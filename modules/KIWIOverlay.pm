@@ -44,15 +44,14 @@ sub new {
 	# Module Parameters
 	#------------------------------------------
 	my $kiwi   = shift;
-	my $baseRO = shift;
 	my $rootRW = shift;
+	my $baseRO = shift;
+	my $mode   = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	if (! -e $baseRO) {
-		$kiwi -> error  ("File/Directory $baseRO doesn't exist");
-		$kiwi -> failed ();
-		return undef;
+	if (! $mode) {
+		$mode = "copy";
 	}
 	if (! -d $rootRW) {
 		$kiwi -> error ("Directory $rootRW doesn't exist");
@@ -60,12 +59,24 @@ sub new {
 		return undef;
 	}
 	#==========================================
+	# Check rootRW structure
+	#------------------------------------------
+	if (-f "$rootRW/kiwi-root.cache") {
+		my $FD; if (! open ($FD,"$rootRW/kiwi-root.cache")) {
+			$kiwi -> error  ("Can't open cache root meta data");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$baseRO = <$FD>; close $FD; chomp $baseRO;
+		$mode = "union";
+	}
+	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi}   = $kiwi;
 	$this->{baseRO} = $baseRO;
 	$this->{rootRW} = $rootRW;
-	$this->{mode}   = "copy";
+	$this->{mode}   = $mode;
 	return $this;
 }
 
@@ -104,6 +115,9 @@ sub mountOverlay {
 	# _not_ mount anything
 	# ---
 	my $this = shift;
+	if (! defined $this->{baseRO}) {
+		return $this->{rootRW};
+	}
 	if ($this->{mode} eq "union") {
 		return $this -> unionOverlay();
 	} elsif ($this->{mode} eq "recycle") {
@@ -158,42 +172,22 @@ sub unionOverlay {
 	$this->{tmpdir} = $tmpdir;
 	$cowdev = "$rootRW/kiwi-root.cow";
 	$this->{cowdev} = $cowdev;
-	if (! -f $cowdev) {
-		#==========================================
-		# Create tmp COW file for write operations
-		#------------------------------------------
-		$haveCow= 0;
-		$status = qxx ("cat < /dev/null > $cowdev 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to create overlay COW file: $status");
-			return undef;
-		}
-		#==========================================
-		# Fuse mount and resize
-		#------------------------------------------
-		$status = qxx (
-			"clicfs --ignore-cow-errors -m 5000 -c $cowdev $baseRO $tmpdir 2>&1"
-		);
-		$result = $? >> 8;
-		if ($result == 0) {
-			$status = qxx ("resize2fs $tmpdir/fsdata.ext3 2>&1");
-			$result = $? >> 8;
-		}
-	} else {
-		#==========================================
-		# Use existing COW file
-		#------------------------------------------
+	#==========================================
+	# Check for cow file before mount
+	#------------------------------------------
+	if (-e $cowdev) {
 		$haveCow=1;
-		#==========================================
-		# Fuse mount operate in RAM
-		#------------------------------------------
-		$status = qxx (
-			"clicfs -m 5000 -c $cowdev $baseRO $tmpdir 2>&1"
-		);
-		$result = $? >> 8;
 	}
+	#==========================================
+	# Fuse mount the clicfs base file
+	#------------------------------------------
+	$kiwi -> info("Creating overlay path\n");
+	$kiwi -> info("--> Base: $baseRO(ro)\n");
+	$kiwi -> info("--> COW:  $cowdev(rw)\n");
+	$status = qxx (
+		"clicfs -m 5000 -c $cowdev $baseRO $tmpdir 2>&1"
+	);
+	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to mount $baseRO to: $tmpdir: $status");
@@ -201,6 +195,31 @@ sub unionOverlay {
 	}
 	push @mount,"umount $tmpdir";
 	$this->{mount} = \@mount;
+	#==========================================
+	# Add filesystem options...
+	#------------------------------------------
+	qxx ("tune2fs -m 0 $tmpdir/fsdata.ext3 &>/dev/null");
+	qxx ("tune2fs -i 0 $tmpdir/fsdata.ext3 &>/dev/null");
+	#==========================================
+	# Resize or check...
+	#------------------------------------------
+	if (! $haveCow) {
+		$status = qxx ("resize2fs $tmpdir/fsdata.ext3 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to resize clicfs container: $status");
+			return undef;
+		}
+	} else {
+		$status = qxx ("e2fsck -p $tmpdir/fsdata.ext3 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to check clicfs container: $status");
+			return undef;
+		}
+	}
 	#==========================================
 	# loop mount filesystem from fuse mount
 	#------------------------------------------
@@ -213,6 +232,7 @@ sub unionOverlay {
 		$kiwi -> error ("Failed to loop mount $baseRO to: $tmpdir: $status");
 		return undef;
 	}
+	$kiwi -> info ("--> Mounted on: $tmpdir\n");
 	push @mount,"umount $tmpdir";
 	$this->{mount} = \@mount;
 	#==========================================

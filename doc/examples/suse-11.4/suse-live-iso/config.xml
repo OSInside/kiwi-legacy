@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.0" name="suse-11.4-live-iso">
+<image schemaversion="5.1" name="suse-11.4-live-iso">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>

@@ -729,6 +729,26 @@ sub printLogExcerpt {
 }
 
 #==========================================
+# finalizeLog
+#------------------------------------------
+sub finalizeLog {
+	my $this = shift;
+	if (! defined $main::LogFile) {
+		my $rootLog = $this -> getRootLog();
+		if ((defined $rootLog) &&
+			(-f $rootLog) && ($rootLog =~ /(.*)\..*\.screenrc\.log/)
+		) { 
+			my $logfile = $1;
+			$logfile = "$logfile.log";
+			$this -> info ("Complete logfile at: $logfile");
+			qxx ("mv $rootLog $logfile 2>&1");
+			$this -> done ();
+		}
+	}
+	return $this;
+}
+
+#==========================================
 # setLogHumanReadable
 #------------------------------------------
 sub setLogHumanReadable {

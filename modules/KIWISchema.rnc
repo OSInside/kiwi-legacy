@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 5.0" ]
+	db:releaseinfo [ "RNC Schema Version 5.1" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -64,7 +64,7 @@ div {
 		attribute inherit { text }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "5.0" }
+		attribute schemaversion { "5.1" }
 	k.image.kiwirevision.attribute =
 		## A kiwi SVN revision number which is known to build
 		## a working image from this description. If the kiwi SVN
@@ -216,19 +216,6 @@ div {
 		## Contact Information from the Author, like Email etc.
 		element contact {
 			k.contact.attlist,
-			text
-		}
-}
-
-#==========================================
-# common element <defaultbaseroot>
-#
-div {
-	k.defaultbaseroot.attlist = empty
-	k.defaultbaseroot =
-		## Default Path if baseroot Option is not Specified
-		element defaultbaseroot {
-			k.defaultbaseroot.attlist,
 			text
 		}
 }
@@ -1376,9 +1363,6 @@ div {
 	k.type.fsnocheck.attribute =
 		## Turn off periodic filesystem checks on ext2/3/4.
 		attribute fsnocheck { xsd:boolean }
-	k.type.baseroot.attribute =
-		## Specify the path to a pre created base root system.
-		attribute baseroot { text }
 	k.type.bootprofile.attribute =
 		## Specifies the boot profile defined in the boot image
 		## description. When kiwi builds the boot image the
@@ -1519,7 +1503,6 @@ div {
 		k.type.filesystem.attribute? &
 		k.type.fsreadonly.attribute? &
 		k.type.fsreadwrite.attribute? &
-		k.type.baseroot.attribute? &
 		k.type.format.attribute? &
 		k.type.installiso.attribute? &
 		k.type.installstick.attribute? &
@@ -2347,8 +2330,7 @@ div {
 			k.locale? &
 			k.boot-theme? &
 			k.defaultdestination? &
-			k.defaultroot? &
-			k.defaultbaseroot?
+			k.defaultroot?
 		}
 }
 

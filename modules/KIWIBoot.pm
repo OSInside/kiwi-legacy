@@ -106,6 +106,20 @@ sub new {
 			$kiwi -> error  ("Couldn't find image file/directory: $system");
 			$kiwi -> failed ();
 			return undef;
+		} else {
+			#==========================================
+			# Check for overlay structure
+			#------------------------------------------
+			$this->{overlay} = new KIWIOverlay (
+				$kiwi,$system,$main::CacheRoot,$main::CacheRootMode
+			);
+			if (! $this->{overlay}) {
+				return undef;
+			}
+			$system = $this->{overlay} -> mountOverlay();
+			if (! -d $system) {
+				return undef;
+			}
 		}
 	}
 	#==========================================
@@ -174,6 +188,7 @@ sub new {
 	$this->{loopdir}  = $loopdir;
 	$this->{lvmgroup} = $vgroup;
 	$this->{tmpdirs}  = [ $tmpdir, $loopdir ];
+	$this->{kiwi}     = $kiwi;
 
 	#==========================================
 	# setup pointer to XML configuration
@@ -383,7 +398,6 @@ sub new {
 	#==========================================
 	# Store object data (2)
 	#------------------------------------------
-	$this->{kiwi}      = $kiwi;
 	$this->{initrd}    = $initrd;
 	$this->{system}    = $system;
 	$this->{kernel}    = $kernel;

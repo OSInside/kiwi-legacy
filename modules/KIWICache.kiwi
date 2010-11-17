@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.0" name="cache-builder">
+<image schemaversion="5.1" name="cache-builder">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -9,7 +9,7 @@
 		</specification>
 	</description>
 	<preferences>
-		<type image="ext2"/>
+		<type image="clicfs"/>
 		<version>1.1.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-excludedocs>true</rpm-excludedocs>

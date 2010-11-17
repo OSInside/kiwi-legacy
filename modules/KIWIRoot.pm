@@ -54,8 +54,8 @@ sub new {
 	my $useRoot      = shift;
 	my $addPacks     = shift;
 	my $delPacks     = shift;
-	my $baseRoot     = shift;
-	my $baseRootMode = shift;
+	my $cacheRoot    = shift;
+	my $cacheRootMode= shift;
 	my $targetArch   = shift;
 	#==========================================
 	# Constructor setup
@@ -168,7 +168,7 @@ sub new {
 	$this->{useRoot}       = $useRoot;
 	$this->{addPacks}      = $addPacks;
 	$this->{delPacks}      = $delPacks;
-	$this->{baseRoot}      = $baseRoot;
+	$this->{cacheRoot}     = $cacheRoot;
 	#==========================================
 	# check channel count
 	#------------------------------------------
@@ -181,15 +181,27 @@ sub new {
 	#==========================================
 	# Create root directory
 	#------------------------------------------
-	my @root = $xml -> createTmpDirectory (
-		$useRoot,$selfRoot,$baseRoot,$baseRootMode
+	my $root = $xml -> createTmpDirectory (
+		$useRoot,$selfRoot
 	);
-	my $overlay = $root[2];
-	my $root    = $root[0];
 	if ( ! defined $root ) {
 		$kiwi -> error ("Couldn't create root directory: $!");
 		$kiwi -> failed ();
 		$this -> cleanMount();
+		return undef;
+	}
+	#==========================================
+	# Check for overlay structure
+	#------------------------------------------
+	$this->{origtree}= $root;
+	$this->{overlay} = new KIWIOverlay (
+		$kiwi,$root,$cacheRoot,$cacheRootMode
+	);
+	if (! $this->{overlay}) {
+		return undef;
+	}
+	$root = $this->{overlay} -> mountOverlay();
+	if (! -d $root) {
 		return undef;
 	}
 	#==========================================
@@ -200,7 +212,11 @@ sub new {
 	# Set root log file
 	#------------------------------------------
 	if (! defined $main::LogFile) {
-		$kiwi -> setRootLog ($root[1]."."."$$".".screenrc.log");
+		if (-e $this->{origtree}) {
+			$kiwi -> setRootLog ($this->{origtree}."."."$$".".screenrc.log");
+		} else {
+			$kiwi -> setRootLog ($root."."."$$".".screenrc.log");
+		}
 	}
 	#==========================================
 	# Get configured name of package manager
@@ -209,10 +225,6 @@ sub new {
 	my $pmgr = $xml -> getPackageManager();
 	if (! defined $pmgr) {
 		$kiwi -> failed();
-		if (defined $overlay) {
-			$overlay -> resetOverlay();
-		}
-		rmdir $root[1];
 		$this -> cleanMount();
 		return undef;
 	}
@@ -225,19 +237,14 @@ sub new {
 		$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
 	);
 	if (! defined $manager) {
-		if (defined $overlay) {
-			$overlay -> resetOverlay();
-		}
-		rmdir $root[1];
 		$this -> cleanMount();
 		return undef;
 	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{root}          = $root;
-	$this->{manager}       = $manager;
-	$this->{overlay}       = $overlay;
+	$this->{root}    = $root;
+	$this->{manager} = $manager;
 	return $this;
 }
 
@@ -1196,7 +1203,6 @@ sub cleanMount {
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $xml  = $this->{xml};
-	my $overlay = $this->{overlay};
 	if (! defined $this->{mountList}) {
 		return $this;
 	}
@@ -1232,9 +1238,6 @@ sub cleanMount {
 			qxx ("rmdir -p \"$item\" 2>&1");
 		}
 		
-	}
-	if ($overlay) {
-		$overlay -> resetOverlay();
 	}
 	if (-d $prefix) {
 		rmdir $prefix;

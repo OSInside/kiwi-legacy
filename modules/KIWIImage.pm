@@ -129,6 +129,30 @@ sub new {
 }
 
 #==========================================
+# setupOverlay
+#------------------------------------------
+sub setupOverlay {
+	# ...
+	# mount the clicfs cache if the image is based on it
+	# and register the overlay mount point as new imageTree
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $tree = $this->{imageTree};
+	$this->{overlay} = new KIWIOverlay (
+		$kiwi,$tree,$main::CacheRoot,$main::CacheRootMode
+	);
+	if (! $this->{overlay}) {
+		return undef;
+	}
+	$this->{imageTree} = $this->{overlay} -> mountOverlay();
+	if (! defined $this->{imageTree}) {
+		return undef;
+	}
+	return $this;
+}
+
+#==========================================
 # stripImage
 #------------------------------------------
 sub stripImage {
@@ -728,13 +752,9 @@ sub createImageUSB {
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-".$text."boot-$$";
 	$main::Prepare  = $boot;
-	undef $main::BaseRoot;
-	if (defined $type{baseroot}) {
-		$main::BaseRoot = $type{baseroot};
-	}
-	if (defined $main::BaseRoot) {
-		if (($main::BaseRoot !~ /^\//) && (! -d $main::BaseRoot)) {
-			$main::BaseRoot = $main::System."/".$main::BaseRoot;
+	if (defined $main::CacheRoot) {
+		if (($main::CacheRoot !~ /^\//) && (! -d $main::CacheRoot)) {
+			$main::CacheRoot = $main::System."/".$main::CacheRoot;
 		}
 	}
 	if (($main::Prepare !~ /^\//) && (! -d $main::Prepare)) {
@@ -1357,13 +1377,9 @@ sub createImageLiveCD {
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-cdboot-$$";
 	$main::Prepare  = $boot;
-	undef $main::BaseRoot;
-	if (defined $type{baseroot}) {
-		$main::BaseRoot = $type{baseroot};
-	}
-	if (defined $main::BaseRoot) {
-		if (($main::BaseRoot !~ /^\//) && (! -d $main::BaseRoot)) {
-			$main::BaseRoot = $main::System."/".$main::BaseRoot;
+	if (defined $main::CacheRoot) {
+		if (($main::CacheRoot !~ /^\//) && (! -d $main::CacheRoot)) {
+			$main::CacheRoot = $main::System."/".$main::CacheRoot;
 		}
 	}
 	if (($main::Prepare !~ /^\//) && (! -d $main::Prepare)) {
@@ -2546,12 +2562,9 @@ sub createImageSplit {
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-splitboot-$$";
 	$main::Prepare  = $boot;
-	if (defined $type{baseroot}) {
-		$main::BaseRoot = $type{baseroot};
-	}
-	if (defined $main::BaseRoot) {
-		if (($main::BaseRoot !~ /^\//) && (! -d $main::BaseRoot)) {
-			$main::BaseRoot = $main::System."/".$main::BaseRoot;
+	if (defined $main::CacheRoot) {
+		if (($main::CacheRoot !~ /^\//) && (! -d $main::CacheRoot)) {
+			$main::CacheRoot = $main::System."/".$main::CacheRoot;
 		}
 	}
 	if (($main::Prepare !~ /^\//) && (! -d $main::Prepare)) {
@@ -2803,6 +2816,10 @@ sub preImage {
 	my $this       = shift;
 	my $haveExtend = shift;
 	my $quiet      = shift;
+	#==========================================
+	# Mount overlay tree if required...
+	#------------------------------------------
+	$this -> setupOverlay();
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------

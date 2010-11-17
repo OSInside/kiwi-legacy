@@ -691,16 +691,6 @@ sub getImageDefaultDestination {
 }
 
 #==========================================
-# getImageDefaultBaseRoot
-#------------------------------------------
-sub getImageDefaultBaseRoot {
-	my $this = shift;
-	my $node = $this->{imgnameNodeList} -> get_node(1);
-	my $path = $node -> getAttribute ("defaultbaseroot");
-	return $path;
-}
-
-#==========================================
 # getImageDefaultRoot
 #------------------------------------------
 sub getImageDefaultRoot {
@@ -772,7 +762,6 @@ sub getImageTypeAndAttributes {
 		$record{boottimeout}   = $node -> getAttribute("boottimeout");
 		$record{installboot}   = $node -> getAttribute("installboot");
 		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
-		$record{baseroot}      = $node -> getAttribute("baseroot");
 		$record{bootprofile}   = $node -> getAttribute("bootprofile");
 		$record{bootkernel}    = $node -> getAttribute("bootkernel");
 		$record{filesystem}    = $node -> getAttribute("filesystem");
@@ -3532,6 +3521,7 @@ sub getInstallSize {
 			if ($package) {
 				push @result,$package;
 			}
+			push @result,$main::PackageManager;
 		}
 		#==========================================
 		# Handle pattern names
@@ -3817,18 +3807,13 @@ sub getPackageNodeList {
 # createTmpDirectory
 #------------------------------------------
 sub createTmpDirectory {
-	my $this     = shift;
-	my $useRoot  = shift;
-	my $selfRoot = shift;
-	my $baseRoot = shift;
-	my $baseRootMode = shift;
-	my $rootError = 1;
+	my $this          = shift;
+	my $useRoot       = shift;
+	my $selfRoot      = shift;
+	my $rootError     = 1;
 	my $root;
 	my $code;
 	my $kiwi = $this->{kiwi};
-	if ((defined $baseRootMode) && ($baseRootMode eq "recycle")) {
-		$useRoot = $baseRoot;
-	}
 	if (! defined $useRoot) {
 		if (! defined $selfRoot) {
 			$root = qxx (" mktemp -q -d /tmp/kiwi.XXXXXX ");
@@ -3867,43 +3852,10 @@ sub createTmpDirectory {
 		}
 		return undef;
 	}
-	my $origroot = $root;
-	my $overlay;
-	if (defined $baseRoot) {
-		if ((defined $baseRootMode) && ($baseRootMode eq "union")) {
-			$kiwi -> info("Creating overlay path\n");
-			$kiwi -> info("--> Base: $baseRoot(ro)\n");
-			$kiwi -> info("--> COW:  $root/kiwi-root.cow(rw)\n");
-		} elsif ((defined $baseRootMode) && ($baseRootMode eq "recycle")) {
-			$kiwi -> info("Using overlay path $baseRoot\n");
-		} else {
-			$kiwi -> info("Importing overlay path $baseRoot -> $root\n");
-		}
-		$overlay = new KIWIOverlay ( $kiwi,$baseRoot,$root );
-		if (! defined $overlay) {
-			$rootError = 1;
-		} elsif (defined $baseRootMode) {
-			$overlay -> setMode ($baseRootMode);
-		}
-		if ($overlay) {
-			$root = $overlay -> mountOverlay();
-		}
-		if (! defined $root) {
-			$rootError = 1;
-		}
-		if (! $rootError) {
-			if ((defined $baseRootMode) && ($baseRootMode eq "union")) {
-				$kiwi -> info ("--> Mounted on: $root\n");
-			}
-		}
-	}
 	if ( $rootError ) {
-		if ($overlay) {
-			$overlay -> resetOverlay();
-		}
 		return undef;
 	}
-	return ($root,$origroot,$overlay);
+	return $root;
 }
 
 #==========================================
