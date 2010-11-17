@@ -1660,8 +1660,9 @@ true/false</a:documentation>
     </define>
     <define name="k.oem-unattended">
       <element name="oem-unattended">
-        <a:documentation>For oemboot driven images: don't ask questions if possible y/n</a:documentation>
-        <db:para>For oemboot driven images: don't ask questions if possible y/n</db:para>
+        <a:documentation>For oemboot driven images: don't ask questions if possible
+true/false</a:documentation>
+        <db:para>For oemboot driven images: don't ask questions ifpossible true/false</db:para>
         <ref name="k.oem-unattended.attlist"/>
         <ref name="k.oem-unattended.content"/>
       </element>

@@ -1155,7 +1155,7 @@ div {
 	k.oem-shutdown.attlist = empty
 	k.oem-shutdown =
 		## For oemboot driven images: shutdown after first deployment 
-        ## true/false
+		## true/false
 		[
 		db:para [
 			"For oemboot driven images: shutdown after first deployment "~
@@ -1177,7 +1177,7 @@ div {
 	k.oem-shutdown-interactive.attlist = empty
 	k.oem-shutdown-interactive =
 		## For oemboot driven images: shutdown after first deployment 
-        ## true/false
+		## true/false
 		[
 		db:para [
 			"For oemboot driven images: shutdown after first deployment "~
@@ -1222,10 +1222,12 @@ div {
 	k.oem-unattended.content = xsd:boolean
 	k.oem-unattended.attlist = empty
 	k.oem-unattended =
-		## For oemboot driven images: don't ask questions if possible y/n
+		## For oemboot driven images: don't ask questions if possible
+		## true/false
 		[
 		db:para [
-			"For oemboot driven images: don't ask questions if possible y/n"
+			"For oemboot driven images: don't ask questions if"~
+            "possible true/false"
 		]
 		]
 		element oem-unattended {

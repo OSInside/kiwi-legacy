@@ -793,7 +793,7 @@
               </varlistentry>
               <varlistentry>
                 <term><sgmltag class="starttag"
-                    >oem-reboot</sgmltag>true|false<sgmltag
+                    >oem-bootwait</sgmltag>true|false<sgmltag
                     class="endtag">oem-bootwait</sgmltag></term>
                 <listitem>
                   <para>Specify if the system should wait for user interaction
@@ -838,7 +838,7 @@
               </varlistentry>
               <varlistentry>
                 <term><sgmltag class="starttag"
-                    >oem-reboot</sgmltag>true|false<sgmltag
+                    >oem-reboot-interactive</sgmltag>true|false<sgmltag
                     class="endtag">oem-reboot-interactive</sgmltag></term>
                 <listitem>
                   <para>Specify if the system is to be rebooted after
@@ -888,7 +888,7 @@
               </varlistentry>
               <varlistentry>
                 <term><sgmltag class="starttag"
-                    >oem-reboot</sgmltag>true|false<sgmltag
+                    >oem-shutdown</sgmltag>true|false<sgmltag
                     class="endtag">oem-shutdown</sgmltag></term>
                 <listitem>
                   <para>Specify if the system is to be powered down after
@@ -901,7 +901,7 @@
               </varlistentry>
               <varlistentry>
                 <term><sgmltag class="starttag"
-                    >oem-reboot</sgmltag>true|false<sgmltag
+                    >oem-shutdown-interactive</sgmltag>true|false<sgmltag
                     class="endtag">oem-shutdown-interactive</sgmltag></term>
                 <listitem>
                   <para>Specify if the system is to be powered down after
@@ -950,6 +950,19 @@
                   <para>Set the size of the root partition. This value
                     is represented by the variable
                       <varname>OEM_SYSTEMSIZE</varname> in
+                      <filename>config.oempartition</filename>. </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><sgmltag class="starttag"
+                  >oem-unattended</sgmltag>true|false<sgmltag
+                    class="endtag">oem-unattended</sgmltag></term>
+                <listitem>
+                  <para>The installation of the image to the target system
+                      occurs automatically without requiering user
+                      interaction. If multiple possible target devices are
+                      discovered the image is deployed to the first device.
+                      <varname>OEM_UNATTENDED</varname> in
                       <filename>config.oempartition</filename>. </para>
                 </listitem>
               </varlistentry>
