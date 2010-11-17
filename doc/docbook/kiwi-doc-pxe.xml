@@ -922,7 +922,7 @@ test3_KIWI_MAC_LIST="00:54:33:FA:44:33, 84:3D:45:2F:5F:33"</screen>
       </itemizedlist>
     </sect2>
     <sect2>
-      <title>The Hardware Group File</title>
+      <title>The Group Details File</title>
       <para>In addition to the config.group file, each defined group will require a
         config.&lt;GROUP_NAME> file. This file is exactly like a standard KIWI config.&lt;MAC> file,
         but is assigned to a group of hosts rather then a single unit. If we continue with the
@@ -950,6 +950,150 @@ CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIG
       <para>As we can see, while group 1 and 2 share the syslog.conf configuration file, they have
         different xorg.conf files defined, therefore two distinct groups with one or more hosts
         assigned to each group can now be configured by managing a smaller number of files.</para>
+    </sect2>
+    <sect2>
+      <title> Using Hardware Mapping to Provide Overrides</title>
+      <para>The only issue with running mixed hardware configurations pertains primarily to hardware
+        differences. For instance, it may be possible to create a single, xorg.conf file that is
+        able to work with all of the hardware, but there is a chance it might not be possible to do
+        so. With this in mind, KIWI provides a mechanism to provide "default" configurations that
+        works with the most common hardware configuration, while providing hardware specific
+        overrides to allow for any differences and yet have all hardware linked to the same
+        group.</para>
+      <sect3>
+        <title>The Hardware Mapping Elements</title>
+        <para>To make use of the hardware linking mechanism, two additional parameters needs to be
+          added to the group details file, the one named config.&lt;group_name>. These two elements
+          "link" hardware specific configurations to the appropriate systems. A general example
+          would look like this:</para>
+        <screen>HARDWARE_MAP="vendor_name_model"
+
+vendor_name_model_HARDWARE_MAP="00:00:00:11:11:11"</screen>
+        <para>These parameters are not required, and the same functionality can be applied by using
+          multiple groups to do the same thing, but that might not be desirable to some
+          administrators. This feature allows for a slightly more complex group to be defined, but
+          the end result is a single group, that can contain multiple sub-groups ensuring
+          flexibility in using a mixed set of hardware. </para>
+        <para>The definitions for the above parameters are as follows: </para>
+        <itemizedlist>
+          <listitem>
+            <para>HARDWARE_MAP</para>
+            <para>This element follows the same rules as defined by the KIWI_GROUP element. However,
+              this variable will create sub-groups used to ensure multiple types of hardware vendors
+              can be used within the same group.  The name of the group(s) should be clearly
+              defined, and a good convention to follow would be to use a combination of the vendor
+              name with the model number or type. This would allow for cases where the same vendor
+              is used, but differences between alternative models requires different maps to be
+              used.</para>
+          </listitem>
+          <listitem>
+            <para>&lt;HARDWARE_MAP_NAME>_HARDWARE_MAP</para>
+            <para>This element behaves exactly like the &lt;GROUP_NAME>_KIWI_MAC_LIST element
+              defined above, in that it lists all MAC addreses that need to be linked to a hardware
+              map. Any host defined within the list will receive configuration files that have been
+              specifically defined in a hardware_config.&lt;hardware_map> file, in addition to any
+              files defined within a CONF element.</para>
+          </listitem>
+        </itemizedlist>
+      </sect3>
+      <sect3>
+        <title>The Hardware Mapping Details File</title>
+        <para>Once the hardware map has been defined, the last step is to ensure configuration
+          specific elements are linked to the host(s) in question. This is done by creating a new
+          hardware_config.&lt;hardware_map> file. The contents of the file is quite simple, and
+          contains only one element called VENDOR_CONF, as the following example shows:</para>
+        <screen>VENDOR_CONF=CONFIGURATIONS/xorg.conf.hardware_name_model;/etc/X11/xorg.conf;192.168.100.2;4096</screen>
+        <para>The format of the VENDOR_CONF values is exactly the same as the CONF variable used in
+          the standard host and group configurations. In addition, files defined within this list
+          will over-write any files defined in the group configuration, if and only if, all of the
+          following cases apply:</para>
+        <itemizedlist>
+          <listitem>
+            <para>The host is assigned to the current hardware map</para>
+          </listitem>
+          <listitem>
+            <para>The file is defined within the CONF and VENDOR_CONF elements</para>
+          </listitem>
+        </itemizedlist>
+        <para>NOTE: If a file is not defined in the CONF element, but is defined in the VENDOR_CONF
+          element, it is simply downloaded to the host as if it was a CONF file. In this case, no
+          overwritting will take place as it is considered a new file.</para>
+      </sect3>
+      <sect3>
+        <title>A Complete Example</title>
+        <para>The following is an example of a group that is using hardware from multiple vendors.
+          For the purposes of this example, lets assume the group will have 10 defined hosts, seven
+          are imaginative HP thinstations, while the remaining three are older Maxterm thinstations.
+          We will also assume that the differences we are trying to address are specific to the
+          video card and X.Org drivers used as a result.</para>
+        <para>With this in mind, we will need the following KIWI specific files:</para>
+        <screen>[root@test01 KIWI]# cd /srv/tftpboot/KIWI
+[root@test01 KIWI]# ls -la
+total 24
+drwxr-xr-x  2 root root 4096 Nov  9 04:44 .
+drwxr-x---  9 root root 4096 Nov  9 04:38 ..
+-rw-r--r--  1 root root  497 Nov  9 04:43 config.example1
+-rw-r--r--  1 root root  228 Nov  9 04:41 config.group
+-rw-r--r--  1 root root  133 Nov  9 04:44 hardware_config.maxterm_3500</screen>
+        <para>As we can see, there is a KIWI group file, the group configuration or details file,
+          and a new file that we have not seen before called hardware_config.maxterm_3500. We will
+          first look at the contents of the config,group file:</para>
+        <screen>[root@test01 KIWI]# cat config.group
+KIWI_GROUP="example1"
+
+example1_KIWI_MAC_LIST="00:00:00:00:00:01 00:00:00:00:00:02 00:00:00:00:00:03 00:00:00:00:00:04 00:00:00:00:00:05 00:00:00:00:00:06 \
+                        00:00:00:00:00:07 00:00:00:00:00:08 00:00:00:00:00:09 00:00:00:00:00:0A"</screen>
+        <para>Within the file, there is a group called "example1", with ten hosts defined, in this
+          case with imaginary sequential MAC addresses. Next, we look at the config.example1 group
+          details/configuration file:</para>
+        <screen>[root@test01 KIWI]# cat config.example1
+KIWI_INITRD=/boot/initrd
+KIWI_KERNEL=/boot/linux
+DISK=/dev/sda
+PART=5;S;x,769;L;/,x;L;x,
+IMAGE=/dev/sda2;exmaple-kiosk-opensuse-11.3-pxe-client.i686;0.0.1;192.168.1.2;4096
+UNIONFS_CONFIG=/dev/sda3,/dev/sda2,clicfs
+CONF=prefs.js;/home/kioskuser/.mozilla/firefox/07xvl1ty.default/prefs.js;192.168.1.2;4096,xorg.conf;/etc/X11/xorg.conf;192.168.1.2;4096
+RELOAD_IMAGE=yes
+RELOAD_CONFIG=yes
+
+HARDWARE_MAP="maxterm_3500"
+maxterm_3500_HARDWARE_MAP="00:00:00:00:00:02 00:00:00:00:00:03 00:00:00:00:00:04"</screen>
+        <para>Here, most of the standard KIWI configuration elements are in place, with a few
+          extras. There are three areas we want to focus our attention on, the CONF, HARDWARE_MAP
+          and maxterm_3500_HARDWARE_MAP variables, as they are the most critical elements to our
+          example.</para>
+        <para>The first parameter to look at is the CONF parameter, which indicates a prefs.js (for
+          Mozilla Firefox), and a xorg.conf (for X Windows) files will be copied to the host during
+          boot up. These files should be considered defaults for the group, and all hosts defined in
+          this group will use these files. As such, when the systems boot, both of these files will
+          be copied over to their local file systems when the CONF element is processed.</para>
+        <para>Lastly, we have a hardware mapping group called "maxterm_3500", with three of the
+          groups hosts defined as part of of a sub-group, or hardware map. The content of this file
+          is as follows:</para>
+        <screen>[root@test01 KIWI]# cat hardware_config.maxterm_3500
+VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,someconfig.cfg;/etc/sysconfig/someconfig.cfg;192.168.1.2;4096</screen>
+        <para>When the VENDOR_CONF defintition is used, we are telling KIWI that all files defined
+          within this element, are specific to the hardware map they are linked to. As a result, any
+          files listed here will be transfered to a host if, and only if, the host has been linked
+          to the hardware map via the maxterm_3500_HARDWARE_MAP element. In our example the only
+          systems that will receive the xorg.conf.maxterm_3500 file will be the three maxterms we
+          linked to the hardware map itself.</para>
+        <para>In our VENDOR_CONF element, we are indicating two files that should be transfered, in
+          addition to any file transfered during the processing of the CONF element. A "specific"
+          xorg.conf file, as well as someconfig.cfg. In the case of the xorg.conf.maxterm_3500 file,
+          when it is transfered to the host, it will overwrite the xorg.conf file that was
+          previously transfered via the CONF element. However, with the someconfig.cfg file, because
+          it was not previously defined in the CONF element, it will simply get transfered over, and
+          is a perfect example of how one could enable functionality that is not otherwise
+          configured.</para>
+        <para>As a result of this example, we have seven terminals that are using a prefs.js and
+          generic xorg.conf file for their system configuration, and three terminals that are using
+          prefs.js, a new version of the xorg.conf file as well as a file called somconfig.cfg. For
+          the purposes of our example, the contents of the prefs.js, xorg.conf,
+          xorg.conf.maxterm_3500 and someconfig.cfg are arbitrary, and don't need to be explained
+          here.</para>
+      </sect3>
     </sect2>
   </sect1>
 </chapter>
