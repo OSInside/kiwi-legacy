@@ -170,33 +170,6 @@ sub new {
 	$this->{reqProfiles}     = $reqProfiles;
 	$this->{profilesNodeList}= $profilesNodeList;
 	#==========================================
-	# Check kiwirevision attribute
-	#------------------------------------------
-	if (open (my $FD,$main::Revision)) {
-		my $cur_rev = <$FD>; close $FD;
-		my $req_rev = $imgnameNodeList
-			-> get_node(1) -> getAttribute ("kiwirevision");
-		if ((defined $req_rev) && ($cur_rev < $req_rev)) {
-			$kiwi -> failed ();
-			$kiwi -> error  (
-				"KIWI revision too old, require r$req_rev got r$cur_rev"
-			);
-			$kiwi -> failed ();
-			return undef;
-		}
-	}
-	#==========================================
-	# Check image version format
-	#------------------------------------------
-	my $version = $this -> getImageVersion();
-	if ($version !~ /^\d+\.\d+\.\d+$/) {
-		$kiwi -> error  ("Invalid version format: $version");
-		$kiwi -> failed ();
-		$kiwi -> error  ("Expected 'Major.Minor.Release'");
-		$kiwi -> failed ();
-		return undef;
-	}
-	#==========================================
 	# Apply default profiles from XML if set
 	#------------------------------------------
 	$this -> setDefaultProfiles();
@@ -4517,6 +4490,39 @@ sub getVMConfigOpts {
 # Private helper methods
 #------------------------------------------
 #==========================================
+# __checkFilesysSpec
+#------------------------------------------
+sub __checkFilesysSpec {
+	# ...
+	# It is necessary to specify the filesystem attribute for certain
+	# image types. Make sure the attribute is specified when required.
+	# ---
+	my $this = shift;
+	my $isInvalid;
+	my $kiwi = $this->{kiwi};
+	my @typeNodes = $this->{systemTree} -> getElementsByTagName("type");
+	my @typesReqFS = qw /oem usb vmx/;
+	for my $typeN (@typeNodes) {
+		my $imgType = $typeN -> getAttribute( "image" );
+		if (grep /$imgType/, @typesReqFS) {
+			my $hasFSattr = $typeN -> getAttribute( "filesystem" );
+			if (! $hasFSattr) {
+				my $msg = 'filesystem attribute must be set for image="'
+				. $imgType
+				. '"';
+				$kiwi -> error ( $msg );
+				$kiwi -> failed ();
+				$isInvalid = 1;
+			}
+		}
+	}
+	if ($isInvalid) {
+		return undef;
+	}
+	return 1;
+}
+
+#==========================================
 # __checkPostDumpAction
 #------------------------------------------
 sub __checkPostDumpAction {
@@ -4552,6 +4558,53 @@ sub __checkPostDumpAction {
 				}
 			}
 		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkRevision
+#------------------------------------------
+sub __checkRevision {
+	# ...
+	# Check that the current revision meets the minimum requirement
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	if (open (my $FD,$main::Revision)) {
+		my $cur_rev = <$FD>; close $FD;
+		my $req_rev = $this->{imgnameNodeList}
+			-> get_node(1) -> getAttribute ("kiwirevision");
+		if ((defined $req_rev) && ($cur_rev < $req_rev)) {
+			$kiwi -> failed ();
+			$kiwi -> error  (
+				"KIWI revision too old, require r$req_rev got r$cur_rev"
+			);
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkVersionFormat
+#------------------------------------------
+sub __checkVersionFormat {
+	# ...
+	# Check image version format
+	# This check should be implemented in the schema but there is a
+	# bug in libxml2 that prevents proper type validation for elements
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $version = $this -> getImageVersion();
+	if ($version !~ /^\d+\.\d+\.\d+$/) {
+		$kiwi -> error  ("Invalid version format: $version");
+		$kiwi -> failed ();
+		$kiwi -> error  ("Expected 'Major.Minor.Release'");
+		$kiwi -> failed ();
+		return undef;
 	}
 	return 1;
 }
@@ -4620,7 +4673,16 @@ sub __validateConsistency {
 	# elements and attributes as well as certain values.
 	# ---
 	my $this = shift;
+	if (! $this -> __checkRevision()) {
+		return undef;
+	}
+	if (! $this -> __checkVersionFormat()) {
+		return undef;
+	}
 	if (! $this -> __checkPostDumpAction()) {
+		return undef;
+	}
+	if (! $this -> __checkFilesysSpec()) {
 		return undef;
 	}
 	return 1;
