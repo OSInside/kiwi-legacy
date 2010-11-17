@@ -207,6 +207,11 @@ function OEMInstall {
 		# Found one single disk... use it
 		#--------------------------------------
 		instDisk=${deviceArray[0]}
+	elif [ ! -z "$kiwi_oemunattended" ];then
+		#======================================
+		# Unattended mode... use first disk
+		#--------------------------------------
+		instDisk=${deviceArray[0]}
 	else
 		#======================================
 		# Found multiple disks...
