@@ -390,29 +390,6 @@
     <title>Global Options</title>
 	<variablelist>
 	<varlistentry>
-		<term><optional><option>--base-root</option>
-			<replaceable>base-path</replaceable></optional></term>
-		<listitem>
-		<para>
-			Refers to an already prepared root tree. KIWI will use
-			this tree to skip the first stage of the prepare step and
-			run the second stage directly.</para>
-		</listitem>
-	</varlistentry>
-	<varlistentry>
-		<term><optional><option>--base-root-mode</option>
-			<replaceable>copy|union|recycle</replaceable></optional></term>
-		<listitem>
-		<para>
-			Specifies the overlay mode for the base root tree.
-			This can be either a copy of the tree, a union mount or
-			the tree itself. The last mode (recycle) will modify the
-			base root tree which might make it obsolete as base root
-			for other kiwi calls
-		</para>
-		</listitem>
-	</varlistentry>
-	<varlistentry>
 		<term><optional><option>--add-profile</option>
 			<replaceable>profile-name</replaceable></optional></term>
 		<listitem>

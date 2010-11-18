@@ -685,18 +685,6 @@
         </varlistentry>
         <varlistentry>
           <term><sgmltag class="attribute"
-            >defaultbaseroot</sgmltag></term>
-          <listitem>
-            <para>Used if the option <option>--base-root</option> is not
-              specified when calling KIWI. It’s possible to prepare and
-              create an image using a predefined non empty root
-              directory as base information. This could speedup the
-              build process a lot if the base root path already contains
-              most of the image data. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute"
             >kernelcmdline</sgmltag></term>
           <listitem>
             <para> Specifies additional kernel parameters. The following
@@ -777,6 +765,28 @@
             <variablelist>
               <varlistentry>
                 <term><sgmltag class="starttag"
+                    >oem-align-partition</sgmltag>>true|false<sgmltag
+                    class="endtag">oem-align-partition</sgmltag></term>
+                <listitem>
+                  <para>Kiwi attempts to align the start sector of the disk
+                      partition on a 4K boundary. This alignment is dependent
+                      on the partitioner being used. With the
+                      <sgmltag class="element">oem-align-partition</sgmltag>
+                      element value set to true Kiwi will align the start
+                      sector when fdisk is used as the partitioner. By default
+                      Kiwi uses parted, fdisk is used for hybrid images, if
+                      the version of parted found lags the --machine command
+                      line argument, or if fdisk is requested as the
+                      partitioner on the Kiwi command line. In these cases
+                      the value of
+                      <sgmltag class="element">oem-align-partition</sgmltag>
+                      is considered.
+                      <varname>OEM_ALIGN</varname> variable in
+                      <filename>config.oempartition</filename>. </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><sgmltag class="starttag"
                     >oem-boot-title</sgmltag>text<sgmltag class="endtag"
                     >oem-boot-title</sgmltag></term>
                 <listitem>
@@ -806,6 +816,18 @@
               </varlistentry>
               <varlistentry>
                 <term><sgmltag class="starttag"
+                    >oem-inplace-recovery</sgmltag>true|false<sgmltag
+                    class="endtag">oem-inplace-recovery</sgmltag></term>
+                <listitem>
+                  <para>Specify if the recovery archive is stored as part of
+                    the image or if the archive is to be created at the time
+                    the image is deployed to the target storage device.
+                    <varname>OEM_RECOVERY_INPLACE</varname> variable in
+                    <filename>config.oempartition</filename>. </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><sgmltag class="starttag"
                     >oem-kiwi-initrd</sgmltag>true|false<sgmltag
                     class="endtag">oem-kiwi-initrd</sgmltag></term>
                 <listitem>
@@ -819,7 +841,25 @@
                     detect the storage location during every boot. This
                     detection process is part of the oemboot boot image.
                     This value is represented by the
-                      <varname>OEM_KIWI_INITRD</varname> variable in
+                    <varname>OEM_KIWI_INITRD</varname> variable in
+                    <filename>config.oempartition</filename>. </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><sgmltag class="starttag"
+                    >oem-partition-install</sgmltag>true|false<sgmltag
+                    class="endtag">oem-partition-install</sgmltag></term>
+                <listitem>
+                  <para>Specify if the image is to be installed into a
+                      free partition on the target storage device. By default
+                      the value is false and Kiwi installs images to a
+                      target device which causes data loss on the device. With
+                      <sgmltag class="element">oem-partition-install</sgmltag>
+                      set to true any other settings that have influence on
+                      the partition table, such as
+                      <sgmltag class="element">oem-swap</sgmltag> are ignored.
+                      This value is represented by the
+                      <varname>OEM_PARTITION_INSTALL</varname> variable in
                       <filename>config.oempartition</filename>. </para>
                 </listitem>
               </varlistentry>
