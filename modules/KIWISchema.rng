@@ -1298,61 +1298,69 @@ to the used package manager.</db:para>
   </div>
   <!--
     ==========================================
-    common element <oem-swapsize>
+    common element <oem-align-partition>
     
   -->
   <div>
-    <define name="k.oem-swapsize.attlist">
+    <define name="k.oem-align-partition.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-align-partition.attlist">
       <empty/>
     </define>
-    <define name="k.oem-swapsize">
-      <element name="oem-swapsize">
-        <a:documentation>For oemboot driven images: Set the size of the swap
-partition in MB</a:documentation>
-        <db:para>For oemboot driven images: Set the size of the swap
-partition in MB. No swapspace with oem-swap set to false.</db:para>
-        <ref name="k.oem-swapsize.attlist"/>
-        <data type="nonNegativeInteger"/>
+    <define name="k.oem-align-partition">
+      <element name="oem-align-partition">
+        <a:documentation>For oemboot driven images: align start sectors. This is only
+done when fdisk is used. For parted the option -a is passed in
+in any case</a:documentation>
+        <db:para>For oemboot driven images: align start sectors. This is only
+done when fdisk is used. For parted the option -a is passed
+in any case</db:para>
+        <ref name="k.oem-align-partition.attlist"/>
+        <ref name="k.oem-align-partition.content"/>
       </element>
     </define>
   </div>
   <!--
     ==========================================
-    common element <oem-systemsize>
+    common element <oem-boot-title>
     
   -->
   <div>
-    <define name="k.oem-systemsize.attlist">
+    <define name="k.oem-boot-title.attlist">
       <empty/>
     </define>
-    <define name="k.oem-systemsize">
-      <element name="oem-systemsize">
-        <a:documentation>For oemboot driven images: Set the size of the system
-(root) partition in MB</a:documentation>
-        <db:para>For oemboot driven images: Set the size of the system
-(root) partition in MB.</db:para>
-        <ref name="k.oem-systemsize.attlist"/>
-        <data type="nonNegativeInteger"/>
+    <define name="k.oem-boot-title">
+      <element name="oem-boot-title">
+        <a:documentation>For oemboot driven images: setup of the boot menu text
+displayed within the square brackets after first reboot
+of the OEM image</a:documentation>
+        <db:para>For oemboot driven images: setup of the boot menu text
+displayed within the square brackets after first reboot
+of the OEM image.</db:para>
+        <ref name="k.oem-boot-title.attlist"/>
+        <text/>
       </element>
     </define>
   </div>
   <!--
     ==========================================
-    common element <oem-recoveryID>
+    common element <oem-bootwait>
     
   -->
   <div>
-    <define name="k.oem-recoveryID.attlist">
+    <define name="k.oem-bootwait.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-bootwait.attlist">
       <empty/>
     </define>
-    <define name="k.oem-recoveryID">
-      <element name="oem-recoveryID">
-        <a:documentation>For oemboot driven images: Set the partition ID of
-recovery partition. Default value is 83 (Linux)</a:documentation>
-        <db:para>For oemboot driven images: Set the partition ID of
-recovery partition. Default value is 83 (Linux)</db:para>
-        <ref name="k.oem-recoveryID.attlist"/>
-        <data type="nonNegativeInteger"/>
+    <define name="k.oem-bootwait">
+      <element name="oem-bootwait">
+        <a:documentation>For oemboot driven images: halt system after image dump true/false</a:documentation>
+        <db:para>For oemboot driven images: wait for user acknowledgement after first deployment true/false. A message to be acknowledged by the user is posted after the image has been dumped (installed) on the target disk. After user interaction the system reboots (softboot).</db:para>
+        <ref name="k.oem-bootwait.attlist"/>
+        <ref name="k.oem-bootwait.content"/>
       </element>
     </define>
   </div>
@@ -1385,47 +1393,24 @@ of the oem image</db:para>
   </div>
   <!--
     ==========================================
-    common element <oem-swap>
+    common element <oem-kiwi-initrd>
     
   -->
   <div>
-    <define name="k.oem-swap.content">
+    <define name="k.oem-kiwi-initrd.content">
       <data type="boolean"/>
     </define>
-    <define name="k.oem-swap.attlist">
+    <define name="k.oem-kiwi-initrd.attlist">
       <empty/>
     </define>
-    <define name="k.oem-swap">
-      <element name="oem-swap">
-        <a:documentation>For oemboot driven images: use a swap partition yes/no</a:documentation>
-        <db:para>For oemboot driven images: use a swap partition yes/no.</db:para>
-        <ref name="k.oem-swap.attlist"/>
-        <ref name="k.oem-swap.content"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <oem-align-partition>
-    
-  -->
-  <div>
-    <define name="k.oem-align-partition.content">
-      <data type="boolean"/>
-    </define>
-    <define name="k.oem-align-partition.attlist">
-      <empty/>
-    </define>
-    <define name="k.oem-align-partition">
-      <element name="oem-align-partition">
-        <a:documentation>For oemboot driven images: align start sectors. This is only
-done when fdisk is used. For parted the option -a is passed in
-in any case</a:documentation>
-        <db:para>For oemboot driven images: align start sectors. This is only
-done when fdisk is used. For parted the option -a is passed
-in any case</db:para>
-        <ref name="k.oem-align-partition.attlist"/>
-        <ref name="k.oem-align-partition.content"/>
+    <define name="k.oem-kiwi-initrd">
+      <element name="oem-kiwi-initrd">
+        <a:documentation>For oemboot driven images: use kiwi initrd in any case
+and don't replace it with mkinitrd created initrd</a:documentation>
+        <db:para>For oemboot driven images: use kiwi initrd in any case
+and don't replace it with mkinitrd created initrd</db:para>
+        <ref name="k.oem-kiwi-initrd.attlist"/>
+        <ref name="k.oem-kiwi-initrd.content"/>
       </element>
     </define>
   </div>
@@ -1453,72 +1438,6 @@ all other oem-* options concerning the partition table
 will not have any effect</db:para>
         <ref name="k.oem-partition-install.attlist"/>
         <ref name="k.oem-partition-install.content"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <oem-recovery>
-    
-  -->
-  <div>
-    <define name="k.oem-recovery.content">
-      <data type="boolean"/>
-    </define>
-    <define name="k.oem-recovery.attlist">
-      <empty/>
-    </define>
-    <define name="k.oem-recovery">
-      <element name="oem-recovery">
-        <a:documentation>For oemboot driven images: create a recovery archive yes/no</a:documentation>
-        <db:para>For oemboot driven images: create a recovery archive yes/no</db:para>
-        <ref name="k.oem-recovery.attlist"/>
-        <ref name="k.oem-recovery.content"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <oem-boot-title>
-    
-  -->
-  <div>
-    <define name="k.oem-boot-title.attlist">
-      <empty/>
-    </define>
-    <define name="k.oem-boot-title">
-      <element name="oem-boot-title">
-        <a:documentation>For oemboot driven images: setup of the boot menu text
-displayed within the square brackets after first reboot
-of the OEM image </a:documentation>
-        <db:para>For oemboot driven images: setup of the boot menu text
-displayed within the square brackets after first reboot
-of the OEM image.</db:para>
-        <ref name="k.oem-boot-title.attlist"/>
-        <text/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <oem-kiwi-initrd>
-    
-  -->
-  <div>
-    <define name="k.oem-kiwi-initrd.content">
-      <data type="boolean"/>
-    </define>
-    <define name="k.oem-kiwi-initrd.attlist">
-      <empty/>
-    </define>
-    <define name="k.oem-kiwi-initrd">
-      <element name="oem-kiwi-initrd">
-        <a:documentation>For oemboot driven images: use kiwi initrd in any case
-and don't replace it with mkinitrd created initrd</a:documentation>
-        <db:para>For oemboot driven images: use kiwi initrd in any case
-and don't replace it with mkinitrd created initrd</db:para>
-        <ref name="k.oem-kiwi-initrd.attlist"/>
-        <ref name="k.oem-kiwi-initrd.content"/>
       </element>
     </define>
   </div>
@@ -1561,6 +1480,47 @@ and don't replace it with mkinitrd created initrd</db:para>
         <db:para>For oemboot driven images: reboot after first deployment true/false. A message to be acknowledged by the user is posted after the image has been dumped (installed) and expanded on the target disk. After user interaction the system is rebooted in similar fashion to shutdown -r.</db:para>
         <ref name="k.oem-reboot-interactive.attlist"/>
         <ref name="k.oem-reboot-interactive.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <oem-recovery>
+    
+  -->
+  <div>
+    <define name="k.oem-recovery.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-recovery.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-recovery">
+      <element name="oem-recovery">
+        <a:documentation>For oemboot driven images: create a recovery archive yes/no</a:documentation>
+        <db:para>For oemboot driven images: create a recovery archive yes/no</db:para>
+        <ref name="k.oem-recovery.attlist"/>
+        <ref name="k.oem-recovery.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <oem-recoveryID>
+    
+  -->
+  <div>
+    <define name="k.oem-recoveryID.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-recoveryID">
+      <element name="oem-recoveryID">
+        <a:documentation>For oemboot driven images: Set the partition ID of
+recovery partition. Default value is 83 (Linux)</a:documentation>
+        <db:para>For oemboot driven images: Set the partition ID of
+recovery partition. Default value is 83 (Linux)</db:para>
+        <ref name="k.oem-recoveryID.attlist"/>
+        <data type="nonNegativeInteger"/>
       </element>
     </define>
   </div>
@@ -1610,22 +1570,62 @@ true/false</a:documentation>
   </div>
   <!--
     ==========================================
-    common element <oem-bootwait>
+    common element <oem-swap>
     
   -->
   <div>
-    <define name="k.oem-bootwait.content">
+    <define name="k.oem-swap.content">
       <data type="boolean"/>
     </define>
-    <define name="k.oem-bootwait.attlist">
+    <define name="k.oem-swap.attlist">
       <empty/>
     </define>
-    <define name="k.oem-bootwait">
-      <element name="oem-bootwait">
-        <a:documentation>For oemboot driven images: halt system after image dump true/false</a:documentation>
-        <db:para>For oemboot driven images: wait for user acknowledgement after first deployment true/false. A message to be acknowledged by the user is posted after the image has been dumped (installed) on the target disk. After user interaction the system reboots (softboot).</db:para>
-        <ref name="k.oem-bootwait.attlist"/>
-        <ref name="k.oem-bootwait.content"/>
+    <define name="k.oem-swap">
+      <element name="oem-swap">
+        <a:documentation>For oemboot driven images: use a swap partition yes/no</a:documentation>
+        <db:para>For oemboot driven images: use a swap partition yes/no.</db:para>
+        <ref name="k.oem-swap.attlist"/>
+        <ref name="k.oem-swap.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <oem-swapsize>
+    
+  -->
+  <div>
+    <define name="k.oem-swapsize.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-swapsize">
+      <element name="oem-swapsize">
+        <a:documentation>For oemboot driven images: Set the size of the swap
+partition in MB</a:documentation>
+        <db:para>For oemboot driven images: Set the size of the swap
+partition in MB. No swapspace with oem-swap set to false.</db:para>
+        <ref name="k.oem-swapsize.attlist"/>
+        <data type="nonNegativeInteger"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <oem-systemsize>
+    
+  -->
+  <div>
+    <define name="k.oem-systemsize.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-systemsize">
+      <element name="oem-systemsize">
+        <a:documentation>For oemboot driven images: Set the size of the system
+(root) partition in MB</a:documentation>
+        <db:para>For oemboot driven images: Set the size of the system
+(root) partition in MB.</db:para>
+        <ref name="k.oem-systemsize.attlist"/>
+        <data type="nonNegativeInteger"/>
       </element>
     </define>
   </div>
@@ -1825,17 +1825,10 @@ the correct timezone and copy it to /etc/localtime.</db:para>
     
   -->
   <div>
-    <define name="k.type.fsnocheck.attribute">
-      <attribute name="fsnocheck">
-        <a:documentation>Turn off periodic filesystem checks on ext2/3/4.</a:documentation>
-        <data type="boolean"/>
-      </attribute>
-    </define>
-    <define name="k.type.bootprofile.attribute">
-      <attribute name="bootprofile">
-        <a:documentation>Specifies the boot profile defined in the boot image
-description. When kiwi builds the boot image the
-information is passed as add-profile option</a:documentation>
+    <define name="k.type.boot.attribute">
+      <attribute name="boot">
+        <a:documentation>Specifies the path of the boot image (initrd), relative
+to /usr/share/kiwi/image</a:documentation>
       </attribute>
     </define>
     <define name="k.type.bootkernel.attribute">
@@ -1843,54 +1836,6 @@ information is passed as add-profile option</a:documentation>
         <a:documentation>Specifies the kernel boot profile defined in the boot
 image description. When kiwi builds the boot image the
 information is passed as add-profile option</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.type.boot.attribute">
-      <attribute name="boot">
-        <a:documentation>Specifies the path of the boot image (initrd), relative
-to /usr/share/kiwi/image</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.type.checkprebuilt.attribute">
-      <attribute name="checkprebuilt">
-        <a:documentation>Activates whether KIWI should search for a prebuild boot
-image or not</a:documentation>
-        <data type="boolean"/>
-      </attribute>
-    </define>
-    <define name="k.type.volid.attribute">
-      <attribute name="volid">
-        <a:documentation>for the iso type only:
-Specifies the volume ID (volume name or label) to be written
-into the master block. There is space for 32 characters.</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.type.flags.attribute">
-      <attribute name="flags">
-        <a:documentation>Specifies flags for the image type. This could be compressed
-or unified and applies to the iso type only</a:documentation>
-        <choice>
-          <value>clic</value>
-          <value>compressed</value>
-          <value>unified</value>
-        </choice>
-      </attribute>
-    </define>
-    <define name="k.type.hybrid.attribute">
-      <attribute name="hybrid">
-        <a:documentation>for the iso type only:
-Specifies that the iso file should be turned into
-a hybrid iso file. It's required to use the vmxboot
-boot image to boot that iso though</a:documentation>
-        <data type="boolean"/>
-      </attribute>
-    </define>
-    <define name="k.type.hybridpersistent.attribute">
-      <attribute name="hybridpersistent">
-        <a:documentation>for the iso type only:
-will trigger the creation of a partition for a COW file
-to keep data persistent over a reboot</a:documentation>
-        <data type="boolean"/>
       </attribute>
     </define>
     <define name="k.type.bootloader.attribute">
@@ -1905,6 +1850,13 @@ At the moment grub, zipl and sys|extlinux are supported</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.type.bootprofile.attribute">
+      <attribute name="bootprofile">
+        <a:documentation>Specifies the boot profile defined in the boot image
+description. When kiwi builds the boot image the
+information is passed as add-profile option</a:documentation>
+      </attribute>
+    </define>
     <define name="k.type.boottimeout.attribute">
       <attribute name="boottimeout">
         <a:documentation>Specifies the boot timeout in seconds prior to launching
@@ -1914,16 +1866,11 @@ seconds if syslinux is used</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
-    <define name="k.type.installboot.attribute">
-      <attribute name="installboot">
-        <a:documentation>Specifies the bootloader default boot entry for the"
-initial boot of a kiwi install image. This value is"
-evaluated for grub and ext|syslinux but not for zipl"</a:documentation>
-        <choice>
-          <value>failsafe-install</value>
-          <value>harddisk</value>
-          <value>install</value>
-        </choice>
+    <define name="k.type.checkprebuilt.attribute">
+      <attribute name="checkprebuilt">
+        <a:documentation>Activates whether KIWI should search for a prebuild boot
+image or not</a:documentation>
+        <data type="boolean"/>
       </attribute>
     </define>
     <define name="k.type.compressed.attribute">
@@ -1932,21 +1879,6 @@ evaluated for grub and ext|syslinux but not for zipl"</a:documentation>
 compressed or not. This makes only sense for filesystem
 only images respectively for the pxe or cpio type</a:documentation>
         <data type="boolean"/>
-      </attribute>
-    </define>
-    <define name="k.type.vga.attribute">
-      <attribute name="vga">
-        <a:documentation>Specifies the kernel framebuffer mode. More information
-about the possible values can be found by calling
-hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.type.luks.attribute">
-      <attribute name="luks">
-        <a:documentation>Setup cryptographic volume along with the given filesystem
-using the LUKS extension. The value of this attribute
-represents the password string used to be able to
-mount that filesystem while booting</a:documentation>
       </attribute>
     </define>
     <define name="k.type.filesystem.attribute">
@@ -1965,6 +1897,34 @@ file for write operations</a:documentation>
           <value>squashfs</value>
           <value>xfs</value>
         </choice>
+      </attribute>
+    </define>
+    <define name="k.type.flags.attribute">
+      <attribute name="flags">
+        <a:documentation>Specifies flags for the image type. This could be compressed
+or unified and applies to the iso type only</a:documentation>
+        <choice>
+          <value>clic</value>
+          <value>compressed</value>
+          <value>unified</value>
+        </choice>
+      </attribute>
+    </define>
+    <define name="k.type.format.attribute">
+      <attribute name="format">
+        <a:documentation>Specifies the format of the virtual disk.</a:documentation>
+        <choice>
+          <value>ec2</value>
+          <value>ovf</value>
+          <value>qcow2</value>
+          <value>vmdk</value>
+        </choice>
+      </attribute>
+    </define>
+    <define name="k.type.fsnocheck.attribute">
+      <attribute name="fsnocheck">
+        <a:documentation>Turn off periodic filesystem checks on ext2/3/4.</a:documentation>
+        <data type="boolean"/>
       </attribute>
     </define>
     <define name="k.type.fsreadonly.attribute">
@@ -1994,32 +1954,20 @@ file for write operations</a:documentation>
         </choice>
       </attribute>
     </define>
-    <define name="k.type.format.attribute">
-      <attribute name="format">
-        <a:documentation>Specifies the format of the virtual disk.</a:documentation>
-        <choice>
-          <value>ec2</value>
-          <value>ovf</value>
-          <value>qcow2</value>
-          <value>vmdk</value>
-        </choice>
-      </attribute>
-    </define>
-    <define name="k.type.installiso.attribute">
-      <attribute name="installiso">
-        <a:documentation>Specifies if a install iso should be created (oem only)</a:documentation>
+    <define name="k.type.hybrid.attribute">
+      <attribute name="hybrid">
+        <a:documentation>for the iso type only:
+Specifies that the iso file should be turned into
+a hybrid iso file. It's required to use the vmxboot
+boot image to boot that iso though</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
-    <define name="k.type.installstick.attribute">
-      <attribute name="installstick">
-        <a:documentation>Specifies if a install stick should be created (oem only)</a:documentation>
-        <data type="boolean"/>
-      </attribute>
-    </define>
-    <define name="k.type.primary.attribute">
-      <attribute name="primary">
-        <a:documentation>Specifies the primary type (choose KIWI option type)</a:documentation>
+    <define name="k.type.hybridpersistent.attribute">
+      <attribute name="hybridpersistent">
+        <a:documentation>for the iso type only:
+will trigger the creation of a partition for a COW file
+to keep data persistent over a reboot</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
@@ -2046,6 +1994,30 @@ file for write operations</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.type.installboot.attribute">
+      <attribute name="installboot">
+        <a:documentation>Specifies the bootloader default boot entry for the"
+initial boot of a kiwi install image. This value is"
+evaluated for grub and ext|syslinux but not for zipl"</a:documentation>
+        <choice>
+          <value>failsafe-install</value>
+          <value>harddisk</value>
+          <value>install</value>
+        </choice>
+      </attribute>
+    </define>
+    <define name="k.type.installiso.attribute">
+      <attribute name="installiso">
+        <a:documentation>Specifies if a install iso should be created (oem only)</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
+    <define name="k.type.installstick.attribute">
+      <attribute name="installstick">
+        <a:documentation>Specifies if a install stick should be created (oem only)</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.type.kernelcmdline.attribute">
       <!--
         The kernelcmdline element specifies additional
@@ -2053,56 +2025,68 @@ file for write operations</a:documentation>
       -->
       <attribute name="kernelcmdline"/>
     </define>
+    <define name="k.type.luks.attribute">
+      <attribute name="luks">
+        <a:documentation>Setup cryptographic volume along with the given filesystem
+using the LUKS extension. The value of this attribute
+represents the password string used to be able to
+mount that filesystem while booting</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.type.primary.attribute">
+      <attribute name="primary">
+        <a:documentation>Specifies the primary type (choose KIWI option type)</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
+    <define name="k.type.vga.attribute">
+      <attribute name="vga">
+        <a:documentation>Specifies the kernel framebuffer mode. More information
+about the possible values can be found by calling
+hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.type.volid.attribute">
+      <attribute name="volid">
+        <a:documentation>for the iso type only:
+Specifies the volume ID (volume name or label) to be written
+into the master block. There is space for 32 characters.</a:documentation>
+      </attribute>
+    </define>
     <define name="k.type.attlist">
       <interleave>
-        <ref name="k.type.image.attribute"/>
         <optional>
-          <ref name="k.type.fsnocheck.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.type.checkprebuilt.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.type.bootprofile.attribute"/>
+          <ref name="k.type.boot.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.bootkernel.attribute"/>
         </optional>
         <optional>
-          <ref name="k.type.boot.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.type.volid.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.type.flags.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.type.hybrid.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.type.hybridpersistent.attribute"/>
-        </optional>
-        <optional>
           <ref name="k.type.bootloader.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.bootprofile.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.boottimeout.attribute"/>
         </optional>
         <optional>
-          <ref name="k.type.installboot.attribute"/>
+          <ref name="k.type.checkprebuilt.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.compressed.attribute"/>
         </optional>
         <optional>
-          <ref name="k.type.vga.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.type.luks.attribute"/>
-        </optional>
-        <optional>
           <ref name="k.type.filesystem.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.flags.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.format.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.fsnocheck.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.fsreadonly.attribute"/>
@@ -2111,7 +2095,14 @@ file for write operations</a:documentation>
           <ref name="k.type.fsreadwrite.attribute"/>
         </optional>
         <optional>
-          <ref name="k.type.format.attribute"/>
+          <ref name="k.type.hybrid.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.hybridpersistent.attribute"/>
+        </optional>
+        <ref name="k.type.image.attribute"/>
+        <optional>
+          <ref name="k.type.installboot.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.installiso.attribute"/>
@@ -2120,10 +2111,19 @@ file for write operations</a:documentation>
           <ref name="k.type.installstick.attribute"/>
         </optional>
         <optional>
+          <ref name="k.type.kernelcmdline.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.luks.attribute"/>
+        </optional>
+        <optional>
           <ref name="k.type.primary.attribute"/>
         </optional>
         <optional>
-          <ref name="k.type.kernelcmdline.attribute"/>
+          <ref name="k.type.vga.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.volid.attribute"/>
         </optional>
       </interleave>
     </define>
@@ -2136,7 +2136,7 @@ file for write operations</a:documentation>
             <ref name="k.ec2config"/>
           </optional>
           <optional>
-            <ref name="k.systemdisk"/>
+            <ref name="k.machine"/>
           </optional>
           <optional>
             <ref name="k.oemconfig"/>
@@ -2151,7 +2151,7 @@ file for write operations</a:documentation>
             <ref name="k.split"/>
           </optional>
           <optional>
-            <ref name="k.machine"/>
+            <ref name="k.systemdisk"/>
           </optional>
         </interleave>
       </element>
@@ -2163,18 +2163,18 @@ file for write operations</a:documentation>
     
   -->
   <div>
-    <define name="k.volume.name.attribute">
-      <attribute name="name">
-        <a:documentation>volume name. The name specifies a path which has to
-exist inside the root directory.</a:documentation>
-      </attribute>
-    </define>
     <define name="k.volume.freespace.attribute">
       <attribute name="freespace">
         <a:documentation>free space to be added to this volume. The value is
 used as MB by default but you can add "M" and/or "G" as
 prefix</a:documentation>
         <ref name="volume-size-type"/>
+      </attribute>
+    </define>
+    <define name="k.volume.name.attribute">
+      <attribute name="name">
+        <a:documentation>volume name. The name specifies a path which has to
+exist inside the root directory.</a:documentation>
       </attribute>
     </define>
     <define name="k.volume.size.attribute">
@@ -2191,10 +2191,10 @@ add "M" and/or "G" as prefix</a:documentation>
         <optional>
           <ref name="k.volume.freespace.attribute"/>
         </optional>
+        <ref name="k.volume.name.attribute"/>
         <optional>
           <ref name="k.volume.size.attribute"/>
         </optional>
-        <ref name="k.volume.name.attribute"/>
       </interleave>
     </define>
     <define name="k.volume">
@@ -3118,34 +3118,22 @@ and setup the system disk</db:para>
         <interleave>
           <ref name="k.oemconfig.attlist"/>
           <optional>
-            <ref name="k.oem-systemsize"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-swap"/>
-          </optional>
-          <optional>
             <ref name="k.oem-align-partition"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-partition-install"/>
           </optional>
           <optional>
             <ref name="k.oem-boot-title"/>
           </optional>
           <optional>
-            <ref name="k.oem-kiwi-initrd"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-swapsize"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-recovery"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-recoveryID"/>
+            <ref name="k.oem-bootwait"/>
           </optional>
           <optional>
             <ref name="k.oem-inplace-recovery"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-kiwi-initrd"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-partition-install"/>
           </optional>
           <optional>
             <ref name="k.oem-reboot"/>
@@ -3154,13 +3142,25 @@ and setup the system disk</db:para>
             <ref name="k.oem-reboot-interactive"/>
           </optional>
           <optional>
+            <ref name="k.oem-recovery"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-recoveryID"/>
+          </optional>
+          <optional>
             <ref name="k.oem-shutdown"/>
           </optional>
           <optional>
             <ref name="k.oem-shutdown-interactive"/>
           </optional>
           <optional>
-            <ref name="k.oem-bootwait"/>
+            <ref name="k.oem-swap"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-swapsize"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-systemsize"/>
           </optional>
           <optional>
             <ref name="k.oem-unattended"/>
@@ -3352,11 +3352,23 @@ and also depends of the selected image output type.</db:para>
         <a:documentation>Configuration Information Needed for Logical Extend</a:documentation>
         <interleave>
           <ref name="k.preferences.attlist"/>
-          <zeroOrMore>
-            <ref name="k.type"/>
-          </zeroOrMore>
           <optional>
-            <ref name="k.version"/>
+            <ref name="k.boot-theme"/>
+          </optional>
+          <optional>
+            <ref name="k.defaultdestination"/>
+          </optional>
+          <optional>
+            <ref name="k.defaultroot"/>
+          </optional>
+          <optional>
+            <ref name="k.hwclock"/>
+          </optional>
+          <optional>
+            <ref name="k.keytable"/>
+          </optional>
+          <optional>
+            <ref name="k.locale"/>
           </optional>
           <optional>
             <ref name="k.packagemanager"/>
@@ -3371,25 +3383,13 @@ and also depends of the selected image output type.</db:para>
             <ref name="k.rpm-force"/>
           </optional>
           <optional>
-            <ref name="k.keytable"/>
-          </optional>
-          <optional>
             <ref name="k.timezone"/>
           </optional>
+          <zeroOrMore>
+            <ref name="k.type"/>
+          </zeroOrMore>
           <optional>
-            <ref name="k.hwclock"/>
-          </optional>
-          <optional>
-            <ref name="k.locale"/>
-          </optional>
-          <optional>
-            <ref name="k.boot-theme"/>
-          </optional>
-          <optional>
-            <ref name="k.defaultdestination"/>
-          </optional>
-          <optional>
-            <ref name="k.defaultroot"/>
+            <ref name="k.version"/>
           </optional>
         </interleave>
       </element>

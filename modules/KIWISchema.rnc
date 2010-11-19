@@ -876,62 +876,70 @@ div {
 }
 
 #==========================================
-# common element <oem-swapsize>
+# common element <oem-align-partition>
 #
 div {
-	k.oem-swapsize.attlist = empty
-	k.oem-swapsize =
-		## For oemboot driven images: Set the size of the swap
-		## partition in MB
+	k.oem-align-partition.content = xsd:boolean
+	k.oem-align-partition.attlist = empty
+	k.oem-align-partition =
+		## For oemboot driven images: align start sectors. This is only
+		## done when fdisk is used. For parted the option -a is passed in
+		## in any case
 		[
 		db:para [
-			"For oemboot driven images: Set the size of the swap\x{a}"~
-			"partition in MB. No swapspace with oem-swap set to false."
+			"For oemboot driven images: align start sectors. This is only\x{a}"~
+			"done when fdisk is used. For parted the option -a is passed\x{a}"~
+			"in any case"
 		]
 		]
-		element oem-swapsize {
-			k.oem-swapsize.attlist,
-			xsd:nonNegativeInteger
+		element oem-align-partition {
+			k.oem-align-partition.attlist,
+			k.oem-align-partition.content
 		}
 }
 
 #==========================================
-# common element <oem-systemsize>
+# common element <oem-boot-title>
 #
 div {
-	k.oem-systemsize.attlist = empty
-	k.oem-systemsize =
-		## For oemboot driven images: Set the size of the system
-		## (root) partition in MB
+	k.oem-boot-title.attlist = empty
+	k.oem-boot-title =
+		## For oemboot driven images: setup of the boot menu text
+		## displayed within the square brackets after first reboot
+		## of the OEM image
 		[
 		db:para [
-			"For oemboot driven images: Set the size of the system\x{a}"~
-			"(root) partition in MB."
+			"For oemboot driven images: setup of the boot menu text\x{a}"~
+			"displayed within the square brackets after first reboot\x{a}"~
+			"of the OEM image."
 		]
 		]
-		element oem-systemsize {
-			k.oem-systemsize.attlist,
-			xsd:nonNegativeInteger
+		element oem-boot-title {
+			k.oem-boot-title.attlist,
+			text
 		}
 }
 
 #==========================================
-# common element <oem-recoveryID>
+# common element <oem-bootwait>
 #
 div {
-	k.oem-recoveryID.attlist = empty
-	k.oem-recoveryID =
-		## For oemboot driven images: Set the partition ID of
-		## recovery partition. Default value is 83 (Linux)
+	k.oem-bootwait.content = xsd:boolean
+	k.oem-bootwait.attlist = empty
+	k.oem-bootwait =
+		## For oemboot driven images: halt system after image dump true/false
 		[
 		db:para [
-			"For oemboot driven images: Set the partition ID of\x{a}"~
-			"recovery partition. Default value is 83 (Linux)"
+			"For oemboot driven images: wait for user acknowledgement "~
+			"after first deployment true/false. A message to be "~
+			"acknowledged by the user is posted after the image has been "~
+			"dumped (installed) on the target disk. After user interaction "~
+			"the system reboots (softboot)."
 		]
 		]
-		element oem-recoveryID {
-			k.oem-recoveryID.attlist,
-			xsd:nonNegativeInteger
+		element oem-bootwait {
+			k.oem-bootwait.attlist,
+			k.oem-bootwait.content
 		}
 }
 
@@ -961,44 +969,23 @@ div {
 }
 
 #==========================================
-# common element <oem-swap>
+# common element <oem-kiwi-initrd>
 #
 div {
-	k.oem-swap.content = xsd:boolean
-	k.oem-swap.attlist = empty
-	k.oem-swap =
-		## For oemboot driven images: use a swap partition yes/no
+	k.oem-kiwi-initrd.content = xsd:boolean
+	k.oem-kiwi-initrd.attlist = empty
+	k.oem-kiwi-initrd =
+		## For oemboot driven images: use kiwi initrd in any case
+		## and don't replace it with mkinitrd created initrd
 		[
 		db:para [
-			"For oemboot driven images: use a swap partition yes/no."
+			"For oemboot driven images: use kiwi initrd in any case\x{a}"~
+            "and don't replace it with mkinitrd created initrd"
 		]
 		]
-		element oem-swap {
-			k.oem-swap.attlist,
-			k.oem-swap.content
-		}
-}
-
-#==========================================
-# common element <oem-align-partition>
-#
-div {
-	k.oem-align-partition.content = xsd:boolean
-	k.oem-align-partition.attlist = empty
-	k.oem-align-partition =
-		## For oemboot driven images: align start sectors. This is only
-		## done when fdisk is used. For parted the option -a is passed in
-		## in any case
-		[
-		db:para [
-			"For oemboot driven images: align start sectors. This is only\x{a}"~
-			"done when fdisk is used. For parted the option -a is passed\x{a}"~
-			"in any case"
-		]
-		]
-		element oem-align-partition {
-			k.oem-align-partition.attlist,
-			k.oem-align-partition.content
+		element oem-kiwi-initrd {
+			k.oem-kiwi-initrd.attlist,
+			k.oem-kiwi-initrd.content
 		}
 }
 
@@ -1024,68 +1011,6 @@ div {
 		element oem-partition-install {
 			k.oem-partition-install.attlist,
 			k.oem-partition-install.content
-		}
-}
-
-#==========================================
-# common element <oem-recovery>
-#
-div {
-	k.oem-recovery.content = xsd:boolean
-	k.oem-recovery.attlist = empty
-	k.oem-recovery =
-		## For oemboot driven images: create a recovery archive yes/no
-		[
-		db:para [
-			"For oemboot driven images: create a recovery archive yes/no"
-		]
-		]
-		element oem-recovery {
-			k.oem-recovery.attlist,
-			k.oem-recovery.content
-		}
-}
-
-#==========================================
-# common element <oem-boot-title>
-#
-div {
-	k.oem-boot-title.attlist = empty
-	k.oem-boot-title =
-		## For oemboot driven images: setup of the boot menu text
-		## displayed within the square brackets after first reboot
-		## of the OEM image 
-        [
-		db:para [
-			"For oemboot driven images: setup of the boot menu text\x{a}"~
-			"displayed within the square brackets after first reboot\x{a}"~
-			"of the OEM image."
-		]
-		]
-		element oem-boot-title {
-			k.oem-boot-title.attlist,
-			text
-		}
-}
-
-#==========================================
-# common element <oem-kiwi-initrd>
-#
-div {
-	k.oem-kiwi-initrd.content = xsd:boolean
-	k.oem-kiwi-initrd.attlist = empty
-	k.oem-kiwi-initrd =
-		## For oemboot driven images: use kiwi initrd in any case
-		## and don't replace it with mkinitrd created initrd
-		[
-		db:para [
-			"For oemboot driven images: use kiwi initrd in any case\x{a}"~
-            "and don't replace it with mkinitrd created initrd"
-		]
-		]
-		element oem-kiwi-initrd {
-			k.oem-kiwi-initrd.attlist,
-			k.oem-kiwi-initrd.content
 		}
 }
 
@@ -1135,6 +1060,45 @@ div {
 }
 
 #==========================================
+# common element <oem-recovery>
+#
+div {
+	k.oem-recovery.content = xsd:boolean
+	k.oem-recovery.attlist = empty
+	k.oem-recovery =
+		## For oemboot driven images: create a recovery archive yes/no
+		[
+		db:para [
+			"For oemboot driven images: create a recovery archive yes/no"
+		]
+		]
+		element oem-recovery {
+			k.oem-recovery.attlist,
+			k.oem-recovery.content
+		}
+}
+
+#==========================================
+# common element <oem-recoveryID>
+#
+div {
+	k.oem-recoveryID.attlist = empty
+	k.oem-recoveryID =
+		## For oemboot driven images: Set the partition ID of
+		## recovery partition. Default value is 83 (Linux)
+		[
+		db:para [
+			"For oemboot driven images: Set the partition ID of\x{a}"~
+			"recovery partition. Default value is 83 (Linux)"
+		]
+		]
+		element oem-recoveryID {
+			k.oem-recoveryID.attlist,
+			xsd:nonNegativeInteger
+		}
+}
+
+#==========================================
 # common element <oem-shutdown>
 #
 div {
@@ -1180,25 +1144,61 @@ div {
 }
 
 #==========================================
-# common element <oem-bootwait>
+# common element <oem-swap>
 #
 div {
-	k.oem-bootwait.content = xsd:boolean
-	k.oem-bootwait.attlist = empty
-	k.oem-bootwait =
-		## For oemboot driven images: halt system after image dump true/false
+	k.oem-swap.content = xsd:boolean
+	k.oem-swap.attlist = empty
+	k.oem-swap =
+		## For oemboot driven images: use a swap partition yes/no
 		[
 		db:para [
-			"For oemboot driven images: wait for user acknowledgement "~
-			"after first deployment true/false. A message to be "~
-			"acknowledged by the user is posted after the image has been "~
-			"dumped (installed) on the target disk. After user interaction "~
-			"the system reboots (softboot)."
+			"For oemboot driven images: use a swap partition yes/no."
 		]
 		]
-		element oem-bootwait {
-			k.oem-bootwait.attlist,
-			k.oem-bootwait.content
+		element oem-swap {
+			k.oem-swap.attlist,
+			k.oem-swap.content
+		}
+}
+
+#==========================================
+# common element <oem-swapsize>
+#
+div {
+	k.oem-swapsize.attlist = empty
+	k.oem-swapsize =
+		## For oemboot driven images: Set the size of the swap
+		## partition in MB
+		[
+		db:para [
+			"For oemboot driven images: Set the size of the swap\x{a}"~
+			"partition in MB. No swapspace with oem-swap set to false."
+		]
+		]
+		element oem-swapsize {
+			k.oem-swapsize.attlist,
+			xsd:nonNegativeInteger
+		}
+}
+
+#==========================================
+# common element <oem-systemsize>
+#
+div {
+	k.oem-systemsize.attlist = empty
+	k.oem-systemsize =
+		## For oemboot driven images: Set the size of the system
+		## (root) partition in MB
+		[
+		db:para [
+			"For oemboot driven images: Set the size of the system\x{a}"~
+			"(root) partition in MB."
+		]
+		]
+		element oem-systemsize {
+			k.oem-systemsize.attlist,
+			xsd:nonNegativeInteger
 		}
 }
 
@@ -1360,37 +1360,74 @@ div {
 # common element <type>
 #
 div {
-	k.type.fsnocheck.attribute =
-		## Turn off periodic filesystem checks on ext2/3/4.
-		attribute fsnocheck { xsd:boolean }
-	k.type.bootprofile.attribute =
-		## Specifies the boot profile defined in the boot image
-		## description. When kiwi builds the boot image the
-		## information is passed as add-profile option
-		attribute bootprofile { text }
+	k.type.boot.attribute =
+		## Specifies the path of the boot image (initrd), relative
+		## to /usr/share/kiwi/image
+		attribute boot { text }
 	k.type.bootkernel.attribute =
 		## Specifies the kernel boot profile defined in the boot
 		## image description. When kiwi builds the boot image the
 		## information is passed as add-profile option
 		attribute bootkernel { text }
-	k.type.boot.attribute =
-		## Specifies the path of the boot image (initrd), relative
-		## to /usr/share/kiwi/image
-		attribute boot { text }
+	k.type.bootloader.attribute =
+		## Specifies the bootloader used for booting the image."
+		## At the moment grub, zipl and sys|extlinux are supported
+		attribute bootloader {
+			"extlinux" | "grub" | "syslinux" | "zipl"
+		}
+	k.type.bootprofile.attribute =
+		## Specifies the boot profile defined in the boot image
+		## description. When kiwi builds the boot image the
+		## information is passed as add-profile option
+		attribute bootprofile { text }
+	k.type.boottimeout.attribute =
+		## Specifies the boot timeout in seconds prior to launching
+		## the default boot option. the unit for the timeout value
+		## is seconds if GRUB is used as the boot loader and 1/10
+		## seconds if syslinux is used
+		attribute boottimeout { xsd:nonNegativeInteger }
 	k.type.checkprebuilt.attribute =
 		## Activates whether KIWI should search for a prebuild boot
 		## image or not
 		attribute checkprebuilt { xsd:boolean }
-	k.type.volid.attribute =
-		## for the iso type only:
-		## Specifies the volume ID (volume name or label) to be written
-		## into the master block. There is space for 32 characters.
-		attribute volid { text }
+	k.type.compressed.attribute =
+		## Specifies whether the image output file should be
+		## compressed or not. This makes only sense for filesystem
+		## only images respectively for the pxe or cpio type
+		attribute compressed { xsd:boolean }
+	k.type.filesystem.attribute = 
+		## Specifies the filesystem which can be one of:
+		## btrfs, clicfs, ext2, ext3, ext4, reiserfs, squashfs, or xfs
+		## clicfs is a fuse based compressed filesystem using a cow
+		## file for write operations
+		attribute filesystem {
+			"btrfs" | "clicfs" | "ext2" | "ext3" | "ext4" |
+			"reiserfs" | "squashfs" | "xfs"
+		}
 	k.type.flags.attribute =
 		## Specifies flags for the image type. This could be compressed
 		## or unified and applies to the iso type only
 		attribute flags {
 			"clic" | "compressed" | "unified"
+		}
+	k.type.format.attribute =
+		## Specifies the format of the virtual disk.
+		attribute format {
+			"ec2" | "ovf" | "qcow2" | "vmdk"
+		}
+	k.type.fsnocheck.attribute =
+		## Turn off periodic filesystem checks on ext2/3/4.
+		attribute fsnocheck { xsd:boolean }
+	k.type.fsreadonly.attribute =
+		## Specifies the filesystem for the read-only part of a split image
+		attribute fsreadonly {
+			"btrfs" | "ext2" | "ext3" | "ext4" |
+			"reiserfs" | "squashfs" | "xfs"
+		}
+	k.type.fsreadwrite.attribute =
+		## Specifies the filesystem for the read-write part of a split image
+		attribute fsreadwrite {
+			"btrfs" | "ext2" | "ext3" | "ext4" | "reiserfs" | "xfs"
 		}
 	k.type.hybrid.attribute =
 		## for the iso type only:
@@ -1403,75 +1440,6 @@ div {
 		## will trigger the creation of a partition for a COW file
 		## to keep data persistent over a reboot
 		attribute hybridpersistent { xsd:boolean }
-	k.type.bootloader.attribute =
-		## Specifies the bootloader used for booting the image."
-		## At the moment grub, zipl and sys|extlinux are supported
-		attribute bootloader {
-			"extlinux" | "grub" | "syslinux" | "zipl"
-		}
-	k.type.boottimeout.attribute =
-		## Specifies the boot timeout in seconds prior to launching
-		## the default boot option. the unit for the timeout value
-		## is seconds if GRUB is used as the boot loader and 1/10
-		## seconds if syslinux is used
-		attribute boottimeout { xsd:nonNegativeInteger }
-	k.type.installboot.attribute =
-		## Specifies the bootloader default boot entry for the"
-		## initial boot of a kiwi install image. This value is"
-		## evaluated for grub and ext|syslinux but not for zipl"
-		attribute installboot {
-			"failsafe-install" | "harddisk" | "install"
-		}
-	k.type.compressed.attribute =
-		## Specifies whether the image output file should be
-		## compressed or not. This makes only sense for filesystem
-		## only images respectively for the pxe or cpio type
-		attribute compressed { xsd:boolean }
-	k.type.vga.attribute =
-		## Specifies the kernel framebuffer mode. More information
-		## about the possible values can be found by calling
-		## hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt
-		attribute vga { text }
-	k.type.luks.attribute =
-		## Setup cryptographic volume along with the given filesystem
-		## using the LUKS extension. The value of this attribute
-		## represents the password string used to be able to
-		## mount that filesystem while booting
-		attribute luks { text }
-	k.type.filesystem.attribute = 
-		## Specifies the filesystem which can be one of:
-		## btrfs, clicfs, ext2, ext3, ext4, reiserfs, squashfs, or xfs
-		## clicfs is a fuse based compressed filesystem using a cow
-		## file for write operations
-		attribute filesystem {
-			"btrfs" | "clicfs" | "ext2" | "ext3" | "ext4" |
-			"reiserfs" | "squashfs" | "xfs"
-		}
-	k.type.fsreadonly.attribute =
-		## Specifies the filesystem for the read-only part of a split image
-		attribute fsreadonly {
-			"btrfs" | "ext2" | "ext3" | "ext4" |
-			"reiserfs" | "squashfs" | "xfs"
-		}
-	k.type.fsreadwrite.attribute =
-		## Specifies the filesystem for the read-write part of a split image
-		attribute fsreadwrite {
-			"btrfs" | "ext2" | "ext3" | "ext4" | "reiserfs" | "xfs"
-		}
-	k.type.format.attribute =
-		## Specifies the format of the virtual disk.
-		attribute format {
-			"ec2" | "ovf" | "qcow2" | "vmdk"
-		}
-	k.type.installiso.attribute =
-		## Specifies if a install iso should be created (oem only)
-		attribute installiso { xsd:boolean }
-	k.type.installstick.attribute =
-		## Specifies if a install stick should be created (oem only)
-		attribute installstick { xsd:boolean }
-	k.type.primary.attribute =
-		## Specifies the primary type (choose KIWI option type)
-		attribute primary { xsd:boolean }
 	k.type.image.attribute =
 		## Specifies the image type
 		attribute image {
@@ -1479,46 +1447,78 @@ div {
 			"ext4" | "iso" | "oem" | "product" | "pxe" | "reiserfs" |
 			"split" | "squashfs" | "usb" | "vmx" | "xfs"
 		}
+	k.type.installboot.attribute =
+		## Specifies the bootloader default boot entry for the"
+		## initial boot of a kiwi install image. This value is"
+		## evaluated for grub and ext|syslinux but not for zipl"
+		attribute installboot {
+			"failsafe-install" | "harddisk" | "install"
+		}
+	k.type.installiso.attribute =
+		## Specifies if a install iso should be created (oem only)
+		attribute installiso { xsd:boolean }
+	k.type.installstick.attribute =
+		## Specifies if a install stick should be created (oem only)
+		attribute installstick { xsd:boolean }
 	k.type.kernelcmdline.attribute =
 		# The kernelcmdline element specifies additional
 		# kernel command line options
 		attribute kernelcmdline { text }
+	k.type.luks.attribute =
+		## Setup cryptographic volume along with the given filesystem
+		## using the LUKS extension. The value of this attribute
+		## represents the password string used to be able to
+		## mount that filesystem while booting
+		attribute luks { text }
+	k.type.primary.attribute =
+		## Specifies the primary type (choose KIWI option type)
+		attribute primary { xsd:boolean }
+	k.type.vga.attribute =
+		## Specifies the kernel framebuffer mode. More information
+		## about the possible values can be found by calling
+		## hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt
+		attribute vga { text }
+	k.type.volid.attribute =
+		## for the iso type only:
+		## Specifies the volume ID (volume name or label) to be written
+		## into the master block. There is space for 32 characters.
+		attribute volid { text }
 	k.type.attlist =
-		k.type.image.attribute &
-		k.type.fsnocheck.attribute? &
-		k.type.checkprebuilt.attribute? &
-		k.type.bootprofile.attribute? &
-		k.type.bootkernel.attribute? &
 		k.type.boot.attribute? &
-		k.type.volid.attribute? &
-		k.type.flags.attribute? &
-		k.type.hybrid.attribute? &
-		k.type.hybridpersistent.attribute? &
+		k.type.bootkernel.attribute? &
 		k.type.bootloader.attribute? &
+		k.type.bootprofile.attribute? &
 		k.type.boottimeout.attribute? &
-		k.type.installboot.attribute? &
+		k.type.checkprebuilt.attribute? &
 		k.type.compressed.attribute? &
-		k.type.vga.attribute? &
-		k.type.luks.attribute? &
 		k.type.filesystem.attribute? &
+		k.type.flags.attribute? &
+		k.type.format.attribute? &
+		k.type.fsnocheck.attribute? &
 		k.type.fsreadonly.attribute? &
 		k.type.fsreadwrite.attribute? &
-		k.type.format.attribute? &
+		k.type.hybrid.attribute? &
+		k.type.hybridpersistent.attribute? &
+		k.type.image.attribute &
+		k.type.installboot.attribute? &
 		k.type.installiso.attribute? &
 		k.type.installstick.attribute? &
+		k.type.kernelcmdline.attribute? &
+		k.type.luks.attribute? &
 		k.type.primary.attribute? &
-		k.type.kernelcmdline.attribute?
+		k.type.vga.attribute? &
+		k.type.volid.attribute?
 	k.type =
 		## The Image Type of the Logical Extend
 		element type { 
 			k.type.attlist &
             k.ec2config? &
-			k.systemdisk? &
+			k.machine? &
 			k.oemconfig? &
 			k.pxedeploy? &
 			k.size? &
 			k.split? &
-			k.machine?
+			k.systemdisk?
 		}
 }
 
@@ -1526,15 +1526,15 @@ div {
 # common element <volume>
 #
 div {
-	k.volume.name.attribute =
-		## volume name. The name specifies a path which has to
-		## exist inside the root directory.
-		attribute name { text }
 	k.volume.freespace.attribute =
 		## free space to be added to this volume. The value is
 		## used as MB by default but you can add "M" and/or "G" as
 		## prefix
 		attribute freespace { volume-size-type }
+	k.volume.name.attribute =
+		## volume name. The name specifies a path which has to
+		## exist inside the root directory.
+		attribute name { text }
 	k.volume.size.attribute =
 		## absolute size of the volume. If the size value
 		## is too small to store all data it will be ignored.
@@ -1543,8 +1543,8 @@ div {
 		attribute size { volume-size-type }
 	k.volume.attlist =
 		k.volume.freespace.attribute? &
-		k.volume.size.attribute? &
-		k.volume.name.attribute
+		k.volume.name.attribute &
+		k.volume.size.attribute?
 	k.volume =
 		## Specify which parts of the filesystem should be
 		## on a extra volume.
@@ -2202,21 +2202,21 @@ div {
 		]
 		element oemconfig {
 			k.oemconfig.attlist &
-			k.oem-systemsize? &
-			k.oem-swap? &
 			k.oem-align-partition? &
-			k.oem-partition-install? &
 			k.oem-boot-title? &
-			k.oem-kiwi-initrd? &
-			k.oem-swapsize? &
-			k.oem-recovery? &
-			k.oem-recoveryID? &
+			k.oem-bootwait? &
 			k.oem-inplace-recovery? &
+			k.oem-kiwi-initrd? &
+			k.oem-partition-install? &
 			k.oem-reboot? &
 			k.oem-reboot-interactive? &
+			k.oem-recovery? &
+			k.oem-recoveryID? &
 			k.oem-shutdown? &
 			k.oem-shutdown-interactive? &
-			k.oem-bootwait? &
+			k.oem-swap? &
+			k.oem-swapsize? &
+			k.oem-systemsize? &
 			k.oem-unattended?
 		}
 }
@@ -2318,19 +2318,19 @@ div {
 		## Configuration Information Needed for Logical Extend
 		element preferences {
 			k.preferences.attlist &
-			k.type* &
-			k.version? &
+			k.boot-theme? &
+			k.defaultdestination? &
+			k.defaultroot? &
+			k.hwclock? &
+			k.keytable? &
+			k.locale? &
 			k.packagemanager? &
 			k.rpm-check-signatures? &
 			k.rpm-excludedocs? &
 			k.rpm-force? &
-			k.keytable? &
 			k.timezone? &
-			k.hwclock? &
-			k.locale? &
-			k.boot-theme? &
-			k.defaultdestination? &
-			k.defaultroot?
+			k.type* &
+			k.version?
 		}
 }
 

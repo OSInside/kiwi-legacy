@@ -77,7 +77,7 @@ check:
 		docbook_4 docbook-xsl-stylesheets \
 		fop fop-offo batik \
 		excalibur-avalon-framework xmlgraphics-commons \
-		dejavu sil-charis
+		dejavu sil-charis xml-commons-resolver
 
 revision:
 	cat ../../rpm/kiwi.spec | grep Version: | cut -f2 -d: |\

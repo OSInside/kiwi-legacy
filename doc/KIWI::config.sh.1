@@ -2,12 +2,12 @@
 .\"     Title: kiwi::config.sh
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.76.1-RC1 <http://docbook.sf.net/>
-.\"      Date: Created: 11/05/2010
+.\"      Date: Created: 11/19/2010
 .\"    Manual: KIWI Manualpage
-.\"    Source: KIWI 4.64
+.\"    Source: KIWI 4.65
 .\"  Language: English
 .\"
-.TH "KIWI::CONFIG\&.SH" "1" "Created: 11/05/2010" "KIWI 4\&.64" "KIWI Manualpage"
+.TH "KIWI::CONFIG\&.SH" "1" "Created: 11/19/2010" "KIWI 4\&.65" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -78,10 +78,11 @@ exit
 .PP
 The
 \&.kconfig
-file allows to make use of a common set of functions\&. Those which are SUSE Linux specific starts with the name
-\fIsuse\fR\&. Those which are common to all linux systems starts with the name
-\fIbase\fR\&. The following list describes which functions are available for
+file allows to make use of a common set of functions\&. Functions specific to SUSE Linux specific begin with the name
+\fIsuse\fR\&. Functions applicable to all linux systems starts with the name
+\fIbase\fR\&. The following list describes the functions available inside the
 config\&.sh
+script\&.
 .PP
 [baseCleanMount]
 .RS 4

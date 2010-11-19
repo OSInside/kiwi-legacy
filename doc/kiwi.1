@@ -2,12 +2,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.76.1-RC1 <http://docbook.sf.net/>
-.\"      Date: Created: 11/05/2010
+.\"      Date: Created: 11/19/2010
 .\"    Manual: KIWI Manualpage
-.\"    Source: KIWI 4.64
+.\"    Source: KIWI 4.65
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 11/05/2010" "KIWI 4\&.64" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 11/19/2010" "KIWI 4\&.65" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -164,16 +164,6 @@ List general information about the image description\&. So far you can get infor
 Create splash screen from the data inside the initrd and re\-create the initrd with the splash screen attached to the initrd cpio archive\&. This enables the kernel to load the splash screen at boot time\&. If splashy is used only a link to the original initrd will be created
 .RE
 .SH "GLOBAL OPTIONS"
-.PP
-[\fB\-\-base\-root\fR \fIbase\-path\fR]
-.RS 4
-Refers to an already prepared root tree\&. KIWI will use this tree to skip the first stage of the prepare step and run the second stage directly\&.
-.RE
-.PP
-[\fB\-\-base\-root\-mode\fR \fIcopy|union|recycle\fR]
-.RS 4
-Specifies the overlay mode for the base root tree\&. This can be either a copy of the tree, a union mount or the tree itself\&. The last mode (recycle) will modify the base root tree which might make it obsolete as base root for other kiwi calls
-.RE
 .PP
 [\fB\-\-add\-profile\fR \fIprofile\-name\fR]
 .RS 4
