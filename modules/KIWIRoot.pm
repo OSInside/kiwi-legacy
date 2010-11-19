@@ -440,7 +440,7 @@ sub init {
 		$manager -> freeLock();
 		return undef;
 	}
-	$this -> cleanMount('cache\/(kiwi|zypp)$');
+	$this -> cleanMount('(cache\/(kiwi|zypp)$)|(dev$)');
 	$manager -> freeLock();
 	#==================================
 	# Create default fstab file
@@ -1061,6 +1061,11 @@ sub setupCacheMount {
 		@mountList = @{$this->{mountList}};
 	} else {
 		@mountList = ();
+	}
+	if (! -f "$root/dev/console") {
+		qxx ("mkdir -p $root/dev");
+		qxx ("mount --bind /dev $root/dev");
+		push (@mountList,"$root/dev");
 	}
 	foreach my $cache (@cache) {
 		if (! -d $cache) {
