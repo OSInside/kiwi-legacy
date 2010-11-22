@@ -2085,9 +2085,11 @@ function setupDefaultFstab {
 	local nfstab=$prefix/etc/fstab
 	mkdir -p $prefix/etc
 	cat > $nfstab < /dev/null
-	echo "devpts  /dev/pts   devpts  mode=0620,gid=5 0 0"   >> $nfstab
-	echo "proc    /proc      proc    defaults 0 0"          >> $nfstab
-	echo "sysfs   /sys       sysfs   noauto 0 0"            >> $nfstab
+	echo "devpts  /dev/pts          devpts  mode=0620,gid=5 0 0"  >> $nfstab
+	echo "proc    /proc             proc    defaults        0 0"  >> $nfstab
+	echo "sysfs   /sys              sysfs   noauto          0 0"  >> $nfstab
+	echo "debugfs /sys/kernel/debug debugfs noauto          0 0"  >> $nfstab
+	echo "usbfs   /proc/bus/usb     usbfs   noauto          0 0"  >> $nfstab
 }
 #======================================
 # updateRootDeviceFstab
@@ -2130,7 +2132,7 @@ function updateRootDeviceFstab {
 				[ ! $volume = "Comp" ] && \
 				[ ! $volume = "Swap" ]
 			then
-				echo "/dev/$VGROUP/LV$volume /$mpoint $FSTYPE defaults 0 0" \
+				echo "/dev/$VGROUP/LV$volume /$mpoint $FSTYPE defaults 1 1" \
 				>> $nfstab
 			fi
 		done
@@ -2147,7 +2149,7 @@ function updateSwapDeviceFstab {
 	local sdev=$2
 	local diskByID=`getDiskID $sdev`
 	local nfstab=$prefix/etc/fstab
-	echo "$diskByID swap swap pri=42 0 0" >> $nfstab
+	echo "$diskByID swap swap defaults 0 0" >> $nfstab
 }
 #======================================
 # updateLVMBootDeviceFstab
@@ -2175,7 +2177,7 @@ function updateLVMBootDeviceFstab {
 	if [ -z "$FSTYPE" ] || [ "$FSTYPE" = "unknown" ];then
 		FSTYPE="auto"
 	fi
-	echo "$diskByID $mount $FSTYPE defaults 0 0" >> $nfstab
+	echo "$diskByID $mount $FSTYPE defaults 1 2" >> $nfstab
 	echo "$mount/boot /boot none bind 0 0" >> $nfstab
 	if [ ! -z "$FSTYPE_SAVE" ];then
 		FSTYPE=$FSTYPE_SAVE
@@ -2218,9 +2220,9 @@ function updateSyslinuxBootDeviceFstab {
 	local diskByID=`getDiskID $sdev`
 	local nfstab=$prefix/etc/fstab
 	if [ $loader = "syslinux" ];then
-		echo "$diskByID /syslboot vfat defaults 0 0" >> $nfstab
+		echo "$diskByID /syslboot vfat defaults 1 2" >> $nfstab
 	else
-		echo "$diskByID /syslboot ext2 defaults 0 0" >> $nfstab
+		echo "$diskByID /syslboot ext2 defaults 1 2" >> $nfstab
 	fi
 	echo "/syslboot/boot /boot none bind 0 0" >> $nfstab
 }
@@ -2256,7 +2258,7 @@ function updateOtherDeviceFstab {
 		then
 			device=$(ddn $DISK $count)
 			probeFileSystem $device
-			echo "$device $partMount $FSTYPE defaults 1 1" >> $nfstab
+			echo "$device $partMount $FSTYPE defaults 0 0" >> $nfstab
 		fi
 	done
 }
@@ -4958,6 +4960,11 @@ function cleanImage {
 	# is called
 	# ----
 	#======================================
+	# setup logging in this mode
+	#--------------------------------------
+	exec 2>>$ELOG_FILE
+	set -x
+	#======================================
 	# kill second utimer and tail
 	#--------------------------------------
 	. /iprocs
@@ -4991,22 +4998,37 @@ function cleanImage {
 		return
 	fi
 	#======================================
-	# umount LVM root parts lazy
+	# umount LVM root parts
 	#--------------------------------------
-	if [ "$haveLVM" = "yes" ]; then
-		for i in /dev/$VGROUP/LV*;do
-			if [ ! -e $i ];then
-				continue
-			fi
-			if \
-				[ ! $i = "/dev/$VGROUP/LVRoot" ] && \
-				[ ! $i = "/dev/$VGROUP/LVComp" ] && \
-				[ ! $i = "/dev/$VGROUP/LVSwap" ]
-			then
-				umount -l $i &>/dev/null
-			fi
-		done
-	fi
+	for i in /dev/$VGROUP/LV*;do
+		if [ ! -e $i ];then
+			continue
+		fi
+		if \
+			[ ! $i = "/dev/$VGROUP/LVRoot" ] && \
+			[ ! $i = "/dev/$VGROUP/LVComp" ] && \
+			[ ! $i = "/dev/$VGROUP/LVSwap" ]
+		then
+			mpoint=$(echo ${i##/*/LV})
+			umount $mpoint 1>&2
+		fi
+	done
+	#======================================
+	# umount image boot partition if any
+	#--------------------------------------
+	for i in lvmboot btrboot clicboot xfsboot luksboot syslboot;do
+		if [ ! -e /$i ];then
+			continue
+		fi
+		umount /$i 1>&2
+	done
+	umount /boot 1>&2
+	#======================================
+	# turn off swap
+	#--------------------------------------
+	mount -t proc proc /proc
+	swapoff -a   1>&2
+	umount /proc 1>&2
 }
 #======================================
 # bootImage
