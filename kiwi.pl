@@ -1601,7 +1601,7 @@ sub usage {
 	print "    kiwi -c | --create  <image-root> -d <destination>\n";
 	print "       [ --type <image-type> ]\n";
 	print "Image Cache:\n";
-	print "    kiwi --image-cache <image-path>\n";
+	print "    kiwi --init-cache <image-path>\n";
 	print "       [ --cache <dir> ]\n";
 	print "Image Upgrade:\n";
 	print "    kiwi -u | --upgrade <image-root>\n";
