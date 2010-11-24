@@ -18,6 +18,7 @@ package KIWIXML;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 require Exporter;
 use Carp qw (cluck);
 use File::Glob ':glob';
@@ -147,6 +148,12 @@ sub new {
 	# validate XML document with cur. schema
 	#------------------------------------------
 	if (! $this -> __validateXML ()) {
+		return undef;
+	}
+	#==========================================
+	# Check data consistentcy
+	#==========================================
+	if (! $this -> __validateConsistency ()) {
 		return undef;
 	}
 	#==========================================
@@ -408,12 +415,6 @@ sub new {
 	# Store object data (create URL list)
 	#------------------------------------------
 	$this -> createURLList ();
-	#==========================================
-	# Check data consistentcy
-	#==========================================
-	if (! $this -> __validateConsistency ()) {
-		return undef;
-	}
 	return $this;
 }
 
@@ -710,6 +711,9 @@ sub getImageDefaultRoot {
 # getImageTypeAndAttributes
 #------------------------------------------
 sub getImageTypeAndAttributes {
+	# TODO
+	# This method is should be removed in an effort
+	# to remove state from the XML representation
 	# ...
 	# Get the image type and its attributes for beeing
 	# able to create the appropriate logical extend
@@ -1922,8 +1926,10 @@ sub getProfiles {
 		my $name = $element -> getAttribute ("name");
 		my $desc = $element -> getAttribute ("description");
 		my $incl = $element -> getAttribute ("import");
-		if ((defined $import) && ("$incl" ne "true")) {
-			next;
+		if (defined $import) {
+			if ((defined $incl) && ("$incl" ne "true")) {
+				next;
+			}
 		}
 		my %profile = ();
 		$profile{name} = $name;
@@ -1937,6 +1943,9 @@ sub getProfiles {
 # setDefaultProfiles
 #------------------------------------------
 sub setDefaultProfiles {
+	# TODO
+	# This method should be removed in an effort to
+	# remove state from the XML representattion
 	# ...
 	# import default profiles if no other profiles
 	# were set on the commandline
@@ -2586,7 +2595,9 @@ sub getImageConfig {
 	if (@tstp) {
 		$result{kiwi_testing} = join(" ",@tstp);
 	}
-	if ((%type) && ($type{compressed} eq "true")) {
+	if ((%type)
+		&& (defined $type{compressed})
+		&& ($type{compressed} eq "true")) {
 		$result{kiwi_compressed} = "yes";
 	}
 	if (%type) {
@@ -2604,13 +2615,19 @@ sub getImageConfig {
 	if ((%type) && ($type{installboot})) {
 		$result{kiwi_installboot} = $type{installboot};
 	}
-	if ((%type) && ($type{luks} eq "true")) {
+	if ((%type)
+		&& (defined $type{luks})
+		&& ($type{luks} eq "true")) {
 		$result{kiwi_luks} = "yes";
 	}
-	if ((%type) && ($type{hybrid} eq "true")) {
+	if ((%type)
+		&& (defined $type{hybrid})
+		&& ($type{hybrid} eq "true")) {
 		$result{kiwi_hybrid} = "yes";
 	}
-	if ((%type) && ($type{hybridpersistent} eq "true")) {
+	if ((%type)
+		&& (defined $type{hybridpersistent})
+		&& ($type{hybridpersistent} eq "true")) {
 		$result{kiwi_hybridpersistent} = "yes";
 	}
 	if ((%type) && ($type{lvm})) {
@@ -2711,17 +2728,18 @@ sub getImageConfig {
 		my $oemrecoid= $node -> getElementsByTagName ("oem-recoveryID");
 		my $inplace  = $node -> getElementsByTagName ("oem-inplace-recovery");
 		if ((defined $oempinst) && ("$oempinst" eq "true")) {
-			$result{kiwi_oempartition_install} = "yes";
+			$result{kiwi_oempartition_install} = $oempinst;
 		}
-		if ((defined $oemswap) && ("$oemswap" eq "false")) {
-			$result{kiwi_oemswap} = "no";
-		} elsif ((defined $oemswapMB) && ("$oemswapMB" > 0)) {
-			$result{kiwi_oemswapMB} = $oemswapMB;
+		if ((defined $oemswap) && ("$oemswap" eq "true")) {
+			$result{kiwi_oemswap} = $oemswap;
+			if ((defined $oemswapMB) && (int($oemswapMB) > 0)) {
+				$result{kiwi_oemswapMB} = $oemswapMB;
+			}
 		}
 		if ((defined $oemalign) && ("$oemalign" eq "true")) {
 			$result{kiwi_oemalign} = $oemalign;
 		}
-		if ((defined $oemrootMB) && ("$oemrootMB" > 0)) {
+		if ((defined $oemrootMB) && ((int "$oemrootMB") > 0)) {
 			$result{kiwi_oemrootMB} = $oemrootMB;
 		}
 		if ((defined $oemtitle) && ("$oemtitle" ne "")) {
@@ -4442,6 +4460,65 @@ sub getVMConfigOpts {
 # Private helper methods
 #------------------------------------------
 #==========================================
+# __checkDefaultProfSetting
+#------------------------------------------
+sub __checkDefaultProfSetting {
+	# ...
+	# Make sure only one profile is marked as default.
+	# ---
+	my $this        = shift;
+	my $numDefProfs = 0;
+	my $systemTree  = $this->{systemTree};
+	my @profiles    = $systemTree -> getElementsByTagName('profile');
+	for my $profile (@profiles) {
+		my $import = $profile -> getAttribute('import');
+		if (defined $import && $import eq 'true') {
+			$numDefProfs++;
+		}
+		if ($numDefProfs > 1) {
+			my $kiwi = $this->{kiwi};
+			my $msg = 'Only one profile may be set as the dafault profile by '
+			. 'using the "import" attrinute.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return undef;
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkDefaultTypeSetting
+#------------------------------------------
+sub __checkDefaultTypeSetting {
+	# ...
+	# Check that only one type is marked as primary per profile
+	# ---
+	my $this        = shift;
+	my $systemTree  = $this->{systemTree};
+	my @preferences = $systemTree -> getElementsByTagName('preferences');
+	for my $pref (@preferences) {
+		my $hasPrimary = 0;
+		my @types = $pref -> getChildrenByTagName('type');
+		for my $typeN (@types) {
+			my $primary = $typeN -> getAttribute('primary');
+			if (defined $primary && $primary eq 'true') {
+				$hasPrimary++;
+			}
+			if ($hasPrimary > 1) {
+				my $kiwi = $this->{kiwi};
+				my $msg = 'Only one primary type my be specified per '
+				. 'preferences section.';
+				$kiwi -> error ($msg);
+				$kiwi -> failed ();
+				return undef;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkFilesysSpec
 #------------------------------------------
 sub __checkFilesysSpec {
@@ -4453,7 +4530,7 @@ sub __checkFilesysSpec {
 	my $isInvalid;
 	my $kiwi = $this->{kiwi};
 	my @typeNodes = $this->{systemTree} -> getElementsByTagName("type");
-	my @typesReqFS = qw /oem usb vmx/;
+	my @typesReqFS = qw /oem pxe usb vmx/;
 	for my $typeN (@typeNodes) {
 		my $imgType = $typeN -> getAttribute( "image" );
 		if (grep /$imgType/, @typesReqFS) {
@@ -4484,8 +4561,7 @@ sub __checkPostDumpAction {
 	# ---
 	my $this = shift;
 	my @confNodes = $this->{systemTree} -> getElementsByTagName("oemconfig");
-	if (@confNodes) {
-		my $oemconfig = $confNodes[0];
+	for my $oemconfig (@confNodes) {
 		my @postDumOpts = qw
 		/oem-bootwait oem-reboot
 		 oem-reboot-interactive
@@ -4515,6 +4591,83 @@ sub __checkPostDumpAction {
 }
 
 #==========================================
+# __checkPreferencesDefinition
+#------------------------------------------
+sub __checkPreferencesDefinition {
+	# ...
+	# Check that only one <preference> definition exists without
+	# use of the profiles attribute.
+	#
+	my $this            = shift;
+	my $kiwi            = $this->{kiwi};
+	my $numProfilesAttr = 0;
+	my $systemTree      = $this->{systemTree};
+	my @preferences     = $systemTree -> getElementsByTagName('preferences');
+	my @usedProfs       = ();
+	for my $pref (@preferences) {
+		my $profName = $pref -> getAttribute('profiles');
+		if (! $profName) {
+			$numProfilesAttr++;
+		} else {
+			if (grep /$profName/, @usedProfs) {
+				my $msg = 'Only one <preferences> element may reference a '
+				. "given profile. $profName referenced multiple times.";
+				$kiwi -> error ($msg);
+				$kiwi -> failed ();
+				return undef;
+			} else {
+				push @usedProfs, $profName;
+			}
+		}
+		if ($numProfilesAttr > 1) {
+			my $msg = 'Specify only one <preferences> element without using '
+			. 'the "profiles" attribute.';
+			$kiwi -> error ($msg);
+			$kiwi -> failed();
+			return undef;
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkReferencedProfDefined
+#------------------------------------------
+sub __checkReferencedProfDefined {
+	# ...
+	# Check that any reference of profiles has a defined target, i.e. the
+	# profile must be defined
+	# ---
+	my $this       = shift;
+	my $kiwi       = $this->{kiwi};
+	my $status     = 1;
+	my $systemTree = $this->{systemTree};
+	my @profiles = $systemTree -> getElementsByTagName('profile');
+	my @profNames = ();
+	for my $prof (@profiles) {
+		push @profNames, $prof -> getAttribute('name');
+	}
+	my @nodes = ();
+	push @nodes, $systemTree -> getElementsByTagName('drivers');
+	push @nodes, $systemTree -> getElementsByTagName('packages');
+	push @nodes, $systemTree -> getElementsByTagName('preferences');
+	push @nodes, $systemTree -> getElementsByTagName('repository');
+	for my $node (@nodes) {
+		my $refProf = $node -> getAttribute('profiles');
+		if (defined $refProf) {
+			if (! grep /$refProf/, @profNames) {
+				my $msg = "Found reference to profile $refProf "
+				. 'but this profile does not exist.';
+				$kiwi -> error ($msg);
+				$kiwi -> failed ();
+				$status = undef;
+			}
+		}
+	}
+	return $status;
+}
+
+#==========================================
 # __checkRevision
 #------------------------------------------
 sub __checkRevision {
@@ -4523,9 +4676,11 @@ sub __checkRevision {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
+	my $systemTree = $this->{systemTree};
+	my $imgnameNodeList = $systemTree -> getElementsByTagName ("image");
 	if (open (my $FD,$main::Revision)) {
 		my $cur_rev = <$FD>; close $FD;
-		my $req_rev = $this->{imgnameNodeList}
+		my $req_rev = $imgnameNodeList
 			-> get_node(1) -> getAttribute ("kiwirevision");
 		if ((defined $req_rev) && ($cur_rev < $req_rev)) {
 			$kiwi -> failed ();
@@ -4540,9 +4695,9 @@ sub __checkRevision {
 }
 
 #==========================================
-# __checkVersionFormat
+# __checkVersionDefinition
 #------------------------------------------
-sub __checkVersionFormat {
+sub __checkVersionDefinition {
 	# ...
 	# Check image version format
 	# This check should be implemented in the schema but there is a
@@ -4550,7 +4705,16 @@ sub __checkVersionFormat {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $version = $this -> getImageVersion();
+	my $systemTree = $this->{systemTree};
+	my @versions = $systemTree -> getElementsByTagName("version");
+	my $numVersions = @versions;
+	if ($numVersions > 1) {
+		my $msg = "Only one <version> definition expected, found $numVersions";
+		$kiwi -> error  ($msg);
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $version = $versions[0] -> textContent();
 	if ($version !~ /^\d+\.\d+\.\d+$/) {
 		$kiwi -> error  ("Invalid version format: $version");
 		$kiwi -> failed ();
@@ -4623,18 +4787,34 @@ sub __validateConsistency {
 	# Validate XML data that cannot be validated through Schema and
 	# structure validation. This includes conditional presence of
 	# elements and attributes as well as certain values.
+	# Note that any checks need to work off $this->{systemTree}. The
+	# consistency check occurs prior to this object being porpulated
+	# with XML data. This allows us to basically have no error checking
+	# in any code that populates this object from XML data.
 	# ---
 	my $this = shift;
-	if (! $this -> __checkRevision()) {
+	if (! $this -> __checkDefaultProfSetting()) {
 		return undef;
 	}
-	if (! $this -> __checkVersionFormat()) {
+	if (! $this -> __checkDefaultTypeSetting()){
+		return undef;
+	}
+	if (! $this -> __checkFilesysSpec()) {
 		return undef;
 	}
 	if (! $this -> __checkPostDumpAction()) {
 		return undef;
 	}
-	if (! $this -> __checkFilesysSpec()) {
+	if (! $this -> __checkPreferencesDefinition()) {
+		return undef;
+	}
+	if (! $this -> __checkReferencedProfDefined()) {
+		return undef;
+	}
+	if (! $this -> __checkRevision()) {
+		return undef;
+	}
+	if (! $this -> __checkVersionDefinition()) {
 		return undef;
 	}
 	return 1;
