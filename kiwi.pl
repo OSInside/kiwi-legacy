@@ -1781,7 +1781,9 @@ sub listXMLInfo {
 	#==========================================
 	# Create log object
 	#------------------------------------------
-	$kiwi = new KIWILog("tiny");
+	if (! defined $kiwi) {
+		$kiwi = new KIWILog("tiny");
+	}
 	#==========================================
 	# Setup logging location
 	#------------------------------------------
