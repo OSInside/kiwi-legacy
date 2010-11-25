@@ -339,6 +339,10 @@ function suseConfig {
 	# SuSEconfig
 	#--------------------------------------
 	/sbin/SuSEconfig
+	#======================================
+	# SuSEconfig permissions
+	#--------------------------------------
+	SuSEconfig --module permissions
 }
 
 #======================================
