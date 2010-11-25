@@ -368,6 +368,14 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		my %type = %{$xml->getImageTypeAndAttributes()};
+		if ($type{type} eq "cpio") {
+			# /.../
+			# set a faked 'clicfs' image type for cpio images to prevent
+			# the kernel extraction from the cache image
+			# ----
+			$xml -> setImageType ("clicfs");
+			%type = %{$xml->getImageTypeAndAttributes()};
+		}
 		#==========================================
 		# Create cache(s)...
 		#------------------------------------------
@@ -1443,6 +1451,11 @@ sub init {
 		$kiwi -> error ("No operation specified");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
+	}
+	if (($InitCache) && ($LogFile)) {
+		$kiwi -> warning ("Logfile option not supported in init-cache mode");
+		$kiwi -> skipped ();
+		undef $LogFile;
 	}
 	if (($targetDevice) && (! -b $targetDevice)) {
 		$kiwi -> error ("Target device $targetDevice doesn't exist");
@@ -2915,7 +2928,9 @@ sub initializeCache {
 	my $name = $xml -> getImageName();
 	if (($type{boot}) && ($type{boot} =~ /.*\/(.*)/)) {
 		$CacheDistro = $1;
-	} elsif (($type{type} eq "cpio") && ($name =~ /initrd-.*boot-(.*)/)) {
+	} elsif (
+		($type{type} =~ /clicfs|cpio/) && ($name =~ /initrd-.*boot-(.*)/)
+	) {
 		$CacheDistro = $1;
 	} else {
 		$kiwi -> warning ("Can't setup cache without a boot type");

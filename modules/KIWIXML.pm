@@ -1343,6 +1343,25 @@ sub setForeignImageAttribute {
 }
 
 #==========================================
+# setImageType
+#------------------------------------------
+sub setImageType {
+	# ...
+	# set 'image' attribute of the selected type
+	# ---
+	my $this = shift;
+	my $val  = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	if ($tnode) {
+		$tnode-> setAttribute ("image","$val");
+	}
+	$this->{imageWhat} = $val;
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
 # setPackageManager
 #------------------------------------------
 sub setPackageManager {
