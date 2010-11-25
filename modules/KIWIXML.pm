@@ -3587,7 +3587,6 @@ sub getInstallSize {
 			if ($package) {
 				push @result,$package;
 			}
-			push @result,$main::PackageManager;
 		}
 		#==========================================
 		# Handle pattern names
@@ -3604,6 +3603,13 @@ sub getInstallSize {
 			}
 		}
 	}
+	#==========================================
+	# Add packagemanager in any case
+	#------------------------------------------
+	push @result,$main::PackageManager;
+	#==========================================
+	# Run the solver...
+	#------------------------------------------
 	my $psolve = new KIWISatSolver (
 		$kiwi,\@result,$this->{urllist},"solve-patterns",
 		undef,undef
