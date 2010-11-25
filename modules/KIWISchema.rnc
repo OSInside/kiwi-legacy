@@ -2272,10 +2272,7 @@ div {
 		"bootstrap" | "delete" | "image" | "iso" | "oem" | "pxe" |
 		"split" | "testsuite" | "usb" | "vmx"
 	}
-	k.packages.profiles.attribute =
-		## Namespace this section applies to. If not specified it
-		## applies to all namespaces
-		attribute profiles { text }
+	k.packages.profiles.attribute = k.profiles.attribute
 	k.packages.patternType.attribute =
 		## Selection type for patterns. Could be onlyRequired
 		## plusSuggested or plusRecommended

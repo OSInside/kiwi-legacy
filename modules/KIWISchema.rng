@@ -3276,10 +3276,7 @@ virtual machine when running the image.</db:para>
       </attribute>
     </define>
     <define name="k.packages.profiles.attribute">
-      <attribute name="profiles">
-        <a:documentation>Namespace this section applies to. If not specified it
-applies to all namespaces</a:documentation>
-      </attribute>
+      <ref name="k.profiles.attribute"/>
     </define>
     <define name="k.packages.patternType.attribute">
       <attribute name="patternType">
