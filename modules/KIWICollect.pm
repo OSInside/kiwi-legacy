@@ -1757,22 +1757,24 @@ sub createMetadata
   $this->createBootPackageLinks();
 
   ## step 9: LISTINGS
-  $this->logMsg("I", "Calling mk_listings:");
-  my $listings = "/usr/bin/mk_listings";
-  if(! (-f $listings or -x $listings)) {
-    $this->logMsg("W", "[createMetadata] excutable `$listings` not found. Maybe package `inst-source-utils` is not installed?");
-    return;
+  my $make_listings = $this->{m_proddata}->getVar("MAKE_LISTINGS");
+  unless (defined($make_listings) && $make_listings eq "false") {
+    $this->logMsg("I", "Calling mk_listings:");
+    my $listings = "/usr/bin/mk_listings";
+    if(! (-f $listings or -x $listings)) {
+      $this->logMsg("W", "[createMetadata] excutable `$listings` not found. Maybe package `inst-source-utils` is not installed?");
+      return;
+    }
+    my $cmd = "$listings ".$this->{m_basesubdir}->{'1'};
+    @data = qx($cmd);
+    undef $cmd;
+    $this->logMsg("I", "[createMetadata] $listings output:");
+    foreach(@data) {
+      chomp $_;
+      $this->logMsg("I", "\t$_");
+    }
+    @data = (); # clear list
   }
-  my $cmd = "$listings ".$this->{m_basesubdir}->{'1'};
-  @data = qx($cmd);
-  undef $cmd;
-  $this->logMsg("I", "[createMetadata] $listings output:");
-  foreach(@data) {
-    chomp $_;
-    $this->logMsg("I", "\t$_");
-  }
-  @data = (); # clear list
-
 
 
   ## step 7: SHA1SUMS
