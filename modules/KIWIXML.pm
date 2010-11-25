@@ -189,11 +189,13 @@ sub new {
 	#==========================================
 	# Check type information from xml input
 	#------------------------------------------
-	$this->{typerecord} = $this -> getImageTypeAndAttributes();
-	if (! $this->{typeNode}) {
-		$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
-		$kiwi -> failed ();
-		return undef;
+	if ($optionsNodeList) {
+		$this->{typerecord} = $this -> getImageTypeAndAttributes();
+		if (! $this->{typeNode}) {
+			$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
+			$kiwi -> failed ();
+			return undef;
+		}
 	}
 	#==========================================
 	# Add default split section if not defined
