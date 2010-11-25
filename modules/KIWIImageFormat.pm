@@ -183,13 +183,8 @@ sub createMaschineConfiguration {
 		$kiwi -> skipped ();
 		return undef;
 	}
-	if (($type{type}) && ($type{type} eq "xen")) {
-		$kiwi -> info ("Starting $imgtype image machine configuration\n");
-		return $this -> createXENConfiguration();
-	} elsif (
-		($type{bootprofile}) && ($type{bootprofile} eq "xen") &&
-		($xend eq "domU")
-	) {
+	if (($type{bootprofile}) && ($type{bootprofile} eq "xen")
+		&& ($xend eq "domU")) {
 		$kiwi -> info ("Starting $imgtype image machine configuration\n");
 		return $this -> createXENConfiguration();
 	} elsif ($format eq "vmdk") {
@@ -503,29 +498,16 @@ sub createXENConfiguration {
 	my $device = $xenconfig{xen_diskdevice};
 	$device =~ s/\/dev\///;
 	my $part = $device."1";
-	if ($type{type} eq "xen") {
-		$device = $device."1";
-	}
 	my $memory = $xenconfig{xen_memory};
-	if ($type{type} ne "xen") {
-		$image .= ".".$format;
-	}
+	$image .= ".".$format;
 	print $FD '#  -*- mode: python; -*-'."\n";
 	print $FD "name=\"".$this->{xml}->getImageDisplayName()."\"\n";
-	if ($type{type} eq "xen") {
-		print $FD 'kernel="'.$kernel.'"'."\n";
-		print $FD 'ramdisk="'.$initrd.'"'."\n";
-	}
 	print $FD 'memory='.$memory."\n";
-	if ($type{type} ne "xen") {
-		my $tap = $format;
-		if ($tap eq "raw") {
-			$tap = "aio";
-		}
-		print $FD 'disk=[ "tap:'.$tap.':'.$image.','.$device.',w" ]'."\n";
-	} else {
-		print $FD 'disk=[ "file:'.$image.','.$part.',w" ]'."\n";
+	my $tap = $format;
+	if ($tap eq "raw") {
+		$tap = "aio";
 	}
+	print $FD 'disk=[ "tap:'.$tap.':'.$image.','.$device.',w" ]'."\n";
 	#==========================================
 	# network setup
 	#------------------------------------------
@@ -551,12 +533,6 @@ sub createXENConfiguration {
 	}
 	if ($vifcount >= 0) {
 		print $FD " ]"."\n";
-	}
-	#==========================================
-	# kernel boot parameters
-	#------------------------------------------
-	if ($type{type} eq "xen") {
-		print $FD 'root="'.$part.' rw"'."\n";
 	}
 	#==========================================
 	# Process raw config options
