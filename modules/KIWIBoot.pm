@@ -106,7 +106,7 @@ sub new {
 			$kiwi -> error  ("Couldn't find image file/directory: $system");
 			$kiwi -> failed ();
 			return undef;
-		} else {
+		} elsif (-f "$system/kiwi-root.cow") {
 			#==========================================
 			# Check for overlay structure
 			#------------------------------------------
