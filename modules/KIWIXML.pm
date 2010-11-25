@@ -177,17 +177,6 @@ sub new {
 	$this->{reqProfiles}     = $reqProfiles;
 	$this->{profilesNodeList}= $profilesNodeList;
 	#==========================================
-	# Check type information from xml input
-	#------------------------------------------
-	if ($optionsNodeList) {
-		$this->{typerecord} = $this -> getImageTypeAndAttributes();
-		if (! $this->{typeNode}) {
-			$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
-			$kiwi -> failed ();
-			return undef;
-		}
-	}
-	#==========================================
 	# Apply default profiles from XML if set
 	#------------------------------------------
 	$this -> setDefaultProfiles();
@@ -195,6 +184,15 @@ sub new {
 	# Check profile names
 	#------------------------------------------
 	if (! $this -> checkProfiles()) {
+		return undef;
+	}
+	#==========================================
+	# Check type information from xml input
+	#------------------------------------------
+	$this->{typerecord} = $this -> getImageTypeAndAttributes();
+	if (! $this->{typeNode}) {
+		$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
+		$kiwi -> failed ();
 		return undef;
 	}
 	#==========================================
@@ -1967,7 +1965,6 @@ sub setDefaultProfiles {
 	# ---
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
-	my $record = $this->{typerecord};
 	my @list   = ();
 	#==========================================
 	# check for profiles already processed
@@ -1990,7 +1987,8 @@ sub setDefaultProfiles {
 	#==========================================
 	# read from type: bootprofile + bootkernel
 	#------------------------------------------
-	if (($record) && ($record->{"type"} eq "cpio")) {
+	my $record = $this -> getImageTypeAndAttributes();
+	if ((defined $record->{type}) && ($record->{"type"} eq "cpio")) {
 		if ($record->{bootprofile}) {
 			push @list, split (/,/,$record->{bootprofile});
 		} else {
