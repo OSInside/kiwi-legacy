@@ -177,6 +177,17 @@ sub new {
 	$this->{reqProfiles}     = $reqProfiles;
 	$this->{profilesNodeList}= $profilesNodeList;
 	#==========================================
+	# Check type information from xml input
+	#------------------------------------------
+	if ($optionsNodeList) {
+		$this->{typerecord} = $this -> getImageTypeAndAttributes();
+		if (! $this->{typeNode}) {
+			$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
+	#==========================================
 	# Apply default profiles from XML if set
 	#------------------------------------------
 	$this -> setDefaultProfiles();
@@ -185,17 +196,6 @@ sub new {
 	#------------------------------------------
 	if (! $this -> checkProfiles()) {
 		return undef;
-	}
-	#==========================================
-	# Check type information from xml input
-	#------------------------------------------
-	if ($optionsNodeList) {
-		$this -> getImageTypeAndAttributes();
-		if (! $this->{typeNode}) {
-			$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
-			$kiwi -> failed ();
-			return undef;
-		}
 	}
 	#==========================================
 	# Add default split section if not defined
@@ -1926,14 +1926,10 @@ sub getProfiles {
 		my $name = $element -> getAttribute ("name");
 		my $desc = $element -> getAttribute ("description");
 		my $incl = $element -> getAttribute ("import");
-		if (defined $import) {
-			if ((defined $incl) && ("$incl" ne "true")) {
-				next;
-			}
-		}
 		my %profile = ();
 		$profile{name} = $name;
 		$profile{description} = $desc;
+		$profile{include} = $incl;
 		push @result, { %profile };
 	}
 	return @result;
@@ -1950,17 +1946,53 @@ sub setDefaultProfiles {
 	# import default profiles if no other profiles
 	# were set on the commandline
 	# ---
-	my $this = shift;
-	my @list = ();
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $record = $this->{typerecord};
+	my @list   = ();
+	#==========================================
+	# check for profiles already processed
+	#------------------------------------------
 	if ((defined $this->{reqProfiles}) && (@{$this->{reqProfiles}})) {
+		my $info = join (",",@{$this->{reqProfiles}});
+		$kiwi -> info ("Using profile(s): $info");
+		$kiwi -> done ();
 		return $this;
 	}
-	my @profiles = $this -> getProfiles ("default");
+	#==========================================
+	# read from profile section
+	#------------------------------------------
+	my @profiles = $this -> getProfiles ();
 	foreach my $profile (@profiles) {
-		push (@list,$profile->{name});
+		if (($profile->{include}) && ("$profile->{include}" eq "true")) {
+			push (@list,$profile->{name});
+		}
 	}
+	#==========================================
+	# read from type: bootprofile + bootkernel
+	#------------------------------------------
+	if (($record) && ($record->{"type"} eq "cpio")) {
+		if ($record->{bootprofile}) {
+			push @list, split (/,/,$record->{bootprofile});
+		} else {
+			# apply 'default' profile required for boot images
+			push @list, "default";
+		}
+		if ($record->{bootkernel}) {
+			push @list, split (/,/,$record->{bootkernel});
+		} else {
+			# apply 'std' kernel profile required for boot images
+			push @list, "std";
+		}
+	}
+	#==========================================
+	# store list
+	#------------------------------------------
 	if (@list) {
+		my $info = join (",",@list);
+		$kiwi -> info ("Using profile(s): $info");
 		$this->{reqProfiles} = \@list;
+		$kiwi -> done ();
 	}
 	return $this;
 }
@@ -2000,11 +2032,6 @@ sub checkProfiles {
 			}
 		}
 	}
-	if (@prequest) {
-		my $info = join (",",@prequest);
-		$kiwi -> info ("Using profile(s): $info");
-		$kiwi -> done ();
-	}
 	return $this;
 }
 
@@ -2017,8 +2044,10 @@ sub requestedProfile {
 	# a given element is requested to be included
 	# in this image.
 	# ---
-	my $this = shift;
-	my $element = shift;
+	my $this      = shift;
+	my $element   = shift;
+	my @requested = @{$this->{reqProfiles}};
+
 	if (! defined $element) {
 		return 1;
 	}

@@ -399,53 +399,9 @@ sub main {
 		}
 		my %type = %{$xml->getImageTypeAndAttributes()};
 		#==========================================
-		# Check for bootprofile in xml descr.
+		# print boot theme information
 		#------------------------------------------
-		if (! @Profiles) {
-			if ($type{"type"} eq "cpio") {
-				if ($type{bootprofile}) {
-					push @Profiles, split (/,/,$type{bootprofile});
-				}
-				if ($type{bootkernel}) {
-					push @Profiles, split (/,/,$type{bootkernel});
-				}
-			}
-		}
-		#==========================================
-		# Check for bootkernel in xml descr.
-		#------------------------------------------		
 		if ($type{"type"} eq "cpio") {
-			my %phash = ();
-			my $found = 0;
-			my @pname = $xml -> getProfiles();
-			foreach my $profile (@pname) {
-				my $name = $profile -> {name};
-				my $descr= $profile -> {description};
-				if ($descr =~ /KERNEL:/) {
-					$phash{$name} = $profile -> {description};
-				}
-			}
-			foreach my $profile (@Profiles) {
-				if ($phash{$profile}) {
-					# /.../
-					# ok, a kernel from the profile list is
-					# already selected
-					# ----
-					$found = 1;
-					last;
-				}
-			}
-			if (! $found) {
-				# /.../
-				# no kernel profile selected use standard (std)
-				# profile which is defined in each boot image
-				# description
-				# ----
-				push @Profiles, "std";
-			}
-			if (! $xml -> checkProfiles (\@Profiles)) {
-				my $code = kiwiExit (1); return $code;
-			}
 			my $theme = $xml -> getBootTheme();
 			if ($theme) {
 				$kiwi -> info ("Using boot theme: $theme");
@@ -618,37 +574,17 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		#==========================================
-		# Check for bootprofile in xml descr
+		# Process system image description
 		#------------------------------------------
-		my $xml;
-		my %attr;
 		my $origcreate = $Create;
-		if (! @Profiles) {
-			$kiwi -> info ("Reading image description [Create]...\n");
-			$xml = new KIWIXML (
-				$kiwi,"$Create/image",\%ForeignRepo,$SetImageType
-			);
-			if (! defined $xml) {
-				my $code = kiwiExit (1); return $code;
-			}
-			%attr = %{$xml->getImageTypeAndAttributes()};
-			if (($attr{"type"} eq "cpio") && ($attr{bootprofile})) {
-				@Profiles = split (/,/,$attr{bootprofile});
-				if (! $xml -> checkProfiles (\@Profiles)) {
-					my $code = kiwiExit (1); return $code;
-				}
-			}
-		}
+		$kiwi -> info ("Reading image description [Create]...\n");
+		my $xml = new KIWIXML (
+			$kiwi,"$Create/image",\%ForeignRepo,$SetImageType,\@Profiles
+		);
 		if (! defined $xml) {
-			$kiwi -> info ("Reading image description [Create]...\n");
-			$xml = new KIWIXML (
-				$kiwi,"$Create/image",undef,$SetImageType,\@Profiles
-			);
-			if (! defined $xml) {
-				my $code = kiwiExit (1); return $code;
-			}
-			%attr = %{$xml->getImageTypeAndAttributes()};
+			my $code = kiwiExit (1); return $code;
 		}
+		my %attr = %{$xml->getImageTypeAndAttributes()};
 		#==========================================
 		# Check for default destination in XML
 		#------------------------------------------
@@ -3160,6 +3096,7 @@ sub createCache {
 	#==========================================
 	# Variable setup and reset function
 	#------------------------------------------
+	$ENV{MKCLICFS_COMPRESSION} = 0;
 	sub reset_sub {
 		my $backupSurvive      = $main::Survive;
 		my @backupProfiles     = @main::Profiles;
