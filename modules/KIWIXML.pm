@@ -2065,7 +2065,6 @@ sub requestedProfile {
 	# ---
 	my $this      = shift;
 	my $element   = shift;
-	my @requested = @{$this->{reqProfiles}};
 
 	if (! defined $element) {
 		return 1;
@@ -2086,12 +2085,14 @@ sub requestedProfile {
 	foreach my $profile (@splitProfiles) {
 		$profileHash{$profile} = 1;
 	}
-	foreach my $reqprof (@{$this->{reqProfiles}}) {
-		# strip whitespace
-		$reqprof =~ s/^\s+//s;
-		$reqprof =~ s/\s+$//s;
-		if (defined $profileHash{$reqprof}) {
-			return 1;
+	if (defined $this->{reqProfiles}) {
+		foreach my $reqprof (@{$this->{reqProfiles}}) {
+			# strip whitespace
+			$reqprof =~ s/^\s+//s;
+			$reqprof =~ s/\s+$//s;
+			if (defined $profileHash{$reqprof}) {
+				return 1;
+			}
 		}
 	}
 	return 0;
