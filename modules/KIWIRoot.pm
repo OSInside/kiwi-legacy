@@ -337,35 +337,37 @@ sub init {
 	# Copy/touch some defaults files
 	#----------------------------------
 	$kiwi -> info ("Creating default template files for new root system");
-	qxx ("mkdir -p $root/dev");
-	qxx ("mkdir -m 755 -p $root/dev/pts");
-	qxx ("mknod -m 666 $root/dev/null c 1 3");
-	qxx ("mknod -m 666 $root/dev/zero c 1 5");
-	qxx ("mknod -m 622 $root/dev/full c 1 7");
-	qxx ("mknod -m 666 $root/dev/random c 1 8");
-	qxx ("mknod -m 644 $root/dev/urandom c 1 9");
-	qxx ("mknod -m 666 $root/dev/tty c 5 0");
-	qxx ("mknod -m 666 $root/dev/ptmx c 5 2");
-	qxx ("ln -s /proc/self/fd $root/dev/fd");
-	qxx ("ln -s fd/2 $root/dev/stderr");
-	qxx ("ln -s fd/0 $root/dev/stdin");
-	qxx ("ln -s fd/1 $root/dev/stdout");
-	qxx ("mknod -m 640 $root/dev/loop0 b 7 0");
-	qxx ("mknod -m 640 $root/dev/loop1 b 7 1");
-	qxx ("mknod -m 640 $root/dev/loop2 b 7 2");
-	qxx ("mknod -m 640 $root/dev/loop3 b 7 3");
-	qxx ("mkdir -p $root/etc/sysconfig");
-	qxx ("mkdir -p $root/var/log/YaST2");
-	# for smart we need the dpkg default file
-	qxx ("mkdir -p $root/var/lib/dpkg");
-	qxx ("touch $root/var/lib/dpkg/status");
-	qxx ("mkdir -p $root/var/lib/dpkg/updates");
-	qxx ("touch $root/var/lib/dpkg/available");
-	# for building in suse autobuild we need the following file
-	qxx ("touch $root/.buildenv");
-	# need mtab at least empty for mount calls
-	qxx ("touch $root/etc/mtab");
-	qxx ("touch $root/etc/sysconfig/bootloader");
+	if (! defined $this->{cacheRoot}) {
+		qxx ("mkdir -p $root/dev");
+		qxx ("mkdir -m 755 -p $root/dev/pts");
+		qxx ("mknod -m 666 $root/dev/null c 1 3");
+		qxx ("mknod -m 666 $root/dev/zero c 1 5");
+		qxx ("mknod -m 622 $root/dev/full c 1 7");
+		qxx ("mknod -m 666 $root/dev/random c 1 8");
+		qxx ("mknod -m 644 $root/dev/urandom c 1 9");
+		qxx ("mknod -m 666 $root/dev/tty c 5 0");
+		qxx ("mknod -m 666 $root/dev/ptmx c 5 2");
+		qxx ("ln -s /proc/self/fd $root/dev/fd");
+		qxx ("ln -s fd/2 $root/dev/stderr");
+		qxx ("ln -s fd/0 $root/dev/stdin");
+		qxx ("ln -s fd/1 $root/dev/stdout");
+		qxx ("mknod -m 640 $root/dev/loop0 b 7 0");
+		qxx ("mknod -m 640 $root/dev/loop1 b 7 1");
+		qxx ("mknod -m 640 $root/dev/loop2 b 7 2");
+		qxx ("mknod -m 640 $root/dev/loop3 b 7 3");
+		qxx ("mkdir -p $root/etc/sysconfig");
+		qxx ("mkdir -p $root/var/log/YaST2");
+		# for smart we need the dpkg default file
+		qxx ("mkdir -p $root/var/lib/dpkg");
+		qxx ("touch $root/var/lib/dpkg/status");
+		qxx ("mkdir -p $root/var/lib/dpkg/updates");
+		qxx ("touch $root/var/lib/dpkg/available");
+		# for building in suse autobuild we need the following file
+		qxx ("touch $root/.buildenv");
+		# need mtab at least empty for mount calls
+		qxx ("touch $root/etc/mtab");
+		qxx ("touch $root/etc/sysconfig/bootloader");
+	}
 	# need user/group files as template
 	my $groupTemplate = "/etc/group"; 
 	my $paswdTemplate = "/etc/passwd";
@@ -396,7 +398,9 @@ sub init {
 	#==========================================
 	# Create package keys
 	#------------------------------------------
-	$manager -> setupPackageKeys();
+	if (! defined $this->{cacheRoot}) {
+		$manager -> setupPackageKeys();
+	}
 	#==========================================
 	# Setup shared cache directory
 	#------------------------------------------

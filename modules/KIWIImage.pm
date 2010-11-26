@@ -118,6 +118,10 @@ sub new {
 	$this->{baseSystem} = $baseSystem;
 	$this->{arch}       = $arch;
 	#==========================================
+	# Mount overlay tree if required...
+	#------------------------------------------
+	$this -> setupOverlay();
+	#==========================================
 	# Store a disk label ID for this object
 	#------------------------------------------
 	$this -> getMBRDiskLabel();
@@ -126,6 +130,19 @@ sub new {
 	#------------------------------------------
 	$this -> cleanKernelFSMount();
 	return $this;
+}
+
+#==========================================
+# getImageTree
+#------------------------------------------
+sub getImageTree {
+	# ...
+	# return current value of system image tree. Normally
+	# this is the same as given in the module parameter list
+	# but in case of an overlay cache mount the path changes
+	# ---
+	my $this = shift;
+	return $this->{imageTree}
 }
 
 #==========================================
@@ -2816,10 +2833,6 @@ sub preImage {
 	my $this       = shift;
 	my $haveExtend = shift;
 	my $quiet      = shift;
-	#==========================================
-	# Mount overlay tree if required...
-	#------------------------------------------
-	$this -> setupOverlay();
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------

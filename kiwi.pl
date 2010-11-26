@@ -504,14 +504,12 @@ sub main {
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! defined $CacheRoot) {
-			if (! defined $root -> init ()) {
-				$kiwi -> error ("Base initialization failed");
-				$kiwi -> failed ();
-				$root -> copyBroken();
-				undef $root;
-				my $code = kiwiExit (1); return $code;
-			}
+		if (! defined $root -> init ()) {
+			$kiwi -> error ("Base initialization failed");
+			$kiwi -> failed ();
+			$root -> copyBroken();
+			undef $root;
+			my $code = kiwiExit (1); return $code;
 		}
 		#==========================================
 		# Check for pre chroot call
@@ -584,7 +582,6 @@ sub main {
 		#==========================================
 		# Process system image description
 		#------------------------------------------
-		my $origcreate = $Create;
 		$kiwi -> info ("Reading image description [Create]...\n");
 		my $xml = new KIWIXML (
 			$kiwi,"$Create/image",\%ForeignRepo,$SetImageType,\@Profiles
@@ -712,56 +709,6 @@ sub main {
 			undef $main::Upgrade;
 		}
 		#==========================================
-		# Check for overlay structure
-		#------------------------------------------
-		my $overlay = new KIWIOverlay (
-			$kiwi,$Create,$CacheRoot,$CacheRootMode
-		);
-		if (! defined $overlay) {
-			my $code = kiwiExit (1); return $code;
-		}
-		$Create = $overlay -> mountOverlay();
-		if (! defined $Create) {
-			my $code = kiwiExit (1); return $code;
-		}
-		#==========================================
-		# Cleanup the tree according to prev runs
-		#------------------------------------------
-		if (-f "$Create/rootfs.tar") {
-			qxx ("rm -f $Create/rootfs.tar");
-		}
-		if (-f "$Create/recovery.tar.gz") {
-			qxx ("rm -f $Create/recovery.*");
-		}
-		#==========================================
-		# Update .profile env, current type
-		#------------------------------------------
-		$kiwi -> info ("Updating type in .profile environment");
-		my $type = $attr{type};
-		qxx (
-			"sed -i -e 's#kiwi_type=.*#kiwi_type=\"$type\"#' $Create/.profile"
-		);
-		$kiwi -> done();
-		#==========================================
-		# Create recovery archive if specified
-		#------------------------------------------
-		if ($type eq "oem") {
-			my $configure = new KIWIConfigure (
-				$kiwi,$xml,$Create,$Create."/image",$Destination
-			);
-			if (! defined $configure) {
-				my $code = kiwiExit (1); return $code;
-			}
-			if (! $configure -> setupRecoveryArchive($attr{filesystem})) {
-				my $code = kiwiExit (1); return $code;
-			}
-		}
-		#==========================================
-		# Close overlay mount if active
-		#------------------------------------------
-		undef $overlay;
-		$Create  = $origcreate;
-		#==========================================
 		# Create KIWIImage object
 		#------------------------------------------
 		$image = new KIWIImage (
@@ -770,6 +717,42 @@ sub main {
 		);
 		if (! defined $image) {
 			my $code = kiwiExit (1); return $code;
+		}
+		#==========================================
+		# Obtain currently used image tree path
+		#------------------------------------------
+		my $tree = $image -> getImageTree();
+		#==========================================
+		# Cleanup the tree according to prev runs
+		#------------------------------------------
+		if (-f "$tree/rootfs.tar") {
+			qxx ("rm -f $tree/rootfs.tar");
+		}
+		if (-f "$tree/recovery.tar.gz") {
+			qxx ("rm -f $tree/recovery.*");
+		}
+		#==========================================
+		# Update .profile env, current type
+		#------------------------------------------
+		$kiwi -> info ("Updating type in .profile environment");
+		my $type = $attr{type};
+		qxx (
+			"sed -i -e 's#kiwi_type=.*#kiwi_type=\"$type\"#' $tree/.profile"
+		);
+		$kiwi -> done();
+		#==========================================
+		# Create recovery archive if specified
+		#------------------------------------------
+		if ($type eq "oem") {
+			my $configure = new KIWIConfigure (
+				$kiwi,$xml,$tree,$tree."/image",$Destination
+			);
+			if (! defined $configure) {
+				my $code = kiwiExit (1); return $code;
+			}
+			if (! $configure -> setupRecoveryArchive($attr{filesystem})) {
+				my $code = kiwiExit (1); return $code;
+			}
 		}
 		#==========================================
 		# Initialize logical image extend
