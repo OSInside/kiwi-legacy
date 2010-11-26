@@ -4301,38 +4301,6 @@ function cleanDirectory {
 	rm -rf $tmpdir
 }
 #======================================
-# cleanInitrd
-#--------------------------------------
-function cleanInitrd {
-	cp /usr/bin/chroot /bin
-	cp /sbin/halt /bin/reboot
-	if [ -x /usr/sbin/klogconsole ];then
-		cp /usr/sbin/klogconsole /bin
-	fi
-	for dir in /*;do
-		case "$dir" in
-			"/lib")   continue ;;
-			"/lib64") continue ;;
-			"/bin")   continue ;;
-			"/mnt")   continue ;;
-			"/read-only") continue ;;
-			"/read-write") continue ;;
-			"/xino")  continue ;;
-			"/dev")   continue ;;
-		esac
-		rm -rf $dir/* &>/dev/null
-	done
-	if test -L /read-only;then
-		rm -f /read-only
-	fi
-	if test -L /read-write;then
-		rm -f /read-write
-	fi
-	# mount opens fstab so we give them one
-	touch /etc/fstab
-	hash -r
-}
-#======================================
 # searchGroupConfig
 #--------------------------------------
 function searchGroupConfig {
