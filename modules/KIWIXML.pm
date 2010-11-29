@@ -1222,8 +1222,11 @@ sub setForeignSystemDiskElement {
 	my $item = shift;
 	my $kiwi = $this->{kiwi};
 	my $tnode= $this->{typeNode};
+	my $value;
 	my $foreignRepo = $this->{foreignRepo};
-	my $value = $foreignRepo->{$item};
+	if (($foreignRepo) && ($item)) {
+		$value = $foreignRepo->{$item};
+	}
 	my $newconfig = 0;
 	my $addElement;
 	if ($item) {
