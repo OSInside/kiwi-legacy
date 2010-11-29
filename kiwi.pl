@@ -1436,9 +1436,9 @@ sub init {
 		my $code = kiwiExit (1); return $code;
 	}
 	if (($InitCache) && ($LogFile)) {
-		$kiwi -> warning ("Logfile option not supported in init-cache mode");
-		$kiwi -> skipped ();
-		undef $LogFile;
+		$kiwi -> warning ("Logfile set to terminal in init-cache mode");
+		$kiwi -> done ();
+		$LogFile = "terminal";
 	}
 	if (($targetDevice) && (! -b $targetDevice)) {
 		$kiwi -> error ("Target device $targetDevice doesn't exist");
