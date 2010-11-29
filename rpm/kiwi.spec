@@ -48,7 +48,7 @@ Requires:       satsolver-tools
 %ifarch %ix86 x86_64
 Requires:       master-boot-code
 %if %{suse_version} > 1110
-Requires:       clicfs >= 1.3.8
+Requires:       clicfs >= 1.3.9
 %endif
 %endif
 Summary:        OpenSuSE - KIWI Image System
