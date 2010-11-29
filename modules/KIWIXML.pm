@@ -4632,8 +4632,8 @@ sub __checkPreferencesDefinition {
 #------------------------------------------
 sub __checkReferencedProfDefined {
 	# ...
-	# Check that any reference of profiles has a defined target, i.e. the
-	# profile must be defined
+	# Check that any reference of profiles has a defined
+	# target, i.e. the profile must be defined
 	# ---
 	my $this       = shift;
 	my $kiwi       = $this->{kiwi};
@@ -4651,9 +4651,19 @@ sub __checkReferencedProfDefined {
 	push @nodes, $systemTree -> getElementsByTagName('repository');
 	for my $node (@nodes) {
 		my $refProf = $node -> getAttribute('profiles');
-		if (defined $refProf) {
-			if (! grep /$refProf/, @profNames) {
-				my $msg = "Found reference to profile $refProf "
+		if (! $refProf) {
+			next;
+		}
+		foreach my $profile (split (/,/,$refProf)) {
+			my $foundit = 0;
+			foreach my $lookup (@profNames) {
+				if ($profile eq $lookup) {
+					$foundit = 1;
+					last;
+				}
+			}
+			if (! $foundit) {
+				my $msg = "Found reference to profile $profile "
 				. 'but this profile does not exist.';
 				$kiwi -> error ($msg);
 				$kiwi -> failed ();
