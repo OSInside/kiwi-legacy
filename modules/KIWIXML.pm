@@ -179,7 +179,7 @@ sub new {
 	#==========================================
 	# Apply default profiles from XML if set
 	#------------------------------------------
-	$this -> setDefaultProfiles();
+	$this -> __populateDefaultProfiles();
 	#==========================================
 	# Check profile names
 	#------------------------------------------
@@ -1958,68 +1958,6 @@ sub getProfiles {
 }
 
 #==========================================
-# setDefaultProfiles
-#------------------------------------------
-sub setDefaultProfiles {
-	# TODO
-	# This method should be removed in an effort to
-	# remove state from the XML representattion
-	# ...
-	# import default profiles if no other profiles
-	# were set on the commandline
-	# ---
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my @list   = ();
-	#==========================================
-	# check for profiles already processed
-	#------------------------------------------
-	if ((defined $this->{reqProfiles}) && (@{$this->{reqProfiles}})) {
-		my $info = join (",",@{$this->{reqProfiles}});
-		$kiwi -> info ("Using profile(s): $info");
-		$kiwi -> done ();
-		return $this;
-	}
-	#==========================================
-	# read from profile section
-	#------------------------------------------
-	my @profiles = $this -> getProfiles ();
-	foreach my $profile (@profiles) {
-		if (($profile->{include}) && ("$profile->{include}" eq "true")) {
-			push (@list,$profile->{name});
-		}
-	}
-	#==========================================
-	# read from type: bootprofile + bootkernel
-	#------------------------------------------
-	my $record = $this -> getImageTypeAndAttributes();
-	if ((defined $record->{type}) && ($record->{"type"} eq "cpio")) {
-		if ($record->{bootprofile}) {
-			push @list, split (/,/,$record->{bootprofile});
-		} else {
-			# apply 'default' profile required for boot images
-			push @list, "default";
-		}
-		if ($record->{bootkernel}) {
-			push @list, split (/,/,$record->{bootkernel});
-		} else {
-			# apply 'std' kernel profile required for boot images
-			push @list, "std";
-		}
-	}
-	#==========================================
-	# store list
-	#------------------------------------------
-	if (@list) {
-		my $info = join (",",@list);
-		$kiwi -> info ("Using profile(s): $info");
-		$this->{reqProfiles} = \@list;
-		$kiwi -> done ();
-	}
-	return $this;
-}
-
-#==========================================
 # checkProfiles
 #------------------------------------------
 sub checkProfiles {
@@ -2078,7 +2016,7 @@ sub requestedProfile {
 		# to be in all profiles.
 		return 1;
 	}
-	if ((scalar $this->{reqProfiles}) == 0) {
+	if ((! $this->{reqProfiles}) || ((scalar @{$this->{reqProfiles}}) == 0)) {
 		# element has a profile, but no profiles requested
 		# so exclude it.
 		return 0;
@@ -4926,6 +4864,74 @@ sub __validateXML {
 		}
 	}
 	return 1;
+}
+
+#==========================================
+# __populateDefaultProfiles
+#------------------------------------------
+sub __populateDefaultProfiles {
+	# ...
+	# import default profiles if no other profiles
+	# were set on the commandline
+	# ---
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my @list   = ();
+	#==========================================
+	# check for profiles already processed
+	#------------------------------------------
+	if ((defined $this->{reqProfiles}) && (@{$this->{reqProfiles}})) {
+		my $info = join (",",@{$this->{reqProfiles}});
+		$kiwi -> info ("Using profile(s): $info");
+		$kiwi -> done ();
+		return $this;
+	}
+	#==========================================
+	# read from profile section
+	#------------------------------------------
+	my @profiles = $this -> getProfiles ();
+	foreach my $profile (@profiles) {
+		if (($profile->{include}) && ("$profile->{include}" eq "true")) {
+			push (@list,$profile->{name});
+		}
+	}
+	#==========================================
+	# read default type: bootprofile,bootkernel
+	#------------------------------------------
+	# /.../
+	# read the first <type> element which is always the one and only
+	# type element in a boot image description. The check made here
+	# applies only to boot image descriptions:
+	# ----
+	my $node = $this->{optionsNodeList}
+		-> get_node(1) -> getElementsByTagName ("type") -> get_node(1);
+	my $type = $node -> getAttribute("image");
+	if ((defined $type) && ($type eq "cpio")) {
+		my $bootprofile = $node -> getAttribute("bootprofile");
+		my $bootkernel  = $node -> getAttribute("bootkernel");
+		if ($bootprofile) {
+			push @list, split (/,/,$bootprofile);
+		} else {
+			# apply 'default' profile required for boot images
+			push @list, "default";
+		}
+		if ($bootkernel) {
+			push @list, split (/,/,$bootkernel);
+		} else {
+			# apply 'std' kernel profile required for boot images
+			push @list, "std";
+		}
+	}
+	#==========================================
+	# store list
+	#------------------------------------------
+	if (@list) {
+		my $info = join (",",@list);
+		$kiwi -> info ("Using profile(s): $info");
+		$this->{reqProfiles} = \@list;
+		$kiwi -> done ();
+	}
+	return $this;
 }
 
 1;
