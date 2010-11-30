@@ -2960,7 +2960,7 @@ sub getVMwareConfig {
 	$guestos{sles}{ix86}   = "sles";
 	$guestos{sles}{x86_64} = "sles-64";
 	my $guest= $node -> getAttribute ("guestOS");
-	if (! defined $guestos{$guest}{$arch}) {
+	if ((!defined $guest) || (! defined $guestos{$guest}{$arch})) {
 		if ($arch eq "ix86") {
 			$guest = "suse";
 		} else {
@@ -4915,21 +4915,23 @@ sub __populateDefaultProfiles {
 	# ----
 	my $node = $this->{optionsNodeList}
 		-> get_node(1) -> getElementsByTagName ("type") -> get_node(1);
-	my $type = $node -> getAttribute("image");
-	if ((defined $type) && ($type eq "cpio")) {
-		my $bootprofile = $node -> getAttribute("bootprofile");
-		my $bootkernel  = $node -> getAttribute("bootkernel");
-		if ($bootprofile) {
-			push @list, split (/,/,$bootprofile);
-		} else {
-			# apply 'default' profile required for boot images
-			push @list, "default";
-		}
-		if ($bootkernel) {
-			push @list, split (/,/,$bootkernel);
-		} else {
-			# apply 'std' kernel profile required for boot images
-			push @list, "std";
+	if (defined $node) {
+		my $type = $node -> getAttribute("image");
+		if ((defined $type) && ($type eq "cpio")) {
+			my $bootprofile = $node -> getAttribute("bootprofile");
+			my $bootkernel  = $node -> getAttribute("bootkernel");
+			if ($bootprofile) {
+				push @list, split (/,/,$bootprofile);
+			} else {
+				# apply 'default' profile required for boot images
+				push @list, "default";
+			}
+			if ($bootkernel) {
+				push @list, split (/,/,$bootkernel);
+			} else {
+				# apply 'std' kernel profile required for boot images
+				push @list, "std";
+			}
 		}
 	}
 	#==========================================
