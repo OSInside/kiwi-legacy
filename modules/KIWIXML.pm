@@ -68,7 +68,7 @@ sub new {
 	my $kiwi        = shift;
 	my $imageDesc   = shift;
 	my $foreignRepo = shift;
-	my $imageWhat   = shift;
+	my $imageType   = shift;
 	my $reqProfiles = shift;
 	#==========================================
 	# Constructor setup
@@ -173,13 +173,17 @@ sub new {
 	$this->{foreignRepo}     = $foreignRepo;
 	$this->{optionsNodeList} = $optionsNodeList;
 	$this->{imgnameNodeList} = $imgnameNodeList;
-	$this->{imageWhat}       = $imageWhat;
+	$this->{imageType}       = $imageType;
 	$this->{reqProfiles}     = $reqProfiles;
 	$this->{profilesNodeList}= $profilesNodeList;
 	#==========================================
-	# Apply default profiles from XML if set
+	# Populate default profiles from XML if set
 	#------------------------------------------
 	$this -> __populateDefaultProfiles();
+	#==========================================
+	# Populate typeinfo hash
+	#------------------------------------------
+	$this -> __populateTypeInfo();
 	#==========================================
 	# Check profile names
 	#------------------------------------------
@@ -187,15 +191,10 @@ sub new {
 		return undef;
 	}
 	#==========================================
-	# Check type information from xml input
+	# Select and initialize image type
 	#------------------------------------------
-	if ($optionsNodeList) {
-		$this->{typerecord} = $this -> getImageTypeAndAttributes();
-		if (! $this->{typeNode}) {
-			$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
-			$kiwi -> failed ();
-			return undef;
-		}
+	if (! $this -> __populateImageTypeAndNode()) {
+		return undef;
 	}
 	#==========================================
 	# Add default split section if not defined
@@ -220,7 +219,7 @@ sub new {
 		my $need = new XML::LibXML::NodeList();
 		my @node = $repositNodeList -> get_nodelist();
 		foreach my $element (@node) {
-			if (! $this -> requestedProfile ($element)) {
+			if (! $this -> __requestedProfile ($element)) {
 				next;
 			}
 			my $status = $element -> getAttribute("status");
@@ -243,7 +242,7 @@ sub new {
 			my @fplistDelete;
 			foreach my $element (@node) {
 				my $type = $element  -> getAttribute ("type");
-				if (! $foreignRepo -> {xmlobj} -> requestedProfile ($element)) {
+				if (! $foreignRepo -> {xmlobj} -> __requestedProfile ($element)) {
 					next;
 				}
 				if (($type eq "image") || ($type eq "bootstrap")) {
@@ -548,7 +547,7 @@ sub getPreferencesNodeByTagName {
 	my $name = shift;
 	my @node = $this->{optionsNodeList} -> get_nodelist();
 	foreach my $element (@node) {
-		if (! $this -> requestedProfile ($element)) {
+		if (! $this -> __requestedProfile ($element)) {
 			next;
 		}
 		my $tag = $element -> getElementsByTagName ("$name");
@@ -711,98 +710,19 @@ sub getImageDefaultRoot {
 # getImageTypeAndAttributes
 #------------------------------------------
 sub getImageTypeAndAttributes {
-	# TODO
-	# This method is should be removed in an effort
-	# to remove state from the XML representation
 	# ...
-	# Get the image type and its attributes for beeing
-	# able to create the appropriate logical extend
+	# return typeinfo hash for selected build type
 	# ---
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my %result = ();
-	my $count  = 0;
-	my $first  = "";
-	my $ptype  = "";
-	my $urlhd  = new KIWIURL ($kiwi,undef);
-	my @tnodes = ();
-	my @node = $this->{optionsNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		if (! $this -> requestedProfile ($element)) {
-			next;
-		}
-		my @types = $element -> getElementsByTagName ("type");
-		push (@tnodes,@types);
+	my $this     = shift;
+	my $typeinfo = $this->{typeInfo};
+	my $imageType= $this->{imageType};
+	if (! $typeinfo) {
+		return undef;
 	}
-	foreach my $node (@tnodes) {
-		my %record = ();
-		my $prim = $node -> getAttribute("primary");
-		if ((! defined $prim) || ($prim eq "false")) {
-			$prim = $node -> getAttribute("image");
-		} else {
-			$prim  = "primary";
-			$ptype = $node -> getAttribute("image");
-		}
-		if ($count == 0) {
-			$first = $prim;
-		}
-		if (defined $node->getElementsByTagName("systemdisk")->get_node(1)) {
-			$record{lvm} = "true";
-		}
-		$record{node}          = $node;
-		$record{type}          = $node -> getAttribute("image");
-		$record{luks}          = $node -> getAttribute("luks");
-		$record{cmdline}       = $node -> getAttribute("kernelcmdline");
-		$record{compressed}    = $node -> getAttribute("compressed");
-		$record{boot}          = $node -> getAttribute("boot");
-		$record{volid}         = $node -> getAttribute("volid");
-		$record{flags}         = $node -> getAttribute("flags");
-		$record{hybrid}        = $node -> getAttribute("hybrid");
-		$record{format}        = $node -> getAttribute("format");
-		$record{installiso}    = $node -> getAttribute("installiso");
-		$record{installstick}  = $node -> getAttribute("installstick");
-		$record{vga}           = $node -> getAttribute("vga");
-		$record{bootloader}    = $node -> getAttribute("bootloader");
-		$record{boottimeout}   = $node -> getAttribute("boottimeout");
-		$record{installboot}   = $node -> getAttribute("installboot");
-		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
-		$record{bootprofile}   = $node -> getAttribute("bootprofile");
-		$record{bootkernel}    = $node -> getAttribute("bootkernel");
-		$record{filesystem}    = $node -> getAttribute("filesystem");
-		$record{fsnocheck}     = $node -> getAttribute("fsnocheck");
-		$record{hybridpersistent}  = $node -> getAttribute("hybridpersistent");
-		if ($record{type} eq "split") {
-			my $filesystemRO = $node -> getAttribute("fsreadonly");
-			my $filesystemRW = $node -> getAttribute("fsreadwrite");
-			if ((defined $filesystemRO) && (defined $filesystemRW)) {
-				$record{filesystem} = "$filesystemRW,$filesystemRO";
-			}
-		}
-		my $bootpath = $urlhd -> obsPath ($record{boot},"boot");
-		if (defined $bootpath) {
-			$record{boot} = $bootpath;
-		}
-		$result{$prim} = \%record;
-		$count++;
+	if (! $imageType) {
+		return undef;
 	}
-	if (! defined $this->{imageWhat}) {
-		if (defined $result{primary}) {
-			$this->{imageWhat} = $result{primary}{type};
-			$this->{typeNode}  = $result{primary}{node};
-			return $result{primary};
-		} else {
-			$this->{imageWhat} = $result{$first}{type};
-			$this->{typeNode}  = $result{$first}{node};
-			return $result{$first};
-		}
-	}
-	if ($ptype eq $this->{imageWhat}) {
-		$this->{typeNode}  = $result{primary}{node};
-		return $result{primary};
-	} else {
-		$this->{typeNode}  = $result{$this->{imageWhat}}{node};
-		return $result{$this->{imageWhat}};
-	}
+	return $typeinfo->{$imageType};
 }
 
 #==========================================
@@ -1359,7 +1279,7 @@ sub setImageType {
 	if ($tnode) {
 		$tnode-> setAttribute ("image","$val");
 	}
-	$this->{imageWhat} = $val;
+	$this->{imageType} = $val;
 	$this -> updateXML();
 	return $this;
 }
@@ -1897,7 +1817,7 @@ sub getTypes {
 	my @node    = $this->{optionsNodeList} -> get_nodelist();
 	my $urlhd   = new KIWIURL ($kiwi,undef);
 	foreach my $element (@node) {
-		if (! $this -> requestedProfile ($element)) {
+		if (! $this -> __requestedProfile ($element)) {
 			next;
 		}
 		my @types = $element -> getElementsByTagName ("type");
@@ -1993,50 +1913,6 @@ sub checkProfiles {
 		}
 	}
 	return $this;
-}
-
-#==========================================
-# requestedProfile
-#------------------------------------------
-sub requestedProfile {
-	# ...
-	# Return a boolean representing whether or not
-	# a given element is requested to be included
-	# in this image.
-	# ---
-	my $this      = shift;
-	my $element   = shift;
-
-	if (! defined $element) {
-		return 1;
-	}
-	my $profiles = $element -> getAttribute ("profiles");
-	if (! defined $profiles) {
-		# If no profile is specified, then it is assumed
-		# to be in all profiles.
-		return 1;
-	}
-	if ((! $this->{reqProfiles}) || ((scalar @{$this->{reqProfiles}}) == 0)) {
-		# element has a profile, but no profiles requested
-		# so exclude it.
-		return 0;
-	}
-	my @splitProfiles = split(/,/, $profiles);
-	my %profileHash = ();
-	foreach my $profile (@splitProfiles) {
-		$profileHash{$profile} = 1;
-	}
-	if (defined $this->{reqProfiles}) {
-		foreach my $reqprof (@{$this->{reqProfiles}}) {
-			# strip whitespace
-			$reqprof =~ s/^\s+//s;
-			$reqprof =~ s/\s+$//s;
-			if (defined $profileHash{$reqprof}) {
-				return 1;
-			}
-		}
-	}
-	return 0;
 }
 
 #==========================================
@@ -2284,7 +2160,7 @@ sub getRepository {
 		#============================================
 		# Check to see if node is in included profile
 		#--------------------------------------------
-		if (! $this -> requestedProfile ($element)) {
+		if (! $this -> __requestedProfile ($element)) {
 			next;
 		}
 		#============================================
@@ -2422,7 +2298,7 @@ sub addPackages {
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		my $type = $node  -> getAttribute ("type");
-		if (! $this -> requestedProfile ($node)) {
+		if (! $this -> __requestedProfile ($node)) {
 			next;
 		}
 		if ($type eq $ptype) {
@@ -2458,7 +2334,7 @@ sub addPatterns {
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		my $type = $node  -> getAttribute ("type");
-		if (! $this -> requestedProfile ($node)) {
+		if (! $this -> __requestedProfile ($node)) {
 			next;
 		}
 		if ($type eq $ptype) {
@@ -2495,7 +2371,7 @@ sub addArchives {
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		my $type = $node  -> getAttribute ("type");
-		if (! $this -> requestedProfile ($node)) {
+		if (! $this -> __requestedProfile ($node)) {
 			next;
 		}
 		if ($type eq $ptype) {
@@ -2637,7 +2513,7 @@ sub getImageConfig {
 	}
 	@nodelist = $this->{optionsNodeList} -> get_nodelist();
 	foreach my $element (@nodelist) {
-		if (! $this -> requestedProfile ($element)) {
+		if (! $this -> __requestedProfile ($element)) {
 			next;
 		}
 		my $keytable = $element -> getElementsByTagName ("keytable");
@@ -2668,7 +2544,7 @@ sub getImageConfig {
 	foreach my $element (@nodelist) {
 		my $type = $element -> getAttribute("type");
 		$type = "kiwi_".$type;
-		if (! $this -> requestedProfile ($element)) {
+		if (! $this -> __requestedProfile ($element)) {
 			next;
 		}
 		my @ntag = $element -> getElementsByTagName ("file") -> get_nodelist();
@@ -2789,7 +2665,7 @@ sub getPackageAttributes {
 	my @node = $this->{packageNodeList} -> get_nodelist();
 	my %result;
 	foreach my $element (@node) {
-		if (! $this -> requestedProfile ($element)) {
+		if (! $this -> __requestedProfile ($element)) {
 			next;
 		}
 		my $type = $element -> getAttribute ("type");
@@ -3235,7 +3111,7 @@ sub getList {
 		#============================================
 		# Check to see if node is in included profile
 		#--------------------------------------------
-		if (! $this -> requestedProfile ($node)) {
+		if (! $this -> __requestedProfile ($node)) {
 			next;
 		}
 		#==========================================
@@ -3497,7 +3373,7 @@ sub getInstallSize {
 		#============================================
 		# Check to see if node is in included profile
 		#--------------------------------------------
-		if (! $this -> requestedProfile ($node)) {
+		if (! $this -> __requestedProfile ($node)) {
 			next;
 		}
 		#==========================================
@@ -4406,7 +4282,7 @@ sub addDefaultSplitNode {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $tnode= $this->{typeNode};
-	my $type = $this->{imageWhat};
+	my $type = $this->{imageType};
 	if (($type ne "split") && ($type ne "iso")) {
 		return $this;
 	}
@@ -4456,6 +4332,50 @@ sub getVMConfigOpts {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __requestedProfile
+#------------------------------------------
+sub __requestedProfile {
+	# ...
+	# Return a boolean representing whether or not
+	# a given element is requested to be included
+	# in this image.
+	# ---
+	my $this      = shift;
+	my $element   = shift;
+
+	if (! defined $element) {
+		return 1;
+	}
+	my $profiles = $element -> getAttribute ("profiles");
+	if (! defined $profiles) {
+		# If no profile is specified, then it is assumed
+		# to be in all profiles.
+		return 1;
+	}
+	if ((! $this->{reqProfiles}) || ((scalar @{$this->{reqProfiles}}) == 0)) {
+		# element has a profile, but no profiles requested
+		# so exclude it.
+		return 0;
+	}
+	my @splitProfiles = split(/,/, $profiles);
+	my %profileHash = ();
+	foreach my $profile (@splitProfiles) {
+		$profileHash{$profile} = 1;
+	}
+	if (defined $this->{reqProfiles}) {
+		foreach my $reqprof (@{$this->{reqProfiles}}) {
+			# strip whitespace
+			$reqprof =~ s/^\s+//s;
+			$reqprof =~ s/\s+$//s;
+			if (defined $profileHash{$reqprof}) {
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
 #==========================================
 # __checkDefaultProfSetting
 #------------------------------------------
@@ -4977,6 +4897,151 @@ sub __populateDefaultProfiles {
 		$this->{reqProfiles} = \@list;
 		$kiwi -> done ();
 	}
+	return $this;
+}
+
+#==========================================
+# __populateTypeInfo
+#------------------------------------------
+sub __populateTypeInfo {
+	# ...
+	# Extract the information contained in the <type> elements
+	# according to the selected profiles and store the type
+	# description in the object internal typeInfo hash:
+	# ---
+	# typeInfo{imagetype}{attr} = value
+	# ---
+	#
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my %result = ();
+	my $urlhd  = new KIWIURL ($kiwi,undef);
+	my @tnodes = ();
+	my @node   = $this->{optionsNodeList} -> get_nodelist();
+	#==========================================
+	# select relevant types
+	#------------------------------------------
+	foreach my $element (@node) {
+		if (! $this -> __requestedProfile ($element)) {
+			next;
+		}
+		my @types = $element -> getElementsByTagName ("type");
+		push (@tnodes,@types);
+	}
+	#==========================================
+	# walk through the types and subelements
+	#------------------------------------------
+	foreach my $node (@tnodes) {
+		my %record = ();
+		my $prim = $node -> getAttribute("primary");
+		if (! defined $prim) {
+			$record{primary} = "false";
+		} else {
+			$record{primary} = $prim;
+		}
+		if (defined $node->getElementsByTagName("systemdisk")->get_node(1)) {
+			$record{lvm} = "true";
+		}
+		$record{node}          = $node;
+		$record{type}          = $node -> getAttribute("image");
+		$record{luks}          = $node -> getAttribute("luks");
+		$record{cmdline}       = $node -> getAttribute("kernelcmdline");
+		$record{compressed}    = $node -> getAttribute("compressed");
+		$record{boot}          = $node -> getAttribute("boot");
+		$record{volid}         = $node -> getAttribute("volid");
+		$record{flags}         = $node -> getAttribute("flags");
+		$record{hybrid}        = $node -> getAttribute("hybrid");
+		$record{format}        = $node -> getAttribute("format");
+		$record{installiso}    = $node -> getAttribute("installiso");
+		$record{installstick}  = $node -> getAttribute("installstick");
+		$record{vga}           = $node -> getAttribute("vga");
+		$record{bootloader}    = $node -> getAttribute("bootloader");
+		$record{boottimeout}   = $node -> getAttribute("boottimeout");
+		$record{installboot}   = $node -> getAttribute("installboot");
+		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
+		$record{bootprofile}   = $node -> getAttribute("bootprofile");
+		$record{bootkernel}    = $node -> getAttribute("bootkernel");
+		$record{filesystem}    = $node -> getAttribute("filesystem");
+		$record{fsnocheck}     = $node -> getAttribute("fsnocheck");
+		$record{hybridpersistent}  = $node -> getAttribute("hybridpersistent");
+		if ($record{type} eq "split") {
+			my $filesystemRO = $node -> getAttribute("fsreadonly");
+			my $filesystemRW = $node -> getAttribute("fsreadwrite");
+			if ((defined $filesystemRO) && (defined $filesystemRW)) {
+				$record{filesystem} = "$filesystemRW,$filesystemRO";
+			}
+		}
+		my $bootpath = $urlhd -> obsPath ($record{boot},"boot");
+		if (defined $bootpath) {
+			$record{boot} = $bootpath;
+		}
+		$result{$record{type}} = \%record;
+	}
+	$this->{typeInfo} = \%result;
+}
+
+#==========================================
+# __populateImageTypeAndNode
+#------------------------------------------
+sub __populateImageTypeAndNode {
+	# ...
+	# initialize imageType and typeNode according to the
+	# requested type or by the type specified as primary
+	# or by the first type node found
+	# ---
+	my $this     = shift;
+	my $kiwi     = $this->{kiwi};
+	my $typeinfo = $this->{typeInfo};
+	my $select;
+	#==========================================
+	# check if there is a preferences section
+	#------------------------------------------
+	if (! $this->{optionsNodeList}) {
+		return undef;
+	}
+	#==========================================
+	# check if typeinfo hash exists
+	#------------------------------------------
+	if (! $typeinfo) {
+		return undef;
+	}
+	#==========================================
+	# select type and type node
+	#------------------------------------------
+	if (! defined $this->{imageType}) {
+		# /.../
+		# no type was requested: select primary type or if
+		# not set in the XML description select the first one
+		# in the list
+		# ----
+		my @types = keys %{$typeinfo};
+		foreach my $type (@types) {
+			if ($typeinfo->{$type}{primary} eq "true") {
+				$select = $type; last;
+			}
+		}
+		if (! $select) {
+			$select = $types[0];
+		}
+	} else {
+		# /.../
+		# a specific type was requested, select this type
+		# ----
+		$select = $this->{imageType};
+	}
+	#==========================================
+	# check selection
+	#------------------------------------------
+	if (! $typeinfo->{$select}) {
+		$kiwi -> error  ("Can't find requested image type: $select");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# store object data
+	#------------------------------------------
+	$this->{imageType} = $typeinfo->{$select}{type};
+	$this->{typeNode}  = $typeinfo->{$select}{node};
 	return $this;
 }
 
