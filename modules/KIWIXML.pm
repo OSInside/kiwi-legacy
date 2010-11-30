@@ -4485,6 +4485,37 @@ sub __checkDefaultProfSetting {
 }
 
 #==========================================
+# __checkTypeUnique
+#------------------------------------------
+sub __checkTypeUnique {
+	# ...
+	# Check that only one type with image="myName" exists per
+	# <preferences section>
+	# ---
+	my $this        = shift;
+	my $systemTree  = $this->{systemTree};
+	my @preferences = $systemTree -> getElementsByTagName('preferences');
+	for my $pref (@preferences) {
+		my @imgTypes = ();
+		my @types = $pref -> getChildrenByTagName('type');
+		for my $typeN (@types) {
+			my $imgT = $typeN -> getAttribute('image');
+			if (grep /$imgT/, @imgTypes) {
+				my $kiwi = $this->{kiwi};
+				my $msg = 'Multiple definition of <type image="'
+					. $imgT
+					. '".../> found.';
+				$kiwi -> error ($msg);
+				$kiwi -> failed ();
+				return undef;
+			}
+			push @imgTypes, $imgT
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkDefaultTypeSetting
 #------------------------------------------
 sub __checkDefaultTypeSetting {
@@ -4819,6 +4850,9 @@ sub __validateConsistency {
 		return undef;
 	}
 	if (! $this -> __checkRevision()) {
+		return undef;
+	}
+	if (! $this -> __checkTypeUnique()) {
 		return undef;
 	}
 	if (! $this -> __checkVersionDefinition()) {
