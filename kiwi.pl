@@ -478,12 +478,6 @@ sub main {
 			$xml -> addRemovePackages (@RemovePackage);
 		}
 		#==========================================
-		# Check for inheritance
-		#------------------------------------------
-		if (! $xml -> setupImageInheritance()) {
-			my $code = kiwiExit (1); return $code;
-		}
-		#==========================================
 		# Select cache if requested and exists
 		#------------------------------------------
 		if ($ImageCache) {

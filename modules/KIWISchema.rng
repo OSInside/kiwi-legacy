@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 5.1</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 5.2</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -88,16 +88,10 @@ second the location of the XSD Schema
         <data type="anyURI"/>
       </attribute>
     </define>
-    <define name="k.image.inherit.attribute">
-      <attribute name="inherit">
-        <a:documentation>Path to an image description directory from which
-the package Information is inherited</a:documentation>
-      </attribute>
-    </define>
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>5.1</value>
+        <value>5.2</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -123,9 +117,6 @@ named /etc/ImageID</a:documentation>
         <ref name="k.image.name.attribute"/>
         <optional>
           <ref name="k.image.displayname.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.image.inherit.attribute"/>
         </optional>
         <optional>
           <ref name="k.image.kiwirevision.attribute"/>

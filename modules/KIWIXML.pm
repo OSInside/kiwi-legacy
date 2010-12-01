@@ -40,11 +40,6 @@ our @EXPORT = qw (
 );
 
 #==========================================
-# Globals
-#------------------------------------------
-our %inheritanceHash;
-
-#==========================================
 # Constructor
 #------------------------------------------
 sub new { 
@@ -508,16 +503,6 @@ sub getImageDisplayName {
 		return $this->getImageName();
 	}
 	return $name;
-}
-
-#==========================================
-# getImageInherit
-#------------------------------------------
-sub getImageInherit {
-	my $this = shift;
-	my $node = $this->{imgnameNodeList} -> get_node(1);
-	my $path = $node -> getAttribute ("inherit");
-	return $path;
 }
 
 #==========================================
@@ -3618,43 +3603,6 @@ sub getForeignPackageNodeList {
 	# ---
 	my $this = shift;
 	return $this->{packageNodeList};
-}
-
-#==========================================
-# getImageInheritance
-#------------------------------------------
-sub setupImageInheritance {
-	# ...
-	# check if there is a configuration specified to inherit
-	# data from. The method will read the inherited description
-	# and prepend the data to this object. Currently only the
-	# <packages> nodes are used from the base description
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $path = $this -> getImageInherit();
-	if (! defined $path) {
-		return $this;
-	}
-	$kiwi -> info ("--> Inherit: $path ");
-	if (defined $KIWIXML::inheritanceHash{$path}) {
-		$kiwi -> skipped();
-		return $this;
-	}
-	my $ixml = new KIWIXML ( $kiwi,$path );
-	if (! defined $ixml) {
-		return undef;
-	}
-	my $name = $ixml -> getImageName();
-	$kiwi -> note ("[$name]");
-	$this->{packageNodeList} -> prepend (
-		$ixml -> getPackageNodeList()
-	);
-	$this -> updateXML();
-	$kiwi -> done();
-	$KIWIXML::inheritanceHash{$path} = 1;
-	$ixml -> setupImageInheritance();
-	#return $this;
 }
 
 #==========================================

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.1" name="suse-11.2-gnome-demo">
+<image schemaversion="5.2" name="suse-11.2-gnome-demo">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rschweikert@novell.</contact>

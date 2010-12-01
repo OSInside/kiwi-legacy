@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 5.1" ]
+	db:releaseinfo [ "RNC Schema Version 5.2" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -58,13 +58,9 @@ div {
 		## second the location of the XSD Schema
 		## (not relevant for RELAX NG or DTD)
 		attribute xsi:schemaLocation { xsd:anyURI }
-	k.image.inherit.attribute =
-		## Path to an image description directory from which
-		## the package Information is inherited
-		attribute inherit { text }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "5.1" }
+		attribute schemaversion { "5.2" }
 	k.image.kiwirevision.attribute =
 		## A kiwi SVN revision number which is known to build
 		## a working image from this description. If the kiwi SVN
@@ -77,7 +73,6 @@ div {
 		attribute id { xsd:string {length="10"} }
 	k.image.attlist = k.image.name.attribute 
 		& k.image.displayname.attribute?
-		& k.image.inherit.attribute?
 		& k.image.kiwirevision.attribute?
 		& k.image.id?
 		& k.image.schemaversion.attribute

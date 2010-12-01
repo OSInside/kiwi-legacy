@@ -31,7 +31,7 @@
 <xsl:template match="type" mode="conv50to51">
 	<type>
 		<xsl:copy-of select="@*[not(local-name(.) = 'baseroot')]"/>
-		<xsl:apply-templates mode="conv20to24"/>
+		<xsl:apply-templates mode="conv50to51"/>
 	</type>
 </xsl:template>
 
