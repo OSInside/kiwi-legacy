@@ -196,7 +196,7 @@ sub new {
 	if (defined $system) {
 		if (-d $system) {
 			$xml = new KIWIXML (
-				$kiwi,$system."/image",undef,$main::SetImageType,$profile
+				$kiwi,$system."/image",$main::SetImageType,$profile
 			);
 		} else {
 			my %fsattr = main::checkFileSystem ($system);
@@ -241,7 +241,7 @@ sub new {
 				# read disk image XML description
 				#------------------------------------------
 				$xml = new KIWIXML (
-					$kiwi,$tmpdir."/image",undef,$main::SetImageType,$profile
+					$kiwi,$tmpdir."/image",$main::SetImageType,$profile
 				);
 				#==========================================
 				# clean up
@@ -258,7 +258,7 @@ sub new {
 				# read disk image XML description
 				#------------------------------------------
 				$xml = new KIWIXML (
-					$kiwi,$tmpdir."/image",undef,$main::SetImageType,$profile
+					$kiwi,$tmpdir."/image",$main::SetImageType,$profile
 				);
 				#==========================================
 				# clean up
@@ -1544,7 +1544,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			return undef;
 		}
-		$xml = new KIWIXML ( $kiwi,$system."/image",undef,$imgtype,$profile );
+		$xml = new KIWIXML ( $kiwi,$system."/image",$imgtype,$profile );
 		if (! defined $xml) {
 			return undef;
 		}
@@ -1562,7 +1562,7 @@ sub setupBootDisk {
 		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
 		}
-		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype,$profile );
+		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",$imgtype,$profile );
 		main::umount();
 		if (! defined $xml) {
 			return undef;
@@ -2448,7 +2448,7 @@ sub setupBootDisk {
 			if ($haveDiskDevice) {
 				$this -> {system} = $this->{loop};
 			}
-			$kiwi -> info ("Creating install ISO image\n");
+			$kiwi -> info ("--> Creating install ISO image\n");
 			$this -> cleanLoop ();
 			if (! $this -> setupInstallCD()) {
 				return undef;

@@ -201,11 +201,8 @@ sub thisPath {
 		return undef;
 	}
 	my $thisPath;
-	if (defined $main::ForeignRepo{prepare}) {
-		if (! open FD,"$main::ForeignRepo{create}/image/main::Prepare") {
-			return undef;
-		}
-		$thisPath = <FD>; close FD;
+	if ((defined $main::ImageDescription) && (-d $main::ImageDescription)) {
+		$thisPath = $main::ImageDescription;
 		$thisPath = "$thisPath/$module";
 	} elsif (defined $main::Create) {
 		if (! open FD,"$main::Create/image/main::Prepare") {

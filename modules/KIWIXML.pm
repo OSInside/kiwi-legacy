@@ -62,7 +62,6 @@ sub new {
 	#------------------------------------------
 	my $kiwi        = shift;
 	my $imageDesc   = shift;
-	my $foreignRepo = shift;
 	my $imageType   = shift;
 	my $reqProfiles = shift;
 	#==========================================
@@ -165,12 +164,21 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{foreignRepo}     = $foreignRepo;
 	$this->{optionsNodeList} = $optionsNodeList;
 	$this->{imgnameNodeList} = $imgnameNodeList;
 	$this->{imageType}       = $imageType;
 	$this->{reqProfiles}     = $reqProfiles;
 	$this->{profilesNodeList}= $profilesNodeList;
+	$this->{repositNodeList} = $repositNodeList;
+	$this->{packageNodeList} = $packageNodeList;
+	#==========================================
+	# Update XML data from changeset if exists
+	#------------------------------------------
+	if (%main::XMLChangeSet) {
+		$this -> __populateImageTypeAndNode();
+		$this -> __updateDescriptionFromChangeSet (\%main::XMLChangeSet);
+		undef %main::XMLChangeSet;
+	}
 	#==========================================
 	# Populate default profiles from XML if set
 	#------------------------------------------
@@ -204,203 +212,11 @@ sub new {
 		$main::PackageManager = $this -> getPackageManager();
 	}
 	#==========================================
-	# setup foreign XML sections
-	#------------------------------------------
-	if ( defined $foreignRepo->{xmlnode} ) {
-		#==========================================
-		# 1) foreign repositories
-		#------------------------------------------
-		$kiwi -> info ("Including foreign repository node(s)");
-		my $need = new XML::LibXML::NodeList();
-		my @node = $repositNodeList -> get_nodelist();
-		foreach my $element (@node) {
-			if (! $this -> __requestedProfile ($element)) {
-				next;
-			}
-			my $status = $element -> getAttribute("status");
-			if ((! defined $status) || ($status eq "fixed")) {
-				$need -> push ($element);
-			}
-		}
-		$repositNodeList = $foreignRepo->{xmlnode};
-		$repositNodeList -> prepend ($need);
-		$kiwi -> done ();
-		if ( defined $foreignRepo->{xmlpacnode} ) {
-			#==========================================
-			# 2) foreign image packages
-			#------------------------------------------
-			my @node = $foreignRepo -> {xmlpacnode} -> get_nodelist();
-			my @plist;
-			my @alist;
-			my @falistImage;
-			my @fplistImage;
-			my @fplistDelete;
-			foreach my $element (@node) {
-				my $type = $element  -> getAttribute ("type");
-				if (! $foreignRepo -> {xmlobj} -> __requestedProfile ($element)) {
-					next;
-				}
-				if (($type eq "image") || ($type eq "bootstrap")) {
-					push (@plist,$element->getElementsByTagName ("package"));
-					push (@alist,$element->getElementsByTagName ("archive"));
-				}
-			}
-			foreach my $element (@plist) {
-				my $package = $element -> getAttribute ("name");
-				my $bootinc = $element -> getAttribute ("bootinclude");
-				my $bootdel = $element -> getAttribute ("bootdelete");
-				if ((defined $bootinc) && ("$bootinc" eq "true")) {
-					push (@fplistImage,$package);
-				}
-				if ((defined $bootdel) && ("$bootdel" eq "true")) {
-					push (@fplistDelete,$package);
-				}
-			}
-			foreach my $element (@alist) {
-				my $archive = $element -> getAttribute ("name");
-				my $bootinc = $element -> getAttribute ("bootinclude");
-				if ((defined $bootinc) && ("$bootinc" eq "true")) {
-					push (@falistImage,$archive);
-				}
-			}
-			if (@fplistImage) {
-				$kiwi -> info ("Adding foreign package(s):\n");
-				foreach my $p (@fplistImage) {
-					$kiwi -> info ("--> $p\n");
-				}
-				$this -> addPackages (
-					"bootstrap",$packageNodeList,@fplistImage
-				);
-				if (@fplistDelete) {
-					$this -> addPackages (
-						"delete",$packageNodeList,@fplistDelete
-					);
-				}
-			}
-			if (@falistImage) {
-				$kiwi -> info ("Adding foreign archive(s):\n");
-				foreach my $p (@falistImage) {
-					$kiwi -> info ("--> $p\n");
-				}
-				$this -> addArchives (
-					"bootstrap",$packageNodeList,@falistImage
-				);
-			}
-		}
-		#==========================================
-		# 3) foreign machine attributes in type
-		#------------------------------------------
-		if (defined $foreignRepo->{"domain"}) {
-			$this -> setForeignMachineAttribute ("domain");
-		}
-		#==========================================
-		# 4) foreign preferences in type
-		#------------------------------------------
-		if (defined $foreignRepo->{"locale"}) {
-			$this -> setForeignOptionsElement ("locale");
-		}
-		if (defined $foreignRepo->{"boot-theme"}) {
-			$this -> setForeignOptionsElement ("boot-theme");
-		}
-		if (defined $foreignRepo->{"packagemanager"}) {
-			$this -> setForeignOptionsElement ("packagemanager");
-		}
-		if (defined $foreignRepo->{"oem-swap"}) {
-			$this -> setForeignOEMOptionsElement ("oem-swap");
-		}
-		if (defined $foreignRepo->{"oem-align-partition"}) {
-			$this -> setForeignOEMOptionsElement ("oem-align-partition");
-		}
-		if (defined $foreignRepo->{"oem-partition-install"}) {
-			$this -> setForeignOEMOptionsElement ("oem-partition-install");
-		}
-		if (defined $foreignRepo->{"oem-swapsize"}) {
-			$this -> setForeignOEMOptionsElement ("oem-swapsize");
-		}
-		if (defined $foreignRepo->{"oem-systemsize"}) {
-			$this -> setForeignOEMOptionsElement ("oem-systemsize");
-		}
-		if (defined $foreignRepo->{"oem-boot-title"}) {
-			$this -> setForeignOEMOptionsElement ("oem-boot-title");
-		}
-		if (defined $foreignRepo->{"oem-kiwi-initrd"}) {
-			$this -> setForeignOEMOptionsElement ("oem-kiwi-initrd");
-		}
-		if (defined $foreignRepo->{"oem-reboot"}) {
-			$this -> setForeignOEMOptionsElement ("oem-reboot");
-		}
-		if (defined $foreignRepo->{"oem-reboot-interactive"}) {
-			$this -> setForeignOEMOptionsElement ("oem-reboot-interactive");
-		}
-		if (defined $foreignRepo->{"oem-shutdown"}) {
-			$this -> setForeignOEMOptionsElement ("oem-shutdown");
-		}
-		if (defined $foreignRepo->{"oem-shutdown-interactive"}) {
-			$this -> setForeignOEMOptionsElement ("oem-shutdown-interactive");
-		}
-		if (defined $foreignRepo->{"oem-bootwait"}) {
-			$this -> setForeignOEMOptionsElement ("oem-bootwait");
-		}
-		if (defined $foreignRepo->{"oem-unattended"}) {
-			$this -> setForeignOEMOptionsElement ("oem-unattended");
-		}
-		if (defined $foreignRepo->{"oem-recovery"}) {
-			$this -> setForeignOEMOptionsElement ("oem-recovery");
-		}
-		if (defined $foreignRepo->{"oem-recoveryID"}) {
-			$this -> setForeignOEMOptionsElement ("oem-recoveryID");
-		}
-		if (defined $foreignRepo->{"oem-inplace-recovery"}) {
-			$this -> setForeignOEMOptionsElement ("oem-inplace-recovery");
-		}
-		if (defined $foreignRepo->{"lvm"}) {
-			$this -> setForeignSystemDiskElement();
-		}
-		#==========================================
-		# 5) foreign attributes in type
-		#------------------------------------------
-		if (defined $foreignRepo->{"hybrid"}) {
-			$this -> setForeignTypeAttribute (
-				"hybrid",$foreignRepo->{"hybrid"}
-			);
-		}
-		if (defined $foreignRepo->{"hybridpersistent"}) {
-			$this -> setForeignTypeAttribute (
-				"hybridpersistent",$foreignRepo->{"hybridpersistent"}
-			);
-		}
-		if (defined $foreignRepo->{"kernelcmdline"}) {
-			$this -> setForeignTypeAttribute (
-				"kernelcmdline",$foreignRepo->{"kernelcmdline"}
-			);
-		}
-		if (defined $foreignRepo->{"bootloader"}) {
-			$this -> setForeignTypeAttribute (
-				"bootloader",$foreignRepo->{"bootloader"}
-			);
-		}
-		if (defined $foreignRepo->{"installboot"}) {
-			$this -> setForeignTypeAttribute (
-				"installboot",$foreignRepo->{"installboot"}
-			);
-		}
-		#==========================================
-		# 6) foreign image attributes, toplevel
-		#------------------------------------------
-		if (defined $foreignRepo->{"displayname"}) {
-			$this -> setForeignImageAttribute (
-				"displayname",$foreignRepo->{"displayname"}
-			);
-		}
-	}
-	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{imageDesc}          = $imageDesc;
 	$this->{driversNodeList}    = $driversNodeList;
 	$this->{usrdataNodeList}    = $usrdataNodeList;
-	$this->{repositNodeList}    = $repositNodeList;
-	$this->{packageNodeList}    = $packageNodeList;
 	$this->{instsrcNodeList}    = $instsrcNodeList;
 	$this->{havemd5File}        = $havemd5File;
 	$this->{arch}               = $arch;
@@ -426,6 +242,27 @@ sub updateXML {
 	my $xmlu = $this->{systemTree}->toString();
 	my $xmlf = $this->{xmlOrigFile};
 	$kiwi -> storeXML ( $xmlu,$xmlf );
+	return $this;
+}
+
+#==========================================
+# writeXMLDescription
+#------------------------------------------
+sub writeXMLDescription {
+	# ...
+	# Write back the XML file into the prepare tree
+	# below the image/ directory
+	# ---
+	my $this = shift;
+	my $root = shift;
+	my $xmlu = $this->{systemTree}->toString();
+	my $file = $root."/image/config.xml";
+	my $FD;
+	if (! open ($FD, '>', $file)) {
+		return undef;
+	}
+	print $FD $xmlu;
+	close $FD;
 	return $this;
 }
 
@@ -1044,210 +881,6 @@ sub getPXEDeployInitrd {
 	} else {
 		return undef;
 	}
-}
-
-#==========================================
-# setForeignOptionsElement
-#------------------------------------------
-sub setForeignOptionsElement {
-	# ...
-	# If given element exists in the foreign hash, set this
-	# element into the current preferences (options) XML tree
-	# ---
-	my $this = shift;
-	my $item = shift;
-	my $kiwi = $this->{kiwi};
-	my $foreignRepo = $this->{foreignRepo};
-	my $value = $foreignRepo->{$item};
-	$kiwi -> info ("Including foreign element $item: $value");
-	my $addElement = new XML::LibXML::Element ("$item");
-	$addElement -> appendText ($value);
-	my $opts = $this -> getPreferencesNodeByTagName ("$item");
-	my $node = $opts -> getElementsByTagName ("$item");
-	if ($node) {
-		if ("$node" eq "$value") {
-			$kiwi -> done ();
-			return $this;
-		}
-		$node = $node -> get_node(1);
-		$opts -> removeChild ($node);
-	}
-	$opts -> appendChild ($addElement);
-	$kiwi -> done ();
-	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
-# setForeignOEMOptionsElement
-#------------------------------------------
-sub setForeignOEMOptionsElement {
-	# ...
-	# If given element exists in the foreign hash, set this
-	# element into the current oemconfig (options) XML tree
-	# ---
-	my $this = shift;
-	my $item = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $foreignRepo = $this->{foreignRepo};
-	my $value = $foreignRepo->{$item};
-	my $newconfig = 0;
-	$kiwi -> info ("Including foreign OEM element $item: $value");
-	my $addElement = new XML::LibXML::Element ("$item");
-	$addElement -> appendText ($value);
-	my $opts = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $opts) {
-		$opts = new XML::LibXML::Element ("oemconfig");
-		$newconfig = 1;
-	}
-	my $node = $opts -> getElementsByTagName ("$item");
-	if ($node) {
-		$node = $node -> get_node(1);
-		$opts -> removeChild ($node);
-	}
-	$opts -> appendChild ($addElement);
-	if ($newconfig) {
-		$this->{typeNode} -> appendChild ($opts);
-	}
-	$kiwi -> done ();
-	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
-# setForeignSystemDiskElement
-#------------------------------------------
-sub setForeignSystemDiskElement {
-	# ...
-	# If given element exists in the foreign hash, set this
-	# element into the current systemdisk XML tree
-	# ---
-	my $this = shift;
-	my $item = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $value;
-	my $foreignRepo = $this->{foreignRepo};
-	if (($foreignRepo) && ($item)) {
-		$value = $foreignRepo->{$item};
-	}
-	my $newconfig = 0;
-	my $addElement;
-	if ($item) {
-		$kiwi -> info ("Including foreign SystemDisk element $item: $value");
-		$addElement = new XML::LibXML::Element ("$item");
-		$addElement -> appendText ($value);
-	} else {
-		$kiwi -> info ("Including foreign SystemDisk element");
-	}
-	my $disk = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
-	if (! defined $disk) {
-		$disk = new XML::LibXML::Element ("systemdisk");
-		$newconfig = 1;
-	}
-	if ($item) {
-		my $node = $disk -> getElementsByTagName ("$item");
-		if ($node) {
-			$node = $node -> get_node(1);
-			$disk -> removeChild ($node);
-		}
-		$disk -> appendChild ($addElement);
-	}
-	if ($newconfig) {
-		$this->{typeNode} -> appendChild ($disk);
-	}
-	$kiwi -> done ();
-	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
-# setForeignMachineAttribute
-#------------------------------------------
-sub setForeignMachineAttribute {
-	# ...
-	# If given element exists in the foreign hash, set this
-	# attribute into the current machine (options) XML tree
-	# if no machine section exists create a new one
-	# ---
-	my $this = shift;
-	my $item = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $foreignRepo = $this->{foreignRepo};
-	my $value = $foreignRepo->{$item};
-	my $newconfig = 0;
-	$kiwi -> info ("Including foreign machine attribute $item: $value");
-	my $opts = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	if (! defined $opts) {
-		$opts = new XML::LibXML::Element ("machine");
-		$newconfig = 1;
-	}
-	my $node = $opts -> getElementsByTagName ("$item");
-	if ($node) {
-		$node = $node -> get_node(1);
-		$opts -> removeChild ($node);
-	}
-	if ($value) {
-		$opts-> setAttribute ("$item","$value");
-	} else {
-		$opts-> setAttribute ("$item","true");
-	}
-	if ($newconfig) {
-		$this->{typeNode} -> appendChild ($opts);
-	}
-	$kiwi -> done ();
-	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
-# setForeignTypeAttribute
-#------------------------------------------
-sub setForeignTypeAttribute {
-	# ...
-	# set given attribute to selected type in the
-	# xml preferences node
-	# ---
-	my $this = shift;
-	my $attr = shift;
-	my $val  = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	if ($val) {
-		$kiwi -> info ("Including foreign type attribute: $attr : $val");
-		$tnode-> setAttribute ("$attr","$val");
-	} else {
-		$kiwi -> info ("Including foreign type attribute: $attr");
-		$tnode-> setAttribute ("$attr","true");
-	}
-	$kiwi -> done ();
-	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
-# setForeignImageAttribute
-#------------------------------------------
-sub setForeignImageAttribute {
-	# ...
-	# set given attribute to the image section
-	# ---
-	my $this = shift;
-	my $attr = shift;
-	my $val  = shift;
-	my $kiwi = $this->{kiwi};
-	my $inode= $this->{imgnameNodeList} -> get_node(1);
-	$kiwi -> info ("Including foreign image attribute: $attr");
-	if ($val) {
-		$inode -> setAttribute ("$attr","$val");
-	} else {
-		$inode -> setAttribute ("$attr","true");
-	}
-	$kiwi -> done ();
-	$this -> updateXML();
-	return $this;
 }
 
 #==========================================
@@ -2291,6 +1924,7 @@ sub addPackages {
 		}
 	}
 	foreach my $pack (@packs) {
+		next if ($pack eq "");
 		my $addElement = new XML::LibXML::Element ("package");
 		$addElement -> setAttribute("name",$pack);
 		$nodes -> get_node($nodeNumber)
@@ -2562,22 +2196,38 @@ sub getImageConfig {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (defined $node) {
-		my $oemswapMB= $node -> getElementsByTagName ("oem-swapsize");
-		my $oemrootMB= $node -> getElementsByTagName ("oem-systemsize");
-		my $oemswap  = $node -> getElementsByTagName ("oem-swap");
-		my $oemalign = $node -> getElementsByTagName ("oem-align-partition");
-		my $oempinst = $node -> getElementsByTagName ("oem-partition-install");
-		my $oemtitle = $node -> getElementsByTagName ("oem-boot-title");
-		my $oemkboot = $node -> getElementsByTagName ("oem-kiwi-initrd");
-		my $oemreboot= $node -> getElementsByTagName ("oem-reboot");
-		my $oemrebootinter= $node -> getElementsByTagName ("oem-reboot-interactive");
-		my $oemshutdown= $node -> getElementsByTagName ("oem-shutdown");
-		my $oemshutdowninter= $node -> getElementsByTagName ("oem-shutdown-interactive");
-		my $oemwait  = $node -> getElementsByTagName ("oem-bootwait");
-		my $oemnomsg = $node -> getElementsByTagName ("oem-unattended");
-		my $oemreco  = $node -> getElementsByTagName ("oem-recovery");
-		my $oemrecoid= $node -> getElementsByTagName ("oem-recoveryID");
-		my $inplace  = $node -> getElementsByTagName ("oem-inplace-recovery");
+		my $oemswapMB= $node
+			-> getElementsByTagName ("oem-swapsize");
+		my $oemrootMB= $node
+			-> getElementsByTagName ("oem-systemsize");
+		my $oemswap  = $node
+			-> getElementsByTagName ("oem-swap");
+		my $oemalign = $node
+			-> getElementsByTagName ("oem-align-partition");
+		my $oempinst = $node
+			-> getElementsByTagName ("oem-partition-install");
+		my $oemtitle = $node
+			-> getElementsByTagName ("oem-boot-title");
+		my $oemkboot = $node
+			-> getElementsByTagName ("oem-kiwi-initrd");
+		my $oemreboot= $node
+			-> getElementsByTagName ("oem-reboot");
+		my $oemrebootinter= $node
+			-> getElementsByTagName ("oem-reboot-interactive");
+		my $oemshutdown= $node
+			-> getElementsByTagName ("oem-shutdown");
+		my $oemshutdowninter= $node
+			-> getElementsByTagName ("oem-shutdown-interactive");
+		my $oemwait  = $node
+			-> getElementsByTagName ("oem-bootwait");
+		my $oemnomsg = $node
+			-> getElementsByTagName ("oem-unattended");
+		my $oemreco  = $node
+			-> getElementsByTagName ("oem-recovery");
+		my $oemrecoid= $node
+			-> getElementsByTagName ("oem-recoveryID");
+		my $inplace  = $node
+			-> getElementsByTagName ("oem-inplace-recovery");
 		if ((defined $oempinst) && ("$oempinst" eq "true")) {
 			$result{kiwi_oempartition_install} = $oempinst;
 		}
@@ -3582,9 +3232,9 @@ sub getArchiveList {
 }
 
 #==========================================
-# getForeignNodeList
+# getNodeList
 #------------------------------------------
-sub getForeignNodeList {
+sub getNodeList {
 	# ...
 	# Return the current <repository> list which consists
 	# of XML::LibXML::Element object pointers
@@ -3594,9 +3244,9 @@ sub getForeignNodeList {
 }
 
 #==========================================
-# getForeignPackageNodeList
+# getPackageNodeList
 #------------------------------------------
-sub getForeignPackageNodeList {
+sub getPackageNodeList {
 	# ...
 	# Return the current <packages> list which consists
 	# of XML::LibXML::Element object pointers
@@ -3632,14 +3282,6 @@ sub resolveArchitectur {
 	}
 	$path =~ s/\%arch/$arch/;
 	return $path;
-}
-
-#==========================================
-# getPackageNodeList
-#------------------------------------------
-sub getPackageNodeList {
-	my $this = shift;
-	return $this->{packageNodeList};
 }
 
 #==========================================
@@ -4278,8 +3920,459 @@ sub getVMConfigOpts {
 }
 
 #==========================================
+# buildImageName
+#------------------------------------------
+sub buildImageName {
+	# ...
+	# build image file name from XML information
+	# ---
+	my $this      = shift;
+	my $separator = shift;
+	my $extension = shift;
+	my $arch = qxx ("uname -m"); chomp ( $arch );
+	$arch = ".$arch";
+	if (! defined $separator) {
+		$separator = "-";
+	}
+	my $name = $this -> getImageName();
+	my $iver = $this -> getImageVersion();
+	if (defined $extension) {
+		$name = $name.$extension.$arch.$separator.$iver;
+	} else {
+		$name = $name.$arch.$separator.$iver;
+	}
+	chomp  $name;
+	return $name;
+}
+
+#==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __updateDescriptionFromChangeSet
+#------------------------------------------
+sub __updateDescriptionFromChangeSet {
+	# ...
+	# Write given changes into the previosly read in XML tree
+	# This function is used to incorporate repository, packages
+	# and other changes into the current XML description. Most
+	# often required in order to build the boot image to fit
+	# together with the system image
+	# ---
+	my $this      = shift;
+	my $changeset = shift;
+	my $kiwi      = $this->{kiwi};
+	my $repositNodeList = $this->{repositNodeList};
+	my $packageNodeList = $this->{packageNodeList};
+	#==========================================
+	# check changeset...
+	#------------------------------------------
+	if (! defined $changeset) {
+		return undef;
+	}
+	#==========================================
+	# 1) merge/update repositories
+	#------------------------------------------
+	if ($changeset->{xmlnode}) {
+		$kiwi -> info ("Updating repository node(s)");
+		my $need = new XML::LibXML::NodeList();
+		my @node = $repositNodeList -> get_nodelist();
+		foreach my $element (@node) {
+			if (! $this -> __requestedProfile ($element)) {
+				next;
+			}
+			my $status = $element -> getAttribute("status");
+			if ((! defined $status) || ($status eq "fixed")) {
+				$need -> push ($element);
+			}
+		}
+		$repositNodeList = $changeset->{xmlnode};
+		$repositNodeList -> prepend ($need);
+		$kiwi -> done ();
+	}
+	#==========================================
+	# 2) merge/update packages
+	#------------------------------------------
+	if (($changeset->{xmlpacnode}) && ($changeset->{xmlobj})) {
+		my @node = $changeset -> {xmlpacnode} -> get_nodelist();
+		my @plist;
+		my @alist;
+		my @falistImage;
+		my @fplistImage;
+		my @fplistDelete;
+		foreach my $element (@node) {
+			my $type = $element  -> getAttribute ("type");
+			if (! $changeset -> {xmlobj} -> __requestedProfile ($element)) {
+				next;
+			}
+			if (($type eq "image") || ($type eq "bootstrap")) {
+				push (@plist,$element->getElementsByTagName ("package"));
+				push (@alist,$element->getElementsByTagName ("archive"));
+			}
+		}
+		foreach my $element (@plist) {
+			my $package = $element -> getAttribute ("name");
+			my $bootinc = $element -> getAttribute ("bootinclude");
+			my $bootdel = $element -> getAttribute ("bootdelete");
+			if ((defined $bootinc) && ("$bootinc" eq "true")) {
+				push (@fplistImage,$package);
+			}
+			if ((defined $bootdel) && ("$bootdel" eq "true")) {
+				push (@fplistDelete,$package);
+			}
+		}
+		foreach my $element (@alist) {
+			my $archive = $element -> getAttribute ("name");
+			my $bootinc = $element -> getAttribute ("bootinclude");
+			if ((defined $bootinc) && ("$bootinc" eq "true")) {
+				push (@falistImage,$archive);
+			}
+		}
+		if (@fplistImage) {
+			$kiwi -> info ("Updating package(s):\n");
+			foreach my $p (@fplistImage) {
+				$kiwi -> info ("--> $p\n");
+			}
+			$this -> addPackages (
+				"bootstrap",$packageNodeList,@fplistImage
+			);
+			if (@fplistDelete) {
+				$this -> addPackages (
+					"delete",$packageNodeList,@fplistDelete
+				);
+			}
+		}
+		if (@falistImage) {
+			$kiwi -> info ("Updating archive(s):\n");
+			foreach my $p (@falistImage) {
+				$kiwi -> info ("--> $p\n");
+			}
+			$this -> addArchives (
+				"bootstrap",$packageNodeList,@falistImage
+			);
+		}
+	}
+	#==========================================
+	# 3) merge/update machine attribs in type
+	#------------------------------------------
+	if (defined $changeset->{"domain"}) {
+		$this -> __setMachineAttribute ("domain",$changeset);
+	}
+	#==========================================
+	# 4) merge/update preferences in type
+	#------------------------------------------
+	if (defined $changeset->{"locale"}) {
+		$this -> __setOptionsElement ("locale",$changeset);
+	}
+	if (defined $changeset->{"boot-theme"}) {
+		$this -> __setOptionsElement ("boot-theme",$changeset);
+	}
+	if (defined $changeset->{"packagemanager"}) {
+		$this -> __setOptionsElement ("packagemanager",$changeset);
+	}
+	if (defined $changeset->{"oem-swap"}) {
+		$this -> __setOEMOptionsElement ("oem-swap",$changeset);
+	}
+	if (defined $changeset->{"oem-align-partition"}) {
+		$this -> __setOEMOptionsElement ("oem-align-partition",$changeset);
+	}
+	if (defined $changeset->{"oem-partition-install"}) {
+		$this -> __setOEMOptionsElement ("oem-partition-install",$changeset);
+	}
+	if (defined $changeset->{"oem-swapsize"}) {
+		$this -> __setOEMOptionsElement ("oem-swapsize",$changeset);
+	}
+	if (defined $changeset->{"oem-systemsize"}) {
+		$this -> __setOEMOptionsElement ("oem-systemsize",$changeset);
+	}
+	if (defined $changeset->{"oem-boot-title"}) {
+		$this -> __setOEMOptionsElement ("oem-boot-title",$changeset);
+	}
+	if (defined $changeset->{"oem-kiwi-initrd"}) {
+		$this -> __setOEMOptionsElement ("oem-kiwi-initrd",$changeset);
+	}
+	if (defined $changeset->{"oem-reboot"}) {
+		$this -> __setOEMOptionsElement ("oem-reboot",$changeset);
+	}
+	if (defined $changeset->{"oem-reboot-interactive"}) {
+		$this -> __setOEMOptionsElement ("oem-reboot-interactive",$changeset);
+	}
+	if (defined $changeset->{"oem-shutdown"}) {
+		$this -> __setOEMOptionsElement ("oem-shutdown");
+	}
+	if (defined $changeset->{"oem-shutdown-interactive"}) {
+		$this -> __setOEMOptionsElement ("oem-shutdown-interactive",$changeset);
+	}
+	if (defined $changeset->{"oem-bootwait"}) {
+		$this -> __setOEMOptionsElement ("oem-bootwait",$changeset);
+	}
+	if (defined $changeset->{"oem-unattended"}) {
+		$this -> __setOEMOptionsElement ("oem-unattended",$changeset);
+	}
+	if (defined $changeset->{"oem-recovery"}) {
+		$this -> __setOEMOptionsElement ("oem-recovery",$changeset);
+	}
+	if (defined $changeset->{"oem-recoveryID"}) {
+		$this -> __setOEMOptionsElement ("oem-recoveryID",$changeset);
+	}
+	if (defined $changeset->{"oem-inplace-recovery"}) {
+		$this -> __setOEMOptionsElement ("oem-inplace-recovery",$changeset);
+	}
+	if (defined $changeset->{"lvm"}) {
+		$this -> __setSystemDiskElement (undef,$changeset);
+	}
+	#==========================================
+	# 5) merge/update type attributes
+	#------------------------------------------
+	if (defined $changeset->{"hybrid"}) {
+		$this -> __setTypeAttribute (
+			"hybrid",$changeset->{"hybrid"}
+		);
+	}
+	if (defined $changeset->{"hybridpersistent"}) {
+		$this -> __setTypeAttribute (
+			"hybridpersistent",$changeset->{"hybridpersistent"}
+		);
+	}
+	if (defined $changeset->{"kernelcmdline"}) {
+		$this -> __setTypeAttribute (
+			"kernelcmdline",$changeset->{"kernelcmdline"}
+		);
+	}
+	if (defined $changeset->{"bootloader"}) {
+		$this -> __setTypeAttribute (
+			"bootloader",$changeset->{"bootloader"}
+		);
+	}
+	if (defined $changeset->{"installboot"}) {
+		$this -> __setTypeAttribute (
+			"installboot",$changeset->{"installboot"}
+		);
+	}
+	if (defined $changeset->{"bootkernel"}) {
+		$this -> __setTypeAttribute (
+			"bootkernel",$changeset->{"bootkernel"}
+		);
+	}
+	if (defined $changeset->{"bootprofile"}) {
+		$this -> __setTypeAttribute (
+			"bootprofile",$changeset->{"bootprofile"}
+		);
+	}
+	#==========================================
+	# 6) merge/update image attribs, toplevel
+	#------------------------------------------
+	if (defined $changeset->{"displayname"}) {
+		$this -> __setImageAttribute (
+			"displayname",$changeset->{"displayname"}
+		);
+	}
+}
+
+#==========================================
+# __setOptionsElement
+#------------------------------------------
+sub __setOptionsElement {
+	# ...
+	# If given element exists in the data hash, set this
+	# element into the current preferences (options) XML tree
+	# ---
+	my $this = shift;
+	my $item = shift;
+	my $data = shift;
+	my $kiwi = $this->{kiwi};
+	my $value = $data->{$item};
+	$kiwi -> info ("Updating element $item: $value");
+	my $addElement = new XML::LibXML::Element ("$item");
+	$addElement -> appendText ($value);
+	my $opts = $this -> getPreferencesNodeByTagName ("$item");
+	my $node = $opts -> getElementsByTagName ("$item");
+	if ($node) {
+		if ("$node" eq "$value") {
+			$kiwi -> done ();
+			return $this;
+		}
+		$node = $node -> get_node(1);
+		$opts -> removeChild ($node);
+	}
+	$opts -> appendChild ($addElement);
+	$kiwi -> done ();
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# __setOEMOptionsElement
+#------------------------------------------
+sub __setOEMOptionsElement {
+	# ...
+	# If given element exists in the data hash, set this
+	# element into the current oemconfig (options) XML tree
+	# ---
+	my $this = shift;
+	my $item = shift;
+	my $data = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $value = $data->{$item};
+	my $newconfig = 0;
+	$kiwi -> info ("Updating OEM element $item: $value");
+	my $addElement = new XML::LibXML::Element ("$item");
+	$addElement -> appendText ($value);
+	my $opts = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $opts) {
+		$opts = new XML::LibXML::Element ("oemconfig");
+		$newconfig = 1;
+	}
+	my $node = $opts -> getElementsByTagName ("$item");
+	if ($node) {
+		$node = $node -> get_node(1);
+		$opts -> removeChild ($node);
+	}
+	$opts -> appendChild ($addElement);
+	if ($newconfig) {
+		$this->{typeNode} -> appendChild ($opts);
+	}
+	$kiwi -> done ();
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# __setSystemDiskElement
+#------------------------------------------
+sub __setSystemDiskElement {
+	# ...
+	# If given element exists in the data hash, set this
+	# element into the current systemdisk XML tree
+	# ---
+	my $this = shift;
+	my $item = shift;
+	my $data = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $value;
+	if (($data) && ($item)) {
+		$value = $data->{$item};
+	}
+	my $newconfig = 0;
+	my $addElement;
+	if ($item) {
+		$kiwi -> info ("Updating SystemDisk element $item: $value");
+		$addElement = new XML::LibXML::Element ("$item");
+		$addElement -> appendText ($value);
+	} else {
+		$kiwi -> info ("Updating SystemDisk element");
+	}
+	my $disk = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
+	if (! defined $disk) {
+		$disk = new XML::LibXML::Element ("systemdisk");
+		$newconfig = 1;
+	}
+	if ($item) {
+		my $node = $disk -> getElementsByTagName ("$item");
+		if ($node) {
+			$node = $node -> get_node(1);
+			$disk -> removeChild ($node);
+		}
+		$disk -> appendChild ($addElement);
+	}
+	if ($newconfig) {
+		$this->{typeNode} -> appendChild ($disk);
+	}
+	$kiwi -> done ();
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# __setMachineAttribute
+#------------------------------------------
+sub __setMachineAttribute {
+	# ...
+	# If given element exists in the data hash, set this
+	# attribute into the current machine (options) XML tree
+	# if no machine section exists create a new one
+	# ---
+	my $this = shift;
+	my $item = shift;
+	my $data = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $value = $data->{$item};
+	my $newconfig = 0;
+	$kiwi -> info ("Updating machine attribute $item: $value");
+	my $opts = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	if (! defined $opts) {
+		$opts = new XML::LibXML::Element ("machine");
+		$newconfig = 1;
+	}
+	my $node = $opts -> getElementsByTagName ("$item");
+	if ($node) {
+		$node = $node -> get_node(1);
+		$opts -> removeChild ($node);
+	}
+	if ($value) {
+		$opts-> setAttribute ("$item","$value");
+	} else {
+		$opts-> setAttribute ("$item","true");
+	}
+	if ($newconfig) {
+		$this->{typeNode} -> appendChild ($opts);
+	}
+	$kiwi -> done ();
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# __setTypeAttribute
+#------------------------------------------
+sub __setTypeAttribute {
+	# ...
+	# set given attribute to selected type in the
+	# xml preferences node
+	# ---
+	my $this = shift;
+	my $attr = shift;
+	my $val  = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	if ($val) {
+		$kiwi -> info ("Updating type attribute: $attr : $val");
+		$tnode-> setAttribute ("$attr","$val");
+	} else {
+		$kiwi -> info ("Updating type attribute: $attr");
+		$tnode-> setAttribute ("$attr","true");
+	}
+	$kiwi -> done ();
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# __setImageAttribute
+#------------------------------------------
+sub __setImageAttribute {
+	# ...
+	# set given attribute to the image section
+	# ---
+	my $this = shift;
+	my $attr = shift;
+	my $val  = shift;
+	my $kiwi = $this->{kiwi};
+	my $inode= $this->{imgnameNodeList} -> get_node(1);
+	$kiwi -> info ("Updating image attribute: $attr");
+	if ($val) {
+		$inode -> setAttribute ("$attr","$val");
+	} else {
+		$inode -> setAttribute ("$attr","true");
+	}
+	$kiwi -> done ();
+	$this -> updateXML();
+	return $this;
+}
+
 #==========================================
 # __requestedProfile
 #------------------------------------------
@@ -4951,7 +5044,13 @@ sub __populateImageTypeAndNode {
 	# check if typeinfo hash exists
 	#------------------------------------------
 	if (! $typeinfo) {
-		return undef;
+		# /.../
+		# if not typeinfo hash was populated we use the first type
+		# node listed in the description as the used type.
+		# ----
+		$this->{typeNode} = $this->{optionsNodeList}
+			-> get_node(1) -> getElementsByTagName ("type") -> get_node(1);
+		return $this;
 	}
 	#==========================================
 	# select type and type node

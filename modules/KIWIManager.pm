@@ -1643,12 +1643,10 @@ sub setupArchives {
 		return undef;
 	}
 	#==========================================
-	# check for foreign call
+	# override path to image description
 	#------------------------------------------
-	if (defined $main::ForeignRepo{prepare}) {
-		if (open FD,"$main::ForeignRepo{create}/image/main::Prepare") {
-			$idesc = <FD>; close FD;
-		}
+	if ((defined $main::ImageDescription) && (-d $main::ImageDescription)) {
+		$idesc = $main::ImageDescription;
 	}
 	#==========================================
 	# check for archive files

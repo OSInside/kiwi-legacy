@@ -165,8 +165,6 @@ our $InstallStickSystem;    # virtual disk system image to be installed on disk
 our $StripImage;            # strip shared objects and binaries
 our $CreateHash;            # create .checksum.md5 for given description
 our $SetupSplash;           # setup splash screen (bootsplash or splashy)
-our $ImageName;             # filename of current image, used in Modules
-our %ForeignRepo;           # may contain XML::LibXML::Element objects
 our @AddRepository;         # add repository for building physical extend
 our @AddRepositoryType;     # add repository type
 our @AddRepositoryAlias;    # alias name for the repository
@@ -218,6 +216,8 @@ our $Convert;               # convert image into given format/configuration
 our $Format;                # format to convert to, vmdk, ovf, etc...
 our $defaultAnswer;         # default answer to any questions
 our $targetDevice;          # alternative device instead of a loop device
+our %XMLChangeSet;          # internal data set for update of XML objects
+our $ImageDescription;      # uniq path to image description due to caller opts
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -363,7 +363,7 @@ sub main {
 		# Process system image description
 		#------------------------------------------
 		$kiwi -> info ("Reading image description [Cache]...\n");
-		my $xml = new KIWIXML ($kiwi,$InitCache,\%ForeignRepo,undef,\@Profiles);
+		my $xml = new KIWIXML ($kiwi,$InitCache,undef,undef,\@Profiles);
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -397,7 +397,7 @@ sub main {
 		# Process system image description
 		#------------------------------------------
 		$kiwi -> info ("Reading image description [Prepare]...\n");
-		my $xml = new KIWIXML ( $kiwi,$Prepare,\%ForeignRepo,undef,\@Profiles );
+		my $xml = new KIWIXML ( $kiwi,$Prepare,undef,\@Profiles );
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -552,6 +552,14 @@ sub main {
 			undef $root;
 			my $code = kiwiExit (1); return $code;
 		}
+		if (! $xml -> writeXMLDescription ($root->getRootPath())) {
+			$kiwi -> error ("Couldn't write XML description");
+			$kiwi -> failed ();
+			$root -> cleanMount ();
+			$root -> copyBroken();
+			undef $root;
+			my $code = kiwiExit (1); return $code;
+		}
 		#==========================================
 		# Clean up
 		#------------------------------------------
@@ -578,7 +586,7 @@ sub main {
 		#------------------------------------------
 		$kiwi -> info ("Reading image description [Create]...\n");
 		my $xml = new KIWIXML (
-			$kiwi,"$Create/image",\%ForeignRepo,$SetImageType,\@Profiles
+			$kiwi,"$Create/image",$SetImageType,\@Profiles
 		);
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
@@ -688,18 +696,17 @@ sub main {
 			if (@deleteList) {
 				$kiwi -> info ("--> Remove: @deleteList\n");
 			}
+			my $resetVariables   = createResetClosure();
 			$main::Survive       = "yes";
 			$main::Upgrade       = $main::Create;
 			@main::AddPackage    = @addonList;
 			@main::RemovePackage = @deleteList;
-			my $backupCreate     = $main::Create;
 			undef $main::Create;
 			if (! defined main::main()) {
-				$main::Survive = "default";
+				&{$resetVariables};
 				my $code = kiwiExit (1); return $code;
 			}
-			$main::Survive = "default";
-			$main::Create  = $backupCreate;
+			&{$resetVariables};
 			undef $main::Upgrade;
 		}
 		#==========================================
@@ -1194,7 +1201,7 @@ sub main {
 	# Create a virtual disk image
 	#------------------------------------------
 	if (defined $BootVMDisk) {
-		$kiwi -> info ("Creating boot VM disk from: $BootVMDisk...\n");
+		$kiwi -> info ("--> Creating boot VM disk from: $BootVMDisk...\n");
 		if (! defined $BootVMSystem) {
 			$kiwi -> error  ("No VM system image specified");
 			$kiwi -> failed ();
@@ -1350,6 +1357,38 @@ sub init {
 	#----------------------------------------
 	if (defined $Destination) {
 		$Destination = File::Spec->rel2abs ($Destination);
+	}
+	#========================================
+	# check prepare/create/cache paths
+	#----------------------------------------
+	if (defined $CacheRoot) {
+		if (($CacheRoot !~ /^\//) && (! -d $CacheRoot)) {
+			$CacheRoot = $System."/".$CacheRoot;
+		}
+		$CacheRoot =~ s/\/$//;
+	}
+	if (defined $Prepare) {
+		if (($Prepare !~ /^\//) && (! -d $Prepare)) {
+			$Prepare = $System."/".$Prepare;
+		}
+		$Prepare =~ s/\/$//;
+	}
+	if (defined $Create) {
+		if (($Create !~ /^\//) && (! -d $Create)) {
+			$Create = $System."/".$Create;
+		}
+		$Create =~ s/\/$//;
+	}
+	#========================================
+	# store uniq path to image description
+	#----------------------------------------
+	if (defined $Prepare) {
+		$ImageDescription = $Prepare;
+	}
+	if (defined $Create) {
+		if (open FD,"$Create/image/main::Prepare") {
+			$ImageDescription = <FD>; close FD;
+		}
 	}
 	#========================================
 	# store original value of Profiles
@@ -3091,27 +3130,7 @@ sub createCache {
 	# Variable setup and reset function
 	#------------------------------------------
 	$ENV{MKCLICFS_COMPRESSION} = 0;
-	sub reset_sub {
-		my $backupSurvive      = $main::Survive;
-		my @backupProfiles     = @main::Profiles;
-		my $backupCreate       = $main::Create;
-		my $backupPrepare      = $main::Prepare;
-		my $backupRootTree     = $main::RootTree;
-		my $backupForceNewRoot = $main::ForceNewRoot;
-		my @backupPatterns     = @main::AddPattern;
-		my @backupPackages     = @main::AddPackage;
-		return sub {
-			@main::Profiles     = @backupProfiles;
-			$main::Prepare      = $backupPrepare;
-			$main::Create       = $backupCreate;
-			$main::ForceNewRoot = $backupForceNewRoot;
-			@main::AddPattern   = @backupPatterns;
-			@main::AddPackage   = @backupPackages;
-			$main::RootTree     = $backupRootTree;
-			$main::Survive      = $backupSurvive;
-		}
-	}
-	my $resetVariables     = reset_sub();
+	my $resetVariables     = createResetClosure();
 	my $CacheDistro        = $init->[0];
 	my @CachePatterns      = @{$init->[1]};
 	my @CachePackages      = @{$init->[2]};
@@ -3188,7 +3207,7 @@ sub createCache {
 		if (! $image -> createImageClicFS ()) {
 			&{$resetVariables}; return undef;
 		}
-		my $name = $imageCacheDir."/".$image -> buildImageName();
+		my $name = $imageCacheDir."/".$xml -> buildImageName();
 		qxx ("mv $name $main::RootTree.clicfs");
 		qxx ("rm $name.clicfs $name.md5");
 		qxx ("rm -f  $imageCacheDir/initrd-*");
@@ -3204,6 +3223,32 @@ sub createCache {
 	}
 	&{$resetVariables};
 	return $imageCacheDir;
+}
+
+#==========================================
+# createResetClosure
+#------------------------------------------
+sub createResetClosure {
+	my $backupSurvive       = $main::Survive;
+	my @backupProfiles      = @main::Profiles;
+	my $backupCreate        = $main::Create;
+	my $backupPrepare       = $main::Prepare;
+	my $backupRootTree      = $main::RootTree;
+	my $backupForceNewRoot  = $main::ForceNewRoot;
+	my @backupPatterns      = @main::AddPattern;
+	my @backupPackages      = @main::AddPackage;
+	my @backupRemovePackages= @main::RemovePackage;
+	return sub {
+		@main::Profiles     = @backupProfiles;
+		$main::Prepare      = $backupPrepare;
+		$main::Create       = $backupCreate;
+		$main::ForceNewRoot = $backupForceNewRoot;
+		@main::AddPattern   = @backupPatterns;
+		@main::AddPackage   = @backupPackages;
+		@main::RemovePackage= @backupRemovePackages;
+		$main::RootTree     = $backupRootTree;
+		$main::Survive      = $backupSurvive;
+	}
 }
 
 main();
