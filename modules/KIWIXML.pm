@@ -202,7 +202,7 @@ sub new {
 	#==========================================
 	# Add default split section if not defined
 	#------------------------------------------
-	$this -> addDefaultSplitNode();
+	$this -> __addDefaultSplitNode();
 	#==========================================
 	# Set global packagemanager value
 	#------------------------------------------
@@ -3862,45 +3862,6 @@ sub getSingleInstSourceSatSolvable {
 }
 
 #==========================================
-# addDefaultSplitNode
-#------------------------------------------
-sub addDefaultSplitNode {
-	# ...
-	# if no split section is setup we add a default section
-	# from the contents of the KIWISplit.txt file and use it
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $type = $this->{imageType};
-	if (($type ne "split") && ($type ne "iso")) {
-		return $this;
-	}
-	my $splitNodeList = $tnode -> getElementsByTagName ("split");
-	if ($splitNodeList) {
-		return;
-	}
-	my $splitTree;
-	my $splitXML = new XML::LibXML;
-	eval {
-		$splitTree = $splitXML
-			-> parse_file ( $main::KSplit );
-	};
-	if ($@) {
-		my $evaldata=$@;
-		$kiwi -> error  ("Problem reading split file: $main::KSplit");
-		$kiwi -> failed ();
-		$kiwi -> error  ("$evaldata\n");
-		return undef;
-	}
-	$this->{typeNode} -> appendChild (
-		$splitTree -> getElementsByTagName ("split")
-	);
-	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
 # getVMConfigOpts
 #------------------------------------------
 sub getVMConfigOpts {
@@ -3948,6 +3909,73 @@ sub buildImageName {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __addDefaultSplitNode
+#------------------------------------------
+sub __addDefaultSplitNode {
+	# ...
+	# if no split section is setup we add a default section
+	# from the contents of the KIWISplit.txt file and apply
+	# it to the split types
+	# ---
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my @node   = $this->{optionsNodeList} -> get_nodelist();
+	my @tnodes = ();
+	my @snodes = ();
+	#==========================================
+	# store list of all types
+	#------------------------------------------
+	foreach my $element (@node) {
+		my @types = $element -> getElementsByTagName ("type");
+		push (@tnodes,@types);
+	}
+	#==========================================
+	# select relevant types w.o. split section
+	#------------------------------------------
+	foreach my $element (@tnodes) {
+		my $image = $element -> getAttribute("image");
+		if (($image eq "split") || ($image eq "iso")) {
+			my @splitsections = $element -> getElementsByTagName ("split");
+			if (! @splitsections) {
+				push (@snodes,$element);
+			}
+		}
+	}
+	#==========================================
+	# return if no split types are found
+	#------------------------------------------
+	if (! @snodes) {
+		return $this;
+	}
+	#==========================================
+	# read in default split section
+	#------------------------------------------
+	my $splitTree;
+	my $splitXML = new XML::LibXML;
+	eval {
+		$splitTree = $splitXML
+			-> parse_file ( $main::KSplit );
+	};
+	if ($@) {
+		my $evaldata=$@;
+		$kiwi -> error  ("Problem reading split file: $main::KSplit");
+		$kiwi -> failed ();
+		$kiwi -> error  ("$evaldata\n");
+		return undef;
+	}
+	#==========================================
+	# append default section to selected nodes
+	#------------------------------------------
+	foreach my $element (@snodes) {
+		$element -> appendChild (
+			$splitTree -> getElementsByTagName ("split")
+		);
+	}
+	$this -> updateXML();
+	return $this;
+}
+
 #==========================================
 # __updateDescriptionFromChangeSet
 #------------------------------------------
