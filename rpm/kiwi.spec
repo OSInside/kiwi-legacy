@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 4.66)
+# spec file for package kiwi (Version 4.67)
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -52,7 +52,7 @@ Requires:       clicfs >= 1.3.9
 %endif
 %endif
 Summary:        OpenSuSE - KIWI Image System
-Version:        4.66
+Version:        4.67
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later
