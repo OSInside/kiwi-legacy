@@ -4014,8 +4014,8 @@ sub __updateDescriptionFromChangeSet {
 				$need -> push ($element);
 			}
 		}
-		$repositNodeList = $changeset->{xmlnode};
-		$repositNodeList -> prepend ($need);
+		$this->{repositNodeList} = $changeset->{xmlnode};
+		$this->{repositNodeList} -> prepend ($need);
 		$kiwi -> done ();
 	}
 	#==========================================
