@@ -3130,8 +3130,10 @@ sub setupLogicalExtend {
 	#==========================================
 	# extract kernel from physical extend
 	#------------------------------------------
-	if (! $this -> extractKernel ($name)) {
-		return undef;
+	if (! defined $main::InitCache) {
+		if (! $this -> extractKernel ($name)) {
+			return undef;
+		}
 	}
 	#==========================================
 	# Strip if specified

@@ -370,14 +370,6 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		my %type = %{$xml->getImageTypeAndAttributes()};
-		if ($type{type} eq "cpio") {
-			# /.../
-			# set a faked 'clicfs' image type for cpio images to prevent
-			# the kernel extraction from the cache image
-			# ----
-			$xml -> setImageType ("clicfs");
-			%type = %{$xml->getImageTypeAndAttributes()};
-		}
 		#==========================================
 		# Create cache(s)...
 		#------------------------------------------
@@ -3208,6 +3200,12 @@ sub createCache {
 		$kiwi -> info (
 			"--> Building clicfs cache...\n"
 		);
+		# /.../
+		# tell the system that we are in cache mode
+		# and prevent kernel extraction from image
+		# cache
+		# ----
+		$InitCache = "active";
 		my $image = new KIWIImage (
 			$kiwi,$xml,$root,$imageCacheDir,undef,"/base-system"
 		);
@@ -3230,6 +3228,10 @@ sub createCache {
 		# Move process log to final cache log...
 		#------------------------------------------
 		$kiwi -> finalizeLog();
+		#==========================================
+		# unset cache mode
+		#------------------------------------------
+		undef $InitCache;
 	}
 	&{$resetVariables};
 	return $imageCacheDir;
