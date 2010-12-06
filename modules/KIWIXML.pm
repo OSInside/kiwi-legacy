@@ -172,6 +172,19 @@ sub new {
 	$this->{repositNodeList} = $repositNodeList;
 	$this->{packageNodeList} = $packageNodeList;
 	#==========================================
+	# Read and create profile hash
+	#------------------------------------------
+	my $profileHash = $this -> __populateProfiles();
+	#==========================================
+	# Read and create type hash
+	#------------------------------------------
+	my $typeList = $this -> __populateTypeInfo();
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{profileHash} = $profileHash;
+	$this->{typeList}    = $typeList;
+	#==========================================
 	# Update XML data from changeset if exists
 	#------------------------------------------
 	if (%main::XMLChangeSet) {
@@ -184,9 +197,9 @@ sub new {
 	#------------------------------------------
 	$this -> __populateDefaultProfiles();
 	#==========================================
-	# Populate typeinfo hash
+	# Populate typeInfo hash
 	#------------------------------------------
-	$this -> __populateTypeInfo();
+	$this -> __populateProfiledTypeInfo();
 	#==========================================
 	# Check profile names
 	#------------------------------------------
@@ -4900,6 +4913,26 @@ sub __validateXML {
 }
 
 #==========================================
+# __populateProfiles
+#------------------------------------------
+sub __populateProfiles {
+	# ...
+	# import profiles section if specified
+	# ---
+	my $this     = shift;
+	my %result   = ();
+	my @profiles = $this -> getProfiles ();
+	foreach my $profile (@profiles) {
+		if ($profile->{include}) {
+			$result{$profile->{name}} = "$profile->{include}";
+		} else {
+			$result{$profile->{name}} = "false";
+		}
+	}
+	return \%result;
+}
+
+#==========================================
 # __populateDefaultProfiles
 #------------------------------------------
 sub __populateDefaultProfiles {
@@ -4907,9 +4940,10 @@ sub __populateDefaultProfiles {
 	# import default profiles if no other profiles
 	# were set on the commandline
 	# ---
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my @list   = ();
+	my $this     = shift;
+	my $kiwi     = $this->{kiwi};
+	my $profiles = $this->{profileHash};
+	my @list     = ();
 	#==========================================
 	# check for profiles already processed
 	#------------------------------------------
@@ -4920,12 +4954,11 @@ sub __populateDefaultProfiles {
 		return $this;
 	}
 	#==========================================
-	# read from profile section
+	# select profiles marked to become included
 	#------------------------------------------
-	my @profiles = $this -> getProfiles ();
-	foreach my $profile (@profiles) {
-		if (($profile->{include}) && ("$profile->{include}" eq "true")) {
-			push (@list,$profile->{name});
+	foreach my $name (keys %{$profiles}) {
+		if ($profiles->{$name} eq "true") {
+			push @list,$name;
 		}
 	}
 	#==========================================
@@ -4958,12 +4991,12 @@ sub __populateDefaultProfiles {
 		}
 	}
 	#==========================================
-	# store list
+	# store list of requested profiles
 	#------------------------------------------
 	if (@list) {
 		my $info = join (",",@list);
 		$kiwi -> info ("Using profile(s): $info");
-		$this->{reqProfiles} = \@list;
+		$this -> {reqProfiles} = \@list;
 		$kiwi -> done ();
 	}
 	return $this;
@@ -4975,78 +5008,168 @@ sub __populateDefaultProfiles {
 sub __populateTypeInfo {
 	# ...
 	# Extract the information contained in the <type> elements
-	# according to the selected profiles and store the type
-	# description in the object internal typeInfo hash:
+	# and store the type descriptions in a list of hash references
 	# ---
-	# typeInfo{imagetype}{attr} = value
+	# list = (
+	#   {
+	#      'key' => 'value'
+	#      'key' => 'value'
+	#   },
+	#   {
+	#      'key' => 'value'
+	#      'key' => 'value'
+	#   }
+	# )
 	# ---
 	#
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
-	my %result = ();
 	my $urlhd  = new KIWIURL ($kiwi,undef);
-	my @tnodes = ();
 	my @node   = $this->{optionsNodeList} -> get_nodelist();
+	my @result = ();
 	#==========================================
-	# select relevant types
+	# select types
+	#------------------------------------------
+	foreach my $element (@node) {
+		my @types    = $element -> getElementsByTagName ("type");
+		my $profiles = $element -> getAttribute("profiles");
+		my @assigned = ("all");
+		if ($profiles) {
+			@assigned = split (/,/,$profiles);
+		}
+		foreach my $node (@types) {
+			my %record = ();
+			my $prim   = $node -> getAttribute("primary");
+			if (! defined $prim) {
+				$record{primary} = "false";
+			} else {
+				$record{primary} = $prim;
+			}
+			my $disk = $node->getElementsByTagName("systemdisk")->get_node(1);
+			#==========================================
+			# meta data
+			#------------------------------------------
+			$record{node}     = $node;
+			$record{assigned} = \@assigned;
+			#==========================================
+			# type attributes
+			#------------------------------------------
+			$record{type}          = $node
+				-> getAttribute("image");
+			$record{luks}          = $node
+				-> getAttribute("luks");
+			$record{cmdline}       = $node
+				-> getAttribute("kernelcmdline");
+			$record{compressed}    = $node
+				-> getAttribute("compressed");
+			$record{boot}          = $node
+				-> getAttribute("boot");
+			$record{volid}         = $node
+				-> getAttribute("volid");
+			$record{flags}         = $node
+				-> getAttribute("flags");
+			$record{hybrid}        = $node
+				-> getAttribute("hybrid");
+			$record{format}        = $node
+				-> getAttribute("format");
+			$record{installiso}    = $node
+				-> getAttribute("installiso");
+			$record{installstick}  = $node
+				-> getAttribute("installstick");
+			$record{vga}           = $node
+				-> getAttribute("vga");
+			$record{bootloader}    = $node
+				-> getAttribute("bootloader");
+			$record{boottimeout}   = $node
+				-> getAttribute("boottimeout");
+			$record{installboot}   = $node
+				-> getAttribute("installboot");
+			$record{checkprebuilt} = $node
+				-> getAttribute("checkprebuilt");
+			$record{bootprofile}   = $node
+				-> getAttribute("bootprofile");
+			$record{bootkernel}    = $node
+				-> getAttribute("bootkernel");
+			$record{filesystem}    = $node
+				-> getAttribute("filesystem");
+			$record{fsnocheck}     = $node
+				-> getAttribute("fsnocheck");
+			$record{hybridpersistent}  = $node
+				-> getAttribute("hybridpersistent");
+			if (defined $disk) {
+				$record{lvm} = "true";
+			}
+			if ($record{type} eq "split") {
+				my $filesystemRO = $node -> getAttribute("fsreadonly");
+				my $filesystemRW = $node -> getAttribute("fsreadwrite");
+				if ((defined $filesystemRO) && (defined $filesystemRW)) {
+					$record{filesystem} = "$filesystemRW,$filesystemRO";
+				}
+			}
+			my $bootpath = $urlhd -> obsPath ($record{boot},"boot");
+			if (defined $bootpath) {
+				$record{boot} = $bootpath;
+			}
+			#==========================================
+			# push to list
+			#------------------------------------------
+			push @result,\%record;
+		}
+	}
+	return \@result;
+}
+
+#==========================================
+# __populateProfiledTypeInfo
+#------------------------------------------
+sub __populateProfiledTypeInfo {
+	# ...
+	# Store those types from the typeList which are selected
+	# by the profiles or the internal 'all' profile and store
+	# them in the object internal typeInfo hash:
+	# ---
+	# typeInfo{imagetype}{attr} = value
+	# ---
+	my $this     = shift;
+	my $kiwi     = $this->{kiwi};
+	my %result   = ();
+	my %select   = ();
+	my $typeList = $this->{typeList};
+	my @node     = $this->{optionsNodeList} -> get_nodelist();
+	#==========================================
+	# create selection according to profiles
 	#------------------------------------------
 	foreach my $element (@node) {
 		if (! $this -> __requestedProfile ($element)) {
 			next;
 		}
-		my @types = $element -> getElementsByTagName ("type");
-		push (@tnodes,@types);
+		my $profiles = $element -> getAttribute("profiles");
+		my @assigned = ("all");
+		if ($profiles) {
+			@assigned = split (/,/,$profiles);
+		}
+		foreach my $p (@assigned) {
+			$select{$p} = $p;
+		}
 	}
 	#==========================================
-	# walk through the types and subelements
+	# select record(s) according to selection
 	#------------------------------------------
-	foreach my $node (@tnodes) {
-		my %record = ();
-		my $prim = $node -> getAttribute("primary");
-		if (! defined $prim) {
-			$record{primary} = "false";
-		} else {
-			$record{primary} = $prim;
-		}
-		if (defined $node->getElementsByTagName("systemdisk")->get_node(1)) {
-			$record{lvm} = "true";
-		}
-		$record{node}          = $node;
-		$record{type}          = $node -> getAttribute("image");
-		$record{luks}          = $node -> getAttribute("luks");
-		$record{cmdline}       = $node -> getAttribute("kernelcmdline");
-		$record{compressed}    = $node -> getAttribute("compressed");
-		$record{boot}          = $node -> getAttribute("boot");
-		$record{volid}         = $node -> getAttribute("volid");
-		$record{flags}         = $node -> getAttribute("flags");
-		$record{hybrid}        = $node -> getAttribute("hybrid");
-		$record{format}        = $node -> getAttribute("format");
-		$record{installiso}    = $node -> getAttribute("installiso");
-		$record{installstick}  = $node -> getAttribute("installstick");
-		$record{vga}           = $node -> getAttribute("vga");
-		$record{bootloader}    = $node -> getAttribute("bootloader");
-		$record{boottimeout}   = $node -> getAttribute("boottimeout");
-		$record{installboot}   = $node -> getAttribute("installboot");
-		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
-		$record{bootprofile}   = $node -> getAttribute("bootprofile");
-		$record{bootkernel}    = $node -> getAttribute("bootkernel");
-		$record{filesystem}    = $node -> getAttribute("filesystem");
-		$record{fsnocheck}     = $node -> getAttribute("fsnocheck");
-		$record{hybridpersistent}  = $node -> getAttribute("hybridpersistent");
-		if ($record{type} eq "split") {
-			my $filesystemRO = $node -> getAttribute("fsreadonly");
-			my $filesystemRW = $node -> getAttribute("fsreadwrite");
-			if ((defined $filesystemRO) && (defined $filesystemRW)) {
-				$record{filesystem} = "$filesystemRW,$filesystemRO";
+	foreach my $record (@{$typeList}) {
+		my $found = 0;
+		foreach my $p (@{$record->{assigned}}) {
+			if ($select{$p}) {
+				$found = 1; last;
 			}
 		}
-		my $bootpath = $urlhd -> obsPath ($record{boot},"boot");
-		if (defined $bootpath) {
-			$record{boot} = $bootpath;
-		}
-		$result{$record{type}} = \%record;
+		next if ! $found;
+		$result{$record->{type}} = $record;
 	}
+	#==========================================
+	# store types in typeInfo hash
+	#------------------------------------------
 	$this->{typeInfo} = \%result;
+	return $this;
 }
 
 #==========================================
