@@ -363,7 +363,9 @@ sub main {
 		# Process system image description
 		#------------------------------------------
 		$kiwi -> info ("Reading image description [Cache]...\n");
-		my $xml = new KIWIXML ($kiwi,$InitCache,undef,undef,\@Profiles);
+		my $xml = new KIWIXML (
+			$kiwi,$InitCache,undef,\@Profiles
+		);
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -397,7 +399,9 @@ sub main {
 		# Process system image description
 		#------------------------------------------
 		$kiwi -> info ("Reading image description [Prepare]...\n");
-		my $xml = new KIWIXML ( $kiwi,$Prepare,undef,\@Profiles );
+		my $xml = new KIWIXML (
+			$kiwi,$Prepare,undef,\@Profiles
+		);
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -842,7 +846,7 @@ sub main {
 		#------------------------------------------
 		$kiwi -> info ("Reading image description [TestSuite]...\n");
 		my $xml = new KIWIXML (
-			$kiwi,"$RunTestSuite/image",undef,undef,\@Profiles
+			$kiwi,"$RunTestSuite/image",undef,\@Profiles
 		);
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
@@ -966,7 +970,7 @@ sub main {
 	if (defined $Upgrade) {
 		$kiwi -> info ("Reading image description [Upgrade]...\n");
 		my $xml = new KIWIXML (
-			$kiwi,"$Upgrade/image",undef,undef,\@ProfilesOrig
+			$kiwi,"$Upgrade/image",undef,\@ProfilesOrig
 		);
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
@@ -1754,7 +1758,9 @@ sub listImage {
 		}
 		if (getControlFile ($System."/".$image)) {
 			$kiwi -> info ($image);
-			my $xml = new KIWIXML ( $kiwi,$System."/".$image);
+			my $xml = new KIWIXML (
+				$kiwi,$System."/".$image,undef,undef
+			);
 			if (! $xml) {
 				next;
 			}
@@ -1830,7 +1836,9 @@ sub listXMLInfo {
 		exit 1;
 	}
 	$kiwi -> info ("Reading image description [ListXMLInfo]...\n");
-	my $xml  = new KIWIXML ($kiwi,$listXMLInfo,undef,undef,\@Profiles);
+	my $xml  = new KIWIXML (
+		$kiwi,$listXMLInfo,undef,\@Profiles
+	);
 	if (! defined $xml) {
 		exit 1;
 	}
@@ -2881,7 +2889,9 @@ sub createInstSource {
 		$kiwi->done();
 	}
 	$kiwi -> info ("Reading image description [InstSource]...\n");
-	my $xml = new KIWIXML ( $kiwi,$CreateInstSource );
+	my $xml = new KIWIXML (
+		$kiwi,$CreateInstSource,undef,undef
+	);
 	if (! defined $xml) {
 		my $code = kiwiExit (1); return $code;
 	}
