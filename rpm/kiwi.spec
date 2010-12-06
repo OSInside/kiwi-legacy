@@ -1,10 +1,17 @@
 #
 # spec file for package kiwi (Version 4.67)
 #
-# Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
-# This file and all modifications and additions to the pristine
-# package are under the same license as the package itself.
+# Copyright (c) 2010 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
+# All modifications and additions to the file contributed by third parties
+# remain the property of their copyright owners, unless otherwise agreed
+# upon. The license for this file, and modifications and additions to the
+# file, is the same license as for the pristine package itself (unless the
+# license for the pristine package is not an Open Source License, in which
+# case the license is the MIT License). An "Open Source License" is a
+# license that conforms to the Open Source Definition (Version 1.9)
+# published by the Open Source Initiative.
+
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
@@ -12,8 +19,9 @@
 
 Url:            http://kiwi.berlios.de
 %define sattools_version %(rpm -q --qf %{VERSION}-%{RELEASE} satsolver-tools)
+
 Name:           kiwi
-BuildRequires:  perl-XML-LibXML perl-libwww-perl perl-Config-IniFiles
+BuildRequires:  perl-Config-IniFiles perl-XML-LibXML perl-libwww-perl
 BuildRequires:  module-init-tools screen zlib-devel
 BuildRequires:  gcc-c++ libxslt swig trang
 %if %{suse_version} > 1020
@@ -28,7 +36,7 @@ BuildRequires:  libqt4 libqt4-devel
 BuildRequires:  freetype2-devel libpng-devel qt qt-devel
 %endif 
 %if %{suse_version} > 1030
-BuildRequires:  rpm-devel libexpat-devel libsatsolver-devel
+BuildRequires:  libexpat-devel libsatsolver-devel rpm-devel
 %endif
 %if %{suse_version} <= 1010
 Requires:       qt
@@ -53,9 +61,9 @@ Requires:       clicfs >= 1.3.9
 %endif
 Summary:        OpenSuSE - KIWI Image System
 Version:        4.67
-Release:        80
+Release:        1
 Group:          System/Management
-License:        GPL v2 or later
+License:        GPLv2
 Source:         %{name}.tar.bz2
 Source1:        %{name}-rpmlintrc
 Source2:        %{name}-docu.tar.bz2
@@ -73,7 +81,7 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 
 %package -n kiwi-instsource
-License:        GPL v2 only
+License:        GPLv2
 Requires:       kiwi = %{version}
 Requires:       inst-source-utils createrepo build
 Summary:        Installation Source creation
@@ -95,7 +103,7 @@ Authors:
 	Jan Bornschlegel <jcborn@novell.com>
 
 %package -n kiwi-doc
-License:        LGPL v2.0 or later
+License:        LGPLv2.0+
 Summary:        OpenSuSE - KIWI Image System Documentation
 Group:          Documentation/Howto
 %if 0%{?suse_version} > 1120
@@ -112,7 +120,7 @@ Authors:
     Marcus Schaefer
 
 %package -n kiwi-tools
-License:        GPL v2 or later
+License:        GPLv2+
 Summary:        OpenSuSE - KIWI tools collection
 Group:          System/Management
 
@@ -125,8 +133,9 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 
 %ifarch %ix86 x86_64
+
 %package -n kiwi-pxeboot
-License:        GPL v2 or later
+License:        GPLv2+
 Requires:       syslinux
 Summary:        OpenSuSE - KIWI Image System PXE boot structure
 Group:          System/Management
@@ -143,14 +152,15 @@ Authors:
 %endif
 
 %ifarch %ix86 x86_64
+
 %package -n kiwi-desc-isoboot
-License:        GPL v2 or later
+License:        GPLv2+
 Requires:       kiwi = %{version}
 Requires:       syslinux
 %if %{suse_version} > 1010
-Requires: genisoimage
+Requires:       genisoimage
 %else
-Requires: mkisofs
+Requires:       mkisofs
 %endif
 Summary:        OpenSuSE - KIWI Image System ISO boot
 Group:          System/Management
@@ -167,8 +177,9 @@ Authors:
 %endif
 
 %ifarch %ix86 x86_64
+
 %package -n kiwi-desc-usbboot
-License:        GPL v2 or later
+License:        GPLv2+
 Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System USB boot
 Group:          System/Management
@@ -185,8 +196,9 @@ Authors:
 %endif
 
 %ifarch %ix86 x86_64 s390 s390x
+
 %package -n kiwi-desc-vmxboot
-License:        GPL v2 or later
+License:        GPLv2+
 Requires:       kiwi = %{version}
 Requires:       multipath-tools parted
 %ifarch %ix86 x86_64
@@ -212,8 +224,9 @@ Authors:
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64
+
 %package -n kiwi-desc-netboot
-License:        GPL v2 or later
+License:        GPLv2+
 Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System PXE network boot
 Group:          System/Management
@@ -230,8 +243,9 @@ Authors:
 %endif
 
 %ifarch %ix86 x86_64 s390 s390x
+
 %package -n kiwi-desc-oemboot
-License:        GPL v2 only
+License:        GPLv2
 Requires:       kiwi = %{version}
 %if 0%{?suse_version} >= 1130
 Requires:       virt-utils
@@ -243,9 +257,9 @@ Requires:       multipath-tools parted
 Requires:       grub
 %endif
 %if %{suse_version} > 1010
-Requires: genisoimage
+Requires:       genisoimage
 %else
-Requires: mkisofs
+Requires:       mkisofs
 %endif
 Summary:        OpenSuSE - KIWI image descriptions
 Group:          System/Management
@@ -264,6 +278,7 @@ Authors:
 %endif
 
 %ifarch %ix86 x86_64 s390 s390x
+
 %package -n kiwi-templates
 License:        GPL v2.0 or later
 Requires:       kiwi-desc-vmxboot = %{version}
@@ -331,6 +346,7 @@ rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/KIWI/example.pl
 cat kiwi.loader
 
 %ifarch %ix86 x86_64
+
 %post -n kiwi-pxeboot
 #============================================================
 # create /srv/tftpboot/pxelinux.cfg/default only if not exist
@@ -375,7 +391,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/kiwi
 %{perl_vendorarch}/KIWI
 %{perl_vendorarch}/auto/KIWI
+%if 0%{?suse_version} < 1140
 /var/adm/perl-modules/kiwi
+%endif
 #=================================================
 # KIWI doc...      
 #-------------------------------------------------
@@ -409,6 +427,7 @@ rm -rf $RPM_BUILD_ROOT
 # KIWI-pxeboot files...  
 # ------------------------------------------------
 %ifarch %ix86 x86_64
+
 %files -n kiwi-pxeboot -f kiwi.loader
 %defattr(-, root, root)
 %doc /srv/tftpboot/README
@@ -423,6 +442,7 @@ rm -rf $RPM_BUILD_ROOT
 #=================================================
 # KIWI-tools files...  
 # ------------------------------------------------
+
 %files -n kiwi-tools
 %defattr(-, root, root)
 %doc %{_defaultdocdir}/kiwi/README.tools
@@ -431,6 +451,7 @@ rm -rf $RPM_BUILD_ROOT
 # KIWI-desc-* and templates...
 # ------------------------------------------------
 %ifarch %ix86 x86_64
+
 %files -n kiwi-desc-isoboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/isoboot
@@ -440,6 +461,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %ifarch %ix86 x86_64 s390 s390x
+
 %files -n kiwi-desc-vmxboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/vmxboot
@@ -448,6 +470,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %ifarch %ix86 x86_64
+
 %files -n kiwi-desc-usbboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/usbboot
@@ -456,6 +479,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64
+
 %files -n kiwi-desc-netboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/netboot
@@ -464,6 +488,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %ifarch %ix86 x86_64 s390 s390x
+
 %files -n kiwi-desc-oemboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/oemboot
@@ -472,6 +497,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %ifarch %ix86 x86_64
+
 %files -n kiwi-templates
 %defattr(-, root, root)
 %{_datadir}/kiwi/image/suse-11.4-JeOS
@@ -485,3 +511,5 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch s390 s390x
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %endif
+
+%changelog
