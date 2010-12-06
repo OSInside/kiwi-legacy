@@ -66,6 +66,8 @@ sub new {
 	my $zipped    = 0;
 	my $vga       = "0x314";
 	my $vgroup    = "kiwiVG";
+	my $haveTree  = 0;
+	my $haveSplit = 0;
 	my $vmmbyte;
 	my $kernel;
 	my $knlink;
@@ -92,10 +94,32 @@ sub new {
 		return undef;
 	}
 	#==========================================
+	# check for split system
+	#------------------------------------------
+	if (-f "$system/rootfs.tar") {
+		$kiwi -> error ("Can't use split root tree, run create first");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# find image type...
+	#------------------------------------------
+	if (! defined $main::SetImageType) {
+		if ($initrd =~ /oemboot/) {
+			$main::SetImageType = "oem";
+		}
+		if ($initrd =~ /usbboot/) {
+			$main::SetImageType = "usb";
+		}
+		if ($initrd =~ /vmxboot/) {
+			$main::SetImageType = "vmx";
+		}
+	}
+	#==========================================
 	# check system image file parameter
 	#------------------------------------------
 	if (defined $system) {
-		if (-f $system || -b $system) {
+		if ((-f $system) || (-b $system)) {
 			my %fsattr = main::checkFileSystem ($system);
 			if ($fsattr{readonly}) {
 				$syszip = main::isize ($system);
@@ -121,6 +145,12 @@ sub new {
 				return undef;
 			}
 		}
+	}
+	#==========================================
+	# check if we got the tree or image file
+	#------------------------------------------
+	if (-d $system) {
+		$haveTree = 1;
 	}
 	#==========================================
 	# compressed initrd used...
@@ -188,6 +218,7 @@ sub new {
 	$this->{loopdir}  = $loopdir;
 	$this->{lvmgroup} = $vgroup;
 	$this->{tmpdirs}  = [ $tmpdir, $loopdir ];
+	$this->{haveTree} = $haveTree;
 	$this->{kiwi}     = $kiwi;
 
 	#==========================================
@@ -253,6 +284,13 @@ sub new {
 				#------------------------------------------
 				if (! main::mount ($system,$tmpdir)) {
 					return undef;
+				}
+				#==========================================
+				# check for split type
+				#------------------------------------------
+				if (-f "$tmpdir/rootfs.tar") {
+					$main::SetImageType = "split";
+					$haveSplit = 1;
 				}
 				#==========================================
 				# read disk image XML description
@@ -416,6 +454,8 @@ sub new {
 	$this->{xml}       = $xml;
 	$this->{xendomain} = $xendomain;
 	$this->{profile}   = $profile;
+	$this->{haveSplit} = $haveSplit;
+	$this->{imgtype}   = $main::SetImageType;
 	return $this;
 }
 
@@ -578,7 +618,6 @@ sub setupInstallCD {
 	my $xml       = $this->{xml};
 	my $pinst     = $xml->getOEMPartitionInstall();
 	my $md5name   = $system;
-	my $imgtype   = "oem";
 	my $gotsys    = 1;
 	my $volid     = "-V \"KIWI CD/DVD Installation\"";
 	my $bootloader= "grub";
@@ -703,13 +742,8 @@ sub setupInstallCD {
 			$this -> cleanLoop ();
 			return undef;
 		}
-		if (-f "$tmpdir/rootfs.tar") {
-			$imgtype = "split";
-			$this->{imgtype} = $imgtype;
-		}
 		$this -> cleanLoop();
 	}
-	$this->{imgtype} = $imgtype;
 	#==========================================
 	# Build md5sum of system image
 	#------------------------------------------
@@ -959,7 +993,6 @@ sub setupInstallStick {
 	my $md5name   = $system;
 	my %deviceMap = ();
 	my @commands  = ();
-	my $imgtype   = "oem";
 	my $gotsys    = 1;
 	my $bootloader= "grub";
 	my $haveDiskDevice;
@@ -1080,13 +1113,8 @@ sub setupInstallStick {
 			$this -> cleanLoop ();
 			return undef;
 		}
-		if (-f "$tmpdir/rootfs.tar") {
-			$imgtype = "split";
-			$this->{imgtype} = $imgtype;
-		}
 		$this -> cleanLoop();
 	}
-	$this->{imgtype} = $imgtype;
 	$this->{bootpart}= 0;
 	#==========================================
 	# Build md5sum of system image
@@ -1486,13 +1514,14 @@ sub setupBootDisk {
 	my $lvm       = $this->{lvm};
 	my $profile   = $this->{profile};
 	my $xendomain = $this->{xendomain};
+	my $xml       = $this->{xml};
+	my $haveTree  = $this->{haveTree};
+	my $imgtype   = $this->{imgtype};
+	my $haveSplit = $this->{haveSplit};
 	my $diskname  = $system.".raw";
 	my %deviceMap = ();
 	my @commands  = ();
-	my $imgtype   = "vmx";
 	my $bootfix   = "VMX";
-	my $haveTree  = 0;
-	my $haveSplit = 0;
 	my $lvmbootMB = 0;
 	my $luksbootMB= 0;
 	my $syslbootMB= 0;
@@ -1512,61 +1541,12 @@ sub setupBootDisk {
 	my $result;
 	my $status;
 	my $destdir;
-	my $xml;
 	my %lvmparts;
 	#==========================================
 	# check if we got a real device
 	#------------------------------------------
 	if ($device) {
 		$haveDiskDevice = $device;
-	}
-	#==========================================
-	# check if image type is oem
-	#------------------------------------------
-	if ($initrd =~ /oemboot/) {
-		$imgtype = "oem";
-	}
-	#==========================================
-	# check if image type is usb
-	#------------------------------------------
-	if ($initrd =~ /usbboot/) {
-		$imgtype = "usb";
-	}
-	#==========================================
-	# check if system is tree or image file
-	#------------------------------------------
-	if ( -d $system ) {
-		#==========================================
-		# check image type
-		#------------------------------------------
-		if (-f "$system/rootfs.tar") {
-			$kiwi -> error ("Can't use split root tree, run create first");
-			$kiwi -> failed ();
-			return undef;
-		}
-		$xml = new KIWIXML ( $kiwi,$system."/image",$imgtype,$profile );
-		if (! defined $xml) {
-			return undef;
-		}
-		$haveTree = 1;
-	} else {
-		#==========================================
-		# build disk name and label from xml data
-		#------------------------------------------
-		if (! main::mount ($system,$tmpdir)) {
-			return undef;
-		}
-		#==========================================
-		# check image type
-		#------------------------------------------
-		if (-f "$tmpdir/rootfs.tar") {
-			$imgtype = "split";
-		}
-		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",$imgtype,$profile );
-		main::umount();
-		if (! defined $xml) {
-			return undef;
-		}
 	}
 	#==========================================
 	# load type attributes...
@@ -1700,7 +1680,6 @@ sub setupBootDisk {
 	$diskname = $xml -> getImageName();
 	$diskname = $destdir."/".$diskname.".".$arch."-".$version.".raw";
 	$splitfile= $destdir."/".$label."-read-write.".$arch."-".$version;
-	$this->{imgtype}  = $imgtype;
 	$this->{bootlabel}= $label;
 	#==========================================
 	# build bootfix for the bootloader on oem
@@ -1743,7 +1722,6 @@ sub setupBootDisk {
 		$this->{vmmbyte} = $vmsize;
 		$vmsize = $vmsize."M";
 		$this->{vmsize}  = $vmsize;
-		$haveSplit = 1;
 	}
 	#==========================================
 	# increase vmsize if single boot partition
@@ -1765,7 +1743,7 @@ sub setupBootDisk {
 		$FSTypeRW = $type{filesystem};
 		$FSTypeRO = $FSTypeRW;
 	}
-	if ($haveTree) {
+	if ($haveSplit) {
 		my %fsattr = main::checkFileSystem ($FSTypeRW);
 		if ($fsattr{readonly}) {
 			$kiwi -> error ("Can't copy data into requested RO filesystem");
