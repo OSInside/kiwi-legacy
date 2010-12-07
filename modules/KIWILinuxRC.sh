@@ -25,6 +25,7 @@ export HYBRID_PERSISTENT_FS=ext3
 export HYBRID_PERSISTENT_ID=83
 export HYBRID_PERSISTENT_DIR=/read-write
 export UTIMER_INFO=/dev/utimer
+export bootLoaderOK=0
 
 #======================================
 # Exports (General)
@@ -6424,7 +6425,9 @@ function setupBootPartition {
 	fi
 	mkdir -p /mnt/$mpoint
 	mount $imageBootDevice /mnt/$mpoint
-	rm -fr /mnt/$mpoint/*
+	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+		rm -fr /mnt/$mpoint/*
+	fi
 	cp -a /mnt/boot /mnt/$mpoint
 	if [ -e /boot.tgz ];then
 		tar -xf /boot.tgz -C /mnt/$mpoint
