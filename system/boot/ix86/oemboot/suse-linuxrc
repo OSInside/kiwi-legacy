@@ -365,6 +365,10 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 					systemException "Failed to store $i" "reboot"
 				fi
 			done
+			if ! cp -a etc/zypp etc/zypp.backup;then
+				rm -rf etc/zypp.backup; cd / ; umountSystem
+				systemException "Failed to backup zypp database" "reboot"
+			fi
 			if ! cp -a var/lib/rpm var/lib/rpm.backup;then
 				rm -rf var/lib/rpm.backup; cd / ; umountSystem
 				systemException "Failed to backup RPM database" "reboot"
@@ -468,6 +472,9 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 				systemException "Failed to restore $i" "reboot"
 			fi
 		done
+		if [ -e /mnt/etc/zypp.backup ];then
+			rm -rf /mnt/etc/zypp &&	mv /mnt/etc/zypp.backup /mnt/etc/zypp
+		fi
 	fi
 	#======================================
 	# 16.5) restore boot files 1
