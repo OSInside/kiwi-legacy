@@ -174,16 +174,11 @@ sub new {
 	#==========================================
 	# Read and create profile hash
 	#------------------------------------------
-	my $profileHash = $this -> __populateProfiles();
+	$this->{profileHash} = $this -> __populateProfiles();
 	#==========================================
 	# Read and create type hash
 	#------------------------------------------
-	my $typeList = $this -> __populateTypeInfo();
-	#==========================================
-	# Store object data
-	#------------------------------------------
-	$this->{profileHash} = $profileHash;
-	$this->{typeList}    = $typeList;
+	$this->{typeList} = $this -> __populateTypeInfo();
 	#==========================================
 	# Update XML data from changeset if exists
 	#------------------------------------------
@@ -239,6 +234,20 @@ sub new {
 	#------------------------------------------
 	$this -> createURLList ();
 	return $this;
+}
+
+#==========================================
+# updateTypeList
+#------------------------------------------
+sub updateTypeList {
+	# ...
+	# if the XML tree has changed because of a function
+	# changing the typenode, it's required to update the
+	# internal typeInfo hash too
+	# ---
+	my $this = shift;
+	$this->{typeList} = $this -> __populateTypeInfo();
+	$this -> __populateProfiledTypeInfo();
 }
 
 #==========================================
@@ -911,6 +920,7 @@ sub setImageType {
 		$tnode-> setAttribute ("image","$val");
 	}
 	$this->{imageType} = $val;
+	$this -> updateTypeList();
 	$this -> updateXML();
 	return $this;
 }
@@ -4275,6 +4285,7 @@ sub __setOEMOptionsElement {
 		$this->{typeNode} -> appendChild ($opts);
 	}
 	$kiwi -> done ();
+	$this -> updateTypeList();
 	$this -> updateXML();
 	return $this;
 }
@@ -4322,6 +4333,7 @@ sub __setSystemDiskElement {
 		$this->{typeNode} -> appendChild ($disk);
 	}
 	$kiwi -> done ();
+	$this -> updateTypeList();
 	$this -> updateXML();
 	return $this;
 }
@@ -4362,6 +4374,7 @@ sub __setMachineAttribute {
 		$this->{typeNode} -> appendChild ($opts);
 	}
 	$kiwi -> done ();
+	$this -> updateTypeList();
 	$this -> updateXML();
 	return $this;
 }
@@ -4387,6 +4400,7 @@ sub __setTypeAttribute {
 		$tnode-> setAttribute ("$attr","true");
 	}
 	$kiwi -> done ();
+	$this -> updateTypeList();
 	$this -> updateXML();
 	return $this;
 }
