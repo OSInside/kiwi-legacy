@@ -7,10 +7,9 @@
 		<specification>SUSE Linux Enterprise 11 JeOS</specification>
 	</description>
 	<profiles>
-		<profile name="xenFlavour" description="VMX with Xen kernel"/>
 		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
-		<profile name="x86" description="x86 architecture" import="true"/>
-		<profile name="s390" description="s390 architecture"/>
+		<profile name="xenFlavour" description="VMX with Xen kernel"/>
+		<profile name="vmxFlavour-s390" description="VMX for s390 with default kernel"/>
 	</profiles>
 	<preferences>
 		<version>1.1.0</version>
@@ -36,7 +35,7 @@
 			<machine domain="dom0"/>
 		</type>
 	</preferences>
-	<preferences profiles="vmxFlavour">
+	<preferences profiles="vmxFlavour,vmxFlavour-s390">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" format="vmdk">
 			<machine memory="512" guestOS="suse" HWversion="4">
 				<vmdisk controller="scsi" id="0"/>
@@ -111,12 +110,12 @@
 		<package name="release-notes-sles"/>
 		<package name="glib2-branding-SLES"/>
 	</packages>
-	<packages type="image" profiles="x86">
+	<packages type="image" profiles="vmxFlavour">
 		<package name="grub"/>
 		<package name="bootsplash-branding-SLES" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
 	</packages>
-	<packages type="image" profiles="s390">
+	<packages type="image" profiles="vmxFlavour-s390">
 		<package name="zipl"/>
 	</packages>
 	<packages type="image" profiles="xenFlavour">
@@ -125,7 +124,7 @@
 		<package name="xen-tools-domU" replaces=""/>
 		<package name="xen" replaces=""/>
 	</packages>
-	<packages type="image" profiles="vmxFlavour">
+	<packages type="image" profiles="vmxFlavour,vmxFlavour-s390">
 		<package name="kernel-default" replaces="kernel-xen"/>
 		<package name="kernel-default-base" replaces="kernel-xen-base"/>
 		<package name="kernel-default-base" replaces="xen-tools-domU"/>
