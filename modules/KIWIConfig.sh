@@ -680,16 +680,20 @@ function baseSetupInPlaceGITRepository {
 		return
 	fi
 	pushd /
-	echo /proc > .gitignore
+	rm -rf .git
+	cat > .gitignore < /dev/null
 	local files="
-		/sys /dev /var/log /home /media /var/run /etc/Image*
-		/var/tmp /tmp /var/lock *.lock /image /var/spool /var/cache
-		/var/lib /boot /root /var/adm /base-system
+		/bin/ /boot/ /dev/ /image/ /lib/ /lib64/ /lost+found/ /media/ /mnt/
+		/opt/ /proc/ /sbin/ /sys/ /tmp/ /var/ /usr/ *.lock /etc/Image*
+		/base-system/ /.broken /.buildenv .bash_history /.kconfig /.profile
+		/etc/mtab
 	"
+	set -o noglob on
 	for entry in $files;do
 		echo $entry >> .gitignore
 	done
-	git init && git add . && \
+	set -o noglob off
+	git init && git add -A && \
 	git commit -m "deployed"
 	popd
 }
