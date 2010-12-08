@@ -42,6 +42,7 @@ use KIWIOverlay;
 use KIWIQX;
 use KIWITest;
 use KIWIImageFormat;
+use KIWIXMLValidator;
 
 #============================================
 # Globals (Version)
@@ -141,6 +142,7 @@ $KnownFS{cpio}{ro}        = 0;
 our $Build;                 # run prepare and create in one step
 our $Prepare;               # control XML file for building chroot extend
 our $Create;                # image description for building image extend
+our $CheckConfig;           # Configuration file to check
 our $InitCache;             # create image cache(s) from given description
 our $CreateInstSource;      # create installation source from meta packages
 our $Upgrade;               # upgrade physical extend
@@ -1337,7 +1339,8 @@ sub init {
 		"grub-chainload"        => \$GrubChainload,
 		"format|f=s"            => \$Format,
 		"convert=s"             => \$Convert,
-        "yes|y"                 => \$defaultAnswer,
+		"check-config=s"        => \$CheckConfig,
+		"yes|y"                 => \$defaultAnswer,
 		"debug"                 => \$Debug,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
@@ -1403,6 +1406,12 @@ sub init {
 		$FSInodeSize = 256;
 	}
 	#==========================================
+	# non root task: Check XML configuration
+	#------------------------------------------
+	if (defined $CheckConfig) {
+		checkConfig();
+	}
+	#==========================================
 	# non root task: Create crypted password
 	#------------------------------------------
 	if (defined $CreatePassword) {
@@ -1458,6 +1467,7 @@ sub init {
 		(! defined $BootUSB)            &&
 		(! defined $Clone)              &&
 		(! defined $RunTestSuite)       &&
+		(! defined $CheckConfig)        &&
 		(! defined $Convert)
 	) {
 		$kiwi -> error ("No operation specified");
@@ -1552,6 +1562,8 @@ sub usage {
 
 	print "Usage:\n";
 	print "    kiwi -l | --list\n";
+	print "Configuration check:\n";
+	print "    kiwi --check-config <path-to-xml-file-to-check>\n";
 	print "Image Cloning:\n";
 	print "    kiwi -o | --clone <image-path> -d <destination>\n";
 	print "Image Creation in one step:\n";
@@ -1761,6 +1773,35 @@ sub listImage {
 			$kiwi -> done();
 		}
 	}
+	exit 0;
+}
+
+#==========================================
+# checkConfig
+#------------------------------------------
+sub checkConfig {
+	# ...
+	# Check the specified configuration file
+	# ---
+	my $kiwi = new KIWILog("tiny");
+	if (! -f $CheckConfig) {
+		$kiwi -> error (
+			"Could not access specified file to check: $CheckConfig"
+		);
+		$kiwi -> failed ();
+		exit 1;
+	}
+	my $validator = new KIWIXMLValidator (
+		$kiwi,$CheckConfig,$Revision,$Schema,$SchemaCVT
+	);
+	my $isValid = $validator -> validate();
+	if (! defined $isValid) {
+		$kiwi -> error ('Validation failed');
+		$kiwi -> failed ();
+		exit 1;
+	}
+	$kiwi -> info ('Validation passed');
+	$kiwi -> done ();
 	exit 0;
 }
 
