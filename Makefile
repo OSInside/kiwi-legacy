@@ -159,10 +159,9 @@ modules/KIWISchema.rng: modules/KIWISchema.rnc
 	for i in `find -name config.xml` modules/KIWICache.kiwi;do \
 		test -f xsl/master.xsl && \
 			xsltproc -o $$i.new xsl/master.xsl $$i && mv $$i.new $$i;\
-		echo $$i; j=`jing modules/KIWISchema.rng $$i`;if test ! -z "$$j";then\
-			echo $$j; break;\
-		fi;\
-	done; test -z "$$j" || false
+		echo $$i;\
+		./kiwi.pl --check-config $$i || break;\
+	done
 
 modules/KIWISchemaTest.rng: modules/KIWISchemaTest.rnc
 	#============================================
