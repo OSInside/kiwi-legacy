@@ -797,7 +797,7 @@ sub main {
 				last SWITCH;
 			};
 			/^usb/      && do {
-				$ok = $image -> createImageUSB ( $para );
+				$ok = $image -> createImageRootAndBoot ( $para );
 				last SWITCH;
 			};
 			/^vmx/      && do {
