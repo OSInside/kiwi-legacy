@@ -891,26 +891,6 @@ sub getPXEDeployInitrd {
 }
 
 #==========================================
-# setImageType
-#------------------------------------------
-sub setImageType {
-	# ...
-	# set 'image' attribute of the selected type
-	# ---
-	my $this = shift;
-	my $val  = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	if ($tnode) {
-		$tnode-> setAttribute ("image","$val");
-	}
-	$this->{imageType} = $val;
-	$this -> updateTypeList();
-	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
 # setPackageManager
 #------------------------------------------
 sub setPackageManager {
