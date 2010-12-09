@@ -3719,7 +3719,10 @@ function includeKernelParameters {
 		export ELOG_EXCEPTION=$kiwistderr
 	fi
 	if [ ! -z "$ramdisk_size" ];then
-		local modfile=/etc/modprobe.conf.local
+		local modfile=/etc/modprobe.d/99-local.conf
+		if [ ! -f $modfile ];then
+			modfile=/etc/modprobe.conf.local
+		fi
 		if [ -f $modfile ];then
 			sed -i -e s"@rd_size=.*@rd_size=$ramdisk_size@" $modfile
 		fi
