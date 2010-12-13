@@ -363,7 +363,9 @@ sub init {
 		qxx ("mkdir -p $root/var/lib/dpkg/updates");
 		qxx ("touch $root/var/lib/dpkg/available");
 		# for building in suse autobuild we need the following file
-		qxx ("touch $root/.buildenv");
+		if (-f '/.buildenv') {
+			qxx ("touch $root/.buildenv");
+		}
 		# need mtab at least empty for mount calls
 		qxx ("touch $root/etc/mtab");
 		qxx ("touch $root/etc/sysconfig/bootloader");
@@ -971,7 +973,7 @@ sub setup {
 	if (-e "$imageDesc/config.sh") {
 		$kiwi -> info ("Calling image script: config.sh");
 		qxx (" cp $imageDesc/config.sh $root/tmp ");
-                qxx (" chmod u+x $root/tmp/config.sh ");
+				qxx (" chmod u+x $root/tmp/config.sh ");
 		my $data = qxx (" chroot $root /tmp/config.sh 2>&1 ");
 		my $code = $? >> 8;
 		if ($code != 0) {
