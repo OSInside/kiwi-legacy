@@ -2221,14 +2221,20 @@ sub getImageConfig {
 		}
 		if ((defined $oemswap) && ("$oemswap" eq "true")) {
 			$result{kiwi_oemswap} = $oemswap;
-			if ((defined $oemswapMB) && (int($oemswapMB) > 0)) {
+			if ((defined $oemswapMB) && 
+				("$oemswapMB" ne "")   && 
+				(int($oemswapMB) > 0)
+			) {
 				$result{kiwi_oemswapMB} = $oemswapMB;
 			}
 		}
 		if ((defined $oemalign) && ("$oemalign" eq "true")) {
 			$result{kiwi_oemalign} = $oemalign;
 		}
-		if ((defined $oemrootMB) && ((int "$oemrootMB") > 0)) {
+		if ((defined $oemrootMB) && 
+			("$oemrootMB" ne "")   && 
+			(int($oemrootMB) > 0)
+		) {
 			$result{kiwi_oemrootMB} = $oemrootMB;
 		}
 		if ((defined $oemtitle) && ("$oemtitle" ne "")) {
