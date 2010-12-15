@@ -184,6 +184,7 @@ sub updateDescription {
 	my $src_xml   = shift;
 	my %src_type  = %{$src_xml->getImageTypeAndAttributes()};
 	my %changeset = ();
+	my @profiles;
 	#==========================================
 	# Store general data
 	#------------------------------------------
@@ -210,6 +211,10 @@ sub updateDescription {
 	}
 	if ($src_type{bootkernel}) {
 		$changeset{"bootkernel"} = $src_type{bootkernel};
+	}
+	if ($src_xml->{reqProfiles}) {
+		push @profiles,@{$src_xml->{reqProfiles}};
+		$changeset{"profiles"} = \@profiles;
 	}
 	$changeset{"xmlobj"}         = $src_xml;
 	$changeset{"xmlnode"}        = $src_xml->getNodeList();

@@ -3988,11 +3988,19 @@ sub __updateDescriptionFromChangeSet {
 	my $kiwi      = $this->{kiwi};
 	my $repositNodeList = $this->{repositNodeList};
 	my $packageNodeList = $this->{packageNodeList};
+	my $reqProfiles;
 	#==========================================
 	# check changeset...
 	#------------------------------------------
 	if (! defined $changeset) {
 		return undef;
+	}
+	#==========================================
+	# check profiles in changeset...
+	#------------------------------------------
+	if ($changeset->{profiles}) {
+		$reqProfiles = $this->{reqProfiles};
+		$this->{reqProfiles} = $changeset->{profiles};
 	}
 	#==========================================
 	# 1) merge/update repositories
@@ -4026,7 +4034,7 @@ sub __updateDescriptionFromChangeSet {
 		my @fplistDelete;
 		foreach my $element (@node) {
 			my $type = $element  -> getAttribute ("type");
-			if (! $changeset -> {xmlobj} -> __requestedProfile ($element)) {
+			if (! $this -> __requestedProfile ($element)) {
 				next;
 			}
 			if (($type eq "image") || ($type eq "bootstrap")) {
@@ -4191,6 +4199,10 @@ sub __updateDescriptionFromChangeSet {
 			"displayname",$changeset->{"displayname"}
 		);
 	}
+	#==========================================
+	# 7) cleanup reqProfiles
+	#------------------------------------------
+	$this->{reqProfiles} = $reqProfiles;
 }
 
 #==========================================
