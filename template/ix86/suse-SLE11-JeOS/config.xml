@@ -110,7 +110,7 @@
 		<package name="release-notes-sles"/>
 		<package name="glib2-branding-SLES"/>
 	</packages>
-	<packages type="image" profiles="vmxFlavour">
+	<packages type="image" profiles="vmxFlavour,xenFlavour">
 		<package name="grub"/>
 		<package name="bootsplash-branding-SLES" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
