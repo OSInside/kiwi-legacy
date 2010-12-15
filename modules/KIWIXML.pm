@@ -933,7 +933,8 @@ sub getPackageManager {
 		if ("$pmgr" eq "$manager") {
 			my $file = $packageManager{$manager};
 			if (! -f $file) {
-				$kiwi -> loginfo ("Package manager $file doesn't exist");
+				$kiwi -> info ("Package manager $file doesn't exist");
+				$kiwi -> skipped ();
 				return undef;
 			}
 			return $manager;
@@ -2993,11 +2994,16 @@ sub getInstSourceDUDPackList {
 # getInstallSize
 #------------------------------------------
 sub getInstallSize {
-	my $this  = shift;
-	my $kiwi  = $this->{kiwi};
-	my $nodes = $this->{packageNodeList};
-	my @result= ();
-	my @delete= ();
+	my $this    = shift;
+	my $kiwi    = $this->{kiwi};
+	my $nodes   = $this->{packageNodeList};
+	my $manager = $this->getPackageManager();
+	my @result  = ();
+	my @delete  = ();
+	my %meta    = ();
+	my $solf    = undef;
+	my @solp    = ();
+	my @rpat    = ();
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		my $type = $node -> getAttribute ("type");
@@ -3059,21 +3065,38 @@ sub getInstallSize {
 	#==========================================
 	# Run the solver...
 	#------------------------------------------
-	my $psolve = new KIWISatSolver (
-		$kiwi,\@result,$this->{urllist},"solve-patterns",
-		undef,undef
-	);
-	if (! defined $psolve) {
-		$kiwi -> warning ("SaT solver setup failed");
-		return undef;
+	if (($manager) && ($manager eq "ensconce")) {
+		my $list = qxx ("ensconce -d");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error (
+				"Error retrieving package metadata from ensconce."
+			);
+			return undef;
+		}
+		%meta = eval($list);
+		@solp = keys(%meta);
+		# Ensconce reports package sizes in bytes, fix that
+		foreach my $pkg (keys(%meta)) {
+			$meta{$pkg} =~ s#^(\d+)#int($1/1024)#e;
+		}
+	} else {
+		my $psolve = new KIWISatSolver (
+			$kiwi,\@result,$this->{urllist},"solve-patterns",
+			undef,undef
+		);
+		if (! defined $psolve) {
+			$kiwi -> warning ("SaT solver setup failed");
+			return undef;
+		}
+		%meta = $psolve -> getMetaData();
+		$solf = $psolve -> getSolfile();
+		@solp = $psolve -> getPackages();
+		@rpat = qxx (
+			"dumpsolv $solf|grep 'solvable:name: pattern:'|cut -f4 -d :"
+		);
+		chomp @rpat;
 	}
-	my %meta = $psolve -> getMetaData();
-	my $solf = $psolve -> getSolfile();
-	my @solp = $psolve -> getPackages();
-	my @rpat = qxx (
-		"dumpsolv $solf|grep 'solvable:name: pattern:'|cut -f4 -d :"
-	);
-	chomp @rpat;
 	return (\%meta,\@delete,$solf,\@result,\@solp,\@rpat);
 }
 
