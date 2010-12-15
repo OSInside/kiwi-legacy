@@ -149,7 +149,7 @@ sub new {
 	];
 	$this->{ensconce}    = [
 		$packageManager{ensconce},
-		"-r /"
+		"-r $root"
 	];
 	$this->{yum}         = [
 		$packageManager{yum},
@@ -1162,7 +1162,7 @@ sub installPackages {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "$main::Prepare/ensconce &\n";
+		print $fd "@ensconce &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
 		print $fd "echo \$ECODE > $screenCall.exit\n";
@@ -1307,7 +1307,7 @@ sub removePackages {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "$main::Prepare/ensconce &\n";
+		print $fd "@ensconce &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
 		print $fd "echo \$ECODE > $screenCall.exit\n";
@@ -2017,7 +2017,7 @@ sub setupRootSystem {
 			#==========================================
 			# Ensconce options
 			#------------------------------------------
-			$ensconce_args = "bootstrap";
+			$ensconce_args = "-b";
 		}
 		if (! $chroot) {
 			$kiwi -> info ("Initializing image system on: $root...");
@@ -2031,7 +2031,7 @@ sub setupRootSystem {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "$main::Prepare/ensconce $ensconce_args &\n";
+		print $fd "@ensconce $ensconce_args &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
 		print $fd "echo \$ECODE > $screenCall.exit\n";
