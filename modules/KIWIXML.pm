@@ -1790,7 +1790,12 @@ sub ignoreRepositories {
 	# Ignore all the repositories in the XML file.
 	# ---
 	my $this = shift;
-	$this->{repositNodeList} = new XML::LibXML::NodeList;
+	my @node = $this->{repositNodeList} -> get_nodelist();
+	foreach my $element (@node) {
+		$this->{imgnameNodeList}->get_node(1)->removeChild ($element);
+	}
+	$this->{repositNodeList} = 
+		$this->{systemTree}->getElementsByTagName ("repository");
 	$this-> updateXML();
 	return $this;
 }
@@ -1861,25 +1866,22 @@ sub addRepository {
 			$kiwi -> skipped ();
 			next;
 		}
-		my $tempXML  = new XML::LibXML;
-		my $xaddXML  = new XML::LibXML::NodeList;
-		my $tempFile = $this->{controlFile};
-		my $tempTree = $tempXML -> parse_file ( $tempFile );
-		my $temprepositNodeList = $tempTree->getElementsByTagName("repository");
-		my $element = $temprepositNodeList->get_node(1);
-		$element -> setAttribute ("type",$type);
-		$element -> setAttribute ("status","fixed");
-		$element -> getElementsByTagName ("source") -> get_node (1)
-			 -> setAttribute ("path",$path);
+		my $addrepo = new XML::LibXML::Element ("repository");
+		$addrepo -> setAttribute ("type",$type);
+		$addrepo -> setAttribute ("status","fixed");
+		my $addsrc  = new XML::LibXML::Element ("source");
+		$addsrc -> setAttribute ("path",$path);
 		if (defined $alias) {
-			$element -> setAttribute ("alias",$alias);
+			$addsrc -> setAttribute ("alias",$alias);
 		}
 		if ((defined $prio) && ($prio != 0)) {
-			$element -> setAttribute ("priority",$prio);
+			$addsrc -> setAttribute ("priority",$prio);
 		}
-		$xaddXML -> push ( $element );
-		$this->{repositNodeList} -> append ( $xaddXML );
+		$addrepo -> appendChild ($addsrc);
+		$this->{imgnameNodeList}->get_node(1)->appendChild ($addrepo);
 	}
+	$this->{repositNodeList} =
+		$this->{systemTree}->getElementsByTagName ("repository");
 	$this -> createURLList();
 	$this -> updateXML();
 	return $this;
