@@ -1559,4 +1559,35 @@ function baseDisableCtrlAltDel {
 	sed -i "s/ca::ctrlaltdel/#ca::ctrlaltdel/" /etc/inittab
 }
 
+#======================================
+# basePackBootIncludes
+#--------------------------------------
+function basePackBootIncludes {
+	# /.../
+	# This function packs the rpm files for the packages
+	# listed in $kiwi_fixedpackbootincludes and the file list
+	# in bootincluded_archives.filelist into a tarball
+	# ----
+	local archive=/bootinclude.tgz
+	if [ -f /bootincluded_archives.filelist ];then
+		echo "Packing bootincluded archives..."
+		cat /bootincluded_archives.filelist | xargs tar -C / -rvf $archive
+	fi
+	if [ ! -z "$kiwi_fixedpackbootincludes" ];then
+		echo "Packing bootincluded packages..."
+		rpm -ql $kiwi_fixedpackbootincludes | xargs tar -C / -rvf $archive
+	fi
+}
+
+#======================================
+# baseUnpackBootIncludes
+#--------------------------------------
+function baseUnpackBootIncludes {
+	local archive=/bootinclude.tgz
+	if [ -f $archive ];then
+		echo "Unpacking bootinclude archive..."
+		tar -C / -xvf $archive && rm -f $archive
+	fi
+}
+
 # vim: set noexpandtab:

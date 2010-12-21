@@ -1898,6 +1898,7 @@ sub addPackages {
 	# ----
 	my $this  = shift;
 	my $ptype = shift;
+	my $bincl = shift;
 	my $nodes = shift;
 	my @packs = @_;
 	if (! defined $nodes) {
@@ -1918,6 +1919,9 @@ sub addPackages {
 		next if ($pack eq "");
 		my $addElement = new XML::LibXML::Element ("package");
 		$addElement -> setAttribute("name",$pack);
+		if (($bincl) && ($bincl->{$pack} == 1)) {
+			$addElement -> setAttribute("bootinclude","true");
+		}
 		$nodes -> get_node($nodeNumber)
 			-> appendChild ($addElement);
 	}
@@ -1972,6 +1976,7 @@ sub addArchives {
 	# ----
 	my $this  = shift;
 	my $ptype = shift;
+	my $bincl = shift;
 	my $nodes = shift;
 	my @tars  = @_;
 	if (! defined $nodes) {
@@ -1991,6 +1996,9 @@ sub addArchives {
 	foreach my $tar (@tars) {
 		my $addElement = new XML::LibXML::Element ("archive");
 		$addElement -> setAttribute("name",$tar);
+		if ($bincl) {
+			$addElement -> setAttribute("bootinclude","true");
+		}
 		$nodes -> get_node($nodeNumber)
 			-> appendChild ($addElement);
 	}
@@ -2007,7 +2015,7 @@ sub addImagePackages {
 	# section of the xml description parse tree.
 	# ----
 	my $this  = shift;
-	return $this -> addPackages ("bootstrap",undef,@_);
+	return $this -> addPackages ("bootstrap",undef,undef,@_);
 }
 
 #==========================================
@@ -2031,7 +2039,38 @@ sub addRemovePackages {
 	# section of the xml description parse tree.
 	# ----
 	my $this  = shift;
-	return $this -> addPackages ("delete",undef,@_);
+	return $this -> addPackages ("delete",undef,undef,@_);
+}
+
+#==========================================
+# getBootIncludes
+#------------------------------------------
+sub getBootIncludes {
+	# ...
+	# Collect all items marked as bootinclude="true"
+	# and return them in a list of names
+	# ----
+	my $this = shift;
+	my @node = $this->{packageNodeList} -> get_nodelist();
+	my @result = ();
+	my @plist  = ();
+	foreach my $element (@node) {
+		my $type = $element -> getAttribute ("type");
+		if (! $this -> __requestedProfile ($element)) {
+			next;
+		}
+		if (($type eq "image") || ($type eq "bootstrap")) {
+			push (@plist,$element->getElementsByTagName ("package"));
+		}
+	}
+	foreach my $element (@plist) {
+		my $itemname= $element -> getAttribute ("name");
+		my $bootinc = $element -> getAttribute ("bootinclude");
+		if ((defined $bootinc) && ("$bootinc" eq "true")) {
+			push (@result,$itemname);
+		}
+	}
+	return @result;
 }
 
 #==========================================
@@ -2055,6 +2094,13 @@ sub getImageConfig {
 		$rev =~ s/\n//g;
 	}
 	$result{kiwi_revision} = $rev;
+	#==========================================
+	# bootincluded items (packs,archives)
+	#------------------------------------------
+	my @bincl = $this -> getBootIncludes();
+	if (@bincl) {
+		$result{kiwi_fixedpackbootincludes} = join(" ",@bincl);
+	}
 	#==========================================
 	# preferences attributes and text elements
 	#------------------------------------------
@@ -4055,6 +4101,7 @@ sub __updateDescriptionFromChangeSet {
 		my @falistImage;
 		my @fplistImage;
 		my @fplistDelete;
+		my %fixedBootInclude;
 		foreach my $element (@node) {
 			my $type = $element  -> getAttribute ("type");
 			if (! $this -> __requestedProfile ($element)) {
@@ -4069,12 +4116,16 @@ sub __updateDescriptionFromChangeSet {
 			my $package = $element -> getAttribute ("name");
 			my $bootinc = $element -> getAttribute ("bootinclude");
 			my $bootdel = $element -> getAttribute ("bootdelete");
+			my $include = 0;
 			if ((defined $bootinc) && ("$bootinc" eq "true")) {
 				push (@fplistImage,$package);
+				$include++;
 			}
 			if ((defined $bootdel) && ("$bootdel" eq "true")) {
 				push (@fplistDelete,$package);
+				$include--;
 			}
+			$fixedBootInclude{$package} = $include;
 		}
 		foreach my $element (@alist) {
 			my $archive = $element -> getAttribute ("name");
@@ -4089,11 +4140,11 @@ sub __updateDescriptionFromChangeSet {
 				$kiwi -> info ("--> $p\n");
 			}
 			$this -> addPackages (
-				"bootstrap",$packageNodeList,@fplistImage
+				"bootstrap",\%fixedBootInclude,$packageNodeList,@fplistImage
 			);
 			if (@fplistDelete) {
 				$this -> addPackages (
-					"delete",$packageNodeList,@fplistDelete
+					"delete",undef,$packageNodeList,@fplistDelete
 				);
 			}
 		}
@@ -4103,7 +4154,7 @@ sub __updateDescriptionFromChangeSet {
 				$kiwi -> info ("--> $p\n");
 			}
 			$this -> addArchives (
-				"bootstrap",$packageNodeList,@falistImage
+				"bootstrap","bootinclude",$packageNodeList,@falistImage
 			);
 		}
 	}

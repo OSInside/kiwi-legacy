@@ -1676,6 +1676,7 @@ sub setupArchives {
 	print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 	print $fd "trap clean INT TERM\n";
 	print $fd "for i in @tars;do\n";
+	print $fd "   tar -tf $idesc/\$i >> $root/bootincluded_archives.filelist\n";
 	print $fd "   if ! tar -C $root -xvf $idesc/\$i;then\n";
 	print $fd "       ECODE=\$?\n";
 	print $fd "       echo \$ECODE > $screenCall.exit\n";
