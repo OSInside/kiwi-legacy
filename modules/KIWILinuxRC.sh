@@ -5631,14 +5631,33 @@ function callPartitioner {
 	local input=$1
 	if [ $PARTITIONER = "sfdisk" ];then
 		Echo "Repartition the disk according to real geometry [ fdisk ]"
-		if [ ! -z "$OEM_ALIGN" ];then
-			local pstart=$(checkFDiskFirstSector $imageDiskDevice)
-		fi
+		local pstart=$(checkFDiskFirstSector $imageDiskDevice)
 		echo "w" >> $input
 		echo "q" >> $input
 		fdisk $imageDiskDevice < $input 1>&2
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
+		fi
+		local pstopp_new=$(checkFDiskEndSector   $imageDiskDevice)
+		local pstart_new=$(checkFDiskFirstSector $imageDiskDevice)
+		if [ $pstart_new -ne $pstart ];then
+			local fixpart=/part.input-fixupStartSector
+			local numpdevs=$(fdisk -ul $imageDiskDevice | grep '^/dev/' | wc -l)
+			echo "d"          > $fixpart
+			if [ $numpdevs -gt 1 ];then
+				echo "1"     >> $fixpart
+			fi
+			echo "n"         >> $fixpart
+			echo "p"         >> $fixpart
+			echo "1"         >> $fixpart
+			echo $pstart     >> $fixpart
+			echo $pstopp_new >> $fixpart
+			echo "w"         >> $fixpart
+			echo "q"         >> $fixpart
+			fdisk -u $imageDiskDevice < $fixpart 1>&2
+			if test $? != 0; then
+				systemException "Failed to fix partition table" "reboot"
+			fi
 		fi
 		if [ ! -z "$OEM_ALIGN" ];then
 			fixupFDiskSectors $input $pstart
@@ -5724,11 +5743,25 @@ function createFDasdInput {
 #--------------------------------------
 function checkFDiskFirstSector {
 	# /.../
-	# check original alignment using fdisk
+	# check number of start sector for first partition
 	# ----
 	local dev=$1
-	fdisk -ul ${dev} | grep '^'${dev}1 | \
-		sed -e's@'${dev}1'[ \*]*\([0-9]\+\) .*$@\1@'
+	local p1=$(ddn $dev 1)
+	fdisk -ul ${dev} | grep '^'$p1 | \
+		sed -e's@'$p1'[ \*]*\([0-9]\+\) .*$@\1@'
+}
+
+#======================================
+# checkFDiskEndSector
+#--------------------------------------
+function checkFDiskEndSector {
+	# /.../
+	# check number of end sector for first partition
+	# ----
+	local dev=$1
+	local p1=$(ddn $dev 1)
+	fdisk -ul ${dev} | grep '^'$p1 | \
+		sed -e's@'$p1'[ \*]*\([0-9]\+\)[ \*]*\([0-9]\+\) .*$@\2@'
 }
 #======================================
 # fixupFDiskSectors
