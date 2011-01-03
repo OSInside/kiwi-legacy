@@ -223,7 +223,7 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64
+%ifarch %ix86 x86_64
 
 %package -n kiwi-desc-netboot
 License:        GPLv2+
@@ -478,7 +478,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/usbboot/suse*
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64
+%ifarch %ix86 x86_64
 
 %files -n kiwi-desc-netboot
 %defattr(-, root, root)
