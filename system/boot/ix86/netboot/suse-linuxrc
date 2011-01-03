@@ -21,6 +21,7 @@
 #--------------------------------------
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 export IFS_ORIG=$IFS
+export input=/part.input
 export ARCH=`arch`
 export DEBUG=0
 
@@ -43,6 +44,8 @@ export NAME=0
 #--------------------------------------
 export SYSTEM_INTEGRITY
 export SYSTEM_MD5STATUS
+export systemIntegrity="unknown"
+export haveDisk=0
 
 #======================================
 # Exports (clicfs usage)
@@ -57,69 +60,10 @@ export kiwi_hybridpersistent=yes
 initialize
 
 #======================================
-# setupSystemAliasName
-#--------------------------------------
-function setupSystemAliasName {
-	# /.../
-	# Ask for an alias name if NAME from config.<MAC> 
-	# contains a number. If the number is -1 the system will
-	# ask for ever for this name otherwhise the number sets
-	# a timeout how long to wait for input of this data
-	# ----
-	if test $NAME -ne 0;then
-		if test $NAME -eq -1;then
-			Echo -n "Enter Alias Name for this system: " && \
-			read SYSALIAS
-		else
-			Echo -n "Enter Alias Name [timeout in $NAME sec]: " && \
-			read -t $NAME SYSALIAS
-		fi
-	fi
-}
-
-#======================================
-# setupSystemHWInfoFile
-#--------------------------------------
-function setupSystemHWInfoFile {
-	# /.../
-	# calls hwinfo and stores the information into a file
-	# suffixed by the hardware address of the network card
-	# ----
-	hwinfo --all --log=hwinfo.$DHCPCHADDR >/dev/null
-}
-
-#======================================
-# setupSystemHWTypeFile
-#--------------------------------------
-function setupSystemHWTypeFile {
-	# /.../
-	# collects information about the alias name the
-	# architecture the BIOS version and more and stores
-	# that into a file suffixed by the hardware address of the
-	# network card. The information is uploaded to the pxe
-	# boot server and used to create a machine config.<MAC> 
-	# from the ldap directory
-	# ----
-	echo "NCNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
-	echo "CRNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
-	echo "IPADDR=$IPADDR"     >> hwtype.$DHCPCHADDR
-	echo "ARCHITECTURE=$ARCH" >> hwtype.$DHCPCHADDR
-	#========================================
-	# Try to get BIOS data if tools are there
-	#----------------------------------------
-	if [ -f /sbin/posbios ];then
-		HWBIOS=`/sbin/posbios -b`
-		echo "HWBIOS=$HWBIOS" >> hwtype.$DHCPCHADDR
-		HWTYPE=`/sbin/posbios -ms`
-		echo "HWTYPE=$HWTYPE" >> hwtype.$DHCPCHADDR
-	fi
-}
-
-#======================================
 # Beautify Startup
 #--------------------------------------
-echo "Loading KIWI Boot-System..."
-echo "---------------------------"
+echo "Loading KIWI PXE Boot-System..."
+echo "-------------------------------"
 
 #======================================
 # Update library path
@@ -166,26 +110,10 @@ errorLogStart
 openKernelConsole
 
 #======================================
-# 6) Obtain/load network module
+# 6) probe/load network module
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
-	loaded=0
-	probeNetworkCard
-	IFS=":"
-	for i in $networkModule;do
-		if [ ! -z $i ];then
-			modprobe $i 2>/dev/null
-			if test $? = 0;then
-				loaded=1
-			fi
-		fi
-	done
-	IFS=$IFS_ORIG
-	if test $loaded = 0;then
-		systemException \
-			"Network module: Failed to load network module !" \
-		"reboot"
-	fi
+	loadNetworkCard
 fi
 
 #======================================
@@ -201,27 +129,7 @@ runHook postnetwork
 # 8) get TFTP Server IP/name
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
-	checkServer
-	if [ -z $SERVER ];then
-		SERVER=tftp.$DOMAIN
-	fi
-	Echo "Checking Server name: $SERVER"
-	if ! ping -c 1 $SERVER >/dev/null 2>&1;then
-		Echo "Server: $SERVER not found"
-		if [ -z "$SERVERTYPE" ] || [ "$SERVERTYPE" = "tftp" ]; then
-			if [ ! -z "$DHCPSIADDR" ];then
-				Echo "Using: $DHCPSIADDR from dhcpcd-info"
-				SERVER=$DHCPSIADDR
-			elif [ ! -z "$DHCPSID" ];then
-				Echo "Using: $DHCPSID from dhcpcd-info"
-				SERVER=$DHCPSID
-			else
-				systemException \
-					"Can't assign SERVER IP/name... fatal !" \
-				"reboot"
-			fi
-		fi
-	fi
+	pxeSetupDownloadServer
 fi
 
 #======================================
@@ -284,9 +192,9 @@ if [ $LOCAL_BOOT = "no" ];then
 		# Register new network client
 		#--------------------------------------
 		Echo "Registering new network client..."
-		setupSystemAliasName
-		setupSystemHWInfoFile
-		setupSystemHWTypeFile
+		pxeSetupSystemAliasName
+		pxeSetupSystemHWInfoFile
+		pxeSetupSystemHWTypeFile
 		#======================================
 		# Put files on the boot server
 		#--------------------------------------
@@ -322,8 +230,8 @@ if [ $LOCAL_BOOT = "no" ];then
 	#--------------------------------------
 	if [ $NEWIP -eq 1 ];then
 		Echo "Outdated IP address, notify new client setup..."
-		setupSystemAliasName
-		setupSystemHWTypeFile
+		pxeSetupSystemAliasName
+		pxeSetupSystemHWTypeFile
 		putFile hwtype.$DHCPCHADDR upload/hwtype.$DHCPCHADDR
 		echo
 		Echo "Notified: $DHCPCHADDR"
@@ -356,41 +264,41 @@ runHook preprobe
 probeDevices "skipUSB"
 runHook postprobe
 
-export systemIntegrity="unknown"
 #======================================
-# 11) Is this a diskful station
+# 11) Check for diskful station
 #--------------------------------------
 if \
 	[ $LOCAL_BOOT = "no" ] && \
-	[ ! -z "$PART" ]       && \
+	([ ! -z "$PART" ] || [ ! -z "$IMAGE" ]) && \
 	[ -z "$NFSROOT" ]      && \
 	[ -z "$NBDROOT" ]      && \
 	[ -z "$AOEROOT" ]
 then
-	#======================================
-	# Check for installed system
-	#--------------------------------------
-	count=0
-	IFS="," ; for i in $IMAGE;do
-	case $count in
-	0) {
+	if ! waitForStorageDevice $DISK;then
+		systemException \
+			"Disk $DISK doesn't appear... fatal !" \
+		"reboot"
+	fi
+	export haveDisk=1
+	export imageDiskDevice=$DISK
+fi
+
+#======================================
+# 12) Check for installed system
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
+	IMAGE_FIRST=$(echo $IMAGE | cut -f1 -d,)
+	for i in $IMAGE_FIRST;do
 		field=0
 		IFS=";" ; for n in $i;do
-		case $field in
-			0) imageDevice=$n ; field=1 ;;
-			1) imageName=$n   ; field=2 ;;
-			2) imageVersion=$n; field=3
-		esac
+			case $field in
+				0) imageDevice=$n ; field=1 ;;
+				1) imageName=$n   ; field=2 ;;
+				2) imageVersion=$n; field=3
+			esac
 		done
-		count=1
-		if ! waitForStorageDevice $DISK;then
-			systemException \
-				"Disk $DISK doesn't appear... fatal !" \
-			"reboot"
-		fi
-		export imageDiskDevice=$DISK
 		updateNeeded initialize
-		if linuxPartition $DISK;then
+		if linuxPartition $imageDiskDevice;then
 			if mountSystem $imageDevice;then
 				updateNeeded
 				umountSystem
@@ -408,52 +316,41 @@ then
 		else
 			systemIntegrity="clean"
 		fi
-	}
-	;;
-	*)
-		# handle other images here...
-	;;
-	esac
 	done
-	#======================================
-	# Evaluate PART partition information
-	#--------------------------------------
-	if test $systemIntegrity = "clean";then
-		runHook prepartition
-		Echo "Creating partition table..."
-		#======================================
-		# Create partition table if needed
-		#--------------------------------------
-		input=/part.input
-		imageDiskDevice=$DISK
-		dd if=/dev/zero of=$DISK bs=512 count=1 >/dev/null && \
-			parted -s $DISK mklabel msdos
-		createPartitionerInput $(pxePartitionInput)
-		callPartitioner $input
-		#======================================
-		# Setup swap space if required
-		#--------------------------------------
-		export imageSwapDevice=$(pxeSwapDevice)
-		if [ ! -z "$imageSwapDevice" ];then
-			if ! mkswap $imageSwapDevice 1>&2;then
-				systemException "Failed to create swap signature" "reboot"
-			fi
-		fi
-		runHook postpartition
-	fi
 fi
 
 #======================================
-# 12) Download network client image
+# 13) Create ptable on diskful system
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
+	runHook prepartition
+	#======================================
+	# Create partition table
+	#--------------------------------------
+	Echo "Creating partition table..."
+	cleanPartitionTable
+	createPartitionerInput $(pxePartitionInput)
+	callPartitioner $input
+	#======================================
+	# Setup swap space if requested
+	#--------------------------------------
+	export imageSwapDevice=$(pxeSwapDevice)
+	if [ ! -z "$imageSwapDevice" ];then
+		if ! mkswap $imageSwapDevice 1>&2;then
+			systemException "Failed to create swap signature" "reboot"
+		fi
+	fi
+	runHook postpartition
+fi
+
+#======================================
+# 14) Setup root device environment
 #--------------------------------------
 runHook predownload
-if \
-	[ $LOCAL_BOOT = "no" ] && \
-	([ ! -z "$PART" ] || [ ! -z "$IMAGE" ]) && \
-	[ -z "$NFSROOT" ]      && \
-	[ -z "$NBDROOT" ]      && \
-	[ -z "$AOEROOT" ]
-then
+if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
+	#======================================
+	# 14.1) Download network client image
+	#--------------------------------------
 	count=0
 	IFS="," ; for i in $IMAGE;do
 		imageZipped="uncompressed"
@@ -476,6 +373,10 @@ then
 		if [ $count = 2 ];then
 			imageNextRootDevice=$imageDevice
 		fi
+		# /.../
+		# start download only if installed system is different
+		# from the image on the pxe boot server
+		# ---
 		if test `getSystemIntegrity $count` = "fine";then
 			continue
 		fi
@@ -566,7 +467,7 @@ then
 	done
 else
 	#======================================
-	# 12.1) Check for local boot
+	# 14.2) Check for local boot
 	#--------------------------------------
 	if [ $LOCAL_BOOT = "yes" ];then
 		imageDisk=$(dn $root)
@@ -582,7 +483,7 @@ else
 		fi
 	fi
 	#======================================
-	# 12.2) Check for NFS root
+	# 14.3) Check for NFS root
 	#--------------------------------------
 	if [ ! -z "$NFSROOT" ];then
 		IFS="," ; for i in $NFSROOT;do
@@ -610,7 +511,7 @@ else
 		export FSTYPE=nfs
 	fi
 	#======================================
-	# 12.3) Check for NBD root
+	# 14.4) Check for NBD root
 	#--------------------------------------
 	if [ ! -z "$NBDROOT" ];then
 		if ! modprobe nbd;then
@@ -716,7 +617,7 @@ else
 		systemIntegrity="clean"
 	fi
 	#======================================
-	# 12.4) Check for AOE root
+	# 14.5) Check for AOE root
 	#--------------------------------------
 	if [ ! -z "$AOEROOT" ];then
 		aoeRODevice=`echo $AOEROOT | cut -d , -f 1`
@@ -757,19 +658,7 @@ fi
 runHook postdownload
 
 #======================================
-# 13) Check for RELOAD_CONFIG
-#--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
-	if test ! -z $DISK;then
-	if test ! -z $RELOAD_CONFIG;then
-		systemIntegrity_save=$systemIntegrity
-		systemIntegrity="clean"
-	fi
-	fi
-fi
-
-#======================================
-# 14) Mount OS image to /mnt
+# 15) Mount OS image to /mnt
 #--------------------------------------
 runHook premount
 if ! mountSystem;then
@@ -779,14 +668,14 @@ validateRootTree
 runHook postmount
 
 #======================================
-# 15) Import fixed configuration files
+# 16) Import fixed configuration files
 #--------------------------------------
 runHook preconfig
-if [ $LOCAL_BOOT = "no" ];then
+if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	mkdir -p /config
-	#======================================
-	# Get files from CONF, VENDOR_CONF
-	#--------------------------------------
+	#=======================================
+	# 16.1) Get files from CONF, VENDOR_CONF
+	#---------------------------------------
 	IFS="," ; for i in $CONF $VENDOR_CONF;do
 		field=0
 		IFS=";" ; for n in $i;do
@@ -803,21 +692,21 @@ if [ $LOCAL_BOOT = "no" ];then
 		fetchFile $configSource /config/$configDest uncomp $configServer
 	done
 	IFS=$IFS_ORIG
-	#======================================
-	# Check for KIWI_INITRD
-	#--------------------------------------
-	if test $systemIntegrity = "clean";then
-		if [ ! -z $KIWI_INITRD ];then
+	#=======================================
+	# 16.2) Check for KIWI_INITRD
+	#---------------------------------------
+	if [ $haveDisk = "1" ] && [ $systemIntegrity = "clean" ];then
+		if [ ! -z "$KIWI_INITRD" ];then
 			Echo "Import KIWI initrd file: $KIWI_INITRD"
 			rm -f /mnt/boot/initrd* && mkdir -p /mnt/boot >/dev/null 2>&1
 			fetchFile $KIWI_INITRD /mnt/boot/initrd.kiwi
-			if [ ! -z $KIWI_KERNEL ];then
+			if [ ! -z "$KIWI_KERNEL" ];then
 				Echo "Import KIWI kernel file: $KIWI_KERNEL"
 				rm -f /mnt/boot/linux*
 				fetchFile $KIWI_KERNEL /mnt/boot/linux.kiwi
 			fi
 			KIWI_INITRD_PARAMS="IMAGE=local"
-			if [ ! -z $COMBINED_IMAGE ]; then
+			if [ ! -z "$COMBINED_IMAGE" ]; then
 				SPLIT="COMBINED_IMAGE=$COMBINED_IMAGE"
 				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $SPLIT"
 			fi
@@ -832,80 +721,38 @@ fi
 runHook postconfig
 
 #======================================
-# 16) check filesystem and kernels
+# 17) check filesystem and kernels
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
-	if test $systemIntegrity = "clean";then
-		if [ "$FSTYPE" != "nfs" ];then
-			probeFileSystem $imageRootDevice
-		fi
-		kernelList /mnt
+if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
+	if [ "$FSTYPE" != "nfs" ];then
+		probeFileSystem $imageRootDevice
 	fi
-fi
-
-#======================================
-# 17) make initrd available on unionfs
-#--------------------------------------
-if \
-	[ $LOCAL_BOOT = "no" ] && \
-	[ ! -z "$PART" ]       && \
-	[ -z "$NFSROOT" ]      && \
-	[ -z "$NBDROOT" ]      && \
-	[ -z "$AOEROOT" ]
-then
-	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
-		# /.../
-		# we are using a special root setup with aufs or clicfs. In this
-		# case we can't use the SuSE Linux initrd but must stick to the
-		# kiwi boot system.
-		# ----
-		pushd $imageBootDevice &>/dev/null
-		IFS="," ; for i in $KERNEL_LIST;do
-			if test -z "$i";then
-				continue
-			fi
-			kernel=`echo $i | cut -f1 -d:`
-			initrd=`echo $i | cut -f2 -d:`
-			if [ ! -f initrd.kiwi ] && [ ! -f linux.kiwi ];then
-				Echo "WARNING: can't find kiwi initrd/linux !"
-				Echo -b "local boot will not work, maybe you forgot"
-				Echo -b "to add KIWI_INITRD and KIWI_KERNEL in config.<MAC> ?"
-				break
-			fi
-			rm -f $initrd && ln -s initrd.kiwi $initrd
-			rm -f $kernel && ln -s linux.kiwi  $kernel
-			export bootLoaderOK=1
-			break
-		done
-		IFS=$IFS_ORIG
-		popd >/dev/null
-	fi
+	kernelList /mnt
 fi
 
 #======================================
 # 18) Create system dependant files
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
-	if test $systemIntegrity = "clean";then
-		setupDefaultPXENetwork /config
-		setupDefaultFstab /config
-		updateRootDeviceFstab /config "$imageRootDevice"
-		if test ! -z $DISK;then
-			updateSwapDeviceFstab /config ${DISK}1
-			updateOtherDeviceFstab /config
-			if [ "$haveLVM" = "yes" ];then
-				updateLVMBootDeviceFstab /config $imageBootDevice
-			elif [ "$haveClicFS" = "yes" ];then
-				updateClicBootDeviceFstab /config $imageBootDevice
-			elif [ "$haveBtrFS" = "yes" ];then
-				updateBtrBootDeviceFstab /config $imageBootDevice
-			elif [ "$haveXFS" = "yes" ];then
-				updateXfsBootDeviceFstab /config $imageBootDevice
-			fi
-			setupBootLoader /mnt /config $(($bootid - 1)) \
-				$imageRootDevice NET $imageSwapDevice
-			setupKernelModules /config
+if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
+	mkdir -p /config
+	setupDefaultPXENetwork /config
+	setupDefaultFstab /config
+	updateRootDeviceFstab /config "$imageRootDevice"
+	if test ! -z $DISK;then
+		updateSwapDeviceFstab /config ${DISK}1
+		updateOtherDeviceFstab /config
+		if [ "$haveLVM" = "yes" ];then
+			updateLVMBootDeviceFstab /config $imageBootDevice
+		elif [ "$haveClicFS" = "yes" ];then
+			updateClicBootDeviceFstab /config $imageBootDevice
+		elif [ "$haveBtrFS" = "yes" ];then
+			updateBtrBootDeviceFstab /config $imageBootDevice
+		elif [ "$haveXFS" = "yes" ];then
+			updateXfsBootDeviceFstab /config $imageBootDevice
 		fi
+		setupBootLoader /mnt /config $(($bootid - 1)) \
+			$imageRootDevice NET $imageSwapDevice
+		setupKernelModules /config
 	fi
 fi
 
@@ -913,42 +760,16 @@ fi
 # 19) If image is new, notify
 #--------------------------------------
 runHook prenotify
-if [ $LOCAL_BOOT = "no" ];then
-	if test $systemIntegrity = "clean"; then
-		count=0
-		IFS="," ; for i in $IMAGE;do
-			count=$(($count + 1))
-			field=0
-			IFS=";" ; for n in $i;do
-			case $field in
-				0) field=1 ;;
-				1) imageName=$n   ; field=2 ;;
-				2) imageVersion=$n; field=3 ;;
-				3) imageServer=$n ; field=4 ;;
-				4) imageBlkSize=$n; field=5 ;;
-				5) imageZipped=$n ;
-			esac
-			done
-			Echo "Notify of new image: image/$imageName"
-			echo "image/$imageName" > bootversion.$DHCPCHADDR
-			echo "$imageVersion"   >> bootversion.$DHCPCHADDR
-			putFile bootversion.$DHCPCHADDR upload/bootversion.$DHCPCHADDR
-			rm -f bootversion.$DHCPCHADDR
-		done
-	fi
+if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
+	pxeNotifyNewImage
 fi
 runHook postnotify
 
 #======================================
 # 20) send DHCP_RELEASE, reset cache
 #--------------------------------------
-if \
-	[ $LOCAL_BOOT = "no" ] && \
-	[ -z "$NFSROOT" ]      && \
-	[ -z "$NBDROOT" ]      && \
-	[ -z "$AOEROOT" ]
-then
-	dhcpcd -p -k $PXE_IFACE
+if [ $LOCAL_BOOT = "no" ];then
+	releaseNetwork
 fi
 
 #======================================
@@ -972,13 +793,11 @@ umountSystemFilesystems
 #======================================
 # 24) copy initrd files to image
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
-	if test $systemIntegrity = "clean";then
-		if canWrite /mnt;then
-			importBranding
-			cp /preinit /mnt
-			cp /include /mnt
-		fi
+if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
+	if canWrite /mnt;then
+		importBranding
+		cp /preinit /mnt
+		cp /include /mnt
 	fi
 fi
 
@@ -988,13 +807,13 @@ fi
 kernelCheck /mnt
 
 #======================================
-# 26 kill boot shell
+# 26) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 27 Activate new root
+# 27) Activate new root
 #--------------------------------------
 runHook preactivate
 activateImage

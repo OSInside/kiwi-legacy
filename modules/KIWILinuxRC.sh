@@ -3239,6 +3239,30 @@ function probeNetworkCard {
 	networkModule=`echo $networkModule`
 }
 #======================================
+# loadNetworkCard
+#--------------------------------------
+function loadNetworkCard {
+	# /.../
+	# load network module found by probeNetworkCard()
+	# ----
+	local loaded=0
+	probeNetworkCard
+	IFS=":" ; for i in $networkModule;do
+		if [ ! -z "$i" ];then
+			modprobe $i 2>/dev/null
+			if [ $? = 0 ];then
+				loaded=1
+			fi
+		fi
+	done
+	IFS=$IFS_ORIG
+	if [ $loaded = 0 ];then
+		systemException \
+			"Network module: Failed to load network module !" \
+		"reboot"
+	fi
+}
+#======================================
 # setupNetwork
 #--------------------------------------
 function setupNetwork {
@@ -3333,6 +3357,18 @@ function setupNetwork {
 		echo "nameserver $i" >> /etc/resolv.conf
 	done
 	DHCPCHADDR=`echo $DHCPCHADDR | tr a-z A-Z`
+}
+#======================================
+# releaseNetwork
+#--------------------------------------
+function releaseNetwork {
+	# /.../
+	# release network setup by dhcpcd and free the lease
+	# Do that only for _non_ network root devices
+	# ----
+	if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ] && [ -z "$AOEROOT" ];then
+		dhcpcd -p -k $PXE_IFACE
+	fi
 }
 #======================================
 # updateNeeded
@@ -3729,26 +3765,6 @@ function includeKernelParameters {
 	fi
 	if [ ! -z "$lang" ];then
 		export DIALOG_LANG=$lang
-	fi
-}
-#======================================
-# checkServer
-#--------------------------------------
-function checkServer {
-	# /.../
-	# check the kernel commandline parameter kiwiserver.
-	# If it exists its contents will be used as
-	# server address stored in the SERVER variabe
-	# ----
-	if [ ! -z $kiwiserver ];then
-		Echo "Found server in kernel cmdline"
-		SERVER=$kiwiserver
-	fi
-	if [ ! -z $kiwiservertype ]; then
-		Echo "Found server type in kernel cmdline"
-		SERVERTYPE=$kiwiservertype
-	else
-		SERVERTYPE=tftp
 	fi
 }
 #======================================
@@ -6294,6 +6310,146 @@ function restoreLVMPhysicalVolumes {
 	done
 }
 #======================================
+# pxeNotifyNewImage
+#--------------------------------------
+function pxeNotifyNewImage {
+	# /.../
+	# upload image name and version information to
+	# the pxe boot server
+	# ----
+	local count=0
+	local field=0
+	IFS="," ; for i in $IMAGE;do
+		count=$(($count + 1))
+		field=0
+		IFS=";" ; for n in $i;do
+			case $field in
+				0) field=1 ;;
+				1) imageName=$n   ; field=2 ;;
+				2) imageVersion=$n; field=3
+			esac
+		done
+		Echo "Notify of new image: image/$imageName"
+		echo "image/$imageName" > bootversion.$DHCPCHADDR
+		echo "$imageVersion"   >> bootversion.$DHCPCHADDR
+		putFile bootversion.$DHCPCHADDR upload/bootversion.$DHCPCHADDR
+		rm -f bootversion.$DHCPCHADDR
+	done
+}
+#======================================
+# pxeCheckServer
+#--------------------------------------
+function pxeCheckServer {
+	# /.../
+	# check the kernel commandline parameter kiwiserver.
+	# If it exists its contents will be used as
+	# server address stored in the SERVER variabe
+	# ----
+	if [ ! -z $kiwiserver ];then
+		Echo "Found server in kernel cmdline"
+		SERVER=$kiwiserver
+	fi
+	if [ ! -z $kiwiservertype ]; then
+		Echo "Found server type in kernel cmdline"
+		SERVERTYPE=$kiwiservertype
+	else
+		SERVERTYPE=tftp
+	fi
+}
+#======================================
+# pxeSetupDownloadServer
+#--------------------------------------
+function pxeSetupDownloadServer {
+	# /.../
+	# the pxe image system requires a server which stores
+	# the image files. This function setup the SERVER variable
+	# pointing to that server using the following heuristic:
+	# ----
+	# 1) check for $kiwiserver from cmdline
+	# 2) try tftp.$DOMAIN whereas $DOMAIN is from dhcpcd-info
+	# 3) try address of DHCP server if no servertype or tftp is used
+	# 4) fail if no location was found
+	# ----
+	pxeCheckServer
+	if [ -z "$SERVER" ];then
+		SERVER=tftp.$DOMAIN
+	fi
+	Echo "Checking Server name: $SERVER"
+	if ! ping -c 1 $SERVER >/dev/null 2>&1;then
+		Echo "Server: $SERVER not found"
+		if [ -z "$SERVERTYPE" ] || [ "$SERVERTYPE" = "tftp" ]; then
+			if [ ! -z "$DHCPSIADDR" ];then
+				Echo "Using: $DHCPSIADDR from dhcpcd-info"
+				SERVER=$DHCPSIADDR
+			elif [ ! -z "$DHCPSID" ];then
+				Echo "Using: $DHCPSID from dhcpcd-info"
+				SERVER=$DHCPSID
+			else
+				systemException \
+					"Can't assign SERVER IP/name... fatal !" \
+				"reboot"
+			fi
+		fi
+	fi
+}
+#======================================
+# pxeSetupSystemAliasName
+#--------------------------------------
+function pxeSetupSystemAliasName {
+	# /.../
+	# Ask for an alias name if NAME from config.<MAC>
+	# contains a number. If the number is -1 the system will
+	# ask for ever for this name otherwhise the number sets
+	# a timeout how long to wait for input of this data
+	# ----
+	if test $NAME -ne 0;then
+		if test $NAME -eq -1;then
+			Echo -n "Enter Alias Name for this system: " && \
+			read SYSALIAS
+		else
+			Echo -n "Enter Alias Name [timeout in $NAME sec]: " && \
+			read -t $NAME SYSALIAS
+		fi
+	fi
+}
+#======================================
+# pxeSetupSystemHWInfoFile
+#--------------------------------------
+function pxeSetupSystemHWInfoFile {
+	# /.../
+	# calls hwinfo and stores the information into a file
+	# suffixed by the hardware address of the network card
+	# NOTE: it's required to have the dhcp info file sourced
+	# before this function is called
+	# ----
+	hwinfo --all --log=hwinfo.$DHCPCHADDR >/dev/null
+}
+#======================================
+# pxeSetupSystemHWTypeFile
+#--------------------------------------
+function pxeSetupSystemHWTypeFile {
+	# /.../
+	# collects information about the alias name the
+	# architecture the BIOS version and more and stores
+	# that into a file suffixed by the hardware address of the
+	# network card. Obtaining the BIOS information requires
+	# the posbios tool to be installed in the initrd
+	# ----
+	echo "NCNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
+	echo "CRNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
+	echo "IPADDR=$IPADDR"     >> hwtype.$DHCPCHADDR
+	echo "ARCHITECTURE=$ARCH" >> hwtype.$DHCPCHADDR
+	#========================================
+	# Try to get BIOS data if tools are there
+	#----------------------------------------
+	if [ -f /sbin/posbios ];then
+		HWBIOS=`/sbin/posbios -b`
+		echo "HWBIOS=$HWBIOS" >> hwtype.$DHCPCHADDR
+		HWTYPE=`/sbin/posbios -ms`
+		echo "HWTYPE=$HWTYPE" >> hwtype.$DHCPCHADDR
+	fi
+}
+#======================================
 # pxeSizeToMB
 #--------------------------------------
 function pxeSizeToMB {
@@ -6524,6 +6680,19 @@ function setupConsole {
 	if [ -e /sys/class/tty/hvc0 ];then
 		echo "H0:12345:respawn:/sbin/mingetty --noclear hvc0 linux" >> $itab
 		echo hvc0 >> $stty
+	fi
+}
+#======================================
+# cleanPartitionTable
+#--------------------------------------
+function cleanPartitionTable {
+	# /.../
+	# remove partition table and create a new msdos
+	# table label if parted is in use
+	# ----
+	dd if=/dev/zero of=$imageDiskDevice bs=512 count=1 >/dev/null
+	if [ $PARTITIONER = "parted" ];then
+		parted -s $imageDiskDevice mklabel msdos
 	fi
 }
 #======================================

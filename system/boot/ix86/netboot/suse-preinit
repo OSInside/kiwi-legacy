@@ -35,12 +35,8 @@ fi
 #======================================
 # 3) start udev
 #--------------------------------------
-if [ ! -z $DISK ] && [ $systemIntegrity = "clean" ]; then
-	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
-		mountSystemFilesystems
-		udevSystemStart
-	fi
-fi
+mountSystemFilesystems
+udevSystemStart
 
 #======================================
 # 4) update mount table
@@ -55,7 +51,7 @@ createFramebufferDevices
 #======================================
 # 6) create initrd on diskful
 #--------------------------------------
-if [ ! -z "$DISK" ] && [ "$systemIntegrity" = "clean" ]; then
+if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ]; then
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 		#======================================
 		# use distro initrd via mkinitrd
@@ -65,17 +61,34 @@ if [ ! -z "$DISK" ] && [ "$systemIntegrity" = "clean" ]; then
 		#======================================
 		# use kiwi initrd downloaded before
 		#--------------------------------------
-		:
+		pushd /boot &>/dev/null
+		IFS="," ; for i in $KERNEL_LIST;do
+			if test -z "$i";then
+				continue
+			fi
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			if [ ! -f initrd.kiwi ] && [ ! -f linux.kiwi ];then
+				Echo "WARNING: can't find kiwi initrd/linux !"
+				Echo -b "local boot will not work, maybe you forgot"
+				Echo -b "to add KIWI_INITRD and KIWI_KERNEL in config.<MAC> ?"
+				break
+			fi
+			rm -f $initrd && ln -s initrd.kiwi $initrd
+			rm -f $kernel && ln -s linux.kiwi  $kernel
+			bootLoaderOK=1
+			break
+		done
+		IFS=$IFS_ORIG
+		popd >/dev/null
 	fi
 fi
 
 #======================================
 # 7) Install boot loader on diskful
 #--------------------------------------
-if [ ! -z "$DISK" ] && [ "$bootLoaderOK" = 1 ];then
-	if test $systemIntegrity = "clean";then
-		installBootLoader
-	fi
+if [ "$bootLoaderOK" = 1 ];then
+	installBootLoader
 fi
 
 #======================================
@@ -89,18 +102,9 @@ if [ "$systemIntegrity" = "clean" ];then
 fi
 
 #======================================
-# 9) Reset systemIntegrity
+# 9) check for valid mount points
 #--------------------------------------
-if [ ! -z "$DISK" ];then
-	if test ! -z $RELOAD_CONFIG;then
-		systemIntegrity=$systemIntegrity_save
-	fi
-fi
-
-#======================================
-# 10) check for valid mount points 
-#--------------------------------------
-if [ ! -z "$DISK" ];then
+if [ ! -z "$imageDiskDevice" ];then
 	IFS=":" ; for i in $PART_MOUNT;do
 	if [ ! -z "$i" ] && [ ! -e "$i" ] && [ ! "$i" = "x" ];then
 		mkdir -p $i
@@ -109,9 +113,9 @@ if [ ! -z "$DISK" ];then
 fi
 
 #======================================
-# 11) Update /etc/ImageVersion files
+# 10) Update /etc/ImageVersion files
 #--------------------------------------
-if [ ! -z "$DISK" ];then
+if [ ! -z "$imageDiskDevice" ];then
 	count=0
 	IFS="," ; for i in $IMAGE;do
 		count=$(($count + 1))
@@ -120,10 +124,7 @@ if [ ! -z "$DISK" ];then
 		case $field in
 			0) field=1 ;;
 			1) imageName=$n   ; field=2 ;;
-			2) imageVersion=$n; field=3 ;;
-			3) imageServer=$n ; field=4 ;;
-			4) imageBlkSize=$n; field=5 ;;
-			5) imageZipped=$n ;
+			2) imageVersion=$n; field=3
 		esac
 		done
 		atversion="$imageName-$imageVersion"
@@ -136,7 +137,7 @@ if [ ! -z "$DISK" ];then
 fi
 
 #======================================
-# 12) setup network for nfs boot
+# 11) setup network for nfs boot
 #--------------------------------------
 if [ ! -z "$NFSROOT" ];then
 	mount -t proc  proc    /proc
@@ -150,16 +151,12 @@ if [ ! -z "$NFSROOT" ];then
 fi
 
 #======================================
-# 13) setup console
+# 12) setup console
 #--------------------------------------
 setupConsole
 
 #======================================
-# 14) kill udev
+# 13) kill udev
 #--------------------------------------
-if [ ! -z "$DISK" ] && [ "$systemIntegrity" = "clean" ]; then
-	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
-		udevSystemStop
-		umountSystemFilesystems
-	fi
-fi
+udevSystemStop
+umountSystemFilesystems
