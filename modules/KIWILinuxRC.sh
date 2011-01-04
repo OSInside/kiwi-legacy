@@ -233,6 +233,27 @@ function importFile {
 	IFS=$IFS_ORIG
 }
 #======================================
+# unsetFile
+#--------------------------------------
+function unsetFile {
+	# /.../
+	# unset variables specified within the given file.
+	# the file must be in the config.<MAC> style format
+	# ----
+	IFS="
+	"
+	while read line;do
+		echo $line | grep -qi "^#" && continue
+		key=`echo "$line" | cut -d '=' -f1`
+		if [ -z "$key" ];then
+			continue
+		fi
+		Debug "unset $key"
+		eval unset "$key"
+	done
+	IFS=$IFS_ORIG
+}
+#======================================
 # systemException
 #--------------------------------------
 function systemException {
@@ -3367,7 +3388,18 @@ function releaseNetwork {
 	# Do that only for _non_ network root devices
 	# ----
 	if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ] && [ -z "$AOEROOT" ];then
+		#======================================
+		# free the lease and the cache
+		#--------------------------------------
 		dhcpcd -p -k $PXE_IFACE
+		#======================================
+		# remove sysconfig state information
+		#--------------------------------------
+		rm -rf /dev/.sysconfig/network
+		#======================================
+		# unset dhcp info variables
+		#--------------------------------------
+		unsetFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
 	fi
 }
 #======================================
