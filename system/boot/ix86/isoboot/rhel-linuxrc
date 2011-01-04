@@ -117,7 +117,7 @@ IFS="," ; for i in $IMAGE;do
 	esac
 	done
 	imageReadOnly="$imageName"
-	imageReadOnly=`echo $imageReadOnly | sed -e s@.$ARCH\$@@`
+	imageReadOnly=`echo $imageReadOnly | sed -e s@.$ARCH@@`
 	imageReadOnly="$imageReadOnly-read-only.$ARCH-$imageVersion"
 	imageName="/cdrom/$imageName-$imageVersion"
 	gzippName=$imageName.gz
