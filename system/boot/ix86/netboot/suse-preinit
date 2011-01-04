@@ -46,7 +46,9 @@ updateMTAB
 #======================================
 # 5) create framebuffer devices
 #--------------------------------------
-createFramebufferDevices
+if [ "$systemIntegrity" = "clean" ];then
+	createFramebufferDevices
+fi
 
 #======================================
 # 6) create initrd on diskful
@@ -104,7 +106,7 @@ fi
 #======================================
 # 9) check for valid mount points
 #--------------------------------------
-if [ ! -z "$imageDiskDevice" ];then
+if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
 	IFS=":" ; for i in $PART_MOUNT;do
 	if [ ! -z "$i" ] && [ ! -e "$i" ] && [ ! "$i" = "x" ];then
 		mkdir -p $i
@@ -115,7 +117,7 @@ fi
 #======================================
 # 10) Update /etc/ImageVersion files
 #--------------------------------------
-if [ ! -z "$imageDiskDevice" ];then
+if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
 	count=0
 	IFS="," ; for i in $IMAGE;do
 		count=$(($count + 1))
@@ -153,7 +155,9 @@ fi
 #======================================
 # 12) setup console
 #--------------------------------------
-setupConsole
+if [ "$systemIntegrity" = "clean" ];then
+	setupConsole
+fi
 
 #======================================
 # 13) kill udev

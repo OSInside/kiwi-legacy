@@ -3389,6 +3389,10 @@ function releaseNetwork {
 	# ----
 	if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ] && [ -z "$AOEROOT" ];then
 		#======================================
+		# unset dhcp info variables
+		#--------------------------------------
+		unsetFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
+		#======================================
 		# free the lease and the cache
 		#--------------------------------------
 		dhcpcd -p -k $PXE_IFACE
@@ -3396,10 +3400,6 @@ function releaseNetwork {
 		# remove sysconfig state information
 		#--------------------------------------
 		rm -rf /dev/.sysconfig/network
-		#======================================
-		# unset dhcp info variables
-		#--------------------------------------
-		unsetFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
 	fi
 }
 #======================================
