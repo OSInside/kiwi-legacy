@@ -2298,16 +2298,25 @@ function setupKernelModules {
 	if [ -z "$srcprefix" ];then
 		srcprefix=/mnt
 	fi
-	local ktempl=$srcprefix/var/adm/fillup-templates/sysconfig.kernel
+	local sysimg_ktempl=$srcprefix/var/adm/fillup-templates/sysconfig.kernel
+	local sysimg_syskernel=$srcprefix/etc/sysconfig/kernel
 	local syskernel=$destprefix/etc/sysconfig/kernel
+	local newstyle_mkinitrd=$srcprefix/lib/mkinitrd/scripts/boot-usb.sh
+	local key
+	local val
 	mkdir -p $destprefix/etc/sysconfig
-	if [ ! -f $ktempl ];then
+	#======================================
+	# check for sysconfig template file
+	#--------------------------------------
+	if [ ! -f $sysimg_ktempl ];then
 		systemException \
 			"Can't find kernel sysconfig template in system image !" \
 		"reboot"
 	fi
-	cp $ktempl $syskernel
-	if [ ! -e $srcprefix/lib/mkinitrd/scripts/boot-usb.sh ];then
+	#======================================
+	# check for mkinitrd capabilities
+	#--------------------------------------
+	if [ ! -e $newstyle_mkinitrd ];then
 		# /.../
 		# if boot-usb.sh does not exist we are based on an old
 		# mkinitrd version which requires all modules as part of
@@ -2317,12 +2326,31 @@ function setupKernelModules {
 		local USB_MODULES="ehci-hcd ohci-hcd uhci-hcd usbcore usb-storage sd"
 		INITRD_MODULES="$INITRD_MODULES $USB_MODULES"
 	fi
-	sed -i -e \
-		s"@^INITRD_MODULES=.*@INITRD_MODULES=\"$INITRD_MODULES\"@" \
-	$syskernel
-	sed -i -e \
-		s"@^DOMU_INITRD_MODULES=.*@DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"@" \
-	$syskernel
+	#======================================
+	# use system image config or template
+	#--------------------------------------
+	if [ -f $sysimg_syskernel ];then
+		cp $sysimg_syskernel $syskernel
+	else
+		cp $sysimg_ktempl $syskernel
+	fi
+	#======================================
+	# update config file
+	#--------------------------------------
+	for key in INITRD_MODULES DOMU_INITRD_MODULES;do
+		if [ $key = "INITRD_MODULES" ];then
+			val=$INITRD_MODULES
+		fi
+		if [ $key = "DOMU_INITRD_MODULES" ];then
+			val=$DOMURD_MODULES
+		fi
+		if [ -z "$val" ];then
+			continue
+		fi
+		sed -i -e \
+			s"@^$key=\"\(.*\)\"@$key=\"\1 $val\"@" \
+		$syskernel
+	done
 }
 #======================================
 # kernelCheck
