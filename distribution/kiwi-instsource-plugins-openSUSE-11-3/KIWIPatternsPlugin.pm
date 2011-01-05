@@ -164,7 +164,7 @@ sub execute
   foreach my $f(@dirent) {
     next if $f !~ m{(.*\.pat|.*\.pat\.gz)};
     if($f !~ m{.*\.gz$} and $this->{m_compress} =~ m{yes}i) {
-      if (system('gzip', "$dirname/$f") == 0) {
+      if (system('gzip', '--rsyncable', "$dirname/$f") == 0) {
 	$f = "$f.gz";
       }
     }

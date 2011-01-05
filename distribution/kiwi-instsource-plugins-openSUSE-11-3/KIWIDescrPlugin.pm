@@ -233,7 +233,7 @@ sub executeDir
 
   if($this->{m_compress} =~ m{yes}i) {
       foreach my $pfile(glob("$targetdir/packages*")) {
-	  if(system("gzip", "$pfile") == 0) {
+	  if(system("gzip", "--rsyncable", "$pfile") == 0) {
 	      unlink "$targetdir/$pfile";
 	  }
 	  else {
