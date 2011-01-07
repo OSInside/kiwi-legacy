@@ -1196,7 +1196,7 @@ sub createImageLiveCD {
 	# Check for user-specified cmdline options
 	#------------------------------------------
 	if (defined $stype{cmdline}) {
-		$cmdline = " $cmdline";
+		$cmdline = " $stype{cmdline}";
 	}
 	#==========================================
 	# Get image creation date and name
