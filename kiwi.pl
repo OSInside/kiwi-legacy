@@ -47,7 +47,7 @@ use KIWIXMLValidator;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "4.69";
+our $Version       = "4.70";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
