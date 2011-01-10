@@ -981,10 +981,10 @@ function setupBootLoaderSyslinuxRecovery {
 	echo "prompt   1"                  >> $conf
 	echo "TIMEOUT $KIWI_BOOT_TIMEOUT"  >> $conf
 	echo "display isolinux.msg"        >> $conf
-	if [ -f "$destsPrefix/boot/syslinux/bootlogo" ];then
+	if [ -f "$mountPrefix/boot/syslinux/bootlogo" ];then
 		if \
-			[ -f "$destsPrefix/boot/syslinux/gfxboot.com" ] || \
-			[ -f "$destsPrefix/boot/syslinux/gfxboot.c32" ]
+			[ -f "$mountPrefix/boot/syslinux/gfxboot.com" ] || \
+			[ -f "$mountPrefix/boot/syslinux/gfxboot.c32" ]
 		then
 			echo "ui gfxboot bootlogo isolinux.msg" >> $conf
 		else
@@ -1462,10 +1462,10 @@ function setupBootLoaderSyslinux {
 	echo "prompt   1"                  >> $conf
 	echo "TIMEOUT $KIWI_BOOT_TIMEOUT"  >> $conf
 	echo "display isolinux.msg"        >> $conf
-	if [ -f "$destsPrefix/boot/syslinux/bootlogo" ];then
+	if [ -f "$mountPrefix/boot/syslinux/bootlogo" ];then
 		if \
-			[ -f "$destsPrefix/boot/syslinux/gfxboot.com" ] || \
-			[ -f "$destsPrefix/boot/syslinux/gfxboot.c32" ]
+			[ -f "$mountPrefix/boot/syslinux/gfxboot.com" ] || \
+			[ -f "$mountPrefix/boot/syslinux/gfxboot.c32" ]
 		then
 			echo "ui gfxboot bootlogo isolinux.msg" >> $conf
 		else
@@ -4915,12 +4915,12 @@ function setupConfigFiles {
 	cd /config
 	find . -type f | while read file;do
 		dir=$(dirname $file)
+		if [ ! -d /mnt/$dir ];then
+			mkdir -p /mnt/$dir
+		fi
 		if ! canWrite /mnt/$dir;then
 			Echo "Can't write to $dir, read-only filesystem... skipped"
 			continue
-		fi
-		if [ ! -d /mnt/$dir ];then
-			mkdir -p /mnt/$dir
 		fi
 		cp $file /mnt/$file
 	done
@@ -6681,7 +6681,11 @@ function setupBootPartition {
 	fi
 	mkdir -p /mnt/$mpoint
 	mount $imageBootDevice /mnt/$mpoint
-	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+	if \
+		[ -z "$UNIONFS_CONFIG" ] &&
+		[ -z "$COMBINED_IMAGE" ] &&
+		[ "$bootid" = "1" ]
+	then
 		rm -fr /mnt/$mpoint/*
 	fi
 	cp -a /mnt/boot /mnt/$mpoint
