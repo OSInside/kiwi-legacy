@@ -750,7 +750,7 @@ sub createImageSquashFS {
 	# Compress image using gzip
 	#------------------------------------------
 	my %type = %{$xml->getImageTypeAndAttributes()};
-	if (($type{compressed}) && ($type{compressed} =~ /yes|true/)) {
+	if (($type{compressed}) && ($type{compressed} eq 'true')) {
 		if (! $this -> compressImage ($name)) {
 			return undef;
 		}
@@ -1184,11 +1184,11 @@ sub createImageLiveCD {
 	#==========================================
 	# Check for hybrid ISO
 	#------------------------------------------
-	if ((defined $stype{hybrid}) && ($stype{hybrid} =~ /yes|true/i)) {
+	if ((defined $stype{hybrid}) && ($stype{hybrid} eq 'true')) {
 		$hybrid = 1;
 	}
 	if ((defined $stype{hybridpersistent}) &&
-		($stype{hybridpersistent} =~ /yes|true/i)
+		($stype{hybridpersistent} eq 'true')
 	) {
 		$hybridpersistent = 1;
 	}
@@ -2719,7 +2719,7 @@ sub writeImageConfig {
 		#==========================================
 		# IMAGE information
 		#------------------------------------------
-		if (($type{compressed}) && ($type{compressed} =~ /yes|true/)) {
+		if (($type{compressed}) && ($type{compressed} eq 'true')) {
 			print FD "IMAGE=${device}${targetPartition};";
 			print FD "$namecd;$server;$blocks;compressed";
 			if ("$type{type}" eq "split" && defined $this->{imageTreeRW}) {
@@ -2931,7 +2931,7 @@ sub postImage {
 	# Compress image using gzip
 	#------------------------------------------
 	if (! defined $nozip) {
-		if (($type{compressed}) && ($type{compressed} =~ /yes|true/)) {
+		if (($type{compressed}) && ($type{compressed} eq 'true')) {
 			if (! $this -> compressImage ($name)) {
 				return undef;
 			}
