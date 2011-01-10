@@ -3381,11 +3381,13 @@ sub setupBootLoaderConfiguration {
 		print FD "prompt   1"."\n";
 		my $bootTimeout = $type{boottimeout} ? int $type{boottimeout} : 200;
 		print FD "timeout  $bootTimeout"."\n";
-		if ($syslinux_new_format) {
-			print FD "ui gfxboot bootlogo isolinux.msg"."\n";
-		} else {
-			print FD "gfxboot  bootlogo"."\n";
-			print FD "display  isolinux.msg"."\n";
+		print FD "display isolinux.msg"."\n";
+		if (-f "$gfx/bootlogo") {
+			if ($syslinux_new_format) {
+				print FD "ui gfxboot bootlogo isolinux.msg"."\n";
+			} else {
+				print FD "gfxboot bootlogo"."\n";
+			}
 		}
 		if ($type =~ /^KIWI (CD|USB)/) {
 			$title = $this -> makeLabel ("Boot from Hard Disk");

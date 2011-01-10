@@ -1668,11 +1668,13 @@ sub createImageLiveCD {
 	binmode(FD, ":utf8");
 	print FD "default $label"."\n";
 	print FD "implicit 1"."\n";
-	if ($syslinux_new_format) {
-		print FD "ui gfxboot bootlogo isolinux.msg"."\n";
-	} else {
-		print FD "gfxboot  bootlogo"."\n";
-		print FD "display  isolinux.msg"."\n";
+	print FD "display isolinux.msg"."\n";
+	if (-f "$gfx/bootlogo" ) {
+		if ($syslinux_new_format) {
+			print FD "ui gfxboot bootlogo isolinux.msg"."\n";
+		} else {
+			print FD "gfxboot bootlogo"."\n";
+		}
 	}
 	print FD "prompt   1"."\n";
 	print FD "timeout  $bootTimeout"."\n";

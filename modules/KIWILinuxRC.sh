@@ -980,14 +980,16 @@ function setupBootLoaderSyslinuxRecovery {
 	echo "implicit 1"                   > $conf
 	echo "prompt   1"                  >> $conf
 	echo "TIMEOUT $KIWI_BOOT_TIMEOUT"  >> $conf
-	if \
-		[ -f "$destsPrefix/boot/syslinux/gfxboot.com" ] || \
-		[ -f "$destsPrefix/boot/syslinux/gfxboot.c32" ]
-	then
-		echo "ui gfxboot bootlogo isolinux.msg" >> $conf
-	else
-		echo "gfxboot  bootlogo"                >> $conf
-		echo "display  isolinux.msg"            >> $conf
+	echo "display isolinux.msg"        >> $conf
+	if [ -f "$destsPrefix/boot/syslinux/bootlogo" ];then
+		if \
+			[ -f "$destsPrefix/boot/syslinux/gfxboot.com" ] || \
+			[ -f "$destsPrefix/boot/syslinux/gfxboot.c32" ]
+		then
+			echo "ui gfxboot bootlogo isolinux.msg" >> $conf
+		else
+			echo "gfxboot bootlogo"                 >> $conf
+		fi
 	fi
 	kernel=linux.vmx   # this is a copy of the kiwi linux.vmx file
 	initrd=initrd.vmx  # this is a copy of the kiwi initrd.vmx file
@@ -1459,14 +1461,16 @@ function setupBootLoaderSyslinux {
 	echo "implicit 1"                   > $conf
 	echo "prompt   1"                  >> $conf
 	echo "TIMEOUT $KIWI_BOOT_TIMEOUT"  >> $conf
-	if \
-		[ -f "$destsPrefix/boot/syslinux/gfxboot.com" ] || \
-		[ -f "$destsPrefix/boot/syslinux/gfxboot.c32" ]
-	then
-		echo "ui gfxboot bootlogo isolinux.msg" >> $conf
-	else
-		echo "gfxboot  bootlogo"                >> $conf
-		echo "display  isolinux.msg"            >> $conf
+	echo "display isolinux.msg"        >> $conf
+	if [ -f "$destsPrefix/boot/syslinux/bootlogo" ];then
+		if \
+			[ -f "$destsPrefix/boot/syslinux/gfxboot.com" ] || \
+			[ -f "$destsPrefix/boot/syslinux/gfxboot.c32" ]
+		then
+			echo "ui gfxboot bootlogo isolinux.msg" >> $conf
+		else
+			echo "gfxboot bootlogo"                 >> $conf
+		fi
 	fi
 	local count=1
 	IFS="," ; for i in $KERNEL_LIST;do
