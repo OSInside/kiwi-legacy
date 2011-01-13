@@ -32,6 +32,7 @@ use FileHandle;
 use File::Basename;
 use File::Spec;
 use Math::BigFloat;
+use KIWILocator;
 use KIWIQX;
 
 #==========================================
@@ -2054,22 +2055,41 @@ sub setupBootDisk {
 			}
 			%fsattr= main::checkFileSystem ($mapper);
 		}
+		my $locator = new KIWILocator($kiwi);
 		SWITCH: for ($fsattr{type}) {
 			/^ext\d/    && do {
 				$kiwi -> info ("Resizing system $fsattr{type} filesystem");
-				$status = qxx ("/sbin/resize2fs -f -F -p $mapper 2>&1");
+				my $resize = $locator -> getExecPath ('resize2fs');
+				if (! $resize) {
+					$kiwi -> error ('Could not locate resize2fs');
+					$kiwi -> failed ();
+					return undef;
+				}
+				$status = qxx ("$resize -f -F -p $mapper 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
 				$kiwi -> info ("Resizing system $fsattr{type} filesystem");
-				$status = qxx ("/sbin/resize_reiserfs $mapper 2>&1");
+				my $resize = $locator -> getExecPath ('resize_reiserfs');
+				if (! $resize) {
+					$kiwi -> error ('Could not locate resize_reiserfs');
+					$kiwi -> failed ();
+					return undef;
+				}
+				$status = qxx ("$resize $mapper 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^btrfs/    && do {
 				$kiwi -> info ("Resizing system $fsattr{type} filesystem");
-				my $bctl = "/sbin/btrfsctl -r max /mnt";
+				my $bfsctl = $locator -> getExecPath('btrfsctl');
+				if (! $bfsctl) {
+					$kiwi -> error ('Could not locate btrfsctl');
+					$kiwi -> failed ();
+					return undef;
+				}
+				my $bctl = "$bfsctl -r max /mnt";
 				$status = qxx ("
 					mount $mapper /mnt && $bctl; umount /mnt 2>&1"
 				);
@@ -2078,7 +2098,12 @@ sub setupBootDisk {
 			};
 			/^xfs/      && do {
 				$kiwi -> info ("Resizing system $fsattr{type} filesystem");
-				my $xfsGrow = main::findExec('xfs_growfs');
+				my $xfsGrow = $locator -> getExecPath('xfs_growfs');
+				if (! $xfsGrow) {
+					$kiwi -> error ('Could not locate xfs_grow');
+					$kiwi -> failed ();
+					return undef;
+				}
 				$status = qxx ("
 					mount $mapper /mnt && $xfsGrow /mnt; umount /mnt 2>&1"
 				);
@@ -2124,22 +2149,41 @@ sub setupBootDisk {
 				}
 				%fsattr= main::checkFileSystem ($mapper);
 			}
+			my $locator = new KIWILocator($kiwi);
 			SWITCH: for ($fsattr{type}) {
 				/^ext\d/    && do {
 					$kiwi -> info ("Resizing split $fsattr{type} filesystem");
-					$status = qxx ("/sbin/resize2fs -f -F -p $mapper 2>&1");
+					my $resize = $locator -> getExecPath ('resize2fs');
+					if (! $resize) {
+						$kiwi -> error ('Could not locate resize2fs');
+						$kiwi -> failed ();
+						return undef;
+					}
+					$status = qxx ("$resize -f -F -p $mapper 2>&1");
 					$result = $? >> 8;
 					last SWITCH;
 				};
 				/^reiserfs/ && do {
 					$kiwi -> info ("Resizing split $fsattr{type} filesystem");
-					$status = qxx ("/sbin/resize_reiserfs $mapper 2>&1");
+					my $resize = $locator -> getExecPath ('resize_reiserfs');
+					if (! $resize) {
+						$kiwi -> error ('Could not locate resize_reiserfs');
+						$kiwi -> failed ();
+						return undef;
+					}
+					$status = qxx ("$resize $mapper 2>&1");
 					$result = $? >> 8;
 					last SWITCH;
 				};
 				/^btrfs/    && do {
-					$kiwi -> info ("Resizing system $fsattr{type} filesystem");
-					my $bctl = "/sbin/btrfsctl -r max /mnt";
+					$kiwi -> info ("Resizing split $fsattr{type} filesystem");
+					my $bfsctl = $locator -> getExecPath('btrfsctl');
+					if (! $bfsctl) {
+						$kiwi -> error ('Could not locate btrfsctl');
+						$kiwi -> failed ();
+						return undef;
+					}
+					my $bctl = "$bfsctl -r max /mnt";
 					$status = qxx ("
 						mount $mapper /mnt&& $bctl; umount /mnt 2>&1"
 					);
@@ -2147,8 +2191,13 @@ sub setupBootDisk {
 					last SWITCH;
 				};
 				/^xfs/      && do {
-					$kiwi -> info ("Resizing system $fsattr{type} filesystem");
-					my $xfsGrow = main::findExec('xfs_growfs');
+					$kiwi -> info ("Resizing split $fsattr{type} filesystem");
+					my $xfsGrow = $locator -> getExecPath('xfs_growfs');
+					if (! $xfsGrow) {
+						$kiwi -> error ('Could not locate xfs_grow');
+						$kiwi -> failed ();
+						return undef;
+					}
 					$status = qxx ("
 					    mount $mapper /mnt && $xfsGrow /mnt; umount /mnt 2>&1"
 					);

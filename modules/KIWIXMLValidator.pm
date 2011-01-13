@@ -21,6 +21,7 @@ use strict;
 use warnings;
 require Exporter;
 use XML::LibXML;
+use KIWILocator;
 use KIWILog;
 use KIWIQX;
 
@@ -586,7 +587,8 @@ sub __validateXML {
 			print $UPCNTFL $upgradedStr;
 			close ( $UPCNTFL );
 		}
-		my $jingExec = main::findExec('jing');
+		my $locator = new KIWILocator($kiwi);
+		my $jingExec = $locator -> getExecPath('jing');
 		if ($jingExec) {
 			qxx ("$jingExec $this->{schema} $upgradedContolFile 1>&2");
 			return undef;

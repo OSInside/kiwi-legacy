@@ -34,6 +34,7 @@ use Getopt::Long;
 use File::Spec;
 use KIWIRoot;
 use KIWIXML;
+use KIWILocator;
 use KIWILog;
 use KIWIImage;
 use KIWIBoot;
@@ -111,18 +112,19 @@ our $InitCDir = "/var/cache/kiwi/image";
 # Globals (Supported filesystem names)
 #------------------------------------------
 our %KnownFS;
-$KnownFS{ext4}{tool}      = findExec("mkfs.ext4");
-$KnownFS{ext3}{tool}      = findExec("mkfs.ext3");
-$KnownFS{ext2}{tool}      = findExec("mkfs.ext2");
-$KnownFS{squashfs}{tool}  = findExec("mksquashfs");
-$KnownFS{clicfs}{tool}    = findExec("mkclicfs");
-$KnownFS{clic}{tool}      = findExec("mkclicfs");
-$KnownFS{unified}{tool}   = findExec("mksquashfs");
-$KnownFS{compressed}{tool}= findExec("mksquashfs");
-$KnownFS{reiserfs}{tool}  = findExec("mkreiserfs");
-$KnownFS{btrfs}{tool}     = findExec("mkfs.btrfs");
-$KnownFS{xfs}{tool}       = findExec("mkfs.xfs");
-$KnownFS{cpio}{tool}      = findExec("cpio");
+our $locator = new KIWILocator();
+$KnownFS{ext4}{tool}      = $locator -> getExecPath("mkfs.ext4");
+$KnownFS{ext3}{tool}      = $locator -> getExecPath("mkfs.ext3");
+$KnownFS{ext2}{tool}      = $locator -> getExecPath("mkfs.ext2");
+$KnownFS{squashfs}{tool}  = $locator -> getExecPath("mksquashfs");
+$KnownFS{clicfs}{tool}    = $locator -> getExecPath("mkclicfs");
+$KnownFS{clic}{tool}      = $locator -> getExecPath("mkclicfs");
+$KnownFS{unified}{tool}   = $locator -> getExecPath("mksquashfs");
+$KnownFS{compressed}{tool}= $locator -> getExecPath("mksquashfs");
+$KnownFS{reiserfs}{tool}  = $locator -> getExecPath("mkreiserfs");
+$KnownFS{btrfs}{tool}     = $locator -> getExecPath("mkfs.btrfs");
+$KnownFS{xfs}{tool}       = $locator -> getExecPath("mkfs.xfs");
+$KnownFS{cpio}{tool}      = $locator -> getExecPath("cpio");
 $KnownFS{ext3}{ro}        = 0;
 $KnownFS{ext4}{ro}        = 0;
 $KnownFS{ext2}{ro}        = 0;
@@ -258,22 +260,6 @@ sub createDirInteractive {
 	return undef;
 }
 
-#============================================
-# findExec
-#--------------------------------------------
-sub findExec {
-	my $execName = shift;
-	my $execPath = qxx ("which $execName 2>&1"); chomp $execPath;
-	my $code = $? >> 8;
-	if ($code != 0) {
-		if ($kiwi) {
-			$kiwi -> loginfo ("warning: $execName not found\n");
-		}
-		return undef;
-	}
-	return $execPath;
-}
-
 #==========================================
 # main
 #------------------------------------------
@@ -393,15 +379,14 @@ sub main {
 		# Process system image description
 		#------------------------------------------
 		$kiwi -> info ("Reading image description [Prepare]...\n");
+		if (! checkImageIntegrity($Prepare)) {
+			my $code = kiwiExit (1); return $code;
+		}
 		my $xml = new KIWIXML (
 			$kiwi,$Prepare,undef,\@Profiles
 		);
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
-		}
-		if (! $xml -> haveMD5File()) {
-			$kiwi -> warning ("Description provides no MD5 hash, check");
-			$kiwi -> skipped ();
 		}
 		my %type = %{$xml->getImageTypeAndAttributes()};
 		#==========================================
@@ -1760,7 +1745,13 @@ sub listImage {
 		if (-l "$System/$image") {
 			next;
 		}
-		if (getControlFile ($System."/".$image)) {
+		if ($image =~ /(iso|net|oem|usb|vmx)boot/) {
+			next;
+		}
+		my $controlFile = $locator -> getControlFile (
+			"$System/$image"
+		);
+		if ($controlFile) {
 			$kiwi -> info ($image);
 			my $xml = new KIWIXML (
 				$kiwi,$System."/".$image,undef,undef
@@ -2401,7 +2392,7 @@ sub createHash {
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
-	if (! getControlFile ($CreateHash)) {
+	if (! $locator -> getControlFile ($CreateHash)) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Not a kiwi description: no xml description found");
 		$kiwi -> failed ();
@@ -2863,40 +2854,28 @@ sub checkFileSystem {
 }
 
 #==========================================
-# getControlFile
+# checkImageIntegrity
 #------------------------------------------
-sub getControlFile {
-	# /.../
-	# This function receives a directory as parameter
-	# and searches for a kiwi xml description in it.
-	# ----
-	my $dir    = shift;
-	my $config = "$dir/$ConfigName";
-	if (! -d $dir) {
-		if (($main::kiwi) && ($main::kiwi -> trace())) {
-			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+sub checkImageIntegrity {
+	# /../
+	# Check the image description integrity if a checksum file exists
+	# ---
+	my $imageDesc = shift;
+	my $checkmdFile = $imageDesc."/.checksum.md5";
+	if (-f $checkmdFile) {
+		my $data = qxx ("cd $imageDesc && md5sum -c .checksum.md5 2>&1");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			chomp $data;
+			$kiwi -> error ("Integrity check for $imageDesc failed:\n$data");
+			$kiwi -> failed ();
+			return undef;
 		}
-		return undef;
-	}
-	if (-f $config) {
-		return $config;
-	}
-	my @globsearch = glob ($dir."/*.kiwi");
-	my $globitems  = @globsearch;
-	if ($globitems == 0) {
-		if (($main::kiwi) && ($main::kiwi -> trace())) {
-			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
-		}
-		return undef;
-	} elsif ($globitems > 1) {
-		if (($main::kiwi) && ($main::kiwi -> trace())) {
-			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
-		}
-		return undef;
 	} else {
-		$config = pop @globsearch;
+		$kiwi -> warning ("Description provides no MD5 hash, check");
+		$kiwi -> skipped ();
 	}
-	return $config;
+	return 1;
 }
 
 #==========================================

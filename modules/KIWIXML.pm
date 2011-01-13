@@ -25,6 +25,7 @@ use File::Glob ':glob';
 use File::Basename;
 use LWP;
 use XML::LibXML;
+use KIWILocator;
 use KIWILog;
 use KIWIManager qw (%packageManager);
 use KIWIOverlay;
@@ -90,57 +91,31 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
+	my $arch = qxx ("uname -m"); chomp $arch;
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
+	}
+	#==========================================
+	# Check pre condition
+	#------------------------------------------
+	if (! -d $imageDesc) {
+		$kiwi -> error ("Couldn't locate configuration directory $imageDesc");
+		$kiwi -> failed ();
+		return undef;
 	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi} = $kiwi;
 	#==========================================
-	# Setup defaults to read in image directory
+	# Lookup XML configuration file
 	#------------------------------------------
-	if (($imageDesc !~ /\//) && (! -d $imageDesc)) {
-		$imageDesc = $main::System."/".$imageDesc;
-	}
-	my $arch = qxx ("uname -m"); chomp $arch;
-	my $controlFile = $imageDesc."/".$main::ConfigName;
-	my $checkmdFile = $imageDesc."/.checksum.md5";
-	my $havemd5File = 1;
+	my $locator = new KIWILocator($kiwi);
+	my $controlFile = $locator -> getControlFile ( $imageDesc );
 	#==========================================
-	# Check xml alternatives if default failed
+	# Store object data
 	#------------------------------------------
-	if (! -f $controlFile) {
-		my @globsearch = glob ($imageDesc."/*.kiwi");
-		my $globitems  = @globsearch;
-		if ($globitems == 0) {
-			$kiwi -> error ("Cannot open control file: $controlFile");
-			$kiwi -> failed ();
-			return undef;
-		} elsif ($globitems > 1) {
-			$kiwi -> error ("Found multiple *.kiwi control files");
-			$kiwi -> failed ();
-			return undef;
-		} else {
-			$controlFile = pop @globsearch;
-		}
-	}
 	$this->{xmlOrigFile} = $controlFile;
-	#==========================================
-	# Check image md5 sum
-	#------------------------------------------
-	if (-f $checkmdFile) {
-		my $data = qxx ("cd $imageDesc && md5sum -c .checksum.md5 2>&1");
-		my $code = $? >> 8;
-		if ($code != 0) {
-			chomp $data;
-			$kiwi -> error ("Integrity check for $imageDesc failed:\n$data");
-			$kiwi -> failed ();
-			return undef;
-		}
-	} else {
-		$havemd5File = 0;
-	}
 	#==========================================
 	# Read and Validate XML information
 	#------------------------------------------
@@ -229,11 +204,9 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{imageDesc}          = $imageDesc;
 	$this->{driversNodeList}    = $driversNodeList;
 	$this->{usrdataNodeList}    = $usrdataNodeList;
 	$this->{instsrcNodeList}    = $instsrcNodeList;
-	$this->{havemd5File}        = $havemd5File;
 	$this->{arch}               = $arch;
 	$this->{controlFile}        = $controlFile;
 	#==========================================
@@ -302,14 +275,6 @@ sub getConfigName {
 	my $this = shift;
 	my $name = $this->{controlFile};
 	return ($name);
-}
-
-#==========================================
-# haveMD5File
-#------------------------------------------
-sub haveMD5File {
-	my $this = shift;
-	return $this->{havemd5File};
 }
 
 #==========================================
