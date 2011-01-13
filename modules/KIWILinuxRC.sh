@@ -5851,7 +5851,7 @@ function checkFDiskEndSector {
 #--------------------------------------
 function fixupFDiskSectors {
 	# /.../
-	# align the partition start sectors using fdisk
+	# align the first partition start sector using fdisk
 	# ----
 	local input=$1
 	local palign=$2
@@ -5888,6 +5888,8 @@ function fixupFDiskSectors {
 				echo "$pdev" >> $input
 			fi
 		fi
+		# handle only the first partition
+		break
 	done
 	if [ -s $input ]; then
 		echo "w" >> $input
