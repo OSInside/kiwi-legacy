@@ -5740,6 +5740,9 @@ function callPartitioner {
 			fi
 		fi
 		if [ ! -z "$OEM_ALIGN" ];then
+			if [ ! -z "$haveLVM" ];then
+				vgchange -an
+			fi
 			fixupFDiskSectors $input $pstart
 		fi
 	elif [ $PARTITIONER = "fdasd" ];then
