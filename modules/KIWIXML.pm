@@ -29,8 +29,30 @@ use KIWILog;
 use KIWIManager qw (%packageManager);
 use KIWIOverlay;
 use KIWIQX;
-use KIWISatSolver;
 use KIWIXMLValidator;
+
+#==========================================
+# Modules (satsolver support)
+#------------------------------------------
+BEGIN {
+	my $satsolver = (glob ("/usr/lib/perl5/vendor_perl/*/satsolver.pm"))[0];
+	my $legacy    = 1;
+	if ($satsolver) {
+		# /.../
+		# check for solutions() method provided with this version of
+		# perl-satsolver. It must exist in order to work with kiwi
+		# ----
+		system ("grep -q '^\*solutions =' $satsolver");
+		$legacy = $? >> 8;
+	}
+	if ($legacy) {
+		require KIWISatSolverLegacy;
+		KIWISatSolverLegacy -> import;
+	} else {
+		require KIWISatSolver;
+		KIWISatSolver -> import;
+	}
+}
 
 #==========================================
 # Exports
@@ -2776,8 +2798,9 @@ sub getList {
 		#==========================================
 		# Get type and packages
 		#------------------------------------------
-		my $node = $nodes -> get_node($i);
-		my $type;
+		my $node  = $nodes -> get_node($i);
+		my $ptype = $node -> getAttribute ("patternType");
+		my $type  = "";
 		if (($what ne "metapackages") && ($what ne "instpackages")) {
 			$type = $node -> getAttribute ("type");
 			if ($type ne $what) {
@@ -2869,7 +2892,8 @@ sub getList {
 					#------------------------------------------
 					# 1) try to use libsatsolver...
 					my $psolve = new KIWISatSolver (
-						$kiwi,\@pattlist,$this->{urllist},"solve-patterns"
+						$kiwi,\@pattlist,$this->{urllist},"solve-patterns",
+						undef,undef,undef,$ptype
 					);
 					if (! defined $psolve) {
 						$kiwi -> error (
@@ -3050,6 +3074,7 @@ sub getInstallSize {
 	my $solf    = undef;
 	my @solp    = ();
 	my @rpat    = ();
+	my $ptype;
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		my $type = $node -> getAttribute ("type");
@@ -3059,10 +3084,10 @@ sub getInstallSize {
 		if (! $this -> __requestedProfile ($node)) {
 			next;
 		}
-		#==========================================
-		# Handle package names to be deleted later
-		#------------------------------------------
 		if ($type eq "delete") {
+			#==========================================
+			# Handle package names to be deleted later
+			#------------------------------------------
 			my @dlist = $node -> getElementsByTagName ("package");
 			foreach my $element (@dlist) {
 				my $package = $element -> getAttribute ("name");
@@ -3074,19 +3099,23 @@ sub getInstallSize {
 					push @delete,$package;
 				}
 			}
-		}
-		#==========================================
-		# Handle package names
-		#------------------------------------------
-		my @plist = $node -> getElementsByTagName ("package");
-		foreach my $element (@plist) {
-			my $package = $element -> getAttribute ("name");
-			if (! $this -> isArchAllowed ($element,"packages")) {
-				next;
+		} else {
+			#==========================================
+			# Handle package names to be included
+			#------------------------------------------
+			if (($type eq "image") && (! $ptype)) {
+				$ptype = $node -> getAttribute ("patternType");
 			}
-			$package =~ s/@//;
-			if ($package) {
-				push @result,$package;
+			my @plist = $node -> getElementsByTagName ("package");
+			foreach my $element (@plist) {
+				my $package = $element -> getAttribute ("name");
+				if (! $this -> isArchAllowed ($element,"packages")) {
+					next;
+				}
+				$package =~ s/@//;
+				if ($package) {
+					push @result,$package;
+				}
 			}
 		}
 		#==========================================
@@ -3129,7 +3158,7 @@ sub getInstallSize {
 	} else {
 		my $psolve = new KIWISatSolver (
 			$kiwi,\@result,$this->{urllist},"solve-patterns",
-			undef,undef
+			undef,undef,undef,$ptype
 		);
 		if (! defined $psolve) {
 			$kiwi -> warning ("SaT solver setup failed");

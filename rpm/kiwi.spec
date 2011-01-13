@@ -18,8 +18,6 @@
 # needsrootforbuild
 
 Url:            http://kiwi.berlios.de
-%define sattools_version %(rpm -q --qf %{VERSION}-%{RELEASE} satsolver-tools)
-
 Name:           kiwi
 BuildRequires:  perl-Config-IniFiles perl-XML-LibXML perl-libwww-perl
 BuildRequires:  module-init-tools screen zlib-devel
@@ -36,7 +34,10 @@ BuildRequires:  libqt4 libqt4-devel
 BuildRequires:  freetype2-devel libpng-devel qt qt-devel
 %endif 
 %if %{suse_version} > 1030
-BuildRequires:  libexpat-devel libsatsolver-devel rpm-devel
+BuildRequires:  libexpat-devel rpm-devel
+%endif
+%if %{suse_version} > 1030 && %{suse_version} <= 1130
+BuildRequires: libsatsolver-devel
 %endif
 %if %{suse_version} <= 1010
 Requires:       qt
@@ -52,6 +53,9 @@ Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
 Requires:       kiwi-tools libxslt checkmedia
 %if %{suse_version} > 1030
 Requires:       satsolver-tools
+%endif
+%if %{suse_version} > 1130
+Requires:       perl-satsolver
 %endif
 %ifarch %ix86 x86_64
 Requires:       master-boot-code

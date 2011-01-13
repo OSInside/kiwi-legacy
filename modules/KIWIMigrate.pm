@@ -1117,7 +1117,8 @@ sub getPackageList {
 		}
 		$this->{patterns} = \@patlist;
 		my $psolve = new KIWISatSolver (
-			$kiwi,\@patlist,\@urllist,undef,undef,undef,"silent"
+			$kiwi,\@patlist,\@urllist,undef,undef,undef,
+			"silent","plusRecommended"
 		);
 		my @result = ();
 		if (! defined $psolve) {
@@ -1170,7 +1171,8 @@ sub getPackageList {
 			my $repo = $psolve -> getRepo();
 			my $pool = $psolve -> getPool();
 			my $xsolve = new KIWISatSolver (
-				$kiwi,\@result,\@urllist,"solve-packages",$repo,$pool,"silent"
+				$kiwi,\@result,\@urllist,"solve-packages",$repo,$pool,
+				"silent","plusRecommended"
 			);
 			if (! defined $xsolve) {
 				$kiwi -> error  ("Failed to solve packages");
