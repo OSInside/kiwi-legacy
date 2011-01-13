@@ -4342,21 +4342,19 @@ sub setStoragePartition {
 		# fdisk
 		#------------------------------------------
 		/^fdisk/  && do {
-			$kiwi -> loginfo (
-				"FDISK input: $device [@commands]"
-			);
 			$status = qxx ("dd if=/dev/zero of=$device bs=512 count=1 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> loginfo ($status);
 				return undef;
 			}
-			if (! open (FD,"|/sbin/fdisk -u $device &> $tmpdir/fdisk.log")) {
-				return undef;
-			}
 			my $palign = $xml -> getOEMAlignPartition();
 			if (($palign) && ("$palign" eq "true")) {
-				# fix up the first sector
+				#==========================================
+				# create aligned table
+				#------------------------------------------
+				my @commands_first = ();
+				my @commands_next  = ();
 				for (my $count=0;$count<@commands;$count++) {
 					if ($commands[$count] eq "n") {
 						if (($commands[$count+2] eq "1") &&
@@ -4367,15 +4365,58 @@ sub setStoragePartition {
 						}
 					}
 				}
-			}
-			foreach my $cmd (@commands) {
-				if ($cmd eq ".") {
-					print FD "\n";
-				} else {
-					print FD "$cmd\n";
+				for (my $count=0;$count<=4;$count++) {
+					push @commands_first, $commands[$count];
 				}
+				push @commands_first, "w";
+				push @commands_first, "q";
+				for (my $count=5;$count<@commands;$count++) {
+					push @commands_next, $commands[$count];
+				}
+				$kiwi -> loginfo (
+					"FDISK input aligned: $device [@commands]"
+				);
+				if (! open (FD,"|/sbin/fdisk -u $device &>$tmpdir/fdisk.log")) {
+					return undef;
+				}
+				foreach my $cmd (@commands_first) {
+					if ($cmd eq ".") {
+						print FD "\n";
+					} else {
+						print FD "$cmd\n";
+					}
+				}
+				close FD;
+				if (! open (FD,"|/sbin/fdisk $device &>$tmpdir/fdisk.log")) {
+					return undef;
+				}
+				foreach my $cmd (@commands_next) {
+					if ($cmd eq ".") {
+						print FD "\n";
+					} else {
+						print FD "$cmd\n";
+					}
+				}
+				close FD;
+			} else {
+				#==========================================
+				# standard call without alignment
+				#------------------------------------------
+				$kiwi -> loginfo (
+					"FDISK input: $device [@commands]"
+				);
+				if (! open (FD,"|/sbin/fdisk $device &>$tmpdir/fdisk.log")) {
+					return undef;
+				}
+				foreach my $cmd (@commands) {
+					if ($cmd eq ".") {
+						print FD "\n";
+					} else {
+						print FD "$cmd\n";
+					}
+				}
+				close FD;
 			}
-			close FD;
 			$result = $? >> 8;
 			my $flog;
 			if (open (FD,"$tmpdir/fdisk.log")) {
