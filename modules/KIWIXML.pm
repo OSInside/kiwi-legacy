@@ -2329,6 +2329,8 @@ sub getPackageAttributes {
 	my $kiwi = $this->{kiwi};
 	my @node = $this->{packageNodeList} -> get_nodelist();
 	my %result;
+	$result{patternType} = "onlyRequired";
+	$result{type} = $what;
 	foreach my $element (@node) {
 		if (! $this -> __requestedProfile ($element)) {
 			next;
@@ -2338,11 +2340,10 @@ sub getPackageAttributes {
 			next;
 		}
 		my $ptype = $element -> getAttribute ("patternType");
-		if (! defined $ptype) {
-			$ptype = "onlyRequired";
+		if ($ptype) {
+			$result{patternType} = $ptype;
+			$result{type} = $type;
 		}
-		$result{patternType} = $ptype;
-		$result{type} = $type;
 	}
 	return %result;
 }
