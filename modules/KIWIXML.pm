@@ -4199,7 +4199,7 @@ sub __updateDescriptionFromChangeSet {
 		$this -> __setOEMOptionsElement ("oem-reboot-interactive",$changeset);
 	}
 	if (defined $changeset->{"oem-shutdown"}) {
-		$this -> __setOEMOptionsElement ("oem-shutdown");
+		$this -> __setOEMOptionsElement ("oem-shutdown",$changeset);
 	}
 	if (defined $changeset->{"oem-shutdown-interactive"}) {
 		$this -> __setOEMOptionsElement ("oem-shutdown-interactive",$changeset);
