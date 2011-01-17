@@ -241,6 +241,34 @@ sub __checkFilesysSpec {
 }
 
 #==========================================
+# __checkPatternTypeAttrUse
+#------------------------------------------
+sub __checkPatternTypeAttrUse {
+    # ...
+    # The PatternType attribute may only be used for image and bootstrap
+    # packages. Check that this is set appropriately.
+    # ---
+    my $this = shift;
+    my @pkgsNodes = $this->{systemTree} -> getElementsByTagName("packages");
+    my @allowedTypes = qw /bootstrap image/;
+    for my $pkgs (@pkgsNodes) {
+        if ($pkgs -> getAttribute( "patternType" )) {
+            my $type = $pkgs -> getAttribute( "type");
+            if (! grep /$type/, @allowedTypes) {
+                my $kiwi = $this->{kiwi};
+                my $msg = 'The patternType atribute may only be used for '
+                  . '<packages> specification of type "bootstrap" and '
+                  . 'type "image".';
+                $kiwi -> error ( $msg );
+				$kiwi -> failed ();
+                return undef
+            }
+        }
+    }
+    return 1;
+}
+
+#==========================================
 # __checkPostDumpAction
 #------------------------------------------
 sub __checkPostDumpAction {
@@ -530,6 +558,9 @@ sub __validateConsistency {
 		return undef;
 	}
 	if (! $this -> __checkFilesysSpec()) {
+		return undef;
+	}
+    if (! $this -> __checkPatternTypeAttrUse()) {
 		return undef;
 	}
 	if (! $this -> __checkPostDumpAction()) {
