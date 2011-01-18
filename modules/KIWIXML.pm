@@ -1857,14 +1857,14 @@ sub addRepository {
 		my $addrepo = new XML::LibXML::Element ("repository");
 		$addrepo -> setAttribute ("type",$type);
 		$addrepo -> setAttribute ("status","fixed");
-		my $addsrc  = new XML::LibXML::Element ("source");
-		$addsrc -> setAttribute ("path",$path);
 		if (defined $alias) {
-			$addsrc -> setAttribute ("alias",$alias);
+			$addrepo -> setAttribute ("alias",$alias);
 		}
 		if ((defined $prio) && ($prio != 0)) {
-			$addsrc -> setAttribute ("priority",$prio);
+			$addrepo -> setAttribute ("priority",$prio);
 		}
+		my $addsrc  = new XML::LibXML::Element ("source");
+		$addsrc -> setAttribute ("path",$path);
 		$addrepo -> appendChild ($addsrc);
 		$this->{imgnameNodeList}->get_node(1)->appendChild ($addrepo);
 	}
