@@ -341,9 +341,14 @@ sub setupAutoYaST {
 		$kiwi -> failed ();
 		return "failed";
 	}
-	qxx (
-		"cp $imageDesc/config-yast-autoyast.xml $root/$autodir/$autocnf 2>&1"
-	);
+	my $autosetup = "$root/$autodir/$autocnf";
+	if ( -f $autosetup ) {
+		$kiwi -> info ("$autocnf file already exists, won't overwrite");
+	} else {
+		qxx (
+			"cp $imageDesc/config-yast-autoyast.xml $autosetup 2>&1"
+		);
+	}
 	if ( ! open (FD,">$root/etc/install.inf")) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to create install.inf: $!");
@@ -392,13 +397,19 @@ sub setupFirstBootYaST {
 		return "failed";
 	}
 	my $firstboot = "$root/etc/YaST2/firstboot.xml";
-	my $data = qxx ("cp $imageDesc/config-yast-firstboot.xml $firstboot 2>&1");
-	my $code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed to copy config-yast-firstboot.xml: $data");
-		$kiwi -> failed ();
-		return "failed"; 
+	if ( -f $firstboot ) {
+		$kiwi -> info ("firstboot.xml file already exists, won't overwrite");
+	} else {
+		my $data = qxx (
+			"cp $imageDesc/config-yast-firstboot.xml $firstboot 2>&1"
+		);
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to copy config-yast-firstboot.xml: $data");
+			$kiwi -> failed ();
+			return "failed";
+		}
 	}
 	# /.../
 	# keep an existing /etc/sysconfig/firstboot or copy the template
@@ -455,10 +466,10 @@ sub setupFirstBootYaST {
 			if (! -e "$root/etc/init.d/$service") {
 				next;
 			}
-			$data = qxx (
+			my $data = qxx (
 				"chroot $root /sbin/insserv /etc/init.d/$service 2>&1"
 			);
-			$code = $? >> 8;
+			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error ("Failed to activate service(s): $data");
@@ -471,8 +482,8 @@ sub setupFirstBootYaST {
 		# current firstboot service works like yast second stage and
 		# is activated by touching /var/lib/YaST2/reconfig_system
 		# ----
-		$data = qxx ("touch $root/var/lib/YaST2/reconfig_system 2>&1");
-		$code = $? >> 8;
+		my $data = qxx ("touch $root/var/lib/YaST2/reconfig_system 2>&1");
+		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error ("Failed to activate firstboot: $data");
