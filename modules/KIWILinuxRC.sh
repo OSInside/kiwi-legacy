@@ -6112,6 +6112,7 @@ function normalizeRepartInput {
 	#======================================
 	# create list of commands
 	#--------------------------------------
+	unset pcmds
 	for cmd in $*;do
 		pcmds[$index]=$cmd
 		index=$(($index + 1))
@@ -6592,6 +6593,32 @@ function pxeSwapDevice {
 		esac
 		done
 		if test $partID = "82" -o $partID = "S";then
+			device=$(ddn $DISK $count)
+			waitForStorageDevice $device
+			echo $device
+			return
+		fi
+	done
+}
+#======================================
+# pxeBootDevice
+#--------------------------------------
+function pxeBootDevice {
+	local field=0
+	local count=0
+	local device
+	local IFS=","
+	for i in $PART;do
+		field=0
+		count=$((count + 1))
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		if [ $partMount = "/boot" ];then
 			device=$(ddn $DISK $count)
 			waitForStorageDevice $device
 			echo $device

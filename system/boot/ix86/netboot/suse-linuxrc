@@ -297,6 +297,19 @@ if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 				2) imageVersion=$n; field=3
 			esac
 		done
+		if [ ! -z "$RAID" ];then
+			field=0
+			IFS=";" ; for n in $RAID;do
+				case $field in
+					0) raidLevel=$n ; field=1 ;;
+					1) raidFirst=$n ; field=2 ;;
+					2) raidSecond=$n; field=3
+				esac
+			done
+			IFS=$IFS_ORIG
+			mdadm --assemble $imageDevice \
+				$raidFirst $raidSecond
+		fi
 		updateNeeded initialize
 		if linuxPartition $imageDiskDevice;then
 			if mountSystem $imageDevice;then
@@ -312,9 +325,11 @@ if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 				umountSystem
 				RELOAD_IMAGE="yes"
 				systemIntegrity="clean"
+				mdadm --stop $imageDevice
 			fi
 		else
 			systemIntegrity="clean"
+			mdadm --stop $imageDevice
 		fi
 	done
 fi
@@ -331,6 +346,73 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	cleanPartitionTable
 	createPartitionerInput $(pxePartitionInput)
 	callPartitioner $input
+	if [ ! -z "$RAID" ];then
+		#======================================
+		# Setup raid partitions
+		#--------------------------------------
+		field=0
+		IFS=";" ; for n in $RAID;do
+			case $field in
+				0) raidLevel=$n ; field=1 ;;
+				1) raidFirst=$n ; field=2 ;;
+				2) raidSecond=$n; field=3
+			esac
+		done
+		IFS=$IFS_ORIG
+		raidDiskFirst=$(dn $raidFirst)
+		raidDiskSecond=$(dn $raidSecond)
+		raidIDFirst=$(nd $raidFirst)
+		raidIDSecond=$(nd $raidSecond)
+		#======================================
+		# wait for raid disks to appear
+		#--------------------------------------
+		if ! waitForStorageDevice $raidDiskFirst;then
+			systemException \
+				"Disk $raidDiskFirst doesn't appear... fatal !" \
+			"reboot"
+		fi
+		if ! waitForStorageDevice $raidDiskSecond;then
+			systemException \
+				"Disk $raidDiskSecond doesn't appear... fatal !" \
+			"reboot"
+		fi
+		rm -f $input
+		imageDiskDevice=$raidDiskFirst
+		createPartitionerInput n p $raidIDFirst . . t $raidIDFirst fd
+		callPartitioner $input
+		rm -f $input
+		imageDiskDevice=$raidDiskSecond
+		cleanPartitionTable
+		createPartitionerInput n p $raidIDSecond . . t $raidIDSecond fd
+		callPartitioner $input
+		rm -f $input
+		#======================================
+		# wait for raid partitions to appear
+		#--------------------------------------
+		if ! waitForStorageDevice $raidFirst;then
+			systemException \
+				"Disk $raidFirst doesn't appear... fatal !" \
+			"reboot"
+		fi
+		if ! waitForStorageDevice $raidSecond;then
+			systemException \
+				"Disk $raidSecond doesn't appear... fatal !" \
+			"reboot"
+		fi
+		imageDiskDevice=$DISK
+		#======================================
+		# Create raid array
+		#--------------------------------------
+		mdadm --zero-superblock $raidFirst
+		mdadm --zero-superblock $raidSecond
+		yes | mdadm --create /dev/md0 \
+			--level=$raidLevel --raid-disks=2 $raidFirst $raidSecond
+		if [ ! $? = 0 ];then
+			systemException \
+				"Failed to create raid array... fatal !" \
+			"reboot"
+		fi
+	fi
 	#======================================
 	# Setup swap space if requested
 	#--------------------------------------
@@ -339,6 +421,13 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 		if ! mkswap $imageSwapDevice 1>&2;then
 			systemException "Failed to create swap signature" "reboot"
 		fi
+	fi
+	#======================================
+	# Setup boot space if requested
+	#--------------------------------------
+	export imageBootDevice=$(pxeBootDevice)
+	if [ ! -z "$imageBootDevice" ];then
+		createFilesystem $imageBootDevice
 	fi
 	runHook postpartition
 fi
@@ -668,13 +757,24 @@ validateRootTree
 runHook postmount
 
 #======================================
-# 16) Import fixed configuration files
+# 16) Setup boot device contents
+#--------------------------------------
+if [ ! -z "$imageBootDevice" ];then
+	export bootid=$(nd $imageBootDevice)
+	cd /mnt/boot && tar -czf /tmp/boot.tgz .
+	rm -rf /mnt/boot/* && mount $imageBootDevice /mnt/boot
+	cd /mnt/boot && tar -xf /tmp/boot.tgz
+	rm -f /tmp/boot.tgz
+fi
+
+#======================================
+# 17) Import fixed configuration files
 #--------------------------------------
 runHook preconfig
 if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	mkdir -p /config
 	#=======================================
-	# 16.1) Get files from CONF, VENDOR_CONF
+	# 17.1) Get files from CONF, VENDOR_CONF
 	#---------------------------------------
 	IFS="," ; for i in $CONF $VENDOR_CONF;do
 		field=0
@@ -693,7 +793,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	done
 	IFS=$IFS_ORIG
 	#=======================================
-	# 16.2) Check for KIWI_INITRD
+	# 17.2) Check for KIWI_INITRD
 	#---------------------------------------
 	if [ $haveDisk = "1" ] && [ $systemIntegrity = "clean" ];then
 		if [ ! -z "$KIWI_INITRD" ];then
@@ -721,7 +821,7 @@ fi
 runHook postconfig
 
 #======================================
-# 17) check filesystem and kernels
+# 18) check filesystem and kernels
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	if [ "$FSTYPE" != "nfs" ];then
@@ -731,7 +831,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 18) Create system dependant files
+# 19) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	mkdir -p /config
@@ -741,15 +841,6 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	if test ! -z $DISK;then
 		updateSwapDeviceFstab /config ${DISK}1
 		updateOtherDeviceFstab /config
-		if [ "$haveLVM" = "yes" ];then
-			updateLVMBootDeviceFstab /config $imageBootDevice
-		elif [ "$haveClicFS" = "yes" ];then
-			updateClicBootDeviceFstab /config $imageBootDevice
-		elif [ "$haveBtrFS" = "yes" ];then
-			updateBtrBootDeviceFstab /config $imageBootDevice
-		elif [ "$haveXFS" = "yes" ];then
-			updateXfsBootDeviceFstab /config $imageBootDevice
-		fi
 		setupBootLoader /mnt /config $(($bootid - 1)) \
 			$imageRootDevice NET $imageSwapDevice
 		setupKernelModules /config
@@ -757,7 +848,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 19) If image is new, notify
+# 20) If image is new, notify
 #--------------------------------------
 runHook prenotify
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
@@ -766,32 +857,32 @@ fi
 runHook postnotify
 
 #======================================
-# 20) send DHCP_RELEASE, reset cache
+# 21) send DHCP_RELEASE, reset cache
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	releaseNetwork
 fi
 
 #======================================
-# 21) copy system dependant files
+# 22) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 22) update system dependant files
+# 23) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
-# 23) umount system filesystems
+# 24) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 24) copy initrd files to image
+# 25) copy initrd files to image
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	if canWrite /mnt;then
@@ -802,23 +893,23 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 25) check if reboot is required
+# 26) check if reboot is required
 #--------------------------------------
 kernelCheck /mnt
 
 #======================================
-# 26) kill boot shell
+# 27) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 27) Activate new root
+# 28) Activate new root
 #--------------------------------------
 runHook preactivate
 activateImage
 
 #======================================
-# 28) Unmount initrd / system init
+# 29) Unmount initrd / system init
 #--------------------------------------
 bootImage $@

@@ -186,6 +186,7 @@
 		<package name="cromfs"/>
 		<package name="kiwi-tools"/>
 		<package name="cyrus-sasl"/>
+		<package name="mdadm"/>
 	</packages>
 	<packages type="image" profiles="diskless">
 		<package name="bc"/>
@@ -242,7 +243,6 @@
 		<package name="limal-bootloader"/>
 		<package name="limal-perl"/>
 		<package name="logrotate"/>
-		<package name="mdadm"/>
 		<package name="mingetty"/>
 		<package name="openSUSE-release"/>
 		<package name="openldap2-client"/>
