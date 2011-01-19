@@ -208,6 +208,32 @@ sub __checkDefaultTypeSetting {
 }
 
 #==========================================
+# __checkDisplaynameValid
+#------------------------------------------
+sub __checkDisplaynameValid {
+	# ...
+	# The displayname attribute of the image may not contain spaces
+	# ---
+	my $this = shift;
+	my @imgNodes = $this->{systemTree} -> getElementsByTagName('image');
+	# There is only one image node, it is the root node
+	my $displayName = $imgNodes[0] -> getAttribute('displayname');
+	if ($displayName) {
+		my @words = split /\s/, $displayName;
+		my $count = @words;
+		if ($count > 1) {
+			my $kiwi = $this->{kiwi};
+			my $msg = 'Found white space in string provided as displayname. '
+			. 'No white space permitted';
+			$kiwi -> error ( $msg );
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkFilesysSpec
 #------------------------------------------
 sub __checkFilesysSpec {
@@ -244,28 +270,28 @@ sub __checkFilesysSpec {
 # __checkPatternTypeAttrUse
 #------------------------------------------
 sub __checkPatternTypeAttrUse {
-    # ...
-    # The PatternType attribute may only be used for image and bootstrap
-    # packages. Check that this is set appropriately.
-    # ---
-    my $this = shift;
-    my @pkgsNodes = $this->{systemTree} -> getElementsByTagName("packages");
-    my @allowedTypes = qw /bootstrap image/;
-    for my $pkgs (@pkgsNodes) {
-        if ($pkgs -> getAttribute( "patternType" )) {
-            my $type = $pkgs -> getAttribute( "type");
-            if (! grep /$type/, @allowedTypes) {
-                my $kiwi = $this->{kiwi};
-                my $msg = 'The patternType atribute may only be used for '
-                  . '<packages> specification of type "bootstrap" and '
-                  . 'type "image".';
-                $kiwi -> error ( $msg );
+	# ...
+	# The PatternType attribute may only be used for image and bootstrap
+	# packages. Check that this is set appropriately.
+	# ---
+	my $this = shift;
+	my @pkgsNodes = $this->{systemTree} -> getElementsByTagName("packages");
+	my @allowedTypes = qw /bootstrap image/;
+	for my $pkgs (@pkgsNodes) {
+		if ($pkgs -> getAttribute( "patternType" )) {
+			my $type = $pkgs -> getAttribute( "type");
+			if (! grep /$type/, @allowedTypes) {
+				my $kiwi = $this->{kiwi};
+				my $msg = 'The patternType atribute may only be used for '
+				. '<packages> specification of type "bootstrap" and '
+				. 'type "image".';
+				$kiwi -> error ( $msg );
 				$kiwi -> failed ();
-                return undef
-            }
-        }
-    }
-    return 1;
+				return undef
+			}
+		}
+	}
+	return 1;
 }
 
 #==========================================
@@ -557,10 +583,13 @@ sub __validateConsistency {
 	if (! $this -> __checkDefaultTypeSetting()){
 		return undef;
 	}
+	if (! $this -> __checkDisplaynameValid()) {
+		return undef;
+	}
 	if (! $this -> __checkFilesysSpec()) {
 		return undef;
 	}
-    if (! $this -> __checkPatternTypeAttrUse()) {
+	if (! $this -> __checkPatternTypeAttrUse()) {
 		return undef;
 	}
 	if (! $this -> __checkPostDumpAction()) {
