@@ -122,7 +122,10 @@ sub new {
 	my $validator = new KIWIXMLValidator (
 		$kiwi,$controlFile,$main::Revision,$main::Schema,$main::SchemaCVT
 	);
-	my $isValid = $validator -> validate();
+	my $isValid;
+	if ($validator) {
+		$isValid = $validator -> validate();
+	}
 	if (! $isValid) {
 		return undef;
 	}
