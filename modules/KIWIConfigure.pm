@@ -329,19 +329,19 @@ sub setupAutoYaST {
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $imageDesc = $this->{imageDesc};
-	if (! -f "$imageDesc/config-yast-autoyast.xml") {
+	my $autodir   = "var/lib/autoinstall/autoconf";
+	my $autocnf   = "autoconf.xml";
+	my $autosetup = "$root/$autodir/$autocnf";
+	if ((! -f "$imageDesc/config-yast-autoyast.xml") && (! -f $autosetup)) {
 		return "skipped";
 	}
 	$kiwi -> info ("Setting up AutoYaST...");
-	my $autodir = "var/lib/autoinstall/autoconf";
-	my $autocnf = "autoconf.xml";
 	if (! -d "$root/$autodir") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("AutoYaST seems not to be installed");
 		$kiwi -> failed ();
 		return "failed";
 	}
-	my $autosetup = "$root/$autodir/$autocnf";
 	if ( -f $autosetup ) {
 		$kiwi -> info ("$autocnf file already exists, won't overwrite");
 	} else {
@@ -383,7 +383,8 @@ sub setupFirstBootYaST {
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $imageDesc = $this->{imageDesc};
-	if (! -f "$imageDesc/config-yast-firstboot.xml") {
+	my $firstboot = "$root/etc/YaST2/firstboot.xml";
+	if ((! -f "$imageDesc/config-yast-firstboot.xml") && (! -f $firstboot)) {
 		return "skipped";
 	}
 	$kiwi -> info ("Setting up YaST firstboot service...");
@@ -396,7 +397,6 @@ sub setupFirstBootYaST {
 		$kiwi -> failed ();
 		return "failed";
 	}
-	my $firstboot = "$root/etc/YaST2/firstboot.xml";
 	if ( -f $firstboot ) {
 		$kiwi -> info ("firstboot.xml file already exists, won't overwrite");
 	} else {
