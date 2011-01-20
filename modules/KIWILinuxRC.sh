@@ -6708,8 +6708,16 @@ function setupBootPartition {
 		fi
 		return
 	fi
+	if [ -z "$imageDiskDevice" ];then
+		# no disk device like for live ISO based on clicfs
+		return
+	fi
 	if [ -z "$imageBootDevice" ];then
 		export imageBootDevice=$(ddn $imageDiskDevice $bootid)
+	fi
+	if [ ! -e $imageBootDevice ];then
+		# no such boot device like for live ISO hybrid disk
+		return
 	fi
 	mkdir -p /mnt/$mpoint
 	mount $imageBootDevice /mnt/$mpoint
