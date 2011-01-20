@@ -33,7 +33,7 @@
     </group>
   </cmdsynopsis>
 
-  <para>If not test names are set the default tests rpm and ldd run. The
+  <para>If no test names are set, the default tests rpm and ldd run. The
     name of a test corresponds with the name of the directory the test
     is implemented in. </para>
   
@@ -78,7 +78,7 @@
 &lt;/test_case&gt;</screen>
 
     <para>There are basically two sections called
-        <sgmltag>equirements</sgmltag> and <sgmltag>test</sgmltag>. In
+        <sgmltag>requirements</sgmltag> and <sgmltag>test</sgmltag>. In
       requirements you define what files/directories or packages has to
       be present in your image to run the test. For example if you need
       to check the RPM database, the database has to be present within

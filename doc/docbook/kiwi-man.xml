@@ -124,7 +124,7 @@
         <arg choice="plain">-r</arg>
         <arg choice="plain">--root</arg>
         <replaceable>image-root</replaceable>
-        <arg choice="plain">--chache</arg>
+        <arg choice="plain">--cache</arg>
         <replaceable>directory</replaceable>
       </group>
     </cmdsynopsis>
@@ -363,7 +363,7 @@
 			information about the available patterns in the configured repositories with
 			<replaceable>repo-patterns</replaceable>, a list of used patterns for this image
 			with <replaceable>patterns</replaceable>, a list of supported image types
-			with <replaceable>types</replaceable>, a list of source URL's with
+			with <replaceable>types</replaceable>, a list of source URLs with
 			<replaceable>sources</replaceable>, an estimation about the install size and
 			the size of the packages marked as to be deleted with <replaceable>size</replaceable>,
 			a list of profiles with <replaceable>profiles</replaceable>, and a list of solved packages to become installed with <replaceable>packages</replaceable>.
@@ -517,7 +517,7 @@
 		<listitem>
 		<para>
 			Set the package manager to use for this image. If set it
-			will temporarly overwrite the value set in the xml
+			will temporarily overwrite the value set in the xml
 			description.
 		</para>
 		</listitem>
@@ -565,7 +565,7 @@
 			root-path path. If no <option>--root</option> option is
 			given, KIWI will search for the attribute defaultroot in
 			<filename>config.xml</filename>. If no root directory is
-			known, a <command>mktmp</command> directory will be created
+			known, a <command>mktemp</command> directory will be created
 			and used as root directory.
 		</para>
 		</listitem>
@@ -590,8 +590,8 @@
         </optional></term>
         <listitem>
         <para>
-            When specifying a cache directory KIWI will create a cache each for
-			patterns and packages and re-use them if possible for subsequent
+            When specifying a cache directory, KIWI will create a cache each for
+			patterns and packages and re-use them, if possible, for subsequent
             root tree preparations of this and/or other images 
         </para>
         </listitem>
@@ -674,7 +674,7 @@
 		<term><optional><option>-s</option> | <option>--strip</option></optional></term>
 		<listitem>
 		<para>
-			Strip shared objects and executables only make sense in
+			Strip shared objects and executables - only makes sense in
 			combination with <option>--create</option>
 		</para>
 		</listitem>

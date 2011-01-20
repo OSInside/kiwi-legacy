@@ -47,7 +47,7 @@
       packages and patterns could be assigned to the given base
       repository. In almost all cases there will be information about
       packages which couldn’t be assigned. You should go to that list
-      and think of the repository which contains that packages (Pacman,
+      and think of the repository which contains that packages (Packman,
       etc). If something is missing add it either to the zypper list on
       your system or use the KIWI options <option>--add-repo</option> …
         <option>--add-repotype</option>. </para>
@@ -75,10 +75,10 @@
       automatically copied into the overlay directory below
         <filename>/tmp/mySystem/root</filename>. You should check that
       no modified file is a binary because such a binary would be
-      replaced by a new install of the package anyway. As a software
-      deloper people tend to compile software from source and
+      replaced by a new install of the package anyway. Software
+      developers tend to compile software from source and
       copy/install them into their system. Doing this could cause binary
-      files previosly installed by a package to be reported as modified.
+      files previously installed by a package to be reported as modified.
       You should remove such files from your overlay tree. </para>
 
     <para>The migration also copy the entire <filename>/etc</filename>

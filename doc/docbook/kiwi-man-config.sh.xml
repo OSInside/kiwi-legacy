@@ -283,7 +283,7 @@ exit</programlisting>
          <term><optional>Echo {echo commandline}</optional></term>
         <listitem>
           <para>
-            Helper function to print a message to the controling terminal
+            Helper function to print a message to the controlling terminal
           </para>
         </listitem>
       </varlistentry>
@@ -291,7 +291,7 @@ exit</programlisting>
          <term><optional>Rm {list of files}</optional></term>
         <listitem>
           <para>
-            Helper function to delete files and anounce it to log
+            Helper function to delete files and announce it to log
           </para>
         </listitem>
       </varlistentry>
@@ -299,7 +299,7 @@ exit</programlisting>
          <term><optional>Rpm {rpm commandline}</optional></term>
         <listitem>
           <para>
-            Helper function to the RPM function and anounce it to log
+            Helper function to the RPM function and announce it to log
           </para>
         </listitem>
       </varlistentry>
@@ -353,7 +353,7 @@ exit</programlisting>
          <term><optional>suseRemoveService {servicename}</optional></term>
         <listitem>
           <para>
-            Remove a service and its dependant services
+            Remove a service and its dependent services
             using the suse insserv program
           </para>
         </listitem>
@@ -374,7 +374,7 @@ exit</programlisting>
           <para>
             Activates the following services to be on by default using the
             chkconfig program: boot.rootfsck boot.cleanup boot.localfs boot.localnet
-            boot.clock policykitd dbus consolekt haldaemon network atd syslog cron kbd
+            boot.clock policykitd dbus consolekit haldaemon network atd syslog cron kbd
           </para>
         </listitem>
       </varlistentry>
@@ -430,7 +430,7 @@ exit</programlisting>
         <term><optional>$kiwi_drivers</optional></term>
         <listitem>
           <para>
-            A comma seperated list of the driver entries as listed in the
+            A comma separated list of the driver entries as listed in the
             drivers section of the <filename>config.xml</filename>. Similar variables exists for
             the <sgmltag>usbdrivers</sgmltag> and <sgmltag>scsidrivers</sgmltag> sections
           </para>

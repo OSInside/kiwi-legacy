@@ -13,7 +13,7 @@
     <title>Introduction</title>
       <para>The openSUSE KIWI Image System provides a complete operating
     system image solution for Linux supported hardware platforms as well
-    as for virtualisation systems like Xen, VMWare, etc. The KIWI
+    as for virtualization systems like Xen, VMware, etc. The KIWI
     architecture was designed as a two level system. The first stage,
     based on a valid <emphasis>software package source</emphasis>,
     creates a so called <emphasis>unpacked image</emphasis> according to
@@ -40,7 +40,7 @@
             </callout>
             <callout arearefs="co.imageservingarch.kernel">
               <para>Encapsulated system reachable via kernel
-                filesystem/extention drivers</para>
+                filesystem/extension drivers</para>
             </callout>
           </calloutlist>
         </imageobjectco>
@@ -56,7 +56,7 @@
     represents an already completed <emphasis>installation</emphasis>,
     encapsulated as a file and optionally includes the configuration for
     a specific task. Such an operating system starts working as soon as
-    the image has been brought to a system storage device no matter if
+    the image has been brought to a system storage device, no matter if
     this is a volatile or non volatile storage. The process of creating
     an image takes place without user interaction. This means, all
     requirements of the encapsulated system have to be fulfilled before
@@ -115,7 +115,7 @@
     <listitem>
       <formalpara>
         <title>Executing User Defined config.sh Script</title>
-        <para>At the end of the preperation stage the optional script
+        <para>At the end of the preparation stage the optional script
           named <filename>config.sh</filename> is called. This script
           should be used to configure the system which means, for
           example, the activation of services. For a detailed
@@ -137,7 +137,7 @@
           root below the directory <filename class="directory"
               ><replaceable>new-root</replaceable>/image</filename>. Any
           subsequent create step will read the image description
-          information from the new root tree and not from the original
+          from the new root tree and not from the original
           image description location. According to this, if you need to
           change the image description data after the prepare call has
           finished, you need to change it inside the new root tree as
@@ -211,7 +211,7 @@
                 <para>Live Image on CD, DVD or USB stick</para>
               </callout>
               <callout arearefs="co.imagetypes.virtualdisk">
-                <para>Full virtual system which can be played in VMWare, Xen, 
+                <para>Full virtual system which can be played in VMware, Xen, 
                   Amazon Cloud, etc. Guest configuration can be created.</para>
               </callout>
               <callout arearefs="co.imagetypes.oemdisk">
@@ -276,7 +276,7 @@
       description of such a boot image compared to the system image
       description. The system image description is the one the user
       creates and it represents the later operating system, whereas the
-      boot image only lives temporarly in RAM as long as the system
+      boot image only lives temporarily in RAM as long as the system
       image will be activated. The boot image descriptions are stored in
         <filename>/usr/share/kiwi/image/*boot</filename> and can be
       built in the same way as the system image. A boot image without a
@@ -297,7 +297,7 @@
       mainly meant for debugging purposes. Note the following parameters
       are only useful if the KIWI initrd is used. In case of any other
       initrd code written by yourself or simply because KIWI replaced
-      itself with the distribution specfic mkinitrd tool, the parameters
+      itself with the distribution specific mkinitrd tool, the parameters
       might not have any effect. </para>
 
     <itemizedlist>
@@ -317,13 +317,13 @@
         <formalpara>
           <title><parameter>kiwistderr=/dev/...</parameter></title>
           <para>While the system boots, KIWI writes messages to tty1 and
-            tty3. The tty1 messages are highlevel information whereas
+            tty3. The tty1 messages are high-level information whereas
             the tty3 messages represents the shell debug output and any
             error messages from the commands called. With the kiwistderr
             parameter one can combine both message sets and specify
             where to write them to. It’s very common to set <filename
               class="devicefile">/dev/console</filename> as possible
-            alternative to the default logging behaviour.</para>
+            alternative to the default logging behavior.</para>
         </formalpara>
       </listitem>
     </itemizedlist>
@@ -372,7 +372,7 @@
 
     <para>The prefixed implementation allows us to integrate all the
       distribution specific tasks into one project but this of course
-      requires the help and knowledge of the people who are familar with
+      requires the help and knowledge of the people who are familiar with
       their preferred Linux distribution. </para>
   </sect1>
 </chapter>

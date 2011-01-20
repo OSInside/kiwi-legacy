@@ -88,7 +88,7 @@
     <para>You can test the installation procedure in a virtual
       environment using the <filename class="extension">.iso</filename>
       file. In this case the re-partitioning code in the boot image will
-      be executed. The following commnads show this procedure using
+      be executed. The following commands show this procedure using
       QEMU. </para>
 
     <screen><command>cd</command> /tmp/myoem-result 
@@ -196,7 +196,7 @@
 
       <para>With the optional <sgmltag>systemdisk</sgmltag> section you
         can specify to have one or more top level directories in a
-        s -deparate volume. See <xref linkend="chap.description"/> for a
+        separate volume. See <xref linkend="chap.description"/> for a
         detailed explanation. </para>
     </sect2>
 

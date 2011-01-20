@@ -17,7 +17,7 @@
   </indexterm>
   <para>A PXE image consists of a boot image and a system image like all
     other image types too. But with a PXE image the image files are
-    available seperately and needs to be copied at specific locations of
+    available separately and needs to be copied at specific locations of
     a network boot server. PXE is a boot protocol implemented in most
     BIOS implementations which makes it so interesting. The protocol
     sends DHCP requests to assign an IP address and after that it uses
@@ -147,7 +147,7 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
         <para>Copy of the image boot configuration. Normally the boot
           configuration applies to one client which means it is required
           to obtain the MAC address of this client. If the boot
-          configuration should be used globaly, copy the KIWI generated
+          configuration should be used globally, copy the KIWI generated
           file as config.default: </para>
         <screen><command>cp</command> suse-11.2-pxe-client.i686-1.2.8.config \
   /srv/tftpboot/KIWI/config.<replaceable>MAC</replaceable> </screen>
@@ -409,7 +409,7 @@ DISK=device</screen>
         <varlistentry>
           <term><varname>COMBINED_IMAGE</varname></term>
           <listitem>
-            <para>If set to an non-empty string, indicates that the both
+            <para>If set to a non-empty string, indicates that the both
               image specified needs to be combined into one bootable
               image, whereas the first image defines the read-write part
               and the second image defines the read-only part. </para>
@@ -532,7 +532,7 @@ DISK=/dev/sda</screen>
           <listitem>
             <para>Mount the system image root filesystem remotely via
               AoE (ATA over Ethernet). This means there is a server
-              which exports a block device representing the the root
+              which exports a block device representing the root
               directory of the system image via the AoE subsystem. The
               block device could be a partition of a real or a virtual
               disk. In order to use the AoE subsystem I recommend to
@@ -865,22 +865,22 @@ KIWI_INITRD=/boot/initrd</screen>
     <para>While the PXE standard takes care of the ability to create hardware groups via hardware or
       IP address groups, it does not take into account groups for non-contiguous hardware or IP
       addresses. The PXE standard makes the assumption that each hardware group will be clearly
-      deliniated by a range of IP addresses, or the hardware is from the same vendor. While an ideal
+      delineated by a range of IP addresses, or the hardware is from the same vendor. While an ideal
       scenario, this may not be the case in an established, slightly dated installation where the
       hardware itself has out-lived the vendors that made them.</para>
 
     <para>KIWI has the ability to create groups for non-contiguous configurations
       where different hardware types may be involved due to newer equipment being rotated into
       production or older hardware failing and replacements are from different vendors. In addition,
-      an organization might decide to organize their equipment by function, rather then by vendor,
+      an organization might decide to organize their equipment by function, rather than by vendor,
       and may not be able to use the same hardware from one end to the other. </para>
     <sect2>
       <title>The Group Configuration File</title>
       <para>To make use of the grouping functionality, some new configuration files will be
-        required. These configuration files currently have to be manually managed rather then
+        required. These configuration files currently have to be manually managed rather than
         provided, however future versions of KIWI may provide a means of managing groups more
         effectively once this feature stabilizes. The number of configuration files required will
-        depend on the number of hardware groups that will be created, rather then one configuration
+        depend on the number of hardware groups that will be created, rather than one configuration
         file for each MAC address that will reside on the network. </para>
       <para>There will be one configuration file that will always be required if using groups,
         called:</para>
@@ -906,7 +906,7 @@ test3_KIWI_MAC_LIST="00:54:33:FA:44:33, 84:3D:45:2F:5F:33"</screen>
           <para>This element is the only static definition that needs to exist when using groups.
             While there is no implicit limit to the number of groups that can be configured, it
             should be kept to a minimum for reasonable management or it could quickly become
-            un-manageable. It will need to contain one or more group names separted by comma's (,) and
+            un-manageable. It will need to contain one or more group names separated by comma's (,) and
             spacing (for readability). In the above example, our group names were:</para>
           <itemizedlist>
             <listitem>
@@ -952,7 +952,7 @@ test3_KIWI_MAC_LIST="00:54:33:FA:44:33, 84:3D:45:2F:5F:33"</screen>
             lower case letters in this list will never get matched.</para>
           <para>The second caveat is that as the list gets longer, it can be harder to maintain
             and it has the potential to slow down the booting process. However, testing has been 
-            completed with 1500+ hosts defined, and there was little delay when transfering the 
+            completed with 1500+ hosts defined, and there was little delay when transferring the 
             file to a single host. The file size will have a larger impact when trying to download
             it to 1500+ hosts, so some consideration will have to take that into account. 
             The comparison itself still occurred in under half a second while searching 
@@ -964,22 +964,22 @@ test3_KIWI_MAC_LIST="00:54:33:FA:44:33, 84:3D:45:2F:5F:33"</screen>
       <title>The Group Details File</title>
       <para>In addition to the config.group file, each defined group will require a
         config.&lt;GROUP_NAME> file. This file is exactly like a standard KIWI config.&lt;MAC> file,
-        but is assigned to a group of hosts rather then a single unit. If we continue with the
+        but is assigned to a group of hosts rather than a single unit. If we continue with the
         example we used in the previous section, we would need the following files:</para>
       <screen>/srv/tftpboot/KIWI/config.test1
 /srv/tftpboot/KIWI/config.test2
 /srv/tftpboot/KIWI/config.test3</screen>
       <para>The contents of these files is the same that would normally reside in a config.&lt;MAC>
-        file, and all defintions that would be supported for a single host, are supported for a
+        file, and all definitions that would be supported for a single host, are supported for a
         group of hosts. In addition, if a host is matched to a group, yet the config.&lt;GROUP_NAME>
         file does not exist, KIWI will error out.</para>
-      <para>For example, the following configiuration file, called config.test1 would be used for
+      <para>For example, the following configuration file, called config.test1 would be used for
         the group called "test1":</para>
       <screen>DISK=/dev/sda
 PART=5;S;x,x;L;/
 IMAGE=/dev/sda2;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096
 CONF=CONFIGURATIONS/xorg.conf.test1;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096</screen>
-      <para>As a result of this configuration file, the image would be configured consistantly
+      <para>As a result of this configuration file, the image would be configured consistently
         across all the hosts assigned to test1. The following file called config.test2, contains a
         small change that may be specific to a function:</para>
       <screen>DISK=/dev/sda
@@ -1114,16 +1114,16 @@ maxterm_3500_HARDWARE_MAP="00:00:00:00:00:02 00:00:00:00:00:03 00:00:00:00:00:04
 VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,someconfig.cfg;/etc/sysconfig/someconfig.cfg;192.168.1.2;4096</screen>
         <para>When the VENDOR_CONF defintition is used, we are telling KIWI that all files defined
           within this element, are specific to the hardware map they are linked to. As a result, any
-          files listed here will be transfered to a host if, and only if, the host has been linked
+          files listed here will be transferred to a host if, and only if, the host has been linked
           to the hardware map via the maxterm_3500_HARDWARE_MAP element. In our example the only
           systems that will receive the xorg.conf.maxterm_3500 file will be the three maxterms we
           linked to the hardware map itself.</para>
-        <para>In our VENDOR_CONF element, we are indicating two files that should be transfered, in
-          addition to any file transfered during the processing of the CONF element. A "specific"
+        <para>In our VENDOR_CONF element, we are indicating two files that should be transferred, in
+          addition to any file transferred during the processing of the CONF element. A "specific"
           xorg.conf file, as well as someconfig.cfg. In the case of the xorg.conf.maxterm_3500 file,
-          when it is transfered to the host, it will overwrite the xorg.conf file that was
-          previously transfered via the CONF element. However, with the someconfig.cfg file, because
-          it was not previously defined in the CONF element, it will simply get transfered over, and
+          when it is transferred to the host, it will overwrite the xorg.conf file that was
+          previously transferred via the CONF element. However, with the someconfig.cfg file, because
+          it was not previously defined in the CONF element, it will simply get transferred over, and
           is a perfect example of how one could enable functionality that is not otherwise
           configured.</para>
         <para>As a result of this example, we have seven terminals that are using a prefs.js and

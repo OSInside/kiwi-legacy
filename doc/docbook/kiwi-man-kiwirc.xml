@@ -40,7 +40,7 @@
     </para>
     <para>
       The file is sourced by a Perl process and thus Perl compatible syntax
-      for the supported variable sttings is required.
+      for the supported variable settings is required.
     </para>
 
   <example>
@@ -87,7 +87,7 @@ $System='/usr/share/kiwi/image';</screen>
         <term><optional>LogServerPort</optional></term>
         <listitem>
           <para>
-            Specify a port number for log message queing.
+            Specify a port number for log message queuing.
           </para>
           <para>
             The default value is off

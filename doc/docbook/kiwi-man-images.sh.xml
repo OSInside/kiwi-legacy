@@ -42,7 +42,7 @@
       to be small. As <filename>images.sh</filename> is called in the create step you should be
       aware to design the script in a way that it can be called multiple times
       without shooting itself into its knee. As KIWI allows to create different
-      image types from one previosly prepared tree one needs to take into account
+      image types from one previously prepared tree one needs to take into account
       that <filename>images.sh</filename> can be called more than one time. If you exit <filename>images.sh</filename>
       with an exit code != 0 KIWI will exit with an error too.
     </para>
@@ -129,7 +129,7 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-         <term><optional>suseGFXBoot {theme} {loadertyp}</optional></term>
+         <term><optional>suseGFXBoot {theme} {loadertype}</optional></term>
         <listitem>
           <para>
             This function requires the gfxboot and at least one bootsplash-theme-*
@@ -163,7 +163,7 @@ exit</programlisting>
          <term><optional>Rm {list of files}</optional></term>
         <listitem>
           <para>
-            Helper function to delete files and anounce it to log.
+            Helper function to delete files and announce it to log.
           </para>
         </listitem>
       </varlistentry>
@@ -171,7 +171,7 @@ exit</programlisting>
          <term><optional>Rpm {rpm commandline}</optional></term>
         <listitem>
           <para>
-            Helper function to the rpm function and anounce it to log.
+            Helper function to the rpm function and announce it to log.
           </para>
         </listitem>
       </varlistentry>
@@ -179,7 +179,7 @@ exit</programlisting>
          <term><optional>Echo {echo commandline}</optional></term>
         <listitem>
           <para>
-            Helper function to print a message to the controling
+            Helper function to print a message to the controlling
             terminal.
           </para>
         </listitem>
@@ -219,7 +219,7 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>$kiwi_keytablee</optional></term>
+        <term><optional>$kiwi_keytable</optional></term>
         <listitem>
           <para>
             The contents of the keytable setup as done in <filename>config.xml</filename>
@@ -264,7 +264,7 @@ exit</programlisting>
         <term><optional>$kiwi_drivers</optional></term>
         <listitem>
           <para>
-            A comma seperated list of the driver entries as listed in the
+            A comma separated list of the driver entries as listed in the
             drivers section of the <filename>config.xml</filename>. Similar variables exists for
             the usbdrivers and scsidrivers sections
           </para>
