@@ -8,7 +8,7 @@
     <primary>KIWI</primary>
     <secondary>image description</secondary>
   </indexterm>
-  <para>In order to be able to create an image with KIWI a so called
+  <para>In order to be able to create an image with KIWI, a so called
     image description must be created. The image description is
     represented by a directory which has to contain at least one file
     named <filename>config.xml</filename> or alternatively <filename
@@ -30,7 +30,7 @@
 
   <para>The following additional information is optional for the process
     of building an image, but most often mandatory for the functionality
-    of the later operating system: </para>
+    of the created operating system: </para>
 
   <variablelist>
     <varlistentry>
@@ -332,7 +332,7 @@
         </listitem>
       </itemizedlist>
 
-      <para>By default, KIWI use the smart package manager but it is
+      <para>By default, KIWI uses the smart package manager but it is
         also possible to use the SUSE package manager called
           <command>zypper</command>. </para>
 
@@ -1533,9 +1533,9 @@
         The <sgmltag class="attribute">type</sgmltag> attribute
         specifies the repository type which must be supported by the
         package manager. At the moment KIWI supports the package
-        managers smart and zypper whereas smart has support for more
-        repository types compared to zypper. Therefore the possible
-        values for the type attribute has beend copied from smart. The
+        managers smart and zypper, whereas smart has support for more
+        repository types compared to zypper. Therefore, the possible
+        values for the type attribute have been copied from smart. The
         following table shows the possible repo types:</para>
 
       <table id="tab.description.supported-types">
