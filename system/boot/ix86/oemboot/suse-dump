@@ -275,6 +275,7 @@ function OEMInstall {
 		imageMD5="$imageName.md5"
 	fi
 	IFS=$IFS_ORIG
+	OEMRootImage=$imageName
 	#======================================
 	# Search, ask for the install partition
 	#--------------------------------------
@@ -283,6 +284,8 @@ function OEMInstall {
 		# Loop mount disk image file
 		#--------------------------------------
 		reqpart=1
+		info=/tmp/partinfo
+		wmrc=/wmrc
 		loop=$(losetup -s -f $imageName)
 		loop=$(echo $loop | sed -e s@^/dev/@@)
 		if ! kpartx -a /dev/$loop;then
@@ -305,47 +308,112 @@ function OEMInstall {
 				"Installation aborted..." \
 			"reboot"
 		fi
-		partitions=$(OEMFindPartitions $instDisk)
-		if [ ! -z "$partitions" ];then
-			count=0
-			IFS=","
-			for i in $partitions;do
-				count=$((count + 1))
-			done
-			IFS=$IFS_ORIG
-		fi
-		if [ -z "$partitions" ] || [ $count -lt $reqpart ];then
-			if [ -z "$partitions" ];then
-				Echo "No suitable partition(s) for installation found:"
-			else
-				Echo "Not enough partitions for installation found:"
-				Echo "Found $count but required $reqpart"
+		while true;do
+			partitions=$(OEMFindPartitions $instDisk)
+			if [ ! -z "$partitions" ];then
+				count=0
+				IFS=","
+				for i in $partitions;do
+					count=$((count + 1))
+				done
+				IFS=$IFS_ORIG
 			fi
-			Echo "Please prepare your disk first:"
-			echo
-			Echo -b "kiwi requires $reqpart partition(s) of the types below"
-			Echo -b "without any filesystem inside. I recommend to use YaST"
-			Echo -b "to do the re-partitioning. YaST also allows you to shrink"
-			Echo -b "existing partitions without loosing data."
-			echo
-			count=0
-			for i in /dev/mapper/${loop}*;do
-				psize=`partitionSize $i`
-				partid=$(partitionID /dev/$loop $(nd $i))
-				if [ $count = 0 ];then
-					Echo -b "* Root partition requires at least $psize KB"
+			if [ -z "$partitions" ] || [ $count -lt $reqpart ];then
+				#======================================
+				# Print partition user information
+				#--------------------------------------
+				if [ -z "$partitions" ];then
+					echo "No suitable partition(s) for installation found:" \
+						 > $info
+				else
+					echo "Not enough partitions for installation found:" \
+						 > $info
+					echo "Found $count but required $reqpart"      >> $info
 				fi
-				if [ $count = 1 ];then
-					Echo -b "* Boot partition requires at least $psize KB"
+				echo "Please prepare your disk first:"             >> $info
+				echo >> $info
+				echo "kiwi requires $reqpart partition(s) of the"  >> $info
+				echo "types below without any filesystem inside !" >> $info
+				echo >> $info
+				count=0
+				for i in /dev/mapper/${loop}*;do
+					psize=`partitionSize $i`
+					partid=$(partitionID /dev/$loop $(nd $i))
+					if [ $count = 0 ];then
+						echo "* Root partition requires at least $psize KB" \
+							>> $info
+					fi
+					if [ $count = 1 ];then
+						echo "* Boot partition requires at least $psize KB" \
+							>> $info
+					fi
+					echo "  Partition Type: 0x$partid" >> $info
+					count=$((count + 1))
+				done
+				#======================================
+				# Mount OEM root image read-write
+				#--------------------------------------
+				OEMRootSystem=/system
+				mkdir -p $OEMRootSystem
+				createSnapshotMap $OEMRootImage
+				if [ ! -e $snapshotMap ];then
+					systemException \
+						"Failed to create CD root snapshot map..." \
+					"reboot"
 				fi
-				Echo -b "  Partition Type: 0x$partid"
-				count=$((count + 1))
-			done
-			echo
-			systemException \
-				"Installation aborted..." \
-			"reboot"
-		fi
+				if ! mount $snapshotMap $OEMRootSystem;then
+					systemException \
+						"Failed to mount OEM root image..." \
+					"reboot"
+				fi
+				#======================================
+				# Check OEM image tool chain
+				#--------------------------------------
+				for i in \
+					usr/sbin/gparted \
+					usr/bin/dialog   \
+					usr/bin/xinit    \
+					usr/bin/xterm    \
+					usr/bin/dialog   \
+					usr/bin/icewm
+				do
+					if [ ! -e $OEMRootSystem/$i ];then
+						systemException \
+							"missing $i in OEM image..." \
+						"reboot"
+					fi
+				done
+				#======================================
+				# Make system devices available
+				#--------------------------------------
+				for i in dev sys proc dev/pts;do
+					mount --bind /$i /system/$i
+				done
+				#======================================
+				# Start gparted for partition setup
+				#--------------------------------------
+				cp $info /system/tmp
+				cp $wmrc /system/tmp
+				chroot /system 	xinit /bin/bash -c '
+					icewm -c /tmp/wmrc &
+					xterm +sb -e dialog --textbox /tmp/partinfo 20 70 &
+					gparted $imageDiskDevice
+				' -- :0 vt7
+				#======================================
+				# Cleanup and recheck
+				#--------------------------------------
+				for i in dev/pts proc sys dev;do
+					umount /system/$i
+				done
+				umount $OEMRootSystem
+				resetSnapshotMap
+				continue
+			fi
+			#======================================
+			# Partition setup fine, proceed
+			#--------------------------------------
+			break
+		done
 		#======================================
 		# Do we have a LVM image...
 		#--------------------------------------
@@ -448,9 +516,9 @@ function OEMInstall {
 			bID=$rID
 		fi
 		if [ "$haveLVM" = "yes" ];then
-			setupDeviceNames $rID $sID no no $bID no $VGROUP
+			setupDeviceNames $rID $sID no $bID no $VGROUP
 		else
-			setupDeviceNames $rID $sID no no $bID no
+			setupDeviceNames $rID $sID no $bID no
 		fi
 	else
 		instItems[0]=$imageName:$imageDevice
@@ -631,6 +699,7 @@ function OEMInstall {
 		if [ -x /usr/bin/dcounter ];then
 			test -e /progress || mkfifo /progress
 			TEXT_VERIFY=$(getText "Verifying %1" $imageDevice)
+			echo "$TEXT_VERIFY ( 0% )" > /progress &
 			dump="cat $imageDevice"
 			dump="$dump | dcounter -s $verifyMByte -l \"$TEXT_VERIFY \""
 			errorLogStop

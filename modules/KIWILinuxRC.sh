@@ -6804,6 +6804,88 @@ function cleanPartitionTable {
 	fi
 }
 #======================================
+# createSnapshotMap
+#--------------------------------------
+function createSnapshotMap {
+	local readOnlyRootImage=$1
+	local snapshotChunk=8
+	local snapshotCount=100
+	local reset=/tmp/resetSnapshotMap
+	local diskLoop
+	local snapLoop
+	local orig_sectors
+	local snap_sectors
+	#======================================
+	# cleanup
+	#--------------------------------------
+	unset snapshotMap
+	#======================================
+	# create root filesystem loop device
+	#--------------------------------------
+	diskLoop=$(losetup -s -f $readOnlyRootImage)
+	if [ ! $? = 0 ];then
+		return
+	fi
+	echo "losetup -d $diskLoop" > $reset
+	if ! kpartx -a $diskLoop;then
+		return
+	fi
+	echo "kpartx -d $diskLoop" >> $reset
+	diskLoop=$(echo $diskLoop | cut -f3 -d '/')
+	diskLoop=/dev/mapper/${diskLoop}p1
+	#======================================
+	# create snapshot loop device
+	#--------------------------------------
+	if ! dd if=/dev/zero of=/tmp/cow bs=1M count=$snapshotCount;then
+		return
+	fi
+	if ! mkfs.ext3 -F /tmp/cow &>/dev/null;then
+		return
+	fi
+	echo "rm -f /tmp/cow" >> $reset
+	snapLoop=$(losetup -s -f /tmp/cow)
+	if [ ! $? = 0 ];then
+		return
+	fi
+	echo "losetup -d $snapLoop" >> $reset
+	#======================================
+	# setup device mapper tables
+	#--------------------------------------
+	orig_sectors=$(blockdev --getsize $diskLoop)
+	snap_sectors=$(blockdev --getsize $snapLoop)
+	echo "0 $orig_sectors linear $diskLoop 0" | \
+		dmsetup create ms_data
+	echo "dmsetup remove ms_data" >> $reset
+	dmsetup create ms_origin --notable
+	echo "dmsetup remove ms_origin" >> $reset
+	dmsetup table ms_data | dmsetup load ms_origin
+	dmsetup resume ms_origin
+	dmsetup create ms_snap --notable
+	echo "dmsetup remove ms_snap" >> $reset
+	echo "0 $orig_sectors snapshot $diskLoop $snapLoop p $snapshotChunk" |\
+		dmsetup load ms_snap
+	echo "0 $orig_sectors snapshot-origin $diskLoop" | \
+		dmsetup load ms_data
+	dmsetup resume ms_snap
+	dmsetup resume ms_data
+	#======================================
+	# export mount point
+	#--------------------------------------
+	export snapshotMap=/dev/mapper/ms_snap
+}
+#======================================
+# resetSnapshotMap
+#--------------------------------------
+function resetSnapshotMap {
+	local reset=/tmp/resetSnapshotMap
+	if [ ! -f $reset ];then
+		return
+	fi
+	tac $reset > $reset.run
+	bash -x $reset.run
+	unset snapshotMap
+}
+#======================================
 # initialize
 #--------------------------------------
 function initialize {
