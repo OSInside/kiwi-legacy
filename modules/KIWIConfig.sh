@@ -221,11 +221,11 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_BOOTWAIT=1"
 		echo "OEM_BOOTWAIT=1" >> $oemfile
 	fi
-	if [ ! -z "kiwi_oemunattended" ];then
+	if [ ! -z "$kiwi_oemunattended" ];then
 		echo "Setting up OEM_UNATTENDED=1"
 		echo "OEM_UNATTENDED=1" >> $oemfile
 	fi
-	if [ ! -z "$kiwi_oemswap" ];then
+	if [ -z "$kiwi_oemswap" ];then
 		echo "Setting up OEM_WITHOUTSWAP=1"
 		echo "OEM_WITHOUTSWAP=1" >> $oemfile
 	fi
