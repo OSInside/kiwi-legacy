@@ -782,7 +782,7 @@ sub setupInstallationSource {
 			}
 			$kiwi -> done ();
 			if ( $prio ) {
-				$kiwi -> info ("=> Set priority to: $prio");
+				$kiwi -> info ("--> Set priority to: $prio");
 				my $modrepo = "modifyrepo -p $prio $alias";
 				if (! $chroot) {
 					$data = qxx ("@zypper --root \"$root\" $modrepo 2>&1");

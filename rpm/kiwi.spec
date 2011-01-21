@@ -44,7 +44,7 @@ Requires:       qt
 %endif
 %ifarch %ix86 x86_64
 %if %{suse_version} > 1010
-Recommends:     squashfs
+Requires:       squashfs
 %endif
 %endif
 Requires:       perl = %{perl_version}

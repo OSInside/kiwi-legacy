@@ -617,14 +617,12 @@ sub setupInstallCD {
 	my $isxen     = $this->{isxen};
 	my $lvm       = $this->{lvm};
 	my $xml       = $this->{xml};
-	my $pinst     = $xml->getOEMPartitionInstall();
 	my $md5name   = $system;
 	my $gotsys    = 1;
 	my $volid     = "-V \"KIWI CD/DVD Installation\"";
 	my $bootloader= "grub";
 	my $status;
 	my $result;
-	my $ibasename;
 	my $tmpdir;
 	my %type;
 	my $haveDiskDevice;
@@ -748,24 +746,30 @@ sub setupInstallCD {
 	#==========================================
 	# Build md5sum of system image
 	#------------------------------------------
-	if (! $haveDiskDevice) {
-		$this -> buildMD5Sum ($system);
-	} else {
-		$this -> buildMD5Sum ($this->{loop},$system);
+	if ($gotsys) {
+		if (! $haveDiskDevice) {
+			$this -> buildMD5Sum ($system);
+		} else {
+			$this -> buildMD5Sum ($this->{loop},$system);
+		}
 	}
+	#==========================================
+	# Setup image basename
+	#------------------------------------------
+	my $namecd = basename ($system);
 	#==========================================
 	# Compress system image
 	#------------------------------------------
-	$md5name =~ s/\.raw$/\.md5/;
-	if (! $pinst) {
+	if ($gotsys) {
+		$md5name =~ s/\.raw$/\.md5/;
 		$kiwi -> info ("Compressing installation image...");
-		if (! $haveDiskDevice) {
-			$status = qxx ("$main::Gzip -f $system 2>&1");
-			$result = $? >> 8;
-		} else {
-			$status = qxx ("cat $haveDiskDevice|$main::Gzip -f > $system.gz");
-			$result = $? >> 8;
+		if ($haveDiskDevice) {
+			$status = qxx ("cat $haveDiskDevice > $system");
 		}
+		$status = qxx (
+			"mksquashfs $system $md5name $system.squashfs -no-progress 2>&1"
+		);
+		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to compress system image: $status");
@@ -773,50 +777,13 @@ sub setupInstallCD {
 			return undef;
 		}
 		$kiwi -> done();
-		$system = $system.".gz";
-	} elsif ($haveDiskDevice) {
-		$kiwi -> info ("Loading system image image file...");
-		$status = qxx ("cat $haveDiskDevice > $system");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to load system image: $status");
-			$kiwi -> failed ();
-			return undef;
-		}
-		$kiwi -> done();
-	}
-	#==========================================
-	# Setup image basename
-	#------------------------------------------
-	my $namecd = basename ($system);
-	if ($gotsys) {
-		my $suffix = '\.raw\.gz';
-		if ($pinst) {
-			$suffix = '\.raw';
-		}
-		if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)$suffix$/) {
-			$kiwi -> error  ("Couldn't extract version information");
-			$kiwi -> failed ();
-			if ((! $pinst) && (! $haveDiskDevice)) {
-				qxx ( "$main::Gzip -d $system" );
-			}
-			return undef;
-		}
-		if (! $pinst) {
-			$ibasename = $1.".gz";
-		} else {
-			$ibasename = $1;
-		}
+		$system = $system.".squashfs";
 	}
 	#==========================================
 	# Setup initrd for install purpose
 	#------------------------------------------
 	$initrd = $this -> setupInstallFlags();
 	if (! defined $initrd) {
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-		}
 		return undef;
 	}
 	#==========================================
@@ -825,18 +792,12 @@ sub setupInstallCD {
 	$this->{initrd} = $initrd;
 	if (! $this -> createBootStructure()) {
 		$this->{initrd} = $oldird;
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-		}
 		return undef;
 	}
 	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
 	if (! $this -> setupBootLoaderStages ($bootloader,"iso")) {
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-		}
 		return undef;
 	}
 	qxx ("rm -rf $tmpdir/usr 2>&1");
@@ -850,9 +811,6 @@ sub setupInstallCD {
 		$title = "KIWI CD Boot: $namecd";
 	}
 	if (! $this -> setupBootLoaderConfiguration ($bootloader,$title)) {
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-		}
 		return undef;
 	}
 	#==========================================
@@ -862,40 +820,20 @@ sub setupInstallCD {
 		if (! open (FD,">$tmpdir/config.isoclient")) {
 			$kiwi -> error  ("Couldn't create CD install flag file");
 			$kiwi -> failed ();
-			if ((! $pinst) && (! $haveDiskDevice)) {
-				qxx ( "$main::Gzip -d $system" );
-			}
 			return undef;
 		}
-		print FD "IMAGE=$ibasename\n";
+		print FD "IMAGE=$namecd\n";
 		close FD;
 		$kiwi -> info ("Importing system image: $system");
-		$status = qxx ("cp $system $tmpdir/$ibasename 2>&1");
+		$status = qxx ("mv $system $tmpdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed importing system image: $status");
 			$kiwi -> failed ();
-			if ((! $pinst) && (! $haveDiskDevice)) {
-				qxx ( "$main::Gzip -d $system" );
-			}
 			return undef;
 		}
-		$status = qxx ("cp $md5name $tmpdir/$ibasename.md5 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed importing system md5 sum: $status");
-			$kiwi -> failed ();
-			if ((! $pinst) && (! $haveDiskDevice)) {
-				qxx ( "$main::Gzip -d $system" );
-			}
-			return undef;
-		}
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-			$system =~ s/\.gz$//;
-		}
+		$system =~ s/\.squashfs$//;
 		$kiwi -> done();
 	}
 	#==========================================
@@ -988,7 +926,6 @@ sub setupInstallStick {
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
 	my $xml       = $this->{xml};
-	my $pinst     = $xml->getOEMPartitionInstall();
 	my $irdsize   = main::isize ($initrd);
 	my $diskname  = $system.".install.raw";
 	my $md5name   = $system;
@@ -1001,7 +938,6 @@ sub setupInstallStick {
 	my $result;
 	my $destdir;
 	my $version;
-	my $ibasename;
 	my $tmpdir;
 	my %type;
 	my $stick;
@@ -1120,24 +1056,26 @@ sub setupInstallStick {
 	#==========================================
 	# Build md5sum of system image
 	#------------------------------------------
-	if (! $haveDiskDevice) {
-		$this -> buildMD5Sum ($system);
-	} else {
-		$this -> buildMD5Sum ($this->{loop},$system);
+	if ($gotsys) {
+		if (! $haveDiskDevice) {
+			$this -> buildMD5Sum ($system);
+		} else {
+			$this -> buildMD5Sum ($this->{loop},$system);
+		}
 	}
 	#==========================================
 	# Compress system image
 	#------------------------------------------
-	$md5name=~ s/\.raw$/\.md5/;
-	if (! $pinst) {
+	if ($gotsys) {
+		$md5name =~ s/\.raw$/\.md5/;
 		$kiwi -> info ("Compressing installation image...");
-		if (! $haveDiskDevice) {
-			$status = qxx ("$main::Gzip -f $system 2>&1");
-			$result = $? >> 8;
-		} else {
-			$status = qxx ("cat $haveDiskDevice|$main::Gzip -f > $system.gz");
-			$result = $? >> 8;
+		if ($haveDiskDevice) {
+			$status = qxx ("cat $haveDiskDevice > $system");
 		}
+		$status = qxx (
+			"mksquashfs $system $md5name $system.squashfs -no-progress 2>&1"
+		);
+		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to compress system image: $status");
@@ -1145,18 +1083,7 @@ sub setupInstallStick {
 			return undef;
 		}
 		$kiwi -> done();
-		$system = $system.".gz";
-	} elsif ($haveDiskDevice) {
-		$kiwi -> info ("Loading system image image file...");
-		$status = qxx ("cat $haveDiskDevice > $system");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to load system image: $status");
-			$kiwi -> failed ();
-			return undef;
-		}
-		$kiwi -> done();
+		$system = $system.".squashfs";
 	}
 	#==========================================
 	# setup required disk size
@@ -1171,33 +1098,11 @@ sub setupInstallStick {
 	# Setup image basename
 	#------------------------------------------
 	my $nameusb = basename ($system);
-	if ($gotsys) {
-		my $suffix = '\.raw\.gz';
-		if ($pinst) {
-			$suffix = '\.raw';
-		}
-		if ($nameusb !~ /(.*)-(\d+\.\d+\.\d+)$suffix$/) {
-			$kiwi -> error  ("Couldn't extract version information");
-			$kiwi -> failed ();
-			if ((! $pinst) && (! $haveDiskDevice)) {
-				qxx ( "$main::Gzip -d $system" );
-			}
-			return undef;
-		}
-		if (! $pinst) {
-			$ibasename = $1.".gz";
-		} else {
-			$ibasename = $1;
-		}
-	}
 	#==========================================
 	# Setup initrd for install purpose
 	#------------------------------------------
 	$initrd = $this -> setupInstallFlags();
 	if (! defined $initrd) {
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-		}
 		return undef;
 	}
 	$this->{initrd} = $initrd;
@@ -1206,18 +1111,12 @@ sub setupInstallStick {
 	#------------------------------------------
 	if (! $this -> createBootStructure("vmx")) {
 		$this->{initrd} = $oldird;
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-		}
 		return undef;
 	}
 	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
 	if (! $this -> setupBootLoaderStages ($bootloader)) {
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-		}
 		return undef;
 	}
 	#==========================================
@@ -1228,9 +1127,6 @@ sub setupInstallStick {
 		$title = "KIWI USB Boot: $nameusb";
 	}
 	if (! $this -> setupBootLoaderConfiguration ($bootloader,$title)) {
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-		}
 		return undef;
 	}
 	$this->{initrd} = $oldird;
@@ -1248,18 +1144,12 @@ sub setupInstallStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed creating virtual disk: $status");
 			$kiwi -> failed ();
-			if (! $pinst) {
-				qxx ( "$main::Gzip -d $system" );
-			}
 			return undef;
 		}
 		$kiwi -> done();
 		$kiwi -> info ("Binding virtual disk to loop device");
 		if (! $this -> bindDiskDevice ($diskname)) {
 			$kiwi -> failed ();
-			if (! $pinst) {
-				qxx ( "$main::Gzip -d $system" );
-			}
 			return undef;
 		}
 		$kiwi -> done();
@@ -1294,9 +1184,6 @@ sub setupInstallStick {
 		$kiwi -> error  ("Couldn't create partition table");
 		$kiwi -> failed ();
 		$this -> cleanLoop();
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-		}
 		return undef;
 	}
 	$kiwi -> done();
@@ -1308,9 +1195,6 @@ sub setupInstallStick {
 		if (! $this -> bindDiskPartitions ($this->{loop})) {
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
-			if (! $pinst) {
-				qxx ( "$main::Gzip -d $system" );
-			}
 			return undef;
 		}
 		$kiwi -> done();
@@ -1318,7 +1202,6 @@ sub setupInstallStick {
 		# Create loop device mapping table
 		#------------------------------------------
 		%deviceMap = $this -> setLoopDeviceMap ($this->{loop});
-		$kiwi -> done();
 	} else {
 		#==========================================
 		# Create disk device mapping table
@@ -1381,9 +1264,6 @@ sub setupInstallStick {
 			$kiwi -> error  ("Failed creating filesystem: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
-			if ((! $pinst) && (! $haveDiskDevice)) {
-				qxx ( "$main::Gzip -d $system" );
-			}
 			return undef;
 		}
 		$kiwi -> done();
@@ -1397,9 +1277,6 @@ sub setupInstallStick {
 		$kiwi -> error  ("Couldn't mount boot partition: $status");
 		$kiwi -> failed ();
 		$this -> cleanLoop ();
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-		}
 		return undef;
 	}
 	$status = qxx ("cp -a $tmpdir/boot $loopdir 2>&1");
@@ -1409,9 +1286,6 @@ sub setupInstallStick {
 		$kiwi -> error  ("Couldn't install boot data: $status");
 		$kiwi -> failed ();
 		$this -> cleanLoop ();
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-		}
 		return undef;
 	}
 	main::umount();
@@ -1426,33 +1300,15 @@ sub setupInstallStick {
 			$kiwi -> error  ("Couldn't mount data partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
-			if ((! $pinst) && (! $haveDiskDevice)) {
-				qxx ( "$main::Gzip -d $system" );
-			}
 			return undef;
 		}
-		$status = qxx ("cp $system $loopdir/$ibasename 2>&1");
+		$status = qxx ("mv $system $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed importing system image: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
-			if ((! $pinst) && (! $haveDiskDevice)) {
-				qxx ( "$main::Gzip -d $system" );
-			}
-			return undef;
-		}
-		$status = qxx ("cp $md5name $loopdir/$ibasename.md5 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed importing system md5 sum: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			if ((! $pinst) && (! $haveDiskDevice)) {
-				qxx ( "$main::Gzip -d $system" );
-			}
 			return undef;
 		}
 		if (! open (FD,">$loopdir/config.usbclient")) {
@@ -1460,17 +1316,11 @@ sub setupInstallStick {
 			$kiwi -> error  ("Couldn't create USB install flag file");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
-			if ((! $pinst) && (! $haveDiskDevice)) {
-				qxx ( "$main::Gzip -d $system" );
-			}
 			return undef;
 		}
-		print FD "IMAGE=$ibasename\n";
+		print FD "IMAGE=$nameusb\n";
 		close FD;
 		main::umount();
-		if ((! $pinst) && (! $haveDiskDevice)) {
-			qxx ( "$main::Gzip -d $system" );
-		}
 		$kiwi -> done();
 	}
 	#==========================================
@@ -2361,7 +2211,7 @@ sub setupBootDisk {
 			if ($haveDiskDevice) {
 				$this -> {system} = $this->{loop};
 			}
-			$kiwi -> info ("Creating install USB Stick image\n");
+			$kiwi -> info ("--> Creating install USB Stick image\n");
 			$this -> cleanLoop ();
 			if (! $this -> setupInstallStick()) {
 				return undef;
@@ -2437,9 +2287,6 @@ sub setupInstallFlags {
 	my $system = $this->{system};
 	my $irddir = $initrd."_".$$.".vmxsystem";
 	my $xml    = $this->{xml};
-	my $pinst  = $xml->getOEMPartitionInstall();
-	my $ibasename;
-	my $iversion;
 	my $newird;
 	if (! mkdir $irddir) {
 		$kiwi -> error  ("Failed to create vmxsystem directory");
@@ -2478,25 +2325,13 @@ sub setupInstallFlags {
 			return undef;
 		}
 		my $namecd = basename ($system);
-		if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
-			$kiwi -> error  ("Couldn't extract version information");
-			$kiwi -> failed ();
-			qxx ("rm -rf $irddir");
-			return undef;
-		}
-		$ibasename = $1;
-		$iversion  = $2;
 		if (! -f $imd5) {
 			$kiwi -> error  ("Couldn't find md5 file");
 			$kiwi -> failed ();
 			qxx ("rm -rf $irddir");
 			return undef;
 		}
-		if (! $pinst) {
-			print FD "IMAGE=nope;$ibasename;$iversion;compressed\n";
-		} else {
-			print FD "IMAGE=nope;$ibasename;$iversion\n";
-		}
+		print FD "IMAGE=$namecd\n";
 		close FD;
 	}
 	#==========================================

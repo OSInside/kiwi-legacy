@@ -127,7 +127,7 @@ function OEMInstall {
 	local dsize=0
 	local index=0
 	local message
-	local prefix=/cdrom
+	local prefix
 	#======================================
 	# Check for install mode indicator file
 	#--------------------------------------
@@ -254,27 +254,16 @@ function OEMInstall {
 	#======================================
 	# Evaluate OEM install file
 	#--------------------------------------
-	field=0
-	imageZipped="uncompressed"
-	IFS=";" ; for n in $IMAGE;do
-	case $field in
-		0) field=1 ;; 
-		1) imageName=$n   ; field=2 ;;
-		2) imageVersion=$n; field=3 ;;
-		3) imageZipped=$n ;
-	esac
-	done
+	imageName=$(echo $IMAGE | cut -f2 -d=)
 	if [ ! -z "$pxe" ];then
 		prefix=/image
-	fi
-	if [ "$imageZipped" = "compressed" ];then
-		imageName="$prefix/$imageName.gz"
-		imageMD5="$imageName.md5"
 	else
-		imageName="$prefix/$imageName"
-		imageMD5="$imageName.md5"
+		prefix=/squashed
+		mkdir -p $prefix
+		mount -o loop /cdrom/$imageName.squashfs $prefix
 	fi
-	IFS=$IFS_ORIG
+	imageName=$prefix/$imageName
+	imageMD5=$(echo $imageName | sed -e s@.raw@.md5@)
 	OEMRootImage=$imageName
 	#======================================
 	# Search, ask for the install partition
@@ -538,9 +527,6 @@ function OEMInstall {
 		if [ -z "$nombridcheck" ];then
 			mbrD=$instDisk
 			mbrI="cat $imageName"
-			if [ "$imageZipped" = "compressed" ];then
-				mbrI="gzip -cd $imageName"
-			fi
 			mbrM=$(dd if=$mbrD bs=1 count=4 \
 				skip=$((0x1b8))|hexdump -n4 -e '"0x%x"')
 			mbrI=$($mbrI | dd  bs=1 count=4 \
@@ -630,9 +616,6 @@ function OEMInstall {
 		#--------------------------------------
 		if [ -z "$pxe" ];then
 			dump="cat $Source"
-			if test "$imageZipped" = "compressed"; then
-				dump="gzip -cd $Source"
-			fi
 			if [ -x /usr/bin/dcounter ];then
 				progressBaseName=$(basename $Source)
 				TEXT_LOAD=$(getText "Loading %1" $progressBaseName)
@@ -674,7 +657,7 @@ function OEMInstall {
 		else
 			multicast="disable"
 			Echo "Loading $Source [$Target BS:$imageBlkSize Byte]..."
-			fetchFile $Source $Target $imageZipped $imageServer
+			fetchFile $Source $Target uncompressed $imageServer
 			if test $loadCode != 0 || ! loadOK "$loadStatus";then
 				systemException \
 					"Download of $imageName failed: $loadStatus" \
@@ -739,7 +722,10 @@ function OEMInstall {
 	#======================================
 	# Umount CD/DVD USB
 	#--------------------------------------
-	umount /cdrom
+	if [ -z "$pxe" ];then
+		umount /squashed
+		umount /cdrom
+	fi
 	#======================================
 	# Reread partition table
 	#--------------------------------------
