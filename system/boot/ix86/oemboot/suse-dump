@@ -99,11 +99,11 @@ function OEMFindPartitions {
 		local kbsize=$(echo $i | cut -f1 -d:)
 		local mbsize=$((kbsize / 1024))
 		local partid=$(partitionID /dev/$disk $(nd $device))
-		if [ ! "$partid" = "83" ] && [ ! "$partid" = "8e" ] ;then
+		if [ ! "$partid" = "83" ];then
 			continue
 		fi
 		probeFileSystem $device
-		if [ ! -z "$FSTYPE" ] && [ "$FSTYPE" != "unknown" ];then
+		if [ ! -z "$FSTYPE" ] && [ ! "$FSTYPE" = "unknown" ];then
 			continue
 		fi
 		if [ -z "$result" ];then
