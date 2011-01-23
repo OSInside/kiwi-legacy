@@ -260,7 +260,11 @@ function OEMInstall {
 	else
 		prefix=/squashed
 		mkdir -p $prefix
-		mount -o loop /cdrom/$imageName.squashfs $prefix
+		if ! mount -o loop /cdrom/$imageName.squashfs $prefix;then
+			systemException \
+				"Failed to mount install image container" \
+			"reboot"
+		fi
 	fi
 	imageName=$prefix/$imageName
 	imageMD5=$(echo $imageName | sed -e s@.raw@.md5@)
