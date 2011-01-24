@@ -325,10 +325,11 @@ if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 				umountSystem
 				RELOAD_IMAGE="yes"
 				systemIntegrity="clean"
-				mdadm --stop $imageDevice
 			fi
 		else
 			systemIntegrity="clean"
+		fi
+		if [ $systemIntegrity = "fine" ] && [ ! -z "$RAID" ];then
 			mdadm --stop $imageDevice
 		fi
 	done
