@@ -769,20 +769,7 @@
                     class="endtag">oem-align-partition</sgmltag></term>
                 <listitem>
                   <para>Kiwi attempts to align the start sector of the disk
-                      partition on a 4K boundary. This alignment is dependent
-                      on the partitioner being used. With the
-                      <sgmltag class="element">oem-align-partition</sgmltag>
-                      element value set to true Kiwi will align the start
-                      sector when fdisk is used as the partitioner. By default
-                      Kiwi uses parted, fdisk is used for hybrid images, if
-                      the version of parted found lags the --machine command
-                      line argument, or if fdisk is requested as the
-                      partitioner on the Kiwi command line. In these cases
-                      the value of
-                      <sgmltag class="element">oem-align-partition</sgmltag>
-                      is considered.
-                      <varname>OEM_ALIGN</varname> variable in
-                      <filename>config.oempartition</filename>. </para>
+                      partition on a 4K boundary.</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -1102,14 +1089,9 @@
                   required if the system image is to be installed on a
                   disk or other permanent storage device. Each partition
                   is specified with one partition child element. The
-                  mandatory type attribute specifies the partition type.
-                  The possible values are the sfdisk supported types,
-                  use the following command to obtain a list of
-                  supported values: </para>
-
-                <screen><command>sfdisk</command> --list-type </screen>
-
-                <para>The required <sgmltag class="attribute"
+                  mandatory type attribute specifies the partition type
+                  id.</para>
+                  <para>The required <sgmltag class="attribute"
                     >number</sgmltag> attribute provides the number
                   of the partition to be created. The size of the
                   partition may be specified with the optional size
@@ -1126,7 +1108,7 @@
                     >size</sgmltag> attribute triggers KIWI into
                   calculating the required size for this partition. The
                   calculated size is sufficient for the created image.
-                </para>
+                  </para>
               </listitem>
               <listitem>
                 <para>If the system image is based on a read-only

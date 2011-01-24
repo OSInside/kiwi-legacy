@@ -779,12 +779,12 @@
 		</listitem>
 	</varlistentry>
 	<varlistentry>
-        <term><optional><option>--partitioner <replaceable>fdisk|parted</replaceable></option>
+        <term><optional><option>--partitioner <replaceable>parted|fdasd</replaceable></option>
         </optional></term>
         <listitem>
         <para>
 			Select the tool to create partition tables. Supported are
-			fdisk (sfdisk) and parted. By default fdisk is used
+			parted and fdasd (s390). By default parted is used
         </para>
         </listitem>
     </varlistentry>

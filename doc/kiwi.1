@@ -2,12 +2,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.76.1-RC1 <http://docbook.sf.net/>
-.\"      Date: Created: 01/21/2011
+.\"      Date: Created: 01/24/2011
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 4.71
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 01/21/2011" "KIWI 4\&.71" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 01/24/2011" "KIWI 4\&.71" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -373,9 +373,9 @@ When calling kiwi in creation mode this option will set the number of mounts aft
 When calling kiwi in creation mode this option will set the maximal time between two filesystem checks\&. Set to 0 to disable time\-dependent checks\&. This option applies only to ext[234] filesystems\&.
 .RE
 .PP
-[\fB\-\-partitioner \fR\fB\fIfdisk|parted\fR\fR ]
+[\fB\-\-partitioner \fR\fB\fIparted|fdasd\fR\fR ]
 .RS 4
-Select the tool to create partition tables\&. Supported are fdisk (sfdisk) and parted\&. By default fdisk is used
+Select the tool to create partition tables\&. Supported are parted and fdasd (s390)\&. By default parted is used
 .RE
 .PP
 [\fB\-\-check\-kernel\fR]

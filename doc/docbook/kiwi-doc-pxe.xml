@@ -310,13 +310,8 @@ DISK=device</screen>
             <para>Specifies the partitioning data. The comma-separated
               list must contain the size (size), the type number (id),
               and the mount point (Mount). The size is measured in MB by
-              default. Additionally all size specifications supported by
-              the sfdisk program are allowed as well. The type number
-              specifies the ID of the partition. Valid ID’s are listed
-              via the <command>sfdisk</command>
-              <option>--list-types</option> command. The mount specifies
-              the directory the partition is mounted to. </para>
-
+              default. The mount specifies the directory the partition
+              is mounted to. </para>
             <itemizedlist>
               <listitem>
                 <para>The first element of the list must define the swap
