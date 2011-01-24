@@ -1512,11 +1512,10 @@ sub init {
 	}
 	if (defined $Partitioner) {
 		if (
-			($Partitioner ne "fdisk")  &&
 			($Partitioner ne "parted") &&
 			($Partitioner ne "fdasd")
 		) {
-			$kiwi -> error ("Invalid partitioner, expected fdisk|parted");
+			$kiwi -> error ("Invalid partitioner, expected parted|fdasd");
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;
 		}
@@ -1716,9 +1715,9 @@ sub usage {
 	print "      Set the maximal time between two filesystem checks for ext[234].\n";
 	print "      Set to 0 to disable time-dependent checks.\n";
 	print "\n";
-	print "    [ --partitioner <fdisk|parted> ]\n";
+	print "    [ --partitioner <parted|fdasd> ]\n";
 	print "      Select the tool to create partition tables. Supported are\n";
-	print "      fdisk (sfdisk) and parted. By default fdisk is used\n";
+	print "      parted and fdasd (s390). By default parted is used\n";
 	print "\n";
 	print "    [ --check-kernel ]\n";
 	print "      Activates check for matching kernels between boot and\n";
@@ -1785,6 +1784,9 @@ sub checkConfig {
 	my $validator = new KIWIXMLValidator (
 		$kiwi,$CheckConfig,$Revision,$Schema,$SchemaCVT
 	);
+	if (! $validator) {
+		exit 1;
+	}
 	my $isValid = $validator -> validate();
 	if (! defined $isValid) {
 		$kiwi -> error ('Validation failed');

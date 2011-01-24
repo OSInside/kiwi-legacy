@@ -23,6 +23,7 @@ export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
 export HYBRID_PERSISTENT_FS=ext3
 export HYBRID_PERSISTENT_ID=83
+export HYBRID_PERSISTENT_PART=4
 export HYBRID_PERSISTENT_DIR=/read-write
 export UTIMER_INFO=/dev/utimer
 export bootLoaderOK=0
@@ -58,7 +59,7 @@ if parted -h | grep -q '\-\-machine';then
 	export PARTED_HAVE_MACHINE=1
 fi
 if [ $PARTED_HAVE_MACHINE -eq 0 ];then
-	export PARTITIONER=sfdisk
+	export PARTITIONER=unsupported
 fi
 if dhcpcd -p 2>&1 | grep -q 'Usage';then
 	export DHCPCD_HAVE_PERSIST=0
@@ -2970,13 +2971,7 @@ function CDMount {
 		#======================================
 		# search for hybrid device
 		#--------------------------------------
-		# /.../
-		# we have to use fdisk here for partition manipulation
-		# because parted doesn't accept the partition table written
-		# by the isohybrid tool :(
-		# ----
-		PARTITIONER=sfdisk
-		if [ "x$kiwi_hybridpersistent" = "xyes" ];then
+		if [ "$kiwi_hybridpersistent" = "yes" ];then
 			protectedDevice=$(echo $biosBootDevice | sed -e s@/dev/@@)
 			protectedDisk=$(cat /sys/block/$protectedDevice/ro)
 			if [ $protectedDisk = "0" ];then
@@ -3000,20 +2995,12 @@ function CDMount {
 			#======================================
 			# search hybrid for a write partition
 			#--------------------------------------
-			for disknr in 2 3 4;do
-				id=`partitionID $biosBootDevice $disknr`
-				if [ "$id" = "83" ];then
-					export HYBRID_RW=$biosBootDevice$disknr
-					break
-				fi
-			done
+			export HYBRID_RW=$(ddn $biosBootDevice $HYBRID_PERSISTENT_PART)
 			#======================================
-			# device found go with it
+			# LIVECD_CONFIG found go with it
 			#--------------------------------------
-			PARTITIONER=parted
 			return
 		fi
-		PARTITIONER=parted
 		umount $cddev &>/dev/null
 	fi
 	echo
@@ -3534,15 +3521,6 @@ function cleanSweep {
 	dd if=/dev/zero of=$diskDevice bs=32M >/dev/null
 }
 #======================================
-# sfdiskGetPartitionID
-#--------------------------------------
-function sfdiskGetPartitionID {
-	# /.../
-	# prints the partition ID for the given device and number
-	# ----
-	sfdisk -c $1 $2
-}
-#======================================
 # fdasdGetPartitionID
 #--------------------------------------
 function fdasdGetPartitionID {
@@ -3578,9 +3556,7 @@ function partedGetPartitionID {
 function partitionID {
 	local diskDevice=$1
 	local diskNumber=$2
-	if [ $PARTITIONER = "sfdisk" ];then
-		sfdiskGetPartitionID $diskDevice $diskNumber
-	elif [ $PARTITIONER = "fdasd" ];then
+	if [ $PARTITIONER = "fdasd" ];then
 		fdasdGetPartitionID $diskDevice $diskNumber
 	else
 		partedGetPartitionID $diskDevice $diskNumber
@@ -4022,6 +3998,7 @@ function mountSystemClicFS {
 	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 	local clic_cmd=clicfs
 	local resetReadWrite=0
+	local ramOnly=0
 	local haveBytes
 	local haveKByte
 	local haveMByte
@@ -4050,8 +4027,12 @@ function mountSystemClicFS {
 	#======================================
 	# check read/write device location
 	#--------------------------------------
-	getDiskDevice $rwDevice | grep -q ram
-	if [ $? = 0 ];then
+	if [ ! -e $rwDevice ];then
+		ramOnly=1
+	elif getDiskDevice $rwDevice | grep -q ram;then
+		ramOnly=1
+	fi
+	if [ $ramOnly = 1 ];then
 		haveKByte=`cat /proc/meminfo | grep MemFree | cut -f2 -d:| cut -f1 -dk`
 		haveMByte=`expr $haveKByte / 1024`
 		haveMByte=`expr $haveMByte \* 7 / 10`
@@ -4061,8 +4042,8 @@ function mountSystemClicFS {
 		haveMByte=`expr $haveBytes / 1024 / 1024`
 		wantCowFS=0
 		if \
-			[ "x$kiwi_hybrid" = "xyes" ] &&
-			[ "x$kiwi_hybridpersistent" = "xyes" ]
+			[ "$kiwi_hybrid" = "yes" ] &&
+			[ "$kiwi_hybridpersistent" = "yes" ]
 		then
 			# write into a cow file on a filesystem, for hybrid iso's
 			wantCowFS=1
@@ -5670,82 +5651,71 @@ function runInteractive {
 # createHybridPersistent
 #--------------------------------------
 function createHybridPersistent {
-	local dev=$1;
-	local relativeDevName=`basename $dev`
+	# /.../
+	# create a new partition to handle the copy-on-write actions
+	# by the clicfs live mount. A new partition with a filesystem
+	# inside labeled as 'hybrid' is created for this purpose
+	# ----
+	local device=$1
 	local input=/part.input
-	local id=0
-	for disknr in 2 3 4; do
-		id=`partitionID $dev $disknr`
-		if [ $id = $HYBRID_PERSISTENT_ID ]; then
-			Echo "Existing persistent hybrid partition found $dev$disknr"
-			return
-		else
-			Echo "Creating hybrid persistent partition for COW data: "
-			Echo "$dev$disknr id=$HYBRID_PERSISTENT_ID fs=$HYBRID_PERSISTENT_FS"
-			if [ $disknr -lt 4 ];then
-				createPartitionerInput \
-					n p $disknr . . t $disknr $HYBRID_PERSISTENT_ID w
-			else
-				createPartitionerInput \
-					n p . . t 4 $HYBRID_PERSISTENT_ID w
-			fi
-			imageDiskDevice=$dev
-			callPartitioner $input
-			if ! waitForStorageDevice $dev$disknr;then
-				Echo "Partition $dev$disknr doesn't appear... fatal !"
-				Echo "Persistent writing deactivated"
-				unset kiwi_hybridpersistent
-			elif ! mkfs.$HYBRID_PERSISTENT_FS $dev$disknr;then
-				Echo "Failed to create hybrid persistent filesystem"
-				Echo "Persistent writing deactivated"
-				unset kiwi_hybridpersistent
-			fi
-			return
+	local disknr=$HYBRID_PERSISTENT_PART
+	mkdir -p /cow
+	rm -f $input
+	#======================================
+	# check persistent write partition
+	#--------------------------------------
+	if mount -L hybrid /cow;then
+		Echo "Existing persistent hybrid partition found"
+		umount /cow
+		rmdir  /cow
+		return
+	fi
+	#======================================
+	# create persistent write partition
+	#--------------------------------------
+	# /.../
+	# we have to use fdisk here because parted can't work
+	# with the partition table created by isohybrid
+	# ----
+	Echo "Creating hybrid persistent partition for COW data"
+	for cmd in n p $disknr . . t $disknr $HYBRID_PERSISTENT_ID w q;do
+		if [ $cmd = "." ];then
+			echo >> $input
+			continue
 		fi
+		echo $cmd >> $input
 	done
+	fdisk $device < $input 1>&2
+	if test $? != 0; then
+		Echo "Failed to create persistent write partition"
+		Echo "Persistent writing deactivated"
+		unset kiwi_hybridpersistent
+		return
+	fi
+	#======================================
+	# check partition device node
+	#--------------------------------------
+	if ! waitForStorageDevice $(ddn $device $disknr);then
+		Echo "Partition $disknr on $device doesn't appear... fatal !"
+		Echo "Persistent writing deactivated"
+		unset kiwi_hybridpersistent
+		return
+	fi
+	#======================================
+	# create filesystem on write partition
+	#--------------------------------------
+	if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid $(ddn $device $disknr);then
+		Echo "Failed to create hybrid persistent filesystem"
+		Echo "Persistent writing deactivated"
+		unset kiwi_hybridpersistent
+	fi
 }
 #======================================
 # callPartitioner
 #--------------------------------------
 function callPartitioner {
 	local input=$1
-	if [ $PARTITIONER = "sfdisk" ];then
-		Echo "Repartition the disk according to real geometry [ fdisk ]"
-		local pstart=$(checkFDiskFirstSector $imageDiskDevice)
-		echo "w" >> $input
-		echo "q" >> $input
-		fdisk $imageDiskDevice < $input 1>&2
-		if test $? != 0; then
-			systemException "Failed to create partition table" "reboot"
-		fi
-		local pstopp_new=$(checkFDiskEndSector   $imageDiskDevice)
-		local pstart_new=$(checkFDiskFirstSector $imageDiskDevice)
-		if [ $pstart_new -ne $pstart ];then
-			local fixpart=/part.input-fixupStartSector
-			local numpdevs=$(fdisk -ul $imageDiskDevice | grep '^/dev/' | wc -l)
-			echo "d"          > $fixpart
-			if [ $numpdevs -gt 1 ];then
-				echo "1"     >> $fixpart
-			fi
-			echo "n"         >> $fixpart
-			echo "p"         >> $fixpart
-			echo "1"         >> $fixpart
-			echo $pstart     >> $fixpart
-			echo $pstopp_new >> $fixpart
-			echo "w"         >> $fixpart
-			echo "q"         >> $fixpart
-			fdisk -u $imageDiskDevice < $fixpart 1>&2
-			if test $? != 0; then
-				systemException "Failed to fix partition table" "reboot"
-			fi
-		fi
-		if [ ! -z "$OEM_ALIGN" ];then
-			if [ ! -z "$haveLVM" ];then
-				vgchange -an
-			fi
-			fixupFDiskSectors $input $pstart
-		fi
-	elif [ $PARTITIONER = "fdasd" ];then
+	if [ $PARTITIONER = "fdasd" ];then
 		Echo "Repartition the disk according to real geometry [ fdasd ]"
 		echo "w" >> $input
 		echo "q" >> $input
@@ -5757,7 +5727,7 @@ function callPartitioner {
 		# /.../
 		# nothing to do for parted here as we write
 		# imediately with parted and don't create a
-		# command input file as for fdisk but we re-read
+		# command input file as for fdasd but we re-read
 		# the disk so that the new table will be used
 		# ----
 		udevPending
@@ -5771,9 +5741,7 @@ function createPartitionerInput {
 	if echo $imageDiskDevice | grep -q 'dev\/dasd';then
 		PARTITIONER=fdasd
 	fi
-	if [ $PARTITIONER = "sfdisk" ];then
-		createFDiskInput $@
-	elif [ $PARTITIONER = "fdasd" ];then
+	if [ $PARTITIONER = "fdasd" ];then
 		createFDasdInput $@
 	else
 		Echo "Repartition the disk according to real geometry [ parted ]"
@@ -5814,98 +5782,6 @@ function createFDasdInput {
 		if [ $cmd = "82" ];then
 			cmd=2
 		fi
-		if [ $cmd = "." ];then
-			echo >> $input
-			continue
-		fi
-		echo $cmd >> $input
-	done
-}
-#======================================
-# checkFDiskFirstSector
-#--------------------------------------
-function checkFDiskFirstSector {
-	# /.../
-	# check number of start sector for first partition
-	# ----
-	local dev=$1
-	local p1=$(ddn $dev 1)
-	fdisk -ul ${dev} | grep '^'$p1 | \
-		sed -e's@'$p1'[ \*]*\([0-9]\+\) .*$@\1@'
-}
-
-#======================================
-# checkFDiskEndSector
-#--------------------------------------
-function checkFDiskEndSector {
-	# /.../
-	# check number of end sector for first partition
-	# ----
-	local dev=$1
-	local p1=$(ddn $dev 1)
-	fdisk -ul ${dev} | grep '^'$p1 | \
-		sed -e's@'$p1'[ \*]*\([0-9]\+\)[ \*]*\([0-9]\+\) .*$@\2@'
-}
-#======================================
-# fixupFDiskSectors
-#--------------------------------------
-function fixupFDiskSectors {
-	# /.../
-	# align the first partition start sector using fdisk
-	# ----
-	local input=$1
-	local palign=$2
-	local pstart pend act psize ptype rest
-	case "$palign" in
-		64) palign=8;;
-		2048) palign=2048;;
-		*) return;;
-	esac
-	local numpdevs=$(fdisk -ul $imageDiskDevice | grep '^/dev/' | wc -l)
-	rm -f $input
-	fdisk -ul $imageDiskDevice | grep '^/dev/' | \
-	while read pdev act pstart pend psize ptype rest; do
-		pdev=${pdev#$imageDiskDevice}
-		if [ "$act" != '*' ]; then
-			ptype="$psize"
-			pend="$pstart"
-			pstart="$act"
-		fi
-		local aligned=$(( ( $pstart + $palign - 1 ) / $palign * $palign ))
-		if [ "$aligned" -ne "$pstart" ]; then
-			echo "d" >> $input
-			test $numpdevs -gt 1 && echo "$pdev" >> $input
-			echo "n" >> $input
-			echo "p" >> $input
-			test $numpdevs -lt 4 && echo "$pdev" >> $input
-			echo "$aligned" >> $input
-			echo "$pend" >> $input
-			echo "t" >> $input
-			test $numpdevs -gt 1 && echo "$pdev" >> $input
-			echo "$ptype" >> $input
-			if [ "$act" = '*' ]; then
-				echo "a" >> $input
-				echo "$pdev" >> $input
-			fi
-		fi
-		# handle only the first partition
-		break
-	done
-	if [ -s $input ]; then
-		echo "w" >> $input
-		echo "q" >> $input
-		fdisk -u $imageDiskDevice < $input 1>&2
-		if test $? != 0; then
-			systemException "Failed to fix up partition table" "reboot"
-		fi
-	fi
-}
-#======================================
-# createFDiskInput
-#--------------------------------------
-function createFDiskInput {
-	local input=/part.input
-	for cmd in $*;do
 		if [ $cmd = "." ];then
 			echo >> $input
 			continue
@@ -6889,6 +6765,14 @@ function resetSnapshotMap {
 # initialize
 #--------------------------------------
 function initialize {
+	#======================================
+	# Check partitioner capabilities
+	#--------------------------------------
+	if [ $PARTITIONER = "unsupported" ];then
+		systemException \
+			"Installed parted version is too old" \
+		"reboot"
+	fi
 	#======================================
 	# Check for hotfix kernel
 	#--------------------------------------

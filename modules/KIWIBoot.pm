@@ -3984,7 +3984,7 @@ sub setStoragePartition {
 	my $ignore;
 	my $action;
 	if (! defined $tool) {
-		$tool = "fdisk";
+		$tool = "parted";
 	}
 	SWITCH: for ($tool) {
 		#==========================================
@@ -4042,94 +4042,6 @@ sub setStoragePartition {
 				my @flog = <FD>; close FD;
 				$flog = join ("\n",@flog);
 				$kiwi -> loginfo ("FDASD: $flog");
-			}
-			last SWITCH;
-		};
-		#==========================================
-		# fdisk
-		#------------------------------------------
-		/^fdisk/  && do {
-			$status = qxx ("dd if=/dev/zero of=$device bs=512 count=1 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> loginfo ($status);
-				return undef;
-			}
-			my $palign = $xml -> getOEMAlignPartition();
-			if (($palign) && ("$palign" eq "true")) {
-				#==========================================
-				# create aligned table
-				#------------------------------------------
-				my @commands_first = ();
-				my @commands_next  = ();
-				for (my $count=0;$count<@commands;$count++) {
-					if ($commands[$count] eq "n") {
-						if (($commands[$count+2] eq "1") &&
-							($commands[$count+3] eq ".")
-						) {
-							$commands[$count+3] = "64";
-							last;
-						}
-					}
-				}
-				for (my $count=0;$count<=4;$count++) {
-					push @commands_first, $commands[$count];
-				}
-				push @commands_first, "w";
-				push @commands_first, "q";
-				for (my $count=5;$count<@commands;$count++) {
-					push @commands_next, $commands[$count];
-				}
-				$kiwi -> loginfo (
-					"FDISK input aligned: $device [@commands]"
-				);
-				if (! open (FD,"|/sbin/fdisk -u $device &>$tmpdir/fdisk.log")) {
-					return undef;
-				}
-				foreach my $cmd (@commands_first) {
-					if ($cmd eq ".") {
-						print FD "\n";
-					} else {
-						print FD "$cmd\n";
-					}
-				}
-				close FD;
-				if (! open (FD,"|/sbin/fdisk $device &>$tmpdir/fdisk.log")) {
-					return undef;
-				}
-				foreach my $cmd (@commands_next) {
-					if ($cmd eq ".") {
-						print FD "\n";
-					} else {
-						print FD "$cmd\n";
-					}
-				}
-				close FD;
-			} else {
-				#==========================================
-				# standard call without alignment
-				#------------------------------------------
-				$kiwi -> loginfo (
-					"FDISK input: $device [@commands]"
-				);
-				if (! open (FD,"|/sbin/fdisk $device &>$tmpdir/fdisk.log")) {
-					return undef;
-				}
-				foreach my $cmd (@commands) {
-					if ($cmd eq ".") {
-						print FD "\n";
-					} else {
-						print FD "$cmd\n";
-					}
-				}
-				close FD;
-			}
-			$result = $? >> 8;
-			my $flog;
-			if (open (FD,"$tmpdir/fdisk.log")) {
-				my @flog = <FD>; close FD;
-				$flog = join ("\n",@flog);
-				$kiwi -> loginfo ("FDISK: $flog");
 			}
 			last SWITCH;
 		};
@@ -4196,30 +4108,9 @@ sub getStorageID {
 	my $result;
 	my $status;
 	if (! defined $tool) {
-		$tool = "fdisk";
+		$tool = "parted";
 	}
 	SWITCH: for ($tool) {
-		#==========================================
-		# fdisk
-		#------------------------------------------
-		/^fdisk/  && do {
-			my $disk;
-			my $devnr= -1;
-			if ($pdev =~ /mapper/) {
-				if ($pdev =~ /mapper\/(.*)p(\d+)/) {
-					$disk = "/dev/".$1;
-					$devnr= $2;
-				}
-			} else {
-				if ($pdev =~ /(.*)(\d+)/) {
-					$disk = $1;
-					$devnr= $2;
-				}
-			}
-			$status = qxx ("/sbin/sfdisk -c $disk $devnr 2>&1");
-			$result = $? >> 8;
-			last SWITCH;
-		};
 		#==========================================
 		# parted
 		#------------------------------------------

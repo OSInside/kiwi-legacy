@@ -1023,7 +1023,7 @@ specifies the disk device name</a:documentation>
   <div>
     <define name="k.partition.type.attribute">
       <attribute name="type">
-        <a:documentation>Partition Type identifier, see fdisk for details</a:documentation>
+        <a:documentation>Partition Type identifier, see parted for details</a:documentation>
       </attribute>
     </define>
     <define name="k.partition.number.attribute">
@@ -1301,12 +1301,10 @@ to the used package manager.</db:para>
     </define>
     <define name="k.oem-align-partition">
       <element name="oem-align-partition">
-        <a:documentation>For oemboot driven images: align start sectors. This is only
-done when fdisk is used. For parted the option -a is passed in
-in any case</a:documentation>
-        <db:para>For oemboot driven images: align start sectors. This is only
-done when fdisk is used. For parted the option -a is passed
-in any case</db:para>
+        <a:documentation>For oemboot driven images: align start sectors.
+For parted the option -a is passed</a:documentation>
+        <db:para>For oemboot driven images: align start sectors.
+For parted the option -a is passed.</db:para>
         <ref name="k.oem-align-partition.attlist"/>
         <ref name="k.oem-align-partition.content"/>
       </element>
