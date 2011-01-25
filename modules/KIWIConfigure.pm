@@ -329,26 +329,21 @@ sub setupAutoYaST {
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $imageDesc = $this->{imageDesc};
-	my $autodir   = "var/lib/autoinstall/autoconf";
-	my $autocnf   = "autoconf.xml";
-	my $autosetup = "$root/$autodir/$autocnf";
-	if ((! -f "$imageDesc/config-yast-autoyast.xml") && (! -f $autosetup)) {
+	if (! -f "$imageDesc/config-yast-autoyast.xml") {
 		return "skipped";
 	}
 	$kiwi -> info ("Setting up AutoYaST...");
+	my $autodir = "var/lib/autoinstall/autoconf";
+	my $autocnf = "autoconf.xml";
 	if (! -d "$root/$autodir") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("AutoYaST seems not to be installed");
 		$kiwi -> failed ();
 		return "failed";
 	}
-	if ( -f $autosetup ) {
-		$kiwi -> info ("$autocnf file already exists, won't overwrite");
-	} else {
-		qxx (
-			"cp $imageDesc/config-yast-autoyast.xml $autosetup 2>&1"
-		);
-	}
+	qxx (
+		"cp $imageDesc/config-yast-autoyast.xml $root/$autodir/$autocnf 2>&1"
+	);
 	if ( ! open (FD,">$root/etc/install.inf")) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to create install.inf: $!");
@@ -383,8 +378,7 @@ sub setupFirstBootYaST {
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $imageDesc = $this->{imageDesc};
-	my $firstboot = "$root/etc/YaST2/firstboot.xml";
-	if ((! -f "$imageDesc/config-yast-firstboot.xml") && (! -f $firstboot)) {
+	if (! -f "$imageDesc/config-yast-firstboot.xml") {
 		return "skipped";
 	}
 	$kiwi -> info ("Setting up YaST firstboot service...");
@@ -397,19 +391,14 @@ sub setupFirstBootYaST {
 		$kiwi -> failed ();
 		return "failed";
 	}
-	if ( -f $firstboot ) {
-		$kiwi -> info ("firstboot.xml file already exists, won't overwrite");
-	} else {
-		my $data = qxx (
-			"cp $imageDesc/config-yast-firstboot.xml $firstboot 2>&1"
-		);
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to copy config-yast-firstboot.xml: $data");
-			$kiwi -> failed ();
-			return "failed";
-		}
+	my $firstboot = "$root/etc/YaST2/firstboot.xml";
+	my $data = qxx ("cp $imageDesc/config-yast-firstboot.xml $firstboot 2>&1");
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to copy config-yast-firstboot.xml: $data");
+		$kiwi -> failed ();
+		return "failed"; 
 	}
 	# /.../
 	# keep an existing /etc/sysconfig/firstboot or copy the template
@@ -466,10 +455,10 @@ sub setupFirstBootYaST {
 			if (! -e "$root/etc/init.d/$service") {
 				next;
 			}
-			my $data = qxx (
+			$data = qxx (
 				"chroot $root /sbin/insserv /etc/init.d/$service 2>&1"
 			);
-			my $code = $? >> 8;
+			$code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error ("Failed to activate service(s): $data");
@@ -482,8 +471,8 @@ sub setupFirstBootYaST {
 		# current firstboot service works like yast second stage and
 		# is activated by touching /var/lib/YaST2/reconfig_system
 		# ----
-		my $data = qxx ("touch $root/var/lib/YaST2/reconfig_system 2>&1");
-		my $code = $? >> 8;
+		$data = qxx ("touch $root/var/lib/YaST2/reconfig_system 2>&1");
+		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error ("Failed to activate firstboot: $data");
