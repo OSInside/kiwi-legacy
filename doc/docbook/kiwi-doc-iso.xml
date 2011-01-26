@@ -139,7 +139,7 @@
         files and directories should be writable in a so called split
         section. In order to allow to login into the system, at least
         the <filename class="directory">/var</filename> directory should
-        be writable. This is because the PAM authentification requires
+        be writable. This is because the PAM authentication requires
         to be able to report any login attempt to
           <filename>/var/log/messages</filename> which therefore needs
         to be writable. The following split section can be used if the
