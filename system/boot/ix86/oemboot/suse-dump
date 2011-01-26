@@ -632,7 +632,7 @@ function OEMInstall {
 				else
 					progressBaseName=$(basename $Source)
 				fi
-				TEXT_LOAD=$(getText "Loading %1" $progressBaseName)
+				TEXT_LOAD=$(getText "Loading %1" "$progressBaseName")
 				dump="$dump | dcounter -s $needMByte -l \"$TEXT_LOAD \""
 			fi
 			Echo "Loading $Source [$Target] "
