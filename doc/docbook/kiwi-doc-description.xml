@@ -339,7 +339,7 @@
       <para>In general the specification of one
           <sgmltag>preferences</sgmltag> section is sufficient. However,
         it’s possible to specify multiple <sgmltag>preferences</sgmltag>
-        sections and distinquish between the sections via the <sgmltag
+        sections and distinguish between the sections via the <sgmltag
           class="attribute">profiles</sgmltag> attribute. Data may also
         be shared between different profiles. Using profiles it is
         possible to, for example, configure specific preferences for OEM
@@ -404,7 +404,7 @@
               deployment on optical media (CD or DVD). Use the <sgmltag
                 class="attribute">boot</sgmltag>="<sgmltag
                 class="attvalue">isoboot/suse-*</sgmltag>" attribute
-              when generating this image type to select the apropriate
+              when generating this image type to select the appropriate
               boot image for optical media. In addition the optional
                 <sgmltag class="attribute">flags</sgmltag> attribute may
               be set to the following values with the effects described
@@ -430,7 +430,7 @@
               <varlistentry>
                 <term><sgmltag class="attvalue">unified</sgmltag></term>
                 <listitem>
-                  <para>Compressed ﬁlesystem with squashfs mounted with
+                  <para>Compressed filesystem with squashfs mounted with
                     an aufs based overlay mount to allow read-write
                     access.</para>
                 </listitem>
@@ -1098,7 +1098,7 @@
                   attribute. The optional mountpoint attribute provides
                   the value for the mount point of the partition. The
                   optional boolean target attribute identifies the
-                  partion as the system image target partition. KIWI
+                  partition as the system image target partition. KIWI
                   always generates the swap partition as the first
                   partition of the netboot boot image. By default, the
                   second partition is used for the system image. Use the
@@ -1164,7 +1164,7 @@
               space might be required for proper execution of components
               within the image. </para>
             <para>If the size element is not used KIWI will create an
-              image with containing approxiamtely 30 % free space. </para>
+              image with containing approximately 30 % free space. </para>
             <screen>&lt;size unit="M"&gt;1000&lt;/size&gt;</screen>
           </listitem>
         </varlistentry>
@@ -1176,7 +1176,7 @@
               is is considered if the compressed attribute is is set to
               true. With the configuration in this block it is possible
               to determine which files are writable and whether these
-              files should be persentently writable or temporarily. Note
+              files should be persistently writable or temporarily. Note
               that for ISO images only temporary write access is
               possible. </para>
             <para>When processing the provided configuration KIWI
@@ -1193,7 +1193,7 @@
               instead of in <systemitem class="filesystem"
                 >tmpfs</systemitem>. Creating read-write access to a
               directory and it’s files requires two specifications as
-              showb below. </para>
+              shown below. </para>
             <screen>&lt;split&gt; 
   &lt;temporary&gt; 
     <sgmltag class="sgmlcomment"> read/write access to </sgmltag>
@@ -1517,7 +1517,7 @@
         package manager. At the moment KIWI supports the package
         managers smart and zypper whereas smart has support for more
         repository types compared to zypper. Therefore the possible
-        values for the type attribute has beend copied from smart. The
+        values for the type attribute have been copied from smart. The
         following table shows the possible repo types:</para>
 
       <table id="tab.description.supported-types">
@@ -1851,9 +1851,9 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
 
         <variablelist>
           <varlistentry>
-            <term><sgmltag class="attribute">only</sgmltag></term>
+            <term><sgmltag class="attribute">onlyRequired</sgmltag></term>
             <listitem>
-              <para>RequiredIncorporates only patterns and packages that
+              <para>Incorporates only patterns and packages that
                 are required by the given pattern </para>
             </listitem>
           </varlistentry>
