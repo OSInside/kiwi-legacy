@@ -6707,8 +6707,13 @@ function createSnapshotMap {
 		return
 	fi
 	echo "kpartx -d $diskLoop" >> $reset
-	diskLoop=$(echo $diskLoop | cut -f3 -d '/')
-	diskLoop=/dev/mapper/${diskLoop}p1
+	if searchVolumeGroup; then
+		diskLoop=/dev/$VGROUP/LVRoot
+		echo "vgchange -an" >> $reset
+	else
+		diskLoop=$(echo $diskLoop | cut -f3 -d '/')
+		diskLoop=/dev/mapper/${diskLoop}p1
+	fi
 	#======================================
 	# create snapshot loop device
 	#--------------------------------------

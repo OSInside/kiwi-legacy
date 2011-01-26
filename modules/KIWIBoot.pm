@@ -4348,7 +4348,7 @@ sub setVolumeGroup {
 	if (($syszip) || ($haveSplit)) {
 		$status = qxx ("lvcreate -L $syszip -n LVComp $VGroup 2>&1");
 		$result = $? >> 8;
-		$status.= qxx ("lvcreate -l 100%FREE -n LVRoot $VGroup 2>&1");
+		$status.= qxx ("lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1");
 		$result+= $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -4377,7 +4377,7 @@ sub setVolumeGroup {
 			$this->{deviceinodes} = \%ihash;
 		}
 		if ($result == 0) {
-			$status = qxx ("lvcreate -l 100%FREE -n LVRoot $VGroup 2>&1");
+			$status = qxx ("lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1");
 			$result = $? >> 8;
 		}
 		if ($result != 0) {

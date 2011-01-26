@@ -332,14 +332,12 @@ function OEMInstall {
 				for i in /dev/mapper/${loop}*;do
 					psize=`partitionSize $i`
 					partid=$(partitionID /dev/$loop $(nd $i))
-					if [ $count = 0 ];then
-						echo "* Root partition requires at least $psize KB" \
-							>> $info
+					partname=Root
+					if [ $reqpart -eq 2 ] && [ $count = 0 ];then
+						partname=Boot
 					fi
-					if [ $count = 1 ];then
-						echo "* Boot partition requires at least $psize KB" \
-							>> $info
-					fi
+					echo "* $partname partition requires at least $psize KB" \
+						>> $info
 					echo "  Partition Type: 0x$partid" >> $info
 					count=$((count + 1))
 				done
@@ -433,9 +431,9 @@ function OEMInstall {
 			#--------------------------------------
 			for p in /dev/mapper/${loop}*;do
 				if [ $p = /dev/mapper/${loop}p1 ];then
-					select="root"
-				elif [ $p = /dev/mapper/${loop}p2 ];then
 					select="boot"
+				elif [ $p = /dev/mapper/${loop}p2 ];then
+					select="root"
 				fi
 				TEXT_SELECT=$(
 					getText "Select %1 partition for installation:" $select)
@@ -472,20 +470,27 @@ function OEMInstall {
 						else
 							partitions_next=$partitions_next,$pname:$psize
 						fi
+						count=$((count + 1))
 					fi
-					count=$((count + 1))
 				done
 				IFS=$IFS_ORIG
 				partitions=$partitions_next
 				if [ $p = /dev/mapper/${loop}p1 ];then
 					imageDevice=$selectedPart
-					rID=$(nd $selectedPart)
-					instItems[0]=$imageName:$imageDevice
-				elif [ $p = /dev/mapper/${loop}p2 ];then
 					bID=$(nd $selectedPart)
+					instItems[0]=/dev/mapper/${loop}p1:$imageDevice
+				elif [ $p = /dev/mapper/${loop}p2 ];then
+					rID=$(nd $selectedPart)
 					instItems[1]=/dev/mapper/${loop}p2:$selectedPart
 				fi
 			done
+			# /.../
+			# reverse order of instItems because
+			# root partition must be first entry
+			# ----
+			instItems_tmp=${instItems[0]}
+			instItems[0]=${instItems[1]}
+			instItems[1]=$instItems_tmp
 		fi
 		#======================================
 		# Search for a swap space
@@ -621,7 +626,12 @@ function OEMInstall {
 		if [ -z "$pxe" ];then
 			dump="cat $Source"
 			if [ -x /usr/bin/dcounter ];then
-				progressBaseName=$(basename $Source)
+				if [ ! -z "$OEM_PARTITION_INSTALL" ];then
+					progressP=$(echo $Source | cut -f5 -dp)
+					progressBaseName="$(basename $OEMRootImage) [p$progressP]"
+				else
+					progressBaseName=$(basename $Source)
+				fi
 				TEXT_LOAD=$(getText "Loading %1" $progressBaseName)
 				dump="$dump | dcounter -s $needMByte -l \"$TEXT_LOAD \""
 			fi
