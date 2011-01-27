@@ -393,9 +393,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/tests
 %{_datadir}/kiwi/xsl
 %{_sbindir}/kiwi
+%if 0%{?suse_version} < 1140
 %{perl_vendorarch}/KIWI
 %{perl_vendorarch}/auto/KIWI
-%if 0%{?suse_version} < 1140
 /var/adm/perl-modules/kiwi
 %endif
 #=================================================
