@@ -100,6 +100,10 @@ sub normalizePath {
 	if (defined $path) {
 		return $path;
 	}
+	$path = $this -> smbPath ($module);
+	if (defined $path) {
+		return $path;
+	}
 	$path = $this -> dirPath ($module);
 	if (defined $path) {
 		return $path;
@@ -259,6 +263,59 @@ sub dirPath {
 		return undef;
 	}
 	return $module;
+}
+
+#==========================================
+# smbPath
+#------------------------------------------
+sub smbPath {
+	# ...
+	# This method pass along the smb mount path to the
+	# packagemanager. The smb prefix will only work for
+	# zypper at the moment
+	# ---
+	my $this   = shift;
+	my $module = shift;
+	my $kiwi   = $this->{kiwi};
+	my $root   = $this->{root};
+	my $result;
+	my $status;
+	my $name;
+	my $tmpdir;
+	#==========================================
+	# normalize URL data
+	#------------------------------------------
+	if ((! defined $module) || ($module !~ /^smb:\/\//)) {
+		return undef;
+	}
+	$module =~ s/^smb:\/\///;
+	$name   = basename ($module);
+	$tmpdir = "/tmp/kiwimount-$name";
+	#==========================================
+	# create SMB mount point and perform mount
+	#------------------------------------------
+	if (! defined $root) {
+		return $tmpdir;
+	}
+	$status = qxx ("mkdir -p $tmpdir 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> warning ("Couldn't create tmp dir for smb mount: $status: $!");
+		$kiwi -> skipped ();
+		return undef;
+	}
+	$status = qxx ("mount -t cifs $module $tmpdir 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> warning ("Failed to mount share $module: $status");
+		$kiwi -> skipped ();
+		return undef;
+	}
+	#==========================================
+	# add mount to mount list of root obj
+	#------------------------------------------
+	$root -> addToMountList ($tmpdir);
+	return $tmpdir;
 }
 
 #==========================================
