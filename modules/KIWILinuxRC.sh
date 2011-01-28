@@ -52,14 +52,16 @@ if [ -x /sbin/blogd ];then
 	test -z "$CONSOLE"            && export CONSOLE=/dev/console
 	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
 fi
-if parted -h | grep -q '\-\-align';then
-	export PARTED_HAVE_ALIGN=1
-fi
-if parted -h | grep -q '\-\-machine';then
-	export PARTED_HAVE_MACHINE=1
-fi
-if [ $PARTED_HAVE_MACHINE -eq 0 ];then
-	export PARTITIONER=unsupported
+if [ -e /usr/sbin/parted ];then
+	if parted -h | grep -q '\-\-align';then
+		export PARTED_HAVE_ALIGN=1
+	fi
+	if parted -h | grep -q '\-\-machine';then
+		export PARTED_HAVE_MACHINE=1
+	fi
+	if [ $PARTED_HAVE_MACHINE -eq 0 ];then
+		export PARTITIONER=unsupported
+	fi
 fi
 if dhcpcd -p 2>&1 | grep -q 'Usage';then
 	export DHCPCD_HAVE_PERSIST=0
