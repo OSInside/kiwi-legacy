@@ -1639,6 +1639,24 @@
               set</quote>.</para>
           </listitem>
         </varlistentry>
+        <varlistentry>
+           <term><sgmltag class="attribute">username</sgmltag>="<sgmltag
+              class="attvalue">name</sgmltag>"</term>
+           <listitem>
+             <para>Specifies the repository user name. It depends on the
+               source type whether this information is used or not
+             </para>
+           </listitem>
+        </varlistentry>
+        <varlistentry>
+           <term><sgmltag class="attribute">password</sgmltag>="<sgmltag
+              class="attvalue">string</sgmltag>"</term>
+           <listitem>
+             <para>Specifies the repository password. It depends on the
+               source type whether this information is used or not
+             </para>
+           </listitem>
+        </varlistentry>
       </variablelist>
 
       <para>The source child element contains the path attribute, which
@@ -1671,6 +1689,17 @@
               same directory. Attempting to use a second or third .iso file
               in a series as a stand alone repository will result in an
               error.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><uri>smb://<replaceable>Samba share pathname</replaceable></uri></term>
+          <listitem>
+            <para>A path to a samba share using the cifs protocol. kiwi
+              creates a mount point and mount the share including username
+              and password if specified. Make sure you have installed
+              the package cifs-utils as part of the type='image' packages
+              to allow the mount inside the newly created root system
+            </para>
           </listitem>
         </varlistentry>
         <varlistentry>
