@@ -880,7 +880,8 @@ sub setupPackageFiles
 	}
 	$this->logMsg("W", "     => package $packName not available for arch $arch in any repo") if $this->{m_debug} >= 4;
       } # /@fallbackarch
-      $this->logMsg("W", "    => package $packName not available for $requestedArch nor its fallbacks") if $this->{m_debug} >= 1;
+      # FIXME: we need to make it an option to ignore this error.
+      $this->logMsg("E", "    => package $packName not available for $requestedArch nor its fallbacks"); # if $this->{m_debug} >= 1;
     } # /@archs
   }
   return $retval;
@@ -1186,7 +1187,8 @@ sub unpackMetapackages
         }
       }
       # Package was not found
-      $this->logMsg("W", "Metapackage <$metapack> not available for required $reqArch architecture!");
+      # FIXME: we need to make it an option to ignore this error.
+      $this->logMsg("E", "Metapackage <$metapack> not available for required $reqArch architecture!");
     }
   }
 
