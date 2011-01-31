@@ -107,6 +107,7 @@ sub new {
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi} = $kiwi;
+	$this->{arch} = $arch;
 	#==========================================
 	# Lookup XML configuration file
 	#------------------------------------------
@@ -156,6 +157,7 @@ sub new {
 	$this->{profilesNodeList}= $profilesNodeList;
 	$this->{repositNodeList} = $repositNodeList;
 	$this->{packageNodeList} = $packageNodeList;
+	$this->{instsrcNodeList} = $instsrcNodeList;
 	#==========================================
 	# Read and create profile hash
 	#------------------------------------------
@@ -209,8 +211,6 @@ sub new {
 	#------------------------------------------
 	$this->{driversNodeList}    = $driversNodeList;
 	$this->{usrdataNodeList}    = $usrdataNodeList;
-	$this->{instsrcNodeList}    = $instsrcNodeList;
-	$this->{arch}               = $arch;
 	$this->{controlFile}        = $controlFile;
 	#==========================================
 	# Store object data (create URL list)
@@ -4076,9 +4076,10 @@ sub __updateDescriptionFromChangeSet {
 	#==========================================
 	# 1) merge/update repositories
 	#------------------------------------------
-	if ($changeset->{xmlnode}) {
+	if ($changeset->{repositories}) {
 		$kiwi -> info ("Updating repository node(s)");
-		my $need = new XML::LibXML::NodeList();
+		$this -> ignoreRepositories();
+		# 1) add those repos which are marked as fixed in the boot xml
 		my @node = $repositNodeList -> get_nodelist();
 		foreach my $element (@node) {
 			if (! $this -> __requestedProfile ($element)) {
@@ -4086,18 +4087,25 @@ sub __updateDescriptionFromChangeSet {
 			}
 			my $status = $element -> getAttribute("status");
 			if ((! defined $status) || ($status eq "fixed")) {
-				$need -> push ($element);
+				$this->{imgnameNodeList}->get_node(1)->appendChild ($element);
 			}
 		}
-		$this->{repositNodeList} = $changeset->{xmlnode};
-		$this->{repositNodeList} -> prepend ($need);
+		# 2) add those repos which are part of the changeset
+		foreach my $element (@{$changeset->{repositories}}) {
+			$this->{imgnameNodeList}->get_node(1)->appendChild ($element);
+		}
+		# 3) update XML tree
+		$this->{repositNodeList} =
+			$this->{systemTree}->getElementsByTagName ("repository");
+		$this -> createURLList();
+		$this -> updateXML();
 		$kiwi -> done ();
 	}
 	#==========================================
 	# 2) merge/update packages
 	#------------------------------------------
-	if (($changeset->{xmlpacnode}) && ($changeset->{xmlobj})) {
-		my @node = $changeset -> {xmlpacnode} -> get_nodelist();
+	if ($changeset->{xmlpacnode}) {
+		my @node = @{$changeset->{xmlpacnode}};
 		my @plist;
 		my @alist;
 		my @falistImage;
@@ -4106,9 +4114,6 @@ sub __updateDescriptionFromChangeSet {
 		my %fixedBootInclude;
 		foreach my $element (@node) {
 			my $type = $element  -> getAttribute ("type");
-			if (! $this -> __requestedProfile ($element)) {
-				next;
-			}
 			if (($type eq "image") || ($type eq "bootstrap")) {
 				push (@plist,$element->getElementsByTagName ("package"));
 				push (@alist,$element->getElementsByTagName ("archive"));
@@ -4500,19 +4505,21 @@ sub __requestedProfile {
 	# ---
 	my $this      = shift;
 	my $element   = shift;
+	my $nodeName  = $element->nodeName();
 
 	if (! defined $element) {
+		# print "Element not defined\n";
 		return 1;
 	}
 	my $profiles = $element -> getAttribute ("profiles");
 	if (! defined $profiles) {
-		# If no profile is specified, then it is assumed
-		# to be in all profiles.
+		# If no profile is specified, then it is assumed to be in all profiles.
+		# print "Section $nodeName always used\n";
 		return 1;
 	}
 	if ((! $this->{reqProfiles}) || ((scalar @{$this->{reqProfiles}}) == 0)) {
-		# element has a profile, but no profiles requested
-		# so exclude it.
+		# element has a profile, but no profiles requested so exclude it.
+		# print "Section $nodeName profiled, but no profiles requested\n";
 		return 0;
 	}
 	my @splitProfiles = split(/,/, $profiles);
@@ -4526,10 +4533,12 @@ sub __requestedProfile {
 			$reqprof =~ s/^\s+//s;
 			$reqprof =~ s/\s+$//s;
 			if (defined $profileHash{$reqprof}) {
+				# print "Section $nodeName selected\n";
 				return 1;
 			}
 		}
 	}
+	# print "Section $nodeName not selected\n";
 	return 0;
 }
 

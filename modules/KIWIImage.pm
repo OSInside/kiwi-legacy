@@ -185,6 +185,9 @@ sub updateDescription {
 	my %src_type  = %{$src_xml->getImageTypeAndAttributes()};
 	my %changeset = ();
 	my @profiles;
+	my @xmlnodes;
+	my @xmlpnodes;
+	my @node;
 	#==========================================
 	# Store general data
 	#------------------------------------------
@@ -216,14 +219,35 @@ sub updateDescription {
 		push @profiles,@{$src_xml->{reqProfiles}};
 		$changeset{"profiles"} = \@profiles;
 	}
-	$changeset{"xmlobj"}         = $src_xml;
-	$changeset{"xmlnode"}        = $src_xml->getNodeList();
-	$changeset{"xmlpacnode"}     = $src_xml->getPackageNodeList();
+	#==========================================
+	# Store general data
+	#------------------------------------------
 	$changeset{"packagemanager"} = $src_xml->getPackageManager();
 	$changeset{"domain"}         = $src_xml->getXenDomain();
 	$changeset{"displayname"}    = $src_xml->getImageDisplayName();
 	$changeset{"locale"}         = $src_xml->getLocale();
 	$changeset{"boot-theme"}     = $src_xml->getBootTheme();
+	#==========================================
+	# Store repositories
+	#------------------------------------------
+	@node = $src_xml->getNodeList() -> get_nodelist();
+	foreach my $element (@node) {
+		if ($src_xml -> __requestedProfile ($element)) {
+			$element -> removeAttribute ("profiles");
+			push (@xmlnodes,$element);
+		}
+	}
+	$changeset{"repositories"} = \@xmlnodes;
+	#==========================================
+	# Store packages
+	#------------------------------------------
+	@node = $src_xml->getPackageNodeList() -> get_nodelist();
+	foreach my $element (@node) {
+		if ($src_xml -> __requestedProfile ($element)) {
+			push (@xmlpnodes,$element);
+		}
+	}
+	$changeset{"xmlpacnode"} = \@xmlpnodes;
 	#==========================================
 	# Store OEM data
 	#------------------------------------------
