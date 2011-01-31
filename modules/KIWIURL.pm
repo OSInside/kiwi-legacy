@@ -315,7 +315,7 @@ sub smbPath {
 			"mount -t cifs -o username=$user,passwort=$pwd $module $tmpdir 2>&1"
 		);
 	} else {
-		$status = qxx ("mount -t cifs $module $tmpdir 2>&1");
+		$status = qxx ("mount -t cifs -o guest $module $tmpdir 2>&1");
 	}
 	$result = $? >> 8;
 	if ($result != 0) {
