@@ -44,6 +44,8 @@ sub new {
 	#------------------------------------------	
 	my $kiwi = shift;
 	my $root = shift;
+	my $user = shift;
+	my $pwd  = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -55,6 +57,8 @@ sub new {
 	#------------------------------------------
 	$this->{kiwi} = $kiwi;
 	$this->{root} = $root;
+	$this->{user} = $user;
+	$this->{pwd}  = $pwd;
 	$this->{type} = "unknown";
 	return $this;
 }
@@ -278,6 +282,8 @@ sub smbPath {
 	my $module = shift;
 	my $kiwi   = $this->{kiwi};
 	my $root   = $this->{root};
+	my $user   = $this->{user};
+	my $pwd    = $this->{pwd};
 	my $result;
 	my $status;
 	my $name;
@@ -304,7 +310,13 @@ sub smbPath {
 		$kiwi -> skipped ();
 		return undef;
 	}
-	$status = qxx ("mount -t cifs $module $tmpdir 2>&1");
+	if (($user) && ($pwd)) {
+		$status = qxx (
+			"mount -t cifs -o username=$user,passwort=$pwd $module $tmpdir 2>&1"
+		);
+	} else {
+		$status = qxx ("mount -t cifs $module $tmpdir 2>&1");
+	}
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> warning ("Failed to mount share $module: $status");

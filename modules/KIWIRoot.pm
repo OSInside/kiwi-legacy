@@ -97,7 +97,9 @@ sub new {
 		my $type = $repository{$source}[0];
 		my $alias= $repository{$source}[1];
 		my $prio = $repository{$source}[2];
-		my $urlHandler  = new KIWIURL ($kiwi,$this);
+		my $user = $repository{$source}[3];
+		my $pwd  = $repository{$source}[4];
+		my $urlHandler  = new KIWIURL ($kiwi,$this,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		if ($publics_url =~ /^\//) {
 			my ( $publics_url_test ) = bsd_glob ( $publics_url );

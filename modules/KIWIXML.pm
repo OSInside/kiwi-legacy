@@ -300,7 +300,9 @@ sub createURLList {
 		@sourcelist = keys %repository;
 	}
 	foreach my $source (@sourcelist) {
-		my $urlHandler  = new KIWIURL ($kiwi,undef);
+		my $user = $repository{$source}[3];
+		my $pwd  = $repository{$source}[4];
+		my $urlHandler  = new KIWIURL ($kiwi,undef,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		push (@urllist,$publics_url);
 		$urlhash{$source} = $publics_url;
@@ -1412,7 +1414,7 @@ sub getTypes {
 	my @tnodes  = ();
 	my $gotprim = 0;
 	my @node    = $this->{optionsNodeList} -> get_nodelist();
-	my $urlhd   = new KIWIURL ($kiwi,undef);
+	my $urlhd   = new KIWIURL ($kiwi);
 	foreach my $element (@node) {
 		if (! $this -> __requestedProfile ($element)) {
 			next;
@@ -1766,9 +1768,11 @@ sub getRepository {
 		my $type = $element -> getAttribute("type");
 		my $alias= $element -> getAttribute("alias");
 		my $prio = $element -> getAttribute("priority");
+		my $user = $element -> getAttribute("username");
+		my $pwd  = $element -> getAttribute("password");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
-		$result{$source} = [$type,$alias,$prio];
+		$result{$source} = [$type,$alias,$prio,$user,$pwd];
 	}
 	return %result;
 }
@@ -4641,7 +4645,7 @@ sub __populateTypeInfo {
 	#
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
-	my $urlhd  = new KIWIURL ($kiwi,undef);
+	my $urlhd  = new KIWIURL ($kiwi);
 	my @node   = $this->{optionsNodeList} -> get_nodelist();
 	my @result = ();
 	#==========================================
