@@ -1697,7 +1697,7 @@
             <para>A path to a samba share using the cifs protocol. kiwi
               creates a mount point and mount the share including username
               and password if specified. Make sure you have installed
-              the package cifs-utils as part of the type='image' packages
+              the package cifs-utils as part of the type='bootstrap' packages
               to allow the mount inside the newly created root system
             </para>
           </listitem>
