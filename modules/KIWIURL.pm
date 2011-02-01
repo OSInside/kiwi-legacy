@@ -294,19 +294,17 @@ sub smbPath {
 	if ((! defined $module) || ($module !~ /^smb:\/\//)) {
 		return undef;
 	}
-	$module =~ s/^smb:\/\///;
-	$name   = basename ($module);
-	$tmpdir = "/tmp/kiwimount-$name";
+	$module =~ s/^smb://;
 	#==========================================
 	# create SMB mount point and perform mount
 	#------------------------------------------
 	if (! defined $root) {
 		return $tmpdir;
 	}
-	$status = qxx ("mkdir -p $tmpdir 2>&1");
+	$tmpdir = qxx ("mktemp -q -d /tmp/kiwimount.XXXXXX"); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> warning ("Couldn't create tmp dir for smb mount: $status: $!");
+		$kiwi -> warning ("Couldn't create tmp dir for smb mount: $tmpdir: $!");
 		$kiwi -> skipped ();
 		return undef;
 	}
