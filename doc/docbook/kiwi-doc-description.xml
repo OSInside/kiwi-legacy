@@ -1673,6 +1673,7 @@
               description directory being referenced. </para>
           </listitem>
         </varlistentry>
+
         <varlistentry>
           <term><uri>iso://<replaceable>path/to/isofile</replaceable></uri></term>
           <listitem>
@@ -1691,14 +1692,37 @@
               error.</para>
           </listitem>
         </varlistentry>
+
+        <varlistentry>
+          <term><uri>plain://<replaceable>URI</replaceable></uri></term>
+          <listitem>
+            <para>A plain resource string. Everything following 'plain://'
+             will be forwarded to the package manager without further
+             modifications. This can be used if kiwi does not support a
+             special URI but the package manager does.
+            </para>
+          </listitem>
+        </varlistentry>
+
         <varlistentry>
           <term><uri>smb://<replaceable>Samba share pathname</replaceable></uri></term>
           <listitem>
             <para>A path to a samba share using the cifs protocol. kiwi
               creates a mount point and mount the share including username
-              and password if specified. Make sure you have installed
-              the package cifs-utils as part of the type='bootstrap' packages
-              to allow the mount inside the newly created root system
+              and password if specified. In order to allow the mount inside
+              the new root tree, make sure you have installed
+              the package which provides the cifs mount utility as part of
+              the type='bootstrap' package section. Currently this package
+              is named <emphasis>cifs-utils</emphasis>. Because the mount utility
+              has to be part of the system and the boot image you also need
+              to make sure that the package is bootincluded like the
+              following example shows:
+              <screen>
+                &lt;packages type="bootstrap"&gt;
+                   ...
+                   &lt;package name="cifs-utils" bootinclude="true"/&gt;
+                &lt;/packages&gt;
+              </screen>
             </para>
           </listitem>
         </varlistentry>
