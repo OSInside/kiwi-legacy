@@ -2474,11 +2474,11 @@ sub checkType {
 		my $mktool_vs = qxx ("mksquashfs -version 2>&1 | head -n 1");
 		my $module_vs = qxx ("modinfo -d $km 2>&1");
 		my $error = 0;
-		if ($mktool_vs =~ /^mksquashfs version (.*) \(/) {
+		if ($mktool_vs =~ /^mksquashfs version (\d\.\d) \(/) {
 			$mktool_vs = $1;
 			$error++;
 		}
-		if ($module_vs =~ /^squashfs (.*),/) {
+		if ($module_vs =~ /^squashfs (\d\.\d),/) {
 			$module_vs = $1;
 			$error++;
 		}
