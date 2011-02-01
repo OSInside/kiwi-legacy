@@ -127,7 +127,11 @@ selectLanguage
 #--------------------------------------
 Echo "Searching for boot device..."
 if [ "$LOCAL_BOOT" = "no" ];then
-	if ! searchBusIDBootDevice;then
+	searchBIOSBootDevice
+	if [ ! -e "$biosBootDevice" ];then
+		searchBusIDBootDevice
+	fi
+	if [ ! -e "$biosBootDevice" ];then
 		systemException "$biosBootDevice" "reboot"
 	fi
 	export imageDiskDevice=$biosBootDevice

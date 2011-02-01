@@ -87,7 +87,7 @@ function setupInitialDeviceNames {
 		export imageRWDevice=/dev/$VGROUP/LVRoot
 		export imageRODevice=/dev/$VGROUP/LVComp
 		export imageIOWRDevice=$imageRWDevice
-		export imageBootDevice=$(ddn $imageDiskDevice 2)
+		export imageBootDevice=$(ddn $imageDiskDevice 1)
 		if [ ! -z "$KIWI_RECOVERY" ];then
 			export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
 		fi
@@ -369,9 +369,13 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 					systemException "Failed to store $i" "reboot"
 				fi
 			done
-			if ! cp -a var/lib/rpm tmp/;then
-				rm -rf tmp/rpm; cd / ; umountSystem
-				systemException "Failed to store RPM database" "reboot"
+			if ! cp -a etc/zypp etc/zypp.backup;then
+				rm -rf etc/zypp.backup; cd / ; umountSystem
+				systemException "Failed to backup zypp database" "reboot"
+			fi
+			if ! cp -a var/lib/rpm var/lib/rpm.backup;then
+				rm -rf var/lib/rpm.backup; cd / ; umountSystem
+				systemException "Failed to backup RPM database" "reboot"
 			fi
 		fi
 		#======================================
@@ -472,12 +476,9 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 				systemException "Failed to restore $i" "reboot"
 			fi
 		done
-		mv /mnt/var/lib/rpm /mnt/var/lib/rpm.backup
-		if ! mv /mnt/tmp/rpm /mnt/var/lib/;then
-			mv /mnt/var/lib/rpm.backup /mnt/var/lib/rpm
-			systemException "Failed to restore RPM database" "reboot"
+		if [ -e /mnt/etc/zypp.backup ];then
+			rm -rf /mnt/etc/zypp &&	mv /mnt/etc/zypp.backup /mnt/etc/zypp
 		fi
-		rm -rf /mnt/var/lib/rpm.backup
 	fi
 	#======================================
 	# 16.5) restore boot files 1

@@ -156,12 +156,17 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# Run user script
+# 12) setup console
+#--------------------------------------
+setupConsole
+
+#======================================
+# 13) Run user script
 #--------------------------------------
 runHook preCallInit
 
 #======================================
-# 12) kill udev
+# 14) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

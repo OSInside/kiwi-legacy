@@ -151,12 +151,12 @@ fi
 setupConsole
 
 #======================================
-# Run user script
+# 12) Run user script
 #--------------------------------------
 runHook preCallInit
 
 #======================================
-# 12) kill udev
+# 13) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems
