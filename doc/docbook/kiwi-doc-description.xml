@@ -8,10 +8,10 @@
     <primary>KIWI</primary>
     <secondary>image description</secondary>
   </indexterm>
-  <para>In order to be able to create an image with KIWI a so called
+  <para>In order to be able to create an image with KIWI, a so called
     image description must be created. The image description is
     represented by a directory which has to contain at least one file
-    named <filename>config.xml</filename> or alternatively <filename
+    named <filename>config.xml</filename> or <filename
       class="extension">*.kiwi</filename>. A good start for such a
     description can be found in the examples provided in
       <filename>/usr/share/doc/packages/kiwi/examples</filename>. </para>
@@ -30,7 +30,7 @@
 
   <para>The following additional information is optional for the process
     of building an image, but most often mandatory for the functionality
-    of the later operating system: </para>
+    of the created operating system: </para>
 
   <variablelist>
     <varlistentry>
@@ -332,7 +332,7 @@
         </listitem>
       </itemizedlist>
 
-      <para>By default, KIWI use the smart package manager but it is
+      <para>By default, KIWI uses the smart package manager but it is
         also possible to use the SUSE package manager called
           <command>zypper</command>. </para>
 
@@ -366,8 +366,8 @@
           <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
               class="attvalue">cpio</sgmltag>"</term>
           <listitem>
-            <para>Use the cpio image type to specify the generation os a
-              boot image (intrd). When generating a boot image it is
+            <para>Use the cpio image type to specify the generation of a
+              boot image (initrd). When generating a boot image, it is
               possible to specify a specific boot profile and boot
               kernel using the optional <sgmltag class="attribute"
                 >bootprofile</sgmltag>="<sgmltag class="attvalue"
@@ -478,7 +478,7 @@
           <listitem>
             <para>Creating a network boot image is supported by KIWI
               with the image="pxe" type. When specifying the creation of
-              a netwoork boot image use the <sgmltag class="attribute"
+              a network boot image use the <sgmltag class="attribute"
                 >filesystem</sgmltag> and boot="netboot/suse-*"
               attributes to specify the filesystem of the image and the
               proper boot image. To compress the image file set the
@@ -508,7 +508,7 @@
               attribute to select the underlying type of the split
               image. The attributes <sgmltag class="attribute"
                 >fsreadwrite</sgmltag>, <sgmltag class="attribute"
-                >fsreadonly</sgmltag> are used to controll the
+                >fsreadonly</sgmltag> are used to control the
               read-write properties of the filesystem specified as the
               attributes value. Use the appropriate
                 <sgmltag>*config</sgmltag> child block to specify the
@@ -558,7 +558,7 @@
               found in the Linux kernel documentation for the
               framebuffer device (see
                 <filename>Documentation/fb/vesafb.txt</filename>). KIWI
-              also supports the selection of the booloader for the
+              also supports the selection of the bootloader for the
               virtual disk according to the rules indicated for the USB
               system. Last but not least the virtual disk system may
               also be created with a LVM based layout by using the
@@ -592,7 +592,7 @@
         also be specified at the commandline with the
           <option>--prebuiltbootimage</option> parameter. </para>
 
-      <para>Within the preferences section there are the following
+      <para>Within the preferences section, there are the following
         optional attributes: </para>
 
       <variablelist>
@@ -657,7 +657,7 @@
               part of the locale information. The KIWI schema validates
               the locale string according to the following
                 pattern:<literal>[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*</literal>.
-              This means you have to specifiy the locale like the
+              This means you have to specify the locale like the
               following example: en_US or en_US,de_DE </para>
           </listitem>
         </varlistentry>
@@ -884,7 +884,7 @@
                     class="endtag">oem-recovery</sgmltag></term>
                 <listitem>
                   <para>If this element is set to true (default value is
-                    false), KIWI will create a recovery archivefrom the
+                    false), KIWI will create a recovery archive from the
                     prepared root tree. The archive will appear as
                       <filename>/recovery.tar.bz2</filename> in the
                     image file. During first boot of the image a single
@@ -946,7 +946,7 @@
                     >oem-swap</sgmltag>true|false<sgmltag class="endtag"
                     >oem-swap</sgmltag></term>
                 <listitem>
-                  <para>Specify if a sawp partition should be created.
+                  <para>Specify if a swap partition should be created.
                     The creation of a swap partition is the default
                     behavior. This value is represented by the
                       <varname>OEM_WITHOUTSWAP</varname> variable in
@@ -958,10 +958,10 @@
                   >oem-swapsize</sgmltag>number in MB<sgmltag
                     class="endtag">oem-swapsize</sgmltag></term>
                 <listitem>
-                  <para>Set the size of the swap partition. If a swpa
+                  <para>Set the size of the swap partition. If a swap
                     partition is to be created and the size of the swap
                     partition is not specified with this optional
-                    element, KIWI will calculate the size of the swpar
+                    element, KIWI will calculate the size of the swap
                     partition and create a swap partition equal to two
                     times the RAM installed on the system at initial
                     boot time. This value is represented by the
@@ -1008,13 +1008,13 @@
               infrastructure. Creation of the network boot
               infrastructure is simplified by the KIWI provided package
                 <package>kiwi-pxeboot</package>. This package configures
-              the basic PXE boot enviroment as expected by KIWI pxe
+              the basic PXE boot environment as expected by KIWI pxe
               images. The <package>kiwi-pxeboot</package> package
               creates a directory structure in
                 <filename>/srv/tftpboot</filename>. Files created by the
               KIWI create step need to be copied to the
                 <filename>/srv/tftpboot</filename> directory structure.
-              For additional details about the PXE image please refere
+              For additional details about the PXE image please refer
               to the PXE Image chapter later in this document. </para>
 
             <para>In addition to the image files it is necessary that
@@ -1024,7 +1024,7 @@
                   <filename>config.<replaceable>MAC</replaceable></filename>
               in the directory <filename>/srv/tftpboot/KIWI</filename>.
               The content of this file is created automatically by KIWI
-              if the pexedeploy section is provided in the image
+              if the pxedeploy section is provided in the image
               description. A pxedeploy section is outlined below: </para>
             <screen>&lt;pxedeploy server="IP" blocksize="4096"&gt;
    &lt;timeout&gt;seconds&lt;/timeout&gt;
@@ -1080,7 +1080,7 @@
                   initrd remains on the PXE server and also be used for
                   local boot. If the configured image uses the
                     <sgmltag>split</sgmltag> type or the
-                    <sgmltag>pexedeploy</sgmltag> section includes any
+                    <sgmltag>pxedeploy</sgmltag> section includes any
                   union information the kernel and initrd elements must
                   be used. </para>
               </listitem>
@@ -1163,8 +1163,8 @@
               the image KIWI will not alter the image size as the free
               space might be required for proper execution of components
               within the image. </para>
-            <para>If the size element is not used KIWI will create an
-              image with containing approximately 30 % free space. </para>
+            <para>If the size element is not used, KIWI will create an
+              image containing approximately 30 % free space. </para>
             <screen>&lt;size unit="M"&gt;1000&lt;/size&gt;</screen>
           </listitem>
         </varlistentry>
@@ -1173,7 +1173,7 @@
           <listitem>
             <para>For images of type split or iso the information
               provided in the optional <sgmltag>split</sgmltag> section
-              is is considered if the compressed attribute is is set to
+              is considered if the compressed attribute is set to
               true. With the configuration in this block it is possible
               to determine which files are writable and whether these
               files should be persistently writable or temporarily. Note
@@ -1515,8 +1515,8 @@
         The <sgmltag class="attribute">type</sgmltag> attribute
         specifies the repository type which must be supported by the
         package manager. At the moment KIWI supports the package
-        managers smart and zypper whereas smart has support for more
-        repository types compared to zypper. Therefore the possible
+        managers smart and zypper, whereas smart has support for more
+        repository types compared to zypper. Therefore, the possible
         values for the type attribute have been copied from smart. The
         following table shows the possible repo types:</para>
 
@@ -1590,7 +1590,7 @@
         </tgroup>
       </table>
 
-      <para>Within the repository section there are the following
+      <para>Within the repository section, there are the following
         optional attributes: </para>
 
       <variablelist>
@@ -1687,7 +1687,7 @@
               information for the package management tool to find packages
               in the other .iso files as long as they are located in the
               same directory. Attempting to use a second or third .iso file
-              in a series as a stand alone repository will result in an
+              in a series as a standalone repository will result in an
               error.</para>
           </listitem>
         </varlistentry>
@@ -1785,7 +1785,7 @@
             <para>Bootstrap packages, list of packages for the new
               operating system root tree. The packages list the required
               components to support a chroot environment in the new
-              system root tree, such a glibc. </para>
+              system root tree, such as glibc. </para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -1873,7 +1873,7 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
           specify which pattern references or packages should be used in
           a given pattern. The values of these attributes are only
           evaluated, if the KIWI pattern solver is used. If the new (up
-          to SUSE 11.0) satsolver pattern solver is used these values
+          to SUSE 11.0) satsolver pattern solver is used, these values
           are ignored because the satsolver can’t handle that at the
           moment. Allowed values for the <sgmltag class="attribute"
             >pattern*</sgmltag> attributes are: </para>

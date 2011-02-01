@@ -42,7 +42,7 @@
             <para><simplelist type="inline">
               <member>Faster, because already prepared</member>
               <member>cannot handle image description changes</member>
-              <member>reuires free space to store
+              <member>requires free space to store
                 <filename>/tmp/myOSImage</filename></member>
             </simplelist>
             </para>
@@ -81,7 +81,7 @@
   <para>Another reason for updating an image beside software updates are
     configuration changes or enhancements, for example an image should
     have replaced its browser with another better browser or a new
-    service like apache should be enabled. In principal it’s possible to
+    service like apache should be enabled. In principle it’s possible to
     do all those changes manually within the physical extend but
     concerning maintenance this would be a nightmare. Why, because it
     will leave the system in an unversioned condition. Nobody knows what
@@ -92,7 +92,7 @@
       <secondary>physical extends</secondary>
     </indexterm>
   <blockquote>
-    <para>Dont’t modify physical extends manually!</para>
+    <para>Don’t modify physical extends manually!</para>
   </blockquote>
   <para>Changes to the image configuration should be done within the
     image description. The image description itself should be part of a

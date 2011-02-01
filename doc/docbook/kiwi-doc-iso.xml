@@ -16,7 +16,7 @@
     <primary>ISO images</primary>
   </indexterm>
   <para>A live system image is an operating System on CD or DVD. In
-    principal one can treat the CD/DVD as the hard disk of the system
+    principle one can treat the CD/DVD as the hard disk of the system
     with the restriction that you can’t write data on it. So as soon as
     the media is plugged into the computer, the machine is able to boot
     from that media. After some time one can login to the system and
@@ -49,7 +49,7 @@
         </para>
       </listitem>
       <listitem>
-        <para>Use a virtualisation system to test the image directly.
+        <para>Use a virtualization system to test the image directly.
           Testing an iso can be done with any full virtual system for
           example: </para>
 

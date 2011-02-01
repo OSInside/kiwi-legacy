@@ -91,7 +91,7 @@
 
   <sect1 id="sec.ec2.using">
     <title>Using the Image</title>
-    <para> The generated image needs to be transfered over to Amazon
+    <para> The generated image needs to be transferred over to Amazon
       which is done by the <command>ec2-upload-bundle</command> tool.
       You can do this by calling: </para>
 

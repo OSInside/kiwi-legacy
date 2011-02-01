@@ -16,7 +16,7 @@
     <primary>VMX images</primary>
   </indexterm>
   <para>A VMX image is a virtual disk image for use in full
-    virtualisation systems like Qemu or VMware. The image is a file
+    virtualization systems like Qemu or VMware. The image is a file
     containing the system represented by the configured packages in
     config.xml as well as partition data and bootloader information. The
     size of this virtual disk can be specified by using the size element
@@ -27,7 +27,7 @@
     <title>Building the suse-vm-guest Example</title>
     <para> The vm-guest example provided with KIWI is based on recent
       openSUSE releases, one example configuration per release. The
-      example uses base pattern and the virtual disk is formated using
+      example uses base pattern and the virtual disk is formatted using
       the distribution default filesystem. </para>
 
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples 
@@ -91,7 +91,7 @@
           </row>
           <row>
             <entry>ovf</entry>
-            <entry>Open Virtual Format requires VMwares ovftool</entry>
+            <entry>Open Virtual Format requires VMware's ovftool</entry>
           </row>
           <row>
             <entry>qcow2</entry>
@@ -136,7 +136,7 @@
       <para>Given the specification above KIWI will create a VMware
         guest configuration specifying the availability of 512&nbsp;MB
         of RAM and an IDE disk controller interface for the VM guest.
-        For aditional information about the configuration settings
+        For additional information about the configuration settings
         please refer to the <emphasis>machine</emphasis> section. </para>
 
       <para>The guest configuration can be loaded through VMware user
@@ -149,7 +149,7 @@
       <para>Using the <sgmltag class="attribute"
           >format</sgmltag>="<sgmltag class="attvalue">vmdk</sgmltag>"
         attribute of the <sgmltag class="starttag">type</sgmltag> start
-        tag will create the VMware formated disk image (<filename
+        tag will create the VMware formatted disk image (<filename
           class="extension">.vmdk</filename> file) and the required
         VMware guest configuration (<filename class="extension"
           >.vmx</filename>) file. </para>

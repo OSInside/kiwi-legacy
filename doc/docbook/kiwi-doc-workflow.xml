@@ -13,7 +13,7 @@
     <title>Introduction</title>
       <para>The openSUSE KIWI Image System provides a complete operating
     system image solution for Linux supported hardware platforms as well
-    as for virtualisation systems like Xen, VMWare, etc. The KIWI
+    as for virtualization systems like Xen, VMware, etc. The KIWI
     architecture was designed as a two level system. The first stage,
     based on a valid <emphasis>software package source</emphasis>,
     creates a so called <emphasis>unpacked image</emphasis> according to
@@ -40,7 +40,7 @@
             </callout>
             <callout arearefs="co.imageservingarch.kernel">
               <para>Encapsulated system reachable via kernel
-                filesystem/extention drivers</para>
+                filesystem/extension drivers</para>
             </callout>
           </calloutlist>
         </imageobjectco>
@@ -56,10 +56,10 @@
     represents an already completed <emphasis>installation</emphasis>,
     encapsulated as a file and optionally includes the configuration for
     a specific task. Such an operating system starts working as soon as
-    the image has been brought to a system storage device no matter if
+    the image has been brought to a system storage device, no matter if
     this is a volatile or non volatile storage. The process of creating
     an image takes place without user interaction. This means, all
-    requirements of the encapsulated system has to be fulfilled before
+    requirements of the encapsulated system have to be fulfilled before
     the image is created. All of this information is stored in the
       <emphasis>image description</emphasis>. </para>
   </sect1>
@@ -76,12 +76,12 @@
   <para>The creation of an image with KIWI is always divided into two
     basic steps: the <emphasis>prepare</emphasis> and the
       <emphasis>create</emphasis> step. The create step requires the
-    prepare step to be exited successfully. Within this first prepare
+    prepare step to be completed successfully. Within this first prepare
     step, KIWI builds a new root tree or, in KIWI speak, a new unpacked
     image. The building of a new root tree consists of the creation of
     the directory specified to hold it and the installation of the
     selected packages on it. The installation of software packages is
-    driven by a package manager. KIWI supports the smart package
+    driven by a package manager. KIWI supports the smart <!--and zypper -->package
     managers. The prepare step executes the following major stages: </para>
 
   <itemizedlist>
@@ -102,7 +102,7 @@
           description file. Then the packages specified in the bootstrap
           section are installed. These packages are installed externally
           to the target root system (i.&nbsp;e. not chroot’ed) and
-          establish the initial environment so the rest of the process
+          establish the initial environment, so the rest of the process
           may run chroot’ed. Essential packages in this section are
           filesystem and glibc-locale. In practice you only need to
           specify those two, since the rest of the packages will be
@@ -115,7 +115,7 @@
     <listitem>
       <formalpara>
         <title>Executing User Defined config.sh Script</title>
-        <para>At the end of the preperation stage the optional script
+        <para>At the end of the preparation stage the optional script
           named <filename>config.sh</filename> is called. This script
           should be used to configure the system which means, for
           example, the activation of services. For a detailed
@@ -137,8 +137,8 @@
           root below the directory <filename class="directory"
               ><replaceable>new-root</replaceable>/image</filename>. Any
           subsequent create step will read the image description
-          information from the new root tree and not from the original
-          image description location. According to this if you need to
+          from the new root tree and not from the original
+          image description location. According to this, if you need to
           change the image description data after the prepare call has
           finished, you need to change it inside the new root tree as
           well as in your original description directory to prevent
@@ -151,8 +151,8 @@
   <para>After the prepare step has finished successfully, a subsequent
     building of an image file follows or, in KIWI speak, a new packed
     image. The building of an image requires a successfully prepared new
-    root tree in the first place. Using this tree multiple image types
-    can be created. So to speak it’s possible to create a VMware image
+    root tree in the first place. Using this tree, multiple image types
+    can be created. So to speak, it’s possible to create a VMware image
     and a Xen image from the same prepared root tree. The create step
     executes the following major stages: </para>
 
@@ -186,8 +186,8 @@
           <primary>KIWI</primary>
           <secondary>requested image types</secondary>
         </indexterm>
-        <para>What image type(s) a KIWI image supports depends on what
-          types has been setup in the main image description file
+        <para>What image type(s) a KIWI image supports, depends on what
+          types have been setup in the main image description file
             <filename>config.xml</filename>. At least one type must be
           setup. The following picture shows what image types are
           currently supported by KIWI:</para>
@@ -211,7 +211,7 @@
                 <para>Live Image on CD, DVD or USB stick</para>
               </callout>
               <callout arearefs="co.imagetypes.virtualdisk">
-                <para>Full virtual system which can be played in VMWare, Xen, 
+                <para>Full virtual system which can be played in VMware, Xen, 
                   Amazon Cloud, etc. Guest configuration can be created.</para>
               </callout>
               <callout arearefs="co.imagetypes.oemdisk">
@@ -231,12 +231,12 @@
     call KIWI and how to make use of the result image can be found in
     the image type specific sections later in this document. </para>
 
-    <para>Todays Linux systems are using a special boot image to control
+    <para>Today’s Linux systems are using a special boot image to control
       the boot process. This boot image is called initrd. The Linux
       kernel loads this compressed cpio initial ramdisk into RAM and
       calls init or (if present) the program linuxrc. The KIWI image
-      system also takes care for the creation of this boot image. Each
-      image type has it’s own special boot code and shares the common
+      system also handles the creation of this boot image. Each
+      image type has its own special boot code and shares the common
       parts in a set of module functions. The image descriptions for the
       boot images are provided by KIWI and thus the user has in almost
       all cases no need to take care for the boot image. </para>
@@ -276,11 +276,11 @@
       description of such a boot image compared to the system image
       description. The system image description is the one the user
       creates and it represents the later operating system, whereas the
-      boot image only lives temporarly in RAM as long as the system
-      image will be activated. The boot image descriptions are stores in
+      boot image only lives temporarily in RAM as long as the system
+      image will be activated. The boot image descriptions are stored in
         <filename>/usr/share/kiwi/image/*boot</filename> and can be
-      build in the same way as the system image. A boot image without a
-      corresponding system image doesn’t make sense though. </para>
+      built in the same way as the system image. A boot image without a
+      corresponding system image doesn’t make sense, though. </para>
   </sect1>
 
   <sect1 id="sec.workflow.bootparameters">
@@ -293,11 +293,11 @@
       <primary>boot parameters</primary>
     </indexterm>
     <para> When booting an image created by KIWI using one of the
-      provided boot images there are some useful kernel parameters
+      provided boot images, there are some useful kernel parameters
       mainly meant for debugging purposes. Note the following parameters
       are only useful if the KIWI initrd is used. In case of any other
       initrd code written by yourself or simply because KIWI replaced
-      itself with the distribution specfic mkinitrd tool the parameters
+      itself with the distribution specific mkinitrd tool, the parameters
       might not have any effect. </para>
 
     <itemizedlist>
@@ -317,13 +317,13 @@
         <formalpara>
           <title><parameter>kiwistderr=/dev/...</parameter></title>
           <para>While the system boots, KIWI writes messages to tty1 and
-            tty3. The tty1 messages are highlevel information whereas
+            tty3. The tty1 messages are high-level information whereas
             the tty3 messages represents the shell debug output and any
             error messages from the commands called. With the kiwistderr
             parameter one can combine both message sets and specify
             where to write them to. It’s very common to set <filename
               class="devicefile">/dev/console</filename> as possible
-            alternative to the default logging behaviour.</para>
+            alternative to the default logging behavior.</para>
         </formalpara>
       </listitem>
     </itemizedlist>
@@ -341,21 +341,21 @@
     </indexterm>
     <para> KIWI has been developed to be usable for any Linux
       distribution. However, each Linux distribution is different. On
-      one hand, KIWI provides common code </para>
+      one hand, KIWI provides common code <!--FIXME--></para>
 
     <para>By design of a Linux distribution there are differences
       between each of them. With KIWI we provide on one hand the code
-      which is common to all Linux distributions according to standards
+      which is common to all Linux distributions, according to standards
       and on the other hand there is also code where we have to
       distinguish between the distribution type. </para>
 
-    <para>In case of such specific tasks which are almost all in the
-      area of booting, KIWI provides a set of functions which all
-      contains a distribution prefix. As this project uses SUSE Linux as
-      base distribution all required distribution specific tasks has
+    <para>In the case of specific tasks mostly related to
+      booting, KIWI provides a set of functions which all
+      contain a distribution prefix. As this project uses SUSE Linux as
+      base distribution, all required distribution specific tasks have
       been implemented for SUSE. Other distributions could be missing.
-      The existing implementation for SUSE turns out to be adapted to
-      other distributions very easily though. </para>
+      The existing implementation for SUSE can be adapted to
+      other distributions very easily, though. </para>
 
     <para>A look into the code therefore will show you functions which
       are prefixed by <quote>suse</quote> as well as scripts whose names
@@ -364,7 +364,7 @@
       distribution specific. If you plan to use KIWI with another
       distribution than SUSE, you need to adapt it. For example, the
       boot workflow is controlled by a program called
-        <command>linuxrc</command> which is in KIWI a script represented
+        <command>linuxrc</command> which in KIWI is a script represented
       by <command>suse-linuxrc</command>. Another example is the
       function <function>suseStripKernel</function>, which is able to
       remove everything but a specified list of kernel drivers from the
@@ -372,7 +372,7 @@
 
     <para>The prefixed implementation allows us to integrate all the
       distribution specific tasks into one project but this of course
-      requires the help and knowledge of the people who are familar with
+      requires the help and knowledge of the people who are familiar with
       their preferred Linux distribution. </para>
   </sect1>
 </chapter>

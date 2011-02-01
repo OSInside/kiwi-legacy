@@ -49,7 +49,7 @@
   <sect1 id="sec.xen.using">
     <title>Using the Image</title>
     <para>In order to run a domain U the Xen tool <command>xm</command>
-      needs to be called in conjunction with the KIWI genereated domain
+      needs to be called in conjunction with the KIWI generated domain
       U configuration file </para>
 
     <screen><command>xm</command> create -c /tmp/myxen-result/ <!--

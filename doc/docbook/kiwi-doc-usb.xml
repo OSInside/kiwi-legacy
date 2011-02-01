@@ -93,7 +93,7 @@
       USB stick looks like a normal disk to the system. The KIWI boot
       process searches for the USB stick to be able to mount the correct
       storage device. However, in a virtual environment the disk doesn’t
-      appear as a USB stick. If your virtualisation solution doesn’t
+      appear as a USB stick. If your virtualization solution doesn’t
       provide a virtual BIOS which allows booting from USB stick, test
       the stick on real hardware. </para>
   </sect1>

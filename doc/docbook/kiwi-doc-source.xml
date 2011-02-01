@@ -48,7 +48,7 @@
       <step>
         <para>Find your SUSE standard installation CDs or the DVD and
           make them available to the build system. Most Linux systems
-          auto-mount a previosly inserted media automatically. If this
+          auto-mount a previously inserted media automatically. If this
           is the case you simply can change the directory to the auto
           mounted path below <filename class="directory"
             >/media</filename>. If your system doesn’t mount the device
@@ -58,9 +58,9 @@
       <step>
         <para>If you do not have a DVD but a CD set, copy the contents
           of <emphasis>all</emphasis> CDs into one directory. It’s
-          absolutly important that you first start with the
+          absolutely important that you first start with the
             <emphasis>last</emphasis> CD and copy the first CD at last.
-          In case of CDs you should have a bundly of 4 CDs. Copy them in
+          In case of CDs you should have a bundle of 4 CDs. Copy them in
           the order 4 3 2 1. </para>
       </step>
       <step>
@@ -73,7 +73,7 @@
 <command>cp</command> -a /mnt/* /image/CDs/full-11.0-i386/ </screen>
 
         <para>Remember if you have a CD set start with number 4 first
-          and after that unplugg the CD and insert the next one to
+          and after that, eject the CD and insert the next one to
           repeat the copy command until all CDs are copied into to
           /image </para>
       </step>
