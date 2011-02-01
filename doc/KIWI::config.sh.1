@@ -2,12 +2,12 @@
 .\"     Title: kiwi::config.sh
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.76.1-RC1 <http://docbook.sf.net/>
-.\"      Date: Created: 01/31/2011
+.\"      Date: Created: 02/01/2011
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 4.72
 .\"  Language: English
 .\"
-.TH "KIWI::CONFIG\&.SH" "1" "Created: 01/31/2011" "KIWI 4\&.72" "KIWI Manualpage"
+.TH "KIWI::CONFIG\&.SH" "1" "Created: 02/01/2011" "KIWI 4\&.72" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -220,17 +220,17 @@ is set to 1
 .PP
 [Echo {echo commandline}]
 .RS 4
-Helper function to print a message to the controling terminal
+Helper function to print a message to the controlling terminal
 .RE
 .PP
 [Rm {list of files}]
 .RS 4
-Helper function to delete files and anounce it to log
+Helper function to delete files and announce it to log
 .RE
 .PP
 [Rpm {rpm commandline}]
 .RS 4
-Helper function to the RPM function and anounce it to log
+Helper function to the RPM function and announce it to log
 .RE
 .PP
 [suseActivateDefaultServices]
@@ -264,7 +264,7 @@ Recursively insert a service\&. If there is a service required for this service 
 .PP
 [suseRemoveService {servicename}]
 .RS 4
-Remove a service and its dependant services using the suse insserv program
+Remove a service and its dependent services using the suse insserv program
 .RE
 .PP
 [suseService {servicename} {on|off}]
@@ -274,7 +274,7 @@ Activate/Deactivate a service by using the chkconfig program The function requir
 .PP
 [suseServiceDefaultOn]
 .RS 4
-Activates the following services to be on by default using the chkconfig program: boot\&.rootfsck boot\&.cleanup boot\&.localfs boot\&.localnet boot\&.clock policykitd dbus consolekt haldaemon network atd syslog cron kbd
+Activates the following services to be on by default using the chkconfig program: boot\&.rootfsck boot\&.cleanup boot\&.localfs boot\&.localnet boot\&.clock policykitd dbus consolekit haldaemon network atd syslog cron kbd
 .RE
 .PP
 [suseSetupProductInformation]
@@ -307,7 +307,7 @@ config\&.xml
 .PP
 [$kiwi_drivers]
 .RS 4
-A comma seperated list of the driver entries as listed in the drivers section of the
+A comma separated list of the driver entries as listed in the drivers section of the
 config\&.xml\&. Similar variables exists for the
 usbdrivers
 and

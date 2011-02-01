@@ -2,12 +2,12 @@
 .\"     Title: kiwi::images.sh
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.76.1-RC1 <http://docbook.sf.net/>
-.\"      Date: Created: 01/31/2011
+.\"      Date: Created: 02/01/2011
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 4.72
 .\"  Language: English
 .\"
-.TH "KIWI::IMAGES\&.SH" "1" "Created: 01/31/2011" "KIWI 4\&.72" "KIWI Manualpage"
+.TH "KIWI::IMAGES\&.SH" "1" "Created: 02/01/2011" "KIWI 4\&.72" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -37,7 +37,7 @@ script in place\&. This script is called at the beginning of the KIWI create ste
 images\&.sh
 is used for boot images because they needs to be small\&. As
 images\&.sh
-is called in the create step you should be aware to design the script in a way that it can be called multiple times without shooting itself into its knee\&. As KIWI allows to create different image types from one previosly prepared tree one needs to take into account that
+is called in the create step you should be aware to design the script in a way that it can be called multiple times without shooting itself into its knee\&. As KIWI allows to create different image types from one previously prepared tree one needs to take into account that
 images\&.sh
 can be called more than one time\&. If you exit
 images\&.sh
@@ -115,7 +115,7 @@ config\&.xml
 and creates the config\&.oempartition file as part of the automatically created boot image (initrd)\&. The information must be available as part of the boot image because it controls the OEM repartition workflow on first boot of an OEM image\&. Detailed information about the meaning of each option can be found in the OEM chapter of the KIWI cookbook\&.
 .RE
 .PP
-[suseGFXBoot {theme} {loadertyp}]
+[suseGFXBoot {theme} {loadertype}]
 .RS 4
 This function requires the gfxboot and at least one bootsplash\-theme\-* package to be installed in order to work correctly\&. The function creates from this package data a graphics boot screen for the isolinux and grub boot loaders\&. Additionally it creates the bootsplash files for the resolutions 800x600, 1024x768, and 1280x1024
 .RE
@@ -134,17 +134,17 @@ This function removes a whole bunch of tools binaries and libraries which are no
 .PP
 [Rm {list of files}]
 .RS 4
-Helper function to delete files and anounce it to log\&.
+Helper function to delete files and announce it to log\&.
 .RE
 .PP
 [Rpm {rpm commandline}]
 .RS 4
-Helper function to the rpm function and anounce it to log\&.
+Helper function to the rpm function and announce it to log\&.
 .RE
 .PP
 [Echo {echo commandline}]
 .RS 4
-Helper function to print a message to the controling terminal\&.
+Helper function to print a message to the controlling terminal\&.
 .RE
 .PP
 [Debug {message}]
@@ -167,7 +167,7 @@ The name of the image as listed in config\&.xml
 The image version string major\&.minor\&.release
 .RE
 .PP
-[$kiwi_keytablee]
+[$kiwi_keytable]
 .RS 4
 The contents of the keytable setup as done in
 config\&.xml
@@ -199,7 +199,7 @@ A list of profiles used to build this image
 .PP
 [$kiwi_drivers]
 .RS 4
-A comma seperated list of the driver entries as listed in the drivers section of the
+A comma separated list of the driver entries as listed in the drivers section of the
 config\&.xml\&. Similar variables exists for the usbdrivers and scsidrivers sections
 .RE
 .PP

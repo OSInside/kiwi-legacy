@@ -2,12 +2,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.76.1-RC1 <http://docbook.sf.net/>
-.\"      Date: Created: 01/31/2011
+.\"      Date: Created: 02/01/2011
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 4.72
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 01/31/2011" "KIWI 4\&.72" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 02/01/2011" "KIWI 4\&.72" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -60,7 +60,7 @@ representing a live system on CD or DVD\&. Other than that KIWI is able to creat
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-p | \-\-prepare} \fIimage\-path\fR
 .br
-[\-r | \-\-root\fIimage\-root\fR | \-\-chache\fIdirectory\fR]
+[\-r | \-\-root\fIimage\-root\fR | \-\-cache\fIdirectory\fR]
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-c | \-\-create} \fIimage\-root\fR
 .br
@@ -152,7 +152,7 @@ and is checked if KIWI creates an image from this description\&.
 List general information about the image description\&. So far you can get information about the available patterns in the configured repositories with
 \fIrepo\-patterns\fR, a list of used patterns for this image with
 \fIpatterns\fR, a list of supported image types with
-\fItypes\fR, a list of source URL\*(Aqs with
+\fItypes\fR, a list of source URLs with
 \fIsources\fR, an estimation about the install size and the size of the packages marked as to be deleted with
 \fIsize\fR, a list of profiles with
 \fIprofiles\fR, and a list of solved packages to become installed with
@@ -230,7 +230,7 @@ Set the log server port\&. By default port 9000 is used\&. If multiple KIWI proc
 .PP
 [\fB\-\-package\-manager \fR\fB\fIsmart|zypper\fR\fR ]
 .RS 4
-Set the package manager to use for this image\&. If set it will temporarly overwrite the value set in the xml description\&.
+Set the package manager to use for this image\&. If set it will temporarily overwrite the value set in the xml description\&.
 .RE
 .PP
 [\fB\-A\fR | \fB\-\-target\-arch \fR\fB\fIi586|x86_64|armv5tel|ppc\fR\fR ]
@@ -256,7 +256,7 @@ Set up the physical extend, chroot system below the given root\-path path\&. If 
 \fB\-\-root\fR
 option is given, KIWI will search for the attribute defaultroot in
 config\&.xml\&. If no root directory is known, a
-\fBmktmp\fR
+\fBmktemp\fR
 directory will be created and used as root directory\&.
 .RE
 .PP
@@ -268,7 +268,7 @@ Force creation of new root directory\&. If the directory already exists, it is d
 .PP
 [\fB\-\-cache\fR \fIdirectory\fR ]
 .RS 4
-When specifying a cache directory KIWI will create a cache each for patterns and packages and re\-use them if possible for subsequent root tree preparations of this and/or other images
+When specifying a cache directory, KIWI will create a cache each for patterns and packages and re\-use them, if possible, for subsequent root tree preparations of this and/or other images
 .RE
 .PP
 [\fB\-\-add\-package\fR \fIpackage\fR ]
@@ -320,7 +320,7 @@ config\&.xml
 .PP
 [\fB\-s\fR | \fB\-\-strip\fR]
 .RS 4
-Strip shared objects and executables only make sense in combination with
+Strip shared objects and executables \- only makes sense in combination with
 \fB\-\-create\fR
 .RE
 .PP
