@@ -108,6 +108,10 @@ sub normalizePath {
 	if (defined $path) {
 		return $path;
 	}
+	$path = $this -> plainPath ($module);
+	if (defined $path) {
+		return $path;
+	}
 	$path = $this -> dirPath ($module);
 	if (defined $path) {
 		return $path;
@@ -546,6 +550,31 @@ sub openSUSEpath {
 		$kiwi -> skipped ();
 	}
 	return undef;
+}
+
+#==========================================
+# plainPath
+#------------------------------------------
+sub plainPath {
+	# ...
+	# This method forwards the URL (everything following "plain://")
+	# unmodified to the package manager. This can be used if kiwi
+	# does not support a special URL but the package manager does.
+	# ---
+	my $this   = shift;
+	my $module = shift;
+	my $kiwi   = $this->{kiwi};
+	#==========================================
+	# normalize URL data
+	#------------------------------------------
+	if ((! defined $module) || ($module !~ /^plain:\/\//)) {
+		return undef;
+	}
+	$module =~ s/^plain:\/\///;
+	$kiwi -> loginfo (
+		"URL: $module will be forwarded AS IS to the package manger!\n"
+	);
+	return $module;
 }
 
 #==========================================
