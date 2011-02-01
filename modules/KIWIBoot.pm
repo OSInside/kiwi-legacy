@@ -603,7 +603,12 @@ sub setupInstallCD {
 	my $destdir   = dirname ($initrd);
 	my $gotsys    = 1;
 	my $volid     = "-V \"KIWI CD/DVD Installation\"";
-	my $bootloader= "grub";
+	my $bootloader;
+	if ($arch =~ /ppc|ppc64/) {
+		$bootloader = "lilo";
+	} else {
+		$bootloader = "grub";
+	}
 	my $status;
 	my $result;
 	my $tmpdir;
@@ -705,9 +710,14 @@ sub setupInstallCD {
 		#==========================================
 		# find partition to check
 		#------------------------------------------
-		my $sdev = $this->{bindloop}."1";
-		if (! -e $sdev) {
+		my $sdev;
+		if ($arch =~ /ppc|ppc64/) {
 			$sdev = $this->{bindloop}."2";
+		} else {
+			$sdev = $this->{bindloop}."1";
+			if (! -e $sdev) {
+				$sdev = $this->{bindloop}."2";
+			}
 		}
 		#==========================================
 		# check for activated volume group
@@ -892,6 +902,9 @@ sub setupInstallCD {
 		qxx ("mv $tmpdir/boot/syslinux $tmpdir/boot/loader 2>&1");
 		$base = "-R -J -f -b boot/loader/isolinux.bin -no-emul-boot $volid";
 		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size";
+	} elsif ($bootloader eq "lilo") {
+		$base = "-r";
+		$opts = "-U -chrp-boot";
 	} else {
 		# don't know how to use this bootloader together with isolinux
 		$kiwi -> failed ();
@@ -923,9 +936,11 @@ sub setupInstallCD {
 		return undef;
 	}
 	$kiwi -> done ();
-	if (! $iso -> relocateCatalog ($name)) {
-		$iso  -> cleanISO ();
-		return undef;
+	if ($arch !~ /ppc|ppc64/) {
+		if (! $iso -> relocateCatalog ($name)) {
+			$iso  -> cleanISO ();
+			return undef;
+		}
 	}
 	#==========================================
 	# Clean tmp
@@ -1452,7 +1467,14 @@ sub setupBootDisk {
 	my $dmapper   = 0;
 	my $haveluks  = 0;
 	my $needBootP = 0;
-	my $bootloader= "grub";
+	my $prepbootMB= 0;
+	my $bootloader;
+	my $boot;
+	if ($arch =~ /ppc|ppc64/) {
+		$bootloader = "lilo";
+	} else {
+		$bootloader = "grub";
+	}
 	my $haveDiskDevice;
 	my $splitfile;
 	my $version;
@@ -1597,6 +1619,13 @@ sub setupBootDisk {
 			if ($syslbootMB < $main::FatStorage) {
 				$syslbootMB = $main::FatStorage;
 			}
+		}
+	}
+	if ($arch =~ /ppc|ppc64/) {
+		if ($lvm) {
+			$prepbootMB = 50;
+		} else {
+			$prepbootMB = 8;
 		}
 	}
 	#==========================================
@@ -1758,6 +1787,26 @@ sub setupBootDisk {
 		#==========================================
 		# create disk partition
 		#------------------------------------------
+		if ($arch =~ /ppc|ppc64/) {
+			my $prepsize = $prepbootMB;
+			if (! $lvm) {
+				@commands = (
+					"n","p","1",".","+".$prepsize."M",
+					"n","p","2",".",".",
+					"t","1","41",
+					"t","2","83",
+					"a","1","w","q"
+				);
+			} else {
+				@commands = (
+					"n","p","1",".","+".$prepbootMB."M",
+					"n","p","2",".",".",
+					"t","1","6",
+					"t","2","8e",
+					"a","1","w","q"
+				);
+			}
+		} else {
 		if (! $lvm) {
 			if (($syszip) || ($haveSplit) || ($dmapper)) {
 				# xda1 ro / xda2 rw
@@ -1851,6 +1900,7 @@ sub setupBootDisk {
 				);
 			}
 		}
+		}
 		if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create partition table");
@@ -1875,7 +1925,11 @@ sub setupBootDisk {
 			#==========================================
 			# Create disk device mapping table
 			#------------------------------------------
-			%deviceMap = $this -> setDefaultDeviceMap ($this->{loop});
+			if ($arch =~ /ppc|ppc64/) {
+				%deviceMap = $this -> setPPCDeviceMap ($this->{loop});
+			} else {
+				%deviceMap = $this -> setDefaultDeviceMap ($this->{loop});
+			}
 			#==========================================
 			# Umount possible mounted stick partitions
 			#------------------------------------------
@@ -1918,7 +1972,11 @@ sub setupBootDisk {
 		#==========================================
 		# set root device name from deviceMap
 		#------------------------------------------
-		$root = $deviceMap{1};
+		if (($arch =~ /ppc|ppc64/) && (!$lvm)) {
+			$root = $deviceMap{2};
+		} else {
+			$root = $deviceMap{1};
+		}
 		#==========================================
 		# check partition sizes
 		#------------------------------------------
@@ -2145,6 +2203,18 @@ sub setupBootDisk {
 			return undef;
 		}
 		$kiwi -> done();
+	} elsif (($arch =~ /ppc|ppc64/) && ($lvm)) {
+		$boot = $deviceMap{fat};
+		$kiwi -> info ("Creating DOS boot filesystem");
+		$status = qxx ("/sbin/mkdosfs -F 16 $boot 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create DOS filesystem: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
 	} elsif (
 		($dmapper) || ($haveluks) || ($needBootP) ||
 		($lvm) || ($bootloader eq "extlinux")
@@ -2191,6 +2261,13 @@ sub setupBootDisk {
 		$root = $deviceMap{extlinux};
 	} elsif ($dmapper) {
 		$root = $deviceMap{dmapper};
+	} elsif ($arch =~ /ppc|ppc64/){
+		if ($lvm) {
+			$boot = $deviceMap{fat};
+			$root = $deviceMap{1};
+		} else {
+			$root = $deviceMap{2};
+		}
 	} elsif (($syszip) || ($haveSplit) || ($lvm)) {
 		$root = $deviceMap{2};
 		if ($haveluks) {
@@ -2211,11 +2288,48 @@ sub setupBootDisk {
 		$this -> cleanLoop ();
 		return undef;
 	}
+	if (($arch =~/ppc|ppc64/) && ($lvm)) {
+		$status = qxx ("mkdir -p $loopdir/vfat");
+		$boot = $deviceMap{fat};
+		if (! main::mount ($boot, $loopdir."/vfat")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't mount image: $boot");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+	}
 	#==========================================
 	# Copy boot data on system image
 	#------------------------------------------
 	$status = qxx ("cp -dR $tmpdir/boot $loopdir 2>&1");
 	$result = $? >> 8;
+	if ($arch =~ /ppc|ppc64/) {
+		#==========================================
+		# Copy yaboot.conf
+		#------------------------------------------
+		if (! $lvm) {
+			$status = qxx ("cp $tmpdir/etc/yaboot.conf $loopdir/etc/ 2>&1");
+			$result = $? >> 8;
+		} else {
+			$status = qxx (
+				"cp $tmpdir/etc/yaboot.conf $loopdir/vfat/yaboot.cnf 2>&1"
+			);
+			$result = $? >> 8;
+			$status = qxx ("cp $loopdir/boot/linux.vmx  $loopdir/vfat");
+			$status = qxx ("cp $loopdir/boot/initrd.vmx $loopdir/vfat");
+			$result = $? >> 8;
+			$status = qxx (
+				"cp $loopdir/lib/lilo/chrp/yaboot.chrp $loopdir/vfat/yaboot"
+			);
+			$result = $? >> 8;
+			$status = qxx ("cp -a $tmpdir/ppc $loopdir/vfat/");
+			$result = $? >> 8;
+			main::umount($boot);
+			$status = qxx ("rm -rf $loopdir/vfat");
+			$result = $? >> 8;
+		}
+	}
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Couldn't copy boot data to system image: $status");
@@ -3466,6 +3580,105 @@ sub setupBootLoaderConfiguration {
 		$kiwi -> done();
 	}
 	#==========================================
+	# lilo
+	#------------------------------------------
+	if ($loader eq "lilo") {
+		$cmdline =~ s/\n//g;
+		my $title_standard;
+		$title_standard = $this -> makeLabel ("$label");
+		#==========================================
+		# Standard boot
+		#------------------------------------------
+		qxx ("mkdir -p $tmpdir/etc");
+		if (! open (FD,">$tmpdir/etc/yaboot.conf")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create yaboot.conf: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		#==========================================
+		# CD NON-LVM BOOT
+		#-------------------------------------------
+		if (($type =~ /^KIWI CD/) && (!$lvm)) {
+			print FD "default = $title_standard\n";
+			print FD "image = /boot/linux\n";
+			print FD "\t"."label = $title_standard\n";
+			print FD "\t"."append = \"$cmdline\"\n";
+			print FD "\t"."initrd = /boot/initrd\n";
+			close FD;
+		} elsif (($type =~ /^KIWI CD/) && ($lvm)) {
+			#==========================================
+			# CD LVM Boot
+			#-------------------------------------------
+			print FD "default = $title_standard\n";
+			print FD "image = /boot/linux\n";
+			print FD "\t"."label = $title_standard\n";
+			print FD "\t"."append = \"$cmdline\"\n";
+			print FD "\t"."initrd = /boot/initrd\n";
+			close FD;
+		} elsif (!($type =~ /^KIWI CD/) && (!$lvm)) {
+			#==========================================
+			# RAW NON-LVM
+			#------------------------------------------
+			print FD "partition = 2\n";
+			print FD "timeout = 80\n";
+			print FD "default = $title_standard\n";
+			print FD "image = /boot/linux.vmx"."\n";
+			print FD "\t"."label = $title_standard\n";
+			print FD "\t"."root = /dev/sda2\n";
+			print FD "\t"."append = \"$cmdline\"\n";
+			print FD "\t"."initrd = /boot/initrd.vmx\n";
+			close FD;
+		} elsif (!($type =~ /^KIWI CD/) && ($lvm)) {
+			#==========================================
+			# RAW LVM
+			#-------------------------------------------
+			print FD "default = $title_standard\n";
+			print FD "image = linux.vmx"."\n";
+			print FD "\t"."label = $title_standard\n";
+			print FD "\t"."append = \"$cmdline\"\n";
+			print FD "\t"."initrd = initrd.vmx\n";
+			close FD;
+		}
+		#==========================================
+		# Create bootinfo.txt (CD and LVM setups)
+		#-------------------------------------------
+		if ($type =~ /^KIWI CD/)  {
+			qxx ("mkdir -p $tmpdir/ppc/");
+			if (! open (FD,">$tmpdir/ppc/bootinfo.txt")) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create bootinfo.txt: $!");
+				$kiwi -> failed ();
+				return undef;
+			}
+			print FD "<chrp-boot>\n";
+			print FD "<description>$title_standard</description>\n";
+			print FD "<os-name>$title_standard</os-name>\n";
+			print FD "<boot-script>boot &device;:1,\\suseboot\\yaboot.ibm";
+			print FD "</boot-script>\n";
+			print FD "</chrp-boot>\n";
+			close FD;
+			qxx ("mkdir $tmpdir/suseboot");
+			qxx ("cp /lib/lilo/chrp/yaboot.chrp $tmpdir/suseboot/yaboot.ibm");
+			qxx ("cp $tmpdir/etc/yaboot.conf $tmpdir/suseboot/yaboot.cnf");
+		} elsif (!($type =~ /^KIWI CD/) && ($lvm)) {
+			qxx ("mkdir -p $tmpdir/ppc/");
+			if (! open (FD,">$tmpdir/ppc/bootinfo.txt")) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create bootinfo.txt: $!");
+				$kiwi -> failed ();
+				return undef;
+			}
+			print FD "<chrp-boot>\n";
+			print FD "<description>$title_standard</description>\n";
+			print FD "<os-name>$title_standard</os-name>\n";
+			print FD "<boot-script>boot &device;:1,yaboot</boot-script>\n";
+			print FD "</chrp-boot>\n";
+			close FD;
+		}
+		$kiwi -> done ();
+	}
+	#==========================================
 	# more boot managers to come...
 	#------------------------------------------
 	# ...
@@ -3484,6 +3697,7 @@ sub installBootLoader {
 	my $tmpdir   = $this->{tmpdir};
 	my $bootpart = $this->{bootpart};
 	my $chainload= $this->{chainload};
+	my $lvm	     = $this->{lvm};
 	my $result;
 	my $status;
 	#==========================================
@@ -3779,15 +3993,47 @@ sub installBootLoader {
 		$kiwi -> done();
 	}
 	#==========================================
+	# install lilo
+	#------------------------------------------
+	if ($loader eq "lilo") {
+		#==========================================
+		# Activate devices
+		#------------------------------------------
+		if (! $this -> bindDiskPartitions ($this->{loop})) {
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		#==========================================
+		# install yaboot on PReP partition
+		#------------------------------------------
+		if (!$lvm) {
+			my %deviceMap = %{$deviceMap};
+			my $device = $deviceMap{1};
+			$kiwi -> info ("Installing yaboot on device: $device");
+			$status = qxx ("dd if=/lib/lilo/chrp/yaboot.chrp of=$device 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't install yaboot on $device: $status");
+				$kiwi -> failed ();
+				$this -> cleanLoop ();
+				return undef;
+			}
+		}
+	}
+	#==========================================
 	# more boot managers to come...
 	#------------------------------------------
 	# ...
 	#==========================================
 	# Write custom disk label ID to MBR
 	#------------------------------------------
-	$kiwi -> info ("Saving disk label in MBR: $this->{mbrid}...");
-	if (! $this -> writeMBRDiskLabel ($diskname)) {
-		return undef;
+	if ($loader ne "lilo") {
+		$kiwi -> info ("Saving disk label in MBR: $this->{mbrid}...");
+		if (! $this -> writeMBRDiskLabel ($diskname)) {
+			return undef;
+		}
 	}
 	$kiwi -> done();
 	return $this;
@@ -4243,6 +4489,39 @@ sub getStorageSize {
 }
 
 #==========================================
+# setPPCDeviceMap
+#------------------------------------------
+sub setPPCDeviceMap {
+	# ...
+	# set default devuce map for PowerSystems
+	# ---
+	my $this   = shift;
+	my $device = shift;
+	my $loader = $this->{bootloader};
+	my $dmapper= $this->{dmapper};
+	my $search = "41";
+	my %result;
+	if (! defined $device) {
+		return undef;
+	}
+	for (my $i=1;$i<=3;$i++) {
+		$result{$i} = $device.$i;
+	}
+	if ($loader eq "lilo") {
+		for (my $i=1;$i<=2;$i++) {
+			my $type = $this -> getStorageID ($device.$i);
+			if ($type = $search) {
+				$result{prep} = $device.$i;
+			}
+			last;
+		}
+	} elsif ($dmapper) {
+		$result{dmapper} = $device."3";
+	}
+	return %result;
+}
+
+#==========================================
 # setDefaultDeviceMap
 #------------------------------------------
 sub setDefaultDeviceMap {
@@ -4338,6 +4617,7 @@ sub setLVMDeviceMap {
 	my $device = shift;
 	my $names  = shift;
 	my @names  = @{$names};
+	my $arch   = $this->{arch};
 	my $loader = $this->{bootloader};
 	my $dmapper= $this->{dmapper};
 	my %result;
@@ -4353,10 +4633,10 @@ sub setLVMDeviceMap {
 	for (my $i=0;$i<@names;$i++) {
 		$result{$i+1} = "/dev/$group/".$names[$i];
 	}
-	if ($loader =~ /(sys|ext)linux/) {
+	if (($arch =~ /ppc|ppc64/) || ($loader =~ /(sys|ext)linux/)) {
 		if ($device =~ /loop/) {
 			my $dmap = $device; $dmap =~ s/dev\///;
-			if ($loader eq "syslinux") {
+			if (($arch =~ /ppc|ppc64/) || ($loader =~ /syslinux/)) {
 				$result{fat} = "/dev/mapper".$dmap."p1";
 			} else {
 				$result{extlinux} = "/dev/mapper".$dmap."p1";

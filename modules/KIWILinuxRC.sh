@@ -67,6 +67,14 @@ fi
 if dhcpcd -p 2>&1 | grep -q 'Usage';then
 	export DHCPCD_HAVE_PERSIST=0
 fi
+#======================================
+# Exports (arch specific)
+#--------------------------------------
+arch=`uname -m`
+if [ "$arch" = "ppc64" ];then
+	loader=lilo
+	export ELOG_BOOTSHELL=/dev/hvc0
+fi
 
 #======================================
 # Dialog
@@ -2004,7 +2012,6 @@ function setupBootLoaderLilo {
 	echo "boot=$rdev"                                        >  $conf
 	echo "activate"                                          >> $conf
 	echo "timeout=`expr $KIWI_BOOT_TIMEOUT \* 10`"           >> $conf
-	echo "default=kiwi$count"                                >> $conf
 	local count=1
 	IFS="," ; for i in $KERNEL_LIST;do
 		if test ! -z "$i";then
@@ -2032,27 +2039,34 @@ function setupBootLoaderLilo {
 			#======================================
 			# create standard entry
 			#--------------------------------------
-			echo "label=\"$title\""                           >> $conf
 			if xenServer $kname $mountPrefix;then
 				systemException \
 					"*** lilo: Xen dom0 boot not implemented ***" \
 				"reboot"
 			else
+				echo "default=\"$title\""		      >> $conf
 				echo "image=/boot/$kernel"                    >> $conf
+				echo "label=\"$title\""                       >> $conf
 				echo "initrd=/boot/$initrd"                   >> $conf
 				echo -n "append=\"quiet sysrq=1 panic=9"      >> $conf
 				echo -n " root=$diskByID"                     >> $conf
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
 				fi
+				if [ ! "$arch" = "ppc64" ];then
 				echo -n " $console vga=$fbmode splash=silent" >> $conf
+				fi
 				if [ ! -z "$swap" ];then                     
 					echo -n " resume=$swapByID"               >> $conf
 				fi
 				if [ -e /dev/xvc0 ];then
 					echo -n " console=xvc console=tty"        >> $conf
 				elif [ -e /dev/hvc0 ];then
-					echo -n " console=hvc console=tty"        >> $conf
+					if [ "$arch" = "ppc64" ];then
+					echo -n " console=hvc0"        >> $conf
+					else
+					echo -n " console=hvc0 console=tty"        >> $conf
+					fi
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                >> $conf
 				echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
@@ -2065,27 +2079,33 @@ function setupBootLoaderLilo {
 			# create failsafe entry
 			#--------------------------------------
 			title=$(makeLabel "Failsafe -- $title")
-			echo "label=\"$title\""                           >> $conf
 			if xenServer $kname $mountPrefix;then
 				systemException \
 					"*** lilo: Xen dom0 boot not implemented ***" \
 				"reboot"
 			else
 				echo "image=/boot/$kernel"                    >> $conf
+				echo "label=\"$title\""                       >> $conf
 				echo "initrd=/boot/$initrd"                   >> $conf
 				echo -n "append=\"quiet sysrq=1 panic=9"      >> $conf
 				echo -n " root=$diskByID"                     >> $conf
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
 				fi
+				if [ ! "$arch" = "ppc64" ];then
 				echo -n " $console vga=$fbmode splash=silent" >> $conf
+				fi
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"               >> $conf
 				fi
 				if [ -e /dev/xvc0 ];then
 					echo -n " console=xvc console=tty"        >> $conf
 				elif [ -e /dev/hvc0 ];then
-					echo -n " console=hvc console=tty"        >> $conf
+					if [ "$arch" = "ppc64" ];then
+					echo -n " console=hvc0"        >> $conf
+					else
+					echo -n " console=hvc0 console=tty"        >> $conf
+					fi
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                >> $conf
 				echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
@@ -3098,6 +3118,31 @@ function CDUmount {
 #--------------------------------------
 function CDEject {
 	eject $cddev
+}
+#======================================
+# searchOFBootDevice
+#--------------------------------------
+function searchOFBootDevice {
+	# /.../
+	# search for the device with the OF PROM id
+	# this is required for the ppc boot architecture
+	# as we don't have a BIOS and a MBR here
+	# ----
+	IFS=$IFS_ORIG
+	local h=/usr/sbin/hwinfo
+	local c="Device File:|PROM id"
+	local ddevs=`$h --disk|grep -E "$c"|sed -e"s@(.*)@@"|cut -f2 -d:|tr -d " "`
+	#======================================
+	# Store device with PROM id 
+	#--------------------------------------
+	for curd in $ddevs;do
+		if [ $curd = "/dev/sda" ];then
+			export biosBootDevice=$curd
+			return 0
+		fi
+	done
+	export biosBootDevice="Can't find OF boot device"
+	return 1
 }
 #======================================
 # searchBusIDBootDevice
@@ -4424,8 +4469,10 @@ function mountSystem {
 	#======================================
 	# setup boot partition
 	#--------------------------------------
-	if [ $retval = 0 ] && [ -z "$RESTORE" ];then
-		setupBootPartition
+	if [ ! "$arch" = "ppc64" ];then
+		if [ $retval = 0 ] && [ -z "$RESTORE" ];then
+			setupBootPartition
+		fi
 	fi
 	#======================================
 	# reset mount counter

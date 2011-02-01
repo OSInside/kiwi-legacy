@@ -1,0 +1,27 @@
+Build instructions for local build
+==================================
+* create a SLES11 installation source below /path/to/SLE11/repo
+  tip: copy SLE11 DVD
+
+* call kiwi prepare:
+  kiwi -p suse-SLE11-JeOS --root /tmp/kiwi-sle11 --ignore-repos \
+       --add-repo /path/to/SLE11/repo \
+       --add-repotype yast2 \
+       --add-repo /usr/share/kiwi/repo/suse-repo/suse-sle11-repo/ \
+       --add-repotype rpm-dir
+
+* call kiwi create for physical device:
+  kiwi --create /tmp/kiwi-sle11 --ignore-repos \
+	   --add-repo /path/to/SLE11/repo \
+       --add-repotype yast2 \
+       --add-repo /usr/share/kiwi/repo/suse-repo/suse-sle11-repo/ \
+       --add-repotype rpm-dir \
+	   -d /tmp/myimage --type vmx --targetDevice /dev/sdaX
+
+* call kiwi create for virtio device (VIO image):
+  kiwi --create /tmp/kiwi-sle11 --ignore-repos \
+       --add-repo /path/to/SLE11/repo \
+       --add-repotype yast2 \
+       --add-repo /usr/share/kiwi/repo/suse-repo/suse-sle11-repo/ \
+       --add-repotype rpm-dir \
+       -d /tmp/myimage --type vmx

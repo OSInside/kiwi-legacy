@@ -1874,6 +1874,7 @@ At the moment grub, zipl and sys|extlinux are supported</a:documentation>
           <value>grub</value>
           <value>syslinux</value>
           <value>zipl</value>
+          <value>lilo</value>
         </choice>
       </attribute>
     </define>

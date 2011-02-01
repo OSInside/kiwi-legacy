@@ -183,7 +183,7 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 %endif
 
-%ifarch %ix86 x86_64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
 
 %package -n kiwi-desc-vmxboot
 License:        GPLv2+
@@ -273,7 +273,7 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 %endif
 
-%ifarch %ix86 x86_64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
 
 %package -n kiwi-templates
 License:        GPL v2.0 or later
@@ -455,7 +455,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/isoboot/rhel*
 %endif
 
-%ifarch %ix86 x86_64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
 
 %files -n kiwi-desc-vmxboot
 %defattr(-, root, root)
@@ -482,10 +482,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/oemboot/suse*
 %endif
 
-%ifarch %ix86 x86_64
 
 %files -n kiwi-templates
 %defattr(-, root, root)
+%ifarch %ix86 x86_64
 %{_datadir}/kiwi/image/suse-11.4-JeOS
 %{_datadir}/kiwi/image/suse-11.3-JeOS
 %{_datadir}/kiwi/image/suse-11.2-JeOS
@@ -495,6 +495,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/rhel-05.4-JeOS
 %endif
 %ifarch s390 s390x
+%{_datadir}/kiwi/image/suse-SLE11-JeOS
+%endif
+%ifarch ppc ppc64
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %endif
 

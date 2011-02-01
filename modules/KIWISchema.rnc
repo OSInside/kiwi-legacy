@@ -1396,7 +1396,7 @@ div {
 		## Specifies the bootloader used for booting the image."
 		## At the moment grub, zipl and sys|extlinux are supported
 		attribute bootloader {
-			"extlinux" | "grub" | "syslinux" | "zipl"
+			"extlinux" | "grub" | "syslinux" | "zipl" | "lilo"
 		}
 	k.type.bootprofile.attribute =
 		## Specifies the boot profile defined in the boot image
