@@ -14,7 +14,7 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<preferences>
-		<type image="ext3" boot="vmxboot/suse-11.3" bootprofile="xen" bootkernel="ec2" format="ec2">
+		<type image="ext3" format="ec2">
 			<ec2config>
 				<ec2privatekeyfile>Path to EC2 private key file</ec2privatekeyfile>
 				<ec2certfile>Path to EC2 public certificate file</ec2certfile>
@@ -35,7 +35,7 @@
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
-		<package name="kernel-ec2" replaces="kernel-xen"/>
+		<package name="kernel-ec2"/>
         <package name="suse-ami-tools"/>
 		<package name="vim"/>
 		<package name="xen-tools-domU"/>
