@@ -10,7 +10,7 @@
     attention to detail. However, this does not guarantee complete
     accuracy. Neither Novell, Inc., SUSE Linux Products GmbH, the
     authors, nor the translators shall be held liable for possible
-    errors or the consequences thereof.</p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="chapter"><a href="#chap.workflow">1. Basic Workflow</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.workflow.introduction">1.1. Introduction</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootprocess">1.2. Boot Process</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootparameters">1.3. Boot Parameters</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.common-specific-code">1.4. Common and Distribution Specific Code</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.description">2. KIWI Image Description</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.description.config.xml">2.1. The config.xml File</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.description.image">2.1.1. <code class="sgmltag-element">image</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.description">2.1.2. <code class="sgmltag-element">description</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.profiles">2.1.3. <code class="sgmltag-element">profiles</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.preferences">2.1.4. <code class="sgmltag-element">preferences</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.users">2.1.5. <code class="sgmltag-element">users</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.drivers">2.1.6. <code class="sgmltag-element">drivers</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.repository">2.1.7. <code class="sgmltag-element">repository</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.packages">2.1.8. <code class="sgmltag-element">packages</code> Element</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.appliance">3. Creating Appliances with KIWI</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.appliance.history">3.1. History</a></span></dt><dt><span class="sect1"><a href="#sec.appliance.kiwi-model">3.2. The KIWI Model</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.maintenance">4. Maintenance of Operating System Images</a></span></dt><dt><span class="chapter"><a href="#chap.migration">5. System to Image Migration</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.migrate.create-clean-repository">5.1. Create a Clean Repository Set First</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.watch-overlay">5.2. Watch the Overlay and Unpackaged Files</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.checklist">5.3. Checklist</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.turn-system-into-image">5.4. Turn my System Into an Image&#8230;</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.instsourcesetup">6. Installation Source</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.instsourcesetup.adapt-example">6.1. Adapt the Example&#8217;s config.xml</a></span></dt><dt><span class="sect1"><a href="#sec.instsourcesetup.create-local-inst-source">6.2. Create a Local Installation Source</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.iso">7. ISO Image&#8212;Live Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.iso.building">7.1. Building the suse-live-iso Example</a></span></dt><dt><span class="sect1"><a href="#sec.iso.using">7.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.iso.flavours">7.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.iso.split-mode">7.3.1. Split mode</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.usb">8. USB Image&#8212;Live-Stick System</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.usb.building">8.1. Building the suse-live-stick Example</a></span></dt><dt><span class="sect1"><a href="#sec.usb.using">8.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.usb.flavours">8.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.usb.split-stick">8.3.1. Split Stick</a></span></dt><dt><span class="sect2"><a href="#sec.usb.lvm">8.3.2. LVM Support</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.vmx">9. VMX Image&#8212;Virtual Disks</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.vmx.building">9.1. Building the suse-vm-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.using">9.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.flavours">9.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.vmx.vmware-support">9.3.1. VMware support</a></span></dt><dt><span class="sect2"><a href="#sec.vmx.lvm">9.3.2. LVM Support</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.pxe">10. PXE Image&#8212;Thin Clients</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.pxe.setting-up">10.1. Setting Up the Required Services</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.atftp-server">10.1.1. Atftp Server</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.dhcp-server">10.1.2. DHCP Server</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.building">10.2. Building the suse-pxe-client Example</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.using">10.3. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.flavours">10.4. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.client-control-file">10.4.1. The PXE Client Control File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.client-config-file">10.4.2. The PXE Client Configuration File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.another-user">10.4.3. User another than tftp as Download Protocol</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.ram-only-image">10.4.4. RAM Only Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.union-image">10.4.5. Union Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.split-image">10.4.6. Split Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nfs">10.4.7. Root Tree Over NFS</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nbd">10.4.8. Root Tree Over NBD</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-aoe">10.4.9. Root Tree Over AoE</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.groups">10.5. Hardware Grouping</a></span></dt><dd><dl><dt><span class="sect2"><a href="#id2560192">10.5.1. The Group Configuration File</a></span></dt><dt><span class="sect2"><a href="#id2560377">10.5.2. The Group Details File</a></span></dt><dt><span class="sect2"><a href="#id2560460">10.5.3.  Using Hardware Mapping to Provide Overrides</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.oem">11. OEM Image&#8212;Preload Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.oem.building">11.1. Building the suse-oem-preload Example</a></span></dt><dt><span class="sect1"><a href="#sec.oem.using">11.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.oem.flavours">11.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.oem.installation">11.3.1. Specializing the OEM install process</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partitioning">11.3.2. Influencing the OEM Partitioning</a></span></dt><dt><span class="sect2"><a href="#sec.oem.lvm">11.3.3. LVM Support</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partition-based-installation">11.3.4. Partition Based Installation</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.xen">12. Xen Image&#8212;Paravirtual Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.xen.building">12.1. Building the suse-xen-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.xen.using">12.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.xen.flavours">12.3. Flavours</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.ec2">13. EC2 Image&#8212;Amazon Elastic Compute Cloud</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.ec2.building">13.1. Building the suse-xen-guest Example for EC2</a></span></dt><dt><span class="sect1"><a href="#sec.ec2.using">13.2. Using the Image</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.testing">14. KIWI Testsuite</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.testing.testsuite">14.1. Testsuite Packages</a></span></dt><dt><span class="sect1"><a href="#sec.testing.creating">14.2. Creating a Test</a></span></dt></dl></dd><dt><span class="appendix"><a href="#appendix">A. KIWI Man Pages</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#ref.kiwi.kiwi">kiwi</a></span><span class="refpurpose"> &#8212; Creating Operating System Images</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.config.sh">kiwi::config.sh</a></span><span class="refpurpose"> &#8212; Configuration File for KIWI image description</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.images.sh">kiwi::images.sh</a></span><span class="refpurpose"> &#8212; Configuration File for KIWI image description</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.kiwirc">kiwi::kiwirc</a></span><span class="refpurpose"> &#8212; Resource file for the Kiwi imaging system</span></dt></dl></dd></dl></div><div class="list-of-figures"><p><b>List of Figures</b></p><dl><dt>1.1. <a href="#fig.imageservingarch">Image Serving Architecture</a></dt><dt>1.2. <a href="#fig.imagetypes">Image Types</a></dt><dt>1.3. <a href="#fig.workflow.bootprocess">Boot Process</a></dt><dt>2.1. <a href="#fig.description.imagedescrdir">Image Description Directory</a></dt><dt>4.1. <a href="#fig.maintain">Image Maintenance Scenarios</a></dt></dl></div><div class="list-of-tables"><p><b>List of Tables</b></p><dl><dt>2.1. <a href="#tab.description.supported-types">Supported Types for zypper and smart</a></dt><dt>9.1. <a href="#tab.vmx.supported-disk-formats">Supported Virtual Disk Formats</a></dt><dt>13.1. <a href="#tab.ec2.kernel-image-ids">Amazon Kernel Image IDs</a></dt></dl></div><div class="list-of-examples"><p><b>List of Examples</b></p><dl><dt>A.1. <a href="#id2565006">Template for config.sh</a></dt><dt>A.2. <a href="#id2566135">Template for images.sh</a></dt><dt>A.3. <a href="#id2566802">Template for .kiwi.rc</a></dt></dl></div><div class="chapter" title="Chapter 1. Basic Workflow"><div class="titlepage"><div><div><h2 class="title"><a name="chap.workflow"></a>Chapter 1. Basic Workflow</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.workflow.introduction">1.1. Introduction</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootprocess">1.2. Boot Process</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootparameters">1.3. Boot Parameters</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.common-specific-code">1.4. Common and Distribution Specific Code</a></span></dt></dl></div><a class="indexterm" name="id2527604"></a><div class="sect1" title="1.1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.workflow.introduction"></a>1.1. Introduction<span class="permalink"><a alt="Permalink" title="1.1. Introduction" href="#sec.workflow.introduction">¶</a></span></h2></div></div></div><p>The openSUSE KIWI Image System provides a complete operating
+    errors or the consequences thereof.</p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="chapter"><a href="#chap.workflow">1. Basic Workflow</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.workflow.introduction">1.1. Introduction</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootprocess">1.2. Boot Process</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootparameters">1.3. Boot Parameters</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.common-specific-code">1.4. Common and Distribution Specific Code</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.description">2. KIWI Image Description</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.description.config.xml">2.1. The config.xml File</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.description.image">2.1.1. <code class="sgmltag-element">image</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.description">2.1.2. <code class="sgmltag-element">description</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.profiles">2.1.3. <code class="sgmltag-element">profiles</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.preferences">2.1.4. <code class="sgmltag-element">preferences</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.users">2.1.5. <code class="sgmltag-element">users</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.drivers">2.1.6. <code class="sgmltag-element">drivers</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.repository">2.1.7. <code class="sgmltag-element">repository</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.packages">2.1.8. <code class="sgmltag-element">packages</code> Element</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.appliance">3. Creating Appliances with KIWI</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.appliance.history">3.1. History</a></span></dt><dt><span class="sect1"><a href="#sec.appliance.kiwi-model">3.2. The KIWI Model</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.maintenance">4. Maintenance of Operating System Images</a></span></dt><dt><span class="chapter"><a href="#chap.migration">5. System to Image Migration</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.migrate.create-clean-repository">5.1. Create a Clean Repository Set First</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.watch-overlay">5.2. Watch the Overlay and Unpackaged Files</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.checklist">5.3. Checklist</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.turn-system-into-image">5.4. Turn my System Into an Image&#8230;</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.instsourcesetup">6. Installation Source</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.instsourcesetup.adapt-example">6.1. Adapt the Example&#8217;s config.xml</a></span></dt><dt><span class="sect1"><a href="#sec.instsourcesetup.create-local-inst-source">6.2. Create a Local Installation Source</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.iso">7. ISO Image&#8212;Live Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.iso.building">7.1. Building the suse-live-iso Example</a></span></dt><dt><span class="sect1"><a href="#sec.iso.using">7.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.iso.flavours">7.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.iso.split-mode">7.3.1. Split mode</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.usb">8. USB Image&#8212;Live-Stick System</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.usb.building">8.1. Building the suse-live-stick Example</a></span></dt><dt><span class="sect1"><a href="#sec.usb.using">8.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.usb.flavours">8.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.usb.split-stick">8.3.1. Split Stick</a></span></dt><dt><span class="sect2"><a href="#sec.usb.lvm">8.3.2. LVM Support</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.vmx">9. VMX Image&#8212;Virtual Disks</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.vmx.building">9.1. Building the suse-vm-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.using">9.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.flavours">9.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.vmx.vmware-support">9.3.1. VMware support</a></span></dt><dt><span class="sect2"><a href="#sec.vmx.lvm">9.3.2. LVM Support</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.pxe">10. PXE Image&#8212;Thin Clients</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.pxe.setting-up">10.1. Setting Up the Required Services</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.atftp-server">10.1.1. Atftp Server</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.dhcp-server">10.1.2. DHCP Server</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.building">10.2. Building the suse-pxe-client Example</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.using">10.3. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.flavours">10.4. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.client-control-file">10.4.1. The PXE Client Control File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.client-config-file">10.4.2. The PXE Client Configuration File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.another-user">10.4.3. User another than tftp as Download Protocol</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.ram-only-image">10.4.4. RAM Only Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.union-image">10.4.5. Union Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.split-image">10.4.6. Split Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nfs">10.4.7. Root Tree Over NFS</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nbd">10.4.8. Root Tree Over NBD</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-aoe">10.4.9. Root Tree Over AoE</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.groups">10.5. Hardware Grouping</a></span></dt><dd><dl><dt><span class="sect2"><a href="#id2560192">10.5.1. The Group Configuration File</a></span></dt><dt><span class="sect2"><a href="#id2560377">10.5.2. The Group Details File</a></span></dt><dt><span class="sect2"><a href="#id2560460">10.5.3.  Using Hardware Mapping to Provide Overrides</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.oem">11. OEM Image&#8212;Preload Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.oem.building">11.1. Building the suse-oem-preload Example</a></span></dt><dt><span class="sect1"><a href="#sec.oem.using">11.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.oem.flavours">11.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.oem.installation">11.3.1. Specializing the OEM install process</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partitioning">11.3.2. Influencing the OEM Partitioning</a></span></dt><dt><span class="sect2"><a href="#sec.oem.lvm">11.3.3. LVM Support</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partition-based-installation">11.3.4. Partition Based Installation</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.xen">12. Xen Image&#8212;Paravirtual Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.xen.building">12.1. Building the suse-xen-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.xen.using">12.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.xen.flavours">12.3. Flavours</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.ec2">13. EC2 Image&#8212;Amazon Elastic Compute Cloud</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.ec2.building">13.1. Building the suse-ec2-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.ec2.using">13.2. Using the Image</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.testing">14. KIWI Testsuite</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.testing.testsuite">14.1. Testsuite Packages</a></span></dt><dt><span class="sect1"><a href="#sec.testing.creating">14.2. Creating a Test</a></span></dt></dl></dd><dt><span class="appendix"><a href="#appendix">A. KIWI Man Pages</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#ref.kiwi.kiwi">kiwi</a></span><span class="refpurpose"> &#8212; Creating Operating System Images</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.config.sh">kiwi::config.sh</a></span><span class="refpurpose"> &#8212; Configuration File for KIWI image description</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.images.sh">kiwi::images.sh</a></span><span class="refpurpose"> &#8212; Configuration File for KIWI image description</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.kiwirc">kiwi::kiwirc</a></span><span class="refpurpose"> &#8212; Resource file for the Kiwi imaging system</span></dt></dl></dd></dl></div><div class="list-of-figures"><p><b>List of Figures</b></p><dl><dt>1.1. <a href="#fig.imageservingarch">Image Serving Architecture</a></dt><dt>1.2. <a href="#fig.imagetypes">Image Types</a></dt><dt>1.3. <a href="#fig.workflow.bootprocess">Boot Process</a></dt><dt>2.1. <a href="#fig.description.imagedescrdir">Image Description Directory</a></dt><dt>4.1. <a href="#fig.maintain">Image Maintenance Scenarios</a></dt></dl></div><div class="list-of-tables"><p><b>List of Tables</b></p><dl><dt>2.1. <a href="#tab.description.supported-types">Supported Types for zypper and smart</a></dt><dt>9.1. <a href="#tab.vmx.supported-disk-formats">Supported Virtual Disk Formats</a></dt><dt>13.1. <a href="#tab.ec2.kernel-image-ids">Amazon Kernel Image IDs</a></dt></dl></div><div class="list-of-examples"><p><b>List of Examples</b></p><dl><dt>A.1. <a href="#id2565466">Template for config.sh</a></dt><dt>A.2. <a href="#id2566595">Template for images.sh</a></dt><dt>A.3. <a href="#id2567262">Template for .kiwi.rc</a></dt></dl></div><div class="chapter" title="Chapter 1. Basic Workflow"><div class="titlepage"><div><div><h2 class="title"><a name="chap.workflow"></a>Chapter 1. Basic Workflow</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.workflow.introduction">1.1. Introduction</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootprocess">1.2. Boot Process</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootparameters">1.3. Boot Parameters</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.common-specific-code">1.4. Common and Distribution Specific Code</a></span></dt></dl></div><a class="indexterm" name="id2527604"></a><div class="sect1" title="1.1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.workflow.introduction"></a>1.1. Introduction<span class="permalink"><a alt="Permalink" title="1.1. Introduction" href="#sec.workflow.introduction">¶</a></span></h2></div></div></div><p>The openSUSE KIWI Image System provides a complete operating
     system image solution for Linux supported hardware platforms as well
     as for virtualization systems like Xen, VMware, etc. The KIWI
     architecture was designed as a two level system. The first stage,
@@ -2217,9 +2217,9 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,someconfi
       configuration with 512 MB of RAM and expects the disk at <code class="filename">/dev/xvda</code><a class="indexterm" name="id2561743"></a>. Additional information
       to setup the Xen guest machine properties are explained in the
       machine section. The KIWI Xen domain U configuration is stored in
-      the file <code class="filename">/tmp/myxen-result/suse-11.2-xen-guest.i686-1.1.2.xenconfig</code>.</p></div></div><div class="chapter" title="Chapter 13. EC2 Image&#8212;Amazon Elastic Compute Cloud"><div class="titlepage"><div><div><h2 class="title"><a name="chap.ec2"></a>Chapter 13. EC2 Image&#8212;Amazon Elastic Compute Cloud</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.ec2.building">13.1. Building the suse-xen-guest Example for EC2</a></span></dt><dt><span class="sect1"><a href="#sec.ec2.using">13.2. Using the Image</a></span></dt></dl></div><a class="indexterm" name="id2561773"></a><a class="indexterm" name="id2561784"></a><a class="indexterm" name="id2561796"></a><a class="indexterm" name="id2561808"></a><p>The <span class="trademark">Amazon Elastic Compute Cloud</span>&#8482; (Amazon
+      the file <code class="filename">/tmp/myxen-result/suse-11.2-xen-guest.i686-1.1.2.xenconfig</code>.</p></div></div><div class="chapter" title="Chapter 13. EC2 Image&#8212;Amazon Elastic Compute Cloud"><div class="titlepage"><div><div><h2 class="title"><a name="chap.ec2"></a>Chapter 13. EC2 Image&#8212;Amazon Elastic Compute Cloud</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.ec2.building">13.1. Building the suse-ec2-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.ec2.using">13.2. Using the Image</a></span></dt></dl></div><a class="indexterm" name="id2561773"></a><a class="indexterm" name="id2561784"></a><a class="indexterm" name="id2561796"></a><a class="indexterm" name="id2561808"></a><p>The <span class="trademark">Amazon Elastic Compute Cloud</span>&#8482; (Amazon
     EC2) web service provides you with the ability to execute arbitrary
-    applications in our computing environment. To use Amazon EC2 you
+	applications in the Amazon computing environment. To use Amazon EC2 you
     simply: </p><div class="procedure"><a name="proc.ec2.using"></a><ol class="procedure" type="1"><li class="step" title="Step 1"><p>Create an Amazon Machine Image (AMI) containing all your
         software, including your operating system and associated
         configuration settings, applications, libraries, etc. Such an
@@ -2228,65 +2228,171 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,someconfi
         system should have these tools installed. Due to license issues
         we are not allowed to distribute the tools which means you need
         to download, install and setup them from here:<a class="ulink" href="http://aws.amazon.com/documentation/ec2/" target="_top">http://aws.amazon.com/documentation/ec2/</a>
+		software, including the operating system and associated
+        configuration settings, applications, libraries, etc.
       </p></li><li class="step" title="Step 2"><p>Upload this AMI to the Amazon S3 (Amazon Simple Storage
-        Service) service. This gives us reliable, secure access to your
-        AMI. </p></li><li class="step" title="Step 3"><p>Register your AMI with Amazon EC2. This allows us to verify
-        that your AMI has been uploaded correctly and to allocate a
-        unique identifier for it. </p></li><li class="step" title="Step 4"><p>Use this AMI ID and the Amazon EC2 web service APIs to run,
-        monitor, and terminate as many instances of this AMI as
-        required. Currently, Amazon provides command line tools and Java
-        libraries but you may also directly access the SOAP-based API.
-      </p></li></ol></div><p>Please note while instances are running, you are billed for the
-    computing and network resources that they consume. You should start
-    creating an EC2 with KIWI after you can make sure your system is
-    prepared for EC2 which means if you call the command
-      <span class="command"><strong>ec2-describe-images</strong></span>
-    <code class="option">-a</code> you will get a valid output. </p><div class="sect1" title="13.1. Building the suse-xen-guest Example for EC2"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.ec2.building"></a>13.1. Building the suse-xen-guest Example for EC2<span class="permalink"><a alt="Permalink" title="13.1. Building the suse-xen-guest Example for EC2" href="#sec.ec2.building">¶</a></span></h2></div></div></div><p>One example provided with KIWI is based on openSUSE 11.3 and
-      includes the base pattern plus the vim editor. </p><p>Before you run KIWI you need to include some of your EC2
-      account information into the image description
-        <code class="filename">config.xml</code> file. The box below shows the
-      values you need to adapt: </p><pre class="screen">&lt;ec2config&gt; ec2accountnr="12345678911"
-   ec2privatekeyfile="Path to EC2 private key file" 
-   ec2certfile="Path to EC2 public certificate file"
-&lt;/ec2config&gt;</pre><p>After that call KIWI as follows: </p><pre class="screen"><span class="command"><strong>cd</strong></span> /usr/share/doc/packages/kiwi/examples 
-<span class="command"><strong>cd</strong></span> suse-11.3
-<span class="command"><strong>kiwi</strong></span> --prepare ./suse-xen-guest --add-profile \
-  ec2Flavour --root /tmp/myec2</pre><pre class="screen"><span class="command"><strong>kiwi</strong></span> --create /tmp/myec2 --add-profile \ 
- ec2Flavour --type vmx -d /tmp/myec2-result</pre></div><div class="sect1" title="13.2. Using the Image"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.ec2.using"></a>13.2. Using the Image<span class="permalink"><a alt="Permalink" title="13.2. Using the Image" href="#sec.ec2.using">¶</a></span></h2></div></div></div><p> The generated image needs to be transferred over to Amazon
-      which is done by the <span class="command"><strong>ec2-upload-bundle</strong></span> tool.
-      You can do this by calling: </p><pre class="screen"><span class="command"><strong>ec2-upload-bundle</strong></span> -b myImages \
-      -a <em class="replaceable"><code>AWS_Key_ID</code></em> -s <em class="replaceable"><code>AWS_secret_Key_ID</code></em> -m /tmp/myec2/ \
-      suse-11.1-xen-guest.i686-1.1.2.ami.manifest.xml </pre><p>After this is done the image needs to be registered in order
-      to receive a so called AMI id which starts with
-        <span class="quote">&#8220;<span class="quote">ami-</span>&#8221;</span> followed by a random key sequence. To
-      register call: </p><pre class="screen"><span class="command"><strong>ec2-register</strong></span> myImages/ suse-11.1-xen-guest.i686-1.1.2.ami.manifest.xml </pre><p>The result is the AMI id which you need to run an instance
-      from your image. The command
-        <span class="command"><strong>ec2-describe-images</strong></span> allows you to review your
-      registered images. Since you will be running an instance of a
-      public AMI, you will need to use a public/private keypair to
-      ensure that only you will have access. One half of this keypair
-      will be embedded into your instance, allowing you to login
-      securely without a password using the other half of the keypair.
-      Every keypair you generate requires a name. Be sure to choose a
-      name that is easy to remember, perhaps one that describes the
-      image&#8217;s content. For our example we&#8217;ll use the name gsg-keypair. </p><pre class="screen"><span class="command"><strong>ec2-add-keypair</strong></span> gsg-keypair </pre><p>The private key returned needs to be saved in a local file so
-      that you can use it later. Using your favorite text editor, create
-      a file named <code class="filename">id_rsa-gsg-keypair</code> and paste
+	   Service) service.
+      </p></li><li class="step" title="Step 3"><p>Register your AMI with Amazon EC2.</p></li><li class="step" title="Step 4"><p>
+        Use the AMI ID created during registration to run your EC2 guest.
+      </p></li></ol></div><p>
+    KIWI creates an AMI using tools provided by Amazon. Due to
+    licensing issues it is not possible to distribute the Amazon tools with
+    your Linux distribution or KIWI. Amazon provides two sets of tools,
+    AMI tools and API tools. The tools can be downloaded from the Amazon
+    web site at <a class="ulink" href="http://aws.amazon.com/developertools/368" target="_top">http://aws.amazon.com/developertools/368</a> and
+    <a class="ulink" href="http://aws.amazon.com/developertools/351" target="_top">http://aws.amazon.com/developertools/351</a> respectively.
+    The documentation for the command line tools may be accessed on the
+    Amazon web-site as well at
+    <a class="ulink" href="http://docs.amazonwebservices.com/AWSEC2/latest/CommandLineReference" target="_top">http://docs.amazonwebservices.com/AWSEC2/latest/CommandLineReference</a>. While KIWI only needs to interact with the AMI tools to create the
+    AMI you will also need to install the API tools to interact with EC2.
+    You must at least install the AMI tools to create an EC2 image with KIWI.
+    </p><p>When working with the Amazon tools it is useful to set the
+    EC2_HOME, EC2_PRIVATE_KEY, and EC2_CERT environment variables. Setting
+    EC2_PRIVATE_KEY, and EC2_CERT allows you to forego specification of the
+    <code class="option">--private-key</code> and <code class="option">--cert</code> with every
+    command. The EC@_HOME environment variable is used by the tools to find
+    required libraries.
+    </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>EC2_HOME</p><p>Location of the bin and lib directories installed by the
+            Amazon tools. A good location for the tools on your
+            system is <code class="filename">/usr/local</code>.
+        </p></li><li class="listitem"><p>EC2_PRIVATE_KEY</p><p>Path to your private key file (including the filename). For
+            example <code class="filename">/home/USERNAME/AWS/keys/pk-....pem</code>
+        </p></li><li class="listitem"><p>EC2_CERT</p><p>Path to your certificate file (including the filename). For
+            example <code class="filename">/home/USERNAME/AWS/keys/cert-....pem</code>
+        </p></li></ul></div><p>Please note that your account will be billed by Amazon at the 
+     published rate for any computing resources you consume in EC2. This
+     includes but is not limited to, running instances, storing data
+     (your image) on S3 or EBS, and network traffic.
+    </p><div class="sect1" title="13.1. Building the suse-ec2-guest Example"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.ec2.building"></a>13.1. Building the suse-ec2-guest Example<span class="permalink"><a alt="Permalink" title="13.1. Building the suse-ec2-guest Example" href="#sec.ec2.building">¶</a></span></h2></div></div></div><p>The example provided with KIWI uses openSUSE as the base
+      distribution and includes the base pattern plus the vim editor.
+    </p><p>Before building the EC2 example assure that the EC2 command line
+      tools are installed and work as expected. Executing the 
+      <span class="command"><strong>ec2-describe-images</strong></span> <code class="option">-a</code> command
+      should return a list of all available instances in EC2. Further, you
+      need to edit the <code class="filename">config.xml</code> file of the example
+      and enter your EC2 account information. Replace the values for
+      <code class="sgmltag-element">ec2accountnr</code>,
+      <code class="sgmltag-element">ec2privatekeyfile</code>, and
+      <code class="sgmltag-element">ec2certfile</code>. Note that the account
+      number is displayed with dsahes ('-") on the Amazon web site, but the
+      entry in <code class="filename">config.xml</code> is expected to be numeric only.
+      The private key file is the private file you downloaded when you
+      created the certificate. It is recommended to create a copy of the
+      example <code class="filename">/usr/share/doc/packages/kiwi/examples/suse-<em class="replaceable"><code>Version</code></em>/suse-ec2-guest</code>.
+    </p><p>You are now ready to build the EC2 example. Lets assume you copied
+      the example configuration directory to /tmp prior to modifying the
+      <code class="filename">config.xml</code> file.
+    </p><pre class="screen">
+        <span class="command"><strong>kiwi</strong></span> --prepare /tmp/suse-ec2-guest --root /tmp/myec2
+    </pre><pre class="screen">
+        <span class="command"><strong>kiwi</strong></span> --create /tmp/myec2 -d /tmp/myec2-result -y
+    </pre></div><div class="sect1" title="13.2. Using the Image"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.ec2.using"></a>13.2. Using the Image<span class="permalink"><a alt="Permalink" title="13.2. Using the Image" href="#sec.ec2.using">¶</a></span></h2></div></div></div><p> The generated image needs to be transfered to Amazon. The upload
+      of the AMI is performed using the <span class="command"><strong>ec2-upload-bundle</strong></span>
+      command line tool. This tool is part of the API tools provided by Amazon.
+      Upload the AMI as follows, replacing 
+      <em class="replaceable"><code>AWS_Key_ID</code></em> and
+      <em class="replaceable"><code>AWS_secret_Key_ID</code></em> with your Amazon key
+      information. Also you may want to choose a different name for your
+      bucket than <code class="filename">myImages</code>. If the bucket does not
+      exist in S3 it will be created.
+    </p><pre class="screen"><span class="command"><strong>ec2-upload-bundle</strong></span> -b <em class="replaceable"><code>myImages</code></em> \
+        -a <em class="replaceable"><code>AWS_Key_ID</code></em> -s <em class="replaceable"><code>AWS_secret_Key_ID</code></em> -m /tmp/myec2/ \
+     suse-11.3-ec2-guest.i686-1.1.2.ec2/ \
+     suse-11.3-ec2-guest.i686-1.1.2.ami.manifest.xml
+    </pre><p>After the upload process is complete register your image with the
+      EC2 infrastructure using the <span class="command"><strong>ec2-register</strong></span>
+      command as shown below. The result of the registration
+      process is an AMI ID returned on the command line in the form
+      <span class="quote">&#8220;<span class="quote">ami-</span>&#8221;</span> followed by a random key sequence.
+    </p><pre class="screen"><span class="command"><strong>ec2-register</strong></span> myImages/ suse-11.3-ec2-guest.i686-1.1.2.ami.manifest.xml </pre><p>Once the image is registered via the <span class="command"><strong>ec2-register</strong></span>
+      command you can use the AWS management console in your browser to 
+      launch an instance of your image. It is alos possible to launch an
+      instance from the command line. This process is demonstrated below.
+      The <span class="command"><strong>ec2-describe-images</strong></span> command will provide you
+      with an overview of all your registered images.
+    </p><p>Prior to launching your instance from the command line you will need
+      to have a keypair. In the Web UI the launch wizard will guide you
+      through this process. The command line interface if the
+      <span class="command"><strong>ec2-add-keypair</strong></span> command. The public/private
+      keypair is used to allow you to have access to your instance. If you
+      do not already have a keypair for interacting with EC2 images you can
+      generate a keypair as shown below. The 
+      <em class="replaceable"><code>gsg-keypair</code></em> name is used in this example,
+      but you can choose any name you like. As you will need to use the
+      key quite often you probably want a name that is easy to remember
+      and not too terribly long to type.
+    </p><pre class="screen"><span class="command"><strong>ec2-add-keypair</strong></span> gsg-keypair </pre><p>
+      Save the private key returned by the command in a local file.
+      Using your favorite text editor, create a file named 
+      <code class="filename">id_rsa-gsg-keypair</code> and paste
       everything between (and including) the <code class="literal">-----BEGIN RSA
-        PRIVATE KEY-----</code> and <code class="literal">-----END RSA PRIVATE
-        KEY-----</code> lines into it. To review your keypairs call
-        <span class="command"><strong>ec2-describe-keypairs</strong></span>. </p><p>We are almost done now but to be able to run an instance it&#8217;s
-      required to select an appropriate AKI ID from the <a class="xref" href="#tab.ec2.kernel-image-ids" title="Table 13.1. Amazon Kernel Image IDs">Amazon Kernel Image IDs</a>  
-      table below. For this host,
-        <span class="emphasis"><em>aki-407d9529</em></span> is being chosen, because we
-      are bundling an AMI representing a virtual disk with PVGrub. If
-      the table below is outdated just check the current ID list at
-      Amazon directly </p><div class="table"><a name="tab.ec2.kernel-image-ids"></a><p class="title"><b>Table 13.1. Amazon Kernel Image IDs</b><span class="permalink"><a alt="Permalink" title="Table 13.1. Amazon Kernel Image IDs" href="#tab.ec2.kernel-image-ids">¶</a></span></p><div class="table-contents"><table summary="Amazon Kernel Image IDs" border="1"><colgroup><col><col></colgroup><thead><tr><th>AKI</th><th>Name</th></tr></thead><tbody><tr><td>aki-407d9529</td><td><code class="filename">ec2-public-images/pv-grub-hd0-V1.01-i386.gz.manifest.xml</code></td></tr><tr><td>aki-427d952b</td><td><code class="filename">ec2-public-images/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</code></td></tr></tbody></table></div></div><br class="table-break"><p>Fire up your new ec2 instance with the following command: </p><pre class="screen"><span class="command"><strong>ec2-run-instances</strong></span> ami-... \
+      PRIVATE KEY-----</code> and <code class="literal">-----END RSA PRIVATE
+      KEY-----</code> lines into it. To review your existing
+      keypairs use the <span class="command"><strong>ec2-describe-keypairs</strong></span> command.
+    </p><p>The Amazon EC2 infrastructure uses PVGrub (Para-Virtual Grub) to
+      boot instances of an image. Basically Amazon provides a minimal
+      Linux kernel that has parts of Grub built in and is specialized
+      to EC2. PVGrub at some point looks for and reads the 
+      <code class="filename">/boot/grub/menu.lst</code> file in
+      your image and then boots the specified kernel. Each availability zone
+      in EC2 has it's own independent copy of this boot mechanism. Every boot
+      kernel has an ID starting with the TLA (Three Letter Acronym)
+      <span class="emphasis"><em>aki</em></span>. The 
+      <a class="xref" href="#tab.ec2.kernel-image-ids" title="Table 13.1. Amazon Kernel Image IDs">Amazon Kernel Image IDs</a>
+      table below provides guidelines for the selection of the AKI ID.
+
+    </p><div class="table"><a name="tab.ec2.kernel-image-ids"></a><p class="title"><b>Table 13.1. Amazon Kernel Image IDs</b><span class="permalink"><a alt="Permalink" title="Table 13.1. Amazon Kernel Image IDs" href="#tab.ec2.kernel-image-ids">¶</a></span></p><div class="table-contents"><table summary="Amazon Kernel Image IDs" border="1"><colgroup><col><col><col><col></colgroup><thead><tr><th>Zone</th><th>AKI</th><th>Arch</th><th>Name</th></tr></thead><tbody><tr><td>US-East</td><td>aki-407d9529</td><td>x86</td><td><code class="filename">ec2-public-images/pv-grub-hd0-V1.01-i386.gz.manifest.xml</code></td></tr><tr><td>US-East</td><td>aki-427d952b</td><td>x86-64</td><td><code class="filename">ec2-public-images/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</code></td></tr><tr><td>US-West</td><td>aki-99af01dc</td><td>x86</td><td><code class="filename">ec2-public-images-us-west-1/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</code></td></tr><tr><td>US-West</td><td>aki-99af01dc</td><td>x86-64</td><td><code class="filename">ec2-public-images-us-west-1/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</code></td></tr><tr><td>EU-West</td><td>aki-4deec439</td><td>x86</td><td><code class="filename">ec2-public-images-eu/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</code></td></tr><tr><td>EU-West</td><td>aki-4feec43b</td><td>x86-64</td><td><code class="filename">ec2-public-images-eu/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</code></td></tr><tr><td>AP-SouthEast</td><td>aki-13d5aa41</td><td>x86</td><td><code class="filename">ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</code></td></tr><tr><td>AP-SouthEast</td><td>aki-11d5aa43</td><td>x86-64</td><td><code class="filename">ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</code></td></tr></tbody></table></div></div><p><br class="table-break">
+
+    </p><p>The information in the table above was extracted from the Amazon
+      documentation found at: <a class="ulink" href="http://ec2-downloads.s3.amazonaws.com/user_specified_kernels.pdf" target="_top">http://ec2-downloads.s3.amazonaws.com/user_specified_kernels.pdf</a>.
+      Kiwi images created for EC2 do not contain a partition table. Therefore,
+      PVGrub images designated by <span class="emphasis"><em>h0</em></span> in the manifest name
+      need to be used with the images created by Kiwi.
+    </p><p>With the appropriate boot kernel selected you can start your image.
+      In this example we use the x86 Kernel in the US-East availability
+      zone.
+    </p><pre class="screen"><span class="command"><strong>ec2-run-instances</strong></span> ami-... \
    --kernel aki-407d9529 \ 
-   -k gsg-keypair </pre><p>To check the state of your instance(s) call the 
-      command <span class="command"><strong>ec2-describe-instances</strong></span>.</p><p>If you see your instance at the status: <span class="emphasis"><em>running</em></span> you can login into it. If you can&#8217;t make
-      sure you have allowed port 22 to be available </p><pre class="screen"><span class="command"><strong>ec2-authorize</strong></span> default -p 22 </pre><p>Congratulations ! You made it and can now use Amazons storage
-      and computing power. </p></div></div><div class="chapter" title="Chapter 14. KIWI Testsuite"><div class="titlepage"><div><div><h2 class="title"><a name="chap.testing"></a>Chapter 14. KIWI Testsuite</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.testing.testsuite">14.1. Testsuite Packages</a></span></dt><dt><span class="sect1"><a href="#sec.testing.creating">14.2. Creating a Test</a></span></dt></dl></div><a class="indexterm" name="id2562254"></a><a class="indexterm" name="id2562266"></a><p>The KIWI test suite is useful to perform basic quality checks on
+   -k gsg-keypair </pre><p>To check the state of your instance(s) use the
+      command <span class="command"><strong>ec2-describe-instances</strong></span>.</p><p>Once the instance state is shown as <span class="emphasis"><em>running</em></span> you can login into it using ssh as follows:
+    </p><pre class="screen"><span class="command"><strong>ssh</strong></span> -i <em class="replaceable"><code>PATH_TO_PRIVATE_KEY</code></em> \
+      root@<em class="replaceable"><code>YOUR_INSTANCE_ID</code></em>
+    </pre><p>If you are unable to log in, it is most likely that the security
+      setting for the instance is blocking the ssh access. To remedy this
+      problem open port 22 using the <span class="command"><strong>ec2-authorize</strong></span>
+      command as shown below.
+    </p><pre class="screen"><span class="command"><strong>ec2-authorize</strong></span> default -p 22 </pre><p>A few more remarks about EC2 are in order. As you have seen at the
+     end of our example it is important that you include ssh in your image
+     and that you start the ssh daemon in your image. Starting the sshd 
+     process is accomplished by adding
+     <span class="emphasis"><em>suseInsertService sshd</em></span> in
+     <code class="filename">config.sh</code>.
+   </p><p>Earlier in the example you generated a keypair that was then used
+     to allow you to log into your running instance. The key does need to get
+     injected into the instance when you launch it. This key injection happens
+     through an init script <code class="filename">/etc/init.d/amazon</code>. This 
+     script is provided by the <code class="filename">suse-ami-tools</code> package.
+     Therefore, you need to include this package in the 
+     <code class="sgmltag-element">packages</code> section of your
+     <code class="filename">config.xml</code> file. You also need to make sure the
+     <code class="filename">amazon</code> init script gets executed during boot by
+     using <span class="emphasis"><em>suseInsertService amazon</em></span> in your
+     <code class="filename">config.sh</code> file.
+   </p><p>Last but not least some information about the storage options. Amazon
+     offers S3 <a class="ulink" href="http://aws.amazon.com/s3/" target="_top">http://aws.amazon.com/s3/</a> backed images
+     (this is what we have worked with in this example) and EBS
+     (Elastic Block Store) <a class="ulink" href="http://aws.amazon.com/ebs/" target="_top">http://aws.amazon.com/ebs/</a> backed
+     images. At the time of this writing it is not possible to use an image 
+     format created by Kiwi with the Amazon tools directly to create an
+     EBS backed image. It is possible to create an EBS volume from a KIWI
+     raw image, but the process is cumbersome and requires a running Linux
+     instance in EC2. It is anticipated that at some point in the future the
+     Amazon team will address this problem and that the
+     <span class="command"><strong>ec2-import-instance</strong></span> command in conjunction with the
+     <span class="command"><strong>ec2-upload-disk-image</strong></span> command will be able to create
+     EBS volumes from Linux based disk images. At this point you will be able
+     to use the raw image created by KIWI to create an EBS backed image.
+   </p></div></div><div class="chapter" title="Chapter 14. KIWI Testsuite"><div class="titlepage"><div><div><h2 class="title"><a name="chap.testing"></a>Chapter 14. KIWI Testsuite</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.testing.testsuite">14.1. Testsuite Packages</a></span></dt><dt><span class="sect1"><a href="#sec.testing.creating">14.2. Creating a Test</a></span></dt></dl></div><a class="indexterm" name="id2562718"></a><a class="indexterm" name="id2562730"></a><p>The KIWI test suite is useful to perform basic quality checks on
     the image root directory. The test cases are stored in
     subdirectories below <code class="filename">/usr/share/kiwi/tests</code>. To run the testsuite
     call KIWI as follows: </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   testsuite   <em class="replaceable"><code>image-root</code></em>  [  test <code class="option">name</code>    test <code class="option">name</code> ...]</p></div><p>If no test names are set, the default tests rpm and ldd run. The
@@ -2363,7 +2469,7 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,someconfi
       The creation step is based on the result of the
       preparation step and uses the contents of the new image root tree to
       create the output image. If the image type ISO was requested, the
-      output image would be a file with the suffix <code class="filename">.iso</code><a class="indexterm" name="id2562919"></a> representing a live system on
+      output image would be a file with the suffix <code class="filename">.iso</code><a class="indexterm" name="id2563380"></a> representing a live system on
       CD or DVD. Other than that KIWI is able to create images for
       virtual and para-virtual (Xen) environments as well as for USB
       stick, PXE network clients and OEM customized Linux systems. 
@@ -2404,7 +2510,7 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,someconfi
     </p><p>
       The migration process will always place it's result into the
       <code class="filename">/tmp/$OptionValueOf-m</code> directory. The reason for this is because
-      <code class="filename">/tmp</code><a class="indexterm" name="id2563248"></a> is always excluded from the migration operation and therefore
+      <code class="filename">/tmp</code><a class="indexterm" name="id2563708"></a> is always excluded from the migration operation and therefore
       we can safely place new files there without influencing the
       migration itself. You should have at least 50 MB free space for
       the cache file and the image description all the rest are just
@@ -2428,17 +2534,17 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,someconfi
       third step after preparation and creation. KIWI calls the postprocessing
       modules automatically according to the specified output image type and
       attributes but it's also possible to call them manually.
-    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootstick <em class="replaceable"><code>initrd</code></em>  [--bootstick-system <em class="replaceable"><code>systemImage</code></em>] [--bootstick-device <em class="replaceable"><code>device</code></em>]</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootvm <em class="replaceable"><code>initrd</code></em>   --bootvm-system <em class="replaceable"><code>systemImage</code></em>  [--bootvm-disksize <em class="replaceable"><code>size</code></em>]</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootcd <em class="replaceable"><code>initrd</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installcd <em class="replaceable"><code>initrd</code></em>   --installcd-system <em class="replaceable"><code>vmx-system-image</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installstick <em class="replaceable"><code>initrd</code></em>   --installstick-system <em class="replaceable"><code>vmx-system-image</code></em> </p></div></div><div class="refsect1" title="Image format conversion"><a name="id2563524"></a><h2>Image format conversion</h2><p>
+    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootstick <em class="replaceable"><code>initrd</code></em>  [--bootstick-system <em class="replaceable"><code>systemImage</code></em>] [--bootstick-device <em class="replaceable"><code>device</code></em>]</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootvm <em class="replaceable"><code>initrd</code></em>   --bootvm-system <em class="replaceable"><code>systemImage</code></em>  [--bootvm-disksize <em class="replaceable"><code>size</code></em>]</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootcd <em class="replaceable"><code>initrd</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installcd <em class="replaceable"><code>initrd</code></em>   --installcd-system <em class="replaceable"><code>vmx-system-image</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installstick <em class="replaceable"><code>initrd</code></em>   --installstick-system <em class="replaceable"><code>vmx-system-image</code></em> </p></div></div><div class="refsect1" title="Image format conversion"><a name="id2563984"></a><h2>Image format conversion</h2><p>
       The KIWI format conversion is useful to perform the creation of
 	  another image output format like vmdk for VMware or ovf the open
       virtual machine format. Along with the conversion KIWI also creates
       the virtual machine configuration according to the format if
       there is a machine section specified in the XML description
-    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --convert <em class="replaceable"><code>systemImage</code></em>  [--format <em class="replaceable"><code>vmdk|ovf|qcow2</code></em>]</p></div></div><div class="refsect1" title="Testsuite"><a name="id2563568"></a><h2>Testsuite</h2><p>
+    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --convert <em class="replaceable"><code>systemImage</code></em>  [--format <em class="replaceable"><code>vmdk|ovf|qcow2</code></em>]</p></div></div><div class="refsect1" title="Testsuite"><a name="id2564028"></a><h2>Testsuite</h2><p>
       The KIWI test suite is useful to perform basic quality checks on
       the image root directory. The test cases are stored in subdirectories
       below <code class="filename">/usr/share/kiwi/tests</code>.
-    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --testsuite <em class="replaceable"><code>image-root</code></em>  [--test <em class="replaceable"><code>name</code></em>...]</p></div></div><div class="refsect1" title="Helper Tools"><a name="id2563613"></a><h2>Helper Tools</h2><p>
+    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --testsuite <em class="replaceable"><code>image-root</code></em>  [--test <em class="replaceable"><code>name</code></em>...]</p></div></div><div class="refsect1" title="Helper Tools"><a name="id2564074"></a><h2>Helper Tools</h2><p>
       The helper tools provide optional functions like
       creating a crypted password string for the users section of the
       <code class="filename">config.xml</code> file or signing the image
@@ -2682,7 +2788,7 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,someconfi
       been set up. If there are SUSE Linux related YaST XML information, these are
       validated before <code class="filename">config.sh</code> is called too. If you exit config.sh with an
       exit code != 0 kiwi will exit with an error too.
-    </p><div class="example"><a name="id2565006"></a><p class="title"><b>Example A.1. Template for config.sh</b></p><div class="example-contents"><pre class="programlisting">
+    </p><div class="example"><a name="id2565466"></a><p class="title"><b>Example A.1. Template for config.sh</b></p><div class="example-contents"><pre class="programlisting">
 #======================================
 # Functions...
 #--------------------------------------
@@ -2780,7 +2886,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
             Call all postin scriptlets which among other things activates
             all required default services using suseInsertService
           </p></dd><dt><span class="term">[<span class="optional">suseActivateServices</span>]</span></dt><dd><p>
-            Check all services in <code class="filename">/etc/init.d/</code><a class="indexterm" name="id2565586"></a> and activate them
+            Check all services in <code class="filename">/etc/init.d/</code><a class="indexterm" name="id2566046"></a> and activate them
             by calling suseInsertService
           </p></dd><dt><span class="term">[<span class="optional">suseCloneRunlevel {runlevel}</span>]</span></dt><dd><p>
             Clone the given runlevel to work in the same way
@@ -2818,7 +2924,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
 			in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_delete</span>]</span></dt><dd><p>
             A list of all packages which are part of the packages section
-            with <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2565799"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
+            with <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2566260"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_drivers</span>]</span></dt><dd><p>
             A comma separated list of the driver entries as listed in the
             drivers section of the <code class="filename">config.xml</code>. Similar variables exists for
@@ -2854,7 +2960,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
       image types from one previously prepared tree one needs to take into account
       that <code class="filename">images.sh</code> can be called more than one time. If you exit <code class="filename">images.sh</code>
       with an exit code != 0 KIWI will exit with an error too.
-    </p><div class="example"><a name="id2566135"></a><p class="title"><b>Example A.2. Template for images.sh</b></p><div class="example-contents"><pre class="programlisting">#======================================
+    </p><div class="example"><a name="id2566595"></a><p class="title"><b>Example A.2. Template for images.sh</b></p><div class="example-contents"><pre class="programlisting">#======================================
 # Functions...
 #--------------------------------------
 test -f /.kconfig &amp;&amp; . /.kconfig
@@ -2887,7 +2993,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
           </p></dd><dt><span class="term">[<span class="optional">baseGetProfilesUsed</span>]</span></dt><dd><p>
             Return the name(s) of profiles used to build this image.
           </p></dd><dt><span class="term">[<span class="optional">baseGetPackagesForDeletion</span>]</span></dt><dd><p>
-            Return the list of packages setup in the packages <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2566264"></a>="<code class="sgmltag-attvalue">delete</code>"
+            Return the list of packages setup in the packages <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2566724"></a>="<code class="sgmltag-attvalue">delete</code>"
             section of the <code class="filename">config.xml</code> used to build
             this image.
           </p></dd><dt><span class="term">[<span class="optional">baseSetupOEMPartition</span>]</span></dt><dd><p>
@@ -2939,7 +3045,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
             The contents of the timezone setup as done in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_delete</span>]</span></dt><dd><p>
             A list of all packages which are part of the packages section
-            with <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2566578"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
+            with <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2567038"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_profiles</span>]</span></dt><dd><p>
             A list of profiles used to build this image
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_drivers</span>]</span></dt><dd><p>
@@ -2963,7 +3069,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
     </p><p>
       The file is sourced by a Perl process and thus Perl compatible syntax
       for the supported variable settings is required.
-    </p><div class="example"><a name="id2566802"></a><p class="title"><b>Example A.3. Template for .kiwi.rc</b></p><div class="example-contents"><pre class="screen">$BasePath='/usr/share/kiwi';
+    </p><div class="example"><a name="id2567262"></a><p class="title"><b>Example A.3. Template for .kiwi.rc</b></p><div class="example-contents"><pre class="screen">$BasePath='/usr/share/kiwi';
 $Gzip='bzip2';
 $LogServerPort='4455';
 $System='/usr/share/kiwi/image';</pre></div></div><br class="example-break"></div><div class="refsect1" title="Supported Resource Settings"><a name="kiwi.kiwirc.settings"></a><h2>Supported Resource Settings</h2><p>

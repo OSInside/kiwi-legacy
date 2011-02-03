@@ -10,7 +10,7 @@ How to build this Example
          /usr/share/doc/packages/kiwi/examples/suse-11.3/suse-xen-guest \
          --root /tmp/myxen
 
-    kiwi --create /tmp/myxen --type vmx -d /tmp/myxen-result
+    kiwi --create /tmp/myxen -d /tmp/myxen-result
 
 How to test this Example
 ==============================

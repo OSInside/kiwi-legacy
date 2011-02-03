@@ -35,7 +35,9 @@ suseSetupProduct
 # Activate services
 #--------------------------------------
 suseActivateDefaultServices
+suseInsertService amazon
 suseInsertService boot.device-mapper
+suseInsertService boot.xen
 suseInsertService sshd
 
 #======================================
