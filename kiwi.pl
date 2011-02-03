@@ -742,25 +742,31 @@ sub main {
 		# Initialize logical image extend
 		#------------------------------------------
 		my $ok;
+		my $checkFormat = 0;
 		SWITCH: for ($attr{type}) {
 			/^ext2/     && do {
 				$ok = $image -> createImageEXT2 ( $targetDevice );
+				$checkFormat = 1;
 				last SWITCH;
 			};
 			/^ext3/     && do {
 				$ok = $image -> createImageEXT3 ( $targetDevice );
+				$checkFormat = 1;
 				last SWITCH;
 			};
 			/^ext4/     && do {
 				$ok = $image -> createImageEXT4 ( $targetDevice );
+				$checkFormat = 1;
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
 				$ok = $image -> createImageReiserFS ( $targetDevice );
+				$checkFormat = 1;
 				last SWITCH;
 			};
 			/^btrfs/    && do {
 				$ok = $image -> createImageBTRFS ( $targetDevice );
+				$checkFormat = 1;
 				last SWITCH;
 			};
 			/^squashfs/ && do {
@@ -801,6 +807,7 @@ sub main {
 			};
 			/^xfs/    && do {
 				$ok = $image -> createImageXFS ();
+				$checkFormat = 1;
 				last SWITCH;
 			};
 			$kiwi -> error  ("Unsupported type: $attr{type}");
@@ -808,10 +815,22 @@ sub main {
 			undef $image;
 			my $code = kiwiExit (1); return $code;
 		}
-		undef $image;
 		if ($ok) {
+			if (($checkFormat) && ($attr{format})) {
+				my $haveFormat = $attr{format};
+				my $imgfile= $main::Destination."/".$image -> buildImageName();
+				my $format = new KIWIImageFormat ($kiwi,$imgfile,$haveFormat);
+				if (! $format) {
+					my $code = kiwiExit (1); return $code;
+				}
+				if (! $format -> createFormat()) {
+					my $code = kiwiExit (1); return $code;
+				}
+			}
+			undef $image;
 			my $code = kiwiExit (0); return $code;
 		} else {
+			undef $image;
 			my $code = kiwiExit (1); return $code;
 		}
 	}
