@@ -336,6 +336,12 @@
      <filename>config.sh</filename> file.
    </para>
 
+   <para>The key injection mechanism needs to access the network. Therefore,
+     you must configure the network of your instance. The network interface 
+     of the guest is always eth0 and it needs to be configured to use DHCP.
+     See the overlay file tree of the example for configuration details.
+   </para>
+
    <para>Last but not least some information about the storage options. Amazon
      offers S3 <ulink url="http://aws.amazon.com/s3/"/> backed images
      (this is what we have worked with in this example) and EBS
