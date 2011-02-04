@@ -521,7 +521,7 @@ sub createEC2 {
 	print $FD '      echo >> $file'."\n";
 	print $FD '      echo "title '.$title.'" >> $file'."\n";
 	print $FD '      echo "    root (hd0)" >> $file'."\n";
-	print $FD '      echo "    kernel $K root=/devsda1 $args" >> $file'."\n";
+	print $FD '      echo "    kernel $K root=/dev/sda1 $args" >> $file'."\n";
 	print $FD '      if [ -f "/boot/initrd-$D" ]; then'."\n";
 	print $FD '         echo "    initrd /boot/initrd-$D" >> $file'."\n";
 	print $FD '      fi'."\n";
