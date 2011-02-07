@@ -743,7 +743,7 @@ sub addDebugPackage($$$$)
 sub setupPackageFiles
 {
   my $this = shift;
-  my $mode = shift; # 1 = collect source & debug packnames; 2 = use only src/nosrc packs; 0 = nothing special
+  my $mode = shift; # 1 = collect source & debug packnames; 2 = use only src/nosrc packs; 3 = ignore missing packages in any case (debug media mode);
   my $usedPackages = shift;
 
   my $retval = 0;
@@ -888,7 +888,8 @@ sub setupPackageFiles
       push @missingPackages, $packName;
     } # /@archs
   }
-  if (@missingPackages > 0) {
+  # Ignore missing packages on debug media, they may really not exist
+  if ($mode != 3 && @missingPackages > 0) {
       $this->logMsg("W", "MISSING PACKAGES:");
       foreach my $pack(@missingPackages) {
         $this->logMsg("W", "  ".$pack);
@@ -972,7 +973,7 @@ sub collectPackages
     }
   }
   if ( $this->{m_debugmedium} > 0 ) {
-    $setupFiles = $this->setupPackageFiles(0, $this->{m_debugPacks});
+    $setupFiles = $this->setupPackageFiles(3, $this->{m_debugPacks});
     if($setupFiles > 0) {
       $this->logMsg("E", "[collectPackages] $setupFiles DEBUG RPM packages could not be setup");
       return 1;
