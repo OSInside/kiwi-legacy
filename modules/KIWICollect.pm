@@ -763,7 +763,7 @@ sub setupPackageFiles
   my $last_progress_time = 0;
   my $count_packs = 0;
   my $num_packs = keys %{$usedPackages};
-  my @missingPackages;
+  my @missingPackages = ();
 
   PACK:foreach my $packName(keys(%{$usedPackages})) {
     next if $packName eq "_name";
@@ -773,7 +773,8 @@ sub setupPackageFiles
     my @archs;
     $count_packs++;
     if ( $mode == 2 ) {
-      push @archs, 'src', 'nosrc';
+      # use src or nosrc only for this package
+      push @archs, $packOptions->{'arch'};
     }else{
       @archs = $this->getArchList($packOptions, $packName, \$nofallback);
     }
@@ -849,11 +850,14 @@ sub setupPackageFiles
               $srcname =~ s/-[^-]*-[^-]*\.rpm$//; # this strips everything, except main name
               # 
               if ( $this->{m_srcmedium} > 0 ) {
+                my $srcarch = $packPointer->{sourcepackage};
+                $srcarch =~ s{.*\.(.*)\.rpm$}{$1};
                 if (!$this->{m_sourcePacks}->{$srcname}) {
                   # FIXME: add forcerepo here
                   $this->{m_sourcePacks}->{$srcname} = {
                     'medium' => $this->{m_srcmedium},
-                    'onlyarch' => 'src,nosrc'
+                    'arch' => $srcarch,
+                    'onlyarch' => $srcarch
                   };
                 }
                 $packPointer->{sourcepackage} =~ m/.*-([^-]*-[^-]*)\.[^\.]*\.rpm/; # get version-release string
@@ -876,7 +880,6 @@ sub setupPackageFiles
               };
             }
           }
-	  next PACKKEY if ( scalar(keys %{$packOptions->{requireVersion}}) > 0 );
 	  next ARCH; # package processed, jump to the next request arch or package
 	}
 	$this->logMsg("W", "     => package $packName not available for arch $arch in any repo") if $this->{m_debug} >= 4;
