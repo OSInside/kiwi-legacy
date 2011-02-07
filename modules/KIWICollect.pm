@@ -763,6 +763,7 @@ sub setupPackageFiles
   my $last_progress_time = 0;
   my $count_packs = 0;
   my $num_packs = keys %{$usedPackages};
+  my @missingPackages;
 
   PACK:foreach my $packName(keys(%{$usedPackages})) {
     next if $packName eq "_name";
@@ -880,9 +881,17 @@ sub setupPackageFiles
 	}
 	$this->logMsg("W", "     => package $packName not available for arch $arch in any repo") if $this->{m_debug} >= 4;
       } # /@fallbackarch
-      # FIXME: we need to make it an option to ignore this error.
-      $this->logMsg("E", "    => package $packName not available for $requestedArch nor its fallbacks"); # if $this->{m_debug} >= 1;
+      $this->logMsg("W", "    => package $packName not available for $requestedArch nor its fallbacks") if $this->{m_debug} >= 1;
+      push @missingPackages, $packName;
     } # /@archs
+  }
+  if (@missingPackages > 0) {
+      $this->logMsg("W", "MISSING PACKAGES:");
+      foreach my $pack(@missingPackages) {
+        $this->logMsg("W", "  ".$pack);
+      }
+      # FIXME: we need to make it an option to ignore this error.
+      $this->logMsg("E", "Required packages were not found");
   }
   return $retval;
 }
