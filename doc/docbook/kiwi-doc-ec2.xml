@@ -286,6 +286,17 @@
       need to be used with the images created by Kiwi.
     </para>
 
+    <para>Kiwi can embed the appropriate PVGrub Kernel ID in the EC2
+      manifest file if you specify the optional
+      <sgmltag class="element">ec2region</sgmltag> as part of the
+      <sgmltag class="element">ec2config</sgmltag> block in your
+      <filename>config.xml</filename>. If you specify multiple regions Kiwi
+      generates AMIs for each region specified. Supported values for the
+      <sgmltag class="element">ec2region</sgmltag> element are
+      <emphasis>AP-Singapore</emphasis>, <emphasis>EU-West</emphasis>,
+      <emphasis>US-East</emphasis>, and <emphasis>US-West</emphasis>.
+    </para>
+
     <para>With the appropriate boot kernel selected you can start your image.
       In this example we use the x86 Kernel in the US-East availability
       zone.

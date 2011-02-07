@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="5.2" name="suse-11.4-ec2-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
@@ -12,8 +13,6 @@
 		<rpm-force>true</rpm-force>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
-	</preferences>
-	<preferences>
 		<type image="ext3" format="ec2">
 			<ec2config>
 				<ec2privatekeyfile>Path to EC2 private key file</ec2privatekeyfile>
@@ -28,15 +27,15 @@
 	<repository type="yast2">
 		<source path="opensuse://11.4/repo/oss/"/>
 	</repository>
-    <repository type="yast2">
-        <source path="opensuse://11.4/repo/non-oss"/>
-    </repository>
+	<repository type="yast2">
+		<source path="opensuse://11.4/repo/non-oss"/>
+	</repository>
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
 		<package name="kernel-ec2"/>
-        <package name="suse-ami-tools"/>
+		<package name="suse-ami-tools"/>
 		<package name="vim"/>
 		<package name="xen-tools-domU"/>
 		<package name="xen"/>

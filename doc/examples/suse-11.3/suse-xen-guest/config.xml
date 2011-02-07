@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="5.2" name="suse-11.3-xen-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
@@ -12,8 +13,6 @@
 		<rpm-force>true</rpm-force>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
-	</preferences>
-	<preferences>
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.3" bootprofile="xen" bootkernel="xenk">
 			<machine memory="128" domain="domU">
 				<vmdisk controller="ide" id="0" device="/dev/xvda"/>
