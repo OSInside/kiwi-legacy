@@ -2821,7 +2821,7 @@ sub getList {
 				next;
 			}
 			if ($type ne "metapackages") {
-				if (($package =~ /@/) && ($manager eq "zypper")) {
+				if (($package =~ /@/) && $manager && ($manager eq "zypper")) {
 					$package =~ s/@/\./;
 				}
 			}
