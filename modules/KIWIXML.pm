@@ -2467,6 +2467,15 @@ sub getEc2Config {
 	if ($privkeyfile) {
 		$result{EC2PrivateKeyFile} = $privkeyfile;
 	}
+	#==========================================
+	# EC2 region
+	#------------------------------------------
+	my @regionNodes = $node -> getElementsByTagName ("ec2region");
+	my @regions = ();
+	for my $regNode (@regionNodes) {
+		push @regions, $regNode -> textContent();
+	}
+	$result{EC2Regions} = \@regions;
 	return %result;
 }
 

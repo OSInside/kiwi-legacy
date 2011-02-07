@@ -234,6 +234,44 @@ sub __checkDisplaynameValid {
 }
 
 #==========================================
+# __checkEC2Regions
+#------------------------------------------
+sub __checkEC2Regions {
+	# ...
+	# If a region is specified for an EC2 image creation it must only be
+	# specified once.
+	# ---
+	my $this = shift;
+	my @ec2ConfNodes = $this->{systemTree}->getElementsByTagName('ec2config');
+	if (! @ec2ConfNodes) {
+		return 1;
+	}
+	my @regions = $ec2ConfNodes[0] -> getElementsByTagName('ec2region');
+	my @supportedRegions = qw /AP-Singapore EU-West US-East US-West/;
+	my @selectedRegions = ();
+	for my $region (@regions) {
+		my $regionStr = $region -> textContent();
+		if (! grep /$regionStr/, @supportedRegions) {
+			my $msg = "Only one of @supportedRegions may be specified "
+			. 'as ec2region';
+			my $kiwi = $this->{kiwi};
+			$kiwi -> error ( $msg );
+			$kiwi -> failed ();
+			return undef;
+		}
+		if (grep /$regionStr/, @selectedRegions) {
+			my $msg = "Specified region $regionStr not unique";
+			my $kiwi = $this->{kiwi};
+			$kiwi -> error ( $msg );
+			$kiwi -> failed ();
+			return undef;
+		}
+		push @selectedRegions, $regionStr
+	}
+	return 1;
+}
+
+#==========================================
 # __checkFilesysSpec
 #------------------------------------------
 sub __checkFilesysSpec {
@@ -584,6 +622,9 @@ sub __validateConsistency {
 		return undef;
 	}
 	if (! $this -> __checkDisplaynameValid()) {
+		return undef;
+	}
+	if (! $this -> __checkEC2Regions()) {
 		return undef;
 	}
 	if (! $this -> __checkFilesysSpec()) {

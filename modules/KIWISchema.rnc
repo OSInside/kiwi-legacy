@@ -282,6 +282,26 @@ div {
 }
 
 #==========================================
+# common element <ec2region>
+#
+div {
+	k.ec2region.attlist = empty
+	k.ec2region =
+		## Specify the region/availability zone
+		[
+		db:para [
+			"Specify the region/availability zone in EC2 for this image.\x{a}"~
+			"Values are limited to the EC2 recognized zones:\x{a}"~
+			"AP-Singapore, EU-West, US-East, and US-West"
+		]
+		]
+		element ec2region {
+			k.ec2region.attlist,
+			text
+		}
+}
+
+#==========================================
 # common element <file>
 #
 div {
@@ -2071,7 +2091,8 @@ div {
 			k.ec2config.attlist &
 			k.ec2accountnr? &
 			k.ec2certfile? &
-			k.ec2privatekeyfile?
+			k.ec2privatekeyfile? &
+			k.ec2region*
 		}
 }
 

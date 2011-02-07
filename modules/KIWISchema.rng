@@ -432,6 +432,26 @@ cert-*.pem</a:documentation>
   </div>
   <!--
     ==========================================
+    common element <ec2region>
+    
+  -->
+  <div>
+    <define name="k.ec2region.attlist">
+      <empty/>
+    </define>
+    <define name="k.ec2region">
+      <element name="ec2region">
+        <a:documentation>Specify the region/availability zone</a:documentation>
+        <db:para>Specify the region/availability zone in EC2 for this image.
+Values are limited to the EC2 recognized zones:
+AP-Singapore, EU-West, US-East, and US-West</db:para>
+        <ref name="k.ec2region.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <file>
     
   -->
@@ -2958,6 +2978,9 @@ configuration options.</db:para>
           <optional>
             <ref name="k.ec2privatekeyfile"/>
           </optional>
+          <zeroOrMore>
+            <ref name="k.ec2region"/>
+          </zeroOrMore>
         </interleave>
       </element>
     </define>

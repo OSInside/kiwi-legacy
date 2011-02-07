@@ -25,6 +25,7 @@ use KIWILog;
 use KIWIQX;
 use File::Basename;
 use KIWIBoot;
+use KIWILocator;
 
 #==========================================
 # Constructor
@@ -349,6 +350,34 @@ sub createEC2 {
 	my $tmpdir;
 	my $FD;
 	#==========================================
+	# Check for Amazon EC2 toolkit
+	#------------------------------------------
+	my $locator = new KIWILocator($kiwi);
+	my $bundleCmd = $locator -> getExecPath ('ec2-bundle-image');
+	if (! $bundleCmd ) {
+		$kiwi -> error (
+			"Couldn't find ec2-bundle-image; required to create EC2 image"
+		);
+		$kiwi -> failed ();
+		return undef
+	}
+	#==========================================
+	# Import AWS region kernel map
+	#------------------------------------------
+	my %ec2RegionKernelMap;
+	if (! open ($FD,$main::KRegion)) {
+		return undef;
+	}
+	while (my $line = <$FD>) {
+		next if $line =~ /^#/;
+		if ($line =~ /(.*)\s*=\s*(.*)/) {
+			my $region= $1;
+			my $aki   = $2;
+			$ec2RegionKernelMap{$region} = $aki;
+		}
+	}
+	close $FD;
+	#==========================================
 	# Check AWS account information
 	#------------------------------------------
 	$kiwi -> info ("Creating $format image...");
@@ -579,18 +608,28 @@ sub createEC2 {
 	my $ca = $ec2{EC2CertFile};
 	my $nr = $ec2{AWSAccountNr};
 	my $fi = $source;
-	my $amiopts = "-i $fi -k $pk -c $ca -u $nr -p $aminame";
-	qxx ("mkdir -p $target 2>&1");
-	qxx ("rm -rf $target/* 2>&1");
-	$status = qxx (
-		"ec2-bundle-image $amiopts -d $target -r $arch 2>&1"
-	);
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("ec2-bundle-image: $status");
-		$kiwi -> failed ();
-		return undef;
+	my $amiopts = "-i $fi -k $pk -c $ca -u $nr -p $aminame "
+	. '--block-device-mapping ami=sda1,root=/dev/sda1';
+	my @regions = @{ $ec2{EC2Regions} };
+	if (! @regions) {
+		push @regions, 'any';
+	}
+	for my $region (@regions) {
+		my $regionTgt = "$target-$region";
+		if ( $region ne 'any' ) {
+			my $kernel = $ec2RegionKernelMap{"$region-$arch"};
+			$amiopts .= " --kernel $kernel";
+		}
+		qxx ("mkdir -p $regionTgt 2>&1");
+		qxx ("rm -rf $regionTgt/* 2>&1");
+		$status = qxx ( "$bundleCmd $amiopts -d $regionTgt -r $arch 2>&1" );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("$bundleCmd: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
 	}
 	$kiwi -> done();
 	return $target;
