@@ -1473,6 +1473,13 @@ sub getArchList
   my @archs = ();
 
   return @archs if(not defined($packName));
+
+  if(defined($packOptions->{'onlyarch'})) {
+    # black listed packages
+    return @archs if ($packOptions->{'onlyarch'} eq "");
+    return @archs if ($packOptions->{'onlyarch'} eq "skipit"); # convinience for old hack
+  };
+
   if(defined($packOptions->{'arch'})) {
     # Check if this is a rule for this platform
     $packOptions->{'arch'} =~ s{,\s*,}{,}g;
