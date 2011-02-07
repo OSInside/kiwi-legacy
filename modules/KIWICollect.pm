@@ -1496,7 +1496,17 @@ sub getArchList
   }
 
   # set required archs
-  push @archs, $this->{m_archlist}->headList();
+  if(defined($packOptions->{'arch'})) {
+    # use archs defined for this package
+    foreach my $plattform (split(/,\s*/, $packOptions->{'arch'})) {
+      foreach my $reqArch ($this->{m_archlist}->headList()) {
+        push @archs, $reqArch if ( $reqArch eq $plattform );
+      };
+    };
+  }else{
+    # take all global defined archs
+    push @archs, $this->{m_archlist}->headList();
+  }
 
   if(defined($packOptions->{'addarch'})) {
     if(not(grep($packOptions->{'addarch'} eq $_, @archs))) {
