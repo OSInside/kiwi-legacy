@@ -46,6 +46,7 @@ export SYSTEM_INTEGRITY
 export SYSTEM_MD5STATUS
 export systemIntegrity="unknown"
 export haveDisk=0
+export haveRamDisk=0
 
 #======================================
 # Exports (clicfs usage)
@@ -267,20 +268,24 @@ runHook postprobe
 #======================================
 # 11) Check for diskful station
 #--------------------------------------
-if \
-	[ $LOCAL_BOOT = "no" ] && \
-	([ ! -z "$PART" ] || [ ! -z "$IMAGE" ]) && \
-	[ -z "$NFSROOT" ]      && \
-	[ -z "$NBDROOT" ]      && \
-	[ -z "$AOEROOT" ]
-then
-	if ! waitForStorageDevice $DISK;then
-		systemException \
-			"Disk $DISK doesn't appear... fatal !" \
-		"reboot"
+if [ $LOCAL_BOOT = "no" ];then
+	checkDevice=$DISK
+	if [ -z "$checkDevice" ];then
+		checkDevice=$(echo $IMAGE | cut -f1 -d\;)
 	fi
-	export haveDisk=1
-	export imageDiskDevice=$DISK
+	if [ ! -z "$checkDevice" ];then
+		if ! waitForStorageDevice $checkDevice;then
+			systemException \
+				"Block device $checkDevice doesn't appear... fatal !" \
+			"reboot"
+		fi
+		if echo $checkDevice | grep -q dev\/ram;then
+			export haveRamDisk=1
+		else
+			export haveDisk=1
+			export imageDiskDevice=$checkDevice
+		fi
+	fi
 fi
 
 #======================================
@@ -437,7 +442,10 @@ fi
 # 14) Setup root device environment
 #--------------------------------------
 runHook predownload
-if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
+if \
+	[ $LOCAL_BOOT = "no" ] && \
+	([ $haveDisk = "1" ] || [ $haveRamDisk = "1" ])
+then
 	#======================================
 	# 14.1) Download network client image
 	#--------------------------------------
