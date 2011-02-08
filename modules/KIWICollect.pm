@@ -1484,20 +1484,21 @@ sub getArchList
     return @archs if ($packOptions->{'onlyarch'} eq "skipit"); # convinience for old hack
   };
 
+  my @archlist = $this->{m_archlist}->headList();
   if(defined($packOptions->{'arch'})) {
     # Check if this is a rule for this platform
     $packOptions->{'arch'} =~ s{,\s*,}{,}g;
     $packOptions->{'arch'} =~ s{,\s*}{,}g;
     $packOptions->{'arch'} =~ s{,\s*$}{};
     $packOptions->{'arch'} =~ s{^\s*,}{};
-    my $found = 0;
+    @archlist = ();
     foreach my $plattform (split(/,\s*/, $packOptions->{'arch'})) {
       foreach my $reqArch ($this->{m_archlist}->headList()) {
-        $found = 1 if ( $reqArch eq $plattform );
+        push @archlist, $reqArch if ( $reqArch eq $plattform );
       };
     };
-    if ( "$found" eq "0" ) {
-      # not our plattform
+    if ( @archlist == 0 ) {
+      # our required plattforms were not found at all, return empty list
       return @archs;
     }
   }
@@ -1516,7 +1517,7 @@ sub getArchList
   }
 
   # set required archs
-  push @archs, $this->{m_archlist}->headList();
+  push @archs, @archlist;
 
   if(defined($packOptions->{'addarch'})) {
     if(not(grep($packOptions->{'addarch'} eq $_, @archs))) {
