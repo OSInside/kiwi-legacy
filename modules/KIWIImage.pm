@@ -3598,6 +3598,15 @@ sub buildMD5Sum {
 	my $name = shift;
 	my $kiwi = $this->{kiwi};
 	#==========================================
+	# Skip this in init cache mode
+	#------------------------------------------
+	if (defined $main::InitCache) {
+		if ($name =~ /\.gz$/) {
+			$name =~ s/\.gz//;
+		}
+		return $name;
+	}
+	#==========================================
 	# Create image md5sum
 	#------------------------------------------
 	$kiwi -> info ("Creating image MD5 sum...");

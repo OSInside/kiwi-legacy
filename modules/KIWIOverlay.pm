@@ -143,6 +143,7 @@ sub unionOverlay {
 	my $cowdev;
 	my $result;
 	my $status;
+	my %snapshot;
 	#==========================================
 	# Check result of filesystem detection
 	#------------------------------------------
@@ -152,11 +153,11 @@ sub unionOverlay {
 		return undef;
 	}
 	#==========================================
-	# Check for CLIC extension
+	# Check for ext2 extension
 	#------------------------------------------
-	if ($type ne "clicfs") {
+	if ($type ne "ext2") {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't detect clicfs on: $baseRO");
+		$kiwi -> error  ("Couldn't detect ext2 on: $baseRO");
 		return undef;
 	}
 	#==========================================
@@ -175,89 +176,42 @@ sub unionOverlay {
 	#==========================================
 	# Check for cow file before mount
 	#------------------------------------------
-	if (-e $cowdev) {
+	if (-f $cowdev) {
 		$haveCow=1;
 	}
 	#==========================================
-	# Fuse mount the clicfs base file
+	# Create snapshot map
+	#------------------------------------------
+	%snapshot = $this -> createSnapshotMap ($baseRO,$cowdev);
+	if (! %snapshot) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to snapshot $baseRO");
+		return undef;
+	}
+	push @mount,@{$snapshot{stack}};
+	$this->{mount} = \@mount;
+	#==========================================
+	# Mount cache as snapshot
 	#------------------------------------------
 	$kiwi -> info("Creating overlay path\n");
 	$kiwi -> info("--> Base: $baseRO(ro)\n");
 	$kiwi -> info("--> COW:  $cowdev(rw)\n");
-	$status = qxx (
-		"clicfs -m 5000 -c $cowdev $baseRO $tmpdir 2>&1"
-	);
+	$status = qxx ("mount $snapshot{mount} $tmpdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
+		$kiwi -> error  ("Failed to mount $baseRO to: $tmpdir: $status");
 		$kiwi -> failed ();
-		$kiwi -> error ("Failed to mount $baseRO to: $tmpdir: $status");
 		return undef;
 	}
 	push @mount,"umount $tmpdir";
 	$this->{mount} = \@mount;
 	#==========================================
-	# Add filesystem options...
-	#------------------------------------------
-	qxx ("tune2fs -m 0 $tmpdir/fsdata.ext3 &>/dev/null");
-	qxx ("tune2fs -i 0 $tmpdir/fsdata.ext3 &>/dev/null");
-	#==========================================
-	# Resize or check...
-	#------------------------------------------
-	if (! $haveCow) {
-		$status = qxx ("resize2fs $tmpdir/fsdata.ext3 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Failed to resize clicfs container: $status");
-			return undef;
-		}
-	} else {
-		$status = qxx ("e2fsck -p $tmpdir/fsdata.ext3 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Failed to check clicfs container: $status");
-			return undef;
-		}
-	}
-	#==========================================
-	# loop mount filesystem from fuse mount
-	#------------------------------------------
-	my $opts = "loop,noatime,nodiratime,errors=remount-ro,barrier=0";
-	$baseRO = $tmpdir."/fsdata.ext3";
-	$status = qxx ("mount -o $opts $baseRO $tmpdir 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Failed to loop mount $baseRO to: $tmpdir: $status");
-		return undef;
-	}
-	$kiwi -> info ("--> Mounted on: $tmpdir\n");
-	push @mount,"umount $tmpdir";
-	$this->{mount} = \@mount;
-	#==========================================
-	# create meta data for further operations
+	# setup cache meta data
 	#------------------------------------------
 	if (! $haveCow) {
 		qxx ("echo $this->{baseRO} > $rootRW/kiwi-root.cache");
-		qxx ("mkdir -p $rootRW/image");
 		if ($main::Prepare) {
-			my $basePath = File::Spec->rel2abs ($main::Prepare);
-			$status = qxx (
-				"cp $basePath/config.xml $rootRW/image 2>&1"
-			);
-			$result = $? >> 8;
-			if ($result != 0) {
-				$status = qxx (
-					"cp $basePath/*.kiwi $rootRW/image 2>&1"
-				);
-				$result = $? >> 8;
-			}
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error ("Failed to copy XML file: $status");
-				return undef;
-			}
+			$main::OverlayRootTree = "$rootRW/image";
 		}
 	}
 	return $tmpdir;
@@ -315,6 +269,83 @@ sub resetOverlay {
 	}
 	qxx ("rm -rf $tmpdir 2>&1");
 	return $this;
+}
+
+#==========================================
+# createSnapshotMap
+#------------------------------------------
+sub createSnapshotMap {
+	my $this = shift;
+	my $readOnlyRootImage = shift;
+	my $cowfile = shift;
+	my $snapshotChunk=8;
+	my $snapshotCount="5G";
+	my $imageLoop;
+	my $snapLoop;
+	my @releaseList = ();
+	my $snapshotMap;
+	my $orig_s;
+	my $data;
+	my $code;
+	my %result;
+	my $table;
+	#======================================
+	# create root filesystem loop device
+	#--------------------------------------
+	$imageLoop = qxx ("losetup -s -f $readOnlyRootImage 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$result{stack} = \@releaseList;
+		return undef;
+	}
+	chomp $imageLoop;
+	push (@releaseList,"losetup -d $imageLoop");
+	#======================================
+	# create snapshot loop device
+	#--------------------------------------
+	if (! -f $cowfile) {
+		$data = qxx (
+			"dd if=/dev/zero of=$cowfile bs=1 seek=$snapshotCount count=1 2>&1"
+		);
+		$code = $? >> 8;
+		if ($code != 0) {
+			$result{stack} = \@releaseList;
+			return undef;
+		}
+	}
+	$snapLoop = qxx ("losetup -s -f $cowfile");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$result{stack} = \@releaseList;
+		return undef;
+	}
+	chomp $snapLoop;
+	push (@releaseList,"losetup -d $snapLoop");
+	#======================================
+	# setup device mapper tables
+	#--------------------------------------
+	$orig_s =qxx ("blockdev --getsize $imageLoop"); chomp $orig_s;
+	qxx ("echo '0 $orig_s linear $imageLoop 0' | dmsetup create ms_data");
+	push (@releaseList,"dmsetup remove ms_data");
+	qxx ("dmsetup create ms_origin --notable");
+	push (@releaseList,"dmsetup remove ms_origin");
+	qxx ("dmsetup table ms_data | dmsetup load ms_origin");
+	qxx ("dmsetup resume ms_origin");
+	qxx ("dmsetup create ms_snap --notable");
+	push (@releaseList,"dmsetup remove ms_snap");
+	$table = "0 $orig_s snapshot $imageLoop $snapLoop p $snapshotChunk";
+	qxx ("echo '$table' | dmsetup load ms_snap");
+	$table = "0 $orig_s snapshot-origin $imageLoop";
+	qxx ("echo '$table' | dmsetup load ms_data");
+	qxx ("dmsetup resume ms_snap");
+	qxx ("dmsetup resume ms_data");
+	#======================================
+	# return result
+	#--------------------------------------
+	$snapshotMap = "/dev/mapper/ms_snap";
+	$result{mount} = $snapshotMap;
+	$result{stack} = \@releaseList;
+	return %result;
 }
 
 #==========================================

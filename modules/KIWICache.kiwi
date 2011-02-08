@@ -9,7 +9,9 @@
 		</specification>
 	</description>
 	<preferences>
-		<type image="clicfs"/>
+		<type image="ext2">
+			<size unit="G">4</size>
+		</type>
 		<version>1.1.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-excludedocs>true</rpm-excludedocs>

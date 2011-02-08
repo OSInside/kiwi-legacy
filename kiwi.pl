@@ -3034,7 +3034,7 @@ sub initializeCache {
 	if (($type{boot}) && ($type{boot} =~ /.*\/(.*)/)) {
 		$CacheDistro = $1;
 	} elsif (
-		($type{type} =~ /clicfs|cpio/) && ($name =~ /initrd-.*boot-(.*)/)
+		($type{type} =~ /ext2|cpio/) && ($name =~ /initrd-.*boot-(.*)/)
 	) {
 		$CacheDistro = $1;
 	} else {
@@ -3119,11 +3119,11 @@ sub selectCache {
 	#------------------------------------------
 	if (@CachePackages) {
 		my $cstr = $xml -> getImageName();
-		my $cdir = $ImageCache."/".$CacheDistro."-".$cstr.".clicfs";
+		my $cdir = $ImageCache."/".$CacheDistro."-".$cstr.".ext2";
 		push @file,$cdir;
 	}
 	foreach my $pattern (@CachePatterns) {
-		my $cdir = $ImageCache."/".$CacheDistro."-".$pattern.".clicfs";
+		my $cdir = $ImageCache."/".$CacheDistro."-".$pattern.".ext2";
 		push @file,$cdir;
 	}
 	#==========================================
@@ -3131,7 +3131,7 @@ sub selectCache {
 	#------------------------------------------
 	foreach my $clic (@file) {
 		my $meta = $clic;
-		$meta =~ s/\.clicfs$/\.cache/;
+		$meta =~ s/\.ext2$/\.cache/;
 		#==========================================
 		# check cache files
 		#------------------------------------------
@@ -3216,7 +3216,6 @@ sub createCache {
 	#==========================================
 	# Variable setup and reset function
 	#------------------------------------------
-	$ENV{MKCLICFS_COMPRESSION} = 0;
 	my $resetVariables     = createResetClosure();
 	my $CacheDistro        = $init->[0];
 	my @CachePatterns      = @{$init->[1]};
@@ -3280,10 +3279,10 @@ sub createCache {
 		qxx ("rm -f $root/image/config.xml");
 		qxx ("rm -f $root/image/*.kiwi");
 		#==========================================
-		# Turn cache into clicfs file
+		# Turn cache into ext2 fs image
 		#------------------------------------------
 		$kiwi -> info (
-			"--> Building clicfs cache...\n"
+			"--> Building ext2 cache...\n"
 		);
 		# /.../
 		# tell the system that we are in cache mode
@@ -3291,18 +3290,19 @@ sub createCache {
 		# cache
 		# ----
 		$InitCache = "active";
+		my $cxml  = new KIWIXML ($kiwi,$BasePath."/modules");
 		my $image = new KIWIImage (
-			$kiwi,$xml,$root,$imageCacheDir,undef,"/base-system"
+			$kiwi,$cxml,$root,$imageCacheDir,undef,"/base-system"
 		);
 		if (! defined $image) {
 			&{$resetVariables}; return undef;
 		}
-		if (! $image -> createImageClicFS ()) {
+		if (! $image -> createImageEXT2 ()) {
 			&{$resetVariables}; return undef;
 		}
-		my $name = $imageCacheDir."/".$xml -> buildImageName();
-		qxx ("mv $name $main::RootTree.clicfs");
-		qxx ("rm $name.clicfs $name.md5");
+		my $name= $imageCacheDir."/".$cxml -> buildImageName();
+		qxx ("mv $name $main::RootTree.ext2");
+		qxx ("rm -f  $name.ext2");
 		qxx ("rm -f  $imageCacheDir/initrd-*");
 		qxx ("rm -rf $main::RootTree");
 		#==========================================

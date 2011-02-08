@@ -268,6 +268,11 @@ sub writeXMLDescription {
 	}
 	print $FD $xmlu;
 	close $FD;
+	if ($main::OverlayRootTree) {
+		qxx ("mkdir -p $main::OverlayRootTree");
+		qxx ("cp $file $main::OverlayRootTree");
+		undef $main::OverlayRootTree;
+	}
 	return $this;
 }
 
