@@ -1484,27 +1484,28 @@ sub getArchList
     return @archs if ($packOptions->{'onlyarch'} eq "skipit"); # convinience for old hack
   };
 
-  my @archlist = $this->{m_archlist}->headList();
+  my @archs = $this->{m_archlist}->headList();
   if(defined($packOptions->{'arch'})) {
     # Check if this is a rule for this platform
     $packOptions->{'arch'} =~ s{,\s*,}{,}g;
     $packOptions->{'arch'} =~ s{,\s*}{,}g;
     $packOptions->{'arch'} =~ s{,\s*$}{};
     $packOptions->{'arch'} =~ s{^\s*,}{};
-    @archlist = ();
+    @archs = ();
     foreach my $plattform (split(/,\s*/, $packOptions->{'arch'})) {
       foreach my $reqArch ($this->{m_archlist}->headList()) {
-        push @archlist, $reqArch if ( $reqArch eq $plattform );
+        push @archs, $reqArch if ( $reqArch eq $plattform );
       };
     };
-    if ( @archlist == 0 ) {
+    if ( @archs == 0 ) {
       # our required plattforms were not found at all, return empty list
       return @archs;
     }
   }
 
   if(defined($packOptions->{'onlyarch'})) {
-    # allow 'onlyarch="x86_64,i586"'
+    # reset arch list and limit to onlyarch definition
+    @archs = ();
     $packOptions->{'onlyarch'} =~ s{,\s*,}{,}g;
     $packOptions->{'onlyarch'} =~ s{,\s*}{,}g;
     $packOptions->{'onlyarch'} =~ s{,\s*$}{};
@@ -1516,10 +1517,9 @@ sub getArchList
     return @archs;
   }
 
-  # set required archs
-  push @archs, @archlist;
-
   if(defined($packOptions->{'addarch'})) {
+    # addarch is a modifier, use default list as base
+    @archs = $this->{m_archlist}->headList();
     if(not(grep($packOptions->{'addarch'} eq $_, @archs))) {
       $packOptions->{'addarch'} =~ s{,\s*,}{,}g;
       $packOptions->{'addarch'} =~ s{,\s*}{,}g;
@@ -1529,6 +1529,8 @@ sub getArchList
     }
   }
   if(defined($packOptions->{'removearch'})) {
+    # removearch is a modifier, use default list as base
+    @archs = $this->{m_archlist}->headList();
     $packOptions->{'removearch'} =~ s{,\s*,}{,}g;
     $packOptions->{'removearch'} =~ s{,\s*}{,}g;
     $packOptions->{'removearch'} =~ s{,\s*$}{};
