@@ -894,8 +894,10 @@ sub setupPackageFiles
       foreach my $pack(@missingPackages) {
         $this->logMsg("W", "  ".$pack);
       }
-      # FIXME: we need to make it an option to ignore this error.
-      $this->logMsg("E", "Required packages were not found");
+      if ( !defined($this->{m_proddata}->getOpt("IGNORE_MISSING_REPO_PACKAGES")) || $this->{m_proddata}->getOpt("IGNORE_MISSING_REPO_PACKAGES") ne "true" ) {
+        # abort
+        $this->logMsg("E", "Required packages were not found");
+      };
   }
   return $retval;
 }
@@ -1200,8 +1202,10 @@ sub unpackMetapackages
         }
       }
       # Package was not found
-      # FIXME: we need to make it an option to ignore this error.
-      $this->logMsg("E", "Metapackage <$metapack> not available for required $reqArch architecture!");
+      if ( !defined($this->{m_proddata}->getOpt("IGNORE_MISSING_META_PACKAGES")) || $this->{m_proddata}->getOpt("IGNORE_MISSING_META_PACKAGES") ne "true" ) {
+        # abort
+        $this->logMsg("E", "Metapackage <$metapack> not available for required $reqArch architecture!");
+      }
     }
   }
 
