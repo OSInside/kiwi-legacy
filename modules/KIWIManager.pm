@@ -765,7 +765,7 @@ sub setupInstallationSource {
 					$prio = $val;
 				}
 			}
-			my $sadd = "addrepo @zopts $alias";
+			my $sadd = "addrepo -f @zopts $alias";
 			if (! $chroot) {
 				$kiwi -> info ("Adding bootstrap zypper service: $alias");
 				$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
@@ -1140,9 +1140,7 @@ sub installPackages {
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
-		print $fd "@kchroot @zypper refresh &\n";
-		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "test \$? = 0 && @kchroot @zypper install ";
+		print $fd "@kchroot @zypper install ";
 		print $fd "@installOpts @addonPackages &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
@@ -1285,9 +1283,7 @@ sub removePackages {
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
-		print $fd "@kchroot @zypper refresh &\n";
-		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "test \$? = 0 && @kchroot @zypper remove ";
+		print $fd "@kchroot @zypper remove ";
 		print $fd "@installOpts @removePackages || true &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
@@ -1447,9 +1443,6 @@ sub setupUpgrade {
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
-		print $fd "@kchroot @zypper refresh &\n";
-		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "test \$? = 0 && ";
 		if (defined $delPacks) {
 			my @removePackages = @{$delPacks};
 			if (@removePackages) {
@@ -1902,9 +1895,6 @@ sub setupRootSystem {
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
 			print $fd "export ZYPP_CONF=".$root."/".$this->{zyppconf}."\n";
-			print $fd "@zypper --root $root refresh &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && ";
 			if (@newprods) {
 				print $fd "@zypper --root $root install ";
 				print $fd "@installOpts -t product @newprods &\n";
@@ -1970,9 +1960,6 @@ sub setupRootSystem {
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
 			print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
-			print $fd "@kchroot @zypper refresh &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && ";
 			if (@newprods) {
 				print $fd "@kchroot @zypper install ";
 				print $fd "@installOpts -t product @newprods &\n";
