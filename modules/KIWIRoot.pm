@@ -309,6 +309,29 @@ sub init {
 	my $root = $this->{root};
 	my $manager    = $this->{manager};
 	my $baseSystem = $this->{baseSystem};
+	#==================================
+	# Create /etc/ImageVersion file
+	#----------------------------------
+	my $imageVersionFile = "$root/etc/ImageVersion";
+	my $imageVersion = $xml -> getImageVersion();
+	my $imageName    = $xml -> getImageName();
+	qxx ("mkdir -p $root/etc");
+	if ( ! open (FD,">$imageVersionFile")) {
+		$kiwi -> error ("Failed to create version file: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	print FD $imageName."-".$imageVersion; close FD;
+	#==================================
+	# Copy helper scripts to new root
+	#----------------------------------
+	qxx ("cp $main::KConfig $root/.kconfig 2>&1");
+	#==================================
+	# Return early if cache is used
+	#----------------------------------
+	if (defined $main::ImageCache) {
+		return $this;
+	}
 	#==========================================
 	# Get base Package list
 	#------------------------------------------
@@ -397,7 +420,6 @@ sub init {
 	# need resolv.conf/hosts for internal chroot name resolution
 	qxx (" cp /etc/resolv.conf $root/etc 2>&1 ");
 	qxx (" cp /etc/hosts $root/etc 2>&1 ");
-	qxx (" cp $main::KConfig $root/.kconfig 2>&1 ");
 	$kiwi -> done();
 	#==========================================
 	# Create package keys
@@ -461,19 +483,6 @@ sub init {
 	print FD "devpts /dev/pts devpts mode=0620,gid=5 0 0\n";
 	print FD "proc   /proc    proc   defaults        0 0\n";
 	close FD;
-
-	#==================================
-	# Create /etc/ImageVersion file
-	#----------------------------------
-	my $imageVersionFile = "$root/etc/ImageVersion";
-	my $imageVersion = $xml -> getImageVersion();
-	my $imageName    = $xml -> getImageName();
-	if ( ! open (FD,">$imageVersionFile")) {
-		$kiwi -> error ("Failed to create version file: $!");
-		$kiwi -> failed ();
-		return undef;
-	}
-	print FD $imageName."-".$imageVersion; close FD;
 	#==================================
 	# Return object reference
 	#----------------------------------

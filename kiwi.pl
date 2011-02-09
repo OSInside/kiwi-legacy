@@ -468,6 +468,15 @@ sub main {
 			my $cacheInit = initializeCache($xml,\%type,$Prepare);
 			selectCache ($xml,$cacheInit);
 		}
+		if ($ImageCache) {
+			#==========================================
+			# Add bootstrap packages to image section
+			#------------------------------------------
+			my @initPacs = $xml -> getBaseList();
+			if (@initPacs) {
+				$xml -> addImagePackages (@initPacs);
+			}
+		}
 		#==========================================
 		# Initialize root system
 		#------------------------------------------
@@ -3201,6 +3210,7 @@ sub selectCache {
 			}
 		}
 	}
+	undef $ImageCache;
 	return undef;
 }
 
