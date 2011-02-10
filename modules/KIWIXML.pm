@@ -197,7 +197,9 @@ sub new {
 	#==========================================
 	# Add default split section if not defined
 	#------------------------------------------
-	$this -> __addDefaultSplitNode();
+	if (! $this -> __addDefaultSplitNode()) {
+		return undef;
+	}
 	#==========================================
 	# Set global packagemanager value
 	#------------------------------------------
@@ -4016,7 +4018,10 @@ sub __addDefaultSplitNode {
 	#------------------------------------------
 	foreach my $element (@tnodes) {
 		my $image = $element -> getAttribute("image");
-		if (($image eq "split") || ($image eq "iso")) {
+		my $flags = $element -> getAttribute("flags");
+		if (($image eq "split") || 
+			(($image eq "iso") && ($flags eq "compressed"))
+		) {
 			my @splitsections = $element -> getElementsByTagName ("split");
 			if (! @splitsections) {
 				push (@snodes,$element);
@@ -4048,9 +4053,11 @@ sub __addDefaultSplitNode {
 	#==========================================
 	# append default section to selected nodes
 	#------------------------------------------
+	my $defaultSplit = $splitTree
+		-> getElementsByTagName ("split") -> get_node(1);
 	foreach my $element (@snodes) {
-		$element -> appendChild (
-			$splitTree -> getElementsByTagName ("split")
+		$element -> addChild (
+			$defaultSplit -> cloneNode (1)
 		);
 	}
 	$this -> updateXML();
