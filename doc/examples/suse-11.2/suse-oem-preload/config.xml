@@ -7,7 +7,7 @@
 		<specification>openSUSE 11.2 oem preload system</specification>
 	</description>
 	<preferences>
-		<type image="split" fsreadwrite="ext4" fsreadonly="squashfs" boot="oemboot/suse-11.2" installiso="true">
+		<type image="split" fsreadwrite="ext3" fsreadonly="squashfs" boot="oemboot/suse-11.2" installiso="true">
 			<split>
 				<persistent>
 					<file name="/etc"/>
