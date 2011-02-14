@@ -60,6 +60,9 @@
 		<file name="drivers/acpi/dock.ko"/>
 		<file name="lib/crc-t10dif.ko"/>
 		<file name="lib/crc16.ko"/>
+		<file name="drivers/gpu/drm/i915/i915.ko"/>
+		<file name="drivers/gpu/drm/nouveau/nouveau.ko"/>
+		<file name="gpu/drm/radeon/radeon.ko"/>
 	</drivers>
 	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>
