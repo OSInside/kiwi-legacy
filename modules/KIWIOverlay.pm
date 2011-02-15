@@ -289,6 +289,8 @@ sub createSnapshotMap {
 	my $code;
 	my %result;
 	my $table;
+	my $range = 0xfe;
+	my $tsalt = 1 + int (rand($range));
 	#======================================
 	# create root filesystem loop device
 	#--------------------------------------
@@ -325,24 +327,24 @@ sub createSnapshotMap {
 	# setup device mapper tables
 	#--------------------------------------
 	$orig_s =qxx ("blockdev --getsize $imageLoop"); chomp $orig_s;
-	qxx ("echo '0 $orig_s linear $imageLoop 0' | dmsetup create ms_data");
-	push (@releaseList,"dmsetup remove ms_data");
-	qxx ("dmsetup create ms_origin --notable");
-	push (@releaseList,"dmsetup remove ms_origin");
-	qxx ("dmsetup table ms_data | dmsetup load ms_origin");
-	qxx ("dmsetup resume ms_origin");
-	qxx ("dmsetup create ms_snap --notable");
-	push (@releaseList,"dmsetup remove ms_snap");
+	qxx ("echo '0 $orig_s linear $imageLoop 0'|dmsetup create ms_data_$tsalt");
+	push (@releaseList,"dmsetup remove ms_data_$tsalt");
+	qxx ("dmsetup create ms_origin_$tsalt --notable");
+	push (@releaseList,"dmsetup remove ms_origin_$tsalt");
+	qxx ("dmsetup table ms_data_$tsalt | dmsetup load ms_origin_$tsalt");
+	qxx ("dmsetup resume ms_origin_$tsalt");
+	qxx ("dmsetup create ms_snap_$tsalt --notable");
+	push (@releaseList,"dmsetup remove ms_snap_$tsalt");
 	$table = "0 $orig_s snapshot $imageLoop $snapLoop p $snapshotChunk";
-	qxx ("echo '$table' | dmsetup load ms_snap");
+	qxx ("echo '$table' | dmsetup load ms_snap_$tsalt");
 	$table = "0 $orig_s snapshot-origin $imageLoop";
-	qxx ("echo '$table' | dmsetup load ms_data");
-	qxx ("dmsetup resume ms_snap");
-	qxx ("dmsetup resume ms_data");
+	qxx ("echo '$table' | dmsetup load ms_data_$tsalt");
+	qxx ("dmsetup resume ms_snap_$tsalt");
+	qxx ("dmsetup resume ms_data_$tsalt");
 	#======================================
 	# return result
 	#--------------------------------------
-	$snapshotMap = "/dev/mapper/ms_snap";
+	$snapshotMap = "/dev/mapper/ms_snap_$tsalt";
 	$result{mount} = $snapshotMap;
 	$result{stack} = \@releaseList;
 	return %result;
