@@ -466,6 +466,14 @@ sub setupFirstBootYaST {
 				return "failed";
 			}
 		}
+		$data = qxx ("touch $root/etc/reconfig_system 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to activate firstboot: $data");
+			$kiwi -> failed ();
+			return "failed";
+		}
 	} else {
 		# /.../
 		# current firstboot service works like yast second stage and
