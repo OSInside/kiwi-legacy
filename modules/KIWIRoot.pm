@@ -1015,22 +1015,28 @@ sub setup {
 	#========================================
 	# cleanup temporary copy of resolv.conf
 	#----------------------------------------
-	if ((-f "$root/etc/resolv.conf") && (-f "/etc/resolv.conf")) {
-		my $data = qxx ("diff -q /etc/resolv.conf $root/etc/resolv.conf");
-		my $code = $? >> 8;
-		if ($code == 0) {
-			$kiwi -> info ("Cleanup temporary copy of resolv.conf");
-			qxx ("rm -f $root/etc/resolv.conf");
-			$kiwi -> done ();
+	if (! -e "$imageDesc/root/etc/resolv.conf") {
+		# restore only if overlay tree doesn't contain a resolv.conf
+		if ((-f "$root/etc/resolv.conf") && (-f "/etc/resolv.conf")) {
+			my $data = qxx ("diff -q /etc/resolv.conf $root/etc/resolv.conf");
+			my $code = $? >> 8;
+			if ($code == 0) {
+				$kiwi -> info ("Cleanup temporary copy of resolv.conf");
+				qxx ("rm -f $root/etc/resolv.conf");
+				$kiwi -> done ();
+			}
 		}
 	}
 	#========================================
 	# cleanup temporary copy of hosts
 	#----------------------------------------
-	if (-f "$root/etc/hosts.rpmnew") {
-		$kiwi -> info ("Cleanup temporary copy of hosts");
-		qxx ("mv $root/etc/hosts.rpmnew $root/etc/hosts");
-		$kiwi -> done ();
+	if (! -e "$imageDesc/root/etc/hosts") {
+		# restore only if overlay tree doesn't contain a hosts
+		if (-f "$root/etc/hosts.rpmnew") {
+			$kiwi -> info ("Cleanup temporary copy of hosts");
+			qxx ("mv $root/etc/hosts.rpmnew $root/etc/hosts");
+			$kiwi -> done ();
+		}
 	}
 	#========================================
 	# cleanup temporary .buildenv
