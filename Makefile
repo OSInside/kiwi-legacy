@@ -43,7 +43,7 @@ TFTPIMAGE   = ${tftp_prefix}/image
 PACKDOCVZ   = ${doc_prefix}/kiwi
 MANVZ       = ${man_prefix}/man1
 
-all: modules/KIWISchema.rng
+all: modules/KIWISchema.rng test
 	#============================================
 	# build tools
 	#--------------------------------------------
@@ -147,14 +147,23 @@ modules/KIWISchema.rng: modules/KIWISchema.rnc
 	@echo "*** Converting KIWI RNC -> RNG..."
 	trang -I rnc -O rng modules/KIWISchema.rnc modules/KIWISchema.rng
 
+valid: modules/KIWISchema.rng
 	#============================================
-	# Check RNG Schema...
+	# Validate all XML descriptions...
 	#--------------------------------------------
 	for i in `find -name config.xml` modules/KIWICache.kiwi;do \
 		test -f xsl/master.xsl && \
 			xsltproc -o $$i.new xsl/master.xsl $$i && mv $$i.new $$i;\
 		echo $$i;\
 		./kiwi.pl --check-config $$i || break;\
+	done
+
+test:
+	#============================================
+	# Run unit tests...
+	#--------------------------------------------
+	for i in `find tests/unit -name "*.t"`;do \
+		perl $$i ;\
 	done
 
 clean:

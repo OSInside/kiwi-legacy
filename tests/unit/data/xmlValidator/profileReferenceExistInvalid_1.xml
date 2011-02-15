@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<image schemaversion="5.1" name="suse-11.3-xen-guest">
+	<description type="system">
+		<author>Robert Schweikert</author>
+		<contact>rschweikert@novell.com</contact>
+		<specification>openSUSE 11.3 test profile cross references</specification>
+	</description>
+	<preferences>
+        <type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install"> 
+            <oemconfig> 
+                <oem-reboot>true</oem-reboot> 
+                <oem-swap>false</oem-swap> 
+                <oem-unattended>true</oem-unattended> 
+            </oemconfig> 
+        </type>
+		<version>1.1.2</version>
+		<packagemanager>zypper</packagemanager>
+		<rpm-check-signatures>false</rpm-check-signatures>
+		<rpm-force>true</rpm-force>
+		<locale>en_US</locale>
+		<keytable>us.map.gz</keytable>
+	</preferences>
+	<preferences profiles="xenFlavour">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.3" bootprofile="xen" bootkernel="xenk">
+			<machine memory="128" domain="domU">
+				<vmdisk controller="ide" id="0" device="/dev/xvda"/>
+				<vmnic interface="br0" mac="00:0C:6E:AA:57:2F"/>
+			</machine>
+		</type>
+	</preferences>
+	<preferences profiles="ec2Flavour">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.3" bootprofile="xen" bootkernel="ec2" format="ec2">
+			<machine memory="128" domain="domU">
+				<vmdisk controller="ide" id="0" device="/dev/xvda"/>
+				<vmnic interface="br0" mac="00:0C:6E:AA:57:2F"/>
+			</machine>
+			<ec2config>
+				<ec2privatekeyfile>Path to EC2 private key file</ec2privatekeyfile>
+				<ec2certfile>Path to EC2 public certificate file</ec2certfile>
+				<ec2accountnr>12345678911</ec2accountnr>
+			</ec2config>
+		</type>
+	</preferences>
+
+	<users group="root">
+		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+	</users>
+	<repository type="yast2">
+		<source path="iso:///opt/isos/openSUSE-11.3-DVD-x86_64.iso"/>
+	</repository>
+	<packages type="image">
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="ifplugd"/>
+		<package name="vim"/>
+		<package name="xen-tools-domU"/>
+		<package name="xen"/>
+		<opensusePattern name="base"/>
+	</packages>
+	<packages type="image" profiles="xenFlavour">
+		<package name="kernel-xen" replaces="kernel-ec2"/>
+	</packages>
+	<packages type="image" profiles="ec2Flavour">
+		<package name="kernel-ec2" replaces="kernel-xen"/>
+	</packages>
+	<packages type="bootstrap">
+		<package name="filesystem"/>
+		<package name="glibc-locale"/>
+	</packages>
+</image>

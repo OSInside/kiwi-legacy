@@ -20,6 +20,7 @@
 Url:            http://kiwi.berlios.de
 Name:           kiwi
 BuildRequires:  perl-Config-IniFiles perl-XML-LibXML perl-libwww-perl
+BuildRequires:  perl-Test-Unit perl-FindBin-Real
 BuildRequires:  module-init-tools screen zlib-devel
 BuildRequires:  gcc-c++ libxslt swig trang
 %if %{suse_version} > 1020
