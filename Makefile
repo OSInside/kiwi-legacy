@@ -43,7 +43,7 @@ TFTPIMAGE   = ${tftp_prefix}/image
 PACKDOCVZ   = ${doc_prefix}/kiwi
 MANVZ       = ${man_prefix}/man1
 
-all: modules/KIWISchema.rng test
+all: modules/KIWISchema.rng
 	#============================================
 	# build tools
 	#--------------------------------------------
