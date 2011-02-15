@@ -167,7 +167,7 @@ sub __checkDefaultProfSetting {
 		if ($numDefProfs > 1) {
 			my $kiwi = $this->{kiwi};
 			my $msg = 'Only one profile may be set as the dafault profile by '
-			. 'using the "import" attrinute.';
+			. 'using the "import" attribute.';
 			$kiwi -> error($msg);
 			$kiwi -> failed();
 			return undef;
@@ -196,7 +196,7 @@ sub __checkDefaultTypeSetting {
 			}
 			if ($hasPrimary > 1) {
 				my $kiwi = $this->{kiwi};
-				my $msg = 'Only one primary type my be specified per '
+				my $msg = 'Only one primary type may be specified per '
 				. 'preferences section.';
 				$kiwi -> error ($msg);
 				$kiwi -> failed ();
