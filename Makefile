@@ -29,7 +29,6 @@ man_prefix  = ${buildroot}/usr/share/man
 KIWIBINVZ   = ${buildroot}/usr/sbin
 KIWIMODVZ   = ${kiwi_prefix}/modules
 KIWILOCVZ   = ${kiwi_prefix}/locale
-KIWITSTVZ   = ${kiwi_prefix}/tests
 KIWIXSLVZ   = ${kiwi_prefix}/xsl
 TOOLSVZ     = ${bin_prefix}
 INITVZ      = ${init_prefix}
@@ -44,7 +43,7 @@ TFTPIMAGE   = ${tftp_prefix}/image
 PACKDOCVZ   = ${doc_prefix}/kiwi
 MANVZ       = ${man_prefix}/man1
 
-all: modules/KIWISchema.rng modules/KIWISchemaTest.rng
+all: modules/KIWISchema.rng
 	#============================================
 	# build tools
 	#--------------------------------------------
@@ -61,7 +60,7 @@ install:
 	#--------------------------------------------
 	install -d -m 755 ${KIWIBINVZ} ${KIWIMODVZ} ${KIWIIMAGE} ${KIWIXSLVZ}
 	install -d -m 755 ${TFTPKIWI} ${TFTPBOOT} ${TFTPBOOTCONF} ${TFTPIMAGE}
-	install -d -m 755 ${TFTPBOOTBOOT} ${KIWITSTVZ} ${KIWILOCVZ}
+	install -d -m 755 ${TFTPBOOTBOOT} ${KIWILOCVZ}
 	install -d -m 755 ${TFTPUPLOAD} ${KIWIREPO}
 	install -d -m 755 ${PACKDOCVZ} ${MANVZ}
 	install -d -m 755 ${TOOLSVZ} ${INITVZ}
@@ -108,11 +107,6 @@ install:
 	# install NLS support (translations)...
 	#--------------------------------------------
 	${MAKE} -C locale KIWILOCVZ=${KIWILOCVZ} install
-
-	#============================================
-	# Install KIWI tests
-	#--------------------------------------------
-	cp -a tests/* ${KIWITSTVZ}
 
 	#============================================
 	# Install TFTP netboot structure and loader
@@ -162,23 +156,6 @@ modules/KIWISchema.rng: modules/KIWISchema.rnc
 		echo $$i;\
 		./kiwi.pl --check-config $$i || break;\
 	done
-
-modules/KIWISchemaTest.rng: modules/KIWISchemaTest.rnc
-	#============================================
-	# Convert RNC -> RNG...
-	#--------------------------------------------
-	@echo "*** Converting KIWI TEST RNC -> RNG..."
-	trang -I rnc -O rng modules/KIWISchemaTest.rnc modules/KIWISchemaTest.rng
-
-	#============================================
-	# Check RNG TEST Schema...
-	#--------------------------------------------
-	for i in `find tests -name test-case.xml`;do \
-		echo $$i; j=`jing modules/KIWISchemaTest.rng $$i`;if test ! -z "$$j";\
-		then\
-			echo $$j; break;\
-		fi;\
-	done; test -z "$$j" || false
 
 clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)

@@ -390,7 +390,6 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/kiwi/modules/KIWICollect.pm
 %exclude %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
 %exclude %{_datadir}/kiwi/modules/KIWIUtil.pm
-%{_datadir}/kiwi/tests
 %{_datadir}/kiwi/xsl
 %{_sbindir}/kiwi
 %if 0%{?suse_version} < 1140

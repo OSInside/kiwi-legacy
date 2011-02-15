@@ -41,7 +41,6 @@ use KIWIBoot;
 use KIWIMigrate;
 use KIWIOverlay;
 use KIWIQX;
-use KIWITest;
 use KIWIImageFormat;
 use KIWIXMLValidator;
 
@@ -150,8 +149,6 @@ our $InitCache;             # create image cache(s) from given description
 our $CreateInstSource;      # create installation source from meta packages
 our $Upgrade;               # upgrade physical extend
 our $Destination;           # destination directory for logical extends
-our $RunTestSuite;          # run tests on prepared tree
-our @RunTestName;           # run specified tests
 our $LogFile;               # optional file name for logging
 our $RootTree;              # optional root tree destination
 our $Survive;               # if set to "yes" don't exit kiwi
@@ -846,133 +843,6 @@ sub main {
 	}
 
 	#==========================================
-	# Run test suite on prepared root tree 
-	#------------------------------------------
-	if (defined $RunTestSuite) {
-		#==========================================
-		# install testing packages if any
-		#------------------------------------------
-		$kiwi -> info ("Reading image description [TestSuite]...\n");
-		my $xml = new KIWIXML (
-			$kiwi,"$RunTestSuite/image",undef,\@Profiles
-		);
-		if (! defined $xml) {
-			my $code = kiwiExit (1); return $code;
-		}
-		my @testingPackages = $xml -> getTestingList();
-		if (@testingPackages) {
-			#==========================================
-			# Initialize root system, use existing root
-			#------------------------------------------
-			$root = new KIWIRoot (
-				$kiwi,$xml,$RunTestSuite,undef,
-				"/base-system",$RunTestSuite,undef,undef,
-				$CacheRoot,$CacheRootMode,
-				$TargetArch
-			);
-			if (! defined $root) {
-				$kiwi -> error ("Couldn't create root object");
-				$kiwi -> failed ();
-				my $code = kiwiExit (1); return $code;
-			}
-			if (! $root -> prepareTestingEnvironment()) {
-				$root -> cleanMount ();
-				$root -> copyBroken();
-				undef $root;
-				my $code = kiwiExit (1); return $code;
-			}
-			if (! $root -> installTestingPackages(\@testingPackages)) {
-				$root -> cleanMount ();
-				$root -> copyBroken();
-				undef $root;
-				my $code = kiwiExit (1); return $code;
-			}
-		}
-		#==========================================
-		# create package manager for operations
-		#------------------------------------------
-		my $manager = new KIWIManager (
-			$kiwi,$xml,$xml,$RunTestSuite,
-			$xml->getPackageManager(),$TargetArch
-		);
-		#==========================================
-		# set default tests if no names are set
-		#------------------------------------------
-		if (! @RunTestName) {
-			@RunTestName = ("rpm","ldd");
-		}
-		#==========================================
-		# run all tests in @RunTestName
-		#------------------------------------------
-		my $testCount = @RunTestName;
-		my $result_success = 0;
-		my $result_failed  = 0;
-		$kiwi -> info ("Test suite, evaluating ".$testCount." test(s)\n");
-		foreach my $run (@RunTestName) {
-			my $runtest = $run;
-			if ($runtest !~ /^\.*\//) {
-				# if test does not begin with '/' or './' add default path
-				$runtest = $TestBase."/".$run;
-			}
-			my $test = new KIWITest (
-				$runtest,$RunTestSuite,$SchemaTST,$manager
-			);
-			my $testResult = $test -> run();
-			$kiwi -> info (
-				"Testcase ".$test->getName()." - ".$test->getSummary()
-			);
-			if ($testResult == 0) {
-				$kiwi -> done();
-				$result_success += 1;
-			} else {
-				$kiwi -> failed();
-				$result_failed +=1;
-				my @outputArray = @{$test -> getAllResults()};
-				$kiwi -> warning ("Error message : \n");
-				my $txtmsg=$test->getOverallMessage();
-				$kiwi -> note($txtmsg);
-			}
-		}
-		#==========================================
-		# uninstall testing packages
-		#------------------------------------------
-		if (@testingPackages) {
-			if (! $root -> uninstallTestingPackages(\@testingPackages)) {
-				$root -> cleanupTestingEnvironment();
-				$root -> cleanMount ();
-				$root -> copyBroken();
-				undef $root;
-				my $code = kiwiExit (1); return $code;
-			}
-			$root -> cleanupTestingEnvironment();
-			$root -> cleanMount ();
-		}
-		#==========================================
-		# print test report
-		#------------------------------------------	
-		if ($result_failed == 0) {
-			$kiwi -> info (
-				"Tests finished : ".$result_success.
-				" test passed, "
-			);
-			$kiwi -> done();
-			$root -> cleanBroken();
-			undef $root;
-			kiwiExit (0);
-		} else {
-			$kiwi -> info (
-				"Tests finished : ". $result_failed .
-				" of ". ($result_failed+$result_success) .
-				" tests failed"
-			);
-			$kiwi -> failed();
-			$root -> copyBroken();
-			undef $root;
-			kiwiExit (1);
-		}
-	}	
-
-	#==========================================
 	# Upgrade image in chroot system
 	#------------------------------------------
 	if (defined $Upgrade) {
@@ -1293,8 +1163,6 @@ sub init {
 		"skip=s"                => \@Skip,
 		"list|l"                => \&listImage,
 		"create|c=s"            => \$Create,
-		"testsuite=s"           => \$RunTestSuite,
-		"test=s"                => \@RunTestName,
 		"create-instsource=s"   => \$CreateInstSource,
 		"ignore-repos"          => \$IgnoreRepos,
 		"add-repo=s"            => \@AddRepository,
@@ -1480,7 +1348,6 @@ sub init {
 		(! defined $BootCD)             &&
 		(! defined $BootUSB)            &&
 		(! defined $Clone)              &&
-		(! defined $RunTestSuite)       &&
 		(! defined $CheckConfig)        &&
 		(! defined $Convert)
 	) {
@@ -1610,9 +1477,6 @@ sub usage {
 	print "       [ --installstick-system <vmx-system-image> ]\n";
 	print "Image format conversion:\n";
 	print "    kiwi --convert <systemImage> [ --format <vmdk|ovf|qcow2> ]\n";
-	print "Testsuite:\n";
-	print "    kiwi --testsuite <image-root> \n";
-	print "       [ --test name --test name ... ]\n";
 	print "Helper Tools:\n";
 	print "    kiwi --createpassword\n";
 	print "    kiwi --createhash <image-path>\n";

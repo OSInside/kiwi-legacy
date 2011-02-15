@@ -8,18 +8,13 @@
 .SUFFIXES: rnc
 
 RELAXNG=../../modules/KIWISchema.rnc
-RELAXNG_TEST=../../modules/KIWISchemaTest.rnc
 
 .PHONY: all
-all:  kiwi.xsd test.xsd
+all:  kiwi.xsd
 
 kiwi.xsd: $(RELAXNG)
 	@echo "*** Converting KIWI RNC -> XSD..."
 	trang $< $@
 
-test.xsd: $(RELAXNG_TEST)
-	@echo "*** Converting KIWI TEST RNC -> XSD..."
-	trang $< $@
-
 clean:
-	rm -f kiwi.xsd test.xsd xsi.xsd
+	rm -f kiwi.xsd xsi.xsd

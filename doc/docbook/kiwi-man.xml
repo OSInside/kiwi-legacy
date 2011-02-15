@@ -283,27 +283,13 @@
   </refsect1>
  
   <refsect1>
-    <title>Testsuite</title>
-    <para>
-      The KIWI test suite is useful to perform basic quality checks on
-      the image root directory. The test cases are stored in subdirectories
-      below <filename>/usr/share/kiwi/tests</filename>.
-    </para>
-    <cmdsynopsis><command>kiwi</command>
-      <arg choice="plain">--testsuite <replaceable>image-root</replaceable></arg>
-      <arg choice="opt" rep="repeat">--test <replaceable>name</replaceable></arg>
-    </cmdsynopsis>
-  </refsect1>
-
-  <refsect1>
     <title>Helper Tools</title>
     <para>
       The helper tools provide optional functions like
       creating a crypted password string for the users section of the
-      <filename>config.xml</filename> file or signing the image
-      description with an md5sum hash as well as adding splash data to
-      the boot image used by the bootloader and the testsuite mode which
-      allows testing the integrity of the new root tree.
+      <filename>config.xml</filename> file as well as signing the image
+      description with an md5sum hash and adding splash data to
+      the boot image used by the bootloader.
     </para>
     <cmdsynopsis>
 		<command>kiwi</command> <arg choice="plain">--createpassword</arg>
