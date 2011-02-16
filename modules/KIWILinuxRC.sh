@@ -3584,7 +3584,7 @@ function linuxPartition {
 	# ----
 	local diskDevice=$1
 	local diskPartitionType=`partitionID $diskDevice 2`
-	if test "$diskPartitionType" = "83";then
+	if [ "$diskPartitionType" = "83" ] || [ "$diskPartitionType" = "fd" ];then
 		return 0
 	fi
 	return 1
