@@ -384,12 +384,24 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 		fi
 		rm -f $input
 		imageDiskDevice=$raidDiskFirst
-		createPartitionerInput n p $raidIDFirst . . t $raidIDFirst fd
+		if [ $raidIDFirst -gt 1 ];then
+			createPartitionerInput \
+				n p $raidIDFirst . . t $raidIDFirst fd w q
+		else
+			createPartitionerInput \
+				n p $raidIDFirst . . t fd w q
+		fi
 		callPartitioner $input
 		rm -f $input
 		imageDiskDevice=$raidDiskSecond
 		cleanPartitionTable
-		createPartitionerInput n p $raidIDSecond . . t $raidIDSecond fd
+		if [ $raidIDSecond -gt 1 ];then
+			createPartitionerInput \
+				n p $raidIDSecond . . t $raidIDSecond fd w q
+		else
+			createPartitionerInput \
+				n p $raidIDSecond . . t fd w q
+		fi
 		callPartitioner $input
 		rm -f $input
 		#======================================
