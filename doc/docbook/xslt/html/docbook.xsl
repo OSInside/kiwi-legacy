@@ -4,7 +4,8 @@
 
   <xsl:import
     href="http://docbook.sourceforge.net/release/xsl/current/html/docbook.xsl"/>
-  
+
+  <xsl:output encoding="utf-8"/>
   <xsl:include href="sections.xsl"/>
   <xsl:include href="formal.xsl"/>
 

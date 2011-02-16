@@ -2,12 +2,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.76.1-RC1 <http://docbook.sf.net/>
-.\"      Date: Created: 02/11/2011
+.\"      Date: Created: 02/16/2011
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 4.74
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 02/11/2011" "KIWI 4\&.74" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 02/16/2011" "KIWI 4\&.74" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -113,17 +113,11 @@ The KIWI post\-processing modes are used for special image deployment tasks, lik
 The KIWI format conversion is useful to perform the creation of another image output format like vmdk for VMware or ovf the open virtual machine format\&. Along with the conversion KIWI also creates the virtual machine configuration according to the format if there is a machine section specified in the XML description
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-convert\ \fIsystemImage\fR [\-\-format\ \fIvmdk|ovf|qcow2\fR]
-.SH "TESTSUITE"
-.PP
-The KIWI test suite is useful to perform basic quality checks on the image root directory\&. The test cases are stored in subdirectories below
-/usr/share/kiwi/tests\&.
-.HP \w'\fBkiwi\fR\ 'u
-\fBkiwi\fR \-\-testsuite\ \fIimage\-root\fR [\-\-test\ \fIname\fR...]
 .SH "HELPER TOOLS"
 .PP
 The helper tools provide optional functions like creating a crypted password string for the users section of the
 config\&.xml
-file or signing the image description with an md5sum hash as well as adding splash data to the boot image used by the bootloader and the testsuite mode which allows testing the integrity of the new root tree\&.
+file as well as signing the image description with an md5sum hash and adding splash data to the boot image used by the bootloader\&.
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-createpassword
 .HP \w'\fBkiwi\fR\ 'u

@@ -1781,7 +1781,6 @@
     <sect2 id="sec.description.packages">
       <title><sgmltag>packages</sgmltag> Element</title>
       <screen>&lt;packages type="type" profiles="name" patternType="type"
-        patternPackageType="type" 
    &lt;package name="name" arch="arch"/&gt; 
    &lt;package name="name" replaces="name"/&gt;
    &lt;package name="name" bootinclude="true" bootdelete="true"/&gt; 
@@ -1888,34 +1887,28 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
           <primary>KIWI</primary>
           <secondary>patterns</secondary>
         </indexterm>
-        <para> Using a pattern name enhances the package list with a
-          number of additional packages belonging to this pattern.
-          Support for patterns is SUSE-specific, and available with
-          openSUSE 10.1 or later. The optional <sgmltag
-            class="attribute">patternType</sgmltag> and <sgmltag
-            class="attribute">patternPackageType</sgmltag> attributes
-          specify which pattern references or packages should be used in
-          a given pattern. The values of these attributes are only
-          evaluated, if the KIWI pattern solver is used. If the new (up
-          to SUSE 11.0) satsolver pattern solver is used, these values
-          are ignored because the satsolver can’t handle that at the
-          moment. Allowed values for the <sgmltag class="attribute"
-            >pattern*</sgmltag> attributes are: </para>
-
+        <para> Using a pattern name allows you to considerably shorten
+          the list of specified packages in the <filename>config.xml</filename>
+          file. A named pattern, specified with the <sgmltag
+            class="element">opensusePattern</sgmltag> element is a
+          representation of a predefined list of packages. Specifying a
+          pattern will install all packages listed in the named pattern to be
+          installed in the image. Support for patterns is SUSE-specific, 
+          and available with openSUSE 10.1 or later. The optional <sgmltag
+            class="attribute">patternType</sgmltag> attribute on the 
+          <sgmltag class="element">packages</sgmltag> element allows you to
+          control the installation of dependent packages in the image.
+          You may assigne one of the following values to the
+          <sgmltag class="attribute">patternType</sgmltag> attribute:
+        </para>
         <variablelist>
           <varlistentry>
             <term><sgmltag class="attribute">onlyRequired</sgmltag></term>
             <listitem>
               <para>Incorporates only patterns and packages that
-                are required by the given pattern </para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term><sgmltag class="attribute"
-              >plusSuggested</sgmltag></term>
-            <listitem>
-              <para>Incorporates patterns and packages that are required
-                and suggested by the given pattern </para>
+               the specifeid patterns and packages require. This is
+               a "hard dependency" only resolution.
+              </para>
             </listitem>
           </varlistentry>
           <varlistentry>
@@ -1923,25 +1916,36 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
               >plusRecommended</sgmltag></term>
             <listitem>
               <para>Incorporates patterns and packages that are required
-                and recommended by the given pattern. </para>
+               and recommended by the specified patterns and packages
+               in <filename>config.xml</filename>.
+              </para>
             </listitem>
           </varlistentry>
         </variablelist>
-
-        <para>By default, only required patterns and packages are used.
-          The result list of packages is solved into a clean conflict
-          free list of packages by the package manager. This for example
-          means that including a suggested package may include required
-          and recommended packages as well according to the
-          dependencies. If a pattern contains unwanted packages, you can
-          use the ignore element to specify an ignore list, with the
-          name attribute containing the package name. Please note that
-          you can’t ignore a package if it is required by a package
-          dependency of another package in your list. The package
-          manager will automatically pull in the package even if you
-          have ignored it. </para>
+        <para>By default, only required patterns and packages are installed.
+          KIWI depends on the package manager to resolve the specified list
+          of patterns and packages against the specified repositories and
+          complete the installation. Note that not all supported package
+          managers support the use of named patterns, thus the value of the
+          <sgmltag class="element">packageManager</sgmltag> element
+          determines whether you are able to use named patterns or not.
+          Should the list of specified packages result in a conflict the
+          image creation process will stop and the information provided by
+          the package manager will be captured in the build log and will be
+          displayed in the terminal window where KIWI was started. The
+          <sgmltag class="element">ignore</sgmltag> element may be of use
+          in resolving such conflicts. However, the <sgmltag
+            class="element">ignore</sgmltag> element is limited to effect
+          packages named explicitely. Packages installed in the image through
+          a named pattern are not effected by the <sgmltag
+           class="element">ignore</sgmltag> element setting. THerefore,
+          package conflicts created by packages within named patterns cannot
+          be resolved using the ignore mechanism. Further, if a package is
+          specified to be ignored, but is required by another package, then
+          the required package is installed in the image via the automatic
+          dependency resolution by the package manager in use.
+        </para>
       </sect3>
-
       <sect3 id="sec.description.architecture-restrictions">
         <title>Architecture Restrictions</title>
         <indexterm>
