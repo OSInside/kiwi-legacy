@@ -2269,8 +2269,8 @@ sub getImageConfig {
 		if ((defined $oempinst) && ("$oempinst" eq "true")) {
 			$result{kiwi_oempartition_install} = $oempinst;
 		}
-		if ((defined $oemswap) && ("$oemswap" eq "true")) {
-			$result{kiwi_oemswap} = $oemswap;
+		if ("$oemswap" ne "false") {
+			$result{kiwi_oemswap} = "true";
 			if ((defined $oemswapMB) && 
 				("$oemswapMB" ne "")   && 
 				(int($oemswapMB) > 0)
