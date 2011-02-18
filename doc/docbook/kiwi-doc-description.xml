@@ -747,8 +747,7 @@
           <term><sgmltag>oemconfig</sgmltag></term>
           <listitem>
             <para>By default, the oemboot process will create or modify
-              a swap, <filename>/home</filename> and
-                <filename>/</filename> partition. It is possible to
+              a swap, and <filename>/</filename> partition. It is possible to
               influence the behavior by the <filename>oem-*</filename>
               elements explained below. KIWI uses this information to
               create the file <filename>/config.oempartition</filename>
