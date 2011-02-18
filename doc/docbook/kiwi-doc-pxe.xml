@@ -340,37 +340,18 @@ DISK=device</screen>
              <para>In addtion to the PART line it's also allowed to add a raid
               array setup. The first parmater of the RAID line is the raid level.
               So far only raid1 (mirroring) is supported. The second and third
-              parameter specifies the raid devices which makes up the array.
+              parameter specifies the raid disk devices which makes up the array.
+              If a RAID line is present all partitions in PART will be created
+              as raid partitions. The first raid is named md0 the second one md1
+              and so on. It's required to specifiy the correct raid partition in
+              the IMAGE line according to the PART setup.
               A typical raid image setup could look like this:</para>
-
               <screen>
                  DISK=/dev/sda
-                 IMAGE=/dev/md0;LimeJeOS-openSUSE-11.3.i686;1.11.3;192.168.100.2;4096
-                 PART=5;S;x,80;L;/boot
-                 RAID=1;/dev/sda3;/dev/sdb1
+                 IMAGE=/dev/md1;LimeJeOS-openSUSE-11.3.i686;1.11.3;192.168.100.2;4096
+                 PART=5;S;x,2000;83;/
+                 RAID=1;/dev/sda;/dev/sdb
               </screen>
-
-              <itemizedlist>
-                <listitem>
-                  <para>If a raid setup is used and local boot of the client has to work
-                  it's required to add a boot partition in the PART line like the
-                  example above shows. In this example a swap space which must be on
-                  the first partition and a boot partition as second partition is created.
-                  The disk which is used for that setup is the one specified in the
-                  DISK variable</para>
-                </listitem>
-                <listitem>
-                  <para>If one of the raid partitions should be created on the same disk
-                  which is specified in the DISK variable it's important that the
-                  RAID partition setup doesn't conflict with the PART setup. In
-                  the example above the raid partition must be the third partition
-                  because the first two are already in use. It's also required that
-                  the sequence of partition id's doesn't leave a gap in between
-                  because that's not supported by the parted partitioner. Any other
-                  than the third partition on DISK as a raid device would be a
-                  mistake in this example</para>
-                </listitem>
-              </itemizedlist>
 		  </listitem>
         </varlistentry>
         <varlistentry>
