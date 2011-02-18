@@ -380,7 +380,7 @@ sub createEC2 {
 	#==========================================
 	# Check AWS account information
 	#------------------------------------------
-	$kiwi -> info ("Creating $format image...");
+	$kiwi -> info ("Creating $format image...\n");
 	$target  =~ s/\/$//;
 	$target .= ".$format";
 	$aminame.= ".ami";
@@ -388,33 +388,29 @@ sub createEC2 {
 	my $arch = qxx ("uname -m"); chomp ( $arch );
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	my %ec2  = $xml->getEc2Config();
+	my $have_account = 1;
 	if (! defined $ec2{AWSAccountNr}) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Missing AWS account number");
-		$kiwi -> failed ();
-		return undef;
+		$kiwi -> warning  ("Missing AWS account number");
+		$kiwi -> skipped ();
+		$have_account = 0;
 	}
 	if (! defined $ec2{EC2CertFile}) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Missing AWS user's PEM encoded RSA pubkey cert file");
-		$kiwi -> failed ();
-		return undef;
+		$kiwi -> warning  ("Missing AWS user's PEM encoded RSA pubkey cert file");
+		$kiwi -> skipped ();
+		$have_account = 0;
 	} elsif (! -f $ec2{EC2CertFile}) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("EC2 file: $ec2{EC2CertFile} does not exist");
-		$kiwi -> failed ();
-		return undef;
+		$kiwi -> warning  ("EC2 file: $ec2{EC2CertFile} does not exist");
+		$kiwi -> skipped ();
+		$have_account = 0;
 	}
 	if (! defined $ec2{EC2PrivateKeyFile}) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Missing AWS user's PEM encoded RSA private key file");
-		$kiwi -> failed ();
-		return undef;
+		$kiwi -> warning ("Missing AWS user's PEM encoded RSA private key file");
+		$kiwi -> skipped ();
+		$have_account = 0;
 	} elsif (! -f $ec2{EC2PrivateKeyFile}) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("EC2 file: $ec2{EC2PrivateKeyFile} does not exist");
-		$kiwi -> failed ();
-		return undef;
+		$kiwi -> warning  ("EC2 file: $ec2{EC2PrivateKeyFile} does not exist");
+		$kiwi -> skipped ();
+		$have_account = 0;
 	}
 	if ($arch =~ /i.86/) {
 		$arch = "i386";
@@ -604,6 +600,11 @@ sub createEC2 {
 	#==========================================
 	# call ec2-bundle-image (Amazon toolkit)
 	#------------------------------------------
+	if ($have_account == 0) {
+		$kiwi -> warning ("EC2 bundle creation skipped due to missing credentials");
+		$kiwi -> skipped ();
+		return $source;
+	}
 	my $pk = $ec2{EC2PrivateKeyFile};
 	my $ca = $ec2{EC2CertFile};
 	my $nr = $ec2{AWSAccountNr};
