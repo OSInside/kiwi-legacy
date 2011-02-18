@@ -289,9 +289,12 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 12) Check for installed system
+# 13) Check for installed system
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
+	if [ ! -z "$RAID" ];then
+		pxeRaidAssemble
+	fi
 	IMAGE_FIRST=$(echo $IMAGE | cut -f1 -d,)
 	for i in $IMAGE_FIRST;do
 		field=0
@@ -302,19 +305,6 @@ if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 				2) imageVersion=$n; field=3
 			esac
 		done
-		if [ ! -z "$RAID" ];then
-			field=0
-			IFS=";" ; for n in $RAID;do
-				case $field in
-					0) raidLevel=$n ; field=1 ;;
-					1) raidFirst=$n ; field=2 ;;
-					2) raidSecond=$n; field=3
-				esac
-			done
-			IFS=$IFS_ORIG
-			mdadm --assemble $imageDevice \
-				$raidFirst $raidSecond
-		fi
 		updateNeeded initialize
 		if linuxPartition $imageDiskDevice;then
 			if mountSystem $imageDevice;then
@@ -334,9 +324,6 @@ if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 		else
 			systemIntegrity="clean"
 		fi
-		if [ $systemIntegrity = "fine" ] && [ ! -z "$RAID" ];then
-			mdadm --stop $imageDevice
-		fi
 	done
 fi
 
@@ -349,26 +336,26 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	# Create partition table
 	#--------------------------------------
 	Echo "Creating partition table..."
-	cleanPartitionTable
-	createPartitionerInput $(pxePartitionInput)
-	callPartitioner $input
-	if [ ! -z "$RAID" ];then
+	if [ -z "$RAID" ];then
 		#======================================
-		# Setup raid partitions
+		# Standard table
+		#--------------------------------------
+		cleanPartitionTable
+		createPartitionerInput $(pxePartitionInput)
+		callPartitioner $input
+	else
+		#======================================
+		# Raid1 table
 		#--------------------------------------
 		field=0
 		IFS=";" ; for n in $RAID;do
 			case $field in
-				0) raidLevel=$n ; field=1 ;;
-				1) raidFirst=$n ; field=2 ;;
-				2) raidSecond=$n; field=3
+				0) raidLevel=$n     ; field=1 ;;
+				1) raidDiskFirst=$n ; field=2 ;;
+				2) raidDiskSecond=$n; field=3
 			esac
 		done
 		IFS=$IFS_ORIG
-		raidDiskFirst=$(dn $raidFirst)
-		raidDiskSecond=$(dn $raidSecond)
-		raidIDFirst=$(nd $raidFirst)
-		raidIDSecond=$(nd $raidSecond)
 		#======================================
 		# wait for raid disks to appear
 		#--------------------------------------
@@ -382,59 +369,34 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 				"Disk $raidDiskSecond doesn't appear... fatal !" \
 			"reboot"
 		fi
-		rm -f $input
-		imageDiskDevice=$raidDiskFirst
-		if [ $raidIDFirst -gt 1 ];then
-			createPartitionerInput \
-				n p $raidIDFirst . . t $raidIDFirst fd w q
-		else
-			createPartitionerInput \
-				n p $raidIDFirst . . t fd w q
-		fi
-		callPartitioner $input
-		rm -f $input
-		imageDiskDevice=$raidDiskSecond
-		cleanPartitionTable
-		if [ $raidIDSecond -gt 1 ];then
-			createPartitionerInput \
-				n p $raidIDSecond . . t $raidIDSecond fd w q
-		else
-			createPartitionerInput \
-				n p $raidIDSecond . . t fd w q
-		fi
-		callPartitioner $input
-		rm -f $input
 		#======================================
-		# wait for raid partitions to appear
+		# stop eventually assembled raid
 		#--------------------------------------
-		if ! waitForStorageDevice $raidFirst;then
-			systemException \
-				"Disk $raidFirst doesn't appear... fatal !" \
-			"reboot"
-		fi
-		if ! waitForStorageDevice $raidSecond;then
-			systemException \
-				"Disk $raidSecond doesn't appear... fatal !" \
-			"reboot"
-		fi
+		pxeRaidStop
+		#======================================
+		# call partitioner on each raid disk
+		#--------------------------------------
+		for raid_dev in $raidDiskFirst $raidDiskSecond;do
+			imageDiskDevice=$raid_dev
+			rm -f $input
+			cleanPartitionTable
+			createPartitionerInput $(pxeRaidPartitionInput)
+			callPartitioner $input
+		done
 		imageDiskDevice=$DISK
 		#======================================
 		# Create raid array
 		#--------------------------------------
-		mdadm --zero-superblock $raidFirst
-		mdadm --zero-superblock $raidSecond
-		yes | mdadm --create /dev/md0 \
-			--level=$raidLevel --raid-disks=2 $raidFirst $raidSecond
-		if [ ! $? = 0 ];then
-			systemException \
-				"Failed to create raid array... fatal !" \
-			"reboot"
-		fi
+		pxeRaidCreate
 	fi
 	#======================================
 	# Setup swap space if requested
 	#--------------------------------------
-	export imageSwapDevice=$(pxeSwapDevice)
+	if [ -z "$RAID" ];then
+		export imageSwapDevice=$(pxeSwapDevice)
+	else
+		export imageSwapDevice=$(pxeRaidSwapDevice)
+	fi
 	if [ ! -z "$imageSwapDevice" ];then
 		if ! mkswap $imageSwapDevice 1>&2;then
 			systemException "Failed to create swap signature" "reboot"
@@ -443,9 +405,11 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	#======================================
 	# Setup boot space if requested
 	#--------------------------------------
-	export imageBootDevice=$(pxeBootDevice)
-	if [ ! -z "$imageBootDevice" ];then
-		createFilesystem $imageBootDevice
+	if [ -z "$RAID" ];then
+		export imageBootDevice=$(pxeBootDevice)
+		if [ ! -z "$imageBootDevice" ];then
+			createFilesystem $imageBootDevice
+		fi
 	fi
 	runHook postpartition
 fi
@@ -786,6 +750,14 @@ if [ ! -z "$imageBootDevice" ];then
 	rm -rf /mnt/boot/* && mount $imageBootDevice /mnt/boot
 	cd /mnt/boot && tar -xf /tmp/boot.tgz
 	rm -f /tmp/boot.tgz
+else
+	export bootid=$(nd $imageRootDevice)
+fi
+if [ ! -z "$RAID" ];then
+	# raid md devices start with 0 but partition id's start with 1
+	bootid=$((bootid + 1))
+	# make mdadm.conf available in system image
+	cp /mdadm.conf /mnt/etc
 fi
 
 #======================================
@@ -859,8 +831,8 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	setupDefaultPXENetwork /config
 	setupDefaultFstab /config
 	updateRootDeviceFstab /config "$imageRootDevice"
-	if test ! -z $DISK;then
-		updateSwapDeviceFstab /config ${DISK}1
+	if [ ! -z "$DISK" ];then
+		updateSwapDeviceFstab /config $imageSwapDevice
 		updateOtherDeviceFstab /config
 		setupBootLoader /mnt /config $(($bootid - 1)) \
 			$imageRootDevice NET $imageSwapDevice

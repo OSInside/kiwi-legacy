@@ -1208,7 +1208,7 @@ function setupBootLoaderS390 {
 	# check for device by ID
 	#--------------------------------------
 	local diskByID=`getDiskID $rdev`
-	local swapByID=`getDiskID $swap`
+	local swapByID=`getDiskID $swap swap`
 	#======================================
 	# check for boot image .profile
 	#--------------------------------------
@@ -1409,7 +1409,7 @@ function setupBootLoaderSyslinux {
 	# check for device by ID
 	#--------------------------------------
 	local diskByID=`getDiskID $rdev`
-	local swapByID=`getDiskID $swap`
+	local swapByID=`getDiskID $swap swap`
 	#======================================
 	# check for boot image .profile
 	#--------------------------------------
@@ -1642,7 +1642,7 @@ function setupBootLoaderGrub {
 	# check for device by ID
 	#--------------------------------------
 	local diskByID=`getDiskID $rdev`
-	local swapByID=`getDiskID $swap`
+	local swapByID=`getDiskID $swap swap`
 	#======================================
 	# check for boot image .profile
 	#--------------------------------------
@@ -1907,7 +1907,7 @@ function setupBootLoaderLilo {
 	# check for device by ID
 	#--------------------------------------
 	local diskByID=`getDiskID $rdev`
-	local swapByID=`getDiskID $swap`
+	local swapByID=`getDiskID $swap swap`
 	#======================================
 	# check for boot image .profile
 	#--------------------------------------
@@ -4817,10 +4817,15 @@ function getDiskID {
 	# name into the udev ID based representation
 	# ----
 	local device=$1
+	local swap=$2
 	if [ -z "$device" ];then
 		return
 	fi
 	if echo $device | grep -q "$VGROUP"; then
+		echo $device
+		return
+	fi
+	if [ -z "$swap" ] && echo $device | grep -q "dev\/md"; then
 		echo $device
 		return
 	fi
@@ -6022,6 +6027,14 @@ function normalizeRepartInput {
 					index=$(($index + 1))
 				fi
 			;;
+			"t")
+				partid=${pcmds[$index + 1]}
+				if ! echo $partid | grep -q "^[0-4]$";then
+					# make sure there is a ID set for the type
+					index_fix=$(($index_fix + 1))
+					pcmds_fix[$index_fix]=1
+				fi
+			;;
 		esac
 		index=$(($index + 1))
 		index_fix=$(($index_fix + 1))
@@ -6443,14 +6456,125 @@ function pxePartitionInput {
 		fi
 		if [ $count -eq 1 ];then
 			echo -n "n p $count 1 $partSize "
+			if [ $partID = "82" ] || [ $partID = "8e" ];then
+				echo -n "t $partID "
+			fi
 		else
 			echo -n "n p $count . $partSize "
+			if [ $partID = "82" ] || [ $partID = "8e" ];then
+				echo -n "t $count $partID "
+			fi
 		fi
-		if [ $partID = "82" ] || [ $partID = "8e" ];then
+		done
+	echo "w q"
+}
+#======================================
+# pxeRaidPartitionInput
+#--------------------------------------
+function pxeRaidPartitionInput {
+	local field=0
+	local count=0
+	local IFS=","
+	for i in $PART;do
+		field=0
+		count=$((count + 1))
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		partSize=$(pxeSizeToMB $partSize)
+		partID=fd
+		if [ $count -eq 1 ];then
+			echo -n "n p $count 1 $partSize "
+			echo -n "t $partID "
+		else
+			echo -n "n p $count . $partSize "
 			echo -n "t $count $partID "
 		fi
 	done
 	echo "w q"
+}
+#======================================
+# pxeRaidCreate
+#--------------------------------------
+function pxeRaidCreate {
+	local count=0
+	local mdcount=0
+	local IFS=","
+	local raidFirst
+	local raidSecond
+	local conf=/mdadm.conf
+	touch $conf
+	for i in $PART;do
+		count=$((count + 1))
+		raidFirst=$(ddn $raidDiskFirst $count)
+		raidSecond=$(ddn $raidDiskSecond $count)
+		if ! waitForStorageDevice $raidFirst;then
+			return
+		fi
+		if ! waitForStorageDevice $raidSecond;then
+			return
+		fi
+		mdadm --zero-superblock $raidFirst
+		mdadm --zero-superblock $raidSecond
+		yes | mdadm --create /dev/md$mdcount \
+			--level=$raidLevel --raid-disks=2 $raidFirst $raidSecond
+		if [ ! $? = 0 ];then
+			systemException \
+				"Failed to create raid array... fatal !" \
+			"reboot"
+		fi
+		echo "DEVICE $raidFirst $raidSecond" >> $conf
+		echo "ARRAY /dev/md$mdcount devices=$raidFirst,$raidSecond" >> $conf
+		mdcount=$((mdcount + 1))
+	done
+}
+#======================================
+# pxeRaidAssemble
+#--------------------------------------
+function pxeRaidAssemble {
+	local count=0
+	local mdcount=0
+	local field=0
+	local IFS=";"
+	local raidFirst
+	local raidSecond
+	for n in $RAID;do
+		case $field in
+			0) raidLevel=$n     ; field=1 ;;
+			1) raidDiskFirst=$n ; field=2 ;;
+			2) raidDiskSecond=$n; field=3
+		esac
+	done
+	IFS=","
+	for i in $PART;do
+		count=$((count + 1))
+		raidFirst=$(ddn $raidDiskFirst $count)
+		raidSecond=$(ddn $raidDiskSecond $count)
+		if ! waitForStorageDevice $raidFirst;then
+			return
+		fi
+		if ! waitForStorageDevice $raidSecond;then
+			return
+		fi
+		mdadm --assemble /dev/md$mdcount \
+			$raidFirst $raidSecond
+		mdcount=$((mdcount + 1))
+	done
+}
+#======================================
+# pxeRaidStop
+#--------------------------------------
+function pxeRaidStop {
+	local count=0
+	local IFS=","
+	for i in $PART;do
+		mdadm --stop /dev/md$count
+		count=$((count + 1))
+	done
 }
 #======================================
 # pxeSwapDevice
@@ -6476,6 +6600,34 @@ function pxeSwapDevice {
 			echo $device
 			return
 		fi
+	done
+}
+#======================================
+# pxeRaidSwapDevice
+#--------------------------------------
+function pxeRaidSwapDevice {
+	local field=0
+	local count=0
+	local mdcount=0
+	local device
+	local IFS=","
+	for i in $PART;do
+		field=0
+		count=$((count + 1))
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		if test $partID = "82" -o $partID = "S";then
+			device=/dev/md$mdcount
+			waitForStorageDevice $device
+			echo $device
+			return
+		fi
+		mdcount=$((mdcount + 1))
 	done
 }
 #======================================
