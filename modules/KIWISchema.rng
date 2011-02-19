@@ -3311,7 +3311,7 @@ virtual machine when running the image.</db:para>
     <define name="k.packages.patternType.attribute">
       <attribute name="patternType">
         <a:documentation>Selection type for patterns. Could be onlyRequired
-plusSuggested or plusRecommended</a:documentation>
+or plusRecommended</a:documentation>
         <choice>
           <value>onlyRequired</value>
           <value>plusRecommended</value>
