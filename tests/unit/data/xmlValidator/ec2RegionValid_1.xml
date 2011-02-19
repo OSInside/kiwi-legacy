@@ -3,7 +3,7 @@
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
-		<specification>openSUSE 11.3 ec2 guest system</specification>
+		<specification>test ec2region specification</specification>
 	</description>
 	<preferences>
 		<version>1.1.2</version>

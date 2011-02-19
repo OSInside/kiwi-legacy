@@ -2299,7 +2299,7 @@ div {
 	k.packages.profiles.attribute = k.profiles.attribute
 	k.packages.patternType.attribute =
 		## Selection type for patterns. Could be onlyRequired
-		## plusSuggested or plusRecommended
+		## or plusRecommended
 		attribute patternType {
 			"onlyRequired" | "plusRecommended"
 		}

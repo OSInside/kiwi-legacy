@@ -305,6 +305,101 @@ sub __checkFilesysSpec {
 }
 
 #==========================================
+# __checkPatternTypeAttrConsistent
+#------------------------------------------
+sub __checkPatternTypeAttrConsistent {
+	# ...
+	# Check that the values for the patternType attribute do not conflict.
+	# If all <packages> sections use profiles attributes the patternType
+	# attribute value may be different for all <packages> sections. However,
+	# if a default <packages> section exists, i.e. no profiles attribute
+	# is used, then all patternType attribute values must be the same as
+	# the value set for the default profile.
+	# ---
+	my $this = shift;
+	my @pkgsNodes = $this->{systemTree} -> getElementsByTagName("packages");
+	my $defPatternTypeVal = '';
+	my $defPackSection;
+	# Check if a <packages> spec without a profiles attribute exists
+	for my $pkgs (@pkgsNodes) {
+		if ( (! $pkgs -> getAttribute( "profiles" ))
+			&& ($pkgs -> getAttribute( "type" ) eq 'image')) {
+			$defPackSection = $pkgs;
+			my $patternType = $pkgs -> getAttribute( "patternType" );
+			if ($patternType) {
+				$defPatternTypeVal = $patternType;
+			} else {
+				$defPatternTypeVal = 'onlyRequired';
+			}
+			last;
+		}
+	}
+	# Set up a hash for specified profiles for packages, if a profile is used
+	# multiple times, the value of patternType must be the same for eac use
+	my %profPatternUseMap = ();
+	for my $pkgs (@pkgsNodes) {
+		my $profiles = $pkgs -> getAttribute( "profiles" );
+		if ($profiles) {
+			my @profNames = split /,/, $profiles;
+			my $patternType = $pkgs -> getAttribute( "patternType" );
+			if (! $patternType) {
+				$patternType = 'onlyRequired';
+			}
+			for my $profName (@profNames) {
+				if (! grep /$profName/, (keys %profPatternUseMap) ) {
+					$profPatternUseMap{$profName} = $patternType;
+				} elsif ( $profPatternUseMap{$profName} ne $patternType) {
+					my $kiwi = $this->{kiwi};
+					my $msg = 'Conflicting patternType attribute values for "'
+					. $profName
+					. '" profile found.';
+					$kiwi -> error ( $msg );
+					$kiwi -> failed ();
+					return undef
+				}
+			}
+		}
+	}
+	if (! $defPackSection) {
+		# No default <packages> section exists, no additional checking
+		# required
+		return 1;
+	}
+	for my $pkgs (@pkgsNodes) {
+		if ($pkgs != $defPackSection) {
+			my $patternType = $pkgs -> getAttribute( "patternType" );
+			if ($patternType && $patternType ne $defPatternTypeVal) {
+				my $kiwi = $this->{kiwi};
+				my $msg = 'The specified value "'
+				. $patternType
+				. '" for the patternType attribute differs from the '
+				. 'specified default value: "'
+				. $defPatternTypeVal
+				. '".';
+				$kiwi -> error ( $msg );
+				$kiwi -> failed ();
+				return undef
+			}
+			my $type = $pkgs -> getAttribute( "type" );
+			if (! $patternType
+				&& $type ne 'bootstrap'
+				&& $type ne 'delete'
+				&& $defPatternTypeVal ne 'onlyRequired') {
+				my $kiwi = $this->{kiwi};
+				my $msg = 'The patternType attribute was omitted, but the '
+				. 'base <packages> specification requires "'
+				. $defPatternTypeVal
+				. '" the values must match.';
+				$kiwi -> error ( $msg );
+				$kiwi -> failed ();
+				return undef
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkPatternTypeAttrUse
 #------------------------------------------
 sub __checkPatternTypeAttrUse {
@@ -447,8 +542,9 @@ sub __checkReferencedProfDefined {
 				}
 			}
 			if (! $foundit) {
-				my $msg = "Found reference to profile $profile "
-				. 'but this profile does not exist.';
+				my $msg = 'Found reference to profile "'
+                  . $profile
+				  . '" but this profile is not defined.';
 				$kiwi -> error ($msg);
 				$kiwi -> failed ();
 				$status = undef;
@@ -631,6 +727,9 @@ sub __validateConsistency {
 		return undef;
 	}
 	if (! $this -> __checkPatternTypeAttrUse()) {
+		return undef;
+	}
+	if (! $this -> __checkPatternTypeAttrConsistent()) {
 		return undef;
 	}
 	if (! $this -> __checkPostDumpAction()) {

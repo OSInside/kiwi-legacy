@@ -3,8 +3,11 @@
     <description type="system">
         <author>Robert Schweikert</author>
         <contact>rschweikert@novell.com</contact>
-        <specification>Test configuration of multiple NICs</specification>
+        <specification>test profiles reference</specification>
     </description>
+    <profiles>
+        <profile name="ola" description="a test profile"/>
+    </profiles>
     <preferences>
         <type image="vmx" filesystem="ext4" boot="vmxboot/suse-11.3" format="vmdk">
             <machine memory="512">
@@ -24,7 +27,7 @@
         <user pwd="linux" pwdformat="plain" home="/root" name="root"/>
     </users>
     <repository type="yast2">
-        <source path="iso:///opt/isos/openSUSE-11.3-DVD-x86_64.iso"/>
+        <source path="opensuse://11.3/repo/oss/"/>
     </repository>
     <packages type="image">
         <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
@@ -33,6 +36,9 @@
         <package name="ifplugd"/>
         <package name="vim"/>
         <opensusePattern name="base"/>
+    </packages>
+    <packages type="image" profiles="ola">
+        <package name="yast2"/>
     </packages>
     <packages type="bootstrap">
         <package name="filesystem"/>

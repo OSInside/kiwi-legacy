@@ -3,7 +3,7 @@
     <description type="system">
         <author>Robert Schweikert</author>
         <contact>rschweikert@novell.com</contact>
-        <specification>openSUSE 11.3 oem test missing filesystem attr</specification>
+        <specification>test missing filesystem attr</specification>
     </description>
     <preferences>
         <type image="oem" boot="oemboot/suse-11.3" installiso="true" installboot="install">
@@ -24,7 +24,7 @@
         <user pwd="linux" pwdformat="plain" home="/root" name="root"/>
     </users>
     <repository type="yast2">
-        <source path="iso:///opt/isos/openSUSE-11.3-DVD-x86_64.iso"/>
+        <source path="opensuse://11.3/repo/oss/"/>
     </repository>
     <packages type="image" patternType="plusRecommended">
         <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>

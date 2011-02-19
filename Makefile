@@ -162,6 +162,7 @@ test:
 	#============================================
 	# Run unit tests...
 	#--------------------------------------------
+	tests/unit/cleanup.sh
 	for i in `find tests/unit -name "*.t"`;do \
 		perl $$i ;\
 	done

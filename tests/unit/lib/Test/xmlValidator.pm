@@ -357,6 +357,53 @@ sub test_oemPostDump {
 }
 
 #==========================================
+# test_patternTattrConsistent
+#------------------------------------------
+sub test_patternTattrConsistent {
+	# ...
+	# Test that the patternType attribute consistency criteria is
+	# properly enforced.
+	# ---
+	my $this = shift;
+	my @invalidConfigs = $this -> __getInvalidFiles('patternTattrCons');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $kiwi = $this -> {kiwi};
+		my $msg = $kiwi -> getMessage();
+		my $expectedMsg;
+		if ($iConfFile =~ /patternTattrConsInvalid_1.xml/) {
+			$expectedMsg = 'Conflicting patternType attribute values for '
+			. '"my-second" profile found.';
+		} elsif ($iConfFile =~ /patternTattrConsInvalid_2.xml/) {
+			$expectedMsg = 'Conflicting patternType attribute values for '
+			. '"my-first" profile found.';
+		} elsif ($iConfFile =~ /patternTattrConsInvalid_3.xml/) {
+			$expectedMsg = 'The specified value "plusRecommended" for the '
+			. 'patternType attribute differs from the specified default '
+			. 'value: "onlyRequired".';
+		} elsif ($iConfFile =~ /patternTattrConsInvalid_4.xml/) {
+			$expectedMsg = 'The patternType attribute was omitted, but the '
+			. 'base <packages> specification requires "plusRecommended" '
+			. 'the values must match.';
+		} else {
+			# Force a test failure, there is no generic message in this test
+			# stream
+			$expectedMsg = 'ola';
+		}
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('patternTattrCons');
+	$this -> __verifyValid(@validConfigs);
+}
+
+#==========================================
 # test_patternTattrUse
 #------------------------------------------
 sub test_patternTattrUse {
@@ -435,13 +482,13 @@ sub test_profileReferenceExist {
 		$validator -> validate();
 		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
-		my $expectedMsg = 'Found reference to profile ';
+		my $expectedMsg = 'Found reference to profile "';
 		if ($iConfFile =~ /profileReferenceExistInvalid_(1|2).xml/) {
 			$expectedMsg .= 'ec2Flavour';
 		} elsif ($iConfFile =~ /profileReferenceExistInvalid_(3|4).xml/) {
 			$expectedMsg .= 'ola';
 		}
-		$expectedMsg .= ' but this profile does not exist.';
+		$expectedMsg .= '" but this profile is not defined.';
 		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
 		$this -> assert_str_equals('error', $msgT);
