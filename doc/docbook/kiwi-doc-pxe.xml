@@ -225,7 +225,7 @@ IMAGE=/dev/sda2;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096</screen>
       <para>The following format is used: </para>
 
       <screen>IMAGE=device;name;version;srvip;bsize;compressed,...,
-CONF=src;dest;srvip;bsize,...,src;dest;srvip;bsize
+CONF=src;dest;srvip;bsize;[hash],...,src;dest;srvip;bsize;[hash]
 PART=size;id;Mount,...,size;id;Mount
 DISK=device</screen>
 
@@ -301,7 +301,76 @@ DISK=device</screen>
               configuration files. The source (src) corresponds to the
               path on the TFTP server and is loaded via TFTP. The
               download is made to the file on the netboot client
-              indicated by the target (dest). </para>
+              indicated by the target (dest). Download only happens when
+	      configuration files are missing on the client or, if md5sum hash
+	      is supplied ([hash]), when different. To achieve this, list of
+	      CONF files (and VENDOR_CONF) files is kept on the client in
+	      the <filename>/etc/KIWI/InstalledConfigFiles</filename> backup file, and
+              is compared to the CONF data gathered from the config.MAC and also
+	      from other configuration files, e.g. config.group, if supplied.
+              Configuration files selected for comparison are those with
+	      same (dest) path. If destination path (dest) is same for more configuration
+	      files, only the last one is used (and VENDOR_CONF has always
+	      precedence to CONF). By comparing configuration file lists
+	      present in the current CONF, VENDOR_CONF variables and stored in
+	      the backup file, following actions can result:
+
+<table id="tab.configuration.files.synchronization">
+      <title>Configuration files synchronization possibilities</title>
+      <tgroup cols="3">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="1*"/>
+        <colspec colwidth="1*"/>
+        <thead>
+          <row>
+            <entry>cfg file in CONF,VENDOR_CONF</entry>
+            <entry>cfg file in InstalledConfigFiles backup</entry>
+            <entry>action</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>hash_a</entry>
+            <entry>hash_a</entry>
+            <entry>nothing, keep</entry>
+          </row>
+          <row>
+            <entry>hash_a</entry>
+            <entry>hash_b</entry>
+            <entry>download from server</entry>
+          </row>
+          <row>
+            <entry>none</entry>
+            <entry>hash</entry>
+            <entry>download from server</entry>
+          </row>
+          <row>
+            <entry>hash</entry>
+            <entry>none</entry>
+            <entry>download from server</entry>
+          </row>
+          <row>
+            <entry>none</entry>
+            <entry>none</entry>
+            <entry>nothing, keep</entry>
+          </row>
+          <row>
+            <entry>present</entry>
+            <entry>not present</entry>
+            <entry>download from server (regardless hash)</entry>
+          </row>
+          <row>
+            <entry>not present</entry>
+            <entry>present</entry>
+            <entry>delete on client (regardles hash)</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+    Note that actual configuration files (or their md5sum hashes) on the client machine are not tested, only data from the backup file are used. This means that
+    actual configuration files can be altered or even deleted without triggering any action, or, on the other hand, an action can be triggered without modifying the
+    configuration files, only by modifying or removing of the backup file.
+    </para>
           </listitem>
         </varlistentry>
         <varlistentry>
