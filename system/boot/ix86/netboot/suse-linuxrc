@@ -289,7 +289,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 13) Check for installed system
+# 12) Check for installed system
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 	if [ ! -z "$RAID" ];then
@@ -765,28 +765,89 @@ fi
 #--------------------------------------
 runHook preconfig
 if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
-	mkdir -p /config
+	if test ! -z $RELOAD_CONFIG;then
+		Echo "Configuration files reload forced via RELOAD_CONFIG..."
+	fi
 	#=======================================
-	# 17.1) Get files from CONF, VENDOR_CONF
+	# 17.1) Import files from backup
 	#---------------------------------------
-	IFS="," ; for i in $CONF $VENDOR_CONF;do
+	BCFG_BASE='etc/KIWI'
+	BCFG_NAME='InstalledConfigFiles'
+	if [ -s "/mnt/$BCFG_BASE/$BCFG_NAME" ] ;then
+		importFile 'BK_' </mnt/$BCFG_BASE/$BCFG_NAME
+	fi
+	ALL_CCONF=`condenseConfigData "$CONF,$VENDOR_CONF"`
+	ALL_CBK_CONF=`condenseConfigData "$BK_CONF,$BK_VENDOR_CONF"`
+	#=======================================
+	# 17.2) Store new configuration
+	#---------------------------------------
+	mkdir  /config
+	mkdir -p  /config/$BCFG_BASE
+	cp "$CONFIG" "/config/$BCFG_BASE/config.$DHCPCHADDR"
+	echo "CONF=$CONF"               >  "/config/$BCFG_BASE/$BCFG_NAME"
+	echo "VENDOR_CONF=$VENDOR_CONF" >> "/config/$BCFG_BASE/$BCFG_NAME"
+	#=======================================
+	# 17.3) Get files from CONF, VENDOR_CONF
+	#---------------------------------------
+	IFS="," ; for i in $ALL_CCONF;do
+		unset configHash
 		field=0
-		IFS=";" ; for n in $i;do
+		IFS=";"; for n in $i;do
 		case $field in
 			0) configSource=$n ; field=1 ;;
 			1) configDest=$n   ; field=2 ;;
 			2) configServer=$n ; field=3 ;;
-			3) configBlkSize=$n;
+			3) configBlkSize=$n; field=4 ;;
+			4) configHash=$n   ; field=5
 		esac
 		done
-		Echo "Import configuration file: $configDest"
-		dirs=`dirname  $configDest`
-		mkdir -p /config/$dirs
-		fetchFile $configSource /config/$configDest uncomp $configServer
+		# /.../
+		# compare new config data to backup config data
+		# ----
+		cfg_copy=1
+		cfgmsg_why='(forced)'
+		if test -z $RELOAD_CONFIG;then
+			cfgmsg_why='(missing)'
+			IFS=","; for j in $ALL_CBK_CONF;do
+				BKconfigDest=`echo "$j" | cut -d ';' -f 2`
+				BKconfigHash=`echo "$j" | cut -d ';' -f 5`
+				if [ "$BKconfigDest" = "$configDest" ];then
+					cfgmsg_why='(changed)'
+					if [ "$configHash" = "$BKconfigHash" ];then
+						cfg_copy=0
+					fi
+					break
+				fi
+			done
+		fi
+		if [ $cfg_copy -eq '1' ];then
+			Echo "Importing $cfgmsg_why configuration file: $configDest"
+			dirs=`dirname  $configDest`
+			mkdir -p /config/$dirs
+			fetchFile $configSource /config/$configDest uncomp $configServer
+		fi
+	done
+	#=======================================
+	# 17.4) check config files to be deleted
+	#---------------------------------------
+	IFS="," ; for i in $ALL_CBK_CONF;do
+		BKconfigDest=`echo "$i" | cut -d ';' -f 2`
+		deletethis=1
+		IFS=","; for j in $ALL_CCONF;do
+			configDest=`echo "$j" | cut -d ';' -f 2`
+			if [ "$BKconfigDest" = "$configDest" ];then
+				deletethis=0
+				break
+			fi
+		done
+		if [ "$deletethis" -eq '1' ];then
+			Echo "Deleting obsolete configuration file: $BKconfigDest"
+			rm /mnt/$BKconfigDest
+		fi
 	done
 	IFS=$IFS_ORIG
 	#=======================================
-	# 17.2) Check for KIWI_INITRD
+	# 17.5) Check for KIWI_INITRD
 	#---------------------------------------
 	if [ $haveDisk = "1" ] && [ $systemIntegrity = "clean" ];then
 		if [ ! -z "$KIWI_INITRD" ];then

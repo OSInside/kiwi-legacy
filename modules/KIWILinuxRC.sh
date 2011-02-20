@@ -216,6 +216,7 @@ function importFile {
 	# ----
 	IFS="
 	"
+	local prefix=$1 #change name of key with a prefix
 	while read line;do
 		echo $line | grep -qi "^#" && continue
 		key=`echo "$line" | cut -d '=' -f1`
@@ -226,8 +227,8 @@ function importFile {
 		if ! echo $item | grep -E -q "^(\"|')";then
 			item="'"$item"'"
 		fi
-		Debug "$key=$item"
-		eval export "$key\=$item"
+		Debug "$prefix$key=$item"
+		eval export "$prefix$key\=$item"
 	done
 	if [ ! -z "$ERROR_INTERRUPT" ];then
 		Echo -e "$ERROR_INTERRUPT"
@@ -245,16 +246,48 @@ function unsetFile {
 	# ----
 	IFS="
 	"
+	local prefix=$1 #change name of key with a prefix
 	while read line;do
 		echo $line | grep -qi "^#" && continue
 		key=`echo "$line" | cut -d '=' -f1`
 		if [ -z "$key" ];then
 			continue
 		fi
-		Debug "unset $key"
-		eval unset "$key"
+		Debug "unset $prefix$key"
+		eval unset "$prefix$key"
 	done
 	IFS=$IFS_ORIG
+}
+#======================================
+# condenseConfigData
+#--------------------------------------
+function condenseConfigData {
+	# /.../
+	# if multiple same config files (config files with same deployment path)
+	# are present on the CONF line,
+	# only last one will be kept (this preserves compatibility)
+	# ----
+	IFS=","
+	local conf=( $1 )
+	local cconf
+	local sep=''
+	for (( i=0; i<${#conf[@]}; i++ ));do
+		local configDest=`echo "${conf[$i]}" | cut -d ';' -f 2`
+		if test ! -z $configDest;then
+			local copythis=1
+			for (( j=i+1; j<${#conf[@]}; j++ ));do
+				local cmpconfigDest=`echo "${conf[$j]}" | cut -d ';' -f 2`
+				if [ "$cmpconfigDest" = "$configDest" ];then
+					copythis=0
+					break
+				fi
+			done
+			[ $copythis -eq '1' ] && cconf="${cconf}${sep}${conf[$i]}"
+			sep=$IFS
+		fi
+	done
+	IFS=$IFS_ORIG
+	echo "$cconf"
 }
 #======================================
 # systemException
