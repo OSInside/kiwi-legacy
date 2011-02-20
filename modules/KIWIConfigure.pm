@@ -295,7 +295,7 @@ sub setupUsersGroups {
 				return undef;
 			}
 			$kiwi -> done ();
-			if (defined $home) {
+			if ((defined $home) && (-d "$root/$home")) {
 				$kiwi -> info("Setting owner/group permissions $user [$group]");
 				$data = qxx ( "chroot $root chown -R $user:$group $home 2>&1" );
 				$code = $? >> 8;
