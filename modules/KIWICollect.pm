@@ -645,6 +645,9 @@ sub mainTask
       $checkmedia = "checkmedia" if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK"))
                                       && $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") ne "0"
                                       && $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") ne "false" );
+      my $hybridmedia;
+      $hybridmedia = 1 if ( defined($this->{m_proddata}->getVar("RUN_ISOHYBRID"))
+                            && $this->{m_proddata}->getVar("RUN_ISOHYBRID") eq "true" );
 
       $iso = new KIWIIsoLinux( $this->{m_logger},
                                $this->{m_basesubdir}->{$cd},
@@ -664,6 +667,15 @@ sub mainTask
       }
       else {
         $this->logMsg("I", "Created Iso image <$isoname>");
+      }
+      if ($hybridmedia) {
+        if(!$iso->createHybrid()) {
+          $this->logMsg("E", "Isohybrid call failed");
+          return 1;
+        }
+        else {
+          $this->logMsg("I", "Isohybrid call successful");
+        }
       }
       if(!$iso->checkImage()) {
         $this->logMsg("E", "Tagmedia call failed");

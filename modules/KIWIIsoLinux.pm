@@ -751,7 +751,8 @@ sub createHybrid {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $data = qxx ("isohybrid -id $mbrid -type 0x83 $iso 2>&1");
+	my $data = qxx ("isohybrid $iso 2>&1");
+	$data = qxx ("isohybrid -id $mbrid -type 0x83 $iso 2>&1") if $mbrid;
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call isohybrid: $data");
