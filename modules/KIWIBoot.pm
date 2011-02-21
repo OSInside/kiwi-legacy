@@ -618,6 +618,7 @@ sub setupInstallCD {
 	my $lvm       = $this->{lvm};
 	my $xml       = $this->{xml};
 	my $md5name   = $system;
+	my $destdir   = dirname ($initrd);
 	my $gotsys    = 1;
 	my $volid     = "-V \"KIWI CD/DVD Installation\"";
 	my $bootloader= "grub";
@@ -626,14 +627,12 @@ sub setupInstallCD {
 	my $tmpdir;
 	my %type;
 	my $haveDiskDevice;
-	my $destdir;
 	my $version;
 	#==========================================
 	# Check for disk device
 	#------------------------------------------
 	if (-b $system) {
 		$haveDiskDevice = $system;
-		$destdir = dirname ($initrd);
 		$version = $xml -> getImageVersion();
 		$system  = $xml -> getImageName();
 		$system  = $destdir."/".$system.".".$arch."-".$version.".raw";
@@ -814,6 +813,52 @@ sub setupInstallCD {
 		return undef;
 	}
 	#==========================================
+	# Check for optional config-cdroot archive
+	#------------------------------------------
+	my $cdrootData = "config-cdroot.tgz";
+	if (-f "$destdir/$cdrootData") {
+		$kiwi -> info ("Integrating CD root information...");
+		$status= qxx (
+			"tar -C $tmpdir -xvf $destdir/$cdrootData"
+		);
+		$result= $? >> 8;
+		qxx ("rm -f $destdir/$cdrootData");
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to integrate CD root data: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done();
+	}
+	#==========================================
+	# Check for optional config-cdroot.sh
+	#------------------------------------------
+	my $cdrootScript = "config-cdroot.sh";
+	if (-x "$destdir/$cdrootScript") {
+		$kiwi -> info ("Calling CD root setup script...");
+		my $pwd = qxx ("pwd"); chomp $pwd;
+		my $script = "$destdir/$cdrootScript";
+		if ($script !~ /^\//) {
+			$script = $pwd."/".$script;
+		}
+		$status = qxx (
+			"cd $tmpdir && bash -c $script 2>&1"
+		);
+		$result = $? >> 8;
+		qxx ("rm -f $script");
+		if ($result != 0) {
+			chomp $status;
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to call CD root script: $status");
+			$kiwi -> failed ();
+			return undef;
+		} else {
+			$kiwi -> loginfo ("config-cdroot.sh: $status");
+		}
+		$kiwi -> done();
+	}
+	#==========================================
 	# Copy system image if given
 	#------------------------------------------
 	if ($gotsys) {
@@ -929,6 +974,7 @@ sub setupInstallStick {
 	my $irdsize   = main::isize ($initrd);
 	my $diskname  = $system.".install.raw";
 	my $md5name   = $system;
+	my $destdir   = dirname ($initrd);
 	my %deviceMap = ();
 	my @commands  = ();
 	my $gotsys    = 1;
@@ -936,7 +982,6 @@ sub setupInstallStick {
 	my $haveDiskDevice;
 	my $status;
 	my $result;
-	my $destdir;
 	my $version;
 	my $tmpdir;
 	my %type;
@@ -946,7 +991,6 @@ sub setupInstallStick {
 	#------------------------------------------
 	if (-b $system) {
 		$haveDiskDevice = $system;
-		$destdir = dirname ($initrd);
 		$version = $xml -> getImageVersion();
 		$system  = $xml -> getImageName();
 		$system  = $destdir."/".$system.".".$arch."-".$version.".raw";
@@ -1290,6 +1334,52 @@ sub setupInstallStick {
 	}
 	main::umount();
 	$kiwi -> done();
+	#==========================================
+	# Check for optional config-cdroot archive
+	#------------------------------------------
+	my $cdrootData = "config-cdroot.tgz";
+	if (-f "$destdir/$cdrootData") {
+		$kiwi -> info ("Integrating CD root information...");
+		$status= qxx (
+			"tar -C $loopdir -xvf $destdir/$cdrootData"
+		);
+		$result= $? >> 8;
+		qxx ("rm -f $destdir/$cdrootData");
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to integrate CD root data: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done();
+	}
+	#==========================================
+	# Check for optional config-cdroot.sh
+	#------------------------------------------
+	my $cdrootScript = "config-cdroot.sh";
+	if (-x "$destdir/$cdrootScript") {
+		$kiwi -> info ("Calling CD root setup script...");
+		my $pwd = qxx ("pwd"); chomp $pwd;
+		my $script = "$destdir/$cdrootScript";
+		if ($script !~ /^\//) {
+			$script = $pwd."/".$script;
+		}
+		$status = qxx (
+			"cd $loopdir && bash -c $script 2>&1"
+		);
+		$result = $? >> 8;
+		qxx ("rm -f $script");
+		if ($result != 0) {
+			chomp $status;
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to call CD root script: $status");
+			$kiwi -> failed ();
+			return undef;
+		} else {
+			$kiwi -> loginfo ("config-cdroot.sh: $status");
+		}
+		$kiwi -> done();
+	}
 	#==========================================
 	# Copy system image if defined
 	#------------------------------------------

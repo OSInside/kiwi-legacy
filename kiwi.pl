@@ -723,6 +723,20 @@ sub main {
 			qxx ("rm -f $tree/recovery.*");
 		}
 		#==========================================
+		# Check for optional config-cdroot archive
+		#------------------------------------------
+		qxx ("rm -f $Destination/config-cdroot.tgz");
+		if (-f "$tree/image/config-cdroot.tgz") {
+			qxx ("mv $tree/image/config-cdroot.tgz $Destination");
+		}
+		#==========================================
+		# Check for optional config-cdroot.sh
+		#------------------------------------------
+		qxx ("rm -f $Destination/config-cdroot.sh");
+		if (-f "$tree/image/config-cdroot.sh") {
+			qxx ("mv $tree/image/config-cdroot.sh $Destination");
+		}
+		#==========================================
 		# Update .profile env, current type
 		#------------------------------------------
 		$kiwi -> info ("Updating type in .profile environment");
