@@ -741,6 +741,8 @@ sub createHybrid {
 	my $mbrid= shift;
 	my $kiwi = $this->{kiwi};
 	my $iso  = $this->{dest};
+	my $data;
+	my $code;
 	my $loop;
 	my $FD;
 	#==========================================
@@ -751,9 +753,12 @@ sub createHybrid {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $data = qxx ("isohybrid $iso 2>&1");
-	$data = qxx ("isohybrid -id $mbrid -type 0x83 $iso 2>&1") if $mbrid;
-	my $code = $? >> 8;
+	if ($mbrid) {
+		$data = qxx ("isohybrid -id $mbrid -type 0x83 $iso 2>&1");
+	} else {
+		$data = qxx ("isohybrid $iso 2>&1");
+	}
+	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call isohybrid: $data");
 		$kiwi -> failed ();
