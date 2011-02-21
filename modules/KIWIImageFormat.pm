@@ -350,18 +350,6 @@ sub createEC2 {
 	my $tmpdir;
 	my $FD;
 	#==========================================
-	# Check for Amazon EC2 toolkit
-	#------------------------------------------
-	my $locator = new KIWILocator($kiwi);
-	my $bundleCmd = $locator -> getExecPath ('ec2-bundle-image');
-	if (! $bundleCmd ) {
-		$kiwi -> error (
-			"Couldn't find ec2-bundle-image; required to create EC2 image"
-		);
-		$kiwi -> failed ();
-		return undef
-	}
-	#==========================================
 	# Import AWS region kernel map
 	#------------------------------------------
 	my %ec2RegionKernelMap;
@@ -390,35 +378,35 @@ sub createEC2 {
 	my %ec2  = $xml->getEc2Config();
 	my $have_account = 1;
 	if (! defined $ec2{AWSAccountNr}) {
-		$kiwi -> warning  ("Missing AWS account number");
-		$kiwi -> skipped ();
+		$kiwi->warning ("Missing AWS account number");
+		$kiwi->skipped ();
 		$have_account = 0;
 	}
 	if (! defined $ec2{EC2CertFile}) {
-		$kiwi -> warning  ("Missing AWS user's PEM encoded RSA pubkey cert file");
-		$kiwi -> skipped ();
+		$kiwi->warning ("Missing AWS user's PEM encoded RSA pubkey cert file");
+		$kiwi->skipped ();
 		$have_account = 0;
 	} elsif (! -f $ec2{EC2CertFile}) {
-		$kiwi -> warning  ("EC2 file: $ec2{EC2CertFile} does not exist");
-		$kiwi -> skipped ();
+		$kiwi->warning ("EC2 file: $ec2{EC2CertFile} does not exist");
+		$kiwi->skipped ();
 		$have_account = 0;
 	}
 	if (! defined $ec2{EC2PrivateKeyFile}) {
-		$kiwi -> warning ("Missing AWS user's PEM encoded RSA private key file");
-		$kiwi -> skipped ();
+		$kiwi->warning ("Missing AWS user's PEM encoded RSA private key file");
+		$kiwi->skipped ();
 		$have_account = 0;
 	} elsif (! -f $ec2{EC2PrivateKeyFile}) {
-		$kiwi -> warning  ("EC2 file: $ec2{EC2PrivateKeyFile} does not exist");
-		$kiwi -> skipped ();
+		$kiwi->warning ("EC2 file: $ec2{EC2PrivateKeyFile} does not exist");
+		$kiwi->skipped ();
 		$have_account = 0;
 	}
 	if ($arch =~ /i.86/) {
 		$arch = "i386";
 	}
 	if (($arch ne "i386") && ($arch ne "x86_64")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Unsupport AWS EC2 architecture: $arch");
-		$kiwi -> failed ();
+		$kiwi->failed ();
+		$kiwi->error  ("Unsupport AWS EC2 architecture: $arch");
+		$kiwi->failed ();
 		return undef;
 	}
 	#==========================================
@@ -601,10 +589,27 @@ sub createEC2 {
 	# call ec2-bundle-image (Amazon toolkit)
 	#------------------------------------------
 	if ($have_account == 0) {
-		$kiwi -> warning ("EC2 bundle creation skipped due to missing credentials");
-		$kiwi -> skipped ();
+		$kiwi->warning (
+			"EC2 bundle creation skipped due to missing credentials"
+		);
+		$kiwi->skipped ();
 		return $source;
 	}
+	#==========================================
+	# Check for Amazon EC2 toolkit
+	#------------------------------------------
+	my $locator = new KIWILocator($kiwi);
+	my $bundleCmd = $locator -> getExecPath ('ec2-bundle-image');
+	if (! $bundleCmd ) {
+		$kiwi -> error (
+			"Couldn't find ec2-bundle-image; required to create EC2 image"
+		);
+		$kiwi -> failed ();
+		return undef
+	}
+	#==========================================
+	# Create bundle(s)
+	#------------------------------------------
 	my $pk = $ec2{EC2PrivateKeyFile};
 	my $ca = $ec2{EC2CertFile};
 	my $nr = $ec2{AWSAccountNr};
