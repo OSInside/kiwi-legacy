@@ -11,7 +11,7 @@ all:
 	./.locale
 	for i in `ls -1 .`; do \
 		if [ -d ./$$i ];then \
-			if [ ! "$$i" = "kiwi-help" ] && [ ! "$$i" == "kiwi-template" ];then \
+			if [ ! "$$i" = "kiwi-help" ] && [ ! "$$i" = "kiwi-template" ];then \
 				( cd ./$$i/${LC}  && msgfmt -o kiwi.mo kiwi.po ) ;\
 			fi \
 		fi \
@@ -21,7 +21,7 @@ all:
 install:
 	for i in `ls -1 .`; do \
 		if [ -d ./$$i ];then \
-		if [ ! "$$i" = "kiwi-help" ] && [ ! "$$i" == "kiwi-template" ];then \
+		if [ ! "$$i" = "kiwi-help" ] && [ ! "$$i" = "kiwi-template" ];then \
 		install -d -m 755 ${KIWILOCVZ}/$$i/${LC} ;\
 		test -e ./$$i/${LC}/kiwi.mo && \
 			install -m 644 ./$$i/${LC}/kiwi.mo ${KIWILOCVZ}/$$i/${LC} || true ;\
