@@ -506,6 +506,28 @@ sub __checkPreferencesDefinition {
 }
 
 #==========================================
+# __checkProfileNames
+#------------------------------------------
+sub __checkProfileNames {
+	# ...
+	# Check that a profile name does not contain whitespace.
+	# ---
+	my $this = shift;
+	my @profiles = $this->{systemTree} -> getElementsByTagName('profile');
+	for my $prof (@profiles) {
+		my $name = $prof -> getAttribute('name');
+		if ($name =~ /\s/) {
+			my $kiwi = $this -> {kiwi};
+			my $msg = 'Name of a profile may not contain whitespace.';
+			$kiwi -> error ($msg);
+			$kiwi -> failed();
+			return undef;
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkReferencedProfDefined
 #------------------------------------------
 sub __checkReferencedProfDefined {
@@ -543,7 +565,7 @@ sub __checkReferencedProfDefined {
 			if (! $foundit) {
 				my $msg = 'Found reference to profile "'
 				. $profile
-				  . '" but this profile is not defined.';
+				. '" but this profile is not defined.';
 				$kiwi -> error ($msg);
 				$kiwi -> failed ();
 				$status = undef;
@@ -735,6 +757,9 @@ sub __validateConsistency {
 		return undef;
 	}
 	if (! $this -> __checkPreferencesDefinition()) {
+		return undef;
+	}
+	if (! $this -> __checkProfileNames()) {
 		return undef;
 	}
 	if (! $this -> __checkReferencedProfDefined()) {

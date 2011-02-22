@@ -468,6 +468,33 @@ sub test_preferenceUnique {
 }
 
 #==========================================
+# test_profileName
+#------------------------------------------
+sub test_profileName {
+	# ...
+	# Test that the profile name convention is enforced properly.
+	# ---
+	my $this = shift;
+	my @invalidConfigs = $this -> __getInvalidFiles('profileName');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $kiwi = $this -> {kiwi};
+		my $msg = $kiwi -> getMessage();
+		my $expectedMsg = 'Name of a profile may not contain whitespace.';
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('profileName');
+	$this -> __verifyValid(@validConfigs);
+}
+
+#==========================================
 # test_profileReferenceExist
 #------------------------------------------
 sub test_profileReferenceExist {
