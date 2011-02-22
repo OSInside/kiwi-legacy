@@ -175,12 +175,10 @@ sub closeSegment {
 	}
 	return unless $this->{OWNER} == $$;  # avoid dup dealloc
 	if (! shmctl($this->{SHMKEY}, IPC_RMID, 0)) {
-		$kiwi -> warning ("shmctl RMID: $!");
-		$kiwi -> skipped ();
+		$kiwi -> loginfo ("shmctl RMID: $!\n");
 	}
 	if (! $this->{SEMA}->remove()) {
-		$kiwi -> warning ("sema->remove: $!");
-		$kiwi -> skipped ();
+		$kiwi -> loginfo ("sema->remove: $!\n");
 	}
 	return $this;
 }
