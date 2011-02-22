@@ -335,7 +335,7 @@ sub __checkPatternTypeAttrConsistent {
 		}
 	}
 	# Set up a hash for specified profiles for packages, if a profile is used
-	# multiple times, the value of patternType must be the same for eac use
+	# multiple times, the value of patternType must be the same for each use
 	my %profPatternUseMap = ();
 	for my $pkgs (@pkgsNodes) {
 		my $profiles = $pkgs -> getAttribute( "profiles" );
@@ -409,15 +409,14 @@ sub __checkPatternTypeAttrUse {
 	# ---
 	my $this = shift;
 	my @pkgsNodes = $this->{systemTree} -> getElementsByTagName("packages");
-	my @allowedTypes = qw /bootstrap image/;
+	my @notAllowedTypes = qw /delete/;
 	for my $pkgs (@pkgsNodes) {
 		if ($pkgs -> getAttribute( "patternType" )) {
 			my $type = $pkgs -> getAttribute( "type");
-			if (! grep /$type/, @allowedTypes) {
+			if (grep /$type/, @notAllowedTypes) {
 				my $kiwi = $this->{kiwi};
-				my $msg = 'The patternType atribute may only be used for '
-				. '<packages> specification of type "bootstrap" and '
-				. 'type "image".';
+				my $msg = 'The patternType atribute is not allowed on a '
+				. "<packages> specification of type $type.";
 				$kiwi -> error ( $msg );
 				$kiwi -> failed ();
 				return undef
@@ -543,7 +542,7 @@ sub __checkReferencedProfDefined {
 			}
 			if (! $foundit) {
 				my $msg = 'Found reference to profile "'
-                  . $profile
+				. $profile
 				  . '" but this profile is not defined.';
 				$kiwi -> error ($msg);
 				$kiwi -> failed ();

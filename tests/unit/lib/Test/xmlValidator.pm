@@ -418,8 +418,8 @@ sub test_patternTattrUse {
 		$validator -> validate();
 		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
-		my $expectedMsg = 'The patternType atribute may only be used for '
-		. '<packages> specification of type "bootstrap" and type "image".';
+		my $expectedMsg = 'The patternType atribute is not allowed on a '
+		. '<packages> specification of type delete.';
 		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
 		$this -> assert_str_equals('error', $msgT);
