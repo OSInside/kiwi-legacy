@@ -346,7 +346,7 @@ sub __checkPatternTypeAttrConsistent {
 				$patternType = 'onlyRequired';
 			}
 			for my $profName (@profNames) {
-				if (! grep /$profName/, (keys %profPatternUseMap) ) {
+				if (! grep /^$profName$/, (keys %profPatternUseMap) ) {
 					$profPatternUseMap{$profName} = $patternType;
 				} elsif ( $profPatternUseMap{$profName} ne $patternType) {
 					my $kiwi = $this->{kiwi};
