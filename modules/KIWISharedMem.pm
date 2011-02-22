@@ -185,4 +185,12 @@ sub closeSegment {
 	return $this;
 }
 
+#==========================================
+# DESTRUCTOR
+#------------------------------------------
+sub DESTROY {
+	my $this = shift;
+	$this -> closeSegment();
+}
+
 1;
