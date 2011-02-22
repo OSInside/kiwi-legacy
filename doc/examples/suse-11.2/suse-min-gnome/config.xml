@@ -47,7 +47,6 @@
 		<package name="xorg-x11-server"/>
 		<opensusePattern name="base"/>
 	</packages>
-	<packages type="vmx"/>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
