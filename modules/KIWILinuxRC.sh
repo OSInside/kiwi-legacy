@@ -83,7 +83,7 @@ function Dialog {
 				--exit-label "$TEXT_EXIT" \
 				$@
 			echo \$? > /tmp/fbcode
-		EOF
+EOF
 		fbiterm -m $UFONT -- bash /tmp/fbcode
 		code=$(cat /tmp/fbcode)
 	else
