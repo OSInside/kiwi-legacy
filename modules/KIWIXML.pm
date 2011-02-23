@@ -113,6 +113,9 @@ sub new {
 	#------------------------------------------
 	my $locator = new KIWILocator($kiwi);
 	my $controlFile = $locator -> getControlFile ( $imageDesc );
+	if (! $controlFile) {
+		return undef;
+	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
