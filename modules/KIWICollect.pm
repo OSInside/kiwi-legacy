@@ -1598,7 +1598,10 @@ sub collectProducts
 
       # get all .prod files
       local *D;
-      opendir(D, $tmp."/etc/products.d/") || return ();
+      if (!opendir(D, $tmp."/etc/products.d/")) {
+        $this->logMsg("I", "No products found, skipping");
+        next RELEASEPACK;
+      }
       my @r = grep {$_ =~ '\.prod$'} readdir(D);
       closedir D;
 
