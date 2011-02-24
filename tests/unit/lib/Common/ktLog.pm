@@ -50,9 +50,10 @@ sub new {
 	#==========================================
 	# Stored Messages
 	#------------------------------------------
-	$this -> {errMsg}  = '';
-	$this -> {infoMsg} = '';
-	$this -> {warnMsg} = '';
+	$this -> {errMsg}     = '';
+	$this -> {infoMsg}    = '';
+	$this -> {logInfoMsg} = '';
+	$this -> {warnMsg}    = '';
 	#==========================================
 	# Stored State
 	#------------------------------------------
@@ -116,6 +117,10 @@ sub getMessage {
 	}
 	if ( $this -> {infoMsg} ) {
 		$msg = $this -> {infoMsg};
+		$msgCnt += 1;
+	}
+	if ( $this -> {logInfoMsg} ) {
+		$msg = $this -> {logInfoMsg};
 		$msgCnt += 1;
 	}
 	if ( $this -> {warnMsg} ) {
@@ -188,6 +193,18 @@ sub info {
 	return $this;
 }
 
+#==========================================
+# loginfo
+#------------------------------------------
+sub loginfo {
+	# ...
+	# Set the information message
+	# ---
+	my $this = shift;
+	$this -> {logInfoMsg} = shift;
+	$this -> {msgType} = 'info';
+	return $this;
+}
 
 #==========================================
 # skipped
@@ -238,9 +255,10 @@ sub __resetData {
 	# Reset object data
 	# ---
 	my $this = shift;
-	$this->{errMsg}  = '';
-	$this->{infoMsg} = '';
-	$this->{warnMsg} = '';
+	$this->{errMsg}     = '';
+	$this->{infoMsg}    = '';
+	$this->{logInfoMsg} = '';
+	$this->{warnMsg}    = '';
 	return $this;
 }
 

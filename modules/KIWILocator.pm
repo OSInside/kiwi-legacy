@@ -20,6 +20,7 @@ package KIWILocator;
 use strict;
 use warnings;
 require Exporter;
+use KIWILog;
 use KIWIQX;
 
 #==========================================
@@ -70,7 +71,6 @@ sub getControlFile {
 	my $this   = shift;
 	my $dir    = shift;
 	my $kiwi   = $this->{kiwi};
-	my $config = "$dir/" . $this->{configName};
 	if (! -d $dir) {
 		my $msg = "Expected a directory at $dir.\nSpecify a directory";
 		$msg .= ' as the configuration base.';
@@ -78,6 +78,7 @@ sub getControlFile {
 		$kiwi -> failed();
 		return undef;
 	}
+	my $config = "$dir/" . $this->{configName};
 	if (-f $config) {
 		return $config;
 	}
@@ -92,7 +93,7 @@ sub getControlFile {
 		for my $item (@globsearch) {
 			$msg .= "\t$item\n";
 		}
-		$kiwi -> errot ($msg);
+		$kiwi -> error ($msg);
 		$kiwi -> failed();
 		return undef;
 	} else {
