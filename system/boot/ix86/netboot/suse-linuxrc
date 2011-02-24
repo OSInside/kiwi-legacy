@@ -765,7 +765,7 @@ fi
 #--------------------------------------
 runHook preconfig
 if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
-	if test ! -z $RELOAD_CONFIG;then
+	if [ ! -z "$RELOAD_CONFIG" ];then
 		Echo "Configuration files reload forced via RELOAD_CONFIG..."
 	fi
 	#=======================================
@@ -806,7 +806,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 		# ----
 		cfg_copy=1
 		cfgmsg_why='(forced)'
-		if test -z $RELOAD_CONFIG;then
+		if [ -z "$RELOAD_CONFIG" ];then
 			cfgmsg_why='(missing)'
 			IFS=","; for j in $ALL_CBK_CONF;do
 				BKconfigDest=`echo "$j" | cut -d ';' -f 2`
