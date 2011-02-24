@@ -1076,7 +1076,6 @@ sub installPackages {
 	my @smart      = @{$this->{smart}};
 	my @zypper     = @{$this->{zypper}};
 	my @yum        = @{$this->{yum}};
-	my @ensconce   = @{$this->{ensconce}};
 	my $screenCall = $this->{screenCall};
 	#==========================================
 	# check addon packages
@@ -1152,20 +1151,12 @@ sub installPackages {
 	# ensconce
 	#------------------------------------------
 	if ($manager eq "ensconce") {
-		$kiwi -> info ("Installing addon packages...");
-		print $fd "function clean { kill \$SPID; ";
-		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
-		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
-		print $fd "c=\$((\$c+1));done;\n";
-		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
-		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
-		print $fd "trap clean INT TERM\n";
-		print $fd "@ensconce &\n";
-		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "ECODE=\$?\n";
-		print $fd "echo \$ECODE > $screenCall.exit\n";
-		print $fd "exit \$ECODE\n";
+		# FIXME
+		$kiwi -> failed ();
+		$kiwi -> error  ("*** not implemeted ***");
+		$kiwi -> failed ();
 		$fd -> close();
+		return undef;
 	}
 	#==========================================
 	# yum
@@ -1216,7 +1207,6 @@ sub removePackages {
 	my @smart      = @{$this->{smart}};
 	my @zypper     = @{$this->{zypper}};
 	my @yum        = @{$this->{yum}};
-	my @ensconce   = @{$this->{ensconce}};
 	my $screenCall = $this->{screenCall};
 	#==========================================
 	# check to be removed packages
@@ -1295,20 +1285,12 @@ sub removePackages {
 	# ensconce
 	#------------------------------------------
 	if ($manager eq "ensconce") {
-		$kiwi -> info ("Installing addon packages...");
-		print $fd "function clean { kill \$SPID; ";
-		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
-		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
-		print $fd "c=\$((\$c+1));done;\n";
-		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
-		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
-		print $fd "trap clean INT TERM\n";
-		print $fd "@ensconce &\n";
-		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "ECODE=\$?\n";
-		print $fd "echo \$ECODE > $screenCall.exit\n";
-		print $fd "exit \$ECODE\n";
+		# FIXME
+		$kiwi -> failed ();
+		$kiwi -> error  ("*** not implemeted ***");
+		$kiwi -> failed ();
 		$fd -> close();
+		return undef;
 	}
 	#==========================================
 	# yum
@@ -1354,7 +1336,6 @@ sub setupUpgrade {
 	my @smart      = @{$this->{smart}};
 	my @zypper     = @{$this->{zypper}};
 	my @yum        = @{$this->{yum}};
-	my @ensconce   = @{$this->{ensconce}};
 	my $screenCall = $this->{screenCall};
 	#==========================================
 	# setup screen call
@@ -1991,7 +1972,8 @@ sub setupRootSystem {
 	# ensconce
 	#------------------------------------------
 	if ($manager eq "ensconce") {
-		my $ensconce_args = "";
+		my $imagename = $xml -> getImageName();
+		my $ensconce_args = "-i $imagename";
 		if (! $chroot) {
 			#==========================================
 			# Setup baselibs
@@ -2005,7 +1987,7 @@ sub setupRootSystem {
 			#==========================================
 			# Ensconce options
 			#------------------------------------------
-			$ensconce_args = "-b";
+			$ensconce_args .= " -b";
 		}
 		if (! $chroot) {
 			$kiwi -> info ("Initializing image system on: $root...");
