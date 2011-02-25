@@ -3767,6 +3767,8 @@ function validateBlockSize {
 	# to the size of the image. The block size itself is also
 	# limited to 65464 bytes
 	# ----
+	local blkTest
+	local nBlk
 	if [ -z "$zblocks" ] && [ -z "$blocks" ];then
 		# md5 file not yet read in... skip
 		return
@@ -3776,15 +3778,16 @@ function validateBlockSize {
 	else
 		isize=`expr $blocks \* $blocksize`
 	fi
-	isize=`expr $isize / 65535`
-	if [ $isize -gt $imageBlkSize ];then
-		imageBlkSize=`expr $isize + 1024`
-	fi
-	if [ $imageBlkSize -gt 65464 ];then
-		systemException \
-			"Maximum blocksize for atftp protocol exceeded" \
-		"reboot"
-	fi
+	for blkTest in 32768 61440 65464 ; do
+		nBlk=`expr $isize / $blkTest`
+		if [ $nBlk -lt 65535 ] ; then
+			imageBlkSize=$blkTest
+			return
+		fi
+	done
+	systemException \
+		"Maximum blocksize for atftp protocol exceeded" \
+	"reboot"
 }
 #======================================
 # loadOK
