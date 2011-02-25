@@ -329,7 +329,7 @@ sub init {
 	#==================================
 	# Return early if cache is used
 	#----------------------------------
-	if (defined $main::ImageCache) {
+	if ((defined $main::ImageCache) || (defined $main::RecycleRoot)) {
 		return $this;
 	}
 	#==========================================

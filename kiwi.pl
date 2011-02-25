@@ -220,6 +220,7 @@ our $defaultAnswer;         # default answer to any questions
 our $targetDevice;          # alternative device instead of a loop device
 our %XMLChangeSet;          # internal data set for update of XML objects
 our $ImageDescription;      # uniq path to image description due to caller opts
+our $RecycleRoot;           # use existing root directory incl. contents
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -479,7 +480,7 @@ sub main {
 		#------------------------------------------
 		$root = new KIWIRoot (
 			$kiwi,$xml,$Prepare,$RootTree,
-			"/base-system",undef,undef,undef,
+			"/base-system",$RecycleRoot,undef,undef,
 			$CacheRoot,$CacheRootMode,
 			$TargetArch
 		);
@@ -1163,6 +1164,7 @@ sub init {
 	#------------------------------------------
 	my $result = GetOptions(
 		"version"               => \&version,
+		"recycle-root"          => \$RecycleRoot,
 		"targetdevice=s"        => \$targetDevice,
 		"v|verbose+"            => \$Verbosity,
 		"logfile=s"             => \$LogFile,
@@ -1241,6 +1243,12 @@ sub init {
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
+	#========================================
+	# check if recycle-root is used
+	#----------------------------------------
+	if (defined $RecycleRoot) {
+		$RecycleRoot = $RootTree;
+	}
 	#============================================
 	# check Partitioner according to device
 	#--------------------------------------------
