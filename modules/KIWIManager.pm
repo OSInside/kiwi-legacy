@@ -223,6 +223,11 @@ sub setupScreen {
 	$cd -> close();
 
 	#==========================================
+	# Global exports
+	#------------------------------------------
+	print $fd "export PBL_SKIP_BOOT_TEST=1"."\n";
+
+	#==========================================
 	# return screen call file handle
 	#------------------------------------------
 	return $fd;
@@ -772,8 +777,16 @@ sub setupInstallationSource {
 				$code = $? >> 8;
 			} else {
 				$kiwi -> info ("Adding chroot zypper service: $alias");
-				$data = qxx ("@kchroot @zypper $sadd 2>&1");
-				$code = $? >> 8;
+				$data = qxx ("@kchroot zypper --version 2>&1 | cut -c 8");
+				if ($data >= 1) {
+					$data = qxx ("@kchroot @zypper $sadd 2>&1");
+					$code = $? >> 8;
+				} else {
+					$kiwi -> skipped ();
+					$kiwi -> info ("image zypper version is too old");
+					$kiwi -> skipped ();
+					return $this;
+				}
 			}
 			if ($code != 0) {
 				$kiwi -> failed ();
@@ -1414,6 +1427,13 @@ sub setupUpgrade {
 		if ($pattr{patternType} ne "plusRecommended") {
 			push (@installOpts,"--no-recommends");
 		}
+		print $fd "ZV=\$(@kchroot zypper --version 2>&1 | cut -c 8)"."\n";
+		print $fd 'if [ $ZV = 0 ];then'."\n";
+		print $fd "\t".'echo "image zypper version is too old, upgrade skipped"'."\n";
+		print $fd "\t"."ECODE=0\n";
+		print $fd "\t"."echo \$ECODE > $screenCall.exit\n";
+		print $fd "\t"."exit \$ECODE\n";
+		print $fd "fi"."\n";
 		print $fd "function clean { kill \$SPID;";
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 

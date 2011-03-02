@@ -1,8 +1,5 @@
 Build instructions for local build
 ==================================
-* make sure you have the smart packagemanager installed
-  http://download.opensuse.org/repositories/smart
-
 * create a SLES10 installation source below /path/to/SLE10/repo
   tip: copy SLE10 DVD
 

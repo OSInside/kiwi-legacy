@@ -73,7 +73,7 @@ Source1:        %{name}-rpmlintrc
 Source2:        %{name}-docu.tar.bz2
 Source3:        %{name}-repo.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-Recommends:     smart zypper
+Recommends:     zypper
 
 %description
 The OpenSuSE KIWI Image System provides a complete operating system

@@ -57,13 +57,13 @@
 	<repository type="rpm-dir" status="fixed">
 		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle10-repo"/>
 	</repository>
-	<packages type="image" profiles="std">
+	<packages type="bootstrap" profiles="std">
 		<package name="kernel-default"/>
 	</packages>
-	<packages type="image" profiles="smp">
+	<packages type="bootstrap" profiles="smp">
 		<package name="kernel-smp"/>
 	</packages>
-	<packages type="image">
+	<packages type="bootstrap">
 		<package name="bc"/>
 		<package name="curl"/>
 		<package name="psmisc"/>
@@ -91,8 +91,6 @@
 		<package name="bootsplash"/>
 		<package name="tar"/>
 		<package name="cyrus-sasl"/>
-	</packages>
-	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc"/>
 		<package name="glibc-locale"/>
