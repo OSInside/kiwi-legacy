@@ -369,19 +369,22 @@ sub new {
 		}
 		if ($cmdlBytes > $sizeBytes) {
 			$sizeBytes = $cmdlBytes;
+			$vmsize = $sizeBytes;
 		} elsif ($sizeXMLBytes > $sizeBytes) {
 			$sizeBytes = $sizeXMLBytes;
+			$vmsize = $sizeBytes;
+		} else {
+			#==========================================
+			# Sum up system + kernel + initrd
+			#------------------------------------------
+			# /.../
+			# if system is a split system the vmsize will be
+			# adapted within the image creation function accordingly
+			# ----
+			my $kernelSize = main::isize ($kernel);
+			my $initrdSize = main::isize ($initrd);
+			$vmsize = $kernelSize + ($initrdSize * 1.5) + $sizeBytes;
 		}
-		#==========================================
-		# Sum up system + kernel + initrd
-		#------------------------------------------
-		# /.../
-		# if system is a split system the vmsize will be
-		# adapted within the image creation function accordingly
-		# ----
-		my $kernelSize = main::isize ($kernel);
-		my $initrdSize = main::isize ($initrd);
-		$vmsize = $kernelSize + ($initrdSize * 1.5) + $sizeBytes;
 		#==========================================
 		# Calculate required inode count for root
 		#------------------------------------------
