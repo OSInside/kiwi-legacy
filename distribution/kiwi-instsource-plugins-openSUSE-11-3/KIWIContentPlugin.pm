@@ -176,9 +176,11 @@ sub execute
     my $flavor = $coll->productData()->getVar("FLAVOR");
     my $ftpmode = ($flavor =~ m{ftp}i);
 
+    my %ftpcontentkeys = map {$_ => 1} qw{CONTENTSTYLE REPOID DESCRDIR DATADIR VENDOR};
+
     foreach my $i(sort { $a <=> $b } keys(%{$info})) {
       # ftp medias beside first one should get provide the product
-      if ( !$ftpmode || $cd eq "1" || $info->{$i}->[0] eq "CONTENTSTYLE" ) {
+      if ( !$ftpmode || $cd eq "1" || $ftpcontentkeys{$info->{$i}->[0]} ) {
         print CONT sprintf('%-*s %s', $len, $info->{$i}->[0], $info->{$i}->[1])."\n";
       }
     }
