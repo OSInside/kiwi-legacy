@@ -170,8 +170,17 @@ sub execute
       $len = ($l>$len)?$l:$len;
     }
     $len++;
+
+    # ftp media special mode ?
+    my $coll = $this->{m_collect};
+    my $flavor = $coll->productData()->getVar("FLAVOR");
+    my $ftpmode = ($flavor =~ m{ftp}i);
+
     foreach my $i(sort { $a <=> $b } keys(%{$info})) {
-      print CONT sprintf('%-*s %s', $len, $info->{$i}->[0], $info->{$i}->[1])."\n";
+      # ftp medias beside first one should get provide the product
+      if ( !$ftpmode || $cd eq "1" || $info->{$i}->[0] eq "CONTENTSTYLE" ) {
+        print CONT sprintf('%-*s %s', $len, $info->{$i}->[0], $info->{$i}->[1])."\n";
+      }
     }
     close(CONT);
 
