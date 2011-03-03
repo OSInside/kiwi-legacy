@@ -16,7 +16,7 @@
 	<xsl:choose>
 		<xsl:when test="$content = 'true'">
 			<systemdisk name="kiwiVG">
-			<volume name="/home" freespace="200M"/>
+				<volume name="/home" freespace="200M"/>
 			</systemdisk>
 		</xsl:when>
 		<xsl:otherwise>
@@ -59,13 +59,11 @@
 		<xsl:copy-of select="@*[not(local-name(.) = 'lvm')]"/>
 		<xsl:choose>
 			<xsl:when test="lvmvolumes">
+				<xsl:variable name="content"
+					select="translate(normalize-space(oemconfig/oem-home), 
+							&uppercase;, &lowercase;)"
+				/>
 				<xsl:choose>
-					<xsl:when test="oemconfig/oem-home">
-					<xsl:variable name="content"
-						select="translate(normalize-space(oemconfig/oem-home), 
-								&uppercase;, &lowercase;)"
-					/>
-					<xsl:choose>
 					<xsl:when test="$content = 'true'">
 						<xsl:apply-templates
 							select="*[not(self::lvmvolumes)]" mode="conv47to48"
@@ -74,8 +72,9 @@
 							mode="mode-volumes"
 						/>
 					</xsl:when>
-					</xsl:choose>
-					</xsl:when>
+					<xsl:otherwise>
+						<xsl:apply-templates mode="conv47to48"/>
+					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:when>
 			<xsl:otherwise>
