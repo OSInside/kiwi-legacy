@@ -482,7 +482,12 @@ sub test_profileName {
 		$validator -> validate();
 		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
-		my $expectedMsg = 'Name of a profile may not contain whitespace.';
+		my $expectedMsg ;
+		if ($iConfFile =~ /profileNameInvalid_2.xml/) {
+			$expectedMsg = 'Name of a profile may not be set to "all".';
+		} else {
+			$expectedMsg = 'Name of a profile may not contain whitespace.';
+		}
 		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
 		$this -> assert_str_equals('error', $msgT);

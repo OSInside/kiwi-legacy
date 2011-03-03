@@ -317,15 +317,15 @@ sub __checkPatternTypeAttrConsistent {
 	# the value set for the default profile.
 	# ---
 	my $this = shift;
-	my @pkgsNodes = $this->{systemTree} -> getElementsByTagName("packages");
+	my @pkgsNodes = $this->{systemTree} -> getElementsByTagName('packages');
 	my $defPatternTypeVal = '';
 	my $defPackSection;
 	# Check if a <packages> spec without a profiles attribute exists
 	for my $pkgs (@pkgsNodes) {
-		if ( (! $pkgs -> getAttribute( "profiles" ))
-			&& ($pkgs -> getAttribute( "type" ) eq 'image')) {
+		if ( (! $pkgs -> getAttribute( 'profiles' ))
+			&& ($pkgs -> getAttribute( 'type' ) eq 'image')) {
 			$defPackSection = $pkgs;
-			my $patternType = $pkgs -> getAttribute( "patternType" );
+			my $patternType = $pkgs -> getAttribute( 'patternType' );
 			if ($patternType) {
 				$defPatternTypeVal = $patternType;
 			} else {
@@ -338,10 +338,10 @@ sub __checkPatternTypeAttrConsistent {
 	# multiple times, the value of patternType must be the same for each use
 	my %profPatternUseMap = ();
 	for my $pkgs (@pkgsNodes) {
-		my $profiles = $pkgs -> getAttribute( "profiles" );
+		my $profiles = $pkgs -> getAttribute( 'profiles' );
 		if ($profiles) {
 			my @profNames = split /,/, $profiles;
-			my $patternType = $pkgs -> getAttribute( "patternType" );
+			my $patternType = $pkgs -> getAttribute( 'patternType' );
 			if (! $patternType) {
 				$patternType = 'onlyRequired';
 			}
@@ -367,7 +367,7 @@ sub __checkPatternTypeAttrConsistent {
 	}
 	for my $pkgs (@pkgsNodes) {
 		if ($pkgs != $defPackSection) {
-			my $patternType = $pkgs -> getAttribute( "patternType" );
+			my $patternType = $pkgs -> getAttribute( 'patternType' );
 			if ($patternType && $patternType ne $defPatternTypeVal) {
 				my $kiwi = $this->{kiwi};
 				my $msg = 'The specified value "'
@@ -380,7 +380,7 @@ sub __checkPatternTypeAttrConsistent {
 				$kiwi -> failed ();
 				return undef
 			}
-			my $type = $pkgs -> getAttribute( "type" );
+			my $type = $pkgs -> getAttribute( 'type' );
 			if (! $patternType
 				&& $type ne 'bootstrap'
 				&& $type ne 'delete'
@@ -510,7 +510,8 @@ sub __checkPreferencesDefinition {
 #------------------------------------------
 sub __checkProfileNames {
 	# ...
-	# Check that a profile name does not contain whitespace.
+	# Check that a profile name does not contain whitespace, and is not
+	# named "all". "all" has a special meaning in Kiwi :(
 	# ---
 	my $this = shift;
 	my @profiles = $this->{systemTree} -> getElementsByTagName('profile');
@@ -519,6 +520,13 @@ sub __checkProfileNames {
 		if ($name =~ /\s/) {
 			my $kiwi = $this -> {kiwi};
 			my $msg = 'Name of a profile may not contain whitespace.';
+			$kiwi -> error ($msg);
+			$kiwi -> failed();
+			return undef;
+		}
+		if ($name =~ /^all$/) {
+			my $kiwi = $this -> {kiwi};
+			my $msg = 'Name of a profile may not be set to "all".';
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
 			return undef;

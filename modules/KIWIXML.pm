@@ -30,6 +30,7 @@ use KIWILog;
 use KIWIManager qw (%packageManager);
 use KIWIOverlay;
 use KIWIQX;
+use KIWIURL;
 use KIWIXMLValidator;
 
 #==========================================
@@ -3334,8 +3335,8 @@ sub getNodeList {
 #------------------------------------------
 sub getPackageNodeList {
 	# ...
-	# Return the current <packages> list which consists
-	# of XML::LibXML::Element object pointers
+	# Return a list of all <packages> nodes. Each list member
+	# is an XML::LibXML::Element object pointer
 	# ---
 	my $this = shift;
 	return $this->{packageNodeList};
@@ -3990,6 +3991,27 @@ sub buildImageName {
 	}
 	chomp  $name;
 	return $name;
+}
+
+#==========================================
+# hasDefaultPackages
+#------------------------------------------
+sub hasDefaultPackages {
+	# ...
+	# Returns true if a <packages> element exists that
+	# has no profiles attribute.
+	# ---
+	my $this = shift;
+	for my $pkgs (@{$this->{packageNodeList} }) {
+		my $type = $pkgs -> getAttribute( 'type' );
+		if ($type eq 'image') {
+			my $profiles = $pkgs -> getAttribute ('profiles');
+			if (! $profiles) {
+				return 1;
+			}
+		}
+	}
+	return 0;
 }
 
 #==========================================
@@ -4884,6 +4906,11 @@ sub __populateImageTypeAndNode {
 	#==========================================
 	# check selection
 	#------------------------------------------
+	if (! $select) {
+		$kiwi -> error  ('Cannot determine build type');
+		$kiwi -> failed ();
+		return undef;
+	}
 	if (! $typeinfo->{$select}) {
 		$kiwi -> error  ("Can't find requested image type: $select");
 		$kiwi -> failed ();

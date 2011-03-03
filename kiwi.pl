@@ -32,6 +32,7 @@ use warnings;
 use Carp qw (cluck);
 use Getopt::Long;
 use File::Spec;
+use KIWICommandLine;
 use KIWIRoot;
 use KIWIXML;
 use KIWILocator;
@@ -41,6 +42,7 @@ use KIWIBoot;
 use KIWIMigrate;
 use KIWIOverlay;
 use KIWIQX;
+use KIWIRuntimeChecker;
 use KIWIImageFormat;
 use KIWIXMLValidator;
 
@@ -221,6 +223,7 @@ our $targetDevice;          # alternative device instead of a loop device
 our %XMLChangeSet;          # internal data set for update of XML objects
 our $ImageDescription;      # uniq path to image description due to caller opts
 our $RecycleRoot;           # use existing root directory incl. contents
+our $cmdL;                  # command line storage object
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -385,6 +388,10 @@ sub main {
 			$kiwi,$Prepare,undef,\@Profiles
 		);
 		if (! defined $xml) {
+			my $code = kiwiExit (1); return $code;
+		}
+		my $krc = new KIWIRuntimeChecker ($kiwi,$cmdL,$xml);
+		if (! $krc -> prepareChecks()) {
 			my $code = kiwiExit (1); return $code;
 		}
 		my %type = %{$xml->getImageTypeAndAttributes()};
@@ -580,6 +587,10 @@ sub main {
 			$kiwi,"$Create/image",$SetImageType,\@Profiles
 		);
 		if (! defined $xml) {
+			my $code = kiwiExit (1); return $code;
+		}
+		my $krc = new KIWIRuntimeChecker ($kiwi,$cmdL,$xml);
+		if (! $krc -> createChecks()) {
 			my $code = kiwiExit (1); return $code;
 		}
 		my %attr = %{$xml->getImageTypeAndAttributes()};
@@ -1159,6 +1170,7 @@ sub init {
 	$SIG{"TERM"}     = \&quit;
 	$SIG{"INT"}      = \&quit;
 	my $kiwi = new KIWILog("tiny");
+	$cmdL = new KIWICommandLine($kiwi);
 	#==========================================
 	# get options and call non-root tasks
 	#------------------------------------------
@@ -1260,6 +1272,7 @@ sub init {
 	#----------------------------------------
 	if (defined $Destination) {
 		$Destination = File::Spec->rel2abs ($Destination);
+		$cmdL -> setImagetargetDir ($Destination);
 	}
 	#========================================
 	# check prepare/create/cache paths
@@ -1287,6 +1300,7 @@ sub init {
 	#----------------------------------------
 	if (defined $Prepare) {
 		$ImageDescription = $Prepare;
+		$cmdL -> setConfigDir ($ImageDescription);
 	}
 	if (defined $Create) {
 		if (open FD,"$Create/image/main::Prepare") {
@@ -1297,6 +1311,7 @@ sub init {
 	# store original value of Profiles
 	#----------------------------------------
 	@ProfilesOrig = @Profiles;
+	$cmdL -> setBuildProfiles (\@Profiles);
 	#========================================
 	# set default inode ratio for ext2/3
 	#----------------------------------------
@@ -1442,9 +1457,14 @@ sub init {
 		$kiwi -> error  ("No destination directory specified");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
+	} elsif (defined $Build) {
+		$cmdL -> setTargetDirsForBuild();
 	}
 	if (defined $listXMLInfo) {
 		listXMLInfo();
+	}
+	if (defined $SetImageType) {
+		$cmdL -> setBuildType($SetImageType);
 	}
 }
 

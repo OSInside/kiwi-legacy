@@ -8,7 +8,7 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test implementation for the KIWILocato module.
+# DESCRIPTION   : Unit test implementation for the KIWILocator module.
 #               :
 # STATUS        : Development
 #----------------
@@ -42,7 +42,7 @@ sub new {
 #------------------------------------------
 sub test_ctor {
 	# ...
-	# Test the locator contructor, it has no error conditions, thus check
+	# Test the locator constructor, it has no error conditions, thus check
 	# the object construction.
 	# ---
 	my $this = shift;
@@ -232,9 +232,12 @@ sub test_getExecPerl {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __getLocator
+#------------------------------------------
 sub __getLocator {
 	# ...
-	# Helper function to create a KIWILocator object
+	# Helper method to create a KIWILocator object
 	# ---
 	my $this = shift;
 	my $locator = new KIWILocator ( $this -> {kiwi} );

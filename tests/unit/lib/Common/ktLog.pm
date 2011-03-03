@@ -102,6 +102,66 @@ sub failed {
 }
 
 #==========================================
+# getErrorMessage
+#------------------------------------------
+sub getErrorMessage {
+	# ...
+	# Retrieve the error message.
+	# In general the getMessage method should be used. However, under certain
+	# test conditions it is unavoidable to have multiple messages in the log
+	# object. For these rare occasions the log allows access to the specific
+	# message types directly.
+	# ---
+	my $this = shift;
+	return $this -> {errMsg};
+}
+
+#==========================================
+# getInfoMessage
+#------------------------------------------
+sub getInfoMessage {
+	# ...
+	# Retrieve the info message.
+	# In general the getMessage method should be used. However, under certain
+	# test conditions it is unavoidable to have multiple messages in the log
+	# object. For these rare occasions the log allows access to the specific
+	# message types directly.
+	# ---
+	my $this = shift;
+	return $this -> {infoMsg};
+}
+
+#==========================================
+# getLogInfoMessage
+#------------------------------------------
+sub getLogInfoMessage {
+	# ...
+	# Retrieve the loginfo message.
+	# In general the getMessage method should be used. However, under certain
+	# test conditions it is unavoidable to have multiple messages in the log
+	# object. For these rare occasions the log allows access to the specific
+	# message types directly.
+	# ---
+	my $this = shift;
+	return $this -> {logInfoMsg};
+}
+
+#==========================================
+# getWarningMessage
+#------------------------------------------
+sub getWarningMessage {
+	# ...
+	# Retrieve the error message.
+	# In general the getMessage method should be used. However, under certain
+	# test conditions it is unavoidable to have multiple messages in the log
+	# object. For these rare occasions the log allows access to the specific
+	# message types directly.
+	# ---
+	my $this = shift;
+	return $this -> {warnMsg};
+}
+
+#==========================================
 # getMessage
 #------------------------------------------
 sub getMessage {
@@ -132,6 +192,7 @@ sub getMessage {
 	}
 	if ( $msgCnt > 1 ) {
 		$msg = 'Log error: Multiple messages defined';
+		$this -> __printAllMessages();
 	}
 	return $msg;
 }
@@ -219,6 +280,17 @@ sub skipped {
 }
 
 #==========================================
+# storeXML
+#------------------------------------------
+sub storeXML {
+	# ...
+	# Dummy function, storing the XML has nothing really to do with logging
+	# but that's a discussion for another day.
+	my $this = shift;
+	return $this;
+}
+
+#==========================================
 # warning
 #------------------------------------------
 sub warning {
@@ -234,6 +306,36 @@ sub warning {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __printAllMessages
+#------------------------------------------
+sub __printAllMessages {
+	# ...
+	# Print all the messages that have been set.
+	# During testing it is expected that the state of the log object is
+	# such that only one message is set. To aid in test development and
+	# failure investigation it is useful when all messages that have been set
+	# get printed upon failure.
+	# ---
+	my $this = shift;
+	if ( $this -> {errMsg} ) {
+		my $msg = $this -> {errMsg};
+		print STDERR "Log set error message: $msg\n";
+	}
+	if ( $this -> {infoMsg} ) {
+		my $msg = $this -> {infoMsg};
+		print STDERR "Log set info message: $msg\n";
+	}
+	if ( $this -> {logInfoMsg} ) {
+		my $msg = $this -> {logInfoMsg};
+		print STDERR "Log set loginfo message: $msg\n";
+	}
+	if ( $this -> {warnMsg} ) {
+		my $msg = $this -> {warnMsg};
+		print STDERR "Log set warning message: $msg\n";
+	}
+}
+
 #==========================================
 # __reset
 #------------------------------------------
