@@ -2259,8 +2259,8 @@ div {
 		## the virtual guestOS identification string for the VM
 		attribute guestOS { text }
 	k.machine.memory.attribute =
-		## The memory setup for the guest VM.
-		attribute memory { text }
+		## The memory setup for the guest VM. Specify memory in MB
+		attribute memory { xsd:nonNegativeInteger }
 	k.machine.domain.attribute =
 		## The domain setup for the VM (xen only)
 		attribute domain { "dom0" | "domU" }
