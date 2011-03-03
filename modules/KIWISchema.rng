@@ -444,7 +444,7 @@ cert-*.pem</a:documentation>
         <a:documentation>Specify the region/availability zone</a:documentation>
         <db:para>Specify the region/availability zone in EC2 for this image.
 Values are limited to the EC2 recognized zones:
-AP-Singapore, EU-West, US-East, and US-West</db:para>
+AP-Japan, AP-Singapore, EU-West, US-East, and US-West</db:para>
         <ref name="k.ec2region.attlist"/>
         <text/>
       </element>
