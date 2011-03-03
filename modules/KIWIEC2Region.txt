@@ -1,6 +1,8 @@
 # /.../
 # Ec2 region table for correct Amazon kernel (aki) assignment
 # ----
+AP-Japan-i386=aki-d209a2d3
+AP-Japan-x86_64=aki-d409a2d5
 AP-Singapore-i386=aki-13d5aa41
 AP-Singapore-x86_64=aki-11d5aa43
 EU-West-i386=aki-4deec439

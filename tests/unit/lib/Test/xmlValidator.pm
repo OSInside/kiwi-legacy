@@ -276,11 +276,12 @@ sub test_ec2Regions {
 		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg;
+		my @supportedRegions=qw /AP-Japan AP-Singapore EU-West US-East US-West/;
 		if ( $iConfFile =~ 'ec2RegionInvalid_1.xml' ) {
 			$expectedMsg = 'Specified region EU-West not unique';
 		} else {
-			$expectedMsg = 'Only one of AP-Singapore EU-West US-East US-West '
-			. 'may be specified as ec2region';
+			$expectedMsg = "Only one of @supportedRegions may be specified "
+			. 'as ec2region';
 		}
 		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
