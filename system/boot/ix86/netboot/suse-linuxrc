@@ -294,6 +294,8 @@ fi
 if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 	if [ ! -z "$RAID" ];then
 		pxeRaidAssemble
+	else
+		pxeRaidZeroSuperBlock
 	fi
 	IMAGE_FIRST=$(echo $IMAGE | cut -f1 -d,)
 	for i in $IMAGE_FIRST;do

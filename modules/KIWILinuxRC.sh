@@ -6580,6 +6580,7 @@ function pxeRaidAssemble {
 	local count=0
 	local mdcount=0
 	local field=0
+	local devices
 	local IFS=";"
 	local raidFirst
 	local raidSecond
@@ -6596,14 +6597,43 @@ function pxeRaidAssemble {
 		raidFirst=$(ddn $raidDiskFirst $count)
 		raidSecond=$(ddn $raidDiskSecond $count)
 		if ! waitForStorageDevice $raidFirst;then
-			return
+			echo "Warning: device $raidFirst did not appear"
+		else
+			devices=$raidFirst
 		fi
 		if ! waitForStorageDevice $raidSecond;then
-			return
+			echo "Warning: device $raidSecond did not appear"
+		else
+			devices="$devices $raidSecond"
 		fi
-		mdadm --assemble /dev/md$mdcount \
-			$raidFirst $raidSecond
+		IFS=$IFS_ORIG
+		mdadm --assemble --run /dev/md$mdcount $devices
 		mdcount=$((mdcount + 1))
+	done
+}
+#======================================
+# pxeRaidZeroSuperBlock
+#--------------------------------------
+function pxeRaidZeroSuperBlock {
+	# /.../
+	# if we switch from a raid setup back to a non-raid
+	# setup and use the same partition table setup as before
+	# it might happen that the raid superblock survives.
+	# This function removes all raid super blocks from
+	# all partitions in the PART setup. If the partition
+	# layout is different compared to the former raid layout
+	# the superblock is not valid anymore
+	# ----
+	local count=1
+	local device
+	local IFS=","
+	for i in $PART;do
+		device=$(ddn $imageDiskDevice $count)
+		if ! waitForStorageDevice $device;then
+			continue
+		fi
+		mdadm --zero-superblock $device
+		count=$((count + 1))
 	done
 }
 #======================================
