@@ -2539,6 +2539,7 @@ sub getVMwareConfig {
 		$guest = $guestos{$guest}{$arch};
 	}
 	my $memory = $node -> getAttribute ("memory");
+	my $ncpus  = $node -> getAttribute ("ncpus");
 	#==========================================
 	# storage setup disk
 	#------------------------------------------
@@ -2586,6 +2587,7 @@ sub getVMwareConfig {
 	$result{vmware_hwver} = $hwver;
 	$result{vmware_guest} = $guest;
 	$result{vmware_memory}= $memory;
+	$result{vmware_ncpus} = $ncpus;
 	if ($disk) {
 		$result{vmware_disktype} = $type;
 		$result{vmware_diskid}   = $id;
@@ -2619,6 +2621,7 @@ sub getXenConfig {
 	# global setup
 	#------------------------------------------
 	my $memory = $node -> getAttribute ("memory");
+	my $ncpus  = $node -> getAttribute ("ncpus");
 	my $domain = $node -> getAttribute ("domain");
 	#==========================================
 	# storage setup
@@ -2656,6 +2659,7 @@ sub getXenConfig {
 		$result{xen_config} = \@vmConfigOpts
 	}
 	$result{xen_memory}= $memory;
+	$result{xen_ncpus} = $ncpus;
 	$result{xen_domain}= $domain;
 	if ($disk) {
 		$result{xen_diskdevice} = $device;

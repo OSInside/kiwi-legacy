@@ -2249,27 +2249,31 @@ div {
 # main block: <machine>
 #
 div {
-	k.machine.arch.attribute = 
-		## the VM architecture type
-		attribute arch { "ix86" | "x86_64" | "%arch" }
 	k.machine.HWversion.attribute =
 		## The virtual HW version number for the VM configuration
 		attribute HWversion { xsd:integer }
+	k.machine.arch.attribute =
+		## the VM architecture type
+		attribute arch { "ix86" | "x86_64" | "%arch" }
+	k.machine.domain.attribute =
+		## The domain setup for the VM (xen only)
+		attribute domain { "dom0" | "domU" }
 	k.machine.guestOS.attribute =
 		## the virtual guestOS identification string for the VM
 		attribute guestOS { text }
 	k.machine.memory.attribute =
 		## The memory setup for the guest VM. Specify memory in MB
 		attribute memory { xsd:nonNegativeInteger }
-	k.machine.domain.attribute =
-		## The domain setup for the VM (xen only)
-		attribute domain { "dom0" | "domU" }
+    k.machine.ncpus.attribute =
+        ## The number of virtual cpus for the guest VM
+        attribute ncpus { xsd:nonNegativeInteger }
 	k.machine.attlist =
-		k.machine.arch.attribute? &
 		k.machine.HWversion.attribute? &
+		k.machine.arch.attribute? &
+		k.machine.domain.attribute? &
 		k.machine.guestOS.attribute? &
 		k.machine.memory.attribute? &
-		k.machine.domain.attribute?
+		k.machine.ncpus.attribute?
 	k.machine =
 		## specifies the VM configuration sections
 		[

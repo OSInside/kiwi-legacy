@@ -725,10 +725,16 @@ sub createXENConfiguration {
 	$device =~ s/\/dev\///;
 	my $part = $device."1";
 	my $memory = $xenconfig{xen_memory};
+	my $ncpus  = $xenconfig{xen_ncpus};
 	$image .= ".".$format;
 	print $FD '#  -*- mode: python; -*-'."\n";
 	print $FD "name=\"".$this->{xml}->getImageDisplayName()."\"\n";
-	print $FD 'memory='.$memory."\n";
+	if ($memory) {
+		print $FD 'memory='.$memory."\n";
+	}
+	if ($ncpus) {
+		print $FD 'vcpus='.$ncpus."\n";
+	}
 	my $tap = $format;
 	if ($tap eq "raw") {
 		$tap = "aio";
@@ -834,7 +840,12 @@ sub createVMwareConfiguration {
 		print $FD 'virtualHW.version = "4"'."\n";
 	}
 	print $FD 'displayName = "'.$image.'"'."\n";
-	print $FD 'memsize = "'.$vmwconfig{vmware_memory}.'"'."\n";
+	if ($vmwconfig{vmware_memory}) {
+		print $FD 'memsize = "'.$vmwconfig{vmware_memory}.'"'."\n";
+	}
+	if ($vmwconfig{vmware_ncpus}) {
+		print $FD 'numvcpus = "'.$vmwconfig{vmware_ncpus}.'"'."\n";
+	}
 	print $FD 'guestOS = "'.$vmwconfig{vmware_guest}.'"'."\n";
 	#==========================================
 	# storage setup

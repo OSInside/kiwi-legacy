@@ -3205,6 +3205,12 @@ and setup the system disk</db:para>
     
   -->
   <div>
+    <define name="k.machine.HWversion.attribute">
+      <attribute name="HWversion">
+        <a:documentation>The virtual HW version number for the VM configuration</a:documentation>
+        <data type="integer"/>
+      </attribute>
+    </define>
     <define name="k.machine.arch.attribute">
       <attribute name="arch">
         <a:documentation>the VM architecture type</a:documentation>
@@ -3215,10 +3221,13 @@ and setup the system disk</db:para>
         </choice>
       </attribute>
     </define>
-    <define name="k.machine.HWversion.attribute">
-      <attribute name="HWversion">
-        <a:documentation>The virtual HW version number for the VM configuration</a:documentation>
-        <data type="integer"/>
+    <define name="k.machine.domain.attribute">
+      <attribute name="domain">
+        <a:documentation>The domain setup for the VM (xen only)</a:documentation>
+        <choice>
+          <value>dom0</value>
+          <value>domU</value>
+        </choice>
       </attribute>
     </define>
     <define name="k.machine.guestOS.attribute">
@@ -3232,22 +3241,22 @@ and setup the system disk</db:para>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
-    <define name="k.machine.domain.attribute">
-      <attribute name="domain">
-        <a:documentation>The domain setup for the VM (xen only)</a:documentation>
-        <choice>
-          <value>dom0</value>
-          <value>domU</value>
-        </choice>
+    <define name="k.machine.ncpus.attribute">
+      <attribute name="ncpus">
+        <a:documentation>The number of virtual cpus for the guest VM</a:documentation>
+        <data type="nonNegativeInteger"/>
       </attribute>
     </define>
     <define name="k.machine.attlist">
       <interleave>
         <optional>
+          <ref name="k.machine.HWversion.attribute"/>
+        </optional>
+        <optional>
           <ref name="k.machine.arch.attribute"/>
         </optional>
         <optional>
-          <ref name="k.machine.HWversion.attribute"/>
+          <ref name="k.machine.domain.attribute"/>
         </optional>
         <optional>
           <ref name="k.machine.guestOS.attribute"/>
@@ -3256,7 +3265,7 @@ and setup the system disk</db:para>
           <ref name="k.machine.memory.attribute"/>
         </optional>
         <optional>
-          <ref name="k.machine.domain.attribute"/>
+          <ref name="k.machine.ncpus.attribute"/>
         </optional>
       </interleave>
     </define>
