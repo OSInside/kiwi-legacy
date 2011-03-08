@@ -208,10 +208,14 @@ Requires:       multipath-tools parted
 %ifarch %ix86 x86_64
 Requires:       grub
 %endif
+%ifarch ppc ppc64 s390 s390x
+Requires:       virt-utils
+%else
 %if 0%{?suse_version} >= 1130
 Requires:       virt-utils
 %else
 Requires:       qemu
+%endif
 %endif
 Summary:        OpenSuSE - KIWI Image System Virtual Machine boot
 Group:          System/Management
