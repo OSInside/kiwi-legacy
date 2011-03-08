@@ -246,15 +246,19 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 %endif
 
-%ifarch %ix86 x86_64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
 
 %package -n kiwi-desc-oemboot
 License:        GPLv2
 Requires:       kiwi = %{version}
+%ifarch ppc ppc64 s390 s390x
+Requires:       virt-utils
+%else
 %if 0%{?suse_version} >= 1130
 Requires:       virt-utils
 %else
 Requires:       qemu
+%endif
 %endif
 Requires:       multipath-tools parted
 %ifarch %ix86 x86_64
@@ -490,7 +494,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/netboot/suse*
 %endif
 
-%ifarch %ix86 x86_64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
 
 %files -n kiwi-desc-oemboot
 %defattr(-, root, root)
