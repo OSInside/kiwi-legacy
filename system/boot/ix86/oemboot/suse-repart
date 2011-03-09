@@ -334,6 +334,10 @@ function OEMRepartLVM {
 	# p2: ( LVM  )  +luks
 	# -------------------------------------
 	#======================================
+	# check for boot partition
+	#--------------------------------------
+	createBootDeviceData 1
+	#======================================
 	# setup initial boot device ID
 	#--------------------------------------
 	export bootid=1
