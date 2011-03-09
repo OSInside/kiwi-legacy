@@ -18,6 +18,7 @@
 #======================================
 # Exports (General)
 #--------------------------------------
+export BOOTABLE_FLAG="$(echo -ne '\x80')"
 export ELOG_FILE=/var/log/boot.kiwi
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
@@ -2928,6 +2929,39 @@ function CDMountOption {
 	fi
 }
 #======================================
+# IsBootable
+#--------------------------------------
+function IsBootable {
+	# /.../
+	# params: device, partitionNumber
+	# checks whether a partition is marked as bootable or not
+	# ----
+	local offset
+	let offset="446 + 16 * (${2} - 1)"
+	local flag=$(dd "if=${1}" bs=1 count=1 skip=${offset} 2>/dev/null)
+	test "$flag" = "${BOOTABLE_FLAG}"
+}
+#======================================
+# GetBootable
+#--------------------------------------
+function GetBootable {
+	# /.../
+	# params: device
+	# print the number of the first bootable partition on the
+	# given block device. If no partition is flagged as bootable,
+	# it prints 1.
+	# ----
+	local partition
+	for (( partition = 1; partition <= 4; partition++ ));do
+		if IsBootable "${1}" "${partition}";then
+			echo "${partition}"
+			return
+		fi
+	done
+	# No bootable partition found, select the first one
+	echo "1"
+}
+#======================================
 # CDMount
 #--------------------------------------
 function CDMount {
@@ -3013,8 +3047,8 @@ function CDMount {
 				createHybridPersistent $biosBootDevice
 			fi
 		fi
-		Echo -n "Mounting hybrid live boot drive..."
-		cddev=$(ddn $biosBootDevice 1)
+		cddev=$(ddn "${biosBootDevice}" "$(GetBootable "${biosBootDevice}")")
+		Echo -n "Mounting hybrid live boot drive ${cddev}..."
 		kiwiMount "$cddev" "/cdrom" "-o ro"
 		if [ -f $LIVECD_CONFIG ];then
 			echo
