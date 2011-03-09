@@ -2,12 +2,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.76.1-RC1 <http://docbook.sf.net/>
-.\"      Date: Created: 03/02/2011
+.\"      Date: Created: 03/09/2011
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 4.80
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 03/02/2011" "KIWI 4\&.80" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 03/09/2011" "KIWI 4\&.80" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -365,6 +365,11 @@ When calling kiwi in creation mode this option will set the number of mounts aft
 [\fB\-\-fs\-check\-interval \fR\fB\fInumber\fR\fR ]
 .RS 4
 When calling kiwi in creation mode this option will set the maximal time between two filesystem checks\&. Set to 0 to disable time\-dependent checks\&. This option applies only to ext[234] filesystems\&.
+.RE
+.PP
+[\fB\-\-fat\-storage \fR\fB\fIsize in MB\fR\fR ]
+.RS 4
+if the syslinux bootlaoder is used this option allows to specify the size of the fat partition\&. This is useful if the fat space is not only used for booting the system but also for custom data\&. Therefore this option makes sense when building a USB stick image (image type: usb or oem)
 .RE
 .PP
 [\fB\-\-partitioner \fR\fB\fIparted|fdasd\fR\fR ]
