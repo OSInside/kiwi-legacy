@@ -765,6 +765,19 @@
 		</listitem>
 	</varlistentry>
 	<varlistentry>
+		<term><optional><option>--fat-storage <replaceable>size in MB</replaceable></option>
+		</optional></term>
+		<listitem>
+		<para>
+			if the syslinux bootlaoder is used this option allows to
+			specify the size of the fat partition. This is useful if
+			the fat space is not only used for booting the system but
+			also for custom data. Therefore this option makes sense
+			when building a USB stick image (image type: usb or oem)
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
         <term><optional><option>--partitioner <replaceable>parted|fdasd</replaceable></option>
         </optional></term>
         <listitem>

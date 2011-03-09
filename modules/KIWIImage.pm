@@ -903,6 +903,9 @@ sub createImageRootAndBoot {
 	if (($text ne "VMX") || ($stype{luks})) {
 		$treeAccess = 0;
 	}
+	if ($stype{lvm}) {
+		$treeAccess = 1;
+	}
 	#==========================================
 	# Walk through the types
 	#------------------------------------------

@@ -223,6 +223,7 @@ our $targetDevice;          # alternative device instead of a loop device
 our %XMLChangeSet;          # internal data set for update of XML objects
 our $ImageDescription;      # uniq path to image description due to caller opts
 our $RecycleRoot;           # use existing root directory incl. contents
+our $FatStorage;            # specify size of fat partition if syslinux is used
 our $cmdL;                  # command line storage object
 our $kiwi;                  # global logging handler object
 
@@ -642,7 +643,7 @@ sub main {
 		#==========================================
 		# Check tool set
 		#------------------------------------------
-		my $para = checkType ( \%attr,$Create );
+		my $para = checkType ( $xml,\%attr,$Create );
 		if (! defined $para) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -1241,6 +1242,7 @@ sub init {
 		"fs-inoderatio=i"       => \$FSInodeRatio,
 		"fs-max-mount-count=i"  => \$FSMaxMountCount,
 		"fs-check-interval=i"   => \$FSCheckInterval,
+		"fat-storage=i"         => \$FatStorage,
 		"partitioner=s"         => \$Partitioner,
 		"target-arch=s"         => \$TargetArch,
 		"check-kernel"          => \$CheckKernel,
@@ -1647,8 +1649,15 @@ sub usage {
 	print "      be checked for ext[234]. Set to 0 to disable checks.\n";
 	print "\n";
 	print "    [ --fs-check-interval <number> ]\n";
-	print "      Set the maximal time between two filesystem checks for ext[234].\n";
-	print "      Set to 0 to disable time-dependent checks.\n";
+	print "      Set the maximal time between two filesystem checks for\n";
+	print "      ext[234]. Set to 0 to disable time-dependent checks.\n";
+	print "\n";
+	print "    [ --fat-storage <size in MB> ]\n";
+	print "      if the syslinux bootlaoder is used this option allows to\n";
+	print "      specify the size of the fat partition. This is useful if\n";
+	print "      the fat space is not only used for booting the system but\n";
+	print "      also for custom data. Therefore this option makes sense\n";
+	print "      when building a USB stick image (image type: usb or oem)\n";
 	print "\n";
 	print "    [ --partitioner <parted|fdasd> ]\n";
 	print "      Select the tool to create partition tables. Supported are\n";
@@ -2352,15 +2361,31 @@ sub createHash {
 # checkType
 #------------------------------------------
 sub checkType {
-	my (%type) = %{$_[0]};
-	my $root   = $_[1];
+	my $xml    = $_[0];
+	my (%type) = %{$_[1]};
+	my $root   = $_[2];
 	my $para   = "ok";
-	#==========================================
-	# check for required filesystem tool(s)
-	#------------------------------------------
 	my $type  = $type{type};
 	my $flags = $type{flags};
 	my $fs    = $type{filesystem};
+	#==========================================
+	# check for required image attributes
+	#------------------------------------------
+	if (($type eq "usb") || (defined $main::FatStorage)) {
+		# /.../
+		# for the usb type or the implicit request via the
+		# option --fat-storage, we require syslinux as bootloader
+		# because it works better on USB sticks. Additionally
+		# we use LVM because it allows to better resize the
+		# stick
+		# ----
+		$xml -> __setTypeAttribute ("bootloader","syslinux");
+		$xml -> __setSystemDiskElement ();
+		$xml -> writeXMLDescription ($root);
+	}
+	#==========================================
+	# check for required filesystem tool(s)
+	#------------------------------------------
 	if (($flags) || ($fs)) {
 		my @fs = ();
 		if (($flags) && ($type eq "iso")) {
