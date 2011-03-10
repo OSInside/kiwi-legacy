@@ -560,7 +560,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		# kiwi boot system.
 		# ----
 		mountCalled=no
-		if [ -e "$imageRWDevice" ];then
+		if [ -e "$imageRWDevice" ] && blkid $imageRWDevice;then
 			kiwiMount $imageRWDevice "/mnt"
 			mountCalled=yes
 		fi
@@ -571,8 +571,13 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			fi
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
-			rm -f $initrd && ln -s initrd.vmx $initrd
-			rm -f $kernel && ln -s linux.vmx  $kernel
+			if [ "$loader" = "syslinux" ];then
+				rm -f $initrd && mv initrd.vmx initrd.1
+				rm -f $kernel && mv linux.vmx  linux.1
+			else
+				rm -f $initrd && ln -s initrd.vmx $initrd
+				rm -f $kernel && ln -s linux.vmx  $kernel
+			fi
 			break
 		done
 		IFS=$IFS_ORIG
