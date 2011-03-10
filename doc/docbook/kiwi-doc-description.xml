@@ -519,29 +519,6 @@
         </varlistentry>
         <varlistentry>
           <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
-              class="attvalue">usb</sgmltag>"</term>
-          <listitem>
-            <para>Use the usb value to create a USB stick image. Set the
-                <sgmltag class="attribute">filesystem</sgmltag>
-              attribute to the desired supported filesystem for the
-              image and use the <sgmltag class="attribute"
-                >boot</sgmltag>="<sgmltag class="attvalue"
-                >usbboot/suse-*</sgmltag>" attribute to select the USB
-              boot image for the system. For a USB image you may also
-              select GRUB or Syslinux as a bootloader by setting the
-              optional <sgmltag class="attribute">bootloader</sgmltag>
-              attribute to grub or syslinux, respectively. The boot timeout
-              value my be set by using the optional 
-              <sgmltag class="attribute">boottimeout</sgmltag> attribute.
-              The unit for the timeout value is seconds if GRUB is used
-              as the boot loader and 1/10 seconds if syslinux is used as
-              the boot loader. The USB image may also be created with LVM
-              support. The same rules as indicated for the OEM image
-              apply. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
               class="attvalue">vmx</sgmltag>"</term>
           <listitem>
             <para>Creation of a virtual disk system is enabled with the

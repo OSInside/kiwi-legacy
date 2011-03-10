@@ -30,28 +30,31 @@
     deploy an image on a USB stick. A USB stick is simply a removable
     physical storage device. </para>
 
-  <sect1 id="sec.oem.building">
+    <sect1 id="sec.oem.building">
     <title>Building the suse-oem-preload Example</title>
-    <para>The OEM example provided with kiwi is based on recent openSUSE
-      releases, one example configuration per release, and includes the
-      default and x11 patterns. The image type is a split type utilizing
-      the distributions default filesystem format for the read-write
-      partition and the <systemitem class="filesystem"
-        >squashfs</systemitem> filesystem for the read-only partition.
-      Using the additional <sgmltag class="attribute"
-        >installiso</sgmltag> attribute creates an installable ISO
-      image. When booting from the ISO image the OEM disk image will be
-      deployed to the storage media on the booting machine (after
-      confirmation by the user). </para>
 
-    <para>The commands provided below use the openSUSE 11.2 based
-      example built for the x86 architecture. </para>
+    <para>
+		The OEM example provided with kiwi is based on recent openSUSE
+		releases, one example configuration per release, and includes the
+		default and x11 patterns. The image type is a split type utilizing
+		the distributions default filesystem format for the read-write
+		partition and the <systemitem class="filesystem"
+		>squashfs</systemitem> filesystem for the read-only partition.
+		Using the additional <sgmltag class="attribute"
+		>installiso</sgmltag> attribute creates an installable ISO
+		image. When booting from the ISO image the OEM disk image will be
+		deployed to the storage media on the booting machine (after
+		confirmation by the user).
+	</para>
 
-    <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
-<command>cd</command> suse-11.2
-<command>kiwi</command> --prepare ./suse-oem-preload --root /tmp/myoem </screen>
-    <screen><command>kiwi</command> --create /tmp/myoem --type split -d /tmp/myoem-result</screen>
-  </sect1>
+<screen>
+<command>cd</command> /usr/share/doc/packages/kiwi/examples
+==> select the example directory for the desired distribution change into it
+<command>cd</command> suse-...
+<command>kiwi</command> --build ./suse-oem-preload -d /tmp/myoem-result --type split
+</screen>
+
+    </sect1>
 
   <sect1 id="sec.oem.using">
     <title>Using the Image</title>
@@ -67,16 +70,20 @@
       The following command shows how to use QEMU to test the OEM disk
       image (<filename>filename.raw</filename>). </para>
 
-    <screen><command>cd</command> /tmp/myoem-result 
-<command>qemu</command> suse-11.2-oem-preload.i686-1.1.2.raw -m 512</screen>
+<screen>
+<command>cd</command> /tmp/myoem-result 
+<command>qemu</command> suse-*-oem-preload.*.raw
+</screen>
 
     <para>or using the <command>dd</command> command you can dump the
       image onto a test hard disk or USB stick and upon reboot select
       the appropriate device as the boot device in the BIOS: </para>
 
-    <screen><command>cd</command> /tmp/myoem-result 
-<command>dd</command> if=suse-11.2-oem-preload.i686-1.1.2.raw<!-- 
---> of=/dev/<replaceable>device</replaceable> bs=32k</screen>
+<screen>
+<command>cd</command> /tmp/myoem-result 
+<command>dd</command> if=suse-*-oem-preload.*.raw<!-- 
+--> of=/dev/<replaceable>device</replaceable> bs=32k
+</screen>
 
     <para>Note, when testing an oem image using the virtual disk image,
       i.e. the <filename class="extension">.raw</filename> file, the
@@ -91,10 +98,12 @@
       be executed. The following commands show this procedure using
       QEMU. </para>
 
-    <screen><command>cd</command> /tmp/myoem-result 
+<screen>
+<command>cd</command> /tmp/myoem-result 
 <command>qemu-img</command> create /tmp/mydisk 20G 
 <command>qemu</command> -hda /tmp/mydisk<!-- 
---> -cdrom suse-11.2-oem-preload.i686-1.1.2.iso -boot d</screen>
+--> -cdrom suse-*-oem-preload.*.iso -boot d
+</screen>
 
   </sect1>
 
@@ -184,17 +193,15 @@
         control over the volume group and is free to change
         (resize/increase) the group and the volumes inside. Support for
         LVM has been added for all disk based image types. This includes
-        the vmx, oem and usb image types. In order to use LVM for the
-        oem type just add the <option>--lvm</option> command line option
-        when executing the create step or add the attribute <sgmltag
-          class="attribute">lvm</sgmltag>="<sgmltag class="attvalue"
-          >true</sgmltag>" to of the <sgmltag>type</sgmltag> element in
-        your <filename>config.xml</filename> file. </para>
+        the vmx and oem image types. In order to use LVM the existence
+        of a, at least empty, <sgmltag>systemdisk</sgmltag> section is
+        required.
+      </para>
 
       <screen><command>kiwi</command> --create /tmp/myoem --type oem<!-- 
       --> -d /tmp/myoem-result --lvm</screen>
 
-      <para>With the optional <sgmltag>systemdisk</sgmltag> section you
+      <para>With the <sgmltag>systemdisk</sgmltag> section you
         can specify to have one or more top level directories in a
         separate volume. See <xref linkend="chap.description"/> for a
         detailed explanation. </para>

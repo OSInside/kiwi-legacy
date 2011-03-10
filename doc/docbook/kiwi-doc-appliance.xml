@@ -54,16 +54,17 @@
       <step>
         <para>Prepare the preliminary version of your new appliance by
           calling <command>kiwi</command>
-          <option>--prepare</option>… and refer to
-          <xref linkend="chap.usb"/> for details. </para>
+          <option>--prepare</option>
+        </para>
       </step>
       <step>
         <para>Decide for a testing environment. In my opinion a real
           hardware based test machine which allows to boot from USB is a
-          good and fast approach. According to this make sure you have a
-          usb type in your <filename>config.xml</filename>
+          good and fast approach.
         </para>
-        <screen>&lt;type filesystem="ext3 boot="usbboot/suse-..."&gt;usb&lt;/type&gt;</screen>
+<screen>
+&lt;type image="iso" boot="isoboot/suse-..." flags="clic" hybrid="true"/&gt;
+</screen>
       </step>
       <step>
         <para>Create the preliminary live stick image of your new
@@ -71,9 +72,10 @@
           <option>--create</option>… After successful creation of the
           image files find an USB stick which is able to store your
           appliance and plug it into a free USB port on your image build
-          machine. Use the <command>kiwi</command>
-          <option>--bootstick</option>… call to deploy the image on the
-          stick. Refer to <xref linkend="chap.usb"/> for details. </para>
+          machine. The deployment can be performed from any
+          OS including Windows as long as a tool to dump data onto a disk
+          device exists and is used.
+        </para>
       </step>
       <step>
         <para>Plug in the stick on your test machine and boot it.

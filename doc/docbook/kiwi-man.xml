@@ -245,11 +245,6 @@
       attributes but it's also possible to call them manually.
     </para>    
     <cmdsynopsis><command>kiwi</command>
-      <arg choice="plain">--bootstick <replaceable>initrd</replaceable></arg>
-      <arg choice="opt">--bootstick-system <replaceable>systemImage</replaceable></arg>
-      <arg choice="opt">--bootstick-device <replaceable>device</replaceable></arg>
-    </cmdsynopsis>
-    <cmdsynopsis><command>kiwi</command>
       <arg choice="plain">--bootvm <replaceable>initrd</replaceable></arg>
       <arg choice="plain">--bootvm-system <replaceable>systemImage</replaceable></arg>
       <arg choice="opt">--bootvm-disksize <replaceable>size</replaceable></arg>

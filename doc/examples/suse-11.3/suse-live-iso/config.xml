@@ -27,6 +27,7 @@
 		<package name="kernel-default"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
+		<package name="yast2-firstboot"/>
 		<opensusePattern name="default"/>
 		<opensusePattern name="kde4"/>
 	</packages>
