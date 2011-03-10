@@ -1593,6 +1593,11 @@ sub setupBootDisk {
 	#------------------------------------------
 	if ($bootloader =~ /(sys|ext)linux/) {
 		$syslbootMB = 60;
+		if (defined $main::FatStorage) {
+			if ($syslbootMB < $main::FatStorage) {
+				$syslbootMB = $main::FatStorage;
+			}
+		}
 	}
 	#==========================================
 	# build disk name and label from xml data
@@ -1828,12 +1833,6 @@ sub setupBootDisk {
 				}
 				my $lvmsize = $this->{vmmbyte} - $syslbootMB;
 				my $bootpartsize = "+".$syslbootMB."M";
-				if (($bootloader eq "syslinux")&&(defined $main::FatStorage)) {
-					if ($syslbootMB < $main::FatStorage) {
-						$bootpartsize = "+".$main::FatStorage."M";
-						$lvmsize = $this->{vmmbyte} - $main::FatStorage;
-					}
-				}
 				@commands = (
 					"n","p","1",".",$bootpartsize,
 					"n","p","2",".",".",
