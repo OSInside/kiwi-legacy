@@ -2015,7 +2015,6 @@ to keep data persistent over a reboot</a:documentation>
           <value>reiserfs</value>
           <value>split</value>
           <value>squashfs</value>
-          <value>usb</value>
           <value>vmx</value>
           <value>xfs</value>
         </choice>
@@ -3310,7 +3309,6 @@ virtual machine when running the image.</db:para>
           <value>pxe</value>
           <value>split</value>
           <value>testsuite</value>
-          <value>usb</value>
           <value>vmx</value>
         </choice>
       </attribute>

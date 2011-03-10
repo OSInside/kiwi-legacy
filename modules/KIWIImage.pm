@@ -889,9 +889,6 @@ sub createImageRootAndBoot {
 		$type = $1;
 		$boot = $2;
 	}
-	if (! defined $text) {
-		$text = "USB";
-	}
 	if ((! defined $type) || (! defined $boot)) {
 		$kiwi -> error  ("Invalid $text type specified: $para");
 		$kiwi -> failed ();
@@ -1897,10 +1894,10 @@ sub createImageSplit {
 	# ...
 	# Create all split images and the specified boot image which
 	# should be used in combination to this split image. The process
-	# requires a subsequent action which could be either a kiwi call
-	# to create a vmx/oemboot based virtual disk or an usbboot based
-	# USB stick or the created images needs to copied into a PXE boot
-	# structure for use with a netboot setup.
+	# requires subsequent kiwi calls to create the vmx/oemboot
+	# required virtual disk images or the created images needs
+	# to be copied into a PXE boot structure for use with
+	# a netboot setup.
 	# ---
 	my $this = shift;
 	my $type = shift;

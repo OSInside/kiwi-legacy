@@ -180,25 +180,6 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 %endif
 
-%ifarch %ix86 x86_64
-
-%package -n kiwi-desc-usbboot
-License:        GPLv2+
-Requires:       kiwi = %{version}
-Summary:        OpenSuSE - KIWI Image System USB boot
-Group:          System/Management
-%if 0%{?suse_version} > 1120
-BuildArch:      noarch
-%endif
-
-%description -n kiwi-desc-usbboot
-kiwi boot (initrd) image for activating system images on USB stick
-
-Authors:
---------
-    Marcus Schaefer <ms@novell.com>
-%endif
-
 %ifarch %ix86 x86_64 s390 s390x
 
 %package -n kiwi-desc-vmxboot
@@ -478,15 +459,6 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image/vmxboot
 %doc %{_datadir}/kiwi/image/vmxboot/README
 %{_datadir}/kiwi/image/vmxboot/suse*
-%endif
-
-%ifarch %ix86 x86_64
-
-%files -n kiwi-desc-usbboot
-%defattr(-, root, root)
-%dir %{_datadir}/kiwi/image/usbboot
-%doc %{_datadir}/kiwi/image/usbboot/README
-%{_datadir}/kiwi/image/usbboot/suse*
 %endif
 
 %ifarch %ix86 x86_64

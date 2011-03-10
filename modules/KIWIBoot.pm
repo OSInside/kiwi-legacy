@@ -8,7 +8,7 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : This module is used to create a boot usb stick
+# DESCRIPTION   : This module is used to create a boot USB stick
 #               : or boot cd from a previously created initrd
 #               : image
 #               : 
@@ -108,9 +108,6 @@ sub new {
 	if (! defined $main::SetImageType) {
 		if ($initrd =~ /oemboot/) {
 			$main::SetImageType = "oem";
-		}
-		if ($initrd =~ /usbboot/) {
-			$main::SetImageType = "usb";
 		}
 		if ($initrd =~ /vmxboot/) {
 			$main::SetImageType = "vmx";
@@ -586,24 +583,6 @@ sub getRemovableUSBStorageDevices {
 		}
 	}
 	return %devices;
-}
-
-#==========================================
-# setupBootStick
-#------------------------------------------
-sub setupBootStick {
-	my $this   = shift;
-	#==========================================
-	# search for USB stick device(s)
-	#------------------------------------------
-	my $stick = $this -> searchUSBStickDevice ();
-	if (! $stick) {
-		return undef;
-	}
-	#==========================================
-	# run boot disk process on stick device
-	#------------------------------------------
-	return $this -> setupBootDisk ($stick);
 }
 
 #==========================================
@@ -2269,7 +2248,7 @@ sub setupBootDisk {
 	# cleanup temp directory
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
-	if (($haveDiskDevice) && ($imgtype ne "usb"))  {
+	if ($haveDiskDevice)  {
 		#==========================================
 		# create image file from disk device
 		#------------------------------------------
@@ -3088,7 +3067,7 @@ sub setupBootLoaderConfiguration {
 				print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 				print FD " cdinst=1 loader=$bloader";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/linux.vmx vga=$vga";
 				print FD " loader=$bloader splash=silent";
@@ -3100,7 +3079,7 @@ sub setupBootLoaderConfiguration {
 			print FD $cmdline;
 			if ($type =~ /^KIWI CD/) {
 				print FD " initrd (cd)/boot/initrd\n";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD " initrd /boot/initrd.vmx\n";
 			} else {
 				print FD " initrd /boot/initrd\n";
@@ -3111,7 +3090,7 @@ sub setupBootLoaderConfiguration {
 				print FD " module /boot/linux vga=$vga splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 				print FD " cdinst=1 loader=$bloader";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz.vmx\n";
 				print FD " module /boot/linux.vmx vga=$vga";
@@ -3125,7 +3104,7 @@ sub setupBootLoaderConfiguration {
 			print FD $cmdline;
 			if ($type =~ /^KIWI CD/) {
 				print FD " module (cd)/boot/initrd\n";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD " module /boot/initrd.vmx\n";
 			} else {
 				print FD " module /boot/initrd\n";
@@ -3141,7 +3120,7 @@ sub setupBootLoaderConfiguration {
 				print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 				print FD " cdinst=1 loader=$bloader";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/linux.vmx vga=$vga";
 				print FD " loader=$bloader splash=silent";
@@ -3155,7 +3134,7 @@ sub setupBootLoaderConfiguration {
 			print FD $cmdline;
 			if ($type =~ /^KIWI CD/) {
 				print FD " initrd (cd)/boot/initrd\n";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD " initrd /boot/initrd.vmx\n";
 			} else {
 				print FD " initrd /boot/initrd\n";
@@ -3166,7 +3145,7 @@ sub setupBootLoaderConfiguration {
 				print FD " module (cd)/boot/linux vga=$vga splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 				print FD " cdinst=1 loader=$bloader";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz.vmx\n";
 				print FD " module /boot/linux.vmx vga=$vga";
@@ -3182,7 +3161,7 @@ sub setupBootLoaderConfiguration {
 			print FD $cmdline;
 			if ($type =~ /^KIWI CD/) {
 				print FD " module (cd)/boot/initrd\n"
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD " module /boot/initrd.vmx\n"
 			} else {
 				print FD " module /boot/initrd\n";
@@ -3264,7 +3243,7 @@ sub setupBootLoaderConfiguration {
 				print FD "vga=$vga loader=$bloader splash=silent ";
 				print FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
 				print FD "cdinst=1";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD "kernel /boot/linux.vmx\n";
 				print FD "append initrd=/boot/initrd.vmx ";
 				print FD "vga=$vga loader=$bloader splash=silent";
@@ -3279,7 +3258,7 @@ sub setupBootLoaderConfiguration {
 				$kiwi -> error  ("*** syslinux: Xen cdinst not supported ***");
 				$kiwi -> failed ();
 				return undef;
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("*** syslinux: Xen boot not supported ***");
 				$kiwi -> failed ();
@@ -3312,7 +3291,7 @@ sub setupBootLoaderConfiguration {
 				print FD "vga=$vga loader=$bloader splash=silent ";
 				print FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
 				print FD "cdinst=1";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD "kernel /boot/linux.vmx\n";
 				print FD "append initrd=/boot/initrd.vmx ";
 				print FD "vga=$vga loader=$bloader splash=silent";
@@ -3329,7 +3308,7 @@ sub setupBootLoaderConfiguration {
 				$kiwi -> error  ("*** syslinux: Xen cdinst not supported ***");
 				$kiwi -> failed ();
 				return undef;
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("*** syslinux: Xen boot not supported ***");
 				$kiwi -> failed ();
@@ -3445,7 +3424,7 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> error  ("*** zipl: CD boot not supported ***");
 			$kiwi -> failed ();
 			return undef;
-		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 			print FD "\t"."image   = boot/linux.vmx"."\n";
 			print FD "\t"."target  = boot/zipl"."\n";
 			print FD "\t"."ramdisk = boot/initrd.vmx,0x2000000"."\n";
@@ -3469,7 +3448,7 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> error  ("*** zipl: CD boot not supported ***");
 			$kiwi -> failed ();
 			return undef;
-		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 			print FD "\t"."image   = boot/linux.vmx"."\n";
 			print FD "\t"."target  = boot/zipl"."\n";
 			print FD "\t"."ramdisk = boot/initrd.vmx,0x2000000"."\n";

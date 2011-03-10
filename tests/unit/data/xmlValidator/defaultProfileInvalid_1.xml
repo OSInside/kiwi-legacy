@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.1" name="suse-11.3-xen-guest">
+
+<image schemaversion="5.2" name="suse-11.3-xen-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -10,13 +11,13 @@
 		<profile name="ec2Flavour" description="VMX with default kernel" import="true"/>
 	</profiles>
 	<preferences>
-        <type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install"> 
-            <oemconfig> 
-                <oem-reboot>true</oem-reboot> 
-                <oem-swap>false</oem-swap> 
-                <oem-unattended>true</oem-unattended> 
-            </oemconfig> 
-        </type>
+		<type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
+			<oemconfig>
+				<oem-reboot>true</oem-reboot>
+				<oem-swap>false</oem-swap>
+				<oem-unattended>true</oem-unattended>
+			</oemconfig>
+		</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -45,7 +46,6 @@
 			</ec2config>
 		</type>
 	</preferences>
-
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>

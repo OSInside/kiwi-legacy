@@ -154,9 +154,6 @@ our $Destination;           # destination directory for logical extends
 our $LogFile;               # optional file name for logging
 our $RootTree;              # optional root tree destination
 our $Survive;               # if set to "yes" don't exit kiwi
-our $BootStick;             # deploy initrd booting from USB stick
-our $BootStickSystem;       # system image to be copied on an USB stick
-our $BootStickDevice;       # device to install stick image on
 our $BootVMSystem;          # system image to be copied on a VM disk
 our $BootVMDisk;            # deploy initrd booting from a VM 
 our $BootVMSize;            # size of virtual disk
@@ -823,10 +820,6 @@ sub main {
 				$ok = $image -> createImageSplit ( $para );
 				last SWITCH;
 			};
-			/^usb/      && do {
-				$ok = $image -> createImageRootAndBoot ( $para );
-				last SWITCH;
-			};
 			/^vmx/      && do {
 				$ok = $image -> createImageVMX ( $para );
 				last SWITCH;
@@ -1002,26 +995,6 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		$boot -> setupSplash();
-		undef $boot;
-		my $code = kiwiExit (0); return $code;
-	}
-
-	#==========================================
-	# Write a initrd/system image to USB stick
-	#------------------------------------------
-	if (defined $BootStick) {
-		$kiwi -> info ("Creating boot USB stick from: $BootStick...\n");
-		$boot = new KIWIBoot (
-			$kiwi,$BootStick,$BootStickSystem,undef,
-			$BootStickDevice,$LVM
-		);
-		if (! defined $boot) {
-			my $code = kiwiExit (1); return $code;
-		}
-		if (! $boot -> setupBootStick()) {
-			undef $boot;
-			my $code = kiwiExit (1); return $code;
-		}
 		undef $boot;
 		my $code = kiwiExit (0); return $code;
 	}
@@ -1210,10 +1183,7 @@ sub init {
 		"upgrade|u=s"           => \$Upgrade,
 		"destdir|d=s"           => \$Destination,
 		"root|r=s"              => \$RootTree,
-		"bootstick=s"           => \$BootStick,
 		"bootvm=s"              => \$BootVMDisk,
-		"bootstick-system=s"    => \$BootStickSystem,
-		"bootstick-device=s"    => \$BootStickDevice,
 		"bootvm-system=s"       => \$BootVMSystem,
 		"bootvm-disksize=s"     => \$BootVMSize,
 		"installcd=s"           => \$InstallCD,
@@ -1375,7 +1345,6 @@ sub init {
 		(! defined $Prepare)            &&
 		(! defined $Create)             &&
 		(! defined $InitCache)          &&
-		(! defined $BootStick)          &&
 		(! defined $InstallCD)          &&
 		(! defined $Upgrade)            &&
 		(! defined $SetupSplash)        &&
@@ -1433,11 +1402,6 @@ sub init {
 		$kiwi -> failed ();
 		$kiwi -> error ("--> 1) no such file or directory\n");
 		$kiwi -> error ("--> 2) and/or not in executable format\n");
-		my $code = kiwiExit (1); return $code;
-	}
-	if ((defined $BootStick) && (! defined $BootStickSystem)) {
-		$kiwi -> error ("USB stick setup must specify a bootstick-system");
-		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
 	if ((defined $BootVMDisk) && (! defined $BootVMSystem)) {
@@ -1509,8 +1473,6 @@ sub usage {
 	print "       [ --skip <package> --skip <...> ]\n";
 	print "       [ --nofiles --notemplate ]\n";
 	print "Image postprocessing modes:\n";
-	print "    kiwi --bootstick <initrd> --bootstick-system <systemImage>\n";
-	print "       [ --bootstick-device <device> ]\n";
 	print "    kiwi --bootvm <initrd> --bootvm-system <systemImage>\n";
 	print "       [ --bootvm-disksize <size> ]\n";
 	print "    kiwi --bootcd  <initrd>\n";
@@ -1653,11 +1615,13 @@ sub usage {
 	print "      ext[234]. Set to 0 to disable time-dependent checks.\n";
 	print "\n";
 	print "    [ --fat-storage <size in MB> ]\n";
-	print "      if the syslinux bootlaoder is used this option allows to\n";
-	print "      specify the size of the fat partition. This is useful if\n";
-	print "      the fat space is not only used for booting the system but\n";
-	print "      also for custom data. Therefore this option makes sense\n";
-	print "      when building a USB stick image (image type: usb or oem)\n";
+	print "      This option turns on the syslinux bootloader and makes\n";
+	print "      the image to use LVM for the operating system. The size\n";
+	print "      of the syslinux required bootpartition is set to the\n";
+	print "      specified value. This is useful if the fat space is not\n";
+	print "      only used for booting the system but also for custom\n";
+	print "      Therefore this option makes sense when building Windows\n";
+	print "      friendly USB stick images\n";
 	print "\n";
 	print "    [ --partitioner <parted|fdasd> ]\n";
 	print "      Select the tool to create partition tables. Supported are\n";
@@ -1688,7 +1652,7 @@ sub listImage {
 		if (-l "$System/$image") {
 			next;
 		}
-		if ($image =~ /(iso|net|oem|usb|vmx)boot/) {
+		if ($image =~ /(iso|net|oem|vmx)boot/) {
 			next;
 		}
 		my $controlFile = $locator -> getControlFile (
@@ -2371,13 +2335,12 @@ sub checkType {
 	#==========================================
 	# check for required image attributes
 	#------------------------------------------
-	if (($type eq "usb") || (defined $main::FatStorage)) {
+	if (defined $main::FatStorage) {
 		# /.../
-		# for the usb type or the implicit request via the
-		# option --fat-storage, we require syslinux as bootloader
-		# because it works better on USB sticks. Additionally
-		# we use LVM because it allows to better resize the
-		# stick
+		# if the option --fat-storage is set, we set syslinux
+		# as bootloader because it works better on USB sticks.
+		# Additionally we use LVM because it allows to better
+		# resize the stick
 		# ----
 		$xml -> __setTypeAttribute ("bootloader","syslinux");
 		$xml -> __setSystemDiskElement ();
@@ -2482,7 +2445,7 @@ sub checkType {
 			}
 			last SWITCH;
 		};
-		/^usb|vmx|oem|pxe/ && do {
+		/^vmx|oem|pxe/ && do {
 			if (! defined $type{filesystem}) {
 				$kiwi -> error ("$type{type}: No filesystem specified");
 				$kiwi -> failed ();

@@ -139,7 +139,7 @@ sub __haveValidTypeString {
 	my @allowedTypes = qw (
 		btrfs clicfs cpio ext2 ext3 ext4 iso
 		oem product pxe reiserfs split squashfs
-		usb vmx xfs
+		vmx xfs
 	);
 	if ($type) {
 		if (! grep /$type/, @allowedTypes) {

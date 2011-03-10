@@ -13,7 +13,6 @@
                 <oem-unattended>true</oem-unattended>
             </oemconfig>
         </type>
-        <type image="usb" boot="usbboot/suse-11.3" />
         <type image="vmx" boot="usbboot/suse-11.3" format="vmdk"/>
         <version>1.0.0</version>
         <packagemanager>zypper</packagemanager>

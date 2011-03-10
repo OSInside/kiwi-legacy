@@ -283,7 +283,7 @@ sub __checkFilesysSpec {
 	my $isInvalid;
 	my $kiwi = $this->{kiwi};
 	my @typeNodes = $this->{systemTree} -> getElementsByTagName("type");
-	my @typesReqFS = qw /oem pxe usb vmx/;
+	my @typesReqFS = qw /oem pxe vmx/;
 	for my $typeN (@typeNodes) {
 		my $imgType = $typeN -> getAttribute( "image" );
 		if (grep /$imgType/, @typesReqFS) {

@@ -1468,7 +1468,7 @@ div {
 		attribute image {
 			"btrfs" | "clicfs" | "cpio" | "ext2" | "ext3" |
 			"ext4" | "iso" | "oem" | "product" | "pxe" | "reiserfs" |
-			"split" | "squashfs" | "usb" | "vmx" | "xfs"
+			"split" | "squashfs" | "vmx" | "xfs"
 		}
 	k.type.installboot.attribute =
 		## Specifies the bootloader default boot entry for the"
@@ -2298,7 +2298,7 @@ div {
 div {
 	k.packages.type.attribute = attribute type {
 		"bootstrap" | "delete" | "image" | "iso" | "oem" | "pxe" |
-		"split" | "testsuite" | "usb" | "vmx"
+		"split" | "testsuite" | "vmx"
 	}
 	k.packages.profiles.attribute = k.profiles.attribute
 	k.packages.patternType.attribute =
