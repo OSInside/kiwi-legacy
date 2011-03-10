@@ -3558,11 +3558,11 @@ sub installBootLoader {
 		my $glog;
 		if (open (FD,"$tmpdir/grub.log")) {
 			my @glog = <FD>; close FD;
+			my $stage1 = grep { /^\s*Running.*succeeded$/ } @glog;
+			my $stage1_5 = grep { /^\s*Running.*are embedded\.$/ } @glog;
+			$result = !(($stage1 == 1) && ($stage1_5 == 1));
 			$glog = join ("\n",@glog);
 			$kiwi -> loginfo ("GRUB: $glog");
-			if ($glog =~ /Error/) {
-				$result = 1;
-			}
 		}
 		if ($result != 1) {
 			my $boot = "'boot sector'";
