@@ -1998,6 +1998,13 @@ to keep data persistent over a reboot</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
+    <define name="k.type.ramonly.attribute">
+      <attribute name="ramonly">
+        <a:documentation>for use with overlay filesystems only:
+will force any COW action to happen in RAM</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.type.image.attribute">
       <attribute name="image">
         <a:documentation>Specifies the image type</a:documentation>
@@ -2125,6 +2132,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.hybridpersistent.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.ramonly.attribute"/>
         </optional>
         <ref name="k.type.image.attribute"/>
         <optional>

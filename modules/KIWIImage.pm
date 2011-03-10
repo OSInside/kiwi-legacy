@@ -197,6 +197,9 @@ sub updateDescription {
 	if ($src_type{hybridpersistent}) {
 		$changeset{"hybridpersistent"} = $src_type{hybridpersistent};
 	}
+	if ($src_type{ramonly}) {
+		$changeset{"ramonly"} = $src_type{ramonly};
+	}
 	if ($src_type{cmdline}) {
 		$changeset{"kernelcmdline"} = $src_type{cmdline};
 	}

@@ -2157,6 +2157,11 @@ sub getImageConfig {
 		&& ($type{hybridpersistent} eq "true")) {
 		$result{kiwi_hybridpersistent} = "yes";
 	}
+	if ((%type)
+		&& (defined $type{ramonly})
+		&& ($type{ramonly} eq "true")) {
+		$result{kiwi_ramonly} = "yes";
+	}
 	if ((%type) && ($type{lvm})) {
 		$result{kiwi_lvm} = $type{lvm};
 	}
@@ -4297,6 +4302,11 @@ sub __updateDescriptionFromChangeSet {
 			"hybridpersistent",$changeset->{"hybridpersistent"}
 		);
 	}
+	if (defined $changeset->{"ramonly"}) {
+		$this -> __setTypeAttribute (
+			"ramonly",$changeset->{"ramonly"}
+		);
+	}
 	if (defined $changeset->{"kernelcmdline"}) {
 		$this -> __setTypeAttribute (
 			"kernelcmdline",$changeset->{"kernelcmdline"}
@@ -4776,6 +4786,8 @@ sub __populateTypeInfo {
 				-> getAttribute("fsnocheck");
 			$record{hybridpersistent}  = $node
 				-> getAttribute("hybridpersistent");
+			$record{ramonly}       = $node
+				-> getAttribute("ramonly");
 			if (defined $disk) {
 				$record{lvm} = "true";
 			}

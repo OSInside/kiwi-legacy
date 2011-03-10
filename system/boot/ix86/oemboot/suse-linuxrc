@@ -85,6 +85,9 @@ function setupInitialDeviceNames {
 			export imageRootDevice=/dev/$VGROUP/LVRoot
 		fi
 		export imageRWDevice=/dev/$VGROUP/LVRoot
+		if [ ! -z "$kiwi_ramonly" ];then
+			export imageRWDevice=/dev/ram1
+		fi
 		export imageRODevice=/dev/$VGROUP/LVComp
 		export imageIOWRDevice=$imageRWDevice
 		export imageBootDevice=$(ddn $imageDiskDevice 1)
