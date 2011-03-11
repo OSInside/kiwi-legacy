@@ -260,6 +260,25 @@ kiwi --create ... --fat-storage 500
 			information about the OEM image type please refer to the OEM
 			chapter <xref linkend="chap.oem"/>
 		</para>
+		<sect3>
+			<title>OEM compressed / readonly USB stick</title>
+			<indexterm>
+				<primary>KIWI</primary>
+				<secondary>compressed root</secondary>
+			</indexterm>
+		<para>
+			If a compressed filesystem type like clicfs is used for the
+			image root directory it's also possible to allow persistent
+			writing on the USB stick or alternatively disallow that and
+			let all write actions perfom in RAM only. kiwi provides the
+			type attribute ramonly for this purpose. So in order to create
+			a read-only oem stick with compressed root filesystem the
+			following type section is required:
+<screen>
+&lt;type image="oem" filesystem="clicfs" ramonly="true" .../&gt;
+</screen>
+		</para>
+		</sect3>
 	</sect2>
   </sect1>
 
