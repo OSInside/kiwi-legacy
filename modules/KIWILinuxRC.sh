@@ -874,6 +874,7 @@ function setupSUSEInitrd {
 		systemIntegrity=unknown
 		bootLoaderOK=0
 	fi
+	resetBootBind
 }
 #======================================
 # callSUSEInitrdScripts
@@ -7025,6 +7026,142 @@ function resetSnapshotMap {
 	bash -x $reset.run
 	unset snapshotMap
 }
+#======================================
+# resetBootBind
+#--------------------------------------
+function resetBootBind {
+	# /.../
+	# remove the bind mount boot setup and replace with a
+	# symbolic link to make the suse kernel update process
+	# to work correctly
+	# ----
+	local bootdir
+	#======================================
+	# find bind boot dir
+	#--------------------------------------
+	for i in lvmboot btrboot clicboot xfsboot luksboot syslboot;do
+		if [ -d /$i ];then
+			bootdir=$i
+			break
+		fi
+	done
+	if [ -z "$bootdir" ];then
+		return
+	fi
+	#======================================
+	# reset bind mount to standard boot dir
+	#--------------------------------------
+	umount /boot
+	mv /$bootdir/boot /$bootdir/tmp
+	mv /$bootdir/tmp/* /$bootdir
+	rmdir /$bootdir/tmp
+	umount /$bootdir
+	rmdir /$bootdir
+	#======================================
+	# update fstab entry
+	#--------------------------------------
+	cat /etc/fstab | grep -v bind > /etc/fstab.new
+	mv /etc/fstab.new /etc/fstab
+	cat /etc/fstab | sed -e s@/$bootdir@/boot@ > /etc/fstab.new
+	mv /etc/fstab.new /etc/fstab
+	#======================================
+	# mount boot again
+	#--------------------------------------
+	mount $imageBootDevice /boot
+	#======================================
+	# check for syslinux requirements
+	#--------------------------------------	
+	if [ "$loader" = "syslinux" ];then
+		# /.../
+		# if syslinux is used we need to make sure that the
+		# filename on the boot partition is correct 8+3
+		# we also have to move the kernel and initrd to /boot
+		# on the boot partition. This is normally done by the
+		# boot -> . link but we can't create links on fat
+		# ----
+		IFS="," ; for i in $KERNEL_LIST;do
+			if test -z "$i";then
+				continue
+			fi
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			mkdir -p /boot/boot
+			mv /boot/$kernel /boot/boot/linux.1
+			mv /boot/$initrd /boot/boot/initrd.1
+			break
+		done
+		IFS=$IFS_ORIG
+	fi
+}
+#======================================
+# setupKernelLinks
+#--------------------------------------
+function setupKernelLinks {
+	# /.../
+	# check kernel names and links to kernel and initrd
+	# according to the different boot-up situations
+	# ----
+	#======================================
+	# mount boot partition of required
+	#--------------------------------------
+	local mountCalled=no
+	if [ -e "$imageRWDevice" ] && blkid $imageRWDevice;then
+		kiwiMount $imageRWDevice "/mnt"
+		mountCalled=yes
+	fi
+	#======================================
+	# Change to boot directory
+	#--------------------------------------
+	pushd /mnt/boot >/dev/null
+	#======================================
+	# remove garbage if possible 
+	#--------------------------------------
+	if [ $loader = "syslinux" ] || [ $loader = "extlinux" ];then
+		rm -rf grub
+	fi
+	#======================================
+	# setup if overlay filesystem is used
+	#--------------------------------------
+	if [ "$OEM_KIWI_INITRD" = "yes" ] || isFSTypeReadOnly;then
+		# /.../
+		# we are using a special root setup based on an overlay
+		# filesystem. In this case we can't use the SuSE Linux
+		# initrd but must stick to the kiwi boot system.
+		# ----
+		IFS="," ; for i in $KERNEL_LIST;do
+			if test -z "$i";then
+				continue
+			fi
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			break
+		done
+		IFS=$IFS_ORIG
+		if [ "$loader" = "syslinux" ];then
+			rm -f $initrd && mv initrd.vmx initrd.1
+			rm -f $kernel && mv linux.vmx  linux.1
+		else
+			rm -f $initrd && ln -s initrd.vmx $initrd
+			rm -f $kernel && ln -s linux.vmx  $kernel
+		fi
+	fi	
+	#======================================
+	# make sure boot => . link exists
+	#--------------------------------------
+	if [ ! $loader = "syslinux" ] && [ ! -e boot ];then
+		ln -s . boot
+	fi
+	#======================================
+	# umount boot partition if required
+	#--------------------------------------
+	popd >/dev/null
+	if [ "$mountCalled" = "yes" ];then
+		umount /mnt
+	fi
+}
+
+#FIXME
+
 #======================================
 # initialize
 #--------------------------------------

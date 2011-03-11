@@ -206,39 +206,7 @@ fi
 # 14) setup ird/kernel links for union
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
-	if isFSTypeReadOnly;then
-		# /.../
-		# we are using a special root setup with aufs. In this case
-		# we can't use the SuSE Linux initrd but must stick to the
-		# kiwi boot system.
-		# ----
-		mountCalled=no
-		if [ -e "$imageRWDevice" ] && blkid $imageRWDevice;then
-			kiwiMount $imageRWDevice "/mnt"
-			mountCalled=yes
-		fi
-		pushd /mnt/boot >/dev/null
-		IFS="," ; for i in $KERNEL_LIST;do
-			if test -z "$i";then
-				continue
-			fi
-			kernel=`echo $i | cut -f1 -d:`
-			initrd=`echo $i | cut -f2 -d:`
-			if [ "$loader" = "syslinux" ];then
-				rm -f $initrd && mv initrd.vmx initrd.1
-				rm -f $kernel && mv linux.vmx  linux.1
-			else
-				rm -f $initrd && ln -s initrd.vmx $initrd
-				rm -f $kernel && ln -s linux.vmx  $kernel
-			fi
-			break
-		done
-		IFS=$IFS_ORIG
-		popd >/dev/null
-		if [ "$mountCalled" = "yes" ];then
-			umount /mnt
-		fi
-	fi
+	setupKernelLinks
 fi
 
 #======================================
