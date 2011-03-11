@@ -1,4 +1,4 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>openSUSE-KIWI Image System</title><link rel="stylesheet" type="text/css" href="susebooks.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1-RC1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div lang="en" class="book" title="openSUSE-KIWI Image System"><div class="titlepage"><div><div><h1 class="title"><a name="id2438293"></a>openSUSE-KIWI Image System</h1></div><div><h2 class="subtitle">Cookbook</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Marcus</span> <span class="surname">Schäfer</span></h3><span class="contrib">Project, Design and Implementation</span> <div class="affiliation"><span class="jobtitle">Software Engineer<br></span><span class="orgname">SUSE LINUX Products GmbH<br></span></div><code class="email">&lt;<a class="email" href="mailto:ms@suse.de">ms@suse.de</a>&gt;</code></div><div class="othercredit"><h3 class="othercredit"><span class="firstname">Thomas</span> <span class="surname">Schraitle</span></h3><span class="contrib">Various text improvements, migration to DocBook</span> <div class="affiliation"><span class="jobtitle">Documentation Specialist<br></span><span class="orgname">SUSE LINUX Products GmbH<br></span></div><code class="email">&lt;<a class="email" href="mailto:toms@suse.de">toms@suse.de</a>&gt;</code></div></div></div><div><p class="releaseinfo">KIWI Version 4.80</p></div><div><div class="legalnotice" title="License"><a name="id2522385"></a><p class="legalnotice-title"><b>License</b></p><p>Permission is granted to copy, distribute and/or modify this
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>openSUSE-KIWI Image System</title><link rel="stylesheet" type="text/css" href="susebooks.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1-RC1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div lang="en" class="book" title="openSUSE-KIWI Image System"><div class="titlepage"><div><div><h1 class="title"><a name="id2438293"></a>openSUSE-KIWI Image System</h1></div><div><h2 class="subtitle">Cookbook</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Marcus</span> <span class="surname">Schäfer</span></h3><span class="contrib">Project, Design and Implementation</span> <div class="affiliation"><span class="jobtitle">Software Engineer<br></span><span class="orgname">SUSE LINUX Products GmbH<br></span></div><code class="email">&lt;<a class="email" href="mailto:ms@suse.de">ms@suse.de</a>&gt;</code></div><div class="othercredit"><h3 class="othercredit"><span class="firstname">Thomas</span> <span class="surname">Schraitle</span></h3><span class="contrib">Various text improvements, migration to DocBook</span> <div class="affiliation"><span class="jobtitle">Documentation Specialist<br></span><span class="orgname">SUSE LINUX Products GmbH<br></span></div><code class="email">&lt;<a class="email" href="mailto:toms@suse.de">toms@suse.de</a>&gt;</code></div></div></div><div><p class="releaseinfo">KIWI Version 4.81</p></div><div><div class="legalnotice" title="License"><a name="id2522385"></a><p class="legalnotice-title"><b>License</b></p><p>Permission is granted to copy, distribute and/or modify this
     document under the terms of the GNU Free Documentation License,
     Version 1.2 or (at your option) version 1.3; with the Invariant
     Section being this copyright notice and license. A copy of the
@@ -10,7 +10,7 @@
     attention to detail. However, this does not guarantee complete
     accuracy. Neither Novell, Inc., SUSE Linux Products GmbH, the
     authors, nor the translators shall be held liable for possible
-    errors or the consequences thereof.</p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="chapter"><a href="#chap.workflow">1. Basic Workflow</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.workflow.introduction">1.1. Introduction</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootprocess">1.2. Boot Process</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootparameters">1.3. Boot Parameters</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.common-specific-code">1.4. Common and Distribution Specific Code</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.description">2. KIWI Image Description</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.description.config.xml">2.1. The config.xml File</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.description.image">2.1.1. <code class="sgmltag-element">image</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.description">2.1.2. <code class="sgmltag-element">description</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.profiles">2.1.3. <code class="sgmltag-element">profiles</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.preferences">2.1.4. <code class="sgmltag-element">preferences</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.users">2.1.5. <code class="sgmltag-element">users</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.drivers">2.1.6. <code class="sgmltag-element">drivers</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.repository">2.1.7. <code class="sgmltag-element">repository</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.packages">2.1.8. <code class="sgmltag-element">packages</code> Element</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.appliance">3. Creating Appliances with KIWI</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.appliance.history">3.1. History</a></span></dt><dt><span class="sect1"><a href="#sec.appliance.kiwi-model">3.2. The KIWI Model</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.maintenance">4. Maintenance of Operating System Images</a></span></dt><dt><span class="chapter"><a href="#chap.migration">5. System to Image Migration</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.migrate.create-clean-repository">5.1. Create a Clean Repository Set First</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.watch-overlay">5.2. Watch the Overlay and Unpackaged Files</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.checklist">5.3. Checklist</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.turn-system-into-image">5.4. Turn my System Into an Image…</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.instsourcesetup">6. Installation Source</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.instsourcesetup.adapt-example">6.1. Adapt the Example’s config.xml</a></span></dt><dt><span class="sect1"><a href="#sec.instsourcesetup.create-local-inst-source">6.2. Create a Local Installation Source</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.iso">7. ISO Image—Live Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.iso.building">7.1. Building the suse-live-iso Example</a></span></dt><dt><span class="sect1"><a href="#sec.iso.using">7.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.iso.flavours">7.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.iso.split-mode">7.3.1. Split mode</a></span></dt><dt><span class="sect2"><a href="#sec.iso.hybrid-mode">7.3.2. Hybrid mode</a></span></dt></dl></dd><dt><span class="sect1"><a href="#id2556523">7.4. USB stick images</a></span></dt><dd><dl><dt><span class="sect2"><a href="#id2556549">7.4.1. ISO Hybrid stick</a></span></dt><dt><span class="sect2"><a href="#id2556584">7.4.2. OEM USB stick</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.vmx">8. VMX Image—Virtual Disks</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.vmx.building">8.1. Building the suse-vm-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.using">8.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.flavours">8.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.vmx.vmware-support">8.3.1. VMware support</a></span></dt><dt><span class="sect2"><a href="#sec.vmx.lvm">8.3.2. LVM Support</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.pxe">9. PXE Image—Thin Clients</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.pxe.setting-up">9.1. Setting Up the Required Services</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.atftp-server">9.1.1. Atftp Server</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.dhcp-server">9.1.2. DHCP Server</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.building">9.2. Building the suse-pxe-client Example</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.using">9.3. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.flavours">9.4. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.client-control-file">9.4.1. The PXE Client Control File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.client-config-file">9.4.2. The PXE Client Configuration File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.another-user">9.4.3. User another than tftp as Download Protocol</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.ram-only-image">9.4.4. RAM Only Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.union-image">9.4.5. Union Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.split-image">9.4.6. Split Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nfs">9.4.7. Root Tree Over NFS</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nbd">9.4.8. Root Tree Over NBD</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-aoe">9.4.9. Root Tree Over AoE</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.groups">9.5. Hardware Grouping</a></span></dt><dd><dl><dt><span class="sect2"><a href="#id2559638">9.5.1. The Group Configuration File</a></span></dt><dt><span class="sect2"><a href="#id2559823">9.5.2. The Group Details File</a></span></dt><dt><span class="sect2"><a href="#id2559907">9.5.3.  Using Hardware Mapping to Provide Overrides</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.oem">10. OEM Image—Preload Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.oem.building">10.1. Building the suse-oem-preload Example</a></span></dt><dt><span class="sect1"><a href="#sec.oem.using">10.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.oem.flavours">10.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.oem.installation">10.3.1. Specializing the OEM install process</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partitioning">10.3.2. Influencing the OEM Partitioning</a></span></dt><dt><span class="sect2"><a href="#sec.oem.lvm">10.3.3. LVM Support</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partition-based-installation">10.3.4. Partition Based Installation</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.xen">11. Xen Image—Paravirtual Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.xen.building">11.1. Building the suse-xen-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.xen.using">11.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.xen.flavours">11.3. Flavours</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.ec2">12. EC2 Image—Amazon Elastic Compute Cloud</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.ec2.building">12.1. Building the suse-ec2-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.ec2.using">12.2. Using the Image</a></span></dt></dl></dd><dt><span class="appendix"><a href="#appendix">A. KIWI Man Pages</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#ref.kiwi.kiwi">kiwi</a></span><span class="refpurpose"> — Creating Operating System Images</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.config.sh">kiwi::config.sh</a></span><span class="refpurpose"> — Configuration File for KIWI image description</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.images.sh">kiwi::images.sh</a></span><span class="refpurpose"> — Configuration File for KIWI image description</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.kiwirc">kiwi::kiwirc</a></span><span class="refpurpose"> — Resource file for the Kiwi imaging system</span></dt></dl></dd></dl></div><div class="list-of-figures"><p><b>List of Figures</b></p><dl><dt>1.1. <a href="#fig.imageservingarch">Image Serving Architecture</a></dt><dt>1.2. <a href="#fig.imagetypes">Image Types</a></dt><dt>1.3. <a href="#fig.workflow.bootprocess">Boot Process</a></dt><dt>2.1. <a href="#fig.description.imagedescrdir">Image Description Directory</a></dt><dt>4.1. <a href="#fig.maintain">Image Maintenance Scenarios</a></dt></dl></div><div class="list-of-tables"><p><b>List of Tables</b></p><dl><dt>2.1. <a href="#tab.description.supported-types">Supported Types for zypper and smart</a></dt><dt>8.1. <a href="#tab.vmx.supported-disk-formats">Supported Virtual Disk Formats</a></dt><dt>9.1. <a href="#tab.configuration.files.synchronization">Configuration files synchronization possibilities</a></dt><dt>12.1. <a href="#tab.ec2.kernel-image-ids">Amazon Kernel Image IDs</a></dt></dl></div><div class="list-of-examples"><p><b>List of Examples</b></p><dl><dt>A.1. <a href="#id2564560">Template for config.sh</a></dt><dt>A.2. <a href="#id2565686">Template for images.sh</a></dt><dt>A.3. <a href="#id2566353">Template for .kiwi.rc</a></dt></dl></div><div class="chapter" title="Chapter 1. Basic Workflow"><div class="titlepage"><div><div><h2 class="title"><a name="chap.workflow"></a>Chapter 1. Basic Workflow</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.workflow.introduction">1.1. Introduction</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootprocess">1.2. Boot Process</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootparameters">1.3. Boot Parameters</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.common-specific-code">1.4. Common and Distribution Specific Code</a></span></dt></dl></div><a class="indexterm" name="id2541908"></a><div class="sect1" title="1.1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.workflow.introduction"></a>1.1. Introduction<span class="permalink"><a alt="Permalink" title="1.1. Introduction" href="#sec.workflow.introduction">¶</a></span></h2></div></div></div><p>The openSUSE KIWI Image System provides a complete operating
+    errors or the consequences thereof.</p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="chapter"><a href="#chap.workflow">1. Basic Workflow</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.workflow.introduction">1.1. Introduction</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootprocess">1.2. Boot Process</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootparameters">1.3. Boot Parameters</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.common-specific-code">1.4. Common and Distribution Specific Code</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.description">2. KIWI Image Description</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.description.config.xml">2.1. The config.xml File</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.description.image">2.1.1. <code class="sgmltag-element">image</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.description">2.1.2. <code class="sgmltag-element">description</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.profiles">2.1.3. <code class="sgmltag-element">profiles</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.preferences">2.1.4. <code class="sgmltag-element">preferences</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.users">2.1.5. <code class="sgmltag-element">users</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.drivers">2.1.6. <code class="sgmltag-element">drivers</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.repository">2.1.7. <code class="sgmltag-element">repository</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.packages">2.1.8. <code class="sgmltag-element">packages</code> Element</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.appliance">3. Creating Appliances with KIWI</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.appliance.history">3.1. History</a></span></dt><dt><span class="sect1"><a href="#sec.appliance.kiwi-model">3.2. The KIWI Model</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.maintenance">4. Maintenance of Operating System Images</a></span></dt><dt><span class="chapter"><a href="#chap.migration">5. System to Image Migration</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.migrate.create-clean-repository">5.1. Create a Clean Repository Set First</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.watch-overlay">5.2. Watch the Overlay and Unpackaged Files</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.checklist">5.3. Checklist</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.turn-system-into-image">5.4. Turn my System Into an Image…</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.instsourcesetup">6. Installation Source</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.instsourcesetup.adapt-example">6.1. Adapt the Example’s config.xml</a></span></dt><dt><span class="sect1"><a href="#sec.instsourcesetup.create-local-inst-source">6.2. Create a Local Installation Source</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.iso">7. ISO Image—Live Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.iso.building">7.1. Building the suse-live-iso Example</a></span></dt><dt><span class="sect1"><a href="#sec.iso.using">7.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.iso.flavours">7.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.iso.split-mode">7.3.1. Split mode</a></span></dt><dt><span class="sect2"><a href="#sec.iso.hybrid-mode">7.3.2. Hybrid mode</a></span></dt></dl></dd><dt><span class="sect1"><a href="#id2556523">7.4. USB stick images</a></span></dt><dd><dl><dt><span class="sect2"><a href="#id2556549">7.4.1. ISO Hybrid stick</a></span></dt><dt><span class="sect2"><a href="#id2556584">7.4.2. OEM USB stick</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.vmx">8. VMX Image—Virtual Disks</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.vmx.building">8.1. Building the suse-vm-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.using">8.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.flavours">8.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.vmx.vmware-support">8.3.1. VMware support</a></span></dt><dt><span class="sect2"><a href="#sec.vmx.lvm">8.3.2. LVM Support</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.pxe">9. PXE Image—Thin Clients</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.pxe.setting-up">9.1. Setting Up the Required Services</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.atftp-server">9.1.1. Atftp Server</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.dhcp-server">9.1.2. DHCP Server</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.building">9.2. Building the suse-pxe-client Example</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.using">9.3. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.flavours">9.4. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.client-control-file">9.4.1. The PXE Client Control File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.client-config-file">9.4.2. The PXE Client Configuration File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.another-user">9.4.3. User another than tftp as Download Protocol</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.ram-only-image">9.4.4. RAM Only Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.union-image">9.4.5. Union Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.split-image">9.4.6. Split Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nfs">9.4.7. Root Tree Over NFS</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nbd">9.4.8. Root Tree Over NBD</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-aoe">9.4.9. Root Tree Over AoE</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.groups">9.5. Hardware Grouping</a></span></dt><dd><dl><dt><span class="sect2"><a href="#id2559689">9.5.1. The Group Configuration File</a></span></dt><dt><span class="sect2"><a href="#id2559874">9.5.2. The Group Details File</a></span></dt><dt><span class="sect2"><a href="#id2559957">9.5.3.  Using Hardware Mapping to Provide Overrides</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.oem">10. OEM Image—Preload Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.oem.building">10.1. Building the suse-oem-preload Example</a></span></dt><dt><span class="sect1"><a href="#sec.oem.using">10.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.oem.flavours">10.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.oem.installation">10.3.1. Specializing the OEM install process</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partitioning">10.3.2. Influencing the OEM Partitioning</a></span></dt><dt><span class="sect2"><a href="#sec.oem.lvm">10.3.3. LVM Support</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partition-based-installation">10.3.4. Partition Based Installation</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.xen">11. Xen Image—Paravirtual Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.xen.building">11.1. Building the suse-xen-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.xen.using">11.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.xen.flavours">11.3. Flavours</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.ec2">12. EC2 Image—Amazon Elastic Compute Cloud</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.ec2.building">12.1. Building the suse-ec2-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.ec2.using">12.2. Using the Image</a></span></dt></dl></dd><dt><span class="appendix"><a href="#appendix">A. KIWI Man Pages</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#ref.kiwi.kiwi">kiwi</a></span><span class="refpurpose"> — Creating Operating System Images</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.config.sh">kiwi::config.sh</a></span><span class="refpurpose"> — Configuration File for KIWI image description</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.images.sh">kiwi::images.sh</a></span><span class="refpurpose"> — Configuration File for KIWI image description</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.kiwirc">kiwi::kiwirc</a></span><span class="refpurpose"> — Resource file for the Kiwi imaging system</span></dt></dl></dd></dl></div><div class="list-of-figures"><p><b>List of Figures</b></p><dl><dt>1.1. <a href="#fig.imageservingarch">Image Serving Architecture</a></dt><dt>1.2. <a href="#fig.imagetypes">Image Types</a></dt><dt>1.3. <a href="#fig.workflow.bootprocess">Boot Process</a></dt><dt>2.1. <a href="#fig.description.imagedescrdir">Image Description Directory</a></dt><dt>4.1. <a href="#fig.maintain">Image Maintenance Scenarios</a></dt></dl></div><div class="list-of-tables"><p><b>List of Tables</b></p><dl><dt>2.1. <a href="#tab.description.supported-types">Supported Types for zypper and smart</a></dt><dt>8.1. <a href="#tab.vmx.supported-disk-formats">Supported Virtual Disk Formats</a></dt><dt>9.1. <a href="#tab.configuration.files.synchronization">Configuration files synchronization possibilities</a></dt><dt>12.1. <a href="#tab.ec2.kernel-image-ids">Amazon Kernel Image IDs</a></dt></dl></div><div class="list-of-examples"><p><b>List of Examples</b></p><dl><dt>A.1. <a href="#id2564621">Template for config.sh</a></dt><dt>A.2. <a href="#id2565750">Template for images.sh</a></dt><dt>A.3. <a href="#id2566417">Template for .kiwi.rc</a></dt></dl></div><div class="chapter" title="Chapter 1. Basic Workflow"><div class="titlepage"><div><div><h2 class="title"><a name="chap.workflow"></a>Chapter 1. Basic Workflow</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.workflow.introduction">1.1. Introduction</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootprocess">1.2. Boot Process</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootparameters">1.3. Boot Parameters</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.common-specific-code">1.4. Common and Distribution Specific Code</a></span></dt></dl></div><a class="indexterm" name="id2541908"></a><div class="sect1" title="1.1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.workflow.introduction"></a>1.1. Introduction<span class="permalink"><a alt="Permalink" title="1.1. Introduction" href="#sec.workflow.introduction">¶</a></span></h2></div></div></div><p>The openSUSE KIWI Image System provides a complete operating
     system image solution for Linux supported hardware platforms as well
     as for virtualization systems like Xen, VMware, etc. The KIWI
     architecture was designed as a two level system. The first stage,
@@ -1420,7 +1420,18 @@ kiwi --create ... --fat-storage 500
 			allows easy manipulation of the logical root volume. For further
 			information about the OEM image type please refer to the OEM
 			chapter <a class="xref" href="#chap.oem" title="Chapter 10. OEM Image—Preload Systems">Chapter 10, <i>OEM Image—Preload Systems</i></a>
-		</p></div></div></div><div class="chapter" title="Chapter 8. VMX Image—Virtual Disks"><div class="titlepage"><div><div><h2 class="title"><a name="chap.vmx"></a>Chapter 8. VMX Image—Virtual Disks</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.vmx.building">8.1. Building the suse-vm-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.using">8.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.flavours">8.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.vmx.vmware-support">8.3.1. VMware support</a></span></dt><dt><span class="sect2"><a href="#sec.vmx.lvm">8.3.2. LVM Support</a></span></dt></dl></dd></dl></div><a class="indexterm" name="id2556643"></a><a class="indexterm" name="id2556655"></a><a class="indexterm" name="id2556666"></a><p>A VMX image is a virtual disk image for use in full
+		</p><div class="sect3" title="7.4.2.1. OEM compressed / readonly USB stick"><div class="titlepage"><div><div><h4 class="title"><a name="id2556632"></a>7.4.2.1. OEM compressed / readonly USB stick<span class="permalink"><a alt="Permalink" title="7.4.2.1. OEM compressed / readonly USB stick" href="#id2556632">¶</a></span></h4></div></div></div><a class="indexterm" name="id2556638"></a><p>
+			If a compressed filesystem type like clicfs is used for the
+			image root directory it's also possible to allow persistent
+			writing on the USB stick or alternatively disallow that and
+			let all write actions perfom in RAM only. kiwi provides the
+			type attribute ramonly for this purpose. So in order to create
+			a read-only oem stick with compressed root filesystem the
+			following type section is required:
+</p><pre class="screen">
+&lt;type image="oem" filesystem="clicfs" ramonly="true" .../&gt;
+</pre><p>
+		</p></div></div></div></div><div class="chapter" title="Chapter 8. VMX Image—Virtual Disks"><div class="titlepage"><div><div><h2 class="title"><a name="chap.vmx"></a>Chapter 8. VMX Image—Virtual Disks</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.vmx.building">8.1. Building the suse-vm-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.using">8.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.flavours">8.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.vmx.vmware-support">8.3.1. VMware support</a></span></dt><dt><span class="sect2"><a href="#sec.vmx.lvm">8.3.2. LVM Support</a></span></dt></dl></dd></dl></div><a class="indexterm" name="id2556679"></a><a class="indexterm" name="id2556691"></a><a class="indexterm" name="id2556703"></a><p>A VMX image is a virtual disk image for use in full
     virtualization systems like Qemu or VMware. The image is a file
     containing the system represented by the configured packages in
     config.xml as well as partition data and bootloader information. The
@@ -1437,14 +1448,14 @@ kiwi --create ... --fat-storage 500
       environments. Some virtualization environments support multiple
       virtual disk formats. Using the QEMU virtualization environment
       test the created image with the following command: </p><pre class="screen"><span class="command"><strong>cd</strong></span> /tmp/myvm-result 
-<span class="command"><strong>qemu</strong></span> suse-11.2-vm-guest.i686-1.1.2.raw -m 256 </pre></div><div class="sect1" title="8.3. Flavours"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.vmx.flavours"></a>8.3. Flavours<span class="permalink"><a alt="Permalink" title="8.3. Flavours" href="#sec.vmx.flavours">¶</a></span></h2></div></div></div><p>KIWI always generates a file in the <code class="filename">.raw</code><a class="indexterm" name="id2556791"></a> format. The .raw file is a
+<span class="command"><strong>qemu</strong></span> suse-11.2-vm-guest.i686-1.1.2.raw -m 256 </pre></div><div class="sect1" title="8.3. Flavours"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.vmx.flavours"></a>8.3. Flavours<span class="permalink"><a alt="Permalink" title="8.3. Flavours" href="#sec.vmx.flavours">¶</a></span></h2></div></div></div><p>KIWI always generates a file in the <code class="filename">.raw</code><a class="indexterm" name="id2556827"></a> format. The .raw file is a
       disk image with a structure equivalent to the structure of a
       physical hard disk. Individual virtualization systems have
       specific formats to facilitate improved I/O performance to the
       virtual disk, represented by the image file, or additional
       specified virtual hard disk files. KIWI will generate a specific
       format when the format attribute of the type element is added. </p><pre class="screen">&lt;type image="vmx"... format="name"/&gt;</pre><p>The following table lists the supported virtual disk
-      formats:</p><div class="table"><a name="tab.vmx.supported-disk-formats"></a><p class="title"><b>Table 8.1. Supported Virtual Disk Formats</b><span class="permalink"><a alt="Permalink" title="Table 8.1. Supported Virtual Disk Formats" href="#tab.vmx.supported-disk-formats">¶</a></span></p><div class="table-contents"><a class="indexterm" name="id2556828"></a><a class="indexterm" name="id2556840"></a><table summary="Supported Virtual Disk Formats" border="1"><colgroup><col><col></colgroup><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>vmdk</td><td>Disk format for VMware</td></tr><tr><td>ovf</td><td>Open Virtual Format requires VMware's ovftool</td></tr><tr><td>qcow2</td><td>QEMU virtual disk format</td></tr></tbody></table></div></div><br class="table-break"><div class="sect2" title="8.3.1. VMware support"><div class="titlepage"><div><div><h3 class="title"><a name="sec.vmx.vmware-support"></a>8.3.1. VMware support<span class="permalink"><a alt="Permalink" title="8.3.1. VMware support" href="#sec.vmx.vmware-support">¶</a></span></h3></div></div></div><a class="indexterm" name="id2556916"></a><a class="indexterm" name="id2556927"></a><p>A VMware image is accompanied by a guest configuration file.
+      formats:</p><div class="table"><a name="tab.vmx.supported-disk-formats"></a><p class="title"><b>Table 8.1. Supported Virtual Disk Formats</b><span class="permalink"><a alt="Permalink" title="Table 8.1. Supported Virtual Disk Formats" href="#tab.vmx.supported-disk-formats">¶</a></span></p><div class="table-contents"><a class="indexterm" name="id2556864"></a><a class="indexterm" name="id2556876"></a><table summary="Supported Virtual Disk Formats" border="1"><colgroup><col><col></colgroup><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>vmdk</td><td>Disk format for VMware</td></tr><tr><td>ovf</td><td>Open Virtual Format requires VMware's ovftool</td></tr><tr><td>qcow2</td><td>QEMU virtual disk format</td></tr></tbody></table></div></div><br class="table-break"><div class="sect2" title="8.3.1. VMware support"><div class="titlepage"><div><div><h3 class="title"><a name="sec.vmx.vmware-support"></a>8.3.1. VMware support<span class="permalink"><a alt="Permalink" title="8.3.1. VMware support" href="#sec.vmx.vmware-support">¶</a></span></h3></div></div></div><a class="indexterm" name="id2556952"></a><a class="indexterm" name="id2556963"></a><p>A VMware image is accompanied by a guest configuration file.
         This file includes information about the hardware to be
         represented to the guest image by the VMware virtualization
         environment as well as specification of resources such as
@@ -1467,17 +1478,17 @@ kiwi --create ... --fat-storage 500
         For additional information about the configuration settings
         please refer to the <span class="emphasis"><em>machine</em></span> section. </p><p>The guest configuration can be loaded through VMware user
         interface and may be modified through the GUI. The configuration
-        file has the <code class="filename">.vmx</code><a class="indexterm" name="id2557010"></a>
-        extension as shown in the example below. </p><pre class="screen">/tmp/myvm-result/suse-11.2-vm-guest.i686-1.1.2.vmx</pre><p>Using the <code class="sgmltag-attribute">format</code><a class="indexterm" name="id2557033"></a>="<code class="sgmltag-attvalue">vmdk</code>"
+        file has the <code class="filename">.vmx</code><a class="indexterm" name="id2557046"></a>
+        extension as shown in the example below. </p><pre class="screen">/tmp/myvm-result/suse-11.2-vm-guest.i686-1.1.2.vmx</pre><p>Using the <code class="sgmltag-attribute">format</code><a class="indexterm" name="id2557069"></a>="<code class="sgmltag-attvalue">vmdk</code>"
         attribute of the <code class="sgmltag-starttag">&lt;type&gt;</code> start
-        tag will create the VMware formatted disk image (<code class="filename">.vmdk</code><a class="indexterm" name="id2557059"></a> file) and the required
-        VMware guest configuration (<code class="filename">.vmx</code><a class="indexterm" name="id2557074"></a>) file. </p><p>In addition it is possible to create an image for the Xen
-        virtualization framework. By adding the <code class="sgmltag-attribute">bootprofile</code><a class="indexterm" name="id2557092"></a> and <code class="sgmltag-attribute">bootkernel</code><a class="indexterm" name="id2557105"></a> attributes to the
+        tag will create the VMware formatted disk image (<code class="filename">.vmdk</code><a class="indexterm" name="id2557095"></a> file) and the required
+        VMware guest configuration (<code class="filename">.vmx</code><a class="indexterm" name="id2557111"></a>) file. </p><p>In addition it is possible to create an image for the Xen
+        virtualization framework. By adding the <code class="sgmltag-attribute">bootprofile</code><a class="indexterm" name="id2557128"></a> and <code class="sgmltag-attribute">bootkernel</code><a class="indexterm" name="id2557141"></a> attributes to the
           <code class="sgmltag-starttag">&lt;type&gt;</code> start tag with values
         of <code class="sgmltag-attvalue">xen</code> and <code class="sgmltag-attvalue">xenboot</code>, respectively. Please refer
-        to the <a class="xref" href="#chap.xen" title="Chapter 11. Xen Image—Paravirtual Systems">Chapter 11, <i>Xen Image—Paravirtual Systems</i></a> for additional details.</p></div><div class="sect2" title="8.3.2. LVM Support"><div class="titlepage"><div><div><h3 class="title"><a name="sec.vmx.lvm"></a>8.3.2. LVM Support<span class="permalink"><a alt="Permalink" title="8.3.2. LVM Support" href="#sec.vmx.lvm">¶</a></span></h3></div></div></div><a class="indexterm" name="id2557144"></a><p>KIWI also provides support for LVM (Logical Volume
+        to the <a class="xref" href="#chap.xen" title="Chapter 11. Xen Image—Paravirtual Systems">Chapter 11, <i>Xen Image—Paravirtual Systems</i></a> for additional details.</p></div><div class="sect2" title="8.3.2. LVM Support"><div class="titlepage"><div><div><h3 class="title"><a name="sec.vmx.lvm"></a>8.3.2. LVM Support<span class="permalink"><a alt="Permalink" title="8.3.2. LVM Support" href="#sec.vmx.lvm">¶</a></span></h3></div></div></div><a class="indexterm" name="id2557181"></a><p>KIWI also provides support for LVM (Logical Volume
         Management). In this mode the disk partition table will include
-        one lvm partition and one standard <code class="systemitem">ext2</code><a class="indexterm" name="id2557167"></a> boot partition. KIWI
+        one lvm partition and one standard <code class="systemitem">ext2</code><a class="indexterm" name="id2557204"></a> boot partition. KIWI
         creates the kiwiVG volume group and adds logical volumes as they
         are needed and configured according to the image type and
         filesystem. After boot of the system the user has full control
@@ -1489,7 +1500,7 @@ kiwi --create ... --fat-storage 500
         or add the attribute lvm="true" as part of the type section in
         your <code class="filename">config.xml</code> file. </p><pre class="screen"><span class="command"><strong>kiwi</strong></span> --create /tmp/myvm --type vmx -d /tmp/myvm-result --lvm </pre><p>With the optional systemdisk section you can set one or more
         top level directories into a separate volume. See <a class="xref" href="#chap.description" title="Chapter 2. KIWI Image Description">Chapter 2, <i>KIWI Image Description</i></a> for a detailed explanation.
-      </p></div></div></div><div class="chapter" title="Chapter 9. PXE Image—Thin Clients"><div class="titlepage"><div><div><h2 class="title"><a name="chap.pxe"></a>Chapter 9. PXE Image—Thin Clients</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.pxe.setting-up">9.1. Setting Up the Required Services</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.atftp-server">9.1.1. Atftp Server</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.dhcp-server">9.1.2. DHCP Server</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.building">9.2. Building the suse-pxe-client Example</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.using">9.3. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.flavours">9.4. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.client-control-file">9.4.1. The PXE Client Control File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.client-config-file">9.4.2. The PXE Client Configuration File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.another-user">9.4.3. User another than tftp as Download Protocol</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.ram-only-image">9.4.4. RAM Only Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.union-image">9.4.5. Union Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.split-image">9.4.6. Split Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nfs">9.4.7. Root Tree Over NFS</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nbd">9.4.8. Root Tree Over NBD</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-aoe">9.4.9. Root Tree Over AoE</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.groups">9.5. Hardware Grouping</a></span></dt><dd><dl><dt><span class="sect2"><a href="#id2559638">9.5.1. The Group Configuration File</a></span></dt><dt><span class="sect2"><a href="#id2559823">9.5.2. The Group Details File</a></span></dt><dt><span class="sect2"><a href="#id2559907">9.5.3.  Using Hardware Mapping to Provide Overrides</a></span></dt></dl></dd></dl></div><a class="indexterm" name="id2557230"></a><a class="indexterm" name="id2557242"></a><a class="indexterm" name="id2557253"></a><p>A PXE image consists of a boot image and a system image like all
+      </p></div></div></div><div class="chapter" title="Chapter 9. PXE Image—Thin Clients"><div class="titlepage"><div><div><h2 class="title"><a name="chap.pxe"></a>Chapter 9. PXE Image—Thin Clients</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.pxe.setting-up">9.1. Setting Up the Required Services</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.atftp-server">9.1.1. Atftp Server</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.dhcp-server">9.1.2. DHCP Server</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.building">9.2. Building the suse-pxe-client Example</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.using">9.3. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.flavours">9.4. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.client-control-file">9.4.1. The PXE Client Control File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.client-config-file">9.4.2. The PXE Client Configuration File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.another-user">9.4.3. User another than tftp as Download Protocol</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.ram-only-image">9.4.4. RAM Only Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.union-image">9.4.5. Union Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.split-image">9.4.6. Split Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nfs">9.4.7. Root Tree Over NFS</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nbd">9.4.8. Root Tree Over NBD</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-aoe">9.4.9. Root Tree Over AoE</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.groups">9.5. Hardware Grouping</a></span></dt><dd><dl><dt><span class="sect2"><a href="#id2559689">9.5.1. The Group Configuration File</a></span></dt><dt><span class="sect2"><a href="#id2559874">9.5.2. The Group Details File</a></span></dt><dt><span class="sect2"><a href="#id2559957">9.5.3.  Using Hardware Mapping to Provide Overrides</a></span></dt></dl></dd></dl></div><a class="indexterm" name="id2557266"></a><a class="indexterm" name="id2557278"></a><a class="indexterm" name="id2557289"></a><p>A PXE image consists of a boot image and a system image like all
     other image types too. But with a PXE image the image files are
     available separately and needs to be copied at specific locations of
     a network boot server. PXE is a boot protocol implemented in most
@@ -1497,14 +1508,14 @@ kiwi --create ... --fat-storage 500
     sends DHCP requests to assign an IP address and after that it uses
     tftp to download kernel and boot instructions. </p><div class="sect1" title="9.1. Setting Up the Required Services"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.pxe.setting-up"></a>9.1. Setting Up the Required Services<span class="permalink"><a alt="Permalink" title="9.1. Setting Up the Required Services" href="#sec.pxe.setting-up">¶</a></span></h2></div></div></div><p>Before you start to build pxe images with KIWI, setup the boot
       server. The boot server requires the services atftp and DHCP to
-      run. </p><div class="sect2" title="9.1.1. Atftp Server"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.atftp-server"></a>9.1.1. Atftp Server<span class="permalink"><a alt="Permalink" title="9.1.1. Atftp Server" href="#sec.pxe.atftp-server">¶</a></span></h3></div></div></div><p>In order to setup the <code class="systemitem">atftp</code><a class="indexterm" name="id2557302"></a> server the following steps are required </p><div class="procedure"><a name="proc.pxe.atftp-server-setup"></a><ol class="procedure" type="1"><li class="step" title="Step 1"><p>Install the packages <span class="package">atftp</span> and
+      run. </p><div class="sect2" title="9.1.1. Atftp Server"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.atftp-server"></a>9.1.1. Atftp Server<span class="permalink"><a alt="Permalink" title="9.1.1. Atftp Server" href="#sec.pxe.atftp-server">¶</a></span></h3></div></div></div><p>In order to setup the <code class="systemitem">atftp</code><a class="indexterm" name="id2557338"></a> server the following steps are required </p><div class="procedure"><a name="proc.pxe.atftp-server-setup"></a><ol class="procedure" type="1"><li class="step" title="Step 1"><p>Install the packages <span class="package">atftp</span> and
               <span class="package">kiwi-pxeboot</span>. </p></li><li class="step" title="Step 2"><p>Edit the file
             <code class="filename">/etc/sysconfig/atftpd</code>. Set or modify
             the following variables: </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><pre class="screen">
 ATFTPD_OPTIONS="--daemon --no-multicast"
 </pre></li><li class="listitem"><pre class="screen">
 ATFTPD_DIRECTORY="/srv/tftpboot"
-</pre></li></ul></div></li><li class="step" title="Step 3"><p>Run <code class="systemitem">atftpd</code><a class="indexterm" name="id2557380"></a> by
+</pre></li></ul></div></li><li class="step" title="Step 3"><p>Run <code class="systemitem">atftpd</code><a class="indexterm" name="id2557416"></a> by
             calling the command:</p><pre class="screen"><span class="command"><strong>
 rcatftpd</strong></span> start
 </pre></li></ol></div></div><div class="sect2" title="9.1.2. DHCP Server"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.dhcp-server"></a>9.1.2. DHCP Server<span class="permalink"><a alt="Permalink" title="9.1.2. DHCP Server" href="#sec.pxe.dhcp-server">¶</a></span></h3></div></div></div><p> In contrast to the atftp server setup the following DHCP
@@ -1535,11 +1546,11 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
 </pre></li><li class="step" title="Step 3"><p>Edit the file <code class="filename">/etc/sysconfig/dhcpd</code>
             and setup the network interface the server should listen on: </p><pre class="screen">
 DHCPD_INTERFACE="eth0"
-</pre></li><li class="step" title="Step 4"><p>Run the <code class="systemitem">dhcp</code><a class="indexterm" name="id2557498"></a> server by calling:</p><pre class="screen">
+</pre></li><li class="step" title="Step 4"><p>Run the <code class="systemitem">dhcp</code><a class="indexterm" name="id2557534"></a> server by calling:</p><pre class="screen">
 <span class="command"><strong>rcdhcpd</strong></span> start
 </pre></li></ol></div></div></div><div class="sect1" title="9.2. Building the suse-pxe-client Example"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.pxe.building"></a>9.2. Building the suse-pxe-client Example<span class="permalink"><a alt="Permalink" title="9.2. Building the suse-pxe-client Example" href="#sec.pxe.building">¶</a></span></h2></div></div></div><p>The example provided with KIWI is based on open­SUSE 11.2 and
       creates an image for a Wyse VX0 terminal with a 128MB flash card
-      and 512MB of RAM. The image makes use of the <code class="systemitem">squashfs</code><a class="indexterm" name="id2557545"></a> compressed
+      and 512MB of RAM. The image makes use of the <code class="systemitem">squashfs</code><a class="indexterm" name="id2557581"></a> compressed
       filesystem and its root tree is deployed as unified (aufs) based
       system. </p><pre class="screen">
 <span class="command"><strong>cd</strong></span> /usr/share/doc/packages/kiwi/examples
@@ -1585,7 +1596,7 @@ LABEL Local-Boot
         <code class="filename">config.<em class="replaceable"><code>MAC</code></em></code> (or
         <code class="filename">config.default</code>) file. When a new client
       boots up and there is no client configuration file the new client
-      is registered by uploading a control file to the <code class="systemitem">TFTP</code><a class="indexterm" name="id2557772"></a> server. The
+      is registered by uploading a control file to the <code class="systemitem">TFTP</code><a class="indexterm" name="id2557808"></a> server. The
       following sections informs about the control and the configuration
       file. </p><div class="sect2" title="9.4.1. The PXE Client Control File"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.client-control-file"></a>9.4.1. The PXE Client Control File<span class="permalink"><a alt="Permalink" title="9.4.1. The PXE Client Control File" href="#sec.pxe.client-control-file">¶</a></span></h3></div></div></div><p>This section describes the netboot client control file: </p><pre class="screen">
 hwtype.$&lt;$MAC Address$&gt;$
@@ -1593,7 +1604,7 @@ hwtype.$&lt;$MAC Address$&gt;$
         clients. In this case, there is no configuration file
         corresponding to the client MAC address available. Using the MAC
         address information, the control file is created, which is
-        uploaded to the <code class="systemitem">TFTP</code><a class="indexterm" name="id2557814"></a> servers upload directory
+        uploaded to the <code class="systemitem">TFTP</code><a class="indexterm" name="id2557851"></a> servers upload directory
           <code class="filename">/var/lib/tftpboot/upload</code>. </p></div><div class="sect2" title="9.4.2. The PXE Client Configuration File"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.client-config-file"></a>9.4.2. The PXE Client Configuration File<span class="permalink"><a alt="Permalink" title="9.4.2. The PXE Client Configuration File" href="#sec.pxe.client-config-file">¶</a></span></h3></div></div></div><p>This section describes the netboot client configuration
         file: </p><pre class="screen">
 config.$&lt;$MAC Address$&gt;$
@@ -1617,14 +1628,14 @@ PART=size;id;Mount,...,size;id;Mount
 DISK=device
 </pre><div class="variablelist"><dl><dt><span class="term"><code class="varname">IMAGE</code></span></dt><dd><p>Specifies which image (name) should be loaded with
               which version (version) and to which storage device
-              (device) it should be linked, e. g., <code class="filename">/dev/ram1</code><a class="indexterm" name="id2557913"></a> or <code class="filename">/dev/hda2</code><a class="indexterm" name="id2557927"></a>. The netboot
+              (device) it should be linked, e. g., <code class="filename">/dev/ram1</code><a class="indexterm" name="id2557949"></a> or <code class="filename">/dev/hda2</code><a class="indexterm" name="id2557964"></a>. The netboot
               client partition (device) hda2 defines the root file
               system / and hda1 is used for the swap partition. The
               numbering of the hard disk device should not be confused
-              with the RAM disk device, where <code class="filename">/dev/ram0</code><a class="indexterm" name="id2557946"></a> is used for the
+              with the RAM disk device, where <code class="filename">/dev/ram0</code><a class="indexterm" name="id2557983"></a> is used for the
               initial RAM disk and can not be used as storage device for
               the second stage system image. SUSE recommends to use the
-              device <code class="filename">/dev/ram1</code><a class="indexterm" name="id2557964"></a>
+              device <code class="filename">/dev/ram1</code><a class="indexterm" name="id2558000"></a>
               for the RAM disk. If the hard drive is used, a
               corresponding partitioning must be performed. </p><div class="variablelist"><dl><dt><span class="term">srvip</span></dt><dd><p>Specifies the server IP address for the TFTP
                     download. Must always be indicated, except in PART.
@@ -1643,7 +1654,7 @@ DISK=device
                     image isn’t compressed. It will also fail if you
                     don’t specify <code class="literal">"compressed"</code> but
                     the image is compressed. The name of the compressed
-                    image has to contain the suffix <code class="filename">.gz</code><a class="indexterm" name="id2558062"></a> and needs to be
+                    image has to contain the suffix <code class="filename">.gz</code><a class="indexterm" name="id2558098"></a> and needs to be
                     compressed with the <span class="command"><strong>gzip</strong></span> tool.
                     Using a compressed image will automatically
                       <span class="emphasis"><em>deactivate</em></span> the multicast
@@ -1694,7 +1705,7 @@ PART=5;S;x,2000;83;/
 RAID=1;/dev/sda;/dev/sdb
 </pre></dd><dt><span class="term"><code class="varname">DISK</code></span></dt><dd><p>Specifies the hard disk. Used only with PART and
               defines the device via which the hard disk can be
-              addressed, e.g., <code class="filename">/dev/hda</code><a class="indexterm" name="id2558393"></a>. </p></dd><dt><span class="term"><code class="varname">RELOAD_IMAGE</code></span></dt><dd><p>If set to a non-empty string, this forces the
+              addressed, e.g., <code class="filename">/dev/hda</code><a class="indexterm" name="id2558429"></a>. </p></dd><dt><span class="term"><code class="varname">RELOAD_IMAGE</code></span></dt><dd><p>If set to a non-empty string, this forces the
               configured image to be loaded from the server even if the
               image on the disk is up-to-date. The primary purpose of
               this setting is to aid debugging. The option is sensible
@@ -1708,8 +1719,8 @@ RAID=1;/dev/sda;/dev/sdb
               the system. The variables value must be set to the name of
               the initrd file which is used via PXE network boot. If the
               standard tftp setup suggested with the kiwi-pxeboot
-              package is used all initrd files resides in the <code class="filename">boot/</code><a class="indexterm" name="id2558482"></a> directory below the
-              tftp server path <code class="filename">/var/lib/tftpboot</code><a class="indexterm" name="id2558498"></a>.
+              package is used all initrd files resides in the <code class="filename">boot/</code><a class="indexterm" name="id2558524"></a> directory below the
+              tftp server path <code class="filename">/var/lib/tftpboot</code><a class="indexterm" name="id2558539"></a>.
               Because the tftp server do a chroot into the tftp server
               path you need to specify the initrd file as the following
               example shows: </p><pre class="screen">
@@ -1721,8 +1732,8 @@ KIWI_INITRD=/boot/<em class="replaceable"><code>name-of-initrd-file</code></em>
               image is <span class="bold"><strong>clicfs</strong></span>.
             </p><pre class="screen">
 UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs
-</pre><p>In this example the first device <code class="filename">/dev/sda2</code><a class="indexterm" name="id2558557"></a> represents the
-              read/write filesystem and the second device <code class="filename">/dev/sda3</code><a class="indexterm" name="id2558573"></a> represents the
+</pre><p>In this example the first device <code class="filename">/dev/sda2</code><a class="indexterm" name="id2558599"></a> represents the
+              read/write filesystem and the second device <code class="filename">/dev/sda3</code><a class="indexterm" name="id2558614"></a> represents the
               compressed system image filesystem. The container
               filesystem aufs is then used to cover the read/write layer
               with the read-only device to one read/write filesystem. If
@@ -1755,7 +1766,7 @@ DISK=/dev/sda
               program. For more information on how to set up the server,
               see the nbd-server man pages. The kernel on the remote
               client can set up a special network block device named
-                <code class="filename">/dev/nb0</code><a class="indexterm" name="id2558693"></a> using
+                <code class="filename">/dev/nb0</code><a class="indexterm" name="id2558735"></a> using
               the nbd-client command. After this device exists, the
               mount program is used to mount the root filesystem. To
               allow the KIWI boot image to use that, the following
@@ -1767,9 +1778,9 @@ NBD-Write-Port-Number;/dev/NBD-Write-Device
 </pre><p> The NBD-Device, NBD-Swap-Port-Number,
               NBD-Swap-Device, NBD-Write-Port-Number and
               NBD-Write-Device variables are optional. If the nbd root
-              device is not set, the default values (<code class="filename">/dev/nb0</code><a class="indexterm" name="id2558727"></a>, port 2000)
+              device is not set, the default values (<code class="filename">/dev/nb0</code><a class="indexterm" name="id2558769"></a>, port 2000)
               applies and if the nbd swap device is not set the default
-              values (<code class="filename">/dev/nb1</code><a class="indexterm" name="id2558744"></a>,
+              values (<code class="filename">/dev/nb1</code><a class="indexterm" name="id2558785"></a>,
               port 9210) applies. The swap space over the network using
               a network block device is only established if the client
               has less than 48 MB of RAM. The optional
@@ -1784,25 +1795,25 @@ NBD-Write-Port-Number;/dev/NBD-Write-Device
               install the <span class="package">aoetools</span> and
                 <span class="package">vblade</span> packages from here first:
                 <a class="ulink" href="http://download.opensuse.org/repositories/system:/aoetools" target="_top">http://download.opensuse.org/repositories/system:/aoetools</a>. Once installed the following example shows how to
-              export the local <code class="filename">/dev/sdb1</code><a class="indexterm" name="id2558800"></a> partition via AoE:</p><pre class="screen">
+              export the local <code class="filename">/dev/sdb1</code><a class="indexterm" name="id2558841"></a> partition via AoE:</p><pre class="screen">
 <span class="command"><strong>vbladed</strong></span> 0 1 eth0 /dev/sdb1
 </pre><p> Some explanation about this command, each AoE device
               is identified by a couple Major/Minor, with major between
               0-65535 and minor between 0-255. AoE is based just over
               Ethernet on the OSI models so we need to indicate which
               ethernet card we’ll use. In this example we export
-                <code class="filename">/dev/sdb1</code><a class="indexterm" name="id2558838"></a> with a
+                <code class="filename">/dev/sdb1</code><a class="indexterm" name="id2558881"></a> with a
               major value of 0 and minor of 1 on the eth0 interface. We
               are ready to use our partition on the network! To be able
               to use the device KIWI needs the information which AoE
               device contains the root filesystem. In our example this
-              is the device <code class="filename">/dev/etherd/e0.1</code><a class="indexterm" name="id2558858"></a>. According to this the
+              is the device <code class="filename">/dev/etherd/e0.1</code><a class="indexterm" name="id2558901"></a>. According to this the
               AOEROOT variable must be set as follows: </p><pre class="screen">
 AOEROOT=/dev/etherd/e0.1
 </pre><p> KIWI is now able to mount and use the specified AoE
               device as the remote root filesystem. In case of a
-              compressed read-only image with <code class="systemitem">aufs</code><a class="indexterm" name="id2558885"></a> 
-              or <code class="systemitem">clicfs</code><a class="indexterm" name="id2558900"></a>, the
+              compressed read-only image with <code class="systemitem">aufs</code><a class="indexterm" name="id2558928"></a> 
+              or <code class="systemitem">clicfs</code><a class="indexterm" name="id2558943"></a>, the
               AOEROOT variable can also contain a device for the write
               actions: </p><pre class="screen">
 AOEROOT=/dev/etherd/e0.1,/dev/ram1
@@ -1827,7 +1838,7 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM
               of the system. The value must be set to the name of the
               initrd file which is used via PXE network boot. If the
               standard TFTP setup suggested with the kiwi-pxeboot
-              package is used, all initrd files reside in the <code class="filename">/srv/tftpboot/boot/</code><a class="indexterm" name="id2558997"></a>
+              package is used, all initrd files reside in the <code class="filename">/srv/tftpboot/boot/</code><a class="indexterm" name="id2559040"></a>
               directory. Because the TFTP server does a chroot into the
               TFTP server path, you must specify the initrd file as
               follows: </p><pre class="screen">
@@ -1859,7 +1870,7 @@ KIWI_KERNEL=/boot/name-of-kernel-file
         controlled by the given server and protocol. You need to make
         sure that this server provides the same directory and file
         structure as initially provided by the <span class="package">kiwi-pxeboot</span> package.
-      </p></div><div class="sect2" title="9.4.4. RAM Only Image"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.ram-only-image"></a>9.4.4. RAM Only Image<span class="permalink"><a alt="Permalink" title="9.4.4. RAM Only Image" href="#sec.pxe.ram-only-image">¶</a></span></h3></div></div></div><a class="indexterm" name="id2559175"></a><p>If there is no local storage and no remote root mount setup
+      </p></div><div class="sect2" title="9.4.4. RAM Only Image"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.ram-only-image"></a>9.4.4. RAM Only Image<span class="permalink"><a alt="Permalink" title="9.4.4. RAM Only Image" href="#sec.pxe.ram-only-image">¶</a></span></h3></div></div></div><a class="indexterm" name="id2559218"></a><p>If there is no local storage and no remote root mount setup
         the image can be stored into the main memory of the client.
         Please be aware that there should be still enough RAM space
         available for the operating system after the image has been
@@ -1870,7 +1881,7 @@ KIWI_KERNEL=/boot/name-of-kernel-file
               <code class="filename">config.<em class="replaceable"><code>MAC</code></em></code>
           </p><pre class="screen">
 IMAGE=/dev/ram1;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096
-</pre></li></ul></div></div><div class="sect2" title="9.4.5. Union Image"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.union-image"></a>9.4.5. Union Image<span class="permalink"><a alt="Permalink" title="9.4.5. Union Image" href="#sec.pxe.union-image">¶</a></span></h3></div></div></div><a class="indexterm" name="id2559245"></a><p>As used in the suse-pxe-client example it is possible to
+</pre></li></ul></div></div><div class="sect2" title="9.4.5. Union Image"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.union-image"></a>9.4.5. Union Image<span class="permalink"><a alt="Permalink" title="9.4.5. Union Image" href="#sec.pxe.union-image">¶</a></span></h3></div></div></div><a class="indexterm" name="id2559288"></a><p>As used in the suse-pxe-client example it is possible to
         make use of the aufs or clicfs overlay filesystems to combine
         two filesystems into one. In case of thin clients there is often
         the need for a compressed filesystem due to space limitations.
@@ -1879,15 +1890,15 @@ IMAGE=/dev/ram1;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096
         read-write filesystem is a solution for this problem. In order
         to use a compressed root filesystem make sure your
           <code class="filename">config.xml</code>’s filesystem attribute
-        contains either <code class="systemitem">squashfs</code><a class="indexterm" name="id2559281"></a> 
-        or <code class="systemitem">clicfs</code><a class="indexterm" name="id2559295"></a>. Below, find an example: </p><pre class="screen">
+        contains either <code class="systemitem">squashfs</code><a class="indexterm" name="id2559324"></a> 
+        or <code class="systemitem">clicfs</code><a class="indexterm" name="id2559338"></a>. Below, find an example: </p><pre class="screen">
 DISK=/dev/sda
 PART=5;S;x,62;L;/,x;L;x,
 IMAGE=/dev/sda2;suse-11.2-pxe-client.i386;\
       1.2.8;192.168.100.2;4096
 UNIONFS_CONFIG=/dev/sda3,/dev/sda2,aufs
 KIWI_INITRD=/boot/initrd
-</pre></div><div class="sect2" title="9.4.6. Split Image"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.split-image"></a>9.4.6. Split Image<span class="permalink"><a alt="Permalink" title="9.4.6. Split Image" href="#sec.pxe.split-image">¶</a></span></h3></div></div></div><a class="indexterm" name="id2559321"></a><p>As an alternative to the <code class="varname">UNIONFS_CONFIG</code>
+</pre></div><div class="sect2" title="9.4.6. Split Image"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.split-image"></a>9.4.6. Split Image<span class="permalink"><a alt="Permalink" title="9.4.6. Split Image" href="#sec.pxe.split-image">¶</a></span></h3></div></div></div><a class="indexterm" name="id2559364"></a><p>As an alternative to the <code class="varname">UNIONFS_CONFIG</code>
         method it is also possible to create a split image and combine
         the two portions with the <code class="varname">COMBINED_IMAGE</code>
         method. This allows to use different filesystems without the
@@ -1927,7 +1938,7 @@ COMBINED_IMAGE=yes
 KIWI_INITRD=/boot/initrd
 </pre></li></ul></div></div><div class="sect2" title="9.4.7. Root Tree Over NFS"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.root-tree-over-nfs"></a>9.4.7. Root Tree Over NFS<span class="permalink"><a alt="Permalink" title="9.4.7. Root Tree Over NFS" href="#sec.pxe.root-tree-over-nfs">¶</a></span></h3></div></div></div><p> Instead of installing the image onto a local storage device
         of the client it is also possible to let the client mount the
-        root tree via an <code class="systemitem">NFS</code><a class="indexterm" name="id2559453"></a>
+        root tree via an <code class="systemitem">NFS</code><a class="indexterm" name="id2559496"></a>
         remote mount. Below find an example: </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>Export the KIWI prepared tree via NFS.</p></li><li class="listitem"><p>Sample
               <code class="filename">config.<em class="replaceable"><code>MAC</code></em></code>: </p><pre class="screen">
 NFSROOT=192.168.100.7;/tmp/kiwi.nfsroot
@@ -1957,7 +1968,7 @@ AOEROOT=/dev/etherd/e0.1
       where different hardware types may be involved due to newer equipment being rotated into
       production or older hardware failing and replacements are from different vendors. In addition,
       an organization might decide to organize their equipment by function, rather than by vendor,
-      and may not be able to use the same hardware from one end to the other. </p><div class="sect2" title="9.5.1. The Group Configuration File"><div class="titlepage"><div><div><h3 class="title"><a name="id2559638"></a>9.5.1. The Group Configuration File<span class="permalink"><a alt="Permalink" title="9.5.1. The Group Configuration File" href="#id2559638">¶</a></span></h3></div></div></div><p>To make use of the grouping functionality, some new configuration files will be
+      and may not be able to use the same hardware from one end to the other. </p><div class="sect2" title="9.5.1. The Group Configuration File"><div class="titlepage"><div><div><h3 class="title"><a name="id2559689"></a>9.5.1. The Group Configuration File<span class="permalink"><a alt="Permalink" title="9.5.1. The Group Configuration File" href="#id2559689">¶</a></span></h3></div></div></div><p>To make use of the grouping functionality, some new configuration files will be
         required. These configuration files currently have to be manually managed rather than
         provided, however future versions of KIWI may provide a means of managing groups more
         effectively once this feature stabilizes. The number of configuration files required will
@@ -2003,7 +2014,7 @@ KIWI_GROUP="test1, test_my_name, LIST_HARDWARE, Multple_Case_Group_1"
             file to a single host. The file size will have a larger impact when trying to download
             it to 1500+ hosts, so some consideration will have to take that into account. 
             The comparison itself still occurred in under half a second while searching 
-            through all 1500+ MAC addresses across 3 defined groups.</p></li></ul></div></div><div class="sect2" title="9.5.2. The Group Details File"><div class="titlepage"><div><div><h3 class="title"><a name="id2559823"></a>9.5.2. The Group Details File<span class="permalink"><a alt="Permalink" title="9.5.2. The Group Details File" href="#id2559823">¶</a></span></h3></div></div></div><p>In addition to the config.group file, each defined group will require a
+            through all 1500+ MAC addresses across 3 defined groups.</p></li></ul></div></div><div class="sect2" title="9.5.2. The Group Details File"><div class="titlepage"><div><div><h3 class="title"><a name="id2559874"></a>9.5.2. The Group Details File<span class="permalink"><a alt="Permalink" title="9.5.2. The Group Details File" href="#id2559874">¶</a></span></h3></div></div></div><p>In addition to the config.group file, each defined group will require a
         config.&lt;GROUP_NAME&gt; file. This file is exactly like a standard KIWI config.&lt;MAC&gt; file,
         but is assigned to a group of hosts rather than a single unit. If we continue with the
         example we used in the previous section, we would need the following files:</p><pre class="screen">
@@ -2030,13 +2041,13 @@ CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,\
      CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096
 </pre><p>As we can see, while group 1 and 2 share the syslog.conf configuration file, they have
         different xorg.conf files defined, therefore two distinct groups with one or more hosts
-        assigned to each group can now be configured by managing a smaller number of files.</p></div><div class="sect2" title="9.5.3.  Using Hardware Mapping to Provide Overrides"><div class="titlepage"><div><div><h3 class="title"><a name="id2559907"></a>9.5.3.  Using Hardware Mapping to Provide Overrides<span class="permalink"><a alt="Permalink" title="9.5.3.  Using Hardware Mapping to Provide Overrides" href="#id2559907">¶</a></span></h3></div></div></div><p>The only issue with running mixed hardware configurations pertains primarily to hardware
+        assigned to each group can now be configured by managing a smaller number of files.</p></div><div class="sect2" title="9.5.3.  Using Hardware Mapping to Provide Overrides"><div class="titlepage"><div><div><h3 class="title"><a name="id2559957"></a>9.5.3.  Using Hardware Mapping to Provide Overrides<span class="permalink"><a alt="Permalink" title="9.5.3.  Using Hardware Mapping to Provide Overrides" href="#id2559957">¶</a></span></h3></div></div></div><p>The only issue with running mixed hardware configurations pertains primarily to hardware
         differences. For instance, it may be possible to create a single, xorg.conf file that is
         able to work with all of the hardware, but there is a chance it might not be possible to do
         so. With this in mind, KIWI provides a mechanism to provide "default" configurations that
         works with the most common hardware configuration, while providing hardware specific
         overrides to allow for any differences and yet have all hardware linked to the same
-        group.</p><div class="sect3" title="9.5.3.1. The Hardware Mapping Elements"><div class="titlepage"><div><div><h4 class="title"><a name="id2559926"></a>9.5.3.1. The Hardware Mapping Elements<span class="permalink"><a alt="Permalink" title="9.5.3.1. The Hardware Mapping Elements" href="#id2559926">¶</a></span></h4></div></div></div><p>To make use of the hardware linking mechanism, two additional parameters needs to be
+        group.</p><div class="sect3" title="9.5.3.1. The Hardware Mapping Elements"><div class="titlepage"><div><div><h4 class="title"><a name="id2559986"></a>9.5.3.1. The Hardware Mapping Elements<span class="permalink"><a alt="Permalink" title="9.5.3.1. The Hardware Mapping Elements" href="#id2559986">¶</a></span></h4></div></div></div><p>To make use of the hardware linking mechanism, two additional parameters needs to be
           added to the group details file, the one named config.&lt;group_name&gt;. These two elements
           "link" hardware specific configurations to the appropriate systems. A general example
           would look like this:</p><pre class="screen">
@@ -2056,7 +2067,7 @@ vendor_name_model_HARDWARE_MAP="00:00:00:11:11:11"
               defined above, in that it lists all MAC addreses that need to be linked to a hardware
               map. Any host defined within the list will receive configuration files that have been
               specifically defined in a hardware_config.&lt;hardware_map&gt; file, in addition to any
-              files defined within a CONF element.</p></li></ul></div></div><div class="sect3" title="9.5.3.2. The Hardware Mapping Details File"><div class="titlepage"><div><div><h4 class="title"><a name="id2560018"></a>9.5.3.2. The Hardware Mapping Details File<span class="permalink"><a alt="Permalink" title="9.5.3.2. The Hardware Mapping Details File" href="#id2560018">¶</a></span></h4></div></div></div><p>Once the hardware map has been defined, the last step is to ensure configuration
+              files defined within a CONF element.</p></li></ul></div></div><div class="sect3" title="9.5.3.2. The Hardware Mapping Details File"><div class="titlepage"><div><div><h4 class="title"><a name="id2560078"></a>9.5.3.2. The Hardware Mapping Details File<span class="permalink"><a alt="Permalink" title="9.5.3.2. The Hardware Mapping Details File" href="#id2560078">¶</a></span></h4></div></div></div><p>Once the hardware map has been defined, the last step is to ensure configuration
           specific elements are linked to the host(s) in question. This is done by creating a new
           hardware_config.&lt;hardware_map&gt; file. The contents of the file is quite simple, and
           contains only one element called VENDOR_CONF, as the following example shows:</p><pre class="screen">
@@ -2066,7 +2077,7 @@ VENDOR_CONF=CONFIGURATIONS/xorg.conf.hardware_name_model;/etc/X11/xorg.conf;192.
           will over-write any files defined in the group configuration, if and only if, all of the
           following cases apply:</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>The host is assigned to the current hardware map</p></li><li class="listitem"><p>The file is defined within the CONF and VENDOR_CONF elements</p></li></ul></div><p>NOTE: If a file is not defined in the CONF element, but is defined in the VENDOR_CONF
           element, it is simply downloaded to the host as if it was a CONF file. In this case, no
-          overwritting will take place as it is considered a new file.</p></div><div class="sect3" title="9.5.3.3. A Complete Example"><div class="titlepage"><div><div><h4 class="title"><a name="id2560077"></a>9.5.3.3. A Complete Example<span class="permalink"><a alt="Permalink" title="9.5.3.3. A Complete Example" href="#id2560077">¶</a></span></h4></div></div></div><p>The following is an example of a group that is using hardware from multiple vendors.
+          overwritting will take place as it is considered a new file.</p></div><div class="sect3" title="9.5.3.3. A Complete Example"><div class="titlepage"><div><div><h4 class="title"><a name="id2560137"></a>9.5.3.3. A Complete Example<span class="permalink"><a alt="Permalink" title="9.5.3.3. A Complete Example" href="#id2560137">¶</a></span></h4></div></div></div><p>The following is an example of a group that is using hardware from multiple vendors.
           For the purposes of this example, lets assume the group will have 10 defined hosts, seven
           are imaginative HP thinstations, while the remaining three are older Maxterm thinstations.
           We will also assume that the differences we are trying to address are specific to the
@@ -2136,7 +2147,7 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
           prefs.js, a new version of the xorg.conf file as well as a file called somconfig.cfg. For
           the purposes of our example, the contents of the prefs.js, xorg.conf,
           xorg.conf.maxterm_3500 and someconfig.cfg are arbitrary, and don't need to be explained
-          here.</p></div></div></div></div><div class="chapter" title="Chapter 10. OEM Image—Preload Systems"><div class="titlepage"><div><div><h2 class="title"><a name="chap.oem"></a>Chapter 10. OEM Image—Preload Systems</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.oem.building">10.1. Building the suse-oem-preload Example</a></span></dt><dt><span class="sect1"><a href="#sec.oem.using">10.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.oem.flavours">10.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.oem.installation">10.3.1. Specializing the OEM install process</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partitioning">10.3.2. Influencing the OEM Partitioning</a></span></dt><dt><span class="sect2"><a href="#sec.oem.lvm">10.3.3. LVM Support</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partition-based-installation">10.3.4. Partition Based Installation</a></span></dt></dl></dd></dl></div><a class="indexterm" name="id2560240"></a><a class="indexterm" name="id2560251"></a><a class="indexterm" name="id2560263"></a><p>An OEM image is a virtual disk image representing all partitions
+          here.</p></div></div></div></div><div class="chapter" title="Chapter 10. OEM Image—Preload Systems"><div class="titlepage"><div><div><h2 class="title"><a name="chap.oem"></a>Chapter 10. OEM Image—Preload Systems</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.oem.building">10.1. Building the suse-oem-preload Example</a></span></dt><dt><span class="sect1"><a href="#sec.oem.using">10.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.oem.flavours">10.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.oem.installation">10.3.1. Specializing the OEM install process</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partitioning">10.3.2. Influencing the OEM Partitioning</a></span></dt><dt><span class="sect2"><a href="#sec.oem.lvm">10.3.3. LVM Support</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partition-based-installation">10.3.4. Partition Based Installation</a></span></dt></dl></dd></dl></div><a class="indexterm" name="id2560297"></a><a class="indexterm" name="id2560308"></a><a class="indexterm" name="id2560320"></a><p>An OEM image is a virtual disk image representing all partitions
     and bootloader information in the same fashion it exists on a
     physical disk. The image format matches the format of the VMX image
     type. All flavors discussed previously for the VMX image type apply
@@ -2151,8 +2162,8 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
 		releases, one example configuration per release, and includes the
 		default and x11 patterns. The image type is a split type utilizing
 		the distributions default filesystem format for the read-write
-		partition and the <code class="systemitem">squashfs</code><a class="indexterm" name="id2560312"></a> filesystem for the read-only partition.
-		Using the additional <code class="sgmltag-attribute">installiso</code><a class="indexterm" name="id2560325"></a> attribute creates an installable ISO
+		partition and the <code class="systemitem">squashfs</code><a class="indexterm" name="id2560369"></a> filesystem for the read-only partition.
+		Using the additional <code class="sgmltag-attribute">installiso</code><a class="indexterm" name="id2560383"></a> attribute creates an installable ISO
 		image. When booting from the ISO image the OEM disk image will be
 		deployed to the storage media on the booting machine (after
 		confirmation by the user).
@@ -2164,8 +2175,8 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
 </pre></div><div class="sect1" title="10.2. Using the Image"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.oem.using"></a>10.2. Using the Image<span class="permalink"><a alt="Permalink" title="10.2. Using the Image" href="#sec.oem.using">¶</a></span></h2></div></div></div><p>The virtual disk image created by KIWI with the commands shown
       above can be tested using virtualization software such as QEMU,
       VMware, or VirtualBox. The virtual disk is represented by the file
-      with the <code class="filename">.raw</code><a class="indexterm" name="id2560386"></a> extension,
-      whereas the file with the <code class="filename">.iso</code><a class="indexterm" name="id2560402"></a> extension represents the installation disk for
+      with the <code class="filename">.raw</code><a class="indexterm" name="id2560444"></a> extension,
+      whereas the file with the <code class="filename">.iso</code><a class="indexterm" name="id2560459"></a> extension represents the installation disk for
       this oem image. The ISO image is bootable
         (<code class="filename">filename.iso</code>) and can be burned to optical
       media. It is recommended to test the image on a bare test system.
@@ -2179,29 +2190,29 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
 <span class="command"><strong>cd</strong></span> /tmp/myoem-result 
 <span class="command"><strong>dd</strong></span> if=suse-*-oem-preload.*.raw of=/dev/<em class="replaceable"><code>device</code></em> bs=32k
 </pre><p>Note, when testing an oem image using the virtual disk image,
-      i.e. the <code class="filename">.raw</code><a class="indexterm" name="id2560485"></a> file, the
+      i.e. the <code class="filename">.raw</code><a class="indexterm" name="id2560542"></a> file, the
       geometry of the disk image is not changed and therefore retains
       the disk geometry of the host system. This implies that the
       re-partitioning performed for a physical disk install during the
       oem boot workflow will be skipped. </p><p>You can test the installation procedure in a virtual
-      environment using the <code class="filename">.iso</code><a class="indexterm" name="id2560508"></a>
+      environment using the <code class="filename">.iso</code><a class="indexterm" name="id2560566"></a>
       file. In this case the re-partitioning code in the boot image will
       be executed. The following commands show this procedure using
       QEMU. </p><pre class="screen">
 <span class="command"><strong>cd</strong></span> /tmp/myoem-result 
 <span class="command"><strong>qemu-img</strong></span> create /tmp/mydisk 20G 
 <span class="command"><strong>qemu</strong></span> -hda /tmp/mydisk -cdrom suse-*-oem-preload.*.iso -boot d
-</pre></div><div class="sect1" title="10.3. Flavours"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.oem.flavours"></a>10.3. Flavours<span class="permalink"><a alt="Permalink" title="10.3. Flavours" href="#sec.oem.flavours">¶</a></span></h2></div></div></div><p>As indicated above the use of the <code class="sgmltag-attribute">installiso</code><a class="indexterm" name="id2560560"></a> and <code class="sgmltag-attribute">installstick</code><a class="indexterm" name="id2560572"></a> attributes for the oem image supports
+</pre></div><div class="sect1" title="10.3. Flavours"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.oem.flavours"></a>10.3. Flavours<span class="permalink"><a alt="Permalink" title="10.3. Flavours" href="#sec.oem.flavours">¶</a></span></h2></div></div></div><p>As indicated above the use of the <code class="sgmltag-attribute">installiso</code><a class="indexterm" name="id2560617"></a> and <code class="sgmltag-attribute">installstick</code><a class="indexterm" name="id2560629"></a> attributes for the oem image supports
       the creation of an installation image. The installation image can
       be created in two formats, one suitable for CD/DVD media and a
       second suitable for a USB stick. The self installing image deploys
       the oem image onto the selected storage device. The installation
       process is a simple image dump using the <span class="command"><strong>dd</strong></span> command.
       During this process the target system remains in terminal mode. The
-      following configuration snippets show the use of the <code class="sgmltag-attribute">installiso</code><a class="indexterm" name="id2560599"></a> and <code class="sgmltag-attribute">installstick</code><a class="indexterm" name="id2560611"></a> attributes to create
-      the ISO or USB installation image format respectively. </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><pre class="screen">&lt;type image="name" ... installiso="true"/&gt;</pre><p>Creates a <code class="filename">.iso</code><a class="indexterm" name="id2560641"></a> file
+      following configuration snippets show the use of the <code class="sgmltag-attribute">installiso</code><a class="indexterm" name="id2560656"></a> and <code class="sgmltag-attribute">installstick</code><a class="indexterm" name="id2560668"></a> attributes to create
+      the ISO or USB installation image format respectively. </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><pre class="screen">&lt;type image="name" ... installiso="true"/&gt;</pre><p>Creates a <code class="filename">.iso</code><a class="indexterm" name="id2560699"></a> file
           which can be burned onto a CD or a DVD. This represents an
-          installation CD/DVD </p></li><li class="listitem"><pre class="screen">&lt;type image="name" ... installstick="true"/&gt;</pre><p>Creates a <code class="filename">.raw.install</code><a class="indexterm" name="id2560671"></a> file which can be dumped
+          installation CD/DVD </p></li><li class="listitem"><pre class="screen">&lt;type image="name" ... installstick="true"/&gt;</pre><p>Creates a <code class="filename">.raw.install</code><a class="indexterm" name="id2560728"></a> file which can be dumped
             (<span class="command"><strong>dd</strong></span>) onto a USB stick. This represents an
           installation Stick </p></li></ul></div><div class="sect2" title="10.3.1. Specializing the OEM install process"><div class="titlepage"><div><div><h3 class="title"><a name="sec.oem.installation"></a>10.3.1. Specializing the OEM install process<span class="permalink"><a alt="Permalink" title="10.3.1. Specializing the OEM install process" href="#sec.oem.installation">¶</a></span></h3></div></div></div><p>It is possible to specialize the OEM install process by providing
           shell scripts with the following names in the
@@ -2218,14 +2229,14 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
       </p></div><div class="sect2" title="10.3.2. Influencing the OEM Partitioning"><div class="titlepage"><div><div><h3 class="title"><a name="sec.oem.partitioning"></a>10.3.2. Influencing the OEM Partitioning<span class="permalink"><a alt="Permalink" title="10.3.2. Influencing the OEM Partitioning" href="#sec.oem.partitioning">¶</a></span></h3></div></div></div><p>By default the oemboot process will create/modify a swap,
           <code class="filename">/home</code> and <code class="filename">/</code>
         partition. It is possible to influence the behavior with the
-          <code class="sgmltag-element">oem-*</code> elements. See <a class="xref" href="#chap.description" title="Chapter 2. KIWI Image Description">Chapter 2, <i>KIWI Image Description</i></a> for details. </p></div><div class="sect2" title="10.3.3. LVM Support"><div class="titlepage"><div><div><h3 class="title"><a name="sec.oem.lvm"></a>10.3.3. LVM Support<span class="permalink"><a alt="Permalink" title="10.3.3. LVM Support" href="#sec.oem.lvm">¶</a></span></h3></div></div></div><a class="indexterm" name="id2560794"></a><p>KIWI also provides support for LVM (Logical Volume
+          <code class="sgmltag-element">oem-*</code> elements. See <a class="xref" href="#chap.description" title="Chapter 2. KIWI Image Description">Chapter 2, <i>KIWI Image Description</i></a> for details. </p></div><div class="sect2" title="10.3.3. LVM Support"><div class="titlepage"><div><div><h3 class="title"><a name="sec.oem.lvm"></a>10.3.3. LVM Support<span class="permalink"><a alt="Permalink" title="10.3.3. LVM Support" href="#sec.oem.lvm">¶</a></span></h3></div></div></div><a class="indexterm" name="id2560851"></a><p>KIWI also provides support for LVM (Logical Volume
         Management). In this mode the disk partition table will include
         one lvm partition and one standard ext2 boot partition. KIWI
         creates the kiwiVG volume group, unless the lvmgroup attribute
         has been set, and adds logical volumes to the group based on the
         configuration given by the <code class="sgmltag-element">systemdisk</code> block
         for this type. The filesystem for the volume group is determined
-        by the <code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id2560823"></a> attribute
+        by the <code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id2560880"></a> attribute
         of the type element. After booting the system the user has full
         control over the volume group and is free to change
         (resize/increase) the group and the volumes inside. Support for
@@ -2258,7 +2269,7 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
             image which it can’t do if the file is only available as
             compressed version. This means the install media in this
             mode will be approximately double the size of a standard
-            install media. </p></li></ul></div></div></div></div><div class="chapter" title="Chapter 11. Xen Image—Paravirtual Systems"><div class="titlepage"><div><div><h2 class="title"><a name="chap.xen"></a>Chapter 11. Xen Image—Paravirtual Systems</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.xen.building">11.1. Building the suse-xen-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.xen.using">11.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.xen.flavours">11.3. Flavours</a></span></dt></dl></div><a class="indexterm" name="id2560989"></a><a class="indexterm" name="id2561000"></a><a class="indexterm" name="id2561012"></a><p>Xen is a free software virtual machine monitor. It allows
+            install media. </p></li></ul></div></div></div></div><div class="chapter" title="Chapter 11. Xen Image—Paravirtual Systems"><div class="titlepage"><div><div><h2 class="title"><a name="chap.xen"></a>Chapter 11. Xen Image—Paravirtual Systems</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.xen.building">11.1. Building the suse-xen-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.xen.using">11.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.xen.flavours">11.3. Flavours</a></span></dt></dl></div><a class="indexterm" name="id2561036"></a><a class="indexterm" name="id2561048"></a><a class="indexterm" name="id2561059"></a><p>Xen is a free software virtual machine monitor. It allows
     several guest operating systems to be executed on the same computer
     hardware at the same time. </p><p>A Xen system is structured with the Xen hypervisor as the lowest
     and most privileged layer. Above this layer are one or more guest
@@ -2288,10 +2299,10 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
     &lt;vmdisk ... device="/dev/xvda"/&gt;
   &lt;/machine&gt;
 &lt;/type&gt; </pre><p>If this information is present KIWI will create a Xen domain U
-      configuration with 512 MB of RAM and expects the disk at <code class="filename">/dev/xvda</code><a class="indexterm" name="id2561171"></a>. Additional information
+      configuration with 512 MB of RAM and expects the disk at <code class="filename">/dev/xvda</code><a class="indexterm" name="id2561225"></a>. Additional information
       to setup the Xen guest machine properties are explained in the
       machine section. The KIWI Xen domain U configuration is stored in
-      the file <code class="filename">/tmp/myxen-result/suse-11.2-xen-guest.i686-1.1.2.xenconfig</code>.</p></div></div><div class="chapter" title="Chapter 12. EC2 Image—Amazon Elastic Compute Cloud"><div class="titlepage"><div><div><h2 class="title"><a name="chap.ec2"></a>Chapter 12. EC2 Image—Amazon Elastic Compute Cloud</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.ec2.building">12.1. Building the suse-ec2-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.ec2.using">12.2. Using the Image</a></span></dt></dl></div><a class="indexterm" name="id2561201"></a><a class="indexterm" name="id2561212"></a><a class="indexterm" name="id2561224"></a><a class="indexterm" name="id2561236"></a><p>The <span class="trademark">Amazon Elastic Compute Cloud</span>™ (Amazon
+      the file <code class="filename">/tmp/myxen-result/suse-11.2-xen-guest.i686-1.1.2.xenconfig</code>.</p></div></div><div class="chapter" title="Chapter 12. EC2 Image—Amazon Elastic Compute Cloud"><div class="titlepage"><div><div><h2 class="title"><a name="chap.ec2"></a>Chapter 12. EC2 Image—Amazon Elastic Compute Cloud</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.ec2.building">12.1. Building the suse-ec2-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.ec2.using">12.2. Using the Image</a></span></dt></dl></div><a class="indexterm" name="id2561254"></a><a class="indexterm" name="id2561266"></a><a class="indexterm" name="id2561278"></a><a class="indexterm" name="id2561289"></a><p>The <span class="trademark">Amazon Elastic Compute Cloud</span>™ (Amazon
     EC2) web service provides you with the ability to execute arbitrary
 	applications in the Amazon computing environment. To use Amazon EC2 you
     simply: </p><div class="procedure"><a name="proc.ec2.using"></a><ol class="procedure" type="1"><li class="step" title="Step 1"><p>Create an Amazon Machine Image (AMI) containing all your
@@ -2511,7 +2522,7 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
       The creation step is based on the result of the
       preparation step and uses the contents of the new image root tree to
       create the output image. If the image type ISO was requested, the
-      output image would be a file with the suffix <code class="filename">.iso</code><a class="indexterm" name="id2562535"></a> representing a live system on
+      output image would be a file with the suffix <code class="filename">.iso</code><a class="indexterm" name="id2562596"></a> representing a live system on
       CD or DVD. Other than that KIWI is able to create images for
       virtual and para-virtual (Xen) environments as well as for USB
       stick, PXE network clients and OEM customized Linux systems. 
@@ -2552,7 +2563,7 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
     </p><p>
       The migration process will always place it's result into the
       <code class="filename">/tmp/$OptionValueOf-m</code> directory. The reason for this is because
-      <code class="filename">/tmp</code><a class="indexterm" name="id2562863"></a> is always excluded from the migration operation and therefore
+      <code class="filename">/tmp</code><a class="indexterm" name="id2562924"></a> is always excluded from the migration operation and therefore
       we can safely place new files there without influencing the
       migration itself. You should have at least 50 MB free space for
       the cache file and the image description all the rest are just
@@ -2576,13 +2587,13 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
       third step after preparation and creation. KIWI calls the postprocessing
       modules automatically according to the specified output image type and
       attributes but it's also possible to call them manually.
-    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootvm <em class="replaceable"><code>initrd</code></em>   --bootvm-system <em class="replaceable"><code>systemImage</code></em>  [--bootvm-disksize <em class="replaceable"><code>size</code></em>]</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootcd <em class="replaceable"><code>initrd</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installcd <em class="replaceable"><code>initrd</code></em>   --installcd-system <em class="replaceable"><code>vmx-system-image</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installstick <em class="replaceable"><code>initrd</code></em>   --installstick-system <em class="replaceable"><code>vmx-system-image</code></em> </p></div></div><div class="refsect1" title="Image format conversion"><a name="id2563102"></a><h2>Image format conversion</h2><p>
+    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootvm <em class="replaceable"><code>initrd</code></em>   --bootvm-system <em class="replaceable"><code>systemImage</code></em>  [--bootvm-disksize <em class="replaceable"><code>size</code></em>]</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootcd <em class="replaceable"><code>initrd</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installcd <em class="replaceable"><code>initrd</code></em>   --installcd-system <em class="replaceable"><code>vmx-system-image</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installstick <em class="replaceable"><code>initrd</code></em>   --installstick-system <em class="replaceable"><code>vmx-system-image</code></em> </p></div></div><div class="refsect1" title="Image format conversion"><a name="id2563163"></a><h2>Image format conversion</h2><p>
       The KIWI format conversion is useful to perform the creation of
 	  another image output format like vmdk for VMware or ovf the open
       virtual machine format. Along with the conversion KIWI also creates
       the virtual machine configuration according to the format if
       there is a machine section specified in the XML description
-    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --convert <em class="replaceable"><code>systemImage</code></em>  [--format <em class="replaceable"><code>vmdk|ovf|qcow2</code></em>]</p></div></div><div class="refsect1" title="Helper Tools"><a name="id2563146"></a><h2>Helper Tools</h2><p>
+    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --convert <em class="replaceable"><code>systemImage</code></em>  [--format <em class="replaceable"><code>vmdk|ovf|qcow2</code></em>]</p></div></div><div class="refsect1" title="Helper Tools"><a name="id2563207"></a><h2>Helper Tools</h2><p>
       The helper tools provide optional functions like
       creating a crypted password string for the users section of the
       <code class="filename">config.xml</code> file as well as signing the image
@@ -2832,7 +2843,7 @@ VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
       been set up. If there are SUSE Linux related YaST XML information, these are
       validated before <code class="filename">config.sh</code> is called too. If you exit config.sh with an
       exit code != 0 kiwi will exit with an error too.
-    </p><div class="example"><a name="id2564560"></a><p class="title"><b>Example A.1. Template for config.sh</b></p><div class="example-contents"><pre class="programlisting">
+    </p><div class="example"><a name="id2564621"></a><p class="title"><b>Example A.1. Template for config.sh</b></p><div class="example-contents"><pre class="programlisting">
 #======================================
 # Functions...
 #--------------------------------------
@@ -2930,7 +2941,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
             Call all postin scriptlets which among other things activates
             all required default services using suseInsertService
           </p></dd><dt><span class="term">[<span class="optional">suseActivateServices</span>]</span></dt><dd><p>
-            Check all services in <code class="filename">/etc/init.d/</code><a class="indexterm" name="id2565137"></a> and activate them
+            Check all services in <code class="filename">/etc/init.d/</code><a class="indexterm" name="id2565201"></a> and activate them
             by calling suseInsertService
           </p></dd><dt><span class="term">[<span class="optional">suseCloneRunlevel {runlevel}</span>]</span></dt><dd><p>
             Clone the given runlevel to work in the same way
@@ -2968,7 +2979,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
 			in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_delete</span>]</span></dt><dd><p>
             A list of all packages which are part of the packages section
-            with <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2565350"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
+            with <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2565414"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_drivers</span>]</span></dt><dd><p>
             A comma separated list of the driver entries as listed in the
             drivers section of the <code class="filename">config.xml</code>. Similar variables exists for
@@ -3004,7 +3015,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
       image types from one previously prepared tree one needs to take into account
       that <code class="filename">images.sh</code> can be called more than one time. If you exit <code class="filename">images.sh</code>
       with an exit code != 0 KIWI will exit with an error too.
-    </p><div class="example"><a name="id2565686"></a><p class="title"><b>Example A.2. Template for images.sh</b></p><div class="example-contents"><pre class="programlisting">#======================================
+    </p><div class="example"><a name="id2565750"></a><p class="title"><b>Example A.2. Template for images.sh</b></p><div class="example-contents"><pre class="programlisting">#======================================
 # Functions...
 #--------------------------------------
 test -f /.kconfig &amp;&amp; . /.kconfig
@@ -3037,7 +3048,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
           </p></dd><dt><span class="term">[<span class="optional">baseGetProfilesUsed</span>]</span></dt><dd><p>
             Return the name(s) of profiles used to build this image.
           </p></dd><dt><span class="term">[<span class="optional">baseGetPackagesForDeletion</span>]</span></dt><dd><p>
-            Return the list of packages setup in the packages <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2565815"></a>="<code class="sgmltag-attvalue">delete</code>"
+            Return the list of packages setup in the packages <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2565879"></a>="<code class="sgmltag-attvalue">delete</code>"
             section of the <code class="filename">config.xml</code> used to build
             this image.
           </p></dd><dt><span class="term">[<span class="optional">baseSetupOEMPartition</span>]</span></dt><dd><p>
@@ -3089,7 +3100,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
             The contents of the timezone setup as done in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_delete</span>]</span></dt><dd><p>
             A list of all packages which are part of the packages section
-            with <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2566129"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
+            with <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2566193"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_profiles</span>]</span></dt><dd><p>
             A list of profiles used to build this image
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_drivers</span>]</span></dt><dd><p>
@@ -3113,7 +3124,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
     </p><p>
       The file is sourced by a Perl process and thus Perl compatible syntax
       for the supported variable settings is required.
-    </p><div class="example"><a name="id2566353"></a><p class="title"><b>Example A.3. Template for .kiwi.rc</b></p><div class="example-contents"><pre class="screen">$BasePath='/usr/share/kiwi';
+    </p><div class="example"><a name="id2566417"></a><p class="title"><b>Example A.3. Template for .kiwi.rc</b></p><div class="example-contents"><pre class="screen">$BasePath='/usr/share/kiwi';
 $Gzip='bzip2';
 $LogServerPort='4455';
 $System='/usr/share/kiwi/image';</pre></div></div><br class="example-break"></div><div class="refsect1" title="Supported Resource Settings"><a name="kiwi.kiwirc.settings"></a><h2>Supported Resource Settings</h2><p>
