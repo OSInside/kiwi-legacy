@@ -331,12 +331,13 @@ function OEMInstall {
 				count=0
 				for i in /dev/mapper/${loop}*;do
 					psize=`partitionSize $i`
+					psize=$((psize / 1024))
 					partid=$(partitionID /dev/$loop $(nd $i))
 					partname=Root
 					if [ $reqpart -eq 2 ] && [ $count = 0 ];then
 						partname=Boot
 					fi
-					echo "* $partname partition requires at least $psize KB" \
+					echo "* $partname partition requires at least $psize MB" \
 						>> $info
 					echo "  Partition Type: 0x$partid" >> $info
 					count=$((count + 1))

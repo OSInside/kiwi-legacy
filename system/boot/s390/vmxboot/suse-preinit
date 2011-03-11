@@ -74,46 +74,19 @@ if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 fi
 
 #======================================
-# 9) Check FAT requires on syslinux
-#--------------------------------------
-if [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
-	# /.../
-	# if syslinux is used we need to make sure that the
-	# filename on the boot partition is correct 8+3
-	# ----
-	count=1
-	IFS="," ; for i in $KERNEL_LIST;do
-		if test -z "$i";then
-			continue
-		fi
-		kernel=`echo $i | cut -f1 -d:`
-		initrd=`echo $i | cut -f2 -d:`
-		mv /boot/$kernel /boot/linux.$count
-		mv /boot/$initrd /boot/initrd.$count
-		running=$(uname -r)
-		rlinux=vmlinuz-$running
-		rinitrd=initrd-$running
-		ln -s /boot/linux.$count  /boot/$rlinux
-		ln -s /boot/initrd.$count /boot/$rinitrd
-		count=`expr $count + 1`
-	done
-	IFS=$IFS_ORIG
-fi
-
-#======================================
-# 10) Install boot loader if ok
+# 9) Install boot loader if ok
 #--------------------------------------
 if [ $bootLoaderOK = 1 ];then
 	installBootLoader
 fi
 
 #======================================
-# 11) setup console
+# 10) setup console
 #--------------------------------------
 setupConsole
 
 #======================================
-# 12) kill udev
+# 11) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems
