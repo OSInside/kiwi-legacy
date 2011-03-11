@@ -2,6 +2,6 @@ This is the Lime-JeOS 11.4 SuSE Linux System.
 To upgrade your system call:
 
     zypper refresh
-    zypper install -t product openSUSE-11.3
+    zypper install -t product openSUSE-11.4
 
 Have a lot of fun...
