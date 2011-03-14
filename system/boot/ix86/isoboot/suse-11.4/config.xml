@@ -123,6 +123,7 @@
 		<package name="dialog"/>
 		<package name="gfxboot"/>
 		<package name="parted"/>
+		<package name="kernel-firmware"/>
 	</packages>
 	<packages type="delete">
 		<package name="gfxboot"/>

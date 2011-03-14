@@ -199,6 +199,7 @@
 		<package name="cyrus-sasl"/>
 		<package name="xfsprogs"/>
 		<package name="mdadm"/>
+		<package name="kernel-firmware"/>
 	</packages>
 	<packages type="image" profiles="diskless">
 		<package name="bc"/>

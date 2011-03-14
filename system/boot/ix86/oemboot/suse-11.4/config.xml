@@ -148,6 +148,7 @@
 		<package name="syslinux"/>
 		<package name="dosfstools"/>
 		<package name="xfsprogs"/>
+		<package name="kernel-firmware"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
