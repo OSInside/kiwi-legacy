@@ -253,5 +253,79 @@
       </itemizedlist>
 
     </sect2>
+	
+	<sect2 id="sec.oem.pxe-based-installation">
+		<title>Network Based Installation</title>
+		<para>
+			Instead of manually dumping the OEM image on the target
+			device or creating a kiwi install CD, USB stick, there is
+			a third method of deploying the OEM image on the target
+			device. It's possible to let the image be downloaded from
+			a PXE boot server over the network. This requires a PXE
+			network boot server to be setup properly in the first place
+			For details how to do this refer to the
+			chapter: <xref linkend="chap.pxe"/>. If your pxe server
+			is running the following steps are required to setup
+			the install process over the network
+		</para>
+		<itemizedlist>
+			<listitem>
+				<para>
+					Make sure you have created an install iso along with
+					your oem image:
+<screen>
+&lt;type image="oem" ... installiso="true"/&gt;
+</screen>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					loop mount the created .iso file and copy the
+					initrd and kernel images over to your pxe server
+<screen>
+mount -o loop install-image.iso /mnt
+scp /mnt/boot/initrd pxe.server.ip:/srv/tftpboot/boot
+scp /mnt/boot/linux  pxe.server.ip:/srv/tftpboot/boot
+</screen>
+				</para>
+            </listitem>
+			<listitem>
+				<para>
+					Compress the system image which lives inside the
+					squashfs file. This is required because kiwi can't
+					loop mount the squashfs over the network without
+					a further export configuration. After the image has
+					been gzip compressed the file is copied over to the
+					pxe boot server
+<screen>
+mkdir /mnt2
+mount /mnt/image-file.squashfs /mnt2
+gzip /mnt2/image-file /tmp/image-file.gz
+scp /tmp/image-file.gz pxe.server.ip:/srv/tftpboot/image
+scp /mnt2/*.md5 pxe.server.ip:/srv/tftpboot/image
+umount /mnt2
+umount /mnt
+</screen>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					At last set the kernel commandline parameter pxe=1
+					via the append line in your PXE configuration
+					(for example: /pxelinux.cfg/default).
+					Alternatively the image can be stored on a FTP,HTTP server
+					specified via the kiwiserver and kiwiservertype append
+					information. In this case make sure you copied the
+					system image and md5 file to the correct ftp,http
+					location.
+<screen>
+LABEL ...
+     kernel boot/linux
+     append initrd=boot/initrd ... pxe=1
+</screen>
+				</para>
+            </listitem>
+		</itemizedlist>
+	</sect2>
   </sect1>
 </chapter>
