@@ -284,8 +284,8 @@
 					initrd and kernel images over to your pxe server
 <screen>
 mount -o loop install-image.iso /mnt
-scp /mnt/boot/initrd pxe.server.ip:/srv/tftpboot/boot
-scp /mnt/boot/linux  pxe.server.ip:/srv/tftpboot/boot
+scp /mnt/boot/loader/initrd pxe.server.ip:/srv/tftpboot/boot
+scp /mnt/boot/loader/linux  pxe.server.ip:/srv/tftpboot/boot
 </screen>
 				</para>
             </listitem>
@@ -299,29 +299,43 @@ scp /mnt/boot/linux  pxe.server.ip:/srv/tftpboot/boot
 					pxe boot server
 <screen>
 mkdir /mnt2
-mount /mnt/image-file.squashfs /mnt2
-gzip /mnt2/image-file /tmp/image-file.gz
-scp /tmp/image-file.gz pxe.server.ip:/srv/tftpboot/image
-scp /mnt2/*.md5 pxe.server.ip:/srv/tftpboot/image
+mount -o loop /mnt/image-file.raw.squashfs /mnt2
+gzip -c /mnt2/image-file.raw &gt; /tmp/image-file.gz
+scp /tmp/image-file.gz   pxe.server.ip:/srv/tftpboot/image
+scp /mnt2/image-file.md5 pxe.server.ip:/srv/tftpboot/image
 umount /mnt2
-umount /mnt
+rmdir  /mnt2
 </screen>
 				</para>
 			</listitem>
 			<listitem>
 				<para>
-					At last set the kernel commandline parameter pxe=1
+					At last set the kernel commandline parameters
 					via the append line in your PXE configuration
-					(for example: /pxelinux.cfg/default).
+					(for example: pxelinux.cfg/default). It's important that
+					at least the parameter <command>pxe=1</command> is added
+					here. Additionally the boot parameters for the bootloader and
+					and an optonal LVM group name from the isolinux.cfg file
+					from the installation media should be copied too. 
+
 					Alternatively the image can be stored on a FTP,HTTP server
 					specified via the kiwiserver and kiwiservertype append
 					information. In this case make sure you copied the
 					system image and md5 file to the correct ftp,http
 					location.
 <screen>
+cat /mnt/boot/loader/isolinux.cfg | grep append
+
+ ===> copy loader=... and VGROUP=... information if present
+      into the PXE configuration append line
+
+vi pxelinux.cfg/default
+
 LABEL ...
      kernel boot/linux
-     append initrd=boot/initrd ... pxe=1
+     append initrd=boot/initrd pxe=1 loader=... VGROUP=...
+
+umount /mnt
 </screen>
 				</para>
             </listitem>
