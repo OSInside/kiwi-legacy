@@ -922,6 +922,9 @@ function setupBootLoader {
 		para="$para \"$1\""
 		shift
 	done
+	if [ ! -z "kiwi_bootloader" ];then
+		loader=$kiwi_bootloader
+	fi
 	if [ -z "$loader" ];then
 		loader="grub"
 	fi
