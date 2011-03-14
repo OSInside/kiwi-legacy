@@ -503,10 +503,8 @@ function errorLogStart {
 function udevPending {
 	local timeout=30
 	if [ -x /sbin/udevadm ];then
-		/sbin/udevadm trigger
 		/sbin/udevadm settle --timeout=$timeout
 	else
-		/sbin/udevtrigger
 		/sbin/udevsettle --timeout=$timeout
 	fi
 }
@@ -566,8 +564,12 @@ function udevStart {
 	# start the udev daemon
 	udevd udev_log="debug" &
 	echo UDEVD_PID=$! >> /iprocs
-	# wait for pending triggered udev events.
-	udevPending
+	# trigger udev events
+	if [ -x /sbin/udevadm ];then
+		/sbin/udevadm trigger
+	else
+		/sbin/udevtrigger
+	fi
 	# start splashy if configured
 	startSplashy
 }
