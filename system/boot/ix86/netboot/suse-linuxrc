@@ -582,6 +582,12 @@ else
 		if [ ! -z "$COMBINED_IMAGE" ] || [ ! -z "$UNIONFS_CONFIG" ];then
 			imageRootDevice="-o nolock,ro $nfsRootServer:$nfsRootDevice"
 		fi
+		if [ ! -z "$UNIONFS_CONFIG" ];then
+			unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+			if [ "$unionFST" = "clicfs" ];then
+				systemException "clicfs over NFSROOT is not supported" "reboot"
+			fi
+		fi
 		imageRootName="NFSRoot-System"
 		systemIntegrity="clean"
 		export FSTYPE=nfs
