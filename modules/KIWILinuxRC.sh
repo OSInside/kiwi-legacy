@@ -2799,6 +2799,7 @@ function CDDevice {
 			sleep 1
 		fi
 		count=`expr $count + 1`
+		udevPending
 	done
 	echo
 	if [ -z "$cddev" ];then
