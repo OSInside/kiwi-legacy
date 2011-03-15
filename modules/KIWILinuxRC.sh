@@ -2804,6 +2804,7 @@ function CDDevice {
 			sleep 1
 		fi
 		count=`expr $count + 1`
+		udevPending
 	done
 	echo
 	if [ -z "$cddev" ];then
@@ -7107,12 +7108,13 @@ function setupKernelLinks {
 	# according to the different boot-up situations
 	# ----
 	#======================================
-	# mount boot partition of required
+	# mount boot partition if required
 	#--------------------------------------
 	local mountCalled=no
-	if [ -e "$imageRWDevice" ] && blkid $imageRWDevice;then
-		kiwiMount $imageRWDevice "/mnt"
-		mountCalled=yes
+	if [ -e "$imageBootDevice" ] && blkid $imageBootDevice;then
+		if kiwiMount $imageBootDevice "/mnt";then
+			mountCalled=yes
+		fi
 	fi
 	#======================================
 	# Change to boot directory
@@ -7164,9 +7166,6 @@ function setupKernelLinks {
 		umount /mnt
 	fi
 }
-
-#FIXME
-
 #======================================
 # initialize
 #--------------------------------------
