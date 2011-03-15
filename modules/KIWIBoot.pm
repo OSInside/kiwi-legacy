@@ -2242,13 +2242,6 @@ sub setupBootDisk {
 	main::umount();
 	$kiwi -> done();
 	#==========================================
-	# cleanup device maps and part mount
-	#------------------------------------------
-	if ($lvm) {
-		qxx ("vgchange -an $this->{lvmgroup} 2>&1");
-	}
-	$this -> cleanLoopMaps();
-	#==========================================
 	# Install boot loader on disk
 	#------------------------------------------
 	my $bootdevice = $diskname;
@@ -2259,6 +2252,13 @@ sub setupBootDisk {
 		$this -> cleanLoop ();
 		return undef;
 	}
+	#==========================================
+	# cleanup device maps and part mount
+	#------------------------------------------
+	if ($lvm) {
+		qxx ("vgchange -an $this->{lvmgroup} 2>&1");
+	}
+	$this -> cleanLoopMaps();
 	#==========================================
 	# cleanup temp directory
 	#------------------------------------------
