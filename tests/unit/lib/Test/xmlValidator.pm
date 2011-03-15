@@ -296,6 +296,52 @@ sub test_ec2Regions {
 }
 
 #==========================================
+# test_httpsRepoCredentials
+#------------------------------------------
+sub test_httpsRepoCredentials {
+	# ...
+	# Test proper enforcement of the credential rules for repositories.
+	# Repositories with username attribute must have password attribute and
+	# vice versa
+	# All https repositories must have the same credentials.
+	# ---
+	my $this = shift;
+	my @invalidConfigs = $this -> __getInvalidFiles('httpsRepoCredentials');
+	my $expectedMsg;
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $kiwi = $this -> {kiwi};
+		my $msg = $kiwi -> getMessage();
+		if ($iConfFile =~ /httpsRepoCredentialsInvalid_1|5.xml/) {
+			$expectedMsg = 'Specified username without password on repository';
+			
+		} elsif ($iConfFile =~ /httpsRepoCredentialsInvalid_2|6.xml/) {
+			$expectedMsg = 'Specified password without username on repository';
+		} elsif ($iConfFile =~ /httpsRepoCredentialsInvalid_3.xml/) {
+			$expectedMsg = 'Specified username, someoneelse, for https '
+			. 'repository does not match previously specified name, itsme. '
+			. 'All credentials for https repositories must be equal.';
+		} elsif ($iConfFile =~ /httpsRepoCredentialsInvalid_4.xml/) {
+			$expectedMsg = 'Specified password, another, for https repository '
+			. 'does not match previously specified password, heythere. All '
+			. 'credentials for https repositories must be equal.';
+		} else {
+			$expectedMsg = 'Should not get here.';
+		}
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('httpsRepoCredentials');
+	$this -> __verifyValid(@validConfigs);
+}
+
+#==========================================
 # test_missingFilesysAttr
 #------------------------------------------
 sub test_missingFilesysAttr {
