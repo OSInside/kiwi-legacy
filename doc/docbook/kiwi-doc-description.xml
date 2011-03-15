@@ -1481,20 +1481,22 @@
 
     <sect2 id="sec.description.repository">
       <title><sgmltag>repository</sgmltag> Element</title>
-      <screen>&lt;repository type="type" status="replaceable"
-        alias="name" priority="number"&gt; 
+      <screen>&lt;repository type="type" alias="name" password="password"
+         priority="number" status="replaceable" username="user-name"&gt; 
    &lt;source path="URL"/&gt;
 &lt;/repository&gt;</screen>
 
-      <para>The mandatory <sgmltag>repository</sgmltag> element
-        specifies the source URL and type used by the package manager.
-        The <sgmltag class="attribute">type</sgmltag> attribute
-        specifies the repository type which must be supported by the
-        package manager. At the moment KIWI supports the package
-        managers smart and zypper, whereas smart has support for more
-        repository types compared to zypper. Therefore, the possible
-        values for the type attribute have been copied from smart. The
-        following table shows the possible repo types:</para>
+      <para>The mandatory <sgmltag class="element">repository</sgmltag> element
+        specifies the location and type of a repository to be used by the 
+        package manager as a package installation source. The mandatory
+        <sgmltag class="attribute">type</sgmltag> attribute
+        specifies the repository type. A specified repository can only be
+        accessed by the chosen package manager if the given type is supported
+        by the specified package manager. KIWI supports smart or zypper as
+        package managers, specified with the <sgmltag class="element">
+        packagemanager</sgmltag> element. The default package manager is the
+        smart package manager. The following table shows the possible 
+        supported repository types for each package manager:</para>
 
       <table id="tab.description.supported-types">
         <title>Supported Types for zypper and smart</title>
@@ -1566,133 +1568,204 @@
         </tgroup>
       </table>
 
-      <para>Within the repository section, there are the following
-        optional attributes: </para>
+      <para>Tthe <sgmltag class="element">repository</sgmltag> element
+        has the following optional attributes: </para>
 
       <variablelist>
-        <varlistentry>
-          <term><sgmltag class="attribute">status</sgmltag>="<sgmltag
-              class="attvalue">replaceable</sgmltag>"</term>
-          <listitem>
-            <para>This attribute makes only sense for boot image
-              descriptions. It indicates that the repository is allowed
-              to become replaced by the repositories defined in the
-              system image descriptions. Because KIWI automatically
-              builds the boot image if required it should create that
-              image from the same repositories which are used to build
-              the system image to make sure both fit together. Therefore
-              it is required to allow the repository to become
-              overwritten which is indicated by the status attribute.
-            </para>
-          </listitem>
-        </varlistentry>
         <varlistentry>
           <term><sgmltag class="attribute">alias</sgmltag>="<sgmltag
               class="attvalue">name</sgmltag>"</term>
           <listitem>
-            <para>Specifies an alternative name used to identify the
-              source channel. If not set the source attribute value is
-              used and builds the alias name by replacing each
-                <quote>/</quote> with a <quote>_</quote>. An alias name
-              should be set if the source argument doesn’t really
-              explain what this repository contains </para>
+            <para>Specifies an alternative name for the configured
+              repository. If the attribute is not specified KIWI will generate
+              an alias name by replacing any <quote>/</quote> in the given 
+              repository location with an <quote>_</quote>. It is helpful to
+              set an alias name if the repository path is insufficient in
+              expressing the purpose of the contained packages.</para>
           </listitem>
+        </varlistentry>
+        <varlistentry>
+           <term><sgmltag class="attribute">password</sgmltag>="<sgmltag
+              class="attvalue">string</sgmltag>"</term>
+           <listitem>
+             <para>Specifies a password for the given repository. The
+               <sgmltag class="attribute">password</sgmltag> attribute must
+               be used in combination with the <sgmltag class="attribute">
+               username</sgmltag> attribute. Dependent on the
+               repository location this information may not be used.
+             </para>
+           </listitem>
         </varlistentry>
         <varlistentry>
           <term><sgmltag class="attribute">priority</sgmltag>="<sgmltag
               class="attvalue">number</sgmltag>"</term>
           <listitem>
-            <para>Specifies the repository priority assigned to all
-              packages available in this repository. For smart the
-              following applies: If the exact same package is available
-              in more than one channel, the repository with the
-                <emphasis>highest</emphasis> priority number is used.
-              The value 0 means <quote>no priority is set</quote>. For
-              zypper the following applies: If the exact same package is
-              available in more than one channel, the repository with
-              the <emphasis>lowest</emphasis> priority number is used.
-              The value 99 means <quote>no priority is
-              set</quote>.</para>
+            <para>Specifies the repository priority for this given repository.
+              Priority values are treated differently by different package
+              managers. Repository priorities allow the package management
+              system to disambiguate packages that may be contained in more
+              than one of the configured repositories. The smart package
+              manager treats packages from repositories with the 
+              <emphasis>highest</emphasis> priority number as preferable to
+              packages from a repository with a lower priority number.
+              The value 0 means <quote>no priority is set</quote>. The
+              zypper package manager prefers packages from a repository with 
+              a <emphasis>lower</emphasis> priority over packages from
+              a repository with higher priority values. The value 99 means
+              <quote>no priority is set</quote>.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><sgmltag class="attribute">status</sgmltag>="<sgmltag
+              class="attvalue">replaceable</sgmltag>"</term>
+          <listitem>
+            <para>This attribute should only be applied in the context of a
+              boot image description. Setting the <sgmltag class="attribute">
+              status</sgmltag> to <sgmltag class="attvalue">replaceable
+              </sgmltag> indicates that the specified repository my be
+              replaced by the repositories specified in the image description.
+              This is important as the KIWI generated boot image, if required,
+              should be created based on packages from the same repositories
+              used to build the system image.
+            </para>
           </listitem>
         </varlistentry>
         <varlistentry>
            <term><sgmltag class="attribute">username</sgmltag>="<sgmltag
               class="attvalue">name</sgmltag>"</term>
            <listitem>
-             <para>Specifies the repository user name. It depends on the
-               source type whether this information is used or not
-             </para>
-           </listitem>
-        </varlistentry>
-        <varlistentry>
-           <term><sgmltag class="attribute">password</sgmltag>="<sgmltag
-              class="attvalue">string</sgmltag>"</term>
-           <listitem>
-             <para>Specifies the repository password. It depends on the
-               source type whether this information is used or not
+             <para>Specifies a user name for the given repository. The
+               <sgmltag class="attribute">username</sgmltag> attribute must
+               be used in combination with the <sgmltag class="attribute">
+               password</sgmltag> attribute. Dependent on the
+               repository location this information may not be used.
              </para>
            </listitem>
         </varlistentry>
       </variablelist>
 
-      <para>The source child element contains the path attribute, which
-        specifies the location (URL) of the repository. The path
-        specification can be any of the following, and can include the
-          <systemitem class="macro">%arch</systemitem> macro which is
-        expanded to the architecture of the image building host. </para>
+      <para>When specifying an https location for a repository it is
+        generally necessary to include the <quote>openssl-certs</quote> and
+        <quote>cracklib-dict-full</quote> packages in the 
+        <sgmltag class="attvalue">bootstrap</sgmltag> section of the
+        image configuration.</para>
+      
+      <para>The location of a repository is specified by the 
+        <sgmltag class="attribute">path</sgmltag> attribute of the
+        mandatory <sgmltag class="element">source</sgmltag> child element.
+        The location specification may include the
+        <systemitem class="macro">%arch</systemitem> macro which will expand
+        to the architecture of the image building host. The value for the 
+        <sgmltag class="attribute">path</sgmltag> attribute may begin with
+        any of the following location indicators:</para>
 
       <variablelist>
         <varlistentry>
-          <term><uri>this://<replaceable>PATH</replaceable></uri></term>
+          <term><uri>file:///local/path</uri></term>
           <listitem>
-            <para>A relative path name, which is relative to the image
-              description directory being referenced. </para>
+            <para>An absolute path to a directory accessible through the
+              local file system. The <quote>file://</quote> prefix may
+              be omitted.</para>
           </listitem>
         </varlistentry>
-
+        <varlistentry>
+          <term><uri>ftp://<replaceable>URL</replaceable></uri></term>
+          <listitem>
+            <para>A ftp protocol based network location. </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><uri>http://<replaceable>URL</replaceable></uri></term>
+          <listitem>
+            <para>A http protocol based network location. </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><uri>https://<replaceable>URL</replaceable></uri></term>
+          <listitem>
+            <para>A https protocol based network location. See the comment
+              above about the handling of certificates and additional
+              package requirements in the <sgmltag class="attvalue">bootstrap
+              </sgmltag> section of the image configuration.</para>
+          </listitem>
+        </varlistentry>
         <varlistentry>
           <term><uri>iso://<replaceable>path/to/isofile</replaceable></uri></term>
           <listitem>
-            <para>A path to a local .iso file which is then loopback
-              mounted and used as a local path based repository.
-              Alternatively one can do the loop mount himself and point
-              a standard local path to the mounted directory </para>
-            <para>When using multiple .iso files from the same product, such
-              SLES all .iso files need to be located in the same directory,
-              but only the first .iso file needs to be added as a repository
-              to the configuration. The first .iso file contains sufficient
-              information for the package management tool to find packages
-              in the other .iso files as long as they are located in the
-              same directory. Attempting to use a second or third .iso file
-              in a series as a standalone repository will result in an
+            <para>An absolute path to an .iso file accessible via the local
+              file system. KIWI will loop mount the the .iso file to a
+              KIWI created directory with a generated name. The generated path
+              is provided to the specified package manager as a repository
+              location.</para>
+            <para>Using multiple .iso files from the same SLE product, requires
+              that all .iso files are located in the same directory. Only
+              the first .iso file is to be specified as a repository in
+              the <filename>config.xml</filename>. The first .iso file
+              contains all information necessary for the package manager to
+              locate packages that are contained in other .iso files of the
+              same product. Attempting to use multiple .iso files
+              in a series as standalone repositories will result in an
               error.</para>
           </listitem>
         </varlistentry>
-
+        <varlistentry>
+          <term><uri>obs://$dir1/$dir2</uri></term>
+          <listitem>
+            <para>A special network location used with the http protocol.
+                The values of <varname>$dir1</varname> and 
+                <varname>$dir2</varname> represent the project location in the 
+                openSUSE build service. The location is evaluated as
+                <uri>this://repos/$dir1/$dir2</uri>.</para>
+            <para>The <quote>obs://</quote> prefix is also valid as part
+              of the value for the <sgmltag class="attribute">boot</sgmltag>
+              attribute of the <sgmltag class="element">type</sgmltag>. If
+              used with the <sgmltag class="attribute">boot</sgmltag>
+              attribute it is evaluated as
+              <uri>this://images/$dir1/$dir2</uri>.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><uri>opensuse://<replaceable>PROJECTNAME</replaceable></uri></term>
+          <listitem>
+            <para>A special network location used with the http protocol. The
+              given <replaceable>PROJECTNAME</replaceable> specifies a
+              project in the openSUSE buildservice. The repository is a
+              repository of type <sgmltag class="attvalue">rpm-md</sgmltag>.
+              For example: <sgmltag class="attribute">path</sgmltag>=
+              <sgmltag class="attvalue">"opensuse://openSUSE:10.3/standard"
+              </sgmltag>. </para>
+          </listitem>
+        </varlistentry>
         <varlistentry>
           <term><uri>plain://<replaceable>URI</replaceable></uri></term>
           <listitem>
             <para>A plain resource string. Everything following 'plain://'
              will be forwarded to the package manager without further
-             modifications. This can be used if kiwi does not support a
-             special URI but the package manager does.
+             modification. This type of location specification is useful when
+             KIWI does not support a specific URI but the specified package
+             manager does.
             </para>
           </listitem>
         </varlistentry>
-
         <varlistentry>
           <term><uri>smb://<replaceable>Samba share pathname</replaceable></uri></term>
           <listitem>
-            <para>A path to a samba share using the cifs protocol. kiwi
-              creates a mount point and mount the share including username
-              and password if specified. In order to allow the mount inside
-              the new root tree, make sure you have installed
-              the package which provides the cifs mount utility as part of
-              the type='bootstrap' package section. Currently this package
-              is named <emphasis>cifs-utils</emphasis>. Because the mount utility
-              has to be part of the system and the boot image you also need
-              to make sure that the package is bootincluded like the
-              following example shows:
+            <para>A path to a samba share using the cifs protocol. KIWI
+              creates a mount point and mounts the share including username
+              and password, if specified. Access to the smb share from within
+              the new root tree is provided via a cifs mount. Therefore, 
+              the package providing the cifs tools must be included in the
+              package list for the <sgmltag class="attvalue">bootstrap
+              </sgmltag> section of the image configuration. At the time of
+              this writing the package providing the cifs tools is called
+              <emphasis>cifs-utils</emphasis>. If any packages provided by the
+              Samba share are used as part of the boot image the cifs tools
+              must also be included in the boot image. This is accomplished
+              with the <sgmltag class="attribute">bootinclude</sgmltag>
+              attribute of the <sgmltag class="element">package</sgmltag>
+              element. This is shown in the example below:
+
               <screen>
                 &lt;packages type="bootstrap"&gt;
                    ...
@@ -1703,52 +1776,10 @@
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term><uri>http://<replaceable>URL</replaceable></uri></term>
+          <term><uri>this://<replaceable>PATH</replaceable></uri></term>
           <listitem>
-            <para>A http protocol based network location </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>https://<replaceable>URL</replaceable></uri></term>
-          <listitem>
-            <para>A https protocol based network location </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>ftp://<replaceable>URL</replaceable></uri></term>
-          <listitem>
-            <para>A ftp protocol based network location </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>opensuse://<replaceable>PROJECTNAME</replaceable></uri></term>
-          <listitem>
-            <para>A special http based network location which is created
-              from the given openSUSE buildservice project name. The
-              result is pointing to an rpm-md repository on the openSUSE
-              buildservice. For example:
-              path="opensuse://openSUSE:10.3/standard" </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>file:///local/path</uri></term>
-          <listitem>
-            <para>A local path which should be an absolute path
-              description. The file:// prefix is optional and could also
-              be omitted. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>obs://$dir1/$dir2</uri></term>
-          <listitem>
-            <para>A special buildservice path whereas
-                <varname>$dir1</varname> and <varname>$dir2</varname>
-              represents the buildservice project location. If this type
-              is used as part of a boot attribute KIWI evaluates it to
-                <uri>this://images/$dir1/$dir2</uri> and if used as part
-              of a repository source path attribute it evaluates to
-                <uri>this://repos/$dir1/$dir2</uri>
-            </para>
+            <para><replaceable>PATH</replaceable> is the relative location to
+              the image description directory for the curent image.</para>
           </listitem>
         </varlistentry>
       </variablelist>
