@@ -62,7 +62,7 @@ sub new {
 	#------------------------------------------
 	my $code;
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
+		$kiwi = new KIWILog("tiny");
 	}
 	if (($imageDesc !~ /\//) && (! -d $imageDesc)) {
 		$imageDesc = $main::System."/".$imageDesc;

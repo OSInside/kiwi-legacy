@@ -67,7 +67,7 @@ sub new {
 	my $code;
 	my $data;
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
+		$kiwi = new KIWILog("tiny");
 	}
 	if (! defined $name) {
 		$kiwi -> failed ();

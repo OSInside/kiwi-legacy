@@ -50,7 +50,7 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
+		$kiwi = new KIWILog("tiny");
 	}
 	my $key = shmget(IPC_PRIVATE, MAXBUF, S_IRWXU);
 	if (! defined $key) {

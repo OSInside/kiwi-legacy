@@ -57,7 +57,7 @@ sub new {
 	my $code;
 	my $data;
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
+		$kiwi = new KIWILog("tiny");
 	}
 	#==========================================
 	# check image file

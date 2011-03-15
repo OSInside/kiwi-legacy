@@ -70,7 +70,7 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
+		$kiwi = new KIWILog("tiny");
 	}
 	if (! defined $xml) {
 		$kiwi -> error ("No XML reference specified");

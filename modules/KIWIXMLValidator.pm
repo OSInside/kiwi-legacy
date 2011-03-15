@@ -56,7 +56,7 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
+		$kiwi = new KIWILog("tiny");
 	}
 	#==========================================
 	# Check pre-conditions
@@ -300,6 +300,68 @@ sub __checkFilesysSpec {
 	}
 	if ($isInvalid) {
 		return undef;
+	}
+	return 1;
+}
+
+#==========================================
+# __checkHttpsCredentialsrConsistent
+#------------------------------------------
+sub __checkHttpsCredentialsConsistent {
+	# ...
+	# username and password attributes for all repositories configured
+	# as https: must have the same value. Any repository that has a
+	# username attribute must also have a password attribute.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @repoNodes = $this->{systemTree} -> getElementsByTagName('repository');
+	my $uname;
+	my $passwd;
+	my $numRep = @repoNodes;
+	for my $repoNode (@repoNodes) {
+		my $user = $repoNode -> getAttribute('username');
+		my $pass = $repoNode -> getAttribute('password');
+		if (! $user && $pass) {
+			my $msg = 'Specified password without username on repository';
+			$kiwi -> error ($msg);
+			$kiwi -> failed();
+			return undef;
+		}
+		if ($user && (! $pass)) {
+			my $msg = 'Specified username without password on repository';
+			$kiwi -> error ($msg);
+			$kiwi -> failed();
+			return undef;
+		}
+		if ($user && $pass) {
+			my @sources = $repoNode -> getElementsByTagName ('source');
+			my $path = $sources[0] -> getAttribute('path');
+			if ($path !~ /^https:/) {
+				next;
+			}
+			if (! $uname) {
+				$uname = $user;
+				$passwd = $pass;
+				next;
+			}
+			if ($user ne $uname) {
+				my $msg = "Specified username, $user, for https repository "
+				. "does not match previously specified name, $uname. "
+				. 'All credentials for https repositories must be equal.';
+				$kiwi -> error ($msg);
+				$kiwi -> failed();
+				return undef;
+			}
+			if ($pass ne $passwd) {
+				my $msg = "Specified password, $pass, for https repository "
+				. "does not match previously specified password, $passwd. "
+				. 'All credentials for https repositories must be equal.';
+				$kiwi -> error ($msg);
+				$kiwi -> failed();
+				return undef;
+			}
+		}
 	}
 	return 1;
 }
@@ -753,6 +815,9 @@ sub __validateConsistency {
 		return undef;
 	}
 	if (! $this -> __checkFilesysSpec()) {
+		return undef;
+	}
+	if (! $this -> __checkHttpsCredentialsConsistent()) {
 		return undef;
 	}
 	if (! $this -> __checkPatternTypeAttrUse()) {

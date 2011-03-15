@@ -49,7 +49,7 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
+		$kiwi = new KIWILog("tiny");
 	}
 	#==========================================
 	# Object initialize object member data

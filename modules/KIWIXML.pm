@@ -94,7 +94,7 @@ sub new {
 	#------------------------------------------
 	my $arch = qxx ("uname -m"); chomp $arch;
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
+		$kiwi = new KIWILog("tiny");
 	}
 	#==========================================
 	# Check pre condition
@@ -1786,6 +1786,30 @@ sub getRepository {
 		$result{$source} = [$type,$alias,$prio,$user,$pwd];
 	}
 	return %result;
+}
+
+#==========================================
+# getHttpsRepositoryCredentials
+#------------------------------------------
+sub getHttpsRepositoryCredentials {
+	# ...
+	# If any repository is configered with credentials return the username
+	# and password
+	# ---
+	my $this = shift;
+	my @repoNodes = $this->{repositNodeList} -> get_nodelist();
+	for my $repo (@repoNodes) {
+		my $uname = $repo -> getAttribute('username');
+		my $pass = $repo -> getAttribute('password');
+		if ($uname) {
+			my @sources = $repo -> getElementsByTagName ('source');
+			my $path = $sources[0] -> getAttribute('path');
+			if ( $path =~ /^https:/) {
+				return ($uname, $pass);
+			}
+		}
+	}
+	return undef;
 }
 
 #==========================================

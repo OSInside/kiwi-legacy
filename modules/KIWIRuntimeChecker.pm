@@ -72,7 +72,7 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
+		$kiwi = new KIWILog("tiny");
 	}
 	$this->{cmdArgs} = $cmdArgs;
 	$this->{locator} = new KIWILocator($kiwi);

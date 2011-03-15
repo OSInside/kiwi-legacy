@@ -22,8 +22,10 @@ use strict;
 use Carp qw (cluck);
 use FileHandle;
 use File::Basename;
+use File::Path qw(make_path remove_tree);
 use Config::IniFiles;
 use KIWILog;
+use KIWILocator;
 use KIWIQX;
 
 #==========================================
@@ -36,11 +38,12 @@ our @EXPORT = qw (%packageManager);
 # Exports
 #------------------------------------------
 our %packageManager;
-$packageManager{smart}   = "/usr/bin/smart";
-$packageManager{zypper}  = "/usr/bin/zypper";
-$packageManager{ensconce}= "/usr/bin/ensconce";
-$packageManager{yum}     = "/usr/bin/yum";
-$packageManager{default} = "smart";
+my $locator = new KIWILocator();
+$packageManager{smart}   = $locator -> getExecPath('smart');
+$packageManager{zypper}  = $locator -> getExecPath('zypper');
+$packageManager{ensconce}= $locator -> getExecPath('ensconce');
+$packageManager{yum}     = $locator -> getExecPath('yum');
+$packageManager{default} = 'smart';
 
 #==========================================
 # Constructor
@@ -70,7 +73,7 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
+		$kiwi = new KIWILog("tiny");
 	}
 	if (! defined $xml) {
 		$kiwi -> error  ("Missing XML description pointer");
@@ -91,26 +94,62 @@ sub new {
 	if (! defined $manager) {
 		$manager = $packageManager{default};
 	}
-	my $dataDir = "/var/cache/kiwi/$manager";
-	if (! -d $dataDir) {
-		qxx ("mkdir -p $dataDir");
+	if (defined $targetArch && $manager ne 'zypper') {
+		$kiwi -> warning ("Target architecture not supported for $manager");
+		$kiwi -> skipped ();
 	}
-	my $zyppConf = "/var/cache/kiwi/zypp.conf.$$";
-	qxx ("rm -f /var/cache/kiwi/zypp.conf*");
-	qxx ("echo '[main]' > $zyppConf");
-	$ENV{ZYPP_CONF} = $zyppConf;	
-	my $zconfig = new Config::IniFiles (
-		-file => $zyppConf, -allowedcommentchars => '#'
-	);
-	if (defined $targetArch) {
-		if ($manager eq "zypper") {
+	#==========================================
+	# Clean out any potential previous data
+	#------------------------------------------
+	my $dataDir = "/var/cache/kiwi/$manager";
+	make_path ($dataDir);
+	remove_tree ($dataDir, {keep_root => 1} );
+	my $zyppConf;   # Configuration file for libzypp
+	my $zypperConf; # Configuration file for zypper
+	my $zconfig;
+	#==========================================
+	# Create package manager conf files
+	#------------------------------------------
+	if ($manager eq "zypper") {
+		$zypperConf = "$dataDir/zypper.conf.$$";
+		$zyppConf = "$dataDir/zypp.conf.$$";
+		qxx ("echo '[main]' > $zypperConf");
+		qxx ("echo '[main]' > $zyppConf");
+		$ENV{ZYPP_CONF} = $zyppConf;
+		# /.../
+		# Bug in aria2c causes loss of credentials, thus download will not
+		# work. Disable aria2c and use curl instead. curl is the default for
+		# SLES 11 and openSUSE 11.4
+		# ----
+		$ENV{ZYPP_ARIA2C} = 0;
+		$zconfig = new Config::IniFiles (
+			-file => $zyppConf, -allowedcommentchars => '#'
+		);
+		my ($uname, $pass) = $xml->getHttpsRepositoryCredentials();
+		if ($uname) {
+			$kiwi -> info ('Creating credentials data');
+			my $credDir = "$dataDir/credentials.d";
+			make_path($credDir);
+			$zconfig->newval('main', 'credentials.global.dir', $credDir);
+			$zconfig->RewriteConfig();
+			open my $credFile, '>'. "$credDir/kiwiRepoCredentials";
+			if (!$credFile) {
+				my $msg = 'Unable to open credetials file for write '
+				. "in $credDir";
+				$kiwi -> error ($msg);
+				$kiwi -> failed();
+				return undef;
+			}
+			print $credFile "username=$uname\n";
+			print $credFile "password=$pass\n";
+			close $credFile;
+			$kiwi -> done();
+		}
+		if (defined $targetArch) {
 			$kiwi -> info ("Setting target architecture to: $targetArch");
 			$zconfig->newval('main', 'arch', $targetArch);
-			$zconfig->RewriteConfig;
+			$zconfig->RewriteConfig();
 			$kiwi -> done ();
-		} else {
-			$kiwi -> warning ("Target architecture not supported for $manager");
-			$kiwi -> skipped ();
 		}
 	}
 	my @channelList = ();
@@ -145,7 +184,8 @@ sub new {
 		"--no-gpg-checks",
 		"--reposd-dir $dataDir",
 		"--cache-dir $dataDir",
-		"--raw-cache-dir $dataDir"
+		"--raw-cache-dir $dataDir",
+		"--config $zypperConf"
 	];
 	$this->{ensconce}    = [
 		$packageManager{ensconce},
@@ -746,6 +786,14 @@ sub setupInstallationSource {
 					if ($val =~ /^'\//) {
 						$val =~ s/^'(.*)'$/"file:\/\/$1"/
 					}
+					if ($val =~ /^'https:/) {
+						my ($uname, $pass) = $this->{xml}
+									->getHttpsRepositoryCredentials();
+						if ($uname) {
+							chop $val;
+							$val .= "?credentials=kiwiRepoCredentials'";
+						}
+					}
 					push (@zopts,$val);
 				}
 				#==========================================
@@ -1152,6 +1200,7 @@ sub installPackages {
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
+		print $fd "export ZYPP_ARIA2C=0\n";
 		print $fd "@kchroot @zypper install ";
 		print $fd "@installOpts @addonPackages &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
@@ -1286,6 +1335,7 @@ sub removePackages {
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
+		print $fd "export ZYPP_ARIA2C=0\n";
 		print $fd "@kchroot @zypper remove ";
 		print $fd "@installOpts @removePackages || true &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
@@ -1444,6 +1494,7 @@ sub setupUpgrade {
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
+		print $fd "export ZYPP_ARIA2C=0\n";
 		if (defined $delPacks) {
 			my @removePackages = @{$delPacks};
 			if (@removePackages) {
@@ -1896,6 +1947,7 @@ sub setupRootSystem {
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
 			print $fd "export ZYPP_CONF=".$root."/".$this->{zyppconf}."\n";
+			print $fd "export ZYPP_ARIA2C=0\n";
 			if (@newprods) {
 				print $fd "@zypper --root $root install ";
 				print $fd "@installOpts -t product @newprods &\n";
@@ -1961,6 +2013,7 @@ sub setupRootSystem {
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
 			print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
+			print $fd "export ZYPP_ARIA2C=0\n";
 			if (@newprods) {
 				print $fd "@kchroot @zypper install ";
 				print $fd "@installOpts -t product @newprods &\n";

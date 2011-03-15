@@ -84,7 +84,7 @@ sub new {
 	# create log object if not done
 	#------------------------------------------
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
+		$kiwi = new KIWILog("tiny");
 	}
 	#==========================================
 	# check initrd file parameter
