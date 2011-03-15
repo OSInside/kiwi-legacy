@@ -106,7 +106,7 @@ sub sendLogServerMessage {
 	my $level   = $this->{level};
 	my $date    = $this->{date};
 	if (! defined $smem) {
-		if ($this->trace()) {
+		if (($this->trace()) && ($main::TT)) {
 			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
 		return undef;

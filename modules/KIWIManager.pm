@@ -22,7 +22,6 @@ use strict;
 use Carp qw (cluck);
 use FileHandle;
 use File::Basename;
-use File::Path qw(make_path remove_tree);
 use Config::IniFiles;
 use KIWILog;
 use KIWILocator;
@@ -102,8 +101,10 @@ sub new {
 	# Clean out any potential previous data
 	#------------------------------------------
 	my $dataDir = "/var/cache/kiwi/$manager";
-	make_path ($dataDir);
-	remove_tree ($dataDir, {keep_root => 1} );
+	if (! -d $dataDir) {
+		qxx ("mkdir -p $dataDir");
+	}
+	qxx ("rm -rf $dataDir/*");
 	my $zyppConf;   # Configuration file for libzypp
 	my $zypperConf; # Configuration file for zypper
 	my $zconfig;
@@ -129,7 +130,7 @@ sub new {
 		if ($uname) {
 			$kiwi -> info ('Creating credentials data');
 			my $credDir = "$dataDir/credentials.d";
-			make_path($credDir);
+			mkdir $credDir;
 			$zconfig->newval('main', 'credentials.global.dir', $credDir);
 			$zconfig->RewriteConfig();
 			open my $credFile, '>'. "$credDir/kiwiRepoCredentials";
