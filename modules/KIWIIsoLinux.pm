@@ -23,6 +23,7 @@ use Carp qw (cluck);
 use Fcntl; # needed for some constants for sysopen
 use File::Find;
 use File::Basename;
+use KIWILocator;
 use KIWILog;
 use KIWIQX;
 
@@ -85,10 +86,13 @@ sub new {
 	#==========================================
 	# Find iso tool to use on this system
 	#------------------------------------------
-	if (-x "/usr/bin/genisoimage") {
-		$tool = "/usr/bin/genisoimage";
-	} elsif (-x "/usr/bin/mkisofs") {
-		$tool = "/usr/bin/mkisofs";
+	my $locator = new KIWILocator($kiwi);
+	my $genTool = $locator -> getExecPath('genisoimage');
+	my $mkTool = $locator -> getExecPath('mkisofs');
+	if ($genTool && -x $genTool) {
+		$tool = $genTool;
+	} elsif ($mkTool && -x $mkTool) {
+		$tool = $mkTool;
 	} else {
 		$kiwi -> error  ("No ISO creation tool found");
 		$kiwi -> failed ();

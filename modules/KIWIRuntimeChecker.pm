@@ -180,11 +180,13 @@ sub __checkFilesystemTool {
 			$toolError = 1;
 		}
 	} elsif ($typeName eq 'iso') {
-		my $haveTool = $this -> {locator} -> getExecPath('mkisofs');
-		if (! $haveTool) {
-			$checkedFS = 'mkisofs';
+        my $genTool = $this -> {locator} -> getExecPath('genisoimage');
+		my $mkTool = $this -> {locator} -> getExecPath('mkisofs');
+		if ((! $genTool) && (! $mkTool)) {
+			$checkedFS = 'iso';
 			$toolError = 1;
 		}
+		my $haveTool;
 		if ($flag && $flag eq 'clic') {
 			$haveTool = $this -> __isFsToolAvailable('clicfs');
 			$checkedFS = 'clicfs';
