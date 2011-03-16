@@ -49,14 +49,7 @@ updateMTAB
 createFramebufferDevices
 
 #======================================
-# 6) check preinit services
-#--------------------------------------
-if isVirtioDevice;then
-	runPreinitServices virtio
-fi
-
-#======================================
-# 7) create /etc/ImagePackages
+# 6) create /etc/ImagePackages
 #--------------------------------------
 if [ -x /bin/rpm ];then
 	Echo "Creating initial image package info file"
@@ -64,26 +57,26 @@ if [ -x /bin/rpm ];then
 fi
 
 #======================================
-# 8) create initrd on diskful
+# 7) create initrd on diskful
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 	setupSUSEInitrd
 fi
 
 #======================================
-# 9) Install boot loader if ok
+# 8) Install boot loader if ok
 #--------------------------------------
 if [ $bootLoaderOK = 1 ];then
 	installBootLoader
 fi
 
 #======================================
-# 10) setup console
+# 9) setup console
 #--------------------------------------
 setupConsole
 
 #======================================
-# 11) kill udev
+# 10) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

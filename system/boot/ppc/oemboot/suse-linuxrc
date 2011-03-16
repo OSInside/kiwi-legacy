@@ -85,6 +85,9 @@ function setupInitialDeviceNames {
 			export imageRootDevice=/dev/$VGROUP/LVRoot
 		fi
 		export imageRWDevice=/dev/$VGROUP/LVRoot
+		if [ ! -z "$kiwi_ramonly" ];then
+			export imageRWDevice=/dev/ram1
+		fi
 		export imageRODevice=/dev/$VGROUP/LVComp
 		export imageIOWRDevice=$imageRWDevice
 		export imageBootDevice=$(ddn $imageDiskDevice 2)
@@ -100,7 +103,6 @@ function setupInitialDeviceNames {
 			export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
 			export imageRootDevice=$(ddn $imageDiskDevice 1)
 		else
-			if [ "$arch" = "ppc64" ];then
 			for i in 2 3;do
 				export imageRootDevice=$(ddn $imageDiskDevice $i)
 				probeFileSystem $imageRootDevice
@@ -108,15 +110,6 @@ function setupInitialDeviceNames {
 					break
 				fi
 			done
-			else
-                        for i in 1 2;do
-                                export imageRootDevice=$(ddn $imageDiskDevice $i)
-                                probeFileSystem $imageRootDevice
-                                if [ ! "$FSTYPE" = "unknown" ];then
-                                        break
-                                fi
-                        done
-			fi
 		fi
 	fi
 	#======================================
@@ -573,9 +566,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	setupDefaultFstab /config
 	updateRootDeviceFstab /config $imageRootDevice
 	if [ "$haveLVM" = "yes" ];then
-		if [! "$arch" = "ppc" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
-		fi
 	elif [ "$haveClicFS" = "yes" ];then
 		updateClicBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveBtrFS" = "yes" ];then

@@ -129,9 +129,6 @@ Echo "Searching for boot device..."
 if [ "$LOCAL_BOOT" = "no" ];then
 	searchOFBootDevice
 	if [ ! -e "$biosBootDevice" ];then
-		searchBusIDBootDevice
-	fi
-	if [ ! -e "$biosBootDevice" ];then
 		systemException "$biosBootDevice" "reboot"
 	fi
 	export imageDiskDevice=$biosBootDevice
@@ -215,7 +212,7 @@ fi
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupDefaultFstab /config
 	updateRootDeviceFstab /config $imageRootDevice
-	if [ ! "$arch" = "ppc64" && "$haveLVM" = "yes" ];then
+	if [ "$haveLVM" = "yes" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveClicFS" = "yes" ];then
 		updateClicBootDeviceFstab /config $imageBootDevice

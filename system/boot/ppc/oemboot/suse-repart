@@ -74,7 +74,7 @@ function OEMRepartStandard {
 	export bootid=1
 	if [ "$haveBootPartition" = "yes" ];then
 		if [ ! "$loader" = "lilo" ];then
-		bootid=2
+			bootid=2
 		fi
 	fi
 	#======================================
@@ -116,8 +116,8 @@ function OEMRepartStandard {
 		# clean/backup boot partition
 		#--------------------------------------
 		if [ "$haveBootPartition" = "yes" ];then
-                        createPartitionerInput \
-                                d 2
+			createPartitionerInput \
+				d 2
 		fi
 		#======================================
 		# count partitions to be created
@@ -154,7 +154,6 @@ function OEMRepartStandard {
 		createPartitionerInput \
 			n p $pID . $partsize
 		rootParam=$pID
-
 		#======================================
 		# add swap partition
 		#--------------------------------------
@@ -336,9 +335,13 @@ function OEMRepartLVM {
 	# repartition disk if LVM partition plus boot partition
 	# is used. Initial partition table layout is:
 	# =====================================
-	# p1: ( boot ) 
-	# p2: ( LVM  )  +luks
+	# p2: ( boot )
+	# p3: ( LVM  )  +luks
 	# -------------------------------------
+	#======================================
+	# check for boot partition
+	#--------------------------------------
+	createBootDeviceData 2
 	#======================================
 	# setup initial boot device ID
 	#--------------------------------------
@@ -393,7 +396,7 @@ function OEMRepartLVM {
 		#--------------------------------------
 		if [ ! -z "$OEM_RECOVERY" ];then
 			createPartitionerInput \
-				n p $pID . . t $pID $recoID	
+				n p $pID . . t $pID $recoID
 			recoParam=$pID
 			pID=$((pID + 1))
 		fi
@@ -421,13 +424,13 @@ function OEMRepartLVM {
 			swapParam=yes
 		fi
 		#======================================
-		# Extend LVRoot... 
+		# Extend LVRoot...
 		#--------------------------------------
 		if [ -z "$OEM_SYSTEMSIZE" ];then
 			lvextend -l +100%FREE /dev/$VGROUP/LVRoot
 		else
 			lvextend --size $OEM_SYSTEMSIZE"M" /dev/$VGROUP/LVRoot
- 		fi
+		fi
 		#======================================
 		# setup new device names
 		#--------------------------------------
@@ -735,7 +738,6 @@ function createBootDeviceData {
 		fi
 		if [ "$loader" = "lilo" ];then
 			bootpartID=41
-			#FIXME: Do we need bootXMBytes here?
 			export bootXMBytes=1
 			export prepsize=$(partitionSize $(ddn $imageDiskDevice 1))
 		fi 
@@ -743,11 +745,11 @@ function createBootDeviceData {
 		# Store contents in RAM
 		#--------------------------------------
 		if [ ! "$loader" = "lilo" ];then
-		mount $(ddn $imageDiskDevice $bootPart) /mnt
-		tar -czf /boot.tgz -C /mnt .
-		umount /mnt
+			mount $(ddn $imageDiskDevice $bootPart) /mnt
+			tar -czf /boot.tgz -C /mnt .
+			umount /mnt
 		else
-		dd if=$(ddn $imageDiskDevice $bootPart) of=/boot.raw
+			dd if=$(ddn $imageDiskDevice $bootPart) of=/boot.raw
 		fi
 	fi
 	#====================================== 
