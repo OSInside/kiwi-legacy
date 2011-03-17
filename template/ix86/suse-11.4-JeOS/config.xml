@@ -86,6 +86,6 @@
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="cracklib-dict-full"/>
-		<package name="openssl-certs"/>
+		<package name="ca-certificates"/>
 	</packages>
 </image>
