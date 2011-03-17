@@ -1505,7 +1505,7 @@ sub setupBootDisk {
 		# add boot space if lvm based
 		#------------------------------------------
 		$lvm = 1;
-		$lvmbootMB  = 60;
+		$lvmbootMB  = 100;
 		$this->{lvm}= $lvm;
 		#==========================================
 		# set volume group name
@@ -1587,21 +1587,21 @@ sub setupBootDisk {
 	if ($type{filesystem} eq "clicfs") {
 		$this->{dmapper} = 1;
 		$dmapper  = 1;
-		$dmbootMB = 60;
+		$dmbootMB = 100;
 	}
 	#==========================================
 	# check if fs requires a boot partition
 	#------------------------------------------
 	if (($type{filesystem} eq "btrfs") || ($type{filesystem} eq "xfs")) {
 		$needBootP  = 1;
-		$luksbootMB = 60;
+		$luksbootMB = 100;
 	}
 	#==========================================
 	# check for LUKS extension
 	#------------------------------------------
 	if ($type{luks}) {
 		$haveluks   = 1;
-		$luksbootMB = 60;
+		$luksbootMB = 100;
 	}
 	#==========================================
 	# setup boot loader type
@@ -1623,7 +1623,7 @@ sub setupBootDisk {
 	}
 	if ($arch =~ /ppc|ppc64/) {
 		if ($lvm) {
-			$prepbootMB = 50;
+			$prepbootMB = 100;
 		} else {
 			$prepbootMB = 8;
 		}

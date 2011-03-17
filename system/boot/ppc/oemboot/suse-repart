@@ -731,7 +731,7 @@ function createBootDeviceData {
 		# Variable setup
 		#--------------------------------------
 		export haveBootPartition=yes
-		export bootXMBytes=60
+		export bootXMBytes=100
 		export bootpartID=83
 		if [ "$loader" = "syslinux" ];then
 			bootpartID=6
