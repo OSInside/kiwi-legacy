@@ -1158,12 +1158,14 @@ sub init {
 	$SIG{"HUP"}      = \&quit;
 	$SIG{"TERM"}     = \&quit;
 	$SIG{"INT"}      = \&quit;
+	my $Help;
+	my $Version;
 	my $kiwi = new KIWILog("tiny");
 	#==========================================
 	# get options and call non-root tasks
 	#------------------------------------------
 	my $result = GetOptions(
-		"version"               => \&version,
+		"version"               => \$Version,
 		"recycle-root"          => \$RecycleRoot,
 		"targetdevice=s"        => \$targetDevice,
 		"v|verbose+"            => \$Verbosity,
@@ -1240,8 +1242,7 @@ sub init {
 		"check-config=s"        => \$CheckConfig,
 		"yes|y"                 => \$defaultAnswer,
 		"debug"                 => \$Debug,
-		"help|h"                => \&usage,
-		"<>"                    => \&usage
+		"help|h"                => \$Help
 	);
 	#========================================
 	# check if recycle-root is used
@@ -1340,15 +1341,30 @@ sub init {
 		cloneImage();
 	}
 	#==========================================
+	# non root task: Help
+	#------------------------------------------
+	if (defined $Help) {
+		usage(0);
+	}
+	#==========================================
+	# non root task: Version
+	#------------------------------------------
+	if (defined $Version) {
+		version(0);
+	}
+	#==========================================
+	# Check result of options parsing
+	#------------------------------------------
+	if ( $result != 1 ) {
+		usage(1);
+	}
+	#==========================================
 	# Check for root privileges
 	#------------------------------------------
 	if ($< != 0) {
 		$kiwi -> error ("Only root can do this");
 		$kiwi -> failed ();
-		usage();
-	}
-	if ( $result != 1 ) {
-		usage();
+		usage(1);
 	}
 	#==========================================
 	# Check option combination/values
@@ -1456,6 +1472,7 @@ sub usage {
 	# Explain the available options for this
 	# image creation system
 	# ---
+	my $exit = shift;
 	my $kiwi = new KIWILog("tiny");
 	my $date = qxx ( "bash -c 'LANG=POSIX date -I'" ); chomp $date;
 	print "Linux KIWI setup  (image builder) ($date)\n";
@@ -1639,7 +1656,7 @@ sub usage {
 	print "      system image. The kernel check also tries to fix the boot\n";
 	print "      image if no matching kernel was found.\n";
 	print "--\n";
-	version();
+	version ($exit);
 }
 
 #==========================================
@@ -2230,6 +2247,10 @@ sub version {
 	# ...
 	# Version information
 	# ---
+	my $exit = shift;
+	if (! defined $exit) {
+		$exit = 0;
+	}
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
@@ -2239,7 +2260,7 @@ sub version {
 	}
 	$kiwi -> info ("kiwi version v$Version\nGIT Commit: $rev\n");
 	$kiwi -> cleanSweep();
-	exit 0;
+	exit ($exit);
 }
 
 #==========================================
