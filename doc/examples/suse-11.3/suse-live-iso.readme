@@ -24,7 +24,7 @@ How to test this Example
 * Testing an iso can be done with any full virtual system or simply
   by burning the .iso file on a CD or DVD. For example:
 
-    qemu -cdrom /tmp/myiso-result/suse-11.3-live-iso.i686-2.5.iso -m 512
+    qemu -cdrom /tmp/myiso-result/suse-11.3-live.i686-2.5.2.iso -m 512
 
 Login Details
 ==============================

@@ -15,7 +15,7 @@ KIWI Image Description Example
 How to build this Example
 ==============================
 
-    kiwi -p /usr/share/doc/packages/kiwi/examples/suse-11.3/suse-min-gnome \
+    kiwi -p /usr/share/doc/packages/kiwi/examples/suse-11.4/suse-min-gnome \
          --root /tmp/mymingnome
 
     kiwi --create /tmp/mymingnome -d /tmp/mymingnome-result
@@ -26,7 +26,7 @@ How to test this Example
   virtualization software. Using qemu as an example you can use the 
   following command to test the VMware image for a 64 bit build.
 
-   qemu-kvm /tmp/mymingnome-result/suse-11.3-gnome-demo.x86_64-1.0.1.vmdk
+   qemu-kvm /tmp/mymingnome-result/suse-11.4-gnome-demo.x86_64-1.0.1.vmdk
 
   
 Login Details

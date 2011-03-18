@@ -11,10 +11,10 @@ KIWI Image Description Example
   machine. After the package location has been specified you may build the
   images as indicated below.
 
-  Use Eucalyptus version 1.6.2 or later with openSUSE 11.3
+  Use Eucalyptus version 1.6.2 or later with openSUSE 11.4
 
   It is assumed that you copied
-  /usr/share/doc/packages/kiwi/examples/suse-11.3/suse-euca-cloud to
+  /usr/share/doc/packages/kiwi/examples/suse-11.4/suse-euca-cloud to
   /tmp/suse-euca-cloud
 
 How to build this Example

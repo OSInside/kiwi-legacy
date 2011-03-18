@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.2" name="suse-11.3-live-iso">
+<image schemaversion="5.2" name="suse-11.3-live">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -8,6 +8,13 @@
 	</description>
 	<preferences>
 		<type image="iso" primary="true" boot="isoboot/suse-11.3" hybrid="true" flags="clic"/>
+		<type image="oem" boot="oemboot/suse-11.3" filesystem="clicfs" bootloader="syslinux" ramonly="true">
+			<oemconfig>
+				<oem-swap>false</oem-swap>
+				<oem-systemsize>2048</oem-systemsize>
+			</oemconfig>
+			<systemdisk/>
+		</type>
 		<version>2.5.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -17,6 +24,9 @@
 	</preferences>
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+	</users>
+	<users group="users">
+		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
 	</users>
 	<repository type="yast2">
 		<source path="opensuse://11.3/repo/oss/"/>
