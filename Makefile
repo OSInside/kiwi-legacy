@@ -168,6 +168,13 @@ test:
 		perl $$i ;\
 	done
 
+%.t:
+	#============================================
+	# Run specific unit test
+	#--------------------------------------------
+	tests/unit/cleanup.sh
+	perl tests/unit/$@
+
 clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
 	(find -name .checksum.md5 | xargs rm -f)
