@@ -392,7 +392,7 @@ exit</programlisting>
          <term><optional>suseStripPackager {-a}</optional></term>
         <listitem>
           <para>
-             Remove smart o zypper packages and db files
+             Remove smart or zypper packages and db files
              Also remove rpm package and db if <option>-a</option> given
           </para>
         </listitem>

@@ -293,7 +293,7 @@
 
       <screen>&lt;preferences profiles="name"&gt;
   &lt;version&gt;1.1.2&lt;/version&gt;
-  &lt;packagemanager&gt;smart&lt;/packagemanager&gt;
+  &lt;packagemanager&gt;zypper&lt;/packagemanager&gt;
   &lt;type image="name" ...&gt;
     &lt;ec2config|systemdisk|oemconfig|pxedeploy|size|split|machine&gt;
   &lt;/type&gt; 
@@ -332,9 +332,9 @@
         </listitem>
       </itemizedlist>
 
-      <para>By default, KIWI uses the smart package manager but it is
-        also possible to use the SUSE package manager called
-          <command>zypper</command>. </para>
+      <para>By default, KIWI uses the <command>zypper</command> package
+        manager but it is also possible to use the non SUSE native package
+        manager called <command>smart</command>. </para>
 
       <para>In general the specification of one
           <sgmltag>preferences</sgmltag> section is sufficient. However,
@@ -1494,8 +1494,8 @@
         accessed by the chosen package manager if the given type is supported
         by the specified package manager. KIWI supports smart or zypper as
         package managers, specified with the <sgmltag class="element">
-        packagemanager</sgmltag> element. The default package manager is the
-        smart package manager. The following table shows the possible 
+        packagemanager</sgmltag> element. The default package manager is
+        zypper. The following table shows the possible 
         supported repository types for each package manager:</para>
 
       <table id="tab.description.supported-types">

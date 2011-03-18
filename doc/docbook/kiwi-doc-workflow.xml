@@ -81,7 +81,7 @@
     image. The building of a new root tree consists of the creation of
     the directory specified to hold it and the installation of the
     selected packages on it. The installation of software packages is
-    driven by a package manager. KIWI supports the smart <!--and zypper -->package
+    driven by a package manager. KIWI supports the smart and zypper package
     managers. The prepare step executes the following major stages: </para>
 
   <itemizedlist>
@@ -97,7 +97,7 @@
     <listitem>
       <formalpara>
         <title>Installing Packages</title>
-        <para>First the selected package manager (smart by default) is
+        <para>First the selected package manager (zypper by default) is
           instructed to use the repositories specified in the image
           description file. Then the packages specified in the bootstrap
           section are installed. These packages are installed externally
