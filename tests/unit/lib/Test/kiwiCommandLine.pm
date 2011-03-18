@@ -82,6 +82,50 @@ sub test_cmdBuildTypeUsage {
 }
 
 #==========================================
+# test_cmdPackageMgrUsage
+#------------------------------------------
+sub test_cmdPackageMgrUsage {
+	# ...
+	# Test the storage of the package manager
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Test improper call
+	my $res = $cmd -> setPackageManager();
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'setPackageManager method called without specifying '
+	. 'package manager value.';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	# Test unsupported package manager
+	$res = $cmd -> setPackageManager('pablo');
+	$msg = $kiwi -> getMessage();
+	$expectedMsg = 'Unsupported package manager specified: pablo';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	# Make sure we can get our data back
+	$res = $cmd -> setPackageManager('zypper');
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	my $pckMgr = $cmd -> getPackageManager();
+	$this -> assert_str_equals('zypper', $pckMgr);
+}
+
+#==========================================
 # test_cmdProfileUsage
 #------------------------------------------
 sub test_cmdProfileUsage {

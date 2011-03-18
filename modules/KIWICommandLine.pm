@@ -62,6 +62,7 @@ sub new {
 	$this->{configDir}     = '';
 	$this->{imageTgtDir}   = '';
 	$this->{kiwi}          = $kiwi;
+	$this->{packageMgr}    = '';
 	$this->{rootTgtDir}    = '';
 
 	return $this;
@@ -130,6 +131,17 @@ sub getImageTargetDir {
 }
 
 #==========================================
+# getPackageManager
+#------------------------------------------
+sub getPackageManager {
+	# ...
+	# Return the package manager for this build if set as command line option
+	# ---
+	my $this = shift;
+	return $this -> {packageMgr};
+}
+
+#==========================================
 # getPrepTargetDir
 #------------------------------------------
 sub getRootTargetDir {
@@ -156,19 +168,6 @@ sub setAdditionalPatterns {
 # setAdditionalRepos
 #------------------------------------------
 sub setAdditionalRepos {
-}
-
-#==========================================
-# setBuildTargetDir
-#------------------------------------------
-sub setTargetDirsForBuild {
-	# ...
-	# Setup the target dirs for a combined (prepare & create) image build.
-	# ---
-	my $this = shift;
-	$this->{prepTgtDir} = $this->{imageTgtDir};
-	$this->{imageTgtDir} = $this->{prepTgtDir} . '/build';
-	return 1;
 }
 
 #==========================================
@@ -222,7 +221,34 @@ sub setImagetargetDir {
 }
 
 #==========================================
-# setPrepTargetDir
+# setPackageManager
+#------------------------------------------
+sub setPackageManager {
+	# ...
+	# Set the package manager for this build as defined on the command line
+	# ---
+	my $this   = shift;
+	my $pkgMgr = shift;
+	my @supportedPkgMgrs = qw (ensconce smart yum zypper);
+	if (! $pkgMgr) {
+		my $msg = 'setPackageManager method called without specifying '
+		. 'package manager value.';
+		$this -> {kiwi} -> error ($msg);
+		$this -> {kiwi} -> failed();
+		return undef;
+	}
+	if (grep /$pkgMgr/, @supportedPkgMgrs) {
+		$this -> {packageMgr} = $pkgMgr;
+		return 1;
+	}
+	my $msg = "Unsupported package manager specified: $pkgMgr";
+	$this -> {kiwi} -> error ($msg);
+	$this -> {kiwi} -> failed();
+	return undef;
+}
+
+#==========================================
+# setRootTargetDir
 #------------------------------------------
 sub setRootTargetDir {
 	# ...
@@ -230,6 +256,19 @@ sub setRootTargetDir {
 	# ---
 	my $this = shift;
 	$this -> {rootTgtDir} = shift;
+	return 1;
+}
+
+#==========================================
+# setTargetDirsForBuild
+#------------------------------------------
+sub setTargetDirsForBuild {
+	# ...
+	# Setup the target dirs for a combined (prepare & create) image build.
+	# ---
+	my $this = shift;
+	$this->{prepTgtDir} = $this->{imageTgtDir};
+	$this->{imageTgtDir} = $this->{prepTgtDir} . '/build';
 	return 1;
 }
 

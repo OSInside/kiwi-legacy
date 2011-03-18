@@ -22,6 +22,7 @@ use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
 
 use KIWICommandLine;
+use KIWILocator;
 use KIWIRuntimeChecker;
 use KIWIXML;
 
@@ -193,7 +194,7 @@ sub test_fsToolCheckFsysImg {
 			# Test this condition last to get potential error messages
 			$this -> assert_null($res);
 		} else {
-			# Filesystem tools is present
+			# Filesystem tool is present
 			my $msg = $kiwi -> getMessage();
 			$this -> assert_str_equals('No messages set', $msg);
 			my $msgT = $kiwi -> getMessageType();
@@ -328,24 +329,10 @@ sub test_fsToolCheckSplitImg {
 	my $xml = $this -> __getXMLObj($configPath);
 	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
 	my $res = $checker -> createChecks();
-	my $eMsg = $kiwi -> getErrorMessage();
-	if ($eMsg) {
-		# File system tool is not present
-		my $logMsg = $kiwi -> getLogInfoMessage();
-		my $expected = "warning: mkfs.btrfs not found\n";
-		$this -> assert_str_equals($expected, $logMsg);
-		$expected = 'Requested image creation with filesystem "btrfs"; '
-		. 'but tool to create the file system could not '
-		. 'be found.';
-		$this -> assert_str_equals($expected, $eMsg);
-		my $msgT = $kiwi -> getMessageType();
-		$this -> assert_str_equals('error', $msgT);
-		my $state = $kiwi -> getState();
-		$this -> assert_str_equals('failed', $state);
-		# Test this condition last to get potential error messages
-		$this -> assert_null($res);
-	} else {
-		# Filesystem tools is present
+	my $locator = new KIWILocator($kiwi);
+	my $haveBtrfs = $locator -> getExecPath('mkfs.btrfs');
+	if ($haveBtrfs) {
+		# Filesystem tool is present
 		my $msg = $kiwi -> getMessage();
 		$this -> assert_str_equals('No messages set', $msg);
 		my $msgT = $kiwi -> getMessageType();
@@ -354,6 +341,20 @@ sub test_fsToolCheckSplitImg {
 		$this -> assert_str_equals('No state set', $state);
 		# Test this condition last to get potential error messages
 		$this -> assert_not_null($res);
+	} else {
+		# File system tool is not present
+		my $logMsg = $kiwi -> getLogInfoMessage();
+		my $expected = "warning: mkfs.btrfs not found\n";
+		$this -> assert_str_equals($expected, $logMsg);
+		my $eMsg = $kiwi -> getErrorMessage();
+		$expected = 'Requested image creation with filesystem "btrfs"; '
+		. 'but tool to create the file system could not '
+		. 'be found.';
+		$this -> assert_str_equals($expected, $eMsg);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_null($res);
 	}
 }
 
@@ -407,6 +408,84 @@ sub test_noBuildType {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($xml);
+}
+
+#==========================================
+# test_packageManagerCheck
+#------------------------------------------
+sub test_packageManagerCheck {
+	# ...
+	# Test that the runtime check for package manager tool existence behaves
+	# properly.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
+	# Select manager least likely to be present we want this part of
+	# the test to simulate a failure condition
+	$cmd -> setPackageManager('ensconce');
+	my $xml = $this -> __getXMLObj( $this -> {dataDir} );
+	$xml -> setPackageManager('ensconce');
+	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	my $res = $checker -> prepareChecks();
+	my $locator = new KIWILocator($kiwi);
+	my $haveEnsconce = $locator -> getExecPath('ensconce');
+	if ($haveEnsconce) {
+		my $msg = $kiwi -> getMessage();
+		$this -> assert_str_equals('No messages set', $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('none', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('No state set', $state);
+		$this -> assert_not_null($res);
+		my $infoMsg = 'Found ensconce package manager, not hitting the '
+			. "anticipated failure condition. This is NOT an error.\n";
+		print STDOUT $infoMsg;
+	} else {
+		my $logInf = $kiwi -> getLogInfoMessage();
+		$this -> assert_str_equals("warning: ensconce not found\n", $logInf);
+		my $errMsg = $kiwi -> getErrorMessage();
+		my $expected = 'Executable for specified package manager, ensconce, '
+			. 'could not be found.';
+		$this -> assert_str_equals($expected, $errMsg);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		$this -> assert_null($res);
+	}
+	# Test the most likely use case, zypper set as package manager in
+	# config.xml, this test should succeed
+	$cmd = $this -> __getCommandLineObj();
+	$xml = $this -> __getXMLObj( $this -> {dataDir} );
+	$checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	$res = $checker -> prepareChecks();
+
+	$locator = new KIWILocator($kiwi);
+	my $haveZypper = $locator -> getExecPath('zypper');
+	if ($haveZypper) {
+		my $msg = $kiwi -> getMessage();
+		$this -> assert_str_equals('No messages set', $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('none', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('No state set', $state);
+		$this -> assert_not_null($res);
+
+	} else {
+		my $logInf = $kiwi -> getLogInfoMessage();
+		$this -> assert_str_equals("warning: zypper not found\n", $logInf);
+		my $errMsg = $kiwi -> getErrorMessage();
+		my $failExpect = 'Executable for specified package manager, zypper, '
+			. 'could not be found.';
+		$this -> assert_str_equals($failExpect, $errMsg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		$this -> assert_null($res);
+		my $infoMsg = 'Did not find zypper package manager, not hitting the '
+			. "anticipated success condition. This is NOT an error.\n";
+		print STDOUT $infoMsg;
+	}
 }
 
 #==========================================

@@ -92,10 +92,13 @@ sub createChecks {
 	if (! $this -> __haveValidTypeString()) {
 		return undef;
 	}
+	if (! $this -> __checkHaveTypeToBuild()) {
+		return undef;
+	}
 	if (! $this -> __checkFilesystemTool()) {
 		return undef;
 	}
-	if (! $this -> __checkHaveTypeToBuild()) {
+	if (! $this -> __checkPackageManagerExists()) {
 		return undef;
 	}
 	return 1;
@@ -115,6 +118,9 @@ sub prepareChecks {
 	if (! $this -> __checkHaveTypeToBuild()) {
 		return undef;
 	}
+	if (! $this -> __checkPackageManagerExists()) {
+		return undef;
+	}
 	if (! $this -> __checkPatternTypeAttrrValueConsistent()) {
 		return undef;
 	}
@@ -126,7 +132,7 @@ sub prepareChecks {
 #------------------------------------------
 sub __haveValidTypeString {
 	# ...
-	# if the commandline data set contains a buildtype
+	# if the commandline data set contains buildtype
 	# information, check if it contains a valid string
 	# This check must be done for prepare and create in
 	# order to early detect a broken commandline when
@@ -144,8 +150,8 @@ sub __haveValidTypeString {
 	if ($type) {
 		if (! grep /$type/, @allowedTypes) {
 			my $kiwi = $this -> {kiwi};
-			my $msg = 'Specified value for "type" command line argument is not '
-			. 'valid.';
+			my $msg = 'Specified value for "type" command line argument is '
+				. 'not valid.';
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
 			return undef;
@@ -180,7 +186,7 @@ sub __checkFilesystemTool {
 			$toolError = 1;
 		}
 	} elsif ($typeName eq 'iso') {
-        my $genTool = $this -> {locator} -> getExecPath('genisoimage');
+		my $genTool = $this -> {locator} -> getExecPath('genisoimage');
 		my $mkTool = $this -> {locator} -> getExecPath('mkisofs');
 		if ((! $genTool) && (! $mkTool)) {
 			$checkedFS = 'iso';
@@ -240,6 +246,26 @@ sub __checkHaveTypeToBuild {
 	# ---
 	#TODO
 	# implement when XML becomes a dumb container and looses notion of state
+	return 1;
+}
+
+#==========================================
+# __checkPackageManagerExists
+#------------------------------------------
+sub __checkPackageManagerExists {
+	# ...
+	# Check that the specified package manager exists
+	# ---
+	my $this = shift;
+	my $pkgMgr = $this -> {xml} -> getPackageManager();
+	my $haveExec = $this -> {locator} -> getExecPath($pkgMgr);
+	if (! $haveExec) {
+		my $msg = "Executable for specified package manager, $pkgMgr, "
+			. 'could not be found.';
+		$this -> {kiwi} -> error($msg);
+		$this -> {kiwi} -> failed();
+		return undef;
+	}
 	return 1;
 }
 
@@ -312,7 +338,7 @@ sub __isFsToolAvailable {
 	my $fsType = shift;
 	my $locator = $this -> {locator};
 	if ($fsType eq 'btrfs' ) {
-		$locator -> getExecPath('mkfs.btrfs');
+		return $locator -> getExecPath('mkfs.btrfs');
 	}
 	if ($fsType eq 'clicfs' ) {
 		return $locator -> getExecPath('mkclicfs');

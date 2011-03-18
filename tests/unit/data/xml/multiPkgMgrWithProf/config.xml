@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.2" name="suse-default-runtime-check-config">
+<image schemaversion="5.2" name="suse-xml-test-config">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rschweikert@novell.</contact>
-		<specification>A general vaild configuration use for runtime tester</specification>
+		<specification>Package manager specified for specifc profile, test should return smart or zypper, depending on build profile</specification>
 	</description>
 	<profiles>
-		<profile name="my-first" description="a first test profile"/>
-		<profile name="my-second" description="a second test profile"/>
+		<profile name="specPkgMgr" description="test-profile"/>
 	</profiles>
 	<preferences>
-		<type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-11.3" format="vmdk">
+		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-11.3" format="vmdk">
 			<machine memory="1024">
 				<vmdisk controller="ide" id="0"/>
 			</machine>
 		</type>
 		<version>1.0.1</version>
-		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
+	</preferences>
+	<preferences profiles="specPkgMgr">
+		<packagemanager>zypper</packagemanager>
 	</preferences>
 	<users group="users">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
@@ -32,15 +33,7 @@
 	<repository type="rpm-dir">
 		<source path="/tmp"/>
 	</repository>
-	<packages type="image" profiles="my-first" patternType="plusRecommended">
-		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="kernel-default"/>
-		<package name="ifplugd"/>
-		<package name="vim"/>
-		<opensusePattern name="base"/>
-	</packages>
-	<packages type="image" profiles="my-second" patternType="onlyRequired">
+	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default"/>

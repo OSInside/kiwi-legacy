@@ -27,7 +27,6 @@ use LWP;
 use XML::LibXML;
 use KIWILocator;
 use KIWILog;
-use KIWIManager qw (%packageManager);
 use KIWIOverlay;
 use KIWIQX;
 use KIWIURL;
@@ -67,7 +66,7 @@ our @EXPORT = qw (
 #==========================================
 # Constructor
 #------------------------------------------
-sub new { 
+sub new {
 	# ...
 	# Create a new KIWIXML object which is used to access the
 	# configuration XML data stored as description file.
@@ -203,14 +202,6 @@ sub new {
 	#------------------------------------------
 	if (! $this -> __addDefaultSplitNode()) {
 		return undef;
-	}
-	#==========================================
-	# Set global packagemanager value
-	#------------------------------------------
-	if (defined $main::PackageManager) {
-		$this -> setPackageManager ($main::PackageManager);
-	} else {
-		$main::PackageManager = $this -> getPackageManager();
 	}
 	#==========================================
 	# Store object data
@@ -902,6 +893,13 @@ sub setPackageManager {
 	# ---
 	my $this  = shift;
 	my $value = shift;
+	if (! $value) {
+		my $msg = 'setPackageManager method called without specifying '
+		. 'package manager value.';
+		$this -> {kiwi} -> error ($msg);
+		$this -> {kiwi} -> failed();
+		return undef;
+	}
 	my $opts = $this -> getPreferencesNodeByTagName ("packagemanager");
 	my $pmgr = $opts -> getElementsByTagName ("packagemanager");
 	if (($pmgr) && ("$pmgr" eq "$value")) {
@@ -910,7 +908,9 @@ sub setPackageManager {
 	my $addElement = new XML::LibXML::Element ("packagemanager");
 	$addElement -> appendText ($value);
 	my $node = $opts -> getElementsByTagName ("packagemanager") -> get_node(1);
-	$opts -> removeChild ($node);
+	if ($node) {
+		$opts -> removeChild ($node);
+	}
 	$opts -> appendChild ($addElement);
 	$this -> updateXML();
 	return $this;
@@ -928,23 +928,12 @@ sub getPackageManager {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $node = $this -> getPreferencesNodeByTagName ("packagemanager");
-	my $pmgr = $node -> getElementsByTagName ("packagemanager");
+	my @packMgrs = $node -> getElementsByTagName ("packagemanager");
+	my $pmgr = $packMgrs[0];
 	if (! $pmgr) {
-		return $packageManager{default};
+		return 'zypper';
 	}
-	foreach my $manager (keys %packageManager) {
-		if ("$pmgr" eq "$manager") {
-			my $file = $packageManager{$manager};
-			if (! -f $file) {
-				$kiwi -> info ("Package manager $file doesn't exist");
-				$kiwi -> skipped ();
-				return undef;
-			}
-			return $manager;
-		}
-	}
-	$kiwi -> loginfo ("Invalid package manager: $pmgr");
-	return undef;
+	return $pmgr -> textContent();
 }
 
 #==========================================
@@ -3162,7 +3151,7 @@ sub getInstallSize {
 	#==========================================
 	# Add packagemanager in any case
 	#------------------------------------------
-	push @result,$main::PackageManager;
+	push @result, $manager;
 	#==========================================
 	# Run the solver...
 	#------------------------------------------

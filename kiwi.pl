@@ -197,7 +197,6 @@ our $listXMLInfo;           # list XML information for this operation
 our @listXMLInfoSelection;  # info selection for listXMLInfo
 our $CreatePassword;        # create crypted password
 our $ISOCheck;              # create checkmedia boot entry
-our $PackageManager;        # package manager to use for this image
 our $FSBlockSize;           # filesystem block size
 our $FSInodeSize;           # filesystem inode size
 our $FSJournalSize;         # filesystem journal size
@@ -357,6 +356,10 @@ sub main {
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}
+		my $pkgMgr = $cmdL -> getPackageManager();
+		if ($pkgMgr) {
+			$xml -> setPackageManager($pkgMgr);
+		}
 		my %type = %{$xml->getImageTypeAndAttributes()};
 		#==========================================
 		# Create cache(s)...
@@ -387,6 +390,10 @@ sub main {
 		);
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
+		}
+		my $pkgMgr = $cmdL -> getPackageManager();
+		if ($pkgMgr) {
+			$xml -> setPackageManager($pkgMgr);
 		}
 		my $krc = new KIWIRuntimeChecker ($kiwi,$cmdL,$xml);
 		if (! $krc -> prepareChecks()) {
@@ -586,6 +593,10 @@ sub main {
 		);
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
+		}
+		my $pkgMgr = $cmdL -> getPackageManager();
+		if ($pkgMgr) {
+			$xml -> setPackageManager($pkgMgr);
 		}
 		my $krc = new KIWIRuntimeChecker ($kiwi,$cmdL,$xml);
 		if (! $krc -> createChecks()) {
@@ -873,6 +884,10 @@ sub main {
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}
+		my $pkgMgr = $cmdL -> getPackageManager();
+		if ($pkgMgr) {
+			$xml -> setPackageManager($pkgMgr);
+		}
 		#==========================================
 		# Check for ignore-repos option
 		#------------------------------------------
@@ -1143,6 +1158,7 @@ sub init {
 	$SIG{"HUP"}      = \&quit;
 	$SIG{"TERM"}     = \&quit;
 	$SIG{"INT"}      = \&quit;
+	my $PackageManager;
 	my $kiwi = new KIWILog("tiny");
 	$cmdL = new KIWICommandLine($kiwi);
 	#==========================================
@@ -1227,6 +1243,15 @@ sub init {
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
+	#========================================
+	# check if a package manager is specified
+	#----------------------------------------
+	if (defined $PackageManager) {
+		my $result = $cmdL -> setPackageManager($PackageManager);
+		if (! $result) {
+			my $code = kiwiExit (1); return $code;
+		}
+	}
 	#========================================
 	# check if recycle-root is used
 	#----------------------------------------
@@ -1775,6 +1800,10 @@ sub listXMLInfo {
 	);
 	if (! defined $xml) {
 		exit 1;
+	}
+	my $pkgMgr = $cmdL -> getPackageManager();
+	if ($pkgMgr) {
+		$xml -> setPackageManager($pkgMgr);
 	}
 	#==========================================
 	# Check for ignore-repos option
@@ -2877,6 +2906,10 @@ sub createInstSource {
 	if (! defined $xml) {
 		my $code = kiwiExit (1); return $code;
 	}
+	my $pkgMgr = $cmdL -> getPackageManager();
+	if ($pkgMgr) {
+		$xml -> setPackageManager($pkgMgr);
+	}
 	#==========================================
 	# Initialize installation source tree
 	#------------------------------------------
@@ -3197,6 +3230,10 @@ sub createCache {
 		# ----
 		$InitCache = "active";
 		my $cxml  = new KIWIXML ($kiwi,$BasePath."/modules");
+		my $pkgMgr = $cmdL -> getPackageManager();
+		if ($pkgMgr) {
+			$cxml -> setPackageManager($pkgMgr);
+		}
 		my $image = new KIWIImage (
 			$kiwi,$cxml,$root,$imageCacheDir,undef,"/base-system"
 		);
