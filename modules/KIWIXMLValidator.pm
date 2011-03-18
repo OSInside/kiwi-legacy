@@ -590,10 +590,10 @@ sub __checkRevision {
 		my $cur_rev = <$FD>; close $FD;
 		my $req_rev = $imgnameNodeList
 			-> get_node(1) -> getAttribute ("kiwirevision");
-		if ((defined $req_rev) && ($cur_rev < $req_rev)) {
+		if ((defined $req_rev) && ($cur_rev ne $req_rev)) {
 			$kiwi -> failed ();
 			$kiwi -> error  (
-				"KIWI revision too old, require r$req_rev got r$cur_rev"
+				"KIWI revision mismatch, require r$req_rev got r$cur_rev"
 			);
 			$kiwi -> failed ();
 			return undef;
