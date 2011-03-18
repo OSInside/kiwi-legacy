@@ -96,8 +96,8 @@ second the location of the XSD Schema
     </define>
     <define name="k.image.kiwirevision.attribute">
       <attribute name="kiwirevision">
-        <a:documentation>A kiwi SVN revision number which is known to build
-a working image from this description. If the kiwi SVN
+        <a:documentation>A kiwi git revision number which is known to build
+a working image from this description. If the kiwi git
 revision is less than the specified value the
 process will exit.</a:documentation>
         <data type="nonNegativeInteger"/>

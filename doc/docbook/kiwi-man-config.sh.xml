@@ -12,7 +12,6 @@
     <productname>KIWI</productname>
     <!--<productnumber></productnumber>-->
     <date>Created: <?dbtimestamp?></date>
-    <releaseinfo role="SVN">$Date: 2007-12-03 16:22:06 +0100 (Mon, 03 Dec 2007) $</releaseinfo>
     <authorgroup>
       <author>
         <firstname>Marcus</firstname>

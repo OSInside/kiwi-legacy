@@ -216,10 +216,10 @@
         <varlistentry>
           <term><sgmltag class="attribute">kiwirevision</sgmltag></term>
           <listitem>
-            <para>specifies a KIWI SVN revision number which is known to
+            <para>specifies a KIWI git revision number which is known to
               build a working image from this description. If the KIWI
-              SVN revision is less than the specified value, the process
-              will exit. The currently used SVN revision can be queried
+              git revision doesn't match the specified value, the process
+              will exit. The currently used git revision can be queried
               by calling <command>kiwi</command>
               <option>--version</option>. </para>
           </listitem>

@@ -62,8 +62,8 @@ div {
 		## The allowed Schema version (fixed value)
 		attribute schemaversion { "5.2" }
 	k.image.kiwirevision.attribute =
-		## A kiwi SVN revision number which is known to build
-		## a working image from this description. If the kiwi SVN
+		## A kiwi git revision number which is known to build
+		## a working image from this description. If the kiwi git
 		## revision is less than the specified value the
 		## process will exit.
 		attribute kiwirevision { xsd:nonNegativeInteger }
