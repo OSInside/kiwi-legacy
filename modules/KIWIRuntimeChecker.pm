@@ -302,6 +302,9 @@ sub __checkPatternTypeAttrrValueConsistent {
 	my $reqPatternTypeVal;
 	for my $pkgs (@pkgsNodes) {
 		my $profiles = $pkgs -> getAttribute( 'profiles' );
+		if (! $profiles) {
+			next;
+		}
 		my @profNames = split /,/, $profiles;
 		my $patternType = $pkgs -> getAttribute( 'patternType' );
 		if (! $patternType) {
