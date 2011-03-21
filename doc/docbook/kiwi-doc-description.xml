@@ -1609,6 +1609,19 @@
              </para>
            </listitem>
         </varlistentry>
+		<varlistentry>
+			<term><sgmltag class="attribute">prefer-license</sgmltag>="<sgmltag
+			  class="attvalue">true|false</sgmltag>"</term>
+			<listitem>
+				<para>The repository providing this attribute will be used
+				primarly to install the license tarball if found on that
+				repository. If no repository with a prefered license attribute
+				exists, the search happens over all repositories. It's not
+				guaranteed in that case that the search order follows the
+				repository order like they are written into the XML
+				description.</para>
+			</listitem>
+		</varlistentry>
         <varlistentry>
           <term><sgmltag class="attribute">priority</sgmltag>="<sgmltag
               class="attvalue">number</sgmltag>"</term>
