@@ -807,6 +807,8 @@ div {
 		## source argument doesn't really explain what this repository
 		## contains
 		attribute alias { text }
+	k.repository.prefer-license.attribute =
+		attribute prefer-license { xsd:boolean }
 	k.repository.priority.attribute =
 		## Channel priority assigned to all packages available in
 		## this channel (0 if not set). If the exact same package
@@ -826,6 +828,7 @@ div {
 		k.repository.profiles.attribute? &
 		k.repository.status.attribute? &
 		k.repository.alias.attribute? &
+		k.repository.prefer-license.attribute? &
 		k.repository.priority.attribute? &
 		k.repository.password.attribute? &
 		k.repository.username.attribute?

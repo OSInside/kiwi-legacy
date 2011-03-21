@@ -15,6 +15,7 @@
 		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
 	</profiles>
 	<preferences>
+		<type image="pxe" boot="netboot/suse-11.3" filesystem="clicfs"/>
 		<type image="iso" primary="true" boot="isoboot/suse-11.3" flags="clic" hybrid="true"/>
 		<version>1.11.3</version>
 		<packagemanager>zypper</packagemanager>

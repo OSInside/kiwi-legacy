@@ -1790,9 +1790,10 @@ sub getRepository {
 		my $prio = $element -> getAttribute("priority");
 		my $user = $element -> getAttribute("username");
 		my $pwd  = $element -> getAttribute("password");
+		my $plic = $element -> getAttribute("prefer-license");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
-		$result{$source} = [$type,$alias,$prio,$user,$pwd];
+		$result{$source} = [$type,$alias,$prio,$user,$pwd,$plic];
 	}
 	return %result;
 }

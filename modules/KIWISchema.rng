@@ -1204,6 +1204,11 @@ source argument doesn't really explain what this repository
 contains</a:documentation>
       </attribute>
     </define>
+    <define name="k.repository.prefer-license.attribute">
+      <attribute name="prefer-license">
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.repository.priority.attribute">
       <attribute name="priority">
         <a:documentation>Channel priority assigned to all packages available in
@@ -1236,6 +1241,9 @@ whether and how this information is passed</a:documentation>
         </optional>
         <optional>
           <ref name="k.repository.alias.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.prefer-license.attribute"/>
         </optional>
         <optional>
           <ref name="k.repository.priority.attribute"/>

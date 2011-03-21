@@ -1750,8 +1750,30 @@ sub setupRootSystem {
 	# search for licenses on media
 	#------------------------------------------
 	if (! $chroot) {
+		my @repolist = ();
 		my $license = "license.tar.gz";
+		#=================================================
+		# use only repos which set prefer-license to true
+		#-------------------------------------------------
 		foreach my $alias (keys %{$source{public}}) {
+			if ($source{$alias}{license}) {
+				push @repolist,$alias;
+			}
+		}
+		#=================================================
+		# use all repos if none has set prefer-license
+		#-------------------------------------------------
+		if (! @repolist) {
+			foreach my $alias (keys %{$source{public}}) {
+				push @repolist,$alias;
+			}
+		}
+		# /.../
+		# walk through selected repolist. Note if more than
+		# one repo is searched the selected repo doesn't have
+		# to be the first one according to the XML description
+		# ----
+		foreach my $alias (@repolist) {
 			my $repo = $alias;
 			foreach my $opt (@{$source{public}{$alias}}) {
 				$opt =~ /(.*?)=(.*)/;

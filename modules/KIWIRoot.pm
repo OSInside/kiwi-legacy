@@ -99,6 +99,7 @@ sub new {
 		my $prio = $repository{$source}[2];
 		my $user = $repository{$source}[3];
 		my $pwd  = $repository{$source}[4];
+		my $plic = $repository{$source}[5];
 		my $urlHandler  = new KIWIURL ($kiwi,$this,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		if ($publics_url =~ /^\//) {
@@ -156,6 +157,10 @@ sub new {
 		push (@public_options ,"-y");
 		$sourceChannel{private}{$channel} = \@private_options;
 		$sourceChannel{public}{$channel}  = \@public_options;
+		$sourceChannel{$channel}{license} = 0;
+		if (($plic) && ("$plic" eq "true")) {
+			$sourceChannel{$channel}{license} = 1;
+		}
 		$count++;
 	}
 	#==========================================
