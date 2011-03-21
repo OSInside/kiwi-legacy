@@ -891,6 +891,19 @@
               </varlistentry>
               <varlistentry>
                 <term><sgmltag class="starttag"
+                    >oem-silent-boot</sgmltag>true|false<sgmltag
+                    class="endtag">oem-silent-boot</sgmltag></term>
+                <listitem>
+                  <para>Specify if the system should boot in silent mode
+                    after the oem image has been deployed to the designated
+                    storage device (default value is false). This value
+                    is represented by the <varname>OEM_SILENTBOOT</varname>
+                    variable in
+                    <filename>config.oempartition</filename>. </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><sgmltag class="starttag"
                     >oem-shutdown</sgmltag>true|false<sgmltag
                     class="endtag">oem-shutdown</sgmltag></term>
                 <listitem>

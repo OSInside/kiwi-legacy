@@ -12,6 +12,7 @@
 			<oemconfig>
 				<oem-swap>false</oem-swap>
 				<oem-systemsize>2048</oem-systemsize>
+				<oem-silent-boot>true</oem-silent-boot>
 			</oemconfig>
 			<systemdisk/>
 		</type>
