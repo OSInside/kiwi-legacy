@@ -263,6 +263,7 @@ sub updateDescription {
 	$changeset{"oem-kiwi-initrd"}          = $src_xml->getOEMKiwiInitrd();
 	$changeset{"oem-reboot"}               = $src_xml->getOEMReboot();
 	$changeset{"oem-reboot-interactive"}   = $src_xml->getOEMRebootInter();
+	$changeset{"oem-silent-boot"}          = $src_xml->getOEMSilentBoot();
 	$changeset{"oem-shutdown"}             = $src_xml->getOEMShutdown();
 	$changeset{"oem-shutdown-interactive"} = $src_xml->getOEMShutdownInter();
 	$changeset{"oem-bootwait"}             = $src_xml->getOEMBootWait();

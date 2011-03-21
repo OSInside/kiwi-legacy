@@ -205,6 +205,10 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_REBOOT_INTERACTIVE=1"
 		echo "OEM_REBOOT_INTERACTIVE=1" >> $oemfile
 	fi
+	if [ ! -z "$kiwi_oemsilentboot" ];then
+		echo "Setting up OEM_SILENTBOOT=1"
+		echo "OEM_SILENTBOOT=1" >> $oemfile
+	fi
 	if [ ! -z "$kiwi_oemshutdown" ];then
 		echo "Setting up OEM_SHUTDOWN=1"
 		echo "OEM_SHUTDOWN=1" >> $oemfile

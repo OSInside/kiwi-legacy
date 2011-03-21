@@ -1553,6 +1553,28 @@ recovery partition. Default value is 83 (Linux)</db:para>
   </div>
   <!--
     ==========================================
+    common element <oem-silent-boot>
+    
+  -->
+  <div>
+    <define name="k.oem-silent-boot.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-silent-boot.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-silent-boot">
+      <element name="oem-silent-boot">
+        <a:documentation>For oemboot driven images: boot silently during the initial boot
+true/false</a:documentation>
+        <db:para>For oemboot driven images: complete the initial boot of the system in silent mode, true/false. </db:para>
+        <ref name="k.oem-silent-boot.attlist"/>
+        <ref name="k.oem-silent-boot.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <oem-shutdown>
     
   -->
@@ -3186,6 +3208,9 @@ and setup the system disk</db:para>
           </optional>
           <optional>
             <ref name="k.oem-recoveryID"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-silent-boot"/>
           </optional>
           <optional>
             <ref name="k.oem-shutdown"/>

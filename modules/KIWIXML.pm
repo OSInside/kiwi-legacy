@@ -1082,6 +1082,26 @@ sub getOEMRebootInter {
 #==========================================
 # getOEMShutdown
 #------------------------------------------
+sub getOEMSilentBoot {
+	# ...
+	# Obtain the oem-silent-boot value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
+	my $silent = $node -> getElementsByTagName ("oem-silent-boot");
+	if ((! defined $silent) || ("$silent" eq "")) {
+		return undef;
+	}
+	return $silent;
+}
+
+#==========================================
+# getOEMShutdown
+#------------------------------------------
 sub getOEMShutdown {
 	# ...
 	# Obtain the oem-shutdown value or return undef
@@ -2274,6 +2294,8 @@ sub getImageConfig {
 			-> getElementsByTagName ("oem-reboot");
 		my $oemrebootinter= $node
 			-> getElementsByTagName ("oem-reboot-interactive");
+		my $oemsilentboot = $node
+			-> getElementsByTagName ("oem-silent-boot");
 		my $oemshutdown= $node
 			-> getElementsByTagName ("oem-shutdown");
 		my $oemshutdowninter= $node
@@ -2320,6 +2342,9 @@ sub getImageConfig {
 		}
 		if ((defined $oemrebootinter) && ("$oemrebootinter" eq "true")) {
 			$result{kiwi_oemrebootinteractive} = $oemrebootinter;
+		}
+		if ((defined $oemsilentboot) && ("$oemsilentboot" eq "true")) {
+			$result{kiwi_oemsilentboot} = $oemsilentboot;
 		}
 		if ((defined $oemshutdown) && ("$oemshutdown" eq "true")) {
 			$result{kiwi_oemshutdown} = $oemshutdown;
@@ -4277,6 +4302,9 @@ sub __updateDescriptionFromChangeSet {
 	}
 	if (defined $changeset->{"oem-reboot-interactive"}) {
 		$this -> __setOEMOptionsElement ("oem-reboot-interactive",$changeset);
+	}
+	if (defined $changeset->{"oem-silent-boot"}) {
+		$this -> __setOEMOptionsElement ("oem-silent-boot",$changeset);
 	}
 	if (defined $changeset->{"oem-shutdown"}) {
 		$this -> __setOEMOptionsElement ("oem-shutdown",$changeset);

@@ -1122,6 +1122,27 @@ div {
 }
 
 #==========================================
+# common element <oem-silent-boot>
+#
+div {
+	k.oem-silent-boot.content = xsd:boolean
+	k.oem-silent-boot.attlist = empty
+	k.oem-silent-boot =
+		## For oemboot driven images: boot silently during the initial boot
+		## true/false
+    	[
+        db:para [
+			"For oemboot driven images: complete the initial boot of the "~
+			"system in silent mode, true/false. "
+		]
+		]
+    	element oem-silent-boot {
+			k.oem-silent-boot.attlist,
+			k.oem-silent-boot.content
+		}
+}
+
+#==========================================
 # common element <oem-shutdown>
 #
 div {
@@ -2241,6 +2262,7 @@ div {
 			k.oem-reboot-interactive? &
 			k.oem-recovery? &
 			k.oem-recoveryID? &
+			k.oem-silent-boot? &
 			k.oem-shutdown? &
 			k.oem-shutdown-interactive? &
 			k.oem-swap? &
