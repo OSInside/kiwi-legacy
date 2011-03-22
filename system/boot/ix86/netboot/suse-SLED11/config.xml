@@ -30,6 +30,8 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers" profiles="default,xen">
+		<file name="drivers/gpu/drm/i915/i915.ko"/>
+		<file name="drivers/char/agp/intel-agp.ko"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
@@ -67,6 +69,8 @@
 		<file name="drivers/acpi/dock.ko"/>
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
+		<file name="drivers/gpu/drm/i915/i915.ko"/>
+		<file name="drivers/char/agp/intel-agp.ko"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>

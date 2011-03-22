@@ -570,6 +570,8 @@ function udevStart {
 	createInitialDevices /dev
 	# terminal devices
 	mount -t devpts devpts /dev/pts
+	# load modules required before udev
+	moduleLoadBeforeUdev
 	# start the udev daemon
 	udevd udev_log="debug" &
 	echo UDEVD_PID=$! >> /iprocs
@@ -581,6 +583,26 @@ function udevStart {
 	fi
 	# start splashy if configured
 	startSplashy
+}
+#======================================
+# moduleLoadBeforeUdev
+#--------------------------------------
+function moduleLoadBeforeUdev {
+	# /.../
+	# load modules which have to be loaded before the
+	# udev daemon is started in this function
+	# ----
+	loadAGPModules
+}
+#======================================
+# loadAGPModules
+#--------------------------------------
+function loadAGPModules {
+	local krunning=$(uname -r)
+	for i in /lib/modules/$krunning/kernel/drivers/char/agp/*; do
+		test -e $i || continue
+		modprobe $(echo $i | sed "s#.*\\/\\([^\\/]\\+\\).ko#\\1#")
+	done
 }
 #======================================
 # udevKill
