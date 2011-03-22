@@ -1530,7 +1530,7 @@ sub usage {
 	print "    kiwi --createhash <image-path>\n";
 	print "    kiwi --info <image-path> --select <\n";
 	print "           repo-patterns|patterns|types|sources|\n";
-	print "           size|profiles|packages\n";
+	print "           size|profiles|packages|version\n";
 	print "         > --select ...\n";
 	print "    kiwi --setup-splash <initrd>\n";
 	print "\n";
@@ -1776,6 +1776,7 @@ sub listXMLInfo {
 	$select{"size"}          = "List install/delete size estimation";
 	$select{"packages"}      = "List of packages to become installed";
 	$select{"profiles"}      = "List profiles";
+	$select{"version"}       = "List name and version";
 	#==========================================
 	# Create log object
 	#------------------------------------------
@@ -2057,6 +2058,17 @@ sub listXMLInfo {
 					}
 				}
 				last SWITCH;
+			};
+			#==========================================
+			# version
+			#------------------------------------------
+			/^version/       && do {
+				my $version = $xml -> getImageVersion();
+				my $appname = $xml -> getImageName();
+				my $vnode = new XML::LibXML::Element ("image");
+				$vnode -> setAttribute ("version","$version");
+				$vnode -> setAttribute ("name","$appname");
+				$scan -> appendChild ($vnode);
 			};
 		}
 	}
