@@ -509,6 +509,16 @@ function udevPending {
 	fi
 }
 #======================================
+# udevTrigger
+#--------------------------------------
+function udevTrigger {
+	if [ -x /sbin/udevadm ];then
+		/sbin/udevadm trigger
+	else
+		/sbin/udevtrigger
+	fi
+}
+#======================================
 # udevSystemStart
 #--------------------------------------
 function udevSystemStart {
@@ -564,14 +574,13 @@ function udevStart {
 	# load modules required before udev
 	moduleLoadBeforeUdev
 	# start the udev daemon
-	udevd udev_log="debug" &
-	echo UDEVD_PID=$! >> /iprocs
-	# trigger udev events
-	if [ -x /sbin/udevadm ];then
-		/sbin/udevadm trigger
-	else
-		/sbin/udevtrigger
-	fi
+	startproc /sbin/udevd --daemon
+	UDEVD_PID=$(pidof /sbin/udevd)
+	echo UDEVD_PID=$UDEVD_PID >> /iprocs
+	# trigger events for all devices
+	udevTrigger
+	# wait for events to finish
+	udevPending
 	# start splashy if configured
 	startSplashy
 }
@@ -618,8 +627,8 @@ function startBlogD {
 		> /dev/shm/initrd.msg
 		ln -sf /dev/shm/initrd.msg /var/log/boot.msg
 		mkdir -p /var/run
-		/sbin/blogd $REDIRECT
-		BLOGD_PID=$(cat /var/run/blogd.pid)
+		startproc /sbin/blogd $REDIRECT
+		BLOGD_PID=$(pidof /sbin/blogd)
 		echo BLOGD_PID=$BLOGD_PID >> /iprocs
 	fi
 }
