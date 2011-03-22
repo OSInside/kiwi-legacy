@@ -1310,6 +1310,35 @@ function suseSetupProductInformation {
 }
 
 #======================================
+# suseStripFirmware
+#--------------------------------------
+function suseStripFirmware {
+	# /.../
+	# check all kernel modules if they require a firmware and
+	# strip out all firmware files which are not referenced
+	# by a kernel module
+	# ----
+	local ifs=$IFS
+	local base=/lib/modules
+	local name
+	local bmdir
+	local IFS="
+	"
+	mkdir -p /lib/firmware-required
+	for i in $(find $base -name "*.ko" | xargs modinfo | grep ^firmware);do
+		IFS=$ifs
+		name=$(echo $(echo $i | cut -f2 -d:))
+		if [ -e /lib/firmware/$name ];then
+			bmdir=$(dirname $name)
+			mkdir -p /lib/firmware-required/$bmdir
+			mv /lib/firmware/$name /lib/firmware-required/$bmdir
+		fi
+	done
+	rm -rf /lib/firmware
+	mv /lib/firmware-required /lib/firmware
+}
+
+#======================================
 # suseStripKernel
 #--------------------------------------
 function suseStripKernel {
@@ -1480,6 +1509,7 @@ function suseStripKernel {
 			popd
 		done
 	done
+	suseStripFirmware
 }
 
 #======================================
