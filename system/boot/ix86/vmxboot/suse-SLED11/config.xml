@@ -22,6 +22,8 @@
 		<profile name="rt" description="KERNEL: RealTime kernel"/>
 	</profiles>
 	<drivers type="drivers">
+		<file name="drivers/gpu/drm/i915/i915.ko"/>
+		<file name="drivers/char/agp/intel-agp.ko"/>
 		<file name="crypto/*"/>
 		<file name="drivers/virtio/*"/>
 		<file name="drivers/block/virtio_blk.ko"/>
