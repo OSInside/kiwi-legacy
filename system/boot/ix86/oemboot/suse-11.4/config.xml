@@ -106,6 +106,7 @@
 	<packages type="image">
 		<package name="curl"/>
 		<package name="atftp"/>
+		<package name="busybox"/>
 		<package name="parted"/>
 		<package name="adaptec-firmware"/>
 		<package name="dialog"/>

@@ -169,6 +169,7 @@
 		<package name="psmisc"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
+		<package name="busybox"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>
@@ -202,6 +203,7 @@
 		<package name="clicfs"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
+		<package name="busybox"/>
 		<package name="dhcpcd"/>
 		<package name="file"/>
 		<package name="hwinfo"/>
