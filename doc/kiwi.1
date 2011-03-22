@@ -2,12 +2,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.76.1-RC1 <http://docbook.sf.net/>
-.\"      Date: Created: 03/21/2011
+.\"      Date: Created: 03/22/2011
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 4.82
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 03/21/2011" "KIWI 4\&.82" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 03/22/2011" "KIWI 4\&.82" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -121,7 +121,7 @@ file as well as signing the image description with an md5sum hash and adding spl
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-createhash\ \fIimage\-path\fR
 .HP \w'\fBkiwi\fR\ 'u
-\fBkiwi\fR {\-i | \-\-info} \fIImagePath\fR {\-\-select\ \fI\ repo\-patterns|patterns|types|sources|size|profiles|packages\ \fR}
+\fBkiwi\fR {\-i | \-\-info} \fIImagePath\fR {\-\-select\ \fI\ repo\-patterns|patterns|types|sources|size|profiles|packages|version\ \fR}
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-setup\-splash\ \fIinitrd\fR
 .PP
@@ -147,8 +147,9 @@ List general information about the image description\&. So far you can get infor
 \fItypes\fR, a list of source URLs with
 \fIsources\fR, an estimation about the install size and the size of the packages marked as to be deleted with
 \fIsize\fR, a list of profiles with
-\fIprofiles\fR, and a list of solved packages to become installed with
-\fIpackages\fR\&.
+\fIprofiles\fR, a list of solved packages to become installed with
+\fIpackages\fR, and the information about the appliance name and version with
+\fIversion\fR
 .RE
 .PP
 [\fB\-\-setup\-splash \fR\fB\fIinitrd\fR\fR ]
