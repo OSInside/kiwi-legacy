@@ -793,6 +793,17 @@
         </para>
         </listitem>
     </varlistentry>
+	<varlistentry>
+		<term><optional><option>--mbrid <replaceable>number</replaceable></option></optional></term>
+		<listitem>
+		<para>
+			Specifies a custom mbrid. The number value is treated as
+			decimal number which is internally translated into a 4byte
+			hex value. The allowed range therefore is from 0x0 to
+			max 0xffffffff. By default kiwi creates a random value
+		</para>
+		</listitem>
+	</varlistentry>
 	</variablelist>
   </refsect1>
 
