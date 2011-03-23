@@ -150,7 +150,7 @@ sub new {
 	#==========================================
 	# Store a disk label ID for this object
 	#------------------------------------------
-	$this -> getMBRDiskLabel();
+	$this->{mbrid} = main::getMBRDiskLabel();
 	#==========================================
 	# Clean kernel mounts if any
 	#------------------------------------------
@@ -4064,29 +4064,6 @@ sub cleanKernelFSMount {
 	foreach my $system (@kfs) {
 		qxx ("umount $this->{imageDest}/$system 2>&1");
 	}
-}
-
-#==========================================
-# getMBRDiskLabel
-#------------------------------------------
-sub getMBRDiskLabel {
-	# ...
-	# create a random 4byte MBR disk label ID, used
-	# the isohybrid call as parameter
-	# ---
-	my $this  = shift;
-	my $range = 0xfe;
-	my @bytes;
-	undef $this->{mbrid};
-	for (my $i=0;$i<4;$i++) {
-		$bytes[$i] = 1 + int(rand($range));
-		redo if $bytes[0] <= 0xf;
-	}
-	my $nid = sprintf ("0x%02x%02x%02x%02x",
-		$bytes[0],$bytes[1],$bytes[2],$bytes[3]
-	);
-	$this->{mbrid} = $nid;
-	return $this;
 }
 
 #==========================================

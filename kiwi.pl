@@ -222,6 +222,7 @@ our $RecycleRoot;           # use existing root directory incl. contents
 our $FatStorage;            # specify size of fat partition if syslinux is used
 our $cmdL;                  # command line storage object
 our $kiwi;                  # global logging handler object
+our $MBRID;                 # custom mbrid value
 
 #============================================
 # Globals
@@ -1242,6 +1243,7 @@ sub init {
 		"check-config=s"        => \$CheckConfig,
 		"yes|y"                 => \$defaultAnswer,
 		"debug"                 => \$Debug,
+		"mbrid=o"               => \$MBRID,
 		"help|h"                => \$Help
 	);
 	#========================================
@@ -1473,6 +1475,14 @@ sub init {
 	if (defined $SetImageType) {
 		$cmdL -> setBuildType($SetImageType);
 	}
+	if (defined $MBRID) {
+		if ($MBRID < 0 || $MBRID > 0xffffffff) {
+			$kiwi -> error ("Invalid mbrid");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		$MBRID = sprintf ("0x%08x", $MBRID);
+	}
 }
 
 #==========================================
@@ -1673,6 +1683,10 @@ sub usage {
 	print "      Activates check for matching kernels between boot and\n";
 	print "      system image. The kernel check also tries to fix the boot\n";
 	print "      image if no matching kernel was found.\n";
+	print "\n";
+	print "    [ --mbrid <number>]\n";
+	print "      Sets the disk id to the given value. The default is to\n";
+	print "      generate a random id.\n";
 	print "--\n";
 	version ($exit);
 }
@@ -3321,6 +3335,31 @@ sub createResetClosure {
 		@main::RemovePackage= @backupRemovePackages;
 		$main::RootTree     = $backupRootTree;
 		$main::Survive      = $backupSurvive;
+	}
+}
+
+#==========================================
+# getMBRDiskLabel
+#------------------------------------------
+sub getMBRDiskLabel {
+	# ...
+	# set the mbrid to either the value given at the
+	# commandline or a random 4byte MBR disk label ID
+	# ---
+	my $this  = shift;
+	my $range = 0xfe;
+	if (defined $main::MBRID) {
+		return $main::MBRID;
+	} else {
+		my @bytes;
+		for (my $i=0;$i<4;$i++) {
+			$bytes[$i] = 1 + int(rand($range));
+			redo if $bytes[0] <= 0xf;
+		}
+		my $nid = sprintf ("0x%02x%02x%02x%02x",
+			$bytes[0],$bytes[1],$bytes[2],$bytes[3]
+		);
+		return $nid;
 	}
 }
 
