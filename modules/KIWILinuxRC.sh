@@ -6680,15 +6680,14 @@ function pxeRaidCreate {
 		fi
 		mdadm --zero-superblock $raidFirst
 		mdadm --zero-superblock $raidSecond
-		yes | mdadm --create /dev/md$mdcount \
+		mdadm --create --run /dev/md$mdcount \
 			--level=$raidLevel --raid-disks=2 $raidFirst $raidSecond
 		if [ ! $? = 0 ];then
 			systemException \
 				"Failed to create raid array... fatal !" \
 			"reboot"
 		fi
-		echo "DEVICE $raidFirst $raidSecond" >> $conf
-		echo "ARRAY /dev/md$mdcount devices=$raidFirst,$raidSecond" >> $conf
+		echo "mdadm -Db /dev/md$mdcount" >> $conf
 		mdcount=$((mdcount + 1))
 	done
 }
