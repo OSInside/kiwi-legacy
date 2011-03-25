@@ -292,11 +292,7 @@ sub createVMDK {
 	$kiwi -> info ("Creating $format image...");
 	$target  =~ s/\.raw$/\.$format/;
 	$convert = "convert -f raw $source -O $format";
-	if (($vmwc{vmware_disktype}) && ($vmwc{vmware_disktype}=~/^scsi/)) {
-		$status = qxx ("qemu-img $convert -s $target 2>&1");
-	} else {
-		$status = qxx ("qemu-img $convert $target 2>&1");
-	}
+	$status = qxx ("qemu-img $convert $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
