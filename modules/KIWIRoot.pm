@@ -21,6 +21,8 @@ package KIWIRoot;
 use strict;
 use Carp qw (cluck);
 use File::Glob ':glob';
+use File::Find;
+use FileHandle;
 use KIWIURL;
 use KIWILog;
 use KIWIManager;
@@ -779,6 +781,7 @@ sub installArchives {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
+	my $root = $this->{root};
 	my $manager = $this->{manager};
 	#==========================================
 	# get image archive list
@@ -790,6 +793,120 @@ sub installArchives {
 	$manager -> switchToLocal();
 	if (! $manager -> setupArchives($this->{imageDesc},@archives)) {
 		return undef;
+	}
+	#==========================================
+	# Check ownership of archive files
+	#------------------------------------------
+	if (-f "$root/bootincluded_archives.filelist") {
+		$this -> fixupOverlayFilesOwnership ("bootincluded_archives.filelist");
+	}
+	return $this;
+}
+
+#==========================================
+# fixupOverlayFilesOwnership
+#------------------------------------------
+sub fixupOverlayFilesOwnership {
+	# ...
+	# search for files and directories in the given path or
+	# table of contents (toc) file and make sure those files
+	# get the right ownership assigned
+	# ---
+	my $this  = shift;
+	my $path  = shift;
+	my $kiwi  = $this->{kiwi};
+	my $root  = $this->{root};
+	my $item  = $root."/".$path;
+	my $prefix= "FixupOwner";
+	my @files = ();
+	my %except= ();
+	if (-d $item) {
+		#==========================================
+		# got dir, search files there
+		#------------------------------------------
+		sub generateWanted {
+			my $result = shift;
+			my $base   = shift;
+			return sub {
+				my @names = ($File::Find::name,$File::Find::dir);
+				foreach my $name (@names) {
+					$name =~ s/^$base//; $name =~ s/^\///;
+					push @{$result},$name;
+				}
+			}
+		}
+		my $wref = generateWanted (\@files,$root);
+		find ({ wanted => $wref, follow => 0 }, $item);
+	} elsif (-f $item) {
+		#==========================================
+		# got archive, use archive toc file
+		#------------------------------------------
+		my $fd = new FileHandle;
+		if ($fd -> open ($item)) {
+			while (my $line = <$fd>) {
+				chomp $line; $line =~ s/^\///;
+				push (@files,$line);
+			}
+			$fd -> close();
+		} else {
+			$kiwi -> warning ("$prefix: Failed to open $item: $!");
+			$kiwi -> skipped ();
+			return undef;
+		}
+	} else {
+		$kiwi -> warning ("$prefix: No such file or directory: $item");
+		$kiwi -> skipped ();
+		return undef;
+	}
+	#==========================================
+	# check file list
+	#------------------------------------------
+	if (! @files) {
+		$kiwi -> warning ("$prefix: No files found in: $item");
+		$kiwi -> skipped ();
+		return undef;
+	}
+	#==========================================
+	# create passwd exception directories
+	#------------------------------------------
+	my $fd = new FileHandle;
+	if (! $fd -> open ($root."/etc/passwd")) {
+		$kiwi -> warning ("$prefix: No passwd file found in: $root");
+		$kiwi -> skipped ();
+		return undef;
+	}
+	while (my $line = <$fd>) {
+		chomp $line;
+		my $name = (split (/:/,$line))[5];
+		$name =~ s/\///;
+		if ($name =~ /^(bin|sbin|root)/) {
+			next;
+		}
+		$except{$name} = 1;
+	}
+	$fd -> close();
+	#==========================================
+	# walk through all files
+	#------------------------------------------
+	foreach my $file (@files) {
+		my $ok = 1;
+		foreach my $exception (keys %except) {
+			if ($file =~ /$exception/) {
+				$kiwi -> loginfo (
+					"$prefix: $file belongs to passwd, leaving it untouched"
+				);
+				$ok = 0; last;
+			}
+		}
+		next if ! $ok;
+		my $data = qxx ("chroot $root chown -c root:root $file 2>&1");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> warning (
+				"$prefix: Failed to fixup ownership of $root/$file: $data"
+			);
+			$kiwi -> skipped ();
+		}
 	}
 	return $this;
 }
@@ -842,6 +959,9 @@ sub setup {
 	#----------------------------------------
 	if ((-d "$imageDesc/root") && (bsd_glob($imageDesc.'/root/*'))) {
 		$kiwi -> info ("Copying user defined files to image tree");
+		#========================================
+		# copy user defined files to tmproot
+		#----------------------------------------
 		mkdir $root."/tmproot";
 		if ((-l "$imageDesc/root/linuxrc") || (-l "$imageDesc/root/include")) {
 			$data = qxx (
@@ -858,6 +978,13 @@ sub setup {
 			$kiwi -> info   ($data);
 			return undef;
 		}
+		#========================================
+		# check tmproot ownership
+		#----------------------------------------
+		$this -> fixupOverlayFilesOwnership ("tmproot");
+		#========================================
+		# copy tmproot to real root (tar)
+		#----------------------------------------
 		$data = qxx ("tar -cf - -C $root/tmproot . | tar -x -C $root 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
@@ -865,6 +992,9 @@ sub setup {
 			$kiwi -> info   ($data);
 			return undef;
 		}
+		#========================================
+		# cleanup tmproot
+		#----------------------------------------
 		qxx ("rm -rf $root/tmproot");
 		$kiwi -> done();
 	}
