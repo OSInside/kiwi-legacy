@@ -4093,7 +4093,7 @@ sub __addDefaultSplitNode {
 		my $image = $element -> getAttribute("image");
 		my $flags = $element -> getAttribute("flags");
 		if (($image eq "split") || 
-			(($image eq "iso") && ($flags eq "compressed"))
+			(($image eq "iso") && ($flags) && ($flags eq "compressed"))
 		) {
 			my @splitsections = $element -> getElementsByTagName ("split");
 			if (! @splitsections) {

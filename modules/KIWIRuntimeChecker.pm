@@ -203,7 +203,7 @@ sub __checkFilesystemTool {
 			$haveTool = $this -> __isFsToolAvailable('squashfs');
 			$checkedFS = 'squashfs';
 		}
-		if (! $haveTool) {
+		if (($flag) && (! $haveTool)) {
 			$toolError = 1;
 		}
 	} else {
