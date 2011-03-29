@@ -583,7 +583,7 @@ function udevStart {
 	# load modules required before udev
 	moduleLoadBeforeUdev
 	# start the udev daemon
-	startproc /sbin/udevd --daemon
+	/sbin/udevd --daemon
 	UDEVD_PID=$(pidof /sbin/udevd)
 	echo UDEVD_PID=$UDEVD_PID >> /iprocs
 	# trigger events for all devices
