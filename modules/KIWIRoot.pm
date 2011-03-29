@@ -66,7 +66,7 @@ sub new {
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
-	if (($imageDesc !~ /\//) && (! -d $imageDesc)) {
+	if (($imageDesc !~ /^\//) && (! -d $imageDesc)) {
 		$imageDesc = $main::System."/".$imageDesc;
 	}
 	if (! defined $baseSystem) {

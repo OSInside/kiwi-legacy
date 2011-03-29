@@ -293,10 +293,14 @@ sub checkAndSetupPrebuiltBootImage {
 	my $pblt = $type{checkprebuilt};
 	my $boot = $type{boot};
 	my $ok   = 0;
+	my $bootpath = $boot;
+	if (($boot !~ /^\//) && (! -d $boot)) {
+		$bootpath = $main::System."/".$boot;
+	}
 	#==========================================
 	# open boot image XML object
 	#------------------------------------------
-	my $bxml = new KIWIXML ( $kiwi,$main::System."/".$boot );
+	my $bxml = new KIWIXML ( $kiwi,$bootpath );
 	if (! $bxml) {
 		return undef;
 	}
@@ -313,7 +317,7 @@ sub checkAndSetupPrebuiltBootImage {
 	#==========================================
 	# check path names for boot image
 	#------------------------------------------
-	my $lookup = $main::System."/".$boot."-prebuilt/";
+	my $lookup = $bootpath."-prebuilt/";
 	if (defined $main::PrebuiltBootImage) {
 		$lookup = $main::PrebuiltBootImage."/";
 	}
@@ -1000,7 +1004,11 @@ sub createImageRootAndBoot {
 		#------------------------------------------
 		$main::Survive  = "yes";
 		$main::RootTree = "$tmpdir/kiwi-".$text."boot-$$";
-		$main::Prepare  = $main::System."/".$stype{boot};
+		if (($stype{boot} !~ /^\//) && (! -d $stype{boot})) {
+			$main::Prepare = $main::System."/".$stype{boot};
+		} else {
+			$main::Prepare = $stype{boot};
+		}
 		$main::Create   = $main::RootTree;
 		undef @main::Profiles;
 		undef @main::AddPackage;
@@ -1467,7 +1475,11 @@ sub createImageLiveCD {
 		#------------------------------------------
 		$main::Survive  = "yes";
 		$main::RootTree = "$tmpdir/kiwi-isoboot-$$";
-		$main::Prepare  = $main::System."/".$stype{boot};
+		if (($stype{boot} !~ /^\//) && (! -d $stype{boot})) {
+			$main::Prepare = $main::System."/".$stype{boot};
+		} else {
+			$main::Prepare = $stype{boot};
+		}
 		$main::Create   = $main::RootTree;
 		undef @main::Profiles;
 		undef @main::AddPackage;
@@ -2498,7 +2510,11 @@ sub createImageSplit {
 		#------------------------------------------
 		$main::Survive  = "yes";
 		$main::RootTree = "$tmpdir/kiwi-splitboot-$$";
-		$main::Prepare  = $main::System."/".$type{boot};
+		if (($type{boot} !~ /^\//) && (! -d $type{boot})) {
+			$main::Prepare = $main::System."/".$type{boot};
+		} else {
+			$main::Prepare = $type{boot};
+		}
 		$main::Create   = $main::RootTree;
 		undef @main::Profiles;
 		undef @main::AddPackage;
