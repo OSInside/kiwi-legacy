@@ -381,7 +381,7 @@ function OEMRepartLVM {
 		#--------------------------------------
 		disk2MBytes=$((diskXMBytes - disk1MBytes - recoMByte))
 		createPartitionerInput \
-			d $pID u y $pID n p $pID . +"$disk2MBytes"M t $pID 8e
+			d $pID u y n p $pID . +"$disk2MBytes"M t $pID 8e
 		extendID=$pID
 		pID=$((pID + 1))
 		#======================================
