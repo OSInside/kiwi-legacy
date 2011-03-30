@@ -32,7 +32,7 @@
 		<package name="ifplugd"/>
 		<package name="kernel-xen" replaces="kernel-ec2"/>
 		<package name="vim"/>
-		<package name="xen-tools-domU"/>
+		<package name="xen-tools"/>
 		<package name="xen"/>
 		<opensusePattern name="base"/>
 	</packages>

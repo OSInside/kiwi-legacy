@@ -74,12 +74,12 @@
 	</packages>
 	<packages type="image" profiles="xenFlavour">
 		<package name="kernel-xen" replaces="kernel-default"/>
-		<package name="xen-tools-domU" replaces=""/>
+		<package name="xen-tools" replaces=""/>
 		<package name="xen" replaces=""/>
 	</packages>
 	<packages type="image" profiles="vmxFlavour">
 		<package name="kernel-default" replaces="kernel-xen"/>
-		<package name="kernel-default" replaces="xen-tools-domU"/>
+		<package name="kernel-default" replaces="xen-tools"/>
 		<package name="kernel-default" replaces="xen"/>
 	</packages>
 	<packages type="bootstrap">
