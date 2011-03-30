@@ -3728,6 +3728,11 @@ sub installBootLoader {
 			$bootdev = $diskname."2";
 			if (! -e $bootdev) {
 				$bootdev = $diskname."1";
+			} else {
+				my $type = qxx ("blkid $bootdev -s TYPE -o value");
+				if ($type =~ /LVM/) {
+					$bootdev = $diskname."1";
+				}
 			}
 			$haveRealDevice = 1;
 		}
