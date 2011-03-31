@@ -380,8 +380,12 @@ function OEMRepartLVM {
 		# resize LVM partition
 		#--------------------------------------
 		disk2MBytes=$((diskXMBytes - disk1MBytes - recoMByte))
+		disk2MBytes=+"$disk2MBytes"M
+		if [ $recoMByte -eq 0 ];then
+			disk2MBytes=.
+		fi
 		createPartitionerInput \
-			d $pID u y n p $pID . +"$disk2MBytes"M t $pID 8e
+			d $pID u y n p $pID . $disk2MBytes t $pID 8e
 		extendID=$pID
 		pID=$((pID + 1))
 		#======================================
