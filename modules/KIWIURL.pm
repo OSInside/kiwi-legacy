@@ -120,6 +120,39 @@ sub normalizePath {
 }
 
 #==========================================
+# normalizeBootPath
+#------------------------------------------
+sub normalizeBootPath {
+	# ...
+	# check local path functions and normalize the high level
+	# URLs if required. This function is meant to be called
+	# on the value of the boot attribute only
+	# ---
+	my $this   = shift;
+	my $module = shift;
+	my $kiwi   = $this->{kiwi};
+	my $path;
+	$module = $this -> quote ($module);
+	$path = $this -> thisPath ($module);
+	if (defined $path) {
+		return $path;
+	}
+	$path = $this -> obsPath ($module,"boot");
+	if (defined $path) {
+		return $path;
+	}
+	$path = $this -> systemPath ($module);
+	if (defined $path) {
+		return $path;
+	}
+	$path = $this -> dirPath ($module);
+	if (defined $path) {
+		return $path;
+	}
+	return $module;
+}
+
+#==========================================
 # quote
 #------------------------------------------
 sub quote {
@@ -183,6 +216,30 @@ sub quote {
 		}
 		return $surl;
 	}
+}
+
+#==========================================
+# systemPath
+#------------------------------------------
+sub systemPath {
+	#...
+	# This path uses the provided system:// path and
+	# prefix it with kiwi's default module system dir
+	#---
+	my $this   = shift;
+	my $module = shift;
+	my $prefix = $main::System;
+	my $kiwi   = $this->{kiwi};
+	my $path    = undef;
+	#==========================================
+	# normalize URL data
+	#------------------------------------------
+	if ((! defined $module) || ($module !~ /^system:\/\//)) {
+		return undef;
+	}
+	$module =~ s/system:\/\///;
+	$path = $this -> dirPath ("dir://".$prefix."/".$module);
+	return $path;
 }
 
 #==========================================

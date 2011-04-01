@@ -1446,7 +1446,7 @@ sub getTypes {
 		my %record  = ();
 		$record{type} = $node -> getAttribute("image");
 		$record{boot} = $node -> getAttribute("boot");
-		my $bootpath = $urlhd -> obsPath ($record{boot},"boot");
+		my $bootpath = $urlhd -> normalizeBootPath ($record{boot});
 		if (defined $bootpath) {
 			$record{boot} = $bootpath;
 		}
@@ -4840,7 +4840,7 @@ sub __populateTypeInfo {
 					$record{filesystem} = "$filesystemRW,$filesystemRO";
 				}
 			}
-			my $bootpath = $urlhd -> obsPath ($record{boot},"boot");
+			my $bootpath = $urlhd -> normalizeBootPath ($record{boot});
 			if (defined $bootpath) {
 				$record{boot} = $bootpath;
 			}
