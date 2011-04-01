@@ -1979,9 +1979,11 @@ sub listXMLInfo {
 			# sources
 			#------------------------------------------
 			/^sources/       && do {
-				foreach my $url (@{$xml->{urllist}}) {
+				my %repos = $xml -> getRepository();
+				foreach my $url (keys %repos) {
 					my $source = new XML::LibXML::Element ("source");
 					$source -> setAttribute ("path","$url");
+					$source -> setAttribute ("type",$repos{$url}->[0]);
 					$scan -> appendChild ($source);
 				}
 				last SWITCH;
@@ -3054,7 +3056,7 @@ sub initializeCache {
 	# Create image package list
 	#------------------------------------------
 	$listXMLInfo = $mode;
-	@listXMLInfoSelection = ("packages");
+	@listXMLInfoSelection = ("packages","sources");
 	$CacheScan = listXMLInfo ("internal");
 	if (! $CacheScan) {
 		undef $ImageCache;
@@ -3206,6 +3208,7 @@ sub createCache {
 	my $CacheDistro        = $init->[0];
 	my @CachePatterns      = @{$init->[1]};
 	my @CachePackages      = @{$init->[2]};
+	my $CacheScan          = $init->[3];
 	my $imageCacheDir      = $ImageCache;
 	my $imagePrepareDir    = $main::Prepare;
 	#==========================================
@@ -3220,6 +3223,20 @@ sub createCache {
 	if (@CachePackages) {
 		push @CachePatterns,"package-cache"
 	}
+	#==========================================
+	# setup repositories for building
+	#------------------------------------------
+	$main::IgnoreRepos = 1;
+	my @repos = $CacheScan -> getElementsByTagName ("source");
+	foreach my $node (@repos) {
+		my $path = $node -> getAttribute ("path");
+		my $type = $node -> getAttribute ("type");
+		push @main::AddRepository, $path;
+		push @main::AddRepositoryType, $type;
+	}
+	#==========================================
+	# walk through cachable patterns
+	#------------------------------------------
 	foreach my $pattern (@CachePatterns) {
 		if ($pattern eq "package-cache") {
 			$pattern = $xml -> getImageName();
@@ -3316,25 +3333,31 @@ sub createCache {
 # createResetClosure
 #------------------------------------------
 sub createResetClosure {
-	my $backupSurvive       = $main::Survive;
-	my @backupProfiles      = @main::Profiles;
-	my $backupCreate        = $main::Create;
-	my $backupPrepare       = $main::Prepare;
-	my $backupRootTree      = $main::RootTree;
-	my $backupForceNewRoot  = $main::ForceNewRoot;
-	my @backupPatterns      = @main::AddPattern;
-	my @backupPackages      = @main::AddPackage;
-	my @backupRemovePackages= @main::RemovePackage;
+	my $backupSurvive           = $main::Survive;
+	my @backupProfiles          = @main::Profiles;
+	my $backupCreate            = $main::Create;
+	my $backupPrepare           = $main::Prepare;
+	my $backupRootTree          = $main::RootTree;
+	my $backupForceNewRoot      = $main::ForceNewRoot;
+	my @backupPatterns          = @main::AddPattern;
+	my @backupPackages          = @main::AddPackage;
+	my @backupRemovePackages    = @main::RemovePackage;
+	my $backupIgnoreRepos       = $main::IgnoreRepos;
+	my @backupAddRepository     = @main::AddRepository;
+	my @backupAddRepositoryType = @main::AddRepositoryType;
 	return sub {
-		@main::Profiles     = @backupProfiles;
-		$main::Prepare      = $backupPrepare;
-		$main::Create       = $backupCreate;
-		$main::ForceNewRoot = $backupForceNewRoot;
-		@main::AddPattern   = @backupPatterns;
-		@main::AddPackage   = @backupPackages;
-		@main::RemovePackage= @backupRemovePackages;
-		$main::RootTree     = $backupRootTree;
-		$main::Survive      = $backupSurvive;
+		@main::Profiles          = @backupProfiles;
+		$main::Prepare           = $backupPrepare;
+		$main::Create            = $backupCreate;
+		$main::ForceNewRoot      = $backupForceNewRoot;
+		@main::AddPattern        = @backupPatterns;
+		@main::AddPackage        = @backupPackages;
+		@main::RemovePackage     = @backupRemovePackages;
+		$main::IgnoreRepos       = $backupIgnoreRepos;
+		@main::AddRepository     = @backupAddRepository;
+		@main::AddRepositoryType = @backupAddRepositoryType;
+		$main::RootTree          = $backupRootTree;
+		$main::Survive           = $backupSurvive;
 	}
 }
 
