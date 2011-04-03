@@ -44,6 +44,7 @@ use KIWIOverlay;
 use KIWIQX;
 use KIWIRuntimeChecker;
 use KIWIImageFormat;
+use KIWIXMLInfo;
 use KIWIXMLValidator;
 
 #============================================
@@ -193,8 +194,6 @@ our $LogPort;               # specify alternative log server port
 our $GzipCmd;               # command to run to gzip things
 our $PrebuiltBootImage;     # directory where a prepared boot image may be found
 our $PreChrootCall;         # program name called before chroot switch
-our $listXMLInfo;           # list XML information for this operation
-our @listXMLInfoSelection;  # info selection for listXMLInfo
 our $CreatePassword;        # create crypted password
 our $ISOCheck;              # create checkmedia boot entry
 our $FSBlockSize;           # filesystem block size
@@ -1160,8 +1159,11 @@ sub init {
 	$SIG{"TERM"}     = \&quit;
 	$SIG{"INT"}      = \&quit;
 	my $Help;
-	my $Version;
+	my $ListXMLInfo;           # list XML information for this operation
+	my @ListXMLInfoSelection;  # info selection for listXMLInfo
 	my $PackageManager;
+	my $Version;
+
 	my $kiwi = new KIWILog("tiny");
 	$cmdL = new KIWICommandLine($kiwi);
 	#==========================================
@@ -1223,8 +1225,8 @@ sub init {
 		"package-manager=s"     => \$PackageManager,
 		"prebuiltbootimage=s"   => \$PrebuiltBootImage,
 		"prechroot-call=s"      => \$PreChrootCall,
-		"info|i=s"              => \$listXMLInfo,
-		"select=s"              => \@listXMLInfoSelection,
+		"info|i=s"              => \$ListXMLInfo,
+		"select=s"              => \@ListXMLInfoSelection,
 		"fs-blocksize=i"        => \$FSBlockSize,
 		"fs-journalsize=i"      => \$FSJournalSize,
 		"fs-inodesize=i"        => \$FSInodeSize,
@@ -1247,6 +1249,66 @@ sub init {
 		"help|h"                => \$Help
 	);
 	#========================================
+	# check if repositories are to be added
+	#----------------------------------------
+	if (defined @AddRepository) {
+		my $res = $cmdL -> setAdditionalRepos(
+			\@AddRepository,
+			\@AddRepositoryAlias,
+			\@AddRepositoryPriority,
+			\@AddRepositoryType
+		);
+		if (! $res) {
+			my $code = kiwiExit (1); return $code;
+		}
+	}
+	#========================================
+	# check if repositories are to be ignored
+	#----------------------------------------
+	if (defined $IgnoreRepos) {
+		$cmdL -> setIgnoreRepos(1);
+	}
+	#========================================
+	# check if we are doing caching
+	#----------------------------------------
+	if (defined $InitCache) {
+		$cmdL -> setAdditionalRepos(
+			\@AddRepository,
+			\@AddRepositoryAlias,
+			\@AddRepositoryPriority,
+			\@AddRepositoryType
+		);
+		$cmdL -> setBuildProfiles(\@Profiles);
+		$cmdL -> setConfigDir($InitCache);
+		my $res = $cmdL -> setIgnoreRepos($IgnoreRepos);
+		if (! $res) {
+			my $code = kiwiExit (1); return $code;
+		}
+		if (defined $LogFile) {
+			$res = $cmdL -> setLogFile($LogFile);
+		}
+		if (defined $PackageManager) {
+			$res = $cmdL -> setPackageManager($PackageManager);
+		}
+		if (defined $SetRepository) {
+			$res = $cmdL -> setReplacementRepo(
+				$SetRepository,
+				$SetRepositoryAlias,
+				$SetRepositoryPriority,
+				$SetRepositoryType
+			);
+		}
+		if (! $res) {
+			my $code = kiwiExit (1); return $code;
+		}
+	}
+	#========================================
+	# check if a specifc logfile has been defined
+	#----------------------------------------
+	if (defined $LogFile) {
+		$cmdL -> setLogFile($LogFile);
+	}
+	#========================================
 	# check if a package manager is specified
 	#----------------------------------------
 	if (defined $PackageManager) {
@@ -1260,6 +1322,20 @@ sub init {
 	#----------------------------------------
 	if (defined $RecycleRoot) {
 		$RecycleRoot = $RootTree;
+	}
+	#========================================
+	# check replacement repo information
+	#----------------------------------------
+	if (defined $SetRepository) {
+		my $result = $cmdL -> setReplacementRepo(
+			$SetRepository,
+			$SetRepositoryAlias,
+			$SetRepositoryPriority,
+			$SetRepositoryType
+		);
+		if (! $result) {
+			my $code = kiwiExit (1); return $code;
+		}
 	}
 	#============================================
 	# check Partitioner according to device
@@ -1394,7 +1470,7 @@ sub init {
 		(! defined $BootVMDisk)         &&
 		(! defined $Migrate)            &&
 		(! defined $InstallStick)       &&
-		(! defined $listXMLInfo)        &&
+		(! defined $ListXMLInfo)        &&
 		(! defined $CreatePassword)     &&
 		(! defined $BootCD)             &&
 		(! defined $BootUSB)            &&
@@ -1410,6 +1486,7 @@ sub init {
 		$kiwi -> warning ("Logfile set to terminal in init-cache mode");
 		$kiwi -> done ();
 		$LogFile = "terminal";
+		$cmdL -> setLogFile($LogFile);
 	}
 	if (($targetDevice) && (! -b $targetDevice)) {
 		$kiwi -> error ("Target device $targetDevice doesn't exist");
@@ -1418,11 +1495,6 @@ sub init {
 	}
 	if ((defined $IgnoreRepos) && (defined $SetRepository)) {
 		$kiwi -> error ("Can't use ignore repos together with set repos");
-		$kiwi -> failed ();
-		my $code = kiwiExit (1); return $code;
-	}
-	if ((defined @AddRepository) && (! defined @AddRepositoryType)) {
-		$kiwi -> error ("No repository type specified");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
@@ -1469,8 +1541,45 @@ sub init {
 	} elsif (defined $Build) {
 		$cmdL -> setTargetDirsForBuild();
 	}
-	if (defined $listXMLInfo) {
-		listXMLInfo();
+	if (defined $ListXMLInfo) {
+		$cmdL -> setAdditionalRepos(
+			\@AddRepository,
+			\@AddRepositoryAlias,
+			\@AddRepositoryPriority,
+			\@AddRepositoryType
+		);
+		$cmdL -> setBuildProfiles(\@Profiles);
+		$cmdL -> setConfigDir($ListXMLInfo);
+		my $res = $cmdL -> setIgnoreRepos($IgnoreRepos);
+		if (! $res) {
+			my $code = kiwiExit (1); return $code;
+		}
+		if (defined $LogFile) {
+			$res = $cmdL -> setLogFile($LogFile);
+		}
+		if (defined $PackageManager) {
+			$res = $cmdL -> setPackageManager($PackageManager);
+		}
+		if (defined $SetRepository) {
+			$res = $cmdL -> setReplacementRepo(
+				$SetRepository,
+				$SetRepositoryAlias,
+				$SetRepositoryPriority,
+				$SetRepositoryType
+			);
+		}
+		if (! $res) {
+			my $code = kiwiExit (1); return $code;
+		}
+		my $info = new KIWIXMLInfo($kiwi, $cmdL);
+		if (! $info) {
+			my $code = kiwiExit (1); return $code;
+		}
+		$res = $info -> printXMLInfo(\@ListXMLInfoSelection);
+		if (! $res) {
+			my $code = kiwiExit (1); return $code;
+		}
+		my $code = kiwiExit (0); return $code;
 	}
 	if (defined $SetImageType) {
 		$cmdL -> setBuildType($SetImageType);
@@ -1760,349 +1869,6 @@ sub checkConfig {
 	$kiwi -> info ('Validation passed');
 	$kiwi -> done ();
 	exit 0;
-}
-
-#==========================================
-# listXMLInfo
-#------------------------------------------
-sub listXMLInfo {
-	# ...
-	# print information about the XML description. The
-	# information listed here is for information only
-	# before a prepare and/or create command is called
-	# ---
-	my $internal = shift;
-	my %select;
-	my $gotselection = 0;
-	my $meta;
-	my $delete;
-	my $solfile;
-	my $satlist;
-	my $solp;
-	my $rpat;
-	#==========================================
-	# Create info block description
-	#------------------------------------------
-	$select{"repo-patterns"} = "List available patterns from repos";
-	$select{"patterns"}      = "List configured patterns";
-	$select{"types"}         = "List configured types";
-	$select{"sources"}       = "List configured source URLs";
-	$select{"size"}          = "List install/delete size estimation";
-	$select{"packages"}      = "List of packages to become installed";
-	$select{"profiles"}      = "List profiles";
-	$select{"version"}       = "List name and version";
-	#==========================================
-	# Create log object
-	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
-	#==========================================
-	# Setup logging location
-	#------------------------------------------
-	if (defined $LogFile) {
-		if ((! defined $Survive) || ($Survive ne "yes")) {
-			$kiwi -> info ("Setting log file to: $LogFile\n");
-			if (! $kiwi -> setLogFile ( $LogFile )) {
-				exit 1;
-			}
-		}
-	}
-	#==========================================
-	# Check selection list
-	#------------------------------------------
-	foreach my $info (@listXMLInfoSelection) {
-		if (defined $select{$info}) {
-			$gotselection = 1; last;
-		}
-	}
-	if (! $gotselection) {
-		$kiwi -> error  ("Can't find info for given selection");
-		$kiwi -> failed ();
-		$kiwi -> info   ("Choose between the following:\n");
-		foreach my $info (keys %select) {
-			my $s = sprintf ("--> %-15s:%s\n",$info,$select{$info});
-			$kiwi -> info ($s); 
-		}
-		exit 1;
-	}
-	$kiwi -> info ("Reading image description [ListXMLInfo]...\n");
-	my $xml  = new KIWIXML (
-		$kiwi,$listXMLInfo,undef,\@Profiles
-	);
-	if (! defined $xml) {
-		exit 1;
-	}
-	my $pkgMgr = $cmdL -> getPackageManager();
-	if ($pkgMgr) {
-		$xml -> setPackageManager($pkgMgr);
-	}
-	#==========================================
-	# Check for ignore-repos option
-	#------------------------------------------
-	if (defined $IgnoreRepos) {
-		$xml -> ignoreRepositories ();
-	}
-	#==========================================
-	# Check for set-repo option
-	#------------------------------------------
-	if (defined $SetRepository) {
-		$xml -> setRepository (
-			$SetRepositoryType,$SetRepository,
-			$SetRepositoryAlias,$SetRepositoryPriority
-		);
-	}
-	#==========================================
-	# Check for add-repo option
-	#------------------------------------------
-	if (defined @AddRepository) {
-		$xml -> addRepository (
-			\@AddRepositoryType,\@AddRepository,
-			\@AddRepositoryAlias,\@AddRepositoryPriority
-		);
-	}
-	#==========================================
-	# Setup loop sources
-	#------------------------------------------
-	my @mountInfolist = ();
-	if ($xml->{urlhash}) {
-		foreach my $source (keys %{$xml->{urlhash}}) {
-			#==========================================
-			# iso:// sources
-			#------------------------------------------
-			if ($source =~ /^iso:\/\/(.*)/) {
-				my $iso  = $1;
-				my $dir  = $xml->{urlhash}->{$source};
-				my $data = qxx ("mkdir -p $dir; mount -o loop $iso $dir 2>&1");
-				my $code = $? >> 8;
-				if ($code != 0) {
-					$kiwi -> failed ();
-					$kiwi -> error  ("Failed to loop mount ISO path: $data");
-					$kiwi -> failed ();
-					rmdir $dir;
-					exit 1;
-				}
-				push (@mountInfolist,$dir);
-			}
-		}
-	}
-	sub newCleanMount {
-		my @list = shift;
-		return sub {
-			foreach my $dir (@list) {
-				next if ! defined $dir;
-				qxx ("umount $dir ; rmdir $dir 2>&1");
-			}
-		}
-	}
-	*cleanInfoMount = newCleanMount (@mountInfolist);
-	#==========================================
-	# Initialize XML imagescan element
-	#------------------------------------------
-	my $scan = new XML::LibXML::Element ("imagescan");
-	#==========================================
-	# Walk through selection list
-	#------------------------------------------
-	foreach my $info (@listXMLInfoSelection) {
-		SWITCH: for ($info) {
-			#==========================================
-			# repo-patterns
-			#------------------------------------------
-			/^repo-patterns/ && do {
-				if (! $meta) {
-					($meta,$delete,$solfile,$satlist,$solp,$rpat) =
-						$xml->getInstallSize();
-					if (! $meta) {
-						$kiwi -> failed();
-						cleanInfoMount();
-						exit 1;
-					}
-				}
-				if (! $rpat) {
-					$kiwi -> info ("No patterns in repo solvable\n");
-				} else {
-					foreach my $p (@{$rpat}) {
-						next if ($p eq "\n");
-						$p =~ s/^\s+//;
-						$p =~ s/\s+$//;
-						my $pattern = new XML::LibXML::Element ("repopattern");
-						$pattern -> setAttribute ("name","$p");
-						$scan -> appendChild ($pattern);
-					}
-				}
-				last SWITCH;
-			};
-			#==========================================
-			# patterns
-			#------------------------------------------
-			/^patterns/      && do {
-				if (! $meta) {
-					($meta,$delete,$solfile,$satlist,$solp) =
-						$xml->getInstallSize();
-					if (! $meta) {
-						$kiwi -> failed();
-						cleanInfoMount();
-						exit 1;
-					}
-				}
-				if (! keys %{$meta}) {
-					$kiwi -> info ("No packages/patterns solved\n");
-				} else {
-					foreach my $p (sort keys %{$meta}) {
-						if ($p =~ /pattern:(.*)/) {
-							my $name = $1;
-							my $pattern = new XML::LibXML::Element ("pattern");
-							$pattern -> setAttribute ("name","$name");
-							$scan -> appendChild ($pattern);
-						}
-					}
-				}
-				last SWITCH;
-			};
-			#==========================================
-			# types
-			#------------------------------------------
-			/^types/         && do {
-				foreach my $t ($xml -> getTypes()) {
-					my %type = %{$t};
-					my $type = new XML::LibXML::Element ("type");
-					$type -> setAttribute ("name","$type{type}");
-					$type -> setAttribute ("primary","$type{primary}");
-					if (defined $type{boot}) {
-						$type -> setAttribute ("boot","$type{boot}");
-					}
-					$scan -> appendChild ($type);
-				}
-				last SWITCH;
-			};
-			#==========================================
-			# sources
-			#------------------------------------------
-			/^sources/       && do {
-				my %repos = $xml -> getRepository();
-				foreach my $url (keys %repos) {
-					my $source = new XML::LibXML::Element ("source");
-					$source -> setAttribute ("path","$url");
-					$source -> setAttribute ("type",$repos{$url}->[0]);
-					$scan -> appendChild ($source);
-				}
-				last SWITCH;
-			};
-			#==========================================
-			# size
-			#------------------------------------------
-			/^size/          && do {
-				if (! $meta) {
-					($meta,$delete,$solfile,$satlist,$solp) =
-						$xml->getInstallSize();
-					if (! $meta) {
-						$kiwi -> failed();
-						cleanInfoMount();
-						exit 1;
-					}
-				}
-				my $size = 0;
-				my %meta = %{$meta};
-				foreach my $p (keys %meta) {
-					my @metalist = split (/:/,$meta{$p});
-					$size += $metalist[0];
-				}
-				my $sizenode = new XML::LibXML::Element ("size");
-				if ($size > 0) {
-					$sizenode -> setAttribute ("rootsizeKB","$size");
-				}
-				$size = 0;
-				if ($delete) {
-					foreach my $del (@{$delete}) {
-						if ($meta{$del}) {
-							my @metalist = split (/:/,$meta{$del});
-							$size += $metalist[0];
-						}
-					}
-				}
-				if ($size > 0) {
-					$sizenode -> setAttribute ("deletionsizeKB","$size");
-				}
-				$scan -> appendChild ($sizenode);
-				last SWITCH;
-			};
-			#==========================================
-			# packages
-			#------------------------------------------
-			/^packages/     && do {
-				if (! $meta) {
-					($meta,$delete,$solfile,$satlist,$solp) =
-						$xml->getInstallSize();
-					if (! $meta) {
-						$kiwi -> failed();
-						cleanInfoMount();
-						exit 1;
-					}
-				}
-				if (! keys %{$meta}) {
-					$kiwi -> info ("No packages/patterns solved\n");
-				} else {
-					foreach my $p (sort keys %{$meta}) {
-						if ($p =~ /pattern:.*/) {
-							next;
-						}
-						my @m = split (/:/,$meta->{$p});
-						my $pacnode = new XML::LibXML::Element ("package");
-						$pacnode -> setAttribute ("name","$p");
-						$pacnode -> setAttribute ("arch","$m[1]");
-						$pacnode -> setAttribute ("version","$m[2]");
-						$scan -> appendChild ($pacnode);
-					}
-				}
-				last SWITCH;
-			};
-			#==========================================
-			# profiles
-			#------------------------------------------
-			/^profiles/      && do {
-				my @profiles = $xml -> getProfiles ();
-				if ((scalar @profiles) == 0) {
-					$kiwi -> info ("No profiles available\n");
-				} else {
-					foreach my $profile (@profiles) {
-						my $name = $profile -> {name};
-						my $desc = $profile -> {description};
-						my $pnode = new XML::LibXML::Element ("profile");
-						$pnode -> setAttribute ("name","$name");
-						$pnode -> setAttribute ("description","$desc");
-						$scan -> appendChild ($pnode);
-					}
-				}
-				last SWITCH;
-			};
-			#==========================================
-			# version
-			#------------------------------------------
-			/^version/       && do {
-				my $version = $xml -> getImageVersion();
-				my $appname = $xml -> getImageName();
-				my $vnode = new XML::LibXML::Element ("image");
-				$vnode -> setAttribute ("version","$version");
-				$vnode -> setAttribute ("name","$appname");
-				$scan -> appendChild ($vnode);
-			};
-		}
-	}
-	#==========================================
-	# Cleanup mount list
-	#------------------------------------------
-	cleanInfoMount();
-	#==========================================
-	# print scan results
-	#------------------------------------------
-	if ($internal) {
-		return $scan;
-	} else {
-		open (my $F, "|xsltproc $main::Pretty -");
-		print $F $scan->toString();
-		close $F;
-		exit 0;
-	}
 }
 
 #==========================================
@@ -3055,15 +2821,14 @@ sub initializeCache {
 	#==========================================
 	# Create image package list
 	#------------------------------------------
-	$listXMLInfo = $mode;
-	@listXMLInfoSelection = ("packages","sources");
-	$CacheScan = listXMLInfo ("internal");
+	$cmdL -> setConfigDir($mode);
+	my $info = new KIWIXMLInfo($kiwi, $cmdL);
+	my @infoReq = ('packages', 'sources');
+	$CacheScan = $info -> getXMLInfoTree(\@infoReq);
 	if (! $CacheScan) {
 		undef $ImageCache;
 		return undef;
 	}
-	undef $listXMLInfo;
-	undef @listXMLInfoSelection;
 	#==========================================
 	# Return result list
 	#------------------------------------------
