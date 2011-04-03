@@ -12,7 +12,7 @@
 #               :
 # STATUS        : Development
 #----------------
-package Test::xml;
+package Test::kiwiXML;
 
 use strict;
 use warnings;
@@ -38,7 +38,7 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {dataDir} = $this -> getDataDir() . '/xml/';
+	$this -> {dataDir} = $this -> getDataDir() . '/kiwiXML/';
 	$this -> {kiwi} = new  Common::ktLog();
 
 	return $this;
@@ -58,6 +58,25 @@ sub test_packageManagerInfoHasConfigValue {
 	my $xml = new KIWIXML($this -> {kiwi}, $confDir, undef, undef);
 	my $pkgMgr = $xml -> getPackageManager();
 	$this -> assert_str_equals('zypper', $pkgMgr);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+}
+
+#==========================================
+# test_packageManagerSet_noArg
+#------------------------------------------
+sub test_packageManagerSet_noArg {
+	# ...
+	# Verify of setPackageManager method error condition
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'specPkgMgr';
+	my $xml = new KIWIXML($this -> {kiwi}, $confDir, undef, undef);
 	# Call set without argument, expect error
 	my $res = $xml -> setPackageManager();
 	my $msg = $kiwi -> getMessage();
@@ -70,13 +89,26 @@ sub test_packageManagerInfoHasConfigValue {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($res);
-	# Set the package manager to be yum
-	$res = $xml -> setPackageManager('smart');
-	$msg = $kiwi -> getMessage();
+}
+
+#==========================================
+# test_packageManagerSet_noArg
+#------------------------------------------
+sub test_packageManagerSet_valid {
+	# ...
+	# Verify setPackageManager works as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'specPkgMgr';
+	my $xml = new KIWIXML($this -> {kiwi}, $confDir, undef, undef);
+	# Set the package manager to be smart
+	my $res = $xml -> setPackageManager('smart');
+	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
+	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
+	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
@@ -89,79 +121,34 @@ sub test_packageManagerInfoHasConfigValue {
 #------------------------------------------
 sub test_packageManagerInfoHasProfs {
 	# ...
-	# Verify that the default package manager is provided if no package manager
-	# is set in the configuration
+	# Verify package manager override works as expected
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'multiPkgMgrWithProf';
-	my $xml = new KIWIXML($this -> {kiwi}, $confDir, undef, undef);
-	my $pkgMgr = $xml -> getPackageManager();
-	$this -> assert_str_equals('zypper', $pkgMgr);
-	# Set the package manager to be yum
-	my $res = $xml -> setPackageManager('yum');
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($res);
-	my $newPkgMgr = $xml -> getPackageManager();
-	$this -> assert_str_equals('yum', $newPkgMgr);
-	# Use the profile that has a package manager specified
 	my @profiles = ('specPkgMgr');
-	$xml = new KIWIXML($this -> {kiwi}, $confDir, undef, \@profiles);
-	$pkgMgr = $xml -> getPackageManager();
-	$this -> assert_str_equals('zypper', $pkgMgr);
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('Using profile(s): specPkgMgr', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('info', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('completed', $state);
-	# Set the package manager to be yum
-	$res = $xml -> setPackageManager('yum');
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($res);
-	$newPkgMgr = $xml -> getPackageManager();
-	$this -> assert_str_equals('yum', $newPkgMgr);
-}
-
-#==========================================
-# test_packageManagerInfoNoConfigValue
-#------------------------------------------
-sub test_packageManagerInfoNoConfigValue {
-	# ...
-	# Verify that the default package manager is provided if no package manager
-	# is set in the configuration
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'defPkgMgr';
-	my $xml = new KIWIXML($this -> {kiwi}, $confDir, undef, undef);
+	# Verify we get the specified manager
+	my $xml = new KIWIXML($this -> {kiwi}, $confDir, undef,\@profiles);
 	my $pkgMgr = $xml -> getPackageManager();
-	$this -> assert_str_equals('zypper', $pkgMgr);
-	# Set the package manager to be yum
-	my $res = $xml -> setPackageManager('yum');
+	$this -> assert_str_equals('smart', $pkgMgr);
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
+	$this -> assert_str_equals('Using profile(s): specPkgMgr', $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
+	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Override the specified package manager with yum
+	my $res = $xml -> setPackageManager('yum');
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
 	my $newPkgMgr = $xml -> getPackageManager();
 	$this -> assert_str_equals('yum', $newPkgMgr);
 }
-
 
 1;

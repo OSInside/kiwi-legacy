@@ -41,9 +41,9 @@ sub new {
 }
 
 #==========================================
-# test_ctor
+# test_ctor_noArg1
 #------------------------------------------
-sub test_ctor {
+sub test_ctor_noArg1 {
 	# ...
 	# Test the runtime checker constructor
 	# ---
@@ -61,26 +61,49 @@ sub test_ctor {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($checker);
+}
+
+#==========================================
+# test_ctor_noArg2
+#------------------------------------------
+sub test_ctor_noArg2 {
+	# ...
+	# Test the runtime checker constructor
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	# Test missing third argument
 	my $cmd = $this -> __getCommandLineObj();
-	$checker = new KIWIRuntimeChecker($kiwi, $cmd);
-	$msg = $kiwi -> getMessage();
-	$expected = 'Expecting reference to KIWIXML object as third argument.';
+	my $checker = new KIWIRuntimeChecker($kiwi, $cmd);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Expecting reference to KIWIXML object as third argument.';
 	$this -> assert_str_equals($expected, $msg);
-	$msgT = $kiwi -> getMessageType();
+	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
-	$state = $kiwi -> getState();
+	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($checker);
+}
+
+#==========================================
+# test_ctor_valid
+#------------------------------------------
+sub test_ctor_valid {
+	# ...
+	# Test the runtime checker constructor
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	# No error construction
+	my $cmd = $this -> __getCommandLineObj();
 	my $xml = $this -> __getXMLObj( $this -> {dataDir} );
-	$checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
-	$msg = $kiwi -> getMessage();
+	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
+	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
+	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($checker);
@@ -413,7 +436,7 @@ sub test_noBuildType {
 #==========================================
 # test_packageManagerCheck
 #------------------------------------------
-sub test_packageManagerCheck {
+sub test_packageManagerCheck_ens {
 	# ...
 	# Test that the runtime check for package manager tool existence behaves
 	# properly.
@@ -452,14 +475,26 @@ sub test_packageManagerCheck {
 		$this -> assert_str_equals('failed', $state);
 		$this -> assert_null($res);
 	}
+}
+
+#==========================================
+# test_packageManagerCheck_ens
+#------------------------------------------
+sub test_packageManagerCheck_zypp {
+	# ...
+	# Test that the runtime check for package manager tool existence behaves
+	# properly.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
 	# Test the most likely use case, zypper set as package manager in
 	# config.xml, this test should succeed
-	$cmd = $this -> __getCommandLineObj();
-	$xml = $this -> __getXMLObj( $this -> {dataDir} );
-	$checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
-	$res = $checker -> prepareChecks();
+	my $xml = $this -> __getXMLObj( $this -> {dataDir} );
+	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	my $res = $checker -> prepareChecks();
 
-	$locator = new KIWILocator($kiwi);
+	my $locator = new KIWILocator($kiwi);
 	my $haveZypper = $locator -> getExecPath('zypper');
 	if ($haveZypper) {
 		my $msg = $kiwi -> getMessage();
@@ -548,4 +583,5 @@ sub __getXMLObj {
 	}
 	return $xml;
 }
+
 1;

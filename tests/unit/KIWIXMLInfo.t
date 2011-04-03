@@ -1,5 +1,5 @@
 #================
-# FILE          : KIWIXML.t
+# FILE          : KIWIXMLInfo.t
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2011 Novell Inc.
@@ -34,4 +34,4 @@ our $SchemaCVT = "$FindBin::Bin/../../xsl/master.xsl";
 # END variable hack
 
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiXML' );
+$runner->start( 'Test::kiwiXMLInfo');

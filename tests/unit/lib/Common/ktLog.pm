@@ -110,10 +110,31 @@ sub getErrorMessage {
 	# In general the getMessage method should be used. However, under certain
 	# test conditions it is unavoidable to have multiple messages in the log
 	# object. For these rare occasions the log allows access to the specific
-	# message types directly.
+	# message types directly. The message type is reset, the final call in a
+	# test should always be to getMessage() to assure no unexpected messages
+	# are present.
 	# ---
 	my $this = shift;
-	return $this -> {errMsg};
+	my $msg = $this -> {errMsg};
+	$this -> {errMsg} = '';
+	return $msg;
+}
+
+#==========================================
+# getErrorState
+#------------------------------------------
+sub getErrorState {
+	# ...
+	# Retrieve the state of the error flag.
+	# Generally the getState method should be used. However, under certain
+	# circumstances the code issues a set of messages together. The individual
+	# get*State methods allow to retrieve the expected state and clear the
+	# flag for this state. THe final call in any test should always be to
+	# getState to assure there are no unexpected messages.
+	my $this = shift;
+	my $val = $this -> {failed} ? 'failed' : 0;
+	$this -> {failed} = 0;
+	return $val;
 }
 
 #==========================================
@@ -125,10 +146,14 @@ sub getInfoMessage {
 	# In general the getMessage method should be used. However, under certain
 	# test conditions it is unavoidable to have multiple messages in the log
 	# object. For these rare occasions the log allows access to the specific
-	# message types directly.
+	# message types directly. The message type is reset, the final call in a
+	# test should always be to getMessage() to assure no unexpected messages
+	# are present.
 	# ---
 	my $this = shift;
-	return $this -> {infoMsg};
+	my $msg = $this -> {infoMsg};
+	$this -> {infoMsg} = '';
+	return $msg;
 }
 
 #==========================================
@@ -140,10 +165,14 @@ sub getLogInfoMessage {
 	# In general the getMessage method should be used. However, under certain
 	# test conditions it is unavoidable to have multiple messages in the log
 	# object. For these rare occasions the log allows access to the specific
-	# message types directly.
+	# message types directly. The message type is reset, the final call in a
+	# test should always be to getMessage() to assure no unexpected messages
+	# are present.
 	# ---
 	my $this = shift;
-	return $this -> {logInfoMsg};
+	my $msg = $this -> {logInfoMsg};
+	$this -> {logInfoMsg} = '';
+	return $msg;
 }
 
 #==========================================
@@ -151,14 +180,35 @@ sub getLogInfoMessage {
 #------------------------------------------
 sub getWarningMessage {
 	# ...
-	# Retrieve the error message.
+	# Retrieve the warning message.
 	# In general the getMessage method should be used. However, under certain
 	# test conditions it is unavoidable to have multiple messages in the log
 	# object. For these rare occasions the log allows access to the specific
-	# message types directly.
+	# message types directly. The message type is reset, the final call in a
+	# test should always be to getMessage() to assure no unexpected messages
+	# are present.
 	# ---
 	my $this = shift;
-	return $this -> {warnMsg};
+	my $msg = $this -> {warnMsg};
+	$this -> {warnMsg} = '';
+	return $msg;
+}
+
+#==========================================
+# getWarningState
+#------------------------------------------
+sub getWarningState {
+	# ...
+	# Retrieve the state of the skipped flag.
+	# Generally the getState method should be used. However, under certain
+	# circumstances the code issues a set of messages together. The individual
+	# get*State methods allow to retrieve the expected state and clear the
+	# flag for this state. THe final call in any test should always be to
+	# getState to assure there are no unexpected messages.
+	my $this = shift;
+	my $val = $this -> {skipped} ? 'skipped' : 0;
+	$this -> {skipped} = 0;
+	return $val;
 }
 
 #==========================================
@@ -249,7 +299,11 @@ sub info {
 	# Set the information message
 	# ---
 	my $this = shift;
-	$this -> {infoMsg} = shift;
+	if ($this -> {infoMsg}) {
+		$this -> {infoMsg} = $this -> {infoMsg} . shift;
+	} else {
+		$this -> {infoMsg} = shift;
+	}
 	$this -> {msgType} = 'info';
 	return $this;
 }

@@ -4,11 +4,8 @@
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rschweikert@novell.</contact>
-		<specification>Package manager specified for specifc profile, test should return smart or zypper, depending on build profile</specification>
+		<specification>Package manager specified, test should return zypper</specification>
 	</description>
-	<profiles>
-		<profile name="specPkgMgr" description="test-profile"/>
-	</profiles>
 	<preferences>
 		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-11.3" format="vmdk">
 			<machine memory="1024">
@@ -20,9 +17,6 @@
 		<rpm-force>true</rpm-force>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
-	</preferences>
-	<preferences profiles="specPkgMgr">
-		<packagemanager>zypper</packagemanager>
 	</preferences>
 	<users group="users">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
