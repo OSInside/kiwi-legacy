@@ -73,6 +73,7 @@ Source1:        %{name}-rpmlintrc
 Source2:        %{name}-docu.tar.bz2
 Source3:        %{name}-repo.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+Recommends:     jing
 Recommends:     zypper
 Provides:       kiwi-desc-usbboot
 Obsoletes:      kiwi-desc-usbboot
