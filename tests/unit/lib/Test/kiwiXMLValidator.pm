@@ -12,7 +12,7 @@
 #               :
 # STATUS        : Development
 #----------------
-package Test::xmlValidator;
+package Test::kiwiXMLValidator;
 
 use strict;
 use warnings;
@@ -31,7 +31,7 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {dataDir} = $this -> getDataDir() . '/xmlValidator/';
+	$this -> {dataDir} = $this -> getDataDir() . '/kiwiXMLValidator/';
 	$this -> {kiwi} = new  Common::ktLog();
 	$this -> {schema} = $this -> getBaseDir() . '/../modules/KIWISchema.rng';
 	$this -> {xslt} =  $this -> getBaseDir() . '/../xsl/master.xsl';

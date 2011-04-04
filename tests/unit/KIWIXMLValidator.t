@@ -24,4 +24,4 @@ use lib "$FindBin::Bin/lib";
 use lib "$FindBin::Bin/../../modules";
 
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::xmlValidator' );
+$runner->start( 'Test::kiwiXMLValidator' );
