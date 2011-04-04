@@ -3917,8 +3917,12 @@ sub getSingleInstSourceSatSolvable {
 		my @done   = ();
 		$scommand = "";
 		$destfile = $sdir."/primary-".$count;
-		foreach my $file (glob ("$sdir/packages-*.gz")) {
-			$gzicmd .= $file." ";
+		foreach my $file (glob ("$sdir/packages-*")) {
+			if ($file =~ /\.gz$/) {
+				$gzicmd .= $file." ";
+			} else {
+				$stdcmd .= $file." ";
+			}
 		}
 		foreach my $file (glob ("$sdir/*.pat*")) {
 			if ($file =~ /\.gz$/) {
@@ -3933,14 +3937,16 @@ sub getSingleInstSourceSatSolvable {
 		if ($stdcmd ne "cat ") {
 			push @done,$stdcmd;
 		}
-		$scommand = join (";",@done);
-		my $data = qxx ("($scommand) | susetags2solv > $destfile 2>/dev/null");
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("--> Can't create SaT solvable file");
-			$kiwi -> failed ();
-			$error = 1;
+		foreach my $cmd (@done) {
+			my $data = qxx ("$cmd | susetags2solv >> $destfile 2>/dev/null");
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("--> Can't create SaT solvable file");
+				$kiwi -> failed ();
+				$error = 1;
+				last;
+			}
 		}
 	}
 	$count++;
