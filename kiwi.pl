@@ -1164,7 +1164,7 @@ sub init {
 	my $PackageManager;
 	my $Version;
 
-	my $kiwi = new KIWILog("tiny");
+	$kiwi = new KIWILog("tiny");
 	$cmdL = new KIWICommandLine($kiwi);
 	#==========================================
 	# get options and call non-root tasks
