@@ -34,7 +34,7 @@
 	<repository type="yast2">
 		<source path="opensuse://11.2/repo/oss/"/>
 	</repository>
-	<repository type="rpm-dir">
+	<repository type="rpm-md">
 		<source path="PATH_TO_EUCALYPTUS_RPMS"/>
 	</repository>
 	<packages type="image" patternType="plusRecommended">
