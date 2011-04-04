@@ -832,29 +832,6 @@ sub test_cmdReplaceRepo_noRepo {
 }
 
 #==========================================
-# test_cmdReplaceRepo_noRepoType
-#------------------------------------------
-sub test_cmdReplaceRepo_noRepoType {
-	# ...
-	# Test the storage of the replacement repo information
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Test improper call no argument
-	my $res = $cmd -> setReplacementRepo('os11.3', 'alias', 1);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'setReplacementRepo method called without specifying '
-		. 'a repository type.';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-}
-
-#==========================================
 # test_cmdReplaceRepo_unsupRepoType
 #------------------------------------------
 sub test_cmdReplaceRepo_unsupRepoType {
