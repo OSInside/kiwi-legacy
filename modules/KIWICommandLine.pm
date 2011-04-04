@@ -267,7 +267,7 @@ sub setAdditionalRepos {
 	if ($repoAlias) {
 		@repositAlias = @{$repoAlias};
 		my $numAlias = @repositAlias;
-		if ($numRepos != $numAlias) {
+		if (($numAlias > 0) && ($numRepos != $numAlias)) {
 			my $msg = 'Number of specified repositories does not match number '
 				. 'of provided alias, cannot form proper match.';
 			$kiwi -> error ($msg);
@@ -279,7 +279,7 @@ sub setAdditionalRepos {
 	if ($repoPrios) {
 		@repositPrio = @{$repoPrios};
 		my $numPrios = @repositPrio;
-		if ($numRepos != $numPrios) {
+		if (($numPrios > 0) && ($numRepos != $numPrios)) {
 			my $msg = 'Number of specified repositories does not match number '
 				. 'of provided priorities, cannot form proper match.';
 			$kiwi -> error ($msg);
@@ -437,6 +437,10 @@ sub setLogFile {
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
 		return undef;
+	}
+	if ($logPath eq "terminal") {
+		$this -> {logFile} = $logPath;
+		return 1;
 	}
 	my $absPath = File::Spec->rel2abs($logPath);
 	my ($volume, $path, $file) = File::Spec->splitpath($logPath);
