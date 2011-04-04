@@ -10,11 +10,10 @@
 #               :
 # DESCRIPTION   : Unit test implementation for the KIWIXMLInfo module.
 #               : Certain queries require root priveleges, thus these queries
-#               : are not implemented as unit tests. Manual testing is required
-#               : to verify query functionality for
+#               : only get tested when this test is executed as root.
 #               :     -- packages
-#               :     -- patterns
-#               :     -- repo-patterns
+#               :     -- patterns       (TBI)
+#               :     -- repo-patterns  (TBI)
 #               :     -- size
 #               :
 # STATUS        : Development
@@ -40,7 +39,7 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	my $baseDir = $this -> getDataDir() . '/xmlInfo/';
+	my $baseDir = $this -> getDataDir() . '/kiwiXMLInfo/';
 	$this -> {baseDir} = $baseDir;
 	$this -> {kiwi}    = new Common::ktLog();
 
@@ -182,6 +181,42 @@ sub test_getTree_noArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+}
+
+#==========================================
+# test_packagesInfo
+#------------------------------------------
+sub test_packagesInfo {
+	# ...
+	# Test to ensure we get the proper package information
+	# skip test if not root
+	# ---
+	if ($< != 0) {
+		print "\t\tInfo: Not root, skipping test_packagesInfo\n";
+		return;
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	# Setup directory to operate as repository
+	my $repoDir = $this -> createTestTmpDir();
+	my $pckgOrig = $this -> {baseDir} . 'repo';
+	system "cp -r $pckgOrig/* $repoDir";
+	my $cmd  = $this -> __getCmdl();
+	$cmd -> setConfigDir($this -> {baseDir});
+	# Replace the repo from the config file with the previously setup repo
+	$cmd -> setReplacementRepo($repoDir, 'testRepo', 1, 'rpm-md');
+	my $info = $this -> __getInfoObj($cmd);
+	my @requests = ('packages');
+	my $tree = $info -> getXMLInfoTree(\@requests);
+	my $expectedMsg = '<imagescan><package name="kiwi-test-dummy" '
+		. 'arch="noarch" version="0.0.1-1"/></imagescan>';
+	$this -> assert_str_equals($expectedMsg, $tree -> toString());
+	$this -> assert_not_null($tree);
+	# Setting up SaT generates a number of meesges that are not useful
+	# for this test, just make sure everything in the log object gets reset
+	$kiwi -> getState();
+	# Clean up
+	$this -> removeTestTmpDir();
 }
 
 #==========================================
@@ -327,6 +362,41 @@ sub test_typesInfo {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+}
+
+#==========================================
+# test_sizeInfo
+#------------------------------------------
+sub test_sizeInfo {
+	# ...
+	# Test to ensure we get the proper package information
+	# skip test if not root
+	# ---
+	if ($< != 0) {
+		print "\t\tInfo: Not root, skipping test_sizeInfo\n";
+		return;
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	# Setup directory to operate as repository
+	my $repoDir = $this -> createTestTmpDir();
+	my $pckgOrig = $this -> {baseDir} . 'repo';
+	system "cp -r $pckgOrig/* $repoDir";
+	my $cmd  = $this -> __getCmdl();
+	$cmd -> setConfigDir($this -> {baseDir});
+	# Replace the repo from the config file with the previously setup repo
+	$cmd -> setReplacementRepo($repoDir, 'testRepo', 1, 'rpm-md');
+	my $info = $this -> __getInfoObj($cmd);
+	my @requests = ('size');
+	my $tree = $info -> getXMLInfoTree(\@requests);
+	my $expectedMsg = '<imagescan><size rootsizeKB="1"/></imagescan>';
+	$this -> assert_str_equals($expectedMsg, $tree -> toString());
+	$this -> assert_not_null($tree);
+	# Setting up SaT generates a number of meesges that are not useful
+	# for this test, just make sure everything in the log object gets reset
+	$kiwi -> getState();
+	# Clean up
+	$this -> removeTestTmpDir();
 }
 
 #==========================================

@@ -33,7 +33,7 @@
 		<source path="/tmp"/>
 	</repository>
 	<packages type="image" patternType="onlyRequired">
-		<package name="sash"/>
-		<opensusePattern name="base"/>
+		<package name="kiwi-test-dummy"/>
+		<!--<opensusePattern name="base"/>-->
 	</packages>
 </image>

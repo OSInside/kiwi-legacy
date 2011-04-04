@@ -10,3 +10,5 @@ echo "Cleaning up artifacts"
 for i in `find . -name "*.converted.xml"`;do \
     rm $i ;\
 done
+
+rm -rf /tmp/kiwiDevTests

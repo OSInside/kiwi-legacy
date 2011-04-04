@@ -61,6 +61,21 @@ return;
 }
 
 #==========================================
+# createTestTmpDir
+#------------------------------------------
+sub createTestTmpDir {
+	# ...
+	# Create a directory to allow tests to write data
+	# ---
+	my $this = shift;
+	# Lets assume /tmp exists
+	my $testDir = '/tmp/kiwiDevTests';
+	my $res = mkdir $testDir;
+	$this -> assert_equals(1, $res);
+	return $testDir;
+}
+
+#==========================================
 # getBaseDir
 #------------------------------------------
 sub getBaseDir {
@@ -80,6 +95,17 @@ sub getDataDir {
 	# ---
 	my $dir = dirname ( $FindBin::Bin ) . '/unit/data';
 	return $dir;
+}
+
+#==========================================
+# removeTestTmpDir
+#------------------------------------------
+sub removeTestTmpDir {
+	# ...
+	# Remove the test temporary directory
+	# ---
+	system 'rm -rf /tmp/kiwiDevTests';
+	return 1;
 }
 
 1;

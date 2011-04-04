@@ -421,11 +421,15 @@ sub test_cmdConfDirUsage_noDirRead {
 	# ...
 	# Test the storage and verification of the configuration directory data
 	# ---
+	if ($< == 0) {
+		print "\t\tInfo: user root, skipping test_cmdConfDirUsage_noDirRead\n";
+		return;
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCmdObj();
 	# Directory has no read access
-	# If the test is run a root the test will fail
+	# If the test is run a root the test is skipped
 	my $res = $cmd -> setConfigDir('/root');
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'No read access to specified configuration directory '
@@ -545,11 +549,15 @@ sub test_cmdLogFileUsagee_noWrite {
 	# ...
 	# Test the storage of the logfile path
 	# ---
+	if ($< == 0) {
+		print "\t\tInfo: user root, skipping test_cmdLogFileUsagee_noWrite\n";
+		return;
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCmdObj();
 	# Test no write permission
-	# If the test is executed as root this test will fail
+	# If the test is executed as root this test is skipped
 	my $res = $cmd -> setLogFile('/usr/cmdlTestLog.log');
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Unable to write to location /usr/, cannot create log '
