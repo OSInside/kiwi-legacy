@@ -1776,6 +1776,13 @@ sub setupBootDisk {
 			}
 		} else {
 			$kiwi -> info ("Using disk device $haveDiskDevice...");
+			# /.../
+			# the following is required for suse studio to determine the
+			# size of the image target disk. It has no relevance for the
+			# standard build process and is therefore called without any
+			# return value check. 
+			qxx ("qemu-img create $diskname $vmsize 2>&1");
+			# ----
 			$this->{loop} = $haveDiskDevice;
 			if (! -b $this->{loop}) {
 				$kiwi -> failed ();
