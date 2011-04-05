@@ -1614,7 +1614,7 @@ sub setupBootDisk {
 	# add boot space if syslinux based
 	#------------------------------------------
 	if ($bootloader =~ /(sys|ext)linux/) {
-		$syslbootMB = 60;
+		$syslbootMB = 100;
 		if (defined $main::FatStorage) {
 			if ($syslbootMB < $main::FatStorage) {
 				$syslbootMB = $main::FatStorage;
@@ -1801,7 +1801,7 @@ sub setupBootDisk {
 				@commands = (
 					"n","p","1",".","+".$prepbootMB."M",
 					"n","p","2",".",".",
-					"t","1","6",
+					"t","1","c",
 					"t","2","8e",
 					"a","1","w","q"
 				);
@@ -1811,7 +1811,7 @@ sub setupBootDisk {
 			if (($syszip) || ($haveSplit) || ($dmapper)) {
 				# xda1 ro / xda2 rw
 				if ($bootloader =~ /(sys|ext)linux/) {
-					my $partid = 6;
+					my $partid = "c";
 					if ($bootloader eq "extlinux" ) {
 						$partid = 83;
 					}
@@ -1849,7 +1849,7 @@ sub setupBootDisk {
 			} else {
 				# xda1 rw
 				if ($bootloader =~ /(sys|ext)linux/) {
-					my $partid = 6;
+					my $partid = "c";
 					if ($bootloader eq "extlinux" ) {
 						$partid = 83;
 					}
@@ -1876,7 +1876,7 @@ sub setupBootDisk {
 			}
 		} else {
 			if ($bootloader =~ /(sys|ext)linux/) {
-				my $partid = 6;
+				my $partid = "c";
 				if ($bootloader eq "extlinux" ) {
 					$partid = 83;
 				}
@@ -4524,7 +4524,7 @@ sub setDefaultDeviceMap {
 		$result{$i} = $device.$i;
 	}
 	if ($loader =~ /(sys|ext)linux/) {
-		my $search = 6;
+		my $search = "c";
 		if ($loader eq "extlinux" ) {
 			$search = 83;
 		}
@@ -4566,7 +4566,7 @@ sub setLoopDeviceMap {
 		$result{$i} = "/dev/mapper".$dmap."p$i";
 	}
 	if ($loader =~ /(sys|ext)linux/) {
-		my $search = 6;
+		my $search = "c";
 		if ($loader eq "extlinux" ) {
 			$search = 83;
 		}
