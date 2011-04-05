@@ -183,6 +183,30 @@ sub test_cmdAddRepos_mismatchRepoAli {
 }
 
 #==========================================
+# test_cmdAddRepos_mismatchRepoAli_empty
+#------------------------------------------
+sub test_cmdAddRepos_mismatchRepoAli_empty {
+	# ...
+	# Test the AdditionalRepo storage
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Provide improper argument
+	my @repos = ('os11.3', 'os11.3-non-oss');
+	my @alias = ();
+	my @types = ('yast2', 'rpm-md');
+	my $res = $cmd -> setAdditionalRepos(\@repos, \@alias, undef, \@types);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+}
+
+#==========================================
 # test_cmdAddRepos_mismatchRepoPrio
 #------------------------------------------
 sub test_cmdAddRepos_mismatchRepoPrio {
@@ -206,6 +230,30 @@ sub test_cmdAddRepos_mismatchRepoPrio {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+}
+
+#==========================================
+# test_cmdAddRepos_mismatchRepoPrio_empty
+#------------------------------------------
+sub test_cmdAddRepos_mismatchRepoPrio_empty {
+	# ...
+	# Test the AdditionalRepo storage
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Provide improper argument
+	my @repos = ('os11.3', 'os11.3-non-oss');
+	my @prio = ();
+	my @types = ('yast2', 'rpm-dir');
+	my $res = $cmd -> setAdditionalRepos(\@repos, undef, \@prio, \@types);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
 }
 
 #==========================================
