@@ -30,7 +30,6 @@
 
 #include "Platform.h"
 #include "DeviceItem.h"
-#define VERSION "SUSE Studio Image Writer 1.8"
 #define DROPDOWN_DIRECTIVE "Insert a USB device"
 
 class MainWindow : public QWidget

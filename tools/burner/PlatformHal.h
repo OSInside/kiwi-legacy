@@ -21,33 +21,36 @@
  *  
  */
 
-#ifndef __PLATFORM_H__
-#define __PLATFORM_H__
+#ifndef __PLATFORMHAL_H__
+#define __PLATFORMHAL_H__
 
+#ifdef USEHAL
 #include <QtCore>
+#include <hal/libhal.h>
+#include <hal/libhal-storage.h>
+
 #include <QtDBus>
 
 #include "DeviceItem.h"
+#include "Platform.h"
 
-class Platform
+class PlatformHal : public Platform
 {
 
 public:
-    Platform(bool kioskMode = false);
-    bool removeDeviceFromList(const QString &displayName);
-    DeviceItem *findDeviceInList(const QString &displayName);
+    PlatformHal(bool kioskMode = false);
+    void findDevices(bool unsafe = false);
+    bool isMounted(QString path);
     void writeData(QString path, QString fileName, qint64 deviceSize);
-    QLinkedList<DeviceItem *> getDeviceList() { return itemList; }
+    bool unmountDevice(QString path);
+    DeviceItem *getNewDevice(QString devicePath);
 
-    virtual void findDevices(bool unsafe = false) {}
-    virtual bool isMounted(QString path) { return false; }
-    virtual bool unmountDevice(QString path) { return false; }
-    virtual DeviceItem *getNewDevice(QString devicePath) { return(NULL); }
+private:
+    bool performUnmount(QString udi);
+    DeviceItem *getNewDevice(QString devicePath, LibHalContext *context = NULL);
+    LibHalContext *initHal();
 
-protected:
-    bool mKioskMode;
-    DeviceItem *pDevice;
-    QLinkedList<DeviceItem *> itemList;
 };
+#endif
 
 #endif

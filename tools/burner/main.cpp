@@ -29,7 +29,8 @@
 
 
 #include "MainWindow.h"
-#include "Platform.h"
+#include "PlatformHal.h"
+#include "PlatformUdisks.h"
 #include "DeviceItem.h"
 
 
@@ -58,7 +59,7 @@ main (int argc, char *argv[])
                 fprintf(stdout, "Usage:\t%s [-d <device>] [-f <raw file>] [-u] [-l] [-v]\n", argv[0]);
                 fprintf(stdout, "Flashes a raw disk file to a device\n\n");
                 fprintf(stdout, "-d <device>\t\tSpecify a device, for example: /dev/sdc\n");
-                fprintf(stdout, "-f <raw file\t\tSpecify the file to write\n");
+                fprintf(stdout, "-f <raw file>\t\tSpecify the file to write\n");
                 fprintf(stdout, "-k\t\t\tOperate in \"kiosk mode\", only listing disks smaller than 200GB\n");
                 fprintf(stdout, "-l\t\t\tList valid USB devices\n");
                 fprintf(stdout, "-m\t\t\tMaximize the window\n");
@@ -81,7 +82,7 @@ main (int argc, char *argv[])
                 kioskMode = true;
                 break;
             case 'v':
-                fprintf(stdout, "%s\nWritten by Matt Barringer <mbarringer@suse.de>\n", VERSION);
+                fprintf(stdout, "SUSE Studio Imagewriter %s\nWritten by Matt Barringer <mbarringer@suse.de>\n", APP_VERSION);
                 exit(0);
                 break;
             case 'm':
@@ -93,8 +94,13 @@ main (int argc, char *argv[])
     }
 
     QApplication app(argc, argv);
-    Platform *platform = new Platform(kioskMode);
+#ifdef USEHAL
+    PlatformHal *platform = new PlatformHal(kioskMode);
+#else
+    PlatformUdisks *platform = new PlatformUdisks(kioskMode);
+#endif
     platform->findDevices(unsafe);
+
     if (listMode)
     {
         QLinkedList<DeviceItem *> list = platform->getDeviceList();

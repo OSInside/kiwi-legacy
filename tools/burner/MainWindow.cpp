@@ -59,7 +59,7 @@ MainWindow::MainWindow (Platform *platform,
     useOldUI();
 #endif
 
-    setWindowTitle(tr(VERSION));
+    setWindowTitle(QString("SUSE Studio Imagewriter %1").arg(APP_VERSION));
     reloadDeviceList(cmddevice);
 
     if (cmdfile != NULL)
@@ -71,6 +71,7 @@ MainWindow::MainWindow (Platform *platform,
         }
     }
 
+#ifdef USEHAL
     // Hook into DBUS insertion and removal notifications
     dbusConnection.connect("",
                            "/org/freedesktop/Hal/Manager",
@@ -85,7 +86,21 @@ MainWindow::MainWindow (Platform *platform,
                            "DeviceRemoved",
                            this,
                            SLOT(deviceRemoved(QDBusMessage)));
+#else
+    dbusConnection.connect("",
+                           "/org/freedesktop/UDisks",
+                           "org.freedesktop.UDisks",
+                           "DeviceAdded",
+                           this,
+                           SLOT(deviceInserted(QDBusMessage)));
 
+    dbusConnection.connect("",
+                           "/org/freedesktop/UDisks",
+                           "org.freedesktop.UDisks",
+                           "DeviceRemoved",
+                           this,
+                           SLOT(deviceRemoved(QDBusMessage)));
+#endif
     if (!mMaximized)
         centerWindow();
 }
@@ -203,7 +218,7 @@ MainWindow::useOldUI()
 
     file = new QLabel(tr("File"));
     device = new QLabel(tr("Device"));
-    version = new QLabel(VERSION);
+    version = new QLabel(QString("SUSE Studio Imagewriter %1").arg(APP_VERSION));
 
     buttonLayout = new QHBoxLayout;
     buttonLayout->addWidget(exitButton);
@@ -301,8 +316,15 @@ MainWindow::checkIso(const QString &fileName)
 void
 MainWindow::deviceInserted(QDBusMessage message)
 {
-    QString devicePath = message.arguments().at(0).toString();
+    QString devicePath;
+#ifdef USEHAL
+    devicePath = message.arguments().at(0).toString();
     if (devicePath.startsWith("/org/freedesktop/Hal/devices/storage_serial"))
+#else
+    QDBusObjectPath path = message.arguments().at(0).value<QDBusObjectPath>();
+    devicePath = path.path();
+    if (devicePath.startsWith("/org/freedesktop/UDisks/devices/"))
+#endif
     {
         DeviceItem *device = pPlatform->getNewDevice(devicePath);
         if (device != NULL)
@@ -315,8 +337,15 @@ void
 MainWindow::deviceRemoved(QDBusMessage message)
 {
     int index;
-    QString devicePath = message.arguments().at(0).toString();
+    QString devicePath;
+#ifdef USEHAL
+    devicePath = message.arguments().at(0).toString();
     if (devicePath.startsWith("/org/freedesktop/Hal/devices/storage_serial"))
+#else
+    QDBusObjectPath path = message.arguments().at(0).value<QDBusObjectPath>();
+    devicePath = path.path();
+    if (devicePath.startsWith("/org/freedesktop/UDisks/devices/"))
+#endif
     {
         QLinkedList<DeviceItem *> list = pPlatform->getDeviceList();
         QLinkedList<DeviceItem *>::iterator i;
