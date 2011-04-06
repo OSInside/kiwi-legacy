@@ -37,9 +37,8 @@ DISTFILE_EXTRAFILES = $$RESOURCES \
     imagewriter.pro \
     README \
     INSTALL \
-    *.qm \
-    *.ts \
     *.png \
+    imagewriter.qrc \
     imagewriter.desktop \
     imagewriter.spec \
     icons/ 
