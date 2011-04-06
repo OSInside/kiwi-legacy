@@ -984,7 +984,7 @@ function suseStripInitrd {
 		gettext diff bc utimer cmp busybox kexec pam_console_apply
 		setterm kpartx vgcfgbackup vgcfgrestore lsdasd dasd_configure
 		qeth_configure fdasd mkdosfs egrep mkfs.xfs mdadm yes fdisk
-		startproc
+		startproc zfcp_host_configure zfcp_disk_configure
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
