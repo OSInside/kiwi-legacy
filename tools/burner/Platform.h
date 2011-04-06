@@ -45,7 +45,6 @@ public:
     virtual DeviceItem *getNewDevice(QString devicePath) { return(NULL); }
 
 protected:
-    bool performUnmount(QString udi);
     bool mKioskMode;
     DeviceItem *pDevice;
     QLinkedList<DeviceItem *> itemList;

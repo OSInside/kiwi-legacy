@@ -46,6 +46,7 @@ public:
     DeviceItem *getNewDevice(QString devicePath);
 
 private:
+    bool performUnmount(QString udi);
     DeviceItem *getNewDevice(QString devicePath, LibHalContext *context = NULL);
     LibHalContext *initHal();
 
