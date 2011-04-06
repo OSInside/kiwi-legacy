@@ -170,6 +170,11 @@ sub new {
 			"--data-dir=$dataDir",
 			"-o remove-packages=false"
 		];
+		$this->{smart_chroot} = [
+			"smart",
+			"--data-dir=$dataDir",
+			"-o remove-packages=false"
+		];
 		$this->{smartroot} = ["-o rpm-root=$root"];
 		if (glob ("$root//etc/smart/channels/*")) {
 			qxx ( "rm -f $root/etc/smart/channels/*" );
@@ -184,14 +189,32 @@ sub new {
 			"--raw-cache-dir $dataDir",
 			"--config $zypperConf"
 		];
+		$this->{zypper_chroot} = [
+			"zypper",
+			'--non-interactive',
+			'--no-gpg-checks',
+			"--reposd-dir $dataDir",
+			"--cache-dir $dataDir",
+			"--raw-cache-dir $dataDir",
+			"--config $zypperConf"
+		];
 	} elsif ($manager eq 'ensconce') {
 		$this->{ensconce} = [
 			$locator -> getExecPath('ensconce'),
 			"-r $root"
 		];
+		$this->{ensconce_chroot} = [
+			"ensconce",
+			"-r $root"
+		];
 	} elsif ($manager eq 'yum') {
 		$this->{yum} = [
 			$locator -> getExecPath('yum'),
+			"-c $dataDir/yum.conf",
+			"-y"
+		];
+		$this->{yum_chroot} = [
+			"yum",
 			"-c $dataDir/yum.conf",
 			"-y"
 		];
@@ -412,6 +435,7 @@ sub setupSignatureCheck {
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
 				$data = qxx ("@smart config --set $option 2>&1");
 			} else {
+				@smart= @{$this->{smart_chroot}};
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
 				$data=qxx ("@kchroot @smart config --set $option 2>&1");
 			}
@@ -483,6 +507,7 @@ sub resetSignatureCheck {
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
 				$data = qxx ("@smart config --set $option 2>&1");
 			} else {
+				@smart= @{$this->{smart_chroot}};
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
 				$data=qxx ("@kchroot @smart config --set $option 2>&1");
 			}
@@ -561,6 +586,7 @@ sub setupExcludeDocs {
 				$kiwi -> info ("Setting RPM doc exclusion to: $imgExclDocs");
 				$data = qxx ("@smart config --set $option 2>&1");
 			} else {
+				@smart= @{$this->{smart_chroot}};
 				$kiwi -> info ("Setting RPM doc exclusion to: $imgExclDocs");
 				$data=qxx ("@kchroot @smart config --set $option 2>&1");
 			}
@@ -632,6 +658,7 @@ sub resetExcludeDocs {
 				$kiwi -> info ("Resetting RPM doc exclusion to: $curExclDocs");
 				$data = qxx ("@smart config --set $option 2>&1");
 			} else {
+				@smart= @{$this->{smart_chroot}};
 				$kiwi -> info ("Resetting RPM doc exclusion to: $curExclDocs");
 				$data=qxx ("@kchroot @smart config --set $option 2>&1");
 			}
@@ -706,8 +733,6 @@ sub setupInstallationSource {
 	if ($manager eq "smart") {
 		my @smart  = @{$this->{smart}};
 		my @rootdir= @{$this->{smartroot}};
-		my $stype  = "private";
-		my $cmds   = "@smart channel --add";
 		#==========================================
 		# make sure channel list is clean
 		#------------------------------------------
@@ -715,12 +740,18 @@ sub setupInstallationSource {
 		foreach my $c (@chls) {
 			chomp $c; qxx ("@smart channel --remove $c -y 2>&1");
 		}
+		my $stype; # private or public channels
+		my $cmds;  # smart call in and outside of the chroot
 		#==========================================
 		# re-add new channels
 		#------------------------------------------
 		if (! $chroot) {
 			$stype = "public";
 			$cmds  = "@smart @rootdir channel --add";
+		} else {
+			$stype = "private";
+			@smart  = @{$this->{smart_chroot}};
+			$cmds   = "@smart channel --add";
 		}
 		foreach my $chl (keys %{$source{$stype}}) {
 			my @opts = @{$source{$stype}{$chl}};
@@ -813,6 +844,7 @@ sub setupInstallationSource {
 				$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
 				$code = $? >> 8;
 			} else {
+				my @zypper= @{$this->{zypper_chroot}};
 				$kiwi -> info ("Adding chroot zypper service: $alias");
 				$data = qxx ("@kchroot zypper --version 2>&1 | cut -c 8");
 				if ($data >= 1) {
@@ -838,6 +870,7 @@ sub setupInstallationSource {
 					$data = qxx ("@zypper --root \"$root\" $modrepo 2>&1");
 					$code = $? >> 8;
 				} else {
+					my @zypper= @{$this->{zypper_chroot}};
 					$data = qxx ("@kchroot @zypper $modrepo 2>&1");
 					$code = $? >> 8;
 				}
@@ -952,9 +985,12 @@ sub resetInstallationSource {
 		my @smart  = @{$this->{smart}};
 		my @rootdir= @{$this->{smartroot}};
 		my @list   = @channelList;
-		my $cmds   = "@smart channel --remove";
+		my $cmds;
 		if (! $chroot) {
 			$cmds="@smart @rootdir channel --remove";
+		} else {
+			@smart= @{$this->{smart_chroot}};
+			$cmds = "@smart channel --remove";
 		}
 		if (! $chroot) {
 			$kiwi -> info ("Removing smart channel(s): @channelList");
@@ -978,9 +1014,12 @@ sub resetInstallationSource {
 	if ($manager eq "zypper") {
 		my @zypper = @{$this->{zypper}};
 		my @list = @channelList;
-		my $cmds = "@zypper removerepo";
+		my $cmds;
 		if (! $chroot) {
 			$cmds = "@zypper --root $root removerepo";
+		} else {
+			@zypper = @{$this->{zypper_chroot}};
+			$cmds = "@zypper removerepo";
 		}
 		if (! $chroot) {
 			$kiwi -> info ("Removing zypper service(s): @channelList");
@@ -1143,7 +1182,7 @@ sub installPackages {
 	# smart
 	#------------------------------------------
 	if ($manager eq "smart") {
-		my @smart = @{$this->{smart}};
+		my @smart = @{$this->{smart_chroot}};
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
@@ -1171,7 +1210,7 @@ sub installPackages {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		my @zypper = @{$this->{zypper}};
+		my @zypper = @{$this->{zypper_chroot}};
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
@@ -1213,7 +1252,7 @@ sub installPackages {
 	# yum
 	#------------------------------------------
 	if ($manager eq "yum") {
-		my @yum = @{$this->{yum}};
+		my @yum = @{$this->{yum_chroot}};
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
@@ -1278,7 +1317,7 @@ sub removePackages {
 	# smart
 	#------------------------------------------
 	if ($manager eq "smart") {
-		my @smart = @{$this->{smart}};
+		my @smart = @{$this->{smart_chroot}};
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
@@ -1306,7 +1345,7 @@ sub removePackages {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		my @zypper = @{$this->{zypper}};
+		my @zypper = @{$this->{zypper_chroot}};
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
@@ -1348,7 +1387,7 @@ sub removePackages {
 	# yum
 	#------------------------------------------
 	if ($manager eq "yum") {
-		my @yum = @{$this->{yum}};
+		my @yum = @{$this->{yum_chroot}};
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
@@ -1398,7 +1437,7 @@ sub setupUpgrade {
 	# smart
 	#------------------------------------------
 	if ($manager eq "smart") {
-		my @smart = @{$this->{smart}};
+		my @smart = @{$this->{smart_chroot}};
 		my @opts = (
 			"--log-level=error",
 			"-y"
@@ -1454,7 +1493,7 @@ sub setupUpgrade {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		my @zypper = @{$this->{zypper}};
+		my @zypper = @{$this->{zypper_chroot}};
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
@@ -1547,7 +1586,7 @@ sub setupUpgrade {
 	# yum
 	#------------------------------------------
 	if ($manager eq "yum") {
-		my @yum  = @{$this->{yum}};
+		my @yum  = @{$this->{yum_chroot}};
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
@@ -1803,12 +1842,12 @@ sub setupRootSystem {
 	# smart
 	#------------------------------------------
 	if ($manager eq "smart") {
-		my @smart   = @{$this->{smart}};
 		my @rootdir = @{$this->{smartroot}};
 		if (! $chroot) {
 			#==========================================
 			# setup install options outside of chroot
 			#------------------------------------------
+			my @smart = @{$this->{smart}};
 			my @installOpts = (
 				"--explain",
 				"--log-level=error",
@@ -1861,6 +1900,7 @@ sub setupRootSystem {
 			#==========================================
 			# setup install options inside of chroot
 			#------------------------------------------
+			my @smart   = @{$this->{smart_chroot}};
 			my @install = @packs;
 			my @installOpts = (
 				"--explain",
@@ -1899,11 +1939,11 @@ sub setupRootSystem {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		my @zypper = @{$this->{zypper}};
 		if (! $chroot) {
 			#==========================================
 			# setup install options outside of chroot
 			#------------------------------------------
+			my @zypper = @{$this->{zypper}};
 			my @installOpts = (
 				"--auto-agree-with-licenses"
 			);
@@ -1986,6 +2026,7 @@ sub setupRootSystem {
 			#==========================================
 			# select patterns and packages
 			#------------------------------------------
+			my @zypper    = @{$this->{zypper_chroot}};
 			my @install   = ();
 			my @newpatts  = ();
 			my @newprods  = ();
@@ -2096,11 +2137,11 @@ sub setupRootSystem {
 	# yum
 	#------------------------------------------
 	if ($manager eq "yum") {
-		my @yum = @{$this->{yum}};
 		if (! $chroot) {
 			#==========================================
 			# Add package manager to package list
 			#------------------------------------------
+			my @yum = @{$this->{yum}};
 			if ($this -> setupInstallPackages()) {
 				push (@packs,$manager);
 			}
@@ -2170,6 +2211,7 @@ sub setupRootSystem {
 			#==========================================
 			# select groups and packages
 			#------------------------------------------
+			my @yum       = @{$this->{yum_chroot}};
 			my @install   = ();
 			my @newpatts  = ();
 			foreach my $need (@packs) {
@@ -2316,6 +2358,7 @@ sub setupPackageInfo {
 			$data = qxx ("@smart @rootdir query --installed $pack 2>/dev/null");
 			$code = $? >> 8;
 		} else {
+			@smart= @{$this->{smart_chroot}};
 			$kiwi -> info ("Checking for package: $pack");
 			$data = qxx (
 				"@kchroot @smart query --installed $pack 2>/dev/null"
