@@ -3097,32 +3097,57 @@ function CDEject {
 #--------------------------------------
 function searchBusIDBootDevice {
 	# /.../
-	# on s390 we store the Bus-ID for the disk inside
-	# the initrd. This id is used to set the device online
+	# if searchBIOSBootDevice did not return a result this
+	# function is called to check for a DASD or ZFCP device
+	# like they exist on the s390 architecture. If found the
+	# device is set online and the biosBootDevice variable
+	# is set to this device for further processing
 	# ----
-	local dlink=/sys/bus/ccw/devices/$busid
-	local id
-	local status
-	local device
-	local rest
-	if [ ! -e $dlink ];then
+	local haveDASD=0
+	local haveZFCP=0
+	local deviceID=0
+	local dpath=/dev/disk/by-path
+	#======================================
+	# distinguish between dasd and zfcp
+	#--------------------------------------
+	if [ ! -z "$ccwid" ] ;then
+		deviceID=$ccwid
+		haveZFCP=1
+	elif [ ! -z "$busid" ];then
+		deviceID=$busid
+		haveDASD=1
+	fi
+	#======================================
+	# check if we can find the device
+	#--------------------------------------
+	if [ ! -e /sys/bus/ccw/devices/$deviceID ];then
 		systemException \
-			"Can't find disk with ID: $busid" \
+			"Can't find disk with ID: $deviceID" \
 		"reboot"
 	fi
-	dasd_configure $busid 1 0
-	lsdasd $busid | tail -n 1 | while read id status device rest;do
-		echo "/dev/$device" > /tmp/biosBootDevice
-	done
-	if [ ! -e /tmp/biosBootDevice ];then
-		export biosBootDevice="Failed to set disk $busid online"
-		return 1
+	#======================================
+	# DASD
+	#--------------------------------------
+	if [ $haveDASD -eq 1 ];then
+		dasd_configure $deviceID 1 0
+		biosBootDevice="$dpath/ccw-$deviceID"
 	fi
-	export biosBootDevice=$(cat /tmp/biosBootDevice)
+	#======================================
+	# ZFCP
+	#--------------------------------------
+	if [ $haveZFCP -eq 1 ];then
+		zfcp_host_configure $deviceID 1
+		zfcp_disk_configure $deviceID $wwpn $lun 1
+		biosBootDevice="$dpath/ccw-$deviceID-zfcp-$wwpn:$lun"
+	fi
+	#======================================
+	# setup boot device variable
+	#--------------------------------------
 	if [ ! -e $biosBootDevice ];then
-		export biosBootDevice="Failed to set disk $busid online"
+		export biosBootDevice="Failed to set disk $deviceID online"
 		return 1
 	fi
+	export biosBootDevice=$(getDiskDevice $biosBootDevice)
 	return 0
 }
 #======================================
