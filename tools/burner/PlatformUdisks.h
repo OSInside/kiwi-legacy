@@ -21,34 +21,38 @@
  *  
  */
 
-#ifndef __PLATFORM_H__
-#define __PLATFORM_H__
+#ifndef __PLATFORMUDISKS_H__
+#define __PLATFORMUDISKS_H__
 
 #include <QtCore>
 #include <QtDBus>
-
 #include "DeviceItem.h"
+#include "Platform.h"
 
-class Platform
+class PlatformUdisks : public Platform
 {
 
 public:
-    Platform(bool kioskMode = false);
-    bool removeDeviceFromList(const QString &displayName);
-    DeviceItem *findDeviceInList(const QString &displayName);
+    PlatformUdisks(bool kioskMode = false);
+    void findDevices(bool unsafe = false);
+    bool isMounted(QString path);
     void writeData(QString path, QString fileName, qint64 deviceSize);
-    QLinkedList<DeviceItem *> getDeviceList() { return itemList; }
+    bool unmountDevice(QString path);
+    DeviceItem *getNewDevice(QString devicePath);
 
-    virtual void findDevices(bool unsafe = false) {}
-    virtual bool isMounted(QString path) { return false; }
-    virtual bool unmountDevice(QString path) { return false; }
-    virtual DeviceItem *getNewDevice(QString devicePath) { return(NULL); }
-
-protected:
+private:
+    bool udiskEnabled();
+    bool isUSB(const QString &udiskPath);
+    bool isPartitionMounted(const QString &partitionPath);
+    bool getIsDrive(const QString &path);
+    QStringList getPartitionList(const QString &devicePath);
     bool performUnmount(QString udi);
-    bool mKioskMode;
-    DeviceItem *pDevice;
-    QLinkedList<DeviceItem *> itemList;
+    QString getPath(const QString &devicePath);
+    QString getModel(const QString &devicePath);
+    QString getVendor(const QString &devicePath);
+    bool getIsRemovable(const QString &devicePath);
+    long long getSize(const QString &devicePath);
+
 };
 
 #endif
