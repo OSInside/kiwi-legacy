@@ -149,6 +149,34 @@ sub validate {
 # Private helper methods
 #------------------------------------------
 #==========================================
+# __checkBootSpecPresent
+#------------------------------------------
+sub __checkBootSpecPresent {
+	# ...
+	# Check that the boot attribute is set for types that require an
+	# initrd.
+	# ---
+	my $this        = shift;
+	my $systemTree  = $this->{systemTree};
+	my @needsInitrd = qw /iso oem pxe split vmx/;
+	my @types = $systemTree -> getElementsByTagName('type');
+	for my $type (@types) {
+		my $image = $type -> getAttribute('image');
+		if (grep /^$image/, @needsInitrd) {
+			my $boot = $type -> getAttribute('boot');
+			if (! $boot) {
+				my $kiwi = $this -> {kiwi};
+				my $msg = "$image requires initrd, but no 'boot' "
+					. 'attribute specified.';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return undef;
+			}
+		}
+	}
+	return 1;
+}
+#==========================================
 # __checkDefaultProfSetting
 #------------------------------------------
 sub __checkDefaultProfSetting {
@@ -166,7 +194,7 @@ sub __checkDefaultProfSetting {
 		}
 		if ($numDefProfs > 1) {
 			my $kiwi = $this->{kiwi};
-			my $msg = 'Only one profile may be set as the dafault profile by '
+			my $msg = 'Only one profile may be set as the default profile by '
 			. 'using the "import" attribute.';
 			$kiwi -> error($msg);
 			$kiwi -> failed();
@@ -282,12 +310,12 @@ sub __checkFilesysSpec {
 	my $this = shift;
 	my $isInvalid;
 	my $kiwi = $this->{kiwi};
-	my @typeNodes = $this->{systemTree} -> getElementsByTagName("type");
+	my @typeNodes = $this->{systemTree} -> getElementsByTagName('type');
 	my @typesReqFS = qw /oem pxe vmx/;
 	for my $typeN (@typeNodes) {
-		my $imgType = $typeN -> getAttribute( "image" );
+		my $imgType = $typeN -> getAttribute( 'image' );
 		if (grep /$imgType/, @typesReqFS) {
-			my $hasFSattr = $typeN -> getAttribute( "filesystem" );
+			my $hasFSattr = $typeN -> getAttribute( 'filesystem' );
 			if (! $hasFSattr) {
 				my $msg = 'filesystem attribute must be set for image="'
 				. $imgType
@@ -715,7 +743,7 @@ sub __checkVersionDefinition {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $systemTree = $this->{systemTree};
-	my @versions = $systemTree -> getElementsByTagName("version");
+	my @versions = $systemTree -> getElementsByTagName('version');
 	my $numVersions = @versions;
 	if ($numVersions > 1) {
 		my $msg = "Only one <version> definition expected, found $numVersions";
@@ -802,6 +830,9 @@ sub __validateConsistency {
 	# in any code that populates this object from XML data.
 	# ---
 	my $this = shift;
+	if (! $this -> __checkBootSpecPresent()) {
+		return undef;
+	}
 	if (! $this -> __checkDefaultProfSetting()) {
 		return undef;
 	}

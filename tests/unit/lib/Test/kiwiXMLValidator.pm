@@ -40,6 +40,46 @@ sub new {
 }
 
 #==========================================
+# test_bootDescriptSet
+#------------------------------------------
+sub test_bootDescriptSet {
+	# ...
+	# Test that required boot attribute requirement is properly enforced
+	# ---
+	my $this = shift;
+	my @invalidConfigs = $this -> __getInvalidFiles('bootDescript');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $kiwi = $this -> {kiwi};
+		my $msg = $kiwi -> getMessage();
+		my $specType;
+		if ( $iConfFile =~ 'bootDescriptInvalid_1.xml' ) {
+			$specType = 'iso';
+		} elsif ( $iConfFile =~ 'bootDescriptInvalid_2.xml' ) {
+			$specType = 'oem';
+		} elsif ( $iConfFile =~ 'bootDescriptInvalid_3.xml' ) {
+			$specType = 'pxe';
+		} elsif ( $iConfFile =~ 'bootDescriptInvalid_4.xml' ) {
+			$specType = 'split';
+		} elsif ( $iConfFile =~ 'bootDescriptInvalid_5.xml' ) {
+			$specType = 'vmx';
+		}
+		my $expectedMsg = "$specType requires initrd, but no 'boot' "
+					. 'attribute specified.';
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('bootDescript');
+	$this -> __verifyValid(@validConfigs);
+}
+
+#==========================================
 # test_ctorInvalidConfPath
 #------------------------------------------
 sub test_ctorInvalidConfPath {
@@ -188,7 +228,7 @@ sub test_defaultProfileSpec {
 		$validator -> validate();
 		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
-		my $expectedMsg = 'Only one profile may be set as the dafault '
+		my $expectedMsg = 'Only one profile may be set as the default '
 		. 'profile by using the "import" attribute.';
 		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();

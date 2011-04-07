@@ -34,6 +34,6 @@
 	</repository>
 	<packages type="image" patternType="onlyRequired">
 		<package name="kiwi-test-dummy"/>
-		<!--<opensusePattern name="base"/>-->
+<!--<opensusePattern name="base"/>-->
 	</packages>
 </image>
