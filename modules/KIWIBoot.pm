@@ -57,7 +57,6 @@ sub new {
 	my $system = shift;
 	my $vmsize = shift;
 	my $device = shift;
-	my $lvm    = shift;
 	my $profile= shift;
 	#==========================================
 	# Constructor setup
@@ -450,7 +449,6 @@ sub new {
 	$this->{arch}      = $arch;
 	$this->{ptool}     = $main::Partitioner;
 	$this->{chainload} = $main::GrubChainload;
-	$this->{lvm}       = $lvm;
 	$this->{vga}       = $vga;
 	$this->{xml}       = $xml;
 	$this->{xendomain} = $xendomain;
