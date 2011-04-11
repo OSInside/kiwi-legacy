@@ -72,7 +72,7 @@ sub new {
 	#------------------------------------------
 	if (! defined $xml) {
 		my $boot = new KIWIBoot (
-			$kiwi,undef,$image,undef,undef,undef,\@main::ProfilesOrig
+			$kiwi,undef,$image,undef,undef,\@main::ProfilesOrig
 		);
 		if ($boot) {
 			$xml = $boot->{xml};

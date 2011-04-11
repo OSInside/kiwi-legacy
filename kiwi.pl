@@ -1116,7 +1116,7 @@ sub main {
 		}
 		$boot = new KIWIBoot (
 			$kiwi,$BootVMDisk,$BootVMSystem,
-			$BootVMSize,undef,$LVM,\@ProfilesOrig
+			$BootVMSize,undef,\@ProfilesOrig
 		);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
@@ -2187,6 +2187,13 @@ sub checkType {
 		# resize the stick
 		# ----
 		$xml -> __setTypeAttribute ("bootloader","syslinux");
+		$xml -> __setSystemDiskElement ();
+		$xml -> writeXMLDescription ($root);
+	} elsif (defined $main::LVM) {
+		# /.../
+		# if the option --lvm is set, we add/update a systemdisk
+		# element which triggers the use of LVM
+		# ----
 		$xml -> __setSystemDiskElement ();
 		$xml -> writeXMLDescription ($root);
 	}
