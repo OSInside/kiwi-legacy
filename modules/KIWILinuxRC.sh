@@ -4526,7 +4526,7 @@ function mountSystem {
 	# setup boot partition
 	#--------------------------------------
 	if [ ! "$arch" = "ppc64" ];then
-		if [ $retval = 0 ] && [ -z "$RESTORE" ];then
+		if [ "$LOCAL_BOOT" = "no" ] && [ $retval = 0 ] && [ -z "$RESTORE" ];then
 			setupBootPartition
 		fi
 	fi
