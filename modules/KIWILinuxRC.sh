@@ -670,6 +670,7 @@ function installBootLoader {
 	# The selection of the bootloader happens according to
 	# the architecture of the system
 	# ----
+	resetBootBind
 	local arch=`uname -m`
 	if [ -z "$loader" ];then
 		loader="grub"
@@ -915,7 +916,6 @@ function setupSUSEInitrd {
 		systemIntegrity=unknown
 		bootLoaderOK=0
 	fi
-	resetBootBind
 }
 #======================================
 # callSUSEInitrdScripts

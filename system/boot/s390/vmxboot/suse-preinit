@@ -70,7 +70,15 @@ fi
 # 8) create initrd on diskful
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+	#======================================
+	# use distro initrd via mkinitrd
+	#--------------------------------------
 	setupSUSEInitrd
+else
+	#======================================
+	# use kiwi initrd from RW partition
+	#--------------------------------------
+	bootLoaderOK=1
 fi
 
 #======================================
