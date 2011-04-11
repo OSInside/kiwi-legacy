@@ -142,6 +142,9 @@ Echo "Found boot device: $imageDiskDevice"
 #--------------------------------------
 export imageRootDevice=$(ddn $imageDiskDevice 2)
 export imageRWDevice=$(ddn $imageDiskDevice 3)
+if [ ! -z "$kiwi_ramonly" ];then
+	export imageRWDevice=/dev/ram1
+fi
 export imageRODevice=$(ddn $imageDiskDevice 2)
 if [ -z "$imageDiskDevice" ];then
 	systemException \
@@ -156,6 +159,9 @@ if searchVolumeGroup; then
 		export imageRootDevice=/dev/$VGROUP/LVRoot
 	fi
 	export imageRWDevice=/dev/$VGROUP/LVRoot
+	if [ ! -z "$kiwi_ramonly" ];then
+		export imageRWDevice=/dev/ram1
+	fi
 	export imageRODevice=/dev/$VGROUP/LVComp
 	export imageBootDevice=$(ddn $imageDiskDevice 2)
 fi
