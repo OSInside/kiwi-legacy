@@ -4300,7 +4300,7 @@ function mountSystemClicFS {
 	if [ ! $LOCAL_BOOT = "no" ];then
 		e2fsck -p $roDir/fsdata.ext3
 	fi
-	if [ $LOCAL_BOOT = "no" ];then
+	if [ $LOCAL_BOOT = "no" ] || [ $ramOnly = 1 ];then
 		resize2fs $roDir/fsdata.ext3 $size"s"
 	fi
 	mount -o loop,noatime,nodiratime,errors=remount-ro,barrier=0 \
