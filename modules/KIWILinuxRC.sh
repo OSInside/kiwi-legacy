@@ -7194,24 +7194,14 @@ function resetBootBind {
 	#--------------------------------------	
 	if [ "$loader" = "syslinux" ];then
 		# /.../
-		# if syslinux is used we need to make sure that the
-		# filename on the boot partition is correct 8+3
-		# we also have to move the kernel and initrd to /boot
-		# on the boot partition. This is normally done by the
-		# boot -> . link but we can't create links on fat
+		# if syslinux is used we need to make sure to move
+		# the kernel and initrd to /boot on the boot partition.
+		# This is normally done by the boot -> . link but we
+		# can't create links on fat
 		# ----
-		IFS="," ; for i in $KERNEL_LIST;do
-			if test -z "$i";then
-				continue
-			fi
-			kernel=`echo $i | cut -f1 -d:`
-			initrd=`echo $i | cut -f2 -d:`
-			mkdir -p /boot/boot
-			mv /boot/$kernel /boot/boot/linux.1
-			mv /boot/$initrd /boot/boot/initrd.1
-			break
-		done
-		IFS=$IFS_ORIG
+		mkdir -p /boot/boot
+		mv /boot/linux.1  /boot/boot/linux.1
+		mv /boot/initrd.1 /boot/boot/initrd.1
 	fi
 }
 #======================================
