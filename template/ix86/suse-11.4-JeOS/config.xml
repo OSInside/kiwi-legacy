@@ -69,6 +69,7 @@
 		<package name="iputils"/>
 		<package name="vim"/>
 		<package name="grub"/>
+		<package name="syslinux"/>
 		<opensusePattern name="base"/>
 		<opensuseProduct name="openSUSE"/>
 	</packages>
