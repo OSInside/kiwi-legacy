@@ -109,6 +109,7 @@
 		<package name="branding-SLES"/>
 		<package name="release-notes-sles"/>
 		<package name="glib2-branding-SLES"/>
+		<package name="lvm2"/>
 	</packages>
 	<packages type="image" profiles="vmxFlavour,xenFlavour">
 		<package name="grub"/>
