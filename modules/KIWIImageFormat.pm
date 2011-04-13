@@ -575,7 +575,7 @@ sub createEC2 {
 		clean_loop $tmpdir;
 		return undef;
 	}
-	print $FD '/dev/sda1 / none defaults 0 0'."\n";
+	print $FD "/dev/sda1 / $type{type} defaults 0 0"."\n";
 	close $FD;
 	#==========================================
 	# cleanup loop
