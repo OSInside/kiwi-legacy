@@ -1563,13 +1563,6 @@ function setupBootLoaderSyslinux {
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
 			kname=${KERNEL_NAME[$count]}
-			#======================================
-			# move to FAT requirements 8+3
-			#--------------------------------------
-			if [ "$loader" = "syslinux" ];then
-				kernel="linux.$count"
-				initrd="initrd.$count"
-			fi
 			if ! echo $gfix | grep -E -q "OEM|USB|VMX|NET|unknown";then
 				if [ "$count" = "1" ];then
 					title=$(makeLabel "$gfix")
@@ -2451,21 +2444,57 @@ function setupKernelModules {
 	done
 }
 #======================================
+# getKernelBootParameters
+#--------------------------------------
+function getKernelBootParameters {
+	# /.../
+	# check contents of bootloader configuration
+	# and extract cmdline parameters
+	# ----
+	local prefix=$1
+	local params
+	local files="
+		$prefix/boot/syslinux/syslinux.cfg
+		$prefix/boot/syslinux/extlinux.conf
+		$prefix/boot/grub/menu.lst
+		$prefix/etc/lilo.conf
+		$prefix/etc/zipl.conf
+	"
+	for c in $files;do
+		if [ -f $c ];then
+			params=$(cat $c | grep 'root=' | head -n1)
+			break
+		fi
+	done
+	params=$(echo $params | sed -e 's@^append=@@')
+	params=$(echo $params | sed -e 's@^append@@')
+	params=$(echo $params | sed -e 's@^module@@')
+	params=$(echo $params | sed -e 's@^kernel@@')
+	params=$(echo $params | sed -e 's@^parameters=@@')
+	params=$(echo $params | sed -e 's@"@@g')
+	params=$(echo $params)
+	echo $params
+}
+#======================================
 # kernelCheck
 #--------------------------------------
 function kernelCheck {
 	# /.../
-	# Check this running kernel against the kernel
+	# Check the running kernel against the kernel
 	# installed in the image. If the version does not 
 	# match we need to reboot to activate the system
-	# image kernel which is done if kexec is installed
-	# 
-	# 1) try to load KIWI_KERNEL and KIWI_INITRD if set in config.<MAC>
-	# 2) try to load default kernel set in /IMAGE_NAME file on image
+	# image kernel. This is done by either using kexec
+	# or a real reboot is triggered
 	# ----
 	local kactive=`uname -r`
 	local kreboot=1
 	local prefix=$1
+	local kernel
+	local initrd
+	local params
+	#======================================
+	# check installed and running kernel
+	#--------------------------------------
 	for i in $prefix/lib/modules/*;do
 		if [ ! -d $i ];then
 			continue
@@ -2476,107 +2505,61 @@ function kernelCheck {
 			break
 		fi
 	done
-	if [ $kreboot = 1 ];then
-		if [ -f /sbin/kexec ] ; then
-			Echo "Kernel versions do not match trying boot another kernel..."
-			#======================================
-			# load builtin image configs
-			#--------------------------------------
-			if [ -f $prefix/IMAGE_NAME ] ; then
-				. $prefix/IMAGE_NAME 
-			fi
-			#======================================
-			# check KEXEC_USED from /proc/cmdline
-			#--------------------------------------
-			ldconfig
-			mountSystemFilesystems &>/dev/null
-			KEXEC_USED=$(cat /proc/cmdline |\
-				tr ' ' '\n' | grep 'KEXEC_USED=' |  sed 's/KEXEC_USED=//')
-			kernel_cmdline=$(cat /proc/cmdline |\
-				tr ' ' '\n' | grep -v 'KEXEC_USED=' |\
-				grep -v 'BOOT_IMAGE' | tr '\n' ' ')
-			umountSystemFilesystems
-			#======================================
-			# avoid nonterminating reboot
-			#--------------------------------------
-			if [ -z "$KEXEC_USED" ] ; then
-				: # first try
-			elif [ "$KEXEC_USED" = "1" ] ; then
-				Echo "kernel $KIWI_KERNEL,$KIWI_INITRD not supported"
-				Echo "falling back to $KIWI_KERNEL_DEFAULT,$KIWI_INITRD_DEFAULT"
-				KIWI_KERNEL=""
-				KIWI_INITRD=""
-			elif [ $KEXEC_USED = 2 ] ; then
-				Echo "kexec kernel boot failed for all installed kernels"
-				Echo "Please, check your initrd and root images"
-				REBOOT_IMAGE="yes"
-				sleep 5
-				return 1
-			else
-				Echo "Wrong value of KEXEC_USED option"
-				REBOOT_IMAGE="yes"
-				sleep 5
-				return 1
-			fi
-			#======================================
-			# check for KIWI_KERNEL/KIWI_INITRD
-			#--------------------------------------
-			pathToKernel=$prefix/boot/linux.kiwi
-			pathToInitrd=$prefix/boot/initrd.kiwi
-			if [ -z $KIWI_KERNEL ] ; then
-				KIWI_KERNEL=boot/$KIWI_KERNEL_DEFAULT
-				pathToKernel=$prefix/$KIWI_KERNEL
-			fi
-			if [ -z $KIWI_INITRD ] ; then
-				KIWI_INITRD=boot/$KIWI_INITRD_DEFAULT
-				pathToInitrd=$prefix/$KIWI_INITRD
-			fi
-			#======================================
-			# download kernel and initrd if needed 
-			#--------------------------------------
-			mkdir -p $prefix/boot /boot 2>dev/null
-			if [ ! -e $pathToKernel ] ; then
-				if [ -z `mount | grep rw | grep " $prefix "` ] ; then
-					pathToKernel=/$KIWI_KERNEL
-				fi
-				fetchFile $KIWI_KERNEL $pathToKernel 
-			fi
-			if [ ! -e $pathToInitrd ] ; then
-				if [ -z `mount | grep rw | grep " $prefix "` ] ; then
-					pathToInitrd=/$KIWI_INITRD
-				fi
-				fetchFile $KIWI_INITRD $pathToInitrd
-			fi
-			#======================================
-			# prepare kernel command line
-			#--------------------------------------
-			if [ x"$KERNEL_CMDLINE_ARGS_OVERWRITE" = x"yes" ] ; then
-				KERNEL_CMDLINE_ARGS="$KERNEL_CMDLINE_ARGS"
-			elif [ x"$KERNEL_CMDLINE_ARGS_OVERWRITE" = x"append" ] ; then
-				if [ $KEXEC_USED = 0 ] ; then
-					KERNEL_CMDLINE_ARGS="$kernel_cmdline $KERNEL_CMDLINE_ARGS"
-				else 
-					KERNEL_CMDLINE_ARGS="$kernel_cmdline"
-				fi
-			else
-				KERNEL_CMDLINE_ARGS=""
-			fi
-			KEXEC_USED=$((KEXEC_USED+1))
-			#======================================
-			# load and run kernel...
-			#--------------------------------------
-			if [ -f $pathToKernel -a -f $pathToInitrd ] ; then
-				kexec -l $pathToKernel \
-					--append="$KERNEL_CMDLINE_ARGS KEXEC_USED=$KEXEC_USED" \
-					--initrd=$pathToInitrd
-				kexec -e
-			else
-				Echo "Failed to download $KIWI_KERNEL,$KIWI_INITRD"
-			fi
-		fi
-		Echo "Kernel versions do not match rebooting in 5 sec..."
-		REBOOT_IMAGE="yes"
+	if [ $kreboot = 0 ];then
+		return
+	fi
+	Echo "Kernel versions do not match..."
+	#======================================
+	# trigger reboot if kexec doesn't exist
+	#--------------------------------------
+	if [ ! -f /sbin/kexec ];then
+		Echo "Reboot triggered in 5 sec..."
+		export REBOOT_IMAGE="yes"
 		sleep 5
+		return
+	fi
+	#======================================
+	# trigger reboot using kexec
+	#--------------------------------------
+	if [ -f /sbin/kexec ];then
+		#======================================
+		# find installed kernel / initrd
+		#--------------------------------------
+		IFS="," ; for i in $KERNEL_LIST;do
+			if test -z "$i";then
+				continue
+			fi
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			break
+		done
+		if [ ! -f $prefix/boot/$kernel ] || [ ! -f $prefix/boot/$initrd ];then
+			Echo "Can't find $kernel / $initrd in system image"
+			Echo "Reboot triggered in 5 sec..."
+			export REBOOT_IMAGE="yes"
+			sleep 5
+			return
+		fi
+		#======================================
+		# extract bootloader cmdline params
+		#--------------------------------------
+		params=$(getKernelBootParameters $prefix)
+		#======================================
+		# load and run kernel...
+		#--------------------------------------
+		kexec -l $prefix/boot/$kernel \
+			--append="$params" --initrd=$prefix/boot/$initrd
+		if [ ! $? = 0 ];then
+			Echo "Failed to load kernel"
+			Echo "Reboot triggered in 5 sec..."
+			export REBOOT_IMAGE="yes"
+			sleep 5
+			return
+		fi
+		#======================================
+		# go for gold
+		#--------------------------------------
+		exec kexec -e
 	fi
 }
 #======================================
@@ -7199,9 +7182,18 @@ function resetBootBind {
 		# This is normally done by the boot -> . link but we
 		# can't create links on fat
 		# ----
+		IFS="," ; for i in $KERNEL_LIST;do
+			if test -z "$i";then
+				continue
+			fi
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			break
+		done
+		IFS=$IFS_ORIG
 		mkdir -p /boot/boot
-		mv /boot/linux.1  /boot/boot/linux.1
-		mv /boot/initrd.1 /boot/boot/initrd.1
+		mv /boot/$kernel /boot/boot/
+		mv /boot/$initrd /boot/boot/
 	fi
 }
 #======================================
@@ -7234,7 +7226,10 @@ function setupKernelLinks {
 	#======================================
 	# setup if overlay filesystem is used
 	#--------------------------------------
-	if [ "$OEM_KIWI_INITRD" = "yes" ] || isFSTypeReadOnly;then
+	if  [ "$OEM_KIWI_INITRD" = "yes" ] || \
+		[ "$PXE_KIWI_INITRD" = "yes" ] || \
+		isFSTypeReadOnly
+	then
 		# /.../
 		# we are using a special root setup based on an overlay
 		# filesystem. In this case we can't use the SuSE Linux
@@ -7250,8 +7245,22 @@ function setupKernelLinks {
 		done
 		IFS=$IFS_ORIG
 		if [ "$loader" = "syslinux" ];then
-			rm -f $initrd && mv initrd.vmx initrd.1
-			rm -f $kernel && mv linux.vmx  linux.1
+			rm -f $initrd && mv initrd.vmx $initrd
+			rm -f $kernel && mv linux.vmx  $kernel
+		elif [ "$PXE_KIWI_INITRD" = "yes" ];then
+			if [ ! -f initrd.kiwi ] && [ ! -f linux.kiwi ];then
+				Echo "WARNING: can't find kiwi initrd/linux !"
+				Echo -b "local boot will not work, maybe you forgot"
+				Echo -b "to add KIWI_INITRD and KIWI_KERNEL in config.<MAC> ?"
+			else
+				if [ "$loader" = "syslinux" ];then
+					rm -f $initrd && mv initrd.kiwi $initrd
+					rm -f $kernel && mv linux.kiwi  $kernel
+				else
+					rm -f $initrd && ln -s initrd.kiwi $initrd
+					rm -f $kernel && ln -s linux.kiwi  $kernel
+				fi
+			fi
 		else
 			rm -f $initrd && ln -s initrd.vmx $initrd
 			rm -f $kernel && ln -s linux.vmx  $kernel

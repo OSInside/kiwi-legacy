@@ -63,26 +63,7 @@ if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ]; then
 		#======================================
 		# use kiwi initrd downloaded before
 		#--------------------------------------
-		pushd /boot &>/dev/null
-		IFS="," ; for i in $KERNEL_LIST;do
-			if test -z "$i";then
-				continue
-			fi
-			kernel=`echo $i | cut -f1 -d:`
-			initrd=`echo $i | cut -f2 -d:`
-			if [ ! -f initrd.kiwi ] && [ ! -f linux.kiwi ];then
-				Echo "WARNING: can't find kiwi initrd/linux !"
-				Echo -b "local boot will not work, maybe you forgot"
-				Echo -b "to add KIWI_INITRD and KIWI_KERNEL in config.<MAC> ?"
-				break
-			fi
-			rm -f $initrd && ln -s initrd.kiwi $initrd
-			rm -f $kernel && ln -s linux.kiwi  $kernel
-			bootLoaderOK=1
-			break
-		done
-		IFS=$IFS_ORIG
-		popd >/dev/null
+		bootLoaderOK=1
 	fi
 fi
 
@@ -160,7 +141,12 @@ if [ "$systemIntegrity" = "clean" ];then
 fi
 
 #======================================
-# 13) kill udev
+# 13) setup console
+#--------------------------------------
+kernelCheck
+
+#======================================
+# 14) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

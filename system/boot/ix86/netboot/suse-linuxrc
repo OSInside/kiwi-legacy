@@ -858,20 +858,19 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	# 17.5) Check for KIWI_INITRD
 	#---------------------------------------
 	if [ $haveDisk = "1" ] && [ $systemIntegrity = "clean" ];then
-		if [ ! -z "$KIWI_INITRD" ];then
-			Echo "Import KIWI initrd file: $KIWI_INITRD"
+		if [ ! -z "$KIWI_INITRD" ] && [ ! -z "$KIWI_KERNEL" ];then
+			Echo "Import KIWI initrd/kernel file: $KIWI_INITRD/$KIWI_KERNEL"
 			rm -f /mnt/boot/initrd* && mkdir -p /mnt/boot >/dev/null 2>&1
 			fetchFile $KIWI_INITRD /mnt/boot/initrd.kiwi
-			if [ ! -z "$KIWI_KERNEL" ];then
-				Echo "Import KIWI kernel file: $KIWI_KERNEL"
-				rm -f /mnt/boot/linux*
-				fetchFile $KIWI_KERNEL /mnt/boot/linux.kiwi
-			fi
+			Echo "Import KIWI kernel file: $KIWI_KERNEL"
+			rm -f /mnt/boot/linux*
+			fetchFile $KIWI_KERNEL /mnt/boot/linux.kiwi
 			KIWI_INITRD_PARAMS="IMAGE=local"
 			if [ ! -z "$COMBINED_IMAGE" ]; then
 				SPLIT="COMBINED_IMAGE=$COMBINED_IMAGE"
 				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $SPLIT"
 			fi
+			export PXE_KIWI_INITRD=yes
 		fi
 		if [ ! -z "$UNIONFS_CONFIG" ]; then
 			unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
@@ -893,7 +892,14 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 19) Create system dependant files
+# 19) setup ird/kernel links for union
+#--------------------------------------
+if [ "$LOCAL_BOOT" = "no" ] && [ $systemIntegrity = "clean" ];then
+	setupKernelLinks
+fi
+
+#======================================
+# 20) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	mkdir -p /config
@@ -910,7 +916,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 20) If image is new, notify
+# 21) If image is new, notify
 #--------------------------------------
 runHook prenotify
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
@@ -919,32 +925,32 @@ fi
 runHook postnotify
 
 #======================================
-# 21) send DHCP_RELEASE, reset cache
+# 22) send DHCP_RELEASE, reset cache
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	releaseNetwork
 fi
 
 #======================================
-# 22) copy system dependant files
+# 23) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 23) update system dependant files
+# 24) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
-# 24) umount system filesystems
+# 25) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 25) copy initrd files to image
+# 26) copy initrd files to image
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	if canWrite /mnt;then
@@ -953,11 +959,6 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 		cp /include /mnt
 	fi
 fi
-
-#======================================
-# 26) check if reboot is required
-#--------------------------------------
-kernelCheck /mnt
 
 #======================================
 # 27) kill boot shell
