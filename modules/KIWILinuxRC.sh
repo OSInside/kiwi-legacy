@@ -6143,21 +6143,8 @@ function createPartedInput {
 			"t")
 				ptypex=${pcmds[$index + 2]}
 				partid=${pcmds[$index + 1]}
-				case $ptypex in
-					"82")
-						ptypex=swap
-					;;
-					"8e")
-						ptypex=lvm
-					;;
-					*)
-						unset ptypex
-					;;
-				esac
-				if [ ! -z "$ptypex" ];then
-					cmdq="$cmdq set $partid $ptypex on"
-					partedWrite "$disk" "$cmdq"
-				fi
+				cmdq="$cmdq set $partid type 0x$ptypex"
+				partedWrite "$disk" "$cmdq"
 				cmdq=""
 				;;
 		esac
