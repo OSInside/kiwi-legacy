@@ -1818,7 +1818,7 @@ sub setupBootDisk {
 				if ($bootloader =~ /(sys|ext)linux/) {
 					my $partid = "c";
 					if ($bootloader eq "extlinux" ) {
-						$partid = 83;
+						$partid = "83";
 					}
 					my $syslsize = $this->{vmmbyte} - $syslbootMB - $syszip;
 					@commands = (
@@ -1856,7 +1856,7 @@ sub setupBootDisk {
 				if ($bootloader =~ /(sys|ext)linux/) {
 					my $partid = "c";
 					if ($bootloader eq "extlinux" ) {
-						$partid = 83;
+						$partid = "83";
 					}
 					my $syslsize = $this->{vmmbyte} - $syslbootMB;
 					@commands = (
@@ -1883,7 +1883,7 @@ sub setupBootDisk {
 			if ($bootloader =~ /(sys|ext)linux/) {
 				my $partid = "c";
 				if ($bootloader eq "extlinux" ) {
-					$partid = 83;
+					$partid = "83";
 				}
 				my $lvmsize = $this->{vmmbyte} - $syslbootMB;
 				my $bootpartsize = "+".$syslbootMB."M";
@@ -4417,46 +4417,14 @@ sub getStorageID {
 	# partition. If the call fails the function
 	# returns 0
 	# ---
-	my $this = shift;
-	my $pdev = shift;
-	my $tool = $this->{ptool};
-	my $result;
-	my $status;
-	if (! defined $tool) {
-		$tool = "parted";
-	}
-	SWITCH: for ($tool) {
-		#==========================================
-		# parted
-		#------------------------------------------
-		/^parted/  && do {
-			my $parted = "/usr/sbin/parted -m ";
-			my $disk   = $pdev;
-			if ($pdev =~ /mapper/) {
-				if ($pdev =~ /mapper\/(.*)p(\d+)/) {
-					$disk = "/dev/".$1;
-					$pdev = "/dev/".$1.$2;
-				}
-			} else {
-				if ($pdev =~ /(.*)(\d+)/) {
-					$disk = $1;
-				}
-			}
-			$parted .= '-s '.$disk.' print |';
-			$parted .= 'sed -e "s@^\([0-4]\):@'.$disk.'\1:@" |';
-			$parted .= 'grep ^'.$pdev.':|cut -f2 -d= | cut -f1 -d,';
-			$status = qxx ($parted);
-			$result = $? >> 8;
-			if ((! $status) && ($pdev =~ /loop/)) {
-				$status = qxx ("/usr/sbin/parted -s $pdev mklabel msdos 2>&1");
-				$status = qxx ($parted);
-				$result = $? >> 8;
-			}
-			last SWITCH;
-		};
-	}
+	my $this   = shift;
+	my $device = shift;
+	my $partid = shift;
+	my $status = qxx ("sfdisk --id $device $partid 2>&1");
+	my $result = $? >> 8;
 	if ($result == 0) {
-		return int $status;
+		chomp  $status;
+		return $status;
 	}
 	return 0;
 }
@@ -4501,7 +4469,7 @@ sub setPPCDeviceMap {
 	}
 	if ($loader eq "lilo") {
 		for (my $i=1;$i<=2;$i++) {
-			my $type = $this -> getStorageID ($device.$i);
+			my $type = $this -> getStorageID ($device,$i);
 			if ($type = $search) {
 				$result{prep} = $device.$i;
 			}
@@ -4535,11 +4503,11 @@ sub setDefaultDeviceMap {
 	if ($loader =~ /(sys|ext)linux/) {
 		my $search = "c";
 		if ($loader eq "extlinux" ) {
-			$search = 83;
+			$search = "83";
 		}
 		for (my $i=3;$i>=1;$i--) {
-			my $type = $this -> getStorageID ($device.$i);
-			if ($type == $search) {
+			my $type = $this -> getStorageID ($device,$i);
+			if ($type eq $search) {
 				if ($loader eq "syslinux" ) {
 					$result{fat} = $device.$i;
 				} else {
@@ -4577,11 +4545,11 @@ sub setLoopDeviceMap {
 	if ($loader =~ /(sys|ext)linux/) {
 		my $search = "c";
 		if ($loader eq "extlinux" ) {
-			$search = 83;
+			$search = "83";
 		}
 		for (my $i=3;$i>=1;$i--) {
-			my $type = $this -> getStorageID ("/dev/mapper".$dmap."p$i");
-			if ($type == $search) {
+			my $type = $this -> getStorageID ($device,$i);
+			if ("$type" eq "$search") {
 				if ($loader eq "syslinux") {
 					$result{fat} = "/dev/mapper".$dmap."p$i";
 				} else {
