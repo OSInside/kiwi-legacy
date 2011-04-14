@@ -897,13 +897,6 @@ function setupSUSEInitrd {
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper stop
 		fi
-		if [ $bootLoaderOK = "1" ] && [ $haveVMX = "1" ];then
-			running=$(uname -r)
-			rlinux=vmlinuz-$running
-			rinitrd=initrd-$running
-			ln -s $rlinux  /boot/linux.vmx
-			ln -s $rinitrd /boot/initrd.vmx
-		fi
 		if [ $umountSys -eq 1 ];then
 			umount /sys
 		fi
@@ -1583,7 +1576,7 @@ function setupBootLoaderSyslinux {
 			#--------------------------------------
 			echo "DEFAULT $title"                              >> $conf
 			echo "label $title"                                >> $conf
-			if xenServer $kernel $mountPrefix;then
+			if xenServer $kname $mountPrefix;then
 				systemException \
 					"*** $loader: Xen dom0 boot not implemented ***" \
 				"reboot"
@@ -1616,7 +1609,7 @@ function setupBootLoaderSyslinux {
 			#--------------------------------------
 			title=$(makeLabel "Failsafe -- $title")
 			echo "label $title"                                >> $conf
-			if xenServer $kernel $mountPrefix;then
+			if xenServer $kname $mountPrefix;then
 				systemException \
 					"*** $loader: Xen dom0 boot not implemented ***" \
 				"reboot"
@@ -3781,23 +3774,23 @@ function kernelList {
 			KERNEL_PAIR=$kernel:$initrd
 			KERNEL_NAME[$kcount]=$krunning
 			KERNEL_LIST=$KERNEL_PAIR
+			kcount=$((kcount+1))
 		fi
 	fi
 	#======================================
 	# search for other kernels
 	#--------------------------------------
-	if [ ! -z "$KERNEL_LIST" ];then
-		for i in $prefix/lib/modules/*;do
-			if [ ! -d $i ];then
-				continue
-			fi
-			unset kernel
-			unset initrd
-			kname=`basename $i`
-			if [ "$kname" = $krunning ];then
-				continue
-			fi
-			for name in vmlinux vmlinuz image;do
+	for i in $prefix/lib/modules/*;do
+		if [ ! -d $i ];then
+			continue
+		fi
+		unset kernel
+		unset initrd
+		kname=`basename $i`
+		if [ "$kname" = $krunning ];then
+			continue
+		fi
+		for name in vmlinux vmlinuz image;do
 			for k in $prefix/boot/$name-${i##*/}; do
 				if [ -f $k ];then
 					kernel=${k##*/}
@@ -3805,16 +3798,17 @@ function kernelList {
 					break 2
 				fi
 			done
-			done
-			if [ -z "$kernel" ];then
-				continue
-			fi
-			kcount=$((kcount+1))
+		done
+		if [ ! -z "$kernel" ];then
 			kpair=$kernel:$initrd
 			KERNEL_NAME[$kcount]=$kname
 			KERNEL_LIST=$KERNEL_LIST,$kpair
-		done
-	fi
+			kcount=$((kcount+1))
+		fi
+	done
+	#======================================
+	# what if no kernel was found...
+	#--------------------------------------
 	if [ -z "$KERNEL_LIST" ];then
 		# /.../
 		# the system image doesn't provide the kernel and initrd but
@@ -3832,6 +3826,7 @@ function kernelList {
 			KERNEL_NAME[1]=vmlinux
 		fi
 	fi
+	KERNEL_LIST=$(echo $KERNEL_LIST | sed -e s@^,@@)
 	export KERNEL_LIST
 	export KERNEL_NAME
 	export KERNEL_PAIR
