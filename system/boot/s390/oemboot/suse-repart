@@ -759,7 +759,7 @@ function createBootDeviceData {
 		export bootXMBytes=100
 		export bootpartID=83
 		if [ "$loader" = "syslinux" ];then
-			bootpartID=6
+			bootpartID=c
 		fi
 		#======================================
 		# Store contents in RAM
