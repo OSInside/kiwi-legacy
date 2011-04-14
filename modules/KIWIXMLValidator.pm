@@ -262,6 +262,40 @@ sub __checkDisplaynameValid {
 }
 
 #==========================================
+# __checkEC2IsFsysType
+#------------------------------------------
+sub __checkEC2IsFsysType {
+	# ...
+	# When building an EC2 image we expect the type to be a file system image.
+	# ---
+	my $this = shift;
+	# TODO:
+	# Excluding btrfs and xfs, needs testing first. There are potentisl issues
+	# with both file systems as they require a boot partiotion and our current
+	# setup for EC2 is to not have a boot partition.
+	# Excluding clicfs and squashfs, they appear to be impractical for EC2,
+	# can be enabled if someone complains
+	my @supportedFSTypes = qw /ext2 ext3 ext4 reiserfs/;
+	my @typeNodes = $this->{systemTree}->getElementsByTagName('type');
+	for my $type (@typeNodes) {
+		my $format = $type -> getAttribute('format');
+		if ($format && $format eq 'ec2') {
+			my $imgType = $type -> getAttribute('image');
+			if (! grep /^$imgType$/, @supportedFSTypes) {
+				my $kiwi = $this->{kiwi};
+				my $msg = 'For EC2 image creation the image type must be '
+					. 'one of the following supported file systems: '
+					. "@supportedFSTypes";
+				$kiwi -> error ( $msg );
+				$kiwi -> failed ();
+				return undef;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkEC2Regions
 #------------------------------------------
 sub __checkEC2Regions {
@@ -840,6 +874,9 @@ sub __validateConsistency {
 		return undef;
 	}
 	if (! $this -> __checkDisplaynameValid()) {
+		return undef;
+	}
+	if (! $this -> __checkEC2IsFsysType()) {
 		return undef;
 	}
 	if (! $this -> __checkEC2Regions()) {

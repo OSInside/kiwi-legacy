@@ -301,6 +301,36 @@ sub test_displayName {
 }
 
 #==========================================
+# test_ec2IsFileSys
+#------------------------------------------
+sub test_ec2IsFileSys {
+	# ...
+	# Test that the image type for the EC2 format is a file system image
+	# ---
+	my $this = shift;
+	my @invalidConfigs = $this -> __getInvalidFiles('ec2IsFS');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $kiwi = $this -> {kiwi};
+		my $msg = $kiwi -> getMessage();
+		my $expectedMsg = 'For EC2 image creation the image type must be '
+			. 'one of the following supported file systems: ext2 ext3 '
+			. 'ext4 reiserfs';
+		my @supportedFS = qw /ext2 ext3 ext4 reiserfs/;
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('ec2IsFS');
+	$this -> __verifyValid(@validConfigs);
+}
+
+#==========================================
 # test_ec2Regions
 #------------------------------------------
 sub test_ec2Regions {
@@ -540,7 +570,7 @@ sub test_preferenceUnique {
 		. 'using the "profiles" attribute.';
 		} elsif ($iConfFile =~ /preferenceUniqueInvalid_2.xml/) {
 			$expectedMsg = 'Only one <preferences> element may reference a '
-			. 'given profile. xenFlavour referenced multiple times.';
+			. 'given profile. xenFlavor referenced multiple times.';
 		}
 		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
@@ -603,7 +633,7 @@ sub test_profileReferenceExist {
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'Found reference to profile "';
 		if ($iConfFile =~ /profileReferenceExistInvalid_(1|2).xml/) {
-			$expectedMsg .= 'ec2Flavour';
+			$expectedMsg .= 'vmwFlavor';
 		} elsif ($iConfFile =~ /profileReferenceExistInvalid_(3|4).xml/) {
 			$expectedMsg .= 'ola';
 		}

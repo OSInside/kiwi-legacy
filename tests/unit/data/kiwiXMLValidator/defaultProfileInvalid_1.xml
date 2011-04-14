@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <image schemaversion="5.2" name="suse-11.3-xen-guest">
 	<description type="system">
-		<author>Marcus Schäfer</author>
-		<contact>ms@novell.com</contact>
+		<author>Robert Schweikert</author>
+		<contact>rschweikert@novell.com</contact>
 		<specification>test profiles validation</specification>
 	</description>
 	<profiles>
-		<profile name="xenFlavour" description="VMX with Xen kernel" import="true"/>
-		<profile name="ec2Flavour" description="VMX with default kernel" import="true"/>
+		<profile name="xenFlavor" description="VMX with Xen kernel" import="true"/>
+		<profile name="vmwFlavor" description="VMX with default kernel" import="true"/>
 	</profiles>
 	<preferences>
 		<type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
@@ -25,7 +24,7 @@
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 	</preferences>
-	<preferences profiles="xenFlavour">
+	<preferences profiles="xenFlavor">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.3" bootprofile="xen" bootkernel="xenk">
 			<machine memory="128" domain="domU">
 				<vmdisk controller="ide" id="0" device="/dev/xvda"/>
@@ -33,17 +32,11 @@
 			</machine>
 		</type>
 	</preferences>
-	<preferences profiles="ec2Flavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.3" bootprofile="xen" bootkernel="ec2" format="ec2">
+	<preferences profiles="vmwFlavor">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.3" format="vmdk">
 			<machine memory="128" domain="domU">
-				<vmdisk controller="ide" id="0" device="/dev/xvda"/>
-				<vmnic interface="br0" mac="00:0C:6E:AA:57:2F"/>
+				<vmdisk controller="ide" id="0"/>
 			</machine>
-			<ec2config>
-				<ec2privatekeyfile>Path to EC2 private key file</ec2privatekeyfile>
-				<ec2certfile>Path to EC2 public certificate file</ec2certfile>
-				<ec2accountnr>12345678911</ec2accountnr>
-			</ec2config>
 		</type>
 	</preferences>
 	<users group="root">
@@ -57,15 +50,15 @@
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
-		<package name="xen-tools-domU"/>
-		<package name="xen"/>
 		<opensusePattern name="base"/>
 	</packages>
-	<packages type="image" profiles="xenFlavour">
-		<package name="kernel-xen" replaces="kernel-ec2"/>
+	<packages type="image" profiles="xenFlavor">
+		<package name="kernel-xen" replaces="kernel-default"/>
+		<package name="xen-tools-domU"/>
+		<package name="xen"/>
 	</packages>
-	<packages type="image" profiles="ec2Flavour">
-		<package name="kernel-ec2" replaces="kernel-xen"/>
+	<packages type="image" profiles="vmwFlavor">
+		<package name="kernel-default" replaces="kernel-xen"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
