@@ -142,9 +142,9 @@
     <sect2 id="sec.oem.installation">
       <title>Specializing the OEM install process</title>
       <para>It is possible to specialize the OEM install process by providing
-          shell scripts with the following names in the
-          <filename>root/kiwi-hooks</filename> directory in the configuration
-          tree as overlay files.
+          shell scripts with the following names. For more information how
+          to pack the scripts and make them work in the boot code, see
+          the chapter <xref linkend="sec.hooks"/>.
           <itemizedlist>
             <listitem>
               <para><filename>preHWdetect.sh</filename>

@@ -283,6 +283,78 @@
       corresponding system image doesn’t make sense, though. </para>
   </sect1>
 
+  <sect1 id="sec.hooks">
+	<title>Boot image Hook-Scripts</title>
+	<indexterm>
+		<primary>KIWI</primary>
+		<secondary>hook scripts</secondary>
+	</indexterm>
+	<indexterm>
+		<primary>kiwi-hooks</primary>
+	</indexterm>
+	<para>
+		When booting an image the first time the kiwi boot code runs.
+		While in that boot code there are several places users can
+		hook in custom shell script code to extend the boot workflow
+		according to their needs. The following describes how to setup
+		the hook scripts so that they end up in the kiwi created boot
+		image (initrd). The existence, name and location of hooks
+		depends on the image type and is explained in the chapter
+		describing that image type.
+	</para>
+	<itemizedlist>
+		<listitem>
+			<para>
+				all hook scripts are searched in <filename>/kiwi-hooks</filename>
+				It's therefore important that the scripts are placed in that
+				directory. In order to do that it's best to store all the
+				hook scripts in a tar archive
+
+<screen>
+mkdir kiwi-hooks
+--> place all scripts inside kiwi-hooks
+tar -cf kiwi-hooks.tgz kiwi-hooks/
+</screen>
+
+				The tarball itself must be stored in the image description
+				directory at the same level where your system image
+				XML description (config.XML) resides.
+			</para>
+		</listitem>
+		<listitem>
+			<para>
+				A hook script is called by its name followed by the suffix
+				<filename>.sh</filename>. It's required that your script
+				is stored exactly with that name and suffix inside the archive.
+				The script code itself is handled as inplaced code. This means
+				no extra shell process is started to run the script. According
+                to this the hook script has full access to all variables of the
+				boot environment and it's not required to have the 'x' bit
+                set on the file.
+			</para>
+		</listitem>
+		<listitem>
+			<para>
+				Hook scripts are called in kiwi's boot code only. This means
+				the script has to be part of the boot image created by kiwi.
+				In order to do that you need to place the following statement
+				in your system image config.xml
+<screen>
+&lt;packages type="image"&gt;
+	&lt;archive name="kiwi-hooks.tgz" bootinclude="true"/&gt;
+&lt;/packages&gt;
+</screen>
+				With the attribute bootinclude set to true, kiwi will
+				integrate the kiwi-hooks.tgz tarball into the boot image.
+				Please note if you are using a prebuilt boot image this
+				won't have any effect and you need to build this boot image
+				with the hook scripts in it at least once before you use
+				it as prebuilt boot image again. 
+			</para>
+		</listitem>
+	</itemizedlist>
+  </sect1>
+
   <sect1 id="sec.workflow.bootparameters">
     <title>Boot Parameters</title>
     <indexterm>
