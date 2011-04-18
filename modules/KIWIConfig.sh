@@ -1333,11 +1333,17 @@ function suseStripFirmware {
 	for i in $(find $base -name "*.ko" | xargs modinfo | grep ^firmware);do
 		IFS=$ifs
 		name=$(echo $(echo $i | cut -f2 -d:))
-		if [ -e /lib/firmware/$name ];then
-			bmdir=$(dirname $name)
-			mkdir -p /lib/firmware-required/$bmdir
-			mv /lib/firmware/$name /lib/firmware-required/$bmdir
+		if [ -z "$name" ];then
+			continue
 		fi
+		for match in /lib/firmware/$name /lib/firmware/*/$name;do
+			if [ -e $match ];then
+				match=$(echo $match | sed -e 's@\/lib\/firmware\/@@')
+				bmdir=$(dirname $match)
+				mkdir -p /lib/firmware-required/$bmdir
+				mv /lib/firmware/$match /lib/firmware-required/$bmdir
+			fi
+		done
 	done
 	rm -rf /lib/firmware
 	mv /lib/firmware-required /lib/firmware
