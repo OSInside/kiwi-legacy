@@ -977,6 +977,44 @@ function setupBootLoader {
 			"*** boot loader setup for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+	setupBootLoaderTheme "/config"
+}
+#======================================
+# setupBootLoaderTheme
+#--------------------------------------
+function setupBootLoaderTheme {
+	local destprefix=$1
+	local srcprefix=$2
+	if [ -z "$srcprefix" ];then
+		srcprefix=/mnt
+	fi
+	#======================================
+	# no boot theme set, return
+	#--------------------------------------
+	if [ -z "$kiwi_boottheme" ];then
+		return
+	fi
+	#======================================
+	# prepare paths
+	#--------------------------------------
+	local sysimg_bootsplash=$srcprefix/etc/sysconfig/bootsplash
+	local sysbootsplash=$destprefix/etc/sysconfig/bootsplash
+	mkdir -p $destprefix/etc/sysconfig
+	touch $sysbootsplash
+	#======================================
+	# check for bootsplash config in sysimg
+	#--------------------------------------
+	if [ -f $sysimg_bootsplash ];then
+		cp $sysimg_bootsplash $sysbootsplash
+	fi
+	#======================================
+	# change/create bootsplash config
+	#--------------------------------------
+	if cat $sysbootsplash | grep -q -E "^THEME"; then
+		sed -i "s/^THEME=.*/THEME=\"$kiwi_boottheme\"/" $sysbootsplash
+	else
+		echo "THEME=\"$kiwi_boottheme\"" >> $sysbootsplash
+	fi
 }
 #======================================
 # setupBootLoaderRecovery
