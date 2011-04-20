@@ -6592,24 +6592,14 @@ function pxeSetupSystemHWInfoFile {
 function pxeSetupSystemHWTypeFile {
 	# /.../
 	# collects information about the alias name the
-	# architecture the BIOS version and more and stores
-	# that into a file suffixed by the hardware address of the
-	# network card. Obtaining the BIOS information requires
-	# the posbios tool to be installed in the initrd
+	# architecture and more and stores that into a
+	# file suffixed by the hardware address of the
+	# network card.
 	# ----
 	echo "NCNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
 	echo "CRNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
 	echo "IPADDR=$IPADDR"     >> hwtype.$DHCPCHADDR
 	echo "ARCHITECTURE=$ARCH" >> hwtype.$DHCPCHADDR
-	#========================================
-	# Try to get BIOS data if tools are there
-	#----------------------------------------
-	if [ -f /sbin/posbios ];then
-		HWBIOS=`/sbin/posbios -b`
-		echo "HWBIOS=$HWBIOS" >> hwtype.$DHCPCHADDR
-		HWTYPE=`/sbin/posbios -ms`
-		echo "HWTYPE=$HWTYPE" >> hwtype.$DHCPCHADDR
-	fi
 }
 #======================================
 # pxeSizeToMB

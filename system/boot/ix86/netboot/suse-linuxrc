@@ -145,11 +145,17 @@ if [ $LOCAL_BOOT = "no" ];then
 	if [ ! -z "$NBDROOT" ];then
 		KLIST[0]="NBDROOT=$NBDROOT";
 	fi
+	Echo "Checking for config file..."
 	#======================================
-	# Connection/access check for SERVER
+	# hook: preLoadConfiguration
 	#--------------------------------------
-	Echo "Checking for config file: config.$DHCPCHADDR"
-	fetchFile KIWI/config.$DHCPCHADDR $CONFIG
+	runHook preLoadConfiguration
+	#======================================
+	# Load config.<MAC>
+	#--------------------------------------
+	if [ ! -s $CONFIG ] ; then
+		fetchFile KIWI/config.$DHCPCHADDR $CONFIG
+	fi
 	#======================================
 	# Check alternative config names
 	#--------------------------------------
@@ -174,17 +180,6 @@ if [ $LOCAL_BOOT = "no" ];then
 		searchHardwareMapConfig
 		IMPORTED=1
 	fi
-	#========================================
-	# Compare current IP and IP from config 
-	#----------------------------------------
-	NEWIP=0
-	if [ ! -z "$WORKSTATION_LDAP_IP" ]; then
-		WSNR=`echo $WORKSTATION_LDAP_IP | sed -r -e 's/(^|\.)0*/\1/g'`
-		IPNR=`echo $IPADDR | sed -r -e 's/(^|\.)0*/\1/g'`
-		if [ "$WSNR" != "$IPNR" ];then 
-			NEWIP=1
-		fi
-	fi
 	#======================================
 	# No config found register new client
 	#--------------------------------------
@@ -199,8 +194,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		#======================================
 		# Put files on the boot server
 		#--------------------------------------
-		putFile hwtype.$DHCPCHADDR upload/hwtype.$DHCPCHADDR
-		putFile hwinfo.$DHCPCHADDR upload/hwinfo.$DHCPCHADDR
+		putFile hwtype.$DHCPCHADDR upload/client.$DHCPCHADDR
 		echo
 		Echo "Registered as: $DHCPCHADDR"
 		Echo "Waiting for configuration..."
@@ -227,17 +221,6 @@ if [ $LOCAL_BOOT = "no" ];then
 		done
 	fi
 	#======================================
-	# Config found but DHCP IP setup change
-	#--------------------------------------
-	if [ $NEWIP -eq 1 ];then
-		Echo "Outdated IP address, notify new client setup..."
-		pxeSetupSystemAliasName
-		pxeSetupSystemHWTypeFile
-		putFile hwtype.$DHCPCHADDR upload/hwtype.$DHCPCHADDR
-		echo
-		Echo "Notified: $DHCPCHADDR"
-	fi
-	#======================================
 	# import latest configuration
 	#--------------------------------------
 	if [ $IMPORTED -eq 0 ];then
@@ -256,6 +239,10 @@ if [ $LOCAL_BOOT = "no" ];then
 			eval export \"$i\"
 		done
 	fi
+	#======================================
+	# hook: postLoadConfiguration
+	#--------------------------------------
+	runHook postLoadConfiguration
 fi
 
 #======================================
