@@ -4720,7 +4720,7 @@ function searchHardwareMapHardwareAddress {
 function runHook {
 	HOOK="/kiwi-hooks/$1.sh"
 	if [ -e $HOOK ]; then
-		. $HOOK
+		. $HOOK $@
 	fi
 }
 #======================================
