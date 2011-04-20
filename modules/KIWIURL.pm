@@ -523,12 +523,12 @@ sub openSUSEpath {
 	my $this     = shift;
 	my $module   = shift;
 	my $quiet    = shift;
-	my $browser  = LWP::UserAgent->new;
-	my $location = $main::openSUSE;
-	my @dists    = qw (standard);
-	my @urllist  = ();
 	my $kiwi     = $this->{kiwi};
+	my $browser  = LWP::UserAgent->new;
+	my $uriTable = $main::repoURI;
 	my $origurl  = $module;
+	my %matches  = ();
+	my $FD;
 	#==========================================
 	# allow proxy server from environment
 	#------------------------------------------
@@ -546,23 +546,29 @@ sub openSUSEpath {
 		return undef;
 	}
 	#==========================================
-	# Create urllist for later testing
+	# Create URL list from URI table
 	#------------------------------------------
-	foreach my $dist (@dists) {
-		foreach my $subdir (@main::openSUSE) {
-			my $url1 = $location."/".$subdir."/".$module."/";
-			push @urllist,$url1;
-			if ($url1 !~ /\/$dist/) {
-				my $url2 = $location."/".$subdir."/".$module."/".$dist."/";
-				push @urllist,$url2;
-			}
-		}
+	if (! open $FD, $uriTable) {
+		return undef;
 	}
+	while (my $match =<$FD>) {
+		chomp $match;
+		my @list = split (/\|/,$match);
+		my $repo = $module;
+		my $match= '$repo =~ '.$list[1];
+		eval $match;
+		$matches{$repo} = $list[0];
+	}
+	close $FD;
 	#==========================================
-	# Check url entries in urllist
+	# Check URL entries
 	#------------------------------------------
 	my @responses = ();
-	foreach my $url (@urllist) {
+	foreach my $url (keys %matches) {
+		my $type = $matches{$url};
+		if ($type ne "opensuse") {
+			next;
+		}
 		my $response = $this -> urlResponse ( $browser,$url );
 		if (! $response) {
 			next;
