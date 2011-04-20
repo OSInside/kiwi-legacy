@@ -25,4 +25,16 @@
 	</image>
 </xsl:template>
 
+<!-- remove obsolete usb image type -->
+<xsl:template match="type" mode="conv51to52">
+	<xsl:choose>
+		<xsl:when test="@image!='usb'">
+			<type>
+			<xsl:copy-of select="@*"/>
+			<xsl:apply-templates mode="conv51to52"/>
+			</type>
+		</xsl:when>
+	</xsl:choose>
+</xsl:template>
+
 </xsl:stylesheet>
