@@ -4719,6 +4719,9 @@ function searchHardwareMapHardwareAddress {
 #--------------------------------------
 function runHook {
 	HOOK="/kiwi-hooks/$1.sh"
+	if [ ! -e $HOOK ];then
+		HOOK="/lib/kiwi/hooks/$1.sh"
+	fi
 	if [ -e $HOOK ]; then
 		. $HOOK $@
 	fi
