@@ -28,6 +28,8 @@ export HYBRID_PERSISTENT_PART=4
 export HYBRID_PERSISTENT_DIR=/read-write
 export UTIMER_INFO=/dev/utimer
 export bootLoaderOK=0
+export haveDASD=0
+export haveZFCP=0
 
 #======================================
 # Exports (General)
@@ -3200,20 +3202,32 @@ function searchBusIDBootDevice {
 	# device is set online and the biosBootDevice variable
 	# is set to this device for further processing
 	# ----
-	local haveDASD=0
-	local haveZFCP=0
 	local deviceID=0
 	local dpath=/dev/disk/by-path
+	local ipl_type=$(cat /sys/firmware/ipl/ipl_type)
+	local wwpn
+	local slun
 	#======================================
-	# distinguish between dasd and zfcp
+	# determine device type: dasd or zfcp
 	#--------------------------------------
-	if [ ! -z "$ccwid" ] ;then
-		deviceID=$ccwid
-		haveZFCP=1
-	elif [ ! -z "$busid" ];then
-		deviceID=$busid
-		haveDASD=1
+	if [ -z "$ipl_type" ];then
+		systemException \
+			"Can't find IPL type" \
+		"reboot"
 	fi
+	if [ "$ipl_type" = "fcp" ];then
+		haveZFCP=1
+	elif [ "$ipl_type" = "ccw" ];then
+		haveDASD=1
+	else
+		systemException \
+			"Unknown IPL type: $ipl_type" \
+		"reboot"
+	fi
+	#======================================
+	# store device bus / host id
+	#--------------------------------------
+	deviceID=$(cat /sys/firmware/ipl/device)
 	#======================================
 	# check if we can find the device
 	#--------------------------------------
@@ -3233,9 +3247,11 @@ function searchBusIDBootDevice {
 	# ZFCP
 	#--------------------------------------
 	if [ $haveZFCP -eq 1 ];then
+		wwpn=$(cat /sys/firmware/ipl/wwpn)
+		slun=$(cat /sys/firmware/ipl/lun)
 		zfcp_host_configure $deviceID 1
-		zfcp_disk_configure $deviceID $wwpn $lun 1
-		biosBootDevice="$dpath/ccw-$deviceID-zfcp-$wwpn:$lun"
+		zfcp_disk_configure $deviceID $wwpn $slun 1
+		biosBootDevice="$dpath/ccw-$deviceID-zfcp-$wwpn:$slun"
 	fi
 	#======================================
 	# setup boot device variable
@@ -6994,7 +7010,7 @@ function setupBootPartition {
 # isVirtioDevice
 #--------------------------------------
 function isVirtioDevice {
-	if echo $imageDiskDevice | grep -q vda;then
+	if [ $haveDASD -eq 0 ] && [ $haveZFCP -eq 0 ];then
 		return 0
 	fi
 	return 1
@@ -7003,7 +7019,16 @@ function isVirtioDevice {
 # isDASDDevice
 #--------------------------------------
 function isDASDDevice {
-	if echo $imageDiskDevice | grep -q dasd;then
+	if [ $haveDASD -eq 1 ];then
+		return 0
+	fi
+	return 1
+}
+#======================================
+# isZFCPDevice
+#--------------------------------------
+function isZFCPDevice {
+	if [ $haveZFCP -eq 1 ];then
 		return 0
 	fi
 	return 1
