@@ -3441,21 +3441,6 @@ sub setupBootLoaderConfiguration {
 		print FD "$this->{mbrid}";
 		close FD;
 		$kiwi -> done();
-		my %ccwid;
-		#==========================================
-		# Create disk Bus-ID for online call
-		#------------------------------------------
-		if ($main::targetDevice) {
-			$kiwi -> info ("Saving disk Bus-ID...");
-			%ccwid = $this -> __getCCWID ($main::targetDevice);
-			if ((! $ccwid{busid}) && (! $ccwid{ccwid})) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Can't find Bus-ID for $main::targetDevice");
-				$kiwi -> failed ();
-				return undef;
-			}
-			$kiwi -> done();
-		}
 		#==========================================
 		# Create zipl.conf
 		#------------------------------------------
@@ -3528,14 +3513,7 @@ sub setupBootLoaderConfiguration {
 			print FD "\t"."ramdisk = boot/initrd,0x2000000"."\n";
 		}
 		print FD "\t"."parameters = \"loader=$bloader";
-		if ($ccwid{busid}) {
-			print FD " busid=$ccwid{busid} $cmdline\""."\n";
-		} elsif ($ccwid{ccwid}) {
-			print FD " ccwid=$ccwid{ccwid} wwpn=$ccwid{wwpn} lun=$ccwid{lun}";
-			print FD " $cmdline\""."\n";
-		} else {
-			print FD " $cmdline\""."\n";
-		}
+		print FD " $cmdline\""."\n";
 		#==========================================
 		# Failsafe boot
 		#------------------------------------------
@@ -3555,14 +3533,7 @@ sub setupBootLoaderConfiguration {
 			print FD "\t"."ramdisk = boot/initrd,0x2000000"."\n";
 		}
 		print FD "\t"."parameters = \"x11failsafe loader=$bloader";
-		if ($ccwid{busid}) {
-			print FD " busid=$ccwid{busid} $cmdline\""."\n";
-		} elsif ($ccwid{ccwid}) {
-			print FD " ccwid=$ccwid{ccwid} wwpn=$ccwid{wwpn} lun=$ccwid{lun}";
-			print FD " $cmdline\""."\n";
-		} else {
-			print FD " $cmdline\""."\n";
-		}
+		print FD " $cmdline\""."\n";
 		close FD;
 		$kiwi -> done();
 	}
@@ -5181,59 +5152,6 @@ sub __expandFS {
 		$kiwi -> done();
 	}
 	return $this;
-}
-
-#==========================================
-# __getCCWID
-#------------------------------------------
-sub __getCCWID {
-	# ...
-	# find the ccwid and wwpn + lun if a zfcp device
-	# is specified. The function will turn the device node
-	# name into a by-path name if necessary and matches
-	# the values from the by-path device naming convention
-	# for s390 DASD and ZFCP devices. The function will
-	# return an empty hash if no such device exists
-	# ----
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $device = shift;
-	my $bypath = '\/dev\/disk\/by-path';
-	my %result = ();
-	#==========================================
-	# check if device exists
-	#------------------------------------------
-	if (! -e $device) {
-		$kiwi -> loginfo ("getCCWID: Device $device doesn't exist\n");
-		return %result;
-	}
-	#==========================================
-	# turn device name into by-path name
-	#------------------------------------------
-	if ($device !~ /$bypath\/.*/) {
-		my @paths = glob ("/dev/disk/by-path/*");
-		foreach my $path (@paths) {
-			my $ndev = readlink ($path);
-			$ndev = "/dev/".basename $ndev;
-			if ($ndev eq $device) {
-				$device = $path; last;
-			}
-		}
-	}
-	#==========================================
-	# match values
-	#------------------------------------------
-	if ($device =~ /$bypath\/ccw-([^-]+)$/) {
-		$result{busid}=$1;
-	} elsif ($device =~ /$bypath\/ccw-(.*)-zfcp-(.*):([^-]+)$/) {
-		$result{ccwid} = $1;
-		$result{wwpn}  = $2;
-		$result{lun}   = $3;
-	} else {
-		$kiwi -> loginfo ("Invalid disk device specified: $device\n");
-		return %result;
-	}
-	return %result;
 }
 
 1;

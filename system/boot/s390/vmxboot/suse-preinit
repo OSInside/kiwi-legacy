@@ -57,6 +57,9 @@ fi
 if isDASDDevice;then
 	runPreinitServices dasd
 fi
+if isZFCPDevice;then
+	runPreinitServices zfcp
+fi
 
 #======================================
 # 7) create /etc/ImagePackages
