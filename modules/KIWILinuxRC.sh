@@ -28,12 +28,12 @@ export HYBRID_PERSISTENT_PART=4
 export HYBRID_PERSISTENT_DIR=/read-write
 export UTIMER_INFO=/dev/utimer
 export bootLoaderOK=0
-export haveDASD=0
-export haveZFCP=0
 
 #======================================
 # Exports (General)
 #--------------------------------------
+test -z "$haveDASD"           && export haveDASD=0
+test -z "$haveZFCP"           && export haveZFCP=0
 test -z "$ELOG_CONSOLE"       && export ELOG_CONSOLE=/dev/tty3
 test -z "$ELOG_BOOTSHELL"     && export ELOG_BOOTSHELL=/dev/tty2
 test -z "$ELOG_EXCEPTION"     && export ELOG_EXCEPTION=/dev/tty1
