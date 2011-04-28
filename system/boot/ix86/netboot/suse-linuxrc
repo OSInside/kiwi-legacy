@@ -143,7 +143,13 @@ if [ $LOCAL_BOOT = "no" ];then
 	#--------------------------------------
 	unset ALLOW_CMDLINE_OVERWRITE
 	if [ ! -z "$NBDROOT" ];then
-		KLIST[0]="NBDROOT=$NBDROOT";
+		KLIST[0]="NBDROOT=$NBDROOT"
+	fi
+	if [ ! -z "$NFSROOT" ];then
+		KLIST[1]="NFSROOT=$NFSROOT"
+	fi
+	if [ ! -z "$AOEROOT" ];then
+		KLIST[2]="AOEROOT=$AOEROOT"
 	fi
 	Echo "Checking for config file..."
 	#======================================
