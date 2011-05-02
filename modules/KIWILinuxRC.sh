@@ -6485,33 +6485,6 @@ function restoreLVMPhysicalVolumes {
 	done
 }
 #======================================
-# pxeNotifyNewImage
-#--------------------------------------
-function pxeNotifyNewImage {
-	# /.../
-	# upload image name and version information to
-	# the pxe boot server
-	# ----
-	local count=0
-	local field=0
-	IFS="," ; for i in $IMAGE;do
-		count=$(($count + 1))
-		field=0
-		IFS=";" ; for n in $i;do
-			case $field in
-				0) field=1 ;;
-				1) imageName=$n   ; field=2 ;;
-				2) imageVersion=$n; field=3
-			esac
-		done
-		Echo "Notify of new image: image/$imageName"
-		echo "image/$imageName" > bootversion.$DHCPCHADDR
-		echo "$imageVersion"   >> bootversion.$DHCPCHADDR
-		putFile bootversion.$DHCPCHADDR upload/bootversion.$DHCPCHADDR
-		rm -f bootversion.$DHCPCHADDR
-	done
-}
-#======================================
 # pxeCheckServer
 #--------------------------------------
 function pxeCheckServer {
