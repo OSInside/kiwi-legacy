@@ -909,41 +909,32 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 21) If image is new, notify
-#--------------------------------------
-runHook prenotify
-if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
-	pxeNotifyNewImage
-fi
-runHook postnotify
-
-#======================================
-# 22) send DHCP_RELEASE, reset cache
+# 21) send DHCP_RELEASE, reset cache
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	releaseNetwork
 fi
 
 #======================================
-# 23) copy system dependant files
+# 22) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 24) update system dependant files
+# 23) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
-# 25) umount system filesystems
+# 24) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 26) copy initrd files to image
+# 25) copy initrd files to image
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	if canWrite /mnt;then
@@ -954,18 +945,18 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 27) kill boot shell
+# 26) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 28) Activate new root
+# 27) Activate new root
 #--------------------------------------
 runHook preactivate
 activateImage
 
 #======================================
-# 29) Unmount initrd / system init
+# 28) Unmount initrd / system init
 #--------------------------------------
 bootImage $@
