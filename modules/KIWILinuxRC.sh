@@ -2547,9 +2547,7 @@ function kernelCheck {
 	#--------------------------------------
 	if [ ! -f /sbin/kexec ];then
 		Echo "Reboot triggered in 5 sec..."
-		export REBOOT_IMAGE="yes"
-		sleep 5
-		return
+		sleep 5 ; /sbin/reboot -f -i
 	fi
 	#======================================
 	# trigger reboot using kexec
@@ -2569,9 +2567,7 @@ function kernelCheck {
 		if [ ! -f $prefix/boot/$kernel ] || [ ! -f $prefix/boot/$initrd ];then
 			Echo "Can't find $kernel / $initrd in system image"
 			Echo "Reboot triggered in 5 sec..."
-			export REBOOT_IMAGE="yes"
-			sleep 5
-			return
+			sleep 5 ; /sbin/reboot -f -i
 		fi
 		#======================================
 		# extract bootloader cmdline params
@@ -2585,9 +2581,7 @@ function kernelCheck {
 		if [ ! $? = 0 ];then
 			Echo "Failed to load kernel"
 			Echo "Reboot triggered in 5 sec..."
-			export REBOOT_IMAGE="yes"
-			sleep 5
-			return
+			sleep 5 ; /sbin/reboot -f -i
 		fi
 		#======================================
 		# go for gold
