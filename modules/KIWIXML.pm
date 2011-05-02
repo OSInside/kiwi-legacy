@@ -4765,6 +4765,7 @@ sub __populateTypeInfo {
 	my $urlhd  = new KIWIURL ($kiwi);
 	my @node   = $this->{optionsNodeList} -> get_nodelist();
 	my @result = ();
+	my $first  = 1;
 	#==========================================
 	# select types
 	#------------------------------------------
@@ -4787,8 +4788,10 @@ sub __populateTypeInfo {
 			#==========================================
 			# meta data
 			#------------------------------------------
+			$record{first}    = $first;
 			$record{node}     = $node;
 			$record{assigned} = \@assigned;
+			$first = 0;
 			#==========================================
 			# type attributes
 			#------------------------------------------
@@ -4936,7 +4939,7 @@ sub __populateImageTypeAndNode {
 	#------------------------------------------
 	if (! $typeinfo) {
 		# /.../
-		# if not typeinfo hash was populated we use the first type
+		# if no typeinfo hash was populated we use the first type
 		# node listed in the description as the used type.
 		# ----
 		$this->{typeNode} = $this->{optionsNodeList}
@@ -4953,13 +4956,17 @@ sub __populateImageTypeAndNode {
 		# in the list
 		# ----
 		my @types = keys %{$typeinfo};
+		my $first;
 		foreach my $type (@types) {
 			if ($typeinfo->{$type}{primary} eq "true") {
 				$select = $type; last;
 			}
+			if ($typeinfo->{$type}{first} == 1) {
+				$first = $type;
+			}
 		}
 		if (! $select) {
-			$select = $types[0];
+			$select = $first;
 		}
 	} else {
 		# /.../
