@@ -2734,7 +2734,7 @@ sub createInstSource {
 	#==========================================
 	# Initialize installation source tree
 	#------------------------------------------
-	my $root = $xml -> createTmpDirectory ( undef, $RootTree );
+	my $root = $locator -> createTmpDirectory ( undef, $RootTree );
 	if (! defined $root) {
 		$kiwi -> error ("Couldn't create instsource root");
 		$kiwi -> failed ();

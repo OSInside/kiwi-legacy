@@ -3420,61 +3420,6 @@ sub resolveArchitectur {
 }
 
 #==========================================
-# createTmpDirectory
-#------------------------------------------
-sub createTmpDirectory {
-	my $this          = shift;
-	my $useRoot       = shift;
-	my $selfRoot      = shift;
-	my $rootError     = 1;
-	my $root;
-	my $code;
-	my $kiwi = $this->{kiwi};
-	if (! defined $useRoot) {
-		if (! defined $selfRoot) {
-			$root = qxx (" mktemp -q -d /tmp/kiwi.XXXXXX ");
-			$code = $? >> 8;
-			if ($code == 0) {
-				$rootError = 0;
-			}
-			chomp $root;
-		} else {
-			$root = $selfRoot;
-			rmdir $root;
-			if ( -e $root && -d $root && $main::ForceNewRoot ) {
-				$kiwi -> info ("Removing old root directory '$root'");
-				if (-e $root."/base-system") {
-					$kiwi -> failed();
-					$kiwi -> info  ("Mount point /base-system exists");
-					$kiwi -> failed();
-					return undef;
-				}
-				qxx ("rm -R $root");
-				$kiwi -> done();
-			}
-			if (mkdir $root) {
-				$rootError = 0;
-			}
-		}
-	} else {
-		if (-d $useRoot) { 
-			$root = $useRoot;
-			$rootError = 0;
-		}
-	}
-	if ( $rootError ) {
-		if ($kiwi -> trace()) {
-			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
-		}
-		return undef;
-	}
-	if ( $rootError ) {
-		return undef;
-	}
-	return $root;
-}
-
-#==========================================
 # getInstSourceFile
 #------------------------------------------
 sub getInstSourceFile {

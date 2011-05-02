@@ -23,11 +23,12 @@ use Carp qw (cluck);
 use File::Glob ':glob';
 use File::Find;
 use FileHandle;
-use KIWIURL;
+use KIWIConfigure;
+use KIWILocator;
 use KIWILog;
 use KIWIManager;
-use KIWIConfigure;
 use KIWIQX;
+use KIWIURL;
 
 #==========================================
 # Constructor
@@ -190,7 +191,8 @@ sub new {
 	#==========================================
 	# Create root directory
 	#------------------------------------------
-	my $root = $xml -> createTmpDirectory (
+	my $locator = new KIWILocator ($this -> {kiwi});
+	my $root = $locator -> createTmpDirectory (
 		$useRoot,$selfRoot
 	);
 	if ( ! defined $root ) {
