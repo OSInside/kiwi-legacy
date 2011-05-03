@@ -2538,10 +2538,20 @@ function kernelCheck {
 			break
 		fi
 	done
-	if [ $kreboot = 0 ];then
-		return
+	#======================================
+	# check for forced reboot
+	#--------------------------------------
+	if [ ! -z "$FORCE_KEXEC" ];then
+		kreboot=2
 	fi
-	Echo "Kernel versions do not match..."
+	#======================================
+	# evaluate kreboot condition
+	#--------------------------------------
+	case $kreboot in
+		1) Echo "Kernel versions do not match..." ;;
+		2) Echo "kexec based reboot forced..." ;;
+		0) return ;;
+	esac
 	#======================================
 	# trigger reboot if kexec doesn't exist
 	#--------------------------------------
