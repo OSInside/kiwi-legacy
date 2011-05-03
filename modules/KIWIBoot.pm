@@ -3506,11 +3506,11 @@ sub setupBootLoaderConfiguration {
 		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 			print FD "\t"."image   = boot/linux.vmx"."\n";
 			print FD "\t"."target  = boot/zipl"."\n";
-			print FD "\t"."ramdisk = boot/initrd.vmx,0x2000000"."\n";
+			print FD "\t"."ramdisk = boot/initrd.vmx,0x4000000"."\n";
 		} else {
 			print FD "\t"."image   = boot/linux"."\n";
 			print FD "\t"."target  = boot/zipl"."\n";
-			print FD "\t"."ramdisk = boot/initrd,0x2000000"."\n";
+			print FD "\t"."ramdisk = boot/initrd,0x4000000"."\n";
 		}
 		print FD "\t"."parameters = \"loader=$bloader";
 		print FD " $cmdline\""."\n";
@@ -3526,11 +3526,11 @@ sub setupBootLoaderConfiguration {
 		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 			print FD "\t"."image   = boot/linux.vmx"."\n";
 			print FD "\t"."target  = boot/zipl"."\n";
-			print FD "\t"."ramdisk = boot/initrd.vmx,0x2000000"."\n";
+			print FD "\t"."ramdisk = boot/initrd.vmx,0x4000000"."\n";
 		} else {
 			print FD "\t"."image   = boot/linux"."\n";
 			print FD "\t"."target  = boot/zipl"."\n";
-			print FD "\t"."ramdisk = boot/initrd,0x2000000"."\n";
+			print FD "\t"."ramdisk = boot/initrd,0x4000000"."\n";
 		}
 		print FD "\t"."parameters = \"x11failsafe loader=$bloader";
 		print FD " $cmdline\""."\n";
@@ -3848,16 +3848,20 @@ sub installBootLoader {
 	if ($loader eq "zipl") {
 		$kiwi -> info ("Installing zipl on device: $diskname");
 		my $bootdev;
-		my @geometry;
+		my $offset;
 		my $haveRealDevice = 0;
 		if ($diskname !~ /\/dev\//) {
 			#==========================================
-			# detect disk geometry of disk image file
+			# clean loop maps
 			#------------------------------------------
-			@geometry = $this -> diskGeometry ($diskname);
-			if (! @geometry) {
+			$this -> cleanLoop ();
+			#==========================================
+			# detect disk offset of disk image file
+			#------------------------------------------
+			$offset = $this -> diskOffset ($diskname);
+			if (! $offset) {
 				$kiwi -> failed ();
-				$kiwi -> error  ("Failed to detect disk geometry");
+				$kiwi -> error  ("Failed to detect disk offset");
 				$kiwi -> failed ();
 				return undef;
 			}
@@ -3872,7 +3876,18 @@ sub installBootLoader {
 				$this -> cleanLoop ();
 				return undef;
 			}
-			$bootdev = $this->{bindloop}.$geometry[2];
+			#==========================================
+			# find boot partition
+			#------------------------------------------
+			$bootdev = $this->{bindloop}."2";
+			if (! -e $bootdev) {
+				$bootdev = $this->{bindloop}."1";
+			} else {
+				my $type = qxx ("blkid $bootdev -s TYPE -o value");
+				if ($type =~ /LVM/) {
+					$bootdev = $this->{bindloop}."1";
+				}
+			}
 			if (! -e $bootdev) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Can't find loop map: $bootdev");
@@ -3881,6 +3896,9 @@ sub installBootLoader {
 				return undef;
 			}
 		} else {
+			#==========================================
+			# find boot partition
+			#------------------------------------------
 			$bootdev = $diskname."2";
 			if (! -e $bootdev) {
 				$bootdev = $diskname."1";
@@ -3927,13 +3945,18 @@ sub installBootLoader {
 				$this -> cleanLoop ();
 				return undef;
 			}
+			$kiwi -> loginfo ("zipl.conf target values:\n");
 			foreach my $line (@data) {
 				print FD $line;
 				if ($line =~ /^:menu/) {
+					$kiwi -> loginfo ("targetbase = $this->{loop}\n");
+					$kiwi -> loginfo ("targetbase = SCSI\n");
+					$kiwi -> loginfo ("targetblocksize = 512\n");
+					$kiwi -> loginfo ("targetoffset = $offset\n");
 					print FD "\t"."targetbase = $this->{loop}"."\n";
 					print FD "\t"."targettype = SCSI"."\n";
 					print FD "\t"."targetblocksize = 512"."\n";
-					print FD "\t"."targetoffset = $geometry[1]"."\n";
+					print FD "\t"."targetoffset = $offset"."\n";
 				}
 			}
 			close FD;
@@ -4952,39 +4975,29 @@ sub addBootNext {
 }
 
 #==========================================
-# diskGeometry
+# diskOffset
 #------------------------------------------
-sub diskGeometry {
+sub diskOffset {
 	# ...
-	# find disk geometry: CYLINDERS,HEADS,SECTORS and
-	# also the start sector of the boot partition which
-	# is in kiwi always the last partition in the table
+	# find the offset to the start of the first partition
 	# ---
 	my $this = shift;
 	my $disk = shift;
-	my $bootid = 0;
-	my $geometry;
-	my $bootsector;
-	my $bios  = qx (parted $disk unit cyl print | grep BIOS 2>&1);
+	my $offset;
 	my @table = qx (parted -m $disk unit s print 2>&1);
-	if ($bios =~ /geometry: (.*?)\./) {
-		$geometry = $1;
-	} else {
-		return undef;
-	}
 	chomp @table;
 	foreach my $entry (@table) {
 		if ($entry =~ /^[1-4]:/) {
 			my @items = split (/:/,$entry);
-			$bootsector = $items[1];
-			chop $bootsector;
-			$bootid++;
+			$offset = $items[1];
+			chop $offset;
+			last;
 		}
 	}
-	if (! $bootsector) {
+	if (! $offset) {
 		return undef;
 	}
-	return ($geometry,$bootsector,$bootid);
+	return $offset;
 }
 
 #==========================================
