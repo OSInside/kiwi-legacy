@@ -5053,7 +5053,7 @@ function getDiskID {
 		echo $device
 		return
 	fi
-	for i in /dev/disk/by-path/*;do
+	for i in /dev/disk/by-id/*;do
 		if [ -z "$i" ];then
 			continue
 		fi
