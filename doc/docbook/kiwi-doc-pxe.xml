@@ -466,6 +466,32 @@ RAID=1;/dev/sda;/dev/sdb
                 >/dev/hda</filename>. </para>
           </listitem>
         </varlistentry>
+		<varlistentry>
+		  <term><varname>REBOOT_IMAGE</varname></term>
+          <listitem>
+            <para>If set to a non-empty string, this will reboot the
+			  system after the initial deployment process is done.
+              This means before the system init process is activated
+              the system is rebooted. If the machine's default boot
+              setup is to boot via PXE it will again boot from the
+			  network.
+            </para>
+          </listitem>
+        </varlistentry>
+		<varlistentry>
+          <term><varname>FORCE_KEXEC</varname></term>
+          <listitem>
+            <para>During the initial deployment process kiwi checks
+              if the running kernel is the same as the kernel installed
+              via the system image. If there is a mismatch kiwi activates
+              the installed kernel by calling kexec. This is mostly the
+              same as to perform a reboot but without the need of the
+              BIOS or any bootloader. If FORCE_KEXEC is set to a non-empty
+              string kiwi will also perform kexec if the kernel versions
+              matches.
+            </para>
+          </listitem>
+        </varlistentry>
         <varlistentry>
           <term><varname>RELOAD_IMAGE</varname></term>
           <listitem>
