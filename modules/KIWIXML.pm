@@ -4900,13 +4900,16 @@ sub __populateProfiledTypeInfo {
 	#------------------------------------------
 	foreach my $record (@{$typeList}) {
 		my $found = 0;
+		my $first = 1;
 		foreach my $p (@{$record->{assigned}}) {
 			if ($select{$p}) {
 				$found = 1; last;
 			}
 		}
 		next if ! $found;
+		$record->{first} = $first;
 		$result{$record->{type}} = $record;
+		$first = 0;
 	}
 	#==========================================
 	# store types in typeInfo hash
