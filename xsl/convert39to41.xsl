@@ -104,19 +104,10 @@
             </type>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:choose>
-            <xsl:when test="@image">
-              <xsl:copy-of select="current()"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:element name="type">
-                    <xsl:attribute name="image">
-                        <xsl:value-of select="current()"/>
-                    </xsl:attribute>
-                    <xsl:copy-of select="@*"/>
-                </xsl:element>
-            </xsl:otherwise>
-          </xsl:choose>
+            <type>
+                <xsl:call-template name="insertcomprops" mode="conv39to41"/>
+                <xsl:apply-templates select="*"/>
+            </type>
         </xsl:otherwise>
     </xsl:choose>
 </xsl:template>
