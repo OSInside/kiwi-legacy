@@ -17,17 +17,26 @@
 	</xsl:copy>
 </xsl:template>
 
-<!-- update schema version -->
+<!-- version update -->
 <para xmlns="http://docbook.org/ns/docbook">
 	Changed attribute <tag class="attribute">schemaversion</tag>
 	to <tag class="attribute">schemaversion</tag> from
 	<literal>3.5</literal> to <literal>3.7</literal>.
 </para>
 <xsl:template match="image" mode="conv35to37">
-	<image schemaversion="3.7">
-		<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
-		<xsl:apply-templates mode="conv35to37"/>
-	</image>
+	<xsl:choose>
+		<!-- nothing to do if already at 3.7 -->
+		<xsl:when test="@schemaversion > 3.5">
+			<xsl:copy-of select="/"/>
+		</xsl:when>
+		<!-- otherwise apply templates -->
+		<xsl:otherwise>
+			<image schemaversion="3.7">
+				<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
+				<xsl:apply-templates mode="conv35to37"/>
+			</image>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 <!-- update bool types -->

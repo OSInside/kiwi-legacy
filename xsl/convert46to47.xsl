@@ -13,17 +13,26 @@
 	</xsl:copy>  
 </xsl:template>
 
-<!-- update schema version -->
+<!-- version update -->
 <para xmlns="http://docbook.org/ns/docbook">
 	Changed attribute <tag class="attribute">schemaversion</tag>
 	to <tag class="attribute">schemaversion</tag> from
 	<literal>4.6</literal> to <literal>4.7</literal>.
 </para>
 <xsl:template match="image" mode="conv46to47">
-	<image schemaversion="4.7">
-		<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
-		<xsl:apply-templates mode="conv46to47"/>
-	</image>
+	<xsl:choose>
+		<!-- nothing to do if already at 4.7 -->
+		<xsl:when test="@schemaversion > 4.6">
+			<xsl:copy-of select="/"/>
+		</xsl:when>
+		<!-- otherwise apply templates -->
+		<xsl:otherwise>
+			<image schemaversion="4.7">
+				<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
+				<xsl:apply-templates mode="conv46to47"/>
+			</image>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 <!-- turn vmwareconfig into machine, ignore usb attribute -->

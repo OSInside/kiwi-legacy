@@ -17,17 +17,26 @@
 	</xsl:copy>  
 </xsl:template>
 
-<!-- update schema version -->
+<!-- version update -->
 <para xmlns="http://docbook.org/ns/docbook">
 	Changed attribute <tag class="attribute">schemaversion</tag>
 	to <tag class="attribute">schemaversion</tag> from
 	<literal>4.8</literal> to <literal>4.9</literal>.
 </para>
 <xsl:template match="image" mode="conv48to49">
-	<image schemaversion="4.9">
-		<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
-		<xsl:apply-templates mode="conv48to49"/>
-	</image>
+	<xsl:choose>
+		<!-- nothing to do if already at 4.9 -->
+		<xsl:when test="@schemaversion > 4.8">
+			<xsl:copy-of select="/"/>
+		</xsl:when>
+		<!-- otherwise apply templates -->
+		<xsl:otherwise>
+			<image schemaversion="4.9">
+				<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
+				<xsl:apply-templates mode="conv48to49"/>
+			</image>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 <!-- transform oem-dumphalt to oem-bootwait -->

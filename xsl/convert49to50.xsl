@@ -11,17 +11,26 @@
 	</xsl:copy>  
 </xsl:template>
 
-<!-- update schema version -->
+<!-- version update -->
 <para xmlns="http://docbook.org/ns/docbook">
 	Changed attribute <tag class="attribute">schemaversion</tag>
 	to <tag class="attribute">schemaversion</tag> from
 	<literal>4.9</literal> to <literal>5.0</literal>.
 </para>
 <xsl:template match="image" mode="conv49to50">
-	<image schemaversion="5.0">
-		<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
-		<xsl:apply-templates  mode="conv49to50"/>  
-	</image>
+	<xsl:choose>
+		<!-- nothing to do if already at 5.0 -->
+		<xsl:when test="@schemaversion > 4.9">
+			<xsl:copy-of select="/"/>
+		</xsl:when>
+		<!-- otherwise apply templates -->
+		<xsl:otherwise>
+			<image schemaversion="5.0">
+				<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
+				<xsl:apply-templates  mode="conv49to50"/>  
+			</image>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 <!-- convert xen image type to vmx -->
