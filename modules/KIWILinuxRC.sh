@@ -958,7 +958,7 @@ function setupBootLoader {
 		para="$para \"$1\""
 		shift
 	done
-	if [ ! -z "kiwi_bootloader" ];then
+	if [ ! -z "$kiwi_bootloader" ];then
 		loader=$kiwi_bootloader
 	fi
 	if [ -z "$loader" ];then
@@ -7037,12 +7037,16 @@ function setupConsole {
 	local itab=/etc/inittab
 	local stty=/etc/securetty
 	if [ -e /sys/class/tty/xvc0 ];then
-		echo "X0:12345:respawn:/sbin/mingetty --noclear xvc0 linux" >> $itab
-		echo xvc0 >> $stty
+		if ! grep -q xvc0 $itab;then
+			echo "X0:12345:respawn:/sbin/mingetty --noclear xvc0 linux" >> $itab
+			echo xvc0 >> $stty
+		fi
 	fi
 	if [ -e /sys/class/tty/hvc0 ];then
-		echo "H0:12345:respawn:/sbin/mingetty --noclear hvc0 linux" >> $itab
-		echo hvc0 >> $stty
+		if ! grep -q hvc0 $itab;then
+			echo "H0:12345:respawn:/sbin/mingetty --noclear hvc0 linux" >> $itab
+			echo hvc0 >> $stty
+		fi
 	fi
 }
 #======================================
