@@ -11,7 +11,7 @@
     </xsl:copy>  
 </xsl:template>
 
-<!-- update schema version and modify type element -->
+<!-- version update -->
 <para xmlns="http://docbook.org/ns/docbook">
     Changed attribute <tag class="attribute">schemaversion</tag>
     to <tag class="attribute">schemaversion</tag> from
@@ -22,10 +22,19 @@
     children of the <tag class="element">type</tag> element.
 </para>
 <xsl:template match="image" mode="conv39to41">
-    <image schemaversion="4.1">
-    <xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
-    <xsl:apply-templates  mode="conv39to41"/>  
-    </image>
+	<xsl:choose>
+		<!-- nothing to do if already at 4.1 -->
+		<xsl:when test="@schemaversion > 3.9">
+			<xsl:copy-of select="/"/>
+		</xsl:when>
+		<!-- otherwise apply templates -->
+		<xsl:otherwise>
+			<image schemaversion="4.1">
+				<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
+				<xsl:apply-templates  mode="conv39to41"/>  
+			</image>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 <xsl:template match="preferences" mode="conv39to41">

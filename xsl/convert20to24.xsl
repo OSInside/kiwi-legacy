@@ -13,16 +13,25 @@
 	</xsl:copy>
 </xsl:template>
 
-<!-- update schama version -->
+<!-- version update -->
 <para xmlns="http://docbook.org/ns/docbook">
 	Changed attribute <tag class="attribute">schemeversion</tag>
 	from <literal>2.0</literal> to <literal>2.4</literal>. 
 </para>
 <xsl:template match="image" mode="conv20to24">
-	<image schemeversion="2.4">
-		<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
-		<xsl:apply-templates mode="conv20to24"/>
-	</image>
+	<xsl:choose>
+		<!-- nothing to do if already at 2.4 -->
+		<xsl:when test="@schemeversion > 2.0 or @schemaversion > 2.0">
+			<xsl:copy-of select="/"/>
+		</xsl:when>
+		<!-- otherwise apply templates -->
+		<xsl:otherwise>
+			<image schemeversion="2.4">
+				<xsl:copy-of select="@*[local-name() != 'schemeversion']"/>
+				<xsl:apply-templates mode="conv20to24"/>
+			</image>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 <!-- remove attributes and add info -->

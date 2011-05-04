@@ -17,7 +17,7 @@
 <xsl:variable name="ec2cert" select="/image/preferences/type/@ec2certfile"/>
 <xsl:variable name="ec2acct" select="/image/preferences/type/@ec2accountnr"/>
 
-<!-- update schema version and create new element ec2config -->
+<!-- version update -->
 <para xmlns="http://docbook.org/ns/docbook">
     Changed attribute <tag class="attribute">schemaversion</tag>
     to <tag class="attribute">schemaversion</tag> from
@@ -27,13 +27,20 @@
     <tag class="element">ec2config</tag> element is a child of the
     <tag class="element">type</tag> element.
 </para>
-
 <xsl:template match="image" mode="conv41to42">
-    <image schemaversion="4.2">
-        <xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
-        <xsl:apply-templates mode="conv41to42"/>
-        
-    </image>
+	<xsl:choose>
+		<!-- nothing to do if already at 4.2 -->
+		<xsl:when test="@schemaversion > 4.1">
+			<xsl:copy-of select="/"/>
+		</xsl:when>
+		<!-- otherwise apply templates -->
+		<xsl:otherwise>
+			<image schemaversion="4.2">
+				<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
+				<xsl:apply-templates mode="conv41to42"/>
+			</image>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 <xsl:template match="preferences" mode="conv41to42">

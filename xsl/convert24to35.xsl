@@ -13,17 +13,26 @@
 	</xsl:copy>
 </xsl:template>
 
-<!-- update schema version -->
+<!-- version update -->
 <para xmlns="http://docbook.org/ns/docbook">
 	Changed attribute <tag class="attribute">schemeversion</tag>
 	to <tag class="attribute">schemaversion</tag> from
 	<literal>2.4</literal> to <literal>3.5</literal>.
 </para>
 <xsl:template match="image" mode="conv24to35">
-	<image schemaversion="3.5">
-		<xsl:copy-of select="@*[local-name() != 'schemeversion']"/>
-		<xsl:apply-templates mode="conv24to35"/>
-	</image>
+	<xsl:choose>
+		<!-- nothing to do if already at 3.5 -->
+		<xsl:when test="@schemaversion > 2.4 or @schemeversion > 2.4">
+			<xsl:copy-of select="/"/>
+		</xsl:when>
+		<!-- otherwise apply templates -->
+		<xsl:otherwise>
+			<image schemaversion="3.5">
+				<xsl:copy-of select="@*[local-name() != 'schemeversion']"/>
+				<xsl:apply-templates mode="conv24to35"/>
+			</image>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 <!-- remove compressed element -->

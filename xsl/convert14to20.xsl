@@ -19,10 +19,19 @@
 	from <literal>1.4</literal> to <literal>2.0</literal>. 
 </para>
 <xsl:template match="image" mode="conv14to20">
-	<image schemeversion="2.0">
-		<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
-		<xsl:apply-templates mode="conv14to20"/>
-	</image>
+	<xsl:choose>
+		<!-- nothing to do if already at 2.0 -->
+		<xsl:when test="@schemeversion > 1.4 or @schemaversion > 1.4">
+			<xsl:copy-of select="/"/>
+		</xsl:when>
+		<!-- otherwise apply templates -->
+		<xsl:otherwise>
+			<image schemeversion="2.0">
+				<xsl:copy-of select="@*[local-name() != 'schemeversion']"/>
+				<xsl:apply-templates mode="conv14to20"/>
+			</image>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 <!-- split section update -->
