@@ -911,6 +911,7 @@ fi
 #======================================
 # 21) send DHCP_RELEASE, reset cache
 #--------------------------------------
+runHook preNetworkRelease
 if [ $LOCAL_BOOT = "no" ];then
 	releaseNetwork
 fi
