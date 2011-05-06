@@ -483,6 +483,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/oemboot/suse*
 %endif
 
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
 
 %files -n kiwi-templates
 %defattr(-, root, root)
@@ -500,6 +501,8 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %ifarch ppc ppc64
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
+%endif
+
 %endif
 
 %changelog
