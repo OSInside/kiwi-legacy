@@ -161,6 +161,8 @@ our $InstallCD;             # Installation initrd booting from CD
 our $InstallCDSystem;       # virtual disk system image to be installed on disk
 our $BootCD;                # Boot initrd booting from CD
 our $BootUSB;               # Boot initrd booting from Stick
+our $TestImage;             # call end-to-end testsuite if installed
+our $TestCase;              # path to image description including test/ case
 our $InstallStick;          # Installation initrd booting from USB stick
 our $InstallStickSystem;    # virtual disk system image to be installed on disk
 our $StripImage;            # strip shared objects and binaries
@@ -1142,6 +1144,144 @@ sub main {
 		$format -> createMaschineConfiguration();
 		my $code = kiwiExit (0); return $code;
 	}
+
+	#==========================================
+	# Test suite
+	#------------------------------------------
+	if (defined $TestImage) {
+		$kiwi -> info ("Starting image test run...");
+		my $suite  = "/usr/lib/os-autoinst";
+		my $distri = "kiwi-$$";
+		#==========================================
+		# Check pre-conditions
+		#------------------------------------------
+		if (! -d $suite) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Required os-autoinst test-suite not installed");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! -f $TestImage) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Test image $TestImage doesn't exist");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! defined $SetImageType) {
+			$kiwi -> failed ();
+			$kiwi -> error ("No test image type specified");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! defined $TestCase) {
+			$kiwi -> failed ();
+			$kiwi -> error ("No test test case specified");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! -d $TestCase."/".$SetImageType) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Test case $SetImageType does not exist");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! -f $TestCase."/env.sh") {
+			$kiwi -> failed ();
+			$kiwi -> error ("Can't find environment for this test");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		#==========================================
+		# Turn parameters into absolute pathes
+		#------------------------------------------
+		$TestImage = File::Spec->rel2abs ($TestImage);
+		$TestCase  = File::Spec->rel2abs ($TestCase);
+		#==========================================
+		# Create distri link for os-autoinst
+		#------------------------------------------
+		my $test = $TestCase."/".$SetImageType;
+		my $data = qxx ("ln -s $test $suite/distri/$distri 2>&1");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't create distri link: $data");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		#==========================================
+		# Create result mktemp directory
+		#------------------------------------------
+		my $out = qxx ("mktemp -q -d /tmp/kiwi-testrun-XXXXXX 2>&1");
+		$code = $? >> 8; chomp $out;
+		if ($code != 0) {
+			$kiwi -> error  ("Couldn't create result directory: $out: $!");
+			$kiwi -> failed ();
+			qxx ("rm -f $suite/distri/$distri");
+			my $code = kiwiExit (1); return $code;
+		}
+		qxx ("chmod 755 $out 2>&1");
+		#==========================================
+		# Copy environment to result directory
+		#------------------------------------------
+		$data = qxx ("cp $TestCase/env.sh $out");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to copy test environment: $data");
+			$kiwi -> failed ();
+			qxx ("rm -f $suite/distri/$distri");
+			qxx ("rm -rf $out");
+			my $code = kiwiExit (1); return $code;
+		}
+		#==========================================
+		# Create call file
+		#------------------------------------------
+		if (open my $FD,">$out/run.sh") {
+			print $FD "cd $out\n";
+			print $FD "export DISTRI=$distri"."\n";
+			print $FD "export ISO=$TestImage"."\n";
+			print $FD 'isotovideo $ISO'."\n";
+			close $FD;
+		} else {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to create run test script: $!");
+			$kiwi -> failed ();
+			qxx ("rm -f $suite/distri/$distri");
+			qxx ("rm -rf $out");
+			my $code = kiwiExit (1); return $code;
+		}
+		#==========================================
+		# Create screen ctrl file
+		#------------------------------------------
+		if (open my $FD,">$out/run.ctrl") {
+			print $FD "logfile /dev/null\n";
+			close $FD;
+		} else {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to create screen ctrl file: $!");
+			$kiwi -> failed ();
+			qxx ("rm -f $suite/distri/$distri");
+			qxx ("rm -rf $out");
+			my $code = kiwiExit (1); return $code;
+		}
+		#==========================================
+		# Call the test
+		#------------------------------------------
+		$kiwi -> done ();
+		$kiwi -> info ("Calling isotovideo, this can take some time...\n");
+		$kiwi -> info ("watch the screen session by: 'screen -r'");
+		qxx ("chmod u+x $out/run.sh");
+		qxx ("screen -L -D -m -c $out/run.ctrl $out/run.sh");
+		$code = $? >> 8;
+		qxx ("rm -f $suite/distri/$distri");
+		if ($code == 0) {
+			$kiwi -> done ();
+		} else {
+			$kiwi -> failed ();
+		}
+		$kiwi -> info ("Find test results in $out/currentautoinst-log.txt");
+		$kiwi -> done ();
+	}
 	return 1;
 }
 
@@ -1243,6 +1383,8 @@ sub init {
 		"targetdevice=s"        => \$targetDevice,
 		"type|t=s"              => \$SetImageType,
 		"upgrade|u=s"           => \$Upgrade,
+		"test-image=s"          => \$TestImage,
+		"test-case=s"           => \$TestCase,
 		"v|verbose+"            => \$Verbosity,
 		"version"               => \$Version,
 		"yes|y"                 => \$defaultAnswer,
@@ -1475,6 +1617,7 @@ sub init {
 		(! defined $BootUSB)            &&
 		(! defined $Clone)              &&
 		(! defined $CheckConfig)        &&
+		(! defined $TestImage)          &&
 		(! defined $Convert)
 	) {
 		$kiwi -> error ("No operation specified");
@@ -1632,6 +1775,9 @@ sub usage {
 	print "       [ --exclude <directory> --exclude <...> ]\n";
 	print "       [ --skip <package> --skip <...> ]\n";
 	print "       [ --nofiles --notemplate ]\n";
+	print "Testsuite (requires os-autoinst package):\n";
+	print "    kiwi --test-image <image> --test-case <path>\n";
+	print "         --type <image-type>\n";
 	print "Image postprocessing modes:\n";
 	print "    kiwi --bootvm <initrd> --bootvm-system <systemImage>\n";
 	print "       [ --bootvm-disksize <size> ]\n";
