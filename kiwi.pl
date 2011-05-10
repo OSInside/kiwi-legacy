@@ -223,6 +223,7 @@ our $FatStorage;            # specify size of fat partition if syslinux is used
 our $cmdL;                  # command line storage object
 our $kiwi;                  # global logging handler object
 our $MBRID;                 # custom mbrid value
+our $ListXMLInfo;           # list XML information
 
 #============================================
 # Globals
@@ -1298,7 +1299,6 @@ sub init {
 	$SIG{"TERM"}     = \&quit;
 	$SIG{"INT"}      = \&quit;
 	my $Help;
-	my $ListXMLInfo;           # list XML information for this operation
 	my @ListXMLInfoSelection;  # info selection for listXMLInfo
 	my $PackageManager;
 	my $Version;

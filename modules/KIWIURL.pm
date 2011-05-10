@@ -273,6 +273,9 @@ sub thisPath {
 	if ((defined $main::ImageDescription) && (-d $main::ImageDescription)) {
 		$thisPath = $main::ImageDescription;
 		$thisPath = "$thisPath/$module";
+	} elsif ((defined $main::ListXMLInfo) && (-d $main::ListXMLInfo)) {
+		$thisPath = $main::ListXMLInfo;
+		$thisPath = "$thisPath/$module";
 	} elsif (defined $main::Create) {
 		if (! open FD,"$main::Create/image/main::Prepare") {
 			return undef;
