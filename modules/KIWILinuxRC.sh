@@ -5811,8 +5811,13 @@ function ddn {
 	# linux device node specs: If the last character of the
 	# device is a letter, attach the partition number. If the
 	# last character is a number, attach a 'p' and then the
-	# partition number.
+	# partition number. If the device name starts with /dev/disk
+	# the /dev/disk/<name>-partN schema is used
 	# ----
+	if echo $1 | grep -q "^\/dev\/disk\/" ; then
+		echo $1"-part"$2
+		return
+	fi
 	local lastc=$(echo $1 | sed -e 's@\(^.*\)\(.$\)@\2@')
 	if echo $lastc | grep -qP "^\d+$";then
 		echo $1"p"$2
