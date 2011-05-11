@@ -1381,10 +1381,22 @@ sub init {
 		}
 	}
 	#========================================
+	# check if prepare & create
+	#----------------------------------------
+	if (defined $Build) {
+		$cmdL -> setConfigDir ($Build);
+	}
+	#========================================
 	# check if repositories are to be ignored
 	#----------------------------------------
 	if (defined $IgnoreRepos) {
 		$cmdL -> setIgnoreRepos(1);
+	}
+	#========================================
+	# check for specified cache location
+	#----------------------------------------
+	if (defined $ImageCache) {
+		$cmdL -> setCacheDir($ImageCache)
 	}
 	#========================================
 	# check if we are doing caching
@@ -1440,6 +1452,7 @@ sub init {
 	#----------------------------------------
 	if (defined $RecycleRoot) {
 		$RecycleRoot = $RootTree;
+		$cmdL -> enableRootRecycle();
 	}
 	#========================================
 	# check replacement repo information
@@ -1454,6 +1467,12 @@ sub init {
 		if (! $result) {
 			my $code = kiwiExit (1); return $code;
 		}
+	}
+	#============================================
+	# check if a target arch is defined
+	#--------------------------------------------
+	if (defined $TargetArch) {
+		$cmdL -> setImageArchitecture($TargetArch);
 	}
 	#============================================
 	# check Partitioner according to device
@@ -1620,6 +1639,7 @@ sub init {
 	if ((defined $RootTree) && ($RootTree !~ /^\//)) {
 		my $workingDir = qxx ( "pwd" ); chomp $workingDir;
 		$RootTree = $workingDir."/".$RootTree;
+		$cmdL -> setRootTargetDir($RootTree);
 	}
 	if (defined $LogPort) {
 		$kiwi -> info ("Setting log server port to: $LogPort");

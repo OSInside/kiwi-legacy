@@ -21,7 +21,9 @@ use strict;
 use warnings;
 require Exporter;
 use File::Spec;
+use KIWILocator;
 use KIWILog;
+use KIWIQX;
 
 #==========================================
 # Exports
@@ -60,25 +62,51 @@ sub new {
 	#==========================================
 	# Object initialize object member data
 	#------------------------------------------
-	$this->{addPackages}        = ''; # Holds array ref
-	$this->{addPatterns}        = ''; # Holds array ref
 	$this->{imageTgtDir}        = '';
 	$this->{kiwi}               = $kiwi;
-	$this->{rootTgtDir}         = '';
 	$this->{supportedRepoTypes} = \@supportedRepos;
 	return $this;
+}
+
+#==========================================
+# enableRootRecycle
+#------------------------------------------
+sub enableRootRecycle {
+	# ...
+	# Set the recycle root directory if root dir is set, else set a flag
+	# for delayed setting.
+	# ---
+	my $this = shift;
+	if ($this -> {rootTgtDir}) {
+		$this -> {recycleRootDir} = $this -> {rootTgtDir};
+	} else {
+		$this -> {setRecycleRoot} = 1;
+	}
+	return 1;
 }
 
 #==========================================
 # getAdditionalPackages
 #------------------------------------------
 sub getAdditionalPackages {
+	# ...
+	# Return information about additional packages set by the user
+	# on the command line.
+	# ---
+	my $this = shift;
+	return $this -> {addPackages};
 }
 
 #==========================================
 # getAdditionalPatterns
 #------------------------------------------
 sub getAdditionalPatterns {
+	# ...
+	# Return information about additional patterns set by the user
+	# on the command line.
+	# ---
+	my $this = shift;
+	return $this->{addPatterns};
 }
 
 #==========================================
@@ -116,6 +144,17 @@ sub getBuildProfiles {
 }
 
 #==========================================
+# getCacheDir
+#------------------------------------------
+sub getCacheDir {
+	# ...
+	# Return location of the directory containing the caches
+	# ---
+	my $this = shift;
+	return $this -> {cacheDir};
+}
+
+#==========================================
 # getConfigDir
 #------------------------------------------
 sub getConfigDir {
@@ -135,6 +174,17 @@ sub getIgnoreRepos {
 	# ---
 	my $this = shift;
 	return $this -> {ignoreRepos};
+}
+
+#==========================================
+# getImageArchitecture
+#------------------------------------------
+sub getImageArchitecture {
+	# ...
+	# Return the architecture for this image
+	# ---
+	my $this = shift;
+	return $this -> {imageArch};
 }
 
 #==========================================
@@ -171,6 +221,28 @@ sub getPackageManager {
 }
 
 #==========================================
+# getPackagesToRemove
+#------------------------------------------
+sub getPackagesToRemove {
+	# ...
+	# Return the list of packages to remove set on the command line as a ref
+	# ---
+	my $this = shift;
+	return $this -> {removePackages};
+}
+
+#==========================================
+# getRecycleRootDir
+#------------------------------------------
+sub getRecycleRootDir {
+	# ...
+	# Return the root target directory to be recycled
+	# ---
+	my $this = shift;
+	return $this -> {recycleRootDir};
+}
+
+#==========================================
 # getReplacementRepo
 #------------------------------------------
 sub getReplacementRepo {
@@ -197,12 +269,56 @@ sub getRootTargetDir {
 # setAdditionalPackages
 #------------------------------------------
 sub setAdditionalPackages {
+	# ...
+	# Set package names for packages specified on the command line
+	# ---
+	my $this     = shift;
+	my $packages = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $packages) {
+		my $msg = 'setAdditionalPackages method called without specifying '
+		. 'packages';
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return undef;
+	}
+	if (! ref $packages) {
+		my $msg = 'setAdditionalPackages method expecting ARRAY_REF as '
+			. 'first argument.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return undef;
+	}
+	$this -> {addPackages} = $packages;
+	return 1;
 }
 
 #==========================================
 # setAdditionalPatterns
 #------------------------------------------
 sub setAdditionalPatterns {
+	# ...
+	# Set pattern names for patterns specified on the command line
+	# ---
+	my $this     = shift;
+	my $patterns = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $patterns) {
+		my $msg = 'setAdditionalPatterns method called without specifying '
+		. 'packages';
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return undef;
+	}
+	if (! ref $patterns) {
+		my $msg = 'setAdditionalPatterns method expecting ARRAY_REF as '
+			. 'first argument.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return undef;
+	}
+	$this->{addPatterns} = $patterns;
+	return 1;
 }
 
 #==========================================
@@ -311,7 +427,6 @@ sub setAdditionalRepos {
 	$repoInfo{repositoryPriorities} = $repoPrios;
 	$repoInfo{repositoryTypes}      = $repoTypes;
 	$this -> {additionalRepos} = \%repoInfo;
-
 	return 1;
 }
 
@@ -351,6 +466,41 @@ sub setBuildProfiles {
 		return undef;
 	}
 	$this -> {buildProfiles} = $profRef;
+	return 1;
+}
+
+#==========================================
+# setCacheDir
+#------------------------------------------
+sub setCacheDir {
+	# ...
+	# Set the location of the directory containing the caches
+	# ---
+	my $this = shift;
+	my $dir  = shift;
+	if (! $dir) {
+		my $msg = 'setCacheDir method called without specifying a '
+			. 'cache directory.';
+		$this -> {kiwi} -> error ($msg);
+		$this -> {kiwi} -> failed();
+		return undef;
+	}
+	if ((-d $dir) && (! -w $dir)) {
+		my $msg = 'No write access to specified cache directory "'
+			. "$dir"
+			. '".';
+		$this -> {kiwi} -> error ($msg);
+		$this -> {kiwi} -> failed();
+		return undef;
+	}
+	if ( $dir !~ /^\//) {
+		my $locator = new KIWILocator($this -> {kiwi});
+		$dir = $locator -> getDefaultCacheDir() . '/' . $dir;
+		my $msg = 'Specified relative path as cache location; moving cache to '
+		. "$dir\n";
+		$this -> {kiwi} -> info ($msg);
+	}
+	$this -> {cacheDir} = $dir;
 	return 1;
 }
 
@@ -407,6 +557,34 @@ sub setIgnoreRepos {
 		return undef;
 	}
 	$this -> {ignoreRepos} = $val;
+	return 1;
+}
+
+#==========================================
+# setImageArchitecture
+#------------------------------------------
+sub setImageArchitecture {
+	# ...
+	# Set the architecture for this image
+	# ---
+	my $this = shift;
+	my $arch = shift;
+	my @supportedArch = qw (i586 ppc ppc64 s390  s390x  x86_64);
+	if (! $arch) {
+		my $msg = 'setImageArchitecture method called without specifying '
+			. 'an architecture.';
+		$this -> {kiwi} -> error ($msg);
+		$this -> {kiwi} -> failed();
+		return undef;
+	}
+	if (! grep /^$arch/, @supportedArch) {
+		my $msg = 'Improper architecture setting, expecting on of: '
+			. "@supportedArch";
+		$this -> {kiwi} -> error ($msg);
+		$this -> {kiwi} -> failed();
+		return undef;
+	}
+	$this -> {imageArch} = $arch;
 	return 1;
 }
 
@@ -482,6 +660,34 @@ sub setPackageManager {
 }
 
 #==========================================
+# getPackagesToRemove
+#------------------------------------------
+sub setPackagesToRemove {
+	# ...
+	# Set the list of packages to remove
+	# ---
+	my $this     = shift;
+	my $packages = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $packages) {
+		my $msg = 'setPackagesToRemove method called without specifying '
+		. 'packages';
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return undef;
+	}
+	if (! ref $packages) {
+		my $msg = 'setPackagesToRemove method expecting ARRAY_REF as '
+			. 'first argument.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return undef;
+	}
+	$this -> {removePackages} = $packages;
+	return 1;
+}
+
+#==========================================
 # setReplacementRepo
 #------------------------------------------
 sub setReplacementRepo {
@@ -542,8 +748,29 @@ sub setRootTargetDir {
 	# ...
 	# Set the target directory for the unpacked root tree
 	# ---
-	my $this = shift;
-	$this -> {rootTgtDir} = shift;
+	my $this    = shift;
+	my $rootTgt = shift;
+	my $kiwi = $this -> {kiwi};
+	if (! $rootTgt) {
+		my $msg = 'setRootTargetDir method called without specifying '
+			. 'a target directory';
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return undef;
+	}
+	if ($rootTgt !~ /^\//) {
+		my $workingDir = qxx ('pwd');
+		chomp $workingDir;
+		$rootTgt = $workingDir . '/' . $rootTgt;
+		my $msg = 'Specified relative path for target directory; target is '
+			. "$rootTgt\n";
+		$kiwi -> info ($msg);
+	}
+	if ($this -> {setRecycleRoot}) {
+		$this -> {recycleRootDir} = $rootTgt;
+		$this -> {setRecycleRoot} = 0;
+	}
+	$this -> {rootTgtDir} = $rootTgt;
 	return 1;
 }
 

@@ -17,6 +17,9 @@ package Test::kiwiCommandLine;
 use strict;
 use warnings;
 
+use Cwd;
+use FindBin;
+
 use Common::ktLog;
 use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
@@ -55,6 +58,156 @@ sub test_ctor {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($cmd);
+}
+
+#==========================================
+# test_cmdAddPackages_improperArg
+#------------------------------------------
+sub test_cmdAddPackages_improperArg {
+	# ...
+	# Test the AdditionalPackages storage
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Provide improper argument
+	my @packages = ('foo');
+	my $res = $cmd -> setAdditionalPackages(@packages);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'setAdditionalPackages method expecting ARRAY_REF as '
+		. 'first argument.';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+}
+
+#==========================================
+# test_cmdAddPackages_noArg
+#------------------------------------------
+sub test_cmdAddPackages_noArg {
+	# ...
+	# Test the AdditionalPackages storage
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Provide no argument
+	my $res = $cmd -> setAdditionalPackages();
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'setAdditionalPackages method called without '
+		. 'specifying packages';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+}
+
+#==========================================
+# test_cmdAddPackages_valid
+#------------------------------------------
+sub test_cmdAddPackages_valid {
+	# ...
+	# Test the AdditionalPackages storage
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Make sure there is no dafault
+	my $addlPckgs = $cmd -> getPackagesToRemove();
+	$this -> assert_null($addlPckgs);
+	# Expected use case
+	my @packages = ('foo', 'bar');
+	my $res = $cmd -> setAdditionalPackages(\@packages);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	# Make sure we get our data back
+	$addlPckgs = $cmd -> getAdditionalPackages();
+	$this -> assert_array_equal(\@packages, $addlPckgs);
+}
+
+#==========================================
+# test_cmdAddPatterns_improperArg
+#------------------------------------------
+sub test_cmdAddPatterns_improperArg {
+	# ...
+	# Test the AdditionalPatterns storage
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Provide improper argument
+	my @patterns = ('foo');
+	my $res = $cmd -> setAdditionalPatterns(@patterns);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'setAdditionalPatterns method expecting ARRAY_REF as '
+		. 'first argument.';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+}
+
+#==========================================
+# test_cmdAddPatterns_noArg
+#------------------------------------------
+sub test_cmdAddPatterns_noArg {
+	# ...
+	# Test the AdditionalPatterns storage
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Provide no argument
+	my $res = $cmd -> setAdditionalPatterns();
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'setAdditionalPatterns method called without '
+		. 'specifying packages';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+}
+
+#==========================================
+# test_cmdAddPatterns_valid
+#------------------------------------------
+sub test_cmdAddPatterns_valid {
+	# ...
+	# Test the AdditionalPatterns storage
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Make sure there is no dafault
+	my $addlPatterns = $cmd -> getPackagesToRemove();
+	$this -> assert_null($addlPatterns);
+	# Expected use case
+	my @patterns = ('foo', 'bar');
+	my $res = $cmd -> setAdditionalPatterns(\@patterns);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	# Make sure we get our data back
+	$addlPatterns = $cmd -> getAdditionalPatterns();
+	$this -> assert_array_equal(\@patterns, $addlPatterns);
 }
 
 #==========================================
@@ -414,6 +567,108 @@ sub test_cmdBuildTypeUsage {
 }
 
 #==========================================
+# test_cmdCacheDirUsage_relPath
+#------------------------------------------
+sub test_cmdCacheDirUsage_relPath {
+	# ...
+	#Test the storage and verification of the cache directory data
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Specify relative path
+	my $res = $cmd -> setCacheDir('tmp');
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'Specified relative path as cache location; moving '
+		. "cache to /var/cache/kiwi/image/tmp\n";
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	# Make sure we get the proper value back
+	my $dir = $cmd -> getCacheDir();
+	$this -> assert_str_equals('/var/cache/kiwi/image/tmp', $dir);
+}
+
+#==========================================
+# test_cmdCacheDirUsage_noArg
+#------------------------------------------
+sub test_cmdCacheDirUsage_noArg {
+	# ...
+	# Test the storage and verification of the cache directory data
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# No argument specified
+	my $res = $cmd -> setCacheDir();
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'setCacheDir method called without specifying a '
+		. 'cache directory.';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+}
+
+#==========================================
+# test_cmdCacheDirUsage_valid
+#------------------------------------------
+sub test_cmdCacheDirUsage_valid {
+	# ...
+	# Test the storage and verification of the cache directory data
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Expecting success
+	my $res = $cmd -> setCacheDir('/tmp');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	# Make sure we get our data back
+	my $dir = $cmd -> getCacheDir();
+	$this -> assert_str_equals('/tmp', $dir);
+}
+
+#==========================================
+# test_cmdCacheDirUsage_noDirWrite
+#------------------------------------------
+sub test_cmdCacheDirUsage_noDirWrite {
+	# ...
+	# Test the storage and verification of the cache directory data
+	# ---
+	if ($< == 0) {
+		print "\t\tInfo: user root, skipping ";
+		print "test_cmdCacheDirUsage_noDirRead\n";
+		return;
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Directory has no read access
+	# If the test is run a root the test is skipped
+	my $res = $cmd -> setCacheDir('/root');
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'No write access to specified cache directory '
+		. '"/root".';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+}
+
+#==========================================
 # test_cmdConfDirUsage_noArg
 #------------------------------------------
 sub test_cmdConfDirUsage_noArg {
@@ -562,6 +817,79 @@ sub test_cmdIgnoreRepoUsage_conflict {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+}
+
+#==========================================
+# test_cmdImageArchUsage_invalidArg
+#------------------------------------------
+sub test_cmdImageArchUsage_invalidArg {
+	# ...
+	# Test the storage of the logfile path
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Test improper call no argument
+	my $res = $cmd -> setImageArchitecture('ia64');
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'Improper architecture setting, expecting on of: '
+		. 'i586 ppc ppc64 s390 s390x x86_64';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+}
+
+#==========================================
+# test_cmdImageArchUsage_noArg
+#------------------------------------------
+sub test_cmdImageArchUsage_noArg {
+	# ...
+	# Test the storage of the logfile path
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Test that the command line object has no default
+	my $defArch = $cmd -> getImageArchitecture();
+	$this -> assert_null($defArch);
+	# Test improper call no argument
+	my $res = $cmd -> setImageArchitecture();
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'setImageArchitecture method called without specifying '
+		. 'an architecture.';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+}
+
+#==========================================
+# test_cmdImageArchUsage_valid
+#------------------------------------------
+sub test_cmdImageArchUsage_valid {
+	# ...
+	# Test the storage of the logfile path
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Test improper call no argument
+	my $res = $cmd -> setImageArchitecture('s390x');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	# Make sure we get our value back
+	my $arch = $cmd -> getImageArchitecture();
+	$this -> assert_str_equals('s390x', $arch);
 }
 
 #==========================================
@@ -714,6 +1042,81 @@ sub test_cmdPackageMgrUsage_valid {
 }
 
 #==========================================
+# test_cmdPckgsRemove_improperArg
+#------------------------------------------
+sub test_cmdPckgsRemove_improperArg {
+	# ...
+	# Test the PackagesToRemove storage
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Provide improper argument
+	my @packages = ('foo');
+	my $res = $cmd -> setPackagesToRemove(@packages);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'setPackagesToRemove method expecting ARRAY_REF as '
+		. 'first argument.';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+}
+
+#==========================================
+# test_cmdPckgsRemove_noArg
+#------------------------------------------
+sub test_cmdPckgsRemove_noArg {
+	# ...
+	# Test the PackagesToRemove storage
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Provide no argument
+	my $res = $cmd -> setPackagesToRemove();
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'setPackagesToRemove method called without '
+		. 'specifying packages';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+}
+
+#==========================================
+# test_cmdPckgsRemove_valid
+#------------------------------------------
+sub test_cmdPckgsRemove_valid {
+	# ...
+	# Test the PackagesToRemove storage
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Make sure there is no dafault
+	my $rmPckgs = $cmd -> getPackagesToRemove();
+	$this -> assert_null($rmPckgs);
+	# Expected use case
+	my @packages = ('foo', 'bar');
+	my $res = $cmd -> setPackagesToRemove(\@packages);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	# Make sure we get our data back
+	$rmPckgs = $cmd -> getPackagesToRemove();
+	$this -> assert_array_equal(\@packages, $rmPckgs);
+}
+
+#==========================================
 # test_cmdProfileUsage_invalid
 #------------------------------------------
 sub test_cmdProfileUsage_invalid {
@@ -788,6 +1191,48 @@ sub test_cmdProfileUsage_valid {
 	# Make sure we can get our data back
 	my @cmdProfs = @{$cmd -> getBuildProfiles()};
 	$this -> assert_array_equal(\@profiles, \@cmdProfs);
+}
+
+#==========================================
+# test_cmdRecycleRoot_delayedSet
+#------------------------------------------
+sub test_cmdRecycleRoot_delayedSet {
+	# ...
+	# Test the storage for root directory recycling
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Test the command lien object has no default
+	my $recycle = $cmd -> getRecycleRootDir();
+	$this -> assert_null($recycle);
+	# Enable root recycle, make sure we have not data as the source is not
+	# set yet
+	$cmd -> enableRootRecycle();
+	$recycle = $cmd -> getRecycleRootDir();
+	$this -> assert_null($recycle);
+	# Set the root target, verify the recycle root get set
+	$cmd -> setRootTargetDir('/tmp');
+	$recycle = $cmd -> getRecycleRootDir();
+	$this -> assert_str_equals('/tmp', $recycle);
+}
+
+#==========================================
+# test_cmdRecycleRoot_delayedSet
+#------------------------------------------
+sub test_cmdRecycleRoot_immediateSet {
+	# ...
+	# Test the storage for root directory recycling
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+
+	# Enable root recycle should have immediate effect
+	$cmd -> setRootTargetDir('/tmp');
+	$cmd -> enableRootRecycle();
+	my $recycle = $cmd -> getRecycleRootDir();
+	$this -> assert_str_equals('/tmp', $recycle);
 }
 
 #==========================================
@@ -897,7 +1342,7 @@ sub test_cmdReplaceRepo_unsupRepoType {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCmdObj();
-	# Test improper call no argument
+	# Test improper call unsuported repository type
 	my $res = $cmd -> setReplacementRepo('os11.3', 'alias', 1, 'foo');
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Specified repository type foo not supported.';
@@ -919,7 +1364,7 @@ sub test_cmdReplaceRepo_valid {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCmdObj();
-	# Test improper call no argument
+	# Test expected use case
 	my $res = $cmd -> setReplacementRepo('os11.3', 'alias', 1, 'yast2');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -934,6 +1379,83 @@ sub test_cmdReplaceRepo_valid {
 	$this -> assert_str_equals('alias', $repoInfo{repositoryAlias});
 	$this -> assert_equals(1, $repoInfo{repositoryPriority});
 	$this -> assert_str_equals('yast2', $repoInfo{repositoryType});
+}
+
+#==========================================
+# test_cmdRootTargetDir_noArgs
+#------------------------------------------
+sub test_cmdRootTargetDir_noArgs {
+	# ...
+	# Test the storage of the root target directory information
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Test that commandline object has no default setting
+	my $rootTgt = $cmd -> getRootTargetDir();
+	$this -> assert_null($rootTgt);
+	# Test improper call no argument
+	my $res = $cmd -> setRootTargetDir();
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'setRootTargetDir method called without specifying a '
+		. 'target directory';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res); 
+}
+
+#==========================================
+# test_cmdRootTargetDir_absPath
+#------------------------------------------
+sub test_cmdRootTargetDir_absPath {
+	# ...
+	# Test the storage of the root target directory information
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Test expected use case with absolute path
+	my $res = $cmd -> setRootTargetDir('/tmp');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	# Check we get the expected result
+	my $rootTgt = $cmd -> getRootTargetDir();
+	$this -> assert_str_equals('/tmp', $rootTgt);
+}
+
+#==========================================
+# test_cmdRootTargetDir_noArgs
+#------------------------------------------
+sub test_cmdRootTargetDir_relPath {
+	# ...
+	# Test the storage of the root target directory information
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	# Test expected use case with absolute path
+	my $res = $cmd -> setRootTargetDir('unpacked');
+	my $tgtPath = Cwd::realpath($FindBin::Bin . '/../../unpacked');
+	my $expectedMsg = 'Specified relative path for target directory; target '
+		. "is $tgtPath\n";
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	# Check we get the expected result
+	my $rootTgt = $cmd -> getRootTargetDir();
+	$this -> assert_str_equals($tgtPath, $rootTgt);
 }
 
 #==========================================
