@@ -53,11 +53,25 @@ sub assert_array_equal {
 		if ( ! grep /^$item$/x, @cmp_array ) {
 			my $msg = 'Did not get the expected list of names. '
 			.'Mismatch content.';
-			$self->assert(0, $msg);
+			$this -> assert(0, $msg);
 		}
 	}
+	return;
+}
 
-return;
+#==========================================
+# assert_file_exists
+#------------------------------------------
+sub assert_file_exists {
+	# ...
+	# Test for file existence
+	# ---
+	my $this = shift;
+	my $fl   = shift;
+	if (! -f $fl) {
+		$this -> assert(0, "File $fl not found.");
+	}
+	return;
 }
 
 #==========================================

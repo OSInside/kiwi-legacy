@@ -35,6 +35,16 @@ use strict;
 use warnings;
 
 #==========================================
+# Destructor
+#------------------------------------------
+sub DESTROY {
+	# ...
+	# Clean up
+	# ---
+	unlink '/tmp/kiwiTestLog.log';
+}
+
+#==========================================
 # Constructor
 #------------------------------------------
 sub new {
@@ -61,6 +71,10 @@ sub new {
 	$this -> {failed}    = 0;
 	$this -> {msgType}   = 'none';
 	$this -> {skipped}   = 0;
+	#==========================================
+	# A "fake" log file
+	#------------------------------------------
+	$this -> {rootLog} = '/tmp/kiwiTestLog.log';
 	return $this;
 }
 
@@ -176,42 +190,6 @@ sub getLogInfoMessage {
 }
 
 #==========================================
-# getWarningMessage
-#------------------------------------------
-sub getWarningMessage {
-	# ...
-	# Retrieve the warning message.
-	# In general the getMessage method should be used. However, under certain
-	# test conditions it is unavoidable to have multiple messages in the log
-	# object. For these rare occasions the log allows access to the specific
-	# message types directly. The message type is reset, the final call in a
-	# test should always be to getMessage() to assure no unexpected messages
-	# are present.
-	# ---
-	my $this = shift;
-	my $msg = $this -> {warnMsg};
-	$this -> {warnMsg} = '';
-	return $msg;
-}
-
-#==========================================
-# getWarningState
-#------------------------------------------
-sub getWarningState {
-	# ...
-	# Retrieve the state of the skipped flag.
-	# Generally the getState method should be used. However, under certain
-	# circumstances the code issues a set of messages together. The individual
-	# get*State methods allow to retrieve the expected state and clear the
-	# flag for this state. THe final call in any test should always be to
-	# getState to assure there are no unexpected messages.
-	my $this = shift;
-	my $val = $this -> {skipped} ? 'skipped' : 0;
-	$this -> {skipped} = 0;
-	return $val;
-}
-
-#==========================================
 # getMessage
 #------------------------------------------
 sub getMessage {
@@ -231,6 +209,10 @@ sub getMessage {
 	}
 	if ( $this -> {logInfoMsg} ) {
 		$msg = $this -> {logInfoMsg};
+		$msgCnt += 1;
+	}
+	if ( $this -> {noteMsg} ) {
+		$msg = $this -> {noteMsg};
 		$msgCnt += 1;
 	}
 	if ( $this -> {warnMsg} ) {
@@ -256,6 +238,17 @@ sub getMessageType {
 	# ---
 	my $this = shift;
 	return $this -> {msgType};
+}
+
+#==========================================
+# getRootLog
+#------------------------------------------
+sub getRootLog {
+	# ...
+	# Return test logfile location
+	# ---
+	my $this = shift;
+	return $this -> {rootLog};
 }
 
 #==========================================
@@ -292,6 +285,42 @@ sub getState {
 }
 
 #==========================================
+# getWarningMessage
+#------------------------------------------
+sub getWarningMessage {
+	# ...
+	# Retrieve the warning message.
+	# In general the getMessage method should be used. However, under certain
+	# test conditions it is unavoidable to have multiple messages in the log
+	# object. For these rare occasions the log allows access to the specific
+	# message types directly. The message type is reset, the final call in a
+	# test should always be to getMessage() to assure no unexpected messages
+	# are present.
+	# ---
+	my $this = shift;
+	my $msg = $this -> {warnMsg};
+	$this -> {warnMsg} = '';
+	return $msg;
+}
+
+#==========================================
+# getWarningState
+#------------------------------------------
+sub getWarningState {
+	# ...
+	# Retrieve the state of the skipped flag.
+	# Generally the getState method should be used. However, under certain
+	# circumstances the code issues a set of messages together. The individual
+	# get*State methods allow to retrieve the expected state and clear the
+	# flag for this state. THe final call in any test should always be to
+	# getState to assure there are no unexpected messages.
+	my $this = shift;
+	my $val = $this -> {skipped} ? 'skipped' : 0;
+	$this -> {skipped} = 0;
+	return $val;
+}
+
+#==========================================
 # info
 #------------------------------------------
 sub info {
@@ -319,6 +348,32 @@ sub loginfo {
 	$this -> {logInfoMsg} = shift;
 	$this -> {msgType} = 'info';
 	return $this;
+}
+
+#==========================================
+# note
+#------------------------------------------
+sub note {
+	# ...
+	# Set note message
+	# ---
+	my $this = shift;
+	$this -> {noteMsg} = shift;
+	$this -> {msgType} = 'note';
+	return;
+}
+
+#==========================================
+# setRootLog
+#------------------------------------------
+sub setRootLog {
+	# ...
+	# Create a test log file
+	# ---
+	my $this = shift;
+	my $log = $this -> {rootLog};
+	system "touch $log";
+	return;
 }
 
 #==========================================
