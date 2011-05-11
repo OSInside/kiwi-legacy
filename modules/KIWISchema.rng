@@ -2234,7 +2234,7 @@ into the master block. There is space for 32 characters.</a:documentation>
       <attribute name="freespace">
         <a:documentation>free space to be added to this volume. The value is
 used as MB by default but you can add "M" and/or "G" as
-prefix</a:documentation>
+postfix</a:documentation>
         <ref name="volume-size-type"/>
       </attribute>
     </define>
@@ -2249,7 +2249,7 @@ exist inside the root directory.</a:documentation>
         <a:documentation>absolute size of the volume. If the size value
 is too small to store all data it will be ignored.
 The value is used as MB by default but you can
-add "M" and/or "G" as prefix</a:documentation>
+add "M" and/or "G" as postfix</a:documentation>
         <ref name="volume-size-type"/>
       </attribute>
     </define>
@@ -2267,9 +2267,9 @@ add "M" and/or "G" as prefix</a:documentation>
     <define name="k.volume">
       <element name="volume">
         <a:documentation>Specify which parts of the filesystem should be
-on a extra volume.</a:documentation>
-        <db:para>Specify which parts of the filesystem should be onextra
-a extra volume.</db:para>
+on an extra volume.</a:documentation>
+        <db:para>Specify which parts of the filesystem should be on
+an extra volume.</db:para>
         <ref name="k.volume.attlist"/>
         <empty/>
       </element>

@@ -1581,7 +1581,7 @@ div {
 	k.volume.freespace.attribute =
 		## free space to be added to this volume. The value is
 		## used as MB by default but you can add "M" and/or "G" as
-		## prefix
+		## postfix
 		attribute freespace { volume-size-type }
 	k.volume.name.attribute =
 		## volume name. The name specifies a path which has to
@@ -1591,7 +1591,7 @@ div {
 		## absolute size of the volume. If the size value
 		## is too small to store all data it will be ignored.
 		## The value is used as MB by default but you can
-		## add "M" and/or "G" as prefix
+		## add "M" and/or "G" as postfix
 		attribute size { volume-size-type }
 	k.volume.attlist =
 		k.volume.freespace.attribute? &
@@ -1599,11 +1599,11 @@ div {
 		k.volume.size.attribute?
 	k.volume =
 		## Specify which parts of the filesystem should be
-		## on a extra volume.
+		## on an extra volume.
 		[
 		db:para [
-			"Specify which parts of the filesystem should be onextra\x{a}"
-			"a extra volume."
+			"Specify which parts of the filesystem should be on\x{a}"
+			"an extra volume."
 		]
 		]
 		element volume {
