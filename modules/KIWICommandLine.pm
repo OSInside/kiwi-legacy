@@ -69,9 +69,9 @@ sub new {
 }
 
 #==========================================
-# enableRootRecycle
+# setRootRecycle
 #------------------------------------------
-sub enableRootRecycle {
+sub setRootRecycle {
 	# ...
 	# Set the recycle root directory if root dir is set, else set a flag
 	# for delayed setting.

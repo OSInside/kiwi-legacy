@@ -1452,7 +1452,7 @@ sub init {
 	#----------------------------------------
 	if (defined $RecycleRoot) {
 		$RecycleRoot = $RootTree;
-		$cmdL -> enableRootRecycle();
+		$cmdL -> setRootRecycle();
 	}
 	#========================================
 	# check replacement repo information
