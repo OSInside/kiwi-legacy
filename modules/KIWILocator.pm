@@ -55,8 +55,9 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{configName} = 'config.xml';
-	$this->{kiwi}       = $kiwi;
+	$this->{configName}  = 'config.xml';
+	$this->{defCacheDir} = '/var/cache/kiwi/image';
+	$this->{kiwi}        = $kiwi;
 	return $this;
 }
 
@@ -155,6 +156,17 @@ sub getControlFile {
 		$config = pop @globsearch;
 	}
 	return $config;
+}
+
+#============================================
+# getDefaultCacheDir
+#--------------------------------------------
+sub getDefaultCacheDir {
+	# ...
+	# Return the path of the default cache directory Kiwi uses
+	# ---
+	my $this = shift;
+	return $this -> {defCacheDir};
 }
 
 #============================================

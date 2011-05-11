@@ -108,7 +108,6 @@ our $Revision = $BasePath."/.revision";
 our $TestBase = $BasePath."/tests";
 our $SchemaCVT= $BasePath."/xsl/master.xsl";
 our $Pretty   = $BasePath."/xsl/print.xsl";
-our $InitCDir = "/var/cache/kiwi/image";
 
 #==========================================
 # Globals (Supported filesystem names)
@@ -366,7 +365,7 @@ sub main {
 		# Create cache(s)...
 		#------------------------------------------
 		if (! defined $ImageCache) {
-			$ImageCache = $main::InitCDir;
+			$ImageCache = $locator -> getDefaultCacheDir();
 		}
 		my $cacheInit = initializeCache($xml,\%type,$InitCache);
 		if (! createCache ($xml,$cacheInit)) {

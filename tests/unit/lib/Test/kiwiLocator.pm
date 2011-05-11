@@ -182,6 +182,27 @@ sub test_getControlFileNoErrorKiwiExt {
 }
 
 #==========================================
+# test_getDefCacheDir
+#------------------------------------------
+sub test_getDefCacheDir {
+	# ...
+	# Test that we get the expected location for the default cache directory
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my $cacheDir = $locator -> getDefaultCacheDir();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Make sure directory has expected path
+	$this -> assert_str_equals($cacheDir, '/var/cache/kiwi/image');
+}
+
+#==========================================
 # test_getExecPathNoExec
 #------------------------------------------
 sub test_getExecPathNoExec {
