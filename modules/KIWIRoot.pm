@@ -318,6 +318,7 @@ sub init {
 	my $root = $this->{root};
 	my $manager    = $this->{manager};
 	my $baseSystem = $this->{baseSystem};
+	my $FD;
 	#==================================
 	# Create /etc/ImageVersion file
 	#----------------------------------
@@ -325,12 +326,13 @@ sub init {
 	my $imageVersion = $xml -> getImageVersion();
 	my $imageName    = $xml -> getImageName();
 	qxx ("mkdir -p $root/etc");
-	if ( ! open (FD,">$imageVersionFile")) {
+	if ( ! open ($FD, ">$imageVersionFile")) {
 		$kiwi -> error ("Failed to create version file: $!");
 		$kiwi -> failed ();
 		return undef;
 	}
-	print FD $imageName."-".$imageVersion; close FD;
+	print $FD $imageName."-".$imageVersion;
+	close $FD;
 	#==================================
 	# Copy helper scripts to new root
 	#----------------------------------
