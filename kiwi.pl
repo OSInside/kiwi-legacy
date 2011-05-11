@@ -194,7 +194,6 @@ our $NoColor;               # do not used colored output (done/failed messages)
 our $LogPort;               # specify alternative log server port
 our $GzipCmd;               # command to run to gzip things
 our $PrebuiltBootImage;     # directory where a prepared boot image may be found
-our $PreChrootCall;         # program name called before chroot switch
 our $CreatePassword;        # create crypted password
 our $ISOCheck;              # create checkmedia boot entry
 our $FSBlockSize;           # filesystem block size
@@ -509,26 +508,6 @@ sub main {
 			$root -> copyBroken();
 			undef $root;
 			my $code = kiwiExit (1); return $code;
-		}
-		#==========================================
-		# Check for pre chroot call
-		#------------------------------------------
-		if (defined $PreChrootCall) {
-			$kiwi -> info ("Calling pre-chroot program: $PreChrootCall");
-			my $path = $root -> getRootPath();
-			my $data = qxx ("$PreChrootCall $path 2>&1");
-			my $code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> failed ();
-				$kiwi -> info   ($data);
-				$kiwi -> failed ();
-				$root -> copyBroken();
-				undef $root;
-				my $code = kiwiExit (1); return $code;
-			} else {
-				$kiwi -> loginfo ("$PreChrootCall: $data");
-			}
-			$kiwi -> done ();
 		}
 		#==========================================
 		# Install root system
@@ -1367,7 +1346,6 @@ sub init {
 		"package-manager=s"     => \$PackageManager,
 		"partitioner=s"         => \$Partitioner,
 		"prebuiltbootimage=s"   => \$PrebuiltBootImage,
-		"prechroot-call=s"      => \$PreChrootCall,
 		"prepare|p=s"           => \$Prepare,
 		"recycle-root"          => \$RecycleRoot,
 		"root|r=s"              => \$RootTree,
@@ -1653,13 +1631,6 @@ sub init {
 		$kiwi -> info ("Setting gzip command to: $GzipCmd");
 		$Gzip = $GzipCmd;
 		$kiwi -> done ();
-	}
-	if ((defined $PreChrootCall) && (! -x $PreChrootCall)) {
-		$kiwi -> error ("pre-chroot program: $PreChrootCall");
-		$kiwi -> failed ();
-		$kiwi -> error ("--> 1) no such file or directory\n");
-		$kiwi -> error ("--> 2) and/or not in executable format\n");
-		my $code = kiwiExit (1); return $code;
 	}
 	if ((defined $BootVMDisk) && (! defined $BootVMSystem)) {
 		$kiwi -> error ("Virtual Disk setup must specify a bootvm-system");
