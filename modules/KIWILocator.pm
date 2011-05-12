@@ -68,10 +68,12 @@ sub createTmpDirectory {
 	my $this          = shift;
 	my $useRoot       = shift;
 	my $selfRoot      = shift;
+	my $cmdL          = shift;
 	my $rootError     = 1;
 	my $root;
 	my $code;
 	my $kiwi = $this->{kiwi};
+	my $forceRoot = $cmdL -> getForceNewRoot();
 	if (! defined $useRoot) {
 		if (! defined $selfRoot) {
 			$root = qxx (" mktemp -q -d /tmp/kiwi.XXXXXX ");
@@ -83,7 +85,7 @@ sub createTmpDirectory {
 		} else {
 			$root = $selfRoot;
 			rmdir $root;
-			if ( -e $root && -d $root && $main::ForceNewRoot ) {
+			if ( -e $root && -d $root && $forceRoot ) {
 				$kiwi -> info ("Removing old root directory '$root'");
 				if (-e $root."/base-system") {
 					$kiwi -> failed();

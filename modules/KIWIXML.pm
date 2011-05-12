@@ -126,13 +126,6 @@ sub new {
 	my $validator = new KIWIXMLValidator (
 		$kiwi,$controlFile,$main::Revision,$main::Schema,$main::SchemaCVT
 	);
-	my $isValid;
-	if ($validator) {
-		$isValid = $validator -> validate();
-	}
-	if (! $isValid) {
-		return undef;
-	}
 	my $systemTree = $validator -> getDOM();
 	#==========================================
 	# Store object data

@@ -122,6 +122,17 @@ sub getAdditionalRepos {
 }
 
 #==========================================
+# getForceNewRoot
+#------------------------------------------
+sub getForceNewRoot {
+	# ...
+	# Return the bool value for the force-new-root option
+	# ---
+	my $this = shift;
+	return $this -> {forceNewRoot};
+}
+
+#==========================================
 # getBuildType
 #------------------------------------------
 sub getBuildType {
@@ -427,6 +438,16 @@ sub setAdditionalRepos {
 	$repoInfo{repositoryPriorities} = $repoPrios;
 	$repoInfo{repositoryTypes}      = $repoTypes;
 	$this -> {additionalRepos} = \%repoInfo;
+	return 1;
+}
+
+#==========================================
+# setForceNewRoot
+#------------------------------------------
+sub setForceNewRoot {
+	my $this = shift;
+	my $fnr  = shift;
+	$this -> {forceNewRoot} = $fnr;
 	return 1;
 }
 

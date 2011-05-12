@@ -55,7 +55,6 @@ sub new {
 	#------------------------------------------
 	$this->{showLevel} = [0,1,2,3,4,5];
 	$this->{channel}   = *STDOUT;
-	$this->{errorOk}   = 0;
 	$this->{state}     = "O";
 	$this->{message}   = "initialize";
 	$this->{used}      = 1;
@@ -225,7 +224,7 @@ sub done {
 	    $this -> doStat();
 		print $FD "\033[1;32mdone\n";
 		$this -> doNorm();
-		if ($this->{errorOk}) {
+		if ($rootEFD) {
 			print $rootEFD "   done\n";
 		}
 	} else {
@@ -249,7 +248,7 @@ sub failed {
 		$this -> doStat();
 		print $FD "\033[1;31mfailed\n";
 		$this -> doNorm();
-		if ($this->{errorOk}) {
+		if ($rootEFD) {
 			print $rootEFD "   failed\n";
 		}
 	} else {
@@ -273,7 +272,7 @@ sub skipped {
 		$this -> doStat();
 		print $FD "\033[1;33mskipped\n";
 		$this -> doNorm();
-		if ($this->{errorOk}) {
+		if ($rootEFD) {
 			print $rootEFD "   skipped\n";
 		}
 	} else {
@@ -297,7 +296,7 @@ sub notset {
 		$this -> doStat();
 		print $FD "\033[1;36mnotset\n";
 		$this -> doNorm();
-		if ($this->{errorOk}) {
+		if ($rootEFD) {
 			print $rootEFD "   notset\n";
 		}
 	} else {
@@ -324,11 +323,6 @@ sub step {
 		$this -> doStat();
 		print $FD "\033[1;32m($data%)";
 		$this -> doStat();
-		if ($this->{errorOk}) {
-			# Don't set progress info to log file
-		}
-	} else {
-		# Don't set progress info to log file
 	}
 }
 
@@ -475,7 +469,7 @@ sub printLog {
 	#==========================================
 	# send message cache if needed
 	#------------------------------------------
-	if ((($this->{fileLog}) || ($this->{errorOk})) && (@mcache) && ($rootEFD)) {
+	if (($this->{fileLog}) && (@mcache) && ($rootEFD)) {
 		foreach my $message (@mcache) {
 			print $rootEFD $message;
 		}
@@ -489,7 +483,7 @@ sub printLog {
 	#==========================================
 	# print message to root file
 	#------------------------------------------
-	if ($this->{errorOk} && ($rootEFD)) {
+	if ($rootEFD) {
 		print $rootEFD $result;
 	}
 	#==========================================
@@ -575,7 +569,7 @@ sub saveInCache {
 	if (defined $this->{mcache}) {
 		@mcache = @{$this->{mcache}};
 	}
-	if ((! $this->{fileLog}) && (! $this->{errorOk})) {
+	if (! $this->{fileLog}) {
 		push (@mcache,$logdata);
 		$this->{mcache} = \@mcache;
 	}
@@ -814,19 +808,14 @@ sub setRootLog {
 	# ---
 	my $this = shift;
 	my $file = shift;
-	if ($this->{errorOk}) {
-		return;
-	}
 	info ( $this, "Set root log: $file..." );
-	if (! (open EFD,">$file")) {
+	if (! (open EFD,">>$file")) {
 		$this -> skipped ();
 		$this -> warning ("Couldn't open root log channel: $!\n");
-		$this->{errorOk} = 0;
 	}
 	binmode(EFD,':unix');
 	$this -> done ();
 	$this->{rootLog} = $file;
-	$this->{errorOk} = 1;
 	$this->{rootefd} = *EFD;
 }
 
@@ -964,7 +953,7 @@ sub cleanSweep {
 	my $logchild = $this->{logchild};
 	my $rootEFD  = $this->{rootefd};
 	my $sharedMem= $this->{smem};
-	if ($this->{errorOk}) {
+	if ($rootEFD) {
 		close $rootEFD;
 	}
 	if (defined $logchild) {

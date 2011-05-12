@@ -11,7 +11,6 @@
 # DESCRIPTION   : This module is used to create a logical
 #               : extend, an image file based on a Linux
 #               : filesystem
-#               : 
 #               :
 # STATUS        : Development
 #----------------
@@ -21,17 +20,23 @@ package KIWIImage;
 #------------------------------------------
 use strict;
 use Carp qw (cluck);
-use KIWILog;
-use KIWIBoot;
-use KIWIXML;
-use KIWIIsoLinux;
-use Math::BigFloat;
+use Fcntl ':mode';
 use File::Basename;
 use File::Find qw(find);
 use File::stat;
-use Fcntl ':mode';
+use Math::BigFloat;
 use POSIX qw(getcwd);
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
+use KIWIBoot;
+use KIWICommandLine;
+use KIWIImageCreator;
+use KIWIIsoLinux;
+use KIWILog;
 use KIWIQX;
+use KIWIXML;
 
 #==========================================
 # Constructor
@@ -1002,14 +1007,27 @@ sub createImageRootAndBoot {
 		#==========================================
 		# Setup boot prepare and create...
 		#------------------------------------------
-		$main::Survive  = "yes";
-		$main::RootTree = "$tmpdir/kiwi-".$text."boot-$$";
+		my $configDir;
 		if (($stype{boot} !~ /^\//) && (! -d $stype{boot})) {
-			$main::Prepare = $main::System."/".$stype{boot};
+			$configDir = $main::System."/".$stype{boot};
 		} else {
-			$main::Prepare = $stype{boot};
+			$configDir = $stype{boot};
 		}
-		$main::Create   = $main::RootTree;
+		my $rootTarget = "$tmpdir/kiwi-".$text."boot-$$";
+		my $cmdL = new KIWICommandLine ($kiwi);
+		$cmdL -> setConfigDir ($configDir);
+		$cmdL -> setRootTargetDir ($rootTarget);
+		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic -> prepareBootImage($configDir, $rootTarget)) {
+			if (! -d $main::RootTree.$baseSystem) {
+				qxx ("rm -rf $tmpdir");
+			}
+			&{$this->{resetvars}};
+			return undef;
+		}
+		$main::Create   = $rootTarget;
+		$main::RootTree = $rootTarget;
+		$main::Survive  = "yes";
 		undef @main::Profiles;
 		undef @main::AddPackage;
 		undef @main::RemovePackage;
@@ -1473,14 +1491,27 @@ sub createImageLiveCD {
 		#==========================================
 		# Setup boot prepare and create...
 		#------------------------------------------
-		$main::Survive  = "yes";
-		$main::RootTree = "$tmpdir/kiwi-isoboot-$$";
+		my $configDir;
 		if (($stype{boot} !~ /^\//) && (! -d $stype{boot})) {
-			$main::Prepare = $main::System."/".$stype{boot};
+			$configDir = $main::System."/".$stype{boot};
 		} else {
-			$main::Prepare = $stype{boot};
+			$configDir = $stype{boot};
 		}
-		$main::Create   = $main::RootTree;
+		my $rootTarget = "$tmpdir/kiwi-isoboot-$$";
+		my $cmdL = new KIWICommandLine ($kiwi);
+		$cmdL -> setConfigDir ($configDir);
+		$cmdL -> setRootTargetDir ($rootTarget);
+		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic -> prepareBootImage($configDir, $rootTarget) ) {
+			if (! -d $main::RootTree.$baseSystem) {
+				qxx ("rm -rf $tmpdir");
+			}
+			&{$this->{resetvars}};
+			return undef;
+		}
+		$main::Create   = $rootTarget;
+		$main::RootTree = $rootTarget;
+		$main::Survive  = "yes";
 		undef @main::Profiles;
 		undef @main::AddPackage;
 		undef @main::RemovePackage;
@@ -2508,14 +2539,27 @@ sub createImageSplit {
 		#==========================================
 		# Setup boot prepare and create...
 		#------------------------------------------
-		$main::Survive  = "yes";
-		$main::RootTree = "$tmpdir/kiwi-splitboot-$$";
+		my $configDir;
 		if (($type{boot} !~ /^\//) && (! -d $type{boot})) {
-			$main::Prepare = $main::System."/".$type{boot};
+			$configDir = $main::System."/".$type{boot};
 		} else {
-			$main::Prepare = $type{boot};
+			$configDir = $type{boot};
 		}
-		$main::Create   = $main::RootTree;
+		my $rootTarget = "$tmpdir/kiwi-splitboot-$$";
+		my $cmdL = new KIWICommandLine ($kiwi);
+		$cmdL -> setConfigDir ($configDir);
+		$cmdL -> setRootTargetDir ($rootTarget);
+		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic -> prepareBootImage($configDir, $rootTarget) ) {
+			if (! -d $main::RootTree.$baseSystem) {
+				qxx ("rm -rf $tmpdir");
+			}
+			&{$this->{resetvars}};
+			return undef;
+		}
+		$main::Create   = $rootTarget;
+		$main::RootTree = $rootTarget;
+		$main::Survive  = "yes";
 		undef @main::Profiles;
 		undef @main::AddPackage;
 		undef @main::RemovePackage;

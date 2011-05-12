@@ -60,6 +60,7 @@ sub new {
 	my $cacheRoot    = shift;
 	my $cacheRootMode= shift;
 	my $targetArch   = shift;
+	my $cmdL         = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -193,7 +194,7 @@ sub new {
 	#------------------------------------------
 	my $locator = new KIWILocator ($this -> {kiwi});
 	my $root = $locator -> createTmpDirectory (
-		$useRoot,$selfRoot
+		$useRoot,$selfRoot,$cmdL
 	);
 	if ( ! defined $root ) {
 		$kiwi -> error ("Couldn't create root directory: $!");

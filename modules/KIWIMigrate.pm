@@ -61,6 +61,7 @@ sub new {
 	my $addt = shift;
 	my $adda = shift;
 	my $addp = shift;
+	my $fnr  = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -83,7 +84,7 @@ sub new {
 		return undef;
 	}
 	$kiwi -> note (" [$product]");
-	if (defined $main::ForceNewRoot) {
+	if (defined $fnr) {
 		qxx ("rm -rf $dest");
 	}
 	if (! defined $dest) {

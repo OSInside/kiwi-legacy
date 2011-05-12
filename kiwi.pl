@@ -38,6 +38,7 @@ use KIWIXML;
 use KIWILocator;
 use KIWILog;
 use KIWIImage;
+use KIWIImageCreator;
 use KIWIBoot;
 use KIWIMigrate;
 use KIWIOverlay;
@@ -222,6 +223,7 @@ our $cmdL;                  # command line storage object
 our $kiwi;                  # global logging handler object
 our $MBRID;                 # custom mbrid value
 our $ListXMLInfo;           # list XML information
+our $kic;                   # global Image Creator object
 
 #============================================
 # Globals
@@ -322,23 +324,23 @@ sub main {
 		#==========================================
 		# Setup prepare 
 		#------------------------------------------
-		$main::Prepare = $Build;
-		$main::RootTree= $Destination."/build/image-root";
-		$main::Survive = "yes";
-		$main::ForceNewRoot = 1;
-		undef $main::Build;
-		mkdir $Destination."/build";
-		if (! defined main::main()) {
-			$main::Survive = "default";
+		my $imageTarget = $cmdL -> getImageTargetDir();
+		my $rootTarget  = $imageTarget.'/image-root';
+		$cmdL -> setRootTargetDir ($rootTarget);
+		$cmdL -> setForceNewRoot (1);
+		mkdir $imageTarget;
+		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic -> prepareImage()) {
 			my $code = kiwiExit (1); return $code;
 		}
 		#==========================================
 		# Setup create 
 		#------------------------------------------
 		undef $main::Prepare;
-		undef $main::ForceNewRoot;
+		undef $main::Build;
 		$main::Survive = "default";
-		$main::Create = $RootTree;
+		$main::Create = $rootTarget;
+		$cmdL -> setForceNewRoot (0);
 		main::main();
 	}
 
@@ -360,14 +362,13 @@ sub main {
 		if ($pkgMgr) {
 			$xml -> setPackageManager($pkgMgr);
 		}
-		my %type = %{$xml->getImageTypeAndAttributes()};
 		#==========================================
 		# Create cache(s)...
 		#------------------------------------------
 		if (! defined $ImageCache) {
 			$ImageCache = $locator -> getDefaultCacheDir();
 		}
-		my $cacheInit = initializeCache($xml,\%type,$InitCache);
+		my $cacheInit = initializeCache($xml,$InitCache);
 		if (! createCache ($xml,$cacheInit)) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -378,177 +379,13 @@ sub main {
 	# Prepare image and build chroot system
 	#----------------------------------------
 	if (defined $Prepare) {
-		#==========================================
-		# Process system image description
-		#------------------------------------------
-		$kiwi -> info ("Reading image description [Prepare]...\n");
-		if (! checkImageIntegrity($Prepare)) {
+		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic) {
 			my $code = kiwiExit (1); return $code;
 		}
-		my $xml = new KIWIXML (
-			$kiwi,$Prepare,undef,\@Profiles
-		);
-		if (! defined $xml) {
+		if (! $kic -> prepareImage()) {
 			my $code = kiwiExit (1); return $code;
 		}
-		my $pkgMgr = $cmdL -> getPackageManager();
-		if ($pkgMgr) {
-			$xml -> setPackageManager($pkgMgr);
-		}
-		my $krc = new KIWIRuntimeChecker ($kiwi,$cmdL,$xml);
-		if (! $krc -> prepareChecks()) {
-			my $code = kiwiExit (1); return $code;
-		}
-		my %type = %{$xml->getImageTypeAndAttributes()};
-		#==========================================
-		# print boot theme information
-		#------------------------------------------
-		if ($type{"type"} eq "cpio") {
-			my $theme = $xml -> getBootTheme();
-			if ($theme) {
-				$kiwi -> info ("Using boot theme: $theme");
-			} else {
-				$kiwi -> warning ("No boot theme set, default is openSUSE");
-			}
-			$kiwi -> done ();
-		}
-		#==========================================
-		# Check for default root in XML
-		#------------------------------------------	
-		if (! defined $RootTree) {
-			$kiwi -> info ("Checking for default root in XML data...");
-			$RootTree = $xml -> getImageDefaultRoot();
-			if ($RootTree) {
-				if ($RootTree !~ /^\//) {
-					my $workingDir = qxx ( "pwd" ); chomp $workingDir;
-					$RootTree = $workingDir."/".$RootTree;
-				}
-				$kiwi -> done();
-			} else {
-				undef $RootTree;
-				$kiwi -> notset();
-			}
-		}
-		#==========================================
-		# Check for ignore-repos option
-		#------------------------------------------
-		if (defined $IgnoreRepos) {
-			$xml -> ignoreRepositories ();
-		}
-		#==========================================
-		# Check for set-repo option
-		#------------------------------------------
-		if (defined $SetRepository) {
-			$xml -> setRepository (
-				$SetRepositoryType,$SetRepository,
-				$SetRepositoryAlias,$SetRepositoryPriority
-			);
-		}
-		#==========================================
-		# Check for add-repo option
-		#------------------------------------------
-		if (defined @AddRepository) {
-			$xml -> addRepository (
-				\@AddRepositoryType,\@AddRepository,
-				\@AddRepositoryAlias,\@AddRepositoryPriority
-			);
-		}
-		#==========================================
-		# Check for add-package option
-		#------------------------------------------
-		if (defined @AddPackage) {
-			$xml -> addImagePackages (@AddPackage);
-		}
-		#==========================================
-		# Check for add-pattern option
-		#------------------------------------------
-		if (defined @AddPattern) {
-			$xml -> addImagePatterns (@AddPattern);
-		}
-		#==========================================
-		# Check for del-package option
-		#------------------------------------------
-		if (defined @RemovePackage) {
-			$xml -> addRemovePackages (@RemovePackage);
-		}
-		#==========================================
-		# Select cache if requested and exists
-		#------------------------------------------
-		if ($ImageCache) {
-			my $cacheInit = initializeCache($xml,\%type,$Prepare);
-			selectCache ($xml,$cacheInit);
-		}
-		if ($ImageCache) {
-			#==========================================
-			# Add bootstrap packages to image section
-			#------------------------------------------
-			my @initPacs = $xml -> getBaseList();
-			if (@initPacs) {
-				$xml -> addImagePackages (@initPacs);
-			}
-		}
-		#==========================================
-		# Initialize root system
-		#------------------------------------------
-		$root = new KIWIRoot (
-			$kiwi,$xml,$Prepare,$RootTree,
-			"/base-system",$RecycleRoot,undef,undef,
-			$CacheRoot,$CacheRootMode,
-			$TargetArch
-		);
-		if (! defined $root) {
-			$kiwi -> error ("Couldn't create root object");
-			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
-		}
-		if (! defined $root -> init ()) {
-			$kiwi -> error ("Base initialization failed");
-			$kiwi -> failed ();
-			$root -> copyBroken();
-			undef $root;
-			my $code = kiwiExit (1); return $code;
-		}
-		#==========================================
-		# Install root system
-		#------------------------------------------
-		if (! $root -> install ()) {
-			$kiwi -> error ("Image installation failed");
-			$kiwi -> failed ();
-			$root -> cleanMount ();
-			$root -> copyBroken();
-			undef $root;
-			my $code = kiwiExit (1); return $code;
-		}
-		if (! $root -> installArchives ()) {
-			$kiwi -> error ("Archive installation failed");
-			$kiwi -> failed ();
-			$root -> cleanMount ();
-			$root -> copyBroken();
-			undef $root;
-			my $code = kiwiExit (1); return $code;
-		}
-		if (! $root -> setup ()) {
-			$kiwi -> error ("Couldn't setup image system");
-			$kiwi -> failed ();
-			$root -> cleanMount ();
-			$root -> copyBroken();
-			undef $root;
-			my $code = kiwiExit (1); return $code;
-		}
-		if (! $xml -> writeXMLDescription ($root->getRootPath())) {
-			$kiwi -> error ("Couldn't write XML description");
-			$kiwi -> failed ();
-			$root -> cleanMount ();
-			$root -> copyBroken();
-			undef $root;
-			my $code = kiwiExit (1); return $code;
-		}
-		#==========================================
-		# Clean up
-		#------------------------------------------
-		$root -> cleanMount ();
-		$root -> cleanBroken();
-		undef $root;
 		kiwiExit (0);
 	}
 
@@ -907,7 +744,7 @@ sub main {
 			$kiwi,$xml,$Upgrade,undef,
 			"/base-system",$Upgrade,\@AddPackage,\@RemovePackage,
 			$CacheRoot,$CacheRootMode,
-			$TargetArch
+			$TargetArch,$cmdL
 		);
 		if (! defined $root) {
 			$kiwi -> error ("Couldn't create root object");
@@ -943,7 +780,8 @@ sub main {
 		$migrate = new KIWIMigrate (
 			$kiwi,$Destination,$Migrate,\@Exclude,\@Skip,
 			\@AddRepository,\@AddRepositoryType,
-			\@AddRepositoryAlias,\@AddRepositoryPriority
+			\@AddRepositoryAlias,\@AddRepositoryPriority,
+			$cmdL->getForceNewRoot()
 		);
 		#==========================================
 		# Check object and repo setup, mandatory
@@ -1387,6 +1225,12 @@ sub init {
 		$cmdL -> setConfigDir ($Build);
 	}
 	#========================================
+	# check if force-new-root is set
+	#----------------------------------------
+	if (defined $ForceNewRoot) {
+		$cmdL -> setForceNewRoot ($ForceNewRoot);
+	}
+	#========================================
 	# check if repositories are to be ignored
 	#----------------------------------------
 	if (defined $IgnoreRepos) {
@@ -1399,40 +1243,6 @@ sub init {
 		$cmdL -> setCacheDir($ImageCache)
 	}
 	#========================================
-	# check if we are doing caching
-	#----------------------------------------
-	if (defined $InitCache) {
-		$cmdL -> setAdditionalRepos(
-			\@AddRepository,
-			\@AddRepositoryAlias,
-			\@AddRepositoryPriority,
-			\@AddRepositoryType
-		);
-		$cmdL -> setBuildProfiles(\@Profiles);
-		$cmdL -> setConfigDir($InitCache);
-		my $res = $cmdL -> setIgnoreRepos($IgnoreRepos);
-		if (! $res) {
-			my $code = kiwiExit (1); return $code;
-		}
-		if (defined $LogFile) {
-			$res = $cmdL -> setLogFile($LogFile);
-		}
-		if (defined $PackageManager) {
-			$res = $cmdL -> setPackageManager($PackageManager);
-		}
-		if (defined $SetRepository) {
-			$res = $cmdL -> setReplacementRepo(
-				$SetRepository,
-				$SetRepositoryAlias,
-				$SetRepositoryPriority,
-				$SetRepositoryType
-			);
-		}
-		if (! $res) {
-			my $code = kiwiExit (1); return $code;
-		}
-	}
-	#========================================
 	# check if a specifc logfile has been defined
 	#----------------------------------------
 	if (defined $LogFile) {
@@ -1442,17 +1252,10 @@ sub init {
 	# check if a package manager is specified
 	#----------------------------------------
 	if (defined $PackageManager) {
-		my $result = $cmdL -> setPackageManager($PackageManager);
+		my $result = $cmdL -> setPackageManager ($PackageManager);
 		if (! $result) {
 			my $code = kiwiExit (1); return $code;
 		}
-	}
-	#========================================
-	# check if recycle-root is used
-	#----------------------------------------
-	if (defined $RecycleRoot) {
-		$RecycleRoot = $RootTree;
-		$cmdL -> setRootRecycle();
 	}
 	#========================================
 	# check replacement repo information
@@ -1468,15 +1271,36 @@ sub init {
 			my $code = kiwiExit (1); return $code;
 		}
 	}
+	#========================================
+	# check add-on repo information
+	#----------------------------------------
+	if (@AddRepository) {
+		my $result = $cmdL -> setAdditionalRepos(
+			\@AddRepository,
+			\@AddRepositoryAlias,
+			\@AddRepositoryPriority,
+			\@AddRepositoryType
+		);
+		if (! $result) {
+			my $code = kiwiExit (1); return $code;
+		}
+	}
+	#========================================
+	# check if recycle-root is used
+	#----------------------------------------
+	if (defined $RecycleRoot) {
+		$RecycleRoot = $RootTree;
+		$cmdL -> setRootRecycle();
+	}
 	#============================================
 	# check if a target arch is defined
 	#--------------------------------------------
 	if (defined $TargetArch) {
-		$cmdL -> setImageArchitecture($TargetArch);
+		$cmdL -> setImageArchitecture ($TargetArch);
 	}
 	#============================================
 	# check Partitioner according to device
-	#--------------------------------------------
+	#-----------------------------------------
 	if (($targetDevice) && ($targetDevice =~ /\/dev\/dasd/)) {
 		$Partitioner = "fdasd";
 	}
@@ -1636,10 +1460,8 @@ sub init {
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
-	if ((defined $RootTree) && ($RootTree !~ /^\//)) {
-		my $workingDir = qxx ( "pwd" ); chomp $workingDir;
-		$RootTree = $workingDir."/".$RootTree;
-		$cmdL -> setRootTargetDir($RootTree);
+	if (defined $RootTree) {
+		$cmdL -> setRootTargetDir($RootTree)
 	}
 	if (defined $LogPort) {
 		$kiwi -> info ("Setting log server port to: $LogPort");
@@ -2167,18 +1989,14 @@ sub quit {
 	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
 	$kiwi -> setLogHumanReadable();
 	$kiwi -> cleanSweep();
+	if ($kic) {
+		undef $kic;
+	}
 	if (defined $CreatePassword) {
 		system "stty echo";
 	}
 	if (defined $boot) {
 		$boot -> cleanLoop ();
-	}
-	if (defined $root) {
-		$root  -> copyBroken  ();
-		$root  -> cleanLock   ();
-		$root  -> cleanManager();
-		$root  -> cleanSource ();
-		$root  -> cleanMount  ();
 	}
 	if (defined $image) {
 		$image -> cleanMount ();
@@ -2810,31 +2628,6 @@ sub checkFileSystem {
 }
 
 #==========================================
-# checkImageIntegrity
-#------------------------------------------
-sub checkImageIntegrity {
-	# /../
-	# Check the image description integrity if a checksum file exists
-	# ---
-	my $imageDesc = shift;
-	my $checkmdFile = $imageDesc."/.checksum.md5";
-	if (-f $checkmdFile) {
-		my $data = qxx ("cd $imageDesc && md5sum -c .checksum.md5 2>&1");
-		my $code = $? >> 8;
-		if ($code != 0) {
-			chomp $data;
-			$kiwi -> error ("Integrity check for $imageDesc failed:\n$data");
-			$kiwi -> failed ();
-			return undef;
-		}
-	} else {
-		$kiwi -> warning ("Description provides no MD5 hash, check");
-		$kiwi -> skipped ();
-	}
-	return 1;
-}
-
-#==========================================
 # createInstSource
 #------------------------------------------
 sub createInstSource {
@@ -2870,7 +2663,7 @@ sub createInstSource {
 	#==========================================
 	# Initialize installation source tree
 	#------------------------------------------
-	my $root = $locator -> createTmpDirectory ( undef, $RootTree );
+	my $root = $locator -> createTmpDirectory ( undef, $RootTree, $cmdL );
 	if (! defined $root) {
 		$kiwi -> error ("Couldn't create instsource root");
 		$kiwi -> failed ();
@@ -2913,8 +2706,7 @@ sub initializeCache {
 	# Variable setup
 	#------------------------------------------
 	my $xml  = $_[0];
-	my %type = %{$_[1]};
-	my $mode = $_[2];
+	my $mode = $_[1];
 	#==========================================
 	# Variable setup
 	#------------------------------------------
@@ -2925,6 +2717,7 @@ sub initializeCache {
 	#==========================================
 	# Check boot type of the image
 	#------------------------------------------
+	my %type = %{$xml->getImageTypeAndAttributes()};
 	my $name = $xml -> getImageName();
 	if (($type{boot}) && ($type{boot} =~ /.*\/(.*)/)) {
 		$CacheDistro = $1;
@@ -3105,6 +2898,7 @@ sub selectCache {
 sub createCache {
 	my $xml  = $_[0];
 	my $init = $_[1];
+	my $cmdL = new KIWICommandLine ($kiwi);
 	if ((! $init) || (! $ImageCache)) {
 		return undef;
 	}
@@ -3117,7 +2911,6 @@ sub createCache {
 	my @CachePackages      = @{$init->[2]};
 	my $CacheScan          = $init->[3];
 	my $imageCacheDir      = $ImageCache;
-	my $imagePrepareDir    = $main::Prepare;
 	#==========================================
 	# undef ImageCache for recursive kiwi call
 	#------------------------------------------
@@ -3141,47 +2934,50 @@ sub createCache {
 		push @main::AddRepository, $path;
 		push @main::AddRepositoryType, $type;
 	}
+	$cmdL -> setIgnoreRepos($IgnoreRepos);
+	$cmdL -> setAdditionalRepos(
+		\@AddRepository,
+		\@AddRepositoryAlias,
+		\@AddRepositoryPriority,
+		\@AddRepositoryType
+	);
 	#==========================================
 	# walk through cachable patterns
 	#------------------------------------------
 	foreach my $pattern (@CachePatterns) {
 		if ($pattern eq "package-cache") {
 			$pattern = $xml -> getImageName();
-			push @CachePackages,$xml->getPackageManager();
-			undef @main::AddPattern;
-			@main::AddPackage = @CachePackages;
+			$cmdL -> setAdditionalPackages (
+				[@CachePackages,$xml->getPackageManager()]
+			);
+			$cmdL -> setAdditionalPatterns ([]);
 			$kiwi -> info (
 				"--> Building cache file for plain package list\n"
 			);
 		} else {
-			@main::AddPackage = $xml->getPackageManager();
-			@main::AddPattern = $pattern;
+			$cmdL -> setAdditionalPackages ([$xml->getPackageManager()]);
+			$cmdL -> setAdditionalPatterns ([$pattern]);
 			$kiwi -> info (
 				"--> Building cache file for pattern: $pattern\n"
 			);
 		}
 		#==========================================
-		# use KIWICache.kiwi for cache creation
+		# use KIWICache.kiwi for cache preparation
 		#------------------------------------------
-		$main::Prepare      = $BasePath."/modules";
-		$main::RootTree     = $imageCacheDir."/";
-		$main::RootTree    .= $CacheDistro."-".$pattern;
-		$main::Survive      = "yes";
-		$main::ForceNewRoot = 1;
-		undef @main::Profiles;
-		undef $main::Create;
-		undef $main::kiwi;
-		#==========================================
-		# Prepare new cache tree
-		#------------------------------------------
-		if (! defined main::main()) {
+		my $rootTarget  = $imageCacheDir."/".$CacheDistro."-".$pattern;
+		$cmdL -> setBuildProfiles(\@Profiles);
+		$cmdL -> setConfigDir ($BasePath."/modules");
+		$cmdL -> setRootTargetDir ($rootTarget);
+		$cmdL -> setForceNewRoot (1);
+		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic -> prepareImage()) {
 			&{$resetVariables}; return undef;
 		}
 		#==========================================
 		# Create cache meta data
 		#------------------------------------------
-		my $meta   = $main::RootTree.".cache";
-		my $root   = $main::RootTree;
+		my $meta   = $rootTarget.".cache";
+		my $root   = $rootTarget;
 		my $ignore = "'gpg-pubkey|bundle-lang'";
 		my $rpmopts= "'%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n'";
 		my $rpm    = "rpm --root $root";
@@ -3215,10 +3011,14 @@ sub createCache {
 			&{$resetVariables}; return undef;
 		}
 		my $name= $imageCacheDir."/".$cxml -> buildImageName();
-		qxx ("mv $name $main::RootTree.ext2");
+		qxx ("mv $name $rootTarget.ext2");
 		qxx ("rm -f  $name.ext2");
 		qxx ("rm -f  $imageCacheDir/initrd-*");
-		qxx ("rm -rf $main::RootTree");
+		qxx ("rm -rf $rootTarget");
+		#==========================================
+		# write XML changes to logfile...
+		#------------------------------------------
+		$kiwi -> writeXML();
 		#==========================================
 		# Reformat log file for human readers...
 		#------------------------------------------
