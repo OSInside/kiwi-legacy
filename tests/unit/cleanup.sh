@@ -8,7 +8,14 @@
 echo "Cleaning up artifacts"
 
 for i in `find . -name "*.converted.xml"`;do \
-    rm $i ;\
+	rm $i ;\
 done
 
-rm -rf /tmp/kiwiDevTests
+grep kiwi /proc/mounts >& /dev/null
+if [ $? -ne 0 ]; then
+	rm -rf /tmp/kiwiDevTests
+else
+	echo "Mounted directories detected in /tmp/kiwiDevTests not removing"
+	echo "directory. Tests might fail. Manualy umount and re-run tests."
+fi
+

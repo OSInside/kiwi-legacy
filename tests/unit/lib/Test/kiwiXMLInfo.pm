@@ -197,14 +197,17 @@ sub test_packagesInfo {
 	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
+	# Avoid chain failures
+	$this -> removeTestTmpDir();
 	# Setup directory to operate as repository
-	my $repoDir = $this -> createTestTmpDir();
-	my $pckgOrig = $this -> {baseDir} . 'repo';
-	system "cp -r $pckgOrig/* $repoDir";
+	my $repoParentDir = $this -> createTestTmpDir();
+	my $repoOrig = $this -> getDataDir();
+	system "cp -r $repoOrig/kiwiTestRepo $repoParentDir";
 	my $cmd  = $this -> __getCmdl();
 	$cmd -> setConfigDir($this -> {baseDir});
 	# Replace the repo from the config file with the previously setup repo
-	$cmd -> setReplacementRepo($repoDir, 'testRepo', 1, 'rpm-md');
+	$cmd -> setReplacementRepo($repoParentDir . '/kiwiTestRepo', 'testRepo',
+							1, 'rpm-md');
 	my $info = $this -> __getInfoObj($cmd);
 	my @requests = ('packages');
 	my $tree = $info -> getXMLInfoTree(\@requests);
@@ -378,14 +381,17 @@ sub test_sizeInfo {
 	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
+	# Avoid chain failures
+	$this -> removeTestTmpDir();
 	# Setup directory to operate as repository
 	my $repoDir = $this -> createTestTmpDir();
-	my $pckgOrig = $this -> {baseDir} . 'repo';
-	system "cp -r $pckgOrig/* $repoDir";
+	my $pckgOrig = $this -> getDataDir();
+	system "cp -r $pckgOrig/kiwiTestRepo $repoDir";
 	my $cmd  = $this -> __getCmdl();
 	$cmd -> setConfigDir($this -> {baseDir});
 	# Replace the repo from the config file with the previously setup repo
-	$cmd -> setReplacementRepo($repoDir, 'testRepo', 1, 'rpm-md');
+	$cmd -> setReplacementRepo($repoDir . '/kiwiTestRepo', 'testRepo',
+							1, 'rpm-md');
 	my $info = $this -> __getInfoObj($cmd);
 	my @requests = ('size');
 	my $tree = $info -> getXMLInfoTree(\@requests);

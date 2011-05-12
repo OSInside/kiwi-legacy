@@ -118,6 +118,27 @@ sub removeTestTmpDir {
 	# ...
 	# Remove the test temporary directory
 	# ---
+	my $this = shift;
+	# Before removing anything make sure there are no dangling mounts that
+	# might have a negative imapct on the system we run on
+	my $mounts;
+	if (! open $mounts, '<', '/proc/mounts' ) {
+		return 0;
+	}
+	while (<$mounts>) {
+		my $line = $_;
+		if ($line =~ /.*kiwi.*/) {
+			my ($source, $mntPnt, $rest) = split /\s/, $line;
+			my $res = system "umount $mntPnt";
+			if ($res) {
+				my $msg = "Unable to clean up mount point $mntPnt from "
+					. 'previous test run. Not deleting directory '
+					. '/tmp/kiwiDevTests. Please umount and clean up '
+					. 'manually. ';
+				$this -> assert(0, $msg);
+			}
+		}
+	}
 	system 'rm -rf /tmp/kiwiDevTests';
 	return 1;
 }

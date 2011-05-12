@@ -1208,7 +1208,7 @@ sub test_cmdRecycleRoot_delayedSet {
 	$this -> assert_null($recycle);
 	# Enable root recycle, make sure we have not data as the source is not
 	# set yet
-	$cmd -> enableRootRecycle();
+	$cmd -> setRootRecycle();
 	$recycle = $cmd -> getRecycleRootDir();
 	$this -> assert_null($recycle);
 	# Set the root target, verify the recycle root get set
@@ -1230,7 +1230,7 @@ sub test_cmdRecycleRoot_immediateSet {
 
 	# Enable root recycle should have immediate effect
 	$cmd -> setRootTargetDir('/tmp');
-	$cmd -> enableRootRecycle();
+	$cmd -> setRootRecycle();
 	my $recycle = $cmd -> getRecycleRootDir();
 	$this -> assert_str_equals('/tmp', $recycle);
 }
