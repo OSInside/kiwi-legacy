@@ -63,6 +63,7 @@ sub new {
 	my $imageStrip = shift;
 	my $baseSystem = shift;
 	my $imageOrig  = shift;
+	my $initCache  = shift;
 	my $configFile = $xml -> getConfigName();
 	#==========================================
 	# Use absolute path for image destination
@@ -141,6 +142,7 @@ sub new {
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi}       = $kiwi;
+	$this->{initCache}  = $initCache;
 	$this->{xml}        = $xml;
 	$this->{imageTree}  = $imageTree;
 	$this->{imageDest}  = $imageDest;
@@ -3207,6 +3209,7 @@ sub setupLogicalExtend {
 	my $kiwi  = $this->{kiwi};
 	my $imageTree = $this->{imageTree};
 	my $imageStrip= $this->{imageStrip};
+	my $initCache = $this->{initCache};
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
@@ -3227,7 +3230,7 @@ sub setupLogicalExtend {
 	#==========================================
 	# extract kernel from physical extend
 	#------------------------------------------
-	if (! defined $main::InitCache) {
+	if (! defined $initCache) {
 		if (! $this -> extractKernel ($name)) {
 			return undef;
 		}
@@ -3661,10 +3664,11 @@ sub buildMD5Sum {
 	my $this = shift;
 	my $name = shift;
 	my $kiwi = $this->{kiwi};
+	my $initCache = $this->{initCache};
 	#==========================================
 	# Skip this in init cache mode
 	#------------------------------------------
-	if (defined $main::InitCache) {
+	if (defined $initCache) {
 		if ($name =~ /\.gz$/) {
 			$name =~ s/\.gz//;
 		}

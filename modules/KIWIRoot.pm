@@ -339,9 +339,15 @@ sub init {
 	#----------------------------------
 	qxx ("cp $main::KConfig $root/.kconfig 2>&1");
 	#==================================
+	# Return early if existing root
+	#----------------------------------
+	if (defined $main::RecycleRoot) {
+		return $this;
+	}
+	#==================================
 	# Return early if cache is used
 	#----------------------------------
-	if ((defined $main::ImageCache) || (defined $main::RecycleRoot)) {
+	if ((defined $main::ImageCache) && (! defined $main::InitCache)) {
 		return $this;
 	}
 	#==========================================

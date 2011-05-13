@@ -303,15 +303,25 @@ sub __prepareTree {
 	my $configDir  = shift;
 	my $rootTgtDir = shift;
 	my $kiwi = $this -> {kiwi};
+	my $cmdL = $this -> {cmdL};
 	my %attr = %{$xml->getImageTypeAndAttributes()};
 	#==========================================
 	# Select cache if requested and exists
 	#------------------------------------------
 	if ($this -> {cacheDir}) {
-		my $cacheInit = main::initializeCache($xml, $configDir);
-		# Side effect of this call is setting of global vars $CacheRoot
-		# and $CacheRootMode
-		main::selectCache ($xml,$cacheInit);
+		my $icache = new KIWICache (
+			$kiwi,$xml,$this->{cacheDir},$main::BasePath,
+			$this->{buildProfiles},$configDir
+		);
+		my $cacheInit = $icache -> initializeCache ($cmdL);
+		if (! $cacheInit) {
+			return undef;
+		}
+		my @selected = $icache -> selectCache ($cacheInit);
+		if (@selected) {
+			$main::CacheRoot     = $selected[0];
+			$main::CacheRootMode = $selected[1];
+		}
 		#==========================================
 		# Add bootstrap packages to image section
 		#------------------------------------------
