@@ -79,6 +79,16 @@ sub new {
 }
 
 #==========================================
+# closeRootChannel
+#------------------------------------------
+sub closeRootChannel {
+	# ...
+	# Dummy method to mimick interface of proper log object
+	# ---
+	return;
+}
+
+#==========================================
 # done
 #------------------------------------------
 sub done {
@@ -363,6 +373,16 @@ sub note {
 	return;
 }
 
+#==========================================
+# reopenRootChannel
+#------------------------------------------
+sub reopenRootChannel {
+	# ...
+	# Dummy implementation to mimick log object
+	# ---
+	my $this = shift;
+	return $this;
+}
 #==========================================
 # setRootLog
 #------------------------------------------
