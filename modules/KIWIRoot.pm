@@ -901,6 +901,7 @@ sub fixupOverlayFilesOwnership {
 	#------------------------------------------
 	foreach my $file (@files) {
 		my $ok = 1;
+		$file =~ s/^ +//;
 		foreach my $exception (keys %except) {
 			if ($file =~ /$exception/) {
 				$kiwi -> loginfo (
