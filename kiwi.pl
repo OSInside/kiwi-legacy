@@ -536,18 +536,28 @@ sub main {
 			if (@deleteList) {
 				$kiwi -> info ("--> Remove: @deleteList\n");
 			}
-			my $resetVariables   = createResetClosure();
-			$main::Survive       = "yes";
-			$main::Upgrade       = $main::Create;
-			@main::AddPackage    = @addonList;
-			@main::RemovePackage = @deleteList;
-			undef $main::Create;
-			if (! defined main::main()) {
-				&{$resetVariables};
+			#==========================================
+			# temporary store config dir location
+			#------------------------------------------
+			my $cdir = $cmdL -> getConfigDir();
+			#==========================================
+			# make sure config dir is image tree
+			#------------------------------------------
+			$cmdL -> setConfigDir ($Create);
+			#==========================================
+			# upgrade the tree
+			#------------------------------------------
+			my $kic  = new KIWIImageCreator ($kiwi, $cmdL);
+			if (! $kic) {
 				my $code = kiwiExit (1); return $code;
 			}
-			&{$resetVariables};
-			undef $main::Upgrade;
+			if (! $kic -> upgradeImage()) {
+				my $code = kiwiExit (1); return $code;
+			}
+			#==========================================
+			# reset config dir location
+			#------------------------------------------
+			$cmdL -> setConfigDir ($cdir);
 		}
 		#==========================================
 		# Create KIWIImage object
@@ -706,80 +716,13 @@ sub main {
 	# Upgrade image in chroot system
 	#------------------------------------------
 	if (defined $Upgrade) {
-		$kiwi -> info ("Reading image description [Upgrade]...\n");
-		my $xml = new KIWIXML (
-			$kiwi,"$Upgrade/image",undef,\@ProfilesOrig
-		);
-		if (! defined $xml) {
+		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic) {
 			my $code = kiwiExit (1); return $code;
 		}
-		my $pkgMgr = $cmdL -> getPackageManager();
-		if ($pkgMgr) {
-			$xml -> setPackageManager($pkgMgr);
-		}
-		#==========================================
-		# Check for ignore-repos option
-		#------------------------------------------
-		if (defined $IgnoreRepos) {
-			$xml -> ignoreRepositories ();
-		}
-		#==========================================
-		# Check for set-repo option
-		#------------------------------------------
-		if (defined $SetRepository) {
-			$xml -> setRepository (
-				$SetRepositoryType,$SetRepository,
-				$SetRepositoryAlias,$SetRepositoryPriority
-			);
-		}
-		#==========================================
-		# Check for add-repo option
-		#------------------------------------------
-		if (defined @AddRepository) {
-			$xml -> addRepository (
-				\@AddRepositoryType,\@AddRepository,
-				\@AddRepositoryAlias,\@AddRepositoryPriority
-			);
-		}
-		#==========================================
-		# Check for add-pattern option
-		#------------------------------------------
-		if (defined @AddPattern) {
-			foreach my $pattern (@AddPattern) {
-				push (@AddPackage,"pattern:$pattern");
-			}
-		}
-		#==========================================
-		# Initialize root system, use existing root
-		#------------------------------------------
-		$root = new KIWIRoot (
-			$kiwi,$xml,$Upgrade,undef,
-			"/base-system",$Upgrade,\@AddPackage,\@RemovePackage,
-			$CacheRoot,$CacheRootMode,
-			$TargetArch,$cmdL
-		);
-		if (! defined $root) {
-			$kiwi -> error ("Couldn't create root object");
-			$kiwi -> failed ();
+		if (! $kic -> upgradeImage()) {
 			my $code = kiwiExit (1); return $code;
 		}
-		#==========================================
-		# Upgrade root system
-		#------------------------------------------
-		if (! $root -> upgrade ()) {
-			$kiwi -> error ("Image Upgrade failed");
-			$kiwi -> failed ();
-			$root -> cleanMount ();
-			$root -> copyBroken();
-			undef $root;
-			my $code = kiwiExit (1); return $code;
-		}
-		#==========================================
-		# clean up
-		#------------------------------------------ 
-		$root -> cleanMount ();
-		$root -> cleanBroken();
-		undef $root;
 		kiwiExit (0);
 	}
 
@@ -1217,6 +1160,24 @@ sub init {
 		"yes|y"                 => \$defaultAnswer,
 	);
 	#========================================
+	# check if packages are to be added
+	#----------------------------------------
+	if (defined @AddPackage) {
+		$cmdL -> setAdditionalPackages (\@AddPackage);
+	}
+	#========================================
+	# check if patterns are to be added
+	#----------------------------------------
+	if (defined @AddPattern) {
+		$cmdL -> setAdditionalPatterns (\@AddPattern);
+	}
+	#========================================
+	# check if packs are marked for removal
+	#----------------------------------------
+	if (defined @RemovePackage) {
+		$cmdL -> setPackagesToRemove (\@RemovePackage)
+	}
+	#========================================
 	# check if repositories are to be added
 	#----------------------------------------
 	if (defined @AddRepository) {
@@ -1351,10 +1312,16 @@ sub init {
 		$ImageDescription = $Prepare;
 		$cmdL -> setConfigDir ($ImageDescription);
 	}
+	if (defined $Upgrade) {
+		$ImageDescription = $Upgrade;
+		$cmdL -> setConfigDir ($ImageDescription);
+	}
 	if (defined $Create) {
+		$ImageDescription = $Create;
 		if (open FD,"$Create/image/main::Prepare") {
 			$ImageDescription = <FD>; close FD;
 		}
+		$cmdL -> setConfigDir ($ImageDescription);
 	}
 	#========================================
 	# store original value of Profiles

@@ -161,6 +161,85 @@ sub prepareBootImage {
 }
 
 #==========================================
+# upgradeImage
+#------------------------------------------
+sub upgradeImage {
+	my $this      = shift;
+	my $configDir = $this -> {configDir};
+	my $kiwi      = $this -> {kiwi};
+	my $ignore    = $this -> {ignoreRepos};
+	if (! $this -> __checkImageIntegrity() ) {
+		return undef;
+	}
+	#==========================================
+	# Setup the image XML description
+	#------------------------------------------
+	$configDir .= "/image";
+	my $locator = new KIWILocator($kiwi);
+	my $controlFile = $locator -> getControlFile ($configDir);;
+	if (! $controlFile) {
+		return undef;
+	}
+	my $validator = new KIWIXMLValidator (
+		$kiwi,$controlFile,$main::Revision,$main::Schema,$main::SchemaCVT
+	);
+	my $isValid = $validator ? $validator -> validate() : undef;
+	if (! $isValid) {
+		return undef;
+	}
+	$kiwi -> info ("Reading image description [Upgrade]...\n");
+	my $buildProfs = $this -> {buildProfiles};
+	my $xml = new KIWIXML (
+		$kiwi, $configDir, undef, $buildProfs
+	);
+	if (! defined $xml) {
+		return undef;
+	}
+	my $krc = new KIWIRuntimeChecker (
+		$kiwi, $this -> {cmdL}, $xml
+	);
+	#==========================================
+	# Apply XML over rides from command line
+	#------------------------------------------
+	if ($ignore) {
+		$xml -> ignoreRepositories ();
+	}
+	if ($this -> {addlPackages}) {
+		$xml -> addImagePackages (@{$this -> {addlPackages}});
+	}
+	if ($this -> {addlPatterns}) {
+		$xml -> addImagePatterns (@{$this -> {addlPatterns}});
+	}
+	if ($this -> {addlRepos}) {
+		my %addlRepos = %{$this -> {addlRepos}};
+		$xml -> addRepository (
+			$addlRepos{repositoryTypes},
+			$addlRepos{repositories},
+			$addlRepos{repositoryAlia},
+			$addlRepos{repositoryPriorities}
+		);
+	}
+	if ($this -> {removePackages}) {
+		$xml -> addRemovePackages (@{$this -> {removePackages}});
+	}
+	if ($this -> {replRepo}) {
+		my %replRepo = %{$this -> {replRepo}};
+		$xml -> setRepository (
+			$replRepo{repositoryType},
+			$replRepo{repository},
+			$replRepo{repositoryAlias},
+			$replRepo{respositoryPriority}
+		);
+	}
+	if (! $krc -> prepareChecks()) {
+		return undef;
+	}
+	return $this -> __upgradeTree(
+		$xml,$this->{configDir}
+	);
+}
+
+#==========================================
 # prepareImage
 #------------------------------------------
 sub prepareImage {
@@ -290,6 +369,68 @@ sub __checkImageIntegrity {
 	}
 	return 1;
 }
+#==========================================
+# __upgradeTree
+#------------------------------------------
+sub __upgradeTree {
+	# ...
+	# Upgrade the existing tree using the packagemanager
+	# upgrade functionality
+	# ---
+	my $this      = shift;
+	my $xml       = shift;
+	my $configDir = shift;
+	my $kiwi      = $this -> {kiwi};
+	my $cmdL      = $this -> {cmdL};
+	#==========================================
+	# Select cache if requested and exists
+	#------------------------------------------
+	if ($this -> {cacheDir}) {
+		my $icache = new KIWICache (
+			$kiwi,$xml,$this->{cacheDir},$main::BasePath,
+			$this->{buildProfiles},$configDir
+		);
+		my $cacheInit = $icache -> initializeCache ($cmdL);
+		if (! $cacheInit) {
+			return undef;
+		}
+		my @selected = $icache -> selectCache ($cacheInit);
+		if (@selected) {
+			$main::CacheRoot     = $selected[0];
+			$main::CacheRootMode = $selected[1];
+		}
+	}
+	#==========================================
+	# Initialize root system
+	#------------------------------------------
+	my $root = new KIWIRoot (
+		$kiwi,$xml,$configDir,undef,'/base-system',
+		$configDir,$this->{addlPackages},$this->{removePackages},
+		$main::CacheRoot,
+		$main::CacheRootMode,
+		$this -> {imageArch},
+		$this -> {cmdL}
+	);
+	if (! defined $root) {
+		$kiwi -> error ("Couldn't create root object");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# store root pointer for destructor code
+	#------------------------------------------
+	$this->{root} = $root;
+	#==========================================
+	# Upgrade root system
+	#------------------------------------------
+	if (! $root -> upgrade ()) {
+		$kiwi -> error ("Image Upgrade failed");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$this -> DESTROY(1);
+	return 1;
+}
 
 #==========================================
 # __prepareTree
@@ -396,9 +537,7 @@ sub __prepareTree {
 	#==========================================
 	# Clean up
 	#------------------------------------------
-	$root -> cleanMount ();
-	$root -> cleanBroken();
-	undef $root;
+	$this -> DESTROY(1);
 	return 1;
 }
 
@@ -407,16 +546,18 @@ sub __prepareTree {
 #------------------------------------------
 sub DESTROY {
 	my $this = shift;
+	my $ok   = shift;
 	my $root = $this->{root};
-	if (! $root) {
-		return;
+	if ($root) {
+		if ($ok) {
+			$root -> cleanBroken ();
+		}
+		$root -> cleanLock   ();
+		$root -> cleanManager();
+		$root -> cleanSource ();
+		$root -> cleanMount  ();
+		undef $root;
 	}
-	$root -> cleanMount  ();
-	$root -> copyBroken  ();
-	$root -> cleanLock   ();
-	$root -> cleanManager();
-	$root -> cleanSource ();
-	undef $root;
 }
 
 1;
