@@ -327,6 +327,7 @@ sub createCache {
 		# Move process log to final cache log...
 		#------------------------------------------
 		$kiwi -> finalizeLog();
+		$kiwi -> resetRootChannel();
 		undef $kic;
 	}
 	return $imageCacheDir;
