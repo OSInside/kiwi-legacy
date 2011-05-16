@@ -24,6 +24,7 @@ require Exporter;
 # KIWI Modules
 #------------------------------------------
 use KIWICommandLine;
+use KIWIImageFormat;
 use KIWILocator;
 use KIWILog;
 use KIWIQX;
@@ -72,14 +73,6 @@ sub new {
 		$kiwi -> failed();
 		return undef;
 	}
-	my $configDir = $cmdL -> getConfigDir();
-	if (! defined $configDir) {
-		my $msg = 'Invalid KIWICommandLine object, no configuration '
-			. 'directory.';
-		$kiwi -> error ($msg);
-		$kiwi -> failed();
-		return undef;
-	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -95,7 +88,12 @@ sub new {
 	$this->{removePackages} = $cmdL -> getPackagesToRemove();
 	$this->{replRepo}       = $cmdL -> getReplacementRepo();
 	$this->{rootTgtDir}     = $cmdL -> getRootTargetDir();
-	$this->{configDir}      = $configDir;
+	$this->{initrd}         = $cmdL -> getInitrdFile();
+	$this->{sysloc}         = $cmdL -> getSystemLocation();
+	$this->{disksize}       = $cmdL -> getImageDiskSize();
+	$this->{targetdevice}   = $cmdL -> getImageTargetDevice();
+	$this->{format}         = $cmdL -> getImageFormat();
+	$this->{configDir}      = $cmdL -> getConfigDir();
 	$this->{kiwi}           = $kiwi;
 	$this->{cmdL}           = $cmdL;
 	return $this;
@@ -131,12 +129,12 @@ sub prepareBootImage {
 	my $rootTgtDir = shift;
 	my $kiwi      = $this -> {kiwi};
 	if (! $configDir) {
-		$kiwi -> error ('prepareBotImage: no configuration directory defined');
+		$kiwi -> error ('prepareBootImage: no configuration directory defined');
 		$kiwi -> failed ();
 		return undef;
 	}
 	if (! -d $configDir) {
-		my $msg = 'prepareBotImage: config dir "'
+		my $msg = 'prepareBootImage: config dir "'
 			. $configDir
 			. '" does not exist';
 		$kiwi -> error ($msg);
@@ -144,7 +142,7 @@ sub prepareBootImage {
 		return undef;
 	}
 	if (! $rootTgtDir) {
-		$kiwi -> error ('prepareBotImage: no root traget defined');
+		$kiwi -> error ('prepareBootImage: no root traget defined');
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -168,6 +166,11 @@ sub upgradeImage {
 	my $configDir = $this -> {configDir};
 	my $kiwi      = $this -> {kiwi};
 	my $ignore    = $this -> {ignoreRepos};
+	if (! $configDir) {
+		$kiwi -> error ('prepareBootImage: no configuration directory defined');
+		$kiwi -> failed ();
+		return undef;
+	}
 	if (! $this -> __checkImageIntegrity() ) {
 		return undef;
 	}
@@ -251,6 +254,11 @@ sub prepareImage {
 	my $kiwi      = $this -> {kiwi};
 	my $pkgMgr    = $this -> {packageManager};
 	my $ignore    = $this -> {ignoreRepos};
+	if (! $configDir) {
+		$kiwi -> error ('prepareBootImage: no configuration directory defined');
+		$kiwi -> failed ();
+		return undef;
+	}
 	if (! $this -> __checkImageIntegrity() ) {
 		return undef;
 	}
@@ -339,6 +347,196 @@ sub prepareImage {
 	return $this -> __prepareTree(
 		$xml,$this->{configDir},$this->{rootTgtDir}
 	);
+}
+
+#==========================================
+# createSplash
+#------------------------------------------
+sub createSplash {
+	# ...
+	# create a splash screen on the stored initrd file
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $ird  = $this->{initrd};
+	my $boot = new KIWIBoot ($kiwi,$ird);
+	if (! defined $boot) {
+		return undef;
+	}
+	$this->{boot} = $boot;
+	$boot -> setupSplash();
+	undef $boot;
+	return 1;
+}
+
+#==========================================
+# createImageBootUSB
+#------------------------------------------
+sub createImageBootUSB {
+	# ...
+	# create a bootable USB stick with the stored initrd
+	# file. Note That this only creates a stick running the
+	# initrd and not more
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $ird  = $this->{initrd};
+	$kiwi -> info ("Creating boot USB stick from: $ird...\n");
+	my $boot = new KIWIBoot ($kiwi,$ird);
+	if (! defined $boot) {
+		return undef;
+	}
+	$this->{boot} = $boot;
+	if (! $boot -> setupInstallStick()) {
+		undef $boot;
+		return undef;
+	}
+	undef $boot;
+	return 1;
+}
+
+#==========================================
+# createImageBootCD
+#------------------------------------------
+sub createImageBootCD {
+	# ...
+	# create a bootable CD with the stored initrd
+	# file. Note That this only creates a boot CD running the
+	# initrd and not more
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $ird  = $this->{initrd};
+	$kiwi -> info ("Creating boot ISO from: $ird...\n");
+	my $boot = new KIWIBoot ($kiwi,$ird);
+	if (! defined $boot) {
+		return undef;
+	}
+	$this->{boot} = $boot;
+	if (! $boot -> setupInstallCD()) {
+		undef $boot;
+		return undef;
+	}
+	undef $boot;
+	return 1;
+}
+
+#==========================================
+# createImageInstallCD
+#------------------------------------------
+sub createImageInstallCD {
+	# ...
+	# create an OEM install CD
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $ird  = $this->{initrd};
+	my $sys  = $this->{sysloc};
+	$kiwi -> info ("Creating install ISO from: $ird...\n");
+	if (! defined $sys) {
+		$kiwi -> error  ("No Install system image specified");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $boot = new KIWIBoot ($kiwi,$ird,$sys);
+	if (! defined $boot) {
+		return undef;
+	}
+	$this->{boot} = $boot;
+	if (! $boot -> setupInstallCD()) {
+		undef $boot;
+		return undef;
+	}
+	undef $boot;
+	return 1;
+}
+
+#==========================================
+# createImageInstallStick
+#------------------------------------------
+sub createImageInstallStick {
+	# ...
+	# create an OEM install Stick
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $ird  = $this->{initrd};
+	my $sys  = $this->{sysloc};
+	$kiwi -> info ("Creating install Stick from: $ird...\n");
+	if (! defined $sys) {
+		$kiwi -> error  ("No Install system image specified");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $boot = new KIWIBoot ($kiwi,$ird,$sys);
+	if (! defined $boot) {
+		return undef;
+	}
+	$this->{boot} = $boot;
+	if (! $boot -> setupInstallStick()) {
+		undef $boot;
+		return undef;
+	}
+	undef $boot;
+	return 1;
+}
+
+#==========================================
+# createImageDisk
+#------------------------------------------
+sub createImageDisk {
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $ird  = $this->{initrd};
+	my $sys  = $this->{sysloc};
+	my $size = $this->{disksize};
+	my $tdev = $this->{targetdevice};
+	my $prof = $this->{buildProfiles};
+	$kiwi -> info ("--> Creating boot VM disk from: $ird...\n");
+	if (! defined $sys) {
+		$kiwi -> error  ("No VM system image specified");
+		$kiwi -> failed ();
+		return undef;
+	}
+	qxx ( "file $sys | grep -q 'gzip compressed data'" );
+	my $code = $? >> 8;
+	if ($code == 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Can't use compressed VM system");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $boot = new KIWIBoot (
+		$kiwi,$ird,$sys,$size,undef,$prof
+	);
+	if (! defined $boot) {
+		return undef;
+	}
+	$this->{boot} = $boot;
+	if (! $boot -> setupBootDisk($tdev)) {
+		undef $boot;
+		return undef;
+	}
+	undef $boot;
+	return 1;
+}
+
+#==========================================
+# createImageFormat
+#------------------------------------------
+sub createImageFormat {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $format = $this->{format};
+	my $sys    = $this->{sysloc};
+	$kiwi -> info ("--> Starting image format conversion...\n");
+	my $imageformat = new KIWIImageFormat ($kiwi,$sys,$format);
+	if (! $imageformat) {
+		return undef;
+	}
+	$imageformat -> createFormat();
+	$imageformat -> createMaschineConfiguration();
+	return 1;
 }
 
 #==========================================
@@ -548,6 +746,7 @@ sub DESTROY {
 	my $this = shift;
 	my $ok   = shift;
 	my $root = $this->{root};
+	my $boot = $this->{boot};
 	if ($root) {
 		if ($ok) {
 			$root -> cleanBroken ();
@@ -557,6 +756,9 @@ sub DESTROY {
 		$root -> cleanSource ();
 		$root -> cleanMount  ();
 		undef $root;
+	}
+	if ($boot) {
+		undef $boot;
 	}
 }
 

@@ -40,28 +40,6 @@ sub new {
 }
 
 #==========================================
-# test_ctor_invalidCmdlArg
-#------------------------------------------
-sub test_ctor_invalidCmdlArg {
-	# ...
-	# Test object construction, do not supply a command line object argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	my $kic = new KIWIImageCreator($kiwi, $cmd);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'Invalid KIWICommandLine object, no configuration '
-		. 'directory.';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($kic);
-}
-
-#==========================================
 # test_ctor_noCmdlArg
 #------------------------------------------
 sub test_ctor_noCmdlArg {
@@ -96,7 +74,7 @@ sub test_prepBootImg_noCfgDir {
 	$cmd -> setConfigDir($confDir);
 	my $kic = new KIWIImageCreator($kiwi, $cmd);
 	my $res = $kic -> prepareBootImage('ola');
-	my $expectedMsg = 'prepareBotImage: config dir "ola" does not exist';
+	my $expectedMsg = 'prepareBootImage: config dir "ola" does not exist';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -121,7 +99,7 @@ sub test_prepBootImg_noCfgDirArg {
 	$cmd -> setConfigDir($confDir);
 	my $kic = new KIWIImageCreator($kiwi, $cmd);
 	my $res = $kic -> prepareBootImage();
-	my $expectedMsg = 'prepareBotImage: no configuration directory defined';
+	my $expectedMsg = 'prepareBootImage: no configuration directory defined';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -146,7 +124,7 @@ sub test_prepBootImg_noRootDirArg {
 	$cmd -> setConfigDir($confDir);
 	my $kic = new KIWIImageCreator($kiwi,$cmd);
 	my $res = $kic -> prepareBootImage('/tmp');
-	my $expectedMsg = 'prepareBotImage: no rot traget defined';
+	my $expectedMsg = 'prepareBootImage: no root traget defined';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();

@@ -1033,7 +1033,7 @@ sub createImageRootAndBoot {
 		$cmdL -> setConfigDir ($configDir);
 		$cmdL -> setRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if (! $kic -> prepareBootImage($configDir, $rootTarget)) {
+		if ((! $kic) || (! $kic->prepareBootImage($configDir, $rootTarget))) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -1158,32 +1158,39 @@ sub createImageVMX {
 	#==========================================
 	# Create virtual disk image(s)
 	#------------------------------------------
-	$main::Survive     = "yes";
-	$main::BootVMDisk  = $main::Destination."/".$name->{bootImage}.".splash.gz";
-	$main::BootVMSystem= $main::Destination."/".$name->{systemImage};
-	undef $main::Prepare;
-	undef $main::Create;
+	my $cmdL = new KIWICommandLine ($kiwi);
+	$cmdL -> setInitrdFile (
+		$main::Destination."/".$name->{bootImage}.".splash.gz"
+	);
 	if (defined $name->{imageTree}) {
-		$main::BootVMSystem = $name->{imageTree};
+		$cmdL -> setSystemLocation (
+			$main::BootVMSystem = $name->{imageTree}
+		);
+	} else {
+		$cmdL -> setSystemLocation (
+			$main::Destination."/".$name->{systemImage}
+		);
 	}
-	if (! defined main::main()) {
-		&{$this->{resetvars}};
+	my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+	if ((! $kic) || (! $kic->createImageDisk())) {
+		undef $kic;
 		return undef;
 	}
 	#==========================================
 	# Create VM format/configuration
 	#------------------------------------------
 	if ((defined $name->{format}) || ($xendomain eq "domU")) {
-		undef $main::BootVMDisk;
-		undef $main::BootVMSystem;
-		$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
-		$main::Format  = $name->{format};
-		if (! defined main::main()) {
-			&{$this->{resetvars}};
+		my $cmdL = new KIWICommandLine ($kiwi);
+		$cmdL -> setSystemLocation (
+			$main::Destination."/".$name->{systemImage}.".raw"
+		);
+		$cmdL -> setImageFormat ($name->{format});
+		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if ((! $kic) || (! $kic->createImageFormat())) {
+			undef $kic;
 			return undef;
 		}
 	}
-	&{$this->{resetvars}};
 	return $this;
 }
 
@@ -1518,7 +1525,7 @@ sub createImageLiveCD {
 		$cmdL -> setConfigDir ($configDir);
 		$cmdL -> setRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if (! $kic -> prepareBootImage($configDir, $rootTarget) ) {
+		if ((! $kic) || (! $kic->prepareBootImage($configDir, $rootTarget))) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -2567,7 +2574,7 @@ sub createImageSplit {
 		$cmdL -> setConfigDir ($configDir);
 		$cmdL -> setRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if (! $kic -> prepareBootImage($configDir, $rootTarget) ) {
+		if ((! $kic) || (! $kic->prepareBootImage($configDir, $rootTarget))) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -2636,28 +2643,34 @@ sub createImageSplit {
 		#==========================================
 		# Create virtual disk images if requested
 		#------------------------------------------
-		$main::BootVMDisk  = $main::Destination."/".$name->{bootImage};
-		$main::BootVMDisk  = $main::BootVMDisk.".splash.gz";
-		$main::BootVMSystem= $main::Destination."/".$name->{systemImage};
-		if (! defined main::main()) {
-			&{$this->{resetvars}};
+		my $cmdL = new KIWICommandLine ($kiwi);
+		$cmdL -> setInitrdFile (
+			$main::Destination."/".$name->{bootImage}.".splash.gz"
+		);
+		$cmdL -> setSystemLocation (
+			$main::Destination."/".$name->{systemImage}
+		);
+		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if ((! $kic) || (! $kic->createImageDisk())) {
+			undef $kic;
 			return undef;
 		}
 		#==========================================
 		# Create VM format/configuration
 		#------------------------------------------
 		if ((defined $name->{format}) || ($xendomain eq "domU")) {
-			undef $main::BootVMDisk;
-			undef $main::BootVMSystem;
-			$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
-			$main::Format  = $name->{format};
-			if (! defined main::main()) {
-				&{$this->{resetvars}};
+			my $cmdL = new KIWICommandLine ($kiwi);
+			$cmdL -> setSystemLocation (
+				$main::Destination."/".$name->{systemImage}.".raw"
+			);
+			$cmdL -> setImageFormat ($name->{format});
+			my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+			if ((! $kic) || (! $kic->createImageFormat())) {
+				undef $kic;
 				return undef;
 			}
 		}
 	}
-	&{$this->{resetvars}};
 	return $this;
 }
 

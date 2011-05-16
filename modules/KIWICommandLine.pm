@@ -808,4 +808,111 @@ sub setTargetDirsForBuild {
 	return 1;
 }
 
+#==========================================
+# setInitrdFile
+#------------------------------------------
+sub setInitrdFile {
+	# ...
+	# Store the name of the initrd file
+	# ---
+	my $this = shift;
+	my $file = shift;
+	$this->{initrdFile} = $file;
+	return 1;
+}
+
+#==========================================
+# getSplashFile
+#------------------------------------------
+sub getInitrdFile {
+	my $this = shift;
+	return $this->{initrdFile};
+}
+
+#==========================================
+# setSystemLocation
+#------------------------------------------
+sub setSystemLocation {
+	# ...
+	# Store the system image location which could either
+	# be the system tree or an image file representing
+	# the system tree
+	# ---
+	my $this   = shift;
+	my $system = shift;
+	$this->{systemLocation} = $system;
+	return 1;
+}
+
+#==========================================
+# getSystemLocation
+#------------------------------------------
+sub getSystemLocation {
+	my $this = shift;
+	return $this->{systemLocation};
+}
+
+#==========================================
+# setImageDiskSize
+#------------------------------------------
+sub setImageDiskSize {
+	# ...
+	# Store the value for the bootvm-disksize option
+	# ---
+	my $this = shift;
+	my $size = shift;
+	$this->{diskSize} = $size;
+	return 1;
+}
+
+#==========================================
+# getImageDiskSize
+#------------------------------------------
+sub getImageDiskSize {
+	my $this = shift;
+	return $this->{diskSize};
+}
+
+#==========================================
+# setImageTargetDevice
+#------------------------------------------
+sub setImageTargetDevice {
+	# ...
+	# Store the value for the targetdevice option
+	# ---
+	my $this   = shift;
+	my $device = shift;
+	$this->{targetDevice} = $device;
+	return 1;
+}
+
+#==========================================
+# getImageTargetDevice
+#------------------------------------------
+sub getImageTargetDevice {
+	my $this = shift;
+	return $this->{targetDevice};
+}
+
+#==========================================
+# setImageFormat
+#------------------------------------------
+sub setImageFormat {
+	# ...
+	# Store the value of the format option
+	# ---
+	my $this   = shift;
+	my $format = shift;
+	$this->{format} = $format;
+	return 1;
+}
+
+#==========================================
+# getImageFormat
+#------------------------------------------
+sub getImageFormat {
+	my $this = shift;
+	return $this->{format};
+}
+
 1;

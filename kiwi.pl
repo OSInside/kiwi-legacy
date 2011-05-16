@@ -778,143 +778,98 @@ sub main {
 	# setup a splash initrd
 	#------------------------------------------
 	if (defined $SetupSplash) {
-		$boot = new KIWIBoot ($kiwi,$SetupSplash);
-		if (! defined $boot) {
+		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic) {
 			my $code = kiwiExit (1); return $code;
 		}
-		$boot -> setupSplash();
-		undef $boot;
-		my $code = kiwiExit (0); return $code;
+		if (! $kic -> createSplash()) {
+			my $code = kiwiExit (1); return $code;
+		}
+		kiwiExit (0);
 	}
 
 	#==========================================
 	# Create a boot Stick (USB)
 	#------------------------------------------
 	if (defined $BootUSB) {
-		$kiwi -> info ("Creating boot USB stick from: $BootUSB...\n");
-		$boot = new KIWIBoot ($kiwi,$BootUSB);
-		if (! defined $boot) {
+		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic) {
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! $boot -> setupInstallStick()) {
-			undef $boot;
+		if (! $kic -> createImageBootUSB()) {
 			my $code = kiwiExit (1); return $code;
 		}
-		undef $boot;
-		my $code = kiwiExit (0); return $code;
+		kiwiExit (0);
 	}
 
 	#==========================================
 	# Create a boot CD (ISO)
 	#------------------------------------------
 	if (defined $BootCD) {
-		$kiwi -> info ("Creating boot ISO from: $BootCD...\n");
-		$boot = new KIWIBoot ($kiwi,$BootCD);
-		if (! defined $boot) {
+		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic) {
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! $boot -> setupInstallCD()) {
-			undef $boot;
+		if (! $kic -> createImageBootCD()) {
 			my $code = kiwiExit (1); return $code;
 		}
-		undef $boot;
-		my $code = kiwiExit (0); return $code;
+		kiwiExit (0);
 	}
 
 	#==========================================
 	# Create an install CD (ISO)
 	#------------------------------------------
 	if (defined $InstallCD) {
-		$kiwi -> info ("Creating install ISO from: $InstallCD...\n");
-		if (! defined $InstallCDSystem) {
-			$kiwi -> error  ("No Install system image specified");
-			$kiwi -> failed ();
-			my $code = kiwiExit (1);
-			return $code;
-		}
-		$boot = new KIWIBoot ($kiwi,$InstallCD,$InstallCDSystem);
-		if (! defined $boot) {
+		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic) {
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! $boot -> setupInstallCD()) {
-			undef $boot;
+		if (! $kic -> createImageInstallCD()) {
 			my $code = kiwiExit (1); return $code;
 		}
-		undef $boot;
-		my $code = kiwiExit (0); return $code;
+		kiwiExit (0);
 	}
 
 	#==========================================
 	# Create an install USB stick
 	#------------------------------------------
 	if (defined $InstallStick) {
-		$kiwi -> info ("Creating install Stick from: $InstallStick...\n");
-		if (! defined $InstallStickSystem) {
-			$kiwi -> error  ("No Install system image specified");
-			$kiwi -> failed ();
-			my $code = kiwiExit (1);
-			return $code;
-		}
-		$boot = new KIWIBoot ($kiwi,$InstallStick,$InstallStickSystem);
-		if (! defined $boot) {
+		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic) {
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! $boot -> setupInstallStick()) {
-			undef $boot;
+		if (! $kic -> createImageInstallStick()) {
 			my $code = kiwiExit (1); return $code;
 		}
-		undef $boot;
-		my $code = kiwiExit (0); return $code;
+		kiwiExit (0);
 	}
 
 	#==========================================
 	# Create a virtual disk image
 	#------------------------------------------
 	if (defined $BootVMDisk) {
-		$kiwi -> info ("--> Creating boot VM disk from: $BootVMDisk...\n");
-		if (! defined $BootVMSystem) {
-			$kiwi -> error  ("No VM system image specified");
-			$kiwi -> failed ();
-			my $code = kiwiExit (1);
-			return $code;
-		}
-		qxx ( "file $BootVMSystem | grep -q 'gzip compressed data'" );
-		my $code = $? >> 8;
-		if ($code == 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Can't use compressed VM system");
-			$kiwi -> failed ();
-			my $code = kiwiExit (1);
-			return $code;
-		}
-		$boot = new KIWIBoot (
-			$kiwi,$BootVMDisk,$BootVMSystem,
-			$BootVMSize,undef,\@ProfilesOrig
-		);
-		if (! defined $boot) {
+		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic) {
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! $boot -> setupBootDisk($targetDevice)) {
-			undef $boot;
+		if (! $kic -> createImageDisk()) {
 			my $code = kiwiExit (1); return $code;
 		}
-		undef $boot;
-		$code = kiwiExit (0); return $code;
+		kiwiExit (0);
 	}
-	
+
 	#==========================================
 	# Convert image into format/configuration
 	#------------------------------------------
 	if (defined $Convert) {
-		$kiwi -> info ("Starting image format conversion...\n");
-		my $format = new KIWIImageFormat ($kiwi,$Convert,$Format);
-		if (! $format) {
-			my $code = kiwiExit (1);
-			return $code;
+		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic) {
+			my $code = kiwiExit (1); return $code;
 		}
-		$format -> createFormat();
-		$format -> createMaschineConfiguration();
-		my $code = kiwiExit (0); return $code;
+		if (! $kic -> createImageFormat()) {
+			my $code = kiwiExit (1); return $code;
+		}
+		kiwiExit (0);
 	}
 
 	#==========================================
@@ -1159,6 +1114,60 @@ sub init {
 		"version"               => \$Version,
 		"yes|y"                 => \$defaultAnswer,
 	);
+	#========================================
+	# check if initrd needs to be stored
+	#----------------------------------------
+	if (defined $SetupSplash) {
+		$cmdL -> setInitrdFile ($SetupSplash);
+	}
+	if (defined $BootUSB) {
+		$cmdL -> setInitrdFile ($BootUSB);
+	}
+	if (defined $BootCD) {
+		$cmdL -> setInitrdFile ($BootCD);
+	}
+	if (defined $InstallCD) {
+		$cmdL -> setInitrdFile ($InstallCD);
+	}
+	if (defined $InstallStick) {
+		$cmdL -> setInitrdFile ($InstallStick);
+	}
+	if (defined $BootVMDisk) {
+		$cmdL -> setInitrdFile ($BootVMDisk);
+	}
+	#========================================
+	# check if system loc. needs to be stored
+	#----------------------------------------
+	if (defined $InstallCDSystem) {
+		$cmdL -> setSystemLocation ($InstallCDSystem);
+	}
+	if (defined $InstallStickSystem) {
+		$cmdL -> setSystemLocation ($InstallStickSystem);
+	}
+	if (defined $BootVMSystem) {
+		$cmdL -> setSystemLocation ($BootVMSystem);
+	}
+	if (defined $Convert) {
+		$cmdL -> setSystemLocation ($Convert);
+	}
+	#========================================
+	# check if image format is specified
+	#----------------------------------------
+	if (defined $Format) {
+		$cmdL -> setImageFormat ($Format);
+	}
+	#========================================
+	# check if disk size needs to be stored
+	#----------------------------------------
+	if (defined $BootVMSize) {
+		$cmdL -> setImageDiskSize ($BootVMSize);
+	}
+	#========================================
+	# check if targetdevice is specified
+	#----------------------------------------
+	if (defined $targetDevice) {
+		$cmdL -> setImageTargetDevice ($targetDevice);
+	}
 	#========================================
 	# check if packages are to be added
 	#----------------------------------------
