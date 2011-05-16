@@ -307,6 +307,19 @@ sub checkAndSetupPrebuiltBootImage {
 	#==========================================
 	# open boot image XML object
 	#------------------------------------------
+	my $locator = new KIWILocator($kiwi);
+	my $controlFile = $locator -> getControlFile ($bootpath);
+	if (! $controlFile) {
+		return undef;
+	}
+	my $validator = new KIWIXMLValidator (
+		$kiwi,$controlFile,$main::Revision,
+		$main::Schema,$main::SchemaCVT
+	);
+	my $isValid = $validator ? $validator -> validate() : undef;
+	if (! $isValid) {
+		return undef;
+	}
 	my $bxml = new KIWIXML ( $kiwi,$bootpath );
 	if (! $bxml) {
 		return undef;
@@ -1021,6 +1034,7 @@ sub createImageRootAndBoot {
 		$cmdL -> setRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic -> prepareBootImage($configDir, $rootTarget)) {
+			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
 			}
@@ -1505,6 +1519,7 @@ sub createImageLiveCD {
 		$cmdL -> setRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic -> prepareBootImage($configDir, $rootTarget) ) {
+			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
 			}
@@ -2553,6 +2568,7 @@ sub createImageSplit {
 		$cmdL -> setRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic -> prepareBootImage($configDir, $rootTarget) ) {
+			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
 			}

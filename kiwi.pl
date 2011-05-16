@@ -1950,6 +1950,7 @@ sub kiwiExit {
 	# Cleanup and exit now...
 	#------------------------------------------
 	$kiwi -> cleanSweep();
+	cleanup();
 	exit $code;
 }
 
@@ -1968,14 +1969,22 @@ sub quit {
 	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
 	$kiwi -> setLogHumanReadable();
 	$kiwi -> cleanSweep();
+	cleanup();
+	exit 1;
+}
+
+#==========================================
+# cleanup
+#------------------------------------------
+sub cleanup {
+	# ...
+	# call object destructors
+	# ---
 	if ($kic) {
 		undef $kic;
 	}
 	if ($icache) {
 		undef $icache;
-	}
-	if (defined $CreatePassword) {
-		system "stty echo";
 	}
 	if (defined $boot) {
 		$boot -> cleanLoop ();
@@ -1988,7 +1997,6 @@ sub quit {
 	if (defined $migrate) {
 		$migrate -> cleanMount ();
 	}
-	exit 1;
 }
 
 #==========================================
@@ -2194,9 +2202,10 @@ sub checkType {
 			}
 			$kiwi -> loginfo ("squashfs mktool major version: $mktool_vs\n");
 			$kiwi -> loginfo ("squashfs module major version: $module_vs\n");
+			my $msg = "--> squashfs tool/driver mismatch";
 			if (($error == 2) && ($mktool_vs ne $module_vs)) {
 				$kiwi -> error (
-					"--> squashfs tool/driver mismatch: $mktool_vs vs $module_vs"
+					"$msg: $mktool_vs vs $module_vs"
 				);
 				$kiwi -> failed ();
 				return undef;
@@ -2677,38 +2686,6 @@ sub createInstSource {
 	$kiwi->info( "KIWICollect completed successfully." );
 	$kiwi->done();
 	kiwiExit (0);
-}
-
-#==========================================
-# createResetClosure
-#------------------------------------------
-sub createResetClosure {
-	my $backupSurvive           = $main::Survive;
-	my @backupProfiles          = @main::Profiles;
-	my $backupCreate            = $main::Create;
-	my $backupPrepare           = $main::Prepare;
-	my $backupRootTree          = $main::RootTree;
-	my $backupForceNewRoot      = $main::ForceNewRoot;
-	my @backupPatterns          = @main::AddPattern;
-	my @backupPackages          = @main::AddPackage;
-	my @backupRemovePackages    = @main::RemovePackage;
-	my $backupIgnoreRepos       = $main::IgnoreRepos;
-	my @backupAddRepository     = @main::AddRepository;
-	my @backupAddRepositoryType = @main::AddRepositoryType;
-	return sub {
-		@main::Profiles          = @backupProfiles;
-		$main::Prepare           = $backupPrepare;
-		$main::Create            = $backupCreate;
-		$main::ForceNewRoot      = $backupForceNewRoot;
-		@main::AddPattern        = @backupPatterns;
-		@main::AddPackage        = @backupPackages;
-		@main::RemovePackage     = @backupRemovePackages;
-		$main::IgnoreRepos       = $backupIgnoreRepos;
-		@main::AddRepository     = @backupAddRepository;
-		@main::AddRepositoryType = @backupAddRepositoryType;
-		$main::RootTree          = $backupRootTree;
-		$main::Survive           = $backupSurvive;
-	}
 }
 
 #==========================================

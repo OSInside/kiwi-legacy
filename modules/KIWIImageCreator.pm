@@ -144,7 +144,7 @@ sub prepareBootImage {
 		return undef;
 	}
 	if (! $rootTgtDir) {
-		$kiwi -> error ('prepareBotImage: no rot traget defined');
+		$kiwi -> error ('prepareBotImage: no root traget defined');
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -176,7 +176,7 @@ sub upgradeImage {
 	#------------------------------------------
 	$configDir .= "/image";
 	my $locator = new KIWILocator($kiwi);
-	my $controlFile = $locator -> getControlFile ($configDir);;
+	my $controlFile = $locator -> getControlFile ($configDir);
 	if (! $controlFile) {
 		return undef;
 	}

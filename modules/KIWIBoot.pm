@@ -223,6 +223,16 @@ sub new {
 	#------------------------------------------
 	if (defined $system) {
 		if (-d $system) {
+			my $locator = new KIWILocator($kiwi);
+			my $controlFile = $locator -> getControlFile ($system."/image");
+			my $validator = new KIWIXMLValidator (
+				$kiwi,$controlFile,$main::Revision,
+				$main::Schema,$main::SchemaCVT
+			);
+			my $isValid = $validator ? $validator -> validate() : undef;
+			if (! $isValid) {
+				return undef;
+			}
 			$xml = new KIWIXML (
 				$kiwi,$system."/image",$main::SetImageType,$profile
 			);
@@ -268,6 +278,17 @@ sub new {
 				#==========================================
 				# read disk image XML description
 				#------------------------------------------
+				my $locator = new KIWILocator($kiwi);
+				my $controlFile = $locator -> getControlFile ($tmpdir."/image");
+				my $validator = new KIWIXMLValidator (
+					$kiwi,$controlFile,$main::Revision,
+					$main::Schema,$main::SchemaCVT
+				);
+				my $isValid = $validator ? $validator -> validate() : undef;
+				if (! $isValid) {
+					$this -> cleanLoop ();
+					return undef;
+				}
 				$xml = new KIWIXML (
 					$kiwi,$tmpdir."/image",$main::SetImageType,$profile
 				);
@@ -292,6 +313,17 @@ sub new {
 				#==========================================
 				# read disk image XML description
 				#------------------------------------------
+				my $locator = new KIWILocator($kiwi);
+				my $controlFile = $locator -> getControlFile ($tmpdir."/image");
+				my $validator = new KIWIXMLValidator (
+					$kiwi,$controlFile,$main::Revision,
+					$main::Schema,$main::SchemaCVT
+				);
+				my $isValid = $validator ? $validator -> validate() : undef;
+				if (! $isValid) {
+					main::umount();
+					return undef;
+				}
 				$xml = new KIWIXML (
 					$kiwi,$tmpdir."/image",$main::SetImageType,$profile
 				);

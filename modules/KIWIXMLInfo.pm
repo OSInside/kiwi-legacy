@@ -21,7 +21,10 @@ use strict;
 use warnings;
 require Exporter;
 use XML::LibXML;
-# KIWI modules
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
 use KIWICommandLine;
 use KIWILog;
 use KIWIQX;
@@ -133,7 +136,6 @@ sub printXMLInfo {
 	if (! $infoTree) {
 		return undef;
 	}
-	# TODO eliminate access to global, this should be in the locator
 	open (my $F, "|xsltproc $main::Pretty -");
 	print $F $infoTree -> toString();
 	close $F;
@@ -497,14 +499,27 @@ sub __xmlSetup {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-
 	#==========================================
 	# Setup the XML
 	#------------------------------------------
 	my $buildProfs = $this -> {buildProfiles};
 	my $configDir  = $this -> {configDir};
-	# TODO change when XML becomes stateless
-	my $xml = new KIWIXML ($kiwi, $configDir, undef, $buildProfs);
+	my $locator = new KIWILocator($kiwi);
+	my $controlFile = $locator -> getControlFile ($configDir);
+	if (! $controlFile) {
+		return undef;
+	}
+	my $validator = new KIWIXMLValidator (
+		$kiwi,$controlFile,$main::Revision,
+		$main::Schema,$main::SchemaCVT
+	);
+	my $isValid = $validator ? $validator -> validate() : undef;
+	if (! $isValid) {
+		return undef;
+	}
+	my $xml = new KIWIXML (
+		$kiwi, $configDir, undef, $buildProfs
+	);
 	if (! defined $xml) {
 		return undef;
 	}
