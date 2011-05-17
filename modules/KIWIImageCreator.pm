@@ -157,39 +157,6 @@ sub prepareBootImage {
 	if (! defined $xml) {
 		return undef;
 	}
-	my $krc = new KIWIRuntimeChecker (
-		$kiwi, $this -> {cmdL}, $xml
-	);
-	#==========================================
-	# Apply XML over rides from command line
-	#------------------------------------------
-	if ($pkgMgr) {
-		$xml -> setPackageManager($pkgMgr);
-	}
-	if ($ignore) {
-		$xml -> ignoreRepositories ();
-	}
-	if ($this -> {addlRepos}) {
-		my %addlRepos = %{$this -> {addlRepos}};
-		$xml -> addRepository (
-			$addlRepos{repositoryTypes},
-			$addlRepos{repositories},
-			$addlRepos{repositoryAlia},
-			$addlRepos{repositoryPriorities}
-		);
-	}
-	if ($this -> {replRepo}) {
-		my %replRepo = %{$this -> {replRepo}};
-		$xml -> setRepository (
-			$replRepo{repositoryType},
-			$replRepo{repository},
-			$replRepo{repositoryAlias},
-			$replRepo{respositoryPriority}
-		);
-	}
-	if (! $krc -> prepareChecks()) {
-		return undef;
-	}
 	return $this -> __prepareTree (
 		$xml, $configDir, $rootTgtDir
 	);

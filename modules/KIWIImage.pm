@@ -1150,6 +1150,7 @@ sub createImageVMX {
 	my $para = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
+	my $cmdL = $this->{cmdL};
 	my %xenc = $xml  -> getXenConfig();
 	my $name = $this -> createImageRootAndBoot ($para,"VMX");
 	my $xendomain;
@@ -1164,7 +1165,6 @@ sub createImageVMX {
 	#==========================================
 	# Create virtual disk image(s)
 	#------------------------------------------
-	my $cmdL = new KIWICommandLine ($kiwi);
 	$cmdL -> setInitrdFile (
 		$main::Destination."/".$name->{bootImage}.".splash.gz"
 	);
@@ -1186,7 +1186,6 @@ sub createImageVMX {
 	# Create VM format/configuration
 	#------------------------------------------
 	if ((defined $name->{format}) || ($xendomain eq "domU")) {
-		my $cmdL = new KIWICommandLine ($kiwi);
 		$cmdL -> setSystemLocation (
 			$main::Destination."/".$name->{systemImage}.".raw"
 		);
@@ -2651,7 +2650,6 @@ sub createImageSplit {
 		#==========================================
 		# Create virtual disk images if requested
 		#------------------------------------------
-		my $cmdL = new KIWICommandLine ($kiwi);
 		$cmdL -> setInitrdFile (
 			$main::Destination."/".$name->{bootImage}.".splash.gz"
 		);
@@ -2667,7 +2665,6 @@ sub createImageSplit {
 		# Create VM format/configuration
 		#------------------------------------------
 		if ((defined $name->{format}) || ($xendomain eq "domU")) {
-			my $cmdL = new KIWICommandLine ($kiwi);
 			$cmdL -> setSystemLocation (
 				$main::Destination."/".$name->{systemImage}.".raw"
 			);
