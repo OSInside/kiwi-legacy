@@ -243,6 +243,9 @@ sub __getTree {
 	my $requests = shift;
 	my $kiwi = $this -> {kiwi};
 	my $xml = $this -> __xmlSetup();
+	if (! $xml) {
+		return undef;
+	}
 	my $mountDirs = $this -> __setupRepoMounts($xml);
 	if (! $mountDirs) {
 		return undef;

@@ -76,26 +76,28 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{addlPackages}   = $cmdL -> getAdditionalPackages();
-	$this->{addlPatterns}   = $cmdL -> getAdditionalPatterns();
-	$this->{addlRepos}      = $cmdL -> getAdditionalRepos();
-	$this->{buildProfiles}  = $cmdL -> getBuildProfiles();
-	$this->{cacheDir}       = $cmdL -> getCacheDir();
-	$this->{ignoreRepos}    = $cmdL -> getIgnoreRepos();
-	$this->{imageArch}      = $cmdL -> getImageArchitecture();
-	$this->{packageManager} = $cmdL -> getPackageManager();
-	$this->{recycleRootDir} = $cmdL -> getRecycleRootDir();
-	$this->{removePackages} = $cmdL -> getPackagesToRemove();
-	$this->{replRepo}       = $cmdL -> getReplacementRepo();
-	$this->{rootTgtDir}     = $cmdL -> getRootTargetDir();
-	$this->{initrd}         = $cmdL -> getInitrdFile();
-	$this->{sysloc}         = $cmdL -> getSystemLocation();
-	$this->{disksize}       = $cmdL -> getImageDiskSize();
-	$this->{targetdevice}   = $cmdL -> getImageTargetDevice();
-	$this->{format}         = $cmdL -> getImageFormat();
-	$this->{configDir}      = $cmdL -> getConfigDir();
-	$this->{kiwi}           = $kiwi;
-	$this->{cmdL}           = $cmdL;
+	$this->{addlPackages}     = $cmdL -> getAdditionalPackages();
+	$this->{addlPatterns}     = $cmdL -> getAdditionalPatterns();
+	$this->{addlRepos}        = $cmdL -> getAdditionalRepos();
+	$this->{buildProfiles}    = $cmdL -> getBuildProfiles();
+	$this->{cacheDir}         = $cmdL -> getCacheDir();
+	$this->{ignoreRepos}      = $cmdL -> getIgnoreRepos();
+	$this->{imageArch}        = $cmdL -> getImageArchitecture();
+	$this->{packageManager}   = $cmdL -> getPackageManager();
+	$this->{recycleRootDir}   = $cmdL -> getRecycleRootDir();
+	$this->{removePackages}   = $cmdL -> getPackagesToRemove();
+	$this->{replRepo}         = $cmdL -> getReplacementRepo();
+	$this->{rootTgtDir}       = $cmdL -> getRootTargetDir();
+	$this->{rootInitrdTgtDir} = $cmdL -> getInitrdRootTargetDir();
+	$this->{initrd}           = $cmdL -> getInitrdFile();
+	$this->{sysloc}           = $cmdL -> getSystemLocation();
+	$this->{disksize}         = $cmdL -> getImageDiskSize();
+	$this->{targetdevice}     = $cmdL -> getImageTargetDevice();
+	$this->{format}           = $cmdL -> getImageFormat();
+	$this->{configDir}        = $cmdL -> getConfigDir();
+	$this->{configInitrdDir}  = $cmdL -> getInitrdConfigDir();
+	$this->{kiwi}             = $kiwi;
+	$this->{cmdL}             = $cmdL;
 	return $this;
 }
 
@@ -125,9 +127,11 @@ sub prepareBootImage {
 	# Prepare the boot image
 	# ---
 	my $this       = shift;
-	my $configDir  = shift;
-	my $rootTgtDir = shift;
-	my $kiwi      = $this -> {kiwi};
+	my $configDir  = $this->{configInitrdDir};
+	my $rootTgtDir = $this->{rootInitrdTgtDir};
+	my $kiwi       = $this->{kiwi};
+	my $ignore     = $this -> {ignoreRepos};
+	my $pkgMgr    = $this -> {packageManager};
 	if (! $configDir) {
 		$kiwi -> error ('prepareBootImage: no configuration directory defined');
 		$kiwi -> failed ();
@@ -148,9 +152,42 @@ sub prepareBootImage {
 	}
 	$kiwi -> info ("Prepare boot image (initrd)...\n");
 	my $xml = new KIWIXML (
-		$kiwi, $configDir, undef, undef
+		$kiwi,$configDir,undef,undef
 	);
 	if (! defined $xml) {
+		return undef;
+	}
+	my $krc = new KIWIRuntimeChecker (
+		$kiwi, $this -> {cmdL}, $xml
+	);
+	#==========================================
+	# Apply XML over rides from command line
+	#------------------------------------------
+	if ($pkgMgr) {
+		$xml -> setPackageManager($pkgMgr);
+	}
+	if ($ignore) {
+		$xml -> ignoreRepositories ();
+	}
+	if ($this -> {addlRepos}) {
+		my %addlRepos = %{$this -> {addlRepos}};
+		$xml -> addRepository (
+			$addlRepos{repositoryTypes},
+			$addlRepos{repositories},
+			$addlRepos{repositoryAlia},
+			$addlRepos{repositoryPriorities}
+		);
+	}
+	if ($this -> {replRepo}) {
+		my %replRepo = %{$this -> {replRepo}};
+		$xml -> setRepository (
+			$replRepo{repositoryType},
+			$replRepo{repository},
+			$replRepo{repositoryAlias},
+			$replRepo{respositoryPriority}
+		);
+	}
+	if (! $krc -> prepareChecks()) {
 		return undef;
 	}
 	return $this -> __prepareTree (
@@ -580,10 +617,11 @@ sub __upgradeTree {
 	my $configDir = shift;
 	my $kiwi      = $this -> {kiwi};
 	my $cmdL      = $this -> {cmdL};
+	my $cacheMode = "remount";
 	#==========================================
 	# Select cache if requested and exists
 	#------------------------------------------
-	my $cacheRoot = $this -> __selectCache ($xml,$configDir);
+	my $cacheRoot = $this -> __selectCache ($xml,$configDir,$cacheMode);
 	#==========================================
 	# Initialize root system
 	#------------------------------------------
@@ -621,9 +659,13 @@ sub __selectCache {
 	my $this      = shift;
 	my $xml       = shift;
 	my $configDir = shift;
+	my $cacheMode = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmdL = $this -> {cmdL};
 	if ( ! $this -> {cacheDir}) {
+		return undef;
+	}
+	if (($cacheMode eq "remount") && (! -f "$configDir/kiwi-root.cache")) {
 		return undef;
 	}
 	my $icache = new KIWICache (
@@ -651,13 +693,14 @@ sub __prepareTree {
 	my $xml        = shift;
 	my $configDir  = shift;
 	my $rootTgtDir = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmdL = $this -> {cmdL};
-	my %attr = %{$xml->getImageTypeAndAttributes()};
+	my $kiwi       = $this -> {kiwi};
+	my $cmdL       = $this -> {cmdL};
+	my %attr       = %{$xml->getImageTypeAndAttributes()};
+	my $cacheMode  = "initial";
 	#==========================================
 	# Select cache if requested and exists
 	#------------------------------------------
-	my $cacheRoot = $this -> __selectCache ($xml,$configDir);
+	my $cacheRoot = $this -> __selectCache ($xml,$configDir,$cacheMode);
 	if ($cacheRoot) {
 		#==========================================
 		# Add bootstrap packages to image section

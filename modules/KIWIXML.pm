@@ -167,7 +167,6 @@ sub new {
 	if (%main::XMLChangeSet) {
 		$this -> __populateImageTypeAndNode();
 		$this -> __updateDescriptionFromChangeSet (\%main::XMLChangeSet);
-		undef %main::XMLChangeSet;
 	}
 	#==========================================
 	# Populate default profiles from XML if set

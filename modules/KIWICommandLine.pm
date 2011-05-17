@@ -177,6 +177,17 @@ sub getConfigDir {
 }
 
 #==========================================
+# getInitrdConfigDir
+#------------------------------------------
+sub getInitrdConfigDir {
+	# ...
+	# Return location of the configuration tree
+	# ---
+	my $this = shift;
+	return $this -> {configInitrdDir};
+}
+
+#==========================================
 # getIgnoreRepos
 #------------------------------------------
 sub getIgnoreRepos {
@@ -274,6 +285,17 @@ sub getRootTargetDir {
 	# ---
 	my $this = shift;
 	return $this -> {rootTgtDir};
+}
+
+#==========================================
+# getInitrdRootTargetDir
+#------------------------------------------
+sub getInitrdRootTargetDir {
+	# ...
+	# Return the location for the unpacked initrd image directory
+	# ---
+	my $this = shift;
+	return $this -> {rootInitrdTgtDir};
 }
 
 #==========================================
@@ -526,6 +548,15 @@ sub setCacheDir {
 }
 
 #==========================================
+# setInitrdConfigDir
+#------------------------------------------
+sub setInitrdConfigDir {
+	my $this = shift;
+	my $dir  = shift;
+	return $this -> setConfigDir ($dir,"initrd");
+}
+
+#==========================================
 # setConfigDir
 #------------------------------------------
 sub setConfigDir {
@@ -534,6 +565,7 @@ sub setConfigDir {
 	# ---
 	my $this = shift;
 	my $dir  = shift;
+	my $boot = shift;
 	if (! $dir) {
 		my $msg = 'setConfigDir method called without specifying a '
 			. 'configuration directory.';
@@ -557,7 +589,11 @@ sub setConfigDir {
 		$this -> {kiwi} -> failed();
 		return undef;
 	}
-	$this -> {configDir} = $dir;
+	if ($boot) {
+		$this -> {configInitrdDir} = $dir;
+	} else {
+		$this -> {configDir} = $dir;
+	}
 	return 1;
 }
 
@@ -763,6 +799,15 @@ sub setReplacementRepo {
 }
 
 #==========================================
+# setInitrdRootTargetDir
+#------------------------------------------
+sub setInitrdRootTargetDir {
+	my $this = shift;
+	my $dir  = shift;
+	return $this -> setRootTargetDir ($dir,"initrd");
+}
+
+#==========================================
 # setRootTargetDir
 #------------------------------------------
 sub setRootTargetDir {
@@ -771,7 +816,8 @@ sub setRootTargetDir {
 	# ---
 	my $this    = shift;
 	my $rootTgt = shift;
-	my $kiwi = $this -> {kiwi};
+	my $boot    = shift;
+	my $kiwi    = $this -> {kiwi};
 	if (! $rootTgt) {
 		my $msg = 'setRootTargetDir method called without specifying '
 			. 'a target directory';
@@ -791,7 +837,11 @@ sub setRootTargetDir {
 		$this -> {recycleRootDir} = $rootTgt;
 		$this -> {setRecycleRoot} = 0;
 	}
-	$this -> {rootTgtDir} = $rootTgt;
+	if ($boot) {
+		$this -> {rootInitrdTgtDir} = $rootTgt;
+	} else {
+		$this -> {rootTgtDir} = $rootTgt;
+	}
 	return 1;
 }
 

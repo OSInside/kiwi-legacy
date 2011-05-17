@@ -126,9 +126,13 @@ sub getControlFile {
 	# This function receives a directory as parameter
 	# and searches for a kiwi xml description in it.
 	# ----
-	my $this   = shift;
-	my $dir    = shift;
-	my $kiwi   = $this->{kiwi};
+	my $this    = shift;
+	my $dir     = shift;
+	my $kiwi    = $this->{kiwi};
+	my @subdirs = ("/","/image/");
+	my $found   = 0;
+	my @globsearch;
+	my $config;
 	if (! -d $dir) {
 		my $msg = "Expected a directory at $dir.\nSpecify a directory";
 		$msg .= ' as the configuration base.';
@@ -136,28 +140,35 @@ sub getControlFile {
 		$kiwi -> failed();
 		return undef;
 	}
-	my $config = "$dir/" . $this->{configName};
-	if (-f $config) {
-		return $config;
+	foreach my $search (@subdirs) {
+		$config = $dir.$search.$this->{configName};
+		if (-f $config) {
+			$found = 1; last;
+		}
+		@globsearch = glob ($dir."/*.kiwi");
+		my $globitems  = @globsearch;
+		if ($globitems == 0) {
+			next;
+		} elsif ($globitems > 1) {
+			$found = 2; last;
+		} else {
+			$config = pop @globsearch; last;
+		}
 	}
-	my @globsearch = glob ($dir."/*.kiwi");
-	my $globitems  = @globsearch;
-	if ($globitems == 0) {
-		$kiwi -> error ( "Could not locate a configuration file in $dir");
-		$kiwi -> failed();
-		return undef;
-	} elsif ($globitems > 1) {
+	if ($found == 1) {
+		return $config;
+	} elsif ($found == 2) {
 		my $msg = "Found multiple control files in $dir\n";
 		for my $item (@globsearch) {
 			$msg .= "\t$item\n";
 		}
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
 	} else {
-		$config = pop @globsearch;
+		$kiwi -> error ( "Could not locate a configuration file in $dir");
+		$kiwi -> failed();
 	}
-	return $config;
+	return undef;
 }
 
 #============================================

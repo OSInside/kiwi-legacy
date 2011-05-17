@@ -64,6 +64,7 @@ sub new {
 	my $baseSystem = shift;
 	my $imageOrig  = shift;
 	my $initCache  = shift;
+	my $cmdL       = shift;
 	my $configFile = $xml -> getConfigName();
 	#==========================================
 	# Use absolute path for image destination
@@ -77,6 +78,11 @@ sub new {
 	#------------------------------------------
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
+	}
+	if (! defined $cmdL) {
+		$kiwi -> error ("No Commandline reference specified");
+		$kiwi -> failed ();
+		return undef;
 	}
 	if (! defined $xml) {
 		$kiwi -> error ("No XML reference specified");
@@ -142,6 +148,7 @@ sub new {
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi}       = $kiwi;
+	$this->{cmdL}       = $cmdL;
 	$this->{initCache}  = $initCache;
 	$this->{xml}        = $xml;
 	$this->{imageTree}  = $imageTree;
@@ -902,6 +909,7 @@ sub createImageRootAndBoot {
 	my $text       = shift;
 	my $kiwi       = $this->{kiwi};
 	my $sxml       = $this->{xml};
+	my $cmdL       = $this->{cmdL};
 	my %stype      = %{$sxml->getImageTypeAndAttributes()};
 	my $imageTree  = $this->{imageTree};
 	my $baseSystem = $this->{baseSystem};
@@ -1027,11 +1035,10 @@ sub createImageRootAndBoot {
 			$configDir = $stype{boot};
 		}
 		my $rootTarget = "$tmpdir/kiwi-".$text."boot-$$";
-		my $cmdL = new KIWICommandLine ($kiwi);
-		$cmdL -> setConfigDir ($configDir);
-		$cmdL -> setRootTargetDir ($rootTarget);
+		$cmdL -> setInitrdConfigDir ($configDir);
+		$cmdL -> setInitrdRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic->prepareBootImage($configDir, $rootTarget))) {
+		if ((! $kic) || (! $kic->prepareBootImage())) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -1039,6 +1046,7 @@ sub createImageRootAndBoot {
 			&{$this->{resetvars}};
 			return undef;
 		}
+		undef %main::XMLChangeSet;
 		$main::Create   = $rootTarget;
 		$main::RootTree = $rootTarget;
 		$main::Survive  = "yes";
@@ -1215,6 +1223,7 @@ sub createImageLiveCD {
 	my $kiwi = $this->{kiwi};
 	my $arch = $this->{arch};
 	my $sxml = $this->{xml};
+	my $cmdL = $this->{cmdL};
 	my $imageTree = $this->{imageTree};
 	my $baseSystem= $this->{baseSystem};
 	my @bootdata;
@@ -1519,11 +1528,10 @@ sub createImageLiveCD {
 			$configDir = $stype{boot};
 		}
 		my $rootTarget = "$tmpdir/kiwi-isoboot-$$";
-		my $cmdL = new KIWICommandLine ($kiwi);
-		$cmdL -> setConfigDir ($configDir);
-		$cmdL -> setRootTargetDir ($rootTarget);
+		$cmdL -> setInitrdConfigDir ($configDir);
+		$cmdL -> setInitrdRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic->prepareBootImage($configDir, $rootTarget))) {
+		if ((! $kic) || (! $kic->prepareBootImage())) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -1531,6 +1539,7 @@ sub createImageLiveCD {
 			&{$this->{resetvars}};
 			return undef;
 		}
+		undef %main::XMLChangeSet;
 		$main::Create   = $rootTarget;
 		$main::RootTree = $rootTarget;
 		$main::Survive  = "yes";
@@ -1976,6 +1985,7 @@ sub createImageSplit {
 	my $imageTree = $this->{imageTree};
 	my $baseSystem= $this->{baseSystem};
 	my $sxml = $this->{xml};
+	my $cmdL = $this->{cmdL};
 	my %xenc = $sxml->getXenConfig();
 	my $FSTypeRW;
 	my $FSTypeRO;
@@ -2568,11 +2578,10 @@ sub createImageSplit {
 			$configDir = $type{boot};
 		}
 		my $rootTarget = "$tmpdir/kiwi-splitboot-$$";
-		my $cmdL = new KIWICommandLine ($kiwi);
-		$cmdL -> setConfigDir ($configDir);
-		$cmdL -> setRootTargetDir ($rootTarget);
+		$cmdL -> setInitrdConfigDir ($configDir);
+		$cmdL -> setInitrdRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic->prepareBootImage($configDir, $rootTarget))) {
+		if ((! $kic) || (! $kic->prepareBootImage())) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -2580,6 +2589,7 @@ sub createImageSplit {
 			&{$this->{resetvars}};
 			return undef;
 		}
+		undef %main::XMLChangeSet;
 		$main::Create   = $rootTarget;
 		$main::RootTree = $rootTarget;
 		$main::Survive  = "yes";

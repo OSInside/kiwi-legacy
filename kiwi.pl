@@ -561,7 +561,7 @@ sub main {
 		#------------------------------------------
 		$image = new KIWIImage (
 			$kiwi,$xml,$Create,$Destination,$StripImage,
-			"/base-system",$Create
+			"/base-system",$Create,undef,$cmdL
 		);
 		if (! defined $image) {
 			my $code = kiwiExit (1); return $code;
@@ -1219,7 +1219,7 @@ sub init {
 	# check for specified cache location
 	#----------------------------------------
 	if (defined $ImageCache) {
-		$cmdL -> setCacheDir($ImageCache)
+		$cmdL -> setCacheDir($ImageCache);
 	}
 	#========================================
 	# check if a specifc logfile has been defined

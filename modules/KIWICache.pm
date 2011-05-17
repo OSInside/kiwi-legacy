@@ -302,7 +302,7 @@ sub createCache {
 		# ----
 		my $image = new KIWIImage (
 			$kiwi,$cxml,$root,$imageCacheDir,
-			undef,"/base-system",undef,"active"
+			undef,"/base-system",undef,"active",$cmdL
 		);
 		if (! defined $image) {
 			undef $kic; return undef;

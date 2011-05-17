@@ -57,6 +57,14 @@ sub new {
 	#==========================================
 	# Check rootRW structure
 	#------------------------------------------
+	$this->{initial} = 0;
+	if (defined $baseRO) {
+		# ...
+		# base read-only path specified, means this is an initial
+		# prepare call using a cache
+		# ---
+		$this->{initial} = 1;
+	}
 	if (-f "$rootRW/kiwi-root.cache") {
 		my $FD; if (! open ($FD,"$rootRW/kiwi-root.cache")) {
 			$kiwi -> error  ("Can't open cache root meta data");
@@ -171,7 +179,7 @@ sub unionOverlay {
 	#------------------------------------------
 	if (! $haveCow) {
 		qxx ("echo $this->{baseRO} > $rootRW/kiwi-root.cache");
-		if ($main::Prepare) {
+		if ($this->{initial}) {
 			$main::OverlayRootTree = "$rootRW/image";
 		}
 	}
