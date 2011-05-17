@@ -27,6 +27,7 @@ use KIWIConfigure;
 use KIWILocator;
 use KIWILog;
 use KIWIManager;
+use KIWIOverlay;
 use KIWIQX;
 use KIWIURL;
 
@@ -58,7 +59,6 @@ sub new {
 	my $addPacks     = shift;
 	my $delPacks     = shift;
 	my $cacheRoot    = shift;
-	my $cacheRootMode= shift;
 	my $targetArch   = shift;
 	my $cmdL         = shift;
 	#==========================================
@@ -206,9 +206,7 @@ sub new {
 	# Check for overlay structure
 	#------------------------------------------
 	$this->{origtree}= $root;
-	$this->{overlay} = new KIWIOverlay (
-		$kiwi,$root,$cacheRoot,$cacheRootMode
-	);
+	$this->{overlay} = new KIWIOverlay ($kiwi,$root,$cacheRoot);
 	if (! $this->{overlay}) {
 		return undef;
 	}

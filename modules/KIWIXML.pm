@@ -27,7 +27,6 @@ use LWP;
 use XML::LibXML;
 use KIWILocator;
 use KIWILog;
-use KIWIOverlay;
 use KIWIQX;
 use KIWIURL;
 use KIWIXMLValidator;

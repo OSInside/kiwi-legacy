@@ -131,9 +131,7 @@ sub new {
 			#==========================================
 			# Check for overlay structure
 			#------------------------------------------
-			$this->{overlay} = new KIWIOverlay (
-				$kiwi,$system,$main::CacheRoot,$main::CacheRootMode
-			);
+			$this->{overlay} = new KIWIOverlay ($kiwi,$system);
 			if (! $this->{overlay}) {
 				return undef;
 			}

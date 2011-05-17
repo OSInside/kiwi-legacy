@@ -583,31 +583,15 @@ sub __upgradeTree {
 	#==========================================
 	# Select cache if requested and exists
 	#------------------------------------------
-	if ($this -> {cacheDir}) {
-		my $icache = new KIWICache (
-			$kiwi,$xml,$this->{cacheDir},$main::BasePath,
-			$this->{buildProfiles},$configDir
-		);
-		my $cacheInit = $icache -> initializeCache ($cmdL);
-		if (! $cacheInit) {
-			return undef;
-		}
-		my @selected = $icache -> selectCache ($cacheInit);
-		if (@selected) {
-			$main::CacheRoot     = $selected[0];
-			$main::CacheRootMode = $selected[1];
-		}
-	}
+	my $cacheRoot = $this -> __selectCache ($xml,$configDir);
 	#==========================================
 	# Initialize root system
 	#------------------------------------------
 	my $root = new KIWIRoot (
 		$kiwi,$xml,$configDir,undef,'/base-system',
 		$configDir,$this->{addlPackages},$this->{removePackages},
-		$main::CacheRoot,
-		$main::CacheRootMode,
-		$this -> {imageArch},
-		$this -> {cmdL}
+		$cacheRoot,$this->{imageArch},
+		$this->{cmdL}
 	);
 	if (! defined $root) {
 		$kiwi -> error ("Couldn't create root object");
@@ -631,6 +615,32 @@ sub __upgradeTree {
 }
 
 #==========================================
+# __selectCache
+#------------------------------------------
+sub __selectCache {
+	my $this      = shift;
+	my $xml       = shift;
+	my $configDir = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmdL = $this -> {cmdL};
+	if ( ! $this -> {cacheDir}) {
+		return undef;
+	}
+	my $icache = new KIWICache (
+		$kiwi,$xml,$this->{cacheDir},$main::BasePath,
+		$this->{buildProfiles},$configDir
+	);
+	if (! $icache) {
+		return undef;
+	}
+	my $cacheInit = $icache -> initializeCache ($cmdL);
+	if ($cacheInit) {
+		return $icache->selectCache ($cacheInit);
+	}
+	return undef;
+}
+
+#==========================================
 # __prepareTree
 #------------------------------------------
 sub __prepareTree {
@@ -647,20 +657,8 @@ sub __prepareTree {
 	#==========================================
 	# Select cache if requested and exists
 	#------------------------------------------
-	if ($this -> {cacheDir}) {
-		my $icache = new KIWICache (
-			$kiwi,$xml,$this->{cacheDir},$main::BasePath,
-			$this->{buildProfiles},$configDir
-		);
-		my $cacheInit = $icache -> initializeCache ($cmdL);
-		if (! $cacheInit) {
-			return undef;
-		}
-		my @selected = $icache -> selectCache ($cacheInit);
-		if (@selected) {
-			$main::CacheRoot     = $selected[0];
-			$main::CacheRootMode = $selected[1];
-		}
+	my $cacheRoot = $this -> __selectCache ($xml,$configDir);
+	if ($cacheRoot) {
 		#==========================================
 		# Add bootstrap packages to image section
 		#------------------------------------------
@@ -686,9 +684,7 @@ sub __prepareTree {
 	#------------------------------------------
 	my $root = new KIWIRoot (
 		$kiwi,$xml,$configDir,$rootTgtDir,'/base-system',
-		$this -> {recycleRootDir},undef,undef,
-		$main::CacheRoot,
-		$main::CacheRootMode,
+		$this -> {recycleRootDir},undef,undef,$cacheRoot,
 		$this -> {imageArch},
 		$this -> {cmdL}
 	);

@@ -349,7 +349,6 @@ sub selectCache {
 	my @CachePackages = @{$init->[2]};
 	my $CacheScan     = $init->[3];
 	my $haveCache     = 0;
-	my @result        = ();
 	my %plist         = ();
 	my %Cache         = ();
 	#==========================================
@@ -444,10 +443,8 @@ sub selectCache {
 		foreach my $clic (keys %Cache) {
 			if ($Cache{$clic} == $max) {
 				$kiwi -> info ("Using cache: $clic");
-				push @result,$clic;
-				push @result,"union";
 				$kiwi -> done();
-				return @result;
+				return $clic;
 			}
 		}
 	}

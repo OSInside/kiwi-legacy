@@ -46,13 +46,9 @@ sub new {
 	my $kiwi   = shift;
 	my $rootRW = shift;
 	my $baseRO = shift;
-	my $mode   = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	if (! $mode) {
-		$mode = "copy";
-	}
 	if (! -d $rootRW) {
 		$kiwi -> error ("Directory $rootRW doesn't exist");
 		$kiwi -> failed ();
@@ -68,7 +64,6 @@ sub new {
 			return undef;
 		}
 		$baseRO = <$FD>; close $FD; chomp $baseRO;
-		$mode = "union";
 	}
 	#==========================================
 	# Store object data
@@ -76,32 +71,6 @@ sub new {
 	$this->{kiwi}   = $kiwi;
 	$this->{baseRO} = $baseRO;
 	$this->{rootRW} = $rootRW;
-	$this->{mode}   = $mode;
-	return $this;
-}
-
-#==========================================
-# setMode
-#------------------------------------------
-sub setMode {
-	# ...
-	# set the overlay mode. There are two modes "union" and
-	# "copy". The copy mode is the default mode. While in the
-	# union mode the overlay root system will be created by
-	# mounting the baseRO together with the rootRW tree into
-	# a temporary new root tree. The copy mode will tar/untar
-	# the baseRO into the rootRW and return the rootRW as root
-	# directory.
-	# ---
-	my $this = shift;
-	my $mode = shift;
-	if ($mode eq "union") {
-		$this->{mode} = $mode;
-	} elsif ($mode eq "recycle") {
-		$this->{mode} = $mode;
-	} else {
-		$this->{mode} = "copy";
-	}
 	return $this;
 }
 
@@ -110,21 +79,13 @@ sub setMode {
 #------------------------------------------
 sub mountOverlay {
 	# ...
-	# call the appropriate overlay function according to the
-	# specified mode. Note if in copy mode mountOverlay will
-	# _not_ mount anything
+	# call the appropriate overlay function
 	# ---
 	my $this = shift;
 	if (! defined $this->{baseRO}) {
 		return $this->{rootRW};
 	}
-	if ($this->{mode} eq "union") {
-		return $this -> unionOverlay();
-	} elsif ($this->{mode} eq "recycle") {
-		return $this -> recycleOverlay();
-	} else {
-		return $this -> copyOverlay();
-	}
+	return $this -> unionOverlay();
 }
 
 #==========================================
@@ -218,34 +179,6 @@ sub unionOverlay {
 }
 
 #==========================================
-# copyOverlay
-#------------------------------------------
-sub copyOverlay {
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $baseRO = $this->{baseRO};
-	my $rootRW = $this->{rootRW};
-	my $data;
-	my $code;
-	$data = qxx ("tar -C $baseRO -cz --to-stdout . | tar -C $rootRW -xz");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("Failed to tar/untar base tree: $data");
-		$kiwi -> failed ();
-		return undef;
-	}
-	return $rootRW;
-}
-
-#==========================================
-# recycleOverlay
-#------------------------------------------
-sub recycleOverlay {
-	my $this = shift;
-	return $this->{baseRO};
-}
-
-#==========================================
 # resetOverlay
 #------------------------------------------
 sub resetOverlay {
@@ -256,12 +189,6 @@ sub resetOverlay {
 	my $mount  = $this->{mount};
 	my $data;
 	my $code;
-	if ($this->{mode} eq "copy") {
-		return $this;
-	}
-	if ($this->{mode} eq "recycle") {
-		return $this;
-	}
 	if ($mount) {
 		foreach my $cmd (reverse @{$mount}) {
 			qxx ("$cmd 2>&1");

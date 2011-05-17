@@ -124,6 +124,9 @@ sub prepareChecks {
 	if (! $this -> __checkPatternTypeAttrrValueConsistent()) {
 		return undef;
 	}
+	if (! $this -> __checkRootRecycleCapability()) {
+		return undef;
+	}
 	return 1;
 }
 
@@ -156,6 +159,27 @@ sub __haveValidTypeString {
 			$kiwi -> failed();
 			return undef;
 		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkRootRecycleCapability
+#------------------------------------------
+sub __checkRootRecycleCapability {
+	# ...
+	# Check the root tree if --recycle-root is set. In that case
+	# it's not allowed to use a root tree which is based on
+	# an image cache
+	# ---
+	my $this = shift;
+	my $cmdL = $this -> {cmdArgs};
+	my $tree = $cmdL -> getRecycleRootDir();
+	my $kiwi = $this -> {kiwi};
+	if (($tree) && (-f "$tree/kiwi-root.cache")) {
+		$kiwi -> error ("Can't recycle cache based root tree");
+		$kiwi -> failed();
+		return undef;
 	}
 	return 1;
 }

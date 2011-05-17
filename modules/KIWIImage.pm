@@ -414,9 +414,7 @@ sub setupOverlay {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $tree = $this->{imageTree};
-	$this->{overlay} = new KIWIOverlay (
-		$kiwi,$tree,$main::CacheRoot,$main::CacheRootMode
-	);
+	$this->{overlay} = new KIWIOverlay ($kiwi,$tree);
 	if (! $this->{overlay}) {
 		return undef;
 	}

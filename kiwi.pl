@@ -42,7 +42,6 @@ use KIWIImage;
 use KIWIImageCreator;
 use KIWIBoot;
 use KIWIMigrate;
-use KIWIOverlay;
 use KIWIQX;
 use KIWIRuntimeChecker;
 use KIWIImageFormat;
@@ -189,8 +188,6 @@ our @Skip;                  # skip this package in migration mode
 our @Profiles;              # list of profiles to include in image
 our @ProfilesOrig;          # copy of original Profiles option value 
 our $ForceNewRoot;          # force creation of new root directory
-our $CacheRoot;             # Cache file set via selectCache()
-our $CacheRootMode;         # Cache mode set via selectCache()
 our $NoColor;               # do not used colored output (done/failed messages)
 our $LogPort;               # specify alternative log server port
 our $GzipCmd;               # command to run to gzip things
@@ -1292,15 +1289,6 @@ sub init {
 	if (defined $Destination) {
 		$Destination = File::Spec->rel2abs ($Destination);
 		$cmdL -> setImagetargetDir ($Destination);
-	}
-	#========================================
-	# check prepare/create/cache paths
-	#----------------------------------------
-	if (defined $CacheRoot) {
-		if (($CacheRoot !~ /^\//) && (! -d $CacheRoot)) {
-			$CacheRoot = $System."/".$CacheRoot;
-		}
-		$CacheRoot =~ s/\/$//;
 	}
 	if (defined $Prepare) {
 		if (($Prepare !~ /^\//) && (! -d $Prepare)) {
