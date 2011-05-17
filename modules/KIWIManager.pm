@@ -1750,8 +1750,8 @@ sub setupArchives {
 	print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 	print $fd "trap clean INT TERM\n";
 	print $fd "for i in @tars;do\n";
-	print $fd "   tar --numeric-owner -tvf $idesc/\$i ";
-	print $fd " | grep -v ^d | cut -c49- | cut -f1 -d-";
+	print $fd "   tar -tf $idesc/\$i";
+	print $fd ' | grep -v /$ ';
 	print $fd ">> $root/bootincluded_archives.filelist\n";
 	print $fd "   if ! tar -C $root -xvf $idesc/\$i;then\n";
 	print $fd "       ECODE=\$?\n";
