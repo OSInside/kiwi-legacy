@@ -1694,7 +1694,7 @@ div {
 		k.user.home.attribute &
 		k.user.id.attribute? &
 		k.user.name.attribute &
-		k.user.pwd.attribute &
+		k.user.pwd.attribute? &
 		k.user.pwdformat? &
 		k.user.realname.attribute? &
 		k.user.shell.attribute?
