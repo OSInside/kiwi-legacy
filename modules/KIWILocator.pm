@@ -152,7 +152,8 @@ sub getControlFile {
 		} elsif ($globitems > 1) {
 			$found = 2; last;
 		} else {
-			$config = pop @globsearch; last;
+			$config = pop @globsearch;
+			$found = 1; last;
 		}
 	}
 	if ($found == 1) {
