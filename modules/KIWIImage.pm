@@ -120,31 +120,6 @@ sub new {
 	my $arch = qxx ("uname -m"); chomp ( $arch );
 	$arch = ".$arch";
 	#==========================================
-	# Store initial values of main variables
-	#------------------------------------------
-	sub reset_sub {
-		my @backupProfiles     = @main::Profiles;
-		my $backupCreate       = $main::Create;
-		my $backupPrepare      = $main::Prepare;
-		my $backupRootTree     = $main::RootTree;
-		my $backupForceNewRoot = $main::ForceNewRoot;
-		my @backupPatterns     = @main::AddPattern;
-		my @backupPackages     = @main::AddPackage;
-		my $backupSetImageType = $main::SetImageType;
-		return sub {
-			@main::Profiles     = @backupProfiles;
-			$main::Prepare      = $backupPrepare;
-			$main::Create       = $backupCreate;
-			$main::ForceNewRoot = $backupForceNewRoot;
-			@main::AddPattern   = @backupPatterns;
-			@main::AddPackage   = @backupPackages;
-			$main::RootTree     = $backupRootTree;
-			$main::SetImageType = $backupSetImageType;
-			$main::Survive      = "default";
-			undef %main::XMLChangeSet;
-		}
-	}
-	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi}       = $kiwi;
@@ -156,7 +131,6 @@ sub new {
 	$this->{imageStrip} = $imageStrip;
 	$this->{baseSystem} = $baseSystem;
 	$this->{arch}       = $arch;
-	$this->{resetvars}  = reset_sub();
 	#==========================================
 	# Mount overlay tree if required...
 	#------------------------------------------
@@ -1026,7 +1000,7 @@ sub createImageRootAndBoot {
 		chomp $tmpdir;
 		push @{$this->{tmpdirs}},$tmpdir;
 		#==========================================
-		# Setup boot prepare and create...
+		# Prepare boot image...
 		#------------------------------------------
 		my $configDir;
 		if (($stype{boot} !~ /^\//) && (! -d $stype{boot})) {
@@ -1038,40 +1012,31 @@ sub createImageRootAndBoot {
 		$cmdL -> setInitrdConfigDir ($configDir);
 		$cmdL -> setInitrdRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic->prepareBootImage())) {
+		if ((! $kic) || (! $kic -> prepareBootImage())) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
 			}
-			&{$this->{resetvars}};
 			return undef;
 		}
 		undef %main::XMLChangeSet;
-		$main::Create   = $rootTarget;
-		$main::RootTree = $rootTarget;
-		$main::Survive  = "yes";
-		undef @main::Profiles;
-		undef @main::AddPackage;
-		undef @main::RemovePackage;
-		undef $main::SetImageType;
 		#==========================================
-		# Call kiwi again
+		# Create boot image...
 		#------------------------------------------
-		if (! defined main::main()) {
+		$cmdL -> setInitrdConfigDir ($rootTarget);
+		$cmdL -> setInitrdImageTargetDir ($this->{imageDest});
+		$kic  -> initialize();
+		if ((! $kic) || (! $kic -> createBootImage())) {
+			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
 			}
-			&{$this->{resetvars}};
 			return undef;
 		}
 		#==========================================
 		# Clean up tmp directory
 		#------------------------------------------
 		qxx ("rm -rf $tmpdir");
-		#==========================================
-		# Reset variables
-		#------------------------------------------
-		&{$this->{resetvars}};
 	}
 	#==========================================
 	# setup initrd name
@@ -1126,7 +1091,6 @@ sub createImagePXE {
 	if (! defined $name) {
 		return undef;
 	}
-	&{$this->{resetvars}};
 	return $this;
 }
 
@@ -1518,7 +1482,7 @@ sub createImageLiveCD {
 		chomp $tmpdir;
 		push @{$this->{tmpdirs}},$tmpdir;
 		#==========================================
-		# Setup boot prepare and create...
+		# Prepare boot image...
 		#------------------------------------------
 		my $configDir;
 		if (($stype{boot} !~ /^\//) && (! -d $stype{boot})) {
@@ -1530,40 +1494,31 @@ sub createImageLiveCD {
 		$cmdL -> setInitrdConfigDir ($configDir);
 		$cmdL -> setInitrdRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic->prepareBootImage())) {
+		if ((! $kic) || (! $kic -> prepareBootImage())) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
 			}
-			&{$this->{resetvars}};
 			return undef;
 		}
 		undef %main::XMLChangeSet;
-		$main::Create   = $rootTarget;
-		$main::RootTree = $rootTarget;
-		$main::Survive  = "yes";
-		undef @main::Profiles;
-		undef @main::AddPackage;
-		undef @main::RemovePackage;
-		undef $main::SetImageType;
 		#==========================================
-		# Call kiwi again
+		# Create boot image...
 		#------------------------------------------
-		if (! defined main::main()) {
+		$cmdL -> setInitrdConfigDir ($rootTarget);
+		$cmdL -> setInitrdImageTargetDir ($this->{imageDest});
+		$kic  -> initialize();
+		if ((! $kic) || (! $kic -> createBootImage())) {
+			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
 			}
-			&{$this->{resetvars}};
 			return undef;
 		}
 		#==========================================
 		# Clean up tmp directory
 		#------------------------------------------
 		qxx ("rm -rf $tmpdir");
-		#==========================================
-		# Reset variables
-		#------------------------------------------
-		&{$this->{resetvars}};
 	}
 	#==========================================
 	# setup initrd/kernel names
@@ -2568,7 +2523,7 @@ sub createImageSplit {
 		chomp $tmpdir;
 		push @{$this->{tmpdirs}},$tmpdir;
 		#==========================================
-		# Setup boot prepare and create...
+		# Prepare boot image...
 		#------------------------------------------
 		my $configDir;
 		if (($type{boot} !~ /^\//) && (! -d $type{boot})) {
@@ -2580,40 +2535,31 @@ sub createImageSplit {
 		$cmdL -> setInitrdConfigDir ($configDir);
 		$cmdL -> setInitrdRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic->prepareBootImage())) {
+		if ((! $kic) || (! $kic -> prepareBootImage())) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
 			}
-			&{$this->{resetvars}};
 			return undef;
 		}
 		undef %main::XMLChangeSet;
-		$main::Create   = $rootTarget;
-		$main::RootTree = $rootTarget;
-		$main::Survive  = "yes";
-		undef @main::Profiles;
-		undef @main::AddPackage;
-		undef @main::RemovePackage;
-		undef $main::SetImageType;
 		#==========================================
-		# Call kiwi again
+		# Create boot image...
 		#------------------------------------------
-		if (! defined main::main()) {
+		$cmdL -> setInitrdConfigDir ($rootTarget);
+		$cmdL -> setInitrdImageTargetDir ($this->{imageDest});
+		$kic  -> initialize();
+		if ((! $kic) || (! $kic -> createBootImage())) {
+			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
 			}
-			&{$this->{resetvars}};
 			return undef;
 		}
 		#==========================================
 		# Clean up tmp directory
 		#------------------------------------------
 		qxx ("rm -rf $tmpdir");
-		#==========================================
-		# Reset variables
-		#------------------------------------------
-		&{$this->{resetvars}};
 	}
 	#==========================================
 	# setup initrd name

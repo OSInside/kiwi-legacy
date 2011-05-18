@@ -221,6 +221,17 @@ sub getImageTargetDir {
 }
 
 #==========================================
+# getInitrdImageTargetDir
+#------------------------------------------
+sub getInitrdImageTargetDir {
+	# ...
+	# Return the location of the target directory for the boot image
+	# ---
+	my $this = shift;
+	return $this -> {imageInitrdTgtDir};
+}
+
+#==========================================
 # getLogFile
 #------------------------------------------
 sub getLogFile {
@@ -654,6 +665,18 @@ sub setImagetargetDir {
 	# ---
 	my $this = shift;
 	$this -> {imageTgtDir} = shift;
+	return 1;
+}
+
+#==========================================
+# setInitrdImageTargetDir
+#------------------------------------------
+sub setInitrdImageTargetDir {
+	# ...
+	# Set the destination directory for the completed boot image
+	# ---
+	my $this = shift;
+	$this -> {imageInitrdTgtDir} = shift;
 	return 1;
 }
 
