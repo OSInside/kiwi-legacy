@@ -497,7 +497,7 @@ div {
 		]
 		element metadata {
 			k.metadata.attlist &
-			k.repopackage+ &
+			k.repopackage* &
 			k.metafile* &
 			k.chroot*
 		}

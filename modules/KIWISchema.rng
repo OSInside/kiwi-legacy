@@ -690,9 +690,9 @@ metadata it will not be installed by rpm but its cpio
 archive is extracted in a specific way.</db:para>
         <interleave>
           <ref name="k.metadata.attlist"/>
-          <oneOrMore>
+          <zeroOrMore>
             <ref name="k.repopackage"/>
-          </oneOrMore>
+          </zeroOrMore>
           <zeroOrMore>
             <ref name="k.metafile"/>
           </zeroOrMore>
