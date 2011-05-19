@@ -107,6 +107,7 @@ sub new {
 	#------------------------------------------
 	$this->{kiwi} = $kiwi;
 	$this->{arch} = $arch;
+	$this->{gdata}= $main::global -> getGlobals();
 	#==========================================
 	# Lookup XML configuration file
 	#------------------------------------------
@@ -123,7 +124,10 @@ sub new {
 	# Read and Validate XML information
 	#------------------------------------------
 	my $validator = new KIWIXMLValidator (
-		$kiwi,$controlFile,$main::Revision,$main::Schema,$main::SchemaCVT
+		$kiwi,$controlFile,
+		$this->{gdata}->{Revision},
+		$this->{gdata}->{Schema},
+		$this->{gdata}->{SchemaCVT}
 	);
 	my $systemTree = $validator -> getDOM();
 	#==========================================
@@ -2119,7 +2123,7 @@ sub getImageConfig {
 	# revision information
 	#------------------------------------------
 	my $rev  = "unknown";
-	if (open (my $FD,$main::Revision)) {
+	if (open (my $FD,$this->{gdata}->{Revision})) {
 		$rev = <$FD>; close $FD;
 		$rev =~ s/\n//g;
 	}
@@ -4056,11 +4060,13 @@ sub __addDefaultSplitNode {
 	my $splitXML = new XML::LibXML;
 	eval {
 		$splitTree = $splitXML
-			-> parse_file ( $main::KSplit );
+			-> parse_file ( $this->{gdata}->{KSplit} );
 	};
 	if ($@) {
 		my $evaldata=$@;
-		$kiwi -> error  ("Problem reading split file: $main::KSplit");
+		$kiwi -> error  (
+			"Problem reading split file: $this->{gdata}->{KSplit}"
+		);
 		$kiwi -> failed ();
 		$kiwi -> error  ("$evaldata\n");
 		return undef;

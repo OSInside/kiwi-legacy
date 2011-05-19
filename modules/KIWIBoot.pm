@@ -54,6 +54,7 @@ sub new {
 	#------------------------------------------
 	my $kiwi   = shift;
 	my $initrd = shift;
+	my $cmdL   = shift;
 	my $system = shift;
 	my $vmsize = shift;
 	my $device = shift;
@@ -117,9 +118,9 @@ sub new {
 	#------------------------------------------
 	if (defined $system) {
 		if ((-f $system) || (-b $system)) {
-			my %fsattr = main::checkFileSystem ($system);
+			my %fsattr = $main::global -> checkFileSystem ($system);
 			if ($fsattr{readonly}) {
-				$syszip = main::isize ($system);
+				$syszip = $main::global -> isize ($system);
 			} else {
 				$syszip = 0;
 			}
@@ -209,6 +210,7 @@ sub new {
 	#==========================================
 	# Store object data (1)
 	#------------------------------------------
+	$this->{gdata}    = $main::global -> getGlobals();
 	$this->{tmpdir}   = $tmpdir;
 	$this->{loopdir}  = $loopdir;
 	$this->{lvmgroup} = $vgroup;
@@ -224,8 +226,10 @@ sub new {
 			my $locator = new KIWILocator($kiwi);
 			my $controlFile = $locator -> getControlFile ($system."/image");
 			my $validator = new KIWIXMLValidator (
-				$kiwi,$controlFile,$main::Revision,
-				$main::Schema,$main::SchemaCVT
+				$kiwi,$controlFile,
+				$this->{gdata}->{Revision},
+				$this->{gdata}->{Schema},
+				$this->{gdata}->{SchemaCVT}
 			);
 			my $isValid = $validator ? $validator -> validate() : undef;
 			if (! $isValid) {
@@ -235,7 +239,7 @@ sub new {
 				$kiwi,$system."/image",$main::SetImageType,$profile
 			);
 		} else {
-			my %fsattr = main::checkFileSystem ($system);
+			my %fsattr = $main::global -> checkFileSystem ($system);
 			if ((! $fsattr{type}) || ($fsattr{type} eq "auto")) {
 				#==========================================
 				# bind $system to loop device
@@ -267,7 +271,7 @@ sub new {
 				#==========================================
 				# perform mount call
 				#------------------------------------------
-				if (! main::mount($sdev, $tmpdir)) {
+				if (! $main::global -> mount($sdev, $tmpdir)) {
 					$kiwi -> error ("System image mount failed: $status");
 					$kiwi -> failed ();
 					$this -> cleanLoop ();
@@ -279,8 +283,10 @@ sub new {
 				my $locator = new KIWILocator($kiwi);
 				my $controlFile = $locator -> getControlFile ($tmpdir."/image");
 				my $validator = new KIWIXMLValidator (
-					$kiwi,$controlFile,$main::Revision,
-					$main::Schema,$main::SchemaCVT
+					$kiwi,$controlFile,
+					$this->{gdata}->{Revision},
+					$this->{gdata}->{Schema},
+					$this->{gdata}->{SchemaCVT}
 				);
 				my $isValid = $validator ? $validator -> validate() : undef;
 				if (! $isValid) {
@@ -298,7 +304,7 @@ sub new {
 				#==========================================
 				# loop mount system image
 				#------------------------------------------
-				if (! main::mount ($system,$tmpdir)) {
+				if (! $main::global -> mount ($system,$tmpdir)) {
 					return undef;
 				}
 				#==========================================
@@ -314,12 +320,14 @@ sub new {
 				my $locator = new KIWILocator($kiwi);
 				my $controlFile = $locator -> getControlFile ($tmpdir."/image");
 				my $validator = new KIWIXMLValidator (
-					$kiwi,$controlFile,$main::Revision,
-					$main::Schema,$main::SchemaCVT
+					$kiwi,$controlFile,
+					$this->{gdata}->{Revision},
+					$this->{gdata}->{Schema},
+					$this->{gdata}->{SchemaCVT}
 				);
 				my $isValid = $validator ? $validator -> validate() : undef;
 				if (! $isValid) {
-					main::umount();
+					$main::global -> umount();
 					return undef;
 				}
 				$xml = new KIWIXML (
@@ -328,7 +336,7 @@ sub new {
 				#==========================================
 				# clean up
 				#------------------------------------------
-				main::umount();
+				$main::global -> umount();
 			}
 		}
 		if (! defined $xml) {
@@ -371,7 +379,7 @@ sub new {
 			$sizeBytes+= $journal;
 		} else {
 			# system is specified as a file...
-			$sizeBytes = main::isize ($system);
+			$sizeBytes = $main::global -> isize ($system);
 			$sizeBytes*= 1.1;
 		}
 		#==========================================
@@ -407,8 +415,8 @@ sub new {
 			# if system is a split system the vmsize will be
 			# adapted within the image creation function accordingly
 			# ----
-			my $kernelSize = main::isize ($kernel);
-			my $initrdSize = main::isize ($initrd);
+			my $kernelSize = $main::global -> isize ($kernel);
+			my $initrdSize = $main::global -> isize ($initrd);
 			$vmsize = $kernelSize + ($initrdSize * 1.5) + $sizeBytes;
 		}
 		#==========================================
@@ -446,7 +454,9 @@ sub new {
 	#==========================================
 	# Store a disk label ID for this object
 	#------------------------------------------
-	$this->{mbrid} = main::getMBRDiskLabel();
+	$this->{mbrid} = $main::global -> getMBRDiskLabel (
+		$cmdL -> getMBRID()
+	);
 	#==========================================
 	# find system architecture
 	#------------------------------------------
@@ -460,7 +470,7 @@ sub new {
 			$vga = $type{vga};
 		}
 		if ($type{luks}) {
-			$main::LuksCipher = $type{luks};
+			$main::global -> setGlobals ("LuksCipher",$type{luks});
 		}
 	}
 	#==========================================
@@ -481,6 +491,7 @@ sub new {
 	$this->{chainload} = $main::GrubChainload;
 	$this->{vga}       = $vga;
 	$this->{xml}       = $xml;
+	$this->{cmdL}      = $cmdL;
 	$this->{xendomain} = $xendomain;
 	$this->{profile}   = $profile;
 	$this->{haveSplit} = $haveSplit;
@@ -505,6 +516,7 @@ sub createBootStructure {
 	my $lname  = "linux";
 	my $iname  = "initrd";
 	my $xname  = "xen.gz";
+	my $zipper = $this->{gdata}->{Gzip};
 	my $status;
 	my $result;
 	if (defined $loc) {
@@ -530,11 +542,11 @@ sub createBootStructure {
 			# deflate/inflate initrd to make xen happy
 			my $irdunc = $initrd;
 			$irdunc =~ s/\.gz//;
-			qxx ("$main::Gzip -d $initrd && $main::Gzip $irdunc");
+			qxx ("$zipper -d $initrd && $zipper $irdunc");
 		}
 		$status = qxx ( "cp $initrd $tmpdir/boot/$iname 2>&1" );
 	} else {
-		$status = qxx ( "cat $initrd | $main::Gzip > $tmpdir/boot/$iname" );
+		$status = qxx ( "cat $initrd | $zipper > $tmpdir/boot/$iname" );
 	}
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -754,7 +766,7 @@ sub setupInstallCD {
 		#==========================================
 		# perform mount call
 		#------------------------------------------
-		if (! main::mount ($sdev, $tmpdir)) {
+		if (! $main::global -> mount ($sdev, $tmpdir)) {
 			$kiwi -> error ("Failed to mount system partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
@@ -996,7 +1008,8 @@ sub setupInstallStick {
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
 	my $xml       = $this->{xml};
-	my $irdsize   = main::isize ($initrd);
+	my $cmdL      = $this->{cmdL};
+	my $irdsize   = $main::global -> isize ($initrd);
 	my $diskname  = $system.".install.raw";
 	my $md5name   = $system;
 	my $destdir   = dirname ($initrd);
@@ -1113,7 +1126,7 @@ sub setupInstallStick {
 		#==========================================
 		# perform mount call
 		#------------------------------------------
-		if (! main::mount ($sdev, $tmpdir)) {
+		if (! $main::global -> mount ($sdev, $tmpdir)) {
 			$kiwi -> error  ("Failed to mount system partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
@@ -1159,7 +1172,7 @@ sub setupInstallStick {
 	#------------------------------------------
 	$irdsize= ($irdsize / 1e6) + 20;
 	$irdsize= sprintf ("%.0f", $irdsize);
-	$vmsize = main::isize ($system);
+	$vmsize = $main::global -> isize ($system);
 	$vmsize = ($vmsize / 1e6) * 1.3 + $irdsize;
 	$vmsize = sprintf ("%.0f", $vmsize);
 	$vmsize = $vmsize."M";
@@ -1320,7 +1333,9 @@ sub setupInstallStick {
 	foreach my $root ($boot,$data) {
 		next if ! defined $root;
 		$kiwi -> info ("Creating ext3 filesystem on $root partition");
-		my %FSopts = main::checkFSOptions();
+		my %FSopts = $main::global -> checkFSOptions(
+			@{$cmdL -> getFilesystemOptions()}
+		);
 		my $fsopts = $FSopts{ext3};
 		my $fstool = "mkfs.ext3";
 		if (($root eq $data) && ($this->{inodes})) {
@@ -1341,7 +1356,7 @@ sub setupInstallStick {
 	# Copy boot data on first partition
 	#------------------------------------------
 	$kiwi -> info ("Installing boot data to disk");
-	if (! main::mount ($boot, $loopdir)) {
+	if (! $main::global -> mount ($boot, $loopdir)) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount boot partition: $status");
 		$kiwi -> failed ();
@@ -1357,7 +1372,7 @@ sub setupInstallStick {
 		$this -> cleanLoop ();
 		return undef;
 	}
-	main::umount();
+	$main::global -> umount();
 	$kiwi -> done();
 	#==========================================
 	# Check for optional config-cdroot archive
@@ -1410,7 +1425,7 @@ sub setupInstallStick {
 	#------------------------------------------
 	if ($gotsys) {
 		$kiwi -> info ("Installing image data to disk");
-		if (! main::mount($data, $loopdir)) {
+		if (! $main::global -> mount($data, $loopdir)) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount data partition: $status");
 			$kiwi -> failed ();
@@ -1435,7 +1450,7 @@ sub setupInstallStick {
 		}
 		print FD "IMAGE=$nameusb\n";
 		close FD;
-		main::umount();
+		$main::global -> umount();
 		$kiwi -> done();
 	}
 	#==========================================
@@ -1481,6 +1496,7 @@ sub setupBootDisk {
 	my $profile   = $this->{profile};
 	my $xendomain = $this->{xendomain};
 	my $xml       = $this->{xml};
+	my $cmdL      = $this->{cmdL};
 	my $haveTree  = $this->{haveTree};
 	my $imgtype   = $this->{imgtype};
 	my $haveSplit = $this->{haveSplit};
@@ -1701,7 +1717,8 @@ sub setupBootDisk {
 	# increase vmsize if image split portion
 	#------------------------------------------
 	if (($imgtype eq "split") && (-f $splitfile)) {
-		my $splitsize = main::isize ($splitfile); $splitsize /= 1048576;
+		my $splitsize = $main::global -> isize ($splitfile);
+		$splitsize /= 1048576;
 		$vmsize = $this->{vmmbyte} + ($splitsize * 1.5) + $lvmbootMB;
 		$vmsize = sprintf ("%.0f", $vmsize);
 		$this->{vmmbyte} = $vmsize;
@@ -1729,7 +1746,7 @@ sub setupBootDisk {
 		$FSTypeRO = $FSTypeRW;
 	}
 	if ($haveSplit) {
-		my %fsattr = main::checkFileSystem ($FSTypeRW);
+		my %fsattr = $main::global -> checkFileSystem ($FSTypeRW);
 		if ($fsattr{readonly}) {
 			$kiwi -> error ("Can't copy data into requested RO filesystem");
 			$kiwi -> failed ();
@@ -2018,7 +2035,8 @@ sub setupBootDisk {
 		if ($syszip > 0) {
 			my $sizeOK = 1;
 			my $systemPSize = $this->getStorageSize ($deviceMap{1});
-			my $systemISize = main::isize ($system); $systemISize /= 1024;
+			my $systemISize = $main::global -> isize ($system);
+			$systemISize /= 1024;
 			chomp $systemPSize;
 			#print "_______A $systemPSize : $systemISize\n";
 			if ($systemPSize < $systemISize) {
@@ -2065,14 +2083,14 @@ sub setupBootDisk {
 		$kiwi -> done();
 		$result = 0;
 		my $mapper = $root;
-		my %fsattr = main::checkFileSystem ($root);
+		my %fsattr = $main::global -> checkFileSystem ($root);
 		if ($fsattr{type} eq "luks") {
 			$mapper = $this -> luksResize ($root,"luks-resize");
 			if (! $mapper) {
 				$this -> luksClose();
 				return undef;
 			}
-			%fsattr= main::checkFileSystem ($mapper);
+			%fsattr= $main::global -> checkFileSystem ($mapper);
 		}
 		my $expanded = $this -> __expandFS (
 			$fsattr{type},'system', $mapper
@@ -2095,14 +2113,14 @@ sub setupBootDisk {
 			$kiwi -> done();
 			$result = 0;
 			$mapper = $root;
-			my %fsattr = main::checkFileSystem ($root);
+			my %fsattr = $main::global -> checkFileSystem ($root);
 			if ($fsattr{type} eq "luks") {
 				$mapper = $this -> luksResize ($root,"luks-resize");
 				if (! $mapper) {
 					$this -> luksClose();
 					return undef;
 				}
-				%fsattr= main::checkFileSystem ($mapper);
+				%fsattr= $main::global -> checkFileSystem ($mapper);
 			}
 			my $expanded = $this -> __expandFS (
 				$fsattr{type},'split', $mapper
@@ -2121,7 +2139,7 @@ sub setupBootDisk {
 		#==========================================
 		# Mount system image partition
 		#------------------------------------------
-		if (! main::mount ($root, $loopdir)) {
+		if (! $main::global -> mount ($root, $loopdir)) {
 			$this -> cleanLoop ();
 			return undef;
 		}
@@ -2144,7 +2162,7 @@ sub setupBootDisk {
 					$this -> cleanLoop ();
 					return undef;
 				}
-				if (! main::mount ($device, "$loopdir/$pname")) {
+				if (! $main::global -> mount ($device, "$loopdir/$pname")) {
 					$this -> cleanLoop ();
 					return undef;
 				}
@@ -2174,7 +2192,7 @@ sub setupBootDisk {
 		#==========================================
 		# Umount system image partition
 		#------------------------------------------
-		main::umount();
+		$main::global -> umount();
 	}
 	#==========================================
 	# create read/write filesystem if needed
@@ -2206,7 +2224,9 @@ sub setupBootDisk {
 		} else {
 			$kiwi -> info ("Creating ext3 read-write filesystem");
 		}
-		my %FSopts = main::checkFSOptions();
+		my %FSopts = $main::global -> checkFSOptions(
+			@{$cmdL -> getFilesystemOptions()}
+		);
 		my $fsopts = $FSopts{ext3};
 		my $fstool = "mkfs.ext3";
 		$status = qxx ("$fstool $fsopts $root 2>&1");
@@ -2269,7 +2289,9 @@ sub setupBootDisk {
 		if ($bootloader eq "extlinux") {
 			$root = $deviceMap{extlinux};
 		}
-		my %FSopts = main::checkFSOptions();
+		my %FSopts = $main::global -> checkFSOptions(
+			@{$cmdL -> getFilesystemOptions()}
+		);
 		my $fsopts = $FSopts{ext2};
 		my $fstool = "mkfs.ext2";
 		$status = qxx ("$fstool $fsopts $root 2>&1");
@@ -2316,7 +2338,7 @@ sub setupBootDisk {
 	} else {
 		$root = $deviceMap{1};
 	}
-	if (! main::mount ($root, $loopdir)) {
+	if (! $main::global -> mount ($root, $loopdir)) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount image: $root");
 		$kiwi -> failed ();
@@ -2326,7 +2348,7 @@ sub setupBootDisk {
 	if (($arch =~/ppc|ppc64/) && ($lvm)) {
 		$status = qxx ("mkdir -p $loopdir/vfat");
 		$boot = $deviceMap{fat};
-		if (! main::mount ($boot, $loopdir."/vfat")) {
+		if (! $main::global -> mount ($boot, $loopdir."/vfat")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount image: $boot");
 			$kiwi -> failed ();
@@ -2360,7 +2382,7 @@ sub setupBootDisk {
 			$result = $? >> 8;
 			$status = qxx ("cp -a $tmpdir/ppc $loopdir/vfat/");
 			$result = $? >> 8;
-			main::umount($boot);
+			$main::global -> umount($boot);
 			$status = qxx ("rm -rf $loopdir/vfat");
 			$result = $? >> 8;
 		}
@@ -2372,7 +2394,7 @@ sub setupBootDisk {
 		$this -> cleanLoop ();
 		return undef;
 	}
-	main::umount();
+	$main::global -> umount();
 	$kiwi -> done();
 	#==========================================
 	# Install boot loader on disk
@@ -2513,6 +2535,7 @@ sub setupInstallFlags {
 	my $system = $this->{system};
 	my $irddir = $initrd."_".$$.".vmxsystem";
 	my $xml    = $this->{xml};
+	my $zipper = $this->{gdata}->{Gzip};
 	my $newird;
 	if (! mkdir $irddir) {
 		$kiwi -> error  ("Failed to create vmxsystem directory");
@@ -2522,7 +2545,7 @@ sub setupInstallFlags {
 	#==========================================
 	# unpack initrd files
 	#------------------------------------------
-	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
+	my $unzip  = "$this->{gdata}->{Gzip} -cd $initrd 2>&1";
 	my $status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
 	my $result = $? >> 8;
 	if ($result != 0) {
@@ -2566,7 +2589,7 @@ sub setupInstallFlags {
 	$newird = $initrd;
 	$newird =~ s/\.gz/\.install\.gz/;
 	$status = qxx (
-		"(cd $irddir && find|cpio --quiet -oH newc | $main::Gzip) > $newird"
+		"(cd $irddir && find|cpio --quiet -oH newc | $zipper) > $newird"
 	);
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -2630,7 +2653,7 @@ sub setupSplash {
 	# unpack initrd files
 	#------------------------------------------
 	mkdir $irddir;
-	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
+	my $unzip  = "$this->{gdata}->{Gzip} -cd $initrd 2>&1";
 	if ($zipped) {
 		$status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
 	} else {
@@ -2690,7 +2713,7 @@ sub setupSplashLink {
 	my $status;
 	my $result;
 	if ($initrd !~ /.gz$/) {
-		$status = qxx ("$main::Gzip -f $initrd 2>&1");
+		$status = qxx ("$this->{gdata}->{Gzip} -f $initrd 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			return ("Failed to compress initrd: $status");
@@ -2739,6 +2762,7 @@ sub setupSplashForGrub {
 	my $newird = shift;
 	my $newspl = "$spldir/splash";
 	my $irddir = "$spldir/initrd";
+	my $zipper = $this->{gdata}->{Gzip};
 	my $status;
 	my $result;
 	#==========================================
@@ -2755,7 +2779,7 @@ sub setupSplashForGrub {
 	#------------------------------------------
 	while (my $splash = glob("$newspl/*.spl")) {
 		mkdir "$splash.dir";
-		qxx ("$main::Gzip -cd $splash > $splash.bob");
+		qxx ("$zipper -cd $splash > $splash.bob");
 		my $count = $this -> extractCPIO ( $splash.".bob" );
 		for (my $id=1; $id <= $count; $id++) {
 			qxx ("cat $splash.bob.$id |(cd $splash.dir && cpio -i 2>&1)");
@@ -2776,11 +2800,11 @@ sub setupSplashForGrub {
 	}
 	qxx (
 		"(cd $newspl && \
-		find|cpio --quiet -oH newc | $main::Gzip) > $spldir/all.spl"
+		find|cpio --quiet -oH newc | $zipper) > $spldir/all.spl"
 	);
 	qxx (
 		"rm -f $newird && \
-		(cd $irddir && find | cpio --quiet -oH newc | $main::Gzip) > $newird"
+		(cd $irddir && find | cpio --quiet -oH newc | $zipper) > $newird"
 	);
 	#==========================================
 	# create splash initrd
@@ -2798,7 +2822,7 @@ sub cleanLoop {
 	my $loop   = $this->{loop};
 	my $lvm    = $this->{lvm};
 	my $loopdir= $this->{loopdir};
-	main::umount();
+	$main::global -> umount();
 	if ((defined $loop) && ($loop =~ /loop/)) {
 		if (defined $lvm) {
 			qxx ("vgchange -an $this->{lvmgroup} 2>&1");
@@ -2838,7 +2862,7 @@ sub buildMD5Sum {
 	my $outf = shift;
 	my $kiwi = $this->{kiwi};
 	$kiwi -> info ("Creating image MD5 sum...");
-	my $size = main::isize ($file);
+	my $size = $main::global -> isize ($file);
 	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
@@ -2909,6 +2933,7 @@ sub setupBootLoaderStages {
 	my $tmpdir = $this->{tmpdir};
 	my $initrd = $this->{initrd};
 	my $zipped = $this->{zipped};
+	my $zipper = $this->{gdata}->{Gzip};
 	my $status = 0;
 	my $result = 0;
 	#==========================================
@@ -2918,7 +2943,7 @@ sub setupBootLoaderStages {
 		my $stages = "'usr/lib/grub/*'";
 		my $message= "'image/loader/message'";
 		my $gbinary= "'usr/sbin/grub'";
-		my $unzip  = "$main::Gzip -cd $initrd 2>&1";
+		my $unzip  = "$zipper -cd $initrd 2>&1";
 		$status = qxx ( "mkdir -p $tmpdir/boot/grub 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -3010,7 +3035,7 @@ sub setupBootLoaderStages {
 	#------------------------------------------
 	if ($loader =~ /(sys|ext)linux/) {
 		my $message= "'image/loader/*'";
-		my $unzip  = "$main::Gzip -cd $initrd 2>&1";
+		my $unzip  = "$zipper -cd $initrd 2>&1";
 		#==========================================
 		# Create syslinux boot data directory
 		#------------------------------------------
@@ -4141,7 +4166,7 @@ sub checkLVMbind {
 	#==========================================
 	# activate volume groups
 	#------------------------------------------
-	open (my $SCAN,"vgscan|");
+	open (my $SCAN,"vgscan 2>/dev/null |");
 	while (my $line = <$SCAN>) {
 		if ($line =~ /\"(.*)\"/) {
 			push (@groups,$1);
@@ -4771,7 +4796,7 @@ sub luksResize {
 	my $source = shift;
 	my $name   = shift;
 	my $kiwi   = $this->{kiwi};
-	my $cipher = $main::LuksCipher;
+	my $cipher = $this->{gdata}->{LuksCipher};
 	my $status;
 	my $result;
 	my $hald;
@@ -4869,8 +4894,11 @@ sub setupFilesystem {
 	my $inodes = $this->{deviceinodes};
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
+	my $cmdL   = $this->{cmdL};
 	my %type   = %{$xml->getImageTypeAndAttributes()};
-	my %FSopts = main::checkFSOptions();
+	my %FSopts = $main::global -> checkFSOptions(
+		@{$cmdL -> getFilesystemOptions()}
+	);
 	my $iorig  = $this->{inodes};
 	my $result;
 	my $status;

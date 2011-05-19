@@ -218,7 +218,7 @@ sub new {
 	$this->{product} = $product;
 	$this->{mount}   = [];
 	$this->{autoyastCloneList} = \@autoyastCloneList;
-
+	$this->{gdata}   = $main::global -> getGlobals();
 	return $this;
 }
 
@@ -244,7 +244,7 @@ sub createReport {
 	# Beautify report...
 	#------------------------------------------
 	mkdir "$dest/.report";
-	qxx ("tar -C $dest/.report -xf $main::KMigraCSS 2>&1");
+	qxx ("tar -C $dest/.report -xf $this->{gdata}->{KMigraCSS} 2>&1");
 	#==========================================
 	# Start report
 	#------------------------------------------
@@ -797,7 +797,7 @@ sub setTemplate {
 	#==========================================
 	# create xml description
 	#------------------------------------------
-	if (! open (FD,">$dest/$main::ConfigName")) {
+	if (! open (FD,">$dest/$this->{gdata}->{ConfigName}")) {
 		return undef;
 	}
 	#==========================================
@@ -898,7 +898,7 @@ sub getOperatingSystemVersion {
 		}
 	}
 	close FD;
-	if (! open (FD,$main::KMigrate)) {
+	if (! open (FD,$this->{gdata}->{KMigrate})) {
 		return undef;
 	}
 	while (my $line = <FD>) {
@@ -1242,7 +1242,7 @@ sub setSystemOverlayFiles {
 			$kiwi -> warning ("=> Cache doesn't provide version");
 			$kiwi -> skipped ();
 			undef $cache;
-		} elsif ($cdata->{version} ne $main::Version) {
+		} elsif ($cdata->{version} ne $this->{gdata}->{Version}) {
 			$kiwi -> warning ("=> Cache version doesn't match");
 			$kiwi -> skipped ();
 			undef $cache;
@@ -1417,7 +1417,7 @@ sub setSystemOverlayFiles {
 	# Write cache if required
 	#------------------------------------------
 	if (! $cache) {
-		$cdata->{version} = $main::Version;
+		$cdata->{version} = $this->{gdata}->{Version};
 		store ($cdata,$dest.".cache");
 	}
 	#==========================================

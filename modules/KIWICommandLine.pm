@@ -988,4 +988,76 @@ sub getImageFormat {
 	return $this->{format};
 }
 
+#==========================================
+# setDefaultAnswer
+#------------------------------------------
+sub setDefaultAnswer {
+	# ...
+	# Store the value of the format option
+	# ---
+	my $this   = shift;
+	my $answer = shift;
+	$this->{defaultAnswer} = $answer;
+	return 1;
+}
+
+#==========================================
+# getDefaultAnswer
+#------------------------------------------
+sub getDefaultAnswer {
+	my $this = shift;
+	return $this->{defaultAnswer};
+}
+
+#==========================================
+# setFilesystemOptions
+#------------------------------------------
+sub setFilesystemOptions {
+	# ...
+	# Store the list of filesystem specific options
+	# ---
+	my $this   = shift;
+	my $FSBlockSize     = shift;
+	my $FSInodeSize     = shift;
+	my $FSInodeRatio    = shift;
+	my $FSJournalSize   = shift;
+	my $FSMaxMountCount = shift;
+	my $FSCheckInterval = shift;
+	my @result;
+	push @result,$FSBlockSize;
+	push @result,$FSInodeSize;
+	push @result,$FSInodeRatio;
+	push @result,$FSJournalSize;
+	push @result,$FSMaxMountCount;
+	push @result,$FSCheckInterval;
+	$this->{fsoptions} = \@result;
+	return 1;
+}
+
+#==========================================
+# getFilesystemOptions
+#------------------------------------------
+sub getFilesystemOptions {
+	my $this = shift;
+	return $this->{fsoptions};
+}
+
+#==========================================
+# setMBRID
+#------------------------------------------
+sub setMBRID {
+	my $this  = shift;
+	my $mbrid = shift;
+	$this->{mbrid} = $mbrid;
+	return 1;
+}
+
+#==========================================
+# getMBRID
+#------------------------------------------
+sub getMBRID {
+	my $this = shift;
+	return $this->{mbrid};
+}
+
 1;

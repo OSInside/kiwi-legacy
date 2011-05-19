@@ -131,6 +131,7 @@ sub new {
 	$this->{imageStrip} = $imageStrip;
 	$this->{baseSystem} = $baseSystem;
 	$this->{arch}       = $arch;
+	$this->{gdata}      = $main::global -> getGlobals();
 	#==========================================
 	# Mount overlay tree if required...
 	#------------------------------------------
@@ -138,7 +139,9 @@ sub new {
 	#==========================================
 	# Store a disk label ID for this object
 	#------------------------------------------
-	$this->{mbrid} = main::getMBRDiskLabel();
+	$this->{mbrid} = $main::global -> getMBRDiskLabel (
+		$cmdL -> getMBRID()
+	);
 	#==========================================
 	# Clean kernel mounts if any
 	#------------------------------------------
@@ -283,7 +286,7 @@ sub checkAndSetupPrebuiltBootImage {
 	my $ok   = 0;
 	my $bootpath = $boot;
 	if (($boot !~ /^\//) && (! -d $boot)) {
-		$bootpath = $main::System."/".$boot;
+		$bootpath = $this->{gdata}->{System}."/".$boot;
 	}
 	#==========================================
 	# open boot image XML object
@@ -294,8 +297,10 @@ sub checkAndSetupPrebuiltBootImage {
 		return undef;
 	}
 	my $validator = new KIWIXMLValidator (
-		$kiwi,$controlFile,$main::Revision,
-		$main::Schema,$main::SchemaCVT
+		$kiwi,$controlFile,
+		$this->{gdata}->{Revision},
+		$this->{gdata}->{Schema},
+		$this->{gdata}->{SchemaCVT}
 	);
 	my $isValid = $validator ? $validator -> validate() : undef;
 	if (! $isValid) {
@@ -808,6 +813,7 @@ sub createImageCPIO {
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $imageTree = $this->{imageTree};
+	my $zipper    = $this->{gdata}->{Gzip};
 	my $compress  = 1;
 	#==========================================
 	# PRE filesystem setup
@@ -838,7 +844,7 @@ sub createImageCPIO {
 	}
 	if ($compress) {
 		$data = qxx (
-			"cd $imageTree && find . | cpio @cpio | $main::Gzip -f > $dest"
+			"cd $imageTree && find . | cpio @cpio | $zipper -f > $dest"
 		);
 	} else {
 		$data = qxx ("rm -f $dest && rm -f $dest.gz");
@@ -1004,7 +1010,7 @@ sub createImageRootAndBoot {
 		#------------------------------------------
 		my $configDir;
 		if (($stype{boot} !~ /^\//) && (! -d $stype{boot})) {
-			$configDir = $main::System."/".$stype{boot};
+			$configDir = $this->{gdata}->{System}."/".$stype{boot};
 		} else {
 			$configDir = $stype{boot};
 		}
@@ -1056,7 +1062,7 @@ sub createImageRootAndBoot {
 	#==========================================
 	# Include splash screen to initrd
 	#------------------------------------------
-	my $kboot  = new KIWIBoot ($kiwi,$initrd);
+	my $kboot  = new KIWIBoot ($kiwi,$initrd,$cmdL);
 	if (! defined $kboot) {
 		return undef;
 	}
@@ -1486,7 +1492,7 @@ sub createImageLiveCD {
 		#------------------------------------------
 		my $configDir;
 		if (($stype{boot} !~ /^\//) && (! -d $stype{boot})) {
-			$configDir = $main::System."/".$stype{boot};
+			$configDir = $this->{gdata}->{System}."/".$stype{boot};
 		} else {
 			$configDir = $stype{boot};
 		}
@@ -1674,7 +1680,8 @@ sub createImageLiveCD {
 	}
 	chomp $tmpdir;
 	push @{$this->{tmpdirs}},$tmpdir;
-	$data = qxx ("$main::Gzip -cd $pinitrd | (cd $tmpdir && cpio -di 2>&1)");
+	my $zipper = $this->{gdata}->{Gzip};
+	$data = qxx ("$zipper -cd $pinitrd | (cd $tmpdir && cpio -di 2>&1)");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed();
@@ -1862,7 +1869,8 @@ sub createImageLiveCD {
 	if (! defined $gzip) {
 		$attr = "-R -J -pad -joliet-long";
 	}
-	$attr .= " -p \"$main::Preparer\" -publisher \"$main::Publisher\"";
+	$attr .= ' -p "'.$this->{gdata}->{Preparer}.'"';
+	$attr .= ' -publisher "'.$this->{gdata}->{Publisher}.'"';
 	if (! defined $gzip) {
 		$attr .= " -iso-level 4"; 
 	}
@@ -2391,7 +2399,7 @@ sub createImageSplit {
 		if (! -d $source) {
 			next;
 		}
-		my %fsattr = main::checkFileSystem ($type);
+		my %fsattr = $main::global -> checkFileSystem ($type);
 		if (! $fsattr{readonly}) {
 			#==========================================
 			# mount logical extend for data transfer
@@ -2527,7 +2535,7 @@ sub createImageSplit {
 		#------------------------------------------
 		my $configDir;
 		if (($type{boot} !~ /^\//) && (! -d $type{boot})) {
-			$configDir = $main::System."/".$type{boot};
+			$configDir = $this->{gdata}->{System}."/".$type{boot};
 		} else {
 			$configDir = $type{boot};
 		}
@@ -2579,7 +2587,7 @@ sub createImageSplit {
 	#==========================================
 	# Include splash screen to initrd
 	#------------------------------------------
-	my $kboot  = new KIWIBoot ($kiwi,$initrd);
+	my $kboot  = new KIWIBoot ($kiwi,$initrd,$cmdL);
 	if (! defined $kboot) {
 		return undef;
 	}
@@ -2764,7 +2772,9 @@ sub writeImageConfig {
 					$targetPartitionNext = $targetPartition + 1;
 				}
 				if ($href -> {size} eq "image") {
-					my $size = main::isize ("$this->{imageDest}/$name");
+					my $size = $main::global -> isize (
+						"$this->{imageDest}/$name"
+					);
 					print FD int (($size/1024/1024)+1);
 				} else {
 					print FD $href -> {size};
@@ -3037,7 +3047,7 @@ sub buildLogicalExtend {
 	if ($type{luks}) {
 		$encode = 1;
 		$cipher = "$type{luks}";
-		$main::LuksCipher = $cipher;
+		$main::global -> setGlobals ("LuksCipher",$cipher);
 	}
 	#==========================================
 	# Calculate block size and number of blocks
@@ -3451,12 +3461,15 @@ sub setupEXT2 {
 	my $name    = shift;
 	my $journal = shift;
 	my $device  = shift;
+	my $cmdL    = $this->{cmdL};
 	my $kiwi    = $this->{kiwi};
-	my $xml  = $this->{xml};
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my $xml     = $this->{xml};
+	my %type    = %{$xml->getImageTypeAndAttributes()};
 	my $fsopts;
 	my $tuneopts;
-	my %FSopts = main::checkFSOptions();
+	my %FSopts = $main::global -> checkFSOptions(
+		@{$cmdL->getFilesystemOptions()}
+	);
 	my $fstool;
 	my $target = "$this->{imageDest}/$name";
 	if ((defined $journal) && ($journal eq "journaled-ext3")) {
@@ -3512,8 +3525,11 @@ sub setupBTRFS {
 	my $this   = shift;
 	my $name   = shift;
 	my $device = shift;
+	my $cmdL   = $this->{cmdL};
 	my $kiwi   = $this->{kiwi};
-	my %FSopts = main::checkFSOptions();
+	my %FSopts = $main::global -> checkFSOptions(
+		@{$cmdL->getFilesystemOptions()}
+	);
 	my $fsopts = $FSopts{btrfs};
 	my $target = "$this->{imageDest}/$name";
 	if ($device) {
@@ -3546,8 +3562,11 @@ sub setupReiser {
 	my $this   = shift;
 	my $name   = shift;
 	my $device = shift;
-	my $kiwi = $this->{kiwi};
-	my %FSopts = main::checkFSOptions();
+	my $cmdL   = $this->{cmdL};
+	my $kiwi   = $this->{kiwi};
+	my %FSopts = $main::global -> checkFSOptions(
+		@{$cmdL->getFilesystemOptions()}
+	);
 	my $fsopts = $FSopts{reiserfs};
 	my $target = "$this->{imageDest}/$name";
 	if ($device) {
@@ -3615,10 +3634,13 @@ sub setupSquashFS {
 # setupXFS
 #------------------------------------------
 sub setupXFS {
-	my $this = shift;
-	my $name = shift;
-	my $kiwi = $this->{kiwi};
-	my %FSopts = main::checkFSOptions();
+	my $this   = shift;
+	my $name   = shift;
+	my $cmdL   = $this->{cmdL};
+	my $kiwi   = $this->{kiwi};
+	my %FSopts = $main::global -> checkFSOptions(
+		@{$cmdL->getFilesystemOptions()}
+	);
 	my $fsopts = $FSopts{xfs};
 	my $data = qxx (
 		"/sbin/mkfs.xfs $fsopts $this->{imageDest}/$name 2>&1"
@@ -3658,7 +3680,7 @@ sub buildMD5Sum {
 	# Create image md5sum
 	#------------------------------------------
 	$kiwi -> info ("Creating image MD5 sum...");
-	my $size = main::isize ("$this->{imageDest}/$name");
+	my $size = $main::global -> isize ("$this->{imageDest}/$name");
 	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
@@ -3735,7 +3757,7 @@ sub compressImage {
 	# Compress image using gzip
 	#------------------------------------------
 	$kiwi -> info ("Compressing image...");
-	my $data = qxx ("$main::Gzip -f $this->{imageDest}/$name");
+	my $data = qxx ("$this->{gdata}->{Gzip} -f $this->{imageDest}/$name");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -3767,7 +3789,7 @@ sub updateMD5File {
 			return undef;
 		}
 		my $line = <FD>; close FD; chomp $line;
-		my $size = main::isize ($image);
+		my $size = $main::global -> isize ($image);
 		my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 		my $blocksize = 1;
 		for my $factor (split /\s/,$primes) {
@@ -3888,6 +3910,7 @@ sub checkKernel {
 	my $name    = shift;
 	my $kiwi    = $this->{kiwi};
 	my $arch    = $this->{arch};
+	my $zipper  = $this->{gdata}->{Gzip};
 	my %sysk    = ();
 	my %bootk   = ();
 	my $status;
@@ -3913,7 +3936,7 @@ sub checkKernel {
 	my $cmd = "cat $initrd";
 	my $zip = 0;
 	if ($initrd =~ /\.gz$/) {
-		$cmd = "$main::Gzip -cd $initrd";
+		$cmd = "$zipper -cd $initrd";
 		$zip = 1;
 	}
 	my @status = qxx ("$cmd|cpio -it --quiet 'lib/modules/*'|cut -f1-3 -d/");
@@ -4001,7 +4024,9 @@ sub checkKernel {
 	qxx ("cp -a  $systree/boot $tmpdir");
 	qxx ("rm -rf $tmpdir/lib/modules");
 	qxx ("cp -a  $systree/lib/modules $tmpdir/lib");
-	qxx ("cp $main::BasePath/modules/KIWIConfig.sh $tmpdir/.kconfig");
+	qxx (
+		"cp $this->{gdata}->{BasePath}/modules/KIWIConfig.sh $tmpdir/.kconfig"
+	);
 	qxx ("chmod u+x $tmpdir/images.sh");
 	#==========================================
 	# 4) call images.sh script...
@@ -4033,7 +4058,7 @@ sub checkKernel {
 	$status = qxx ( "cd $tmpdir && find . | cpio @cpio > $dest/$name");
 	if ($zip) {
 		$status = qxx (
-			"cd $tmpdir && cat $dest/$name | $main::Gzip -f > $initrd"
+			"cd $tmpdir && cat $dest/$name | $zipper -f > $initrd"
 		);
 	} 
 	#==========================================

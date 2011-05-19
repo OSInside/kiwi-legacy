@@ -49,7 +49,7 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $tiny  = shift;
+	my $port = shift;
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -63,7 +63,7 @@ sub new {
 	#==========================================
 	# Check for tiny object
 	#------------------------------------------
-	if (defined $tiny) {
+	if ((defined $port) && (int $port == 0)) {
 		return $this;
 	}
 	#==========================================
@@ -79,15 +79,7 @@ sub new {
 	#==========================================
 	# Create Log Server on $LogServerPort
 	#------------------------------------------
-	my $logPort = $main::LogServerPort;
-	if ($logPort ne "off") {
-		if ($logPort =~ m/\D/) {
-			$this -> warning ("Non numerical port number specified");
-			$this -> skipped ();
-			return $this;
-		}
-		$this -> setLogServer();
-	}
+	$this -> setLogServer ($port);
 	return $this;
 }
 
@@ -858,6 +850,7 @@ sub setLogServer {
 	# query is a XML formated information
 	# ---
 	my $this  = shift;
+	my $port  = shift;
 	my $child = fork();
 	if (! defined $child) {
 		$this -> warning ("Can't fork logserver process: $!");
@@ -881,10 +874,10 @@ sub setLogServer {
 		#------------------------------------------
 		our @logChilds = ();
 		our %logChilds = ();
-		our $logServer = new KIWISocket ( $this,$main::LogServerPort );
+		our $logServer = new KIWISocket ($this,$port);
 		our $sharedMem = $this->{smem};
 		if (! defined $logServer) {
-			$this -> warning ("Can't open log port: $main::LogServerPort\n");
+			$this -> warning ("Can't open log port: $port\n");
 			$sharedMem -> closeSegment();
 			undef $this-> {smem};
 			exit 1;
@@ -1003,10 +996,11 @@ sub storeXML {
 # writeXML
 #------------------------------------------
 sub writeXML {
-	my $this = shift;
-	my $data = $this->{xmlString};
-	my $cmpf = $this->{xmlOrigFile};
-	my $cache= $this->{xmlCache};
+	my $this   = shift;
+	my $pretty = shift;
+	my $data   = $this->{xmlString};
+	my $cmpf   = $this->{xmlOrigFile};
+	my $cache  = $this->{xmlCache};
 	my @NC;
 	my $FX;
 	if ((! $data) || (! -f $cmpf)) {
@@ -1033,9 +1027,9 @@ sub writeXML {
 	}
 	binmode $FX;
 	print $FX $data; close $FX;
-	qxx ("xsltproc -o $used.new $main::Pretty $used");
+	qxx ("xsltproc -o $used.new $pretty $used");
 	qxx ("mv $used.new $used");
-	qxx ("xsltproc -o $orig.new $main::Pretty $orig");
+	qxx ("xsltproc -o $orig.new $pretty $orig");
 	qxx ("mv $orig.new $orig");
 	my $diff  = qxx ("diff -uwB $orig $used | grep -v -E '^[-+]{3}' 2>&1");
 	if (! $diff) {

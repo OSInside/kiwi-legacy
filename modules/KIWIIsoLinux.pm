@@ -198,6 +198,7 @@ sub new {
 	$this -> {catalog}= \@catalog;
 	$this -> {tool}   = $tool;
 	$this -> {check}  = $mediacheck;
+	$this -> {gdata}  = $main::global -> getGlobals();
 	return $this;
 }
 
@@ -343,7 +344,8 @@ sub ppc64_default {
 	$para.= " -hfs-volid FIXME"; # FIXME should be same as value of -A
 	$para.= " -l";
 	$para.= " --macbin";
-	$para.= " -map $main::BasePath/modules/KIWIIsoLinux-AppleFileMapping.txt";
+	$para.= " -map $this->{gdata}->{BasePath}";
+	$para.= "/modules/KIWIIsoLinux-AppleFileMapping.txt";
 	$para.= " --netatalk";
 	$para.= " -part";
 	$para.= " -T";

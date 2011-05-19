@@ -114,6 +114,8 @@ sub new {
     m_rmlists	    => undef,
   };
 
+  $this->{gdata} = $main::global -> getGlobals();
+
   bless $this, $class;
 
   #==========================================
@@ -636,8 +638,8 @@ sub mainTask
       $attr .= " -f"; # follow symlinks - really necessary?
       $attr .= " -J"; # Joilet extensions - only useful for i586/x86_64, I think
       $attr .= " -joliet-long"; # longer filenames for joilet filenames
-      $attr .= " -p \"$main::Preparer\"";
-      $attr .= " -publisher \"$main::Publisher\"";
+      $attr .= " -p \"$this->{gdata}->{Preparer}\"";
+      $attr .= " -publisher \"$this->{gdata}->{Publisher}\"";
       $attr .= " -A \"$name\"";
       $attr .= " -V \"$vid\"";
 

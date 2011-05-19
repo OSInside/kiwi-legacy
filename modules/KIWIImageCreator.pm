@@ -76,8 +76,9 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{kiwi}             = $kiwi;
-	$this->{cmdL}             = $cmdL;
+	$this->{kiwi}  = $kiwi;
+	$this->{cmdL}  = $cmdL;
+	$this->{gdata} = $main::global -> getGlobals();
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -189,7 +190,10 @@ sub upgradeImage {
 		return undef;
 	}
 	my $validator = new KIWIXMLValidator (
-		$kiwi,$controlFile,$main::Revision,$main::Schema,$main::SchemaCVT
+		$kiwi,$controlFile,
+		$this->{gdata}->{Revision},
+		$this->{gdata}->{Schema},
+		$this->{gdata}->{SchemaCVT}
 	);
 	my $isValid = $validator ? $validator -> validate() : undef;
 	if (! $isValid) {
@@ -277,7 +281,10 @@ sub prepareImage {
 		return undef;
 	}
 	my $validator = new KIWIXMLValidator (
-		$kiwi,$controlFile,$main::Revision,$main::Schema,$main::SchemaCVT
+		$kiwi,$controlFile,
+		$this->{gdata}->{Revision},
+		$this->{gdata}->{Schema},
+		$this->{gdata}->{SchemaCVT}
 	);
 	my $isValid = $validator ? $validator -> validate() : undef;
 	if (! $isValid) {
@@ -379,7 +386,10 @@ sub createBootImage {
 		return undef;
 	}
 	my $validator = new KIWIXMLValidator (
-		$kiwi,$controlFile,$main::Revision,$main::Schema,$main::SchemaCVT
+		$kiwi,$controlFile,
+		$this->{gdata}->{Revision},
+		$this->{gdata}->{Schema},
+		$this->{gdata}->{SchemaCVT}
 	);
 	my $isValid = $validator ? $validator -> validate() : undef;
 	if (! $isValid) {
@@ -422,8 +432,8 @@ sub createBootImage {
 	#==========================================
 	# Create destdir if needed
 	#------------------------------------------
-	my $dirCreated = $this -> createDirInteractive(
-		$destination
+	my $dirCreated = $main::global -> createDirInteractive(
+		$destination,$cmdL -> getDefaultAnswer()
 	);
 	if (! defined $dirCreated) {
 		return undef;
@@ -483,7 +493,10 @@ sub createImage {
 		return undef;
 	}
 	my $validator = new KIWIXMLValidator (
-		$kiwi,$controlFile,$main::Revision,$main::Schema,$main::SchemaCVT
+		$kiwi,$controlFile,
+		$this->{gdata}->{Revision},
+		$this->{gdata}->{Schema},
+		$this->{gdata}->{SchemaCVT}
 	);
 	my $isValid = $validator ? $validator -> validate() : undef;
 	if (! $isValid) {
@@ -559,8 +572,8 @@ sub createImage {
 	#==========================================
 	# Create destdir if needed
 	#------------------------------------------
-	my $dirCreated = $this -> createDirInteractive(
-		$destination
+	my $dirCreated = $main::global -> createDirInteractive(
+		$destination,$cmdL -> getDefaultAnswer()
 	);
 	if (! defined $dirCreated) {
 		return undef;
@@ -786,7 +799,9 @@ sub createImage {
 		if (($checkFormat) && ($attr{format})) {
 			my $haveFormat = $attr{format};
 			my $imgfile= $destination."/".$image -> buildImageName();
-			my $format = new KIWIImageFormat ($kiwi,$imgfile,$haveFormat);
+			my $format = new KIWIImageFormat (
+				$kiwi,$imgfile,$cmdL,$haveFormat
+			);
 			if (! $format) {
 				return undef;
 			}
@@ -812,7 +827,8 @@ sub createSplash {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $ird  = $this->{initrd};
-	my $boot = new KIWIBoot ($kiwi,$ird);
+	my $cmdL = $this->{cmdL};
+	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL);
 	if (! defined $boot) {
 		return undef;
 	}
@@ -834,8 +850,9 @@ sub createImageBootUSB {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $ird  = $this->{initrd};
+	my $cmdL = $this->{cmdL};
 	$kiwi -> info ("Creating boot USB stick from: $ird...\n");
-	my $boot = new KIWIBoot ($kiwi,$ird);
+	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL);
 	if (! defined $boot) {
 		return undef;
 	}
@@ -860,8 +877,9 @@ sub createImageBootCD {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $ird  = $this->{initrd};
+	my $cmdL = $this->{cmdL};
 	$kiwi -> info ("Creating boot ISO from: $ird...\n");
-	my $boot = new KIWIBoot ($kiwi,$ird);
+	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL);
 	if (! defined $boot) {
 		return undef;
 	}
@@ -885,13 +903,14 @@ sub createImageInstallCD {
 	my $kiwi = $this->{kiwi};
 	my $ird  = $this->{initrd};
 	my $sys  = $this->{sysloc};
+	my $cmdL = $this->{cmdL};
 	$kiwi -> info ("Creating install ISO from: $ird...\n");
 	if (! defined $sys) {
 		$kiwi -> error  ("No Install system image specified");
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $boot = new KIWIBoot ($kiwi,$ird,$sys);
+	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL,$sys);
 	if (! defined $boot) {
 		return undef;
 	}
@@ -915,13 +934,14 @@ sub createImageInstallStick {
 	my $kiwi = $this->{kiwi};
 	my $ird  = $this->{initrd};
 	my $sys  = $this->{sysloc};
+	my $cmdL = $this->{cmdL};
 	$kiwi -> info ("Creating install Stick from: $ird...\n");
 	if (! defined $sys) {
 		$kiwi -> error  ("No Install system image specified");
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $boot = new KIWIBoot ($kiwi,$ird,$sys);
+	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL,$sys);
 	if (! defined $boot) {
 		return undef;
 	}
@@ -945,6 +965,7 @@ sub createImageDisk {
 	my $size = $this->{disksize};
 	my $tdev = $this->{targetdevice};
 	my $prof = $this->{buildProfiles};
+	my $cmdL = $this->{cmdL};
 	$kiwi -> info ("--> Creating boot VM disk from: $ird...\n");
 	if (! defined $sys) {
 		$kiwi -> error  ("No VM system image specified");
@@ -960,7 +981,7 @@ sub createImageDisk {
 		return undef;
 	}
 	my $boot = new KIWIBoot (
-		$kiwi,$ird,$sys,$size,undef,$prof
+		$kiwi,$ird,$cmdL,$sys,$size,undef,$prof
 	);
 	if (! defined $boot) {
 		return undef;
@@ -982,8 +1003,11 @@ sub createImageFormat {
 	my $kiwi   = $this->{kiwi};
 	my $format = $this->{format};
 	my $sys    = $this->{sysloc};
+	my $cmdL   = $this->{cmdL};
 	$kiwi -> info ("--> Starting image format conversion...\n");
-	my $imageformat = new KIWIImageFormat ($kiwi,$sys,$format);
+	my $imageformat = new KIWIImageFormat (
+		$kiwi,$sys,$cmdL,$format
+	);
 	if (! $imageformat) {
 		return undef;
 	}
@@ -1085,7 +1109,7 @@ sub __selectCache {
 		return undef;
 	}
 	my $icache = new KIWICache (
-		$kiwi,$xml,$this->{cacheDir},$main::BasePath,
+		$kiwi,$xml,$this->{cacheDir},$this->{gdata}->{BasePath},
 		$this->{buildProfiles},$configDir
 	);
 	if (! $icache) {
@@ -1194,35 +1218,6 @@ sub __prepareTree {
 	return 1;
 }
 
-#============================================
-# createDirInteractive
-#--------------------------------------------
-sub createDirInteractive {
-	my $this      = shift;
-	my $targetDir = shift;
-	my $kiwi      = $this->{kiwi};
-	if (! -d $targetDir) {
-		my $prefix = $kiwi -> getPrefix (1);
-		my $answer = (defined $main::defaultAnswer) ? "yes" : "unknown";
-		$kiwi -> info ("Destination: $targetDir doesn't exist\n");
-		while ($answer !~ /^yes$|^no$/) {
-			print STDERR $prefix,
-				"Would you like kiwi to create it [yes/no] ? ";
-			chomp ($answer = <>);
-		}
-		if ($answer eq "yes") {
-			qxx ("mkdir -p $targetDir");
-			return 1;
-		}
-	} else {
-		# Directory exists
-		return 1;
-	}
-	# Directory does not exist and user did
-	# not request dir creation.
-	return undef;
-}
-
 #==========================================
 # checkType
 #------------------------------------------
@@ -1268,7 +1263,7 @@ sub checkType {
 			@fs = split (/,/,$type{filesystem});
 		}
 		foreach my $fs (@fs) {
-			my %result = main::checkFileSystem ($fs);
+			my %result = $main::global -> checkFileSystem ($fs);
 			if (%result) {
 				if (! $result{hastool}) {
 					$kiwi -> error (

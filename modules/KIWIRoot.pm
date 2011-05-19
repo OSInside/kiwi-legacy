@@ -69,7 +69,7 @@ sub new {
 		$kiwi = new KIWILog("tiny");
 	}
 	if (($imageDesc !~ /^\//) && (! -d $imageDesc)) {
-		$imageDesc = $main::System."/".$imageDesc;
+		$imageDesc = $this->{gdata}->{System}."/".$imageDesc;
 	}
 	if (! defined $baseSystem) {
 		$kiwi -> error ("No base system path specified");
@@ -180,6 +180,7 @@ sub new {
 	$this->{addPacks}      = $addPacks;
 	$this->{delPacks}      = $delPacks;
 	$this->{cacheRoot}     = $cacheRoot;
+	$this->{gdata}         = $main::global -> getGlobals();
 	#==========================================
 	# check channel count
 	#------------------------------------------
@@ -335,7 +336,7 @@ sub init {
 	#==================================
 	# Copy helper scripts to new root
 	#----------------------------------
-	qxx ("cp $main::KConfig $root/.kconfig 2>&1");
+	qxx ("cp $this->{gdata}->{KConfig} $root/.kconfig 2>&1");
 	#==================================
 	# Return early if existing root
 	#----------------------------------

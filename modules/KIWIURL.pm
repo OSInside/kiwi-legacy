@@ -60,6 +60,7 @@ sub new {
 	$this->{user} = $user;
 	$this->{pwd}  = $pwd;
 	$this->{type} = "unknown";
+	$this->{gdata}= $main::global -> getGlobals();
 	return $this;
 }
 
@@ -228,7 +229,7 @@ sub systemPath {
 	#---
 	my $this   = shift;
 	my $module = shift;
-	my $prefix = $main::System;
+	my $prefix = $this->{gdata}->{System};
 	my $kiwi   = $this->{kiwi};
 	my $path    = undef;
 	#==========================================
@@ -528,7 +529,7 @@ sub openSUSEpath {
 	my $quiet    = shift;
 	my $kiwi     = $this->{kiwi};
 	my $browser  = LWP::UserAgent->new;
-	my $uriTable = $main::repoURI;
+	my $uriTable = $this->{gdata}->{repoURI};
 	my $origurl  = $module;
 	my %matches  = ();
 	my $FD;

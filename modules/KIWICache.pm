@@ -115,6 +115,7 @@ sub new {
 	$this->{base}     = $base;
 	$this->{profiles} = $prof;
 	$this->{config}   = $conf;
+	$this->{gdata}    = $main::global -> getGlobals();
 	return $this;
 }
 
@@ -318,7 +319,7 @@ sub createCache {
 		#==========================================
 		# write XML changes to logfile...
 		#------------------------------------------
-		$kiwi -> writeXML();
+		$kiwi -> writeXML ($this->{gdata}->{Pretty});
 		#==========================================
 		# Reformat log file for human readers...
 		#------------------------------------------

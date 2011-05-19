@@ -47,98 +47,20 @@ use KIWIRuntimeChecker;
 use KIWIImageFormat;
 use KIWIXMLInfo;
 use KIWIXMLValidator;
+use KIWIGlobals;
 
 #============================================
-# Globals (Version)
+# Globals (debugging)
 #--------------------------------------------
-our $Version       = "4.88";
-our $Publisher     = "SUSE LINUX Products GmbH";
-our $Preparer      = "KIWI - http://kiwi.berlios.de";
-our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
-our $ConfigName    = "config.xml";
-our $Partitioner   = "parted";
 our $TT            = "Trace Level ";
-our $ConfigStatus  = 0;
 our $TL            = 1;
 our $BT;
-#============================================
-# Read $HOME/.kiwirc
-#--------------------------------------------
-if ( -f $ConfigFile) {
-	my $kiwi = new KIWILog("tiny");
-	if (! do $ConfigFile) {
-		$kiwi -> warning ("Invalid $ConfigFile file...");
-		$kiwi -> skipped ();
-	} else {
-		$kiwi -> info ("Using $ConfigFile");
-		$kiwi -> done ();
-		$ConfigStatus = 1;
-	}
-}
+
 #============================================
 # Globals
 #--------------------------------------------
-our $BasePath;         # configurable base kiwi path
-our $Gzip;             # configurable gzip command
-our $LogServerPort;    # configurable log server port
-our $LuksCipher;       # stored luks passphrase
-our $System;           # configurable baes kiwi image desc. path
-our @UmountStack;      # command list to umount
-if ( ! defined $BasePath ) {
-	$BasePath = "/usr/share/kiwi";
-}
-if (! defined $Gzip) {
-	$Gzip = "gzip -9";
-}
-if (! defined $LogServerPort) {
-	$LogServerPort = "off";
-}
-if ( ! defined $System ) {
-	$System  = $BasePath."/image";
-}
-our $Tools    = $BasePath."/tools";
-our $Schema   = $BasePath."/modules/KIWISchema.rng";
-our $SchemaTST= $BasePath."/modules/KIWISchemaTest.rng";
-our $KConfig  = $BasePath."/modules/KIWIConfig.sh";
-our $KMigrate = $BasePath."/modules/KIWIMigrate.txt";
-our $KRegion  = $BasePath."/modules/KIWIEC2Region.txt";
-our $KMigraCSS= $BasePath."/modules/KIWIMigrate.tgz";
-our $KSplit   = $BasePath."/modules/KIWISplit.txt";
-our $repoURI  = $BasePath."/modules/KIWIURL.txt";
-our $Revision = $BasePath."/.revision";
-our $TestBase = $BasePath."/tests";
-our $SchemaCVT= $BasePath."/xsl/master.xsl";
-our $Pretty   = $BasePath."/xsl/print.xsl";
-
-#==========================================
-# Globals (Supported filesystem names)
-#------------------------------------------
-our %KnownFS;
+our $global  = new KIWIGlobals();
 our $locator = new KIWILocator();
-$KnownFS{ext4}{tool}      = $locator -> getExecPath("mkfs.ext4");
-$KnownFS{ext3}{tool}      = $locator -> getExecPath("mkfs.ext3");
-$KnownFS{ext2}{tool}      = $locator -> getExecPath("mkfs.ext2");
-$KnownFS{squashfs}{tool}  = $locator -> getExecPath("mksquashfs");
-$KnownFS{clicfs}{tool}    = $locator -> getExecPath("mkclicfs");
-$KnownFS{clic}{tool}      = $locator -> getExecPath("mkclicfs");
-$KnownFS{unified}{tool}   = $locator -> getExecPath("mksquashfs");
-$KnownFS{compressed}{tool}= $locator -> getExecPath("mksquashfs");
-$KnownFS{reiserfs}{tool}  = $locator -> getExecPath("mkreiserfs");
-$KnownFS{btrfs}{tool}     = $locator -> getExecPath("mkfs.btrfs");
-$KnownFS{xfs}{tool}       = $locator -> getExecPath("mkfs.xfs");
-$KnownFS{cpio}{tool}      = $locator -> getExecPath("cpio");
-$KnownFS{ext3}{ro}        = 0;
-$KnownFS{ext4}{ro}        = 0;
-$KnownFS{ext2}{ro}        = 0;
-$KnownFS{squashfs}{ro}    = 1;
-$KnownFS{clicfs}{ro}      = 1;
-$KnownFS{clic}{ro}        = 1;
-$KnownFS{unified}{ro}     = 1;
-$KnownFS{compressed}{ro}  = 1;
-$KnownFS{reiserfs}{ro}    = 0;
-$KnownFS{btrfs}{ro}       = 0;
-$KnownFS{xfs}{ro}         = 0;
-$KnownFS{cpio}{ro}        = 0;
 
 #============================================
 # Globals
@@ -222,39 +144,12 @@ our $MBRID;                 # custom mbrid value
 our $ListXMLInfo;           # list XML information
 our $kic;                   # global Image Creator object
 our $icache;                # global Image Cache object
+our $Partitioner = "parted";# default partitioner
 
 #============================================
 # Globals
 #--------------------------------------------
 my $migrate;    # KIWIMigrate object for system to image migration
-
-#============================================
-# createDirInteractive
-#--------------------------------------------
-sub createDirInteractive {
-	my $kiwi = shift;
-	my $targetDir = shift;
-	if (! -d $targetDir) {
-		my $prefix = $kiwi -> getPrefix (1);
-		my $answer = (defined $defaultAnswer) ? "yes" : "unknown";
-		$kiwi -> info ("Destination: $Destination doesn't exist\n");
-		while ($answer !~ /^yes$|^no$/) {
-			print STDERR $prefix,
-				"Would you like kiwi to create it [yes/no] ? ";
-			chomp ($answer = <>);
-		}
-		if ($answer eq "yes") {
-			qxx ("mkdir -p $Destination");
-			return 1;
-		}
-	} else {
-		# Directory exists
-		return 1;
-	}
-	# Directory does not exist and user did
-	# not request dir creation.
-	return undef;
-}
 
 #==========================================
 # main
@@ -267,6 +162,7 @@ sub main {
 	# of a XML control file. Once prepared KIWI can create several
 	# OS image types.
 	# ---
+	my $gdata = $global -> getGlobals();
 	#==========================================
 	# Initialize and check options
 	#------------------------------------------
@@ -275,7 +171,7 @@ sub main {
 	# Create logger object
 	#------------------------------------------
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
+		$kiwi = new KIWILog ($gdata->{LogServerPort});
 	}
 	#==========================================
 	# remove pre-defined smart channels
@@ -308,7 +204,9 @@ sub main {
 		#==========================================
 		# Create destdir if needed
 		#------------------------------------------
-		my $dirCreated = createDirInteractive($kiwi, $Destination);
+		my $dirCreated = $global -> createDirInteractive(
+			$Destination, $defaultAnswer
+		);
 		if (! defined $dirCreated) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -328,9 +226,6 @@ sub main {
 		# Setup create 
 		#------------------------------------------
 		$ImageDescription = $rootTarget;
-		if ((! -d $rootTarget) && (open FD,"$rootTarget/image/main::Prepare")) {
-			$ImageDescription = <FD>; close FD;
-		}
 		$cmdL -> setImagetargetDir ($Destination);
 		$cmdL -> setConfigDir ($ImageDescription);
 		$cmdL -> setForceNewRoot (0);
@@ -338,6 +233,7 @@ sub main {
 		if (! $kic -> createImage ($kiwi,$cmdL)) {
 			my $code = kiwiExit (1); return $code;
 		}
+		kiwiExit (0);
 	}
 
 	#========================================
@@ -366,7 +262,7 @@ sub main {
 			$cdir = $locator -> getDefaultCacheDir();
 		}
 		$icache = new KIWICache (
-			$kiwi,$xml,$cdir,$BasePath,\@Profiles,$InitCache
+			$kiwi,$xml,$cdir,$gdata->{BasePath},\@Profiles,$InitCache
 		);
 		if (! $icache) {
 			my $code = kiwiExit (1); return $code;
@@ -721,6 +617,7 @@ sub init {
 	$SIG{"HUP"}      = \&quit;
 	$SIG{"TERM"}     = \&quit;
 	$SIG{"INT"}      = \&quit;
+	my $gdata = $global -> getGlobals();
 	my $Help;
 	my @ListXMLInfoSelection;  # info selection for listXMLInfo
 	my $PackageManager;
@@ -811,6 +708,25 @@ sub init {
 		"version"               => \$Version,
 		"yes|y"                 => \$defaultAnswer,
 	);
+	#========================================
+	# set list of filesystem options
+	#----------------------------------------
+	$cmdL -> setFilesystemOptions (
+		$FSBlockSize,$FSInodeSize,$FSInodeRatio,$FSJournalSize,
+		$FSMaxMountCount,$FSCheckInterval
+	);
+	#========================================
+	# check if MBRID is specified
+	#----------------------------------------
+	if (defined $MBRID) {
+		$cmdL -> setMBRID ($MBRID);
+	}
+	#========================================
+	# check if default answer is specified
+	#----------------------------------------
+	if (defined $defaultAnswer) {
+		$cmdL -> setDefaultAnswer ($defaultAnswer);
+	}
 	#========================================
 	# check if initrd needs to be stored
 	#----------------------------------------
@@ -992,13 +908,13 @@ sub init {
 	}
 	if (defined $Prepare) {
 		if (($Prepare !~ /^\//) && (! -d $Prepare)) {
-			$Prepare = $System."/".$Prepare;
+			$Prepare = $gdata->{System}."/".$Prepare;
 		}
 		$Prepare =~ s/\/$//;
 	}
 	if (defined $Create) {
 		if (($Create !~ /^\//) && (! -d $Create)) {
-			$Create = $System."/".$Create;
+			$Create = $gdata->{System}."/".$Create;
 		}
 		$Create =~ s/\/$//;
 	}
@@ -1015,9 +931,6 @@ sub init {
 	}
 	if (defined $Create) {
 		$ImageDescription = $Create;
-		if ((! -d $Create) && (open FD,"$Create/image/main::Prepare")) {
-			$ImageDescription = <FD>; close FD;
-		}
 		$cmdL -> setConfigDir ($ImageDescription);
 	}
 	#========================================
@@ -1141,12 +1054,12 @@ sub init {
 	}
 	if (defined $LogPort) {
 		$kiwi -> info ("Setting log server port to: $LogPort");
-		$LogServerPort = $LogPort;
+		$global -> setGlobals ("LogServerPort", $LogPort);
 		$kiwi -> done ();
 	}
 	if (defined $GzipCmd) {
 		$kiwi -> info ("Setting gzip command to: $GzipCmd");
-		$Gzip = $GzipCmd;
+		$global -> setGlobals ("Gzip", $GzipCmd);
 		$kiwi -> done ();
 	}
 	if ((defined $BootVMDisk) && (! defined $BootVMSystem)) {
@@ -1440,26 +1353,28 @@ sub listImage {
 	# ...
 	# list known image descriptions and exit
 	# ---
-	my $kiwi = new KIWILog("tiny");
-	opendir (FD,$System);
+	my $kiwi   = new KIWILog("tiny");
+	my $gdata  = $global -> getGlobals();
+	my $system = $gdata->{System};
+	opendir (FD,$system);
 	my @images = readdir (FD); closedir (FD);
 	foreach my $image (@images) {
 		if ($image =~ /^\./) {
 			next;
 		}
-		if (-l "$System/$image") {
+		if (-l "$system/$image") {
 			next;
 		}
 		if ($image =~ /(iso|net|oem|vmx)boot/) {
 			next;
 		}
 		my $controlFile = $locator -> getControlFile (
-			"$System/$image"
+			"$system/$image"
 		);
 		if ($controlFile) {
 			$kiwi -> info ($image);
 			my $xml = new KIWIXML (
-				$kiwi,$System."/".$image,undef,undef
+				$kiwi,$system."/".$image,undef,undef
 			);
 			if (! $xml) {
 				next;
@@ -1479,7 +1394,8 @@ sub checkConfig {
 	# ...
 	# Check the specified configuration file
 	# ---
-	my $kiwi = new KIWILog("tiny");
+	my $kiwi  = new KIWILog("tiny");
+	my $gdata = $global -> getGlobals();
 	if (! -f $CheckConfig) {
 		$kiwi -> error (
 			"Could not access specified file to check: $CheckConfig"
@@ -1488,7 +1404,8 @@ sub checkConfig {
 		exit 1;
 	}
 	my $validator = new KIWIXMLValidator (
-		$kiwi,$CheckConfig,$Revision,$Schema,$SchemaCVT
+		$kiwi,$CheckConfig,$gdata->{Revision},
+		$gdata->{Schema},$gdata->{SchemaCVT}
 	);
 	if (! $validator) {
 		exit 1;
@@ -1514,7 +1431,10 @@ sub cloneImage {
 	# existing checksum will be removed as we assume
 	# that the clone will be changed
 	# ----
-	my $answer = "unknown";
+	my $answer     = "unknown";
+	my $gdata      = $global -> getGlobals();
+	my $configName = $gdata->{ConfigName};
+	my $system     = $gdata->{System};
 	#==========================================
 	# Check destination definition
 	#------------------------------------------
@@ -1530,9 +1450,9 @@ sub cloneImage {
 	# Evaluate image path or name 
 	#------------------------------------------
 	if (($Clone !~ /^\//) && (! -d $Clone)) {
-		$Clone = $main::System."/".$Clone;
+		$Clone = $system."/".$Clone;
 	}
-	my $cfg = $Clone."/".$main::ConfigName;
+	my $cfg = $Clone."/".$configName;
 	my $md5 = $Destination."/.checksum.md5";
 	if (! -f $cfg) {
 		my @globsearch = glob ($Clone."/*.kiwi");
@@ -1600,11 +1520,12 @@ sub kiwiExit {
 	# private Exit function, exit safely
 	# ---
 	my $code = $_[0];
+	my $gdata= $global -> getGlobals();
 	#==========================================
 	# Write temporary XML changes to logfile
 	#------------------------------------------
 	if (defined $kiwi) {
-		$kiwi -> writeXML();
+		$kiwi -> writeXML ($gdata->{Pretty});
 	}
 	#==========================================
 	# Create log object if we don't have one...
@@ -1686,7 +1607,8 @@ sub version {
 	# ...
 	# Version information
 	# ---
-	my $exit = shift;
+	my $exit  = shift;
+	my $gdata = $global -> getGlobals();
 	if (! defined $exit) {
 		$exit = 0;
 	}
@@ -1694,10 +1616,10 @@ sub version {
 		$kiwi = new KIWILog("tiny");
 	}
 	my $rev  = "unknown";
-	if (open FD,$Revision) {
+	if (open FD,$gdata->{Revision}) {
 		$rev = <FD>; close FD;
 	}
-	$kiwi -> info ("kiwi version v$Version\nGIT Commit: $rev\n");
+	$kiwi -> info ("kiwi version v$gdata->{Version}\nGIT Commit: $rev\n");
 	$kiwi -> cleanSweep();
 	exit ($exit);
 }
@@ -1750,6 +1672,7 @@ sub createPassword {
 	$kiwi -> info ("Your password:\n\t$encrypted\n");
 	my $code = kiwiExit (0); return $code;
 }
+
 #==========================================
 # createHash
 #------------------------------------------
@@ -1786,265 +1709,6 @@ sub createHash {
 	}
 	$kiwi -> done();
 	my $code = kiwiExit (0); return $code;
-}
-
-#==========================================
-# checkFSOptions
-#------------------------------------------
-sub checkFSOptions {
-	# /.../
-	# checks the $FS* option values and build an option
-	# string for the relevant filesystems
-	# ---
-	my %result = ();
-	my $fs_maxmountcount;
-	my $fs_checkinterval;
-	foreach my $fs (keys %KnownFS) {
-		my $blocksize;   # block size in bytes
-		my $journalsize; # journal size in MB (ext) or blocks (reiser)
-		my $inodesize;   # inode size in bytes (ext only)
-		my $inoderatio;  # bytes/inode ratio
-		my $fsfeature;   # filesystem features (ext only)
-		SWITCH: for ($fs) {
-			#==========================================
-			# EXT2-4
-			#------------------------------------------
-			/ext[432]/   && do {
-				if ($FSBlockSize)   {$blocksize   = "-b $FSBlockSize"}
-				if (($FSInodeSize) && ($FSInodeSize != 256)) {
-					$inodesize = "-I $FSInodeSize"
-				}
-				if ($FSInodeRatio)  {$inoderatio  = "-i $FSInodeRatio"}
-				if ($FSJournalSize) {$journalsize = "-J size=$FSJournalSize"}
-				if ($FSMaxMountCount) {
-					$fs_maxmountcount = " -c $FSMaxMountCount";
-				}
-				if ($FSCheckInterval) {
-					$fs_checkinterval = " -i $FSCheckInterval";
-				}
-				$fsfeature = "-F -O resize_inode";
-				last SWITCH;
-			};
-			#==========================================
-			# reiserfs
-			#------------------------------------------
-			/reiserfs/  && do {
-				if ($FSBlockSize)   {$blocksize   = "-b $FSBlockSize"}
-				if ($FSJournalSize) {$journalsize = "-s $FSJournalSize"}
-				last SWITCH;
-			};
-			# no options for this filesystem...
-		};
-		if (defined $inodesize) {
-			$result{$fs} .= $inodesize." ";
-		}
-		if (defined $inoderatio) {
-			$result{$fs} .= $inoderatio." ";
-		}
-		if (defined $blocksize) {
-			$result{$fs} .= $blocksize." ";
-		}
-		if (defined $journalsize) {
-			$result{$fs} .= $journalsize." ";
-		}
-		if (defined $fsfeature) {
-			$result{$fs} .= $fsfeature." ";
-		}
-	}
-	if ($fs_maxmountcount || $fs_checkinterval) {
-		$result{extfstune} = "$fs_maxmountcount$fs_checkinterval";
-	}
-	return %result;
-}
-
-#==========================================
-# mount
-#------------------------------------------
-sub mount {
-	# /.../
-	# implements a generic mount function for all supported
-	# file system types
-	# ---
-	my $source= shift;
-	my $dest  = shift;
-	my $salt  = int (rand(20));
-	my %fsattr = main::checkFileSystem ($source);
-	my $type   = $fsattr{type};
-	my $cipher = $main::LuksCipher;
-	my $status;
-	my $result;
-	#==========================================
-	# Check result of filesystem detection
-	#------------------------------------------
-	if (! %fsattr) {
-		$kiwi -> error  ("Couldn't detect filesystem on: $source");
-		$kiwi -> failed ();
-		return undef;
-	}
-	#==========================================
-	# Check for DISK file
-	#------------------------------------------
-	if (-f $source) {
-		my $boot = "'boot sector'";
-		my $null = "/dev/null";
-		$status= qxx (
-			"dd if=$source bs=512 count=1 2>$null|file - | grep -q $boot"
-		);
-		$result= $? >> 8;
-		if ($result == 0) {			
-			$status = qxx ("/sbin/losetup -s -f $source 2>&1"); chomp $status;
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> error  (
-					"Couldn't loop bind disk file: $status"
-				);
-				$kiwi -> failed (); umount();
-				return undef;
-			}
-			my $loop = $status;
-			push @UmountStack,"losetup -d $loop";
-			$status = qxx ("kpartx -a $loop 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> error (
-					"Couldn't loop bind disk partition(s): $status"
-				);
-				$kiwi -> failed (); umount();
-				return undef;
-			}
-			push @UmountStack,"kpartx -d $loop";
-			$loop =~ s/\/dev\///;
-			$source = "/dev/mapper/".$loop."p1";
-			if (! -b $source) {
-				$kiwi -> error ("No such block device $source");
-				$kiwi -> failed (); umount();
-				return undef;
-			}
-		}
-	}
-	#==========================================
-	# Check for LUKS extension
-	#------------------------------------------
-	if ($type eq "luks") {
-		if (-f $source) {
-			$status = qxx ("/sbin/losetup -s -f $source 2>&1"); chomp $status;
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> error  ("Couldn't loop bind logical extend: $status");
-				$kiwi -> failed (); umount();
-				return undef;
-			}
-			$source = $status;
-			push @UmountStack,"losetup -d $source";
-		}
-		if ($cipher) {
-			$status = qxx (
-				"echo $cipher | cryptsetup luksOpen $source luks-$salt 2>&1"
-			);
-		} else {
-			$status = qxx ("cryptsetup luksOpen $source luks-$salt 2>&1");
-		}
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error  ("Couldn't open luks device: $status");
-			$kiwi -> failed (); umount();
-			return undef;
-		}
-		$source = "/dev/mapper/luks-".$salt;
-		push @UmountStack,"cryptsetup luksClose luks-$salt";
-	}
-	#==========================================
-	# Mount device or loop mount file
-	#------------------------------------------
-	if ((-f $source) && ($type ne "clicfs")) {
-		$status = qxx ("mount -o loop $source $dest 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error ("Failed to loop mount $source to: $dest: $status");
-			$kiwi -> failed (); umount();
-			return undef;
-		}
-	} else {
-		if ($type eq "clicfs") {
-			$status = qxx ("clicfs -m 512 $source $dest 2>&1");
-			$result = $? >> 8;
-			if ($result == 0) {
-				$status = qxx ("resize2fs $dest/fsdata.ext3 2>&1");
-				$result = $? >> 8;
-			}
-		} else {
-			$status = qxx ("mount $source $dest 2>&1");
-			$result = $? >> 8;
-		}
-		if ($result != 0) {
-			$kiwi -> error ("Failed to mount $source to: $dest: $status");
-			$kiwi -> failed (); umount();
-			return undef;
-		}
-	}
-	push @UmountStack,"umount $dest";
-	#==========================================
-	# Post mount actions
-	#------------------------------------------
-	if (-f $dest."/fsdata.ext3") {
-		$source = $dest."/fsdata.ext3";
-		$status = qxx ("mount -o loop $source $dest 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error ("Failed to loop mount $source to: $dest: $status");
-			$kiwi -> failed (); umount();
-			return undef;
-		}
-		push @UmountStack,"umount $dest";
-	}
-	return $dest;
-}
-
-#==========================================
-# umount
-#------------------------------------------
-sub umount {
-	# /.../
-	# implements an umount function for filesystems mounted
-	# via main::mount(). The function walks through the
-	# contents of the UmountStack list
-	# ---
-	my $status;
-	my $result;
-	qxx ("sync");
-	foreach my $cmd (reverse @UmountStack) {
-		$status = qxx ("$cmd 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> warning ("UmountStack failed: $cmd: $status\n");
-		}
-	}
-	@UmountStack = ();
-}
-
-#==========================================
-# isize
-#------------------------------------------
-sub isize {
-	# /.../
-	# implements a size function like the -s operator
-	# but also works for block specials using blockdev
-	# ---
-	my $target = shift;
-	if (! defined $target) {
-		return 0;
-	}
-	if (-b $target) {
-		my $size = qxx ("blockdev --getsize64 $target 2>&1");
-		my $code = $? >> 8;
-		if ($code == 0) {
-			chomp  $size;
-			return $size;
-		}
-	} elsif (-f $target) {
-		return -s $target;
-	}
-	return 0;
 }
 
 #==========================================
@@ -2115,132 +1779,6 @@ sub createInstSource {
 	$kiwi->info( "KIWICollect completed successfully." );
 	$kiwi->done();
 	kiwiExit (0);
-}
-
-#==========================================
-# getMBRDiskLabel
-#------------------------------------------
-sub getMBRDiskLabel {
-	# ...
-	# set the mbrid to either the value given at the
-	# commandline or a random 4byte MBR disk label ID
-	# ---
-	my $this  = shift;
-	my $range = 0xfe;
-	if (defined $main::MBRID) {
-		return $main::MBRID;
-	} else {
-		my @bytes;
-		for (my $i=0;$i<4;$i++) {
-			$bytes[$i] = 1 + int(rand($range));
-			redo if $bytes[0] <= 0xf;
-		}
-		my $nid = sprintf ("0x%02x%02x%02x%02x",
-			$bytes[0],$bytes[1],$bytes[2],$bytes[3]
-		);
-		return $nid;
-	}
-}
-
-#==========================================
-# checkFileSystem
-#------------------------------------------
-sub checkFileSystem {
-	# /.../
-	# checks attributes of the given filesystem(s) and returns
-	# a summary hash containing the following information
-	# ---
-	# $filesystem{hastool}  --> has the tool to create the filesystem
-	# $filesystem{readonly} --> is a readonly filesystem
-	# $filesystem{type}     --> what filesystem type is this
-	# ---
-	my $fs     = shift;
-	my %result = ();
-	if (defined $main::KnownFS{$fs}) {
-		#==========================================
-		# got a known filesystem type
-		#------------------------------------------
-		$result{type}     = $fs;
-		$result{readonly} = $main::KnownFS{$fs}{ro};
-		$result{hastool}  = 0;
-		if (($main::KnownFS{$fs}{tool}) && (-x $main::KnownFS{$fs}{tool})) {
-			$result{hastool} = 1;
-		}
-	} else {
-		#==========================================
-		# got a file, block special or something
-		#------------------------------------------
-		if (-e $fs) {
-			my $data = qxx ("dd if=$fs bs=128k count=1 2>/dev/null | file -");
-			my $code = $? >> 8;
-			my $type;
-			if ($code != 0) {
-				if ($main::kiwi -> trace()) {
-					$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
-				}
-				return undef;
-			}
-			SWITCH: for ($data) {
-				/ext4/      && do {
-					$type = "ext4";
-					last SWITCH;
-				};
-				/ext3/      && do {
-					$type = "ext3";
-					last SWITCH;
-				};
-				/ext2/      && do {
-					$type = "ext2";
-					last SWITCH;
-				};
-				/ReiserFS/  && do {
-					$type = "reiserfs";
-					last SWITCH;
-				};
-				/BTRFS/     && do {
-					$type = "btrfs";
-					last SWITCH;
-				};
-				/Squashfs/  && do {
-					$type = "squashfs";
-					last SWITCH;
-				};
-				/LUKS/      && do {
-					$type = "luks";
-					last SWITCH;
-				};
-				/XFS/     && do {
-					$type = "xfs";
-					last SWITCH;
-				};
-				# unknown filesystem type check clicfs...
-				$data = qxx (
-					"dd if=$fs bs=128k count=1 2>/dev/null | grep -q CLIC"
-				);
-				$code = $? >> 8;
-				if ($code == 0) {
-					$type = "clicfs";
-					last SWITCH;
-				}
-				# unknown filesystem type use auto...
-				$type = "auto";
-			};
-			$result{type}     = $type;
-			$result{readonly} = $main::KnownFS{$type}{ro};
-			$result{hastool}  = 0;
-			if (defined $main::KnownFS{$type}{tool}) {
-				if (-x $main::KnownFS{$type}{tool}) {
-					$result{hastool} = 1;
-				}
-			}
-		} else {
-			if ($main::kiwi -> trace()) {
-				$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
-			}
-			return ();
-		}
-	}
-	return %result;
 }
 
 main();

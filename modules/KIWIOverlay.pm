@@ -104,7 +104,7 @@ sub unionOverlay {
 	my $kiwi   = $this->{kiwi};
 	my $baseRO = $this->{baseRO};
 	my $rootRW = $this->{rootRW};
-	my %fsattr = main::checkFileSystem ($baseRO);
+	my %fsattr = $main::global -> checkFileSystem ($baseRO);
 	my $type   = $fsattr{type};
 	my @mount  = ();
 	my $haveCow= 0;

@@ -98,7 +98,7 @@ sub new {
 	$this->{kiwi}           = $kiwi;
 	$this->{packageManager} = $cmdL -> getPackageManager();
 	$this->{replRepo}       = $cmdL -> getReplacementRepo();
-
+	$this->{gdata}          = $main::global -> getGlobals();
 	return $this;
 }
 
@@ -136,7 +136,7 @@ sub printXMLInfo {
 	if (! $infoTree) {
 		return undef;
 	}
-	open (my $F, "|xsltproc $main::Pretty -");
+	open (my $F, "|xsltproc $this->{gdata}->{Pretty} -");
 	print $F $infoTree -> toString();
 	close $F;
 	return 1;
@@ -513,8 +513,10 @@ sub __xmlSetup {
 		return undef;
 	}
 	my $validator = new KIWIXMLValidator (
-		$kiwi,$controlFile,$main::Revision,
-		$main::Schema,$main::SchemaCVT
+		$kiwi,$controlFile,
+		$this->{gdata}->{Revision},
+		$this->{gdata}->{Schema},
+		$this->{gdata}->{SchemaCVT}
 	);
 	my $isValid = $validator ? $validator -> validate() : undef;
 	if (! $isValid) {

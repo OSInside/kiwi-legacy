@@ -74,6 +74,7 @@ sub new {
 	$this->{imageDest} = $imageDest;
 	$this->{xml}       = $xml;
 	$this->{root}      = $root;
+	$this->{gdata}     = $main::global -> getGlobals();
 	return $this;
 }
 
@@ -141,7 +142,7 @@ sub setupRecoveryArchive {
 	# Compress archive into .tar.gz
 	#------------------------------------------
 	$status = qxx (
-		"$main::Gzip $root/recovery.tar 2>&1"
+		"$this->{gdata}->{Gzip} $root/recovery.tar 2>&1"
 	);
 	$code = $? >> 8;
 	if ($code != 0) {

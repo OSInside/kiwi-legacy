@@ -46,6 +46,7 @@ sub new {
 	#------------------------------------------
 	my $kiwi   = shift;
 	my $image  = shift;
+	my $cmdL   = shift;
 	#==========================================
 	# Module Parameters [ optional ]
 	#------------------------------------------
@@ -72,7 +73,7 @@ sub new {
 	#------------------------------------------
 	if (! defined $xml) {
 		my $boot = new KIWIBoot (
-			$kiwi,undef,$image,undef,undef,\@main::ProfilesOrig
+			$kiwi,undef,$cmdL,$image,undef,undef,\@main::ProfilesOrig
 		);
 		if ($boot) {
 			$xml = $boot->{xml};
@@ -109,6 +110,7 @@ sub new {
 	$this->{image}   = $image;
 	$this->{type}    = $type;
 	$this->{imgtype} = $type->{type};
+	$this->{gdata}   = $main::global -> getGlobals();
 	return $this;
 }
 
@@ -349,7 +351,7 @@ sub createEC2 {
 	# Import AWS region kernel map
 	#------------------------------------------
 	my %ec2RegionKernelMap;
-	if (! open ($FD,$main::KRegion)) {
+	if (! open ($FD,$this->{gdata}->{KRegion})) {
 		return undef;
 	}
 	while (my $line = <$FD>) {
