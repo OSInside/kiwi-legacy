@@ -39,6 +39,9 @@ BuildRequires:  libexpat-devel rpm-devel
 %if %{suse_version} > 1030 && %{suse_version} <= 1130
 BuildRequires: libsatsolver-devel
 %endif
+%if %{suse_version} > 1140
+BuildRequires: perl-Test-Unit
+%endif
 %if %{suse_version} <= 1010
 Requires:       qt
 %endif
@@ -299,6 +302,12 @@ Authors:
 
 %build
 # empty because of rpmlint warning rpm-buildroot-usage
+
+%if %{suse_version} > 1140
+%check
+make valid
+make test
+%endif
 
 %install
 # build
