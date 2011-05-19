@@ -7,9 +7,9 @@ if ! echo $version | grep -q -E "^[0-9]+\.[0-9]+$";then
 fi
 
 # code version update
-cat kiwi.pl | sed \
-	-e s"@our \$Version       = \".*\"@our \$Version       = \"$version\"@"\
-> kiwi.pl.new && mv kiwi.pl.new kiwi.pl && chmod 755 kiwi.pl
+cat modules/KIWIGlobals.pm | sed \
+	-e s"@\$data{Version}       = \".*\"@\$data\{Version\}       = \"$version\"@" \
+> modules/KIWIGlobals.pm.new && mv modules/KIWIGlobals.pm.new modules/KIWIGlobals.pm && chmod 644 modules/KIWIGlobals.pm
 
 # spec file version update
 cat rpm/kiwi.spec | sed \
