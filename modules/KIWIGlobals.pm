@@ -43,18 +43,21 @@ sub new {
 	$data{Version}       = "4.88";
 	$data{Publisher}     = "SUSE LINUX Products GmbH";
 	$data{Preparer}      = "KIWI - http://kiwi.berlios.de";
-	$data{ConfigFile}    = "$ENV{'HOME'}/.kiwirc";
 	$data{ConfigName}    = "config.xml";
 	#============================================
-	# Read $HOME/.kiwirc
+	# Read .kiwirc
 	#--------------------------------------------
+	my $file = "$ENV{'HOME'}/.kiwirc";
+	if (! -f $file) {
+		$file = ".kiwirc";
+	}
 	my $kiwi = new KIWILog("tiny");
-	if ( -f $data{ConfigFile}) {
-		if (! do $data{ConfigFile}) {
-			$kiwi -> warning ("Invalid $data{ConfigFile} file...");
+	if ( -f $file) {
+		if (! do $file) {
+			$kiwi -> warning ("Invalid $file file...");
 			$kiwi -> skipped ();
 		} else {
-			$kiwi -> info ("Using $data{ConfigFile}");
+			$kiwi -> info ("Using $file");
 			$kiwi -> done ();
 		}
 	}
