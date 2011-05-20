@@ -163,7 +163,8 @@ test:
 	# Run unit tests...
 	#--------------------------------------------
 	tests/unit/cleanup.sh
-	for i in `find tests/unit -name "*.t"`;do \
+	cd tests/unit && \
+	for i in `find . -name "*.t"`;do \
 		echo $$i ;\
 		perl $$i ;\
 	done

@@ -1443,7 +1443,7 @@ sub test_cmdRootTargetDir_relPath {
 	my $cmd = $this -> __getCmdObj();
 	# Test expected use case with absolute path
 	my $res = $cmd -> setRootTargetDir('unpacked');
-	my $tgtPath = Cwd::realpath($FindBin::Bin . '/../../unpacked');
+	my $tgtPath = Cwd::realpath($FindBin::Bin . '/../../tests/unit/unpacked');
 	my $expectedMsg = 'Specified relative path for target directory; target '
 		. "is $tgtPath\n";
 	my $msg = $kiwi -> getMessage();
