@@ -53,12 +53,14 @@ Requires:       squashfs
 Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
-Requires:       kiwi-tools libxslt checkmedia util-linux
+Requires:       libxslt checkmedia util-linux
+Requires:       kiwi-tools >= %{version}
 %if %{suse_version} > 1030
 Requires:       satsolver-tools
 %endif
 %if %{suse_version} > 1130
 Requires:       perl-satsolver >= 0.42
+BuildArch:      noarch
 %endif
 %ifarch %ix86 x86_64
 Requires:       master-boot-code
@@ -78,8 +80,8 @@ Source3:        %{name}-repo.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Recommends:     jing
 Recommends:     zypper
-Provides:       kiwi-desc-usbboot
-Obsoletes:      kiwi-desc-usbboot
+Provides:       kiwi-desc-usbboot = %{version}
+Obsoletes:      kiwi-desc-usbboot = %{version}
 
 
 %description
@@ -305,7 +307,6 @@ Authors:
 
 %if %{suse_version} > 1140
 %check
-make valid
 make test
 %endif
 
@@ -372,6 +373,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
 %dir /var/cache/kiwi
+%doc %{_mandir}/man1/kiwi.1.gz
+%doc %{_mandir}/man1/KIWI::images.sh.1.gz
+%doc %{_mandir}/man1/KIWI::config.sh.1.gz
+%doc %{_mandir}/man1/KIWI::kiwirc.1.gz
 %ifarch %ix86 x86_64
 %exclude %{_datadir}/kiwi/image/suse-11.4-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.3-JeOS
@@ -406,10 +411,6 @@ rm -rf $RPM_BUILD_ROOT
 %files -n kiwi-doc
 %defattr(-, root, root)
 %dir %{_defaultdocdir}/kiwi
-%doc %{_mandir}/man1/kiwi.1.gz
-%doc %{_mandir}/man1/KIWI::images.sh.1.gz
-%doc %{_mandir}/man1/KIWI::config.sh.1.gz
-%doc %{_mandir}/man1/KIWI::kiwirc.1.gz
 %doc %{_defaultdocdir}/kiwi/COPYING
 %doc %{_defaultdocdir}/kiwi/examples
 %doc %{_defaultdocdir}/kiwi/images
