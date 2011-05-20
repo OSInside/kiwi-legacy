@@ -74,7 +74,7 @@ sub test_prepBootImg_noCfgDir {
 	$cmd -> setConfigDir($confDir);
 	my $kic = new KIWIImageCreator($kiwi, $cmd);
 	my $res = $kic -> prepareBootImage('ola');
-	my $expectedMsg = 'prepareBootImage: no configuration directory defined';
+	my $expectedMsg = 'prepareBootImage: config dir "ola" does not exist';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -124,7 +124,7 @@ sub test_prepBootImg_noRootDirArg {
 	$cmd -> setConfigDir($confDir);
 	my $kic = new KIWIImageCreator($kiwi,$cmd);
 	my $res = $kic -> prepareBootImage('/tmp');
-	my $expectedMsg = 'prepareBootImage: no configuration directory defined';
+	my $expectedMsg = 'prepareBootImage: no root traget defined';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();

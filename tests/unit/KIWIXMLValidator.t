@@ -23,5 +23,8 @@ use lib "$FindBin::Bin/lib";
 # Location of Kiwi modules relative to test
 use lib "$FindBin::Bin/../../modules";
 
+use KIWIGlobals;
+our $global  = new KIWIGlobals();
+
 my $runner = Test::Unit::HarnessUnit->new();
 $runner->start( 'Test::kiwiXMLValidator' );

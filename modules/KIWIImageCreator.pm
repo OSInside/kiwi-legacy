@@ -108,15 +108,12 @@ sub initialize {
 	$this->{replRepo}         = $cmdL -> getReplacementRepo();
 	$this->{rootTgtDir}       = $cmdL -> getRootTargetDir();
 	$this->{imageTgtDir}      = $cmdL -> getImageTargetDir();
-	$this->{imageInitrdTgtDir}= $cmdL -> getInitrdImageTargetDir();
-	$this->{rootInitrdTgtDir} = $cmdL -> getInitrdRootTargetDir();
 	$this->{initrd}           = $cmdL -> getInitrdFile();
 	$this->{sysloc}           = $cmdL -> getSystemLocation();
 	$this->{disksize}         = $cmdL -> getImageDiskSize();
 	$this->{targetdevice}     = $cmdL -> getImageTargetDevice();
 	$this->{format}           = $cmdL -> getImageFormat();
 	$this->{configDir}        = $cmdL -> getConfigDir();
-	$this->{configInitrdDir}  = $cmdL -> getInitrdConfigDir();
 	$this->{buildType}        = $cmdL -> getBuildType();
 	return 1;
 }
@@ -129,11 +126,9 @@ sub prepareBootImage {
 	# Prepare the boot image
 	# ---
 	my $this       = shift;
-	my $configDir  = $this->{configInitrdDir};
-	my $rootTgtDir = $this->{rootInitrdTgtDir};
+	my $configDir  = shift;
+	my $rootTgtDir = shift;
 	my $kiwi       = $this->{kiwi};
-	my $ignore     = $this->{ignoreRepos};
-	my $pkgMgr     = $this->{packageManager};
 	if (! $configDir) {
 		$kiwi -> error ('prepareBootImage: no configuration directory defined');
 		$kiwi -> failed ();
@@ -159,6 +154,10 @@ sub prepareBootImage {
 	if (! defined $xml) {
 		return undef;
 	}
+	#==========================================
+	# Apply XML over rides from command line
+	#------------------------------------------
+	$xml = $this -> __applyBaseXMLOverrides($xml);
 	return $this -> __prepareTree (
 		$xml, $configDir, $rootTgtDir
 	);
@@ -171,7 +170,6 @@ sub upgradeImage {
 	my $this      = shift;
 	my $configDir = $this -> {configDir};
 	my $kiwi      = $this -> {kiwi};
-	my $ignore    = $this -> {ignoreRepos};
 	if (! $configDir) {
 		$kiwi -> error ('prepareBootImage: no configuration directory defined');
 		$kiwi -> failed ();
@@ -213,36 +211,8 @@ sub upgradeImage {
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------
-	if ($ignore) {
-		$xml -> ignoreRepositories ();
-	}
-	if ($this -> {addlPackages}) {
-		$xml -> addImagePackages (@{$this -> {addlPackages}});
-	}
-	if ($this -> {addlPatterns}) {
-		$xml -> addImagePatterns (@{$this -> {addlPatterns}});
-	}
-	if ($this -> {addlRepos}) {
-		my %addlRepos = %{$this -> {addlRepos}};
-		$xml -> addRepository (
-			$addlRepos{repositoryTypes},
-			$addlRepos{repositories},
-			$addlRepos{repositoryAlia},
-			$addlRepos{repositoryPriorities}
-		);
-	}
-	if ($this -> {removePackages}) {
-		$xml -> addRemovePackages (@{$this -> {removePackages}});
-	}
-	if ($this -> {replRepo}) {
-		my %replRepo = %{$this -> {replRepo}};
-		$xml -> setRepository (
-			$replRepo{repositoryType},
-			$replRepo{repository},
-			$replRepo{repositoryAlias},
-			$replRepo{respositoryPriority}
-		);
-	}
+	$xml = $this -> __applyBaseXMLOverrides($xml);
+	$xml = $this -> __applyAdditionalXMLOverrides($xml);
 	if (! $krc -> prepareChecks()) {
 		return undef;
 	}
@@ -262,8 +232,6 @@ sub prepareImage {
 	my $configDir = $this -> {configDir};
 	my $rootTgtDir= $this -> {rootTgtDir};
 	my $kiwi      = $this -> {kiwi};
-	my $pkgMgr    = $this -> {packageManager};
-	my $ignore    = $this -> {ignoreRepos};
 	if (! $configDir) {
 		$kiwi -> error ('prepareBootImage: no configuration directory defined');
 		$kiwi -> failed ();
@@ -322,39 +290,8 @@ sub prepareImage {
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------
-	if ($pkgMgr) {
-		$xml -> setPackageManager($pkgMgr);
-	}
-	if ($ignore) {
-		$xml -> ignoreRepositories ();
-	}
-	if ($this -> {addlPackages}) {
-		$xml -> addImagePackages (@{$this -> {addlPackages}});
-	}
-	if ($this -> {addlPatterns}) {
-		$xml -> addImagePatterns (@{$this -> {addlPatterns}});
-	}
-	if ($this -> {addlRepos}) {
-		my %addlRepos = %{$this -> {addlRepos}};
-		$xml -> addRepository (
-			$addlRepos{repositoryTypes},
-			$addlRepos{repositories},
-			$addlRepos{repositoryAlia},
-			$addlRepos{repositoryPriorities}
-		);
-	}
-	if ($this -> {removePackages}) {
-		$xml -> addRemovePackages (@{$this -> {removePackages}});
-	}
-	if ($this -> {replRepo}) {
-		my %replRepo = %{$this -> {replRepo}};
-		$xml -> setRepository (
-			$replRepo{repositoryType},
-			$replRepo{repository},
-			$replRepo{repositoryAlias},
-			$replRepo{respositoryPriority}
-		);
-	}
+	$xml = $this -> __applyBaseXMLOverrides($xml);
+	$xml = $this -> __applyAdditionalXMLOverrides($xml);
 	if (! $krc -> prepareChecks()) {
 		return undef;
 	}
@@ -371,8 +308,8 @@ sub createBootImage {
 	# Create the boot image
 	# ---
 	my $this         = shift;
-	my $configDir    = $this->{configInitrdDir};
-	my $destination  = $this->{imageInitrdTgtDir};
+	my $configDir    = shift;
+	my $destination  = shift;
 	my $kiwi         = $this->{kiwi};
 	my $pkgMgr       = $this->{packageManager};
 	my $ignore       = $this->{ignoreRepos};
@@ -405,30 +342,7 @@ sub createBootImage {
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------
-	if ($pkgMgr) {
-		$xml -> setPackageManager($pkgMgr);
-	}
-	if ($ignore) {
-		$xml -> ignoreRepositories ();
-	}
-	if ($this -> {addlRepos}) {
-		my %addlRepos = %{$this -> {addlRepos}};
-		$xml -> addRepository (
-			$addlRepos{repositoryTypes},
-			$addlRepos{repositories},
-			$addlRepos{repositoryAlia},
-			$addlRepos{repositoryPriorities}
-		);
-	}
-	if ($this -> {replRepo}) {
-		my %replRepo = %{$this -> {replRepo}};
-		$xml -> setRepository (
-			$replRepo{repositoryType},
-			$replRepo{repository},
-			$replRepo{repositoryAlias},
-			$replRepo{respositoryPriority}
-		);
-	}
+	$xml = $this -> __applyBaseXMLOverrides($xml);
 	#==========================================
 	# Create destdir if needed
 	#------------------------------------------
@@ -533,39 +447,8 @@ sub createImage {
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------
-	if ($pkgMgr) {
-		$xml -> setPackageManager($pkgMgr);
-	}
-	if ($ignore) {
-		$xml -> ignoreRepositories ();
-	}
-	if ($this -> {addlPackages}) {
-		$xml -> addImagePackages (@{$this -> {addlPackages}});
-	}
-	if ($this -> {addlPatterns}) {
-		$xml -> addImagePatterns (@{$this -> {addlPatterns}});
-	}
-	if ($this -> {addlRepos}) {
-		my %addlRepos = %{$this -> {addlRepos}};
-		$xml -> addRepository (
-			$addlRepos{repositoryTypes},
-			$addlRepos{repositories},
-			$addlRepos{repositoryAlia},
-			$addlRepos{repositoryPriorities}
-		);
-	}
-	if ($this -> {removePackages}) {
-		$xml -> addRemovePackages (@{$this -> {removePackages}});
-	}
-	if ($this -> {replRepo}) {
-		my %replRepo = %{$this -> {replRepo}};
-		$xml -> setRepository (
-			$replRepo{repositoryType},
-			$replRepo{repository},
-			$replRepo{repositoryAlias},
-			$replRepo{respositoryPriority}
-		);
-	}
+	$xml = $this -> __applyBaseXMLOverrides($xml);
+	$xml = $this -> __applyAdditionalXMLOverrides($xml);
 	if (! $krc -> createChecks()) {
 		return undef;
 	}
@@ -711,7 +594,7 @@ sub createImage {
 	#==========================================
 	# Create recovery archive if specified
 	#------------------------------------------
-	if ($type eq "oem") {
+	if ((defined $type) && ($type eq "oem")) {
 		my $configure = new KIWIConfigure (
 			$kiwi,$xml,$tree,$tree."/image",$destination
 		);
@@ -1020,6 +903,64 @@ sub createImageFormat {
 # Private helper methods
 #------------------------------------------
 #==========================================
+# __applyAdditionalXMLOverrides
+#------------------------------------------
+sub __applyAdditionalXMLOverrides {
+	# ...
+	# Apply XML overrides from command line applicable to some
+	# procedures
+	# ---
+	my $this = shift;
+	my $xml  = shift;
+	if ($this -> {addlPackages}) {
+		$xml -> addImagePackages (@{$this -> {addlPackages}});
+	}
+	if ($this -> {addlPatterns}) {
+		$xml -> addImagePatterns (@{$this -> {addlPatterns}});
+	}
+	if ($this -> {removePackages}) {
+		$xml -> addRemovePackages (@{$this -> {removePackages}});
+	}
+	return $xml;
+}
+
+#==========================================
+# __applyBaseXMLOverrides
+#------------------------------------------
+sub __applyBaseXMLOverrides {
+	# ...
+	# Apply XML overrides from command line common to all procedures
+	# ---
+	my $this = shift;
+	my $xml  = shift;
+	if ($this -> {packageManager}) {
+		$xml -> setPackageManager($this -> {packageManager});
+	}
+	if ($this -> {ignoreRepos}) {
+		$xml -> ignoreRepositories ();
+	}
+	if ($this -> {addlRepos}) {
+		my %addlRepos = %{$this -> {addlRepos}};
+		$xml -> addRepository (
+			$addlRepos{repositoryTypes},
+			$addlRepos{repositories},
+			$addlRepos{repositoryAlia},
+			$addlRepos{repositoryPriorities}
+		);
+	}
+	if ($this -> {replRepo}) {
+		my %replRepo = %{$this -> {replRepo}};
+		$xml -> setRepository (
+			$replRepo{repositoryType},
+			$replRepo{repository},
+			$replRepo{repositoryAlias},
+			$replRepo{respositoryPriority}
+		);
+	}
+	return $xml;
+}
+
+#==========================================
 # __checkImageIntegrity
 #------------------------------------------
 sub __checkImageIntegrity {
@@ -1044,6 +985,7 @@ sub __checkImageIntegrity {
 	}
 	return 1;
 }
+
 #==========================================
 # __upgradeTree
 #------------------------------------------

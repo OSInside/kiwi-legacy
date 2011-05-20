@@ -1015,10 +1015,8 @@ sub createImageRootAndBoot {
 			$configDir = $stype{boot};
 		}
 		my $rootTarget = "$tmpdir/kiwi-".$text."boot-$$";
-		$cmdL -> setInitrdConfigDir ($configDir);
-		$cmdL -> setInitrdRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic -> prepareBootImage())) {
+		if ((! $kic) || (! $kic -> prepareBootImage ($configDir,$rootTarget))) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -1029,10 +1027,9 @@ sub createImageRootAndBoot {
 		#==========================================
 		# Create boot image...
 		#------------------------------------------
-		$cmdL -> setInitrdConfigDir ($rootTarget);
-		$cmdL -> setInitrdImageTargetDir ($this->{imageDest});
-		$kic  -> initialize();
-		if ((! $kic) || (! $kic -> createBootImage())) {
+		if ((! $kic) || (! $kic -> createBootImage(
+			$rootTarget,$this->{imageDest}))
+		) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -1497,10 +1494,8 @@ sub createImageLiveCD {
 			$configDir = $stype{boot};
 		}
 		my $rootTarget = "$tmpdir/kiwi-isoboot-$$";
-		$cmdL -> setInitrdConfigDir ($configDir);
-		$cmdL -> setInitrdRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic -> prepareBootImage())) {
+		if ((! $kic) || (! $kic -> prepareBootImage ($configDir,$rootTarget))) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -1511,10 +1506,9 @@ sub createImageLiveCD {
 		#==========================================
 		# Create boot image...
 		#------------------------------------------
-		$cmdL -> setInitrdConfigDir ($rootTarget);
-		$cmdL -> setInitrdImageTargetDir ($this->{imageDest});
-		$kic  -> initialize();
-		if ((! $kic) || (! $kic -> createBootImage())) {
+		if ((! $kic) || (! $kic -> createBootImage (
+			$rootTarget,$this->{imageDest}))
+		) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -2540,10 +2534,8 @@ sub createImageSplit {
 			$configDir = $type{boot};
 		}
 		my $rootTarget = "$tmpdir/kiwi-splitboot-$$";
-		$cmdL -> setInitrdConfigDir ($configDir);
-		$cmdL -> setInitrdRootTargetDir ($rootTarget);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic -> prepareBootImage())) {
+		if ((! $kic) || (! $kic -> prepareBootImage ($configDir,$rootTarget))) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -2554,10 +2546,9 @@ sub createImageSplit {
 		#==========================================
 		# Create boot image...
 		#------------------------------------------
-		$cmdL -> setInitrdConfigDir ($rootTarget);
-		$cmdL -> setInitrdImageTargetDir ($this->{imageDest});
-		$kic  -> initialize();
-		if ((! $kic) || (! $kic -> createBootImage())) {
+		if ((! $kic) || (! $kic -> createBootImage(
+			$rootTarget,$this->{imageDest}))
+		) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");

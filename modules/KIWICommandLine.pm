@@ -177,17 +177,6 @@ sub getConfigDir {
 }
 
 #==========================================
-# getInitrdConfigDir
-#------------------------------------------
-sub getInitrdConfigDir {
-	# ...
-	# Return location of the configuration tree
-	# ---
-	my $this = shift;
-	return $this -> {configInitrdDir};
-}
-
-#==========================================
 # getIgnoreRepos
 #------------------------------------------
 sub getIgnoreRepos {
@@ -218,17 +207,6 @@ sub getImageTargetDir {
 	# ---
 	my $this = shift;
 	return $this -> {imageTgtDir};
-}
-
-#==========================================
-# getInitrdImageTargetDir
-#------------------------------------------
-sub getInitrdImageTargetDir {
-	# ...
-	# Return the location of the target directory for the boot image
-	# ---
-	my $this = shift;
-	return $this -> {imageInitrdTgtDir};
 }
 
 #==========================================
@@ -559,15 +537,6 @@ sub setCacheDir {
 }
 
 #==========================================
-# setInitrdConfigDir
-#------------------------------------------
-sub setInitrdConfigDir {
-	my $this = shift;
-	my $dir  = shift;
-	return $this -> setConfigDir ($dir,"initrd");
-}
-
-#==========================================
 # setConfigDir
 #------------------------------------------
 sub setConfigDir {
@@ -665,18 +634,6 @@ sub setImagetargetDir {
 	# ---
 	my $this = shift;
 	$this -> {imageTgtDir} = shift;
-	return 1;
-}
-
-#==========================================
-# setInitrdImageTargetDir
-#------------------------------------------
-sub setInitrdImageTargetDir {
-	# ...
-	# Set the destination directory for the completed boot image
-	# ---
-	my $this = shift;
-	$this -> {imageInitrdTgtDir} = shift;
 	return 1;
 }
 
