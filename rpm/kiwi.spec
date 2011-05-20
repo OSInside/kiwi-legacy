@@ -53,8 +53,7 @@ Requires:       squashfs
 Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
-Requires:       libxslt checkmedia util-linux
-Requires:       kiwi-tools >= %{version}
+Requires:       kiwi-tools libxslt checkmedia util-linux
 %if %{suse_version} > 1030
 Requires:       satsolver-tools
 %endif
@@ -79,8 +78,7 @@ Source3:        %{name}-repo.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Recommends:     jing
 Recommends:     zypper
-Provides:       kiwi-desc-usbboot = %{version}
-Obsoletes:      kiwi-desc-usbboot = %{version}
+Obsoletes:      kiwi-desc-usbboot <= 4.81
 
 
 %description
