@@ -40,7 +40,7 @@ sub new {
 	# Variable setup
 	#------------------------------------------
 	my %data;
-	$data{Version}       = "4.88";
+	$data{Version}       = "4.89";
 	$data{Publisher}     = "SUSE LINUX Products GmbH";
 	$data{Preparer}      = "KIWI - http://kiwi.berlios.de";
 	$data{ConfigName}    = "config.xml";
