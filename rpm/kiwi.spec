@@ -60,7 +60,6 @@ Requires:       satsolver-tools
 %endif
 %if %{suse_version} > 1130
 Requires:       perl-satsolver >= 0.42
-BuildArch:      noarch
 %endif
 %ifarch %ix86 x86_64
 Requires:       master-boot-code
