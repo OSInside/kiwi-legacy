@@ -60,7 +60,9 @@
                     <xsl:when test="name()='ec2certfile'"/>
                     <xsl:when test="name()='ec2accountnr'"/>
                     <xsl:otherwise>
-                        <xsl:copy select="@"/>                  
+                      <xsl:attribute name="{local-name()}">
+                        <xsl:value-of select="."/>
+                      </xsl:attribute>
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:for-each>
