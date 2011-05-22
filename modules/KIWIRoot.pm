@@ -789,10 +789,14 @@ sub installArchives {
 	# directory of the image system
 	# ---
 	my $this = shift;
+	my $idesc= shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $root = $this->{root};
 	my $manager = $this->{manager};
+	if (! defined $idesc) {
+		$idesc = $this->{imageDesc};
+	}
 	#==========================================
 	# get image archive list
 	#------------------------------------------
@@ -801,7 +805,7 @@ sub installArchives {
 	# Install raw data archives
 	#------------------------------------------
 	$manager -> switchToLocal();
-	if (! $manager -> setupArchives($this->{imageDesc},@archives)) {
+	if (! $manager -> setupArchives($idesc,@archives)) {
 		return undef;
 	}
 	#==========================================

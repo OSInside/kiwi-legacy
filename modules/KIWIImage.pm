@@ -1016,7 +1016,9 @@ sub createImageRootAndBoot {
 		}
 		my $rootTarget = "$tmpdir/kiwi-".$text."boot-$$";
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic -> prepareBootImage ($configDir,$rootTarget))) {
+		if ((! $kic) ||	(! $kic -> prepareBootImage (
+			$configDir,$rootTarget,$this->{imageTree}))
+		) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -1495,7 +1497,9 @@ sub createImageLiveCD {
 		}
 		my $rootTarget = "$tmpdir/kiwi-isoboot-$$";
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic -> prepareBootImage ($configDir,$rootTarget))) {
+		if ((! $kic) || (! $kic -> prepareBootImage (
+			$configDir,$rootTarget,$this->{imageTree}))
+		) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -2535,7 +2539,9 @@ sub createImageSplit {
 		}
 		my $rootTarget = "$tmpdir/kiwi-splitboot-$$";
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic -> prepareBootImage ($configDir,$rootTarget))) {
+		if ((! $kic) || (! $kic -> prepareBootImage (
+			$configDir,$rootTarget,$this->{imageTree}))
+		) {
 			undef $kic;
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $tmpdir");
@@ -2589,8 +2595,6 @@ sub createImageSplit {
 	$name->{systemImage} = $sxml -> buildImageName();
 	$name->{bootImage}   = $bootdata[0];
 	$name->{format}      = $type{format};
-	undef $main::Prepare;
-	undef $main::Create;
 	if ($boot =~ /vmxboot|oemboot/) {
 		#==========================================
 		# Create virtual disk images if requested

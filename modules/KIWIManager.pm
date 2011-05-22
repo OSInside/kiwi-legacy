@@ -1717,10 +1717,10 @@ sub setupArchives {
 		return undef;
 	}
 	#==========================================
-	# override path to image description
+	# check for origin of image description
 	#------------------------------------------
-	if ((defined $main::ImageDescription) && (-d $main::ImageDescription)) {
-		$idesc = $main::ImageDescription;
+	if (open FD,"$idesc/image/main::Prepare") {
+		$idesc = <FD>; close FD;
 	}
 	#==========================================
 	# check for archive files

@@ -128,6 +128,7 @@ sub prepareBootImage {
 	my $this       = shift;
 	my $configDir  = shift;
 	my $rootTgtDir = shift;
+	my $systemTree = shift;
 	my $kiwi       = $this->{kiwi};
 	if (! $configDir) {
 		$kiwi -> error ('prepareBootImage: no configuration directory defined');
@@ -147,6 +148,11 @@ sub prepareBootImage {
 		$kiwi -> failed ();
 		return undef;
 	}
+	if (! $systemTree) {
+		$kiwi -> error ('prepareBootImage: no system image directory defined');
+		$kiwi -> failed ();
+		return undef;
+	}
 	$kiwi -> info ("Prepare boot image (initrd)...\n");
 	my $xml = new KIWIXML (
 		$kiwi,$configDir,undef,undef
@@ -159,7 +165,7 @@ sub prepareBootImage {
 	#------------------------------------------
 	$xml = $this -> __applyBaseXMLOverrides($xml);
 	return $this -> __prepareTree (
-		$xml, $configDir, $rootTgtDir
+		$xml,$configDir,$rootTgtDir,$systemTree
 	);
 }
 
@@ -1075,6 +1081,7 @@ sub __prepareTree {
 	my $xml        = shift;
 	my $configDir  = shift;
 	my $rootTgtDir = shift;
+	my $systemTree = shift;
 	my $kiwi       = $this -> {kiwi};
 	my $cmdL       = $this -> {cmdL};
 	my %attr       = %{$xml->getImageTypeAndAttributes()};
@@ -1138,7 +1145,7 @@ sub __prepareTree {
 		$kiwi -> failed ();
 		return undef;
 	}
-	if (! $root -> installArchives ()) {
+	if (! $root -> installArchives ($systemTree)) {
 		$kiwi -> error ("Archive installation failed");
 		$kiwi -> failed ();
 		return undef;
