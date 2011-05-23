@@ -3260,6 +3260,7 @@ function searchBusIDBootDevice {
 	#======================================
 	# setup boot device variable
 	#--------------------------------------
+	waitForStorageDevice $biosBootDevice
 	if [ ! -e $biosBootDevice ];then
 		export biosBootDevice="Failed to set disk $deviceID online"
 		return 1
