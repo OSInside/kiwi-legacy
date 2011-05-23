@@ -105,12 +105,12 @@ sub new {
 	#==========================================
 	# find image type...
 	#------------------------------------------
-	if (! defined $main::SetImageType) {
+	if (! defined $cmdL->getBuildType()) {
 		if ($initrd =~ /oemboot/) {
-			$main::SetImageType = "oem";
+			$cmdL -> setBuildType ("oem");
 		}
 		if ($initrd =~ /vmxboot/) {
-			$main::SetImageType = "vmx";
+			$cmdL -> setBuildType ("vmx");
 		}
 	}
 	#==========================================
@@ -236,7 +236,7 @@ sub new {
 				return undef;
 			}
 			$xml = new KIWIXML (
-				$kiwi,$system."/image",$main::SetImageType,$profile
+				$kiwi,$system."/image",$cmdL->getBuildType(),$profile
 			);
 		} else {
 			my %fsattr = $main::global -> checkFileSystem ($system);
@@ -294,7 +294,7 @@ sub new {
 					return undef;
 				}
 				$xml = new KIWIXML (
-					$kiwi,$tmpdir."/image",$main::SetImageType,$profile
+					$kiwi,$tmpdir."/image",$cmdL->getBuildType(),$profile
 				);
 				#==========================================
 				# clean up
@@ -311,7 +311,7 @@ sub new {
 				# check for split type
 				#------------------------------------------
 				if (-f "$tmpdir/rootfs.tar") {
-					$main::SetImageType = "split";
+					$cmdL -> setBuildType ("split");
 					$haveSplit = 1;
 				}
 				#==========================================
@@ -331,7 +331,7 @@ sub new {
 					return undef;
 				}
 				$xml = new KIWIXML (
-					$kiwi,$tmpdir."/image",$main::SetImageType,$profile
+					$kiwi,$tmpdir."/image",$cmdL->getBuildType(),$profile
 				);
 				#==========================================
 				# clean up
@@ -364,6 +364,9 @@ sub new {
 		my $cmdlBytes    = 0;
 		my $spare        = 1.5;
 		my $journal      = 12 * 1024 * 1024;
+		my $fsopts       = $cmdL -> getFilesystemOptions();
+		my $inodesize    = $fsopts->[1];
+		my $inoderatio   = $fsopts->[2];
 		#==========================================
 		# Calculate minimum size of the system
 		#------------------------------------------
@@ -374,7 +377,7 @@ sub new {
 			chomp $minInodes;
 			chomp $sizeBytes;
 			$minInodes*= 2;
-			$sizeBytes+= $minInodes * $main::FSInodeSize;
+			$sizeBytes+= $minInodes * $inodesize;
 			$sizeBytes*= $spare;
 			$sizeBytes+= $journal;
 		} else {
@@ -428,7 +431,7 @@ sub new {
 			# will be created during the image creation. In this
 			# case we need to create the inode count
 			# ----
-			$this->{inodes} = int ($sizeBytes / $main::FSInodeRatio);
+			$this->{inodes} = int ($sizeBytes / $inoderatio);
 			$kiwi -> loginfo (
 				"Using ".$this->{inodes}." inodes for the root filesystem\n"
 			);
@@ -495,7 +498,7 @@ sub new {
 	$this->{xendomain} = $xendomain;
 	$this->{profile}   = $profile;
 	$this->{haveSplit} = $haveSplit;
-	$this->{imgtype}   = $main::SetImageType;
+	$this->{imgtype}   = $cmdL->getBuildType();
 	return $this;
 }
 

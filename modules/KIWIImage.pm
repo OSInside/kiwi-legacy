@@ -1334,9 +1334,12 @@ sub createImageLiveCD {
 		# Create EXT2 filesystem on RW extend
 		#------------------------------------------
 		my $setBlockSize = 0;
-		if (! defined $main::FSBlockSize) {
-			$main::FSBlockSize = 4096;
+		my $fsopts       = $cmdL -> getFilesystemOptions();
+		my $blocksize    = $fsopts->[0];
+		if (! defined $blocksize) {
+			$fsopts->[0] = 4096;
 			$setBlockSize = 1;
+			$cmdL -> setFilesystemOptions (@{$fsopts});
 		}
 		if (! $this -> setupEXT2 ( $namerw )) {
 			$this -> restoreSplitExtend ();
@@ -1344,7 +1347,8 @@ sub createImageLiveCD {
 			return undef;
 		}
 		if ($setBlockSize) {
-			undef $main::FSBlockSize;
+			undef $fsopts->[0];
+			$cmdL -> setFilesystemOptions (@{$fsopts});
 		}
 		#==========================================
 		# mount logical extend for data transfer
@@ -3808,6 +3812,7 @@ sub getSize {
 	# ---
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
+	my $cmdL   = $this->{cmdL};
 	my $extend = shift;
 	my $xml    = $this->{xml};
 	my $mini   = qxx ("find $extend | wc -l"); chomp $mini;
@@ -3815,6 +3820,9 @@ sub getSize {
 	my $spare  = 1.5;
 	my $journal= 12 * 1024 * 1024;
 	my $files  = $mini;
+	my $fsopts = $cmdL -> getFilesystemOptions();
+	my $isize  = $fsopts->[1];
+	my $iratio = $fsopts->[2];
 	my $xmlsize;
 	#==========================================
 	# Double minimum inode count
@@ -3826,9 +3834,9 @@ sub getSize {
 	$kiwi -> loginfo ("getSize: files: $files\n");
 	$kiwi -> loginfo ("getSize: spare: $spare\n");
 	$kiwi -> loginfo ("getSize: usage: $minsize Bytes\n");
-	$kiwi -> loginfo ("getSize: inode: $main::FSInodeSize Bytes\n");
+	$kiwi -> loginfo ("getSize: inode: $isize Bytes\n");
 	$kiwi -> loginfo ("getSize: journ: $journal Bytes\n");
-	$minsize += $mini * $main::FSInodeSize;
+	$minsize += $mini * $isize;
 	$minsize *= $spare;
 	$minsize += $journal;
 	$xmlsize = $minsize;
@@ -3872,7 +3880,7 @@ sub getSize {
 	my $usedsize = $minsize; 
 	if ($xmlsize > $minsize) {
 		$usedsize = $xmlsize;
-		$this->{inodes} = sprintf ("%.0f",$usedsize / $main::FSInodeRatio);
+		$this->{inodes} = sprintf ("%.0f",$usedsize / $iratio);
 	} else {
 		$this->{inodes} = $mini;
 	}

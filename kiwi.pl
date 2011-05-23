@@ -102,7 +102,6 @@ our $SetRepository;         # set first repository for building physical extend
 our $SetRepositoryType;     # set firt repository type
 our $SetRepositoryAlias;    # alias name for the repository
 our $SetRepositoryPriority; # priority for the repository
-our $SetImageType;          # set image type to use, default is primary type
 our $Migrate;               # migrate running system to image description
 our @Exclude;               # exclude directories in migrate search
 our @Skip;                  # skip this package in migration mode
@@ -115,12 +114,6 @@ our $GzipCmd;               # command to run to gzip things
 our $PrebuiltBootImage;     # directory where a prepared boot image may be found
 our $CreatePassword;        # create crypted password
 our $ISOCheck;              # create checkmedia boot entry
-our $FSBlockSize;           # filesystem block size
-our $FSInodeSize;           # filesystem inode size
-our $FSJournalSize;         # filesystem journal size
-our $FSMaxMountCount;       # filesystem (ext2-4) max mount count between checks
-our $FSCheckInterval;       # filesystem (ext2-4) max interval between fs checks
-our $FSInodeRatio;          # filesystem bytes/inode ratio
 our $Verbosity = 0;         # control the verbosity level
 our $TargetArch;            # target architecture -> writes zypp.conf
 our $CheckKernel;           # check for kernel matches in boot and system image
@@ -472,6 +465,7 @@ sub main {
 		$kiwi -> info ("Starting image test run...");
 		my $suite  = "/usr/lib/os-autoinst";
 		my $distri = "kiwi-$$";
+		my $type   = $cmdL -> getBuildType();
 		#==========================================
 		# Check pre-conditions
 		#------------------------------------------
@@ -487,7 +481,7 @@ sub main {
 			$kiwi -> failed ();
 			kiwiExit (1);
 		}
-		if (! defined $SetImageType) {
+		if (! defined $type) {
 			$kiwi -> failed ();
 			$kiwi -> error ("No test image type specified");
 			$kiwi -> failed ();
@@ -499,9 +493,9 @@ sub main {
 			$kiwi -> failed ();
 			kiwiExit (1);
 		}
-		if (! -d $TestCase."/".$SetImageType) {
+		if (! -d $TestCase."/".$type) {
 			$kiwi -> failed ();
-			$kiwi -> error ("Test case $SetImageType does not exist");
+			$kiwi -> error ("Test case $type does not exist");
 			$kiwi -> failed ();
 			kiwiExit (1);
 		}
@@ -519,7 +513,7 @@ sub main {
 		#==========================================
 		# Create distri link for os-autoinst
 		#------------------------------------------
-		my $test = $TestCase."/".$SetImageType;
+		my $test = $TestCase."/".$type;
 		my $data = qxx ("ln -s $test $suite/distri/$distri 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -614,15 +608,30 @@ sub init {
 	# requires you to perform at least one action.
 	# An action is either to prepare or create an image
 	# ---
+	#==========================================
+	# IPC; signal setup
+	#------------------------------------------
 	$SIG{"HUP"}      = \&quit;
 	$SIG{"TERM"}     = \&quit;
 	$SIG{"INT"}      = \&quit;
+	#==========================================
+	# Option variables
+	#------------------------------------------
 	my $gdata = $global -> getGlobals();
 	my $Help;
 	my @ListXMLInfoSelection;  # info selection for listXMLInfo
+	my $FSBlockSize;           # filesystem block size
+	my $FSInodeSize;           # filesystem inode size
+	my $FSJournalSize;         # filesystem journal size
+	my $FSMaxMountCount;       # filesystem (ext) max mount count between checks
+	my $FSCheckInterval;       # filesystem (ext) max interval between fs checks
+	my $FSInodeRatio;          # filesystem bytes/inode ratio
+	my $SetImageType;          # set image type to use, default is primary type
 	my $PackageManager;
 	my $Version;
-
+	#==========================================
+	# create logger and cmdline object
+	#------------------------------------------
 	$kiwi = new KIWILog("tiny");
 	$cmdL = new KIWICommandLine($kiwi);
 	if (! $cmdL) {
