@@ -185,7 +185,7 @@ sub main {
 	if (defined $NoColor) {
 		$kiwi -> info ("Switching off colored output\n");
 		if (! $kiwi -> setColorOff ()) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 	}
 	#==========================================
@@ -194,7 +194,7 @@ sub main {
 	if (defined $LogFile) {
 		$kiwi -> info ("Setting log file to: $LogFile\n");
 		if (! $kiwi -> setLogFile ( $LogFile )) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 	}
 	#========================================
@@ -208,7 +208,7 @@ sub main {
 			$Destination, $defaultAnswer
 		);
 		if (! defined $dirCreated) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		#==========================================
 		# Setup prepare 
@@ -220,7 +220,7 @@ sub main {
 		mkdir $imageTarget;
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic -> prepareImage()) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		#==========================================
 		# Setup create 
@@ -231,7 +231,7 @@ sub main {
 		$cmdL -> setForceNewRoot (0);
 		$kic  -> initialize();
 		if (! $kic -> createImage ($kiwi,$cmdL)) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		kiwiExit (0);
 	}
@@ -248,7 +248,7 @@ sub main {
 			$kiwi,$InitCache,undef,\@Profiles
 		);
 		if (! defined $xml) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		my $pkgMgr = $cmdL -> getPackageManager();
 		if ($pkgMgr) {
@@ -265,14 +265,14 @@ sub main {
 			$kiwi,$xml,$cdir,$gdata->{BasePath},\@Profiles,$InitCache
 		);
 		if (! $icache) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		my $cacheInit = $icache -> initializeCache ($cmdL);
 		if (! $cacheInit) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! $icache -> createCache ($cacheInit)) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		kiwiExit (0);
 	}
@@ -283,10 +283,10 @@ sub main {
 	if (defined $Prepare) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! $kic -> prepareImage()) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		kiwiExit (0);
 	}
@@ -297,10 +297,10 @@ sub main {
 	if (defined $Create) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! $kic -> createImage()) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		kiwiExit (0);
 	}
@@ -311,10 +311,10 @@ sub main {
 	if (defined $Upgrade) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! $kic -> upgradeImage()) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		kiwiExit (0);
 	}
@@ -335,11 +335,11 @@ sub main {
 		# Check object and repo setup, mandatory
 		#------------------------------------------
 		if (! defined $migrate) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! $migrate -> getRepos()) {
 			$migrate -> cleanMount();
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		#==========================================
 		# Create report HTML file, errors allowed
@@ -352,15 +352,15 @@ sub main {
 		if (! $MigrateNoTemplate) {
 			if (! $migrate -> setTemplate()) {
 				$migrate -> cleanMount();
-				my $code = kiwiExit (1); return $code;
+				kiwiExit (1);
 			}
 			if (! $migrate -> setPrepareConfigSkript()) {
 				$migrate -> cleanMount();
-				my $code = kiwiExit (1); return $code;
+				kiwiExit (1);
 			}
 			if (! $migrate -> setInitialSetup()) {
 				$migrate -> cleanMount();
-				my $code = kiwiExit (1); return $code;
+				kiwiExit (1);
 			}
 		}
 		$migrate -> cleanMount();
@@ -373,10 +373,10 @@ sub main {
 	if (defined $SetupSplash) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! $kic -> createSplash()) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		kiwiExit (0);
 	}
@@ -387,10 +387,10 @@ sub main {
 	if (defined $BootUSB) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! $kic -> createImageBootUSB()) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		kiwiExit (0);
 	}
@@ -401,10 +401,10 @@ sub main {
 	if (defined $BootCD) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! $kic -> createImageBootCD()) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		kiwiExit (0);
 	}
@@ -415,10 +415,10 @@ sub main {
 	if (defined $InstallCD) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! $kic -> createImageInstallCD()) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		kiwiExit (0);
 	}
@@ -429,10 +429,10 @@ sub main {
 	if (defined $InstallStick) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! $kic -> createImageInstallStick()) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		kiwiExit (0);
 	}
@@ -443,10 +443,10 @@ sub main {
 	if (defined $BootVMDisk) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! $kic -> createImageDisk()) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		kiwiExit (0);
 	}
@@ -457,10 +457,10 @@ sub main {
 	if (defined $Convert) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! $kic -> createImageFormat()) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		kiwiExit (0);
 	}
@@ -479,37 +479,37 @@ sub main {
 			$kiwi -> failed ();
 			$kiwi -> error ("Required os-autoinst test-suite not installed");
 			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! -f $TestImage) {
 			$kiwi -> failed ();
 			$kiwi -> error ("Test image $TestImage doesn't exist");
 			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! defined $SetImageType) {
 			$kiwi -> failed ();
 			$kiwi -> error ("No test image type specified");
 			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! defined $TestCase) {
 			$kiwi -> failed ();
 			$kiwi -> error ("No test test case specified");
 			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! -d $TestCase."/".$SetImageType) {
 			$kiwi -> failed ();
 			$kiwi -> error ("Test case $SetImageType does not exist");
 			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (! -f $TestCase."/env.sh") {
 			$kiwi -> failed ();
 			$kiwi -> error ("Can't find environment for this test");
 			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		#==========================================
 		# Turn parameters into absolute pathes
@@ -526,7 +526,7 @@ sub main {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Can't create distri link: $data");
 			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		#==========================================
 		# Create result mktemp directory
@@ -537,7 +537,7 @@ sub main {
 			$kiwi -> error  ("Couldn't create result directory: $out: $!");
 			$kiwi -> failed ();
 			qxx ("rm -f $suite/distri/$distri");
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		qxx ("chmod 755 $out 2>&1");
 		#==========================================
@@ -551,7 +551,7 @@ sub main {
 			$kiwi -> failed ();
 			qxx ("rm -f $suite/distri/$distri");
 			qxx ("rm -rf $out");
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		#==========================================
 		# Create call file
@@ -568,7 +568,7 @@ sub main {
 			$kiwi -> failed ();
 			qxx ("rm -f $suite/distri/$distri");
 			qxx ("rm -rf $out");
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		#==========================================
 		# Create screen ctrl file
@@ -582,7 +582,7 @@ sub main {
 			$kiwi -> failed ();
 			qxx ("rm -f $suite/distri/$distri");
 			qxx ("rm -rf $out");
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		#==========================================
 		# Call the test
@@ -625,6 +625,9 @@ sub init {
 
 	$kiwi = new KIWILog("tiny");
 	$cmdL = new KIWICommandLine($kiwi);
+	if (! $cmdL) {
+		kiwiExit (1);
+	}
 	#==========================================
 	# get options and call non-root tasks
 	#------------------------------------------
@@ -810,7 +813,7 @@ sub init {
 			\@AddRepositoryType
 		);
 		if (! $res) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 	}
 	#========================================
@@ -849,7 +852,7 @@ sub init {
 	if (defined $PackageManager) {
 		my $result = $cmdL -> setPackageManager ($PackageManager);
 		if (! $result) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 	}
 	#========================================
@@ -863,7 +866,7 @@ sub init {
 			$SetRepositoryType
 		);
 		if (! $result) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 	}
 	#========================================
@@ -877,7 +880,7 @@ sub init {
 			\@AddRepositoryType
 		);
 		if (! $result) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 	}
 	#========================================
@@ -1031,7 +1034,7 @@ sub init {
 	) {
 		$kiwi -> error ("No operation specified");
 		$kiwi -> failed ();
-		my $code = kiwiExit (1); return $code;
+		kiwiExit (1);
 	}
 	if (($InitCache) && ($LogFile)) {
 		$kiwi -> warning ("Logfile set to terminal in init-cache mode");
@@ -1042,12 +1045,12 @@ sub init {
 	if (($targetDevice) && (! -b $targetDevice)) {
 		$kiwi -> error ("Target device $targetDevice doesn't exist");
 		$kiwi -> failed ();
-		my $code = kiwiExit (1); return $code;
+		kiwiExit (1);
 	}
 	if ((defined $IgnoreRepos) && (defined $SetRepository)) {
 		$kiwi -> error ("Can't use ignore repos together with set repos");
 		$kiwi -> failed ();
-		my $code = kiwiExit (1); return $code;
+		kiwiExit (1);
 	}
 	if (defined $RootTree) {
 		$cmdL -> setRootTargetDir($RootTree)
@@ -1065,7 +1068,7 @@ sub init {
 	if ((defined $BootVMDisk) && (! defined $BootVMSystem)) {
 		$kiwi -> error ("Virtual Disk setup must specify a bootvm-system");
 		$kiwi -> failed ();
-		my $code = kiwiExit (1); return $code;
+		kiwiExit (1);
 	}
 	if (defined $Partitioner) {
 		if (
@@ -1074,13 +1077,13 @@ sub init {
 		) {
 			$kiwi -> error ("Invalid partitioner, expected parted|fdasd");
 			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 	}
 	if ((defined $Build) && (! defined $Destination)) {
 		$kiwi -> error  ("No destination directory specified");
 		$kiwi -> failed ();
-		my $code = kiwiExit (1); return $code;
+		kiwiExit (1);
 	} elsif (defined $Build) {
 		$cmdL -> setTargetDirsForBuild();
 	}
@@ -1095,7 +1098,7 @@ sub init {
 		$cmdL -> setConfigDir($ListXMLInfo);
 		my $res = $cmdL -> setIgnoreRepos($IgnoreRepos);
 		if (! $res) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		if (defined $LogFile) {
 			$res = $cmdL -> setLogFile($LogFile);
@@ -1112,17 +1115,17 @@ sub init {
 			);
 		}
 		if (! $res) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		my $info = new KIWIXMLInfo($kiwi, $cmdL);
 		if (! $info) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		$res = $info -> printXMLInfo(\@ListXMLInfoSelection);
 		if (! $res) {
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
-		my $code = kiwiExit (0); return $code;
+		kiwiExit (0);
 	}
 	if (defined $SetImageType) {
 		$cmdL -> setBuildType($SetImageType);
@@ -1131,7 +1134,7 @@ sub init {
 		if ($MBRID < 0 || $MBRID > 0xffffffff) {
 			$kiwi -> error ("Invalid mbrid");
 			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
+			kiwiExit (1);
 		}
 		$MBRID = sprintf ("0x%08x", $MBRID);
 	}
@@ -1670,7 +1673,7 @@ sub createPassword {
 	}
 	$kiwi -> done ();
 	$kiwi -> info ("Your password:\n\t$encrypted\n");
-	my $code = kiwiExit (0); return $code;
+	kiwiExit (0);
 }
 
 #==========================================
@@ -1690,13 +1693,13 @@ sub createHash {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Not a directory: $CreateHash: $!");
 		$kiwi -> failed ();
-		my $code = kiwiExit (1); return $code;
+		kiwiExit (1);
 	}
 	if (! $locator -> getControlFile ($CreateHash)) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Not a kiwi description: no xml description found");
 		$kiwi -> failed ();
-		my $code = kiwiExit (1); return $code;
+		kiwiExit (1);
 	}
 	my $cmd  = "find -L -type f | grep -v .svn | grep -v .checksum.md5";
 	my $status = qxx (
@@ -1708,7 +1711,7 @@ sub createHash {
 		$kiwi -> failed ();
 	}
 	$kiwi -> done();
-	my $code = kiwiExit (0); return $code;
+	kiwiExit (0);
 }
 
 #==========================================
@@ -1726,8 +1729,7 @@ sub createInstSource {
 	eval "require $mod";
 	if($@) {
 		$kiwi->error("Module <$mod> is not available!");
-		my $code = kiwiExit (3);
-		return $code;
+		kiwiExit (3);
 	}
 	else {
 		$kiwi->info("Module KIWICollect loaded successfully...");
@@ -1738,7 +1740,7 @@ sub createInstSource {
 		$kiwi,$CreateInstSource,undef,undef
 	);
 	if (! defined $xml) {
-		my $code = kiwiExit (1); return $code;
+		kiwiExit (1);
 	}
 	my $pkgMgr = $cmdL -> getPackageManager();
 	if ($pkgMgr) {
@@ -1751,7 +1753,7 @@ sub createInstSource {
 	if (! defined $root) {
 		$kiwi -> error ("Couldn't create instsource root");
 		$kiwi -> failed ();
-		my $code = kiwiExit (1); return $code;
+		kiwiExit (1);
 	}
 	#==========================================
 	# Create object...
@@ -1760,12 +1762,12 @@ sub createInstSource {
 	if (! defined( $collect) ) {
 		$kiwi -> error( "Unable to create KIWICollect module." );
 		$kiwi -> failed ();
-		my $code = kiwiExit( 1 ); return $code;
+		kiwiExit( 1 );
 	}
 	if (! defined( $collect -> Init () ) ) {
 		$kiwi -> error( "Object initialisation failed!" );
 		$kiwi -> failed ();
-		my $code = kiwiExit( 1 ); return $code;
+		kiwiExit( 1 );
 	}
 	#==========================================
 	# Call the *CENTRAL* method for it...
@@ -1774,7 +1776,7 @@ sub createInstSource {
 	if ( $ret != 0 ) {
 		$kiwi -> warning( "KIWICollect had runtime error." );
 		$kiwi -> skipped ();
-		my $code = kiwiExit ( $ret ); return $code;
+		kiwiExit ( $ret );
 	}
 	$kiwi->info( "KIWICollect completed successfully." );
 	$kiwi->done();

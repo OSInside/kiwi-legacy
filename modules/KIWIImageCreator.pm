@@ -399,6 +399,9 @@ sub createImage {
 	#==========================================
 	# Check the tree first...
 	#------------------------------------------
+	if (! defined $configDir) {
+		return undef;
+	}
 	if (-f "$configDir/.broken") {
 		$kiwi -> error  ("Image root tree $configDir is broken");
 		$kiwi -> failed ();
