@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon May 23 11:12:47 CEST 2011 - ms@suse.de
+
+- s390: fixed disk online code, wait for disk device to appear (bnc #693031)
+- add SLE 11 SP 2 media style plugin, using sha256 sums for meta data
+
+-------------------------------------------------------------------
 Fri May 13 14:33:42 CEST 2011 - ms@suse.de
 
 - version update to 4.85 per fate request (fate #311430)
