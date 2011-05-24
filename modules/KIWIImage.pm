@@ -285,6 +285,7 @@ sub checkAndSetupPrebuiltBootImage {
 	my $this = shift;
 	my $ixml = shift;
 	my $kiwi = $this->{kiwi};
+	my $cmdL = $this->{cmdL};
 	my %type = %{$ixml->getImageTypeAndAttributes()};
 	my $pblt = $type{checkprebuilt};
 	my $boot = $type{boot};
@@ -311,7 +312,7 @@ sub checkAndSetupPrebuiltBootImage {
 	if (! $isValid) {
 		return undef;
 	}
-	my $bxml = new KIWIXML ( $kiwi,$bootpath );
+	my $bxml = new KIWIXML ( $kiwi,$bootpath,undef,undef,$cmdL );
 	if (! $bxml) {
 		return undef;
 	}

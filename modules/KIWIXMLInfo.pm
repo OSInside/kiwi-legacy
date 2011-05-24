@@ -104,6 +104,7 @@ sub new {
 	$this->{packageManager} = $cmdL -> getPackageManager();
 	$this->{replRepo}       = $cmdL -> getReplacementRepo();
 	$this->{gdata}          = $main::global -> getGlobals();
+	$this->{cmdL}           = $cmdL;
 	return $this;
 }
 
@@ -507,6 +508,7 @@ sub __xmlSetup {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
+	my $cmdL = $this->{cmdL};
 	#==========================================
 	# Setup the XML
 	#------------------------------------------
@@ -528,7 +530,7 @@ sub __xmlSetup {
 		return undef;
 	}
 	my $xml = new KIWIXML (
-		$kiwi, $configDir, undef, $buildProfs
+		$kiwi, $configDir, undef, $buildProfs, $cmdL
 	);
 	if (! defined $xml) {
 		return undef;

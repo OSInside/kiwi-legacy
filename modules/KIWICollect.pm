@@ -125,6 +125,7 @@ sub new {
   $this->{m_xml}      = shift;
   $this->{m_basedir}  = shift;
   $this->{m_debug}    = shift || 0;
+  $this->{cmdL}       = shift;
 
   if( !(defined($this->{m_xml})
 	and defined($this->{m_basedir})
@@ -150,7 +151,7 @@ sub new {
     $this->logMsg("I", "Created new KIWIUtil object");
   }
 
-  $this->{m_urlparser} = new KIWIURL($this->{m_logger});
+  $this->{m_urlparser} = new KIWIURL($this->{m_logger},$this->{cmdL});
   if(!$this->{m_urlparser}) {
     $this->logMsg("E", "Can't create KIWIURL object!");
     return undef;

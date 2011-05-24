@@ -296,7 +296,7 @@ sub createCache {
 		$kiwi -> info (
 			"--> Building ext2 cache...\n"
 		);
-		my $cxml  = new KIWIXML ($kiwi,$base."/modules");
+		my $cxml  = new KIWIXML ($kiwi,$base."/modules",undef,undef,$cmdL);
 		my $pkgMgr = $cmdL -> getPackageManager();
 		if ($pkgMgr) {
 			$cxml -> setPackageManager($pkgMgr);

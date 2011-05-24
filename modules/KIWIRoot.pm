@@ -109,7 +109,7 @@ sub new {
 		my $user = $repository{$source}[3];
 		my $pwd  = $repository{$source}[4];
 		my $plic = $repository{$source}[5];
-		my $urlHandler  = new KIWIURL ($kiwi,$this,$user,$pwd);
+		my $urlHandler  = new KIWIURL ($kiwi,$cmdL,$this,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		if ($publics_url =~ /^\//) {
 			my ( $publics_url_test ) = bsd_glob ( $publics_url );
@@ -1469,14 +1469,6 @@ sub cleanLock {
 	my $manager = $this->{manager};
 	$manager -> freeLock();
 	return $this;
-}
-
-#==========================================
-# getCMDL
-#------------------------------------------
-sub getCMDL {
-	my $this = shift;
-	return $this->{cmdL};
 }
 
 1;

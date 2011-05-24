@@ -87,6 +87,7 @@ sub new {
 	my $imageDesc   = shift;
 	my $imageType   = shift;
 	my $reqProfiles = shift;
+	my $cmdL        = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -107,12 +108,18 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	if (! $cmdL) {
+		$kiwi -> error  ("No commandline reference specified");
+		$kiwi -> failed ();
+		return undef;
+	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi} = $kiwi;
 	$this->{arch} = $arch;
 	$this->{gdata}= $main::global -> getGlobals();
+	$this->{cmdL} = $cmdL;
 	#==========================================
 	# Lookup XML configuration file
 	#------------------------------------------
@@ -288,6 +295,7 @@ sub getConfigName {
 sub createURLList {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
+	my $cmdL = $this->{cmdL};
 	my %repository  = ();
 	my @urllist     = ();
 	my %urlhash     = ();
@@ -304,7 +312,7 @@ sub createURLList {
 	foreach my $source (@sourcelist) {
 		my $user = $repository{$source}[3];
 		my $pwd  = $repository{$source}[4];
-		my $urlHandler  = new KIWIURL ($kiwi,undef,$user,$pwd);
+		my $urlHandler  = new KIWIURL ($kiwi,$cmdL,undef,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		push (@urllist,$publics_url);
 		$urlhash{$source} = $publics_url;
@@ -1430,11 +1438,12 @@ sub getTypes {
 	# ---
 	my $this    = shift;
 	my $kiwi    = $this->{kiwi};
+	my $cmdL    = $this->{cmdL};
 	my @result  = ();
 	my @tnodes  = ();
 	my $gotprim = 0;
 	my @node    = $this->{optionsNodeList} -> get_nodelist();
-	my $urlhd   = new KIWIURL ($kiwi);
+	my $urlhd   = new KIWIURL ($kiwi,$cmdL);
 	foreach my $element (@node) {
 		if (! $this -> __requestedProfile ($element)) {
 			next;
@@ -4709,7 +4718,8 @@ sub __populateTypeInfo {
 	#
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
-	my $urlhd  = new KIWIURL ($kiwi);
+	my $cmdL   = $this->{cmdL};
+	my $urlhd  = new KIWIURL ($kiwi,$cmdL);
 	my @node   = $this->{optionsNodeList} -> get_nodelist();
 	my @result = ();
 	my $first  = 1;

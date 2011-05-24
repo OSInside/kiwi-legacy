@@ -134,6 +134,7 @@ sub prepareBootImage {
 	my $configDir  = shift;
 	my $rootTgtDir = shift;
 	my $systemTree = shift;
+	my $cmdL       = $this->{cmdL};
 	my $kiwi       = $this->{kiwi};
 	if (! $configDir) {
 		$kiwi -> error ('prepareBootImage: no configuration directory defined');
@@ -160,7 +161,7 @@ sub prepareBootImage {
 	}
 	$kiwi -> info ("Prepare boot image (initrd)...\n");
 	my $xml = new KIWIXML (
-		$kiwi,$configDir,undef,undef
+		$kiwi,$configDir,undef,undef,$cmdL
 	);
 	if (! defined $xml) {
 		return undef;
@@ -181,6 +182,7 @@ sub upgradeImage {
 	my $this      = shift;
 	my $configDir = $this -> {configDir};
 	my $kiwi      = $this -> {kiwi};
+	my $cmdL      = $this -> {cmdL};
 	if (! $configDir) {
 		$kiwi -> error ('prepareBootImage: no configuration directory defined');
 		$kiwi -> failed ();
@@ -211,7 +213,7 @@ sub upgradeImage {
 	$kiwi -> info ("Reading image description [Upgrade]...\n");
 	my $buildProfs = $this -> {buildProfiles};
 	my $xml = new KIWIXML (
-		$kiwi, $configDir, undef, $buildProfs
+		$kiwi, $configDir, undef, $buildProfs,$cmdL
 	);
 	if (! defined $xml) {
 		return undef;
@@ -243,6 +245,7 @@ sub prepareImage {
 	my $configDir = $this -> {configDir};
 	my $rootTgtDir= $this -> {rootTgtDir};
 	my $kiwi      = $this -> {kiwi};
+	my $cmdL      = $this -> {cmdL};
 	if (! $configDir) {
 		$kiwi -> error ('prepareBootImage: no configuration directory defined');
 		$kiwi -> failed ();
@@ -272,7 +275,7 @@ sub prepareImage {
 	$kiwi -> info ("Reading image description [Prepare]...\n");
 	my $buildProfs = $this -> {buildProfiles};
 	my $xml = new KIWIXML (
-		$kiwi, $configDir, undef, $buildProfs
+		$kiwi, $configDir, undef, $buildProfs,$cmdL
 	);
 	if (! defined $xml) {
 		return undef;
@@ -345,7 +348,7 @@ sub createBootImage {
 	}
 	$kiwi -> info ("Create boot image (initrd)...\n");
 	my $xml = new KIWIXML (
-		$kiwi,$configDir,"cpio",undef
+		$kiwi,$configDir,"cpio",undef,$cmdL
 	);
 	if (! defined $xml) {
 		return undef;
@@ -432,7 +435,7 @@ sub createImage {
 	}
 	$kiwi -> info ("Reading image description [Create]...\n");
 	my $xml = new KIWIXML (
-		$kiwi,$configDir,$type,$buildProfs
+		$kiwi,$configDir,$type,$buildProfs,$cmdL
 	);
 	if (! defined $xml) {
 		return undef;

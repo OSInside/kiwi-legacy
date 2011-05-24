@@ -241,7 +241,7 @@ sub new {
 				return undef;
 			}
 			$xml = new KIWIXML (
-				$kiwi,$system."/image",$cmdL->getBuildType(),$profile
+				$kiwi,$system."/image",$cmdL->getBuildType(),$profile,$cmdL
 			);
 		} else {
 			my %fsattr = $main::global -> checkFileSystem ($system);
@@ -299,7 +299,7 @@ sub new {
 					return undef;
 				}
 				$xml = new KIWIXML (
-					$kiwi,$tmpdir."/image",$cmdL->getBuildType(),$profile
+					$kiwi,$tmpdir."/image",$cmdL->getBuildType(),$profile,$cmdL
 				);
 				#==========================================
 				# clean up
@@ -336,7 +336,7 @@ sub new {
 					return undef;
 				}
 				$xml = new KIWIXML (
-					$kiwi,$tmpdir."/image",$cmdL->getBuildType(),$profile
+					$kiwi,$tmpdir."/image",$cmdL->getBuildType(),$profile,$cmdL
 				);
 				#==========================================
 				# clean up

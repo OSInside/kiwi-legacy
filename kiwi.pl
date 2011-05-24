@@ -61,6 +61,7 @@ our $BT;
 #--------------------------------------------
 our $global  = new KIWIGlobals();
 our $locator = new KIWILocator();
+our $kiwi;
 
 #============================================
 # Variables (operation mode)
@@ -69,7 +70,6 @@ my $migrate;    # Migration
 my $kic;        # Image preparation / creation
 my $icache;     # Image Cache creation
 my $cmdL;       # Command line data container
-my $kiwi;       # logger object
 
 #============================================
 # Globals
@@ -87,7 +87,6 @@ our $CheckKernel;           # check for kernel matches in boot and system image
 our $LVM;                   # use LVM partition setup for virtual disk
 our $GrubChainload;         # install grub loader in first partition not MBR
 our %XMLChangeSet;          # internal data set for update of XML objects
-our $ImageDescription;      # uniq path to image description due to caller opts
 our $FatStorage;            # specify size of fat partition if syslinux is used
 
 #==========================================
@@ -164,9 +163,8 @@ sub main {
 		#==========================================
 		# Setup create 
 		#------------------------------------------
-		$ImageDescription = $rootTarget;
 		$cmdL -> setImagetargetDir ($Destination);
-		$cmdL -> setConfigDir ($ImageDescription);
+		$cmdL -> setConfigDir ($rootTarget);
 		$cmdL -> setForceNewRoot (0);
 		$kic  -> initialize();
 		if (! $kic -> createImage ($kiwi,$cmdL)) {
@@ -185,7 +183,7 @@ sub main {
 		$kiwi -> info ("Reading image description [Cache]...\n");
 		my $xml = new KIWIXML (
 			$kiwi,$cmdL->getOperationMode("initCache"),
-			undef,$cmdL->getBuildProfiles()
+			undef,$cmdL->getBuildProfiles(),$cmdL
 		);
 		if (! defined $xml) {
 			kiwiExit (1);
@@ -983,16 +981,13 @@ sub init {
 	# store uniq path to image description
 	#----------------------------------------
 	if (defined $Prepare) {
-		$ImageDescription = $Prepare;
-		$cmdL -> setConfigDir ($ImageDescription);
+		$cmdL -> setConfigDir ($Prepare);
 	}
 	if (defined $Upgrade) {
-		$ImageDescription = $Upgrade;
-		$cmdL -> setConfigDir ($ImageDescription);
+		$cmdL -> setConfigDir ($Upgrade);
 	}
 	if (defined $Create) {
-		$ImageDescription = $Create;
-		$cmdL -> setConfigDir ($ImageDescription);
+		$cmdL -> setConfigDir ($Create);
 	}
 	#========================================
 	# store operation modes
@@ -1038,6 +1033,9 @@ sub init {
 	}
 	if (defined $TestImage) {
 		$cmdL -> setOperationMode ("testImage",$TestImage);
+	}
+	if (defined $ListXMLInfo) {
+		$cmdL -> setOperationMode ("listXMLInfo",$ListXMLInfo);
 	}
 	#========================================
 	# store original value of Profiles
@@ -1470,7 +1468,7 @@ sub listImage {
 		if ($controlFile) {
 			$kiwi -> info ($image);
 			my $xml = new KIWIXML (
-				$kiwi,$system."/".$image,undef,undef
+				$kiwi,$system."/".$image,undef,undef,$cmdL
 			);
 			if (! $xml) {
 				next;
@@ -1833,7 +1831,7 @@ sub createInstSource {
 	}
 	$kiwi -> info ("Reading image description [InstSource]...\n");
 	my $xml = new KIWIXML (
-		$kiwi,$idesc,undef,undef
+		$kiwi,$idesc,undef,undef,$cmdL
 	);
 	if (! defined $xml) {
 		kiwiExit (1);
@@ -1854,7 +1852,7 @@ sub createInstSource {
 	#==========================================
 	# Create object...
 	#------------------------------------------
-	my $collect = new KIWICollect ( $kiwi, $xml, $root, $vlevel );
+	my $collect = new KIWICollect ( $kiwi, $xml, $root, $vlevel,$cmdL );
 	if (! defined( $collect) ) {
 		$kiwi -> error( "Unable to create KIWICollect module." );
 		$kiwi -> failed ();

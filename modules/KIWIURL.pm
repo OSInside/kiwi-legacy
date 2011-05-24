@@ -43,6 +43,7 @@ sub new {
 	# Module Parameters
 	#------------------------------------------	
 	my $kiwi = shift;
+	my $cmdL = shift;
 	my $root = shift;
 	my $user = shift;
 	my $pwd  = shift;
@@ -55,20 +56,12 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	if ($root) {
-		my $cmdL = $root -> getCMDL();
-		if ($cmdL) {
-			$this->{cmdL} = $cmdL;
-		}
-	}
-	#==========================================
-	# Store object data
-	#------------------------------------------
 	$this->{kiwi} = $kiwi;
 	$this->{root} = $root;
 	$this->{user} = $user;
 	$this->{pwd}  = $pwd;
 	$this->{type} = "unknown";
+	$this->{cmdL} = $cmdL;
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -270,12 +263,13 @@ sub thisPath {
 	my $module = shift;
 	my $cmdL   = $this->{cmdL};
 	my $kiwi   = $this->{kiwi};
+	my $cdir   = $cmdL->getConfigDir();
+	my $xmlinfo= $cmdL->getOperationMode ("listXMLInfo");
+	my $create = $cmdL->getOperationMode ("create");
+	my $upgrade= $cmdL->getOperationMode ("upgrade");
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
-	if (! defined $cmdL) {
-		return undef;
-	}
 	if ((! defined $module) || ($module !~ /^this:\/\//)) {
 		return undef;
 	}
@@ -284,24 +278,22 @@ sub thisPath {
 		return undef;
 	}
 	my $thisPath;
-	if ((defined $main::ImageDescription) && (-d $main::ImageDescription)) {
-		$thisPath = $main::ImageDescription;
-		$thisPath = "$thisPath/$module";
-	} elsif ((defined $main::ListXMLInfo) && (-d $main::ListXMLInfo)) {
-		$thisPath = $main::ListXMLInfo;
-		$thisPath = "$thisPath/$module";
-	} elsif (defined $main::Create) {
-		if (! open FD,"$main::Create/image/main::Prepare") {
+	if ((defined $cdir) && (-d $cdir)) {
+		$thisPath = $cdir."/".$module;
+	} elsif ((defined $xmlinfo) && (-d $xmlinfo)) {
+		$thisPath = $xmlinfo."/".$module;
+	} elsif (defined $create) {
+		if (! open FD,"$create/image/main::Prepare") {
 			return undef;
 		}
 		$thisPath = <FD>; close FD;
-		$thisPath = "$thisPath/$module";
-	} elsif (defined $main::Upgrade) {
-		if (! open FD,"$main::Upgrade/image/main::Prepare") {
+		$thisPath = $thisPath."/".$module;
+	} elsif (defined $upgrade) {
+		if (! open FD,"$upgrade/image/main::Prepare") {
 			return undef;
 		}
 		$thisPath = <FD>; close FD;
-		$thisPath = "$thisPath/$module";
+		$thisPath = $thisPath."/".$module;
 	} else {
 		$thisPath = $cmdL->getOperationMode("prepare");
 		$thisPath.= "/".$module;
