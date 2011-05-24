@@ -73,6 +73,11 @@ sub new {
 		}
 		$baseRO = <$FD>; close $FD; chomp $baseRO;
 	}
+	if (! $main::global) {
+		$kiwi -> error  ("Globals object not found");
+		$kiwi -> failed ();
+		return undef;
+	}
 	#==========================================
 	# Store object data
 	#------------------------------------------

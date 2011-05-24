@@ -93,7 +93,7 @@ Authors:
 %package -n kiwi-instsource
 License:        GPLv2
 Requires:       kiwi = %{version}
-Requires:       inst-source-utils createrepo build
+Requires:       inst-source-utils createrepo build perl-RPMQ
 Summary:        Installation Source creation
 Group:          System/Management
 %if 0%{?suse_version} > 1120

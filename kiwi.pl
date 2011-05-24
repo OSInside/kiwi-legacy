@@ -80,7 +80,6 @@ our $RootTree;              # optional root tree destination
 our $BootVMSystem;          # system image to be copied on a VM disk
 our $BootVMSize;            # size of virtual disk
 our $StripImage;            # strip shared objects and binaries
-our $ImageCache;            # build an image cache for later re-use
 our @ProfilesOrig;          # copy of original Profiles option value 
 our $PrebuiltBootImage;     # directory where a prepared boot image may be found
 our $ISOCheck;              # create checkmedia boot entry
@@ -89,7 +88,6 @@ our $LVM;                   # use LVM partition setup for virtual disk
 our $GrubChainload;         # install grub loader in first partition not MBR
 our %XMLChangeSet;          # internal data set for update of XML objects
 our $ImageDescription;      # uniq path to image description due to caller opts
-our $RecycleRoot;           # use existing root directory incl. contents
 our $FatStorage;            # specify size of fat partition if syslinux is used
 
 #==========================================
@@ -199,7 +197,7 @@ sub main {
 		#==========================================
 		# Create cache(s)...
 		#------------------------------------------
-		my $cdir = $ImageCache;
+		my $cdir = $cmdL->getCacheDir();
 		if (! $cdir) {
 			$cdir = $locator -> getDefaultCacheDir();
 		}
@@ -642,6 +640,8 @@ sub init {
 	my $Format;                # format to convert to, vmdk, ovf, etc...
 	my $defaultAnswer;         # default answer to any questions
 	my $targetDevice;          # alternative device instead of a loop device
+	my $ImageCache;            # build an image cache for later re-use
+	my $RecycleRoot;           # use existing root directory incl. contents
 	my $PackageManager;        # package manager to use
 	my $Version;               # version information
 	#==========================================
@@ -935,7 +935,6 @@ sub init {
 	# check if recycle-root is used
 	#----------------------------------------
 	if (defined $RecycleRoot) {
-		$RecycleRoot = $RootTree;
 		$cmdL -> setRootRecycle();
 	}
 	#============================================

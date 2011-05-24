@@ -109,6 +109,11 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	if (! $main::global) {
+		$kiwi -> error  ("Globals object not found");
+		$kiwi -> failed ();
+		return undef;
+	}
 	if (! defined $main::LogFile) {
 		$imageTree =~ s/\/$//;
 		if (defined $imageOrig) {
@@ -2502,7 +2507,6 @@ sub createImageSplit {
 	#==========================================
 	# build boot image only if specified
 	#------------------------------------------
-	$name->{systemImage} = $main::ImageName;
 	if (! defined $boot) {
 		return $this;
 	}

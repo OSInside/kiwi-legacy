@@ -78,6 +78,11 @@ sub new {
 		$kiwi -> failed();
 		return undef;
 	}
+	if (! $main::global) {
+		$kiwi -> error  ("Globals object not found");
+		$kiwi -> failed ();
+		return undef;
+	}
 	#==========================================
 	# Reset logging target if requested
 	#------------------------------------------

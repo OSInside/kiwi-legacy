@@ -54,18 +54,23 @@ sub new {
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
-	my @supportedRepos = qw(
+	my @supportedRepos = qw (
 		apt-deb apt-rpm deb-dir mirrors red-carpet
 		rpm-dir rpm-md slack-site up2date-mirrors
 		urpmi yast2
 	);
 	#==========================================
-	# Object initialize object member data
+	# Store Object data
 	#------------------------------------------
 	$this->{imageTgtDir}        = '';
 	$this->{kiwi}               = $kiwi;
 	$this->{supportedRepoTypes} = \@supportedRepos;
-	$this->{gdata}              = $main::global -> getGlobals();
+	#==========================================
+	# Store Object data
+	#------------------------------------------
+	if ($main::global) {
+		$this->{gdata} = $main::global -> getGlobals();
+	}
 	return $this;
 }
 

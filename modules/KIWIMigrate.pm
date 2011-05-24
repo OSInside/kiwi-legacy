@@ -29,11 +29,14 @@ use File::Basename;
 use File::Path;
 use File::Copy;
 use Storable;
-use KIWILog;
-use KIWIQX;
 use File::Spec;
 use Fcntl ':mode';
 use Cwd 'abs_path';
+#==========================================
+# KIWI Modules
+#------------------------------------------
+use KIWILog;
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -69,6 +72,11 @@ sub new {
 	my $data;
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
+	}
+	if (! $main::global) {
+		$kiwi -> error  ("Globals object not found");
+		$kiwi -> failed ();
+		return undef;
 	}
 	if (! defined $name) {
 		$kiwi -> failed ();

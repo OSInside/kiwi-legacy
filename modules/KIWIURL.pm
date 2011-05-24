@@ -55,12 +55,26 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	if ($root) {
+		my $cmdL = $root -> getCMDL();
+		if ($cmdL) {
+			$this->{cmdL} = $cmdL;
+		}
+	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
 	$this->{kiwi} = $kiwi;
 	$this->{root} = $root;
 	$this->{user} = $user;
 	$this->{pwd}  = $pwd;
 	$this->{type} = "unknown";
-	$this->{gdata}= $main::global -> getGlobals();
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	if ($main::global) {
+		$this->{gdata}= $main::global -> getGlobals();
+	}
 	return $this;
 }
 
@@ -254,15 +268,14 @@ sub thisPath {
 	# ---
 	my $this   = shift;
 	my $module = shift;
-	my $kiwi;
-	if (! defined $this->{kiwi}) {
-		$kiwi = new KIWILog("tiny");
-	} else {
-		$kiwi = $this->{kiwi};
-	}
+	my $cmdL   = $this->{cmdL};
+	my $kiwi   = $this->{kiwi};
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
+	if (! defined $cmdL) {
+		return undef;
+	}
 	if ((! defined $module) || ($module !~ /^this:\/\//)) {
 		return undef;
 	}
@@ -290,7 +303,8 @@ sub thisPath {
 		$thisPath = <FD>; close FD;
 		$thisPath = "$thisPath/$module";
 	} else {
-		$thisPath = "$main::Prepare/$module";
+		$thisPath = $cmdL->getOperationMode("prepare");
+		$thisPath.= "/".$module;
 	}
 	if ($thisPath !~ /^\//) {
 		my $pwd = qxx ("pwd"); chomp $pwd;

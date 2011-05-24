@@ -92,6 +92,11 @@ sub new {
 		$kiwi -> failed ();
 		return undef; 
 	}
+	if (! $main::global) {
+		$kiwi -> error  ("Globals object not found");
+		$kiwi -> failed ();
+		return undef;
+	}
 	my $count = 1;
 	my %sourceChannel = ();
 	#==========================================
@@ -256,6 +261,7 @@ sub new {
 	#------------------------------------------
 	$this->{root}    = $root;
 	$this->{manager} = $manager;
+	$this->{cmdL}    = $cmdL;
 	return $this;
 }
 
@@ -316,6 +322,7 @@ sub init {
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $root = $this->{root};
+	my $cmdL = $this->{cmdL};
 	my $manager    = $this->{manager};
 	my $baseSystem = $this->{baseSystem};
 	my $FD;
@@ -340,13 +347,13 @@ sub init {
 	#==================================
 	# Return early if existing root
 	#----------------------------------
-	if (defined $main::RecycleRoot) {
+	if ($cmdL -> getRecycleRootDir()) {
 		return $this;
 	}
 	#==================================
 	# Return early if cache is used
 	#----------------------------------
-	if ((defined $main::ImageCache) && (! defined $main::InitCache)) {
+	if (($cmdL-> getCacheDir()) && (! $cmdL->getOperationMode("initCache"))) {
 		return $this;
 	}
 	#==========================================
@@ -1462,6 +1469,14 @@ sub cleanLock {
 	my $manager = $this->{manager};
 	$manager -> freeLock();
 	return $this;
+}
+
+#==========================================
+# getCMDL
+#------------------------------------------
+sub getCMDL {
+	my $this = shift;
+	return $this->{cmdL};
 }
 
 1;

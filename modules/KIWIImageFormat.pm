@@ -95,6 +95,14 @@ sub new {
 		}
 	}
 	#==========================================
+	# check global pointer
+	#------------------------------------------
+	if (! $main::global) {
+		$kiwi -> error  ("Globals object not found");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
 	# Read some XML data
 	#------------------------------------------
 	my %xenref = $xml -> getXenConfig();

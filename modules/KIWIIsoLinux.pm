@@ -83,6 +83,11 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	if (! $main::global) {
+		$kiwi -> error  ("Globals object not found");
+		$kiwi -> failed ();
+		return undef;
+	}
 	#==========================================
 	# Find iso tool to use on this system
 	#------------------------------------------

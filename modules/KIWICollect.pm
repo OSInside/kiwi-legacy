@@ -1502,7 +1502,7 @@ sub getArchList
     return @archs if ($packOptions->{'onlyarch'} eq "skipit"); # convinience for old hack
   };
 
-  my @archs = $this->{m_archlist}->headList();
+  @archs = $this->{m_archlist}->headList();
   if(defined($packOptions->{'arch'})) {
     # Check if this is a rule for this platform
     $packOptions->{'arch'} =~ s{,\s*,}{,}g;
