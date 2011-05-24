@@ -63,86 +63,34 @@ our $global  = new KIWIGlobals();
 our $locator = new KIWILocator();
 
 #============================================
-# Globals
+# Variables (operation mode)
 #--------------------------------------------
-our $Build;                 # run prepare and create in one step
-our $Prepare;               # control XML file for building chroot extend
-our $Create;                # image description for building image extend
-our $CheckConfig;           # Configuration file to check
-our $InitCache;             # create image cache(s) from given description
-our $CreateInstSource;      # create installation source from meta packages
-our $Upgrade;               # upgrade physical extend
-our $Destination;           # destination directory for logical extends
-our $LogFile;               # optional file name for logging
-our $RootTree;              # optional root tree destination
-our $BootVMSystem;          # system image to be copied on a VM disk
-our $BootVMDisk;            # deploy initrd booting from a VM 
-our $BootVMSize;            # size of virtual disk
-our $InstallCD;             # Installation initrd booting from CD
-our $InstallCDSystem;       # virtual disk system image to be installed on disk
-our $BootCD;                # Boot initrd booting from CD
-our $BootUSB;               # Boot initrd booting from Stick
-our $TestImage;             # call end-to-end testsuite if installed
-our $TestCase;              # path to image description including test/ case
-our $InstallStick;          # Installation initrd booting from USB stick
-our $InstallStickSystem;    # virtual disk system image to be installed on disk
-our $StripImage;            # strip shared objects and binaries
-our $CreateHash;            # create .checksum.md5 for given description
-our $SetupSplash;           # setup splash screen (bootsplash or splashy)
-our @AddRepository;         # add repository for building physical extend
-our @AddRepositoryType;     # add repository type
-our @AddRepositoryAlias;    # alias name for the repository
-our @AddRepositoryPriority; # priority for the repository
-our @AddPackage;            # add packages to the image package list
-our @AddPattern;            # add patterns to the image package list
-our $ImageCache;            # build an image cache for later re-use
-our @RemovePackage;         # remove package by adding them to the remove list
-our $IgnoreRepos;           # ignore repositories specified so far
-our $SetRepository;         # set first repository for building physical extend
-our $SetRepositoryType;     # set firt repository type
-our $SetRepositoryAlias;    # alias name for the repository
-our $SetRepositoryPriority; # priority for the repository
-our $Migrate;               # migrate running system to image description
-our @Exclude;               # exclude directories in migrate search
-our @Skip;                  # skip this package in migration mode
-our @Profiles;              # list of profiles to include in image
-our @ProfilesOrig;          # copy of original Profiles option value 
-our $ForceNewRoot;          # force creation of new root directory
-our $NoColor;               # do not used colored output (done/failed messages)
-our $LogPort;               # specify alternative log server port
-our $GzipCmd;               # command to run to gzip things
-our $PrebuiltBootImage;     # directory where a prepared boot image may be found
-our $CreatePassword;        # create crypted password
-our $ISOCheck;              # create checkmedia boot entry
-our $Verbosity = 0;         # control the verbosity level
-our $TargetArch;            # target architecture -> writes zypp.conf
-our $CheckKernel;           # check for kernel matches in boot and system image
-our $Clone;                 # clone existing image description
-our $LVM;                   # use LVM partition setup for virtual disk
-our $Debug;                 # activates the internal stack trace output
-our $GrubChainload;         # install grub loader in first partition not MBR
-our $MigrateNoFiles;        # migrate: don't create overlay files
-our $MigrateNoTemplate;     # migrate: don't create image description template
-our $Convert;               # convert image into given format/configuration
-our $Format;                # format to convert to, vmdk, ovf, etc...
-our $defaultAnswer;         # default answer to any questions
-our $targetDevice;          # alternative device instead of a loop device
-our %XMLChangeSet;          # internal data set for update of XML objects
-our $ImageDescription;      # uniq path to image description due to caller opts
-our $RecycleRoot;           # use existing root directory incl. contents
-our $FatStorage;            # specify size of fat partition if syslinux is used
-our $cmdL;                  # command line storage object
-our $kiwi;                  # global logging handler object
-our $MBRID;                 # custom mbrid value
-our $ListXMLInfo;           # list XML information
-our $kic;                   # global Image Creator object
-our $icache;                # global Image Cache object
-our $Partitioner = "parted";# default partitioner
+my $migrate;    # Migration
+my $kic;        # Image preparation / creation
+my $icache;     # Image Cache creation
+my $cmdL;       # Command line data container
+my $kiwi;       # logger object
 
 #============================================
 # Globals
 #--------------------------------------------
-my $migrate;    # KIWIMigrate object for system to image migration
+our $Destination;           # destination directory for logical extends
+our $LogFile;               # optional file name for logging
+our $RootTree;              # optional root tree destination
+our $BootVMSystem;          # system image to be copied on a VM disk
+our $BootVMSize;            # size of virtual disk
+our $StripImage;            # strip shared objects and binaries
+our $ImageCache;            # build an image cache for later re-use
+our @ProfilesOrig;          # copy of original Profiles option value 
+our $PrebuiltBootImage;     # directory where a prepared boot image may be found
+our $ISOCheck;              # create checkmedia boot entry
+our $CheckKernel;           # check for kernel matches in boot and system image
+our $LVM;                   # use LVM partition setup for virtual disk
+our $GrubChainload;         # install grub loader in first partition not MBR
+our %XMLChangeSet;          # internal data set for update of XML objects
+our $ImageDescription;      # uniq path to image description due to caller opts
+our $RecycleRoot;           # use existing root directory incl. contents
+our $FatStorage;            # specify size of fat partition if syslinux is used
 
 #==========================================
 # main
@@ -175,7 +123,7 @@ sub main {
 	#==========================================
 	# Check for nocolor option
 	#------------------------------------------
-	if (defined $NoColor) {
+	if ($cmdL -> getNoColor()) {
 		$kiwi -> info ("Switching off colored output\n");
 		if (! $kiwi -> setColorOff ()) {
 			kiwiExit (1);
@@ -193,12 +141,12 @@ sub main {
 	#========================================
 	# Prepare and Create in one step
 	#----------------------------------------
-	if (defined $Build) {
+	if ($cmdL->getOperationMode("build")) {
 		#==========================================
 		# Create destdir if needed
 		#------------------------------------------
 		my $dirCreated = $global -> createDirInteractive(
-			$Destination, $defaultAnswer
+			$Destination, $cmdL->getDefaultAnswer()
 		);
 		if (! defined $dirCreated) {
 			kiwiExit (1);
@@ -232,13 +180,14 @@ sub main {
 	#========================================
 	# Create image cache(s)
 	#----------------------------------------
-	if (defined $InitCache) {
+	if ($cmdL->getOperationMode("initCache")) {
 		#==========================================
 		# Process system image description
 		#------------------------------------------
 		$kiwi -> info ("Reading image description [Cache]...\n");
 		my $xml = new KIWIXML (
-			$kiwi,$InitCache,undef,\@Profiles
+			$kiwi,$cmdL->getOperationMode("initCache"),
+			undef,$cmdL->getBuildProfiles()
 		);
 		if (! defined $xml) {
 			kiwiExit (1);
@@ -255,7 +204,9 @@ sub main {
 			$cdir = $locator -> getDefaultCacheDir();
 		}
 		$icache = new KIWICache (
-			$kiwi,$xml,$cdir,$gdata->{BasePath},\@Profiles,$InitCache
+			$kiwi,$xml,$cdir,$gdata->{BasePath},
+			$cmdL->getBuildProfiles(),
+			$cmdL->getOperationMode("initCache")
 		);
 		if (! $icache) {
 			kiwiExit (1);
@@ -273,7 +224,7 @@ sub main {
 	#========================================
 	# Prepare image and build chroot system
 	#----------------------------------------
-	if (defined $Prepare) {
+	if ($cmdL->getOperationMode("prepare")) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
@@ -287,7 +238,7 @@ sub main {
 	#==========================================
 	# Create image from chroot system
 	#------------------------------------------
-	if (defined $Create) {
+	if ($cmdL->getOperationMode("create")) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
@@ -301,7 +252,7 @@ sub main {
 	#==========================================
 	# Upgrade image in chroot system
 	#------------------------------------------
-	if (defined $Upgrade) {
+	if ($cmdL->getOperationMode("upgrade")) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
@@ -315,13 +266,23 @@ sub main {
 	#==========================================
 	# Migrate system to image description
 	#------------------------------------------
-	if (defined $Migrate) {
+	if ($cmdL->getOperationMode("migrate")) {
 		$kiwi -> info ("Starting system to image migration");
-		$Destination = "/tmp/$Migrate";
+		$Destination = $cmdL->getOperationMode("migrate");
+		$Destination = "/tmp/".$Destination;
+		my $addlRepos = $cmdL -> getAdditionalRepos();
+		my $migopts   = $cmdL -> getMigrationOptions();
+		my $exclude   = $migopts->[0];
+		my $skip      = $migopts->[1];
+		my $nofiles   = $migopts->[2];
+		my $notempl   = $migopts->[3];
 		$migrate = new KIWIMigrate (
-			$kiwi,$Destination,$Migrate,\@Exclude,\@Skip,
-			\@AddRepository,\@AddRepositoryType,
-			\@AddRepositoryAlias,\@AddRepositoryPriority,
+			$kiwi,$Destination,
+			$cmdL->getOperationMode("migrate"),$exclude,$skip,
+			$addlRepos->{repositories},
+			$addlRepos->{repositoryTypes},
+			$addlRepos->{repositoryAlia},
+			$addlRepos->{repositoryPriorities},
 			$cmdL->getForceNewRoot()
 		);
 		#==========================================
@@ -337,12 +298,12 @@ sub main {
 		#==========================================
 		# Create report HTML file, errors allowed
 		#------------------------------------------
-		if (! $MigrateNoFiles) {
+		if (! $nofiles) {
 			$migrate -> setSystemOverlayFiles();
 		}
 		$migrate -> getPackageList();
 		$migrate -> createReport();
-		if (! $MigrateNoTemplate) {
+		if (! $notempl) {
 			if (! $migrate -> setTemplate()) {
 				$migrate -> cleanMount();
 				kiwiExit (1);
@@ -363,7 +324,7 @@ sub main {
 	#==========================================
 	# setup a splash initrd
 	#------------------------------------------
-	if (defined $SetupSplash) {
+	if ($cmdL->getOperationMode("setupSplash")) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
@@ -377,7 +338,7 @@ sub main {
 	#==========================================
 	# Create a boot Stick (USB)
 	#------------------------------------------
-	if (defined $BootUSB) {
+	if ($cmdL->getOperationMode("bootUSB")) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
@@ -391,7 +352,7 @@ sub main {
 	#==========================================
 	# Create a boot CD (ISO)
 	#------------------------------------------
-	if (defined $BootCD) {
+	if ($cmdL->getOperationMode("bootCD")) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
@@ -405,7 +366,7 @@ sub main {
 	#==========================================
 	# Create an install CD (ISO)
 	#------------------------------------------
-	if (defined $InstallCD) {
+	if ($cmdL->getOperationMode("installCD")) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
@@ -419,7 +380,7 @@ sub main {
 	#==========================================
 	# Create an install USB stick
 	#------------------------------------------
-	if (defined $InstallStick) {
+	if ($cmdL->getOperationMode("installStick")) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
@@ -433,7 +394,7 @@ sub main {
 	#==========================================
 	# Create a virtual disk image
 	#------------------------------------------
-	if (defined $BootVMDisk) {
+	if ($cmdL->getOperationMode("bootVMDisk")) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
@@ -447,7 +408,7 @@ sub main {
 	#==========================================
 	# Convert image into format/configuration
 	#------------------------------------------
-	if (defined $Convert) {
+	if ($cmdL->getOperationMode("convert")) {
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
@@ -461,11 +422,13 @@ sub main {
 	#==========================================
 	# Test suite
 	#------------------------------------------
-	if (defined $TestImage) {
+	if ($cmdL->getOperationMode("testImage")) {
 		$kiwi -> info ("Starting image test run...");
 		my $suite  = "/usr/lib/os-autoinst";
 		my $distri = "kiwi-$$";
 		my $type   = $cmdL -> getBuildType();
+		my $image  = $cmdL -> getOperationMode("testImage");
+		my $tcase  = $cmdL -> getTestCase();
 		#==========================================
 		# Check pre-conditions
 		#------------------------------------------
@@ -475,9 +438,9 @@ sub main {
 			$kiwi -> failed ();
 			kiwiExit (1);
 		}
-		if (! -f $TestImage) {
+		if (! -f $image) {
 			$kiwi -> failed ();
-			$kiwi -> error ("Test image $TestImage doesn't exist");
+			$kiwi -> error ("Test image $image doesn't exist");
 			$kiwi -> failed ();
 			kiwiExit (1);
 		}
@@ -487,19 +450,19 @@ sub main {
 			$kiwi -> failed ();
 			kiwiExit (1);
 		}
-		if (! defined $TestCase) {
+		if (! defined $tcase) {
 			$kiwi -> failed ();
 			$kiwi -> error ("No test test case specified");
 			$kiwi -> failed ();
 			kiwiExit (1);
 		}
-		if (! -d $TestCase."/".$type) {
+		if (! -d $tcase."/".$type) {
 			$kiwi -> failed ();
 			$kiwi -> error ("Test case $type does not exist");
 			$kiwi -> failed ();
 			kiwiExit (1);
 		}
-		if (! -f $TestCase."/env.sh") {
+		if (! -f $tcase."/env.sh") {
 			$kiwi -> failed ();
 			$kiwi -> error ("Can't find environment for this test");
 			$kiwi -> failed ();
@@ -508,12 +471,12 @@ sub main {
 		#==========================================
 		# Turn parameters into absolute pathes
 		#------------------------------------------
-		$TestImage = File::Spec->rel2abs ($TestImage);
-		$TestCase  = File::Spec->rel2abs ($TestCase);
+		$image = File::Spec->rel2abs ($image);
+		$tcase = File::Spec->rel2abs ($tcase);
 		#==========================================
 		# Create distri link for os-autoinst
 		#------------------------------------------
-		my $test = $TestCase."/".$type;
+		my $test = $tcase."/".$type;
 		my $data = qxx ("ln -s $test $suite/distri/$distri 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -537,7 +500,7 @@ sub main {
 		#==========================================
 		# Copy environment to result directory
 		#------------------------------------------
-		$data = qxx ("cp $TestCase/env.sh $out");
+		$data = qxx ("cp $tcase/env.sh $out");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -553,7 +516,7 @@ sub main {
 		if (open my $FD,">$out/run.sh") {
 			print $FD "cd $out\n";
 			print $FD "export DISTRI=$distri"."\n";
-			print $FD "export ISO=$TestImage"."\n";
+			print $FD "export ISO=$image"."\n";
 			print $FD 'isotovideo $ISO'."\n";
 			close $FD;
 		} else {
@@ -627,8 +590,60 @@ sub init {
 	my $FSCheckInterval;       # filesystem (ext) max interval between fs checks
 	my $FSInodeRatio;          # filesystem bytes/inode ratio
 	my $SetImageType;          # set image type to use, default is primary type
-	my $PackageManager;
-	my $Version;
+	my $Build;                 # run prepare and create in one step
+	my $Prepare;               # control XML file for building chroot extend
+	my $Create;                # image description for building image extend
+	my $InitCache;             # create image cache(s) from given description
+	my $Upgrade;               # upgrade physical extend
+	my $BootVMDisk;            # deploy initrd booting from a VM
+	my $InstallCD;             # Installation initrd booting from CD
+	my $BootCD;                # Boot initrd booting from CD
+	my $BootUSB;               # Boot initrd booting from Stick
+	my $TestImage;             # call end-to-end testsuite if installed
+	my $InstallStick;          # Installation initrd booting from USB stick
+	my $SetupSplash;           # setup splash screen (bootsplash or splashy)
+	my $Migrate;               # migrate running system to image description
+	my $Convert;               # convert image into given format/configuration
+	my $MBRID;                 # custom mbrid value
+	my @RemovePackage;         # remove pack by adding them to the remove list
+	my $IgnoreRepos;           # ignore repositories specified so far
+	my $SetRepository;         # set first repo for building physical extend
+	my $SetRepositoryType;     # set firt repository type
+	my $SetRepositoryAlias;    # alias name for the repository
+	my $SetRepositoryPriority; # priority for the repository
+	my @AddRepository;         # add repository for building physical extend
+	my @AddRepositoryType;     # add repository type
+	my @AddRepositoryAlias;    # alias name for the repository
+	my @AddRepositoryPriority; # priority for the repository
+	my @AddPackage;            # add packages to the image package list
+	my @AddPattern;            # add patterns to the image package list
+	my $Partitioner;           # default partitioner
+	my $ListXMLInfo;           # list XML information
+	my $CheckConfig;           # Configuration file to check
+	my $CreateInstSource;      # create installation source from meta packages
+	my $CreateHash;            # create .checksum.md5 for given description
+	my $CreatePassword;        # create crypted password
+	my $Clone;                 # clone existing image description
+	my $InstallCDSystem;       # disk system image to be installed on disk
+	my $TestCase;              # path to image description including test/ case
+	my $InstallStickSystem;    # disk system image to be installed on disk
+	my @Exclude;               # exclude directories in migrate search
+	my @Skip;                  # skip this package in migration mode
+	my @Profiles;              # list of profiles to include in image
+	my $ForceNewRoot;          # force creation of new root directory
+	my $NoColor;               # don't use colored output (done/failed messages)
+	my $LogPort;               # specify alternative log server port
+	my $GzipCmd;               # command to run to gzip things
+	my $Verbosity;             # control the verbosity level
+	my $TargetArch;            # target architecture -> writes zypp.conf
+	my $Debug;                 # activates the internal stack trace output
+	my $MigrateNoFiles;        # migrate: don't create overlay files
+	my $MigrateNoTemplate;     # migrate: don't create image description
+	my $Format;                # format to convert to, vmdk, ovf, etc...
+	my $defaultAnswer;         # default answer to any questions
+	my $targetDevice;          # alternative device instead of a loop device
+	my $PackageManager;        # package manager to use
+	my $Version;               # version information
 	#==========================================
 	# create logger and cmdline object
 	#------------------------------------------
@@ -716,7 +731,7 @@ sub init {
 		"upgrade|u=s"           => \$Upgrade,
 		"test-image=s"          => \$TestImage,
 		"test-case=s"           => \$TestCase,
-		"v|verbose+"            => \$Verbosity,
+		"v|verbose=i"           => \$Verbosity,
 		"version"               => \$Version,
 		"yes|y"                 => \$defaultAnswer,
 	);
@@ -727,6 +742,30 @@ sub init {
 		$FSBlockSize,$FSInodeSize,$FSInodeRatio,$FSJournalSize,
 		$FSMaxMountCount,$FSCheckInterval
 	);
+	#========================================
+	# set list of migration options
+	#----------------------------------------
+	$cmdL -> setMigrationOptions (
+		\@Exclude,\@Skip,$MigrateNoFiles,$MigrateNoTemplate
+	);
+	#========================================
+	# check if TestCase is specified
+	#----------------------------------------
+	if (defined $TestCase) {
+		$cmdL -> setTestCase ($TestCase);
+	}
+	#========================================
+	# check if Debug is specified
+	#----------------------------------------
+	if (defined $Debug) {
+		$cmdL -> setDebug ($Debug);
+	}
+	#========================================
+	# check if NoColor is specified
+	#----------------------------------------
+	if (defined $NoColor) {
+		$cmdL -> setNoColor ($NoColor);
+	}
 	#========================================
 	# check if MBRID is specified
 	#----------------------------------------
@@ -796,25 +835,25 @@ sub init {
 	#========================================
 	# check if packages are to be added
 	#----------------------------------------
-	if (defined @AddPackage) {
+	if (@AddPackage) {
 		$cmdL -> setAdditionalPackages (\@AddPackage);
 	}
 	#========================================
 	# check if patterns are to be added
 	#----------------------------------------
-	if (defined @AddPattern) {
+	if (@AddPattern) {
 		$cmdL -> setAdditionalPatterns (\@AddPattern);
 	}
 	#========================================
 	# check if packs are marked for removal
 	#----------------------------------------
-	if (defined @RemovePackage) {
+	if (@RemovePackage) {
 		$cmdL -> setPackagesToRemove (\@RemovePackage)
 	}
 	#========================================
 	# check if repositories are to be added
 	#----------------------------------------
-	if (defined @AddRepository) {
+	if (@AddRepository) {
 		my $res = $cmdL -> setAdditionalRepos(
 			\@AddRepository,
 			\@AddRepositoryAlias,
@@ -906,10 +945,21 @@ sub init {
 		$cmdL -> setImageArchitecture ($TargetArch);
 	}
 	#============================================
+	# check if a partitioner is used
+	#--------------------------------------------
+	if ($Partitioner) {
+		if (($Partitioner ne "parted") &&($Partitioner ne "fdasd")) {
+			$kiwi -> error ("Invalid partitioner, expected parted|fdasd");
+			$kiwi -> failed ();
+			kiwiExit (1);
+		}
+		$cmdL -> setPartitioner ($Partitioner);
+	}
+	#============================================
 	# check Partitioner according to device
 	#-----------------------------------------
 	if (($targetDevice) && ($targetDevice =~ /\/dev\/dasd/)) {
-		$Partitioner = "fdasd";
+		$cmdL -> setPartitioner ("fdasd");
 	}
 	#========================================
 	# turn destdir into absolute path
@@ -946,6 +996,51 @@ sub init {
 		$cmdL -> setConfigDir ($ImageDescription);
 	}
 	#========================================
+	# store operation modes
+	#----------------------------------------
+	if (defined $Build) {
+		$cmdL -> setOperationMode ("build",$Build);
+	}
+	if (defined $Prepare) {
+		$cmdL -> setOperationMode ("prepare",$Prepare);
+	}
+	if (defined $Upgrade) {
+		$cmdL -> setOperationMode ("upgrade",$Upgrade);
+	}
+	if (defined $Create) {
+		$cmdL -> setOperationMode ("create",$Create);
+	}
+	if (defined $InitCache) {
+		$cmdL -> setOperationMode ("initCache",$InitCache);
+	}
+	if (defined $Migrate) {
+		$cmdL -> setOperationMode ("migrate",$Migrate);
+	}
+	if (defined $SetupSplash) {
+		$cmdL -> setOperationMode ("setupSplash",$SetupSplash);
+	}
+	if (defined $BootUSB) {
+		$cmdL -> setOperationMode ("bootUSB",$BootUSB);
+	}
+	if (defined $BootCD) {
+		$cmdL -> setOperationMode ("bootCD",$BootCD);
+	}
+	if (defined $InstallCD) {
+		$cmdL -> setOperationMode ("installCD",$InstallCD);
+	}
+	if (defined $InstallStick) {
+		$cmdL -> setOperationMode ("installStick",$InstallStick);
+	}
+	if (defined $BootVMDisk) {
+		$cmdL -> setOperationMode ("bootVMDisk",$BootVMDisk);
+	}
+	if (defined $Convert) {
+		$cmdL -> setOperationMode ("convert",$Convert);
+	}
+	if (defined $TestImage) {
+		$cmdL -> setOperationMode ("testImage",$TestImage);
+	}
+	#========================================
 	# store original value of Profiles
 	#----------------------------------------
 	@ProfilesOrig = @Profiles;
@@ -966,7 +1061,7 @@ sub init {
 	# non root task: Check XML configuration
 	#------------------------------------------
 	if (defined $CheckConfig) {
-		checkConfig();
+		checkConfig ($CheckConfig);
 	}
 	#==========================================
 	# non root task: Create crypted password
@@ -978,19 +1073,19 @@ sub init {
 	# non root task: create inst source
 	#----------------------------------------
 	if (defined $CreateInstSource) {
-		createInstSource();
+		createInstSource ($CreateInstSource,$Verbosity);
 	}
 	#==========================================
 	# non root task: create md5 hash
 	#------------------------------------------
 	if (defined $CreateHash) {
-		createHash();
+		createHash ($CreateHash);
 	}
 	#==========================================
 	# non root task: Clone image 
 	#------------------------------------------
 	if (defined $Clone) {
-		cloneImage();
+		cloneImage ($Clone);
 	}
 	#==========================================
 	# non root task: Help
@@ -1078,16 +1173,6 @@ sub init {
 		$kiwi -> error ("Virtual Disk setup must specify a bootvm-system");
 		$kiwi -> failed ();
 		kiwiExit (1);
-	}
-	if (defined $Partitioner) {
-		if (
-			($Partitioner ne "parted") &&
-			($Partitioner ne "fdasd")
-		) {
-			$kiwi -> error ("Invalid partitioner, expected parted|fdasd");
-			$kiwi -> failed ();
-			kiwiExit (1);
-		}
 	}
 	if ((defined $Build) && (! defined $Destination)) {
 		$kiwi -> error  ("No destination directory specified");
@@ -1406,17 +1491,18 @@ sub checkConfig {
 	# ...
 	# Check the specified configuration file
 	# ---
-	my $kiwi  = new KIWILog("tiny");
-	my $gdata = $global -> getGlobals();
-	if (! -f $CheckConfig) {
+	my $config = shift;
+	my $kiwi   = new KIWILog("tiny");
+	my $gdata  = $global -> getGlobals();
+	if (! -f $config) {
 		$kiwi -> error (
-			"Could not access specified file to check: $CheckConfig"
+			"Could not access specified file to check: $config"
 		);
 		$kiwi -> failed ();
 		exit 1;
 	}
 	my $validator = new KIWIXMLValidator (
-		$kiwi,$CheckConfig,$gdata->{Revision},
+		$kiwi,$config,$gdata->{Revision},
 		$gdata->{Schema},$gdata->{SchemaCVT}
 	);
 	if (! $validator) {
@@ -1443,6 +1529,7 @@ sub cloneImage {
 	# existing checksum will be removed as we assume
 	# that the clone will be changed
 	# ----
+	my $clone      = shift;
 	my $answer     = "unknown";
 	my $gdata      = $global -> getGlobals();
 	my $configName = $gdata->{ConfigName};
@@ -1456,18 +1543,18 @@ sub cloneImage {
 		$kiwi -> failed ();
 		kiwiExit (1);
 	} else {
-		$kiwi -> info ("Cloning image $Clone -> $Destination...");
+		$kiwi -> info ("Cloning image $clone -> $Destination...");
 	}
 	#==========================================
 	# Evaluate image path or name 
 	#------------------------------------------
-	if (($Clone !~ /^\//) && (! -d $Clone)) {
-		$Clone = $system."/".$Clone;
+	if (($clone !~ /^\//) && (! -d $clone)) {
+		$clone = $system."/".$clone;
 	}
-	my $cfg = $Clone."/".$configName;
+	my $cfg = $clone."/".$configName;
 	my $md5 = $Destination."/.checksum.md5";
 	if (! -f $cfg) {
-		my @globsearch = glob ($Clone."/*.kiwi");
+		my @globsearch = glob ($clone."/*.kiwi");
 		my $globitems  = @globsearch;
 		if ($globitems == 0) {
 			$kiwi -> failed ();
@@ -1504,11 +1591,11 @@ sub cloneImage {
 	#==========================================
 	# Copy path to destination 
 	#------------------------------------------
-	my $data = qxx ("cp -a $Clone/* $Destination 2>&1");
+	my $data = qxx ("cp -a $clone/* $Destination 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
-		$kiwi -> error ("Failed to copy $Clone: $data");
+		$kiwi -> error ("Failed to copy $clone: $data");
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
@@ -1553,7 +1640,7 @@ sub kiwiExit {
 	# Check for backtrace and clean flag...
 	#------------------------------------------
 	if ($code != 0) {
-		if (defined $Debug) {
+		if ($cmdL -> getDebug()) {
 			$kiwi -> printBackTrace();
 		}
 		$kiwi -> printLogExcerpt();
@@ -1694,17 +1781,16 @@ sub createHash {
 	# file .checksum.md5 is checked on runtime with the md5sum
 	# command
 	# ----
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
-	$kiwi -> info ("Creating MD5 sum for $CreateHash...");
-	if (! -d $CreateHash) {
+	my $idesc = shift;
+	$kiwi  = new KIWILog("tiny");
+	$kiwi -> info ("Creating MD5 sum for $idesc...");
+	if (! -d $idesc) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Not a directory: $CreateHash: $!");
+		$kiwi -> error  ("Not a directory: $idesc: $!");
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
-	if (! $locator -> getControlFile ($CreateHash)) {
+	if (! $locator -> getControlFile ($idesc)) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Not a kiwi description: no xml description found");
 		$kiwi -> failed ();
@@ -1712,7 +1798,7 @@ sub createHash {
 	}
 	my $cmd  = "find -L -type f | grep -v .svn | grep -v .checksum.md5";
 	my $status = qxx (
-		"cd $CreateHash && $cmd | xargs md5sum > .checksum.md5"
+		"cd $idesc && $cmd | xargs md5sum > .checksum.md5"
 	);
 	my $result = $? >> 8;
 	if ($result != 0) {
@@ -1732,6 +1818,8 @@ sub createInstSource {
 	# If it is not available, the option cannot be used.
 	# kiwi then issues a warning and exits.
 	# ----
+	my $idesc = shift;
+	my $vlevel= shift;
 	$kiwi = new KIWILog("tiny");
 	$kiwi -> deactivateBackTrace();
 	my $mod = "KIWICollect";
@@ -1746,7 +1834,7 @@ sub createInstSource {
 	}
 	$kiwi -> info ("Reading image description [InstSource]...\n");
 	my $xml = new KIWIXML (
-		$kiwi,$CreateInstSource,undef,undef
+		$kiwi,$idesc,undef,undef
 	);
 	if (! defined $xml) {
 		kiwiExit (1);
@@ -1766,8 +1854,8 @@ sub createInstSource {
 	}
 	#==========================================
 	# Create object...
-	#----------------------------------------
-	my $collect = new KIWICollect ( $kiwi, $xml, $root, $Verbosity );
+	#------------------------------------------
+	my $collect = new KIWICollect ( $kiwi, $xml, $root, $vlevel );
 	if (! defined( $collect) ) {
 		$kiwi -> error( "Unable to create KIWICollect module." );
 		$kiwi -> failed ();

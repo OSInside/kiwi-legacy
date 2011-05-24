@@ -37,13 +37,16 @@ sub new {
 	my $class = shift;
 	bless $this,$class;
 	#==========================================
-	# Variable setup
+	# Globals (generic)
 	#------------------------------------------
 	my %data;
 	$data{Version}       = "4.89";
 	$data{Publisher}     = "SUSE LINUX Products GmbH";
 	$data{Preparer}      = "KIWI - http://kiwi.berlios.de";
 	$data{ConfigName}    = "config.xml";
+	$data{Partitioner}   = "parted";
+	$data{FSInodeRatio}  = 16384;
+	$data{FSInodeSize}   = 256;
 	#============================================
 	# Read .kiwirc
 	#--------------------------------------------
@@ -84,6 +87,9 @@ sub new {
 	}
 	use strict 'vars';
 	my $BasePath = $data{BasePath};
+	#==========================================
+	# Globals (path names)
+	#------------------------------------------
 	$data{Tools}     = $BasePath."/tools";
 	$data{Schema}    = $BasePath."/modules/KIWISchema.rng";
 	$data{SchemaTST} = $BasePath."/modules/KIWISchemaTest.rng";

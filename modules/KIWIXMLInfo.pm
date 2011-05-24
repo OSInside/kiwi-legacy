@@ -538,19 +538,21 @@ sub __xmlSetup {
 	}
 	if ($this -> {replRepo}) {
 		my %replRepo = %{$this -> {replRepo}};
-		$xml -> setRepository ($replRepo{repositoryType},
-							$replRepo{repository},
-							$replRepo{repositoryAlias},
-							$replRepo{respositoryPriority}
-							);
+		$xml -> setRepository (
+			$replRepo{repositoryType},
+			$replRepo{repository},
+			$replRepo{repositoryAlias},
+			$replRepo{respositoryPriority}
+		);
 	}
 	if ($this -> {addlRepos}) {
 		my %addlRepos = %{$this -> {addlRepos}};
-		$xml -> addRepository ($addlRepos{repositoryTypes},
-							$addlRepos{repositories},
-							$addlRepos{repositoryAlia},
-							$addlRepos{repositoryPriorities}
-							);
+		$xml -> addRepository (
+			$addlRepos{repositoryTypes},
+			$addlRepos{repositories},
+			$addlRepos{repositoryAlia},
+			$addlRepos{repositoryPriorities}
+		);
 	}
 	return $xml;
 }

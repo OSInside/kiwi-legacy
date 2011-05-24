@@ -477,6 +477,13 @@ sub new {
 		}
 	}
 	#==========================================
+	# check partitioner
+	#------------------------------------------
+	my $ptool = $cmdL -> getPartitioner();
+	if (! $ptool) {
+		$ptool = $this->{gdata}->{Partitioner};
+	}
+	#==========================================
 	# Store object data (2)
 	#------------------------------------------
 	$this->{initrd}    = $initrd;
@@ -490,7 +497,7 @@ sub new {
 	$this->{isxen}     = $isxen;
 	$this->{xengz}     = $xengz;
 	$this->{arch}      = $arch;
-	$this->{ptool}     = $main::Partitioner;
+	$this->{ptool}     = $ptool;
 	$this->{chainload} = $main::GrubChainload;
 	$this->{vga}       = $vga;
 	$this->{xml}       = $xml;

@@ -65,6 +65,7 @@ sub new {
 	$this->{imageTgtDir}        = '';
 	$this->{kiwi}               = $kiwi;
 	$this->{supportedRepoTypes} = \@supportedRepos;
+	$this->{gdata}              = $main::global -> getGlobals();
 	return $this;
 }
 
@@ -981,6 +982,12 @@ sub setFilesystemOptions {
 	my $FSMaxMountCount = shift;
 	my $FSCheckInterval = shift;
 	my @result;
+	if (! defined $FSInodeRatio) {
+		$FSInodeRatio = $this->{gdata}->{FSInodeRatio};
+	}
+	if (! defined $FSInodeSize) {
+		$FSInodeSize = $this->{gdata}->{FSInodeSize};
+	}
 	push @result,$FSBlockSize;
 	push @result,$FSInodeSize;
 	push @result,$FSInodeRatio;
@@ -1015,6 +1022,124 @@ sub setMBRID {
 sub getMBRID {
 	my $this = shift;
 	return $this->{mbrid};
+}
+
+#==========================================
+# setOperationMode
+#------------------------------------------
+sub setOperationMode {
+	my $this = shift;
+	my $mode = shift;
+	my $value= shift;
+	$this->{operation}{$mode} = $value;
+	return 1;
+}
+
+#==========================================
+# getOperationMode
+#------------------------------------------
+sub getOperationMode {
+	my $this = shift;
+	my $mode = shift;
+	return $this->{operation}{$mode}
+}
+
+#==========================================
+# setPartitioner
+#------------------------------------------
+sub setPartitioner {
+	my $this = shift;
+	my $tool = shift;
+	$this->{partitioner} = $tool;
+	return 1;
+}
+
+#==========================================
+# getPartitioner
+#------------------------------------------
+sub getPartitioner {
+	my $this = shift;
+	return $this->{partitioner};
+}
+
+#==========================================
+# setNoColor
+#------------------------------------------
+sub setNoColor {
+	my $this = shift;
+	my $value= shift;
+	$this->{nocolor} = $value;
+	return 1;
+}
+
+#==========================================
+# getNoColor
+#------------------------------------------
+sub getNoColor {
+	my $this = shift;
+	return $this->{nocolor};
+}
+
+#==========================================
+# setMigrationOptions
+#------------------------------------------
+sub setMigrationOptions {
+	my $this    = shift;
+	my $exclude = shift;
+	my $skip    = shift;
+	my $nofiles = shift;
+	my $notempl = shift;
+	my @result;
+	push @result,$exclude;
+	push @result,$skip;
+	push @result,$nofiles;
+	push @result,$notempl;
+	$this->{migrationOptions} = \@result;
+	return 1;
+}
+
+#==========================================
+# getMigrationOptions
+#------------------------------------------
+sub getMigrationOptions {
+	my $this = shift;
+	return $this->{migrationOptions};
+}
+
+#==========================================
+# setDebug
+#------------------------------------------
+sub setDebug {
+	my $this = shift;
+	my $value= shift;
+	$this->{debug} = $value;
+	return 1;
+}
+
+#==========================================
+# getDebug
+#------------------------------------------
+sub getDebug {
+	my $this = shift;
+	return $this->{debug};
+}
+
+#==========================================
+# setTestCase
+#------------------------------------------
+sub setTestCase {
+	my $this = shift;
+	my $value= shift;
+	$this->{testcase} = $value;
+	return 1;
+}
+
+#==========================================
+# getTestCase
+#------------------------------------------
+sub getTestCase {
+	my $this = shift;
+	return $this->{testcase};
 }
 
 1;
