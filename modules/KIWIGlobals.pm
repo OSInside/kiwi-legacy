@@ -545,7 +545,7 @@ sub checkFileSystem {
 			my $type;
 			if ($code != 0) {
 				if ($main::kiwi -> trace()) {
-					$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+					$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 				}
 				return undef;
 			}
@@ -604,7 +604,7 @@ sub checkFileSystem {
 			}
 		} else {
 			if ($main::kiwi -> trace()) {
-				$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+				$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 			}
 			return ();
 		}

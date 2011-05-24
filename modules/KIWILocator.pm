@@ -108,7 +108,7 @@ sub createTmpDirectory {
 	}
 	if ( $rootError ) {
 		if ($kiwi -> trace()) {
-			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
 		return undef;
 	}

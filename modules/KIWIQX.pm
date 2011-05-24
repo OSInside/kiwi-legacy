@@ -100,7 +100,7 @@ sub qxx ($) {
 			$main::kiwi->loginfo ("EXEC [Failed: $prog]\n");
 		}
 		if ((defined $main::kiwi) && ($main::kiwi -> trace())) {
-			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
 		$? = 0xffff;
 		return "$prog: command not found";

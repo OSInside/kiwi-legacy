@@ -832,19 +832,6 @@ sub setRootTargetDir {
 }
 
 #==========================================
-# setTargetDirsForBuild
-#------------------------------------------
-sub setTargetDirsForBuild {
-	# ...
-	# Setup the target dirs for a combined (prepare & create) image build.
-	# ---
-	my $this = shift;
-	$this->{prepTgtDir} = $this->{imageTgtDir};
-	$this->{imageTgtDir} = $this->{prepTgtDir} . '/build';
-	return 1;
-}
-
-#==========================================
 # setInitrdFile
 #------------------------------------------
 sub setInitrdFile {

@@ -110,6 +110,7 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	$this->{cmdL}    = $cmdL;
 	$this->{xenref}  = \%xenref;
 	$this->{vmwref}  = \%vmwref;
 	$this->{kiwi}    = $kiwi;
@@ -220,7 +221,8 @@ sub createOVF {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $format = $this->{format};
-	my $ovftool = "/usr/bin/ovftool";
+	my $cmdL   = $this->{cmdL};
+	my $ovftool= "/usr/bin/ovftool";
 	my $vmdk;
 	my $vmxf;
 	my $source;
@@ -267,9 +269,10 @@ sub createOVF {
 			"$ovftool -o -q $source $target/$output 2>&1"
 		);
 		$result = $? >> 8;
+		my $destination = $cmdL -> getImageTargetDir();
 		# --- beg ----
 		qxx ("sed -i -e 's;disk;scsi-hardDisk;' $source");
-		qxx ("rm -rf $main::Destination/*.lck 2>&1");
+		qxx ("rm -rf $destination/*.lck 2>&1");
 		# --- end ----
 		if ($result != 0) {
 			$kiwi -> failed ();

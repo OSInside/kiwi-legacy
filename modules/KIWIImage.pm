@@ -286,6 +286,7 @@ sub checkAndSetupPrebuiltBootImage {
 	my $ixml = shift;
 	my $kiwi = $this->{kiwi};
 	my $cmdL = $this->{cmdL};
+	my $idest= $cmdL->getImageTargetDir();
 	my %type = %{$ixml->getImageTypeAndAttributes()};
 	my $pblt = $type{checkprebuilt};
 	my $boot = $type{boot};
@@ -351,7 +352,7 @@ sub checkAndSetupPrebuiltBootImage {
 		$kiwi -> done();
 		$kiwi -> info ("Copying pre-built boot image to destination");
 		my $lookup = basename $pinitrd;
-		if (-f "$main::Destination/$lookup") {
+		if (-f "$idest/$lookup") {
 			#==========================================
 			# Already exists in destination dir
 			#------------------------------------------
@@ -362,9 +363,9 @@ sub checkAndSetupPrebuiltBootImage {
 			# Needs to be copied...
 			#------------------------------------------
 			if ($psplash) {
-				qxx ("cp -a $psplash $main::Destination 2>&1");
+				qxx ("cp -a $psplash $idest 2>&1");
 			}
-			my $data = qxx ("cp -a $pinitrd $main::Destination 2>&1");
+			my $data = qxx ("cp -a $pinitrd $idest 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed();
@@ -372,7 +373,7 @@ sub checkAndSetupPrebuiltBootImage {
 				$kiwi -> failed();
 				$ok = 0;
 			} else {
-				$data = qxx ("cp -a $plinux* $main::Destination 2>&1");
+				$data = qxx ("cp -a $plinux* $idest 2>&1");
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed();
@@ -896,6 +897,7 @@ sub createImageRootAndBoot {
 	my $kiwi       = $this->{kiwi};
 	my $sxml       = $this->{xml};
 	my $cmdL       = $this->{cmdL};
+	my $idest      = $cmdL->getImageTargetDir();
 	my %stype      = %{$sxml->getImageTypeAndAttributes()};
 	my $imageTree  = $this->{imageTree};
 	my $baseSystem = $this->{baseSystem};
@@ -1002,7 +1004,7 @@ sub createImageRootAndBoot {
 		#==========================================
 		# Create tmp dir for boot image creation
 		#------------------------------------------
-		my $tmpdir = qxx ("mktemp -q -d $main::Destination/boot-$text.XXXXXX");
+		my $tmpdir = qxx ("mktemp -q -d $idest/boot-$text.XXXXXX");
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -1052,9 +1054,9 @@ sub createImageRootAndBoot {
 	#==========================================
 	# setup initrd name
 	#------------------------------------------
-	my $initrd = $main::Destination."/".$bootdata[0].".gz";
+	my $initrd = $idest."/".$bootdata[0].".gz";
 	if (! -f $initrd) {
-		$initrd = $main::Destination."/".$bootdata[0];
+		$initrd = $idest."/".$bootdata[0];
 	}
 	#==========================================
 	# Check boot and system image kernel
@@ -1126,6 +1128,7 @@ sub createImageVMX {
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $cmdL = $this->{cmdL};
+	my $idest= $cmdL->getImageTargetDir();
 	my %xenc = $xml  -> getXenConfig();
 	my $name = $this -> createImageRootAndBoot ($para,"VMX");
 	my $xendomain;
@@ -1141,7 +1144,7 @@ sub createImageVMX {
 	# Create virtual disk image(s)
 	#------------------------------------------
 	$cmdL -> setInitrdFile (
-		$main::Destination."/".$name->{bootImage}.".splash.gz"
+		$idest."/".$name->{bootImage}.".splash.gz"
 	);
 	if (defined $name->{imageTree}) {
 		$cmdL -> setSystemLocation (
@@ -1149,7 +1152,7 @@ sub createImageVMX {
 		);
 	} else {
 		$cmdL -> setSystemLocation (
-			$main::Destination."/".$name->{systemImage}
+			$idest."/".$name->{systemImage}
 		);
 	}
 	my $kic = new KIWIImageCreator ($kiwi, $cmdL);
@@ -1162,7 +1165,7 @@ sub createImageVMX {
 	#------------------------------------------
 	if ((defined $name->{format}) || ($xendomain eq "domU")) {
 		$cmdL -> setSystemLocation (
-			$main::Destination."/".$name->{systemImage}.".raw"
+			$idest."/".$name->{systemImage}.".raw"
 		);
 		$cmdL -> setImageFormat ($name->{format});
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
@@ -1198,6 +1201,7 @@ sub createImageLiveCD {
 	my $arch = $this->{arch};
 	my $sxml = $this->{xml};
 	my $cmdL = $this->{cmdL};
+	my $idest= $cmdL->getImageTargetDir();
 	my $imageTree = $this->{imageTree};
 	my $baseSystem= $this->{baseSystem};
 	my @bootdata;
@@ -1487,7 +1491,7 @@ sub createImageLiveCD {
 		#==========================================
 		# Create tmp dir for boot image creation
 		#------------------------------------------
-		my $tmpdir = qxx ("mktemp -q -d $main::Destination/boot-iso.XXXXXX");
+		my $tmpdir = qxx ("mktemp -q -d $idest/boot-iso.XXXXXX");
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -1537,9 +1541,9 @@ sub createImageLiveCD {
 	#==========================================
 	# setup initrd/kernel names
 	#------------------------------------------
-	my $pinitrd = $main::Destination."/".$bootdata[0].".gz";
-	my $plinux  = $main::Destination."/".$bootdata[0].".kernel";
-	my $pxboot  = glob ($main::Destination."/".$bootdata[0]."*xen.gz");
+	my $pinitrd = $idest."/".$bootdata[0].".gz";
+	my $plinux  = $idest."/".$bootdata[0].".kernel";
+	my $pxboot  = glob ($idest."/".$bootdata[0]."*xen.gz");
 	if (-f $pxboot) {
 		$isxen = 1;
 	}
@@ -1554,7 +1558,7 @@ sub createImageLiveCD {
 	#==========================================
 	# Prepare for CD ISO image
 	#------------------------------------------
-	my $CD = $main::Destination."/CD";
+	my $CD = $idest."/CD";
 	$kiwi -> info ("Creating CD filesystem structure");
 	qxx ("mkdir -p $CD/boot");
 	push @{$this->{tmpdirs}},$CD;
@@ -1678,7 +1682,7 @@ sub createImageLiveCD {
 	# check for graphics boot files
 	#------------------------------------------
 	$kiwi -> info ("Extracting initrd for boot graphics data lookup");
-	my $tmpdir = qxx ("mktemp -q -d $main::Destination/boot-iso.XXXXXX");
+	my $tmpdir = qxx ("mktemp -q -d $idest/boot-iso.XXXXXX");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed();
@@ -1956,6 +1960,7 @@ sub createImageSplit {
 	my $baseSystem= $this->{baseSystem};
 	my $sxml = $this->{xml};
 	my $cmdL = $this->{cmdL};
+	my $idest= $cmdL->getImageTargetDir();
 	my %xenc = $sxml->getXenConfig();
 	my $FSTypeRW;
 	my $FSTypeRO;
@@ -2528,7 +2533,7 @@ sub createImageSplit {
 		#==========================================
 		# Create tmp dir for boot image creation
 		#------------------------------------------
-		my $tmpdir = qxx ("mktemp -q -d $main::Destination/boot-split.XXXXXX");
+		my $tmpdir = qxx ("mktemp -q -d $idest/boot-split.XXXXXX");
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -2578,9 +2583,9 @@ sub createImageSplit {
 	#==========================================
 	# setup initrd name
 	#------------------------------------------
-	my $initrd = $main::Destination."/".$bootdata[0].".gz";
+	my $initrd = $idest."/".$bootdata[0].".gz";
 	if (! -f $initrd) {
-		$initrd = $main::Destination."/".$bootdata[0];
+		$initrd = $idest."/".$bootdata[0];
 	}
 	#==========================================
 	# Check boot and system image kernel
@@ -2609,10 +2614,10 @@ sub createImageSplit {
 		# Create virtual disk images if requested
 		#------------------------------------------
 		$cmdL -> setInitrdFile (
-			$main::Destination."/".$name->{bootImage}.".splash.gz"
+			$idest."/".$name->{bootImage}.".splash.gz"
 		);
 		$cmdL -> setSystemLocation (
-			$main::Destination."/".$name->{systemImage}
+			$idest."/".$name->{systemImage}
 		);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if ((! $kic) || (! $kic->createImageDisk())) {
@@ -2624,7 +2629,7 @@ sub createImageSplit {
 		#------------------------------------------
 		if ((defined $name->{format}) || ($xendomain eq "domU")) {
 			$cmdL -> setSystemLocation (
-				$main::Destination."/".$name->{systemImage}.".raw"
+				$idest."/".$name->{systemImage}.".raw"
 			);
 			$cmdL -> setImageFormat ($name->{format});
 			my $kic = new KIWIImageCreator ($kiwi, $cmdL);

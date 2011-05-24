@@ -54,7 +54,7 @@ use KIWIGlobals;
 #--------------------------------------------
 our $TT            = "Trace Level ";
 our $TL            = 1;
-our $BT;
+our @BT;
 
 #============================================
 # Globals
@@ -74,7 +74,6 @@ my $cmdL;       # Command line data container
 #============================================
 # Globals
 #--------------------------------------------
-our $Destination;           # destination directory for logical extends
 our $LogFile;               # optional file name for logging
 our $RootTree;              # optional root tree destination
 our $BootVMSystem;          # system image to be copied on a VM disk
@@ -142,8 +141,9 @@ sub main {
 		#==========================================
 		# Create destdir if needed
 		#------------------------------------------
+		$cmdL -> setDefaultAnswer ("yes");
 		my $dirCreated = $global -> createDirInteractive(
-			$Destination, $cmdL->getDefaultAnswer()
+			$cmdL->getImageTargetDir()."/build", $cmdL->getDefaultAnswer()
 		);
 		if (! defined $dirCreated) {
 			kiwiExit (1);
@@ -152,7 +152,7 @@ sub main {
 		# Setup prepare 
 		#------------------------------------------
 		my $imageTarget = $cmdL -> getImageTargetDir();
-		my $rootTarget  = $imageTarget.'/image-root';
+		my $rootTarget  = $imageTarget.'/build/image-root';
 		$cmdL -> setRootTargetDir ($rootTarget);
 		$cmdL -> setForceNewRoot (1);
 		mkdir $imageTarget;
@@ -163,7 +163,6 @@ sub main {
 		#==========================================
 		# Setup create 
 		#------------------------------------------
-		$cmdL -> setImagetargetDir ($Destination);
 		$cmdL -> setConfigDir ($rootTarget);
 		$cmdL -> setForceNewRoot (0);
 		$kic  -> initialize();
@@ -264,16 +263,16 @@ sub main {
 	#------------------------------------------
 	if ($cmdL->getOperationMode("migrate")) {
 		$kiwi -> info ("Starting system to image migration");
-		$Destination = $cmdL->getOperationMode("migrate");
-		$Destination = "/tmp/".$Destination;
-		my $addlRepos = $cmdL -> getAdditionalRepos();
-		my $migopts   = $cmdL -> getMigrationOptions();
-		my $exclude   = $migopts->[0];
-		my $skip      = $migopts->[1];
-		my $nofiles   = $migopts->[2];
-		my $notempl   = $migopts->[3];
+		my $destination = $cmdL->getOperationMode("migrate");
+		my $addlRepos   = $cmdL -> getAdditionalRepos();
+		my $migopts     = $cmdL -> getMigrationOptions();
+		my $exclude     = $migopts->[0];
+		my $skip        = $migopts->[1];
+		my $nofiles     = $migopts->[2];
+		my $notempl     = $migopts->[3];
+		$destination    = "/tmp/".$destination;
 		$migrate = new KIWIMigrate (
-			$kiwi,$Destination,
+			$kiwi,$destination,
 			$cmdL->getOperationMode("migrate"),$exclude,$skip,
 			$addlRepos->{repositories},
 			$addlRepos->{repositoryTypes},
@@ -640,6 +639,7 @@ sub init {
 	my $targetDevice;          # alternative device instead of a loop device
 	my $ImageCache;            # build an image cache for later re-use
 	my $RecycleRoot;           # use existing root directory incl. contents
+	my $Destination;           # destination directory for logical extends
 	my $PackageManager;        # package manager to use
 	my $Version;               # version information
 	#==========================================
@@ -1175,8 +1175,6 @@ sub init {
 		$kiwi -> error  ("No destination directory specified");
 		$kiwi -> failed ();
 		kiwiExit (1);
-	} elsif (defined $Build) {
-		$cmdL -> setTargetDirsForBuild();
 	}
 	if (defined $ListXMLInfo) {
 		$cmdL -> setAdditionalRepos(
@@ -1531,16 +1529,17 @@ sub cloneImage {
 	my $gdata      = $global -> getGlobals();
 	my $configName = $gdata->{ConfigName};
 	my $system     = $gdata->{System};
+	my $destination= $cmdL->getImageTargetDir();
 	#==========================================
 	# Check destination definition
 	#------------------------------------------
 	my $kiwi = new KIWILog("tiny");
-	if (! defined $Destination) {
+	if (! defined $destination) {
 		$kiwi -> error  ("No destination directory specified");
 		$kiwi -> failed ();
 		kiwiExit (1);
 	} else {
-		$kiwi -> info ("Cloning image $clone -> $Destination...");
+		$kiwi -> info ("Cloning image $clone -> $destination...");
 	}
 	#==========================================
 	# Evaluate image path or name 
@@ -1549,7 +1548,7 @@ sub cloneImage {
 		$clone = $system."/".$clone;
 	}
 	my $cfg = $clone."/".$configName;
-	my $md5 = $Destination."/.checksum.md5";
+	my $md5 = $destination."/.checksum.md5";
 	if (! -f $cfg) {
 		my @globsearch = glob ($clone."/*.kiwi");
 		my $globitems  = @globsearch;
@@ -1570,17 +1569,17 @@ sub cloneImage {
 	#==========================================
 	# Check if destdir exists or not 
 	#------------------------------------------
-	if (! -d $Destination) {
+	if (! -d $destination) {
 		my $prefix = $kiwi -> getPrefix (1);
 		$kiwi -> note ("\n");
-		$kiwi -> info ("Destination: $Destination doesn't exist\n");
+		$kiwi -> info ("Destination: $destination doesn't exist\n");
 		while ($answer !~ /^yes$|^no$/) {
 			print STDERR $prefix,
 				"Would you like kiwi to create it [yes/no] ? ";
 			chomp ($answer = <>);
 		}
 		if ($answer eq "yes") {
-			qxx ("mkdir -p $Destination");
+			qxx ("mkdir -p $destination");
 		} else {
 			kiwiExit (1);
 		}
@@ -1588,7 +1587,7 @@ sub cloneImage {
 	#==========================================
 	# Copy path to destination 
 	#------------------------------------------
-	my $data = qxx ("cp -a $clone/* $Destination 2>&1");
+	my $data = qxx ("cp -a $clone/* $destination 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -1672,10 +1671,7 @@ sub quit {
 		$kiwi -> reopenRootChannel();
 	}
 	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
-	$kiwi -> setLogHumanReadable();
-	$kiwi -> cleanSweep();
-	cleanup();
-	exit 1;
+	kiwiExit (1);
 }
 
 #==========================================
