@@ -114,7 +114,7 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	if (! defined $main::LogFile) {
+	if (! $cmdL -> getLogFile()) {
 		$imageTree =~ s/\/$//;
 		if (defined $imageOrig) {
 			$kiwi -> setRootLog ($imageOrig.".".$$.".screenrc.log");

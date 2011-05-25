@@ -301,7 +301,7 @@ sub setupScreenCall {
 	#==========================================
 	# Check log location
 	#------------------------------------------
-	if ((defined $main::LogFile) && ($main::LogFile eq "terminal")) {
+	if ($kiwi -> terminalLogging()) {
 		$logs = 0;
 	}
 	#==========================================

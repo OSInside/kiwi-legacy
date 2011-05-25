@@ -227,7 +227,7 @@ sub new {
 	#==========================================
 	# Set root log file
 	#------------------------------------------
-	if (! defined $main::LogFile) {
+	if (! $cmdL -> getLogFile()) {
 		if (-e $this->{origtree}) {
 			$kiwi -> setRootLog ($this->{origtree}."."."$$".".screenrc.log");
 		} else {

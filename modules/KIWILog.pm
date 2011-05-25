@@ -657,6 +657,17 @@ sub state {
 }
 
 #==========================================
+# terminalLogging
+#------------------------------------------
+sub terminalLogging {
+	my $this = shift;
+	if (($this->{fileLog}) && ($this->{fileLog} == 2)) {
+		return 1;
+	}
+	return 0;
+}
+
+#==========================================
 # setLogFile
 #------------------------------------------
 sub setLogFile {
@@ -667,7 +678,7 @@ sub setLogFile {
 	my $this = shift;
 	my $file = $_[0];
 	if ($file eq "terminal") {
-		$this->{fileLog} = 1;
+		$this->{fileLog} = 2;
 		return $this;
 	}
 	if (! (open FD,">$file")) {
@@ -734,17 +745,15 @@ sub printLogExcerpt {
 #------------------------------------------
 sub finalizeLog {
 	my $this = shift;
-	if (! defined $main::LogFile) {
-		my $rootLog = $this -> getRootLog();
-		if ((defined $rootLog) &&
-			(-f $rootLog) && ($rootLog =~ /(.*)\..*\.screenrc\.log/)
-		) { 
-			my $logfile = $1;
-			$logfile = "$logfile.log";
-			$this -> info ("Complete logfile at: $logfile");
-			qxx ("mv $rootLog $logfile 2>&1");
-			$this -> done ();
-		}
+	my $rootLog = $this -> getRootLog();
+	if ((defined $rootLog) &&
+		(-f $rootLog) && ($rootLog =~ /(.*)\..*\.screenrc\.log/)
+	) {
+		my $logfile = $1;
+		$logfile = "$logfile.log";
+		$this -> info ("Complete logfile at: $logfile");
+		qxx ("mv $rootLog $logfile 2>&1");
+		$this -> done ();
 	}
 	return $this;
 }

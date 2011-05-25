@@ -74,7 +74,7 @@ my $cmdL;       # Command line data container
 #============================================
 # Globals
 #--------------------------------------------
-our $LogFile;               # optional file name for logging
+our @ListXMLInfoSelection;  # info selection for listXMLInfo
 our $RootTree;              # optional root tree destination
 our $BootVMSystem;          # system image to be copied on a VM disk
 our $BootVMSize;            # size of virtual disk
@@ -128,9 +128,10 @@ sub main {
 	#==========================================
 	# Setup logging location
 	#------------------------------------------
-	if (defined $LogFile) {
-		$kiwi -> info ("Setting log file to: $LogFile\n");
-		if (! $kiwi -> setLogFile ( $LogFile )) {
+	my $logFile = $cmdL -> getLogFile();
+	if (defined $logFile) {
+		$kiwi -> info ("Setting log file to: $logFile\n");
+		if (! $kiwi -> setLogFile ( $logFile )) {
 			kiwiExit (1);
 		}
 	}
@@ -415,6 +416,26 @@ sub main {
 	}
 
 	#==========================================
+	# List XML and repo information
+	#------------------------------------------
+	if ($cmdL->getOperationMode("listXMLInfo")) {
+		$cmdL -> setConfigDir(
+			$cmdL->getOperationMode("listXMLInfo")
+		);
+		my $info = new KIWIXMLInfo($kiwi, $cmdL);
+		if (! $info) {
+			kiwiExit (1);
+		}
+		my $res = $info -> printXMLInfo (
+			\@ListXMLInfoSelection
+		);
+		if (! $res) {
+			kiwiExit (1);
+		}
+		kiwiExit (0);
+	}
+
+	#==========================================
 	# Test suite
 	#------------------------------------------
 	if ($cmdL->getOperationMode("testImage")) {
@@ -577,7 +598,6 @@ sub init {
 	#------------------------------------------
 	my $gdata = $global -> getGlobals();
 	my $Help;
-	my @ListXMLInfoSelection;  # info selection for listXMLInfo
 	my $FSBlockSize;           # filesystem block size
 	my $FSInodeSize;           # filesystem inode size
 	my $FSJournalSize;         # filesystem journal size
@@ -640,6 +660,7 @@ sub init {
 	my $ImageCache;            # build an image cache for later re-use
 	my $RecycleRoot;           # use existing root directory incl. contents
 	my $Destination;           # destination directory for logical extends
+	my $LogFile;               # optional file name for logging
 	my $PackageManager;        # package manager to use
 	my $Version;               # version information
 	#==========================================
@@ -733,6 +754,12 @@ sub init {
 		"version"               => \$Version,
 		"yes|y"                 => \$defaultAnswer,
 	);
+	#==========================================
+	# Check result of options parsing
+	#------------------------------------------
+	if ( $result != 1 ) {
+		usage(1);
+	}
 	#========================================
 	# set list of filesystem options
 	#----------------------------------------
@@ -916,20 +943,6 @@ sub init {
 		}
 	}
 	#========================================
-	# check add-on repo information
-	#----------------------------------------
-	if (@AddRepository) {
-		my $result = $cmdL -> setAdditionalRepos(
-			\@AddRepository,
-			\@AddRepositoryAlias,
-			\@AddRepositoryPriority,
-			\@AddRepositoryType
-		);
-		if (! $result) {
-			kiwiExit (1);
-		}
-	}
-	#========================================
 	# check if recycle-root is used
 	#----------------------------------------
 	if (defined $RecycleRoot) {
@@ -1097,12 +1110,6 @@ sub init {
 		version(0);
 	}
 	#==========================================
-	# Check result of options parsing
-	#------------------------------------------
-	if ( $result != 1 ) {
-		usage(1);
-	}
-	#==========================================
 	# Check for root privileges
 	#------------------------------------------
 	if ($< != 0) {
@@ -1137,11 +1144,13 @@ sub init {
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
+	if (defined $LogFile) {
+		$cmdL -> setLogFile ($LogFile);
+	}
 	if (($InitCache) && ($LogFile)) {
 		$kiwi -> warning ("Logfile set to terminal in init-cache mode");
+		$cmdL -> setLogFile ("terminal");
 		$kiwi -> done ();
-		$LogFile = "terminal";
-		$cmdL -> setLogFile($LogFile);
 	}
 	if (($targetDevice) && (! -b $targetDevice)) {
 		$kiwi -> error ("Target device $targetDevice doesn't exist");
@@ -1175,46 +1184,6 @@ sub init {
 		$kiwi -> error  ("No destination directory specified");
 		$kiwi -> failed ();
 		kiwiExit (1);
-	}
-	if (defined $ListXMLInfo) {
-		$cmdL -> setAdditionalRepos(
-			\@AddRepository,
-			\@AddRepositoryAlias,
-			\@AddRepositoryPriority,
-			\@AddRepositoryType
-		);
-		$cmdL -> setBuildProfiles(\@Profiles);
-		$cmdL -> setConfigDir($ListXMLInfo);
-		my $res = $cmdL -> setIgnoreRepos($IgnoreRepos);
-		if (! $res) {
-			kiwiExit (1);
-		}
-		if (defined $LogFile) {
-			$res = $cmdL -> setLogFile($LogFile);
-		}
-		if (defined $PackageManager) {
-			$res = $cmdL -> setPackageManager($PackageManager);
-		}
-		if (defined $SetRepository) {
-			$res = $cmdL -> setReplacementRepo(
-				$SetRepository,
-				$SetRepositoryAlias,
-				$SetRepositoryPriority,
-				$SetRepositoryType
-			);
-		}
-		if (! $res) {
-			kiwiExit (1);
-		}
-		my $info = new KIWIXMLInfo($kiwi, $cmdL);
-		if (! $info) {
-			kiwiExit (1);
-		}
-		$res = $info -> printXMLInfo(\@ListXMLInfoSelection);
-		if (! $res) {
-			kiwiExit (1);
-		}
-		kiwiExit (0);
 	}
 	if (defined $SetImageType) {
 		$cmdL -> setBuildType($SetImageType);
