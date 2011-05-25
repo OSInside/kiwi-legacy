@@ -7039,6 +7039,7 @@ function runPreinitServices {
 function setupConsole {
 	# /.../
 	# setup the xvc and/or hvc console if the device is present
+	# also remove the ttyS0 console if no ttyS0 device exists
 	# ----
 	local itab=/etc/inittab
 	local stty=/etc/securetty
@@ -7053,6 +7054,9 @@ function setupConsole {
 			echo "H0:12345:respawn:/sbin/mingetty --noclear hvc0 linux" >> $itab
 			echo hvc0 >> $stty
 		fi
+	fi
+	if [ ! -e /sys/class/tty/ttyS0 ];then
+		cat $itab | grep -vi 'S0:.*ttyS0' > $itab.new && mv $itab.new $itab
 	fi
 }
 #======================================
