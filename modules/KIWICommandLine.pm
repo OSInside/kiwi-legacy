@@ -1134,4 +1134,22 @@ sub getTestCase {
 	return $this->{testcase};
 }
 
+#==========================================
+# setXMLInfoSelection
+#------------------------------------------
+sub setXMLInfoSelection {
+	my $this = shift;
+	my $list = shift;
+	$this->{XMLInfoSelection} = $list;
+	return 1;
+}
+
+#==========================================
+# getXMLInfoSelection
+#------------------------------------------
+sub getXMLInfoSelection {
+	my $this = shift;
+	return $this->{XMLInfoSelection};
+}
+
 1;

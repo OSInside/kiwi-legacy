@@ -74,8 +74,6 @@ my $cmdL;       # Command line data container
 #============================================
 # Globals
 #--------------------------------------------
-our @ListXMLInfoSelection;  # info selection for listXMLInfo
-our $RootTree;              # optional root tree destination
 our $BootVMSystem;          # system image to be copied on a VM disk
 our $BootVMSize;            # size of virtual disk
 our $StripImage;            # strip shared objects and binaries
@@ -427,7 +425,7 @@ sub main {
 			kiwiExit (1);
 		}
 		my $res = $info -> printXMLInfo (
-			\@ListXMLInfoSelection
+			$cmdL -> getXMLInfoSelection()
 		);
 		if (! $res) {
 			kiwiExit (1);
@@ -661,6 +659,8 @@ sub init {
 	my $RecycleRoot;           # use existing root directory incl. contents
 	my $Destination;           # destination directory for logical extends
 	my $LogFile;               # optional file name for logging
+	my @ListXMLInfoSelection;  # info selection for listXMLInfo
+	my $RootTree;              # optional root tree destination
 	my $PackageManager;        # package manager to use
 	my $Version;               # version information
 	#==========================================
@@ -773,6 +773,12 @@ sub init {
 	$cmdL -> setMigrationOptions (
 		\@Exclude,\@Skip,$MigrateNoFiles,$MigrateNoTemplate
 	);
+	#========================================
+	# check if XML Info Selection is set
+	#----------------------------------------
+	if (@ListXMLInfoSelection) {
+		$cmdL -> setXMLInfoSelection (\@ListXMLInfoSelection);
+	}
 	#========================================
 	# check if TestCase is specified
 	#----------------------------------------
@@ -1808,7 +1814,9 @@ sub createInstSource {
 	#==========================================
 	# Initialize installation source tree
 	#------------------------------------------
-	my $root = $locator -> createTmpDirectory ( undef, $RootTree, $cmdL );
+	my $root = $locator -> createTmpDirectory (
+		undef, $cmdL->getRootTargetDir(), $cmdL
+	);
 	if (! defined $root) {
 		$kiwi -> error ("Couldn't create instsource root");
 		$kiwi -> failed ();

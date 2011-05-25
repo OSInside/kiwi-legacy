@@ -901,6 +901,7 @@ sub createImageRootAndBoot {
 	my %stype      = %{$sxml->getImageTypeAndAttributes()};
 	my $imageTree  = $this->{imageTree};
 	my $baseSystem = $this->{baseSystem};
+	my $checkBase  = $cmdL->getRootTargetDir()."/".$baseSystem;
 	my $treeAccess = 1;
 	my @bootdata;
 	my $type;
@@ -1028,7 +1029,7 @@ sub createImageRootAndBoot {
 			$configDir,$rootTarget,$this->{imageTree}))
 		) {
 			undef $kic;
-			if (! -d $main::RootTree.$baseSystem) {
+			if (! -d $checkBase) {
 				qxx ("rm -rf $tmpdir");
 			}
 			return undef;
@@ -1041,7 +1042,7 @@ sub createImageRootAndBoot {
 			$rootTarget,$this->{imageDest}))
 		) {
 			undef $kic;
-			if (! -d $main::RootTree.$baseSystem) {
+			if (! -d $checkBase) {
 				qxx ("rm -rf $tmpdir");
 			}
 			return undef;
@@ -1204,6 +1205,7 @@ sub createImageLiveCD {
 	my $idest= $cmdL->getImageTargetDir();
 	my $imageTree = $this->{imageTree};
 	my $baseSystem= $this->{baseSystem};
+	my $checkBase = $cmdL->getRootTargetDir()."/".$baseSystem;
 	my @bootdata;
 	my $error;
 	my $data;
@@ -1515,7 +1517,7 @@ sub createImageLiveCD {
 			$configDir,$rootTarget,$this->{imageTree}))
 		) {
 			undef $kic;
-			if (! -d $main::RootTree.$baseSystem) {
+			if (! -d $checkBase) {
 				qxx ("rm -rf $tmpdir");
 			}
 			return undef;
@@ -1528,7 +1530,7 @@ sub createImageLiveCD {
 			$rootTarget,$this->{imageDest}))
 		) {
 			undef $kic;
-			if (! -d $main::RootTree.$baseSystem) {
+			if (! -d $checkBase) {
 				qxx ("rm -rf $tmpdir");
 			}
 			return undef;
@@ -1734,8 +1736,8 @@ sub createImageLiveCD {
 		$kiwi -> failed();
 		$kiwi -> error  ("Failed to create $destination/isolinux.cfg: $!");
 		$kiwi -> failed ();
-		if (! -d $main::RootTree.$baseSystem) {
-			qxx ("rm -rf $main::RootTree");
+		if (! -d $checkBase) {
+			qxx ("rm -rf $cmdL->getRootTargetDir()");
 			qxx ("rm -rf $tmpdir");
 		}
 		return undef;
@@ -1825,8 +1827,8 @@ sub createImageLiveCD {
 		$kiwi -> failed();
 		$kiwi -> error  ("Failed to create isolinux.msg: $!");
 		$kiwi -> failed ();
-		if (! -d $main::RootTree.$baseSystem) {
-			qxx ("rm -rf $main::RootTree");
+		if (! -d $checkBase) {
+			qxx ("rm -rf $cmdL->getRootTargetDir()");
 			qxx ("rm -rf $tmpdir");
 		}
 		return undef;
@@ -1955,11 +1957,12 @@ sub createImageSplit {
 	my $type = shift;
 	my $nopersistent = shift;
 	my $kiwi = $this->{kiwi};
+	my $cmdL = $this->{cmdL};
 	my $arch = $this->{arch};
 	my $imageTree = $this->{imageTree};
 	my $baseSystem= $this->{baseSystem};
+	my $checkBase = $cmdL->getRootTargetDir()."/".$baseSystem;
 	my $sxml = $this->{xml};
-	my $cmdL = $this->{cmdL};
 	my $idest= $cmdL->getImageTargetDir();
 	my %xenc = $sxml->getXenConfig();
 	my $FSTypeRW;
@@ -2557,7 +2560,7 @@ sub createImageSplit {
 			$configDir,$rootTarget,$this->{imageTree}))
 		) {
 			undef $kic;
-			if (! -d $main::RootTree.$baseSystem) {
+			if (! -d $checkBase) {
 				qxx ("rm -rf $tmpdir");
 			}
 			return undef;
@@ -2570,7 +2573,7 @@ sub createImageSplit {
 			$rootTarget,$this->{imageDest}))
 		) {
 			undef $kic;
-			if (! -d $main::RootTree.$baseSystem) {
+			if (! -d $checkBase) {
 				qxx ("rm -rf $tmpdir");
 			}
 			return undef;
