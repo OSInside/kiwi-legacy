@@ -6924,10 +6924,15 @@ function setupBootPartition {
 		mpoint=clicboot
 	elif [ "$haveXFS" = "yes" ];then
 		#======================================
-		# btrboot
+		# xfsboot
 		#--------------------------------------
 		test -z "$bootid" && export bootid=2
 		mpoint=xfsboot
+	elif [ ! -z "$COMBINED_IMAGE" ];then
+		#======================================
+		# split
+		#--------------------------------------
+		test -z "$bootid" && export bootid=2
 	elif \
 		[ "$loader" = "syslinux" ] || \
 		[ "$loader" = "extlinux" ] || \
@@ -6958,6 +6963,10 @@ function setupBootPartition {
 		if [ -z "$bootid" ];then
 			export bootid=1
 		fi
+		return
+	fi
+	if [ ! -z "$COMBINED_IMAGE" ];then
+		# split image, /boot must be on the fsreadwrite area
 		return
 	fi
 	if [ -z "$imageDiskDevice" ];then
