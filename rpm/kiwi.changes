@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed May 25 15:09:05 CEST 2011 - ms@suse.de
+
+- enhanced setupConsole to remove the ttyS0 console if no
+  ttyS0 device exists (bnc #695948)
+- fixed setupConsole() if search string appears as comment
+- use -t squashfs to mount the installation image. This works
+  around the problem if libuuid doesn't know the squashfs
+  signature
+
+-------------------------------------------------------------------
 Mon May 23 11:12:47 CEST 2011 - ms@suse.de
 
 - s390: fixed disk online code, wait for disk device to appear (bnc #693031)
