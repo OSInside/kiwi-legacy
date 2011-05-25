@@ -7043,13 +7043,13 @@ function setupConsole {
 	local itab=/etc/inittab
 	local stty=/etc/securetty
 	if [ -e /sys/class/tty/xvc0 ];then
-		if ! grep -q xvc0 $itab;then
+		if ! cat $itab | grep -v '^#' | grep -q xvc0;then
 			echo "X0:12345:respawn:/sbin/mingetty --noclear xvc0 linux" >> $itab
 			echo xvc0 >> $stty
 		fi
 	fi
 	if [ -e /sys/class/tty/hvc0 ];then
-		if ! grep -q hvc0 $itab;then
+		if ! cat $itab | grep -v '^#' | grep -q hvc0;then
 			echo "H0:12345:respawn:/sbin/mingetty --noclear hvc0 linux" >> $itab
 			echo hvc0 >> $stty
 		fi
