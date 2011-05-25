@@ -36,6 +36,7 @@ sub new {
 	my $this = shift -> SUPER::new(@_);
 	$this -> {dataDir} = $this -> getDataDir() . '/kiwiRuntimeChecker';
 	$this -> {kiwi} = new Common::ktLog();
+	$this -> {cmdL} = new KIWICommandLine($this->{kiwi});
 
 	return $this;
 }
@@ -422,7 +423,9 @@ sub test_noBuildType {
 	#my $xml = $this -> __getXMLObj($configDir);
 	#my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
 	#my $res = $checker -> prepareChecks();
-	my $xml = new KIWIXML($kiwi, $configDir, undef, undef);
+	my $xml = new KIWIXML(
+		$kiwi, $configDir, undef, undef,$this->{cmdL}
+	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Cannot determine build type', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -574,7 +577,9 @@ sub __getXMLObj {
 	my $configDir = shift;
 	# TODO
 	# Fix the creation of the XML object once the ctor arguments change
-	my $xml = new KIWIXML( $this -> {kiwi}, $configDir, undef, undef);
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $configDir, undef, undef,$this->{cmdL}
+	);
 	if (! $xml) {
 		my $msg = 'Failed to create XML obj, most likely improper config '
 		. 'path: '

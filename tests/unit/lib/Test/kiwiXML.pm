@@ -22,6 +22,7 @@ use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
 
 use KIWIXML;
+use KIWICommandLine;
 
 # All tests will need to be adjusted once KIWXML turns into a stateless
 # container and the ctor receives the config.xml file name as an argument.
@@ -40,6 +41,7 @@ sub new {
 	my $this = shift -> SUPER::new(@_);
 	$this -> {dataDir} = $this -> getDataDir() . '/kiwiXML/';
 	$this -> {kiwi} = new  Common::ktLog();
+	$this -> {cmdL} = new KIWICommandLine($this->{kiwi});
 
 	return $this;
 }
@@ -55,7 +57,9 @@ sub test_packageManagerInfoHasConfigValue {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'specPkgMgr';
-	my $xml = new KIWIXML($this -> {kiwi}, $confDir, undef, undef);
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
 	my $pkgMgr = $xml -> getPackageManager();
 	$this -> assert_str_equals('zypper', $pkgMgr);
 	my $msg = $kiwi -> getMessage();
@@ -76,7 +80,9 @@ sub test_packageManagerSet_noArg {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'specPkgMgr';
-	my $xml = new KIWIXML($this -> {kiwi}, $confDir, undef, undef);
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
 	# Call set without argument, expect error
 	my $res = $xml -> setPackageManager();
 	my $msg = $kiwi -> getMessage();
@@ -101,7 +107,9 @@ sub test_packageManagerSet_valid {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'specPkgMgr';
-	my $xml = new KIWIXML($this -> {kiwi}, $confDir, undef, undef);
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
 	# Set the package manager to be smart
 	my $res = $xml -> setPackageManager('smart');
 	my $msg = $kiwi -> getMessage();
@@ -128,7 +136,9 @@ sub test_packageManagerInfoHasProfs {
 	my $confDir = $this->{dataDir} . 'multiPkgMgrWithProf';
 	my @profiles = ('specPkgMgr');
 	# Verify we get the specified manager
-	my $xml = new KIWIXML($this -> {kiwi}, $confDir, undef,\@profiles);
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef,\@profiles,$this->{cmdL}
+	);
 	my $pkgMgr = $xml -> getPackageManager();
 	$this -> assert_str_equals('smart', $pkgMgr);
 	my $msg = $kiwi -> getMessage();
