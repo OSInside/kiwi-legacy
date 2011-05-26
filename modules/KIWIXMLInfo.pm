@@ -54,6 +54,7 @@ sub new {
 	#------------------------------------------
 	my $kiwi = shift;
 	my $cmdL = shift;
+	my $xml  = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -105,6 +106,7 @@ sub new {
 	$this->{replRepo}       = $cmdL -> getReplacementRepo();
 	$this->{gdata}          = $main::global -> getGlobals();
 	$this->{cmdL}           = $cmdL;
+	$this->{xml}            = $xml;
 	return $this;
 }
 
@@ -247,8 +249,11 @@ sub __getTree {
 	# ---
 	my $this     = shift;
 	my $requests = shift;
-	my $kiwi = $this -> {kiwi};
-	my $xml = $this -> __xmlSetup();
+	my $kiwi     = $this -> {kiwi};
+	my $xml      = $this -> {xml};
+	if (! $xml) {
+		$xml = $this -> __xmlSetup();
+	}
 	if (! $xml) {
 		return undef;
 	}

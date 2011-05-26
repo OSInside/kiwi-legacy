@@ -4147,92 +4147,63 @@ sub __updateDescriptionFromChangeSet {
 			}
 			my $status = $element -> getAttribute("status");
 			if ((! defined $status) || ($status eq "fixed")) {
-				$this->{imgnameNodeList}->get_node(1)->appendChild ($element);
+				my $type  = $element -> getAttribute("type");
+				my $source= $element -> getElementsByTagName("source")
+					-> get_node(1) -> getAttribute ("path");
+				$this -> addRepository ([$type],[$source]);
 			}
 		}
 		# 2) add those repos which are part of the changeset
-		foreach my $element (@{$changeset->{repositories}}) {
-			$this->{imgnameNodeList}->get_node(1)->appendChild ($element);
+		foreach my $source (keys %{$changeset->{repositories}}) {
+			my $props = $changeset->{repositories}->{$source};
+			my $type  = $props->[0];
+			my $alias = $props->[1];
+			my $prio  = $props->[2];
+			$this -> addRepository ([$type],[$source],[$alias],[$prio]);
 		}
-		# 3) update XML tree
-		$this->{repositNodeList} =
-			$this->{systemTree}->getElementsByTagName ("repository");
-		$this -> createURLList();
-		$this -> updateXML();
 		$kiwi -> done ();
 	}
 	#==========================================
 	# 2) merge/update packages
 	#------------------------------------------
-	if ($changeset->{xmlpacnode}) {
-		my @node = @{$changeset->{xmlpacnode}};
-		my @plist;
-		my @alist;
-		my @falistImage;
-		my @fplistImage;
-		my @fplistDelete;
-		my %fixedBootInclude;
-		foreach my $element (@node) {
-			my $type = $element  -> getAttribute ("type");
-			if (($type eq "image") || ($type eq "bootstrap")) {
-				push (@plist,$element->getElementsByTagName ("package"));
-				push (@alist,$element->getElementsByTagName ("archive"));
-			}
+	if ($changeset->{fplistImage}) {
+		$kiwi -> info ("Updating package(s):\n");
+		my $fixedBootInclude = $changeset->{fixedBootInclude};
+		my @fplistImage = @{$changeset->{fplistImage}};
+		my @fplistDelete = @{$changeset->{fplistDelete}};
+		foreach my $p (@fplistImage) {
+			$kiwi -> info ("--> $p\n");
 		}
-		foreach my $element (@plist) {
-			my $package = $element -> getAttribute ("name");
-			my $bootinc = $element -> getAttribute ("bootinclude");
-			my $bootdel = $element -> getAttribute ("bootdelete");
-			my $include = 0;
-			if ((defined $bootinc) && ("$bootinc" eq "true")) {
-				push (@fplistImage,$package);
-				$include++;
-			}
-			if ((defined $bootdel) && ("$bootdel" eq "true")) {
-				push (@fplistDelete,$package);
-				$include--;
-			}
-			$fixedBootInclude{$package} = $include;
-		}
-		foreach my $element (@alist) {
-			my $archive = $element -> getAttribute ("name");
-			my $bootinc = $element -> getAttribute ("bootinclude");
-			if ((defined $bootinc) && ("$bootinc" eq "true")) {
-				push (@falistImage,$archive);
-			}
-		}
-		if (@fplistImage) {
-			$kiwi -> info ("Updating package(s):\n");
-			foreach my $p (@fplistImage) {
-				$kiwi -> info ("--> $p\n");
-			}
+		$this -> addPackages (
+			"image",$fixedBootInclude,$packageNodeList,@fplistImage
+		);
+		if (@fplistDelete) {
 			$this -> addPackages (
-				"bootstrap",\%fixedBootInclude,$packageNodeList,@fplistImage
-			);
-			if (@fplistDelete) {
-				$this -> addPackages (
-					"delete",undef,$packageNodeList,@fplistDelete
-				);
-			}
-		}
-		if (@falistImage) {
-			$kiwi -> info ("Updating archive(s):\n");
-			foreach my $p (@falistImage) {
-				$kiwi -> info ("--> $p\n");
-			}
-			$this -> addArchives (
-				"bootstrap","bootinclude",$packageNodeList,@falistImage
+				"delete",undef,$packageNodeList,@fplistDelete
 			);
 		}
 	}
 	#==========================================
-	# 3) merge/update machine attribs in type
+	# 3) merge/update archives
+	#------------------------------------------
+	if ($changeset->{falistImage}) {
+		$kiwi -> info ("Updating archive(s):\n");
+		my @falistImage = @{$changeset->{falistImage}};
+		foreach my $p (@falistImage) {
+			$kiwi -> info ("--> $p\n");
+		}
+		$this -> addArchives (
+			"image","bootinclude",$packageNodeList,@falistImage
+		);
+	}
+	#==========================================
+	# 4) merge/update machine attribs in type
 	#------------------------------------------
 	if (defined $changeset->{"domain"}) {
 		$this -> __setMachineAttribute ("domain",$changeset);
 	}
 	#==========================================
-	# 4) merge/update preferences in type
+	# 5) merge/update preferences in type
 	#------------------------------------------
 	if (defined $changeset->{"locale"}) {
 		$this -> __setOptionsElement ("locale",$changeset);
@@ -4298,7 +4269,7 @@ sub __updateDescriptionFromChangeSet {
 		$this -> __setSystemDiskElement (undef,$changeset);
 	}
 	#==========================================
-	# 5) merge/update type attributes
+	# 6) merge/update type attributes
 	#------------------------------------------
 	if (defined $changeset->{"hybrid"}) {
 		$this -> __setTypeAttribute (
@@ -4341,7 +4312,7 @@ sub __updateDescriptionFromChangeSet {
 		);
 	}
 	#==========================================
-	# 6) merge/update image attribs, toplevel
+	# 7) merge/update image attribs, toplevel
 	#------------------------------------------
 	if (defined $changeset->{"displayname"}) {
 		$this -> __setImageAttribute (
@@ -4349,7 +4320,7 @@ sub __updateDescriptionFromChangeSet {
 		);
 	}
 	#==========================================
-	# 7) cleanup reqProfiles
+	# 8) cleanup reqProfiles
 	#------------------------------------------
 	$this->{reqProfiles} = $reqProfiles;
 }

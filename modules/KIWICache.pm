@@ -59,13 +59,15 @@ sub new {
 	my $base = shift;
 	my $prof = shift;
 	my $conf = shift;
+	my $cmdL = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
-	my $cmdL = new KIWICommandLine ($kiwi);
+	# FIXME
+	#my $cmdL = new KIWICommandLine ($kiwi);
 	#==========================================
 	# Check pre-conditions
 	#------------------------------------------
@@ -182,7 +184,7 @@ sub initializeCache {
 	# Create image package list
 	#------------------------------------------
 	$cmdL -> setConfigDir ($conf);
-	my $info = new KIWIXMLInfo ($kiwi, $cmdL);
+	my $info = new KIWIXMLInfo ($kiwi,$cmdL,$xml);
 	my @infoReq = ('packages', 'sources');
 	$CacheScan = $info -> getXMLInfoTree(\@infoReq);
 	if (! $CacheScan) {
@@ -229,20 +231,6 @@ sub createCache {
 	if (@CachePackages) {
 		push @CachePatterns,"package-cache"
 	}
-	#==========================================
-	# setup repositories for building
-	#------------------------------------------
-	my @repos = $CacheScan -> getElementsByTagName ("source");
-	foreach my $node (@repos) {
-		my $path = $node -> getAttribute ("path");
-		my $type = $node -> getAttribute ("type");
-		push @repoPaths,$path;
-		push @repoTypes,$type;
-	}
-	$cmdL -> setIgnoreRepos(1);
-	$cmdL -> setAdditionalRepos (
-		\@repoPaths,[],[],\@repoTypes
-	);
 	#==========================================
 	# walk through cachable patterns
 	#------------------------------------------

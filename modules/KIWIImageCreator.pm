@@ -1069,7 +1069,7 @@ sub __selectCache {
 	}
 	my $icache = new KIWICache (
 		$kiwi,$xml,$this->{cacheDir},$this->{gdata}->{BasePath},
-		$this->{buildProfiles},$configDir
+		$this->{buildProfiles},$configDir,$cmdL
 	);
 	if (! $icache) {
 		return undef;

@@ -181,8 +181,13 @@ sub updateDescription {
 	my %src_type  = %{$src_xml->getImageTypeAndAttributes()};
 	my %changeset = ();
 	my @profiles;
-	my @xmlnodes;
-	my @xmlpnodes;
+	my %repos;
+	my @plist;
+	my @alist;
+	my @falistImage;
+	my @fplistImage;
+	my @fplistDelete;
+	my %fixedBootInclude;
 	my @node;
 	#==========================================
 	# Store general data
@@ -231,22 +236,60 @@ sub updateDescription {
 	#------------------------------------------
 	@node = $src_xml->getNodeList() -> get_nodelist();
 	foreach my $element (@node) {
-		if ($src_xml -> __requestedProfile ($element)) {
-			$element -> removeAttribute ("profiles");
-			push (@xmlnodes,$element);
+		if (! $src_xml -> __requestedProfile ($element)) {
+			next;
 		}
+		my $type  = $element -> getAttribute("type");
+		my $alias = $element -> getAttribute("alias");
+		my $prio  = $element -> getAttribute("priority");
+		my $user  = $element -> getAttribute("username");
+		my $pwd   = $element -> getAttribute("password");
+		my $plic  = $element -> getAttribute("prefer-license");
+		my $source= $element -> getElementsByTagName("source")
+			-> get_node(1) -> getAttribute ("path");
+		$repos{$source} = [$type,$alias,$prio,$user,$pwd,$plic];
 	}
-	$changeset{"repositories"} = \@xmlnodes;
+	$changeset{"repositories"} = \%repos;
 	#==========================================
-	# Store packages
+	# Store boot included packages
 	#------------------------------------------
 	@node = $src_xml->getPackageNodeList() -> get_nodelist();
 	foreach my $element (@node) {
-		if ($src_xml -> __requestedProfile ($element)) {
-			push (@xmlpnodes,$element);
+		if (! $src_xml -> __requestedProfile ($element)) {
+			next;
+		}
+		my $type = $element  -> getAttribute ("type");
+		if (($type eq "image") || ($type eq "bootstrap")) {
+			push (@plist,$element->getElementsByTagName ("package"));
+			push (@alist,$element->getElementsByTagName ("archive"));
 		}
 	}
-	$changeset{"xmlpacnode"} = \@xmlpnodes;
+	foreach my $element (@plist) {
+		my $package = $element -> getAttribute ("name");
+		my $bootinc = $element -> getAttribute ("bootinclude");
+		my $bootdel = $element -> getAttribute ("bootdelete");
+		my $include = 0;
+		if ((defined $bootinc) && ("$bootinc" eq "true")) {
+			push (@fplistImage,$package);
+			$include++;
+		}
+		if ((defined $bootdel) && ("$bootdel" eq "true")) {
+			push (@fplistDelete,$package);
+			$include--;
+		}
+		$fixedBootInclude{$package} = $include;
+	}
+	foreach my $element (@alist) {
+		my $archive = $element -> getAttribute ("name");
+		my $bootinc = $element -> getAttribute ("bootinclude");
+		if ((defined $bootinc) && ("$bootinc" eq "true")) {
+			push (@falistImage,$archive);
+		}
+	}
+	$changeset{"fixedBootInclude"} = \%fixedBootInclude;
+	$changeset{"falistImage"}  = \@falistImage;
+	$changeset{"fplistImage"}  = \@fplistImage;
+	$changeset{"fplistDelete"} = \@fplistDelete;
 	#==========================================
 	# Store OEM data
 	#------------------------------------------

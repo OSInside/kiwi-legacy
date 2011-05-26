@@ -190,7 +190,8 @@ sub main {
 		$icache = new KIWICache (
 			$kiwi,$xml,$cdir,$gdata->{BasePath},
 			$cmdL->getBuildProfiles(),
-			$cmdL->getOperationMode("initCache")
+			$cmdL->getOperationMode("initCache"),
+			$cmdL
 		);
 		if (! $icache) {
 			kiwiExit (1);

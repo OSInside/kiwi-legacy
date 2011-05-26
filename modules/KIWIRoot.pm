@@ -1427,6 +1427,9 @@ sub cleanMount {
 	if (-d $prefix) {
 		rmdir $prefix;
 	}
+	if (defined $this->{overlay}) {
+		undef $this->{overlay};
+	}
 	$this->{mountList} = \@newList;
 	return $this;
 }
