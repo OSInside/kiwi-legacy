@@ -264,6 +264,7 @@ sub writeXMLDescription {
 	# ---
 	my $this = shift;
 	my $root = shift;
+	my $gdata= $this->{gdata};
 	my $xmlu = $this->{systemTree}->toString();
 	my $file = $root."/image/config.xml";
 	my $FD;
@@ -272,10 +273,13 @@ sub writeXMLDescription {
 	}
 	print $FD $xmlu;
 	close $FD;
-	if ($main::OverlayRootTree) {
-		qxx ("mkdir -p $main::OverlayRootTree");
-		qxx ("cp $file $main::OverlayRootTree");
-		undef $main::OverlayRootTree;
+	my $overlayTree = $gdata->{OverlayRootTree};
+	if ($overlayTree) {
+		qxx ("mkdir -p $overlayTree");
+		qxx ("cp $file $overlayTree");
+		$main::global -> setGlobals (
+			"OverlayRootTree",0
+		);
 	}
 	return $this;
 }

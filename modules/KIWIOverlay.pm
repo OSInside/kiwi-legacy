@@ -185,7 +185,14 @@ sub unionOverlay {
 	if (! $haveCow) {
 		qxx ("echo $this->{baseRO} > $rootRW/kiwi-root.cache");
 		if ($this->{initial}) {
-			$main::OverlayRootTree = "$rootRW/image";
+			# /.../
+			# tell the global object that we want to store the updated
+			# XML configuration in $rootRW/image. This happens upon
+			# the call of writeXMLDescription()
+			# ----
+			$main::global -> setGlobals (
+				"OverlayRootTree","$rootRW/image"
+			);
 		}
 	}
 	return $tmpdir;

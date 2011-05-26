@@ -40,13 +40,14 @@ sub new {
 	# Globals (generic)
 	#------------------------------------------
 	my %data;
-	$data{Version}       = "4.89";
-	$data{Publisher}     = "SUSE LINUX Products GmbH";
-	$data{Preparer}      = "KIWI - http://kiwi.berlios.de";
-	$data{ConfigName}    = "config.xml";
-	$data{Partitioner}   = "parted";
-	$data{FSInodeRatio}  = 16384;
-	$data{FSInodeSize}   = 256;
+	$data{Version}         = "4.89";
+	$data{Publisher}       = "SUSE LINUX Products GmbH";
+	$data{Preparer}        = "KIWI - http://kiwi.berlios.de";
+	$data{ConfigName}      = "config.xml";
+	$data{Partitioner}     = "parted";
+	$data{FSInodeRatio}    = 16384;
+	$data{FSInodeSize}     = 256;
+	$data{OverlayRootTree} = 0;
 	#============================================
 	# Read .kiwirc
 	#--------------------------------------------
@@ -68,7 +69,7 @@ sub new {
 	$data{BasePath}      = $BasePath;      # configurable base kiwi path
 	$data{Gzip}          = $Gzip;          # configurable gzip command
 	$data{LogServerPort} = $LogServerPort; # configurable log server port
-	$data{LuksCipher}    = $LuksCipher;    # stored luks passphrase
+	$data{LuksCipher}    = $LuksCipher;    # configurable luks passphrase
 	$data{System}        = $System;        # configurable base image desc. path
 	if ( ! defined $BasePath ) {
 		$data{BasePath} = "/usr/share/kiwi";
