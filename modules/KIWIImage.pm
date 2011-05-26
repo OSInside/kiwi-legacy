@@ -331,8 +331,9 @@ sub checkAndSetupPrebuiltBootImage {
 	# check path names for boot image
 	#------------------------------------------
 	my $lookup = $bootpath."-prebuilt/";
-	if (defined $main::PrebuiltBootImage) {
-		$lookup = $main::PrebuiltBootImage."/";
+	my $prebuiltPath = $cmdL -> getPrebuiltBootImagePath();
+	if (defined $prebuiltPath) {
+		$lookup = $prebuiltPath."/";
 	}
 	my $pinitrd = $lookup.$bootImageName.".gz";
 	my $psplash;
@@ -1062,7 +1063,7 @@ sub createImageRootAndBoot {
 	#==========================================
 	# Check boot and system image kernel
 	#------------------------------------------
-	if (defined $main::CheckKernel) {
+	if ($cmdL->getCheckKernel()) {
 		if (! $this -> checkKernel ($initrd,$imageTree,$bootdata[0])) {
 			return undef;
 		}
@@ -1149,7 +1150,7 @@ sub createImageVMX {
 	);
 	if (defined $name->{imageTree}) {
 		$cmdL -> setSystemLocation (
-			$main::BootVMSystem = $name->{imageTree}
+			$name->{imageTree}
 		);
 	} else {
 		$cmdL -> setSystemLocation (
@@ -1552,7 +1553,7 @@ sub createImageLiveCD {
 	#==========================================
 	# Check boot and system image kernel
 	#------------------------------------------
-	if (defined $main::CheckKernel) {
+	if ($cmdL->getCheckKernel()) {
 		if (! $this -> checkKernel ($pinitrd,$imageTree,$bootdata[0])) {
 			return undef;
 		}
@@ -1793,7 +1794,7 @@ sub createImageLiveCD {
 	#==========================================
 	# setup isolinux checkmedia boot entry
 	#------------------------------------------
-	if (defined $main::ISOCheck) {
+	if ($cmdL->getISOCheck()) {
 		print FD "\n";
 		if (! $isxen) {
 			print FD "label mediacheck"."\n";
@@ -2593,7 +2594,7 @@ sub createImageSplit {
 	#==========================================
 	# Check boot and system image kernel
 	#------------------------------------------
-	if (defined $main::CheckKernel) {
+	if ($cmdL->getCheckKernel()) {
 		if (! $this -> checkKernel ($initrd,$imageTree,$bootdata[0])) {
 			return undef;
 		}

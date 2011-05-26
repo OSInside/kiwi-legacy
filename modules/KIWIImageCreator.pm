@@ -566,7 +566,7 @@ sub createImage {
 	# Create KIWIImage object
 	#------------------------------------------
 	my $image = new KIWIImage (
-		$kiwi,$xml,$configDir,$destination,$main::StripImage,
+		$kiwi,$xml,$configDir,$destination,$cmdL->getStripImage(),
 		"/base-system",$configDir,undef,$cmdL
 	);
 	if (! defined $image) {
@@ -1184,6 +1184,7 @@ sub __prepareTree {
 sub checkType {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
+	my $cmdL   = $this->{cmdL};
 	my $xml    = $_[0];
 	my (%type) = %{$_[1]};
 	my $root   = $_[2];
@@ -1194,7 +1195,7 @@ sub checkType {
 	#==========================================
 	# check for required image attributes
 	#------------------------------------------
-	if (defined $main::FatStorage) {
+	if ($cmdL->getFatStorage()) {
 		# /.../
 		# if the option --fat-storage is set, we set syslinux
 		# as bootloader because it works better on USB sticks.
@@ -1204,7 +1205,7 @@ sub checkType {
 		$xml -> __setTypeAttribute ("bootloader","syslinux");
 		$xml -> __setSystemDiskElement ();
 		$xml -> writeXMLDescription ($root);
-	} elsif (defined $main::LVM) {
+	} elsif ($cmdL->getLVM()) {
 		# /.../
 		# if the option --lvm is set, we add/update a systemdisk
 		# element which triggers the use of LVM

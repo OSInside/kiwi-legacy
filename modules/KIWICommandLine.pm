@@ -1152,4 +1152,131 @@ sub getXMLInfoSelection {
 	return $this->{XMLInfoSelection};
 }
 
+#==========================================
+# setStripImage
+#------------------------------------------
+sub setStripImage {
+	my $this  = shift;
+	my $value = shift;
+	$this->{stripImage} = $value;
+	return 1;
+}
+
+#==========================================
+# getStripImage
+#------------------------------------------
+sub getStripImage {
+	my $this = shift;
+	return $this->{stripImage};
+}
+
+#==========================================
+# setPrebuiltBootImagePath
+#------------------------------------------
+sub setPrebuiltBootImagePath {
+	my $this  = shift;
+	my $value = shift;
+	$this->{prebuiltBootPath} = $value;
+	return 1;
+}
+
+#==========================================
+# getPrebuiltBootImagePath
+#------------------------------------------
+sub getPrebuiltBootImagePath {
+	my $this = shift;
+	return $this->{prebuiltBootPath};
+}
+
+#==========================================
+# setISOCheck
+#------------------------------------------
+sub setISOCheck {
+	my $this  = shift;
+	my $value = shift;
+	$this->{isocheck} = $value;
+	return 1;
+}
+
+#==========================================
+# getISOCheck
+#------------------------------------------
+sub getISOCheck {
+	my $this = shift;
+	return $this->{isocheck};
+}
+
+#==========================================
+# setCheckKernel
+#------------------------------------------
+sub setCheckKernel {
+	my $this  = shift;
+	my $value = shift;
+	$this->{kernelcheck} = $value;
+	return 1;
+}
+
+#==========================================
+# getCheckKernel
+#------------------------------------------
+sub getCheckKernel {
+	my $this = shift;
+	return $this->{kernelcheck};
+}
+
+
+#==========================================
+# setLVM
+#------------------------------------------
+sub setLVM {
+	my $this  = shift;
+	my $value = shift;
+	$this->{lvm} = $value;
+	return 1;
+}
+
+#==========================================
+# getLVM
+#------------------------------------------
+sub getLVM {
+	my $this = shift;
+	return $this->{lvm};
+}
+
+#==========================================
+# setGrubChainload
+#------------------------------------------
+sub setGrubChainload {
+	my $this  = shift;
+	my $value = shift;
+	$this->{chainload} = $value;
+	return 1;
+}
+
+#==========================================
+# getGrubChainload
+#------------------------------------------
+sub getGrubChainload {
+	my $this = shift;
+	return $this->{chainload};
+}
+
+#==========================================
+# setFatStorage
+#------------------------------------------
+sub setFatStorage {
+	my $this  = shift;
+	my $value = shift;
+	$this->{fatsize} = $value;
+	return 1;
+}
+
+#==========================================
+# getFatStorage
+#------------------------------------------
+sub getFatStorage {
+	my $this = shift;
+	return $this->{fatsize};
+}
+
 1;

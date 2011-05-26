@@ -503,7 +503,6 @@ sub new {
 	$this->{xengz}     = $xengz;
 	$this->{arch}      = $arch;
 	$this->{ptool}     = $ptool;
-	$this->{chainload} = $main::GrubChainload;
 	$this->{vga}       = $vga;
 	$this->{xml}       = $xml;
 	$this->{cmdL}      = $cmdL;
@@ -511,6 +510,7 @@ sub new {
 	$this->{profile}   = $profile;
 	$this->{haveSplit} = $haveSplit;
 	$this->{imgtype}   = $cmdL->getBuildType();
+	$this->{chainload} = $cmdL->getGrubChainload();
 	return $this;
 }
 
@@ -1674,9 +1674,10 @@ sub setupBootDisk {
 	#------------------------------------------
 	if ($bootloader =~ /(sys|ext)linux/) {
 		$syslbootMB = 100;
-		if (defined $main::FatStorage) {
-			if ($syslbootMB < $main::FatStorage) {
-				$syslbootMB = $main::FatStorage;
+		my $fatstorage = $cmdL->getFatStorage();
+		if (defined $fatstorage) {
+			if ($syslbootMB < $fatstorage) {
+				$syslbootMB = $fatstorage;
 			}
 		}
 	}

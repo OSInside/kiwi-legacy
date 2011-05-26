@@ -74,17 +74,7 @@ my $cmdL;       # Command line data container
 #============================================
 # Globals
 #--------------------------------------------
-our $BootVMSystem;          # system image to be copied on a VM disk
-our $BootVMSize;            # size of virtual disk
-our $StripImage;            # strip shared objects and binaries
-our @ProfilesOrig;          # copy of original Profiles option value 
-our $PrebuiltBootImage;     # directory where a prepared boot image may be found
-our $ISOCheck;              # create checkmedia boot entry
-our $CheckKernel;           # check for kernel matches in boot and system image
-our $LVM;                   # use LVM partition setup for virtual disk
-our $GrubChainload;         # install grub loader in first partition not MBR
 our %XMLChangeSet;          # internal data set for update of XML objects
-our $FatStorage;            # specify size of fat partition if syslinux is used
 
 #==========================================
 # main
@@ -661,6 +651,15 @@ sub init {
 	my $LogFile;               # optional file name for logging
 	my @ListXMLInfoSelection;  # info selection for listXMLInfo
 	my $RootTree;              # optional root tree destination
+	my $BootVMSystem;          # system image to be copied on a VM disk
+	my $BootVMSize;            # size of virtual disk
+	my $StripImage;            # strip shared objects and binaries
+	my $PrebuiltBootImage;     # dir. where a prepared boot image may be found
+	my $ISOCheck;              # create checkmedia boot entry
+	my $CheckKernel;           # check if kernel matches in boot and system img
+	my $LVM;                   # use LVM partition setup for virtual disk
+	my $GrubChainload;         # install grub loader in first partition not MBR
+	my $FatStorage;            # size of fat partition if syslinux is used
 	my $PackageManager;        # package manager to use
 	my $Version;               # version information
 	#==========================================
@@ -773,6 +772,48 @@ sub init {
 	$cmdL -> setMigrationOptions (
 		\@Exclude,\@Skip,$MigrateNoFiles,$MigrateNoTemplate
 	);
+	#========================================
+	# check if fat-storage option is set
+	#----------------------------------------
+	if (defined $FatStorage) {
+		$cmdL -> setFatStorage ($FatStorage);
+	}
+	#========================================
+	# check if grub-chainload option is set
+	#----------------------------------------
+	if (defined $GrubChainload) {
+		$cmdL -> setGrubChainload ($GrubChainload);
+	}
+	#========================================
+	# check if lvm option is set
+	#----------------------------------------
+	if (defined $LVM) {
+		$cmdL -> setLVM ($LVM);
+	}
+	#========================================
+	# check if check-kernel option is set
+	#----------------------------------------
+	if (defined $CheckKernel) {
+		$cmdL -> setCheckKernel ($CheckKernel);
+	}
+	#========================================
+	# check if isocheck option is set
+	#----------------------------------------
+	if (defined $ISOCheck) {
+		$cmdL -> setISOCheck ($ISOCheck);
+	}
+	#========================================
+	# check if prebuilt boot path is set
+	#----------------------------------------
+	if (defined $PrebuiltBootImage) {
+		$cmdL -> setPrebuiltBootImagePath ($PrebuiltBootImage);
+	}
+	#========================================
+	# check if strip image option is set
+	#----------------------------------------
+	if (defined $StripImage) {
+		$cmdL -> setStripImage ($StripImage);
+	}
 	#========================================
 	# check if XML Info Selection is set
 	#----------------------------------------
@@ -1059,7 +1100,6 @@ sub init {
 	#========================================
 	# store original value of Profiles
 	#----------------------------------------
-	@ProfilesOrig = @Profiles;
 	$cmdL -> setBuildProfiles (\@Profiles);
 	#========================================
 	# set default inode ratio for ext2/3
