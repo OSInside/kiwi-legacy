@@ -163,11 +163,7 @@ test:
 	# Run unit tests...
 	#--------------------------------------------
 	tests/unit/cleanup.sh
-	cd tests/unit && \
-	for i in `find . -name "*.t"`;do \
-		echo $$i ;\
-		perl $$i ;\
-	done
+	cd tests/unit && /usr/bin/prove .
 	rm -f .revision
 
 %.t:
@@ -175,7 +171,7 @@ test:
 	# Run specific unit test
 	#--------------------------------------------
 	tests/unit/cleanup.sh
-	perl tests/unit/$@
+	cd tests/unit && /usr/bin/prove $@
 
 clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
