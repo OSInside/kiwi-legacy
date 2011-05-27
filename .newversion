@@ -8,7 +8,7 @@ fi
 
 # code version update
 cat modules/KIWIGlobals.pm | sed \
-	-e s"@\$data{Version}       = \".*\"@\$data\{Version\}       = \"$version\"@" \
+	-e s"@\$data{Version}         = \".*\"@\$data\{Version\}         = \"$version\"@" \
 > modules/KIWIGlobals.pm.new && mv modules/KIWIGlobals.pm.new modules/KIWIGlobals.pm && chmod 644 modules/KIWIGlobals.pm
 
 # spec file version update
