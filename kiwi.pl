@@ -71,11 +71,6 @@ my $kic;        # Image preparation / creation
 my $icache;     # Image Cache creation
 my $cmdL;       # Command line data container
 
-#============================================
-# Globals
-#--------------------------------------------
-our %XMLChangeSet;          # internal data set for update of XML objects
-
 #==========================================
 # main
 #------------------------------------------

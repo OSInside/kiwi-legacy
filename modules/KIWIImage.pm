@@ -1045,7 +1045,7 @@ sub createImageRootAndBoot {
 		#==========================================
 		# Setup changeset to be used by boot image
 		#------------------------------------------
-		%main::XMLChangeSet = $this -> updateDescription ($sxml);
+		my %XMLChangeSet = $this -> updateDescription ($sxml);
 		#==========================================
 		# Create tmp dir for boot image creation
 		#------------------------------------------
@@ -1070,7 +1070,7 @@ sub createImageRootAndBoot {
 		my $rootTarget = "$tmpdir/kiwi-".$text."boot-$$";
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if ((! $kic) ||	(! $kic -> prepareBootImage (
-			$configDir,$rootTarget,$this->{imageTree}))
+			$configDir,$rootTarget,$this->{imageTree},\%XMLChangeSet))
 		) {
 			undef $kic;
 			if (! -d $checkBase) {
@@ -1078,11 +1078,10 @@ sub createImageRootAndBoot {
 			}
 			return undef;
 		}
-		undef %main::XMLChangeSet;
 		#==========================================
 		# Create boot image...
 		#------------------------------------------
-		if ((! $kic) || (! $kic -> createBootImage(
+		if ((! $kic) || (! $kic -> createBootImage (
 			$rootTarget,$this->{imageDest}))
 		) {
 			undef $kic;
@@ -1533,7 +1532,7 @@ sub createImageLiveCD {
 		#==========================================
 		# Setup changeset to be used by boot image
 		#------------------------------------------
-		%main::XMLChangeSet = $this -> updateDescription ($sxml);
+		my %XMLChangeSet = $this -> updateDescription ($sxml);
 		#==========================================
 		# Create tmp dir for boot image creation
 		#------------------------------------------
@@ -1558,7 +1557,7 @@ sub createImageLiveCD {
 		my $rootTarget = "$tmpdir/kiwi-isoboot-$$";
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if ((! $kic) || (! $kic -> prepareBootImage (
-			$configDir,$rootTarget,$this->{imageTree}))
+			$configDir,$rootTarget,$this->{imageTree},\%XMLChangeSet))
 		) {
 			undef $kic;
 			if (! -d $checkBase) {
@@ -1566,7 +1565,6 @@ sub createImageLiveCD {
 			}
 			return undef;
 		}
-		undef %main::XMLChangeSet;
 		#==========================================
 		# Create boot image...
 		#------------------------------------------
@@ -2576,7 +2574,7 @@ sub createImageSplit {
 		#==========================================
 		# Setup changeset to be used by boot image
 		#------------------------------------------
-		%main::XMLChangeSet = $this -> updateDescription ($sxml);
+		my %XMLChangeSet = $this -> updateDescription ($sxml);
 		#==========================================
 		# Create tmp dir for boot image creation
 		#------------------------------------------
@@ -2601,7 +2599,7 @@ sub createImageSplit {
 		my $rootTarget = "$tmpdir/kiwi-splitboot-$$";
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if ((! $kic) || (! $kic -> prepareBootImage (
-			$configDir,$rootTarget,$this->{imageTree}))
+			$configDir,$rootTarget,$this->{imageTree},\%XMLChangeSet))
 		) {
 			undef $kic;
 			if (! -d $checkBase) {
@@ -2609,11 +2607,10 @@ sub createImageSplit {
 			}
 			return undef;
 		}
-		undef %main::XMLChangeSet;
 		#==========================================
 		# Create boot image...
 		#------------------------------------------
-		if ((! $kic) || (! $kic -> createBootImage(
+		if ((! $kic) || (! $kic -> createBootImage (
 			$rootTarget,$this->{imageDest}))
 		) {
 			undef $kic;

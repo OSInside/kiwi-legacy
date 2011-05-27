@@ -88,6 +88,7 @@ sub new {
 	my $imageType   = shift;
 	my $reqProfiles = shift;
 	my $cmdL        = shift;
+	my $changeset   = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -180,9 +181,9 @@ sub new {
 	#==========================================
 	# Update XML data from changeset if exists
 	#------------------------------------------
-	if (%main::XMLChangeSet) {
+	if (defined $changeset) {
 		$this -> __populateImageTypeAndNode();
-		$this -> __updateDescriptionFromChangeSet (\%main::XMLChangeSet);
+		$this -> __updateDescriptionFromChangeSet ($changeset);
 	}
 	#==========================================
 	# Populate default profiles from XML if set
@@ -4166,7 +4167,7 @@ sub __updateDescriptionFromChangeSet {
 	#==========================================
 	# 2) merge/update packages
 	#------------------------------------------
-	if ($changeset->{fplistImage}) {
+	if (@{$changeset->{fplistImage}}) {
 		$kiwi -> info ("Updating package(s):\n");
 		my $fixedBootInclude = $changeset->{fixedBootInclude};
 		my @fplistImage = @{$changeset->{fplistImage}};
@@ -4186,7 +4187,7 @@ sub __updateDescriptionFromChangeSet {
 	#==========================================
 	# 3) merge/update archives
 	#------------------------------------------
-	if ($changeset->{falistImage}) {
+	if (@{$changeset->{falistImage}}) {
 		$kiwi -> info ("Updating archive(s):\n");
 		my @falistImage = @{$changeset->{falistImage}};
 		foreach my $p (@falistImage) {

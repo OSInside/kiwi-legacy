@@ -134,6 +134,7 @@ sub prepareBootImage {
 	my $configDir  = shift;
 	my $rootTgtDir = shift;
 	my $systemTree = shift;
+	my $changeset  = shift;
 	my $cmdL       = $this->{cmdL};
 	my $kiwi       = $this->{kiwi};
 	if (! $configDir) {
@@ -159,9 +160,9 @@ sub prepareBootImage {
 		$kiwi -> failed ();
 		return undef;
 	}
-	$kiwi -> info ("Prepare boot image (initrd)...\n");
+	$kiwi -> info ("--> Prepare boot image (initrd)...\n");
 	my $xml = new KIWIXML (
-		$kiwi,$configDir,undef,undef,$cmdL
+		$kiwi,$configDir,undef,undef,$cmdL,$changeset
 	);
 	if (! defined $xml) {
 		return undef;
@@ -346,7 +347,7 @@ sub createBootImage {
 	if (! $isValid) {
 		return undef;
 	}
-	$kiwi -> info ("Create boot image (initrd)...\n");
+	$kiwi -> info ("--> Create boot image (initrd)...\n");
 	my $xml = new KIWIXML (
 		$kiwi,$configDir,"cpio",undef,$cmdL
 	);

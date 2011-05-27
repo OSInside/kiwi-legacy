@@ -1402,7 +1402,7 @@ sub cleanMount {
 				next;
 			}
 		}
-		$kiwi -> info ("Umounting path: $item\n");
+		$kiwi -> loginfo ("Umounting path: $item\n");
 		my $data = qxx ("umount \"$item\" 2>&1");
 		my $code = $? >> 8;
 		if (($code != 0) && ($data !~ "not mounted")) {
