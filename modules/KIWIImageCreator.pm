@@ -1351,13 +1351,14 @@ sub DESTROY {
 		$root -> cleanMount  ();
 		undef $root;
 	}
+	if ($boot) {
+		$boot -> cleanLoop ();
+		undef $boot;
+	}
 	if ($image) {
 		$image -> cleanMount ();
 		$image -> restoreCDRootData ();
 		$image -> restoreSplitExtend ();
-	}
-	if ($boot) {
-		undef $boot;
 	}
 }
 
