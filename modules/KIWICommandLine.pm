@@ -1279,4 +1279,25 @@ sub getFatStorage {
 	return $this->{fatsize};
 }
 
+#==========================================
+# setDiskStartSector
+#------------------------------------------
+sub setDiskStartSector {
+	my $this  = shift;
+	my $value = shift;
+	if (! defined $value) {
+		$value = $this->{gdata}->{DiskStartSector};
+	}
+	$this->{startsector} = $value;
+	return 1;
+}
+
+#==========================================
+# getDiskStartSector
+#------------------------------------------
+sub getDiskStartSector {
+	my $this = shift;
+	return $this->{startsector};
+}
+
 1;

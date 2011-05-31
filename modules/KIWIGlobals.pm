@@ -47,6 +47,7 @@ sub new {
 	$data{Partitioner}     = "parted";
 	$data{FSInodeRatio}    = 16384;
 	$data{FSInodeSize}     = 256;
+	$data{DiskStartSector} = 2048;
 	$data{OverlayRootTree} = 0;
 	#============================================
 	# Read .kiwirc

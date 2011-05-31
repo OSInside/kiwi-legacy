@@ -656,6 +656,7 @@ sub init {
 	my $LVM;                   # use LVM partition setup for virtual disk
 	my $GrubChainload;         # install grub loader in first partition not MBR
 	my $FatStorage;            # size of fat partition if syslinux is used
+	my $DiskStartSector;       # location of start sector (default is 32)
 	my $PackageManager;        # package manager to use
 	my $Version;               # version information
 	#==========================================
@@ -745,6 +746,7 @@ sub init {
 		"upgrade|u=s"           => \$Upgrade,
 		"test-image=s"          => \$TestImage,
 		"test-case=s"           => \$TestCase,
+		"start-sector=i"        => \$DiskStartSector,
 		"v|verbose=i"           => \$Verbosity,
 		"version"               => \$Version,
 		"yes|y"                 => \$defaultAnswer,
@@ -755,6 +757,12 @@ sub init {
 	if ( $result != 1 ) {
 		usage(1);
 	}
+	#========================================
+	# set start sector for disk images
+	#----------------------------------------
+	$cmdL -> setDiskStartSector (
+		$DiskStartSector
+	);
 	#========================================
 	# set list of filesystem options
 	#----------------------------------------
@@ -1345,6 +1353,12 @@ sub usage {
 	print "      Set a special target-architecture. This overrides the \n";
 	print "      used architecture for the image-packages in zypp.conf.\n";
 	print "      When used with smart this option doesn't have any effect.\n";
+	print "\n";
+	print "    [ --start-sector <number> ]\n";
+	print "      The start sector value for virtual disk based images.\n";
+	print "      The default is 2048. For newer disks including SSD\n";
+	print "      this is a reasonable default. In order to use the old\n";
+	print "      style disk layout the value can be set to 32\n";
 	print "\n";
 	print "    [ --debug ]\n";
 	print "      Prints a stack trace in case of internal errors\n";

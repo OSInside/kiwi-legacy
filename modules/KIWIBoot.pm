@@ -4318,21 +4318,28 @@ sub initCylinders {
 	my $device = shift;
 	my $size   = shift;
 	my $kiwi   = $this->{kiwi};
+	my $cmdL   = $this->{cmdL};
+	my $cylsize= $this->{pDiskCylinderSize};
+	my $secsize= 512;
 	my $cyls   = 0;
 	my $status;
 	my $result;
 	if (! defined $this->{pDiskCylinders}) {
-		my $cylsize = $this -> getCylinderSizeAndCount($device);
-		if ($cylsize == 0) {
+		my $cylcount = $this -> getCylinderSizeAndCount($device);
+		if ($cylcount == 0) {
 			return 0;
 		}
+		$cylsize= $this->{pDiskCylinderSize};
 	}
 	$cyls = $this -> getCylinder ($size);
 	if ($cyls == 0) {
 		return 0;
 	}
 	if (! defined $this->{pStart}) {
-		$this->{pStart} = 0;
+		$cylsize *= 1024;
+		$this->{pStart} = sprintf (
+			"%.0f",(($cmdL->getDiskStartSector() * $secsize) / $cylsize)
+		);
 	} else {
 		$this->{pStart} = $this->{pStopp};
 	}
@@ -4457,7 +4464,7 @@ sub setStoragePartition {
 			$status = qxx ("/usr/sbin/parted --help | grep -q align=");
 			$result = $? >> 8;
 			if ($result == 0) {
-				 $align="-a cyl";
+				$align="-a cyl";
 			}
 			foreach my $p_cmd (@p_cmd) {
 				$status= qxx (
