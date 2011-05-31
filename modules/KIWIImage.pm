@@ -244,10 +244,9 @@ sub updateDescription {
 		my $prio  = $element -> getAttribute("priority");
 		my $user  = $element -> getAttribute("username");
 		my $pwd   = $element -> getAttribute("password");
-		my $plic  = $element -> getAttribute("prefer-license");
 		my $source= $element -> getElementsByTagName("source")
 			-> get_node(1) -> getAttribute ("path");
-		$repos{$source} = [$type,$alias,$prio,$user,$pwd,$plic];
+		$repos{$source} = [$type,$alias,$prio,$user,$pwd];
 	}
 	$changeset{"repositories"} = \%repos;
 	#==========================================

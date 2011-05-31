@@ -1867,6 +1867,8 @@ sub setRepository {
 	my $path = shift;
 	my $alias= shift;
 	my $prio = shift;
+	my $user = shift;
+	my $pass = shift;
 	my @node = $this->{repositNodeList} -> get_nodelist();
 	foreach my $element (@node) {
 		my $status = $element -> getAttribute("status");
@@ -1885,6 +1887,10 @@ sub setRepository {
 		}
 		if ((defined $prio) && ($prio != 0)) {
 			$element -> setAttribute ("priority",$prio);
+		}
+		if ((defined $user) && (defined $pass)) {
+			$element -> setAttribute ("username",$user);
+			$element -> setAttribute ("password",$pass);
 		}
 		last;
 	}
@@ -1909,12 +1915,28 @@ sub addRepository {
 	my $kiwi = $this->{kiwi};
 	my @type = @{$_[0]};
 	my @path = @{$_[1]};
-	my @alias= @{$_[2]};
-	my @prio = @{$_[3]};
+	my @alias;
+	my @prio;
+	my @user;
+	my @pass;
+	if ($_[2]) {
+		@alias= @{$_[2]};
+	}
+	if ($_[3]) {
+		@prio = @{$_[3]};
+	}
+	if ($_[4]) {
+		@user = @{$_[4]};
+	}
+	if ($_[5]) {
+		@pass = @{$_[5]};
+	}
 	foreach my $path (@path) {
 		my $type = shift @type;
 		my $alias= shift @alias;
 		my $prio = shift @prio;
+		my $user = shift @user;
+		my $pass = shift @pass;
 		if (! defined $type) {
 			$kiwi -> error   ("No type for repo [$path] specified");
 			$kiwi -> skipped ();
@@ -1928,6 +1950,10 @@ sub addRepository {
 		}
 		if ((defined $prio) && ($prio != 0)) {
 			$addrepo -> setAttribute ("priority",$prio);
+		}
+		if ((defined $user) && (defined $pass)) {
+			$addrepo -> setAttribute ("username",$user);
+			$addrepo -> setAttribute ("password",$pass);
 		}
 		my $addsrc  = new XML::LibXML::Element ("source");
 		$addsrc -> setAttribute ("path",$path);
@@ -4160,7 +4186,11 @@ sub __updateDescriptionFromChangeSet {
 			my $type  = $props->[0];
 			my $alias = $props->[1];
 			my $prio  = $props->[2];
-			$this -> addRepository ([$type],[$source],[$alias],[$prio]);
+			my $user  = $props->[3];
+			my $pass  = $props->[4];
+			$this -> addRepository (
+				[$type],[$source],[$alias],[$prio],[$user],[$pass]
+			);
 		}
 		$kiwi -> done ();
 	}
