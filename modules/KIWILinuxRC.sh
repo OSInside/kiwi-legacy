@@ -7065,7 +7065,7 @@ function setupConsole {
 		fi
 	fi
 	if [ ! -e /sys/class/tty/ttyS0 ];then
-		cat $itab | grep -vi 'S0:.*ttyS0' > $itab.new && mv $itab.new $itab
+		cat $itab | grep -vi 'ttyS0' > $itab.new && mv $itab.new $itab
 	fi
 }
 #======================================
