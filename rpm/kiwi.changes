@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue May 31 12:02:05 CEST 2011 - ms@suse.de
+
+- really fixed setupConsole to remove the ttyS0 console if no
+  ttyS0 device exists (bnc #695948)
+
+-------------------------------------------------------------------
 Wed May 25 15:09:05 CEST 2011 - ms@suse.de
 
 - enhanced setupConsole to remove the ttyS0 console if no
