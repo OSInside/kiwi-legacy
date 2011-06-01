@@ -163,7 +163,7 @@ test:
 	# Run unit tests...
 	#--------------------------------------------
 	tests/unit/cleanup.sh
-	cd tests/unit && /usr/bin/prove .
+	cd tests/unit && /usr/bin/prove -f .
 	rm -f .revision
 
 %.t:
@@ -171,7 +171,7 @@ test:
 	# Run specific unit test
 	#--------------------------------------------
 	tests/unit/cleanup.sh
-	cd tests/unit && /usr/bin/prove $@
+	cd tests/unit && /usr/bin/prove -f $@
 
 clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
