@@ -41,7 +41,7 @@ BuildRequires: libsatsolver-devel
 %endif
 %if %{suse_version} > 1140
 BuildRequires: perl-Test-Unit btrfsprogs squashfs
-BuildRequires: dvd+rw-tools cdrkit-cdrtools-compat zypper
+BuildRequires: genisoimage cdrkit-cdrtools-compat zypper
 %endif
 %if %{suse_version} <= 1010
 Requires:       qt
@@ -169,7 +169,7 @@ License:        GPLv2+
 Requires:       kiwi = %{version}
 Requires:       syslinux
 %if %{suse_version} > 1010
-Requires:       dvd+rw-tools
+Requires:       genisoimage
 %else
 Requires:       mkisofs
 %endif
@@ -257,7 +257,7 @@ Requires:       multipath-tools parted
 Requires:       grub
 %endif
 %if %{suse_version} > 1010
-Requires:       dvd+rw-tools
+Requires:       genisoimage
 %else
 Requires:       mkisofs
 %endif
