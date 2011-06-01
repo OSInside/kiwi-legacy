@@ -433,6 +433,30 @@ sub warning {
 }
 
 #==========================================
+# doNorm
+#------------------------------------------
+sub doNorm {
+	# ...
+	# Reset cursor position to standard value
+	# In this module do nothing
+	# ---
+	my $this = shift;
+	return $this;
+}
+
+#==========================================
+# terminalLogging
+#------------------------------------------
+sub terminalLogging {
+	# ...
+	# Check if terminal logging is activated
+	# In this module always report false -> not activated
+	# ---
+	my $this = shift;
+	return 0;
+}
+
+#==========================================
 # Private helper methods
 #------------------------------------------
 #==========================================
