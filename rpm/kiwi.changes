@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Jun  1 14:43:25 CEST 2011 - ms@suse.de
+
+- fixed the problem where the <size> element is being dropped
+  during XML file upgrade if the <size> element is specified as
+  a child of <preferences>. The <size> element is moved to
+  every <type>
+
+-------------------------------------------------------------------
 Tue May 31 12:02:05 CEST 2011 - ms@suse.de
 
 - really fixed setupConsole to remove the ttyS0 console if no
