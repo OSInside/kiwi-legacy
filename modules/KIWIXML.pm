@@ -274,6 +274,9 @@ sub writeXMLDescription {
 	}
 	print $FD $xmlu;
 	close $FD;
+	my $pretty = $gdata->{Pretty};
+	qxx ("xsltproc -o $file.new $pretty $file");
+	qxx ("mv $file.new $file");
 	my $overlayTree = $gdata->{OverlayRootTree};
 	if ($overlayTree) {
 		qxx ("mkdir -p $overlayTree");
