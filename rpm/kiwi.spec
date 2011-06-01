@@ -20,7 +20,7 @@
 Url:            http://kiwi.berlios.de
 Name:           kiwi
 BuildRequires:  perl-Config-IniFiles perl-XML-LibXML perl-libwww-perl
-BuildRequires:  module-init-tools screen zlib-devel zypper
+BuildRequires:  module-init-tools screen zlib-devel
 BuildRequires:  gcc-c++ libxslt swig trang
 %if %{suse_version} > 1020
 BuildRequires:  fdupes
@@ -40,7 +40,8 @@ BuildRequires:  libexpat-devel rpm-devel
 BuildRequires: libsatsolver-devel
 %endif
 %if %{suse_version} > 1140
-BuildRequires: perl-Test-Unit
+BuildRequires: perl-Test-Unit btrfsprogs squashfs
+BuildRequires: dvd+rw-tools cdrkit-cdrtools-compat zypper
 %endif
 %if %{suse_version} <= 1010
 Requires:       qt
@@ -168,7 +169,7 @@ License:        GPLv2+
 Requires:       kiwi = %{version}
 Requires:       syslinux
 %if %{suse_version} > 1010
-Requires:       genisoimage
+Requires:       dvd+rw-tools
 %else
 Requires:       mkisofs
 %endif
@@ -256,7 +257,7 @@ Requires:       multipath-tools parted
 Requires:       grub
 %endif
 %if %{suse_version} > 1010
-Requires:       genisoimage
+Requires:       dvd+rw-tools
 %else
 Requires:       mkisofs
 %endif
