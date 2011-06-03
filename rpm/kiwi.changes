@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jun  3 16:45:14 CEST 2011 - ms@suse.de
+
+- added squashfs in drivers section of SLE10 boot image descriptions
+
+-------------------------------------------------------------------
 Fri Jun  3 11:31:14 CEST 2011 - ms@suse.de
 
 - fixed xsl style sheets, apply changes only if the
