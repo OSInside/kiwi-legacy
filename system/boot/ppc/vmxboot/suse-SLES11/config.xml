@@ -7,7 +7,7 @@
 		<specification>boot/initrd image for virtual machines</specification>
 	</description>
 	<preferences>
-		<type image="cpio" bootprofile="default" bootkernel="ppc64"/>
+		<type image="cpio" bootprofile="ppc64" bootkernel="ppc64"/>
 		<version>2.7.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>

@@ -30,12 +30,23 @@ export UTIMER_INFO=/dev/utimer
 export bootLoaderOK=0
 
 #======================================
+# Exports (arch specific)
+#--------------------------------------
+arch=`uname -m`
+if [ "$arch" = "ppc64" ];then
+	loader=lilo
+	test -z  "$ELOG_BOOTSHELL" && export ELOG_BOOTSHELL=/dev/hvc0
+	test -z  "$ELOG_CONSOLE"   && export ELOG_CONSOLE=/dev/hvc0
+else
+	test -z "$ELOG_CONSOLE"    && export ELOG_CONSOLE=/dev/tty3
+	test -z "$ELOG_BOOTSHELL"  && export ELOG_BOOTSHELL=/dev/tty2
+fi
+
+#======================================
 # Exports (General)
 #--------------------------------------
 test -z "$haveDASD"           && export haveDASD=0
 test -z "$haveZFCP"           && export haveZFCP=0
-test -z "$ELOG_CONSOLE"       && export ELOG_CONSOLE=/dev/tty3
-test -z "$ELOG_BOOTSHELL"     && export ELOG_BOOTSHELL=/dev/tty2
 test -z "$ELOG_EXCEPTION"     && export ELOG_EXCEPTION=/dev/tty1
 test -z "$KLOG_CONSOLE"       && export KLOG_CONSOLE=4
 test -z "$KLOG_DEFAULT"       && export KLOG_DEFAULT=1
@@ -68,14 +79,6 @@ if [ -e /usr/sbin/parted ];then
 fi
 if dhcpcd -p 2>&1 | grep -q 'Usage';then
 	export DHCPCD_HAVE_PERSIST=0
-fi
-#======================================
-# Exports (arch specific)
-#--------------------------------------
-arch=`uname -m`
-if [ "$arch" = "ppc64" ];then
-	loader=lilo
-	export ELOG_BOOTSHELL=/dev/hvc0
 fi
 
 #======================================
@@ -6649,7 +6652,7 @@ function pxePartitionInput {
 		fi
 		if [ $count -eq 1 ];then
 			echo -n "n p $count 1 $partSize "
-			if [ $partID = "82" ] || [ $partID = "8e" ];then
+			if [ $partID = "82" ] || [ $partID = "8e" ] || [ $partID = "41" ] ;then
 				echo -n "t $partID "
 			fi
 		else
