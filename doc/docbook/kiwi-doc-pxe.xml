@@ -120,7 +120,7 @@ DHCPD_INTERFACE="eth0"
   </sect1>
   <sect1 id="sec.pxe.building">
     <title>Building the suse-pxe-client Example</title>
-    <para>The example provided with KIWI is based on open­SUSE 11.2 and
+    <para>The example provided with KIWI is based on openSUSE and
       creates an image for a Wyse VX0 terminal with a 128MB flash card
       and 512MB of RAM. The image makes use of the <systemitem
         class="filesystem">squashfs</systemitem> compressed
@@ -251,7 +251,7 @@ config.$&lt;$MAC Address$&gt;$
 <screen>
 DISK=/dev/sda
 PART=5;S;x,x;L;/
-IMAGE=/dev/sda2;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096
+IMAGE=/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096
 </screen>
 
       <para>The following format is used: </para>
@@ -451,7 +451,7 @@ DISK=device
               A typical raid image setup could look like this:</para>
 <screen>
 DISK=/dev/sda
-IMAGE=/dev/md1;LimeJeOS-openSUSE-11.3.i686;1.11.3;192.168.100.2;4096
+IMAGE=/dev/md1;LimeJeOS-openSUSE-##.#.i686;1.11.3;192.168.100.2;4096
 PART=5;S;x,2000;83;/
 RAID=1;/dev/sda;/dev/sdb
 </screen>
@@ -711,7 +711,7 @@ NFSROOT=NFS.Server.IP.address;/path/to/root/tree
               device like: </para>
 
 <screen>
-UNIONFS_CONFIG=/tmp/kiwi-11.1-cow,nfs,aufs # write to NFS directory
+UNIONFS_CONFIG=/tmp/kiwi-cow,nfs,aufs # write to NFS directory
 UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM
 </screen>
 
@@ -829,7 +829,7 @@ KIWI_KERNEL=/boot/name-of-kernel-file
               <filename>config.<replaceable>MAC</replaceable></filename>
           </para>
 <screen>
-IMAGE=/dev/ram1;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096
+IMAGE=/dev/ram1;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096
 </screen>
         </listitem>
       </itemizedlist>
@@ -856,7 +856,7 @@ IMAGE=/dev/ram1;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096
 <screen>
 DISK=/dev/sda
 PART=5;S;x,62;L;/,x;L;x,
-IMAGE=/dev/sda2;suse-11.2-pxe-client.i386;\
+IMAGE=/dev/sda2;suse-##.#-pxe-client.i386;\
       1.2.8;192.168.100.2;4096
 UNIONFS_CONFIG=/dev/sda3,/dev/sda2,aufs
 KIWI_INITRD=/boot/initrd
@@ -883,7 +883,7 @@ KIWI_INITRD=/boot/initrd
             example </para>
 <screen>
 &lt;type fsreadonly="squashfs" 
-   image="split" fsreadwrite="ext3" boot="netboot/suse-11.2"/&gt;
+   image="split" fsreadwrite="ext3" boot="netboot/suse-..."/&gt;
 </screen>
         </listitem>
         <listitem>
@@ -917,8 +917,8 @@ KIWI_INITRD=/boot/initrd
               <filename>config.<replaceable>MAC</replaceable></filename>: </para>
 
 <screen>
-IMAGE=/dev/sda2;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096,\
-      /dev/sda3;suse-11.2-pxe-client-read-write.i686;1.2.8;192.168.100.2;4096
+IMAGE=/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096,\
+      /dev/sda3;suse-##.#-pxe-client-read-write.i686;1.2.8;192.168.100.2;4096
 PART=200;S;x,500;L;/,x;L;
 DISK=/dev/sda
 COMBINED_IMAGE=yes
@@ -1126,7 +1126,7 @@ KIWI_GROUP="test1, test_my_name, LIST_HARDWARE, Multple_Case_Group_1"
 <screen>
 DISK=/dev/sda
 PART=5;S;x,x;L;/
-IMAGE=/dev/sda2;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096
+IMAGE=/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096
 CONF=CONFIGURATIONS/xorg.conf.test1;/etc/X11/xorg.conf;192.168.100.2;4096,\
      CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096
 </screen>
@@ -1136,7 +1136,7 @@ CONF=CONFIGURATIONS/xorg.conf.test1;/etc/X11/xorg.conf;192.168.100.2;4096,\
 <screen>
 DISK=/dev/sda
 PART=5;S;x,x;L;/
-IMAGE=/dev/sda2;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096
+IMAGE=/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096
 CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,\
      CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096
 </screen>
@@ -1254,7 +1254,7 @@ KIWI_INITRD=/boot/initrd
 KIWI_KERNEL=/boot/linux
 DISK=/dev/sda
 PART=5;S;x,769;L;/,x;L;x,
-IMAGE=/dev/sda2;exmaple-kiosk-opensuse-11.3-pxe-client.i686;0.0.1;192.168.1.2;4096
+IMAGE=/dev/sda2;exmaple-kiosk-opensuse-##.#-pxe-client.i686;0.0.1;192.168.1.2;4096
 UNIONFS_CONFIG=/dev/sda3,/dev/sda2,clicfs
 CONF=prefs.js;/home/kioskuser/.mozilla/firefox/07xvl1ty.default/prefs.js;192.168.1.2;4096,
      xorg.conf;/etc/X11/xorg.conf;192.168.1.2;4096
