@@ -38,9 +38,9 @@
   <sect1 id="sec.xen.building">
     <title>Building the suse-xen-guest Example</title>
     <para>The latest example provided with KIWI is based on openSUSE
-      11.3 and includes the base pattern. </para>
+      and includes the base pattern. </para>
 
-    <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples cd suse-11.2
+    <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples cd suse-...
 <command>kiwi</command> --prepare ./suse-xen-guest --root /tmp/myxen</screen>
 
     <screen><command>kiwi</command> --create /tmp/myxen --type vmx -d /tmp/myxen-result</screen>
@@ -52,8 +52,9 @@
       needs to be called in conjunction with the KIWI generated domain
       U configuration file </para>
 
-    <screen><command>xm</command> create -c /tmp/myxen-result/ <!--
-  --> suse-11.2-xen-guest.i686-1.1.2.xenconfig </screen>
+    <screen><command>xm</command> create -c /tmp/myxen-result/
+        the-file-with-suffix.xenconfig
+    </screen>
   </sect1>
 
   <sect1 id="sec.xen.flavours">
@@ -77,7 +78,7 @@
         class="devicefile">/dev/xvda</filename>. Additional information
       to setup the Xen guest machine properties are explained in the
       machine section. The KIWI Xen domain U configuration is stored in
-      the file <filename>/tmp/myxen-result/suse-11.2-xen-guest.i686-1.1.2.xenconfig</filename>.</para>
+      the file <filename>/tmp/myxen-result/suse-##.#-xen-guest.####-#.#.#.xenconfig</filename>.</para>
 
   </sect1>
 </chapter>

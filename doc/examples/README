@@ -34,11 +34,11 @@ source which is stored below /images/CDs
 
 3) Once you have access to the media copy the contents of the
    CDs / DVD to your hard drive. You need at least 4GB free
-   space available. The following is intended to create a SUSE
-   11.0 installation source:
+   space available. The following is intended to create an openSUSE
+   installation source:
 
-      mkdir -p /image/CDs/full-11.0-i386/
-      cp -a /mnt/* /image/CDs/full-11.0-i386/
+      mkdir -p /image/CDs/full-##.#-i386/
+      cp -a /mnt/* /image/CDs/full-##.#-i386/
 
    Remember if you have a CD set start with number 4 first and
    after that unplugg the CD and insert the next one to repeat

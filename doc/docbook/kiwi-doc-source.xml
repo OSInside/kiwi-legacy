@@ -26,9 +26,8 @@
       looks like the following: </para>
 
     <screen>&lt;repository type="yast2"&gt;
-   <sgmltag class="sgmlcomment">&lt;source path="/image/CDs/full-11.0-i386"/&gt;</sgmltag>
-   &lt;source path="opensuse://openSUSE:11.0/standard/"/&gt; 
-&lt;/repository&gt;</screen>
+   &lt;source path="opensuse://openSUSE:##.#/standard/"/&gt; 
+   &lt;/repository&gt;</screen>
   </sect1>
 
   <sect1 id="sec.instsourcesetup.create-local-inst-source">
@@ -66,11 +65,11 @@
       <step>
         <para>Copy the contents of the CDs/DVD to your hard drive once
           you have access to the media. You need at least 4GB free space
-          available. The following is intended to create a SUSE 11.0
+          available. The following is intended to create an openSUSE
           installation source: </para>
 
-        <screen><command>mkdir</command> -p /image/CDs/full-11.0-i386/ 
-<command>cp</command> -a /mnt/* /image/CDs/full-11.0-i386/ </screen>
+        <screen><command>mkdir</command> -p /image/CDs/full-##.#-i386/ 
+<command>cp</command> -a /mnt/* /image/CDs/full-##.#-i386/ </screen>
 
         <para>Remember if you have a CD set start with number 4 first
           and after that, eject the CD and insert the next one to

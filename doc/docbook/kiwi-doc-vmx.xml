@@ -31,7 +31,7 @@
       the distribution default filesystem. </para>
 
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples 
-<command>cd</command> suse-11.2
+<command>cd</command> suse-...
 <command>kiwi</command> --prepare ./suse-vm-guest --root /tmp/myvm </screen>
 
     <screen><command>kiwi</command> --create /tmp/myvm --type vmx -d /tmp/myvm-result</screen>
@@ -47,7 +47,7 @@
       test the created image with the following command: </para>
 
     <screen><command>cd</command> /tmp/myvm-result 
-<command>qemu</command> suse-11.2-vm-guest.i686-1.1.2.raw -m 256 </screen>
+<command>qemu</command> suse-##.#-vm-guest.i686-1.1.2.raw -m 256 </screen>
   </sect1>
   
   <sect1 id="sec.vmx.flavours">
@@ -144,7 +144,7 @@
         file has the <filename class="extension">.vmx</filename>
         extension as shown in the example below. </para>
 
-      <screen>/tmp/myvm-result/suse-11.2-vm-guest.i686-1.1.2.vmx</screen>
+      <screen>/tmp/myvm-result/suse-##.#-vm-guest.i686-1.1.2.vmx</screen>
 
       <para>Using the <sgmltag class="attribute"
           >format</sgmltag>="<sgmltag class="attvalue">vmdk</sgmltag>"

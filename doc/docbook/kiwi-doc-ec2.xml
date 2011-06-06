@@ -149,8 +149,8 @@
      --> <replaceable>myImages</replaceable> \
         -a <replaceable>AWS_Key_ID</replaceable> -s<!--
      --> <replaceable>AWS_secret_Key_ID</replaceable> -m /tmp/myec2/ \
-     suse-11.3-ec2-guest.i686-1.1.2.ec2/ \
-     suse-11.3-ec2-guest.i686-1.1.2.ami.manifest.xml
+     suse-##.#-ec2-guest.i686-1.1.2.ec2/ \
+     suse-##.#-ec2-guest.i686-1.1.2.ami.manifest.xml
     </screen>
 
     <para>After the upload process is complete register your image with the
@@ -161,7 +161,7 @@
     </para>
 
     <screen><command>ec2-register</command> myImages/<!--
-     --> suse-11.3-ec2-guest.i686-1.1.2.ami.manifest.xml </screen>
+     --> suse-##.#-ec2-guest.i686-1.1.2.ami.manifest.xml </screen>
 
     <para>Once the image is registered via the <command>ec2-register</command>
       command you can use the AWS management console in your browser to 

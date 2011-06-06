@@ -1,8 +1,0 @@
-Build instructions for local build
-==================================
-* tip: create a local 11.1 installation source to speed up the build process
-  tip: copy 11.1 DVD
-
-* call kiwi:
-  kiwi --build suse-11.1-JeOS --set-repo /path/to/11.1/repo \
-	   -d /tmp/myimage --type vmx
