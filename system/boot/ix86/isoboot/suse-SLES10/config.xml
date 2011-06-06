@@ -31,7 +31,7 @@
 		<file name="fs/ext2/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
-		<file name="fs/squashfs/*"/>
+		<file name="fs/squashfs.ko"/>
 		<file name="fs/binfmt_aout.ko"/>
 		<file name="fs/binfmt_misc.ko"/>
 		<file name="fs/mbcache.ko"/>
