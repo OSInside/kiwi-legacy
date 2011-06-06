@@ -724,12 +724,15 @@ function setupDeviceNames {
 #--------------------------------------
 function createBootDeviceData {
 	local bootPart=$1
-	if partitionSize $(ddn $imageDiskDevice $bootPart) &>/dev/null;then
+	local bootDevice=$(ddn $imageDiskDevice $bootPart)
+	local bootKBytes
+	if [ -e "$bootDevice" ];then
 		#======================================
 		# Variable setup
 		#--------------------------------------
+		bootKBytes=$(partitionSize $bootDevice)
 		export haveBootPartition=yes
-		export bootXMBytes=100
+		export bootXMBytes=$((bootKBytes / 1024))
 		export bootpartID=83
 		if [ "$loader" = "syslinux" ];then
 			bootpartID=c
