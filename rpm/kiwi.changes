@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jun  6 10:18:55 CEST 2011 - ms@suse.de
+
+- fixed location of squashfs in drivers section for sle10
+
+-------------------------------------------------------------------
 Fri Jun  3 16:45:14 CEST 2011 - ms@suse.de
 
 - added squashfs in drivers section of SLE10 boot image descriptions
