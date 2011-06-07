@@ -1,7 +1,7 @@
 #!/bin/bash
 
 version=$1
-if ! echo $version | grep -q -E "^[0-9]+\.[0-9]+$";then
+if ! echo $version | grep -q -E "^[0-9]+\.[0-9]+\.[0-9]+$";then
 	echo "NOT A VERSION ! ... abort"
 	exit 1
 fi
