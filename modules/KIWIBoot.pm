@@ -217,6 +217,7 @@ sub new {
 	$this->{tmpdirs}  = [ $tmpdir, $loopdir ];
 	$this->{haveTree} = $haveTree;
 	$this->{kiwi}     = $kiwi;
+	$this->{bootsize} = 100;
 
 	#==========================================
 	# setup pointer to XML configuration
@@ -226,6 +227,10 @@ sub new {
 			$xml = new KIWIXML (
 				$kiwi,$system."/image",$main::SetImageType,$profile
 			);
+			#==========================================
+			# Determine size of /boot area
+			#------------------------------------------
+			$this ->{bootsize} = $this -> __getBootSize ($system);
 		} else {
 			my %fsattr = main::checkFileSystem ($system);
 			if ((! $fsattr{type}) || ($fsattr{type} eq "auto")) {
@@ -272,6 +277,10 @@ sub new {
 					$kiwi,$tmpdir."/image",$main::SetImageType,$profile
 				);
 				#==========================================
+				# Determine size of /boot area
+				#------------------------------------------
+				$this ->{bootsize} = $this -> __getBootSize ($tmpdir);
+				#==========================================
 				# clean up
 				#------------------------------------------
 				$this -> cleanLoop ();
@@ -295,6 +304,10 @@ sub new {
 				$xml = new KIWIXML (
 					$kiwi,$tmpdir."/image",$main::SetImageType,$profile
 				);
+				#==========================================
+				# Determine size of /boot area
+				#------------------------------------------
+				$this ->{bootsize} = $this -> __getBootSize ($tmpdir);
 				#==========================================
 				# clean up
 				#------------------------------------------
@@ -1454,18 +1467,14 @@ sub setupBootDisk {
 	my $haveTree  = $this->{haveTree};
 	my $imgtype   = $this->{imgtype};
 	my $haveSplit = $this->{haveSplit};
+	my $bootsize  = $this->{bootsize};
 	my $diskname  = $system.".raw";
 	my %deviceMap = ();
 	my @commands  = ();
 	my $bootfix   = "VMX";
-	my $lvmbootMB = 0;
-	my $luksbootMB= 0;
-	my $syslbootMB= 0;
-	my $dmbootMB  = 0;
 	my $dmapper   = 0;
 	my $haveluks  = 0;
 	my $needBootP = 0;
-	my $prepbootMB= 0;
 	my $bootloader;
 	my $boot;
 	if ($arch =~ /ppc|ppc64/) {
@@ -1503,7 +1512,6 @@ sub setupBootDisk {
 		# add boot space if lvm based
 		#------------------------------------------
 		$lvm = 1;
-		$lvmbootMB  = 100;
 		$this->{lvm}= $lvm;
 		#==========================================
 		# set volume group name
@@ -1585,21 +1593,18 @@ sub setupBootDisk {
 	if ($type{filesystem} eq "clicfs") {
 		$this->{dmapper} = 1;
 		$dmapper  = 1;
-		$dmbootMB = 100;
 	}
 	#==========================================
 	# check if fs requires a boot partition
 	#------------------------------------------
 	if (($type{filesystem} eq "btrfs") || ($type{filesystem} eq "xfs")) {
 		$needBootP  = 1;
-		$luksbootMB = 100;
 	}
 	#==========================================
 	# check for LUKS extension
 	#------------------------------------------
 	if ($type{luks}) {
 		$haveluks   = 1;
-		$luksbootMB = 100;
 	}
 	#==========================================
 	# setup boot loader type
@@ -1612,18 +1617,10 @@ sub setupBootDisk {
 	# add boot space if syslinux based
 	#------------------------------------------
 	if ($bootloader =~ /(sys|ext)linux/) {
-		$syslbootMB = 100;
 		if (defined $main::FatStorage) {
-			if ($syslbootMB < $main::FatStorage) {
-				$syslbootMB = $main::FatStorage;
+			if ($bootsize < $main::FatStorage) {
+				$bootsize = $main::FatStorage;
 			}
-		}
-	}
-	if ($arch =~ /ppc|ppc64/) {
-		if ($lvm) {
-			$prepbootMB = 100;
-		} else {
-			$prepbootMB = 8;
 		}
 	}
 	#==========================================
@@ -1672,7 +1669,7 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (($imgtype eq "split") && (-f $splitfile)) {
 		my $splitsize = main::isize ($splitfile); $splitsize /= 1048576;
-		$vmsize = $this->{vmmbyte} + ($splitsize * 1.5) + $lvmbootMB;
+		$vmsize = $this->{vmmbyte} + ($splitsize * 1.5) + $bootsize;
 		$vmsize = sprintf ("%.0f", $vmsize);
 		$this->{vmmbyte} = $vmsize;
 		$vmsize = $vmsize."M";
@@ -1681,8 +1678,8 @@ sub setupBootDisk {
 	#==========================================
 	# increase vmsize if single boot partition
 	#------------------------------------------
-	if (($dmbootMB) || ($syslbootMB) || ($lvmbootMB)) {
-		$vmsize = $this->{vmmbyte} + (($dmbootMB+$syslbootMB+$lvmbootMB) * 1.3);
+	if ($bootsize) {
+		$vmsize = $this->{vmmbyte} + ($bootsize * 1.3);
 		$vmsize = sprintf ("%.0f", $vmsize);
 		$this->{vmmbyte} = $vmsize;
 		$vmsize = $vmsize."M";
@@ -1793,7 +1790,7 @@ sub setupBootDisk {
 		# create disk partition
 		#------------------------------------------
 		if ($arch =~ /ppc|ppc64/) {
-			my $prepsize = $prepbootMB;
+			my $prepsize = $bootsize;
 			if (! $lvm) {
 				@commands = (
 					"n","p","1",".","+".$prepsize."M",
@@ -1804,7 +1801,7 @@ sub setupBootDisk {
 				);
 			} else {
 				@commands = (
-					"n","p","1",".","+".$prepbootMB."M",
+					"n","p","1",".","+".$bootsize."M",
 					"n","p","2",".",".",
 					"t","1","c",
 					"t","2","8e",
@@ -1820,7 +1817,7 @@ sub setupBootDisk {
 					if ($bootloader eq "extlinux" ) {
 						$partid = "83";
 					}
-					my $syslsize = $this->{vmmbyte} - $syslbootMB - $syszip;
+					my $syslsize = $this->{vmmbyte} - $bootsize - $syszip;
 					@commands = (
 						"n","p","1",".","+".$syszip."M",
 						"n","p","2",".","+".$syslsize."M",
@@ -1829,7 +1826,7 @@ sub setupBootDisk {
 						"a","3","w","q"
 					);
 				} elsif ($dmapper) {
-					my $dmsize = $this->{vmmbyte} - $dmbootMB - $syszip;
+					my $dmsize = $this->{vmmbyte} - $bootsize - $syszip;
 					@commands = (
 						"n","p","1",".","+".$syszip."M",
 						"n","p","2",".","+".$dmsize."M",
@@ -1837,7 +1834,7 @@ sub setupBootDisk {
 						"a","3","w","q"
 					);
 				} elsif ($haveluks) {
-					my $lukssize = $this->{vmmbyte} - $luksbootMB - $syszip;
+					my $lukssize = $this->{vmmbyte} - $bootsize - $syszip;
 					@commands = (
 						"n","p","1",".","+".$syszip."M",
 						"n","p","2",".","+".$lukssize."M",
@@ -1858,7 +1855,7 @@ sub setupBootDisk {
 					if ($bootloader eq "extlinux" ) {
 						$partid = "83";
 					}
-					my $syslsize = $this->{vmmbyte} - $syslbootMB;
+					my $syslsize = $this->{vmmbyte} - $bootsize;
 					@commands = (
 						"n","p","1",".","+".$syslsize."M",
 						"n","p","2",".",".",
@@ -1866,7 +1863,7 @@ sub setupBootDisk {
 						"a","2","w","q"
 					);
 				} elsif (($haveluks) || ($needBootP)) {
-					my $lukssize = $this->{vmmbyte} - $luksbootMB;
+					my $lukssize = $this->{vmmbyte} - $bootsize;
 					@commands = (
 						"n","p","1",".","+".$lukssize."M",
 						"n","p","2",".",".",
@@ -1885,8 +1882,8 @@ sub setupBootDisk {
 				if ($bootloader eq "extlinux" ) {
 					$partid = "83";
 				}
-				my $lvmsize = $this->{vmmbyte} - $syslbootMB;
-				my $bootpartsize = "+".$syslbootMB."M";
+				my $lvmsize = $this->{vmmbyte} - $bootsize;
+				my $bootpartsize = "+".$bootsize."M";
 				@commands = (
 					"n","p","1",".",$bootpartsize,
 					"n","p","2",".",".",
@@ -1895,8 +1892,8 @@ sub setupBootDisk {
 					"a","1","w","q"
 				);
 			} else {
-				my $lvmsize = $this->{vmmbyte} - $lvmbootMB;
-				my $bootpartsize = "+".$lvmbootMB."M";
+				my $lvmsize = $this->{vmmbyte} - $bootsize;
+				my $bootpartsize = "+".$bootsize."M";
 				@commands = (
 					"n","p","1",".",$bootpartsize,
 					"n","p","2",".",".",
@@ -5078,6 +5075,29 @@ sub DESTROY {
 #==========================================
 # Private methods
 #------------------------------------------
+#==========================================
+# getBootSize
+#------------------------------------------
+sub __getBootSize {
+	# ...
+	# calculate required size of /boot. This is
+	# needed if we have a separate boot partition
+	# The function returns the size in M-Bytes
+	# ---
+	my $this   = shift;
+	my $extend = shift;
+	my $kiwi   = $this->{kiwi};
+	my $boot   = $extend."/boot";
+	my $bbytes = qxx ("du -s --block-size=1 $boot | cut -f1"); chomp $bbytes;
+	my $gotMB  = sprintf ("%.0f",(($bbytes / 1048576) * 1.3));
+	my $minMB  = 100;
+	if ($gotMB < $minMB) {
+		$gotMB = $minMB;
+	}
+	$kiwi -> loginfo ("Set boot space to: $gotMB\n");
+	return $gotMB;
+}
+
 #==========================================
 # __expandFS
 #------------------------------------------

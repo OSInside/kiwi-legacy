@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Jun  7 11:29:18 CEST 2011 - ms@suse.de
+
+- don't use a fixed value for the size of the boot partition. The
+  size among others depends on how many kernels were installed. Thus
+  a fixed value is always wrong. The new function __getBootSize()
+  is used to check the actual size of the boot/* area and this value
+  is used to create the boot partition if required. In case of an
+  oem image the re-creation of the boot partition happens based on
+  the original boot partition size (bnc #698161)
+
+-------------------------------------------------------------------
 Mon Jun  6 10:18:55 CEST 2011 - ms@suse.de
 
 - fixed location of squashfs in drivers section for sle10
