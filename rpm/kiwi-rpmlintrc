@@ -18,3 +18,18 @@ addFilter("cross-directory-hard-link .*")
 
 # don't check for locale locations, they are used in the initrd only
 addFilter("file-not-in-%lang .*")
+
+# don't check for included file deps in doc example descriptions
+addFilter("W: doc-file-dependency .*")
+
+# don't check for repeated names as they are set by pdb not by spec
+addFilter("W: name-repeated-in-summary .*")
+
+# don't check for manual page of binaries used in initrd only
+addFilter("W: no-manual-page-for-binary dcounter");
+addFilter("W: no-manual-page-for-binary startshell");
+addFilter("W: no-manual-page-for-binary utimer");
+addFilter("W: no-manual-page-for-binary driveready");
+
+# kiwi master package can't be noarch if sub packages are arch specific
+addFilter("W: no-binary");
