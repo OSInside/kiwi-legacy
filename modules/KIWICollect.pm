@@ -882,7 +882,7 @@ sub setupPackageFiles
                 # Add debug packages, we do not know, if they exist at all
                 my $suffix = "";
                 my $basename = $packName;
-                foreach my $tsuffix qw(32bit 64bit x86) {
+                foreach my $tsuffix (qw(32bit 64bit x86)) {
                    if ( $packName =~ /^(.*)(-$tsuffix)$/ ) {
 			$basename = $1;
 			$suffix = $2;
