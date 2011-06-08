@@ -291,11 +291,6 @@ fi
 #
 stty $otty
 
-# create config file if not yet done
-if [ ! -f /etc/X11/xorg.conf ];then
-	/usr/sbin/sax2 -c 0 -a -i &>/dev/null
-fi
-
 #
 # Let YaST2 finish its installation, if you installed with YaST2
 #
@@ -311,6 +306,18 @@ if test -f /var/lib/YaST2/runme_at_boot ; then
     else
 	# oops, yast2 not installed
 	rm -f /var/lib/YaST2/runme_at_boot
+    fi
+fi
+# trigger firstboot mechanism if configured
+if test -f /var/lib/YaST2/reconfig_system ; then
+    HOSTTYPE=$(uname -m)
+    splashtrigger "YaST"
+    exec 0<> $REDIRECT 1>&0 2>&0
+    if test -x /usr/lib/YaST2/startup/YaST2.Firstboot; then
+	/usr/lib/YaST2/startup/YaST2.Firstboot
+    else
+	# oops, yast2-firstboot not installed
+	rm -f /var/lib/YaST2/reconfig_system
     fi
 fi
 # run SuSEconfig (with args) if needed
