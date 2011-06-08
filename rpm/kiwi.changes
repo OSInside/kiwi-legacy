@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Wed Jun  8 12:46:59 CEST 2011 - ms@suse.de
+
+- changed kiwi version number from a two part version
+  into a three part version number: v4.85.1. The major
+  and minor part of the version will not change with
+  bugfix releases. The following rules should apply to
+  the version number: major.minor.release. major change
+  might include incompatible changes. minor change
+  includes features and schema version updates. release
+  change includes any kind of bugfixes
+
+-------------------------------------------------------------------
 Tue Jun  7 11:29:18 CEST 2011 - ms@suse.de
 
 - don't use a fixed value for the size of the boot partition. The
