@@ -1,3 +1,22 @@
+################################################################
+# Copyright (c) 2008 Jan-Christoph Bornschlegel, Novell Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program (see the file LICENSE); if not, write to the
+# Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+#
+################################################################
+
 #================
 # FILE          : KIWIInstSourceBasePlugin.pm
 #----------------
@@ -187,7 +206,57 @@ sub logMsg
   $this->{m_collect}->logMsg($type, $msg);
 }
 
+# method to distinguish debugmedia and ftp media subdirectories.
+# This is needed in several different plugins.
+sub getSubdirLists
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
 
+  my @ret = ();
+  my $coll = $this->{m_collect};
+  my $dbm = $coll->productData()->getOpt("DEBUGMEDIUM");
+  my $flavor = $coll->productData()->getVar("FLAVOR");
+  my $basesubdirs = $coll->basesubdirs();
+  my @paths = values(%{$basesubdirs});
+  @paths = grep { $_ =~ /[^0]$/ } @paths; # remove Media0
+  #@paths = sort @paths; # sort it
+
+  my %path = map { $_ => 1 } @paths;
+
+  # case 1: FTP tree, all subdirs get a separate call.
+  if($flavor =~ m{ftp}i) {
+    my @d = sort(keys(%path));
+    foreach(@d) {
+      my @tmp;
+      push @tmp, $_;
+      push @ret, \@tmp;
+    }
+  }
+  # case 2: non-ftp tree, may have separate DEBUGMEDIUM specified
+  elsif($dbm >= 2) {
+    my @deb;
+    my @rest;
+    foreach my $d(keys(%path)) {
+      if($d =~ m{.*$dbm$}) {
+       push @deb, $d;
+      }
+      else {
+       push @rest, $d;
+      }
+    }
+    push @ret, \@deb;
+    push @ret, \@rest;
+  }
+  else {
+    my @d = keys(%path);
+    push @ret, \@d;
+  }
+
+  return @ret;
+}
 
 1;
 

@@ -1,3 +1,22 @@
+################################################################
+# Copyright (c) 2008 Jan-Christoph Bornschlegel, Novell Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program (see the file LICENSE); if not, write to the
+# Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+#
+################################################################
+
 #================
 # FILE          : KIWIMiniIsoPlugin.pm
 #----------------
@@ -91,6 +110,7 @@ sub new
 
 
 
+# returns: number of patched gfxboot files
 sub execute
 {
   my $this = shift;
@@ -105,27 +125,40 @@ sub execute
 
   my $repoloc = $this->collect()->productData()->getOpt("REPO_LOCATION");
   my $ismini = $this->collect()->productData()->getVar("FLAVOR");
-  if(not defined($repoloc) or $repoloc =~ m{notset}i) {
-    $this->logMsg("W", "<REPO_LOCATION> is missing, can't patch <gfxboot.cfg>!");
+  if(not defined($ismini)) {
+    $this->logMsg("W", "FLAVOR not set?");
     return $retval;
   }
-  if(not defined($ismini) or $ismini =~ m{notset}i) {
-    $this->logMsg("W", "Can't determine if this is a miniiso! Doing nothing");
-    return $retval;
-  }
-  $repoloc =~ m{^http://([^/]+)/(.+)};
-  my ($srv, $path) = ($1, $2);
-
-  if($ismini !~ m{mini}i and !$srv) {
+  if($ismini !~ m{mini}i) {
     $this->logMsg("I", "Nothing to for for media type <$ismini>");
     return $retval;
   }
 
+  my ($srv, $path);
+  if(not defined($repoloc)) {
+    $this->logMsg("I", "<REPO_LOCATION> is unset, boot protocol will be set to 'slp'!");
+  }
+  else {
+    $repoloc =~ m{^http://([^/]+)/(.+)};
+    ($srv, $path) = ($1, $2);
+    if(not defined($srv) or not defined($path)) {
+      $this->logMsg("W", "Parsing repo-location=<$repoloc> failed!");
+      return $retval;
+    }
+  }
+
   my @gfxbootfiles;
-  find( sub { find_cb($this, \@gfxbootfiles) }, $this->handler()->collect()->basedir());
+  find( sub { find_cb($this, '.*/gfxboot\.cfg$', \@gfxbootfiles) }, $this->handler()->collect()->basedir());
+  my @rootfiles;
+  find( sub { find_cb($this, '.*/root$', \@rootfiles) }, $this->handler()->collect()->basedir());
+
+  foreach(@rootfiles) {
+    $this->logMsg("I", "removing file <$_>");
+    unlink $_;
+  }
 
   if(!@gfxbootfiles) {
-    $this->logMsg("E", "No gfxboot.cfg file found!");
+    $this->logMsg("W", "No gfxboot.cfg file found! This _MIGHT_ be ok for S/390! Please verify <installation-images> package(s)!");
     return $retval;
   }
 
@@ -156,7 +189,7 @@ sub execute
       }
     }
 
-    if($ismini =~ m{mini}i) {
+    if(!$repoloc) {
       if($install == -1) {
 	push @lines, "install=slp";
       }
@@ -164,7 +197,7 @@ sub execute
 	$lines[$install] =~ s{^install.*}{install=slp};
       }
     }
-    else {
+    elsif($srv) {
       if($ihs == -1) {
 	push @lines, "install.http.server=$srv";
       }
@@ -202,10 +235,14 @@ sub find_cb
   my $this = shift;
   return undef if not ref($this);
 
+  my $pat = shift;
   my $listref = shift;
-  return undef if not defined($listref);
+  if(not defined($listref) or not defined($pat)) {
+    return undef;
+  }
 
-  if($File::Find::name =~ m{.*/gfxboot\.cfg$}) {
+  #if($File::Find::name =~ m{.*/gfxboot\.cfg$}) {
+  if($File::Find::name =~ m{$pat}) {
     push @{$listref}, $File::Find::name;
   }
 }
