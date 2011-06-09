@@ -1106,6 +1106,18 @@ sub init {
 	#----------------------------------------
 	$cmdL -> setBuildProfiles (\@Profiles);
 	#========================================
+	# set log file if given
+	#----------------------------------------
+	if (defined $LogFile) {
+		$cmdL -> setLogFile ($LogFile);
+	}
+	#========================================
+	# set root target directory if given
+	#----------------------------------------
+	if (defined $RootTree) {
+		$cmdL -> setRootTargetDir($RootTree)
+	}
+	#========================================
 	# set default inode ratio for ext2/3
 	#----------------------------------------
 	if (! defined $FSInodeRatio) {
@@ -1194,9 +1206,6 @@ sub init {
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
-	if (defined $LogFile) {
-		$cmdL -> setLogFile ($LogFile);
-	}
 	if (($InitCache) && ($LogFile)) {
 		$kiwi -> warning ("Logfile set to terminal in init-cache mode");
 		$cmdL -> setLogFile ("terminal");
@@ -1211,9 +1220,6 @@ sub init {
 		$kiwi -> error ("Can't use ignore repos together with set repos");
 		$kiwi -> failed ();
 		kiwiExit (1);
-	}
-	if (defined $RootTree) {
-		$cmdL -> setRootTargetDir($RootTree)
 	}
 	if (defined $LogPort) {
 		$kiwi -> info ("Setting log server port to: $LogPort");
