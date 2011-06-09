@@ -1,3 +1,22 @@
+################################################################
+# Copyright (c) 2008 Jan-Christoph Bornschlegel, Novell Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program (see the file LICENSE); if not, write to the
+# Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+#
+################################################################
+
 #================
 # FILE          : KIWIContentPlugin.pm
 #----------------
@@ -151,8 +170,19 @@ sub execute
       $len = ($l>$len)?$l:$len;
     }
     $len++;
+
+    # ftp media special mode ?
+    my $coll = $this->{m_collect};
+    my $flavor = $coll->productData()->getVar("FLAVOR");
+    my $ftpmode = ($flavor =~ m{ftp}i);
+
+    my %ftpcontentkeys = map {$_ => 1} qw{CONTENTSTYLE REPOID DESCRDIR DATADIR VENDOR};
+
     foreach my $i(sort { $a <=> $b } keys(%{$info})) {
-      print CONT sprintf('%-*s %s', $len, $info->{$i}->[0], $info->{$i}->[1])."\n";
+      # ftp medias beside first one should get provide the product
+      if ( !$ftpmode || $cd eq "1" || $ftpcontentkeys{$info->{$i}->[0]} ) {
+        print CONT sprintf('%-*s %s', $len, $info->{$i}->[0], $info->{$i}->[1])."\n";
+      }
     }
     close(CONT);
 

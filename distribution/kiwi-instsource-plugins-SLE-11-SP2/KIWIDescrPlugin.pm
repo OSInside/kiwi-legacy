@@ -1,3 +1,22 @@
+################################################################
+# Copyright (c) 2008 Jan-Christoph Bornschlegel, Novell Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program (see the file LICENSE); if not, write to the
+# Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+#
+################################################################
+
 #================
 # FILE          : KIWIDescrPlugin.pm
 #----------------
@@ -15,6 +34,7 @@ package KIWIDescrPlugin;
 
 use strict;
 
+use File::Basename;
 use base "KIWIBasePlugin";
 use Config::IniFiles;
 use Data::Dumper;
@@ -42,30 +62,30 @@ sub new
   }
 
   my $ini = new Config::IniFiles( -file => "$configpath/$configfile" );
-  my $name    = $ini->val('base', 'name'); # scalar value
-  my $order   = $ini->val('base', 'order'); # scalar value
-  my $tool    = $ini->val('base', 'tool'); # scalar value
-  my $tdir    = $ini->val('base', 'tooldir'); # scalar value
-  my $tpack   = $ini->val('base', 'toolpack'); # scalar value
-  my $enable  = $ini->val('base', 'defaultenable'); # scalar value
+  my $name       = $ini->val('base', 'name'); # scalar value
+  my $order      = $ini->val('base', 'order'); # scalar value
+  my $tool       = $ini->val('base', 'tool'); # scalar value
+  my $createrepo = $ini->val('base', 'createrepo'); # scalar value
+  my $rezip      = $ini->val('base', 'rezip'); # scalar value
+  my $tdir       = $ini->val('base', 'tooldir'); # scalar value
+  my $tpack      = $ini->val('base', 'toolpack'); # scalar value
+  my $enable     = $ini->val('base', 'defaultenable'); # scalar value
 
-  my $pdbfiles	= $ini->val('options', 'pdbfiles');
-  my @params	= $ini->val('options', 'parameter');
-  my @langs	= $ini->val('options', 'language');
+  my @params	 = $ini->val('options', 'parameter');
 
-  my $gzip    = $ini->val('target', 'compress');
+  my $gzip       = $ini->val('target', 'compress');
 
   # if any of those isn't set, complain!
   if(not defined($name)
      or not defined($order)
      or not defined($tool)
+     or not defined($createrepo)
+     or not defined($rezip)
      or not defined($tdir)
      or not defined($tpack)
      or not defined($enable)
-     or not defined($pdbfiles)
      or not defined($gzip)
-     or not (@params)
-     or not (@langs)) {
+     or not (@params)) {
     $this->logMsg("E", "Plugin ini file <$config> seems broken!");
     return undef;
   }
@@ -77,14 +97,20 @@ sub new
     return undef;
   }
 
+  my $params = "";
+  foreach my $p(@params) {
+    $p = $this->collect()->productData()->_substitute("$p");
+    $params .= "$p ";
+  }
+
   $this->name($name);
   $this->order($order);
   $this->{m_tool} = $tool;
   $this->{m_tooldir} = $tdir;
   $this->{m_toolpack} = $tpack;
-  $this->{m_pdbfiles} = $pdbfiles;
-  $this->{m_params} = join(' ', @params);
-  $this->{m_languages} = join(' ', @langs);
+  $this->{m_createrepo} = $createrepo;
+  $this->{m_rezip} = $rezip;
+  $this->{m_params} = $params;
   $this->{m_compress} = $gzip;
   if($enable != 0) {
     $this->ready(1);
@@ -116,21 +142,22 @@ sub execute
     return $retval;
   }
 
-  # ftp trees should get no connection. This should maybe get an optional switch.
-  # FIXME: FLAVOR is not a good idea, but the media type is currently not reachable here.
-  if( $coll->productData()->getvar("FLAVOR") =~ m{ftp}i ) {
-    foreach my $d(values %{$basesubdirs}) {
-      my @a;
-      push @a, $d;
-      $retval += $this->executeDir( @a );
-    }
+  foreach my $dirlist($this->getSubdirLists()) {
+    my ($s,$m) = $this->executeDir(sort @{$dirlist});
   }
-  else {
-    my @paths = values(%{$basesubdirs});
-    @paths = grep { $_ =~ /[^0]$/ } @paths; # remove Media0
-    @paths = sort @paths; # sort it
-    $retval += $this->executeDir( @paths );
-  }
+#  if( $coll->productData()->getVar("FLAVOR") =~ m{ftp}i ) {
+#    foreach my $d(values %{$basesubdirs}) {
+#      my @a;
+#      push @a, $d;
+#      $retval += $this->executeDir( @a );
+#    }
+#  }
+#  else {
+#    my @paths = values(%{$basesubdirs});
+#    @paths = grep { $_ =~ /[^0]$/ } @paths; # remove Media0
+#    @paths = sort @paths; # sort it
+#    $retval += $this->executeDir( @paths );
+#  }
   return $retval;
 }
 
@@ -149,6 +176,7 @@ sub executeDir
   my $coll  = $this->{m_collect};
   my $datadir  = $coll->productData()->getInfo("DATADIR");
   my $descrdir = $coll->productData()->getInfo("DESCRDIR");
+  my $createrepomd = $coll->productData()->getVar("CREATE_REPOMD");
 
   my $targetdir = $paths[0]."/".$descrdir;
 
@@ -162,37 +190,59 @@ sub executeDir
 
   $this->logMsg("I", "Calling ".$this->name()." for directories <@paths>:");
 
-  my $cmd = "$this->{m_tooldir}/$this->{m_tool} $this->{m_pdbfiles} $pathlist $this->{m_params} $this->{m_languages} -o ".$paths[0]."/".$descrdir;
+  my $cmd = "$this->{m_tooldir}/$this->{m_tool} $pathlist $this->{m_params} -o ".$paths[0]."/".$descrdir;
+  $this->logMsg("I", "Executing command <$cmd>");
   my $data = qx( $cmd );
   my $status = $? >> 8;
-  my $linkname = "packages.sk";	# default link name for uncompressed file
-  my $linktarget = "packages.cs";
-  if($this->{m_compress} =~ m{yes}i) {
-    if(!opendir(PATDIR, "$targetdir")) {
-      $this->logMsg("E", "Can't open directory <$targetdir>!");
-      return $retval;
-    }
-    my @files = readdir(PATDIR);
-    closedir(PATDIR);
+  if($status) {
+    $this->logMsg("E", "Calling <$cmd> exited with code <$status> and the following output:\n$data\n");
+    return $retval;
+  }
 
-    foreach my $pfile(@files) {
-      next if($pfile !~ m{^(packages[.]*.*)});
-      if(system("gzip", "$targetdir/$pfile") == 0) {
-	unlink "$targetdir/$pfile";
-	if($pfile =~ m{packages.(cs|cz)}) {
-	  $linktarget .= ".gz";
-	  $linkname .= ".gz";
-	}
+  if ( $createrepomd eq "true" ) {
+    foreach my $p (@paths) {
+      my $cmd = "$this->{m_createrepo} $p/$datadir ";
+      $this->logMsg("I", "Executing command <$cmd>");
+      my $data = qx( $cmd );
+      my $status = $? >> 8;
+      if($status) {
+        $this->logMsg("E", "Calling <$cmd> exited with code <$status> and the following output:\n$data\n");
+        return $retval;
       }
-      else {
-	$this->logMsg("W", "Can't compress file <$targetdir/$pfile>!");
+      $cmd = "$this->{m_rezip} $p/$datadir ";
+      $this->logMsg("I", "Executing command <$cmd>");
+      my $data = qx( $cmd );
+      my $status = $? >> 8;
+      if($status) {
+        $this->logMsg("E", "Calling <$cmd> exited with code <$status> and the following output:\n$data\n");
+        return $retval;
       }
     }
   }
-  symlink "$linktarget", "$targetdir/$linkname";
 
-  $retval = 1;
-  return $retval;
+  foreach my $trans (glob('/usr/share/locale/en_US/LC_MESSAGES/package-translations-*.mo')) {
+     $trans = basename($trans, ".mo");
+     $trans =~ s,.*-,,;
+     my $cmd = "/usr/bin/translate_packages.pl $trans < $targetdir/packages.en > $targetdir/packages.$trans";
+     my $data = qx( $cmd );
+     if($? >> 8) {
+	 $this->logMsg("E", "Calling <translate_packages.pl $trans > failed:\n$data\n");
+	 return 1;
+     }
+  }
+
+  if($this->{m_compress} =~ m{yes}i) {
+      foreach my $pfile(glob("$targetdir/packages*")) {
+	  if(system("gzip", "--rsyncable", "$pfile") == 0) {
+	      unlink "$targetdir/$pfile";
+	  }
+	  else {
+	      $this->logMsg("W", "Can't compress file <$targetdir/$pfile>!");
+	  }
+      }
+  }
+
+  return 1;
 }
 
 
