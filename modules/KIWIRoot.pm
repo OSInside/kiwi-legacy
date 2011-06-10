@@ -1042,7 +1042,7 @@ sub setup {
 	#----------------------------------------
 	if (-f "$root/linuxrc") {
 		$kiwi -> info ("Setting up linuxrc...");
-		my $data = qxx ("cp $root/linuxrc $root/init 2>&1");
+		my $data = qxx ("ln $root/linuxrc $root/init 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
