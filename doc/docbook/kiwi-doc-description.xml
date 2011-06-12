@@ -1687,10 +1687,10 @@
 
       <variablelist>
         <varlistentry>
-          <term><uri>file:///local/path</uri></term>
+          <term><uri>dir:///local/path</uri></term>
           <listitem>
             <para>An absolute path to a directory accessible through the
-              local file system. The <quote>file://</quote> prefix may
+              local file system. The <quote>dir://</quote> prefix may
               be omitted.</para>
           </listitem>
         </varlistentry>
