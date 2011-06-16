@@ -77,8 +77,10 @@ Source1:        %{name}-rpmlintrc
 Source2:        %{name}-docu.tar.bz2
 Source3:        %{name}-repo.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+%if 0%{?suse_version}
 Recommends:     jing
 Recommends:     zypper
+%endif
 Obsoletes:      kiwi-desc-usbboot <= 4.81
 
 
@@ -336,7 +338,9 @@ test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
 	echo /srv/tftpboot/pxelinux.0 > kiwi.loader
 test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
 	echo /srv/tftpboot/mboot.c32 >> kiwi.loader
+%if 0%{?suse_version}
 %perl_process_packlist
+%endif
 rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/KIWI/example.pl
 ./.links
 %if %{suse_version} > 1020
@@ -393,7 +397,7 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/kiwi/modules/KIWIUtil.pm
 %{_datadir}/kiwi/xsl
 %{_sbindir}/kiwi
-%if 0%{?suse_version} < 1140
+%if 0%{?suse_version} < 1140 && %{suse_version} >0
 %{perl_vendorarch}/KIWI
 %{perl_vendorarch}/auto/KIWI
 /var/adm/perl-modules/kiwi
