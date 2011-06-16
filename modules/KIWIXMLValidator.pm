@@ -462,6 +462,9 @@ sub __checkPatternTypeAttrConsistent {
 	# multiple times, the value of patternType must be the same for each use
 	my %profPatternUseMap = ();
 	for my $pkgs (@pkgsNodes) {
+		if ( $pkgs -> getAttribute( 'type' ) eq 'delete') {
+			next;
+		}
 		my $profiles = $pkgs -> getAttribute( 'profiles' );
 		if ($profiles) {
 			my @profNames = split /,/, $profiles;
