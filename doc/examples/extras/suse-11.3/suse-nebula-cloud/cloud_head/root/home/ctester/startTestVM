@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Author   : Robert Schweikert
+# License  : GPLv2
+# Copyright: 2011 SUSE
+
+export ONE_AUTH=/var/lib/one/.one/one_auth
+/usr/bin/oneimage register testVM.one
+/usr/bin/onevm create testVM.vmd
