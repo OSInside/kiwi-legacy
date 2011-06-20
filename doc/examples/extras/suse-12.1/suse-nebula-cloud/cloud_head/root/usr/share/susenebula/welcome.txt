@@ -3,13 +3,3 @@ Welcome to SUSENebula
 The next few setup steps will guide you through the final configuration of the 
 Cloud Head node. After this is complete, your head node is ready for business.
 
-One note on security, this image contains pre-configured ssh keys that are
-available (including the private key) to the rest of the world. Therefore it
-is recommended that you generate new ssh keys for the oneadmin user. After the
-setup steps are complete, login as root (the oneadmin user has no password)
-and execute the following command:
-
-ssh-keygen -f /var/lib/one/.ssh/id_rsa
-
-Answer 'y' to over write the existing key. Do NOT enter a passphrase.
-

@@ -55,8 +55,7 @@ suseConfig
 # write the file
 mkdir /var/lib/one/.one
 # Set he desired permissions
-chown oneadmin:cloud /var/lib/one
-chown -R oneadmin:cloud /var/lib/one
+chown oneadmin:cloud /var/lib/one/.one
 # The permissions for the testcase
 chown -R oneadmin:cloud /home/ctester
 
