@@ -609,6 +609,9 @@ function moduleLoadBeforeUdev {
 # loadAGPModules
 #--------------------------------------
 function loadAGPModules {
+	# remove kms udev rule, see bnc #659843 for details
+	rm -f /lib/udev/rules.d/79-kms.rules
+	# load agp modules manually (not by udev) 
 	local krunning=$(uname -r)
 	for i in /lib/modules/$krunning/kernel/drivers/char/agp/*; do
 		test -e $i || continue
