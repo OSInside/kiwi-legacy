@@ -5089,7 +5089,8 @@ sub __getBootSize {
 	my $kiwi   = $this->{kiwi};
 	my $boot   = $extend."/boot";
 	my $bbytes = qxx ("du -s --block-size=1 $boot | cut -f1"); chomp $bbytes;
-	my $gotMB  = sprintf ("%.0f",(($bbytes / 1048576) * 1.3));
+	# 3 times the size should be enough for kernel updates
+	my $gotMB  = sprintf ("%.0f",(($bbytes / 1048576) * 3));
 	my $minMB  = 100;
 	if ($gotMB < $minMB) {
 		$gotMB = $minMB;
