@@ -5031,7 +5031,7 @@ function validateRootTree {
 	# check whether that mount is a valid system tree or not. Therefore
 	# some sanity checks are made here
 	# ----
-	if [ ! -x /mnt/sbin/init ];then
+	if [ ! -x /mnt/sbin/init -a ! -L /mnt/sbin/init ];then
 		systemException "/sbin/init no such file or not executable" "reboot"
 	fi
 }
