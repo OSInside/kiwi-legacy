@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jun 20 14:09:51 CEST 2011 - ms@suse.de
+
+- remove 79-kms.rules udev rule from kiwi initrd (bnc #659843)
+
+-------------------------------------------------------------------
 Mon Jun 20 13:21:02 CEST 2011 - ms@suse.de
 
 - changed __getBootSize() function so that it multiplies the
