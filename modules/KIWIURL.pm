@@ -278,26 +278,42 @@ sub thisPath {
 		return undef;
 	}
 	my $thisPath;
-	if ((defined $cdir) && (-d $cdir)) {
-		$thisPath = $cdir."/".$module;
-	} elsif ((defined $xmlinfo) && (-d $xmlinfo)) {
+	my $lookup;
+	#==========================================
+	# standard path expansion
+	#------------------------------------------
+	if ((defined $xmlinfo) && (-d $xmlinfo)) {
+		# this path is config dir set by --info option
 		$thisPath = $xmlinfo."/".$module;
 	} elsif (defined $create) {
-		if (! open FD,"$create/image/main::Prepare") {
-			return undef;
-		}
-		$thisPath = <FD>; close FD;
-		$thisPath = $thisPath."/".$module;
+		# set lookup file to search for this path
+		$lookup = "$create/image/main::Prepare";
 	} elsif (defined $upgrade) {
-		if (! open FD,"$upgrade/image/main::Prepare") {
+		# set lookup file to search for this path
+		$lookup = "$upgrade/image/main::Prepare";
+	} else {
+		if ((defined $cdir) && (-d $cdir)) {
+			# this path is config dir if it exists
+			$thisPath = $cdir."/".$module;
+		} else {
+			# this path is config dir set by --prepare
+			$thisPath = $cmdL->getOperationMode("prepare");
+			$thisPath.= "/".$module;
+		}
+	}
+	#==========================================
+	# extra path expansion by lookup file
+	#------------------------------------------
+	if (defined $lookup) {
+		if (! open FD,$lookup) {
 			return undef;
 		}
 		$thisPath = <FD>; close FD;
 		$thisPath = $thisPath."/".$module;
-	} else {
-		$thisPath = $cmdL->getOperationMode("prepare");
-		$thisPath.= "/".$module;
 	}
+	#==========================================
+	# turn into absolute path
+	#------------------------------------------
 	if ($thisPath !~ /^\//) {
 		my $pwd = qxx ("pwd"); chomp $pwd;
 		$thisPath = $pwd."/".$thisPath;
