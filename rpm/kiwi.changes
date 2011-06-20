@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jun 20 13:21:02 CEST 2011 - ms@suse.de
+
+- changed __getBootSize() function so that it multiplies the
+  calculated minimum boot space by 3 to allow proper kernel
+  updates (bnc #698161)
+
+-------------------------------------------------------------------
 Wed Jun  8 12:46:59 CEST 2011 - ms@suse.de
 
 - changed kiwi version number from a two part version
