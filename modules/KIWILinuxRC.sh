@@ -4006,6 +4006,12 @@ function includeKernelParameters {
 			continue
 		fi
 		kernelKey=`echo $i | cut -f1 -d=`
+		#======================================
+		# convert parameters to lowercase if required
+		#--------------------------------------
+		if [ "$1" = "lowercase" ];then
+			kernelKey=`echo $kernelKey | tr [:upper:] [:lower:]`
+		fi
 		kernelVal=`echo $i | cut -f2 -d=`
 		eval export $kernelKey=$kernelVal
 	done
@@ -4031,6 +4037,12 @@ function includeKernelParameters {
 	if [ ! -z "$lang" ];then
 		export DIALOG_LANG=$lang
 	fi
+}
+#======================================
+# includeKernelParametersLowerCase
+#--------------------------------------
+function includeKernelParametersLowerCase {
+	includeKernelParameters "lowercase"
 }
 #======================================
 # umountSystem
