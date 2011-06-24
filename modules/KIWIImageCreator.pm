@@ -398,7 +398,6 @@ sub createImage {
 	my $this         = shift;
 	my $configDir    = $this -> {configDir};
 	my $buildProfs   = $this -> {buildProfiles};
-	my $type         = $this -> {buildType};
 	my $kiwi         = $this -> {kiwi};
 	my $pkgMgr       = $this -> {packageManager};
 	my $ignore       = $this -> {ignoreRepos};
@@ -436,7 +435,8 @@ sub createImage {
 	}
 	$kiwi -> info ("Reading image description [Create]...\n");
 	my $xml = new KIWIXML (
-		$kiwi,$configDir,$type,$buildProfs,$cmdL
+		$kiwi,$configDir,$this->{buildType},
+		$buildProfs,$cmdL
 	);
 	if (! defined $xml) {
 		return undef;
@@ -606,13 +606,13 @@ sub createImage {
 	#------------------------------------------
 	$kiwi -> info ("Updating type in .profile environment");
 	qxx (
-		"sed -i -e 's#kiwi_type=.*#kiwi_type=\"$type\"#' $tree/.profile"
+		"sed -i -e 's#kiwi_type=.*#kiwi_type=\"$attr{type}\"#' $tree/.profile"
 	);
 	$kiwi -> done();
 	#==========================================
 	# Create recovery archive if specified
 	#------------------------------------------
-	if ((defined $type) && ($type eq "oem")) {
+	if ($attr{type} eq "oem") {
 		my $configure = new KIWIConfigure (
 			$kiwi,$xml,$tree,$tree."/image",$destination
 		);
