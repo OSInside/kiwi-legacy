@@ -3637,6 +3637,137 @@ function releaseNetwork {
 	fi
 }
 #======================================
+# setupNetworkInterfaceS390
+#--------------------------------------
+function setupNetworkInterfaceS390 {
+	# /.../
+	# bring up the network card according to the parm file
+	# parameters and create the correspondent udev rules
+	# needs includeKernelParametersLowerCase to be run
+	# because parm file parameters are case insensitive
+	# ----
+	case "$instnetdev" in
+		"osa"|"hsi")
+			local qeth_cmd="/sbin/qeth_configure"
+			if [ "$layer2" = "1" ];then
+				qeth_cmd="$qeth_cmd -l"
+			fi
+			if [ -n "$portname" ];then
+				qeth_cmd="$qeth_cmd -p$portname"
+			fi
+			if [ -n "$portno" ];then
+				qeth_cmd="$qeth_cmd -n$portno"
+			fi
+			qeth_cmd="$qeth_cmd $readchannel $writechannel"
+			if [ -n "$datachannel" ];then
+				qeth_cmd="$qeth_cmd $datachannel"
+			fi
+			$qeth_cmd 1
+			;;
+		"ctc")
+			/sbin/ctc_configure $readchannel $writechannel 1 $ctcprotocol
+			;;
+		"iucv")
+			/sbin/iucv_configure $iucvpeer 1
+			;;
+		*)
+			systemException \
+				"Unknown s390 network type: $instnetdev" "reboot"
+			;;
+	esac
+	if [ ! $? = 0 ];then
+		systemException \
+			"Failed to bring up the network: $instnetdev" \
+		"reboot"
+	fi
+}
+#======================================
+# setupNetworkStatic
+#--------------------------------------
+function setupNetworkStatic {
+	# /.../
+	# configure static network either bring it up manually
+	# or save the configuration depending on 'up' parameter
+	# ----
+	local up=$1
+	if [ "$up" == "1" ];then
+		#======================================
+		# activate network
+		#--------------------------------------
+		local iface=`cat /proc/net/dev|tail -n1|cut -d':' -f1|sed 's/ //g'`
+		local ifconfig_cmd="/sbin/ifconfig $iface $hostip netmask $netmask"
+		if [ -n "$broadcast" ];then
+			ifconfig_cmd="$ifconfig_cmd broadcast $broadcast"
+		fi
+		if [ -n "$pointopoint" ];then
+			ifconfig_cmd="$ifconfig_cmd pointopoint $pointopoint"
+		fi
+		if [ -n "$osahwaddr" ];then
+			ifconfig_cmd="$ifconfig_cmd hw ether $osahwaddr"
+		fi
+		$ifconfig_cmd up
+		if [ ! $? = 0 ];then
+			systemException "Failed to set up the network: $iface" "reboot"
+		fi
+	else
+		#======================================
+		# write network setup
+		#--------------------------------------
+		local netFile="/etc/sysconfig/network/ifcfg-$iface"
+		echo "BOOTPROTO='static'" > $netFile
+		echo "STARTMODE='auto'" >> $netFile
+		echo "IPADDR='$hostip'" >> $netFile
+		echo "NETMASK='$netmask'" >> $netFile
+		if [ -n "$broadcast" ];then
+			echo "BROADCAST='$broadcast'" >> $netFile
+		fi
+		if [ -n "$pointopoint" ];then
+			echo "REMOTE_IPADDR='$pointopoint'" >> $netFile
+		fi
+	fi
+	setupDefaultGateway
+	setupDNS
+}
+#======================================
+# setupDefaultGateway
+#--------------------------------------
+function setupDefaultGateway {
+	# /.../
+	# setup default gateway. either set the route or save
+	# the configuration depending on 'up' parameter
+	# ----
+	local up=$1
+	if [ "$up" == "1" ];then
+		#======================================
+		# activate GW route
+		#--------------------------------------
+		route add default gw $gateway
+	else
+		#======================================
+		# write GW configuration
+		#--------------------------------------
+		echo "default  $gateway - -" > "/etc/sysconfig/network/routes"
+	fi
+}
+#======================================
+# setupDNS
+#--------------------------------------
+function setupDNS {
+	# /.../
+	# setup DNS. write data to resolv.conf
+	# ----
+	if [ -n "$domain" ];then
+		export DOMAIN=$domain
+		echo "search $domain" >> /etc/resolv.conf
+	fi
+	if [ -n "$nameserver" ];then
+		export DNS=$nameserver
+		IFS="," ; for i in $nameserver;do
+			echo "nameserver $i" >> /etc/resolv.conf
+		done
+	fi
+}
+#======================================
 # updateNeeded
 #--------------------------------------
 function updateNeeded {
