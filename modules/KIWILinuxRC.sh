@@ -4858,6 +4858,10 @@ function fetchFile {
 	local izip=$3
 	local host=$4
 	local type=$5
+	local chunk=$6
+	if test -z "$chunk";then
+		chunk=4k
+	fi
 	if test -z "$path"; then
 		systemException "No path specified" "reboot"
 	fi
@@ -4882,27 +4886,30 @@ function fetchFile {
 		"http")
 			if test "$izip" = "compressed"; then
 				curl -f http://$host/$path 2>$TRANSFER_ERRORS_FILE |\
-					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
+					gzip -d 2>>$TRANSFER_ERRORS_FILE | dd bs=$chunk of=$dest
 			else
-				curl -f http://$host/$path > $dest 2> $TRANSFER_ERRORS_FILE
+				curl -f http://$host/$path 2> $TRANSFER_ERRORS_FILE |\
+					dd bs=$chunk of=$dest
 			fi
 			loadCode=$?
 			;;
 		"https")
 			if test "$izip" = "compressed"; then
 				curl -f -k https://$host/$path 2>$TRANSFER_ERRORS_FILE |\
-					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
+					gzip -d 2>>$TRANSFER_ERRORS_FILE | dd bs=$chunk of=$dest
 			else
-				curl -f -k https://$host/$path > $dest 2> $TRANSFER_ERRORS_FILE
+				curl -f -k https://$host/$path 2> $TRANSFER_ERRORS_FILE |\
+					dd bs=$chunk of=$dest
 			fi
 			loadCode=$?
 			;;
 		"ftp")
 			if test "$izip" = "compressed"; then
 				curl ftp://$host/$path 2>$TRANSFER_ERRORS_FILE |\
-					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
+					gzip -d 2>>$TRANSFER_ERRORS_FILE | dd bs=$chunk of=$dest
 			else
-				curl ftp://$host/$path > $dest 2> $TRANSFER_ERRORS_FILE
+				curl ftp://$host/$path 2> $TRANSFER_ERRORS_FILE |\
+					dd bs=$chunk of=$dest
 			fi
 			loadCode=$?
 			;;
@@ -4921,13 +4928,14 @@ function fetchFile {
 				# atftp is disabled because it doesn't work with pipes
 				busybox tftp \
 					-b $imageBlkSize -g -r $path \
-					-l >(gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE) \
+					-l >(gzip -d 2>>$TRANSFER_ERRORS_FILE | dd bs=$chunk of=$dest) \
 					$host 2>>$TRANSFER_ERRORS_FILE
 			else
 				atftp \
 					--option "$multicast_atftp"  \
 					--option "blksize $imageBlkSize" \
-					-g -r $path -l $dest $host &> $TRANSFER_ERRORS_FILE
+					-g -r $path -l >(dd bs=$chunk of=$dest) \
+					$host &> $TRANSFER_ERRORS_FILE
 			fi
 			loadCode=$?
 			;;
