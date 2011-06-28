@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 28 17:17:46 CEST 2011 - ms@suse.de
+
+- allow firstboot and autoyast service to be enabled together (bnc #700105)
+
+-------------------------------------------------------------------
 Tue Jun 28 14:28:16 CEST 2011 - ms@suse.de
 
 - added quoting of special characters for kiwi_oemtitle (bnc #702044)
