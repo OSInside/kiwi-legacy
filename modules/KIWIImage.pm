@@ -3656,6 +3656,7 @@ sub setupSquashFS {
 	my $xml  = $this->{xml};
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	my $imageTree = $this->{imageTree};
+	my $locator = new KIWILocator($kiwi);
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}
@@ -3665,7 +3666,8 @@ sub setupSquashFS {
 		$this -> restoreImageDest();
 	}
 	unlink ("$this->{imageDest}/$name");
-	my $data = qxx ("/usr/bin/mksquashfs $tree $this->{imageDest}/$name 2>&1");
+	my $squashfs_tool = $locator -> getExecPath("mksquashfs");
+	my $data = qxx ("$squashfs_tool $tree $this->{imageDest}/$name 2>&1");
 	my $code = $? >> 8; 
 	if ($code != 0) {
 		$kiwi -> failed ();
