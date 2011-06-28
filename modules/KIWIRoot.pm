@@ -938,6 +938,7 @@ sub setup {
 	my $imageDesc = $this->{imageDesc};
 	my $manager   = $this->{manager};
 	my $data;
+	my $status;
 	#======================================== 
 	# Consistency check
 	#----------------------------------------
@@ -1103,13 +1104,15 @@ sub setup {
 	#========================================
 	# check for yast firstboot setup file
 	#----------------------------------------
-	my $status = $configure -> setupFirstBootYaST();
-	if ($status eq "skipped") {
-		$status = $configure -> setupAutoYaST();
+	$status = $configure -> setupFirstBootYaST();
+	if ($status eq "failed") {
+		return undef;
 	}
-	if ($status eq "skipped") {
-		$status = $configure -> setupFirstBootAnaconda();
+	$status = $configure -> setupAutoYaST();
+	if ($status eq "failed") {
+		return undef;
 	}
+	$status = $configure -> setupFirstBootAnaconda();
 	if ($status eq "failed") {
 		return undef;
 	}
