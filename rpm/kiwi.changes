@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 28 14:28:16 CEST 2011 - ms@suse.de
+
+- added quoting of special characters for kiwi_oemtitle (bnc #702044)
+
+-------------------------------------------------------------------
 Mon Jun 20 14:09:51 CEST 2011 - ms@suse.de
 
 - remove 79-kms.rules udev rule from kiwi initrd (bnc #659843)
