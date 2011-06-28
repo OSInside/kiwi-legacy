@@ -2333,7 +2333,7 @@ sub getImageConfig {
 			$result{kiwi_oemrootMB} = $oemrootMB;
 		}
 		if ((defined $oemtitle) && ("$oemtitle" ne "")) {
-			$result{kiwi_oemtitle} = $oemtitle;
+			$result{kiwi_oemtitle} = $this -> __quote ($oemtitle);
 		}
 		if ((defined $oemkboot) && ("$oemkboot" ne "")) {
 			$result{kiwi_oemkboot} = $oemkboot;
@@ -4996,6 +4996,16 @@ sub __populateImageTypeAndNode {
 	$this->{imageType} = $typeinfo->{$select}{type};
 	$this->{typeNode}  = $typeinfo->{$select}{node};
 	return $this;
+}
+
+#==========================================
+# __quote
+#------------------------------------------
+sub __quote {
+	my $this = shift;
+	my $line = shift;
+	$line =~ s/([\"\$\`\\])/\\$1/g;
+	return $line;
 }
 
 1;
