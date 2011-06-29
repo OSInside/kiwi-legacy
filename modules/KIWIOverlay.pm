@@ -225,7 +225,7 @@ sub createSnapshotMap {
 	my $this = shift;
 	my $readOnlyRootImage = shift;
 	my $cowfile = shift;
-	my $snapshotChunk=8;
+	my $snapshotChunk=4096;
 	my $snapshotCount="5G";
 	my $imageLoop;
 	my $snapLoop;
