@@ -889,9 +889,9 @@ sub createImageDisk {
 	}
 	$this->{boot} = $boot;
 	if (! $boot -> setupBootDisk($tdev)) {
-		undef $boot;
 		return undef;
 	}
+	$boot -> cleanLoop ();
 	undef $boot;
 	return 1;
 }
