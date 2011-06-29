@@ -444,12 +444,13 @@ sub checkAndSetupPrebuiltBootImage {
 #------------------------------------------
 sub setupOverlay {
 	# ...
-	# mount the clicfs cache if the image is based on it
+	# mount the image cache if the image is based on it
 	# and register the overlay mount point as new imageTree
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $tree = $this->{imageTree};
+	my $xml  = $this->{xml};
 	$this->{overlay} = new KIWIOverlay ($kiwi,$tree);
 	if (! $this->{overlay}) {
 		return undef;
@@ -458,6 +459,7 @@ sub setupOverlay {
 	if (! defined $this->{imageTree}) {
 		return undef;
 	}
+	$xml -> writeXMLDescription ($this->{imageTree});
 	return $this;
 }
 
