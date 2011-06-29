@@ -247,7 +247,9 @@ sub new {
 			#==========================================
 			# Determine size of /boot area
 			#------------------------------------------
-			$this ->{bootsize} = $this -> __getBootSize ($system);
+			if (defined $initrd) {
+				$this ->{bootsize} = $this -> __getBootSize ($system);
+			}
 		} else {
 			my %fsattr = $main::global -> checkFileSystem ($system);
 			if ((! $fsattr{type}) || ($fsattr{type} eq "auto")) {
@@ -309,7 +311,9 @@ sub new {
 				#==========================================
 				# Determine size of /boot area
 				#------------------------------------------
-				$this ->{bootsize} = $this -> __getBootSize ($tmpdir);
+				if (defined $initrd) {
+					$this ->{bootsize} = $this -> __getBootSize ($tmpdir);
+				}
 				#==========================================
 				# clean up
 				#------------------------------------------
@@ -350,7 +354,9 @@ sub new {
 				#==========================================
 				# Determine size of /boot area
 				#------------------------------------------
-				$this ->{bootsize} = $this -> __getBootSize ($tmpdir);
+				if (defined $initrd) {
+					$this ->{bootsize} = $this -> __getBootSize ($tmpdir);
+				}
 				#==========================================
 				# clean up
 				#------------------------------------------
@@ -375,16 +381,17 @@ sub new {
 	#==========================================
 	# Setup disk size and inode count
 	#------------------------------------------
-	if (defined $system) {
+	if ((defined $system) && (defined $initrd)) {
 		my $sizeBytes;
 		my $minInodes;
 		my $sizeXMLBytes = 0;
-		my $cmdlBytes    = 0;
 		my $spare        = 1.5;
 		my $journal      = 12 * 1024 * 1024;
 		my $fsopts       = $cmdL -> getFilesystemOptions();
 		my $inodesize    = $fsopts->[1];
 		my $inoderatio   = $fsopts->[2];
+		my $kernelSize   = $main::global -> isize ($kernel);
+		my $initrdSize   = $main::global -> isize ($initrd);
 		#==========================================
 		# Calculate minimum size of the system
 		#------------------------------------------
@@ -398,13 +405,17 @@ sub new {
 			$sizeBytes+= $minInodes * $inodesize;
 			$sizeBytes*= $spare;
 			$sizeBytes+= $journal;
+			$sizeBytes+= $kernelSize;
+			$sizeBytes+= ($initrdSize * 1.5);
 		} else {
 			# system is specified as a file...
 			$sizeBytes = $main::global -> isize ($system);
+			$sizeBytes+= $kernelSize;
+			$sizeBytes+= ($initrdSize * 1.5);
 			$sizeBytes*= 1.1;
 		}
 		#==========================================
-		# Decide for a size prefer 1)cmdline 2)XML
+		# Store optional size setup from XML
 		#------------------------------------------
 		my $sizeXMLAddBytes = $xml -> getImageSizeAdditiveBytes();
 		if ($sizeXMLAddBytes) {
@@ -412,34 +423,10 @@ sub new {
 		} else {
 			$sizeXMLBytes = $xml -> getImageSizeBytes();
 		}
-		if ($vmsize =~ /^(\d+)([MG])$/i) {
-			my $value= $1;
-			my $unit = $2;
-			if ($unit eq "G") {
-				# convert GB to MB...
-				$value *= 1024;
-			}
-			# convert MB to Byte
-			$cmdlBytes = $value * 1048576;
-		}
-		if ($cmdlBytes > $sizeBytes) {
-			$sizeBytes = $cmdlBytes;
-			$vmsize = $sizeBytes;
-		} elsif ($sizeXMLBytes > $sizeBytes) {
-			$sizeBytes = $sizeXMLBytes;
-			$vmsize = $sizeBytes;
-		} else {
-			#==========================================
-			# Sum up system + kernel + initrd
-			#------------------------------------------
-			# /.../
-			# if system is a split system the vmsize will be
-			# adapted within the image creation function accordingly
-			# ----
-			my $kernelSize = $main::global -> isize ($kernel);
-			my $initrdSize = $main::global -> isize ($initrd);
-			$vmsize = $kernelSize + ($initrdSize * 1.5) + $sizeBytes;
-		}
+		#==========================================
+		# Store initial disk size
+		#------------------------------------------
+		$this -> __initDiskSize ($sizeBytes,$vmsize,$sizeXMLBytes);
 		#==========================================
 		# Calculate required inode count for root
 		#------------------------------------------
@@ -449,21 +436,11 @@ sub new {
 			# will be created during the image creation. In this
 			# case we need to create the inode count
 			# ----
-			$this->{inodes} = int ($sizeBytes / $inoderatio);
+			$this->{inodes} = int ($this->{vmmbytes} / $inoderatio);
 			$kiwi -> loginfo (
 				"Using ".$this->{inodes}." inodes for the root filesystem\n"
 			);
 		}
-		#==========================================
-		# Create vmsize MB string and vmmbyte value
-		#------------------------------------------
-		$vmsize  = $vmsize / 1048576;
-		$vmsize  = sprintf ("%.0f", $vmsize);
-		$vmmbyte = $vmsize;
-		$vmsize  = $vmsize."M";
-		$kiwi -> loginfo (
-			"Starting with disk size: $vmsize\n"
-		);
 	}
 	#==========================================
 	# round compressed image size
@@ -507,8 +484,6 @@ sub new {
 	$this->{initrd}    = $initrd;
 	$this->{system}    = $system;
 	$this->{kernel}    = $kernel;
-	$this->{vmmbyte}   = $vmmbyte;
-	$this->{vmsize}    = $vmsize;
 	$this->{syszip}    = $syszip;
 	$this->{device}    = $device;
 	$this->{zipped}    = $zipped;
@@ -1030,7 +1005,6 @@ sub setupInstallStick {
 	my $initrd    = $this->{initrd};
 	my $system    = $this->{system};
 	my $oldird    = $this->{initrd};
-	my $vmsize    = $this->{vmsize};
 	my $device    = $this->{device};
 	my $loopdir   = $this->{loopdir};
 	my $zipped    = $this->{zipped};
@@ -1038,6 +1012,7 @@ sub setupInstallStick {
 	my $xml       = $this->{xml};
 	my $cmdL      = $this->{cmdL};
 	my $irdsize   = $main::global -> isize ($initrd);
+	my $vmsize    = $main::global -> isize ($system);
 	my $diskname  = $system.".install.raw";
 	my $md5name   = $system;
 	my $destdir   = dirname ($initrd);
@@ -1200,7 +1175,6 @@ sub setupInstallStick {
 	#------------------------------------------
 	$irdsize= ($irdsize / 1e6) + 20;
 	$irdsize= sprintf ("%.0f", $irdsize);
-	$vmsize = $main::global -> isize ($system);
 	$vmsize = ($vmsize / 1e6) * 1.3 + $irdsize;
 	$vmsize = sprintf ("%.0f", $vmsize);
 	$vmsize = $vmsize."M";
@@ -1513,7 +1487,6 @@ sub setupBootDisk {
 	my $kiwi      = $this->{kiwi};
 	my $arch      = $this->{arch};
 	my $system    = $this->{system};
-	my $vmsize    = $this->{vmsize};
 	my $syszip    = $this->{syszip};
 	my $tmpdir    = $this->{tmpdir};
 	my $initrd    = $this->{initrd};
@@ -1632,19 +1605,12 @@ sub setupBootDisk {
 				#==========================================
 				# increase total vm disk size
 				#------------------------------------------
+				$kiwi->loginfo ("Increasing disk size for volume $pname\n");
 				if ($haveAbsolute) {
-					$vmsize = $this->{vmmbyte} + 30 + $diff;
-					$vmsize = sprintf ("%.0f", $vmsize);
+					$this -> __updateDiskSize ($diff + 30);
 				} else {
-					$vmsize = $this->{vmmbyte} + 30 + $space;
-					$vmsize = sprintf ("%.0f", $vmsize);
+					$this -> __updateDiskSize ($space+ 30);
 				}
-				$this->{vmmbyte} = $vmsize;
-				$vmsize = $vmsize."M";
-				$this->{vmsize}  = $vmsize;
-				$kiwi->loginfo (
-					"Increasing disk size to: $vmsize for volume $pname\n"
-				);
 			}
 		}
 	}
@@ -1706,47 +1672,31 @@ sub setupBootDisk {
 		}
 	}
 	#==========================================
-	# increase vmsize on in-place recovery
+	# increase disk size for in-place recovery
 	#------------------------------------------
 	my $inplace = $xml -> getOEMRecoveryInPlace();
 	if (($inplace) && ("$inplace" eq "true")) {
 		my ($FD,$recoMB);
 		my $sizefile = "$destdir/recovery.partition.size";
 		if (open ($FD,$sizefile)) {
-			$recoMB = <$FD>; chomp $recoMB;
+			$recoMB = <$FD>; chomp $recoMB;	close $FD; unlink $sizefile;
 			$kiwi -> info (
 				"Adding $recoMB MB spare space for in-place recovery"
 			);
-			close $FD;
-			unlink $sizefile;
-			$vmsize = $this->{vmmbyte} + $recoMB;
-			$this->{vmmbyte} = $vmsize;
-			$vmsize = $vmsize."M";
-			$this->{vmsize}  = $vmsize;
+			$this -> __updateDiskSize ($recoMB);
 			$kiwi -> done ();
 		}
 	}
 	#==========================================
-	# increase vmsize if image split portion
+	# increase vmsize if image split RW portion
 	#------------------------------------------
 	if (($imgtype eq "split") && (-f $splitfile)) {
 		my $splitsize = $main::global -> isize ($splitfile);
-		$splitsize /= 1048576;
-		$vmsize = $this->{vmmbyte} + ($splitsize * 1.5) + $bootsize;
-		$vmsize = sprintf ("%.0f", $vmsize);
-		$this->{vmmbyte} = $vmsize;
-		$vmsize = $vmsize."M";
-		$this->{vmsize}  = $vmsize;
-	}
-	#==========================================
-	# increase vmsize if single boot partition
-	#------------------------------------------
-	if ($bootsize) {
-		$vmsize = $this->{vmmbyte} + ($bootsize * 1.3);
-		$vmsize = sprintf ("%.0f", $vmsize);
-		$this->{vmmbyte} = $vmsize;
-		$vmsize = $vmsize."M";
-		$this->{vmsize}  = $vmsize;
+		my $splitMB = $splitsize / 1048576;
+		$kiwi -> info (
+			"Adding $splitMB MB space for split read-write portion"
+		);
+		$this -> __updateDiskSize ($splitMB);
 	}
 	#==========================================
 	# obtain filesystem type from xml data
@@ -1790,6 +1740,18 @@ sub setupBootDisk {
 	}
 	$this->{bootpart} = $bootpart;
 	#==========================================
+	# Update raw disk size if boot part is used
+	#------------------------------------------
+	if (($syszip)    ||
+		($haveSplit) ||
+		($haveluks)  ||
+		($needBootP) ||
+		($dmapper)   ||
+		($lvm)
+	) {
+		$this -> __updateDiskSize ($bootsize);
+	}
+	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
 	if (! $this -> setupBootLoaderStages ($bootloader)) {
@@ -1818,7 +1780,7 @@ sub setupBootDisk {
 		}
 		if (! $haveDiskDevice) {
 			$kiwi -> info ("Creating virtual disk...");
-			$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
+			$status = qxx ("qemu-img create $diskname $this->{vmsize} 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -1839,7 +1801,7 @@ sub setupBootDisk {
 			# size of the image target disk. It has no relevance for the
 			# standard build process and is therefore called without any
 			# return value check. 
-			qxx ("qemu-img create $diskname $vmsize 2>&1");
+			qxx ("qemu-img create $diskname $this->{vmsize} 2>&1");
 			# ----
 			$this->{loop} = $haveDiskDevice;
 			if (! -b $this->{loop}) {
@@ -5176,7 +5138,7 @@ sub __getBootSize {
 	if ($gotMB < $minMB) {
 		$gotMB = $minMB;
 	}
-	$kiwi -> loginfo ("Set boot space to: $gotMB\n");
+	$kiwi -> loginfo ("Set boot space to: ".$gotMB."M\n");
 	return $gotMB;
 }
 
@@ -5266,6 +5228,80 @@ sub __expandFS {
 	if ($status) {
 		$kiwi -> done();
 	}
+	return $this;
+}
+
+#==========================================
+# __initDiskSize
+#------------------------------------------
+sub __initDiskSize {
+	# ...
+	# setup initial disk size value
+	# ---
+	my $this      = shift;
+	my $kiwi      = $this->{kiwi};
+	my $minBytes  = shift;
+	my $cmdlsize  = shift;
+	my $XMLBytes  = shift;
+	my $cmdlBytes = 0;
+	my $vmsize    = 0;
+	my $vmmbyte   = 0;
+	#===========================================
+	# turn optional size from cmdline into bytes
+	#-------------------------------------------
+	if ($cmdlsize =~ /^(\d+)([MG])$/i) {
+		my $value= $1;
+		my $unit = $2;
+		if ($unit eq "G") {
+			# convert GB to MB...
+			$value *= 1024;
+		}
+		# convert MB to Byte
+		$cmdlBytes = $value * 1048576;
+	}
+	#===========================================
+	# adapt min size according to cmdline or XML
+	#-------------------------------------------
+	if ($cmdlBytes > $minBytes) {
+		$minBytes = $cmdlBytes;
+	} elsif ($XMLBytes > $minBytes) {
+		$minBytes = $XMLBytes;
+	}
+	#==========================================
+	# Create vmsize MB string and vmmbyte value
+	#------------------------------------------
+	$vmsize  = $minBytes / 1048576;
+	$vmsize  = sprintf ("%.0f", $vmsize);
+	$vmmbyte = $vmsize;
+	$vmsize  = $vmsize."M";
+	$kiwi -> loginfo (
+		"Starting with disk size: $vmsize\n"
+	);
+	$this->{vmmbyte} = $vmmbyte;
+	$this->{vmsize}  = $vmsize;
+	return $this;
+}
+
+#==========================================
+# __updateDiskSize
+#------------------------------------------
+sub __updateDiskSize {
+	# ...
+	# increase the current virtual disk size value
+	# by the specified value. value is treated as
+	# number in MB
+	# ---
+	my $this   = shift;
+	my $addMB  = shift;
+	my $kiwi   = $this->{kiwi};
+	my $vmsize = $this->{vmmbyte} + $addMB;
+	$vmsize = sprintf ("%.0f", $vmsize);
+	$this->{vmmbyte} = $vmsize;
+	$vmsize = $vmsize."M";
+	$this->{vmsize}  = $vmsize;
+	$kiwi->loginfo (
+		"Increasing disk size by ".$addMB."M to: ".$vmsize."\n"
+	);
 	return $this;
 }
 
