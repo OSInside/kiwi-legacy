@@ -260,7 +260,7 @@ function OEMInstall {
 	else
 		prefix=/squashed
 		mkdir -p $prefix
-		if ! mount -o loop -t squashfs /cdrom/$imageName.squashfs $prefix;then
+		if ! mount -o loop /cdrom/$imageName.squashfs $prefix;then
 			systemException \
 				"Failed to mount install image container" \
 			"reboot"
