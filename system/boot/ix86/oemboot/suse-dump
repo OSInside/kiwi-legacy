@@ -369,7 +369,6 @@ function OEMInstall {
 					usr/bin/dialog   \
 					usr/bin/xinit    \
 					usr/bin/xterm    \
-					usr/bin/dialog   \
 					usr/bin/icewm
 				do
 					if [ ! -e $OEMRootSystem/$i ];then
