@@ -543,6 +543,15 @@ sub setCacheDir {
 }
 
 #==========================================
+# unsetCacheDir
+#------------------------------------------
+sub unsetCacheDir {
+	my $this = shift;
+	undef $this -> {cacheDir};
+	return 1;
+}
+
+#==========================================
 # setConfigDir
 #------------------------------------------
 sub setConfigDir {

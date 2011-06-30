@@ -66,8 +66,6 @@ sub new {
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
-	# FIXME
-	#my $cmdL = new KIWICommandLine ($kiwi);
 	#==========================================
 	# Check pre-conditions
 	#------------------------------------------
@@ -188,6 +186,8 @@ sub initializeCache {
 	my @infoReq = ('packages', 'sources');
 	$CacheScan = $info -> getXMLInfoTree(\@infoReq);
 	if (! $CacheScan) {
+		$kiwi -> warning ("Failed to scan cache");
+		$kiwi -> skipped ();
 		return undef;
 	}
 	#==========================================
@@ -335,7 +335,9 @@ sub selectCache {
 	my $init = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
+	my $cmdL = $this->{cmdL};
 	if (! $init) {
+		$cmdL -> unsetCacheDir();
 		return undef;
 	}
 	my $CacheDistro   = $init->[0];
@@ -380,6 +382,9 @@ sub selectCache {
 		#------------------------------------------
 		my $CACHE_FD;
 		if (! open ($CACHE_FD,$meta)) {
+			$kiwi -> loginfo (
+				"Cache: no cache meta data $meta found\n"
+			);
 			next;
 		}
 		#==========================================
@@ -442,6 +447,7 @@ sub selectCache {
 			}
 		}
 	}
+	$cmdL -> unsetCacheDir();
 	return undef;
 }
 
