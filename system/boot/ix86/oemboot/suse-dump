@@ -283,6 +283,15 @@ function OEMInstall {
 		info=/tmp/partinfo
 		wmrc=/wmrc
 		loop=$(losetup -s -f $imageName)
+		if [ $? != 0 ];then
+			# /.../
+			# old version of losetup doesn't know about
+			# the --find option therefore we set a fixed
+			# loop device name and setup this
+			# ----
+			loop=/dev/loop1
+			losetup $loop $imageName
+		fi
 		loop=$(echo $loop | sed -e s@^/dev/@@)
 		if ! kpartx -a /dev/$loop;then
 			systemException \

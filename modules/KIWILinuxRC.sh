@@ -3893,8 +3893,8 @@ function partedGetPartitionID {
 	# /.../
 	# prints the partition ID for the given device and number
 	# ----
-	parted -m -s $1 print | grep ^$2: | cut -f2 -d, |\
-		cut -f2 -d= | tr -d ";" | tr -d 0
+	parted -m -s $1 print | grep ^$2: | cut -f2 -d= |\
+		sed -e 's@[,; ]@@g' | tr -d 0
 }
 #======================================
 # partitionID
@@ -7256,7 +7256,16 @@ function createSnapshotMap {
 	#--------------------------------------
 	diskLoop=$(losetup -s -f $readOnlyRootImage)
 	if [ ! $? = 0 ];then
-		return
+		# /.../
+		# old version of losetup doesn't know about
+		# the --find option therefore we set a fixed
+		# loop device name and setup this
+		# ----
+		diskLoop=/dev/loop2
+		losetup $diskLoop $readOnlyRootImage
+		if [ ! $? = 0 ];then
+			return
+		fi
 	fi
 	echo "losetup -d $diskLoop" > $reset
 	if ! kpartx -a $diskLoop;then
@@ -7282,7 +7291,16 @@ function createSnapshotMap {
 	echo "rm -f /tmp/cow" >> $reset
 	snapLoop=$(losetup -s -f /tmp/cow)
 	if [ ! $? = 0 ];then
-		return
+		# /.../
+		# old version of losetup doesn't know about
+		# the --find option therefore we set a fixed
+		# loop device name and setup this
+		# ----
+		snapLoop=/dev/loop3
+		losetup $snapLoop /tmp/cow
+		if [ ! $? = 0 ];then
+			return
+		fi
 	fi
 	echo "losetup -d $snapLoop" >> $reset
 	#======================================
