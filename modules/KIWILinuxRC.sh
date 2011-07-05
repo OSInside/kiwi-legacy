@@ -6548,6 +6548,9 @@ function resizeFilesystem {
 	fi
 	if [ -z "$callme" ];then
 		if [ $ramdisk -eq 0 ];then
+			$check
+		fi
+		if [ $ramdisk -eq 0 ];then
 			eval $resize_lucks
 			eval $resize_fs
 		else
@@ -6558,9 +6561,6 @@ function resizeFilesystem {
 			systemException \
 				"Failed to resize/check filesystem" \
 			"reboot"
-		fi
-		if [ $ramdisk -eq 0 ];then
-			$check
 		fi
 		INITRD_MODULES="$INITRD_MODULES $FSTYPE"
 	else
