@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul  5 12:59:08 CEST 2011 - ms@suse.de
+
+- added check if reading the md5 file was successful (bnc #703829)
+
+-------------------------------------------------------------------
 Tue Jun 28 17:17:46 CEST 2011 - ms@suse.de
 
 - allow firstboot and autoyast service to be enabled together (bnc #700105)
