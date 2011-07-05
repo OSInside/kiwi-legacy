@@ -603,7 +603,11 @@ function OEMInstall {
 		Source=$(echo $i | cut -f1 -d:)
 		Target=$(echo $i | cut -f2 -d:)
 		if [ -z "$OEM_PARTITION_INSTALL" ];then
-			read sum1 blocks blocksize zblocks zblocksize < $imageMD5
+			if ! read sum1 blocks blocksize zblocks zblocksize < $imageMD5;then
+				systemException \
+					"Reading of $imageMD5 failed" \
+				"reboot"
+			fi
 		else
 			blocksize=4096
 			partKB=$(partitionSize $Source)
