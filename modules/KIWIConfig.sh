@@ -1012,6 +1012,7 @@ function suseStripInitrd {
 		/etc/protocols /etc/services /etc/termcap /etc/aliases
 		/etc/bash.bashrc /etc/filesystems /etc/ld.so.conf /etc/magic
 		/etc/group /etc/passwd /etc/nsswitch.conf /etc/scsi_id.config
+		/etc/netconfig
 	"
 	for i in $files;do
 		if [ -e $i ];then
