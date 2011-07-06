@@ -432,23 +432,56 @@ function createInitialDevices {
 	test -L $prefix/stderr || ln -s fd/2 $prefix/stderr
 }
 #======================================
+# mount_rpc_pipefs
+#--------------------------------------
+function mount_rpc_pipefs {
+	# See if the file system is there yet
+	case `stat -c "%t" -f /var/lib/nfs/rpc_pipefs` in
+	*67596969*)
+		return 0;;
+	esac
+	mount -t rpc_pipefs rpc_pipefs /var/lib/nfs/rpc_pipefs
+}
+#======================================
+# umount_rpc_pipefs
+#--------------------------------------
+function umount_rpc_pipefs {
+	# See if the file system is there
+	case `stat -c "%t" -f /var/lib/nfs/rpc_pipefs` in
+	*67596969*)
+		umount /var/lib/nfs/rpc_pipefs
+	esac
+}
+#======================================
+# setupNFSServices
+#--------------------------------------
+function setupNFSServices {
+	mount_rpc_pipefs
+	if [ -x /sbin/rpcbind ];then
+		startproc /sbin/rpcbind
+	fi
+	if [ -x /usr/sbin/rpc.statd ];then
+		startproc /usr/sbin/rpc.statd --no-notify
+	fi
+	if [ -x /usr/sbin/rpc.idmapd ];then
+		startproc /usr/sbin/rpc.idmapd
+	fi
+}
+#======================================
 # mountSystemFilesystems
 #--------------------------------------
 function mountSystemFilesystems {
 	mount -t proc  proc   /proc
 	mount -t sysfs sysfs  /sys
-	if [ -d /var/lib/nfs/rpc_pipefs ];then
-		mount -t rpc_pipefs rpc_pipefs /var/lib/nfs/rpc_pipefs
-	fi
 }
 #======================================
 # umountSystemFilesystems
 #--------------------------------------
 function umountSystemFilesystems {
+	umount_rpc_pipefs
 	umount /dev/pts &>/dev/null
 	umount /sys     &>/dev/null
 	umount /proc    &>/dev/null
-	umount /var/lib/nfs/rpc_pipefs &>/dev/null
 }
 #======================================
 # createFramebufferDevices
@@ -4533,7 +4566,7 @@ function mountSystemOverlay {
 		# on it if not remote. Mount the filesystem
 		# ----
 		if [ "$roDevice" = "nfs" ];then
-			rwDevice="-o nolock,rw $nfsRootServer:$rwDevice"
+			rwDevice="-o vers=3,rw $nfsRootServer:$rwDevice"
 		fi
 		if [ ! "$roDevice" = "nfs" ] && ! setupReadWrite; then
 			return 1
@@ -4688,7 +4721,7 @@ function mountSystem {
 	#======================================
 	# wait for storage device to appear
 	#--------------------------------------
-	if ! echo $mountDevice | grep -qE "loop|nolock";then
+	if ! echo $mountDevice | grep -qE "loop|vers=";then
 		waitForStorageDevice $mountDevice
 	fi
 	#======================================
@@ -5550,8 +5583,8 @@ function bootImage {
 		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
 			"/preinit ; . /include ; cleanImage ; exec /sbin/halt -fihp" 
 	fi
-	# FIXME: clicfs doesn't like run-init
-	if [ ! "$haveClicFS" = "yes" ];then
+	# FIXME: clicfs / nfsroot doesn't like run-init
+	if [ ! "$haveClicFS" = "yes" ] && [ -z "$NFSROOT" ];then
 		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
 			"/preinit ; . /include ; cleanImage ; exec /sbin/init $option"
 	else

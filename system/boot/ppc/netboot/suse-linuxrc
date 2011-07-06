@@ -570,10 +570,11 @@ else
 		if [ -z "$nfsRootServer" ];then
 			nfsRootServer=$SERVER
 		fi
+		setupNFSServices
 		Echo "Mounting NFS root system: $nfsRootServer:$nfsRootDevice..."
-		imageRootDevice="-o nolock,rw $nfsRootServer:$nfsRootDevice"
+		imageRootDevice="-o vers=3,rw $nfsRootServer:$nfsRootDevice"
 		if [ ! -z "$COMBINED_IMAGE" ] || [ ! -z "$UNIONFS_CONFIG" ];then
-			imageRootDevice="-o nolock,ro $nfsRootServer:$nfsRootDevice"
+			imageRootDevice="-o vers=3,ro $nfsRootServer:$nfsRootDevice"
 		fi
 		if [ ! -z "$UNIONFS_CONFIG" ];then
 			unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
@@ -768,6 +769,12 @@ runHook preconfig
 if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	if [ ! -z "$RELOAD_CONFIG" ];then
 		Echo "Configuration files reload forced via RELOAD_CONFIG..."
+	fi
+	#=======================================
+	# 17.0) Import NFS root files
+	#---------------------------------------
+	if [ ! -z "$NFSROOT" ];then
+		test -f /etc/resolv.conf && cp /etc/resolv.conf /mnt/etc
 	fi
 	#=======================================
 	# 17.1) Import files from backup

@@ -971,7 +971,7 @@ function suseStripInitrd {
 		true touch sleep sh pidof sed rmdir rm pwd ps mv mkdir kill hostname
 		gzip grep false df cp cat bash basename arch sort ls uniq lsmod
 		usleep parted mke2fs pvcreate vgcreate lvm resize2fs ln hdparm
-		dmesg splash fbmngplay portmap start-statd sm-notify
+		dmesg splash fbmngplay portmap start-statd sm-notify rpcbind
 		rpc.statd rpc.idmapd nbd-client mount.nfs mount.nfs4 eject
 		blockdev posbios ping killall killall5 udevcontrol udevd
 		udevsettle udevtrigger mknod stat path_id hwup scsi_id scsi_tur

@@ -120,33 +120,19 @@ if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
 fi
 
 #======================================
-# 11) setup network for nfs boot
-#--------------------------------------
-if [ ! -z "$NFSROOT" ];then
-	mount -t proc  proc    /proc
-	mount -t sysfs sysfs   /sys
-	mount -t devpts devpts /dev/pts
-	if [ -x /etc/init.d/portmap ];then
-		/etc/init.d/portmap start
-	elif [ -x /etc/init.d/rpcbind ];then
-		/etc/init.d/rpcbind start
-	fi
-fi
-
-#======================================
-# 12) setup console
+# 11) setup console
 #--------------------------------------
 if [ "$systemIntegrity" = "clean" ];then
 	setupConsole
 fi
 
 #======================================
-# 13) setup console
+# 12) kernelCheck
 #--------------------------------------
 kernelCheck
 
 #======================================
-# 14) kill udev
+# 13) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems
