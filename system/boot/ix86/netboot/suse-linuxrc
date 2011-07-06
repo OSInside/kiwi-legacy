@@ -571,9 +571,9 @@ else
 			nfsRootServer=$SERVER
 		fi
 		Echo "Mounting NFS root system: $nfsRootServer:$nfsRootDevice..."
-		imageRootDevice="-o nolock,rw $nfsRootServer:$nfsRootDevice"
+		imageRootDevice="-o nolock,rw,vers=3 $nfsRootServer:$nfsRootDevice"
 		if [ ! -z "$COMBINED_IMAGE" ] || [ ! -z "$UNIONFS_CONFIG" ];then
-			imageRootDevice="-o nolock,ro $nfsRootServer:$nfsRootDevice"
+			imageRootDevice="-o nolock,ro,vers=3 $nfsRootServer:$nfsRootDevice"
 		fi
 		if [ ! -z "$UNIONFS_CONFIG" ];then
 			unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`

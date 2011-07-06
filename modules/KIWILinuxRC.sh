@@ -437,6 +437,9 @@ function createInitialDevices {
 function mountSystemFilesystems {
 	mount -t proc  proc   /proc
 	mount -t sysfs sysfs  /sys
+	if [ -d /var/lib/nfs/rpc_pipefs ];then
+		mount -t rpc_pipefs rpc_pipefs /var/lib/nfs/rpc_pipefs
+	fi
 }
 #======================================
 # umountSystemFilesystems
@@ -445,6 +448,7 @@ function umountSystemFilesystems {
 	umount /dev/pts &>/dev/null
 	umount /sys     &>/dev/null
 	umount /proc    &>/dev/null
+	umount /var/lib/nfs/rpc_pipefs &>/dev/null
 }
 #======================================
 # createFramebufferDevices
