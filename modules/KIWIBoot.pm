@@ -716,7 +716,7 @@ sub setupInstallCD {
 	#==========================================
 	# check if system image is given
 	#------------------------------------------
-	if (! defined $system) {
+	if (! $system) {
 		$system = $initrd;
 		$gotsys = 0;
 	}
@@ -3083,6 +3083,17 @@ sub setupBootLoaderConfiguration {
 		%type = %{$xml->getImageTypeAndAttributes()};
 		$cmdline  = $type{cmdline};
 	}
+	if ($type =~ /^KIWI CD Boot/) {
+		# /.../
+		# use predefined set of parameters for simple boot CD
+		# not including a system image
+		# ----
+		$type{installboot} = "install";
+		$type{boottimeout} = 1;
+		$type{fastboot}    = 1;
+		$cmdline="kiwistderr=/dev/hvc0";
+		$vga="normal";
+	}
 	if ((($type =~ /^KIWI (CD|USB)/)) && ($type{installboot})) {
 		# In install mode we have the following menu layout
 		# ----
@@ -3166,10 +3177,15 @@ sub setupBootLoaderConfiguration {
 		print FD "color cyan/blue white/blue\n";
 		print FD "default $defaultBootNr\n";
 		my $bootTimeout = $type{boottimeout} ? int $type{boottimeout} : 10;
+		if ($type{fastboot}) {
+			$bootTimeout = 0;
+		}
 		print FD "timeout $bootTimeout\n";
 		if ($type =~ /^KIWI (CD|USB)/) {
 			my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
-			print FD "gfxmenu $dev/boot/message\n";
+			if (! $type{fastboot}) {
+				print FD "gfxmenu $dev/boot/message\n";
+			}
 			print FD "title Boot from Hard Disk\n";
 			if ($dev eq '(cd)') {
 				print FD " rootnoverify (hd0)\n";
