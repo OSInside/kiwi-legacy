@@ -985,7 +985,7 @@ sub setupInstallCD {
 	}
 	$kiwi -> done ();
 	if ($arch !~ /ppc|ppc64/) {
-		if (! $iso -> relocateCatalog ($name)) {
+		if (! $iso -> relocateCatalog ()) {
 			$iso  -> cleanISO ();
 			return undef;
 		}

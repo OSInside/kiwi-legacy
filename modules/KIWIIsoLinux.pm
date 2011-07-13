@@ -951,6 +951,7 @@ sub fixCatalog {
 		$kiwi -> skipped();
 	}
 	close $ISO;
+	return $this;
 }
 
 #==========================================
