@@ -671,6 +671,12 @@ sub mainTask
       else {
         $this->logMsg("I", "Created Iso image <$isoname>");
       }
+      if (! $iso->relocateCatalog()) {
+        return 1;     
+      }
+      if (! $iso->fixCatalog()) {
+        return 1;
+      }
       if ($hybridmedia) {
         if(!$iso->createHybrid()) {
           $this->logMsg("E", "Isohybrid call failed");
