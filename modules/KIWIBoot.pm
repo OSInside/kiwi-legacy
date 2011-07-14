@@ -2121,7 +2121,9 @@ sub setupBootDisk {
 		# Copy root tree to disk
 		#------------------------------------------
 		$kiwi -> info ("Copying system image tree on disk");
-		$status = qxx ("tar -cf - -C $system . | tar -x -C $loopdir 2>&1");
+		$status = qxx (
+			"tar --one-file-system -cf - -C $system . | tar -x -C $loopdir 2>&1"
+		);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
