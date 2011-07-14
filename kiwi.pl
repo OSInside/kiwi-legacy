@@ -50,7 +50,7 @@ use KIWIXMLValidator;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "4.85.3";
+our $Version       = "4.85.4";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";

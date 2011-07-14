@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jul 14 16:22:26 CEST 2011 - ms@suse.de
+
+- use the --one-file-system option for tar when copying the
+  system image tree. This prevents the copy of files existing
+  beyond the local filesystem (bnc #705717)
+
+-------------------------------------------------------------------
 Wed Jul 13 14:41:00 CEST 2011 - ms@suse.de
 
 - make sure relocateCatalog and fixCatalog is called
