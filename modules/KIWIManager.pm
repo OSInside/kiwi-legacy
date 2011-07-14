@@ -785,6 +785,14 @@ sub setupInstallationSource {
 		if (! $chroot) {
 			$stype = "public";
 		}
+		if ($chroot) {
+			$data = qxx ("@kchroot zypper --version 2>&1 | cut -c 8");
+			if ($data < 1) {
+				$kiwi -> info ("image zypper version is too old");
+				$kiwi -> skipped ();
+				return $this;
+			}
+		}
 		foreach my $alias (keys %{$source{$stype}}) {
 			my @sopts = @{$source{$stype}{$alias}};
 			my @zopts = ();
@@ -846,16 +854,8 @@ sub setupInstallationSource {
 			} else {
 				my @zypper= @{$this->{zypper_chroot}};
 				$kiwi -> info ("Adding chroot zypper service: $alias");
-				$data = qxx ("@kchroot zypper --version 2>&1 | cut -c 8");
-				if ($data >= 1) {
-					$data = qxx ("@kchroot @zypper $sadd 2>&1");
-					$code = $? >> 8;
-				} else {
-					$kiwi -> skipped ();
-					$kiwi -> info ("image zypper version is too old");
-					$kiwi -> skipped ();
-					return $this;
-				}
+				$data = qxx ("@kchroot @zypper $sadd 2>&1");
+				$code = $? >> 8;
 			}
 			if ($code != 0) {
 				$kiwi -> failed ();
