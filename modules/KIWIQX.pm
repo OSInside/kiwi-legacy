@@ -106,6 +106,14 @@ sub qxx ($) {
 		return "$prog: command not found";
 	}
 	#==========================================
+	# Check if the command is studio hijacked
+	#------------------------------------------
+	if (-e $prog."_real") {
+		if ((defined $main::kiwi) && ($QXXLOG)) {
+			$main::kiwi -> loginfo ("EXEC WARNING [$prog is hijacked]\n");
+		}
+	}
+	#==========================================
 	# Call command line
 	#------------------------------------------
 	return qx ($cmd);
