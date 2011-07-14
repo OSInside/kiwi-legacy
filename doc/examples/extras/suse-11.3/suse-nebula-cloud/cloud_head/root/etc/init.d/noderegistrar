@@ -8,7 +8,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:       noderegistrar
-# Required-Start: $remote_fs $syslog network
+# Required-Start: $remote_fs $syslog $network
 # Required-Stop:  $remote_fs $syslog
 # Should-Start:   cloudinfo
 # Default-Start:  3 5

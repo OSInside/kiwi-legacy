@@ -8,7 +8,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:       cloudinfo
-# Required-Start: $remote_fs $syslog network
+# Required-Start: $remote_fs $syslog $network
 # Required-Stop:  $remote_fs $syslog
 # Default-Start:  3 5
 # Default-Stop:   0 1 2 6

@@ -15,7 +15,7 @@
                 <oem-unattended>true</oem-unattended>
 			</oemconfig>
 		</type>
-		<version>1.1.0</version>
+		<version>1.2.0</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
@@ -29,7 +29,7 @@
 		<source path="opensuse://11.3/repo/oss/"/>
 	</repository>
     <repository type="rpm-md">
-        <source path="http://download.opensuse.org/repositories/Virtualization:/Cloud:/OpenNebula/openSUSE_11.3"/>
+        <source path="opensuse://repositories/Virtualization:/Cloud:/OpenNebula/openSUSE_11.3"/>
     </repository>
     <repository type="rpm-md">
         <source path="opensuse://11.3/repo/oss/suse/"/>
@@ -47,6 +47,7 @@
 		<package name="kernel-default"/>
         <package name="nfs-kernel-server"/>
         <package name="opennebula"/>
+        <package name="opennebula-sunstone"/>
         <package name="openssh"/>
         <package name="openssl"/>
         <package name="python"/>
