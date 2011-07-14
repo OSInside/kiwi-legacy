@@ -52,9 +52,9 @@ sub new {
 	#============================================
 	# Read .kiwirc
 	#--------------------------------------------
-	my $file = "$ENV{'HOME'}/.kiwirc";
-	if (! -f $file) {
-		$file = ".kiwirc";
+	my $file = ".kiwirc";
+	if (($ENV{'HOME'}) && (-f $ENV{'HOME'}."/.kiwirc")) {
+		$file = "$ENV{'HOME'}/.kiwirc";
 	}
 	my $kiwi = new KIWILog("tiny");
 	if ( -f $file) {
