@@ -1193,6 +1193,7 @@ sub setupInstallStick {
 		}
 		$kiwi -> done();
 		$system = $system.".squashfs";
+		$vmsize = -s $system;
 	}
 	#==========================================
 	# setup required disk size
@@ -1275,15 +1276,21 @@ sub setupInstallStick {
 	# create disk partitions
 	#------------------------------------------
 	$kiwi -> info ("Create partition table for disk");
+	my $partid = "83";
+	if ($bootloader eq "syslinux" ) {
+		$partid = "c";
+	}
 	if ($gotsys) {
 		@commands = (
 			"n","p","1",".","+".$irdsize."M",
 			"n","p","2",".",".",
+			"t","1",$partid,
 			"a","1","w","q"
 		);
 	} else {
 		@commands = (
 			"n","p","1",".",".",
+			"t","1",$partid,
 			"a","1","w","q"
 		);
 	}
@@ -1358,17 +1365,23 @@ sub setupInstallStick {
 	#------------------------------------------
 	foreach my $root ($boot,$data) {
 		next if ! defined $root;
-		$kiwi -> info ("Creating ext3 filesystem on $root partition");
-		my %FSopts = $main::global -> checkFSOptions(
-			@{$cmdL -> getFilesystemOptions()}
-		);
-		my $fsopts = $FSopts{ext3};
-		my $fstool = "mkfs.ext3";
-		if (($root eq $data) && ($this->{inodes})) {
-			$fsopts.= " -N $this->{inodes}";
+		if (($root eq $boot) && ($bootloader eq "syslinux")) {
+			$kiwi -> info ("Creating DOS boot filesystem");
+			$status = qxx ("/sbin/mkdosfs $root 2>&1");
+			$result = $? >> 8;
+		} else {
+			$kiwi -> info ("Creating ext3 filesystem on $root partition");
+			my %FSopts = $main::global -> checkFSOptions(
+				@{$cmdL -> getFilesystemOptions()}
+			);
+			my $fsopts = $FSopts{ext3};
+			my $fstool = "mkfs.ext3";
+			if (($root eq $data) && ($this->{inodes})) {
+				$fsopts.= " -N $this->{inodes}";
+			}
+			$status = qxx ( "$fstool $fsopts $root 2>&1" );
+			$result = $? >> 8;
 		}
-		$status = qxx ( "$fstool $fsopts $root 2>&1" );
-		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed creating filesystem: $status");
