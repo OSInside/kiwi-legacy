@@ -658,6 +658,7 @@ sub setupInstallCD {
 	my %type;
 	my $haveDiskDevice;
 	my $version;
+	my $FD;
 	#==========================================
 	# Check for disk device
 	#------------------------------------------
@@ -669,6 +670,19 @@ sub setupInstallCD {
 		$md5name = $system;
 		$this->{system} = $system;
 	}
+	#==========================================
+	# read MBR disk label
+	#------------------------------------------
+	if (! open $FD,"dd 2>/dev/null if=$system bs=1 count=4 skip=\$((0x1b8))|") {
+		$kiwi -> error  ("Couldn't open: $system: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $mbrid = sprintf "0x%08x", unpack "V", <$FD>;
+	if (($this->{mbrid}) && ($mbrid ne $this->{mbrid})) {
+		$this->{mbrid} = $mbrid;
+	}
+	close $FD;
 	#==========================================
 	# read config XML attributes
 	#------------------------------------------
@@ -984,6 +998,11 @@ sub setupInstallCD {
 		return undef;
 	}
 	$kiwi -> done ();
+	if ($bootloader =~ /(sys|ext)linux/) {
+		if (! $iso->createHybrid($this->{mbrid})) {
+			return undef;
+		}
+	}
 	if ($arch !~ /ppc|ppc64/) {
 		if (! $iso -> relocateCatalog ()) {
 			$iso  -> cleanISO ();
@@ -3395,7 +3414,7 @@ sub setupBootLoaderConfiguration {
 				print FD "append initrd=initrd ";
 				print FD "vga=$vga loader=$bloader splash=silent ";
 				print FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
-				print FD "cdinst=1";
+				print FD "cdinst=1 kiwi_hybrid=1";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD "kernel /boot/linux.vmx\n";
 				print FD "append initrd=/boot/initrd.vmx ";
@@ -3443,7 +3462,7 @@ sub setupBootLoaderConfiguration {
 				print FD "append initrd=initrd ";
 				print FD "vga=$vga loader=$bloader splash=silent ";
 				print FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
-				print FD "cdinst=1";
+				print FD "cdinst=1 kiwi_hybrid=1";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD "kernel /boot/linux.vmx\n";
 				print FD "append initrd=/boot/initrd.vmx ";

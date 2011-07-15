@@ -217,7 +217,11 @@ if [ -z "$pxe" ];then
 	Echo "Searching for boot device..."
 	if [ "$LOCAL_BOOT" = "no" ];then
 		if ! searchBIOSBootDevice;then
-			systemException "$biosBootDevice" "reboot"
+			if [ ! -z "$cdinst" ];then
+				biosBootDevice=/dev/cdrom
+			else
+				systemException "$biosBootDevice" "reboot"
+			fi
 		fi
 		export imageDiskDevice=$biosBootDevice
 	else

@@ -3085,7 +3085,8 @@ function GetBootable {
 function CDMount {
 	# /.../
 	# search all CD/DVD drives and use the one we can find
-	# the CD configuration on
+	# the CD configuration on. This also includes hybrid
+	# devices which appears as a disk
 	# ----
 	local count=0
 	local ecode=0
@@ -3097,7 +3098,7 @@ function CDMount {
 	#======================================
 	# check for hybrid mbr ID
 	#--------------------------------------
-	if [ -z "$cdinst" ];then
+	if [ ! -z "$kiwi_hybrid" ];then
 		searchBIOSBootDevice
 		ecode=$?
 		if [ ! $ecode = 0 ];then
@@ -3106,8 +3107,6 @@ function CDMount {
 			fi
 			unset kiwi_hybrid
 		fi
-	else
-		unset kiwi_hybrid
 	fi
 	#======================================
 	# walk through media
@@ -3338,16 +3337,6 @@ function searchBIOSBootDevice {
 		fi
 		pred=$curd
 	done
-	#======================================
-	# Check for OEM ISO installation mode
-	#--------------------------------------
-	if [ ! -z "$cdinst" ];then
-		CDMount
-		umount $cddev
-		curd=$cddev
-		export biosBootDevice=$curd
-		return 0
-	fi
 	#======================================
 	# Search and copy all mbrid files 
 	#--------------------------------------
