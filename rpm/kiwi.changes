@@ -1,8 +1,16 @@
 -------------------------------------------------------------------
 Mon Jul 18 11:54:31 CEST 2011 - ms@suse.de
 
-- do not try to run boot loader setup code when no boot
-  loader exists (bnc #705208)
+- do not try to run boot loader setup code when no boot loader
+  exists. This commit integrates the kiwi-relocateCatalog.patch
+  from Rudi (slightly modified by Adrian) into the
+  git (bnc #705208)
+
+-------------------------------------------------------------------
+Mon Jul 18 00:40:20 CEST 2011 - ro@suse.de
+
+- failing relocateCatalog or fixCatalog is not a fatal error,
+  at least not for images that are not bootable or for ppc
 
 -------------------------------------------------------------------
 Thu Jul 14 16:22:26 CEST 2011 - ms@suse.de
