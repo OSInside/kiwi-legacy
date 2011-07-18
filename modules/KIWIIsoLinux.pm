@@ -821,6 +821,15 @@ sub relocateCatalog {
 		close $ISO;
 		return undef;
 	}
+	my $applemedia = read_sector (0x00);
+	my $applemedia_id = substr($applemedia, 0x230, 19);
+	if ($applemedia_id eq "Apple_partition_map") {
+		$kiwi -> skipped ();
+		$kiwi -> info  ("Apple partition does not need catalog relocation");
+		$kiwi -> skipped ();
+		close $ISO;
+		return $this;
+	}
 	my $new_location = $path_table - 1;
 	my $eltorito_descr = read_sector (0x11);
 	my $eltorito_id = substr($eltorito_descr, 0, 0x1e);
@@ -917,6 +926,15 @@ sub fixCatalog {
 		$kiwi -> failed ();
 		close $ISO;
 		return undef;
+	}
+	my $applemedia = read_sector (0x00);
+	my $applemedia_id = substr($applemedia, 0x230, 19);
+	if ($applemedia_id eq "Apple_partition_map") {
+		$kiwi -> skipped ();
+		$kiwi -> info  ("Apple partition does not need catalog relocation");
+		$kiwi -> skipped ();
+		close $ISO;
+		return $this;
 	}
 	my $eltorito_descr = read_sector (0x11);
 	my $eltorito_id = substr($eltorito_descr, 0, 0x1e);
