@@ -655,11 +655,16 @@ sub mainTask
                                $attr,
                                $checkmedia);
 
-      if(!$iso->callBootMethods()) {
-        $this->logMsg("W", "Creating boot methods failed, medium maybe not be bootable");
-      }
-      else {
-        $this->logMsg("I", "Boot methods called successfully");
+      # Just the first media is usually bootable at SUSE
+      my $is_bootable = 0;
+      if(-d "$this->{m_basesubdir}->{$cd}/boot") {
+        if(!$iso->callBootMethods()) {
+          $this->logMsg("W", "Creating boot methods failed, medium maybe not be bootable");
+        }
+        else {
+          $this->logMsg("I", "Boot methods called successfully");
+          $is_bootable = 1;
+        }
       }
       if(!$iso->createISO()) {
         $this->logMsg("E", "Cannot create Iso image");
@@ -668,19 +673,21 @@ sub mainTask
       else {
         $this->logMsg("I", "Created Iso image <$isoname>");
       }
-      if (! $iso->relocateCatalog()) {
-        return 1;     
-      }
-      if (! $iso->fixCatalog()) {
-        return 1;
-      }
-      if ($hybridmedia) {
-        if(!$iso->createHybrid()) {
-          $this->logMsg("E", "Isohybrid call failed");
+      if ($is_bootable) {
+        if (! $iso->relocateCatalog()) {
+          return 1;     
+        }
+        if (! $iso->fixCatalog()) {
           return 1;
         }
-        else {
-          $this->logMsg("I", "Isohybrid call successful");
+        if ($hybridmedia) {
+          if(!$iso->createHybrid()) {
+            $this->logMsg("E", "Isohybrid call failed");
+            return 1;
+          }
+          else {
+            $this->logMsg("I", "Isohybrid call successful");
+          }
         }
       }
       if(!$iso->checkImage()) {
