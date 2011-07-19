@@ -140,6 +140,7 @@ sub new {
 	#------------------------------------------
 	$this->{data} = \%data;
 	$this->{kiwi} = $kiwi;
+	$this->{UmountStack} = [];
 	return $this;
 }
 
@@ -286,9 +287,9 @@ sub mount {
 	my %fsattr = $this -> checkFileSystem ($source);
 	my $type   = $fsattr{type};
 	my $cipher = $this->{data}->{LuksCipher};
+	my @UmountStack = @{$this->{UmountStack}};
 	my $status;
 	my $result;
-	my @UmountStack;
 	#==========================================
 	# Check result of filesystem detection
 	#------------------------------------------
@@ -454,7 +455,7 @@ sub umount {
 			$kiwi -> warning ("UmountStack failed: $cmd: $status\n");
 		}
 	}
-	$this->{UmountStack} = ();
+	$this->{UmountStack} = [];
 }
 
 #==========================================
