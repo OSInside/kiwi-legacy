@@ -79,5 +79,5 @@ check:
 		dejavu sil-charis xml-commons-resolver
 
 revision:
-	cat ../../rpm/kiwi.spec | grep Version: | cut -f2 -d: |\
+	cat ../../rpm/kiwi.spec | grep Version: | cut -f2 -d: | cut -f1-2 -d. |\
 		tr -d " " | tr -d "\n" > Revision.txt
