@@ -69,7 +69,6 @@ clean:
 	rm -f kiwi.html
 	rm -f kiwi.pdf
 	rm -f kiwi.fo
-	make -C images clean
 
 check:
 	@echo "Checking for packages..."
