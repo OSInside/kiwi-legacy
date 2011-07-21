@@ -941,12 +941,6 @@ sub init {
 		}
 	}
 	#========================================
-	# check if prepare & create
-	#----------------------------------------
-	if (defined $Build) {
-		$cmdL -> setConfigDir ($Build);
-	}
-	#========================================
 	# check if force-new-root is set
 	#----------------------------------------
 	if (defined $ForceNewRoot) {
@@ -1041,6 +1035,12 @@ sub init {
 		}
 		$Create =~ s/\/$//;
 	}
+	if (defined $Build) {
+		if (($Build !~ /^\//) && (! -d $Build)) {
+			$Build = $gdata->{System}."/".$Build;
+		}
+		$Build =~ s/\/$//;
+	}
 	#========================================
 	# store uniq path to image description
 	#----------------------------------------
@@ -1052,6 +1052,9 @@ sub init {
 	}
 	if (defined $Create) {
 		$cmdL -> setConfigDir ($Create);
+	}
+	if (defined $Build) {
+		$cmdL -> setConfigDir ($Build);
 	}
 	#========================================
 	# store operation modes
