@@ -4,7 +4,7 @@
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2011 SUSE LINUX Products GmbH, Germany
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -20,6 +20,7 @@ package KIWICommandLine;
 use strict;
 use warnings;
 require Exporter;
+use Digest::MD5 qw (md5_base64);
 use File::Spec;
 use KIWILocator;
 use KIWILog;
@@ -772,7 +773,7 @@ sub setReplacementRepo {
 		my $msg = "No repo alias defined, generating time based name.\n";
 		$kiwi -> loginfo ($msg);
 		my $curTime = time;
-		$repoAlias = 'genName_' . "$curTime";
+		$repoAlias = 'genName_' . md5_base64($repo);
 	}
 	if (! $repoPrio) {
 		my $msg = "No repo priority specified, using default value '10'\n";
