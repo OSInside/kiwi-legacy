@@ -175,9 +175,15 @@ function OEMInstall {
 	IFS=$IFS_ORIG
 	Echo "Searching harddrive for $OEMInstallType installation"
 	hwinfo=/usr/sbin/hwinfo
-	deviceDisks=`$hwinfo --disk |\
-		grep "Device File:" | cut -f2 -d: |\
-		cut -f1 -d"(" | sed -e s"@$imageDiskDevice@@"`
+	if [ ! -z "$imageDiskDevice" ];then
+		deviceDisks=`$hwinfo --disk |\
+			grep "Device File:" | cut -f2 -d: |\
+			cut -f1 -d"(" | sed -e s"@$imageDiskDevice@@"`
+	else
+		deviceDisks=`$hwinfo --disk |\
+			grep "Device File:" | cut -f2 -d: |\
+			cut -f1 -d"("`
+	fi
 	export deviceDisks=`echo $deviceDisks`
 	if [ -z "$deviceDisks" ];then
 		systemException \
