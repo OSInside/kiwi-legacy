@@ -178,7 +178,7 @@
 
     <sect2 id="sec.description.image">
       <title><sgmltag>image</sgmltag> Element</title>
-      <screen>&lt;image schemaversion="3.5" name="iname"
+      <screen>&lt;image schemaversion="5.2" name="iname"
   displayname="text" 
   inherit="path" 
   kiwirevision="number" 
