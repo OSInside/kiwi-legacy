@@ -94,7 +94,6 @@ sub new {
 	if (! -d $dataDir) {
 		qxx ("mkdir -p $dataDir");
 	}
-	qxx ("rm -rf $dataDir/*");
 	my $zyppConf;   # Configuration file for libzypp
 	my $zypperConf; # Configuration file for zypper
 	my $zconfig;
@@ -2643,6 +2642,17 @@ sub createYumConfig {
 	qxx ("echo 'plugins=1' >> $config");
 	qxx ("echo 'metadata_expire=1800' >> $config");
 	return $config;
+}
+
+#==========================================
+# Destructor
+#------------------------------------------
+sub DESTROY {
+	my $this   = shift;
+	my $meta   = $this->{dataDir};
+	my $zypperConf = "$meta/zypper.conf.$$";
+	my $zyppConf   = "$meta/zypp.conf.$$";
+	qxx ("rm -f $zypperConf $zyppConf");
 }
 
 1;
