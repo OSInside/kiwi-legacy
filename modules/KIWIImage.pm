@@ -877,6 +877,7 @@ sub createImageCPIO {
 	#==========================================
 	# PRE Create filesystem on extend
 	#------------------------------------------
+	$kiwi -> info ("Creating cpio archive...");
 	my $pwd  = qxx ("pwd"); chomp $pwd;
 	my @cpio = ("--create", "--format=newc", "--quiet");
 	my $dest = $this->{imageDest}."/".$name.".gz";
@@ -906,11 +907,13 @@ sub createImageCPIO {
 	}
 	my $code = $? >> 8;
 	if ($code != 0) {
+		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create cpio archive");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
 		return undef;
 	}
+	$kiwi -> done();
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
@@ -3280,6 +3283,7 @@ sub setupLogicalExtend {
 		if (! $this -> extractKernel ($name)) {
 			return undef;
 		}
+		$this -> extractSplash ($name);
 	}
 	#==========================================
 	# Strip if specified
@@ -3369,6 +3373,66 @@ sub mountLogicalExtend {
 		return undef;
 	}
 	return "$this->{imageDest}/mnt-$$";
+}
+
+#==========================================
+# extractSplash
+#------------------------------------------
+sub extractSplash {
+	my $this = shift;
+	my $name = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageTree = $this->{imageTree};
+	my $imageDest = $this->{imageDest};
+	my $zipper    = $this->{gdata}->{Gzip};
+	my $newspl    = $imageDest."/splash";
+	#==========================================
+	# move out all splash files
+	#------------------------------------------
+	$kiwi -> info ("Extracting splash files...");
+	mkdir $newspl;
+	my $status = qxx ("mv $imageTree/image/loader/*.spl $newspl 2>&1");
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> skipped ();
+		$kiwi -> info ("No splash files found in initrd");
+		$kiwi -> skipped ();
+		unlink $newspl;
+		return $this;
+	}
+	#==========================================
+	# create new splash with all pictures
+	#------------------------------------------
+	while (my $splash = glob("$newspl/*.spl")) {
+		mkdir "$splash.dir";
+		qxx ("$zipper -cd $splash > $splash.bob");
+		my $count = $this -> extractCPIO ( $splash.".bob" );
+		for (my $id=1; $id <= $count; $id++) {
+			qxx ("cat $splash.bob.$id |(cd $splash.dir && cpio -i 2>&1)");
+		}
+		qxx ("cp -a $splash.dir/etc $newspl");
+		$result = 1;
+		if (-e "$splash.dir/bootsplash") {
+			qxx ("cat $splash.dir/bootsplash >> $newspl/bootsplash");
+			$result = $? >> 8;
+		}
+		qxx ("rm -rf $splash.dir");
+		qxx ("rm -f  $splash.bob*");
+		qxx ("rm -f  $splash");
+		if ($result != 0) {
+			my $splfile = basename ($splash);
+			$kiwi -> skipped ();
+			$kiwi -> info ("No bootsplash file found in $splfile cpio");
+			$kiwi -> skipped ();
+			return $this;
+		}
+	}
+	qxx ("(cd $newspl && \
+		find|cpio --quiet -oH newc | $zipper) > $imageDest/$name.spl"
+	);
+	qxx ("rm -rf $newspl");
+	$kiwi -> done();
+	return $this;
 }
 
 #==========================================
@@ -4218,6 +4282,58 @@ sub buildImageName {
 	}
 	chomp  $name;
 	return $name;
+}
+
+#==========================================
+# extractCPIO
+#------------------------------------------
+sub extractCPIO {
+	my $this = shift;
+	my $file = shift;
+	if (! open FD,$file) {
+		return 0;
+	}
+	local $/;
+	my $data   = <FD>; close FD;
+	my @data   = split (//,$data);
+	my $stream = "";
+	my $count  = 0;
+	my $start  = 0;
+	my $pos1   = -1;
+	my $pos2   = -1;
+	my @index;
+	while (1) {
+		my $pos1 = index ($data,"TRAILER!!!",$start);
+		if ($pos1 >= $start) {
+			$pos2 = index ($data,"07070",$pos1);
+		} else {
+			last;
+		}
+		if ($pos2 >= $pos1) {
+			$pos2--;
+			push (@index,$pos2);
+			#print "$start -> $pos2\n";
+			$start = $pos2;
+		} else {
+			$pos2 = @data; $pos2--;
+			push (@index,$pos2);
+			#print "$start -> $pos2\n";
+			last;
+		}
+	}
+	for (my $i=0;$i<@data;$i++) {
+		$stream .= $data[$i];
+		if ($i == $index[$count]) {
+			$count++;
+			if (! open FD,">$file.$count") {
+				return 0;
+			}
+			print FD $stream;
+			close FD;
+			$stream = "";
+		}
+	}
+	return $count;
 }
 
 #==========================================

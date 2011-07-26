@@ -2488,58 +2488,6 @@ sub setupBootDisk {
 }
 
 #==========================================
-# extractCPIO
-#------------------------------------------
-sub extractCPIO {
-	my $this = shift;
-	my $file = shift;
-	if (! open FD,$file) {
-		return 0;
-	}
-	local $/;
-	my $data   = <FD>; close FD;
-	my @data   = split (//,$data);
-	my $stream = "";
-	my $count  = 0;
-	my $start  = 0;
-	my $pos1   = -1;
-	my $pos2   = -1;
-	my @index;
-	while (1) {
-		my $pos1 = index ($data,"TRAILER!!!",$start);
-		if ($pos1 >= $start) {
-			$pos2 = index ($data,"07070",$pos1);
-		} else {
-			last;
-		}
-		if ($pos2 >= $pos1) {
-			$pos2--;
-			push (@index,$pos2);
-			#print "$start -> $pos2\n";
-			$start = $pos2;
-		} else {
-			$pos2 = @data; $pos2--;
-			push (@index,$pos2);
-			#print "$start -> $pos2\n";
-			last;
-		}
-	}
-	for (my $i=0;$i<@data;$i++) {
-		$stream .= $data[$i];
-		if ($i == $index[$count]) {
-			$count++;
-			if (! open FD,">$file.$count") {
-				return 0;
-			}
-			print FD $stream;
-			close FD;
-			$stream = "";
-		}
-	}
-	return $count;
-}
-
-#==========================================
 # setupInstallFlags
 #------------------------------------------
 sub setupInstallFlags {
@@ -2629,18 +2577,22 @@ sub setupSplash {
 	my $kiwi   = $this->{kiwi};
 	my $initrd = $this->{initrd};
 	my $zipped = 0;
+	my $status;
 	my $newird;
+	my $splfile;
 	my $result;
 	#==========================================
-	# check if compressed and setup splash.gz
+	# setup file names
 	#------------------------------------------
 	if ($initrd =~ /\.gz$/) {
 		$zipped = 1;
 	}
 	if ($zipped) {
 		$newird = $initrd; $newird =~ s/\.gz/\.splash.gz/;
+		$splfile= $initrd; $splfile =~ s/\.gz/\.spl/;
 	} else {
 		$newird = $initrd.".splash.gz";
+		$splfile= $initrd.".spl";
 	}
 	#==========================================
 	# check if splash initrd is already there
@@ -2649,50 +2601,19 @@ sub setupSplash {
 		# splash initrd already created...
 		return $newird;
 	}
-	#==========================================
-	# create temp dir for operations
-	#------------------------------------------
 	$kiwi -> info ("Setting up splash screen...");
-	my $spldir = qxx ("mktemp -q -d /tmp/kiwisplash.XXXXXX");
-	my $status = $? >> 8;
-	if ($status != 0) {
-		$kiwi -> skipped ();
-		$kiwi -> warning  ("Failed to create splash directory: $!");
-		$kiwi -> skipped ();
-		return $initrd;
-	}
-	chomp $spldir;
-	my $irddir = "$spldir/initrd";
 	#==========================================
-	# unpack initrd files
+	# setup splash in initrd
 	#------------------------------------------
-	mkdir $irddir;
-	my $unzip  = "$this->{gdata}->{Gzip} -cd $initrd 2>&1";
-	if ($zipped) {
-		$status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
+	if (-f $splfile) {
+		qxx ("cat $initrd $splfile > $newird");
+		$status = "ok";
 	} else {
-		$status = qxx ("cat $initrd | (cd $irddir && cpio -di 2>&1)");
-	}
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> skipped ();
-		$kiwi -> warning ("Failed to extract data: $!");
-		$kiwi -> skipped ();
-		qxx ("rm -rf $spldir");
-		return $initrd;
+		$status = "Can't find splash file: $splfile";
 	}
 	#==========================================
-	# check for splash system
+	# check status and return
 	#------------------------------------------
-	if (-x $irddir."/usr/sbin/splashy") {
-		$status = $this -> setupSplashy ($newird);
-	} else {
-		$status = $this -> setupSplashForGrub ($spldir,$newird);
-	}
-	#==========================================
-	# cleanup
-	#------------------------------------------
-	qxx ("rm -rf $spldir");
 	if ($status ne "ok") {
 		$kiwi -> skipped ();
 		$kiwi -> warning ($status);
@@ -2744,86 +2665,6 @@ sub setupSplashLink {
 	if ($result != 0) {
 		return ("Failed to create splash link $!");
 	}
-	return "ok";
-}
-
-#==========================================
-# setupSplashy
-#------------------------------------------
-sub setupSplashy {
-	# ...
-	# when booting with splashy no changes to the initrd are
-	# required. This function only makes sure the .splash.gz
-	# file exists. This is done by creating a link to the
-	# original initrd file
-	# ---
-	my $this   = shift;
-	my $newird = shift;
-	my $status = $this -> setupSplashLink ($newird);
-	return $status;
-}
-
-#==========================================
-# setupSplashForGrub
-#------------------------------------------
-sub setupSplashForGrub {
-	# ...
-	# when booting with grub it is required to append the splash
-	# files (cpio data) at the end of the boot image (initrd)
-	# --- 
-	my $this   = shift;
-	my $spldir = shift;
-	my $newird = shift;
-	my $newspl = "$spldir/splash";
-	my $irddir = "$spldir/initrd";
-	my $zipper = $this->{gdata}->{Gzip};
-	my $status;
-	my $result;
-	#==========================================
-	# move splash files
-	#------------------------------------------
-	mkdir $newspl;
-	$status = qxx ("mv $irddir/image/loader/*.spl $newspl 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		return ("No splash files found in initrd");		
-	}
-	#==========================================
-	# create new splash with all pictures
-	#------------------------------------------
-	while (my $splash = glob("$newspl/*.spl")) {
-		mkdir "$splash.dir";
-		qxx ("$zipper -cd $splash > $splash.bob");
-		my $count = $this -> extractCPIO ( $splash.".bob" );
-		for (my $id=1; $id <= $count; $id++) {
-			qxx ("cat $splash.bob.$id |(cd $splash.dir && cpio -i 2>&1)");
-		}
-		qxx ("cp -a $splash.dir/etc $newspl");
-		$result = 1;
-		if (-e "$splash.dir/bootsplash") {
-			qxx ("cat $splash.dir/bootsplash >> $newspl/bootsplash");
-			$result = $? >> 8;
-		}
-		qxx ("rm -rf $splash.dir");
-		qxx ("rm -f  $splash.bob*");
-		qxx ("rm -f  $splash");
-		if ($result != 0) {
-			my $splfile = basename ($splash);
-			return ("No bootsplash file found in $splfile cpio");
-		}
-	}
-	qxx (
-		"(cd $newspl && \
-		find|cpio --quiet -oH newc | $zipper) > $spldir/all.spl"
-	);
-	qxx (
-		"rm -f $newird && \
-		(cd $irddir && find | cpio --quiet -oH newc | $zipper) > $newird"
-	);
-	#==========================================
-	# create splash initrd
-	#------------------------------------------
-	qxx ("cat $spldir/all.spl >> $newird");
 	return "ok";
 }
 
