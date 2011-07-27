@@ -559,13 +559,15 @@ sub __checkPatternTypeAttrUse {
 sub __checkPostDumpAction {
 	# ...
 	# Check that only one post dump action for the OEM
-	# image type is set
+	# image type is set, spare oem-bootwait
+	# It is reasonable to use oem-bootwait with other actions such
+	# as shutdown or reboot.
 	# ---
 	my $this = shift;
 	my @confNodes = $this->{systemTree} -> getElementsByTagName("oemconfig");
 	for my $oemconfig (@confNodes) {
 		my @postDumOpts = qw
-		/oem-bootwait oem-reboot
+		/oem-reboot
 		 oem-reboot-interactive
 		 oem-shutdown
 		 oem-shutdown-interactive

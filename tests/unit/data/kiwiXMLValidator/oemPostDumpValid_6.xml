@@ -8,8 +8,8 @@
     <preferences>
         <type image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
             <oemconfig>
-                <oem-reboot-interactive>true</oem-reboot-interactive>
-                <oem-shutdown>true</oem-shutdown>
+                <oem-bootwait>true</oem-bootwait>
+                <oem-reboot>true</oem-reboot>
                 <oem-swap>false</oem-swap>
                 <oem-unattended>true</oem-unattended>
             </oemconfig>

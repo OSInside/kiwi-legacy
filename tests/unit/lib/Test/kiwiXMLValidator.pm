@@ -416,8 +416,7 @@ sub test_httpsRepoCredentials {
 #------------------------------------------
 sub test_missingFilesysAttr {
 	# ...
-	# Test that the oem post dump action uniqueness is properly
-	# enforced.
+	# Test that the filesystem attribute is set when required
 	# ---
 	my $this = shift;
 	my @invalidConfigs = $this -> __getInvalidFiles('missingFilesysAttr');
@@ -459,7 +458,7 @@ sub test_oemPostDump {
 		$validator -> validate();
 		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
-		my $expectedMsg = 'Use one of oem-bootwait oem-reboot '
+		my $expectedMsg = 'Use one of oem-reboot '
 		. 'oem-reboot-interactive oem-shutdown oem-shutdown-interactive';
 		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
