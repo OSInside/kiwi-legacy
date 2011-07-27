@@ -1604,6 +1604,14 @@ sub createImageLiveCD {
 		}
 	}
 	#==========================================
+	# Include splash screen to initrd
+	#------------------------------------------
+	my $kboot  = new KIWIBoot ($kiwi,$pinitrd,$cmdL);
+	if (! defined $kboot) {
+		return undef;
+	}
+	$pinitrd = $kboot -> setupSplash();
+	#==========================================
 	# Prepare for CD ISO image
 	#------------------------------------------
 	my $CD = $idest."/CD";
@@ -3387,6 +3395,15 @@ sub extractSplash {
 	my $zipper    = $this->{gdata}->{Gzip};
 	my $newspl    = $imageDest."/splash";
 	#==========================================
+	# check if boot image
+	#------------------------------------------
+	if (! defined $name) {
+		return $this;
+	}
+	if (! $this->isBootImage ($name)) {
+		return $this;
+	}
+	#==========================================
 	# move out all splash files
 	#------------------------------------------
 	$kiwi -> info ("Extracting splash files...");
@@ -3436,21 +3453,12 @@ sub extractSplash {
 }
 
 #==========================================
-# extractKernel
+# isBootImage
 #------------------------------------------
-sub extractKernel {
+sub isBootImage {
 	my $this = shift;
 	my $name = shift;
-	my $kiwi = $this->{kiwi};
-	my $xml  = $this->{xml}; 
-	my $imageTree = $this->{imageTree};
-	#==========================================
-	# extract kernel from physical extend
-	#------------------------------------------
-	# This is done for boot images only. Therefore we check
-	# if the file vmlinux[.gz] exists which was created by the
-	# suseStripKernel() function
-	# ---
+	my $xml  = $this->{xml};
 	if (! defined $name) {
 		return $this;
 	}
@@ -3461,46 +3469,65 @@ sub extractKernel {
 	}
 	SWITCH: for ($para) {
 		/ext3/i     && do {
-			return $name;
+			return 0;
 			last SWITCH;
 		};
 		/ext4/i     && do {
-			return $name;
+			return 0;
 			last SWITCH;
 		};
 		/reiserfs/i && do {
-			return $name;
+			return 0;
 			last SWITCH;
 		};
 		/iso/i && do {
-			return $name;
+			return 0;
 			last SWITCH;
 		};
 		/ext2/i && do {
 			if ($name !~ /boot/) {
-				return $name;
+				return 0;
 			}
 			last SWITCH;
 		};
 		/squashfs/i && do {
-			return $name;
+			return 0;
 			last SWITCH;
 		};
 		/clicfs/i && do {
-			return $name;
+			return 0;
 			last SWITCH;
 		};
 		/btrfs/i  && do {
-			return $name;
+			return 0;
 			last SWITCH;
 		};
 		/xfs/i    && do {
-			return $name;
+			return 0;
 			last SWITCH;
 		};
 	}
+	return 1;
+}
+
+#==========================================
+# extractKernel
+#------------------------------------------
+sub extractKernel {
+	my $this = shift;
+	my $name = shift;
+	my $imageTree = $this->{imageTree};
 	#==========================================
-	# this is a boot image, extract kernel
+	# check for boot image
+	#------------------------------------------
+	if (! defined $name) {
+		return $this;
+	}
+	if (! $this->isBootImage ($name)) {
+		return $name;
+	}
+	#==========================================
+	# extract kernel from physical extend
 	#------------------------------------------
 	return $this -> extractLinux (
 		$name,$imageTree,$this->{imageDest}
