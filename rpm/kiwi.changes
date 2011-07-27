@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jul 27 11:43:00 CEST 2011 - ms@suse.de
+
+- allow bootwait post dump action in combination with other post dump action
+
+-------------------------------------------------------------------
 Mon Jul 18 15:56:06 UTC 2011 - adrian@suse.de
 
 - skip catalog relocation and fixing on apple medias to avoid failure
