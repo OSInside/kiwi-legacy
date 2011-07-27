@@ -2561,6 +2561,16 @@ sub setupInstallFlags {
 		return undef;
 	}
 	qxx ("rm -rf $irddir");
+	#==========================================
+	# recreate splash data to initrd
+	#------------------------------------------
+	my $splash = $initrd;
+	if (! ($splash =~ s/splash\.gz/spl/)) {
+		$splash =~ s/gz/spl/;
+	}
+	if (-f $splash) {
+		qxx ("cat $splash >> $newird");
+	}
 	return $newird;
 }
 
