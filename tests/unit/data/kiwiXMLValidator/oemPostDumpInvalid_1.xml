@@ -10,6 +10,7 @@
             <oemconfig>
                 <oem-bootwait>true</oem-bootwait>
                 <oem-reboot>true</oem-reboot>
+                <oem-reboot-interactive>true</oem-reboot-interactive>
                 <oem-swap>false</oem-swap>
                 <oem-unattended>true</oem-unattended>
             </oemconfig>
