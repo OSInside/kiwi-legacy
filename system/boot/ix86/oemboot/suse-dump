@@ -176,11 +176,11 @@ function OEMInstall {
 	Echo "Searching harddrive for $OEMInstallType installation"
 	hwinfo=/usr/sbin/hwinfo
 	if [ ! -z "$imageDiskDevice" ];then
-		deviceDisks=`$hwinfo --disk |\
+		deviceDisks=`$hwinfo --disk --listmd  |\
 			grep "Device File:" | cut -f2 -d: |\
 			cut -f1 -d"(" | sed -e s"@$imageDiskDevice@@"`
 	else
-		deviceDisks=`$hwinfo --disk |\
+		deviceDisks=`$hwinfo --disk --listmd  |\
 			grep "Device File:" | cut -f2 -d: |\
 			cut -f1 -d"("`
 	fi
@@ -193,11 +193,12 @@ function OEMInstall {
 	Echo "Found following disk device(s)"
 	count=0
 	for i in $deviceDisks;do
-		dsize=`partitionSize $i`
+		dbyid=$(getDiskID $i)
+		dsize=`partitionSize $dbyid`
 		dsizeMB=`expr $dsize / 1024`
 		if [ "$dsizeMB" -gt 0 ];then
 			Echo -b "Disk $count -> $i [ $dsizeMB MB ]"
-			deviceArray[$count]=$i
+			deviceArray[$count]=$dbyid
 			deviceDSize[$count]=$dsize
 			count=`expr $count + 1`
 		fi
@@ -219,16 +220,15 @@ function OEMInstall {
 		hd="\"$TEXT_SELECT\""
 		count=0
 		for i in $deviceDisks;do
-			dsize=`partitionSize $i`
+			dbyid=$(getDiskID $i)
+			dsize=`partitionSize $dbyid`
 			dsizeMB=`expr $dsize / 1024`
 			if [ "$dsizeMB" -gt 0 ];then
-				dname=`getDiskID $i`
-				dname=`basename $dname | cut -c1-20`"..."
 				if [ $count = 0 ];then
-					dpara="$i \"$dname [ $dsizeMB MB ]\" on"
+					dpara="$dbyid \"[ $dsizeMB MB ]\" on"
 					count=1
 				else
-					dpara="$dpara $i \"$dname [ $dsizeMB MB ]\" off"
+					dpara="$dpara $dbyid \"[ $dsizeMB MB ]\" off"
 				fi
 			fi
 		done
@@ -588,7 +588,7 @@ function OEMInstall {
 	if [ -z "$kiwi_oemunattended" ];then
 		TEXT_INST=$(
 			getText "Destroying ALL data on %1, continue ?" $items)
-		Dialog --yesno "\"$TEXT_INST\"" 5 70
+		Dialog --yesno "\"$TEXT_INST\"" 5 80
 		if [ ! $? = 0 ];then
 			systemException \
 				"System installation canceled" \
