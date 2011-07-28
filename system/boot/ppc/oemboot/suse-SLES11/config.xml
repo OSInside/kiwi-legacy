@@ -7,7 +7,7 @@
 		<specification>boot/initrd image used on OEM VMX disk</specification>
 	</description>
 	<preferences>
-		<type image="cpio" bootprofile="default" bootkernel="ppc64"/>
+		<type image="cpio" bootprofile="ppc64" bootkernel="ppc64"/>
 		<version>2.7.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -23,46 +23,39 @@
 		<profile name="ppc64" description="KERNEL: ppc64 kernel"/>
 	</profiles>
 	<drivers type="drivers">
-		<file name="crypto/*"/>
-		<file name="drivers/thermal/*"/>
-		<file name="drivers/hwmon/*"/>
-		<file name="drivers/acpi/*"/>
 		<file name="drivers/usb/*"/>
-		<file name="drivers/virtio/*"/>
-		<file name="drivers/block/virtio_blk.ko"/>
-		<file name="drivers/char/hw_random/virtio-rng.ko"/>
-		<file name="drivers/net/*"/>
-		<file name="net/packet/*"/>
-		<file name="drivers/md/*"/>
 		<file name="drivers/block/loop.ko"/>
-		<file name="drivers/hid/*"/>
-		<file name="drivers/ide/*"/>
+		<file name="net/packet/*"/>
+		<file name="lib/zlib_deflate/zlib_deflate.ko"/>
+		<file name="lib/libcrc32c.ko"/>
 		<file name="fs/ext3/*"/>
+		<file name="fs/ext4/*"/>
 		<file name="fs/ext2/*"/>
-		<file name="fs/fat/*"/>
-		<file name="fs/vfat/*"/>
 		<file name="fs/binfmt_aout.ko"/>
 		<file name="fs/binfmt_misc.ko"/>
-		<file name="fs/mbcache.ko"/>
-		<file name="fs/quota_v1.ko"/>
-		<file name="fs/quota_v2.ko"/>
 		<file name="fs/jbd/*"/>
-		<file name="fs/hfs/*"/>
-		<file name="fs/exportfs/*"/>
+		<file name="fs/jbd2/*"/>
 		<file name="fs/squashfs/*"/>
-		<file name="fs/nls/nls_utf8.ko"/>
-		<file name="fs/nls/nls_cp437.ko"/>
-		<file name="fs/nls/nls_iso8859-1.ko"/>
 		<file name="fs/fuse/*"/>
-		<file name="fs/udf/*"/>
-		<file name="drivers/ata/*"/>
-		<file name="drivers/scsi/*"/>
-		<file name="drivers/message/fusion/*"/>
-		<file name="drivers/cdrom/*"/>
-		<file name="drivers/parport/*"/>
-		<file name="drivers/char/lp.ko"/>
-		<file name="drivers/acpi/dock.ko"/>
-		<file name="drivers/firmware/edd.ko"/>
+		<file name="fs/xfs/*"/>
+		<file name="fs/lockd/*"/>
+		<file name="net/ipv6/*"/>
+		<file name="drivers/scsi/scsi_mod.ko"/>
+		<file name="drivers/scsi/scsi_transport_srp.ko"/>
+		<file name="drivers/scsi/sd_mod.ko"/>
+		<file name="drivers/scsi/scsi_tgt.ko"/>
+		<file name="drivers/scsi/ibmvscsi"/>
+		<file name="drivers/scsi/ibmvscsi/ibmvscsic.ko"/>
+		<file name="drivers/scsi/ipr.ko"/>
+		<file name="drivers/scsi/lpfc/*"/>
+		<file name="drivers/scsi/scsi_transport_fc.ko"/>
+		<file name="drivers/net/ibmveth.ko"/>
+		<file name="drivers/net/veth.ko"/>
+		<file name="drivers/net/tg3.ko"/>
+		<file name="drivers/net/ehea/ehea.ko"/>
+		<file name="drivers/net/e1000e/e1000e.ko"/>
+		<file name="drivers/net/e1000/e1000.ko"/>
+		<file name="lib/crc-t10dif.ko"/>
 	</drivers>
 	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>

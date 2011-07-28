@@ -17,30 +17,39 @@
 		<profile name="ppc64" description="KERNEL: ppc64 kernel"/>
 	</profiles>
 	<drivers type="drivers">
-		<file name="crypto/*"/>
-		<file name="drivers/virtio/*"/>
-		<file name="drivers/char/*"/>
-		<file name="drivers/net/*"/>
-		<file name="drivers/md/*"/>
-		<file name="drivers/block/*"/>
-		<file name="drivers/scsi/*"/>
+		<file name="drivers/usb/*"/>
+		<file name="drivers/block/loop.ko"/>
+		<file name="net/packet/*"/>
+		<file name="lib/zlib_deflate/zlib_deflate.ko"/>
+		<file name="lib/libcrc32c.ko"/>
 		<file name="fs/ext3/*"/>
+		<file name="fs/ext4/*"/>
 		<file name="fs/ext2/*"/>
-		<file name="fs/fat/*"/>
-		<file name="fs/vfat/*"/>
 		<file name="fs/binfmt_aout.ko"/>
 		<file name="fs/binfmt_misc.ko"/>
-		<file name="fs/mbcache.ko"/>
-		<file name="fs/quota_v1.ko"/>
-		<file name="fs/quota_v2.ko"/>
 		<file name="fs/jbd/*"/>
-		<file name="fs/hfs/*"/>
-		<file name="fs/exportfs/*"/>
+		<file name="fs/jbd2/*"/>
 		<file name="fs/squashfs/*"/>
-		<file name="fs/nls/nls_utf8.ko"/>
-		<file name="fs/nls/nls_cp437.ko"/>
-		<file name="fs/nls/nls_iso8859-1.ko"/>
 		<file name="fs/fuse/*"/>
+		<file name="fs/xfs/*"/>
+		<file name="fs/lockd/*"/>
+		<file name="net/ipv6/*"/>
+		<file name="drivers/scsi/scsi_mod.ko"/>
+		<file name="drivers/scsi/scsi_transport_srp.ko"/>
+		<file name="drivers/scsi/sd_mod.ko"/>
+		<file name="drivers/scsi/scsi_tgt.ko"/>
+		<file name="drivers/scsi/ibmvscsi"/>
+		<file name="drivers/scsi/ibmvscsi/ibmvscsic.ko"/>
+		<file name="drivers/scsi/ipr.ko"/>
+		<file name="drivers/scsi/lpfc/*"/>
+		<file name="drivers/scsi/scsi_transport_fc.ko"/>
+		<file name="drivers/net/ibmveth.ko"/>
+		<file name="drivers/net/veth.ko"/>
+		<file name="drivers/net/tg3.ko"/>
+		<file name="drivers/net/ehea/ehea.ko"/>
+		<file name="drivers/net/e1000e/e1000e.ko"/>
+		<file name="drivers/net/e1000/e1000.ko"/>
+		<file name="lib/crc-t10dif.ko"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>
