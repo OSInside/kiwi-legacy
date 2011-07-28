@@ -7266,6 +7266,12 @@ function setupConsole {
 	if [ ! -e /sys/class/tty/ttyS0 ];then
 		cat $itab | grep -vi 'ttyS0' > $itab.new && mv $itab.new $itab
 	fi
+	if [ "$arch" = "ppc64" ];then
+		if [ -e /sys/class/tty/ttyS0 -a ! -e /sys/class/tty/hvc0 ];then
+			cat $itab | grep -vi 'ttyS0' > $itab.new && mv $itab.new $itab
+			echo "S0:12345:respawn:/sbin/agetty -L 19200 ttyS0 vt102" >> $itab
+		fi
+	fi
 }
 #======================================
 # cleanPartitionTable
