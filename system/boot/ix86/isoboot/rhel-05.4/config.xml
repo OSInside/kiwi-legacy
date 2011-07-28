@@ -70,6 +70,7 @@
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="basesystem"/>
+		<package name="yum-priorities"/>
 	</packages>
 	<packages type="image">
 		<package name="psmisc"/>

@@ -930,6 +930,9 @@ sub setupInstallationSource {
 					$data -> newval ($alias, "name"   , $alias);
 					$data -> newval ($alias, "baseurl", $val);
 				}
+				if($key eq "priority"){
+					$data -> newval ($alias, "priority", $val);
+				}
 			}
 			if (! $chroot) {
 				$kiwi -> info ("Adding bootstrap yum repo: $alias");
