@@ -985,7 +985,7 @@ function suseStripInitrd {
 		setterm kpartx vgcfgbackup vgcfgrestore lsdasd dasd_configure
 		qeth_configure fdasd mkdosfs egrep mkfs.xfs mdadm yes fdisk
 		startproc zfcp_host_configure zfcp_disk_configure vgrename
-		kpartx_id mpath_id
+		kpartx_id mpath_id dmraid dmevent_tool
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
@@ -996,7 +996,8 @@ function suseStripInitrd {
 	#------------------------------------------
 	baseStripUnusedLibs \
 		librt libutil libsysfs libnss_files libnss_compat libnsl libpng \
-		libfontenc libutempter libfreetype libgcc_s libresolv libnss_dns
+		libfontenc libutempter libfreetype libgcc_s libresolv libnss_dns \
+		libdmraid-events-isw
 	#==========================================
 	# remove images.sh and /root
 	#------------------------------------------

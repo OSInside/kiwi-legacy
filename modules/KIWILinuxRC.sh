@@ -2814,6 +2814,12 @@ function probeDevices {
 		probeUSB
 	fi
 	#======================================
+	# probe / create dmraid devices
+	#--------------------------------------
+	if [ -x /sbin/dmraid ] && dmraid -s &>/dev/null;then
+		dmraid -a y -p
+	fi
+	#======================================
 	# probe Disk devices and load modules
 	#--------------------------------------
 	if [ $HAVE_MODULES_ORDER = 0 ];then
@@ -3610,9 +3616,22 @@ function setupNetwork {
 		unset opts
 	fi
 	if ! dhcpcd $opts $PXE_IFACE 1>&2;then
-		systemException \
-			"Failed to setup DHCP network interface !" \
-		"reboot"
+		# /.../
+		# can't setup network on that interface, walk through
+		# the devlist and see if we get data from another device
+		# ----
+		PXE_IFACE=""
+		for iface in ${dev_list[*]};do
+			if dhcpcd $opts $iface 1>&2;then
+				PXE_IFACE=$iface
+				break
+			fi
+		done
+		if [ -z "$PXE_IFACE" ];then
+			systemException \
+				"Failed to setup DHCP network interface !" \
+			"reboot"
+		fi
 	fi
 	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
 		if [ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ];then
@@ -5226,7 +5245,7 @@ function getDiskID {
 	if [ -z "$device" ];then
 		return
 	fi
-	if echo $device | grep -q "$VGROUP"; then
+	if [ ! -z "$VGROUP" ] && echo $device | grep -q "$VGROUP"; then
 		echo $device
 		return
 	fi

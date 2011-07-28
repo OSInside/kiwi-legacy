@@ -183,6 +183,7 @@
 		<package name="kiwi-tools"/>
 		<package name="cyrus-sasl"/>
 		<package name="mdadm"/>
+		<package name="dmraid"/>
 	</packages>
 	<packages type="image" profiles="diskless">
 		<package name="bc"/>

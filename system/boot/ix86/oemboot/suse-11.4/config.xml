@@ -136,6 +136,7 @@
 		<package name="lvm2"/>
 		<package name="bzip2"/>
 		<package name="kiwi-tools"/>
+		<package name="dmraid"/>
 		<package name="cryptsetup"/>
 		<package name="fbiterm"/>
 		<package name="bc"/>
