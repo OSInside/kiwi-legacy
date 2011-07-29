@@ -4383,8 +4383,13 @@ sub makeLabel {
 sub DESTROY {
 	my $this = shift;
 	my $dirs = $this->{tmpdirs};
+	my $imageDest = $this->{imageDest};
+	my $spldir    = $imageDest."/splash";
 	foreach my $dir (@{$dirs}) {
 		qxx ("rm -rf $dir 2>&1");
+	}
+	if (-d $spldir) {
+		qxx ("rm -rf $spldir 2>&1");
 	}
 	return $this;
 }
