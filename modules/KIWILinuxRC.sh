@@ -5046,6 +5046,8 @@ function fetchFile {
 	local host=$4
 	local type=$5
 	local chunk=$6
+	local dump
+	local call
 	if test -z "$chunk";then
 		chunk=4k
 	fi
@@ -5069,36 +5071,50 @@ function fetchFile {
 		path=$(echo $path | sed -e s@\\.gz@@)
 		path="$path.gz"
 	fi
+	#======================================
+	# setup progress meta information
+	#--------------------------------------
+	dump="dd bs=$chunk of=$dest"
+	showProgress=0
+	if [ -x /usr/bin/dcounter ] && [ -f /etc/image.md5 ];then
+		showProgress=1
+		read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
+		needBytes=`expr $blocks \* $blocksize`
+		needMByte=`expr $needBytes / 1048576`
+		progressBaseName=$(basename $path)
+		TEXT_LOAD=$(getText "Loading %1" "$progressBaseName")
+		dump="dcounter -s $needMByte -l \"$TEXT_LOAD \" 2>/progress | $dump"
+	fi
+	#======================================
+	# build download command
+	#--------------------------------------
 	case "$type" in
 		"http")
 			if test "$izip" = "compressed"; then
-				curl -f http://$host/$path 2>$TRANSFER_ERRORS_FILE |\
-					gzip -d 2>>$TRANSFER_ERRORS_FILE | dd bs=$chunk of=$dest
+				call="curl -f http://$host/$path 2>$TRANSFER_ERRORS_FILE |\
+					gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump"
 			else
-				curl -f http://$host/$path 2> $TRANSFER_ERRORS_FILE |\
-					dd bs=$chunk of=$dest
+				call="curl -f http://$host/$path 2> $TRANSFER_ERRORS_FILE |\
+					$dump"
 			fi
-			loadCode=$?
 			;;
 		"https")
 			if test "$izip" = "compressed"; then
-				curl -f -k https://$host/$path 2>$TRANSFER_ERRORS_FILE |\
-					gzip -d 2>>$TRANSFER_ERRORS_FILE | dd bs=$chunk of=$dest
+				call="curl -f -k https://$host/$path 2>$TRANSFER_ERRORS_FILE |\
+					gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump"
 			else
-				curl -f -k https://$host/$path 2> $TRANSFER_ERRORS_FILE |\
-					dd bs=$chunk of=$dest
+				call="curl -f -k https://$host/$path 2> $TRANSFER_ERRORS_FILE |\
+					$dump"
 			fi
-			loadCode=$?
 			;;
 		"ftp")
 			if test "$izip" = "compressed"; then
-				curl ftp://$host/$path 2>$TRANSFER_ERRORS_FILE |\
-					gzip -d 2>>$TRANSFER_ERRORS_FILE | dd bs=$chunk of=$dest
+				call="curl ftp://$host/$path 2>$TRANSFER_ERRORS_FILE |\
+					gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump"
 			else
-				curl ftp://$host/$path 2> $TRANSFER_ERRORS_FILE |\
-					dd bs=$chunk of=$dest
+				call="curl ftp://$host/$path 2> $TRANSFER_ERRORS_FILE |\
+					$dump"
 			fi
-			loadCode=$?
 			;;
 		"tftp")
 			validateBlockSize
@@ -5113,23 +5129,49 @@ function fetchFile {
 			if test "$izip" = "compressed"; then
 				# mutlicast is disabled because you can't seek in a pipe
 				# atftp is disabled because it doesn't work with pipes
-				busybox tftp \
+				call="busybox tftp \
 					-b $imageBlkSize -g -r $path \
-					-l >(gzip -d 2>>$TRANSFER_ERRORS_FILE | dd bs=$chunk of=$dest) \
-					$host 2>>$TRANSFER_ERRORS_FILE
+					-l >(gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump) \
+					$host 2>>$TRANSFER_ERRORS_FILE"
 			else
-				atftp \
-					--option "$multicast_atftp"  \
-					--option "blksize $imageBlkSize" \
-					-g -r $path -l >(dd bs=$chunk of=$dest) \
-					$host &> $TRANSFER_ERRORS_FILE
+				call="atftp \
+					--option \"$multicast_atftp\"  \
+					--option \"blksize $imageBlkSize\" \
+					-g -r $path -l >($dump) \
+					$host &> $TRANSFER_ERRORS_FILE"
 			fi
-			loadCode=$?
 			;;
 		*)
 			systemException "Unknown download type: $type" "reboot"
 			;;
 	esac
+	#======================================
+	# run the download
+	#--------------------------------------
+	if [ $showProgress -eq 1 ];then
+		test -e /progress || mkfifo /progress
+		errorLogStop
+		(
+			eval $call &>/dev/null
+			loadCode=$?
+		)&
+		echo "cat /progress | dialog \
+			--backtitle \"$TEXT_INSTALLTITLE\" \
+			--progressbox 3 65
+		" > /tmp/progress.sh
+		if [ -e /dev/fb0 ];then
+			fbiterm -m $UFONT -- bash -e /tmp/progress.sh
+		else
+			bash -e /tmp/progress.sh
+		fi
+		clear
+	else
+		eval $call
+		loadCode=$?
+	fi
+	if [ $showProgress -eq 1 ];then
+		errorLogContinue
+	fi
 	loadStatus=`cat $TRANSFER_ERRORS_FILE`
 	return $loadCode
 }

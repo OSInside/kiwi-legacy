@@ -458,13 +458,13 @@ then
 			# get image md5sum to be able to check for the size
 			# requirements if we are loading into RAM
 			# ---
+			IFS=$IFS_ORIG
 			fetchFile $imageMD5s /etc/image.md5 uncomp $imageServer
 			if test $loadCode != 0 || ! loadOK "$loadStatus"; then
 				systemException \
 					"Download of $imageMD5s failed: $loadStatus" \
 				"reboot"
 			fi
-			IFS=" "
 			read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
 			if ! validateSize;then
 				systemException \
@@ -492,9 +492,35 @@ then
 			# check the md5sum of the downloaded data records
 			# ----
 			Echo "Download complete, checking data..."
-			dd if=$imageDevice bs=1024 2>/dev/null |\
-				head --bytes=$((blocks * blocksize)) |\
-				md5sum - > /etc/ireal.md5
+			verifyBytes=$((blocks * blocksize))
+			verifyMByte=$((verifyBytes / 1048576))
+			if [ -x /usr/bin/dcounter ];then
+				test -e /progress || mkfifo /progress
+				TEXT_VERIFY=$(getText "Verifying %1" $imageDevice)
+				echo "$TEXT_VERIFY ( 0% )" > /progress &
+				dump="cat $imageDevice"
+				dump="$dump | dcounter -s $verifyMByte -l \"$TEXT_VERIFY \""
+				errorLogStop
+				(
+					eval $dump 2>/progress |\
+						head --bytes=$verifyBytes | md5sum - > /etc/ireal.md5
+				)&
+				echo "cat /progress | dialog \
+					--backtitle \"$TEXT_INSTALLTITLE\" \
+					--progressbox 3 65
+				" > /tmp/progress.sh
+				if [ -e /dev/fb0 ];then
+					fbiterm -m $UFONT -- bash -e /tmp/progress.sh
+				else
+					bash -e /tmp/progress.sh
+				fi
+				clear
+				errorLogContinue
+			else
+				dd if=$imageDevice bs=1024 |\
+					head --bytes=$verifyBytes |\
+					md5sum - > /etc/ireal.md5
+			fi
 			read sum2 dumy < /etc/ireal.md5
 			if test $sum1 = $sum2;then
 				Echo "Image checksum test: fine :-)"
@@ -514,7 +540,7 @@ then
 			Echo -b "   TFTP server provides the same md5 sum as included"
 			Echo -b "   within the appropriate .md5 file for this image"
 			echo
-			if test -z $DISK;then
+			if [ -z "$DISK" ];then
 			Echo -b "4) ramdisk size is too small for the image:"
 			Echo -b "   check the ramdisk_size parameter of the PXE"
 			Echo -b "   configuration file on the TFTP server"
@@ -527,7 +553,7 @@ then
 			Echo "Retry to load image..."
 			sleep 15
 		done
-		if test ! -z $DISK;then
+		if [ ! -z "$DISK" ];then
 			probeFileSystem $imageDevice
 			resizeFilesystem $imageDevice
 		fi

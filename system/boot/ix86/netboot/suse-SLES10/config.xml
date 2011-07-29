@@ -68,6 +68,9 @@
 		<package name="bc"/>
 		<package name="adaptec-firmware"/>
 		<package name="curl"/>
+		<package name="dialog"/>
+		<package name="fbiterm"/>
+		<package name="gettext"/>
 		<package name="psmisc"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
