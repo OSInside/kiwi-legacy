@@ -214,6 +214,10 @@
 		<package name="filesystem"/>
 		<package name="glibc"/>
 		<package name="glibc-locale"/>
+		<package name="openssl-certs"/>
+		<package name="dialog"/>
+		<package name="fbiterm"/>
+		<package name="gettext-runtime"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,xen">
 		<package name="cracklib-dict-small"/>
