@@ -4180,7 +4180,9 @@ sub __updateDescriptionFromChangeSet {
 				my $type  = $element -> getAttribute("type");
 				my $source= $element -> getElementsByTagName("source")
 					-> get_node(1) -> getAttribute ("path");
-				$this -> addRepository ([$type],[$source]);
+				my $alias = $element -> getAttribute("alias");
+				my $prio = $element -> getAttribute("priority");
+				$this -> addRepository ([$type],[$source],[$alias],[$prio]);
 			}
 		}
 		# 2) add those repos which are part of the changeset
