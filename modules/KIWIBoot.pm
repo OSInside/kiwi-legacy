@@ -4080,19 +4080,21 @@ sub getCylinderSizeAndCount {
 	my $status;
 	my $result;
 	my $parted;
+	my $locator = new KIWILocator($kiwi);
+	my $parted_exec = $locator -> getExecPath("parted");
 	$status = qxx ("dd if=/dev/zero of=$disk bs=512 count=1 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> loginfo ($status);
 		return 0;
 	}
-	$status = qxx ("/usr/sbin/parted -s $disk mklabel msdos 2>&1");
+	$status = qxx ("$parted_exec -s $disk mklabel msdos 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> loginfo ($status);
 		return 0;
 	}
-	$parted = "/usr/sbin/parted -m $disk unit cyl print";
+	$parted = "$parted_exec -m $disk unit cyl print";
 	$status = qxx (
 		"$parted | head -n 3 | tail -n 1 | cut -f4 -d: | tr -d 'kB;'"
 	);
@@ -4221,6 +4223,8 @@ sub setStoragePartition {
 	my $status;
 	my $ignore;
 	my $action;
+	my $locator = new KIWILocator($kiwi);
+	my $parted_exec = $locator -> getExecPath("parted");
 	if (! defined $tool) {
 		$tool = "parted";
 	}
@@ -4312,14 +4316,14 @@ sub setStoragePartition {
 				"PARTED input: $device [@p_cmd]"
 			);
 			my $align="";
-			$status = qxx ("/usr/sbin/parted --help | grep -q align=");
+			$status = qxx ("$parted_exec --help | grep -q align=");
 			$result = $? >> 8;
 			if ($result == 0) {
 				$align="-a cyl";
 			}
 			foreach my $p_cmd (@p_cmd) {
 				$status= qxx (
-					"/usr/sbin/parted $align -s $device unit cyl $p_cmd 2>&1"
+					"$parted_exec $align -s $device unit cyl $p_cmd 2>&1"
 				);
 				$result= $? >> 8;
 				$kiwi -> loginfo ($status);

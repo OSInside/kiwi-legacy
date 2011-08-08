@@ -66,7 +66,7 @@ if [ -x /sbin/blogd ];then
 	test -z "$CONSOLE"            && export CONSOLE=/dev/console
 	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
 fi
-if [ -e /usr/sbin/parted ];then
+if [ -e $(which parted) ];then
 	if parted -h | grep -q '\-\-align';then
 		export PARTED_HAVE_ALIGN=1
 	fi
