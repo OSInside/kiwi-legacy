@@ -2806,8 +2806,7 @@ sub setupBootLoaderStages {
 	#------------------------------------------
 	if ($loader eq "grub") {
 		my $stages = "'usr/lib/grub/*'";
-		my $message= "'image/loader/message'";
-		my $gbinary= "'usr/sbin/grub'";
+		my $figure = "'image/loader/message'";
 		my $unzip  = "$zipper -cd $initrd 2>&1";
 		$status = qxx ( "mkdir -p $tmpdir/boot/grub 2>&1" );
 		$result = $? >> 8;
@@ -2818,50 +2817,28 @@ sub setupBootLoaderStages {
 			return undef;
 		}
 		#==========================================
-		# Get Grub binary from initrd
-		#------------------------------------------
-		$kiwi -> info ("Importing grub binary");
-		if ($zipped) {
-			$status= qxx ("$unzip | (cd $tmpdir && cpio -di $gbinary 2>&1)");
-		} else {
-			$status= qxx ("cat $initrd|(cd $tmpdir && cpio -di $gbinary 2>&1)");
-		}
-		if (! -e $tmpdir."/usr/sbin/grub" ) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("No grub bootloader found in initrd: $status");
-			$kiwi -> failed ();
-			return undef;
-		}
-		$kiwi -> done ();
-		#==========================================
 		# Get Grub graphics boot message
 		#------------------------------------------
-		$kiwi -> info ("Importing graphics boot message");
+		$kiwi -> info ("Importing graphics boot message and stage files");
 		if ($zipped) {
-			$status= qxx ("$unzip | (cd $tmpdir && cpio -di $message 2>&1)");
+			$status= qxx (
+				"$unzip | (cd $tmpdir && cpio -i -d $figure -d $stages 2>&1)"
+			);
 		} else {
-			$status= qxx ("cat $initrd|(cd $tmpdir && cpio -di $message 2>&1)");
+			$status= qxx (
+				"cat $initrd|(cd $tmpdir && cpio -i -d $figure -d $stages 2>&1)"
+			);
 		}
 		if (-e $tmpdir."/image/loader/message") {
-			$status = qxx ("mv $tmpdir/$message $tmpdir/boot/message 2>&1");
+			$status = qxx ("mv $tmpdir/$figure $tmpdir/boot/message 2>&1");
 			$result = $? >> 8;
 			$kiwi -> done();
 		} else {
 			$kiwi -> skipped();
 		}
 		#==========================================
-		# Get Grub stage files from initrd
+		# check Grub stage files...
 		#------------------------------------------
-		$kiwi -> info ("Importing grub stages");
-		if ($zipped) {
-			$status = qxx (
-				"$unzip | (cd $tmpdir && cpio -di $stages 2>&1)"
-			);
-		} else {
-			$status = qxx (
-				"cat $initrd | (cd $tmpdir && cpio -di $stages 2>&1)"
-			);
-		}
 		if (glob($tmpdir."/usr/lib/grub/*")) {
 			$status = qxx (
 				"mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1"
@@ -2874,7 +2851,7 @@ sub setupBootLoaderStages {
 				$result = $? >> 8;
 			}
 		} else {
-			$kiwi -> skipped (); chomp $status;
+			chomp $status;
 			$kiwi -> error   ("Failed importing grub stages: $status");
 			$kiwi -> skipped ();
 			$kiwi -> info    ("Trying to use grub stages from local machine");
@@ -2887,13 +2864,11 @@ sub setupBootLoaderStages {
 				$result = $? >> 8;
 			}
 			if ($result != 0) {
-				$kiwi -> failed ();
 				$kiwi -> error  ("Failed importing grub stages: $status");
 				$kiwi -> failed ();
 				return undef;
 			}
 		}
-		$kiwi -> done();
 	}
 	#==========================================
 	# syslinux
@@ -3596,6 +3571,7 @@ sub installBootLoader {
 	my $bootpart = $this->{bootpart};
 	my $chainload= $this->{chainload};
 	my $lvm	     = $this->{lvm};
+	my $locator  = new KIWILocator($kiwi);
 	my $result;
 	my $status;
 	#==========================================
@@ -3625,7 +3601,13 @@ sub installBootLoader {
 		#==========================================
 		# Install grub in batch mode
 		#------------------------------------------
-		my $grub = "/usr/sbin/grub";
+		my $grub = $locator -> getExecPath ('grub');
+		if (! $grub) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't locate grub binary");
+			$kiwi -> failed ();
+			return undef;
+		}
 		my $grubOptions = "--device-map $dmfile --no-floppy --batch";
 		$kiwi -> loginfo ("GRUB: $grub $grubOptions\n");
 		qxx ("mount --bind $tmpdir/boot/grub /boot/grub");

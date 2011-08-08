@@ -809,9 +809,9 @@ function installBootLoaderGrub {
 	# install the grub according to the contents of
 	# /etc/grub.conf and /boot/grub/menu.lst
 	# ----
-	if [ -x /usr/sbin/grub ];then
+	if [ -x $(which grub) ];then
 		Echo "Installing boot loader..."
-		/usr/sbin/grub --batch --no-floppy < /etc/grub.conf 1>&2
+		grub --batch --no-floppy < /etc/grub.conf 1>&2
 		if [ ! $? = 0 ];then
 			Echo "Failed to install boot loader"
 		fi
@@ -878,8 +878,8 @@ function installBootLoaderGrubRecovery {
 	echo "root (hd0,$gdevreco)"  >> $input
 	echo "setup (hd0,$gdevreco)" >> $input
 	echo "quit"          >> $input
-	if [ -x /usr/sbin/grub ];then
-		/usr/sbin/grub --batch < $input 1>&2
+	if [ -x $(which grub) ];then
+		grub --batch < $input 1>&2
 		rm -f $input
 	else
 		Echo "Image doesn't have grub installed"
