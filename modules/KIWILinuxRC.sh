@@ -436,7 +436,7 @@ function createInitialDevices {
 #--------------------------------------
 function mount_rpc_pipefs {
 	# See if the file system is there yet
-	case `stat -c "%t" -f /var/lib/nfs/rpc_pipefs` in
+	case `stat -c "%t" -f /var/lib/nfs/rpc_pipefs 2>/dev/null` in
 	*67596969*)
 		return 0;;
 	esac
@@ -447,7 +447,7 @@ function mount_rpc_pipefs {
 #--------------------------------------
 function umount_rpc_pipefs {
 	# See if the file system is there
-	case `stat -c "%t" -f /var/lib/nfs/rpc_pipefs` in
+	case `stat -c "%t" -f /var/lib/nfs/rpc_pipefs 2>/dev/null` in
 	*67596969*)
 		umount /var/lib/nfs/rpc_pipefs
 	esac
