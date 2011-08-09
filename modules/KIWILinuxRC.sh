@@ -2463,6 +2463,7 @@ function setupKernelModules {
 		srcprefix=/mnt
 	fi
 	local sysimg_ktempl=$srcprefix/var/adm/fillup-templates/sysconfig.kernel
+	local sysimg_ktempl2=$sysimg_ktempl-mkinitrd
 	local sysimg_syskernel=$srcprefix/etc/sysconfig/kernel
 	local syskernel=$destprefix/etc/sysconfig/kernel
 	local newstyle_mkinitrd=$srcprefix/lib/mkinitrd/scripts/boot-usb.sh
@@ -2472,7 +2473,7 @@ function setupKernelModules {
 	#======================================
 	# check for sysconfig template file
 	#--------------------------------------
-	if [ ! -f $sysimg_ktempl ];then
+	if [ ! -f $sysimg_ktempl ] && [ ! -f $sysimg_ktempl2 ];then
 		systemException \
 			"Can't find kernel sysconfig template in system image !" \
 		"reboot"
