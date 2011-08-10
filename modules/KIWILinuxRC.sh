@@ -319,7 +319,7 @@ function systemException {
 	fi
 	test -e /proc/splash && echo verbose > /proc/splash
 	if [ $what = "reboot" ];then
-		if cat /proc/cmdline | grep -qi "kiwidebug=1";then
+		if cat /proc/cmdline 2>/dev/null | grep -qi "kiwidebug=1";then
 			what="shell"
 		fi
 	fi
@@ -5507,6 +5507,12 @@ function bootImage {
 	local reboot=no
 	local option=$@
 	#======================================
+	# check for init kernel option
+	#--------------------------------------
+	if [ -z "$init" ];then
+		init=/sbin/init
+	fi
+	#======================================
 	# turn runlevel 4 to 5 if found
 	#--------------------------------------
 	option=$(echo $@ | sed -e s@4@5@)
@@ -5558,7 +5564,7 @@ function bootImage {
 		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
 			"/preinit ; . /include ; cleanImage ; exec /sbin/reboot -f -i"
 	fi
-	if [ $rebootinter = "yes" ];then
+	if [ "$rebootinter" = "yes" ];then
 		Echo "Reboot requested... rebooting after preinit"
 		if [ "$OEMInstallType" = "CD" ];then
 			TEXT_DUMP=$TEXT_CDPULL
@@ -5573,12 +5579,12 @@ function bootImage {
 		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
 			"/preinit ; . /include ; cleanImage ; exec /sbin/reboot -f -i"
 	fi
-	if [ $shutdown = "yes" ];then
+	if [ "$shutdown" = "yes" ];then
 		Echo "Shutdown  requested... system shutdown after preinit"
 		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
 			"/preinit ; . /include ; cleanImage ; exec /sbin/halt -fihp"
 	fi
-	if [ $shutdowninter = "yes" ];then
+	if [ "$shutdowninter" = "yes" ];then
 		Echo "Shutdown  requested... system shutdown after preinit"
 		if [ "$OEMInstallType" = "CD" ];then
 			TEXT_DUMP=$TEXT_CDPULL_SDOWN
@@ -5596,10 +5602,10 @@ function bootImage {
 	# FIXME: clicfs doesn't like run-init
 	if [ ! "$haveClicFS" = "yes" ];then
 		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
-			"/preinit ; . /include ; cleanImage ; exec /sbin/init $option"
+			"/preinit ; . /include ; cleanImage ; exec $init $option"
 	else
 		cd /mnt && exec chroot . /bin/bash -c \
-			"/preinit ; . /include ; cleanImage ; exec /sbin/init $option"
+			"/preinit ; . /include ; cleanImage ; exec $init $option"
 	fi
 }
 #======================================
