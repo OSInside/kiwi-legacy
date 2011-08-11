@@ -3229,6 +3229,7 @@ sub setupBootLoaderConfiguration {
 		my $bootTimeout = $type{boottimeout} ? int $type{boottimeout} : 200;
 		print FD "timeout  $bootTimeout"."\n";
 		print FD "display isolinux.msg"."\n";
+		my @labels = ();
 		if (-f "$gfx/bootlogo") {
 			if ($syslinux_new_format) {
 				print FD "ui gfxboot bootlogo isolinux.msg"."\n";
@@ -3246,6 +3247,7 @@ sub setupBootLoaderConfiguration {
 			$title = $this -> makeLabel ("$label [ $type ]");
 			print FD "label $title"."\n";
 		}
+		push @labels,$title;
 		#==========================================
 		# Standard boot
 		#------------------------------------------
@@ -3297,6 +3299,7 @@ sub setupBootLoaderConfiguration {
 			$title = $this -> makeLabel ("Failsafe -- $label [ $type ]");
 			print FD "label $title"."\n";
 		}
+		push @labels,$title;
 		if (! $isxen) {
 			if ($type =~ /^KIWI CD/) {
 				print FD "kernel linux\n";
@@ -3336,6 +3339,22 @@ sub setupBootLoaderConfiguration {
 			print FD " noapic maxcpus=0 edd=off";
 		}
 		print FD $cmdline;
+		close FD;
+		#==========================================
+		# setup isolinux.msg file
+		#------------------------------------------
+		if (! open (FD,">$tmpdir/boot/syslinux/isolinux.msg")) {
+			$kiwi -> failed();
+			$kiwi -> error  ("Failed to create isolinux.msg: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print FD "\n"."Welcome !"."\n\n";
+		foreach my $label (@labels) {
+			print FD "$label"."\n";
+		}
+		print FD "\n\n";
+		print FD "Have a lot of fun..."."\n";
 		close FD;
 		$kiwi -> done();
 	}
