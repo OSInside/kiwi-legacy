@@ -7143,7 +7143,7 @@ function setupBootPartition {
 		# syslboot / luksboot
 		#--------------------------------------
 		if [ -z "$bootid" ];then
-			test "$loader" = "syslinux" && pSearch=6
+			test "$loader" = "syslinux" && pSearch=c
 			for i in 4 3 2;do
 				pType=$(partitionID $imageDiskDevice $i)
 				if [ "$pType" = $pSearch ];then
