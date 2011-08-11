@@ -34,10 +34,11 @@ export bootLoaderOK=0
 #--------------------------------------
 arch=`uname -m`
 if [ "$arch" = "ppc64" ];then
-	loader=lilo
+	test -z "$loader" && export loader=lilo
 	test -z  "$ELOG_BOOTSHELL" && export ELOG_BOOTSHELL=/dev/hvc0
 	test -z  "$ELOG_CONSOLE"   && export ELOG_CONSOLE=/dev/hvc0
 else
+	test -z "$loader" && export loader=grub
 	test -z "$ELOG_CONSOLE"    && export ELOG_CONSOLE=/dev/tty3
 	test -z "$ELOG_BOOTSHELL"  && export ELOG_BOOTSHELL=/dev/tty2
 fi
@@ -714,9 +715,6 @@ function installBootLoader {
 	# ----
 	resetBootBind
 	local arch=`uname -m`
-	if [ -z "$loader" ];then
-		loader="grub"
-	fi
 	case $arch-$loader in
 		i*86-grub)       installBootLoaderGrub ;;
 		x86_64-grub)     installBootLoaderGrub ;;
@@ -750,9 +748,6 @@ function installBootLoaderRecovery {
 	# happens according to the architecture of the system
 	# ----
 	local arch=`uname -m`
-	if [ -z "$loader" ];then
-		loader="grub"
-	fi
 	case $arch-$loader in
 		i*86-grub)       installBootLoaderGrubRecovery ;;
 		x86_64-grub)     installBootLoaderGrubRecovery ;;
@@ -998,12 +993,6 @@ function setupBootLoader {
 		para="$para \"$1\""
 		shift
 	done
-	if [ ! -z "$kiwi_bootloader" ];then
-		loader=$kiwi_bootloader
-	fi
-	if [ -z "$loader" ];then
-		loader="grub"
-	fi
 	case $arch-$loader in
 		i*86-grub)       eval setupBootLoaderGrub $para ;;
 		x86_64-grub)     eval setupBootLoaderGrub $para ;;
@@ -1073,9 +1062,6 @@ function setupBootLoaderRecovery {
 		para="$para \"$1\""
 		shift
 	done
-	if [ -z "$loader" ];then
-		loader="grub"
-	fi
 	case $arch-$loader in
 		i*86-grub)       eval setupBootLoaderGrubRecovery $para ;;
 		x86_64-grub)     eval setupBootLoaderGrubRecovery $para ;;
@@ -1362,12 +1348,6 @@ function setupBootLoaderS390 {
 	local diskByID=`getDiskID $rdev`
 	local swapByID=`getDiskID $swap swap`
 	#======================================
-	# check for boot image .profile
-	#--------------------------------------
-	if [ -f /.profile ];then
-		importFile < /.profile
-	fi
-	#======================================
 	# check for bootloader displayname
 	#--------------------------------------
 	if [ -z "$kiwi_oemtitle" ] && [ ! -z "$kiwi_displayname" ];then
@@ -1562,12 +1542,6 @@ function setupBootLoaderSyslinux {
 	#--------------------------------------
 	local diskByID=`getDiskID $rdev`
 	local swapByID=`getDiskID $swap swap`
-	#======================================
-	# check for boot image .profile
-	#--------------------------------------
-	if [ -f /.profile ];then
-		importFile < /.profile
-	fi
 	#======================================
 	# check for bootloader displayname
 	#--------------------------------------
@@ -1788,12 +1762,6 @@ function setupBootLoaderGrub {
 	#--------------------------------------
 	local diskByID=`getDiskID $rdev`
 	local swapByID=`getDiskID $swap swap`
-	#======================================
-	# check for boot image .profile
-	#--------------------------------------
-	if [ -f /.profile ];then
-		importFile < /.profile
-	fi
 	#======================================
 	# check for system image .profile
 	#--------------------------------------
@@ -2053,12 +2021,6 @@ function setupBootLoaderLilo {
 	#--------------------------------------
 	local diskByID=`getDiskID $rdev`
 	local swapByID=`getDiskID $swap swap`
-	#======================================
-	# check for boot image .profile
-	#--------------------------------------
-	if [ -f /.profile ];then
-		importFile < /.profile
-	fi
 	#======================================
 	# check for bootloader displayname
 	#--------------------------------------
@@ -3099,9 +3061,6 @@ function CDMount {
 	local ecode=0
 	local cdopt
 	mkdir -p /cdrom
-	if [ -f /.profile ];then
-		importFile < /.profile
-	fi
 	#======================================
 	# check for hybrid mbr ID
 	#--------------------------------------
@@ -5740,9 +5699,6 @@ function makeLabel {
 	# underscores. current bootloaders show the
 	# underscore sign as as space in the boot menu
 	# ---
-	if [ -z "$loader" ];then
-		loader="grub"
-	fi
 	if [ ! $loader = "syslinux" ] && [ ! $loader = "extlinux" ];then
 		echo $1 | tr " " "_"
 	else
@@ -5922,9 +5878,6 @@ function selectLanguage {
 	local en_GB=English
 	local code
 	local lang
-	if [ -f /.profile ];then
-		importFile < /.profile
-	fi
 	if [ ! -z "$kiwi_oemunattended" ] && [ "$DIALOG_LANG" = "ask" ];then
 		DIALOG_LANG=en_US
 	fi
@@ -7594,6 +7547,15 @@ function setupKernelLinks {
 # initialize
 #--------------------------------------
 function initialize {
+	#======================================
+	# Exports boot image .profile
+	#--------------------------------------
+	if [ -f /.profile ];then
+		importFile < /.profile
+		if [ ! -z "$kiwi_bootloader" ];then
+			loader=$kiwi_bootloader
+		fi
+	fi
 	#======================================
 	# Check partitioner capabilities
 	#--------------------------------------
