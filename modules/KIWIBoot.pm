@@ -2937,7 +2937,6 @@ sub setupBootLoaderConfiguration {
 	#==========================================
 	# setup boot loader default boot label/nr
 	#------------------------------------------
-	my $defaultBootLabel = $label;
 	my $defaultBootNr    = 0;
 	if ($xml) {
 		%type = %{$xml->getImageTypeAndAttributes()};
@@ -2962,15 +2961,9 @@ sub setupBootLoaderConfiguration {
 		# 2 -> Failsafe -- Install/Restore $label
 		# ----
 		if ($type{installboot} eq "install") {
-			$defaultBootLabel= makeLabel (
-				"Install/Restore $label"
-			);
 			$defaultBootNr = 1;
 		}
 		if ($type{installboot} eq "failsafe-install") {
-			$defaultBootLabel= makeLabel (
-				"Failsafe -- Install/Restore $label"
-			);
 			$defaultBootNr = 2;
 		}
 	}
@@ -3223,7 +3216,6 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# General syslinux setup
 		#------------------------------------------
-		print FD "default  $defaultBootLabel"."\n";
 		print FD "implicit 1"."\n";
 		print FD "prompt   1"."\n";
 		my $bootTimeout = $type{boottimeout} ? int $type{boottimeout} : 200;
@@ -3238,15 +3230,17 @@ sub setupBootLoaderConfiguration {
 			}
 		}
 		if ($type =~ /^KIWI (CD|USB)/) {
-			$title = $this -> makeLabel ("Boot from Hard Disk");
-			print FD "label $title\n";
-			print FD "localboot 0x80\n";
 			$title = $this -> makeLabel ("Install/Restore $label");
-			print FD "label $title\n";
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
-			print FD "label $title"."\n";
 		}
+		print FD "default $title"."\n";
+		if ($type =~ /^KIWI (CD|USB)/) {
+			my $localboot = $this -> makeLabel ("Boot from Hard Disk");
+			print FD "label $localboot\n";
+			print FD "localboot 0x80\n";
+		}
+		print FD "label $title"."\n";
 		push @labels,$title;
 		#==========================================
 		# Standard boot
