@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug 15 10:39:36 CEST 2011 - ms@suse.de
+ 
+- in 12.1 the sysconfig.kernel file has been changed into a
+  sysconfig.kernel-mkinitrd file.
+
+-------------------------------------------------------------------
 Wed Jul 27 11:43:00 CEST 2011 - ms@suse.de
 
 - allow bootwait post dump action in combination with other post dump action
