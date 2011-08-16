@@ -3967,7 +3967,7 @@ sub getSize {
 	my $xml    = $this->{xml};
 	my $mini   = qxx ("find $extend | wc -l"); chomp $mini;
 	my $minsize= qxx ("du -s --block-size=1 $extend | cut -f1"); chomp $minsize;
-	my $spare  = 1.5;
+	my $spare  = 1.1;
 	my $journal= 12 * 1024 * 1024;
 	my $files  = $mini;
 	my $fsopts = $cmdL -> getFilesystemOptions();
