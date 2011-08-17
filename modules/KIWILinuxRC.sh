@@ -6017,6 +6017,10 @@ function ddn {
 	# the /dev/disk/<name>-partN schema is used
 	# ----
 	if echo $1 | grep -q "^\/dev\/disk\/" ; then
+		if [ -e $1"_part"$2 ]; then
+			echo $1"_part"$2
+			return
+		fi
 		echo $1"-part"$2
 		return
 	fi
