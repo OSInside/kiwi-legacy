@@ -16,6 +16,7 @@
 		<timezone>Europe/Berlin</timezone>
 		<hwclock>utc</hwclock>
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootloader="zipl" primary="true"/>
+		<type image="pxe" filesystem="ext3" boot="netboot/suse-SLES11" bootloader="zipl"/>
 	</preferences>
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
