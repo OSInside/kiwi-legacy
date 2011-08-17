@@ -3160,7 +3160,10 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		print FD "color cyan/blue white/blue\n";
 		print FD "default $defaultBootNr\n";
-		my $bootTimeout = $type{boottimeout} ? int $type{boottimeout} : 10;
+		my $bootTimeout = 10;
+		if (defined $type{boottimeout}) {
+			$bootTimeout = $type{boottimeout};
+		}
 		print FD "timeout $bootTimeout\n";
 		if ($type =~ /^KIWI (CD|USB)/) {
 			my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
@@ -3347,7 +3350,10 @@ sub setupBootLoaderConfiguration {
 		print FD "default  $defaultBootLabel"."\n";
 		print FD "implicit 1"."\n";
 		print FD "prompt   1"."\n";
-		my $bootTimeout = $type{boottimeout} ? int $type{boottimeout} : 200;
+		my $bootTimeout = 100;
+		if (defined $type{boottimeout}) { 
+			$bootTimeout = $type{boottimeout};
+		}
 		print FD "timeout  $bootTimeout"."\n";
 		print FD "display isolinux.msg"."\n";
 		if (-f "$gfx/bootlogo") {
