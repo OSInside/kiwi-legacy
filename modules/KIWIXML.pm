@@ -2213,7 +2213,7 @@ sub getImageConfig {
 	if ((%type) && ($type{bootloader})) {
 		$result{kiwi_bootloader} = $type{bootloader};
 	}
-	if ((%type) && ($type{boottimeout})) {
+	if ((%type) && (defined $type{boottimeout})) {
 		$result{KIWI_BOOT_TIMEOUT} = $type{boottimeout};
 	}
 	if ((%type) && ($type{installboot})) {

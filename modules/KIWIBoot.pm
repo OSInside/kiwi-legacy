@@ -3029,7 +3029,10 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		print FD "color cyan/blue white/blue\n";
 		print FD "default $defaultBootNr\n";
-		my $bootTimeout = $type{boottimeout} ? int $type{boottimeout} : 10;
+		my $bootTimeout = 10;
+		if (defined $type{boottimeout}) {
+			$bootTimeout = $type{boottimeout};
+		}
 		if ($type{fastboot}) {
 			$bootTimeout = 0;
 		}
@@ -3218,7 +3221,10 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		print FD "implicit 1"."\n";
 		print FD "prompt   1"."\n";
-		my $bootTimeout = $type{boottimeout} ? int $type{boottimeout} : 200;
+		my $bootTimeout = 100;
+		if (defined $type{boottimeout}) { 
+			$bootTimeout = $type{boottimeout};
+		}
 		print FD "timeout  $bootTimeout"."\n";
 		print FD "display isolinux.msg"."\n";
 		my @labels = ();
