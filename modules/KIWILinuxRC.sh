@@ -2218,6 +2218,9 @@ function setupDefaultPXENetwork {
 	# create the /sysconfig/network file according to the PXE
 	# boot interface.
 	# ----
+	if [ -z "$PXE_IFACE" ];then
+		return
+	fi
 	local prefix=$1
 	local niface=$prefix/etc/sysconfig/network/ifcfg-$PXE_IFACE
 	mkdir -p $prefix/etc/sysconfig/network
@@ -3237,6 +3240,17 @@ function searchBusIDBootDevice {
 	local wwpn
 	local slun
 	#======================================
+	# check for custom device init command
+	#--------------------------------------
+	if [ ! -z "$DEVICE_INIT" ];then
+		if ! eval $DEVICE_INIT;then
+			export biosBootDevice="Failed to call: $DEVICE_INIT"
+			return 1
+		fi
+		export biosBootDevice=$DISK
+		return 0
+	fi
+	#======================================
 	# determine device type: dasd or zfcp
 	#--------------------------------------
 	if [ -z "$ipl_type" ];then
@@ -3707,6 +3721,174 @@ function releaseNetwork {
 	fi
 }
 #======================================
+# setupNetworkInterfaceS390
+#--------------------------------------
+function setupNetworkInterfaceS390 {
+	# /.../
+	# bring up the network card according to the parm file
+	# parameters and create the correspondent udev rules
+	# needs includeKernelParametersLowerCase to be run
+	# because parm file parameters are case insensitive
+	# ----
+	case "$instnetdev" in
+		"osa"|"hsi")
+			local qeth_cmd="/sbin/qeth_configure"
+			if [ "$layer2" = "1" ];then
+				qeth_cmd="$qeth_cmd -l"
+			fi
+			if [ -n "$portname" ];then
+				qeth_cmd="$qeth_cmd -p $portname"
+			fi
+			if [ -n "$portno" ];then
+				qeth_cmd="$qeth_cmd -n $portno"
+			fi
+			qeth_cmd="$qeth_cmd $readchannel $writechannel"
+			if [ -n "$datachannel" ];then
+				qeth_cmd="$qeth_cmd $datachannel"
+			fi
+			eval $qeth_cmd 1
+			;;
+		"ctc")
+			/sbin/ctc_configure $readchannel $writechannel 1 $ctcprotocol
+			;;
+		"iucv")
+			/sbin/iucv_configure $iucvpeer 1
+			;;
+		*)
+			systemException \
+				"Unknown s390 network type: $instnetdev" "reboot"
+			;;
+	esac
+	if [ ! $? = 0 ];then
+		systemException \
+			"Failed to bring up the network: $instnetdev" \
+		"reboot"
+	fi
+	udevPending
+}
+#======================================
+# convertCIDRToNetmask
+#--------------------------------------
+function convertCIDRToNetmask {
+	# /.../
+	# convert the CIDR part to a useable netmask
+	# ----
+	local cidr=$1
+	local count=0
+	for count in `seq 1 4`;do
+		if [ $((cidr / 8)) -gt 0 ];then
+			echo -n 255
+		else
+			local remainder=$((cidr % 8))
+			if [ $remainder -gt 0 ];then
+				echo -n $(( value = 256 - (256 >> remainder)))
+			else
+				echo -n 0
+			fi
+		fi
+		cidr=$((cidr - 8))
+		if [ $count -lt 4 ];then
+			echo -n .
+		fi
+	done
+	echo
+}
+#======================================
+# setupNetworkStatic
+#--------------------------------------
+function setupNetworkStatic {
+	# /.../
+	# configure static network either bring it up manually
+	# or save the configuration depending on 'up' parameter
+	# ----
+	local up=$1
+	if [[ $hostip =~ / ]];then
+		#======================================
+		# interpret the CIDR part and remove it from the hostip
+		#--------------------------------------
+		local cidr=$(echo $hostip | cut -f2 -d/)
+		hostip=$(echo $hostip | cut -f1 -d/)
+		netmask=$(convertCIDRToNetmask $cidr)
+	fi
+	if [ "$up" = "1" ];then
+		#======================================
+		# activate network
+		#--------------------------------------
+		local iface=`cat /proc/net/dev|tail -n1|cut -d':' -f1|sed 's/ //g'`
+		local ifconfig_cmd="/sbin/ifconfig $iface $hostip netmask $netmask"
+		if [ -n "$broadcast" ];then
+			ifconfig_cmd="$ifconfig_cmd broadcast $broadcast"
+		fi
+		if [ -n "$pointopoint" ];then
+			ifconfig_cmd="$ifconfig_cmd pointopoint $pointopoint"
+		fi
+		if [ -n "$osahwaddr" ];then
+			ifconfig_cmd="$ifconfig_cmd hw ether $osahwaddr"
+		fi
+		$ifconfig_cmd up
+		if [ ! $? = 0 ];then
+			systemException "Failed to set up the network: $iface" "reboot"
+		fi
+		export iface_static=$iface
+	elif [ ! -z $iface_static ];then
+		#======================================
+		# write network setup
+		#--------------------------------------
+		local netFile="/etc/sysconfig/network/ifcfg-$iface_static"
+		echo "BOOTPROTO='static'" > $netFile
+		echo "STARTMODE='auto'" >> $netFile
+		echo "IPADDR='$hostip'" >> $netFile
+		echo "NETMASK='$netmask'" >> $netFile
+		if [ -n "$broadcast" ];then
+			echo "BROADCAST='$broadcast'" >> $netFile
+		fi
+		if [ -n "$pointopoint" ];then
+			echo "REMOTE_IPADDR='$pointopoint'" >> $netFile
+		fi
+	fi
+	setupDefaultGateway $up
+	setupDNS
+}
+#======================================
+# setupDefaultGateway
+#--------------------------------------
+function setupDefaultGateway {
+	# /.../
+	# setup default gateway. either set the route or save
+	# the configuration depending on 'up' parameter
+	# ----
+	local up=$1
+	if [ "$up" == "1" ];then
+		#======================================
+		# activate GW route
+		#--------------------------------------
+		route add default gw $gateway
+	else
+		#======================================
+		# write GW configuration
+		#--------------------------------------
+		echo "default  $gateway - -" > "/etc/sysconfig/network/routes"
+	fi
+}
+#======================================
+# setupDNS
+#--------------------------------------
+function setupDNS {
+	# /.../
+	# setup DNS. write data to resolv.conf
+	# ----
+	if [ -n "$domain" ];then
+		export DOMAIN=$domain
+		echo "search $domain" >> /etc/resolv.conf
+	fi
+	if [ -n "$nameserver" ];then
+		export DNS=$nameserver
+		IFS="," ; for i in $nameserver;do
+			echo "nameserver $i" >> /etc/resolv.conf
+		done
+	fi
+}
+#======================================
 # updateNeeded
 #--------------------------------------
 function updateNeeded {
@@ -3811,7 +3993,7 @@ function cleanSweep {
 function fdasdGetPartitionID {
 	local count=1
 	for i in $(fdasd -s -p $1 | grep -E '^[ ]+\/' |\
-		 awk -v OFS=":" '$1=$1' | cut -f5 -d:);do
+		awk -v OFS=":" '$1=$1' | cut -f5 -d:);do
 		if [ $count = $2 ];then
 			if $i = 2;then
 				echo 82
@@ -4076,6 +4258,12 @@ function includeKernelParameters {
 			continue
 		fi
 		kernelKey=`echo $i | cut -f1 -d=`
+		#======================================
+		# convert parameters to lowercase if required
+		#--------------------------------------
+		if [ "$1" = "lowercase" ];then
+			kernelKey=`echo $kernelKey | tr [:upper:] [:lower:]`
+		fi
 		kernelVal=`echo $i | cut -f2 -d=`
 		eval export $kernelKey=$kernelVal
 	done
@@ -4101,6 +4289,12 @@ function includeKernelParameters {
 	if [ ! -z "$lang" ];then
 		export DIALOG_LANG=$lang
 	fi
+}
+#======================================
+# includeKernelParametersLowerCase
+#--------------------------------------
+function includeKernelParametersLowerCase {
+	includeKernelParameters "lowercase"
 }
 #======================================
 # umountSystem
@@ -6889,7 +7083,7 @@ function pxeSetupDownloadServer {
 		SERVER=tftp.$DOMAIN
 	fi
 	Echo "Checking Server name: $SERVER"
-	if ! ping -c 1 $SERVER >/dev/null 2>&1;then
+	if ! ping -c 1 -w 30 $SERVER >/dev/null 2>&1;then
 		Echo "Server: $SERVER not found"
 		if [ -z "$SERVERTYPE" ] || [ "$SERVERTYPE" = "tftp" ]; then
 			if [ ! -z "$DHCPSIADDR" ];then
@@ -6974,6 +7168,66 @@ function pxeSizeToMB {
 # pxePartitionInput
 #--------------------------------------
 function pxePartitionInput {
+	if [ $PARTITIONER = "fdasd" ];then
+		pxePartitionInputFDASD
+	else
+		pxePartitionInputGeneric
+	fi
+}
+#======================================
+# pxeRaidPartitionInput
+#--------------------------------------
+function pxeRaidPartitionInput {
+	if [ $PARTITIONER = "fdasd" ];then
+		pxeRaidPartitionInputFDASD
+	else
+		pxeRaidPartitionInputGeneric
+	fi
+}
+#======================================
+# pxePartitionInputFDASD
+#--------------------------------------
+function pxePartitionInputFDASD {
+	local field=0
+	local count=0
+	local IFS=","
+	for i in $PART;do
+		field=0
+		count=$((count + 1))
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		partSize=$(pxeSizeToMB $partSize)
+		if [ "$partID" = '82' ] || [ "$partID" = 'S' ];then
+			partID=2
+		elif [ "$partID" = '83' ] || [ "$partID" = 'L' ];then
+			partID=1
+		elif [ "$partID" -eq '8e' ] || [ "$partID" = 'V' ];then
+			partID=4
+		else
+			partID=1
+		fi
+		echo -n "n . $partSize "
+		if [ $partID = "2" ] || [ $partID = "4" ];then
+			echo -n "t $count $partID "
+		fi
+	done
+	echo "w"
+}
+#======================================
+# pxeRaidPartitionInputFDASD
+#--------------------------------------
+function pxeRaidPartitionInputFDASD {
+	pxePartitionInputFDASD
+}
+#======================================
+# pxePartitionInputGeneric
+#--------------------------------------
+function pxePartitionInputGeneric {
 	local field=0
 	local count=0
 	local IFS=","
@@ -7012,9 +7266,9 @@ function pxePartitionInput {
 	echo "w q"
 }
 #======================================
-# pxeRaidPartitionInput
+# pxeRaidPartitionInputGeneric
 #--------------------------------------
-function pxeRaidPartitionInput {
+function pxeRaidPartitionInputGeneric {
 	local field=0
 	local count=0
 	local IFS=","

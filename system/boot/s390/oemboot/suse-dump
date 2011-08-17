@@ -185,6 +185,9 @@ function OEMInstall {
 			cut -f1 -d"("`
 	fi
 	export deviceDisks=`echo $deviceDisks`
+	if [ ! -z "$ramdisk" ];then
+		deviceDisks="$deviceDisks /dev/ram1"
+	fi
 	if [ -z "$deviceDisks" ];then
 		systemException \
 			"No device(s) for installation found... abort" \
@@ -555,13 +558,13 @@ function OEMInstall {
 		#--------------------------------------
 		if [ ! -z "$pxe" ];then
 			multicast="disable"
-			fetchFile $imageMD5 /image.md5 uncompressed $imageServer
+			fetchFile $imageMD5 /etc/image.md5 uncompressed $imageServer
 			if test $loadCode != 0 || ! loadOK "$loadStatus";then
 				systemException \
 					"Download of $imageMD5 failed: $loadStatus" \
 				"reboot"
 			fi
-			imageMD5=/image.md5
+			imageMD5=/etc/image.md5
 		fi
 	fi
 	#======================================
@@ -755,6 +758,9 @@ function OEMInstall {
 	#--------------------------------------
 	if [ -z "$OEM_PARTITION_INSTALL" ];then
 		blockdev --rereadpt $imageDevice
+		if echo $imageDevice | grep -q "^\/dev\/ram";then
+			kpartx -a $imageDevice
+		fi
 		deviceTest=$(ddn $imageDevice 1)
 		if ! waitForStorageDevice $deviceTest;then
 			systemException \
