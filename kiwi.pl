@@ -138,6 +138,7 @@ sub main {
 		my $imageTarget = $cmdL -> getImageTargetDir();
 		my $rootTarget  = $imageTarget.'/build/image-root';
 		$cmdL -> setRootTargetDir ($rootTarget);
+		$cmdL -> setOperationMode ("prepare", $cmdL->getConfigDir());
 		$cmdL -> setForceNewRoot (1);
 		mkdir $imageTarget;
 		$kic = new KIWIImageCreator ($kiwi, $cmdL);
@@ -148,6 +149,7 @@ sub main {
 		# Setup create 
 		#------------------------------------------
 		$cmdL -> setConfigDir ($rootTarget);
+		$cmdL -> setOperationMode ("create",$rootTarget);
 		$cmdL -> setForceNewRoot (0);
 		$kic  -> initialize();
 		if (! $kic -> createImage ($kiwi,$cmdL)) {
