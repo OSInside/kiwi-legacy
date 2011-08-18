@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Thu Aug 18 12:58:23 CEST 2011 - ms@suse.de
+
+- added support for download and verification progress
+  information for pxe (netboot) images (bnc #708711)
+
+- added support for pxe buffered write on destination device in
+  fetchFile() function used for netboot images. By default a
+  chunk size of 4k is used
+
+-------------------------------------------------------------------
 Mon Aug 15 10:39:36 CEST 2011 - ms@suse.de
  
 - in 12.1 the sysconfig.kernel file has been changed into a
