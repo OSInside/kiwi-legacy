@@ -3222,8 +3222,16 @@ sub setupBootLoaderConfiguration {
 		print FD "implicit 1"."\n";
 		print FD "prompt   1"."\n";
 		my $bootTimeout = 100;
-		if (defined $type{boottimeout}) { 
+		if (defined $type{boottimeout}) {
 			$bootTimeout = $type{boottimeout};
+			if (int ($bootTimeout) == 0) {
+				# /.../
+				# a timeout value of 0 disables the timeout in syslinux
+				# therefore we set the smallest possible value in that case
+				# which is 1/10 sec
+				# ----
+				$bootTimeout = 1;
+			}
 		}
 		print FD "timeout  $bootTimeout"."\n";
 		print FD "display isolinux.msg"."\n";
