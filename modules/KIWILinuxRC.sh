@@ -7563,10 +7563,12 @@ function initialize {
 	#======================================
 	# Check partitioner capabilities
 	#--------------------------------------
-	if [ $PARTITIONER = "unsupported" ];then
-		systemException \
-			"Installed parted version is too old" \
-		"reboot"
+	if echo $kiwi_iname | grep -qE '(oem|net)boot';then
+		if [ $PARTITIONER = "unsupported" ];then
+			systemException \
+				"Installed parted version is too old" \
+			"reboot"
+		fi
 	fi
 	#======================================
 	# Check for hotfix kernel
