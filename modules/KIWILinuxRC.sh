@@ -67,7 +67,7 @@ if [ -x /sbin/blogd ];then
 	test -z "$CONSOLE"            && export CONSOLE=/dev/console
 	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
 fi
-if [ -e $(which parted) ];then
+if which parted &>/dev/null;then
 	if parted -h | grep -q '\-\-align';then
 		export PARTED_HAVE_ALIGN=1
 	fi
@@ -804,7 +804,7 @@ function installBootLoaderGrub {
 	# install the grub according to the contents of
 	# /etc/grub.conf and /boot/grub/menu.lst
 	# ----
-	if [ -x $(which grub) ];then
+	if which grub &>/dev/null;then
 		Echo "Installing boot loader..."
 		grub --batch --no-floppy < /etc/grub.conf 1>&2
 		if [ ! $? = 0 ];then
@@ -873,7 +873,7 @@ function installBootLoaderGrubRecovery {
 	echo "root (hd0,$gdevreco)"  >> $input
 	echo "setup (hd0,$gdevreco)" >> $input
 	echo "quit"          >> $input
-	if [ -x $(which grub) ];then
+	if which grub &>/dev/null;then
 		grub --batch < $input 1>&2
 		rm -f $input
 	else
