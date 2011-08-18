@@ -385,7 +385,7 @@ sub new {
 		my $sizeBytes;
 		my $minInodes;
 		my $sizeXMLBytes = 0;
-		my $spare        = 1.1;
+		my $spare        = 1.5;
 		my $journal      = 12 * 1024 * 1024;
 		my $fsopts       = $cmdL -> getFilesystemOptions();
 		my $inodesize    = $fsopts->[1];
@@ -406,12 +406,12 @@ sub new {
 			$sizeBytes*= $spare;
 			$sizeBytes+= $journal;
 			$sizeBytes+= $kernelSize;
-			$sizeBytes+= ($initrdSize * 1.1);
+			$sizeBytes+= ($initrdSize * 1.5);
 		} else {
 			# system is specified as a file...
 			$sizeBytes = $main::global -> isize ($system);
 			$sizeBytes+= $kernelSize;
-			$sizeBytes+= ($initrdSize * 1.1);
+			$sizeBytes+= ($initrdSize * 1.5);
 			$sizeBytes*= 1.1;
 		}
 		#==========================================
