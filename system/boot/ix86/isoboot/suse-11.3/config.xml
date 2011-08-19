@@ -171,7 +171,6 @@
 		<package name="mktemp"/>
 		<package name="mtools"/>
 		<package name="net-tools"/>
-		<package name="netcfg"/>
 		<package name="openSUSE-release"/>
 		<package name="openldap2-client"/>
 		<package name="openslp"/>

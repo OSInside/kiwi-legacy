@@ -656,9 +656,11 @@ sub cleanupResolvConf {
 	my $needHosts = $this->{needHosts};
 	if ($needResolvConf) {
 		qxx ("rm -f $root/etc/resolv.conf");
+		undef $this->{needResolvConf};
 	}
 	if ($needHosts) {
 		qxx ("rm -f $root/etc/hosts");
+		undef $this->{needHosts};
 	}
 }
 
