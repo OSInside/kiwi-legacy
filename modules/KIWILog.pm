@@ -56,7 +56,6 @@ sub new {
 	$this->{showLevel} = [0,1,2,3,4,5];
 	$this->{channel}   = *STDOUT;
 	$this->{errorOk}   = 0;
-	$this->{state}     = "O";
 	$this->{message}   = "initialize";
 	$this->{used}      = 1;
 	$this -> getPrefix (1);
@@ -224,7 +223,6 @@ sub done {
 		print $FD "   done\n";
 	}
 	$this -> saveInCache ("   done\n");
-	$this->{state} = "O";
 }
 
 #==========================================
@@ -248,7 +246,6 @@ sub failed {
 		print $FD "   failed\n";
 	}
 	$this -> saveInCache ("   failed\n");
-	$this->{state} = "O";
 }
 
 #==========================================
@@ -272,7 +269,6 @@ sub skipped {
 		print $FD "   skipped\n";
 	}
 	$this -> saveInCache ("   skipped\n");
-	$this->{state} = "O";
 }
 
 #==========================================
@@ -296,7 +292,6 @@ sub notset {
 		print $FD "   notset\n";
 	}
 	$this -> saveInCache ("   notset\n");
-	$this->{state} = "O";
 }
 
 #==========================================
@@ -420,7 +415,6 @@ sub printLog {
 	my $logdata = $_[1];
 	my $flag    = $_[2];
 	my @mcache  = ();
-	my $needcr  = "";
 	my $date    = $this -> getPrefix ( $lglevel );
 	#==========================================
 	# check log status 
@@ -429,19 +423,8 @@ sub printLog {
 		$logdata = $lglevel;
 		$lglevel = 1;
 	}
-	if (($this->{state} eq "I") && ($lglevel != 5)) {
-		$needcr = "\n";
-	}
 	if (defined $this->{mcache}) {
 		@mcache = @{$this->{mcache}};
-	}
-	#==========================================
-	# save log status 
-	#------------------------------------------
-	if ($logdata !~ /\n$/) {
-		$this->{state} = "I";
-	} else {
-		$this->{state} = "O";
 	}
 	#==========================================
 	# set log status 
@@ -460,16 +443,16 @@ sub printLog {
 			next;
 		}
 		if (($lglevel == 1) || ($lglevel == 2)) {
-			$result = $needcr.$date.$logdata;
+			$result = $date.$logdata;
 		} elsif ($lglevel == 5) {
-			$result = $needcr.$logdata;
+			$result = $logdata;
 		} elsif ($lglevel == 3) {
-			$result = $needcr.$date.$logdata;
+			$result = $date.$logdata;
 			if ($this->trace()) {
 				$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 			}
 		} else {
-			$result = Carp::longmess($needcr.$logdata);
+			$result = Carp::longmess($logdata);
 		}
 	}
 	#==========================================
@@ -643,17 +626,6 @@ sub note {
 	my $this = shift;
 	my $data = shift;
 	$this -> printLog ( 5,$data );
-}
-
-#==========================================
-# state
-#------------------------------------------
-sub state {
-	# ...
-	# get current cursor log state
-	# ---
-	my $this = shift;
-	return $this->{state};
 }
 
 #==========================================
