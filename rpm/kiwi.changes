@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Aug 19 17:36:24 CEST 2011 - ms@suse.de
+
+- don't remove netcfg from boot images. This would remove the
+  etc/hosts file which might be required. Along with this change
+  also fixed the cleanupResolvConf() function which has to
+  reset the needResolvConf and needHosts flags in order to prevent
+  a deletion at a later point in time (bnc #713158)
+
+-------------------------------------------------------------------
 Thu Aug 18 12:58:23 CEST 2011 - ms@suse.de
 
 - added support for download and verification progress
