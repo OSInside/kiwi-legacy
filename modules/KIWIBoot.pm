@@ -3615,6 +3615,11 @@ sub installBootLoader {
 	if ($loader eq "grub") {
 		$kiwi -> info ("Installing grub on device: $diskname");
 		#==========================================
+		# Clean loop maps
+		#------------------------------------------
+		$this -> cleanLoopMaps();
+		$this -> cleanLoop();
+		#==========================================
 		# Create device map for the disk
 		#------------------------------------------
 		my $dmfile = "$tmpdir/grub-device.map";
@@ -3628,6 +3633,25 @@ sub installBootLoader {
 		print $dmfd "(hd0) $diskname\n";
 		$dmfd -> close();
 		#==========================================
+		# Create command list to install grub
+		#------------------------------------------
+		my $cmdfile = "$tmpdir/grub-device.cmds";
+		if (! $dmfd -> open(">$cmdfile")) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Couldn't create grub command list: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print $dmfd "device (hd0) $diskname\n";
+		print $dmfd "root (hd0,$bootpart)\n";
+		if ($chainload) {
+			print $dmfd "setup (hd0,0)\n";
+		} else {
+			print $dmfd "setup (hd0)\n";
+		}
+		print $dmfd "quit\n";
+		$dmfd -> close();
+		#==========================================
 		# Install grub in batch mode
 		#------------------------------------------
 		my $grub = $locator -> getExecPath ('grub');
@@ -3638,32 +3662,22 @@ sub installBootLoader {
 			return undef;
 		}
 		my $grubOptions = "--device-map $dmfile --no-floppy --batch";
-		$kiwi -> loginfo ("GRUB: $grub $grubOptions\n");
 		qxx ("mount --bind $tmpdir/boot/grub /boot/grub");
-		if (! open (FD,"|$grub $grubOptions &> $tmpdir/grub.log")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't call grub: $!");
-			$kiwi -> failed ();
-			return undef;
-		}
-		print FD "device (hd0) $diskname\n";
-		print FD "root (hd0,$bootpart)\n";
-		if ($chainload) {
-			print FD "setup (hd0,0)\n";
-		} else {
-			print FD "setup (hd0)\n";
-		}
-		print FD "quit\n";
-		close FD;
+		qxx ("$grub $grubOptions < $cmdfile &> $tmpdir/grub.log");
 		qxx ("umount /boot/grub");
 		my $glog;
-		if (open (FD,"$tmpdir/grub.log")) {
-			my @glog = <FD>; close FD;
+		if ($dmfd -> open ("$tmpdir/grub.log")) {
+			my @glog = <$dmfd>; $dmfd -> close();
+			if ($dmfd -> open ("$cmdfile")) {
+				my @cmdlog = <$dmfd>; $dmfd -> close();
+				push @glog,"GRUB: commands:";
+				push @glog,@cmdlog;
+			}
 			my $stage1 = grep { /^\s*Running.*succeeded$/ } @glog;
 			my $stage1_5 = grep { /^\s*Running.*are embedded\.$/ } @glog;
 			$result = !(($stage1 == 1) && ($stage1_5 == 1));
 			$glog = join ("\n",@glog);
-			$kiwi -> loginfo ("GRUB: $glog");
+			$kiwi -> loginfo ("GRUB: $glog\n");
 		}
 		if ($result != 1) {
 			my $boot = "'boot sector'";
