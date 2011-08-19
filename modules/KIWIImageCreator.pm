@@ -1357,8 +1357,6 @@ sub DESTROY {
 	}
 	if ($image) {
 		$image -> cleanMount ();
-		$image -> restoreCDRootData ();
-		$image -> restoreSplitExtend ();
 	}
 }
 
