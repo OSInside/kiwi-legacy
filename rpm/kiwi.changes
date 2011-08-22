@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug 22 11:58:12 CEST 2011 - ms@suse.de
+
+- don't use pipes in combination with atftp (bnc #713167)
+
+-------------------------------------------------------------------
 Fri Aug 19 17:36:24 CEST 2011 - ms@suse.de
 
 - don't remove netcfg from boot images. This would remove the
