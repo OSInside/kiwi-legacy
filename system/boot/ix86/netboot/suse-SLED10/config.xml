@@ -128,7 +128,6 @@
 		<package name="ash"/>
 		<package name="gdbm"/>
 		<package name="gfxboot"/>
-		<package name="fribidi"/>
 		<package name="make"/>
 	</packages>
 </image>
