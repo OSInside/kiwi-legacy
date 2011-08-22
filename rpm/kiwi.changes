@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug 22 16:37:52 CEST 2011 - ms@suse.de
+
+- make sure fribidi stays installed in netboot. It's required for
+  the fbiterm based progress information (bnc #713173)
+
+-------------------------------------------------------------------
 Mon Aug 22 11:58:12 CEST 2011 - ms@suse.de
 
 - don't use pipes in combination with atftp (bnc #713167)
