@@ -255,7 +255,6 @@
 		<package name="pm-utils"/>
 		<package name="pmtools"/>
 		<package name="suse-build-key"/>
-		<package name="fribidi"/>
 		<package name="make"/>
 	</packages>
 	<packages type="delete" profiles="diskless">
