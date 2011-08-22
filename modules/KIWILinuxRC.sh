@@ -5035,6 +5035,7 @@ function fetchFile {
 	# setup progress meta information
 	#--------------------------------------
 	dump="dd bs=$chunk of=$dest"
+	dump_atftp=$dump
 	showProgress=0
 	if [ -x /usr/bin/dcounter ] && [ -f /etc/image.md5 ];then
 		showProgress=1
@@ -5044,6 +5045,7 @@ function fetchFile {
 		progressBaseName=$(basename $path)
 		TEXT_LOAD=$(getText "Loading %1" "$progressBaseName")
 		dump="dcounter -s $needMByte -l \"$TEXT_LOAD \" 2>/progress | $dump"
+		dump_atftp="dcounter -s $needMByte -l \"$TEXT_LOAD \" 2>/progress >$dest"
 	fi
 	#======================================
 	# build download command
@@ -5097,7 +5099,7 @@ function fetchFile {
 				call="atftp \
 					--option \"$multicast_atftp\"  \
 					--option \"blksize $imageBlkSize\" \
-					-g -r $path -l >($dump) \
+					-g -r $path -l >($dump_atftp) \
 					$host &> $TRANSFER_ERRORS_FILE"
 			fi
 			;;
