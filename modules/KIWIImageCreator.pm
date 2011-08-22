@@ -533,7 +533,7 @@ sub createImage {
 		@deleteList = keys %uniq;
 	}
 	if ((@addonList) || (@deleteList)) {
-		$kiwi -> info ("Image update:");
+		$kiwi -> info ("Image update:\n");
 		if (@addonList) {
 			$kiwi -> info ("--> Install/Update: @addonList\n");
 		}
