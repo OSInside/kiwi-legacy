@@ -4992,6 +4992,67 @@ function waitForBlockDevice {
 }
 
 #======================================
+# atftpProgress
+#--------------------------------------
+function atftpProgress {
+	# /.../
+	# atftp doesn't use a stream based download and sometimes
+	# seek back and forth which makes it hard to use pipes for
+	# progress indication. Therefore we watch the trace output
+	# ----
+	local imgsize=$1    # image size in MB
+	local prefix=$2     # line prefix text
+	local file=$3       # file with progress data
+	local bytes=0       # log lines multiplied by blocksize
+	local lines=0       # log lines
+	local percent=0     # in percent of all
+	local size=0        # log file size
+	local size_prev=-1  # previos log file size
+	local blocksize=512 # blocksize use for download
+	local all=$((imgsize * 1024 * 1024))
+	#======================================
+	# setup blocksize
+	#--------------------------------------
+	while true;do
+		if head -n 20 $file | grep -q 'block: 1,';then
+			if head $file | grep -q 'blksize =' ;then
+				blocksize=$(head $file | grep "blksize =" | cut -f2 -d=)
+			fi
+			break
+		fi
+		sleep 1
+	done
+	#======================================
+	# print progress information
+	#--------------------------------------
+	while true;do
+		# /.../
+		# the trace logs two lines indicating one download block of
+		# blocksize bytes. We assume only full blocks. At the end
+		# it might happen that only a part of blocksize bytes is
+		# required. The function does not precisely calculate them
+		# and assumes blocksize bytes. imho that's ok for the progress
+		# bar. In order to be exact the function would have to sum
+		# up all bytes from the trace log for each iteration which
+		# would cause the download to pause because it has to wait
+		# for the progress bar to get ready
+		# ----
+		size=$(stat -c %s $file)
+		if [ $size_prev -eq $size ];then
+			echo; break
+		fi
+		size_prev=$size
+		lines=$(cat $file | wc -l)
+		lines=$((lines / 2))
+		bytes=$((lines * $blocksize))
+		percent=$(echo "scale=2; $bytes * 100"  | bc)
+		percent=$(echo "scale=0; $percent / $all" | bc)
+		echo -en "$prefix ( $percent%)\r"
+		sleep 1
+	done
+}
+
+#======================================
 # fetchFile
 #--------------------------------------
 function fetchFile {
@@ -5035,7 +5096,6 @@ function fetchFile {
 	# setup progress meta information
 	#--------------------------------------
 	dump="dd bs=$chunk of=$dest"
-	dump_atftp=$dump
 	showProgress=0
 	if [ -x /usr/bin/dcounter ] && [ -f /etc/image.md5 ];then
 		showProgress=1
@@ -5045,7 +5105,6 @@ function fetchFile {
 		progressBaseName=$(basename $path)
 		TEXT_LOAD=$(getText "Loading %1" "$progressBaseName")
 		dump="dcounter -s $needMByte -l \"$TEXT_LOAD \" 2>/progress | $dump"
-		dump_atftp="dcounter -s $needMByte -l \"$TEXT_LOAD \" 2>/progress >$dest"
 	fi
 	#======================================
 	# build download command
@@ -5099,8 +5158,8 @@ function fetchFile {
 				call="atftp \
 					--option \"$multicast_atftp\"  \
 					--option \"blksize $imageBlkSize\" \
-					-g -r $path -l >($dump_atftp) \
-					$host &> $TRANSFER_ERRORS_FILE"
+					-g -r $path -l $dest $host &> $TRANSFER_ERRORS_FILE \
+					--trace 2>/tmp/atftp_trace"
 			fi
 			;;
 		*)
@@ -5112,6 +5171,14 @@ function fetchFile {
 	#--------------------------------------
 	if [ $showProgress -eq 1 ];then
 		test -e /progress || mkfifo /progress
+		if [ "$type" = "tftp" ] && [ ! "$izip" = "compressed" ];then
+			cat > /tmp/atftp_trace < /dev/null
+			(
+				atftpProgress \
+					$needMByte "$TEXT_LOAD" /tmp/atftp_trace \
+				> /progress
+			)&
+		fi
 		errorLogStop
 		(
 			eval $call &>/dev/null
