@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Aug 23 10:06:24 CEST 2011 - ms@suse.de
+
+- added atftpProgress() function which implements the progress
+  information for atftp by watching the atftp trace output.
+  atftp seeks in the output stream which forbids the use of
+  pipes for the progress information (bnc #713167)
+
+-------------------------------------------------------------------
 Mon Aug 22 16:37:52 CEST 2011 - ms@suse.de
 
 - make sure fribidi stays installed in netboot. It's required for
