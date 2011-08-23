@@ -299,6 +299,30 @@ Authors:
     Marcus Schaefer
 %endif
 
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+
+%package -n kiwi-media-requires
+License:        GPL v2.0 or later
+Summary:        OpenSuSE - packages which should be part of the DVD
+Group:          System/Management
+BuildArch:      noarch
+Recommends:     busybox
+Recommends:     atftp
+Recommends:     gfxboot
+Recommends:     memtest86+
+
+%description -n kiwi-media-requires
+This package recommends a set of packages which should be part of
+the DVD distribution. Some kiwi system/boot templates references
+those packages and it is assumed that they are part of the 
+distributed source media (DVD)
+
+Authors:
+--------
+    Marcus Schaefer
+%endif
+
+
 %prep
 %setup -n %name -a2 -a3
 
@@ -517,6 +541,14 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch ppc ppc64
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %endif
+
+%endif
+
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+
+%files -n kiwi-media-requires
+%defattr(-, root, root)
+%dir %{_defaultdocdir}/kiwi
 
 %endif
 
