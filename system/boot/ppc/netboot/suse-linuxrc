@@ -505,15 +505,18 @@ then
 					eval $dump 2>/progress |\
 						head --bytes=$verifyBytes | md5sum - > /etc/ireal.md5
 				)&
+				dump_pid=$!
 				echo "cat /progress | dialog \
 					--backtitle \"$TEXT_INSTALLTITLE\" \
 					--progressbox 3 65
 				" > /tmp/progress.sh
 				if [ -e /dev/fb0 ];then
-					fbiterm -m $UFONT -- bash -e /tmp/progress.sh
+					fbiterm -m $UFONT -- bash -e /tmp/progress.sh || \
+					bash -e /tmp/progress.sh
 				else
 					bash -e /tmp/progress.sh
 				fi
+				wait $dump_pid
 				clear
 				errorLogContinue
 			else
