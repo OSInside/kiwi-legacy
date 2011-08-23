@@ -5007,8 +5007,6 @@ function atftpProgress {
 	local bytes=0       # log lines multiplied by blocksize
 	local lines=0       # log lines
 	local percent=0     # in percent of all
-	local size=0        # log file size
-	local size_prev=-1  # previos log file size
 	local all=$((imgsize * 1024 * 1024))
 	#======================================
 	# print progress information
@@ -5025,11 +5023,10 @@ function atftpProgress {
 		# would cause the download to pause because it has to wait
 		# for the progress bar to get ready
 		# ----
-		size=$(stat -c %s $file)
-		if [ $size_prev -eq $size ];then
+		if [ -e /tmp/download_done ];then
+			rm -f /tmp/download_done
 			echo; break
 		fi
-		size_prev=$size
 		# the same block can be transferred multiple times
 		lines=$(grep "^sent ACK" $file | sort | uniq | wc -l)
 		bytes=$((lines * $blocksize))
@@ -5143,11 +5140,13 @@ function fetchFile {
 					-l >(gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump) \
 					$host 2>>$TRANSFER_ERRORS_FILE"
 			else
+				rm -f /tmp/download_done
 				call="atftp \
 					--trace \
 					--option \"$multicast_atftp\"  \
 					--option \"blksize $imageBlkSize\" \
-					-g -r $path -l $dest $host &> $TRANSFER_ERRORS_FILE "
+					-g -r $path -l $dest $host &> $TRANSFER_ERRORS_FILE ;\
+					touch /tmp/download_done"
 			fi
 			;;
 		*)
