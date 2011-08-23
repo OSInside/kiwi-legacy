@@ -5003,25 +5003,13 @@ function atftpProgress {
 	local imgsize=$1    # image size in MB
 	local prefix=$2     # line prefix text
 	local file=$3       # file with progress data
+	local blocksize=$4  # blocksize use for download
 	local bytes=0       # log lines multiplied by blocksize
 	local lines=0       # log lines
 	local percent=0     # in percent of all
 	local size=0        # log file size
 	local size_prev=-1  # previos log file size
-	local blocksize=512 # blocksize use for download
 	local all=$((imgsize * 1024 * 1024))
-	#======================================
-	# setup blocksize
-	#--------------------------------------
-	while true;do
-		if head -n 20 $file | grep -q 'block: 1,';then
-			if head $file | grep -q 'blksize =' ;then
-				blocksize=$(head $file | grep "blksize =" | cut -f2 -d=)
-			fi
-			break
-		fi
-		sleep 1
-	done
 	#======================================
 	# print progress information
 	#--------------------------------------
@@ -5042,8 +5030,8 @@ function atftpProgress {
 			echo; break
 		fi
 		size_prev=$size
-		lines=$(cat $file | wc -l)
-		lines=$((lines / 2))
+		# the same block can be transferred multiple times
+		lines=$(grep "^sent ACK" $file | sort | uniq | wc -l)
 		bytes=$((lines * $blocksize))
 		percent=$(echo "scale=2; $bytes * 100"  | bc)
 		percent=$(echo "scale=0; $percent / $all" | bc)
@@ -5156,10 +5144,10 @@ function fetchFile {
 					$host 2>>$TRANSFER_ERRORS_FILE"
 			else
 				call="atftp \
+					--trace \
 					--option \"$multicast_atftp\"  \
 					--option \"blksize $imageBlkSize\" \
-					-g -r $path -l $dest $host &> $TRANSFER_ERRORS_FILE \
-					--trace 2>/tmp/atftp_trace"
+					-g -r $path -l $dest $host &> $TRANSFER_ERRORS_FILE "
 			fi
 			;;
 		*)
@@ -5172,10 +5160,10 @@ function fetchFile {
 	if [ $showProgress -eq 1 ];then
 		test -e /progress || mkfifo /progress
 		if [ "$type" = "tftp" ] && [ ! "$izip" = "compressed" ];then
-			cat > /tmp/atftp_trace < /dev/null
+			cat > $TRANSFER_ERRORS_FILE < /dev/null
 			(
 				atftpProgress \
-					$needMByte "$TEXT_LOAD" /tmp/atftp_trace \
+					$needMByte "$TEXT_LOAD" $TRANSFER_ERRORS_FILE $imageBlkSize \
 				> /progress
 			)&
 		fi
@@ -5201,7 +5189,7 @@ function fetchFile {
 	if [ $showProgress -eq 1 ];then
 		errorLogContinue
 	fi
-	loadStatus=`cat $TRANSFER_ERRORS_FILE`
+	loadStatus=`grep -v "^\(received \)\|\(sent \)" $TRANSFER_ERRORS_FILE`
 	return $loadCode
 }
 
