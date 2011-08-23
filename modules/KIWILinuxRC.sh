@@ -5008,10 +5008,21 @@ function atftpProgress {
 	local lines=0       # log lines
 	local percent=0     # in percent of all
 	local all=$((imgsize * 1024 * 1024))
+	local line
+	local step=0
+	# number of cycles for approx. 2% steps
+	local max_step=$(($all / $blocksize / 25))
+	cat < dev/null > $file.tmp
 	#======================================
 	# print progress information
 	#--------------------------------------
-	while true;do
+	while read line ;do
+		echo "$line" >> $file.tmp
+		let step=step+1
+		if [ $step -lt $max_step ]; then
+			continue
+		fi
+		step=0
 		# /.../
 		# the trace logs two lines indicating one download block of
 		# blocksize bytes. We assume only full blocks. At the end
@@ -5023,18 +5034,16 @@ function atftpProgress {
 		# would cause the download to pause because it has to wait
 		# for the progress bar to get ready
 		# ----
-		if [ -e /tmp/download_done ];then
-			rm -f /tmp/download_done
-			echo; break
-		fi
 		# the same block can be transferred multiple times
-		lines=$(grep "^sent ACK" $file | sort | uniq | wc -l)
+		lines=$(grep "^sent ACK" $file.tmp | sort -u | wc -l)
 		bytes=$((lines * $blocksize))
 		percent=$(echo "scale=2; $bytes * 100"  | bc)
 		percent=$(echo "scale=0; $percent / $all" | bc)
 		echo -en "$prefix ( $percent%)\r"
-		sleep 1
 	done
+	grep -v "^\(received \)\|\(sent \)" $file.tmp > $file
+	rm $file.tmp
+	echo
 }
 
 #======================================
@@ -5054,6 +5063,7 @@ function fetchFile {
 	local chunk=$6
 	local dump
 	local call
+	local call_pid
 	if test -z "$chunk";then
 		chunk=4k
 	fi
@@ -5082,7 +5092,7 @@ function fetchFile {
 	#--------------------------------------
 	dump="dd bs=$chunk of=$dest"
 	showProgress=0
-	if [ -x /usr/bin/dcounter ] && [ -f /etc/image.md5 ];then
+	if [ -x /usr/bin/dcounter ] && [ -f /etc/image.md5 ] && [ -b "$dest" ];then
 		showProgress=1
 		read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
 		needBytes=`expr $blocks \* $blocksize`
@@ -5140,13 +5150,22 @@ function fetchFile {
 					-l >(gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump) \
 					$host 2>>$TRANSFER_ERRORS_FILE"
 			else
-				rm -f /tmp/download_done
-				call="atftp \
-					--trace \
-					--option \"$multicast_atftp\"  \
-					--option \"blksize $imageBlkSize\" \
-					-g -r $path -l $dest $host &> $TRANSFER_ERRORS_FILE ;\
-					touch /tmp/download_done"
+				if [ $showProgress -eq 1 ];then
+					call="atftp \
+						--trace \
+						--option \"$multicast_atftp\"  \
+						--option \"blksize $imageBlkSize\" \
+						-g -r $path -l $dest $host 2>&1 | \
+						atftpProgress \
+							$needMByte \"$TEXT_LOAD\" $TRANSFER_ERRORS_FILE $imageBlkSize \
+						> /progress"
+				else
+					call="atftp \
+						--option \"$multicast_atftp\"  \
+						--option \"blksize $imageBlkSize\" \
+						-g -r $path -l $dest $host \
+						&> $TRANSFER_ERRORS_FILE"
+				fi
 			fi
 			;;
 		*)
@@ -5158,29 +5177,31 @@ function fetchFile {
 	#--------------------------------------
 	if [ $showProgress -eq 1 ];then
 		test -e /progress || mkfifo /progress
-		if [ "$type" = "tftp" ] && [ ! "$izip" = "compressed" ];then
-			cat > $TRANSFER_ERRORS_FILE < /dev/null
-			(
-				atftpProgress \
-					$needMByte "$TEXT_LOAD" $TRANSFER_ERRORS_FILE $imageBlkSize \
-				> /progress
-			)&
-		fi
+		test -e /tmp/load_code && rm -f /tmp/load_code
 		errorLogStop
 		(
 			eval $call &>/dev/null
-			loadCode=$?
+			echo $? > /tmp/load_code
 		)&
+		call_pid=$!
 		echo "cat /progress | dialog \
 			--backtitle \"$TEXT_INSTALLTITLE\" \
 			--progressbox 3 65
 		" > /tmp/progress.sh
 		if [ -e /dev/fb0 ];then
-			fbiterm -m $UFONT -- bash -e /tmp/progress.sh
+			fbiterm -m $UFONT -- bash -e /tmp/progress.sh || \
+			bash -e /tmp/progress.sh
 		else
 			bash -e /tmp/progress.sh
 		fi
 		clear
+		wait $call_pid
+		loadCode=`cat /tmp/load_code`
+		if [ -z "$loadCode" ]; then
+			systemException \
+				"Failed to get the download process return value" \
+			"reboot"
+		fi
 	else
 		eval $call
 		loadCode=$?
@@ -5188,7 +5209,7 @@ function fetchFile {
 	if [ $showProgress -eq 1 ];then
 		errorLogContinue
 	fi
-	loadStatus=`grep -v "^\(received \)\|\(sent \)" $TRANSFER_ERRORS_FILE`
+	loadStatus=`cat $TRANSFER_ERRORS_FILE`
 	return $loadCode
 }
 
