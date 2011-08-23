@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Aug 23 14:04:47 CEST 2011 - ms@suse.de
+ 
+- make sure atftpProgress() finishes _after_ the atftp process has
+  concluded the download, related to (bnc #713167)
+
+-------------------------------------------------------------------
 Tue Aug 23 13:10:59 CEST 2011 - ms@suse.de
 
 - use $imageBlkSize as parameter for atftpProgress()
