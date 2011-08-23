@@ -385,8 +385,8 @@ sub new {
 		my $sizeBytes;
 		my $minInodes;
 		my $sizeXMLBytes = 0;
-		my $spare        = 1.5;
-		my $journal      = 12 * 1024 * 1024;
+		my $spare        = 100 * 1024 * 1024; # 100M free
+		my $journal      = 12  * 1024 * 1024; # 12M  journal
 		my $fsopts       = $cmdL -> getFilesystemOptions();
 		my $inodesize    = $fsopts->[1];
 		my $inoderatio   = $fsopts->[2];
@@ -403,16 +403,16 @@ sub new {
 			chomp $sizeBytes;
 			$minInodes*= 2;
 			$sizeBytes+= $minInodes * $inodesize;
-			$sizeBytes*= $spare;
 			$sizeBytes+= $journal;
 			$sizeBytes+= $kernelSize;
-			$sizeBytes+= ($initrdSize * 1.5);
+			$sizeBytes+= $initrdSize;
+			$sizeBytes+= $spare;
 		} else {
 			# system is specified as a file...
 			$sizeBytes = $main::global -> isize ($system);
 			$sizeBytes+= $kernelSize;
-			$sizeBytes+= ($initrdSize * 1.5);
-			$sizeBytes*= 1.1;
+			$sizeBytes+= $initrdSize;
+			$sizeBytes+= $spare;
 		}
 		#==========================================
 		# Store optional size setup from XML
@@ -5073,7 +5073,7 @@ sub __getBootSize {
 	my $bbytes = qxx ("du -s --block-size=1 $boot | cut -f1"); chomp $bbytes;
 	# 3 times the size should be enough for kernel updates
 	my $gotMB  = sprintf ("%.0f",(($bbytes / 1048576) * 3));
-	my $minMB  = 100;
+	my $minMB  = 150;
 	if ($gotMB < $minMB) {
 		$gotMB = $minMB;
 	}
