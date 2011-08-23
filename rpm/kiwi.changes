@@ -1,4 +1,18 @@
 -------------------------------------------------------------------
+Tue Aug 23 18:58:57 CEST 2011 - ms@suse.de
+
+- fixed boot code: explicitly wait until the background
+  job showing the progress information has finished
+- let atftpProgress() read output directly so there is just one job
+- fixed fetchFile(): enable progress only for block devices, without
+  this it showed the progress for md5 and other files when the first
+  image download failed.
+- fixed fetchFile(): fbiterm does not work with serial console, added
+  fallback when it fails
+- fixed fetchFile(): loadCode value from the background job is
+  returned correctly now
+
+-------------------------------------------------------------------
 Tue Aug 23 14:04:47 CEST 2011 - ms@suse.de
  
 - make sure atftpProgress() finishes _after_ the atftp process has
