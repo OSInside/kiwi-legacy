@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Aug 23 13:10:59 CEST 2011 - ms@suse.de
+
+- use $imageBlkSize as parameter for atftpProgress()
+- take care for handling of re-sent blocks in atftpProgress()
+- fixed atftp error output handling $TRANSFER_ERRORS_FILE vs. /tmp/atftp_trace
+- fixed atftp blocksize detection - with multicast the block number 1
+  does not have to be at the beginning
+
+-------------------------------------------------------------------
 Tue Aug 23 10:06:24 CEST 2011 - ms@suse.de
 
 - added atftpProgress() function which implements the progress
