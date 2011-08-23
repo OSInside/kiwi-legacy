@@ -465,15 +465,18 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		dPID=$(pidof mst)
 		kill $dPID
 	)&
+	dump_pid=$!
 	echo "mst -f /progress | dialog \
 		--backtitle \"$TEXT_RECOVERYTITLE\" \
 		--progressbox 3 50
 	" > /tmp/progress.sh
 	if [ -e /dev/fb0 ];then
-		fbiterm -m $UFONT -- bash -e /tmp/progress.sh
+		fbiterm -m $UFONT -- bash -e /tmp/progress.sh || \
+		bash -e /tmp/progress.sh
 	else
 		bash -e /tmp/progress.sh
 	fi
+	wait $dump_pid
 	clear
 	#======================================
 	# 16.4) restore temporary stored files
