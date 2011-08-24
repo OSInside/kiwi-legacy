@@ -7273,13 +7273,6 @@ function setupBootPartition {
 	#--------------------------------------
 	mkdir -p /$mpoint
 	mount $imageBootDevice /$mpoint
-	if \
-		[ -z "$UNIONFS_CONFIG" ] &&
-		[ -z "$COMBINED_IMAGE" ] &&
-		[ "$bootid" = "1" ]
-	then
-		rm -fr /$mpoint/*
-	fi
 	cp -a /mnt/boot /$mpoint
 	if [ -e /boot.tgz ];then
 		tar -xf /boot.tgz -C /$mpoint
