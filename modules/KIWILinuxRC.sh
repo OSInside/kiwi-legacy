@@ -5157,7 +5157,8 @@ function fetchFile {
 						--option \"blksize $imageBlkSize\" \
 						-g -r $path -l $dest $host 2>&1 | \
 						atftpProgress \
-							$needMByte \"$TEXT_LOAD\" $TRANSFER_ERRORS_FILE $imageBlkSize \
+							$needMByte \"$TEXT_LOAD\" \
+							$TRANSFER_ERRORS_FILE $imageBlkSize \
 						> /progress"
 				else
 					call="atftp \
