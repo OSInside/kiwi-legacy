@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Aug 24 16:54:38 CEST 2011 - ms@suse.de
+
+- don't remove data from initial boot partition
+- call setupBootPartition() only if systemIntegrity is != fine
+- clean up setupBootPartition, create mount points inside the initrd
+- clean up netboot code, setup bootid before mountSystem and let
+  setupBootPartition do the setup of the boot contents
+- added support for pxe luks encrypted images
+
+-------------------------------------------------------------------
 Tue Aug 23 18:58:57 CEST 2011 - ms@suse.de
 
 - fixed boot code: explicitly wait until the background
