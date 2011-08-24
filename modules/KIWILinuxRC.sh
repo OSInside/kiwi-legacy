@@ -4714,7 +4714,12 @@ function mountSystem {
 	# setup boot partition
 	#--------------------------------------
 	if [ ! "$arch" = "ppc64" ];then
-		if [ "$LOCAL_BOOT" = "no" ] && [ $retval = 0 ] && [ -z "$RESTORE" ];then
+		if \
+			[ "$LOCAL_BOOT" = "no" ]          && \
+			[ ! "$systemIntegrity" = "fine" ] && \
+			[ $retval = 0 ]                   && \
+			[ -z "$RESTORE" ]
+		then
 			setupBootPartition
 		fi
 	fi
@@ -7263,21 +7268,37 @@ function setupBootPartition {
 		# no such boot device like for live ISO hybrid disk
 		return
 	fi
-	mkdir -p /mnt/$mpoint
-	mount $imageBootDevice /mnt/$mpoint
+	#======================================
+	# copy boot data from image to bootpart
+	#--------------------------------------
+	mkdir -p /$mpoint
+	mount $imageBootDevice /$mpoint
 	if \
 		[ -z "$UNIONFS_CONFIG" ] &&
 		[ -z "$COMBINED_IMAGE" ] &&
 		[ "$bootid" = "1" ]
 	then
-		rm -fr /mnt/$mpoint/*
+		rm -fr /$mpoint/*
 	fi
-	cp -a /mnt/boot /mnt/$mpoint
+	cp -a /mnt/boot /$mpoint
 	if [ -e /boot.tgz ];then
-		tar -xf /boot.tgz -C /mnt/$mpoint
+		tar -xf /boot.tgz -C /$mpoint
 	fi
-	rm -rf /mnt/boot
-	mkdir  /mnt/boot
+	umount /$mpoint
+	rmdir  /$mpoint
+	#======================================
+	# bind mount boot partition
+	#--------------------------------------
+	# the resetBootBind() function will resolve this to a
+	# standard /boot mount when the bootloader will be
+	# installed in preinit.
+	# ---
+	if ! isFSTypeReadOnly;then
+		rm -rf /mnt/boot
+		mkdir  /mnt/boot
+	fi
+	mkdir /mnt/$mpoint
+	mount $imageBootDevice /mnt/$mpoint
 	mount --bind \
 		/mnt/$mpoint/boot /mnt/boot
 }

@@ -798,11 +798,28 @@ fi
 #--------------------------------------
 Echo "Filesystem of PXE system is: $FSTYPE -> $imageRootDevice"
 if isFSTypeReadOnly;then
-	setupUnionFS $imageRWDevice $imageRODevice $unionFST
+	if [ ! -z "$imageRWDevice" ] && [ ! -z "$imageRODevice" ];then
+		setupUnionFS $imageRWDevice $imageRODevice $unionFST
+	fi
 fi
 
 #======================================
-# 19) Mount OS image to /mnt
+# 19) Setup bootid for this table
+#--------------------------------------
+if [ ! -z "$imageBootDevice" ];then
+	# bootid is boot partition
+	export bootid=$(nd $imageBootDevice)
+else
+	# bootid is root partition
+	export bootid=$(nd $imageRootDevice)
+fi
+if [ ! -z "$RAID" ];then
+	# raid md devices start with 0 but partition id's start with 1
+	bootid=$((bootid + 1))
+fi
+
+#======================================
+# 20) Mount OS image to /mnt
 #--------------------------------------
 runHook premount
 if ! mountSystem;then
@@ -810,25 +827,6 @@ if ! mountSystem;then
 fi
 validateRootTree
 runHook postmount
-
-#======================================
-# 20) Setup boot device contents
-#--------------------------------------
-if [ ! -z "$imageBootDevice" ];then
-	export bootid=$(nd $imageBootDevice)
-	cd /mnt/boot && tar -czf /tmp/boot.tgz .
-	rm -rf /mnt/boot/* && mount $imageBootDevice /mnt/boot
-	cd /mnt/boot && tar -xf /tmp/boot.tgz
-	rm -f /tmp/boot.tgz
-else
-	export bootid=$(nd $imageRootDevice)
-fi
-if [ ! -z "$RAID" ];then
-	# raid md devices start with 0 but partition id's start with 1
-	bootid=$((bootid + 1))
-	# make mdadm.conf available in system image
-	cp /mdadm.conf /mnt/etc
-fi
 
 #======================================
 # 21) Import fixed configuration files
@@ -845,7 +843,13 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 		test -f /etc/resolv.conf && cp /etc/resolv.conf /mnt/etc
 	fi
 	#=======================================
-	# 21.1) Import files from backup
+	# 21.1) Import RAID config file
+	#---------------------------------------
+	if [ ! -z "$RAID" ];then
+		cp /mdadm.conf /mnt/etc
+	fi
+	#=======================================
+	# 21.2) Import files from backup
 	#---------------------------------------
 	BCFG_BASE='etc/KIWI'
 	BCFG_NAME='InstalledConfigFiles'
@@ -855,7 +859,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	ALL_CCONF=`condenseConfigData "$CONF,$VENDOR_CONF"`
 	ALL_CBK_CONF=`condenseConfigData "$BK_CONF,$BK_VENDOR_CONF"`
 	#=======================================
-	# 21.2) Store new configuration
+	# 21.3) Store new configuration
 	#---------------------------------------
 	mkdir  /config
 	mkdir -p  /config/$BCFG_BASE
@@ -863,7 +867,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	echo "CONF=$CONF"               >  "/config/$BCFG_BASE/$BCFG_NAME"
 	echo "VENDOR_CONF=$VENDOR_CONF" >> "/config/$BCFG_BASE/$BCFG_NAME"
 	#=======================================
-	# 21.3) Get files from CONF, VENDOR_CONF
+	# 21.4) Get files from CONF, VENDOR_CONF
 	#---------------------------------------
 	IFS="," ; for i in $ALL_CCONF;do
 		unset configHash
@@ -904,7 +908,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 		fi
 	done
 	#=======================================
-	# 21.4) check config files to be deleted
+	# 21.5) check config files to be deleted
 	#---------------------------------------
 	IFS="," ; for i in $ALL_CBK_CONF;do
 		BKconfigDest=`echo "$i" | cut -d ';' -f 2`
@@ -923,7 +927,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	done
 	IFS=$IFS_ORIG
 	#=======================================
-	# 21.5) Check for KIWI_INITRD
+	# 21.6) Check for KIWI_INITRD
 	#---------------------------------------
 	if [ $haveDisk = "1" ] && [ $systemIntegrity = "clean" ];then
 		if [ ! -z "$KIWI_INITRD" ] && [ ! -z "$KIWI_KERNEL" ];then
