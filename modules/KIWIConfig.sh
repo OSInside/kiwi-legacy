@@ -1638,8 +1638,9 @@ function baseUnpackBootIncludes {
 # baseSetupBootLoaderCompatLinks
 #--------------------------------------
 function baseSetupBootLoaderCompatLinks {
-	if [ -d /usr/lib/grub ];then
-		cd /usr/share && ln -s /usr/lib/grub grub
+	if [ ! -d /usr/lib/grub ];then
+		mkdir -p /usr/lib/grub
+		cp -l /usr/share/grub/*/* /usr/lib/grub
 	fi
 }
 
