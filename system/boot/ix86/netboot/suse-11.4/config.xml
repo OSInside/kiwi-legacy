@@ -26,6 +26,7 @@
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<drivers type="drivers" profiles="default,xen">
+		<file name="crypto/*"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/input/keyboard/*"/>
@@ -162,6 +163,7 @@
 		<package name="xen"/>
 	</packages>
 	<packages type="image" profiles="default,xen">
+		<package name="cryptsetup"/>
 		<package name="bc"/>
 		<package name="adaptec-firmware"/>
 		<package name="clicfs"/>
