@@ -31,6 +31,7 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers" profiles="default,xen,ppc64">
+		<file name="crypto/*"/>
 		<file name="drivers/usb/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="net/packet/*"/>
@@ -155,6 +156,7 @@
 		<package name="kernel-ppc64-base"/>
 	</packages>
 	<packages type="image" profiles="default,xen,ppc64">
+		<package name="cryptsetup"/>
 		<package name="bc"/>
 		<package name="adaptec-firmware"/>
 		<package name="curl"/>

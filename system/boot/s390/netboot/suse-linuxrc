@@ -259,7 +259,12 @@ probeDevices "skipUSB"
 runHook postprobe
 
 #======================================
-# 11) Check for diskful station
+# 11) Select language if not in cmdline
+#--------------------------------------
+selectLanguage
+
+#======================================
+# 12) Check for diskful station
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	checkDevice=$DISK
@@ -282,7 +287,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 12) Check for installed system
+# 13) Check for installed system
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 	if [ ! -z "$RAID" ];then
@@ -302,6 +307,13 @@ if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 		done
 		updateNeeded initialize
 		if linuxPartition $imageDiskDevice;then
+			probeFileSystem $imageDevice
+			if [ "$FSTYPE" = "luks" ];then
+				imageDevice=$(luksOpen $imageDevice)
+				imageRODevice=$imageDevice
+				probeFileSystem $imageRootDevice
+				export haveLuks=yes
+			fi
 			if mountSystem $imageDevice;then
 				updateNeeded
 				umountSystem
@@ -323,7 +335,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 fi
 
 #======================================
-# 13) Create ptable on diskful system
+# 14) Create ptable on diskful system
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	runHook prepartition
@@ -410,7 +422,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 14) Setup root device environment
+# 15) Setup root device environment
 #--------------------------------------
 runHook predownload
 if \
@@ -418,7 +430,7 @@ if \
 	([ $haveDisk = "1" ] || [ $haveRamDisk = "1" ])
 then
 	#======================================
-	# 14.1) Download network client image
+	# 15.1) Download network client image
 	#--------------------------------------
 	count=0
 	IFS="," ; for i in $IMAGE;do
@@ -438,9 +450,6 @@ then
 		if [ $count = 1 ];then
 			imageRootDevice=$imageDevice
 			imageRootName=$imageName
-		fi
-		if [ $count = 2 ];then
-			imageNextRootDevice=$imageDevice
 		fi
 		# /.../
 		# start download only if installed system is different
@@ -544,28 +553,29 @@ then
 			Echo -b "   within the appropriate .md5 file for this image"
 			echo
 			if [ -z "$DISK" ];then
-			Echo -b "4) ramdisk size is too small for the image:"
-			Echo -b "   check the ramdisk_size parameter of the PXE"
-			Echo -b "   configuration file on the TFTP server"
+				Echo -b "4) ramdisk size is too small for the image:"
+				Echo -b "   check the ramdisk_size parameter of the PXE"
+				Echo -b "   configuration file on the TFTP server"
 			else
-			Echo -b "4) partition size is too small for the image:"
-			Echo -b "   check the PART line in the image config file on the"
-			Echo -b "   TFTP server"
+				Echo -b "4) partition size is too small for the image:"
+				Echo -b "   check the PART line in the image config file on the"
+				Echo -b "   TFTP server"
 			fi
 			echo
 			Echo "Retry to load image..."
 			sleep 15
 		done
-		if [ ! -z "$DISK" ];then
-			probeFileSystem $imageDevice
-			resizeFilesystem $imageDevice
+		imageRootDevice=$imageDevice
+		if [ ! -z "$UNIONFS_CONFIG" ];then
+			imageRWDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+			imageRODevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 		fi
 		rm -f /etc/ireal.md5
 		rm -f /etc/image.md5
 	done
 else
 	#======================================
-	# 14.2) Check for local boot
+	# 15.2) Check for local boot
 	#--------------------------------------
 	if [ $LOCAL_BOOT = "yes" ];then
 		imageDisk=$(dn $root)
@@ -574,14 +584,12 @@ else
 		imageRootName="Local-System"
 		if [ ! -z "$UNIONFS_CONFIG" ];then
 			unionFST=$UNIONFS_CONFIG
-			setupUnionFS $(ddn $imageDisk 3) $(ddn $imageDisk 2) $unionFST
-		fi
-		if [ ! -z "$COMBINED_IMAGE" ];then
-			imageNextRootDevice=$(ddn $imageDisk 3)
+			imageRWDevice=$(ddn $imageDisk 3)
+			imageRODevice=$(ddn $imageDisk 2)
 		fi
 	fi
 	#======================================
-	# 14.3) Check for NFS root
+	# 15.3) Check for NFS root
 	#--------------------------------------
 	if [ ! -z "$NFSROOT" ];then
 		IFS="," ; for i in $NFSROOT;do
@@ -605,18 +613,20 @@ else
 		if [ ! -z "$COMBINED_IMAGE" ] || [ ! -z "$UNIONFS_CONFIG" ];then
 			imageRootDevice="-o vers=3,ro $nfsRootServer:$nfsRootDevice"
 		fi
+		imageRootName="NFSRoot-System"
+		systemIntegrity="clean"
+		export FSTYPE=nfs
 		if [ ! -z "$UNIONFS_CONFIG" ];then
+			imageRWDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+			imageRODevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 			unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
 			if [ "$unionFST" = "clicfs" ];then
 				systemException "clicfs over NFSROOT is not supported" "reboot"
 			fi
 		fi
-		imageRootName="NFSRoot-System"
-		systemIntegrity="clean"
-		export FSTYPE=nfs
 	fi
 	#======================================
-	# 14.4) Check for NBD root
+	# 15.4) Check for NBD root
 	#--------------------------------------
 	if [ ! -z "$NBDROOT" ];then
 		if ! modprobe nbd;then
@@ -711,18 +721,15 @@ else
 		# setup union if basic root filesystem is read-only
 		# ----
 		imageRootDevice=$nbdDevice
-		probeFileSystem $imageRootDevice
-		Echo "Filesystem of remote root system is: $FSTYPE"
-		if [ -z "$COMBINED_IMAGE" ];then
-			if isFSTypeReadOnly;then
-				setupUnionFS "$nbdwriteDevice" "$imageRootDevice" $unionFST
-			fi
-		fi
 		imageRootName="NBDRoot-System"
 		systemIntegrity="clean"
+		if [ -z "$COMBINED_IMAGE" ];then
+			imageRWDevice=$nbdwriteDevice
+			imageRODevice=$imageRootDevice
+		fi
 	fi
 	#======================================
-	# 14.5) Check for AOE root
+	# 15.5) Check for AOE root
 	#--------------------------------------
 	if [ ! -z "$AOEROOT" ];then
 		aoeRODevice=`echo $AOEROOT | cut -d , -f 1`
@@ -749,21 +756,53 @@ else
 		fi
 		Echo "Mounting AoE root system: $aoeRODevice..."
 		imageRootDevice=$aoeRODevice
-		probeFileSystem $imageRootDevice
-		Echo "Filesystem of remote root system is: $FSTYPE"
-		if [ -z "$COMBINED_IMAGE" ];then
-			if isFSTypeReadOnly;then
-				setupUnionFS "$aoeRWDevice" "$imageRootDevice" $unionFST
-			fi
-		fi
 		imageRootName="AOERoot-System"
 		systemIntegrity="clean"
+		if [ -z "$COMBINED_IMAGE" ];then
+			imageRWDevice=$aoeRWDevice
+			imageRODevice=$imageRootDevice
+		fi
 	fi
 fi
 runHook postdownload
 
 #======================================
-# 15) Mount OS image to /mnt
+# 16) Get filesystem type
+#--------------------------------------
+if [ -b $imageRootDevice ];then
+	probeFileSystem $imageRootDevice
+	if [ "$FSTYPE" = "luks" ];then
+		imageRootDevice=$(luksOpen $imageRootDevice)
+		imageRODevice=$imageRootDevice
+		probeFileSystem $imageRootDevice
+		export haveLuks=yes
+	fi
+	if [ "$FSTYPE" = "unknown" ];then
+		systemException \
+			"Couldn't determine filesystem type... abort" \
+		"reboot"
+	fi
+fi
+
+#======================================
+# 17) resize fs on diskful client
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
+	if [ $haveDisk = "1" ] || [ $haveRamDisk = "1" ];then
+		resizeFilesystem $imageRootDevice
+	fi
+fi
+
+#======================================
+# 18) Check filesystem
+#--------------------------------------
+Echo "Filesystem of PXE system is: $FSTYPE -> $imageRootDevice"
+if isFSTypeReadOnly;then
+	setupUnionFS $imageRWDevice $imageRODevice $unionFST
+fi
+
+#======================================
+# 19) Mount OS image to /mnt
 #--------------------------------------
 runHook premount
 if ! mountSystem;then
@@ -773,7 +812,7 @@ validateRootTree
 runHook postmount
 
 #======================================
-# 16) Setup boot device contents
+# 20) Setup boot device contents
 #--------------------------------------
 if [ ! -z "$imageBootDevice" ];then
 	export bootid=$(nd $imageBootDevice)
@@ -792,7 +831,7 @@ if [ ! -z "$RAID" ];then
 fi
 
 #======================================
-# 17) Import fixed configuration files
+# 21) Import fixed configuration files
 #--------------------------------------
 runHook preconfig
 if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
@@ -800,13 +839,13 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 		Echo "Configuration files reload forced via RELOAD_CONFIG..."
 	fi
 	#=======================================
-	# 17.0) Import NFS root files
+	# 21.0) Import NFS root files
 	#---------------------------------------
 	if [ ! -z "$NFSROOT" ];then
 		test -f /etc/resolv.conf && cp /etc/resolv.conf /mnt/etc
 	fi
 	#=======================================
-	# 17.1) Import files from backup
+	# 21.1) Import files from backup
 	#---------------------------------------
 	BCFG_BASE='etc/KIWI'
 	BCFG_NAME='InstalledConfigFiles'
@@ -816,7 +855,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	ALL_CCONF=`condenseConfigData "$CONF,$VENDOR_CONF"`
 	ALL_CBK_CONF=`condenseConfigData "$BK_CONF,$BK_VENDOR_CONF"`
 	#=======================================
-	# 17.2) Store new configuration
+	# 21.2) Store new configuration
 	#---------------------------------------
 	mkdir  /config
 	mkdir -p  /config/$BCFG_BASE
@@ -824,7 +863,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	echo "CONF=$CONF"               >  "/config/$BCFG_BASE/$BCFG_NAME"
 	echo "VENDOR_CONF=$VENDOR_CONF" >> "/config/$BCFG_BASE/$BCFG_NAME"
 	#=======================================
-	# 17.3) Get files from CONF, VENDOR_CONF
+	# 21.3) Get files from CONF, VENDOR_CONF
 	#---------------------------------------
 	IFS="," ; for i in $ALL_CCONF;do
 		unset configHash
@@ -865,7 +904,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 		fi
 	done
 	#=======================================
-	# 17.4) check config files to be deleted
+	# 21.4) check config files to be deleted
 	#---------------------------------------
 	IFS="," ; for i in $ALL_CBK_CONF;do
 		BKconfigDest=`echo "$i" | cut -d ';' -f 2`
@@ -884,7 +923,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	done
 	IFS=$IFS_ORIG
 	#=======================================
-	# 17.5) Check for KIWI_INITRD
+	# 21.5) Check for KIWI_INITRD
 	#---------------------------------------
 	if [ $haveDisk = "1" ] && [ $systemIntegrity = "clean" ];then
 		if [ ! -z "$KIWI_INITRD" ] && [ ! -z "$KIWI_KERNEL" ];then
@@ -911,7 +950,7 @@ fi
 runHook postconfig
 
 #======================================
-# 18) check filesystem and kernels
+# 22) check filesystem and kernels
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	if [ "$FSTYPE" != "nfs" ];then
@@ -921,14 +960,14 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 19) setup ird/kernel links for union
+# 23) setup ird/kernel links for union
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ] && [ $systemIntegrity = "clean" ];then
 	setupKernelLinks
 fi
 
 #======================================
-# 20) Create system dependant files
+# 24) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	mkdir -p /config
@@ -945,25 +984,25 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 21) copy system dependant files
+# 25) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 22) update system dependant files
+# 26) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
-# 23) umount system filesystems
+# 27) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 24) copy initrd files to image
+# 28) copy initrd files to image
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	if canWrite /mnt;then
@@ -974,18 +1013,18 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 25) kill boot shell
+# 29) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 26) Activate new root
+# 30) Activate new root
 #--------------------------------------
 runHook preactivate
 activateImage
 
 #======================================
-# 27) Unmount initrd / system init
+# 31) Unmount initrd / system init
 #--------------------------------------
 bootImage $@

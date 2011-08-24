@@ -30,6 +30,7 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers" profiles="default,xen">
+		<file name="crypto/*"/>
 		<file name="drivers/gpu/drm/i915/i915.ko"/>
 		<file name="drivers/char/agp/intel-agp.ko"/>
 		<file name="drivers/md/*"/>
@@ -154,6 +155,7 @@
 		<package name="xen"/>
 	</packages>
 	<packages type="image" profiles="default,xen">
+		<package name="cryptsetup"/>
 		<package name="bc"/>
 		<package name="adaptec-firmware"/>
 		<package name="curl"/>

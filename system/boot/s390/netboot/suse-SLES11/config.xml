@@ -17,6 +17,7 @@
 		<profile name="std" description="KERNEL: Default"/>
 	</profiles>
 	<drivers type="drivers">
+		<file name="crypto/*"/>
 		<file name="drivers/gpu/drm/i915/i915.ko"/>
 		<file name="drivers/char/agp/intel-agp.ko"/>
 		<file name="drivers/md/*"/>
@@ -67,6 +68,7 @@
 		<package name="kernel-default-base"/>
 	</packages>
 	<packages type="image">
+		<package name="cryptsetup"/>
 		<package name="bc"/>
 		<package name="curl"/>
 		<package name="psmisc"/>
