@@ -1634,4 +1634,13 @@ function baseUnpackBootIncludes {
 	fi
 }
 
+#======================================
+# baseSetupBootLoaderCompatLinks
+#--------------------------------------
+function baseSetupBootLoaderCompatLinks {
+	if [ -d /usr/lib/grub ];then
+		cd /usr/share && ln -s /usr/lib/grub grub
+	fi
+}
+
 # vim: set noexpandtab:

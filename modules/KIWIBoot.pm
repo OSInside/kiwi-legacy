@@ -3025,6 +3025,10 @@ sub setupBootLoaderConfiguration {
 			return undef;
 		}
 		#==========================================
+		# Compat link
+		#------------------------------------------
+		qxx ("cd $tmpdir/boot/grub && ln -s menu.lst grub.conf");
+		#==========================================
 		# General grub setup
 		#------------------------------------------
 		print FD "color cyan/blue white/blue\n";
