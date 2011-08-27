@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="5.2" name="suse-11.4-SUSENebula-guest">
 	<description type="system">
 		<author>Robert Schweikert</author>
@@ -25,7 +26,7 @@
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default"/>
 		<package name="ifplugd"/>
-        <package name="iputils"/>
+		<package name="iputils"/>
 		<package name="vim"/>
 		<opensusePattern name="base"/>
 	</packages>

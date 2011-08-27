@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="5.2" name="suse-11.3-OpenNebula-Cloud-Node">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rschweikert@novell.com</contact>
 		<specification>OpenNebula Cloud Node configuration</specification>
-    </description>
-    <preferences>
-        <type image="oem" filesystem="ext3" boot="oemboot/suse-11.3" installstick="true" installboot="install" boottimeout="2">
+	</description>
+	<preferences>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.3" installstick="true" installboot="install" boottimeout="2">
 			<oemconfig>
 				<oem-boot-title>OpenNebula Cloud Node</oem-boot-title>
 				<oem-shutdown>true</oem-shutdown>
 				<oem-swap>true</oem-swap>
 				<oem-swapsize>2048</oem-swapsize>
-                <oem-unattended>true</oem-unattended>
+				<oem-unattended>true</oem-unattended>
 			</oemconfig>
 		</type>
 		<version>1.1.0</version>
@@ -28,35 +29,35 @@
 	<repository type="yast2">
 		<source path="opensuse://11.3/repo/oss/"/>
 	</repository>
-    <repository type="rpm-md">
-        <source path="http://download.opensuse.org/repositories/Virtualization:/Cloud:/OpenNebula/openSUSE_11.3"/>
-    </repository>
+	<repository type="rpm-md">
+		<source path="http://download.opensuse.org/repositories/Virtualization:/Cloud:/OpenNebula/openSUSE_11.3"/>
+	</repository>
 	<packages type="image" patternType="plusRecommended">
 		<opensusePattern name="base"/>
 		<package name="bootsplash"/>
-        <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="bridge-utils"/>
 		<package name="dhcp-client"/>
-        <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
 		<package name="iptables"/>
 		<package name="iputils"/>
 		<package name="kernel-default"/>
-        <package name="kvm"/>
-        <package name="libvirt"/>
-        <package name="nfs-client"/>
-        <package name="openssh"/>
-        <package name="openssl"/>
-        <package name="qemu"/>
+		<package name="kvm"/>
+		<package name="libvirt"/>
+		<package name="nfs-client"/>
+		<package name="openssh"/>
+		<package name="openssl"/>
+		<package name="qemu"/>
 		<package name="rsyslog"/>
-        <package name="ruby"/>
-        <package name="rubygems"/>
-        <package name="rubygem-libxml-ruby"/>
-        <package name="rubygem-nokogiri"/>
-        <package name="terminfo"/>
+		<package name="ruby"/>
+		<package name="rubygems"/>
+		<package name="rubygem-libxml-ruby"/>
+		<package name="rubygem-nokogiri"/>
+		<package name="terminfo"/>
 		<package name="vi"/>
-        <package name="xmlrpc-c"/>
-        <package name="yast2-nfs-client"/>
+		<package name="xmlrpc-c"/>
+		<package name="yast2-nfs-client"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

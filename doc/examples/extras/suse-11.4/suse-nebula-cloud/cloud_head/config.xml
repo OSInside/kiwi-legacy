@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="5.2" name="suse-11.4-OpenNebula-Head-Node">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rschweikert@novell.com</contact>
 		<specification>OpenNebula Head Node</specification>
-    </description>
-    <preferences>
-        <type image="oem" filesystem="ext3" boot="oemboot/suse-11.4" installstick="true" installboot="install" boottimeout="2">
+	</description>
+	<preferences>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.4" installstick="true" installboot="install" boottimeout="2">
 			<oemconfig>
 				<oem-boot-title>OpenNebula Head Node</oem-boot-title>
 				<oem-shutdown>true</oem-shutdown>
 				<oem-swap>true</oem-swap>
 				<oem-swapsize>2048</oem-swapsize>
-                <oem-unattended>true</oem-unattended>
+				<oem-unattended>true</oem-unattended>
 			</oemconfig>
 		</type>
 		<version>1.2.0</version>
@@ -28,43 +29,43 @@
 	<repository type="yast2">
 		<source path="opensuse://11.4/repo/oss/"/>
 	</repository>
-    <repository type="rpm-md">
-        <source path="opensuse://repositories/Virtualization:/Cloud:/OpenNebula/openSUSE_11.4"/>
-    </repository>
-    <repository type="rpm-md">
-        <source path="opensuse://11.4/repo/oss/suse/"/>
-    </repository>
+	<repository type="rpm-md">
+		<source path="opensuse://repositories/Virtualization:/Cloud:/OpenNebula/openSUSE_11.4"/>
+	</repository>
+	<repository type="rpm-md">
+		<source path="opensuse://11.4/repo/oss/suse/"/>
+	</repository>
 	<packages type="image" patternType="plusRecommended">
 		<opensusePattern name="base"/>
 		<package name="bootsplash"/>
-        <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="bridge-utils"/>
 		<package name="dhcp-server"/>
-        <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
 		<package name="iptables"/>
 		<package name="iputils"/>
 		<package name="kernel-default"/>
-        <package name="nfs-kernel-server"/>
-        <package name="opennebula"/>
-        <package name="opennebula-sunstone"/>
-        <package name="openssh"/>
-        <package name="openssl"/>
-        <package name="python"/>
+		<package name="nfs-kernel-server"/>
+		<package name="opennebula"/>
+		<package name="opennebula-sunstone"/>
+		<package name="openssh"/>
+		<package name="openssl"/>
+		<package name="python"/>
 		<package name="rsyslog"/>
-        <package name="ruby"/>
-        <package name="rubygems"/>
-        <package name="rubygem-libxml-ruby"/>
-        <package name="rubygem-nokogiri"/>
-        <package name="sqlite3"/>
-        <package name="sudo"/>
-        <package name="terminfo"/>
+		<package name="ruby"/>
+		<package name="rubygems"/>
+		<package name="rubygem-libxml-ruby"/>
+		<package name="rubygem-nokogiri"/>
+		<package name="sqlite3"/>
+		<package name="sudo"/>
+		<package name="terminfo"/>
 		<package name="vi"/>
-        <package name="xmlrpc-c"/>
-        <package name="yast2-dhcp-server"/>
-        <package name="yast2-firstboot"/>
-        <package name="yast2-network"/>
-        <package name="yast2-nfs-server"/>
+		<package name="xmlrpc-c"/>
+		<package name="yast2-dhcp-server"/>
+		<package name="yast2-firstboot"/>
+		<package name="yast2-network"/>
+		<package name="yast2-nfs-server"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
