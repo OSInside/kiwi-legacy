@@ -305,7 +305,9 @@ Authors:
 License:        GPL v2.0 or later
 Summary:        OpenSuSE - packages which should be part of the DVD
 Group:          System/Management
+%if 0%{?suse_version} > 1120
 BuildArch:      noarch
+%endif
 Recommends:     busybox
 Recommends:     atftp
 Recommends:     gfxboot
