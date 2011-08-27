@@ -1204,6 +1204,13 @@ source argument doesn't really explain what this repository
 contains</a:documentation>
       </attribute>
     </define>
+    <define name="k.repository.imageinclude.attribute">
+      <attribute name="imageinclude">
+        <a:documentation>Specify whether or not this repository should be configured in the
+resulting image. Boolean value true or false, the default is false.</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.repository.prefer-license.attribute">
       <attribute name="prefer-license">
         <data type="boolean"/>
@@ -1241,6 +1248,9 @@ whether and how this information is passed</a:documentation>
         </optional>
         <optional>
           <ref name="k.repository.alias.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.imageinclude.attribute"/>
         </optional>
         <optional>
           <ref name="k.repository.prefer-license.attribute"/>

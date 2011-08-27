@@ -807,6 +807,10 @@ div {
 		## source argument doesn't really explain what this repository
 		## contains
 		attribute alias { text }
+    k.repository.imageinclude.attribute =
+        ## Specify whether or not this repository should be configured in the
+        ## resulting image. Boolean value true or false, the default is false.
+        attribute imageinclude { xsd:boolean }
 	k.repository.prefer-license.attribute =
 		attribute prefer-license { xsd:boolean }
 	k.repository.priority.attribute =
@@ -828,6 +832,7 @@ div {
 		k.repository.profiles.attribute? &
 		k.repository.status.attribute? &
 		k.repository.alias.attribute? &
+        k.repository.imageinclude.attribute? &
 		k.repository.prefer-license.attribute? &
 		k.repository.priority.attribute? &
 		k.repository.password.attribute? &

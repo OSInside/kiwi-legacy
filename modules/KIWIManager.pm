@@ -850,18 +850,36 @@ sub setupInstallationSource {
 				$kiwi -> info ("Adding bootstrap zypper service: $alias");
 				$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
 				$code = $? >> 8;
+				if ($code != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("zypper: $data");
+					return undef;
+				}
+				$kiwi -> done ();
 			} else {
 				my @zypper= @{$this->{zypper_chroot}};
 				$kiwi -> info ("Adding chroot zypper service: $alias");
 				$data = qxx ("@kchroot @zypper $sadd 2>&1");
 				$code = $? >> 8;
+				if ($code != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("zypper: $data");
+					return undef;
+				}
+				$kiwi -> done ();
+				if ($source{$alias}{imgincl}) {
+					$kiwi -> info ("Adding $alias repo to image");
+					$sadd =~ s/--keep-packages//;
+					$data = qxx ("@kchroot zypper $sadd 2>&1");
+					$code = $? >> 8;
+					if ($code != 0) {
+						$kiwi -> failed ();
+						$kiwi -> error  ("zypper: $data");
+						return undef;
+					}
+					$kiwi -> done ();
+				}
 			}
-			if ($code != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("zypper: $data");
-				return undef;
-			}
-			$kiwi -> done ();
 			if ( $prio ) {
 				$kiwi -> info ("--> Set priority to: $prio");
 				my $modrepo = "modifyrepo -p $prio $alias";
