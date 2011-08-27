@@ -1494,9 +1494,9 @@
 
     <sect2 id="sec.description.repository">
       <title><sgmltag>repository</sgmltag> Element</title>
-      <screen>&lt;repository type="type" alias="name" password="password"
-         priority="number" status="replaceable" username="user-name"&gt; 
-   &lt;source path="URL"/&gt;
+      <screen>&lt;repository type="type" alias="name" imageinclude="true|false"
+              password="password" priority="number" status="replaceable"
+              username="user-name"&gt; &lt;source path="URL"/&gt;
 &lt;/repository&gt;</screen>
 
       <para>The mandatory <sgmltag class="element">repository</sgmltag> element
@@ -1581,7 +1581,7 @@
         </tgroup>
       </table>
 
-      <para>Tthe <sgmltag class="element">repository</sgmltag> element
+      <para>The <sgmltag class="element">repository</sgmltag> element
         has the following optional attributes: </para>
 
       <variablelist>
@@ -1595,6 +1595,32 @@
               repository location with an <quote>_</quote>. It is helpful to
               set an alias name if the repository path is insufficient in
               expressing the purpose of the contained packages.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><sgmltag class="attribute">imageinclude</sgmltag>="<sgmltag
+              class="attvalue">true|false</sgmltag>"</term>
+          <listitem>
+            <para>Specifies whether the given repository should be configured
+              as a repository in the image or not. The default behavior is
+              that repositories used to build an image are not configured
+              as a repository inside the image. This feature allows you to
+              change the behavior by setting the value to <sgmltag
+              class="attvalue">true</sgmltag>. The repository is configured
+              in the image according to the source path as specified with the
+              <sgmltag class="attribute">path</sgmltag> attribute of the
+              <sgmltag class="element">source</sgmltag> element. Therefore,
+              if the path is not a fully qualified URL, you may need to adjust
+              the repository file in the image to accomodate the expected
+              location. It is recommended that you use the
+              <sgmltag class="attribute">alias</sgmltag> attribute in
+              combination with the
+              <sgmltag class="attribute">imageinclude</sgmltag> attribute to
+              avoid having unpredictable random names assigned to the
+              repository you wish to include in the image. This also
+              facilitates modification of the "baseurl" entry in the .repo
+              file from the config.sh script if you need to make adjustments
+              to the path.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
