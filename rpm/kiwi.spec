@@ -385,6 +385,8 @@ cat kiwi.loader
 	fi
 %endif
 
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+
 %post -n kiwi-templates
 #============================================================
 # Clean up old old template directories if the exists
@@ -392,6 +394,7 @@ oldDists=( 10.1 10.2 10.3 11.0 11.1 11.2 )
 for dist in ${oldDists[@]};do
 	rm -rf /usr/share/kiwi/image/suse-$dist-JeOS
 done
+%endif
   
 %clean
 rm -rf $RPM_BUILD_ROOT
