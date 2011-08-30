@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Aug 30 16:15:35 CEST 2011 - ms@suse.de
+
+- make sure $prio variable is initialized empty for
+  each repo validation (bnc #714927)
+
+-------------------------------------------------------------------
 Wed Aug 24 16:54:38 CEST 2011 - ms@suse.de
 
 - don't remove data from initial boot partition
