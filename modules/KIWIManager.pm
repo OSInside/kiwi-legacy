@@ -779,7 +779,6 @@ sub setupInstallationSource {
 	if ($manager eq "zypper") {
 		my @zypper = @{$this->{zypper}};
 		my $stype = "private";
-		my $prio;
 		qxx ("rm -f $dataDir/*.repo");
 		if (! $chroot) {
 			$stype = "public";
@@ -795,6 +794,7 @@ sub setupInstallationSource {
 		foreach my $alias (keys %{$source{$stype}}) {
 			my @sopts = @{$source{$stype}{$alias}};
 			my @zopts = ();
+			my $prio;
 			foreach my $opt (@sopts) {
 				next if ! defined $opt;
 				$opt =~ /(.*?)=(.*)/;
