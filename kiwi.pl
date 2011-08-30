@@ -1500,7 +1500,7 @@ sub listImage {
 			"$system/$image"
 		);
 		if ($controlFile) {
-			$kiwi -> info ($image);
+			$kiwi -> info ("* ".$image."\n");
 			my $xml = new KIWIXML (
 				$kiwi,$system."/".$image,undef,undef,$cmdL
 			);
@@ -1508,7 +1508,7 @@ sub listImage {
 				next;
 			}
 			my $version = $xml -> getImageVersion();
-			$kiwi -> note (" -> Version: $version");
+			$kiwi -> info ("Version: $version");
 			$kiwi -> done();
 		}
 	}
