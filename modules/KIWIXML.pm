@@ -1908,12 +1908,8 @@ sub setRepository {
 #------------------------------------------
 sub addRepository {
 	# ...
-	# Add a repository node to the current list of repos
-	# this is done by reading the xml description file again and
-	# overwriting the first repository node with the new data
-	# A new object XML::LibXML::NodeList is created which
-	# contains the changed element. The element is then appended
-	# the the global repositNodeList
+	# Add a repository section to the current list of
+	# repos and update repositNodeList accordingly. 
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
