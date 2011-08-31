@@ -901,7 +901,7 @@ sub setupPackageFiles
                 }
                 $this->addDebugPackage($srcname."-debuginfo".$suffix, $arch, $packPointer);
                 $this->addDebugPackage($srcname."-debugsource", $arch, $packPointer);
-                $this->addDebugPackage($basename."-debuginfo".$suffix, $arch, $packPointer);
+                $this->addDebugPackage($basename."-debuginfo".$suffix, $arch, $packPointer) unless $srcname eq $basename;
               };
             }
           }
