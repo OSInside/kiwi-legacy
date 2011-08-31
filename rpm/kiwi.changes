@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Aug 31 14:32:57 UTC 2011 - adrian@suse.de
+
+- product build: repository prios are more important then fallback architectures
+
+-------------------------------------------------------------------
 Tue Aug 30 16:15:35 CEST 2011 - ms@suse.de
 
 - make sure $prio variable is initialized empty for
