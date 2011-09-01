@@ -7273,7 +7273,7 @@ function setupBootPartition {
 	#--------------------------------------
 	mkdir -p /$mpoint
 	mount $imageBootDevice /$mpoint
-	if [ ! -d /$mpoint/boot ];then
+	if [ -z "$COMBINED_IMAGE" ];then
 		cp -a /mnt/boot /$mpoint
 		if [ -e /boot.tgz ];then
 			tar -xf /boot.tgz -C /$mpoint
