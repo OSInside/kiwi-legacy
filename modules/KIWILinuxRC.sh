@@ -4013,7 +4013,7 @@ function kernelList {
 		# if there is a downloaded kernel and initrd from the KIWI_INITRD
 		# setup. the kernelList function won't find initrds that gets
 		# downloaded over tftp so make sure the vmlinu[zx]/initrd combo
-		# gets added
+		# gets added as well as the linux.vmx/initrd.vmx combo
 		# ----
 		if [ -e $prefix/boot/vmlinuz ];then
 			KERNEL_LIST="vmlinuz:initrd"
@@ -4022,6 +4022,10 @@ function kernelList {
 		if [ -e $prefix/boot/vmlinux ];then
 			KERNEL_LIST="vmlinux:initrd"
 			KERNEL_NAME[1]=vmlinux
+		fi
+		if [ -e $prefix/boot/linux.vmx ];then
+			KERNEL_LIST="vmlinux:initrd"
+			KERNEL_NAME[1]="vmlinux"
 		fi
 	fi
 	KERNEL_LIST=$(echo $KERNEL_LIST | sed -e s@^,@@)
@@ -7253,10 +7257,6 @@ function setupBootPartition {
 		fi
 		return
 	fi
-	if [ ! -z "$COMBINED_IMAGE" ];then
-		# split image, /boot must be on the fsreadwrite area
-		return
-	fi
 	if [ -z "$imageDiskDevice" ];then
 		# no disk device like for live ISO based on clicfs
 		return
@@ -7273,9 +7273,11 @@ function setupBootPartition {
 	#--------------------------------------
 	mkdir -p /$mpoint
 	mount $imageBootDevice /$mpoint
-	cp -a /mnt/boot /$mpoint
-	if [ -e /boot.tgz ];then
-		tar -xf /boot.tgz -C /$mpoint
+	if [ ! -d /$mpoint/boot ];then
+		cp -a /mnt/boot /$mpoint
+		if [ -e /boot.tgz ];then
+			tar -xf /boot.tgz -C /$mpoint
+		fi
 	fi
 	umount /$mpoint
 	rmdir  /$mpoint
