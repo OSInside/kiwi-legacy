@@ -1734,6 +1734,7 @@ sub setupBootDisk {
 			"Adding $splitMB MB space for split read-write portion"
 		);
 		$this -> __updateDiskSize ($splitMB);
+		$kiwi -> done();
 	}
 	#==========================================
 	# obtain filesystem type from xml data
