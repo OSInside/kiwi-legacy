@@ -437,6 +437,9 @@ function createInitialDevices {
 #--------------------------------------
 function mount_rpc_pipefs {
 	# See if the file system is there yet
+	if [ ! -e /var/lib/nfs/rpc_pipefs ];then
+		return 0
+	fi
 	case `stat -c "%t" -f /var/lib/nfs/rpc_pipefs 2>/dev/null` in
 	*67596969*)
 		return 0;;
