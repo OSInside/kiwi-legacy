@@ -279,7 +279,7 @@ sub new {
 				#==========================================
 				# check for activated volume group
 				#------------------------------------------
-				$sdev = $this -> checkLVMbind ($sdev);
+				$sdev = $this -> checkLVMbind ($sdev,$this->{loop});
 				#==========================================
 				# perform mount call
 				#------------------------------------------
@@ -784,7 +784,7 @@ sub setupInstallCD {
 		#==========================================
 		# check for activated volume group
 		#------------------------------------------
-		$sdev = $this -> checkLVMbind ($sdev);
+		$sdev = $this -> checkLVMbind ($sdev,$this->{loop});
 		#==========================================
 		# perform mount call
 		#------------------------------------------
@@ -1149,7 +1149,7 @@ sub setupInstallStick {
 		#==========================================
 		# check for activated volume group
 		#------------------------------------------
-		$sdev = $this -> checkLVMbind ($sdev);
+		$sdev = $this -> checkLVMbind ($sdev,$this->{loop});
 		#==========================================
 		# perform mount call
 		#------------------------------------------
@@ -4077,7 +4077,14 @@ sub checkLVMbind {
 	# ---
 	my $this = shift;
 	my $sdev = shift;
+	my $disk = shift;
 	my @groups;
+	#==========================================
+	# check for lvm flag on disk
+	#------------------------------------------
+	if (! $this-> __getPartID ($disk,"lvm")) {
+		return $sdev;
+	}
 	#==========================================
 	# activate volume groups
 	#------------------------------------------
@@ -5247,6 +5254,29 @@ sub __updateDiskSize {
 		"Increasing disk size by ".$addMB."M to: ".$vmsize."\n"
 	);
 	return $this;
+}
+
+#==========================================
+# __getPartID
+#------------------------------------------
+sub __getPartID {
+	# ...
+	# try to find the partition number which references
+	# the provided flag like "boot" or "lvm"
+	# ---
+	my $this = shift;
+	my $disk = shift;
+	my $flag = shift;
+	my $fd   = new FileHandle;
+	if ($fd -> open ("parted -m $disk print | cut -f1,7 -d:|")) {
+		while (my $line = <$fd>) {
+			if ($line =~ /^(\d):$flag/) {
+				return $1;
+			}
+		}
+		$fd -> close();
+	}
+	return 0;
 }
 
 1;
