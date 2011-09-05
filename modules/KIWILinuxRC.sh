@@ -888,6 +888,64 @@ function installBootLoaderGrubRecovery {
 	fi
 }
 #======================================
+# setupRHELInitrd
+#--------------------------------------
+function setupRHELInitrd {
+	# /.../
+	# call mkinitrd on RHEL systems to create the distro initrd.
+	# Note: mkinitrd will be obsolete on RHEL in future releases
+	# so this function is a candiate for a rewrite
+	# ----
+	bootLoaderOK=1
+	local umountProc=0
+	local umountSys=0
+	local systemMap=0
+	local haveVMX=0
+	local params
+	local running
+	local rlinux
+	local rinitrd
+	local kernel_version=`uname -r`
+	for i in `find /boot/ -name "System.map*"`;do
+		systemMap=1
+	done
+	if [ $systemMap -eq 1 ];then
+		if [ ! -e /proc/mounts ];then
+			mount -t proc proc /proc
+			umountProc=1
+		fi
+		if [ ! -e /sys/block ];then
+			mount -t sysfs sysfs /sys
+			umountSys=1
+		fi
+		if [ $bootLoaderOK = "1" ];then
+			if [ -f /boot/initrd.vmx ];then
+				rm -f /boot/initrd.vmx
+				rm -f /boot/linux.vmx
+				rm -f /boot/initrd-*.img   ##remove the dist's initrd image
+				haveVMX=1
+			fi
+		fi
+		params=" -f /boot/initrd-$kernel_version $kernel_version"
+		if ! mkinitrd $params;then
+			Echo "Can't create initrd"
+			systemIntegrity=unknown
+			bootLoaderOK=0
+		fi
+		if [ $umountSys -eq 1 ];then
+			umount /sys
+		fi
+		if [ $umountProc -eq 1 ];then
+			umount /proc
+		fi
+	else
+		Echo "Image doesn't include kernel system map"
+		Echo "Can't create initrd"
+		systemIntegrity=unknown
+		bootLoaderOK=0
+	fi
+}
+#======================================
 # setupSUSEInitrd
 #--------------------------------------
 function setupSUSEInitrd {

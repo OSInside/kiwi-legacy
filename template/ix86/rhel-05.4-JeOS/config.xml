@@ -15,7 +15,16 @@
 		<timezone>Europe/Berlin</timezone>
 		<hwclock>utc</hwclock>
 		<rpm-check-signatures>false</rpm-check-signatures>
-		<type image="iso" boot="isoboot/rhel-05.4" flags="clic"/>
+		<type image="iso" primary="true" boot="isoboot/rhel-05.4" flags="clic"/>
+		<type image="vmx" boot="vmxboot/rhel-05.4" filesystem="ext3" format="vmdk">
+			<machine memory="1024" guestOS="rhel5">
+				<vmdisk controller="scsi" id="0"/>
+				<vmnic driver="e1000" interface="0" mode="bridged"/>
+			</machine>
+			<systemdisk name="Vgroup1">
+				<volume name="home" freespace="200M"/>
+			</systemdisk>
+		</type>
 	</preferences>
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
@@ -36,6 +45,8 @@
 		<package name="selinux-policy-devel"/>
 		<package name="libselinux-utils"/>
 		<package name="dhclient"/>
+		<package name="parted"/>
+		<package name="lvm2"/>
 		<rhelGroup name="System Tools"/>
 		<rhelGroup name="Text-based Internet"/>
 		<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>
