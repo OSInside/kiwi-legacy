@@ -176,11 +176,11 @@ function OEMInstall {
 	Echo "Searching harddrive for $OEMInstallType installation"
 	hwinfo=/usr/sbin/hwinfo
 	if [ ! -z "$imageDiskDevice" ];then
-		deviceDisks=`$hwinfo --disk |\
+		deviceDisks=`$hwinfo --disk --listmd  |\
 			grep "Device File:" | cut -f2 -d: |\
 			cut -f1 -d"(" | sed -e s"@$imageDiskDevice@@"`
 	else
-		deviceDisks=`$hwinfo --disk |\
+		deviceDisks=`$hwinfo --disk --listmd  |\
 			grep "Device File:" | cut -f2 -d: |\
 			cut -f1 -d"("`
 	fi
@@ -193,11 +193,12 @@ function OEMInstall {
 	Echo "Found following disk device(s)"
 	count=0
 	for i in $deviceDisks;do
-		dsize=`partitionSize $i`
+		dbyid=$(getDiskID $i)
+		dsize=`partitionSize $dbyid`
 		dsizeMB=`expr $dsize / 1024`
 		if [ "$dsizeMB" -gt 0 ];then
 			Echo -b "Disk $count -> $i [ $dsizeMB MB ]"
-			deviceArray[$count]=$i
+			deviceArray[$count]=$dbyid
 			deviceDSize[$count]=$dsize
 			count=`expr $count + 1`
 		fi
@@ -219,16 +220,15 @@ function OEMInstall {
 		hd="\"$TEXT_SELECT\""
 		count=0
 		for i in $deviceDisks;do
-			dsize=`partitionSize $i`
+			dbyid=$(getDiskID $i)
+			dsize=`partitionSize $dbyid`
 			dsizeMB=`expr $dsize / 1024`
 			if [ "$dsizeMB" -gt 0 ];then
-				dname=`getDiskID $i`
-				dname=`basename $dname | cut -c1-20`"..."
 				if [ $count = 0 ];then
-					dpara="$i \"$dname [ $dsizeMB MB ]\" on"
+					dpara="$dbyid \"[ $dsizeMB MB ]\" on"
 					count=1
 				else
-					dpara="$dpara $i \"$dname [ $dsizeMB MB ]\" off"
+					dpara="$dpara $dbyid \"[ $dsizeMB MB ]\" off"
 				fi
 			fi
 		done
@@ -283,6 +283,15 @@ function OEMInstall {
 		info=/tmp/partinfo
 		wmrc=/wmrc
 		loop=$(losetup -s -f $imageName)
+		if [ $? != 0 ];then
+			# /.../
+			# old version of losetup doesn't know about
+			# the --find option therefore we set a fixed
+			# loop device name and setup this
+			# ----
+			loop=/dev/loop1
+			losetup $loop $imageName
+		fi
 		loop=$(echo $loop | sed -e s@^/dev/@@)
 		if ! kpartx -a /dev/$loop;then
 			systemException \
@@ -369,7 +378,6 @@ function OEMInstall {
 					usr/bin/dialog   \
 					usr/bin/xinit    \
 					usr/bin/xterm    \
-					usr/bin/dialog   \
 					usr/bin/icewm
 				do
 					if [ ! -e $OEMRootSystem/$i ];then
@@ -428,7 +436,8 @@ function OEMInstall {
 			pname=`echo $partitions | cut -f1 -d:`
 			imageDevice=$pname
 			rID=$(nd $pname)
-			instItems[0]=$imageName:$imageDevice
+			instItems[0]=$imageName
+			instPaths[0]=$imageDevice
 		else
 			#======================================
 			# There is a choice, let the user do it
@@ -482,19 +491,26 @@ function OEMInstall {
 				if [ $p = /dev/mapper/${loop}p1 ];then
 					imageDevice=$selectedPart
 					bID=$(nd $selectedPart)
-					instItems[0]=/dev/mapper/${loop}p1:$imageDevice
+					instItems[0]=/dev/mapper/${loop}p1
+					instPaths[0]=$imageDevice
 				elif [ $p = /dev/mapper/${loop}p2 ];then
 					rID=$(nd $selectedPart)
-					instItems[1]=/dev/mapper/${loop}p2:$selectedPart
+					instItems[1]=/dev/mapper/${loop}p2
+					instPaths[1]=$selectedPart
 				fi
 			done
 			# /.../
-			# reverse order of instItems because
-			# root partition must be first entry
+			# reverse order of instItems and instPaths because
+			# the root partition must be the first entry
 			# ----
+			# instItems
 			instItems_tmp=${instItems[0]}
 			instItems[0]=${instItems[1]}
 			instItems[1]=$instItems_tmp
+			# instPaths
+			instPaths_tmp=${instPaths[0]}
+			instPaths[0]=${instPaths[1]}
+			instPaths[1]=$instPaths_tmp
 		fi
 		#======================================
 		# Search for a swap space
@@ -523,7 +539,8 @@ function OEMInstall {
 			setupDeviceNames $rID $sID no $bID no
 		fi
 	else
-		instItems[0]=$imageName:$imageDevice
+		instItems[0]=$imageName
+		instPaths[0]=$imageDevice
 	fi
 	#======================================
 	# Checks and MD5 sums...
@@ -571,16 +588,15 @@ function OEMInstall {
 	#======================================
 	# Warn me before performing the install
 	#--------------------------------------
-	for i in ${instItems[*]}; do
-		Target=$(echo $i | cut -f2 -d:)
-		items="$items,$Target"
+	for i in ${instPaths[*]}; do
+		items="$items,$i"
 	done
 	items=$(echo $items | sed -e s@^,@@)
 	Echo "Entering installation mode for disk: $items"
 	if [ -z "$kiwi_oemunattended" ];then
 		TEXT_INST=$(
 			getText "Destroying ALL data on %1, continue ?" $items)
-		Dialog --yesno "\"$TEXT_INST\"" 5 70
+		Dialog --yesno "\"$TEXT_INST\"" 5 80
 		if [ ! $? = 0 ];then
 			systemException \
 				"System installation canceled" \
@@ -588,14 +604,19 @@ function OEMInstall {
 		fi
 	fi
 	clear
-	for i in ${instItems[*]};do
+	instIndex=0
+	while [ $instIndex -lt ${#instItems[*]} ];do
 		#======================================
 		# Setup source and target data
 		#--------------------------------------
-		Source=$(echo $i | cut -f1 -d:)
-		Target=$(echo $i | cut -f2 -d:)
+		Source=${instItems[$instIndex]}
+		Target=${instPaths[$instIndex]}
 		if [ -z "$OEM_PARTITION_INSTALL" ];then
-			read sum1 blocks blocksize zblocks zblocksize < $imageMD5
+			if ! read sum1 blocks blocksize zblocks zblocksize < $imageMD5;then
+				systemException \
+					"Reading of $imageMD5 failed" \
+				"reboot"
+			fi
 		else
 			blocksize=4096
 			partKB=$(partitionSize $Source)
@@ -685,6 +706,7 @@ function OEMInstall {
 				"reboot"
 			fi
 		fi
+		instIndex=$((instIndex + 1))
 	done
 	#======================================
 	# Clear loops if required
