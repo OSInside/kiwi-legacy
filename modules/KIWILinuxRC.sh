@@ -3506,7 +3506,11 @@ function updateMTAB {
 		mount -t proc proc /proc
 		umount=1
 	fi
-	cat /proc/mounts > $prefix/etc/mtab
+	if [ -e /proc/self/mounts ];then
+		pushd $prefix/etc
+		rm -f mtab && ln -s /proc/self/mounts mtab
+		popd
+	fi
 	if [ $umount -eq 1 ];then
 		umount /proc
 	fi
