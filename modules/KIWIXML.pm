@@ -1979,20 +1979,38 @@ sub addPackages {
 	my $ptype = shift;
 	my $bincl = shift;
 	my $nodes = shift;
+	my $kiwi  = $this->{kiwi};
 	my @packs = @_;
 	if (! defined $nodes) {
 		$nodes = $this->{packageNodeList};
 	}
-	my $nodeNumber = 1;
+	my $nodeNumber = -1;
+	my $nodeNumberBootStrap = -1;
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		my $type = $node  -> getAttribute ("type");
 		if (! $this -> __requestedProfile ($node)) {
 			next;
 		}
-		if ($type eq $ptype) {
-			$nodeNumber = $i; last;
+		if ($type eq "bootstrap") {
+			$nodeNumberBootStrap = $i;
 		}
+		if ($type eq $ptype) {
+			$nodeNumber = $i;
+		}
+	}
+	if ($nodeNumberBootStrap < 0) {
+		$kiwi -> warning (
+			"Failed to add @packs, package(s), no bootstrap section found"
+		);
+		$kiwi -> skipped ();
+		return $this;
+	}
+	if ($nodeNumber < 0) {
+		$kiwi -> loginfo (
+			"addPackages: no image section found, switching to bootstrap\n"
+		);
+		$nodeNumber = $nodeNumberBootStrap;
 	}
 	foreach my $pack (@packs) {
 		next if ($pack eq "");
@@ -2094,7 +2112,7 @@ sub addImagePackages {
 	# section of the xml description parse tree.
 	# ----
 	my $this  = shift;
-	return $this -> addPackages ("bootstrap",undef,undef,@_);
+	return $this -> addPackages ("image",undef,undef,@_);
 }
 
 #==========================================
