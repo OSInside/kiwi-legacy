@@ -421,8 +421,9 @@ sub init {
 		if (-f '/.buildenv') {
 			qxx ("touch $root/.buildenv");
 		}
-		# need mtab at least empty for mount calls
-		qxx ("touch $root/etc/mtab");
+		# need mtab link for mount calls
+		qxx ("ln -s /proc/self/mounts $root/etc/mtab");
+		# need sysconfig/bootloader to make post scripts happy
 		qxx ("touch $root/etc/sysconfig/bootloader");
 	}
 	# need user/group files as template
