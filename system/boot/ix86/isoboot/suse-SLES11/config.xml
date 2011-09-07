@@ -80,7 +80,7 @@
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
 	</packages>
-	<packages type="image" profiles="rt">
+	<packages type="bootstrap" profiles="rt">
 		<package name="kernel-rt"/>
 		<package name="kernel-rt-base"/>
 	</packages>
