@@ -398,40 +398,58 @@ function copyDeviceNodes {
 	popd >/dev/null
 }
 #======================================
-# copyDevices
+# createInitialDevices
 #--------------------------------------
 function createInitialDevices {
 	local prefix=$1
+	#======================================
+	# create master dev dir
+	#--------------------------------------
 	mkdir -p $prefix
 	if [ ! -d $prefix ];then
 		return
 	fi
-	if [ -e $prefix/null ];then
-		rm -f $prefix/null
+	#======================================
+	# mount devtmpfs or tmpfs
+	#--------------------------------------
+	if mount -t devtmpfs -o mode=0755,nr_inodes=0 devtmpfs $prefix; then
+		export have_devtmpfs=true
+	else
+		export have_devtmpfs=false
+		mount -t tmpfs -o mode=0755,nr_inodes=0 udev $prefix
+		mknod -m 0666 $prefix/tty     c 5 0
+		mknod -m 0600 $prefix/console c 5 1
+		mknod -m 0666 $prefix/ptmx    c 5 2
+		mknod -m 0666 $prefix/null c 1 3
+		mknod -m 0600 $prefix/kmsg c 1 11
+		mknod -m 0660 $prefix/snapshot c 10 231
+		mknod -m 0666 $prefix/random c 1 8
+		mknod -m 0644 $prefix/urandom c 1 9
 	fi
-	test -c $prefix/tty      || mknod -m 0666 $prefix/tty      c 5 0
-	test -c $prefix/tty1     || mknod -m 0666 $prefix/tty1     c 4 1
-	test -c $prefix/tty2     || mknod -m 0666 $prefix/tty2     c 4 2
-	test -c $prefix/tty3     || mknod -m 0666 $prefix/tty3     c 4 3
-	test -c $prefix/tty4     || mknod -m 0666 $prefix/tty4     c 4 4
-	test -c $prefix/console  || mknod -m 0600 $prefix/console  c 5 1
-	test -c $prefix/ptmx     || mknod -m 0666 $prefix/ptmx     c 5 2
+	#======================================
+	# mount shared mem tmpfs
+	#--------------------------------------
+	mkdir -m 1777 $prefix/shm
+	mount -t tmpfs -o mode=1777 tmpfs $prefix/shm
+	#======================================
+	# mount devpts tmpfs
+	#--------------------------------------
+	mkdir -m 0755 $prefix/pts
+	mount -t devpts -o mode=0620,gid=5 devpts $prefix/pts
+	#======================================
+	# link default descriptors
+	#--------------------------------------
+	ln -s /proc/self/fd $prefix/fd
+	ln -s fd/0 $prefix/stdin
+	ln -s fd/1 $prefix/stdout
+	ln -s fd/2 $prefix/stderr
+	#======================================
+	# setup dev/console
+	#--------------------------------------
 	exec < $prefix/console > $prefix/console
-	test -c $prefix/null     || mknod -m 0666 $prefix/null     c 1 3
-	test -c $prefix/kmsg     || mknod -m 0600 $prefix/kmsg     c 1 11
-	test -c $prefix/snapshot || mknod -m 0660 $prefix/snapshot c 10 231
-	test -c $prefix/random   || mknod -m 0666 $prefix/random   c 1 8
-	test -c $prefix/urandom  || mknod -m 0644 $prefix/urandom  c 1 9
-	test -b $prefix/loop0    || mknod -m 0640 $prefix/loop0    b 7 0
-	test -b $prefix/loop1    || mknod -m 0640 $prefix/loop1    b 7 1
-	test -b $prefix/loop2    || mknod -m 0640 $prefix/loop2    b 7 2
-	mkdir -p -m 0755 $prefix/pts
-	mkdir -p -m 1777 $prefix/shm
-	test -L $prefix/fd     || ln -s /proc/self/fd $prefix/fd
-	test -L $prefix/stdin  || ln -s fd/0 $prefix/stdin
-	test -L $prefix/stdout || ln -s fd/1 $prefix/stdout
-	test -L $prefix/stderr || ln -s fd/2 $prefix/stderr
 }
+
+
 #======================================
 # mount_rpc_pipefs
 #--------------------------------------
@@ -624,8 +642,6 @@ function udevStart {
 	mount -t tmpfs -o mode=0755 udev /dev
 	# static nodes
 	createInitialDevices /dev
-	# terminal devices
-	mount -t devpts devpts /dev/pts
 	# load modules required before udev
 	moduleLoadBeforeUdev
 	# start the udev daemon
@@ -7407,6 +7423,43 @@ function runPreinitServices {
 	done
 }
 #======================================
+# setupTTY
+#--------------------------------------
+function setupTTY {
+	# /.../
+	# create tty device nodes in case we don't have devtmpfs
+	# ----
+	local tty_driver
+	local major
+	local minor
+	local tty
+	if $have_devtmpfs;then
+		return
+	fi
+	if [ "$console" ]; then
+		tty_driver="${tty_driver:+$tty_driver }${console%%,*}"
+	fi
+	for o in $tty_driver; do
+		case "$o" in
+			ttyS*) test -e /dev/$o || mknod -m 0660 /dev/$o c 4 64 ;;
+			tty*)  test -e /dev/$o || mknod -m 0660 /dev/$o c 4  1 ;;
+		esac
+	done
+	tty_driver=$(showconsole -n 2>/dev/null)
+	if test -n "$tty_driver" ; then
+		major=${tty_driver%% *}
+		minor=${tty_driver##* }
+		if test $major -eq 4 -a $minor -lt 64 ; then
+			tty=/dev/tty$minor
+			test -e $tty || mknod -m 0660 $tty c 4 $minor
+		fi
+		if test $major -eq 4 -a $minor -ge 64 ; then
+			tty=/dev/ttyS$((64-$minor))
+			test -e $tty || mknod -m 0660 $tty c 4 $minor
+		fi
+	fi
+}
+#======================================
 # setupConsole
 #--------------------------------------
 function setupConsole {
@@ -7416,6 +7469,7 @@ function setupConsole {
 	# ----
 	local itab=/etc/inittab
 	local stty=/etc/securetty
+	setupTTY
 	if [ -e /sys/class/tty/xvc0 ];then
 		if ! cat $itab | grep -v '^#' | grep -q xvc0;then
 			echo "X0:12345:respawn:/sbin/mingetty --noclear xvc0 linux" >> $itab
