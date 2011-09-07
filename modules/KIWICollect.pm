@@ -821,23 +821,23 @@ sub setupPackageFiles
 
       my @fallbacklist = ($requestedArch);
       if($nofallback==0 && $mode != 2) {
-        @fallbacklist = $this->{m_archlist}->fallbacks($requestedArch);
+	@fallbacklist = $this->{m_archlist}->fallbacks($requestedArch);
         @fallbacklist = ($requestedArch) unless @fallbacklist;
         $this->logMsg("I", " Look for fallbacks fallbacks") if $this->{m_debug} >= 6;
       }
 
       $this->logMsg("I", "    Use as expanded architectures >".join(" ", @fallbacklist)."<") if $this->{m_debug} >= 5;
       my $fb_available = 0;
-      PACKKEY:foreach my $packKey( sort{$poolPackages->{$a}->{priority} <=> $poolPackages->{$b}->{priority}} keys(%{$poolPackages})) {
-        FA:foreach my $arch(@fallbacklist) {
-          $this->logMsg("I", "    check architecture $arch ") if $this->{m_debug} >= 5;
-          # FIXME: check for forcerepo
+      FA:foreach my $arch(@fallbacklist) {
+        $this->logMsg("I", "    check architecture $arch ") if $this->{m_debug} >= 5;
+        PACKKEY:foreach my $packKey( sort{$poolPackages->{$a}->{priority} <=> $poolPackages->{$b}->{priority}} keys(%{$poolPackages})) {
+        # FIXME: check for forcerepo
           $this->logMsg("I", "    check $packKey ") if $this->{m_debug} >= 5;
 
           my $packPointer = $poolPackages->{$packKey};
 	  if ( $packPointer->{arch} ne $arch ) {
 	    $this->logMsg("I", "     => package $packName not available for arch $arch in repo $packKey") if $this->{m_debug} >= 4;
-            next FA;
+            next PACKKEY;
           }
           if($nofallback==0 && $mode != 2 && $this->{m_archlist}->arch($arch)) {
 	    my $follow = $this->{m_archlist}->arch($arch)->follower();
@@ -849,7 +849,7 @@ sub setupPackageFiles
                && ! defined( $packOptions->{requireVersion}->{$packPointer->{version}."-".$packPointer->{release}} ) )
           {
 	    $this->logMsg("D", "     => package ".$packName."-".$packPointer->{version}."-".$packPointer->{release}." not available for arch $arch in repo $packKey in this version") if $this->{m_debug} >= 4;
-            next FA;
+            next PACKKEY;
           }
           # Success, found a package !
           my $medium = $packOptions->{'medium'} || 1;
@@ -910,9 +910,9 @@ sub setupPackageFiles
           }
 	  next ARCH; # package processed, jump to the next request arch or package
 	}
-        $this->logMsg("W", "    => package $packName not available for $requestedArch nor its fallbacks for repository $packKey") if $this->{m_debug} >= 4;
+	$this->logMsg("W", "     => package $packName not available for arch $arch in any repo") if $this->{m_debug} >= 4;
       } # /@fallbackarch
-      $this->logMsg("W", "     => package $packName not available for arch $requestedArch in any repo") if $this->{m_debug} >= 1;
+      $this->logMsg("W", "    => package $packName not available for $requestedArch nor its fallbacks") if $this->{m_debug} >= 1;
       push @missingPackages, $packName;
     } # /@archs
   }
@@ -1112,11 +1112,11 @@ sub unpackMetapackages
       }
       $this->logMsg("I", "    Use as expanded architectures >".join(" ", @fallbacklist)."<") if $this->{m_debug} >= 5;
 
-      PACKKEY:foreach my $packKey( sort{$poolPackages->{$a}->{priority} <=> $poolPackages->{$b}->{priority}} keys(%{$poolPackages})) {
-        FARCH:foreach my $arch(@fallbacklist) {
+      FARCH:foreach my $arch(@fallbacklist) {
+        PACKKEY:foreach my $packKey( sort{$poolPackages->{$a}->{priority} <=> $poolPackages->{$b}->{priority}} keys(%{$poolPackages})) {
           my $packPointer = $poolPackages->{$packKey};
-          next FARCH if(!$packPointer->{'localfile'}); # should not be needed
-          next FARCH if($packPointer->{arch} ne $arch);
+          next PACKKEY if(!$packPointer->{'localfile'}); # should not be needed
+          next PACKKEY if($packPointer->{arch} ne $arch);
 
           $this->logMsg("I", "unpack $packPointer->{'localfile'} ");
           $this->{m_util}->unpac_package($packPointer->{'localfile'}, "$tmp");
