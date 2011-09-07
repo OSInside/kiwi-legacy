@@ -3507,9 +3507,9 @@ function updateMTAB {
 		umount=1
 	fi
 	if [ -e /proc/self/mounts ];then
-		pushd $prefix/etc
+		pushd $prefix/etc >/dev/null
 		rm -f mtab && ln -s /proc/self/mounts mtab
-		popd
+		popd >/dev/null
 	fi
 	if [ $umount -eq 1 ];then
 		umount /proc
