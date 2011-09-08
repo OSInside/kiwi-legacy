@@ -2028,11 +2028,16 @@ sub addPackages {
 		$kiwi -> skipped ();
 		return $this;
 	}
-	if ($nodeNumber < 0) {
-		$kiwi -> loginfo (
-			"addPackages: no image section found, switching to bootstrap\n"
+	if (($nodeNumber < 0) && ($ptype eq "image")) {
+		$kiwi -> warning (
+			"addPackages: no image section found, adding to bootstrap"
 		);
+		$kiwi -> done();
 		$nodeNumber = $nodeNumberBootStrap;
+	}
+	if ($nodeNumber < 0) {
+		$kiwi -> loginfo ("addPackages: no $ptype section found... skipped\n");
+		return $this;
 	}
 	foreach my $pack (@packs) {
 		next if ($pack eq "");
