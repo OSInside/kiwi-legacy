@@ -86,7 +86,7 @@
 	<packages type="image" profiles="ec2">
 		<package name="kernel-ec2"/>
 	</packages>
-	<packages type="bootstrap" profiles="desktop">
+	<packages type="image" profiles="desktop">
 		<package name="kernel-desktop"/>
 	</packages>
 	<packages type="image">

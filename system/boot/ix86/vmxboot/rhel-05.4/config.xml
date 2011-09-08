@@ -64,7 +64,7 @@
 	<repository type="rpm-md" status="fixed" priority="1">
 		<source path="/usr/share/kiwi/repo/rhel-repo/rhel-054-repo"/>
 	</repository>
-	<packages type="bootstrap" profiles="std">
+	<packages type="image" profiles="std">
 		<package name="kernel"/>
 	</packages>
 	<packages type="bootstrap">
