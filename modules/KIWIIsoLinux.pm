@@ -57,6 +57,7 @@ sub new {
 	my $dest         = shift;  # destination for the iso file
 	my $params       = shift;  # global genisoimage/mkisofs parameters
 	my $mediacheck   = shift;  # run tagmedia with --check y/n
+	my $cmdL         = shift;  # commandline params
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -204,6 +205,7 @@ sub new {
 	$this -> {tool}   = $tool;
 	$this -> {check}  = $mediacheck;
 	$this -> {gdata}  = $main::global -> getGlobals();
+	$this -> {cmdL}   = $cmdL;
 	return $this;
 }
 
@@ -688,7 +690,14 @@ sub createISO {
 	my $para = $this -> {params};
 	my $ldir = $this -> {tmpdir};
 	my $prog = $this -> {tool};
+	my $cmdL = $this -> {cmdL};
 	my $cmdln= "$prog $para -o $dest $ldir $src 2>&1";
+	if ($cmdL) {
+		my $editBoot = $cmdL -> getEditBootConfig();
+		if (($editBoot) && (-e $editBoot)) {
+			system ("cd $src && bash --norc -c $editBoot");
+		}
+	}
 	$kiwi -> loginfo ( "Calling: $cmdln\n" );
 	my $data = qxx ( $cmdln	);
 	my $code = $? >> 8;

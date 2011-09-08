@@ -659,6 +659,7 @@ sub init {
 	my $GrubChainload;         # install grub loader in first partition not MBR
 	my $FatStorage;            # size of fat partition if syslinux is used
 	my $DiskStartSector;       # location of start sector (default is 32)
+	my $EditBootConfig;        # allow to run script before bootloader install
 	my $PackageManager;        # package manager to use
 	my $Version;               # version information
 	#==========================================
@@ -708,6 +709,7 @@ sub init {
 		"fs-inodesize=i"        => \$FSInodeSize,
 		"fs-journalsize=i"      => \$FSJournalSize,
 		"fs-max-mount-count=i"  => \$FSMaxMountCount,
+		"edit-bootconfig=s"     => \$EditBootConfig,
 		"grub-chainload"        => \$GrubChainload,
 		"gzip-cmd=s"            => \$GzipCmd,
 		"help|h"                => \$Help,
@@ -778,6 +780,12 @@ sub init {
 	$cmdL -> setMigrationOptions (
 		\@Exclude,\@Skip,$MigrateNoFiles,$MigrateNoTemplate
 	);
+	#========================================
+	# check if edit-bootconfig option is set
+	#----------------------------------------
+	if (defined $EditBootConfig) {
+		$cmdL -> setEditBootConfig ($EditBootConfig);
+	}
 	#========================================
 	# check if fat-storage option is set
 	#----------------------------------------
@@ -1215,6 +1223,11 @@ sub init {
 		$kiwi -> warning ("Logfile set to terminal in init-cache mode");
 		$cmdL -> setLogFile ("terminal");
 		$kiwi -> done ();
+	}
+	if (($EditBootConfig) && (! -e $EditBootConfig)) {
+		$kiwi -> error ("Boot config script $EditBootConfig doesn't exist");
+		$kiwi -> failed ();
+		kiwiExit (1);
 	}
 	if (($targetDevice) && (! -b $targetDevice)) {
 		$kiwi -> error ("Target device $targetDevice doesn't exist");

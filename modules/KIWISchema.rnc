@@ -1416,6 +1416,12 @@ div {
 		## Specifies the path of the boot image (initrd), relative
 		## to /usr/share/kiwi/image
 		attribute boot { text }
+	k.type.editbootconfig.attribute =
+		## Specifies the path to a script which is called right
+		## before the bootloader is installed. The script runs
+		## relative to the directory which contains the image
+		## structure
+		attribute editbootconfig { text }
 	k.type.bootkernel.attribute =
 		## Specifies the kernel boot profile defined in the boot
 		## image description. When kiwi builds the boot image the
@@ -1541,6 +1547,7 @@ div {
 		attribute volid { text }
 	k.type.attlist =
 		k.type.boot.attribute? &
+		k.type.editbootconfig.attribute? &
 		k.type.bootkernel.attribute? &
 		k.type.bootloader.attribute? &
 		k.type.bootprofile.attribute? &

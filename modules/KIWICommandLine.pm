@@ -1310,4 +1310,22 @@ sub getDiskStartSector {
 	return $this->{startsector};
 }
 
+#==========================================
+# setEditBootConfig
+#------------------------------------------
+sub setEditBootConfig {
+	my $this  = shift;
+	my $value = shift;
+	$this->{editbootconfig} = File::Spec->rel2abs($value);
+	return 1;
+}
+
+#==========================================
+# getEditBootConfig
+#------------------------------------------
+sub getEditBootConfig {
+	my $this = shift;
+	return $this->{editbootconfig};
+}
+
 1;

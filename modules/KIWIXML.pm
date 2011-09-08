@@ -514,6 +514,28 @@ sub getImageSizeBytes {
 }
 
 #==========================================
+# getEditBootConfig
+#------------------------------------------
+sub getEditBootConfig {
+	# ...
+	# Get the type specific editbootconfig value.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $editBoot = $tnode -> getAttribute ("editbootconfig");
+	if ((! defined $editBoot) || ("$editBoot" eq "")) {
+		return undef;
+	}
+	if (! -e $editBoot) {
+		$kiwi -> warning ("Boot config script $editBoot doesn't exist");
+		$kiwi -> skipped ();
+		return undef;
+	}
+	return File::Spec->rel2abs($editBoot);
+}
+
+#==========================================
 # getImageDefaultDestination
 #------------------------------------------
 sub getImageDefaultDestination {

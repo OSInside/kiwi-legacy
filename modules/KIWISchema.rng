@@ -1898,6 +1898,14 @@ the correct timezone and copy it to /etc/localtime.</db:para>
 to /usr/share/kiwi/image</a:documentation>
       </attribute>
     </define>
+    <define name="k.type.editbootconfig.attribute">
+      <attribute name="editbootconfig">
+        <a:documentation>Specifies the path to a script which is called right
+before the bootloader is installed. The script runs
+relative to the directory which contains the image
+structure</a:documentation>
+      </attribute>
+    </define>
     <define name="k.type.bootkernel.attribute">
       <attribute name="bootkernel">
         <a:documentation>Specifies the kernel boot profile defined in the boot
@@ -2131,6 +2139,9 @@ into the master block. There is space for 32 characters.</a:documentation>
       <interleave>
         <optional>
           <ref name="k.type.boot.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.editbootconfig.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.bootkernel.attribute"/>

@@ -804,6 +804,22 @@
 		</para>
 		</listitem>
 	</varlistentry>
+	<varlistentry>
+		<term><optional><option>--edit-bootconfig <replaceable>script</replaceable></option></optional></term>
+		<listitem>
+		<para>
+			Specifies the location of a custom script which is called
+			right before the bootloader is installed. This allows to modify
+			the bootloader configuration file written by kiwi. The scripts
+			working directory is the one which represents the image
+			structure including the bootloader configuration files. Please
+			have in mind that according to the image type, architecture
+			and bootloader type the files/directory structure and also
+			the name of the bootloader configuration files might be
+			different.
+		</para>
+		</listitem>
+	</varlistentry>
 	</variablelist>
   </refsect1>
 

@@ -979,7 +979,7 @@ sub setupInstallCD {
 		$name = $wdir."/".$name;
 	}
 	my $iso = new KIWIIsoLinux (
-		$kiwi,$tmpdir,$name,undef,"checkmedia"
+		$kiwi,$tmpdir,$name,undef,"checkmedia",$this->{cmdL}
 	);
 	if (! defined $iso) {
 		return undef;
@@ -3605,9 +3605,19 @@ sub installBootLoader {
 	my $bootpart = $this->{bootpart};
 	my $chainload= $this->{chainload};
 	my $lvm	     = $this->{lvm};
+	my $cmdL     = $this->{cmdL};
 	my $locator  = new KIWILocator($kiwi);
 	my $result;
 	my $status;
+	#==========================================
+	# Check for edit boot config
+	#------------------------------------------
+	if ($cmdL) {
+		my $editBoot = $cmdL -> getEditBootConfig();
+		if (($editBoot) && (-e $editBoot)) {
+			system ("cd $tmpdir && bash --norc -c $editBoot");
+		}
+	}
 	#==========================================
 	# Check boot partition number
 	#------------------------------------------
