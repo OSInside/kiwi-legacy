@@ -1513,7 +1513,7 @@ sub listImage {
 			"$system/$image"
 		);
 		if ($controlFile) {
-			$kiwi -> info ("* ".$image."\n");
+			$kiwi -> info ("* \033[1;32m".$image."\033[m\017\n");
 			my $xml = new KIWIXML (
 				$kiwi,$system."/".$image,undef,undef,$cmdL
 			);
