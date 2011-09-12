@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Dec  8 12:37:30 CET 2011 - ms@suse.de
+
+- removed binary packages provided as local repo (bnc #734887)
+  * moved SLE10 repo from local to remote
+  * moved SLE11 repo from local to remote
+
+-------------------------------------------------------------------
 Fri Nov 25 10:51:59 CET 2011 - ms@suse.de
 
 - fixed parameter quoting of setupBootLoader() functions (bnc #729315)

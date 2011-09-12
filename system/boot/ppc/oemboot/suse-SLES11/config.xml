@@ -68,10 +68,10 @@
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="/image/CDs/full-i386"/>
+		<source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>
 	</repository>
-	<repository type="rpm-md" status="fixed">
-		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle11-repo"/>
+	<repository type="yast2" status="fixed">
+		<source path="http://download.suse.de/install/SLP/SLE-11-SP2-SDK-LATEST/%arch/DVD1"/>
 	</repository>
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
