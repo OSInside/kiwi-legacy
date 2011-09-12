@@ -84,6 +84,9 @@
 	<repository type="yast2" status="replaceable">
 		<source path="/image/CDs/full-i386"/>
 	</repository>
+	<repository type="rpm-md" status="fixed">
+		<source path="http://download.opensuse.org/repositories/Virtualization:/Appliances:/suse-sle11/SLE_11_SP1"/>
+	</repository>
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
 	</packages>
