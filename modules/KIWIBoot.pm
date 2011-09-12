@@ -5280,7 +5280,7 @@ sub __getPartID {
 	my $fd   = new FileHandle;
 	if ($fd -> open ("parted -m $disk print | cut -f1,7 -d:|")) {
 		while (my $line = <$fd>) {
-			if ($line =~ /^(\d):$flag/) {
+			if ($line =~ /^(\d):[ ,]*$flag/) {
 				return $1;
 			}
 		}
