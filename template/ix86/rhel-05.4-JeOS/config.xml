@@ -33,7 +33,7 @@
 		<source path="iso:///image/CDs/RHEL-5.4-%arch-DVD.iso/Server"/>
 	</repository>
 	<repository type="rpm-md">
-		<source path="/usr/share/kiwi/repo/rhel-repo/rhel-054-repo"/>
+		<source path="http://download.opensuse.org/repositories/Virtualization:/Appliances:/rhel-054/RedHat_RHEL-5"/>
 	</repository>
 	<packages type="image">
 		<package name="grub"/>
