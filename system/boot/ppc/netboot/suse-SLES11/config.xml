@@ -129,9 +129,6 @@
 	<repository type="yast2" status="replaceable">
 		<source path="/image/CDs/full-ppc64"/>
 	</repository>
-	<repository type="rpm-md" status="fixed">
-		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle11-repo"/>
-	</repository>
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
