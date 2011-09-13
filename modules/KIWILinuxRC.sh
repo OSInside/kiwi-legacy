@@ -4252,7 +4252,11 @@ function includeKernelParameters {
 			modfile=/etc/modprobe.conf.local
 		fi
 		if [ -f $modfile ];then
-			sed -i -e s"@rd_size=.*@rd_size=$ramdisk_size@" $modfile
+			if grep -q rd_size $modfile;then
+				sed -i -e s"@rd_size=.*@rd_size=$ramdisk_size@" $modfile
+			else
+				echo "options brd rd_size=$ramdisk_size" >> $modfile
+			fi
 		fi
 	fi
 	if [ ! -z "$lang" ];then
@@ -6190,6 +6194,10 @@ function ddn {
 			return
 		fi
 		echo $1"-part"$2
+		return
+	elif echo $1 | grep -q "^\/dev\/ram";then
+		name=$(echo $1 | tr -d /dev)
+		echo /dev/mapper/${name}p$2
 		return
 	fi
 	local lastc=$(echo $1 | sed -e 's@\(^.*\)\(.$\)@\2@')

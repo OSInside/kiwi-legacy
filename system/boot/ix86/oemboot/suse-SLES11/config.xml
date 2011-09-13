@@ -30,6 +30,7 @@
 		<file name="drivers/acpi/*"/>
 		<file name="drivers/usb/*"/>
 		<file name="drivers/virtio/*"/>
+		<file name="drivers/block/brd.ko"/>
 		<file name="drivers/block/cciss.ko"/>
 		<file name="drivers/block/virtio_blk.ko"/>
 		<file name="drivers/char/hw_random/virtio-rng.ko"/>

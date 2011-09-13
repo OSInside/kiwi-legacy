@@ -185,6 +185,9 @@ function OEMInstall {
 			cut -f1 -d"("`
 	fi
 	export deviceDisks=`echo $deviceDisks`
+	if [ ! -z "$ramdisk" ];then
+		deviceDisks="$deviceDisks /dev/ram1"
+	fi
 	if [ -z "$deviceDisks" ];then
 		systemException \
 			"No device(s) for installation found... abort" \
@@ -777,6 +780,9 @@ function OEMInstall {
 	#--------------------------------------
 	if [ -z "$OEM_PARTITION_INSTALL" ];then
 		blockdev --rereadpt $imageDevice
+		if echo $imageDevice | grep -q "^\/dev\/ram";then
+			kpartx -a $imageDevice
+		fi
 		deviceTest=$(ddn $imageDevice 1)
 		if ! waitForStorageDevice $deviceTest;then
 			systemException \
