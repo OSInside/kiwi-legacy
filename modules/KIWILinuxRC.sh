@@ -5013,6 +5013,8 @@ function startShell {
 	if [ -z "$kiwistderr" ] && [ ! -z $kiwidebug ];then
 		Echo "Starting boot shell on $ELOG_BOOTSHELL"
 		setctsid -f $ELOG_BOOTSHELL /bin/bash -i
+		ELOGSHELL_PID=$(fuser $ELOG_BOOTSHELL | tr -d " ")
+		echo ELOGSHELL_PID=$ELOGSHELL_PID >> /iprocs
 	fi
 }
 #======================================
@@ -5027,9 +5029,9 @@ function killShell {
 		mount -t proc proc /proc
 		umountProc=1
 	fi
-	if [ -z "$kiwistderr" ];then
+	if [ ! -z "$ELOGSHELL_PID" ];then
 		Echo "Stopping boot shell"
-		fuser -k $ELOG_BOOTSHELL >/dev/null
+		kill $ELOGSHELL_PID &>/dev/null
 	fi
 	if [ $umountProc -eq 1 ];then
 		umount /proc
