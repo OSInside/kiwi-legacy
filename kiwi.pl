@@ -1051,6 +1051,12 @@ sub init {
 		}
 		$Build =~ s/\/$//;
 	}
+	if (defined $InitCache) {
+		if (($InitCache !~ /^\//) && (! -d $InitCache)) {
+			$InitCache = $gdata->{System}."/".$InitCache;
+		}
+		$InitCache =~ s/\/$//;
+	}
 	#========================================
 	# store uniq path to image description
 	#----------------------------------------
