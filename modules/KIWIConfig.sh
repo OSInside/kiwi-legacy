@@ -1574,6 +1574,11 @@ function baseSetRunlevel {
 		1|2|3|5)
 			sed -i "s/id:[0123456]:initdefault:/id:$RUNLEVEL:initdefault:/" \
 			/etc/inittab
+			if test -d /etc/systemd/system; then
+				ln -sf \
+					/lib/systemd/system/runlevel$RUNLEVEL.target \
+					/etc/systemd/system/default.target
+			fi
 		;;
 		*)
 			echo "Invalid runlevel argument: $RUNLEVEL"
