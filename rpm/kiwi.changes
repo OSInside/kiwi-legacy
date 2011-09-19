@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 19 12:41:31 CEST 2011 - ms@suse.de
+
+- allow long names in install iso images (-joliet-long)
+  This is related to (bnc #716149)
+
+-------------------------------------------------------------------
 Wed Aug 31 14:32:57 UTC 2011 - adrian@suse.de
 
 - product build: repository prios are more important then fallback architectures
