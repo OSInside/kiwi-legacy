@@ -950,7 +950,8 @@ sub setupInstallCD {
 	if ($bootloader eq "grub") {
 		# let isolinux run grub second stage...
 		$base = "-R -J -f -b boot/grub/stage2 -no-emul-boot $volid";
-		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size";
+		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
+		$opts.= "-pad -joliet-long";
 	} elsif ($bootloader =~ /(sys|ext)linux/) {
 		# turn sys/extlinux configuation into a isolinux configuration...
 		my $cfg_ext = "$tmpdir/boot/syslinux/syslinux.cfg";
@@ -963,10 +964,11 @@ sub setupInstallCD {
 		qxx ("mv $tmpdir/boot/linux  $tmpdir/boot/syslinux");
 		qxx ("mv $tmpdir/boot/syslinux $tmpdir/boot/loader 2>&1");
 		$base = "-R -J -f -b boot/loader/isolinux.bin -no-emul-boot $volid";
-		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size";
+		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
+		$opts.= "-pad -joliet-long";
 	} elsif ($bootloader eq "lilo") {
 		$base = "-r";
-		$opts = "-U -chrp-boot";
+		$opts = "-U -chrp-boot -pad -joliet-long";
 	} else {
 		# don't know how to use this bootloader together with isolinux
 		$kiwi -> failed ();
