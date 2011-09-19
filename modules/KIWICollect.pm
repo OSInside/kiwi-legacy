@@ -1166,7 +1166,7 @@ sub unpackMetapackages
             my @themes = readdir(TD);
             closedir(TD);
             my $found=0;
-            foreach my $d(@themes) {
+            foreach my $d(sort(@themes)) {
               if($d =~ m{$thema}i) {
                 $this->logMsg("I", "Using thema $d");
                 $thema = $d;	# changed after I saw that yast2-slideshow has a thema "SuSE-SLES" (matches "SuSE", but not in line 831)
@@ -1175,7 +1175,7 @@ sub unpackMetapackages
               }
             }
             if($found==0) {
-              foreach my $d(@themes) {
+              foreach my $d(sort(@themes)) {
                 if($d =~ m{linux|sles|suse}i) {
                   $this->logMsg("W", "Using fallback theme $d instead of $thema");
                   $thema = $d;
@@ -1185,8 +1185,7 @@ sub unpackMetapackages
             }
             ## $thema is now the thema to use:
             for my $i(1..3) {
-              ## @lars: wtf soll denn sein, wenn es CD2 gibt, aber die Konfig der Medien kein Medium "2" hat?
-              ## Laut Rudi (tm) ist das zulässig!
+              # drop not used configs when media does not exist
               if(-d "$tmp/SuSE/$thema/CD$i" and $this->{m_basesubdir}->{$i} and -d "$tmp/SuSE/$thema/CD$i") {
                 qx(cp -a $tmp/SuSE/$thema/CD$i/* $this->{m_basesubdir}->{$i});
               }
