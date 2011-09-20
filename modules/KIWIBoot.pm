@@ -2292,7 +2292,7 @@ sub setupBootDisk {
 		($lvm) || ($bootloader eq "extlinux")
 	) {
 		$root = $deviceMap{dmapper};
-		$kiwi -> info ("Creating ext2 boot filesystem");
+		$kiwi -> info ("Creating ext3 boot filesystem");
 		if (($haveluks) || ($needBootP)) {
 			if (($syszip) || ($haveSplit) || ($dmapper)) {
 				$root = $deviceMap{3};
@@ -2309,8 +2309,8 @@ sub setupBootDisk {
 		my %FSopts = $main::global -> checkFSOptions(
 			@{$cmdL -> getFilesystemOptions()}
 		);
-		my $fsopts = $FSopts{ext2};
-		my $fstool = "mkfs.ext2";
+		my $fsopts = $FSopts{ext3};
+		my $fstool = "mkfs.ext3";
 		$status = qxx ("$fstool $fsopts $root 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
