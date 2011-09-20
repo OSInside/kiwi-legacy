@@ -24,3 +24,9 @@
 #--------------------------------------
 Echo "Calling pre-init stage in system image"
 errorLogStart
+
+#======================================
+# 2) clean mount
+#--------------------------------------
+umountSystemFilesystems
+
