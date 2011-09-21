@@ -148,6 +148,7 @@
 		<package name="dosfstools"/>
 		<package name="xfsprogs"/>
 		<package name="kernel-firmware"/>
+		<package name="iputils"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

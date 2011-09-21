@@ -147,6 +147,7 @@
 		<package name="syslinux"/>
 		<package name="dosfstools"/>
 		<package name="xfsprogs"/>
+		<package name="iputils"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
