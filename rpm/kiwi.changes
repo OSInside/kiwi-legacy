@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Sep 21 15:02:35 CEST 2011 - ms@suse.de
+
+- fixed download of md5 file in oem pxe install mode
+- make sure iputils is there in oemboot for pxe based installation
+
+-------------------------------------------------------------------
 Mon Sep 19 12:41:31 CEST 2011 - ms@suse.de
 
 - allow long names in install iso images (-joliet-long)
