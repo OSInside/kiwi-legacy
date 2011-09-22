@@ -61,7 +61,10 @@ sub new {
 	#==========================================
 	# Check pre-conditions
 	#------------------------------------------
-	if (! -f $configPath) {
+	if ((! $configPath) || (! -f $configPath)) {
+		if (! $configPath) {
+			$configPath = "undefined";
+		}
 		$kiwi -> error ("Could not find specified configuration: $configPath");
 		$kiwi -> failed ();
 		return undef;
