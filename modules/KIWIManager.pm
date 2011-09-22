@@ -2348,6 +2348,7 @@ sub resetSource {
 	if ($manager eq "yum") {
 		$kiwi -> info ("Removing yum repo(s) in: $dataDir");
 		qxx ("rm -f $dataDir/*.repo 2>&1");
+		$kiwi -> done();
 	}
 	return $this;
 }
