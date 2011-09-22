@@ -47,6 +47,7 @@
 		<package name="dhclient"/>
 		<package name="parted"/>
 		<package name="lvm2"/>
+		<package name="kernel"/>
 		<rhelGroup name="System Tools"/>
 		<rhelGroup name="Text-based Internet"/>
 		<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>
