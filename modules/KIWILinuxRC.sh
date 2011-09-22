@@ -2924,7 +2924,7 @@ function probeDevices {
 	#======================================
 	# Manual loading of modules
 	#--------------------------------------
-	for i in rd brd edd dm-mod xennet xenblk virtio_blk;do
+	for i in rd brd edd dm-mod xennet xenblk virtio_blk loop;do
 		modprobe $i &>/dev/null
 	done
 	udevPending
