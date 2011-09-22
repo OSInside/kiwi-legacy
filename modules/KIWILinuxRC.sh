@@ -3811,7 +3811,7 @@ function setupNetworkStatic {
 			echo "REMOTE_IPADDR='$pointopoint'" >> $netFile
 		fi
 	fi
-	setupDefaultGateway
+	setupDefaultGateway $up
 	setupDNS
 }
 #======================================

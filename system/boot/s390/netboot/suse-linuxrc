@@ -91,7 +91,7 @@ udevStart
 #======================================
 # 4) Include proc/cmdline information
 #--------------------------------------
-includeKernelParameters
+includeKernelParametersLowerCase
 if [ ! -z $IMAGE ];then
 	# /.../
 	# if the image information is already in place at this stage
@@ -122,7 +122,7 @@ fi
 #--------------------------------------
 runHook prenetwork
 if [ $LOCAL_BOOT = "no" ];then
-	setupNetworkStatic
+	setupNetworkStatic 1
 fi
 runHook postnetwork
 
@@ -347,8 +347,8 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 		#======================================
 		# Standard table
 		#--------------------------------------
-		createPartitionerInput $(pxePartitionInput)
 		cleanPartitionTable
+		createPartitionerInput $(pxePartitionInput)
 		callPartitioner $input
 	else
 		#======================================
@@ -386,8 +386,8 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 		for raid_dev in $raidDiskFirst $raidDiskSecond;do
 			imageDiskDevice=$raid_dev
 			rm -f $input
-			createPartitionerInput $(pxeRaidPartitionInput)
 			cleanPartitionTable
+			createPartitionerInput $(pxeRaidPartitionInput)
 			callPartitioner $input
 		done
 		imageDiskDevice=$DISK
