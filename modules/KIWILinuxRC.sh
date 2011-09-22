@@ -2503,6 +2503,7 @@ function setupKernelModules {
 	fi
 	local sysimg_ktempl=$srcprefix/var/adm/fillup-templates/sysconfig.kernel
 	local sysimg_ktempl2=$sysimg_ktempl-mkinitrd
+	local sysimg_ktempl3=/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 	local sysimg_syskernel=$srcprefix/etc/sysconfig/kernel
 	local syskernel=$destprefix/etc/sysconfig/kernel
 	local newstyle_mkinitrd=$srcprefix/lib/mkinitrd/scripts/boot-usb.sh
@@ -2512,7 +2513,11 @@ function setupKernelModules {
 	#======================================
 	# check for sysconfig template file
 	#--------------------------------------
-	if [ ! -f $sysimg_ktempl ] && [ ! -f $sysimg_ktempl2 ];then
+	if \
+		[ ! -f $sysimg_ktempl ]  && \
+		[ ! -f $sysimg_ktempl2 ] && \
+		[ ! -f $sysimg_ktempl3 ]
+	then
 		systemException \
 			"Can't find kernel sysconfig template in system image !" \
 		"reboot"
@@ -5773,8 +5778,11 @@ function bootImage {
 		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
 			"/preinit ; . /include ; cleanImage ; exec /sbin/halt -fihp" 
 	fi
-	# FIXME: clicfs / nfsroot doesn't like run-init
-	if [ ! "$haveClicFS" = "yes" ] && [ -z "$NFSROOT" ];then
+	# FIXME: clicfs / nfsroot / RHEL doesn't like run-init
+	if \
+		[ ! "$haveClicFS" = "yes" ] && [ -z "$NFSROOT" ]     && \
+		[ ! -e /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release ]
+	then
 		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
 			"/preinit ; . /include ; cleanImage ; exec $init $option"
 	else
