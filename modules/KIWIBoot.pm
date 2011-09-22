@@ -2693,7 +2693,7 @@ sub cleanLoop {
 	$main::global -> umount();
 	if ((defined $loop) && ($loop =~ /loop/)) {
 		if (defined $lvm) {
-			qxx ("vgchange -an $this->{lvmgroup} 2>&1");
+			qxx ("vgchange -an 2>&1");
 		}
 		$this -> cleanLoopMaps();
 		qxx ("/sbin/losetup -d $loop 2>&1");
