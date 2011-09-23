@@ -26,7 +26,12 @@ Echo "Calling pre-init stage in system image"
 errorLogStart
 
 #======================================
-# 2) clean mount
+# 2) update auth config 
+#--------------------------------------
+authconfig --updateall
+
+#======================================
+# 3) clean mount
 #--------------------------------------
 umountSystemFilesystems
 

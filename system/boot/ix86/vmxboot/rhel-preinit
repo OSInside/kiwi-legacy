@@ -74,7 +74,12 @@ fi
 setupConsole
 
 #======================================
-# 8) kill udev
+# 8) update auth config 
+#--------------------------------------
+authconfig --updateall
+
+#======================================
+# 9) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems
