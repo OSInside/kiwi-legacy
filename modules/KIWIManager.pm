@@ -1284,7 +1284,7 @@ sub installPackages {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "for i in @@addonPackages;do\n";
+		print $fd "for i in @addonPackages;do\n";
 		print $fd "\tif ! @kchroot @yum list all \$i;then\n";
 		print $fd "\t\tECODE=1\n";
 		print $fd "\t\techo \$ECODE > $screenCall.exit\n";
@@ -1652,7 +1652,7 @@ sub setupUpgrade {
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@addonPackages) {
-				print $fd "for i in @@addonPackages;do\n";
+				print $fd "for i in @addonPackages;do\n";
 				print $fd "\tif ! @kchroot @yum list all \$i;then\n";
 				print $fd "\t\tECODE=1\n";
 				print $fd "\t\techo \$ECODE > $screenCall.exit\n";
