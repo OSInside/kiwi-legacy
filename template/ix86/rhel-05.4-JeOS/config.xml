@@ -16,7 +16,7 @@
 		<hwclock>utc</hwclock>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<type image="iso" primary="true" boot="isoboot/rhel-05.4" flags="clic"/>
-		<type image="vmx" boot="vmxboot/rhel-05.4" filesystem="ext3" format="vmdk">
+		<type image="vmx" boot="vmxboot/rhel-05.4" filesystem="ext3" format="vmdk" kernelcmdline="rhgb">
 			<machine memory="1024" guestOS="rhel5">
 				<vmdisk controller="scsi" id="0"/>
 				<vmnic driver="e1000" interface="0" mode="bridged"/>
@@ -51,6 +51,7 @@
 		<rhelGroup name="System Tools"/>
 		<rhelGroup name="Text-based Internet"/>
 		<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>
+		<package name="redhat-logos" bootinclude="true" bootdelete="true"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

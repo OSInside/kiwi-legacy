@@ -1039,6 +1039,21 @@ function rhelGFXBoot {
 }
 
 #======================================
+# rhelSplashToGrub
+#--------------------------------------
+function rhelSplashToGrub {
+	local grub_stage=/usr/lib/grub
+	local rhel_logos=/boot/grub/splash.xpm.gz
+	if [ ! -e $rhel_logos ];then
+		return
+	fi
+	if [ ! -d $grub_stage ];then
+		mkdir -p $grub_stage
+	fi
+	mv $rhel_logos $grub_stage
+}
+
+#======================================
 # suseGFXBoot
 #--------------------------------------
 function suseGFXBoot {

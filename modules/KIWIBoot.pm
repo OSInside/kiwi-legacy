@@ -3046,8 +3046,12 @@ sub setupBootLoaderConfiguration {
 		print FD "timeout $bootTimeout\n";
 		if ($type =~ /^KIWI (CD|USB)/) {
 			my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
-			if ((! $type{fastboot}) && (-e "$tmpdir/boot/message")) {
-				print FD "gfxmenu $dev/boot/message\n";
+			if (! $type{fastboot}) {
+				if (-e "$tmpdir/boot/grub/splash.xpm.gz") {
+					print FD "splashimage=$dev/boot/grub/splash.xpm.gz\n"
+				} elsif (-e "$tmpdir/boot/message") {
+					print FD "gfxmenu $dev/boot/message\n";
+				}
 			}
 			print FD "title Boot from Hard Disk\n";
 			if ($dev eq '(cd)') {
@@ -3070,7 +3074,9 @@ sub setupBootLoaderConfiguration {
 			print FD "title $title\n";
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
-			if (-e "$tmpdir/boot/message") {
+			if (-e "$tmpdir/boot/grub/splash.xpm.gz") {
+				print FD "splashimage=(hd0,$bootpart)/boot/grub/splash.xpm.gz\n"
+			} elsif (-e "$tmpdir/boot/message") {
 				print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
 			}
 			print FD "title $title\n";

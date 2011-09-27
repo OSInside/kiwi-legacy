@@ -33,11 +33,15 @@ baseStripLocales \
 	$(for i in $(echo $kiwi_language | tr "," " ");do echo -n "$i.utf8 ";done)
 baseStripTranslations kiwi.mo
 
-
 #======================================
 # Setup link for the grub stage files
 #--------------------------------------
 baseSetupBootLoaderCompatLinks
+
+#======================================
+# check for RHEL boot logo
+#--------------------------------------
+rhelSplashToGrub
 
 #======================================
 # Umount kernel filesystems

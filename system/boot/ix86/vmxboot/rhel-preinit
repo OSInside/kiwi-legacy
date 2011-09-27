@@ -36,7 +36,6 @@ fi
 # 3) start udev
 #--------------------------------------
 mountSystemFilesystems
-udevSystemStart
 
 #======================================
 # 4) create /etc/ImagePackages
@@ -81,5 +80,5 @@ authconfig --updateall
 #======================================
 # 9) kill udev
 #--------------------------------------
-udevSystemStop
+killall udevd
 umountSystemFilesystems

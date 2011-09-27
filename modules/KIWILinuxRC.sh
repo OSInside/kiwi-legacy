@@ -1889,7 +1889,9 @@ function setupBootLoaderGrub {
 	# create menu.lst file
 	#--------------------------------------
 	echo "timeout $KIWI_BOOT_TIMEOUT"  > $menu
-	if [ -f /image/loader/message ] || [ -f /boot/message ];then
+	if [ -f $mountPrefix/boot/grub/splash.xpm.gz ];then
+		echo "splashimage=$gdev/boot/grub/splash.xpm.gz" >> $menu
+	elif [ -f /image/loader/message ] || [ -f /boot/message ];then
 		echo "gfxmenu $gdev/boot/message" >> $menu
 	fi
 	local count=1
