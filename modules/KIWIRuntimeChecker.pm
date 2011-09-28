@@ -25,7 +25,7 @@ use warnings;
 require Exporter;
 use KIWILocator;
 use KIWILog;
-
+use KIWIQX;
 
 #==========================================
 # Exports
@@ -127,11 +127,61 @@ sub prepareChecks {
 	if (! $this -> __checkRootRecycleCapability()) {
 		return undef;
 	}
+	if (! $this -> __hasValidArchives()) {
+		return undef;
+	}
 	return 1;
 }
 
 #==========================================
 # Private helper methods
+#------------------------------------------
+#==========================================
+# __hasValidArchives
+#------------------------------------------
+sub __hasValidArchives {
+	# ...
+	# check if the optional given archives doesn't
+	# include bogus files
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $cmdL = $this->{cmdArgs};
+	my @list = $xml -> getArchiveList();
+	my $desc = $cmdL-> getConfigDir();
+	my @nogo = ('^etc\/YaST2\/licenses\/.*');
+	#==========================================
+	# check for origin of image description
+	#------------------------------------------
+	if (open FD,"$desc/image/main::Prepare") {
+		$desc = <FD>; close FD;
+	}
+	#==========================================
+	# check archive contents
+	#------------------------------------------
+	foreach my $ar (@list) {
+		if (! -f "$desc/$ar") {
+			$kiwi -> warning ("specified archive $ar doesn't exist in $desc");
+			$kiwi -> skipped ();
+			next;
+		}
+		my $contents = qxx ("tar -tf $desc/$ar 2>&1");
+		foreach my $exp (@nogo) {
+			if (grep (/$exp/,$contents)) {
+				$kiwi -> error  ("bogus archive contents in $ar");
+				$kiwi -> failed ();
+				$kiwi -> error  ("archive matches: $exp");
+				$kiwi -> failed ();
+				return undef;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __haveValidTypeString
 #------------------------------------------
 sub __haveValidTypeString {
 	# ...
