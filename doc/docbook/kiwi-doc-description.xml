@@ -570,9 +570,24 @@
           <option>--prebuiltbootimage</option> parameter. </para>
 
       <para>Within the preferences section, there are the following
-        optional attributes: </para>
+        optional elements: </para>
 
       <variablelist>
+        <varlistentry>
+          <term><sgmltag class="attribute"
+              >showlicense</sgmltag></term>
+          <listitem>
+            <para>
+               Specifies the base name of a license file which is displayed in oem
+               images before the installation happens. It's possible to add more showlicense
+               sections to display more licenses one after the other. If no such element
+               is specified the default 'license' and 'EULA' files are searched. The
+               search algorithm will append the .txt or .locale.txt suffix to the license
+               name to form the license file name. You should make sure that you license
+               files contains this suffix.
+            </para>
+          </listitem>
+        </varlistentry>
         <varlistentry>
           <term><sgmltag class="attribute"
               >rpm-check-signatures</sgmltag></term>
