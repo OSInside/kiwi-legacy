@@ -6140,52 +6140,47 @@ function getText {
 function displayEULA {
 	# /.../
 	# display in a dialog window the text part of the
-	# selected language file or the default file 
-	# /license.txt or /EULA.txt
+	# selected language file(s). The files are searched
+	# by the names in kiwi_showlicense
 	# ----
 	local code=$(echo $DIALOG_LANG | cut -f1 -d_)
-	#======================================
-	# check license files
-	#--------------------------------------
-	local files=$(find /license.*txt 2>/dev/null)
-	if [ -z "$files" ];then
-		return
+	if [ -z "$kiwi_showlicense" ];then
+		kiwi_showlicense="license EULA"
 	fi
-	#======================================
-	# use selected file or default
-	#--------------------------------------
-	code=/license.$code.txt
-	if [ ! -f $code ];then
-		code=/license.txt
+	for name in $kiwi_showlicense;do
+		#======================================
+		# select license file by name
+		#--------------------------------------
+		code=/$name.$code.txt
 		if [ ! -f $code ];then
-			code=/EULA.txt
+			code=/$name.txt
 		fi
-	fi
-	#======================================
-	# check selected file and show it
-	#--------------------------------------
-	if [ ! -f $code ];then
-		Echo "License file $code not found... skipped"
-		return
-	fi
-	while true;do
-		Dialog --textbox $code 20 70 \
-			--and-widget --extra-button \
-			--extra-label "$TEXT_NO" \
-			--ok-label "$TEXT_YES" \
-			--cancel-label "$TEXT_CANCEL" \
-			--yesno "\"$TEXT_LICENSE\"" \
-			5 45
-		case $? in
-			0 ) break
-				;;
-			1 ) continue
-				;;
-			* ) systemException \
-					"License not accepted... reboot" \
-				"reboot"
-				;;
-		esac
+		if [ ! -f $code ];then
+			Echo "License with basename $name not found... skipped"
+			continue
+		fi
+		#======================================
+		# show license until accepted
+		#--------------------------------------
+		while true;do
+			Dialog --textbox $code 20 70 \
+				--and-widget --extra-button \
+				--extra-label "$TEXT_NO" \
+				--ok-label "$TEXT_YES" \
+				--cancel-label "$TEXT_CANCEL" \
+				--yesno "\"$TEXT_LICENSE\"" \
+				5 45
+			case $? in
+				0 ) break
+					;;
+				1 ) continue
+					;;
+				* ) systemException \
+						"License not accepted... reboot" \
+					"reboot"
+					;;
+			esac
+		done
 	done
 }
 #======================================

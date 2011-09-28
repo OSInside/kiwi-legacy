@@ -1390,6 +1390,25 @@ div {
 }
 
 #==========================================
+# common element <showlicense>
+#
+div {
+	k.showlicense.attlist = empty
+	k.showlicense =
+		## Setup showlicense
+		[
+		db:para [
+			"Image license setup. The specfied license name\x{a}"~
+			"will be displayed in a dialog window on boot."
+		]
+		]
+		element showlicense {
+			k.showlicense.attlist,
+			text
+		}
+}
+
+#==========================================
 # common element <timezone>
 #
 div {
@@ -2397,6 +2416,7 @@ div {
 			k.rpm-force? &
 			k.timezone? &
 			k.type* &
+			k.showlicense* &
 			k.version?
 		}
 }

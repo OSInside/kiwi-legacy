@@ -1869,6 +1869,25 @@ set to utc or localtime.</db:para>
   </div>
   <!--
     ==========================================
+    common element <showlicense>
+    
+  -->
+  <div>
+    <define name="k.showlicense.attlist">
+      <empty/>
+    </define>
+    <define name="k.showlicense">
+      <element name="showlicense">
+        <a:documentation>Setup showlicense</a:documentation>
+        <db:para>Image license setup. The specfied license name
+will be displayed in a dialog window on boot.</db:para>
+        <ref name="k.showlicense.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <timezone>
     
   -->
@@ -3489,6 +3508,9 @@ and also depends of the selected image output type.</db:para>
           </optional>
           <zeroOrMore>
             <ref name="k.type"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="k.showlicense"/>
           </zeroOrMore>
           <optional>
             <ref name="k.version"/>

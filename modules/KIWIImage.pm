@@ -227,6 +227,7 @@ sub updateDescription {
 	# Store general data
 	#------------------------------------------
 	$changeset{"packagemanager"} = $src_xml->getPackageManager();
+	$changeset{"showlicense"}    = $src_xml->getLicenseNames();
 	$changeset{"domain"}         = $src_xml->getXenDomain();
 	$changeset{"displayname"}    = $src_xml->getImageDisplayName();
 	$changeset{"locale"}         = $src_xml->getLocale();

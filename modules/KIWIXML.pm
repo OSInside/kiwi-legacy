@@ -975,6 +975,28 @@ sub getPackageManager {
 }
 
 #==========================================
+# getLicenseNames
+#------------------------------------------
+sub getLicenseNames {
+	# ...
+	# Get the names of all showlicense elements and return
+	# them as a list to the caller
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $node = $this -> getPreferencesNodeByTagName ("showlicense");
+	my @lics = $node -> getElementsByTagName ("showlicense");
+	my @names = ();
+	foreach my $node (@lics) {
+		push (@names,$node -> textContent());
+	}
+	if (@names) {
+		return \@names;
+	}
+	return undef;
+}
+
+#==========================================
 # getXenDomain
 #------------------------------------------
 sub getXenDomain {
@@ -2235,6 +2257,10 @@ sub getImageConfig {
 	my $size = getImageSize    ($this);
 	my $name = getImageName    ($this);
 	my $dname= getImageDisplayName ($this);
+	my $lics = getLicenseNames ($this);
+	if ($lics) {
+		$result{kiwi_showlicense} = join(" ",@{$lics});
+	}
 	if (@delp) {
 		$result{kiwi_delete} = join(" ",@delp);
 	}
@@ -4281,7 +4307,7 @@ sub __updateDescriptionFromChangeSet {
 		$this -> __setMachineAttribute ("domain",$changeset);
 	}
 	#==========================================
-	# 5) merge/update preferences in type
+	# 5) merge/update preferences and type
 	#------------------------------------------
 	if (defined $changeset->{"locale"}) {
 		$this -> __setOptionsElement ("locale",$changeset);
@@ -4291,6 +4317,9 @@ sub __updateDescriptionFromChangeSet {
 	}
 	if (defined $changeset->{"packagemanager"}) {
 		$this -> __setOptionsElement ("packagemanager",$changeset);
+	}
+	if (defined $changeset->{"showlicense"}) {
+		$this -> __addOptionsElement ("showlicense",$changeset);
 	}
 	if (defined $changeset->{"oem-swap"}) {
 		$this -> __setOEMOptionsElement ("oem-swap",$changeset);
@@ -4431,6 +4460,35 @@ sub __setOptionsElement {
 	}
 	$opts -> appendChild ($addElement);
 	$kiwi -> done ();
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# __addOptionsElement
+#------------------------------------------
+sub __addOptionsElement {
+	# ...
+	# add a new element into the current preferences XML tree
+	# the data reference must be an array. Each element of the
+	# array is processed as new XML element
+	# ---
+	my $this = shift;
+	my $item = shift;
+	my $data = shift;
+	my $kiwi = $this->{kiwi};
+	my $value= $data->{$item};
+	if (! $value) {
+		return $this;
+	}
+	foreach my $text (@{$value}) {
+		$kiwi -> info ("Adding element $item: $text");
+		my $addElement = new XML::LibXML::Element ("$item");
+		$addElement -> appendText ($text);
+		my $opts = $this -> getPreferencesNodeByTagName ("$item");
+		$opts -> appendChild ($addElement);
+		$kiwi -> done ();
+	}
 	$this -> updateXML();
 	return $this;
 }
