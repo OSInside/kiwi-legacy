@@ -7484,27 +7484,35 @@ function setupConsole {
 	# ----
 	local itab=/etc/inittab
 	local stty=/etc/securetty
+	local xvc="X0:12345:respawn:/sbin/mingetty --noclear xvc0 linux"
+	local hvc="H0:12345:respawn:/sbin/mingetty --noclear hvc0 linux"
+	#======================================
+	# create tty nodes if not done
+	#--------------------------------------
 	setupTTY
+	#======================================
+	# setup xvc console (xen)
+	#--------------------------------------
 	if [ -e /sys/class/tty/xvc0 ];then
 		if ! cat $itab | grep -v '^#' | grep -q xvc0;then
-			echo "X0:12345:respawn:/sbin/mingetty --noclear xvc0 linux" >> $itab
-			echo xvc0 >> $stty
+			echo "$xvc" >> $itab
+			echo "xvc0" >> $stty
 		fi
 	fi
+	#======================================
+	# setup hvc console (kvm)
+	#--------------------------------------
 	if [ -e /sys/class/tty/hvc0 ];then
 		if ! cat $itab | grep -v '^#' | grep -q hvc0;then
-			echo "H0:12345:respawn:/sbin/mingetty --noclear hvc0 linux" >> $itab
-			echo hvc0 >> $stty
+			echo "$hvc" >> $itab
+			echo "hvc0" >> $stty
 		fi
 	fi
+	#======================================
+	# remove ttyS0 if not present
+	#--------------------------------------
 	if [ ! -e /sys/class/tty/ttyS0 ];then
 		cat $itab | grep -vi 'ttyS0' > $itab.new && mv $itab.new $itab
-	fi
-	if [ "$arch" = "ppc64" ];then
-		if [ -e /sys/class/tty/ttyS0 -a ! -e /sys/class/tty/hvc0 ];then
-			cat $itab | grep -vi 'ttyS0' > $itab.new && mv $itab.new $itab
-			echo "S0:12345:respawn:/sbin/agetty -L 19200 ttyS0 vt102" >> $itab
-		fi
 	fi
 }
 #======================================
