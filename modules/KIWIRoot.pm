@@ -1090,6 +1090,7 @@ sub setup {
 					$kiwi -> failed ();
 					$kiwi -> info   ($data);
 					$kiwi -> failed ();
+					return undef;
 				} else {
 					$kiwi -> loginfo ("$script: $data");
 				}
