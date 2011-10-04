@@ -446,13 +446,13 @@ rm -rf $RPM_BUILD_ROOT
 %files -n kiwi-doc
 %defattr(-, root, root)
 %dir %{_defaultdocdir}/kiwi
-%doc %{_defaultdocdir}/kiwi/COPYING
-%doc %{_defaultdocdir}/kiwi/examples
-%doc %{_defaultdocdir}/kiwi/images
-%doc %{_defaultdocdir}/kiwi/kiwi.pdf
-%doc %{_defaultdocdir}/kiwi/kiwi.html
-%doc %{_defaultdocdir}/kiwi/susebooks.css
-%doc %{_defaultdocdir}/kiwi/schema
+%dir %{_defaultdocdir}/kiwi/COPYING
+%dir %{_defaultdocdir}/kiwi/examples
+%dir %{_defaultdocdir}/kiwi/images
+%dir %{_defaultdocdir}/kiwi/kiwi.pdf
+%dir %{_defaultdocdir}/kiwi/kiwi.html
+%dir %{_defaultdocdir}/kiwi/susebooks.css
+%dir %{_defaultdocdir}/kiwi/schema
 #=================================================
 # KIWI instsource...      
 #-------------------------------------------------
