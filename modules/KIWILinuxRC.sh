@@ -4663,10 +4663,10 @@ function mountSystemCombined {
 	local mountDevice=$1
 	local loopf=$2
 	local roDevice=$mountDevice
-	if [ "$haveLVM" = "yes" ]; then
-		local rwDevice="/dev/$VGROUP/LVRoot"
-	elif [ "$haveLuks" = "yes" ]; then
+	if [ "$haveLuks" = "yes" ]; then
 		local rwDevice="/dev/mapper/luksReadWrite"
+	elif [ "$haveLVM" = "yes" ]; then
+		local rwDevice="/dev/$VGROUP/LVRoot"
 	else
 		local rwDevice=`getNextPartition $mountDevice`
 	fi
