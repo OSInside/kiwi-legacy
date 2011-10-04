@@ -4386,7 +4386,7 @@ sub setStoragePartition {
 				}
 			}
 			$kiwi -> loginfo (
-				"PARTED input: $device [@p_cmd]"
+				"PARTED input: $device [@p_cmd]\n"
 			);
 			my $align="";
 			$status = qxx ("$parted_exec --help | grep -q align=");
