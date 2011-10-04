@@ -2163,23 +2163,47 @@ sub setupBootDisk {
 		#------------------------------------------
 		if (($lvm) && (%lvmparts)) {
 			my $VGroup = $this->{lvmgroup};
+			my @paths  = ();
+			my %phash  = ();
+			#==========================================
+			# Create path names in correct order
+			#------------------------------------------
+			sub numeric {
+				($a <=> $b) || ($a cmp $b);
+			}
 			foreach my $name (keys %lvmparts) {
-				my $device = "/dev/$VGroup/LV$name";
 				my $pname  = $name; $pname =~ s/_/\//g;
-				$status = qxx ("mkdir -p $loopdir/$pname 2>&1");
-				$result = $? >> 8;
-				if ($result != 0) {
-					$kiwi -> error ("Can't create mount point $loopdir/$pname");
-					$this -> cleanLoop ();
-					return undef;
-				}
-				if (! $this -> setupFilesystem ($FSTypeRO,$device,$pname)) {
-					$this -> cleanLoop ();
-					return undef;
-				}
-				if (! $main::global -> mount ($device, "$loopdir/$pname")) {
-					$this -> cleanLoop ();
-					return undef;
+				$pname =~ s/^\///;
+				$pname =~ s/\s*$//;
+				push @paths,$pname;
+			}
+			foreach my $name (@paths) {
+				my $part = split (/\//,$name);
+				push @{$phash{$part}},$name;
+			}
+			#==========================================
+			# Create filesystems and Mount LVM volumes
+			#------------------------------------------
+			foreach my $level (sort numeric keys %phash) {
+				foreach my $pname (@{$phash{$level}}) {
+					my $lname = $pname; $lname =~ s/\//_/g;
+					my $device = "/dev/$VGroup/LV$lname";
+					$status = qxx ("mkdir -p $loopdir/$pname 2>&1");
+					$result = $? >> 8;
+					if ($result != 0) {
+						$kiwi -> error ("Can't create mount point $loopdir/$pname");
+						$this -> cleanLoop ();
+						return undef;
+					}
+					if (! $this -> setupFilesystem ($FSTypeRO,$device,$pname)) {
+						$this -> cleanLoop ();
+						return undef;
+					}
+					$kiwi -> loginfo ("Mounting logical volume: $pname\n");
+					if (! $main::global -> mount ($device, "$loopdir/$pname")) {
+						$this -> cleanLoop ();
+						return undef;
+					}
 				}
 			}
 		}
