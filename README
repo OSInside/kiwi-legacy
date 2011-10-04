@@ -29,6 +29,11 @@ Usage
 
   kvm -cdrom /tmp/myimage/*.iso
 
+Mailing list
+------------
+
+  http://groups.google.com/group/kiwi-images
+
 Contributing
 ------------
 
