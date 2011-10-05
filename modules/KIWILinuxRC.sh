@@ -749,8 +749,9 @@ function installBootLoader {
 			"*** boot loader install for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+	masterBootID=0xffffffff
 	if [ ! -z "$masterBootID" ];then
-		Echo "writing MBR ID back to master boot record: $masterBootID"
+		Echo "writing default MBR ID to master boot record: $masterBootID"
 		masterBootIDHex=$(echo $masterBootID |\
 			sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/\\x\4\\x\3\\x\2\\x\1/')
 		echo -e -n $masterBootIDHex | dd of=$imageDiskDevice \
@@ -3226,7 +3227,7 @@ function searchImageHybridMedia {
 		umount $cddev &>/dev/null
 		return
 	fi
-	umount $cddev &>/dev/null
+	umount $hddev &>/dev/null
 	echo "not found"
 }
 #======================================
@@ -3489,6 +3490,7 @@ function searchBIOSBootDevice {
 	# Compare ID with MBR entry 
 	#--------------------------------------
 	ifix=0
+	match_count=0
 	for curd in $ddevs;do
 		if [ ! -b $curd ];then
 			continue
@@ -3498,6 +3500,7 @@ function searchBIOSBootDevice {
 		if [ "$mbrML" = "$mbrI" ] || [ "$mbrMB" = "$mbrI" ];then
 			ifix=1
 			matched=$curd
+			match_count=$(($match_count + 1))
 			if [ "$mbrML" = "$mbrI" ];then
 				export masterBootID=$mbrML
 			fi
@@ -3510,6 +3513,10 @@ function searchBIOSBootDevice {
 			fi
 		fi
 	done
+	if [ $match_count -gt 1 ];then
+		export biosBootDevice="multiple devices matches same identifier: $mbrI"
+		return 2
+	fi
 	if [ $ifix -eq 1 ];then
 		export biosBootDevice=$matched
 		return 0
