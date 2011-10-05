@@ -119,7 +119,7 @@ sub new {
 	if (defined $system) {
 		if ((-f $system) || (-b $system)) {
 			my %fsattr = $main::global -> checkFileSystem ($system);
-			if ($fsattr{readonly}) {
+			if (($fsattr{readonly}) || ($fsattr{type} eq "luks")) {
 				$syszip = $main::global -> isize ($system);
 			} else {
 				$syszip = 0;

@@ -816,6 +816,7 @@ sub createImageSquashFS {
 	my $this  = shift;
 	my $kiwi  = $this->{kiwi};
 	my $xml   = $this->{xml};
+	my %type  = %{$xml->getImageTypeAndAttributes()};
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
@@ -838,7 +839,6 @@ sub createImageSquashFS {
 	#==========================================
 	# Compress image using gzip
 	#------------------------------------------
-	my %type = %{$xml->getImageTypeAndAttributes()};
 	if (($type{compressed}) && ($type{compressed} eq 'true')) {
 		if (! $this -> compressImage ($name)) {
 			return undef;
@@ -2784,9 +2784,9 @@ sub preImage {
 	# Create logical extend
 	#------------------------------------------
 	if (! defined $haveExtend) {
-	if (! $this -> buildLogicalExtend ($name,$mBytes."M")) {
-		return undef;
-	}
+		if (! $this -> buildLogicalExtend ($name,$mBytes."M")) {
+			return undef;
+		}
 	}
 	return $name;
 }
@@ -3757,8 +3757,6 @@ sub setupSquashFS {
 		$tree = $imageTree;
 	}
 	if ($type{luks}) {
-		$kiwi -> warning ("LUKS extension not supported for squashfs");
-		$kiwi -> skipped ();
 		$this -> restoreImageDest();
 	}
 	unlink ("$this->{imageDest}/$name");
@@ -3772,8 +3770,50 @@ sub setupSquashFS {
 		$kiwi -> error  ($data);
 		return undef;
 	}
+	#==========================================
+	# Check for LUKS extension
+	#------------------------------------------
+	if ($type{luks}) {
+		my $outimg = $this->{imageDest}."/".$name;
+		my $squashimg = $outimg.".squashfs";
+		my $cipher = "$type{luks}";
+		my $data = qxx ("mv $outimg $squashimg 2>&1");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to rename squashfs image");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my $bytes = int ((-s $squashimg) * 1.1);
+		$data = qxx (
+			"dd if=/dev/zero of=$outimg bs=1 seek=$bytes count=1 2>&1"
+		);
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to create luks loop container");
+			$kiwi -> failed ();
+			return undef;
+		}
+		if (! $this -> setupEncoding ($name.".squashfs",$outimg,$cipher)) {
+			return undef;
+		}
+		$data = qxx (
+			"dd if=$squashimg of=$this->{imageDest}/$name.squashfs 2>&1"
+		);
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to dump squashfs to luks loop: $data");
+			$kiwi -> failed ();
+			$this -> cleanLuks();
+			return undef;
+		}
+	}
 	$this -> restoreImageDest();
 	$data = qxx ("chmod 644 $this->{imageDest}/$name");
+	$data = qxx ("rm -f $this->{imageDest}/$name.squashfs");
 	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.squashfs 2>&1");
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
@@ -4391,6 +4431,8 @@ sub DESTROY {
 	if (-d $spldir) {
 		qxx ("rm -rf $spldir 2>&1");
 	}
+	$this -> cleanMount();
+	$this -> cleanLuks();
 	return $this;
 }
 
