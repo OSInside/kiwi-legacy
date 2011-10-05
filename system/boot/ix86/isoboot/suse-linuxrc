@@ -91,6 +91,8 @@ probeDevices
 # 7) Mount the CD device
 #--------------------------------------
 CDMount
+runMediaCheck
+setupHybridPersistent
 
 #======================================
 # 8) Load configuration

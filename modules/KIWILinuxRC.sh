@@ -2759,13 +2759,15 @@ function getSystemMD5Status {
 #--------------------------------------
 function waitForUSBDeviceScan {
 	local devices=0
+	local s1="usb-storage: device scan complete"
+	local s2="usbcore: registered new interface driver usb-storage"
 	if [ ! "$HAVE_USB" = "yes" ];then
 		return
 	fi
 	if [ ! "$SCAN_USB" = "complete" ];then
 		Echo -n "Waiting for USB device scan to complete..."
 		while \
-			[ $(dmesg|grep -c 'usb-storage: device scan complete') -lt 1 ] && \
+			[ $(dmesg|grep -c -E "$s1|$s2") -lt 1 ] && \
 			[ $devices -lt 15 ]
 		do
 			echo -n .
@@ -2961,7 +2963,7 @@ function CDDevice {
 				test -z $cddev && cddev=$i || cddev=$cddev:$i
 			fi
 		done
-		if [ ! -z "$cddev" ] || [ $count -eq 12 ]; then
+		if [ ! -z "$cddev" ] || [ $count -eq 4 ]; then
 			break
 		else
 			echo -n .
@@ -2971,15 +2973,6 @@ function CDDevice {
 		udevPending
 	done
 	echo
-	if [ -z "$cddev" ];then
-		USBStickDevice
-		if [ $stickFound = 0 ];then
-			systemException \
-				"Failed to detect CD/DVD or USB drive !" \
-			"reboot"
-		fi
-		cddev=$stickDevice
-	fi
 }
 #======================================
 # USBStickDevice
@@ -3133,6 +3126,110 @@ function GetBootable {
 	echo "1"
 }
 #======================================
+# searchImageCDMedia
+#--------------------------------------
+function searchImageCDMedia {
+	# /.../
+	# search for the first CD/DVD device which
+	# contains a KIWI image signature
+	# ----
+	local IFS
+	#======================================
+	# lookup devices from hwinfo
+	#--------------------------------------
+	CDDevice
+	if [ -z "$cddev" ];then
+		return
+	fi
+	#======================================
+	# check device contents
+	#--------------------------------------
+	Echo -n "Checking CD/DVD device(s)..."
+	while true;do
+		IFS=":" ; for i in $cddev;do
+			cdopt=$(CDMountOption $i)
+			if [ -x /usr/bin/driveready ];then
+				driveready $i&& eval mount $cdopt -o ro $i /cdrom >/dev/null
+			else
+				eval mount $cdopt -o ro $i /cdrom >/dev/null
+			fi
+			if [ -f $LIVECD_CONFIG ];then
+				cddev=$i; echo
+				umount $i &>/dev/null
+				return
+			fi
+			umount $i &>/dev/null
+		done
+		if [ $count -eq 3 ]; then
+			break
+		else
+			echo -n .
+			sleep 1
+		fi
+		count=$(($count + 1))
+	done
+	unset cddev
+	echo "not found"
+}
+#======================================
+# searchImageUSBMedia
+#--------------------------------------
+function searchImageUSBMedia {
+	# /.../
+	# search for the first USB device which
+	# contains a KIWI image signature
+	# ----
+	USBStickDevice
+	Echo -n "Checking USB device(s)..."
+	if [ ! $stickFound = 0 ];then
+		cddev=$stickDevice; echo
+		return
+	fi
+	echo "not found"
+}
+#======================================
+# searchImageHybridMedia
+#--------------------------------------
+function searchImageHybridMedia {
+	# /.../
+	# search for the first disk device which
+	# contains a KIWI image signature
+	# ----
+	local ecode
+	local hddev
+	#======================================
+	# check for hybrid configuration
+	#--------------------------------------
+	if [ -z "$kiwi_hybrid" ];then
+		return
+	fi
+	#======================================
+	# check for hybrid mbr ID
+	#--------------------------------------
+	searchBIOSBootDevice
+	ecode=$?
+	Echo -n "Checking Hybrid disk device(s)..."
+	if [ ! $ecode = 0 ];then
+		if [ $ecode = 2 ];then
+			systemException "$biosBootDevice" "reboot"
+		fi
+		echo "not found"
+		return
+	fi
+	#======================================
+	# check image signature
+	#--------------------------------------
+	hddev=$(ddn "${biosBootDevice}" "$(GetBootable "${biosBootDevice}")")
+	kiwiMount "$hddev" "/cdrom" "-o ro"
+	if [ -f $LIVECD_CONFIG ];then
+		cddev=$hddev; echo
+		umount $cddev &>/dev/null
+		return
+	fi
+	umount $cddev &>/dev/null
+	echo "not found"
+}
+#======================================
 # CDMount
 #--------------------------------------
 function CDMount {
@@ -3141,108 +3238,78 @@ function CDMount {
 	# the CD configuration on. This also includes hybrid
 	# devices which appears as a disk
 	# ----
-	local count=0
-	local ecode=0
-	local cdopt
+	local mode=$1
 	mkdir -p /cdrom
 	#======================================
-	# check for hybrid mbr ID
+	# 1) CD/DVD devices
 	#--------------------------------------
-	if [ ! -z "$kiwi_hybrid" ];then
-		searchBIOSBootDevice
-		ecode=$?
-		if [ ! $ecode = 0 ];then
-			if [ $ecode = 2 ];then
-				systemException "$biosBootDevice" "reboot"
-			fi
-			unset kiwi_hybrid
+	searchImageCDMedia
+	if [ ! -z "$cddev" ];then
+		eval mount $cdopt -o ro $cddev /cdrom 1>&2
+		if [ "$mode" = "install" ];then
+			# /.../
+			# if we found an install CD/DVD any disk device
+			# is free to serve as install target
+			# ----
+			unset imageDiskDevice
 		fi
+		return
 	fi
 	#======================================
-	# walk through media
+	# 2) hybrid disk devices
 	#--------------------------------------
-	if [ -z "$kiwi_hybrid" ];then
-		#======================================
-		# search for CD/DVD devices
-		#--------------------------------------
-		CDDevice
-		Echo -n "Mounting live boot drive..."
-		while true;do
-			IFS=":"; for i in $cddev;do
-				cdopt=$(CDMountOption $i)
-				if [ -x /usr/bin/driveready ];then
-					driveready $i&& eval mount $cdopt -o ro $i /cdrom >/dev/null
-				else
-					eval mount $cdopt -o ro $i /cdrom >/dev/null
-				fi
-				if [ -f $LIVECD_CONFIG ];then
-					cddev=$i; echo
-					#======================================
-					# run mediacheck if requested and boot
-					#--------------------------------------
-					if [ "$mediacheck" = 1 ]; then
-						test -e /proc/splash && echo verbose > /proc/splash
-						checkmedia $cddev
-						Echo -n "Press ENTER for reboot: "; read nope
-						/sbin/reboot -f -i >/dev/null
-					fi
-					#======================================
-					# device found go with it
-					#--------------------------------------
-					IFS=$IFS_ORIG
-					return
-				fi
-				umount $i &>/dev/null
-			done
-			IFS=$IFS_ORIG
-			if [ $count -eq 12 ]; then
-				break
-			else
-				echo -n .
-				sleep 1
-			fi
-			count=`expr $count + 1`
-		done
-	else
-		#======================================
-		# search for hybrid device
-		#--------------------------------------
-		if [ "$kiwi_hybridpersistent" = "yes" ];then
-			protectedDevice=$(echo $biosBootDevice | sed -e s@/dev/@@)
-			protectedDisk=$(cat /sys/block/$protectedDevice/ro)
-			if [ $protectedDisk = "0" ];then
-				createHybridPersistent $biosBootDevice
-			fi
-		fi
-		cddev=$(ddn "${biosBootDevice}" "$(GetBootable "${biosBootDevice}")")
-		Echo -n "Mounting hybrid live boot drive ${cddev}..."
-		kiwiMount "$cddev" "/cdrom" "-o ro"
-		if [ -f $LIVECD_CONFIG ];then
-			echo
-			#======================================
-			# run mediacheck if requested and boot
-			#--------------------------------------
-			if [ "$mediacheck" = 1 ]; then
-				test -e /proc/splash && echo verbose > /proc/splash
-				checkmedia $cddev
-				Echo -n "Press ENTER for reboot: "; read nope
-				/sbin/reboot -f -i >/dev/null
-			fi
-			#======================================
-			# search hybrid for a write partition
-			#--------------------------------------
-			export HYBRID_RW=$(ddn $biosBootDevice $HYBRID_PERSISTENT_PART)
-			#======================================
-			# LIVECD_CONFIG found go with it
-			#--------------------------------------
-			return
-		fi
-		umount $cddev &>/dev/null
+	searchImageHybridMedia
+	if [ ! -z "$cddev" ];then
+		kiwiMount "$cddev" "/cdrom" "-o ro" 1>&2
+		return
 	fi
-	echo
+	#======================================
+	# Bad news
+	#--------------------------------------
 	systemException \
 		"Couldn't find Live image configuration file" \
 	"reboot"
+}
+#======================================
+# runMediaCheck
+#--------------------------------------
+function runMediaCheck {
+	# /.../
+	# run checkmedia program on the specified device
+	# ----
+	local device=$1
+	if [ ! "$mediacheck" = 1 ]; then
+		return
+	fi
+	test -e /proc/splash && echo verbose > /proc/splash
+	checkmedia $device
+	Echo -n "Press ENTER for reboot: "; read nope
+	/sbin/reboot -f -i >/dev/null
+}
+#======================================
+# setupHybridFeatures
+#--------------------------------------
+function setupHybridPersistent {
+	# /.../
+	# create a write partition for hybrid images if requested
+	# and store the device name in HYBRID_RW
+	# ----
+	local protectedDevice
+	local protectedDisk
+	#======================================
+	# create write partition for hybrid
+	#--------------------------------------
+	if [ "$kiwi_hybridpersistent" = "yes" ];then
+		protectedDevice=$(echo $biosBootDevice | sed -e s@/dev/@@)
+		protectedDisk=$(cat /sys/block/$protectedDevice/ro)
+		if [ $protectedDisk = "0" ];then
+			createHybridPersistent $biosBootDevice
+		fi
+	fi
+	#======================================
+	# store hybrid write partition device
+	#--------------------------------------
+	export HYBRID_RW=$(ddn $biosBootDevice $HYBRID_PERSISTENT_PART)
 }
 #======================================
 # CDUmount

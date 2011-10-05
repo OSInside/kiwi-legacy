@@ -157,7 +157,7 @@ function OEMInstall {
 		USBStickDevice install
 		if [ $stickFound = 0 ];then
 			Echo "Search for USB stick failed, checking CD/DVD drive"
-			CDMount
+			CDMount install
 			export OEMInstallType=CD
 		else
 			Echo "Found Stick: $stickRoot -> $stickSerial"
