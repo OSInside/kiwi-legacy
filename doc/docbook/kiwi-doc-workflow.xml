@@ -11,16 +11,21 @@
   
   <sect1 id="sec.workflow.introduction">
     <title>Introduction</title>
-      <para>The openSUSE KIWI Image System provides a complete operating
-    system image solution for Linux supported hardware platforms as well
-    as for virtualization systems like Xen, VMware, etc. The KIWI
-    architecture was designed as a two level system. The first stage,
-    based on a valid <emphasis>software package source</emphasis>,
-    creates a so called <emphasis>unpacked image</emphasis> according to
-    the provided image description. The second stage creates from a
-    required unpacked image an operating system image. The result of the
-    second stage is called a <emphasis>packed image</emphasis> or short
-    an image. </para>
+      <para>KIWI creates images in a two step process, as mentioned previously.
+    The first step, the <emphasis>prepare</emphasis> operation, generates a
+    so called <emphasis>unpacked image</emphasis> tree (directory)
+    based on the specified <emphasis>package sources (repositories)</emphasis>
+    in the <filename>config.xml</filename> configuration file. The
+    <filename>config.xml</filename> file is part of the
+    <emphasis>configuration directory (tree)</emphasis> that describes the
+    image to be created by KIWI. The second step, the
+    <emphasis>create</emphasis> operation, creates the
+    <emphasis>packed image</emphasis> or <emphasis>image</emphasis> in the
+    specified format based on the unpacked image and the
+    <emphasis>boot image</emphasis> description specified in the
+    <filename>config.xml</filename> file. The boot image description is
+    supplied by KIWI.
+    <!--insert xref to install chapter here, when we have it--> </para>
 
 
     <figure id="fig.imageservingarch">
@@ -47,21 +52,41 @@
       </mediaobjectco>
     </figure>
   
-  <para>Because this document contains conceptual information about an
-    image system, it is important to understand what an operating system
-    image is all about. A normal installation process is starting from a
-    given installation source and installs single pieces of software
-    until the system is complete. During this process manual user
-    intervention may be required. However, an operating system image
-    represents an already completed <emphasis>installation</emphasis>,
-    encapsulated as a file and optionally includes the configuration for
-    a specific task. Such an operating system starts working as soon as
-    the image has been brought to a system storage device, no matter if
-    this is a volatile or non volatile storage. The process of creating
-    an image takes place without user interaction. This means, all
-    requirements of the encapsulated system have to be fulfilled before
-    the image is created. All of this information is stored in the
-      <emphasis>image description</emphasis>. </para>
+  <para>Prior to building an image with KIWI it is important to understand
+    the make up of an image and the general concepts of a Linux system from
+    boot to running system.</para>
+  <para>A regular installation of a Linux system starts from a given
+    installation source, this could be an installation CD/DVD, a PXE boot
+    environment, or an install media that accesses the Internet to retrieve
+    software for installation. In many installation user interaction with an
+    installer takes place to collect data such as
+    <emphasis>software to be installed</emphasis>,
+    <emphasis>timezone</emphasis>, and <emphasis>user</emphasis> information.
+    Once all information is collected the installer installs the necessary and
+    specified software onto the computer at hand based on the available
+    software sources (repositories). Often a final configuration procedure
+    takes place after the install process is complete. This configuration
+    process contains automated setup functions and may include user
+    interaction.</para>
+  <para>Opposed to a regular install process described above, an image
+    is a <emphasis>completed installation</emphasis> of a Linux system in a
+    file. The image represents an operational system. The behavior of the
+    image varies depending on the image type and image configuration. It is
+    possible to create images that just run inside a virtual environment and
+    do not requires any configuration at start up, as all the configuration
+    information is already encoded in the image. It is possible to create
+    images that automatically configure themselves in a designated
+    environment. Further it is possible to create images that follow an
+    interactive configuration procedure when booted for the first time. An
+    image can also be created to employ any combination of configuration
+    options. The image creation process itself occurs without user interaction.
+    All information that is needed to create the image is encoded in the
+    <filename>config.xml</filename> file and optionally in the
+    <filename>config.sh</filename> and <filename>images.sh</filename> scripts
+    as well as the optional <emphasis>overlay tree (directory)</emphasis>
+    called <filename>root</filename>. The configuration information is stored
+    in the so called <emphasis>image description</emphasis> or
+    <emphasis>configuration directory</emphasis>.</para>
   </sect1>
   
   <sect1 id="sec.workflow.bootprocess">
