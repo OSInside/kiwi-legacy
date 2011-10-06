@@ -194,8 +194,12 @@
         (resize/increase) the group and the volumes inside. Support for
         LVM has been added for all disk based image types. This includes
         the vmx and oem image types. In order to use LVM the existence
-        of a, at least empty, <sgmltag>systemdisk</sgmltag> section is
-        required.
+        of a <sgmltag class="element" >systemdisk</sgmltag> section is
+        required. The <sgmltag class="element" >systemdisk</sgmltag>
+        specification may be empty. An empty
+        <sgmltag class="element" >systemdisk</sgmltag> specification triggers
+        the creation of one LVM root volume with the default
+        <emphasis>kiwiVG</emphasis> name.
       </para>
 
       <screen><command>kiwi</command> --create /tmp/myoem --type oem<!-- 

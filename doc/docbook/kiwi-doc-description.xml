@@ -708,31 +708,38 @@
         <varlistentry>
           <term><sgmltag>systemdisk</sgmltag></term>
           <listitem>
-            <para>Using the optional systemdisk section it possible to
+            <para>Using the optional systemdisk section it is possible to
               create a LVM (Logical Volume Management) based storage
-              layout. By default, the volume group is named kiwiVG. It
+              layout. By default, the volume group is named
+              <emphasis>kiwiVG</emphasis>. It
               is possible to change the name of the group by setting the
-                <sgmltag class="attribute">lvmgroup</sgmltag> attribute
+              <sgmltag class="attribute">name</sgmltag> attribute
               to the desired name. Individual volumes within the volume
-              group are specified using the <sgmltag>volume</sgmltag>
-              element. </para>
+              group are specified using the
+              <sgmltag class="element">volume</sgmltag> element. </para>
             <para>The following example shows the creation of a volume
-              named usr and a volume named var inside the volume group
-              systemVG. </para>
+              named <emphasis role="italic">usr</emphasis> and a volume
+              named <emphasis role="italic">var</emphasis> inside the volume
+              group systemVG.</para>
             <screen> &lt;systemdisk name="systemVG"&gt; 
   &lt;volume name="usr" freespace="100M"/&gt; 
   &lt;volume name="var" size="200M"/&gt; 
 &lt;/systemdisk&gt;</screen>
-            <para>With the optional <sgmltag class="attribute"
-                >freespace</sgmltag> attribute it is possible to add
-              space to the volume. If the freespace attribute is not set
-              the created volume will be 80 % to 90 % full. Using the
-              optional <sgmltag class="attribute">size</sgmltag>
-              attribute the absolute size of the given volume is
-              specified. The size attribute takes precedence over the
-              freespace attribute. Should the specified size be too
-              small the value will be ignored and a volume with
-              approximately 80 % to 90 % fill will be created. </para>
+            <para>The optional attribute
+              <sgmltag class="attribute">freespace</sgmltag> controls the
+              amount of unused space available after software has been
+              installed in the given volume. By default the available space
+              of a created volume is between 10% and 20%. Using the optional
+              <sgmltag class="attribute">size</sgmltag> attribute the
+              absolute size of the given volume is specified. The
+              <sgmltag class="attribute">size</sgmltag> attribute takes
+              precedence over the
+              <sgmltag class="attribute">freespace</sgmltag> attribute. If
+              the specified size is insufficient, based on the estimated
+              software install size for the given volume, the specified
+              value will be ignored and a volume with default settings will
+              be created. This implies that the volume will be 80% to 90%
+              full. </para>
           </listitem>
         </varlistentry>
         <varlistentry>
