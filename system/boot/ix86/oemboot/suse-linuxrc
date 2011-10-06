@@ -228,6 +228,7 @@ if [ -z "$pxe" ];then
 		fi
 		export imageDiskDevice=$biosBootDevice
 	else
+		waitForStorageDevice $disk
 		export imageDiskDevice=$(dn $disk)
 		if [ ! -z "$KIWI_RECOVERY" ];then
 			export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)

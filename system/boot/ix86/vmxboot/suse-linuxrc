@@ -132,6 +132,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	fi
 	export imageDiskDevice=$biosBootDevice
 else
+	waitForStorageDevice $disk
 	export imageDiskDevice=$(dn $disk)
 fi
 Echo "Found boot device: $imageDiskDevice"

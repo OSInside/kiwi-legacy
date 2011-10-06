@@ -2761,15 +2761,14 @@ function getSystemMD5Status {
 function waitForUSBDeviceScan {
 	local devices=0
 	local s1="usb-storage: device scan complete"
-	local s2="usbcore: registered new interface driver usb-storage"
 	if [ ! "$HAVE_USB" = "yes" ];then
 		return
 	fi
 	if [ ! "$SCAN_USB" = "complete" ];then
 		Echo -n "Waiting for USB device scan to complete..."
 		while \
-			[ $(dmesg|grep -c -E "$s1|$s2") -lt 1 ] && \
-			[ $devices -lt 15 ]
+			[ $(dmesg|grep -c -E "$s1") -lt 1 ] && \
+			[ $devices -lt 8 ]
 		do
 			echo -n .
 			sleep 1
