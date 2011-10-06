@@ -397,6 +397,9 @@ for dist in ${oldDists[@]};do
 	rm -rf /usr/share/kiwi/image/suse-$dist-JeOS
 done
 %endif
+
+%pre -n kiwi-doc
+rm -rf %{_defaultdocdir}/kiwi
   
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -447,12 +450,12 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 %dir %{_defaultdocdir}/kiwi
 %doc %{_defaultdocdir}/kiwi/COPYING
-%dir %{_defaultdocdir}/kiwi/examples
-%dir %{_defaultdocdir}/kiwi/images
+%doc %{_defaultdocdir}/kiwi/examples
+%doc %{_defaultdocdir}/kiwi/images
 %doc %{_defaultdocdir}/kiwi/kiwi.pdf
 %doc %{_defaultdocdir}/kiwi/kiwi.html
 %doc %{_defaultdocdir}/kiwi/susebooks.css
-%dir %{_defaultdocdir}/kiwi/schema
+%doc %{_defaultdocdir}/kiwi/schema
 #=================================================
 # KIWI instsource...      
 #-------------------------------------------------
