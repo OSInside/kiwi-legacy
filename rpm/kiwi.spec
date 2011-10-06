@@ -398,9 +398,6 @@ for dist in ${oldDists[@]};do
 done
 %endif
 
-%pre -n kiwi-doc
-rm -rf /usr/share/doc/packages/kiwi/*
-  
 %clean
 rm -rf $RPM_BUILD_ROOT
 #=================================================
