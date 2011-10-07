@@ -3542,12 +3542,8 @@ function searchVolumeGroup {
 	if [ ! "$kiwi_lvm" = "true" ];then
 		return 1
 	fi
-	Echo "Searching for $VGROUP volume group..."
-	if vgscan 2>&1 | grep -q "$VGROUP"; then
-		vgchange -a y $VGROUP
-		return $?
-	fi
-	return 1
+	Echo "Activating $VGROUP volume group..."
+	vgchange -a y $VGROUP
 }
 #======================================
 # searchSwapSpace
