@@ -1221,8 +1221,7 @@ sub unpackMetapackages
             $this->logMsg("W", "No script defined for metapackage $metapack");
           }
 
-          # found a package, jump to next required arch.
-          next ARCH;
+          next PACKKEY; # package processed, jump to the next request package (usually next arch or other version for source and debug package)
         }
       }
       # Package was not found
