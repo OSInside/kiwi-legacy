@@ -8,7 +8,7 @@
   <style type="text/css">
     body {
       margin-top: 1.0em;
-      background-color: #9eee53;
+      background: #93c387 url(images/background.png) repeat-x;
       font-family: Helvetica, Arial, FreeSans, san-serif;
       color: #000000;
     }
@@ -28,6 +28,7 @@
     hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
     .footer { text-align:center; padding-top:30px; font-style: italic; }
   </style>
+
 </head>
 
 <body>
@@ -42,80 +43,94 @@
         <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
     </div>
 
-    <h1><a href="http://github.com/openSUSE/kiwi">kiwi</a>
+    <h1><a href="http://github.com/openSUSE/kiwi">KIWI</a>
       <span class="small">by <a href="http://github.com/openSUSE">openSUSE</a></span></h1>
 
     <div class="description">
-      KIWI OS Image builder
+      KIWI -- OS Image and Appliance builder
     </div>
 
-    <p>The openSUSE KIWI Image System provides a complete operating system
+    <p>The KIWI Image System provides a complete operating system
 image solution for Linux supported hardware platforms as well as
-for virtualisation systems like Xen Qemu or VMware. The KIWI architecture was designed
-as a two level system. The first stage, based on a valid
-software package source, creates a so called physical extend
-according to the provided image description. The second stage creates from
-a required physical extend an operating system image. The result of the
-second stage is called a logical extend or short an image.
+for virtualisation systems like KVM (Qemu), Xen, or VMware. KIWI is a
+command line tool and is the backend of
+<a href="http://www.susestudio.com">SUSE Studio</a>. The project is
+sponsored by <a href="http://www.suse.com">SUSE</a>.</p>
+    <p>KIWI is designed to operate in 2 steps. During the first step of the
+image creation process, KIWI creates a so called <i>unpacked image</i>
+based on a user provided image specification. During this process software
+from specified repositories and/or other specified software sources is
+installed into the <i>unpacked image</i> directory. In the second step KIWI
+creates the <i>compact image</i> or <i>image</i> in the format specified.
 <br><br>
-A normal installation process is starting from a given installation source
-and installs single pieces of software until the system is complete. During
-this process there may be manual user intervention required. However an
-operating system image represents an already completed installation
-encapsulated as a file and optionally includes the configuration for a
-specific task. Such an operating system starts working as soon as the
-image has been brought to a system storage device no matter if this is a
-volatile or non volatile storage. The process of creating an image takes
-place without user interaction.
+The image behavior is determined by the image type and the image setup with
+respect to configuration/customization. Behavior may range from a
+self installing and self configuring image to a plug and play image where no
+configuration by the user or the image itself is necessary.
 <br><br>
-This means all requirements of the encapsulated system has to be fulfilled
-before the image is created. According to this the so called
-image description tree stores all the information needed to
-create an image.
-<H2>Features</H2>
-<p>
+The image specification is stored in a <i>configuration tree (directory)</i>
+that contains the primary configuration file (<i>config.xml</i>) and optional
+shell scripts and overlay files.</p>
+
+<H2>Feature Highlights</H2>
 <ul>
 <li>Distribution independent design</li>
-<li>Support for full virtual systems like VMware, KVM, VirtualBox and more</li>
-<li>Support for Xen para-virtual system</li>
-<li>Support for Amazon EC2 cloud system (ami)</li>
-<li>Support for deploying images over the network (pxe)</li>
-<li>Support for pre-installed OEM systems</li>
-<li>Support for USB-Stick systems</li>
-<li>Support for LiveCD/DVD systems</li>
-<li>Centralized image description based on a XML description</li>
-<li>Prebuild PXE configuration usable with kiwi netboot images</li>
-<li>Architectures: x86, x86_64, s390, [ ppc development branch ]</li>
+<li>Build images for:</li>
+<ul>
+<li>Virtualization systems KVM, VMware, VirtualBox, Xen, and others</li>
+<li>The Cloud, Amazon EC2 (AMI), Eucalyptus, OpenNebula, OpenStack,
+ and others</li>
+<li>Network deployment (PXE)</li>
+<li>Pre-installed OEM systems</li>
+<li>Portable USB-Storage, live or self installing (Stick or drive)</li>
+<li>CD/DVD, live or self installing</li>
+</ul>
+<li>Centralized image description based around a configuration XML file</li>
+<li>Supported architectures:</li>
+<ul>
+<li>x86, x86_64, s390, [ ppc under development ]</li>
+</ul>
 <li>Support for LVM</li>
 <li>Support for xfs,btrfs,ext[2,3,4],reiserfs</li>
-<li>...hopefully more in the future :)</li>
+<li>Support for encryption</li>
+<li>and many more</li>
 </ul>
-</p>
-<H1>Eager to start with your first appliance ?</H1>
-If so you should also have a look at <A HREF="http://www.susestudio.com">SuSE Studio</A> which is a great web application using kiwi as the backend for creating appliances insanely easy. For those who would like to try it out on the commandline I recommend our kiwi cookbook: <A HREF="http://en.opensuse.org/Portal:KIWI">Cook it</A>
+<h2>Eager to start with your first appliance ?</h2>
+With the <A HREF="http://www.susestudio.com">SUSE Studio</A> web application
+you can create an image in no time and you can even test the created image
+in your browser. Getting started KIWI on the command line is not quite as
+speedy. You can get going by following the examples in the
+<A HREF="http://en.opensuse.org/Portal:KIWI">KIWI Cookbook</A>. The latest
+and greates KIWI documentation can be found
+<!--FIXME  link to kiwi.html--><a href="">here</a>. The documentation also
+describes the build of the examples provided by KIWI in the <i>examples</i>
+directory as part of the documentation package.
 
+<h2>Install</h2>
+  <p>RPM packages can be found in the Virtualization/Appliances project in the
+<a href="http://build.opensuse.org">openSUSE Build Service</a> at 
+<a href="http://download.opensuse.org/repositories/Virtualization:/Appliances">http://download.opensuse.org/repositories/Virtualization:/Appliances</a></p>
 
-
-</p><h2>Install</h2>
-<p>RPM packages can be found in the Virtualization/Appliances project here: http://download.opensuse.org/repositories/Virtualization:/Appliances</p>
 <h2>License</h2>
-<p>GPL</p>
+  <p>GPL</p>
+
 <h2>Authors</h2>
-<p>Adrian Schröter (adrian@suse.de)<br/>Robert Schweikert (rjschwei@suse.com)<br/>Marcus Schäfer (ms@suse.de)<br/><br/><br/>      </p>
+  <p>Marcus Schäfer (ms@suse.de)<br/>
+Adrian Schröter (adrian@suse.de)<br/>
+Robert Schweikert (rjschwei@suse.com)</p>
+
 <h2>Contact</h2>
-<p>Marcus Schäfer (ms@suse.de)<br/>      </p>
+  <p>Marcus Schäfer (ms@suse.de)</p>
 
-
-    <h2>Download</h2>
-    <p>
-      You can download this project in either
-      <a href="http://github.com/openSUSE/kiwi/zipball/master">zip</a> or
-      <a href="http://github.com/openSUSE/kiwi/tarball/master">tar</a> formats.
-    </p>
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/openSUSE/kiwi</pre>
-    </p>
+<h2>Download</h2>
+  <p>You can download this project in either
+    <a href="http://github.com/openSUSE/kiwi/zipball/master">zip</a> or
+    <a href="http://github.com/openSUSE/kiwi/tarball/master">tar</a> formats.
+  </p>
+  <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
+    by running:
+    <pre>$ git clone git://github.com/openSUSE/kiwi</pre>
+  </p>
 
     <div class="footer">
       get the source code on GitHub : <a href="http://github.com/openSUSE/kiwi">openSUSE/kiwi</a>
