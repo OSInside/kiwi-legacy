@@ -1,4 +1,20 @@
 -------------------------------------------------------------------
+Fri Oct  7 15:35:30 CEST 2011 - ms@suse.de
+
+- fixed the collection of multiple instances of one package
+  based on version, repository and architecture in case they are
+  source or debug packages.
+- make sure updateOtherDeviceFstab creates the mount point
+- activate only volume group stored in $VGROUP, prevent vgscan
+- fixed luksOpen to generate unique name for luksroot
+- fixed luksOpen to stop asking for the passphrase after 3 times
+- fixed updateOtherDeviceFstab to work in luks and/or RAID env
+- fixed luksOpen to wait until the mapper created the device
+- allow luks_pass to be set on the kernel commandline
+- added level sorting for LVM volumes to make sure e.g /opt is
+  mounted before /opt/bob
+
+-------------------------------------------------------------------
 Wed Sep 21 15:02:35 CEST 2011 - ms@suse.de
 
 - fixed download of md5 file in oem pxe install mode
