@@ -791,9 +791,11 @@ function createBootDeviceFilesystem {
 # createLuksMaps
 #--------------------------------------
 function createLuksMaps {
-	export imageRootDevice=$(luksOpen $imageRootDevice)
+	luksOpen $imageRootDevice
+	export imageRootDevice=$luksDeviceOpened
 	if isFSTypeReadOnly;then
-		export imageIOWRDevice=$(luksOpen $imageIOWRDevice luksReadWrite)
+		luksOpen $imageIOWRDevice luksReadWrite
+		export imageIOWRDevice=$luksDeviceOpened
 		export imageRWDevice=$imageIOWRDevice
 		export imageRODevice=$imageRootDevice
 	fi

@@ -176,7 +176,8 @@ CDUmount
 if [ -z "$UNIONFS_CONFIG" ];then
 	probeFileSystem $imageDevice
 	if [ "$FSTYPE" = "luks" ];then
-		imageDevice=$(luksOpen $imageDevice)
+		luksOpen $imageDevice
+		imageDevice=$luksDeviceOpened
 		probeFileSystem $imageDevice
 		export haveLuks=yes
 	fi

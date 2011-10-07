@@ -2484,9 +2484,15 @@ function updateOtherDeviceFstab {
 			[ ! "$partMount" = "x" ] && \
 			[ ! "$partMount" = "/" ]
 		then
-			device=$(ddn $DISK $count)
+			if [ ! -z "$RAID" ];then
+				device=/dev/md$((count - 1))
+			else
+				device=$(ddn $DISK $count)
+			fi
 			probeFileSystem $device
-			echo "$device $partMount $FSTYPE defaults 0 0" >> $nfstab
+			if [ ! "$FSTYPE" = "luks" ] ; then
+				echo "$device $partMount $FSTYPE defaults 0 0" >> $nfstab
+			fi
 		fi
 	done
 }
@@ -5878,8 +5884,10 @@ function setupUnionFS {
 	local rwDevice=`getDiskID $1`
 	local roDevice=`getDiskID $2`
 	local unionFST=$3
-	rwDeviceLuks=$(luksOpen $rwDevice luksReadWrite)
-	roDeviceLuks=$(luksOpen $roDevice luksReadOnly)
+	luksOpen $rwDevice luksReadWrite
+	rwDeviceLuks=$luksDeviceOpened
+	luksOpen $roDevice luksReadOnly
+	roDeviceLuks=$luksDeviceOpened
 	if [ ! $rwDeviceLuks = $rwDevice ];then
 		rwDevice=$rwDeviceLuks
 		export haveLuks="yes"
@@ -6041,31 +6049,48 @@ function luksOpen {
 	# ----
 	local ldev=$1
 	local name=$2
+	local retry=1
 	local info
-	if [ -z $name ];then
-		name=luksroot
+	if [ -z "$name" ];then
+		name=luks_$(basename $ldev)
 	fi
 	if [ -e /dev/mapper/$name ];then
-		echo /dev/mapper/$name; return
+		export luksDeviceOpened=/dev/mapper/$name
+		return
 	fi
 	if ! cryptsetup isLuks $ldev &>/dev/null;then
-		echo $ldev; return
+		export luksDeviceOpened=$ldev
+		return
+	fi
+	if [ ! -z "$luks_pass" ];then
+		echo $luks_pass > /tmp/luks
 	fi
 	while true;do
 		if [ ! -e /tmp/luks ];then
+			Echo "Try: $retry"
 			LUKS_OPEN=$(runInteractive \
 				"--stdout --insecure --passwordbox "\"$TEXT_LUKS\"" 10 60"
 			)
 			echo $LUKS_OPEN > /tmp/luks
 		fi
-		info=$(cat /tmp/luks | cryptsetup luksOpen $ldev $name 2>&1)
-		if [ $? = 0 ];then
+		if cat /tmp/luks | cryptsetup luksOpen $ldev $name;then
 			break
 		fi
 		rm -f /tmp/luks
-		Dialog --stdout --timeout 10 --msgbox "\"Error: $info\"" 8 60
+		unset luks_pass
+		if [ $retry -eq 3 ];then
+			systemException \
+				"Max retries reached... reboot" \
+			"reboot"
+		fi
+		retry=$(($retry + 1))
 	done
-	echo /dev/mapper/$name
+	if ! waitForStorageDevice /dev/mapper/$name &>/dev/null;then
+		systemException \
+			"LUKS map /dev/mapper/$name doesn't appear... fatal !" \
+		"reboot"
+	fi
+	export luksDeviceOpened=/dev/mapper/$name
 }
 #======================================
 # luksResize
