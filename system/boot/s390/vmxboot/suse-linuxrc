@@ -174,7 +174,8 @@ fi
 #--------------------------------------
 probeFileSystem $imageRootDevice
 if [ "$FSTYPE" = "luks" ];then
-	imageRootDevice=$(luksOpen $imageRootDevice)
+	luksOpen $imageRootDevice
+	imageRootDevice=$luksDeviceOpened
 	imageRODevice=$imageRootDevice
 	probeFileSystem $imageRootDevice
 	export haveLuks=yes

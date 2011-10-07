@@ -119,7 +119,11 @@ function setupInitialDeviceNames {
 	# Check for LUKS extension on root fs
 	#--------------------------------------
 	if [ "$FSTYPE" = "luks" ];then
-		imageRootDevice=$(luksOpen $imageRootDevice)
+		luksOpen $imageRootDevice
+		imageRootDevice=$luksDeviceOpened
+		if [ -e /dev/$VGROUP/LVComp ];then
+			imageRODevice=$imageRootDevice
+		fi
 		probeFileSystem $imageRootDevice
 		export haveLuks=yes
 	fi
