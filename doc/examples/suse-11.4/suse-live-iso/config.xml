@@ -8,14 +8,6 @@
 	</description>
 	<preferences>
 		<type image="iso" primary="true" boot="isoboot/suse-11.4" hybrid="true" flags="clic"/>
-		<type image="oem" boot="oemboot/suse-11.3" filesystem="clicfs" bootloader="syslinux" ramonly="true">
-			<oemconfig>
-				<oem-swap>false</oem-swap>
-				<oem-systemsize>2048</oem-systemsize>
-				<oem-silent-boot>true</oem-silent-boot>
-			</oemconfig>
-			<systemdisk/>
-		</type>
 		<version>2.5.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
