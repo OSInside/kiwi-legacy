@@ -1812,14 +1812,18 @@ sub setupBootDisk {
 	#------------------------------------------
 	my $dmap; # device map
 	my $root; # root device
+	if (! defined $system) {
+		$kiwi -> error  ("No system image given");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if (! $haveDiskDevice) {
+		$kiwi -> info ("Creating virtual disk...");
+	} else {
+		$kiwi -> info ("Using disk device $haveDiskDevice...");
+	}
 	while (1) {
-		if (! defined $system) {
-			$kiwi -> error  ("No system image given");
-			$kiwi -> failed ();
-			return undef;
-		}
 		if (! $haveDiskDevice) {
-			$kiwi -> info ("Creating virtual disk...");
 			$status = qxx ("qemu-img create $diskname $this->{vmsize} 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -1835,7 +1839,6 @@ sub setupBootDisk {
 				return undef;
 			}
 		} else {
-			$kiwi -> info ("Using disk device $haveDiskDevice...");
 			# /.../
 			# the following is required for suse studio to determine the
 			# size of the image target disk. It has no relevance for the
