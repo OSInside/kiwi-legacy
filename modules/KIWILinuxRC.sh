@@ -7664,7 +7664,7 @@ function createSnapshotMap {
 	echo "kpartx -d $diskLoop" >> $reset
 	if searchVolumeGroup; then
 		diskLoop=/dev/$VGROUP/LVRoot
-		echo "vgchange -an" >> $reset
+		echo "vgchange -a n $VGROUP" >> $reset
 	else
 		diskLoop=$(echo $diskLoop | cut -f3 -d '/')
 		diskLoop=/dev/mapper/${diskLoop}p1
