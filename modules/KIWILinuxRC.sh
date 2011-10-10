@@ -5743,10 +5743,12 @@ function luksOpen {
 	while true;do
 		if [ ! -e /tmp/luks ];then
 			Echo "Try: $retry"
+			errorLogStop
 			LUKS_OPEN=$(runInteractive \
 				"--stdout --insecure --passwordbox "\"$TEXT_LUKS\"" 10 60"
 			)
 			echo $LUKS_OPEN > /tmp/luks
+			errorLogContinue
 		fi
 		if cat /tmp/luks | cryptsetup luksOpen $ldev $name;then
 			break
