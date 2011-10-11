@@ -1,4 +1,20 @@
 -------------------------------------------------------------------
+Tue Oct 11 10:23:16 CEST 2011 - ms@suse.de
+
+- fixed the check for the installed system in the netboot code
+  if the luks encryption is used. The check calls luksOpen with
+  luks_open_can_fail=yes. This means if the wrong passphrase is
+  given the check will proceed with 'update is required' and
+  does not fail with a reboot exception in luksOpen
+- added hooks preswap/postswap which run before the check and
+  creation of the imageSwapDevice. This allows to setup your
+  own swap device handling.
+- allow luksOpen to fail if luks_open_can_fail is set
+- allow map name to be specified in luksClose
+- fixed updateOtherDeviceFstab to make use of the prefix argument
+- don't show the LUKS passphrase as part of the boot log
+
+-------------------------------------------------------------------
 Fri Oct  7 15:35:30 CEST 2011 - ms@suse.de
 
 - fixed the collection of multiple instances of one package
