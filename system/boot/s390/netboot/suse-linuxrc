@@ -405,11 +405,13 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	else
 		export imageSwapDevice=$(pxeRaidSwapDevice)
 	fi
+	runHook preswap
 	if [ ! -z "$imageSwapDevice" ];then
 		if ! mkswap $imageSwapDevice 1>&2;then
 			systemException "Failed to create swap signature" "reboot"
 		fi
 	fi
+	runHook postswap
 	#======================================
 	# Setup boot space if requested
 	#--------------------------------------
