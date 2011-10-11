@@ -1,6 +1,9 @@
 -------------------------------------------------------------------
 Tue Oct 11 10:23:16 CEST 2011 - ms@suse.de
 
+- added preException hook which runs inside the systemExcpetion
+  function to allow further tasks before the exception message
+  is printed and the shell/reboot/wait action happens
 - fixed the check for the installed system in the netboot code
   if the luks encryption is used. The check calls luksOpen with
   luks_open_can_fail=yes. This means if the wrong passphrase is
