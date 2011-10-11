@@ -6050,35 +6050,46 @@ function luksOpen {
 	local name=$2
 	local retry=1
 	local info
+	#======================================
+	# no map name set, build it from device
+	#--------------------------------------
 	if [ -z "$name" ];then
 		name=luks_$(basename $ldev)
 	fi
+	#======================================
+	# luks map already exists, return
+	#--------------------------------------
 	if [ -e /dev/mapper/$name ];then
 		export luksDeviceOpened=/dev/mapper/$name
 		return
 	fi
+	#======================================
+	# check device for luks extension
+	#--------------------------------------
 	if ! cryptsetup isLuks $ldev &>/dev/null;then
 		export luksDeviceOpened=$ldev
 		return
 	fi
-	if [ ! -z "$luks_pass" ];then
-		echo $luks_pass > /tmp/luks
-	fi
+	#======================================
+	# ask for passphrase if not cached
+	#--------------------------------------
 	while true;do
-		if [ ! -e /tmp/luks ];then
+		if [ -z "$luks_pass" ];then
 			Echo "Try: $retry"
 			errorLogStop
-			LUKS_OPEN=$(runInteractive \
+			luks_pass=$(runInteractive \
 				"--stdout --insecure --passwordbox "\"$TEXT_LUKS\"" 10 60"
 			)
-			echo $LUKS_OPEN > /tmp/luks
 			errorLogContinue
 		fi
-		if cat /tmp/luks | cryptsetup luksOpen $ldev $name;then
+		if echo "$luks_pass" | cryptsetup luksOpen $ldev $name;then
 			break
 		fi
-		rm -f /tmp/luks
 		unset luks_pass
+		if [ -n "$luks_open_can_fail" ]; then
+			unset luksDeviceOpened
+			return 1
+		fi
 		if [ $retry -eq 3 ];then
 			systemException \
 				"Max retries reached... reboot" \
@@ -6086,12 +6097,19 @@ function luksOpen {
 		fi
 		retry=$(($retry + 1))
 	done
+	#======================================
+	# wait for the luks map to appear
+	#--------------------------------------
 	if ! waitForStorageDevice /dev/mapper/$name &>/dev/null;then
 		systemException \
 			"LUKS map /dev/mapper/$name doesn't appear... fatal !" \
 		"reboot"
 	fi
+	#======================================
+	# store luks device and return
+	#--------------------------------------
 	export luksDeviceOpened=/dev/mapper/$name
+	return 0
 }
 #======================================
 # luksResize
@@ -6119,7 +6137,18 @@ function luksClose {
 	# /.../
 	# close all open LUKS mappings
 	# ----
-	local name
+	local name=$1
+	#======================================
+	# close specified name if set
+	#--------------------------------------
+	if [ -n "$1" ]; then
+		name=$(basename $1)
+		cryptsetup luksClose $name
+		return
+	fi
+	#======================================
+	# close all luks* map names
+	#--------------------------------------
 	for i in /dev/mapper/luks*;do
 		name=$(basename $i)
 		cryptsetup luksClose $name
