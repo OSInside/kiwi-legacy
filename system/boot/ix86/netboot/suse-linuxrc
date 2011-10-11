@@ -309,11 +309,14 @@ if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 		if linuxPartition $imageDiskDevice;then
 			probeFileSystem $imageDevice
 			if [ "$FSTYPE" = "luks" ];then
-				luksOpen $imageDevice
-				imageDevice=$luksDeviceOpened
-				imageRODevice=$imageDevice
-				probeFileSystem $imageRootDevice
-				export haveLuks=yes
+				luks_open_can_fail=yes
+				if luksOpen $imageDevice ; then
+					imageDevice=$luksDeviceOpened
+					imageRODevice=$imageDevice
+					probeFileSystem $imageRootDevice
+					export haveLuks=yes
+				fi
+				unset luks_open_can_fail
 			fi
 			if mountSystem $imageDevice;then
 				updateNeeded
@@ -328,6 +331,9 @@ if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 				umountSystem
 				RELOAD_IMAGE="yes"
 				systemIntegrity="clean"
+			fi
+			if [ -n "$haveLuks" ]; then
+				luksClose $imageDevice
 			fi
 		else
 			systemIntegrity="clean"
