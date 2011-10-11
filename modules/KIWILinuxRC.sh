@@ -2491,8 +2491,8 @@ function updateOtherDeviceFstab {
 			fi
 			probeFileSystem $device
 			if [ ! "$FSTYPE" = "luks" ] ; then
-				if [ ! -d $partMount ];then
-					mkdir -p $partMount
+				if [ ! -d $prefix/$partMount ];then
+					mkdir -p $prefix/$partMount
 				fi
 				echo "$device $partMount $FSTYPE defaults 0 0" >> $nfstab
 			fi
