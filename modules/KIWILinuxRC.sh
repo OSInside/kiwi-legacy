@@ -325,6 +325,7 @@ function systemException {
 			what="shell"
 		fi
 	fi
+	runHook preException "$@"
 	Echo "$1"
 	case "$what" in
 	"reboot")
