@@ -386,7 +386,7 @@ sub new {
 		my $minInodes;
 		my $sizeXMLBytes = 0;
 		my $spare        = 100 * 1024 * 1024; # 100M free
-		my $journal      = 12  * 1024 * 1024; # 12M  journal
+		my $fsoverhead   = 1.4; # 4% filesystem overhead
 		my $fsopts       = $cmdL -> getFilesystemOptions();
 		my $inodesize    = $fsopts->[1];
 		my $inoderatio   = $fsopts->[2];
@@ -399,11 +399,11 @@ sub new {
 			# System is specified as a directory...
 			$minInodes = qxx ("find $system | wc -l");
 			$sizeBytes = qxx ("du -s --block-size=1 $system | cut -f1");
+			$sizeBytes*= $fsoverhead;
 			chomp $minInodes;
 			chomp $sizeBytes;
 			$minInodes*= 2;
 			$sizeBytes+= $minInodes * $inodesize;
-			$sizeBytes+= $journal;
 			$sizeBytes+= $kernelSize;
 			$sizeBytes+= $initrdSize;
 			$sizeBytes+= $spare;
