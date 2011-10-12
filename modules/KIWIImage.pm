@@ -187,6 +187,7 @@ sub updateDescription {
 	my @falistImage;
 	my @fplistImage;
 	my @fplistDelete;
+	my @driverList;
 	my %fixedBootInclude;
 	my @node;
 	#==========================================
@@ -250,6 +251,21 @@ sub updateDescription {
 		$repos{$source} = [$type,$alias,$prio,$user,$pwd];
 	}
 	$changeset{"repositories"} = \%repos;
+	#==========================================
+	# Store drivers section if any
+	#------------------------------------------
+	@node = $src_xml->getDriversNodeList() -> get_nodelist();
+	foreach my $element (@node) {
+		if (! $src_xml -> __requestedProfile ($element)) {
+			next;
+		}
+		my @files = $element->getElementsByTagName ("file");
+		foreach my $element (@files) {
+			my $driver = $element -> getAttribute ("name");
+			push (@driverList,$driver);
+		}
+	}
+	$changeset{"driverList"} = \@driverList;
 	#==========================================
 	# Store boot included packages
 	#------------------------------------------

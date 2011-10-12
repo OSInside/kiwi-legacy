@@ -170,6 +170,7 @@ sub new {
 	$this->{repositNodeList} = $repositNodeList;
 	$this->{packageNodeList} = $packageNodeList;
 	$this->{instsrcNodeList} = $instsrcNodeList;
+	$this->{driversNodeList} = $driversNodeList;
 	#==========================================
 	# Read and create profile hash
 	#------------------------------------------
@@ -214,7 +215,6 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{driversNodeList}    = $driversNodeList;
 	$this->{usrdataNodeList}    = $usrdataNodeList;
 	$this->{controlFile}        = $controlFile;
 	#==========================================
@@ -2012,6 +2012,41 @@ sub addRepository {
 }
 
 #==========================================
+# addDrivers
+#------------------------------------------
+sub addDrivers {
+	# ...
+	# Add the given driver list to the specified drivers
+	# section of the xml description parse tree.
+	# ----
+	my $this  = shift;
+	my @drvs  = @_;
+	my $kiwi  = $this->{kiwi};
+	my $nodes = $this->{driversNodeList};
+	my $nodeNumber = -1;
+    for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node = $nodes -> get_node($i);
+		if (! $this -> __requestedProfile ($node)) {
+			next;
+		}
+		$nodeNumber = $i;
+	}
+	if ($nodeNumber < 0) {
+		$kiwi -> loginfo ("addDrivers: no drivers section found... skipped\n");
+		return $this;
+	}
+	foreach my $driver (@drvs) {
+		next if ($driver eq "");
+		my $addElement = new XML::LibXML::Element ("file");
+		$addElement -> setAttribute("name",$driver);
+		$nodes -> get_node($nodeNumber)
+			-> appendChild ($addElement);
+	}
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
 # addPackages
 #------------------------------------------
 sub addPackages {
@@ -3490,6 +3525,18 @@ sub getNodeList {
 }
 
 #==========================================
+# getDriversNodeList
+#------------------------------------------
+sub getDriversNodeList {
+	# ...
+	# Return a list of all <drivers> nodes. Each list member
+	# is an XML::LibXML::Element object pointer
+	# ---
+	my $this = shift;
+	return $this->{driversNodeList};
+}
+
+#==========================================
 # getPackageNodeList
 #------------------------------------------
 sub getPackageNodeList {
@@ -4268,7 +4315,18 @@ sub __updateDescriptionFromChangeSet {
 		$kiwi -> done ();
 	}
 	#==========================================
-	# 2) merge/update packages
+	# 2) merge/update drivers
+	#------------------------------------------
+	if (@{$changeset->{driverList}}) {
+		$kiwi -> info ("Updating driver(s):\n");
+		my @drivers = @{$changeset->{driverList}};
+		foreach my $d (@drivers) {
+			$kiwi -> info ("--> $d\n");
+		}
+		$this -> addDrivers (@drivers);
+	}
+	#==========================================
+	# 3) merge/update packages
 	#------------------------------------------
 	if (@{$changeset->{fplistImage}}) {
 		$kiwi -> info ("Updating package(s):\n");
@@ -4288,7 +4346,7 @@ sub __updateDescriptionFromChangeSet {
 		}
 	}
 	#==========================================
-	# 3) merge/update archives
+	# 4) merge/update archives
 	#------------------------------------------
 	if (@{$changeset->{falistImage}}) {
 		$kiwi -> info ("Updating archive(s):\n");
@@ -4301,13 +4359,13 @@ sub __updateDescriptionFromChangeSet {
 		);
 	}
 	#==========================================
-	# 4) merge/update machine attribs in type
+	# 5) merge/update machine attribs in type
 	#------------------------------------------
 	if (defined $changeset->{"domain"}) {
 		$this -> __setMachineAttribute ("domain",$changeset);
 	}
 	#==========================================
-	# 5) merge/update preferences and type
+	# 6) merge/update preferences and type
 	#------------------------------------------
 	if (defined $changeset->{"locale"}) {
 		$this -> __setOptionsElement ("locale",$changeset);
@@ -4376,7 +4434,7 @@ sub __updateDescriptionFromChangeSet {
 		$this -> __setSystemDiskElement (undef,$changeset);
 	}
 	#==========================================
-	# 6) merge/update type attributes
+	# 7) merge/update type attributes
 	#------------------------------------------
 	if (defined $changeset->{"hybrid"}) {
 		$this -> __setTypeAttribute (
@@ -4419,7 +4477,7 @@ sub __updateDescriptionFromChangeSet {
 		);
 	}
 	#==========================================
-	# 7) merge/update image attribs, toplevel
+	# 8) merge/update image attribs, toplevel
 	#------------------------------------------
 	if (defined $changeset->{"displayname"}) {
 		$this -> __setImageAttribute (
@@ -4427,7 +4485,7 @@ sub __updateDescriptionFromChangeSet {
 		);
 	}
 	#==========================================
-	# 8) cleanup reqProfiles
+	# 9) cleanup reqProfiles
 	#------------------------------------------
 	$this->{reqProfiles} = $reqProfiles;
 }
