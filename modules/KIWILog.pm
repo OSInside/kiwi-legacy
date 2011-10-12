@@ -295,6 +295,29 @@ sub notset {
 }
 
 #==========================================
+# oops
+#------------------------------------------
+sub oops {
+	# ...
+	# This is the cyan "oops" flag
+	# ---
+	my $this    = shift;
+	my $rootEFD = $this->{rootefd};
+	my $FD      = $this->{channel};
+	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
+		$this -> doStat();
+		print $FD "\033[1;36moops\n";
+		$this -> doNorm();
+		if ($this->{errorOk}) {
+			print $rootEFD "   notset\n";
+		}
+	} else {
+		print $FD "   oops\n";
+	}
+	$this -> saveInCache ("   oops\n");
+}
+
+#==========================================
 # step
 #------------------------------------------
 sub step {
