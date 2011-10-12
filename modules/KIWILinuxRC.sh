@@ -2766,28 +2766,24 @@ function getSystemMD5Status {
 	echo $SYSTEM_MD5STATUS | cut -f$1 -d:
 }
 #======================================
-# waitForUSBDeviceScan
+# waitForIdleEventQueue
 #--------------------------------------
-function waitForUSBDeviceScan {
-	local devices=0
-	local s1="usb-storage: device scan complete"
-	if [ ! "$HAVE_USB" = "yes" ];then
-		return
-	fi
-	if [ ! "$SCAN_USB" = "complete" ];then
-		Echo -n "Waiting for USB device scan to complete..."
-		while \
-			[ $(dmesg|grep -c -E "$s1") -lt 1 ] && \
-			[ $devices -lt 8 ]
-		do
-			echo -n .
-			sleep 1
-			devices=$(( $devices + 1 ))
-		done
-		echo
+function waitForIdleEventQueue {
+	local devs=0
+	local p_devs=1
+	local timeout=5
+	Echo -n "Waiting for devices to settle..."
+	while true;do
 		udevPending
-		SCAN_USB=complete
-	fi
+		devs=$(ls -1 /dev | wc -l)
+		if [ $devs -eq $p_devs ];then
+			break
+		fi
+		p_devs=$devs
+		sleep $timeout
+		echo -n .
+	done
+	echo
 }
 #======================================
 # probeUSB
@@ -2796,8 +2792,6 @@ function probeUSB {
 	local module=""
 	local stdevs=""
 	local hwicmd="/usr/sbin/hwinfo"
-	export HAVE_USB="no"
-	export SCAN_USB="not-started"
 	udevPending
 	if [ $HAVE_MODULES_ORDER = 0 ];then
 		#======================================
@@ -2853,19 +2847,13 @@ function probeUSB {
 			modprobe $i &>/dev/null
 		done
 	fi
-	if [ -e /sys/bus/usb/devices ];then
-		stdevs=$(ls -1 /sys/bus/usb/devices/ | wc -l)
-		if [ $stdevs -gt 0 ];then
-			export HAVE_USB="yes"
-		fi
-	fi
-	waitForUSBDeviceScan
 }
 #======================================
 # probeDevices
 #--------------------------------------
 function probeDevices {
 	local skipUSB=$1
+	waitForIdleEventQueue
 	#======================================
 	# probe USB devices and load modules
 	#--------------------------------------
@@ -2947,6 +2935,7 @@ function probeDevices {
 		modprobe $i &>/dev/null
 	done
 	udevPending
+	waitForIdleEventQueue
 }
 #======================================
 # CDDevice
@@ -2993,7 +2982,6 @@ function USBStickDevice {
 	#======================================
 	# search for USB removable devices
 	#--------------------------------------
-	waitForUSBDeviceScan
 	for device in /sys/bus/usb/drivers/usb-storage/*;do
 		if [ ! -L $device ];then
 			continue
