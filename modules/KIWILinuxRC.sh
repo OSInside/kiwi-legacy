@@ -329,6 +329,7 @@ function systemException {
 			what="shell"
 		fi
 	fi
+	runHook preException "$@"
 	Echo "$1"
 	case "$what" in
 	"reboot")
@@ -2491,8 +2492,8 @@ function updateOtherDeviceFstab {
 			fi
 			probeFileSystem $device
 			if [ ! "$FSTYPE" = "luks" ] ; then
-				if [ ! -d $partMount ];then
-					mkdir -p $partMount
+				if [ ! -d $prefix/$partMount ];then
+					mkdir -p $prefix/$partMount
 				fi
 				echo "$device $partMount $FSTYPE defaults 0 0" >> $nfstab
 			fi
@@ -2765,28 +2766,24 @@ function getSystemMD5Status {
 	echo $SYSTEM_MD5STATUS | cut -f$1 -d:
 }
 #======================================
-# waitForUSBDeviceScan
+# waitForIdleEventQueue
 #--------------------------------------
-function waitForUSBDeviceScan {
-	local devices=0
-	local s1="usb-storage: device scan complete"
-	if [ ! "$HAVE_USB" = "yes" ];then
-		return
-	fi
-	if [ ! "$SCAN_USB" = "complete" ];then
-		Echo -n "Waiting for USB device scan to complete..."
-		while \
-			[ $(dmesg|grep -c -E "$s1") -lt 1 ] && \
-			[ $devices -lt 8 ]
-		do
-			echo -n .
-			sleep 1
-			devices=$(( $devices + 1 ))
-		done
-		echo
+function waitForIdleEventQueue {
+	local devs=0
+	local p_devs=1
+	local timeout=5
+	Echo -n "Waiting for devices to settle..."
+	while true;do
 		udevPending
-		SCAN_USB=complete
-	fi
+		devs=$(ls -1 /dev | wc -l)
+		if [ $devs -eq $p_devs ];then
+			break
+		fi
+		p_devs=$devs
+		sleep $timeout
+		echo -n .
+	done
+	echo
 }
 #======================================
 # probeUSB
@@ -2795,8 +2792,6 @@ function probeUSB {
 	local module=""
 	local stdevs=""
 	local hwicmd="/usr/sbin/hwinfo"
-	export HAVE_USB="no"
-	export SCAN_USB="not-started"
 	udevPending
 	if [ $HAVE_MODULES_ORDER = 0 ];then
 		#======================================
@@ -2852,19 +2847,13 @@ function probeUSB {
 			modprobe $i &>/dev/null
 		done
 	fi
-	if [ -e /sys/bus/usb/devices ];then
-		stdevs=$(ls -1 /sys/bus/usb/devices/ | wc -l)
-		if [ $stdevs -gt 0 ];then
-			export HAVE_USB="yes"
-		fi
-	fi
-	waitForUSBDeviceScan
 }
 #======================================
 # probeDevices
 #--------------------------------------
 function probeDevices {
 	local skipUSB=$1
+	waitForIdleEventQueue
 	#======================================
 	# probe USB devices and load modules
 	#--------------------------------------
@@ -2946,6 +2935,7 @@ function probeDevices {
 		modprobe $i &>/dev/null
 	done
 	udevPending
+	waitForIdleEventQueue
 }
 #======================================
 # CDDevice
@@ -2992,7 +2982,6 @@ function USBStickDevice {
 	#======================================
 	# search for USB removable devices
 	#--------------------------------------
-	waitForUSBDeviceScan
 	for device in /sys/bus/usb/drivers/usb-storage/*;do
 		if [ ! -L $device ];then
 			continue
@@ -6050,35 +6039,46 @@ function luksOpen {
 	local name=$2
 	local retry=1
 	local info
+	#======================================
+	# no map name set, build it from device
+	#--------------------------------------
 	if [ -z "$name" ];then
 		name=luks_$(basename $ldev)
 	fi
+	#======================================
+	# luks map already exists, return
+	#--------------------------------------
 	if [ -e /dev/mapper/$name ];then
 		export luksDeviceOpened=/dev/mapper/$name
 		return
 	fi
+	#======================================
+	# check device for luks extension
+	#--------------------------------------
 	if ! cryptsetup isLuks $ldev &>/dev/null;then
 		export luksDeviceOpened=$ldev
 		return
 	fi
-	if [ ! -z "$luks_pass" ];then
-		echo $luks_pass > /tmp/luks
-	fi
+	#======================================
+	# ask for passphrase if not cached
+	#--------------------------------------
 	while true;do
-		if [ ! -e /tmp/luks ];then
+		if [ -z "$luks_pass" ];then
 			Echo "Try: $retry"
 			errorLogStop
-			LUKS_OPEN=$(runInteractive \
+			luks_pass=$(runInteractive \
 				"--stdout --insecure --passwordbox "\"$TEXT_LUKS\"" 10 60"
 			)
-			echo $LUKS_OPEN > /tmp/luks
 			errorLogContinue
 		fi
-		if cat /tmp/luks | cryptsetup luksOpen $ldev $name;then
+		if echo "$luks_pass" | cryptsetup luksOpen $ldev $name;then
 			break
 		fi
-		rm -f /tmp/luks
 		unset luks_pass
+		if [ -n "$luks_open_can_fail" ]; then
+			unset luksDeviceOpened
+			return 1
+		fi
 		if [ $retry -eq 3 ];then
 			systemException \
 				"Max retries reached... reboot" \
@@ -6086,12 +6086,19 @@ function luksOpen {
 		fi
 		retry=$(($retry + 1))
 	done
+	#======================================
+	# wait for the luks map to appear
+	#--------------------------------------
 	if ! waitForStorageDevice /dev/mapper/$name &>/dev/null;then
 		systemException \
 			"LUKS map /dev/mapper/$name doesn't appear... fatal !" \
 		"reboot"
 	fi
+	#======================================
+	# store luks device and return
+	#--------------------------------------
 	export luksDeviceOpened=/dev/mapper/$name
+	return 0
 }
 #======================================
 # luksResize
@@ -6119,7 +6126,18 @@ function luksClose {
 	# /.../
 	# close all open LUKS mappings
 	# ----
-	local name
+	local name=$1
+	#======================================
+	# close specified name if set
+	#--------------------------------------
+	if [ -n "$1" ]; then
+		name=$(basename $1)
+		cryptsetup luksClose $name
+		return
+	fi
+	#======================================
+	# close all luks* map names
+	#--------------------------------------
 	for i in /dev/mapper/luks*;do
 		name=$(basename $i)
 		cryptsetup luksClose $name

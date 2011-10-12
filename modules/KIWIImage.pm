@@ -4008,7 +4008,7 @@ sub getSize {
 	my $xml    = $this->{xml};
 	my $mini   = qxx ("find $extend | wc -l"); chomp $mini;
 	my $minsize= qxx ("du -s --block-size=1 $extend | cut -f1"); chomp $minsize;
-	my $journal= 12  * 1024 * 1024;
+	my $fsohead= 1.4; # 4% filesystem overhead
 	my $spare  = 100 * 1024 * 1024;
 	my $files  = $mini;
 	my $fsopts = $cmdL -> getFilesystemOptions();
@@ -4025,9 +4025,8 @@ sub getSize {
 	$kiwi -> loginfo ("getSize: files: $files\n");
 	$kiwi -> loginfo ("getSize: usage: $minsize Bytes\n");
 	$kiwi -> loginfo ("getSize: inode: $isize Bytes\n");
-	$kiwi -> loginfo ("getSize: journ: $journal Bytes\n");
+	$minsize *= $fsohead;
 	$minsize += $mini * $isize;
-	$minsize += $journal;
 	$minsize += $spare;
 	$xmlsize = $minsize;
 	$kiwi -> loginfo ("getSize: minsz: $minsize Bytes\n");
