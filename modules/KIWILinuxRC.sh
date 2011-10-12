@@ -3132,6 +3132,7 @@ function searchImageCDMedia {
 	# contains a KIWI image signature
 	# ----
 	local IFS
+	local count=0
 	#======================================
 	# lookup devices from hwinfo
 	#--------------------------------------
