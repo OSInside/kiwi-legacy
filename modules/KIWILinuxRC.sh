@@ -4911,6 +4911,22 @@ function atftpProgress {
 }
 
 #======================================
+# encodeURL
+#--------------------------------------
+function encodeURL {
+	# /.../
+	# encode special characters in URL's to correctly
+	# serve as input for fetchFile and putFile
+	# ----
+	local STR
+	local CH
+	STR="$@"
+	echo -n "$STR" | while read -n1 CH; do
+		[[ $CH =~ [-_A-Za-z0-9./] ]] && printf "$CH" || printf "%%%x" \'"$CH"
+	done
+}
+
+#======================================
 # fetchFile
 #--------------------------------------
 function fetchFile {
@@ -4925,6 +4941,7 @@ function fetchFile {
 	local host=$4
 	local type=$5
 	local chunk=$6
+	local encoded_path
 	local dump
 	local call
 	local call_pid
@@ -4948,20 +4965,21 @@ function fetchFile {
 		fi
 	fi
 	if test "$izip" = "compressed"; then
-		path=$(echo $path | sed -e s@\\.gz@@)
+		path=$(echo "$path" | sed -e s@\\.gz@@)
 		path="$path.gz"
 	fi
+	encoded_path=$(encodeURL "$path")
 	#======================================
 	# setup progress meta information
 	#--------------------------------------
-	dump="dd bs=$chunk of=$dest"
+	dump="dd bs=$chunk of=\"$dest\""
 	showProgress=0
 	if [ -x /usr/bin/dcounter ] && [ -f /etc/image.md5 ] && [ -b "$dest" ];then
 		showProgress=1
 		read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
 		needBytes=`expr $blocks \* $blocksize`
 		needMByte=`expr $needBytes / 1048576`
-		progressBaseName=$(basename $path)
+		progressBaseName=$(basename "$path")
 		TEXT_LOAD=$(getText "Loading %1" "$progressBaseName")
 		dump="dcounter -s $needMByte -l \"$TEXT_LOAD \" 2>/progress | $dump"
 	fi
@@ -4971,28 +4989,34 @@ function fetchFile {
 	case "$type" in
 		"http")
 			if test "$izip" = "compressed"; then
-				call="curl -f http://$host/$path 2>$TRANSFER_ERRORS_FILE |\
+				call="curl -f http://$host/$encoded_path \
+					2>$TRANSFER_ERRORS_FILE |\
 					gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump"
 			else
-				call="curl -f http://$host/$path 2> $TRANSFER_ERRORS_FILE |\
+				call="curl -f http://$host/$encoded_path \
+					2>$TRANSFER_ERRORS_FILE |\
 					$dump"
 			fi
 			;;
 		"https")
 			if test "$izip" = "compressed"; then
-				call="curl -f -k https://$host/$path 2>$TRANSFER_ERRORS_FILE |\
+				call="curl -f -k https://$host/$encoded_path \
+					2>$TRANSFER_ERRORS_FILE |\
 					gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump"
 			else
-				call="curl -f -k https://$host/$path 2> $TRANSFER_ERRORS_FILE |\
+				call="curl -f -k https://$host/$encoded_path \
+					2>$TRANSFER_ERRORS_FILE |\
 					$dump"
 			fi
 			;;
 		"ftp")
 			if test "$izip" = "compressed"; then
-				call="curl ftp://$host/$path 2>$TRANSFER_ERRORS_FILE |\
+				call="curl ftp://$host/$encoded_path \
+					2>$TRANSFER_ERRORS_FILE |\
 					gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump"
 			else
-				call="curl ftp://$host/$path 2> $TRANSFER_ERRORS_FILE |\
+				call="curl ftp://$host/$encoded_path \
+					2>$TRANSFER_ERRORS_FILE |\
 					$dump"
 			fi
 			;;
@@ -5010,7 +5034,7 @@ function fetchFile {
 				# mutlicast is disabled because you can't seek in a pipe
 				# atftp is disabled because it doesn't work with pipes
 				call="busybox tftp \
-					-b $imageBlkSize -g -r $path \
+					-b $imageBlkSize -g -r \"$path\" \
 					-l >(gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump) \
 					$host 2>>$TRANSFER_ERRORS_FILE"
 			else
@@ -5019,7 +5043,7 @@ function fetchFile {
 						--trace \
 						--option \"$multicast_atftp\"  \
 						--option \"blksize $imageBlkSize\" \
-						-g -r $path -l $dest $host 2>&1 | \
+						-g -r \"$path\" -l \"$dest\" $host 2>&1 | \
 						atftpProgress \
 							$needMByte \"$TEXT_LOAD\" \
 							$TRANSFER_ERRORS_FILE $imageBlkSize \
@@ -5028,7 +5052,7 @@ function fetchFile {
 					call="atftp \
 						--option \"$multicast_atftp\"  \
 						--option \"blksize $imageBlkSize\" \
-						-g -r $path -l $dest $host \
+						-g -r \"$path\" -l \"$dest\" $host \
 						&> $TRANSFER_ERRORS_FILE"
 				fi
 			fi
@@ -5090,6 +5114,7 @@ function putFile {
 	local dest=$2
 	local host=$3
 	local type=$4
+	local encoded_dest
 	if test -z "$path"; then
 		systemException "No path specified" "reboot"
 	fi
@@ -5106,21 +5131,25 @@ function putFile {
 			type="$SERVERTYPE"
 		fi
 	fi
+	encoded_dest=$(encodeURL "$dest")
 	case "$type" in
 		"http")
-			curl -f -T $path http://$host/$dest > $TRANSFER_ERRORS_FILE 2>&1
+			curl -f -T "$path" http://$host/$encoded_dest \
+				> $TRANSFER_ERRORS_FILE 2>&1
 			return $?
 			;;
 		"https")
-			curl -f -T $path https://$host/$dest > $TRANSFER_ERRORS_FILE 2>&1
+			curl -f -T "$path" https://$host/$encoded_dest \
+				> $TRANSFER_ERRORS_FILE 2>&1
 			return $?
 			;;
 		"ftp")
-			curl -T $path ftp://$host/$dest  > $TRANSFER_ERRORS_FILE 2>&1
+			curl -T "$path" ftp://$host/$encoded_dest \
+				> $TRANSFER_ERRORS_FILE 2>&1
 			return $?
 			;;
 		"tftp")
-			atftp -p -l $path -r $dest $host >/dev/null 2>&1
+			atftp -p -l "$path" -r "$dest" $host >/dev/null 2>&1
 			return $?
 			;;
 		*)
