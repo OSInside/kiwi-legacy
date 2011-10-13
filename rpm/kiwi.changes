@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Oct 13 10:07:05 CEST 2011 - ms@suse.de
+
+- fetchFile does not handle special characters consistently.
+  fetchFile "some%20file" with atftp correctly downloads 'some%20file'.
+  but with ftp curl converts the file name to 'some file', which is
+  not expected. This patch fixes this and makes the behavior
+  consistent
+
+-------------------------------------------------------------------
 Tue Oct 11 10:23:16 CEST 2011 - ms@suse.de
 
 - added preException hook which runs inside the systemExcpetion
