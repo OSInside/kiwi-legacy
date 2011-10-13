@@ -84,7 +84,8 @@
 	</packages>
 	<packages type="bootstrap" profiles="xenk">
 		<package name="kernel-xen"/>
-		<package name="xen"/>
+		<!-- xen dom0 support only on x86_64 -->
+		<package name="xen" arch="x86_64"/>
 	</packages>
 	<packages type="bootstrap" profiles="desktop">
 		<package name="kernel-desktop"/>

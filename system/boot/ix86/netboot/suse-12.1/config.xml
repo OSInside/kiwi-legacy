@@ -160,7 +160,8 @@
 		<package name="kernel-desktop"/>
 	</packages>
 	<packages type="image" profiles="xen">
-		<package name="xen"/>
+		<!-- xen dom0 support only on x86_64 -->
+		<package name="xen" arch="x86_64"/>
 	</packages>
 	<packages type="image" profiles="default,xen">
 		<package name="cryptsetup"/>

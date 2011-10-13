@@ -5258,9 +5258,21 @@ sub __initDiskSize {
 	#===========================================
 	# adapt min size according to cmdline or XML
 	#-------------------------------------------
-	if ($cmdlBytes > $minBytes) {
+	if ($cmdlBytes > 0) {
+		if ($cmdlBytes < $minBytes) {
+			$kiwi -> warning (
+				"given size is smaller than calculated min size"
+			);
+			$kiwi -> oops();
+		}
 		$minBytes = $cmdlBytes;
-	} elsif ($XMLBytes > $minBytes) {
+	} elsif ($XMLBytes > 0) {
+		if ($XMLBytes < $minBytes) {
+			$kiwi -> warning (
+				"given size is smaller than calculated min size"
+			);
+			$kiwi -> oops();
+		}
 		$minBytes = $XMLBytes;
 	}
 	#==========================================
