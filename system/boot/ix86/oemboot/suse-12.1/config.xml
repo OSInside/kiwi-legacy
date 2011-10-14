@@ -93,7 +93,7 @@
 	</packages>
 	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>
-		<!-- xen dom0 support only on x86_64 -->
+<!-- xen dom0 support only on x86_64 -->
 		<package name="xen" arch="x86_64"/>
 	</packages>
 	<packages type="image" profiles="ec2">
