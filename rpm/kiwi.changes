@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Oct 14 10:53:30 CEST 2011 - ms@suse.de
+
+- incorporate KIWICollect fixes from ro@suse.de and behlert@suse.de
+  * next try for KIWICollect: go back to version before Oct 7th
+  * fix last change in KIWICollect: do not change the loop for
+    metapackages but the loop for normal packages
+
+-------------------------------------------------------------------
 Thu Oct 13 10:07:05 CEST 2011 - ms@suse.de
 
 - fetchFile does not handle special characters consistently.
