@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Oct 14 11:25:25 CEST 2011 - ms@suse.de
+
+- xen dom0 support exists only for x86_64 architecture in
+  SLE11 SP2. Therefore we check for this arch in the boot
+  image descriptions
+
+-------------------------------------------------------------------
 Fri Oct 14 10:53:30 CEST 2011 - ms@suse.de
 
 - incorporate KIWICollect fixes from ro@suse.de and behlert@suse.de
