@@ -218,24 +218,26 @@ fi
 # 9) Search boot device...
 #--------------------------------------
 if [ -z "$pxe" ];then
-	Echo "Searching for boot device..."
-	if [ "$LOCAL_BOOT" = "no" ];then
-		if ! searchBIOSBootDevice;then
-			if [ ! -z "$cdinst" ];then
-				biosBootDevice=/dev/cdrom
-			else
+	if [ ! -z "$cdinst" ];then
+		biosBootDevice=/dev/cdrom
+	else
+		Echo "Searching for boot device..."
+		if [ "$LOCAL_BOOT" = "no" ];then
+			if ! searchBIOSBootDevice;then
 				systemException "$biosBootDevice" "reboot"
 			fi
+			export imageDiskDevice=$biosBootDevice
+		else
+			waitForStorageDevice $disk
+			export imageDiskDevice=$(dn $disk)
+			if [ ! -z "$KIWI_RECOVERY" ];then
+				export imageRecoveryDevice=$(
+					ddn $imageDiskDevice $KIWI_RECOVERY
+				)
+			fi
 		fi
-		export imageDiskDevice=$biosBootDevice
-	else
-		waitForStorageDevice $disk
-		export imageDiskDevice=$(dn $disk)
-		if [ ! -z "$KIWI_RECOVERY" ];then
-			export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
-		fi
+		Echo "Found boot device: $imageDiskDevice"
 	fi
-	Echo "Found boot device: $imageDiskDevice"
 fi
 
 #======================================

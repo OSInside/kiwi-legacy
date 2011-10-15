@@ -2792,7 +2792,6 @@ function probeUSB {
 	local module=""
 	local stdevs=""
 	local hwicmd="/usr/sbin/hwinfo"
-	udevPending
 	if [ $HAVE_MODULES_ORDER = 0 ];then
 		#======================================
 		# load host controller modules
@@ -2853,7 +2852,10 @@ function probeUSB {
 #--------------------------------------
 function probeDevices {
 	local skipUSB=$1
-	waitForIdleEventQueue
+	udevPending
+	if [ $HAVE_MODULES_ORDER = 0 ];then
+		waitForIdleEventQueue
+	fi
 	#======================================
 	# probe USB devices and load modules
 	#--------------------------------------
@@ -2935,7 +2937,9 @@ function probeDevices {
 		modprobe $i &>/dev/null
 	done
 	udevPending
-	waitForIdleEventQueue
+	if [ $HAVE_MODULES_ORDER = 0 ];then
+		waitForIdleEventQueue
+	fi
 }
 #======================================
 # CDDevice
@@ -3355,8 +3359,7 @@ function searchOFBootDevice {
 #--------------------------------------
 function searchBusIDBootDevice {
 	# /.../
-	# if searchBIOSBootDevice did not return a result this
-	# function is called to check for a DASD or ZFCP device
+	# check for a DASD or ZFCP devices
 	# like they exist on the s390 architecture. If found the
 	# device is set online and the biosBootDevice variable
 	# is set to this device for further processing
@@ -3424,40 +3427,49 @@ function searchBusIDBootDevice {
 	return 0
 }
 #======================================
-# searchBIOSBootDevice
+# lookupDiskDevices
 #--------------------------------------
-function searchBIOSBootDevice {
+function lookupDiskDevices {
 	# /.../
-	# search for the BIOS boot device which is the device
-	# with the BIOS id 0x80. The test may fail if the boot
-	# device is a CD/DVD drive. If the test fails we search
-	# for the MBR disk label and compare it with the kiwi
-	# written mbrid file in /boot/grub/ of the system image
+	# use hwinfo to search for disk device nodes
 	# ----
-	IFS=$IFS_ORIG
 	local h=/usr/sbin/hwinfo
 	local c="Device File:|BIOS id"
-	local ddevs=`$h --disk|grep -E "$c"|sed -e"s@(.*)@@"|cut -f2 -d:|tr -d " "`
-	local cmpd=/tmp/mbrids
-	local ifix=0
-	local matched
-	local bios
-	local file
+	udevPending
+	diskDevices=$($h --disk | \
+		grep -E "$c" | sed -e"s@(.*)@@" | cut -f2 -d: | tr -d " ")
+}
+#======================================
+# lookupBiosBootDevice
+#--------------------------------------
+function lookupBiosBootDevice {
+	# /.../
+	# check for devices which have 0x80 bios flag assigned
+	# ----
+	local curd
 	local pred
-	#======================================
-	# Store device with BIOS id 0x80
-	#--------------------------------------
-	for curd in $ddevs;do
+	for curd in $diskDevices;do
 		if [ $curd = "0x80" ];then
-			bios=$pred; break
+			bios=$pred
+			return
 		fi
 		pred=$curd
 	done
-	#======================================
-	# Search and copy all mbrid files 
-	#--------------------------------------
+}
+#======================================
+# storeIDFiles
+#--------------------------------------
+function storeIDFiles {
+	# /.../
+	# store mbrid from the devices into files
+	# ----
+	local cmpd=/tmp/mbrids
+	local ifix=0
+	local curd
+	local id
+	local dev
 	mkdir -p $cmpd
-	for curd in $ddevs;do
+	for curd in $diskDevices;do
 		if [ ! $(echo $curd | cut -c 1) = "/" ];then
 			continue
 		fi
@@ -3475,52 +3487,98 @@ function searchBIOSBootDevice {
 			umount /mnt
 		done
 	done
+}
+#======================================
+# searchBIOSBootDevice
+#--------------------------------------
+function searchBIOSBootDevice {
+	# /.../
+	# search for the boot device. The edd 0x80 information
+	# is used here but not trusted. Trusted is the MBR disk
+	# disk label which is compared with the kiwi written
+	# mbrid file in /boot/grub/ of the system image
+	# ----
+	IFS=$IFS_ORIG
+	local cmpd=/tmp/mbrids
+	local ifix
+	local match_count
+	local matched
+	local curd
+	local file
+	local mbrML
+	local mbrMB
+	local mbrI
 	#======================================
-	# Read mbrid from the newest mbrid file 
+	# Lookup until found
 	#--------------------------------------
-	file=$(ls -1t $cmpd 2>/dev/null | head -n 1)
-	if [ -z "$file" ];then
-		export biosBootDevice="Failed to find MBR identifier !"
-		return 1
-	fi
-	read mbrI < $cmpd/$file
-	#======================================
-	# Compare ID with MBR entry 
-	#--------------------------------------
-	ifix=0
-	match_count=0
-	for curd in $ddevs;do
-		if [ ! -b $curd ];then
-			continue
+	while true;do
+		#======================================
+		# initialize variables
+		#--------------------------------------
+		ifix=0
+		match_count=0
+		#======================================
+		# create device list
+		#--------------------------------------
+		lookupDiskDevices
+		lookupBiosBootDevice
+		#======================================
+		# store MBR id files from device list
+		#--------------------------------------
+		storeIDFiles
+		#======================================
+		# Read mbrid from the newest mbrid file
+		#--------------------------------------
+		file=$(ls -1t $cmpd 2>/dev/null | head -n 1)
+		if [ -z "$file" ];then
+			export biosBootDevice="Failed to find MBR identifier !"
+			sleep 1; continue
 		fi
-		mbrML=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%08x"'`
-		mbrMB=`echo $mbrML | sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/0x\4\3\2\1/'`
-		if [ "$mbrML" = "$mbrI" ] || [ "$mbrMB" = "$mbrI" ];then
-			ifix=1
-			matched=$curd
-			match_count=$(($match_count + 1))
-			if [ "$mbrML" = "$mbrI" ];then
-				export masterBootID=$mbrML
+		#======================================
+		# Compare ID with MBR entry
+		#--------------------------------------
+		read mbrI < $cmpd/$file
+		for curd in $diskDevices;do
+			if [ ! -b $curd ];then
+				continue
 			fi
-			if [ "$mbrMB" = "$mbrI" ];then
-				export masterBootID=$mbrMB
+			mbrML=$(dd if=$curd bs=1 count=4 skip=$((0x1b8)) | \
+				hexdump -n4 -e '"0x%08x"')
+			mbrMB=$(echo $mbrML | \
+				sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/0x\4\3\2\1/')
+			if [ "$mbrML" = "$mbrI" ] || [ "$mbrMB" = "$mbrI" ];then
+				ifix=1
+				matched=$curd
+				match_count=$(($match_count + 1))
+				if [ "$mbrML" = "$mbrI" ];then
+					export masterBootID=$mbrML
+				fi
+				if [ "$mbrMB" = "$mbrI" ];then
+					export masterBootID=$mbrMB
+				fi
+				if [ "$curd" = "$bios" ];then
+					export biosBootDevice=$curd
+					return 0
+				fi
 			fi
-			if [ "$curd" = "$bios" ];then
-				export biosBootDevice=$curd
-				return 0
-			fi
+		done
+		#======================================
+		# Multiple matches are bad
+		#--------------------------------------
+		if [ $match_count -gt 1 ];then
+			export biosBootDevice="multiple devices matches same MBR ID: $mbrI"
+			return 2
 		fi
+		#======================================
+		# Found it...
+		#--------------------------------------
+		if [ $ifix -eq 1 ];then
+			export biosBootDevice=$matched
+			return 0
+		fi
+		export biosBootDevice="No devices matches MBR ID: $mbrI !"
+		sleep 1
 	done
-	if [ $match_count -gt 1 ];then
-		export biosBootDevice="multiple devices matches same identifier: $mbrI"
-		return 2
-	fi
-	if [ $ifix -eq 1 ];then
-		export biosBootDevice=$matched
-		return 0
-	fi
-	export biosBootDevice="No devices matches MBR identifier: $mbrI !"
-	return 2
 }
 #======================================
 # searchVolumeGroup

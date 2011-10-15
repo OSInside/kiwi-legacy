@@ -153,16 +153,19 @@ function OEMInstall {
 	#======================================
 	# Search CD/DVD/USB stick and mount it
 	#--------------------------------------
+	waitForIdleEventQueue
 	if [ -z "$pxe" ];then
 		USBStickDevice install
 		if [ $stickFound = 0 ];then
 			Echo "Search for USB stick failed, checking CD/DVD drive"
 			CDMount install
 			export OEMInstallType=CD
+			export imageDiskDevice=$biosBootDevice
 		else
 			Echo "Found Stick: $stickRoot -> $stickSerial"
 			mkdir -p /cdrom && mount $(ddn $stickRoot 2) /cdrom
 			export OEMInstallType=USB
+			export imageDiskDevice=$stickDevice
 			unset stickSerial
 		fi
 	else
