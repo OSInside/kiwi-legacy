@@ -5855,7 +5855,11 @@ function bootImage {
 	# check for init kernel option
 	#--------------------------------------
 	if [ -z "$init" ];then
-		init=/sbin/init
+		if [ -f /mnt/bin/systemd ];then
+			init=/bin/systemd
+		else
+			init=/sbin/init
+		fi
 	fi
 	#======================================
 	# turn runlevel 4 to 5 if found
