@@ -123,8 +123,10 @@ sub test_buildProfWithDefPackages {
 	my $kiwi = $this -> {kiwi};
 	my @profiles = ('my-first','my-second');
 	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/haveDefaultPkgs';
+	$cmd -> setConfigDir ($configDir);
 	$cmd -> setBuildProfiles(\@profiles);
-	my $xml = $this -> __getXMLObj( $this -> {dataDir} . '/haveDefaultPkgs' );
+	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
 	my $msg = $kiwi -> getMessage();
@@ -393,7 +395,9 @@ sub test_noBuildProfile {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCommandLineObj();
-	my $xml = $this -> __getXMLObj( $this -> {dataDir} );
+	my $configDir = $this -> {dataDir} . '/liveIsoImg/clic';
+	$cmd -> setConfigDir ($configDir);
+	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
 	my $msg = $kiwi -> getMessage();
@@ -437,7 +441,7 @@ sub test_noBuildType {
 }
 
 #==========================================
-# test_packageManagerCheck
+# test_packageManagerCheck_ens
 #------------------------------------------
 sub test_packageManagerCheck_ens {
 	# ...
@@ -447,10 +451,12 @@ sub test_packageManagerCheck_ens {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/liveIsoImg/clic';
+	$cmd -> setConfigDir ($configDir);
 	# Select manager least likely to be present we want this part of
 	# the test to simulate a failure condition
 	$cmd -> setPackageManager('ensconce');
-	my $xml = $this -> __getXMLObj( $this -> {dataDir} );
+	my $xml = $this -> __getXMLObj( $configDir );
 	$xml -> setPackageManager('ensconce');
 	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
@@ -481,7 +487,7 @@ sub test_packageManagerCheck_ens {
 }
 
 #==========================================
-# test_packageManagerCheck_ens
+# test_packageManagerCheck_zypp
 #------------------------------------------
 sub test_packageManagerCheck_zypp {
 	# ...
@@ -491,9 +497,11 @@ sub test_packageManagerCheck_zypp {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/liveIsoImg/clic';
+	$cmd -> setConfigDir ($configDir);
 	# Test the most likely use case, zypper set as package manager in
 	# config.xml, this test should succeed
-	my $xml = $this -> __getXMLObj( $this -> {dataDir} );
+	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
 
@@ -538,8 +546,10 @@ sub test_useSingleBuildProfile {
 	my $kiwi = $this -> {kiwi};
 	my @profiles = ('my-first');
 	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/liveIsoImg/clic';
+	$cmd -> setConfigDir ($configDir);
 	$cmd -> setBuildProfiles(\@profiles);
-	my $xml = $this -> __getXMLObj( $this -> {dataDir} );
+	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
 	my $msg = $kiwi -> getMessage();
