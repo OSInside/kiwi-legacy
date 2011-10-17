@@ -28,7 +28,7 @@
 		<source path="opensuse://11.3/repo/oss/"/>
 	</repository>
 	<repository type="rpm-md">
-		<source path="opensuse:Virtualization:/Cloud:/EC2/openSUSE_11.3"/>
+		<source path="opensuse://Virtualization:/Cloud:/EC2/openSUSE_11.3"/>
 	</repository>
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>

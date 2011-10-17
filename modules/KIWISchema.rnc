@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 5.2" ]
+	db:releaseinfo [ "RNC Schema Version 5.3" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -60,7 +60,7 @@ div {
 		attribute xsi:schemaLocation { xsd:anyURI }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "5.2" }
+		attribute schemaversion { "5.3" }
 	k.image.kiwirevision.attribute =
 		## A kiwi git revision number which is known to build
 		## a working image from this description. If the kiwi git
@@ -292,7 +292,7 @@ div {
 		db:para [
 			"Specify the region/availability zone in EC2 for this image.\x{a}"~
 			"Values are limited to the EC2 recognized zones:\x{a}"~
-			"AP-Japan, AP-Singapore, EU-West, US-East, and US-West"
+			"AP-Northeast, AP-Southeast, EU-West, US-East, and US-West"
 		]
 		]
 		element ec2region {
