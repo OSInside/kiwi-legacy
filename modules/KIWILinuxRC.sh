@@ -4675,7 +4675,6 @@ function mountSystemClicFS {
 			fi
 			clic_cmd="$clic_cmd -m $haveMByte"
 			clic_cmd="$clic_cmd -c $HYBRID_PERSISTENT_DIR/.clicfs_COW"
-			clic_cmd="$clic_cmd --ignore-cow-errors"
 		else
 			# write into a device directly
 			clic_cmd="$clic_cmd -m $haveMByte -c $rwDevice --ignore-cow-errors"
