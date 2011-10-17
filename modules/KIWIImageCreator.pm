@@ -160,6 +160,9 @@ sub prepareBootImage {
 		$kiwi -> failed ();
 		return undef;
 	}
+	if (! $this -> __checkImageIntegrity() ) {
+		return undef;
+	}
 	$kiwi -> info ("--> Prepare boot image (initrd)...\n");
 	my $xml = new KIWIXML (
 		$kiwi,$configDir,undef,undef,$cmdL,$changeset
@@ -347,6 +350,9 @@ sub createBootImage {
 	if (! $isValid) {
 		return undef;
 	}
+	if (! $this -> __checkImageIntegrity() ) {
+		return undef;
+	}
 	$kiwi -> info ("--> Create boot image (initrd)...\n");
 	my $xml = new KIWIXML (
 		$kiwi,$configDir,"cpio",undef,$cmdL
@@ -413,6 +419,9 @@ sub createImage {
 	if (-f "$configDir/.broken") {
 		$kiwi -> error  ("Image root tree $configDir is broken");
 		$kiwi -> failed ();
+		return undef;
+	}
+	if (! $this -> __checkImageIntegrity() ) {
 		return undef;
 	}
 	#==========================================
