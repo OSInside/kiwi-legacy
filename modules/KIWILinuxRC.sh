@@ -3263,6 +3263,7 @@ function CDMount {
 	#--------------------------------------
 	searchImageHybridMedia
 	if [ ! -z "$cddev" ];then
+		setupHybridPersistent
 		kiwiMount "$cddev" "/cdrom" "-o ro" 1>&2
 		return
 	fi

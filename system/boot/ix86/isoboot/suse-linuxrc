@@ -92,7 +92,6 @@ probeDevices
 #--------------------------------------
 CDMount
 runMediaCheck
-setupHybridPersistent
 
 #======================================
 # 8) Load configuration
