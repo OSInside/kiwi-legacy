@@ -3508,6 +3508,7 @@ function searchBIOSBootDevice {
 	local mbrML
 	local mbrMB
 	local mbrI
+	local try_count=0
 	#======================================
 	# Lookup until found
 	#--------------------------------------
@@ -3517,6 +3518,14 @@ function searchBIOSBootDevice {
 		#--------------------------------------
 		ifix=0
 		match_count=0
+		try_count=$((try_count + 1))
+		#======================================
+		# stop after a long time of retry
+		#--------------------------------------
+		if [ $try_count -eq 30 ];then
+			export biosBootDevice="Failed to find boot device !"
+			return 1
+		fi
 		#======================================
 		# create device list
 		#--------------------------------------
