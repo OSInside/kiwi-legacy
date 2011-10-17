@@ -6509,6 +6509,29 @@ function createHybridPersistent {
 	#--------------------------------------
 	if mount -L hybrid /cow;then
 		Echo "Existing persistent hybrid partition found"
+		#======================================
+		# does the cow file exist
+		#--------------------------------------
+		if [ ! -f /cow/.clicfs_COW ];then
+			Echo "Can't find cow file on write partition... deactivated"
+			unset kiwi_hybridpersistent
+			umount /cow
+			rmdir  /cow
+			return
+		fi
+		#======================================
+		# is the cow file valid
+		#--------------------------------------
+		if [ -x /usr/bin/clicfs_fsck ] && ! clicfs_fsck /cow/.clicfs_COW;then
+			Echo "COW file is broken... deactivated"
+			unset kiwi_hybridpersistent
+			umount /cow
+			rmdir  /cow
+			return
+		fi
+		#======================================
+		# everything ok, go ahead
+		#--------------------------------------
 		umount /cow
 		rmdir  /cow
 		return
