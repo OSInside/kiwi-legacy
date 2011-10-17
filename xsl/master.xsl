@@ -23,6 +23,7 @@
 <xsl:import href="convert49to50.xsl"/>
 <xsl:import href="convert50to51.xsl"/>
 <xsl:import href="convert51to52.xsl"/>
+<xsl:import href="convert52to53.xsl"/>
 <xsl:import href="pretty.xsl"/>
 
 
@@ -100,9 +101,12 @@
 	<xsl:variable name="v52">
 		<xsl:apply-templates select="exslt:node-set($v51)" mode="conv51to52"/>
 	</xsl:variable>
+	<xsl:variable name="v53">
+		<xsl:apply-templates select="exslt:node-set($v52)" mode="conv52to53"/>
+	</xsl:variable>
 
 	<xsl:apply-templates
-		select="exslt:node-set($v52)" mode="pretty"
+		select="exslt:node-set($v53)" mode="pretty"
 	/>
 </xsl:template>
 

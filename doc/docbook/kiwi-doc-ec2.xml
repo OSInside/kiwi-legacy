@@ -13,66 +13,84 @@
     <secondary>EC2</secondary>
   </indexterm>
   <indexterm>
-    <primary>Amazon Elastic Comput Cloud</primary>
+    <primary>Amazon Elastic Compute Cloud</primary>
     <see>EC2 image</see>
   </indexterm>
   <indexterm>
     <primary>EC2 images</primary>
   </indexterm>
   <para>The <trademark>Amazon Elastic Compute Cloud</trademark> (Amazon
-    EC2) web service provides you with the ability to execute arbitrary
-	applications in the Amazon computing environment. To use Amazon EC2 you
-    simply: </para>
+    EC2) provides an environment known as 
+    <ulink url="http://en.wikipedia.org/wiki/IAAS">
+      <citetitle>IAAS</citetitle></ulink> (Infrastrcuture as a Service).
+    In this environment you have the ability to run Virtual
+    Machines (VMs) on hardware managed by Amazon and the virtualization
+    infrastructure provided by Amazon.</para>
 
-  <procedure id="proc.ec2.using">
-    <step>
-      <para>Create an Amazon Machine Image (AMI) containing all your
-        software, including your operating system and associated
-        configuration settings, applications, libraries, etc. Such an
-        AMI can be created by the KIWI ec2 image format. In order to do
-        that KIWI makes use of the tools provided by Amazon. Your build
-        system should have these tools installed. Due to license issues
-        we are not allowed to distribute the tools which means you need
-        to download, install and setup them from here:<ulink
-          url="http://aws.amazon.com/documentation/ec2/"/>
-		software, including the operating system and associated
-        configuration settings, applications, libraries, etc.
-      </para>
-    </step>
-    <step>
-      <para>Upload this AMI to the Amazon S3 (Amazon Simple Storage
-	   Service) service.
-      </para>	
-    </step>
-    <step>
-      <para>Register your AMI with Amazon EC2.</para>
-    </step>
-    <step>
-       <para>
-        Use the AMI ID created during registration to run your EC2 guest.
-      </para>
-    </step>
-  </procedure>
-    <para>
-    KIWI creates an AMI using tools provided by Amazon. Due to
-    licensing issues it is not possible to distribute the Amazon tools with
-    your Linux distribution or KIWI. Amazon provides two sets of tools,
-    AMI tools and API tools. The tools can be downloaded from the Amazon
-    web site at <ulink url="http://aws.amazon.com/developertools/368"/> and
-    <ulink url="http://aws.amazon.com/developertools/351"/> respectively.
-    The documentation for the command line tools may be accessed on the
-    Amazon web-site as well at
-    <ulink url="http://docs.amazonwebservices.com/AWSEC2/latest/CommandLineReference"/>. While KIWI only needs to interact with the AMI tools to create the
-    AMI you will also need to install the API tools to interact with EC2.
-    You must at least install the AMI tools to create an EC2 image with KIWI.
-    </para>
-    <para>When working with the Amazon tools it is useful to set the
+  <para>The virtualization infrastructure for EC2 is setup to work with
+    Amazon Machine Images (AMIs). There are two storage models for AMIs:
+    <orderedlist>
+      <listitem>
+        <simpara>
+          <ulink url="http://aws.amazon.com/s3/">
+             <citetitle>S3</citetitle></ulink> (Simple Storage Service)
+          backed AMI
+        </simpara>
+      </listitem>
+      <listitem>
+        <simpara>
+          <ulink url="http://aws.amazon.com/ebs/">
+            <citetitle>EBS</citetitle></ulink> (Elastic Block Store)
+          backed AMI 
+        </simpara>
+      </listitem>
+    </orderedlist>
+    The image created with KIWI can be used to create an AMI for both
+    storage models. For an S3 backed AMI a bundle with a manifest XML file
+    is required and KIWI uses the Amazon tools to create this bundle for you.
+    With the bundle created all you have to do is upload the bundle using
+    the EC2 tools, register a new AMI and run the registered AMI.</para>
+
+  <para>For an EBS backed AMI the procedure to get to a working AMI requires
+    more manual steps when compared to the S3 backed AMI approach. KIWI does
+    not provide any automation for this process at this time. The KIWI
+    created image needs to be uploaded to EC2 and then it needs to be dumped
+    to an EBS volume. This implies that you need to have a running AMI in
+    EC2</para>
+
+  <para>The procedures to handle both storage options are outlined
+    below.</para>
+
+  <para>You can work with EC2 using the Amazon Web application found
+    at <ulink url="http://aws.amazon.com"/> or you can use the Amazon
+    provided command line tools. In this example we will exclusively
+    interact with EC2 using the command line tools. The command line tools
+    are devided into <emphasis>AMI</emphasis> and <emphasis>API</emphasis>
+    tools. The AMI tools are designed to operate on images, while
+    the API tools are designed to work with the Amazon <ulink
+      url="http://en.wikipedia.org/wiki/Representational_state_transfer">
+      <citetitle>REST API</citetitle></ulink>. In order for KIWI to create
+    the bundle for S3 backed AMIs the Amazon AMI tools must be installed.
+    It is recommended that you install both, the AMI and API tools on your
+    build system.</para>
+
+  <para>The Amazon tools are not distributed with KIWI and can be
+    installed using packages from the openSUSE Build Service <ulink
+      url="http://download.opensuse.org/repositories/Virtualization:/Cloud:/EC2/"><citetitle>Virtualization:Cloud:EC2</citetitle></ulink> repository,
+    or can be downloaded from Amazon at 
+    <ulink url="http://aws.amazon.com/developertools/368"/> and
+    <ulink url="http://aws.amazon.com/developertools/351"/>.</para>
+
+  <para>Documentation for Amazon EC2 can be found at <ulink
+        url="http://aws.amazon.com/documentation/ec2/"/>. The documentation
+    for the command line tools may be accessed at <ulink url="http://docs.amazonwebservices.com/AWSEC2/latest/CommandLineReference"/>.</para>
+
+  <para>When working with the Amazon tools it is useful to set the
     EC2_HOME, EC2_PRIVATE_KEY, and EC2_CERT environment variables. Setting
     EC2_PRIVATE_KEY, and EC2_CERT allows you to forego specification of the
-    <option>--private-key</option> and <option>--cert</option> with every
-    command. The EC@_HOME environment variable is used by the tools to find
-    required libraries.
-    </para>
+    <option>--private-key</option> and <option>--cert</option> command line
+    options with every command. The EC2_HOME environment variable is used by
+    the tools to find required libraries.
     <itemizedlist>
       <listitem><para>EC2_HOME</para>
         <para>Location of the bin and lib directories installed by the
@@ -91,282 +109,600 @@
         </para>
       </listitem>
     </itemizedlist>
-    <para>Please note that your account will be billed by Amazon at the 
-     published rate for any computing resources you consume in EC2. This
-     includes but is not limited to, running instances, storing data
-     (your image) on S3 or EBS, and network traffic.
-    </para>
+  </para>
+  <para>Please note that your account will be billed by Amazon at the 
+   published rate for any computing resources you consume in EC2. This
+   includes but is not limited to, running instances, storing data
+   (your image) on S3 or EBS, and network traffic.</para>
     
   <sect1 id="sec.ec2.building">
     <title>Building the suse-ec2-guest Example</title>
     <para>The example provided with KIWI uses openSUSE as the base
-      distribution and includes the base pattern plus the vim editor.
+      distribution and includes the base pattern plus the vim editor. Also
+      included is the suse-ami-tools package that provides tools needed
+      in the EC2 environment.
     </para>
-    <para>Before building the EC2 example assure that the EC2 command line
-      tools are installed and work as expected. Executing the 
-      <command>ec2-describe-images</command> <option>-a</option> command
-      should return a list of all available instances in EC2. Further, you
-      need to edit the <filename>config.xml</filename> file of the example
-      and enter your EC2 account information. Replace the values for
+    <para>Prior to building the EC2 example verify that the EC2 command line
+      tools are installed and work as expected by executing the
+
+      <screen><command>ec2-describe-images</command> -a</screen>
+
+      command. The result is a list of all available images in EC2 printed to
+      your terminal. Additionaly you need to edit the
+      <filename>config.xml</filename> file of the example and enter your EC2
+      account information. Replace the values for
       <sgmltag class="element">ec2accountnr</sgmltag>,
       <sgmltag class="element">ec2privatekeyfile</sgmltag>, and
       <sgmltag class="element">ec2certfile</sgmltag>. Note that the account
-      number is displayed with dsahes ('-") on the Amazon web site, but the
+      number is displayed with dashes ("-") on the Amazon web site, but the
       entry in <filename>config.xml</filename> is expected to be numeric only.
       The private key file is the private file you downloaded when you
-      created the certificate. It is recommended to create a copy of the
-      example <filename>/usr/share/doc/packages/kiwi/examples/suse-<replaceable>Version</replaceable>/suse-ec2-guest</filename>.
-    </para>
+      created your certificate. It is recommended to create a copy of the
+      example <filename>/usr/share/doc/packages/kiwi/examples/suse-<replaceable>Version</replaceable>/suse-ec2-guest</filename>.</para>
 
     <para>You are now ready to build the EC2 example. Lets assume you copied
-      the example configuration directory to /tmp prior to modifying the
-      <filename>config.xml</filename> file.
-    </para>
+      the example configuration directory to
+      <filename class="directory">/tmp</filename> prior to modifying the
+      <filename>config.xml</filename> file.</para>
  
-    <screen>
-        <command>kiwi</command> --prepare /tmp/suse-ec2-guest --root /tmp/myec2
-    </screen>
+      <screen><command>kiwi</command> --prepare <!--
+        -->/tmp/suse-ec2-guest --root /tmp/myec2</screen>
 
-    <screen>
-        <command>kiwi</command> --create /tmp/myec2 -d /tmp/myec2-result -y
-    </screen>
+      <screen><command>kiwi</command> --create <!--
+        -->/tmp/myec2 -d /tmp/myec2-result -y</screen>
   </sect1>
 
   <sect1 id="sec.ec2.using">
-    <title>Using the Image</title>
-    <para> The generated image needs to be transfered to Amazon. The upload
-      of the AMI is performed using the <command>ec2-upload-bundle</command>
-      command line tool. This tool is part of the API tools provided by Amazon.
-      Upload the AMI as follows, replacing 
-      <replaceable>AWS_Key_ID</replaceable> and
-      <replaceable>AWS_secret_Key_ID</replaceable> with your Amazon key
-      information. Also you may want to choose a different name for your
-      bucket than <filename>myImages</filename>. If the bucket does not
-      exist in S3 it will be created.
-    </para>
+    <title>Using EC2 and the created image</title>
+    <para>Upon completion of the image build all files necessary for an S3
+      backed AMI and for an EBS backed AMI can be found in your destination
+      directory, <filename class="directory">/tmp/myec2-result</filename> if
+      you followed the commands given above. Prior to describing the specifics
+      about using the KIWI produced images the following section will address
+      some rudimentary general EC2 concepts and commands that can be used with
+      existing AMIs and the AMIs you can register with the KIWI created
+      images.</para>
+
+    <sect2 id="sec.ec2.using.general">
+      <title>Using a registered AMI</title>
+      <para>This section is not a replacement for the EC2 documention
+        mentioned earlier. We will only cover the concepts and commands
+        necessary to get you started such that you can launch the KIWI
+        created image in this example.</para>
+
+      <para>Prior to launching any instance in EC2 you need to have a keypair.
+        If you do not already have a keypair in EC2 you can create one using
+        the <command>ec2-add-keypair</command> command. This creates a
+        public/private keypair that is used to grant you access to your 
+        running instance via the ssh tools. Generate the keypair as shown
+        below, the <replaceable>gsgkey</replaceable> name is arbitrary
+        and used in this example, you can choose any name you like. The use
+        of the key is quite frequent. Therefore, you probably want to choose
+        a name that is easy to remember and not too terribly long to
+        type.</para>
+  
+      <screen><command>ec2-add-keypair</command> <!--
+        --><replaceable>gsgkey</replaceable> </screen>
+  
+      <para>Save the private key returned by the command in a local file.
+        Using your favorite text editor, paste everything between
+        (and including) the <literal>-----BEGIN RSA PRIVATE KEY-----</literal>
+        and <literal>-----END RSA PRIVATE KEY-----</literal> lines into your
+        editor and save the key to a file. The file can have any name. However,
+        it makes sense to name the file after the keypair name you have
+        chosen earlier. If the file is named differently from the keypair
+        you will end up launching instances with <option>-k</option>
+        <replaceable>mykey</replaceable> and then accessing the instance
+        with <option>-i</option> <replaceable>yourkey</replaceable>, which
+        may be a bit weird. As indicated by the heading, this is your
+        private key, thus make sure you safe guard it appropriately. On Linux
+        the ssh tools will complain if the key file does not have the proper
+        permissions. Change the permissions of your private key file to be
+        read-write by you, the owner, only.
+
+        <screen><command>chown</command> 600 <!--
+          --><replaceable>gsgkey</replaceable> </screen>
+
+        The public key of your keypair is stored in the EC2 infrastructure.
+        EC2 allows you to have multiple keypairs, to review your existing
+        keypairs use the <command>ec2-describe-keypairs</command> command.
+      </para>
+  
+      <para>When you launch an instance of an AMI you must specify a keypair
+        name. This selects the public key to be injected into the instance.
+        The key injection occurs through the <filename>amazon</filename>
+        init script provided by the <filename>suse-ami-tools</filename>
+        package. This package, as mentioned previously, is already included
+        in the example's <filename>config.xml</filename> file. Do not forget
+        to include this package when you create your own image descriptions
+        for EC2 or you will not be able to log into your running instances.
+        Additionally you need to activate this service by adding
+        <emphasis>suseInsertService amazon</emphasis> in your
+        <filename>config.sh</filename> file.</para>
+  
+      <para>The key injection mechanism needs to access the network. Therefore,
+        you must configure the network when you build your image.
+        Configuration of the network can be accomplished through the overlay
+        mechanism or via commands in config.sh. The network interface of a
+        guest in EC2 is always eth0 and it needs to be configured to use DHCP.
+        In the example the overlay mechanism is used to setup the network
+        configuration.</para>
+
+      <para>Another prerequisite to launching an instance in EC2 is knowing
+        the AMI you want to instantiate. As you have already seen, the
+        <command>ec2-describe-images</command> command with the
+        <option>-a</option> option will provide information about all publicly
+        available AMIs. Using the command without the <option>-a</option>
+        option will provide information about your registered images.</para>
+
+      <para>The Amazon EC2 infrastructure uses <ulink
+        url="http://www.linode.com/wiki/index.php/PV-GRUB">
+        <citetitle>PVGrub (Para-Virtual Grub)</citetitle></ulink> to
+        boot instances of an AMI. This allows instances to run the kernel
+        that is part of the AMI, rather than some kernel provided by the
+        Amazon infrastructure. However, an Amazon provided kernel is still
+        required to kick things off and in the startup process PVGrub
+        eventually picks up the <filename>/boot/grub/menu.lst</filename> file
+        in your image and then boots the kernel specified. Note, that during
+        the boot process you do not have access to a console and thus it makes
+        no sense to have multiple kernel entries in your
+        <filename>menu.lst</filename> file. Without console access you do not
+        have an opportunity to choose a kernel. Each EC2 region has it's own
+        independent copy of this boot mechanism and the boot mechanism is
+        differentiated between 32 bit and 64 bit. The boot kernels are named
+        with an ID that starts with the TLA (Three Letter Acronym)
+        <emphasis>aki</emphasis> followed by a dash ("-") and a hex number.
+        The <xref linkend="tab.ec2.kernel-image-ids" xrefstyle="select:title"/>
+        table below provides guidelines for the selection of the boot kernel
+        ID based on Region and image architecture.</para>
+  
+        <table id="tab.ec2.kernel-image-ids">
+          <title>Amazon Kernel Image IDs</title>
+          <tgroup cols="4">
+            <colspec colwidth="1*"/>
+            <colspec colwidth="1*"/>
+            <colspec colwidth="1*"/>
+            <colspec colwidth="4*"/>
+            <thead>
+              <row>
+                <entry>Region</entry>
+                <entry>AKI</entry>
+                <entry>Arch</entry>
+                <entry>Name</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>AP-Northeast</entry>
+                <entry>aki-d209a2d3</entry>
+                <entry>x86</entry>
+                <entry><filename>ec2-public-images-ap-northeast-1/pv-grub-hd0-V1.01-i386.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
+                <entry>AP-Northeast</entry>
+                <entry>aki-d409a2d5</entry>
+                <entry>x86-64</entry>
+                <entry><filename>ec2-public-images-ap-northeast-1/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
+                <entry>AP-Southeast</entry>
+                <entry>aki-13d5aa41</entry>
+                <entry>x86</entry>
+                <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.01-i386.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
+                <entry>AP-Southeast</entry>
+                <entry>aki-11d5aa43</entry>
+                <entry>x86-64</entry>
+                <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
+                <entry>EU-West</entry>
+                <entry>aki-4deec439</entry>
+                <entry>x86</entry>
+                <entry><filename>ec2-public-images-eu/pv-grub-hd0-V1.01-i386.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
+                <entry>EU-West</entry>
+                <entry>aki-4feec43b</entry>
+                <entry>x86-64</entry>
+                <entry><filename>ec2-public-images-eu/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
+                <entry>US-East</entry>
+                <entry>aki-407d9529</entry>
+                <entry>x86</entry>
+                <entry><filename>ec2-public-images/pv-grub-hd0-V1.01-i386.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
+                <entry>US-East</entry>
+                <entry>aki-427d952b</entry>
+                <entry>x86-64</entry>
+                <entry><filename>ec2-public-images/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
+                <entry>US-West</entry>
+                <entry>aki-99a0f1dc</entry>
+                <entry>x86</entry>
+                <entry><filename>ec2-public-images-us-west-1/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
+                <entry>US-West</entry>
+                <entry>aki-9ba0f1de</entry>
+                <entry>x86-64</entry>
+                <entry><filename>ec2-public-images-us-west-1/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
     
-    <screen><command>ec2-upload-bundle</command> -b<!--
-     --> <replaceable>myImages</replaceable> \
-        -a <replaceable>AWS_Key_ID</replaceable> -s<!--
-     --> <replaceable>AWS_secret_Key_ID</replaceable> -m /tmp/myec2/ \
-     suse-##.#-ec2-guest.i686-1.1.2.ec2/ \
-     suse-##.#-ec2-guest.i686-1.1.2.ami.manifest.xml
-    </screen>
+      <para>The information in the table above was extracted from the Amazon
+        documentation found at: <ulink
+        url="http://ec2-downloads.s3.amazonaws.com/user_specified_kernels.pdf"/>.
+        </para>
 
-    <para>After the upload process is complete register your image with the
-      EC2 infrastructure using the <command>ec2-register</command>
-      command as shown below. The result of the registration
-      process is an AMI ID returned on the command line in the form
-      <quote>ami-</quote> followed by a random key sequence.
-    </para>
+        <para>KIWI images created for EC2 do not contain a partition table.
+        Therefore, PVGrub images designated by <emphasis>h0</emphasis> in the
+        manifest name need to be used with the images created by Kiwi.</para>
+  
+      <para>Specifying the optional
+        <sgmltag class="element">ec2region</sgmltag> element as part of the
+        <sgmltag class="element">ec2config</sgmltag> block in your
+        <filename>config.xml</filename> file instructs KIWI to embed the
+        appropriate PVGrub Kernel ID in the EC2 manifest file of the bundle.
+        Therefore, you can create region specific bundles. KIWI will create
+        a bundle for each specified region. Supported values
+        for the <sgmltag class="element">ec2region</sgmltag> element are
+        <emphasis>AP-Northeast</emphasis>, <emphasis>AP-Southeast</emphasis>,
+        <emphasis>EU-West</emphasis>, <emphasis>US-East</emphasis>,
+        and <emphasis>US-West</emphasis>.</para>
 
-    <screen><command>ec2-register</command> myImages/<!--
-     --> suse-##.#-ec2-guest.i686-1.1.2.ami.manifest.xml </screen>
+      <para>Public images in EC2 already have the boot kernel information
+        embedded. If you build a generic image with EC2 by not specifying
+        the EC2 region you will need to specify the appropriate boot kernel
+        on the command line when you launch an instance of your AMI as shown
+        below. The example uses the x86 Kernel in the US-East region.</para>
+  
+      <screen><command>ec2-run-instances</command> ami-... <!--
+        -->--kernel aki-407d9529 -k gsgkey </screen>
+  
+      <para>To check the state of your instance(s) use the
+        command <command>ec2-describe-instances</command>.</para>
+  
+      <para>Once the instance state for an instance is shown as
+        <emphasis>running</emphasis> you can log into the instance using
+        ssh as follows:</para>
+  
+      <screen><command>ssh</command> -i<!--
+        --> <replaceable>PATH_TO_PRIVATE_KEY</replaceable> <!--
+        -->root@<replaceable>PUBLIC_IP_OF_YOUR_INSTANCE</replaceable></screen>
+  
+      <para>The <replaceable>PUBLIC_IP_OF_YOUR_INSTANCE</replaceable> is
+        displayed as part of the output of the
+        <command>ec2-describe-instances</command> command. If you are unable
+        to log in, it is most likely that the security
+        setting for the instance is blocking the ssh access, or that you did
+        not enable the ssh daemon process on startup. Your
+        <filename>config.sh</filename> script should have a line activating
+        the ssh daemon as follows,
+        <emphasis>suseInsertService sshd</emphasis>. If you do not have this
+        entry in <filename>config.sh</filename> you will have to rebuild your
+        image. Addressing the problem with port blocking is acomplished using
+        the <command>ec2-authorize</command> command to open port 22 as shown
+        below.</para>
+  
+      <screen><command>ec2-authorize</command> default -p 22 </screen>
+    </sect2>
 
-    <para>Once the image is registered via the <command>ec2-register</command>
-      command you can use the AWS management console in your browser to 
-      launch an instance of your image. It is alos possible to launch an
-      instance from the command line. This process is demonstrated below.
-      The <command>ec2-describe-images</command> command will provide you
-      with an overview of all your registered images.
-    </para>
+    <sect2 id="sec.ec2.using.S3">
+      <title>Using the bundle for an S3 backed AMI</title>
+      <para>The destination directory,
+        <filename class="directory">/tmp/myec2-result</filename> if you
+        followed the commands given above contains a directory ending
+        with <filename class="directory">-any</filename>. This directory
+        contains the AMI bundle created by KIWI with the Amazon tools for use
+        with the S3 storage model. The 
+        <filename class="directory">-any</filename> ending of the directory
+        name indicates that this bundle may be deployed to any EC2 region.
+        As described earlier you can use the
+        <sgmltag class="element">ec2region</sgmltag> element in
+        <filename>config.xml</filename> to build bundles for specific EC2
+        regions. If the <sgmltag class="element">ec2region</sgmltag> element
+        is used the directory name containing the bundle will end with the
+        appropriate region string.</para>
 
-    <para>Prior to launching your instance from the command line you will need
-      to have a keypair. In the Web UI the launch wizard will guide you
-      through this process. The command line interface if the
-      <command>ec2-add-keypair</command> command. The public/private
-      keypair is used to allow you to have access to your instance. If you
-      do not already have a keypair for interacting with EC2 images you can
-      generate a keypair as shown below. The 
-      <replaceable>gsg-keypair</replaceable> name is used in this example,
-      but you can choose any name you like. As you will need to use the
-      key quite often you probably want a name that is easy to remember
-      and not too terribly long to type.
-    </para>
+      <para>The generated bundle needs to be transfered to Amazon using the
+        <command>ec2-upload-bundle</command> command line tool. This tool is
+        part of the Amazon API tools. Upload the AMI as follows, replacing 
+        <replaceable>AWS_Key_ID</replaceable> and
+        <replaceable>AWS_secret_Key_ID</replaceable> with your Amazon key
+        information. Also you may want to choose a different name for your
+        bucket than <filename>myImages</filename>. If the bucket does not
+        exist in S3 it will be created.</para>
+    
+      <!-- formating is ugly here but looks reasonably good in the html-->
+      <screen><command>ec2-upload-bundle</command> <!--
+        --> -b <replaceable>myImages</replaceable> <!--
+        --> -a <replaceable>AWS_Key_ID</replaceable> <!--
+        --> -s <replaceable>AWS_secret_Key_ID</replaceable> \
+   -m /tmp/myec2/suse-##.#-ec2-guest.<replaceable>ARCH</replaceable>-<!--
+        --><replaceable>Version</replaceable>.ec2-any/ \
+      suse-##.#-ec2-guest.<replaceable>ARCH</replaceable>-<!--
+        --><replaceable>Version</replaceable>.ami.manifest.xml</screen>
 
-    <screen><command>ec2-add-keypair</command> gsg-keypair </screen>
+      <para>Where <replaceable>ARCH</replaceable> indicates the architecture
+        to be used for this image, 32 bit (i686) or 64 bit (x86_64), and
+        <replaceable>Version</replaceable> matches the value of the
+        <sgmltag class="element">version</sgmltag> element in the
+        <filename>config.xml</filename> file.</para>
 
-    <para>
-      Save the private key returned by the command in a local file.
-      Using your favorite text editor, create a file named 
-      <filename>id_rsa-gsg-keypair</filename> and paste
-      everything between (and including) the <literal>-----BEGIN RSA
-      PRIVATE KEY-----</literal> and <literal>-----END RSA PRIVATE
-      KEY-----</literal> lines into it. To review your existing
-      keypairs use the <command>ec2-describe-keypairs</command> command.
-    </para>
+      <para>After the upload process is complete, register your image with the
+        EC2 infrastructure using the <command>ec2-register</command>
+        command as shown below. The result of the registration
+        process is an AMI ID returned on the command line in the form
+        <quote>ami-</quote> followed by a random key sequence. Use this
+        AMI ID to launch your instance as described in the
+        <xref  linkend="sec.ec2.using.general" xrefstyle="select:title"/>
+        section.</para>
 
-    <para>The Amazon EC2 infrastructure uses PVGrub (Para-Virtual Grub) to
-      boot instances of an image. Basically Amazon provides a minimal
-      Linux kernel that has parts of Grub built in and is specialized
-      to EC2. PVGrub at some point looks for and reads the 
-      <filename>/boot/grub/menu.lst</filename> file in
-      your image and then boots the specified kernel. Each availability zone
-      in EC2 has it's own independent copy of this boot mechanism. Every boot
-      kernel has an ID starting with the TLA (Three Letter Acronym)
-      <emphasis>aki</emphasis>. The 
-      <xref linkend="tab.ec2.kernel-image-ids" xrefstyle="select:title"/>
-      table below provides guidelines for the selection of the AKI ID.
+      <screen><command>ec2-register</command> myImages/<!--
+        -->suse-##.#-ec2-guest.<replaceable>ARCH</replaceable>-<!--
+        --><replaceable>Version</replaceable>.ami.manifest.xml</screen>
 
-    <table id="tab.ec2.kernel-image-ids">
-      <title>Amazon Kernel Image IDs</title>
-      <tgroup cols="4">
-        <colspec colwidth="1*"/>
-        <colspec colwidth="1*"/>
-        <colspec colwidth="1*"/>
-        <colspec colwidth="4*"/>
-        <thead>
-          <row>
-            <entry>Zone</entry>
-            <entry>AKI</entry>
-            <entry>Arch</entry>
-            <entry>Name</entry>
-          </row>
-        </thead>
-        <tbody>
-          <row>
-            <entry>US-East</entry>
-            <entry>aki-407d9529</entry>
-            <entry>x86</entry>
-            <entry><filename>ec2-public-images/pv-grub-hd0-V1.01-i386.gz.manifest.xml</filename></entry>
-          </row>
-          <row>
-            <entry>US-East</entry>
-            <entry>aki-427d952b</entry>
-            <entry>x86-64</entry>
-            <entry><filename>ec2-public-images/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
-          </row>
-          <row>
-            <entry>US-West</entry>
-            <entry>aki-99a0f1dc</entry>
-            <entry>x86</entry>
-            <entry><filename>ec2-public-images-us-west-1/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
-          </row>
-          <row>
-            <entry>US-West</entry>
-            <entry>aki-9ba0f1de</entry>
-            <entry>x86-64</entry>
-            <entry><filename>ec2-public-images-us-west-1/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
-          </row>
-          <row>
-            <entry>EU-West</entry>
-            <entry>aki-4deec439</entry>
-            <entry>x86</entry>
-            <entry><filename>ec2-public-images-eu/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
-          </row>
-          <row>
-            <entry>EU-West</entry>
-            <entry>aki-4feec43b</entry>
-            <entry>x86-64</entry>
-            <entry><filename>ec2-public-images-eu/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
-          </row>
-          <row>
-            <entry>AP-SouthEast</entry>
-            <entry>aki-13d5aa41</entry>
-            <entry>x86</entry>
-            <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
-          </row>
-          <row>
-            <entry>AP-SouthEast</entry>
-            <entry>aki-11d5aa43</entry>
-            <entry>x86-64</entry>
-            <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </table>
+      <para>This completes the S3 specific setup using the bundle created with
+        KIWI. The next section explains the use of the disk image file created
+        by KIWI to create and EBS backed AMI.</para>
+    </sect2>
 
-    </para>
+    <sect2 id="sec.ec2.using.EBS">
+      <title>Using the disk image for and EBS backed AMI</title>
+      <para>Inside the destination directory,
+        <filename class="directory">/tmp/myec2-result</filename> if you
+        followed the commands given above, you will find a file with no
+        extension. This file is the filesystem image KIWI created and used to
+        create the AMI bundle suitable for use with S3. This filesystem image
+        is the one we need to install/dump onto an EBS volume to have an EBS
+        backed AMI. In order to create the EBS backed AMI it is necessary
+        to work on a running AMI and the local machine that contains the disk
+        image file. Further, the running instance must have the
+        <command>dd_rescue</command> command available. Using the "regular"
+        <command>dd</command> command will result in failure as it does not
+        properly handle sparse images. The SUSE Linux Enterprise AMIs available
+        in EC2 have the <command>dd_rescue</command> command available. For the
+        openSUSE AMIs available in EC2 it is easy to install the
+        <command>dd_rescue</command> command by executing zypper as shown
+        below.
+      
+        <screen><command>zypper</command> in dd_rescue</screen></para>
 
-    <para>The information in the table above was extracted from the Amazon
-      documentation found at: <ulink
-      url="http://ec2-downloads.s3.amazonaws.com/user_specified_kernels.pdf"/>.
-      Kiwi images created for EC2 do not contain a partition table. Therefore,
-      PVGrub images designated by <emphasis>h0</emphasis> in the manifest name
-      need to be used with the images created by Kiwi.
-    </para>
+      <para>The first step in creating an EBS backed AMI is to create a
+        tarball of the filesystem image file. This is necessary to preserve
+        the sparseness properties of the image. Use the <option>-S</option>
+        option as shown below. The following commands are executed on your
+        build machine.</para>
+      
+        <screen><command>cd</command> /tmp/myec2-result</screen>
+        <screen><command>tar</command> -cSf myImage.tar suse-##.#<!--
+          -->-ec2-guest.<replaceable>ARCH</replaceable>-<!--
+          --><replaceable>Version</replaceable></screen>
+      
+      <para>The tarball needs to be uploaded to EC2 and unpacked. This implies
+        that the running instance of your chosen AMI needs to have sufficient
+        space to store the tarball and the unpacked tarball. Therefore, it is
+        recommended to create a storage volume as shown below. The command
+        used will return a volume ID that you want to remember and that will
+        be referred to as <replaceable>STORE_VOL_ID</replaceable> in this
+        example. Execute this command on your local machine.
+      
+        <screen><command>ec2-create-volume</command> <!--
+          -->-s <replaceable>X</replaceable> <!--
+          -->-z <replaceable>AV_ZONE</replaceable></screen>
+      
+        The <replaceable>X</replaceable> is an integer value representing the
+        size of the volume to be created in GB (Giga Bytes). The
+        <replaceable>AV_ZONE</replaceable> value is one of the Amazon
+        availability zones. For all commands presented here the
+        <replaceable>AV_ZONE</replaceable> value must be the same. Possible
+        values for <replaceable>AV_ZONE</replaceable> are obtained with the
+        <command>ec2-describe-availability-zones</command></para>
+      
+      <para>The next step is to launch an instance of your liking in EC2.
+        This instance will be used to create the EBS volume that will
+        eventually function as the backing store for your AMI, therefore
+        this instance must have the <command>dd_rescue</command> as
+        described earlier. Launching the instance is accomplished with the
+        <command>ec2-run-instances</command> command executed on your local
+         machine.
+      
+        <screen><command>ec2-run-instances</command> <!--
+          -->-k gsgkey <!--
+          -->-n 1 <!--
+          -->-g <replaceable>SECURITY_GROUP_NAME</replaceable> <!--
+          -->-t <replaceable>INSTANCE_TYPE</replaceable> <!--
+          -->-z <replaceable>AV_ZONE</replaceable> ami-.....</screen>
+      
+        The <replaceable>SECURITY_GROUP_NAME</replaceable> is optional, but
+        it is best to have a group setup that allows ssh access by default
+        to avoid having to open the port all the time as outlined earlier.
+        The <replaceable>INSTANCE_TYPE</replaceable> specified with the 
+        <option>-t</option> depends on the architecture of your image, for
+        example a 64 bit AMI cannot run in a small (m1.small) instance
+        type. The <command>ec2-run-instances</command> command returns the
+        instance ID, and you want to remember this ID. This ID will be
+        referred to as <replaceable>INST_ID</replaceable> in this example.
+      </para>
+      
+      <para>Wait until the instance is running, check the status with the
+        <command>ec2-describe-instances</command> command. Once the instance is
+        indicated as <emphasis>running</emphasis> attach the previously created
+        volume to your instance, by executing the
+        <command>ec2-attach-volume</command> command on your local machine.
+      
+        <screen><command>ec2-attach-volume</command> <!--
+          --><replaceable>STORE_VOL_ID</replaceable> <!--
+          -->-i <replaceable>INST_ID</replaceable> <!--
+          -->-d /dev/sdf</screen>
+      
+        The chosen device specified with the <option>-d</option> is arbitrary,
+        however, you do obviously not want to pick a device node that is
+        already in use.</para>
 
-    <para>Kiwi can embed the appropriate PVGrub Kernel ID in the EC2
-      manifest file if you specify the optional
-      <sgmltag class="element">ec2region</sgmltag> as part of the
-      <sgmltag class="element">ec2config</sgmltag> block in your
-      <filename>config.xml</filename>. If you specify multiple regions Kiwi
-      generates AMIs for each region specified. Supported values for the
-      <sgmltag class="element">ec2region</sgmltag> element are
-      <emphasis>AP-Singapore</emphasis>, <emphasis>EU-West</emphasis>,
-      <emphasis>US-East</emphasis>, and <emphasis>US-West</emphasis>.
-    </para>
+      <para>In a different shell login to the running instance as shown in
+        the <xref  linkend="sec.ec2.using.general" xrefstyle="select:title"/>
+        section.</para>
 
-    <para>With the appropriate boot kernel selected you can start your image.
-      In this example we use the x86 Kernel in the US-East availability
-      zone.
-    </para>    
+      <para>Check that the storage volume is attached using the
+        <command>ec2-describe-volumes</command> command on your local machine.
+        Once the volume is attached the status will be shown as
+        <emphasis>in use</emphasis>.</para>
 
-    <screen><command>ec2-run-instances</command> ami-... \
-   --kernel aki-407d9529 \ 
-   -k gsg-keypair </screen>
+      <para>With the EBS storage volume attached to your instance create a
+        filesystem on the volume. There is no need to partition the volume.
+        In the EC2 instance that you previously logged into execute the
+        <command>mkfs</command> command.
+      
+        <screen><command>mkfs</command> -t ext3 /dev/sdf</screen>
+      
+        Once the filesystem creation is complete mount the volume.
+      
+        <screen><command>mount</command> dev/sdf /mnt</screen></para>
 
-    <para>To check the state of your instance(s) use the
-      command <command>ec2-describe-instances</command>.</para>
+      <para>With the storage volume attched, formated and mounted you now have
+        sufficient space to transfer the image tarball you created earlier.
+        From the destination directory on your local machine that contains your
+        tarball initiate an ftp session to your EC2 instance.
+      
+        <screen><command>sftp</command> <!--
+          -->-i <replaceable>PATH_TO_PRIVATE_KEY</replaceable> <!--
+          -->root@<replaceable>PUBLIC_IP_OF_YOUR_INSTANCE</replaceable><!--
+          --></screen>
+        <screen>sftp><command>cd</command> /mnt</screen>
+        <screen>sftp><command>put</command> myImage.tar</screen>
+        <screen>sftp><command>bye</command></screen></para>
 
-    <para>Once the instance state is shown as <emphasis 
-        >running</emphasis> you can login into it using ssh as follows:
-    </para>
+      <para>While the image is transfering you can create a new EC2 volume.
+        This new volume will become the backing store for your new AMI and
+        be referred to as <replaceable>VOL_ID</replaceable> in this example.
+        Use the <command>ec2-create-volume</command> command on your local
+        machine as shown previously. This time you want to make sure that
+        the specified size matches the size of your filesystem image file.
+      
+        <screen><command>ec2-create-volume</command> <!--
+         -->-s <replaceable>Y</replaceable> <!--
+         -->-z <replaceable>AV_ZONE</replaceable></screen>
+      
+        It is good practice to use the <sgmltag class="element">size</sgmltag>
+        element in your <filename>config.xml</filename> file when creating EC2
+        images. Using the <sgmltag class="element">size</sgmltag> element
+        ensures that you have additional space on your root volume and that
+        you can match the volume size exactly to your image size.</para>
 
-    <screen><command>ssh</command> -i<!--
-      --> <replaceable>PATH_TO_PRIVATE_KEY</replaceable> \
-      root@<replaceable>YOUR_INSTANCE_ID</replaceable>
-    </screen>
+      <para>As previously, wait for the volume to be created and check the
+        status with the <command>ec2-describe-volumes</command> command. When
+        the volume creation process is complete, attach the new volume to your
+        running instance by executing the <command>ec2-attach-volume</command>
+        command on your local machine.
 
-    <para>If you are unable to log in, it is most likely that the security
-      setting for the instance is blocking the ssh access. To remedy this
-      problem open port 22 using the <command>ec2-authorize</command>
-      command as shown below.
-    </para>
+        <screen><command>ec2-attach-volume</command> <!--
+          --><replaceable>VOL_ID</replaceable> <!--
+          -->-i <replaceable>INST_ID</replaceable> <!--
+          -->-d /dev/sdg</screen>
 
-    <screen><command>ec2-authorize</command> default -p 22 </screen>
+        Wait until the status for the volume changes to
+        <emphasis>in use</emphasis> before proceeding.</para>
 
-    <para>A few more remarks about EC2 are in order. As you have seen at the
-     end of our example it is important that you include ssh in your image
-     and that you start the ssh daemon in your image. Starting the sshd 
-     process is accomplished by adding
-     <emphasis>suseInsertService sshd</emphasis> in
-     <filename>config.sh</filename>.
-   </para>
+      <para>By now the upload of your image tarball has probably completed and
+        you can unpack the image on your storage volume in your EC2 instance.
+        In the shell on your EC2 instance unpack the tarball as shown
+        below.</para>
 
-   <para>Earlier in the example you generated a keypair that was then used
-     to allow you to log into your running instance. The key does need to get
-     injected into the instance when you launch it. This key injection happens
-     through an init script <filename>/etc/init.d/amazon</filename>. This 
-     script is provided by the <filename>suse-ami-tools</filename> package.
-     Therefore, you need to include this package in the 
-     <sgmltag class="element">packages</sgmltag> section of your
-     <filename>config.xml</filename> file. You also need to make sure the
-     <filename>amazon</filename> init script gets executed during boot by
-     using <emphasis>suseInsertService amazon</emphasis> in your
-     <filename>config.sh</filename> file.
-   </para>
+        <screen><command>cd</command> /mnt</screen>
+        <screen><command>tar</command> -xSf <!--
+          --><replaceable>myImage.tar</replaceable></screen>
 
-   <para>The key injection mechanism needs to access the network. Therefore,
-     you must configure the network of your instance. The network interface 
-     of the guest is always eth0 and it needs to be configured to use DHCP.
-     See the overlay file tree of the example for configuration details.
-   </para>
+      <para>After the unpack operation completes you can dump the filesystem
+        image to your EBS volume that will be your backing store for your AMI,
+        this volume if attached to /dev/sdg in this example. In the shell
+        on your EC2 instance execute te <command>dd_rescue</command> command
+        as shown below.
 
-   <para>Last but not least some information about the storage options. Amazon
-     offers S3 <ulink url="http://aws.amazon.com/s3/"/> backed images
-     (this is what we have worked with in this example) and EBS
-     (Elastic Block Store) <ulink url="http://aws.amazon.com/ebs/"/> backed
-     images. At the time of this writing it is not possible to use an image 
-     format created by Kiwi with the Amazon tools directly to create an
-     EBS backed image. It is possible to create an EBS volume from a KIWI
-     raw image, but the process is cumbersome and requires a running Linux
-     instance in EC2. It is anticipated that at some point in the future the
-     Amazon team will address this problem and that the
-     <command>ec2-import-instance</command> command in conjunction with the
-     <command>ec2-upload-disk-image</command> command will be able to create
-     EBS volumes from Linux based disk images. At this point you will be able
-     to use the raw image created by KIWI to create an EBS backed image.
-   </para>
+        <screen><command>dd_rescue</command> -a /mnt/suse-##.#-<!--
+          -->ec2-guest.<replaceable>ARCH</replaceable>-<!--
+          --><replaceable>Version</replaceable> /dev/sdg</screen>
+
+        The <option>-a</option> option instructs dd_rescue to handle the sparse
+        file properly. You have to wait until the dump process is complete
+        before proceeding to the next step.</para>
+
+      <para>With the dump process complete you can now unmount the storage
+        volume from your EC2 instance by executing the following in the
+        shell of your running instance.
+
+        <screen><command>umount</command> /mnt</screen>
+
+        You can also exit the shell in your running EC2 instance as all
+        remaining commands are executed on your local machine.</para>
+
+      <para>You must detach the volume that is intended as your AMI backing
+        store from your running instance. Detaching and deleting the storage
+        volume as well as terminating the running instance are optional.
+
+        <screen><command>ec2-detach-volume</command> <!--
+          -->-i <replaceable>INST_ID</replaceable> <!--
+          -->-d /dev/sdg <replaceable>VOL_ID</replaceable></screen>
+
+        <screen><command>ec2-detach-volume</command> <!--
+          -->-i <replaceable>INST_ID</replaceable> <!--
+          -->-d /dev/sdf <replaceable>STORE_VOL_ID</replaceable></screen>
+
+         Prior to shutting down the instance or deleting the storage volume,
+         wait until the detach operation has completed. This is indicated by
+         the <emphasis>available</emphasis> status in the output of the
+         <command>ec2-describe-volumes</command> command.
+
+         <screen><command>ec2-delete-volume</command> <!--
+          --><replaceable>STORE_VOL_ID</replaceable></screen>
+
+         <screen><command>ec2-terminate-instances</command> <!--
+          --><replaceable>INST_ID</replaceable></screen></para>
+
+      <para>Your next step is to create a snapshot of the EBS volume that
+        contains your image. The <command>ec2-create-snapshot</command>
+        command returns a snapshot ID that you want to remember and will be
+        referred to as <replaceable>SNAP_ID</replaceable> in this example.
+
+        <screen><command>ec2-create-snapshot</command> <!--
+          -->-d <replaceable>A_SHORT_DESCRIPTION</replaceable> <!--
+          --><replaceable>VOL_ID</replaceable></screen>
+
+        The process of creating the snapshot will take a while and depends on
+        the size of your volume. Check the status of the snapshot creation
+        process using the <command>ec2-describe-snapshots</command> command.
+        When the process is complete the status will change to
+        <emphasis>100%</emphasis>.</para>
+
+      <para>Once the snapshot is complete you can register it as an AMI with
+        the EC2 infrastructure using the <command>ec2-register</command>
+        command.
+
+        <screen><command>ec2-register</command> <!--
+          -->-d <replaceable>A_DESCRIPTION</replaceable> <!--
+          -->-n <replaceable>A_NAME</replaceable> <!--
+          -->-s <replaceable>SNAP_ID</replaceable> <!--
+          -->-a <replaceable>ARCH</replaceable> <!--
+          -->--kernel <replaceable>BOOT_KERNEL_ID</replaceable></screen>
+
+        The <command>ec2-register</command> command will return the AMI ID
+        that you can then use to launch your instance.</para>
+
+      <para>The process of creating an EBS backed AMI is a bit tedious. If
+        you create EBS backed AMIs more often it might be well worth your time
+        to script this process using the Amazon REST API. The EC2 tools
+        provided by Amazon that would by name imply to implement this
+        process (<command>ec2-import-instance</command> and
+        <command>ec2-upload-disk-image</command>) do not handle Linux based
+        disk images at the time of this writing.</para>
+
+    </sect2>
   </sect1>
 </chapter>
