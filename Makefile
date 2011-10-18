@@ -48,6 +48,7 @@ all: modules/KIWISchema.rng
 	# build tools
 	#--------------------------------------------
 	${MAKE} -C tools all
+	${MAKE} -C locale all
 
 	#============================================
 	# install .revision file
