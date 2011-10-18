@@ -165,7 +165,7 @@ function OEMInstall {
 			Echo "Found Stick: $stickRoot -> $stickSerial"
 			mkdir -p /cdrom && mount $(ddn $stickRoot 2) /cdrom
 			export OEMInstallType=USB
-			export imageDiskDevice=$stickDevice
+			export imageDiskDevice=$stickRoot
 			unset stickSerial
 		fi
 	else
