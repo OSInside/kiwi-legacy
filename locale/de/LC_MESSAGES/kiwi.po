@@ -24,11 +24,9 @@ msgstr "LUKS-Passphrase eingeben"
 msgid "Do you accept the license agreement ?"
 msgstr "Akzeptieren Sie die Lizenzvereinbarung?"
 
-# power-off message
 msgid "Do you want to start the System-Recovery ?"
 msgstr "Möchten Sie die System-Wiederherstellung nun starten?"
 
-# power-off message
 msgid "Do you want to start the System-Restore ?"
 msgstr "Möchten Sie die System-Zurücksicherug nun starten?"
 
@@ -39,7 +37,7 @@ msgid "Destroying ALL data on %1, continue ?"
 msgstr "Alle Daten auf %1 werden gelöscht, weitermachen?"
 
 msgid "Clean sweep..."
-msgstr "Bereinigung ..."
+msgstr "Bereinigung..."
 
 msgid "%1 files from %2 restored..."
 msgstr "%1 Dateien von %2 zurückgesichert ..."
@@ -47,13 +45,11 @@ msgstr "%1 Dateien von %2 zurückgesichert ..."
 msgid "backing up: %1..."
 msgstr "Sicherung: %1 ..."
 
-#, fuzzy
 msgid "archiving: %1..."
-msgstr "Sicherung: %1 ..."
+msgstr "Archivierung: %1 ..."
 
-#, fuzzy
 msgid "restoring: %1..."
-msgstr "Sicherung: %1 ..."
+msgstr "Wiederherstellung: %1 ..."
 
 msgid "Yes"
 msgstr "Ja"
@@ -64,7 +60,6 @@ msgstr "Nein"
 msgid "OK"
 msgstr "OK"
 
-# cancel button label
 msgid "Cancel"
 msgstr "Verwerfen"
 
@@ -72,30 +67,29 @@ msgid "Exit"
 msgstr "Exit"
 
 msgid "Please remove the CD/DVD before reboot"
-msgstr ""
+msgstr "Bitte entfernen Sie die CD/DVD vor dem Neustart"
 
 msgid "Please unplug the USB stick before reboot"
-msgstr ""
+msgstr "Bitte entnehmen Sie den USB Stick vor dem Neustart"
 
-#, fuzzy
 msgid "Installation..."
-msgstr "Installation"
+msgstr "Installation..."
 
-#, fuzzy
 msgid "Loading %1"
-msgstr "Fehler beim Laden von %1"
+msgstr "Lade %1"
 
 msgid "Verifying %1"
-msgstr ""
+msgstr "Prüfe %1"
 
 msgid "Select disk for installation:"
-msgstr ""
+msgstr "Festplattenauswahl"
 
 msgid "Select %1 partition for installation:"
-msgstr ""
+msgstr "Auswahl der %1 Partition für die Installation:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
 msgstr ""
+"System wird heruntergefahren, bitte Stick entnehmen vor dem Einschalten"
 
 msgid "Please remove the CD/DVD before shutdown"
-msgstr ""
+msgstr "Bitte entfernen Sie die CD/DVD vor dem Herunterfahren"
