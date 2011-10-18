@@ -377,6 +377,13 @@ function OEMRepartLVM {
 		recoParam=no
 		swapParam=no
 		#======================================
+		# setup all free volume name
+		#--------------------------------------
+		allFreeVolume=LVRoot
+		if [ ! -z "$kiwi_allFreeVolume" ];then
+			allFreeVolume=$kiwi_allFreeVolume
+		fi
+		#======================================
 		# close open device mappings
 		#--------------------------------------
 		if [ "$haveLuks" = "yes" ];then
@@ -428,12 +435,12 @@ function OEMRepartLVM {
 			swapParam=yes
 		fi
 		#======================================
-		# Extend LVRoot...
+		# Extend all free volume...
 		#--------------------------------------
 		if [ -z "$OEM_SYSTEMSIZE" ];then
-			lvextend -l +100%FREE /dev/$VGROUP/LVRoot
+			lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
 		else
-			lvextend --size $OEM_SYSTEMSIZE"M" /dev/$VGROUP/LVRoot
+			lvextend --size $OEM_SYSTEMSIZE"M" /dev/$VGROUP/$allFreeVolume
 		fi
 		#======================================
 		# setup new device names

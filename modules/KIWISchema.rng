@@ -49,7 +49,7 @@
   </define>
   <define name="volume-size-type">
     <data type="token">
-      <param name="pattern">\d+|\d+M|\d+G</param>
+      <param name="pattern">\d+|\d+M|\d+G|all</param>
     </data>
   </define>
   <!--

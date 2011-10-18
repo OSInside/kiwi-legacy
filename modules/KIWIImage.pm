@@ -233,6 +233,7 @@ sub updateDescription {
 	$changeset{"displayname"}    = $src_xml->getImageDisplayName();
 	$changeset{"locale"}         = $src_xml->getLocale();
 	$changeset{"boot-theme"}     = $src_xml->getBootTheme();
+	$changeset{"allFreeVolume"}  = $src_xml->getAllFreeVolume();
 	#==========================================
 	# Store repositories
 	#------------------------------------------

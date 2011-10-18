@@ -35,7 +35,7 @@ image-name = xsd:token {pattern = "[^\s/]+"}
 locale-name = xsd:token {pattern = "[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*"}
 mac-address-type = xsd:token {pattern = "([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}"}
 size-type = xsd:token {pattern = "\d*|image"}
-volume-size-type = xsd:token {pattern = "\d+|\d+M|\d+G"}
+volume-size-type = xsd:token {pattern = "\d+|\d+M|\d+G|all"}
 
 #==========================================
 # start with image description
