@@ -1240,6 +1240,9 @@ function setupBootLoaderSyslinuxRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 			fi
+			if [ -f $mountPrefix/bin/systemd ];then
+				echo -n " init=/bin/systemd" >> $conf
+			fi
 			echo -n " vga=$fbmode loader=$loader"          >> $conf
 			echo -n " splash=silent"                       >> $conf
 			echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
@@ -1265,6 +1268,9 @@ function setupBootLoaderSyslinuxRecovery {
 			echo -n " root=$diskByID"                      >> $conf
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+			fi
+			if [ -f $mountPrefix/bin/systemd ];then
+				echo -n " init=/bin/systemd" >> $conf
 			fi
 			echo -n " vga=$fbmode loader=$loader"          >> $conf
 			echo -n " splash=silent"                       >> $conf
@@ -1339,6 +1345,9 @@ function setupBootLoaderGrubRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			fi
+			if [ -f $mountPrefix/bin/systemd ];then
+				echo -n " init=/bin/systemd"              >> $menu
+			fi
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
@@ -1352,6 +1361,9 @@ function setupBootLoaderGrubRecovery {
 			echo -n " root=$diskByID $console"            >> $menu
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
+			fi
+			if [ -f $mountPrefix/bin/systemd ];then
+				echo -n " init=/bin/systemd"              >> $menu
 			fi
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
@@ -1375,6 +1387,9 @@ function setupBootLoaderGrubRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			fi
+			if [ -f $mountPrefix/bin/systemd ];then
+				echo -n " init=/bin/systemd"              >> $menu
+			fi
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
@@ -1388,6 +1403,9 @@ function setupBootLoaderGrubRecovery {
 			echo -n " root=$diskByID $console"            >> $menu
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
+			fi
+			if [ -f $mountPrefix/bin/systemd ];then
+				echo -n " init=/bin/systemd"              >> $menu
 			fi
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
@@ -1543,6 +1561,9 @@ function setupBootLoaderS390 {
 		if [ "$haveLVM" = "yes" ];then
 			echo -n " VGROUP=$VGROUP" >> $conf
 		fi
+		if [ -f $mountPrefix/bin/systemd ];then
+			echo -n " init=/bin/systemd" >> $conf
+		fi
 		echo -n " $KIWI_INITRD_PARAMS"  >> $conf
 		echo -n " $KIWI_KERNEL_OPTIONS" >> $conf
 		echo " loader=$loader\""        >> $conf
@@ -1559,6 +1580,9 @@ function setupBootLoaderS390 {
 		fi
 		if [ "$haveLVM" = "yes" ];then
 			echo -n " VGROUP=$VGROUP" >> $conf
+		fi
+		if [ -f $mountPrefix/bin/systemd ];then
+			echo -n " init=/bin/systemd" >> $conf
 		fi
 		echo -n " $KIWI_INITRD_PARAMS"       >> $conf
 		echo -n " $KIWI_KERNEL_OPTIONS"      >> $conf
@@ -1735,6 +1759,9 @@ function setupBootLoaderSyslinux {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                  >> $conf
 				fi
+				if [ -f $mountPrefix/bin/systemd ];then
+					echo -n " init=/bin/systemd" >> $conf
+				fi
 				echo " showopts"                               >> $conf
 			fi
 			#======================================
@@ -1767,6 +1794,9 @@ function setupBootLoaderSyslinux {
 				echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                  >> $conf
+				fi
+				if [ -f $mountPrefix/bin/systemd ];then
+					echo -n " init=/bin/systemd" >> $conf
 				fi
 				echo -n " showopts ide=nodma apm=off acpi=off" >> $conf
 				echo -n " noresume selinux=0 nosmp"            >> $conf
@@ -1930,7 +1960,7 @@ function setupBootLoaderGrub {
 				echo -n " module /boot/$kernel"                   >> $menu
 				echo -n " root=$diskByID"                         >> $menu
 				if [ ! -z "$imageDiskDevice" ];then
-					echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 				fi
 				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				if [ ! -z "$swap" ];then
@@ -1945,6 +1975,9 @@ function setupBootLoaderGrub {
 				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                     >> $menu
+				fi
+				if [ -f $mountPrefix/bin/systemd ];then
+					echo -n " init=/bin/systemd"                  >> $menu
 				fi
 				echo " showopts"                                  >> $menu
 				echo " module /boot/$initrd"                      >> $menu
@@ -1952,7 +1985,7 @@ function setupBootLoaderGrub {
 				echo -n " kernel $gdev/boot/$kernel"              >> $menu
 				echo -n " root=$diskByID"                         >> $menu
 				if [ ! -z "$imageDiskDevice" ];then
-					echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 				fi
 				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				if [ ! -z "$swap" ];then
@@ -1968,6 +2001,10 @@ function setupBootLoaderGrub {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                     >> $menu
 				fi
+				if [ -f $mountPrefix/bin/systemd ];then
+					echo -n " init=/bin/systemd"                  >> $menu
+				fi
+
 				echo " showopts"                                  >> $menu
 				echo " initrd $gdev/boot/$initrd"                 >> $menu
 			fi
@@ -1982,13 +2019,16 @@ function setupBootLoaderGrub {
 				echo -n " module /boot/$kernel"                   >> $menu
 				echo -n " root=$diskByID"                         >> $menu
 				if [ ! -z "$imageDiskDevice" ];then
-					echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 				fi
 				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                     >> $menu
+				fi
+				if [ -f $mountPrefix/bin/systemd ];then
+					echo -n " init=/bin/systemd"                  >> $menu
 				fi
 				echo -n " showopts ide=nodma apm=off acpi=off"    >> $menu
 				echo -n " noresume selinux=0 nosmp"               >> $menu
@@ -2003,13 +2043,16 @@ function setupBootLoaderGrub {
 				echo -n " kernel $gdev/boot/$kernel"              >> $menu
 				echo -n " root=$diskByID"                         >> $menu
 				if [ ! -z "$imageDiskDevice" ];then
-					echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 				fi
 				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                     >> $menu
+				fi
+				if [ -f $mountPrefix/bin/systemd ];then
+					echo -n " init=/bin/systemd"                  >> $menu
 				fi
 				echo -n " showopts ide=nodma apm=off acpi=off"    >> $menu
 				echo -n " noresume selinux=0 nosmp"               >> $menu
@@ -2184,7 +2227,7 @@ function setupBootLoaderLilo {
 					"*** lilo: Xen dom0 boot not implemented ***" \
 				"reboot"
 			else
-				echo "default=\"$title\""		      >> $conf
+				echo "default=\"$title\""		              >> $conf
 				echo "image=/boot/$kernel"                    >> $conf
 				echo "label=\"$title\""                       >> $conf
 				echo "initrd=/boot/$initrd"                   >> $conf
@@ -2212,6 +2255,9 @@ function setupBootLoaderLilo {
 				echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                 >> $conf
+				fi
+				if [ -f $mountPrefix/bin/systemd ];then
+					echo -n " init=/bin/systemd"              >> $conf
 				fi
 				echo " showopts\""                            >> $conf
 			fi
@@ -2251,6 +2297,9 @@ function setupBootLoaderLilo {
 				echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                 >> $conf
+				fi
+				if [ -f $mountPrefix/bin/systemd ];then
+					echo -n " init=/bin/systemd"              >> $conf
 				fi
 				echo -n " showopts ide=nodma apm=off"         >> $conf
 				echo " acpi=off noresume selinux=0 nosmp\""   >> $conf
@@ -5856,9 +5905,9 @@ function bootImage {
 	#--------------------------------------
 	if [ -z "$init" ];then
 		if [ -f /mnt/bin/systemd ];then
-			init=/bin/systemd
+			export init=/bin/systemd
 		else
-			init=/sbin/init
+			export init=/sbin/init
 		fi
 	fi
 	#======================================
