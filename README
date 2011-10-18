@@ -1,6 +1,9 @@
 KIWI
 ====
 
+Introduction
+------------
+
 The openSUSE KIWI Image System provides a complete operating
 system image solution for Linux supported hardware platforms as
 well as for virtualization systems like Xen, VMware, etc. The KIWI
@@ -20,19 +23,21 @@ http://download.opensuse.org/repositories/Virtualization:/Appliances/
 Usage
 -----
 
-* make sure you have the kiwi-templates package installed
-* build a live ISO example:
+1. make sure you have the kiwi-templates package installed
+2. build a live ISO example:
 
-  kiwi --build suse-XXX-JeOS -d /tmp/myimage --type iso
+```kiwi --build suse-XXX-JeOS -d /tmp/myimage --type iso
+```
 
-* run your OS in a VM like kvm
+3. run your OS in a VM like kvm
 
-  kvm -cdrom /tmp/myimage/*.iso
+```kvm -cdrom /tmp/myimage/*.iso
+```
 
 Mailing list
 ------------
 
-  http://groups.google.com/group/kiwi-images
+*  http://groups.google.com/group/kiwi-images
 
 Contributing
 ------------
