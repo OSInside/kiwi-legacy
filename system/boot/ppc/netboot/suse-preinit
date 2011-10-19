@@ -132,7 +132,12 @@ fi
 kernelCheck
 
 #======================================
-# 13) kill udev
+# 13) create origin snapshot if possible
+#--------------------------------------
+createOriginSnapshot
+
+#======================================
+# 14) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

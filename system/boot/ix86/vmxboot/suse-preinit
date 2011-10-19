@@ -84,7 +84,12 @@ fi
 setupConsole
 
 #======================================
-# 10) kill udev
+# 10) create origin snapshot if possible
+#--------------------------------------
+createOriginSnapshot
+
+#======================================
+# 11) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

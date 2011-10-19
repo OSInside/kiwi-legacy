@@ -8074,6 +8074,22 @@ function setupKernelLinks {
 	fi
 }
 #======================================
+# createOriginSnapshot
+#--------------------------------------
+function createOriginSnapshot {
+	# /.../
+	# create a snapshot origin which allows to keep
+	# track of any changes happened during the live
+	# time of the image. This origin snapshot requires
+	# the use of the btrfs filesystem
+	# ----
+	if [ ! -x /sbin/btrfsctl ];then
+		echo "btrfsprogrs not installed... skipped"
+		return
+	fi
+	btrfsctl -s origin /
+}
+#======================================
 # initialize
 #--------------------------------------
 function initialize {

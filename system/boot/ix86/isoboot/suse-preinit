@@ -41,6 +41,11 @@ setupConsole
 createFramebufferDevices
 
 #======================================
-# 5) clean mount
+# 5) create origin snapshot if possible
+#--------------------------------------
+createOriginSnapshot
+
+#======================================
+# 6) clean mount
 #--------------------------------------
 umountSystemFilesystems
