@@ -386,7 +386,7 @@ sub new {
 		my $minInodes;
 		my $sizeXMLBytes = 0;
 		my $spare        = 100 * 1024 * 1024; # 100M free
-		my $fsoverhead   = 1.4; # 4% filesystem overhead
+		my $fsoverhead   = 1.4;
 		my $fsopts       = $cmdL -> getFilesystemOptions();
 		my $inodesize    = $fsopts->[1];
 		my $inoderatio   = $fsopts->[2];

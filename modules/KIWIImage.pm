@@ -4025,7 +4025,7 @@ sub getSize {
 	my $xml    = $this->{xml};
 	my $mini   = qxx ("find $extend | wc -l"); chomp $mini;
 	my $minsize= qxx ("du -s --block-size=1 $extend | cut -f1"); chomp $minsize;
-	my $fsohead= 1.4; # 4% filesystem overhead
+	my $fsohead= 1.4;
 	my $spare  = 100 * 1024 * 1024;
 	my $files  = $mini;
 	my $fsopts = $cmdL -> getFilesystemOptions();
