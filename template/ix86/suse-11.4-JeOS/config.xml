@@ -62,6 +62,9 @@
 	<repository type="yast2">
 		<source path="opensuse://11.4/repo/oss"/>
 	</repository>
+	<repository type="rpm-md">
+		<source path="http://download.opensuse.org/repositories/Virtualization:/Appliances:/suse-11.4/openSUSE_11.4"/>
+	</repository>
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
