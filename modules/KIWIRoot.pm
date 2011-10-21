@@ -930,7 +930,7 @@ sub fixupOverlayFilesOwnership {
 			}
 		}
 		next if ! $ok;
-		my $data = qxx ("chroot $root chown -c root:root \"$file\" 2>&1");
+		my $data = qxx ("chroot $root chown -c root:root '".$file."' 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> warning (
