@@ -1370,6 +1370,18 @@ sub init {
 		}
 		$Create =~ s/\/$//;
 	}
+	if (defined $Build) {
+		if (($Build !~ /^\//) && (! -d $Build)) {
+			$Build = $System."/".$Build;
+		}
+		$Build =~ s/\/$//;
+	}
+	if (defined $ListXMLInfo) {
+		if (($ListXMLInfo !~ /^\//) && (! -d $ListXMLInfo)) {
+			$ListXMLInfo = $System."/".$ListXMLInfo;
+		}
+		$ListXMLInfo =~ s/\/$//;
+	}
 	#========================================
 	# store uniq path to image description
 	#----------------------------------------
