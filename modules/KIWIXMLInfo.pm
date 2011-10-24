@@ -20,6 +20,7 @@ package KIWIXMLInfo;
 use strict;
 use warnings;
 require Exporter;
+use File::Find;
 use XML::LibXML;
 
 #==========================================
@@ -184,6 +185,8 @@ sub __checkRequests {
 	$supportedInfoReq{'patterns'}      = 'List configured patterns';
 	$supportedInfoReq{'profiles'}      = 'List profiles';
 	$supportedInfoReq{'repo-patterns'} = 'List available patterns from repos';
+	$supportedInfoReq{'overlay-files'} = 'List of files in root overlay';
+	$supportedInfoReq{'archives'}      = 'List of tar archives to be installed';
 	$supportedInfoReq{'size'}          = 'List install/delete size estimation';
 	$supportedInfoReq{'sources'}       = 'List configured source URLs';
 	$supportedInfoReq{'types'}         = 'List configured types';
@@ -272,11 +275,49 @@ sub __getTree {
 	# Initialize XML imagescan element
 	#------------------------------------------
 	my $scan = new XML::LibXML::Element ("imagescan");
+	$scan -> setAttribute ("description",$this->{configDir});
 	#==========================================
 	# Walk through selection list
 	#------------------------------------------
 	for my $info (@infoRequests) {
 		SWITCH: for ($info) {
+			#==========================================
+			# overlay-files
+			#------------------------------------------
+			/^overlay-files/ && do {
+				my %result;
+				sub generateWanted {
+					my $filehash = shift;
+					my $basedir  = shift;
+					return sub {
+						my $file = $File::Find::name;
+						if (! -d $file) {
+							$file =~ s/$basedir//;
+							$file = "[root/]$file";
+							$filehash->{$file} = $basedir;
+						}
+					}
+				}
+				if (! -d $this->{configDir}."/root") {
+					$kiwi -> info ("No overlay root directory present\n");
+				} else {
+					my $wref = generateWanted (
+						\%result,$this->{configDir}."/root/"
+					);
+					my $rdir = $this->{configDir}."/root";
+					find({ wanted => $wref, follow => 0 }, $rdir);
+					if (! %result) {
+						$kiwi -> info ("No overlay files found\n");
+					} else {
+						foreach my $file (sort keys %result) {
+							my $overlay = new XML::LibXML::Element ("overlay");
+							$overlay -> setAttribute ("file","$file");
+							$scan -> appendChild ($overlay);
+						}
+					}
+				}
+				last SWITCH;
+			};
 			#==========================================
 			# repo-patterns
 			#------------------------------------------
@@ -427,6 +468,19 @@ sub __getTree {
 					}
 				}
 				last SWITCH;
+			};
+			/^archives/      && do {
+				my @archives = $xml -> getArchiveList();
+				if ((scalar @archives) == 0) {
+					$kiwi -> info ("No archives available\n");
+				} else {
+					foreach my $archive (@archives) {
+						my $anode = new XML::LibXML::Element ("archive");
+						$anode -> setAttribute ("name","$archive");
+						$scan -> appendChild ($anode);
+					}
+				}
+                last SWITCH;
 			};
 			#==========================================
 			# profiles

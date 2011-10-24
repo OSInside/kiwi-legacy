@@ -1057,6 +1057,12 @@ sub init {
 		}
 		$InitCache =~ s/\/$//;
 	}
+	if (defined $ListXMLInfo) {
+		if (($ListXMLInfo !~ /^\//) && (! -d $ListXMLInfo)) {
+			$ListXMLInfo = $gdata->{System}."/".$ListXMLInfo;
+		}
+		$ListXMLInfo =~ s/\/$//;
+	}
 	#========================================
 	# store uniq path to image description
 	#----------------------------------------
