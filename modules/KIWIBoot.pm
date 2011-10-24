@@ -3155,7 +3155,9 @@ sub setupBootLoaderConfiguration {
 		print FD "timeout $bootTimeout\n";
 		if ($type =~ /^KIWI (CD|USB)/) {
 			my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
-			print FD "gfxmenu $dev/boot/message\n";
+			if (-e "$tmpdir/boot/message") {
+				print FD "gfxmenu $dev/boot/message\n";
+			}
 			print FD "title Boot from Hard Disk\n";
 			if ($dev eq '(cd)') {
 				print FD " rootnoverify (hd0)\n";
@@ -3177,7 +3179,9 @@ sub setupBootLoaderConfiguration {
 			print FD "title $title\n";
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
-			print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
+			if (-e "$tmpdir/boot/message") {
+				print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
+			}
 			print FD "title $title\n";
 		}
 		#==========================================
