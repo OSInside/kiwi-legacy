@@ -2967,7 +2967,7 @@ sub setupBootLoaderConfiguration {
 	#==========================================
 	# setup boot loader default boot label/nr
 	#------------------------------------------
-	my $defaultBootNr    = 0;
+	my $defaultBootNr = 0;
 	if ($xml) {
 		%type = %{$xml->getImageTypeAndAttributes()};
 		$cmdline  = $type{cmdline};
@@ -3283,16 +3283,30 @@ sub setupBootLoaderConfiguration {
 				print FD "gfxboot bootlogo"."\n";
 			}
 		}
+		#==========================================
+		# Setup default title
+		#------------------------------------------
 		if ($type =~ /^KIWI (CD|USB)/) {
-			$title = $this -> makeLabel ("Install/Restore $label");
+			if ($defaultBootNr == 0) {
+				$title = $this -> makeLabel ("Boot from Hard Disk");
+			} elsif ($defaultBootNr == 1) {
+				$title = $this -> makeLabel ("Install/Restore $label");
+			} else {
+				$title = $this -> makeLabel (
+					"Failsafe -- Install/Restore $label"
+				);
+			}
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
 		}
 		print FD "default $title"."\n";
 		if ($type =~ /^KIWI (CD|USB)/) {
-			my $localboot = $this -> makeLabel ("Boot from Hard Disk");
-			print FD "label $localboot\n";
+			$title = $this -> makeLabel ("Boot from Hard Disk");
+			print FD "label $title\n";
 			print FD "localboot 0x80\n";
+			$title = $this -> makeLabel ("Install/Restore $label");
+		} else {
+			$title = $this -> makeLabel ("$label [ $type ]");
 		}
 		print FD "label $title"."\n";
 		push @labels,$title;
