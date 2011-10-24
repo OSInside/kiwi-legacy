@@ -2136,7 +2136,7 @@ sub setupBootDisk {
 						return undef;
 					}
 					$kiwi -> loginfo ("Mounting logical volume: $pname\n");
-					if (! $main::global -> mount ($device, "$loopdir/$pname")) {
+					if (! main::mount ($device, "$loopdir/$pname")) {
 						$this -> cleanLoop ();
 						return undef;
 					}
