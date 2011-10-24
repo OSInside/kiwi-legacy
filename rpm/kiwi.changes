@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct 24 17:04:25 CEST 2011 - ms@suse.de
+
+- fixed escaping of chown parameters (bnc #725706)
+
+-------------------------------------------------------------------
 Mon Oct 24 15:46:34 CEST 2011 - ms@suse.de
 
 - fixed patch typo: $main::global->mount() must be $main::mount()
