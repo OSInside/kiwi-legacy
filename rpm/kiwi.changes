@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Oct 24 11:22:08 CEST 2011 - ms@suse.de
+
+- don't setup grub gfxboot message if no message file exists (bnc #724787)
+- added support for overlay file and archive listing in info module
+
+-------------------------------------------------------------------
 Fri Oct 14 11:25:25 CEST 2011 - ms@suse.de
 
 - xen dom0 support exists only for x86_64 architecture in
