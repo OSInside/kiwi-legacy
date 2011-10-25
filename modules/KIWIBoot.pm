@@ -4229,6 +4229,12 @@ sub getCylinderSizeAndCount {
 	}
 	chomp $status;
 	$this->{pDiskCylinders} = $status;
+	$kiwi -> loginfo (
+		"Disk Cylinder size is: $this->{pDiskCylinderSize} kB\n"
+	);
+	$kiwi -> loginfo (
+		"Disk Cylinder count is: $this->{pDiskCylinders}\n"
+	);
 	return $status;
 }
 
@@ -4419,7 +4425,11 @@ sub setStoragePartition {
 				if ($cmd eq "t") {
 					my $index= $commands[$count+1];
 					my $type = $commands[$count+2];
-					push (@p_cmd,"set $index type 0x$type");
+					if ($type eq "8e") {
+						push (@p_cmd,"set $index lvm on");
+					} elsif ($type eq "82") {
+						push (@p_cmd,"set $index swap on");
+					}
 				}
 				if ($cmd eq "a") {
 					my $index= $commands[$count+1];
