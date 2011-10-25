@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct 25 12:36:46 CEST 2011 - ms@suse.de
+
+- make the info module write the imagescan XML into a tmpfile (bnc #726337)
+
+-------------------------------------------------------------------
 Mon Oct 24 17:04:25 CEST 2011 - ms@suse.de
 
 - fixed escaping of chown parameters (bnc #725706)
