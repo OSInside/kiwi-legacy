@@ -136,8 +136,16 @@ sub printXMLInfo {
 	# ---
 	my $this     = shift;
 	my $requests = shift;
+	my $kiwi = $this->{kiwi};
 	my $infoRequests = $this -> __checkRequests($requests);
 	if (! $infoRequests) {
+		return undef;
+	}
+	my $outfile = qxx ("mktemp -q /tmp/kiwi-xmlinfo-XXXXXX 2>&1");
+	my $code = $? >> 8; chomp $outfile;
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't create tmp file: $outfile: $!");
+		$kiwi -> failed ();
 		return undef;
 	}
 	$this -> {kiwi} -> info ("Reading image description [ListXMLInfo]...\n");
@@ -145,9 +153,11 @@ sub printXMLInfo {
 	if (! $infoTree) {
 		return undef;
 	}
-	open (my $F, "|xsltproc $this->{gdata}->{Pretty} -");
+	open (my $F, "|xsltproc $this->{gdata}->{Pretty} - | cat > $outfile");
 	print $F $infoTree -> toString();
 	close $F;
+	system ("cat $outfile");
+	$kiwi -> info ("Requested information written to: $outfile\n");
 	return 1;
 }
 

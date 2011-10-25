@@ -2967,7 +2967,7 @@ sub setupBootLoaderConfiguration {
 	#==========================================
 	# setup boot loader default boot label/nr
 	#------------------------------------------
-	my $defaultBootNr    = 0;
+	my $defaultBootNr = 0;
 	if ($xml) {
 		%type = %{$xml->getImageTypeAndAttributes()};
 		$cmdline  = $type{cmdline};
@@ -3283,16 +3283,30 @@ sub setupBootLoaderConfiguration {
 				print FD "gfxboot bootlogo"."\n";
 			}
 		}
+		#==========================================
+		# Setup default title
+		#------------------------------------------
 		if ($type =~ /^KIWI (CD|USB)/) {
-			$title = $this -> makeLabel ("Install/Restore $label");
+			if ($defaultBootNr == 0) {
+				$title = $this -> makeLabel ("Boot from Hard Disk");
+			} elsif ($defaultBootNr == 1) {
+				$title = $this -> makeLabel ("Install/Restore $label");
+			} else {
+				$title = $this -> makeLabel (
+					"Failsafe -- Install/Restore $label"
+				);
+			}
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
 		}
 		print FD "default $title"."\n";
 		if ($type =~ /^KIWI (CD|USB)/) {
-			my $localboot = $this -> makeLabel ("Boot from Hard Disk");
-			print FD "label $localboot\n";
+			$title = $this -> makeLabel ("Boot from Hard Disk");
+			print FD "label $title\n";
 			print FD "localboot 0x80\n";
+			$title = $this -> makeLabel ("Install/Restore $label");
+		} else {
+			$title = $this -> makeLabel ("$label [ $type ]");
 		}
 		print FD "label $title"."\n";
 		push @labels,$title;
@@ -4215,6 +4229,12 @@ sub getCylinderSizeAndCount {
 	}
 	chomp $status;
 	$this->{pDiskCylinders} = $status;
+	$kiwi -> loginfo (
+		"Disk Cylinder size is: $this->{pDiskCylinderSize} kB\n"
+	);
+	$kiwi -> loginfo (
+		"Disk Cylinder count is: $this->{pDiskCylinders}\n"
+	);
 	return $status;
 }
 
@@ -4405,7 +4425,11 @@ sub setStoragePartition {
 				if ($cmd eq "t") {
 					my $index= $commands[$count+1];
 					my $type = $commands[$count+2];
-					push (@p_cmd,"set $index type 0x$type");
+					if ($type eq "8e") {
+						push (@p_cmd,"set $index lvm on");
+					} elsif ($type eq "82") {
+						push (@p_cmd,"set $index swap on");
+					}
 				}
 				if ($cmd eq "a") {
 					my $index= $commands[$count+1];

@@ -2604,7 +2604,7 @@ sub getAllFreeVolume {
 	foreach my $volume (@vollist) {
 		my $name = $volume -> getAttribute ("name");
 		my $free = $volume -> getAttribute ("freespace");
-		if ($free eq "all") {
+		if ((defined $free) && ($free eq "all")) {
 			$allFree = $name;
 			last;
 		}
