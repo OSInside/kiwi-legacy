@@ -1676,13 +1676,6 @@ sub kiwiExit {
 	# private Exit function, exit safely
 	# ---
 	my $code = $_[0];
-	my $gdata= $global -> getGlobals();
-	#==========================================
-	# Write temporary XML changes to logfile
-	#------------------------------------------
-	if (defined $kiwi) {
-		$kiwi -> writeXML ($gdata->{Pretty});
-	}
 	#==========================================
 	# Create log object if we don't have one...
 	#------------------------------------------

@@ -3960,6 +3960,33 @@ function setupNetworkInterfaceS390 {
 	fi
 }
 #======================================
+# convertCIDRToNetmask
+#--------------------------------------
+function convertCIDRToNetmask {
+	# /.../
+	# convert the CIDR part to a useable netmask
+	# ----
+	local cidr=$1
+	local count=0
+	for count in `seq 1 4`;do
+		if [ $((cidr / 8)) -gt 0 ];then
+			echo -n 255
+		else
+			local remainder=$((cidr % 8))
+			if [ $remainder -gt 0 ];then
+				echo -n $(( value = 256 - (256 >> remainder)))
+			else
+				echo -n 0
+			fi
+		fi
+		cidr=$((cidr - 8))
+		if [ $count -lt 4 ];then
+			echo -n .
+		fi
+	done
+	echo
+}
+#======================================
 # setupNetworkStatic
 #--------------------------------------
 function setupNetworkStatic {
@@ -3968,6 +3995,14 @@ function setupNetworkStatic {
 	# or save the configuration depending on 'up' parameter
 	# ----
 	local up=$1
+	if [[ $hostip =~ / ]];then
+		#======================================
+		# interpret the CIDR part and remove it from the hostip
+		#--------------------------------------
+		local cidr=$(echo $hostip | cut -f2 -d/)
+		hostip=$(echo $hostip | cut -f1 -d/)
+		netmask=$(convertCIDRToNetmask $cidr)
+	fi
 	if [ "$up" == "1" ];then
 		#======================================
 		# activate network
@@ -6883,7 +6918,11 @@ function createPartedInput {
 			"t")
 				ptypex=${pcmds[$index + 2]}
 				partid=${pcmds[$index + 1]}
-				cmdq="$cmdq set $partid type 0x$ptypex"
+				if [ $ptypex -eq "8e" ];then
+					cmdq="$cmdq set $partid lvm on"
+				elif [ $ptypex -eq "82" ];then
+					cmdq="$cmdq set $partid swap on"
+				fi
 				partedWrite "$disk" "$cmdq"
 				cmdq=""
 				;;

@@ -312,7 +312,7 @@ sub createCache {
 		#==========================================
 		# write XML changes to logfile...
 		#------------------------------------------
-		$kiwi -> writeXML ($this->{gdata}->{Pretty});
+		$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 		#==========================================
 		# Reformat log file for human readers...
 		#------------------------------------------

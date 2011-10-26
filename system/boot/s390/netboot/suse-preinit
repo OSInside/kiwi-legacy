@@ -115,17 +115,24 @@ if [ "$systemIntegrity" = "clean" ];then
 fi
 
 #======================================
-# 10) kernelCheck
+# 10) setup static network
+#--------------------------------------
+if [ "$systemIntegrity" = "clean" ];then
+	setupNetworkStatic 0
+fi
+
+#======================================
+# 11) kernelCheck
 #--------------------------------------
 kernelCheck
 
 #======================================
-# 11) create origin snapshot if possible
+# 12) create origin snapshot if possible
 #--------------------------------------
 createOriginSnapshot
 
 #======================================
-# 12) kill udev
+# 13) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems
