@@ -217,6 +217,10 @@ sub new {
 	#------------------------------------------
 	$this->{usrdataNodeList}    = $usrdataNodeList;
 	$this->{controlFile}        = $controlFile;
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this -> updateXML();
 	return $this;
 }
 

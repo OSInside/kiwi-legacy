@@ -998,9 +998,9 @@ sub storeXML {
 }
 
 #==========================================
-# writeXML
+# writeXMLDiff
 #------------------------------------------
-sub writeXML {
+sub writeXMLDiff {
 	my $this   = shift;
 	my $pretty = shift;
 	my $data   = $this->{xmlString};

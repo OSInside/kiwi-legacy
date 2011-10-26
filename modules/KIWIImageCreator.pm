@@ -174,6 +174,7 @@ sub prepareBootImage {
 	# Apply XML over rides from command line
 	#------------------------------------------
 	$xml = $this -> __applyBaseXMLOverrides($xml);
+	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	return $this -> __prepareTree (
 		$xml,$configDir,$rootTgtDir,$systemTree
 	);
@@ -230,6 +231,7 @@ sub upgradeImage {
 	#------------------------------------------
 	$xml = $this -> __applyBaseXMLOverrides($xml);
 	$xml = $this -> __applyAdditionalXMLOverrides($xml);
+	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	if (! $krc -> prepareChecks()) {
 		return undef;
 	}
@@ -310,6 +312,7 @@ sub prepareImage {
 	#------------------------------------------
 	$xml = $this -> __applyBaseXMLOverrides($xml);
 	$xml = $this -> __applyAdditionalXMLOverrides($xml);
+	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	if (! $krc -> prepareChecks()) {
 		return undef;
 	}
@@ -364,6 +367,7 @@ sub createBootImage {
 	# Apply XML over rides from command line
 	#------------------------------------------
 	$xml = $this -> __applyBaseXMLOverrides($xml);
+	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	#==========================================
 	# Create destdir if needed
 	#------------------------------------------
@@ -483,6 +487,7 @@ sub createImage {
 	#------------------------------------------
 	$xml = $this -> __applyBaseXMLOverrides($xml);
 	$xml = $this -> __applyAdditionalXMLOverrides($xml);
+	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	if (! $krc -> createChecks()) {
 		return undef;
 	}
