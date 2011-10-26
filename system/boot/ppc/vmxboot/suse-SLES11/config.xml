@@ -17,6 +17,7 @@
 		<profile name="ppc64" description="KERNEL: ppc64 kernel"/>
 	</profiles>
 	<drivers type="drivers">
+		<file name="crypto/*"/>
 		<file name="drivers/usb/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="net/packet/*"/>
