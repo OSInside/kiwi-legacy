@@ -70,6 +70,7 @@
 		<file name="drivers/acpi/dock.ko"/>
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
+		<file name="crypto/*"/>
 		<file name="drivers/gpu/drm/i915/i915.ko"/>
 		<file name="drivers/char/agp/intel-agp.ko"/>
 		<file name="drivers/md/*"/>

@@ -79,6 +79,7 @@
 		<file name="drivers/gpu/drm/radeon/radeon.ko"/>
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
+		<file name="crypto/*"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>

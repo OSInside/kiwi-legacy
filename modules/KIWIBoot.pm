@@ -4425,11 +4425,7 @@ sub setStoragePartition {
 				if ($cmd eq "t") {
 					my $index= $commands[$count+1];
 					my $type = $commands[$count+2];
-					if ($type eq "8e") {
-						push (@p_cmd,"set $index lvm on");
-					} elsif ($type eq "82") {
-						push (@p_cmd,"set $index swap on");
-					}
+					push (@p_cmd,"set $index type 0x$type");
 				}
 				if ($cmd eq "a") {
 					my $index= $commands[$count+1];
