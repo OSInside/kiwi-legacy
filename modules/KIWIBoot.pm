@@ -870,7 +870,7 @@ sub setupInstallCD {
 			$kiwi -> failed ();
 			return undef;
 		}
-		print FD "IMAGE=$namecd\n";
+		print FD "IMAGE='".$namecd."'\n";
 		close FD;
 		$kiwi -> info ("Importing system image: $system");
 		$status = qxx ("mv $system $tmpdir 2>&1");
@@ -1418,7 +1418,7 @@ sub setupInstallStick {
 			$this -> cleanLoop ();
 			return undef;
 		}
-		print FD "IMAGE=$nameusb\n";
+		print FD "IMAGE='".$nameusb."'\n";
 		close FD;
 		main::umount();
 		$kiwi -> done();
@@ -2552,7 +2552,7 @@ sub setupInstallFlags {
 			qxx ("rm -rf $irddir");
 			return undef;
 		}
-		print FD "IMAGE=$namecd\n";
+		print FD "IMAGE='".$namecd."'\n";
 		close FD;
 	}
 	#==========================================

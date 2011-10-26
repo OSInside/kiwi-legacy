@@ -2206,7 +2206,7 @@ sub getImageConfig {
 		$result{kiwi_iname} = $name;
 	}
 	if ($dname) {
-		$result{kiwi_displayname} = $dname;
+		$result{kiwi_displayname} = quotemeta $dname;
 	}
 	if ($iver) {
 		$result{kiwi_iversion} = $iver;

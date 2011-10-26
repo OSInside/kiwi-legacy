@@ -116,8 +116,9 @@ IFS="," ; for i in $IMAGE;do
 		2) imageVersion=$n
 	esac
 	done
+	IFS=$IFS_ORIG
 	imageReadOnly="$imageName"
-	imageReadOnly=`echo $imageReadOnly | sed -e s@.$ARCH@@`
+	imageReadOnly=$(echo $imageReadOnly | sed -e "s@\.${ARCH}\$@@")
 	imageReadOnly="$imageReadOnly-read-only.$ARCH-$imageVersion"
 	imageName="/cdrom/$imageName-$imageVersion"
 	gzippName=$imageName.gz
@@ -126,7 +127,6 @@ IFS="," ; for i in $IMAGE;do
 		continue
 	fi
 	while true;do
-		IFS=" "
 		read sum1 blocks blocksize zblocks zblocksize < $imageMD5s
 		if ! validateSize;then
 			systemException \
