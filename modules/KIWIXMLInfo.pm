@@ -540,15 +540,16 @@ sub __setupRepoMounts {
 	my $this = shift;
 	my $xml  = shift;
 	my $kiwi = $this->{kiwi};
+	my $uhash= $xml -> getURLHash();
 	my @mountPnts;
-	if ($xml->{urlhash}) {
-		for my $source (keys %{$xml->{urlhash}}) {
+	if ($uhash) {
+		for my $source (keys %{$uhash}) {
 			#==========================================
 			# iso:// sources
 			#------------------------------------------
 			if ($source =~ /^iso:\/\/(.*)/) {
 				my $iso  = $1;
-				my $dir  = $xml->{urlhash}->{$source};
+				my $dir  = $uhash->{$source};
 				my $data = qxx ("mkdir -p $dir; mount -o loop $iso $dir 2>&1");
 				my $code = $? >> 8;
 				if ($code != 0) {

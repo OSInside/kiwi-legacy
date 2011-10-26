@@ -217,10 +217,6 @@ sub new {
 	#------------------------------------------
 	$this->{usrdataNodeList}    = $usrdataNodeList;
 	$this->{controlFile}        = $controlFile;
-	#==========================================
-	# Store object data (create URL list)
-	#------------------------------------------
-	$this -> createURLList ();
 	return $this;
 }
 
@@ -328,6 +324,28 @@ sub createURLList {
 	$this->{urllist} = \@urllist;
 	$this->{urlhash} = \%urlhash;
 	return $this;
+}
+
+#==========================================
+# getURLHash
+#------------------------------------------
+sub getURLHash {
+	my $this = shift;
+	if (! $this->{urlhash}) {
+		$this -> createURLList();
+	}
+	return $this->{urlhash};
+}
+
+#==========================================
+# getURLList
+#------------------------------------------
+sub getURLList {
+	my $this = shift;
+	if (! $this->{urllist}) {
+		$this -> createURLList();
+	}
+	return $this->{urllist};
 }
 
 #==========================================
@@ -3005,6 +3023,7 @@ sub getList {
 	my $what = shift;
 	my $nopac= shift;
 	my $kiwi = $this->{kiwi};
+	my $urllist = $this -> getURLList();
 	my %pattr;
 	my $nodes;
 	if ($what ne "metapackages") {
@@ -3119,7 +3138,7 @@ sub getList {
 					#------------------------------------------
 					# 1) try to use libsatsolver...
 					my $psolve = new KIWISatSolver (
-						$kiwi,\@pattlist,$this->{urllist},"solve-patterns",
+						$kiwi,\@pattlist,$urllist,"solve-patterns",
 						undef,undef,undef,$ptype
 					);
 					if (! defined $psolve) {
@@ -3295,6 +3314,7 @@ sub getInstallSize {
 	my $kiwi    = $this->{kiwi};
 	my $nodes   = $this->{packageNodeList};
 	my $manager = $this->getPackageManager();
+	my $urllist = $this -> getURLList();
 	my @result  = ();
 	my @delete  = ();
 	my %meta    = ();
@@ -3384,7 +3404,7 @@ sub getInstallSize {
 		}
 	} else {
 		my $psolve = new KIWISatSolver (
-			$kiwi,\@result,$this->{urllist},"solve-patterns",
+			$kiwi,\@result,$urllist,"solve-patterns",
 			undef,undef,undef,$ptype
 		);
 		if (! defined $psolve) {
