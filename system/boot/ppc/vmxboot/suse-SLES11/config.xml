@@ -24,6 +24,11 @@
 		<file name="drivers/md/*"/>
 		<file name="drivers/block/*"/>
 		<file name="drivers/scsi/*"/>
+		<file name="drivers/usb/*"/>
+		<file name="drivers/block/loop.ko"/>
+		<file name="net/packet/*"/>
+		<file name="lib/zlib_deflate/zlib_deflate.ko"/>
+		<file name="lib/libcrc32c.ko"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/fat/*"/>
