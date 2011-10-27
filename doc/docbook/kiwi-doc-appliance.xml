@@ -5,22 +5,56 @@
 <chapter id="chap.appliance">
   <title>Creating Appliances with KIWI</title>
 
-  <sect1 id="sec.appliance.history">
-    <title>History</title>
+  <sect1 id="sec.appliance.overview">
+    <title>Overview</title>
     <indexterm>
       <primary>KIWI</primary>
-      <secondary>history</secondary>
+      <secondary>overview</secondary>
     </indexterm>
-    <para> Traditionally, many computing functions were written as
-      software applications running on top of a general-purpose
-      operating system. The consumer (whether home computer user or the
-      IT department of a company) bought a computer, installed the
-      operating system or configured a pre-installed operating system,
-      and then installed one or more applications on top of the
-      operating system. An e-mail server was just an e-mail application
-      running on top of Linux, Unix, Microsoft Windows, or some other
-      operating system, on a computer that was not designed specifically
-      for that application. </para>
+    <para>Traditionally, computing functions such as word processing or
+      e-mail handling are delivered as software applications. These
+      applications are targeted to run on a computer with an installed
+      general purpose operating system. Applications often have a
+      specialized installer that must be run by the consumer (whether home
+      computer user or an administrator in an IT department of a company) to
+      install the application on the computer in question. For installation
+      of an application on multiple computers the installation program must
+      often be run on each computer where the application is to be installed.
+      In most cases a given application uses only a small part of the
+      capabilities provided by the general purpose operating system running
+      on a computer. Additionally if an application needs special settings
+      to be applied to the general purpose operating system, these often
+      have to be set by the consumer after the installation is complete.
+      These settings are often documented in an installation guide that
+      consumers may or may not read. Last but not least, running a general
+      purpose operating system to support an application that only requires
+      a small part of the functionality provided by the general purpose OS
+      is a waste of computing resources.</para>
+
+    <para>An appliance is the combination of the parts of a general
+      purpose OS needed by a given application and the application itself,
+      bundled and delivered as one unit. This unit may be delivered in
+      a variety of formats, for example a ready to run virtual machine or
+      a self installing system on optical media or a USB stick.</para>
+
+    <para>Compared to the traditional model of application delivery the
+      appliance model has a number of advantages. The consumer no longer
+      has to install a general purpose OS and the application in separate
+      steps. The application is part of the appliance and the appliance
+      provider, as the application expert, takes care of the application
+      "installation". Further, the appliance provider takes care of any
+      OS tuning that may benefit the application. Last but not least, the
+      reduced size of the OS does not only consume fewer resources than
+      a full blow "regular" install of a general purpose OS, but it also
+      provides a reduced footprint for potential security exposure. From the
+      application providers point of view there may be an opportunity to
+      drop the implementation and maintenance of a specialized installer
+      as the application installation no longer has to be "consumer friendly".
+      </para>
+
+    <para>The traditional software delivery model certainly has it's place.
+      However, for many purposes appliances present a more convenient
+      mechanism for consumers.</para>
   </sect1>
 
   <sect1 id="sec.appliance.kiwi-model">
@@ -186,4 +220,26 @@
       this appliance. </para>
 
   </sect1>
+
+  <sect1 id="sec.appliance.crossplatform">
+    <title>Cross Platform Appliance Build</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>cross-platform</secondary>
+    </indexterm>
+    <para>Building appliances for one processor architecture on another
+      processor architecture is in general not possible with KIWI. The
+      exception is that it is possible to build 32 bit (ix86) appliances on a
+      64 bit system running on the x86-64 architecture. This cross-platform
+      limitation is based on the requirement that KIWI be able to execute
+      installed software inside the unpacked image tree. If the software
+      installed inside the unpacked image tree does not run on the
+      architecture of the build platform then KIWI cannot build the
+      appliance.</para>
+
+    <para>While KIWI has the <option>--target-arch</option> command line
+      argument to instruct the package manager <emphasis>zypper</emphasis>
+      to install packages for the specified architecture, this option
+      is not intended to support cross-platform appliance builds.</para>
+   </sect1>
 </chapter>
