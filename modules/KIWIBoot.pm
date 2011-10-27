@@ -4220,7 +4220,7 @@ sub getCylinderSizeAndCount {
 	chomp $status;
 	$this->{pDiskCylinderSize} = $status;
 	$status = qxx (
-		"$parted | head -n 2 | tail -n 1 | cut -f2 -d: | tr -d cyl"
+		"$parted | head -n 3 | tail -n 1 | cut -f1 -d:"
 	);
 	$result = $? >> 8;
 	if ($result != 0) {
