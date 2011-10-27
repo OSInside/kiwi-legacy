@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Oct 27 15:42:06 CEST 2011 - ms@suse.de
+
+- fixed appliance name escaping. One can use any string for the
+  displayname attribute which is now properly escaped via perl's
+  quotemeta(). Along with this change the image name attribute
+  must match the pattern [a-zA-Z0-9_\-\.] (bnc #716992)
+
+-------------------------------------------------------------------
 Tue Oct 25 12:36:46 CEST 2011 - ms@suse.de
 
 - make the info module write the imagescan XML into a tmpfile (bnc #726337)
