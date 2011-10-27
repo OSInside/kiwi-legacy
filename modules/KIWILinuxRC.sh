@@ -7243,7 +7243,7 @@ function pxeSetupDownloadServer {
 		SERVER=tftp.$DOMAIN
 	fi
 	Echo "Checking Server name: $SERVER"
-	if ! ping -c 1 $SERVER >/dev/null 2>&1;then
+	if ! ping -c 1 -w 30 $SERVER >/dev/null 2>&1;then
 		Echo "Server: $SERVER not found"
 		if [ -z "$SERVERTYPE" ] || [ "$SERVERTYPE" = "tftp" ]; then
 			if [ ! -z "$DHCPSIADDR" ];then
