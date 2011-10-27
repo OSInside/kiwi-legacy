@@ -1931,15 +1931,15 @@ sub createImageLiveCD {
 		return undef;
 	}
 	if ((! defined $gzip) || ($gzip =~ /^(unified|clic)/)) {
-		print FD "IMAGE=/dev/ram1;$namecd\n";
+		print FD "IMAGE='/dev/ram1;$namecd'\n";
 	} else {
-		print FD "IMAGE=/dev/loop1;$namecd\n";
+		print FD "IMAGE='/dev/loop1;$namecd'\n";
 	}
 	if (defined $gzip) {
 		if ($gzip =~ /^unified/) {
-			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,aufs\n";
+			print FD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,aufs'\n";
 		} elsif ($gzip =~ /^clic/) {
-			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,clicfs\n";
+			print FD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,clicfs'\n";
 		} else {
 			print FD "COMBINED_IMAGE=yes\n";
 		}
@@ -2885,8 +2885,8 @@ sub writeImageConfig {
 		# IMAGE information
 		#------------------------------------------
 		if (($type{compressed}) && ($type{compressed} eq 'true')) {
-			print FD "IMAGE=${device}${targetPartition};";
-			print FD "$namecd;$server;$blocks;compressed";
+			print FD "IMAGE='${device}${targetPartition};";
+			print FD "$namecd;$server;$blocks;compressed'";
 			if ("$type{type}" eq "split" && defined $this->{imageTreeRW}) {
 				print FD ",${device}${targetPartitionNext}";
 				print FD ";$namerw;$server;$blocks;compressed\n";
@@ -2894,8 +2894,8 @@ sub writeImageConfig {
 				print FD "\n";
 			}
 		} else {
-			print FD "IMAGE=${device}${targetPartition};";
-			print FD "$namecd;$server;$blocks";
+			print FD "IMAGE='${device}${targetPartition};";
+			print FD "$namecd;$server;$blocks'";
 			if ("$type{type}" eq "split" && defined $this->{imageTreeRW}) {
 				print FD ",${device}${targetPartitionNext}";
 				print FD ";$namerw;$server;$blocks\n";
@@ -2935,7 +2935,7 @@ sub writeImageConfig {
 				$valid = 1;
 			}
 			if ($valid) {
-				print FD "UNIONFS_CONFIG=$value\n";
+				print FD "UNIONFS_CONFIG='".$value."'\n";
 			}
 		}
 		#==========================================
