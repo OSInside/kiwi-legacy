@@ -4,7 +4,7 @@
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2011 Novell Inc.
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
