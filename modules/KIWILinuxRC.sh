@@ -229,27 +229,18 @@ function importFile {
 	# will export each entry of the file as variable into
 	# the current shell environment
 	# ----
-	IFS="
-	"
-	local prefix=$1 #change name of key with a prefix
+	local prefix=$1
+	cat - | grep -v ^# > /tmp/srcme
+	source /tmp/srcme
 	while read line;do
-		echo $line | grep -qi "^#" && continue
-		key=`echo "$line" | cut -d '=' -f1`
-		item=`echo "$line" | cut -d '=' -f2-`
-		if [ -z "$key" ] || [ -z "$item" ];then
-			continue
-		fi
-		if ! echo $item | grep -E -q "^(\"|')";then
-			item="'"$item"'"
-		fi
-		Debug "$prefix$key=$item"
-		eval export "$prefix$key\=$item"
-	done
+		key=$(echo "$line" | cut -d '=' -f1)
+		eval "export $key"
+		eval "export $prefix$key=\$$key"
+	done < /tmp/srcme
 	if [ ! -z "$ERROR_INTERRUPT" ];then
 		Echo -e "$ERROR_INTERRUPT"
 		systemException "*** interrupted ****" "shell"
 	fi
-	IFS=$IFS_ORIG
 }
 #======================================
 # unsetFile
