@@ -4,7 +4,7 @@
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2011 SUSE LINUX Products GmbH, Germany
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -89,7 +89,7 @@ sub createTmpDirectory {
 				$kiwi -> info ("Removing old root directory '$root'");
 				if (-e $root."/base-system") {
 					$kiwi -> failed();
-					$kiwi -> info  ("Mount point /base-system exists");
+					$kiwi -> error  ("Mount point '$root/base-system' exists");
 					$kiwi -> failed();
 					return undef;
 				}
