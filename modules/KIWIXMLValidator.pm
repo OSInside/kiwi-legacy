@@ -275,7 +275,7 @@ sub __checkNameValid {
 	my @imgNodes = $this->{systemTree} -> getElementsByTagName('image');
 	# There is only one image node, it is the root node
 	my $name = $imgNodes[0] -> getAttribute('name');
-	if (($name) && ($name =~ /i.*86|x86_64|ppc|ppc64|s390|s390x/)) {
+	if (($name) && ($name =~ /i586|i686|x86_64|ppc|ppc64|s390|s390x/)) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'Found arch string provided in name. '
             . 'No arch string permitted';
