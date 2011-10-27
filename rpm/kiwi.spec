@@ -17,7 +17,7 @@
 
 # needsrootforbuild
 
-Url:            http://kiwi.berlios.de
+Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
 BuildRequires:  perl-Config-IniFiles perl-XML-LibXML perl-libwww-perl
 BuildRequires:  module-init-tools screen zlib-devel
