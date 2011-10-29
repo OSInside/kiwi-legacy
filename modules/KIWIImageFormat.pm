@@ -143,6 +143,9 @@ sub createFormat {
 	if ($format eq "vmdk") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createVMDK();
+	} elsif ($format eq "vpc") {
+		$kiwi -> info ("Starting raw => $format conversion\n");
+		return $this -> createVPC();
 	} elsif ($format eq "ovf") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createOVF();
@@ -305,28 +308,19 @@ sub createVMDK {
 }
 
 #==========================================
+# createVPC
+#------------------------------------------
+sub createVPC {
+	my $this   = shift;
+	return $this -> createVMDK();
+}
+
+#==========================================
 # createQCOW2
 #------------------------------------------
 sub createQCOW2 {
 	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $format = $this->{format};
-	my $source = $this->{image};
-	my $target = $source;
-	my $status;
-	my $result;
-	$kiwi -> info ("Creating $format image...");
-	$target  =~ s/\.raw$/\.$format/;
-	$status = qxx ("qemu-img convert -f raw $source -O $format $target 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create $format image: $status");
-		$kiwi -> failed ();
-		return undef;
-	}
-	$kiwi -> done ();
-	return $target;
+	return $this -> createVMDK();
 }
 
 #==========================================

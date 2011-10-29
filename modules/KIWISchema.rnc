@@ -1460,7 +1460,7 @@ div {
 	k.type.format.attribute =
 		## Specifies the format of the virtual disk.
 		attribute format {
-			"ec2" | "ovf" | "qcow2" | "vmdk"
+			"ec2" | "ovf" | "qcow2" | "vmdk" | "vpc"
 		}
 	k.type.fsnocheck.attribute =
 		## Turn off periodic filesystem checks on ext2/3/4.

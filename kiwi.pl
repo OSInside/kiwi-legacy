@@ -1654,7 +1654,7 @@ sub usage {
 	print "    kiwi --installstick <initrd>\n";
 	print "       [ --installstick-system <vmx-system-image> ]\n";
 	print "Image format conversion:\n";
-	print "    kiwi --convert <systemImage> [ --format <vmdk|ovf|qcow2> ]\n";
+	print "    kiwi --convert <systemImage> [ --format <vmdk|ovf|qcow2|..> ]\n";
 	print "Helper Tools:\n";
 	print "    kiwi --createpassword\n";
 	print "    kiwi --createhash <image-path>\n";
