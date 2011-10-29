@@ -11,3 +11,5 @@ openSUSE-11.0=suse-11.0
 openSUSE-11.1=suse-11.1
 openSUSE-11.2=suse-11.2
 openSUSE-11.3=suse-11.3
+openSUSE-11.4=suse-11.4
+openSUSE-12.1=suse-12.1

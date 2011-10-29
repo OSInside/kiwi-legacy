@@ -84,6 +84,7 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	$this->{gdata} = $main::global -> getGlobals();
 	my $product = $this -> getOperatingSystemVersion();
 	if (! defined $product) {
 		$kiwi -> failed ();
@@ -226,7 +227,6 @@ sub new {
 	$this->{product} = $product;
 	$this->{mount}   = [];
 	$this->{autoyastCloneList} = \@autoyastCloneList;
-	$this->{gdata}   = $main::global -> getGlobals();
 	return $this;
 }
 
