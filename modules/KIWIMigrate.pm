@@ -691,6 +691,7 @@ sub getRepos {
 		return undef;
 	}
 	foreach my $repo (@list) {
+		$repo =~ s/^\s+//g;
 		if ($repo =~ /^\d.*\|(.*)\|.*\|(.*)\|.*\|(.*)\|(.*)\|(.*)\|/) {
 			my $enabled = $2;
 			my $source  = $5;
@@ -811,7 +812,7 @@ sub setTemplate {
 	#==========================================
 	# <description>
 	#------------------------------------------
-	print FD '<image schemaversion="4.8" ';
+	print FD '<image schemaversion="5.3" ';
 	print FD 'name="suse-migration-'.$product.'">'."\n";
 	print FD "\t".'<description type="system">'."\n";
 	print FD "\t\t".'<author>***AUTHOR***</author>'."\n";
@@ -824,8 +825,7 @@ sub setTemplate {
 	print FD "\t".'<preferences>'."\n";
 	print FD "\t\t".'<type image="oem" boot="oemboot/suse-'.$product.'"';
 	print FD ' filesystem="ext3" installiso="true">'."\n";
-	print FD "\t\t\t".'<oemconfig>'."\n";
-	print FD "\t\t\t".'</oemconfig>'."\n";
+	print FD "\t\t\t".'<oemconfig/>'."\n";
 	print FD "\t\t".'</type>'."\n";
 	print FD "\t\t".'<version>1.1.1</version>'."\n";
 	print FD "\t\t".'<packagemanager>zypper</packagemanager>'."\n";
@@ -856,9 +856,10 @@ sub setTemplate {
 	#==========================================
 	# <packages>
 	#------------------------------------------
-	print FD "\t".'<packages type="image">'."\n";
+	print FD "\t".'<packages type="bootstrap">'."\n";
 	if (defined $pats) {
 		foreach my $pattern (sort @{$pats}) {
+			$pattern =~ s/^pattern://;
 			print FD "\t\t".'<opensusePattern name="'.$pattern.'"/>'."\n";
 		}
 	}
@@ -867,15 +868,6 @@ sub setTemplate {
 			print FD "\t\t".'<package name="'.$package.'"/>'."\n";
 		}
 	}
-	print FD "\t".'</packages>'."\n";
-	#==========================================
-	# <packages type="bootstrap">
-	#------------------------------------------
-	print FD "\t".'<packages type="bootstrap">'."\n";
-	print FD "\t\t".'<package name="filesystem"/>'."\n";
-	print FD "\t\t".'<package name="glibc-locale"/>'."\n";
-	print FD "\t\t".'<package name="cracklib-dict-full"/>'."\n";
-	print FD "\t\t".'<package name="openssl-certs"/>'."\n";
 	print FD "\t".'</packages>'."\n";
 	print FD '</image>'."\n";
 	close FD;
@@ -1119,15 +1111,15 @@ sub getPackageList {
 					my $name = $1;
 					$name =~ s/^ +//g;
 					$name =~ s/ +$//g;
-					$pathash{"$name"} = "$name";
+					$pathash{"pattern:$name"} = "$name";
 				}
 			}
 			@patlist = keys %pathash;
 		}
 		$this->{patterns} = \@patlist;
 		my $psolve = new KIWISatSolver (
-			$kiwi,\@patlist,\@urllist,undef,undef,undef,
-			"silent","plusRecommended"
+			$kiwi,\@patlist,\@urllist,"solve-patterns",
+			undef,undef,undef,"plusRecommended"
 		);
 		my @result = ();
 		if (! defined $psolve) {
@@ -1180,8 +1172,8 @@ sub getPackageList {
 			my $repo = $psolve -> getRepo();
 			my $pool = $psolve -> getPool();
 			my $xsolve = new KIWISatSolver (
-				$kiwi,\@result,\@urllist,"solve-packages",$repo,$pool,
-				"silent","plusRecommended"
+				$kiwi,\@result,\@urllist,"solve-packages",
+				$repo,$pool,undef,"plusRecommended"
 			);
 			if (! defined $xsolve) {
 				$kiwi -> error  ("Failed to solve packages");
