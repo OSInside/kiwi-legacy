@@ -370,7 +370,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 		#--------------------------------------
 		cleanPartitionTable
 		recreateVTOCTable
-		createPartitionerInput $(pxePartitionInputS390)
+		createPartitionerInput $(pxePartitionInput)
 		callPartitioner $input
 	else
 		#======================================
@@ -410,7 +410,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 			rm -f $input
 			cleanPartitionTable
 			recreateVTOCTable
-			createPartitionerInput $(pxeRaidPartitionInputS390)
+			createPartitionerInput $(pxeRaidPartitionInput)
 			callPartitioner $input
 		done
 		imageDiskDevice=$DISK

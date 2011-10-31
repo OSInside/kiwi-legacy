@@ -7339,6 +7339,66 @@ function pxeSizeToMB {
 # pxePartitionInput
 #--------------------------------------
 function pxePartitionInput {
+	if [ $PARTITIONER = "fdasd" ];then
+		pxePartitionInputFDASD
+	else
+		pxePartitionInputGeneric
+	fi
+}
+#======================================
+# pxeRaidPartitionInput
+#--------------------------------------
+function pxeRaidPartitionInput {
+	if [ $PARTITIONER = "fdasd" ];then
+		pxeRaidPartitionInputFDASD
+	else
+		pxeRaidPartitionInputGeneric
+	fi
+}
+#======================================
+# pxePartitionInputFDASD
+#--------------------------------------
+function pxePartitionInputFDASD {
+	local field=0
+	local count=0
+	local IFS=","
+	for i in $PART;do
+		field=0
+		count=$((count + 1))
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		partSize=$(pxeSizeToMB $partSize)
+		if [ "$partID" = '82' ] || [ "$partID" = 'S' ];then
+			partID=2
+		elif [ "$partID" = '83' ] || [ "$partID" = 'L' ];then
+			partID=1
+		elif [ "$partID" -eq '8e' ] || [ "$partID" = 'V' ];then
+			partID=4
+		else
+			partID=1
+		fi
+		echo -n "n . $partSize "
+		if [ $partID = "2" ] || [ $partID = "4" ];then
+			echo -n "t $count $partID "
+		fi
+	done
+	echo "w"
+}
+#======================================
+# pxeRaidPartitionInputFDASD
+#--------------------------------------
+function pxeRaidPartitionInputFDASD {
+	pxePartitionInputFDASD
+}
+#======================================
+# pxePartitionInputGeneric
+#--------------------------------------
+function pxePartitionInputGeneric {
 	local field=0
 	local count=0
 	local IFS=","
@@ -7377,49 +7437,9 @@ function pxePartitionInput {
 	echo "w q"
 }
 #======================================
-# pxePartitionInputS390
+# pxeRaidPartitionInputGeneric
 #--------------------------------------
-function pxePartitionInputS390 {
-	local field=0
-	local count=0
-	local IFS=","
-	for i in $PART;do
-		field=0
-		count=$((count + 1))
-		IFS=";" ; for n in $i;do
-		case $field in
-			0) partSize=$n   ; field=1 ;;
-			1) partID=$n     ; field=2 ;;
-			2) partMount=$n;
-		esac
-		done
-		partSize=$(pxeSizeToMB $partSize)
-		if [ "$partID" = '82' ] || [ "$partID" = 'S' ];then
-			partID=2
-		elif [ "$partID" = '83' ] || [ "$partID" = 'L' ];then
-			partID=1
-		elif [ "$partID" -eq '8e' ] || [ "$partID" = 'V' ];then
-			partID=4
-		else
-			partID=1
-		fi
-		echo -n "n . $partSize "
-		if [ $partID = "2" ] || [ $partID = "4" ];then
-			echo -n "t $count $partID "
-		fi
-	done
-	echo "w"
-}
-#======================================
-# pxeRaidPartitionInputS390
-#--------------------------------------
-function pxeRaidPartitionInputS390 {
-	pxePartitionInputS390
-}
-#======================================
-# pxeRaidPartitionInput
-#--------------------------------------
-function pxeRaidPartitionInput {
+function pxeRaidPartitionInputGeneric {
 	local field=0
 	local count=0
 	local IFS=","
