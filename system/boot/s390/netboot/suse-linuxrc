@@ -60,6 +60,19 @@ export kiwi_hybridpersistent=yes
 initialize
 
 #======================================
+# recreateVTOCTable
+#--------------------------------------
+function recreateVTOCTable {
+	# /.../
+	# re-create VTOC re-using existing partition sizes
+	# ----
+	Echo "Recreate VTOC table [ $imageDiskDevice ]"
+	createPartitionerInput u y w
+	callPartitioner $input
+	rm -f $input
+}
+
+#======================================
 # Beautify Startup
 #--------------------------------------
 echo "Loading KIWI PXE Boot-System..."
@@ -266,6 +279,7 @@ selectLanguage
 #======================================
 # 12) Check for diskful station
 #--------------------------------------
+searchBusIDBootDevice
 if [ $LOCAL_BOOT = "no" ];then
 	checkDevice=$DISK
 	if [ -z "$checkDevice" ];then
@@ -355,6 +369,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 		# Standard table
 		#--------------------------------------
 		cleanPartitionTable
+		recreateVTOCTable
 		createPartitionerInput $(pxePartitionInput)
 		callPartitioner $input
 	else
@@ -394,6 +409,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 			imageDiskDevice=$raid_dev
 			rm -f $input
 			cleanPartitionTable
+			recreateVTOCTable
 			createPartitionerInput $(pxeRaidPartitionInput)
 			callPartitioner $input
 		done
