@@ -4005,7 +4005,7 @@ function setupNetworkStatic {
 		hostip=$(echo $hostip | cut -f1 -d/)
 		netmask=$(convertCIDRToNetmask $cidr)
 	fi
-	if [ "$up" == "1" ];then
+	if [ "$up" = "1" ];then
 		#======================================
 		# activate network
 		#--------------------------------------
@@ -4024,11 +4024,12 @@ function setupNetworkStatic {
 		if [ ! $? = 0 ];then
 			systemException "Failed to set up the network: $iface" "reboot"
 		fi
-	else
+		export iface_static=$iface
+	elif [ ! -z $iface_static ];then
 		#======================================
 		# write network setup
 		#--------------------------------------
-		local netFile="/etc/sysconfig/network/ifcfg-$iface"
+		local netFile="/etc/sysconfig/network/ifcfg-$iface_static"
 		echo "BOOTPROTO='static'" > $netFile
 		echo "STARTMODE='auto'" >> $netFile
 		echo "IPADDR='$hostip'" >> $netFile
