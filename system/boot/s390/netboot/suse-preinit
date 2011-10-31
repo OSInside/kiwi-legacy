@@ -39,7 +39,20 @@ mountSystemFilesystems
 udevSystemStart
 
 #======================================
-# 4) create initrd on diskful
+# 4) check preinit services
+#--------------------------------------
+if isVirtioDevice;then
+	runPreinitServices virtio
+fi
+if isDASDDevice;then
+	runPreinitServices dasd
+fi
+if isZFCPDevice;then
+	runPreinitServices zfcp
+fi
+
+#======================================
+# 5) create initrd on diskful
 #--------------------------------------
 if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ]; then
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
@@ -56,14 +69,14 @@ if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ]; then
 fi
 
 #======================================
-# 5) Install boot loader on diskful
+# 6) Install boot loader on diskful
 #--------------------------------------
 if [ "$bootLoaderOK" = 1 ];then
 	installBootLoader
 fi
 
 #======================================
-# 6) create /etc/ImagePackages
+# 7) create /etc/ImagePackages
 #--------------------------------------
 if [ "$systemIntegrity" = "clean" ];then
 	if [ -x /bin/rpm ];then
@@ -73,7 +86,7 @@ if [ "$systemIntegrity" = "clean" ];then
 fi
 
 #======================================
-# 7) check for valid mount points
+# 8) check for valid mount points
 #--------------------------------------
 if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
 	IFS=":" ; for i in $PART_MOUNT;do
@@ -84,7 +97,7 @@ if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
 fi
 
 #======================================
-# 8) Update /etc/ImageVersion files
+# 9) Update /etc/ImageVersion files
 #--------------------------------------
 if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
 	count=0
@@ -108,31 +121,31 @@ if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
 fi
 
 #======================================
-# 9) setup console
+# 10) setup console
 #--------------------------------------
 if [ "$systemIntegrity" = "clean" ];then
 	setupConsole
 fi
 
 #======================================
-# 10) setup static network
+# 11) setup static network
 #--------------------------------------
 if [ "$systemIntegrity" = "clean" ];then
 	setupNetworkStatic 0
 fi
 
 #======================================
-# 11) kernelCheck
+# 12) kernelCheck
 #--------------------------------------
 kernelCheck
 
 #======================================
-# 12) create origin snapshot if possible
+# 13) create origin snapshot if possible
 #--------------------------------------
 createOriginSnapshot
 
 #======================================
-# 13) kill udev
+# 14) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems
