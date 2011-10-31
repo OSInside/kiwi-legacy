@@ -370,7 +370,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 		#--------------------------------------
 		cleanPartitionTable
 		recreateVTOCTable
-		createPartitionerInput $(pxePartitionInput)
+		createPartitionerInput $(pxePartitionInputS390)
 		callPartitioner $input
 	else
 		#======================================

@@ -7377,6 +7377,46 @@ function pxePartitionInput {
 	echo "w q"
 }
 #======================================
+# pxePartitionInputS390
+#--------------------------------------
+function pxePartitionInputS390 {
+	local field=0
+	local count=0
+	local IFS=","
+	for i in $PART;do
+		field=0
+		count=$((count + 1))
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		partSize=$(pxeSizeToMB $partSize)
+		if [ "$partID" = '82' ] || [ "$partID" = 'S' ];then
+			partID=2
+		elif [ "$partID" = '83' ] || [ "$partID" = 'L' ];then
+			partID=1
+		elif [ "$partID" -eq '8e' ] || [ "$partID" = 'V' ];then
+			partID=4
+		else
+			partID=1
+		fi
+		echo -n "n . $partSize "
+		if [ $partID = "2" ] || [ $partID = "4" ];then
+			echo -n "t $count $partID "
+		fi
+	done
+	echo "w"
+}
+#======================================
+# pxeRaidPartitionInputS390
+#--------------------------------------
+function pxeRaidPartitionInputS390 {
+	pxePartitionInputS390
+}
+#======================================
 # pxeRaidPartitionInput
 #--------------------------------------
 function pxeRaidPartitionInput {
@@ -7404,44 +7444,6 @@ function pxeRaidPartitionInput {
 		fi
 	done
 	echo "w q"
-}
-#======================================
-# pxeRaidPartitionInputS390
-#--------------------------------------
-function pxeRaidPartitionInputS390 {
-	local field=0
-	local count=0
-	local IFS=","
-	for i in $PART;do
-		field=0
-		count=$((count + 1))
-		IFS=";" ; for n in $i;do
-		case $field in
-			0) partSize=$n   ; field=1 ;;
-			1) partID=$n     ; field=2 ;;
-			2) partMount=$n;
-		esac
-		done
-		partSize=$(pxeSizeToMB $partSize)
-		partID=fd
-		if [ "$partID" = '82' ] || [ "$partID" = 'S' ];then
-			partID=2
-		elif [ "$partID" = '83' ] || [ "$partID" = 'L' ];then
-			partID=1
-		elif [ "$partID" -eq '8e' ];then
-			partID=4
-		else
-			partID=1
-		fi
-		if [ $count -eq 1 ];then
-			echo -n "n . $partSize "
-			echo -n "t 1 $partID "
-		else
-			echo -n "n . $partSize "
-			echo -n "t $count $partID "
-		fi
-	done
-	echo "w"
 }
 #======================================
 # pxeRaidCreate
