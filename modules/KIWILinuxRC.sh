@@ -2335,6 +2335,9 @@ function setupDefaultPXENetwork {
 	# create the /sysconfig/network file according to the PXE
 	# boot interface.
 	# ----
+	if [ -z "$PXE_IFACE" ];then
+		return
+	fi
 	local prefix=$1
 	local niface=$prefix/etc/sysconfig/network/ifcfg-$PXE_IFACE
 	mkdir -p $prefix/etc/sysconfig/network
