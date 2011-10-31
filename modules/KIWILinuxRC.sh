@@ -3411,6 +3411,17 @@ function searchBusIDBootDevice {
 	local wwpn
 	local slun
 	#======================================
+	# check for custom device init command
+	#--------------------------------------
+	if [ ! -z "$DEVICE_INIT" ];then
+		if ! eval $DEVICE_INIT;then
+			export biosBootDevice="Failed to call: $DEVICE_INIT"
+			return 1
+		fi
+		export biosBootDevice=$DISK
+		return 0
+	fi
+	#======================================
 	# determine device type: dasd or zfcp
 	#--------------------------------------
 	if [ -z "$ipl_type" ];then
