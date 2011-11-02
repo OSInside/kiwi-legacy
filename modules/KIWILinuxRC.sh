@@ -6282,7 +6282,7 @@ function partedWrite {
 #--------------------------------------
 function partedSectorInit {
 	# /.../
-	# return start/end sectors of current partitions.
+	# return aligned start/end sectors of current table.
 	# ----
 	IFS=$IFS_ORIG
 	local disk=$1
@@ -6301,14 +6301,11 @@ function partedSectorInit {
 			startSectors=${startSectors}:${s_start}s
 		fi
 		if [ -z "$endSectors" ];then
-			endSectors=$((s_stopp + 1))s
+			endSectors=$((s_stopp/8*8+8))s
 		else
-			endSectors=$endSectors:$((s_stopp + 1))s
+			endSectors=$endSectors:$((s_stopp/8*8+8))s
 		fi
 	done
-	if [ -z "$startSectors" ];then
-		startSectors=1
-	fi
 }
 #======================================
 # partedEndCylinder
