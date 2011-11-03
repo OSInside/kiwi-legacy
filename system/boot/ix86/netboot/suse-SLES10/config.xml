@@ -113,7 +113,6 @@
 		<package name="perl-gettext"/>
 		<package name="perl-Bootloader"/>
 		<package name="pam-modules"/>
-		<package name="gawk"/>
 		<package name="gnome-filesystem"/>
 		<package name="openslp"/>
 		<package name="suse-build-key"/>

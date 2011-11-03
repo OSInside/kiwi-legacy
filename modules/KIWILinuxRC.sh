@@ -4191,7 +4191,7 @@ function cleanSweep {
 function fdasdGetPartitionID {
 	local count=1
 	for i in $(fdasd -s -p $1 | grep -E '^[ ]+\/' |\
-		 awk -v OFS=":" '$1=$1' | cut -f5 -d:);do
+		awk -v OFS=":" '$1=$1' | cut -f5 -d:);do
 		if [ $count = $2 ];then
 			if $i = 2;then
 				echo 82
