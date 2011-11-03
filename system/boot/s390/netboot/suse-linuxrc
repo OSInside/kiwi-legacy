@@ -105,7 +105,7 @@ udevStart
 # 4) Include proc/cmdline information
 #--------------------------------------
 includeKernelParametersLowerCase
-if [ ! -z $IMAGE ];then
+if [ ! -z "$IMAGE" ];then
 	# /.../
 	# if the image information is already in place at this stage
 	# it comes from the cmdline data which means we are not booting
