@@ -358,8 +358,8 @@ fi
 #======================================
 # 14) Create ptable on diskful system
 #--------------------------------------
+runHook prepartition
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
-	runHook prepartition
 	#======================================
 	# Create partition table
 	#--------------------------------------
@@ -443,8 +443,8 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 			createFilesystem $imageBootDevice
 		fi
 	fi
-	runHook postpartition
 fi
+runHook postpartition
 
 #======================================
 # 15) Setup root device environment
