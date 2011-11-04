@@ -56,6 +56,7 @@
   </bookinfo>
 
   <xi:include href="kiwi-doc-introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-installation.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-workflow.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-description.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-appliance.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
