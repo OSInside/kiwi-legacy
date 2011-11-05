@@ -243,7 +243,7 @@ sub systemPath {
 	# normalize URL data
 	#------------------------------------------
 	if ((! defined $module) || ($module !~ /^system:\/\//)) {
-		return undef;
+		return;
 	}
 	$module =~ s/system:\/\///;
 	$path = $this -> dirPath ("dir://".$prefix."/".$module);
@@ -271,11 +271,11 @@ sub thisPath {
 	# normalize URL data
 	#------------------------------------------
 	if ((! defined $module) || ($module !~ /^this:\/\//)) {
-		return undef;
+		return;
 	}
 	$module =~ s/this:\/\///;
 	if ((! defined $module) || ($module eq "/")) {
-		return undef;
+		return;
 	}
 	my $thisPath;
 	my $lookup;
@@ -305,10 +305,12 @@ sub thisPath {
 	# extra path expansion by lookup file
 	#------------------------------------------
 	if (defined $lookup) {
-		if (! open FD,$lookup) {
-			return undef;
+        my $FD;
+		if (! open $FD, '<', $lookup) {
+			return;
 		}
-		$thisPath = <FD>; close FD;
+		$thisPath = <$FD>;
+        close $FD;
 		$thisPath = $thisPath."/".$module;
 	}
 	#==========================================
@@ -334,7 +336,7 @@ sub dirPath {
 	# normalize URL data
 	#------------------------------------------
 	if ((! defined $module) || ($module !~ /^dir:\/\//)) {
-		return undef;
+		return;
 	}
 	$module =~ s/dir:\/\///;
 	if ($module !~ /^\//) {
@@ -345,7 +347,7 @@ sub dirPath {
 	if (! -e $module_test) {
 		$kiwi -> warning ("dir path: $module_test doesn't exist: $!");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	return $module;
 }
@@ -373,7 +375,7 @@ sub smbPath {
 	# normalize URL data
 	#------------------------------------------
 	if ((! defined $module) || ($module !~ /^smb:\/\//)) {
-		return undef;
+		return;
 	}
 	$module =~ s/^smb://;
 	#==========================================
@@ -387,7 +389,7 @@ sub smbPath {
 	if ($result != 0) {
 		$kiwi -> warning ("Couldn't create tmp dir for smb mount: $tmpdir: $!");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	if (($user) && ($pwd)) {
 		$status = qxx (
@@ -400,7 +402,7 @@ sub smbPath {
 	if ($result != 0) {
 		$kiwi -> warning ("Failed to mount share $module: $status");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# add mount to mount list of root obj
@@ -427,11 +429,11 @@ sub obsPath {
 	# normalize URL data
 	#------------------------------------------
 	if ((! defined $module) || ($module !~ /^obs:\/\//)) {
-		return undef;
+		return;
 	}
 	$module =~ s/obs:\/\///;
 	if ((! defined $module) || ($module eq "/")) {
-		return undef;
+		return;
 	}
 	if (defined $boot) {
 		$module = "this://images/$module"
@@ -467,7 +469,7 @@ sub isoPath {
 		($module !~ /^iso:\/\//) && 
 		($module !~ /^file:\/\//))
 	) {
-		return undef;
+		return;
 	}
 	$module =~ s/^iso:\/\///;
 	$module =~ s/^file:\/\///;
@@ -481,7 +483,7 @@ sub isoPath {
 		} elsif ($module =~ /url=dir:\/\/(.*)/) {
 			$path = $1;
 		} else {
-			return undef;
+			return;
 		}
 		$module = $path."/".$file;
 	}
@@ -500,7 +502,7 @@ sub isoPath {
 	if (! -e $module_test) {
 		$kiwi -> warning ("ISO path: $module_test doesn't exist: $!");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	my $name   = basename ($module);
 	my $tmpdir = "/tmp/kiwimount-$name";
@@ -515,14 +517,14 @@ sub isoPath {
 	if ($result != 0) {
 		$kiwi -> warning ("Couldn't create tmp dir for iso mount: $status: $!");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	$status = qxx ("mount -o loop $module $tmpdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> warning ("Failed to loop mount ISO path: $status");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# add loop mount to mount list of root obj
@@ -563,26 +565,27 @@ sub openSUSEpath {
 	# normalize URL data
 	#------------------------------------------
 	if ((! defined $module) || ($module !~ /^opensuse:\/\//)) {
-		return undef;
+		return;
 	}
 	$module =~ s/opensuse:\/\///;
 	$module =~ s/\/$//;
 	$module =~ s/^\///;
 	if ((! defined $module) || ($module eq "")) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create URL list from URI table
 	#------------------------------------------
-	if (! open $FD, $uriTable) {
-		return undef;
+	if (! open $FD, '<', $uriTable) {
+		return;
 	}
 	while (my $match =<$FD>) {
 		chomp $match;
 		my @list = split (/\|/,$match);
 		my $repo = $module;
 		my $match= '$repo =~ '.$list[1];
-		eval $match;
+        # Violates "expression eval rule FIXME
+		eval $match; ## no critic
 		$matches{$repo} = $list[0];
 	}
 	close $FD;
@@ -632,7 +635,7 @@ sub openSUSEpath {
 		$kiwi -> warning ("Couldn't resolve opensuse URL: $origurl");
 		$kiwi -> skipped ();
 	}
-	return undef;
+	return;
 }
 
 #==========================================
@@ -651,7 +654,7 @@ sub plainPath {
 	# normalize URL data
 	#------------------------------------------
 	if ((! defined $module) || ($module !~ /^plain:\/\//)) {
-		return undef;
+		return;
 	}
 	$module =~ s/^plain:\/\///;
 	$kiwi -> loginfo (
@@ -680,7 +683,7 @@ sub urlResponse {
 	if ($@) {
 		# host can't be resolved, network timeout
 		if ($@ eq "alarm\n") {
-			return undef;
+			return;
 		}
 	}
 	return $response;

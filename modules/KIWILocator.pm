@@ -27,7 +27,7 @@ use KIWIQX;
 # Exports
 #------------------------------------------
 our @ISA    = qw (Exporter);
-our @EXPORT = qw (createTmpDirectory getExecPath getControlFile );
+our @EXPORT_OK = qw (createTmpDirectory getExecPath getControlFile );
 
 #==========================================
 # Constructor
@@ -50,7 +50,7 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
+		$kiwi = KIWILog -> new("tiny");
 	}
 	#==========================================
 	# Store object data
@@ -91,7 +91,7 @@ sub createTmpDirectory {
 					$kiwi -> failed();
 					$kiwi -> error  ("Mount point '$root/base-system' exists");
 					$kiwi -> failed();
-					return undef;
+					return;
 				}
 				qxx ("rm -R $root");
 				$kiwi -> done();
@@ -110,10 +110,10 @@ sub createTmpDirectory {
 		if ($kiwi -> trace()) {
 			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
-		return undef;
+		return;
 	}
 	if ( $rootError ) {
-		return undef;
+		return;
 	}
 	return $root;
 }
@@ -138,7 +138,7 @@ sub getControlFile {
 		$msg .= ' as the configuration base.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	foreach my $search (@subdirs) {
 		$config = $dir.$search.$this->{configName};
@@ -169,7 +169,7 @@ sub getControlFile {
 		$kiwi -> error ( "Could not locate a configuration file in $dir");
 		$kiwi -> failed();
 	}
-	return undef;
+	return;
 }
 
 #============================================
@@ -196,7 +196,7 @@ sub getExecPath {
 		if ($kiwi) {
 			$kiwi -> loginfo ("warning: $execName not found\n");
 		}
-		return undef;
+		return;
 	}
 	return $execPath;
 }
