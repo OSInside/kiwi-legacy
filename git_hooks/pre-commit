@@ -1,0 +1,129 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use File::Basename;
+use IPC::Open2;
+
+# The known Perl modules
+my @kiwiModules = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
+					KIWICollect.pm KIWICommandLine.pm KIWIConfigure.pm
+					KIWIGlobals.pm KIWIImageCreator.pm KIWIImageFormat.pm
+					KIWIImage.pm KIWIIsoLinux.pm KIWILocator.pm
+					KIWILog.pm KIWIManager.pm KIWIMigrate.pm KIWIOverlay.pm
+					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
+					KIWIRoot.pm KIWIRuntimeChecker.pm KIWISatSolverLegacy.pm
+					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
+					KIWIURL.pm KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm
+					KIWIXMLValidator.pm);
+
+# List of modules not clean to level 1 (brutal) of perlcritic
+my @notClean1 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
+					KIWICollect.pm KIWICommandLine.pm KIWIConfigure.pm
+					KIWIGlobals.pm KIWIImageCreator.pm KIWIImageFormat.pm
+					KIWIImage.pm KIWIIsoLinux.pm KIWILocator.pm
+					KIWILog.pm KIWIManager.pm KIWIMigrate.pm KIWIOverlay.pm
+					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
+					KIWIRoot.pm KIWIRuntimeChecker.pm KIWISatSolverLegacy.pm
+					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
+					KIWIURL.pm KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm
+					KIWIXMLValidator.pm);
+# List of modules not clean to level 2 (cruel) of perlcritic
+my @notClean2 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
+					KIWICollect.pm KIWICommandLine.pm KIWIConfigure.pm
+					KIWIGlobals.pm KIWIImageCreator.pm KIWIImageFormat.pm
+					KIWIImage.pm KIWIIsoLinux.pm KIWILocator.pm
+					KIWILog.pm KIWIManager.pm KIWIMigrate.pm KIWIOverlay.pm
+					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
+					KIWIRoot.pm KIWIRuntimeChecker.pm KIWISatSolverLegacy.pm
+					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
+					KIWIURL.pm KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm
+					KIWIXMLValidator.pm);
+# List of modules not clean to level 3 (harsh) of perlcritic
+my @notClean3 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
+					KIWICollect.pm KIWICommandLine.pm KIWIConfigure.pm
+					KIWIGlobals.pm KIWIImageCreator.pm KIWIImageFormat.pm
+					KIWIImage.pm KIWIIsoLinux.pm KIWILocator.pm
+					KIWILog.pm KIWIManager.pm KIWIMigrate.pm KIWIOverlay.pm
+					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
+					KIWIRoot.pm KIWIRuntimeChecker.pm KIWISatSolverLegacy.pm
+					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
+					KIWIURL.pm KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm
+					KIWIXMLValidator.pm);
+# List of modules not clean to level 4 (stern) of perlcritic
+my @notClean4 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
+					KIWICollect.pm KIWICommandLine.pm KIWIConfigure.pm
+					KIWIGlobals.pm KIWIImageCreator.pm KIWIImageFormat.pm
+					KIWIImage.pm KIWIIsoLinux.pm
+					KIWILog.pm KIWIManager.pm KIWIMigrate.pm KIWIOverlay.pm
+					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
+					KIWIRoot.pm KIWIRuntimeChecker.pm KIWISatSolverLegacy.pm
+					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
+					KIWIURL.pm KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm
+					KIWIXMLValidator.pm);
+# List of modules not clean to level 5 (gentel) of perlcritic
+my @notClean5 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
+					KIWICollect.pm KIWICommandLine.pm KIWIConfigure.pm
+					KIWIGlobals.pm KIWIImageCreator.pm KIWIImageFormat.pm
+					KIWIImage.pm KIWIIsoLinux.pm
+					KIWILog.pm KIWIManager.pm KIWIMigrate.pm KIWIOverlay.pm
+					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
+					KIWIRoot.pm KIWIRuntimeChecker.pm KIWISatSolverLegacy.pm
+					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
+					KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm);
+
+my ($chld_in, $chld_out);
+my $pid = open2($chld_out, $chld_in, 'git', 'diff-index', '--name-only', 
+				'HEAD');
+waitpid( $pid, 0 );
+
+my @changedFiles;
+# Verify that all Perl modules are known
+while (<$chld_out>) {
+	my $fname = basename($_);
+	chomp $fname;
+	if ($fname =~ /.*\.pm/x) {
+		push @changedFiles, $fname;
+		if (! grep { /^$fname$/x } @kiwiModules) {
+			print "Comitting new module '$fname'. Registration required. Add ";
+			print "your module to the\ngit_hooks/pre-commit file in the ";
+			print '@kiwiModules list as well as the notCleanX list';
+			print "\n";
+			exit 1;
+		}
+	}
+}
+
+my @criticLevelFiles = (\@notClean1, \@notClean2, \@notClean3, \@notClean4,
+						\@notClean5);
+
+# Verify the changed file against the strictest perlcritic level possible
+# for this file based on the known "goodness" level. Default is level 5
+my $defSeverity = 5;
+VERIFY:
+for my $fname (@changedFiles) {
+	my $listed;
+	for my $level (0..4) {
+		if (! grep { /^$fname$/x } @{ $criticLevelFiles[$level] } ) {
+			my $severity = int $level + 1;
+			my $cmd = "perlcritic --quiet --severity $severity modules/$fname";
+			my $status = system $cmd;
+			if ($status) {
+				print STDOUT "Failed verification for: $fname\n";
+				exit 1;
+			}
+			next VERIFY;
+		} elsif (grep { /^$fname$/x } @{ $criticLevelFiles[$level] } ) {
+			$listed = 1;
+		}
+	}
+	if (! $listed) {
+		my $cmd = "perlcritic --quiet --severity $defSeverity modules/$fname";
+		my $status = system $cmd;
+		if ($status) {
+			print STDOUT "Failed verification for: $fname\n";
+			exit 1;
+		}
+	}
+}
