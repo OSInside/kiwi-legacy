@@ -67,22 +67,22 @@ sub new {
 		}
 		$kiwi -> error ("Could not find specified configuration: $configPath");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! -f $revRecPath) {
 		$kiwi -> error ("Could not find specified revision file: $revRecPath");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! -f $schemaPath) {
 		$kiwi -> error ("Could not find specified schema: $schemaPath");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! -f $xsltPath) {
 		$kiwi -> error ("Could not find specified transformation: $xsltPath");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Store object data
@@ -97,14 +97,14 @@ sub new {
 	#----------------------------------------
 	my $XML = $this -> __loadControlfile ();
 	if (! $XML) {
-		return undef;
+		return;
 	}
 	#=========================================
 	# Generate the DOM
 	#-----------------------------------------
 	my $systemTree = $this -> __getXMLDocTree ( $XML );
 	if (! $systemTree) {
-		return undef;
+		return;
 	}
 	$this->{systemTree} = $systemTree;
 	return $this;
@@ -136,13 +136,13 @@ sub validate {
 	# validate XML document with the schema
 	#------------------------------------------
 	if (! $this -> __validateXML ()) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check data consistentcy
 	#==========================================
 	if (! $this -> __validateConsistency ()) {
-		return undef;
+		return;
 	}
 	$this->{isValid} = 1;
 	return $this;
@@ -173,7 +173,7 @@ sub __checkBootSpecPresent {
 					. 'attribute specified.';
 				$kiwi -> error($msg);
 				$kiwi -> failed();
-				return undef;
+				return;
 			}
 		}
 	}
@@ -201,7 +201,7 @@ sub __checkDefaultProfSetting {
 			. 'using the "import" attribute.';
 			$kiwi -> error($msg);
 			$kiwi -> failed();
-			return undef;
+			return;
 		}
 	}
 	return 1;
@@ -231,7 +231,7 @@ sub __checkDefaultTypeSetting {
 				. 'preferences section.';
 				$kiwi -> error ($msg);
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 		}
 	}
@@ -258,7 +258,7 @@ sub __checkDisplaynameValid {
 			. 'No white space permitted';
 			$kiwi -> error ( $msg );
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	}
 	return 1;
@@ -291,7 +291,7 @@ sub __checkEC2IsFsysType {
 					. "@supportedFSTypes";
 				$kiwi -> error ( $msg );
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 		}
 	}
@@ -323,14 +323,14 @@ sub __checkEC2Regions {
 			my $kiwi = $this->{kiwi};
 			$kiwi -> error ( $msg );
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		if (grep /$regionStr/, @selectedRegions) {
 			my $msg = "Specified region $regionStr not unique";
 			my $kiwi = $this->{kiwi};
 			$kiwi -> error ( $msg );
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		push @selectedRegions, $regionStr
 	}
@@ -365,7 +365,7 @@ sub __checkFilesysSpec {
 		}
 	}
 	if ($isInvalid) {
-		return undef;
+		return;
 	}
 	return 1;
 }
@@ -392,13 +392,13 @@ sub __checkHttpsCredentialsConsistent {
 			my $msg = 'Specified password without username on repository';
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
-			return undef;
+			return;
 		}
 		if ($user && (! $pass)) {
 			my $msg = 'Specified username without password on repository';
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
-			return undef;
+			return;
 		}
 		if ($user && $pass) {
 			my @sources = $repoNode -> getElementsByTagName ('source');
@@ -417,7 +417,7 @@ sub __checkHttpsCredentialsConsistent {
 				. 'All credentials for https repositories must be equal.';
 				$kiwi -> error ($msg);
 				$kiwi -> failed();
-				return undef;
+				return;
 			}
 			if ($pass ne $passwd) {
 				my $msg = "Specified password, $pass, for https repository "
@@ -425,7 +425,7 @@ sub __checkHttpsCredentialsConsistent {
 				. 'All credentials for https repositories must be equal.';
 				$kiwi -> error ($msg);
 				$kiwi -> failed();
-				return undef;
+				return;
 			}
 		}
 	}
@@ -486,7 +486,7 @@ sub __checkPatternTypeAttrConsistent {
 					. '" profile found.';
 					$kiwi -> error ( $msg );
 					$kiwi -> failed ();
-					return undef
+					return;
 				}
 			}
 		}
@@ -509,7 +509,7 @@ sub __checkPatternTypeAttrConsistent {
 				. '".';
 				$kiwi -> error ( $msg );
 				$kiwi -> failed ();
-				return undef
+				return;
 			}
 			my $type = $pkgs -> getAttribute( 'type' );
 			if (! $patternType
@@ -523,7 +523,7 @@ sub __checkPatternTypeAttrConsistent {
 				. '" the values must match.';
 				$kiwi -> error ( $msg );
 				$kiwi -> failed ();
-				return undef
+				return;
 			}
 		}
 	}
@@ -550,7 +550,7 @@ sub __checkPatternTypeAttrUse {
 				. "<packages> specification of type $type.";
 				$kiwi -> error ( $msg );
 				$kiwi -> failed ();
-				return undef
+				return;
 			}
 		}
 	}
@@ -590,7 +590,7 @@ sub __checkPostDumpAction {
 					$kiwi -> error('Only one post dump action may be defined');
 					$kiwi -> error("Use one of @postDumOpts");
 					$kiwi -> failed();
-					return undef;
+					return;
 				}
 			}
 		}
@@ -622,7 +622,7 @@ sub __checkPreferencesDefinition {
 				. "given profile. $profName referenced multiple times.";
 				$kiwi -> error ($msg);
 				$kiwi -> failed ();
-				return undef;
+				return;
 			} else {
 				push @usedProfs, $profName;
 			}
@@ -632,7 +632,7 @@ sub __checkPreferencesDefinition {
 			. 'the "profiles" attribute.';
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
-			return undef;
+			return;
 		}
 	}
 	return 1;
@@ -655,14 +655,14 @@ sub __checkProfileNames {
 			my $msg = 'Name of a profile may not contain whitespace.';
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
-			return undef;
+			return;
 		}
 		if ($name =~ /^all$/) {
 			my $kiwi = $this -> {kiwi};
 			my $msg = 'Name of a profile may not be set to "all".';
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
-			return undef;
+			return;
 		}
 	}
 	return 1;
@@ -727,7 +727,7 @@ sub __checkRevision {
 	my $kiwi = $this->{kiwi};
 	my $systemTree = $this->{systemTree};
 	my $imgnameNodeList = $systemTree -> getElementsByTagName ("image");
-	if (open (my $FD,$this->{revision})) {
+	if (open (my $FD, '<', $this->{revision})) {
 		my $cur_rev = <$FD>; close $FD;
 		my $req_rev = $imgnameNodeList
 			-> get_node(1) -> getAttribute ("kiwirevision");
@@ -737,7 +737,7 @@ sub __checkRevision {
 				"KIWI revision mismatch, require r$req_rev got r$cur_rev"
 			);
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	}
 	return 1;
@@ -766,7 +766,7 @@ sub __checkTypeUnique {
 					. '".../> found.';
 				$kiwi -> error ($msg);
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 			push @imgTypes, $imgT
 		}
@@ -792,7 +792,7 @@ sub __checkVersionDefinition {
 		my $msg = "Only one <version> definition expected, found $numVersions";
 		$kiwi -> error  ($msg);
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my $version = $versions[0] -> textContent();
 	if ($version !~ /^\d+\.\d+\.\d+$/) {
@@ -800,7 +800,7 @@ sub __checkVersionDefinition {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Expected 'Major.Minor.Release'");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	return 1;
 }
@@ -824,7 +824,7 @@ sub __getXMLDocTree {
 		my $evaldata = $@;
 		$kiwi -> error  ("Problem reading control file");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	return $systemTree;
 }
@@ -844,18 +844,21 @@ sub __loadControlfile {
 	my $xslt        = $this->{xslt};
 	my $XML;
 	if ($skipXSLT) {
-		if (! open ($XML,"cat $controlFile|")) {
+        # Violates 3 arg open rule FIXME
+		if (! open ($XML, "cat $controlFile|")) { ## no critic
 			$kiwi -> error ("XSL: Failed to open file $controlFile");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	} else {
-		if (! open ($XML,"xsltproc $xslt $controlFile|")) {
+        # Violates 3 arg open rule FIXME
+		if (! open ($XML, "xsltproc $xslt $controlFile|")) { ## no critic
 			$kiwi -> error ("XSL: Failed to open xslt processor");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	}
+    print STDERR $XML;
 	binmode $XML;
 	return $XML;
 }
@@ -874,55 +877,55 @@ sub __validateConsistency {
 	# ---
 	my $this = shift;
 	if (! $this -> __checkBootSpecPresent()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkDefaultProfSetting()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkDefaultTypeSetting()){
-		return undef;
+		return;
 	}
 	if (! $this -> __checkDisplaynameValid()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkEC2IsFsysType()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkEC2Regions()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkFilesysSpec()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkHttpsCredentialsConsistent()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkPatternTypeAttrUse()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkPatternTypeAttrConsistent()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkPostDumpAction()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkPreferencesDefinition()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkProfileNames()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkReferencedProfDefined()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkRevision()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkTypeUnique()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkVersionDefinition()) {
-		return undef;
+		return;
 	}
 	return 1;
 }
@@ -965,13 +968,13 @@ sub __validateXML {
 		my $jingExec = $locator -> getExecPath('jing');
 		if ($jingExec) {
 			qxx ("$jingExec $this->{schema} $upgradedContolFile 1>&2");
-			return undef;
+			return;
 		} else {
 			$kiwi -> error ("$evaldata\n");
 			$kiwi -> info  ("Use the jing command for more details\n");
 			$kiwi -> info  ("The following requires jing to be installed\n");
 			$kiwi -> info  ("jing $this->{schema} $upgradedContolFile\n");
-			return undef;
+			return;
 		}
 	}
 	return 1;
