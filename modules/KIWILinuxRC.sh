@@ -3936,16 +3936,16 @@ function setupNetworkInterfaceS390 {
 				qeth_cmd="$qeth_cmd -l"
 			fi
 			if [ -n "$portname" ];then
-				qeth_cmd="$qeth_cmd -p$portname"
+				qeth_cmd="$qeth_cmd -p $portname"
 			fi
 			if [ -n "$portno" ];then
-				qeth_cmd="$qeth_cmd -n$portno"
+				qeth_cmd="$qeth_cmd -n $portno"
 			fi
 			qeth_cmd="$qeth_cmd $readchannel $writechannel"
 			if [ -n "$datachannel" ];then
 				qeth_cmd="$qeth_cmd $datachannel"
 			fi
-			$qeth_cmd 1
+			eval $qeth_cmd 1
 			;;
 		"ctc")
 			/sbin/ctc_configure $readchannel $writechannel 1 $ctcprotocol
@@ -3963,6 +3963,7 @@ function setupNetworkInterfaceS390 {
 			"Failed to bring up the network: $instnetdev" \
 		"reboot"
 	fi
+	udevPending
 }
 #======================================
 # convertCIDRToNetmask

@@ -136,6 +136,8 @@ fi
 # 13) setup static network
 #--------------------------------------
 if [ "$systemIntegrity" = "clean" ];then
+	setupNetworkInterfaceS390
+	udevPending
 	setupNetworkStatic 0
 fi
 
