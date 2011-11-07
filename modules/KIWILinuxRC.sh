@@ -231,10 +231,14 @@ function importFile {
 	# ----
 	local prefix=$1
 	cat - | grep -v ^# > /tmp/srcme
-	# remove quoting from values
-	sed -i -e s"#\(^.*\)=[\"']\(.*\)[\"']#\1=\2#" /tmp/srcme
+	# remove start/stop quoting from values
+	sed -i -e s"#\(^[a-zA-Z0-9_]\+\)=[\"']\(.*\)[\"']#\1=\2#" /tmp/srcme
+	# remove backslash quotes if any
+	sed -i -e s'#\\##g' /tmp/srcme
+	# quote simple quotation marks
+	sed -i -e s"#'#'\\\\''#g" /tmp/srcme
 	# add '...' quoting to values
-	sed -i -e s"#\(^.*\)=\(.*\)#\1='\2'#" /tmp/srcme
+	sed -i -e s"#\(^[a-zA-Z0-9_]\+\)=\(.*\)#\1='\2'#" /tmp/srcme
 	source /tmp/srcme
 	while read line;do
 		key=$(echo "$line" | cut -d '=' -f1)
