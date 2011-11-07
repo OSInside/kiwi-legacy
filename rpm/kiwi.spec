@@ -50,7 +50,7 @@ Requires:       squashfs
 Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
-Requires:       kiwi-tools libxslt checkmedia util-linux
+Requires:       kiwi-tools libxslt checkmedia util-linux rsync
 %if %{suse_version} > 1030
 Requires:       satsolver-tools
 %endif
