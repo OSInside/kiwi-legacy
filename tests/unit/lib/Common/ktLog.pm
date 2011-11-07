@@ -42,6 +42,7 @@ sub DESTROY {
 	# Clean up
 	# ---
 	unlink '/tmp/kiwiTestLog.log';
+    return;
 }
 
 #==========================================
@@ -60,10 +61,10 @@ sub new {
 	#==========================================
 	# Stored Messages
 	#------------------------------------------
-	$this -> {errMsg}     = '';
-	$this -> {infoMsg}    = '';
-	$this -> {logInfoMsg} = '';
-	$this -> {warnMsg}    = '';
+	$this -> {errMsg}     = q{ };
+	$this -> {infoMsg}    = q{ };
+	$this -> {logInfoMsg} = q{ };
+	$this -> {warnMsg}    = q{ };
 	#==========================================
 	# Stored State
 	#------------------------------------------
@@ -140,7 +141,7 @@ sub getErrorMessage {
 	# ---
 	my $this = shift;
 	my $msg = $this -> {errMsg};
-	$this -> {errMsg} = '';
+	$this -> {errMsg} = q{ };
 	return $msg;
 }
 
@@ -176,7 +177,7 @@ sub getInfoMessage {
 	# ---
 	my $this = shift;
 	my $msg = $this -> {infoMsg};
-	$this -> {infoMsg} = '';
+	$this -> {infoMsg} = q{ };
 	return $msg;
 }
 
@@ -195,7 +196,7 @@ sub getLogInfoMessage {
 	# ---
 	my $this = shift;
 	my $msg = $this -> {logInfoMsg};
-	$this -> {logInfoMsg} = '';
+	$this -> {logInfoMsg} = q{ };
 	return $msg;
 }
 
@@ -309,7 +310,7 @@ sub getWarningMessage {
 	# ---
 	my $this = shift;
 	my $msg = $this -> {warnMsg};
-	$this -> {warnMsg} = '';
+	$this -> {warnMsg} = q{ };
 	return $msg;
 }
 
@@ -473,20 +474,21 @@ sub __printAllMessages {
 	my $this = shift;
 	if ( $this -> {errMsg} ) {
 		my $msg = $this -> {errMsg};
-		print STDERR "Log set error message: $msg\n";
+		print {*STDERR} "Log set error message: $msg\n";
 	}
 	if ( $this -> {infoMsg} ) {
 		my $msg = $this -> {infoMsg};
-		print STDERR "Log set info message: $msg\n";
+		print {*STDERR} "Log set info message: $msg\n";
 	}
 	if ( $this -> {logInfoMsg} ) {
 		my $msg = $this -> {logInfoMsg};
-		print STDERR "Log set loginfo message: $msg\n";
+		print {*STDERR} "Log set loginfo message: $msg\n";
 	}
 	if ( $this -> {warnMsg} ) {
 		my $msg = $this -> {warnMsg};
-		print STDERR "Log set warning message: $msg\n";
+		print {*STDERR} "Log set warning message: $msg\n";
 	}
+    return;
 }
 
 #==========================================
@@ -510,10 +512,10 @@ sub __resetData {
 	# Reset object data
 	# ---
 	my $this = shift;
-	$this->{errMsg}     = '';
-	$this->{infoMsg}    = '';
-	$this->{logInfoMsg} = '';
-	$this->{warnMsg}    = '';
+	$this->{errMsg}     = q{ };
+	$this->{infoMsg}    = q{ };
+	$this->{logInfoMsg} = q{ };
+	$this->{warnMsg}    = q{ };
 	return $this;
 }
 

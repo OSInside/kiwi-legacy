@@ -844,15 +844,13 @@ sub __loadControlfile {
 	my $xslt        = $this->{xslt};
 	my $XML;
 	if ($skipXSLT) {
-        # Violates 3 arg open rule FIXME
-		if (! open ($XML, "cat $controlFile|")) { ## no critic
+		if (! open ($XML, '-|', "cat $controlFile")) {
 			$kiwi -> error ("XSL: Failed to open file $controlFile");
 			$kiwi -> failed ();
 			return;
 		}
 	} else {
-        # Violates 3 arg open rule FIXME
-		if (! open ($XML, "xsltproc $xslt $controlFile|")) { ## no critic
+		if (! open ($XML, '-|', "xsltproc $xslt $controlFile")) {
 			$kiwi -> error ("XSL: Failed to open xslt processor");
 			$kiwi -> failed ();
 			return;
