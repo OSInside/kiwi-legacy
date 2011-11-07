@@ -258,7 +258,7 @@ IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
 
 <screen>
 IMAGE='device;name;version;srvip;bsize;compressed,...,'
-CONF=src;dest;srvip;bsize;[hash],...,src;dest;srvip;bsize;[hash]
+CONF='src;dest;srvip;bsize;[hash],...,src;dest;srvip;bsize;[hash]'
 PART='size;id;Mount,...,size;id;Mount'
 DISK=device
 </screen>
@@ -1197,7 +1197,7 @@ vendor_name_model_HARDWARE_MAP="00:00:00:11:11:11"
           hardware_config.&lt;hardware_map> file. The contents of the file is quite simple, and
           contains only one element called VENDOR_CONF, as the following example shows:</para>
 <screen>
-VENDOR_CONF=CONFIGURATIONS/xorg.conf.hardware_name_model;/etc/X11/xorg.conf;192.168.100.2;4096
+VENDOR_CONF='CONFIGURATIONS/xorg.conf.hardware_name_model;/etc/X11/xorg.conf;192.168.100.2;4096'
 </screen>
         <para>The format of the VENDOR_CONF values is exactly the same as the CONF variable used in
           the standard host and group configurations. In addition, files defined within this list
@@ -1277,8 +1277,8 @@ maxterm_3500_HARDWARE_MAP='00:00:00:00:00:02 00:00:00:00:00:03 00:00:00:00:00:04
 <screen>
 cat hardware_config.maxterm_3500
 
-VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
-            someconfig.cfg;/etc/sysconfig/someconfig.cfg;192.168.1.2;4096
+VENDOR_CONF='xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
+            someconfig.cfg;/etc/sysconfig/someconfig.cfg;192.168.1.2;4096'
 </screen>
         <para>When the VENDOR_CONF defintition is used, we are telling KIWI that all files defined
           within this element, are specific to the hardware map they are linked to. As a result, any
