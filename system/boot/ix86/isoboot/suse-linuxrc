@@ -188,53 +188,7 @@ fi
 #--------------------------------------
 swapSpace=`searchSwapSpace`
 if [ ! -z "$swapSpace" ];then
-	#======================================
-	# 11.1) use an existing swap partition
-	#--------------------------------------
 	Echo "Found swap space on: $swapSpace"
-else
-	#======================================
-	# 11.1) use a swap file on a free part.
-	#--------------------------------------
-	swapDevice=`searchDiskSpace`
-	if [ ! -z "$swapDevice" ];then
-		FSTYPE_SAVE=$FSTYPE
-		probeFileSystem $swapDevice
-		SWTYPE=$FSTYPE
-		FSTYPE=$FSTYPE_SAVE
-		if [ $SWTYPE = "unknown" ];then
-			Echo "Can't use unknown filesystem for swap file... skipped"
-		else
-			Echo "Setting up swap file on: $swapDevice -> $SWTYPE"
-			mRAM=`cat /proc/meminfo | grep MemTotal | cut -f2 -d:`
-			mRAM=`echo $mRAM | cut -f1 -d" "`
-			SWSIZE=`expr $mRAM / 1024`
-			SWSIZE=`expr $SWSIZE \* 2`
-			if [ $SWSIZE -lt 64 ];then
-				SWSIZE=64
-			fi
-			SWDIR=/liveswap
-			SWFILE=$SWDIR/kiwiswap
-			mkdir -p $SWDIR
-			if ! mount -t $SWTYPE $swapDevice $SWDIR;then
-				Echo "Failed to mount swap device on: $swapDevice"
-				unset swapDevice
-			fi
-			if [ ! -f $SWFILE ];then
-				dd if=/dev/zero of=$SWFILE bs=1M count=$SWSIZE >/dev/null
-				if [ ! $? = 0 ];then
-					Echo "Failed to create swap file on: $swapDevice"
-					unset swapDevice
-				fi
-				if ! mkswap $SWFILE >/dev/null;then
-					Echo "Failed to initialize swap file"
-					unset swapDevice
-				fi
-			fi
-			Echo "Created swap file: kiwiswap [ $SWSIZE MB ]"
-			umount $SWDIR
-		fi
-	fi
 fi
 
 #======================================

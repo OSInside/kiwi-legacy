@@ -3424,32 +3424,6 @@ function searchSwapSpace {
 	done
 }
 #======================================
-# searchDiskSpace
-#--------------------------------------
-function searchDiskSpace {
-	# /.../
-	# search for a free non swap partition
-	# ----
-	if [ ! -z $kiwinoswapsearch ];then
-		return
-	fi
-	local hwapp=/usr/sbin/hwinfo
-	local diskdevs=`$hwapp --disk | grep "Device File:" | cut -f2 -d:`
-	diskdevs=`echo $diskdevs | sed -e "s@(.*)@@"`
-	for diskdev in $diskdevs;do
-		for disknr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;do
-			id=`partitionID $diskdev $disknr`
-			if [ -z $id ];then
-				id=0
-			fi
-			if [ "$id" -ne 82 ] && [ "$id" -ne 0 ];then
-				echo $diskdev$disknr
-				return
-			fi
-		done
-	done
-}
-#======================================
 # updateMTAB
 #--------------------------------------
 function updateMTAB {
