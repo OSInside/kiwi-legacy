@@ -1880,7 +1880,7 @@ PART='5;S;x,x;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
 </pre><p>The following format is used: </p><pre class="screen">
 IMAGE='device;name;version;srvip;bsize;compressed,...,'
-CONF=src;dest;srvip;bsize;[hash],...,src;dest;srvip;bsize;[hash]
+CONF='src;dest;srvip;bsize;[hash],...,src;dest;srvip;bsize;[hash]'
 PART='size;id;Mount,...,size;id;Mount'
 DISK=device
 </pre><div class="variablelist"><dl><dt><span class="term"><code class="varname">IMAGE</code></span></dt><dd><p>Specifies which image (name) should be loaded with
@@ -2342,7 +2342,7 @@ vendor_name_model_HARDWARE_MAP="00:00:00:11:11:11"
           specific elements are linked to the host(s) in question. This is done by creating a new
           hardware_config.&lt;hardware_map&gt; file. The contents of the file is quite simple, and
           contains only one element called VENDOR_CONF, as the following example shows:</p><pre class="screen">
-VENDOR_CONF=CONFIGURATIONS/xorg.conf.hardware_name_model;/etc/X11/xorg.conf;192.168.100.2;4096
+VENDOR_CONF='CONFIGURATIONS/xorg.conf.hardware_name_model;/etc/X11/xorg.conf;192.168.100.2;4096'
 </pre><p>The format of the VENDOR_CONF values is exactly the same as the CONF variable used in
           the standard host and group configurations. In addition, files defined within this list
           will over-write any files defined in the group configuration, if and only if, all of the
@@ -2398,8 +2398,8 @@ maxterm_3500_HARDWARE_MAP='00:00:00:00:00:02 00:00:00:00:00:03 00:00:00:00:00:04
           is as follows:</p><pre class="screen">
 cat hardware_config.maxterm_3500
 
-VENDOR_CONF=xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
-            someconfig.cfg;/etc/sysconfig/someconfig.cfg;192.168.1.2;4096
+VENDOR_CONF='xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
+            someconfig.cfg;/etc/sysconfig/someconfig.cfg;192.168.1.2;4096'
 </pre><p>When the VENDOR_CONF defintition is used, we are telling KIWI that all files defined
           within this element, are specific to the hardware map they are linked to. As a result, any
           files listed here will be transferred to a host if, and only if, the host has been linked
