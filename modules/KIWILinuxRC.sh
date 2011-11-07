@@ -231,11 +231,15 @@ function importFile {
 	# ----
 	local prefix=$1
 	cat - | grep -v ^# > /tmp/srcme
+	# remove quoting from values
+	sed -i -e s"#\(^.*\)=[\"']\(.*\)[\"']#\1=\2#" /tmp/srcme
+	# add '...' quoting to values
+	sed -i -e s"#\(^.*\)=\(.*\)#\1='\2'#" /tmp/srcme
 	source /tmp/srcme
 	while read line;do
 		key=$(echo "$line" | cut -d '=' -f1)
 		eval "export $key"
-		eval "export $prefix$key=\$$key"
+		test -z "$prefix" || eval "export $prefix$key=\$$key"
 	done < /tmp/srcme
 	if [ ! -z "$ERROR_INTERRUPT" ];then
 		Echo -e "$ERROR_INTERRUPT"
