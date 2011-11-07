@@ -858,7 +858,6 @@ sub __loadControlfile {
 			return;
 		}
 	}
-    print STDERR $XML;
 	binmode $XML;
 	return $XML;
 }
