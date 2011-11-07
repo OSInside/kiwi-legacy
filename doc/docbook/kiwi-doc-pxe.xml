@@ -250,16 +250,16 @@ config.$&lt;$MAC Address$&gt;$
 
 <screen>
 DISK=/dev/sda
-PART=5;S;x,x;L;/
-IMAGE=/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096
+PART='5;S;x,x;L;/'
+IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
 </screen>
 
       <para>The following format is used: </para>
 
 <screen>
-IMAGE=device;name;version;srvip;bsize;compressed,...,
+IMAGE='device;name;version;srvip;bsize;compressed,...,'
 CONF=src;dest;srvip;bsize;[hash],...,src;dest;srvip;bsize;[hash]
-PART=size;id;Mount,...,size;id;Mount
+PART='size;id;Mount,...,size;id;Mount'
 DISK=device
 </screen>
 
@@ -451,9 +451,9 @@ DISK=device
               A typical raid image setup could look like this:</para>
 <screen>
 DISK=/dev/sda
-IMAGE=/dev/md1;LimeJeOS-openSUSE-##.#.i686;1.11.3;192.168.100.2;4096
-PART=5;S;x,2000;83;/
-RAID=1;/dev/sda;/dev/sdb
+IMAGE='/dev/md1;LimeJeOS-openSUSE-##.#.i686;1.11.3;192.168.100.2;4096'
+PART='5;S;x,2000;83;/'
+RAID='1;/dev/sda;/dev/sdb'
 </screen>
 		  </listitem>
         </varlistentry>
@@ -565,8 +565,8 @@ UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs
               should explain the interconnections: </para>
 
 <screen>
-IMAGE=/dev/sda3;image/myImage;1.1.1;192.168.1.1;4096
-PART=200;S;x,300;L;/,x;L;x
+IMAGE='/dev/sda3;image/myImage;1.1.1;192.168.1.1;4096'
+PART='200;S;x,300;L;/,x;L;x'
 UNIONFS_CONFIG=/dev/sda2,/dev/sda3,aufs
 DISK=/dev/sda
 </screen>
@@ -829,7 +829,7 @@ KIWI_KERNEL=/boot/name-of-kernel-file
               <filename>config.<replaceable>MAC</replaceable></filename>
           </para>
 <screen>
-IMAGE=/dev/ram1;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096
+IMAGE='/dev/ram1;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
 </screen>
         </listitem>
       </itemizedlist>
@@ -855,9 +855,9 @@ IMAGE=/dev/ram1;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096
 
 <screen>
 DISK=/dev/sda
-PART=5;S;x,62;L;/,x;L;x,
-IMAGE=/dev/sda2;suse-##.#-pxe-client.i386;\
-      1.2.8;192.168.100.2;4096
+PART='5;S;x,62;L;/,x;L;x'
+IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;\
+      1.2.8;192.168.100.2;4096'
 UNIONFS_CONFIG=/dev/sda3,/dev/sda2,aufs
 KIWI_INITRD=/boot/initrd
 </screen>
@@ -917,9 +917,9 @@ KIWI_INITRD=/boot/initrd
               <filename>config.<replaceable>MAC</replaceable></filename>: </para>
 
 <screen>
-IMAGE=/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096,\
-      /dev/sda3;suse-##.#-pxe-client-read-write.i686;1.2.8;192.168.100.2;4096
-PART=200;S;x,500;L;/,x;L;
+IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096,\
+      /dev/sda3;suse-##.#-pxe-client-read-write.i686;1.2.8;192.168.100.2;4096'
+PART='200;S;x,500;L;/,x;L'
 DISK=/dev/sda
 COMBINED_IMAGE=yes
 KIWI_INITRD=/boot/initrd
@@ -1125,20 +1125,20 @@ KIWI_GROUP="test1, test_my_name, LIST_HARDWARE, Multple_Case_Group_1"
         the group called "test1":</para>
 <screen>
 DISK=/dev/sda
-PART=5;S;x,x;L;/
-IMAGE=/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096
-CONF=CONFIGURATIONS/xorg.conf.test1;/etc/X11/xorg.conf;192.168.100.2;4096,\
-     CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096
+PART='5;S;x,x;L;/'
+IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
+CONF='CONFIGURATIONS/xorg.conf.test1;/etc/X11/xorg.conf;192.168.100.2;4096,\
+     CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096'
 </screen>
       <para>As a result of this configuration file, the image would be configured consistently
         across all the hosts assigned to test1. The following file called config.test2, contains a
         small change that may be specific to a function:</para>
 <screen>
 DISK=/dev/sda
-PART=5;S;x,x;L;/
-IMAGE=/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096
-CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,\
-     CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096
+PART='5;S;x,x;L;/'
+IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
+CONF='CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,\
+     CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096'
 </screen>
       <para>As we can see, while group 1 and 2 share the syslog.conf configuration file, they have
         different xorg.conf files defined, therefore two distinct groups with one or more hosts
@@ -1253,15 +1253,14 @@ cat config.example1
 KIWI_INITRD=/boot/initrd
 KIWI_KERNEL=/boot/linux
 DISK=/dev/sda
-PART=5;S;x,769;L;/,x;L;x,
-IMAGE=/dev/sda2;exmaple-kiosk-opensuse-##.#-pxe-client.i686;0.0.1;192.168.1.2;4096
+PART='5;S;x,769;L;/,x;L;x'
+IMAGE='/dev/sda2;exmaple-kiosk-opensuse-##.#-pxe-client.i686;0.0.1;192.168.1.2;4096'
 UNIONFS_CONFIG=/dev/sda3,/dev/sda2,clicfs
-CONF=prefs.js;/home/kioskuser/.mozilla/firefox/07xvl1ty.default/prefs.js;192.168.1.2;4096,
-     xorg.conf;/etc/X11/xorg.conf;192.168.1.2;4096
+CONF='prefs.js;/home/kioskuser/.mozilla/firefox/07xvl1ty.default/prefs.js;192.168.1.2;4096,xorg.conf;/etc/X11/xorg.conf;192.168.1.2;4096'
 RELOAD_IMAGE=yes
 RELOAD_CONFIG=yes
-HARDWARE_MAP="maxterm_3500"
-maxterm_3500_HARDWARE_MAP="00:00:00:00:00:02 00:00:00:00:00:03 00:00:00:00:00:04"
+HARDWARE_MAP='maxterm_3500'
+maxterm_3500_HARDWARE_MAP='00:00:00:00:00:02 00:00:00:00:00:03 00:00:00:00:00:04'
 </screen>
         <para>Here, most of the standard KIWI configuration elements are in place, with a few
           extras. There are three areas we want to focus our attention on, the CONF, HARDWARE_MAP
