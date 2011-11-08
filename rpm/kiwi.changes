@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Nov  8 15:56:46 CET 2011 - ms@suse.de
+
+- don't create a swap file if no swap partition can be found in
+  the live iso boot code. people complained about the creation
+  of swap files while this is not expected. (bnc #728645)
+
+-------------------------------------------------------------------
 Tue Nov  8 10:02:58 CET 2011 - ms@suse.de
 
 - make sure importFile() stays backward compatible and ensures
