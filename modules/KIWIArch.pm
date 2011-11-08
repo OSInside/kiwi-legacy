@@ -53,7 +53,7 @@ sub new
   $this->{m_next} = shift;
   $this->{m_head} = shift;
   if(not(defined($this->{m_name}) and defined($this->{m_desc}) and defined($this->{m_next}) and defined($this->{m_head}))) {
-    return undef; # rock hard get outta here: caller must check retval anyway
+    return; # rock hard get outta here: caller must check retval anyway
   }
 
   return $this;
@@ -75,7 +75,7 @@ sub name
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   return $this->{m_name};
 }
@@ -89,7 +89,7 @@ sub desc
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   return $this->{m_desc};
 }
@@ -103,10 +103,10 @@ sub follower
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   if($this->{m_next} eq "") {
-    return undef;
+    return;
   }
   else {
     return $this->{m_next};
@@ -128,7 +128,7 @@ sub isHead
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   if($this->{m_head} eq "") {
     return 0;

@@ -25,7 +25,7 @@ use KIWIQX;
 #==========================================
 # Constructor
 #------------------------------------------
-sub new { 
+sub new {
 	# ...
 	# Create a new KIWIConfigure object which is used to provide
 	# different image configuration functions. Configurations are
@@ -41,7 +41,7 @@ sub new {
 	# Module Parameters
 	#------------------------------------------
 	my $kiwi = shift;
-	my $xml  = shift; 
+	my $xml  = shift;
 	my $root = shift;
 	my $imageDesc = shift;
 	my $imageDest = shift;
@@ -54,22 +54,22 @@ sub new {
 	if (! defined $xml) {
 		$kiwi -> error ("No XML reference specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $root) {
 		$kiwi -> error  ("Missing chroot path");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $imageDesc) {
 		$kiwi -> error  ("Missing image description path");
-		$kiwi -> failed (); 
-		return undef;
+		$kiwi -> failed ();
+		return;
 	}
 	if (! $main::global) {
 		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Store object data
@@ -102,7 +102,7 @@ sub setupRecoveryArchive {
 	if (! defined $dest) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Missing image destination path");
-		return undef;
+		return;
 	}
 	$kiwi -> info ("Creating recovery archive...");
 	#==========================================
@@ -118,7 +118,7 @@ sub setupRecoveryArchive {
 	if ($code != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create recovery archive: $status");
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create file count information
@@ -130,15 +130,15 @@ sub setupRecoveryArchive {
 	if ($code != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create recovery file count: $status");
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create uncompressed byte size information
 	#------------------------------------------
-	if (! open ($FD,">$root/recovery.tar.size")) {
+	if (! open ($FD, '>', "$root/recovery.tar.size")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create recovery size info: $!");
-		return undef;
+		return;
 	}
 	my $size = -s "$root/recovery.tar";
 	print $FD $size;
@@ -153,15 +153,15 @@ sub setupRecoveryArchive {
 	if ($code != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to compress recovery archive: $status");
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create recovery partition size info
 	#------------------------------------------
-	if (! open ($FD,">$root/recovery.partition.size")) {
+	if (! open ($FD, '>', "$root/recovery.partition.size")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create recovery partition size info: $!");
-		return undef;
+		return;
 	}
 	my $psize = -s "$root/recovery.tar.gz";
 	$psize /= 1048576;
@@ -174,15 +174,15 @@ sub setupRecoveryArchive {
 	if ($code != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to copy partition size info file: $status");
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create destination filesystem information
 	#------------------------------------------
-	if (! open ($FD,">$root/recovery.tar.filesystem")) {
+	if (! open ($FD, '>', "$root/recovery.tar.filesystem")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create recovery filesystem info: $!");
-		return undef;
+		return;
 	}
 	print $FD $fstype;
 	close $FD;
@@ -209,17 +209,17 @@ sub setupUsersGroups {
 		if (! -x "$root/usr/sbin/useradd") {
 			$kiwi -> error ("Missing useradd command");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		if (! -x "$root/usr/sbin/usermod") {
 			$kiwi -> error ("Missing usermod command");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		if (! -x "$root/usr/sbin/groupadd") {
 			$kiwi -> error ("Missing groupadd command");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		foreach my $user (keys %users) {
 			my $adduser  = "/usr/sbin/useradd";
@@ -272,7 +272,7 @@ sub setupUsersGroups {
 						$kiwi -> failed ();
 						$kiwi -> info   ($data);
 						$kiwi -> failed ();
-						return undef;
+						return;
 					}
 					$kiwi -> done();
 				}
@@ -298,7 +298,7 @@ sub setupUsersGroups {
 				$kiwi -> failed ();
 				$kiwi -> info   ($data);
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 			$kiwi -> done ();
 			if ((defined $home) && (-d "$root/$home")) {
@@ -309,7 +309,7 @@ sub setupUsersGroups {
 					$kiwi -> failed ();
 					$kiwi -> info   ($data);
 					$kiwi -> failed ();
-					return undef;
+					return;
 				}
 				$kiwi -> done();
 			}
@@ -350,21 +350,22 @@ sub setupAutoYaST {
 	qxx (
 		"cp $imageDesc/config-yast-autoyast.xml $root/$autodir/$autocnf 2>&1"
 	);
-	if ( ! open (FD,">$root/etc/install.inf")) {
+    my $FD;
+	if ( ! open ($FD, '>', "$root/etc/install.inf")) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to create install.inf: $!");
 		$kiwi -> failed ();
 		return "failed";
 	}
-	print FD "AutoYaST: http://192.168.100.99/part2.xml\n";
-	close FD;
-	if ( ! open (FD,">$root/var/lib/YaST2/runme_at_boot")) {
+	print $FD "AutoYaST: http://192.168.100.99/part2.xml\n";
+	close $FD;
+	if ( ! open ($FD, '>', "$root/var/lib/YaST2/runme_at_boot")) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to create runme_at_boot: $!");
 		$kiwi -> failed ();
 		return "failed";
 	}
-	close FD;
+	close $FD;
 	$kiwi -> done ();
 	return "success";
 }
@@ -412,6 +413,7 @@ sub setupFirstBootYaST {
 	# generic one (bnc#604705)
 	# ----
 	if ( ! -e "$root/etc/sysconfig/firstboot" ) {
+        my $FD;
 		if ( -e "$root/var/adm/fillup-templates/sysconfig.firstboot" ) {
 			my $template = "$root/var/adm/fillup-templates/sysconfig.firstboot";
 			my $data = qxx (
@@ -426,23 +428,23 @@ sub setupFirstBootYaST {
 				$kiwi -> failed ();
 				return "failed";
 			}
-		} elsif ( ! open (FD,">$root/etc/sysconfig/firstboot")) {
+		} elsif ( ! open ($FD, '>', "$root/etc/sysconfig/firstboot")) {
 			$kiwi -> failed ();
 			$kiwi -> error ("Failed to create /etc/sysconfig/firstboot: $!");
 			$kiwi -> failed ();
 			return "failed";
 		} else {
-			print FD "## Description: Firstboot Configuration\n";
-			print FD "## Default: /usr/share/firstboot/scripts\n";
-			print FD "SCRIPT_DIR=\"/usr/share/firstboot/scripts\"\n";
-			print FD "FIRSTBOOT_WELCOME_DIR=\"/usr/share/firstboot\"\n";
-			print FD "FIRSTBOOT_WELCOME_PATTERNS=\"\"\n";
-			print FD "FIRSTBOOT_LICENSE_DIR=\"/usr/share/firstboot\"\n";
-			print FD "FIRSTBOOT_NOVELL_LICENSE_DIR=\"/etc/YaST2\"\n";
-			print FD "FIRSTBOOT_FINISH_FILE=";
-			print FD "\"/usr/share/firstboot/congrats.txt\"\n";
-			print FD "FIRSTBOOT_RELEASE_NOTES_PATH=\"\"\n";
-			close FD;
+			print $FD "## Description: Firstboot Configuration\n";
+			print $FD "## Default: /usr/share/firstboot/scripts\n";
+			print $FD "SCRIPT_DIR=\"/usr/share/firstboot/scripts\"\n";
+			print $FD "FIRSTBOOT_WELCOME_DIR=\"/usr/share/firstboot\"\n";
+			print $FD "FIRSTBOOT_WELCOME_PATTERNS=\"\"\n";
+			print $FD "FIRSTBOOT_LICENSE_DIR=\"/usr/share/firstboot\"\n";
+			print $FD "FIRSTBOOT_NOVELL_LICENSE_DIR=\"/etc/YaST2\"\n";
+			print $FD "FIRSTBOOT_FINISH_FILE=";
+			print $FD "\"/usr/share/firstboot/congrats.txt\"\n";
+			print $FD "FIRSTBOOT_RELEASE_NOTES_PATH=\"\"\n";
+			close $FD;
 		}
 	}
 	if (-f "$root/etc/init.d/firstboot") {

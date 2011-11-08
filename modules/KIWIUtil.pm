@@ -47,7 +47,7 @@ sub new
   $this->{m_collect} = shift;
   if(not defined $this->{m_collect}) {
     print "No parent defined!";
-    return undef;
+    return;
   }
 
   return $this;
@@ -87,7 +87,7 @@ sub splitPath
   if(!defined($browser) or !defined($targets) or !defined($path))
   {
     $this->{m_collect}->error("E", "Can't proceed request due to missing parameters!");
-    return undef;
+    return;
   }
 
   # ...
@@ -116,7 +116,7 @@ sub splitPath
   elsif($path =~ m{^(ftp://)}) {
     # warn and go, return undef
     $this->{m_collect}->logMsg("W", "Protocol not yet supported. Stay tuned...");
-    return undef;
+    return;
   }
   elsif($path =~ m{^(/|file://)(.*)}) {
     # we deal with local files (including nfs)
@@ -171,7 +171,7 @@ sub splitPathHTTP
     $this->{m_collect}->logMsg("E", "[E] HTTP request failed! Server down?");
     $this->{m_collect}->logMsg("E", "\tThis repository can not be resolved at present.");
     $this->{m_collect}->logMsg("E", "\tI recommend you try again later unless you know what you're doing.");
-    return undef;
+    return;
   }
 
   my $content  = $response->content();
@@ -188,7 +188,7 @@ sub splitPathHTTP
   my @links = ();
   if($content =~ m{error 404}i) {
     pop @{$targets};
-    return undef;
+    return;
   }
 
   $this->{m_collect}->logMsg("I", "Current remote directory is $basepath");
@@ -274,7 +274,7 @@ sub splitPathLocal
   my $rest   = $testlist[1];
 
   # read current dir to list before descent:
-  opendir(DIR, $basepath) or return undef;
+  opendir(DIR, $basepath) or return;
   my @dirlist = readdir(DIR);
   closedir(DIR);
 
@@ -343,7 +343,7 @@ sub expandFilename
       or !defined($filename))
   {
     $this->{m_collect}->logMsg("E", "Can't proceed request due to missing parameters!");
-    return undef;
+    return;
   }
 
   $basepath =~ s{(.*)\/$}{$1}; # remove trailing slash
@@ -389,7 +389,7 @@ sub expandFilenameHTTP
   my $content  = $response->content();
   my @links    = ();
   if ($content =~ m{error 404}i) {
-    return undef;
+    return;
   }
 
   #==========================================
@@ -535,7 +535,7 @@ sub unpac_package
   }
 
   if(! -d $dir) {
-    if(!mkpath("$dir", { mode => 0755 })) {
+    if(!mkpath("$dir", { mode => oct(755) })) {
       $this->{m_collect}->logMsg("E", "[E] unpac_package: cannot create directory <$dir>");
       $retval = 2;
       goto up_failed;
