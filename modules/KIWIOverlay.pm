@@ -214,7 +214,9 @@ sub resetOverlay {
 			qxx ("$cmd 2>&1");
 		}
 	}
-	qxx ("rm -rf $tmpdir 2>&1");
+	if (($tmpdir) && (-d $tmpdir)) {
+		qxx ("rm -rf $tmpdir 2>&1");
+	}
 	return $this;
 }
 
