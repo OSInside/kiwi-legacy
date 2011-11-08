@@ -2214,7 +2214,7 @@ sub setupBootDisk {
 		# Copy root tree to disk
 		#------------------------------------------
 		$kiwi -> info ("Copying system image tree on disk");
-		$status = qxx ("rsync -zaH --one-file-system $system/ $loopdir 2>&1");
+		$status = qxx ("rsync -aHXA --one-file-system $system/ $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
