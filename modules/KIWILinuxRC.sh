@@ -234,7 +234,7 @@ function importFile {
 	# remove start/stop quoting from values
 	sed -i -e s"#\(^[a-zA-Z0-9_]\+\)=[\"']\(.*\)[\"']#\1=\2#" /tmp/srcme
 	# remove backslash quotes if any
-	sed -i -e s'#\\##g' /tmp/srcme
+	sed -i -e s"#\\\\\(.\)#\1#g" /tmp/srcme
 	# quote simple quotation marks
 	sed -i -e s"#'#'\\\\''#g" /tmp/srcme
 	# add '...' quoting to values
