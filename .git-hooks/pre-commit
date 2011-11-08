@@ -90,20 +90,13 @@ my @notClean4 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
                     kiwiXMLInfo.pm kiwiXMLValidator.pm);
 
 # List of modules not clean to level 5 (gentel) of perlcritic
-my @notClean5 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
-					KIWICollect.pm KIWICommandLine.pm KIWIConfigure.pm
-					KIWIGlobals.pm KIWIImageCreator.pm KIWIImageFormat.pm
-					KIWIImage.pm KIWIIsoLinux.pm
+my @notClean5 = qw (KIWIArchList.pm KIWIBoot.pm
+					KIWICollect.pm
+					KIWIGlobals.pm KIWIImageFormat.pm KIWIIsoLinux.pm
 					KIWILog.pm KIWIManager.pm KIWIMigrate.pm KIWIOverlay.pm
 					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
 					KIWIRoot.pm KIWIRuntimeChecker.pm KIWISatSolverLegacy.pm
-					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
-					KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm KIWICommandLine.t
-                    KIWIImageCreator.t KIWILocator.t KIWIRuntimeChecker.t
-                    KIWIXML.t KIWIXMLInfo.t KIWIXMLValidator.t
-                    ktTestCase.pm kiwiCommandLine.pm kiwiLocator.pm
-                    kiwiImageCreator.pm kiwiRuntimeChecker.pm kiwiXML.pm
-                    kiwiXMLInfo.pm kiwiXMLValidator.pm);
+					KIWISatSolver.pm KIWISharedMem.pm KIWIXMLInfo.pm);
 
 my ($chld_in, $chld_out);
 my $pid = open2(
