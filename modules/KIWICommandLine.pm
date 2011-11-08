@@ -444,6 +444,9 @@ sub setLogFile {
 	}
 	my $absPath = File::Spec->rel2abs($logPath);
 	my ($volume, $path, $file) = File::Spec->splitpath($logPath);
+	if ($path eq '') {
+		$path = './';
+	}
 	if (! -w $path) {
 		my $msg = "Unable to write to location $path, cannot create log file.";
 		$this -> {kiwi} -> error ($msg);
