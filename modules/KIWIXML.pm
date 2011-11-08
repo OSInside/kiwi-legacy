@@ -102,17 +102,17 @@ sub new {
 	if (! -d $imageDesc) {
 		$kiwi -> error ("Couldn't locate configuration directory $imageDesc");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $main::global) {
 		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $cmdL) {
 		$kiwi -> error  ("No commandline reference specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Store object data
@@ -127,7 +127,7 @@ sub new {
 	my $locator = new KIWILocator($kiwi);
 	my $controlFile = $locator -> getControlFile ( $imageDesc );
 	if (! $controlFile) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Store object data
@@ -198,19 +198,19 @@ sub new {
 	# Check profile names
 	#------------------------------------------
 	if (! $this -> checkProfiles()) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Select and initialize image type
 	#------------------------------------------
 	if (! $this -> __populateImageTypeAndNode()) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Add default split section if not defined
 	#------------------------------------------
 	if (! $this -> __addDefaultSplitNode()) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Store object data
@@ -270,7 +270,7 @@ sub writeXMLDescription {
 	my $file = $root."/image/config.xml";
 	my $FD;
 	if (! open ($FD, '>', $file)) {
-		return undef;
+		return;
 	}
 	print $FD $xmlu;
 	close $FD;
@@ -547,12 +547,12 @@ sub getEditBootConfig {
 	my $tnode= $this->{typeNode};
 	my $editBoot = $tnode -> getAttribute ("editbootconfig");
 	if ((! defined $editBoot) || ("$editBoot" eq "")) {
-		return undef;
+		return;
 	}
 	if (! -e $editBoot) {
 		$kiwi -> warning ("Boot config script $editBoot doesn't exist");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	return File::Spec->rel2abs($editBoot);
 }
@@ -600,10 +600,10 @@ sub getImageTypeAndAttributes {
 	my $typeinfo = $this->{typeInfo};
 	my $imageType= $this->{imageType};
 	if (! $typeinfo) {
-		return undef;
+		return;
 	}
 	if (! $imageType) {
-		return undef;
+		return;
 	}
 	return $typeinfo->{$imageType};
 }
@@ -654,7 +654,7 @@ sub getPXEDeployImageDevice {
 	if (defined $node) {
 		return $node -> getAttribute ("device");
 	} else {
-		return undef;
+		return;
 	}
 }
 
@@ -738,7 +738,8 @@ sub getPXEDeployPartitions {
 
 		push @result, { %part };
 	}
-	return sort { $a->{number} cmp $b->{number} } @result;
+    my @ordered = sort { $a->{number} cmp $b->{number} } @result;
+	return @ordered;
 }
 
 #==========================================
@@ -790,7 +791,7 @@ sub getPXEDeployTimeout {
 	if ((defined $timeout) && ! ("$timeout" eq "")) {
 		return $timeout;
 	} else {
-		return undef;
+		return;
 	}
 }
 
@@ -808,7 +809,7 @@ sub getPXEDeployKernel {
 	if ((defined $kernel) && ! ("$kernel" eq "")) {
 		return $kernel;
 	} else {
-		return undef;
+		return;
 	}
 }
 
@@ -940,7 +941,7 @@ sub getPXEDeployInitrd {
 	if ((defined $initrd) && ! ("$initrd" eq "")) {
 		return $initrd;
 	} else {
-		return undef;
+		return;
 	}
 }
 
@@ -958,7 +959,7 @@ sub setPackageManager {
 		. 'package manager value.';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	my $opts = $this -> getPreferencesNodeByTagName ("packagemanager");
 	my $pmgr = $opts -> getElementsByTagName ("packagemanager");
@@ -1015,7 +1016,7 @@ sub getLicenseNames {
 	if (@names) {
 		return \@names;
 	}
-	return undef;
+	return;
 }
 
 #==========================================
@@ -1029,11 +1030,11 @@ sub getXenDomain {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $domain = $node -> getAttribute ("domain");
 	if ((! defined $domain) || ("$domain" eq "")) {
-		return undef;
+		return;
 	}
 	return $domain;
 }
@@ -1049,11 +1050,11 @@ sub getOEMSwapSize {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $size = $node -> getElementsByTagName ("oem-swapsize");
 	if ((! defined $size) || ("$size" eq "")) {
-		return undef;
+		return;
 	}
 	return $size;
 }
@@ -1069,11 +1070,11 @@ sub getOEMSystemSize {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $size = $node -> getElementsByTagName ("oem-systemsize");
 	if ((! defined $size) || ("$size" eq "")) {
-		return undef;
+		return;
 	}
 	return $size;
 }
@@ -1089,13 +1090,13 @@ sub getOEMBootTitle {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $title= $node -> getElementsByTagName ("oem-boot-title");
 	if ((! defined $title) || ("$title" eq "")) {
 		$title = $this -> getImageDisplayName();
 		if ((! defined $title) || ("$title" eq "")) {
-			return undef;
+			return;
 		}
 	}
 	return $title;
@@ -1112,11 +1113,11 @@ sub getOEMKiwiInitrd {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $kboot= $node -> getElementsByTagName ("oem-kiwi-initrd");
 	if ((! defined $kboot) || ("$kboot" eq "")) {
-		return undef;
+		return;
 	}
 	return $kboot;
 }
@@ -1132,11 +1133,11 @@ sub getOEMReboot {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $boot = $node -> getElementsByTagName ("oem-reboot");
 	if ((! defined $boot) || ("$boot" eq "")) {
-		return undef;
+		return;
 	}
 	return $boot;
 }
@@ -1152,11 +1153,11 @@ sub getOEMRebootInter {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $boot = $node -> getElementsByTagName ("oem-reboot-interactive");
 	if ((! defined $boot) || ("$boot" eq "")) {
-		return undef;
+		return;
 	}
 	return $boot;
 }
@@ -1172,11 +1173,11 @@ sub getOEMSilentBoot {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $silent = $node -> getElementsByTagName ("oem-silent-boot");
 	if ((! defined $silent) || ("$silent" eq "")) {
-		return undef;
+		return;
 	}
 	return $silent;
 }
@@ -1192,11 +1193,11 @@ sub getOEMShutdown {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $down = $node -> getElementsByTagName ("oem-shutdown");
 	if ((! defined $down) || ("$down" eq "")) {
-		return undef;
+		return;
 	}
 	return $down;
 }
@@ -1212,11 +1213,11 @@ sub getOEMShutdownInter {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $down = $node -> getElementsByTagName ("oem-shutdown-interactive");
 	if ((! defined $down) || ("$down" eq "")) {
-		return undef;
+		return;
 	}
 	return $down;
 }
@@ -1232,11 +1233,11 @@ sub getOEMBootWait {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $wait = $node -> getElementsByTagName ("oem-bootwait");
 	if ((! defined $wait) || ("$wait" eq "")) {
-		return undef;
+		return;
 	}
 	return $wait;
 }
@@ -1252,11 +1253,11 @@ sub getOEMUnattended {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $unattended = $node -> getElementsByTagName ("oem-unattended");
 	if ((! defined $unattended) || ("$unattended" eq "")) {
-		return undef;
+		return;
 	}
 	return $unattended;
 }
@@ -1272,11 +1273,11 @@ sub getOEMSwap {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $swap = $node -> getElementsByTagName ("oem-swap");
 	if ((! defined $swap) || ("$swap" eq "")) {
-		return undef;
+		return;
 	}
 	return $swap;
 }
@@ -1292,11 +1293,11 @@ sub getOEMAlignPartition {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $align = $node -> getElementsByTagName ("oem-align-partition");
 	if ((! defined $align) || ("$align" eq "")) {
-		return undef;
+		return;
 	}
 	return $align;
 }
@@ -1312,11 +1313,11 @@ sub getOEMPartitionInstall {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $pinst = $node -> getElementsByTagName ("oem-partition-install");
 	if ((! defined $pinst) || ("$pinst" eq "")) {
-		return undef;
+		return;
 	}
 	return $pinst;
 }
@@ -1332,11 +1333,11 @@ sub getOEMRecovery {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $reco = $node -> getElementsByTagName ("oem-recovery");
 	if ((! defined $reco) || ("$reco" eq "")) {
-		return undef;
+		return;
 	}
 	return $reco;
 }
@@ -1352,11 +1353,11 @@ sub getOEMRecoveryID {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $reco = $node -> getElementsByTagName ("oem-recoveryID");
 	if ((! defined $reco) || ("$reco" eq "")) {
-		return undef;
+		return;
 	}
 	return $reco;
 }
@@ -1372,11 +1373,11 @@ sub getOEMRecoveryInPlace {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	my $inplace = $node -> getElementsByTagName ("oem-inplace-recovery");
 	if ((! defined $inplace) || ("$inplace" eq "")) {
-		return undef;
+		return;
 	}
 	return $inplace;
 }
@@ -1392,7 +1393,7 @@ sub getLocale {
 	my $node = $this -> getPreferencesNodeByTagName ("locale");
 	my $lang = $node -> getElementsByTagName ("locale");
 	if ((! defined $lang) || ("$lang" eq "")) {
-		return undef;
+		return;
 	}
 	return $lang;
 }
@@ -1408,7 +1409,7 @@ sub getBootTheme {
 	my $node = $this -> getPreferencesNodeByTagName ("boot-theme");
 	my $theme= $node -> getElementsByTagName ("boot-theme");
 	if ((! defined $theme) || ("$theme" eq "")) {
-		return undef;
+		return;
 	}
 	return $theme;
 }
@@ -1425,7 +1426,7 @@ sub getRPMCheckSignatures {
 	my $node = $this -> getPreferencesNodeByTagName ("rpm-check-signatures");
 	my $sigs = $node -> getElementsByTagName ("rpm-check-signatures");
 	if ((! defined $sigs) || ("$sigs" eq "") || ("$sigs" eq "false")) {
-		return undef;
+		return;
 	}
 	return $sigs;
 }
@@ -1442,7 +1443,7 @@ sub getRPMExcludeDocs {
 	my $node = $this-> getPreferencesNodeByTagName ("rpm-excludedocs");
 	my $xdoc = $node -> getElementsByTagName ("rpm-excludedocs");
 	if ((! defined $xdoc) || ("$xdoc" eq "")) {
-		return undef;
+		return;
 	}
 	return $xdoc;
 }
@@ -1459,7 +1460,7 @@ sub getRPMForce {
 	my $node = $this -> getPreferencesNodeByTagName ("rpm-force");
 	my $frpm = $node -> getElementsByTagName ("rpm-force");
 	if ((! defined $frpm) || ("$frpm" eq "") || ("$frpm" eq "false")) {
-		return undef;
+		return;
 	}
 	return $frpm;
 }
@@ -1610,7 +1611,7 @@ sub checkProfiles {
 			if (! $ok) {
 				$kiwi -> error  ("Profile $requested: not found");
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 		}
 	}
@@ -1738,7 +1739,9 @@ sub getInstSourceProductStuff {
 	# ---
 	my $this = shift;
 	my $what = shift;
-	return undef if !$what;
+	if (!$what) {
+        return;
+    }
 
 	my $base = $this->{instsrcNodeList} -> get_node(1);
 	my $elems = $base->getElementsByTagName("productoptions");
@@ -1903,7 +1906,7 @@ sub getHttpsRepositoryCredentials {
 			}
 		}
 	}
-	return undef;
+	return;
 }
 
 #==========================================
@@ -2292,7 +2295,7 @@ sub getImageConfig {
 	# revision information
 	#------------------------------------------
 	my $rev  = "unknown";
-	if (open (my $FD,$this->{gdata}->{Revision})) {
+	if (open (my $FD, '<', $this->{gdata}->{Revision})) {
 		$rev = <$FD>; close $FD;
 		$rev =~ s/\n//g;
 	}
@@ -2599,7 +2602,7 @@ sub getLVMGroupName {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
 	if (! defined $node) {
-		return undef;
+		return;
 	}
 	return $node -> getAttribute ("name");
 }
@@ -3007,7 +3010,7 @@ sub isArchAllowed {
 			}
 		}
 		if (! $foundit) {
-			return undef;
+			return;
 		}
 	}
 	return $this;
@@ -3226,7 +3229,8 @@ sub getList {
 	}
 	$this->{replDelList} = \@replDelList;
 	$this->{replAddList} = \@replAddList;
-	return sort keys %packHash;
+    my @ordered = sort keys %packHash;
+	return @ordered;
 }
 
 #==========================================
@@ -3398,9 +3402,10 @@ sub getInstallSize {
 			$kiwi -> error (
 				"Error retrieving package metadata from ensconce."
 			);
-			return undef;
+			return;
 		}
-		%meta = eval($list);
+        # Violates Expression form of "eval" FIXME
+		%meta = eval($list); ## no critic
 		@solp = keys(%meta);
 		# Ensconce reports package sizes in bytes, fix that
 		foreach my $pkg (keys(%meta)) {
@@ -3413,7 +3418,7 @@ sub getInstallSize {
 		);
 		if (! defined $psolve) {
 			$kiwi -> warning ("SaT solver setup failed");
-			return undef;
+			return;
 		}
 		%meta = $psolve -> getMetaData();
 		$solf = $psolve -> getSolfile();
@@ -3659,7 +3664,7 @@ sub getInstSourceFile {
 	# Check parameters
 	#------------------------------------------
 	if ((! defined $dest) || (! defined $url)) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# setup destination base and dir name
@@ -3672,16 +3677,16 @@ sub getInstSourceFile {
 			$basename = $2;
 		}
 	} else {
-		return undef;
+		return;
 	}
 	#==========================================
 	# check base and dir name
 	#------------------------------------------
 	if (! $basename) {
-		return undef;
+		return;
 	}
 	if (! -d $dirname) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# download file
@@ -3721,7 +3726,7 @@ sub getInstSourceFile {
 			$response = $browser  -> request ( $request );
 		};
 		if ($@) {
-			return undef;
+			return;
 		}
 		my $content  = $response -> content ();
 		my @lines    = split (/\n/,$content);
@@ -3739,9 +3744,9 @@ sub getInstSourceFile {
 				}
 			}
 		}
-		return undef;
+		return;
 	} else {
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -3780,7 +3785,7 @@ sub getInstSourceSatSolvable {
 	foreach my $repo (@{$repos}) {
 		my $solvable = getSingleInstSourceSatSolvable ($kiwi,$repo);
 		if (! $solvable) {
-			return undef;
+			return;
 		}
 		push @index,$solvable;
 		$count++;
@@ -3794,7 +3799,7 @@ sub getInstSourceSatSolvable {
 		if ($code != 0) {
 			$kiwi -> error  ("--> Couldn't merge solve files");
 			$kiwi -> failed ();
-			return undef
+			return;
 		}
 	} else {
 		qxx ("cp $solv $solv.system 2>&1");
@@ -3856,7 +3861,7 @@ sub getSingleInstSourceSatSolvable {
 		$kiwi -> failed ();
 		$kiwi -> error  ("--> Can't find satsolver tools");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# check/create cache directory
@@ -3869,7 +3874,7 @@ sub getSingleInstSourceSatSolvable {
 			$kiwi -> failed ();
 			$kiwi -> error  ("--> Couldn't create cache dir: $data");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -3904,11 +3909,11 @@ sub getSingleInstSourceSatSolvable {
 		}
 	}
 	if (-e $repoMD) {
-		if (! open ($RXML,"cat $repoMD|")) {
+		if (! open ($RXML, '-|', "cat $repoMD")) {
 			$kiwi -> failed ();
 			$kiwi -> error ("--> Failed to open file $repoMD");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		binmode $RXML;
 		my $rxml = new XML::LibXML;
@@ -3935,7 +3940,7 @@ sub getSingleInstSourceSatSolvable {
 		#==========================================
 		# Compare the repo timestamp
 		#------------------------------------------
-		if (open (my $FD,"$index.timestamp")) {
+		if (open (my $FD, '<', "$index.timestamp")) {
 			my $curstamp = <$FD>; chomp $curstamp;
 			if ($curstamp eq $time) {
 				$kiwi -> done();
@@ -3975,11 +3980,11 @@ sub getSingleInstSourceSatSolvable {
 		#==========================================
 		# Store new time stamp
 		#------------------------------------------
-		if (! open ($RXML,">$index.timestamp")) {
+		if (! open ($RXML, '>', "$index.timestamp")) {
 			$kiwi -> failed ();
 			$kiwi -> error ("--> Failed to create timestamp: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		print $RXML $time;
 		close $RXML;
@@ -3987,7 +3992,7 @@ sub getSingleInstSourceSatSolvable {
 	#==========================================
 	# create repo info file
 	#------------------------------------------
-	if (open (my $FD,">$index.info")) {
+	if (open (my $FD, '>', "$index.info")) {
 		print $FD $repo."\n";
 		close $FD;
 	}
@@ -4015,7 +4020,7 @@ sub getSingleInstSourceSatSolvable {
 			$kiwi -> failed ();
 			$kiwi -> error  ("--> Can't find/create a distribution solvable");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		$foundDist = 1;
 	}
@@ -4033,7 +4038,7 @@ sub getSingleInstSourceSatSolvable {
 			#------------------------------------------
 			my $FD;
 			my $patfile = $destfile;
-			if (! open ($FD,$patfile)) {
+			if (! open ($FD, '<', $patfile)) {
 				$kiwi -> warning ("--> Couldn't open patterns file: $!");
 				$kiwi -> skipped ();
 				unlink $patfile;
@@ -4166,7 +4171,7 @@ sub getSingleInstSourceSatSolvable {
 		$kiwi -> done();
 		return $index;
 	}
-	return undef;
+	return;
 }
 
 #==========================================
@@ -4296,7 +4301,7 @@ sub __addDefaultSplitNode {
 		);
 		$kiwi -> failed ();
 		$kiwi -> error  ("$evaldata\n");
-		return undef;
+		return;
 	}
 	#==========================================
 	# append default section to selected nodes
@@ -4333,7 +4338,7 @@ sub __updateDescriptionFromChangeSet {
 	# check changeset...
 	#------------------------------------------
 	if (! defined $changeset) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# check profiles in changeset...
@@ -5154,7 +5159,7 @@ sub __populateImageTypeAndNode {
 	# check if there is a preferences section
 	#------------------------------------------
 	if (! $this->{optionsNodeList}) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# check if typeinfo hash exists
@@ -5202,12 +5207,12 @@ sub __populateImageTypeAndNode {
 	if (! $select) {
 		$kiwi -> error  ('Cannot determine build type');
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $typeinfo->{$select}) {
 		$kiwi -> error  ("Can't find requested image type: $select");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# store object data

@@ -309,14 +309,14 @@ sub setAdditionalPackages {
 		. 'packages';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (! ref $packages) {
 		my $msg = 'setAdditionalPackages method expecting ARRAY_REF as '
 			. 'first argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	$this -> {addPackages} = $packages;
 	return 1;
@@ -337,14 +337,14 @@ sub setAdditionalPatterns {
 		. 'packages';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (! ref $patterns) {
 		my $msg = 'setAdditionalPatterns method expecting ARRAY_REF as '
 			. 'first argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	$this->{addPatterns} = $patterns;
 	return 1;
@@ -369,42 +369,42 @@ sub setAdditionalRepos {
 		. 'repositories';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (! ref $repos) {
 		my $msg = 'setAdditionalRepos method expecting ARRAY_REF as '
 			. 'first argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (($repoAlias) && (! ref $repoAlias)) {
 		my $msg = 'setAdditionalRepos method expecting ARRAY_REF as '
 			. 'second argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (($repoPrios) && (! ref $repoPrios)) {
 		my $msg = 'setAdditionalRepos method expecting ARRAY_REF as '
 			. 'third argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (! $repoTypes) {
 		my $msg = 'setAdditionalRepos method called without specifying '
 		. 'repository types';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (! ref $repoTypes) {
 		my $msg = 'setAdditionalRepos method expecting ARRAY_REF as '
 			. 'fourth argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	my @reposit = @{$repos};
 	my $numRepos = @reposit;
@@ -417,7 +417,7 @@ sub setAdditionalRepos {
 				. 'of provided alias, cannot form proper match.';
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
-			return undef;
+			return;
 		}
 	}
 	my @repositPrio;
@@ -429,7 +429,7 @@ sub setAdditionalRepos {
 				. 'of provided priorities, cannot form proper match.';
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
-			return undef;
+			return;
 		}
 	}
 	my @repositTypes = @{$repoTypes};
@@ -439,7 +439,7 @@ sub setAdditionalRepos {
 		. 'of provided types, cannot form proper match.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	my @supportedTypes = @{$this->{supportedRepoTypes}};
 	for my $type (@repositTypes) {
@@ -447,7 +447,7 @@ sub setAdditionalRepos {
 			my $msg = "Specified repository type $type not supported.";
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
-			return undef;
+			return;
 		}
 	}
 	my %repoInfo;
@@ -496,13 +496,13 @@ sub setBuildProfiles {
 			. 'profiles in ARRAY_REF';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	if (! ref $profRef) {
 		my $msg = 'setBuildProfiles method expecting ARRAY_REF as argument';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	$this -> {buildProfiles} = $profRef;
 	return 1;
@@ -522,7 +522,7 @@ sub setCacheDir {
 			. 'cache directory.';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	if ((-d $dir) && (! -w $dir)) {
 		my $msg = 'No write access to specified cache directory "'
@@ -530,7 +530,7 @@ sub setCacheDir {
 			. '".';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	if ( $dir !~ /^\//) {
 		my $locator = new KIWILocator($this -> {kiwi});
@@ -567,7 +567,7 @@ sub setConfigDir {
 			. 'configuration directory.';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	if (! -d $dir) {
 		my $msg = 'Specified configuration directory "'
@@ -575,7 +575,7 @@ sub setConfigDir {
 			. '" could not be found.';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	if (! -r $dir) {
 		my $msg = 'No read access to specified configuration directory "'
@@ -583,7 +583,7 @@ sub setConfigDir {
 			. '".';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	if ($boot) {
 		$this -> {configInitrdDir} = $dir;
@@ -607,7 +607,7 @@ sub setIgnoreRepos {
 			. 'set repos';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed ();
-		return undef;
+		return;
 	}
 	$this -> {ignoreRepos} = $val;
 	return 1;
@@ -628,14 +628,14 @@ sub setImageArchitecture {
 			. 'an architecture.';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	if (! grep /^$arch/, @supportedArch) {
 		my $msg = 'Improper architecture setting, expecting on of: '
 			. "@supportedArch";
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	$this -> {imageArch} = $arch;
 	return 1;
@@ -667,7 +667,7 @@ sub setLogFile {
 			. 'a log file path.';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	if ($logPath eq "terminal") {
 		$this -> {logFile} = $logPath;
@@ -679,7 +679,7 @@ sub setLogFile {
 		my $msg = "Unable to write to location $path, cannot create log file.";
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	$this -> {logFile} = $logPath;
 	return 1;
@@ -700,7 +700,7 @@ sub setPackageManager {
 		. 'package manager value.';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	if (grep /$pkgMgr/, @supportedPkgMgrs) {
 		$this -> {packageMgr} = $pkgMgr;
@@ -709,7 +709,7 @@ sub setPackageManager {
 	my $msg = "Unsupported package manager specified: $pkgMgr";
 	$this -> {kiwi} -> error ($msg);
 	$this -> {kiwi} -> failed();
-	return undef;
+	return;
 }
 
 #==========================================
@@ -727,14 +727,14 @@ sub setPackagesToRemove {
 		. 'packages';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (! ref $packages) {
 		my $msg = 'setPackagesToRemove method expecting ARRAY_REF as '
 			. 'first argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	$this -> {removePackages} = $packages;
 	return 1;
@@ -760,14 +760,14 @@ sub setReplacementRepo {
 			. 'set repos';
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed ();
-		return undef;
+		return;
 	}
 	if (! $repo) {
 		my $msg = 'setReplacementRepo method called without specifying '
 		. 'a repository.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (! $repoAlias) {
 		my $msg = "No repo alias defined, generating time based name.\n";
@@ -784,7 +784,7 @@ sub setReplacementRepo {
 		my $msg = "Specified repository type $repoType not supported.";
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	$replRepo{repository}         = $repo;
 	$replRepo{repositoryAlias}    = $repoAlias;
@@ -819,7 +819,7 @@ sub setRootTargetDir {
 			. 'a target directory';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if ($rootTgt !~ /^\//) {
 		my $workingDir = qxx ('pwd');
