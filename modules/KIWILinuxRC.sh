@@ -230,7 +230,8 @@ function importFile {
 	# the current shell environment
 	# ----
 	local prefix=$1
-	cat - | grep -v ^# > /tmp/srcme
+	# create clean input, no empty lines and comments
+	cat - | grep -v '^$' | grep -v '^[ \t]*#' > /tmp/srcme
 	# remove start/stop quoting from values
 	sed -i -e s"#\(^[a-zA-Z0-9_]\+\)=[\"']\(.*\)[\"']#\1=\2#" /tmp/srcme
 	# remove backslash quotes if any
