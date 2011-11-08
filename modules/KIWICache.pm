@@ -73,42 +73,42 @@ sub new {
 		my $msg = 'KIWICache: failed to create KIWICommandLine object';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (! defined $xml) {
 		my $msg = 'KIWICache: expecting KIWIXML object as second argument';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if ((! defined $cdir) || (! -d $cdir)) {
 		my $msg = 'KIWICache: no valid cache directory specified';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if ((! defined $base) || (! -d $base)) {
 		my $msg = 'KIWICache: no valid base modules directory specified';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (($prof) && (! ref $prof)) {
 		my $msg = 'KIWICache: expecting ARRAY_REF as fifth argument';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if ((! defined $conf) || (! -d $conf)) {
 		my $msg = 'KIWICache: no valid image configuration directory specified';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (! $main::global) {
 		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Store object data
@@ -155,7 +155,7 @@ sub initializeCache {
 	} else {
 		$kiwi -> warning ("Can't setup cache without a boot type");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check for cachable patterns
@@ -176,7 +176,7 @@ sub initializeCache {
 	if ((! @CachePatterns) && (! @CachePackages)) {
 		$kiwi -> warning ("No cachable patterns/packages in this image");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create image package list
@@ -188,7 +188,7 @@ sub initializeCache {
 	if (! $CacheScan) {
 		$kiwi -> warning ("Failed to scan cache");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Return result list
@@ -212,7 +212,7 @@ sub createCache {
 	my $base = $this->{base};
 	my $prof = $this->{profiles};
 	if (! $init) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Variable setup and reset function
@@ -261,11 +261,11 @@ sub createCache {
 		$cmdL -> setForceNewRoot (1);
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
-			return undef;
+			return;
 		}
 		$this->{kic} = $kic;
 		if (! $kic -> prepareImage()) {
-			undef $kic;	return undef;
+			undef $kic;	return;
 		}
 		#==========================================
 		# Create cache meta data
@@ -299,10 +299,10 @@ sub createCache {
 			undef,"/base-system",undef,"active",$cmdL
 		);
 		if (! defined $image) {
-			undef $kic; return undef;
+			undef $kic; return;
 		}
 		if (! $image -> createImageEXT2 ()) {
-			undef $kic; return undef;
+			undef $kic; return;
 		}
 		my $name= $imageCacheDir."/".$cxml -> buildImageName();
 		qxx ("mv $name $rootTarget.ext2");
@@ -338,7 +338,7 @@ sub selectCache {
 	my $cmdL = $this->{cmdL};
 	if (! $init) {
 		$cmdL -> unsetCacheDir();
-		return undef;
+		return;
 	}
 	my $CacheDistro   = $init->[0];
 	my @CachePatterns = @{$init->[1]};
@@ -381,7 +381,7 @@ sub selectCache {
 		# check cache files
 		#------------------------------------------
 		my $CACHE_FD;
-		if (! open ($CACHE_FD,$meta)) {
+		if (! open ($CACHE_FD, '<', $meta)) {
 			$kiwi -> loginfo (
 				"Cache: no cache meta data $meta found\n"
 			);
@@ -448,7 +448,7 @@ sub selectCache {
 		}
 	}
 	$cmdL -> unsetCacheDir();
-	return undef;
+	return;
 }
 
 #==========================================

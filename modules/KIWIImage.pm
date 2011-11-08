@@ -82,37 +82,37 @@ sub new {
 	if (! defined $cmdL) {
 		$kiwi -> error ("No Commandline reference specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $xml) {
 		$kiwi -> error ("No XML reference specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $baseSystem) {
 		$kiwi -> error ("No base system path specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $imageTree) {
 		$kiwi -> error  ("No image tree specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! -f $configFile) {
 		$kiwi -> error  ("Validation of $imageTree failed");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! -d $imageDest) {
 		$kiwi -> error  ("No valid destdir: $imageDest");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $main::global) {
 		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $cmdL -> getLogFile()) {
 		$imageTree =~ s/\/$//;
@@ -361,7 +361,7 @@ sub checkAndSetupPrebuiltBootImage {
 	my $locator = new KIWILocator($kiwi);
 	my $controlFile = $locator -> getControlFile ($bootpath);
 	if (! $controlFile) {
-		return undef;
+		return;
 	}
 	my $validator = new KIWIXMLValidator (
 		$kiwi,$controlFile,
@@ -371,11 +371,11 @@ sub checkAndSetupPrebuiltBootImage {
 	);
 	my $isValid = $validator ? $validator -> validate() : undef;
 	if (! $isValid) {
-		return undef;
+		return;
 	}
 	my $bxml = new KIWIXML ( $kiwi,$bootpath,undef,undef,$cmdL );
 	if (! $bxml) {
-		return undef;
+		return;
 	}
 	my $bootImageName = $bxml -> buildImageName();
 	undef $bxml;
@@ -471,11 +471,11 @@ sub setupOverlay {
 	my $xml  = $this->{xml};
 	$this->{overlay} = new KIWIOverlay ($kiwi,$tree);
 	if (! $this->{overlay}) {
-		return undef;
+		return;
 	}
 	$this->{imageTree} = $this->{overlay} -> mountOverlay();
 	if (! defined $this->{imageTree}) {
-		return undef;
+		return;
 	}
 	$xml -> writeXMLDescription ($this->{imageTree});
 	return $this;
@@ -529,7 +529,7 @@ sub createImageClicFS {
 	#------------------------------------------
 	my $name = $this -> preImage ();
 	if (! defined $name) {
-		return undef;
+		return;
 	}
 	if (defined $rename) {
 		$data = qxx (
@@ -540,7 +540,7 @@ sub createImageClicFS {
 			$kiwi -> error  ("Can't rename image file");
 			$kiwi -> failed ();
 			$kiwi -> error  ($data);
-			return undef;
+			return;
 		}
 		$name = $rename;
 	}
@@ -548,13 +548,13 @@ sub createImageClicFS {
 	# Create ext3 filesystem on extend
 	#------------------------------------------
 	if (! $this -> setupEXT2 ( $name,$journal )) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# POST filesystem setup
 	#------------------------------------------
 	if (! $this -> postImage ($name,"nozip","clicfs")) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Rename filesystem loop file
@@ -567,7 +567,7 @@ sub createImageClicFS {
 		$kiwi -> error  ("Can't move file to fsdata.ext3");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
-		return undef;
+		return;
 	}
 	#==========================================  
 	# Resize to minimum  
@@ -590,7 +590,7 @@ sub createImageClicFS {
 		if ($code != 0) {
 			$kiwi -> error  ("Failed to resize ext3 container: $data");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	} else {
 		$data = qxx (
@@ -600,7 +600,7 @@ sub createImageClicFS {
 		if ($code != 0) {
 			$kiwi -> error  ("debugfs: block count request failed: $data");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		chomp $data;
 		$blocks = $data;  
@@ -611,7 +611,7 @@ sub createImageClicFS {
 		if ($code != 0) {
 			$kiwi -> error  ("debugfs: free blocks request failed: $data");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}  
 		$kiwi -> info ("clicfs: blocks count=$blocks free=$data");
 		$blocks = $blocks - $data;  
@@ -622,7 +622,7 @@ sub createImageClicFS {
 		if ($code != 0) {
 			$kiwi -> error  ("Failed to resize ext3 container: $data");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -646,7 +646,7 @@ sub createImageClicFS {
 		$kiwi -> error  ("Couldn't create clicfs filesystem");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
-		return undef;
+		return;
 	}
 	qxx ("mv -f $this->{imageDest}/$name.ext3 $this->{imageDest}/$name.clicfs");
 	qxx ("rm -f $this->{imageDest}/fsdata.ext3");
@@ -655,7 +655,7 @@ sub createImageClicFS {
 	# Create image md5sum
 	#------------------------------------------
 	if (! $this -> buildMD5Sum ($name)) {
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -675,19 +675,19 @@ sub createImageEXT {
 	#------------------------------------------
 	my $name = $this -> preImage ($device);
 	if (! defined $name) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
 	if (! $this -> setupEXT2 ( $name,$journal,$device )) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# POST filesystem setup
 	#------------------------------------------
 	if (! $this -> postImage ($name,undef,undef,$device)) {
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -745,19 +745,19 @@ sub createImageReiserFS {
 	#------------------------------------------
 	my $name = $this -> preImage ($device);
 	if (! defined $name) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
 	if (! $this -> setupReiser ( $name,$device )) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# POST filesystem setup
 	#------------------------------------------
 	if (! $this -> postImage ($name,undef,undef,$device)) {
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -776,19 +776,19 @@ sub createImageBTRFS {
 	#------------------------------------------
 	my $name = $this -> preImage ($device);
 	if (! defined $name) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
 	if (! $this -> setupBTRFS ( $name,$device )) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# POST filesystem setup
 	#------------------------------------------
 	if (! $this -> postImage ($name,undef,undef,$device)) {
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -806,19 +806,19 @@ sub createImageXFS {
 	#------------------------------------------
 	my $name = $this -> preImage ();
 	if (! defined $name) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
 	if (! $this -> setupXFS ( $name )) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# POST filesystem setup
 	#------------------------------------------
 	if (! $this -> postImage ($name)) {
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -839,33 +839,33 @@ sub createImageSquashFS {
 	#------------------------------------------
 	my $name = $this -> preImage ("haveExtend");
 	if (! defined $name) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
 	if (! $this -> setupSquashFS ( $name )) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create image md5sum
 	#------------------------------------------
 	if (! $this -> buildMD5Sum ($name)) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Compress image using gzip
 	#------------------------------------------
 	if (($type{compressed}) && ($type{compressed} eq 'true')) {
 		if (! $this -> compressImage ($name)) {
-			return undef;
+			return;
 		}
 	}
 	#==========================================
 	# Create image boot configuration
 	#------------------------------------------
 	if (! $this -> writeImageConfig ($name)) {
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -890,7 +890,7 @@ sub createImageCPIO {
 	#------------------------------------------
 	my $name = $this -> preImage ("haveExtend","quiet");
 	if (! defined $name) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# PRE Create filesystem on extend
@@ -929,7 +929,7 @@ sub createImageCPIO {
 		$kiwi -> error  ("Couldn't create cpio archive");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
-		return undef;
+		return;
 	}
 	$kiwi -> done();
 	#==========================================
@@ -939,7 +939,7 @@ sub createImageCPIO {
 		$name = $name.".gz";
 	}
 	if (! $this -> buildMD5Sum ($name)) {
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -981,7 +981,7 @@ sub createImageRootAndBoot {
 	if ((! defined $type) || (! defined $boot)) {
 		$kiwi -> error  ("Invalid $text type specified: $para");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check for direct tree access
@@ -1050,10 +1050,10 @@ sub createImageRootAndBoot {
 		};
 		$kiwi -> error  ("Unsupported $text type: $type");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	};
 	if (! $ok) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Prepare/Create boot image
@@ -1061,7 +1061,7 @@ sub createImageRootAndBoot {
 	$kiwi -> info ("--> Creating $text boot image: $boot...\n");
 	@bootdata = $this -> checkAndSetupPrebuiltBootImage ($sxml);
 	if (! @bootdata) {
-		return undef;
+		return;
 	}
 	if ($bootdata[1] == 0) {
 		#==========================================
@@ -1076,7 +1076,7 @@ sub createImageRootAndBoot {
 		if ($result != 0) {
 			$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		chomp $tmpdir;
 		push @{$this->{tmpdirs}},$tmpdir;
@@ -1098,7 +1098,7 @@ sub createImageRootAndBoot {
 			if (! -d $checkBase) {
 				qxx ("rm -rf $tmpdir");
 			}
-			return undef;
+			return;
 		}
 		#==========================================
 		# Create boot image...
@@ -1110,7 +1110,7 @@ sub createImageRootAndBoot {
 			if (! -d $checkBase) {
 				qxx ("rm -rf $tmpdir");
 			}
-			return undef;
+			return;
 		}
 		#==========================================
 		# Clean up tmp directory
@@ -1129,7 +1129,7 @@ sub createImageRootAndBoot {
 	#------------------------------------------
 	if ($cmdL->getCheckKernel()) {
 		if (! $this -> checkKernel ($initrd,$imageTree,$bootdata[0])) {
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -1137,7 +1137,7 @@ sub createImageRootAndBoot {
 	#------------------------------------------
 	my $kboot  = new KIWIBoot ($kiwi,$initrd,$cmdL);
 	if (! defined $kboot) {
-		return undef;
+		return;
 	}
 	my $newinitrd = $kboot -> setupSplash();
 	#==========================================
@@ -1168,7 +1168,7 @@ sub createImagePXE {
 	my $para = shift;
 	my $name = $this -> createImageRootAndBoot ($para,"PXE");
 	if (! defined $name) {
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -1199,7 +1199,7 @@ sub createImageVMX {
 	my $name = $this -> createImageRootAndBoot ($para,"VMX");
 	my $xendomain;
 	if (! defined $name) {
-		return undef;
+		return;
 	}
 	if (defined $xenc{xen_domain}) {
 		$xendomain = $xenc{xen_domain};
@@ -1224,7 +1224,7 @@ sub createImageVMX {
 	my $kic = new KIWIImageCreator ($kiwi, $cmdL);
 	if ((! $kic) || (! $kic->createImageDisk())) {
 		undef $kic;
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create VM format/configuration
@@ -1237,7 +1237,7 @@ sub createImageVMX {
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if ((! $kic) || (! $kic->createImageFormat())) {
 			undef $kic;
-			return undef;
+			return;
 		}
 	}
 	return $this;
@@ -1308,7 +1308,7 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		$kiwi -> error  ("No boot image name specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check for hybrid ISO
@@ -1334,13 +1334,13 @@ sub createImageLiveCD {
 	my $namerw = $this -> buildImageName ();
 	my $namero = $this -> buildImageName ("-","-read-only");
 	if (! defined $namerw) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
 	if (! $this -> setupLogicalExtend ("quiet")) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check for config-cdroot and move it
@@ -1371,7 +1371,7 @@ sub createImageLiveCD {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't create ro directory: $error");
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 			push @{$this->{tmpdirs}},$imageTreeReadOnly;
 			my @rodirs = qw (bin boot lib lib64 opt sbin usr);
@@ -1385,7 +1385,7 @@ sub createImageLiveCD {
 					$kiwi -> failed ();
 					$kiwi -> error  ("Couldn't setup ro directory: $data");
 					$kiwi -> failed ();
-					return undef;
+					return;
 				}
 			}
 			$kiwi -> done();
@@ -1404,7 +1404,7 @@ sub createImageLiveCD {
 		if (! $this -> buildLogicalExtend ($namerw,$mbytesrw."M")) {
 			$this -> restoreSplitExtend ();
 			$this -> cleanLuks();
-			return undef;
+			return;
 		}
 		$kiwi -> done ();
 		#==========================================
@@ -1421,7 +1421,7 @@ sub createImageLiveCD {
 		if (! $this -> setupEXT2 ( $namerw )) {
 			$this -> restoreSplitExtend ();
 			$this -> cleanLuks();
-			return undef;
+			return;
 		}
 		if ($setBlockSize) {
 			undef $fsopts->[0];
@@ -1434,7 +1434,7 @@ sub createImageLiveCD {
 		if (! defined $extend) {
 			$this -> restoreSplitExtend ();
 			$this -> cleanLuks();
-			return undef;
+			return;
 		}
 		#==========================================
 		# copy physical to logical
@@ -1442,7 +1442,7 @@ sub createImageLiveCD {
 		if (! $this -> installLogicalExtend ($extend,$imageTree)) {
 			$this -> restoreSplitExtend ();
 			$this -> cleanLuks();
-			return undef;
+			return;
 		}
 		$this -> cleanMount();
 		$this -> restoreImageDest();
@@ -1456,7 +1456,7 @@ sub createImageLiveCD {
 			/^compressed$/ && do {
 				$kiwi -> info ("Creating split ext3 + squashfs...\n");
 				if (! $this -> createImageSplit ("ext3,squashfs", 1)) {
-					return undef;
+					return;
 				}
 				$namero = $namerw;
 				last SWITCH;
@@ -1465,7 +1465,7 @@ sub createImageLiveCD {
 				$kiwi -> info ("Creating squashfs read only filesystem...\n");
 				if (! $this -> setupSquashFS ( $namero,$imageTree )) {
 					$this -> restoreSplitExtend ();
-					return undef;
+					return;
 				}
 				last SWITCH;
 			};
@@ -1473,14 +1473,14 @@ sub createImageLiveCD {
 				$kiwi -> info ("Creating clicfs read only filesystem...\n");
 				if (! $this -> createImageClicFS ( $namero )) {
 					$this -> restoreSplitExtend ();
-					return undef;
+					return;
 				}
 				last SWITCH;
 			};
 			# invalid flag setup...
 			$kiwi -> error  ("Invalid iso flags: $gzip");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -1497,19 +1497,19 @@ sub createImageLiveCD {
 		#------------------------------------------
 		if (! $this -> buildMD5Sum ($namerw)) {
 			$this -> restoreSplitExtend ();
-			return undef;
+			return;
 		}
 		#==========================================
 		# Restoring physical extend
 		#------------------------------------------
 		if (! $this -> restoreSplitExtend ()) {
-			return undef;
+			return;
 		}
 		#==========================================
 		# compress RW extend
 		#------------------------------------------
 		if (! $this -> compressImage ($namerw)) {
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -1524,7 +1524,7 @@ sub createImageLiveCD {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create ro directory: $error");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		my @rodirs = qw (bin boot lib lib64 opt sbin usr);
 		foreach my $dir (@rodirs) {
@@ -1537,7 +1537,7 @@ sub createImageLiveCD {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't setup ro directory: $data");
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 		}
 		$kiwi -> done();
@@ -1548,7 +1548,7 @@ sub createImageLiveCD {
 	$kiwi -> info ("--> Creating ISO boot image: $boot...\n");
 	@bootdata = $this -> checkAndSetupPrebuiltBootImage ($sxml);
 	if (! @bootdata) {
-		return undef;
+		return;
 	}
 	if ($bootdata[1] == 0) {
 		#==========================================
@@ -1563,7 +1563,7 @@ sub createImageLiveCD {
 		if ($result != 0) {
 			$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		chomp $tmpdir;
 		push @{$this->{tmpdirs}},$tmpdir;
@@ -1585,7 +1585,7 @@ sub createImageLiveCD {
 			if (! -d $checkBase) {
 				qxx ("rm -rf $tmpdir");
 			}
-			return undef;
+			return;
 		}
 		#==========================================
 		# Create boot image...
@@ -1597,7 +1597,7 @@ sub createImageLiveCD {
 			if (! -d $checkBase) {
 				qxx ("rm -rf $tmpdir");
 			}
-			return undef;
+			return;
 		}
 		#==========================================
 		# Clean up tmp directory
@@ -1618,7 +1618,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	if ($cmdL->getCheckKernel()) {
 		if (! $this -> checkKernel ($pinitrd,$imageTree,$bootdata[0])) {
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -1626,7 +1626,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	my $kboot  = new KIWIBoot ($kiwi,$pinitrd,$cmdL);
 	if (! defined $kboot) {
-		return undef;
+		return;
 	}
 	$pinitrd = $kboot -> setupSplash();
 	#==========================================
@@ -1651,7 +1651,7 @@ sub createImageLiveCD {
 			$kiwi -> error  ("Failed to integrate CD root data: $data");
 			$kiwi -> failed ();
 			$this -> restoreCDRootData();
-			return undef;
+			return;
 		}
 		$kiwi -> done();
 	}
@@ -1679,7 +1679,7 @@ sub createImageLiveCD {
 			$kiwi -> error  ("Failed to call CD root script: $data");
 			$kiwi -> failed ();
 			$this -> restoreCDRootData();
-			return undef;
+			return;
 		} else {
 			$kiwi -> loginfo ("config-cdroot.sh: $data");
 		}
@@ -1719,14 +1719,15 @@ sub createImageLiveCD {
 		$kiwi -> info ("Saving hybrid disk label on ISO: $this->{mbrid}...");
 		my $destination = "$CD/boot/grub";
 		qxx ("mkdir -p $destination");
-		if (! open (FD,">$destination/mbrid")) {
+        my $FD;
+		if (! open ($FD, '>', "$destination/mbrid")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create mbrid file: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
-		print FD "$this->{mbrid}";
-		close FD;
+		print $FD "$this->{mbrid}";
+		close $FD;
 		$kiwi -> done();
 	}
 	#==========================================
@@ -1749,7 +1750,7 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Copy of isolinux boot files failed: $data");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	$kiwi -> done ();
 	#==========================================
@@ -1762,7 +1763,7 @@ sub createImageLiveCD {
 		$kiwi -> failed();
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	chomp $tmpdir;
 	push @{$this->{tmpdirs}},$tmpdir;
@@ -1773,7 +1774,7 @@ sub createImageLiveCD {
 		$kiwi -> failed();
 		$kiwi -> error ("Failed to extract initrd: $data");
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	$kiwi -> done();
 	#==========================================
@@ -1787,7 +1788,7 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Copy failed: $data");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	$kiwi -> done ();
 	#==========================================
@@ -1804,7 +1805,8 @@ sub createImageLiveCD {
 	if (-f "$gfx/gfxboot.com" || -f "$gfx/gfxboot.c32") {
 		$syslinux_new_format = 1;
 	}
-	if (! open (FD, ">$destination/isolinux.cfg")) {
+    my $FD;
+	if (! open ($FD, '>', "$destination/isolinux.cfg")) {
 		$kiwi -> failed();
 		$kiwi -> error  ("Failed to create $destination/isolinux.cfg: $!");
 		$kiwi -> failed ();
@@ -1812,90 +1814,90 @@ sub createImageLiveCD {
 			qxx ("rm -rf $cmdL->getRootTargetDir()");
 			qxx ("rm -rf $tmpdir");
 		}
-		return undef;
+		return;
 	}
-	binmode(FD, ":utf8");
-	print FD "default $label"."\n";
-	print FD "implicit 1"."\n";
-	print FD "display isolinux.msg"."\n";
+	binmode($FD, ":encoding(UTF-8)");
+	print $FD "default $label"."\n";
+	print $FD "implicit 1"."\n";
+	print $FD "display isolinux.msg"."\n";
 	if (-f "$gfx/bootlogo" ) {
 		if ($syslinux_new_format) {
-			print FD "ui gfxboot bootlogo isolinux.msg"."\n";
+			print $FD "ui gfxboot bootlogo isolinux.msg"."\n";
 		} else {
-			print FD "gfxboot bootlogo"."\n";
+			print $FD "gfxboot bootlogo"."\n";
 		}
 	}
-	print FD "prompt   1"."\n";
-	print FD "timeout  $bootTimeout"."\n";
+	print $FD "prompt   1"."\n";
+	print $FD "timeout  $bootTimeout"."\n";
 	if (! $isxen) {
-		print FD "label $label"."\n";
-		print FD "  kernel linux"."\n";
-		print FD "  append initrd=initrd ramdisk_size=512000 ";
-		print FD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
+		print $FD "label $label"."\n";
+		print $FD "  kernel linux"."\n";
+		print $FD "  append initrd=initrd ramdisk_size=512000 ";
+		print $FD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
 		#print FD "console=ttyS0,9600n8 console=tty0${cmdline} showopts ";
 		if ($vga) {
-			print FD "vga=$vga ";
+			print $FD "vga=$vga ";
 		}
-		print FD "\n";
-		print FD "label $lsafe"."\n";
-		print FD "  kernel linux"."\n";
-		print FD "  append initrd=initrd ramdisk_size=512000 ";
-		print FD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
-		print FD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
-		print FD "noapic maxcpus=0 edd=off"."\n";
+		print $FD "\n";
+		print $FD "label $lsafe"."\n";
+		print $FD "  kernel linux"."\n";
+		print $FD "  append initrd=initrd ramdisk_size=512000 ";
+		print $FD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
+		print $FD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
+		print $FD "noapic maxcpus=0 edd=off"."\n";
 	} else {
-		print FD "label $label"."\n";
-		print FD "  kernel mboot.c32"."\n";
-		print FD "  append xen.gz --- linux ramdisk_size=512000 ";
-		print FD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
+		print $FD "label $label"."\n";
+		print $FD "  kernel mboot.c32"."\n";
+		print $FD "  append xen.gz --- linux ramdisk_size=512000 ";
+		print $FD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
 		#print FD "console=ttyS0,9600n8 console=tty0 ";
 		if ($vga) {
-			print FD "vga=$vga ";
+			print $FD "vga=$vga ";
 		}
-		print FD "--- initrd showopts"."\n";
-		print FD "\n";
-		print FD "label $lsafe"."\n";
-		print FD "  kernel mboot.c32"."\n";
-		print FD "  append xen.gz --- linux ramdisk_size=512000 ";
-		print FD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
-		print FD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
-		print FD "noapic maxcpus=0 edd=off ";
-		print FD "--- initrd showopts"."\n";
+		print $FD "--- initrd showopts"."\n";
+		print $FD "\n";
+		print $FD "label $lsafe"."\n";
+		print $FD "  kernel mboot.c32"."\n";
+		print $FD "  append xen.gz --- linux ramdisk_size=512000 ";
+		print $FD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
+		print $FD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
+		print $FD "noapic maxcpus=0 edd=off ";
+		print $FD "--- initrd showopts"."\n";
 	}
 	#==========================================
 	# setup isolinux checkmedia boot entry
 	#------------------------------------------
 	if ($cmdL->getISOCheck()) {
-		print FD "\n";
+		print $FD "\n";
 		if (! $isxen) {
-			print FD "label mediacheck"."\n";
-			print FD "  kernel linux"."\n";
-			print FD "  append initrd=initrd splash=silent mediacheck=1";
-			print FD "$cmdline ";
-			print FD "showopts"."\n";
+			print $FD "label mediacheck"."\n";
+			print $FD "  kernel linux"."\n";
+			print $FD "  append initrd=initrd splash=silent mediacheck=1";
+			print $FD "$cmdline ";
+			print $FD "showopts"."\n";
 		} else {
-			print FD "label mediacheck"."\n";
-			print FD "  kernel mboot.c32"."\n";
-			print FD "  append xen.gz --- linux splash=silent mediacheck=1";
-			print FD "$cmdline ";
-			print FD "--- initrd showopts"."\n";
+			print $FD "label mediacheck"."\n";
+			print $FD "  kernel mboot.c32"."\n";
+			print $FD "  append xen.gz --- linux splash=silent mediacheck=1";
+			print $FD "$cmdline ";
+			print $FD "--- initrd showopts"."\n";
 		}
 	}
 	#==========================================
 	# setup default harddisk/memtest entries
 	#------------------------------------------
-	print FD "\n";
-	print FD "label harddisk\n";
-	print FD "  localboot 0x80"."\n";
-	print FD "\n";
-	print FD "label memtest"."\n";
-	print FD "  kernel memtest"."\n";
-	print FD "\n";
-	close FD;
+	print $FD "\n";
+	print $FD "label harddisk\n";
+	print $FD "  localboot 0x80"."\n";
+	print $FD "\n";
+	print $FD "label memtest"."\n";
+	print $FD "  kernel memtest"."\n";
+	print $FD "\n";
+	close $FD;
 	#==========================================
 	# setup isolinux.msg file
 	#------------------------------------------
-	if (! open (FD,">$destination/isolinux.msg")) {
+	if (! open ($FD, '>', "$destination/isolinux.msg")) {
 		$kiwi -> failed();
 		$kiwi -> error  ("Failed to create isolinux.msg: $!");
 		$kiwi -> failed ();
@@ -1903,20 +1905,20 @@ sub createImageLiveCD {
 			qxx ("rm -rf $cmdL->getRootTargetDir()");
 			qxx ("rm -rf $tmpdir");
 		}
-		return undef;
+		return;
 	}
-	print FD "\n"."Welcome !"."\n\n";
-	print FD "To start the system enter '".$label."' and press <return>"."\n";
-	print FD "\n\n";
-	print FD "Available boot options:\n";
-	printf (FD "%-20s - %s\n",$label,"Live System");
-	printf (FD "%-20s - %s\n",$lsafe,"Live System failsafe mode");
-	printf (FD "%-20s - %s\n","harddisk","Local boot from hard disk");
-	printf (FD "%-20s - %s\n","mediacheck","Media check");
-	printf (FD "%-20s - %s\n","memtest","Memory Test");
-	print FD "\n";
-	print FD "Have a lot of fun..."."\n";
-	close FD;
+	print $FD "\n"."Welcome !"."\n\n";
+	print $FD "To start the system enter '".$label."' and press <return>"."\n";
+	print $FD "\n\n";
+	print $FD "Available boot options:\n";
+	printf ($FD "%-20s - %s\n",$label,"Live System");
+	printf ($FD "%-20s - %s\n",$lsafe,"Live System failsafe mode");
+	printf ($FD "%-20s - %s\n","harddisk","Local boot from hard disk");
+	printf ($FD "%-20s - %s\n","mediacheck","Media check");
+	printf ($FD "%-20s - %s\n","memtest","Memory Test");
+	print $FD "\n";
+	print $FD "Have a lot of fun..."."\n";
+	close $FD;
 	$kiwi -> done();
 	#==========================================
 	# Cleanup tmpdir
@@ -1925,26 +1927,26 @@ sub createImageLiveCD {
 	#==========================================
 	# Create boot configuration
 	#------------------------------------------
-	if (! open (FD,">$CD/config.isoclient")) {
+	if (! open ($FD, '>', "$CD/config.isoclient")) {
 		$kiwi -> error  ("Couldn't create image boot configuration");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if ((! defined $gzip) || ($gzip =~ /^(unified|clic)/)) {
-		print FD "IMAGE='/dev/ram1;$namecd'\n";
+		print $FD "IMAGE='/dev/ram1;$namecd'\n";
 	} else {
-		print FD "IMAGE='/dev/loop1;$namecd'\n";
+		print $FD "IMAGE='/dev/loop1;$namecd'\n";
 	}
 	if (defined $gzip) {
 		if ($gzip =~ /^unified/) {
-			print FD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,aufs'\n";
+			print $FD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,aufs'\n";
 		} elsif ($gzip =~ /^clic/) {
-			print FD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,clicfs'\n";
+			print $FD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,clicfs'\n";
 		} else {
-			print FD "COMBINED_IMAGE=yes\n";
+			print $FD "COMBINED_IMAGE=yes\n";
 		}
 	}
-	close FD;
+	close $FD;
 	#==========================================
 	# create ISO image
 	#------------------------------------------
@@ -1976,13 +1978,13 @@ sub createImageLiveCD {
 		}
 	}
 	if ($isoerror) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# relocate boot catalog
 	#------------------------------------------
 	if (! $isolinux -> relocateCatalog()) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Turn ISO into hybrid if requested
@@ -1993,7 +1995,7 @@ sub createImageLiveCD {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to create hybrid ISO image");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		$kiwi -> done();
 	}
@@ -2006,7 +2008,7 @@ sub createImageLiveCD {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to tag ISO image");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		$kiwi -> done();
 	}
@@ -2083,7 +2085,7 @@ sub createImageSplit {
 	} else {
 		$kiwi -> error  ("Invalid filesystem setup for split type");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Get system image type information
@@ -2096,13 +2098,13 @@ sub createImageSplit {
 	my $namerw = $this -> buildImageName ("-","-read-write");
 	my $namero = $this -> buildImageName ();
 	if (! defined $namerw) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
 	if (! $this -> setupLogicalExtend ("quiet", $namero)) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create clone of prepared tree
@@ -2119,7 +2121,7 @@ sub createImageSplit {
 		$kiwi -> error  ("Can't create copy of image tree: $data");
 		$kiwi -> failed ();
 		qxx ("rm -rf $imageTree");
-		return undef;
+		return;
 	}
 	$kiwi -> done();
 	#==========================================
@@ -2144,7 +2146,7 @@ sub createImageSplit {
 		$kiwi -> error  ("Couldn't create split tmp directory: $error");
 		$kiwi -> failed ();
 		qxx ("rm -rf $imageTree");
-		return undef;
+		return;
 	}
 	#==========================================
 	# walk through except files if any
@@ -2248,7 +2250,7 @@ sub createImageSplit {
 			);
 			$kiwi -> failed ();
 			qxx ("rm -rf $imageTree $imageTreeTmp");
-			return undef;
+			return;
 		}
 		#==========================================
 		# walk through except files if any
@@ -2367,7 +2369,7 @@ sub createImageSplit {
 			if (! $this -> buildLogicalExtend ($namerw,$mbytesrw."M")) {
 				qxx ("rm -rf $imageTreeRW");
 				qxx ("rm -rf $imageTree");
-				return undef;
+				return;
 			}
 			$kiwi -> done();
 		}
@@ -2404,13 +2406,13 @@ sub createImageSplit {
 			qxx ("rm -rf $imageTreeRW");
 			qxx ("rm -rf $imageTree");
 			$this -> cleanLuks();
-			return undef;
+			return;
 		}
 		if (! $ok) {
 			qxx ("rm -rf $imageTreeRW");
 			qxx ("rm -rf $imageTree");
 			$this -> cleanLuks();
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -2420,7 +2422,7 @@ sub createImageSplit {
 	if (! $this -> buildLogicalExtend ($namero,$mbytesro."M")) {
 		qxx ("rm -rf $imageTreeRW");
 		qxx ("rm -rf $imageTree");
-		return undef;
+		return;
 	}
 	$kiwi -> done();
 	#==========================================
@@ -2460,13 +2462,13 @@ sub createImageSplit {
 		qxx ("rm -rf $imageTreeRW");
 		qxx ("rm -rf $imageTree");
 		$this -> cleanLuks();
-		return undef;
+		return;
 	}
 	if (! $ok) {
 		qxx ("rm -rf $imageTreeRW");
 		qxx ("rm -rf $imageTree");
 		$this -> cleanLuks();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Install logical extends
@@ -2497,7 +2499,7 @@ sub createImageSplit {
 				qxx ("rm -rf $imageTreeRW");
 				qxx ("rm -rf $imageTree");
 				$this -> cleanLuks();
-				return undef;
+				return;
 			}
 			#==========================================
 			# copy physical to logical
@@ -2506,7 +2508,7 @@ sub createImageSplit {
 				qxx ("rm -rf $imageTreeRW");
 				qxx ("rm -rf $imageTree");
 				$this -> cleanLuks();
-				return undef;
+				return;
 			}
 			$this -> cleanMount();
 		}
@@ -2556,7 +2558,7 @@ sub createImageSplit {
 			qxx ("rm -rf $imageTreeRW");
 			qxx ("rm -rf $imageTree");
 			$this -> cleanLuks();
-			return undef;
+			return;
 		}
 		#==========================================
 		# Create image md5sum
@@ -2566,7 +2568,7 @@ sub createImageSplit {
 			qxx ("rm -rf $imageTreeRW");
 			qxx ("rm -rf $imageTree");
 			$this -> cleanLuks();
-			return undef;
+			return;
 		}
 		$this -> remapImageDest();
 	}
@@ -2578,7 +2580,7 @@ sub createImageSplit {
 	if (! $this -> writeImageConfig ($namero)) {
 		qxx ("rm -rf $imageTreeRW");
 		qxx ("rm -rf $imageTree");
-		return undef;
+		return;
 	}
 	#==========================================
 	# Cleanup temporary data
@@ -2598,7 +2600,7 @@ sub createImageSplit {
 	$kiwi -> info ("--> Creating boot image: $boot...\n");
 	@bootdata = $this -> checkAndSetupPrebuiltBootImage ($sxml);
 	if (! @bootdata) {
-		return undef;
+		return;
 	}
 	if ($bootdata[1] == 0) {
 		#==========================================
@@ -2613,7 +2615,7 @@ sub createImageSplit {
 		if ($result != 0) {
 			$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		chomp $tmpdir;
 		push @{$this->{tmpdirs}},$tmpdir;
@@ -2635,7 +2637,7 @@ sub createImageSplit {
 			if (! -d $checkBase) {
 				qxx ("rm -rf $tmpdir");
 			}
-			return undef;
+			return;
 		}
 		#==========================================
 		# Create boot image...
@@ -2647,7 +2649,7 @@ sub createImageSplit {
 			if (! -d $checkBase) {
 				qxx ("rm -rf $tmpdir");
 			}
-			return undef;
+			return;
 		}
 		#==========================================
 		# Clean up tmp directory
@@ -2666,7 +2668,7 @@ sub createImageSplit {
 	#------------------------------------------
 	if ($cmdL->getCheckKernel()) {
 		if (! $this -> checkKernel ($initrd,$imageTree,$bootdata[0])) {
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -2674,7 +2676,7 @@ sub createImageSplit {
 	#------------------------------------------
 	my $kboot  = new KIWIBoot ($kiwi,$initrd,$cmdL);
 	if (! defined $kboot) {
-		return undef;
+		return;
 	}
 	$kboot -> setupSplash();
 	#==========================================
@@ -2696,7 +2698,7 @@ sub createImageSplit {
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
 		if ((! $kic) || (! $kic->createImageDisk())) {
 			undef $kic;
-			return undef;
+			return;
 		}
 		#==========================================
 		# Create VM format/configuration
@@ -2709,7 +2711,7 @@ sub createImageSplit {
 			my $kic = new KIWIImageCreator ($kiwi, $cmdL);
 			if ((! $kic) || (! $kic->createImageFormat())) {
 				undef $kic;
-				return undef;
+				return;
 			}
 		}
 	}
@@ -2788,21 +2790,21 @@ sub preImage {
 	#------------------------------------------
 	my $name = $this -> buildImageName ();
 	if (! defined $name) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
 	my $mBytes = $this -> setupLogicalExtend ($quiet,$name);
 	if (! defined $mBytes) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create logical extend
 	#------------------------------------------
 	if (! defined $haveExtend) {
 		if (! $this -> buildLogicalExtend ($name,$mBytes."M")) {
-			return undef;
+			return;
 		}
 	}
 	return $name;
@@ -2824,11 +2826,12 @@ sub writeImageConfig {
 	#------------------------------------------
 	if (defined $device) {
 		$kiwi -> info ("Creating boot configuration...");
-		if (! open (FD,">$this->{imageDest}/$configName")) {
+        my $FD;
+		if (! open ($FD, '>', "$this->{imageDest}/$configName")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create image boot configuration");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		my $namecd = $this -> buildImageName(";");
 		my $namerw = $this -> buildImageName(";", "-read-write");
@@ -2840,7 +2843,7 @@ sub writeImageConfig {
 		if (! defined $blocks) {
 			$blocks = "";
 		}
-		print FD "DISK=${device}\n";
+		print $FD "DISK=${device}\n";
 		my $targetPartition = 2;
 		my $targetPartitionNext = 3;
 		#==========================================
@@ -2848,7 +2851,7 @@ sub writeImageConfig {
 		#------------------------------------------
 		my @parts = $xml -> getPXEDeployPartitions ();
 		if ((scalar @parts) > 0) {
-			print FD "PART=";
+			print $FD "PART=";
 			for my $href (@parts) {
 				if ($href -> {target}) {
 					$targetPartition = $href -> {number};
@@ -2858,9 +2861,9 @@ sub writeImageConfig {
 					my $size = $main::global -> isize (
 						"$this->{imageDest}/$name"
 					);
-					print FD int (($size/1024/1024)+1);
+					print $FD int (($size/1024/1024)+1);
 				} else {
-					print FD $href -> {size};
+					print $FD $href -> {size};
 				}
 
 				my $type = $href -> {type};
@@ -2877,30 +2880,30 @@ sub writeImageConfig {
 					};
 				}
 
-				print FD ";$type;$mountpoint,";
+				print $FD ";$type;$mountpoint,";
 			}
-			print FD "\n";
+			print $FD "\n";
 		}
 		#==========================================
 		# IMAGE information
 		#------------------------------------------
 		if (($type{compressed}) && ($type{compressed} eq 'true')) {
-			print FD "IMAGE='${device}${targetPartition};";
-			print FD "$namecd;$server;$blocks;compressed'";
+			print $FD "IMAGE='${device}${targetPartition};";
+			print $FD "$namecd;$server;$blocks;compressed'";
 			if ("$type{type}" eq "split" && defined $this->{imageTreeRW}) {
-				print FD ",${device}${targetPartitionNext}";
-				print FD ";$namerw;$server;$blocks;compressed\n";
+				print $FD ",${device}${targetPartitionNext}";
+				print $FD ";$namerw;$server;$blocks;compressed\n";
 			} else {
-				print FD "\n";
+				print $FD "\n";
 			}
 		} else {
-			print FD "IMAGE='${device}${targetPartition};";
-			print FD "$namecd;$server;$blocks'";
+			print $FD "IMAGE='${device}${targetPartition};";
+			print $FD "$namecd;$server;$blocks'";
 			if ("$type{type}" eq "split" && defined $this->{imageTreeRW}) {
-				print FD ",${device}${targetPartitionNext}";
-				print FD ";$namerw;$server;$blocks\n";
+				print $FD ",${device}${targetPartitionNext}";
+				print $FD ";$namerw;$server;$blocks\n";
 			} else {
-				print FD "\n";
+				print $FD "\n";
 			}
 		}
 		#==========================================
@@ -2908,17 +2911,17 @@ sub writeImageConfig {
 		#------------------------------------------
 		my %confs = $xml -> getPXEDeployConfiguration ();
 		if ((scalar keys %confs) > 0) {
-			print FD "CONF=";
+			print $FD "CONF=";
 			foreach my $source (keys %confs) {
-				print FD "$source;$confs{$source};$server;$blocks,";
+				print $FD "$source;$confs{$source};$server;$blocks,";
 			}
-			print FD "\n";
+			print $FD "\n";
 		}
 		#==========================================
 		# COMBINED_IMAGE information
 		#------------------------------------------
 		if ("$type{type}" eq "split") {
-			print FD "COMBINED_IMAGE=yes\n";
+			print $FD "COMBINED_IMAGE=yes\n";
 		}
 		#==========================================
 		# UNIONFS_CONFIG information
@@ -2935,7 +2938,7 @@ sub writeImageConfig {
 				$valid = 1;
 			}
 			if ($valid) {
-				print FD "UNIONFS_CONFIG='".$value."'\n";
+				print $FD "UNIONFS_CONFIG='".$value."'\n";
 			}
 		}
 		#==========================================
@@ -2943,33 +2946,33 @@ sub writeImageConfig {
 		#------------------------------------------
 		my $timeout = $xml -> getPXEDeployTimeout ();
 		if (defined $timeout) {
-			print FD "KIWI_BOOT_TIMEOUT=$timeout\n";
+			print $FD "KIWI_BOOT_TIMEOUT=$timeout\n";
 		}
 		#==========================================
 		# KIWI_KERNEL_OPTIONS information
 		#------------------------------------------
 		my $cmdline = $type{cmdline};
 		if (defined $cmdline) {
-			print FD "KIWI_KERNEL_OPTIONS='$cmdline'\n";
+			print $FD "KIWI_KERNEL_OPTIONS='$cmdline'\n";
 		}
 		#==========================================
 		# KIWI_KERNEL information
 		#------------------------------------------
 		my $kernel = $xml -> getPXEDeployKernel ();
 		if (defined $kernel) {
-			print FD "KIWI_KERNEL=$kernel\n";
+			print $FD "KIWI_KERNEL=$kernel\n";
 		}
 		#==========================================
 		# KIWI_INITRD information
 		#------------------------------------------
 		my $initrd = $xml -> getPXEDeployInitrd ();
 		if (defined $initrd) {
-			print FD "KIWI_INITRD=$initrd\n";
+			print $FD "KIWI_INITRD=$initrd\n";
 		}
 		#==========================================
 		# More to come...
 		#------------------------------------------
-		close FD;
+		close $FD;
 		$kiwi -> done ();
 	}
 	# Reset main::ImageName...
@@ -2999,14 +3002,14 @@ sub postImage {
 	#------------------------------------------
 	my $extend = $this -> mountLogicalExtend ($name,undef,$device);
 	if (! defined $extend) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# copy physical to logical
 	#------------------------------------------
 	if (! $this -> installLogicalExtend ($extend,undef,$device)) {
 		$this -> cleanLuks();
-		return undef;
+		return;
 	}
 	$this -> cleanMount();
 	#==========================================
@@ -3080,7 +3083,7 @@ sub postImage {
 		$kiwi -> error ("Unsupported filesystem type: $type{filesystem}");
 		$kiwi -> failed();
 		$this -> cleanLuks();
-		return undef;
+		return;
 	}
 	$this -> restoreImageDest();
 	$this -> cleanLuks ();
@@ -3089,7 +3092,7 @@ sub postImage {
 	#------------------------------------------
 	if ($fstype ne "clicfs") {
 		if (! $this -> buildMD5Sum ($name)) {
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -3098,7 +3101,7 @@ sub postImage {
 	if (! defined $nozip) {
 		if (($type{compressed}) && ($type{compressed} eq 'true')) {
 			if (! $this -> compressImage ($name)) {
-				return undef;
+				return;
 			}
 		}
 	}
@@ -3106,7 +3109,7 @@ sub postImage {
 	# Create image boot configuration
 	#------------------------------------------
 	if (! $this -> writeImageConfig ($name)) {
-		return undef;
+		return;
 	}
 	return $name;
 }
@@ -3136,7 +3139,7 @@ sub buildLogicalExtend {
 	# Calculate block size and number of blocks
 	#------------------------------------------
 	if (! defined $size) {
-		return undef;
+		return;
 	}
 	my @bsc  = getBlocks ( $size );
 	my $seek = $bsc[2] - 1;
@@ -3150,7 +3153,7 @@ sub buildLogicalExtend {
 		$kiwi -> error  ("Couldn't create logical extend");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
-		return undef;
+		return;
 	}
 	#==========================================
 	# Setup encoding
@@ -3182,7 +3185,7 @@ sub setupEncoding {
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't loop bind logical extend: $data");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my $loop = $data;
 	my @luksloop;
@@ -3197,7 +3200,7 @@ sub setupEncoding {
 		$kiwi -> error  ("Couldn't setup luks format: $loop");
 		$kiwi -> failed ();
 		$this -> cleanLuks ();
-		return undef;
+		return;
 	}
 	$data = qxx ("echo $cipher | cryptsetup luksOpen $loop $name 2>&1");
 	$code = $? >> 8;
@@ -3205,7 +3208,7 @@ sub setupEncoding {
 		$kiwi -> error  ("Couldn't open luks device: $data");
 		$kiwi -> failed ();
 		$this -> cleanLuks ();
-		return undef;
+		return;
 	}
 	my @luksname;
 	if ($this->{luksname}) {
@@ -3248,7 +3251,7 @@ sub installLogicalExtend {
 		$kiwi -> info   ("rsync based copy failed: $data");
 		$kiwi -> failed ();
 		$this -> cleanMount();
-		return undef;
+		return;
 	}
 	$kiwi -> done();
 	#==========================================
@@ -3265,7 +3268,7 @@ sub installLogicalExtend {
 			$kiwi -> error  ("Failed to load filesystem image");
 			$kiwi -> failed ();
 			$kiwi -> error  ($data);
-			return undef;
+			return;
 		}
 		$kiwi -> done();
 	}
@@ -3294,7 +3297,7 @@ sub setupLogicalExtend {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
 			$this -> cleanMount();
-			return undef;
+			return;
 		} else {
 			$kiwi -> loginfo ("images.sh: $data");
 		}
@@ -3305,7 +3308,7 @@ sub setupLogicalExtend {
 	#------------------------------------------
 	if (! defined $initCache) {
 		if (! $this -> extractKernel ($name)) {
-			return undef;
+			return;
 		}
 		$this -> extractSplash ($name);
 	}
@@ -3394,7 +3397,7 @@ sub mountLogicalExtend {
 		$kiwi -> error  (
 			"mnt: $target -> $this->{imageDest}/mnt-$$: $data"
 		);
-		return undef;
+		return;
 	}
 	return "$this->{imageDest}/mnt-$$";
 }
@@ -3590,7 +3593,7 @@ sub extractLinux {
 			$kiwi -> failed ();
 			$kiwi -> info   ("Failed to extract kernel: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		my $kernel = qxx ("get_kernel_version $file"); chomp $kernel;
 		qxx ("mv -f $file $file.$kernel && ln -s $shortfile.$kernel $file");
@@ -3602,7 +3605,7 @@ sub extractLinux {
 				$kiwi -> failed ();
 				$kiwi -> info   ("Xen dom0 requested but no hypervisor found");
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 		}
 		if (-f "$imageTree/boot/xen.gz") {
@@ -3663,7 +3666,7 @@ sub setupEXT2 {
 		$kiwi -> error  ("Couldn't create EXT2 filesystem");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
-		return undef;
+		return;
 	}
 	if ($device) {
 		qxx ("touch $this->{imageDest}/$name");
@@ -3706,7 +3709,7 @@ sub setupBTRFS {
 		$kiwi -> error  ("Couldn't create BTRFS filesystem");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
-		return undef;
+		return;
 	}
 	if ($device) {
 		qxx ("touch $this->{imageDest}/$name");
@@ -3744,7 +3747,7 @@ sub setupReiser {
 		$kiwi -> error  ("Couldn't create Reiser filesystem");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
-		return undef;
+		return;
 	}
 	if ($device) {
 		qxx ("touch $this->{imageDest}/$name");
@@ -3783,7 +3786,7 @@ sub setupSquashFS {
 		$kiwi -> error  ("Couldn't create squashfs filesystem");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check for LUKS extension
@@ -3798,7 +3801,7 @@ sub setupSquashFS {
 			$kiwi -> failed ();
 			$kiwi -> error ("Failed to rename squashfs image");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		my $bytes = int ((-s $squashimg) * 1.1);
 		$data = qxx (
@@ -3809,10 +3812,10 @@ sub setupSquashFS {
 			$kiwi -> failed ();
 			$kiwi -> error ("Failed to create luks loop container");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		if (! $this -> setupEncoding ($name.".squashfs",$outimg,$cipher)) {
-			return undef;
+			return;
 		}
 		$data = qxx (
 			"dd if=$squashimg of=$this->{imageDest}/$name.squashfs 2>&1"
@@ -3823,7 +3826,7 @@ sub setupSquashFS {
 			$kiwi -> error ("Failed to dump squashfs to luks loop: $data");
 			$kiwi -> failed ();
 			$this -> cleanLuks();
-			return undef;
+			return;
 		}
 	}
 	$this -> restoreImageDest();
@@ -3855,7 +3858,7 @@ sub setupXFS {
 		$kiwi -> error  ("Couldn't create XFS filesystem");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
-		return undef;
+		return;
 	}
 	$this -> restoreImageDest();
 	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.xfs 2>&1");
@@ -3943,7 +3946,7 @@ sub restoreSplitExtend {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't restore physical extend: $data");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	}
 	$kiwi -> done();
@@ -3968,7 +3971,7 @@ sub compressImage {
 		$kiwi -> failed ();
 		$kiwi -> error ("Compressing image failed: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	$kiwi -> done();
 	$this -> updateMD5File ("$this->{imageDest}/$name.gz");
@@ -3987,13 +3990,16 @@ sub updateMD5File {
 	#------------------------------------------
 	if (defined $this->{md5file}) {
 		$kiwi -> info ("Updating md5 file...");
-		if (! open (FD,$this->{md5file})) {
+        my $FD;
+		if (! open ($FD, '<', $this->{md5file})) {
 			$kiwi -> failed ();
 			$kiwi -> error ("Failed to open md5 file: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
-		my $line = <FD>; close FD; chomp $line;
+		my $line = <$FD>;
+        close $FD;
+        chomp $line;
 		my $size = $main::global -> isize ($image);
 		my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 		my $blocksize = 1;
@@ -4135,7 +4141,7 @@ sub checkKernel {
 	if (! %sysk) {
 		$kiwi -> error  ("Can't find any system image kernel");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# find boot image kernel
@@ -4151,7 +4157,7 @@ sub checkKernel {
 	if ($result != 0) {
 		$kiwi -> error  ("Can't find any boot image kernel");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	foreach my $module (@status) {
 		chomp $module;
@@ -4160,7 +4166,7 @@ sub checkKernel {
 	if (! %bootk) {
 		$kiwi -> error  ("Can't find any boot image kernel");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# search system image kernel in initrd 
@@ -4180,7 +4186,7 @@ sub checkKernel {
 		$kiwi -> note ("Can't find a system kernel matching the initrd\n");
 		$kiwi -> note ("multiple system kernels were found, make sure your\n");
 		$kiwi -> note ("boot image includes the intended kernel\n");
-		return undef;
+		return;
 	}
 	#==========================================
 	# fix kernel inconsistency:
@@ -4192,7 +4198,7 @@ sub checkKernel {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	push @{$this->{tmpdirs}},$tmpdir;
 	#==========================================
@@ -4205,25 +4211,26 @@ sub checkKernel {
 		$kiwi -> error  ("Couldn't unpack initrd: $status");
 		$kiwi -> failed ();
 		qxx ("rm -rf $tmpdir");
-		return undef;
+		return;
 	}
 	#==========================================
 	# 2) create images.sh script...
 	#------------------------------------------
-	if (! open (FD,">$tmpdir/images.sh")) {
+    my $FD;
+	if (! open ($FD, '>', "$tmpdir/images.sh")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create image.sh file: $!");
 		$kiwi -> failed ();
 		qxx ("rm -rf $tmpdir");
-		return undef;
+		return;
 	}
-	print FD '#!/bin/sh'."\n";
-	print FD 'test -f /.kconfig && . /.kconfig'."\n";
-	print FD 'test -f /.profile && . /.profile'."\n";
-	print FD 'echo "*** Fixing kernel inconsistency ***"'."\n";
-	print FD 'suseStripKernel'."\n";
-	print FD 'exit 0'."\n";
-	close FD;
+	print $FD '#!/bin/sh'."\n";
+	print $FD 'test -f /.kconfig && . /.kconfig'."\n";
+	print $FD 'test -f /.profile && . /.profile'."\n";
+	print $FD 'echo "*** Fixing kernel inconsistency ***"'."\n";
+	print $FD 'suseStripKernel'."\n";
+	print $FD 'exit 0'."\n";
+	close $FD;
 	#==========================================
 	# 3) copy system kernel to initrd...
 	#------------------------------------------
@@ -4244,7 +4251,7 @@ sub checkKernel {
 		$kiwi -> failed ();
 		$kiwi -> info   ($status);
 		qxx ("rm -rf $tmpdir");
-		return undef;
+		return;
 	} else {
 		$kiwi -> loginfo ("images.sh: $status");
 	}
@@ -4256,7 +4263,7 @@ sub checkKernel {
 	qxx ("rm -f $dest/$name*");
 	if (! $this -> extractLinux ($name,$tmpdir,$dest)) {
 		qxx ("rm -rf $tmpdir");
-		return undef;
+		return;
 	}
 	#==========================================
 	# 6) rebundle initrd...
@@ -4267,7 +4274,7 @@ sub checkKernel {
 		$status = qxx (
 			"cd $tmpdir && cat $dest/$name | $zipper -f > $initrd"
 		);
-	} 
+	}
 	#==========================================
 	# 7) recreate md5 file...
 	#------------------------------------------
@@ -4276,7 +4283,7 @@ sub checkKernel {
 	if (! $this -> buildMD5Sum ($name)) {
 		$this->{imageDest} = $origDest;
 		qxx ("rm -rf $tmpdir");
-		return undef;
+		return;
 	}
 	$this->{imageDest} = $origDest;
 	qxx ("rm -rf $tmpdir");
@@ -4371,11 +4378,13 @@ sub buildImageName {
 sub extractCPIO {
 	my $this = shift;
 	my $file = shift;
-	if (! open FD,$file) {
+    my $FD;
+	if (! open $FD, '<', $file) {
 		return 0;
 	}
 	local $/;
-	my $data   = <FD>; close FD;
+	my $data   = <$FD>;
+    close $FD;
 	my @data   = split (//,$data);
 	my $stream = "";
 	my $count  = 0;
@@ -4406,11 +4415,11 @@ sub extractCPIO {
 		$stream .= $data[$i];
 		if ($i == $index[$count]) {
 			$count++;
-			if (! open FD,">$file.$count") {
+			if (! open $FD, '>', "$file.$count") {
 				return 0;
 			}
-			print FD $stream;
-			close FD;
+			print $FD $stream;
+			close $FD;
 			$stream = "";
 		}
 	}

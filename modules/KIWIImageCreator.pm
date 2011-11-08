@@ -71,12 +71,12 @@ sub new {
 			. 'second argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (! $main::global) {
 		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Store object data
@@ -140,7 +140,7 @@ sub prepareBootImage {
 	if (! $configDir) {
 		$kiwi -> error ('prepareBootImage: no configuration directory defined');
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! -d $configDir) {
 		my $msg = 'prepareBootImage: config dir "'
@@ -148,27 +148,27 @@ sub prepareBootImage {
 			. '" does not exist';
 		$kiwi -> error ($msg);
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $rootTgtDir) {
 		$kiwi -> error ('prepareBootImage: no root traget defined');
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $systemTree) {
 		$kiwi -> error ('prepareBootImage: no system image directory defined');
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $this -> __checkImageIntegrity() ) {
-		return undef;
+		return;
 	}
 	$kiwi -> info ("--> Prepare boot image (initrd)...\n");
 	my $xml = new KIWIXML (
 		$kiwi,$configDir,undef,undef,$cmdL,$changeset
 	);
 	if (! defined $xml) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Apply XML over rides from command line
@@ -191,10 +191,10 @@ sub upgradeImage {
 	if (! $configDir) {
 		$kiwi -> error ('prepareBootImage: no configuration directory defined');
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $this -> __checkImageIntegrity() ) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Setup the image XML description
@@ -203,7 +203,7 @@ sub upgradeImage {
 	my $locator = new KIWILocator($kiwi);
 	my $controlFile = $locator -> getControlFile ($configDir);
 	if (! $controlFile) {
-		return undef;
+		return;
 	}
 	my $validator = new KIWIXMLValidator (
 		$kiwi,$controlFile,
@@ -213,7 +213,7 @@ sub upgradeImage {
 	);
 	my $isValid = $validator ? $validator -> validate() : undef;
 	if (! $isValid) {
-		return undef;
+		return;
 	}
 	$kiwi -> info ("Reading image description [Upgrade]...\n");
 	my $buildProfs = $this -> {buildProfiles};
@@ -221,7 +221,7 @@ sub upgradeImage {
 		$kiwi, $configDir, undef, $buildProfs,$cmdL
 	);
 	if (! defined $xml) {
-		return undef;
+		return;
 	}
 	my $krc = new KIWIRuntimeChecker (
 		$kiwi, $this -> {cmdL}, $xml
@@ -233,7 +233,7 @@ sub upgradeImage {
 	$xml = $this -> __applyAdditionalXMLOverrides($xml);
 	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	if (! $krc -> prepareChecks()) {
-		return undef;
+		return;
 	}
 	return $this -> __upgradeTree(
 		$xml,$this->{configDir}
@@ -255,10 +255,10 @@ sub prepareImage {
 	if (! $configDir) {
 		$kiwi -> error ('prepareBootImage: no configuration directory defined');
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $this -> __checkImageIntegrity() ) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Setup the image XML description
@@ -266,7 +266,7 @@ sub prepareImage {
 	my $locator = new KIWILocator($kiwi);
 	my $controlFile = $locator -> getControlFile ($configDir);;
 	if (! $controlFile) {
-		return undef;
+		return;
 	}
 	my $validator = new KIWIXMLValidator (
 		$kiwi,$controlFile,
@@ -276,7 +276,7 @@ sub prepareImage {
 	);
 	my $isValid = $validator ? $validator -> validate() : undef;
 	if (! $isValid) {
-		return undef;
+		return;
 	}
 	$kiwi -> info ("Reading image description [Prepare]...\n");
 	my $buildProfs = $this -> {buildProfiles};
@@ -284,7 +284,7 @@ sub prepareImage {
 		$kiwi, $configDir, undef, $buildProfs,$cmdL
 	);
 	if (! defined $xml) {
-		return undef;
+		return;
 	}
 	my $krc = new KIWIRuntimeChecker (
 		$kiwi, $this -> {cmdL}, $xml
@@ -304,7 +304,7 @@ sub prepareImage {
 			my $msg = 'No target directory set for the unpacked image tree.';
 			$kiwi -> error ($msg);
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -314,7 +314,7 @@ sub prepareImage {
 	$xml = $this -> __applyAdditionalXMLOverrides($xml);
 	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	if (! $krc -> prepareChecks()) {
-		return undef;
+		return;
 	}
 	return $this -> __prepareTree(
 		$xml,$this->{configDir},$rootTgtDir
@@ -341,7 +341,7 @@ sub createBootImage {
 	my $locator = new KIWILocator($kiwi);
 	my $controlFile = $locator -> getControlFile ($configDir);;
 	if (! $controlFile) {
-		return undef;
+		return;
 	}
 	my $validator = new KIWIXMLValidator (
 		$kiwi,$controlFile,
@@ -351,17 +351,17 @@ sub createBootImage {
 	);
 	my $isValid = $validator ? $validator -> validate() : undef;
 	if (! $isValid) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkImageIntegrity() ) {
-		return undef;
+		return;
 	}
 	$kiwi -> info ("--> Create boot image (initrd)...\n");
 	my $xml = new KIWIXML (
 		$kiwi,$configDir,"cpio",undef,$cmdL
 	);
 	if (! defined $xml) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Apply XML over rides from command line
@@ -375,7 +375,7 @@ sub createBootImage {
 		$destination,$cmdL -> getDefaultAnswer()
 	);
 	if (! defined $dirCreated) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create KIWIImage object
@@ -385,7 +385,7 @@ sub createBootImage {
 		"/base-system",$configDir,undef,$cmdL
 	);
 	if (! defined $image) {
-		return undef;
+		return;
 	}
 	$this->{image} = $image;
 	#==========================================
@@ -393,7 +393,7 @@ sub createBootImage {
 	#------------------------------------------
 	if (! $image -> createImageCPIO()) {
 		undef $image;
-		return undef;
+		return;
 	}
 	return 1;
 }
@@ -418,15 +418,15 @@ sub createImage {
 	# Check the tree first...
 	#------------------------------------------
 	if (! defined $configDir) {
-		return undef;
+		return;
 	}
 	if (-f "$configDir/.broken") {
 		$kiwi -> error  ("Image root tree $configDir is broken");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $this -> __checkImageIntegrity() ) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Setup the image XML description
@@ -434,7 +434,7 @@ sub createImage {
 	my $locator = new KIWILocator($kiwi);
 	my $controlFile = $locator -> getControlFile ($configDir);;
 	if (! $controlFile) {
-		return undef;
+		return;
 	}
 	my $validator = new KIWIXMLValidator (
 		$kiwi,$controlFile,
@@ -444,7 +444,7 @@ sub createImage {
 	);
 	my $isValid = $validator ? $validator -> validate() : undef;
 	if (! $isValid) {
-		return undef;
+		return;
 	}
 	$kiwi -> info ("Reading image description [Create]...\n");
 	my $xml = new KIWIXML (
@@ -452,7 +452,7 @@ sub createImage {
 		$buildProfs,$cmdL
 	);
 	if (! defined $xml) {
-		return undef;
+		return;
 	}
 	my %attr = %{$xml->getImageTypeAndAttributes()};
 	my $krc = new KIWIRuntimeChecker (
@@ -475,7 +475,7 @@ sub createImage {
 			$kiwi -> failed ();
 			$kiwi -> info   ("No destination directory specified");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		$this -> {imageTgtDir} = $defaultDestination;
 		$cmdL -> setImagetargetDir ($defaultDestination);
@@ -489,7 +489,7 @@ sub createImage {
 	$xml = $this -> __applyAdditionalXMLOverrides($xml);
 	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	if (! $krc -> createChecks()) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create destdir if needed
@@ -498,7 +498,7 @@ sub createImage {
 		$destination,$cmdL -> getDefaultAnswer()
 	);
 	if (! defined $dirCreated) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check tool set
@@ -507,7 +507,7 @@ sub createImage {
 		$xml,\%attr,$configDir
 	);
 	if (! defined $para) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check for packages updates if needed
@@ -576,10 +576,10 @@ sub createImage {
 		$cmdL -> setPackagesToRemove (\@deleteList);
 		my $kic  = new KIWIImageCreator ($kiwi, $cmdL);
 		if (! $kic) {
-			return undef;
+			return;
 		}
 		if (! $kic -> upgradeImage()) {
-			return undef;
+			return;
 		}
 		$cmdL -> setAdditionalPackages ([]);
 		$cmdL -> setPackagesToRemove ([]);
@@ -592,7 +592,7 @@ sub createImage {
 		"/base-system",$configDir,undef,$cmdL
 	);
 	if (! defined $image) {
-		return undef;
+		return;
 	}
 	$this->{image} = $image;
 	#==========================================
@@ -638,10 +638,10 @@ sub createImage {
 			$kiwi,$xml,$tree,$tree."/image",$destination
 		);
 		if (! defined $configure) {
-			return undef;
+			return;
 		}
 		if (! $configure -> setupRecoveryArchive($attr{filesystem})) {
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -715,7 +715,7 @@ sub createImage {
 		$kiwi -> error  ("Unsupported type: $attr{type}");
 		$kiwi -> failed ();
 		undef $image;
-		return undef;
+		return;
 	}
 	if ($ok) {
 		if (($checkFormat) && ($attr{format})) {
@@ -725,17 +725,17 @@ sub createImage {
 				$kiwi,$imgfile,$cmdL,$haveFormat
 			);
 			if (! $format) {
-				return undef;
+				return;
 			}
 			if (! $format -> createFormat()) {
-				return undef;
+				return;
 			}
 		}
 		undef $image;
 		return 1;
 	} else {
 		undef $image;
-		return undef;
+		return;
 	}
 }
 
@@ -752,7 +752,7 @@ sub createSplash {
 	my $cmdL = $this->{cmdL};
 	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL);
 	if (! defined $boot) {
-		return undef;
+		return;
 	}
 	$this->{boot} = $boot;
 	$boot -> setupSplash();
@@ -776,12 +776,12 @@ sub createImageBootUSB {
 	$kiwi -> info ("Creating boot USB stick from: $ird...\n");
 	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL);
 	if (! defined $boot) {
-		return undef;
+		return;
 	}
 	$this->{boot} = $boot;
 	if (! $boot -> setupInstallStick()) {
 		undef $boot;
-		return undef;
+		return;
 	}
 	undef $boot;
 	return 1;
@@ -803,12 +803,12 @@ sub createImageBootCD {
 	$kiwi -> info ("Creating boot ISO from: $ird...\n");
 	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL);
 	if (! defined $boot) {
-		return undef;
+		return;
 	}
 	$this->{boot} = $boot;
 	if (! $boot -> setupInstallCD()) {
 		undef $boot;
-		return undef;
+		return;
 	}
 	undef $boot;
 	return 1;
@@ -830,16 +830,16 @@ sub createImageInstallCD {
 	if (! defined $sys) {
 		$kiwi -> error  ("No Install system image specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL,$sys);
 	if (! defined $boot) {
-		return undef;
+		return;
 	}
 	$this->{boot} = $boot;
 	if (! $boot -> setupInstallCD()) {
 		undef $boot;
-		return undef;
+		return;
 	}
 	undef $boot;
 	return 1;
@@ -861,16 +861,16 @@ sub createImageInstallStick {
 	if (! defined $sys) {
 		$kiwi -> error  ("No Install system image specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL,$sys);
 	if (! defined $boot) {
-		return undef;
+		return;
 	}
 	$this->{boot} = $boot;
 	if (! $boot -> setupInstallStick()) {
 		undef $boot;
-		return undef;
+		return;
 	}
 	undef $boot;
 	return 1;
@@ -892,7 +892,7 @@ sub createImageDisk {
 	if (! defined $sys) {
 		$kiwi -> error  ("No VM system image specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	qxx ( "file $sys | grep -q 'gzip compressed data'" );
 	my $code = $? >> 8;
@@ -900,17 +900,17 @@ sub createImageDisk {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Can't use compressed VM system");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my $boot = new KIWIBoot (
 		$kiwi,$ird,$cmdL,$sys,$size,undef,$prof
 	);
 	if (! defined $boot) {
-		return undef;
+		return;
 	}
 	$this->{boot} = $boot;
 	if (! $boot -> setupBootDisk($tdev)) {
-		return undef;
+		return;
 	}
 	$boot -> cleanLoop ();
 	undef $boot;
@@ -931,7 +931,7 @@ sub createImageFormat {
 		$kiwi,$sys,$cmdL,$format
 	);
 	if (! $imageformat) {
-		return undef;
+		return;
 	}
 	$imageformat -> createFormat();
 	$imageformat -> createMaschineConfiguration();
@@ -1017,7 +1017,7 @@ sub __checkImageIntegrity {
 			chomp $data;
 			$kiwi -> error ("Integrity check for $configDir failed:\n$data");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	} else {
 		$kiwi -> info ("Description provides no MD5 hash, check\n");
@@ -1055,7 +1055,7 @@ sub __upgradeTree {
 	if (! defined $root) {
 		$kiwi -> error ("Couldn't create root object");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# store root pointer for destructor code
@@ -1067,7 +1067,7 @@ sub __upgradeTree {
 	if (! $root -> upgrade ()) {
 		$kiwi -> error ("Image Upgrade failed");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	$this -> DESTROY(1);
 	return 1;
@@ -1084,23 +1084,23 @@ sub __selectCache {
 	my $kiwi = $this -> {kiwi};
 	my $cmdL = $this -> {cmdL};
 	if ( ! $this -> {cacheDir}) {
-		return undef;
+		return;
 	}
 	if (($cacheMode eq "remount") && (! -f "$configDir/kiwi-root.cache")) {
-		return undef;
+		return;
 	}
 	my $icache = new KIWICache (
 		$kiwi,$xml,$this->{cacheDir},$this->{gdata}->{BasePath},
 		$this->{buildProfiles},$configDir,$cmdL
 	);
 	if (! $icache) {
-		return undef;
+		return;
 	}
 	my $cacheInit = $icache -> initializeCache ($cmdL);
 	if ($cacheInit) {
 		return $icache->selectCache ($cacheInit);
 	}
-	return undef;
+	return;
 }
 
 #==========================================
@@ -1156,7 +1156,7 @@ sub __prepareTree {
 	if (! defined $root) {
 		$kiwi -> error ("Couldn't create root object");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# store root pointer for destructor code
@@ -1168,7 +1168,7 @@ sub __prepareTree {
 	if (! defined $root -> init ()) {
 		$kiwi -> error ("Base initialization failed");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Install root system
@@ -1176,22 +1176,22 @@ sub __prepareTree {
 	if (! $root -> install ()) {
 		$kiwi -> error ("Image installation failed");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $root -> installArchives ($systemTree)) {
 		$kiwi -> error ("Archive installation failed");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $root -> setup ()) {
 		$kiwi -> error ("Couldn't setup image system");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $xml -> writeXMLDescription ($root->getRootPath())) {
 		$kiwi -> error ("Couldn't write XML description");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Clean up
@@ -1253,12 +1253,12 @@ sub checkType {
 						"Can't find filesystem tool for: $result{type}"
 					);
 					$kiwi -> failed ();
-					return undef;
+					return;
 				}
 			} else {
 				$kiwi -> error ("Can't check filesystem attributes from: $fs");
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 		}
 	}
@@ -1303,7 +1303,7 @@ sub checkType {
 					"$msg: $mktool_vs vs $module_vs"
 				);
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 		}
 	}
@@ -1315,7 +1315,7 @@ sub checkType {
 			if (! defined $type{boot}) {
 				$kiwi -> error ("$type{type}: No boot image specified");
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 			$para = $type{boot};
 			if ((defined $type{flags}) && ($type{flags} ne "")) {
@@ -1327,7 +1327,7 @@ sub checkType {
 			if (! defined $type{filesystem}) {
 				$kiwi -> error ("$type{type}: No filesystem pair specified");
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 			$para = $type{filesystem};
 			if (defined $type{boot}) {
@@ -1339,12 +1339,12 @@ sub checkType {
 			if (! defined $type{filesystem}) {
 				$kiwi -> error ("$type{type}: No filesystem specified");
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 			if (! defined $type{boot}) {
 				$kiwi -> error ("$type{type}: No boot image specified");
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 			$para = $type{filesystem}.":".$type{boot};
 			last SWITCH;

@@ -28,8 +28,8 @@ use KIWIQX;
 #==========================================
 # Exports
 #------------------------------------------
-our @ISA    = qw (Exporter);
-our @EXPORT = qw (getDOM validate);
+our @ISA       = qw (Exporter);
+our @EXPORT_OK = qw (getDOM validate);
 
 #==========================================
 # Constructor
@@ -56,7 +56,7 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
+		$kiwi = KIWILog -> new ( 'tiny' );
 	}
 	#==========================================
 	# Check pre-conditions
@@ -165,7 +165,7 @@ sub __checkBootSpecPresent {
 	my @types = $systemTree -> getElementsByTagName('type');
 	for my $type (@types) {
 		my $image = $type -> getAttribute('image');
-		if (grep /^$image/, @needsInitrd) {
+		if (grep { /^$image/x } @needsInitrd) {
 			my $boot = $type -> getAttribute('boot');
 			if (! $boot) {
 				my $kiwi = $this -> {kiwi};
@@ -284,7 +284,7 @@ sub __checkEC2IsFsysType {
 		my $format = $type -> getAttribute('format');
 		if ($format && $format eq 'ec2') {
 			my $imgType = $type -> getAttribute('image');
-			if (! grep /^$imgType$/, @supportedFSTypes) {
+			if (! grep { /^$imgType$/x } @supportedFSTypes) {
 				my $kiwi = $this->{kiwi};
 				my $msg = 'For EC2 image creation the image type must be '
 					. 'one of the following supported file systems: '
@@ -317,7 +317,7 @@ sub __checkEC2Regions {
 	my @selectedRegions = ();
 	for my $region (@regions) {
 		my $regionStr = $region -> textContent();
-		if (! grep /$regionStr/, @supportedRegions) {
+		if (! grep { /$regionStr/x } @supportedRegions) {
 			my $msg = "Only one of @supportedRegions may be specified "
 			. 'as ec2region';
 			my $kiwi = $this->{kiwi};
@@ -325,7 +325,7 @@ sub __checkEC2Regions {
 			$kiwi -> failed ();
 			return;
 		}
-		if (grep /$regionStr/, @selectedRegions) {
+		if (grep { /$regionStr/x } @selectedRegions) {
 			my $msg = "Specified region $regionStr not unique";
 			my $kiwi = $this->{kiwi};
 			$kiwi -> error ( $msg );
@@ -352,7 +352,7 @@ sub __checkFilesysSpec {
 	my @typesReqFS = qw /oem pxe vmx/;
 	for my $typeN (@typeNodes) {
 		my $imgType = $typeN -> getAttribute( 'image' );
-		if (grep /$imgType/, @typesReqFS) {
+		if (grep { /$imgType/x } @typesReqFS) {
 			my $hasFSattr = $typeN -> getAttribute( 'filesystem' );
 			if (! $hasFSattr) {
 				my $msg = 'filesystem attribute must be set for image="'
@@ -477,7 +477,7 @@ sub __checkPatternTypeAttrConsistent {
 				$patternType = 'onlyRequired';
 			}
 			for my $profName (@profNames) {
-				if (! grep /^$profName$/, (keys %profPatternUseMap) ) {
+				if (! grep { /^$profName$/x } (keys %profPatternUseMap) ) {
 					$profPatternUseMap{$profName} = $patternType;
 				} elsif ( $profPatternUseMap{$profName} ne $patternType) {
 					my $kiwi = $this->{kiwi};
@@ -544,7 +544,7 @@ sub __checkPatternTypeAttrUse {
 	for my $pkgs (@pkgsNodes) {
 		if ($pkgs -> getAttribute( "patternType" )) {
 			my $type = $pkgs -> getAttribute( "type");
-			if (grep /$type/, @notAllowedTypes) {
+			if (grep { /$type/x } @notAllowedTypes) {
 				my $kiwi = $this->{kiwi};
 				my $msg = 'The patternType atribute is not allowed on a '
 				. "<packages> specification of type $type.";
@@ -617,7 +617,7 @@ sub __checkPreferencesDefinition {
 		if (! $profName) {
 			$numProfilesAttr++;
 		} else {
-			if (grep /$profName/, @usedProfs) {
+			if (grep { /$profName/x } @usedProfs) {
 				my $msg = 'Only one <preferences> element may reference a '
 				. "given profile. $profName referenced multiple times.";
 				$kiwi -> error ($msg);
@@ -759,7 +759,7 @@ sub __checkTypeUnique {
 		my @types = $pref -> getChildrenByTagName('type');
 		for my $typeN (@types) {
 			my $imgT = $typeN -> getAttribute('image');
-			if (grep /$imgT/, @imgTypes) {
+			if (grep { /$imgT/x } @imgTypes) {
 				my $kiwi = $this->{kiwi};
 				my $msg = 'Multiple definition of <type image="'
 					. $imgT
@@ -816,7 +816,7 @@ sub __getXMLDocTree {
 	my $XML  = shift;
 	my $kiwi = $this->{kiwi};
 	my $systemTree;
-	my $systemXML = new XML::LibXML;
+	my $systemXML = XML::LibXML -> new ();
 	eval {
 		$systemTree = $systemXML -> parse_fh ( $XML );
 	};
@@ -939,8 +939,8 @@ sub __validateXML {
 	my $controlFile = $this->{config};
 	my $kiwi        = $this->{kiwi};
 	my $systemTree  = $this->{systemTree};
-	my $systemXML   = new XML::LibXML;
-	my $systemRNG   = new XML::LibXML::RelaxNG ( location => $this->{schema} );
+	my $systemXML   = XML::LibXML -> new ();
+	my $systemRNG   = XML::LibXML::RelaxNG -> new(location => $this->{schema});
 	eval {
 		$systemRNG ->validate ( $systemTree );
 	};
@@ -961,7 +961,7 @@ sub __validateXML {
 			print $UPCNTFL $upgradedStr;
 			close ( $UPCNTFL );
 		}
-		my $locator = new KIWILocator($kiwi);
+		my $locator = KIWILocator -> new( $kiwi );
 		my $jingExec = $locator -> getExecPath('jing');
 		if ($jingExec) {
 			qxx ("$jingExec $this->{schema} $upgradedContolFile 1>&2");
