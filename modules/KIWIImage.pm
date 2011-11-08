@@ -3241,7 +3241,7 @@ sub installLogicalExtend {
 	$kiwi -> info ("Copying physical to logical [$name]...");
 	my $free = qxx ("df -h $extend 2>&1");
 	$kiwi -> loginfo ("getSize: mount: $free\n");
-	my $data = qxx ("rsync -zaH --one-file-system $source/ $extend 2>&1");
+	my $data = qxx ("rsync -aHXA --one-file-system $source/ $extend 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
