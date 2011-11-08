@@ -1,14 +1,10 @@
 #!/bin/bash
 
-version=$1
-if ! echo $version | pcregrep -q "^\d+$";then
-	echo "NOT A RELEASE ! ... abort"
-	exit 1
-fi
+version=$(cat kiwi.pl | grep 'our $Version' | cut -f2 -d= | cut -f2 -d\")
+v_part1=$(echo $version | cut -f1-2 -d.)
+v_part2=$(echo $version | cut -f3 -d.)
+v_part2=$((v_part2 + 1))
 
-# spec file version update
-cat rpm/kiwi.spec | sed \
-	-e s"@Release:       .*@Release:        $version@" \
-> rpm/kiwi.spec.new && mv rpm/kiwi.spec.new rpm/kiwi.spec
+version=$v_part1.$v_part2
 
-echo "update to release: $version... done"
+./.newversion $version
