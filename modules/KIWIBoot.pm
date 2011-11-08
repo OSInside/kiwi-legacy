@@ -2504,11 +2504,12 @@ sub setupInstallFlags {
 	my $kiwi   = $this->{kiwi};
 	my $initrd = $this->{initrd};
 	my $system = $this->{system};
-	my $irddir = $initrd."_".$$.".vmxsystem";
 	my $xml    = $this->{xml};
 	my $newird;
-	if (! mkdir $irddir) {
-		$kiwi -> error  ("Failed to create vmxsystem directory");
+	my $irddir = qxx ("mktemp -q -d /tmp/kiwiird.XXXXXX"); chomp $irddir;
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Couldn't create tmp dir: $irddir: $!");
 		$kiwi -> failed ();
 		return undef;
 	}
