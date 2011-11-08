@@ -14,6 +14,9 @@
 #----------------
 package Common::ktTestCase;
 
+use warnings;
+use strict;
+
 use base qw /Test::Unit::TestCase/;
 
 use FindBin;
@@ -50,7 +53,7 @@ sub assert_array_equal {
 	}
 
 	for my $item (@base_array) {
-		if ( ! grep /^$item$/x, @cmp_array ) {
+		if ( ! grep { /^$item$/x } @cmp_array ) {
 			my $msg = 'Did not get the expected list of names. '
 			.'Mismatch content.';
 			$this -> assert(0, $msg);
@@ -125,10 +128,11 @@ sub removeTestTmpDir {
 	if (! open $mounts, '<', '/proc/mounts' ) {
 		return 0;
 	}
-	while (<$mounts>) {
-		my $line = $_;
-		if ($line =~ /.*kiwi.*/) {
-			my ($source, $mntPnt, $rest) = split /\s/, $line;
+    my @mountInfo = <$mounts>;
+    close $mounts;
+	for my $line (@mountInfo) {
+		if ($line =~ /.*kiwi.*/x) {
+			my ($source, $mntPnt, $rest) = split /\s/x, $line;
 			my $res = system "umount $mntPnt";
 			if ($res) {
 				my $msg = "Unable to clean up mount point $mntPnt from "
