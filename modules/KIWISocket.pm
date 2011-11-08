@@ -11,7 +11,7 @@
 # DESCRIPTION   : This module is used to provide socket 
 #               : operations which can be used for setting
 #               : up a milestone server
-#               : 
+#               :
 #               :
 # STATUS        : Development
 #----------------
@@ -51,11 +51,11 @@ sub new {
 	#------------------------------------------
 	$port = int $port;
 	if ($port <= 0) {
-		return undef;
+		return;
 	}
 	my $server = $this -> serverSocket ($port);
 	if (! defined $server) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Store object data
@@ -74,13 +74,13 @@ sub serverSocket {
 	my $port  = shift;
 	my $proto = getprotobyname("tcp");
 	socket(SD, PF_INET, SOCK_STREAM, $proto) ||
-		return undef;
+		return;
 	setsockopt(SD, SOL_SOCKET, SO_REUSEADDR, pack("l",1)) ||
-		return undef;
+		return;
 	bind(SD, sockaddr_in($port,INADDR_ANY)) ||
-		return undef;
+		return;
 	listen(SD,SOMAXCONN) ||
-		return undef;
+		return;
 	return *SD;
 }
 
@@ -92,7 +92,7 @@ sub acceptConnection {
 	my $server  = $this->{server};
 	my $paddr   = accept (CD,$server);
 	if (! $paddr) {
-		return undef;
+		return;
 	}
 	$this->{client} = *CD;
 	return $this->{client};
@@ -128,7 +128,7 @@ sub read {
 	my $this    = shift;
 	my $client  = $this->{client};
 	if (! defined $client) {
-		return undef;
+		return;
 	}
 	my $line = <$client>;
 	flush $client;
