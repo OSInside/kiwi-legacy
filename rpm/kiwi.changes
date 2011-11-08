@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Nov  8 10:02:58 CET 2011 - ms@suse.de
+
+- make sure importFile() stays backward compatible and ensures
+  proper quoting. Also make sure the prefixed variable copy is
+  only created if a prefix was set (bnc #728357)
+
+- switch from tar to rsync based copies. Reason for the change is
+  because tar doesn't support file attributes like xattr,acls
+  and fscaps (bnc #728312)
+
+-------------------------------------------------------------------
 Wed Nov  2 15:18:38 CET 2011 - ms@suse.de
 
 - fixed repartition code to create an aligned table (bnc #721580)
