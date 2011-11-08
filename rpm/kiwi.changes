@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov  8 16:29:10 CET 2011 - ms@suse.de
+
+- removed dead code in iso boot code due to the removal of
+  the swap file support (bnc #728645)
+
+-------------------------------------------------------------------
 Tue Nov  8 15:56:46 CET 2011 - ms@suse.de
 
 - don't create a swap file if no swap partition can be found in
