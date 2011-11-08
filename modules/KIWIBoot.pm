@@ -2538,7 +2538,7 @@ sub setupInstallFlags {
 	#------------------------------------------
 	my $unzip  = "$this->{gdata}->{Gzip} -cd $initrd 2>&1";
 	my $status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
-	my $result = $? >> 8;
+	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to extract initrd data: $!");
 		$kiwi -> failed ();
