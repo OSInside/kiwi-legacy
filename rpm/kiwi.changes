@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Nov  9 17:01:15 CET 2011 - ms@suse.de
+
+- make sure partedSectorInit() comes up with an initial value for
+  the start sector if the partition table is empty (bnc #729251)
+
+-------------------------------------------------------------------
 Tue Nov  8 16:29:10 CET 2011 - ms@suse.de
 
 - removed dead code in iso boot code due to the removal of
