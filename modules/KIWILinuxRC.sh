@@ -6795,6 +6795,12 @@ function partedSectorInit {
 			endSectors=$endSectors:$((s_stopp/8*8+8))s
 		fi
 	done
+	# /.../
+	# in case of an empty disk we use the following start sector
+	# ----
+	if [ -z "$startSectors" ];then
+		startSectors=2048s
+	fi
 }
 #======================================
 # partedEndCylinder
