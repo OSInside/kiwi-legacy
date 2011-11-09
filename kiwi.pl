@@ -166,9 +166,10 @@ sub main {
 		# Process system image description
 		#------------------------------------------
 		$kiwi -> info ("Reading image description [Cache]...\n");
+		my $cacheType = "ext2";
 		my $xml = new KIWIXML (
 			$kiwi,$cmdL->getOperationMode("initCache"),
-			undef,$cmdL->getBuildProfiles(),$cmdL
+			$cacheType,$cmdL->getBuildProfiles(),$cmdL,undef,"addType"
 		);
 		if (! defined $xml) {
 			kiwiExit (1);
@@ -193,7 +194,9 @@ sub main {
 		if (! $icache) {
 			kiwiExit (1);
 		}
-		my $cacheInit = $icache -> initializeCache ($cmdL);
+		my $cacheInit = $icache -> initializeCache (
+			$cmdL,"create-cache"
+		);
 		if (! $cacheInit) {
 			kiwiExit (1);
 		}
@@ -1077,6 +1080,9 @@ sub init {
 	}
 	if (defined $Build) {
 		$cmdL -> setConfigDir ($Build);
+	}
+	if (defined $InitCache) {
+		$cmdL -> setConfigDir ($InitCache);
 	}
 	#========================================
 	# store operation modes
