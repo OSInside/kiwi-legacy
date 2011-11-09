@@ -115,9 +115,19 @@ sub new {
 		if ($publics_url =~ /^\//) {
 			my ( $publics_url_test ) = bsd_glob ( $publics_url );
 			if (! -d $publics_url_test) {
-				$kiwi ->warning ("local URL path not found: $publics_url_test");
-				$kiwi ->skipped ();
-				next;
+				if ($source =~ /^obs:\//) {
+					$source =~ s/^obs/opensuse/;
+					$publics_url = $urlHandler -> normalizePath ($source);
+					if ($publics_url =~ /^\//) {
+						next;
+					}
+				} else {
+					$kiwi ->warning (
+						"local URL path not found: $publics_url_test"
+					);
+					$kiwi ->skipped ();
+					next;
+				}
 			}
 		}
 		my $private_url = $publics_url;
