@@ -90,17 +90,17 @@ sub new {
 	if (! $KIWISatSolver::haveSaT) {
 		$kiwi -> error ("--> No SaT plugin installed");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $pref) {
 		$kiwi -> error ("--> Invalid package/pattern/product reference");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $urlref) {
 		$kiwi -> error ("--> Invalid repository URL reference");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $ptype) {
 		$ptype = "onlyRequired";
@@ -111,17 +111,18 @@ sub new {
 	if ((! defined $repo) || (! defined $pool)) {
 		$solvable = KIWIXML::getInstSourceSatSolvable ($kiwi,$urlref);
 		if (! defined $solvable) {
-			return undef;
+			return;
 		}
 		#==========================================
 		# Create SaT repository
 		#------------------------------------------
-		if (! open (FD,$solvable)) {
+		my $FD;
+		if (! open ($FD, '<' ,$solvable)) {
 			$kiwi -> error  ("--> Couldn't open solvable: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
-		close FD;
+		close $FD;
 		$pool = new satsolver::Pool;
 		$arch = qx (uname -m); chomp $arch;
 		$pool -> set_arch ($arch);

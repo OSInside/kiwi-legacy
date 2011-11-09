@@ -60,13 +60,13 @@ sub new {
 		. 'argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $xml ) {
 		my $msg = 'Expecting reference to KIWIXML object as third argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Constructor setup
@@ -90,16 +90,16 @@ sub createChecks {
 	# ---
 	my $this = shift;
 	if (! $this -> __haveValidTypeString()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkHaveTypeToBuild()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkFilesystemTool()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkPackageManagerExists()) {
-		return undef;
+		return;
 	}
 	return 1;
 }
@@ -113,22 +113,22 @@ sub prepareChecks {
 	# ---
 	my $this = shift;
 	if (! $this -> __haveValidTypeString()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkHaveTypeToBuild()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkPackageManagerExists()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkPatternTypeAttrrValueConsistent()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __checkRootRecycleCapability()) {
-		return undef;
+		return;
 	}
 	if (! $this -> __hasValidArchives()) {
-		return undef;
+		return;
 	}
 	return 1;
 }
@@ -154,8 +154,9 @@ sub __hasValidArchives {
 	#==========================================
 	# check for origin of image description
 	#------------------------------------------
-	if (open FD,"$desc/image/main::Prepare") {
-		$desc = <FD>; close FD;
+	if (open my $FD, '<', "$desc/image/main::Prepare") {
+		$desc = <$FD>;
+		close $FD;
 	}
 	#==========================================
 	# check archive contents
@@ -173,7 +174,7 @@ sub __hasValidArchives {
 				$kiwi -> failed ();
 				$kiwi -> error  ("archive matches: $exp");
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 		}
 	}
@@ -207,7 +208,7 @@ sub __haveValidTypeString {
 				. 'not valid.';
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
-			return undef;
+			return;
 		}
 	}
 	return 1;
@@ -229,7 +230,7 @@ sub __checkRootRecycleCapability {
 	if (($tree) && (-f "$tree/kiwi-root.cache")) {
 		$kiwi -> error ("Can't recycle cache based root tree");
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	return 1;
 }
@@ -301,7 +302,7 @@ sub __checkFilesystemTool {
 		. 'be found.';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	return 1;
 }
@@ -338,7 +339,7 @@ sub __checkPackageManagerExists {
 			. 'could not be found.';
 		$this -> {kiwi} -> error($msg);
 		$this -> {kiwi} -> failed();
-		return undef;
+		return;
 	}
 	return 1;
 }
@@ -396,7 +397,7 @@ sub __checkPatternTypeAttrrValueConsistent {
 					. '" found';
 					$kiwi -> error ( $msg );
 					$kiwi -> failed ();
-					return undef;
+					return;
 				}
 			}
 		}

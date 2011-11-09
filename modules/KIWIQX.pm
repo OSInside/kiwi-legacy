@@ -62,7 +62,7 @@ sub qxxLogOn {
 #==========================================
 # qxx
 #------------------------------------------
-sub qxx ($) {
+sub qxx {
 	# ...
 	# Activate execution logging. The function also checks
 	# if the first name evaluated as program name can be

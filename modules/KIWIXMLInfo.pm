@@ -70,7 +70,7 @@ sub new {
 			. 'second argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	my $configDir = $cmdL -> getConfigDir();
 	if (! defined $configDir) {
@@ -78,12 +78,12 @@ sub new {
 			. 'directory.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return undef;
+		return;
 	}
 	if (! $main::global) {
 		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Reset logging target if requested
@@ -92,7 +92,7 @@ sub new {
 	if ($logFile) {
 		$kiwi -> info ("Setting log file to: $logFile\n");
 			if (! $kiwi -> setLogFile ( $logFile )) {
-				return undef;
+				return;
 			}
 	}
 	#==========================================
@@ -122,7 +122,7 @@ sub getXMLInfoTree {
 	my $requests = shift;
 	my $infoRequests = $this -> __checkRequests($requests);
 	if (! $infoRequests) {
-		return undef;
+		return;
 	}
 	return $this -> __getTree($infoRequests);
 }
@@ -139,21 +139,22 @@ sub printXMLInfo {
 	my $kiwi = $this->{kiwi};
 	my $infoRequests = $this -> __checkRequests($requests);
 	if (! $infoRequests) {
-		return undef;
+		return;
 	}
 	my $outfile = qxx ("mktemp -q /tmp/kiwi-xmlinfo-XXXXXX 2>&1");
 	my $code = $? >> 8; chomp $outfile;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create tmp file: $outfile: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	$this -> {kiwi} -> info ("Reading image description [ListXMLInfo]...\n");
 	my $infoTree = $this -> __getTree($infoRequests);
 	if (! $infoTree) {
-		return undef;
+		return;
 	}
-	open (my $F, "|xsltproc $this->{gdata}->{Pretty} - | cat > $outfile");
+	# Violates 3 argument open rule FIXME
+	open (my $F, "|xsltproc $this->{gdata}->{Pretty} - | cat > $outfile"); ## no critic
 	print $F $infoTree -> toString();
 	close $F;
 	system ("cat $outfile");
@@ -178,13 +179,13 @@ sub __checkRequests {
 		my $msg = 'No information requested, nothing todo.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! ref $requests) {
 		my $msg = 'Expecting ARRAY_REF as first argument for info requests.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my @infoReq = @{$requests};
 	#==========================================
@@ -221,7 +222,7 @@ sub __checkRequests {
 			my $s = sprintf ("--> %-15s:%s\n",$info,$supportedInfoReq{$info});
 			$kiwi -> info ($s);
 		}
-		return undef;
+		return;
 	}
 	return \@infoList;
 }
@@ -268,11 +269,11 @@ sub __getTree {
 		$xml = $this -> __xmlSetup();
 	}
 	if (! $xml) {
-		return undef;
+		return;
 	}
 	my $mountDirs = $this -> __setupRepoMounts($xml);
 	if (! $mountDirs) {
-		return undef;
+		return;
 	}
 	my @infoRequests = @{$requests};
 	my $meta;
@@ -289,6 +290,7 @@ sub __getTree {
 	#==========================================
 	# Walk through selection list
 	#------------------------------------------
+	my $generateWanted;
 	for my $info (@infoRequests) {
 		SWITCH: for ($info) {
 			#==========================================
@@ -296,7 +298,7 @@ sub __getTree {
 			#------------------------------------------
 			/^overlay-files/ && do {
 				my %result;
-				sub generateWanted {
+				$generateWanted = sub  {
 					my $filehash = shift;
 					my $basedir  = shift;
 					return sub {
@@ -306,12 +308,12 @@ sub __getTree {
 							$file = "[root/]$file";
 							$filehash->{$file} = $basedir;
 						}
-					}
-				}
+					};
+				};
 				if (! -d $this->{configDir}."/root") {
 					$kiwi -> info ("No overlay root directory present\n");
 				} else {
-					my $wref = generateWanted (
+					my $wref = &$generateWanted (
 						\%result,$this->{configDir}."/root/"
 					);
 					my $rdir = $this->{configDir}."/root";
@@ -338,7 +340,7 @@ sub __getTree {
 					if (! $meta) {
 						$kiwi -> failed();
 						$this -> __cleanMountPnts($mountDirs);
-						return undef;
+						return;
 					}
 				}
 				if (! $rpat) {
@@ -365,7 +367,7 @@ sub __getTree {
 					if (! $meta) {
 						$kiwi -> failed();
 						$this -> __cleanMountPnts($mountDirs);
-						return undef;
+						return;
 					}
 				}
 				if (! keys %{$meta}) {
@@ -421,7 +423,7 @@ sub __getTree {
 					if (! $meta) {
 						$kiwi -> failed();
 						$this -> __cleanMountPnts($mountDirs);
-						return undef;
+						return;
 					}
 				}
 				my $size = 0;
@@ -459,7 +461,7 @@ sub __getTree {
 					if (! $meta) {
 						$kiwi -> failed();
 						$this -> __cleanMountPnts($mountDirs);
-						return undef;
+						return;
 					}
 				}
 				if (! keys %{$meta}) {
@@ -490,7 +492,7 @@ sub __getTree {
 						$scan -> appendChild ($anode);
 					}
 				}
-                last SWITCH;
+				last SWITCH;
 			};
 			#==========================================
 			# profiles
@@ -560,7 +562,7 @@ sub __setupRepoMounts {
 					if (@mountPnts) {
 						$this -> __cleanMountPnts(\@mountPnts);
 					}
-					return undef;
+					return;
 				}
 				push @mountPnts, $dir;
 			}
@@ -587,7 +589,7 @@ sub __xmlSetup {
 	my $locator = new KIWILocator($kiwi);
 	my $controlFile = $locator -> getControlFile ($configDir);
 	if (! $controlFile) {
-		return undef;
+		return;
 	}
 	my $validator = new KIWIXMLValidator (
 		$kiwi,$controlFile,
@@ -597,13 +599,13 @@ sub __xmlSetup {
 	);
 	my $isValid = $validator ? $validator -> validate() : undef;
 	if (! $isValid) {
-		return undef;
+		return;
 	}
 	my $xml = new KIWIXML (
 		$kiwi, $configDir, undef, $buildProfs, $cmdL
 	);
 	if (! defined $xml) {
-		return undef;
+		return;
 	}
 	my $pkgMgr = $this -> {packageManager};
 	if ($pkgMgr) {
