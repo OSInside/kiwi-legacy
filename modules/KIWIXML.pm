@@ -89,6 +89,7 @@ sub new {
 	my $reqProfiles = shift;
 	my $cmdL        = shift;
 	my $changeset   = shift;
+	my $addType     = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -171,6 +172,12 @@ sub new {
 	$this->{packageNodeList} = $packageNodeList;
 	$this->{instsrcNodeList} = $instsrcNodeList;
 	$this->{driversNodeList} = $driversNodeList;
+	#==========================================
+	# add specified type if requested
+	#------------------------------------------
+	if ($addType) {
+		$this -> addSimpleType ($imageType);
+	}
 	#==========================================
 	# Read and create profile hash
 	#------------------------------------------
@@ -2063,6 +2070,27 @@ sub addDrivers {
 		$addElement -> setAttribute("name",$driver);
 		$nodes -> get_node($nodeNumber)
 			-> appendChild ($addElement);
+	}
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# addSimpleType
+#------------------------------------------
+sub addSimpleType {
+	# ...
+	# add simple filesystem type to the list of types
+	# inside the preferences section
+	# ---
+	my $this  = shift;
+	my $type  = shift;
+	my $kiwi  = $this->{kiwi};
+	my $nodes = $this->{optionsNodeList};
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $addElement = new XML::LibXML::Element ("type");
+		$addElement -> setAttribute("image",$type);
+		$nodes -> get_node($i) -> appendChild ($addElement);
 	}
 	$this -> updateXML();
 	return $this;

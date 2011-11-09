@@ -152,7 +152,7 @@ valid: modules/KIWISchema.rng
 	#============================================
 	# Validate all XML descriptions...
 	#--------------------------------------------
-	for i in `find -name config.xml | grep -v tests` modules/KIWICache.kiwi;do \
+	for i in `find -name config.xml | grep -v tests`;do \
 		test -f xsl/master.xsl && \
 			xsltproc -o $$i.new xsl/master.xsl $$i && mv $$i.new $$i;\
 		echo $$i;\

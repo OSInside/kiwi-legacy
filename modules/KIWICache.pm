@@ -130,6 +130,7 @@ sub new {
 sub initializeCache {
 	my $this = shift;
 	my $cmdL = shift;
+	my $createCache = shift;
 	my $conf = $this->{config};
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
@@ -141,19 +142,22 @@ sub initializeCache {
 	my @CachePackages; # image packages building the cache
 	my $CacheScan;     # image scan, for cache package check
 	#==========================================
-	# Check boot type of the image
+	# Find base distro name
 	#------------------------------------------
 	$kiwi -> info ("Initialize image cache...\n");
-	my %type = %{$xml->getImageTypeAndAttributes()};
 	my $name = $xml -> getImageName();
-	if (($type{boot}) && ($type{boot} =~ /.*\/(.*)/)) {
-		$CacheDistro = $1;
-	} elsif (
-		($type{type} =~ /ext2|cpio/) && ($name =~ /initrd-.*boot-(.*)/)
-	) {
-		$CacheDistro = $1;
-	} else {
-		$kiwi -> warning ("Can't setup cache without a boot type");
+	foreach my $t (keys %{$xml->{typeInfo}}) {
+		my %type = %{$xml->{typeInfo}->{$t}};
+		if (($type{boot}) && ($type{boot} =~ /.*\/(.*)/)) {
+			$CacheDistro = $1; last;
+		} elsif (
+			($type{type} =~ /ext2|cpio/) && ($name =~ /initrd-.*boot-(.*)/)
+		) {
+			$CacheDistro = $1; last;
+		}
+	}
+	if (! $CacheDistro) {
+		$kiwi -> warning ("Can't setup distro name for cache");
 		$kiwi -> skipped ();
 		return;
 	}
@@ -181,14 +185,16 @@ sub initializeCache {
 	#==========================================
 	# Create image package list
 	#------------------------------------------
-	$cmdL -> setConfigDir ($conf);
-	my $info = new KIWIXMLInfo ($kiwi,$cmdL,$xml);
-	my @infoReq = ('packages', 'sources');
-	$CacheScan = $info -> getXMLInfoTree(\@infoReq);
-	if (! $CacheScan) {
-		$kiwi -> warning ("Failed to scan cache");
-		$kiwi -> skipped ();
-		return;
+	if (! $createCache) {
+		$cmdL -> setConfigDir ($conf);
+		my $info = new KIWIXMLInfo ($kiwi,$cmdL,$xml);
+		my @infoReq = ('packages', 'sources');
+		$CacheScan = $info -> getXMLInfoTree(\@infoReq);
+		if (! $CacheScan) {
+			$kiwi -> warning ("Failed to scan cache");
+			$kiwi -> skipped ();
+			return;
+		}
 	}
 	#==========================================
 	# Return result list
@@ -209,7 +215,6 @@ sub createCache {
 	my $xml  = $this->{xml};
 	my $cmdL = $this->{cmdL};
 	my $cdir = $this->{cdir};
-	my $base = $this->{base};
 	my $prof = $this->{profiles};
 	if (! $init) {
 		return;
@@ -218,112 +223,79 @@ sub createCache {
 	# Variable setup and reset function
 	#------------------------------------------
 	my $CacheDistro   = $init->[0];
-	my @CachePatterns = @{$init->[1]};
-	my @CachePackages = @{$init->[2]};
-	my $CacheScan     = $init->[3];
 	my $imageCacheDir = $cdir;
-	my @repoPaths     = ();
-	my @repoTypes     = ();    
 	#==========================================
 	# setup variables for kiwi prepare call
 	#------------------------------------------
 	qxx ("mkdir -p $imageCacheDir 2>&1");
-	if (@CachePackages) {
-		push @CachePatterns,"package-cache"
+	#==========================================
+	# Prepare cache
+	#------------------------------------------
+	my $CacheName = $xml -> getImageName();
+	$kiwi -> info (
+		"--> Building cache $CacheName...\n"
+	);
+	my $rootTarget  = $imageCacheDir."/".$CacheDistro."-".$CacheName;
+	$cmdL -> setBuildProfiles ($prof);
+	$cmdL -> setRootTargetDir ($rootTarget);
+	$cmdL -> setOperationMode ("prepare", $cmdL->getConfigDir());
+	$cmdL -> setBuildType ("ext2");
+	$cmdL -> setForceNewRoot (1);
+	my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+	if (! $kic) {
+		return;
+	}
+	$this->{kic} = $kic;
+	if (! $kic -> prepareImage()) {
+		undef $kic;	return;
 	}
 	#==========================================
-	# walk through cachable patterns
+	# Create cache meta data
 	#------------------------------------------
-	foreach my $pattern (@CachePatterns) {
-		if ($pattern eq "package-cache") {
-			$pattern = $xml -> getImageName();
-			$cmdL -> setAdditionalPackages (
-				[@CachePackages,$xml->getPackageManager()]
-			);
-			$cmdL -> setAdditionalPatterns ([]);
-			$kiwi -> info (
-				"--> Building cache file for plain package list\n"
-			);
-		} else {
-			$cmdL -> setAdditionalPackages ([$xml->getPackageManager()]);
-			$cmdL -> setAdditionalPatterns ([$pattern]);
-			$kiwi -> info (
-				"--> Building cache file for pattern: $pattern\n"
-			);
-		}
-		#==========================================
-		# use KIWICache.kiwi for cache preparation
-		#------------------------------------------
-		my $rootTarget  = $imageCacheDir."/".$CacheDistro."-".$pattern;
-		$cmdL -> setBuildProfiles ($prof);
-		$cmdL -> setConfigDir ($base."/modules");
-		$cmdL -> setRootTargetDir ($rootTarget);
-		$cmdL -> setForceNewRoot (1);
-		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if (! $kic) {
-			return;
-		}
-		$this->{kic} = $kic;
-		if (! $kic -> prepareImage()) {
-			undef $kic;	return;
-		}
-		#==========================================
-		# Create cache meta data
-		#------------------------------------------
-		my $meta   = $rootTarget.".cache";
-		my $root   = $rootTarget;
-		my $ignore = "'gpg-pubkey|bundle-lang'";
-		my $rpmopts= "'%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n'";
-		my $rpm    = "rpm --root $root";
-		qxx ("$rpm -qa --qf $rpmopts | grep -vE $ignore > $meta");
-		qxx ("rm -f $root/image/config.xml");
-		qxx ("rm -f $root/image/*.kiwi");
-		#==========================================
-		# Turn cache into ext2 fs image
-		#------------------------------------------
-		$kiwi -> info (
-			"--> Building ext2 cache...\n"
-		);
-		my $cxml  = new KIWIXML ($kiwi,$base."/modules",undef,undef,$cmdL);
-		my $pkgMgr = $cmdL -> getPackageManager();
-		if ($pkgMgr) {
-			$cxml -> setPackageManager($pkgMgr);
-		}
-		# /.../
-		# tell the system that we are in cache mode with
-		# the 'active' flag and therefore prevent kernel
-		# extraction from image cache
-		# ----
-		my $image = new KIWIImage (
-			$kiwi,$cxml,$root,$imageCacheDir,
-			undef,"/base-system",undef,"active",$cmdL
-		);
-		if (! defined $image) {
-			undef $kic; return;
-		}
-		if (! $image -> createImageEXT2 ()) {
-			undef $kic; return;
-		}
-		my $name= $imageCacheDir."/".$cxml -> buildImageName();
-		qxx ("mv $name $rootTarget.ext2");
-		qxx ("rm -f  $name.ext2");
-		qxx ("rm -f  $imageCacheDir/initrd-*");
-		qxx ("rm -rf $rootTarget");
-		#==========================================
-		# write XML changes to logfile...
-		#------------------------------------------
-		$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
-		#==========================================
-		# Reformat log file for human readers...
-		#------------------------------------------
-		$kiwi -> setLogHumanReadable();
-		#==========================================
-		# Move process log to final cache log...
-		#------------------------------------------
-		$kiwi -> finalizeLog();
-		$kiwi -> resetRootChannel();
-		undef $kic;
+	my $meta   = $rootTarget.".cache";
+	my $root   = $rootTarget;
+	my $ignore = "'gpg-pubkey|bundle-lang'";
+	my $rpmopts= "'%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n'";
+	my $rpm    = "rpm --root $root";
+	qxx ("$rpm -qa --qf $rpmopts | grep -vE $ignore > $meta");
+	qxx ("rm -f $root/image/config.xml");
+	qxx ("rm -f $root/image/*.kiwi");
+	#==========================================
+	# Turn cache into ext2 fs image
+	#------------------------------------------
+	$kiwi -> info (
+		"--> Building ext2 cache...\n"
+	);
+	# /.../
+	# tell the system that we are in cache mode with
+	# the 'active' flag and therefore prevent kernel
+	# extraction from image cache
+	# ----
+	my $image = new KIWIImage (
+		$kiwi,$xml,$root,$imageCacheDir,
+		undef,"/base-system",undef,"active",$cmdL
+	);
+	if (! defined $image) {
+		undef $kic; return;
 	}
+	if (! $image -> createImageEXT2 ()) {
+		undef $kic; return;
+	}
+	my $name= $imageCacheDir."/".$xml -> buildImageName();
+	qxx ("mv $name $rootTarget.ext2");
+	qxx ("rm -f  $name.ext2");
+	qxx ("rm -f  $imageCacheDir/initrd-*");
+	qxx ("rm -rf $rootTarget");
+	#==========================================
+	# Reformat log file for human readers...
+	#------------------------------------------
+	$kiwi -> setLogHumanReadable();
+	#==========================================
+	# Move process log to final cache log...
+	#------------------------------------------
+	$kiwi -> finalizeLog();
+	$kiwi -> resetRootChannel();
+	undef $kic;
 	return $imageCacheDir;
 }
 
