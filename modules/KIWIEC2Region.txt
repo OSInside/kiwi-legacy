@@ -1,13 +1,15 @@
 # /.../
 # Ec2 region table for correct Amazon kernel (aki) assignment
 # ----
-AP-Northeast-i386=aki-d209a2d3
-AP-Northeast-x86_64=aki-d409a2d5
-AP-Southeast-i386=aki-13d5aa41
-AP-Southeast-x86_64=aki-11d5aa43
-EU-West-i386=aki-4deec439
-EU-West-x86_64=aki-4feec43b
-US-East-i386=aki-407d9529
-US-East-x86_64=aki-427d952b
-US-West-i386=aki-99a0f1dc
-US-West-x86_64=aki-9ba0f1de
+AP-Northeast-i386=aki-ec5df7ed
+AP-Northeast-x86_64=aki-ee5df7ef
+AP-Southeast-i386=aki-a4225af6
+AP-Southeast-x86_64=aki-aa225af8
+EU-West-i386=aki-64695810
+EU-West-x86_64=aki-62695816
+US-East-i386=aki-805ea7e9
+US-East-x86_64=aki-825ea7eb
+US-West-i386=aki-83396bc6
+US-West-x86_64=aki-8d396bc8
+US-West2-i386=aki-c2e26ff2
+US-West2-x86_64=aki-98e26fa8
