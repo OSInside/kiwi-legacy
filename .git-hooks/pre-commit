@@ -109,7 +109,7 @@ my @changedFiles;
 while (<$chld_out>) {
 	my $fname = basename($_);
 	chomp $fname;
-	if ($fname =~ /.*\.pm|\.pl|\.t/x) {
+	if ($fname =~ /.*\.pm$|\.pl$|\.t$/x) {
 		push @changedFiles, $_;
 		if (! grep { /^$fname$/x } @kiwiModules) {
 			print "Comitting new module '$fname'. Registration required. Add ";
