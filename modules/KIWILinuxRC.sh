@@ -4175,14 +4175,19 @@ function cleanSweep {
 function fdasdGetPartitionID {
 	local count=1
 	for i in $(fdasd -s -p $1 | grep -E '^[ ]+\/' |\
-		awk -v OFS=":" '$1=$1' | cut -f5 -d:);do
+		awk -v OFS=":" '$1=$1' | cut -f7 -d:)
+	do
 		if [ $count = $2 ];then
-			if $i = 2;then
-				echo 82
-			elif $i = 1;then
+			if [ $i = "native" ];then
 				echo 83
+			elif [ $i = "swap" ];then
+				echo 82
 			else
-				echo $i
+				# /.../
+				# don't know this partition information
+				# assume it's a linux partition
+				# ----
+				echo 83
 			fi
 			return
 		fi
