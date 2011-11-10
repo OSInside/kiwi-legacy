@@ -271,7 +271,7 @@ sub createSnapshotMap {
 	$code = $? >> 8;
 	if ($code != 0) {
 		$result{stack} = \@releaseList;
-		return;g
+		return;
 	}
 	chomp $snapLoop;
 	push (@releaseList,"losetup -d $snapLoop");
