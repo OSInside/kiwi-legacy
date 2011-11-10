@@ -1069,7 +1069,7 @@ function setupBootLoader {
 	local arch=`uname -m`
 	local para=""
 	while [ $# -gt 0 ];do
-		para="$para \"$1\""
+		para="$para '$1'"
 		shift
 	done
 	case $arch-$loader in
@@ -1138,7 +1138,7 @@ function setupBootLoaderRecovery {
 	local arch=`uname -m`
 	local para=""
 	while [ $# -gt 0 ];do
-		para="$para \"$1\""
+		para="$para '$1'"
 		shift
 	done
 	case $arch-$loader in
