@@ -61,10 +61,10 @@ sub new {
 	#==========================================
 	# Stored Messages
 	#------------------------------------------
-	$this -> {errMsg}     = q{ };
-	$this -> {infoMsg}    = q{ };
-	$this -> {logInfoMsg} = q{ };
-	$this -> {warnMsg}    = q{ };
+	$this -> {errMsg}     = q{};
+	$this -> {infoMsg}    = q{};
+	$this -> {logInfoMsg} = q{};
+	$this -> {warnMsg}    = q{};
 	#==========================================
 	# Stored State
 	#------------------------------------------
@@ -141,7 +141,7 @@ sub getErrorMessage {
 	# ---
 	my $this = shift;
 	my $msg = $this -> {errMsg};
-	$this -> {errMsg} = q{ };
+	$this -> {errMsg} = q{};
 	return $msg;
 }
 
@@ -177,7 +177,7 @@ sub getInfoMessage {
 	# ---
 	my $this = shift;
 	my $msg = $this -> {infoMsg};
-	$this -> {infoMsg} = q{ };
+	$this -> {infoMsg} = q{};
 	return $msg;
 }
 
@@ -196,7 +196,7 @@ sub getLogInfoMessage {
 	# ---
 	my $this = shift;
 	my $msg = $this -> {logInfoMsg};
-	$this -> {logInfoMsg} = q{ };
+	$this -> {logInfoMsg} = q{};
 	return $msg;
 }
 
@@ -310,7 +310,7 @@ sub getWarningMessage {
 	# ---
 	my $this = shift;
 	my $msg = $this -> {warnMsg};
-	$this -> {warnMsg} = q{ };
+	$this -> {warnMsg} = q{};
 	return $msg;
 }
 
@@ -512,10 +512,10 @@ sub __resetData {
 	# Reset object data
 	# ---
 	my $this = shift;
-	$this->{errMsg}     = q{ };
-	$this->{infoMsg}    = q{ };
-	$this->{logInfoMsg} = q{ };
-	$this->{warnMsg}    = q{ };
+	$this->{errMsg}     = q{};
+	$this->{infoMsg}    = q{};
+	$this->{logInfoMsg} = q{};
+	$this->{warnMsg}    = q{};
 	return $this;
 }
 
