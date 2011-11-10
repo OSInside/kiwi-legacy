@@ -52,7 +52,7 @@ sub new {
 	if (! -d $rootRW) {
 		$kiwi -> error ("Directory $rootRW doesn't exist");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check rootRW structure
@@ -66,17 +66,20 @@ sub new {
 		$this->{initial} = 1;
 	}
 	if (-f "$rootRW/kiwi-root.cache") {
-		my $FD; if (! open ($FD,"$rootRW/kiwi-root.cache")) {
+		my $FD;
+		if (! open ($FD, '<', "$rootRW/kiwi-root.cache")) {
 			$kiwi -> error  ("Can't open cache root meta data");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
-		$baseRO = <$FD>; close $FD; chomp $baseRO;
+		$baseRO = <$FD>;
+		close $FD;
+		chomp $baseRO;
 	}
 	if (! $main::global) {
 		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Store object data
@@ -124,7 +127,7 @@ sub unionOverlay {
 	if (! %fsattr) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't detect filesystem on: $baseRO");
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check for ext2 extension
@@ -132,7 +135,7 @@ sub unionOverlay {
 	if ($type ne "ext2") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't detect ext2 on: $baseRO");
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create tmpdir for mount point
@@ -142,7 +145,7 @@ sub unionOverlay {
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create overlay tmpdir");
-		return undef;
+		return;
 	}
 	$this->{tmpdir} = $tmpdir;
 	$cowdev = "$rootRW/kiwi-root.cow";
@@ -160,7 +163,7 @@ sub unionOverlay {
 	if (! %snapshot) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to snapshot $baseRO");
-		return undef;
+		return;
 	}
 	push @mount,@{$snapshot{stack}};
 	$this->{mount} = \@mount;
@@ -175,7 +178,7 @@ sub unionOverlay {
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to mount $baseRO to: $tmpdir: $status");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	push @mount,"umount $tmpdir";
 	$this->{mount} = \@mount;
@@ -247,7 +250,7 @@ sub createSnapshotMap {
 	$code = $? >> 8;
 	if ($code != 0) {
 		$result{stack} = \@releaseList;
-		return undef;
+		return;
 	}
 	chomp $imageLoop;
 	push (@releaseList,"losetup -d $imageLoop");
@@ -261,14 +264,14 @@ sub createSnapshotMap {
 		$code = $? >> 8;
 		if ($code != 0) {
 			$result{stack} = \@releaseList;
-			return undef;
+			return;
 		}
 	}
 	$snapLoop = qxx ("losetup -s -f $cowfile");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$result{stack} = \@releaseList;
-		return undef;
+		return;
 	}
 	chomp $snapLoop;
 	push (@releaseList,"losetup -d $snapLoop");
