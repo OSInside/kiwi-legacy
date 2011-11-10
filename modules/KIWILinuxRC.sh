@@ -958,7 +958,7 @@ function setupBootLoader {
 	local arch=`uname -m`
 	local para=""
 	while [ $# -gt 0 ];do
-		para="$para \"$1\""
+		para="$para '$1'"
 		shift
 	done
 	if [ ! -z "$kiwi_bootloader" ];then
@@ -1033,7 +1033,7 @@ function setupBootLoaderRecovery {
 	local arch=`uname -m`
 	local para=""
 	while [ $# -gt 0 ];do
-		para="$para \"$1\""
+		para="$para '$1'"
 		shift
 	done
 	if [ -z "$loader" ];then
