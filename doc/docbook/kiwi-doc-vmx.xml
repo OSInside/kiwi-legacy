@@ -90,6 +90,10 @@
             <entry>Disk format for VMware</entry>
           </row>
           <row>
+            <entry>vhd</entry>
+            <entry>Disk format for Microsoft HyperV</entry>
+          </row>
+          <row>
             <entry>ovf</entry>
             <entry>Open Virtual Format requires VMware's ovftool</entry>
           </row>

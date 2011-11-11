@@ -272,7 +272,7 @@
     </para>
     <cmdsynopsis><command>kiwi</command>
       <arg choice="plain">--convert <replaceable>systemImage</replaceable></arg>
-      <arg choice="opt">--format <replaceable>vmdk|ovf|qcow2</replaceable></arg>
+      <arg choice="opt">--format <replaceable>vmdk|ovf|qcow2|vhd</replaceable></arg>
     </cmdsynopsis>
   </refsect1>
  
