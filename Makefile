@@ -164,6 +164,12 @@ test:
 	# Run unit tests...
 	#--------------------------------------------
 	tests/unit/cleanup.sh
+	if test ! -d tests/.timestamps; then \
+		mkdir tests/.timestamps; \
+	fi
+	for i in `find -name "*.t" | cut -d/ -f4`;do \
+		touch tests/.timestamps/$$i's';\
+	done
 	cd tests/unit && /usr/bin/prove -f .
 	rm -f .revision
 
@@ -172,6 +178,10 @@ test:
 	# Run specific unit test
 	#--------------------------------------------
 	tests/unit/cleanup.sh
+	if test ! -d tests/.timestamps; then \
+		mkdir tests/.timestamps; \
+	fi
+	touch tests/.timestamps/$@s
 	cd tests/unit && /usr/bin/prove -f $@
 
 clean:
