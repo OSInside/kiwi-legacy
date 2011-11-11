@@ -4180,12 +4180,12 @@ sub checkLVMbind {
 }
 
 #==========================================
-# getCylinderSizeAndCount
+# getGeometry
 #------------------------------------------
-sub getCylinderSizeAndCount {
+sub getGeometry {
 	# ...
-	# obtain cylinder size and count for the specified disk.
-	# The function returns the size in kB (10^3 B) or zero on error
+	# obtain number of sectors from the given
+	# disk device and return it
 	# ---
 	my $this = shift;
 	my $disk = shift;
@@ -4207,9 +4207,9 @@ sub getCylinderSizeAndCount {
 		$kiwi -> loginfo ($status);
 		return 0;
 	}
-	$parted = "$parted_exec -m $disk unit cyl print";
+	$parted = "$parted_exec -m $disk unit s print";
 	$status = qxx (
-		"$parted | head -n 3 | tail -n 1 | cut -f4 -d: | tr -d 'kB;'"
+		"$parted | head -n 3 | tail -n 1 | cut -f2 -d:"
 	);
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -4217,109 +4217,93 @@ sub getCylinderSizeAndCount {
 		return 0;
 	}
 	chomp $status;
-	$this->{pDiskCylinderSize} = $status;
-	$status = qxx (
-		"$parted | head -n 3 | tail -n 1 | cut -f1 -d:"
-	);
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> loginfo ($status);
-		return 0;
-	}
-	chomp $status;
-	$this->{pDiskCylinders} = $status;
+	$status =~ s/s//;
+	$status --;
+	$this->{pDiskSectors} = $status;
 	$kiwi -> loginfo (
-		"Disk Cylinder size is: $this->{pDiskCylinderSize} kB\n"
-	);
-	$kiwi -> loginfo (
-		"Disk Cylinder count is: $this->{pDiskCylinders}\n"
+		"Disk Sector count is: $this->{pDiskSectors}\n"
 	);
 	return $status;
 }
 
 #==========================================
-# getCylinder
+# getSector
 #------------------------------------------
-sub getCylinder {
+sub getSector {
 	# ...
-	# given a size in MB this function calculates the
-	# aligned cylinder count according to the used disk
-	# if no size is given the maximum value is used
-	# ---
+	# turn the given size in MB to the number of
+	# required sectors
+	# ----
 	my $this  = shift;
 	my $size  = shift;
-	my $csize = $this->{pDiskCylinderSize};
-	my $count = $this->{pDiskCylinders};
-	my $cyls;
-	if (! defined $csize) {
-		return 0;
-	}
+	my $count = $this->{pDiskSectors};
+	my $secsz = 512;
+	my $sectors;
 	if ($size =~ /\+(.*)M$/) {
-		$cyls = sprintf ("%.0f",($size * 1048576) / ($csize * 1000));
+		$sectors = sprintf ("%.0f",($size * 1048576) / $secsz);
+		if ($sectors == 0) {
+			$sectors = 8;
+		}
 	} else {
-		$cyls = $count;
+		$sectors = $count;
 	}
-	return $cyls;
+	return $sectors;
 }
 
 #==========================================
-# resetCylinder
+# resetGeometry
 #------------------------------------------
-sub resetCylinder {
+sub resetGeometry {
 	# ...
-	# reset global cylinder size and count
+	# reset global disk geometry information
 	# ---
 	my $this = shift;
-	undef $this->{pDiskCylinders};
-	undef $this->{pDiskCylinderSize};
+	undef $this->{pDiskSectors};
 	undef $this->{pStart};
 	undef $this->{pStopp};
 	return $this;
 }
 
 #==========================================
-# initCylinders
+# initGeometry
 #------------------------------------------
-sub initCylinders {
+sub initGeometry {
 	# ...
-	# calculate cylinder size and count for parted to create
-	# the appropriate partition. On success the cylinder count
-	# will be returned, on error zero is returned
+	# setup start sector and stop cylinder for the given size at
+	# first invocation the start cylinder is set to the default
+	# value from the global space or to the value specified on
+	# the commandline. On any subsequent call the start sector is
+	# calculated from the end sector of the previos partition
+	# and the new value gets aligned to be modulo 8 clean. The
+	# function returns the number of sectors which represents
+	# the given size
 	# ---
 	my $this   = shift;
 	my $device = shift;
 	my $size   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $cmdL   = $this->{cmdL};
-	my $cylsize= $this->{pDiskCylinderSize};
-	my $secsize= 512;
-	my $cyls   = 0;
-	my $status;
-	my $result;
-	if (! defined $this->{pDiskCylinders}) {
-		my $cylcount = $this -> getCylinderSizeAndCount($device);
-		if ($cylcount == 0) {
-			return 0;
-		}
-		$cylsize= $this->{pDiskCylinderSize};
-	}
-	$cyls = $this -> getCylinder ($size);
-	if ($cyls == 0) {
-		return 0;
-	}
+	my $locator= new KIWILocator($kiwi);
 	if (! defined $this->{pStart}) {
-		$cylsize *= 1024;
-		$this->{pStart} = sprintf (
-			"%.0f",(($cmdL->getDiskStartSector() * $secsize) / $cylsize)
-		);
+		$this->{pStart} = $cmdL->getDiskStartSector();
 	} else {
-		$this->{pStart} = $this->{pStopp};
+		my $parted_exec = $locator -> getExecPath("parted");
+		my $parted = "$parted_exec -m $device unit s print";
+		my $status = qxx (
+			"$parted | grep :$this->{pStart} | cut -f3 -d:"
+		);
+		$status=~ s/s//;
+		$status = int ($status / 8);
+		$status*= 8;
+		$status+= 8;
+		$this->{pStart} = $status;
 	}
-	$this->{pStopp} = $this->{pStart} + $cyls;
-	if ($this->{pStopp} > $this->{pDiskCylinders}) {
-		$this->{pStopp} = $this->{pDiskCylinders}
+	my $sector = $this -> getSector ($size);
+	$this->{pStopp} = $this->{pStart} + $sector;
+	if ($this->{pStopp} > $this->{pDiskSectors}) {
+		$this->{pStopp} = $this->{pDiskSectors}
 	}
-	return $cyls;
+	return $sector;
 }
 
 #==========================================
@@ -4410,43 +4394,31 @@ sub setStoragePartition {
 		# parted
 		#------------------------------------------
 		/^parted/  && do {
-			my @p_cmd = ();
-			$this -> resetCylinder();
+			my $p_cmd = ();
+			$this -> resetGeometry();
+			$this -> getGeometry ($device);
 			for (my $count=0;$count<@commands;$count++) {
 				my $cmd = $commands[$count];
 				if ($cmd eq "n") {
 					my $size = $commands[$count+4];
-					$this -> initCylinders ($device,$size);
-					push (@p_cmd,
-						"mkpart primary $this->{pStart} $this->{pStopp}"
-					);
+					$this -> initGeometry ($device,$size);
+					$p_cmd = "mkpart primary $this->{pStart} $this->{pStopp}";
+					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
+					qxx ("$parted_exec -s $device unit s $p_cmd 2>&1");
 				}
 				if ($cmd eq "t") {
 					my $index= $commands[$count+1];
 					my $type = $commands[$count+2];
-					push (@p_cmd,"set $index type 0x$type");
+					$p_cmd = "set $index type 0x$type";
+					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
+					qxx ("$parted_exec -s $device unit s $p_cmd 2>&1");
 				}
 				if ($cmd eq "a") {
 					my $index= $commands[$count+1];
-					push (@p_cmd,"set $index boot on");
+					$p_cmd = "set $index boot on";
+					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
+					qxx ("$parted_exec -s $device unit s $p_cmd 2>&1");
 				}
-			}
-			$kiwi -> loginfo (
-				"PARTED input: $device [@p_cmd]\n"
-			);
-			my $align="";
-			$status = qxx ("$parted_exec --help | grep -q align=");
-			$result = $? >> 8;
-			if ($result == 0) {
-				$align="-a cyl";
-			}
-			foreach my $p_cmd (@p_cmd) {
-				$status= qxx (
-					"$parted_exec $align -s $device unit cyl $p_cmd 2>&1"
-				);
-				$result= $? >> 8;
-				$kiwi -> loginfo ($status);
-				sleep (1);
 			}
 			last SWITCH;
 		}
