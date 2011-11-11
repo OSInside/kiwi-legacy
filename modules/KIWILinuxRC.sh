@@ -4173,11 +4173,14 @@ function cleanSweep {
 # fdasdGetPartitionID
 #--------------------------------------
 function fdasdGetPartitionID {
+	IFS=$IFS_ORIG
+	local device=$1
+	local partid=$2
 	local count=1
-	for i in $(fdasd -s -p $1 | grep -E '^[ ]+\/' |\
+	for i in $(fdasd -s -p $device | grep -E '^[ ]+\/' |\
 		awk -v OFS=":" '$1=$1' | cut -f7 -d:)
 	do
-		if [ $count = $2 ];then
+		if [ $count -eq $partid ];then
 			if [ $i = "native" ];then
 				echo 83
 			elif [ $i = "swap" ];then
