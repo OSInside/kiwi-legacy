@@ -4,7 +4,7 @@
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2011 Novell Inc.
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -12,6 +12,8 @@
 #               :
 # STATUS        : Development
 #----------------
+package KIWIXMLValidator;
+
 use strict;
 use warnings;
 use FindBin;
@@ -24,7 +26,9 @@ use lib "$FindBin::Bin/lib";
 use lib "$FindBin::Bin/../../modules";
 
 use KIWIGlobals;
-our $global  = new KIWIGlobals();
+our $global  = KIWIGlobals -> new();
 
 my $runner = Test::Unit::HarnessUnit->new();
 $runner->start( 'Test::kiwiXMLValidator' );
+
+1;

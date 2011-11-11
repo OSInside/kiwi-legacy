@@ -4,7 +4,7 @@
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2011 Novell Inc.
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -34,7 +34,7 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = new Common::ktLog();
+	$this -> {kiwi} = Common::ktLog -> new();
 
 	return $this;
 }
@@ -49,7 +49,7 @@ sub test_ctor {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $cmd = new KIWICommandLine($kiwi);
+	my $cmd = KIWICommandLine -> new($kiwi);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -58,6 +58,8 @@ sub test_ctor {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($cmd);
+
+	return;
 }
 
 #==========================================
@@ -82,6 +84,8 @@ sub test_cmdAddPackages_improperArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -105,6 +109,8 @@ sub test_cmdAddPackages_noArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -133,6 +139,8 @@ sub test_cmdAddPackages_valid {
 	# Make sure we get our data back
 	$addlPckgs = $cmd -> getAdditionalPackages();
 	$this -> assert_array_equal(\@packages, $addlPckgs);
+
+	return;
 }
 
 #==========================================
@@ -157,6 +165,8 @@ sub test_cmdAddPatterns_improperArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -180,6 +190,8 @@ sub test_cmdAddPatterns_noArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -208,6 +220,8 @@ sub test_cmdAddPatterns_valid {
 	# Make sure we get our data back
 	$addlPatterns = $cmd -> getAdditionalPatterns();
 	$this -> assert_array_equal(\@patterns, $addlPatterns);
+
+	return;
 }
 
 #==========================================
@@ -233,6 +247,8 @@ sub test_cmdAddRepos_improperAlias {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -258,6 +274,8 @@ sub test_cmdAddRepos_improperPrio {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -282,6 +300,8 @@ sub test_cmdAddRepos_improperRepo {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -307,6 +327,8 @@ sub test_cmdAddRepos_improperTypes {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -333,6 +355,8 @@ sub test_cmdAddRepos_mismatchRepoAli {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -357,6 +381,8 @@ sub test_cmdAddRepos_mismatchRepoAli_empty {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($res);
+
+	return;
 }
 
 #==========================================
@@ -383,6 +409,8 @@ sub test_cmdAddRepos_mismatchRepoPrio {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -407,6 +435,8 @@ sub test_cmdAddRepos_mismatchRepoPrio_empty {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($res);
+
+	return;
 }
 
 #==========================================
@@ -432,6 +462,8 @@ sub test_cmdAddRepos_mismatchRepoTypes {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -458,6 +490,8 @@ sub test_cmdAddRepos_noRepo {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -482,6 +516,8 @@ sub test_cmdAddRepos_noTypes {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -506,6 +542,8 @@ sub test_cmdAddRepos_unssupType {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -537,6 +575,8 @@ sub test_cmdAddRepos_valid {
 	$this -> assert_array_equal(\@alias, $repoInfo{repositoryAlia});
 	$this -> assert_array_equal(\@prios, $repoInfo{repositoryPriorities});
 	$this -> assert_array_equal(\@types, $repoInfo{repositoryTypes});
+
+	return;
 }
 
 #==========================================
@@ -564,6 +604,8 @@ sub test_cmdBuildTypeUsage {
 	# Make sure we can get our data back
 	my $cmdT = $cmd -> getBuildType();
 	$this -> assert_str_equals('reiserfs', $cmdT);
+
+	return;
 }
 
 #==========================================
@@ -590,6 +632,8 @@ sub test_cmdCacheDirUsage_relPath {
 	# Make sure we get the proper value back
 	my $dir = $cmd -> getCacheDir();
 	$this -> assert_str_equals('/var/cache/kiwi/image/tmp', $dir);
+
+	return;
 }
 
 #==========================================
@@ -613,6 +657,8 @@ sub test_cmdCacheDirUsage_noArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -637,6 +683,8 @@ sub test_cmdCacheDirUsage_valid {
 	# Make sure we get our data back
 	my $dir = $cmd -> getCacheDir();
 	$this -> assert_str_equals('/tmp', $dir);
+
+	return;
 }
 
 #==========================================
@@ -666,6 +714,8 @@ sub test_cmdCacheDirUsage_noDirWrite {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -692,6 +742,8 @@ sub test_cmdConfDirUsage_noArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -715,6 +767,8 @@ sub test_cmdConfDirUsage_noDirExist {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -743,6 +797,8 @@ sub test_cmdConfDirUsage_noDirRead {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -767,6 +823,8 @@ sub test_cmdConfDirUsage_valid {
 	# Make sure we get our data back
 	my $dir = $cmd -> getConfigDir();
 	$this -> assert_str_equals('/tmp', $dir);
+
+	return;
 }
 
 #==========================================
@@ -790,6 +848,8 @@ sub test_cmdIgnoreRepoUsage {
 	$cmd -> setIgnoreRepos(1);
 	$ignore = $cmd -> getIgnoreRepos();
 	$this -> assert_equals(1, $ignore);
+
+	return;
 }
 
 #==========================================
@@ -817,6 +877,8 @@ sub test_cmdIgnoreRepoUsage_conflict {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -840,6 +902,8 @@ sub test_cmdImageArchUsage_invalidArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -866,6 +930,8 @@ sub test_cmdImageArchUsage_noArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -890,6 +956,8 @@ sub test_cmdImageArchUsage_valid {
 	# Make sure we get our value back
 	my $arch = $cmd -> getImageArchitecture();
 	$this -> assert_str_equals('s390x', $arch);
+
+	return;
 }
 
 #==========================================
@@ -916,6 +984,8 @@ sub test_cmdLogFileUsage_noArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -944,6 +1014,8 @@ sub test_cmdLogFileUsagee_noWrite {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -968,6 +1040,8 @@ sub test_cmdLogFileUsage_valid {
 	# Make sure we get our data back
 	my $logFile = $cmd -> getLogFile();
 	$this -> assert_str_equals('/tmp/cmdlTestLog.log', $logFile);
+
+	return;
 }
 
 #==========================================
@@ -994,6 +1068,8 @@ sub test_cmdPackageMgrUsage_improper {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -1016,6 +1092,8 @@ sub test_cmdPackageMgrUsage_noSupport {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -1039,6 +1117,8 @@ sub test_cmdPackageMgrUsage_valid {
 	$this -> assert_not_null($res);
 	my $pckMgr = $cmd -> getPackageManager();
 	$this -> assert_str_equals('zypper', $pckMgr);
+
+	return;
 }
 
 #==========================================
@@ -1063,6 +1143,8 @@ sub test_cmdPckgsRemove_improperArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -1086,6 +1168,8 @@ sub test_cmdPckgsRemove_noArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -1114,6 +1198,8 @@ sub test_cmdPckgsRemove_valid {
 	# Make sure we get our data back
 	$rmPckgs = $cmd -> getPackagesToRemove();
 	$this -> assert_array_equal(\@packages, $rmPckgs);
+
+	return;
 }
 
 #==========================================
@@ -1140,6 +1226,8 @@ sub test_cmdProfileUsage_invalid {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -1165,6 +1253,8 @@ sub test_cmdProfileUsage_improper {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -1191,6 +1281,8 @@ sub test_cmdProfileUsage_valid {
 	# Make sure we can get our data back
 	my @cmdProfs = @{$cmd -> getBuildProfiles()};
 	$this -> assert_array_equal(\@profiles, \@cmdProfs);
+
+	return;
 }
 
 #==========================================
@@ -1215,6 +1307,8 @@ sub test_cmdRecycleRoot_delayedSet {
 	$cmd -> setRootTargetDir('/tmp');
 	$recycle = $cmd -> getRecycleRootDir();
 	$this -> assert_str_equals('/tmp', $recycle);
+
+	return;
 }
 
 #==========================================
@@ -1233,6 +1327,8 @@ sub test_cmdRecycleRoot_immediateSet {
 	$cmd -> setRootRecycle();
 	my $recycle = $cmd -> getRecycleRootDir();
 	$this -> assert_str_equals('/tmp', $recycle);
+
+	return;
 }
 
 #==========================================
@@ -1257,6 +1353,8 @@ sub test_cmdReplaceRepo_conflict {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -1279,6 +1377,8 @@ sub test_cmdReplaceRepo_noAlias {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($res);
+
+	return;
 }
 
 #==========================================
@@ -1304,6 +1404,8 @@ sub test_cmdReplaceRepo_noPrio {
 	# Verify the default priority
 	my %repoInfo = %{$cmd -> getReplacementRepo()};
 	$this -> assert_equals(10, $repoInfo{repositoryPriority});
+
+	return;
 }
 
 #==========================================
@@ -1330,6 +1432,8 @@ sub test_cmdReplaceRepo_noRepo {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -1352,6 +1456,8 @@ sub test_cmdReplaceRepo_unsupRepoType {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -1379,6 +1485,8 @@ sub test_cmdReplaceRepo_valid {
 	$this -> assert_str_equals('alias', $repoInfo{repositoryAlias});
 	$this -> assert_equals(1, $repoInfo{repositoryPriority});
 	$this -> assert_str_equals('yast2', $repoInfo{repositoryType});
+
+	return;
 }
 
 #==========================================
@@ -1404,7 +1512,9 @@ sub test_cmdRootTargetDir_noArgs {
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res); 
+	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -1429,6 +1539,8 @@ sub test_cmdRootTargetDir_absPath {
 	# Check we get the expected result
 	my $rootTgt = $cmd -> getRootTargetDir();
 	$this -> assert_str_equals('/tmp', $rootTgt);
+
+	return;
 }
 
 #==========================================
@@ -1456,6 +1568,8 @@ sub test_cmdRootTargetDir_relPath {
 	# Check we get the expected result
 	my $rootTgt = $cmd -> getRootTargetDir();
 	$this -> assert_str_equals($tgtPath, $rootTgt);
+
+	return;
 }
 
 #==========================================
@@ -1469,7 +1583,7 @@ sub __getCmdObj {
 	# Helper method to create a CommandLine object;
 	# ---
 	my $this = shift;
-	my $cmd = new KIWICommandLine($this -> {kiwi});
+	my $cmd = KIWICommandLine -> new($this -> {kiwi});
 	return $cmd;
 }
 
