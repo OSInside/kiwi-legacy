@@ -90,7 +90,7 @@ sub runTests {
 					push @testFailed, $test;
 					# Remove the timestamp file if the test fails
 					my $testNameNoEx = (split /\./x, $test)[0];
-					unlink "$FindBin::Bin/.timestamps/$testNameNoE.ts";
+					unlink "$FindBin::Bin/.timestamps/$testNameNoEx.ts";
 				}
 			}
 			if (@testFailed) {
