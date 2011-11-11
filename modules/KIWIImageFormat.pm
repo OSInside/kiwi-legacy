@@ -155,9 +155,9 @@ sub createFormat {
 	if ($format eq "vmdk") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createVMDK();
-	} elsif ($format eq "vpc") {
+	} elsif ($format eq "vhd") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
-		return $this -> createVPC();
+		return $this -> createVHD();
 	} elsif ($format eq "ovf") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createOVF();
@@ -322,11 +322,30 @@ sub createVMDK {
 }
 
 #==========================================
-# createVPC
+# createVHD
 #------------------------------------------
-sub createVPC {
+sub createVHD {
 	my $this   = shift;
-	return $this -> createVMDK();
+	my $kiwi   = $this->{kiwi};
+	my %vmwc   = %{$this->{vmwref}};
+	my $source = $this->{image};
+	my $target = $source;
+	my $convert;
+	my $status;
+	my $result;
+	$kiwi -> info ("Creating vhd image...");
+	$target  =~ s/\.raw$/\.vhd/;
+	$convert = "convert -f raw $source -O vpc";
+	$status = qxx ("qemu-img $convert $target 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create vhd image: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done ();
+	return $target;
 }
 
 #==========================================
