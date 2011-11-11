@@ -1976,7 +1976,7 @@ or unified and applies to the iso type only</a:documentation>
           <value>ovf</value>
           <value>qcow2</value>
           <value>vmdk</value>
-          <value>vpc</value>
+          <value>vhd</value>
         </choice>
       </attribute>
     </define>
