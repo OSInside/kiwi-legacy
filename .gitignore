@@ -1,0 +1,3 @@
+# test timestamp files
+*.ts
+tests/.timestamps
