@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-
+use Cwd;
 use File::Basename;
 use IPC::Open2;
 
@@ -105,7 +105,7 @@ my $pid = open2(
 waitpid( $pid, 0 );
 
 my @changedFiles;
-# Verify that all Perl modules are known
+# Collect all changed Perl code and verify that all Perl modules are known
 while (<$chld_out>) {
 	my $fname = basename($_);
 	chomp $fname;
@@ -121,13 +121,35 @@ while (<$chld_out>) {
 	}
 }
 
+# Make sure the perl code at least compiles
+# Should the code layout in our repository change,
+# these definitions have to be updated
+my $modulesDir = getcwd() . '/modules';
+my $testInclDir = getcwd() . '/tests/unit/lib';
+my $pathEnv = "$modulesDir:$testInclDir";
+
+my @failedToBuild;
+for my $path (@changedFiles) {
+    my $result = system "env PERL5LIB=$pathEnv perl -wc $path";
+    if ($result != 0) {
+        push @failedToBuild, $path;
+    }
+    if (scalar @failedToBuild) {
+        print {*STDERR} 'Build failure detected for the following files:';
+        for my $fl (@failedToBuild) {
+            print {*STDERR} "\t$fl";
+        }
+        exit 1;
+    }
+}
+
 my @criticLevelFiles = (\@notClean1, \@notClean2, \@notClean3, \@notClean4,
 						\@notClean5);
 
 # Verify the changed file against the strictest perlcritic level possible
 # for this file based on the known "goodness" level. Default is level 3, the
 # default is applied to perl code that is registerd, but not in any of the
-# notClea arrays.
+# notClean arrays.
 my $defSeverity = 3;
 VERIFY:
 for my $path (@changedFiles) {
