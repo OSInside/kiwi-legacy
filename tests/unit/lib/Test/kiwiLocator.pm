@@ -33,7 +33,7 @@ sub new {
 	# ---
 	my $this = shift -> SUPER::new(@_);
 	$this -> {dataDir} = $this -> getDataDir() . '/kiwiLocator/';
-	$this -> {kiwi} = new Common::ktLog();
+	$this -> {kiwi} = Common::ktLog -> new();
 
 	return $this;
 }
@@ -48,7 +48,7 @@ sub test_ctor {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $locator = new KIWILocator ( $kiwi );
+	my $locator = KIWILocator -> new( $kiwi );
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -57,6 +57,8 @@ sub test_ctor {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($locator);
+
+	return;
 }
 
 #==========================================
@@ -65,27 +67,29 @@ sub test_ctor {
 sub test_createTmpDirInTmp {
 	# ...
 	# Test the createTmpDirectory method for the most simplistic case
-    # where a temporary directory is created in /tmp, i.e. there is
-    # no preset root directory.
-    # ---
+	# where a temporary directory is created in /tmp, i.e. there is
+	# no preset root directory.
+	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $locator = $this -> __getLocator();
-    my $cmdL = $this -> __getCommandLine();
-    $cmdL -> setForceNewRoot(0);
-    my $newTmpDir = $locator -> createTmpDirectory( undef, undef, $cmdL);
+	my $cmdL = $this -> __getCommandLine();
+	$cmdL -> setForceNewRoot(0);
+	my $newTmpDir = $locator -> createTmpDirectory( undef, undef, $cmdL);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-    if (! -d $newTmpDir) {
-        my $err = 'Temp dir "' . $newTmpDir . '" was reported to be created,';
-        $err .= ' but does not exists';
-        $this -> assert_null($err);
-    }
-    rmdir $newTmpDir;
+	if (! -d $newTmpDir) {
+		my $err = 'Temp dir "' . $newTmpDir . '" was reported to be created,';
+		$err .= ' but does not exists';
+		$this -> assert_null($err);
+	}
+	rmdir $newTmpDir;
+
+	return;
 }
 
 #==========================================
@@ -94,27 +98,29 @@ sub test_createTmpDirInTmp {
 sub test_createTmpDirSpecifiedDir {
 	# ...
 	# Test the createTmpDirectory method using a specified directory
-    # ---
+	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $locator = $this -> __getLocator();
-    my $cmdL = $this -> __getCommandLine();
-    $cmdL -> setForceNewRoot(0);
-    my $tmpDir = $this -> createTestTmpDir();
-    my $newTmpDir = $locator -> createTmpDirectory( undef, $tmpDir, $cmdL);
+	my $cmdL = $this -> __getCommandLine();
+	$cmdL -> setForceNewRoot(0);
+	my $tmpDir = $this -> createTestTmpDir();
+	my $newTmpDir = $locator -> createTmpDirectory( undef, $tmpDir, $cmdL);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-    $this -> assert_str_equals($tmpDir, $newTmpDir);
-    if (! -d $tmpDir) {
-        my $err = 'Temp dir "' . $tmpDir . '" was reported to be created,';
-        $err .= ' but does not exists';
-        $this -> assert_null($err);
-    }
-    $this -> removeTestTmpDir();
+	$this -> assert_str_equals($tmpDir, $newTmpDir);
+	if (! -d $tmpDir) {
+		my $err = 'Temp dir "' . $tmpDir . '" was reported to be created,';
+		$err .= ' but does not exists';
+		$this -> assert_null($err);
+	}
+	$this -> removeTestTmpDir();
+
+	return;
 }
 
 #==========================================
@@ -123,31 +129,33 @@ sub test_createTmpDirSpecifiedDir {
 sub test_createTmpDirSpecifiedDirOK {
 	# ...
 	# Test the createTmpDirectory method using a specified directory
-    # that is not empty but is OK to be removed
-    # ---
+	# that is not empty but is OK to be removed
+	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $locator = $this -> __getLocator();
-    my $cmdL = $this -> __getCommandLine();
-    $cmdL -> setForceNewRoot(1);
-    my $tmpDir = $this -> createTestTmpDir();
-    mkdir "$tmpDir/kiwi";
-    my $newTmpDir = $locator -> createTmpDirectory( undef, $tmpDir, $cmdL);
+	my $cmdL = $this -> __getCommandLine();
+	$cmdL -> setForceNewRoot(1);
+	my $tmpDir = $this -> createTestTmpDir();
+	mkdir "$tmpDir/kiwi";
+	my $newTmpDir = $locator -> createTmpDirectory( undef, $tmpDir, $cmdL);
 	my $msg = $kiwi -> getMessage();
-    my $expected = "Removing old root directory '$tmpDir'";
+	my $expected = "Removing old root directory '$tmpDir'";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('completed', $state);
-    $this -> assert_str_equals($tmpDir, $newTmpDir);
-    if (! -d $tmpDir) {
-        my $err = 'Temp dir "' . $tmpDir . '" was reported to be created,';
-        $err .= ' but does not exists';
-        $this -> assert_null($err);
-    }
-    rmdir "$tmpDir/kiwi";
-    $this -> removeTestTmpDir();
+	$this -> assert_str_equals($tmpDir, $newTmpDir);
+	if (! -d $tmpDir) {
+		my $err = 'Temp dir "' . $tmpDir . '" was reported to be created,';
+		$err .= ' but does not exists';
+		$this -> assert_null($err);
+	}
+	rmdir "$tmpDir/kiwi";
+	$this -> removeTestTmpDir();
+
+	return;
 }
 
 #==========================================
@@ -156,30 +164,32 @@ sub test_createTmpDirSpecifiedDirOK {
 sub test_createTmpDirSpecifiedDirNotOK {
 	# ...
 	# Test the createTmpDirectory method using a specified directory
-    # that is not empty and is not OK to be removed, i.e. it contains
-    # base-system sub directory
-    # ---
+	# that is not empty and is not OK to be removed, i.e. it contains
+	# base-system sub directory
+	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $locator = $this -> __getLocator();
-    my $cmdL = $this -> __getCommandLine();
-    $cmdL -> setForceNewRoot(1);
-    my $tmpDir = $this -> createTestTmpDir();
-    mkdir "$tmpDir/base-system";
-    my $newTmpDir = $locator -> createTmpDirectory( undef, $tmpDir, $cmdL);
+	my $cmdL = $this -> __getCommandLine();
+	$cmdL -> setForceNewRoot(1);
+	my $tmpDir = $this -> createTestTmpDir();
+	mkdir "$tmpDir/base-system";
+	my $newTmpDir = $locator -> createTmpDirectory( undef, $tmpDir, $cmdL);
 	my $infoMsg = $kiwi -> getInfoMessage();
-    my $expected = "Removing old root directory '$tmpDir'";
+	my $expected = "Removing old root directory '$tmpDir'";
 	$this -> assert_str_equals($expected, $infoMsg);
-    my $errMsg = $kiwi -> getErrorMessage();
-    $expected = "Mount point '$tmpDir/base-system' exists";
+	my $errMsg = $kiwi -> getErrorMessage();
+	$expected = "Mount point '$tmpDir/base-system' exists";
 	$this -> assert_str_equals($expected, $errMsg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
-    $this -> assert_null($newTmpDir);
-    rmdir "$tmpDir/base-system";
-    $this -> removeTestTmpDir();
+	$this -> assert_null($newTmpDir);
+	rmdir "$tmpDir/base-system";
+	$this -> removeTestTmpDir();
+
+	return;
 }
 
 #==========================================
@@ -207,6 +217,8 @@ sub test_getControlFileMultiConfig {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -231,6 +243,8 @@ sub test_getControlFileNoConfigFile {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -255,6 +269,8 @@ sub test_getControlFileNoDir {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -278,6 +294,8 @@ sub test_getControlFileNoErrorConfigXML {
 	$this -> assert_not_null($res);
 	my $configFilePath = $this -> {dataDir} . '/config.xml';
 	$this -> assert_str_equals($configFilePath, $res);
+
+	return;
 }
 
 #==========================================
@@ -303,6 +321,8 @@ sub test_getControlFileNoErrorKiwiExt {
 	$this -> assert_not_null($res);
 	my $configFilePath = $this -> {dataDir} . 'sglConf/config_one.kiwi';
 	$this -> assert_str_equals($configFilePath, $res);
+
+	return;
 }
 
 #==========================================
@@ -324,6 +344,8 @@ sub test_getDefCacheDir {
 	$this -> assert_str_equals('No state set', $state);
 	# Make sure directory has expected path
 	$this -> assert_str_equals($cacheDir, '/var/cache/kiwi/image');
+
+	return;
 }
 
 #==========================================
@@ -345,6 +367,8 @@ sub test_getExecPathNoExec {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($res);
+
+	return;
 }
 
 #==========================================
@@ -372,6 +396,8 @@ sub test_getExecPerl {
 	$this -> assert_not_null($res);
 	my $perlPath = '/usr/bin/perl';
 	$this -> assert_str_equals($perlPath, $res);
+
+	return;
 }
 
 #==========================================
@@ -385,7 +411,7 @@ sub __getCommandLine {
 	# Helper method to create a KIWICommandLine object
 	# ---
 	my $this = shift;
-	my $cmdL = new KIWICommandLine ( $this -> {kiwi} );
+	my $cmdL = KIWICommandLine -> new( $this -> {kiwi} );
 	return $cmdL;
 }
 
@@ -397,7 +423,7 @@ sub __getLocator {
 	# Helper method to create a KIWILocator object
 	# ---
 	my $this = shift;
-	my $locator = new KIWILocator ( $this -> {kiwi} );
+	my $locator = KIWILocator -> new( $this -> {kiwi} );
 	return $locator;
 }
 

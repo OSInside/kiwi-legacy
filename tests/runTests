@@ -92,6 +92,9 @@ sub runTests {
 					my $testNameNoEx = (split /\./x, $test)[0];
 					unlink "$FindBin::Bin/.timestamps/$testNameNoEx.ts";
 				}
+				chomp $test;
+				my $cmd = "touch $FindBin::Bin/.timestamps/$test" . 's';
+				$result = system $cmd;
 			}
 			if (@testFailed) {
 				print {*STDERR} "Following tests failed:\n";
