@@ -508,7 +508,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image/vmxboot
 %doc %{_datadir}/kiwi/image/vmxboot/README
 %{_datadir}/kiwi/image/vmxboot/suse*
+%ifarch %ix86 x86_64
 %{_datadir}/kiwi/image/vmxboot/rhel*
+%endif
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x
