@@ -25,7 +25,7 @@ use Carp qw (cluck);
 use IPC::SysV qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU);
 use IPC::Semaphore;
 use KIWIQX;
-sub MAXBUF() { 2000 }
+sub MAXBUF { 2000 }
 
 #==========================================
 # Constructor
@@ -56,18 +56,18 @@ sub new {
 	if (! defined $key) {
 		$kiwi -> error  ("shmget: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my $sem = IPC::Semaphore -> new (IPC_PRIVATE, 1, S_IRWXU | IPC_CREAT);
 	if (! defined $sem) {
 		$kiwi -> error  ("IPC::Semaphore->new: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $sem -> setval (0,1)) {
 		$kiwi -> error  ("sem setval: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Store object data
@@ -106,7 +106,7 @@ sub peek {
 	if (! shmread($this->{SHMKEY}, $buff, 0, MAXBUF)) {
 		$kiwi -> error  ("shmread: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	substr($buff, index($buff, "\0")) = '';
 	return $buff;
@@ -131,7 +131,7 @@ sub poke {
 	if (! shmwrite($this->{SHMKEY}, $msg, 0, MAXBUF)) {
 		$kiwi -> error  ("shmwrite: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -145,7 +145,7 @@ sub lock {
 	if (! $this->{SEMA}->op(0,-1,0)) {
 		$kiwi -> error  ("semop: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -159,7 +159,7 @@ sub unlock {
 	if (! $this->{SEMA}->op(0,1,0)) {
 		$kiwi -> error  ("semop: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	return $this;
 }

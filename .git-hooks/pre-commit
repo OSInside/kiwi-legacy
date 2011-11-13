@@ -85,7 +85,6 @@ my @notClean4 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWIURL.pm KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm
 					KIWIXMLValidator.pm KIWICommandLine.t KIWIImageCreator.t
 					KIWILocator.t KIWIRuntimeChecker.t KIWIXML.t KIWIXMLInfo.t
-					KIWIXMLValidator.t kiwiCommandLine.pm kiwiLocator.pm
 					kiwiImageCreator.pm kiwiRuntimeChecker.pm kiwiXML.pm
 					kiwiXMLInfo.pm kiwiXMLValidator.pm);
 
@@ -94,8 +93,7 @@ my @notClean5 = qw (KIWIArchList.pm KIWIBoot.pm
 					KIWIGlobals.pm KIWIImageFormat.pm KIWIIsoLinux.pm
 					KIWILog.pm KIWIManager.pm KIWIMigrate.pm
 					KIWIProductData.pm KIWIRepoMetaHandler.pm
-					KIWIRoot.pm KIWISatSolverLegacy.pm
-					KIWISharedMem.pm);
+					KIWIRoot.pm KIWISatSolverLegacy.pm);
 
 my ($chld_in, $chld_out);
 my $pid = open2(
@@ -129,17 +127,17 @@ my $pathEnv = "$modulesDir:$testInclDir";
 
 my @failedToBuild;
 for my $path (@changedFiles) {
-    my $result = system "env PERL5LIB=$pathEnv perl -wc $path";
-    if ($result != 0) {
-        push @failedToBuild, $path;
-    }
-    if (scalar @failedToBuild) {
-        print {*STDERR} 'Build failure detected for the following files:';
-        for my $fl (@failedToBuild) {
-            print {*STDERR} "\t$fl";
-        }
-        exit 1;
-    }
+	my $result = system "env PERL5LIB=$pathEnv perl -wc $path";
+	if ($result != 0) {
+		push @failedToBuild, $path;
+	}
+	if (scalar @failedToBuild) {
+		print {*STDERR} 'Build failure detected for the following files:';
+		for my $fl (@failedToBuild) {
+			print {*STDERR} "\t$fl";
+		}
+		exit 1;
+	}
 }
 
 my @criticLevelFiles = (\@notClean1, \@notClean2, \@notClean3, \@notClean4,
@@ -176,4 +174,16 @@ for my $path (@changedFiles) {
 			exit 1;
 		}
 	}
+}
+
+# Run tests as needed
+my $cmd = './tests/runTests';
+for my $path (@changedFiles) {
+	chomp $path;
+	$cmd .= " $path";
+}
+
+my $status = system $cmd;
+if ($status) {
+	exit 1;
 }
