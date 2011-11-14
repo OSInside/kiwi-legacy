@@ -189,7 +189,7 @@ sub upgradeImage {
 	my $kiwi      = $this -> {kiwi};
 	my $cmdL      = $this -> {cmdL};
 	if (! $configDir) {
-		$kiwi -> error ('prepareBootImage: no configuration directory defined');
+		$kiwi -> error ('upgradeImage: no configuration directory defined');
 		$kiwi -> failed ();
 		return;
 	}
@@ -253,7 +253,7 @@ sub prepareImage {
 	my $kiwi      = $this -> {kiwi};
 	my $cmdL      = $this -> {cmdL};
 	if (! $configDir) {
-		$kiwi -> error ('prepareBootImage: no configuration directory defined');
+		$kiwi -> error ('prepareImage: no configuration directory defined');
 		$kiwi -> failed ();
 		return;
 	}
