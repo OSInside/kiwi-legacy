@@ -4623,9 +4623,11 @@ sub __updateDescriptionFromChangeSet {
 	# 3) merge/update strip
 	#------------------------------------------
 	if ($changeset->{strip}) {
-		$kiwi -> info ("Updating strip section(s):\n");
 		foreach my $type (keys %{$changeset->{strip}}) {
-			$kiwi -> info ("--> $type\n");
+			$kiwi -> info ("Updating $type strip section:\n");
+			foreach my $item (@{$changeset->{strip}{$type}}) {
+				$kiwi -> info ("--> $item\n");
+			}
 			$this -> addStrip ($type,@{$changeset->{strip}{$type}});
 		}
 	}
