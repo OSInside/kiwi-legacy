@@ -426,6 +426,8 @@ function baseStripLocales {
 	"
 	find $directories -mindepth 1 -maxdepth 1 -type d 2>/dev/null |\
 		baseStripAndKeep ${keepLocales}
+	directories="/usr/lib/gconv"
+	find $directories 2>/dev/null | xargs rm -f
 }
 
 #======================================
@@ -892,102 +894,14 @@ function suseStripInitrd {
 	# Remove unneeded files
 	#------------------------------------------
 	rm -rf `find -type d | grep .svn`
-	local files="
-		/usr/share/backgrounds/images /usr/share/zoneinfo
-		/var/lib/yum /var/lib/dpkg /usr/kerberos /usr/lib*/gconv
-		/usr/share/apps/ksplash /usr/share/apps/firstboot
-		/usr/share/info /usr/share/man /usr/share/cracklib /usr/lib*/python*
-		/usr/lib*/perl* /usr/share/doc/packages /var/lib/rpm
-		/usr/lib*/rpm /var/lib/smart /opt/* /usr/include /root/.gnupg
-		/etc/PolicyKit /etc/init.d /etc/profile.d /etc/skel
-		/etc/ssl /etc/java /etc/default /etc/cron* /etc/dbus*
-		/etc/pam.d* /etc/DIR_COLORS /etc/rc* /usr/share/hal /usr/share/ssl
-		/usr/lib*/hal /usr/lib*/*.a /usr/lib*/*.la /usr/lib*/librpm*
-		/usr/lib*/libpanel* /usr/lib*/libmenu* /usr/src/packages/RPMS
-		/usr/lib*/X11 /var/X11R6 /usr/share/X11 /etc/X11
-		/usr/lib*/xorg /usr/share/locale-bundle
-		/etc/ppp /etc/xdg /etc/NetworkManager /lib*/YaST /lib*/security
-		/lib*/mkinitrd/boot /lib*/mkinitrd/dev /lib*/mkinitrd/scripts
-		/lib*/mkinitrd/setup
-		/srv /var/adm /usr/lib*/engines /usr/src/packages
-		/usr/src/linux* /usr/local /var/log/* /usr/share/pixmaps
-		/usr/share/gtk-doc /var/games /opt /var/spool /var/opt
-		/var/cache /var/tmp /etc/rpm /etc/cups /etc/opt
-		/home /media /usr/lib*/lsb /usr/lib*/krb5
-		/usr/lib*/ldscripts /usr/lib*/getconf /usr/lib*/pwdutils
-		/usr/lib*/pkgconfig /usr/lib*/browser-plugins
-		/usr/share/omc /usr/share/tmac /usr/share/emacs /usr/share/idnkit
-		/usr/share/games /usr/share/PolicyKit /usr/share/tabset
-		/usr/share/mkinitrd /usr/share/xsessions /usr/share/pkgconfig
-		/usr/share/dbus-1 /usr/share/sounds /usr/share/dict /usr/share/et
-		/usr/share/ss /usr/share/java /usr/share/themes /usr/share/doc
-		/usr/share/applications /usr/share/mime /usr/share/icons
-		/usr/share/xml /usr/share/sgml /usr/share/fonts /usr/games
-		/usr/lib/mit /usr/lib/news /usr/lib/pkgconfig /usr/lib/smart
-		/usr/lib/browser-plugins /usr/lib/restricted /usr/x86_64-suse-linux
-		/etc/logrotate* /etc/susehelp* /etc/SuSEconfig /etc/permissions.d
-		/etc/aliases.d /etc/hal /etc/news /etc/pwdutils /etc/uucp
-		/etc/openldap /etc/xinetd /etc/depmod.d /etc/smart /etc/lvm
-		/etc/named* /etc/bash_completion* usr/share/gnupg
-		/lib/modules/*/kernel/drivers/net/wireless
-		/lib/modules/*/kernel/drivers/net/pcmcia
-		/lib/modules/*/kernel/drivers/net/tokenring
-		/lib/modules/*/kernel/drivers/net/bonding
-		/lib/modules/*/kernel/drivers/net/hamradio
-		/usr/X11R6/bin /usr/X11R6/lib/X11/locale
-	"
+	local files="$kiwi_strip_delete"
 	for i in $files;do
 		rm -rfv $i
 	done
 	#==========================================
-	# remove unneeded files
-	#------------------------------------------
-	if [ -d /var/cache/zypp ];then
-		files="
-			/usr/lib*/libzypp* /lib*/libgcrypt* /lib*/libgpg*
-			/usr/lib*/dirmngr /usr/lib*/gnupg* /usr/lib*/gpg*
-			/usr/lib*/libboost* /usr/lib*/libcurl* /usr/lib*/libicu*
-			/usr/lib*/libksba* /usr/lib*/libpth*
-			/var/cache/zypp /usr/lib*/zypp* /usr/share/curl
-			/usr/share/emacs /usr/share/gnupg
-			/usr/share/zypp* /var/lib/zypp* /var/log/zypper.log
-		"
-		for i in $files;do
-			rm -rfv $i
-		done
-	fi
-	#==========================================
 	# remove unneeded tools
 	#------------------------------------------
-	local tools="
-		tune2fs swapon swapoff shutdown resize_reiserfs
-		reiserfsck reboot halt pivot_root modprobe modinfo rmmod
-		mkswap mkinitrd mkreiserfs mkfs.cramfs mkfs.btrfs btrfsctl
-		losetup ldconfig insmod init ifconfig e2fsck fsck.ext2
-		fsck.ext3 fsck.ext4 dhcpcd mkfs.ext2 mkfs.ext3 mkfs.ext4
-		depmod atftpd klogconsole hwinfo xargs wc tail tac readlink
-		mkfifo md5sum head expr file free find env du dirname cut
-		column chroot atftp tr host test printf mount dd uname umount
-		true touch sleep sh pidof sed rmdir rm pwd ps mv mkdir kill hostname
-		gzip grep false df cp cat bash basename arch sort ls uniq lsmod
-		usleep parted mke2fs pvcreate vgcreate lvm resize2fs ln hdparm
-		dmesg splash fbmngplay portmap start-statd sm-notify rpcbind
-		rpc.statd rpc.idmapd nbd-client mount.nfs mount.nfs4 eject
-		blockdev posbios ping killall killall5 udevcontrol udevd
-		udevsettle udevtrigger mknod stat path_id hwup scsi_id scsi_tur
-		usb_id ata_id vol_id edd_id setctsid dumpe2fs debugreiserfs
-		fuser udevadm blogd showconsole killproc curl tar
-		ldd driveready checkmedia splashy bzip2 hexdump vgremove
-		pvchange pvresize pvscan vgscan vgchange vgextend vgdisplay
-		lvchange lvresize lvextend lvcreate grub dcounter tty
-		dmsetup dialog awk gawk clicfs cryptsetup clear blkid fbiterm
-		gettext diff bc utimer cmp busybox kexec pam_console_apply
-		setterm kpartx vgcfgbackup vgcfgrestore lsdasd dasd_configure
-		qeth_configure fdasd mkdosfs egrep mkfs.xfs mdadm yes fdisk
-		startproc zfcp_host_configure zfcp_disk_configure vgrename
-		kpartx_id mpath_id dmraid dmevent_tool which mpath_wait seq
-		route
-	"
+	local tools="$kiwi_strip_tools"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
 		baseStripTools "$path" "$tools"
@@ -995,34 +909,45 @@ function suseStripInitrd {
 	#==========================================
 	# remove unused libs
 	#------------------------------------------
-	baseStripUnusedLibs \
-		librt libutil libsysfs libnss_files libnss_compat libnsl libpng \
-		libfontenc libutempter libfreetype libgcc_s libresolv libnss_dns \
-		libdmraid-events-isw
+	baseStripUnusedLibs $kiwi_strip_libs
 	#==========================================
-	# remove images.sh and /root
+	# remove images.sh
 	#------------------------------------------
 	rm -f /image/images.sh
+	#==========================================
+	# remove unused root directories
+	#------------------------------------------
 	rm -rf /root
+	rm -rf /home
+	rm -rf /media
+	rm -rf /opt
+	rm -rf /srv
+	rm -rf /selinux
+	#==========================================
+	# remove unused doc directories
+	#------------------------------------------
+	rm -rf /usr/share/doc
+	rm -rf /usr/share/man
+	#==========================================
+	# remove package manager meta data
+	#------------------------------------------
+	for p in dpkg rpm smart yum;do
+		rm -rf /var/lib/$p
+	done
+
 	#==========================================
 	# strip down configuration files
 	#------------------------------------------
-	rm -rf /tmp/*
-	rm -rf /tmp/.*
-	files="
-		/etc/modprobe.conf /etc/modprobe.conf.local /etc/mtab
-		/etc/protocols /etc/services /etc/termcap /etc/aliases
-		/etc/bash.bashrc /etc/filesystems /etc/ld.so.conf /etc/magic
-		/etc/group /etc/passwd /etc/nsswitch.conf /etc/scsi_id.config
-		/etc/netconfig /etc/hosts /etc/resolv.conf
-	"
-	for i in $files;do
-		if [ -e $i ];then
-			mv $i /tmp
-		fi
-	done
-	rm -f /etc/*
-	mv /tmp/* /etc
+	#rm -rf /tmp/*
+	#rm -rf /tmp/.*
+	#local config="$kiwi_strip_config"
+	#for i in $config;do
+	#	if [ -e $i ];then
+	#		mv $i /tmp
+	#	fi
+	#done
+	#rm -rf /etc/*
+	#mv /tmp/* /etc
 }
 
 #======================================

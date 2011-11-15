@@ -220,6 +220,12 @@ sub new {
 		return;
 	}
 	#==========================================
+	# Add default strip section if not defined
+	#------------------------------------------
+	if (! $this -> __addDefaultStripNode()) {
+		return;
+	}
+	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{usrdataNodeList}    = $usrdataNodeList;
@@ -818,6 +824,73 @@ sub getPXEDeployKernel {
 	} else {
 		return;
 	}
+}
+
+#==========================================
+# getStripFileList
+#------------------------------------------
+sub getStripFileList {
+	# ...
+	# return filelist from the strip section referencing $ftype
+	# ---
+	my $this   = shift;
+	my $ftype  = shift;
+	my $inode  = $this->{imgnameNodeList} -> get_node(1);
+	my @nodes  = $inode -> getElementsByTagName ("strip") -> get_nodelist();
+	my @result = ();
+	my $tnode;
+	if (! @nodes) {
+		return @result;
+	}
+	foreach my $node (@nodes) {
+		my $type = $node -> getAttribute ("type");
+		if ($type eq $ftype) {
+			$tnode = $node; last
+		}
+	}
+	if (! $tnode) {
+		return @result;
+	}
+	my @fileNodeList = $tnode -> getElementsByTagName ("file")
+		-> get_nodelist();
+	foreach my $fileNode (@fileNodeList) {
+		my $name = $fileNode -> getAttribute ("name");
+		push @result, $name;
+	}
+	return @result;
+}
+
+#==========================================
+# getStripDelete
+#------------------------------------------
+sub getStripDelete {
+	# ...
+	# return the type="delete" files from the strip section
+	# ---
+	my $this   = shift;
+	return $this -> getStripFileList ("delete");
+}
+
+#==========================================
+# getStripTools
+#------------------------------------------
+sub getStripTools {
+	# ...
+	# return the type="tools" files from the strip section
+	# ---
+	my $this   = shift;
+	return $this -> getStripFileList ("tools");
+}
+
+#==========================================
+# getStripLibs
+#------------------------------------------
+sub getStripLibs {
+	# ...
+	# return the type="libs" files from the strip section
+	# ---
+	my $this   = shift;
+	return $this -> getStripFileList ("libs");
 }
 
 #==========================================
@@ -2338,19 +2411,31 @@ sub getImageConfig {
 	#==========================================
 	# preferences attributes and text elements
 	#------------------------------------------
-	my %type = %{$this->getImageTypeAndAttributes()};
-	my @delp = $this -> getDeleteList();
-	my @tstp = $this -> getTestingList();
-	my $iver = getImageVersion ($this);
-	my $size = getImageSize    ($this);
-	my $name = getImageName    ($this);
-	my $dname= getImageDisplayName ($this);
-	my $lics = getLicenseNames ($this);
+	my %type  = %{$this->getImageTypeAndAttributes()};
+	my @delp  = $this -> getDeleteList();
+	my $iver  = getImageVersion ($this);
+	my $size  = getImageSize    ($this);
+	my $name  = getImageName    ($this);
+	my $dname = getImageDisplayName ($this);
+	my $lics  = getLicenseNames ($this);
+	my @s_del = $this -> getStripDelete();
+    my @s_tool= $this -> getStripTools();
+    my @s_lib = $this -> getStripLibs();
+    my @tstp  = $this -> getTestingList();
 	if ($lics) {
 		$result{kiwi_showlicense} = join(" ",@{$lics});
 	}
 	if (@delp) {
 		$result{kiwi_delete} = join(" ",@delp);
+	}
+	if (@s_del) {
+		$result{kiwi_strip_delete} = join(" ",@s_del);
+	}
+	if (@s_tool) {
+		$result{kiwi_strip_tools} = join(" ",@s_tool);
+	}
+	if (@s_lib) {
+		$result{kiwi_strip_libs} = join(" ",@s_lib);
 	}
 	if (@tstp) {
 		$result{kiwi_testing} = join(" ",@tstp);
@@ -4271,6 +4356,80 @@ sub hasDefaultPackages {
 #==========================================
 # Private helper methods
 #------------------------------------------
+sub __addDefaultStripNode {
+	# ...
+	# if no strip section is setup we add the default
+	# section(s) from KIWIConfig.txt
+	# ---
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $image  = $this->{imgnameNodeList} -> get_node(1);
+	my @snodes = $image -> getElementsByTagName ("strip");
+	my %attr   = %{$this->getImageTypeAndAttributes()};
+	my $haveDelete = 0;
+	my $haveTools  = 0;
+	my $haveLibs   = 0;
+	#==========================================
+	# check if type is boot image
+	#------------------------------------------
+	if ($attr{"type"} ne "cpio") {
+		return $this;
+	}
+	#==========================================
+	# check if there are strip nodes
+	#------------------------------------------
+	if (@snodes) {
+		foreach my $node (@snodes) {
+			my $type = $node -> getAttribute("type");
+			if ($type eq "delete") {
+				$haveDelete = 1;
+			} elsif ($type eq "tools") {
+				$haveTools = 1;
+			} elsif ($type eq "libs") {
+				$haveLibs = 1;
+			}
+		}
+	}
+	#==========================================
+	# read in default strip section
+	#------------------------------------------
+	my $stripTree;
+	my $stripXML = new XML::LibXML;
+	eval {
+		$stripTree = $stripXML
+			-> parse_file ( $this->{gdata}->{KStrip} );
+	};
+	if ($@) {
+		my $evaldata=$@;
+		$kiwi -> error  (
+			"Problem reading strip file: $this->{gdata}->{KStrip}"
+		);
+		$kiwi -> failed ();
+		$kiwi -> error  ("$evaldata\n");
+		return;
+	}
+	#==========================================
+	# append default sections
+	#------------------------------------------
+	my @defaultStrip = $stripTree
+		-> getElementsByTagName ("initrd") -> get_node (1)
+		-> getElementsByTagName ("strip") -> get_nodelist();
+	foreach my $element (@defaultStrip) {
+		my $type = $element -> getAttribute("type");
+		if ((! $haveDelete) && ($type eq "delete")) {
+			$kiwi -> loginfo ("STRIP: Adding default delete section\n");
+			$image -> addChild ($element -> cloneNode (1));
+		} elsif ((! $haveLibs) && ($type eq "libs")) {
+			$kiwi -> loginfo ("STRIP: Adding default libs section\n");
+			$image -> addChild ($element -> cloneNode (1));
+		} elsif ((! $haveTools) && ($type eq "tools")) {
+			$kiwi -> loginfo ("STRIP: Adding default tools section\n");
+			$image -> addChild ($element -> cloneNode (1));
+		}
+	}
+	$this -> updateXML();
+	return $this;
+}
 #==========================================
 # __addDefaultSplitNode
 #------------------------------------------

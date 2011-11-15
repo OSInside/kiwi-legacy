@@ -95,6 +95,7 @@ div {
 			k.instsource? &
 			k.users* &
 			k.drivers* &
+			k.strip* &
 			k.repository+ &
 			k.packages*
 		}
@@ -1912,6 +1913,25 @@ div {
 		## A Collection of Driver Files 
 		element drivers {
 			k.drivers.attlist &
+			k.file+
+		}
+}
+
+#==========================================
+# main block: <strip>
+#
+div {
+	k.strip.type.attribute = attribute type {
+		"delete" | "tools" | "libs"
+	}
+	k.strip.profiles.attribute = k.profiles.attribute
+	k.strip.attlist =
+		k.strip.type.attribute &
+		k.strip.profiles.attribute?
+	k.strip =
+		## A Collection of files to strip
+		element strip {
+			k.strip.attlist &
 			k.file+
 		}
 }

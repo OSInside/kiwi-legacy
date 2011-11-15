@@ -160,6 +160,9 @@ image.</db:para>
           <zeroOrMore>
             <ref name="k.drivers"/>
           </zeroOrMore>
+          <zeroOrMore>
+            <ref name="k.strip"/>
+          </zeroOrMore>
           <oneOrMore>
             <ref name="k.repository"/>
           </oneOrMore>
@@ -2762,6 +2765,44 @@ a standard image description created by a kiwi user.</a:documentation>
         <a:documentation>A Collection of Driver Files </a:documentation>
         <interleave>
           <ref name="k.drivers.attlist"/>
+          <oneOrMore>
+            <ref name="k.file"/>
+          </oneOrMore>
+        </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    main block: <strip>
+    
+  -->
+  <div>
+    <define name="k.strip.type.attribute">
+      <attribute name="type">
+        <choice>
+          <value>delete</value>
+          <value>tools</value>
+          <value>libs</value>
+        </choice>
+      </attribute>
+    </define>
+    <define name="k.strip.profiles.attribute">
+      <ref name="k.profiles.attribute"/>
+    </define>
+    <define name="k.strip.attlist">
+      <interleave>
+        <ref name="k.strip.type.attribute"/>
+        <optional>
+          <ref name="k.strip.profiles.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.strip">
+      <element name="strip">
+        <a:documentation>A Collection of files to strip</a:documentation>
+        <interleave>
+          <ref name="k.strip.attlist"/>
           <oneOrMore>
             <ref name="k.file"/>
           </oneOrMore>
