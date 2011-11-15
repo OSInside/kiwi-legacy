@@ -155,6 +155,7 @@ sub new {
 	my $imgnameNodeList = $systemTree -> getElementsByTagName ("image");
 	my $optionsNodeList = $systemTree -> getElementsByTagName ("preferences");
 	my $driversNodeList = $systemTree -> getElementsByTagName ("drivers");
+	my $stripNodeList   = $systemTree -> getElementsByTagName ("strip");
 	my $usrdataNodeList = $systemTree -> getElementsByTagName ("users");
 	my $repositNodeList = $systemTree -> getElementsByTagName ("repository");
 	my $packageNodeList = $systemTree -> getElementsByTagName ("packages");
@@ -172,6 +173,7 @@ sub new {
 	$this->{packageNodeList} = $packageNodeList;
 	$this->{instsrcNodeList} = $instsrcNodeList;
 	$this->{driversNodeList} = $driversNodeList;
+	$this->{stripNodeList}   = $stripNodeList;
 	#==========================================
 	# add specified type if requested
 	#------------------------------------------
@@ -2152,6 +2154,30 @@ sub addDrivers {
 }
 
 #==========================================
+# addStrip
+#------------------------------------------
+sub addStrip {
+	# ...
+	# Add the given strip list and type to the xml description
+	# ----
+	my $this  = shift;
+	my $type  = shift;
+	my @list  = @_;
+	my $kiwi  = $this->{kiwi};
+	my $image = $this->{imgnameNodeList} -> get_node(1);
+	my $stripSection = new XML::LibXML::Element ("strip");
+	$stripSection -> setAttribute("type",$type);
+	foreach my $name (@list) {
+		my $fileSection = new XML::LibXML::Element ("file");
+		$fileSection  -> setAttribute("name",$name);
+		$stripSection -> appendChild ($fileSection);
+	}
+	$image-> appendChild ($stripSection);
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
 # addSimpleType
 #------------------------------------------
 sub addSimpleType {
@@ -3719,6 +3745,18 @@ sub getDriversNodeList {
 }
 
 #==========================================
+# getStripNodeList
+#------------------------------------------
+sub getStripNodeList {
+	# ...
+	# Return a list of all <strip> nodes. Each list member
+	# is an XML::LibXML::Element object pointer
+	# ---
+	my $this = shift;
+	return $this->{stripNodeList};
+}
+
+#==========================================
 # getPackageNodeList
 #------------------------------------------
 sub getPackageNodeList {
@@ -4538,7 +4576,7 @@ sub __updateDescriptionFromChangeSet {
 	# 1) merge/update repositories
 	#------------------------------------------
 	if ($changeset->{repositories}) {
-		$kiwi -> info ("Updating repository node(s)");
+		$kiwi -> info ("Updating repository node(s):");
 		$this -> ignoreRepositories();
 		# 1) add those repos which are marked as fixed in the boot xml
 		my @node = $repositNodeList -> get_nodelist();
@@ -4574,7 +4612,7 @@ sub __updateDescriptionFromChangeSet {
 	# 2) merge/update drivers
 	#------------------------------------------
 	if (@{$changeset->{driverList}}) {
-		$kiwi -> info ("Updating driver(s):\n");
+		$kiwi -> info ("Updating driver section(s):\n");
 		my @drivers = @{$changeset->{driverList}};
 		foreach my $d (@drivers) {
 			$kiwi -> info ("--> $d\n");
@@ -4582,7 +4620,17 @@ sub __updateDescriptionFromChangeSet {
 		$this -> addDrivers (@drivers);
 	}
 	#==========================================
-	# 3) merge/update packages
+	# 3) merge/update strip
+	#------------------------------------------
+	if ($changeset->{strip}) {
+		$kiwi -> info ("Updating strip section(s):\n");
+		foreach my $type (keys %{$changeset->{strip}}) {
+			$kiwi -> info ("--> $type\n");
+			$this -> addStrip ($type,@{$changeset->{strip}{$type}});
+		}
+	}
+	#==========================================
+	# 4) merge/update packages
 	#------------------------------------------
 	if (@{$changeset->{fplistImage}}) {
 		$kiwi -> info ("Updating package(s):\n");
@@ -4602,7 +4650,7 @@ sub __updateDescriptionFromChangeSet {
 		}
 	}
 	#==========================================
-	# 4) merge/update archives
+	# 5) merge/update archives
 	#------------------------------------------
 	if (@{$changeset->{falistImage}}) {
 		$kiwi -> info ("Updating archive(s):\n");
@@ -4615,13 +4663,13 @@ sub __updateDescriptionFromChangeSet {
 		);
 	}
 	#==========================================
-	# 5) merge/update machine attribs in type
+	# 6) merge/update machine attribs in type
 	#------------------------------------------
 	if (defined $changeset->{"domain"}) {
 		$this -> __setMachineAttribute ("domain",$changeset);
 	}
 	#==========================================
-	# 6) merge/update preferences and type
+	# 7) merge/update preferences and type
 	#------------------------------------------
 	if (defined $changeset->{"locale"}) {
 		$this -> __setOptionsElement ("locale",$changeset);
@@ -4690,7 +4738,7 @@ sub __updateDescriptionFromChangeSet {
 		$this -> __setSystemDiskElement (undef,$changeset);
 	}
 	#==========================================
-	# 7) merge/update type attributes
+	# 8) merge/update type attributes
 	#------------------------------------------
 	if (defined $changeset->{"hybrid"}) {
 		$this -> __setTypeAttribute (
@@ -4733,7 +4781,7 @@ sub __updateDescriptionFromChangeSet {
 		);
 	}
 	#==========================================
-	# 8) merge/update image attribs, toplevel
+	# 9) merge/update image attribs, toplevel
 	#------------------------------------------
 	if (defined $changeset->{"displayname"}) {
 		$this -> __setImageAttribute (
@@ -4741,13 +4789,13 @@ sub __updateDescriptionFromChangeSet {
 		);
 	}
 	#==========================================
-	# 9) merge/update all free volume
+	# 10) merge/update all free volume
 	#------------------------------------------
 	if (defined $changeset->{"allFreeVolume"}) {
 		$this -> __addAllFreeVolume ($changeset->{"allFreeVolume"});
 	}
 	#==========================================
-	# 10) cleanup reqProfiles
+	# 11) cleanup reqProfiles
 	#------------------------------------------
 	$this->{reqProfiles} = $reqProfiles;
 }

@@ -182,6 +182,7 @@ sub updateDescription {
 	my %changeset = ();
 	my @profiles;
 	my %repos;
+	my %strip;
 	my @plist;
 	my @alist;
 	my @falistImage;
@@ -267,6 +268,24 @@ sub updateDescription {
 		}
 	}
 	$changeset{"driverList"} = \@driverList;
+	#==========================================
+	# Store strip sections if any
+	#------------------------------------------
+	@node = $src_xml->getStripNodeList() -> get_nodelist();
+	foreach my $element (@node) {
+		if (! $src_xml -> __requestedProfile ($element)) {
+			next;
+		}
+		my $type  = $element -> getAttribute ("type");
+		my @files = $element -> getElementsByTagName ("file");
+		my @items = ();
+		foreach my $element (@files) {
+			my $name = $element -> getAttribute ("name");
+			push (@items,$name);
+		}
+		$strip{$type} = \@items;
+	}
+	$changeset{"strip"} = \%strip;
 	#==========================================
 	# Store boot included packages
 	#------------------------------------------
