@@ -259,6 +259,8 @@
 		<package name="pmtools"/>
 		<package name="suse-build-key"/>
 		<package name="make"/>
+		<package name="licenses"/>
+		<package name="iptables"/>
 	</packages>
 	<packages type="delete" profiles="diskless">
 		<package name="cracklib-dict-small"/>
@@ -287,5 +289,7 @@
 		<package name="pam-modules"/>
 		<package name="pam-config"/>
 		<package name="PolicyKit"/>
+		<package name="licenses"/>
+		<package name="iptables"/>
 	</packages>
 </image>

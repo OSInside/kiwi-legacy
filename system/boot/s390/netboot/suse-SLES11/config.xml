@@ -148,5 +148,7 @@
 		<package name="suse-build-key"/>
 		<package name="fribidi"/>
 		<package name="make"/>
+		<package name="licenses"/>
+		<package name="iptables"/>
 	</packages>
 </image>

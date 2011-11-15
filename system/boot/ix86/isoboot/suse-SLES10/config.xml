@@ -134,5 +134,7 @@
 		<package name="gfxboot"/>
 		<package name="make"/>
 		<package name="memtest86+"/>
+		<package name="licenses"/>
+		<package name="iptables"/>
 	</packages>
 </image>

@@ -217,5 +217,7 @@
 		<package name="keyutils-libs"/>
 		<package name="satsolver-tools"/>
 		<package name="syslog-ng"/>
+		<package name="licenses"/>
+		<package name="iptables"/>
 	</packages>
 </image>

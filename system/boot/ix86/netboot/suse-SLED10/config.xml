@@ -129,5 +129,7 @@
 		<package name="gdbm"/>
 		<package name="gfxboot"/>
 		<package name="make"/>
+		<package name="licenses"/>
+		<package name="iptables"/>
 	</packages>
 </image>
