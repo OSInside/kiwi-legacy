@@ -945,8 +945,20 @@ function setupRHELInitrd {
 			fi
 		fi
 		params=" -f /boot/initrd-$kernel_version $kernel_version"
-		if ! mkinitrd $params;then
-			Echo "Can't create initrd"
+		if [ -x /sbin/mkinitrd ] ; then
+			if ! mkinitrd $params;then
+				Echo "Can't create initrd"
+				systemIntegrity=unknown
+				bootLoaderOK=0
+			fi
+		elif [ -x /sbin/dracut ]; then
+			if ! dracut -H  $params;then
+				Echo "Can't create initrd"
+				systemIntegrity=unknown
+				bootLoaderOK=0
+			fi
+		else
+			Echo "Coudn't find a tool to create initrd image"
 			systemIntegrity=unknown
 			bootLoaderOK=0
 		fi
