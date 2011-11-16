@@ -148,7 +148,7 @@ function OEMRepartStandard {
 				partsize=.
 			fi
 			createPartitionerInput \
-				n p $pID . $partsize t 2 82
+				n p $pID . $partsize t $pID 82
 			newparts=$((newparts - 1))
 			swapParam=$pID
 		fi
