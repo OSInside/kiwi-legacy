@@ -315,7 +315,7 @@
 		<secondary>hook scripts</secondary>
 	</indexterm>
 	<indexterm>
-		<primary>kiwi-hooks</primary>
+		<primary>hook scripts</primary>
 	</indexterm>
 	<para>
 		When booting an image the first time the kiwi boot code runs.
@@ -378,7 +378,286 @@ tar -cf kiwi-hooks.tgz kiwi-hooks/
 			</para>
 		</listitem>
 	</itemizedlist>
+	<para>
+		The following is a list of predefined hooks and their meaning
+	</para>
+	<itemizedlist>
+		<listitem>
+			<formalpara>
+			<title>init</title>
+			<para>
+			This hook is called before udev is started. The hook
+			exists only for the <emphasis>pxe</emphasis> image type 
+			</para>
+			</formalpara>
+		</listitem>
+
+		<listitem>
+            <formalpara>
+            <title>preconfig|postconfig</title>
+            <para>
+			This hooks are called before and after the client configuration files
+			(CONF contents) are setup. The hooks exists only for
+			the <emphasis>pxe</emphasis> image type
+            </para>
+            </formalpara>
+        </listitem>
+
+		<listitem>
+            <formalpara>
+            <title>predownload|postdownload</title>
+            <para>
+			This hooks are called before and after the client image received
+			the root filesystem. The hooks exists only for
+			the <emphasis>pxe</emphasis> image type 
+            </para>
+            </formalpara>
+        </listitem>
+		
+		<listitem>
+            <formalpara>
+            <title>preImageDump|postImageDump</title>
+            <para>
+			This hooks are called before and after the install image is
+			dumped on the target disk. The hooks exists only for
+			the <emphasis>oem</emphasis> image type
+            </para>
+            </formalpara>
+        </listitem>
+
+		<listitem>
+            <formalpara>
+            <title>preLoadConfiguration|postLoadConfiguration</title>
+            <para>
+			This hooks are called before and after the client configuration
+			file config.MAC is loaded. The hooks exists only for
+            the <emphasis>pxe</emphasis> image type
+            </para>
+            </formalpara>
+        </listitem>
+
+		<listitem>
+            <formalpara>
+            <title>premount|postmount</title>
+            <para>
+			This hooks are called before and after the client root
+			filesystem is mounted. The hooks exists only for
+            the <emphasis>pxe</emphasis> image type
+            </para>
+            </formalpara>
+        </listitem>
+
+		<listitem>
+            <formalpara>
+            <title>prenetwork|postnetwork</title>
+            <para>
+			This hooks are called before and after the client network
+			is setup. The hooks exists only for
+			the <emphasis>pxe</emphasis> image type
+            </para>
+            </formalpara>
+        </listitem>
+
+        <listitem>
+            <formalpara>
+            <title>prepartition|postpartition</title>
+            <para>
+			This hooks are called before and after the client creates
+			the partition table on the target disk. The hooks exists only
+			for the <emphasis>pxe</emphasis> image type
+            </para>
+            </formalpara>
+        </listitem>
+
+        <listitem>
+            <formalpara>
+            <title>preprobe|postprobe</title>
+            <para>
+			This hooks are called before and after the loading of modules
+			not handled by udev. The hooks exists only for the
+			<emphasis>pxe</emphasis> image type
+            </para>
+            </formalpara>
+        </listitem>
+
+        <listitem>
+            <formalpara>
+            <title>preswap|postswap</title>
+            <para>
+			This hooks are called before and after the creation of the
+			swap space. The hooks exists only for the <emphasis>pxe</emphasis>
+			image type
+            </para>
+            </formalpara>
+        </listitem>
+
+        <listitem>
+            <formalpara>
+            <title>preactivate</title>
+            <para>
+			This hook is called before the root filesystem is moved to /
+			The hook exists only for the <emphasis>pxe</emphasis>
+            image type
+            </para>
+            </formalpara>
+        </listitem>
+
+        <listitem>
+            <formalpara>
+            <title>preCallInit</title>
+            <para>
+			This hook is called in preinit but before init/systemd is started
+			At call time the root filesystem has already moved to /. The
+			hook exists only for the <emphasis>oem</emphasis> image type
+            </para>
+            </formalpara>
+        </listitem>		
+
+        <listitem>
+            <formalpara>
+            <title>preException</title>
+            <para>
+			This hook is called before a system error is handled, the
+			actual error message is passed as parameter. This is a global
+            hook and can be used for all image types
+            </para>
+            </formalpara>
+        </listitem>
+
+        <listitem>
+            <formalpara>
+            <title>preHWdetect</title>
+            <para>
+			This hook is called before the install image boot code searches
+			for the possible target storage device(s). The hook exists only
+			for the <emphasis>oem</emphasis> image type
+            </para>
+            </formalpara>
+        </listitem>
+
+        <listitem>
+            <formalpara>
+            <title>preNetworkRelease</title>
+            <para>
+			This hook is called before the network connection is released.
+			The hook exists only for the <emphasis>pxe</emphasis> image type
+            </para>
+            </formalpara>
+        </listitem>
+	</itemizedlist>
   </sect1>
+
+  <sect1 id="sec.bootcustomization">
+	<title>Boot image customization</title>
+	<indexterm>
+		<primary>KIWI</primary>
+		<secondary>initrd customization</secondary>
+	</indexterm>
+	<indexterm>
+		<primary>initrd customization</primary>
+	</indexterm>
+	<para>
+      KIWI provides boot image descriptions for all the different image
+      types which in almost all cases should be suitable to boot the image.
+      Nevertheless sometimes people have the need to customize the initrd.
+      In order to do that without directly changing the default description
+      KIWI provides the following possibilities. For a better understanding
+      this is separated into the following Question and Answer sections:
+	</para>
+	<itemizedlist>
+		<listitem>
+			<formalpara>
+			<title>The boot image seems too big ?</title>
+			<para>
+			KIWI includes all required tools and libraries to operate in
+			all possible modes for the desired image type. If only one
+			mode is used it is safely possible to remove more data from
+			the initrd to make it smaller and increase boot time.
+			Therefore you can add the following strip section in the
+			system image XML as part of the main image section
+<screen>
+&lt;strip type="delete"/&gt;
+    &lt;file name="..."/&gt;
+&lt;/strip&gt;
+</screen>
+			Be aware that removal of files also can break the entire
+			initrd functionality
+			</para>
+			</formalpara>
+		</listitem>
+
+		<listitem>
+			<formalpara>
+			<title>How to add missing drivers ?</title>
+			<para>
+			KIWI uses a subset of the kernel. If you encounter missing
+			parts for your use case add the following drivers section
+            in the system image XML as part of the main image section
+<screen>
+&lt;drivers type="drivers"/&gt;
+    &lt;file name="drivers/..."/&gt;
+&lt;/drivers&gt;
+</screen>
+            If the driver is provided by a package you additionally have
+			to add that package as a bootincluded package to the following
+			packages section
+
+<screen>
+&lt;packages type="image"/&gt;
+    &lt;package name="..." bootinclude="true"/&gt;
+&lt;/packages&gt;
+</screen>
+			</para>
+			</formalpara>
+		</listitem>
+
+		<listitem>
+            <formalpara>
+            <title>How to add missing tools/libraries ?</title>
+			<para>
+			Additional software can be added by a bootincluded package as
+			mentioned above. or by a bootincluded archive section which
+			is not recommended. After the software has been installed kiwi
+			operates on a predefined tool set which you can see in the
+			tools strip section in <filename>/usr/share/kiwi/modules/KIWIConfig.txt</filename>
+			if the tool is not part of that list it's required to add
+			the following strip section in your system image XML
+			as part of the main image section
+<screen>
+&lt;strip type="tools"/&gt;
+    &lt;file name="..."/&gt;
+&lt;/strip&gt;
+</screen>
+			name is the basename of the tool not its path
+			</para>
+			</formalpara>
+        </listitem>
+
+		<listitem>
+            <formalpara>
+            <title>How to add additional boot code ?</title>
+			<para>
+			If additional code is required it can only be added and called
+			as part of the predefined entry points called <emphasis>hooks</emphasis>.
+			Read more about hook scripts in <xref linkend="sec.hooks"/>
+			</para>
+            </formalpara>
+        </listitem>
+
+		<listitem>
+            <formalpara>
+            <title>What if I need my own boot code ?</title>
+			<para>
+			If the hook scripts doesn't allow the required extension it's
+			best to clone the bootimage code entirely, rename it and maintain
+			an own version were you can add all kind of required changes
+			designed for your use case
+			</para>
+            </formalpara>
+        </listitem>
+	</itemizedlist>
+  </sect1>
+
 
   <sect1 id="sec.workflow.bootparameters">
     <title>Boot Parameters</title>
