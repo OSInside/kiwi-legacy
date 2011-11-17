@@ -774,7 +774,7 @@ function createBootDeviceFilesystem {
 	if [ "$loader" = "syslinux" ];then
 		mkdosfs $imageBootDevice >/dev/null 2>&1
 	elif [ "$loader" = "lilo" ];then
-		mkdosfs $imageBootDevice >/dev/null 2>&1
+		mkdosfs -F 16 $imageBootDevice >/dev/null 2>&1
 	else
 		mke2fs -q $imageBootDevice >/dev/null 2>&1
 	fi
