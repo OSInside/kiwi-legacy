@@ -67,15 +67,13 @@ function OEMRepartStandard {
 	#======================================
 	# check for boot partition
 	#--------------------------------------
-	createBootDeviceData 1 
+	createBootDeviceData 2
 	#======================================
 	# setup initial boot device ID
 	#--------------------------------------
 	export bootid=1
 	if [ "$haveBootPartition" = "yes" ];then
-		if [ ! "$loader" = "lilo" ];then
-			bootid=2
-		fi
+		bootid=2
 	fi
 	#======================================
 	# calculate partition sizes
@@ -131,29 +129,15 @@ function OEMRepartStandard {
 		if [ ! -z "$bootXMBytes" ];then
 			newparts=$((newparts + 1))
 		fi
-
-		#======================================
-		# repart boot partition
-		#--------------------------------------
-		partsize=+"$diskP1MByte"M
-		if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 0 ];then
-			partsize=.
-		fi
-		createPartitionerInput \
-			d n p $pID . $partsize t 1 41
-		
-		bootParam=$pID
 		#======================================
 		# repart root partition
 		#--------------------------------------
-		pID=$((pID + 1))
-		partsize=+"$diskRMBytes"M
+		partsize=+"$disk1MBytes"M
 		if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 0 ];then
 			partsize=.
 		fi
 		createPartitionerInput \
-			n p $pID . $partsize
-		rootParam=$pID
+			d n p $pID . $partsize
 		#======================================
 		# add swap partition
 		#--------------------------------------
@@ -164,7 +148,7 @@ function OEMRepartStandard {
 				partsize=.
 			fi
 			createPartitionerInput \
-				n p $pID . $partsize t 3 82
+				n p $pID . $partsize t $pID 82
 			newparts=$((newparts - 1))
 			swapParam=$pID
 		fi
@@ -180,10 +164,21 @@ function OEMRepartStandard {
 			recoParam=$pID
 		fi
 		#======================================
+		# add boot partition
+		#--------------------------------------
+		if [ ! -z "$bootXMBytes" ];then
+			pID=$((pID + 1))
+			partsize=+"$bootXMBytes"M
+			createPartitionerInput \
+				n p $pID . $partsize t $pID $bootpartID
+			newparts=$((newparts - 1))
+			bootParam=$pID
+		fi
+		#======================================
 		# setup new device names
 		#--------------------------------------
 		setupDeviceNames \
-			$rootParam $swapParam $recoParam $bootParam no
+			1 $swapParam $recoParam $bootParam no
 		callPartitioner $input
 	fi
 	#======================================
@@ -335,17 +330,17 @@ function OEMRepartLVM {
 	# repartition disk if LVM partition plus boot partition
 	# is used. Initial partition table layout is:
 	# =====================================
-	# p2: ( boot )
-	# p3: ( LVM  )  +luks
+	# p1: ( boot )
+	# p2: ( LVM  )  +luks
 	# -------------------------------------
 	#======================================
 	# check for boot partition
 	#--------------------------------------
-	createBootDeviceData 2
+	createBootDeviceData 1
 	#======================================
 	# setup initial boot device ID
 	#--------------------------------------
-	export bootid=2
+	export bootid=1
 	#======================================
 	# calculate partition sizes
 	#--------------------------------------
@@ -355,7 +350,7 @@ function OEMRepartLVM {
 	local disk1MBytes=$(($(partitionSize $(ddn $imageDiskDevice 1)) / 1024))
 	local disk2MBytes=$(($(partitionSize $(ddn $imageDiskDevice 2)) / 1024))
 	if [ ! -z "$OEM_SYSTEMSIZE" ];then
-		disk1MBytes=$OEM_SYSTEMSIZE
+		disk2MBytes=$OEM_SYSTEMSIZE
 	fi
 	local diskRMBytes=$((
 		recoMByte + disk1MBytes + disk2MBytes + swapsize + VOverHeadMB
@@ -373,13 +368,13 @@ function OEMRepartLVM {
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
 		pID=2
-		bootParam=2
+		bootParam=1
 		recoParam=no
 		swapParam=no
 		#======================================
 		# setup all free volume name
 		#--------------------------------------
-		allFreeVolume=LVRoot
+		export allFreeVolume=LVRoot
 		if [ ! -z "$kiwi_allFreeVolume" ];then
 			allFreeVolume=$kiwi_allFreeVolume
 		fi
@@ -389,7 +384,7 @@ function OEMRepartLVM {
 		if [ "$haveLuks" = "yes" ];then
 			luksClose
 		fi
-		vgchange -an
+		vgchange -a n $VGROUP
 		#======================================
 		# resize LVM partition
 		#--------------------------------------
@@ -409,7 +404,6 @@ function OEMRepartLVM {
 			createPartitionerInput \
 				n p $pID . . t $pID $recoID
 			recoParam=$pID
-			pID=$((pID + 1))
 		fi
 		#======================================
 		# setup new device names
@@ -418,7 +412,7 @@ function OEMRepartLVM {
 			1 $swapParam $recoParam $bootParam yes $VGROUP
 		callPartitioner $input
 		waitForStorageDevice $(ddn $imageDiskDevice $extendID)
-		vgchange -an
+		vgchange -a n $VGROUP
 		#======================================
 		# extend volume group with rest space
 		#--------------------------------------
@@ -737,31 +731,28 @@ function setupDeviceNames {
 #--------------------------------------
 function createBootDeviceData {
 	local bootPart=$1
-	if partitionSize $(ddn $imageDiskDevice $bootPart) &>/dev/null;then
+	local bootDevice=$(ddn $imageDiskDevice $bootPart)
+	local bootKBytes
+	if [ -e "$bootDevice" ];then
 		#======================================
 		# Variable setup
 		#--------------------------------------
+		bootKBytes=$(partitionSize $bootDevice)
 		export haveBootPartition=yes
-		export bootXMBytes=100
+		export bootXMBytes=$((bootKBytes / 1024))
 		export bootpartID=83
 		if [ "$loader" = "syslinux" ];then
-			bootpartID=6
+			bootpartID=c
 		fi
 		if [ "$loader" = "lilo" ];then
 			bootpartID=41
-			export bootXMBytes=1
-			export prepsize=$(partitionSize $(ddn $imageDiskDevice 1))
 		fi 
 		#======================================
 		# Store contents in RAM
 		#--------------------------------------
-		if [ ! "$loader" = "lilo" ];then
-			mount $(ddn $imageDiskDevice $bootPart) /mnt
-			tar -czf /boot.tgz -C /mnt .
-			umount /mnt
-		else
-			dd if=$(ddn $imageDiskDevice $bootPart) of=/boot.raw
-		fi
+		mount $(ddn $imageDiskDevice $bootPart) /mnt
+		tar -czf /boot.tgz -C /mnt .
+		umount /mnt
 	fi
 	#====================================== 
 	# check for overlay type
@@ -782,8 +773,8 @@ function createBootDeviceFilesystem {
 	fi
 	if [ "$loader" = "syslinux" ];then
 		mkdosfs $imageBootDevice >/dev/null 2>&1
-	elif [ "$arch" = "ppc64" ];then
-		dd if=/boot.raw of=$imageBootDevice
+	elif [ "$loader" = "lilo" ];then
+		mkdosfs $imageBootDevice >/dev/null 2>&1
 	else
 		mke2fs -q $imageBootDevice >/dev/null 2>&1
 	fi

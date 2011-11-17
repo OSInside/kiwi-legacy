@@ -131,6 +131,7 @@
 		<package name="kexec-tools"/>
 		<package name="kpartx"/>
 		<package name="iputils"/>
+		<package name="dosfstools"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

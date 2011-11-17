@@ -1858,20 +1858,20 @@ sub setupBootDisk {
 		# create disk partition
 		#------------------------------------------
 		if ($arch =~ /ppc|ppc64/) {
-			my $prepsize = $bootsize;
 			if (! $lvm) {
+				my $syslsize = $this->{vmmbyte} - $bootsize;
 				@commands = (
-					"n","p","1",".","+".$prepsize."M",
+					"n","p","1",".","+".$syslsize."M",
 					"n","p","2",".",".",
-					"t","1","41",
-					"t","2","83",
-					"a","1","w","q"
+					"t","2","41",
+					"t","1","83",
+					"a","2","w","q"
 				);
 			} else {
 				@commands = (
 					"n","p","1",".","+".$bootsize."M",
 					"n","p","2",".",".",
-					"t","1","c",
+					"t","1","41",
 					"t","2","8e",
 					"a","1","w","q"
 				);
@@ -2042,11 +2042,7 @@ sub setupBootDisk {
 		#==========================================
 		# set root device name from deviceMap
 		#------------------------------------------
-		if (($arch =~ /ppc|ppc64/) && (!$lvm)) {
-			$root = $deviceMap{2};
-		} else {
-			$root = $deviceMap{1};
-		}
+		$root = $deviceMap{1};
 		#==========================================
 		# check partition sizes
 		#------------------------------------------
@@ -2365,7 +2361,7 @@ sub setupBootDisk {
 			$boot = $deviceMap{fat};
 			$root = $deviceMap{1};
 		} else {
-			$root = $deviceMap{2};
+			$root = $deviceMap{1};
 		}
 	} elsif (($syszip) || ($haveSplit) || ($lvm)) {
 		$root = $deviceMap{2};
@@ -3538,6 +3534,7 @@ sub setupBootLoaderConfiguration {
 	# lilo
 	#------------------------------------------
 	if ($loader eq "lilo") {
+		$kiwi -> info ("Creating lilo/yaboot config file...");
 		$cmdline =~ s/\n//g;
 		my $title_standard;
 		$title_standard = $this -> makeLabel ("$label");
@@ -4471,7 +4468,7 @@ sub getStorageSize {
 #------------------------------------------
 sub setPPCDeviceMap {
 	# ...
-	# set default devuce map for PowerSystems
+	# set default device map for PowerSystems
 	# ---
 	my $this   = shift;
 	my $device = shift;

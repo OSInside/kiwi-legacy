@@ -68,11 +68,11 @@ function setupInitialDeviceNames {
 	#======================================
 	# Set default filesystem device names
 	#--------------------------------------
-	export imageRWDevice=$(ddn $imageDiskDevice 3)
+	export imageRWDevice=$(ddn $imageDiskDevice 2)
 	if [ ! -z "$kiwi_ramonly" ];then
 		export imageRWDevice=/dev/ram1
 	fi
-	export imageRODevice=$(ddn $imageDiskDevice 2)
+	export imageRODevice=$(ddn $imageDiskDevice 1)
 	export imageIOWRDevice=$imageRWDevice
 	#======================================
 	# Check for LVM or standard boot
@@ -93,7 +93,7 @@ function setupInitialDeviceNames {
 		fi
 		export imageRODevice=/dev/$VGROUP/LVComp
 		export imageIOWRDevice=$imageRWDevice
-		export imageBootDevice=$(ddn $imageDiskDevice 2)
+		export imageBootDevice=$(ddn $imageDiskDevice 1)
 		if [ ! -z "$KIWI_RECOVERY" ];then
 			export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
 		fi
@@ -106,7 +106,7 @@ function setupInitialDeviceNames {
 			export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
 			export imageRootDevice=$(ddn $imageDiskDevice 1)
 		else
-			for i in 2 3;do
+			for i in 1 2;do
 				export imageRootDevice=$(ddn $imageDiskDevice $i)
 				probeFileSystem $imageRootDevice
 				if [ ! "$FSTYPE" = "unknown" ];then
@@ -121,6 +121,9 @@ function setupInitialDeviceNames {
 	if [ "$FSTYPE" = "luks" ];then
 		luksOpen $imageRootDevice
 		imageRootDevice=$luksDeviceOpened
+		if [ -e /dev/$VGROUP/LVComp ];then
+			imageRODevice=$imageRootDevice
+		fi
 		probeFileSystem $imageRootDevice
 		export haveLuks=yes
 	fi
@@ -613,7 +616,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		OEM_RECOVERY=$imageRootDevice
 	fi
 	setupBootLoader \
-		/mnt /config 1 $imageRootDevice \
+		/mnt /config $(($bootid - 1)) $imageRootDevice \
 		"$OEM_BOOT_TITLE" $imageSwapDevice
 	setupKernelModules /config
 fi
