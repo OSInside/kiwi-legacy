@@ -363,7 +363,6 @@ function OEMRepartLVM {
 		Echo "Disk is too small, will not re-partition it"
 		disableOEMParameters
 		disableRepart
-		vgchange -a y $VGROUP
 	fi
 	#======================================
 	# write new partition table
@@ -376,7 +375,7 @@ function OEMRepartLVM {
 		#======================================
 		# setup all free volume name
 		#--------------------------------------
-		allFreeVolume=LVRoot
+		export allFreeVolume=LVRoot
 		if [ ! -z "$kiwi_allFreeVolume" ];then
 			allFreeVolume=$kiwi_allFreeVolume
 		fi
@@ -386,7 +385,7 @@ function OEMRepartLVM {
 		if [ "$haveLuks" = "yes" ];then
 			luksClose
 		fi
-		vgchange -an
+		vgchange -a n $VGROUP
 		#======================================
 		# resize LVM partition
 		#--------------------------------------
@@ -414,7 +413,7 @@ function OEMRepartLVM {
 			1 $swapParam $recoParam $bootParam yes $VGROUP
 		callPartitioner $input
 		waitForStorageDevice $(ddn $imageDiskDevice $extendID)
-		vgchange -an
+		vgchange -a n $VGROUP
 		#======================================
 		# extend volume group with rest space
 		#--------------------------------------
@@ -662,7 +661,7 @@ function recreateVTOCTable {
 		if [ "$haveLuks" = "yes" ];then
 			luksClose
 		fi
-		vgchange -an
+		vgchange -a n $VGROUP
 	fi
 	createPartitionerInput u y w
 	callPartitioner $input
@@ -758,12 +757,15 @@ function setupDeviceNames {
 #--------------------------------------
 function createBootDeviceData {
 	local bootPart=$1
-	if partitionSize $(ddn $imageDiskDevice $bootPart) &>/dev/null;then
+	local bootDevice=$(ddn $imageDiskDevice $bootPart)
+	local bootKBytes
+	if [ -e "$bootDevice" ];then
 		#======================================
 		# Variable setup
 		#--------------------------------------
+		bootKBytes=$(partitionSize $bootDevice)
 		export haveBootPartition=yes
-		export bootXMBytes=100
+		export bootXMBytes=$((bootKBytes / 1024))
 		export bootpartID=83
 		if [ "$loader" = "syslinux" ];then
 			bootpartID=c

@@ -121,6 +121,9 @@ function setupInitialDeviceNames {
 	if [ "$FSTYPE" = "luks" ];then
 		luksOpen $imageRootDevice
 		imageRootDevice=$luksDeviceOpened
+		if [ -e /dev/$VGROUP/LVComp ];then
+			imageRODevice=$imageRootDevice
+		fi
 		probeFileSystem $imageRootDevice
 		export haveLuks=yes
 	fi
