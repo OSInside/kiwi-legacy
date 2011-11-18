@@ -5884,19 +5884,21 @@ function cleanImage {
 	#======================================
 	# umount LVM root parts
 	#--------------------------------------
-	for i in /dev/$VGROUP/LV*;do
-		if [ ! -e $i ];then
-			continue
-		fi
-		if \
-			[ ! $i = "/dev/$VGROUP/LVRoot" ] && \
-			[ ! $i = "/dev/$VGROUP/LVComp" ] && \
-			[ ! $i = "/dev/$VGROUP/LVSwap" ]
-		then
-			mpoint=$(echo ${i##/*/LV})
-			umount $mpoint 1>&2
-		fi
-	done
+	if [ $init = "/sbin/init" ];then
+		for i in /dev/$VGROUP/LV*;do
+			if [ ! -e $i ];then
+				continue
+			fi
+			if \
+				[ ! $i = "/dev/$VGROUP/LVRoot" ] && \
+				[ ! $i = "/dev/$VGROUP/LVComp" ] && \
+				[ ! $i = "/dev/$VGROUP/LVSwap" ]
+			then
+				mpoint=$(echo ${i##/*/LV})
+				umount $mpoint 1>&2
+			fi
+		done
+	fi
 	#======================================
 	# umount image boot partition if any
 	#--------------------------------------
@@ -6022,6 +6024,7 @@ function bootImage {
 			"/preinit ; . /include ; cleanImage ; exec /sbin/halt -fihp" 
 	fi
 	# FIXME: clicfs / nfsroot / RHEL doesn't like run-init
+	# NOTE:  for systemd debugging set: --log-level=debug --log-target=kmsg
 	if \
 		[ ! "$haveClicFS" = "yes" ] && [ -z "$NFSROOT" ]     && \
 		[ ! -e /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release ]
