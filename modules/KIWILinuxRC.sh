@@ -5903,23 +5903,27 @@ function cleanImage {
 		return
 	fi
 	#======================================
+	# return early for systemd
+	#--------------------------------------
+	if [ $init = "/bin/systemd" ];then
+		return
+	fi
+	#======================================
 	# umount LVM root parts
 	#--------------------------------------
-	if [ $init = "/sbin/init" ];then
-		for i in /dev/$VGROUP/LV*;do
-			if [ ! -e $i ];then
-				continue
-			fi
-			if \
-				[ ! $i = "/dev/$VGROUP/LVRoot" ] && \
-				[ ! $i = "/dev/$VGROUP/LVComp" ] && \
-				[ ! $i = "/dev/$VGROUP/LVSwap" ]
-			then
-				mpoint=$(echo ${i##/*/LV})
-				umount $mpoint 1>&2
-			fi
-		done
-	fi
+	for i in /dev/$VGROUP/LV*;do
+		if [ ! -e $i ];then
+			continue
+		fi
+		if \
+			[ ! $i = "/dev/$VGROUP/LVRoot" ] && \
+			[ ! $i = "/dev/$VGROUP/LVComp" ] && \
+			[ ! $i = "/dev/$VGROUP/LVSwap" ]
+		then
+			mpoint=$(echo ${i##/*/LV})
+			umount $mpoint 1>&2
+		fi
+	done
 	#======================================
 	# umount image boot partition if any
 	#--------------------------------------
@@ -6000,14 +6004,22 @@ function bootImage {
 		cp -f /var/log/boot.kiwi /mnt/var/log/boot.kiwi
 	fi
 	#======================================
-	# directly boot/reboot
+	# umount proc
 	#--------------------------------------
 	umount proc &>/dev/null && \
 	umount proc &>/dev/null
+	#======================================
+	# run preinit and cleanImage
+	#--------------------------------------
+	chroot /mnt /bin/bash -c \
+		"/preinit ; . /include ; cleanImage"
+	cd /mnt
+	#======================================
+	# hand over control to init
+	#--------------------------------------
 	if [ $reboot = "yes" ];then
 		Echo "Reboot requested... rebooting after preinit"
-		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
-			"/preinit ; . /include ; cleanImage ; exec /sbin/reboot -f -i"
+		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt /sbin/reboot -f -i
 	fi
 	if [ "$rebootinter" = "yes" ];then
 		Echo "Reboot requested... rebooting after preinit"
@@ -6021,13 +6033,11 @@ function bootImage {
 			--msgbox "\"$TEXT_DUMP\"" 5 70
 		clear
 		Echo "Prepare for reboot"
-		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
-			"/preinit ; . /include ; cleanImage ; exec /sbin/reboot -f -i"
+		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt /sbin/reboot -f -i
 	fi
 	if [ "$shutdown" = "yes" ];then
 		Echo "Shutdown  requested... system shutdown after preinit"
-		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
-			"/preinit ; . /include ; cleanImage ; exec /sbin/halt -fihp"
+		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt /sbin/halt -fihp
 	fi
 	if [ "$shutdowninter" = "yes" ];then
 		Echo "Shutdown  requested... system shutdown after preinit"
@@ -6041,20 +6051,17 @@ function bootImage {
 			--msgbox "\"$TEXT_DUMP\"" 5 70
 		clear
 		Echo "Prepare for shutdown"
-		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
-			"/preinit ; . /include ; cleanImage ; exec /sbin/halt -fihp" 
+		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt /sbin/halt -fihp
 	fi
-	# FIXME: clicfs / nfsroot / RHEL doesn't like run-init
-	# NOTE:  for systemd debugging set: --log-level=debug --log-target=kmsg
 	if \
 		[ ! "$haveClicFS" = "yes" ] && [ -z "$NFSROOT" ]     && \
 		[ ! -e /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release ]
 	then
-		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
-			"/preinit ; . /include ; cleanImage ; exec $init $option"
+		# for systemd debugging set: --log-level=debug --log-target=kmsg
+		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt $init $option
 	else
-		cd /mnt && exec chroot . /bin/bash -c \
-			"/preinit ; . /include ; cleanImage ; exec $init $option"
+		# FIXME: clicfs / nfsroot / RHEL doesn't like run-init
+		exec chroot . $init $option
 	fi
 }
 #======================================
