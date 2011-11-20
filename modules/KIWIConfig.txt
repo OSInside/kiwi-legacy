@@ -13,6 +13,7 @@
 	locations except for the ones listed here
 	-->
 	<strip type="tools">
+		<file name="ifup"/>
 		<file name="arch"/>
 		<file name="ata_id"/>
 		<file name="atftp"/>
