@@ -601,7 +601,7 @@ function OEMInstall {
 	Echo "Entering installation mode for disk: $items"
 	if [ -z "$kiwi_oemunattended" ];then
 		TEXT_INST=$(
-			getText "Destroying ALL data on %1, continue ?" $items)
+			getText "Destroying ALL data on %1, continue ?" $(basename $items))
 		Dialog --yesno "\"$TEXT_INST\"" 5 80
 		if [ ! $? = 0 ];then
 			systemException \
@@ -730,7 +730,7 @@ function OEMInstall {
 		verifyMByte=$((verifyBytes / 1048576))
 		if [ -x /usr/bin/dcounter ];then
 			test -e /progress || mkfifo /progress
-			TEXT_VERIFY=$(getText "Verifying %1" $imageDevice)
+			TEXT_VERIFY=$(getText "Verifying %1" $(basename $imageDevice))
 			echo "$TEXT_VERIFY ( 0% )" > /progress &
 			dump="cat $imageDevice"
 			dump="$dump | dcounter -s $verifyMByte -l \"$TEXT_VERIFY \""
