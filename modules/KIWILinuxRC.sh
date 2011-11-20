@@ -639,8 +639,6 @@ function udevStart {
 		rm -f /lib/udev/rules.d/*-drivers.rules
 		HAVE_MODULES_ORDER=0
 	fi
-	# nodes in a tmpfs
-	mount -t tmpfs -o mode=0755 udev /dev
 	# static nodes
 	createInitialDevices /dev
 	# load modules required before udev
