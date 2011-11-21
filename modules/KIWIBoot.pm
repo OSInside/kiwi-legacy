@@ -4287,6 +4287,7 @@ sub initGeometry {
 	if (! defined $this->{pStart}) {
 		$this->{pStart} = $cmdL->getDiskStartSector();
 	} else {
+		sleep (1);
 		my $parted_exec = $locator -> getExecPath("parted");
 		my $parted = "$parted_exec -m $device unit s print";
 		my $status = qxx (
