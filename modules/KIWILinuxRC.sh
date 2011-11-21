@@ -3343,12 +3343,11 @@ function runMediaCheck {
 	# /.../
 	# run checkmedia program on the specified device
 	# ----
-	local device=$1
 	if [ ! "$mediacheck" = 1 ]; then
 		return
 	fi
 	test -e /proc/splash && echo verbose > /proc/splash
-	checkmedia $device
+	checkmedia $cddev
 	Echo -n "Press ENTER for reboot: "; read nope
 	/sbin/reboot -f -i >/dev/null
 }
