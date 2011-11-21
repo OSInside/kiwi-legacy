@@ -552,6 +552,44 @@ sub quoteshell {
 	return $name;
 }
 
+#==========================================
+# quoteFile
+#------------------------------------------
+sub quoteFile {
+	# ...
+	# ensure proper quoting of the given file
+	# ---
+	my $this = shift;
+	my $file = shift;
+	my $kiwi = $this->{kiwi};
+	my $FD;
+	my $data;
+	my $tmpc = qxx ("mktemp -q $file.XXXXXX"); chomp $tmpc;
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Failed to create tmp file");
+		$kiwi -> failed ();
+		return;
+	}
+	if (! open $FD, ">$tmpc") {
+		$kiwi -> error  ("Failed to open tmp file");
+		$kiwi -> failed ();
+		return
+	}
+	print $FD "source $this->{gdata}->{BasePath}/modules/KIWIConfig.sh"."\n";
+	print $FD "baseQuoteFile $file"."\n";
+	close $FD;
+	$data   = qxx ("bash $tmpc");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Failed to quote $file: $data");
+		$kiwi -> failed ();
+		return;
+	}
+	unlink $tmpc;
+	return $this;
+}
+
 1;
 
 # vim: set noexpandtab:
