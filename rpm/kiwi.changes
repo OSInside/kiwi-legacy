@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Nov 21 20:42:52 CET 2011 - ms@suse.de
+
+- apply quoting of .profile contents during build (bnc #729315)
+
+-------------------------------------------------------------------
 Thu Nov 10 11:15:38 CET 2011 - ms@suse.de
 
 - fixed parameter quoting in setupBootLoader (bnc #729315)
