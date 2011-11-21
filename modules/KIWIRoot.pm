@@ -1058,6 +1058,17 @@ sub setup {
 	}
 	close FD;
 	#========================================
+	# configure the system
+	#----------------------------------------
+	my $configure = new KIWIConfigure ( $kiwi,$xml,$root,$imageDesc );
+	if (! defined $configure) {
+		return undef;
+	}
+	#========================================
+	# fixup quoting of .profile
+	#----------------------------------------
+	$configure -> quoteFile ("$root/.profile");
+	#========================================
 	# check for linuxrc
 	#----------------------------------------
 	if (-f "$root/linuxrc") {
@@ -1129,13 +1140,6 @@ sub setup {
 		} else {
 			print FD $imageDesc; close FD;
 		}
-	}
-	#========================================
-	# configure the system
-	#----------------------------------------
-	my $configure = new KIWIConfigure ( $kiwi,$xml,$root,$imageDesc );
-	if (! defined $configure) {
-		return undef;
 	}
 	#========================================
 	# setup users/groups
