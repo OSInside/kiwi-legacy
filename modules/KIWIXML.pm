@@ -3499,57 +3499,33 @@ sub getInstallSize {
 	my $urllist = $this -> getURLList();
 	my @result  = ();
 	my @delete  = ();
+	my @packages= ();
 	my %meta    = ();
 	my $solf    = undef;
 	my @solp    = ();
 	my @rpat    = ();
 	my $ptype;
+	#==========================================
+	# Handle package names to be included
+	#------------------------------------------
+	@packages = $this -> getBaseList();
+	push @result,@packages;
+	@packages = $this -> getInstallList();
+	push @result,@packages;
+	@packages = $this -> getTypeList();
+	push @result,@packages;
+	#==========================================
+	# Handle package names to be deleted later
+	#------------------------------------------
+	@delete = $this -> getDeleteList();
+	#==========================================
+	# Handle pattern names
+	#------------------------------------------
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
-		my $type = $node -> getAttribute ("type");
-		#============================================
-		# Check to see if node is in included profile
-		#--------------------------------------------
 		if (! $this -> __requestedProfile ($node)) {
 			next;
 		}
-		if ($type eq "delete") {
-			#==========================================
-			# Handle package names to be deleted later
-			#------------------------------------------
-			my @dlist = $node -> getElementsByTagName ("package");
-			foreach my $element (@dlist) {
-				my $package = $element -> getAttribute ("name");
-				if (! $this -> isArchAllowed ($element,"packages")) {
-					next;
-				}
-				$package =~ s/@//;
-				if ($package) {
-					push @delete,$package;
-				}
-			}
-		} else {
-			#==========================================
-			# Handle package names to be included
-			#------------------------------------------
-			if (($type eq "image") && (! $ptype)) {
-				$ptype = $node -> getAttribute ("patternType");
-			}
-			my @plist = $node -> getElementsByTagName ("package");
-			foreach my $element (@plist) {
-				my $package = $element -> getAttribute ("name");
-				if (! $this -> isArchAllowed ($element,"packages")) {
-					next;
-				}
-				$package =~ s/@//;
-				if ($package) {
-					push @result,$package;
-				}
-			}
-		}
-		#==========================================
-		# Handle pattern names
-		#------------------------------------------
 		my @pattlist = ();
 		my @slist = $node -> getElementsByTagName ("opensusePattern");
 		foreach my $element (@slist) {

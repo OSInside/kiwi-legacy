@@ -602,7 +602,7 @@ sub __xmlSetup {
 		return;
 	}
 	my $xml = new KIWIXML (
-		$kiwi, $configDir, undef, $buildProfs, $cmdL
+		$kiwi, $configDir, $cmdL->getBuildType(), $buildProfs, $cmdL
 	);
 	if (! defined $xml) {
 		return;

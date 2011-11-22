@@ -147,6 +147,10 @@ sub new {
 		my $id   = 0;
 		my $item = "";
 		foreach my $name (@names) {
+			if ($name =~ /^product:/) {
+				# can't solve products...
+				next;
+			}
 			my $item = $pool->find($name);
 			if ((! $item) && (! $quiet)) {
 				$kiwi -> warning ("--> Failed to queue job: $name");
