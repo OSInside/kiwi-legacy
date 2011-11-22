@@ -5691,6 +5691,10 @@ function getDiskID {
 		echo $device
 		return
 	fi
+	if [ ! -z "$NON_PERSISTENT_DEVICE_NAMES" ]; then
+		echo $device
+		return
+	fi
 	for i in /dev/disk/by-id/*;do
 		if [ -z "$i" ];then
 			continue
