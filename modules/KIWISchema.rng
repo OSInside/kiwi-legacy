@@ -1945,7 +1945,7 @@ At the moment grub, zipl and sys|extlinux are supported</a:documentation>
           <value>grub</value>
           <value>syslinux</value>
           <value>zipl</value>
-          <value>lilo</value>
+          <value>yaboot</value>
         </choice>
       </attribute>
     </define>
@@ -2104,7 +2104,7 @@ will force any COW action to happen in RAM</a:documentation>
       <attribute name="installboot">
         <a:documentation>Specifies the bootloader default boot entry for the"
 initial boot of a kiwi install image. This value is"
-evaluated for grub and ext|syslinux but not for zipl"</a:documentation>
+only evaluated for grub and ext|syslinux"</a:documentation>
         <choice>
           <value>failsafe-install</value>
           <value>harddisk</value>

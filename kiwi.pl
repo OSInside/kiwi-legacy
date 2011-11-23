@@ -1391,7 +1391,7 @@ sub usage {
 	print "    [ --package-manager <smart|zypper> ]\n";
 	print "      Set the package manager to use for this image.\n";
 	print "\n";
-	print "    [ -A | --target-arch <i586|x86_64|armv5tel|ppc> ]\n";
+	print "    [ -A | --target-arch <i586|x86_64> ]\n";
 	print "      Set a special target-architecture. This overrides the \n";
 	print "      used architecture for the image-packages in zypp.conf.\n";
 	print "      When used with smart this option doesn't have any effect.\n";

@@ -15,7 +15,7 @@
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
 		<hwclock>utc</hwclock>
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootloader="lilo" primary="true"/>
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootloader="yaboot" primary="true"/>
 	</preferences>
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>

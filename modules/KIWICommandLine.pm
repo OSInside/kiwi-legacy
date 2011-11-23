@@ -622,7 +622,7 @@ sub setImageArchitecture {
 	# ---
 	my $this = shift;
 	my $arch = shift;
-	my @supportedArch = qw (i586 ppc ppc64 s390  s390x  x86_64);
+	my @supportedArch = qw (i586 x86_64);
 	if (! $arch) {
 		my $msg = 'setImageArchitecture method called without specifying '
 			. 'an architecture.';

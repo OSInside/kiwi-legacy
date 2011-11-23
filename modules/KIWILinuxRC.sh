@@ -34,7 +34,7 @@ export bootLoaderOK=0
 #--------------------------------------
 arch=`uname -m`
 if [ "$arch" = "ppc64" ];then
-	test -z "$loader" && export loader=lilo
+	test -z "$loader" && export loader=yaboot
 	test -z  "$ELOG_BOOTSHELL" && export ELOG_BOOTSHELL=/dev/hvc0
 	test -z  "$ELOG_CONSOLE"   && export ELOG_CONSOLE=/dev/hvc0
 else
@@ -2246,20 +2246,14 @@ function setupBootLoaderLilo {
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
 				fi
-				if [ ! "$arch" = "ppc64" ];then
 				echo -n " $console vga=$fbmode splash=silent" >> $conf
-				fi
 				if [ ! -z "$swap" ];then                     
 					echo -n " resume=$swapByID"               >> $conf
 				fi
 				if [ -e /dev/xvc0 ];then
 					echo -n " console=xvc console=tty"        >> $conf
 				elif [ -e /dev/hvc0 ];then
-					if [ "$arch" = "ppc64" ];then
-					echo -n " console=hvc0"        >> $conf
-					else
-					echo -n " console=hvc0 console=tty"        >> $conf
-					fi
+					echo -n " console=hvc0 console=tty"       >> $conf
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                >> $conf
 				echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
@@ -2288,20 +2282,14 @@ function setupBootLoaderLilo {
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
 				fi
-				if [ ! "$arch" = "ppc64" ];then
 				echo -n " $console vga=$fbmode splash=silent" >> $conf
-				fi
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"               >> $conf
 				fi
 				if [ -e /dev/xvc0 ];then
 					echo -n " console=xvc console=tty"        >> $conf
 				elif [ -e /dev/hvc0 ];then
-					if [ "$arch" = "ppc64" ];then
-					echo -n " console=hvc0"        >> $conf
-					else
-					echo -n " console=hvc0 console=tty"        >> $conf
-					fi
+					echo -n " console=hvc0 console=tty"       >> $conf
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                >> $conf
 				echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
@@ -2497,6 +2485,12 @@ function updateBtrBootDeviceFstab {
 #--------------------------------------
 function updateXfsBootDeviceFstab {
 	updateLVMBootDeviceFstab $1 $2 "/xfsboot"
+}
+#======================================
+# updateYaBootDeviceFstab
+#--------------------------------------
+function updateYaBootDeviceFstab {
+	updateLVMBootDeviceFstab $1 $2 "/yaboot"
 }
 #======================================
 # updateSyslinuxBootDeviceFstab
@@ -5035,15 +5029,13 @@ function mountSystem {
 	#======================================
 	# setup boot partition
 	#--------------------------------------
-	if [ ! "$arch" = "ppc64" ];then
-		if \
-			[ "$LOCAL_BOOT" = "no" ]          && \
-			[ ! "$systemIntegrity" = "fine" ] && \
-			[ $retval = 0 ]                   && \
-			[ -z "$RESTORE" ]
-		then
-			setupBootPartition
-		fi
+	if \
+		[ "$LOCAL_BOOT" = "no" ]          && \
+		[ ! "$systemIntegrity" = "fine" ] && \
+		[ $retval = 0 ]                   && \
+		[ -z "$RESTORE" ]
+	then
+		setupBootPartition
 	fi
 	#======================================
 	# reset mount counter
@@ -5928,7 +5920,7 @@ function cleanImage {
 	#======================================
 	# umount image boot partition if any
 	#--------------------------------------
-	for i in lvmboot btrboot clicboot xfsboot luksboot syslboot;do
+	for i in yaboot lvmboot btrboot clicboot xfsboot luksboot syslboot;do
 		if [ ! -e /$i ];then
 			continue
 		fi
@@ -7730,6 +7722,12 @@ function setupBootPartition {
 		# split
 		#--------------------------------------
 		test -z "$bootid" && export bootid=2
+	elif [ "$loader" = "yaboot" ];then
+		#======================================
+		# yaboot
+		#--------------------------------------
+		test -z "$bootid" && export bootid=2
+		mpoint=yaboot
 	elif \
 		[ "$loader" = "syslinux" ] || \
 		[ "$loader" = "extlinux" ] || \
@@ -8055,7 +8053,7 @@ function resetBootBind {
 	#======================================
 	# find bind boot dir
 	#--------------------------------------
-	for i in lvmboot btrboot clicboot xfsboot luksboot syslboot;do
+	for i in yaboot lvmboot btrboot clicboot xfsboot luksboot syslboot;do
 		if [ -d /$i ];then
 			bootdir=$i
 			break
