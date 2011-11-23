@@ -309,6 +309,12 @@ sub createVMDK {
 	$kiwi -> info ("Creating $format image...");
 	$target  =~ s/\.raw$/\.$format/;
 	$convert = "convert -f raw $source -O $format";
+	if (defined $vmwc{vmware_disktype} ) {
+		my $diskType = $vmwc{vmware_disktype};
+		if ($diskType eq 'scsi') {
+			$convert .= ' -o scsi';
+		}
+	}
 	$status = qxx ("qemu-img $convert $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -327,7 +333,6 @@ sub createVMDK {
 sub createVHD {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
-	my %vmwc   = %{$this->{vmwref}};
 	my $source = $this->{image};
 	my $target = $source;
 	my $convert;
