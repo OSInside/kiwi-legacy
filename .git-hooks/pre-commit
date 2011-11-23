@@ -80,7 +80,7 @@ my @notClean4 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWIImage.pm KIWIIsoLinux.pm
 					KIWILog.pm KIWIManager.pm KIWIMigrate.pm KIWIOverlay.pm
 					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
-					KIWIRoot.pm KIWIRuntimeChecker.pm KIWISatSolverLegacy.pm
+					KIWIRoot.pm KIWISatSolverLegacy.pm
 					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
 					KIWIURL.pm KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm
 					KIWIXMLValidator.pm KIWICommandLine.t KIWIImageCreator.t
