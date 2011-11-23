@@ -31,7 +31,7 @@ use KIWIQX;
 # Exports
 #------------------------------------------
 our @ISA    = qw (Exporter);
-our @EXPORT = qw (createChecks prepareChecks);
+our @EXPORT_OK = qw (createChecks prepareChecks);
 
 #==========================================
 # Constructor
@@ -72,10 +72,10 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
+		$kiwi = KIWILog -> new("tiny");
 	}
 	$this->{cmdArgs} = $cmdArgs;
-	$this->{locator} = new KIWILocator($kiwi);
+	$this->{locator} = KIWILocator -> new($kiwi);
 	$this->{kiwi}    = $kiwi;
 	$this->{xml}     = $xml;
 	return $this;
@@ -161,15 +161,15 @@ sub __hasValidArchives {
 	#==========================================
 	# check archive contents
 	#------------------------------------------
-	foreach my $ar (@list) {
+	for my $ar (@list) {
 		if (! -f "$desc/$ar") {
 			$kiwi -> warning ("specified archive $ar doesn't exist in $desc");
 			$kiwi -> skipped ();
 			next;
 		}
 		my $contents = qxx ("tar -tf $desc/$ar 2>&1");
-		foreach my $exp (@nogo) {
-			if (grep (/$exp/,$contents)) {
+		for my $exp (@nogo) {
+			if (grep { /$exp/x } $contents ) {
 				$kiwi -> error  ("bogus archive contents in $ar");
 				$kiwi -> failed ();
 				$kiwi -> error  ("archive matches: $exp");
@@ -202,7 +202,7 @@ sub __haveValidTypeString {
 		vmx xfs
 	);
 	if ($type) {
-		if (! grep /$type/, @allowedTypes) {
+		if (! grep { /$type/x } @allowedTypes) {
 			my $kiwi = $this -> {kiwi};
 			my $msg = 'Specified value for "type" command line argument is '
 				. 'not valid.';
@@ -254,7 +254,7 @@ sub __checkFilesystemTool {
 	my @knownFsTypes = qw (
 		btrfs clicfs ext2 ext3 ext4 reiserfs squashfs xfs cpio
 	);
-	if (grep /^$typeName/, @knownFsTypes) {
+	if (grep { /^$typeName/x } @knownFsTypes) {
 		my $haveTool = $this -> __isFsToolAvailable($typeName);
 		$checkedFS = $typeName;
 		if (! $haveTool) {
@@ -386,7 +386,7 @@ sub __checkPatternTypeAttrrValueConsistent {
 			$patternType = 'onlyRequired';
 		}
 		for my $profName (@profNames) {
-			if (grep /^$profName/, @buildProfiles) {
+			if (grep { /^$profName/ } @buildProfiles) {
 				if (! $reqPatternTypeVal) {
 					$reqPatternTypeVal = $patternType;
 				} elsif ($reqPatternTypeVal ne $patternType) {
@@ -403,6 +403,56 @@ sub __checkPatternTypeAttrrValueConsistent {
 		}
 	}
 	return 1;
+}
+
+#==========================================
+# __checkVMscsiCapable
+#------------------------------------------
+sub __checkVMscsiCapable {
+	# ...
+	# If a VM image is being built and the specified vmdisk controller is
+	# scsi, then the qemu-img command on the system must support the scsi
+	# option.
+	# ---
+	my $this = shift;
+	my $xml = $this -> {xml};
+	my $typeInfo = $xml -> getImageTypeAndAttributes();
+	my $type = $typeInfo -> {type};
+	if ($type ne 'vmx') {
+		# Nothing to do
+		return 1;
+	}
+	my %vmConfig = $xml -> getVMwareConfig();
+	if (defined $vmConfig{vmware_disktype} ) {
+		my $diskType = $vmConfig{vmware_disktype};
+		if ($diskType ne 'scsi') {
+			# Nothing to do
+			return 1;
+		}
+		my $QEMU_IMG_CAP;
+		if (! open($QEMU_IMG_CAP, '-|', "qemu-img create -f vmdk foo -o '?'")){
+			my $msg = 'Could not execute qemu-img command. This precludes '
+			. 'format conversion.';
+			$this -> {kiwi} -> error ($msg);
+			$this -> {kiwi} -> failed ();
+			return;
+		}
+		while (<$QEMU_IMG_CAP>) {
+			if ($_ =~ /^scsi/) {
+				close $QEMU_IMG_CAP;
+				return 1;
+			}
+		}
+		# Not scsi capable
+		close $QEMU_IMG_CAP;
+		my $msg = 'Configuration specifies scsi vmdisk controller. This disk '
+		. "type cannot be\ncreated on this system. The qemu-img command "
+		. 'must support the "-o scsi" option, but does not. Upgrade'
+		. "\nto a newer version of qemu-img or change the controller to ide";
+		$this -> {kiwi} -> error ($msg);
+		$this -> {kiwi} -> failed ();
+	}
+	return;
 }
 
 #==========================================
