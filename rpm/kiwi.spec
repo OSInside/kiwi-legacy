@@ -194,7 +194,12 @@ Authors:
 %package -n kiwi-desc-vmxboot
 License:        GPLv2+
 Requires:       kiwi = %{version}
+%if 0%{?suse_version}
 Requires:       multipath-tools parted
+%else if 0%{?rhel_version}
+Requires:       device-mapper-multipath parted
+%endif
+
 %ifarch %ix86 x86_64
 Requires:       grub
 %endif
@@ -254,7 +259,12 @@ Requires:       virt-utils
 Requires:       qemu
 %endif
 %endif
+%if 0%{?suse_version}
 Requires:       multipath-tools parted
+%else if 0%{?rhel_version}
+Requires:       device-mapper-multipath parted
+%endif
+
 %ifarch %ix86 x86_64
 Requires:       grub
 %endif
@@ -308,10 +318,12 @@ Group:          System/Management
 %if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
+%if 0%{?suse_version}
 Recommends:     busybox
 Recommends:     atftp
 Recommends:     gfxboot
 Recommends:     memtest86+
+%endif
 
 %description -n kiwi-media-requires
 This package recommends a set of packages which should be part of
