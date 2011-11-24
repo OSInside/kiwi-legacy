@@ -183,18 +183,16 @@ sub new {
 			$locator -> getExecPath('zypper'),
 			'--non-interactive',
 			'--no-gpg-checks',
-			"--reposd-dir $dataDir",
+			"--reposd-dir $dataDir/repos",
 			"--cache-dir $dataDir",
-			"--raw-cache-dir $dataDir",
 			"--config $zypperConf"
 		];
 		$this->{zypper_chroot} = [
 			"zypper",
 			'--non-interactive',
 			'--no-gpg-checks',
-			"--reposd-dir $dataDir",
+			"--reposd-dir $dataDir/repos",
 			"--cache-dir $dataDir",
-			"--raw-cache-dir $dataDir",
 			"--config $zypperConf"
 		];
 	} elsif ($manager eq 'ensconce') {
@@ -779,7 +777,6 @@ sub setupInstallationSource {
 	if ($manager eq "zypper") {
 		my @zypper = @{$this->{zypper}};
 		my $stype = "private";
-		qxx ("rm -f $dataDir/*.repo");
 		if (! $chroot) {
 			$stype = "public";
 		}
@@ -858,8 +855,16 @@ sub setupInstallationSource {
 				$kiwi -> done ();
 			} else {
 				my @zypper= @{$this->{zypper_chroot}};
-				$kiwi -> info ("Adding chroot zypper service: $alias");
-				$data = qxx ("@kchroot @zypper $sadd 2>&1");
+				my $repo = "$dataDir/repos/$alias.repo";
+				if (! -f $repo) {
+					$kiwi -> info ("Adding chroot zypper service: $alias");
+					$data = qxx ("@kchroot @zypper $sadd 2>&1");
+				} else {
+					$kiwi -> info ("Updating chroot zypper service: $alias");
+					$data = qxx (
+						'sed -ie s"@\(baseurl=file:/\)@\1base-system/@" '.$repo
+					);
+				}
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
