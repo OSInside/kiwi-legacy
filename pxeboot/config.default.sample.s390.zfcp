@@ -1,0 +1,5 @@
+DISK=/dev/sda
+IMAGE='/dev/sda2;LimeJeOS-SLE11.s390x;1.2.8;10.10.2.93;4096'
+PART='5;S;x,x;83;/'
+DEVICE_INIT="zfcp_host_configure 0.0.f800 1 && zfcp_disk_configure 0.0.f800 0x20010060451603de 0x0005000000000000 1"
+PARTITIONER=parted
