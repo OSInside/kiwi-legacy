@@ -17,7 +17,6 @@ inst_start_shell (char *tty_tv) {
 		"PATH=/lbin:/bin:/sbin:/usr/bin:/usr/sbin", 0
 	};
 	int fd_ii;
-	int result;
 	int sh_pid = fork ();
 
 	if (sh_pid != 0)
@@ -29,8 +28,8 @@ inst_start_shell (char *tty_tv) {
 	setsid ();
 	fd_ii = open (tty_tv, O_RDWR);
 	ioctl (fd_ii, TIOCSCTTY, (void *)1);
-	result = dup (fd_ii);
-	result = dup (fd_ii);
+	(void)dup (fd_ii);
+	(void)dup (fd_ii);
 
 	execve ("/bin/bash", args_apci, env_pci);
 	fprintf (stderr, "Couldn't start shell (errno = %d)\n", errno);
