@@ -1,4 +1,22 @@
 -------------------------------------------------------------------
+Fri Nov 25 10:51:59 CET 2011 - ms@suse.de
+
+- fixed parameter quoting of setupBootLoader() functions (bnc #729315)
+
+-------------------------------------------------------------------
+Fri Nov 25 10:51:46 CET 2011 - ms@suse.de
+
+- fixed creation of initial aligned partition table in KIWIBoot.pm
+  In SuSE studio the loop device which is normally the target for
+  parted is relinked behind the scene to a virtio device. As result
+  parted now sees a real disk geometry and that induced the bug in
+  kiwi which is not visible if it operates on the file mapped loop
+  device only. Looking at that partition code has turned out that
+  the alignment is broken which in the end broke the repartition
+  process in the first boot of an oem install image. The code is
+  now fixed to work properly on any storage device (bnc #729636)
+
+-------------------------------------------------------------------
 Mon Nov 21 20:42:52 CET 2011 - ms@suse.de
 
 - apply quoting of .profile contents during build (bnc #729315)
