@@ -843,8 +843,23 @@ sub setupInstallationSource {
 				}
 			}
 			my $sadd = "addrepo -f @zopts $alias";
+			my $sdel = "removerepo $alias";
 			if (! $chroot) {
 				$kiwi -> info ("Adding bootstrap zypper service: $alias");
+				my $repo = "$dataDir/repos/$alias.repo";
+				if (-f $repo) {
+					# /.../
+					# repo already exists. might be a leftover from an
+					# earlier attempt so we remove it first
+					# ----
+					$data = qxx ("@zypper --root \"$root\" $sdel 2>&1");
+					$code = $? >> 8;
+					if ($code != 0) {
+						$kiwi -> failed ();
+						$kiwi -> error  ("zypper: $data");
+						return undef;
+					}
+				}
 				$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
 				$code = $? >> 8;
 				if ($code != 0) {
