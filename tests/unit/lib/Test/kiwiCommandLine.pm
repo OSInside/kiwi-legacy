@@ -895,7 +895,7 @@ sub test_cmdImageArchUsage_invalidArg {
 	my $res = $cmd -> setImageArchitecture('ia64');
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Improper architecture setting, expecting on of: '
-		. 'i586 ppc ppc64 s390 s390x x86_64';
+		. 'i586 x86_64';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -945,7 +945,7 @@ sub test_cmdImageArchUsage_valid {
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCmdObj();
 	# Test improper call no argument
-	my $res = $cmd -> setImageArchitecture('s390x');
+	my $res = $cmd -> setImageArchitecture('x86_64');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -955,7 +955,7 @@ sub test_cmdImageArchUsage_valid {
 	$this -> assert_not_null($res);
 	# Make sure we get our value back
 	my $arch = $cmd -> getImageArchitecture();
-	$this -> assert_str_equals('s390x', $arch);
+	$this -> assert_str_equals('x86_64', $arch);
 
 	return;
 }
