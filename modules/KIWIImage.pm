@@ -983,6 +983,49 @@ sub createImageCPIO {
 }
 
 #==========================================
+# createImageTar
+#------------------------------------------
+sub createImageTar {
+	# ...
+	# create tar archive from the image source tree
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $imageTree = $this->{imageTree};
+	#==========================================
+	# PRE filesystem setup
+	#------------------------------------------
+	my $name = $this -> preImage ("haveExtend");
+	if (! defined $name) {
+		return;
+	}
+	#==========================================
+	# PRE Create tarball from extend
+	#------------------------------------------
+	$kiwi -> info ("Creating tar archive...");
+	my $dest = $this->{imageDest}."/".$name;
+	my $data = qxx ("cd $imageTree && tar -cjf $dest . 2>&1");
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create tar archive");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return;
+	}
+	$kiwi -> done();
+	#==========================================
+	# PRE filesystem setup
+	#------------------------------------------
+	qxx ("ln -s $dest $dest.tbz");
+	if (! $this -> buildMD5Sum ($name)) {
+		return;
+	}
+	return $this;
+}
+
+#==========================================
 # createImageRootAndBoot
 #------------------------------------------
 sub createImageRootAndBoot {
@@ -3556,6 +3599,10 @@ sub isBootImage {
 			last SWITCH;
 		};
 		/btrfs/i  && do {
+			return 0;
+			last SWITCH;
+		};
+		/tbz/i    && do {
 			return 0;
 			last SWITCH;
 		};

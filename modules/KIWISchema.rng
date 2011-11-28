@@ -2095,6 +2095,7 @@ will force any COW action to happen in RAM</a:documentation>
           <value>reiserfs</value>
           <value>split</value>
           <value>squashfs</value>
+          <value>tbz</value>
           <value>vmx</value>
           <value>xfs</value>
         </choice>

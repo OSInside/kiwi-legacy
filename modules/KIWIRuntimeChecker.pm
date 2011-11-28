@@ -199,7 +199,7 @@ sub __haveValidTypeString {
 	my @allowedTypes = qw (
 		btrfs clicfs cpio ext2 ext3 ext4 iso
 		oem product pxe reiserfs split squashfs
-		vmx xfs
+		tbz vmx xfs
 	);
 	if ($type) {
 		if (! grep { /$type/x } @allowedTypes) {
@@ -258,6 +258,12 @@ sub __checkFilesystemTool {
 		my $haveTool = $this -> __isFsToolAvailable($typeName);
 		$checkedFS = $typeName;
 		if (! $haveTool) {
+			$toolError = 1;
+		}
+	} elsif ($typeName eq 'tbz') {
+		my $genTool = $this -> {locator} -> getExecPath('tar');
+		if (! $genTool) {
+			$checkedFS = 'tbz';
 			$toolError = 1;
 		}
 	} elsif ($typeName eq 'iso') {

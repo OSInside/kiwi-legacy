@@ -1528,7 +1528,7 @@ div {
 		attribute image {
 			"btrfs" | "clicfs" | "cpio" | "ext2" | "ext3" |
 			"ext4" | "iso" | "oem" | "product" | "pxe" | "reiserfs" |
-			"split" | "squashfs" | "vmx" | "xfs"
+			"split" | "squashfs" | "tbz" | "vmx" | "xfs"
 		}
 	k.type.installboot.attribute =
 		## Specifies the bootloader default boot entry for the"
