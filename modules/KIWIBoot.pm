@@ -1983,11 +1983,7 @@ sub setupBootDisk {
 			#==========================================
 			# Create disk device mapping table
 			#------------------------------------------
-			if ($bootloader eq "yaboot") {
-				%deviceMap = $this -> setPPCDeviceMap ($this->{loop});
-			} else {
-				%deviceMap = $this -> setDefaultDeviceMap ($this->{loop});
-			}
+			%deviceMap = $this -> setDefaultDeviceMap ($this->{loop});
 			#==========================================
 			# Umount possible mounted stick partitions
 			#------------------------------------------
@@ -2272,9 +2268,9 @@ sub setupBootDisk {
 	# create bootloader filesystem if needed
 	#------------------------------------------
 	if ($bootloader eq "syslinux") {
-		$root = $deviceMap{fat};
+		$boot = $deviceMap{fat};
 		$kiwi -> info ("Creating DOS boot filesystem");
-		$status = qxx ("/sbin/mkdosfs $root 2>&1");
+		$status = qxx ("/sbin/mkdosfs $boot 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -2300,27 +2296,27 @@ sub setupBootDisk {
 		($dmapper) || ($haveluks) || ($needBootP) ||
 		($lvm) || ($bootloader eq "extlinux")
 	) {
-		$root = $deviceMap{dmapper};
+		$boot = $deviceMap{dmapper};
 		$kiwi -> info ("Creating ext3 boot filesystem");
 		if (($haveluks) || ($needBootP)) {
 			if (($syszip) || ($haveSplit) || ($dmapper)) {
-				$root = $deviceMap{3};
+				$boot = $deviceMap{3};
 			} else {
-				$root = $deviceMap{2};
+				$boot = $deviceMap{2};
 			}
 		}
 		if ($lvm) {
-			$root = $deviceMap{0};
+			$boot = $deviceMap{0};
 		}
 		if ($bootloader eq "extlinux") {
-			$root = $deviceMap{extlinux};
+			$boot = $deviceMap{extlinux};
 		}
 		my %FSopts = $main::global -> checkFSOptions(
 			@{$cmdL -> getFilesystemOptions()}
 		);
 		my $fsopts = $FSopts{ext3};
 		my $fstool = "mkfs.ext3";
-		$status = qxx ("$fstool $fsopts $root 2>&1");
+		$status = qxx ("$fstool $fsopts $boot 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -2336,83 +2332,41 @@ sub setupBootDisk {
 	#------------------------------------------
 	$kiwi -> info ("Copying boot image to disk");
 	#==========================================
-	# Mount system image / or rw partition
+	# Mount boot space on this disk
 	#------------------------------------------
 	if ($bootloader eq "syslinux") {
-		$root = $deviceMap{fat};
+		$boot = $deviceMap{fat};
 	} elsif ($bootloader eq "extlinux") {
-		$root = $deviceMap{extlinux};
+		$boot = $deviceMap{extlinux};
 	} elsif ($dmapper) {
-		$root = $deviceMap{dmapper};
-	} elsif ($bootloader eq "yaboot"){
-		if ($lvm) {
-			$boot = $deviceMap{fat};
-			$root = $deviceMap{1};
-		} else {
-			$root = $deviceMap{1};
-		}
+		$boot = $deviceMap{dmapper};
+	} elsif (($bootloader eq "yaboot") && (! $lvm)) {
+		$boot = $deviceMap{prep};
 	} elsif (($syszip) || ($haveSplit) || ($lvm)) {
 		$root = $deviceMap{2};
 		if ($haveluks) {
-			$root = $deviceMap{3};
+			$boot = $deviceMap{3};
 		}
 		if ($lvm) {
-			$root = $deviceMap{0};
+			$boot = $deviceMap{0};
 		}
 	} elsif (($haveluks) || ($needBootP)) {
-		$root = $deviceMap{2};
+		$boot = $deviceMap{2};
 	} else {
-		$root = $deviceMap{1};
+		$boot = $root;
 	}
-	if (! $main::global -> mount ($root, $loopdir)) {
+	if (! $main::global -> mount ($boot, $loopdir)) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't mount image: $root");
+		$kiwi -> error  ("Couldn't mount image boot device: $boot");
 		$kiwi -> failed ();
 		$this -> cleanLoop ();
 		return undef;
-	}
-	if (($bootloader eq "yaboot") && ($lvm)) {
-		$status = qxx ("mkdir -p $loopdir/vfat");
-		$boot = $deviceMap{fat};
-		if (! $main::global -> mount ($boot, $loopdir."/vfat")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't mount image: $boot");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return undef;
-		}
 	}
 	#==========================================
 	# Copy boot data on system image
 	#------------------------------------------
 	$status = qxx ("cp -dR $tmpdir/boot $loopdir 2>&1");
 	$result = $? >> 8;
-	if ($bootloader eq "yaboot") {
-		#==========================================
-		# Copy yaboot.conf
-		#------------------------------------------
-		if (! $lvm) {
-			$status = qxx ("cp $tmpdir/etc/yaboot.conf $loopdir/etc/ 2>&1");
-			$result = $? >> 8;
-		} else {
-			$status = qxx (
-				"cp $tmpdir/etc/yaboot.conf $loopdir/vfat/yaboot.cnf 2>&1"
-			);
-			$result = $? >> 8;
-			$status = qxx ("cp $loopdir/boot/linux.vmx  $loopdir/vfat");
-			$status = qxx ("cp $loopdir/boot/initrd.vmx $loopdir/vfat");
-			$result = $? >> 8;
-			$status = qxx (
-				"cp $loopdir/lib/lilo/chrp/yaboot.chrp $loopdir/vfat/yaboot"
-			);
-			$result = $? >> 8;
-			$status = qxx ("cp -a $tmpdir/ppc $loopdir/vfat/");
-			$result = $? >> 8;
-			$main::global -> umount($boot);
-			$status = qxx ("rm -rf $loopdir/vfat");
-			$result = $? >> 8;
-		}
-	}
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Couldn't copy boot data to system image: $status");
@@ -2915,6 +2869,35 @@ sub setupBootLoaderStages {
 		# Cleanup tmpdir
 		#------------------------------------------
 		qxx ("rm -rf $tmpdir/image 2>&1");
+	}
+	#==========================================
+	# yaboot
+	#------------------------------------------
+	if ($loader eq "yaboot") {
+		my $chrp  = "'lib/lilo/chrp/yaboot.chrp'";
+		my $unzip = "$zipper -cd $initrd 2>&1";
+		#==========================================
+		# Create yaboot boot data directory
+		#------------------------------------------
+		qxx ("mkdir -p $tmpdir/boot 2>&1");
+		#==========================================
+		# Get lilo chrp data
+		#------------------------------------------
+		$kiwi -> info ("Importing yaboot.chrp file");
+		if ($zipped) {
+			$status= qxx ("$unzip | (cd $tmpdir && cpio -di $chrp 2>&1)");
+		} else {
+			$status= qxx ("cat $initrd|(cd $tmpdir && cpio -di $chrp 2>&1)");
+		}
+		if (-e $tmpdir."/lib/lilo/chrp/yaboot.chrp") {
+			qxx ("mv $tmpdir/lib/lilo/chrp/yaboot.chrp $tmpdir/boot/yaboot");
+		} else {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to import yaboot.chrp file: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done();
 	}
 	#==========================================
 	# more boot managers to come...
@@ -3522,6 +3505,23 @@ sub setupBootLoaderConfiguration {
 	# yaboot
 	#------------------------------------------
 	if ($loader eq "yaboot") {
+		#==========================================
+		# Create MBR id file for boot device check
+		#------------------------------------------
+		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
+		qxx ("mkdir -p $tmpdir/boot/grub");
+		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create mbrid file: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print FD "$this->{mbrid}";
+		close FD;
+		$kiwi -> done();
+		#==========================================
+		# Create yaboot.cnf
+		#------------------------------------------
 		$kiwi -> info ("Creating lilo/yaboot config file...");
 		$cmdline =~ s/\n//g;
 		my $title_standard;
@@ -3529,10 +3529,9 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Standard boot
 		#------------------------------------------
-		qxx ("mkdir -p $tmpdir/etc");
-		if (! open (FD,">$tmpdir/etc/yaboot.conf")) {
+		if (! open (FD,">$tmpdir/boot/yaboot.cnf")) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create yaboot.conf: $!");
+			$kiwi -> error  ("Couldn't create yaboot.cnf: $!");
 			$kiwi -> failed ();
 			return undef;
 		}
@@ -3582,10 +3581,9 @@ sub setupBootLoaderConfiguration {
 		}
 		#==========================================
 		# Create bootinfo.txt (CD and LVM setups)
-		#-------------------------------------------
+		#------------------------------------------
 		if ($type =~ /^KIWI CD/)  {
-			qxx ("mkdir -p $tmpdir/ppc/");
-			if (! open (FD,">$tmpdir/ppc/bootinfo.txt")) {
+			if (! open (FD,">$tmpdir/bootinfo.txt")) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't create bootinfo.txt: $!");
 				$kiwi -> failed ();
@@ -3602,8 +3600,7 @@ sub setupBootLoaderConfiguration {
 			qxx ("cp /lib/lilo/chrp/yaboot.chrp $tmpdir/suseboot/yaboot.ibm");
 			qxx ("cp $tmpdir/etc/yaboot.conf $tmpdir/suseboot/yaboot.cnf");
 		} elsif (!($type =~ /^KIWI CD/) && ($lvm)) {
-			qxx ("mkdir -p $tmpdir/ppc/");
-			if (! open (FD,">$tmpdir/ppc/bootinfo.txt")) {
+			if (! open (FD,">$tmpdir/bootinfo.txt")) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't create bootinfo.txt: $!");
 				$kiwi -> failed ();
@@ -4008,7 +4005,7 @@ sub installBootLoader {
 		#------------------------------------------
 		if (!$lvm) {
 			my %deviceMap = %{$deviceMap};
-			my $device = $deviceMap{1};
+			my $device = $deviceMap{prep};
 			$kiwi -> info ("Installing yaboot on device: $device");
 			$status = qxx ("dd if=/lib/lilo/chrp/yaboot.chrp of=$device 2>&1");
 			$result = $? >> 8;
@@ -4453,39 +4450,6 @@ sub getStorageSize {
 }
 
 #==========================================
-# setPPCDeviceMap
-#------------------------------------------
-sub setPPCDeviceMap {
-	# ...
-	# set default device map for PowerSystems
-	# ---
-	my $this   = shift;
-	my $device = shift;
-	my $loader = $this->{bootloader};
-	my $dmapper= $this->{dmapper};
-	my $search = "41";
-	my %result;
-	if (! defined $device) {
-		return undef;
-	}
-	for (my $i=1;$i<=3;$i++) {
-		$result{$i} = $device.$i;
-	}
-	if ($loader eq "yaboot") {
-		for (my $i=1;$i<=2;$i++) {
-			my $type = $this -> getStorageID ($device,$i);
-			if ($type = $search) {
-				$result{prep} = $device.$i;
-			}
-			last;
-		}
-	} elsif ($dmapper) {
-		$result{dmapper} = $device."3";
-	}
-	return %result;
-}
-
-#==========================================
 # setDefaultDeviceMap
 #------------------------------------------
 sub setDefaultDeviceMap {
@@ -4504,16 +4468,21 @@ sub setDefaultDeviceMap {
 	for (my $i=1;$i<=3;$i++) {
 		$result{$i} = $device.$i;
 	}
-	if ($loader =~ /(sys|ext)linux/) {
+	if ($loader =~ /(sys|ext)linux|yaboot/) {
 		my $search = "c";
 		if ($loader eq "extlinux" ) {
 			$search = "83";
+		}
+		if ($loader eq "yaboot" ) {
+			$search = "41";
 		}
 		for (my $i=3;$i>=1;$i--) {
 			my $type = $this -> getStorageID ($device,$i);
 			if ($type eq $search) {
 				if ($loader eq "syslinux" ) {
 					$result{fat} = $device.$i;
+				} elsif ($loader eq "yaboot" ) {
+					$result{prep} = $device.$i;
 				} else {
 					$result{extlinux} = $device.$i;
 				}
