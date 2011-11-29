@@ -4515,16 +4515,21 @@ sub setLoopDeviceMap {
 	for (my $i=1;$i<=3;$i++) {
 		$result{$i} = "/dev/mapper".$dmap."p$i";
 	}
-	if ($loader =~ /(sys|ext)linux/) {
+	if ($loader =~ /(sys|ext)linux|yaboot/) {
 		my $search = "c";
 		if ($loader eq "extlinux" ) {
 			$search = "83";
+		}
+		if ($loader eq "yaboot" ) {
+			$search = "41";
 		}
 		for (my $i=3;$i>=1;$i--) {
 			my $type = $this -> getStorageID ($device,$i);
 			if ("$type" eq "$search") {
 				if ($loader eq "syslinux") {
 					$result{fat} = "/dev/mapper".$dmap."p$i";
+				} elsif ($loader eq "yaboot" ) {
+					$result{prep} = "/dev/mapper".$dmap."p$i";
 				} else {
 					$result{extlinux} = "/dev/mapper".$dmap."p$i";
 				}
