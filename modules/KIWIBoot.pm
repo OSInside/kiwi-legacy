@@ -4575,7 +4575,7 @@ sub setLVMDeviceMap {
 				$result{extlinux} = "/dev/mapper".$dmap."p1";
 			}
 		} else {
-			if ($loader eq "syslinux") {
+			if ($loader =~ /syslinux|yaboot/) {
 				$result{fat} = $device."1";
 			} else {
 				$result{extlinux} = $device."1";
