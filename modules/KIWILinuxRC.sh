@@ -1254,11 +1254,9 @@ function setupBootLoaderSyslinuxRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 			fi
-			if [ -f $mountPrefix/bin/systemd ];then
-				echo -n " init=/bin/systemd" >> $conf
-			fi
 			echo -n " vga=$fbmode loader=$loader"          >> $conf
 			echo -n " splash=silent"                       >> $conf
+            echo -n " quiet"                               >> $conf
 			echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
 			echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
 			if [ "$haveLVM" = "yes" ];then
@@ -1283,11 +1281,9 @@ function setupBootLoaderSyslinuxRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 			fi
-			if [ -f $mountPrefix/bin/systemd ];then
-				echo -n " init=/bin/systemd" >> $conf
-			fi
 			echo -n " vga=$fbmode loader=$loader"          >> $conf
 			echo -n " splash=silent"                       >> $conf
+            echo -n " quiet"                               >> $conf
 			echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
 			echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
 			if [ "$haveLVM" = "yes" ];then
@@ -1359,10 +1355,7 @@ function setupBootLoaderGrubRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			fi
-			if [ -f $mountPrefix/bin/systemd ];then
-				echo -n " init=/bin/systemd"              >> $menu
-			fi
-			echo -n " vga=$fbmode splash=silent"          >> $menu
+			echo -n " vga=$fbmode splash=silent quiet"    >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
 			if [ "$haveLVM" = "yes" ];then
@@ -1376,10 +1369,7 @@ function setupBootLoaderGrubRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			fi
-			if [ -f $mountPrefix/bin/systemd ];then
-				echo -n " init=/bin/systemd"              >> $menu
-			fi
-			echo -n " vga=$fbmode splash=silent"          >> $menu
+			echo -n " vga=$fbmode splash=silent quiet"    >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
 			if [ "$haveLVM" = "yes" ];then
@@ -1401,10 +1391,7 @@ function setupBootLoaderGrubRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			fi
-			if [ -f $mountPrefix/bin/systemd ];then
-				echo -n " init=/bin/systemd"              >> $menu
-			fi
-			echo -n " vga=$fbmode splash=silent"          >> $menu
+			echo -n " vga=$fbmode splash=silent quiet"    >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
 			if [ "$haveLVM" = "yes" ];then
@@ -1418,10 +1405,7 @@ function setupBootLoaderGrubRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			fi
-			if [ -f $mountPrefix/bin/systemd ];then
-				echo -n " init=/bin/systemd"              >> $menu
-			fi
-			echo -n " vga=$fbmode splash=silent"          >> $menu
+			echo -n " vga=$fbmode splash=silent quiet"    >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
 			if [ "$haveLVM" = "yes" ];then
@@ -1575,11 +1559,9 @@ function setupBootLoaderS390 {
 		if [ "$haveLVM" = "yes" ];then
 			echo -n " VGROUP=$VGROUP" >> $conf
 		fi
-		if [ -f $mountPrefix/bin/systemd ];then
-			echo -n " init=/bin/systemd" >> $conf
-		fi
 		echo -n " $KIWI_INITRD_PARAMS"  >> $conf
 		echo -n " $KIWI_KERNEL_OPTIONS" >> $conf
+        echo -n " quiet"                >> $conf
 		echo " loader=$loader\""        >> $conf
 		#======================================
 		# create failsafe entry
@@ -1595,11 +1577,9 @@ function setupBootLoaderS390 {
 		if [ "$haveLVM" = "yes" ];then
 			echo -n " VGROUP=$VGROUP" >> $conf
 		fi
-		if [ -f $mountPrefix/bin/systemd ];then
-			echo -n " init=/bin/systemd" >> $conf
-		fi
 		echo -n " $KIWI_INITRD_PARAMS"       >> $conf
 		echo -n " $KIWI_KERNEL_OPTIONS"      >> $conf
+        echo -n " quiet"                     >> $conf
 		echo " loader=$loader x11failsafe\"" >> $conf
 		count=`expr $count + 1`
 	done
@@ -1773,9 +1753,7 @@ function setupBootLoaderSyslinux {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                  >> $conf
 				fi
-				if [ -f $mountPrefix/bin/systemd ];then
-					echo -n " init=/bin/systemd" >> $conf
-				fi
+                echo -n " quiet"                               >> $conf
 				echo " showopts"                               >> $conf
 			fi
 			#======================================
@@ -1809,11 +1787,8 @@ function setupBootLoaderSyslinux {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                  >> $conf
 				fi
-				if [ -f $mountPrefix/bin/systemd ];then
-					echo -n " init=/bin/systemd" >> $conf
-				fi
 				echo -n " showopts ide=nodma apm=off acpi=off" >> $conf
-				echo -n " noresume selinux=0 nosmp"            >> $conf
+				echo -n " noresume selinux=0 nosmp quiet"      >> $conf
 				echo " noapic maxcpus=0 edd=off"               >> $conf
 			fi
 			count=`expr $count + 1`
@@ -1990,10 +1965,7 @@ function setupBootLoaderGrub {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                     >> $menu
 				fi
-				if [ -f $mountPrefix/bin/systemd ];then
-					echo -n " init=/bin/systemd"                  >> $menu
-				fi
-				echo " showopts"                                  >> $menu
+				echo " showopts quiet"                            >> $menu
 				echo " module /boot/$initrd"                      >> $menu
 			else
 				echo -n " kernel $gdev/boot/$kernel"              >> $menu
@@ -2015,11 +1987,7 @@ function setupBootLoaderGrub {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                     >> $menu
 				fi
-				if [ -f $mountPrefix/bin/systemd ];then
-					echo -n " init=/bin/systemd"                  >> $menu
-				fi
-
-				echo " showopts"                                  >> $menu
+				echo " showopts quiet"                            >> $menu
 				echo " initrd $gdev/boot/$initrd"                 >> $menu
 			fi
 			#======================================
@@ -2041,11 +2009,8 @@ function setupBootLoaderGrub {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                     >> $menu
 				fi
-				if [ -f $mountPrefix/bin/systemd ];then
-					echo -n " init=/bin/systemd"                  >> $menu
-				fi
 				echo -n " showopts ide=nodma apm=off acpi=off"    >> $menu
-				echo -n " noresume selinux=0 nosmp"               >> $menu
+				echo -n " noresume selinux=0 nosmp quiet"         >> $menu
 				if [ -e /dev/xvc0 ];then
 					echo -n " console=xvc console=tty"            >> $menu
 				elif [ -e /dev/hvc0 ];then
@@ -2065,11 +2030,8 @@ function setupBootLoaderGrub {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                     >> $menu
 				fi
-				if [ -f $mountPrefix/bin/systemd ];then
-					echo -n " init=/bin/systemd"                  >> $menu
-				fi
 				echo -n " showopts ide=nodma apm=off acpi=off"    >> $menu
-				echo -n " noresume selinux=0 nosmp"               >> $menu
+				echo -n " noresume selinux=0 nosmp quiet"         >> $menu
 				if [ -e /dev/xvc0 ];then
 					echo -n " console=xvc console=tty"            >> $menu
 				elif [ -e /dev/hvc0 ];then
@@ -2264,9 +2226,7 @@ function setupBootLoaderLilo {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                 >> $conf
 				fi
-				if [ -f $mountPrefix/bin/systemd ];then
-					echo -n " init=/bin/systemd"              >> $conf
-				fi
+                echo -n " quiet"                              >> $conf
 				echo " showopts\""                            >> $conf
 			fi
 			#======================================
@@ -2300,10 +2260,7 @@ function setupBootLoaderLilo {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                 >> $conf
 				fi
-				if [ -f $mountPrefix/bin/systemd ];then
-					echo -n " init=/bin/systemd"              >> $conf
-				fi
-				echo -n " showopts ide=nodma apm=off"         >> $conf
+				echo -n " quiet showopts ide=nodma apm=off"   >> $conf
 				echo " acpi=off noresume selinux=0 nosmp\""   >> $conf
 			fi
 			count=`expr $count + 1`
