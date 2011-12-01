@@ -41,11 +41,15 @@ function suseInsertService {
 	# required for this service it will be inserted first
 	# -----
 	local service=$1
-	if /sbin/insserv $service;then
-		echo "Service $service inserted"
+	if [ -f /bin/systemd ];then
+		systemctl enable service_$service.service
 	else
-		if ! /sbin/insserv --recursive $service;then
-			echo "$service: recursive insertion failed...skipped"
+		if /sbin/insserv $service;then
+			echo "Service $service inserted"
+		else
+			if ! /sbin/insserv --recursive $service;then
+				echo "$service: recursive insertion failed...skipped"
+			fi
 		fi
 	fi
 }
@@ -58,12 +62,17 @@ function suseRemoveService {
 	# Remove a service and its dependant services
 	# using insserv -r
 	# ----
-	local service=/etc/init.d/$1
-	if /sbin/insserv -r $service;then
-		echo "Service $service removed"
+	local service=$1
+	if [ -f /bin/systemd ];then
+		systemctl disable service_$service.service
 	else
-		if ! /sbin/insserv --recursive -r $service;then
-			echo "$service: recursive removal failed...skipped"
+		service=/etc/init.d/$service
+		if /sbin/insserv -r $service;then
+			echo "Service $service removed"
+		else
+			if ! /sbin/insserv --recursive -r $service;then
+				echo "$service: recursive removal failed...skipped"
+			fi
 		fi
 	fi
 }
@@ -92,7 +101,7 @@ function suseActivateServices {
 #--------------------------------------
 function suseService {
 	# /.../
-	# if a service exist then enable or disable it using chkconfig
+	# if a service exist then enable or disable it
 	# example : suseService apache2 on
 	# example : suseService apache2 off
 	# ----
@@ -100,9 +109,9 @@ function suseService {
 	local action=$2
 	if [ -x /etc/init.d/$i ] && [ -f /etc/init.d/$service ];then
 		if [ $action = on ];then
-			/sbin/chkconfig $service on
+			suseInsertService $service
 		elif [ $action = off ];then
-			/sbin/chkconfig $service off
+			suseRemoveService $service
 		fi
 	fi
 }
