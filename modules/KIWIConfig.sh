@@ -42,7 +42,7 @@ function suseInsertService {
 	# -----
 	local service=$1
 	if [ -f /bin/systemd ];then
-		systemctl enable service_$service.service
+		systemctl enable $service.service
 	else
 		if /sbin/insserv $service;then
 			echo "Service $service inserted"
@@ -64,7 +64,7 @@ function suseRemoveService {
 	# ----
 	local service=$1
 	if [ -f /bin/systemd ];then
-		systemctl disable service_$service.service
+		systemctl disable $service.service
 	else
 		service=/etc/init.d/$service
 		if /sbin/insserv -r $service;then
