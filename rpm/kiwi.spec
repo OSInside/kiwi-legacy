@@ -21,23 +21,18 @@ Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
 BuildRequires:  perl-Config-IniFiles perl-XML-LibXML perl-libwww-perl
 BuildRequires:  module-init-tools screen zlib-devel
-BuildRequires:  gcc-c++ libxslt swig trang
+BuildRequires:  gcc-c++ libxslt
 %if %{suse_version} > 1020
 BuildRequires:  fdupes
 %endif
 %ifarch %ix86 x86_64
 BuildRequires:  syslinux
 %endif
-%if %{suse_version} > 1010
-BuildRequires:  libqt4 libqt4-devel
-%else
-BuildRequires:  freetype2-devel libpng-devel qt qt-devel
-%endif 
 %if %{suse_version} > 1030
 BuildRequires:  libexpat-devel rpm-devel
 %endif
 %if %{suse_version} > 1030 && %{suse_version} <= 1130
-BuildRequires: libsatsolver-devel
+BuildRequires: libsatsolver-devel swig
 %endif
 %if %{suse_version} > 1140
 BuildRequires: perl-Test-Unit btrfsprogs squashfs
