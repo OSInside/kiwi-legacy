@@ -902,11 +902,7 @@ function suseStripInitrd {
 	#==========================================
 	# Remove unneeded files
 	#------------------------------------------
-	rm -rf `find -type d | grep .svn`
-	local files="$kiwi_strip_delete"
-	for i in $files;do
-		rm -rfv $i
-	done
+	echo "$kiwi_strip_delete" | xargs rm -rfv
 	#==========================================
 	# remove unneeded tools
 	#------------------------------------------
@@ -943,20 +939,6 @@ function suseStripInitrd {
 	for p in dpkg rpm smart yum;do
 		rm -rf /var/lib/$p
 	done
-
-	#==========================================
-	# strip down configuration files
-	#------------------------------------------
-	#rm -rf /tmp/*
-	#rm -rf /tmp/.*
-	#local config="$kiwi_strip_config"
-	#for i in $config;do
-	#	if [ -e $i ];then
-	#		mv $i /tmp
-	#	fi
-	#done
-	#rm -rf /etc/*
-	#mv /tmp/* /etc
 }
 
 #======================================
