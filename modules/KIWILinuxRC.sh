@@ -610,6 +610,10 @@ function udevSystemStop {
 	# /.../
 	# stop udev while in pre-init phase.
 	# ----
+	if [ -x /sbin/udevadm ];then
+		udevadm control --exit &>/dev/null
+		udevadm info --cleanup-db &>/dev/null
+	fi
 	/etc/init.d/boot.udev stop
 	echo
 }
@@ -678,7 +682,15 @@ function loadAGPModules {
 # udevKill
 #--------------------------------------
 function udevKill {
-	. /iprocs ; kill $UDEVD_PID
+	. /iprocs
+	if [ -x /sbin/udevadm ];then
+		udevadm control --exit &>/dev/null
+		udevadm info --cleanup-db &>/dev/null
+	fi
+	sleep 2
+	if kill -0 $UDEVD_PID &>/dev/null;then
+		kill $UDEVD_PID
+	fi
 }
 #======================================
 # startSplashy
