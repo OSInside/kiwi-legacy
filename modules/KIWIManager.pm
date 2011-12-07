@@ -2643,7 +2643,8 @@ sub rpmLibs {
 		'/lib/libnss_files*',
 		'/lib64/libnsl*',
 		'/lib64/libnss_compat*',
-		'/lib64/libnss_files*'
+		'/lib64/libnss_files*',
+		'/sbin/ldconfig'
 	);
 	foreach my $item (@libs) {
 	foreach my $l (glob ($item)) {
