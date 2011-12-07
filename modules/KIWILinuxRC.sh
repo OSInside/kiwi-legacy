@@ -432,6 +432,11 @@ function createInitialDevices {
 	mkdir -m 1777 $prefix/shm
 	mount -t tmpfs -o mode=1777 tmpfs $prefix/shm
 	#======================================
+	# mount udev db tmpfs
+	#--------------------------------------
+	mkdir -p -m 0755 /run
+	mount -t tmpfs -o mode=0755,nodev,nosuid tmpfs /run
+	#======================================
 	# mount devpts tmpfs
 	#--------------------------------------
 	mkdir -m 0755 $prefix/pts
@@ -679,7 +684,17 @@ function loadAGPModules {
 # udevKill
 #--------------------------------------
 function udevKill {
-	. /iprocs ; kill $UDEVD_PID
+	. /iprocs
+	if [ -x /sbin/udevadm ];then
+		Echo "udevd: stop via control signal..."
+		udevadm control --exit &>/dev/null
+		udevadm info --cleanup-db &>/dev/null
+	fi
+	sleep 2
+	if kill -0 $UDEVD_PID &>/dev/null;then
+		Echo "udevd: still running, killing it the hard way"
+		kill $UDEVD_PID
+	fi
 }
 #======================================
 # startSplashy
@@ -5820,6 +5835,7 @@ function activateImage {
 	reopenKernelConsole
 	udevPending
 	mount --move /dev /mnt/dev
+	mount --move /run /mnt/run
 	udevKill
 	#======================================
 	# run preinit stage
