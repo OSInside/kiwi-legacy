@@ -870,7 +870,9 @@ sub setupInstallationSource {
 				$kiwi -> done ();
 			} else {
 				my @zypper= @{$this->{zypper_chroot}};
-				my $repo = "$dataDir/repos/$alias.repo";
+				my $alias_filename = $alias;
+				$alias_filename =~ s/\//_/g;
+				my $repo = "$dataDir/repos/$alias_filename.repo";
 				if (! -f $repo) {
 					$kiwi -> info ("Adding chroot zypper service: $alias");
 					$data = qxx ("@kchroot @zypper $sadd 2>&1");
