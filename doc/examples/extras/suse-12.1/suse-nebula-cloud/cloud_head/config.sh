@@ -32,12 +32,25 @@ echo "Configure image: [$kiwi_iname]..."
 suseSetupProduct
 
 #======================================
+# Manipulate services files
+#--------------------------------------
+sed -i 's/\[Unit\]/\[Unit\]\nAfter=YaST-Firstboot.service\nRequisite=YaST-Firstboot.service/' /lib/systemd/system/sunstone.service
+sed -i 's/\[Unit\]/\[Unit\]\nAfter=YaST-Firstboot.service\nRequisite=YaST-Firstboot.service/' /lib/systemd/system/one.service
+
+#======================================
 # Activate services
 #--------------------------------------
 suseActivateDefaultServices
-suseInsertService boot.device-mapper
+suseInsertService cloudinfo
+suseInsertService dhcpd
+suseInsertService noderegistrar
+suseInsertService one
+suseInsertService one_scheduler
+suseInsertService rpcbind
+# nfsserver has to be after rpcbind
 suseInsertService nfsserver
 suseInsertService sshd
+suseInsertService sunstone
 
 #======================================
 # SuSEconfig

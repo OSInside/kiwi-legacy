@@ -137,7 +137,16 @@ def getConfigFromServer():
 #----------------------------------------------------------------------------
 def getFirstConnectedInterface():
     """Find the interface that has a cable connected."""
-    iFaceInfo = os.popen('/usr/sbin/hwinfo').readlines()
+    # Bring up every interface so we can reliably figure out the one
+    # that is connected
+    iFaces = glob.glob('/sys/class/net/eth*')
+    for iFace in iFaces:
+        name = iFace.split('/')[-1]
+        os.system('/sbin/ifconfig %s up' %name)
+        # Allow time for the interface to activate
+        time.sleep(5)
+                  
+    iFaceInfo = os.popen('/usr/sbin/hwinfo --network').readlines()
     iFaceName = None
     processBlock = None
     for ln in iFaceInfo:
@@ -339,7 +348,7 @@ if __name__ == "__main__":
     setupCloudNetwork(iFace)
     res = configureNode(confDict)
     if res == -1:
-        msg = 'Configuration failure. Manual configuration requires.\n'
+        msg = 'Configuration failure. Manual configuration required.\n'
         syslog.syslog(syslog.LOG_INFO, msg)
         syslog.closelog()
         sys.exit(1)
@@ -362,6 +371,13 @@ if __name__ == "__main__":
         syslog.syslog(syslog.LOG_INFO, msg)
         syslog.closelog()
         sys.exit(1)
+
+    # tmp directory for oned
+    if not os.path.exists('/var/tmp/one'):
+        if os.path.exists('/var/tmp'):
+            os.mkdir('/var/tmp/one')
+            os.system('chown oneadmin:cloud /var/tmp/one')
+            
     # Stop the network interface, will be started during service startup
     os.system('/sbin/ifdown br0')
     msg = 'Cloud node configuration completed with success.\n'

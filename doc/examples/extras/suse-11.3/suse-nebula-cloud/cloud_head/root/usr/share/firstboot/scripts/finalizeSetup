@@ -14,7 +14,7 @@ import syslog
 confFiles = glob.glob('/etc/sysconfig/network/ifcfg-eth*')
 numConfInterf = len(confFiles)
 if numConfInterf > 1:
-	syslog.openlog('BR_SETUP]', syslog.LOG_PID, syslog.LOG_DAEMON)
+	syslog.openlog('[BR_SETUP]', syslog.LOG_PID, syslog.LOG_DAEMON)
 	syslog.syslog(syslog.LOG_INFO, 'Bridge setup\n')
 	msg = 'Multiple configured eth devices found, cannot resolve ambiguity\n'
 	syslog.syslog(syslog.LOG_ERR, msg)
@@ -22,7 +22,7 @@ if numConfInterf > 1:
 	sys.exit(1)
 
 if numConfInterf < 1:
-	syslog.openlog('BR_SETUP]', syslog.LOG_PID, syslog.LOG_DAEMON)
+	syslog.openlog('[BR_SETUP]', syslog.LOG_PID, syslog.LOG_DAEMON)
 	syslog.syslog(syslog.LOG_INFO, 'Bridge setup\n')
 	msg = 'No eth interface configured, cannot setup bridge\n'
 	syslog.syslog(syslog.LOG_ERR, msg)
@@ -74,22 +74,6 @@ for ln in lines:
 	conf.write(ln)
 conf.close()
 
-# Modify the sunstone init script
-lines = open('/etc/init.d/sunstone', 'r').readlines()
-sServInit = open('/etc/init.d/sunstone', 'w')
-for ln in lines:
-	if ln.find('HOST=') != -1:
-		ip = ipAddr.split('/')[0][1:]
-		sServInit.write('HOST="%s"\n' %ip)
-		sServInit.write('ONE_AUTH=/var/lib/one/.one/one_auth\n')
-		sServInit.write('export ONE_AUTH\n')
-		continue
-	if ln.find('ONE_AUTH') != -1:
-		# Removing the placeholder
-		continue
-	sServInit.write(ln)
-sServInit.close()
-		
 # Run the configuration setup
 os.system('/sbin/SuSEconfig >& /dev/null')
 
@@ -102,6 +86,12 @@ os.system('/sbin/insserv cloudinfo')
 os.system('/sbin/insserv noderegistrar')
 # Proper permissions for the authentication file
 os.system('chown oneadmin:cloud /var/lib/one/.one/one_auth')
+
+if not os.path.exists('/var/lock/one'):
+    os.mkdir('/var/lock/one')
+
+os.system('/bin/chown -R oneadmin:cloud /var/lock/one')
+
 # Start the cloud service
 # oned must be started with special environment setting the first time
 os.system('env ONE_AUTH=/var/lib/one/.one/one_auth /etc/init.d/one start >& /dev/null')

@@ -78,7 +78,7 @@ class RegistrationHandler(SocketServer.BaseRequestHandler):
         hosts.close()
         # Register node with Nebula infrastructure
         cmd = '/usr/bin/sudo env ONE_AUTH=/var/lib/one/.one/one_auth '
-        cmd += '/usr/bin/onehost create %s im_kvm vmm_kvm tm_nfs' %ipAddr
+        cmd += '/usr/bin/onehost create %s im_kvm vmm_kvm tm_shared' %ipAddr
         res = os.system(cmd)
         if res:
             msg = 'Registration failed, onehost command with non zero status\n'
@@ -129,6 +129,8 @@ if __name__ == "__main__":
 
     # Write pid to a file
     pid = os.getpid()
+    if not os.path.exists('/var/run/suseNebula'):
+        os.mkdir('/var/run/suseNebula')
     pidFl = open('/var/run/suseNebula/regSrv.pid', 'w');
     pidFl.write('%d\n' %pid)
     pidFl.close()

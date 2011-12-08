@@ -8,13 +8,14 @@ import glob
 import os
 import sys
 import syslog
+import time
 
 # Only one interface should be configured at this point
 # check that this is indeed the case
 confFiles = glob.glob('/etc/sysconfig/network/ifcfg-eth*')
 numConfInterf = len(confFiles)
 if numConfInterf > 1:
-	syslog.openlog('BR_SETUP]', syslog.LOG_PID, syslog.LOG_DAEMON)
+	syslog.openlog('[BR_SETUP]', syslog.LOG_PID, syslog.LOG_DAEMON)
 	syslog.syslog(syslog.LOG_INFO, 'Bridge setup\n')
 	msg = 'Multiple configured eth devices found, cannot resolve ambiguity\n'
 	syslog.syslog(syslog.LOG_ERR, msg)
@@ -22,7 +23,7 @@ if numConfInterf > 1:
 	sys.exit(1)
 
 if numConfInterf < 1:
-	syslog.openlog('BR_SETUP]', syslog.LOG_PID, syslog.LOG_DAEMON)
+	syslog.openlog('[BR_SETUP]', syslog.LOG_PID, syslog.LOG_DAEMON)
 	syslog.syslog(syslog.LOG_INFO, 'Bridge setup\n')
 	msg = 'No eth interface configured, cannot setup bridge\n'
 	syslog.syslog(syslog.LOG_ERR, msg)
@@ -40,8 +41,7 @@ for ln in lines:
 		break
 
 # Stop the running network services
-os.system('/etc/init.d/dhcpd stop >& /dev/null')
-os.system('/etc/init.d/nfsserver stop >& /dev/null')
+os.system('/bin/systemctl stop dhcpd.service >& /dev/null')
 os.system('/sbin/ifdown %s >& /dev/null' %interfaceName)
 
 # Write the bridge configuration
@@ -74,39 +74,22 @@ for ln in lines:
 	conf.write(ln)
 conf.close()
 
-# Modify the sunstone init script
-lines = open('/etc/init.d/sunstone', 'r').readlines()
-sServInit = open('/etc/init.d/sunstone', 'w')
-for ln in lines:
-	if ln.find('HOST=') != -1:
-		ip = ipAddr.split('/')[0][1:]
-		sServInit.write('HOST="%s"\n' %ip)
-		sServInit.write('ONE_AUTH=/var/lib/one/.one/one_auth\n')
-		sServInit.write('export ONE_AUTH\n')
-		continue
-	if ln.find('ONE_AUTH') != -1:
-		# Removing the placeholder
-		continue
-	sServInit.write(ln)
-sServInit.close()
-		
-# Run the configuration setup
-os.system('/sbin/SuSEconfig >& /dev/null')
-
 # Remove the old network configuration file
 os.remove(interfConf)
 
-# Insert the cloud information service and start it
-os.system('/sbin/insserv cloudinfo')
-# Insert the registration service and start it
-os.system('/sbin/insserv noderegistrar')
-# Proper permissions for the authentication file
-os.system('chown oneadmin:cloud /var/lib/one/.one/one_auth')
-# Start the cloud service
-# oned must be started with special environment setting the first time
-os.system('env ONE_AUTH=/var/lib/one/.one/one_auth /etc/init.d/one start >& /dev/null')
-os.system('/sbin/insserv one')
-os.system('/etc/init.d/one stop >& /dev/null')
-# Insert the Web-UI server
-os.system('/sbin/insserv sunstone')
+# Run the configuration setup
+os.system('/sbin/SuSEconfig >& /dev/null')
 
+# Proper permissions for the authentication file
+os.system('/bin/chown oneadmin:cloud /var/lib/one/.one/one_auth')
+
+if not os.path.exists('/var/lock/one'):
+    os.mkdir('/var/lock/one')
+
+os.system('/bin/chown -R oneadmin:cloud /var/lock/one')
+
+# Initial setup of the cloud service
+os.system('/usr/bin/sudo -u oneadmin /usr/bin/env ONE_AUTH=/var/lib/one/.one/one_auth /usr/sbin/onedsetup >& /dev/null')
+
+# Everything needs to catch up
+time.sleep(5)
