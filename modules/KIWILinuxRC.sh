@@ -7747,16 +7747,18 @@ function setupBootPartition {
 		# no such boot device like for live ISO hybrid disk
 		return
 	fi
+	if [ ! -z "$COMBINED_IMAGE" ];then
+		# split read-write partition is boot device
+		return
+	fi
 	#======================================
 	# copy boot data from image to bootpart
 	#--------------------------------------
 	mkdir -p /$mpoint
 	mount $imageBootDevice /$mpoint
-	if [ -z "$COMBINED_IMAGE" ];then
-		cp -a /mnt/boot /$mpoint
-		if [ -e /boot.tgz ];then
-			tar -xf /boot.tgz -C /$mpoint
-		fi
+	cp -a /mnt/boot /$mpoint
+	if [ -e /boot.tgz ];then
+		tar -xf /boot.tgz -C /$mpoint
 	fi
 	umount /$mpoint
 	rmdir  /$mpoint
