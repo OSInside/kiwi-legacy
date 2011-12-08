@@ -169,6 +169,8 @@ if __name__ == "__main__":
 
     # Write pid to a file
     pid = os.getpid()
+    if not os.path.exists('/var/run/suseNebula'):
+        os.mkdir('/var/run/suseNebula')    
     pidFl = open('/var/run/suseNebula/infoSrv.pid', 'w');
     pidFl.write('%d\n' %pid)
     pidFl.close()

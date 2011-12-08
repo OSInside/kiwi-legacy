@@ -3,9 +3,9 @@
 # FILE          : config.sh
 #----------------
 # PROJECT       : OpenSuSE KIWI Image System
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+# COPYRIGHT     : (c) 2011 SUSE LINUX Products GmbH. All rights reserved
 #               :
-# AUTHOR        : Robert Scwheikert <rschweikert@novell.com>
+# AUTHOR        : Robert Scwheikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -35,9 +35,12 @@ suseSetupProduct
 # Activate services
 #--------------------------------------
 suseActivateDefaultServices
-suseInsertService boot.device-mapper
-suseInsertService sshd
 suseInsertService libvirtd
+suseInsertService nfs
+suseInsertService nodesetup
+suseInsertService rpcbind
+suseInsertService sshd
+
 
 #======================================
 # SuSEconfig

@@ -3,8 +3,8 @@
 <image schemaversion="5.3" name="suse-11.4-OpenNebula-Head-Node">
 	<description type="system">
 		<author>Robert Schweikert</author>
-		<contact>rschweikert@novell.com</contact>
-		<specification>OpenNebula Head Node</specification>
+		<contact>rjschwei@suse.com</contact>
+		<specification>OpenNebula Head Node configuration</specification>
 	</description>
 	<preferences>
 		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.4" installstick="true" installboot="install" boottimeout="2">
@@ -16,7 +16,7 @@
 				<oem-unattended>true</oem-unattended>
 			</oemconfig>
 		</type>
-		<version>1.2.0</version>
+		<version>1.3.0</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
@@ -49,6 +49,7 @@
 		<package name="nfs-kernel-server"/>
 		<package name="opennebula"/>
 		<package name="opennebula-sunstone"/>
+<!--        <package name="opennebula-zones"/>-->
 		<package name="openssh"/>
 		<package name="openssl"/>
 		<package name="python"/>
@@ -64,6 +65,7 @@
 		<package name="xmlrpc-c"/>
 		<package name="yast2-dhcp-server"/>
 		<package name="yast2-firstboot"/>
+        <package name="yast2-ncurses"/>
 		<package name="yast2-network"/>
 		<package name="yast2-nfs-server"/>
 	</packages>

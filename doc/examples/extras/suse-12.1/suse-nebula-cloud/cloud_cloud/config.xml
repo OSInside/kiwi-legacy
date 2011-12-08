@@ -3,7 +3,7 @@
 <image schemaversion="5.3" name="suse-12.1-OpenNebula-Cloud-Node">
 	<description type="system">
 		<author>Robert Schweikert</author>
-		<contact>rschweikert@novell.com</contact>
+		<contact>rjschwei@suse.com</contact>
 		<specification>OpenNebula Cloud Node configuration</specification>
 	</description>
 	<preferences>
@@ -16,7 +16,7 @@
 				<oem-unattended>true</oem-unattended>
 			</oemconfig>
 		</type>
-		<version>1.1.0</version>
+		<version>1.2.0</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
@@ -48,6 +48,7 @@
 		<package name="nfs-client"/>
 		<package name="openssh"/>
 		<package name="openssl"/>
+        <package name="pciutils"/>
 		<package name="qemu"/>
 		<package name="rsyslog"/>
 		<package name="ruby"/>
@@ -57,6 +58,8 @@
 		<package name="terminfo"/>
 		<package name="vi"/>
 		<package name="xmlrpc-c"/>
+        <package name="yast2-country"/>
+        <package name="yast2-ncurses"/>
 		<package name="yast2-nfs-client"/>
 	</packages>
 	<packages type="bootstrap">
