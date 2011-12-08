@@ -2343,7 +2343,7 @@ sub setupBootDisk {
 	} elsif (($bootloader eq "yaboot") && (! $lvm)) {
 		$boot = $deviceMap{prep};
 	} elsif (($syszip) || ($haveSplit) || ($lvm)) {
-		$root = $deviceMap{2};
+		$boot = $deviceMap{2};
 		if ($haveluks) {
 			$boot = $deviceMap{3};
 		}
