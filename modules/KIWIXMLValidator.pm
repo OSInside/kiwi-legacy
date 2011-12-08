@@ -946,17 +946,19 @@ sub __validateXML {
 	};
 	if ($@) {
 		my $evaldata=$@;
-		$kiwi -> error  ("Schema validation failed");
+		$kiwi -> error  ("Schema validation failed: $evaldata");
 		$kiwi -> failed ();
 		my $configStr = $systemXML -> parse_file( $controlFile ) -> toString();
 		my $upgradedStr = $systemTree -> toString();
 		my $upgradedContolFile = $controlFile;
 		if ($configStr ne $upgradedStr) {
 			$upgradedContolFile =~ s/\.xml/\.converted\.xml/;
-			$kiwi -> info ("Automatically upgraded $controlFile to");
-			$kiwi -> info ("$upgradedContolFile\n");
-			$kiwi -> info ("Reported line numbers may not match the ");
-			$kiwi -> info ("file $controlFile\n");
+			$kiwi -> info (
+				"Automatically upgraded $controlFile to $upgradedContolFile\n"
+			);
+			$kiwi -> info (
+				"Reported line numbers may not match the file $controlFile\n"
+			);
 			open (my $UPCNTFL, '>', $upgradedContolFile);
 			print $UPCNTFL $upgradedStr;
 			close ( $UPCNTFL );
