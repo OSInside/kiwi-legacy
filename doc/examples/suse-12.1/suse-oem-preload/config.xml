@@ -24,13 +24,13 @@
 	<repository type="yast2">
 		<source path="opensuse://12.1/repo/oss/"/>
 	</repository>
-	<packages type="image" patternType="plusRecommended">
+	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
-		<opensusePattern name="default"/>
+		<opensusePattern name="base"/>
 		<opensusePattern name="x11"/>
 	</packages>
 	<packages type="bootstrap">
