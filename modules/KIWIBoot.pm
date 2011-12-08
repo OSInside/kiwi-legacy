@@ -3718,13 +3718,18 @@ sub installBootLoader {
 				push @glog,"GRUB: commands:";
 				push @glog,@cmdlog;
 			}
-			my $stage1 = grep { /^\s*Running.*succeeded$/ } @glog;
-			my $stage1_5 = grep { /^\s*Running.*are embedded\.$/ } @glog;
-			$result = !(($stage1 == 1) && ($stage1_5 == 1));
+			$result = grep { /^\s*Running.*succeeded$/ } @glog;
+			if (($result) && (! $chainload)) {
+				$result = grep { /^\s*Running.*are embedded\.$/ } @glog;
+			}
+			if ($result) {
+				# found stage information, set good result exit code
+				$result = 0;
+			}
 			$glog = join ("\n",@glog);
 			$kiwi -> loginfo ("GRUB: $glog\n");
 		}
-		if ($result != 1) {
+		if ($result == 0) {
 			my $boot = "'boot sector'";
 			my $null = "/dev/null";
 			$status= qxx (
@@ -3784,12 +3789,6 @@ sub installBootLoader {
 			my $fdst = "perl -e \"printf '%s', pack 'A4', eval 'FDST';\"";
 			qxx (
 				"$fdst|dd of=$diskname bs=1 count=4 seek=\$((0x190)) $opt 2>&1"
-			);
-			#==========================================
-			# zero out preload range
-			#------------------------------------------
-			$status = qxx (
-				"dd if=/dev/zero of=$diskname bs=1 count=496 seek=512 $opt 2>&1"
 			);
 		}
 		$kiwi -> done();
