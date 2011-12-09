@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 5.01.6)
+# spec file for package kiwi (Version 5.01.7)
 #
 # Copyright (c) 2010 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
@@ -63,7 +63,7 @@ Requires:       clicfs >= 1.3.9
 %endif
 %endif
 Summary:        OpenSuSE - KIWI Image System
-Version:        5.01.6
+Version:        5.01.7
 Release:        1
 Group:          System/Management
 License:        GPLv2
