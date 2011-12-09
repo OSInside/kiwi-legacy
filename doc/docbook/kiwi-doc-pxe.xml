@@ -648,7 +648,7 @@ NBD-Write-Port-Number;/dev/NBD-Write-Device
               install the <package>aoetools</package> and
                 <package>vblade</package> packages from here first:
                 <ulink
-                url="http://download.opensuse.org/repositories/system:/aoetools"
+                url="http://download.opensuse.org/repositories/server:/ltsp"
               />. Once installed the following example shows how to
               export the local <filename class="devicefile"
                 >/dev/sdb1</filename> partition via AoE:</para>
