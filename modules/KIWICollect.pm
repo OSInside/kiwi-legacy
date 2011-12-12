@@ -5,6 +5,7 @@
 # COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Jan-Christoph Bornschlegel <jcborn@suse.de>
+# Maintainer    : Adrian Schroeter <adrian@suse.de>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -17,6 +18,10 @@
 #----------------
 
 package KIWICollect;
+
+BEGIN {
+	unshift @INC, '/usr/share/inst-source-utils/modules';
+}
 
 #==========================================
 # Modules
@@ -70,10 +75,6 @@ use Data::Dumper;
 #   debug medium number
 #
 # ---BAUSTELLE---
-
-BEGIN {
-	unshift @INC, '/usr/share/inst-source-utils/modules';
-}
 
 #==========================================
 # Constructor
