@@ -561,6 +561,7 @@ sub openSUSEpath {
 	# allow proxy server from environment
 	#------------------------------------------
 	$browser->env_proxy();
+	$browser->timeout(30);
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
