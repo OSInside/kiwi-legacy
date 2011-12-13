@@ -100,7 +100,7 @@ def configureNode(confSettings):
     fst = open('/etc/fstab', 'a')
     fst.write(confSettings['serverIP'])
     fst.write(':/var/lib/one')
-    fst.write('\t/var/lib/one\tnfs\tdefaults\t1 1\n')
+    fst.write('\t/var/lib/one\tnfs\tdefaults,comment=systemd.automount\t1 1\n')
     fst.close()
             
     return 1
