@@ -159,40 +159,6 @@ sub test_createTmpDirSpecifiedDirOK {
 }
 
 #==========================================
-# test_createTmpDirSpecifiedDirForceNotOK
-#------------------------------------------
-sub test_createTmpDirSpecifiedDirNotOK {
-	# ...
-	# Test the createTmpDirectory method using a specified directory
-	# that is not empty and is not OK to be removed, i.e. it contains
-	# base-system sub directory
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $locator = $this -> __getLocator();
-	my $cmdL = $this -> __getCommandLine();
-	$cmdL -> setForceNewRoot(1);
-	my $tmpDir = $this -> createTestTmpDir();
-	mkdir "$tmpDir/base-system";
-	my $newTmpDir = $locator -> createTmpDirectory( undef, $tmpDir, $cmdL);
-	my $infoMsg = $kiwi -> getInfoMessage();
-	my $expected = "Removing old root directory '$tmpDir'";
-	$this -> assert_str_equals($expected, $infoMsg);
-	my $errMsg = $kiwi -> getErrorMessage();
-	$expected = "Mount point '$tmpDir/base-system' exists";
-	$this -> assert_str_equals($expected, $errMsg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($newTmpDir);
-	rmdir "$tmpDir/base-system";
-	$this -> removeTestTmpDir();
-
-	return;
-}
-
-#==========================================
 # test_getControlFileMultiConfig
 #------------------------------------------
 sub test_getControlFileMultiConfig {

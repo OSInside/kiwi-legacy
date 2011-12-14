@@ -87,9 +87,11 @@ sub createTmpDirectory {
 			rmdir $root;
 			if ( -e $root && -d $root && $forceRoot ) {
 				$kiwi -> info ("Removing old root directory '$root'");
-				if (-e $root."/base-system") {
+				my $status = qxx ("cat /proc/mounts | grep '$root' 2>&1");
+				my $result = $? >> 8;
+				if ($result == 0) {
 					$kiwi -> failed();
-					$kiwi -> error  ("Mount point '$root/base-system' exists");
+					$kiwi -> error  ("Found active mount points in '$root'");
 					$kiwi -> failed();
 					return;
 				}
