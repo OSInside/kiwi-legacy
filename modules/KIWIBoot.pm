@@ -190,6 +190,12 @@ sub new {
 		$xengz = $xen;
 		last;
 	}
+	if (! $isxen) {
+		my $kernel = readlink $xengz.".kernel";
+		if ($kernel =~ /.*-xen$/) {
+			$isxen = 1;
+		}
+	}
 	#==========================================
 	# create tmp dir for operations
 	#------------------------------------------
@@ -541,12 +547,6 @@ sub createBootStructure {
 		return undef;
 	}
 	if ($zipped) {
-		if ($isxen) {
-			# deflate/inflate initrd to make xen happy
-			my $irdunc = $initrd;
-			$irdunc =~ s/\.gz//;
-			qxx ("$zipper -d $initrd && $zipper $irdunc");
-		}
 		$status = qxx ( "cp $initrd $tmpdir/boot/$iname 2>&1" );
 	} else {
 		$status = qxx ( "cat $initrd | $zipper > $tmpdir/boot/$iname" );
@@ -2553,6 +2553,7 @@ sub setupSplash {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $initrd = $this->{initrd};
+	my $isxen  = $this->{isxen};
 	my $zipped = 0;
 	my $status;
 	my $newird;
@@ -2582,7 +2583,10 @@ sub setupSplash {
 	#==========================================
 	# setup splash in initrd
 	#------------------------------------------
-	if (-f $splfile) {
+	if ($isxen) {
+		$status = "skip splash initrd attachment on xen domU";
+		qxx ("rm -f $splfile");
+	} elsif (-f $splfile) {
 		qxx ("cat $initrd $splfile > $newird");
 		$status = "ok";
 	} else {
