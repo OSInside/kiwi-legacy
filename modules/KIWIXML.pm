@@ -3077,6 +3077,8 @@ sub getOVFConfig {
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
 	my %result = ();
+	my $device;
+	my $disktype;
 	if (! defined $node) {
 		return %result;
 	}
@@ -3096,11 +3098,10 @@ sub getOVFConfig {
 	# storage setup
 	#------------------------------------------
 	my $disk = $node -> getElementsByTagName ("vmdisk");
-	my ($device);
 	if ($disk) {
 		my $node  = $disk -> get_node(1);
 		$device = $node -> getAttribute ("device");
-		$device = $node -> getAttribute ("disktype");
+		$disktype = $node -> getAttribute ("disktype");
 	}
 	#==========================================
 	# network setup
@@ -3130,7 +3131,8 @@ sub getOVFConfig {
 	$result{ovf_maxcpu}    = $maxcpu;
 	$result{ovf_type}      = $type;
 	if ($disk) {
-		$result{ovf_disk}  = $device;
+		$result{ovf_disk}    = $device;
+		$result{ovf_disktype}= $disktype;
 	}
 	foreach my $bname (keys %vifs) {
 		$result{ovf_bridge}{$bname} = $vifs{$bname};
