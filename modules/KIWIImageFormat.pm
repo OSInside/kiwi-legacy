@@ -108,12 +108,14 @@ sub new {
 	#------------------------------------------
 	my %xenref = $xml -> getXenConfig();
 	my %vmwref = $xml -> getVMwareConfig();
+	my %ovfref = $xml -> getOVFConfig();
 	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{cmdL}    = $cmdL;
 	$this->{xenref}  = \%xenref;
 	$this->{vmwref}  = \%vmwref;
+	$this->{ovfref}  = \%ovfref;
 	$this->{kiwi}    = $kiwi;
 	$this->{xml}     = $xml;
 	$this->{format}  = $format;
@@ -161,6 +163,9 @@ sub createFormat {
 	} elsif ($format eq "ovf") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createOVF();
+	} elsif ($format eq "ova") {
+		$kiwi -> info ("Starting raw => $format conversion\n");
+		return $this -> createOVA();
 	} elsif ($format eq "qcow2") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createQCOW2();
@@ -206,7 +211,7 @@ sub createMaschineConfiguration {
 	} elsif ($format eq "vmdk") {
 		$kiwi -> info ("Starting $imgtype image machine configuration\n");
 		return $this -> createVMwareConfiguration();
-	} elsif ($format eq "ovf") {
+	} elsif (($format eq "ovf") || ($format eq "ova")) {
 		$kiwi -> info ("Starting $imgtype image machine configuration\n");
 		return $this -> createOVFConfiguration();
 	} else {
@@ -219,6 +224,24 @@ sub createMaschineConfiguration {
 }
 
 #==========================================
+# createOVA
+#------------------------------------------
+sub createOVA {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $cmdL   = $this->{cmdL};
+	my $format = $this->{format};
+	#==========================================
+	# requires ovf to operate
+	#------------------------------------------
+	my $ovfdir = $this -> createOVF();
+	if (! $ovfdir) {
+		return undef;
+	}
+	return $ovfdir;
+}
+
+#==========================================
 # createOVF
 #------------------------------------------
 sub createOVF {
@@ -226,71 +249,47 @@ sub createOVF {
 	my $kiwi   = $this->{kiwi};
 	my $format = $this->{format};
 	my $cmdL   = $this->{cmdL};
-	my $ovftool= "/usr/bin/ovftool";
-	my $vmdk;
-	my $vmxf;
+	my $xml    = $this->{xml};
+	my $ovfref = $this->{ovfref};
+	my $image  = $this->{image};
+	my $mf;
+	my $ovf;
 	my $source;
 	my $target;
+	my $ovfsha1;
+	my $imagesha1;
+	my $FD;
 	#==========================================
-	# check for ovftool
+	# create vmdk for VMware, required for ovf
 	#------------------------------------------
-	if (! -x $ovftool) {
-		$kiwi -> error  ("Can't find $ovftool, is it installed ?");
-		$kiwi -> failed ();
-		return undef;
+	if ($ovfref->{ovf_type} eq "vmware") {
+		my $origin_format = $this->{format};
+		$this->{format} = "vmdk";
+		$image = $this->createVMDK();
+		if (! $image) {
+			return undef;
+		}
+		$this->{format} = $origin_format;
+		$this->{image}  = $image;
 	}
 	#==========================================
-	# create vmdk first, required for ovf
+	# prepare ovf destination directory
 	#------------------------------------------
-	$this->{format}	= "vmdk";
-	$vmdk = $this->createVMDK();
-	$vmxf = $this->createMaschineConfiguration();
-	#==========================================
-	# create ovf from the vmdk
-	#------------------------------------------
-	if ((-e $vmdk) && (-e $vmxf)) {
-		$source = $vmxf;
-		$target = $vmxf;
-		$target =~ s/\.vmx$/\.$format/;
-		$this->{format} = $format;
-		$kiwi -> info ("Creating $format image...");
-		# /.../
-		# temporary hack, because ovftool is not able to handle
-		# scsi-hardDisk correctly at the moment
-		# ---- beg ----
-		qxx ("sed -i -e 's;scsi-hardDisk;disk;' $source");
-		# ---- end ----
-		my $status = qxx ("rm -rf $target; mkdir -p $target 2>&1");
-		my $result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create OVF directory: $status");
-			$kiwi -> failed ();
-			return undef;
-		}
-		my $output = basename $target;
-		$status= qxx (
-			"$ovftool -o -q $source $target/$output 2>&1"
-		);
-		$result = $? >> 8;
-		my $destination = $cmdL -> getImageTargetDir();
-		# --- beg ----
-		qxx ("sed -i -e 's;disk;scsi-hardDisk;' $source");
-		qxx ("rm -rf $destination/*.lck 2>&1");
-		# --- end ----
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create OVF image: $status");
-			$kiwi -> failed ();
-			return undef;
-		}
-		$kiwi -> done();
+	my $ovfdir = $image;
+	if ($ovfref->{ovf_type} eq "vmware") {
+		$ovfdir =~ s/\.vmdk$/\.ovf/;
 	} else {
-		$kiwi -> error  ("Required vmdk files not present");
-		$kiwi -> failed ();
-		return undef;
+		$ovfdir =~ s/\.raw$/\.ovf/;
 	}
-	return $target;
+	if (-d $ovfdir) {
+		qxx ("rm -f $ovfdir/*");
+	} else {
+		qxx ("mkdir -p $ovfdir");
+	}
+	my $img_base = basename $image;
+	qxx ("ln -s $image $ovfdir/$img_base");
+	$this->{ovfdir} = $ovfdir;
+	return $ovfdir;
 }
 
 #==========================================
@@ -967,9 +966,186 @@ sub createVMwareConfiguration {
 # createOVFConfiguration
 #------------------------------------------
 sub createOVFConfiguration {
-	# TODO
-	my $this = shift;
-	return $this;
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $xml    = $this->{xml};
+	my $ovfdir = $this->{ovfdir};
+	my $ovfref = $this->{ovfref};
+	my $format = $this->{format};
+	my $base   = basename $this->{image};
+	my $ovf;
+	my $diskformat;
+	my $systemtype;
+	my $ostype;
+	my $osid;
+	my $FD;
+	#==========================================
+	# setup config file name from image name
+	#------------------------------------------
+	$kiwi -> info ("Creating image OVF configuration file...");
+	my $image = $base;
+	if ($base =~ /(.*)\.(.*?)$/) {
+		$image = $1;
+		$base  = $image.".ovf";
+	}
+	$ovf = $ovfdir."/".$base;
+	unlink $ovf;
+	#==========================================
+	# check XML configuration data
+	#------------------------------------------
+	my %ovfconfig = %{$ovfref};
+	if ((! %ovfconfig) || (! $ovfconfig{ovf_type})) {
+		$kiwi -> skipped ();
+		$kiwi -> warning ("Not enough or Missing OFV config data");
+		$kiwi -> skipped ();
+		return $ovf;
+	}
+	my $type = $ovfconfig{ovf_type};
+	#==========================================
+	# OVF type specific setup
+	#------------------------------------------
+	if ($type eq "zvm") {
+		$osid       = 36;
+		$systemtype = "IBM:zVM:LINUX";
+		$ostype     = "sles";
+		$diskformat = "http://www.ibm.com/".
+			"xmlns/ovf/diskformat/s390.linuxfile.exustar.gz";
+	} elsif ($type eq "povervm") {
+		$osid       = 84;
+		$systemtype = "IBM:POWER:AIXLINUX";
+		$ostype     = "sles";
+		$diskformat = "http://www.ibm.com/".
+			"xmlns/ovf/diskformat/power.aix.mksysb";
+	} elsif ($type eq "xen") {
+		$osid       = 84;
+	} else {
+		$osid       = 84;
+		$systemtype = "vmx-04";
+		$ostype     = $ovfconfig{vmware_guest};
+		$diskformat = "http://www.vmware.com/".
+			"interfaces/specifications/vmdk.html#streamOptimized";
+	}
+	#==========================================
+	# create config file
+	#------------------------------------------
+	if (! open ($FD,">$ovf")) {
+		$kiwi -> error ("Couldn't create OVF config file: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# global setup
+	#------------------------------------------
+	print $FD "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"."\n".
+		'<Envelope vmw:buildId="build-260188"'."\n".
+		'xmlns="http://schemas.dmtf.org/ovf/envelope/1"'."\n".
+		'xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common"'."\n".
+		'xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"'."\n".
+		'xmlns:rasd="http://schemas.dmtf.org/"'."\n".
+		'wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"'."\n".
+		'xmlns:vmw="http://www.vmware.com/schema/ovf"'."\n".
+		'xmlns:vssd="http://schemas.dmtf.org/"'."\n".
+		'wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"'."\n".
+		'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'."\n";
+	#==========================================
+	# image description
+	#------------------------------------------
+	my $size = -s $this->{image};
+	print $FD "<ovf:References>"."\n";
+	print $FD "\t"."<ovf:File ovf:href=\"$base\""."\n".
+		"\t"."ovf:id=\"file1\""."\n".
+		"\t"."ovf:size=\"$size\"/>"."\n";
+	print $FD "</ovf:References>"."\n";
+	#==========================================
+	# storage description
+	#------------------------------------------
+	print $FD "<ovf:DiskSection>"."\n".
+		"\t"."<ovf:Info>Disk Section</ovf:Info>"."\n".
+		"\t"."<ovf:Disk ovf:capacity=\"$size\"".
+			" ovf:capacityAllocationUnits=\"byte\"".
+			" ovf:diskId=\"vmRef1disk\" ovf:fileRef=\"file1\"".
+			" ovf:format=\"$diskformat\"".
+			" ovf:populatedSize=\"$size\"/>"."\n";
+	print $FD "</ovf:DiskSection>"."\n";
+	#==========================================
+	# network description
+	#------------------------------------------
+	if (defined $ovfconfig{ovf_bridge}) {
+		my $name = "The bridged network for:";
+		my %nics = %{$ovfconfig{ovf_bridge}};
+		while (my @nic_info = each %nics) {
+			my $nic = $nic_info[0];
+			next if $nic eq "undef";
+			print $FD "<ovf:NetworkSection>"."\n".
+				"\t"."<Info>The list of logical networks</Info>"."\n".
+				"\t"."<Network ovf:name=\"$nic\">"."\n".
+				"\t\t"."<Description>$name $nic</Description>"."\n";
+			print $FD "</ovf:NetworkSection>"."\n";
+		}
+	}
+	#==========================================
+	# virtual system description
+	#------------------------------------------
+	print $FD "<VirtualSystem ovf:id=\"vm\">"."\n".
+		"\t"."<Info>A virtual machine</Info>"."\n".
+		"\t"."<Name>$base</Name>"."\n".
+		"\t"."<OperatingSystemSection ".
+		"ovf:id=\"$osid\" vmw:osType=\"$ostype\">"."\n".
+		"\t\t"."<Info>Appliance created by KIWI</Info>"."\n".
+		"\t"."</OperatingSystemSection>"."\n".
+		"\t"."<VirtualHardwareSection>"."\n".
+		"\t\t"."<Info>Virtual hardware requirements</Info>"."\n".
+		"\t\t"."<System>"."\n".
+		"\t\t"."<vssd:ElementName>Virtual Hardware Family".
+		"</vssd:ElementName>"."\n".
+		"\t\t"."<vssd:InstanceID>0</vssd:InstanceID>"."\n".
+		"\t\t"."<vssd:VirtualSystemIdentifier>$base".
+		"</vssd:VirtualSystemIdentifier>"."\n".
+		"\t\t"."<vssd:VirtualSystemType>$systemtype".
+		"</vssd:VirtualSystemType>"."\n".
+		"\t\t"."</System>"."\n";
+	print $FD "\t"."</VirtualHardwareSection>"."\n";
+	print $FD "\t"."</VirtualSystem>"."\n";
+	#==========================================
+	# close envelope
+	#------------------------------------------
+	print $FD "</Envelope>";
+	close $FD;
+	#==========================================
+	# create manifest file
+	#------------------------------------------
+	my $mf = $ovf;
+	$mf =~ s/\.ovf$/\.mf/;
+	if (! open ($FD,">$mf")) {
+		$kiwi -> error ("Couldn't create manifest file: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $base_image = basename $this->{image};
+	my $base_config= basename $ovf;
+	my $ovfsha1   = qxx ("sha1sum $ovf | cut -f1 -d ' ' 2>&1");
+	my $imagesha1 = qxx ("sha1sum $this->{image} | cut -f1 -d ' ' 2>&1");
+	print $FD "SHA1($base_config)= $ovfsha1"."\n";
+	print $FD "SHA1($base_image)= $imagesha1"."\n";
+	close $FD;
+	#==========================================
+	# create OVA tarball
+	#------------------------------------------
+	if ($format eq "ova") {
+		my $destdir  = dirname $this->{image};
+		my $ovaimage = basename $ovfdir;
+		$ovaimage =~ s/\.ovf$/\.ova/;
+		my $status = qxx ("tar -h -C $ovfdir -cf $destdir/$ovaimage . 2>&1");
+		my $result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create $format image: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
+	$kiwi -> done();
+	return $ovf;
 }
 
 #==========================================

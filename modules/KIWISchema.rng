@@ -2015,6 +2015,7 @@ or unified and applies to the iso type only</a:documentation>
         <choice>
           <value>ec2</value>
           <value>ovf</value>
+          <value>ova</value>
           <value>qcow2</value>
           <value>vmdk</value>
           <value>vhd</value>
@@ -2512,6 +2513,11 @@ compressed filesystem.</db:para>
     
   -->
   <div>
+    <define name="k.vmdisk.disktype.attribute">
+      <attribute name="disktype">
+        <a:documentation>The type of the disk as it is internally handled by the VM</a:documentation>
+      </attribute>
+    </define>
     <define name="k.vmdisk.controller.attribute">
       <attribute name="controller">
         <a:documentation>The disk controller used for the VM guest</a:documentation>
@@ -2534,6 +2540,9 @@ compressed filesystem.</db:para>
     </define>
     <define name="k.vmdisk.attlist">
       <interleave>
+        <optional>
+          <ref name="k.vmdisk.disktype.attribute"/>
+        </optional>
         <ref name="k.vmdisk.controller.attribute"/>
         <ref name="k.vmdisk.id.attribute"/>
         <optional>
@@ -3334,6 +3343,17 @@ and setup the system disk</db:para>
     
   -->
   <div>
+    <define name="k.machine.ovftype.attribute">
+      <attribute name="ovftype">
+        <a:documentation>The OVF configuration type</a:documentation>
+        <choice>
+          <value>zvm</value>
+          <value>povervm</value>
+          <value>xen</value>
+          <value>vmware</value>
+        </choice>
+      </attribute>
+    </define>
     <define name="k.machine.HWversion.attribute">
       <attribute name="HWversion">
         <a:documentation>The virtual HW version number for the VM configuration</a:documentation>
@@ -3364,6 +3384,42 @@ and setup the system disk</db:para>
         <a:documentation>the virtual guestOS identification string for the VM</a:documentation>
       </attribute>
     </define>
+    <define name="k.machine.min_memory.attribute">
+      <attribute name="min_memory">
+        <a:documentation>The virtual machine min memory</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
+    <define name="k.machine.des_memory.attribute">
+      <attribute name="des_memory">
+        <a:documentation>The virtual machine desired memory</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
+    <define name="k.machine.max_memory.attribute">
+      <attribute name="max_memory">
+        <a:documentation>The virtual machine max memory</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
+    <define name="k.machine.min_cpu.attribute">
+      <attribute name="min_cpu">
+        <a:documentation>The virtual machine min CPU count</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
+    <define name="k.machine.des_cpu.attribute">
+      <attribute name="des_cpu">
+        <a:documentation>The virtual machine desired CPU count</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
+    <define name="k.machine.max_cpu.attribute">
+      <attribute name="max_cpu">
+        <a:documentation>The virtual machine max CPU count</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
     <define name="k.machine.memory.attribute">
       <attribute name="memory">
         <a:documentation>The memory setup for the guest VM. Specify memory in MB</a:documentation>
@@ -3378,6 +3434,27 @@ and setup the system disk</db:para>
     </define>
     <define name="k.machine.attlist">
       <interleave>
+        <optional>
+          <ref name="k.machine.min_memory.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.machine.des_memory.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.machine.max_memory.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.machine.min_cpu.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.machine.des_cpu.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.machine.max_cpu.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.machine.ovftype.attribute"/>
+        </optional>
         <optional>
           <ref name="k.machine.HWversion.attribute"/>
         </optional>

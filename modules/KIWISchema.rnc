@@ -1492,7 +1492,7 @@ div {
 	k.type.format.attribute =
 		## Specifies the format of the virtual disk.
 		attribute format {
-			"ec2" | "ovf" | "qcow2" | "vmdk" | "vhd"
+			"ec2" | "ovf" | "ova" | "qcow2" | "vmdk" | "vhd"
 		}
 	k.type.fsnocheck.attribute =
 		## Turn off periodic filesystem checks on ext2/3/4.
@@ -1769,6 +1769,9 @@ div {
 # common element <vmdisk>
 #
 div {
+	k.vmdisk.disktype.attribute =
+		## The type of the disk as it is internally handled by the VM
+		attribute disktype { text }
 	k.vmdisk.controller.attribute =
 		## The disk controller used for the VM guest
 		attribute controller { "ide" | "scsi" }
@@ -1779,6 +1782,7 @@ div {
 		## The disk device to appear in the guest (xen only)
 		attribute device { text }
 	k.vmdisk.attlist =
+		k.vmdisk.disktype.attribute? &
 		k.vmdisk.controller.attribute &
 		k.vmdisk.id.attribute &
 		k.vmdisk.device.attribute?
@@ -2331,6 +2335,9 @@ div {
 # main block: <machine>
 #
 div {
+	k.machine.ovftype.attribute =
+		## The OVF configuration type
+		attribute ovftype { "zvm" | "povervm" | "xen" | "vmware" }
 	k.machine.HWversion.attribute =
 		## The virtual HW version number for the VM configuration
 		attribute HWversion { xsd:integer }
@@ -2343,6 +2350,24 @@ div {
 	k.machine.guestOS.attribute =
 		## the virtual guestOS identification string for the VM
 		attribute guestOS { text }
+	k.machine.min_memory.attribute =
+		## The virtual machine min memory
+		attribute min_memory { xsd:nonNegativeInteger }
+	k.machine.des_memory.attribute =
+		## The virtual machine desired memory
+		attribute des_memory { xsd:nonNegativeInteger }
+	k.machine.max_memory.attribute =
+		## The virtual machine max memory
+		attribute max_memory { xsd:nonNegativeInteger }
+	k.machine.min_cpu.attribute =
+		## The virtual machine min CPU count
+		attribute min_cpu { xsd:nonNegativeInteger }
+	k.machine.des_cpu.attribute =
+		## The virtual machine desired CPU count
+		attribute des_cpu { xsd:nonNegativeInteger }
+	k.machine.max_cpu.attribute =
+		## The virtual machine max CPU count
+		attribute max_cpu { xsd:nonNegativeInteger }
 	k.machine.memory.attribute =
 		## The memory setup for the guest VM. Specify memory in MB
 		attribute memory { xsd:nonNegativeInteger }
@@ -2350,6 +2375,13 @@ div {
         ## The number of virtual cpus for the guest VM
         attribute ncpus { xsd:nonNegativeInteger }
 	k.machine.attlist =
+		k.machine.min_memory.attribute? &
+		k.machine.des_memory.attribute? &
+		k.machine.max_memory.attribute? &
+		k.machine.min_cpu.attribute? &
+		k.machine.des_cpu.attribute? &
+		k.machine.max_cpu.attribute? &
+		k.machine.ovftype.attribute? &
 		k.machine.HWversion.attribute? &
 		k.machine.arch.attribute? &
 		k.machine.domain.attribute? &
