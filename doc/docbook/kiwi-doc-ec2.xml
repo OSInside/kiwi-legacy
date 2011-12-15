@@ -309,6 +309,18 @@
                 <entry><filename>ec2-public-images-eu/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
               </row>
               <row>
+                <entry>SA-East</entry>
+                <entry>aki-bc3ce3a1</entry>
+                <entry>x86</entry>
+                <entry><filename>ec2-public-images-sa/pv-grub-hd0-V1.02-i386.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
+                <entry>SA-East</entry>
+                <entry>aki-cc3ce3d1</entry>
+                <entry>x86-64</entry>
+                <entry><filename>ec2-public-images-sa/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
                 <entry>US-East</entry>
                 <entry>aki-805ea7e9</entry>
                 <entry>x86</entry>
