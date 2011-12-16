@@ -53,12 +53,15 @@ sub new {
 	#============================================
 	# Read .kiwirc
 	#--------------------------------------------
-	my $file = ".kiwirc";
-	if (($ENV{'HOME'}) && (-f $ENV{'HOME'}."/.kiwirc")) {
+	my $file;
+	if (-f '.kiwirc') {
+		$file = '.kiwirc';
+	}
+	elsif (($ENV{'HOME'}) && (-f $ENV{'HOME'}.'/.kiwirc')) {
 		$file = "$ENV{'HOME'}/.kiwirc";
 	}
 	my $kiwi = new KIWILog("tiny");
-	if ( -f $file) {
+	if ($file) {
 		if (! do $file) {
 			$kiwi -> warning ("Invalid $file file...");
 			$kiwi -> skipped ();
@@ -67,6 +70,7 @@ sub new {
 			$kiwi -> done ();
 		}
 	}
+	## no critic
 	no strict 'vars';
 	$data{BasePath}      = $BasePath;      # configurable base kiwi path
 	$data{Gzip}          = $Gzip;          # configurable gzip command
@@ -89,6 +93,7 @@ sub new {
 		# empty
 	}
 	use strict 'vars';
+	## use critic
 	my $BasePath = $data{BasePath};
 	#==========================================
 	# Globals (path names)
@@ -192,7 +197,7 @@ sub createDirInteractive {
 	}
 	# Directory does not exist and user did
 	# not request dir creation.
-	return undef;
+	return;
 }
 
 #==========================================
@@ -298,7 +303,7 @@ sub mount {
 	if (! %fsattr) {
 		$kiwi -> error  ("Couldn't detect filesystem on: $source");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check for DISK file
@@ -319,7 +324,7 @@ sub mount {
 				);
 				$kiwi -> failed ();
 				$this -> umount();
-				return undef;
+				return;
 			}
 			my $loop = $status;
 			push @UmountStack,"losetup -d $loop";
@@ -331,7 +336,7 @@ sub mount {
 					"Couldn't loop bind disk partition(s): $status"
 				);
 				$kiwi -> failed (); umount();
-				return undef;
+				return;
 			}
 			push @UmountStack,"kpartx -d $loop";
 			$this->{UmountStack} = \@UmountStack;
@@ -340,7 +345,7 @@ sub mount {
 			if (! -b $source) {
 				$kiwi -> error ("No such block device $source");
 				$kiwi -> failed (); umount();
-				return undef;
+				return;
 			}
 		}
 	}
@@ -355,7 +360,7 @@ sub mount {
 				$kiwi -> error  ("Couldn't loop bind logical extend: $status");
 				$kiwi -> failed ();
 				$this -> umount();
-				return undef;
+				return;
 			}
 			$source = $status;
 			push @UmountStack,"losetup -d $source";
@@ -373,7 +378,7 @@ sub mount {
 			$kiwi -> error  ("Couldn't open luks device: $status");
 			$kiwi -> failed ();
 			$this -> umount();
-			return undef;
+			return;
 		}
 		$source = "/dev/mapper/luks-".$salt;
 		push @UmountStack,"cryptsetup luksClose luks-$salt";
@@ -389,7 +394,7 @@ sub mount {
 			$kiwi -> error ("Failed to loop mount $source to: $dest: $status");
 			$kiwi -> failed ();
 			$this -> umount();
-			return undef;
+			return;
 		}
 	} else {
 		if ($type eq "clicfs") {
@@ -407,7 +412,7 @@ sub mount {
 			$kiwi -> error ("Failed to mount $source to: $dest: $status");
 			$kiwi -> failed ();
 			$this -> umount();
-			return undef;
+			return;
 		}
 	}
 	push @UmountStack,"umount $dest";
@@ -423,7 +428,7 @@ sub mount {
 			$kiwi -> error ("Failed to loop mount $source to: $dest: $status");
 			$kiwi -> failed ();
 			$this -> umount();
-			return undef;
+			return;
 		}
 		push @UmountStack,"umount $dest";
 		$this->{UmountStack} = \@UmountStack;
@@ -552,7 +557,7 @@ sub checkFileSystem {
 				if ($main::kiwi -> trace()) {
 					$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 				}
-				return undef;
+				return;
 			}
 			SWITCH: for ($data) {
 				/ext4/      && do {

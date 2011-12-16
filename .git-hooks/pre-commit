@@ -90,7 +90,7 @@ my @notClean4 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 
 # List of modules not clean to level 5 (gentel) of perlcritic
 my @notClean5 = qw (KIWIArchList.pm KIWIBoot.pm
-					KIWIGlobals.pm KIWIImageFormat.pm KIWIIsoLinux.pm
+					KIWIImageFormat.pm KIWIIsoLinux.pm
 					KIWILog.pm KIWIManager.pm KIWIMigrate.pm
 					KIWIProductData.pm KIWIRepoMetaHandler.pm
 					KIWIRoot.pm KIWISatSolverLegacy.pm);
