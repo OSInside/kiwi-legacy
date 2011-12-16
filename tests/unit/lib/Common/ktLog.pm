@@ -42,7 +42,7 @@ sub DESTROY {
 	# Clean up
 	# ---
 	unlink '/tmp/kiwiTestLog.log';
-    return;
+	return;
 }
 
 #==========================================
@@ -434,6 +434,17 @@ sub warning {
 }
 
 #==========================================
+# writeXMLDiff
+#------------------------------------------
+sub writeXMLDiff {
+	# ...
+	# Dummy implementation to mimick regular KIWILog object
+	# ---
+	my $this = shift;
+	return $this;
+}
+
+#==========================================
 # doNorm
 #------------------------------------------
 sub doNorm {
@@ -488,7 +499,7 @@ sub __printAllMessages {
 		my $msg = $this -> {warnMsg};
 		print {*STDERR} "Log set warning message: $msg\n";
 	}
-    return;
+	return;
 }
 
 #==========================================
