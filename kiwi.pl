@@ -664,6 +664,9 @@ sub init {
 	my $DiskStartSector;       # location of start sector (default is 32)
 	my $EditBootConfig;        # allow to run script before bootloader install
 	my $PackageManager;        # package manager to use
+	my $DiskBIOSSectorSize;    # sector size default is 512 bytes
+	my $DiskBIOSHeads;         # BIOS head number, overwrites kernel value
+	my $DiskBIOSSectors;       # BIOS sector number, overwrites kernel value
 	my $Version;               # version information
 	#==========================================
 	# create logger and cmdline object
@@ -754,6 +757,9 @@ sub init {
 		"test-image=s"          => \$TestImage,
 		"test-case=s"           => \$TestCase,
 		"start-sector=i"        => \$DiskStartSector,
+		"bios-sector-size=i"    => \$DiskBIOSSectorSize,
+		"bios-heads=i"          => \$DiskBIOSHeads,
+		"bios-sectors=i"        => \$DiskBIOSSectors,
 		"v|verbose=i"           => \$Verbosity,
 		"version"               => \$Version,
 		"yes|y"                 => \$defaultAnswer,
@@ -771,6 +777,12 @@ sub init {
 		$DiskStartSector
 	);
 	#========================================
+	# set sector size for alignment
+	#----------------------------------------
+	$cmdL -> setDiskBIOSSectorSize (
+		$DiskBIOSSectorSize
+	);
+	#========================================
 	# set list of filesystem options
 	#----------------------------------------
 	$cmdL -> setFilesystemOptions (
@@ -783,6 +795,18 @@ sub init {
 	$cmdL -> setMigrationOptions (
 		\@Exclude,\@Skip,$MigrateNoFiles,$MigrateNoTemplate
 	);
+	#========================================
+	# set BIOS heads for alignment
+	#----------------------------------------
+	if (defined $DiskBIOSHeads) {
+		$cmdL -> setDiskBIOSHeads ($DiskBIOSHeads);
+	}
+	#========================================
+	# set BIOS sectors for alignment
+	#----------------------------------------
+	if (defined $DiskBIOSSectors) {
+		$cmdL -> setDiskBIOSSectors ($DiskBIOSSectors);
+	}
 	#========================================
 	# check if edit-bootconfig option is set
 	#----------------------------------------
@@ -1401,6 +1425,18 @@ sub usage {
 	print "      The default is 2048. For newer disks including SSD\n";
 	print "      this is a reasonable default. In order to use the old\n";
 	print "      style disk layout the value can be set to 32\n";
+	print "\n";
+	print "    [ --bios-sector-size <number> ]\n";
+	print "      Overwrite the default 512 byte sector size value.\n";
+	print "      This will influence the partition alignment\n";
+	print "\n";
+	print "    [ --bios-heads <number> ]\n";
+	print "      Overwrite what the kernel thinks about the number of heads.\n";
+	print "      This will influence the partition alignment\n";
+	print "\n";
+	print "    [ --bios-sectors <number> ]\n";
+	print "      Overwrite what the kernel thinks about the number of\n";
+	print "      sectors. This will influence the partition alignment\n";
 	print "\n";
 	print "    [ --debug ]\n";
 	print "      Prints a stack trace in case of internal errors\n";

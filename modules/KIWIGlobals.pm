@@ -48,6 +48,7 @@ sub new {
 	$data{FSInodeRatio}    = 16384;
 	$data{FSInodeSize}     = 256;
 	$data{DiskStartSector} = 2048;
+	$data{DiskSectorSize}  = 512;
 	$data{OverlayRootTree} = 0;
 	#============================================
 	# Read .kiwirc

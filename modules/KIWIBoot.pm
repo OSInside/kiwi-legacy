@@ -4175,6 +4175,10 @@ sub getGeometry {
 	my $this = shift;
 	my $disk = shift;
 	my $kiwi = $this->{kiwi};
+	my $cmdL = $this->{cmdL};
+	my $secsz = $cmdL -> getDiskBIOSSectorSize();
+	my $BIOS_geo_head   = $cmdL -> getDiskBIOSHeads();
+	my $BIOS_geo_sector = $cmdL -> getDiskBIOSSectors();
 	my $status;
 	my $result;
 	my $parted;
@@ -4192,6 +4196,23 @@ sub getGeometry {
 		$kiwi -> loginfo ($status);
 		return 0;
 	}
+	if ((! $BIOS_geo_head) || (! $BIOS_geo_sector)) {
+		$parted = "$parted_exec $disk unit cyl print";
+		$status = qxx ("$parted | grep ^BIOS 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> loginfo ($status);
+			return 0;
+		}
+		chomp $status;
+		if ($status =~ /geometry:.*,(\d+),(\d+)\./) {
+			$BIOS_geo_head   = $1;
+			$BIOS_geo_sector = $2;
+		} else {
+			$kiwi -> loginfo ("Failed to read BIOS cyl,head,sector geometry\n");
+			return 0;
+		}
+	}
 	$parted = "$parted_exec -m $disk unit s print";
 	$status = qxx (
 		"$parted | head -n 3 | tail -n 1 | cut -f2 -d:"
@@ -4205,8 +4226,13 @@ sub getGeometry {
 	$status =~ s/s//;
 	$status --;
 	$this->{pDiskSectors} = $status;
+	$this->{pDiskCylSize} = $BIOS_geo_head * $BIOS_geo_sector * $secsz;
 	$kiwi -> loginfo (
 		"Disk Sector count is: $this->{pDiskSectors}\n"
+	);
+	my $eq = $BIOS_geo_head.' * '.$BIOS_geo_sector.' * '.$secsz;
+	$kiwi -> loginfo (
+		"Disk Cylinder size is: ($eq) $this->{pDiskCylSize} Bytes\n"
 	);
 	return $status;
 }
@@ -4217,21 +4243,29 @@ sub getGeometry {
 sub getSector {
 	# ...
 	# turn the given size in MB to the number of
-	# required sectors
+	# required sectors aligned to the cylinder
+	# boundary
 	# ----
 	my $this  = shift;
 	my $size  = shift;
 	my $count = $this->{pDiskSectors};
-	my $secsz = 512;
+	my $cylsz = $this->{pDiskCylSize};
+	my $secsz = $this->{gdata}->{DiskSectorSize};
 	my $sectors;
 	if ($size =~ /\+(.*)M$/) {
-		$sectors = sprintf ("%.0f",($size * 1048576) / $secsz);
-		if ($sectors == 0) {
-			$sectors = 8;
-		}
+		# turn value into bytes
+		$size *= 1048576;
 	} else {
-		$sectors = $count;
+		# use entire rest space
+		$size = $count * $secsz;
 	}
+	if ($size < $cylsz) {
+		$size = $cylsz;
+	}
+	$size = int ($size / $cylsz);
+	$size *= $cylsz;
+	$sectors = sprintf ("%.0f",$size / $secsz);
+	$sectors-= 1;
 	return $sectors;
 }
 
@@ -4254,8 +4288,8 @@ sub resetGeometry {
 #------------------------------------------
 sub initGeometry {
 	# ...
-	# setup start sector and stop cylinder for the given size at
-	# first invocation the start cylinder is set to the default
+	# setup start sector and stop sector for the given size at
+	# first invocation the start sector is set to the default
 	# value from the global space or to the value specified on
 	# the commandline. On any subsequent call the start sector is
 	# calculated from the end sector of the previos partition

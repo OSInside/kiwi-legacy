@@ -1314,6 +1314,63 @@ sub getDiskStartSector {
 }
 
 #==========================================
+# setDiskBIOSSectorSize
+#------------------------------------------
+sub setDiskBIOSSectorSize {
+	my $this  = shift;
+	my $value = shift;
+	if (! defined $value) {
+		$value = $this->{gdata}->{DiskSectorSize};
+	}
+	$this->{BIOSSectorSize} = $value;
+	return 1;
+}
+
+#==========================================
+# getDiskBIOSSectorSize
+#------------------------------------------
+sub getDiskBIOSSectorSize {
+	my $this = shift;
+	return $this->{BIOSSectorSize};
+}
+
+#==========================================
+# setDiskBIOSHeads
+#------------------------------------------
+sub setDiskBIOSHeads {
+	my $this  = shift;
+	my $value = shift;
+	$this->{BIOSHeads} = $value;
+	return 1;
+}
+
+#==========================================
+# getDiskBIOSHeads
+#------------------------------------------
+sub getDiskBIOSHeads {
+	my $this = shift;
+	return $this->{BIOSHeads};
+}
+
+#==========================================
+# setDiskBIOSSectors
+#------------------------------------------
+sub setDiskBIOSSectors {
+	my $this  = shift;
+	my $value = shift;
+	$this->{BIOSSectors} = $value;
+	return 1;
+}
+
+#==========================================
+# getDiskBIOSSectors
+#------------------------------------------
+sub getDiskBIOSSectors {
+	my $this = shift;
+	return $this->{BIOSSectors};
+}
+
+#==========================================
 # setEditBootConfig
 #------------------------------------------
 sub setEditBootConfig {
