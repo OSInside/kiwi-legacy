@@ -68,7 +68,7 @@
 		<source path="obs:///SUSE:SLE-10-SP2:GA/standard"/>
 	</repository>
 	<repository type="rpm-md">
-		<source path="http://download.opensuse.org/repositories/Virtualization:/Appliances:/suse-sle10/SLE_10_SDK"/>
+		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle10-repo"/>
 	</repository>
 	<packages type="bootstrap">
 		<package name="aaa_base"/>
