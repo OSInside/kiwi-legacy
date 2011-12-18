@@ -4179,6 +4179,12 @@ sub getGeometry {
 	my $secsz = $cmdL -> getDiskBIOSSectorSize();
 	my $BIOS_geo_head   = $cmdL -> getDiskBIOSHeads();
 	my $BIOS_geo_sector = $cmdL -> getDiskBIOSSectors();
+	# ...
+	# add +1 to the BIOS values to stay compatible with what
+	# fdisk does. Important for the disk layout on arm
+	# ---
+	$BIOS_geo_head++;
+	$BIOS_geo_sector++;
 	my $status;
 	my $result;
 	my $parted;
