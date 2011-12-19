@@ -3669,10 +3669,17 @@ sub extractLinux {
 		}
 		# /.../
 		# the KIWIConfig::suseStripKernel() function provides the
-		# kernel as common name /boot/vmlinuz. We use this file for
-		# the extraction
+		# kernel as common name /boot/vmlinuz so we use this file
+		# for the extraction
 		# ----
-		qxx ("cp $imageTree/boot/vmlinuz $file");
+		my $src_kernel = "$imageTree/boot/vmlinuz";
+		if (! -e $src_kernel) {
+			$kiwi -> failed ();
+			$kiwi -> info   ("Can't find kernel for extraction: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		qxx ("cp $src_kernel $file");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -3681,6 +3688,9 @@ sub extractLinux {
 			return;
 		}
 		my $kernel = qxx ("get_kernel_version $file"); chomp $kernel;
+		if ($kernel eq "") {
+			$kernel = "no-version-found";
+		}
 		qxx ("mv -f $file $file.$kernel && ln -s $shortfile.$kernel $file");
 		# /.../
 		# check for the Xen hypervisor and extract them as well

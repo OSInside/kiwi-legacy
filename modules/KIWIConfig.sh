@@ -1169,6 +1169,14 @@ function suseGFXBoot {
 		if [ -f /boot/memtest* ];then 
 			mv /boot/memtest* /image/loader/memtest
 		fi
+	elif [ "$loader" = "uboot" ];then
+		# uboot loaders
+		if [ -f /boot/u-boot.bin ];then
+			mv /boot/u-boot.bin /image/loader
+		fi
+		if [ -f /boot/MLO ];then
+			mv /boot/MLO /image/loader
+		fi
 	else
 		# boot loader binary part of MBR
 		:
@@ -1438,7 +1446,9 @@ function suseStripKernel {
 			# create common kernel files, last wins !
 			#------------------------------------------
 			pushd /boot
-			if [ -f vmlinux-$VERSION.gz ];then
+			if [ -f uImage-$VERSION ];then
+				mv uImage-$VERSION vmlinuz
+			elif [ -f vmlinux-$VERSION.gz ];then
 				mv vmlinux-$VERSION.gz vmlinux.gz
 				mv vmlinuz-$VERSION vmlinuz
 			elif [ -f vmlinuz-$VERSION.el5 ];then

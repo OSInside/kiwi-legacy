@@ -37,6 +37,10 @@ if [ "$arch" = "ppc64" ];then
 	test -z "$loader" && export loader=yaboot
 	test -z  "$ELOG_BOOTSHELL" && export ELOG_BOOTSHELL=/dev/hvc0
 	test -z  "$ELOG_CONSOLE"   && export ELOG_CONSOLE=/dev/hvc0
+elif [[ $arch =~ arm ]];then
+	test -z "$loader" && export loader=uboot
+	test -z "$ELOG_CONSOLE"    && export ELOG_CONSOLE=/dev/tty3
+	test -z "$ELOG_BOOTSHELL"  && export ELOG_BOOTSHELL=/dev/tty2
 else
 	test -z "$loader" && export loader=grub
 	test -z "$ELOG_CONSOLE"    && export ELOG_CONSOLE=/dev/tty3
@@ -752,6 +756,7 @@ function installBootLoader {
 		i*86-grub)       installBootLoaderGrub ;;
 		x86_64-grub)     installBootLoaderGrub ;;
 		ppc*)            installBootLoaderLilo ;;
+		arm*)            installBootLoaderUBoot ;;
 		i*86-syslinux)   installBootLoaderSyslinux ;;
 		x86_64-syslinux) installBootLoaderSyslinux ;;
 		i*86-extlinux)   installBootLoaderSyslinux ;;
@@ -796,6 +801,21 @@ function installBootLoaderRecovery {
 			"*** boot loader setup for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+}
+#======================================
+# installBootLoaderUBoot
+#--------------------------------------
+function installBootLoaderUBoot {
+	if [ -x /usr/bin/mkimage ];then
+		mkimage -A arm -O linux -a 0 -e 0 -T script -C none \
+			-n 'Boot-Script' -d /boot/boot.script /boot/boot.scr
+		if [ ! $? = 0 ];then
+			Echo "Failed to create boot script image"
+		fi
+	else
+		Echo "Image doesn't have u-boot-tools installed"
+		Echo "Can't create boot script image"
+	fi
 }
 #======================================
 # installBootLoaderS390
@@ -1109,6 +1129,7 @@ function setupBootLoader {
 		s390-zipl)       eval setupBootLoaderS390 $para ;;
 		s390x-zipl)      eval setupBootLoaderS390 $para ;;
 		ppc*)            eval setupBootLoaderLilo $para ;;
+		arm*)            eval setupBootLoaderUBoot $para ;;
 		*)
 		systemException \
 			"*** boot loader setup for $arch-$loader not implemented ***" \
@@ -1432,6 +1453,81 @@ function setupBootLoaderGrubRecovery {
 			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 		fi
 	fi
+}
+#======================================
+# setupBootLoaderUBoot
+#--------------------------------------
+function setupBootLoaderUBoot {
+	# /.../
+	# create boot.script used for the uboot
+	# bootloader
+	# ----
+	local IFS
+	local mountPrefix=$1  # mount path of the image
+	local destsPrefix=$2  # base dir for the config files
+	local unum=$3         # boot partition ID
+	local rdev=$4         # root partition
+	local ufix=$5         # title postfix
+	local swap=$6         # optional swap partition
+	local conf=$destsPrefix/boot/boot.script
+	local kernel=""
+	local initrd=""
+	#======================================
+	# check for device by ID
+	#--------------------------------------
+	local diskByID=`getDiskID $rdev`
+	local swapByID=`getDiskID $swap swap`
+	#======================================
+	# check for system image .profile
+	#--------------------------------------
+	if [ -f $mountPrefix/image/.profile ];then
+		importFile < $mountPrefix/image/.profile
+	fi
+	#======================================
+	# check for kernel options
+	#--------------------------------------
+	if [ ! -z "$kiwi_cmdline" ];then
+		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
+	fi
+	#======================================
+	# create standard entry
+	#--------------------------------------
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test -z "$i";then
+			continue
+		fi
+		kernel=`echo $i | cut -f1 -d:`
+		initrd=`echo $i | cut -f2 -d:`
+		echo "setenv ramdisk $initrd;" > $conf
+		echo "setenv kernel $kernel;" >> $conf
+		echo -n "setenv bootargs root=$diskByID loader=$loader" >> $conf
+		if [ ! -z "$imageDiskDevice" ];then
+			echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+		fi
+		if [ ! -z "$swap" ];then
+			echo -n " resume=$swapByID" >> $conf
+		fi
+		if [ "$haveLVM" = "yes" ];then
+			echo -n " VGROUP=$VGROUP" >> $conf
+		fi
+		if [ -f $mountPrefix/bin/systemd ];then
+			echo -n " init=/bin/systemd" >> $conf
+		fi
+		echo -n " $KIWI_INITRD_PARAMS"  >> $conf
+		echo -n " $KIWI_KERNEL_OPTIONS" >> $conf
+		echo ";" >> $conf
+		# only one entry...
+		break
+	done
+	echo '${loadcmd} ${ramdiskaddr} ${ramdisk};' >> $conf
+	echo 'if imi ${ramdiskaddr}; then; else'     >> $conf
+	echo '    setenv bootargs ${bootargs} noinitrd;' >> $conf
+	echo '    setenv ramdiskaddr "";' >> $conf
+	echo 'fi;' >> $conf
+	echo '${loadcmd} ${kerneladdr} ${kernel}' >> $conf
+	echo 'if imi ${kerneladdr}; then' >> $conf
+	echo '    bootm ${kerneladdr} ${ramdiskaddr}' >> $conf
+	echo 'fi;' >> $conf
 }
 #======================================
 # setupBootLoaderS390

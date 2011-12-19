@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="5.3" name="LimeJeOS-SLE12">
+	<description type="system">
+		<author>Marcus Schäfer</author>
+		<contact>ms@novell.com</contact>
+		<specification>
+			SLE12 JeOS image for arm (panda/beagle) board
+		</specification>
+	</description>
+	<preferences>
+		<type image="tbz" primary="true"/>
+		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-SLES12" bootloader="uboot" bootkernel="omap2plus" kernelcmdline="console=ttyO2">
+			<systemdisk/>
+		</type>
+		<version>1.12.1</version>
+		<packagemanager>zypper</packagemanager>
+		<locale>en_US</locale>
+		<keytable>us.map.gz</keytable>
+		<timezone>Europe/Berlin</timezone>
+		<hwclock>utc</hwclock>
+		<rpm-excludedocs>true</rpm-excludedocs>
+		<boot-theme>openSUSE</boot-theme>
+	</preferences>
+	<users group="root">
+		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+	</users>
+	<repository type="rpm-md">
+		<source path="http://download.opensuse.org/repositories/openSUSE:/Factory:/ARM/standard"/>
+	</repository>
+	<packages type="bootstrap">
+		<package name="ifplugd"/>
+		<package name="iputils"/>
+		<package name="vim"/>
+		<package name="lvm2"/>
+		<package name="kernel-omap2plus"/>
+		<package name="filesystem"/>
+		<package name="glibc-locale"/>
+		<package name="cracklib-dict-full"/>
+		<package name="module-init-tools"/>
+		<package name="kbd"/>
+		<package name="aaa_base"/>
+		<package name="hwinfo"/>
+		<package name="procps"/>
+		<package name="sysconfig"/>
+		<package name="pwdutils"/>
+		<package name="openssh"/>
+		<package name="dhcpcd"/>
+		<package name="insserv"/>
+		<package name="polkit"/>
+		<package name="netcfg"/>
+		<package name="rpcbind"/>
+		<package name="mkinitrd"/>
+		<package name="rpm"/>
+		<package name="rsyslog"/>
+		<package name="systemd"/>
+		<package name="u-boot-tools"/>
+	</packages>
+</image>

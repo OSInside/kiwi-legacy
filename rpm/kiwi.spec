@@ -193,7 +193,7 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
 
 %package -n kiwi-desc-vmxboot
 Requires:       kiwi = %{version}
@@ -293,7 +293,7 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
 
 %package -n kiwi-templates
 Requires:       kiwi-desc-vmxboot = %{version}
@@ -313,7 +313,7 @@ Authors:
     Marcus Schaefer
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
 
 %package -n kiwi-media-requires
 Summary:        OpenSuSE - packages which should be part of the DVD
@@ -516,7 +516,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/isoboot/rhel*
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
 
 %files -n kiwi-desc-vmxboot
 %defattr(-, root, root)
@@ -546,7 +546,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/oemboot/suse*
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
 
 %files -n kiwi-templates
 %defattr(-, root, root)
@@ -567,7 +567,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
 
 %files -n kiwi-media-requires
 %defattr(-, root, root)

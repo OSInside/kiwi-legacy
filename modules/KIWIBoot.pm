@@ -649,6 +649,8 @@ sub setupInstallCD {
 	my $bootloader;
 	if ($arch =~ /ppc|ppc64/) {
 		$bootloader = "yaboot";
+	} elsif ($arch =~ /arm/) {
+		$bootloader = "uboot";
 	} else {
 		$bootloader = "grub";
 	}
@@ -1043,6 +1045,8 @@ sub setupInstallStick {
 	my $bootloader;
 	if ($arch =~ /ppc|ppc64/) {
 		$bootloader = "yaboot";
+	} elsif ($arch =~ /arm/) {
+		$bootloader = "uboot";
 	} else {
 		$bootloader = "grub";
 	}
@@ -1404,13 +1408,8 @@ sub setupInstallStick {
 		$this -> cleanLoop ();
 		return;
 	}
-	$status = qxx ("cp -a $tmpdir/boot $loopdir 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't install boot data: $status");
-		$kiwi -> failed ();
-		$this -> cleanLoop ();
+	if (! $this -> copyBootCode ($tmpdir,$loopdir,$bootloader)) {
+		$main::global -> umount();
 		return;
 	}
 	$main::global -> umount();
@@ -1551,6 +1550,8 @@ sub setupBootDisk {
 	my $bootloader;
 	if ($arch =~ /ppc|ppc64/) {
 		$bootloader = "yaboot";
+	} elsif ($arch =~ /arm/) {
+		$bootloader = "uboot";
 	} else {
 		$bootloader = "grub";
 	}
@@ -1860,7 +1861,7 @@ sub setupBootDisk {
 		if (! $lvm) {
 			if (($syszip) || ($haveSplit) || ($dmapper)) {
 				# xda1 ro / xda2 rw
-				if ($bootloader =~ /(sys|ext)linux|yaboot/) {
+				if ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
 					my $partid = "c";
 					if ($bootloader eq "extlinux" ) {
 						$partid = "83";
@@ -1901,7 +1902,7 @@ sub setupBootDisk {
 				}
 			} else {
 				# xda1 rw
-				if ($bootloader =~ /(sys|ext)linux|yaboot/) {
+				if ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
 					my $partid = "c";
 					if ($bootloader eq "extlinux" ) {
 						$partid = "83";
@@ -1931,7 +1932,7 @@ sub setupBootDisk {
 				}
 			}
 		} else {
-			if ($bootloader =~ /(sys|ext)linux|yaboot/) {
+			if ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
 				my $partid = "c";
 				if ($bootloader eq "extlinux" ) {
 					$partid = "83";
@@ -2267,10 +2268,10 @@ sub setupBootDisk {
 	#==========================================
 	# create bootloader filesystem if needed
 	#------------------------------------------
-	if ($bootloader eq "syslinux") {
+	if (($bootloader eq "syslinux") || ($bootloader eq "uboot")) {
 		$boot = $deviceMap{fat};
 		$kiwi -> info ("Creating DOS boot filesystem");
-		$status = qxx ("/sbin/mkdosfs $boot 2>&1");
+		$status = qxx ("/sbin/mkdosfs -F 32 -n 'boot' $boot 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -2292,6 +2293,7 @@ sub setupBootDisk {
 			$this -> cleanLoop ();
 			return;
 		}
+		$kiwi -> done();
 	} elsif (
 		($dmapper) || ($haveluks) || ($needBootP) ||
 		($lvm) || ($bootloader eq "extlinux")
@@ -2334,7 +2336,7 @@ sub setupBootDisk {
 	#==========================================
 	# Mount boot space on this disk
 	#------------------------------------------
-	if ($bootloader eq "syslinux") {
+	if (($bootloader eq "syslinux") || ($bootloader eq "uboot")) {
 		$boot = $deviceMap{fat};
 	} elsif ($bootloader eq "extlinux") {
 		$boot = $deviceMap{extlinux};
@@ -2365,13 +2367,8 @@ sub setupBootDisk {
 	#==========================================
 	# Copy boot data on system image
 	#------------------------------------------
-	$status = qxx ("cp -dR $tmpdir/boot $loopdir 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Couldn't copy boot data to system image: $status");
-		$kiwi -> failed ();
-		$this -> cleanLoop ();
+	if (! $this -> copyBootCode ($tmpdir,$loopdir,$bootloader)) {
+		$main::global -> umount();
 		return;
 	}
 	$main::global -> umount();
@@ -2902,6 +2899,39 @@ sub setupBootLoaderStages {
 			return;
 		}
 		$kiwi -> done();
+	}
+	#==========================================
+	# uboot stages
+	#------------------------------------------
+	if ($loader eq "uboot") {
+		my $loaders= "'image/loader/*'";
+		my $unzip  = "$zipper -cd $initrd 2>&1";
+		#==========================================
+		# Create uboot boot data directory
+		#------------------------------------------
+		qxx ("mkdir -p $tmpdir/boot 2>&1");
+		#==========================================
+		# Get uboot/MLO loaders
+		#------------------------------------------
+		$kiwi -> info ("Importing uboot loaders");
+		if ($zipped) {
+			$status= qxx ("$unzip | (cd $tmpdir && cpio -di $loaders 2>&1)");
+		} else {
+			$status= qxx ("cat $initrd|(cd $tmpdir && cpio -di $loaders 2>&1)");
+		}
+		if (-d $tmpdir."/image/loader") {
+			$status = qxx (
+				"mv $tmpdir/image/loader/* $tmpdir/boot 2>&1"
+			);
+			$result = $? >> 8;
+			$kiwi -> done();
+		} else {
+			$kiwi -> skipped();
+		}
+		#==========================================
+		# Cleanup tmpdir
+		#------------------------------------------
+		qxx ("rm -rf $tmpdir/image 2>&1");
 	}
 	#==========================================
 	# more boot managers to come...
@@ -3620,9 +3650,139 @@ sub setupBootLoaderConfiguration {
 		$kiwi -> done ();
 	}
 	#==========================================
+	# uboot
+	#------------------------------------------
+	if ($loader eq "uboot") {
+		#==========================================
+		# Create MBR id file for boot device check
+		#------------------------------------------
+		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
+		qxx ("mkdir -p $tmpdir/boot/grub");
+		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create mbrid file: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		print FD "$this->{mbrid}";
+		close FD;
+		$kiwi -> done();
+		#==========================================
+		# Create uboot image file from initrd
+		#------------------------------------------
+		$kiwi -> info ("Creating uBoot initrd image...");
+		$cmdline =~ s/\n//g;
+		my $mkopts = "-A arm -O linux -T ramdisk -C none -a 0x0 -e 0x0";
+		my $inputf = "$tmpdir/boot/initrd.vmx";
+		my $result = "$tmpdir/boot/initrd.uboot";
+		my $data = qxx ("mkimage $mkopts -n 'Initrd' -d $inputf $result");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to create uboot initrd image: $data");
+			$kiwi -> failed ();
+			return;
+		}
+		$kiwi -> done();
+		#==========================================
+		# Create boot.script
+		#------------------------------------------
+		$kiwi -> info ("Creating boot.script uboot config file...");
+		#==========================================
+		# Standard boot
+		#------------------------------------------
+		if (! open (FD,">$tmpdir/boot/boot.script")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create boot.script: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		print FD 'setenv ramdisk boot/initrd.uboot;'."\n";
+		print FD 'setenv kernel boot/linux.vmx;'."\n";
+		print FD 'setenv initrd_high "0xffffffff";'."\n";
+		print FD 'setenv fdt_high "0xffffffff";'."\n";
+		print FD 'setenv bootcmd "';
+		print FD 'fatload mmc 0:1 0x80000000 boot/linux.vmx; ';
+		print FD 'fatload mmc 0:1 0x81600000 boot/initrd.uboot; ';
+		print FD 'bootm 0x80000000 0x81600000";'."\n";
+		if ($type =~ /^KIWI CD/) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("*** uboot: CD boot not supported ***");
+			$kiwi -> failed ();
+			return;
+		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+			print FD "setenv bootargs loader=$bloader $cmdline;"."\n";
+		} else {
+			print FD "setenv bootargs loader=$bloader $cmdline;"."\n";
+		}
+		print FD 'boot'."\n";
+		close FD;
+		#==========================================
+		# Create machine readable uboot format
+		#------------------------------------------
+		$mkopts = "-A arm -O linux -a 0 -e 0 -T script -C none";
+		$inputf = "$tmpdir/boot/boot.script";
+		$result = "$tmpdir/boot/boot.scr";
+		$data = qxx ("mkimage $mkopts -n 'Boot-Script' -d $inputf $result");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to create uboot script image: $data");
+			$kiwi -> failed ();
+			return;
+		}
+		$kiwi -> done();
+	}
+	#==========================================
 	# more boot managers to come...
 	#------------------------------------------
 	# ...
+	return $this;
+}
+
+#==========================================
+# copyBootCode
+#------------------------------------------
+sub copyBootCode {
+	my $this   = shift;
+	my $source = shift;
+	my $dest   = shift;
+	my $loader = shift;
+	my $kiwi = $this->{kiwi};
+	my $status = qxx ("cp -dR $source/boot $dest 2>&1");
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Couldn't copy boot data to system image: $status");
+		$kiwi -> failed ();
+		return;
+	}
+	if ($loader eq "uboot") {
+		$status = qxx ("mv $dest/boot/boot.scr $dest");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Couldn't move boot script: $status");
+			$kiwi -> failed ();
+			return;
+		}
+		if (-f "$dest/boot/u-boot.bin") {
+			$status = qxx ("mv $dest/boot/u-boot.bin $dest");
+			$result = $? >> 8;
+		}
+		if (-f "$dest/boot/MLO") {
+			$status = qxx ("mv $dest/boot/MLO $dest");
+			$result = $? >> 8;
+		}
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error (
+				"Couldn't move uboot/MLO loaders to final path: $status"
+			);
+			$kiwi -> failed ();
+			return;
+		}
+	}
 	return $this;
 }
 
@@ -4020,6 +4180,12 @@ sub installBootLoader {
 				return;
 			}
 		}
+	}
+	#==========================================
+	# install uboot
+	#------------------------------------------
+	if ($loader eq "uboot") {
+		# uboot loader doesn't get installed
 	}
 	#==========================================
 	# more boot managers to come...
@@ -4511,7 +4677,7 @@ sub setDefaultDeviceMap {
 	for (my $i=1;$i<=3;$i++) {
 		$result{$i} = $device.$i;
 	}
-	if ($loader =~ /(sys|ext)linux|yaboot/) {
+	if ($loader =~ /(sys|ext)linux|yaboot|uboot/) {
 		my $search = "c";
 		if ($loader eq "extlinux" ) {
 			$search = "83";
@@ -4522,7 +4688,7 @@ sub setDefaultDeviceMap {
 		for (my $i=3;$i>=1;$i--) {
 			my $type = $this -> getStorageID ($device,$i);
 			if ($type eq $search) {
-				if ($loader eq "syslinux" ) {
+				if (($loader eq "syslinux") || ($loader eq "uboot")) {
 					$result{fat} = $device.$i;
 				} elsif ($loader eq "yaboot" ) {
 					$result{prep} = $device.$i;
@@ -4558,7 +4724,7 @@ sub setLoopDeviceMap {
 	for (my $i=1;$i<=3;$i++) {
 		$result{$i} = "/dev/mapper".$dmap."p$i";
 	}
-	if ($loader =~ /(sys|ext)linux|yaboot/) {
+	if ($loader =~ /(sys|ext)linux|yaboot|uboot/) {
 		my $search = "c";
 		if ($loader eq "extlinux" ) {
 			$search = "83";
@@ -4569,7 +4735,7 @@ sub setLoopDeviceMap {
 		for (my $i=3;$i>=1;$i--) {
 			my $type = $this -> getStorageID ($device,$i);
 			if ("$type" eq "$search") {
-				if ($loader eq "syslinux") {
+				if (($loader eq "syslinux") || ($loader eq "uboot")) {
 					$result{fat} = "/dev/mapper".$dmap."p$i";
 				} elsif ($loader eq "yaboot" ) {
 					$result{prep} = "/dev/mapper".$dmap."p$i";
@@ -4614,16 +4780,16 @@ sub setLVMDeviceMap {
 	for (my $i=0;$i<@names;$i++) {
 		$result{$i+1} = "/dev/$group/".$names[$i];
 	}
-	if ($loader =~ /(sys|ext)linux|yaboot/) {
+	if ($loader =~ /(sys|ext)linux|yaboot|uboot/) {
 		if ($device =~ /loop/) {
 			my $dmap = $device; $dmap =~ s/dev\///;
-			if ($loader =~ /syslinux|yaboot/) {
+			if ($loader =~ /syslinux|yaboot|uboot/) {
 				$result{fat} = "/dev/mapper".$dmap."p1";
 			} else {
 				$result{extlinux} = "/dev/mapper".$dmap."p1";
 			}
 		} else {
-			if ($loader =~ /syslinux|yaboot/) {
+			if ($loader =~ /syslinux|yaboot|uboot/) {
 				$result{fat} = $device."1";
 			} else {
 				$result{extlinux} = $device."1";
@@ -5121,12 +5287,17 @@ sub __getBootSize {
 	my $extend = shift;
 	my $kiwi   = $this->{kiwi};
 	my $boot   = $extend."/boot";
+	my $arch   = qxx ("uname -m"); chomp $arch;
 	my $bbytes = qxx ("du -s --block-size=1 $boot | cut -f1"); chomp $bbytes;
 	# 3 times the size should be enough for kernel updates
 	my $gotMB  = sprintf ("%.0f",(($bbytes / 1048576) * 3));
 	my $minMB  = 150;
 	if ($gotMB < $minMB) {
 		$gotMB = $minMB;
+	}
+	# on arm it's required to have a maximum of 64MB for the boot part
+	if ($arch =~ /arm/) {
+		$gotMB = 64;
 	}
 	$kiwi -> loginfo ("Set boot space to: ".$gotMB."M\n");
 	return $gotMB;

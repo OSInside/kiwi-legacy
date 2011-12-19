@@ -36,6 +36,9 @@ sub new {
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
+	my %data;
+	my $arch = qxx ("uname -m");
+	chomp $arch;
 	#==========================================
 	# Globals (generic)
 	#------------------------------------------
