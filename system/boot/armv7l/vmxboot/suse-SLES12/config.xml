@@ -16,7 +16,7 @@
 		<profile name="default"     description="Booting default setup"/>
 		<profile name="std"         description="KERNEL: For Qemu"/>
 		<profile name="tegra"       description="KERNEL: For tegra boards"/>
-		<profile name="omap2plus"   description="KERNEL: For panda boards"/>
+		<profile name="omap4panda"  description="KERNEL: For panda boards"/>
 		<profile name="omap3beagle" description="KERNEL: For beagle boards"/>
 		<profile name="imx51"       description="KERNEL: For efika boards"/>
 	</profiles>
@@ -63,7 +63,7 @@
 		<file name="drivers/gpu/drm/radeon/radeon.ko"/>
 	</drivers>
 	<repository type="rpm-md" status="replaceable">
-		<source path="http://reiser.suse.de:82/openSUSE:/Factory:/ARM/standard"/>
+		<source path="http://download.opensuse.org/repositories/openSUSE:/Factory:/ARM/standard"/>
 	</repository>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel-default"/>
@@ -74,10 +74,9 @@
 	<packages type="bootstrap" profiles="imx51">
 		<package name="kernel-imx51"/>
 	</packages>
-	<packages type="bootstrap" profiles="omap2plus">
+	<packages type="bootstrap" profiles="omap4panda">
 		<package name="kernel-omap2plus"/>
 		<package name="u-boot-omap4panda"/>
-		<package name="x-loader-omap4panda"/>
 	</packages>
 	<packages type="bootstrap" profiles="omap3beagle">
 		<package name="kernel-omap2plus"/>
