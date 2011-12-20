@@ -69,5 +69,6 @@
 		<package name="systemd-sysvinit"/>
 		<package name="u-boot-tools"/>
 		<package name="less"/>
+		<package name="zypper"/>
 	</packages>
 </image>
