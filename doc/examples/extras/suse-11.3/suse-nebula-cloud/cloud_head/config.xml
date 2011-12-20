@@ -65,7 +65,7 @@
 		<package name="xmlrpc-c"/>
 		<package name="yast2-dhcp-server"/>
 		<package name="yast2-firstboot"/>
-        <package name="yast2-ncurses"/>
+		<package name="yast2-ncurses"/>
 		<package name="yast2-network"/>
 		<package name="yast2-nfs-server"/>
 	</packages>

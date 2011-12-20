@@ -30,11 +30,11 @@
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<!-- internal suse buildservice repo
+<!-- internal suse buildservice repo
 	<repository type="rpm-md">
 		<source path="http://reiser.suse.de:82/openSUSE:/Factory:/ARM/standard"/>
 	</repository>
-	-->
+-->
 	<repository type="rpm-md">
 		<source path="http://download.opensuse.org/repositories/openSUSE:/Factory:/ARM/standard"/>
 	</repository>

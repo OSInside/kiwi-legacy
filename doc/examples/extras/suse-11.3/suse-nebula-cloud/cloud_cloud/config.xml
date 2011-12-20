@@ -48,7 +48,7 @@
 		<package name="nfs-client"/>
 		<package name="openssh"/>
 		<package name="openssl"/>
-        <package name="pciutils"/>
+		<package name="pciutils"/>
 		<package name="qemu"/>
 		<package name="rsyslog"/>
 		<package name="ruby"/>
@@ -58,8 +58,8 @@
 		<package name="terminfo"/>
 		<package name="vi"/>
 		<package name="xmlrpc-c"/>
-        <package name="yast2-country"/>
-        <package name="yast2-ncurses"/>
+		<package name="yast2-country"/>
+		<package name="yast2-ncurses"/>
 		<package name="yast2-nfs-client"/>
 	</packages>
 	<packages type="bootstrap">
