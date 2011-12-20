@@ -8,11 +8,11 @@
 			SLE12 JeOS image for arm (panda/beagle) board
 		</specification>
 	</description>
+	<profiles>
+		<profile name="pandaFlavour" description="Kernel/Tools setup for panda boards" import="true"/>
+	</profiles>
 	<preferences>
 		<type image="tbz" primary="true"/>
-		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-SLES12" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="console=ttyO2">
-			<systemdisk/>
-		</type>
 		<version>1.12.1</version>
 		<packagemanager>zypper</packagemanager>
 		<locale>en_US</locale>
@@ -21,6 +21,11 @@
 		<hwclock>utc</hwclock>
 		<rpm-excludedocs>true</rpm-excludedocs>
 		<boot-theme>openSUSE</boot-theme>
+	</preferences>
+	<preferences profiles="pandaFlavour">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="console=ttyO2">
+			<systemdisk/>
+		</type>
 	</preferences>
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
@@ -33,12 +38,15 @@
 	<repository type="rpm-md">
 		<source path="http://download.opensuse.org/repositories/openSUSE:/Factory:/ARM/standard"/>
 	</repository>
+	<packages type="bootstrap" profiles="pandaFlavour">
+		<package name="kernel-omap2plus"/>
+		<package name="u-boot-omap4panda"/>
+	</packages>
 	<packages type="bootstrap">
 		<package name="ifplugd"/>
 		<package name="iputils"/>
 		<package name="vim"/>
 		<package name="lvm2"/>
-		<package name="kernel-omap2plus"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="cracklib-dict-full"/>
@@ -58,7 +66,8 @@
 		<package name="mkinitrd"/>
 		<package name="rpm"/>
 		<package name="rsyslog"/>
-		<package name="systemd"/>
+		<package name="systemd-sysvinit"/>
 		<package name="u-boot-tools"/>
+		<package name="less"/>
 	</packages>
 </image>
