@@ -256,7 +256,7 @@ sub createCache {
 	my $root   = $rootTarget;
 	my $ignore = "'gpg-pubkey|bundle-lang'";
 	my $rpmopts= "'%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n'";
-	my $rpm    = "rpm --root $root";
+	my $rpm    = "chroot $root rpm";
 	qxx ("$rpm -qa --qf $rpmopts | grep -vE $ignore > $meta");
 	qxx ("rm -f $root/image/config.xml");
 	qxx ("rm -f $root/image/*.kiwi");
@@ -313,8 +313,6 @@ sub selectCache {
 		return;
 	}
 	my $CacheDistro   = $init->[0];
-	my @CachePatterns = @{$init->[1]};
-	my @CachePackages = @{$init->[2]};
 	my $CacheScan     = $init->[3];
 	my $haveCache     = 0;
 	my %plist         = ();
@@ -334,15 +332,7 @@ sub selectCache {
 	#==========================================
 	# setup cache file names...
 	#------------------------------------------
-	if (@CachePackages) {
-		my $cstr = $xml -> getImageName();
-		my $cdir = $this->{cdir}."/".$CacheDistro."-".$cstr.".ext2";
-		push @file,$cdir;
-	}
-	foreach my $pattern (@CachePatterns) {
-		my $cdir = $this->{cdir}."/".$CacheDistro."-".$pattern.".ext2";
-		push @file,$cdir;
-	}
+	@file = glob ($this->{cdir}.'/'.$CacheDistro.'*.ext2');
 	#==========================================
 	# walk through cache files
 	#------------------------------------------
