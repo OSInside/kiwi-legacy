@@ -82,6 +82,7 @@ sub new {
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi}   = $kiwi;
+	$this->{gdata}  = $main::global -> getGlobals();
 	$this->{baseRO} = $baseRO;
 	$this->{rootRW} = $rootRW;
 	return $this;
@@ -227,8 +228,8 @@ sub createSnapshotMap {
 	my $this = shift;
 	my $readOnlyRootImage = shift;
 	my $cowfile = shift;
-	my $snapshotChunk=4096;
-	my $snapshotCount="5G";
+	my $snapshotChunk = $this->{gdata}->{SnapshotChunk};
+	my $snapshotCount = $this->{gdata}->{SnapshotCount};
 	my $imageLoop;
 	my $snapLoop;
 	my @releaseList = ();

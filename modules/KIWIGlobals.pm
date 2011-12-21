@@ -48,6 +48,8 @@ sub new {
 	$data{FSInodeRatio}    = 16384;
 	$data{FSInodeSize}     = 256;
 	$data{DiskStartSector} = 2048;
+	$data{SnapshotChunk}   = 4096;
+	$data{SnapshotCount}   = "5G";
 	$data{OverlayRootTree} = 0;
 	#============================================
 	# Read .kiwirc
