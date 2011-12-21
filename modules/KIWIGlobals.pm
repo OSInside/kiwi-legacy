@@ -36,7 +36,6 @@ sub new {
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
-	my %data;
 	my $arch = qxx ("uname -m");
 	chomp $arch;
 	#==========================================
@@ -52,6 +51,8 @@ sub new {
 	$data{FSInodeSize}     = 256;
 	$data{DiskStartSector} = 2048;
 	$data{DiskSectorSize}  = 512;
+	$data{SnapshotChunk}   = 4096;
+	$data{SnapshotCount}   = "5G";
 	$data{OverlayRootTree} = 0;
 	#============================================
 	# Read .kiwirc
