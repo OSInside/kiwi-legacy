@@ -1473,6 +1473,10 @@ function setupBootLoaderUBoot {
 	local kernel=""
 	local initrd=""
 	#======================================
+	# make sure conf dir exists
+	#--------------------------------------
+	mkdir -p $destsPrefix/boot
+	#======================================
 	# check for device by ID
 	#--------------------------------------
 	local diskByID=`getDiskID $rdev`
@@ -1500,6 +1504,12 @@ function setupBootLoaderUBoot {
 		initrd=`echo $i | cut -f2 -d:`
 		echo "setenv ramdisk $initrd;" > $conf
 		echo "setenv kernel $kernel;" >> $conf
+		echo "setenv initrd_high \"0xffffffff\";" >> $conf
+		echo "setenv fdt_high \"0xffffffff\";"    >> $conf
+		echo -n "setenv bootcmd \"" >> $conf
+		echo -n "fatload mmc 0:1 0x80000000 $kernel; " >> $conf
+		echo -n "fatload mmc 0:1 0x81600000 $initrd; " >> $conf
+		echo "bootm 0x80000000 0x81600000\""
 		echo -n "setenv bootargs root=$diskByID loader=$loader" >> $conf
 		if [ ! -z "$imageDiskDevice" ];then
 			echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
@@ -1510,24 +1520,13 @@ function setupBootLoaderUBoot {
 		if [ "$haveLVM" = "yes" ];then
 			echo -n " VGROUP=$VGROUP" >> $conf
 		fi
-		if [ -f $mountPrefix/bin/systemd ];then
-			echo -n " init=/bin/systemd" >> $conf
-		fi
 		echo -n " $KIWI_INITRD_PARAMS"  >> $conf
 		echo -n " $KIWI_KERNEL_OPTIONS" >> $conf
-		echo ";" >> $conf
+		echo ";"    >> $conf
+		echo "boot" >> $conf
 		# only one entry...
 		break
 	done
-	echo '${loadcmd} ${ramdiskaddr} ${ramdisk};' >> $conf
-	echo 'if imi ${ramdiskaddr}; then; else'     >> $conf
-	echo '    setenv bootargs ${bootargs} noinitrd;' >> $conf
-	echo '    setenv ramdiskaddr "";' >> $conf
-	echo 'fi;' >> $conf
-	echo '${loadcmd} ${kerneladdr} ${kernel}' >> $conf
-	echo 'if imi ${kerneladdr}; then' >> $conf
-	echo '    bootm ${kerneladdr} ${ramdiskaddr}' >> $conf
-	echo 'fi;' >> $conf
 }
 #======================================
 # setupBootLoaderS390
@@ -4345,7 +4344,7 @@ function kernelList {
 	# search running kernel first
 	#--------------------------------------
 	if [ -d $prefix/lib/modules/$krunning ];then
-		for name in vmlinux vmlinuz image;do
+		for name in vmlinux vmlinuz image uImage;do
 			if [ -f $prefix/boot/$name-$krunning ];then
 				kernel=$name-$krunning
 				initrd=initrd-$krunning
@@ -4372,7 +4371,7 @@ function kernelList {
 		if [ "$kname" = $krunning ];then
 			continue
 		fi
-		for name in vmlinux vmlinuz image;do
+		for name in vmlinux vmlinuz image uImage;do
 			for k in $prefix/boot/$name-${i##*/}; do
 				if [ -f $k ];then
 					kernel=${k##*/}
@@ -8257,7 +8256,7 @@ function setupKernelLinks {
 	#======================================
 	# make sure boot => . link exists
 	#--------------------------------------
-	if [ ! $loader = "syslinux" ] && [ ! -e boot ];then
+	if [ ! $loader = "syslinux" -a ! $loader = "uboot" ] && [ ! -e boot ];then
 		ln -s . boot
 	fi
 	#======================================
