@@ -23,7 +23,7 @@
 		<boot-theme>openSUSE</boot-theme>
 	</preferences>
 	<preferences profiles="pandaFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="console=ttyO2">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="console=ttyO2 ethaddr=f2:9e:1a:ca:d9:99">
 			<systemdisk/>
 		</type>
 	</preferences>
