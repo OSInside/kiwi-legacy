@@ -1071,6 +1071,10 @@ sub createImageRootAndBoot {
 		$treeAccess = 0;
 	}
 	if ($stype{lvm}) {
+		if ($stype{luks}) {
+			$kiwi -> warning ("LUKS encryption on LVM not yet supported");
+			$kiwi -> skipped ();
+		}
 		$treeAccess = 1;
 	}
 	#==========================================

@@ -119,7 +119,7 @@ sub new {
 	if (defined $system) {
 		if ((-f $system) || (-b $system)) {
 			my %fsattr = $main::global -> checkFileSystem ($system);
-			if (($fsattr{readonly}) || ($fsattr{type} eq "luks")) {
+			if ($fsattr{readonly}) {
 				$syszip = $main::global -> isize ($system);
 			} else {
 				$syszip = 0;
@@ -330,6 +330,15 @@ sub new {
 				#------------------------------------------
 				if (! $main::global -> mount ($system,$tmpdir)) {
 					return;
+				}
+				#==========================================
+				# check for read-only root
+				#------------------------------------------
+				%fsattr = $main::global -> checkFileSystem (
+					$main::global -> getMountDevice()
+				);
+				if ($fsattr{readonly}) {
+					$syszip = $main::global -> isize ($system);
 				}
 				#==========================================
 				# check for split type
@@ -1355,12 +1364,6 @@ sub setupInstallStick {
 		#------------------------------------------
 		$this -> umountDevice ($this->{loop});
 	}
-	if ($bootloader eq "extlinux") {
-		$deviceMap{extlinux} = $deviceMap{1};
-	}
-	if ($bootloader eq "syslinux") {
-		$deviceMap{fat} = $deviceMap{1};
-	}
 	my $boot = $deviceMap{1};
 	my $data;
 	if ($gotsys) {
@@ -1544,9 +1547,9 @@ sub setupBootDisk {
 	my %deviceMap = ();
 	my @commands  = ();
 	my $bootfix   = "VMX";
-	my $dmapper   = 0;
 	my $haveluks  = 0;
 	my $needBootP = 0;
+	my $rawRW     = 0;
 	my $bootloader;
 	if ($arch =~ /ppc|ppc64/) {
 		$bootloader = "yaboot";
@@ -1655,23 +1658,16 @@ sub setupBootDisk {
 		}
 	}
 	#==========================================
-	# check for overlay filesystems
-	#------------------------------------------
-	if ($type{filesystem} eq "clicfs") {
-		$this->{dmapper} = 1;
-		$dmapper  = 1;
-	}
-	#==========================================
-	# check if fs requires a boot partition
-	#------------------------------------------
-	if (($type{filesystem} eq "btrfs") || ($type{filesystem} eq "xfs")) {
-		$needBootP  = 1;
-	}
-	#==========================================
 	# check for LUKS extension
 	#------------------------------------------
 	if ($type{luks}) {
-		$haveluks   = 1;
+		$haveluks = 1;
+	}
+	#==========================================
+	# check for raw read-write overlay
+	#------------------------------------------
+	if ($type{filesystem} eq "clicfs") {
+		$rawRW = 1;
 	}
 	#==========================================
 	# setup boot loader type
@@ -1680,6 +1676,40 @@ sub setupBootDisk {
 		$bootloader = $type{bootloader};
 	}
 	$this->{bootloader} = $bootloader;
+	#==========================================
+	# setup boot partition ID
+	#------------------------------------------
+	if ($lvm) {
+		$needBootP = 1;
+	} elsif ($syszip) {
+		$needBootP = 2;
+		if ($type{filesystem} eq "clicfs") {
+			$needBootP = 3;
+		} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
+			$needBootP = 3;
+		} elsif ($type{luks}) {
+			$needBootP = 3;
+		}
+	} elsif ($type{filesystem} =~ /btrfs|xfs/) {
+		$needBootP = 2;
+	} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
+		$needBootP = 2;
+	} elsif ($type{luks}) {
+		$needBootP = 2;
+	}
+	$this->{bootpart} = 0;
+	if ($needBootP) {
+		$this->{bootpart} = $needBootP - 1;
+	}
+	#==========================================
+	# setup boot partition type
+	#------------------------------------------
+	my $partid = 83;
+	if ($bootloader =~ /syslinux|uboot/) {
+		$partid = "c";
+	} elsif ($bootloader eq "yaboot") {
+		$partid = "41";
+	}
 	#==========================================
 	# add boot space if syslinux based
 	#------------------------------------------
@@ -1732,7 +1762,7 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (($imgtype eq "split") && (-f $splitfile)) {
 		my $splitsize = $main::global -> isize ($splitfile);
-		my $splitMB = $splitsize / 1048576;
+		my $splitMB = ($splitsize * 1.2) / 1048576;
 		$kiwi -> info (
 			"Adding $splitMB MB space for split read-write portion"
 		);
@@ -1764,32 +1794,9 @@ sub setupBootDisk {
 		return;
 	}
 	#==========================================
-	# Setup boot partition ID
-	#------------------------------------------
-	my $bootpart = "0";
-	if (($syszip) || ($haveSplit) || ($haveluks) || ($needBootP)) {
-		$bootpart = "1";
-	}
-	if ((($syszip) || ($haveSplit)) && ($haveluks)) {
-		$bootpart = "2";
-	}
-	if ($dmapper) {
-		$bootpart = "2"
-	}
-	if ($lvm) {
-		$bootpart = "0";
-	}
-	$this->{bootpart} = $bootpart;
-	#==========================================
 	# Update raw disk size if boot part is used
 	#------------------------------------------
-	if (($syszip)    ||
-		($haveSplit) ||
-		($haveluks)  ||
-		($needBootP) ||
-		($dmapper)   ||
-		($lvm)
-	) {
+	if (($needBootP) && ($imgtype ne "split")) {
 		$this -> __updateDiskSize ($bootsize);
 	}
 	#==========================================
@@ -1859,106 +1866,43 @@ sub setupBootDisk {
 		# create disk partition
 		#------------------------------------------
 		if (! $lvm) {
-			if (($syszip) || ($haveSplit) || ($dmapper)) {
-				# xda1 ro / xda2 rw
-				if ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
-					my $partid = "c";
-					if ($bootloader eq "extlinux" ) {
-						$partid = "83";
-					}
-					if ($bootloader eq "yaboot") {
-						$partid = "41";
-					}
-					my $syslsize = $this->{vmmbyte} - $bootsize - $syszip;
-					@commands = (
-						"n","p","1",".","+".$syszip."M",
-						"n","p","2",".","+".$syslsize."M",
-						"n","p","3",".",".",
-						"t","3",$partid,
-						"a","3","w","q"
-					);
-				} elsif ($dmapper) {
-					my $dmsize = $this->{vmmbyte} - $bootsize - $syszip;
-					@commands = (
-						"n","p","1",".","+".$syszip."M",
-						"n","p","2",".","+".$dmsize."M",
-						"n","p","3",".",".",
-						"a","3","w","q"
-					);
-				} elsif ($haveluks) {
-					my $lukssize = $this->{vmmbyte} - $bootsize - $syszip;
-					@commands = (
-						"n","p","1",".","+".$syszip."M",
-						"n","p","2",".","+".$lukssize."M",
-						"n","p","3",".",".",
-						"a","3","w","q"
-					);
-				} else {
-					@commands = (
-						"n","p","1",".","+".$syszip."M",
-						"n","p","2",".",".",
-						"a","2","w","q"
-					);
-				}
+			if ($needBootP == 3) {
+				# xda1 root-ro | xda2 root-rw | xda3 boot
+				my $sysrw = $this->{vmmbyte} - $bootsize - $syszip;
+				@commands = (
+					"n","p","1",".","+".$syszip."M",
+					"n","p","2",".","+".$sysrw."M",
+					"n","p","3",".",".",
+					"t","3",$partid,
+					"a","3","w","q"
+				);
+			} elsif ($needBootP == 2) {
+				# xda1 root-ro | xda2 root-rw and boot
+				my $sysro = $this->{vmmbyte} - $bootsize;
+				@commands = (
+					"n","p","1",".","+".$sysro."M",
+					"n","p","2",".",".",
+					"t","2",$partid,
+					"a","2","w","q"
+				);
 			} else {
-				# xda1 rw
-				if ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
-					my $partid = "c";
-					if ($bootloader eq "extlinux" ) {
-						$partid = "83";
-					}
-					if ($bootloader eq "yaboot") {
-						$partid = "41";
-					}
-					my $syslsize = $this->{vmmbyte} - $bootsize;
-					@commands = (
-						"n","p","1",".","+".$syslsize."M",
-						"n","p","2",".",".",
-						"t","2",$partid,
-						"a","2","w","q"
-					);
-				} elsif (($haveluks) || ($needBootP)) {
-					my $lukssize = $this->{vmmbyte} - $bootsize;
-					@commands = (
-						"n","p","1",".","+".$lukssize."M",
-						"n","p","2",".",".",
-						"a","2","w","q"
-					);
-				} else {
-					@commands = (
-						"n","p","1",".",".",
-						"a","1","w","q"
-					);
-				}
+				# xda1 root-rw
+				@commands = (
+					"n","p","1",".",".",
+					"a","1","w","q"
+				);
 			}
 		} else {
-			if ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
-				my $partid = "c";
-				if ($bootloader eq "extlinux" ) {
-					$partid = "83";
-				}
-				if ($bootloader eq "yaboot") {
-					$partid = "c";
-				}
-				my $lvmsize = $this->{vmmbyte} - $bootsize;
-				my $bootpartsize = "+".$bootsize."M";
-				@commands = (
-					"n","p","1",".",$bootpartsize,
-					"n","p","2",".",".",
-					"t","1",$partid,
-					"t","2","8e",
-					"a","1","w","q"
-				);
-			} else {
-				my $lvmsize = $this->{vmmbyte} - $bootsize;
-				my $bootpartsize = "+".$bootsize."M";
-				@commands = (
-					"n","p","1",".",$bootpartsize,
-					"n","p","2",".",".",
-					"t","2","8e",
-					"a","1","w","q"
-				);
-			}
+			# xda1 boot | xda2 lvm
+			my $lvmsize = $this->{vmmbyte} - $bootsize;
+			my $bootpartsize = "+".$bootsize."M";
+			@commands = (
+				"n","p","1",".",$bootpartsize,
+				"n","p","2",".",".",
+				"t","1",$partid,
+				"t","2","8e",
+				"a","1","w","q"
+			);
 		}
 		if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
 			$kiwi -> failed ();
@@ -2220,7 +2164,7 @@ sub setupBootDisk {
 	#==========================================
 	# create read/write filesystem if needed
 	#------------------------------------------
-	if (($syszip) && (! $haveSplit) && (! $dmapper)) {
+	if (($syszip) && (! $haveSplit) && (! $rawRW)) {
 		$root = $deviceMap{2};
 		if ($haveluks) {
 			my $cipher = $type{luks};
@@ -2268,66 +2212,45 @@ sub setupBootDisk {
 	#==========================================
 	# create bootloader filesystem if needed
 	#------------------------------------------
-	if (($bootloader eq "syslinux") || ($bootloader eq "uboot")) {
-		$boot = $deviceMap{fat};
-		$kiwi -> info ("Creating DOS boot filesystem");
-		$status = qxx ("/sbin/mkdosfs -F 32 -n 'boot' $boot 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create DOS filesystem: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return;
-		}
-		$kiwi -> done();
-	} elsif (($bootloader eq "yaboot") && ($lvm)) {
-		$boot = $deviceMap{fat};
-		$kiwi -> info ("Creating DOS boot filesystem");
-		$status = qxx ("/sbin/mkdosfs -F 16 $boot 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create DOS filesystem: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return;
-		}
-		$kiwi -> done();
-	} elsif (
-		($dmapper) || ($haveluks) || ($needBootP) ||
-		($lvm) || ($bootloader eq "extlinux")
-	) {
-		$boot = $deviceMap{dmapper};
-		$kiwi -> info ("Creating ext3 boot filesystem");
-		if (($haveluks) || ($needBootP)) {
-			if (($syszip) || ($haveSplit) || ($dmapper)) {
-				$boot = $deviceMap{3};
-			} else {
-				$boot = $deviceMap{2};
-			}
-		}
+	if ($needBootP) {
+		$boot = $deviceMap{$needBootP};
 		if ($lvm) {
 			$boot = $deviceMap{0};
 		}
-		if ($bootloader eq "extlinux") {
-			$boot = $deviceMap{extlinux};
+		if ($bootloader =~ /syslinux|uboot|yaboot/) {
+			$kiwi -> info ("Creating DOS boot filesystem");
+			if ($bootloader eq "yaboot") {
+				$status = qxx ("/sbin/mkdosfs -F 16 $boot 2>&1");
+			} else {
+				$status = qxx ("/sbin/mkdosfs -F 32 -n 'boot' $boot 2>&1");
+			}
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create DOS filesystem: $status");
+				$kiwi -> failed ();
+				$this -> cleanLoop ();
+				return;
+			}
+			$kiwi -> done();
+		} else {
+			$kiwi -> info ("Creating ext3 boot filesystem");
+			my %FSopts = $main::global -> checkFSOptions(
+				@{$cmdL -> getFilesystemOptions()}
+			);
+			my $fsopts = $FSopts{ext3};
+			my $fstool = "mkfs.ext3";
+			$status = qxx ("$fstool $fsopts $boot 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create filesystem: $status");
+				$kiwi -> failed ();
+				$this -> cleanLoop ();
+				return;
+			}
+			$kiwi -> done();
 		}
-		my %FSopts = $main::global -> checkFSOptions(
-			@{$cmdL -> getFilesystemOptions()}
-		);
-		my $fsopts = $FSopts{ext3};
-		my $fstool = "mkfs.ext3";
-		$status = qxx ("$fstool $fsopts $boot 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create filesystem: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return;
-		}
-		$kiwi -> done();
 	}
 	#==========================================
 	# Dump boot image on disk
@@ -2336,24 +2259,11 @@ sub setupBootDisk {
 	#==========================================
 	# Mount boot space on this disk
 	#------------------------------------------
-	if (($bootloader eq "syslinux") || ($bootloader eq "uboot")) {
-		$boot = $deviceMap{fat};
-	} elsif ($bootloader eq "extlinux") {
-		$boot = $deviceMap{extlinux};
-	} elsif ($dmapper) {
-		$boot = $deviceMap{dmapper};
-	} elsif (($bootloader eq "yaboot") && (! $lvm)) {
-		$boot = $deviceMap{prep};
-	} elsif (($syszip) || ($haveSplit) || ($lvm)) {
-		$boot = $deviceMap{2};
-		if ($haveluks) {
-			$boot = $deviceMap{3};
-		}
+	if ($needBootP) {
+		$boot = $deviceMap{$needBootP};
 		if ($lvm) {
 			$boot = $deviceMap{0};
 		}
-	} elsif (($haveluks) || ($needBootP)) {
-		$boot = $deviceMap{2};
 	} else {
 		$boot = $root;
 	}
@@ -3968,9 +3878,9 @@ sub installBootLoader {
 			return;
 		}
 		my %deviceMap = %{$deviceMap};
-		my $device = $deviceMap{fat};
-		if ($loader eq "extlinux") {
-			$device = $deviceMap{extlinux};
+		my $device = $deviceMap{$bootpart+1};
+		if ($lvm) {
+			$device = $deviceMap{0};
 		}
 		if (($device =~ /mapper/) && (! -e $device)) {
 			if (! $this -> bindDiskPartitions ($diskname)) {
@@ -4168,7 +4078,10 @@ sub installBootLoader {
 		#------------------------------------------
 		if (!$lvm) {
 			my %deviceMap = %{$deviceMap};
-			my $device = $deviceMap{prep};
+			my $device = $deviceMap{$bootpart+1};
+			if ($lvm) {
+				$device = $deviceMap{0};
+			}
 			$kiwi -> info ("Installing yaboot on device: $device");
 			$status = qxx ("dd if=/lib/lilo/chrp/yaboot.chrp of=$device 2>&1");
 			$result = $? >> 8;
@@ -4668,38 +4581,12 @@ sub setDefaultDeviceMap {
 	# ---
 	my $this   = shift;
 	my $device = shift;
-	my $loader = $this->{bootloader};
-	my $dmapper= $this->{dmapper};
 	my %result;
 	if (! defined $device) {
 		return;
 	}
 	for (my $i=1;$i<=3;$i++) {
 		$result{$i} = $device.$i;
-	}
-	if ($loader =~ /(sys|ext)linux|yaboot|uboot/) {
-		my $search = "c";
-		if ($loader eq "extlinux" ) {
-			$search = "83";
-		}
-		if ($loader eq "yaboot" ) {
-			$search = "41";
-		}
-		for (my $i=3;$i>=1;$i--) {
-			my $type = $this -> getStorageID ($device,$i);
-			if ($type eq $search) {
-				if (($loader eq "syslinux") || ($loader eq "uboot")) {
-					$result{fat} = $device.$i;
-				} elsif ($loader eq "yaboot" ) {
-					$result{prep} = $device.$i;
-				} else {
-					$result{extlinux} = $device.$i;
-				}
-				last;
-			}
-		}
-	} elsif ($dmapper) {
-		$result{dmapper} = $device."3";
 	}
 	return %result;
 }
@@ -4714,8 +4601,6 @@ sub setLoopDeviceMap {
 	# ---
 	my $this   = shift;
 	my $device = shift;
-	my $loader = $this->{bootloader};
-	my $dmapper= $this->{dmapper};
 	my %result;
 	if (! defined $device) {
 		return;
@@ -4723,30 +4608,6 @@ sub setLoopDeviceMap {
 	my $dmap = $device; $dmap =~ s/dev\///;
 	for (my $i=1;$i<=3;$i++) {
 		$result{$i} = "/dev/mapper".$dmap."p$i";
-	}
-	if ($loader =~ /(sys|ext)linux|yaboot|uboot/) {
-		my $search = "c";
-		if ($loader eq "extlinux" ) {
-			$search = "83";
-		}
-		if ($loader eq "yaboot" ) {
-			$search = "41";
-		}
-		for (my $i=3;$i>=1;$i--) {
-			my $type = $this -> getStorageID ($device,$i);
-			if ("$type" eq "$search") {
-				if (($loader eq "syslinux") || ($loader eq "uboot")) {
-					$result{fat} = "/dev/mapper".$dmap."p$i";
-				} elsif ($loader eq "yaboot" ) {
-					$result{prep} = "/dev/mapper".$dmap."p$i";
-				} else {
-					$result{extlinux} = "/dev/mapper".$dmap."p$i";
-				}
-				last;
-			}
-		}
-	} elsif ($dmapper) {
-		$result{dmapper} = "/dev/mapper".$dmap."p3";
 	}
 	return %result;
 }
@@ -4764,9 +4625,6 @@ sub setLVMDeviceMap {
 	my $device = shift;
 	my $names  = shift;
 	my @names  = @{$names};
-	my $arch   = $this->{arch};
-	my $loader = $this->{bootloader};
-	my $dmapper= $this->{dmapper};
 	my %result;
 	if (! defined $group) {
 		return;
@@ -4779,29 +4637,6 @@ sub setLVMDeviceMap {
 	}
 	for (my $i=0;$i<@names;$i++) {
 		$result{$i+1} = "/dev/$group/".$names[$i];
-	}
-	if ($loader =~ /(sys|ext)linux|yaboot|uboot/) {
-		if ($device =~ /loop/) {
-			my $dmap = $device; $dmap =~ s/dev\///;
-			if ($loader =~ /syslinux|yaboot|uboot/) {
-				$result{fat} = "/dev/mapper".$dmap."p1";
-			} else {
-				$result{extlinux} = "/dev/mapper".$dmap."p1";
-			}
-		} else {
-			if ($loader =~ /syslinux|yaboot|uboot/) {
-				$result{fat} = $device."1";
-			} else {
-				$result{extlinux} = $device."1";
-			}
-		}
-	} elsif ($dmapper) {
-		if ($device =~ /loop/) {
-			my $dmap = $device; $dmap =~ s/dev\///;
-			$result{dmapper} = "/dev/mapper".$dmap."p1";
-		} else {
-			$result{dmapper} = $device."1";
-		}
 	}
 	return %result;
 }

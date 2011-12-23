@@ -283,6 +283,14 @@ sub checkFSOptions {
 }
 
 #==========================================
+# getMountDev
+#------------------------------------------
+sub getMountDevice {
+	my $this = shift;
+	return $this->{mountdev};
+}
+
+#==========================================
 # mount
 #------------------------------------------
 sub mount {
@@ -437,6 +445,7 @@ sub mount {
 		push @UmountStack,"umount $dest";
 		$this->{UmountStack} = \@UmountStack;
 	}
+	$this->{mountdev} = $source;
 	return $dest;
 }
 
