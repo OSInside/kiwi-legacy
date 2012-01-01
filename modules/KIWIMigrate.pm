@@ -11,8 +11,8 @@
 # DESCRIPTION   : This module is used to provide methods for
 #               : migrating a running system into an image
 #               : description
-#               : 
-#               : 
+#               :
+#               :
 #               :
 # STATUS        : Development
 #----------------
@@ -76,13 +76,13 @@ sub new {
 	if (! $main::global) {
 		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $name) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("No image name for migration given");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	$this->{gdata} = $main::global -> getGlobals();
 	my $product = $this -> getOperatingSystemVersion();
@@ -90,7 +90,7 @@ sub new {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't find system version information");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	$kiwi -> note (" [$product]");
 	if (defined $fnr) {
@@ -103,7 +103,7 @@ sub new {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create destination dir: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		chomp $dest;
 	} elsif (-d $dest) {
@@ -116,7 +116,7 @@ sub new {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create destination dir: $data");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	}
 	$dest =~ s/\/$//;
@@ -256,50 +256,51 @@ sub createReport {
 	#==========================================
 	# Start report
 	#------------------------------------------
-	if (! open (FD,">$dest/report.html")) {
+	my $FD;
+	if (! open ($FD, '>', "$dest/report.html")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create report: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
-	print FD '<!DOCTYPE html>'."\n";
-	print FD '<html>'."\n";
-	print FD "\t".'<head>'."\n";
-	print FD "\t\t".'<title>Migration report</title>'."\n";
-	print FD "\t\t".'<!--[if lt IE 9]>'."\n";
-	print FD "\t\t".'<script src="';
-	print FD 'http://html5shiv.googlecode.com/svn/trunk/html5.js">';
-	print FD '</script>'."\n";
-	print FD "\t\t".'<![endif]-->'."\n";
-	print FD "\t\t".'<link rel="stylesheet" type="text/css" ';
-	print FD 'href=".report/css/kiwi.css">'."\n";
-	print FD "\t\t".'<script type="text/javascript" ';
-	print FD 'src=".report/js/jquery.min.js">';
-	print FD '</script>'."\n";
-	print FD "\t\t".'<script type="text/javascript" ';
-	print FD 'src=".report/js/data.js">';
-	print FD '</script>'."\n";
-	print FD "\t\t".'<script type="text/javascript" ';
-	print FD 'src=".report/js/kiwi.js">';
-	print FD '</script>'."\n";
-	print FD "\t".'</head>'."\n";
-	print FD '<body class="files">'."\n";
-	print FD '<div class="headerwrap">'."\n";
-	print FD "\t".'<div class="container"><h1>Migration report</h1></div>'."\n";
-	print FD '</div>'."\n";
-	print FD '<div class="container">'."\n";
+	print $FD '<!DOCTYPE html>'."\n";
+	print $FD '<html>'."\n";
+	print $FD "\t".'<head>'."\n";
+	print $FD "\t\t".'<title>Migration report</title>'."\n";
+	print $FD "\t\t".'<!--[if lt IE 9]>'."\n";
+	print $FD "\t\t".'<script src="';
+	print $FD 'http://html5shiv.googlecode.com/svn/trunk/html5.js">';
+	print $FD '</script>'."\n";
+	print $FD "\t\t".'<![endif]-->'."\n";
+	print $FD "\t\t".'<link rel="stylesheet" type="text/css" ';
+	print $FD 'href=".report/css/kiwi.css">'."\n";
+	print $FD "\t\t".'<script type="text/javascript" ';
+	print $FD 'src=".report/js/jquery.min.js">';
+	print $FD '</script>'."\n";
+	print $FD "\t\t".'<script type="text/javascript" ';
+	print $FD 'src=".report/js/data.js">';
+	print $FD '</script>'."\n";
+	print $FD "\t\t".'<script type="text/javascript" ';
+	print $FD 'src=".report/js/kiwi.js">';
+	print $FD '</script>'."\n";
+	print $FD "\t".'</head>'."\n";
+	print $FD '<body class="files">'."\n";
+	print $FD '<div class="headerwrap">'."\n";
+	print $FD "\t".'<div class="container"><h1>Migration report</h1></div>'."\n";
+	print $FD '</div>'."\n";
+	print $FD '<div class="container">'."\n";
 	#==========================================
 	# Kernel version report
 	#------------------------------------------
-	print FD '<h1>Currently active kernel version</h1>'."\n";
-	print FD '<p>'."\n";
-	print FD 'The table below shows the packages required for the currently ';
-	print FD 'active kernel. If multiple kernels are installed make sure ';
-	print FD 'that the reported kernel package names are part of the ';
-	print FD 'image description';
-	print FD '</p>'."\n";
-	print FD '<hr>'."\n";
-	print FD '<table>'."\n";
+	print $FD '<h1>Currently active kernel version</h1>'."\n";
+	print $FD '<p>'."\n";
+	print $FD 'The table below shows the packages required for the currently ';
+	print $FD 'active kernel. If multiple kernels are installed make sure ';
+	print $FD 'that the reported kernel package names are part of the ';
+	print $FD 'image description';
+	print $FD '</p>'."\n";
+	print $FD '<hr>'."\n";
+	print $FD '<table>'."\n";
 	my @list = qxx (
 		'rpm -qf --qf "%{NAME}:%{VERSION}\n" /lib/modules/$(uname -r)'
 	); chomp @list;
@@ -307,172 +308,172 @@ sub createReport {
 		if ($item =~ /(.*):(.*)/) {
 			my $pac = $1;
 			my $ver = $2;
-			print FD '<tr valign="top">'."\n";
-			print FD '<td>'.$pac.'</td>'."\n";
-			print FD '<td>'.$ver.'</td>'."\n";
-			print FD '</tr>'."\n";
+			print $FD '<tr valign="top">'."\n";
+			print $FD '<td>'.$pac.'</td>'."\n";
+			print $FD '<td>'.$ver.'</td>'."\n";
+			print $FD '</tr>'."\n";
 		}
 	}
-	print FD '</table>'."\n";
+	print $FD '</table>'."\n";
 	#==========================================
 	# Hardware dependent packages report
 	#------------------------------------------
 	my $pack;
 	my %modalias;
-	print FD '<h1>Hardware dependent packages </h1>'."\n";
-	print FD '<p>'."\n";
-	print FD 'The table below shows packages that depend on specific hardware ';
-	print FD 'Please note that it might be required to have a different set ';
-	print FD 'of hardware dependent packages included into the image ';
-	print FD 'description depending on the target hardware. If there is ';
-	print FD 'the need for such packages make sure you add them as follows ';
-	print FD '<package name="name-of-package" bootinclude="true"/>';
-	print FD '</p>'."\n";
-	print FD '<hr>'."\n";
-	print FD '<table>'."\n";
+	print $FD '<h1>Hardware dependent packages </h1>'."\n";
+	print $FD '<p>'."\n";
+	print $FD 'The table below shows packages that depend on specific hardware ';
+	print $FD 'Please note that it might be required to have a different set ';
+	print $FD 'of hardware dependent packages included into the image ';
+	print $FD 'description depending on the target hardware. If there is ';
+	print $FD 'the need for such packages make sure you add them as follows ';
+	print $FD '<package name="name-of-package" bootinclude="true"/>';
+	print $FD '</p>'."\n";
+	print $FD '<hr>'."\n";
+	print $FD '<table>'."\n";
 	for (qxx ( "rpm -qa --qf '\n<%{name}>\n' --supplements" )) {
 		chomp;
 		$pack = $1 if /^<(.+)>/;
 		push @{$modalias{$pack}}, $_ if /^modalias/;
 	}
 	foreach my $item (sort keys %modalias) {
-		print FD '<tr valign="top">'."\n";
-		print FD '<td>'.$item.'</td>'."\n";
-		print FD '</tr>'."\n";
+		print $FD '<tr valign="top">'."\n";
+		print $FD '<td>'.$item.'</td>'."\n";
+		print $FD '</tr>'."\n";
 	}
-	print FD '</table>'."\n";
+	print $FD '</table>'."\n";
 	#==========================================
 	# Package/Pattern report
 	#------------------------------------------
 	if ($twice) {
 		my @pacs = @{$twice};
-		print FD '<h1>Package(s) installed multiple times</h1>'."\n";
-		print FD '<p>'."\n";
-		print FD 'The following packages are installed multiple times. ';
-		print FD 'Please uninstall the old versions of the packages ';
-		print FD 'and re-run the migration. ';
-		print FD '</p>'."\n";
-		print FD '<hr>'."\n";
-		print FD '<table>'."\n";
+		print $FD '<h1>Package(s) installed multiple times</h1>'."\n";
+		print $FD '<p>'."\n";
+		print $FD 'The following packages are installed multiple times. ';
+		print $FD 'Please uninstall the old versions of the packages ';
+		print $FD 'and re-run the migration. ';
+		print $FD '</p>'."\n";
+		print $FD '<hr>'."\n";
+		print $FD '<table>'."\n";
 		my @list = qxx ("rpm -q @pacs --last"); chomp @list;
 		foreach my $job (sort @list) {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
 				my $pac  = $1;
 				my $date = $2;
-				print FD '<tr valign="top">'."\n";
-				print FD '<td>'.$pac.'</td>'."\n";
-				print FD '<td>'.$date.'</td>'."\n";
-				print FD '</tr>'."\n";
+				print $FD '<tr valign="top">'."\n";
+				print $FD '<td>'.$pac.'</td>'."\n";
+				print $FD '<td>'.$date.'</td>'."\n";
+				print $FD '</tr>'."\n";
 			}
 		}
-		print FD '</table>'."\n";
+		print $FD '</table>'."\n";
 	}
 	if ($problem1) {
-		print FD '<h1>Pattern conflict(s)</h1>'."\n";
-		print FD '<p>'."\n";
-		print FD 'The following patterns could not be solved because ';
-		print FD 'they have dependency conflicts. Please check the list ';
-		print FD 'and solve the conflicts by either: ';
-		print FD "\n";
-		print FD '<ul>'."\n";
-		print FD '<li>'."\n";
-		print FD 'Adding all software repositories to zypper which provide ';
-		print FD 'the missing dependences, or';
-		print FD "\n";
-		print FD '</li>'."\n";
-		print FD '<li>'."\n";
-		print FD 'Ignoring the pattern. If you ignore the pattern, your ';
-		print FD 'selected software might not be part of your final image.';
-		print FD "\n";
-		print FD '</li>'."\n";
-		print FD '</ul>'."\n";
-		print FD '</p>'."\n";
-		print FD '<hr>'."\n";
-		print FD '<pre>'."\n";
-		print FD "$problem1";
-		print FD '</pre>'."\n";
+		print $FD '<h1>Pattern conflict(s)</h1>'."\n";
+		print $FD '<p>'."\n";
+		print $FD 'The following patterns could not be solved because ';
+		print $FD 'they have dependency conflicts. Please check the list ';
+		print $FD 'and solve the conflicts by either: ';
+		print $FD "\n";
+		print $FD '<ul>'."\n";
+		print $FD '<li>'."\n";
+		print $FD 'Adding all software repositories to zypper which provide ';
+		print $FD 'the missing dependences, or';
+		print $FD "\n";
+		print $FD '</li>'."\n";
+		print $FD '<li>'."\n";
+		print $FD 'Ignoring the pattern. If you ignore the pattern, your ';
+		print $FD 'selected software might not be part of your final image.';
+		print $FD "\n";
+		print $FD '</li>'."\n";
+		print $FD '</ul>'."\n";
+		print $FD '</p>'."\n";
+		print $FD '<hr>'."\n";
+		print $FD '<pre>'."\n";
+		print $FD "$problem1";
+		print $FD '</pre>'."\n";
 	}
 	if ($problem2) {
-		print FD '<h1>Package conflict(s)</h1>'."\n";
-		print FD '<p>'."\n";
-		print FD 'The following packages could not be solved due to ';
-		print FD 'dependency conflicts. Please check the list and ';
-		print FD 'solve them by either:';
-		print FD "\n";
-		print FD '<ul>'."\n";
-		print FD '<li>'."\n";
-		print FD 'Following one of the problem solutions mentioned in ';
-		print FD 'the conflict report below, or';
-		print FD "\n";
-		print FD '</li>'."\n";
-		print FD '<li>'."\n";
-		print FD 'Skipping the concerning package(s) by calling kiwi ';
-		print FD 'again with the --skip option.';
-		print FD "\n";
-		print FD '</li>'."\n";
-		print FD '</ul>'."\n";
-		print FD '</p>'."\n";
-		print FD '<hr>'."\n";
-		print FD '<pre>'."\n"; 
-		print FD "$problem2";
-		print FD '</pre>'."\n";
+		print $FD '<h1>Package conflict(s)</h1>'."\n";
+		print $FD '<p>'."\n";
+		print $FD 'The following packages could not be solved due to ';
+		print $FD 'dependency conflicts. Please check the list and ';
+		print $FD 'solve them by either:';
+		print $FD "\n";
+		print $FD '<ul>'."\n";
+		print $FD '<li>'."\n";
+		print $FD 'Following one of the problem solutions mentioned in ';
+		print $FD 'the conflict report below, or';
+		print $FD "\n";
+		print $FD '</li>'."\n";
+		print $FD '<li>'."\n";
+		print $FD 'Skipping the concerning package(s) by calling kiwi ';
+		print $FD 'again with the --skip option.';
+		print $FD "\n";
+		print $FD '</li>'."\n";
+		print $FD '</ul>'."\n";
+		print $FD '</p>'."\n";
+		print $FD '<hr>'."\n";
+		print $FD '<pre>'."\n"; 
+		print $FD "$problem2";
+		print $FD '</pre>'."\n";
 	}
 	if (($failedJob1) && (@{$failedJob1})) {
-		print FD '<h1>Pattern(s) not found</h1>'."\n";
-		print FD '<p>'."\n";
-		print FD 'The following patterns could not be found in your ';
-		print FD 'repository list marked as installed. Please check the ';
-		print FD 'list and solve the problem by either: ';
-		print FD "\n";
-		print FD '<ul>'."\n";
-		print FD '<li>'."\n";
-		print FD 'Adding a repository to zypper which provides the ';
-		print FD 'pattern, or';
-		print FD "\n";
-		print FD '</li>'."\n";
-		print FD '<li>'."\n";
-		print FD 'Ignoring the pattern.  If you ignore the pattern, your ';
-		print FD 'selected software will not be a part of your final image.';
-		print FD "\n";
-		print FD '</li>'."\n";
-		print FD '</ul>'."\n";
-		print FD '</p>'."\n";
-		print FD '<hr>'."\n";
-		print FD '<ul>'."\n";
+		print $FD '<h1>Pattern(s) not found</h1>'."\n";
+		print $FD '<p>'."\n";
+		print $FD 'The following patterns could not be found in your ';
+		print $FD 'repository list marked as installed. Please check the ';
+		print $FD 'list and solve the problem by either: ';
+		print $FD "\n";
+		print $FD '<ul>'."\n";
+		print $FD '<li>'."\n";
+		print $FD 'Adding a repository to zypper which provides the ';
+		print $FD 'pattern, or';
+		print $FD "\n";
+		print $FD '</li>'."\n";
+		print $FD '<li>'."\n";
+		print $FD 'Ignoring the pattern.  If you ignore the pattern, your ';
+		print $FD 'selected software will not be a part of your final image.';
+		print $FD "\n";
+		print $FD '</li>'."\n";
+		print $FD '</ul>'."\n";
+		print $FD '</p>'."\n";
+		print $FD '<hr>'."\n";
+		print $FD '<ul>'."\n";
 		foreach my $job (@{$failedJob1}) {
-			print FD '<li>'.$job.'</li>'."\n";
+			print $FD '<li>'.$job.'</li>'."\n";
 		}
-		print FD '</ul>'."\n";
+		print $FD '</ul>'."\n";
 	}
 	if (($failedJob2) && (@{$failedJob2})) {
-		print FD '<h1>Package(s) not found</h1>'."\n";
-		print FD '<p>'."\n";
-		print FD 'The following packages could not be found in your ';
-		print FD 'repository list but are installed on the system ';
-		print FD 'Please check the list and solve the problem by ';
-		print FD 'either:';
-		print FD "\n";
-		print FD '<ul>'."\n";
-		print FD '<li>'."\n";
-		print FD 'Adding a repository to zypper which provides the ';
-		print FD 'package, or';
-		print FD "\n";
-		print FD '</li>'."\n";
-		print FD '<li>'."\n";
-		print FD 'Ignoring the package. If you ignore the package, your ';
-		print FD 'software selection might not be part of your final ';
-		print FD 'image. Also, if you ignore a package which contains ';
-		print FD 'files modified in the system, kiwi will store the ';
-		print FD 'modified files inside the overlay tree. This means your ';
-		print FD 'image might contain files from the ignored package but ';
-		print FD 'they are most likely not useful without the full ';
-		print FD 'package installed.';
-		print FD "\n";
-		print FD '</li>'."\n";
-		print FD '</ul>'."\n";
-		print FD '</p>'."\n";
-		print FD '<hr>'."\n";
-		print FD '<table>'."\n";
+		print $FD '<h1>Package(s) not found</h1>'."\n";
+		print $FD '<p>'."\n";
+		print $FD 'The following packages could not be found in your ';
+		print $FD 'repository list but are installed on the system ';
+		print $FD 'Please check the list and solve the problem by ';
+		print $FD 'either:';
+		print $FD "\n";
+		print $FD '<ul>'."\n";
+		print $FD '<li>'."\n";
+		print $FD 'Adding a repository to zypper which provides the ';
+		print $FD 'package, or';
+		print $FD "\n";
+		print $FD '</li>'."\n";
+		print $FD '<li>'."\n";
+		print $FD 'Ignoring the package. If you ignore the package, your ';
+		print $FD 'software selection might not be part of your final ';
+		print $FD 'image. Also, if you ignore a package which contains ';
+		print $FD 'files modified in the system, kiwi will store the ';
+		print $FD 'modified files inside the overlay tree. This means your ';
+		print $FD 'image might contain files from the ignored package but ';
+		print $FD 'they are most likely not useful without the full ';
+		print $FD 'package installed.';
+		print $FD "\n";
+		print $FD '</li>'."\n";
+		print $FD '</ul>'."\n";
+		print $FD '</p>'."\n";
+		print $FD '<hr>'."\n";
+		print $FD '<table>'."\n";
 		my @pacs = @{$failedJob2};
 		my @list = qxx ("rpm -q @pacs --last"); chomp @list;
 		foreach my $job (sort @list) {
@@ -494,87 +495,89 @@ sub createReport {
 				if ($disturl =~ /^(\s*|\(none\))$/) {
 					$disturl = "No URL";
 				}
-				print FD '<tr valign="top">'."\n";
-				print FD '<td><nobr>'.$pac.'</nobr></td>'."\n";
-				print FD '<td>';
-				print FD '<nobr>'.$date.'</nobr><br>';
-				print FD '<nobr>'.$distro.'</nobr><br>';
-				print FD '<nobr>'.$disturl.'</nobr>';
-				print FD '</td>'."\n";
-				print FD '</tr>'."\n";
+				print $FD '<tr valign="top">'."\n";
+				print $FD '<td><nobr>'.$pac.'</nobr></td>'."\n";
+				print $FD '<td>';
+				print $FD '<nobr>'.$date.'</nobr><br>';
+				print $FD '<nobr>'.$distro.'</nobr><br>';
+				print $FD '<nobr>'.$disturl.'</nobr>';
+				print $FD '</td>'."\n";
+				print $FD '</tr>'."\n";
 			}
 		}
-		print FD '</table>'."\n";
+		print $FD '</table>'."\n";
 	}
 	#==========================================
 	# Modified files report...
 	#------------------------------------------
 	if ($nopackage) {
-		print FD '<h1>Overlay files</h1>'."\n";
-		print FD '<p>'."\n";
-		print FD 'Behind the current overlay files directory you will ';
-		print FD 'find the packaged but modified files and also a ';
-		print FD 'collection of files which seems to be required for ';
-		print FD 'this system. Please check the current tree ';
-		print FD 'and take the same rules as for the unpackaged files ';
-		print FD 'mentioned in the next section into account. ';
-		print FD '</p>'."\n";
-		print FD '<div>'."\n";
-		print FD 'See <a href="'.$dest.'/root">Overlay directory</a>.'."\n";
-		print FD '</div>'."\n";
-		print FD '<h1>Unpackaged files</h1>'."\n";
-		print FD '<p>'."\n";
-		print FD 'Klicking on the Unpackaged files link below ';
-		print FD 'will show you a list of files/directories ';
-		print FD 'which are not part of any packages. ';
-		print FD 'For binary files, including executables and libraries, ';
-		print FD 'you should try to find and include a package that ';
-		print FD 'provides them. If there are no package providers for ';
-		print FD 'this file, you can leave them as overlay files, but it ';
-		print FD 'may cause problems like broken dependencies later. ';
-		print FD 'After that, you should look for personal files like ';
-		print FD 'pictures, movies, or repositories, and remove them if ';
-		print FD 'they can be easily restored in the later image. ';
-		print FD 'Copy all of the files you want to be part of the ';
-		print FD 'image into the '.$dest.'/root directory.'."\n";
-		print FD '</p>'."\n";
-		print FD '<div class="container" id="searchbox">'."\n";
-		print FD 'See <a href="root-nopackage.html">Unpackaged files</a>.'."\n";
-		print FD '</div>'."\n";
+		print $FD '<h1>Overlay files</h1>'."\n";
+		print $FD '<p>'."\n";
+		print $FD 'Behind the current overlay files directory you will ';
+		print $FD 'find the packaged but modified files and also a ';
+		print $FD 'collection of files which seems to be required for ';
+		print $FD 'this system. Please check the current tree ';
+		print $FD 'and take the same rules as for the unpackaged files ';
+		print $FD 'mentioned in the next section into account. ';
+		print $FD '</p>'."\n";
+		print $FD '<div>'."\n";
+		print $FD 'See <a href="'.$dest.'/root">Overlay directory</a>.'."\n";
+		print $FD '</div>'."\n";
+		print $FD '<h1>Unpackaged files</h1>'."\n";
+		print $FD '<p>'."\n";
+		print $FD 'Klicking on the Unpackaged files link below ';
+		print $FD 'will show you a list of files/directories ';
+		print $FD 'which are not part of any packages. ';
+		print $FD 'For binary files, including executables and libraries, ';
+		print $FD 'you should try to find and include a package that ';
+		print $FD 'provides them. If there are no package providers for ';
+		print $FD 'this file, you can leave them as overlay files, but it ';
+		print $FD 'may cause problems like broken dependencies later. ';
+		print $FD 'After that, you should look for personal files like ';
+		print $FD 'pictures, movies, or repositories, and remove them if ';
+		print $FD 'they can be easily restored in the later image. ';
+		print $FD 'Copy all of the files you want to be part of the ';
+		print $FD 'image into the '.$dest.'/root directory.'."\n";
+		print $FD '</p>'."\n";
+		print $FD '<div class="container" id="searchbox">'."\n";
+		print $FD 'See <a href="root-nopackage.html">Unpackaged files</a>.'."\n";
+		print $FD '</div>'."\n";
 		my $openFailed = 0;
-		if (! open (ND,">$dest/root-nopackage.html")) {
+		my $ND;
+		my $JS;
+		if (! open ($ND, '>', "$dest/root-nopackage.html")) {
 			$openFailed = 1;
 		}
-		if (! open (JS,">$dest/.report/js/data.js")) {
+		if (! open ($JS, '>', "$dest/.report/js/data.js")) {
 			$openFailed = 1;
 		}
 		if (! $openFailed) {
 			#==========================================
 			# root-nopackage.html header
 			#------------------------------------------
-			print ND '<!DOCTYPE html>'."\n";
-			print ND '<html>'."\n";
-			print ND "\t".'<head>'."\n";
-			print ND "\t\t".'<title>File list</title>'."\n";
-			print ND "\t\t".'<link rel="stylesheet" type="text/css"';
-			print ND ' href=".report/css/kiwi.css">'."\n";
-			print ND "\t\t".'<script type="text/javascript"';
-			print ND ' src=".report/js/jquery.min.js"></script>'."\n";
-			print ND "\t\t".'<script type="text/javascript"';
-			print ND ' src=".report/js/data.js"></script>'."\n";
-			print ND "\t\t".'<script type="text/javascript"';
-			print ND ' src=".report/js/kiwi.js"></script>'."\n";
-			print ND "\t".'</head>'."\n";
-			print ND '<body class="files">'."\n";
-			print ND '<div class="headerwrap">'."\n";
-			print ND "\t".'<div class="container"><h1>Files</h1></div>'."\n";
-			print ND '</div>'."\n";
-			print ND '<div class="container">'."\n";
-			print ND '<dl id="list">'."\n";
+			print $ND '<!DOCTYPE html>'."\n";
+			print $ND '<html>'."\n";
+			print $ND "\t".'<head>'."\n";
+			print $ND "\t\t".'<title>File list</title>'."\n";
+			print $ND "\t\t".'<link rel="stylesheet" type="text/css"';
+			print $ND ' href=".report/css/kiwi.css">'."\n";
+			print $ND "\t\t".'<script type="text/javascript"';
+			print $ND ' src=".report/js/jquery.min.js"></script>'."\n";
+			print $ND "\t\t".'<script type="text/javascript"';
+			print $ND ' src=".report/js/data.js"></script>'."\n";
+			print $ND "\t\t".'<script type="text/javascript"';
+			print $ND ' src=".report/js/kiwi.js"></script>'."\n";
+			print $ND "\t".'</head>'."\n";
+			print $ND '<body class="files">'."\n";
+			print $ND '<div class="headerwrap">'."\n";
+			print $ND "\t".'<div class="container"><h1>Files</h1></div>'."\n";
+			print $ND '</div>'."\n";
+			print $ND '<div class="container">'."\n";
+			print $ND '<dl id="list">'."\n";
 			#==========================================
 			# data.js header
 			#------------------------------------------
-			print JS 'DATA = ['."\n";
+			print $JS 'DATA = ['."\n";
 			#==========================================
 			# Content
 			#------------------------------------------
@@ -603,73 +606,102 @@ sub createReport {
 					$size.= " Byte";
 				}
 				# ND: root-nopackage.html...
-				print ND '<section class="row">'."\n";
+				print $ND '<section class="row">'."\n";
 				if ($type eq "directory") {
-					print ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
-					print ND '<dd class="file">';
-					print ND "directory";
-					print ND '</dd>'."\n";
-					print ND '<dd class="file"/>'."\n";
+					print $ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
+					print $ND '<dd class="file">';
+					print $ND "directory";
+					print $ND '</dd>'."\n";
+					print $ND '<dd class="file"/>'."\n";
 				} elsif ($type eq "link") {
 					my $target = readlink $file;
-					print ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
-					print ND '<dd class="file">';
-					print ND "link to -> ".$target;
-					print ND '</dd>'."\n";
-					print ND '<dd class="file"/>'."\n";
+					print $ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
+					print $ND '<dd class="file">';
+					print $ND "link to -> ".$target;
+					print $ND '</dd>'."\n";
+					print $ND '<dd class="file"/>'."\n";
 				} else {
-					print ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
-					print ND '<dd class="size">';
-					print ND $size;
-					print ND '</dd>'."\n";
-					print ND '<dd class="modified">';
-					print ND $mtime;
-					print ND '</dd>'."\n";
+					print $ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
+					print $ND '<dd class="size">';
+					print $ND $size;
+					print $ND '</dd>'."\n";
+					print $ND '<dd class="modified">';
+					print $ND $mtime;
+					print $ND '</dd>'."\n";
 				}
-				print ND '</section>'."\n";
+				print $ND '</section>'."\n";
 				# JS: data.js...
 				if ($count) {
-					print JS ",\n";
+					print $JS ",\n";
 				}
 				$count++;
-				print JS '{'."\n";
-				print JS "\t".'\'filename\': \''.$file.'\','."\n";
-				print JS "\t".'\'size\': \''.$size.'\','."\n";
-				print JS "\t".'\'timestamp\': \''.$mtime.'\''."\n";
-				print JS '}';
+				print $JS '{'."\n";
+				print $JS "\t".'\'filename\': \''.$file.'\','."\n";
+				print $JS "\t".'\'size\': \''.$size.'\','."\n";
+				print $JS "\t".'\'timestamp\': \''.$mtime.'\''."\n";
+				print $JS '}';
 			}
 			#==========================================
 			# root-nopackage.html footer
 			#------------------------------------------
-			print ND '</dl>'."\n";
-			print ND '<a href="report.html">Return</a>'."\n";
-			print ND '</div>'."\n";
-			print ND '<div class="footer container">'."\n";
-			print ND "\t".'&copy; 2010 Novell, Inc.'."\n";
-			print ND '</div>'."\n";
-			print ND '</body>'."\n";
-			print ND '</html>'."\n";
+			print $ND '</dl>'."\n";
+			print $ND '<a href="report.html">Return</a>'."\n";
+			print $ND '</div>'."\n";
+			print $ND '<div class="footer container">'."\n";
+			print $ND "\t".'&copy; 2010 Novell, Inc.'."\n";
+			print $ND '</div>'."\n";
+			print $ND '</body>'."\n";
+			print $ND '</html>'."\n";
 			#==========================================
 			# data.js footer
 			#------------------------------------------
-			print JS ']'."\n";
-			close ND;
-			close JS;
+			print $JS ']'."\n";
+			close $ND;
+			close $JS;
 		}
 	}
-	print FD '</div>'."\n";
-	print FD '<div class="footer container">'."\n";
-	print FD "\t".'&copy; 2010 Novell, Inc.'."\n";
-	print FD '</div>'."\n";
-	print FD '</body>'."\n";
-	print FD '</html>'."\n";
-	close FD;
+	print $FD '</div>'."\n";
+	print $FD '<div class="footer container">'."\n";
+	print $FD "\t".'&copy; 2010 Novell, Inc.'."\n";
+	print $FD '</div>'."\n";
+	print $FD '</body>'."\n";
+	print $FD '</html>'."\n";
+	close $FD;
 	#==========================================
 	# Print report note...
 	#------------------------------------------
 	$kiwi -> info ("--> Please check the migration report !!\n");
 	$kiwi -> note ("\n\tfile://$dest/report.html\n\n");
 	return $this;
+}
+
+#==========================================
+# generateWanted
+#------------------------------------------
+sub generateWanted {
+	# unpackaged files in packaged directories...
+	my $filehash = shift;
+	return sub {
+		my $file = $File::Find::name;
+		my $dirn = $File::Find::dir;
+		my $attr;
+		if (-d $file) {
+			$attr = stat ($file);
+			# dont follow directory links and nfs locations...
+			if (($attr->dev < 0x100) || (-l $file)) {
+				$File::Find::prune = 1;
+			} else {
+				$filehash->{$file} = [$dirn,$attr];
+			}
+		} else {
+			if (-l $file) {
+				$attr = lstat ($file);
+			} else {
+				$attr = stat ($file);
+			}
+			$filehash->{$file} = [$dirn,$attr];
+		}
+	}
 }
 
 #==========================================
@@ -688,7 +720,7 @@ sub getRepos {
 	my @list    = qxx ("zypper lr --details 2>&1");	chomp @list;
 	my $code    = $? >> 8;
 	if ($code != 0) {
-		return undef;
+		return;
 	}
 	foreach my $repo (@list) {
 		$repo =~ s/^\s+//g;
@@ -806,34 +838,35 @@ sub setTemplate {
 	#==========================================
 	# create xml description
 	#------------------------------------------
-	if (! open (FD,">$dest/$this->{gdata}->{ConfigName}")) {
-		return undef;
+	my $FD;
+	if (! open ($FD, '>', "$dest/$this->{gdata}->{ConfigName}")) {
+		return;
 	}
 	#==========================================
 	# <description>
 	#------------------------------------------
-	print FD '<image schemaversion="5.3" ';
-	print FD 'name="suse-migration-'.$product.'">'."\n";
-	print FD "\t".'<description type="system">'."\n";
-	print FD "\t\t".'<author>***AUTHOR***</author>'."\n";
-	print FD "\t\t".'<contact>***MAIL***</contact>'."\n";
-	print FD "\t\t".'<specification>'.$product.'</specification>'."\n";
-	print FD "\t".'</description>'."\n";
+	print $FD '<image schemaversion="5.3" ';
+	print $FD 'name="suse-migration-'.$product.'">'."\n";
+	print $FD "\t".'<description type="system">'."\n";
+	print $FD "\t\t".'<author>***AUTHOR***</author>'."\n";
+	print $FD "\t\t".'<contact>***MAIL***</contact>'."\n";
+	print $FD "\t\t".'<specification>'.$product.'</specification>'."\n";
+	print $FD "\t".'</description>'."\n";
 	#==========================================
 	# <preferences>
 	#------------------------------------------
-	print FD "\t".'<preferences>'."\n";
-	print FD "\t\t".'<type image="oem" boot="oemboot/suse-'.$product.'"';
-	print FD ' filesystem="ext3" installiso="true">'."\n";
-	print FD "\t\t\t".'<oemconfig/>'."\n";
-	print FD "\t\t".'</type>'."\n";
-	print FD "\t\t".'<version>1.1.1</version>'."\n";
-	print FD "\t\t".'<packagemanager>zypper</packagemanager>'."\n";
-	print FD "\t\t".'<locale>en_US</locale>'."\n";
-	print FD "\t\t".'<keytable>us.map.gz</keytable>'."\n";
-	print FD "\t\t".'<timezone>Europe/Berlin</timezone>'."\n";
-	print FD "\t\t".'<boot-theme>openSUSE</boot-theme>'."\n";
-	print FD "\t".'</preferences>'."\n";
+	print $FD "\t".'<preferences>'."\n";
+	print $FD "\t\t".'<type image="oem" boot="oemboot/suse-'.$product.'"';
+	print $FD ' filesystem="ext3" installiso="true">'."\n";
+	print $FD "\t\t\t".'<oemconfig/>'."\n";
+	print $FD "\t\t".'</type>'."\n";
+	print $FD "\t\t".'<version>1.1.1</version>'."\n";
+	print $FD "\t\t".'<packagemanager>zypper</packagemanager>'."\n";
+	print $FD "\t\t".'<locale>en_US</locale>'."\n";
+	print $FD "\t\t".'<keytable>us.map.gz</keytable>'."\n";
+	print $FD "\t\t".'<timezone>Europe/Berlin</timezone>'."\n";
+	print $FD "\t\t".'<boot-theme>openSUSE</boot-theme>'."\n";
+	print $FD "\t".'</preferences>'."\n";
 	#==========================================
 	# <repository>
 	#------------------------------------------
@@ -842,35 +875,35 @@ sub setTemplate {
 		my $alias= $osc{$product}{$source}{alias};
 		my $prio = $osc{$product}{$source}{prio};
 		my $url  = $osc{$product}{$source}{src};
-		print FD "\t".'<repository type="'.$type.'"';
+		print $FD "\t".'<repository type="'.$type.'"';
 		if (defined $alias) {
-			print FD ' alias="'.$alias.'"';
+			print $FD ' alias="'.$alias.'"';
 		}
 		if ((defined $prio) && ($prio != 0)) {
-			print FD ' priority="'.$prio.'"';
+			print $FD ' priority="'.$prio.'"';
 		}
-		print FD '>'."\n";
-		print FD "\t\t".'<source path="'.$url.'"/>'."\n";
-		print FD "\t".'</repository>'."\n";
+		print $FD '>'."\n";
+		print $FD "\t\t".'<source path="'.$url.'"/>'."\n";
+		print $FD "\t".'</repository>'."\n";
 	}
 	#==========================================
 	# <packages>
 	#------------------------------------------
-	print FD "\t".'<packages type="bootstrap">'."\n";
+	print $FD "\t".'<packages type="bootstrap">'."\n";
 	if (defined $pats) {
 		foreach my $pattern (sort @{$pats}) {
 			$pattern =~ s/^pattern://;
-			print FD "\t\t".'<opensusePattern name="'.$pattern.'"/>'."\n";
+			print $FD "\t\t".'<opensusePattern name="'.$pattern.'"/>'."\n";
 		}
 	}
 	if (defined $pacs) {
 		foreach my $package (sort @{$pacs}) {
-			print FD "\t\t".'<package name="'.$package.'"/>'."\n";
+			print $FD "\t\t".'<package name="'.$package.'"/>'."\n";
 		}
 	}
-	print FD "\t".'</packages>'."\n";
-	print FD '</image>'."\n";
-	close FD;
+	print $FD "\t".'</packages>'."\n";
+	print $FD '</image>'."\n";
+	close $FD;
 	return $this;
 }
 
@@ -883,12 +916,13 @@ sub getOperatingSystemVersion {
 	# to the table KIWIMigrate.txt
 	# ---
 	my $this = shift;
-	if (! open (FD,"/etc/SuSE-release")) {
-		return undef;
+	my $FD;
+	if (! open ($FD, '<', "/etc/SuSE-release")) {
+		return;
 	}
-	my $name = <FD>; chomp $name;
-	my $vers = <FD>; chomp $vers;
-	my $plvl = <FD>; chomp $plvl;
+	my $name = <$FD>; chomp $name;
+	my $vers = <$FD>; chomp $vers;
+	my $plvl = <$FD>; chomp $plvl;
 	$name =~ s/\s+/-/g;
 	$name =~ s/\-\(.*\)//g;
 	if ((defined $plvl) && ($plvl =~ /PATCHLEVEL = (.*)/)) {
@@ -897,22 +931,23 @@ sub getOperatingSystemVersion {
 			$name = $name."-SP".$plvl;
 		}
 	}
-	close FD;
-	if (! open (FD,$this->{gdata}->{KMigrate})) {
-		return undef;
+	close $FD;
+	if (! open ($FD, '<', $this->{gdata}->{KMigrate})) {
+		return;
 	}
-	while (my $line = <FD>) {
+	while (my $line = <$FD>) {
 		next if $line =~ /^#/;
 		if ($line =~ /(.*)\s*=\s*(.*)/) {
 			my $product= $1;
 			my $boot   = $2;
 			if ($product eq $name) {
-				close FD; return $boot;
+				close $FD;
+				return $boot;
 			}
 		}
 	}
-	close FD;
-	return undef;
+	close $FD;
+	return;
 }
 
 #==========================================
@@ -942,14 +977,15 @@ sub setPrepareConfigSkript {
 	#==========================================
 	# create config script
 	#------------------------------------------
-	if (! open (FD,">$dest/config.sh")) {
-		return undef;
+	my $FD;
+	if (! open ($FD, '>', "$dest/config.sh")) {
+		return;
 	}
-	print FD '#!/bin/bash'."\n";
-	print FD 'test -f /.kconfig && . /.kconfig'."\n";
-	print FD 'test -f /.profile && . /.profile'."\n";
-	print FD 'echo "Configure image: [$kiwi_iname]..."'."\n";
-	print FD 'suseSetupProduct'."\n";
+	print $FD '#!/bin/bash'."\n";
+	print $FD 'test -f /.kconfig && . /.kconfig'."\n";
+	print $FD 'test -f /.profile && . /.profile'."\n";
+	print $FD 'echo "Configure image: [$kiwi_iname]..."'."\n";
+	print $FD 'suseSetupProduct'."\n";
 	#==========================================
 	# Repos...
 	#------------------------------------------
@@ -964,7 +1000,7 @@ sub setPrepareConfigSkript {
 			# $kiwi -> skipped ();
 			next;
 		}
-		print FD "zypper ar \\\n\t\"".$url."\" \\\n\t\"".$alias."\"\n";
+		print $FD "zypper ar \\\n\t\"".$url."\" \\\n\t\"".$alias."\"\n";
 	}
 	#==========================================
 	# Product repo...
@@ -972,7 +1008,7 @@ sub setPrepareConfigSkript {
 	my $repoProduct = "/etc/products.d/openSUSE.prod";
 	if (-e $repoProduct) {
 		my $PXML;
-		if (! open ($PXML,"cat $repoProduct|")) {
+		if (! open ($PXML, '-|', "cat $repoProduct")) {
 			$kiwi -> failed ();
 			$kiwi -> warning ("--> Failed to open product file $repoProduct");
 			$kiwi -> skipped ();
@@ -999,18 +1035,18 @@ sub setPrepareConfigSkript {
 						}
 					}
 					if (! $alreadyThere) {
-						print FD "zypper ar \\\n\t\"";
-						print FD $url."\" \\\n\t\"".$alias."\"\n";
+						print $FD "zypper ar \\\n\t\"";
+						print $FD $url."\" \\\n\t\"".$alias."\"\n";
 					}
 				}
 			}
 			close $PXML;
 		}
 	}
-	print FD 'suseConfig'."\n";
-	print FD 'baseCleanMount'."\n";
-	print FD 'exit 0'."\n";
-	close FD;
+	print $FD 'suseConfig'."\n";
+	print $FD 'baseCleanMount'."\n";
+	print $FD 'exit 0'."\n";
+	close $FD;
 	chmod 0755, "$dest/config.sh";
 	return $this;
 }
@@ -1053,7 +1089,7 @@ sub getPackageList {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to obtain installed packages");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		$kiwi -> done();
 	}
@@ -1103,7 +1139,7 @@ sub getPackageList {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to obtain installed patterns");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		} else {
 			my %pathash = ();
 			foreach my $line (@list) {
@@ -1126,7 +1162,7 @@ sub getPackageList {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to solve patterns");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		# /.../
 		# solve the zypper pattern list into a package list and
@@ -1178,7 +1214,7 @@ sub getPackageList {
 			if (! defined $xsolve) {
 				$kiwi -> error  ("Failed to solve packages");
 				$kiwi -> failed ();
-				return undef;
+				return;
 			}
 			$this->{solverProblem2}    = $xsolve -> getProblemInfo();
 			$this->{solverFailedJobs2} = $xsolve -> getFailedJobs();
@@ -1346,31 +1382,7 @@ sub setSystemOverlayFiles {
 				$dirs_cmp{$dir} = undef;
 			}
 		}
-		# unpackaged files in packaged directories...
-		sub generateWanted {
-			my $filehash = shift;
-			return sub {
-				my $file = $File::Find::name;
-				my $dirn = $File::Find::dir;
-				my $attr;
-				if (-d $file) {
-					$attr = stat ($file);
-					# dont follow directory links and nfs locations...
-					if (($attr->dev < 0x100) || (-l $file)) {
-						$File::Find::prune = 1;
-					} else {
-						$filehash->{$file} = [$dirn,$attr];
-					}
-				} else {
-					if (-l $file) {
-						$attr = lstat ($file);
-					} else {
-						$attr = stat ($file);
-					}
-					$filehash->{$file} = [$dirn,$attr];
-				}
-			}
-		}
+		
 		my $wref = generateWanted (\%result);
 		find({ wanted => $wref, follow => 0 }, sort keys %dirs_rpm);
 		foreach my $file (sort keys %result) {
@@ -1476,101 +1488,102 @@ sub setInitialSetup {
 	if (-f "/etc/X11/xorg.conf.install") {
 		qxx ("cp /etc/X11/xorg.conf.install $dest/root/etc/X11/xorg.conf");
 	} else {
-		if (! open (FD,">$dest/root/etc/X11/xorg.conf")) {
+		my $FD;
+		if (! open ($FD, '>', "$dest/root/etc/X11/xorg.conf")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create fbdev xorg.conf: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		#==========================================
 		# Files
 		#------------------------------------------
-		print FD 'Section "Files"'."\n";
-		print FD "\t".'FontPath   "/usr/share/fonts/truetype/"'."\n";
-		print FD "\t".'FontPath   "/usr/share/fonts/uni/"'."\n";
-		print FD "\t".'FontPath   "/usr/share/fonts/misc/"'."\n";
-		print FD "\t".'ModulePath "/usr/lib/xorg/modules"'."\n";
-		print FD 'EndSection'."\n";
+		print $FD 'Section "Files"'."\n";
+		print $FD "\t".'FontPath   "/usr/share/fonts/truetype/"'."\n";
+		print $FD "\t".'FontPath   "/usr/share/fonts/uni/"'."\n";
+		print $FD "\t".'FontPath   "/usr/share/fonts/misc/"'."\n";
+		print $FD "\t".'ModulePath "/usr/lib/xorg/modules"'."\n";
+		print $FD 'EndSection'."\n";
 		#==========================================
 		# ServerFlags / Module
 		#------------------------------------------
-		print FD 'Section "ServerFlags"'."\n";
-		print FD "\t".'Option "AllowMouseOpenFail"'."\n";
-		print FD "\t".'Option "BlankTime" "0"'."\n";
-		print FD 'EndSection'."\n";
-		print FD 'Section "Module"'."\n";
-		print FD "\t".'Load  "dbe"'."\n";
-		print FD "\t".'Load  "extmod"'."\n";
-		print FD 'EndSection'."\n";
+		print $FD 'Section "ServerFlags"'."\n";
+		print $FD "\t".'Option "AllowMouseOpenFail"'."\n";
+		print $FD "\t".'Option "BlankTime" "0"'."\n";
+		print $FD 'EndSection'."\n";
+		print $FD 'Section "Module"'."\n";
+		print $FD "\t".'Load  "dbe"'."\n";
+		print $FD "\t".'Load  "extmod"'."\n";
+		print $FD 'EndSection'."\n";
 		#==========================================
 		# InputDevice [kbd/mouse]
 		#------------------------------------------
-		print FD 'Section "InputDevice"'."\n";
-		print FD "\t".'Driver      "kbd"'."\n";
-		print FD "\t".'Identifier  "Keyboard[0]"'."\n";
-		print FD "\t".'Option      "Protocol"      "Standard"'."\n";
-		print FD "\t".'Option      "XkbRules"      "xfree86"'."\n";
-		print FD "\t".'Option      "XkbKeycodes"   "xfree86"'."\n";
-		print FD "\t".'Option      "XkbModel"      "pc104"'."\n";
-		print FD "\t".'Option      "XkbLayout"     "us"'."\n";
-		print FD 'EndSection'."\n";
-		print FD 'Section "InputDevice"'."\n";
-		print FD "\t".'Driver      "mouse"'."\n";
-		print FD "\t".'Identifier  "Mouse[1]"'."\n";
-		print FD "\t".'Option      "Device"    "/dev/input/mice"'."\n";
-		print FD "\t".'Option      "Protocol"  "explorerps/2"'."\n";
-		print FD 'EndSection'."\n";
+		print $FD 'Section "InputDevice"'."\n";
+		print $FD "\t".'Driver      "kbd"'."\n";
+		print $FD "\t".'Identifier  "Keyboard[0]"'."\n";
+		print $FD "\t".'Option      "Protocol"      "Standard"'."\n";
+		print $FD "\t".'Option      "XkbRules"      "xfree86"'."\n";
+		print $FD "\t".'Option      "XkbKeycodes"   "xfree86"'."\n";
+		print $FD "\t".'Option      "XkbModel"      "pc104"'."\n";
+		print $FD "\t".'Option      "XkbLayout"     "us"'."\n";
+		print $FD 'EndSection'."\n";
+		print $FD 'Section "InputDevice"'."\n";
+		print $FD "\t".'Driver      "mouse"'."\n";
+		print $FD "\t".'Identifier  "Mouse[1]"'."\n";
+		print $FD "\t".'Option      "Device"    "/dev/input/mice"'."\n";
+		print $FD "\t".'Option      "Protocol"  "explorerps/2"'."\n";
+		print $FD 'EndSection'."\n";
 		#==========================================
 		# Monitor
 		#------------------------------------------
-		print FD 'Section "Monitor"'."\n";
-		print FD "\t".'HorizSync     25-40'."\n";
-		print FD "\t".'Identifier    "Monitor[0]"'."\n";
-		print FD "\t".'ModelName     "Initial"'."\n";
-		print FD "\t".'VendorName    "Initial"'."\n";
-		print FD "\t".'VertRefresh   47-75'."\n";
-		print FD 'EndSection'."\n";
+		print $FD 'Section "Monitor"'."\n";
+		print $FD "\t".'HorizSync     25-40'."\n";
+		print $FD "\t".'Identifier    "Monitor[0]"'."\n";
+		print $FD "\t".'ModelName     "Initial"'."\n";
+		print $FD "\t".'VendorName    "Initial"'."\n";
+		print $FD "\t".'VertRefresh   47-75'."\n";
+		print $FD 'EndSection'."\n";
 		#==========================================
 		# Screen
 		#------------------------------------------
-		print FD 'Section "Screen"'."\n";
-		print FD "\t".'SubSection "Display"'."\n";
-		print FD "\t\t".'Depth  8'."\n";
-		print FD "\t\t".'Modes  "default"'."\n";
-		print FD "\t".'EndSubSection'."\n";
-		print FD "\t".'SubSection "Display"'."\n";
-		print FD "\t\t".'Depth  15'."\n";
-		print FD "\t\t".'Modes  "default"'."\n";
-		print FD "\t".'EndSubSection'."\n";
-		print FD "\t".'SubSection "Display"'."\n";
-		print FD "\t\t".'Depth  16'."\n";
-		print FD "\t\t".'Modes  "default"'."\n";
-		print FD "\t".'EndSubSection'."\n";
-		print FD "\t".'SubSection "Display"'."\n";
-		print FD "\t\t".'Depth  24'."\n";
-		print FD "\t\t".'Modes  "default"'."\n";
-		print FD "\t".'EndSubSection'."\n";
-		print FD "\t".'Device     "Device[fbdev]"'."\n";
-		print FD "\t".'Identifier "Screen[fbdev]"'."\n";
-		print FD "\t".'Monitor    "Monitor[0]"'."\n";
-		print FD 'EndSection'."\n";
+		print $FD 'Section "Screen"'."\n";
+		print $FD "\t".'SubSection "Display"'."\n";
+		print $FD "\t\t".'Depth  8'."\n";
+		print $FD "\t\t".'Modes  "default"'."\n";
+		print $FD "\t".'EndSubSection'."\n";
+		print $FD "\t".'SubSection "Display"'."\n";
+		print $FD "\t\t".'Depth  15'."\n";
+		print $FD "\t\t".'Modes  "default"'."\n";
+		print $FD "\t".'EndSubSection'."\n";
+		print $FD "\t".'SubSection "Display"'."\n";
+		print $FD "\t\t".'Depth  16'."\n";
+		print $FD "\t\t".'Modes  "default"'."\n";
+		print $FD "\t".'EndSubSection'."\n";
+		print $FD "\t".'SubSection "Display"'."\n";
+		print $FD "\t\t".'Depth  24'."\n";
+		print $FD "\t\t".'Modes  "default"'."\n";
+		print $FD "\t".'EndSubSection'."\n";
+		print $FD "\t".'Device     "Device[fbdev]"'."\n";
+		print $FD "\t".'Identifier "Screen[fbdev]"'."\n";
+		print $FD "\t".'Monitor    "Monitor[0]"'."\n";
+		print $FD 'EndSection'."\n";
 		#==========================================
 		# Device
 		#------------------------------------------
-		print FD 'Section "Device"'."\n";
-		print FD "\t".'Driver      "fbdev"'."\n";
-		print FD "\t".'Identifier  "Device[fbdev]"'."\n";
-		print FD 'EndSection'."\n";
+		print $FD 'Section "Device"'."\n";
+		print $FD "\t".'Driver      "fbdev"'."\n";
+		print $FD "\t".'Identifier  "Device[fbdev]"'."\n";
+		print $FD 'EndSection'."\n";
 		#==========================================
 		# ServerLayout
 		#------------------------------------------
-		print FD 'Section "ServerLayout"'."\n";
-		print FD "\t".'Identifier    "Layout[all]"'."\n";
-		print FD "\t".'InputDevice   "Keyboard[0]"  "CoreKeyboard"'."\n";
-		print FD "\t".'InputDevice   "Mouse[1]"     "CorePointer"'."\n";
-		print FD "\t".'Screen        "Screen[fbdev]"'."\n";
-		print FD 'EndSection'."\n";
-		close FD;
+		print $FD 'Section "ServerLayout"'."\n";
+		print $FD "\t".'Identifier    "Layout[all]"'."\n";
+		print $FD "\t".'InputDevice   "Keyboard[0]"  "CoreKeyboard"'."\n";
+		print $FD "\t".'InputDevice   "Mouse[1]"     "CorePointer"'."\n";
+		print $FD "\t".'Screen        "Screen[fbdev]"'."\n";
+		print $FD 'EndSection'."\n";
+		close $FD;
 	}
 	qxx (
 		"cp $dest/root/etc/X11/xorg.conf $dest/root/etc/X11/xorg.conf.install"
@@ -1580,7 +1593,7 @@ sub setInitialSetup {
 	# Activate YaST on initial deployment
 	#------------------------------------------	
 	if (! $this -> autoyastClone()) {
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -1670,7 +1683,7 @@ sub autoyastClone {
 	if( $? != 0 ) {
 		$kiwi -> warning("checking AutoYaST version failed");
 		$kiwi -> skipped();
-		return undef;
+		return;
 	}
 	$ayVersion =~ /^(\d+)\.(\d+)/;
 	if( $1 < 3 && $2 < 19 ) {
@@ -1692,7 +1705,7 @@ sub autoyastClone {
 		$kiwi -> failed ();
 		$kiwi -> error  ("AutoYaST cloning failed. $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# store clone XML for use in kiwi
@@ -1703,7 +1716,7 @@ sub autoyastClone {
 		$kiwi -> failed ();
 		$kiwi -> error  ("failed to move /root/autoinst.xml after cloning. $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (-e "/root/autoinst.xml.backup") {
 		qxx ("mv /root/autoinst.xml.backup /root/autoinst.xml");

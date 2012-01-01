@@ -100,7 +100,7 @@ sub sendLogServerMessage {
 		if (($this->trace()) && ($main::TT)) {
 			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
-		return undef;
+		return;
 	}
 	my $data;
 	if ($level == 1) {
@@ -112,7 +112,7 @@ sub sendLogServerMessage {
 	}
 	$data .= "\n".'  <message info="'.$message.'"/>'."\n";
 	if ($level == 1) {
-        $data .= '</info>';
+		$data .= '</info>';
 	} elsif ($level == 2) {
 		$data .= '</warning>';
 	} else {
@@ -139,7 +139,7 @@ sub getLogServerMessage {
 		if ($this->trace()) {
 			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
-		return undef;
+		return;
 	}
 	return $smem -> get();
 }
@@ -390,16 +390,17 @@ sub reopenRootChannel {
 	if (defined $this->{rootefd}) {
 		return $this;
 	}
-	if (! (open EFD,">>$file")) {
+	my $EFD;
+	if (! (open $EFD, '>>', "$file")) {
 		if ($this->trace()) {
 			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
-		return undef;
+		return;
 	}
-	binmode(EFD,':unix');
-	$this->{rootefd} = *EFD;
+	binmode($EFD,':unix');
+	$this->{rootefd} = *$EFD;
 	if ($this->{fileLog}) {
-		$this->{channel} = *EFD;
+		$this->{channel} = *$EFD;
 	}
 	return $this;
 }
@@ -676,16 +677,17 @@ sub setLogFile {
 		$this->{fileLog} = 2;
 		return $this;
 	}
-	if (! (open FD,">$file")) {
+	my $FD;
+	if (! (open $FD, '>', "$file")) {
 		$this -> warning ("Couldn't open log channel: $!\n");
 		if ($this->trace()) {
 			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
-		return undef;
+		return;
 	}
-	binmode(FD,':unix');
-	$this->{channel} = *FD;
-	$this->{rootefd} = *FD;
+	binmode($FD,':unix');
+	$this->{channel} = *$FD;
+	$this->{rootefd} = *$FD;
 	$this->{rootLog} = $file;
 	$this->{fileLog} = 1;
 	return $this;
@@ -699,10 +701,12 @@ sub printLogExcerpt {
 	my $rootLog = $this->{rootLog};
 	my $search  = "Following information is JFYI";
 	my $ignore;
-	if ((! defined $rootLog) || (! open (FD, $rootLog))) {
-		return undef;
+	my $FD;
+	if ((! defined $rootLog) || (! open ($FD, '<', $rootLog))) {
+		return;
 	}
-	my @lines = <FD>; close FD;
+	my @lines = <$FD>;
+	close $FD;
 	my @result = ();
 	foreach my $line (@lines) {
 		last if ($line =~ /$search/);
@@ -760,18 +764,20 @@ sub setLogHumanReadable {
 	my $this = shift;
 	my $rootLog = $this->{rootLog};
 	local $/;
-	if ((! defined $rootLog) || (! open (FD, $rootLog))) {
-		return undef;
+	my $FD;
+	if ((! defined $rootLog) || (! open ($FD, '<', $rootLog))) {
+		return;
 	}
-	my $stream = <FD>; close FD;
+	my $stream = <$FD>;
+	close $FD;
 	my @stream = split (//,$stream);
 	my $line = "";
 	my $cr   = 0;
-	if (! open (FD, ">$rootLog")) {
+	if (! open ($FD, '>', "$rootLog")) {
 		if ($this->trace()) {
 			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
-		return undef;
+		return;
 	}
 	foreach my $l (@stream) {
 		if ($l eq "\r") {
@@ -780,11 +786,11 @@ sub setLogHumanReadable {
 		}
 		if (($l eq "\n") && (! $cr)) {
 			# normal line, print it
-			print FD "$line\n"; $line = ""; next;
+			print $FD "$line\n"; $line = ""; next;
 		}
 		if (($l eq "\n") && ($cr)) {
 			# multi line ended with line feed, print it
-			print FD "$line\n"; $cr = 0; $line = ""; next;
+			print $FD "$line\n"; $cr = 0; $line = ""; next;
 		}
 		if (($l ne "\n") && ($cr)) {
 			# multi line unfinished, overwrite 
@@ -792,7 +798,7 @@ sub setLogHumanReadable {
 		}
 		$line .= $l;
 	}
-	close FD;
+	close $FD;
 	return $this;
 }
 
@@ -823,16 +829,17 @@ sub setRootLog {
 		return;
 	}
 	info ( $this, "Set root log: $file..." );
-	if (! (open EFD,">$file")) {
+	my $EFD;
+	if (! (open $EFD, '>', "$file")) {
 		$this -> skipped ();
 		$this -> warning ("Couldn't open root log channel: $!\n");
 		$this->{errorOk} = 0;
 	}
-	binmode(EFD,':unix');
+	binmode($EFD,':unix');
 	$this -> done ();
 	$this->{rootLog} = $file;
 	$this->{errorOk} = 1;
-	$this->{rootefd} = *EFD;
+	$this->{rootefd} = *$EFD;
 }
 
 #==========================================
@@ -865,7 +872,7 @@ sub setLogServer {
 		if ($this->trace()) {
 			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
-		return undef;
+		return;
 	}
 	if ($child) {
 		#==========================================
@@ -1009,26 +1016,26 @@ sub writeXMLDiff {
 	my @NC;
 	my $FX;
 	if ((! $data) || (! -f $cmpf)) {
-		return undef;
+		return;
 	}
 	qxxLogOff();
 	my $used = qxx ("mktemp -q /tmp/kiwi-xmlused.XXXXXX"); chomp $used;
 	my $code = $? >> 8;
 	if ($code != 0) {
 		qxxLogOn();
-		return undef;
+		return;
 	}
 	my $orig = qxx ("mktemp -q /tmp/kiwi-xmlorig.XXXXXX"); chomp $orig;
 	if ($code != 0) {
 		qxxLogOn();
-		return undef;
+		return;
 	}
 	qxx ("cp -a $cmpf $orig");
-	if (! open ($FX,">$used")) {
+	if (! open ($FX, '>', "$used")) {
 		qxxLogOn();
 		unlink $used;
 		unlink $orig;
-		return undef;
+		return;
 	}
 	binmode $FX;
 	print $FX $data; close $FX;
