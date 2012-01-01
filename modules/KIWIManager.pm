@@ -66,18 +66,18 @@ sub new {
 	if (! defined $xml) {
 		$kiwi -> error  ("Missing XML description pointer");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $sourceRef) {
 		$kiwi -> error  ("Missing channel description pointer");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my %source = %{$sourceRef};
 	if (! defined $root) {
 		$kiwi -> error  ("Missing chroot path");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $manager) {
 		$manager = $xml -> getPackageManager();
@@ -122,17 +122,17 @@ sub new {
 			mkdir $credDir;
 			$zconfig->newval('main', 'credentials.global.dir', $credDir);
 			$zconfig->RewriteConfig();
-			open my $credFile, '>'. "$credDir/kiwiRepoCredentials";
-			if (!$credFile) {
+			open my $CREDFILE, '>', "$credDir/kiwiRepoCredentials";
+			if (!$CREDFILE) {
 				my $msg = 'Unable to open credetials file for write '
 				. "in $credDir";
 				$kiwi -> error ($msg);
 				$kiwi -> failed();
-				return undef;
+				return;
 			}
-			print $credFile "username=$uname\n";
-			print $credFile "password=$pass\n";
-			close $credFile;
+			print $CREDFILE "username=$uname\n";
+			print $CREDFILE "password=$pass\n";
+			close $CREDFILE;
 			$kiwi -> done();
 		}
 		if (defined $targetArch) {
@@ -266,7 +266,7 @@ sub setupScreen {
 		$kiwi -> error  ("Couldn't create call file: $!");
 		$kiwi -> failed ();
 		$this -> resetInstallationSource();
-		return undef;
+		return;
 	}
 	print $cd "logfile $screenLogs\n";
 	print $cd "logfile flush 1\n";
@@ -325,7 +325,7 @@ sub setupScreenCall {
 		$kiwi -> failed ();
 		$kiwi -> error  ("fork failed: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if ($this->{child}) {
 		#==========================================
@@ -389,7 +389,7 @@ sub setupScreenCall {
 		if ($kiwi -> trace()) {
 			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
-		return undef;
+		return;
 	}
 	$kiwi -> done ();
 	return $this;
@@ -440,7 +440,7 @@ sub setupSignatureCheck {
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ($data);
-				return undef;
+				return;
 			}
 			$kiwi -> done ();
 		}
@@ -512,7 +512,7 @@ sub resetSignatureCheck {
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ($data);
-				return undef;
+				return;
 			}
 			$kiwi -> done ();
 		}
@@ -591,7 +591,7 @@ sub setupExcludeDocs {
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ($data);
-				return undef;
+				return;
 			}
 			$kiwi -> done ();
 		}
@@ -663,7 +663,7 @@ sub resetExcludeDocs {
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ($data);
-				return undef;
+				return;
 			}
 			$kiwi -> done ();
 		}
@@ -765,7 +765,7 @@ sub setupInstallationSource {
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("smart: $data");
-				return undef;
+				return;
 			}
 			push (@channelList,$chl);
 			$kiwi -> done ();
@@ -857,7 +857,7 @@ sub setupInstallationSource {
 					if ($code != 0) {
 						$kiwi -> failed ();
 						$kiwi -> error  ("zypper: $data");
-						return undef;
+						return;
 					}
 				}
 				$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
@@ -865,7 +865,7 @@ sub setupInstallationSource {
 				if ($code != 0) {
 					$kiwi -> failed ();
 					$kiwi -> error  ("zypper: $data");
-					return undef;
+					return;
 				}
 				$kiwi -> done ();
 			} else {
@@ -886,7 +886,7 @@ sub setupInstallationSource {
 				if ($code != 0) {
 					$kiwi -> failed ();
 					$kiwi -> error  ("zypper: $data");
-					return undef;
+					return;
 				}
 				$kiwi -> done ();
 				if ($source{$alias}{imgincl}) {
@@ -897,7 +897,7 @@ sub setupInstallationSource {
 					if ($code != 0) {
 						$kiwi -> failed ();
 						$kiwi -> error  ("zypper: $data");
-						return undef;
+						return;
 					}
 					$kiwi -> done ();
 				}
@@ -916,7 +916,7 @@ sub setupInstallationSource {
 				if ($code != 0) {
 					$kiwi -> failed ();
 					$kiwi -> error  ("zypper: $data");
-					return undef;
+					return;
 				}
 				$kiwi -> done ();
 			}
@@ -993,7 +993,7 @@ sub setupInstallationSource {
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("yum: $data");
-				return undef;
+				return;
 			}
 			$kiwi -> done();
 		}
@@ -1046,7 +1046,7 @@ sub resetInstallationSource {
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ($data);
-			return undef;
+			return;
 		}
 		$kiwi -> done ();
 	}
@@ -1085,7 +1085,7 @@ sub resetInstallationSource {
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ($data);
-			return undef;
+			return;
 		}
 		$kiwi -> done ();
 	}
@@ -1126,7 +1126,7 @@ sub setupDownload {
 	#------------------------------------------
 	my $fd = $this -> setupScreen();
 	if (! defined $fd) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# smart
@@ -1166,7 +1166,7 @@ sub setupDownload {
 		$kiwi -> failed ();
 		$kiwi -> error  ("*** not implemeted ***");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# ensconce
@@ -1176,7 +1176,7 @@ sub setupDownload {
 		$kiwi -> failed ();
 		$kiwi -> error  ("*** not implemeted ***");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# yum
@@ -1186,7 +1186,7 @@ sub setupDownload {
 		$kiwi -> failed ();
 		$kiwi -> error  ("*** not implemeted ***");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	return $this -> setupScreenCall();
 }
@@ -1218,7 +1218,7 @@ sub installPackages {
 	my @addonPackages = @{$instPacks};
 	my $fd = $this -> setupScreen();
 	if (! defined $fd) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# smart
@@ -1288,7 +1288,7 @@ sub installPackages {
 		$kiwi -> error  ("*** not implemeted ***");
 		$kiwi -> failed ();
 		$fd -> close();
-		return undef;
+		return;
 	}
 	#==========================================
 	# yum
@@ -1353,7 +1353,7 @@ sub removePackages {
 	}
 	my $fd = $this -> setupScreen();
 	if (! defined $fd) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# smart
@@ -1423,7 +1423,7 @@ sub removePackages {
 		$kiwi -> error  ("*** not implemeted ***");
 		$kiwi -> failed ();
 		$fd -> close();
-		return undef;
+		return;
 	}
 	#==========================================
 	# yum
@@ -1473,7 +1473,7 @@ sub setupUpgrade {
 	#------------------------------------------
 	my $fd = $this -> setupScreen();
 	if (! defined $fd) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# smart
@@ -1756,13 +1756,14 @@ sub setupArchives {
 	#------------------------------------------
 	if ($chroot) {
 		$kiwi -> error ("Can't access archives in chroot");
-		return undef;
+		return;
 	}
 	#==========================================
 	# check for origin of image description
 	#------------------------------------------
-	if (open FD,"$idesc/image/main::Prepare") {
-		$idesc = <FD>; close FD;
+	if (open my $FD, '<', "$idesc/image/main::Prepare") {
+		$idesc = <$FD>;
+		close $FD;
 	}
 	#==========================================
 	# check for archive files
@@ -1770,7 +1771,7 @@ sub setupArchives {
 	foreach my $tar (@tars) {
 		if (! -f "$idesc/$tar") {
 			$kiwi -> error ("Can't find $idesc/$tar");
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -1778,7 +1779,7 @@ sub setupArchives {
 	#------------------------------------------
 	my $fd = $this -> setupScreen();
 	if (! defined $fd) {
-		return undef;
+		return;
 	}
 	$kiwi -> info ("Installing raw archives in: $root...");
 	#==========================================
@@ -1880,7 +1881,7 @@ sub setupRootSystem {
 	#------------------------------------------
 	my $fd = $this -> setupScreen();
 	if (! defined $fd) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# smart
@@ -1913,7 +1914,7 @@ sub setupRootSystem {
 			$kiwi -> info ("Setting up bootstrap baselibs...");
 			if (! $this -> rpmLibs()) {
 				$kiwi -> failed();
-				return undef;
+				return;
 			}
 			$kiwi -> done();
 			$kiwi -> info ("Initializing image system on: $root...");
@@ -2007,7 +2008,7 @@ sub setupRootSystem {
 			$kiwi -> info ("Setting up bootstrap baselibs...");
 			if (! $this -> rpmLibs()) {
 				$kiwi -> failed();
-				return undef;
+				return;
 			}
 			$kiwi -> done();
 			$kiwi -> info ("Initializing image system on: $root...");
@@ -2150,7 +2151,7 @@ sub setupRootSystem {
 			$kiwi -> info ("Setting up bootstrap baselibs...");
 			if (! $this -> rpmLibs()) {
 				$kiwi -> failed();
-				return undef;
+				return;
 			}
 			$kiwi -> done();
 			#==========================================
@@ -2195,7 +2196,7 @@ sub setupRootSystem {
 			$kiwi -> info ("Setting up bootstrap baselibs...");
 			if (! $this -> rpmLibs()) {
 				$kiwi -> failed();
-				return undef;
+				return;
 			}
 			$kiwi -> done();
 			$kiwi -> info ("Initializing image system on: $root...");
@@ -2314,7 +2315,7 @@ sub setupRootSystem {
 	# run process
 	#------------------------------------------
 	if (! $this -> setupScreenCall()) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# cleanup baselibs
@@ -2657,7 +2658,7 @@ sub rpmLibs {
 	}
 	}
 	if (! @result) {
-		return undef;
+		return;
 	}
 	foreach my $l (@result) {
 		my $dir = dirname ($l);
