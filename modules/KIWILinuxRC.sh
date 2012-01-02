@@ -768,14 +768,13 @@ function installBootLoader {
 			"*** boot loader install for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
-	masterBootID=0xffffffff
-	if [ ! -z "$masterBootID" ];then
-		Echo "writing default MBR ID to master boot record: $masterBootID"
-		masterBootIDHex=$(echo $masterBootID |\
-			sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/\\x\4\\x\3\\x\2\\x\1/')
-		echo -e -n $masterBootIDHex | dd of=$imageDiskDevice \
-			bs=1 count=4 seek=$((0x1b8))
-	fi
+	masterBootID=$(printf 0x%04x%04x $RANDOM $RANDOM)
+	Echo "writing new MBR ID to master boot record: $masterBootID"
+	echo $masterBootID > /boot/grub/mbrid
+	masterBootIDHex=$(echo $masterBootID |\
+		sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/\\x\4\\x\3\\x\2\\x\1/')
+	echo -e -n $masterBootIDHex | dd of=$imageDiskDevice \
+		bs=1 count=4 seek=$((0x1b8))
 }
 #======================================
 # installBootLoaderRecovery
