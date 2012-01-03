@@ -1549,6 +1549,7 @@ sub setupBootDisk {
 	my $bootfix   = "VMX";
 	my $haveluks  = 0;
 	my $needBootP = 0;
+	my $needParts = 1;
 	my $rawRW     = 0;
 	my $bootloader;
 	if ($arch =~ /ppc|ppc64/) {
@@ -1681,26 +1682,34 @@ sub setupBootDisk {
 	#------------------------------------------
 	if ($lvm) {
 		$needBootP = 1;
+		$needParts = 2;
 	} elsif ($syszip) {
-		$needBootP = 2;
-		if ($type{filesystem} eq "clicfs") {
-			$needBootP = 3;
+		$needBootP = 1;
+		$needParts = 2;
+		if ($imgtype eq "split") {
+			$needBootP = 1;
+			$needParts = 3;
+		} elsif ($type{filesystem} eq "clicfs") {
+			$needBootP = 1;
+			$needParts = 3;
 		} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
-			$needBootP = 3;
+			$needBootP = 1;
+			$needParts = 3;
 		} elsif ($type{luks}) {
-			$needBootP = 3;
+			$needBootP = 1;
+			$needParts = 3;
 		}
 	} elsif ($type{filesystem} =~ /btrfs|xfs/) {
-		$needBootP = 2;
+		$needBootP = 1;
+		$needParts = 2;
 	} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
-		$needBootP = 2;
+		$needBootP = 1;
+		$needParts = 2;
 	} elsif ($type{luks}) {
-		$needBootP = 2;
+		$needBootP = 1;
+		$needParts = 2;
 	}
 	$this->{bootpart} = 0;
-	if ($needBootP) {
-		$this->{bootpart} = $needBootP - 1;
-	}
 	#==========================================
 	# setup boot partition type
 	#------------------------------------------
@@ -1866,24 +1875,22 @@ sub setupBootDisk {
 		# create disk partition
 		#------------------------------------------
 		if (! $lvm) {
-			if ($needBootP == 3) {
-				# xda1 root-ro | xda2 root-rw | xda3 boot
-				my $sysrw = $this->{vmmbyte} - $bootsize - $syszip;
+			if ($needParts == 3) {
+				# xda1 boot | xda2 root-ro | xda3 root-rw
 				@commands = (
-					"n","p","1",".","+".$syszip."M",
-					"n","p","2",".","+".$sysrw."M",
+					"n","p","1",".","+".$bootsize."M",
+					"n","p","2",".","+".$syszip."M",
 					"n","p","3",".",".",
-					"t","3",$partid,
-					"a","3","w","q"
+					"t","1",$partid,
+					"a","1","w","q"
 				);
-			} elsif ($needBootP == 2) {
-				# xda1 root-ro | xda2 root-rw and boot
-				my $sysro = $this->{vmmbyte} - $bootsize;
+			} elsif ($needParts == 2) {
+				# xda1 boot | xda2 root-rw
 				@commands = (
-					"n","p","1",".","+".$sysro."M",
+					"n","p","1",".","+".$bootsize."M",
 					"n","p","2",".",".",
-					"t","2",$partid,
-					"a","2","w","q"
+					"t","1",$partid,
+					"a","1","w","q"
 				);
 			} else {
 				# xda1 root-rw
@@ -1977,7 +1984,7 @@ sub setupBootDisk {
 		#------------------------------------------
 		if ($syszip > 0) {
 			my $sizeOK = 1;
-			my $systemPSize = $this->getStorageSize ($deviceMap{1});
+			my $systemPSize = $this->getStorageSize ($deviceMap{2});
 			my $systemISize = $main::global -> isize ($system);
 			$systemISize /= 1024;
 			chomp $systemPSize;
@@ -2014,6 +2021,9 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (! $haveTree) {
 		$kiwi -> info ("Dumping system image on disk");
+		if ($needBootP) {
+			$root = $deviceMap{2};
+		}
 		$status = qxx ("dd if=$system of=$root bs=32k 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -2043,7 +2053,7 @@ sub setupBootDisk {
 		}
 		if ($haveSplit) {
 			$kiwi -> info ("Dumping split read/write part on disk");
-			$root = $deviceMap{2};
+			$root = $deviceMap{3};
 			$status = qxx ("dd if=$splitfile of=$root bs=32k 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -2213,7 +2223,7 @@ sub setupBootDisk {
 	# create bootloader filesystem if needed
 	#------------------------------------------
 	if ($needBootP) {
-		$boot = $deviceMap{$needBootP};
+		$boot = $deviceMap{1};
 		if ($lvm) {
 			$boot = $deviceMap{0};
 		}
@@ -2260,7 +2270,7 @@ sub setupBootDisk {
 	# Mount boot space on this disk
 	#------------------------------------------
 	if ($needBootP) {
-		$boot = $deviceMap{$needBootP};
+		$boot = $deviceMap{1};
 		if ($lvm) {
 			$boot = $deviceMap{0};
 		}

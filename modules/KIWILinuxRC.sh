@@ -2536,6 +2536,12 @@ function updateLVMBootDeviceFstab {
 	fi
 }
 #======================================
+# updateSplitBootDeviceFstab
+#--------------------------------------
+function updateSplitBootDeviceFstab {
+	updateLVMBootDeviceFstab $1 $2 "/splitboot"
+}
+#======================================
 # updateClicBootDeviceFstab
 #--------------------------------------
 function updateClicBootDeviceFstab {
@@ -5994,7 +6000,9 @@ function cleanImage {
 	#======================================
 	# umount image boot partition if any
 	#--------------------------------------
-	for i in yaboot lvmboot btrboot clicboot xfsboot luksboot syslboot;do
+	for i in \
+		yaboot lvmboot btrboot clicboot xfsboot luksboot syslboot splitboot
+	do
 		if [ ! -e /$i ];then
 			continue
 		fi
@@ -7777,30 +7785,31 @@ function setupBootPartition {
 		#======================================
 		# btrboot
 		#--------------------------------------
-		test -z "$bootid" && export bootid=2
+		test -z "$bootid" && export bootid=1
 		mpoint=btrboot
 	elif [ "$haveClicFS" = "yes" ];then
 		#======================================
 		# clicboot
 		#--------------------------------------
-		test -z "$bootid" && export bootid=3
+		test -z "$bootid" && export bootid=1
 		mpoint=clicboot
 	elif [ "$haveXFS" = "yes" ];then
 		#======================================
 		# xfsboot
 		#--------------------------------------
-		test -z "$bootid" && export bootid=2
+		test -z "$bootid" && export bootid=1
 		mpoint=xfsboot
 	elif [ ! -z "$COMBINED_IMAGE" ];then
 		#======================================
-		# split
+		# splitboot
 		#--------------------------------------
-		test -z "$bootid" && export bootid=2
+		test -z "$bootid" && export bootid=1
+		mpoint=splitboot
 	elif [ "$loader" = "yaboot" ];then
 		#======================================
 		# yaboot
 		#--------------------------------------
-		test -z "$bootid" && export bootid=2
+		test -z "$bootid" && export bootid=1
 		mpoint=yaboot
 	elif \
 		[ "$loader" = "syslinux" ] || \
@@ -7810,16 +7819,7 @@ function setupBootPartition {
 		#======================================
 		# syslboot / luksboot
 		#--------------------------------------
-		if [ -z "$bootid" ];then
-			test "$loader" = "syslinux" && pSearch=c
-			for i in 4 3 2;do
-				pType=$(partitionID $imageDiskDevice $i)
-				if [ "$pType" = $pSearch ];then
-					export bootid=$i
-					break
-				fi
-			done
-		fi
+		test -z "$bootid" && export bootid=1
 		if [ "$haveLuks" = "yes" ];then
 			mpoint=luksboot
 		else
@@ -7843,10 +7843,6 @@ function setupBootPartition {
 	fi
 	if [ ! -e $imageBootDevice ];then
 		# no such boot device like for live ISO hybrid disk
-		return
-	fi
-	if [ ! -z "$COMBINED_IMAGE" ];then
-		# split read-write partition is boot device
 		return
 	fi
 	#======================================
@@ -8129,7 +8125,9 @@ function resetBootBind {
 	#======================================
 	# find bind boot dir
 	#--------------------------------------
-	for i in yaboot lvmboot btrboot clicboot xfsboot luksboot syslboot;do
+	for i in \
+		yaboot lvmboot btrboot clicboot xfsboot luksboot syslboot splitboot
+	do
 		if [ -d /$i ];then
 			bootdir=$i
 			break

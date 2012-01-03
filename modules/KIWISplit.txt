@@ -2,8 +2,6 @@
 	<persistent>
 		<file name="/var"/>
 		<file name="/var/*"/>
-		<file name="/boot"/>
-		<file name="/boot/*"/>
 		<file name="/etc"/>
 		<file name="/etc/*"/>
 		<file name="/home"/>
@@ -11,4 +9,8 @@
 		<file name="/tmp"/>
 		<file name="/tmp/*"/>
 	</persistent>
+	<temporary>
+		<file name="/boot"/>
+		<file name="/boot/*"/>
+	</temporary>
 </split>
