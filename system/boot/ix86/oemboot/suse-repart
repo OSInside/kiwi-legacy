@@ -48,6 +48,7 @@ function OEMRepartInit {
 		umount /reco-root && rmdir /reco-root
 	fi
 	export input=/part.input
+	export bootid=1
 	rm -f $input
 }
 
@@ -59,40 +60,42 @@ function OEMRepartStandard {
 	# repartition disk with read/write root filesystem
 	# Initial partition table layout is:
 	# =====================================
+	# p1: [ boot ]
 	# p1: ( root )  +luks
-	# p2: [ boot ]
 	# -------------------------------------
 	local newparts=0
 	local partsize=0
 	#======================================
 	# check for boot partition
 	#--------------------------------------
-	createBootDeviceData 2
-	#======================================
-	# setup initial boot device ID
-	#--------------------------------------
-	export bootid=1
-	if [ "$haveBootPartition" = "yes" ];then
-		bootid=2
-	fi
+	createBootDeviceData
 	#======================================
 	# calculate partition sizes
 	#--------------------------------------
 	diskXMBytes=$(($(partitionSize $imageDiskDevice) / 1024))
 	diskP1MByte=$(($(partitionSize $(ddn $imageDiskDevice 1)) / 1024))
+	diskP2MByte=0
+	if [ "$haveBootPartition" = "yes" ];then
+		diskP2MByte=$(($(partitionSize $(ddn $imageDiskDevice 2)) / 1024))
+	fi
 	diskRMBytes=$((
-		diskXMBytes - diskP1MByte - swapsize - recoMByte - bootXMBytes
+		diskXMBytes - diskP1MByte - diskP2MByte - swapsize - recoMByte
 	))
-	disk1MBytes=$((diskP1MByte + diskRMBytes))
+	if [ "$haveBootPartition" = "yes" ];then
+		diskRootMBytes=$diskP2MByte
+	else
+		diskRootMBytes=$diskP1MByte
+	fi
+	diskSysMBytes=$((diskRootMBytes + diskRMBytes))
 	if [ ! -z "$OEM_SYSTEMSIZE" ];then
-		if [ $OEM_SYSTEMSIZE -le $disk1MBytes ];then
-			disk1MBytes=$OEM_SYSTEMSIZE
+		if [ $OEM_SYSTEMSIZE -le $diskSysMBytes ];then
+			diskSysMBytes=$OEM_SYSTEMSIZE
 		fi
 	fi
 	#======================================
 	# check repart operation
 	#--------------------------------------
-	if [ $disk1MBytes -lt $diskP1MByte ];then
+	if [ $diskSysMBytes -lt $diskRootMBytes ];then
 		# /.../
 		# Requested system partition size is smaller than
 		# existing partition, will not re-partition
@@ -108,14 +111,16 @@ function OEMRepartStandard {
 	if [ -z "$DONT_PARTITION" ];then
 		pID=1
 		bootParam=1
+		rootParam=1
 		recoParam=no
 		swapParam=no
+		cowpParam=no
 		#======================================
 		# clean/backup boot partition
 		#--------------------------------------
 		if [ "$haveBootPartition" = "yes" ];then
-			createPartitionerInput \
-				d 2
+			pID=2
+			rootParam=2
 		fi
 		#======================================
 		# count partitions to be created
@@ -126,18 +131,15 @@ function OEMRepartStandard {
 		if [ ! -z "$OEM_RECOVERY" ];then
 			newparts=$((newparts + 1))
 		fi
-		if [ ! -z "$bootXMBytes" ];then
-			newparts=$((newparts + 1))
-		fi
 		#======================================
 		# repart root partition
 		#--------------------------------------
-		partsize=+"$disk1MBytes"M
+		partsize=+"$diskSysMBytes"M
 		if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 0 ];then
 			partsize=.
 		fi
-		createPartitionerInput \
-			d n p $pID . $partsize
+		createPartitionerInput
+			d $pID n p $pID . $partsize
 		#======================================
 		# add swap partition
 		#--------------------------------------
@@ -164,35 +166,11 @@ function OEMRepartStandard {
 			recoParam=$pID
 		fi
 		#======================================
-		# add boot partition
-		#--------------------------------------
-		if [ ! -z "$bootXMBytes" ];then
-			pID=$((pID + 1))
-			partsize=+"$bootXMBytes"M
-			createPartitionerInput \
-				n p $pID . $partsize t $pID $bootpartID
-			newparts=$((newparts - 1))
-			bootParam=$pID
-		fi
-		#======================================
 		# setup new device names
 		#--------------------------------------
 		setupDeviceNames \
-			1 $swapParam $recoParam $bootParam no
+			$rootParam $swapParam $recoParam $bootParam $cowpParam
 		callPartitioner $input
-	fi
-	#======================================
-	# post repart actions
-	#--------------------------------------
-	if [ -z "$DONT_PARTITION" ];then
-		#======================================
-		# Activate boot partition
-		#--------------------------------------
-		activateBootPartition
-		#======================================
-		# Create boot filesystem if required
-		#--------------------------------------
-		createBootDeviceFilesystem
 	fi
 }
 
@@ -205,10 +183,12 @@ function OEMRepartSplit {
 	# and friends and also systems of image type split.
 	# Initial partition table layout is:
 	# =====================================
-	# p1: ( compressed )
-	# p2: ( write area ) +luks
-	# p3: [ boot ]
+	# p1: boot
+	# p2: RO ( compressed )
+	# p3: RW ( write area ) +luks
 	# -------------------------------------
+	local newparts=0
+	local partsize=0
 	#====================================== 
 	# no recovery support in union mode
 	#--------------------------------------
@@ -216,18 +196,11 @@ function OEMRepartSplit {
 	#======================================
 	# check for boot partition
 	#--------------------------------------
-	createBootDeviceData 3
-	#======================================
-	# setup initial boot device ID
-	#--------------------------------------
-	export bootid=2
-	if [ "$haveBootPartition" = "yes" ];then
-		bootid=3
-	fi
+	createBootDeviceData
 	#====================================== 
 	# check for read-write partition
 	#--------------------------------------
-	if ! partitionSize $(ddn $imageDiskDevice 2) &>/dev/null;then
+	if ! partitionSize $(ddn $imageDiskDevice 3) &>/dev/null;then
 		Echo "No read-write partition in this split/overlay image"
 		disableOEMParameters
 		disableRepart
@@ -239,19 +212,20 @@ function OEMRepartSplit {
 		diskXMBytes=$(($(partitionSize $imageDiskDevice) / 1024))
 		diskP1MByte=$(($(partitionSize $(ddn $imageDiskDevice 1)) / 1024))
 		diskP2MByte=$(($(partitionSize $(ddn $imageDiskDevice 2)) / 1024))
+		diskP3MByte=$(($(partitionSize $(ddn $imageDiskDevice 3)) / 1024))
 		diskRMBytes=$((
-			diskXMBytes - diskP1MByte - diskP2MByte - swapsize - bootXMBytes
+			diskXMBytes - diskP1MByte - diskP2MByte - diskP3MByte - swapsize
 		))
-		disk2MBytes=$((diskP2MByte + diskRMBytes))
+		disk3MBytes=$((diskP3MByte + diskRMBytes))
 		if [ ! -z "$OEM_SYSTEMSIZE" ];then
-			if [ $OEM_SYSTEMSIZE -le $disk2MBytes ];then
-				disk2MBytes=$OEM_SYSTEMSIZE
+			if [ $OEM_SYSTEMSIZE -le $disk3MBytes ];then
+				disk3MBytes=$OEM_SYSTEMSIZE
 			fi
 		fi
 		#======================================
 		# check repart operation
 		#--------------------------------------
-		if [ $disk2MBytes -lt $diskP2MByte ];then
+		if [ $disk3MBytes -lt $diskP3MByte ];then
 			# /.../
 			# Requested read/write partition size is smaller than
 			# existing partition, will not re-partition
@@ -266,22 +240,27 @@ function OEMRepartSplit {
 	# write new partition table
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
-		pID=2
-		bootParam=2
-		recoParam=no
+		pID=3
+		bootParam=1
+		rootParam=2
+		cowpParam=3
 		swapParam=no
+		recoParam=no
 		#======================================
-		# clean/backup boot partition
+		# count partitions to be created
 		#--------------------------------------
-		if [ "$haveBootPartition" = "yes" ];then
-			createPartitionerInput \
-				d 3
+		if [ -z "$OEM_WITHOUTSWAP" ];then
+			newparts=$((newparts + 1))
 		fi
 		#======================================
 		# repart cow partition
 		#--------------------------------------
+		partsize=+"$disk3MBytes"M
+		if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 0 ];then
+			partsize=.
+		fi
 		createPartitionerInput \
-			d $pID n p $pID . +"$disk2MBytes"M
+			d $pID n p $pID . $partsize
 		#======================================
 		# add swap partition
 		#--------------------------------------
@@ -292,33 +271,11 @@ function OEMRepartSplit {
 			swapParam=$pID
 		fi
 		#======================================
-		# add boot partition
-		#--------------------------------------
-		if [ "$haveBootPartition" = "yes" ];then
-			pID=$((pID + 1))
-			createPartitionerInput \
-				n p $pID . +"$bootXMBytes"M t $pID $bootpartID
-			bootParam=$pID
-		fi
-		#======================================
 		# setup new device names
 		#--------------------------------------
 		setupDeviceNames \
-			1 $swapParam $recoParam $bootParam 2
+			$rootParam $swapParam $recoParam $bootParam $cowpParam
 		callPartitioner $input
-	fi
-	#======================================
-	# post repart actions
-	#--------------------------------------
-	if [ -z "$DONT_PARTITION" ];then
-		#======================================
-		# Activate boot partition
-		#--------------------------------------
-		activateBootPartition
-		#======================================
-		# Create boot filesystem if required
-		#--------------------------------------
-		createBootDeviceFilesystem
 	fi
 }
 
@@ -336,11 +293,7 @@ function OEMRepartLVM {
 	#======================================
 	# check for boot partition
 	#--------------------------------------
-	createBootDeviceData 1
-	#======================================
-	# setup initial boot device ID
-	#--------------------------------------
-	export bootid=1
+	createBootDeviceData
 	#======================================
 	# calculate partition sizes
 	#--------------------------------------
@@ -369,6 +322,7 @@ function OEMRepartLVM {
 	if [ -z "$DONT_PARTITION" ];then
 		pID=2
 		bootParam=1
+		rootParam=1
 		recoParam=no
 		swapParam=no
 		#======================================
@@ -440,7 +394,7 @@ function OEMRepartLVM {
 		# setup new device names
 		#--------------------------------------
 		setupDeviceNames \
-			1 $swapParam $recoParam $bootParam yes $VGROUP
+			$rootParam $swapParam $recoParam $bootParam yes $VGROUP
 	fi
 }
 
@@ -599,11 +553,6 @@ function OEMRepart {
 				systemException "Failed to copy recovery gfx message" "reboot"
 			fi
 		fi
-		if [ -f /boot.tgz ];then
-			if ! tar -xf /boot.tgz -C /reco-save;then
-				systemException "Failed to extract recovery boot files" "reboot"
-			fi
-		fi
 		if ! dd if=$imageDiskDevice of=/reco-save/mbr bs=1 count=512;then
 			systemException "Failed to store MBR" "reboot"
 		fi
@@ -618,27 +567,6 @@ function OEMRepart {
 		fi
 		umount /reco-save && rmdir /reco-save
 		umount /reco-root && rmdir /reco-root
-	fi
-}
-
-#======================================
-# activateBootPartition
-#--------------------------------------
-function activateBootPartition {
-	# /.../
-	# set boot flag to current value of $bootid
-	# ----
-	Echo "Set boot flag to partition ID: $bootid [ $imageDiskDevice ]"
-	parted $imageDiskDevice set $bootid boot on
-	if test $? != 0; then
-		systemException "Failed to set boot flag" "reboot"
-	fi
-	blockdev --rereadpt $imageDiskDevice
-	local deviceTest=$(ddn $imageDiskDevice 1)
-	if ! waitForStorageDevice $deviceTest;then
-		systemException \
-			"Partition $deviceTest doesn't appear... fatal !" \
-		"reboot"
 	fi
 }
 
@@ -730,26 +658,12 @@ function setupDeviceNames {
 # createBootDeviceData
 #--------------------------------------
 function createBootDeviceData {
-	local bootPart=$1
-	local bootDevice=$(ddn $imageDiskDevice $bootPart)
-	local bootKBytes
-	if [ -e "$bootDevice" ];then
-		#======================================
-		# Variable setup
-		#--------------------------------------
-		bootKBytes=$(partitionSize $bootDevice)
+	#====================================== 
+	# check for boot partition
+	#-------------------------------------
+	local checkDevice=$(ddn $imageDiskDevice 2)
+	if [ -e "$checkDevice" ];then
 		export haveBootPartition=yes
-		export bootXMBytes=$((bootKBytes / 1024))
-		export bootpartID=83
-		if [ "$loader" = "syslinux" ];then
-			bootpartID=c
-		fi
-		#======================================
-		# Store contents in RAM
-		#--------------------------------------
-		mount $(ddn $imageDiskDevice $bootPart) /mnt
-		tar -czf /boot.tgz -C /mnt .
-		umount /mnt
 	fi
 	#====================================== 
 	# check for overlay type
@@ -759,25 +673,6 @@ function createBootDeviceData {
 		export haveClicFS=yes
 	fi
 	sleep 1
-}
-
-#======================================
-# createBootDeviceFilesystem
-#--------------------------------------
-function createBootDeviceFilesystem {
-	if [ ! "$haveBootPartition" = "yes" ];then
-		return
-	fi
-	if [ "$loader" = "syslinux" ];then
-		mkdosfs $imageBootDevice >/dev/null 2>&1
-	else
-		mke2fs -q $imageBootDevice >/dev/null 2>&1
-	fi
-	if [ ! $? = 0 ];then
-		systemException \
-			"Failed to create Boot filesystem" \
-		"reboot"
-	fi
 }
 
 #======================================

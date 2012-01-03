@@ -66,15 +66,6 @@ function setupInitialDeviceNames {
 		"reboot"
 	fi
 	#======================================
-	# Set default filesystem device names
-	#--------------------------------------
-	export imageRWDevice=$(ddn $imageDiskDevice 2)
-	if [ ! -z "$kiwi_ramonly" ];then
-		export imageRWDevice=/dev/ram1
-	fi
-	export imageRODevice=$(ddn $imageDiskDevice 1)
-	export imageIOWRDevice=$imageRWDevice
-	#======================================
 	# Check for LVM or standard boot
 	#--------------------------------------
 	if searchVolumeGroup; then
@@ -82,39 +73,45 @@ function setupInitialDeviceNames {
 		# LVM setup...
 		#--------------------------------------
 		export haveLVM=yes
+		export imageBootDevice=$(ddn $imageDiskDevice 1)
 		if [ -e /dev/$VGROUP/LVComp ];then
 			export imageRootDevice=/dev/$VGROUP/LVComp
+			export imageRWDevice=/dev/$VGROUP/LVRoot
+			export imageRODevice=/dev/$VGROUP/LVComp
+			export imageIOWRDevice=$imageRWDevice
 		else
 			export imageRootDevice=/dev/$VGROUP/LVRoot
-		fi
-		export imageRWDevice=/dev/$VGROUP/LVRoot
-		if [ ! -z "$kiwi_ramonly" ];then
-			export imageRWDevice=/dev/ram1
-		fi
-		export imageRODevice=/dev/$VGROUP/LVComp
-		export imageIOWRDevice=$imageRWDevice
-		export imageBootDevice=$(ddn $imageDiskDevice 1)
-		if [ ! -z "$KIWI_RECOVERY" ];then
-			export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
 		fi
 		probeFileSystem $imageRootDevice
 	else
 		#======================================
 		# Standard setup
 		#--------------------------------------
-		if [ ! -z "$KIWI_RECOVERY" ];then
-			export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
-			export imageRootDevice=$(ddn $imageDiskDevice 1)
-		else
-			for i in 1 2;do
-				export imageRootDevice=$(ddn $imageDiskDevice $i)
-				probeFileSystem $imageRootDevice
-				if [ ! "$FSTYPE" = "unknown" ];then
-					break
-				fi
-			done
+		export imageRootDevice=$(ddn $imageDiskDevice 1)
+		export imageBootDevice=$(ddn $imageDiskDevice 1)
+		export imageRODevice=$(ddn $imageDiskDevice 2)
+		if [ -e $imageRODevice ];then
+			export imageRWDevice=$(ddn $imageDiskDevice 3)
+			export imageRootDevice=$(ddn $imageDiskDevice 2)
 		fi
 	fi
+	#======================================
+	# Check for recovery device
+	#--------------------------------------
+	if [ ! -z "$KIWI_RECOVERY" ];then
+		export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
+	fi
+	#======================================
+	# Check for ram root
+	#--------------------------------------
+	if [ ! -z "$kiwi_ramonly" ];then
+		export imageRWDevice=/dev/ram1
+		export imageIOWRDevice=$imageRWDevice
+	fi
+	#======================================
+	# Probe root filesystem type
+	#--------------------------------------
+	probeFileSystem $imageRootDevice
 	#======================================
 	# Check for LUKS extension on root fs
 	#--------------------------------------
@@ -603,6 +600,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateSyslinuxBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveLuks" = "yes" ];then
 		updateLuksBootDeviceFstab /config $imageBootDevice
+	elif [ ! -z "$COMBINED_IMAGE" ]; then
+		updateSplitBootDeviceFstab /config $imageBootDevice
 	fi
 	if partitionSize $imageSwapDevice &>/dev/null;then
 		updateSwapDeviceFstab /config $imageSwapDevice
