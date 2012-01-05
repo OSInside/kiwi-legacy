@@ -347,8 +347,8 @@ sub test_ec2Regions {
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg;
 		my @supportedRegions =
-                qw /AP-Northeast AP-Southeast EU-West SA-East US-East/;
-        push  @supportedRegions, qw /US-West US-West2/;
+				qw /AP-Northeast AP-Southeast EU-West SA-East US-East/;
+		push  @supportedRegions, qw /US-West US-West2/;
 		if ( $iConfFile =~ 'ec2RegionInvalid_1.xml' ) {
 			$expectedMsg = 'Specified region EU-West not unique';
 		} else {
@@ -674,6 +674,45 @@ sub test_revisionMismatch {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($validator);
+}
+
+#==========================================
+# test_typeConfigConsist
+#------------------------------------------
+sub test_typeConfigConsist {
+	# ...
+	# Test that the image type configuration consistency is
+	# properly enforced.
+	# ---
+	my $this = shift;
+	my @invalidConfigs = $this -> __getInvalidFiles('typeConfigConsist');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $kiwi = $this -> {kiwi};
+		my $msg = $kiwi -> getMessage();
+		my $expectedMsg = 'Inconsistent configuration: Found ';
+		if ($iConfFile =~ /typeConfigConsistInvalid_1.xml/) {
+			$expectedMsg .= 'machine';
+		} elsif ($iConfFile =~ /typeConfigConsistInvalid_2.xml/) {
+			$expectedMsg .= 'oemconfig';
+		}
+		$expectedMsg .= " type configuration as child of \nimage type ";
+		if ($iConfFile =~ /typeConfigConsistInvalid_1.xml/) {
+			$expectedMsg .= 'oem.';
+		} elsif ($iConfFile =~ /typeConfigConsistInvalid_2.xml/) {
+			$expectedMsg .= 'vmx.';
+		}
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('typeUnique');
+	$this -> __verifyValid(@validConfigs);
 }
 
 #==========================================
