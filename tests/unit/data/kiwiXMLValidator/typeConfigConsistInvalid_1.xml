@@ -6,7 +6,7 @@
 		<specification>test OEM setup with improper config</specification>
 	</description>
 	<preferences>
-		<type image="oem" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true" installboot="install"> 
+		<type image="pxe" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true" installboot="install"> 
 			<machine memory="512">
                 <vmdisk controller="scsi" id="0"/>
 			</machine>

@@ -755,23 +755,25 @@ sub __checkTypeConfigConsist {
 	my $kiwi        = $this -> {kiwi};
 	my $systemTree  = $this -> {systemTree};
 	my @types = $systemTree -> getElementsByTagName('type');
+	# /.../
 	# Relationship of type children to expected type attribute values
+	# allow all for cpio (initrd) type which is used to gather information
+	# relevant inside the initrd
+	# ----
 	my %typeChildDeps = (
-						'ec2config'  => 'format:ec2',
-						'machine'    => 'image:vmx',
-						'oemconfig'  => 'image:oem',
-						'pxedeploy'  => 'image:pxe',
-						'size'       => ':', # generic
-						'split'      => ':', # generic
-						'systemdisk' => ':'  # generic
-						);
-	
+		'ec2config'  => 'format:ec2,cpio',
+		'machine'    => 'image:vmx,split,oem,cpio',
+		'oemconfig'  => 'image:oem,split,cpio',
+		'pxedeploy'  => 'image:pxe,cpio',
+		'size'       => ':', # generic
+		'split'      => ':', # generic
+		'systemdisk' => ':'  # generic
+	);
 	for my $typeNode (@types) {
 		if (! $typeNode -> hasChildNodes()) {
 			next;
 		}
 		my @typeConfig = $typeNode -> childNodes();
-
 		for my $typeOpt (@typeConfig) {
 			my $optName = $typeOpt->localname();
 			if ($optName) {
@@ -779,13 +781,19 @@ sub __checkTypeConfigConsist {
 					my @deps = split /:/, $typeChildDeps{$optName};
 					if (@deps) {
 						my $typeAttrReq    = $deps[0];
-						my $typeAttrValReq = $deps[1];
+						my @typeAttrValReq = split (/,/,$deps[1]);
 						my $configValue =
-								$typeNode -> getAttribute ($typeAttrReq);
-						if ( $configValue ne $typeAttrValReq ) {
+							$typeNode -> getAttribute ($typeAttrReq);
+						my $found = 0;
+						foreach my $typeAttrValReq (@typeAttrValReq) {
+							if ( $configValue eq $typeAttrValReq ) {
+								$found = 1; last;
+							}
+						}
+						if ( ! $found ) {
 							my $msg = 'Inconsistent configuration: Found '
 							. "$optName type configuration as child of "
-							. "\nimage type $configValue.";
+							. "image type $configValue.";
 							$kiwi -> error($msg);
 							$kiwi -> failed();
 							return;

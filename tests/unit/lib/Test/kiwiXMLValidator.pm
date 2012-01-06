@@ -697,9 +697,9 @@ sub test_typeConfigConsist {
 		} elsif ($iConfFile =~ /typeConfigConsistInvalid_2.xml/) {
 			$expectedMsg .= 'oemconfig';
 		}
-		$expectedMsg .= " type configuration as child of \nimage type ";
+		$expectedMsg .= " type configuration as child of image type ";
 		if ($iConfFile =~ /typeConfigConsistInvalid_1.xml/) {
-			$expectedMsg .= 'oem.';
+			$expectedMsg .= 'pxe.';
 		} elsif ($iConfFile =~ /typeConfigConsistInvalid_2.xml/) {
 			$expectedMsg .= 'vmx.';
 		}
