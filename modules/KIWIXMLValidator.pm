@@ -313,7 +313,7 @@ sub __checkEC2Regions {
 	}
 	my @regions = $ec2ConfNodes[0] -> getElementsByTagName('ec2region');
 	my @supportedRegions =
-       qw /AP-Northeast AP-Southeast EU-West SA-East US-East US-West US-West2/;
+	qw /AP-Northeast AP-Southeast EU-West SA-East US-East US-West US-West2/;
 	my @selectedRegions = ();
 	for my $region (@regions) {
 		my $regionStr = $region -> textContent();
@@ -744,6 +744,68 @@ sub __checkRevision {
 }
 
 #==========================================
+# __checkTypeConfigConsist
+#------------------------------------------
+sub __checkTypeConfigConsist {
+	# ...
+	# Check that a specified <*config> section is consistent with the
+	# specified image type.
+	# ---
+	my $this        = shift;
+	my $kiwi        = $this -> {kiwi};
+	my $systemTree  = $this -> {systemTree};
+	my @types = $systemTree -> getElementsByTagName('type');
+	# Relationship of type children to expected type attribute values
+	my %typeChildDeps = (
+						'ec2config'  => 'format:ec2',
+						'machine'    => 'image:vmx',
+						'oemconfig'  => 'image:oem',
+						'pxedeploy'  => 'image:pxe',
+						'size'       => ':', # generic
+						'split'      => ':', # generic
+						'systemdisk' => ':'  # generic
+						);
+	
+	for my $typeNode (@types) {
+		if (! $typeNode -> hasChildNodes()) {
+			next;
+		}
+		my @typeConfig = $typeNode -> childNodes();
+
+		for my $typeOpt (@typeConfig) {
+			my $optName = $typeOpt->localname();
+			if ($optName) {
+				if ( grep { /^$optName$/x } keys %typeChildDeps ) {
+					my @deps = split /:/, $typeChildDeps{$optName};
+					if (@deps) {
+						my $typeAttrReq    = $deps[0];
+						my $typeAttrValReq = $deps[1];
+						my $configValue =
+								$typeNode -> getAttribute ($typeAttrReq);
+						if ( $configValue ne $typeAttrValReq ) {
+							my $msg = 'Inconsistent configuration: Found '
+							. "$optName type configuration as child of "
+							. "\nimage type $configValue.";
+							$kiwi -> error($msg);
+							$kiwi -> failed();
+							return;
+						}
+					}
+				} else {
+					my $msg = "Unknown type configuration section '$optName'"
+					. 'found. Please report to the kiwi mailing list';
+					$kiwi -> warning($msg);
+					$kiwi -> skipped();
+					next;
+				}
+			}
+		}
+	}
+
+	return 1;
+}
+
+#==========================================
 # __checkTypeUnique
 #------------------------------------------
 sub __checkTypeUnique {
@@ -916,6 +978,9 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkRevision()) {
+		return;
+	}
+		if (! $this -> __checkTypeConfigConsist()) {
 		return;
 	}
 	if (! $this -> __checkTypeUnique()) {
