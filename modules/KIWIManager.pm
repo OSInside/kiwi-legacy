@@ -857,6 +857,26 @@ sub setupInstallationSource {
 				}
 				$kiwi -> done ();
 			} else {
+				my @chrootBins = glob "$root/bin/*";
+				my $queryFlName = '/bin/' . basename($chrootBins[0]);
+				my $queryCmd = '/bin/rpm -q --whatprovides';
+				$data = qxx ("@kchroot $queryCmd $queryFlName 2>&1 /dev/null");
+				$code = $? >> 8;
+				if ($code != 0) {
+					$kiwi -> info ('Rebuild package db...');
+					$data = qxx ("@kchroot /bin/rm -rf /var/lib/rpm/*");
+					$data = qxx ("@kchroot /bin/rpm --rebuilddb");
+					$code = $? >> 8;
+					if ($code != 0) {
+						$kiwi -> failed ();
+						my $msg = 'Most likely we encountered an RPM version '
+						. "incompatibility. Sorry.\n";
+						$kiwi -> error ($msg);
+						$kiwi -> error ("rpm: $data");
+						return;
+					}
+					$kiwi -> done ();
+				}
 				my @zypper= @{$this->{zypper_chroot}};
 				$kiwi -> info ("Adding chroot zypper service: $alias");
 				$data = qxx ("@kchroot @zypper $sadd 2>&1");
