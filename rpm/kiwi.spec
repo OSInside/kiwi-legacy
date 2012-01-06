@@ -75,7 +75,7 @@ Requires:       clicfs >= 1.3.9
 Summary:        OpenSuSE - KIWI Image System
 License:        GPL-2.0
 Group:          System/Management
-Version:        5.01.8
+Version:        5.02.1
 Release:        0
 Source:         %{name}.tar.bz2
 Source1:        %{name}-rpmlintrc
