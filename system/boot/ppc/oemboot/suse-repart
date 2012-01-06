@@ -138,7 +138,7 @@ function OEMRepartStandard {
 		if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 0 ];then
 			partsize=.
 		fi
-		createPartitionerInput
+		createPartitionerInput \
 			d $pID n p $pID . $partsize
 		#======================================
 		# add swap partition
