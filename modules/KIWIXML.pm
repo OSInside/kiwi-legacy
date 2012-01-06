@@ -486,7 +486,7 @@ sub getImageSizeAdditiveBytes {
 		my $byte = int $size;
 		my $unit = $node -> getElementsByTagName ("size")
 			-> get_node(1) -> getAttribute("unit");
-		if ($unit eq "M") {
+		if (! $unit || $unit eq "M") {
 			return $byte * 1024 * 1024;
 		}
 		if ($unit eq "G") {
@@ -2053,7 +2053,7 @@ sub addDrivers {
 	my $kiwi  = $this->{kiwi};
 	my $nodes = $this->{driversNodeList};
 	my $nodeNumber = -1;
-    for (my $i=1;$i<= $nodes->size();$i++) {
+	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		if (! $this -> __requestedProfile ($node)) {
 			next;
