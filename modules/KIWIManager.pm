@@ -2460,19 +2460,21 @@ sub setupPackageKeys {
 	# check build key and gpg
 	#------------------------------------------	
 	$kiwi -> info ("Importing build keys...");
-	if (! -x "/usr/lib/rpm/gnupg/dumpsigs") {
+	my $dumsigsExec = '/usr/lib/rpm/gnupg/dumpsigs';
+	my $keyringFile = '/usr/lib/rpm/gnupg/pubring.gpg';
+	if (! -x $dumsigsExec) {
 		$kiwi -> skipped ();
 		$kiwi -> warning ("Can't find dumpsigs on host system");
 		$kiwi -> skipped ();
 		return $this;
 	}
-	if (! -f "/usr/lib/rpm/gnupg/pubring.gpg") {
+	if (! -f $keyringFile) {
 		$kiwi -> skipped ();
 		$kiwi -> warning ("Can't find build keys on host system");
 		$kiwi -> skipped ();
 		return $this;
 	}
-	my $dump = "/usr/lib/rpm/gnupg/dumpsigs";
+	my $dump = $dumsigsExec . ' ' . $keyringFile;
 	my $sigs = "$root/rpm-sigs";
 	$data = qxx ("mkdir -p $sigs && cd $sigs && $dump 2>&1");
 	$code = $? >> 8;
