@@ -753,7 +753,7 @@ sub getPXEDeployPartitions {
 
 		push @result, { %part };
 	}
-    my @ordered = sort { $a->{number} cmp $b->{number} } @result;
+	my @ordered = sort { $a->{number} cmp $b->{number} } @result;
 	return @ordered;
 }
 
@@ -1822,8 +1822,8 @@ sub getInstSourceProductStuff {
 	my $this = shift;
 	my $what = shift;
 	if (!$what) {
-        return;
-    }
+		return;
+	}
 
 	my $base = $this->{instsrcNodeList} -> get_node(1);
 	my $elems = $base->getElementsByTagName("productoptions");
@@ -2131,7 +2131,7 @@ sub addDrivers {
 	my $kiwi  = $this->{kiwi};
 	my $nodes = $this->{driversNodeList};
 	my $nodeNumber = -1;
-    for (my $i=1;$i<= $nodes->size();$i++) {
+	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		if (! $this -> __requestedProfile ($node)) {
 			next;
@@ -2445,9 +2445,9 @@ sub getImageConfig {
 	my $dname = getImageDisplayName ($this);
 	my $lics  = getLicenseNames ($this);
 	my @s_del = $this -> getStripDelete();
-    my @s_tool= $this -> getStripTools();
-    my @s_lib = $this -> getStripLibs();
-    my @tstp  = $this -> getTestingList();
+	my @s_tool= $this -> getStripTools();
+	my @s_lib = $this -> getStripLibs();
+	my @tstp  = $this -> getTestingList();
 	if ($lics) {
 		$result{kiwi_showlicense} = join(" ",@{$lics});
 	}
@@ -3107,17 +3107,17 @@ sub getOVFConfig {
 	# network setup
 	#------------------------------------------
 	my $bridges = $node -> getElementsByTagName ("vmnic");
-    my %vifs = ();
-    for (my $i=1;$i<= $bridges->size();$i++) {
-        my $bridge = $bridges -> get_node($i);
-        if ($bridge) {
-            my $bname = $bridge -> getAttribute ("interface");
-            if (! $bname) {
-                $bname = "undef";
-            }
-            $vifs{$bname} = $i;
-        }
-    }
+	my %vifs = ();
+	for (my $i=1;$i<= $bridges->size();$i++) {
+		my $bridge = $bridges -> get_node($i);
+		if ($bridge) {
+			my $bname = $bridge -> getAttribute ("interface");
+			if (! $bname) {
+				$bname = "undef";
+			}
+			$vifs{$bname} = $i;
+		}
+	}
 	#==========================================
 	# save hash
 	#------------------------------------------
@@ -3479,7 +3479,7 @@ sub getList {
 	}
 	$this->{replDelList} = \@replDelList;
 	$this->{replAddList} = \@replAddList;
-    my @ordered = sort keys %packHash;
+	my @ordered = sort keys %packHash;
 	return @ordered;
 }
 
@@ -3630,7 +3630,7 @@ sub getInstallSize {
 			);
 			return;
 		}
-        # Violates Expression form of "eval" FIXME
+		# Violates Expression form of "eval" FIXME
 		%meta = eval($list); ## no critic
 		@solp = keys(%meta);
 		# Ensconce reports package sizes in bytes, fix that

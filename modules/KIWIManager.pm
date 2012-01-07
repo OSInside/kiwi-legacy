@@ -879,7 +879,7 @@ sub setupInstallationSource {
 				} else {
 					$kiwi -> info ("Updating chroot zypper service: $alias");
 					$data = qxx (
-						'sed -i -e s"@\(baseurl=file:/\)@\1base-system/@" '.$repo
+					  'sed -i -e s"@\(baseurl=file:/\)@\1base-system/@" '.$repo
 					);
 				}
 				$code = $? >> 8;
