@@ -494,14 +494,13 @@ sub getImageSizeAdditiveBytes {
 		my $byte = int $size;
 		my $unit = $node -> getElementsByTagName ("size")
 			-> get_node(1) -> getAttribute("unit");
-		if ($unit eq "M") {
+		if ((! $unit) || ($unit eq "M")) {
+			# no unit or M specified, turn into Bytes...
 			return $byte * 1024 * 1024;
-		}
-		if ($unit eq "G") {
+		} elsif ($unit eq "G") {
+			# unit G specified, turn into Bytes...
 			return $byte * 1024 * 1024 * 1024;
 		}
-		# no unit specified assume MB...
-		return $byte * 1024 * 1024;
 	} else {
 		return 0;
 	}
@@ -529,14 +528,13 @@ sub getImageSizeBytes {
 			# ----
 			my $unit = $node -> getElementsByTagName ("size")
 				-> get_node(1) -> getAttribute("unit");
-			if ($unit eq "M") {
+			if ((! $unit) || ($unit eq "M")) {
+				# no unit or M specified, turn into Bytes...
 				return $byte * 1024 * 1024;
-			}
-			if ($unit eq "G") {
+			} elsif ($unit eq "G") {
+				# unit G specified, turn into Bytes...
 				return $byte * 1024 * 1024 * 1024;
 			}
-			# no unit specified assume MB...
-			return $byte * 1024 * 1024;
 		} else {
 			# /.../
 			# the size is setup as additive value to the required
