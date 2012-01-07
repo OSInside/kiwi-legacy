@@ -740,6 +740,12 @@ sub install {
 	my $manager = $this->{manager};
 	my %type;
 	#==========================================
+	# Check for RPM incompatibility
+	#------------------------------------------
+	if (! $manager -> cleanupRPMDatabase()) {
+		return;
+	}
+	#==========================================
 	# Get image package list
 	#------------------------------------------
 	my @packList = $manager -> setupInstallPackages;

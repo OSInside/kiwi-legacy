@@ -2277,9 +2277,6 @@ sub setupRootSystem {
 			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
-			print $fd "@kchroot rpm --rebuilddb &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && ";
 			if (@newpatts) {
 				print $fd "for i in @newpatts;do\n";
 				print $fd "\tif ! @kchroot @yum grouplist | grep -q \"\$i\";then\n";
@@ -2596,6 +2593,41 @@ sub removeCacheDir {
 }
 
 #==========================================
+# cleanupRPMDatabase
+#------------------------------------------
+sub cleanupRPMDatabase {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my @kchroot= @{$this->{kchroot}};
+	my $data;
+	my $code;
+	#==========================================
+	# run a query on the database
+	#------------------------------------------
+	$data = qxx ("@kchroot /bin/rpm -q --whatprovides /bin &>/dev/null");
+	$code = $? >> 8;
+	#==========================================
+	# try to rebuild DB on failed query
+	#------------------------------------------
+	if ($code != 0) {
+		$kiwi -> info ('Rebuild RPM package db...');
+		$data = qxx ("@kchroot /bin/rm -rf /var/lib/rpm/*");
+		$data = qxx ("@kchroot /bin/rpm --rebuilddb");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error (
+				'Most likely we encountered an RPM version incompatibility'
+			);
+			$kiwi -> error ("rpm: $data");
+			return;
+		}
+		$kiwi -> done();
+	}
+	return $this;
+}
+
+#==========================================
 # rpmLibs
 #------------------------------------------
 sub rpmLibs {
@@ -2618,7 +2650,7 @@ sub rpmLibs {
 			# no baselibs stored/copied...
 			return $this;
 		}
-		qxx ("@kchroot rpm --rebuilddb 2>&1");
+		$this -> cleanupRPMDatabase();
 		@result = @{$result};
 		my %dirlist = ();
 		foreach my $l (@result) {
