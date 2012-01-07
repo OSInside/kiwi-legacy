@@ -32,8 +32,10 @@
 		<file name="drivers/md/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/ide/*"/>
-		<file name="fs/ext3/*"/>
+		<file name="fs/btrfs/*"/>
 		<file name="fs/ext2/*"/>
+		<file name="fs/ext3/*"/>
+		<file name="fs/ext3/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
 		<file name="fs/binfmt_aout.ko"/>
@@ -49,6 +51,7 @@
 		<file name="fs/nls/nls_cp437.ko"/>
 		<file name="fs/nls/nls_iso8859-1.ko"/>
 		<file name="fs/fuse/*"/>
+		<file name="fs/xfs/*"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
@@ -89,6 +92,7 @@
 	</packages>
 	<packages type="image">
 		<package name="psmisc"/>
+		<package name="btrfsprogs"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>
@@ -116,6 +120,7 @@
 		<package name="parted"/>
 		<package name="syslinux"/>
 		<package name="fbiterm"/>
+		<package name="xfsprogs"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
