@@ -35,6 +35,7 @@
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/block/brd.ko"/>
 		<file name="net/packet/*"/>
+		<file name="fs/btrfs/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/binfmt_aout.ko"/>
@@ -164,6 +165,7 @@
 		<package name="busybox"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
+		<package name="btrfsprogs"/>
 		<package name="dhcpcd"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
@@ -187,6 +189,7 @@
 		<package name="kiwi-tools"/>
 		<package name="cyrus-sasl"/>
 		<package name="mdadm"/>
+		<package name="xfsprogs"/>
 	</packages>
 	<packages type="image" profiles="diskless">
 		<package name="bc"/>

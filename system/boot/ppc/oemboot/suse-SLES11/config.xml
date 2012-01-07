@@ -37,6 +37,8 @@
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
+		<file name="fs/btrfs/*"/>
+		<file name="fs/xfs/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/fat/*"/>
@@ -105,6 +107,7 @@
 		<package name="busybox"/>
 		<package name="parted"/>
 		<package name="adaptec-firmware"/>
+		<package name="btrfsprogs"/>
 		<package name="dialog"/>
 		<package name="psmisc"/>
 		<package name="bind-libs"/>
@@ -135,6 +138,7 @@
 		<package name="gettext-runtime"/>
 		<package name="kexec-tools"/>
 		<package name="kpartx"/>
+		<package name="xfsprogs"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

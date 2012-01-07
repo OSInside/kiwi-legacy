@@ -39,8 +39,9 @@
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/block/brd.ko"/>
 		<file name="net/packet/*"/>
-		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
+		<file name="fs/ext3/*"/>
+		<file name="fs/ext4/*"/>
 		<file name="fs/binfmt_aout.ko"/>
 		<file name="fs/binfmt_misc.ko"/>
 		<file name="fs/mbcache.ko"/>
@@ -58,6 +59,8 @@
 		<file name="net/sunrpc/*"/>
 		<file name="fs/lockd/*"/>
 		<file name="fs/nfs_common/*"/>
+		<file name="fs/xfs/*"/>
+		<file name="fs/btrfs/*"/>
 		<file name="net/ipv6/*"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
@@ -160,6 +163,7 @@
 		<package name="cryptsetup"/>
 		<package name="bc"/>
 		<package name="adaptec-firmware"/>
+		<package name="btrfsprogs"/>
 		<package name="curl"/>
 		<package name="psmisc"/>
 		<package name="iputils"/>
@@ -188,6 +192,7 @@
 		<package name="kiwi-tools"/>
 		<package name="cyrus-sasl"/>
 		<package name="mdadm"/>
+		<package name="xfsprogs"/>
 	</packages>
 	<packages type="image" profiles="diskless">
 		<package name="bc"/>
