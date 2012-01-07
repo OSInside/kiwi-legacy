@@ -37,6 +37,7 @@
 		<file name="net/packet/*"/>
 		<file name="lib/zlib_deflate/zlib_deflate.ko"/>
 		<file name="lib/libcrc32c.ko"/>
+		<file name="fs/btrfs/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext4/*"/>
 		<file name="fs/ext2/*"/>
@@ -166,6 +167,7 @@
 		<package name="busybox"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
+		<package name="btrfsprogs"/>
 		<package name="dhcpcd"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
@@ -187,6 +189,7 @@
 		<package name="kiwi-tools"/>
 		<package name="cyrus-sasl"/>
 		<package name="mdadm"/>
+		<package name="xfsprogs"/>
 	</packages>
 	<packages type="image" profiles="diskless">
 		<package name="bc"/>

@@ -25,8 +25,10 @@
 		<file name="drivers/md/*"/>
 		<file name="drivers/block/*"/>
 		<file name="drivers/scsi/*"/>
-		<file name="fs/ext3/*"/>
+		<file name="fs/btrfs/*"/>
 		<file name="fs/ext2/*"/>
+		<file name="fs/ext3/*"/>
+		<file name="fs/ext4/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
 		<file name="fs/binfmt_aout.ko"/>
@@ -42,6 +44,7 @@
 		<file name="fs/nls/nls_cp437.ko"/>
 		<file name="fs/nls/nls_iso8859-1.ko"/>
 		<file name="fs/fuse/*"/>
+		<file name="fs/xfs/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>
@@ -57,6 +60,7 @@
 		<package name="psmisc"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
+		<package name="btrfsprogs"/>
 		<package name="dhcpcd"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
@@ -80,6 +84,7 @@
 		<package name="gettext-runtime"/>
 		<package name="parted"/>
 		<package name="fbiterm"/>
+		<package name="xfsprogs"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
