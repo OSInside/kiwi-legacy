@@ -7108,6 +7108,7 @@ function startUtimer {
 function setupBootPartition {
 	local pSearch=83
 	local mpoint
+	unset NETBOOT_ONLY
 	if [ "$haveLVM" = "yes" ];then
 		#======================================
 		# lvmboot
@@ -7141,14 +7142,19 @@ function setupBootPartition {
 		# syslboot / luksboot
 		#--------------------------------------
 		if [ -z "$bootid" ];then
+			local FSTYPE_SAVE=$FSTYPE
 			test "$loader" = "syslinux" && pSearch=6
 			for i in 4 3 2;do
 				pType=$(partitionID $imageDiskDevice $i)
 				if [ "$pType" = $pSearch ];then
-					export bootid=$i
-					break
+					probeFileSystem $(ddn $imageDiskDevice $i)
+					if [ ! "$FSTYPE" = "luks" ]; then
+						export bootid=$i
+						break
+					fi
 				fi
 			done
+			FSTYPE=$FSTYPE_SAVE
 		fi
 		if [ "$haveLuks" = "yes" ];then
 			mpoint=luksboot
