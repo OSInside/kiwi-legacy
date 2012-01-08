@@ -7777,6 +7777,7 @@ function startUtimer {
 function setupBootPartition {
 	local pSearch=83
 	local mpoint
+	unset NETBOOT_ONLY
 	if [ "$haveLVM" = "yes" ];then
 		#======================================
 		# lvmboot
@@ -7823,7 +7824,19 @@ function setupBootPartition {
 		#--------------------------------------
 		test -z "$bootid" && export bootid=1
 		if [ "$haveLuks" = "yes" ];then
-			mpoint=luksboot
+			local FSTYPE_SAVE=$FSTYPE
+			probeFileSystem $(ddn $imageDiskDevice $bootid)
+			if [ "$FSTYPE" = "luks" ]; then
+				# /.../
+				# ups, boot partition should not be luks encoded
+				# unset bootid and hopefully handly it correctly
+				# outside of this function
+				# ----
+				unset bootid
+			else
+				mpoint=luksboot
+			fi
+			FSTYPE=$FSTYPE_SAVE
 		else
 			mpoint=syslboot
 		fi
@@ -7834,6 +7847,11 @@ function setupBootPartition {
 		if [ -z "$bootid" ];then
 			export bootid=1
 		fi
+		return
+	fi
+	if [ -z "$bootid" ] && [[ $kiwi_iname =~ netboot ]];then
+		# pxe boot env and no suitable boot partition found
+		export NETBOOT_ONLY=yes
 		return
 	fi
 	if [ -z "$imageDiskDevice" ];then

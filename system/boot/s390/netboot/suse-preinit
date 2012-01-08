@@ -60,7 +60,11 @@ fi
 # 7) create initrd on diskful
 #--------------------------------------
 if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ]; then
-	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+	if \
+		[ -z "$UNIONFS_CONFIG" ] && \
+		[ -z "$COMBINED_IMAGE" ] && \
+		[ -z "$NETBOOT_ONLY" ]
+	then
 		#======================================
 		# use distro initrd via mkinitrd
 		#--------------------------------------

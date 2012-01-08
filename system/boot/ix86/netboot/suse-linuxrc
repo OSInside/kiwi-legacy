@@ -820,10 +820,17 @@ if [ ! -z "$imageBootDevice" ];then
 	# bootid is boot partition
 	export bootid=$(nd $imageBootDevice)
 else
-	# bootid is root partition
-	export bootid=$(nd $imageRootDevice)
+	if [ -z "$haveLuks" ]; then
+		# bootid is root partition for non LUKS devices
+		export bootid=$(nd $imageRootDevice)
+	else
+		# bootid can be a boot partition or undefined in
+		# e.g pxe netboot only environments. let setupBootPartition
+		# find out if we have one
+		unset bootid
+	fi
 fi
-if [ ! -z "$RAID" ];then
+if [ ! -z "$RAID" ] && [ ! -z "$bootid" ];then
 	# raid md devices start with 0 but partition id's start with 1
 	bootid=$((bootid + 1))
 fi
