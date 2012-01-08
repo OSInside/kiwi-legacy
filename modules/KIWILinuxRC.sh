@@ -7170,6 +7170,11 @@ function setupBootPartition {
 		fi
 		return
 	fi
+	if [ -z "$bootid" ] && [[ $kiwi_iname =~ netboot ]];then
+		# pxe boot env and no suitable boot partition found
+		export NETBOOT_ONLY=yes
+		return
+	fi
 	if [ -z "$imageDiskDevice" ];then
 		# no disk device like for live ISO based on clicfs
 		return
