@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Sun Jan  8 20:45:09 CET 2012 - ms@suse.de
+
+- netboot: added a check for the boot partition in a LUKS
+  setup. if root is LUKS encrypted the local boot setup only
+  works with a proper boot partition. If such a partition is
+  not found the local boot setup will be skipped (bnc #735112)
+
+-------------------------------------------------------------------
 Sun Jan  8 20:19:26 CET 2012 - ms@suse.de
 
 - added support for Microsoft Hyper-V machine image format
