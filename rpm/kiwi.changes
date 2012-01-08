@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Sun Jan  8 20:19:26 CET 2012 - ms@suse.de
+
+- added support for Microsoft Hyper-V machine image format
+  <type ... format="vpc"/>. This requires a qemu version
+  which supports the vpc format conversion (fate# 309765)
+
+-------------------------------------------------------------------
 Fri Dec 16 11:24:46 CET 2011 - ms@suse.de
 
 - reverted last change because the required packages are not
