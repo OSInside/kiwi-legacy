@@ -2616,8 +2616,10 @@ function updateOtherDeviceFstab {
 			2) partMount=$n;
 		esac
 		done
-		if  [ ! -z "$partMount" ]    && \
-			[ ! "$partMount" = "x" ] && \
+		if \
+			[ ! -z "$partMount" ]       && \
+			[ ! "$partMount" = "x" ]    && \
+			[ ! "$partMount" = "swap" ] && \
 			[ ! "$partMount" = "/" ]
 		then
 			if [ ! -z "$RAID" ];then
@@ -2626,7 +2628,7 @@ function updateOtherDeviceFstab {
 				device=$(ddn $DISK $count)
 			fi
 			probeFileSystem $device
-			if [ ! "$FSTYPE" = "luks" ] ; then
+			if [ ! "$FSTYPE" = "luks" ] && [ ! "$FSTYPE" = "unknown" ];then
 				if [ ! -d $prefix/$partMount ];then
 					mkdir -p $prefix/$partMount
 				fi
@@ -6622,7 +6624,7 @@ function dn {
 	# the last number
 	# ----
 	local part=$(getDiskDevice $1)
-	local part_new=$(echo $part | sed -e 's@\(^.*\)\(p.*$\)@\1@')
+	local part_new=$(echo $part | sed -e 's@\(^.*\)\(p[0-9].*$\)@\1@')
 	if [ $part = $part_new ];then
 		part_new=$(echo $part | sed -e 's@\(^.*\)\([0-9].*$\)@\1@')
 	fi
@@ -6637,7 +6639,7 @@ function nd {
 	# device node name. 
 	# ----
 	local part=$(getDiskDevice $1)
-	local part_new=$(echo $part | sed -e 's@\(^.*\)p\(.*$\)@\2@')
+	local part_new=$(echo $part | sed -e 's@\(^.*\)p\([0-9].*$\)@\2@')
 	if [ $part = $part_new ];then
 		part_new=$(echo $part | sed -e 's@\(^.*\)\([0-9].*$\)@\2@')
 	fi
@@ -7838,7 +7840,7 @@ function setupBootPartition {
 		# no disk device like for live ISO based on clicfs
 		return
 	fi
-	if [ -z "$imageBootDevice" ];then
+	if [ -z "$imageBootDevice" ] && [ ! -z "$bootid" ];then
 		export imageBootDevice=$(ddn $imageDiskDevice $bootid)
 	fi
 	if [ ! -e $imageBootDevice ];then
