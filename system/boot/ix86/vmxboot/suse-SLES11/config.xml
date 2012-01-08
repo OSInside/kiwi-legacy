@@ -35,7 +35,7 @@
 		<file name="fs/btrfs/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/ext3/*"/>
-		<file name="fs/ext3/*"/>
+		<file name="fs/ext4/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
 		<file name="fs/binfmt_aout.ko"/>
