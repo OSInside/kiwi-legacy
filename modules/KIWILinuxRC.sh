@@ -8298,7 +8298,7 @@ function createOriginSnapshot {
 		return
 	fi
 	if [ ! -x /sbin/btrfsctl ];then
-		echo "btrfsprogrs not installed... skipped"
+		echo "btrfsprogs not installed... skipped"
 		return
 	fi
 	btrfsctl -s origin /
