@@ -48,6 +48,7 @@
 		<file name="fs/fuse/*"/>
 		<file name="fs/udf/*"/>
 		<file name="fs/xfs/*"/>
+		<file name="fs/btrfs/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>

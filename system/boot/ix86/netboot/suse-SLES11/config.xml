@@ -60,6 +60,7 @@
 		<file name="fs/lockd/*"/>
 		<file name="fs/nfs_common/*"/>
 		<file name="fs/xfs/*"/>
+		<file name="fs/btrfs/*"/>
 		<file name="net/ipv6/*"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
