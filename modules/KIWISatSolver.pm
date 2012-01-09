@@ -342,6 +342,7 @@ sub getInstallList {
 	# ----
 	my $this   = shift;
 	my $repo   = $this->{repo};
+	my $a = $repo->name();
 	my $solver = $this->{solver};
 	my %result = ();
 	my @a = $solver->installs(1);
@@ -350,7 +351,23 @@ sub getInstallList {
 		my $size = $solvable->attr_values("solvable:installsize");
 		my $ver  = $solvable->attr_values("solvable:evr");
 		my $name = $solvable->attr_values("solvable:name");
-		$result{$name} = "$size:$arch:$ver";
+		my $chs  = $solvable->attr_values("solvable:checksum");
+		my $chst = "unknown";
+		my $di   = new satsolver::Dataiterator (
+			$repo->pool,$repo,undef,0,$solvable,"solvable:checksum"
+		);
+		while ($di->step() != 0) {
+			$chst = $di->key()->type_id();
+			if ($chst == $satsolver::REPOKEY_TYPE_SHA256) {
+				$chst = "sha256";
+			} elsif ($chst == $satsolver::REPOKEY_TYPE_MD5) {
+				$chst = "md5";
+			} elsif ($chst == $satsolver::REPOKEY_TYPE_SHA1) {
+				$chst = "sha1";
+			}
+		}
+		$chs = $chst."=".$chs;
+		$result{$name} = "$size:$arch:$ver:$chs";
 	}
 	return %result;
 }
