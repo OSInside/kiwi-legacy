@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jan  9 10:32:04 CET 2012 - ms@suse.de
+
+- Properly support image builds for SLE with xfs and btrfs filesystem
+  The initrd image descriptions previously did not include necessary
+  drivers and packages (bnc #740073)
+
+-------------------------------------------------------------------
 Sun Jan  8 20:45:09 CET 2012 - ms@suse.de
 
 - netboot: added a check for the boot partition in a LUKS
