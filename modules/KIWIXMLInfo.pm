@@ -390,6 +390,15 @@ sub __getTree {
 					my $source = new XML::LibXML::Element ("source");
 					$source -> setAttribute ("path","$url");
 					$source -> setAttribute ("type",$repos{$url}->[0]);
+					if ($repos{$url}->[2]) {
+						$source -> setAttribute ("priority",$repos{$url}->[2]);
+					}
+					if ($repos{$url}->[3]) {
+						$source -> setAttribute ("username",$repos{$url}->[3]);
+					}
+					if ($repos{$url}->[4]) {
+						$source -> setAttribute ("password",$repos{$url}->[4]);
+					}
 					$scan -> appendChild ($source);
 				}
 				last SWITCH;
@@ -457,6 +466,7 @@ sub __getTree {
 						$pacnode -> setAttribute ("name","$p");
 						$pacnode -> setAttribute ("arch","$m[1]");
 						$pacnode -> setAttribute ("version","$m[2]");
+						$pacnode -> setAttribute ("sum","$m[3]");
 						$scan -> appendChild ($pacnode);
 					}
 				}
