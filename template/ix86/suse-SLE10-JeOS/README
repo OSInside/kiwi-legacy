@@ -6,5 +6,5 @@ Build instructions for local build
 * call kiwi:
   kiwi --build suse-SLE10-JeOS --ignore-repos \
 	   --add-repo /path/to/SLE10/repo --add-repotype yast2 \
-   	   --add-repo /usr/share/kiwi/repo/suse-repo/suse-sle10-repo --add-repotype rpm-dir \
+   	   --add-repo obs://Virtualization:/Appliances:/suse-sle10/SLE_10_SDK --add-repotype rpm-md \
 	   -d /tmp/myimage --type vmx --fs-inodesize 128
