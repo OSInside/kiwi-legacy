@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Jan 10 15:11:39 CET 2012 - ms@suse.de
+
+- added additional data to the XML info module:
+  * repository url per package to the packages info
+  * checksum and checksum type information to packages info
+  * priority, username and password information to sources info
+- removed obsolete KIWISatSolverLegacy module and satplugin
+
+-------------------------------------------------------------------
 Mon Jan  9 10:32:04 CET 2012 - ms@suse.de
 
 - Properly support image builds for SLE with xfs and btrfs filesystem
