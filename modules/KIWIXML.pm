@@ -31,29 +31,7 @@ use KIWIOverlay;
 use KIWIQX;
 use KIWIURL;
 use KIWIXMLValidator;
-
-#==========================================
-# Modules (satsolver support)
-#------------------------------------------
-BEGIN {
-	my $satsolver = (glob ("/usr/lib/perl5/vendor_perl/*/satsolver.pm"))[0];
-	my $legacy    = 1;
-	if ($satsolver) {
-		# /.../
-		# check for solutions() method provided with this version of
-		# perl-satsolver. It must exist in order to work with kiwi
-		# ----
-		system ("grep -q '^\*solutions =' $satsolver");
-		$legacy = $? >> 8;
-	}
-	if ($legacy) {
-		require KIWISatSolverLegacy;
-		KIWISatSolverLegacy -> import;
-	} else {
-		require KIWISatSolver;
-		KIWISatSolver -> import;
-	}
-}
+use KIWISatSolver;
 
 #==========================================
 # Exports
@@ -2934,7 +2912,7 @@ sub getList {
 					# 1) try to use libsatsolver...
 					my $psolve = new KIWISatSolver (
 						$kiwi,\@pattlist,$this->{urllist},"solve-patterns",
-						undef,undef,undef,$ptype
+						undef,undef,$ptype
 					);
 					if (! defined $psolve) {
 						$kiwi -> error (
@@ -3199,7 +3177,7 @@ sub getInstallSize {
 	} else {
 		my $psolve = new KIWISatSolver (
 			$kiwi,\@result,$this->{urllist},"solve-patterns",
-			undef,undef,undef,$ptype
+			undef,undef,$ptype
 		);
 		if (! defined $psolve) {
 			$kiwi -> warning ("SaT solver setup failed");
