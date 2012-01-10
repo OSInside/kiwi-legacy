@@ -72,7 +72,6 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	my $solvable;  # sat solvable file name
 	my $solver;    # sat solver object
 	my $queue;     # sat job queue
 	my @solved;    # solve result
@@ -104,21 +103,44 @@ sub new {
 	# Create and cache sat solvable
 	#------------------------------------------
 	if ((! defined $repo) || (! defined $pool)) {
-		$solvable = KIWIXML::getInstSourceSatSolvable ($kiwi,$urlref);
+		my $solvable = KIWIXML::getInstSourceSatSolvable ($kiwi,$urlref);
 		if (! defined $solvable) {
 			return undef;
 		}
 		#==========================================
 		# Create SaT repository and job queue
 		#------------------------------------------
-		if (! open (FD,$solvable)) {
-			$kiwi -> error  ("--> Couldn't open solvable: $!");
-			$kiwi -> failed ();
-			return undef;
-		}
 		$pool = new KIWI::SaT::_Pool;
-		$repo = $pool -> createRepo('repo');
-		$repo -> addSolvable (*FD); close FD;
+		foreach my $solv (keys %{$solvable}) {
+			my $FD;
+			if (! open ($FD, '<' ,$solv)) {
+				$kiwi -> error  ("--> Couldn't open solvable: $solv");
+				$kiwi -> failed ();
+				return;
+			}
+			$repo = $pool -> createRepo(
+				$solvable->{$solv}
+			);
+			$repo -> addSolvable (*FD);
+			close $FD;
+		}
+		#==========================================
+		# merge all solvables into one
+		#------------------------------------------
+		my $merged= "/var/cache/kiwi/satsolver/merged.solv";
+		my @files = keys %{$solvable};
+		if (@files > 1) {
+			qxx ("mergesolv @files > $merged");
+		} else {
+			qxx ("cp @files $merged 2>&1");
+		}
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("--> Couldn't merge/copy solv files");
+			$kiwi -> failed ();
+			return;
+		}
+		$this->{solfile} = $merged;
 	}
 	$solver = new KIWI::SaT::Solver ($pool);
 	$pool -> initializeLookupTable();
@@ -196,7 +218,6 @@ sub new {
 	$this->{repo}    = $repo;
 	$this->{pool}    = $pool;
 	$this->{result}  = \@solved;
-	$this->{solfile} = $solvable;
 	$this->{meta}    = \%slist;
 	return $this;
 }

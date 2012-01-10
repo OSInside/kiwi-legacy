@@ -72,7 +72,6 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	my $solvable;  # sat solvable file name
 	my $solver;    # sat solver object
 	my @solved;    # solve result
 	my @jobFailed; # failed jobs
@@ -109,25 +108,46 @@ sub new {
 	# Create and cache sat solvable
 	#------------------------------------------
 	if ((! defined $repo) || (! defined $pool)) {
-		$solvable = KIWIXML::getInstSourceSatSolvable ($kiwi,$urlref);
+		my $solvable = KIWIXML::getInstSourceSatSolvable ($kiwi,$urlref);
 		if (! defined $solvable) {
 			return;
 		}
 		#==========================================
 		# Create SaT repository
 		#------------------------------------------
-		my $FD;
-		if (! open ($FD, '<' ,$solvable)) {
-			$kiwi -> error  ("--> Couldn't open solvable: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		close $FD;
 		$pool = new satsolver::Pool;
 		$arch = qx (uname -m); chomp $arch;
 		$pool -> set_arch ($arch);
-		$repo = $pool -> create_repo('repo');
-		$repo -> add_solv ($solvable);
+		foreach my $solv (keys %{$solvable}) {
+			my $FD;
+			if (! open ($FD, '<' ,$solv)) {
+				$kiwi -> error  ("--> Couldn't open solvable: $solv");
+				$kiwi -> failed ();
+				return;
+			}
+			close $FD;
+			$repo = $pool -> create_repo(
+				$solvable->{$solv}
+			);
+			$repo -> add_solv ($solv);
+		}
+		#==========================================
+		# merge all solvables into one
+		#------------------------------------------
+		my $merged= "/var/cache/kiwi/satsolver/merged.solv";
+		my @files = keys %{$solvable};
+		if (@files > 1) {
+			qxx ("mergesolv @files > $merged");
+		} else {
+			qxx ("cp @files $merged 2>&1");
+		}
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("--> Couldn't merge/copy solv files");
+			$kiwi -> failed ();
+			return;
+		}
+		$this->{solfile} = $merged;
 	}
 	#==========================================
 	# Create SaT Solver and jobs
@@ -243,7 +263,6 @@ sub new {
 	$this->{plist}   = $pref;
 	$this->{pool}    = $pool;
 	$this->{result}  = \@solved;
-	$this->{solfile} = $solvable;
 	$this->{meta}    = \%slist;
 	return $this;
 }
@@ -322,7 +341,6 @@ sub getInstallSizeKBytes {
 	# package list
 	# ----
 	my $this   = shift;
-	my $repo   = $this->{repo};
 	my $solver = $this->{solver};
 	my $sum    = 0;
 	my @a = $solver->installs(1);
@@ -341,8 +359,6 @@ sub getInstallList {
 	# return package list and attributes
 	# ----
 	my $this   = shift;
-	my $repo   = $this->{repo};
-	my $a = $repo->name();
 	my $solver = $this->{solver};
 	my %result = ();
 	my @a = $solver->installs(1);
@@ -352,9 +368,11 @@ sub getInstallList {
 		my $ver  = $solvable->attr_values("solvable:evr");
 		my $name = $solvable->attr_values("solvable:name");
 		my $chs  = $solvable->attr_values("solvable:checksum");
+		my $url  = $solvable->repo->name();
 		my $chst = "unknown";
 		my $di   = new satsolver::Dataiterator (
-			$repo->pool,$repo,undef,0,$solvable,"solvable:checksum"
+			$solvable->repo->pool,$solvable->repo,
+			undef,0,$solvable,"solvable:checksum"
 		);
 		while ($di->step() != 0) {
 			$chst = $di->key()->type_id();
@@ -367,7 +385,7 @@ sub getInstallList {
 			}
 		}
 		$chs = $chst."=".$chs;
-		$result{$name} = "$size:$arch:$ver:$chs";
+		$result{$name} = "$size:$arch:$ver:$chs:$url";
 	}
 	return %result;
 }

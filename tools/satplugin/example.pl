@@ -6,7 +6,7 @@ use strict;
 use KIWI::SaT;
 
 # Open Solvable file
-open(F, "cat /var/cache/kiwi/satsolver/51c98db6cde4ff149b3cf5bbfcb57567 |") || die;
+open(F, "cat /var/cache/kiwi/satsolver/39bb03f5598b9e2d37d42a25ec00ed7b |") || die;
 
 # Create Pool and Repository 
 my $pool = new KIWI::SaT::_Pool;
@@ -15,6 +15,7 @@ my $repo = $pool -> createRepo('repo');
 # Add Solvable to Repository
 $repo -> addSolvable (*F);
 close(F) || die;
+$repo -> swig_name_set ("some-name");
 
 # Create Solver
 my $solver = new KIWI::SaT::Solver ($pool);

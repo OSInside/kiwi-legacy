@@ -481,11 +481,13 @@ sub __getTree {
 							next;
 						}
 						my @m = split (/:/,$meta->{$p});
+						my $repo = $m[4]; $repo =~ s/ /:/g;
 						my $pacnode = new XML::LibXML::Element ("package");
 						$pacnode -> setAttribute ("name","$p");
 						$pacnode -> setAttribute ("arch","$m[1]");
 						$pacnode -> setAttribute ("version","$m[2]");
 						$pacnode -> setAttribute ("sum","$m[3]");
+						$pacnode -> setAttribute ("repo",$repo);
 						$scan -> appendChild ($pacnode);
 					}
 				}
