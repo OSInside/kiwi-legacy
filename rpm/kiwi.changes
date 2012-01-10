@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jan 10 16:10:04 CET 2012 - ms@suse.de
+
+- removing references to online repos from the sle boot images (bnc #734887)
+  * Virtualization:/Appliances:/suse-sle11
+  * Virtualization:/Appliances:/suse-sle10
+
+-------------------------------------------------------------------
 Tue Jan 10 15:54:11 CET 2012 - ms@suse.de
 
 - removed binary packages provided as local repo (bnc #734887)
