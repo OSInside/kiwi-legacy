@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jan 10 15:54:11 CET 2012 - ms@suse.de
+
+- removed binary packages provided as local repo (bnc #734887)
+  * moved SLE10 repo from local to remote
+  * moved SLE11 repo from local to remote
+
+-------------------------------------------------------------------
 Tue Jan 10 15:11:39 CET 2012 - ms@suse.de
 
 - added additional data to the XML info module:
