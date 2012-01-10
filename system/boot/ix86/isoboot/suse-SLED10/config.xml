@@ -53,9 +53,6 @@
 	<repository type="yast2" status="replaceable">
 		<source path="/mounts/machcd2/dists/full-sle10-sp2-%arch"/>
 	</repository>
-	<repository type="rpm-md" status="fixed">
-		<source path="http://download.opensuse.org/repositories/Virtualization:/Appliances:/suse-sle10/SLE_10_SDK"/>
-	</repository>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel-default"/>
 	</packages>
