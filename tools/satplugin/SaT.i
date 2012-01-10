@@ -223,6 +223,8 @@ extern "C"
                 continue; // ignore system solvable
             }
             Solvable *s = self->pool->solvables + p;
+            int t;
+            char ct[50] = "unknown";
             // lookup package install size
             unsigned int bytes=solvable_lookup_num(s, SOLVABLE_INSTALLSIZE, 0);
             // lookup package version
@@ -231,16 +233,27 @@ extern "C"
             const char* arch = solvable_lookup_str(s,SOLVABLE_ARCH);
             // lockup package name
             const char* myel = (char*)id2str(pool, s->name);
-
+            // lockup package checksum
+            const char* chs = solvable_lookup_checksum(s,SOLVABLE_CHECKSUM,&t);
+            if (t == REPOKEY_TYPE_SHA256) {
+                sprintf (ct,"sha256");
+            } else if (t == REPOKEY_TYPE_SHA1) {
+                sprintf (ct,"sha1");
+            } else if (t == REPOKEY_TYPE_MD5) {
+                sprintf (ct,"md5");
+            }
+            // lookup repo name
+            const char* rname = repo_name(s->repo);
             // store data into perl hash
-            int l = sizeof (char) * (strlen(vers)+1+strlen(arch)+1+20);
+            int l = sizeof (char) * 
+                (strlen(vers)+1+strlen(arch)+strlen(chs)+strlen(rname)+1+20);
             char* val = (char*)malloc (l);
             memset (val,'\0',l);
-            sprintf (val,"%u:%s:%s",bytes,arch,vers);
+            sprintf (val,"%u:%s:%s:%s=%s:%s",bytes,arch,vers,ct,chs,rname);
             svs[b] = sv_newmortal();
             hv_store(hash,
                 myel,strlen(myel),
-                newSVpv(val,strlen(val)+1),0
+                newSVpv(val,strlen(val)),0
             );
         }
         free (svs);

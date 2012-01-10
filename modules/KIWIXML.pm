@@ -3584,55 +3584,30 @@ sub getInstSourceFile {
 #------------------------------------------
 sub getInstSourceSatSolvable {
 	# /.../
-	# This function will return an uncompressed solvable record
-	# for the given repository list.
+	# This function will return a hash containing the
+	# solvable and repo url per repo
 	# ----
 	my $kiwi  = shift;
 	my $repos = shift;
-	my $arch  = qxx ("uname -m"); chomp $arch;
-	my $sdir  = "/var/cache/kiwi/satsolver";
-	my @index = ();
-	my $count = 0;
-	my $solv;
+	my %index = ();
 	#==========================================
-	# check/create main solvable file name
+	# create solvable/repo index
 	#------------------------------------------
-	foreach my $repo (@{$repos}) {
-		push (@index,$repo);
-	}
-	push (@index,$arch);
-	@index = sort (@index);
-	$solv  = join (":",@index);
-	$solv = qxx ("echo $solv | md5sum | cut -f1 -d-");
-	$solv = $sdir."/".$solv; chomp $solv;
-	$solv =~ s/ +$//;
-	#==========================================
-	# create one solvable per repo
-	#------------------------------------------
-	undef @index;
 	foreach my $repo (@{$repos}) {
 		my $solvable = getSingleInstSourceSatSolvable ($kiwi,$repo);
 		if (! $solvable) {
 			return undef;
 		}
-		push @index,$solvable;
-		$count++;
+		# /.../
+		# satsolver / or the perl binding truncates the name if
+		# there is a ':' sign. No clue why so we replace : with
+		# a space and replace it back in the KIWIXMLInfo module
+		# when the information is printed on the screen
+		# ----
+		$repo =~ s/:/ /g;
+		$index{$solvable} = $repo;
 	}
-	#==========================================
-	# merge all solvables into one
-	#------------------------------------------
-	if ($count > 1) {
-		my $data = qxx ("mergesolv @index > $solv.system");
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("--> Couldn't merge solve files");
-			$kiwi -> failed ();
-			return undef
-		}
-	} else {
-		qxx ("cp $solv $solv.system 2>&1");
-	}
-	return $solv.".system";
+	return \%index;
 }
 
 #==========================================
@@ -3741,7 +3716,8 @@ sub getSingleInstSourceSatSolvable {
 			$kiwi -> failed ();
 			$kiwi -> error ("--> Failed to open file $repoMD");
 			$kiwi -> failed ();
-			return undef;
+			unlink $repoMD;
+			return;
 		}
 		binmode $RXML;
 		my $rxml = new XML::LibXML;
@@ -3772,6 +3748,7 @@ sub getSingleInstSourceSatSolvable {
 			my $curstamp = <$FD>; chomp $curstamp;
 			if ($curstamp eq $time) {
 				$kiwi -> done();
+				unlink $repoMD;
 				return $index;
 			}
 		}
@@ -3812,7 +3789,8 @@ sub getSingleInstSourceSatSolvable {
 			$kiwi -> failed ();
 			$kiwi -> error ("--> Failed to create timestamp: $!");
 			$kiwi -> failed ();
-			return undef;
+			unlink $repoMD;
+			return;
 		}
 		print $RXML $time;
 		close $RXML;
