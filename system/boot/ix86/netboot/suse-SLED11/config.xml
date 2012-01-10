@@ -47,6 +47,7 @@
 		<file name="drivers/net/*"/>
 		<file name="drivers/parport/*"/>
 		<file name="drivers/scsi/*"/>
+		<file name="drivers/staging/hv/*"/>
 		<file name="fs/binfmt_aout.ko"/>
 		<file name="fs/binfmt_misc.ko"/>
 		<file name="fs/exportfs/*"/>
@@ -119,6 +120,7 @@
 		<file name="drivers/net/via-rhine.ko"/>
 		<file name="drivers/net/via-velocity.ko"/>
 		<file name="drivers/net/yellowfin.ko"/>
+		<file name="drivers/staging/hv/*"/>
 		<file name="fs/exportfs/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/ext3/*"/>
