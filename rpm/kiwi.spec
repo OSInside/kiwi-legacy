@@ -14,10 +14,14 @@
 
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
-
-
 Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
+Summary:        OpenSuSE - KIWI Image System
+License:        GPL-2.0
+Group:          System/Management
+Version:        5.02.2
+Release:        0
+# requirements to build packages
 BuildRequires:  gcc-c++
 BuildRequires:  libxslt
 BuildRequires:  module-init-tools
@@ -36,10 +40,6 @@ BuildRequires:  syslinux
 BuildRequires:  libexpat-devel
 BuildRequires:  rpm-devel
 %endif
-%if %{suse_version} > 1030 && %{suse_version} <= 1130
-BuildRequires:  libsatsolver-devel
-BuildRequires:  swig
-%endif
 %if %{suse_version} > 1140
 BuildRequires:  btrfsprogs
 BuildRequires:  perl-Test-Unit
@@ -48,23 +48,27 @@ BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
 BuildRequires:  zypper
 %endif
-%if %{suse_version} <= 1010
-Requires:       qt
-%endif
+# requirements to run kiwi
+Requires:       perl = %{perl_version}
+Requires:       perl-XML-LibXML
+Requires:       perl-libwww-perl
+Requires:       screen
+Requires:       coreutils
+Requires:       perl-XML-LibXML-Common
+Requires:       perl-XML-SAX
+Requires:       perl-Config-IniFiles
+Requires:       kiwi-tools
+Requires:       libxslt
+Requires:       checkmedia
+Requires:       util-linux
+Requires:       rsync
 %ifarch %ix86 x86_64
 %if %{suse_version} > 1010
 Requires:       squashfs
 %endif
 %endif
-Requires:       perl = %{perl_version}
-Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
-Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
-Requires:       kiwi-tools libxslt checkmedia util-linux rsync
 %if %{suse_version} > 1030
 Requires:       satsolver-tools
-%endif
-%if %{suse_version} > 1130
-Requires:       perl-satsolver >= 0.42
 %endif
 %ifarch %ix86 x86_64
 Requires:       master-boot-code
@@ -72,21 +76,22 @@ Requires:       master-boot-code
 Requires:       clicfs >= 1.3.9
 %endif
 %endif
-Summary:        OpenSuSE - KIWI Image System
-License:        GPL-2.0
-Group:          System/Management
-Version:        5.02.2
-Release:        0
+# recommended to run kiwi
+%if 0%{?suse_version}
+Recommends:     perl-satsolver >= 0.42
+Recommends:     jing
+Recommends:     zypper
+%endif
+# obsoletes
+Obsoletes:      kiwi-desc-usbboot <= 4.81
+# sources
 Source:         %{name}.tar.bz2
 Source1:        %{name}-rpmlintrc
 Source2:        %{name}-docu.tar.bz2
 Source3:        %{name}-repo.tar.bz2
+# build root path
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-%if 0%{?suse_version}
-Recommends:     jing
-Recommends:     zypper
-%endif
-Obsoletes:      kiwi-desc-usbboot <= 4.81
+
 
 %description
 The OpenSuSE KIWI Image System provides a complete operating system
@@ -379,10 +384,6 @@ test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
 	echo /srv/tftpboot/pxelinux.0 > kiwi.loader
 test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
 	echo /srv/tftpboot/mboot.c32 >> kiwi.loader
-%if 0%{?suse_version}
-%perl_process_packlist
-%endif
-rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/KIWI/example.pl
 ./.links
 %if %{suse_version} > 1020
 %fdupes $RPM_BUILD_ROOT/srv/tftpboot
@@ -452,11 +453,6 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/kiwi/modules/KIWIUtil.pm
 %{_datadir}/kiwi/xsl
 %{_sbindir}/kiwi
-%if 0%{?suse_version} < 1140 && %{suse_version} >0
-%{perl_vendorarch}/KIWI
-%{perl_vendorarch}/auto/KIWI
-/var/adm/perl-modules/kiwi
-%endif
 #=================================================
 # KIWI doc...      
 #-------------------------------------------------
