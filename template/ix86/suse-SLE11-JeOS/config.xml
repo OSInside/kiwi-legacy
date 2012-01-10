@@ -61,6 +61,9 @@
 	<repository type="rpm-md">
 		<source path="obs:///SUSE:SLE-11:GA/standard"/>
 	</repository>
+	<repository type="rpm-md">
+		<source path="obs://Virtualization:/Appliances:/suse-sle11/SLE_11_SP1"/>
+	</repository>
 	<packages type="image">
 		<package name="sles-release"/>
 		<package name="sles-release-DVD"/>

@@ -58,9 +58,6 @@
 	<repository type="yast2" status="replaceable">
 		<source path="ftp://dist.suse.de/install/SLP/SLED-10-SP2-GMC/%arch/DVD1"/>
 	</repository>
-	<repository type="rpm-md" status="fixed">
-		<source path="obs://Virtualization:/Appliances:/suse-sle10/SLE_10_SDK"/>
-	</repository>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel-default"/>
 	</packages>
