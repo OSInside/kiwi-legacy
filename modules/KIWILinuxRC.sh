@@ -5753,6 +5753,7 @@ function getDiskID {
 	# ----
 	local device=$1
 	local swap=$2
+	local prefix=by-id
 	if [ -z "$device" ];then
 		return
 	fi
@@ -5768,7 +5769,10 @@ function getDiskID {
 		echo $device
 		return
 	fi
-	for i in /dev/disk/by-id/*;do
+	if [ ! -z "$USE_BY_UUID_DEVICE_NAMES" ];then
+		prefix=by-uuid
+	fi
+	for i in /dev/disk/$prefix/*;do
 		if [ -z "$i" ];then
 			continue
 		fi
