@@ -65,7 +65,6 @@ sub new {
 	my $pref    = shift;
 	my $urlref  = shift;
 	my $solvep  = shift;
-	my $repo    = shift;
 	my $pool    = shift;
 	my $quiet   = shift;
 	my $ptype   = shift;
@@ -81,7 +80,7 @@ sub new {
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
-	if ((! defined $repo) || (! defined $pool)) {
+	if (! defined $pool) {
 		if (! defined $quiet) {
 			$kiwi -> info ("Setting up SaT solver...\n");
 		}
@@ -89,7 +88,27 @@ sub new {
 	if (! $KIWISatSolver::haveSaT) {
 		$kiwi -> error ("--> No SaT plugin installed");
 		$kiwi -> failed ();
+		$kiwi -> error ("--> Make sure you have perl-satsolver installed");
+		$kiwi -> failed ();
 		return;
+	} else {
+		my $satsolver = (glob ("/usr/lib/perl5/vendor_perl/*/satsolver.pm"))[0];
+		my $legacy    = 1;
+		if ($satsolver) {
+				# /.../
+				# check for solutions() method provided with this version of
+				# perl-satsolver. It must exist in order to work with kiwi
+				# ----
+				system ("grep -q '^\*solutions =' $satsolver");
+				$legacy = $? >> 8;
+		}
+		if ($legacy) {
+			$kiwi -> error ("--> Can't find solutions() method in SaT plugin");
+			$kiwi -> failed ();
+			$kiwi -> error ("--> perl-satsolver >= 0.42 is required");
+			$kiwi -> failed ();
+			return;
+		}
 	}
 	if (! defined $pref) {
 		$kiwi -> error ("--> Invalid package/pattern/product reference");
@@ -107,7 +126,7 @@ sub new {
 	#==========================================
 	# Create and cache sat solvable
 	#------------------------------------------
-	if ((! defined $repo) || (! defined $pool)) {
+	if (! defined $pool) {
 		my $solvable = KIWIXML::getInstSourceSatSolvable ($kiwi,$urlref);
 		if (! defined $solvable) {
 			return;
@@ -126,7 +145,7 @@ sub new {
 				return;
 			}
 			close $FD;
-			$repo = $pool -> create_repo(
+			my $repo = $pool -> create_repo(
 				$solvable->{$solv}
 			);
 			$repo -> add_solv ($solv);
@@ -186,7 +205,6 @@ sub new {
 	#------------------------------------------
 	$this->{kiwi}    = $kiwi;
 	$this->{solver}  = $solver;
-	$this->{repo}    = $repo;
 	$this->{failed}  = \@jobFailed;
 	#==========================================
 	# Solve the job(s)
@@ -299,17 +317,6 @@ sub getSolfile {
 	# ----
 	my $this = shift;
 	return $this->{solfile};
-}
-
-#==========================================
-# getRepo
-#------------------------------------------
-sub getRepo {
-	# /.../
-	# return satsolver repo object
-	# ----
-	my $this = shift;
-	return $this->{repo};
 }
 
 #==========================================
