@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jan 11 10:47:09 CET 2012 - ms@suse.de
+
+- added staging/hv drivers to 12.1 and SLE11 boot images
+- allow by-uuid device persistency via the kernel
+  commandline option USE_BY_UUID_DEVICE_NAMES=1
+
+-------------------------------------------------------------------
 Tue Jan 10 16:10:04 CET 2012 - ms@suse.de
 
 - removing references to online repos from the sle boot images (bnc #734887)
