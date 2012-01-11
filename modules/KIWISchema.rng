@@ -1943,6 +1943,7 @@ At the moment grub, zipl and sys|extlinux are supported</a:documentation>
         <choice>
           <value>extlinux</value>
           <value>grub</value>
+          <value>grub2</value>
           <value>syslinux</value>
           <value>zipl</value>
           <value>yaboot</value>

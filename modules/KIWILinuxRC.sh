@@ -755,6 +755,8 @@ function installBootLoader {
 	case $arch-$loader in
 		i*86-grub)       installBootLoaderGrub ;;
 		x86_64-grub)     installBootLoaderGrub ;;
+		i*86-grub2)      installBootLoaderGrub2 ;;
+		x86_64-grub2)    installBootLoaderGrub2 ;;
 		ppc*)            installBootLoaderLilo ;;
 		arm*)            installBootLoaderUBoot ;;
 		i*86-syslinux)   installBootLoaderSyslinux ;;
@@ -789,6 +791,8 @@ function installBootLoaderRecovery {
 	case $arch-$loader in
 		i*86-grub)       installBootLoaderGrubRecovery ;;
 		x86_64-grub)     installBootLoaderGrubRecovery ;;
+		i*86-grub2)      installBootLoaderGrub2Recovery ;;
+		x86_64-grub2)    installBootLoaderGrub2Recovery ;;
 		i*86-syslinux)   installBootLoaderSyslinuxRecovery ;;
 		x86_64-syslinux) installBootLoaderSyslinuxRecovery ;;
 		i*86-extlinux)   installBootLoaderSyslinuxRecovery ;;
@@ -869,6 +873,13 @@ function installBootLoaderGrub {
 	fi
 }
 #======================================
+# installBootLoaderGrub2
+#--------------------------------------
+function installBootLoaderGrub2 {
+	# TODO
+	Echo "*** not implemented ***"
+}
+#======================================
 # installBootLoaderLilo
 #--------------------------------------
 function installBootLoaderLilo {
@@ -936,6 +947,13 @@ function installBootLoaderGrubRecovery {
 			"recovery grub setup failed" \
 		"reboot"
 	fi
+}
+#======================================
+# installBootLoaderGrub2Recovery
+#--------------------------------------
+function installBootLoaderGrub2Recovery {
+	# TODO
+	Echo "*** not implemented ***"
 }
 #======================================
 # setupRHELInitrd
@@ -1121,6 +1139,8 @@ function setupBootLoader {
 	case $arch-$loader in
 		i*86-grub)       eval setupBootLoaderGrub $para ;;
 		x86_64-grub)     eval setupBootLoaderGrub $para ;;
+		i*86-grub2)      eval setupBootLoaderGrub2 $para ;;
+		x86_64-grub2)    eval setupBootLoaderGrub2 $para ;;
 		i*86-syslinux)   eval setupBootLoaderSyslinux $para ;;
 		x86_64-syslinux) eval setupBootLoaderSyslinux $para ;;
 		i*86-extlinux)   eval setupBootLoaderSyslinux $para ;;
@@ -1193,6 +1213,8 @@ function setupBootLoaderRecovery {
 	case $arch-$loader in
 		i*86-grub)       eval setupBootLoaderGrubRecovery $para ;;
 		x86_64-grub)     eval setupBootLoaderGrubRecovery $para ;;
+		i*86-grub2)      eval setupBootLoaderGrub2Recovery $para ;;
+		x86_64-grub2)    eval setupBootLoaderGrub2Recovery $para ;;
 		i*86-syslinux)   eval setupBootLoaderSyslinuxRecovery $para ;;
 		x86_64-syslinux) eval setupBootLoaderSyslinuxRecovery $para ;;
 		i*86-extlinux)   eval setupBootLoaderSyslinuxRecovery $para ;;
@@ -1452,6 +1474,13 @@ function setupBootLoaderGrubRecovery {
 			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 		fi
 	fi
+}
+#======================================
+# setupBootLoaderGrub2Recovery
+#--------------------------------------
+function setupBootLoaderGrub2Recovery {
+	# TODO
+	Echo "*** not implemented ***"
 }
 #======================================
 # setupBootLoaderUBoot
@@ -2201,6 +2230,13 @@ function setupBootLoaderGrub {
 	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
 	echo -n " showopts ide=nodma apm=off acpi=off noresume"  >> $sysb
 	echo "selinux=0 nosmp noapic maxcpus=0 edd=off\""        >> $sysb
+}
+#======================================
+# setupBootLoaderGrub2
+#--------------------------------------
+function setupBootLoaderGrub2 {
+	# TODO
+	Echo "*** not implemented ***"
 }
 #======================================
 # setupBootLoaderLilo
