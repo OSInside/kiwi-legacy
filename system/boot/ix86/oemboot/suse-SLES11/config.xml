@@ -62,6 +62,7 @@
 		<file name="fs/udf/*"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
+		<file name="drivers/staging/hv/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/cdrom/*"/>
 		<file name="drivers/parport/*"/>
