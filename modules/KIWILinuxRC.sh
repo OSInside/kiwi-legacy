@@ -3103,7 +3103,7 @@ function CDDevice {
 				test -z $cddev && cddev=$i || cddev=$cddev:$i
 			fi
 		done
-		if [ ! -z "$cddev" ] || [ $count -eq 4 ]; then
+		if [ ! -z "$cddev" ] || [ $count -eq 30 ]; then
 			break
 		else
 			echo -n .
