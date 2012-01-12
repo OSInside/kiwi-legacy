@@ -2706,6 +2706,36 @@ sub setupBootLoaderStages {
 			return undef;
 		}
 		#==========================================
+		# Create boot partition file
+		#------------------------------------------
+		$kiwi -> info ("Creating grub2 core boot image");
+		my $bootfile = "$tmpdir/boot/grub2/bootpart.cfg";
+		my $bpfd = new FileHandle;
+		if (! $bpfd -> open(">$bootfile")) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Couldn't create grub2 bootpart map: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		print $bpfd "prefix=(hd0,1)/boot/grub2\n";
+		$bpfd -> close();
+		#==========================================
+		# Create core grub2 boot image
+		#------------------------------------------
+		my $core    = "$tmpdir/boot/grub2/core.img";
+		my $modules = "biosdisk part_msdos ext2";
+		$status = qxx (
+			"grub2-mkimage -v -o $core -c $bootfile $modules 2>&1"
+		);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create core boot image: $status");
+			$kiwi -> failed ();
+			return;
+		}
+		$kiwi -> done();
+		#==========================================
 		# Get Grub graphics boot message
 		#------------------------------------------
 		$kiwi -> info ("Importing graphics boot message and stage files");
@@ -3998,45 +4028,74 @@ sub installBootLoader {
 		print $dmfd "(hd0) $diskname\n";
 		$dmfd -> close();
 		#==========================================
-		# Create boot partition file
+		# Install grub2
 		#------------------------------------------
-		my $bootfile = "$tmpdir/boot/grub2/bootpart.cfg";
-		my $bpfd = new FileHandle;
-		if (! $bpfd -> open(">$bootfile")) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Couldn't create grub2 bootpart map: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		print $bpfd "prefix=(hd0,1)/boot/grub2\n";
-		$bpfd -> close();
-		#==========================================
-		# Create core grub2 boot image
-		#------------------------------------------
-		my $core    = "$tmpdir/boot/grub2/core.img";
-		my $modules = "biosdisk part_msdos ext2";
-		$status = qxx (
-			"grub2-mkimage -v -o $core -c $bootfile $modules 2>&1"
-		);
+		my $stages = "/mnt/boot/grub2";
+		my $rdev = $this->{bindloop}."1";
+		$status = qxx ("mount $rdev /mnt 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create core boot image: $status");
+			$kiwi -> error ("Couldn't mount boot partition: $status");
 			$kiwi -> failed ();
 			return;
 		}
-		#==========================================
-		# Install grub2
-		#------------------------------------------
-		my $stages = "$tmpdir/boot/grub2";
-		$status = qxx (
-			"grub2-setup -v -r '(hd0)' -d $stages -m $dmfile $diskname 2>&1"
-		);
+		if (! $chainload) {
+			#==========================================
+			# install grub2 into MBR
+			#------------------------------------------
+			$status = qxx (
+				"grub2-setup -vr '(hd0)' -d $stages -m $dmfile $diskname 2>&1"
+			);
+			$result = $? >> 8;
+		} else {
+			#==========================================
+			# install grub2 into partition
+			#------------------------------------------
+			my $rdev = $this->{bindloop}."1";
+			$rdev = readlink ($rdev);
+			$rdev =~ s/\.\./\/dev/;
+			$status = qxx (
+				"grub2-setup -vfr '(hd0,1)' -d $stages -m $dmfile $rdev 2>&1"
+			);
+			$result = $? >> 8;
+		}
+		qxx ("umount /mnt");
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't install $loader on $diskname: $status");
 			$kiwi -> failed ();
 			return undef;
+		}
+		if ($chainload) {
+			# /.../
+			# chainload grub with master-boot-code
+			# zero out sectors between 0x200 - 0x3f0 for preload process
+			# store a copy of the master-boot-code at 0x800
+			# write FDST flag at 0x190
+			# ---
+			my $mbr = "/usr/lib/boot/master-boot-code";
+			my $opt = "conv=notrunc";
+			#==========================================
+			# write master-boot-code
+			#------------------------------------------
+			$status = qxx (
+				"dd if=$mbr of=$diskname bs=1 count=446 $opt 2>&1"
+			);
+			$result= $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't install master boot code: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			#==========================================
+			# write FDST flag
+			#------------------------------------------
+			my $fdst = "perl -e \"printf '%s', pack 'A4', eval 'FDST';\"";
+			qxx (
+				"$fdst|dd of=$diskname bs=1 count=4 seek=\$((0x190)) $opt 2>&1"
+			);
 		}
 		$kiwi -> done();
 	}
