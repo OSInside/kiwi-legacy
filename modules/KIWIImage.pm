@@ -299,7 +299,7 @@ sub updateDescription {
 			my $name = $element -> getAttribute ("name");
 			push (@items,$name);
 		}
-		if (($type eq "tools") || ($type eq "libs")) {
+		if (($type eq "tools") || ($type eq "libs") || ($type eq "delete")) {
 			push (@items,@{$strip_default{$type}});
 		}
 		$strip{$type} = \@items;
