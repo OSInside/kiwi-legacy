@@ -7,7 +7,7 @@ echo "Configure image: [$kiwi_iname]..."
 #==========================================
 # pack boot includes
 #------------------------------------------
-basePackBootIncludes
+# basePackBootIncludes
 
 #==========================================
 # remove unneded kernel files
@@ -33,7 +33,7 @@ suseStripInitrd
 #==========================================
 # unpack boot includes
 #------------------------------------------
-baseUnpackBootIncludes
+# baseUnpackBootIncludes
 
 #==========================================
 # umount /proc
