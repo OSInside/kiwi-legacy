@@ -876,8 +876,24 @@ function installBootLoaderGrub {
 # installBootLoaderGrub2
 #--------------------------------------
 function installBootLoaderGrub2 {
-	# TODO
-	Echo "*** not implemented ***"
+	# /.../
+	# configure and install grub2 according to the
+	# contents of /boot/grub2/grub.cfg
+	# ----
+	if ! which grub2-mkconfig &>/dev/null;then
+		Echo "Image doesn't have grub2 installed"
+		Echo "Can't install boot loader"
+		return 1
+	fi
+	grub2-mkconfig -o $destsPrefix/boot/grub2/grub.cfg 1>&2
+	if [ ! $? = 0 ];then
+		Echo "Failed to create grub2 boot configuration"
+		return 1
+	fi
+	grub2-install $imageDiskDevice 1>&2
+	if [ ! $? = 0 ];then
+		Echo "Failed to install boot loader"
+	fi
 }
 #======================================
 # installBootLoaderLilo
@@ -2235,8 +2251,11 @@ function setupBootLoaderGrub {
 # setupBootLoaderGrub2
 #--------------------------------------
 function setupBootLoaderGrub2 {
-	# TODO
-	Echo "*** not implemented ***"
+	# /.../
+	# this is done via grub2-mkconfig in
+	# installBootLoaderGrub2
+	# ----
+	return
 }
 #======================================
 # setupBootLoaderLilo
