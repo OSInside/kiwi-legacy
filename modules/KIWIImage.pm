@@ -1804,7 +1804,7 @@ sub createImageLiveCD {
 		$kiwi -> info ("Saving hybrid disk label on ISO: $this->{mbrid}...");
 		my $destination = "$CD/boot/grub";
 		qxx ("mkdir -p $destination");
-        my $FD;
+		my $FD;
 		if (! open ($FD, '>', "$destination/mbrid")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create mbrid file: $!");
@@ -1890,7 +1890,7 @@ sub createImageLiveCD {
 	if (-f "$gfx/gfxboot.com" || -f "$gfx/gfxboot.c32") {
 		$syslinux_new_format = 1;
 	}
-    my $FD;
+	my $FD;
 	if (! open ($FD, '>', "$destination/isolinux.cfg")) {
 		$kiwi -> failed();
 		$kiwi -> error  ("Failed to create $destination/isolinux.cfg: $!");
@@ -2812,7 +2812,8 @@ sub getBlocks {
 	# to create a <size> bytes long image. Return list
 	# (bs,count,seek)
 	# ---
-	my $size = $_[0];
+	my $this = shift;
+	my $size = shift;
 	my $bigimage   = 1048576; # 1M
 	my $smallimage = 8192;    # 8K
 	my $number;
@@ -2823,7 +2824,7 @@ sub getBlocks {
 		if ($suffix eq "") {
 			return (($size,1));
 		} else {
-			SWITCH: for ($suffix) { 
+			SWITCH: for ($suffix) {
 			/K/i   && do {
 				$number *= 1024;
 			last SWITCH;
@@ -2911,7 +2912,7 @@ sub writeImageConfig {
 	#------------------------------------------
 	if (defined $device) {
 		$kiwi -> info ("Creating boot configuration...");
-        my $FD;
+		my $FD;
 		if (! open ($FD, '>', "$this->{imageDest}/$configName")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create image boot configuration");
@@ -3226,8 +3227,8 @@ sub buildLogicalExtend {
 	if (! defined $size) {
 		return;
 	}
-	my @bsc  = getBlocks ( $size );
-	my $seek = $bsc[2] - 1;
+	my @bsc  = $this -> getBlocks ( $size );
+	my $seek = $bsc[2] - $bsc[0];
 	#==========================================
 	# Create logical extend storage and FS
 	#------------------------------------------
@@ -4089,7 +4090,7 @@ sub updateMD5File {
 	#------------------------------------------
 	if (defined $this->{md5file}) {
 		$kiwi -> info ("Updating md5 file...");
-        my $FD;
+		my $FD;
 		if (! open ($FD, '<', $this->{md5file})) {
 			$kiwi -> failed ();
 			$kiwi -> error ("Failed to open md5 file: $!");
@@ -4097,8 +4098,8 @@ sub updateMD5File {
 			return;
 		}
 		my $line = <$FD>;
-        close $FD;
-        chomp $line;
+		close $FD;
+		chomp $line;
 		my $size = $main::global -> isize ($image);
 		my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 		my $blocksize = 1;
@@ -4315,7 +4316,7 @@ sub checkKernel {
 	#==========================================
 	# 2) create images.sh script...
 	#------------------------------------------
-    my $FD;
+	my $FD;
 	if (! open ($FD, '>', "$tmpdir/images.sh")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create image.sh file: $!");
@@ -4477,13 +4478,13 @@ sub buildImageName {
 sub extractCPIO {
 	my $this = shift;
 	my $file = shift;
-    my $FD;
+	my $FD;
 	if (! open $FD, '<', $file) {
 		return 0;
 	}
 	local $/;
 	my $data   = <$FD>;
-    close $FD;
+	close $FD;
 	my @data   = split (//,$data);
 	my $stream = "";
 	my $count  = 0;
