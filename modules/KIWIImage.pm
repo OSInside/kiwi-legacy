@@ -2818,43 +2818,40 @@ sub getBlocks {
 	my $smallimage = 8192;    # 8K
 	my $number;
 	my $suffix;
+	my $count;
+	my $seek;
 	if ($size =~ /(\d+)(.*)/) {
 		$number = $1;
 		$suffix = $2;
-		if ($suffix eq "") {
-			return (($size,1));
-		} else {
-			SWITCH: for ($suffix) {
-			/K/i   && do {
+		SWITCH: for ($suffix) {
+			/K/i && do {
 				$number *= 1024;
-			last SWITCH;
+				last SWITCH;
 			}; 
-			/M/i   && do {
+			/M/i && do {
 				$number *= 1024 * 1024;
-			last SWITCH;
+				last SWITCH;
 			}; 
-			/G/i   && do {
+			/G/i && do {
 				$number *= 1024 * 1024 * 1024;
-			last SWITCH;
+				last SWITCH;
 			};
-			# default...
-			return (($size,1));
-			}
 		}
 	} else {
-		return (($size,1));
+		$number = $size;
 	}
-	my $count;
 	if ($number > 100 * 1024 * 1024) {
 		# big image...
 		$count = $number / $bigimage;
 		$count = Math::BigFloat->new($count)->ffround(0);
-		return (($bigimage,$count,$count*$bigimage));
+		$seek  = $count*$bigimage - $bigimage;
+		return (($bigimage,$count,$seek));
 	} else {
 		# small image...
 		$count = $number / $smallimage;
 		$count = Math::BigFloat->new($count)->ffround(0);
-		return (($smallimage,$count,$count*$smallimage));
+		$seek  = $count*$smallimage - $smallimage;
+		return (($smallimage,$count,$seek));
 	}
 }
 
@@ -3228,7 +3225,7 @@ sub buildLogicalExtend {
 		return;
 	}
 	my @bsc  = $this -> getBlocks ( $size );
-	my $seek = $bsc[2] - $bsc[0];
+	my $seek = $bsc[2];
 	#==========================================
 	# Create logical extend storage and FS
 	#------------------------------------------
