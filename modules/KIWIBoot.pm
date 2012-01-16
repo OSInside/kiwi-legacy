@@ -1976,6 +1976,9 @@ sub setupBootDisk {
 		# set root device name from deviceMap
 		#------------------------------------------
 		$root = $deviceMap{1};
+		if ($needBootP) {
+			$root = $deviceMap{2};
+		}
 		#==========================================
 		# check partition sizes
 		#------------------------------------------
@@ -2018,9 +2021,6 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (! $haveTree) {
 		$kiwi -> info ("Dumping system image on disk");
-		if ($needBootP) {
-			$root = $deviceMap{2};
-		}
 		$status = qxx ("dd if=$system of=$root bs=32k 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
