@@ -128,6 +128,7 @@
 		<package name="fbiterm"/>
 		<package name="file"/>
 		<package name="fribidi"/>
+		<package name="genisoimage"/>
 		<package name="gettext-runtime"/>
 		<package name="grub"/>
 		<package name="hwinfo"/>

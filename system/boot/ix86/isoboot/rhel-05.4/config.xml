@@ -90,6 +90,7 @@
 		<package name="lvm2"/>
 		<package name="make"/>
 		<package name="memtest86+"/>
+		<package name="mkisofs"/>
 		<package name="pam"/>
 		<package name="parted"/>
 		<package name="psmisc"/>

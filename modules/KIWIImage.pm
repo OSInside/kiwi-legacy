@@ -1798,24 +1798,6 @@ sub createImageLiveCD {
 	}
 	$kiwi -> done ();
 	#==========================================
-	# Create MBR id file for boot device check
-	#------------------------------------------
-	if ($hybrid) {
-		$kiwi -> info ("Saving hybrid disk label on ISO: $this->{mbrid}...");
-		my $destination = "$CD/boot/grub";
-		qxx ("mkdir -p $destination");
-		my $FD;
-		if (! open ($FD, '>', "$destination/mbrid")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create mbrid file: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		print $FD "$this->{mbrid}";
-		close $FD;
-		$kiwi -> done();
-	}
-	#==========================================
 	# copy boot kernel and initrd
 	#------------------------------------------
 	$kiwi -> info ("Copying boot image and kernel [$isoarch]");
@@ -1863,6 +1845,35 @@ sub createImageLiveCD {
 	}
 	$kiwi -> done();
 	#==========================================
+	# Include MBR ID to initrd
+	#------------------------------------------
+	$kiwi -> info ("Saving hybrid disk label in initrd: $this->{mbrid}...");
+	qxx ("mkdir -p $tmpdir/boot/grub");
+	my $FD;
+	if (! open ($FD, '>', "$tmpdir/boot/grub/mbrid")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create mbrid file: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	print $FD "$this->{mbrid}";
+	close $FD;
+	#==========================================
+	# Repackage initrd
+	#------------------------------------------
+	my @cpio = ("--create", "--format=newc", "--quiet");
+	$data = qxx (
+		"cd $tmpdir && find . | cpio @cpio | $zipper -f > $destination/initrd"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed();
+		$kiwi -> error ("Failed to repackage initrd: $data");
+		$kiwi -> failed();
+		return;
+	}
+	$kiwi -> done();
+	#==========================================
 	# copy base graphics boot CD files
 	#------------------------------------------
 	$kiwi -> info ("Setting up isolinux boot CD [$isoarch]");
@@ -1890,7 +1901,6 @@ sub createImageLiveCD {
 	if (-f "$gfx/gfxboot.com" || -f "$gfx/gfxboot.c32") {
 		$syslinux_new_format = 1;
 	}
-	my $FD;
 	if (! open ($FD, '>', "$destination/isolinux.cfg")) {
 		$kiwi -> failed();
 		$kiwi -> error  ("Failed to create $destination/isolinux.cfg: $!");
@@ -2047,9 +2057,7 @@ sub createImageLiveCD {
 	if (! defined $gzip) {
 		$attr .= " -iso-level 4"; 
 	}
-	if ($stype{volid}) {
-		$attr .= " -V \"$stype{volid}\"";
-	}
+	$attr .= " -V \"$this->{mbrid}\"";
 	my $isolinux = new KIWIIsoLinux (
 		$kiwi,$CD,$name,$attr,"checkmedia",$this->{cmdL}
 	);

@@ -130,6 +130,7 @@
 		<package name="logrotate"/>
 		<package name="make"/>
 		<package name="man"/>
+		<package name="mkisofs"/>
 		<package name="openslp"/>
 		<package name="pam"/>
 		<package name="pam-modules"/>

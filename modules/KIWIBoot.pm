@@ -654,7 +654,6 @@ sub setupInstallCD {
 	my $md5name   = $system;
 	my $destdir   = dirname ($initrd);
 	my $gotsys    = 1;
-	my $volid     = "-V \"KIWI CD/DVD Installation\"";
 	my $bootloader;
 	if ($arch =~ /ppc|ppc64/) {
 		$bootloader = "yaboot";
@@ -703,9 +702,7 @@ sub setupInstallCD {
 	#==========================================
 	# check for volume id
 	#------------------------------------------
-	if ((%type) && ($type{volid})) {
-		$volid = " -V \"$type{volid}\"";
-	}
+	my $volid = $this->{mbrid};
 	#==========================================
 	# setup boot loader type
 	#------------------------------------------
@@ -955,7 +952,7 @@ sub setupInstallCD {
 	my $opts;
 	if ($bootloader eq "grub") {
 		# let isolinux run grub second stage...
-		$base = "-R -J -f -b boot/grub/stage2 -no-emul-boot $volid";
+		$base = "-R -J -f -b boot/grub/stage2 -no-emul-boot -V \"$volid\"";
 		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
 		$opts.= "-pad -joliet-long";
 	} elsif ($bootloader =~ /(sys|ext)linux/) {
@@ -969,7 +966,7 @@ sub setupInstallCD {
 		qxx ("mv $tmpdir/boot/initrd $tmpdir/boot/syslinux");
 		qxx ("mv $tmpdir/boot/linux  $tmpdir/boot/syslinux");
 		qxx ("mv $tmpdir/boot/syslinux $tmpdir/boot/loader 2>&1");
-		$base = "-R -J -f -b boot/loader/isolinux.bin -no-emul-boot $volid";
+		$base = "-R -J -f -b boot/loader/isolinux.bin -no-emul-boot -V \"$volid\"";
 		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
 		$opts.= "-pad -joliet-long";
 	} elsif ($bootloader eq "yaboot") {
@@ -2400,6 +2397,19 @@ sub setupInstallFlags {
 		qxx ("rm -rf $irddir");
 		return;
 	}
+	#==========================================
+	# Include MBR ID to initrd
+	#------------------------------------------
+	my $FD;
+	qxx ("mkdir -p $irddir/boot/grub");
+	if (! open ($FD, '>', "$irddir/boot/grub/mbrid")) {
+		$kiwi -> error  ("Couldn't create mbrid file: $!");
+		$kiwi -> failed ();
+		qxx ("rm -rf $irddir");
+		return;
+	}
+	print $FD "$this->{mbrid}";
+	close $FD;
 	#===========================================
 	# add image.md5 / config.vmxsystem to initrd
 	#-------------------------------------------

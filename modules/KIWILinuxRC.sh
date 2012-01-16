@@ -3134,42 +3134,6 @@ function probeDevices {
 	fi
 }
 #======================================
-# CDDevice
-#--------------------------------------
-function CDDevice {
-	# /.../
-	# detect CD/DVD/USB device(s). The function use the information
-	# from hwinfo --cdrom to search for the block device
-	# ----
-	IFS=$IFS_ORIG
-	local count=0
-	local h=/usr/sbin/hwinfo
-	if [ $HAVE_MODULES_ORDER = 0 ];then
-		for module in sg sd_mod sr_mod cdrom ide-cd BusLogic vfat; do
-			/sbin/modprobe $module
-		done
-	fi
-	Echo -n "Waiting for CD/DVD device(s) to appear..."
-	while true;do
-		cddevs=`$h --cdrom | grep "Device File:"|sed -e"s@(.*)@@" | cut -f2 -d:`
-		cddevs=`echo $cddevs`
-		for i in $cddevs;do
-			if [ -b $i ];then
-				test -z $cddev && cddev=$i || cddev=$cddev:$i
-			fi
-		done
-		if [ ! -z "$cddev" ] || [ $count -eq 30 ]; then
-			break
-		else
-			echo -n .
-			sleep 1
-		fi
-		count=`expr $count + 1`
-		udevPending
-	done
-	echo
-}
-#======================================
 # USBStickDevice
 #--------------------------------------
 function USBStickDevice {
@@ -3287,184 +3251,48 @@ function CDMountOption {
 	fi
 }
 #======================================
-# IsBootable
+# searchImageISODevice
 #--------------------------------------
-function IsBootable {
+function searchImageISODevice {
 	# /.../
-	# params: device, partitionNumber
-	# checks whether a partition is marked as bootable or not
+	# search all devices for the MBR ID stored in the
+	# iso header. This function is called to identify the
+	# live media and/or install media
 	# ----
-	local offset
-	let offset="446 + 16 * (${2} - 1)"
-	local flag=$(dd "if=${1}" bs=1 count=1 skip=${offset} 2>/dev/null)
-	test "$flag" = "${BOOTABLE_FLAG}"
-}
-#======================================
-# GetBootable
-#--------------------------------------
-function GetBootable {
-	# /.../
-	# params: device
-	# print the number of the first bootable partition on the
-	# given block device. If no partition is flagged as bootable,
-	# it prints 1.
-	# ----
-	local partition
-	for (( partition = 1; partition <= 4; partition++ ));do
-		if IsBootable "${1}" "${partition}";then
-			echo "${partition}"
-			return
-		fi
-	done
-	# No bootable partition found, select the first one
-	echo "1"
-}
-#======================================
-# searchImageCDMedia
-#--------------------------------------
-function searchImageCDMedia {
-	# /.../
-	# search for the first CD/DVD device which
-	# contains a KIWI image signature
-	# ----
-	local IFS
+	local mbrVID
+	local mbrIID
 	local count=0
-	#======================================
-	# lookup devices from hwinfo
-	#--------------------------------------
-	CDDevice
-	if [ -z "$cddev" ];then
-		return
+	mkdir -p /cdrom
+	if [ ! -f /boot/grub/mbrid ];then
+		systemException \
+			"Can't find MBR id file in initrd" \
+		"reboot"
 	fi
-	#======================================
-	# check device contents
-	#--------------------------------------
-	Echo -n "Checking CD/DVD device(s)..."
+	mbrIID=$(cat /boot/grub/mbrid)
+	Echo -n "Searching for boot device in Volume ID..."
+	udevPending
 	while true;do
-		IFS=":" ; for i in $cddev;do
-			cdopt=$(CDMountOption $i)
-			if [ -x /usr/bin/driveready ];then
-				driveready $i&& eval mount $cdopt -o ro $i /cdrom >/dev/null
-			else
-				eval mount $cdopt -o ro $i /cdrom >/dev/null
+		for i in /dev/*;do
+			if [ ! -b $i ];then
+				continue
 			fi
-			if [ -f $LIVECD_CONFIG ];then
-				cddev=$i; echo
-				umount $i &>/dev/null
-				return
+			mbrVID=$(
+				isoinfo -d -i $i 2>/dev/null | grep "Volume id:" | cut -f2 -d:
+			)
+			mbrVID=$(echo $mbrVID)
+			if [ "$mbrVID" = "$mbrIID" ];then
+				biosBootDevice=$i; echo; return 0
 			fi
-			umount $i &>/dev/null
 		done
-		if [ $count -eq 3 ]; then
-			break
-		else
-			echo -n .
-			sleep 1
+		if [ $count -eq 30 ];then
+			systemException \
+				"Failed to find MBR identifier !" \
+			"reboot"
 		fi
 		count=$(($count + 1))
+		echo -n .
+		sleep 1
 	done
-	unset cddev
-	echo "not found"
-}
-#======================================
-# searchImageUSBMedia
-#--------------------------------------
-function searchImageUSBMedia {
-	# /.../
-	# search for the first USB device which
-	# contains a KIWI image signature
-	# ----
-	USBStickDevice
-	Echo -n "Checking USB device(s)..."
-	if [ ! $stickFound = 0 ];then
-		cddev=$stickDevice; echo
-		return
-	fi
-	echo "not found"
-}
-#======================================
-# searchImageHybridMedia
-#--------------------------------------
-function searchImageHybridMedia {
-	# /.../
-	# search for the first disk device which
-	# contains a KIWI image signature
-	# ----
-	local ecode
-	local hddev
-	#======================================
-	# check for hybrid configuration
-	#--------------------------------------
-	if [ -z "$kiwi_hybrid" ];then
-		return
-	fi
-	#======================================
-	# check for hybrid mbr ID
-	#--------------------------------------
-	searchBIOSBootDevice
-	ecode=$?
-	Echo -n "Checking Hybrid disk device(s)..."
-	if [ ! $ecode = 0 ];then
-		if [ $ecode = 2 ];then
-			systemException "$biosBootDevice" "reboot"
-		fi
-		echo "not found"
-		return
-	fi
-	#======================================
-	# check image signature
-	#--------------------------------------
-	hddev=$(ddn "${biosBootDevice}" "$(GetBootable "${biosBootDevice}")")
-	kiwiMount "$hddev" "/cdrom" "-o ro"
-	if [ -f $LIVECD_CONFIG ];then
-		cddev=$hddev; echo
-		umount $cddev &>/dev/null
-		return
-	fi
-	umount $hddev &>/dev/null
-	echo "not found"
-}
-#======================================
-# CDMount
-#--------------------------------------
-function CDMount {
-	# /.../
-	# search all CD/DVD drives and use the one we can find
-	# the CD configuration on. This also includes hybrid
-	# devices which appears as a disk
-	# ----
-	local mode=$1
-	mkdir -p /cdrom
-	#======================================
-	# 1) CD/DVD devices
-	#--------------------------------------
-	searchImageCDMedia
-	if [ ! -z "$cddev" ];then
-		eval mount $cdopt -o ro $cddev /cdrom 1>&2
-		if [ "$mode" = "install" ];then
-			# /.../
-			# if we found an install CD/DVD any disk device
-			# is free to serve as install target
-			# ----
-			unset imageDiskDevice
-		fi
-		return
-	fi
-	#======================================
-	# 2) hybrid disk devices
-	#--------------------------------------
-	searchImageHybridMedia
-	if [ ! -z "$cddev" ];then
-		setupHybridPersistent
-		kiwiMount "$cddev" "/cdrom" "-o ro" 1>&2
-		return
-	fi
-	#======================================
-	# Bad news
-	#--------------------------------------
-	systemException \
-		"Couldn't find Live image configuration file" \
-	"reboot"
 }
 #======================================
 # runMediaCheck
@@ -3473,11 +3301,8 @@ function runMediaCheck {
 	# /.../
 	# run checkmedia program on the specified device
 	# ----
-	if [ ! "$mediacheck" = 1 ]; then
-		return
-	fi
 	test -e /proc/splash && echo verbose > /proc/splash
-	checkmedia $cddev
+	checkmedia $biosBootDevice
 	Echo -n "Press ENTER for reboot: "; read nope
 	/sbin/reboot -f -i >/dev/null
 }
@@ -3491,15 +3316,16 @@ function setupHybridPersistent {
 	# ----
 	local protectedDevice
 	local protectedDisk
+	if [ ! "$kiwi_hybridpersistent" = "yes" ];then
+		return
+	fi
 	#======================================
 	# create write partition for hybrid
 	#--------------------------------------
-	if [ "$kiwi_hybridpersistent" = "yes" ];then
-		protectedDevice=$(echo $biosBootDevice | sed -e s@/dev/@@)
-		protectedDisk=$(cat /sys/block/$protectedDevice/ro)
-		if [ $protectedDisk = "0" ];then
-			createHybridPersistent $biosBootDevice
-		fi
+	protectedDevice=$(echo $biosBootDevice | sed -e s@/dev/@@)
+	protectedDisk=$(cat /sys/block/$protectedDevice/ro)
+	if [ $protectedDisk = "0" ];then
+		createHybridPersistent $biosBootDevice
 	fi
 	#======================================
 	# store hybrid write partition device
@@ -3513,13 +3339,13 @@ function CDUmount {
 	# /.../
 	# umount the CD device
 	# ----
-	umount $cddev
+	umount $biosBootDevice
 }
 #======================================
 # CDEject
 #--------------------------------------
 function CDEject {
-	eject $cddev
+	eject $biosBootDevice
 }
 #======================================
 # searchOFBootDevice

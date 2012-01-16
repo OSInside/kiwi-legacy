@@ -81,6 +81,7 @@
 		<package name="make"/>
 		<package name="memtest86+"/>
 		<package name="module-init-tools"/>
+		<package name="mkisofs"/>
 		<package name="net-tools"/>
 		<package name="netcfg"/>
 		<package name="openssl"/>
