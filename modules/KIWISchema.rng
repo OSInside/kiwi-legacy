@@ -1982,6 +1982,17 @@ only images respectively for the pxe or cpio type</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
+    <define name="k.type.devicepersistency.attribute">
+      <attribute name="devicepersistency">
+        <a:documentation>Specifies which method to use in order to get persistent
+storage device names. By default by-id is used.</a:documentation>
+        <choice>
+          <value>by-uuid</value>
+          <value>by-label</value>
+          <value>by-path</value>
+        </choice>
+      </attribute>
+    </define>
     <define name="k.type.filesystem.attribute">
       <attribute name="filesystem">
         <a:documentation>Specifies the filesystem which can be one of:
@@ -2188,6 +2199,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.compressed.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.devicepersistency.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.filesystem.attribute"/>

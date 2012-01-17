@@ -5650,8 +5650,8 @@ function getDiskID {
 		echo $device
 		return
 	fi
-	if [ ! -z "$USE_BY_UUID_DEVICE_NAMES" ];then
-		prefix=by-uuid
+	if [ ! -z "$kiwi_devicepersistency" ];then
+		prefix=$kiwi_devicepersistency
 	fi
 	for i in /dev/disk/$prefix/*;do
 		if [ -z "$i" ];then

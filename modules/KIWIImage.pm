@@ -213,6 +213,9 @@ sub updateDescription {
 	if ($src_type{bootloader}) {
 		$changeset{"bootloader"} = $src_type{bootloader};
 	}
+	if ($src_type{devicepersistency}) {
+		$changeset{"devicepersistency"} = $src_type{devicepersistency};
+	}
 	if ($src_type{installboot}) {
 		$changeset{"installboot"} = $src_type{installboot};
 	}

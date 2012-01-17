@@ -1474,6 +1474,10 @@ div {
 		## compressed or not. This makes only sense for filesystem
 		## only images respectively for the pxe or cpio type
 		attribute compressed { xsd:boolean }
+	k.type.devicepersistency.attribute =
+		## Specifies which method to use in order to get persistent
+		## storage device names. By default by-id is used.
+		attribute devicepersistency { "by-uuid" | "by-label" | "by-path" }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
 		## btrfs, clicfs, ext2, ext3, ext4, reiserfs, squashfs, or xfs
@@ -1575,6 +1579,7 @@ div {
 		k.type.boottimeout.attribute? &
 		k.type.checkprebuilt.attribute? &
 		k.type.compressed.attribute? &
+		k.type.devicepersistency.attribute? &
 		k.type.filesystem.attribute? &
 		k.type.flags.attribute? &
 		k.type.format.attribute? &

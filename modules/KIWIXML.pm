@@ -2456,6 +2456,9 @@ sub getImageConfig {
 	if ((%type) && ($type{bootloader})) {
 		$result{kiwi_bootloader} = $type{bootloader};
 	}
+	if ((%type) && ($type{devicepersistency})) {
+		$result{kiwi_devicepersistency} = $type{devicepersistency};
+	}
 	if ((%type) && (defined $type{boottimeout})) {
 		$result{KIWI_BOOT_TIMEOUT} = $type{boottimeout};
 	}
@@ -4832,6 +4835,11 @@ sub __updateDescriptionFromChangeSet {
 			"bootloader",$changeset->{"bootloader"}
 		);
 	}
+	if (defined $changeset->{"devicepersistency"}) {
+		$this -> __setTypeAttribute (
+			"devicepersistency",$changeset->{"devicepersistency"}
+		);
+	}
 	if (defined $changeset->{"installboot"}) {
 		$this -> __setTypeAttribute (
 			"installboot",$changeset->{"installboot"}
@@ -5347,6 +5355,8 @@ sub __populateTypeInfo {
 				-> getAttribute("vga");
 			$record{bootloader}    = $node
 				-> getAttribute("bootloader");
+			$record{devicepersistency} = $node
+				-> getAttribute("devicepersistency");
 			$record{boottimeout}   = $node
 				-> getAttribute("boottimeout");
 			$record{installboot}   = $node
