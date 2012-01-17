@@ -1,6 +1,6 @@
 #!/bin/bash
 #================
-# FILE          : preinit
+# FILE          : config.sh
 #----------------
 # PROJECT       : OpenSuSE KIWI Image System
 # COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
@@ -9,48 +9,39 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : This file is called after the image root
-#               : has changed by the linuxrc script
+# DESCRIPTION   : configuration script for SUSE based
+#               : operating systems
+#               :
 #               :
 # STATUS        : BETA
 #----------------
 #======================================
 # Functions...
 #--------------------------------------
-. /include
+test -f /.kconfig && . /.kconfig
+test -f /.profile && . /.profile
 
 #======================================
-# 1) start error log
+# Greeting...
 #--------------------------------------
-Echo "Calling pre-init stage in system image"
-errorLogStart
+echo "Configure image: [$kiwi_iname]..."
 
 #======================================
-# 2) update auth config 
+# Keep UTF-8 locale
 #--------------------------------------
-authconfig --updateall
+baseStripLocales \
+	$(for i in $(echo $kiwi_language | tr "," " ");do echo -n "$i.utf8 ";done)
+baseStripTranslations kiwi.mo
+
 
 #======================================
-# 3) update mount table
+# Setup link for the grub stage files
 #--------------------------------------
-updateMTAB
+baseSetupBootLoaderCompatLinks
 
 #======================================
-# 4) setup console
+# Umount kernel filesystems
 #--------------------------------------
-setupConsole
+baseCleanMount
 
-#======================================
-# 5) create framebuffer devices
-#--------------------------------------
-createFramebufferDevices
-
-#======================================
-# 6) create origin snapshot if possible
-#--------------------------------------
-createOriginSnapshot
-
-#======================================
-# 7) clean mount
-#--------------------------------------
-umountSystemFilesystems
+exit 0

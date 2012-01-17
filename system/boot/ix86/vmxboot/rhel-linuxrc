@@ -132,37 +132,46 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	fi
 	export imageDiskDevice=$biosBootDevice
 else
+	waitForStorageDevice $disk
 	export imageDiskDevice=$(dn $disk)
 fi
 Echo "Found boot device: $imageDiskDevice"
 
 #======================================
-# 9) Setup device names...
+# 9) Setup device names a)...
 #--------------------------------------
-export imageRootDevice=$(ddn $imageDiskDevice 1)
-export imageRWDevice=$(ddn $imageDiskDevice 2)
-if [ ! -z "$kiwi_ramonly" ];then
-	export imageRWDevice=/dev/ram1
-fi
-export imageRODevice=$(ddn $imageDiskDevice 1)
 if [ -z "$imageDiskDevice" ];then
 	systemException \
 		"Couldn't find any boot device... abort" \
 	"reboot"
 fi
+#======================================
+# 9) Setup device names b)...
+#--------------------------------------
 if searchVolumeGroup; then
 	export haveLVM=yes
+	export imageBootDevice=$(ddn $imageDiskDevice 1)
 	if [ -e /dev/$VGROUP/LVComp ];then
 		export imageRootDevice=/dev/$VGROUP/LVComp
+		export imageRWDevice=/dev/$VGROUP/LVRoot
+		export imageRODevice=/dev/$VGROUP/LVComp
 	else
 		export imageRootDevice=/dev/$VGROUP/LVRoot
 	fi
-	export imageRWDevice=/dev/$VGROUP/LVRoot
-	if [ ! -z "$kiwi_ramonly" ];then
-		export imageRWDevice=/dev/ram1
-	fi
-	export imageRODevice=/dev/$VGROUP/LVComp
+else
+	export imageRootDevice=$(ddn $imageDiskDevice 1)
 	export imageBootDevice=$(ddn $imageDiskDevice 1)
+	export imageRODevice=$(ddn $imageDiskDevice 2)
+	if [ -e $imageRODevice ];then
+		export imageRWDevice=$(ddn $imageDiskDevice 3)
+		export imageRootDevice=$(ddn $imageDiskDevice 2)
+	fi
+fi
+#======================================
+# 9) Setup device names c)...
+#--------------------------------------
+if [ ! -z "$kiwi_ramonly" ];then
+	export imageRWDevice=/dev/ram1
 fi
 
 #======================================
@@ -236,9 +245,10 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	fi
 	if [ ! -z "$COMBINED_IMAGE" ]; then
 		export KIWI_INITRD_PARAMS="COMBINED_IMAGE=local"
+		updateSplitBootDeviceFstab /config $imageBootDevice
 	fi
 	setupBootLoader /mnt /config $(($bootid - 1)) $imageRootDevice VMX
-	# FIXME: 'setupKernelModules /config' does not work on RHEL
+	setupKernelModules /config
 fi
 
 #======================================
