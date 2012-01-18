@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.3" name="LimeJeOS-RHEL-06.0">
+<image schemaversion="5.3" name="LimeJeOS-RHEL-06.2">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@suse.com</contact>
@@ -36,7 +36,7 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="rpm-md">
-		<source path="iso:///image/CDs/RHEL-6.0-%arch-DVD.iso/Server"/>
+		<source path="iso:///image/CDs/RHEL-6.2-%arch-DVD.iso/Server"/>
 	</repository>
 	<repository type="rpm-md">
 		<source path="obs://Virtualization:/Appliances:/rhel-060/RedHat_RHEL-6"/>
@@ -91,8 +91,8 @@
 		<package name="vim-enhanced"/>
 		<package name="vim-minimal"/>
 		<package name="w3m"/>
-		<rhelGroup name="System Tools"/>
-		<rhelGroup name="Text-based Internet"/>
+		<rhelGroup name="Base"/>
+		<rhelGroup name="Console internet tools"/>
 		<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>
 		<package name="redhat-logos" bootinclude="true" bootdelete="true"/>
 	</packages>
