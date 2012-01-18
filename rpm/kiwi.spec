@@ -544,6 +544,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image/oemboot
 %doc %{_datadir}/kiwi/image/oemboot/README
 %{_datadir}/kiwi/image/oemboot/suse*
+%ifarch %ix86 x86_64
+%{_datadir}/kiwi/image/oemboot/rhel*
+%endif
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
