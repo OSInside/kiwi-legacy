@@ -44,7 +44,6 @@
 		<file name="drivers/net/*"/>
 		<file name="drivers/parport/*"/>
 		<file name="drivers/scsi/*"/>
-		<file name="drivers/staging/hv/*"/>
 		<file name="drivers/thermal/*"/>
 		<file name="drivers/usb/*"/>
 		<file name="drivers/virtio/*"/>
