@@ -561,13 +561,15 @@ sub __setupRepoMounts {
 			#==========================================
 			# iso:// sources
 			#------------------------------------------
-			if ($source =~ /^iso:\/\/(.*)/) {
+			if ($source =~ /^iso:\/\/(.*\.iso)/) {
 				my $iso  = $1;
+				if (! -f $iso) {
+					return \@mountPnts;
+				}
 				my $dir  = $uhash->{$source};
 				my $data = qxx ("mkdir -p $dir; mount -o loop $iso $dir 2>&1");
 				my $code = $? >> 8;
 				if ($code != 0) {
-					$kiwi -> failed ();
 					$kiwi -> error  ("Failed to loop mount ISO path: $data");
 					$kiwi -> failed ();
 					rmdir $dir;
