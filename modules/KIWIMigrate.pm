@@ -187,7 +187,9 @@ sub new {
 		'\/etc\/udev\/rules.d',         # no udev rules
 		'\/media\/',                    # no media automount files
 		'\/lost\+\/found',              # no filesystem specific files
-		'\/var\/lib\/hardware\/'        # no hwinfo hardware files
+		'\/var\/lib\/hardware\/',       # no hwinfo hardware files
+		'\/var\/cache\/',               # no cache files
+		'\/var\/db\/'                   # no db caches
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
@@ -617,7 +619,7 @@ sub createReport {
 					my $target = readlink $file;
 					print $ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
 					print $ND '<dd class="file">';
-					print $ND "link to -> ".$target;
+					print $ND "link to ".$target;
 					print $ND '</dd>'."\n";
 					print $ND '<dd class="file"/>'."\n";
 				} else {
@@ -679,7 +681,6 @@ sub createReport {
 # generateWanted
 #------------------------------------------
 sub generateWanted {
-	# unpackaged files in packaged directories...
 	my $filehash = shift;
 	return sub {
 		my $file = $File::Find::name;
@@ -1133,7 +1134,7 @@ sub getPackageList {
 	#------------------------------------------
 	if (@urllist) {
 		$kiwi -> info ("Creating System solvable from active repos...\n");
-		my @list = qxx ("zypper --no-refresh patterns --installed 2>&1");
+		my @list = qxx ("zypper -n --no-refresh patterns --installed 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -1357,8 +1358,9 @@ sub setSystemOverlayFiles {
 				$base = "$dirn/$name";
 				$base =~ s/\/+/\//g;
 				$base =~ s/^\///;
+				next if $base eq './';
 				push @rpm_file,$base;
-				push @rpm_dir,$base;
+				push @rpm_dir ,$base;
 			} elsif ($dir =~ /.*?\/(.*?)( -> .*)?$/) {
 				my $base = $1;
 				my $name = basename $base;
@@ -1367,6 +1369,7 @@ sub setSystemOverlayFiles {
 				$base = "$dirn/$name";
 				$base =~ s/\/+/\//g;
 				$base =~ s/^\///;
+				next if $base eq './';
 				push @rpm_file,$base;
 			}
 		}
@@ -1375,13 +1378,12 @@ sub setSystemOverlayFiles {
 		my %dirs_cmp;
 		@file_rpm{map {$_ = "/$_"} @rpm_file} = ();
 		@dirs_rpm{map {$_ = "/$_"} @rpm_dir}  = ();
-		$dirs_cmp{"/"} = undef;
 		foreach my $dir (sort keys %dirs_rpm) {
 			while ($dir =~ s:/[^/]+$::) {
-				$dirs_cmp{$dir} = undef;
+				undef $dirs_cmp{$dir};
 			}
 		}
-		
+		# search for unpackaged files in packaged directories...
 		my $wref = generateWanted (\%result);
 		find({ wanted => $wref, follow => 0 }, sort keys %dirs_rpm);
 		foreach my $file (sort keys %result) {
@@ -1389,7 +1391,7 @@ sub setSystemOverlayFiles {
 				delete $result{$file};
 			}
 		}
-		# unpackaged directories...
+		# search for unpackaged directories...
 		foreach my $dir (sort keys %dirs_cmp) {
 			my $FH;	opendir $FH,$dir;
 			while (my $f = readdir $FH) {
@@ -1415,7 +1417,12 @@ sub setSystemOverlayFiles {
 	#------------------------------------------
 	foreach my $file (sort keys %result) {
 		my $ok = 1;
-		foreach my $exp (@deny) {
+		# /.../
+		# /etc is used completely in later overlay tree
+		# so make sure it will not appear in the unpackaged
+		# files html information
+		# ----
+		foreach my $exp ((@deny,'\/etc\/')) {
 			if ($file =~ /$exp/) {
 				$ok = 0; last;
 			}
