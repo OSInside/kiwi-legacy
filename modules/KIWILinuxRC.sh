@@ -3302,9 +3302,13 @@ function runMediaCheck {
 	# run checkmedia program on the specified device
 	# ----
 	test -e /proc/splash && echo verbose > /proc/splash
-	checkmedia $biosBootDevice
-	Echo -n "Press ENTER for reboot: "; read nope
-	/sbin/reboot -f -i >/dev/null
+	if ! checkmedia $biosBootDevice;then
+		Echo "ISO check failed, you have been warned"
+	else
+		Echo "ISO check passed"
+	fi
+	Echo "Press any key to continue: "
+	read
 }
 #======================================
 # setupHybridFeatures
