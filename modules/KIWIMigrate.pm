@@ -189,7 +189,10 @@ sub new {
 		'\/lost\+\/found',              # no filesystem specific files
 		'\/var\/lib\/hardware\/',       # no hwinfo hardware files
 		'\/var\/cache\/',               # no cache files
-		'\/var\/db\/'                   # no db caches
+		'\/var\/db\/',                  # no db caches
+		'\/usr\/share\/doc\/',          # no documentation
+		'\/ruby\/gems\/.*\/doc\/',      # no ruby gem documentation
+		'\/usr\/share\/mime\/'          # no mime types
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
@@ -344,6 +347,32 @@ sub createReport {
 		print $FD '</tr>'."\n";
 	}
 	print $FD '</table>'."\n";
+	#==========================================
+	# GEM packages report
+	#------------------------------------------
+	if (-x "/usr/bin/gem") {
+		my @gems;
+		print $FD '<h1>Installed GEM packages </h1>'."\n";
+		print $FD '<p>'."\n";
+		print $FD 'The table below shows GEM packages installed locally. ';
+		print $FD 'In order to migrate them correctly make sure you either ';
+		print $FD 'have the corresponding rpm package for this gem in your ';
+		print $FD 'kiwi packages list or implement a mechanism to let the ';
+		print $FD 'gem package manager install this software ';
+		print $FD '</p>'."\n";
+		print $FD '<hr>'."\n";
+		print $FD '<table>'."\n";
+		for (qxx ( "gem list --local" )) {
+			chomp;
+			push (@gems,$_);
+		}
+		foreach my $item (sort @gems) {
+			print $FD '<tr valign="top">'."\n";
+			print $FD '<td>'.$item.'</td>'."\n";
+			print $FD '</tr>'."\n";
+		}
+		print $FD '</table>'."\n";
+	}
 	#==========================================
 	# Package/Pattern report
 	#------------------------------------------
@@ -1340,7 +1369,7 @@ sub setSystemOverlayFiles {
 	#==========================================
 	# Find files/directories not packaged
 	#------------------------------------------
-	$kiwi -> info ("Inspecting RPM database [unpackaged files]...");
+	$kiwi -> info ("Inspecting package database(s) [unpackaged files]...");
 	if ($cache) {
 		%result = %{$cdata->{result}};
 		$kiwi -> done();
@@ -1349,6 +1378,7 @@ sub setSystemOverlayFiles {
 		chomp @rpmcheck;
 		my @rpm_dir  = ();
 		my @rpm_file = ();
+		# lookup rpm database files...
 		foreach my $dir (@rpmcheck) {
 			if ($dir =~ /^d.*?\/(.*)$/) {
 				my $base = $1;
@@ -1371,6 +1401,21 @@ sub setSystemOverlayFiles {
 				$base =~ s/^\///;
 				next if $base eq './';
 				push @rpm_file,$base;
+			}
+		}
+		# fake gem contents as rpm files...
+		if (-x "/usr/bin/gem") {
+			my @gemcheck = qxx ("gem contents --all");
+			chomp @gemcheck;
+			foreach my $item (@gemcheck) {
+				my $name = basename $item;
+				my $dirn = dirname  $item;
+				$dirn = abs_path ("/$dirn");
+				my $base = "$dirn/$name";
+				$base =~ s/\/+/\//g;
+				$base =~ s/^\///;
+				push @rpm_file,$base;
+				push @rpm_dir ,$dirn;
 			}
 		}
 		my %file_rpm;
