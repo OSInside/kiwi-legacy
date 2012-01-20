@@ -31,7 +31,7 @@ use File::Copy;
 use Storable;
 use File::Spec;
 use Fcntl ':mode';
-use Cwd 'abs_path';
+use Cwd qw (abs_path cwd);
 #==========================================
 # KIWI Modules
 #------------------------------------------
@@ -192,7 +192,9 @@ sub new {
 		'\/var\/db\/',                  # no db caches
 		'\/usr\/share\/doc\/',          # no documentation
 		'\/ruby\/gems\/.*\/doc\/',      # no ruby gem documentation
-		'\/usr\/share\/mime\/'          # no mime types
+		'\/usr\/share\/mime\/',         # no mime types
+		'\/lost\+found',                # no fs inode backup
+		'\/icons'                       # no icon directories
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
@@ -252,6 +254,7 @@ sub createReport {
 	my $failedJob1 = $this->{solverFailedJobs1};
 	my $failedJob2 = $this->{solverFailedJobs2};
 	my $nopackage  = $this->{nopackage};
+	my $repos      = $this->{repos};
 	my $twice      = $this->{twice};
 	#==========================================
 	# Beautify report...
@@ -347,6 +350,30 @@ sub createReport {
 		print $FD '</tr>'."\n";
 	}
 	print $FD '</table>'."\n";
+	#==========================================
+	# Local repository checkout(s)
+	#------------------------------------------
+	if ($repos) {
+		print $FD '<h1>Local repository checkout paths </h1>'."\n";
+		print $FD '<p>'."\n";
+		print $FD 'The table below shows the local paths which belongs ';
+		print $FD 'to source control systems like git. It is assumed ';
+		print $FD 'that this data can be restored from a central place ';
+		print $FD 'and thus the data there is not part of the unpackaged ';
+		print $FD 'files tree. Please check whether the repository can ';
+		print $FD 'be cloned from a central storage or include the data ';
+		print $FD 'in the overlay tree';
+		print $FD '</p>'."\n";
+		print $FD '<hr>'."\n";
+		print $FD '<table>'."\n";
+		foreach my $repo (keys %{$repos}) {
+			print $FD '<tr valign="top">'."\n";
+			print $FD '<td>'.$repo.'</td>'."\n";
+			print $FD '<td> type: '.$repos->{$repo}.'</td>'."\n";
+			print $FD '</tr>'."\n";
+		}
+		print $FD '</table>'."\n";
+	}
 	#==========================================
 	# GEM packages report
 	#------------------------------------------
@@ -1410,11 +1437,9 @@ sub setSystemOverlayFiles {
 			foreach my $item (@gemcheck) {
 				my $name = basename $item;
 				my $dirn = dirname  $item;
-				$dirn = abs_path ("/$dirn");
-				my $base = "$dirn/$name";
-				$base =~ s/\/+/\//g;
-				$base =~ s/^\///;
-				push @rpm_file,$base;
+				$name =~ s/^\///;
+				$dirn =~ s/^\///;
+				push @rpm_file,$dirn."/".$name;
 				push @rpm_dir ,$dirn;
 			}
 		}
@@ -1423,17 +1448,45 @@ sub setSystemOverlayFiles {
 		my %dirs_cmp;
 		@file_rpm{map {$_ = "/$_"} @rpm_file} = ();
 		@dirs_rpm{map {$_ = "/$_"} @rpm_dir}  = ();
+		$dirs_cmp{"/"} = undef;
 		foreach my $dir (sort keys %dirs_rpm) {
 			while ($dir =~ s:/[^/]+$::) {
-				undef $dirs_cmp{$dir};
+				$dirs_cmp{$dir} = undef;
 			}
 		}
-		# search for unpackaged files in packaged directories...
+		# search files in packaged directories...
 		my $wref = generateWanted (\%result);
 		find({ wanted => $wref, follow => 0 }, sort keys %dirs_rpm);
+
+		# search for unpacked symlinks whose origin is packaged
+		my $work = cwd();
+		foreach my $file (sort keys %result) {
+			if (-l $file) {
+				my $origin = readlink $file;
+				my $dirn = dirname $file;
+				my $path = $dirn."/".$origin;
+				my $base = basename $path;
+				$dirn = dirname $path;
+				# FIXME: path resolution should be done much better
+				chdir $dirn;
+				$dirn = cwd();
+				$path = $dirn."/".$base;
+				if (exists $result{$path}) {
+					delete $result{$file};
+				}
+			}
+		}
+		chdir $work;
+
+		# search for unpackaged files in packaged directories...
 		foreach my $file (sort keys %result) {
 			if (exists $file_rpm{$file}) {
 				delete $result{$file};
+			}
+		}
+		foreach my $dir (sort keys %dirs_rpm) {
+			if (exists $result{$dir}) {
+				delete $result{$dir};
 			}
 		}
 		# search for unpackaged directories...
@@ -1458,6 +1511,25 @@ sub setSystemOverlayFiles {
 		$kiwi -> done ();
 	}
 	#==========================================
+	# add custom deny rules
+	#------------------------------------------
+	# we use all /etc as overlay files later
+	my @custom_deny = ('^\/etc\/');
+	
+	#==========================================
+	# check for local repository checkouts
+	#------------------------------------------
+	# find git repo checkout path and add deny rule for it
+	my %repos = ();
+	foreach my $file (sort keys %result) {
+		if ($file =~ /.git$/) {
+			my $dir = $file;
+			$dir =~ s/\/\.git$//;
+			push @custom_deny,'^'.$dir;
+			$repos{$dir} = "git";
+		}
+	}
+	#==========================================
 	# apply deny files on result hash
 	#------------------------------------------
 	foreach my $file (sort keys %result) {
@@ -1467,7 +1539,7 @@ sub setSystemOverlayFiles {
 		# so make sure it will not appear in the unpackaged
 		# files html information
 		# ----
-		foreach my $exp ((@deny,'\/etc\/')) {
+		foreach my $exp ((@deny,@custom_deny)) {
 			if ($file =~ /$exp/) {
 				$ok = 0; last;
 			}
@@ -1510,6 +1582,7 @@ sub setSystemOverlayFiles {
 	# Store in instance for report
 	#------------------------------------------
 	$this->{nopackage} = \%result;
+	$this->{repos} = \%repos;
 	return $this;
 }
 
