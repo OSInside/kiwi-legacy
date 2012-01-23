@@ -1,3 +1,10 @@
 # test timestamp files
 *.ts
 tests/.timestamps
+# emacs backup files
+*~
+# localization files
+*.mo
+*.op.*.old
+# hidden temporary files
+.tmp.*
