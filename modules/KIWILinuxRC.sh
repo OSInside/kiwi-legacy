@@ -92,29 +92,22 @@ fi
 function Dialog {
 	local code=1
 	export DIALOG_CANCEL=1
-	if [ -e /dev/fb0 ];then
-		cat > /tmp/fbcode <<- EOF
-			dialog \
-				--ok-label "$TEXT_OK" \
-				--cancel-label "$TEXT_CANCEL" \
-				--yes-label "$TEXT_YES" \
-				--no-label "$TEXT_NO" \
-				--exit-label "$TEXT_EXIT" \
-				$@
-			echo \$? > /tmp/fbcode
-EOF
-		fbiterm -m $UFONT -- bash /tmp/fbcode
-		code=$(cat /tmp/fbcode)
-	else
-		eval dialog \
+	cat > /tmp/fbcode <<- EOF
+		dialog \
 			--ok-label "$TEXT_OK" \
 			--cancel-label "$TEXT_CANCEL" \
 			--yes-label "$TEXT_YES" \
 			--no-label "$TEXT_NO" \
 			--exit-label "$TEXT_EXIT" \
 			$@
-		code=$?
+		echo \$? > /tmp/fbcode
+EOF
+	if [ -e /dev/fb0 ] && which fbiterm &>/dev/null;then
+		fbiterm -m $UFONT -- bash -e /tmp/fbcode
+	else
+		bash -e /tmp/fbcode
 	fi
+	code=$(cat /tmp/fbcode)
 	return $code
 }
 #======================================
@@ -5500,9 +5493,8 @@ function fetchFile {
 			--backtitle \"$TEXT_INSTALLTITLE\" \
 			--progressbox 3 65
 		" > /tmp/progress.sh
-		if [ -e /dev/fb0 ];then
-			fbiterm -m $UFONT -- bash -e /tmp/progress.sh || \
-			bash -e /tmp/progress.sh
+		if [ -e /dev/fb0 ] && which fbiterm &>/dev/null;then
+			fbiterm -m $UFONT -- bash -e /tmp/progress.sh
 		else
 			bash -e /tmp/progress.sh
 		fi
@@ -6548,7 +6540,7 @@ function runInteractive {
 	local code
 	echo "dialog $@ > /tmp/out" > $r
 	echo "echo -n \$? > /tmp/out.exit" >> $r
-	if [ -e /dev/fb0 ];then
+	if [ -e /dev/fb0 ] && which fbiterm &>/dev/null;then
 		setctsid $ELOG_EXCEPTION fbiterm -m $UFONT -- bash -i $r
 	else
 		setctsid $ELOG_EXCEPTION bash -i $r
