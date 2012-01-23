@@ -1976,7 +1976,7 @@ sub setupBootDisk {
 		# set root device name from deviceMap
 		#------------------------------------------
 		$root = $deviceMap{1};
-		if ($needBootP) {
+		if (($needBootP) && (! $lvm)) {
 			$root = $deviceMap{2};
 		}
 		#==========================================
