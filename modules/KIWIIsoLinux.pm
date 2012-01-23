@@ -10,7 +10,7 @@
 #               :
 # DESCRIPTION   : This module is used to create an ISO
 #               : filesystem based on genisoimage/mkisofs
-#               : 
+#               :
 #               :
 # STATUS        : Development
 #----------------
@@ -774,9 +774,9 @@ sub createHybrid {
 		return undef;
 	}
 	if ($mbrid) {
-		$data = qxx ("isohybrid -id $mbrid -type 0x83 $iso 2>&1");
+		$data = qxx ("isohybrid -id $mbrid -type 0x83 -o 64 $iso 2>&1");
 	} else {
-		$data = qxx ("isohybrid $iso 2>&1");
+		$data = qxx ("isohybrid -o 64 $iso 2>&1");
 	}
 	$code = $? >> 8;
 	if ($code != 0) {
