@@ -36,7 +36,7 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="rpm-md">
-		<source path="iso:///image/CDs/RHEL-6.2-%arch-DVD.iso/Server"/>
+		<source path="iso:///image/CDs/RHEL-6.2-%arch-DVD.iso"/>
 	</repository>
 	<repository type="rpm-md">
 		<source path="obs://Virtualization:/Appliances:/rhel-060/RedHat_RHEL-6"/>
@@ -83,7 +83,6 @@
 		<package name="redhat-release-server"/>
 		<package name="rpm"/>
 		<package name="screen"/>
-		<package name="selinux-policy-devel"/>
 		<package name="selinux-policy-targeted"/>
 		<package name="sysfsutils"/>
 		<package name="tar"/>
@@ -93,7 +92,8 @@
 		<package name="w3m"/>
 		<rhelGroup name="Base"/>
 		<rhelGroup name="Console internet tools"/>
-		<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>
+		<!-- gfxmenu not supported by rhel6 grub -->
+		<!--<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>-->
 		<package name="redhat-logos" bootinclude="true" bootdelete="true"/>
 	</packages>
 	<packages type="bootstrap">
