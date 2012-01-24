@@ -42,7 +42,7 @@ sub new
   # other init work:
   $this->{m_collect}	= shift;  # first and most important thing: store the caller object
   if(not defined($this->{m_collect})) {
-    return undef; # rock hard get outta here: caller must check retval anyway
+    return; # rock hard get outta here: caller must check retval anyway
   }
   #$this->{m_unitedir}	= $this->{m_collect}->unitedDir();
 
@@ -67,7 +67,7 @@ sub mediaName
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   my $oldname = $this->{m_medianame};
   if(@_) {
@@ -85,7 +85,7 @@ sub collect
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   return $this->{m_collect};
 }
@@ -99,7 +99,7 @@ sub baseurl
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   my $oldbaseurl = $this->{m_baseurl};
   if(@_) {
@@ -211,7 +211,7 @@ sub loadPlugin
     return $retval;
   }
 
-  eval "require $plugin";
+  eval "require $plugin"; ## no critic
   if($@) {
     $this->{m_collect}->logMsg("E", "loadPlugin: loading <$plugin> failed");
   }
@@ -242,7 +242,7 @@ sub _addPlugin
 {
   my $this = shift;
   if(not ref $this) {
-    return undef;
+    return;
   }
   my $retval = 0;
   my $plugin = shift;
@@ -277,17 +277,17 @@ sub getPlugin
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
 
   my $index = shift;
   if(not defined($index)) {
-    return undef;
+    return;
   }
   else {
     if(not defined($this->{m_handlers}->{$index})) {
       $this->collect()->logMsg("W", "no plugin defined with index <$index>\n");
-      return undef;
+      return;
     }
     else {
       return $this->{m_handlers}->{$index};
@@ -301,7 +301,7 @@ sub getPluginList
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
 
   return %{$this->{m_handlers}};
@@ -313,7 +313,7 @@ sub createMetadata
 {
   my $this = shift;
   if(not ref $this) {
-    return undef;
+    return;
   }
   my $retval = 0;
   # execute all registered and activated plugins:
@@ -334,7 +334,7 @@ sub enableAllPlugins
 {
   my $this = shift;
   if(not ref $this) {
-    return undef;
+    return;
   }
 
   foreach(values(%{$this->{m_handlers}})) {
@@ -348,12 +348,12 @@ sub enablePlugins
 {
   my $this = shift;
   if(not ref $this) {
-    return undef;
+    return;
   }
 
   my @enable = @_;
   if(not @enable) {
-    return undef;
+    return;
   }
 
   my $retval = 0; # number of enabled plugins

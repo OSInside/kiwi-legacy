@@ -10,7 +10,7 @@
 #               :
 # DESCRIPTION   : This module is used to initialize and install
 #               : the chroot system of the image
-#               : 
+#               :
 #               :
 # STATUS        : Development
 #----------------
@@ -74,28 +74,28 @@ sub new {
 	if (! defined $baseSystem) {
 		$kiwi -> error ("No base system path specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $xml) {
 		$kiwi -> error ("No XML tree specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! defined $imageDesc) {
 		$kiwi -> error ("No image path specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my %repository = $xml -> getRepository();
 	if (! %repository) {
 		$kiwi -> error ("No repository specified in XML tree");
 		$kiwi -> failed ();
-		return undef; 
+		return;
 	}
 	if (! $main::global) {
 		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my $count = 1;
 	my %sourceChannel = ();
@@ -209,7 +209,7 @@ sub new {
 		$kiwi -> error  ("No Channels left");
 		$kiwi -> failed ();
 		$this -> cleanMount();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Create root directory
@@ -222,7 +222,7 @@ sub new {
 		$kiwi -> error ("Couldn't create root directory: $!");
 		$kiwi -> failed ();
 		$this -> cleanMount();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check for overlay structure
@@ -230,11 +230,11 @@ sub new {
 	$this->{origtree}= $root;
 	$this->{overlay} = new KIWIOverlay ($kiwi,$root,$cacheRoot);
 	if (! $this->{overlay}) {
-		return undef;
+		return;
 	}
 	$root = $this->{overlay} -> mountOverlay();
 	if (! -d $root) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Mark new root directory as broken
@@ -258,7 +258,7 @@ sub new {
 	if (! defined $pmgr) {
 		$kiwi -> failed();
 		$this -> cleanMount();
-		return undef;
+		return;
 	}
 	$kiwi -> note ($pmgr);
 	$kiwi -> done ();
@@ -270,7 +270,7 @@ sub new {
 	);
 	if (! defined $manager) {
 		$this -> cleanMount();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Store object data
@@ -349,10 +349,10 @@ sub init {
 	my $imageVersion = $xml -> getImageVersion();
 	my $imageName    = $xml -> getImageName();
 	qxx ("mkdir -p $root/etc");
-	if ( ! open ($FD, ">$imageVersionFile")) {
+	if ( ! open ($FD, '>', "$imageVersionFile")) {
 		$kiwi -> error ("Failed to create version file: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	print $FD $imageName."-".$imageVersion;
 	close $FD;
@@ -379,7 +379,7 @@ sub init {
 	if (! @initPacs) {
 		$kiwi -> error ("Couldn't create base package list");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check and set lock
@@ -392,11 +392,11 @@ sub init {
 	$manager -> switchToLocal();
 	if (! $manager -> setupSignatureCheck()) {
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	if (! $manager -> setupExcludeDocs()) {
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	#==================================
 	# Copy/touch some defaults files
@@ -478,13 +478,13 @@ sub init {
 	if (! $manager -> setupInstallationSource()) {
 		$this -> cleanMount();
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	if (! $manager -> setupRootSystem(@initPacs)) {
 		$manager -> resetInstallationSource();
 		$this -> cleanMount();
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	#==========================================
 	# reset installation source
@@ -501,7 +501,7 @@ sub init {
 	# if (! $manager -> resetInstallationSource()) {
 	#	$this -> cleanMount();
 	#	$manager -> freeLock();
-	#	return undef;
+	#	return;
 	# }
 	#==========================================
 	# Reset preperation checks
@@ -509,21 +509,21 @@ sub init {
 	if (! $manager -> resetSignatureCheck()) {
 		$this -> cleanMount();
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	$this -> cleanMount('(cache\/(kiwi|zypp)$)|(dev$)');
 	$manager -> freeLock();
 	#==================================
 	# Create default fstab file
 	#----------------------------------
-	if ( ! open (FD,">$root/etc/fstab")) {
+	if ( ! open ($FD, '>', "$root/etc/fstab")) {
 		$kiwi -> error ("Failed to create fstab file: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
-	print FD "devpts /dev/pts devpts mode=0620,gid=5 0 0\n";
-	print FD "proc   /proc    proc   defaults        0 0\n";
-	close FD;
+	print $FD "devpts /dev/pts devpts mode=0620,gid=5 0 0\n";
+	print $FD "proc   /proc    proc   defaults        0 0\n";
+	close $FD;
 	#==================================
 	# Return object reference
 	#----------------------------------
@@ -551,7 +551,7 @@ sub upgrade {
 	if (! $this -> setupMount ()) {
 		$kiwi -> error ("Couldn't mount base system");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# make sure name resolution works
@@ -576,17 +576,17 @@ sub upgrade {
 	#------------------------------------------
 	if (! $manager -> setupSignatureCheck()) {
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	if (! $manager -> setupInstallationSource()) {
 		$this -> cleanupResolvConf();
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	if (! $manager -> setupUpgrade ($addPacks,$delPacks)) {
 		$this -> cleanupResolvConf();
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	# /.../
 	# In order to re-use an already downloaded metadata cache
@@ -600,7 +600,7 @@ sub upgrade {
 	# if (! $manager -> resetInstallationSource()) {
 	#	$this -> cleanupResolvConf();
 	#	$manager -> freeLock();
-	#	return undef;
+	#	return;
 	# }
 	$this -> cleanupResolvConf();
 	$manager -> freeLock();
@@ -622,7 +622,7 @@ sub prepareTestingEnvironment {
 	if (! $this -> setupMount ()) {
 		$kiwi -> error ("Couldn't mount base system");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# make sure name resolution works
@@ -648,7 +648,7 @@ sub prepareTestingEnvironment {
 	if (! $manager -> setupInstallationSource()) {
 		$this -> cleanupResolvConf();
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	$this -> cleanupResolvConf();
 	return $this;
@@ -673,7 +673,7 @@ sub cleanupTestingEnvironment {
 	# if (! $manager -> resetInstallationSource()) {
 	#	$this -> cleanupResolvConf();
 	#	$manager -> freeLock();
-	#	return undef;
+	#	return;
 	# }
 	$this -> cleanupResolvConf();
 	$manager -> freeLock();
@@ -707,7 +707,7 @@ sub installTestingPackages {
 	my $manager  = $this->{manager};
 	if (! $manager -> installPackages ($pack)) {
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -721,7 +721,7 @@ sub uninstallTestingPackages {
 	my $manager  = $this->{manager};
 	if (! $manager -> removePackages ($pack)) {
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -762,7 +762,7 @@ sub install {
 	if (! setupMount ($this)) {
 		$kiwi -> error ("Couldn't mount base system");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check and set lock
@@ -775,22 +775,22 @@ sub install {
 	$manager -> switchToChroot();
 	if (! $manager -> setupSignatureCheck()) {
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	if (! $manager -> setupExcludeDocs()) {
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Add source(s) and install
 	#------------------------------------------
 	if (! $manager -> setupInstallationSource()) {
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	if (! $manager -> setupRootSystem (@packList)) {
 		$manager -> freeLock();
-		return undef;
+		return;
 	}
 	#==========================================
 	# reset installation source
@@ -806,7 +806,7 @@ sub install {
 	# ----
 	# if (! $manager -> resetInstallationSource()) {
 	#	$manager -> freeLock();
-	#	return undef;
+	#	return;
 	# }
 	$manager -> freeLock();
 	return $this;
@@ -838,7 +838,7 @@ sub installArchives {
 	#------------------------------------------
 	$manager -> switchToLocal();
 	if (! $manager -> setupArchives($idesc,@archives)) {
-		return undef;
+		return;
 	}
 	#==========================================
 	# Check ownership of archive files
@@ -870,18 +870,7 @@ sub fixupOverlayFilesOwnership {
 		#==========================================
 		# got dir, search files there
 		#------------------------------------------
-		sub generateWanted {
-			my $result = shift;
-			my $base   = shift;
-			return sub {
-				my @names = ($File::Find::name,$File::Find::dir);
-				foreach my $name (@names) {
-					$name =~ s/^$base//; $name =~ s/^\///;
-					push @{$result},$name;
-				}
-			}
-		}
-		my $wref = generateWanted (\@files,$root);
+		my $wref = $this -> __generateWanted (\@files,$root);
 		find ({ wanted => $wref, follow => 0 }, $item);
 	} elsif (-f $item) {
 		#==========================================
@@ -897,12 +886,12 @@ sub fixupOverlayFilesOwnership {
 		} else {
 			$kiwi -> warning ("$prefix: Failed to open $item: $!");
 			$kiwi -> skipped ();
-			return undef;
+			return;
 		}
 	} else {
 		$kiwi -> warning ("$prefix: No such file or directory: $item");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# check file list
@@ -910,7 +899,7 @@ sub fixupOverlayFilesOwnership {
 	if (! @files) {
 		$kiwi -> warning ("$prefix: No files found in: $item");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# create passwd exception directories
@@ -919,7 +908,7 @@ sub fixupOverlayFilesOwnership {
 	if (! $fd -> open ($root."/etc/passwd")) {
 		$kiwi -> warning ("$prefix: No passwd file found in: $root");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	while (my $line = <$fd>) {
 		chomp $line;
@@ -992,7 +981,7 @@ sub setup {
 	if (! -d "$root/tmp") {
 		$kiwi -> error ("Image system seems to be broken");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#========================================
 	# copy license files if they exist
@@ -1024,7 +1013,7 @@ sub setup {
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
-			return undef;
+			return;
 		}
 		#========================================
 		# check tmproot ownership
@@ -1038,7 +1027,7 @@ sub setup {
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
-			return undef;
+			return;
 		}
 		#========================================
 		# cleanup tmproot
@@ -1050,25 +1039,26 @@ sub setup {
 	# create .profile from <image> tags
 	#----------------------------------------
 	$kiwi -> info ("Create .profile for package scripts");
-	if (! open (FD,">$root/.profile")) {
+	my $FD;
+	if (! open ($FD, '>', "$root/.profile")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create .profile: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	$kiwi -> done();
 	my %config = $xml -> getImageConfig();
 	foreach my $key (keys %config) {
 		$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
-		print FD "$key=\"$config{$key}\"\n";
+		print $FD "$key=\"$config{$key}\"\n";
 	}
-	close FD;
+	close $FD;
 	#========================================
 	# configure the system
 	#----------------------------------------
 	my $configure = new KIWIConfigure ( $kiwi,$xml,$root,$imageDesc );
 	if (! defined $configure) {
-		return undef;
+		return;
 	}
 	#========================================
 	# fixup quoting of .profile
@@ -1084,7 +1074,7 @@ sub setup {
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
-			return undef;
+			return;
 		}
 		qxx ("chmod u+x $root/linuxrc $root/init 2>&1");
 		$kiwi -> done ();
@@ -1096,14 +1086,14 @@ sub setup {
 		$kiwi -> info ("Preparing package setup scripts");
 		qxx (" mkdir -p $root/image/config ");
 		qxx (" cp $imageDesc/config/* $root/image/config 2>&1 ");
-		if (! opendir (FD,"$root/image/config")) {
+		if (! opendir ($FD,"$root/image/config")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't open script directory: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		$kiwi -> done();
-		my @scriptList = readdir FD;
+		my @scriptList = readdir $FD;
 		foreach my $script (@scriptList) {
 			if (-f "$root/image/config/$script") {
 				if ($manager -> setupPackageInfo ( $script )) {
@@ -1117,7 +1107,7 @@ sub setup {
 					$kiwi -> failed ();
 					$kiwi -> info   ($data);
 					$kiwi -> failed ();
-					return undef;
+					return;
 				} else {
 					$kiwi -> loginfo ("$script: $data");
 				}
@@ -1126,7 +1116,7 @@ sub setup {
 			}
 		}
 		rmdir ("$root/image/config");
-		closedir FD;
+		closedir $FD;
 	}
 	#========================================
 	# copy image description to image tree
@@ -1139,34 +1129,36 @@ sub setup {
 	qxx (" cp $root/.profile $root/image 2>&1 ");
 	qxx (" chmod u+x $root/image/images.sh 2>&1");
 	qxx (" chmod u+x $root/image/config-cdroot.sh 2>&1");
-	if (open (FD,">$root/image/main::Prepare")) {
+	if (open ($FD, '>', "$root/image/main::Prepare")) {
 		if ($imageDesc !~ /^\//) {
 			my $pwd = qxx (" pwd "); chomp $pwd;
-			print FD $pwd."/".$imageDesc; close FD;
+			print $FD $pwd."/".$imageDesc;
+			close $FD;
 		} else {
-			print FD $imageDesc; close FD;
+			print $FD $imageDesc;
+			close $FD;
 		}
 	}
 	#========================================
 	# setup users/groups
 	#----------------------------------------
 	if (! $configure -> setupUsersGroups()) {
-		return undef;
+		return;
 	}
 	#========================================
 	# check for yast firstboot setup file
 	#----------------------------------------
 	$status = $configure -> setupFirstBootYaST();
 	if ($status eq "failed") {
-		return undef;
+		return;
 	}
 	$status = $configure -> setupAutoYaST();
 	if ($status eq "failed") {
-		return undef;
+		return;
 	}
 	$status = $configure -> setupFirstBootAnaconda();
 	if ($status eq "failed") {
-		return undef;
+		return;
 	}
 	#========================================
 	# call config.sh image script
@@ -1180,7 +1172,7 @@ sub setup {
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
-			return undef;
+			return;
 		} else {
 			$kiwi -> loginfo ("config.sh: $data");
 		}
@@ -1193,13 +1185,14 @@ sub setup {
 	my $id = $xml -> getImageID();
 	if ($id) {
 		$kiwi -> info ("Creating image ID file: $id");
-		if ( ! open (FD,">$root/etc/ImageID")) {
+		if ( ! open ($FD, '>', "$root/etc/ImageID")) {
 			$kiwi -> failed ();
 			$kiwi -> error ("Failed to create ID file: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
-		print FD "$id\n"; close FD;
+		print $FD "$id\n";
+		close $FD;
 		$kiwi -> done();
 	}
 	#========================================
@@ -1325,13 +1318,13 @@ sub setupMount {
 		$kiwi -> failed ();
 		$kiwi -> error ("Couldn't create directory: $prefix");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	} else {
 		$kiwi -> failed ();
 		$kiwi -> error ("Entity $prefix already exist");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! -f "$root/proc/mounts") {
 		qxx ("mkdir -p $root/proc");
@@ -1398,7 +1391,7 @@ sub setupMount {
 			if ($code != 0) {
 				$kiwi -> failed();
 				$this->{mountList} = \@mountList;
-				return undef;
+				return;
 			}
 			$kiwi -> done();
 		} else {
@@ -1505,6 +1498,25 @@ sub cleanLock {
 	my $manager = $this->{manager};
 	$manager -> freeLock();
 	return $this;
+}
+
+#==========================================
+# __generateWanted
+#------------------------------------------
+sub __generateWanted {
+	# ...
+	# generate search for given files in given directory
+	# ---
+	my $this   = shift;
+	my $result = shift;
+	my $base   = shift;
+	return sub {
+		my @names = ($File::Find::name,$File::Find::dir);
+		foreach my $name (@names) {
+			$name =~ s/^$base//; $name =~ s/^\///;
+			push @{$result},$name;
+		}
+	}
 }
 
 1;
