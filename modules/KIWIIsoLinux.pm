@@ -774,9 +774,9 @@ sub createHybrid {
 		return undef;
 	}
 	if ($mbrid) {
-		$data = qxx ("isohybrid -id $mbrid -type 0x83 -o 64 $iso 2>&1");
+		$data = qxx ("isohybrid -id $mbrid -type 0x83 -offset 64 $iso 2>&1");
 	} else {
-		$data = qxx ("isohybrid -o 64 $iso 2>&1");
+		$data = qxx ("isohybrid -offset 64 $iso 2>&1");
 	}
 	$code = $? >> 8;
 	if ($code != 0) {
