@@ -5,9 +5,9 @@ test -f /.profile && . /.profile
 echo "Configure image: [$kiwi_iname]..."
 
 #==========================================
-# pack boot includes
+# setup config.oempartition if required
 #------------------------------------------
-# basePackBootIncludes
+baseSetupOEMPartition
 
 #==========================================
 # remove unneded kernel files
@@ -29,11 +29,6 @@ rpm -e --nodeps --noscripts \
 # remove unneeded files
 #------------------------------------------
 suseStripInitrd
-
-#==========================================
-# unpack boot includes
-#------------------------------------------
-# baseUnpackBootIncludes
 
 #==========================================
 # umount /proc

@@ -254,7 +254,7 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
 
 %package -n kiwi-desc-oemboot
 Requires:       kiwi = %{version}
@@ -537,7 +537,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/netboot/suse*
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
 
 %files -n kiwi-desc-oemboot
 %defattr(-, root, root)
