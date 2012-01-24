@@ -62,7 +62,7 @@ sub new
   };
   bless ($this, $class);
 
-  return undef if not defined($this->{m_collect});
+  return if not defined($this->{m_collect});
   return $this;
 }
 # / constructor
@@ -81,7 +81,7 @@ sub addSet
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   my $name = shift;
   my $hashref = shift;
@@ -89,11 +89,11 @@ sub addSet
 
   if(not(defined($name) and defined($hashref))) {
     $this->{m_collect}->logMsg("E", "Name and hashref must be defined!");
-    return undef;
+    return;
   }
   else {
     my $what = shift;
-    return undef if not defined $what;	#just to be on the safe side
+    return if not defined $what;	#just to be on the safe side
     if($what eq "prodinfo") {
       foreach my $index(keys(%{$hashref})) {
 	my @list = @{$hashref->{$index}};
@@ -142,11 +142,11 @@ sub getSet
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   my $name = shift;
   if(not defined($name)) {
-    return undef;
+    return;
   }
   else {
     return $this->{$name};
@@ -165,7 +165,7 @@ sub setInfo
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
 
   my $var = shift;
@@ -190,7 +190,7 @@ sub setOpt
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   my $var = shift;
   my $value = shift;
@@ -209,7 +209,7 @@ sub setVar
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   my $var = shift;
   my $value = shift;
@@ -228,7 +228,7 @@ sub getVar
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   my $var = shift;
   my $mydefault = undef;
@@ -236,7 +236,7 @@ sub getVar
 
   if(not defined($var)) {
     $this->{m_collect}->logMsg("E", "ProductData:getVar() \$var is not set");
-    return undef;
+    return;
   }
   else {
     if(defined($this->{prodvars}->{$var})) {
@@ -264,7 +264,7 @@ sub getVarSafe
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   my $retval = $this->getVar(@_);
   if(not defined($retval)) {
@@ -287,11 +287,11 @@ sub getInfo
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   my $info = shift;
   if(not defined($info)) {
-    return undef;
+    return;
   }
   else {
     if(defined($this->{'prodinfo'}->{$this->{'prodinfo-indices'}->{$info}})) {
@@ -299,7 +299,7 @@ sub getInfo
     }
     else {
       $this->{m_collect}->logMsg("W", "ProductData:getInfo($info) is not set");
-      return undef;
+      return;
     }
   }
 }
@@ -341,11 +341,11 @@ sub getOpt
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
   my $opt = shift;
   if(not defined($opt)) {
-    return undef;
+    return;
   }
   else {
     if(defined($this->{prodopts}->{$opt})) {
@@ -353,7 +353,7 @@ sub getOpt
     }
     else {
       $this->{m_collect}->logMsg("W", "ProductData:getOpt($opt) is not set");
-      return undef;
+      return;
     }
   }
 }
@@ -401,7 +401,7 @@ sub _expand
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
 
   #------------------------------------------
@@ -480,12 +480,12 @@ sub _substitute
 {
   my $this = shift;
   if(not ref($this)) {
-    return undef;
+    return;
   }
 
   my $string = shift;
   if(not defined($string)) {
-    return undef;
+    return;
   }
 
   #expression: \$([A-Za-z_]*).* = a dollar sign followed by any character/underscore combination
