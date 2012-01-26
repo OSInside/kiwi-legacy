@@ -347,7 +347,7 @@ sub ppc64_default {
 	my $boot  = $base{$arch}{boot};
 
 	$para.= " -chrp-boot";
-        $para.= " -hfs-bless $src/$boot"; # CHECK: maybe $src is not necessary
+		$para.= " -hfs-bless $src/$boot"; # CHECK: maybe $src is not necessary
 	$para.= " -hfs-volid FIXME"; # FIXME should be same as value of -A
 	$para.= " -l";
 	$para.= " --macbin";
@@ -765,24 +765,42 @@ sub createHybrid {
 	my $code;
 	my $loop;
 	my $FD;
+
+	my $locator = KIWILocator -> new($kiwi);
+	my $isoHybrid = $locator -> getExecPath('isohybrid');
+
+	if (! $isoHybrid) {
+		$kiwi -> error ("Can't find isohybrid, check your syslinux version");
+		$kiwi -> failed ();
+		return;
+	}
+
+	my @neededOpts = qw(id offset type);
+	my %optNames = %{$locator -> getExecArgsFormat($isoHybrid, \@neededOpts)};
+	if (! $optNames{'status'}) {
+		$kiwi -> error ($optNames{'error'});
+		$kiwi -> failed ();
+		return;
+	}
+
+	my $idOpt = $optNames{'id'};
+	my $offsetOpt = $optNames{'offset'};
+	my $typeOpt = $optNames{'type'};
 	#==========================================
 	# Create partition table on iso
 	#------------------------------------------
-	if (! -x "/usr/bin/isohybrid") {
-		$kiwi -> error  ("Can't find isohybrid, check your syslinux version");
-		$kiwi -> failed ();
-		return undef;
-	}
 	if ($mbrid) {
-		$data = qxx ("isohybrid -id $mbrid -type 0x83 -offset 64 $iso 2>&1");
+		my $cmd = "$isoHybrid $idOpt $mbrid $typeOpt 0x83 "
+		. "$offsetOpt 64 $iso 2>&1";
+		$data = qxx ($cmd)
 	} else {
-		$data = qxx ("isohybrid -offset 64 $iso 2>&1");
+		$data = qxx ("$isoHybrid $offsetOpt 64 $iso 2>&1");
 	}
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call isohybrid: $data");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	return $this;
 }
