@@ -20,6 +20,7 @@ package KIWILocator;
 use strict;
 use warnings;
 require Exporter;
+use IPC::Open3;
 use KIWILog;
 use KIWIQX;
 
@@ -186,9 +187,93 @@ sub getDefaultCacheDir {
 }
 
 #============================================
+# getExecArgsFormat
+#--------------------------------------------
+sub getExecArgsFormat {
+	# ...
+	# Return a hash ref of the argument format for the sought after
+	# arguments.
+	# The method handles long arguments and deals with difference in
+	# version where arguments may have changed from -argument to --argument
+	# ---
+	my $this = shift;
+	my $execName = shift;
+	my $opts = shift;
+	my @optsToGet = @{ $opts };
+	my %optInfo;
+	my $CHILDWRITE;
+	my $CHILDSTDOUT;
+	my $CHILDSTDERR;
+
+	if (! -f $execName) {
+		$execName = $this -> getExecPath($execName);
+	}
+
+	if (! $execName) {
+		$optInfo{'status'} = 0;
+		$optInfo{'error'} = "Could not find $execName";
+		return \%optInfo;
+	}
+
+	my $pid = open3($CHILDWRITE, $CHILDSTDOUT, $CHILDSTDERR,
+					"$execName --help");
+	waitpid( $pid, 0 );
+	my $status = $? >> 8;
+
+	my @help = <$CHILDSTDOUT>;
+	if ($status) {
+		my @chldstderr = <$CHILDSTDERR>;
+		@help = (@help, @chldstderr);
+	}
+
+	my $allOptionsFound;
+	my $numOptsToGet = @optsToGet;
+	my $numOptsFound = 0;
+
+	HELPOPTS:
+	for my $opt (@help) {
+		GETOPTS:
+		for my $seekOpt (@optsToGet) {
+			if ($opt =~ /$seekOpt\s+/x) {
+				my @prts = split / /, $opt;
+				OPTLINE:
+				for my $item (@prts) {
+					if ($item =~ /-+$seekOpt/x) {
+						$optInfo{$seekOpt} = $item;
+						$numOptsFound += 1;
+						last OPTLINE;
+					}
+				}
+			}
+		}
+		if ($numOptsFound == $numOptsToGet) {
+			$allOptionsFound = 1;
+			last HELPOPTS;
+		}
+	}
+	if ($allOptionsFound) {
+		$optInfo{'status'} = 1;
+	} else {
+		$optInfo{'status'} = 0;
+		for my $item (keys %optInfo) {
+			if (! grep { /$item/x } @optsToGet) {
+				my $msg = "Could not find argument $item for $execName";
+				$optInfo{'error'} = $msg;
+				last;
+			}
+		}
+	}
+
+	return \%optInfo;
+}
+
+#============================================
 # getExecPath
 #--------------------------------------------
 sub getExecPath {
+	# ...
+	# Return the full path of the given executable
+	# ---
 	my $this     = shift;
 	my $execName = shift;
 	my $kiwi     = $this->{kiwi};
@@ -202,5 +287,7 @@ sub getExecPath {
 	}
 	return $execPath;
 }
+
+
 
 1;
