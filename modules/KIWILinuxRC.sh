@@ -2702,6 +2702,7 @@ function setupKernelModules {
 	local sysimg_ktempl=$srcprefix/var/adm/fillup-templates/sysconfig.kernel
 	local sysimg_ktempl2=$sysimg_ktempl-mkinitrd
 	local sysimg_ktempl3=/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+	local sysimg_ktempl4=/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-Security-6
 	local sysimg_syskernel=$srcprefix/etc/sysconfig/kernel
 	local syskernel=$destprefix/etc/sysconfig/kernel
 	local newstyle_mkinitrd=$srcprefix/lib/mkinitrd/scripts/boot-usb.sh
@@ -2714,7 +2715,8 @@ function setupKernelModules {
 	if \
 		[ ! -f $sysimg_ktempl ]  && \
 		[ ! -f $sysimg_ktempl2 ] && \
-		[ ! -f $sysimg_ktempl3 ]
+		[ ! -f $sysimg_ktempl3 ] && \
+		[ ! -f $sysimg_ktempl4 ]
 	then
 		systemException \
 			"Can't find kernel sysconfig template in system image !" \
@@ -6012,8 +6014,10 @@ function bootImage {
 		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt /sbin/halt -fihp
 	fi
 	if \
-		[ ! "$haveClicFS" = "yes" ] && [ -z "$NFSROOT" ]     && \
-		[ ! -e /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release ]
+		[ ! "$haveClicFS" = "yes" ] && \
+		[ -z "$NFSROOT" ]           && \
+		[ ! -e $sysimg_ktempl3 ]    && \
+		[ ! -e $sysimg_ktempl4 ]
 	then
 		# for systemd debugging set: --log-level=debug --log-target=kmsg
 		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt $init $option
