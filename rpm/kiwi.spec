@@ -216,6 +216,8 @@ Requires:       virt-utils
 %else
 %if 0%{?suse_version} >= 1130
 Requires:       virt-utils
+%else if 0%{?rhel_version}
+Requires:       qemu-img
 %else
 Requires:       qemu
 %endif
@@ -263,6 +265,8 @@ Requires:       virt-utils
 %else
 %if 0%{?suse_version} >= 1130
 Requires:       virt-utils
+%else if 0%{?rhel_version}
+Requires:       qemu-img
 %else
 Requires:       qemu
 %endif
