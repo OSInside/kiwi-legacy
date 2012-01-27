@@ -107,7 +107,7 @@ sub new {
 				m_browser	   => undef,
 				m_srcmedium   => -1,
 				m_debugmedium => -1,
-				m_logStdOut   => undef,
+				m_logStdOut   => 0,
 				m_startUpTime => undef,
 				m_fpacks	   => [],
 				m_fmpacks	   => [],
@@ -497,7 +497,7 @@ sub Init
 		$this->{m_dirlist}->{"$curdir"} = 1;
 		}
 		my $num = $n;
-		if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp"
+		if ( $this->{m_proddata}->getVar("FLAVOR", '') eq "ftp"
 			or $n == $this->{m_debugmedium} )
 		{
 			$num = 1;
@@ -537,8 +537,7 @@ sub Init
 	$this->logMsg('I', "KIWICollect::Init: create KIWIRepoMetaHandler module");
 	$this->{m_metacreator} = KIWIRepoMetaHandler -> new ($this);
 	$this->{m_metacreator}->baseurl($this->{m_united});
-	$this->{m_metacreator}->mediaName(
-								$this->{m_proddata}->getVar('MEDIUM_NAME'));
+	$this->{m_metacreator}->mediaName($this->{m_proddata}->getVar('MEDIUM_NAME'));
 	my $msg = 'Loading plugins from <'
 		. $this->{m_proddata}->getOpt("PLUGIN_DIR")
 		. '>';
@@ -673,12 +672,12 @@ sub mainTask
 	}
 
 	# We create iso files by default, but keep this for manual override
-	if($this->{m_proddata}->getVar("REPO_ONLY") eq "true") {
+	if($this->{m_proddata}->getVar("REPO_ONLY", 'false') eq "true") {
 		$this->logMsg('I', "Skipping ISO generation due to REPO_ONLY setting");
 		return 0;
 	}
 	# should not be applied anymore
-	if($this->{m_proddata}->getVar("FLAVOR") eq "ftp") {
+	if($this->{m_proddata}->getVar("FLAVOR", '') eq "ftp") {
 		my $msg = 'Skipping ISO generation for FLAVOR ftp, please use '
 			. 'REPO_ONLY flag instead !';
 		$this->logMsg('W', $msg);
@@ -1363,16 +1362,15 @@ sub unpackMetapackages
 						next PACKKEY;
 					}
 
-					$this->logMsg('I', "unpack $packPointer->{'localfile'} ");
-					$this->{m_util}->unpac_package(
-										$packPointer->{'localfile'}, "$tmp");
+					$this->logMsg('I', "unpack $packPointer->{localfile} ");
+					$this->{m_util}->unpac_package( $packPointer->{localfile}, "$tmp");
 					# all metapackages contain at least a CD1 dir and _may_
 					# contain another /usr/share/<name> dir
 					if ( -d "$tmp/CD1") {
 						qx(cp -a $tmp/CD1/* $this->{m_basesubdir}->{$medium});
 					}
 					else {
-						my $msg = "No CD1 directory on $packPointer->{name}";
+						my $msg = "No CD1 directory on $packPointer->{localfile}";
 						$this->logMsg('W', $msg);
 					}
 					#for my $sub("usr", "etc") {
@@ -2307,7 +2305,7 @@ sub createMetadata
 			if(-d $item) {
 				@data = qx($dy $item);
 				$this->logMsg('I',
-						"[createMetadata] $dy output for directory $_:");
+						"[createMetadata] $dy output for directory $item:");
 				for my $entry (@data) {
 					chomp $entry;
 					$this->logMsg('I', "\t$entry");
@@ -2525,7 +2523,7 @@ sub createBootPackageLinks
 		}
 		else {
 			RPM:
-			for my $rpmname(<RPMLIST>) {
+			for my $rpmname (<$RPMLIST>) {
 				chomp $rpmname;
 				if(! defined($rpmname)
 				or ! defined($this->{m_repoPacks}->{$rpmname}))
