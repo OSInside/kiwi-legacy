@@ -6,6 +6,10 @@
 		<contact>ms@suse.com</contact>
 		<specification>RHEL Enterprise 6 JeOS</specification>
 	</description>
+	<profiles>
+		<profile name="RedHat" description="Build for RHEL" import="true"/>
+		<profile name="CentOS" description="Build for CentOS"/>
+	</profiles>
 	<preferences>
 		<version>1.1.0</version>
 		<packagemanager>yum</packagemanager>
@@ -17,7 +21,7 @@
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<type image="iso" primary="true" boot="isoboot/rhel-06.0" flags="clic"/>
 		<type image="vmx" boot="vmxboot/rhel-06.0" filesystem="ext3" format="vmdk" kernelcmdline="rhgb">
-			<machine memory="1024" guestOS="rhel5">
+			<machine memory="1024" guestOS="rhel6">
 				<vmdisk controller="scsi" id="0"/>
 				<vmnic driver="e1000" interface="0" mode="bridged"/>
 			</machine>
@@ -36,10 +40,16 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="rpm-md">
+		<source path="obs://Virtualization:/Appliances:/rhel-060/RedHat_RHEL-6"/>
+	</repository>
+	<repository type="rpm-md" profiles="RedHat">
 		<source path="iso:///image/CDs/RHEL-6.2-%arch-DVD.iso"/>
 	</repository>
-	<repository type="rpm-md">
-		<source path="obs://Virtualization:/Appliances:/rhel-060/RedHat_RHEL-6"/>
+	<repository type="rpm-md" profiles="CentOS">
+		<source path="http://mirror.centos.org/centos/6/os/%arch"/>
+	</repository>
+	<repository type="rpm-md" profiles="CentOS">
+		<source path="http://mirror.centos.org/centos/6/updates/%arch"/>
 	</repository>
 	<packages type="image">
 		<package name="bash"/>
@@ -80,7 +90,6 @@
 		<package name="parted"/>
 		<package name="perl-Digest-SHA1"/>
 		<package name="procps"/>
-		<package name="redhat-release-server"/>
 		<package name="rpm"/>
 		<package name="screen"/>
 		<package name="selinux-policy-targeted"/>
