@@ -1,7 +1,7 @@
 #
 # spec file for package kiwi
 #
-# Copyright (c) 2011 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -204,7 +204,8 @@ Authors:
 Requires:       kiwi = %{version}
 %if 0%{?suse_version}
 Requires:       multipath-tools parted
-%else if 0%{?rhel_version}
+%endif
+%if 0%{?rhel_version}
 Requires:       device-mapper-multipath parted
 %endif
 
@@ -216,10 +217,12 @@ Requires:       virt-utils
 %else
 %if 0%{?suse_version} >= 1130
 Requires:       virt-utils
-%else if 0%{?rhel_version}
-Requires:       qemu-img
-%else
+%endif
+%if 0%{?suse_version} < 1130
 Requires:       qemu
+%endif
+%if 0%{?rhel_version}
+Requires:       qemu-img
 %endif
 %endif
 Summary:        OpenSuSE - KIWI Image System Virtual Machine boot
@@ -265,15 +268,18 @@ Requires:       virt-utils
 %else
 %if 0%{?suse_version} >= 1130
 Requires:       virt-utils
-%else if 0%{?rhel_version}
-Requires:       qemu-img
-%else
+%endif
+%if 0%{?suse_version} < 1130
 Requires:       qemu
+%endif
+%if 0%{?rhel_version}
+Requires:       qemu-img
 %endif
 %endif
 %if 0%{?suse_version}
 Requires:       multipath-tools parted
-%else if 0%{?rhel_version}
+%endif
+%if 0%{?rhel_version}
 Requires:       device-mapper-multipath parted
 %endif
 
