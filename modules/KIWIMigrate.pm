@@ -198,7 +198,8 @@ sub new {
 		'\/etc\/bootsplash',            # no splash data
 		'\/etc\/lvm',                   # no lvm meta data
 		'\/etc\/grub.conf',             # no bootloader config
-		'\.old$'                        # no .old files
+		'\.old$',                       # no .old files
+		'\/weak-updates'                # no weak-update links
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
