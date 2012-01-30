@@ -156,8 +156,8 @@ sub new {
 		'\.lock$',                      # no lock files
 		'\.tmp$',                       # no tmp files
 		'\/etc\/gconf\/',               # no gconf files
-		'\.depend',                     # no make depend targets
-		'\.backup',                     # no sysconfig backup files
+		'\.depend$',                    # no make depend targets
+		'\.backup$',                    # no sysconfig backup files
 		'\.gz',                         # no gzip archives
 		'\/usr\/src\/',                 # no sources
 		'\/spool',                      # no spool directories
@@ -194,7 +194,11 @@ sub new {
 		'\/ruby\/gems\/.*\/doc\/',      # no ruby gem documentation
 		'\/usr\/share\/mime\/',         # no mime types
 		'\/lost\+found',                # no fs inode backup
-		'\/icons'                       # no icon directories
+		'\/icons',                      # no icon directories
+		'\/etc\/bootsplash',            # no splash data
+		'\/etc\/lvm',                   # no lvm meta data
+		'\/etc\/grub.conf',             # no bootloader config
+		'\.old$'                        # no .old files
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
@@ -294,7 +298,8 @@ sub createReport {
 	print $FD "\t".'</head>'."\n";
 	print $FD '<body class="files">'."\n";
 	print $FD '<div class="headerwrap">'."\n";
-	print $FD "\t".'<div class="container"><h1>Migration report</h1></div>'."\n";
+	print $FD "\t";
+	print $FD '<div class="container"><h1>Migration report</h1></div>'."\n";
 	print $FD '</div>'."\n";
 	print $FD '<div class="container">'."\n";
 	#==========================================
@@ -330,11 +335,11 @@ sub createReport {
 	my %modalias;
 	print $FD '<h1>Hardware dependent packages </h1>'."\n";
 	print $FD '<p>'."\n";
-	print $FD 'The table below shows packages that depend on specific hardware ';
-	print $FD 'Please note that it might be required to have a different set ';
-	print $FD 'of hardware dependent packages included into the image ';
-	print $FD 'description depending on the target hardware. If there is ';
-	print $FD 'the need for such packages make sure you add them as follows ';
+	print $FD 'The table below shows packages that depend on specific ';
+	print $FD 'hardware Please note that it might be required to have a ';
+	print $FD 'different set of hardware dependent packages included into the ';
+	print $FD 'image description depending on the target hardware. If there ';
+	print $FD 'is the need for such packages make sure you add them as follows';
 	print $FD '<package name="name-of-package" bootinclude="true"/>';
 	print $FD '</p>'."\n";
 	print $FD '<hr>'."\n";
@@ -581,146 +586,29 @@ sub createReport {
 		print $FD '<div>'."\n";
 		print $FD 'See <a href="'.$dest.'/root">Overlay directory</a>.'."\n";
 		print $FD '</div>'."\n";
+
 		print $FD '<h1>Unpackaged files</h1>'."\n";
 		print $FD '<p>'."\n";
-		print $FD 'Klicking on the Unpackaged files link below ';
-		print $FD 'will show you a list of files/directories ';
-		print $FD 'which are not part of any packages. ';
+		print $FD 'Behind the current custom files directory you will ';
+		print $FD 'find files/directories which are not part of any packages.';
 		print $FD 'For binary files, including executables and libraries, ';
 		print $FD 'you should try to find and include a package that ';
 		print $FD 'provides them. If there are no package providers for ';
 		print $FD 'this file, you can leave them as overlay files, but it ';
 		print $FD 'may cause problems like broken dependencies later. ';
 		print $FD 'After that, you should look for personal files like ';
-		print $FD 'pictures, movies, or repositories, and remove them if ';
+		print $FD 'pictures, movies, etc. and remove them if ';
 		print $FD 'they can be easily restored in the later image. ';
-		print $FD 'Copy all of the files you want to be part of the ';
+		print $FD 'Move all of the files you want to be part of the ';
 		print $FD 'image into the '.$dest.'/root directory.'."\n";
 		print $FD '</p>'."\n";
-		print $FD '<div class="container" id="searchbox">'."\n";
-		print $FD 'See <a href="root-nopackage.html">Unpackaged files</a>.'."\n";
+		print $FD '<div>'."\n";
+		print $FD 'See <a href="'.$dest.'/custom">Custom directory</a>.'."\n";
 		print $FD '</div>'."\n";
-		my $openFailed = 0;
-		my $ND;
-		my $JS;
-		if (! open ($ND, '>', "$dest/root-nopackage.html")) {
-			$openFailed = 1;
-		}
-		if (! open ($JS, '>', "$dest/.report/js/data.js")) {
-			$openFailed = 1;
-		}
-		if (! $openFailed) {
-			#==========================================
-			# root-nopackage.html header
-			#------------------------------------------
-			print $ND '<!DOCTYPE html>'."\n";
-			print $ND '<html>'."\n";
-			print $ND "\t".'<head>'."\n";
-			print $ND "\t\t".'<title>File list</title>'."\n";
-			print $ND "\t\t".'<link rel="stylesheet" type="text/css"';
-			print $ND ' href=".report/css/kiwi.css">'."\n";
-			print $ND "\t\t".'<script type="text/javascript"';
-			print $ND ' src=".report/js/jquery.min.js"></script>'."\n";
-			print $ND "\t\t".'<script type="text/javascript"';
-			print $ND ' src=".report/js/data.js"></script>'."\n";
-			print $ND "\t\t".'<script type="text/javascript"';
-			print $ND ' src=".report/js/kiwi.js"></script>'."\n";
-			print $ND "\t".'</head>'."\n";
-			print $ND '<body class="files">'."\n";
-			print $ND '<div class="headerwrap">'."\n";
-			print $ND "\t".'<div class="container"><h1>Files</h1></div>'."\n";
-			print $ND '</div>'."\n";
-			print $ND '<div class="container">'."\n";
-			print $ND '<dl id="list">'."\n";
-			#==========================================
-			# data.js header
-			#------------------------------------------
-			print $JS 'DATA = ['."\n";
-			#==========================================
-			# Content
-			#------------------------------------------
-			my $count= 0;
-			foreach my $file (sort keys %{$nopackage}) {
-				my $fattr = $nopackage->{$file}->[1];
-				my $type  = "file";
-				my $size  = 0;
-				my $mtime = "unknown";
-				if ($fattr) {
-					if (S_ISDIR($fattr->mode)) {
-						$type = "directory";
-					} elsif (S_ISLNK($fattr->mode)) {
-						$type = "link";
-					}
-					$mtime = localtime ($fattr->mtime);
-					$size  = $fattr->size;
-				}
-				if ($size > 1048576) {
-					$size/= 1048576;
-					$size = sprintf ("%.1f Mbyte", $size);
-				} elsif ($size > 1024) {
-					$size/= 1024;
-					$size = sprintf ("%.1f Kbyte", $size);
-				} else {
-					$size.= " Byte";
-				}
-				# ND: root-nopackage.html...
-				print $ND '<section class="row">'."\n";
-				if ($type eq "directory") {
-					print $ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
-					print $ND '<dd class="file">';
-					print $ND "directory";
-					print $ND '</dd>'."\n";
-					print $ND '<dd class="file"/>'."\n";
-				} elsif ($type eq "link") {
-					my $target = readlink $file;
-					print $ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
-					print $ND '<dd class="file">';
-					print $ND "link to ".$target;
-					print $ND '</dd>'."\n";
-					print $ND '<dd class="file"/>'."\n";
-				} else {
-					print $ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
-					print $ND '<dd class="size">';
-					print $ND $size;
-					print $ND '</dd>'."\n";
-					print $ND '<dd class="modified">';
-					print $ND $mtime;
-					print $ND '</dd>'."\n";
-				}
-				print $ND '</section>'."\n";
-				# JS: data.js...
-				if ($count) {
-					print $JS ",\n";
-				}
-				$count++;
-				print $JS '{'."\n";
-				print $JS "\t".'\'filename\': \''.$file.'\','."\n";
-				print $JS "\t".'\'size\': \''.$size.'\','."\n";
-				print $JS "\t".'\'timestamp\': \''.$mtime.'\''."\n";
-				print $JS '}';
-			}
-			#==========================================
-			# root-nopackage.html footer
-			#------------------------------------------
-			print $ND '</dl>'."\n";
-			print $ND '<a href="report.html">Return</a>'."\n";
-			print $ND '</div>'."\n";
-			print $ND '<div class="footer container">'."\n";
-			print $ND "\t".'&copy; 2010 Novell, Inc.'."\n";
-			print $ND '</div>'."\n";
-			print $ND '</body>'."\n";
-			print $ND '</html>'."\n";
-			#==========================================
-			# data.js footer
-			#------------------------------------------
-			print $JS ']'."\n";
-			close $ND;
-			close $JS;
-		}
 	}
 	print $FD '</div>'."\n";
 	print $FD '<div class="footer container">'."\n";
-	print $FD "\t".'&copy; 2010 Novell, Inc.'."\n";
+	print $FD "\t".'&copy; 2012 SuSE Linux Products GmbH.'."\n";
 	print $FD '</div>'."\n";
 	print $FD '</body>'."\n";
 	print $FD '</html>'."\n";
@@ -1489,6 +1377,7 @@ sub setSystemOverlayFiles {
 				delete $result{$dir};
 			}
 		}
+
 		# search for unpackaged directories...
 		foreach my $dir (sort keys %dirs_cmp) {
 			my $FH;	opendir $FH,$dir;
@@ -1513,9 +1402,7 @@ sub setSystemOverlayFiles {
 	#==========================================
 	# add custom deny rules
 	#------------------------------------------
-	# we use all /etc as overlay files later
-	my @custom_deny = ('^\/etc\/');
-	
+	my @custom_deny = ();
 	#==========================================
 	# check for local repository checkouts
 	#------------------------------------------
@@ -1530,15 +1417,10 @@ sub setSystemOverlayFiles {
 		}
 	}
 	#==========================================
-	# apply deny files on result hash
+	# apply all deny files on result hash
 	#------------------------------------------
 	foreach my $file (sort keys %result) {
 		my $ok = 1;
-		# /.../
-		# /etc is used completely in later overlay tree
-		# so make sure it will not appear in the unpackaged
-		# files html information
-		# ----
 		foreach my $exp ((@deny,@custom_deny)) {
 			if ($file =~ /$exp/) {
 				$ok = 0; last;
@@ -1565,11 +1447,6 @@ sub setSystemOverlayFiles {
 		mkpath ("$dest/root/$dir", {verbose => 0});
 		qxx ("cp -a $file $dest/root/$dir");
 	}
-	#==========================================
-	# Create modified files tree /etc
-	#------------------------------------------
-	mkpath ("$dest/root/etc", {verbose => 0});
-	qxx ("tar -cf - -C /etc .|tar -xC $dest/root/etc 2>&1");
 	$kiwi -> done();
 	#==========================================
 	# apply deny files on overlay tree
@@ -1578,6 +1455,38 @@ sub setSystemOverlayFiles {
 		$exp =~ s/\$//;  # shell glob differs from regexps
 		qxx ("rm -rf $dest/root/$exp");
 	}
+	#==========================================
+	# Create custom (unpackaged) files tree
+	#------------------------------------------
+	$kiwi -> info ("Creating custom/unpackaged files tree...");
+	my @dirslist;
+	my %filelist;
+	foreach my $file (sort keys %result) {
+		my $fattr = $result{$file}->[1];
+		my $type  = "file";
+		my $key   = "/";
+		if (($fattr) && (S_ISDIR($fattr->mode))) {
+			$type = "directory";
+		}
+		if ($type eq "directory") {
+			push @dirslist,$file;
+		} else {
+			my $name = basename $file;
+			my $dirn = dirname  $file;
+			$filelist{$dirn}{$name} = $fattr;
+		}
+	}
+	foreach my $dir (sort @dirslist) {
+		qxx ("mkdir -p '$dest/custom/$dir' 2>&1");
+	}
+	foreach my $dir (sort keys %filelist) {
+		foreach my $file (sort keys %{$filelist{$dir}}) {
+			if (-e "$dir/$file") {
+				qxx ("ln -t '$dest/custom/$dir' '$dir/$file' 2>&1");
+			}
+		}
+	}
+	$kiwi -> done();
 	#==========================================
 	# Store in instance for report
 	#------------------------------------------
