@@ -68,6 +68,7 @@ sub new {
 	my $pool    = shift;
 	my $quiet   = shift;
 	my $ptype   = shift;
+	my $merge   = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -132,6 +133,27 @@ sub new {
 			return;
 		}
 		#==========================================
+		# merge all solvables into one
+		#------------------------------------------
+		my $merged= "/var/cache/kiwi/satsolver/merged.solv";
+		my @files = keys %{$solvable};
+		if (@files > 1) {
+			qxx ("mergesolv @files > $merged");
+		} else {
+			qxx ("cp @files $merged 2>&1");
+		}
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("--> Couldn't merge/copy solv files");
+			$kiwi -> failed ();
+			return;
+		}
+		if ($merge) {
+			undef $solvable;
+			$solvable->{$merged} = "merged-repo";
+		}
+		$this->{solfile} = $merged;
+		#==========================================
 		# Create SaT repository
 		#------------------------------------------
 		$pool = new satsolver::Pool;
@@ -150,23 +172,6 @@ sub new {
 			);
 			$repo -> add_solv ($solv);
 		}
-		#==========================================
-		# merge all solvables into one
-		#------------------------------------------
-		my $merged= "/var/cache/kiwi/satsolver/merged.solv";
-		my @files = keys %{$solvable};
-		if (@files > 1) {
-			qxx ("mergesolv @files > $merged");
-		} else {
-			qxx ("cp @files $merged 2>&1");
-		}
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("--> Couldn't merge/copy solv files");
-			$kiwi -> failed ();
-			return;
-		}
-		$this->{solfile} = $merged;
 	}
 	#==========================================
 	# Create SaT Solver and jobs
