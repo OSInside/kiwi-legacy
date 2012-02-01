@@ -372,7 +372,7 @@ sub createReport {
 		print $FD '</p>'."\n";
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
-		foreach my $repo (keys %{$repos}) {
+		foreach my $repo (sort keys %{$repos}) {
 			print $FD '<tr valign="top">'."\n";
 			print $FD '<td>'.$repo.'</td>'."\n";
 			print $FD '<td> type: '.$repos->{$repo}.'</td>'."\n";
