@@ -201,35 +201,30 @@ sub getExecArgsFormat {
 	my $opts = shift;
 	my @optsToGet = @{ $opts };
 	my %optInfo;
+	my $allOptionsFound;
+	my $numOptsToGet = @optsToGet;
+	my $numOptsFound = 0;
 	my $CHILDWRITE;
 	my $CHILDSTDOUT;
 	my $CHILDSTDERR;
-
 	if (! -f $execName) {
 		$execName = $this -> getExecPath($execName);
 	}
-
 	if (! $execName) {
 		$optInfo{'status'} = 0;
 		$optInfo{'error'} = "Could not find $execName";
 		return \%optInfo;
 	}
-
-	my $pid = open3($CHILDWRITE, $CHILDSTDOUT, $CHILDSTDERR,
-					"$execName --help");
+	my $pid = open3 (
+		$CHILDWRITE, $CHILDSTDOUT, $CHILDSTDERR,"$execName --help"
+	);
 	waitpid( $pid, 0 );
 	my $status = $? >> 8;
-
 	my @help = <$CHILDSTDOUT>;
-	if ($status) {
+	if (($status) && ($CHILDSTDERR)) {
 		my @chldstderr = <$CHILDSTDERR>;
 		@help = (@help, @chldstderr);
 	}
-
-	my $allOptionsFound;
-	my $numOptsToGet = @optsToGet;
-	my $numOptsFound = 0;
-
 	HELPOPTS:
 	for my $opt (@help) {
 		GETOPTS:
@@ -263,7 +258,6 @@ sub getExecArgsFormat {
 			}
 		}
 	}
-
 	return \%optInfo;
 }
 
