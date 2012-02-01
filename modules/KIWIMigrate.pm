@@ -1408,14 +1408,32 @@ sub setSystemOverlayFiles {
 	# check for local repository checkouts
 	#------------------------------------------
 	$kiwi -> info ("Searching for revision control checkout(s)...");
-	# find git repo checkout path and add deny rule for it
 	my %repos = ();
 	foreach my $file (sort keys %result) {
 		if ($file =~ /.git$/) {
+			#==========================================
+			# git repo
+			#------------------------------------------
 			my $dir = $file;
 			$dir =~ s/\/\.git$//;
 			push @custom_deny,'^'.$dir;
 			$repos{$dir} = "git";
+		} elsif ($file =~ /.svn$/) {
+			#==========================================
+			# svn repo
+			#------------------------------------------
+			my $dir = $file;
+			my $add = 1;
+			$dir =~ s/\/\.svn$//;
+			foreach my $rule (@custom_deny) {
+				if ($dir =~ /$rule/) {
+					$add = 0; last;
+				}
+			}
+			if ($add) {
+				push @custom_deny,'^'.$dir;
+				$repos{$dir} = "svn";
+			}
 		}
 	}
 	$kiwi -> done();
