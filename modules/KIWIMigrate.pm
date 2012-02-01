@@ -334,7 +334,7 @@ sub createReport {
 	#------------------------------------------
 	my $pack;
 	my %modalias;
-	print $FD '<h1>Hardware dependent packages </h1>'."\n";
+	print $FD '<h1>Hardware dependent RPM packages </h1>'."\n";
 	print $FD '<p>'."\n";
 	print $FD 'The table below shows packages that depend on specific ';
 	print $FD 'hardware Please note that it might be required to have a ';
@@ -411,7 +411,7 @@ sub createReport {
 	#------------------------------------------
 	if ($twice) {
 		my @pacs = @{$twice};
-		print $FD '<h1>Package(s) installed multiple times</h1>'."\n";
+		print $FD '<h1>RPM Package(s) installed multiple times</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following packages are installed multiple times. ';
 		print $FD 'Please uninstall the old versions of the packages ';
@@ -433,7 +433,7 @@ sub createReport {
 		print $FD '</table>'."\n";
 	}
 	if ($problem1) {
-		print $FD '<h1>Pattern conflict(s)</h1>'."\n";
+		print $FD '<h1>Pattern conflict(s) by zypper</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following patterns could not be solved because ';
 		print $FD 'they have dependency conflicts. Please check the list ';
@@ -458,7 +458,7 @@ sub createReport {
 		print $FD '</pre>'."\n";
 	}
 	if ($problem2) {
-		print $FD '<h1>Package conflict(s)</h1>'."\n";
+		print $FD '<h1>RPM Package conflict(s)</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following packages could not be solved due to ';
 		print $FD 'dependency conflicts. Please check the list and ';
@@ -483,7 +483,7 @@ sub createReport {
 		print $FD '</pre>'."\n";
 	}
 	if (($failedJob1) && (@{$failedJob1})) {
-		print $FD '<h1>Pattern(s) not found</h1>'."\n";
+		print $FD '<h1>Pattern(s) not found by zypper</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following patterns could not be found in your ';
 		print $FD 'repository list marked as installed. Please check the ';
@@ -510,7 +510,7 @@ sub createReport {
 		print $FD '</ul>'."\n";
 	}
 	if (($failedJob2) && (@{$failedJob2})) {
-		print $FD '<h1>Package(s) not found</h1>'."\n";
+		print $FD '<h1>RPM Package(s) not found</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following packages could not be found in your ';
 		print $FD 'repository list but are installed on the system ';
@@ -1407,6 +1407,7 @@ sub setSystemOverlayFiles {
 	#==========================================
 	# check for local repository checkouts
 	#------------------------------------------
+	$kiwi -> info ("Searching for revision control checkout(s)...");
 	# find git repo checkout path and add deny rule for it
 	my %repos = ();
 	foreach my $file (sort keys %result) {
@@ -1417,9 +1418,11 @@ sub setSystemOverlayFiles {
 			$repos{$dir} = "git";
 		}
 	}
+	$kiwi -> done();
 	#==========================================
 	# apply all deny files on result hash
 	#------------------------------------------
+	$kiwi -> info ("Apply deny expressions on custom tree...");
 	foreach my $file (sort keys %result) {
 		my $ok = 1;
 		foreach my $exp ((@deny,@custom_deny)) {
@@ -1431,37 +1434,76 @@ sub setSystemOverlayFiles {
 			delete $result{$file};
 		}
 	}
+	$kiwi -> done();
 	#==========================================
 	# Write cache if required
 	#------------------------------------------
 	if (! $cache) {
+		$kiwi -> info ("Writing cache file...");
 		$cdata->{version} = $this->{gdata}->{Version};
 		store ($cdata,$dest.".cache");
+		$kiwi -> done();
 	}
 	#==========================================
 	# Create modified files tree
 	#------------------------------------------
 	$kiwi -> info ("Creating modified files tree...");
 	mkdir "$dest/root";
+	my %modfiles;
+	my $tasks = 0;
+	my $done  = 0;
 	foreach my $file (@modified) {
 		my ($name,$dir,$suffix) = fileparse ($file);
-		mkpath ("$dest/root/$dir", {verbose => 0});
-		qxx ("cp -a $file $dest/root/$dir");
+		$modfiles{$dir}{$name} = $file;
+		$tasks++;
 	}
-	$kiwi -> done();
+	$kiwi -> cursorOFF();
+	my $factor = 100 / $tasks;
+	my $done_percent = 0;
+	my $done_previos = 0;
+	foreach my $dir (sort keys %modfiles) {
+		mkpath ("$dest/root/$dir", {verbose => 0});
+		$done_percent = int ($factor * $done);
+		if ($done_percent > $done_previos) {
+			$kiwi -> step ($done_percent);
+		}
+		$done_previos = $done_percent;
+		$done++;
+	}
+	foreach my $dir (sort keys %modfiles) {
+		next if ! chdir "$dest/root/$dir";
+		foreach my $file (sort keys %{$modfiles{$dir}}) {
+			if (-e "$dir/$file") {
+				link "$dir/$file", "$file";
+				$done_percent = int ($factor * $done);
+				if ($done_percent > $done_previos) {
+					$kiwi -> step ($done_percent);
+				}
+				$done_previos = $done_percent;
+				$done++;
+			}
+		}
+	}
+	$kiwi -> note ("\n");
+	$kiwi -> doNorm ();
+	$kiwi -> cursorON();
 	#==========================================
 	# apply deny files on overlay tree
 	#------------------------------------------
+	$kiwi -> info ("Apply deny expressions on overlay tree...");
 	foreach my $exp (@deny) {
 		$exp =~ s/\$//;  # shell glob differs from regexps
 		qxx ("rm -rf $dest/root/$exp");
 	}
+	$kiwi -> done();
 	#==========================================
 	# Create custom (unpackaged) files tree
 	#------------------------------------------
 	$kiwi -> info ("Creating custom/unpackaged files tree...");
-	my @dirslist;
 	my %filelist;
+	my @dirslist;
+	$tasks = 0;
+	$done  = 0;
 	foreach my $file (sort keys %result) {
 		my $fattr = $result{$file}->[1];
 		my $type  = "file";
@@ -1475,19 +1517,40 @@ sub setSystemOverlayFiles {
 			my $name = basename $file;
 			my $dirn = dirname  $file;
 			$filelist{$dirn}{$name} = $fattr;
+			push @dirslist,$dirn;
 		}
+		$tasks++;
 	}
+	$kiwi -> cursorOFF();
+	$factor = 100 / $tasks;
+	$done_percent = 0;
+	$done_previos = 0;
 	foreach my $dir (sort @dirslist) {
-		qxx ("mkdir -p '$dest/custom/$dir' 2>&1");
+		mkpath ("$dest/custom/$dir", {verbose => 0});
+		$done_percent = int ($factor * $done);
+		if ($done_percent > $done_previos) {
+			$kiwi -> step ($done_percent);
+		}
+		$done_previos = $done_percent;
+		$done++;
 	}
 	foreach my $dir (sort keys %filelist) {
+		next if ! chdir "$dest/custom/$dir";
 		foreach my $file (sort keys %{$filelist{$dir}}) {
 			if (-e "$dir/$file") {
-				qxx ("ln -t '$dest/custom/$dir' '$dir/$file' 2>&1");
+				link "$dir/$file", "$file";
+				$done_percent = int ($factor * $done);
+				if ($done_percent > $done_previos) {
+					$kiwi -> step ($done_percent);
+				}
+				$done_previos = $done_percent;
+				$done++;
 			}
 		}
 	}
-	$kiwi -> done();
+	$kiwi -> note ("\n");
+	$kiwi -> doNorm ();
+	$kiwi -> cursorON();
 	#==========================================
 	# Store in instance for report
 	#------------------------------------------
