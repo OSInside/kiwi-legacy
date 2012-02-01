@@ -1419,7 +1419,7 @@ sub setSystemOverlayFiles {
 	$kiwi -> info ("Searching for revision control checkout(s)...");
 	my %repos = ();
 	foreach my $file (sort keys %result) {
-		if ($file =~ /.git$/) {
+		if ($file =~ /\.git$/) {
 			#==========================================
 			# git repo
 			#------------------------------------------
@@ -1427,7 +1427,7 @@ sub setSystemOverlayFiles {
 			$dir =~ s/\/\.git$//;
 			push @custom_deny,'^'.$dir;
 			$repos{$dir} = "git";
-		} elsif ($file =~ /.svn$/) {
+		} elsif ($file =~ /\.svn$/) {
 			#==========================================
 			# svn repo
 			#------------------------------------------
