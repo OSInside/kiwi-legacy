@@ -1401,6 +1401,15 @@ sub setSystemOverlayFiles {
 		$kiwi -> done ();
 	}
 	#==========================================
+	# Write cache if required
+	#------------------------------------------
+	if (! $cache) {
+		$kiwi -> info ("Writing cache file...");
+		$cdata->{version} = $this->{gdata}->{Version};
+		store ($cdata,$dest.".cache");
+		$kiwi -> done();
+	}
+	#==========================================
 	# add custom deny rules
 	#------------------------------------------
 	my @custom_deny = ();
@@ -1453,15 +1462,6 @@ sub setSystemOverlayFiles {
 		}
 	}
 	$kiwi -> done();
-	#==========================================
-	# Write cache if required
-	#------------------------------------------
-	if (! $cache) {
-		$kiwi -> info ("Writing cache file...");
-		$cdata->{version} = $this->{gdata}->{Version};
-		store ($cdata,$dest.".cache");
-		$kiwi -> done();
-	}
 	#==========================================
 	# Create modified files tree
 	#------------------------------------------
