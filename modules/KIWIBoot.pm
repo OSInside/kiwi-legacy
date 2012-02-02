@@ -3884,6 +3884,7 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return;
 		}
+		qxx ("rm -f $inputf 2>&1");
 		$kiwi -> done();
 		#==========================================
 		# Create boot.script
