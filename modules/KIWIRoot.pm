@@ -975,7 +975,7 @@ sub setup {
 	my $manager   = $this->{manager};
 	my $data;
 	my $status;
-	#======================================== 
+	#========================================
 	# Consistency check
 	#----------------------------------------
 	if (! -d "$root/tmp") {
@@ -1166,7 +1166,7 @@ sub setup {
 	if (-e "$imageDesc/config.sh") {
 		$kiwi -> info ("Calling image script: config.sh");
 		qxx (" cp $imageDesc/config.sh $root/tmp ");
-				qxx (" chmod u+x $root/tmp/config.sh ");
+		qxx (" chmod u+x $root/tmp/config.sh ");
 		my $data = qxx (" chroot $root /tmp/config.sh 2>&1 ");
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -1178,6 +1178,42 @@ sub setup {
 		}
 		qxx (" rm -f $root/tmp/config.sh ");
 		$kiwi -> done ();
+	}
+	#========================================
+	# remove packages marked for deletion
+	#----------------------------------------
+	# This is a terrible HACK, we need to reavaulate how we delete
+	# packages
+	my $PROFILE;
+	my $prof = open($PROFILE, '<', "$root/.profile");
+	if ($prof) {
+		my @profile = <$PROFILE>;
+		close $PROFILE;
+		for my $line (@profile) {
+			if ($line =~ /^kiwi_iname=/x && !($line =~ /=\'initrd/x)) {
+				my $DEL;
+				my $res = open($DEL, '>', "$root/tmp/deletePackgs.sh");
+				if ($res) {
+					print $DEL "#!/bin/bash\n";
+					print $DEL "test -f /.kconfig && . /.kconfig\n";
+					print $DEL "test -f /.profile && . /.profile\n";
+					print $DEL "baseStripRPM \n";
+					close $DEL;
+					qxx ("chmod u+x $root/tmp/deletePackgs.sh");
+					my $data = qxx ("chroot $root /tmp/deletePackgs.sh 2>&1");
+					my $code = $? >> 8;
+					if ($code != 0) {
+						my $msg = 'Unable to remove packages marked for '
+						. "deletion\n";
+						$kiwi -> info ($msg);
+						$kiwi -> info ($data);
+						$kiwi -> skipped();
+					}
+					qxx (" rm -f $root/tmp/deletePackgs.sh");
+				}
+				last;
+			}
+		}
 	}
 	#========================================
 	# create /etc/ImageID file
