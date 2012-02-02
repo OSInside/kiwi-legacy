@@ -2,7 +2,7 @@
 # FILE          : kiwiLocator.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 Novell Inc.
+# COPYRIGHT     : (c) 2012 Novell Inc.
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
@@ -310,6 +310,111 @@ sub test_getDefCacheDir {
 	$this -> assert_str_equals('No state set', $state);
 	# Make sure directory has expected path
 	$this -> assert_str_equals($cacheDir, '/var/cache/kiwi/image');
+
+	return;
+}
+
+#==========================================
+# test_getExecPathArgsDoubleDash
+#------------------------------------------
+sub test_getExecPathArgsDoubleDash {
+	# ...
+	# Test behavior when an executable provides single dash argument options
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my $execDir = $this -> {dataDir} . 'bin';
+	my @opts = qw(calc break);
+	my $res = $locator -> getExecArgsFormat($execDir . '/doubleDash', \@opts);
+	my %result = %{$res};
+	$this -> assert_equals(1, $result{'status'});
+	$this -> assert_str_equals('--calc', $result{'calc'});
+	$this -> assert_str_equals('--break', $result{'break'});
+
+	return;
+}
+
+#==========================================
+# test_getExecPathArgsMissingOpt
+#------------------------------------------
+sub test_getExecPathArgsMissingOpt {
+	# ...
+	# Test behavior when an executable provides single dash argument options
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my $execDir = $this -> {dataDir} . 'bin';
+	my @opts = qw(calc break halftime);
+	my $res = $locator -> getExecArgsFormat($execDir . '/doubleDash', \@opts);
+	my %result = %{$res};
+	$this -> assert_equals(0, $result{'status'});
+	$this -> assert_str_equals('--calc', $result{'calc'});
+	$this -> assert_str_equals('--break', $result{'break'});
+	my $errMsg = "Could not find argument halftime for $execDir/doubleDash";
+	$this -> assert_str_equals($errMsg, $result{'error'});
+
+	return;
+}
+
+#==========================================
+# test_getExecPathArgsNoExec
+#------------------------------------------
+sub test_getExecPathArgsNoExec {
+	# ...
+	# Test behavior when an executable cannot be found
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my @opts = qw(calc break);
+	my $res = $locator -> getExecArgsFormat( 'execDoesNotExist', \@opts );
+	my %result = %{$res};
+	$this -> assert_equals(0, $result{'status'});
+	$this -> assert_str_equals('Could not find execDoesNotExist',
+							$result{'error'});
+
+	return;
+}
+
+#==========================================
+# test_getExecPathArgsOneDash
+#------------------------------------------
+sub test_getExecPathArgsOneDash {
+	# ...
+	# Test behavior when an executable provides single dash argument options
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my $execDir = $this -> {dataDir} . 'bin';
+	my @opts = qw(calc break);
+	my $res = $locator -> getExecArgsFormat($execDir . '/singleDash', \@opts);
+	my %result = %{$res};
+	$this -> assert_equals(1, $result{'status'});
+	$this -> assert_str_equals('-calc', $result{'calc'});
+	$this -> assert_str_equals('-break', $result{'break'});
+
+	return;
+}
+
+#==========================================
+# test_getExecPathArgsSysLS
+#------------------------------------------
+sub test_getExecPathArgsSysLS {
+	# ...
+	# Test behavior when an executable provides single dash argument options
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my @opts = qw(directory full-time);
+	my $res = $locator -> getExecArgsFormat( 'ls', \@opts);
+	my %result = %{$res};
+	$this -> assert_equals(1, $result{'status'});
+	$this -> assert_str_equals('--directory', $result{'directory'});
+	$this -> assert_str_equals('--full-time', $result{'full-time'});
 
 	return;
 }
