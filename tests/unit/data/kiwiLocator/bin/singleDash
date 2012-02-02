@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+
+#================
+# FILE          : singleDash
+#----------------
+# PROJECT       : OpenSUSE Build-Service
+# COPYRIGHT     : (c) 2012 Novell Inc.
+#               :
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : Executable test script used for locator validation
+#               : Write a set of fake command line options to STDERR.
+#               :
+# STATUS        : Development
+#----------------
+
+use strict;
+use warnings;
+
+print STDOUT "Test helper singleDash\n";
+print STDERR "Usage:\n";
+print STDERR "\t-?  -help  => print help message\n";
+print STDERR "\t-calc      => calculate nothing\n";
+print STDERR "\t-option    => no options here\n";
+print STDERR "\t-break     => nothing to break from\n";
+print STDERR "\t-timeout   => take a break\n";
+
+exit 1;

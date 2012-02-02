@@ -202,21 +202,24 @@ sub getExecArgsFormat {
 	my @optsToGet = @{ $opts };
 	my %optInfo;
 	my $allOptionsFound;
+	my $execPath;
 	my $numOptsToGet = @optsToGet;
 	my $numOptsFound = 0;
 	my $CHILDWRITE;
 	my $CHILDSTDOUT;
 	my $CHILDSTDERR;
 	if (! -f $execName) {
-		$execName = $this -> getExecPath($execName);
-	}
-	if (! $execName) {
-		$optInfo{'status'} = 0;
-		$optInfo{'error'} = "Could not find $execName";
-		return \%optInfo;
+		$execPath = $this -> getExecPath($execName);
+		if (! $execPath) {
+			$optInfo{'status'} = 0;
+			$optInfo{'error'} = "Could not find $execName";
+			return \%optInfo;
+		} else {
+			$execName = $execPath
+		}
 	}
 	my $pid = open3 (
-		$CHILDWRITE, $CHILDSTDOUT, $CHILDSTDERR,"$execName --help"
+		$CHILDWRITE, $CHILDSTDOUT, $CHILDSTDERR, "$execName --help"
 	);
 	waitpid( $pid, 0 );
 	my $status = $? >> 8;
@@ -230,7 +233,7 @@ sub getExecArgsFormat {
 		GETOPTS:
 		for my $seekOpt (@optsToGet) {
 			if ($opt =~ /$seekOpt\s+/x) {
-				my @prts = split / /, $opt;
+				my @prts = split /\s/x, $opt;
 				OPTLINE:
 				for my $item (@prts) {
 					if ($item =~ /-+$seekOpt/x) {
@@ -249,14 +252,15 @@ sub getExecArgsFormat {
 	if ($allOptionsFound) {
 		$optInfo{'status'} = 1;
 	} else {
-		$optInfo{'status'} = 0;
-		for my $item (keys %optInfo) {
-			if (! grep { /$item/x } @optsToGet) {
+		my @foundOpts = keys %optInfo;
+		for my $item (@optsToGet) {
+			if (! grep { /$item/x } @foundOpts) {
 				my $msg = "Could not find argument $item for $execName";
 				$optInfo{'error'} = $msg;
 				last;
 			}
 		}
+		$optInfo{'status'} = 0;
 	}
 	return \%optInfo;
 }
