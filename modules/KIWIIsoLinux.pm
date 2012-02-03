@@ -76,18 +76,18 @@ sub new {
 	}
 	if (! -d $source) {
 		$kiwi -> error  ("No such file or directory: $source");
-		$kiwi -> failed (); 
-		return undef;
+		$kiwi -> failed ();
+		return;
 	}
 	if (! defined $dest) {
 		$kiwi -> error  ("No destination file specified");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	if (! $main::global) {
 		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Find iso tool to use on this system
@@ -102,7 +102,7 @@ sub new {
 	} else {
 		$kiwi -> error  ("No ISO creation tool found");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#=======================================
 	# path setup for supported archs
@@ -180,7 +180,7 @@ sub new {
 		$kiwi -> error  ("Couldn't create sort file: $sort: $!");
 		$kiwi -> failed ();
 		$this -> cleanISO();
-		return undef;
+		return;
 	}
 	$ldir = qxx ("mktemp -q -d /tmp/kiso-loader-XXXXXX 2>&1"); chomp $ldir;
 	$code = $? >> 8;
@@ -188,7 +188,7 @@ sub new {
 		$kiwi -> error  ("Couldn't create tmp directory: $ldir: $!");
 		$kiwi -> failed ();
 		$this -> cleanISO();
-		return undef;
+		return;
 	}
 	qxx ("chmod 755 $ldir");
 	#==========================================
@@ -361,7 +361,7 @@ sub ppc64_default {
 }
 
 #==========================================
-# callBootMethods 
+# callBootMethods
 #------------------------------------------
 sub callBootMethods {
 	my $this    = shift;
@@ -372,13 +372,13 @@ sub callBootMethods {
 	if (! @catalog) {
 		$kiwi -> error  ("Can't find valid boot/<arch>/ layout");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	foreach my $boot (@catalog) {
 		if ($boot =~ /(.*)_.*/) {
 			my $arch = $1;
 			qxx ("mkdir -p $ldir/".$base{$arch}{boot}."/loader");
-			no strict 'refs';
+			no strict 'refs'; ## no critic
 			&{$boot}($this,$arch);
 			use strict 'refs';
 		}
@@ -399,22 +399,16 @@ sub createLegacySortFile {
 	my $ldir = $this->{tmpdir};
 	my $FD;
 	if (! -d $src."/".$base{$arch}{boot}) {
-		return undef;
+		return;
 	}
-	if (! open $FD, ">$sort") {
+	if (! open $FD, '>', "$sort") {
 		$kiwi -> error  ("Failed to open sort file: $!");
 		$kiwi -> failed ();
 		$this -> cleanISO();
-		return undef;
-	}
-	sub generateWanted {
-		my $filelist = shift;
-		return sub {
-			push (@{$filelist},$File::Find::name);
-		}
+		return;
 	}
 	my @list = ();
-	my $wref = generateWanted (\@list);
+	my $wref = $this -> __generateWanted (\@list);
 	find ({wanted => $wref,follow => 0 },$src."/".$base{$arch}{boot}."/loader");
 	print $FD "$ldir/".$base{$arch}{boot}."/boot.catalog 3"."\n";
 	print $FD $base{$arch}{boot}."/boot.catalog 3"."\n";
@@ -428,7 +422,7 @@ sub createLegacySortFile {
 }
 
 #==========================================
-# createS390CDLoader 
+# createS390CDLoader
 #------------------------------------------
 sub createS390CDLoader {
 	my $this = shift;
@@ -454,14 +448,14 @@ sub createS390CDLoader {
 		$kiwi -> error  ("Cannot open kernel image $image: $!");
 		$kiwi -> failed ();
 		$this -> cleanISO();
-		return undef;
+		return;
 	}
 
 	if (! sysopen(initrd_fh,$initrd,O_RDONLY) ) {
 		$kiwi -> error  ("Cannot open initrd $initrd: $!");
 		$kiwi -> failed ();
 		$this -> cleanISO ();
-		return undef;
+		return;
 	}
 
 	my $image_size = (stat(image_fh))[7];
@@ -490,17 +484,18 @@ sub createS390CDLoader {
 		my $line;
 
 		$cmdline = '';
-		if (! open(parm_fh,$parmfile) ) {
+		my $PARMFH;
+		if (! open($PARMFH, '<', $parmfile) ) {
 			$kiwi -> error  ("Cannot open parmfile $parmfile: $!");
 			$kiwi -> failed ();
 			$this -> cleanISO();
-			return undef;
+			return;
 		}
-		while($line=<parm_fh>) {
+		while($line=<$PARMFH>) {
 			chomp $line;
 			$cmdline .= $line . " ";
 		}
-		close(parm_fh);
+		close($PARMFH);
 	}
 
 	if ($cmdline ne "") {
@@ -512,7 +507,7 @@ sub createS390CDLoader {
 		$kiwi -> error  ("Kernel commandline too long (". length($cmdline) ." bytes)");
 		$kiwi -> failed ();
 		$this -> cleanISO ();
-		return undef;
+		return;
 	}
 
 	# Now create the image file.
@@ -520,7 +515,7 @@ sub createS390CDLoader {
 		$kiwi -> error  ("Cannot open outfile $outfile: $!");
 		$kiwi -> failed ();
 		$this -> cleanISO ();
-		return undef;
+		return;
 	}
 
 	# First fill the entire size with zeroes
@@ -528,7 +523,7 @@ sub createS390CDLoader {
 		$kiwi -> error  ("Cannot open /dev/zero: $!");
 		$kiwi -> failed ();
 		$this -> cleanISO ();
-		return undef;
+		return;
 	}
 
 	my $buffer="";
@@ -611,7 +606,7 @@ sub createVolumeID {
 				$number = $1; last;
 			}
 		}
-		open ($FD,"$src/content");
+		open ($FD, '<', "$src/content");
 		foreach my $line (<$FD>) {
 			if (($version) && ($name)) {
 				last;
@@ -635,7 +630,7 @@ sub createVolumeID {
 				$hfsvolid = substr ($hfsvolid,0,25);
 				$hfsvolid.= " $number";
 			}
-		} elsif (open ($FD,$src."media.1/build")) {
+		} elsif (open ($FD, '<', $src."media.1/build")) {
 			my $line = <$FD>; close $FD;
 			if ($line =~ /(\w+)-(\d+)-/) {
 				$hfsvolid = "$1 $2 $number";
@@ -658,7 +653,7 @@ sub createISOLinuxConfig {
 		$kiwi -> error  ("Can't find isolinux-config binary");
 		$kiwi -> failed ();
 		$this -> cleanISO();
-		return undef;
+		return;
 	}
 	my $data = qxx (
 		"$isox --base $boot/loader $src/$boot/loader/isolinux.bin 2>&1"
@@ -705,7 +700,7 @@ sub createISO {
 		$kiwi -> error  ("Failed to call $prog: $data");
 		$kiwi -> failed ();
 		$this -> cleanISO();
-		return undef;
+		return;
 	}
 	$this -> cleanISO();
 	return $this;
@@ -745,7 +740,7 @@ sub checkImage {
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call tagmedia: $data");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	return $this;
 }
@@ -821,11 +816,11 @@ sub relocateCatalog {
 	my $iso  = $this->{dest};
 	my $ISO;
 	$kiwi -> info ("Relocating boot catalog ");
-	if (! open $ISO, "+<$iso") {
+	if (! open $ISO, '+<', "$iso") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed opening iso file: $iso: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my $rs = read_sector_closure  ($ISO);
 	my $ws = write_sector_closure ($ISO);
@@ -838,7 +833,7 @@ sub relocateCatalog {
 		$kiwi -> error  ("No iso9660 filesystem");
 		$kiwi -> failed ();
 		close $ISO;
-		return undef;
+		return;
 	}
 	my $path_table = unpack "V", substr($vol_descr, 0x08c, 4);
 	if ($path_table < 0x11) {
@@ -846,7 +841,7 @@ sub relocateCatalog {
 		$kiwi -> error  ("Strange path table location: $path_table");
 		$kiwi -> failed ();
 		close $ISO;
-		return undef;
+		return;
 	}
 	my $applemedia = read_sector (0x00);
 	my $applemedia_id = substr($applemedia, 0x230, 19);
@@ -865,7 +860,7 @@ sub relocateCatalog {
 		$kiwi -> error  ("Given iso is not bootable");
 		$kiwi -> failed ();
 		close $ISO;
-		return undef;
+		return;
 	}
 	my $boot_catalog = unpack "V", substr($eltorito_descr, 0x47, 4);
 	if ($boot_catalog < 0x12) {
@@ -873,7 +868,7 @@ sub relocateCatalog {
 		$kiwi -> error  ("Strange boot catalog location: $boot_catalog");
 		$kiwi -> failed ();
 		close $ISO;
-		return undef;
+		return;
 	}
 	my $vol_descr2 = read_sector ($new_location - 1);
 	my $vol_id2 = substr($vol_descr2, 0, 7);
@@ -893,7 +888,7 @@ sub relocateCatalog {
 		$kiwi -> error  ("Unexpected iso layout");
 		$kiwi -> failed ();
 		close $ISO;
-		return undef;
+		return;
 	}
 	if ($boot_catalog == $new_location) {
 		$kiwi -> skipped ();
@@ -935,11 +930,11 @@ sub fixCatalog {
 	my $iso  = $this->{dest};
 	my $ISO;
 	$kiwi -> info ("Fixing boot catalog according to standard");
-	if (! open $ISO, "+<$iso") {
+	if (! open $ISO, '+<', "$iso") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed opening iso file: $iso: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my $rs = read_sector_closure  ($ISO);
 	my $ws = write_sector_closure ($ISO);
@@ -952,7 +947,7 @@ sub fixCatalog {
 		$kiwi -> error  ("No iso9660 filesystem");
 		$kiwi -> failed ();
 		close $ISO;
-		return undef;
+		return;
 	}
 	my $applemedia = read_sector (0x00);
 	my $applemedia_id = substr($applemedia, 0x230, 19);
@@ -970,7 +965,7 @@ sub fixCatalog {
 		$kiwi -> error  ("ISO Not bootable");
 		$kiwi -> failed ();
 		close $ISO;
-		return undef;
+		return;
 	}
 	my $boot_catalog_idx = unpack "V", substr($eltorito_descr, 0x47, 4);
 	if ($boot_catalog_idx < 0x12) {
@@ -978,7 +973,7 @@ sub fixCatalog {
 		$kiwi -> error  ("Strange boot catalog location: $boot_catalog_idx");
 		$kiwi -> failed ();
 		close $ISO;
-		return undef;
+		return;
 	}
 	my $boot_catalog = read_sector ($boot_catalog_idx);
 	my $entry1 = substr $boot_catalog, 32 * 1, 32;
@@ -1007,10 +1002,10 @@ sub read_sector_closure {
 	return sub {
 		my $buf;
 		if (! seek $ISO, $_[0] * 0x800, 0) {
-			return undef;
+			return;
 		}
 		if (sysread($ISO, $buf, 0x800) != 0x800) {
-			return undef;
+			return;
 		}
 		return $buf;
 	}
@@ -1023,10 +1018,10 @@ sub write_sector_closure {
 	my $ISO = shift;
 	return sub {
 		if (! seek $ISO, $_[0] * 0x800, 0) {
-			return undef;
+			return;
 		}
 		if (syswrite($ISO, $_[1], 0x800) != 0x800) {
-			return undef;
+			return;
 		}
 	}
 }
@@ -1041,6 +1036,17 @@ sub getTool {
 	my $this = shift;
 	my $tool = $this->{tool};
 	return basename $tool;
+}
+
+#==========================================
+# __generateWanted
+#------------------------------------------
+sub __generateWanted {
+	my $this = shift;
+	my $filelist = shift;
+	return sub {
+		push (@{$filelist},$File::Find::name);
+	}
 }
 
 1;
