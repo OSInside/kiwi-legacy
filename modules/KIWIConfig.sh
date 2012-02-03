@@ -546,9 +546,8 @@ function baseStripRPM {
 	# remove rpms defined in config.xml 
 	# under image=delete section
 	# ----
-	for i in `baseGetPackagesForDeletion`
-	do
-		Rpm -e --nodeps $i
+	for i in `baseGetPackagesForDeletion`;do
+		Rpm -e --nodeps --noscripts $i
 	done
 }
 #======================================
@@ -1536,8 +1535,10 @@ function suseRemovePackagesMarkedForDeletion {
 	# This function removes all packages which are
 	# added into the <packages type="delete"> section
 	# ----
-	rpm -e --nodeps \
-		$(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
+	local packs=$(baseGetPackagesForDeletion)
+	local final=$(rpm -q $packs | grep -v 'is not installed')
+	echo "suseRemovePackagesMarkedForDeletion: $final"
+	Rpm -e --nodeps --noscripts $final
 }
 
 #======================================

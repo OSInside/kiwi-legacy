@@ -15,17 +15,6 @@ baseSetupOEMPartition
 suseStripKernel
 
 #==========================================
-# setup gfxboot
-#------------------------------------------
-suseGFXBoot NLD grub
-
-#==========================================
-# remove unneeded packages
-#------------------------------------------
-rpm -e --nodeps --noscripts \
-	$(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
-
-#==========================================
 # remove unneeded files
 #------------------------------------------
 suseStripInitrd

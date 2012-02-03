@@ -1363,7 +1363,7 @@ sub removePackages {
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
-		$kiwi -> info ("Removing addon packages...");
+		$kiwi -> info ("Removing packages...");
 		print $fd "function clean { kill \$SPID;";
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
@@ -1386,14 +1386,14 @@ sub removePackages {
 	#==========================================
 	# zypper
 	#------------------------------------------
-	if ($manager eq "zypper") {
+	if (($manager eq "zypper") || ($manager eq "ensconce")) {
 		my @zypper = @{$this->{zypper_chroot}};
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
-		$kiwi -> info ("Removing addon packages...");
-		my @installOpts = (
-			"--force-resolution"
+		$kiwi -> info ("Removing packages...");
+		my @removeOpts = (
+			"--nodeps"
 		);
 		print $fd "function clean { kill \$SPID;";
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
@@ -1402,28 +1402,15 @@ sub removePackages {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
-		print $fd "export YAST_IS_RUNNING=true\n";
-		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
-		print $fd "export ZYPP_ARIA2C=0\n";
-		print $fd "@kchroot @zypper remove ";
-		print $fd "@installOpts @removePackages || true &\n";
+		print $fd "final=\$(@kchroot rpm -q @removePackages ";
+		print $fd " | grep -v 'is not installed')"."\n";
+		print $fd "@kchroot rpm -e ";
+		print $fd "@removeOpts \$final || true &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
 		print $fd "echo \$ECODE > $screenCall.exit\n";
 		print $fd "exit \$ECODE\n";
 		$fd -> close();
-	}
-	#==========================================
-	# ensconce
-	#------------------------------------------
-	if ($manager eq "ensconce") {
-		# FIXME
-		$kiwi -> failed ();
-		$kiwi -> error  ("*** not implemeted ***");
-		$kiwi -> failed ();
-		$fd -> close();
-		return;
 	}
 	#==========================================
 	# yum
@@ -1433,7 +1420,7 @@ sub removePackages {
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
-		$kiwi -> info ("Removing addon packages...");
+		$kiwi -> info ("Removing packages...");
 		print $fd "function clean { kill \$SPID;";
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;";

@@ -26,13 +26,17 @@ test -f /.profile && . /.profile
 #--------------------------------------
 echo "Configure image: [$kiwi_iname]..."
 
+#==========================================
+# setup gfxboot
+#------------------------------------------
+rhelGFXBoot SLES grub
+
 #======================================
 # Keep UTF-8 locale
 #--------------------------------------
 baseStripLocales \
 	$(for i in $(echo $kiwi_language | tr "," " ");do echo -n "$i.utf8 ";done)
 baseStripTranslations kiwi.mo
-
 
 #======================================
 # Setup link for the grub stage files

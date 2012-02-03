@@ -5,11 +5,6 @@ test -f /.profile && . /.profile
 echo "Configure image: [$kiwi_iname]..."
 
 #==========================================
-# pack boot includes
-#------------------------------------------
-# basePackBootIncludes
-
-#==========================================
 # setup config.oempartition if required
 #------------------------------------------
 baseSetupOEMPartition
@@ -20,25 +15,9 @@ baseSetupOEMPartition
 rhelStripKernel
 
 #==========================================
-# setup gfxboot
-#------------------------------------------
-rhelGFXBoot SLES grub
-
-#==========================================
-# remove unneeded packages
-#------------------------------------------
-rpm -e --nodeps --noscripts \
-	$(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
-
-#==========================================
 # remove unneeded files
 #------------------------------------------
 rhelStripInitrd
-
-#==========================================
-# unpack boot includes
-#------------------------------------------
-# baseUnpackBootIncludes
 
 #==========================================
 # umount /proc

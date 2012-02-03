@@ -1180,6 +1180,20 @@ sub setup {
 		$kiwi -> done ();
 	}
 	#========================================
+	# remove packages from delete section
+	#----------------------------------------
+	my @delete_packs = $xml -> getDeleteList();
+	if (@delete_packs) {
+		$kiwi -> info ("Removing packages marked for deletion:\n");
+		foreach my $p (@delete_packs) {
+			$kiwi -> info (" --> $p\n");
+		}
+		if (! $manager -> removePackages (\@delete_packs)) {
+			$manager -> freeLock();
+			return;
+		}
+	}
+	#========================================
 	# create /etc/ImageID file
 	#----------------------------------------
 	my $id = $xml -> getImageID();
