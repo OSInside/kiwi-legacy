@@ -12,7 +12,7 @@
 #               : creating image output formats based on the
 #               : raw output file like vmdk, ovf, hyperV
 #               : and more
-#               : 
+#               :
 #               :
 # STATUS        : Development
 #----------------
@@ -33,7 +33,7 @@ use KIWILocator;
 sub new {
 	# ...
 	# Create a new KIWIImageFormat object which is used
-	# to gather information required for the format conversion 
+	# to gather information required for the format conversion
 	# ---
 	#==========================================
 	# Object setup
@@ -66,7 +66,7 @@ sub new {
 	if (! (-f $image || -b $image)) {
 		$kiwi -> error ("no such image file: $image");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	} 
 	#==========================================
 	# read XML if required
@@ -83,7 +83,7 @@ sub new {
 		if (! defined $xml) {
 			$kiwi -> error  ("Can't load XML configuration, not an image ?");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	}
 	#==========================================
@@ -101,7 +101,7 @@ sub new {
 	if (! $main::global) {
 		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# Read some XML data
@@ -141,14 +141,14 @@ sub createFormat {
 	if (! defined $format) {
 		$kiwi -> warning ("No format for $imgtype conversion specified");
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	} else {
 		my $data = qxx ("parted $image print 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("system image is not a disk or filesystem");
 			$kiwi -> failed ();
-			return undef
+			return
 		}
 	}
 	#==========================================
@@ -178,7 +178,7 @@ sub createFormat {
 		);
 		$kiwi -> skipped ();
 	}
-	return undef;
+	return;
 }
 
 #==========================================
@@ -202,7 +202,7 @@ sub createMaschineConfiguration {
 			"Can't create machine setup for selected $imgtype image type"
 		);
 		$kiwi -> skipped ();
-		return undef;
+		return;
 	}
 	if (($type{bootprofile}) && ($type{bootprofile} eq "xen")
 		&& ($xend eq "domU")) {
@@ -220,7 +220,7 @@ sub createMaschineConfiguration {
 		);
 		$kiwi -> skipped ();
 	}
-	return undef;
+	return;
 }
 
 #==========================================
@@ -236,7 +236,7 @@ sub createOVA {
 	#------------------------------------------
 	my $ovfdir = $this -> createOVF();
 	if (! $ovfdir) {
-		return undef;
+		return;
 	}
 	return $ovfdir;
 }
@@ -267,7 +267,7 @@ sub createOVF {
 		$this->{format} = "vmdk";
 		$image = $this->createVMDK();
 		if (! $image) {
-			return undef;
+			return;
 		}
 		$this->{format} = $origin_format;
 		$this->{image}  = $image;
@@ -320,7 +320,7 @@ sub createVMDK {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create $format image: $status");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	$kiwi -> done ();
 	return $target;
@@ -346,7 +346,7 @@ sub createVHD {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create vhd image: $status");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	$kiwi -> done ();
 	return $target;
@@ -380,8 +380,8 @@ sub createEC2 {
 	# Import AWS region kernel map
 	#------------------------------------------
 	my %ec2RegionKernelMap;
-	if (! open ($FD,$this->{gdata}->{KRegion})) {
-		return undef;
+	if (! open ($FD, '<', $this->{gdata}->{KRegion})) {
+		return;
 	}
 	while (my $line = <$FD>) {
 		next if $line =~ /^#/;
@@ -434,7 +434,7 @@ sub createEC2 {
 		$kiwi->failed ();
 		$kiwi->error  ("Unsupport AWS EC2 architecture: $arch");
 		$kiwi->failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# loop mount root image and create config
@@ -445,7 +445,7 @@ sub createEC2 {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	$status = qxx ("mount -o loop $source $tmpdir 2>&1");
 	$result = $? >> 8;
@@ -453,33 +453,28 @@ sub createEC2 {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't loop mount $source: $status");
 		$kiwi -> failed ();
-		return undef;
-	}
-	sub clean_loop {
-		my $dir = shift;
-		qxx ("umount $dir 2>&1");
-		qxx ("rmdir  $dir 2>&1");
+		return;
 	}
 	#==========================================
 	# setup Xen console as serial tty
 	#------------------------------------------
 	$this -> __copy_origin ("$tmpdir/etc/inittab");
-	if (! open $FD, ">>$tmpdir/etc/inittab") {
+	if (! open $FD, '>>', "$tmpdir/etc/inittab") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/etc/inittab: $!");
 		$kiwi -> failed ();
-		clean_loop $tmpdir;
-		return undef;
+		$this -> __clean_loop ($tmpdir);
+		return;
 	}
 	print $FD "\n";
 	print $FD 'X0:12345:respawn:/sbin/agetty -L 9600 xvc0 xterm'."\n";
 	close $FD;
-	if (! open $FD, ">>$tmpdir/etc/securetty") {
+	if (! open $FD, '>>', "$tmpdir/etc/securetty") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/etc/securetty: $!");
 		$kiwi -> failed ();
-		clean_loop $tmpdir;
-		return undef;
+		$this -> __clean_loop ($tmpdir);
+		return;
 	}
 	print $FD "\n";
 	print $FD 'xvc0'."\n";
@@ -487,12 +482,12 @@ sub createEC2 {
 	#==========================================
 	# create initrd
 	#------------------------------------------
-	if (! open $FD, ">$tmpdir/create_initrd.sh") {
+	if (! open $FD, '>', "$tmpdir/create_initrd.sh") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/create_initrd.sh: $!");
 		$kiwi -> failed ();
-		clean_loop $tmpdir;
-		return undef;
+		$this -> __clean_loop ($tmpdir);
+		return;
 	}
 	print $FD 'export rootdev=/dev/sda1'."\n";
 	print $FD 'export rootfstype='.$type{type}."\n";
@@ -507,8 +502,8 @@ sub createEC2 {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create initrd: $status");
 		$kiwi -> failed ();
-		clean_loop $tmpdir;
-		return undef;
+		$this -> __clean_loop ($tmpdir);
+		return;
 	}
 	qxx ("rm -f $tmpdir/create_initrd.sh");
 	#==========================================
@@ -517,33 +512,33 @@ sub createEC2 {
 	# copy grub image files
 	qxx ("cp $tmpdir/usr/lib/grub/* $tmpdir/boot/grub");
 	# boot/grub/device.map
-	if (! open $FD, ">$tmpdir/boot/grub/device.map") {
+	if (! open $FD, '>', "$tmpdir/boot/grub/device.map") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/boot/grub/device.map: $!");
 		$kiwi -> failed ();
-		clean_loop $tmpdir;
-		return undef;
+		$this -> __clean_loop ($tmpdir);
+		return;
 	}
-	print $FD '(hd0)'."\t".'/dev/sda1'."\n"; 
+	print $FD '(hd0)'."\t".'/dev/sda1'."\n";
 	close $FD;
 	# etc/grub.conf
-	if (! open $FD, ">$tmpdir/etc/grub.conf") {
+	if (! open $FD, '>', "$tmpdir/etc/grub.conf") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/etc/grub.conf: $!");
 		$kiwi -> failed ();
-		clean_loop $tmpdir;
-		return undef;
+		$this -> __clean_loop ($tmpdir);
+		return;
 	}
 	print $FD 'setup --stage2=/boot/grub/stage2 --force-lba (hd0) (hd0)'."\n";
 	print $FD 'quit'."\n";
 	close $FD;
 	# boot/grub/menu.lst
 	my $args="xencons=xvc0 console=xvc0 splash=silent showopts";
-	if (! open $FD, ">$tmpdir/create_bootmenu.sh") {
+	if (! open $FD, '>', "$tmpdir/create_bootmenu.sh") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/create_bootmenu.sh: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	print $FD 'file=/boot/grub/menu.lst'."\n";
 	print $FD 'args="'.$args.'"'."\n";
@@ -575,13 +570,14 @@ sub createEC2 {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create boot menu: $status");
 		$kiwi -> failed ();
-		clean_loop $tmpdir;
-		return undef;
+		$this -> __clean_loop ($tmpdir);
+		return;
 	}
 	qxx ("rm -f $tmpdir/create_bootmenu.sh");
 	# etc/sysconfig/bootloader
-	if (open $FD, "$tmpdir/etc/sysconfig/bootloader") {
-		my @lines = <$FD>; close $FD;
+	if (open $FD, '<', "$tmpdir/etc/sysconfig/bootloader") {
+		my @lines = <$FD>;
+		close $FD;
 		$this -> __ensure_key (\@lines, "LOADER_TYPE"      , "grub");
 		$this -> __ensure_key (\@lines, "DEFAULT_NAME"     , $title);
 		$this -> __ensure_key (\@lines, "DEFAULT_APPEND"   , $args );
@@ -591,7 +587,7 @@ sub createEC2 {
 		$this -> __ensure_key (\@lines, "XEN_KERNEL_APPEND", $args );
 		$this -> __ensure_key (\@lines, "XEN_APPEND"       , ""    );
 		$this -> __ensure_key (\@lines, "XEN_VGA"          , ""    );
-		open  $FD, ">$tmpdir/etc/sysconfig/bootloader";
+		open  $FD, '>', "$tmpdir/etc/sysconfig/bootloader";
 		print $FD @lines;
 		close $FD;
 	}
@@ -599,19 +595,19 @@ sub createEC2 {
 	# setup fstab
 	#------------------------------------------
 	$this -> __copy_origin ("$tmpdir/etc/fstab");
-	if (! open $FD, ">>$tmpdir/etc/fstab") {
+	if (! open $FD, '>>', "$tmpdir/etc/fstab") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/etc/fstab: $!");
 		$kiwi -> failed ();
-		clean_loop $tmpdir;
-		return undef;
+		$this -> __clean_loop ($tmpdir);
+		return;
 	}
 	print $FD "/dev/sda1 / $type{type} defaults 0 0"."\n";
 	close $FD;
 	#==========================================
 	# cleanup loop
 	#------------------------------------------
-	clean_loop $tmpdir;
+	$this -> __clean_loop ($tmpdir);
 	#==========================================
 	# call ec2-bundle-image (Amazon toolkit)
 	#------------------------------------------
@@ -632,7 +628,7 @@ sub createEC2 {
 			"Couldn't find ec2-bundle-image; required to create EC2 image"
 		);
 		$kiwi -> failed ();
-		return undef
+		return
 	}
 	#==========================================
 	# Create bundle(s)
@@ -661,7 +657,7 @@ sub createEC2 {
 			$kiwi -> failed ();
 			$kiwi -> error  ("$bundleCmd: $status");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	}
 	$kiwi -> done();
@@ -739,7 +735,7 @@ sub createXENConfiguration {
 	#==========================================
 	# Create config file
 	#------------------------------------------
-	if (! open ($FD,">$file")) {
+	if (! open ($FD, '>', "$file")) {
 		$kiwi -> skipped ();
 		$kiwi -> warning  ("Couldn't create xenconfig file: $!");
 		$kiwi -> skipped ();
@@ -848,7 +844,7 @@ sub createVMwareConfiguration {
 	#==========================================
 	# Create config file
 	#------------------------------------------
-	if (! open ($FD,">$file")) {
+	if (! open ($FD, '>', "$file")) {
 		$kiwi -> skipped ();
 		$kiwi -> warning ("Couldn't create VMware config file: $!");
 		$kiwi -> skipped ();
@@ -1028,10 +1024,10 @@ sub createOVFConfiguration {
 	#==========================================
 	# create config file
 	#------------------------------------------
-	if (! open ($FD,">$ovf")) {
+	if (! open ($FD, '>', "$ovf")) {
 		$kiwi -> error ("Couldn't create OVF config file: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	#==========================================
 	# global setup
@@ -1116,10 +1112,10 @@ sub createOVFConfiguration {
 	#------------------------------------------
 	my $mf = $ovf;
 	$mf =~ s/\.ovf$/\.mf/;
-	if (! open ($FD,">$mf")) {
+	if (! open ($FD, '>', "$mf")) {
 		$kiwi -> error ("Couldn't create manifest file: $!");
 		$kiwi -> failed ();
-		return undef;
+		return;
 	}
 	my $base_image = basename $this->{image};
 	my $base_config= basename $ovf;
@@ -1141,7 +1137,7 @@ sub createOVFConfiguration {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create $format image: $status");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 	}
 	$kiwi -> done();
@@ -1183,6 +1179,15 @@ sub __copy_origin {
 	} else {
 		qxx ("cp $file $file.orig");
 	}
+}
+#==========================================
+# __clean_loop
+#------------------------------------------
+sub __clean_loop {
+	my $this = shift;
+	my $dir = shift;
+	qxx ("umount $dir 2>&1");
+	qxx ("rmdir  $dir 2>&1");
 }
 
 1;
