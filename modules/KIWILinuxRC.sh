@@ -2273,6 +2273,10 @@ function setupBootLoaderLilo {
 	local title=""
 	local rdisk=""
 	local fbmode=$vga
+	local loader_type=lilo
+	if [ "$arch" = "ppc64" ];then
+		loader_type=ppc
+	fi
 	if [ -z "$fbmode" ];then
 		fbmode=$DEFAULT_VGA
 	fi
@@ -2437,7 +2441,7 @@ function setupBootLoaderLilo {
 	#======================================
 	# create sysconfig/bootloader
 	#--------------------------------------
-	echo "LOADER_TYPE=\"lilo\""                               > $sysb
+	echo "LOADER_TYPE=\"$loader_type\""                       > $sysb
 	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
 	echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb 
 	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
