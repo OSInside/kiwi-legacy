@@ -101,8 +101,8 @@
 		<package name="w3m"/>
 		<rhelGroup name="Base"/>
 		<rhelGroup name="Console internet tools"/>
-		<!-- gfxmenu not supported by rhel6 grub -->
-		<!--<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>-->
+<!-- gfxmenu not supported by rhel6 grub -->
+<!--<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>-->
 		<package name="redhat-logos" bootinclude="true" bootdelete="true"/>
 	</packages>
 	<packages type="bootstrap">
