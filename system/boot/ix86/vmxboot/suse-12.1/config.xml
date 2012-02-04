@@ -134,46 +134,22 @@
 		<package name="procps"/>
 	</packages>
 	<packages type="delete">
-		<package name="PolicyKit"/>
-		<package name="audit-libs"/>
-		<package name="blocxx"/>
 		<package name="cpio"/>
 		<package name="cracklib-dict-full"/>
-		<package name="cracklib-dict-small"/>
 		<package name="cyrus-sasl"/>
-		<package name="db"/>
-		<package name="expat"/>
 		<package name="fillup"/>
 		<package name="gawk"/>
 		<package name="gdbm"/>
-		<package name="glib2"/>
-		<package name="gnome-filesystem"/>
-		<package name="gpg"/>
 		<package name="info"/>
 		<package name="insserv"/>
 		<package name="iproute2"/>
-		<package name="iptables"/>
-		<package name="irqbalance"/>
-		<package name="licenses"/>
-		<package name="limal"/>
-		<package name="limal-bootloader"/>
-		<package name="limal-perl"/>
-		<package name="logrotate"/>
 		<package name="make"/>
-		<package name="mdadm"/>
 		<package name="mingetty"/>
 		<package name="openSUSE-release"/>
-		<package name="openldap2-client"/>
-		<package name="openslp"/>
 		<package name="pam"/>
 		<package name="pam-modules"/>
-		<package name="pcre"/>
 		<package name="perl"/>
 		<package name="perl-Bootloader"/>
-		<package name="perl-gettext"/>
 		<package name="permissions"/>
-		<package name="pm-utils"/>
-		<package name="pmtools"/>
-		<package name="suse-build-key"/>
 	</packages>
 </image>

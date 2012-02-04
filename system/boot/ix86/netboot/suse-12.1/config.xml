@@ -237,67 +237,22 @@
 		<package name="glibc-locale"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,xen">
-		<package name="PolicyKit"/>
-		<package name="audit-libs"/>
-		<package name="blocxx"/>
 		<package name="cpio"/>
 		<package name="cracklib-dict-full"/>
-		<package name="cracklib-dict-small"/>
-		<package name="db"/>
 		<package name="diffutils"/>
-		<package name="expat"/>
 		<package name="fillup"/>
 		<package name="gdbm"/>
-		<package name="glib2"/>
-		<package name="glibc-locale"/>
-		<package name="gnome-filesystem"/>
-		<package name="gpg"/>
 		<package name="info"/>
 		<package name="insserv"/>
 		<package name="iproute2"/>
-		<package name="iptables"/>
-		<package name="irqbalance"/>
-		<package name="licenses"/>
-		<package name="limal"/>
-		<package name="limal-bootloader"/>
-		<package name="limal-perl"/>
 		<package name="logrotate"/>
 		<package name="make"/>
 		<package name="mingetty"/>
 		<package name="openSUSE-release"/>
-		<package name="openldap2-client"/>
-		<package name="openslp"/>
 		<package name="pam"/>
 		<package name="pam-modules"/>
-		<package name="pcre"/>
 		<package name="perl"/>
 		<package name="perl-Bootloader"/>
-		<package name="perl-gettext"/>
 		<package name="permissions"/>
-		<package name="pm-utils"/>
-		<package name="pmtools"/>
-		<package name="suse-build-key"/>
-	</packages>
-	<packages type="delete" profiles="diskless">
-		<package name="PolicyKit"/>
-		<package name="bundle-lang-common-zh"/>
-		<package name="cracklib-dict-full"/>
-		<package name="cracklib-dict-small"/>
-		<package name="iptables"/>
-		<package name="krb5"/>
-		<package name="licenses"/>
-		<package name="make"/>
-		<package name="openldap2-client"/>
-		<package name="openslp"/>
-		<package name="pam-config"/>
-		<package name="pam-modules"/>
-		<package name="pciutils"/>
-		<package name="perl"/>
-		<package name="perl-HTML-Tagset"/>
-		<package name="perl-gettext"/>
-		<package name="setserial"/>
-		<package name="xorg-x11-libX11"/>
-		<package name="xorg-x11-libXau"/>
-		<package name="xorg-x11-libxcb"/>
 	</packages>
 </image>
