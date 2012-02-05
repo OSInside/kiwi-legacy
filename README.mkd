@@ -14,6 +14,8 @@ The second stage creates from a required unpacked image an
 operating system image. The result of the second stage is called
 a packed image or short an image.
 
+bla bla
+
 Installation
 ------------
 
