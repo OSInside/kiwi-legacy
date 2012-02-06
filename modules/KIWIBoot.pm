@@ -1711,7 +1711,7 @@ sub setupBootDisk {
 	# setup boot partition type
 	#------------------------------------------
 	my $partid = 83;
-	if ($bootloader =~ /syslinux|uboot/) {
+	if ($bootloader =~ /syslinux/) {
 		$partid = "c";
 	} elsif ($bootloader eq "yaboot") {
 		$partid = "41";
@@ -2224,7 +2224,7 @@ sub setupBootDisk {
 		if ($lvm) {
 			$boot = $deviceMap{0};
 		}
-		if ($bootloader =~ /syslinux|uboot|yaboot/) {
+		if ($bootloader =~ /syslinux|yaboot/) {
 			$kiwi -> info ("Creating DOS boot filesystem");
 			if ($bootloader eq "yaboot") {
 				$status = qxx ("/sbin/mkdosfs -F 16 $boot 2>&1");
@@ -3904,8 +3904,8 @@ sub setupBootLoaderConfiguration {
 		print FD 'setenv initrd_high "0xffffffff";'."\n";
 		print FD 'setenv fdt_high "0xffffffff";'."\n";
 		print FD 'setenv bootcmd "';
-		print FD 'fatload mmc 0:1 0x80000000 boot/linux.vmx; ';
-		print FD 'fatload mmc 0:1 0x81600000 boot/initrd.uboot; ';
+		print FD 'ext2load mmc 0:1 0x80000000 boot/linux.vmx; ';
+		print FD 'ext2load mmc 0:1 0x81600000 boot/initrd.uboot; ';
 		print FD 'bootm 0x80000000 0x81600000";'."\n";
 		if ($type =~ /^KIWI CD/) {
 			$kiwi -> failed ();
@@ -4464,7 +4464,48 @@ sub installBootLoader {
 	# install uboot
 	#------------------------------------------
 	if ($loader eq "uboot") {
-		# uboot loader doesn't get installed
+		if (! $deviceMap) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("No device map available");
+			$kiwi -> failed ();
+			return;
+		}
+		my %deviceMap = %{$deviceMap};
+		my $device = $deviceMap{$bootpart+1};
+
+		#==========================================
+		# mount boot device...
+		#------------------------------------------
+		$status = qxx ("mount $device /mnt 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't mount boot partition: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return;
+		}
+		#==========================================
+		# install MLO as raw
+		#------------------------------------------
+		if (-f "/mnt/boot/MLO") {
+			$kiwi -> info ("Installing MLO on device: $diskname");
+			my $MLO = "/mnt/boot/MLO";
+			my $opt = "count=1 seek=1 conv=notrunc";
+			$status = qxx (
+				"dd if=$MLO of=$diskname bs=128k $opt 2>&1"
+			);
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't install MLO on $diskname: $status");
+				$kiwi -> failed ();
+				qxx ("umount /mnt 2>&1");
+				$this -> cleanLoop ();
+				return;
+			}
+		}
+		qxx ("umount /mnt 2>&1");
 	}
 	#==========================================
 	# more boot managers to come...
@@ -5495,10 +5536,6 @@ sub __getBootSize {
 	my $minMB  = 150;
 	if ($gotMB < $minMB) {
 		$gotMB = $minMB;
-	}
-	# on arm it's required to have a maximum of 64MB for the boot part
-	if ($arch =~ /arm/) {
-		$gotMB = 64;
 	}
 	$kiwi -> loginfo ("Set boot space to: ".$gotMB."M\n");
 	return $gotMB;
