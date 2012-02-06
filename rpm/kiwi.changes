@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Feb  6 10:16:40 CET 2012 - ms@suse.de
+
+- added rootfs check to ec2 format code
+
+-------------------------------------------------------------------
 Tue Jan 24 17:30:01 CET 2012 - ms@suse.de
 
 - really fixed basePackBootIncludes to pack only files and don't
