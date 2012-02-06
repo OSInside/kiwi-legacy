@@ -581,14 +581,23 @@ sub createEC2 {
 	# setup fstab
 	#------------------------------------------
 	$this -> __copy_origin ("$tmpdir/etc/fstab");
-	if (! open $FD, ">>$tmpdir/etc/fstab") {
+	if (! open $FD, '+<', "$tmpdir/etc/fstab") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/etc/fstab: $!");
 		$kiwi -> failed ();
 		clean_loop $tmpdir;
 		return undef;
 	}
-	print $FD "/dev/sda1 / $type{type} defaults 0 0"."\n";
+	my $rootfs=0;
+	foreach my $line (<$FD>) {
+		my @entries = split (/\s+/,$line);
+		if ($entries[1] eq "/") {
+			$rootfs=1; last;
+		}
+	}
+	if (! $rootfs) {
+		print $FD "/dev/sda1 / $type{type} defaults 0 0"."\n";
+	}
 	close $FD;
 	#==========================================
 	# cleanup loop
