@@ -802,7 +802,7 @@ sub setTemplate {
 	# <preferences>
 	#------------------------------------------
 	print $FD "\t".'<preferences>'."\n";
-	print $FD "\t\t".'<type image="oem" boot="oemboot/suse-'.$product.'"';
+	print $FD "\t\t".'<type image="oem" boot="oemboot/'.$product.'"';
 	print $FD ' filesystem="ext3" installiso="true">'."\n";
 	print $FD "\t\t\t".'<oemconfig/>'."\n";
 	print $FD "\t\t".'</type>'."\n";
