@@ -909,17 +909,6 @@ sub setPrepareConfigSkript {
 	my $dest = $this->{dest};
 	my %osc  = %{$this->{source}};
 	my $product = $this->{product};
-	my @serviceBoot = glob ("/etc/init.d/boot.d/S*");
-	my @serviceList = glob ("/etc/init.d/rc5.d/S*");
-	my @service = (@serviceBoot,@serviceList);
-	my @result;
-	foreach my $service (@service) {
-		my $name = readlink $service;
-		if (defined $name) {
-			$name =~ s/\.+\/+//g;
-			push @result,$name;
-		}
-	}
 	#==========================================
 	# create config script
 	#------------------------------------------
@@ -932,6 +921,23 @@ sub setPrepareConfigSkript {
 	print $FD 'test -f /.profile && . /.profile'."\n";
 	print $FD 'echo "Configure image: [$kiwi_iname]..."'."\n";
 	print $FD 'suseSetupProduct'."\n";
+	#==========================================
+	# Services...
+	#------------------------------------------
+	my @serviceList;
+	my @slist = qxx ('chkconfig -l | grep :on'); chomp @slist;
+	my $code = $? >> 8;
+	if ($code == 0) {
+		foreach my $line (@slist) {
+			my ($name) = split(/\s+/,$line);
+			push (@serviceList,$name);
+		}
+	}
+	if (@serviceList) {
+		foreach my $service (@serviceList) {
+			print $FD "suseInsertService '$service'"."\n";
+		}
+	}
 	#==========================================
 	# Repos...
 	#------------------------------------------
