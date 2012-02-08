@@ -236,12 +236,11 @@ function importFile {
 	# quote simple quotation marks
 	sed -i -e s"#'#'\\\\''#g" /tmp/srcme
 	# add '...' quoting to values
-	sed -i -e s"#\(^[a-zA-Z0-9_]\+\)=\(.*\)#\1='\2'#" /tmp/srcme
+	sed -i -e s"#\(^[a-zA-Z0-9_]\+\)=\(.*\)#$prefix\1='\2'#" /tmp/srcme
 	source /tmp/srcme
 	while read line;do
 		key=$(echo "$line" | cut -d '=' -f1)
 		eval "export $key"
-		test -z "$prefix" || eval "export $prefix$key=\$$key"
 	done < /tmp/srcme
 	if [ ! -z "$ERROR_INTERRUPT" ];then
 		Echo -e "$ERROR_INTERRUPT"
