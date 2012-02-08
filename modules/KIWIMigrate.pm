@@ -163,7 +163,7 @@ sub new {
 		'\/spool',                      # no spool directories
 		'^\/dev\/',                     # no device node files
 		'\/usr\/X11R6\/',               # no depreciated dirs
-		'\/tmp\/',                      # no /tmp data
+		'\/tmp',                        # no /tmp data
 		'\/boot\/',                     # no /boot data
 		'\/proc\/',                     # no /proc data
 		'\/sys\/',                      # no /sys data
@@ -835,8 +835,22 @@ sub setTemplate {
 	#==========================================
 	# <packages>
 	#------------------------------------------
-	print $FD "\t".'<packages type="bootstrap">'."\n";
+	print $FD "\t".'<packages type="bootstrap" patternType="plusRecommended">';
+	print $FD "\n";
 	if (defined $pats) {
+		# FIXME: I don't have a solution for the problem below
+		# /.../
+		# the migration put a set of packages to matching patterns
+		# I found out that it might be a problem if a pattern provides
+		# more than one package for the same purpose. In that case
+		# the preferred package is installed but this might not be
+		# the package which is currently used on the system. A good
+		# example here is postfix vs. sendmail. kiwi will find
+		# postfix to belong to a pattern. in fact it's provided by
+		# the pattern mail_server. This pattern provides postfix
+		# and sendmail. If only mail_server as pattern is requested,
+		# sendmail will be selected and not postfix
+		# ---
 		foreach my $pattern (sort @{$pats}) {
 			$pattern =~ s/^pattern://;
 			print $FD "\t\t".'<opensusePattern name="'.$pattern.'"/>'."\n";
@@ -1291,11 +1305,13 @@ sub setSystemOverlayFiles {
 	#==========================================
 	# Find files/directories not packaged
 	#------------------------------------------
-	$kiwi -> info ("Inspecting package database(s) [unpackaged files]...");
+	$kiwi -> info ("Inspecting package database(s) [unpackaged files]\n");
 	if ($cache) {
+		$kiwi -> info ("=> reading from cache");
 		%result = %{$cdata->{result}};
 		$kiwi -> done();
 	} else {
+		$kiwi -> info ("=> requesting RPM package list...");
 		my @rpmcheck = qxx ("rpm -qlav");
 		chomp @rpmcheck;
 		my @rpm_dir  = ();
@@ -1325,8 +1341,10 @@ sub setSystemOverlayFiles {
 				push @rpm_file,$base;
 			}
 		}
+		$kiwi -> done();
 		# fake gem contents as rpm files...
 		if (-x "/usr/bin/gem") {
+			$kiwi -> info ("=> requesting GEM package list...");
 			my @gemcheck = qxx ("gem contents --all");
 			chomp @gemcheck;
 			foreach my $item (@gemcheck) {
@@ -1337,7 +1355,10 @@ sub setSystemOverlayFiles {
 				push @rpm_file,$dirn."/".$name;
 				push @rpm_dir ,$dirn;
 			}
+			$kiwi -> done();
 		}
+		# search files in packaged directories...
+		$kiwi -> info ("=> searching files in packaged directories...");
 		my %file_rpm;
 		my %dirs_rpm;
 		my %dirs_cmp;
@@ -1349,12 +1370,27 @@ sub setSystemOverlayFiles {
 				$dirs_cmp{$dir} = undef;
 			}
 		}
-		# search files in packaged directories...
+		my @packaged_dirs = sort keys %dirs_rpm;
+		my @packaged_dirs_new = ();
+		foreach my $dir (@packaged_dirs) {
+			my $ok = 1;
+			foreach my $exp (@deny) {
+				if ($dir =~ /$exp/) {
+					$ok = 0; last;
+				}
+			}
+			if ($ok) {
+				push @packaged_dirs_new,$dir;
+			}
+		}
+		@packaged_dirs = @packaged_dirs_new;
+		$kiwi -> loginfo ("packaged directories: @packaged_dirs");
 		my $wref = generateWanted (\%result);
-		find({ wanted => $wref, follow => 0 }, sort keys %dirs_rpm);
+		find({ wanted => $wref, follow => 0 }, @packaged_dirs);
+		$kiwi -> done();
 
-		# search for unpacked symlinks whose origin is packaged
-		my $work = cwd();
+		# search for unpackaged symlinks whose origin is packaged
+		$kiwi -> info ("=> searching symlinks whose origin is packaged...");
 		foreach my $file (sort keys %result) {
 			if (-l $file) {
 				my $origin = readlink $file;
@@ -1362,18 +1398,17 @@ sub setSystemOverlayFiles {
 				my $path = $dirn."/".$origin;
 				my $base = basename $path;
 				$dirn = dirname $path;
-				# FIXME: path resolution should be done much better
-				chdir $dirn;
-				$dirn = cwd();
+				$dirn = $this -> resolvePath ($dirn);
 				$path = $dirn."/".$base;
 				if (exists $result{$path}) {
 					delete $result{$file};
 				}
 			}
 		}
-		chdir $work;
+		$kiwi -> done();
 
 		# search for unpackaged files in packaged directories...
+		$kiwi -> info ("=> searching unpackaged files in packaged dirs...");
 		foreach my $file (sort keys %result) {
 			if (exists $file_rpm{$file}) {
 				delete $result{$file};
@@ -1384,8 +1419,10 @@ sub setSystemOverlayFiles {
 				delete $result{$dir};
 			}
 		}
+		$kiwi -> done();
 
 		# search for unpackaged directories...
+		$kiwi -> info ("=> searching unpackaged directories...");
 		foreach my $dir (sort keys %dirs_cmp) {
 			my $FH;	opendir $FH,$dir;
 			while (my $f = readdir $FH) {
@@ -1403,8 +1440,8 @@ sub setSystemOverlayFiles {
 			}
 			closedir $FH;
 		}
-		$cdata->{result} = \%result;
 		$kiwi -> done ();
+		$cdata->{result} = \%result;
 	}
 	#==========================================
 	# Write cache if required
@@ -1845,6 +1882,54 @@ sub autoyastClone {
 	return $this;
 }
 
+#==========================================
+# resolvePath
+#------------------------------------------
+sub resolvePath {
+	# ...
+	# resolve a given path string into a clean
+	# representation this includes solving of jump
+	# backs like ../ or irrelevant information
+	# like // or ./
+	# ---
+	my $this = shift;
+	my $origin = shift;
+	my $current= $origin;
+	#========================================
+	# resolve jump back
+	#----------------------------------------
+	while ($current =~ /\.\./) {
+		my @path = split (/\/+/,$current);
+		for (my $l=0;$l<@path;$l++) {
+			if ($path[$l] eq "..") {
+				delete $path[$l];
+				delete $path[$l-1];
+				last;
+			}
+		}
+		$current = join ("/",@path);
+	}
+	#========================================
+	# resolve the rest
+	#----------------------------------------
+	my $result;
+	my @path = split (/\/+/,$current);
+	for (my $l=0;$l<@path;$l++) {
+		my $part = $path[$l];
+		if ($part eq "") {
+			$result.="/"; next;
+		}
+		if ($part eq ".") {
+			next;
+		}
+		$result.=$part;
+		if ($l < @path - 1) {
+			$result.="/";
+		}
+	}
+	$result =~ s/\/+/\//g;
+	return $result;
+}
 
 1;
 
