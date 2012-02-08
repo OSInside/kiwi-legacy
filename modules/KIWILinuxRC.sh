@@ -3586,7 +3586,18 @@ function setupNetwork {
 		"reboot"
 	fi
 	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
-	importFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
+	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
+		importFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
+		if [ ! -z "$IPADDR" ];then
+			break
+		fi
+		sleep 2
+	done
+	if [ -z "$IPADDR" ];then
+		systemException \
+			"Can't assign IP address from dhcp info: dhcpcd-$PXE_IFACE.info !" \
+		"reboot"
+	fi
 	if [ -z "$DOMAIN" ] && [ -n "$DNSDOMAIN" ];then
 		export DOMAIN=$DNSDOMAIN
 	fi
