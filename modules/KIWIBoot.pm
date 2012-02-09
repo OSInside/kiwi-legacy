@@ -654,6 +654,8 @@ sub setupInstallCD {
 	my $md5name   = $system;
 	my $destdir   = dirname ($initrd);
 	my $gotsys    = 1;
+	my $volid     = "KIWI CD/DVD Installation";
+	my $appid     = $this->{mbrid};
 	my $bootloader;
 	if ($arch =~ /ppc|ppc64/) {
 		$bootloader = "yaboot";
@@ -702,7 +704,9 @@ sub setupInstallCD {
 	#==========================================
 	# check for volume id
 	#------------------------------------------
-	my $volid = $this->{mbrid};
+	if ((%type) && ($type{volid})) {
+		$volid = $type{volid};
+	}
 	#==========================================
 	# setup boot loader type
 	#------------------------------------------
@@ -952,7 +956,8 @@ sub setupInstallCD {
 	my $opts;
 	if ($bootloader eq "grub") {
 		# let isolinux run grub second stage...
-		$base = "-R -J -f -b boot/grub/stage2 -no-emul-boot -V \"$volid\"";
+		$base = "-R -J -f -b boot/grub/stage2 -no-emul-boot ";
+		$base.= "-V \"$volid\" -A \"$appid\"";
 		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
 		$opts.= "-pad -joliet-long";
 	} elsif ($bootloader =~ /(sys|ext)linux/) {
@@ -966,7 +971,8 @@ sub setupInstallCD {
 		qxx ("mv $tmpdir/boot/initrd $tmpdir/boot/syslinux");
 		qxx ("mv $tmpdir/boot/linux  $tmpdir/boot/syslinux");
 		qxx ("mv $tmpdir/boot/syslinux $tmpdir/boot/loader 2>&1");
-		$base = "-R -J -f -b boot/loader/isolinux.bin -no-emul-boot -V \"$volid\"";
+		$base = "-R -J -f -b boot/loader/isolinux.bin -no-emul-boot ";
+		$base.= "-V \"$volid\" -A \"$appid\"";
 		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
 		$opts.= "-pad -joliet-long";
 	} elsif ($bootloader eq "yaboot") {

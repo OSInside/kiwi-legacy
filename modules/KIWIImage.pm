@@ -2060,7 +2060,10 @@ sub createImageLiveCD {
 	if (! defined $gzip) {
 		$attr .= " -iso-level 4"; 
 	}
-	$attr .= " -V \"$this->{mbrid}\"";
+	if ($stype{volid}) {
+		$attr .= " -V \"$stype{volid}\"";
+	}
+	$attr .= " -A \"$this->{mbrid}\"";
 	my $isolinux = new KIWIIsoLinux (
 		$kiwi,$CD,$name,$attr,"checkmedia",$this->{cmdL}
 	);

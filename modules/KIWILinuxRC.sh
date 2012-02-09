@@ -3267,7 +3267,7 @@ function searchImageISODevice {
 		"reboot"
 	fi
 	mbrIID=$(cat /boot/grub/mbrid)
-	Echo -n "Searching for boot device in Volume ID..."
+	Echo -n "Searching for boot device in Application ID..."
 	udevPending
 	while true;do
 		for i in /dev/*;do
@@ -3275,7 +3275,7 @@ function searchImageISODevice {
 				continue
 			fi
 			mbrVID=$(
-				isoinfo -d -i $i 2>/dev/null | grep "Volume id:" | cut -f2 -d:
+				isoinfo -d -i $i 2>/dev/null|grep "Application id:"|cut -f2 -d:
 			)
 			mbrVID=$(echo $mbrVID)
 			if [ "$mbrVID" = "$mbrIID" ];then
