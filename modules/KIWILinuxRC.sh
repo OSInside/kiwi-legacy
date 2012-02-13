@@ -1545,7 +1545,7 @@ function setupBootLoaderUBoot {
 		echo -n "setenv bootcmd \"" >> $conf
 		echo -n "ext2load mmc 0:1 0x80000000 $kernel; " >> $conf
 		echo -n "ext2load mmc 0:1 0x81600000 $initrd; " >> $conf
-		echo "bootm 0x80000000 0x81600000\""
+		echo "bootm 0x80000000 0x81600000\"" >> $conf
 		echo -n "setenv bootargs root=$diskByID loader=$loader" >> $conf
 		if [ ! -z "$imageDiskDevice" ];then
 			echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
