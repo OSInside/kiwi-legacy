@@ -497,7 +497,9 @@ sub printLog {
 	# print message to root file
 	#------------------------------------------
 	if ($this->{errorOk} && ($rootEFD)) {
-		print $rootEFD $result;
+		my $msg = $result;
+		$msg .= "\n" if ($msg !~ /\n$/);
+		print $rootEFD $msg;
 	}
 	#==========================================
 	# print message to log channel (stdin,file)
