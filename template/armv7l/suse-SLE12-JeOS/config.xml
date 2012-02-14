@@ -35,10 +35,10 @@
 		</type>
 	</preferences>
 	<preferences profiles="efikaFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="uboot" bootkernel="imx51" kernelcmdline="kiwistderr=/dev/ttymxc0 console=ttymxc0">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="uboot" bootkernel="imx51" kernelcmdline="kiwistderr=/dev/ttymxc0 console=ttymxc0,115200">
 			<systemdisk/>
 		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" bootloader="uboot" bootkernel="imx51" kernelcmdline="kiwistderr=/dev/ttymxc0 console=ttymxc0">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" bootloader="uboot" bootkernel="imx51" kernelcmdline="kiwistderr=/dev/ttymxc0 console=ttymxc0,115200">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>

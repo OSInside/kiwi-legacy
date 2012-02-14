@@ -3910,9 +3910,9 @@ sub setupBootLoaderConfiguration {
 		print FD 'setenv initrd_high "0xffffffff";'."\n";
 		print FD 'setenv fdt_high "0xffffffff";'."\n";
 		print FD 'setenv bootcmd "';
-		print FD 'ext2load mmc 0:1 0x80000000 boot/linux.vmx; ';
-		print FD 'ext2load mmc 0:1 0x81600000 boot/initrd.uboot; ';
-		print FD 'bootm 0x80000000 0x81600000";'."\n";
+		print FD 'ext2load mmc 0:1 ${kerneladdr} boot/linux.vmx; ';
+		print FD 'ext2load mmc 0:1 ${ramdiskaddr} boot/initrd.uboot; ';
+		print FD 'bootm ${kerneladdr} ${ramdiskaddr}";'."\n";
 		if ($type =~ /^KIWI CD/) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("*** uboot: CD boot not supported ***");
