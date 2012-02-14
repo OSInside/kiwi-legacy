@@ -3386,7 +3386,7 @@ sub setupLogicalExtend {
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
-	if (-x "$imageTree/image/images.sh") {
+	if ((! defined $initCache) && (-x "$imageTree/image/images.sh")) {
 		$kiwi -> info ("Calling image script: images.sh");
 		my $data = qxx (" chroot $imageTree /image/images.sh 2>&1 ");
 		my $code = $? >> 8;

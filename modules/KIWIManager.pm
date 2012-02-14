@@ -2586,8 +2586,15 @@ sub cleanupRPMDatabase {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my @kchroot= @{$this->{kchroot}};
+	my $root   = $this->{root};
 	my $data;
 	my $code;
+	#==========================================
+	# check for rpm binary
+	#------------------------------------------
+	if (! -e "$root/bin/rpm") {
+		return $this;
+	}
 	#==========================================
 	# run a query on the database
 	#------------------------------------------

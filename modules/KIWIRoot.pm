@@ -970,6 +970,8 @@ sub setup {
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $xml  = $this->{xml};
+	my $cmdL = $this->{cmdL};
+	my $initCache = $cmdL->getOperationMode("initCache");
 	my $configFile= $xml -> getConfigName();
 	my $imageDesc = $this->{imageDesc};
 	my $manager   = $this->{manager};
@@ -1069,6 +1071,7 @@ sub setup {
 	#----------------------------------------
 	if (-f "$root/linuxrc") {
 		$kiwi -> info ("Setting up linuxrc...");
+		unlink ("$root/init");
 		my $data = qxx ("ln $root/linuxrc $root/init 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -1163,7 +1166,7 @@ sub setup {
 	#========================================
 	# call config.sh image script
 	#----------------------------------------
-	if (-e "$imageDesc/config.sh") {
+	if ((! $initCache) && (-e "$imageDesc/config.sh")) {
 		$kiwi -> info ("Calling image script: config.sh");
 		qxx (" cp $imageDesc/config.sh $root/tmp ");
 				qxx (" chmod u+x $root/tmp/config.sh ");
@@ -1183,7 +1186,7 @@ sub setup {
 	# remove packages from delete section
 	#----------------------------------------
 	my @delete_packs = $xml -> getDeleteList();
-	if (@delete_packs) {
+	if ((! $initCache) && (@delete_packs)) {
 		$kiwi -> info ("Removing packages marked for deletion:\n");
 		foreach my $p (@delete_packs) {
 			$kiwi -> info (" --> $p\n");
