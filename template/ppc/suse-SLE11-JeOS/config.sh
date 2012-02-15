@@ -28,11 +28,6 @@ suseSetupProduct
 #--------------------------------------
 suseImportBuildKey
 
-#==========================================
-# remove unneeded packages
-#------------------------------------------
-suseRemovePackagesMarkedForDeletion
-        
 #======================================
 # Remove all documentation
 #--------------------------------------

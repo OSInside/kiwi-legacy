@@ -40,11 +40,6 @@ suseRemoveService avahi-dnsconfd
 suseRemoveService avahi-daemon
 
 #==========================================
-# remove unneeded packages
-#------------------------------------------
-suseRemovePackagesMarkedForDeletion
-
-#==========================================
 # remove package docs
 #------------------------------------------
 rm -rf /usr/share/doc/packages/*

@@ -31,11 +31,6 @@ if [ `uname -m` == 'x86_64' ];then
 		/var/lib/zypp/db/products/*
 fi
 
-#==========================================
-# remove unneeded packages
-#------------------------------------------
-suseRemovePackagesMarkedForDeletion
-
 #======================================
 # Remove all documentation
 #--------------------------------------
