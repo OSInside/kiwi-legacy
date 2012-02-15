@@ -1543,9 +1543,9 @@ function setupBootLoaderUBoot {
 		echo "setenv initrd_high \"0xffffffff\";" >> $conf
 		echo "setenv fdt_high \"0xffffffff\";"    >> $conf
 		echo -n "setenv bootcmd \"" >> $conf
-		echo -n "ext2load mmc 0:1 0x80000000 $kernel; " >> $conf
-		echo -n "ext2load mmc 0:1 0x81600000 $initrd; " >> $conf
-		echo "bootm 0x80000000 0x81600000\"" >> $conf
+		echo -n "ext2load mmc 0:1 \${kerneladdr} $kernel; " >> $conf
+		echo -n "ext2load mmc 0:1 \${ramdiskaddr} $initrd; " >> $conf
+		echo "bootm \${kerneladdr} \${ramdiskaddr}\"" >> $conf
 		echo -n "setenv bootargs root=$diskByID loader=$loader" >> $conf
 		if [ ! -z "$imageDiskDevice" ];then
 			echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
