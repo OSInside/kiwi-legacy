@@ -22,6 +22,7 @@
 	</profiles>
 	<drivers type="drivers">
 		<file name="crypto/*"/>
+		<file name="drivers/mmc/*"/>
 		<file name="drivers/acpi/*"/>
 		<file name="drivers/acpi/dock.ko"/>
 		<file name="drivers/ata/*"/>
