@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.3" name="LimeJeOS-SLE12">
+<image schemaversion="5.3" name="LimeJeOS-Factory">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
 		<specification>
-			SLE12 JeOS image for arm (panda/beagle) board
+			Factory JeOS image for arm (panda/beagle/efika) boards
 		</specification>
 	</description>
 	<profiles>
@@ -24,10 +24,10 @@
 		<boot-theme>openSUSE</boot-theme>
 	</preferences>
 	<preferences profiles="pandaFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="kiwistderr=/dev/ttyO2 console=ttyO2 ethaddr=f2:9e:1a:ca:d9:99">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-Factory" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="kiwistderr=/dev/ttyO2 console=ttyO2 ethaddr=f2:9e:1a:ca:d9:99 vram=16M">
 			<systemdisk/>
 		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="kiwistderr=/dev/ttyO2 console=ttyO2 ethaddr=f2:9e:1a:ca:d9:99">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-Factory" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="kiwistderr=/dev/ttyO2 console=ttyO2 ethaddr=f2:9e:1a:ca:d9:99 vram=16M">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
@@ -35,10 +35,10 @@
 		</type>
 	</preferences>
 	<preferences profiles="efikaFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="uboot" bootkernel="imx51" kernelcmdline="kiwistderr=/dev/ttymxc0 console=ttymxc0,115200 vram=16M">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-Factory" bootloader="uboot" bootkernel="imx51" kernelcmdline="kiwistderr=/dev/ttymxc0 console=ttymxc0,115200 vram=16M">
 			<systemdisk/>
 		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" bootloader="uboot" bootkernel="imx51" kernelcmdline="kiwistderr=/dev/ttymxc0 console=ttymxc0,115200 vram=16M">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-Factory" bootloader="uboot" bootkernel="imx51" kernelcmdline="kiwistderr=/dev/ttymxc0 console=ttymxc0,115200 vram=16M">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>

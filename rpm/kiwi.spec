@@ -452,7 +452,7 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %endif
 %ifarch %arm
-%exclude %{_datadir}/kiwi/image/suse-SLE12-JeOS
+%exclude %{_datadir}/kiwi/image/suse-Factory-JeOS
 %endif
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
@@ -576,7 +576,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %endif
 %ifarch %arm
-%{_datadir}/kiwi/image/suse-SLE12-JeOS
+%{_datadir}/kiwi/image/suse-Factory-JeOS
 %endif
 %ifarch ppc ppc64
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
