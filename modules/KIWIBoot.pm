@@ -279,13 +279,16 @@ sub new {
 				}
 				$kiwi -> done();
 				#==========================================
-				# find partition and mount it
+				# find root partition and mount it
 				#------------------------------------------
-				my $sdev = $this->{bindloop}."1";
+				my $sdev = $this->{bindloop}."2";
+				if (! -e $sdev) {
+					$sdev = $this->{bindloop}."1";
+				}
 				#==========================================
 				# check for activated volume group
 				#------------------------------------------
-				$sdev = $this -> checkLVMbind ($sdev,$this->{loop});
+				$sdev = $this -> checkLVMbind ($sdev);
 				#==========================================
 				# perform mount call
 				#------------------------------------------
@@ -784,14 +787,14 @@ sub setupInstallCD {
 		#==========================================
 		# find partition to check
 		#------------------------------------------
-		my $sdev = $this->{bindloop}."1";
+		my $sdev = $this->{bindloop}."2";
 		if (! -e $sdev) {
-			$sdev = $this->{bindloop}."2";
+			$sdev = $this->{bindloop}."1";
 		}
 		#==========================================
 		# check for activated volume group
 		#------------------------------------------
-		$sdev = $this -> checkLVMbind ($sdev,$this->{loop});
+		$sdev = $this -> checkLVMbind ($sdev);
 		#==========================================
 		# perform mount call
 		#------------------------------------------
@@ -1160,14 +1163,14 @@ sub setupInstallStick {
 		#==========================================
 		# find partition to check
 		#------------------------------------------
-		my $sdev = $this->{bindloop}."1";
+		my $sdev = $this->{bindloop}."2";
 		if (! -e $sdev) {
-			$sdev = $this->{bindloop}."2";
+			$sdev = $this->{bindloop}."1";
 		}
 		#==========================================
 		# check for activated volume group
 		#------------------------------------------
-		$sdev = $this -> checkLVMbind ($sdev,$this->{loop});
+		$sdev = $this -> checkLVMbind ($sdev);
 		#==========================================
 		# perform mount call
 		#------------------------------------------
@@ -4606,52 +4609,24 @@ sub bindDiskPartitions {
 #------------------------------------------
 sub checkLVMbind {
 	# ...
-	# check if the volume group was activated due to a
-	# previos call of kpartx. In this case the image has
-	# LVM enabled and we have to use the LVM devices
+	# check if sdev points to LVM, if yes activate it and
+	# rebuild sdev to point to the right logical volume
 	# ---
 	my $this = shift;
 	my $sdev = shift;
-	my $disk = shift;
-	my @groups;
-	#==========================================
-	# check for lvm flag on disk
-	#------------------------------------------
-	if (! $this-> __getPartID ($disk,"lvm")) {
+	my $vgname = qxx ("pvs --noheadings -o vg_name $sdev 2>&1");
+	my $result = $? >> 8;
+	if ($result != 0) {
 		return $sdev;
 	}
-	#==========================================
-	# activate volume groups
-	#------------------------------------------
-	open (my $SCAN,"vgscan 2>/dev/null |");
-	while (my $line = <$SCAN>) {
-		if ($line =~ /\"(.*)\"/) {
-			push (@groups,$1);
-		}
-	}
-	close $SCAN;
-	#==========================================
-	# check the device node names for kiwi lvm
-	#------------------------------------------
-	foreach my $lvmgroup (@groups) {
-		qxx ("vgchange -a y $lvmgroup 2>&1");
-		for (my $try=0;$try<=3;$try++) {
-			if (defined (my $lvroot = glob ("/dev/mapper/*-LVRoot"))) {
-				$this->{lvm} = 1;
-				$sdev = $lvroot;
-				if (defined ($lvroot = glob ("/dev/mapper/*-LVComp"))) {
-					$sdev = $lvroot;
-				}
-				if ($lvroot =~ /mapper\/(.*)-.*/) {
-					$this->{lvmgroup} = $1;
-				}
-				last;
-			}
-			sleep 1;
-		}
-		if ($this->{lvm} == 1) {
-			last;
-		}
+	chomp $vgname;
+	$vgname =~ s/^\s+//;
+	$this->{lvm} = 1;
+	$this->{lvmgroup} = $vgname;
+	qxx ("vgchange -a y $vgname 2>&1");
+	$sdev = "/dev/mapper/$vgname-LVComp";
+	if (! -e $sdev) {
+		$sdev = "/dev/mapper/$vgname-LVRoot";
 	}
 	return $sdev;
 }
