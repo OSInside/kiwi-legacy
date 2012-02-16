@@ -742,7 +742,6 @@ function installBootLoader {
 	# The selection of the bootloader happens according to
 	# the architecture of the system
 	# ----
-	resetBootBind
 	local arch=`uname -m`
 	case $arch-$loader in
 		i*86-grub)       installBootLoaderGrub ;;
@@ -6008,10 +6007,14 @@ function bootImage {
 	umount proc &>/dev/null && \
 	umount proc &>/dev/null
 	#======================================
-	# run preinit and cleanImage
+	# run resetBootBind preinit cleanImage
 	#--------------------------------------
 	chroot /mnt /bin/bash -c \
-		"/preinit ; . /include ; cleanImage"
+		". /include ; exec 2>>$ELOG_FILE ; set -x 1>&2 ; resetBootBind"
+	chroot /mnt /bin/bash -c \
+		"/preinit"
+	chroot /mnt /bin/bash -c \
+		". /include ; exec 2>>$ELOG_FILE ; set -x 1>&2 ; cleanImage"
 	cd /mnt
 	#======================================
 	# hand over control to init
