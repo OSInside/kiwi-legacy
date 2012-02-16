@@ -52,6 +52,8 @@
 		<file name="drivers/net/*"/>
 		<file name="drivers/block/nbd.ko"/>
 		<file name="drivers/block/aoe/aoe.ko"/>
+		<file name="drivers/block/virtio_blk.ko"/>
+		<file name="drivers/virtio/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="ftp://dist.suse.de/install/SLP/SLES-10-SP2-GMC/%arch/DVD1"/>

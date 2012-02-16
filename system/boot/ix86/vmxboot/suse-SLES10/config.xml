@@ -44,6 +44,8 @@
 		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="fs/nls/nls_cp437.ko"/>
 		<file name="fs/nls/nls_iso8859-1.ko"/>
+		<file name="drivers/block/virtio_blk.ko"/>
+		<file name="drivers/virtio/*"/>
 	</drivers>
 	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>
