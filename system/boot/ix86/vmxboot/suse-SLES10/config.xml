@@ -27,6 +27,8 @@
 		<file name="drivers/md/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/scsi/*"/>
+		<file name="drivers/block/virtio_blk.ko"/>
+		<file name="drivers/virtio/*"/>
 		<file name="fs/binfmt_aout.ko"/>
 		<file name="fs/binfmt_misc.ko"/>
 		<file name="fs/ext2/*"/>
