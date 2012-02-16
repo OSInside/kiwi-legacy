@@ -3908,10 +3908,14 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return;
 		}
-		print FD 'setenv ramdisk boot/initrd.uboot;'."\n";
-		print FD 'setenv kernel boot/linux.vmx;'."\n";
-		print FD 'setenv initrd_high "0xffffffff";'."\n";
-		print FD 'setenv fdt_high "0xffffffff";'."\n";
+		print FD 'setenv ramdisk boot/initrd.uboot'."\n";
+		print FD 'setenv kernel boot/linux.vmx'."\n";
+		print FD 'setenv initrd_high "0xffffffff"'."\n";
+		print FD 'setenv fdt_high "0xffffffff"'."\n";
+		print FD 'printenv kerneladdr || setenv kerneladdr ${kernel_addr_r}';
+		print FD "\n";
+		print FD 'printenv ramdiskaddr|| setenv ramdiskaddr ${ramdisk_addr_r}';
+		print FD "\n";
 		print FD 'setenv bootcmd "';
 		print FD 'ext2load mmc 0:1 ${kerneladdr} boot/linux.vmx; ';
 		print FD 'ext2load mmc 0:1 ${ramdiskaddr} boot/initrd.uboot; ';

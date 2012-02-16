@@ -1537,10 +1537,14 @@ function setupBootLoaderUBoot {
 		fi
 		kernel=`echo $i | cut -f1 -d:`
 		initrd=`echo $i | cut -f2 -d:`
-		echo "setenv ramdisk $initrd;" > $conf
-		echo "setenv kernel $kernel;" >> $conf
-		echo "setenv initrd_high \"0xffffffff\";" >> $conf
-		echo "setenv fdt_high \"0xffffffff\";"    >> $conf
+		echo "setenv ramdisk $initrd" > $conf
+		echo "setenv kernel $kernel" >> $conf
+		echo "setenv initrd_high \"0xffffffff\"" >> $conf
+		echo "setenv fdt_high \"0xffffffff\""    >> $conf
+		echo 'printenv kerneladdr || setenv kerneladdr ${kernel_addr_r}' \
+			>> $conf
+		echo 'printenv ramdiskaddr|| setenv ramdiskaddr ${ramdisk_addr_r}' \
+			>> $conf
 		echo -n "setenv bootcmd \"" >> $conf
 		echo -n "ext2load mmc 0:1 \${kerneladdr} $kernel; " >> $conf
 		echo -n "ext2load mmc 0:1 \${ramdiskaddr} $initrd; " >> $conf
