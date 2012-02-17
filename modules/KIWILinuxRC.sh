@@ -2558,18 +2558,20 @@ function updateSwapDeviceFstab {
 	echo "$diskByID swap swap defaults 0 0" >> $nfstab
 }
 #======================================
-# updateLVMBootDeviceFstab
+# updateBootDeviceFstab
 #--------------------------------------
-function updateLVMBootDeviceFstab {
+function updateBootDeviceFstab {
 	# /.../
-	# add one line to the fstab file for the /lvmboot
-	# device partition
+	# add temporary bind mounted boot entry to fstab
 	# ----
 	local prefix=$1
 	local sdev=$2
-	local mount=$3
-	if [ -z "$mount" ];then
-		mount=/lvmboot
+	local mount=boot_bind
+	#======================================
+	# Return if no action required
+	#--------------------------------------
+	if [ ! -e /mnt/$mount ];then
+		return
 	fi
 	local diskByID=`getDiskID $sdev`
 	local nfstab=$prefix/etc/fstab
@@ -2583,66 +2585,11 @@ function updateLVMBootDeviceFstab {
 	if [ -z "$FSTYPE" ] || [ "$FSTYPE" = "unknown" ];then
 		FSTYPE="auto"
 	fi
-	echo "$diskByID $mount $FSTYPE defaults 1 2" >> $nfstab
+	echo "$diskByID /$mount $FSTYPE defaults 1 2" >> $nfstab
 	echo "$mount/boot /boot none bind 0 0" >> $nfstab
 	if [ ! -z "$FSTYPE_SAVE" ];then
 		FSTYPE=$FSTYPE_SAVE
 	fi
-}
-#======================================
-# updateSplitBootDeviceFstab
-#--------------------------------------
-function updateSplitBootDeviceFstab {
-	updateLVMBootDeviceFstab $1 $2 "/splitboot"
-}
-#======================================
-# updateClicBootDeviceFstab
-#--------------------------------------
-function updateClicBootDeviceFstab {
-	updateLVMBootDeviceFstab $1 $2 "/clicboot"
-}
-#======================================
-# updateLuksBootDeviceFstab
-#--------------------------------------
-function updateLuksBootDeviceFstab {
-	updateLVMBootDeviceFstab $1 $2 "/luksboot"
-}
-#======================================
-# updateBtrBootDeviceFstab
-#--------------------------------------
-function updateBtrBootDeviceFstab {
-	updateLVMBootDeviceFstab $1 $2 "/btrboot"
-}
-#======================================
-# updateXfsBootDeviceFstab
-#--------------------------------------
-function updateXfsBootDeviceFstab {
-	updateLVMBootDeviceFstab $1 $2 "/xfsboot"
-}
-#======================================
-# updateYaBootDeviceFstab
-#--------------------------------------
-function updateYaBootDeviceFstab {
-	updateLVMBootDeviceFstab $1 $2 "/yaboot"
-}
-#======================================
-# updateSyslinuxBootDeviceFstab
-#--------------------------------------
-function updateSyslinuxBootDeviceFstab {
-	# /.../
-	# add one line to the fstab file for the /syslboot
-	# device partition
-	# ----
-	local prefix=$1
-	local sdev=$2
-	local diskByID=`getDiskID $sdev`
-	local nfstab=$prefix/etc/fstab
-	if [ $loader = "syslinux" ];then
-		echo "$diskByID /syslboot vfat defaults 1 2" >> $nfstab
-	else
-		echo "$diskByID /syslboot ext2 defaults 1 2" >> $nfstab
-	fi
-	echo "/syslboot/boot /boot none bind 0 0" >> $nfstab
 }
 #======================================
 # updateOtherDeviceFstab
@@ -5864,6 +5811,7 @@ function cleanImage {
 	# remove preinit code from system image before real init
 	# is called
 	# ----
+	local bootdir=boot_bind
 	#======================================
 	# setup logging in this mode
 	#--------------------------------------
@@ -5927,14 +5875,9 @@ function cleanImage {
 	#======================================
 	# umount image boot partition if any
 	#--------------------------------------
-	for i in \
-		yaboot lvmboot btrboot clicboot xfsboot luksboot syslboot splitboot
-	do
-		if [ ! -e /$i ];then
-			continue
-		fi
-		umount /$i 1>&2
-	done
+	if [ -e /$bootdir ];then
+		umount /$bootdir 1>&2
+	fi
 	umount /boot 1>&2
 	#======================================
 	# turn off swap
@@ -7706,94 +7649,58 @@ function startUtimer {
 # setupBootPartition
 #--------------------------------------
 function setupBootPartition {
-	local pSearch=83
-	local mpoint
+	#======================================
+	# Variable setup
+	#--------------------------------------
+	local label=undef
+	local mpoint=boot_bind
+	local haveBootPartition=0
+	local FSTYPE_SAVE=$FSTYPE
+	local fs_type=undef
 	unset NETBOOT_ONLY
-	if [ "$haveLVM" = "yes" ];then
-		#======================================
-		# lvmboot
-		#--------------------------------------
-		test -z "$bootid" && export bootid=1
-		mpoint=lvmboot
-	elif [ "$haveBtrFS" = "yes" ];then
-		#======================================
-		# btrboot
-		#--------------------------------------
-		test -z "$bootid" && export bootid=1
-		mpoint=btrboot
-	elif [ "$haveClicFS" = "yes" ];then
-		#======================================
-		# clicboot
-		#--------------------------------------
-		test -z "$bootid" && export bootid=1
-		mpoint=clicboot
-	elif [ "$haveXFS" = "yes" ];then
-		#======================================
-		# xfsboot
-		#--------------------------------------
-		test -z "$bootid" && export bootid=1
-		mpoint=xfsboot
-	elif [ ! -z "$COMBINED_IMAGE" ];then
-		#======================================
-		# splitboot
-		#--------------------------------------
-		test -z "$bootid" && export bootid=1
-		mpoint=splitboot
-	elif [ "$loader" = "yaboot" ];then
-		#======================================
-		# yaboot
-		#--------------------------------------
-		test -z "$bootid" && export bootid=1
-		mpoint=yaboot
-	elif \
-		[ "$loader" = "syslinux" ] || \
-		[ "$loader" = "extlinux" ] || \
-		[ "$haveLuks" = "yes" ]
-	then
-		#======================================
-		# syslboot / luksboot
-		#--------------------------------------
-		test -z "$bootid" && export bootid=1
-		if [ "$haveLuks" = "yes" ];then
-			local FSTYPE_SAVE=$FSTYPE
-			probeFileSystem $(ddn $imageDiskDevice $bootid)
-			if [ "$FSTYPE" = "luks" ]; then
-				# /.../
-				# ups, boot partition should not be luks encoded
-				# unset bootid and hopefully handly it correctly
-				# outside of this function
-				# ----
-				unset bootid
-			else
-				mpoint=luksboot
-			fi
-			FSTYPE=$FSTYPE_SAVE
-		else
-			mpoint=syslboot
-		fi
-	else
-		#======================================
-		# no separate boot partition
-		#--------------------------------------
-		if [ -z "$bootid" ];then
-			export bootid=1
-		fi
+	#======================================
+	# Check for boot partition
+	#--------------------------------------
+	if [ -z "$imageDiskDevice" ];then
+		# no disk device like for live ISO based on clicfs
 		return
+	fi
+	label=$(blkid $(ddn $imageDiskDevice 1) -s LABEL -o value)
+	if [ "$label" = "BOOT" ];then
+		export haveBootPartition=1
+		export imageBootDevice=$(ddn $imageDiskDevice 1)
+	fi
+	#======================================
+	# Export bootid if not yet done
+	#--------------------------------------
+	if [ -z "$bootid" ];then
+		export bootid=1
+	fi
+	#======================================
+	# Probe boot partition filesystem
+	#--------------------------------------
+	probeFileSystem $(ddn $imageDiskDevice $bootid)
+	fs_type=$FSTYPE ; FSTYPE=$FSTYPE_SAVE
+	#======================================
+	# Sanity checks
+	#--------------------------------------
+	if [ "$fs_type" = "luks" ]; then
+		# /.../
+		# ups, boot partition should not be luks encoded
+		# unset bootid and hopefully handly it correctly
+		# outside of this function
+		# ----
+		unset bootid
 	fi
 	if [ -z "$bootid" ] && [[ $kiwi_iname =~ netboot ]];then
 		# pxe boot env and no suitable boot partition found
 		export NETBOOT_ONLY=yes
 		return
 	fi
-	if [ -z "$imageDiskDevice" ];then
-		# no disk device like for live ISO based on clicfs
-		return
-	fi
-	if [ -z "$imageBootDevice" ] && [ ! -z "$bootid" ];then
-		export imageBootDevice=$(ddn $imageDiskDevice $bootid)
-	fi
-	if [ ! -e $imageBootDevice ];then
-		# no such boot device like for live ISO hybrid disk
+	#======================================
+	# Return if no boot setup required
+	#--------------------------------------
+	if [ $haveBootPartition -eq 0 ] || [ ! -e "$imageBootDevice" ];then
 		return
 	fi
 	#======================================
@@ -8072,18 +7979,10 @@ function resetBootBind {
 	# symbolic link to make the suse kernel update process
 	# to work correctly
 	# ----
-	local bootdir
+	local bootdir=boot_bind
 	#======================================
 	# find bind boot dir
 	#--------------------------------------
-	for i in \
-		yaboot lvmboot btrboot clicboot xfsboot luksboot syslboot splitboot
-	do
-		if [ -d /$i ];then
-			bootdir=$i
-			break
-		fi
-	done
 	if [ -z "$bootdir" ];then
 		return
 	fi
@@ -8099,7 +7998,7 @@ function resetBootBind {
 	#======================================
 	# update fstab entry
 	#--------------------------------------
-	cat /etc/fstab | grep -v bind > /etc/fstab.new
+	cat /etc/fstab | grep -v ^boot_bind > /etc/fstab.new
 	mv /etc/fstab.new /etc/fstab
 	cat /etc/fstab | sed -e s@/$bootdir@/boot@ > /etc/fstab.new
 	mv /etc/fstab.new /etc/fstab

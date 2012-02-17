@@ -2236,9 +2236,9 @@ sub setupBootDisk {
 		if ($bootloader =~ /syslinux|yaboot/) {
 			$kiwi -> info ("Creating DOS boot filesystem");
 			if ($bootloader eq "yaboot") {
-				$status = qxx ("/sbin/mkdosfs -F 16 $boot 2>&1");
+				$status = qxx ("/sbin/mkdosfs -F 16 -n 'BOOT' $boot 2>&1");
 			} else {
-				$status = qxx ("/sbin/mkdosfs -F 32 -n 'boot' $boot 2>&1");
+				$status = qxx ("/sbin/mkdosfs -F 32 -n 'BOOT' $boot 2>&1");
 			}
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -2256,7 +2256,7 @@ sub setupBootDisk {
 			);
 			my $fsopts = $FSopts{ext3};
 			my $fstool = "mkfs.ext3";
-			$status = qxx ("$fstool $fsopts $boot 2>&1");
+			$status = qxx ("$fstool -L 'BOOT' $fsopts $boot 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
