@@ -781,7 +781,11 @@ sub setupInstallCD {
 			$kiwi -> info ("Using disk device: $haveDiskDevice");
 			$this->{loop}     = $haveDiskDevice;
 			$this->{bindloop} = $haveDiskDevice;
-			qxx ("vgchange -a y 2>&1");
+			my $devcopy = $this->{bindloop};
+			my $lastc = chop $devcopy;
+			if ($lastc =~ /\d/) {
+				$this->{bindloop} = $haveDiskDevice."p";
+			}
 			$kiwi -> done();
 		}
 		#==========================================
@@ -1157,7 +1161,11 @@ sub setupInstallStick {
 			$kiwi -> info ("Using disk device: $haveDiskDevice");
 			$this->{loop}     = $haveDiskDevice;
 			$this->{bindloop} = $haveDiskDevice;
-			qxx ("vgchange -a y 2>&1");
+			my $devcopy = $this->{bindloop};
+			my $lastc = chop $devcopy;
+			if ($lastc =~ /\d/) {
+				$this->{bindloop} = $haveDiskDevice."p";
+			}
 			$kiwi -> done();
 		}
 		#==========================================
@@ -2596,9 +2604,6 @@ sub cleanLoop {
 	my $loopdir= $this->{loopdir};
 	$main::global -> umount();
 	if ((defined $loop) && ($loop =~ /loop/)) {
-		if (defined $lvm) {
-			qxx ("vgchange -an 2>&1");
-		}
 		$this -> cleanLoopMaps();
 		qxx ("/sbin/losetup -d $loop 2>&1");
 		undef $this->{loop};
@@ -2613,11 +2618,20 @@ sub cleanLoopMaps {
 	my $this = shift;
 	my $dev  = shift;
 	my $loop = $this->{loop};
+	my $lvm  = $this->{lvm};
 	if ($dev) {
 		$loop = $dev;
 	}
 	if ($loop =~ /dev\/(.*)/) {
 		$loop = $1;
+	}
+	if ($lvm) {
+		my $dev = "/dev/mapper/".$loop."p2";
+		if (-e $dev) {
+			my $vgname = qxx ("pvs --noheadings -o vg_name $dev 2>/dev/null");
+			chomp $vgname;
+			qxx ("vgchange -an $vgname 2>&1");
+		}
 	}
 	foreach my $d (glob ("/dev/mapper/$loop*")) {
 		qxx ("dmsetup remove $d 2>&1");
@@ -4299,7 +4313,7 @@ sub installBootLoader {
 			$status = qxx ("umount /mnt 2>&1");
 		}
 		if ($device =~ /mapper/) {
-			$this -> cleanLoopMaps ($diskname);
+			$this -> cleanLoopMaps ();
 		}
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -4977,8 +4991,14 @@ sub setDefaultDeviceMap {
 	if (! defined $device) {
 		return;
 	}
+	my $devcopy= $device;
+	my $lastc  = chop $devcopy;
 	for (my $i=1;$i<=3;$i++) {
-		$result{$i} = $device.$i;
+		if ($lastc =~ /\d/) {
+			$result{$i} = $device."p".$i;
+		} else {
+			$result{$i} = $device.$i;
+		}
 	}
 	return %result;
 }
