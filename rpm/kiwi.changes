@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Feb 20 15:24:53 CET 2012 - ms@suse.de
+
+- make sure /etc/modprobe.d is preserved (bnc #747898)
+
+-------------------------------------------------------------------
 Thu Feb 16 15:38:17 CET 2012 - ms@suse.de
 
 - added virtio drivers for sle10 boot image descriptions (bnc #747346)
