@@ -7983,7 +7983,7 @@ function resetBootBind {
 	#======================================
 	# find bind boot dir
 	#--------------------------------------
-	if [ -z "$bootdir" ];then
+	if [ ! -e "/$bootdir" ];then
 		return
 	fi
 	#======================================
