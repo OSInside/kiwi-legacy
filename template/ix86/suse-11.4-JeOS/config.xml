@@ -60,10 +60,10 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<source path="opensuse://11.4/repo/oss"/>
+		<source path="obs://11.4/repo/oss"/>
 	</repository>
 	<repository type="rpm-md">
-		<source path="http://download.opensuse.org/repositories/Virtualization:/Appliances:/suse-11.4/openSUSE_11.4"/>
+		<source path="obs://Virtualization:/Appliances:/suse-11.4/openSUSE_11.4"/>
 	</repository>
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>

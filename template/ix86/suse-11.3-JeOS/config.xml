@@ -5,9 +5,7 @@
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
 		<specification>
-			openSUSE 11.3 JeOS, is a small text based image which
-			allows editing of files as well as upgrading to a full
-			distro by using zypper with the pre-defined repository 
+			openSUSE 11.3 JeOS, is a small text based image
 		</specification>
 	</description>
 	<profiles>
@@ -61,7 +59,7 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<source path="opensuse://11.3/repo/oss"/>
+		<source path="obs://11.3/repo/oss"/>
 	</repository>
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>

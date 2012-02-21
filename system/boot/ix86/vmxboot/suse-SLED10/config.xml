@@ -50,8 +50,8 @@
 	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>
 	</drivers>
-	<repository type="yast2" status="replaceable">
-		<source path="/mounts/machcd2/dists/full-sle10-sp2-%arch"/>
+	<repository type="rpm-md" status="replaceable">
+		<source path="obs://SUSE:SLE-10-SP2:GA/standard"/>
 	</repository>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel-default"/>

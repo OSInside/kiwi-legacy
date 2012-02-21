@@ -66,8 +66,8 @@
 	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>
 	</drivers>
-	<repository type="yast2" status="replaceable">
-		<source path="/image/CDs/full-i386"/>
+	<repository type="rpm-md" status="replaceable">
+		<source path="obs://SUSE:SLE-11:GA/standard"/>
 	</repository>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel-default"/>

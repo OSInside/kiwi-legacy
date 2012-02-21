@@ -57,8 +57,8 @@
 	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>
 	</drivers>
-	<repository type="yast2" status="replaceable">
-		<source path="ftp://dist.suse.de/install/SLP/SLES-10-SP2-GMC/%arch/DVD1"/>
+	<repository type="rpm-md" status="replaceable">
+		<source path="obs://SUSE:SLE-10-SP2:GA/standard"/>
 	</repository>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel-default"/>

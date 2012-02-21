@@ -56,10 +56,7 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="rpm-md">
-		<source path="obs:///SUSE:SLE-11:GA:Products:Test/standard"/>
-	</repository>
-	<repository type="rpm-md">
-		<source path="obs:///SUSE:SLE-11:GA/standard"/>
+		<source path="obs://SUSE:SLE-11:GA/standard"/>
 	</repository>
 	<repository type="rpm-md">
 		<source path="obs://Virtualization:/Appliances:/suse-sle11/SLE_11_SP1"/>

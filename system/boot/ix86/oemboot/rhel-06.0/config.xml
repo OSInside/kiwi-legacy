@@ -63,9 +63,6 @@
 	<repository type="rpm-md" status="replaceable">
 		<source path="iso:///image/CDs/RHEL-6.0-%arch-DVD.iso"/>
 	</repository>
-	<repository type="rpm-md" status="fixed" priority="1">
-		<source path="obs://Virtualization:/Appliances:/rhel-060/RedHat_RHEL-6"/>
-	</repository>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel"/>
 	</packages>

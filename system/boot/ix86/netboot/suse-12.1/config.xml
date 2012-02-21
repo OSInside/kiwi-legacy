@@ -145,7 +145,7 @@
 		<file name="net/sunrpc/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="/image/CDs/full-12.1-i386"/>
+		<source path="obs://12.1/repo/oss"/>
 	</repository>
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>

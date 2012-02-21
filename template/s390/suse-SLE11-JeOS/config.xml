@@ -24,6 +24,9 @@
 	<repository type="yast2">
 		<source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>
 	</repository>
+	<repository type="yast2">
+		<source path="http://download.suse.de/install/SLP/SLE-11-SP2-SDK-LATEST/%arch/DVD1"/>
+	</repository>
 	<packages type="image">
 		<opensusePattern name="base"/>
 		<opensuseProduct name="SUSE_SLES"/>

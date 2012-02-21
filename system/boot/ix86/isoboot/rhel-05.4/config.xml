@@ -61,9 +61,6 @@
 	<repository type="rpm-md" status="replaceable">
 		<source path="iso:///image/CDs/RHEL-5.4-%arch-DVD.iso/Server"/>
 	</repository>
-	<repository type="rpm-md" status="fixed" priority="1">
-		<source path="obs://Virtualization:/Appliances:/rhel-054/RedHat_RHEL-5"/>
-	</repository>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel"/>
 	</packages>

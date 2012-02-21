@@ -69,7 +69,7 @@
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="/image/CDs/full-i386"/>
+		<source path="obs://12.1/repo/oss"/>
 	</repository>
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>

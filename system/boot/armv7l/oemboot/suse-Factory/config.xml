@@ -80,7 +80,7 @@
 		<file name="net/packet/*"/>
 	</drivers>
 	<repository type="rpm-md" status="replaceable">
-		<source path="http://download.opensuse.org/repositories/openSUSE:/Factory:/ARM/standard"/>
+		<source path="obs://openSUSE:/Factory:/ARM/standard"/>
 	</repository>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel-default"/>
