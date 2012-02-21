@@ -3413,7 +3413,7 @@ sub setupLogicalExtend {
 	# Strip if specified
 	#------------------------------------------
 	if (defined $imageStrip) {
-		stripImage();
+		$this -> stripImage();
 	}
 	#==========================================
 	# Calculate needed space
@@ -4134,12 +4134,14 @@ sub getSize {
 	# method returns the size value in MegaByte
 	# ---
 	my $this   = shift;
+	my $extend = shift;
 	my $kiwi   = $this->{kiwi};
 	my $cmdL   = $this->{cmdL};
-	my $extend = shift;
 	my $xml    = $this->{xml};
-	my $mini   = qxx ("find $extend | wc -l"); chomp $mini;
-	my $minsize= qxx ("du -s --block-size=1 $extend | cut -f1"); chomp $minsize;
+	my $mini   = qxx ("find $extend | wc -l");
+	chomp $mini;
+	my $minsize= qxx ("du -s --block-size=1 $extend | cut -f1");
+	chomp $minsize;
 	my $fsohead= 1.4;
 	my $spare  = 100 * 1024 * 1024;
 	my $files  = $mini;
@@ -4186,7 +4188,7 @@ sub getSize {
 			# check the size value with what kiwi thinks is the minimum
 			if ($xmlsize < $minsize) {
 				$kiwi -> warning (
-					"--> given xml size might be too small, using it anyhow !\n"
+					"--> given xml size might be too small, using it anyhow!\n"
 				);
 				$kiwi -> warning (
 					"--> min size changed from $minsize to $xmlsize bytes\n"
@@ -4198,7 +4200,7 @@ sub getSize {
 	#==========================================
 	# Setup used size and inodes, prefer XML
 	#------------------------------------------
-	my $usedsize = $minsize; 
+	my $usedsize = $minsize;
 	if ($xmlsize > $minsize) {
 		$usedsize = $xmlsize;
 		$this->{inodes} = sprintf ("%.0f",$usedsize / $iratio);
