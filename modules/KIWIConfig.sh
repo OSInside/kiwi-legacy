@@ -1304,6 +1304,7 @@ function suseStripModules {
 	local mlist=$(for i in $files;do echo $i;done | sed -e s@.*\/@@g | sort)
 	local count=1
 	local mosum=1
+	local modup
 	#======================================
 	# create sorted module array
 	#--------------------------------------
@@ -1331,11 +1332,15 @@ function suseStripModules {
 	#======================================
 	# sort out duplicates prefer updates
 	#--------------------------------------
+	if [ -z "$modup" ];then
+		echo "suseStripModules: No update drivers found"
+		return
+	fi
 	for file in $files;do
 		for mod in $modup;do
 			if [[ $file =~ $mod ]] && [[ ! $file =~ "updates" ]];then
-				echo "Update driver found for $mod"
-				echo "Removing old version: $file"
+				echo "suseStripModules: Update driver found for $mod"
+				echo "suseStripModules: Removing old version: $file"
 				rm -f $file
 			fi
 		done
