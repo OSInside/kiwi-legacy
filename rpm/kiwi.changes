@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Wed Feb 22 12:05:40 CET 2012 - ms@suse.de
+
+- added staging/hv drivers to SLE11 boot image descriptions.
+  Beginning with SLE11-SP2 the drivers are part of the standard
+  kernel and thus they should be preserved (bnc #747898)
+
+- with reference to (bnc #747898) a new function called
+  suseStripModules() has been added. The function searches
+  for update modules and removes the old version which
+  might be provided by the standard kernel to prevent
+  a load clash
+
+-------------------------------------------------------------------
 Mon Feb 20 15:24:53 CET 2012 - ms@suse.de
 
 - make sure /etc/modprobe.d is preserved (bnc #747898)
