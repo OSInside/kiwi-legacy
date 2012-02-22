@@ -1352,6 +1352,57 @@ function suseStripFirmware {
 }
 
 #======================================
+# suseStripModules
+#--------------------------------------
+function suseStripModules {
+	# /.../
+	# search for update modules and remove the old version
+	# which might be provided by the standard kernel
+	# ----
+	local kernel=/lib/modules
+	local files=$(find $kernel -type f -name "*.ko")
+	local mlist=$(for i in $files;do echo $i;done | sed -e s@.*\/@@g | sort)
+	local count=1
+	local mosum=1
+	#======================================
+	# create sorted module array
+	#--------------------------------------
+	for mod in $mlist;do
+		name_list[$count]=$mod
+		count=$((count + 1))
+	done
+	count=1
+	#======================================
+	# find duplicate modules by their name
+	#--------------------------------------
+	while [ $count -lt ${#name_list[*]} ];do
+		mod=${name_list[$count]}
+		mod_next=${name_list[$((count + 1))]}
+		if [ "$mod" = "$mod_next" ];then
+			mosum=$((mosum + 1))
+		else
+			if [ $mosum -gt 1 ];then
+				modup="$modup $mod"
+			fi
+			mosum=1
+		fi
+		count=$((count + 1))
+	done
+	#======================================
+	# sort out duplicates prefer updates
+	#--------------------------------------
+	for file in $files;do
+		for mod in $modup;do
+			if [[ $file =~ $mod ]] && [[ ! $file =~ "updates" ]];then
+				echo "Update driver found for $mod"
+				echo "Removing old version: $file"
+				rm -f $file
+			fi
+		done
+	done
+}
+
+#======================================
 # suseStripKernel
 #--------------------------------------
 function suseStripKernel {
@@ -1522,6 +1573,7 @@ function suseStripKernel {
 			popd
 		done
 	done
+	suseStripModules
 	suseStripFirmware
 }
 

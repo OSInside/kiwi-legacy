@@ -38,6 +38,7 @@
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/block/brd.ko"/>
+		<file name="drivers/staging/hv/*"/>
 		<file name="net/packet/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/ext3/*"/>
