@@ -58,6 +58,7 @@
 		<file name="du"/>
 		<file name="dumpe2fs"/>
 		<file name="e2fsck"/>
+		<file name="echo"/>
 		<file name="edd_id"/>
 		<file name="egrep"/>
 		<file name="eject"/>

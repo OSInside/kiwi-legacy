@@ -201,6 +201,7 @@ function OEMInstall {
 	fi
 	Echo "Found following disk device(s)"
 	count=0
+	deviceDisks=$(for i in $deviceDisks; do echo $i;done | sort | xargs)
 	for i in $deviceDisks;do
 		dbyid=$(getDiskID $i)
 		dsize=`partitionSize $dbyid`
