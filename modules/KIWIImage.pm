@@ -365,6 +365,7 @@ sub updateDescription {
 	$changeset{"oem-shutdown-interactive"} = $src_xml->getOEMShutdownInter();
 	$changeset{"oem-bootwait"}             = $src_xml->getOEMBootWait();
 	$changeset{"oem-unattended"}           = $src_xml->getOEMUnattended();
+	$changeset{"oem-unattended-id"}        = $src_xml->getOEMUnattendedID();
 	$changeset{"oem-recovery"}             = $src_xml->getOEMRecovery();
 	$changeset{"oem-recoveryID"}           = $src_xml->getOEMRecoveryID();
 	$changeset{"oem-inplace-recovery"}     = $src_xml->getOEMRecoveryInPlace();

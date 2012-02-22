@@ -1724,6 +1724,26 @@ true/false</a:documentation>
   </div>
   <!--
     ==========================================
+    common element <oem-unattended-id>
+    
+  -->
+  <div>
+    <define name="k.oem-unattended-id.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-unattended-id">
+      <element name="oem-unattended-id">
+        <a:documentation>For oemboot driven images: use the specified disk id
+the id corresponds with the value of devicepersistency
+or by default with /dev/disk/by-id/...</a:documentation>
+        <db:para>For oemboot driven images: use the specified disk idthe id corresponds with the value of devicepersistencyor by default with /dev/disk/by-id/...</db:para>
+        <ref name="k.oem-unattended-id.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <size>
     
   -->
@@ -3348,6 +3368,9 @@ and setup the system disk</db:para>
           </optional>
           <optional>
             <ref name="k.oem-unattended"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-unattended-id"/>
           </optional>
         </interleave>
       </element>

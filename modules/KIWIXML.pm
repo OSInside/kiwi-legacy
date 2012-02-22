@@ -1321,6 +1321,26 @@ sub getOEMUnattended {
 }
 
 #==========================================
+# getOEMUnattendedID
+#------------------------------------------
+sub getOEMUnattendedID {
+	# ...
+	# Obtain the oem-unattended-id value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $unattended_id = $node -> getElementsByTagName ("oem-unattended-id");
+	if ((! defined $unattended_id) || ("$unattended_id" eq "")) {
+		return;
+	}
+	return $unattended_id;
+}
+
+#==========================================
 # getOEMSwap
 #------------------------------------------
 sub getOEMSwap {
@@ -2604,6 +2624,8 @@ sub getImageConfig {
 			-> getElementsByTagName ("oem-bootwait");
 		my $oemnomsg = $node
 			-> getElementsByTagName ("oem-unattended");
+		my $oemdevid = $node
+			-> getElementsByTagName ("oem-unattended-id");
 		my $oemreco  = $node
 			-> getElementsByTagName ("oem-recovery");
 		my $oemrecoid= $node
@@ -2657,6 +2679,9 @@ sub getImageConfig {
 		}
 		if ((defined $oemnomsg) && ("$oemnomsg" eq "true")) {
 			$result{kiwi_oemunattended} = $oemnomsg;
+		}
+		if ((defined $oemdevid) && ("$oemdevid" ne "")) {
+			$result{kiwi_oemunattended_id} = $oemdevid;
 		}
 		if ((defined $oemreco) && ("$oemreco" eq "true")) {
 			$result{kiwi_oemrecovery} = $oemreco;
@@ -4794,6 +4819,9 @@ sub __updateDescriptionFromChangeSet {
 	}
 	if (defined $changeset->{"oem-unattended"}) {
 		$this -> __setOEMOptionsElement ("oem-unattended",$changeset);
+	}
+	if (defined $changeset->{"oem-unattended-id"}) {
+		$this -> __setOEMOptionsElement ("oem-unattended-id",$changeset);
 	}
 	if (defined $changeset->{"oem-recovery"}) {
 		$this -> __setOEMOptionsElement ("oem-recovery",$changeset);
