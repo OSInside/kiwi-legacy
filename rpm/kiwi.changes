@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Feb 23 11:58:48 CET 2012 - ms@suse.de
+
+- follow up and improved fix for basePackBootIncludes to pack
+  only items listed in the rpm package filelist but don't
+  recursively look them up in the filesystem when tar'ing
+  them up (bnc #743159)
+
+-------------------------------------------------------------------
 Wed Feb 22 12:05:40 CET 2012 - ms@suse.de
 
 - added staging/hv drivers to SLE11 boot image descriptions.
