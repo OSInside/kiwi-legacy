@@ -924,9 +924,7 @@ function suseStripInitrd {
 	rm -rf /root
 	rm -rf /home
 	rm -rf /media
-	rm -rf /opt
 	rm -rf /srv
-	rm -rf /selinux
 	#==========================================
 	# remove unused doc directories
 	#------------------------------------------
