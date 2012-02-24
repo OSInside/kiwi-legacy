@@ -961,7 +961,13 @@ sub setupInstallCD {
 	}
 	my $base;
 	my $opts;
-	if ($bootloader eq "grub") {
+	if ($bootloader eq "grub2") {
+		# let mkisofs run grub2 eltorito image...
+		$base = "-R -J -f -b boot/grub2/eltorito.img -no-emul-boot ";
+		$base.= "-V \"$volid\" -A \"$appid\"";
+		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
+		$opts.= "-pad -joliet-long";
+	} elsif ($bootloader eq "grub") {
 		# let isolinux run grub second stage...
 		$base = "-R -J -f -b boot/grub/stage2 -no-emul-boot ";
 		$base.= "-V \"$volid\" -A \"$appid\"";
@@ -2736,12 +2742,12 @@ sub setupBootLoaderStages {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed creating boot manager directory: $status");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		#==========================================
 		# Create boot partition file
 		#------------------------------------------
-		$kiwi -> info ("Creating grub2 core boot image");
+		$kiwi -> info ("Creating grub2 boot partition map");
 		my $bootfile = "$tmpdir/boot/grub2/bootpart.cfg";
 		my $bpfd = new FileHandle;
 		if (! $bpfd -> open(">$bootfile")) {
@@ -2750,23 +2756,12 @@ sub setupBootLoaderStages {
 			$kiwi -> failed ();
 			return;
 		}
-		print $bpfd "prefix=(hd0,1)/boot/grub2\n";
-		$bpfd -> close();
-		#==========================================
-		# Create core grub2 boot image
-		#------------------------------------------
-		my $core    = "$tmpdir/boot/grub2/core.img";
-		my $modules = "biosdisk part_msdos ext2";
-		$status = qxx (
-			"grub2-mkimage -v -o $core -c $bootfile $modules 2>&1"
-		);
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create core boot image: $status");
-			$kiwi -> failed ();
-			return;
+		if ((defined $type) && ($type eq "iso")) {
+			print $bpfd "prefix=(\${root})/boot/grub2\n";
+		} else {
+			print $bpfd "prefix=(hd0,1)/boot/grub2\n";
 		}
+		$bpfd -> close();
 		$kiwi -> done();
 		#==========================================
 		# Get Grub graphics boot message
@@ -2815,6 +2810,37 @@ sub setupBootLoaderStages {
 			$kiwi -> error  ("Failed importing grub2 stages: $status");
 			$kiwi -> failed ();
 			return;
+		}
+		#==========================================
+		# Create core/eltorito grub2 boot images
+		#------------------------------------------
+		$kiwi -> info ("Creating grub2 core boot image");
+		my $core    = "$tmpdir/boot/grub2/core.img";
+		my $modules = "biosdisk part_msdos part_gpt ext2 iso9660 chain";
+		$status = qxx (
+			"grub2-mkimage -v -o $core -c $bootfile $modules 2>&1"
+		);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create core boot image: $status");
+			$kiwi -> failed ();
+			return;
+		}
+		$kiwi -> done();
+		if ((defined $type) && ($type eq "iso")) {
+			$kiwi -> info ("Creating grub2 eltorito boot image");
+			my $cdimg  = "$tmpdir/boot/grub2/eltorito.img";
+			my $cdcore = "$tmpdir/boot/grub2/cdboot.img";
+			$status = qxx ("cat $cdcore $core > $cdimg 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create eltorito image: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$kiwi -> done();
 		}
 	}
 	#==========================================
@@ -3079,7 +3105,7 @@ sub setupBootLoaderConfiguration {
 	# Grub2
 	#------------------------------------------
 	if ($loader eq "grub2") {
-		# TODO: xen dom0 boot and CD boot still missing
+		# TODO: xen dom0 boot still missing
 		my %vesa;
 		#==========================================
 		# gfxpayload mapping table
@@ -3108,7 +3134,7 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create mbrid file: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		print FD "$this->{mbrid}";
 		close FD;
@@ -3121,15 +3147,20 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create grub.cfg: $!");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		#==========================================
 		# General grub2 setup
 		#------------------------------------------
 		print FD 'insmod ext2'."\n";
 		print FD 'insmod gettext'."\n";
+		print FD 'insmod part_msdos'."\n";
+		print FD 'insmod part_gpt'."\n";
+		print FD 'insmod chain'."\n";
 		print FD "set default=$defaultBootNr\n";
-		print FD "set root=\"(hd0,1)\""."\n";
+		if ($type !~ /^KIWI (CD|USB)/) {
+			print FD "set root=\"(hd0,1)\""."\n";
+		}
 		print FD 'set locale_dir=($root)/boot/grub2/locale'."\n";
 		print FD 'set lang=en'."\n";
 		print FD "if loadfont /usr/share/grub2/unicode.pf2 ; then"."\n";
@@ -3150,24 +3181,39 @@ sub setupBootLoaderConfiguration {
 		}
 		print FD "set timeout=$bootTimeout\n";
 		if ($type =~ /^KIWI (CD|USB)/) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("*** not implemented ***");
-			$kiwi -> failed ();
-			return undef;
+			my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
+			print FD 'menuentry "Boot from Hard Disk" {'."\n";
+			if ($dev eq '(cd)') {
+				print FD ' chainloader (hd0)+1'."\n";
+			} else {
+				print FD " chainloader /boot/grub2/bootnext\n";
+				my $bootnext = $this -> addBootNext (
+					"$tmpdir/boot/grub2/bootnext", hex $this->{mbrid}
+				);
+				if (! defined $bootnext) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("Failed to write bootnext\n");
+					$kiwi -> failed ();
+					return;
+				}
+			}
+			print FD '}'."\n";
+			$title = $this -> makeLabel ("Install/Restore $label");
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
-			print FD 'menuentry "'.$title.'"';
-			print FD ' --class opensuse --class os {'."\n";
 		}
+		print FD 'menuentry "'.$title.'"';
+		print FD ' --class opensuse --class os {'."\n";
 		#==========================================
 		# Standard boot
 		#------------------------------------------
 		if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 			if ($type =~ /^KIWI CD/) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("*** not implemented ***");
-				$kiwi -> failed ();
-				return undef;
+				print FD "echo Loading linux...\n";
+				print FD "set gfxpayload=$gfxpayload"."\n";
+				print FD 'linux ($root)/boot/linux';
+				print FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
+				print FD " cdinst=1 loader=$bloader splash=silent";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD "set root=\"(hd0,1)\"\n";
 				print FD "echo Loading linux.vmx...\n";
@@ -3183,10 +3229,8 @@ sub setupBootLoaderConfiguration {
 			}
 			print FD $cmdline;
 			if ($type =~ /^KIWI CD/) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("*** not implemented ***");
-				$kiwi -> failed ();
-				return undef;
+				print FD "echo Loading initrd...\n";
+				print FD "initrd (\$root)/boot/initrd\n";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD "echo Loading initrd.vmx...\n";
 				print FD "initrd /boot/initrd.vmx\n";
@@ -3199,7 +3243,7 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			$kiwi -> error  ("*** not implemented ***");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		#==========================================
 		# Failsafe boot
@@ -3209,10 +3253,11 @@ sub setupBootLoaderConfiguration {
 		print FD ' --class opensuse --class os {'."\n";
 		if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 			if ($type =~ /^KIWI CD/) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("*** not implemented ***");
-				$kiwi -> failed ();
-				return undef;
+				print FD "echo Loading linux...\n";
+				print FD "set gfxpayload=$gfxpayload"."\n";
+				print FD 'linux ($root)/boot/linux';
+				print FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
+				print FD " cdinst=1 loader=$bloader splash=silent";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD "set root=\"(hd0,1)\"\n";
 				print FD "echo Loading linux.vmx...\n";
@@ -3230,10 +3275,8 @@ sub setupBootLoaderConfiguration {
 			print FD " noapic maxcpus=0 edd=off";
 			print FD $cmdline;
 			if ($type =~ /^KIWI CD/) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("*** not implemented ***");
-				$kiwi -> failed ();
-				return undef;
+				print FD "echo Loading initrd...\n";
+				print FD "initrd (\$root)/boot/initrd\n";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD "echo Loading initrd.vmx...\n";
 				print FD "initrd /boot/initrd.vmx\n";
@@ -3246,7 +3289,7 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			$kiwi -> error  ("*** not implemented ***");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		close FD;
 		$kiwi -> done();
@@ -3308,8 +3351,7 @@ sub setupBootLoaderConfiguration {
 			if ($dev eq '(cd)') {
 				print FD " rootnoverify (hd0)\n";
 				print FD " chainloader (hd0)+1\n";
-			}
-			else {
+			} else {
 				print FD " chainloader $dev/boot/grub/bootnext\n";
 				my $bootnext = $this -> addBootNext (
 					"$tmpdir/boot/grub/bootnext", hex $this->{mbrid}
@@ -4103,7 +4145,7 @@ sub installBootLoader {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't install $loader on $diskname: $status");
 			$kiwi -> failed ();
-			return undef;
+			return;
 		}
 		if ($chainload) {
 			# /.../
@@ -4632,7 +4674,7 @@ sub checkLVMbind {
 	# ---
 	my $this = shift;
 	my $sdev = shift;
-	my $vgname = qxx ("pvs --noheadings -o vg_name $sdev 2>&1");
+	my $vgname = qxx ("pvs --noheadings -o vg_name $sdev 2>/dev/null");
 	my $result = $? >> 8;
 	if ($result != 0) {
 		return $sdev;
