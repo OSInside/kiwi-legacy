@@ -51,6 +51,7 @@ sub new {
 	$data{FSInodeSize}     = 256;
 	$data{DiskStartSector} = 2048;
 	$data{DiskSectorSize}  = 512;
+	$data{DiskAlignment}   = 4096;
 	$data{SnapshotChunk}   = 4096;
 	$data{SnapshotCount}   = "5G";
 	$data{OverlayRootTree} = 0;

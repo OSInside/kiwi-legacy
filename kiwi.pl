@@ -664,9 +664,8 @@ sub init {
 	my $DiskStartSector;       # location of start sector (default is 32)
 	my $EditBootConfig;        # allow to run script before bootloader install
 	my $PackageManager;        # package manager to use
+	my $DiskAlignment;         # partition alignment, default is 4096
 	my $DiskBIOSSectorSize;    # sector size default is 512 bytes
-	my $DiskBIOSHeads;         # BIOS head number, overwrites kernel value
-	my $DiskBIOSSectors;       # BIOS sector number, overwrites kernel value
 	my $Version;               # version information
 	#==========================================
 	# create logger and cmdline object
@@ -756,10 +755,9 @@ sub init {
 		"upgrade|u=s"           => \$Upgrade,
 		"test-image=s"          => \$TestImage,
 		"test-case=s"           => \$TestCase,
-		"start-sector=i"        => \$DiskStartSector,
-		"bios-sector-size=i"    => \$DiskBIOSSectorSize,
-		"bios-heads=i"          => \$DiskBIOSHeads,
-		"bios-sectors=i"        => \$DiskBIOSSectors,
+		"disk-start-sector=i"   => \$DiskStartSector,
+		"disk-alignment=i"      => \$DiskAlignment,
+		"disk-sector-size=i"    => \$DiskBIOSSectorSize,
 		"v|verbose=i"           => \$Verbosity,
 		"version"               => \$Version,
 		"yes|y"                 => \$defaultAnswer,
@@ -783,6 +781,12 @@ sub init {
 		$DiskBIOSSectorSize
 	);
 	#========================================
+	# set partition alignment
+	#----------------------------------------
+	$cmdL -> setDiskAlignment (
+		$DiskAlignment
+	);
+	#========================================
 	# set list of filesystem options
 	#----------------------------------------
 	$cmdL -> setFilesystemOptions (
@@ -795,18 +799,6 @@ sub init {
 	$cmdL -> setMigrationOptions (
 		\@Exclude,\@Skip,$MigrateNoFiles,$MigrateNoTemplate
 	);
-	#========================================
-	# set BIOS heads for alignment
-	#----------------------------------------
-	if (defined $DiskBIOSHeads) {
-		$cmdL -> setDiskBIOSHeads ($DiskBIOSHeads);
-	}
-	#========================================
-	# set BIOS sectors for alignment
-	#----------------------------------------
-	if (defined $DiskBIOSSectors) {
-		$cmdL -> setDiskBIOSSectors ($DiskBIOSSectors);
-	}
 	#========================================
 	# check if edit-bootconfig option is set
 	#----------------------------------------
@@ -1420,23 +1412,19 @@ sub usage {
 	print "      used architecture for the image-packages in zypp.conf.\n";
 	print "      When used with smart this option doesn't have any effect.\n";
 	print "\n";
-	print "    [ --start-sector <number> ]\n";
+	print "    [ --disk-start-sector <number> ]\n";
 	print "      The start sector value for virtual disk based images.\n";
 	print "      The default is 2048. For newer disks including SSD\n";
 	print "      this is a reasonable default. In order to use the old\n";
 	print "      style disk layout the value can be set to 32\n";
 	print "\n";
-	print "    [ --bios-sector-size <number> ]\n";
+	print "    [ --disk-sector-size <number> ]\n";
 	print "      Overwrite the default 512 byte sector size value.\n";
 	print "      This will influence the partition alignment\n";
 	print "\n";
-	print "    [ --bios-heads <number> ]\n";
-	print "      Overwrite what the kernel thinks about the number of heads.\n";
-	print "      This will influence the partition alignment\n";
-	print "\n";
-	print "    [ --bios-sectors <number> ]\n";
-	print "      Overwrite what the kernel thinks about the number of\n";
-	print "      sectors. This will influence the partition alignment\n";
+	print "    [ --disk-alignment <number> ]\n";
+	print "      Align the start of each partition to the specified\n";
+	print "      value. By default 4096 bytes are used\n";
 	print "\n";
 	print "    [ --debug ]\n";
 	print "      Prints a stack trace in case of internal errors\n";

@@ -1335,39 +1335,24 @@ sub getDiskBIOSSectorSize {
 }
 
 #==========================================
-# setDiskBIOSHeads
+# setDiskAlignment
 #------------------------------------------
-sub setDiskBIOSHeads {
+sub setDiskAlignment {
 	my $this  = shift;
 	my $value = shift;
-	$this->{BIOSHeads} = $value;
+	if (! defined $value) {
+		$value = $this->{gdata}->{DiskAlignment};
+	}
+	$this->{PTableAlignment} = $value;
 	return 1;
 }
 
 #==========================================
-# getDiskBIOSHeads
+# getDiskAlignment
 #------------------------------------------
-sub getDiskBIOSHeads {
+sub getDiskAlignment {
 	my $this = shift;
-	return $this->{BIOSHeads};
-}
-
-#==========================================
-# setDiskBIOSSectors
-#------------------------------------------
-sub setDiskBIOSSectors {
-	my $this  = shift;
-	my $value = shift;
-	$this->{BIOSSectors} = $value;
-	return 1;
-}
-
-#==========================================
-# getDiskBIOSSectors
-#------------------------------------------
-sub getDiskBIOSSectors {
-	my $this = shift;
-	return $this->{BIOSSectors};
+	return $this->{PTableAlignment};
 }
 
 #==========================================
