@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Feb 27 12:04:55 CET 2012 - ms@suse.de
+
+- because the input stream from XML is utf-8 encoded it's required
+  to set binmode correctly to utf-8 too when writing the data out.
+  This is at least required for the profile file inside the initrd
+  because it contains data from the XML like the oem boot title
+
+-------------------------------------------------------------------
 Thu Feb 23 11:58:48 CET 2012 - ms@suse.de
 
 - follow up and improved fix for basePackBootIncludes to pack
