@@ -50,6 +50,11 @@ use KIWIXMLValidator;
 use KIWIGlobals;
 
 #============================================
+# UTF-8 for output to stdout
+#--------------------------------------------
+binmode(STDOUT, ":utf8");
+
+#============================================
 # Globals (debugging)
 #--------------------------------------------
 our $TT            = "Trace Level ";
