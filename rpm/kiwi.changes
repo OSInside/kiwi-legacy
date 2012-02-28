@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Feb 28 16:17:52 CET 2012 - ms@suse.de
+
+- fixed mkinitrd call in ec2 format code:
+  * don't use -A also make sure the exit code of mkinitrd is evaluated
+  * make sure all required filesystem modules are added to
+    /etc/sysconfig/kernel before calling mkinitrd
+
+-------------------------------------------------------------------
 Mon Feb 27 12:04:55 CET 2012 - ms@suse.de
 
 - because the input stream from XML is utf-8 encoded it's required
