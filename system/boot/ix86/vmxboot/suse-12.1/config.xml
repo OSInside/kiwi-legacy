@@ -82,11 +82,15 @@
 	</packages>
 	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>
+		<package name="kernel-xen-base"/>
 <!-- xen dom0 support only on x86_64 -->
 		<package name="xen" arch="x86_64"/>
 	</packages>
 	<packages type="image" profiles="ec2">
 		<package name="kernel-ec2"/>
+		<package name="kernel-ec2-base"/>
+<!-- xen dom0 support only on x86_64 -->
+		<package name="xen" arch="x86_64"/>
 	</packages>
 	<packages type="image" profiles="desktop">
 		<package name="kernel-desktop"/>
