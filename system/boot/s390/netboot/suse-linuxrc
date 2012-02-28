@@ -603,9 +603,7 @@ else
 	# 15.2) Check for local boot
 	#--------------------------------------
 	if [ $LOCAL_BOOT = "yes" ];then
-		imageDisk=$(dn $root)
-		imageDevice=$(ddn $imageDisk 2)
-		imageRootDevice=$imageDevice
+		imageRootDevice=$root
 		imageRootName="Local-System"
 		if [ ! -z "$UNIONFS_CONFIG" ];then
 			unionFST=$UNIONFS_CONFIG
