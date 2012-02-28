@@ -1825,7 +1825,7 @@ sub setupBootDisk {
 	#==========================================
 	# Update raw disk size if boot part is used
 	#------------------------------------------
-	if (($needBootP) && ($imgtype ne "split")) {
+	if ((! $this->{sizeSetByUser}) && ($needBootP) && ($imgtype ne "split")) {
 		$this -> __updateDiskSize ($bootsize);
 	}
 	#==========================================
@@ -5671,6 +5671,7 @@ sub __initDiskSize {
 	#===========================================
 	# turn optional size from cmdline into bytes
 	#-------------------------------------------
+	$this->{sizeSetByUser} = 0;
 	if ($cmdlsize =~ /^(\d+)([MG])$/i) {
 		my $value= $1;
 		my $unit = $2;
@@ -5692,6 +5693,7 @@ sub __initDiskSize {
 			$kiwi -> oops();
 		}
 		$minBytes = $cmdlBytes;
+		$this->{sizeSetByUser} = 1;
 	} elsif ($XMLBytes > 0) {
 		if ($XMLBytes < $minBytes) {
 			$kiwi -> warning (
@@ -5699,6 +5701,7 @@ sub __initDiskSize {
 			);
 			$kiwi -> oops();
 		}
+		$this->{sizeSetByUser} = 1;
 		$minBytes = $XMLBytes;
 	}
 	#==========================================
