@@ -370,6 +370,9 @@ sub createEC2 {
 	my $source = $this->{image};
 	my $format = $this->{format};
 	my $target = $source;
+	my $mods   = "ext2 ext3 ext4 reiserfs";
+	my $kmod   = "INITRD_MODULES";
+	my $sysk   = "/etc/sysconfig/kernel";
 	my $aminame= basename $source;
 	my $destdir= dirname  $source;
 	my $status;
@@ -492,8 +495,15 @@ sub createEC2 {
 	print $FD 'export rootdev=/dev/sda1'."\n";
 	print $FD 'export rootfstype='.$type{type}."\n";
 	print $FD 'mknod /dev/sda1 b 8 1'."\n";
-	print $FD 'mkinitrd -B -A'."\n";
 	print $FD 'touch /boot/.rebuild-initrd'."\n";
+	print $FD 'sed -i -e \'s@^';
+	print $FD $kmod;
+	print $FD '="\(.*\)"@'.$kmod.'="\1 ';
+	print $FD $mods;
+	print $FD '"@\' ';
+	print $FD $sysk;
+	print $FD "\n";
+	print $FD 'mkinitrd -B'."\n";
 	close $FD;
 	qxx ("chmod u+x $tmpdir/create_initrd.sh");
 	$status = qxx ("chroot $tmpdir bash -c ./create_initrd.sh 2>&1");
