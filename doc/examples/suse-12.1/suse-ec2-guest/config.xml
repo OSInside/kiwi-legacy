@@ -35,10 +35,12 @@
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
 		<package name="kernel-ec2"/>
+		<package name="kernel-ec2-base"/>
 		<package name="suse-ami-tools"/>
 		<package name="vim"/>
 		<package name="xen-tools-domU"/>
 		<package name="xen"/>
+		<package name="grub"/>
 		<opensusePattern name="base"/>
 	</packages>
 	<packages type="bootstrap">
