@@ -2496,6 +2496,7 @@ function setupDefaultFstab {
 	echo "sysfs   /sys              sysfs   noauto          0 0"  >> $nfstab
 	echo "debugfs /sys/kernel/debug debugfs noauto          0 0"  >> $nfstab
 	echo "usbfs   /proc/bus/usb     usbfs   noauto          0 0"  >> $nfstab
+	echo "tmpfs   /run              tmpfs   noauto          0 0"  >> $nfstab
 }
 #======================================
 # updateRootDeviceFstab
@@ -5783,6 +5784,8 @@ function activateImage {
 	Echo "Activating Image: [$name]"
 	reopenKernelConsole
 	udevPending
+	mkdir -p /mnt/run
+	mkdir -p /mnt/dev
 	mount --move /dev /mnt/dev
 	mount --move /run /mnt/run
 	udevKill
