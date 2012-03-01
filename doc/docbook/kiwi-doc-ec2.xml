@@ -83,7 +83,9 @@
 
   <para>Documentation for Amazon EC2 can be found at <ulink
         url="http://aws.amazon.com/documentation/ec2/"/>. The documentation
-    for the command line tools may be accessed at <ulink url="http://docs.amazonwebservices.com/AWSEC2/latest/CommandLineReference"/>.</para>
+    for the command line tools may be accessed at <ulink url="http://docs.amazonwebservices.com/AWSEC2/latest/CommandLineReference"/>. All commands also
+    support the customary <option>--help</option> command line option to
+    display the supported command line arguments for the given command.</para>
 
   <para>When working with the Amazon tools it is useful to set the
     EC2_HOME, EC2_PRIVATE_KEY, and EC2_CERT environment variables. Setting
@@ -114,6 +116,23 @@
    published rate for any computing resources you consume in EC2. This
    includes but is not limited to, running instances, storing data
    (your image) on S3 or EBS, and network traffic.</para>
+
+  <para>One final remark before we get started, the default region for any
+    <command>ec2-</command> command that communicates with the REST API or
+    sends files to EC2 is the US-East region, i.e. us-east-1. Therefore, if
+    you want to upload any data to other EC2 regions you must specify the
+    desired target region. Specifying a region is accomplished by setting
+    the EC2_URL environment variable, by using the <option>--url</option>
+    command line option, or by using the <option>--region</option> argument.
+    The EC2-URL environment variable and the <option>--url</option> argument
+    expect a value in the form
+    <replaceable>https://ec2.amazonaws.com</replaceable> (us-east-1).
+    The <option>--region</option> argument expects the name of
+    a region as returned by the <command>ec2-describe-regions</command>
+    command. The region specified for the <command>ec2-</command> commands
+    must match the specified in the <filename>config.xml</filename> if this
+    option was specified in your configuration.
+  </para>
     
   <sect1 id="sec.ec2.building">
     <title>Building the suse-ec2-guest Example</title>
