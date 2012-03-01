@@ -352,7 +352,7 @@ sub createEC2 {
 	my $source = $this->{image};
 	my $format = $this->{format};
 	my $target = $source;
-	my $mods   = "ext2 ext3 ext4 reiserfs";
+	my $mods   = "ext3 jbd xenblk";
 	my $kmod   = "INITRD_MODULES";
 	my $sysk   = "/etc/sysconfig/kernel";
 	my $aminame= basename $source;
