@@ -18,6 +18,7 @@
 				<ec2privatekeyfile>Path to EC2 private key file</ec2privatekeyfile>
 				<ec2certfile>Path to EC2 public certificate file</ec2certfile>
 				<ec2accountnr>12345678911</ec2accountnr>
+				<ec2region>EU-West</ec2region>
 			</ec2config>
 		</type>
 	</preferences>
