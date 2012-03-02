@@ -155,7 +155,6 @@ mountSystemFilesystems &>/dev/null
 if [ ! -z "$OEM_SILENTBOOT" ];then
     test -e /proc/splash && echo verbose > /proc/splash
 fi
-closeKernelConsole
 
 #======================================
 # 2) Prepare module load support 
@@ -191,7 +190,6 @@ fi
 startBlogD
 startShell
 errorLogStart
-openKernelConsole
 
 #======================================
 # 6) Including required kernel modules

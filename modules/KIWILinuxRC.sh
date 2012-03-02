@@ -30,31 +30,17 @@ export UTIMER_INFO=/dev/utimer
 export bootLoaderOK=0
 
 #======================================
-# Exports (arch specific)
+# Exports (console)
 #--------------------------------------
-arch=`uname -m`
-if [ "$arch" = "ppc64" ];then
-	test -z "$loader" && export loader=yaboot
-	test -z  "$ELOG_BOOTSHELL" && export ELOG_BOOTSHELL=/dev/hvc0
-	test -z  "$ELOG_CONSOLE"   && export ELOG_CONSOLE=/dev/hvc0
-elif [[ $arch =~ arm ]];then
-	test -z "$loader" && export loader=uboot
-	test -z "$ELOG_CONSOLE"    && export ELOG_CONSOLE=/dev/tty3
-	test -z "$ELOG_BOOTSHELL"  && export ELOG_BOOTSHELL=/dev/tty2
-else
-	test -z "$loader" && export loader=grub
-	test -z "$ELOG_CONSOLE"    && export ELOG_CONSOLE=/dev/tty3
-	test -z "$ELOG_BOOTSHELL"  && export ELOG_BOOTSHELL=/dev/tty2
-fi
+test -z $ELOG_BOOTSHELL && export ELOG_BOOTSHELL=/dev/tty2
+test -z $ELOG_EXCEPTION && export ELOG_EXCEPTION=/dev/console
 
 #======================================
 # Exports (General)
 #--------------------------------------
+test -z "$arch"               && export arch=$(uname -m)
 test -z "$haveDASD"           && export haveDASD=0
 test -z "$haveZFCP"           && export haveZFCP=0
-test -z "$ELOG_EXCEPTION"     && export ELOG_EXCEPTION=/dev/tty1
-test -z "$KLOG_CONSOLE"       && export KLOG_CONSOLE=4
-test -z "$KLOG_DEFAULT"       && export KLOG_DEFAULT=1
 test -z "$ELOG_STOPPED"       && export ELOG_STOPPED=0
 test -z "$PARTITIONER"        && export PARTITIONER=parted
 test -z "$DEFAULT_VGA"        && export DEFAULT_VGA=0x314
@@ -172,50 +158,6 @@ function WaitKey {
 		Echo -n "Press ENTER to continue..."
 		read
 	fi
-}
-#======================================
-# closeKernelConsole
-#--------------------------------------
-function closeKernelConsole {
-	# /.../
-	# close the kernel console, set level to 1
-	# ----
-	if [ -x /usr/sbin/klogconsole ];then
-		klogconsole -l 1
-	fi
-}
-#======================================
-# openKernelConsole
-#--------------------------------------
-function openKernelConsole {
-	# /.../
-	# move the kernel console to terminal 3 as you can't see the messages
-	# now directly it looks like the kernel console is switched off
-	# but it isn't really. If DEBUG is set the logging remains on
-	# the first console
-	# ----
-	if [ ! -x /usr/sbin/klogconsole ];then
-		return
-	fi
-	if test "$DEBUG" = 0;then
-		Echo "Kernel logging enabled on: /dev/tty$KLOG_CONSOLE"
-		setctsid /dev/tty$KLOG_CONSOLE \
-			klogconsole -l 7 -r$KLOG_CONSOLE
-	fi
-}
-#======================================
-# reopenKernelConsole
-#--------------------------------------
-function reopenKernelConsole {
-	# /.../
-	# reopen kernel console to be able to see kernel messages
-	# while the system is booting
-	# ----
-	if [ ! -x /usr/sbin/klogconsole ];then
-		return
-	fi
-	Echo "Kernel logging enabled on: /dev/tty$KLOG_DEFAULT"
-	klogconsole -l 7 -r$KLOG_DEFAULT
 }
 #======================================
 # importFile
@@ -541,8 +483,8 @@ function errorLogContinue {
 #--------------------------------------
 function errorLogStart {
 	# /.../
-	# Log all errors up to now to the terminal specified
-	# by ELOG_CONSOLE
+	# Log all errors and the bas debug information to the
+	# file set in ELOG_FILE.
 	# ----
 	if [ ! -f $ELOG_FILE ];then
 		#======================================
@@ -555,22 +497,22 @@ function errorLogStart {
 		#--------------------------------------
 		startUtimer
 		echo "KIWI PreInit Log" >> $ELOG_FILE
-		cat /iprocs | grep -v TAIL_PID > /iprocs
 	fi
-	echo "Boot-Logging enabled on $ELOG_CONSOLE"
-	setctsid -f $ELOG_CONSOLE tail -f $ELOG_FILE &
-	exec 2>>$ELOG_FILE
+	#======================================
+	# Contents of .profile environment
+	#--------------------------------------
 	if [ -f .profile ];then
-		echo "KIWI .profile contents:" 1>&2
-		cat .profile 1>&2
+		echo "KIWI .profile contents:" >> $ELOG_FILE
+		cat .profile >> $ELOG_FILE
 	fi
+	#======================================
+	# Redirect stderr to ELOG_FILE
+	#--------------------------------------
+	exec 2>>$ELOG_FILE
+	#======================================
+	# Enable shell debugging and redirect
+	#--------------------------------------
 	set -x 1>&2
-	local DTYPE=`stat -f -c "%T" /proc 2>/dev/null`
-	if test "$DTYPE" != "proc" ; then
-		mount -t proc proc /proc
-	fi
-	TAIL_PID=$(fuser $ELOG_CONSOLE | tr -d " ")
-	echo TAIL_PID=$TAIL_PID >> /iprocs
 }
 #======================================
 # udevPending
@@ -4421,10 +4363,6 @@ function includeKernelParameters {
 	if [ ! -z "$kiwibrokenmodule" ];then
 		kiwibrokenmodule=`echo $kiwibrokenmodule | tr , " "`
 	fi
-	if [ ! -z "$kiwistderr" ];then
-		export ELOG_CONSOLE=$kiwistderr
-		export ELOG_EXCEPTION=$kiwistderr
-	fi
 	if [ ! -z "$ramdisk_size" ];then
 		local modfile=/etc/modprobe.d/99-local.conf
 		if [ ! -f $modfile ];then
@@ -5186,7 +5124,11 @@ function startShell {
 	# /.../
 	# start a debugging shell on ELOG_BOOTSHELL
 	# ----
-	if [ -z "$kiwistderr" ] && [ ! -z $kiwidebug ];then
+	if [ ! -z $kiwidebug ];then
+		if [ ! -e $ELOG_BOOTSHELL ];then
+			Echo "No terminal $ELOG_BOOTSHELL available for debug shell"
+			return
+		fi
 		Echo "Starting boot shell on $ELOG_BOOTSHELL"
 		setctsid -f $ELOG_BOOTSHELL /bin/bash -i
 		ELOGSHELL_PID=$(fuser $ELOG_BOOTSHELL | tr -d " ")
@@ -5782,7 +5724,6 @@ function activateImage {
 	# move device nodes
 	#--------------------------------------
 	Echo "Activating Image: [$name]"
-	reopenKernelConsole
 	udevPending
 	mkdir -p /mnt/run
 	mkdir -p /mnt/dev
@@ -5825,7 +5766,6 @@ function cleanImage {
 	#--------------------------------------
 	. /iprocs
 	kill $UTIMER_PID &>/dev/null
-	kill $TAIL_PID   &>/dev/null
 	#======================================
 	# remove preinit code from system image
 	#--------------------------------------
@@ -5939,7 +5879,6 @@ function bootImage {
 	#--------------------------------------
 	. /iprocs
 	kill $UTIMER_PID &>/dev/null
-	kill $TAIL_PID   &>/dev/null
 	#======================================
 	# copy boot log file into system image
 	#--------------------------------------

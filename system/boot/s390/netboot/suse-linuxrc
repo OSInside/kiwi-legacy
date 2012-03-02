@@ -87,7 +87,6 @@ ldconfig
 # 1) Mounting local file systems
 #--------------------------------------
 mountSystemFilesystems &>/dev/null
-closeKernelConsole
 
 #======================================
 # 2) Prepare module load support 
@@ -120,7 +119,6 @@ fi
 startBlogD
 startShell
 errorLogStart
-openKernelConsole
 
 #======================================
 # 6) probe/load network module
