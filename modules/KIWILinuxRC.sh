@@ -743,10 +743,32 @@ function installBootLoaderRecovery {
 #--------------------------------------
 function installBootLoaderUBoot {
 	if [ -x /usr/bin/mkimage ];then
+		#======================================
+		# create u-boot script and image
+		#--------------------------------------
 		mkimage -A arm -O linux -a 0 -e 0 -T script -C none \
 			-n 'Boot-Script' -d /boot/boot.script /boot/boot.scr
 		if [ ! $? = 0 ];then
 			Echo "Failed to create boot script image"
+		fi
+		#======================================
+		# install MLO
+		#--------------------------------------
+		if [ -e /boot/MLO ];then
+			dd if=/boot/MLO of=$imageDiskDevice bs=128k count=1 seek=1 1>&2
+			if [ ! $? = 0 ];then
+				Echo "Failed to install MLO"
+			fi
+		else
+			Echo "No MLO loader present in system image"
+			Echo "Install of MLO skipped"
+		fi
+		#======================================
+		# avoid x86 boot code in the MBR
+		#--------------------------------------
+		dd if=/dev/zero of=$imageDiskDevice bs=440 count=1 1>&2
+		if [ ! $? = 0 ];then
+			Echo "Failed to clear MBR"
 		fi
 	else
 		Echo "Image doesn't have u-boot-tools installed"

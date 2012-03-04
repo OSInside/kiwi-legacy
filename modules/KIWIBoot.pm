@@ -4573,6 +4573,20 @@ sub installBootLoader {
 				$this -> cleanLoop ();
 				return;
 			}
+			# To avoid any issues when parted leaves x86 boot code
+			# in the MBR we better clear that part of the image
+			$status = qxx (
+				"dd if=/dev/zero of=$diskname bs=440 count=1 conv=notrunc 2>&1"
+			);
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't clear MBR on $diskname: $status");
+				$kiwi -> failed ();
+				qxx ("umount /mnt 2>&1");
+				$this -> cleanLoop ();
+				return;
+			}
 		}
 		qxx ("umount /mnt 2>&1");
 	}
