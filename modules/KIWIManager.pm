@@ -1384,10 +1384,9 @@ sub removePackages {
 		$fd -> close();
 	}
 	#==========================================
-	# zypper
+	# zypper | ensconce | yum
 	#------------------------------------------
-	if (($manager eq "zypper") || ($manager eq "ensconce")) {
-		my @zypper = @{$this->{zypper_chroot}};
+	if (($manager eq "zypper")||($manager eq "ensconce")||($manager eq "yum")) {
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
@@ -1406,29 +1405,6 @@ sub removePackages {
 		print $fd " | grep -v 'is not installed')"."\n";
 		print $fd "@kchroot rpm -e ";
 		print $fd "@removeOpts \$final || true &\n";
-		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "ECODE=\$?\n";
-		print $fd "echo \$ECODE > $screenCall.exit\n";
-		print $fd "exit \$ECODE\n";
-		$fd -> close();
-	}
-	#==========================================
-	# yum
-	#------------------------------------------
-	if ($manager eq "yum") {
-		my @yum = @{$this->{yum_chroot}};
-		#==========================================
-		# Create screen call file
-		#------------------------------------------
-		$kiwi -> info ("Removing packages...");
-		print $fd "function clean { kill \$SPID;";
-		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
-		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;";
-		print $fd "c=\$((\$c+1));done;\n";
-		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
-		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
-		print $fd "trap clean INT TERM\n";
-		print $fd "@kchroot @yum remove @removePackages &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
 		print $fd "echo \$ECODE > $screenCall.exit\n";
