@@ -4557,9 +4557,9 @@ sub installBootLoader {
 		#==========================================
 		# install MLO as raw
 		#------------------------------------------
-		if (-e "/mnt/MLO") {
+		if (-e "$tmpdir/boot/MLO") {
 			$kiwi -> info ("Installing MLO on device: $diskname");
-			my $MLO = "/mnt/MLO";
+			my $MLO = "$tmpdir/boot/MLO";
 			my $opt = "count=1 seek=1 conv=notrunc";
 			$status = qxx (
 				"dd if=$MLO of=$diskname bs=128k $opt 2>&1"
