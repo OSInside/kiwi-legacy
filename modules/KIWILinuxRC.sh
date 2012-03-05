@@ -53,10 +53,6 @@ test -z "$VGROUP"             && export VGROUP=kiwiVG
 test -z "$PARTED_HAVE_ALIGN"  && export PARTED_HAVE_ALIGN=0
 test -z "$PARTED_HAVE_MACHINE"&& export PARTED_HAVE_MACHINE=0
 test -z "$DHCPCD_HAVE_PERSIST"&& export DHCPCD_HAVE_PERSIST=1
-if [ -x /sbin/blogd ];then
-	test -z "$CONSOLE"            && export CONSOLE=/dev/console
-	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
-fi
 if which parted &>/dev/null;then
 	if parted -h | grep -q '\-\-align';then
 		export PARTED_HAVE_ALIGN=1
@@ -512,7 +508,7 @@ function errorLogStart {
 	#======================================
 	# Enable shell debugging and redirect
 	#--------------------------------------
-	set -x 1>&2
+	set -x
 }
 #======================================
 # udevPending
@@ -639,40 +635,6 @@ function udevKill {
 function startSplashy {
 	if [ -x /usr/sbin/splashy ];then
 		splashy boot
-	fi
-}
-#======================================
-# startBlogD
-#--------------------------------------
-function startBlogD {
-	if test -n "$REDIRECT" ; then
-		mkdir -p /var/log
-		> /dev/shm/initrd.msg
-		ln -sf /dev/shm/initrd.msg /var/log/boot.msg
-		mkdir -p /var/run
-		startproc /sbin/blogd $REDIRECT
-		BLOGD_PID=$(pidof /sbin/blogd)
-		echo BLOGD_PID=$BLOGD_PID >> /iprocs
-	fi
-}
-#======================================
-# killBlogD
-#--------------------------------------
-function killBlogD {
-	# /.../
-	# kill blogd on /dev/console
-	# ----
-	if test -n "$REDIRECT" ; then
-		local umountProc=0
-		if [ ! -e /proc/mounts ];then
-			mount -t proc proc /proc
-			umountProc=1
-		fi
-		Echo "Stopping boot logging"
-		. /iprocs ; kill $BLOGD_PID
-		if [ $umountProc -eq 1 ];then
-			umount /proc
-		fi
 	fi
 }
 #======================================
@@ -5756,6 +5718,9 @@ function activateImage {
 	# run preinit stage
 	#--------------------------------------
 	Echo "Preparing preinit phase..."
+	if ! cp /usr/bin/utimer /mnt;then
+		systemException "Failed to copy utimer code" "reboot"
+	fi
 	if ! cp /iprocs /mnt;then
 		systemException "Failed to copy iprocs code" "reboot"
 	fi

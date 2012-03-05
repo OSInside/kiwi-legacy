@@ -104,7 +104,6 @@ fi
 #======================================
 # 5) start boot shell
 #--------------------------------------
-startBlogD
 startShell
 errorLogStart
 
@@ -1041,7 +1040,6 @@ fi
 # 30) kill boot shell
 #--------------------------------------
 killShell
-killBlogD
 
 #======================================
 # 31) Activate new root
