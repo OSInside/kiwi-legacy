@@ -2003,36 +2003,26 @@ sub setupBootDisk {
 			$root = $deviceMap{2};
 		}
 		#==========================================
-		# check partition sizes
+		# check system partition size
 		#------------------------------------------
-		if ($syszip > 0) {
-			my $sizeOK = 1;
-			my $systemPSize = $this->getStorageSize ($deviceMap{2});
-			my $systemISize = $main::global -> isize ($system);
-			$systemISize /= 1024;
-			chomp $systemPSize;
-			#print "_______A $systemPSize : $systemISize\n";
-			if ($systemPSize < $systemISize) {
-				$syszip += 10;
-				$sizeOK = 0;
-			}
-			if (! $sizeOK) {
-				#==========================================
-				# bad partition alignment try again
-				#------------------------------------------
-				sleep (1);
-				$this -> deleteVolumeGroup();
-				$this -> cleanLoopMaps();
-				qxx ("/sbin/losetup -d $this->{loop}");
-			} else {
-				#==========================================
-				# looks good go for it
-				#------------------------------------------
-				last;
-			}
+		my $sizeOK = 1;
+		my $systemPSize = $this->getStorageSize ($root);
+		my $systemISize = $main::global -> isize ($system);
+		$systemISize /= 1024;
+		chomp $systemPSize;
+		#print "_______A $systemPSize : $systemISize\n";
+		if ($systemPSize <= $systemISize) {
+			#==========================================
+			# system partition still too small
+			#------------------------------------------
+			sleep (1);
+			$this -> deleteVolumeGroup();
+			$this -> cleanLoopMaps();
+			qxx ("/sbin/losetup -d $this->{loop}");
+			$this -> __updateDiskSize (100);
 		} else {
 			#==========================================
-			# entire disk used
+			# looks good go for it
 			#------------------------------------------
 			last;
 		}
@@ -5702,18 +5692,20 @@ sub __initDiskSize {
 	if ($cmdlBytes > 0) {
 		if ($cmdlBytes < $minBytes) {
 			$kiwi -> warning (
-				"given size is smaller than calculated min size"
+				"given size is smaller than calculated min size, fixing"
 			);
 			$kiwi -> oops();
+			$cmdlBytes = $minBytes;
 		}
 		$minBytes = $cmdlBytes;
 		$this->{sizeSetByUser} = 1;
 	} elsif ($XMLBytes > 0) {
 		if ($XMLBytes < $minBytes) {
 			$kiwi -> warning (
-				"given size is smaller than calculated min size"
+				"given size is smaller than calculated min size, fixing"
 			);
 			$kiwi -> oops();
+			$XMLBytes = $minBytes;
 		}
 		$this->{sizeSetByUser} = 1;
 		$minBytes = $XMLBytes;
