@@ -505,7 +505,11 @@ sub printLog {
 	# print message to log channel (stdin,file)
 	#------------------------------------------
 	if ((! defined $flag) || ($this->{fileLog})) {
-		print $FD $result;
+		my $msg = $result;
+		if ($this->{fileLog}) {
+			$msg .= "\n" if ($msg !~ /\n$/);
+		}
+		print $FD $msg;
 	}
 	#==========================================
 	# save in cache if needed
