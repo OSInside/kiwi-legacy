@@ -895,8 +895,8 @@ function updateModuleDependencies {
 	# /.../
 	# update the kernel module dependencies list
 	# ---
-	local depmodExec=$(which depmod)
-	if [ ! -x $depmodExec ];then
+	local depmodExec=$(which depmod 2>/dev/null)
+	if [ ! -x "$depmodExec" ];then
 		Echo "Could not find depmod executable"
 		Echo "Skipping module dependency update"
 		systemIntegrity=unknown
@@ -912,15 +912,15 @@ function updateModuleDependencies {
 #--------------------------------------
 function setupRHELInitrd {
 	# /.../
-	# call mkinitrd on RHEL systems to create the distro initrd.
-	# Note: mkinitrd will be obsolete on RHEL in future releases
-	# so this function is a candiate for a rewrite
+	# call mkinitrd/dracut on RHEL systems to create the distro initrd.
 	# ----
 	bootLoaderOK=1
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
 	local haveVMX=0
+	local dracutExec=$(which dracut 2>/dev/null)
+	local mkinitrdExec=$(which mkinitrd 2>/dev/null)
 	local params
 	local running
 	local rlinux
@@ -948,14 +948,14 @@ function setupRHELInitrd {
 		fi
 		updateModuleDependencies
 		params=" -f /boot/initrd-$kernel_version $kernel_version"
-		if [ -x /sbin/mkinitrd ] ; then
-			if ! mkinitrd $params;then
+		if [ -x "$mkinitrdExec" ] ; then
+			if ! $mkinitrdExec $params;then
 				Echo "Can't create initrd"
 				systemIntegrity=unknown
 				bootLoaderOK=0
 			fi
-		elif [ -x /sbin/dracut ]; then
-			if ! dracut -H  $params;then
+		elif [ -x "$dracutExec" ]; then
+			if ! $dracutExec -H  $params;then
 				Echo "Can't create initrd"
 				systemIntegrity=unknown
 				bootLoaderOK=0
@@ -991,6 +991,7 @@ function setupSUSEInitrd {
 	local umountSys=0
 	local systemMap=0
 	local haveVMX=0
+	local mkinitrdExec=$(which mkinitrd 2>/dev/null)
 	local params
 	local running
 	local rlinux
@@ -1011,7 +1012,7 @@ function setupSUSEInitrd {
 			/etc/init.d/boot.device-mapper start
 		fi
 		updateModuleDependencies
-		if grep -qi param_B /sbin/mkinitrd;then
+		if grep -qi param_B $mkinitrdExec;then
 			params="-B"
 		fi
 		if [ $bootLoaderOK = "1" ];then
@@ -1021,7 +1022,7 @@ function setupSUSEInitrd {
 				haveVMX=1
 			fi
 		fi
-		if ! mkinitrd $params;then
+		if ! $mkinitrdExec $params;then
 			Echo "Can't create initrd"
 			systemIntegrity=unknown
 			bootLoaderOK=0
