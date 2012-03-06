@@ -1022,37 +1022,6 @@ function setupSUSEInitrd {
 	fi
 }
 #======================================
-# callSUSEInitrdScripts
-#--------------------------------------
-function callSUSEInitrdScripts {
-	# /.../
-	# create initrd with mkinitrd and extract the run_all.sh script
-	# after that call the script in /lib/mkinitrd. The mkinitrd
-	# package must be installed in the system image to do that
-	# ----
-	local prefix=$1
-	if [ ! -d $prefix/lib/mkinitrd ];then
-		Echo "No mkinitrd package installed"
-		Echo "Can't call initrd scripts"
-		return
-	fi
-	mkinitrd >/dev/null
-	if [ ! -f $prefix/boot/initrd ];then
-		Echo "No initrd file found"
-		Echo "Can't call initrd scripts"
-		return
-	fi
-	mkdir $prefix/tmp/suse
-	cd $prefix/tmp/suse && gzip -cd $prefix/boot/initrd | cpio -i
-	if [ ! -f $prefix/tmp/suse/run_all.sh ];then
-		Echo "No run_all.sh script in initrd"
-		Echo "Can't call initrd scripts"
-		return
-	fi
-	Echo "Calling SUSE initrd scripts"
-	chroot . bash ./run_all.sh
-}
-#======================================
 # setupBootLoader
 #--------------------------------------
 function setupBootLoader {
