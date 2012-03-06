@@ -838,7 +838,7 @@ sub addAppdata($$) {
 	$this->logMsg('I', "taking $packPointer->{'appdata'}");
 	open(XML, '<', $packPointer->{'appdata'});
 	while ( <XML> ) {
-		next if m,<?xml,;
+		next if m,<\?xml,;
 		next if m,^\s*</?applications,;
 		$this->{m_appdata} .= $_;
 	}
