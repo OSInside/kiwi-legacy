@@ -889,6 +889,25 @@ function installBootLoaderGrub2Recovery {
 	Echo "*** not implemented ***"
 }
 #======================================
+# updateModuleDependencies
+#--------------------------------------
+function updateModuleDependencies {
+	# /.../
+	# update the kernel module dependencies list
+	# ---
+	local depmodExec=$(which depmod)
+	if [ ! -x $depmodExec ];then
+		Echo "Could not find depmod executable"
+		Echo "Skipping module dependency update"
+		systemIntegrity=unknown
+		return
+	fi
+	if ! $depmodExec -a;then
+		Echo "Module dependency update failed."
+		systemIntegrity=unknown
+	fi
+}
+#======================================
 # setupRHELInitrd
 #--------------------------------------
 function setupRHELInitrd {
@@ -927,6 +946,7 @@ function setupRHELInitrd {
 				haveVMX=1
 			fi
 		fi
+		updateModuleDependencies
 		params=" -f /boot/initrd-$kernel_version $kernel_version"
 		if [ -x /sbin/mkinitrd ] ; then
 			if ! mkinitrd $params;then
@@ -990,6 +1010,7 @@ function setupSUSEInitrd {
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper start
 		fi
+		updateModuleDependencies
 		if grep -qi param_B /sbin/mkinitrd;then
 			params="-B"
 		fi
