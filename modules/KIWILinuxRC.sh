@@ -898,6 +898,8 @@ function setupRHELInitrd {
 	# so this function is a candiate for a rewrite
 	# ----
 	bootLoaderOK=1
+	local dracutExec
+	local mkinitrdExec
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
@@ -911,6 +913,16 @@ function setupRHELInitrd {
 		systemMap=1
 	done
 	if [ $systemMap -eq 1 ];then
+		if [ -x /sbin/mkinitrd ];then
+			mkinitrdExec=/sbin/mkinitrd
+		elif [ -x /usr/sbin/mkinitrd ];then
+			mkinitrdExec=/usr/sbin/mkinitrd
+		fi
+		if [ -x /sbin/dracut ];then
+			dracutExec=/sbin/dracut
+		elif [ -x /usr/sbin/dracut ];then
+			dracutExec=/usr/sbin/dracut
+		fi
 		if [ ! -e /proc/mounts ];then
 			mount -t proc proc /proc
 			umountProc=1
@@ -928,14 +940,14 @@ function setupRHELInitrd {
 			fi
 		fi
 		params=" -f /boot/initrd-$kernel_version $kernel_version"
-		if [ -x /sbin/mkinitrd ] ; then
-			if ! mkinitrd $params;then
+		if [ ! -z $mkinitrdExec ] ; then
+			if ! $mkinitrdExec $params;then
 				Echo "Can't create initrd"
 				systemIntegrity=unknown
 				bootLoaderOK=0
 			fi
-		elif [ -x /sbin/dracut ]; then
-			if ! dracut -H  $params;then
+		elif [ ! -z $dracutExec ]; then
+			if ! $dracutExec -H  $params;then
 				Echo "Can't create initrd"
 				systemIntegrity=unknown
 				bootLoaderOK=0
@@ -967,6 +979,7 @@ function setupSUSEInitrd {
 	# based on /etc/sysconfig/kernel
 	# ----
 	bootLoaderOK=1
+	local mkinitrdExec
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
@@ -979,6 +992,11 @@ function setupSUSEInitrd {
 		systemMap=1
 	done
 	if [ $systemMap -eq 1 ];then
+		if [ -x /sbin/mkinitrd ];then
+			mkinitrdExec=/sbin/mkinitrd
+		elif [ -x /usr/sbin/mkinitrd ];then
+			mkinitrdExec=/usr/sbin/mkinitrd
+		fi
 		if [ ! -e /proc/mounts ];then
 			mount -t proc proc /proc
 			umountProc=1
@@ -990,7 +1008,7 @@ function setupSUSEInitrd {
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper start
 		fi
-		if grep -qi param_B /sbin/mkinitrd;then
+		if grep -qi param_B $mkinitrdExec;then
 			params="-B"
 		fi
 		if [ $bootLoaderOK = "1" ];then
@@ -1000,7 +1018,7 @@ function setupSUSEInitrd {
 				haveVMX=1
 			fi
 		fi
-		if ! mkinitrd $params;then
+		if ! $mkinitrdExec $params;then
 			Echo "Can't create initrd"
 			systemIntegrity=unknown
 			bootLoaderOK=0
