@@ -1873,15 +1873,6 @@ sub setupRootSystem {
 			if ($this -> setupInstallPackages()) {
 				push (@packs,$manager);
 			}
-			#==========================================
-			# Setup baselibs
-			#------------------------------------------
-			$kiwi -> info ("Setting up bootstrap baselibs...");
-			if (! $this -> rpmLibs()) {
-				$kiwi -> failed();
-				return;
-			}
-			$kiwi -> done();
 			$kiwi -> info ("Initializing image system on: $root...");
 			#==========================================
 			# Create screen call file
@@ -1967,15 +1958,6 @@ sub setupRootSystem {
 			if ($this -> setupInstallPackages()) {
 				push (@packs,$manager);
 			}
-			#==========================================
-			# Setup baselibs
-			#------------------------------------------
-			$kiwi -> info ("Setting up bootstrap baselibs...");
-			if (! $this -> rpmLibs()) {
-				$kiwi -> failed();
-				return;
-			}
-			$kiwi -> done();
 			$kiwi -> info ("Initializing image system on: $root...");
 			#==========================================
 			# check input list for pattern names
@@ -2111,15 +2093,6 @@ sub setupRootSystem {
 		my $ensconce_args = "-i $imagename";
 		if (! $chroot) {
 			#==========================================
-			# Setup baselibs
-			#------------------------------------------
-			$kiwi -> info ("Setting up bootstrap baselibs...");
-			if (! $this -> rpmLibs()) {
-				$kiwi -> failed();
-				return;
-			}
-			$kiwi -> done();
-			#==========================================
 			# Ensconce options
 			#------------------------------------------
 			$ensconce_args .= " -b";
@@ -2155,15 +2128,6 @@ sub setupRootSystem {
 			if ($this -> setupInstallPackages()) {
 				push (@packs,$manager);
 			}
-			#==========================================
-			# Setup baselibs
-			#------------------------------------------
-			$kiwi -> info ("Setting up bootstrap baselibs...");
-			if (! $this -> rpmLibs()) {
-				$kiwi -> failed();
-				return;
-			}
-			$kiwi -> done();
 			$kiwi -> info ("Initializing image system on: $root...");
 			#==========================================
 			# check input list for group names
@@ -2280,10 +2244,10 @@ sub setupRootSystem {
 		return;
 	}
 	#==========================================
-	# cleanup baselibs
+	# setup baselibs
 	#------------------------------------------
 	if (! $chroot) {
-		$this -> rpmLibs ("clean");
+		$this -> rpmLibs();
 	}
 	return $this;
 }
@@ -2604,73 +2568,15 @@ sub cleanupRPMDatabase {
 #------------------------------------------
 sub rpmLibs {
 	# ...
-	# provide required libraries in order to make
-	# rpm work correctly.
+	# try to fix rpm version incompatibility
 	# ---
 	my $this   = shift;
-	my $clean  = shift;
-	my $kiwi   = $this->{kiwi};
-	my $root   = $this->{root};
-	my $result = $this->{baselibs};
 	my @kchroot= @{$this->{kchroot}};
-	my @result;
 	#==========================================
 	# cleanup baselibs
 	#------------------------------------------
-	if ($clean) {
-		if (! $result) {
-			# no baselibs stored/copied...
-			return $this;
-		}
-		$this -> cleanupRPMDatabase();
-		@result = @{$result};
-		my %dirlist = ();
-		foreach my $l (@result) {
-			my $dir = dirname ($l); $dirlist{$dir} = $dir;
-			qxx ("@kchroot rpm -qf /$l &>/dev/null");
-			my $code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> loginfo ("Cleaning baselib: $l\n");
-				qxx ("rm -f $root/$l 2>&1");
-			} elsif (-f "$root/$l.rpmnew") {
-				$kiwi -> loginfo ("Restore rpmnew basefile: $l\n");
-				qxx ("mv $root/$l.rpmnew $root/$l");
-			}
-		}
-		foreach my $dir (keys %dirlist) {
-			qxx ("rmdir $dir 2>&1");
-		}
-		qxx ("@kchroot ldconfig 2>&1");
-		return $this;
-	}
-	#==========================================
-	# setup baselibs
-	#------------------------------------------
-	my @libs = (
-		'/lib/libnsl*',
-		'/lib/libnss_compat*',
-		'/lib/libnss_files*',
-		'/lib64/libnsl*',
-		'/lib64/libnss_compat*',
-		'/lib64/libnss_files*',
-		'/sbin/ldconfig'
-	);
-	foreach my $item (@libs) {
-	foreach my $l (glob ($item)) {
-		if (($l) && (-f $l)) {
-			$l =~ s/^\///;
-			push @result,$l;
-		}
-	}
-	}
-	if (! @result) {
-		return;
-	}
-	foreach my $l (@result) {
-		my $dir = dirname ($l);
-		qxx ("mkdir -p $root/$dir && cp /$l $root/$l 2>&1");
-	}
-	$this -> {baselibs} = \@result;
+	$this -> cleanupRPMDatabase();
+	qxx ("@kchroot ldconfig 2>&1");
 	return $this;
 }
 
