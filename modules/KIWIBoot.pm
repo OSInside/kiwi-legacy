@@ -191,6 +191,12 @@ sub new {
 		$xengz = $xen;
 		last;
 	}
+	if (! $isxen) {
+		my $kernel = readlink $xengz.".kernel";
+		if ($kernel =~ /.*-xen$/) {
+			$isxen = 1;
+		}
+	}
 	#==========================================
 	# create tmp dir for operations
 	#------------------------------------------
@@ -508,13 +514,13 @@ sub createBootStructure {
 		$kiwi -> failed ();
 		return undef;
 	}
+	if ($isxen) {
+		# make xen happy and don't use cpio with splash info at the end
+		$kiwi -> info ("skip splash initrd attachment on xen domU");
+		$initrd =~ s/\.splash.*\.gz/\.gz/;
+		$kiwi -> done();
+	}
 	if ($zipped) {
-		if ($isxen) {
-			# deflate/inflate initrd to make xen happy
-			my $irdunc = $initrd;
-			$irdunc =~ s/\.gz//;
-			qxx ("$main::Gzip -d $initrd && $main::Gzip $irdunc");
-		}
 		$status = qxx ( "cp $initrd $tmpdir/boot/$iname 2>&1" );
 	} else {
 		$status = qxx ( "cat $initrd | $main::Gzip > $tmpdir/boot/$iname" );
@@ -2518,7 +2524,7 @@ sub setupInstallFlags {
 	#------------------------------------------
 	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 	my $status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
-	my $result = $? >> 8;
+	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to extract initrd data: $!");
 		$kiwi -> failed ();
