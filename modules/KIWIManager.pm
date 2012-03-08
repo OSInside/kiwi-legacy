@@ -2538,12 +2538,12 @@ sub cleanupRPMDatabase {
 		return $this;
 	}
 	#==========================================
-	# run a query on the database
+	# try to initialize rpm database
 	#------------------------------------------
-	$data = qxx ("@kchroot /bin/rpm -q --whatprovides /bin &>/dev/null");
+	$data = qxx ("@kchroot /bin/rpm --initdb &>/dev/null");
 	$code = $? >> 8;
 	#==========================================
-	# try to rebuild DB on failed query
+	# try to rebuild DB on failed init
 	#------------------------------------------
 	if ($code != 0) {
 		$kiwi -> info ('Rebuild RPM package db...');
