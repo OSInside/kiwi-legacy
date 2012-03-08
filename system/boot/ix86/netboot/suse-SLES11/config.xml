@@ -35,6 +35,7 @@
 		<file name="drivers/char/agp/intel-agp.ko"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
+		<file name="drivers/hv/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/block/brd.ko"/>
