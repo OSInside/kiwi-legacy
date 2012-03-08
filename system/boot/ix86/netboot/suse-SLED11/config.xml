@@ -41,6 +41,7 @@
 		<file name="drivers/char/lp.ko"/>
 		<file name="drivers/gpu/drm/i915/i915.ko"/>
 		<file name="drivers/hid/*"/>
+		<file name="drivers/hv/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/message/fusion/*"/>

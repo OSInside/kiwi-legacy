@@ -39,6 +39,7 @@
 		<file name="drivers/gpu/drm/nouveau/nouveau.ko"/>
 		<file name="drivers/gpu/drm/radeon/radeon.ko"/>
 		<file name="drivers/hid/*"/>
+		<file name="drivers/hv/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/input/keyboard/*"/>
 		<file name="drivers/input/mouse/*"/>
