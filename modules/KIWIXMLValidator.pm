@@ -497,7 +497,7 @@ sub __checkPatternTypeAttrConsistent {
 		return 1;
 	}
 	for my $pkgs (@pkgsNodes) {
-		if ("$pkgs" != "$defPackSection") {
+		if ("$pkgs" ne "$defPackSection") {
 			my $patternType = $pkgs -> getAttribute( 'patternType' );
 			if ($patternType && $patternType ne $defPatternTypeVal) {
 				my $kiwi = $this->{kiwi};
