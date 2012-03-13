@@ -363,7 +363,7 @@ Authors:
 
 %if %{suse_version} > 1140
 %check
-make test
+make KIWIVERBTEST=1 test
 %endif
 
 %install

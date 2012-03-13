@@ -43,6 +43,10 @@ TFTPIMAGE   = ${tftp_prefix}/image
 PACKDOCVZ   = ${doc_prefix}/kiwi
 MANVZ       = ${man_prefix}/man1
 
+ifdef KIWIVERBTEST
+TESTVERBOSE = --verbose
+endif
+
 all: modules/KIWISchema.rng
 	#============================================
 	# build tools
@@ -170,7 +174,7 @@ test:
 	for i in `find -name "*.t" | cut -d/ -f4`;do \
 		touch tests/.timestamps/$$i's';\
 	done
-	cd tests/unit && /usr/bin/prove -f .
+	cd tests/unit && /usr/bin/prove ${TESTVERBOSE} -f .
 	rm -f .revision
 
 %.t:
@@ -182,7 +186,7 @@ test:
 		mkdir tests/.timestamps; \
 	fi
 	touch tests/.timestamps/$@s
-	cd tests/unit && /usr/bin/prove -f $@
+	cd tests/unit && /usr/bin/prove ${TESTVERBOSE} -f $@
 
 clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
