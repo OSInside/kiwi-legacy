@@ -7,8 +7,8 @@
 		<specification>openSUSE 12.1 virtual disk system</specification>
 	</description>
 	<preferences>
-		<type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-12.1" format="vmdk">
-			<machine memory="512">
+		<type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-12.1" format="ovf">
+			<machine memory="512" ovftype="vmware">
 				<vmdisk controller="ide" id="0"/>
 			</machine>
 		</type>
