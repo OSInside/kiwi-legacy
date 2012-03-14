@@ -747,7 +747,11 @@ sub createXENConfiguration {
 	#------------------------------------------
 	if ((! %xenconfig) || (! $xenconfig{xen_diskdevice})) {
 		$kiwi -> skipped ();
-		$kiwi -> warning ("Not enough or missing Xen machine config data");
+		if (! %xenconfig) {
+			$kiwi -> warning ("No machine section for this image type found");
+		} else {
+			$kiwi -> warning ("No disk device setup found in machine section");
+		}
 		$kiwi -> skipped ();
 		return $file;
 	}
@@ -856,7 +860,11 @@ sub createVMwareConfiguration {
 	my %vmwconfig = %{$vmwref};
 	if ((! %vmwconfig) || (! $vmwconfig{vmware_disktype})) {
 		$kiwi -> skipped ();
-		$kiwi -> warning ("Not enough or Missing VMware machine config data");
+		if (! %vmwconfig) {
+			$kiwi -> warning ("No machine section for this image type found");
+		} else {
+			$kiwi -> warning ("No disk device setup found in machine section");
+		}
 		$kiwi -> skipped ();
 		return $file;
 	}
@@ -1011,7 +1019,11 @@ sub createOVFConfiguration {
 	my %ovfconfig = %{$ovfref};
 	if ((! %ovfconfig) || (! $ovfconfig{ovf_type})) {
 		$kiwi -> skipped ();
-		$kiwi -> warning ("Not enough or Missing OFV config data");
+		if (! %ovfconfig) {
+			$kiwi -> warning ("No machine section for this image type found");
+		} else {
+			$kiwi -> warning ("No disk device setup found in machine section");
+		}
 		$kiwi -> skipped ();
 		return $ovf;
 	}
