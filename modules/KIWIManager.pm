@@ -1391,6 +1391,7 @@ sub removePackages {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Removing packages...");
+		$this -> rpmLibs();
 		my @removeOpts = (
 			"--nodeps --allmatches --noscripts"
 		);
@@ -1404,9 +1405,13 @@ sub removePackages {
 		print $fd "@kchroot mount -t proc proc /proc"."\n";
 		print $fd "final=\$(@kchroot rpm -q @removePackages ";
 		print $fd " | grep -v 'is not installed')"."\n";
+		print $fd "if [ ! -z \"\$final\" ];then"."\n";
 		print $fd "@kchroot rpm -e @removeOpts \$final &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
+		print $fd "else"."\n";
+		print $fd "ECODE=0"."\n";
+		print $fd "fi"."\n";
 		print $fd "echo \$ECODE > $screenCall.exit\n";
 		print $fd "@kchroot umount /proc"."\n";
 		#print $fd "@kchroot /bin/bash\n";
