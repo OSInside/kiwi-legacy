@@ -464,7 +464,7 @@ sub new {
 	# round compressed image size
 	#------------------------------------------
 	if ($syszip) {
-		$syszip = $syszip / 1048576;
+		$syszip = $syszip / 1e6;
 		$syszip = sprintf ("%.0f", $syszip);
 	}
 	#==========================================
@@ -1791,7 +1791,7 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (($imgtype eq "split") && (-f $splitfile)) {
 		my $splitsize = $main::global -> isize ($splitfile);
-		my $splitMB = ($splitsize * 1.2) / 1048576;
+		my $splitMB = int (($splitsize * 1.2) / 1048576);
 		$kiwi -> info (
 			"Adding $splitMB MB space for split read-write portion"
 		);
