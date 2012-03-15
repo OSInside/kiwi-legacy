@@ -2584,6 +2584,9 @@ function kernelCheck {
 		#======================================
 		# find installed kernel / initrd
 		#--------------------------------------
+		if [ -z "$KERNEL_LIST" ] ; then
+			kernelList $prefix
+		fi
 		IFS="," ; for i in $KERNEL_LIST;do
 			if test -z "$i";then
 				continue
