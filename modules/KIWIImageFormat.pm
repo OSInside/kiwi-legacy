@@ -1068,11 +1068,11 @@ sub createOVFConfiguration {
 		'xmlns="http://schemas.dmtf.org/ovf/envelope/1"'."\n".
 		'xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common"'."\n".
 		'xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"'."\n".
-		'xmlns:rasd="http://schemas.dmtf.org/"'."\n".
-		'wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"'."\n".
+		'xmlns:rasd="http://schemas.dmtf.org/'.
+			'wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"'."\n".
 		'xmlns:vmw="http://www.vmware.com/schema/ovf"'."\n".
-		'xmlns:vssd="http://schemas.dmtf.org/"'."\n".
-		'wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"'."\n".
+		'xmlns:vssd="http://schemas.dmtf.org/'.
+			'wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"'."\n".
 		'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'."\n";
 	#==========================================
 	# image description
