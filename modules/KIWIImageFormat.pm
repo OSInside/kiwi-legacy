@@ -1162,7 +1162,12 @@ sub createOVFConfiguration {
 		my $destdir  = dirname $this->{image};
 		my $ovaimage = basename $ovfdir;
 		$ovaimage =~ s/\.ovf$/\.ova/;
-		my $status = qxx ("tar -h -C $ovfdir -cf $destdir/$ovaimage . 2>&1");
+		my $ovabasis = $ovaimage;
+		$ovabasis =~ s/\.ova$//;
+		my $files = "$ovabasis.ovf $ovabasis.mf $ovabasis.vmdk";
+		my $status = qxx (
+			"tar -h -C $ovfdir -cf $destdir/$ovaimage $files 2>&1"
+		);
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
