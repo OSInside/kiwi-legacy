@@ -38,7 +38,7 @@
 		<package name="ifplugd"/>
 		<package name="vim"/>
 		<package name="yast2-firstboot"/>
-		<opensusePattern name="default"/>
+		<opensusePattern name="base"/>
 		<opensusePattern name="kde4"/>
 	</packages>
 	<packages type="bootstrap">

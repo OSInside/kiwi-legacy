@@ -30,7 +30,7 @@
 		<package name="kernel-default"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
-		<opensusePattern name="default"/>
+		<opensusePattern name="base"/>
 		<opensusePattern name="x11"/>
 	</packages>
 	<packages type="bootstrap">
