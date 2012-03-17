@@ -24,6 +24,7 @@ use XML::LibXML;
 use KIWILocator;
 use KIWILog;
 use KIWIQX;
+use Scalar::Util 'refaddr';
 
 #==========================================
 # Exports
@@ -490,7 +491,7 @@ sub __checkPatternTypeAttrConsistent {
 		return 1;
 	}
 	for my $pkgs (@pkgsNodes) {
-		if ($pkgs != $defPackSection) {
+		if (refaddr($pkgs) != refaddr($defPackSection)) {
 			my $patternType = $pkgs -> getAttribute( 'patternType' );
 			if ($patternType && $patternType ne $defPatternTypeVal) {
 				my $kiwi = $this->{kiwi};
