@@ -918,7 +918,6 @@ function setupRHELInitrd {
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
-	local haveVMX=0
 	local dracutExec=$(which dracut 2>/dev/null)
 	local mkinitrdExec=$(which mkinitrd 2>/dev/null)
 	local params
@@ -938,14 +937,7 @@ function setupRHELInitrd {
 			mount -t sysfs sysfs /sys
 			umountSys=1
 		fi
-		if [ $bootLoaderOK = "1" ];then
-			if [ -f /boot/initrd.vmx ];then
-				rm -f /boot/initrd.vmx
-				rm -f /boot/linux.vmx
-				rm -f /boot/initrd-*.img   ##remove the dist's initrd image
-				haveVMX=1
-			fi
-		fi
+		rm -f /boot/initrd-*.img   ##remove the dist's initrd image
 		updateModuleDependencies
 		params=" -f /boot/initrd-$kernel_version $kernel_version"
 		if [ -x "$mkinitrdExec" ] ; then
@@ -964,6 +956,12 @@ function setupRHELInitrd {
 			Echo "Coudn't find a tool to create initrd image"
 			systemIntegrity=unknown
 			bootLoaderOK=0
+		fi
+		if [ $bootLoaderOK = "1" ];then
+			if [ -f /boot/initrd.vmx ];then
+				rm -f /boot/initrd.vmx
+				rm -f /boot/linux.vmx
+			fi
 		fi
 		if [ $umountSys -eq 1 ];then
 			umount /sys
@@ -990,7 +988,6 @@ function setupSUSEInitrd {
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
-	local haveVMX=0
 	local mkinitrdExec=$(which mkinitrd 2>/dev/null)
 	local params
 	local running
@@ -1015,17 +1012,16 @@ function setupSUSEInitrd {
 		if grep -qi param_B $mkinitrdExec;then
 			params="-B"
 		fi
-		if [ $bootLoaderOK = "1" ];then
-			if [ -f /boot/initrd.vmx ];then
-				rm -f /boot/initrd.vmx
-				rm -f /boot/linux.vmx
-				haveVMX=1
-			fi
-		fi
 		if ! $mkinitrdExec $params;then
 			Echo "Can't create initrd"
 			systemIntegrity=unknown
 			bootLoaderOK=0
+		fi
+		if [ $bootLoaderOK = "1" ];then
+			if [ -f /boot/initrd.vmx ];then
+				rm -f /boot/initrd.vmx
+				rm -f /boot/linux.vmx
+			fi
 		fi
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper stop
