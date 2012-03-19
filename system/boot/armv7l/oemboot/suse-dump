@@ -295,7 +295,7 @@ function OEMInstall {
 		reqpart=1
 		info=/tmp/partinfo
 		wmrc=/wmrc
-		loop=$(losetup -s -f $imageName)
+		loop=$(losetup -f --show $imageName)
 		if [ $? != 0 ];then
 			# /.../
 			# old version of losetup doesn't know about

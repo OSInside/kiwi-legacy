@@ -3278,7 +3278,7 @@ sub setupEncoding {
 	my $kiwi   = $this->{kiwi};
 	my $data;
 	my $code;
-	$data = qxx ("/sbin/losetup -s -f $out 2>&1"); chomp $data;
+	$data = qxx ("/sbin/losetup -f --show $out 2>&1"); chomp $data;
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't loop bind logical extend: $data");

@@ -247,7 +247,7 @@ sub createSnapshotMap {
 	#======================================
 	# create root filesystem loop device
 	#--------------------------------------
-	$imageLoop = qxx ("losetup -s -f $readOnlyRootImage 2>&1");
+	$imageLoop = qxx ("losetup -f --show $readOnlyRootImage 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$result{stack} = \@releaseList;
@@ -268,7 +268,7 @@ sub createSnapshotMap {
 			return;
 		}
 	}
-	$snapLoop = qxx ("losetup -s -f $cowfile");
+	$snapLoop = qxx ("losetup -f --show $cowfile");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$result{stack} = \@releaseList;

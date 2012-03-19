@@ -4610,7 +4610,7 @@ sub bindDiskDevice {
 	#==========================================
 	# bind file to loop device
 	#------------------------------------------
-	$status = qxx ("/sbin/losetup -s -f $system 2>&1"); chomp $status;
+	$status = qxx ("/sbin/losetup -f --show $system 2>&1"); chomp $status;
 	$result = $? >> 8;
 	if ($result != 0) {
 		# /.../
@@ -4618,7 +4618,7 @@ sub bindDiskDevice {
 		# device manually even though it's most likely that this
 		# search will fail too. The following is only useful for
 		# older version of losetup which doesn't understand the
-		# option combination -s -f
+		# option combination -f --show
 		# ----
 		my $loopfound = 0;
 		for (my $id=0;$id<=7;$id++) {

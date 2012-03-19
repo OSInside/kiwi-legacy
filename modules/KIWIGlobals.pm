@@ -329,7 +329,8 @@ sub mount {
 		);
 		$result= $? >> 8;
 		if ($result == 0) {			
-			$status = qxx ("/sbin/losetup -s -f $source 2>&1"); chomp $status;
+			$status = qxx ("/sbin/losetup -f --show $source 2>&1");
+			chomp $status;
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> error  (
@@ -367,7 +368,8 @@ sub mount {
 	#------------------------------------------
 	if ($type eq "luks") {
 		if (-f $source) {
-			$status = qxx ("/sbin/losetup -s -f $source 2>&1"); chomp $status;
+			$status = qxx ("/sbin/losetup -f --show $source 2>&1");
+			chomp $status;
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> error  ("Couldn't loop bind logical extend: $status");

@@ -3150,7 +3150,7 @@ function searchImageISODevice {
 				"Failed to mount ISO storage device !" \
 			"reboot"
 		fi
-		biosBootDevice=$(losetup -s -f /mnt/$isofrom_system)
+		biosBootDevice=$(losetup -f --show /mnt/$isofrom_system)
 		if [ ! $? = 0 ];then
 			systemException \
 				"Failed to loop setup ISO system !" \
@@ -7803,7 +7803,7 @@ function createSnapshotMap {
 	#======================================
 	# create root filesystem loop device
 	#--------------------------------------
-	diskLoop=$(losetup -s -f $readOnlyRootImage)
+	diskLoop=$(losetup -f --show $readOnlyRootImage)
 	if [ ! $? = 0 ];then
 		# /.../
 		# old version of losetup doesn't know about
@@ -7838,7 +7838,7 @@ function createSnapshotMap {
 		return
 	fi
 	echo "rm -f /tmp/cow" >> $reset
-	snapLoop=$(losetup -s -f /tmp/cow)
+	snapLoop=$(losetup -f --show /tmp/cow)
 	if [ ! $? = 0 ];then
 		# /.../
 		# old version of losetup doesn't know about
