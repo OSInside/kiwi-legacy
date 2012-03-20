@@ -69,6 +69,17 @@ if dhcpcd -p 2>&1 | grep -q 'Usage';then
 fi
 
 #======================================
+# Exports (arch specific)
+#--------------------------------------
+if [ "$arch" = "ppc64" ];then
+	test -z "$loader" && export loader=yaboot
+elif [[ $arch =~ arm ]];then
+	test -z "$loader" && export loader=uboot
+else
+	test -z "$loader" && export loader=grub
+fi
+
+#======================================
 # Dialog
 #--------------------------------------
 function Dialog {
