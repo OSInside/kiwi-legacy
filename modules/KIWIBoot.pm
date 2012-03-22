@@ -3972,9 +3972,9 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return;
 		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-			print FD "setenv bootargs loader=$bloader $cmdline;"."\n";
+			print FD "setenv bootargs loader=$bloader $cmdline \${append}\n";
 		} else {
-			print FD "setenv bootargs loader=$bloader $cmdline;"."\n";
+			print FD "setenv bootargs loader=$bloader $cmdline \${append}\n"
 		}
 		print FD 'boot'."\n";
 		close FD;
