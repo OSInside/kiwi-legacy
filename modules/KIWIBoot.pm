@@ -4685,6 +4685,7 @@ sub checkLVMbind {
 	}
 	chomp $vgname;
 	$vgname =~ s/^\s+//;
+	$vgname =~ s/\s+$//;
 	$this->{lvm} = 1;
 	$this->{lvmgroup} = $vgname;
 	qxx ("vgchange -a y $vgname 2>&1");
