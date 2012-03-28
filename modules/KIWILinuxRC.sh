@@ -2388,12 +2388,16 @@ function updateOtherDeviceFstab {
 	# which has a mount point defined.
 	# ----
 	local prefix=$1
+	local sysroot=$2
 	local nfstab=$prefix/etc/fstab
 	local index=0
 	local field=0
 	local count=0
 	local device
 	local IFS=","
+	if [ -z "$sysroot" ];then
+		sysroot=/mnt
+	fi
 	for i in $PART;do
 		field=0
 		count=$((count + 1))
@@ -2417,8 +2421,8 @@ function updateOtherDeviceFstab {
 			fi
 			probeFileSystem $device
 			if [ ! "$FSTYPE" = "luks" ] && [ ! "$FSTYPE" = "unknown" ];then
-				if [ ! -d $prefix/$partMount ];then
-					mkdir -p $prefix/$partMount
+				if [ ! -d $sysroot/$partMount ];then
+					mkdir -p $sysroot/$partMount
 				fi
 				echo "$device $partMount $FSTYPE defaults 0 0" >> $nfstab
 			fi
