@@ -777,7 +777,9 @@ sub setupInstallationSource {
 	if ($manager eq "zypper") {
 		my @zypper = @{$this->{zypper}};
 		my $stype = "private";
+		undef $ENV{ZYPP_LOCKFILE_ROOT};
 		if (! $chroot) {
+			$ENV{ZYPP_LOCKFILE_ROOT} = $root;
 			$stype = "public";
 		}
 		if ($chroot) {
@@ -1057,7 +1059,9 @@ sub resetInstallationSource {
 		my @zypper = @{$this->{zypper}};
 		my @list = @channelList;
 		my $cmds;
+		undef $ENV{ZYPP_LOCKFILE_ROOT};
 		if (! $chroot) {
+			$ENV{ZYPP_LOCKFILE_ROOT} = $root;
 			$cmds = "@zypper --root $root removerepo";
 		} else {
 			@zypper = @{$this->{zypper_chroot}};
@@ -1995,6 +1999,7 @@ sub setupRootSystem {
 			print $fd "export YAST_IS_RUNNING=true\n";
 			print $fd "export ZYPP_CONF=".$root."/".$this->{zyppconf}."\n";
 			print $fd "export ZYPP_ARIA2C=0\n";
+			print $fd "export ZYPP_LOCKFILE_ROOT=$root\n";
 			if (@newprods) {
 				print $fd "@zypper --root $root install ";
 				print $fd "@installOpts -t product @newprods &\n";
