@@ -20,7 +20,7 @@ package KIWICommandLine;
 use strict;
 use warnings;
 require Exporter;
-use Digest::MD5 qw (md5_base64);
+use Digest::MD5 qw (md5_hex);
 use File::Spec;
 use KIWILocator;
 use KIWILog;
@@ -776,7 +776,7 @@ sub setReplacementRepo {
 		my $msg = "No repo alias defined, generating time based name.\n";
 		$kiwi -> loginfo ($msg);
 		my $curTime = time;
-		$repoAlias = 'genName_' . md5_base64($repo);
+		$repoAlias = 'genName_' . md5_hex($repo);
 	}
 	if (! $repoPrio) {
 		my $msg = "No repo priority specified, using default value '10'\n";
