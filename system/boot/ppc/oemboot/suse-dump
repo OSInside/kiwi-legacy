@@ -208,9 +208,10 @@ function OEMInstall {
 		dsizeMB=`expr $dsize / 1024`
 		if [ "$dsizeMB" -gt 0 ];then
 			Echo -b "Disk $count -> $i [ $dsizeMB MB ]"
+			deviceLinux[$count]=$i
 			deviceArray[$count]=$dbyid
 			deviceDSize[$count]=$dsize
-			count=`expr $count + 1`
+			count=$((count + 1))
 		fi
 	done
 	if [ "$count" = "1" ];then
@@ -920,14 +921,14 @@ function identifyDevice {
 	#======================================
 	# find index for device in deviceArray
 	#--------------------------------------
-	for device in $deviceDisks;do
-		if [ $device = $ux_device ];then
+	for device in ${deviceLinux[*]}; do
+		if [ "$device" = "$ux_device" ];then
+			instDisk=${deviceArray[$count]}
 			break
 		fi
 		count=$((count + 1))
 	done
-	instDisk=${deviceArray[$count]}
-	if [ ! -e $instDisk ];then
+	if [ ! -e "$instDisk" ];then
 		systemException \
 			"Storage ID: $instDisk not found" \
 		"reboot"
