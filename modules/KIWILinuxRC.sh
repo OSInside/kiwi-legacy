@@ -2446,7 +2446,7 @@ function updateRootDeviceFstab {
 	if [ -z "$UNIONFS_CONFIG" ]; then
 		echo "$diskByID / $FSTYPE defaults 1 1" >> $nfstab
 	else
-		echo "/dev/root / defaults 1 1" >> $nfstab
+		echo "/dev/root / auto defaults 1 1" >> $nfstab
 	fi
 	#======================================
 	# check for LVM volume setup
