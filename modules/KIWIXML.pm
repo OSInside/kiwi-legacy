@@ -3647,7 +3647,11 @@ sub getInstallSize {
 			undef,undef,$ptype
 		);
 		if (! defined $psolve) {
-			$kiwi -> warning ("SaT solver setup failed");
+			$kiwi -> error ("SaT solver setup failed");
+			return;
+		}
+		if ($psolve -> getProblemsCount()) {
+			$kiwi -> error ("SaT solver problems found !\n");
 			return;
 		}
 		%meta = $psolve -> getMetaData();
