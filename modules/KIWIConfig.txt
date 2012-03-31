@@ -244,6 +244,7 @@
 		<file name="libsysfs"/>
 		<file name="libutempter"/>
 		<file name="libutil"/>
+		<file name="libkmod"/>
 	</strip>
 
 </initrd>
