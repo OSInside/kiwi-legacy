@@ -2917,7 +2917,6 @@ sub setupBootLoaderStages {
 	if ($loader eq "grub") {
 		my $stages = "'usr/lib/grub/*'";
 		my $message= "'image/loader/message'";
-		my $gbinary= "'usr/sbin/grub'";
 		my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 		$status = qxx ( "mkdir -p $tmpdir/boot/grub 2>&1" );
 		$result = $? >> 8;
@@ -2927,22 +2926,6 @@ sub setupBootLoaderStages {
 			$kiwi -> failed ();
 			return undef;
 		}
-		#==========================================
-		# Get Grub binary from initrd
-		#------------------------------------------
-		$kiwi -> info ("Importing grub binary");
-		if ($zipped) {
-			$status= qxx ("$unzip | (cd $tmpdir && cpio -di $gbinary 2>&1)");
-		} else {
-			$status= qxx ("cat $initrd|(cd $tmpdir && cpio -di $gbinary 2>&1)");
-		}
-		if (! -e $tmpdir."/usr/sbin/grub" ) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("No grub bootloader found in initrd: $status");
-			$kiwi -> failed ();
-			return undef;
-		}
-		$kiwi -> done ();
 		#==========================================
 		# Get Grub graphics boot message
 		#------------------------------------------
