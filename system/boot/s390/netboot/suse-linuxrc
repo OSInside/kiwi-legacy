@@ -515,9 +515,12 @@ then
 			fetchFile $imageName $imageDevice $imageZipped $imageServer
 			multicast=$multicast_old
 			if test $loadCode != 0 || ! loadOK "$loadStatus";then
-				systemException \
-					"Download of $imageName failed: $loadStatus" \
-				"reboot"
+				if [ "$imageZipped" = "compressed" ]; then
+					Echo "Download of compressed $imageName.gz failed:"
+				else
+					Echo "Download of $imageName failed:"
+				fi
+				systemException "$loadStatus" "reboot"
 			fi
 			# /.../
 			# check the md5sum of the downloaded data records
