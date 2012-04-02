@@ -116,6 +116,12 @@ function OEMRepartStandard {
 		swapParam=no
 		cowpParam=no
 		#======================================
+		# close open device mappings
+		#--------------------------------------
+		if [ "$haveLuks" = "yes" ];then
+			luksClose
+		fi
+		#======================================
 		# clean/backup boot partition
 		#--------------------------------------
 		if [ "$haveBootPartition" = "yes" ];then
@@ -246,6 +252,12 @@ function OEMRepartSplit {
 		cowpParam=3
 		swapParam=no
 		recoParam=no
+		#======================================
+		# close open device mappings
+		#--------------------------------------
+		if [ "$haveLuks" = "yes" ];then
+			luksClose
+		fi
 		#======================================
 		# count partitions to be created
 		#--------------------------------------
