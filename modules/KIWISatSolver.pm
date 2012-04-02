@@ -182,28 +182,30 @@ sub new {
 	}
 	$pool -> prepare();
 	$job = $pool->create_request();
+	my %jobs = ();
 	foreach my $p (@{$pref}) {
-		my @names = $p;
 		if (! defined $solvep) {
-			push (@names, "pattern:".$p);
-			push (@names, "patterns-openSUSE-".$p);
+			# given names should be solved as patterns...
+			$jobs{"pattern:".$p} = $p;
+			$jobs{"patterns-openSUSE-".$p} = $p;
+		} else {
+			# given names are passed directly...
+			$jobs{$p} = $p;
 		}
-		my $id   = 0;
-		my $item = "";
-		foreach my $name (@names) {
-			if ($name =~ /^product:/) {
-				# can't solve products...
-				next;
-			}
-			my $item = $pool->find($name);
-			if ((! $item) && (! $quiet)) {
-				$kiwi -> warning ("--> Failed to queue job: $name");
-				$kiwi -> skipped ();
-				push @jobFailed, $name;
-				next;
-			}
-			$job -> install ($item);
+	}
+	foreach my $name (sort keys %jobs) {
+		if ($name =~ /^product:/) {
+			# can't solve products...
+			next;
 		}
+		my $item = $pool->find($name);
+		if ((! $item) && (! $quiet)) {
+			$kiwi -> warning ("--> Failed to queue job: $name");
+			$kiwi -> skipped ();
+			push @jobFailed, $name;
+			next;
+		}
+		$job -> install ($item);
 	}
 	#==========================================
 	# Store object data
