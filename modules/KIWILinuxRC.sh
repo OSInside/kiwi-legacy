@@ -32,8 +32,8 @@ export bootLoaderOK=0
 #======================================
 # Exports (console)
 #--------------------------------------
-test -z $ELOG_BOOTSHELL && export ELOG_BOOTSHELL=/dev/tty2
-test -z $ELOG_EXCEPTION && export ELOG_EXCEPTION=/dev/console
+test -z "$ELOG_BOOTSHELL" && export ELOG_BOOTSHELL=/dev/tty2
+test -z "$ELOG_EXCEPTION" && export ELOG_EXCEPTION=/dev/console
 
 #======================================
 # Exports (General)
