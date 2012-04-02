@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Apr  2 16:18:02 CEST 2012 - ms@suse.de
+
+- removed obsolete test and import of grub binary from initrd
+  the extracted binary is not called so this is dirty code
+
+-------------------------------------------------------------------
 Mon Apr  2 12:20:06 CEST 2012 - ms@suse.de
 
 - fixed creation of sat job list, eliminate duplicate jobs
