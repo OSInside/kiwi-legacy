@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Apr  2 12:20:06 CEST 2012 - ms@suse.de
+
+- fixed creation of sat job list, eliminate duplicate jobs
+- make sure solver failed packages/patterns are evaluated in info module
+- make sure solver problems are evaluated in info module
+
+-------------------------------------------------------------------
 Wed Mar 28 21:12:05 CEST 2012 - ms@suse.de
 
 - fixed updateOtherDeviceFstab() to correctly create missing
