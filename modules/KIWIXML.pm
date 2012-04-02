@@ -3654,6 +3654,10 @@ sub getInstallSize {
 			$kiwi -> error ("SaT solver problems found !\n");
 			return;
 		}
+		if (@{$psolve -> getFailedJobs()}) {
+			$kiwi -> error ("SaT solver failed jobs found !");
+			return;
+		}
 		%meta = $psolve -> getMetaData();
 		$solf = $psolve -> getSolfile();
 		@solp = $psolve -> getPackages();
