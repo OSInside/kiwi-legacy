@@ -280,6 +280,19 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		export KIWI_INITRD_PARAMS
 	fi
 	if [ "$haveLVM" = "yes" ] && [ ! -z "$allFreeVolume" ];then
+		if \
+			[ -z "$DONT_PARTITION" ]   && \
+			[ ! -z "$OEM_SYSTEMSIZE" ] && \
+			[ "$allFreeVolume" != "LVRoot" ]
+		then
+			# /.../
+			# resize root filesystem prior to the resize of the
+			# allFree volume. If systemsize _and_ allFree volume
+			# is specified we have to resize both, the root
+			# filesystem and the allFree filesystem
+			# ----
+			resizeFilesystem $deviceResize
+		fi
 		deviceResize=/dev/$VGROUP/$allFreeVolume
 	fi
 	if [ ! -z "$deviceResize" ] && partitionSize $deviceResize &>/dev/null;then
