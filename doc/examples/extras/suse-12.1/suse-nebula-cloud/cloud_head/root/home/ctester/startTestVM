@@ -6,4 +6,6 @@
 
 export ONE_AUTH=/var/lib/one/.one/one_auth
 /usr/bin/oneimage create testVM.one
+# Give the system some time to copy the image file
+sleep 15
 /usr/bin/onevm create testVM.vmd
