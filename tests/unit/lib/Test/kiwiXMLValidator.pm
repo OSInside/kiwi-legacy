@@ -677,6 +677,35 @@ sub test_revisionMismatch {
 }
 
 #==========================================
+# test_sysdiskNameAttrNoWhiteSpace
+#------------------------------------------
+sub test_sysdiskNameAttrNoWhiteSpace {
+	# ...
+	# Test that the value of the name attribute of the <systemdisk>
+	# element does not contain whitespace.
+	# ---
+	my $this = shift;
+	my @invalidConfigs = $this -> __getInvalidFiles('sysdiskWhitespace');
+	my $expectedMsg = 'Found whitespace in name given for systemdisk. '
+		. 'Provided name may not contain whitespace.';
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $kiwi = $this -> {kiwi};
+		my $msg = $kiwi -> getMessage();
+			$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('sysdiskWhitespace');
+	$this -> __verifyValid(@validConfigs);
+}
+
+#==========================================
 # test_typeConfigConsist
 #------------------------------------------
 sub test_typeConfigConsist {
@@ -774,6 +803,35 @@ sub test_versionFormat {
 		$this -> assert_not_null($validator);
 	}
 	my @validConfigs = $this -> __getValidFiles('versionFormat');
+	$this -> __verifyValid(@validConfigs);
+}
+
+#==========================================
+# test_volumeNameAttrNoWhiteSpace
+#------------------------------------------
+sub test_volumeNameAttrNoWhiteSpace {
+	# ...
+	# Test that the value of the name attribute of the <volume>
+	# element does not contain whitespace.
+	# ---
+	my $this = shift;
+	my @invalidConfigs = $this -> __getInvalidFiles('volumeWhitespace');
+	my $expectedMsg = 'Found whitespace in given volume name. '
+		. 'Provided name may not contain whitespace.';
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $kiwi = $this -> {kiwi};
+		my $msg = $kiwi -> getMessage();
+			$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('volumeWhitespace');
 	$this -> __verifyValid(@validConfigs);
 }
 

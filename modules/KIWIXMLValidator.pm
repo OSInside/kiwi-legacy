@@ -745,6 +745,36 @@ sub __checkRevision {
 }
 
 #==========================================
+# __checkSysdiskNameNoWhitespace
+#------------------------------------------
+sub __checkSysdiskNameNoWhitespace {
+	# ...
+	# Check that the name attribute of the <systemdisk> element does not
+	# contain white space
+	# ---
+	my $this        = shift;
+	my $systemTree  = $this -> {systemTree};
+	my @sysdiskNodes = $systemTree -> getElementsByTagName('systemdisk');
+	if (! @sysdiskNodes ) {
+		return 1;
+	}
+	for my $sysdiskNode (@sysdiskNodes) {
+		my $name = $sysdiskNode -> getAttribute('name');
+		if ($name) {
+			if ($name =~ /\s/x) {
+				my $kiwi = $this -> {kiwi};
+				my $msg = 'Found whitespace in name given for systemdisk. '
+					. 'Provided name may not contain whitespace.';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkTypeConfigConsist
 #------------------------------------------
 sub __checkTypeConfigConsist {
@@ -877,6 +907,34 @@ sub __checkVersionDefinition {
 }
 
 #==========================================
+# __checkVolNameNoWhitespace
+#------------------------------------------
+sub __checkVolNameNoWhitespace {
+	# ...
+	# Check that the name attribute of the <volume> element does not
+	# contain white space
+	# ---
+	my $this        = shift;
+	my $systemTree  = $this -> {systemTree};
+	my @volumeNodes = $systemTree -> getElementsByTagName('volume');
+	if (! @volumeNodes ) {
+		return 1;
+	}
+	for my $volNode (@volumeNodes) {
+		my $name = $volNode -> getAttribute('name');
+		if ($name =~ /\s/x) {
+			my $kiwi = $this -> {kiwi};
+			my $msg = 'Found whitespace in given volume name. '
+				. 'Provided name may not contain whitespace.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __getXMLDocTree
 #------------------------------------------
 sub __getXMLDocTree {
@@ -989,13 +1047,19 @@ sub __validateConsistency {
 	if (! $this -> __checkRevision()) {
 		return;
 	}
-		if (! $this -> __checkTypeConfigConsist()) {
+	if (! $this -> __checkSysdiskNameNoWhitespace()) {
+		return;
+	}
+	if (! $this -> __checkTypeConfigConsist()) {
 		return;
 	}
 	if (! $this -> __checkTypeUnique()) {
 		return;
 	}
 	if (! $this -> __checkVersionDefinition()) {
+		return;
+	}
+	if (! $this -> __checkVolNameNoWhitespace()) {
 		return;
 	}
 	return 1;
