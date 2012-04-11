@@ -2922,10 +2922,16 @@ sub getVMwareConfig {
 	if (! defined $hwver) {
 		$hwver = 4;
 	}
-	$guestos{suse}{ix86}   = "suse";
-	$guestos{suse}{x86_64} = "suse-64";
-	$guestos{sles}{ix86}   = "sles";
-	$guestos{sles}{x86_64} = "sles-64";
+	$guestos{suse}{ix86}     = "suse";
+	$guestos{suse}{x86_64}   = "suse-64";
+	$guestos{sles}{ix86}     = "sles";
+	$guestos{sles}{x86_64}   = "sles-64";
+	$guestos{rhel6}{x86_64}  = "rhel6-64";
+	$guestos{rhel6}{ix86}    = "rhel6";
+	$guestos{rhel5}{x86_64}  = "rhel5-64";
+	$guestos{rhel5}{ix86}    = "rhel5";
+	$guestos{centos}{ix86}   = "centos";
+	$guestos{centos}{x86_64} = "centos-64";
 	my $guest= $node -> getAttribute ("guestOS");
 	if ((!defined $guest) || (! defined $guestos{$guest}{$arch})) {
 		if ($arch eq "ix86") {
