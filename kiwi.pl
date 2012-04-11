@@ -880,7 +880,13 @@ sub init {
 	# check if MBRID is specified
 	#----------------------------------------
 	if (defined $MBRID) {
-		$cmdL -> setMBRID ($MBRID);
+		if ($MBRID < 0 || $MBRID > 0xffffffff) {
+			$kiwi -> error ("Invalid mbrid");
+			$kiwi -> failed ();
+			kiwiExit (1);
+		}
+
+		$cmdL -> setMBRID (sprintf ("0x%08x", $MBRID));
 	}
 	#========================================
 	# check if default answer is specified
@@ -1300,14 +1306,6 @@ sub init {
 	}
 	if (defined $SetImageType) {
 		$cmdL -> setBuildType($SetImageType);
-	}
-	if (defined $MBRID) {
-		if ($MBRID < 0 || $MBRID > 0xffffffff) {
-			$kiwi -> error ("Invalid mbrid");
-			$kiwi -> failed ();
-			kiwiExit (1);
-		}
-		$MBRID = sprintf ("0x%08x", $MBRID);
 	}
 }
 
