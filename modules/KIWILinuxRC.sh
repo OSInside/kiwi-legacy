@@ -526,9 +526,12 @@ function errorLogStart {
 #--------------------------------------
 function udevPending {
 	local timeout=30
-	if [ -x /sbin/udevadm ];then
-		/sbin/udevadm settle --timeout=$timeout
+	local udevadmExec=$(which udevadm 2>/dev/null)
+	if [ -x $udevadmExec ];then
+		$udevadmExec settle --timeout=$timeout
 	else
+		# udevsettle exists on old distros and is not
+		# affected by the move from sbin to usr
 		/sbin/udevsettle --timeout=$timeout
 	fi
 }
