@@ -439,8 +439,8 @@ sub checkAndSetupPrebuiltBootImage {
 	}
 	my $pinitrd = $lookup.$bootImageName.".gz";
 	my $psplash;
-	if (-f $lookup.$bootImageName.".splash.gz") {
-		$psplash = $lookup.$bootImageName.".splash.gz";
+	if (-f $lookup.$bootImageName.'.spl') {
+		$psplash = $lookup.$bootImageName.'.spl';
 	}
 	my $plinux  = $lookup.$bootImageName.".kernel";
 	if (! -f $pinitrd) {
