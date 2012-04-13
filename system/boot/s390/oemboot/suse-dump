@@ -328,7 +328,7 @@ function OEMInstall {
 			"reboot"
 		fi
 		while true;do
-			partitions=$(OEMFindPartitions $instDisk)
+			partitions=$(OEMFindPartitions $(getDiskDevice $instDisk))
 			if [ ! -z "$partitions" ];then
 				count=0
 				IFS=","
