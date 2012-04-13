@@ -89,7 +89,12 @@ setupConsole
 createOriginSnapshot
 
 #======================================
-# 11) kill udev
+# 11) Run user script
+#--------------------------------------
+runHook preCallInit
+
+#======================================
+# 12) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems
