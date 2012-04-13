@@ -508,7 +508,8 @@ tar -cf kiwi-hooks.tgz kiwi-hooks/
             <para>
 			This hook is called in preinit but before init/systemd is started
 			At call time the root filesystem has already moved to /. The
-			hook exists only for the <emphasis>oem</emphasis> image type
+			hook exists only for the <emphasis>oem</emphasis> and
+			<emphasis>vmx</emphasis> image types
             </para>
             </formalpara>
         </listitem>		
