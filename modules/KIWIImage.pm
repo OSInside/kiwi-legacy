@@ -899,7 +899,7 @@ sub createImageSquashFS {
 	# Compress image using gzip
 	#------------------------------------------
 	if (($type{compressed}) && ($type{compressed} eq 'true')) {
-		if (! $this -> compressImage ($name)) {
+		if (! $this -> compressImage ($name,'squashfs')) {
 			return;
 		}
 	}
@@ -1597,7 +1597,7 @@ sub createImageLiveCD {
 		#==========================================
 		# compress RW extend
 		#------------------------------------------
-		if (! $this -> compressImage ($namerw)) {
+		if (! $this -> compressImage ($namerw,'ext2')) {
 			return;
 		}
 	}
@@ -3198,7 +3198,13 @@ sub postImage {
 	#------------------------------------------
 	if (! defined $nozip) {
 		if (($type{compressed}) && ($type{compressed} eq 'true')) {
-			if (! $this -> compressImage ($name)) {
+			my $rootfs;
+			if ($type{filesystem}) {
+				$rootfs = $type{filesystem};
+			} else {
+				$rootfs = $type{type};
+			}
+			if (! $this -> compressImage ($name,$rootfs)) {
 				return;
 			}
 		}
@@ -4070,9 +4076,10 @@ sub restoreSplitExtend {
 # compressImage
 #------------------------------------------
 sub compressImage {
-	my $this = shift;
-	my $name = shift;
-	my $kiwi = $this->{kiwi};
+	my $this   = shift;
+	my $name   = shift;
+	my $fstype = shift;
+	my $kiwi   = $this->{kiwi};
 	#==========================================
 	# Compress image using gzip
 	#------------------------------------------
@@ -4087,6 +4094,14 @@ sub compressImage {
 	}
 	$kiwi -> done();
 	$this -> updateMD5File ("$this->{imageDest}/$name.gz");
+	#==========================================
+	# Relink filesystem link to comp image file
+	#------------------------------------------
+	my $fslink = $this->{imageDest}."/".$name.".".$fstype;
+	if (-l $fslink) {
+		qxx ("rm -f $fslink 2>&1");
+		qxx ("ln -vs $this->{imageDest}/$name.gz $fslink 2>&1");
+	}
 	return $name;
 }
 
