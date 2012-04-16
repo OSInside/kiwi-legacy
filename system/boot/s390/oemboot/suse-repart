@@ -593,6 +593,10 @@ function recreateVTOCTable {
 	Echo "Recreate VTOC table [ $imageDiskDevice ]"
 	if [ ! -z "$haveLVM" ];then
 		#======================================
+		# wait until volume group has settled
+		#--------------------------------------
+		sleep 2
+		#======================================
 		# close open device mappings
 		#--------------------------------------
 		if [ "$haveLuks" = "yes" ];then
