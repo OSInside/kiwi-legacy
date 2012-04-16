@@ -16,6 +16,12 @@
 		<timezone>Europe/Berlin</timezone>
 		<hwclock>utc</hwclock>
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootloader="zipl" primary="true"/>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" bootloader="zipl">
+			<systemdisk/>
+			<oemconfig>
+				<oem-swapsize>512</oem-swapsize>
+			</oemconfig>
+		</type>
 		<type image="pxe" filesystem="ext3" boot="netboot/suse-SLES11" bootloader="zipl"/>
 	</preferences>
 	<users group="root">
