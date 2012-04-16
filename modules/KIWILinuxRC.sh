@@ -278,7 +278,6 @@ function systemException {
 	Echo "$1"
 	case "$what" in
 	"reboot")
-		Echo "rebootException: error consoles at Alt-F3/F4"
 		Echo "rebootException: reboot in 120 sec..."; sleep 120
 		/sbin/reboot -f -i >$nuldev
 	;;
