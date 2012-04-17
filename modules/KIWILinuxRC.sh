@@ -1461,15 +1461,13 @@ function setupBootLoaderUBoot {
 		if test -z "$i";then
 			continue
 		fi
-		kernel=`echo $i | cut -f1 -d:`
-		initrd=`echo $i | cut -f2 -d:`
 		# /.../
 		# On other systems which supports a boot menu we add
 		# the linux kernel and initrd with its file names
 		# like this:
 		#
-		#   echo "setenv ramdisk $initrd" > $conf
-		#   echo "setenv kernel $kernel" >> $conf
+		#   kernel=`echo $i | cut -f1 -d:`
+		#   initrd=`echo $i | cut -f2 -d:`
 		#
 		# But on arm systems there can only be one kernel because
 		# uboot doesn't support a menu. Thus perl-bootloader also
@@ -1478,8 +1476,10 @@ function setupBootLoaderUBoot {
 		# mkinitrd to point to the kernel and initrd in order
 		# to support kernel updates
 		# ----
-		echo "setenv ramdisk initrd" > $conf
-		echo "setenv kernel uImage" >> $conf
+		kernel=uImage
+		initrd=initrd
+		echo "setenv ramdisk $initrd" > $conf
+		echo "setenv kernel $kernel" >> $conf
 		echo "setenv initrd_high \"0xffffffff\"" >> $conf
 		echo "setenv fdt_high \"0xffffffff\""    >> $conf
 		echo 'printenv kerneladdr || setenv kerneladdr ${kernel_addr_r}' \
