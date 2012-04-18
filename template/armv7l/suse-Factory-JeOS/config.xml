@@ -11,6 +11,7 @@
 	<profiles>
 		<profile name="pandaFlavour" description="Kernel/Tools setup for panda boards" import="true"/>
 		<profile name="efikaFlavour" description="Kernel/Tools setup for efika boards"/>
+		<profile name="beagleFlavour" description="Kernel/Tools setup for beagle boards"/>
 	</profiles>
 	<preferences>
 		<type image="tbz" primary="true"/>
@@ -24,10 +25,7 @@
 		<boot-theme>openSUSE</boot-theme>
 	</preferences>
 	<preferences profiles="pandaFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-Factory" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="kiwistderr=/dev/ttyO2 console=ttyO2 ethaddr=f2:9e:1a:ca:d9:99 vram=16M">
-			<systemdisk/>
-		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-Factory" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="kiwistderr=/dev/ttyO2 console=ttyO2 ethaddr=f2:9e:1a:ca:d9:99 vram=16M">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-Factory" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="console=ttyO2 vram=16M">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
@@ -35,10 +33,15 @@
 		</type>
 	</preferences>
 	<preferences profiles="efikaFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-Factory" bootloader="uboot" bootkernel="imx51" kernelcmdline="kiwistderr=/dev/ttymxc0 console=ttymxc0,115200 vram=16M">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-Factory" bootloader="uboot" bootkernel="imx51" kernelcmdline="console=ttymxc0,115200 vram=16M">
 			<systemdisk/>
+			<oemconfig>
+				<oem-swapsize>500</oem-swapsize>
+			</oemconfig>
 		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-Factory" bootloader="uboot" bootkernel="imx51" kernelcmdline="kiwistderr=/dev/ttymxc0 console=ttymxc0,115200 vram=16M">
+	</preferences>
+	<preferences profiles="beagleFlavour">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-Factory" bootloader="uboot" bootkernel="omap3beagle" kernelcmdline="console=ttyO2 vram=16M">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
@@ -58,7 +61,20 @@
 	<packages type="bootstrap" profiles="efikaFlavour">
 		<package name="kernel-imx51"/>
 	</packages>
+	<packages type="bootstrap" profiles="beagleFlavour">
+		<package name="kernel-omap2plus"/>
+		<package name="u-boot-omap3beagle"/>
+		<package name="x-loader-omap3beagle"/>
+	</packages>
+<!-- don't remove qemu binfmt helpers from initrd -->
+	<strip type="tools">
+		<file name="qemu-arm-binfmt"/>
+		<file name="qemu-arm"/>
+	</strip>
 	<packages type="bootstrap">
+<!-- for building in emulated environment -->
+		<package name="qemu-linux-user-arm" bootinclude="true"/>
+<!-- standard packages -->
 		<package name="ifplugd"/>
 		<package name="iputils"/>
 		<package name="vim"/>
