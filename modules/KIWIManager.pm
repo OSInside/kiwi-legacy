@@ -998,6 +998,10 @@ sub setupInstallationSource {
 				return;
 			}
 			$kiwi -> done();
+		} else {
+			$kiwi -> info ('Rebuild RPM package db...');
+			$data = qxx ("@kchroot /bin/rpm --rebuilddb");
+			$kiwi -> done();
 		}
 	}
 	$this->{channelList} = \@channelList;
@@ -2539,7 +2543,6 @@ sub cleanupRPMDatabase {
 	my $kiwi    = $this->{kiwi};
 	my @kchroot = @{$this->{kchroot}};
 	my $root    = $this->{root};
-	my $manager = $this->{manager};
 	my $data;
 	my $code;
 	#==========================================
@@ -2556,7 +2559,7 @@ sub cleanupRPMDatabase {
 	#==========================================
 	# try to rebuild DB on failed init
 	#------------------------------------------
-	if (($code != 0) || ($manager eq "yum")) {
+	if ($code != 0) {
 		$kiwi -> info ('Rebuild RPM package db...');
 		$data = qxx ("@kchroot /bin/rm -rf /var/lib/rpm/*");
 		$data = qxx ("@kchroot /bin/rpm --rebuilddb");
