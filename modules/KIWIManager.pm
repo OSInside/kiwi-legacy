@@ -2535,10 +2535,11 @@ sub removeCacheDir {
 # cleanupRPMDatabase
 #------------------------------------------
 sub cleanupRPMDatabase {
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my @kchroot= @{$this->{kchroot}};
-	my $root   = $this->{root};
+	my $this    = shift;
+	my $kiwi    = $this->{kiwi};
+	my @kchroot = @{$this->{kchroot}};
+	my $root    = $this->{root};
+	my $manager = $this->{manager};
 	my $data;
 	my $code;
 	#==========================================
@@ -2555,7 +2556,7 @@ sub cleanupRPMDatabase {
 	#==========================================
 	# try to rebuild DB on failed init
 	#------------------------------------------
-	if ($code != 0) {
+	if (($code != 0) || ($manager eq "yum")) {
 		$kiwi -> info ('Rebuild RPM package db...');
 		$data = qxx ("@kchroot /bin/rm -rf /var/lib/rpm/*");
 		$data = qxx ("@kchroot /bin/rpm --rebuilddb");
