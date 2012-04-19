@@ -105,7 +105,6 @@
 		<package name="cpio"/>
 		<package name="cracklib-dicts"/>
 		<package name="cyrus-sasl"/>
-		<package name="db4"/>
 		<package name="dbus-glib"/>
 		<package name="diffutils"/>
 		<package name="expat"/>

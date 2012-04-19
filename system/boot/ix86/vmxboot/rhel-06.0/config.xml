@@ -103,7 +103,6 @@
 		<package name="binutils"/>
 		<package name="cpio"/>
 		<package name="cyrus-sasl"/>
-		<package name="db4"/>
 		<package name="dbus-glib"/>
 		<package name="diffutils"/>
 		<package name="expat"/>
