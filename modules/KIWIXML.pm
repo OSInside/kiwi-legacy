@@ -4741,35 +4741,39 @@ sub __updateDescriptionFromChangeSet {
 	#==========================================
 	# 4) merge/update packages
 	#------------------------------------------
-	if (@{$changeset->{fplistImage}}) {
-		$kiwi -> info ("Updating package(s):\n");
-		my $fixedBootInclude = $changeset->{fixedBootInclude};
-		my @fplistImage = @{$changeset->{fplistImage}};
-		my @fplistDelete = @{$changeset->{fplistDelete}};
-		foreach my $p (@fplistImage) {
-			$kiwi -> info ("--> $p\n");
-		}
-		$this -> addPackages (
-			"image",$fixedBootInclude,$packageNodeList,@fplistImage
-		);
-		if (@fplistDelete) {
+	foreach my $section (("image","bootstrap")) {
+		if (@{$changeset->{$section."_fplistImage"}}) {
+			$kiwi -> info ("Updating package(s) [$section]:\n");
+			my $fixedBootInclude = $changeset->{fixedBootInclude};
+			my @fplistImage = @{$changeset->{$section."_fplistImage"}};
+			my @fplistDelete = @{$changeset->{$section."_fplistDelete"}};
+			foreach my $p (@fplistImage) {
+				$kiwi -> info ("--> $p\n");
+			}
 			$this -> addPackages (
-				"delete",undef,$packageNodeList,@fplistDelete
+				$section,$fixedBootInclude,$packageNodeList,@fplistImage
 			);
+			if (@fplistDelete) {
+				$this -> addPackages (
+					"delete",undef,$packageNodeList,@fplistDelete
+				);
+			}
 		}
 	}
 	#==========================================
 	# 5) merge/update archives
 	#------------------------------------------
-	if (@{$changeset->{falistImage}}) {
-		$kiwi -> info ("Updating archive(s):\n");
-		my @falistImage = @{$changeset->{falistImage}};
-		foreach my $p (@falistImage) {
-			$kiwi -> info ("--> $p\n");
+	foreach my $section (("image","bootstrap")) {
+		if (@{$changeset->{$section."_falistImage"}}) {
+			$kiwi -> info ("Updating archive(s) [$section]:\n");
+			my @falistImage = @{$changeset->{$section."_falistImage"}};
+			foreach my $p (@falistImage) {
+				$kiwi -> info ("--> $p\n");
+			}
+			$this -> addArchives (
+				$section,"bootinclude",$packageNodeList,@falistImage
+			);
 		}
-		$this -> addArchives (
-			"image","bootinclude",$packageNodeList,@falistImage
-		);
 	}
 	#==========================================
 	# 6) merge/update machine attribs in type

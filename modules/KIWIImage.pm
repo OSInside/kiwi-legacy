@@ -184,11 +184,16 @@ sub updateDescription {
 	my %repos;
 	my %strip;
 	my %strip_default;
-	my @plist;
-	my @alist;
-	my @falistImage;
-	my @fplistImage;
-	my @fplistDelete;
+	my @bootstrap_plist;
+	my @image_plist;
+	my @bootstrap_alist;
+	my @image_alist;
+	my @bootstrap_falistImage;
+	my @image_falistImage;
+	my @bootstrap_fplistImage;
+	my @image_fplistImage;
+	my @bootstrap_fplistDelete;
+	my @image_fplistDelete;
 	my @driverList;
 	my %fixedBootInclude;
 	my @node;
@@ -317,37 +322,67 @@ sub updateDescription {
 			next;
 		}
 		my $type = $element  -> getAttribute ("type");
-		if (($type eq "image") || ($type eq "bootstrap")) {
-			push (@plist,$element->getElementsByTagName ("package"));
-			push (@alist,$element->getElementsByTagName ("archive"));
+		if ($type eq "bootstrap") {
+			push (@bootstrap_plist,$element->getElementsByTagName ("package"));
+			push (@bootstrap_alist,$element->getElementsByTagName ("archive"));
 		}
+		if ($type eq "image") {
+			push (@image_plist,$element->getElementsByTagName ("package"));
+			push (@image_alist,$element->getElementsByTagName ("archive"));
+		}
+
 	}
-	foreach my $element (@plist) {
+	foreach my $element (@bootstrap_plist) {
 		my $package = $element -> getAttribute ("name");
 		my $bootinc = $element -> getAttribute ("bootinclude");
 		my $bootdel = $element -> getAttribute ("bootdelete");
 		my $include = 0;
 		if ((defined $bootinc) && ("$bootinc" eq "true")) {
-			push (@fplistImage,$package);
+			push (@bootstrap_fplistImage,$package);
 			$include++;
 		}
 		if ((defined $bootdel) && ("$bootdel" eq "true")) {
-			push (@fplistDelete,$package);
+			push (@bootstrap_fplistDelete,$package);
 			$include--;
 		}
 		$fixedBootInclude{$package} = $include;
 	}
-	foreach my $element (@alist) {
+	foreach my $element (@image_plist) {
+		my $package = $element -> getAttribute ("name");
+		my $bootinc = $element -> getAttribute ("bootinclude");
+		my $bootdel = $element -> getAttribute ("bootdelete");
+		my $include = 0;
+		if ((defined $bootinc) && ("$bootinc" eq "true")) {
+			push (@image_fplistImage,$package);
+			$include++;
+		}
+		if ((defined $bootdel) && ("$bootdel" eq "true")) {
+			push (@image_fplistDelete,$package);
+			$include--;
+		}
+		$fixedBootInclude{$package} = $include;
+	}
+	foreach my $element (@bootstrap_alist) {
 		my $archive = $element -> getAttribute ("name");
 		my $bootinc = $element -> getAttribute ("bootinclude");
 		if ((defined $bootinc) && ("$bootinc" eq "true")) {
-			push (@falistImage,$archive);
+			push (@bootstrap_falistImage,$archive);
 		}
 	}
-	$changeset{"fixedBootInclude"} = \%fixedBootInclude;
-	$changeset{"falistImage"}  = \@falistImage;
-	$changeset{"fplistImage"}  = \@fplistImage;
-	$changeset{"fplistDelete"} = \@fplistDelete;
+	foreach my $element (@image_alist) {
+		my $archive = $element -> getAttribute ("name");
+		my $bootinc = $element -> getAttribute ("bootinclude");
+		if ((defined $bootinc) && ("$bootinc" eq "true")) {
+			push (@image_falistImage,$archive);
+		}
+	}
+	$changeset{"fixedBootInclude"}       = \%fixedBootInclude;
+	$changeset{"bootstrap_falistImage"}  = \@bootstrap_falistImage;
+	$changeset{"image_falistImage"}      = \@image_falistImage;
+	$changeset{"bootstrap_fplistImage"}  = \@bootstrap_fplistImage;
+	$changeset{"image_fplistImage"}      = \@image_fplistImage;
+	$changeset{"bootstrap_fplistDelete"} = \@bootstrap_fplistDelete;
+	$changeset{"image_fplistDelete"}     = \@image_fplistDelete;
 	#==========================================
 	# Store OEM data
 	#------------------------------------------
