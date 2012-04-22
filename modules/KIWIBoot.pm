@@ -2006,7 +2006,7 @@ sub setupBootDisk {
 		# check system partition size
 		#------------------------------------------
 		my $sizeOK = 1;
-		my $splitPSize  = 0;
+		my $splitPSize  = 1;
 		my $splitISize  = 0;
 		my $systemPSize = $this->getStorageSize ($root);
 		my $systemISize = $main::global -> isize ($system);
