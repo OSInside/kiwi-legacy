@@ -2006,14 +2006,23 @@ sub setupBootDisk {
 		# check system partition size
 		#------------------------------------------
 		my $sizeOK = 1;
+		my $splitPSize  = 0;
+		my $splitISize  = 0;
 		my $systemPSize = $this->getStorageSize ($root);
 		my $systemISize = $main::global -> isize ($system);
 		$systemISize /= 1024;
 		chomp $systemPSize;
 		#print "_______A $systemPSize : $systemISize\n";
-		if ($systemPSize <= $systemISize) {
+		if ($haveSplit) {
+			$splitPSize = $this->getStorageSize ($deviceMap{3});
+			$splitISize = $main::global -> isize ($splitfile);
+			$splitISize /= 1024;
+			chomp $splitPSize;
+			#print "_______B $splitPSize : $splitISize\n";
+		}
+		if (($systemPSize <= $systemISize) || ($splitPSize <= $splitISize)) {
 			#==========================================
-			# system partition still too small
+			# system partition(s) still too small
 			#------------------------------------------
 			sleep (1);
 			$this -> deleteVolumeGroup();
