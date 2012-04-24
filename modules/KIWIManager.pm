@@ -1000,7 +1000,7 @@ sub setupInstallationSource {
 			$kiwi -> done();
 		} else {
 			$kiwi -> info ('Rebuild RPM package db...');
-			$data = qxx ("@kchroot /bin/rpm --rebuilddb");
+			$data = qxx ("@kchroot /bin/rpm --rebuilddb 2>&1");
 			$kiwi -> done();
 		}
 	}
@@ -2562,7 +2562,7 @@ sub cleanupRPMDatabase {
 	if ($code != 0) {
 		$kiwi -> info ('Rebuild RPM package db...');
 		$data = qxx ("@kchroot /bin/rm -rf /var/lib/rpm/*");
-		$data = qxx ("@kchroot /bin/rpm --rebuilddb");
+		$data = qxx ("@kchroot /bin/rpm --rebuilddb 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
