@@ -12,7 +12,7 @@
 				<vmdisk controller="ide" id="0"/>
 			</machine>
 		</type>
-		<type image="iso" boot="isoboot/suse-11.4" flags="unified"/>
+		<type image="iso" boot="isoboot/suse-11.4" flags="clic"/>
 		<version>1.0.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
