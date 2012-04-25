@@ -3327,6 +3327,7 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# General grub setup
 		#------------------------------------------
+		binmode(FD, ":encoding(UTF-8)");
 		print FD "color cyan/blue white/blue\n";
 		print FD "default $defaultBootNr\n";
 		my $bootTimeout = 10;
