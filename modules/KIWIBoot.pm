@@ -2414,7 +2414,7 @@ sub setupInstallFlags {
 	my $status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> error  ("Failed to extract initrd data: $!");
+		$kiwi -> error  ("Failed to extract initrd data: $status");
 		$kiwi -> failed ();
 		qxx ("rm -rf $irddir");
 		return;
