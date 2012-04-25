@@ -101,6 +101,9 @@ sub createChecks {
 	if (! $this -> __checkPackageManagerExists()) {
 		return;
 	}
+	if (! $this -> __hasValidLVMName()) {
+		return;
+	}
 	return 1;
 }
 
@@ -136,6 +139,40 @@ sub prepareChecks {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __hasValidLVMName
+#------------------------------------------
+sub __hasValidLVMName {
+	# ...
+	# check if the optional LVM group name doesn't
+	# exist on the build host
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $vgroupName = $xml -> getLVMGroupName();
+	if (! $vgroupName) {
+		return 1;
+	}
+	my @hostGroups = qxx ("vgs --noheadings -o vg_name 2>/dev/null");
+	chomp @hostGroups;
+	foreach my $hostGroup (@hostGroups) {
+		$hostGroup =~ s/^\s+//g;
+		$hostGroup =~ s/\s+$//g;
+		if ($hostGroup eq $vgroupName) {
+			my $msg = "There is already a volume group ";
+			$msg .= "named \"$vgroupName\" on this build host";
+			$kiwi -> error  ($msg);
+			$kiwi -> failed ();
+			$msg = "Please choose another name in your image configuration";
+			$kiwi -> error  ($msg);
+			$kiwi -> failed ();
+			return;
+		}
+	}
+	return 1;
+}
+
 #==========================================
 # __hasValidArchives
 #------------------------------------------
