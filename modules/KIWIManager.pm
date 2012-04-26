@@ -2572,7 +2572,12 @@ sub rpmLibs {
 			# no baselibs stored/copied...
 			return $this;
 		}
-		qxx ("@kchroot rpm --rebuilddb 2>&1");
+		qxx ("@kchroot /bin/rpm --initdb &>/dev/null");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			qxx ("@kchroot /bin/rm -rf /var/lib/rpm/*");
+			qxx ("@kchroot rpm --rebuilddb 2>&1");
+		}
 		@result = @{$result};
 		my %dirlist = ();
 		foreach my $l (@result) {
