@@ -57,7 +57,8 @@ sub new {
 	my $dest         = shift;  # destination for the iso file
 	my $params       = shift;  # global genisoimage/mkisofs parameters
 	my $mediacheck   = shift;  # run tagmedia with --check y/n
-	my $cmdL         = shift;  # commandline params
+	my $cmdL         = shift;  # commandline params: optional
+	my $xml          = shift;  # system image XML: optional
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -206,6 +207,7 @@ sub new {
 	$this -> {check}  = $mediacheck;
 	$this -> {gdata}  = $main::global -> getGlobals();
 	$this -> {cmdL}   = $cmdL;
+	$this -> {xml}    = $xml;
 	return $this;
 }
 
@@ -686,9 +688,13 @@ sub createISO {
 	my $ldir = $this -> {tmpdir};
 	my $prog = $this -> {tool};
 	my $cmdL = $this -> {cmdL};
+	my $xml  = $this -> {xml};
 	my $cmdln= "$prog $para -o $dest $ldir $src 2>&1";
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootConfig();
+		if ((! $editBoot) && ($xml)) {
+			$editBoot = $xml -> getEditBootConfig();
+		}
 		if (($editBoot) && (-e $editBoot)) {
 			system ("cd $src && bash --norc -c $editBoot");
 		}

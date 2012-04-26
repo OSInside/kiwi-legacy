@@ -2101,7 +2101,7 @@ sub createImageLiveCD {
 	}
 	$attr .= " -A \"$this->{mbrid}\"";
 	my $isolinux = new KIWIIsoLinux (
-		$kiwi,$CD,$name,$attr,"checkmedia",$this->{cmdL}
+		$kiwi,$CD,$name,$attr,"checkmedia",$this->{cmdL},$this->{xml}
 	);
 	if (defined $isolinux) {
 		$isoerror = 0;

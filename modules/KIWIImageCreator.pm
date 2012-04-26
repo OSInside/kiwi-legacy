@@ -459,13 +459,6 @@ sub createImage {
 		$kiwi,$cmdL,$xml
 	);
 	#==========================================
-	# Check for edit bootconfig in XML
-	#------------------------------------------
-	my $editBoot = $xml -> getEditBootConfig();
-	if ($editBoot) {
-		$cmdL -> setEditBootConfig ($editBoot);
-	}
-	#==========================================
 	# Check for default destination in XML
 	#------------------------------------------
 	if (! $target) {
