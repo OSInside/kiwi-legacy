@@ -245,6 +245,7 @@
 		<file name="libutempter"/>
 		<file name="libutil"/>
 		<file name="libkmod"/>
+		<file name="libext2fs"/>
 	</strip>
 
 </initrd>
