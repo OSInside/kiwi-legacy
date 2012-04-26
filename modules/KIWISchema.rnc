@@ -157,7 +157,7 @@ k.size.attribute        =
 	## A partition size or optional image size
 	attribute size { size-type }
 k.dest.attribute        =
-	## Destination of a ressource
+	## Destination of a resource
 	attribute dest { text }
 k.username.attribute    =
 	## A name of a user
