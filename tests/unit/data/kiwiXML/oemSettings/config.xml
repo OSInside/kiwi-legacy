@@ -3,7 +3,7 @@
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
-		<specification>Test configuration to verify OEM setting are stored and returned properly in the XML object</specification>
+		<specification>Test configuration to verify OEM settings are stored and returned properly in the XML object</specification>
 	</description>
 	<preferences>
 		<type image="oem" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true">
