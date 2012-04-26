@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Apr 26 23:25:59 CEST 2012 - ms@suse.de
+
+- fixed creation of --bootcd and/or --bootusb initrd only images
+
+-------------------------------------------------------------------
 Thu Apr 26 17:28:13 CEST 2012 - ms@suse.de
 
 - don't remove wireless drivers and firmware (bnc #759341)
