@@ -664,7 +664,12 @@ sub setupInstallCD {
 	#==========================================
 	# create tmp directory
 	#------------------------------------------
-	my $basedir = dirname ($system);
+	my $basedir;
+	if ($system) { 
+		$basedir = dirname ($system);
+	} else {
+		$basedir = dirname ($initrd);
+	}
 	$tmpdir = qxx ( "mktemp -q -d $basedir/kiwicdinst.XXXXXX" ); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -3048,15 +3053,25 @@ sub setupBootLoaderConfiguration {
 	my $lvm      = $this->{lvm};
 	my $vgroup   = $this->{lvmgroup};
 	my $xml      = $this->{xml};
-	my %type     = %{$xml->getImageTypeAndAttributes()};
-	my $cmdline  = $type{cmdline};
 	my $bloader  = "grub";
+	my $cmdline;
+	my %type;
 	my $title;
 	#==========================================
 	# setup boot loader default boot label/nr
 	#------------------------------------------
 	my $defaultBootLabel = $label;
 	my $defaultBootNr    = 0;
+	#==========================================
+	# setup image type and attributes
+	#------------------------------------------
+	if ($xml) {
+		%type = %{$xml->getImageTypeAndAttributes()};
+		$cmdline  = $type{cmdline};
+	} else {
+		$type{boottimeout} = 1;
+		$defaultBootNr = 1;
+	}
 	if ((($type =~ /^KIWI (CD|USB)/)) && ($type{installboot})) {
 		# In install mode we have the following menu layout
 		# ----
