@@ -3058,8 +3058,8 @@ sub setupBootLoaderConfiguration {
 		# In install mode we have the following menu layout
 		# ----
 		# 0 -> Boot from Hard Disk
-		# 1 -> Install/Restore $label
-		# 2 -> Failsafe -- Install/Restore $label
+		# 1 -> Install $label
+		# 2 -> Failsafe -- Install $label
 		# ----
 		if ($type{installboot} eq "install") {
 			$defaultBootNr = 1;
@@ -3195,7 +3195,7 @@ sub setupBootLoaderConfiguration {
 				}
 			}
 			print FD '}'."\n";
-			$title = $this -> makeLabel ("Install/Restore $label");
+			$title = $this -> makeLabel ("Install $label");
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
 		}
@@ -3361,7 +3361,7 @@ sub setupBootLoaderConfiguration {
 					return;
 				}
 			}
-			$title = $this -> makeLabel ("Install/Restore $label");
+			$title = $this -> makeLabel ("Install $label");
 			print FD "title $title\n";
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
@@ -3554,10 +3554,10 @@ sub setupBootLoaderConfiguration {
 			if ($defaultBootNr == 0) {
 				$title = $this -> makeLabel ("Boot from Hard Disk");
 			} elsif ($defaultBootNr == 1) {
-				$title = $this -> makeLabel ("Install/Restore $label");
+				$title = $this -> makeLabel ("Install $label");
 			} else {
 				$title = $this -> makeLabel (
-					"Failsafe -- Install/Restore $label"
+					"Failsafe -- Install $label"
 				);
 			}
 		} else {
@@ -3568,7 +3568,7 @@ sub setupBootLoaderConfiguration {
 			$title = $this -> makeLabel ("Boot from Hard Disk");
 			print FD "label $title\n";
 			print FD "localboot 0x80\n";
-			$title = $this -> makeLabel ("Install/Restore $label");
+			$title = $this -> makeLabel ("Install $label");
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
 		}
@@ -3616,10 +3616,10 @@ sub setupBootLoaderConfiguration {
 		# Failsafe boot
 		#------------------------------------------
 		if ($type =~ /^KIWI CD/) {
-			$title = $this -> makeLabel ("Failsafe -- Install/Restore $label");
+			$title = $this -> makeLabel ("Failsafe -- Install $label");
 			print FD "label $title"."\n";
 		} elsif ($type =~ /^KIWI USB/) {
-			$title = $this -> makeLabel ("Failsafe -- Install/Restore $label");
+			$title = $this -> makeLabel ("Failsafe -- Install $label");
 			print FD "label $title"."\n";
 		} else {
 			$title = $this -> makeLabel ("Failsafe -- $label [ $type ]");
@@ -3734,10 +3734,10 @@ sub setupBootLoaderConfiguration {
 		my $title_failsafe;
 		if ($type =~ /^KIWI (CD|USB)/) {
 			$title_standard = $this -> makeLabel (
-				"Install/Restore $label"
+				"Install $label"
 			);
 			$title_failsafe = $this -> makeLabel (
-				"Failsafe -- Install/Restore $label"
+				"Failsafe -- Install $label"
 			);
 		} else {
 			$title_standard = $this -> makeLabel (
