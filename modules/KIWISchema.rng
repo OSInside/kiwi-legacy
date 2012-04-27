@@ -264,7 +264,7 @@ installation source from</a:documentation>
   </define>
   <define name="k.dest.attribute">
     <attribute name="dest">
-      <a:documentation>Destination of a ressource</a:documentation>
+      <a:documentation>Destination of a resource</a:documentation>
     </attribute>
   </define>
   <define name="k.username.attribute">
@@ -2147,6 +2147,13 @@ only evaluated for grub and ext|syslinux"</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.type.installprovidefailsafe.attribute">
+      <attribute name="installprovidefailsafe">
+        <a:documentation>Specifies if the bootloader menu should provide an"
+failsafe entry with special kernel parameters or not"</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.type.installiso.attribute">
       <attribute name="installiso">
         <a:documentation>Specifies if a install iso should be created (oem only)</a:documentation>
@@ -2253,6 +2260,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         <ref name="k.type.image.attribute"/>
         <optional>
           <ref name="k.type.installboot.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.installprovidefailsafe.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.installiso.attribute"/>

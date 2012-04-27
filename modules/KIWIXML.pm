@@ -5407,6 +5407,8 @@ sub __populateTypeInfo {
 				-> getAttribute("boottimeout");
 			$record{installboot}   = $node
 				-> getAttribute("installboot");
+			$record{installprovidefailsafe} = $node
+				-> getAttribute("installprovidefailsafe");
 			$record{checkprebuilt} = $node
 				-> getAttribute("checkprebuilt");
 			$record{bootprofile}   = $node

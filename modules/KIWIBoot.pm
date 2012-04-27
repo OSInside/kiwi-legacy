@@ -3032,6 +3032,7 @@ sub setupBootLoaderConfiguration {
 	my $vgroup   = $this->{lvmgroup};
 	my $xml      = $this->{xml};
 	my $bloader  = "grub";
+	my $failsafe = 1;
 	my $cmdline;
 	my %type;
 	my $title;
@@ -3054,18 +3055,28 @@ sub setupBootLoaderConfiguration {
 		$cmdline="kiwistderr=/dev/hvc0";
 		$vga="normal";
 	}
-	if ((($type =~ /^KIWI (CD|USB)/)) && ($type{installboot})) {
+	if ($type =~ /^KIWI (CD|USB)/) {
 		# In install mode we have the following menu layout
 		# ----
 		# 0 -> Boot from Hard Disk
 		# 1 -> Install $label
-		# 2 -> Failsafe -- Install $label
+		# 2 -> [ Failsafe -- Install $label ]
 		# ----
-		if ($type{installboot} eq "install") {
-			$defaultBootNr = 1;
+		if ($type{installboot}) {
+			if ($type{installboot} eq "install") {
+				$defaultBootNr = 1;
+			}
+			if ($type{installboot} eq "failsafe-install") {
+				$defaultBootNr = 2;
+			}
 		}
-		if ($type{installboot} eq "failsafe-install") {
-			$defaultBootNr = 2;
+		if (($type{installprovidefailsafe}) &&
+			($type{installprovidefailsafe} eq "false")
+		) {
+			$failsafe = 0;
+			if ($defaultBootNr == 2) {
+				$defaultBootNr = 1;
+			}
 		}
 	}
 	#==========================================
@@ -3245,48 +3256,50 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Failsafe boot
 		#------------------------------------------
-		$title = $this -> makeLabel ("Failsafe -- $title");
-		print FD 'menuentry "'.$title.'"';
-		print FD ' --class opensuse --class os {'."\n";
-		if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
-			if ($type =~ /^KIWI CD/) {
-				print FD "echo Loading linux...\n";
-				print FD "set gfxpayload=$gfxpayload"."\n";
-				print FD 'linux ($root)/boot/linux';
-				print FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
-				print FD " cdinst=1 loader=$bloader splash=silent";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				print FD "set root=\"(hd0,1)\"\n";
-				print FD "echo Loading linux.vmx...\n";
-				print FD "set gfxpayload=$gfxpayload"."\n";
-				print FD 'linux /boot/linux.vmx';
-				print FD " loader=$bloader splash=silent";
+		if ($failsafe) {
+			$title = $this -> makeLabel ("Failsafe -- $title");
+			print FD 'menuentry "'.$title.'"';
+			print FD ' --class opensuse --class os {'."\n";
+			if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
+				if ($type =~ /^KIWI CD/) {
+					print FD "echo Loading linux...\n";
+					print FD "set gfxpayload=$gfxpayload"."\n";
+					print FD 'linux ($root)/boot/linux';
+					print FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
+					print FD " cdinst=1 loader=$bloader splash=silent";
+				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+					print FD "set root=\"(hd0,1)\"\n";
+					print FD "echo Loading linux.vmx...\n";
+					print FD "set gfxpayload=$gfxpayload"."\n";
+					print FD 'linux /boot/linux.vmx';
+					print FD " loader=$bloader splash=silent";
+				} else {
+					print FD "set root=\"(hd0,1)\"\n";
+					print FD "echo Loading linux...\n";
+					print FD "set gfxpayload=$gfxpayload"."\n";
+					print FD 'linux /boot/linux';
+					print FD " loader=$bloader splash=silent";
+				}
+				print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+				print FD " noapic maxcpus=0 edd=off";
+				print FD $cmdline;
+				if ($type =~ /^KIWI CD/) {
+					print FD "echo Loading initrd...\n";
+					print FD "initrd (\$root)/boot/initrd\n";
+				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+					print FD "echo Loading initrd.vmx...\n";
+					print FD "initrd /boot/initrd.vmx\n";
+				} else {
+					print FD "echo Loading initrd...\n";
+					print FD "initrd /boot/initrd\n";
+				}
+				print FD "}\n";
 			} else {
-				print FD "set root=\"(hd0,1)\"\n";
-				print FD "echo Loading linux...\n";
-				print FD "set gfxpayload=$gfxpayload"."\n";
-				print FD 'linux /boot/linux';
-				print FD " loader=$bloader splash=silent";
+				$kiwi -> failed ();
+				$kiwi -> error  ("*** not implemented ***");
+				$kiwi -> failed ();
+				return;
 			}
-			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-			print FD " noapic maxcpus=0 edd=off";
-			print FD $cmdline;
-			if ($type =~ /^KIWI CD/) {
-				print FD "echo Loading initrd...\n";
-				print FD "initrd (\$root)/boot/initrd\n";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				print FD "echo Loading initrd.vmx...\n";
-				print FD "initrd /boot/initrd.vmx\n";
-			} else {
-				print FD "echo Loading initrd...\n";
-				print FD "initrd /boot/initrd\n";
-			}
-			print FD "}\n";
-		} else {
-			$kiwi -> failed ();
-			$kiwi -> error  ("*** not implemented ***");
-			$kiwi -> failed ();
-			return;
 		}
 		close FD;
 		$kiwi -> done();
@@ -3426,58 +3439,60 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Failsafe boot
 		#------------------------------------------
-		$title = $this -> makeLabel ("Failsafe -- $title");
-		print FD "title $title\n";
-		if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
-			if ($type =~ /^KIWI CD/) {
-				print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
-				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
-				print FD " cdinst=1 loader=$bloader";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				print FD " root (hd0,$bootpart)\n";
-				print FD " kernel /boot/linux.vmx vga=$vga";
-				print FD " loader=$bloader splash=silent";
+		if ($failsafe) {
+			$title = $this -> makeLabel ("Failsafe -- $title");
+			print FD "title $title\n";
+			if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
+				if ($type =~ /^KIWI CD/) {
+					print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
+					print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+					print FD " cdinst=1 loader=$bloader";
+				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+					print FD " root (hd0,$bootpart)\n";
+					print FD " kernel /boot/linux.vmx vga=$vga";
+					print FD " loader=$bloader splash=silent";
+				} else {
+					print FD " root (hd0,$bootpart)\n";
+					print FD " kernel /boot/linux vga=$vga";
+					print FD " loader=$bloader splash=silent";
+				}
+				print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+				print FD " noapic maxcpus=0 edd=off";
+				print FD $cmdline;
+				if ($type =~ /^KIWI CD/) {
+					print FD " initrd (cd)/boot/initrd\n";
+				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+					print FD " initrd /boot/initrd.vmx\n";
+				} else {
+					print FD " initrd /boot/initrd\n";
+				}
 			} else {
-				print FD " root (hd0,$bootpart)\n";
-				print FD " kernel /boot/linux vga=$vga";
-				print FD " loader=$bloader splash=silent";
-			}
-			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-			print FD " noapic maxcpus=0 edd=off";
-			print FD $cmdline;
-			if ($type =~ /^KIWI CD/) {
-				print FD " initrd (cd)/boot/initrd\n";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				print FD " initrd /boot/initrd.vmx\n";
-			} else {
-				print FD " initrd /boot/initrd\n";
-			}
-		} else {
-			if ($type =~ /^KIWI CD/) {
-				print FD " kernel (cd)/boot/xen.gz\n";
-				print FD " module (cd)/boot/linux vga=$vga splash=silent";
-				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
-				print FD " cdinst=1 loader=$bloader";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				print FD " root (hd0,$bootpart)\n";
-				print FD " kernel /boot/xen.gz.vmx\n";
-				print FD " module /boot/linux.vmx vga=$vga";
-				print FD " loader=$bloader splash=silent";
-			} else {
-				print FD " root (hd0,$bootpart)\n";
-				print FD " kernel /boot/xen.gz\n";
-				print FD " module /boot/linux vga=$vga";
-				print FD " loader=$bloader splash=silent";
-			}
-			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-			print FD " noapic maxcpus=0 edd=off";
-			print FD $cmdline;
-			if ($type =~ /^KIWI CD/) {
-				print FD " module (cd)/boot/initrd\n"
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				print FD " module /boot/initrd.vmx\n"
-			} else {
-				print FD " module /boot/initrd\n";
+				if ($type =~ /^KIWI CD/) {
+					print FD " kernel (cd)/boot/xen.gz\n";
+					print FD " module (cd)/boot/linux vga=$vga splash=silent";
+					print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+					print FD " cdinst=1 loader=$bloader";
+				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+					print FD " root (hd0,$bootpart)\n";
+					print FD " kernel /boot/xen.gz.vmx\n";
+					print FD " module /boot/linux.vmx vga=$vga";
+					print FD " loader=$bloader splash=silent";
+				} else {
+					print FD " root (hd0,$bootpart)\n";
+					print FD " kernel /boot/xen.gz\n";
+					print FD " module /boot/linux vga=$vga";
+					print FD " loader=$bloader splash=silent";
+				}
+				print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+				print FD " noapic maxcpus=0 edd=off";
+				print FD $cmdline;
+				if ($type =~ /^KIWI CD/) {
+					print FD " module (cd)/boot/initrd\n"
+				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+					print FD " module /boot/initrd.vmx\n"
+				} else {
+					print FD " module /boot/initrd\n";
+				}
 			}
 		}
 		close FD;
@@ -3615,56 +3630,64 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Failsafe boot
 		#------------------------------------------
-		if ($type =~ /^KIWI CD/) {
-			$title = $this -> makeLabel ("Failsafe -- Install $label");
-			print FD "label $title"."\n";
-		} elsif ($type =~ /^KIWI USB/) {
-			$title = $this -> makeLabel ("Failsafe -- Install $label");
-			print FD "label $title"."\n";
-		} else {
-			$title = $this -> makeLabel ("Failsafe -- $label [ $type ]");
-			print FD "label $title"."\n";
-		}
-		push @labels,$title;
-		if (! $isxen) {
+		if ($failsafe) {
 			if ($type =~ /^KIWI CD/) {
-				print FD "kernel linux\n";
-				print FD "append initrd=initrd ";
-				print FD "vga=$vga loader=$bloader splash=silent ";
-				print FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
-				print FD "cdinst=1 kiwi_hybrid=1";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				print FD "kernel /boot/linux.vmx\n";
-				print FD "append initrd=/boot/initrd.vmx ";
-				print FD "vga=$vga loader=$bloader splash=silent";
+				$title = $this -> makeLabel ("Failsafe -- Install $label");
+				print FD "label $title"."\n";
+			} elsif ($type =~ /^KIWI USB/) {
+				$title = $this -> makeLabel ("Failsafe -- Install $label");
+				print FD "label $title"."\n";
 			} else {
-				print FD "kernel /boot/linux\n";
-				print FD "append initrd=/boot/initrd ";
-				print FD "vga=$vga loader=$bloader splash=silent";
+				$title = $this -> makeLabel ("Failsafe -- $label [ $type ]");
+				print FD "label $title"."\n";
 			}
-			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-			print FD " noapic maxcpus=0 edd=off";
-		} else {
-			if ($type =~ /^KIWI CD/) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("*** syslinux: Xen cdinst not supported ***");
-				$kiwi -> failed ();
-				return;
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("*** syslinux: Xen boot not supported ***");
-				$kiwi -> failed ();
-				return;
+			push @labels,$title;
+			if (! $isxen) {
+				if ($type =~ /^KIWI CD/) {
+					print FD "kernel linux\n";
+					print FD "append initrd=initrd ";
+					print FD "vga=$vga loader=$bloader splash=silent ";
+					print FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
+					print FD "cdinst=1 kiwi_hybrid=1";
+				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+					print FD "kernel /boot/linux.vmx\n";
+					print FD "append initrd=/boot/initrd.vmx ";
+					print FD "vga=$vga loader=$bloader splash=silent";
+				} else {
+					print FD "kernel /boot/linux\n";
+					print FD "append initrd=/boot/initrd ";
+					print FD "vga=$vga loader=$bloader splash=silent";
+				}
+				print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+				print FD " noapic maxcpus=0 edd=off";
 			} else {
-				$kiwi -> failed ();
-				$kiwi -> error  ("*** syslinux: Xen boot not supported ***");
-				$kiwi -> failed ();
-				return;
+				if ($type =~ /^KIWI CD/) {
+					$kiwi -> failed ();
+					$kiwi -> error  (
+						"*** syslinux: Xen cdinst not supported ***"
+					);
+					$kiwi -> failed ();
+					return;
+				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+					$kiwi -> failed ();
+					$kiwi -> error  (
+						"*** syslinux: Xen boot not supported ***"
+					);
+					$kiwi -> failed ();
+					return;
+				} else {
+					$kiwi -> failed ();
+					$kiwi -> error  (
+						"*** syslinux: Xen boot not supported ***"
+					);
+					$kiwi -> failed ();
+					return;
+				}
+				print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+				print FD " noapic maxcpus=0 edd=off";
 			}
-			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-			print FD " noapic maxcpus=0 edd=off";
+			print FD $cmdline;
 		}
-		print FD $cmdline;
 		close FD;
 		#==========================================
 		# setup isolinux.msg file
@@ -3779,23 +3802,25 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Failsafe boot
 		#------------------------------------------
-		print FD "[$title_failsafe]"."\n";
-		if ($type =~ /^KIWI CD/) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("*** zipl: CD boot not supported ***");
-			$kiwi -> failed ();
-			return;
-		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-			print FD "\t"."image   = boot/linux.vmx"."\n";
-			print FD "\t"."target  = boot/zipl"."\n";
-			print FD "\t"."ramdisk = boot/initrd.vmx,0x4000000"."\n";
-		} else {
-			print FD "\t"."image   = boot/linux"."\n";
-			print FD "\t"."target  = boot/zipl"."\n";
-			print FD "\t"."ramdisk = boot/initrd,0x4000000"."\n";
+		if ($failsafe) {
+			print FD "[$title_failsafe]"."\n";
+			if ($type =~ /^KIWI CD/) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("*** zipl: CD boot not supported ***");
+				$kiwi -> failed ();
+				return;
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+				print FD "\t"."image   = boot/linux.vmx"."\n";
+				print FD "\t"."target  = boot/zipl"."\n";
+				print FD "\t"."ramdisk = boot/initrd.vmx,0x4000000"."\n";
+			} else {
+				print FD "\t"."image   = boot/linux"."\n";
+				print FD "\t"."target  = boot/zipl"."\n";
+				print FD "\t"."ramdisk = boot/initrd,0x4000000"."\n";
+			}
+			print FD "\t"."parameters = \"x11failsafe loader=$bloader";
+			print FD " $cmdline\""."\n";
 		}
-		print FD "\t"."parameters = \"x11failsafe loader=$bloader";
-		print FD " $cmdline\""."\n";
 		close FD;
 		$kiwi -> done();
 	}
