@@ -890,8 +890,7 @@ sub getSplitPersistentFiles {
 	if (! defined $persistNode) {
 		return @result;
 	}
-	my @fileNodeList = $persistNode -> getElementsByTagName ("file")
-		-> get_nodelist();
+	my @fileNodeList = $persistNode -> getElementsByTagName ("file");
 	foreach my $fileNode (@fileNodeList) {
 		my $name = $fileNode -> getAttribute ("name");
 		$name =~ s/\/$//;
@@ -918,8 +917,7 @@ sub getSplitTempFiles {
 	if (! defined $tempNode) {
 		return @result;
 	}
-	my @fileNodeList = $tempNode -> getElementsByTagName ("file")
-		-> get_nodelist();
+	my @fileNodeList = $tempNode -> getElementsByTagName ("file");
 	foreach my $fileNode (@fileNodeList) {
 		my $name = $fileNode -> getAttribute ("name");
 		$name =~ s/\/$//;
@@ -948,8 +946,7 @@ sub getSplitTempExceptions {
 	if (! defined $tempNode) {
 		return @result;
 	}
-	my @fileNodeList = $tempNode -> getElementsByTagName ("except")
-		-> get_nodelist();
+	my @fileNodeList = $tempNode -> getElementsByTagName ("except");
 	foreach my $fileNode (@fileNodeList) {
 		push @result, $fileNode -> getAttribute ("name");
 	}
@@ -977,8 +974,7 @@ sub getSplitPersistentExceptions {
 	if (! defined $persistNode) {
 		return @result;
 	}
-	my @fileNodeList = $persistNode -> getElementsByTagName ("except")
-		-> get_nodelist();
+	my @fileNodeList = $persistNode -> getElementsByTagName ("except");
 	foreach my $fileNode (@fileNodeList) {
 		push @result, $fileNode -> getAttribute ("name");
 	}
