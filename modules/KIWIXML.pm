@@ -929,9 +929,9 @@ sub getSplitTempFiles {
 }
 
 #==========================================
-# getSplitTmpExceptions
+# getSplitTempExceptions
 #------------------------------------------
-sub getSplitTmpExceptions {
+sub getSplitTempExceptions {
 	# ...
 	# Get the exceptions defined for temporary
 	# split portions. If there are no exceptions defined
