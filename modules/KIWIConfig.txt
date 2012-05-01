@@ -245,11 +245,9 @@
 		<file name="libutempter"/>
 		<file name="libutil"/>
 		<file name="libkmod"/>
-		<file name="libext2fs"/>
-		<file name="libcom_err"/>
-		<file name="libe2p"/>
-		<file name="libblkid"/>
-		<file name="libuuid"/>
+		<file name="libselinux"/>
+		<file name="libsepol"/>
+		<file name="libdevmapper"/>
 	</strip>
 
 </initrd>

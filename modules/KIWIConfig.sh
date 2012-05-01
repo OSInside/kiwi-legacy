@@ -818,6 +818,7 @@ function baseStripUnusedLibs {
 	local dir
 	local lnk
 	local new
+	local lib
 	# /.../
 	# Find directly used libraries, by calling ldd
 	# on files in *bin*
@@ -825,23 +826,24 @@ function baseStripUnusedLibs {
 	ldconfig
 	rm -f /tmp/needlibs
 	for i in /usr/bin/* /bin/* /sbin/* /usr/sbin/*;do
-		for n in `ldd $i 2>/dev/null`;do
-			if [ -e $n ];then
-				echo $n >> /tmp/needlibs
+		for n in $(ldd $i 2>/dev/null | cut -f2- -d\/ | cut -f1 -d " ");do
+			lib=$(readlink /$n)
+			if [ $? -eq 0 ];then
+				echo $lib >> /tmp/needlibs
 			fi
 		done
 	done
 	count=0
 	for i in `cat /tmp/needlibs | sort | uniq`;do
-		needlibs[$count]=$i
-		count=`expr $count + 1`
-		if [ -L $i ];then
-			dir=`dirname $i`
-			lnk=`readlink $i`
-			new=$dir/$lnk
-			needlibs[$count]=$new
-			count=`expr $count + 1`
-		fi
+		for d in \
+			/lib /lib64 /usr/lib /usr/lib64 \
+			/usr/X11R6/lib /usr/X11R6/lib64
+		do
+			if [ -e "$d/$i" ];then
+				needlibs[$count]=$d/$i
+				count=$((count + 1))
+			fi
+		done
 	done
 	# /.../
 	# add exceptions
@@ -868,13 +870,16 @@ function baseStripUnusedLibs {
 		if [ -d $i ];then
 			continue
 		fi
+		if [ -L $i ];then
+			continue
+		fi
 		for n in ${needlibs[*]};do
 			if [ $i = $n ];then
 				found=1; break
 			fi
 		done
 		if [ $found -eq 0 ];then
-			echo "Removing: $i"
+			echo "Removing library: $i"
 			rm $i
 		fi
 	done
