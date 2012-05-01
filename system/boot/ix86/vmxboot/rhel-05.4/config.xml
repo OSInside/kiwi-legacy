@@ -99,7 +99,6 @@
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="binutils"/>
-		<package name="cpio"/>
 		<package name="cracklib-dicts"/>
 		<package name="cyrus-sasl"/>
 		<package name="dbus-glib"/>

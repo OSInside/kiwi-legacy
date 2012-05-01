@@ -115,7 +115,6 @@
 	</packages>
 	<packages type="delete">
 		<package name="ash"/>
-		<package name="cpio"/>
 		<package name="cracklib-dict-full"/>
 		<package name="cracklib-dict-small"/>
 		<package name="diffutils"/>

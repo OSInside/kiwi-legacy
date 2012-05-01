@@ -238,7 +238,6 @@
 		<package name="glibc-locale"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,xen">
-		<package name="cpio"/>
 		<package name="cracklib-dict-full"/>
 		<package name="diffutils"/>
 		<package name="fillup"/>

@@ -141,7 +141,6 @@
 		<package name="procps"/>
 	</packages>
 	<packages type="delete">
-		<package name="cpio"/>
 		<package name="cracklib-dict-full"/>
 		<package name="cyrus-sasl"/>
 		<package name="fillup"/>

@@ -138,7 +138,6 @@
 		<package name="binutils"/>
 		<package name="blocxx"/>
 		<package name="bootsplash"/>
-		<package name="cpio"/>
 		<package name="cracklib-dict-full"/>
 		<package name="cracklib-dict-small"/>
 		<package name="cron"/>
