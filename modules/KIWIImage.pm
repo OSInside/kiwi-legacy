@@ -2287,7 +2287,7 @@ sub createImageSplit {
 	# walk through except files if any
 	#------------------------------------------
 	my %exceptHash;
-	foreach my $except ($sxml -> getSplitTmpExceptions()) {
+	foreach my $except ($sxml -> getSplitTempExceptions()) {
 		my $globsource = "${imageTree}${except}";
 		my @files = qxx ("find $globsource -xtype f 2>/dev/null");
 		my $code  = $? >> 8;
