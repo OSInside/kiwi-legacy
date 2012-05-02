@@ -706,6 +706,107 @@ sub test_getPXEDeployUnionConfig {
 }
 
 #==========================================
+# test_getSplitPersistentExceptions
+#------------------------------------------
+sub test_getSplitPersistentExceptions {
+	# ...
+	# Verify proper return of getSplitPersistentExceptions method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'splitSettings';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @persExcept = $xml -> getSplitPersistentExceptions();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedExcept = qw / bar /;
+	$this -> assert_array_equal(\@expectedExcept, \@persExcept);
+}
+
+#==========================================
+# test_getSplitPersistentFiles
+#------------------------------------------
+sub test_getSplitPersistentFiles {
+	# ...
+	# Verify proper return of getSplitPersistentFiles method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'splitSettings';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @persFiles = $xml -> getSplitPersistentFiles();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedNames = qw /bar64 genericBar/;
+	$this -> assert_array_equal(\@expectedNames, \@persFiles);
+}
+
+#==========================================
+# test_getSplitTempExceptions
+#------------------------------------------
+sub test_getSplitTempExceptions {
+	# ...
+	# Verify proper return of getSplitTempExceptions method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'splitSettings';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @tmpExcept = $xml -> getSplitTempExceptions();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedExcept = qw /foo anotherFoo/;
+	$this -> assert_array_equal(\@expectedExcept, \@tmpExcept);
+}
+
+#==========================================
+# test_getSplitTempFiles
+#------------------------------------------
+sub test_getSplitTempFiles {
+	# ...
+	# Verify proper return of getSplitTempFiles method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'splitSettings';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @tmpFiles = $xml -> getSplitTempFiles();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedNames = qw /foo64 genericFoo/;
+	$this -> assert_array_equal(\@expectedNames, \@tmpFiles);
+}
+
+
+#==========================================
 # test_packageManagerInfoHasConfigValue
 #------------------------------------------
 sub test_packageManagerInfoHasConfigValue {
