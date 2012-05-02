@@ -284,7 +284,7 @@ sub updateDescription {
 	my $stripTree = $stripXML -> parse_file ($this->{gdata}->{KStrip});
 	my @defaultStrip = $stripTree
 		-> getElementsByTagName ("initrd") -> get_node (1)
-		-> getElementsByTagName ("strip") -> get_nodelist();
+		-> getElementsByTagName ("strip");
 	foreach my $element (@defaultStrip) {
 		my $type  = $element -> getAttribute("type");
 		my @files = $element -> getElementsByTagName ("file");

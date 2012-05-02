@@ -814,7 +814,7 @@ sub getStripFileList {
 	my $this   = shift;
 	my $ftype  = shift;
 	my $inode  = $this->{imgnameNodeList} -> get_node(1);
-	my @nodes  = $inode -> getElementsByTagName ("strip") -> get_nodelist();
+	my @nodes  = $inode -> getElementsByTagName ("strip");
 	my @result = ();
 	my $tnode;
 	if (! @nodes) {
@@ -829,8 +829,7 @@ sub getStripFileList {
 	if (! $tnode) {
 		return @result;
 	}
-	my @fileNodeList = $tnode -> getElementsByTagName ("file")
-		-> get_nodelist();
+	my @fileNodeList = $tnode -> getElementsByTagName ("file");
 	foreach my $fileNode (@fileNodeList) {
 		my $name = $fileNode -> getAttribute ("name");
 		push @result, $name;
@@ -890,8 +889,7 @@ sub getSplitPersistentFiles {
 	if (! defined $persistNode) {
 		return @result;
 	}
-	my @fileNodeList = $persistNode -> getElementsByTagName ("file")
-		-> get_nodelist();
+	my @fileNodeList = $persistNode -> getElementsByTagName ("file");
 	foreach my $fileNode (@fileNodeList) {
 		my $name = $fileNode -> getAttribute ("name");
 		$name =~ s/\/$//;
@@ -918,8 +916,7 @@ sub getSplitTempFiles {
 	if (! defined $tempNode) {
 		return @result;
 	}
-	my @fileNodeList = $tempNode -> getElementsByTagName ("file")
-		-> get_nodelist();
+	my @fileNodeList = $tempNode -> getElementsByTagName ("file");
 	foreach my $fileNode (@fileNodeList) {
 		my $name = $fileNode -> getAttribute ("name");
 		$name =~ s/\/$//;
@@ -948,8 +945,7 @@ sub getSplitTempExceptions {
 	if (! defined $tempNode) {
 		return @result;
 	}
-	my @fileNodeList = $tempNode -> getElementsByTagName ("except")
-		-> get_nodelist();
+	my @fileNodeList = $tempNode -> getElementsByTagName ("except");
 	foreach my $fileNode (@fileNodeList) {
 		push @result, $fileNode -> getAttribute ("name");
 	}
@@ -977,8 +973,7 @@ sub getSplitPersistentExceptions {
 	if (! defined $persistNode) {
 		return @result;
 	}
-	my @fileNodeList = $persistNode -> getElementsByTagName ("except")
-		-> get_nodelist();
+	my @fileNodeList = $persistNode -> getElementsByTagName ("except");
 	foreach my $fileNode (@fileNodeList) {
 		push @result, $fileNode -> getAttribute ("name");
 	}
@@ -1558,7 +1553,7 @@ sub getUsers {
 	foreach my $element (@node) {
 		my $group = $element -> getAttribute("group");
 		my $gid   = $element -> getAttribute("id");
-		my @ntag  = $element -> getElementsByTagName ("user") -> get_nodelist();
+		my @ntag  = $element -> getElementsByTagName ("user");
 		foreach my $element (@ntag) {
 			my $name = $element -> getAttribute ("name");
 			my $uid  = $element -> getAttribute ("id");
@@ -2556,7 +2551,7 @@ sub getImageConfig {
 		if (! $this -> __requestedProfile ($element)) {
 			next;
 		}
-		my @ntag = $element -> getElementsByTagName ("file") -> get_nodelist();
+		my @ntag = $element -> getElementsByTagName ("file");
 		my $data = "";
 		my $prefix = "";
 		if ($type ne "kiwi_drivers") {
@@ -4558,7 +4553,7 @@ sub __addDefaultStripNode {
 	#------------------------------------------
 	my @defaultStrip = $stripTree
 		-> getElementsByTagName ("initrd") -> get_node (1)
-		-> getElementsByTagName ("strip") -> get_nodelist();
+		-> getElementsByTagName ("strip");
 	foreach my $element (@defaultStrip) {
 		my $type = $element -> getAttribute("type");
 		if ((! $haveDelete) && ($type eq "delete")) {
