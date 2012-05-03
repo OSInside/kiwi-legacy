@@ -4755,7 +4755,7 @@ function runHook {
 		HOOK="/lib/kiwi/hooks/$1.sh"
 	fi
 	if [ -e $HOOK ]; then
-		. $HOOK $@
+		. $HOOK "$@"
 	fi
 }
 #======================================
