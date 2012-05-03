@@ -1511,9 +1511,9 @@ div {
 		}
 	k.type.flags.attribute =
 		## Specifies flags for the image type. This could be compressed
-		## or unified and applies to the iso type only
+		## or clic and applies to the iso type only
 		attribute flags {
-			"clic" | "compressed" | "unified"
+			"clic" | "compressed"
 		}
 	k.type.format.attribute =
 		## Specifies the format of the virtual disk.
@@ -1711,7 +1711,7 @@ div {
 	k.union.rw.attribute =
 		## Device for Read-Write
 		attribute rw { text }
-	k.union.type.attribute = attribute type { "aufs" | "clicfs" | "unionfs" }
+	k.union.type.attribute = attribute type { "clicfs" }
 	k.union.attlist =
 		k.union.ro.attribute &
 		k.union.rw.attribute &

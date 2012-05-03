@@ -2034,11 +2034,10 @@ file for write operations</a:documentation>
     <define name="k.type.flags.attribute">
       <attribute name="flags">
         <a:documentation>Specifies flags for the image type. This could be compressed
-or unified and applies to the iso type only</a:documentation>
+or clic and applies to the iso type only</a:documentation>
         <choice>
           <value>clic</value>
           <value>compressed</value>
-          <value>unified</value>
         </choice>
       </attribute>
     </define>
@@ -2415,11 +2414,7 @@ an extra volume.</db:para>
     </define>
     <define name="k.union.type.attribute">
       <attribute name="type">
-        <choice>
-          <value>aufs</value>
-          <value>clicfs</value>
-          <value>unionfs</value>
-        </choice>
+        <value>clicfs</value>
       </attribute>
     </define>
     <define name="k.union.attlist">

@@ -317,9 +317,6 @@ sub __checkFilesystemTool {
 		} elsif ($flag && $flag eq 'compressed') {
 			$haveTool = $this -> __isFsToolAvailable('squashfs');
 			$checkedFS = 'squashfs';
-		} elsif ($flag && $flag eq 'unified') {
-			$haveTool = $this -> __isFsToolAvailable('squashfs');
-			$checkedFS = 'squashfs';
 		}
 		if (($flag) && (! $haveTool)) {
 			$toolError = 1;

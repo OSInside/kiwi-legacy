@@ -1272,7 +1272,7 @@ sub checkType {
 	if (($fs) && ($fs =~ /squashfs/)) {
 		$check_mksquashfs = 1;
 	}
-	if (($flags) && ($flags =~ /compressed|unified/)) {
+	if (($flags) && ($flags =~ /compressed/)) {
 		$check_mksquashfs = 1;
 	}
 	#==========================================

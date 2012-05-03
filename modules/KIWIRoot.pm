@@ -1377,7 +1377,7 @@ sub setupMount {
 		} else {
 			next;
 		}
-		$kiwi -> info ("Mounting local channel: $chl");
+		$kiwi -> info ("Mounting local channel: $chl\n");
 		my $roopt = "dirs=$cache=rw:$path=ro,ro";
 		my $auopt = "dirs=$path=ro";
 		my $mount = $prefix.$path;
@@ -1386,35 +1386,19 @@ sub setupMount {
 		my $data = qxx ("touch $path/bob 2>&1");
 		my $code = $? >> 8;
 		if ($code == 0) {
-			#==========================================
-			# $path is writable try overlay ro mount
-			#------------------------------------------
-			$kiwi -> skipped ();
-			$kiwi -> warning ("Path $path is writable, trying read-only mount");
-			qxx (" rm -f $path/bob 2>&1 ");
-			$data = qxx ("mount -t aufs -o $auopt aufs $mount 2>&1");
-			$code = $? >> 8;
-			if ($code != 0) {
-				$data = qxx ("mount -t unionfs -o $roopt unionfs $mount 2>&1");
-				$code = $? >> 8;
-			}
-			if ($code != 0) {
-				$kiwi -> skipped ();
-				$kiwi -> warning ("Couldn't mount read-only, using bind mount");
-			}
-		}
-		if ($code != 0) {
-			my $data = qxx (" mount -o bind \"$path\" \"$mount\" 2>&1 ");
-			my $code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> failed();
-				$this->{mountList} = \@mountList;
-				return;
-			}
-			$kiwi -> done();
+			qxx ("rm -f $path/bob 2>&1");
+			$kiwi -> warning ("--> Status: read-write mounted");
 		} else {
-			$kiwi -> done();
+			$kiwi -> info ("--> Status: read-only mounted");
 		}
+		$data = qxx ("mount -o bind \"$path\" \"$mount\" 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed();
+			$this->{mountList} = \@mountList;
+			return;
+		}
+		$kiwi -> done();
 	}
 	$this->{mountList} = \@mountList;
 	return $this;

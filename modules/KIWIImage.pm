@@ -1585,14 +1585,6 @@ sub createImageLiveCD {
 				$namero = $namerw;
 				last SWITCH;
 			};
-			/^unified$/ && do {
-				$kiwi -> info ("Creating squashfs read only filesystem...\n");
-				if (! $this -> setupSquashFS ( $namero,$imageTree )) {
-					$this -> restoreSplitExtend ();
-					return;
-				}
-				last SWITCH;
-			};
 			/^clic$/ && do {
 				$kiwi -> info ("Creating clicfs read only filesystem...\n");
 				if (! $this -> createImageClicFS ( $namero )) {
@@ -2066,15 +2058,13 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		return;
 	}
-	if ((! defined $gzip) || ($gzip =~ /^(unified|clic)/)) {
+	if ((! defined $gzip) || ($gzip =~ /^clic/)) {
 		print $FD "IMAGE='/dev/ram1;$namecd'\n";
 	} else {
 		print $FD "IMAGE='/dev/loop1;$namecd'\n";
 	}
 	if (defined $gzip) {
-		if ($gzip =~ /^unified/) {
-			print $FD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,aufs'\n";
-		} elsif ($gzip =~ /^clic/) {
+		if ($gzip =~ /^clic/) {
 			print $FD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,clicfs'\n";
 		} else {
 			print $FD "COMBINED_IMAGE=yes\n";
@@ -3064,7 +3054,7 @@ sub writeImageConfig {
 			my $valid = 0;
 			my $value;
 			if (! $unionConfig{type}) {
-				$unionConfig{type} = "aufs";
+				$unionConfig{type} = "clicfs";
 			}
 			if (($unionConfig{rw}) && ($unionConfig{ro})) {
 				$value = "$unionConfig{rw},$unionConfig{ro},$unionConfig{type}";

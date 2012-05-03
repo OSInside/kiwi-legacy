@@ -9,8 +9,7 @@
 # BELONGS TO    : Operating System images
 #               :
 # DESCRIPTION   : This module is used for directory overlay techniques
-#               : based on aufs / unionfs mount calls
-#               :
+#               : 
 #               :
 # STATUS        : Development
 #----------------

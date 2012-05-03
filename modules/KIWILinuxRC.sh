@@ -4434,7 +4434,6 @@ function umountSystem {
 #--------------------------------------
 function isFSTypeReadOnly {
 	if [ "$FSTYPE" = "squashfs" ];then
-		export unionFST=aufs
 		return 0
 	fi
 	if [ "$FSTYPE" = "clicfs" ];then
@@ -4543,35 +4542,6 @@ function setupReadWrite {
 		fi
 	fi
 	return 0
-}
-#======================================
-# mountSystemUnified
-#--------------------------------------
-function mountSystemUnified {
-	local loopf=$1
-	local roDir=/read-only
-	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
-	#======================================
-	# create read only mount point
-	#--------------------------------------
-	mkdir -p $roDir
-	#======================================
-	# check read/only device location
-	#--------------------------------------
-	if [ ! -z "$NFSROOT" ];then
-		roDevice="$imageRootDevice"
-	fi
-	#======================================
-	# mount read only device
-	#--------------------------------------
-	if ! kiwiMount "$roDevice" "$roDir" "" $loopf;then
-		Echo "Failed to mount read only filesystem"
-		return 1
-	fi
-	#======================================
-	# check union mount method
-	#--------------------------------------
-	mountSystemOverlay
 }
 #======================================
 # mountSystemClicFS
@@ -4709,66 +4679,6 @@ function mountSystemClicFS {
 		return 1
 	fi
 	export haveClicFS=yes
-	return 0
-}
-#======================================
-# mountSystemOverlay
-#--------------------------------------
-function mountSystemOverlay {
-	local roDir=/read-only
-	local rwDir=/read-write
-	local xiDir=/xino
-	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
-	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
-	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
-	#======================================
-	# create read write mount points
-	#--------------------------------------
-	for dir in $rwDir $xiDir;do
-		mkdir -p $dir
-	done
-	#======================================
-	# check read/write device location
-	#--------------------------------------
-	getDiskDevice $rwDevice | grep -q ram
-	if [ $? = 0 ];then
-		# /.../
-		# write part is a ram location, use tmpfs for ram
-		# disk data storage
-		# ----
-		if ! mount -t tmpfs tmpfs $rwDir >/dev/null;then
-			return 1
-		fi
-	else
-		# /.../
-		# write part is not a ram disk, create/check ext3 filesystem
-		# on it if not remote. Mount the filesystem
-		# ----
-		if [ "$roDevice" = "nfs" ];then
-			rwDevice="-o vers=3,rw $nfsRootServer:$rwDevice"
-		fi
-		if [ ! "$roDevice" = "nfs" ] && ! setupReadWrite; then
-			return 1
-		fi
-		if ! mount $rwDevice $rwDir >/dev/null;then
-			Echo "Failed to mount read/write filesystem"
-			return 1
-		fi
-	fi
-	#======================================
-	# setup overlay mount
-	#--------------------------------------
-	if [ $unionFST = "aufs" ];then
-		mount -t tmpfs tmpfs $xiDir >/dev/null || retval=1
-		mount -t aufs \
-			-o dirs=$rwDir=rw:$roDir=ro,xino=$xiDir/.aufs.xino aufs /mnt \
-		>/dev/null || return 1
-	else
-		mount -t unionfs \
-			-o dirs=$rwDir=rw:$roDir=ro unionfs /mnt
-		>/dev/null || return 1
-	fi
-	usleep 500000
 	return 0
 }
 #======================================
@@ -4914,7 +4824,9 @@ function mountSystem {
 		if [ "$unionFST" = "clicfs" ];then
 			mountSystemClicFS $2
 		else
-			mountSystemUnified $2
+			systemException \
+				"Unknown overlay mount method: $unionFST" \
+			"reboot"
 		fi
 		retval=$?
 	else
