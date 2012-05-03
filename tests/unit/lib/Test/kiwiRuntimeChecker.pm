@@ -260,7 +260,7 @@ sub test_fsToolCheckIsoImg {
 			if ($fsTestName =~ 'clic') {
 				$fsExpected = 'clicfs';
 				$fsTool = 'mkclicfs';
-			} elsif ($fsTestName =~ 'compressed' || $fsTestName =~ 'unified') {
+			} elsif ($fsTestName =~ 'compressed') {
 				$fsExpected = 'squashfs';
 				$fsTool = 'mksquashfs';
 			}
