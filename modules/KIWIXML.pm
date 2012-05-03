@@ -464,7 +464,7 @@ sub getImageSizeAdditiveBytes {
 	if ($size) {
 		my $plus = $node -> getElementsByTagName ("size")
 			-> get_node(1) -> getAttribute("additive");
-		if ((! defined $plus) || ($plus eq "false") || ($plus eq "0")) {
+		if ((! defined $plus) || ($plus eq "false")) {
 			return 0;
 		}
 	}
