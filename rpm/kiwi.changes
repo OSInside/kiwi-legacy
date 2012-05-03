@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu May  3 11:15:34 CEST 2012 - ms@suse.de
+
+- fixed hook call with parameters containing spaces (bnc #760331)
+
+-------------------------------------------------------------------
 Thu Apr 26 23:25:59 CEST 2012 - ms@suse.de
 
 - fixed creation of --bootcd and/or --bootusb initrd only images
