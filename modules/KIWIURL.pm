@@ -599,29 +599,29 @@ sub openSUSEpath {
 		if ($type ne "opensuse") {
 			next;
 		}
-		my $response = $this -> urlResponse ( $browser,$url );
-		if (! $response) {
+		my $response = $browser -> get ( $url );
+		if (! $response -> is_success) {
 			next;
 		}
-		my $title = $response-> title ();
+		my $title = $response -> title ();
 		if ((defined $title) && ($title !~ /not found/i)) {
 			my $repourl = $url;
-			$response = $this -> urlResponse ( $browser,$repourl."/repodata" );
-			if (! $response) {
+			$response = $browser -> get ( $repourl."/repodata" );
+			if (! $response -> is_success) {
 				next;
 			}
-			$title = $response-> title ();
+			$title = $response -> title ();
 			if ((defined $title) && ($title !~ /not found/i)) {
 				$this->{type} = "rpm-md";
 				return $url;
 			} else {
 				push (@responses,"$repourl/repodata -> $title");
 			}
-			$response = $this -> urlResponse ( $browser,$repourl."/media.1");
-			if (! $response) {
+			$response = $browser -> get ( $repourl."/media.1");
+			if (! $response -> is_success) {
 				next;
 			}
-			$title = $response-> title ();
+			$title = $response -> title ();
 			if ((defined $title) && ($title !~ /not found/i)) {
 				$this->{type} = "yast2";
 				return $url;
@@ -662,32 +662,6 @@ sub plainPath {
 		"URL: $module will be forwarded AS IS to the package manger!\n"
 	);
 	return $module;
-}
-
-#==========================================
-# urlResponse
-#------------------------------------------
-sub urlResponse {
-	my $this    = shift;
-	my $browser = shift;
-	my $url     = shift;
-	my $timeout = 5;
-	my $request;
-	my $response;
-	eval {
-		local $SIG{ALRM} = sub { die "alarm\n" };
-		alarm $timeout;
-		$request = HTTP::Request->new (GET => $url);
-		$response= $browser -> request  ( $request );
-		alarm 0;
-	};
-	if ($@) {
-		# host can't be resolved, network timeout
-		if ($@ eq "alarm\n") {
-			return;
-		}
-	}
-	return $response;
 }
 
 1;
