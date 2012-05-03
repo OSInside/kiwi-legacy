@@ -3798,11 +3798,15 @@ function releaseNetwork {
 		#======================================
 		# free the lease and the cache
 		#--------------------------------------
-		dhcpcd -p -k $PXE_IFACE
+		dhcpcd -k $PXE_IFACE
 		#======================================
 		# remove sysconfig state information
 		#--------------------------------------
 		rm -rf /dev/.sysconfig/network
+		#======================================
+		# unset host information
+		#--------------------------------------
+		unset HOSTNAME
 	fi
 }
 #======================================
