@@ -38,6 +38,7 @@ test -z "$ELOG_EXCEPTION" && export ELOG_EXCEPTION=/dev/console
 #======================================
 # Exports (General)
 #--------------------------------------
+test -z "$splitroot_size"     && export splitroot_size=512
 test -z "$arch"               && export arch=$(uname -m)
 test -z "$haveDASD"           && export haveDASD=0
 test -z "$haveZFCP"           && export haveZFCP=0
@@ -4369,6 +4370,13 @@ function includeKernelParameters {
 	if [ ! -z "$kiwibrokenmodule" ];then
 		kiwibrokenmodule=`echo $kiwibrokenmodule | tr , " "`
 	fi
+	if \
+		[ ! -z "$kiwisplitroot_size" ]            && \
+		[[ $kiwisplitroot_size = *[[:digit:]]* ]] && \
+		[ $kiwisplitroot_size -gt $splitroot_size ]
+	then
+		splitroot_size=$kiwisplitroot_size
+	fi
 	if [ ! -z "$ramdisk_size" ];then
 		local modfile=/etc/modprobe.d/99-local.conf
 		if [ ! -f $modfile ];then
@@ -4597,7 +4605,7 @@ function mountSystemClicFS {
 		haveMByte=`expr $haveBytes / 1024 / 1024`
 		wantCowFS=0
 		if \
-			[ "$kiwi_hybrid" = "yes" ] &&
+			[ "$kiwi_hybrid" = "yes" ] && \
 			[ "$kiwi_hybridpersistent" = "yes" ]
 		then
 			# write into a cow file on a filesystem, for hybrid iso's
@@ -4688,12 +4696,16 @@ function mountSystemCombined {
 	local mountDevice=$1
 	local loopf=$2
 	local roDevice=$mountDevice
+	local rwDevice
+	local options
+	local rootfs
+	local inr
 	if [ "$haveLuks" = "yes" ]; then
-		local rwDevice="/dev/mapper/luksReadWrite"
+		rwDevice="/dev/mapper/luksReadWrite"
 	elif [ "$haveLVM" = "yes" ]; then
-		local rwDevice="/dev/$VGROUP/LVRoot"
+		rwDevice="/dev/$VGROUP/LVRoot"
 	else
-		local rwDevice=`getNextPartition $mountDevice`
+		rwDevice=`getNextPartition $mountDevice`
 	fi
 	mkdir /read-only >/dev/null
 	# /.../
@@ -4709,7 +4721,7 @@ function mountSystemCombined {
 	# and extract the rootfs tarball with the RAM data and the read-only
 	# and read-write links into the tmpfs.
 	# ----
-	local rootfs=/read-only/rootfs.tar
+	rootfs=/read-only/rootfs.tar
 	if [ ! -f $rootfs ];then
 		Echo "Can't find rootfs tarball"
 		umount "$roDevice" &>/dev/null
@@ -4718,20 +4730,23 @@ function mountSystemCombined {
 	# /.../
 	# count inode numbers for files in rootfs tarball
 	# ----
-	local inr=`tar -tf $rootfs | wc -l`
-	inr=`expr $inr \* 11 / 10 / 1024`
-	inr=$inr"k"
+	inr=$(tar -tf $rootfs | wc -l)
+	inr=$((inr * 2))
 	# /.../
-	# mount tmpfs, reserve max 512MB for the rootfs data
+	# check if rootfs tarball fits into memory
 	# ----
-	if ! mount -t tmpfs tmpfs -o size=512M,nr_inodes=$inr /mnt;then
-		systemException \
-			"Failed to mount root tmpfs" \
-		"reboot"
-	fi
 	if ! validateTarSize $rootfs;then
 		systemException \
 			"Not enough RAM space available for temporary data" \
+		"reboot"
+	fi
+	# /.../
+	# mount tmpfs, reserve max $splitroot_size for the rootfs data
+	# ----
+	options="size=${splitroot_size}M,nr_inodes=$inr"
+	if ! mount -t tmpfs tmpfs -o $options /mnt;then
+		systemException \
+			"Failed to mount root tmpfs" \
 		"reboot"
 	fi
 	cd /mnt && tar xf $rootfs >/dev/null && cd /
@@ -5705,7 +5720,7 @@ function cleanImage {
 	if \
 		[ "$haveClicFS" = "yes" ] || \
 		[ "$haveBtrFS"  = "yes" ] || \
-		[ "$haveXFS"  = "yes" ] || \
+		[ "$haveXFS"    = "yes" ] || \
 		[ ! -z "$NFSROOT" ]       || \
 		[ ! -z "$NBDROOT" ]       || \
 		[ ! -z "$AOEROOT" ]       || \
