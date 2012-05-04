@@ -2158,12 +2158,14 @@ sub createImageSplit {
 	my $kiwi = $this->{kiwi};
 	my $cmdL = $this->{cmdL};
 	my $arch = $this->{arch};
-	my $imageTree = $this->{imageTree};
-	my $baseSystem= $this->{baseSystem};
-	my $checkBase = $cmdL->getRootTargetDir()."/".$baseSystem;
-	my $sxml = $this->{xml};
-	my $idest= $cmdL->getImageTargetDir();
-	my %xenc = $sxml->getXenConfig();
+	my $imageTree  = $this->{imageTree};
+	my $baseSystem = $this->{baseSystem};
+	my $checkBase  = $cmdL->getRootTargetDir()."/".$baseSystem;
+	my $sxml       = $this->{xml};
+	my $idest      = $cmdL->getImageTargetDir();
+	my %xenc       = $sxml->getXenConfig();
+	my $fsopts     = $cmdL -> getFilesystemOptions();
+	my $inodesize  = $fsopts->[1];
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $error;
@@ -2182,6 +2184,8 @@ sub createImageSplit {
 	my $name;
 	my $treebase;
 	my $xendomain;
+	my $minInodes;
+	my $sizeBytes;
 	#==========================================
 	# check for xen domain setup
 	#------------------------------------------
@@ -2471,11 +2475,44 @@ sub createImageSplit {
 		}
 	}
 	#==========================================
-	# Embed tmp extend into ro extend
+	# Embed rootfs meta data into ro extend
 	#------------------------------------------
-	qxx ("cd $imageTreeTmp && tar cvf $imageTree/rootfs.tar * 2>&1");
+	$minInodes = qxx ("find $imageTreeTmp | wc -l");
+	$sizeBytes = qxx ("du -s --block-size=1 $imageTreeTmp | cut -f1");
+	$sizeBytes+= $minInodes * $inodesize;
+	$sizeBytes = sprintf ("%.0f", $sizeBytes);
+	$minInodes*= 2;
+	if (open (my $FD,">$imageTree/rootfs.meta")) {
+		print $FD "inode_nr=$minInodes\n";
+		print $FD "min_size=$sizeBytes\n";
+		close $FD;
+	} else {
+		$kiwi -> error  ("Failed to create rootfs meta data: $!");
+		$kiwi -> failed ();
+		qxx ("rm -rf $imageTreeRW");
+		qxx ("rm -rf $imageTreeTmp");
+		qxx ("rm -rf $imageTree");
+		return;
+	}
+	#==========================================
+	# Embed rootfs.tar for tmpfs into ro extend
+	#------------------------------------------
+	$data = qxx (
+		"cd $imageTreeTmp && tar -cf $imageTree/rootfs.tar * 2>&1"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Failed to create rootfs tarball: $data");
+		$kiwi -> failed ();
+		qxx ("rm -rf $imageTreeRW");
+		qxx ("rm -rf $imageTreeTmp");
+		qxx ("rm -rf $imageTree");
+		return;
+	}
+	#==========================================
+	# Clean rootfs tmp tree
+	#------------------------------------------
 	qxx ("rm -rf $imageTreeTmp");
-
 	#==========================================
 	# Count disk space for extends
 	#------------------------------------------

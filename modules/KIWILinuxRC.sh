@@ -4267,32 +4267,6 @@ function validateSize {
 	return 1
 }
 #======================================
-# validateTarSize
-#--------------------------------------
-function validateTarSize {
-	# /.../
-	# this function requires a destination directory which
-	# could be a tmpfs mount and a compressed tar source file.
-	# The function will then check if the tar file could be
-	# unpacked according to the size of the destination
-	# ----
-	local tsrc=$1
-	local haveKByte=0
-	local haveMByte=0
-	local needBytes=0
-	local needMByte=0
-	haveKByte=`cat /proc/meminfo | grep MemFree | cut -f2 -d: | cut -f1 -dk`
-	haveMByte=`expr $haveKByte / 1024`
-	needBytes=`du --bytes $tsrc | cut -f1`
-	needMByte=`expr $needBytes / 1048576`
-	Echo "Have size: proc/meminfo -> $haveMByte MB"
-	Echo "Need size: $tsrc -> $needMByte MB [ uncompressed ]"
-	if [ "$haveMByte" -gt "$needMByte" ];then
-		return 0
-	fi
-	return 1
-}
-#======================================
 # validateBlockSize
 #--------------------------------------
 function validateBlockSize {
@@ -4703,7 +4677,12 @@ function mountSystemCombined {
 	local rwDevice
 	local options
 	local rootfs
-	local inr
+	local meta
+	local inode_nr
+	local min_size
+	local haveKByte
+	local haveMByte
+	local needMByte
 	if [ "$haveLuks" = "yes" ]; then
 		rwDevice="/dev/mapper/luksReadWrite"
 	elif [ "$haveLVM" = "yes" ]; then
@@ -4731,15 +4710,27 @@ function mountSystemCombined {
 		umount "$roDevice" &>/dev/null
 		return 1
 	fi
+	meta=/read-only/rootfs.meta
+	if [ ! -f $inodes ];then
+		Echo "Can't find rootfs meta data"
+		umount "$roDevice" &>/dev/null
+		return 1
+	fi
 	# /.../
-	# count inode numbers for files in rootfs tarball
+	# source rootfs meta data variables:
+	# => min_size # minimum required tmpfs size in bytes
+	# => inode_nr # number of inodes
 	# ----
-	inr=$(tar -tf $rootfs | wc -l)
-	inr=$((inr * 2))
+	source $meta
 	# /.../
 	# check if rootfs tarball fits into memory
 	# ----
-	if ! validateTarSize $rootfs;then
+	haveKByte=$(cat /proc/meminfo | grep MemFree | cut -f2 -d: | cut -f1 -dk)
+	haveMByte=$((haveKByte / 1024))
+	needMByte=$((min_size  / 1048576))
+	Echo "Have size: proc/meminfo -> $haveMByte MB"
+	Echo "Need size: $rootfs -> $needMByte MB"
+	if [ "$haveMByte" -lt "$needMByte" ];then
 		systemException \
 			"Not enough RAM space available for temporary data" \
 		"reboot"
@@ -4747,7 +4738,7 @@ function mountSystemCombined {
 	# /.../
 	# mount tmpfs, reserve max $splitroot_size for the rootfs data
 	# ----
-	options="size=${splitroot_size}M,nr_inodes=$inr"
+	options="size=${splitroot_size}M,nr_inodes=$inode_nr"
 	if ! mount -t tmpfs tmpfs -o $options /mnt;then
 		systemException \
 			"Failed to mount root tmpfs" \
