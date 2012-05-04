@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri May  4 16:06:29 CEST 2012 - ms@suse.de
+
+- netboot: use --metadata=0.9 format for raid setup (bnc #760713)
+- allow evaluation of $DO_NOT_INSTALL_BOOTLOADER variable in
+  netboot suse-preinit to prevent installation of the bootloader
+  by a variable (bnc #760502)
+
+-------------------------------------------------------------------
 Thu May  3 11:15:34 CEST 2012 - ms@suse.de
 
 - fixed hook call with parameters containing spaces (bnc #760331)
