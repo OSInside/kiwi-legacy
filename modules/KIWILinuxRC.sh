@@ -6942,7 +6942,7 @@ function pxeRaidCreate {
 		fi
 		mdadm --zero-superblock $raidFirst
 		mdadm --zero-superblock $raidSecond
-		mdadm --create --run /dev/md$mdcount \
+		mdadm --create --metadata=0.9 --run /dev/md$mdcount \
 			--level=$raidLevel --raid-disks=2 $raidFirst $raidSecond
 		if [ ! $? = 0 ];then
 			systemException \
