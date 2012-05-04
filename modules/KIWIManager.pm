@@ -1886,7 +1886,7 @@ sub setupRootSystem {
 			if ($this -> setupInstallPackages()) {
 				push (@packs,$manager);
 			}
-			$kiwi -> info ("Initializing image system on: $root...");
+			$kiwi -> info ("Initializing image system on: $root");
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
@@ -1971,7 +1971,7 @@ sub setupRootSystem {
 			if ($this -> setupInstallPackages()) {
 				push (@packs,$manager);
 			}
-			$kiwi -> info ("Initializing image system on: $root...");
+			$kiwi -> info ("Initializing image system on: $root");
 			#==========================================
 			# check input list for pattern names
 			#------------------------------------------
@@ -2112,7 +2112,7 @@ sub setupRootSystem {
 			$ensconce_args .= " -b";
 		}
 		if (! $chroot) {
-			$kiwi -> info ("Initializing image system on: $root...");
+			$kiwi -> info ("Initializing image system on: $root");
 		} else {
 			$kiwi -> info ("Installing image packages...");
 		}
@@ -2142,7 +2142,7 @@ sub setupRootSystem {
 			if ($this -> setupInstallPackages()) {
 				push (@packs,$manager);
 			}
-			$kiwi -> info ("Initializing image system on: $root...");
+			$kiwi -> info ("Initializing image system on: $root");
 			#==========================================
 			# check input list for group names
 			#------------------------------------------
