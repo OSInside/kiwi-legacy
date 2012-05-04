@@ -593,43 +593,36 @@ sub openSUSEpath {
 	#==========================================
 	# Check URL entries
 	#------------------------------------------
-	my @responses = ();
 	foreach my $url (keys %matches) {
 		my $type = $matches{$url};
 		if ($type ne "opensuse") {
 			next;
 		}
+		#==========================================
+		# Try to access URL from matches
+		#------------------------------------------
 		my $response = $browser -> get ( $url );
-		if (! $response -> is_success) {
-			next;
-		}
-		my $title = $response -> title ();
-		if ((defined $title) && ($title !~ /not found/i)) {
+		if ($response -> is_success) {
 			my $repourl = $url;
+			#==========================================
+			# 1) Check for rpm-md repo
+			#------------------------------------------
 			$response = $browser -> get ( $repourl."/repodata" );
-			if (! $response -> is_success) {
-				next;
-			}
-			$title = $response -> title ();
-			if ((defined $title) && ($title !~ /not found/i)) {
+			if ($response -> is_success) {
 				$this->{type} = "rpm-md";
 				return $url;
-			} else {
-				push (@responses,"$repourl/repodata -> $title");
 			}
+			#==========================================
+			# 2) Check for yast2 repo
+			#------------------------------------------
 			$response = $browser -> get ( $repourl."/media.1");
-			if (! $response -> is_success) {
-				next;
-			}
-			$title = $response -> title ();
-			if ((defined $title) && ($title !~ /not found/i)) {
+			if ($response -> is_success) {
 				$this->{type} = "yast2";
 				return $url;
-			} else {
-				push (@responses,"$repourl//media.1 -> $title");
 			}
-		} else {
-			push (@responses,"$url -> $title");
+			$kiwi -> loginfo (
+				"URL: $url is neither rpm-md nor yast2\n"
+			);
 		}
 	}
 	if (! defined $quiet) {
