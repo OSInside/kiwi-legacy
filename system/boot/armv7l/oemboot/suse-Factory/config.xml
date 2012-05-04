@@ -152,7 +152,6 @@
 		<package name="PolicyKit"/>
 		<package name="audit-libs"/>
 		<package name="blocxx"/>
-		<package name="cpio"/>
 		<package name="cracklib-dict-full"/>
 		<package name="cracklib-dict-small"/>
 		<package name="db"/>
