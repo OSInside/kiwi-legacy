@@ -74,7 +74,7 @@ fi
 #======================================
 # 7) Install boot loader on diskful
 #--------------------------------------
-if [ "$bootLoaderOK" = 1 ];then
+if [ "$bootLoaderOK" = 1 ] && [ -z "$DO_NOT_INSTALL_BOOTLOADER" ]; then
 	installBootLoader
 fi
 
