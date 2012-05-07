@@ -3847,6 +3847,10 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		$kiwi -> info ("Creating lilo/yaboot config file...");
 		$cmdline =~ s/\n//g;
+		my $bootTimeout = 80;
+		if (defined $type{boottimeout}) {
+			$bootTimeout = $type{boottimeout};
+		}
 		my $title_standard;
 		$title_standard = $this -> makeLabel ("$label");
 		#==========================================
@@ -3883,7 +3887,7 @@ sub setupBootLoaderConfiguration {
 			# RAW NON-LVM
 			#------------------------------------------
 			print FD "partition = 2\n";
-			print FD "timeout = 80\n";
+			print FD "timeout = $bootTimeout\n";
 			print FD "default = $title_standard\n";
 			print FD "image = /boot/linux.vmx"."\n";
 			print FD "\t"."label = $title_standard\n";
