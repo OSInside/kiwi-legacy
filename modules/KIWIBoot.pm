@@ -3829,20 +3829,6 @@ sub setupBootLoaderConfiguration {
 	#------------------------------------------
 	if ($loader eq "yaboot") {
 		#==========================================
-		# Create MBR id file for boot device check
-		#------------------------------------------
-		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
-		qxx ("mkdir -p $tmpdir/boot/grub");
-		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create mbrid file: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		print FD "$this->{mbrid}";
-		close FD;
-		$kiwi -> done();
-		#==========================================
 		# Create yaboot.cnf
 		#------------------------------------------
 		$kiwi -> info ("Creating lilo/yaboot config file...");
