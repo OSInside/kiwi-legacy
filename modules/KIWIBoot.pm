@@ -2246,11 +2246,11 @@ sub setupBootDisk {
 		}
 		if ($bootloader =~ /syslinux|yaboot/) {
 			$kiwi -> info ("Creating DOS boot filesystem");
-			if ($bootloader eq "yaboot") {
-				$status = qxx ("/sbin/mkdosfs -F 16 -n 'BOOT' $boot 2>&1");
-			} else {
-				$status = qxx ("/sbin/mkdosfs -F 32 -n 'BOOT' $boot 2>&1");
+			my $FATSize = 32;
+			if (($bootloader eq "yaboot") && ($lvm)) {
+				$FATSize = 16;
 			}
+			$status = qxx ("/sbin/mkdosfs -F $FATSize -n 'BOOT' $boot 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
