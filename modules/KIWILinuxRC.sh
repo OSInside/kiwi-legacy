@@ -2320,7 +2320,7 @@ function setupBootLoaderLilo {
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
 				fi
-				echo -n " $console splash=silent" >> $conf
+				echo -n " $console vga=$fbmode splash=silent" >> $conf
 				if [ ! -z "$swap" ];then                     
 					echo -n " resume=$swapByID"               >> $conf
 				fi
@@ -2353,7 +2353,7 @@ function setupBootLoaderLilo {
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
 				fi
-				echo -n " $console splash=silent" >> $conf
+				echo -n " $console vga=$fbmode splash=silent" >> $conf
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"               >> $conf
 				fi
