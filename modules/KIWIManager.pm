@@ -2372,7 +2372,7 @@ sub setupPackageInfo {
 		my $str = "not installed";
 		if (! $chroot) {
 			$kiwi -> info ("Checking for package: $pack");
-			$data = qxx (" rpm -q \"$pack\" 2>&1 ");
+			$data = qxx ("rpm --root $root -q \"$pack\" 2>&1");
 			$code = $? >> 8;
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
