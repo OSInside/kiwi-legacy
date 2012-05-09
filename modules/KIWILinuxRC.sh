@@ -666,7 +666,7 @@ function installBootLoader {
 		x86_64-grub)     installBootLoaderGrub ;;
 		i*86-grub2)      installBootLoaderGrub2 ;;
 		x86_64-grub2)    installBootLoaderGrub2 ;;
-		ppc*)            installBootLoaderLilo ;;
+		ppc*)            installBootLoaderYaboot ;;
 		arm*)            installBootLoaderUBoot ;;
 		i*86-syslinux)   installBootLoaderSyslinux ;;
 		x86_64-syslinux) installBootLoaderSyslinux ;;
@@ -827,12 +827,11 @@ function installBootLoaderGrub2 {
 	fi
 }
 #======================================
-# installBootLoaderLilo
+# installBootLoaderYaboot
 #--------------------------------------
-function installBootLoaderLilo {
+function installBootLoaderYaboot {
 	# /.../
-	# install the lilo according to the contents of
-	# /etc/lilo.conf
+	# install the lilo/yaboot bootloader
 	# ----
 	if [ -x /sbin/lilo ];then
 		Echo "Installing boot loader..."
@@ -1081,7 +1080,7 @@ function setupBootLoader {
 		x86_64-extlinux) eval setupBootLoaderSyslinux $para ;;
 		s390-zipl)       eval setupBootLoaderS390 $para ;;
 		s390x-zipl)      eval setupBootLoaderS390 $para ;;
-		ppc*)            eval setupBootLoaderLilo $para ;;
+		ppc*)            eval setupBootLoaderYaboot $para ;;
 		arm*)            eval setupBootLoaderUBoot $para ;;
 		*)
 		systemException \
@@ -2195,12 +2194,13 @@ function setupBootLoaderGrub2 {
 	return
 }
 #======================================
-# setupBootLoaderLilo
+# setupBootLoaderYaboot
 #--------------------------------------
-function setupBootLoaderLilo {
+function setupBootLoaderYaboot {
 	# /.../
-	# create lilo.conf file used for
-	# installing the bootloader
+	# create lilo.conf file used for installing the bootloader
+	# this file is converted to yaboot.conf therefore lilo.conf
+	# has some restrictions
 	# ----
 	local mountPrefix=$1  # mount path of the image
 	local destsPrefix=$2  # base dir for the config files
