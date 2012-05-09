@@ -1732,10 +1732,8 @@ sub setupBootDisk {
 	# setup boot partition type
 	#------------------------------------------
 	my $partid = 83;
-	if ($bootloader =~ /syslinux/) {
+	if ($bootloader =~ /syslinux|yaboot/) {
 		$partid = "c";
-	} elsif ($bootloader eq "yaboot") {
-		$partid = "41";
 	}
 	#==========================================
 	# add boot space if syslinux based
@@ -3837,8 +3835,6 @@ sub setupBootLoaderConfiguration {
 		if (defined $type{boottimeout}) {
 			$bootTimeout = $type{boottimeout};
 		}
-		my $title_standard;
-		$title_standard = $this -> makeLabel ("$label");
 		#==========================================
 		# Standard boot
 		#------------------------------------------
@@ -3849,83 +3845,59 @@ sub setupBootLoaderConfiguration {
 			return;
 		}
 		#==========================================
-		# CD NON-LVM BOOT
-		#-------------------------------------------
-		if (($type =~ /^KIWI CD/) && (!$lvm)) {
-			print FD "default = $title_standard\n";
-			print FD "image = /boot/linux\n";
-			print FD "\t"."label = $title_standard\n";
-			print FD "\t"."append = \"$cmdline loader=$bloader cdinst=1\"\n";
-			print FD "\t"."initrd = /boot/initrd\n";
-			close FD;
-		} elsif (($type =~ /^KIWI CD/) && ($lvm)) {
-			#==========================================
-			# CD LVM Boot
-			#-------------------------------------------
-			print FD "default = $title_standard\n";
-			print FD "image = /boot/linux\n";
-			print FD "\t"."label = $title_standard\n";
-			print FD "\t"."append = \"$cmdline loader=$bloader cdinst=1\"\n";
-			print FD "\t"."initrd = /boot/initrd\n";
-			close FD;
-		} elsif (!($type =~ /^KIWI CD/) && (!$lvm)) {
-			#==========================================
-			# RAW NON-LVM
-			#------------------------------------------
-			print FD "partition = 2\n";
-			print FD "timeout = $bootTimeout\n";
-			print FD "default = $title_standard\n";
-			print FD "image = /boot/linux.vmx"."\n";
-			print FD "\t"."label = $title_standard\n";
-			print FD "\t"."root = /dev/sda2\n";
-			print FD "\t"."append = \"$cmdline loader=$bloader\"\n";
-			print FD "\t"."initrd = /boot/initrd.vmx\n";
-			close FD;
-		} elsif (!($type =~ /^KIWI CD/) && ($lvm)) {
-			#==========================================
-			# RAW LVM
-			#-------------------------------------------
-			print FD "default = $title_standard\n";
-			print FD "image = linux.vmx"."\n";
-			print FD "\t"."label = $title_standard\n";
-			print FD "\t"."append = \"$cmdline loader=$bloader\"\n";
-			print FD "\t"."initrd = initrd.vmx\n";
-			close FD;
-		}
-		#==========================================
-		# Create bootinfo.txt (CD and LVM setups)
+		# General yaboot setup
 		#------------------------------------------
-		if ($type =~ /^KIWI CD/)  {
-			if (! open (FD,">$tmpdir/bootinfo.txt")) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create bootinfo.txt: $!");
-				$kiwi -> failed ();
-				return;
-			}
-			print FD "<chrp-boot>\n";
-			print FD "<description>$title_standard</description>\n";
-			print FD "<os-name>$title_standard</os-name>\n";
-			print FD "<boot-script>boot &device;:1,\\suseboot\\yaboot.ibm";
-			print FD "</boot-script>\n";
-			print FD "</chrp-boot>\n";
-			close FD;
-			qxx ("mkdir $tmpdir/suseboot");
-			qxx ("cp /lib/lilo/chrp/yaboot.chrp $tmpdir/suseboot/yaboot.ibm");
-			qxx ("cp $tmpdir/etc/yaboot.conf $tmpdir/suseboot/yaboot.cnf");
-		} elsif (!($type =~ /^KIWI CD/) && ($lvm)) {
-			if (! open (FD,">$tmpdir/bootinfo.txt")) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create bootinfo.txt: $!");
-				$kiwi -> failed ();
-				return;
-			}
-			print FD "<chrp-boot>\n";
-			print FD "<description>$title_standard</description>\n";
-			print FD "<os-name>$title_standard</os-name>\n";
-			print FD "<boot-script>boot &device;:1,yaboot</boot-script>\n";
-			print FD "</chrp-boot>\n";
-			close FD;
+		if ($type =~ /^KIWI (CD|USB)/) {
+			$title = $this -> makeLabel ("Install $label");
+		} else {
+			$title = $this -> makeLabel ("$label [ $type ]");
 		}
+		print FD "default = $title\n";
+		print FD "timeout = $bootTimeout\n";
+		#==========================================
+		# Standard boot
+		#------------------------------------------
+		if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
+			if ($type =~ /^KIWI CD/) {
+				print FD "\t"."label = $title\n";
+				print FD "\t"."image  = /boot/linux\n";
+				print FD "\t"."initrd = /boot/initrd\n";
+				print FD "\t"."append = \"$cmdline loader=$bloader cdinst=1\"";
+				print FD "\n";
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+				print FD "\t"."label = $title\n";
+				print FD "\t"."image  = /boot/linux.vmx"."\n";
+				print FD "\t"."initrd = /boot/initrd.vmx\n";
+				print FD "\t"."append = \"$cmdline loader=$bloader\"\n";
+			} else {
+				print FD "\t"."label = $title\n";
+				print FD "\t"."image  = /boot/linux"."\n";
+				print FD "\t"."initrd = /boot/initrd\n";
+				print FD "\t"."append = \"$cmdline loader=$bloader\"\n";
+			}
+		} else {
+			$kiwi -> failed ();
+			$kiwi -> error  ("*** not implemented ***");
+			$kiwi -> failed ();
+			return;
+		}
+		close FD;
+		$kiwi -> done();
+		#==========================================
+		# Create bootinfo.txt
+		#------------------------------------------
+		if (! open (FD,">$tmpdir/boot/bootinfo.txt")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create bootinfo.txt: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		print FD "<chrp-boot>\n";
+		print FD "<description>$title</description>\n";
+		print FD "<os-name>$title</os-name>\n";
+		print FD "<boot-script>boot &device;:1,yaboot</boot-script>\n";
+		print FD "</chrp-boot>\n";
+		close FD;
 		$kiwi -> done ();
 	}
 	#==========================================
@@ -4063,6 +4035,32 @@ sub copyBootCode {
 			$kiwi -> error (
 				"Couldn't move uboot/MLO loaders to final path: $status"
 			);
+			$kiwi -> failed ();
+			return;
+		}
+	}
+	if ($loader eq "yaboot") {
+		$status = qxx ("mv $dest/boot/bootinfo.txt $dest");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Couldn't move bootinfo.txt: $status");
+			$kiwi -> failed ();
+			return;
+		}
+		$status = qxx ("mv $dest/boot/yaboot.cnf $dest");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Couldn't move yaboot config: $status");
+			$kiwi -> failed ();
+			return;
+		}
+		$status = qxx ("mv $dest/boot/yaboot $dest");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Couldn't move yaboot loader: $status");
 			$kiwi -> failed ();
 			return;
 		}
@@ -4517,34 +4515,7 @@ sub installBootLoader {
 	# install yaboot/lilo
 	#------------------------------------------
 	if ($loader eq "yaboot") {
-		#==========================================
-		# Activate devices
-		#------------------------------------------
-		if (! $this -> bindDiskPartitions ($this->{loop})) {
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return;
-		}
-		#==========================================
-		# install yaboot on PReP partition
-		#------------------------------------------
-		if (!$lvm) {
-			my %deviceMap = %{$deviceMap};
-			my $device = $deviceMap{$bootpart+1};
-			if ($lvm) {
-				$device = $deviceMap{0};
-			}
-			$kiwi -> info ("Installing yaboot on device: $device");
-			$status = qxx ("dd if=/lib/lilo/chrp/yaboot.chrp of=$device 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't install yaboot on $device: $status");
-				$kiwi -> failed ();
-				$this -> cleanLoop ();
-				return;
-			}
-		}
+		# presence of yaboot binary in the boot partition is already done
 	}
 	#==========================================
 	# install uboot
