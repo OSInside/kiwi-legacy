@@ -3741,9 +3741,16 @@ function setupNetwork {
 			fi
 		done
 		if [ -z "$PXE_IFACE" ];then
-			systemException \
-				"Failed to setup DHCP network interface !" \
-			"reboot"
+			if [ -e "$root" ];then
+				Echo "Failed to setup DHCP network interface !"
+				Echo "Try fallback to local boot on: $root"
+				LOCAL_BOOT=yes
+				return
+			else
+				systemException \
+					"Failed to setup DHCP network interface !" \
+				"reboot"
+			fi
 		fi
 	fi
 	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
@@ -3753,9 +3760,16 @@ function setupNetwork {
 		sleep 2
 	done
 	if [ ! -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ];then
-		systemException \
-			"Can't find DHCP info file: dhcpcd-$PXE_IFACE.info !" \
-		"reboot"
+		if [ -e "$root" ];then
+			Echo "Can't find DHCP info file: dhcpcd-$PXE_IFACE.info !"
+			Echo "Try fallback to local boot on: $root"
+			LOCAL_BOOT=yes
+			return
+		else
+			systemException \
+				"Can't find DHCP info file: dhcpcd-$PXE_IFACE.info !" \
+			"reboot"
+		fi
 	fi
 	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
 	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
@@ -3766,9 +3780,16 @@ function setupNetwork {
 		sleep 2
 	done
 	if [ -z "$IPADDR" ];then
-		systemException \
-			"Can't assign IP address from dhcp info: dhcpcd-$PXE_IFACE.info !" \
-		"reboot"
+		if [ -e "$root" ];then
+			Echo "Can't assign IP addr via dhcp info: dhcpcd-$PXE_IFACE.info !"
+			Echo "Try fallback to local boot on: $root"
+			LOCAL_BOOT=yes
+			return
+		else
+			systemException \
+				"Can't assign IP addr via dhcp info: dhcpcd-$PXE_IFACE.info !" \
+			"reboot"
+		fi
 	fi
 	if [ -z "$DOMAIN" ] && [ -n "$DNSDOMAIN" ];then
 		export DOMAIN=$DNSDOMAIN
@@ -3844,14 +3865,29 @@ function setupNetworkInterfaceS390 {
 			/sbin/iucv_configure $iucvpeer 1
 			;;
 		*)
-			systemException \
-				"Unknown s390 network type: $instnetdev" "reboot"
+			if [ -e "$root" ];then
+				Echo "Unknown s390 network type: $instnetdev"
+				Echo "Try fallback to local boot on: $root"
+				LOCAL_BOOT=yes
+				return
+			else
+				systemException \
+					"Unknown s390 network type: $instnetdev" \
+				"reboot"
+			fi
 			;;
 	esac
 	if [ ! $? = 0 ];then
-		systemException \
-			"Failed to bring up the network: $instnetdev" \
-		"reboot"
+		if [ -e "$root" ];then
+			Echo "Failed to bring up the network: $instnetdev"
+			Echo "Try fallback to local boot on: $root"
+			LOCAL_BOOT=yes
+			return
+		else
+			systemException \
+				"Failed to bring up the network: $instnetdev" \
+			"reboot"
+		fi
 	fi
 	udevPending
 }
@@ -3916,7 +3952,16 @@ function setupNetworkStatic {
 		fi
 		$ifconfig_cmd up
 		if [ ! $? = 0 ];then
-			systemException "Failed to set up the network: $iface" "reboot"
+			if [ -e "$root" ];then
+				Echo "Failed to set up the network: $iface"
+				Echo "Try fallback to local boot on: $root"
+				LOCAL_BOOT=yes
+				return
+			else
+				systemException \
+					"Failed to set up the network: $iface" \
+				"reboot"
+			fi
 		fi
 		export iface_static=$iface
 	elif [ ! -z $iface_static ];then
