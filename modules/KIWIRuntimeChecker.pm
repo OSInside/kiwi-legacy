@@ -264,6 +264,11 @@ sub __checkRootRecycleCapability {
 	my $cmdL = $this -> {cmdArgs};
 	my $tree = $cmdL -> getRecycleRootDir();
 	my $kiwi = $this -> {kiwi};
+	if (($tree) && (! -d $tree)) {
+		$kiwi -> error ("Specified recycle tree doesn't exist: $tree");
+		$kiwi -> failed();
+		return;
+	}
 	if (($tree) && (-f "$tree/kiwi-root.cache")) {
 		$kiwi -> error ("Can't recycle cache based root tree");
 		$kiwi -> failed();

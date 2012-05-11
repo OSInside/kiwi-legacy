@@ -261,6 +261,17 @@ sub getRecycleRootDir {
 }
 
 #==========================================
+# unsetRecycleRootDir
+#------------------------------------------
+sub unsetRecycleRootDir {
+	# ...
+	# Turn off use of root target directory to be recycled
+	# ---
+	my $this = shift;
+	undef $this -> {recycleRootDir};
+}
+
+#==========================================
 # getReplacementRepo
 #------------------------------------------
 sub getReplacementRepo {
@@ -465,7 +476,9 @@ sub setAdditionalRepos {
 sub setForceNewRoot {
 	my $this = shift;
 	my $fnr  = shift;
-	$this -> {forceNewRoot} = $fnr;
+	if (! $this -> {setRecycleRoot}) {
+		$this -> {forceNewRoot} = $fnr;
+	}
 	return 1;
 }
 
