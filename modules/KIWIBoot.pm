@@ -2538,7 +2538,7 @@ sub setupSplash {
 		$status = "Can't find splash file: $splfile";
 	}
 	#==========================================
-	# check status and return
+	# check status
 	#------------------------------------------
 	if ($status ne "ok") {
 		$kiwi -> skipped ();
@@ -2556,6 +2556,12 @@ sub setupSplash {
 		return $initrd;
 	}
 	$kiwi -> done();
+	#==========================================
+	# build md5 sum for real new splash initrd
+	#------------------------------------------
+	my $newmd5 = $newird;
+	$newmd5 =~ s/gz$/md5/;
+	$this -> buildMD5Sum ($newird,$newmd5);
 	return $newird;
 }
 
