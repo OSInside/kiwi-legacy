@@ -916,6 +916,9 @@ sub setupPackageFiles
 		my $nofallback = 0;
 		my @archs;
 		$count_packs++;
+		if(defined($packOptions->{'version'})) {
+			$packOptions->{'requireVersion'}->{ $packOptions->{'version'} } = 1;
+		}
 		if ( $mode == 2 ) {
 			# use src or nosrc only for this package
 			push @archs, $packOptions->{'arch'};
@@ -1003,7 +1006,9 @@ sub setupPackageFiles
 					     && ! defined( $packOptions->{requireVersion}->
 							   {$packPointer->{version}
 							    . "-"
-								. $packPointer->{release}} ) )
+								. $packPointer->{release}} )
+					     && ! defined( $packOptions->{requireVersion}->
+							   {$packPointer->{version}} ) )
 					{
 						if ($this->{m_debug} >= 4) {
 							my $msg = "	    => package "
@@ -1731,19 +1736,7 @@ sub lookUpAllPackages
 					# needs to be a string or sort breaks later
 					$package->{'priority'} = "$this->{m_repos}->{$r}->{priority}";
 
-					# We can have a package only once per architecture and in
-					# one repo
-					my $repokey = $r."@".$arch;
-					# BUT src, nosrc and debug packages need to be available
-					# in all versions.
-					if ( !$flags{'SOURCERPM'} || $name =~ /-debugsource$/
-					     || $name =~ /-debuginfo$/ )
-					{
-						$repokey .= "@"
-						    . $package->{'version'}
-						. "@"
-						    . $package->{'release'};
-					}
+					my $repokey = $r."@".$arch."@".$package->{'version'}."@".$package->{'release'};
 					if ( $packPool->{$name}->{$repokey} ) {
 						# we have it already from a more important repo.
 						next;

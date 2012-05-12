@@ -600,6 +600,10 @@ div {
 		## Specifies that the package with
 		## the given arch should be used in any case
 		attribute onlyarch { text }
+	k.repopackage.version.attribute =
+		## Specifies that the package with
+		## the given version[-release] should be used
+		attribute version { text }
 	k.repopackage.medium.attribute =
 		## Specifies that the package will be put
 		## to the specific medium number (CD1, DVD7, ...)
@@ -613,6 +617,7 @@ div {
 		k.repopackage.addarch.attribute? &
 		k.repopackage.removearch.attribute? &
 		k.repopackage.onlyarch.attribute? &
+		k.repopackage.version.attribute? &
 		k.repopackage.source.attribute? &
 		k.repopackage.script.attribute? &
 		k.repopackage.medium.attribute?
