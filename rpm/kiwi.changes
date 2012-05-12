@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Sat May 12 21:46:24 CEST 2012 - ms@suse.de
+
+- changed setupNetwork* functions in a way that they check
+  for the presence of the $root device and in case of an
+  error and an existing root device LOCAL_BOOT is set and
+  the system try to proceed with local boot of the installed
+  system (fate #313338)
+- additionally create md5 sum's for the kernel and the optional
+  created splash initrd (fate #313338)
+
+-------------------------------------------------------------------
 Fri May  4 16:06:29 CEST 2012 - ms@suse.de
 
 - netboot: use --metadata=0.9 format for raid setup (bnc #760713)
