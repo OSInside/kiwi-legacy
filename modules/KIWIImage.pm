@@ -3366,7 +3366,7 @@ sub extractLinux {
 		(-f "$imageTree/boot/vmlinux")     ||
 		(-f "$imageTree/boot/vmlinuz")
 	) {
-		$kiwi -> info ("Extracting kernel...");
+		$kiwi -> info ("Extracting kernel\n");
 		#==========================================
 		# setup file names / cleanup...
 		#------------------------------------------
@@ -3387,20 +3387,19 @@ sub extractLinux {
 		qxx ("cp $imageTree/boot/vmlinuz $file");
 		my $code = $? >> 8;
 		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> info   ("Failed to extract kernel: $!");
+			$kiwi -> error  ("Failed to extract kernel: $!");
 			$kiwi -> failed ();
 			return undef;
 		}
 		my $kernel = qxx ("get_kernel_version $file"); chomp $kernel;
 		qxx ("mv -f $file $file.$kernel && ln -s $shortfile.$kernel $file");
+		$this -> buildMD5Sum ("$shortfile.$kernel");
 		# /.../
 		# check for the Xen hypervisor and extract them as well
 		# ----
 		if ((defined $xenc{xen_domain}) && ($xenc{xen_domain} eq "dom0")) {
 			if (! -f "$imageTree/boot/xen.gz") {
-				$kiwi -> failed ();
-				$kiwi -> info   ("Xen dom0 requested but no hypervisor found");
+				$kiwi -> error  ("Xen dom0 requested but no hypervisor found");
 				$kiwi -> failed ();
 				return undef;
 			}
@@ -3411,7 +3410,6 @@ sub extractLinux {
 			qxx ("mv $file $file.$kernel.'gz'");
 		}
 		qxx ("rm -rf $imageTree/boot/*");
-		$kiwi -> done();
 	}
 	return $name;
 }

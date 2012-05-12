@@ -2658,7 +2658,7 @@ sub setupSplash {
 		$status = $this -> setupSplashForGrub ($spldir,$newird);
 	}
 	#==========================================
-	# cleanup
+	# check status
 	#------------------------------------------
 	qxx ("rm -rf $spldir");
 	if ($status ne "ok") {
@@ -2677,6 +2677,12 @@ sub setupSplash {
 		return $initrd;
 	}
 	$kiwi -> done();
+	#==========================================
+	# build md5 sum for real new splash initrd
+	#------------------------------------------
+	my $newmd5 = $newird;
+	$newmd5 =~ s/gz$/md5/;
+	$this -> buildMD5Sum ($newird,$newmd5);
 	return $newird;
 }
 
