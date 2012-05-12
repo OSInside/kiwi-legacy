@@ -1646,6 +1646,9 @@ sub setupBootDisk {
 				my $haveAbsolute;
 				if ($lvmparts{$vol}) {
 					$space = $lvmparts{$vol}->[0];
+					if ($space eq "all") {
+						$space = 0;
+					}
 					$haveAbsolute = $lvmparts{$vol}->[1];
 				}
 				my $lvsize = qxx (

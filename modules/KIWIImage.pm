@@ -212,9 +212,6 @@ sub updateDescription {
 	if ($src_type{cmdline}) {
 		$changeset{"kernelcmdline"} = $src_type{cmdline};
 	}
-	if ($src_type{lvm}) {
-		$changeset{"lvm"} = $src_type{lvm};
-	}
 	if ($src_type{bootloader}) {
 		$changeset{"bootloader"} = $src_type{bootloader};
 	}
@@ -243,7 +240,14 @@ sub updateDescription {
 	$changeset{"displayname"}    = $src_xml->getImageDisplayName();
 	$changeset{"locale"}         = $src_xml->getLocale();
 	$changeset{"boot-theme"}     = $src_xml->getBootTheme();
-	$changeset{"allFreeVolume"}  = $src_xml->getAllFreeVolume();
+	#==========================================
+	# Store LVM volumes
+	#------------------------------------------
+	if ($src_type{lvm}) {
+		my %lvmparts = $src_xml -> getLVMVolumes();
+		$changeset{"lvm"} = $src_type{lvm};
+		$changeset{"lvmparts"} = \%lvmparts;
+	}
 	#==========================================
 	# Store repositories
 	#------------------------------------------

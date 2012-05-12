@@ -2578,12 +2578,27 @@ sub getImageConfig {
 	#==========================================
 	# systemdisk
 	#------------------------------------------
-	my $allFreeVolume = $this -> getAllFreeVolume();
-	if (defined $allFreeVolume) {
-		$allFreeVolume =~ s/^\///;
-		$allFreeVolume =~ s/\//_/g;
-		$allFreeVolume = "LV".$allFreeVolume;
-		$result{kiwi_allFreeVolume} = $allFreeVolume;
+	my %lvmparts = $this -> getLVMVolumes();
+	if (%lvmparts) {
+		foreach my $vol (keys %lvmparts) {
+			if (! $lvmparts{$vol}) {
+				next;
+			}
+			my $attrname = "size";
+			my $attrval  = $lvmparts{$vol}->[0];
+			my $absolute = $lvmparts{$vol}->[1];
+			if (! $absolute) {
+				$attrname = "freespace";
+			}
+			$vol =~ s/^\///;
+			$vol =~ s/\//_/g;
+			$vol = "LV".$vol;
+			if ("$attrval" eq "all") {
+				$result{kiwi_allFreeVolume} = $vol;
+			} else {
+				$result{"kiwi_LVM_$vol"} = $attrname.":".$attrval;
+			}
+		}
 	}
 	#==========================================
 	# oemconfig
@@ -2746,36 +2761,6 @@ sub getLVMGroupName {
 }
 
 #==========================================
-# getAllFreeVolume
-#------------------------------------------
-sub getAllFreeVolume {
-	# ...
-	# search the volume list if there is one volume which
-	# has the freespace="all" attribute set. By default
-	# LVRoot is the volume which gets all free space
-	# assigned
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $allFree = "Root";
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
-	if (! defined $node) {
-		return $allFree;
-	}
-	my @vollist = $node -> getElementsByTagName ("volume");
-	foreach my $volume (@vollist) {
-		my $name = $volume -> getAttribute ("name");
-		my $free = $volume -> getAttribute ("freespace");
-		if ((defined $free) && ($free eq "all")) {
-			$allFree = $name;
-			last;
-		}
-	}
-	return $allFree;
-}
-
-#==========================================
 # getLVMVolumes
 #------------------------------------------
 sub getLVMVolumes {
@@ -2802,7 +2787,7 @@ sub getLVMVolumes {
 		if ($size) {
 			$haveAbsolute = 1;
 			$usedValue = $size;
-		} elsif (($free) && ($free ne "all")) {
+		} elsif ($free) {
 			$usedValue = $free;
 			$haveAbsolute = 0;
 		}
@@ -4905,26 +4890,40 @@ sub __updateDescriptionFromChangeSet {
 		);
 	}
 	#==========================================
-	# 10) merge/update all free volume
+	# 10) merge/update volumes with size info
 	#------------------------------------------
-	if (defined $changeset->{"allFreeVolume"}) {
-		$this -> __addAllFreeVolume ($changeset->{"allFreeVolume"});
+	if (defined $changeset->{"lvmparts"}) {
+		my %lvmparts = %{$changeset->{"lvmparts"}};
+		foreach my $vol (keys %lvmparts) {
+			if (! $lvmparts{$vol}) {
+				next;
+			}
+			my $attrname = "size";
+			my $attrval  = $lvmparts{$vol}->[0];
+			my $absolute = $lvmparts{$vol}->[1];
+			if (! $absolute) {
+				$attrname = "freespace";
+			}
+			$this -> __addVolume ($vol,$attrname,$attrval);
+		}
 	}
 	#==========================================
-	# 11) cleanup reqProfiles
+	# 12) cleanup reqProfiles
 	#------------------------------------------
 	$this->{reqProfiles} = $reqProfiles;
 }
 
 #==========================================
-# __addAllFreeVolume
+# __addVolume
 #------------------------------------------
-sub __addAllFreeVolume {
+sub __addVolume {
 	# ...
 	# Add the given volume to the systemdisk section
 	# ---
 	my $this  = shift;
 	my $volume= shift;
+	my $aname = shift;
+	my $aval  = shift;
 	my $kiwi  = $this->{kiwi};
 	my $tnode = $this->{typeNode};
 	my $disk  = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
@@ -4933,7 +4932,7 @@ sub __addAllFreeVolume {
 	}
 	my $addElement = new XML::LibXML::Element ("volume");
 	$addElement -> setAttribute("name",$volume);
-	$addElement -> setAttribute("freespace","all");
+	$addElement -> setAttribute($aname,$aval);
 	$disk -> appendChild ($addElement);
 	$this -> updateXML();
 	return $this;
