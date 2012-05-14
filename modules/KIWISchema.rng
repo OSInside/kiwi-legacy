@@ -2051,6 +2051,7 @@ or clic and applies to the iso type only</a:documentation>
           <value>qcow2</value>
           <value>vmdk</value>
           <value>vhd</value>
+          <value>vhd-fixed</value>
         </choice>
       </attribute>
     </define>

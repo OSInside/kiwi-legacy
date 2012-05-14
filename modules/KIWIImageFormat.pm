@@ -160,6 +160,9 @@ sub createFormat {
 	} elsif ($format eq "vhd") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createVHD();
+	} elsif ($format eq "vhd-fixed") {
+		$kiwi -> info ("Starting raw => $format conversion\n");
+		return $this -> createVHDSubFormatFixed()
 	} elsif ($format eq "ovf") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createOVF();
@@ -345,6 +348,32 @@ sub createVHD {
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create vhd image: $status");
+		$kiwi -> failed ();
+		return;
+	}
+	$kiwi -> done ();
+	return $target;
+}
+
+#==========================================
+# createVHDSubFormatFixed
+#------------------------------------------
+sub createVHDSubFormatFixed {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $source = $this->{image};
+	my $target = $source;
+	my $convert;
+	my $status;
+	my $result;
+	$kiwi -> info ("Creating vhd-fixed image...");
+	$target  =~ s/\.raw$/\.vhdfixed/;
+	$convert = "convert -f raw -O vpc -o subformat=fixed";
+	$status = qxx ("qemu-img $convert $source $target 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create vhd-fixed image: $status");
 		$kiwi -> failed ();
 		return;
 	}
