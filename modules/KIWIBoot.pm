@@ -4778,8 +4778,7 @@ sub getSector {
 	if ($size < $align) {
 		$size = $align;
 	}
-	$size = int ($size / $align);
-	$size *= $align;
+	$size = (int ($size / $align) * $align) + $align;
 	$sectors = sprintf ("%.0f",$size / $secsz);
 	$sectors-= 1;
 	return $sectors;
