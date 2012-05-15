@@ -830,13 +830,19 @@ sub setupInstallCD {
 	if ($gotsys) {
 		$md5name =~ s/\.raw$/\.md5/;
 		$kiwi -> info ("Compressing installation image...");
+		$result = 0;
 		if ($haveDiskDevice) {
-			$status = qxx ("cat $haveDiskDevice > $system");
+			$status = qxx (
+				"qemu-img convert -f raw -O raw $haveDiskDevice $system"
+			);
+			$result = $? >> 8;
 		}
-		$status = qxx (
-			"mksquashfs $system $md5name $system.squashfs -no-progress 2>&1"
-		);
-		$result = $? >> 8;
+		if ($result == 0) {
+			$status = qxx (
+				"mksquashfs $system $md5name $system.squashfs -no-progress 2>&1"
+			);
+			$result = $? >> 8;
+		}
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to compress system image: $status");
@@ -1211,13 +1217,19 @@ sub setupInstallStick {
 	if ($gotsys) {
 		$md5name =~ s/\.raw$/\.md5/;
 		$kiwi -> info ("Compressing installation image...");
+		$result = 0;
 		if ($haveDiskDevice) {
-			$status = qxx ("cat $haveDiskDevice > $system");
+			$status = qxx (
+				"qemu-img convert -f raw -O raw $haveDiskDevice $system"
+			);
+			$result = $? >> 8;
 		}
-		$status = qxx (
-			"mksquashfs $system $md5name $system.squashfs -no-progress 2>&1"
-		);
-		$result = $? >> 8;
+		if ($result == 0) {
+			$status = qxx (
+				"mksquashfs $system $md5name $system.squashfs -no-progress 2>&1"
+			);
+			$result = $? >> 8;
+		}
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to compress system image: $status");
