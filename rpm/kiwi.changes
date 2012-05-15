@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May 15 09:37:32 CEST 2012 - ms@suse.de
+
+- added support for the vhd subformat=fixed type
+
+-------------------------------------------------------------------
 Sat May 12 21:46:24 CEST 2012 - ms@suse.de
 
 - changed setupNetwork* functions in a way that they check
