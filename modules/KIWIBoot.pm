@@ -268,12 +268,6 @@ sub new {
 			$haveSplit = 1;
 		}
 		#==========================================
-		# Determine size of /boot area
-		#------------------------------------------
-		if (defined $initrd) {
-			$this ->{bootsize} = $this -> __getBootSize ($rootpath);
-		}
-		#==========================================
 		# read and validate XML description
 		#------------------------------------------
 		my $locator = new KIWILocator($kiwi);
@@ -1500,7 +1494,6 @@ sub setupBootDisk {
 	my $haveTree  = $this->{haveTree};
 	my $imgtype   = $this->{imgtype};
 	my $haveSplit = $this->{haveSplit};
-	my $bootsize  = $this->{bootsize};
 	my $diskname  = $system.".raw";
 	my %deviceMap = ();
 	my @commands  = ();
@@ -1691,17 +1684,6 @@ sub setupBootDisk {
 		$partid = "c";
 	}
 	#==========================================
-	# add boot space if syslinux based
-	#------------------------------------------
-	if ($bootloader =~ /(sys|ext)linux/) {
-		my $fatstorage = $cmdL->getFatStorage();
-		if (defined $fatstorage) {
-			if ($bootsize < $fatstorage) {
-				$bootsize = $fatstorage;
-			}
-		}
-	}
-	#==========================================
 	# build disk name and label from xml data
 	#------------------------------------------
 	$destdir  = dirname ($initrd);
@@ -1774,12 +1756,6 @@ sub setupBootDisk {
 		return;
 	}
 	#==========================================
-	# Update raw disk size if boot part is used
-	#------------------------------------------
-	if ((! $this->{sizeSetByUser}) && ($needBootP) && ($imgtype ne "split")) {
-		$this -> __updateDiskSize ($bootsize);
-	}
-	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
 	if (! $this -> setupBootLoaderStages ($bootloader)) {
@@ -1794,6 +1770,33 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (! $this -> setupBootLoaderConfiguration ($bootloader,$bootfix,$extra)) {
 		return;
+	}
+	#==========================================
+	# Setup boot partition space
+	#------------------------------------------
+	if ($needBootP) {
+		$this ->{bootsize} = $this -> __getBootSize ($tmpdir);
+	}
+	#==========================================
+	# add boot space if syslinux based
+	#------------------------------------------
+	if ($bootloader =~ /(sys|ext)linux/) {
+		my $fatstorage = $cmdL->getFatStorage();
+		if (defined $fatstorage) {
+			if ($this->{bootsize} < $fatstorage) {
+				$kiwi -> info ("Fat Storage option set:\n");
+				$kiwi -> info (
+					"Set Fat boot partition space to: ".$fatstorage."M\n"
+				);
+				$this->{bootsize} = $fatstorage;
+			}
+		}
+	}
+	#==========================================
+	# Update raw disk size if boot part is used
+	#------------------------------------------
+	if ((! $this->{sizeSetByUser}) && ($needBootP) && ($imgtype ne "split")) {
+		$this -> __updateDiskSize ($this->{bootsize});
 	}
 	#==========================================
 	# create/use disk
@@ -1850,7 +1853,7 @@ sub setupBootDisk {
 			if ($needParts == 3) {
 				# xda1 boot | xda2 root-ro | xda3 root-rw
 				@commands = (
-					"n","p","1",".","+".$bootsize."M",
+					"n","p","1",".","+".$this->{bootsize}."M",
 					"n","p","2",".","+".$syszip."M",
 					"n","p","3",".",".",
 					"t","1",$partid,
@@ -1859,7 +1862,7 @@ sub setupBootDisk {
 			} elsif ($needParts == 2) {
 				# xda1 boot | xda2 root-rw
 				@commands = (
-					"n","p","1",".","+".$bootsize."M",
+					"n","p","1",".","+".$this->{bootsize}."M",
 					"n","p","2",".",".",
 					"t","1",$partid,
 					"a","1","w","q"
@@ -1873,8 +1876,8 @@ sub setupBootDisk {
 			}
 		} else {
 			# xda1 boot | xda2 lvm
-			my $lvmsize = $this->{vmmbyte} - $bootsize;
-			my $bootpartsize = "+".$bootsize."M";
+			my $lvmsize = $this->{vmmbyte} - $this->{bootsize};
+			my $bootpartsize = "+".$this->{bootsize}."M";
 			@commands = (
 				"n","p","1",".",$bootpartsize,
 				"n","p","2",".",".",
@@ -5523,17 +5526,24 @@ sub __getBootSize {
 	my $this   = shift;
 	my $extend = shift;
 	my $kiwi   = $this->{kiwi};
+	my $xml    = $this->{xml};
 	my $boot   = $extend."/boot";
 	my $arch   = qxx ("uname -m"); chomp $arch;
 	my $bbytes = qxx ("du -s --block-size=1 $boot | cut -f1"); chomp $bbytes;
-	# 3 times the size should be enough for kernel updates
-	my $gotMB  = sprintf ("%.0f",(($bbytes / 1048576) * 3));
+	my $needMB = sprintf ("%.0f",($bbytes / 1048576) + 15);
+	my %type   = %{$xml->getImageTypeAndAttributes()};
 	my $minMB  = 150;
-	if ($gotMB < $minMB) {
-		$gotMB = $minMB;
+	if (defined $type{bootpartsize}) {
+		$minMB = $type{bootpartsize};
 	}
-	$kiwi -> loginfo ("Set boot space to: ".$gotMB."M\n");
-	return $gotMB;
+	if ($needMB < $minMB) {
+		$needMB = $minMB;
+	} else {
+		$kiwi -> loginfo ("Specified boot space of $minMB MB is too small\n");
+		$kiwi -> loginfo ("Using calculated value of $needMB MB\n");
+	}
+	$kiwi -> info ("Set boot partition space to: ".$needMB."M\n");
+	return $needMB;
 }
 
 #==========================================

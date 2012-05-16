@@ -5379,6 +5379,8 @@ sub __populateTypeInfo {
 				-> getAttribute("compressed");
 			$record{boot}          = $node
 				-> getAttribute("boot");
+			$record{bootpartsize}  = $node
+				-> getAttribute("bootpartsize");
 			$record{volid}         = $node
 				-> getAttribute("volid");
 			$record{flags}         = $node

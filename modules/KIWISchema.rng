@@ -1941,6 +1941,14 @@ the correct timezone and copy it to /etc/localtime.</db:para>
 to /usr/share/kiwi/image</a:documentation>
       </attribute>
     </define>
+    <define name="k.type.bootpartsize.attribute">
+      <attribute name="bootpartsize">
+        <a:documentation>For images with a separate boot partition this attribute
+specifies the size in MB. If not set the min bootpart
+size is set to 150 MB</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
     <define name="k.type.editbootconfig.attribute">
       <attribute name="editbootconfig">
         <a:documentation>Specifies the path to a script which is called right
@@ -2205,6 +2213,9 @@ into the master block. There is space for 32 characters.</a:documentation>
       <interleave>
         <optional>
           <ref name="k.type.boot.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.bootpartsize.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.editbootconfig.attribute"/>

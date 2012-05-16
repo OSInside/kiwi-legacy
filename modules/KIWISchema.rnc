@@ -1459,6 +1459,11 @@ div {
 		## Specifies the path of the boot image (initrd), relative
 		## to /usr/share/kiwi/image
 		attribute boot { text }
+	k.type.bootpartsize.attribute =
+		## For images with a separate boot partition this attribute
+		## specifies the size in MB. If not set the min bootpart
+		## size is set to 150 MB
+		attribute bootpartsize { xsd:nonNegativeInteger }
 	k.type.editbootconfig.attribute =
 		## Specifies the path to a script which is called right
 		## before the bootloader is installed. The script runs
@@ -1598,6 +1603,7 @@ div {
 		attribute volid { text }
 	k.type.attlist =
 		k.type.boot.attribute? &
+		k.type.bootpartsize.attribute? &
 		k.type.editbootconfig.attribute? &
 		k.type.bootkernel.attribute? &
 		k.type.bootloader.attribute? &
