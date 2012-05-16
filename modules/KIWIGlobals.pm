@@ -290,76 +290,104 @@ sub getMountDevice {
 }
 
 #==========================================
+# isDisk
+#------------------------------------------
+sub isDisk {
+	my $this = shift;
+	if ($this->{isdisk}) {
+		return $this->{isdisk};
+	} else {
+		return 0;
+	}
+}
+
+#==========================================
 # mount
 #------------------------------------------
 sub mount {
 	# /.../
-	# implements a generic mount function for all supported
-	# file system types
+	# implements a generic mount function for all
+	# supported file system/image types
 	# ---
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $source = shift;
 	my $dest   = shift;
 	my $salt   = int (rand(20));
-	my %fsattr = $this -> checkFileSystem ($source);
-	my $type   = $fsattr{type};
 	my $cipher = $this->{data}->{LuksCipher};
 	my @UmountStack = @{$this->{UmountStack}};
 	my $status;
 	my $result;
 	#==========================================
-	# Check result of filesystem detection
+	# Check for DISK file / device
 	#------------------------------------------
-	if (! %fsattr) {
-		$kiwi -> error  ("Couldn't detect filesystem on: $source");
-		$kiwi -> failed ();
-		return;
-	}
-	#==========================================
-	# Check for DISK file
-	#------------------------------------------
-	if (-f $source) {
+	if ((-f $source) || (-b $source)) {
 		my $boot = "'boot sector'";
-		my $null = "/dev/null";
 		$status= qxx (
-			"dd if=$source bs=512 count=1 2>$null|file - | grep -q $boot"
+			"dd if=$source bs=512 count=1 2>/dev/null | file - | grep -q $boot"
 		);
 		$result= $? >> 8;
-		if ($result == 0) {			
-			$status = qxx ("/sbin/losetup -f --show $source 2>&1");
-			chomp $status;
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> error  (
-					"Couldn't loop bind disk file: $status"
-				);
-				$kiwi -> failed ();
-				$this -> umount();
-				return;
+		if ($result == 0) {
+			$this->{isdisk} = 1;
+			if (-b $source) {
+				my $devcopy = $source;
+				my $lastc = chop $devcopy;
+				if ($lastc =~ /\d/) {
+					$source .= "p";
+				}
+				if (! -b $source."2") {
+					$source .= "1";
+				} else {
+					$source .= "2";
+				}
+			} else {
+				$status = qxx ("/sbin/losetup -f --show $source 2>&1");
+				chomp $status;
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error  (
+						"Couldn't loop bind disk file: $status"
+					);
+					$kiwi -> failed ();
+					$this -> umount();
+					return;
+				}
+				my $loop = $status;
+				push @UmountStack,"losetup -d $loop";
+				$this->{UmountStack} = \@UmountStack;
+				$status = qxx ("kpartx -a $loop 2>&1");
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error (
+						"Couldn't loop bind disk partition(s): $status"
+					);
+					$kiwi -> failed (); umount();
+					return;
+				}
+				push @UmountStack,"kpartx -d $loop";
+				$this->{UmountStack} = \@UmountStack;
+				$loop =~ s/\/dev\///;
+				$source = "/dev/mapper/".$loop."p2";
+				if (! -b $source) {
+					$source = "/dev/mapper/".$loop."p1";
+				}
 			}
-			my $loop = $status;
-			push @UmountStack,"losetup -d $loop";
-			$this->{UmountStack} = \@UmountStack;
-			$status = qxx ("kpartx -a $loop 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> error (
-					"Couldn't loop bind disk partition(s): $status"
-				);
-				$kiwi -> failed (); umount();
-				return;
-			}
-			push @UmountStack,"kpartx -d $loop";
-			$this->{UmountStack} = \@UmountStack;
-			$loop =~ s/\/dev\///;
-			$source = "/dev/mapper/".$loop."p1";
 			if (! -b $source) {
 				$kiwi -> error ("No such block device $source");
 				$kiwi -> failed (); umount();
 				return;
 			}
 		}
+	}
+	#==========================================
+	# Check source filesystem
+	#------------------------------------------
+	my %fsattr = $this -> checkFileSystem ($source);
+	my $type   = $fsattr{type};
+	if (! %fsattr) {
+		$kiwi -> error  ("Couldn't detect filesystem on: $source");
+		$kiwi -> failed ();
+		return;
 	}
 	#==========================================
 	# Check for LUKS extension

@@ -229,158 +229,81 @@ sub new {
 	$this->{haveTree} = $haveTree;
 	$this->{kiwi}     = $kiwi;
 	$this->{bootsize} = 100;
+	$this->{isDisk}   = 0;
 
 	#==========================================
 	# setup pointer to XML configuration
 	#------------------------------------------
 	if (defined $system) {
-		if (-d $system) {
-			my $locator = new KIWILocator($kiwi);
-			my $controlFile = $locator -> getControlFile ($system."/image");
-			my $validator = new KIWIXMLValidator (
-				$kiwi,$controlFile,
-				$this->{gdata}->{Revision},
-				$this->{gdata}->{Schema},
-				$this->{gdata}->{SchemaCVT}
-			);
-			my $isValid = $validator ? $validator -> validate() : undef;
-			if (! $isValid) {
+		my $rootpath = $system;
+		if (! -d $system) {
+			#==========================================
+			# mount system image
+			#------------------------------------------
+			if (! $main::global -> mount ($system,$tmpdir)) {
 				return;
 			}
-			$xml = new KIWIXML (
-				$kiwi,$system."/image",$cmdL->getBuildType(),$profile,$cmdL
-			);
+			my $sdev = $main::global -> getMountDevice();
 			#==========================================
-			# Determine size of /boot area
+			# check for activated volume group
 			#------------------------------------------
-			if (defined $initrd) {
-				$this ->{bootsize} = $this -> __getBootSize ($system);
+			$sdev = $this -> checkLVMbind ($sdev);
+			#==========================================
+			# check for read-only root
+			#------------------------------------------
+			my %fsattr = $main::global -> checkFileSystem ($sdev);
+			if ($fsattr{readonly}) {
+				$syszip = $main::global -> isize ($system);
 			}
-		} else {
-			my %fsattr = $main::global -> checkFileSystem ($system);
-			if ((! $fsattr{type}) || ($fsattr{type} eq "auto")) {
-				#==========================================
-				# bind $system to loop device
-				#------------------------------------------
-				$kiwi -> info ("Binding disk to loop device");
-				if (! $this -> bindDiskDevice($system)) {
-					$kiwi -> failed ();
-					return;
-				}
-				$kiwi -> done();
-				#==========================================
-				# setup device mapper
-				#------------------------------------------
-				$kiwi -> info ("Setup device mapper for partition access");
-				if (! $this -> bindDiskPartitions ($this->{loop})) {
-					$kiwi -> failed ();
-					$this -> cleanLoop ();
-					return;
-				}
-				$kiwi -> done();
-				#==========================================
-				# find root partition and mount it
-				#------------------------------------------
-				my $sdev = $this->{bindloop}."2";
-				if (! -e $sdev) {
-					$sdev = $this->{bindloop}."1";
-				}
-				#==========================================
-				# check for activated volume group
-				#------------------------------------------
-				$sdev = $this -> checkLVMbind ($sdev);
-				#==========================================
-				# perform mount call
-				#------------------------------------------
-				if (! $main::global -> mount($sdev, $tmpdir)) {
-					$kiwi -> error ("System image mount failed: $status");
-					$kiwi -> failed ();
-					$this -> cleanLoop ();
-					return;
-				}
-				#==========================================
-				# read disk image XML description
-				#------------------------------------------
-				my $locator = new KIWILocator($kiwi);
-				my $controlFile = $locator -> getControlFile ($tmpdir."/image");
-				my $validator = new KIWIXMLValidator (
-					$kiwi,$controlFile,
-					$this->{gdata}->{Revision},
-					$this->{gdata}->{Schema},
-					$this->{gdata}->{SchemaCVT}
-				);
-				my $isValid = $validator ? $validator -> validate() : undef;
-				if (! $isValid) {
-					$this -> cleanLoop ();
-					return;
-				}
-				$xml = new KIWIXML (
-					$kiwi,$tmpdir."/image",$cmdL->getBuildType(),$profile,$cmdL
-				);
-				#==========================================
-				# Determine size of /boot area
-				#------------------------------------------
-				if (defined $initrd) {
-					$this ->{bootsize} = $this -> __getBootSize ($tmpdir);
-				}
-				#==========================================
-				# clean up
-				#------------------------------------------
-				$this -> cleanLoop ();
-			} else {
-				#==========================================
-				# loop mount system image
-				#------------------------------------------
-				if (! $main::global -> mount ($system,$tmpdir)) {
-					return;
-				}
-				#==========================================
-				# check for read-only root
-				#------------------------------------------
-				%fsattr = $main::global -> checkFileSystem (
-					$main::global -> getMountDevice()
-				);
-				if ($fsattr{readonly}) {
-					$syszip = $main::global -> isize ($system);
-				}
-				#==========================================
-				# check for split type
-				#------------------------------------------
-				if (-f "$tmpdir/rootfs.tar") {
-					$cmdL -> setBuildType ("split");
-					$haveSplit = 1;
-				}
-				#==========================================
-				# read disk image XML description
-				#------------------------------------------
-				my $locator = new KIWILocator($kiwi);
-				my $controlFile = $locator -> getControlFile ($tmpdir."/image");
-				my $validator = new KIWIXMLValidator (
-					$kiwi,$controlFile,
-					$this->{gdata}->{Revision},
-					$this->{gdata}->{Schema},
-					$this->{gdata}->{SchemaCVT}
-				);
-				my $isValid = $validator ? $validator -> validate() : undef;
-				if (! $isValid) {
-					$main::global -> umount();
-					return;
-				}
-				$xml = new KIWIXML (
-					$kiwi,$tmpdir."/image",$cmdL->getBuildType(),$profile,$cmdL
-				);
-				#==========================================
-				# Determine size of /boot area
-				#------------------------------------------
-				if (defined $initrd) {
-					$this ->{bootsize} = $this -> __getBootSize ($tmpdir);
-				}
-				#==========================================
-				# clean up
-				#------------------------------------------
+			#==========================================
+			# set root path to mountpoint
+			#------------------------------------------
+			$rootpath = $tmpdir;
+		}
+		#==========================================
+		# check for split type
+		#------------------------------------------
+		if (-f "$rootpath/rootfs.tar") {
+			$cmdL -> setBuildType ("split");
+			$haveSplit = 1;
+		}
+		#==========================================
+		# Determine size of /boot area
+		#------------------------------------------
+		if (defined $initrd) {
+			$this ->{bootsize} = $this -> __getBootSize ($rootpath);
+		}
+		#==========================================
+		# read and validate XML description
+		#------------------------------------------
+		my $locator = new KIWILocator($kiwi);
+		my $controlFile = $locator -> getControlFile ($rootpath."/image");
+		my $validator = new KIWIXMLValidator (
+			$kiwi,$controlFile,
+			$this->{gdata}->{Revision},
+			$this->{gdata}->{Schema},
+			$this->{gdata}->{SchemaCVT}
+		);
+		my $isValid = $validator ? $validator -> validate() : undef;
+		if (! $isValid) {
+			if (! -d $system) {
 				$main::global -> umount();
 			}
+			return;
 		}
+		$xml = new KIWIXML (
+			$kiwi,$rootpath."/image",$cmdL->getBuildType(),$profile,$cmdL
+		);
+		#==========================================
+		# clean up
+		#------------------------------------------
+		if (! -d $system) {
+			$this->{isDisk} = $main::global -> isDisk();
+			$main::global -> umount();
+		}
+		#==========================================
+		# check if we got the XML description
+		#------------------------------------------
 		if (! defined $xml) {
 			return;
 		}
@@ -832,6 +755,11 @@ sub setupInstallCD {
 		$kiwi -> info ("Compressing installation image...");
 		$result = 0;
 		if ($haveDiskDevice) {
+			# /.../
+			# Unfortunately mksquashfs can not use a block device as
+			# input file so we have to create a file from the device
+			# first and pass that to mksquashfs
+			# ----
 			$status = qxx (
 				"qemu-img convert -f raw -O raw $haveDiskDevice $system"
 			);
@@ -1603,6 +1531,18 @@ sub setupBootDisk {
 	my $destdir;
 	my %lvmparts;
 	#==========================================
+	# check if we can operate on this root
+	#------------------------------------------
+	if ($this->{isDisk}) {
+		$kiwi -> error ("System is specified as raw disk device");
+		$kiwi -> failed();
+		$kiwi -> error (
+			"Required is either a root: directory, fsimage, or partition"
+		);
+		$kiwi -> failed();
+		return;
+	}
+	#==========================================
 	# check if we got a real device
 	#------------------------------------------
 	if ($device) {
@@ -1893,6 +1833,7 @@ sub setupBootDisk {
 			# standard build process and is therefore called without any
 			# return value check. 
 			qxx ("qemu-img create $diskname $this->{vmsize} 2>&1");
+			qxx ("rm -f $diskname");
 			# ----
 			$this->{loop} = $haveDiskDevice;
 			if (! -b $this->{loop}) {
@@ -2159,7 +2100,9 @@ sub setupBootDisk {
 					$status = qxx ("mkdir -p $loopdir/$pname 2>&1");
 					$result = $? >> 8;
 					if ($result != 0) {
-						$kiwi -> error ("Can't create mount point $loopdir/$pname");
+						$kiwi -> error (
+							"Can't create mount point $loopdir/$pname"
+						);
 						$this -> cleanLoop ();
 						return;
 					}
@@ -2188,14 +2131,16 @@ sub setupBootDisk {
 			$this -> cleanLoop ();
 			return;
 		}
+		$kiwi -> done();
 		if ($haveDiskDevice) {
 			#==========================================
 			# fill disk device with zero bytes
 			#------------------------------------------
+			$kiwi -> info ("Filling target device with zero bytes...");
 			qxx ("dd if=/dev/zero of=$loopdir/abc 2>&1");
 			qxx ("rm -f $loopdir/abc");
+			$kiwi -> done();
 		}
-		$kiwi -> done();
 		#==========================================
 		# Umount system image partition
 		#------------------------------------------
@@ -2345,20 +2290,24 @@ sub setupBootDisk {
 	# cleanup temp directory
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
-	if ($haveDiskDevice)  {
-		#==========================================
-		# create image file from disk device
-		#------------------------------------------
-		$kiwi -> info ("Dumping image file from $this->{loop}...");
-		$status = qxx ("dd if=$this->{loop} of=$diskname bs=32k 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Image dump failed: $status");
-			$kiwi -> failed ();
-			return;
+	if ($haveDiskDevice) {
+		if (($type{installiso} ne "true") && ($type{installstick} ne "true")) {
+			#==========================================
+			# create image file from disk device
+			#------------------------------------------
+			$kiwi -> info ("Dumping image file from $this->{loop}...");
+			$status = qxx (
+				"qemu-img convert -f raw -O raw $this->{loop} $diskname 2>&1"
+			);
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("Image dump failed: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$kiwi -> done();
 		}
-		$kiwi -> done();
 	}
 	#==========================================
 	# Create image described by given format
