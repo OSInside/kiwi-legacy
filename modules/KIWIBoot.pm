@@ -1980,7 +1980,7 @@ sub setupBootDisk {
 			$this -> deleteVolumeGroup();
 			$this -> cleanLoopMaps();
 			qxx ("/sbin/losetup -d $this->{loop}");
-			$this -> __updateDiskSize (100);
+			$this -> __updateDiskSize (10);
 		} else {
 			#==========================================
 			# looks good go for it
