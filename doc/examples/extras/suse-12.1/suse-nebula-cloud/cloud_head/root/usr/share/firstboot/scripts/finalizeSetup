@@ -84,12 +84,20 @@ os.system('/sbin/SuSEconfig >& /dev/null')
 os.system('/bin/chown oneadmin:cloud /var/lib/one/.one/one_auth')
 
 if not os.path.exists('/var/lock/one'):
-    os.mkdir('/var/lock/one')
+	os.mkdir('/var/lock/one')
 
 os.system('/bin/chown -R oneadmin:cloud /var/lock/one')
 
 # Initial setup of the cloud service
-os.system('/usr/bin/sudo -u oneadmin /usr/bin/env ONE_AUTH=/var/lib/one/.one/one_auth /usr/sbin/onedsetup >& /dev/null')
-
+res = os.system('/usr/bin/sudo -u oneadmin /usr/bin/env ONE_AUTH=/var/lib/one/.one/one_auth /usr/sbin/onedsetup >& /var/log/one/onedsetup.log')
+if res:
+	if os.path.exists('/var/log/one/oned.log'):
+		os.rename('/var/log/one/oned.log','/var/log/one/oned.setup.log')
+	syslog.openlog('[ONED_INIT]', syslog.LOG_PID, syslog.LOG_DAEMON)
+	msg = 'Possible error with initialization of oned, check log files\n'
+	msg += 'in /var/log/one'
+	syslog.syslog(syslog.LOG_INFO, msg)
+	syslog.closelog()
+	
 # Everything needs to catch up
 time.sleep(5)

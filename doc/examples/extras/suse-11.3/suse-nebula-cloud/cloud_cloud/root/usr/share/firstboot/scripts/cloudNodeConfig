@@ -87,9 +87,10 @@ def configureNode(confSettings):
 		msg += 'Incomplete configuration\n'
 		syslog.syslog(syslog.LOG_INFO, msg)
 		return -1
+	groups = 'kvm,root,%s' %gname
 	res = os.system(
 		'/usr/sbin/useradd -c "%s" -d %s -g %s -G %s -u %s -p %s -m %s'
-		%('Cloud admin', '/var/lib/one', gid, 'kvm,root', uid, pwd, uname))
+		%('Cloud admin', '/var/lib/one', gid, groups, uid, pwd, uname))
 	if res:
 		msg = 'Could not add %s user. ' %uname
 		msg += 'Incomplete configuration\n'
