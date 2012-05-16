@@ -1,0 +1,3 @@
+NAME   = "openSUSE test image store"
+DS_MAD = fs
+TM_MAD = shared

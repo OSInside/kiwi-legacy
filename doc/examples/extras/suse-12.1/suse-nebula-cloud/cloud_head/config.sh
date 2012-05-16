@@ -34,8 +34,8 @@ suseSetupProduct
 #======================================
 # Manipulate services files
 #--------------------------------------
-sed -i 's/\[Unit\]/\[Unit\]\nAfter=YaST-Firstboot.service\nRequisite=YaST-Firstboot.service/' /lib/systemd/system/sunstone.service
-sed -i 's/\[Unit\]/\[Unit\]\nAfter=YaST-Firstboot.service\nRequisite=YaST-Firstboot.service/' /lib/systemd/system/one.service
+sed -i 's/\[Unit\]/\[Unit\]\nAfter=YaST2-Firstboot.service\nRequisite=YaST2-Firstboot.service/' /lib/systemd/system/sunstone.service
+sed -i 's/\[Unit\]/\[Unit\]\nAfter=YaST2-Firstboot.service\nRequisite=YaST2-Firstboot.service/' /lib/systemd/system/one.service
 
 #======================================
 # Activate services
