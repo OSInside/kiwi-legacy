@@ -74,11 +74,18 @@ for ln in lines:
 	conf.write(ln)
 conf.close()
 
-# Run the configuration setup
-os.system('/sbin/SuSEconfig >& /dev/null')
-
 # Remove the old network configuration file
 os.remove(interfConf)
+
+# Fix up the IP address in the sunstone configuration file
+ctx = open('/etc/one/sunstone-server.conf', 'r').read()
+os.rename('/etc/one/sunstone-server.conf', '/etc/one/sunstone-server.conf.save')
+fout = open('/etc/one/sunstone-server.conf', 'w')
+fout.write(ctx.replace('127.0.0.1', ipAddr.split("'")[1].split("/")[0]))
+fout.close()
+
+# Run the configuration setup
+os.system('/sbin/SuSEconfig >& /dev/null')
 
 # Insert the cloud information service and start it
 os.system('/sbin/insserv cloudinfo')

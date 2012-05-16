@@ -67,7 +67,7 @@ suseConfig
 # Directory for authentication file must exist such that YaST module can
 # write the file
 mkdir /var/lib/one/.one
-# Set he desired permissions
+# Set the desired permissions
 chown oneadmin:cloud /var/lib/one/.one
 # The permissions for the testcase
 chown -R oneadmin:cloud /home/ctester

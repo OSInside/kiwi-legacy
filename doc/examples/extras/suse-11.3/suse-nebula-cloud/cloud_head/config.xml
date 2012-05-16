@@ -16,7 +16,7 @@
 				<oem-unattended>true</oem-unattended>
 			</oemconfig>
 		</type>
-		<version>1.4.0</version>
+		<version>1.5.0</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
