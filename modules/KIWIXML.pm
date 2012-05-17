@@ -3011,7 +3011,7 @@ sub getXenConfig {
 	# storage setup
 	#------------------------------------------
 	my $disk = $node -> getElementsByTagName ("vmdisk");
-	my ($device);
+	my $device;
 	if ($disk) {
 		my $node  = $disk -> get_node(1);
 		$device= $node -> getAttribute ("device");
