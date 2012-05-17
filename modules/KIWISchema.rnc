@@ -1808,13 +1808,13 @@ div {
 #
 div {
 	k.vmdisk.disktype.attribute =
-		## The type of the disk as it is internally handled by the VM
+		## The type of the disk as it is internally handled by the VM (ovf only)
 		attribute disktype { text }
 	k.vmdisk.controller.attribute =
-		## The disk controller used for the VM guest
+		## The disk controller used for the VM guest (vmdk only)
 		attribute controller { "ide" | "scsi" }
 	k.vmdisk.id.attribute =
-		## The disk ID / device for the VM disk
+		## The disk ID / device for the VM disk (vmdk only)
 		attribute id { xsd:nonNegativeInteger }
 	k.vmdisk.device.attribute =
 		## The disk device to appear in the guest (xen only)
