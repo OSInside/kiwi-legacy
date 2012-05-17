@@ -71,6 +71,34 @@ sub test_getBootTheme {
 }
 
 #==========================================
+# test_getEc2Config
+#------------------------------------------
+sub test_getEc2Config {
+	# ...
+	# Verify proper return of EC2 configuration settings
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'ec2ConfigSettings';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %ec2Info = $xml -> getEc2Config();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	$this -> assert_str_equals('12345678911', $ec2Info{AWSAccountNr});
+	$this -> assert_str_equals('cert.cert', $ec2Info{EC2CertFile});
+	$this -> assert_str_equals('pv-key.key', $ec2Info{EC2PrivateKeyFile});
+	my @expectedRegions = qw / EU-West US-West /;
+	$this -> assert_array_equal(\@expectedRegions, $ec2Info{EC2Regions});
+}
+
+#==========================================
 # test_getImageDefaultDestination
 #------------------------------------------
 sub test_getImageDefaultDestination {
@@ -1238,6 +1266,76 @@ sub test_getSplitTempFiles {
 	$this -> assert_array_equal(\@expectedNames, \@tmpFiles);
 }
 
+#==========================================
+# test_getVMwareConfig
+#------------------------------------------
+sub test_getVMwareConfig {
+	# ...
+	# Verify proper return of VMWare configuration data
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'vmwareConfigSettings';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %vmConfig = $xml -> getVMwareConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	$this -> assert_str_equals('x86_64', $vmConfig{vmware_arch});
+	$this -> assert_str_equals('2', $vmConfig{vmware_cdid});
+	$this -> assert_str_equals('ide', $vmConfig{vmware_cdtype});
+	my @expectedOpts = qw / ola pablo /;
+	$this -> assert_array_equal(\@expectedOpts, $vmConfig{vmware_config});
+	$this -> assert_str_equals('1', $vmConfig{vmware_diskid});
+	$this -> assert_str_equals('scsi', $vmConfig{vmware_disktype});
+	$this -> assert_str_equals('sles-64', $vmConfig{vmware_guest});
+	$this -> assert_str_equals('7', $vmConfig{vmware_hwver});
+	$this -> assert_str_equals('1024', $vmConfig{vmware_memory});
+	$this -> assert_str_equals('2', $vmConfig{vmware_ncpus});
+	my $nicConfig = $vmConfig{vmware_nic};
+	my %nicSetup = %$nicConfig;
+	my $nicInfo = $nicSetup{eth0};
+	$this -> assert_not_null($nicInfo);
+	my %nicDetails = %$nicInfo;
+	$this -> assert_str_equals('e1000', $nicDetails{drv});
+	$this -> assert_str_equals('dhcp', $nicDetails{mode});
+}
+
+#==========================================
+# test_getXenConfig
+#------------------------------------------
+sub test_getXenConfig {
+	# ...
+	# Verify proper return of Xen  configuration data
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'xenConfigSettings';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %vmConfig = $xml -> getXenConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my @expectedOpts = qw / foo bar /;
+	$this -> assert_array_equal(\@expectedOpts, $vmConfig{xen_config});
+	$this -> assert_str_equals('/dev/xvda', $vmConfig{xen_diskdevice});
+	$this -> assert_str_equals('domU', $vmConfig{xen_domain});
+	$this -> assert_str_equals('128', $vmConfig{xen_memory});
+	$this -> assert_str_equals('3', $vmConfig{xen_ncpus});
+	$this -> assert_str_equals('00:0C:6E:AA:57:2F',$vmConfig{xen_bridge}{br0});
+}
 
 #==========================================
 # test_packageManagerInfoHasConfigValue
