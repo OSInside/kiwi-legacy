@@ -1808,13 +1808,13 @@ div {
 #
 div {
 	k.vmdisk.disktype.attribute =
-		## The type of the disk as it is internally handled by the VM
+		## The type of the disk as it is internally handled by the VM (ovf only)
 		attribute disktype { text }
 	k.vmdisk.controller.attribute =
-		## The disk controller used for the VM guest
+		## The disk controller used for the VM guest (vmdk only)
 		attribute controller { "ide" | "scsi" }
 	k.vmdisk.id.attribute =
-		## The disk ID / device for the VM disk
+		## The disk ID / device for the VM disk (vmdk only)
 		attribute id { xsd:nonNegativeInteger }
 	k.vmdisk.device.attribute =
 		## The disk device to appear in the guest (xen only)
@@ -2378,40 +2378,40 @@ div {
 		## The OVF configuration type
 		attribute ovftype { "zvm" | "povervm" | "xen" | "vmware" }
 	k.machine.HWversion.attribute =
-		## The virtual HW version number for the VM configuration
+		## The virtual HW version number for the VM configuration (vmdk only)
 		attribute HWversion { xsd:integer }
 	k.machine.arch.attribute =
-		## the VM architecture type
+		## the VM architecture type (vmdk only)
 		attribute arch { "ix86" | "x86_64" | "%arch" }
 	k.machine.domain.attribute =
 		## The domain setup for the VM (xen only)
 		attribute domain { "dom0" | "domU" }
 	k.machine.guestOS.attribute =
-		## the virtual guestOS identification string for the VM
+		## The virtual guestOS identification string for the VM (vmdk only)
 		attribute guestOS { text }
 	k.machine.min_memory.attribute =
-		## The virtual machine min memory
+		## The virtual machine min memory in MB (ovf only)
 		attribute min_memory { xsd:nonNegativeInteger }
 	k.machine.des_memory.attribute =
-		## The virtual machine desired memory
+		## The virtual machine desired memory in MB (ovf only)
 		attribute des_memory { xsd:nonNegativeInteger }
 	k.machine.max_memory.attribute =
-		## The virtual machine max memory
+		## The virtual machine max memory in MB (ovf only)
 		attribute max_memory { xsd:nonNegativeInteger }
 	k.machine.min_cpu.attribute =
-		## The virtual machine min CPU count
+		## The virtual machine min CPU count (ovf only)
 		attribute min_cpu { xsd:nonNegativeInteger }
 	k.machine.des_cpu.attribute =
-		## The virtual machine desired CPU count
+		## The virtual machine desired CPU count (ovf only)
 		attribute des_cpu { xsd:nonNegativeInteger }
 	k.machine.max_cpu.attribute =
-		## The virtual machine max CPU count
+		## The virtual machine max CPU count (ovf only)
 		attribute max_cpu { xsd:nonNegativeInteger }
 	k.machine.memory.attribute =
-		## The memory setup for the guest VM. Specify memory in MB
+		## The memory, in MB, setup for the guest VM (all formats)
 		attribute memory { xsd:nonNegativeInteger }
     k.machine.ncpus.attribute =
-        ## The number of virtual cpus for the guest VM
+        ## The number of virtual cpus for the guest VM (all formats)
         attribute ncpus { xsd:nonNegativeInteger }
 	k.machine.attlist =
 		k.machine.min_memory.attribute? &

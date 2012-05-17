@@ -3412,13 +3412,13 @@ and setup the system disk</db:para>
     </define>
     <define name="k.machine.HWversion.attribute">
       <attribute name="HWversion">
-        <a:documentation>The virtual HW version number for the VM configuration</a:documentation>
+        <a:documentation>The virtual HW version number for the VM configuration (vmdk only)</a:documentation>
         <data type="integer"/>
       </attribute>
     </define>
     <define name="k.machine.arch.attribute">
       <attribute name="arch">
-        <a:documentation>the VM architecture type</a:documentation>
+        <a:documentation>the VM architecture type (vmdk only)</a:documentation>
         <choice>
           <value>ix86</value>
           <value>x86_64</value>
@@ -3437,54 +3437,54 @@ and setup the system disk</db:para>
     </define>
     <define name="k.machine.guestOS.attribute">
       <attribute name="guestOS">
-        <a:documentation>the virtual guestOS identification string for the VM</a:documentation>
+        <a:documentation>The virtual guestOS identification string for the VM (vmdk only)</a:documentation>
       </attribute>
     </define>
     <define name="k.machine.min_memory.attribute">
       <attribute name="min_memory">
-        <a:documentation>The virtual machine min memory</a:documentation>
+        <a:documentation>The virtual machine min memory in MB (ovf only)</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
     <define name="k.machine.des_memory.attribute">
       <attribute name="des_memory">
-        <a:documentation>The virtual machine desired memory</a:documentation>
+        <a:documentation>The virtual machine desired memory in MB (ovf only)</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
     <define name="k.machine.max_memory.attribute">
       <attribute name="max_memory">
-        <a:documentation>The virtual machine max memory</a:documentation>
+        <a:documentation>The virtual machine max memory in MB (ovf only)</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
     <define name="k.machine.min_cpu.attribute">
       <attribute name="min_cpu">
-        <a:documentation>The virtual machine min CPU count</a:documentation>
+        <a:documentation>The virtual machine min CPU count (ovf only)</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
     <define name="k.machine.des_cpu.attribute">
       <attribute name="des_cpu">
-        <a:documentation>The virtual machine desired CPU count</a:documentation>
+        <a:documentation>The virtual machine desired CPU count (ovf only)</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
     <define name="k.machine.max_cpu.attribute">
       <attribute name="max_cpu">
-        <a:documentation>The virtual machine max CPU count</a:documentation>
+        <a:documentation>The virtual machine max CPU count (ovf only)</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
     <define name="k.machine.memory.attribute">
       <attribute name="memory">
-        <a:documentation>The memory setup for the guest VM. Specify memory in MB</a:documentation>
+        <a:documentation>The memory, in MB, setup for the guest VM (all formats)</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
     <define name="k.machine.ncpus.attribute">
       <attribute name="ncpus">
-        <a:documentation>The number of virtual cpus for the guest VM</a:documentation>
+        <a:documentation>The number of virtual cpus for the guest VM (all formats)</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>

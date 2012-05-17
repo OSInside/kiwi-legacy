@@ -15,7 +15,7 @@
 		<keytable>us.map.gz</keytable>
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.1" bootprofile="xen" bootkernel="xenk">
 			<machine memory="128" domain="domU">
-				<vmdisk controller="ide" id="0" device="/dev/xvda"/>
+				<vmdisk device="/dev/xvda"/>
 				<vmnic interface="br0" mac="00:0C:6E:AA:57:2F"/>
 			</machine>
 		</type>
