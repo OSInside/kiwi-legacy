@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri May 18 15:36:31 CEST 2012 - ms@suse.de
+
+- fix updateMTAB() to create a /etc/mtab symlink if /proc/self/mounts
+  exists. Otherwise leave /etc/mtab untouched (bnc #755915)
+
+-------------------------------------------------------------------
 Tue May 15 09:37:32 CEST 2012 - ms@suse.de
 
 - added support for the vhd subformat=fixed type
