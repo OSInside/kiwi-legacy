@@ -2568,12 +2568,12 @@ compressed filesystem.</db:para>
   <div>
     <define name="k.vmdisk.disktype.attribute">
       <attribute name="disktype">
-        <a:documentation>The type of the disk as it is internally handled by the VM</a:documentation>
+        <a:documentation>The type of the disk as it is internally handled by the VM (ovf only)</a:documentation>
       </attribute>
     </define>
     <define name="k.vmdisk.controller.attribute">
       <attribute name="controller">
-        <a:documentation>The disk controller used for the VM guest</a:documentation>
+        <a:documentation>The disk controller used for the VM guest (vmdk only)</a:documentation>
         <choice>
           <value>ide</value>
           <value>scsi</value>
@@ -2582,7 +2582,7 @@ compressed filesystem.</db:para>
     </define>
     <define name="k.vmdisk.id.attribute">
       <attribute name="id">
-        <a:documentation>The disk ID / device for the VM disk</a:documentation>
+        <a:documentation>The disk ID / device for the VM disk (vmdk only)</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
