@@ -1,5 +1,0 @@
-TMPDIR=/var/tmp/one
-if ! [ -d $TMPDIR]; then
-  mkdir -p -m 777 $TMPDIR
-  chown oneadmin:cloud $TMPDIR
-fi
