@@ -396,12 +396,15 @@ function OEMRepartLVM {
 			swapParam=yes
 		fi
 		#======================================
-		# Extend all free volume...
+		# Extend root + optional allFreeVolume
 		#--------------------------------------
 		if [ -z "$OEM_SYSTEMSIZE" ];then
 			lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
 		else
-			lvextend --size $OEM_SYSTEMSIZE"M" /dev/$VGROUP/$allFreeVolume
+			lvextend --size $OEM_SYSTEMSIZE"M" /dev/$VGROUP/LVRoot
+			if [ "$allFreeVolume" != "LVRoot" ];then
+				lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
+			fi
 		fi
 		#======================================
 		# setup new device names
