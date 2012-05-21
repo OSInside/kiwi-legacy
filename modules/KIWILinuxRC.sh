@@ -2481,7 +2481,7 @@ function updateRootDeviceFstab {
 				[ ! $volume = "Comp" ] && \
 				[ ! $volume = "Swap" ]
 			then
-				echo "/dev/$VGROUP/LV$volume /$mpoint $FSTYPE defaults 1 1" \
+				echo "/dev/$VGROUP/LV$volume /$mpoint $FSTYPE defaults 1 2" \
 				>> $nfstab
 			fi
 		done
