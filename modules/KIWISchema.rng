@@ -2596,8 +2596,12 @@ compressed filesystem.</db:para>
         <optional>
           <ref name="k.vmdisk.disktype.attribute"/>
         </optional>
-        <ref name="k.vmdisk.controller.attribute"/>
-        <ref name="k.vmdisk.id.attribute"/>
+        <optional>
+          <ref name="k.vmdisk.controller.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.vmdisk.id.attribute"/>
+        </optional>
         <optional>
           <ref name="k.vmdisk.device.attribute"/>
         </optional>

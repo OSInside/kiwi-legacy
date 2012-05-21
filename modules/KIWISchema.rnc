@@ -1821,8 +1821,8 @@ div {
 		attribute device { text }
 	k.vmdisk.attlist =
 		k.vmdisk.disktype.attribute? &
-		k.vmdisk.controller.attribute &
-		k.vmdisk.id.attribute &
+		k.vmdisk.controller.attribute? &
+		k.vmdisk.id.attribute? &
 		k.vmdisk.device.attribute?
 	k.vmdisk =
 		## The VM disk definition.
