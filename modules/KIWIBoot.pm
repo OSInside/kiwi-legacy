@@ -1548,7 +1548,7 @@ sub setupBootDisk {
 	#==========================================
 	# Check for LVM...
 	#------------------------------------------
-	if (($type{lvm} =~ /true|yes/i) || ($lvm)) {
+	if (($type{lvm} eq "true") || ($lvm)) {
 		#==========================================
 		# add boot space if lvm based
 		#------------------------------------------
@@ -1589,7 +1589,13 @@ sub setupBootDisk {
 				my $space = 0;
 				my $diff  = 0;
 				my $haveAbsolute;
-				if ($lvmparts{$vol}) {
+				# /.../
+				# The requested volume size is only used if the image
+				# type is _not_ oem. That's because for oem images the
+				# size of the volumes is created by a resize operation
+				# on first boot of the appliance
+				# ----
+				if (($type{type} ne "oem") && ($lvmparts{$vol})) {
 					$space = $lvmparts{$vol}->[0];
 					if ($space eq "all") {
 						$space = 0;
