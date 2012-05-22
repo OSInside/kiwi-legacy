@@ -819,6 +819,8 @@ function baseStripUnusedLibs {
 	local lnk
 	local new
 	local lib
+	local lddbase
+	local lddref
 	# /.../
 	# Find directly used libraries, by calling ldd
 	# on files in *bin*
@@ -827,9 +829,12 @@ function baseStripUnusedLibs {
 	rm -f /tmp/needlibs
 	for i in /usr/bin/* /bin/* /sbin/* /usr/sbin/*;do
 		for n in $(ldd $i 2>/dev/null | cut -f2- -d\/ | cut -f1 -d " ");do
+			lddbase=$(basename /$n)
+			echo $lddbase >> /tmp/needlibs
 			lib=$(readlink /$n)
 			if [ $? -eq 0 ];then
-				echo $lib >> /tmp/needlibs
+				lddref=$(basename $lib)
+				echo $lddref >> /tmp/needlibs
 			fi
 		done
 	done
