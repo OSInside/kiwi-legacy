@@ -158,6 +158,7 @@
 		<file name="qeth_configure"/>
 		<file name="readlink"/>
 		<file name="reboot"/>
+		<file name="systemctl"/>
 		<file name="reiserfsck"/>
 		<file name="resize2fs"/>
 		<file name="resize_reiserfs"/>
