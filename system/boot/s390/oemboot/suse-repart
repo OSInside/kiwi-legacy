@@ -791,6 +791,7 @@ function resizeLVMVolumes {
 			lvextend -L +${size}M /dev/$VGROUP/$volume
 		fi
 		if [ $? = 0 ];then
+			unset FSTYPE
 			resizeFilesystem /dev/$VGROUP/$volume
 		else
 			Echo "Warning: requested size cannot be reached !"
