@@ -86,6 +86,8 @@ install:
 	cp -a doc/*.css     ${PACKDOCVZ}
 	cp -a doc/COPYING   ${PACKDOCVZ}
 	test -e doc/ChangeLog && cp -a doc/ChangeLog ${PACKDOCVZ} || true
+	rm -f ${PACKDOCVZ}/schema/Makefile
+	rm -f ${PACKDOCVZ}/schema/susesync
 
 	#============================================
 	# kiwi manual pages
