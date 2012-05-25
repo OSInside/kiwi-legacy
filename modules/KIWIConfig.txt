@@ -189,6 +189,7 @@
 		<file name="swapoff"/>
 		<file name="swapon"/>
 		<file name="tac"/>
+		<file name="rev"/>
 		<file name="tail"/>
 		<file name="tar"/>
 		<file name="test"/>
