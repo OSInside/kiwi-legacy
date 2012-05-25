@@ -435,13 +435,31 @@ function OEMPartitionInstall {
 	#--------------------------------------
 	if searchVolumeGroup;then
 		#======================================
+		# setup all free volume name
+		#--------------------------------------
+		export allFreeVolume=LVRoot
+		if [ ! -z "$kiwi_allFreeVolume" ];then
+			allFreeVolume=$kiwi_allFreeVolume
+		fi
+		#======================================
 		# resize PV's
 		#--------------------------------------
 		pvresize $(ddn $imageDiskDevice $rID)
 		#======================================
-		# resize LV's
+		# Resize volumes to requested size
 		#--------------------------------------
-		lvresize -l +100%FREE $imageRootDevice
+		resizeLVMVolumes
+		#======================================
+		# Extend root + optional allFreeVolume
+		#--------------------------------------
+		if [ -z "$OEM_SYSTEMSIZE" ];then
+			lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
+		else
+			lvextend --size $OEM_SYSTEMSIZE"M" /dev/$VGROUP/LVRoot
+			if [ "$allFreeVolume" != "LVRoot" ];then
+				lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
+			fi
+		fi
 	fi
 	#======================================
 	# resize boot filesystem if needed
