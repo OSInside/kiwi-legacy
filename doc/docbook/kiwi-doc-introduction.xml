@@ -34,6 +34,14 @@
     image format of the image produced by KIWI is defined within a
     configuration file named <filename>config.xml</filename> as described in
     <xref linkend="chap.description"/>.</para>
+      <para>Note that not all elements and attributes that may be used in
+    the KIWI <filename>config.xml</filename> configuration file are listed
+    or described in this document. The complete schema documentation
+    can be accessed on the web at
+    <ulink url="http://doc.opensuse.org/projects/kiwi/schema-doc/"/>, latest
+    version, or on you local system using the <filename>
+    file:///usr/share/doc/packages/kiwi/schema/kiwi.html</filename> path
+    as the URL in the browser.</para>
   </sect1>
   <sect1 id="sec.introduction.howtousekiwi">
     <title>How do I use KIWI?</title>
