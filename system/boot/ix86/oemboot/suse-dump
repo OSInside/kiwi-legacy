@@ -99,7 +99,7 @@ function OEMFindPartitions {
 		local kbsize=$(echo $i | cut -f1 -d:)
 		local mbsize=$((kbsize / 1024))
 		local partid=$(partitionID /dev/$disk $(nd $device))
-		if [ ! "$partid" = "83" ];then
+		if [ ! "$partid" = "83" ] && [ ! "$partid" = "8e" ];then
 			continue
 		fi
 		probeFileSystem $device
@@ -107,9 +107,9 @@ function OEMFindPartitions {
 			continue
 		fi
 		if [ -z "$result" ];then
-			result=$device:$mbsize
+			result=$device:$mbsize:$partid
 		else
-			result=$result,$device:$mbsize
+			result=$result,$device:$mbsize:$partid
 		fi
 	done
 	echo $result
@@ -368,6 +368,8 @@ function OEMInstall {
 					echo "  Partition Type: 0x$partid" >> $info
 					count=$((count + 1))
 				done
+				cat $info
+				Echo "Overlay mounting system on install media..."
 				#======================================
 				# Mount OEM root image read-write
 				#--------------------------------------
@@ -434,12 +436,9 @@ function OEMInstall {
 		#======================================
 		# Do we have a LVM image...
 		#--------------------------------------
-		for i in /dev/mapper/${loop}*;do
-			partid=$(partitionID /dev/$loop $(nd $i))
-			if [ "$partid" = "8e" ];then
-				export haveLVM=yes
-			fi
-		done
+		if [ "$kiwi_lvm" = "true" ];then
+			export haveLVM=yes
+		fi
 		#======================================
 		# Select all required partitions
 		#--------------------------------------
@@ -608,8 +607,13 @@ function OEMInstall {
 	items=$(echo $items | sed -e s@^,@@)
 	Echo "Entering installation mode for disk: $items"
 	if [ -z "$kiwi_oemunattended" ];then
+		inst_info=$items
+		if [ -z "$OEM_PARTITION_INSTALL" ];then
+			inst_info=$(basename $items)
+		fi
 		TEXT_INST=$(
-			getText "Destroying ALL data on %1, continue ?" $(basename $items))
+			getText "Destroying ALL data on %1, continue ?" $inst_info)
+
 		Dialog --yesno "\"$TEXT_INST\"" 5 80
 		if [ ! $? = 0 ];then
 			systemException \
@@ -677,6 +681,7 @@ function OEMInstall {
 			Echo "Loading $Source [$Target] "
 			if [ -x /usr/bin/dcounter ];then
 				test -e /progress || mkfifo /progress
+				Echo "Calling: eval $dump 2>/progress|dd bs=32k of=$Target"
 				errorLogStop
 				(
 					if ! eval $dump 2>/progress|dd bs=32k of=$Target &>/dev/null
