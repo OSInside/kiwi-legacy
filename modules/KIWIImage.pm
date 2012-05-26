@@ -236,7 +236,14 @@ sub updateDescription {
 	#------------------------------------------
 	$changeset{"packagemanager"} = $src_xml->getPackageManager();
 	$changeset{"showlicense"}    = $src_xml->getLicenseNames();
-	$changeset{"domain"}         = $src_xml->getXenDomain();
+	my $domain;
+	my %xenc = $src_xml -> getXenConfig();
+	if (%xenc) {
+		if (defined $xenc{xen_domain} && $xenc{xen_domain} ne '') {
+			$domain = $xenc{xen_domain};
+		}
+	}
+	$changeset{"domain"}         = $domain;
 	$changeset{"displayname"}    = $src_xml->getImageDisplayName();
 	$changeset{"locale"}         = $src_xml->getLocale();
 	$changeset{"boot-theme"}     = $src_xml->getBootTheme();
@@ -2486,7 +2493,7 @@ sub createImageSplit {
 	$sizeBytes+= $minInodes * $inodesize;
 	$sizeBytes = sprintf ("%.0f", $sizeBytes);
 	$minInodes*= 2;
-	if (open (my $FD,">$imageTree/rootfs.meta")) {
+	if (open (my $FD,'>', "$imageTree/rootfs.meta")) {
 		print $FD "inode_nr=$minInodes\n";
 		print $FD "min_size=$sizeBytes\n";
 		close $FD;

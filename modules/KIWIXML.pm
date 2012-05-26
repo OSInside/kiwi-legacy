@@ -1073,26 +1073,6 @@ sub getLicenseNames {
 }
 
 #==========================================
-# getXenDomain
-#------------------------------------------
-sub getXenDomain {
-	# ...
-	# Obtain the Xen domain information if set
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $domain = $node -> getAttribute ("domain");
-	if ((! defined $domain) || ("$domain" eq "")) {
-		return;
-	}
-	return $domain;
-}
-
-#==========================================
 # getOEMSwapSize
 #------------------------------------------
 sub getOEMSwapSize {
