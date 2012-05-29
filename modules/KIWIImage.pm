@@ -1169,11 +1169,21 @@ sub createImageRootAndBoot {
 			last SWITCH;
 		};
 		/^btrfs/      && do {
-			$ok = $this -> createImageBTRFS ();
+			if (! $treeAccess) {
+				$ok = $this -> createImageBTRFS ();
+			} else {
+				$ok = $this -> setupLogicalExtend();
+				$result{imageTree} = $imageTree;
+			}
 			last SWITCH;
 		};
 		/^xfs/        && do {
-			$ok = $this -> createImageXFS ();
+			if (! $treeAccess) {
+				$ok = $this -> createImageXFS ();
+			} else {
+				$ok = $this -> setupLogicalExtend();
+				$result{imageTree} = $imageTree;
+			}
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported $text type: $type");
