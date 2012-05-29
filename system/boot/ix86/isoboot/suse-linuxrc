@@ -138,8 +138,8 @@ IFS="," ; for i in $IMAGE;do
 				"Not enough RAM available for this image" \
 			"reboot"
 		fi
-		needBytes=`gzip -l $gzippName|tail -n1|sed -e "s@ \+@:@g"|cut -f3 -d:`
-		needMByte=`expr $needBytes / 1024 / 1024`
+		needBytes=$(gzip -l $gzippName|tail -n1|sed -e "s@ \+@:@g"|cut -f3 -d:)
+		needMByte=$((needBytes / 1024 / 1024))
 		if [ -x /usr/bin/dcounter ];then
 			errorLogStop
 			Echo -n "Loading $imageName [$imageDevice] "

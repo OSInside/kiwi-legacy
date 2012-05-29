@@ -878,7 +878,7 @@ function installBootLoaderGrubRecovery {
 	# fourth primary partition of the disk
 	# ----
 	local input=/grub.input
-	local gdevreco=$(expr $recoid - 1)
+	local gdevreco=$((recoid - 1))
 	echo "device (hd0) $imageDiskDevice" > $input
 	echo "root (hd0,$gdevreco)"  >> $input
 	echo "setup (hd0,$gdevreco)" >> $input
@@ -1296,7 +1296,7 @@ function setupBootLoaderGrubRecovery {
 	local kernel=""
 	local initrd=""
 	local fbmode=$vga
-	local gdevreco=$(expr $recoid - 1)
+	local gdevreco=$((recoid - 1))
 	if [ -z "$fbmode" ];then
 		fbmode=$DEFAULT_VGA
 	fi
@@ -1605,9 +1605,9 @@ function setupBootLoaderS390 {
 		fi
 		title_failsafe=$(makeLabel "Failsafe -- $title_default")
 		echo "    $count = $title_default"  >> $conf
-		count=`expr $count + 1`
+		count=$((count + 1))
 		echo "    $count = $title_failsafe" >> $conf
-		count=`expr $count + 1`
+		count=$((count + 1))
 	done
 	count=1
 	IFS="," ; for i in $KERNEL_LIST;do
@@ -1672,7 +1672,7 @@ function setupBootLoaderS390 {
 		echo -n " $KIWI_KERNEL_OPTIONS"        >> $conf
 		echo -n " loader=$loader x11failsafe"  >> $conf
 		echo " quiet showopts\""               >> $conf
-		count=`expr $count + 1`
+		count=$((count + 1))
 	done
 	#======================================
 	# create recovery entry
@@ -1882,7 +1882,7 @@ function setupBootLoaderSyslinux {
 				echo -n " noapic maxcpus=0 edd=off"            >> $conf
 				echo " quiet showopts"                         >> $conf
 			fi
-			count=`expr $count + 1`
+			count=$((count + 1))
 		fi
 	done
 	#======================================
@@ -1941,7 +1941,7 @@ function setupBootLoaderGrub {
 	local rdisk=""
 	local fbmode=$vga
 	if [ ! -z "$OEM_RECOVERY" ];then
-		local gdevreco=$(expr $recoid - 1)
+		local gdevreco=$((recoid - 1))
 	fi
 	if [ -z "$fbmode" ];then
 		fbmode=$DEFAULT_VGA
@@ -2133,7 +2133,7 @@ function setupBootLoaderGrub {
 				echo " quiet showopts"                            >> $menu
 				echo " initrd $gdev/boot/$initrd"                 >> $menu
 			fi
-			count=`expr $count + 1`
+			count=$((count + 1))
 		fi
 	done
 	#======================================
@@ -2276,9 +2276,10 @@ function setupBootLoaderYaboot {
 	#======================================
 	# create lilo.conf file
 	#--------------------------------------
+	local timeout=$((KIWI_BOOT_TIMEOUT * 10))
 	echo "boot=$rdev"                                        >  $conf
 	echo "activate"                                          >> $conf
-	echo "timeout=`expr $KIWI_BOOT_TIMEOUT \* 10`"           >> $conf
+	echo "timeout=$timeout"                                  >> $conf
 	local count=1
 	IFS="," ; for i in $KERNEL_LIST;do
 		if test ! -z "$i";then
@@ -2371,7 +2372,7 @@ function setupBootLoaderYaboot {
 				echo -n " noresume selinux=0 nosmp"           >> $conf
 				echo " quiet showopts\""                      >> $conf
 			fi
-			count=`expr $count + 1`
+			count=$((count + 1))
 		fi
 	done
 	#======================================
@@ -3436,7 +3437,7 @@ function storeIDFiles {
 			fi
 			if [ -f /mnt/boot/grub/mbrid ];then
 				cp -a /mnt/boot/grub/mbrid $cmpd/mbrid$ifix
-				ifix=$(expr $ifix + 1)
+				ifix=$((ifix + 1))
 				umount /mnt
 				break
 			fi
@@ -3691,7 +3692,7 @@ function setupNetwork {
 			MAC=`echo $i | sed -e s"@HW Address:@@"`
 			MAC=`echo $MAC`
 			mac_list[$index]=$MAC
-			index=`expr $index + 1`
+			index=$((index + 1))
 		fi
 		if echo $i | grep -q "Device File:";then
 			DEV=`echo $i | sed -e s"@Device File:@@"`
@@ -3717,7 +3718,7 @@ function setupNetwork {
 			if [ $i = $BOOTIF ];then
 				iface=${dev_list[$index]}
 			fi
-			index=`expr $index + 1`
+			index=$((index + 1))
 		done
 	fi
 	export PXE_IFACE=$iface
@@ -4176,10 +4177,14 @@ function partitionID {
 #--------------------------------------
 function partitionSize {
 	local diskDevice=$1
+	local psizeBytes
+	local psizeKBytes
 	if [ -z "$diskDevice" ] || [ ! -e "$diskDevice" ];then
 		echo 1 ; return 1
 	fi
-	expr $(blockdev --getsize64 $diskDevice) / 1024
+	psizeBytes=$(blockdev --getsize64 $diskDevice)
+	psizeKBytes=$((psizeBytes / 1024))
+	echo $psizeKBytes
 }
 #======================================
 # linuxPartition
@@ -4299,11 +4304,11 @@ function validateSize {
 	# check if the image fits into the requested partition.
 	# An information about the sizes is printed out
 	# ----
-	haveBytes=`partitionSize $imageDevice`
-	haveBytes=`expr $haveBytes \* 1024`
-	haveMByte=`expr $haveBytes / 1048576`
-	needBytes=`expr $blocks \* $blocksize`
-	needMByte=`expr $needBytes / 1048576`
+	haveBytes=$(partitionSize $imageDevice)
+	haveBytes=$((haveBytes * 1024))
+	haveMByte=$((haveBytes / 1048576))
+	needBytes=$((blocks * $blocksize))
+	needMByte=$((needBytes / 1048576))
 	Echo "Have size: $imageDevice -> $haveBytes Bytes [ $haveMByte MB ]"
 	Echo "Need size: $needBytes Bytes [ $needMByte MB ]"
 	if test $haveBytes -gt $needBytes;then
@@ -4328,9 +4333,9 @@ function validateBlockSize {
 		return
 	fi
 	if [ ! -z "$zblocks" ];then
-		isize=`expr $zblocks \* $zblocksize`
+		isize=$((zblocks * zblocksize))
 	else
-		isize=`expr $blocks \* $blocksize`
+		isize=$((blocks * blocksize))
 	fi
 	local IFS=' '
 	testBlkSizes="32768 61440 65464"
@@ -4338,7 +4343,7 @@ function validateBlockSize {
 		testBlkSizes="$imageBlkSize $testBlkSizes"
 	fi
 	for blkTest in $testBlkSizes ; do
-		nBlk=`expr $isize / $blkTest`
+		nBlk=$((isize / blkTest))
 		if [ $nBlk -lt 65535 ] ; then
 			imageBlkSize=$blkTest
 			return
@@ -4620,12 +4625,12 @@ function mountSystemClicFS {
 	fi
 	if [ $ramOnly = 1 ];then
 		haveKByte=`cat /proc/meminfo | grep MemFree | cut -f2 -d:| cut -f1 -dk`
-		haveMByte=`expr $haveKByte / 1024`
-		haveMByte=`expr $haveMByte \* 7 / 10`
+		haveMByte=$((haveKByte / 1024))
+		haveMByte=$((haveMByte * 7 / 10))
 		clic_cmd="$clic_cmd -m $haveMByte"
 	else
-		haveBytes=`blockdev --getsize64 $rwDevice`
-		haveMByte=`expr $haveBytes / 1024 / 1024`
+		haveBytes=$(blockdev --getsize64 $rwDevice)
+		haveMByte=$((haveBytes / 1024 / 1024))
 		wantCowFS=0
 		if \
 			[ "$kiwi_hybrid" = "yes" ] && \
@@ -5086,7 +5091,7 @@ function getNextPartition {
 	part=$1
 	nextPart=`echo $part | sed -e "s/\(.*\)[0-9]/\1/"`
 	nextPartNum=`echo $part | sed -e "s/.*\([0-9]\)/\1/"`
-	nextPartNum=`expr $nextPartNum + 1`
+	nextPartNum=$((nextPartNum + 1))
 	nextPart="${nextPart}${nextPartNum}"
 	echo $nextPart
 }
@@ -5151,7 +5156,7 @@ function waitForStorageDevice {
 			return 1
 		fi
 		Echo "Waiting for device $device to settle..."
-		check=`expr $check + 1`
+		check=$((check + 1))
 		sleep 2
 	done
 }
@@ -5173,7 +5178,7 @@ function waitForBlockDevice {
 			break
 		fi
 		Echo "Waiting for device $device to settle..."
-		check=`expr $check + 1`
+		check=$((check + 1))
 		sleep 2
 	done
 }
@@ -5300,8 +5305,8 @@ function fetchFile {
 	if [ -x /usr/bin/dcounter ] && [ -f /etc/image.md5 ] && [ -b "$dest" ];then
 		showProgress=1
 		read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
-		needBytes=`expr $blocks \* $blocksize`
-		needMByte=`expr $needBytes / 1048576`
+		needBytes=$((blocks * blocksize))
+		needMByte=$((needBytes / 1048576))
 		progressBaseName=$(basename "$path")
 		TEXT_LOAD=$(getText "Loading %1" "$progressBaseName")
 		dump="dcounter -s $needMByte -l \"$TEXT_LOAD \" 2>/progress | $dump"

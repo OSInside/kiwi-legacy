@@ -204,12 +204,12 @@ function OEMInstall {
 	for i in $deviceDisks;do
 		dbyid=$(getDiskID $i)
 		dsize=`partitionSize $dbyid`
-		dsizeMB=`expr $dsize / 1024`
+		dsizeMB=$((dsize / 1024))
 		if [ "$dsizeMB" -gt 0 ];then
 			Echo -b "Disk $count -> $i [ $dsizeMB MB ]"
 			deviceArray[$count]=$dbyid
 			deviceDSize[$count]=$dsize
-			count=`expr $count + 1`
+			count=$((count + 1))
 		fi
 	done
 	if [ "$count" = "1" ];then
@@ -231,7 +231,7 @@ function OEMInstall {
 		for i in $deviceDisks;do
 			dbyid=$(getDiskID $i)
 			dsize=`partitionSize $dbyid`
-			dsizeMB=`expr $dsize / 1024`
+			dsizeMB=$((dsize / 1024))
 			if [ "$dsizeMB" -gt 0 ];then
 				if [ $count = 0 ];then
 					dpara="$dbyid \"[ $dsizeMB MB ]\" on"
@@ -639,14 +639,14 @@ function OEMInstall {
 		#======================================
 		# Get required disk space, setup I/O
 		#--------------------------------------
-		needBytes=$(expr $blocks \* $blocksize)
-		needKByte=`expr $needBytes / 1024`
-		needMByte=`expr $needKByte / 1024`
+		needBytes=$((blocks * blocksize))
+		needKByte=$((needBytes / 1024))
+		needMByte=$((needKByte / 1024))
 		#======================================
 		# Check disk space...
 		#--------------------------------------
-		haveMByte=`expr $haveKByte / 1024`
-		needMByte=`expr $needKByte / 1024`
+		haveMByte=$((haveKByte / 1024))
+		needMByte=$((needKByte / 1024))
 		Echo "Have size: $Target -> $haveMByte MB"
 		Echo "Need size: $Source -> $needMByte MB"
 		if [ $needMByte -gt $haveMByte ];then
