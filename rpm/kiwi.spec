@@ -14,6 +14,8 @@
 
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
+
+
 Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
 Summary:        OpenSuSE - KIWI Image System
@@ -42,26 +44,26 @@ BuildRequires:  rpm-devel
 %endif
 %if %{suse_version} > 1140
 BuildRequires:  btrfsprogs
-BuildRequires:  perl-Test-Unit
-BuildRequires:  squashfs
 BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
+BuildRequires:  perl-Test-Unit
+BuildRequires:  squashfs
 BuildRequires:  zypper
 %endif
 # requirements to run kiwi
-Requires:       perl = %{perl_version}
-Requires:       perl-XML-LibXML
-Requires:       perl-libwww-perl
-Requires:       screen
+Requires:       checkmedia
 Requires:       coreutils
-Requires:       perl-XML-LibXML-Common
-Requires:       perl-XML-SAX
-Requires:       perl-Config-IniFiles
 Requires:       kiwi-tools
 Requires:       libxslt
-Requires:       checkmedia
-Requires:       util-linux
+Requires:       perl = %{perl_version}
+Requires:       perl-Config-IniFiles
+Requires:       perl-XML-LibXML
+Requires:       perl-XML-LibXML-Common
+Requires:       perl-XML-SAX
+Requires:       perl-libwww-perl
 Requires:       rsync
+Requires:       screen
+Requires:       util-linux
 %ifarch %ix86 x86_64
 %if %{suse_version} > 1010
 Requires:       squashfs
@@ -89,9 +91,29 @@ Source:         %{name}.tar.bz2
 Source1:        %{name}-rpmlintrc
 Source2:        %{name}-docu.tar.bz2
 Source3:        %{name}-repo.tar.bz2
+Source4:        %{name}-find-boot-requires.sh
 # build root path
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
+# find out about the name scheme of the local system for -requieres packages
+%if 0%{?suse_version}
+%if 0%{?sles_version}
+%define mysystems suse-SLES%{sles_version} suse-SLED%{sles_version}
+%else
+%define mysystems %(echo `export VER=%{suse_version}; echo "suse-${VER:0:2}.${VER:2:1}"`)
+%endif
+%endif
+%if 0%{?rhel_version}
+%define mysystems %(echo `VER=%{rhel_version} echo "rhel-0${VER:0:1}.${VER:1:2}"`)
+%endif
+# find out about my arch name, could be done also via symlinks
+%define myarch %{_target_cpu}
+%ifarch armv7l armv7hl
+%define myarch armv7l
+%endif
+%ifarch %ix86
+%define myarch ix86
+%endif
 
 %description
 The OpenSuSE KIWI Image System provides a complete operating system
@@ -103,8 +125,10 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-instsource
+Requires:       build
+Requires:       createrepo
+Requires:       inst-source-utils
 Requires:       kiwi = %{version}
-Requires:       inst-source-utils createrepo build
 Summary:        Installation Source creation
 License:        GPL-2.0
 Group:          System/Management
@@ -196,6 +220,17 @@ kiwi boot (initrd) image for activating system images on ISO media
 Authors:
 --------
     Marcus Schaefer <ms@suse.com>
+
+%package -n kiwi-desc-isoboot-requires
+Requires:       kiwi-desc-isoboot = %{version}
+Requires:       %(echo `bash %{S:4} %{S:0} isoboot %{myarch} %{mysystems}`)
+Summary:        OpenSuSE - KIWI Image System ISO boot required packages
+License:        GPL-2.0+
+Group:          System/Management
+
+%description -n kiwi-desc-isoboot-requires
+Meta-package to pull in all requires to build a isoboot media.
+
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
@@ -203,10 +238,12 @@ Authors:
 %package -n kiwi-desc-vmxboot
 Requires:       kiwi = %{version}
 %if 0%{?suse_version}
-Requires:       multipath-tools parted
+Requires:       multipath-tools
+Requires:       parted
 %endif
 %if 0%{?rhel_version}
-Requires:       device-mapper-multipath parted
+Requires:       device-mapper-multipath
+Requires:       parted
 %endif
 
 %ifarch %ix86 x86_64
@@ -238,6 +275,17 @@ kiwi boot (initrd) image for activating system images on virtual disk
 Authors:
 --------
     Marcus Schaefer <ms@suse.com>
+
+%package -n kiwi-desc-vmxboot-requires
+Requires:       kiwi-desc-vmxboot = %{version}
+Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}`)
+Summary:        OpenSuSE - KIWI Image System VMX boot required packages
+License:        GPL-2.0+
+Group:          System/Management
+
+%description -n kiwi-desc-vmxboot-requires
+Meta-package to pull in all requires to build a vmxboot media.
+
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x
@@ -257,6 +305,17 @@ kiwi boot (initrd) image for activating system images via TFTP
 Authors:
 --------
     Marcus Schaefer <ms@suse.com>
+
+%package -n kiwi-desc-netboot-requires
+Requires:       kiwi-desc-netboot = %{version}
+Requires:       %(echo `bash %{S:4} %{S:0} netboot %{myarch} %{mysystems}`)
+Summary:        OpenSuSE - KIWI Image System NET boot required packages
+License:        GPL-2.0+
+Group:          System/Management
+
+%description -n kiwi-desc-netboot-requires
+Meta-package to pull in all requires to build a netboot media.
+
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
@@ -277,10 +336,12 @@ Requires:       qemu-img
 %endif
 %endif
 %if 0%{?suse_version}
-Requires:       multipath-tools parted
+Requires:       multipath-tools
+Requires:       parted
 %endif
 %if 0%{?rhel_version}
-Requires:       device-mapper-multipath parted
+Requires:       device-mapper-multipath
+Requires:       parted
 %endif
 
 %ifarch %ix86 x86_64
@@ -306,6 +367,17 @@ image description
 Authors:
 --------
     Marcus Schaefer <ms@suse.com>
+
+%package -n kiwi-desc-oemboot-requires
+Requires:       kiwi-desc-oemboot = %{version}
+Requires:       %(echo `bash %{S:4} %{S:0} oemboot %{myarch} %{mysystems}`)
+Summary:        OpenSuSE - KIWI Image System oem boot required packages
+License:        GPL-2.0+
+Group:          System/Management
+
+%description -n kiwi-desc-oemboot-requires
+Meta-package to pull in all requires to build a oemboot media.
+
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
@@ -403,8 +475,17 @@ test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
 %endif
 cat kiwi.loader
 
-%ifarch %ix86 x86_64
+for i in isoboot vmxboot netboot oemboot ; do
+  if [ -d  $RPM_BUILD_ROOT/%{_datadir}/kiwi/image/$i ]; then
+    cat > $RPM_BUILD_ROOT/%{_datadir}/kiwi/image/$i/README.requires <<EOF
+This is a meta package to pull in all dependencies required for $i kiwi
+images. This is supposed to be used in Open Build Service in first place
+to track the dependencies.
+EOF
+  fi
+done
 
+%ifarch %ix86 x86_64
 %post -n kiwi-pxeboot
 #============================================================
 # create /srv/tftpboot/pxelinux.cfg/default only if not exist
@@ -524,6 +605,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_datadir}/kiwi/image/isoboot/README
 %{_datadir}/kiwi/image/isoboot/suse*
 %{_datadir}/kiwi/image/isoboot/rhel*
+
+%files -n kiwi-desc-isoboot-requires
+%defattr(-, root, root)
+%doc %{_datadir}/kiwi/image/isoboot/README.requires
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
@@ -536,6 +621,10 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch %ix86 x86_64
 %{_datadir}/kiwi/image/vmxboot/rhel*
 %endif
+
+%files -n kiwi-desc-vmxboot-requires
+%defattr(-, root, root)
+%doc %{_datadir}/kiwi/image/vmxboot/README.requires
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x
@@ -545,6 +634,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image/netboot
 %doc %{_datadir}/kiwi/image/netboot/README
 %{_datadir}/kiwi/image/netboot/suse*
+
+%files -n kiwi-desc-netboot-requires
+%defattr(-, root, root)
+%doc %{_datadir}/kiwi/image/netboot/README.requires
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
@@ -557,6 +650,10 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch %ix86 x86_64
 %{_datadir}/kiwi/image/oemboot/rhel*
 %endif
+
+%files -n kiwi-desc-oemboot-requires
+%defattr(-, root, root)
+%doc %{_datadir}/kiwi/image/oemboot/README.requires
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
