@@ -795,6 +795,44 @@ sub test_getOEMUnattendedID {
 }
 
 #==========================================
+# test_getOVFConfig
+#------------------------------------------
+sub test_getOVFConfig {
+	#...
+	# Verify proper return of the OVF data
+	#---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'ovfConfigSettings';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %ovfConfig = $xml -> getOVFConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	$this -> assert_str_equals('1024', $ovfConfig{ovf_desmemory});
+	$this -> assert_str_equals('2048', $ovfConfig{ovf_maxmemory});
+	$this -> assert_str_equals('1024', $ovfConfig{ovf_memory});
+	$this -> assert_str_equals('512', $ovfConfig{ovf_minmemory});
+	$this -> assert_str_equals('2', $ovfConfig{ovf_descpu});
+	$this -> assert_str_equals('4', $ovfConfig{ovf_maxcpu});
+	$this -> assert_str_equals('2', $ovfConfig{ovf_ncpus});
+	$this -> assert_str_equals('1', $ovfConfig{ovf_mincpu});
+	$this -> assert_str_equals('powervm', $ovfConfig{ovf_type});
+	$this -> assert_str_equals('/dev/sda', $ovfConfig{ovf_disk});
+	$this -> assert_str_equals('scsi', $ovfConfig{ovf_disktype});
+	my $nicConfig = $ovfConfig{ovf_bridge};
+	my %nicSetup = %$nicConfig;
+	my $nicInfo = $nicSetup{eth0};
+	$this -> assert_not_null($nicInfo);
+}
+
+#==========================================
 # test_getPXEDeployBlockSize
 #------------------------------------------
 sub test_getPXEDeployBlockSize {
