@@ -1305,6 +1305,82 @@ sub test_getSplitTempFiles {
 }
 
 #==========================================
+# test_getStripDelete
+#------------------------------------------
+sub test_getStripDelete {
+	# ...
+	# Verify proper return of getStripDelete method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @delFiles = $xml -> getStripDelete();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedNames = qw (/etc/resolv.conf /lib/libc.so);
+	$this -> assert_array_equal(\@expectedNames, \@delFiles);
+}
+
+#==========================================
+# test_getStripLibs
+#------------------------------------------
+sub test_getStripLibs {
+	# ...
+	# Verify proper return of getStripLibs method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @libFiles = $xml -> getStripLibs();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedNames = qw /libdbus libnss/;
+	$this -> assert_array_equal(\@expectedNames, \@libFiles);
+}
+
+#==========================================
+# test_getStripTools
+#------------------------------------------
+sub test_getStripTools {
+	# ...
+	# Verify proper return of getStripTools method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @toolFiles = $xml -> getStripTools();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedNames = qw /megacli virt-mgr/;
+	$this -> assert_array_equal(\@expectedNames, \@toolFiles);
+}
+
+
+#==========================================
 # test_getVMwareConfig
 #------------------------------------------
 sub test_getVMwareConfig {
