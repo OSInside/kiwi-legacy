@@ -47,6 +47,142 @@ sub new {
 }
 
 #==========================================
+# test_addStripConsistentCall
+#------------------------------------------
+sub test_addStripConsistentCall {
+	# ...
+	# Verify proper operation of addStrip method with improper argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @newDel = qw (/etc/hosts /bin/zsh);
+	$xml -> addStrip ('files', @newDel);
+	my @delFiles = $xml -> getStripDelete();
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Specified strip section type 'files' not supported.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	my @expectedNames = qw (/etc/resolv.conf /lib/libc.so);
+	$this -> assert_array_equal(\@expectedNames, \@delFiles);
+}
+
+#==========================================
+# test_addStripDelete
+#------------------------------------------
+sub test_addStripDelete {
+	# ...
+	# Verify proper operation of addStrip method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @newDel = qw (/etc/hosts /bin/zsh);
+	$xml -> addStrip ('delete', @newDel);
+	my @delFiles = $xml -> getStripDelete();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedNames = qw (/etc/resolv.conf /lib/libc.so /etc/hosts /bin/zsh);
+	$this -> assert_array_equal(\@expectedNames, \@delFiles);
+}
+
+#==========================================
+# test_addStripDelete
+#------------------------------------------
+sub test_addStripDeleteNoPreExist {
+	# ...
+	# Verify proper operation of addStrip method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'specPkgMgr';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @newDel = qw (/etc/hosts /bin/zsh);
+	$xml -> addStrip ('delete', @newDel);
+	my @delFiles = $xml -> getStripDelete();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedNames = qw (/etc/hosts /bin/zsh);
+	$this -> assert_array_equal(\@expectedNames, \@delFiles);
+}
+
+#==========================================
+# test_addStripLibs
+#------------------------------------------
+sub test_addStripLibs {
+	# ...
+	# Verify proper operation of addStrip method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @newLibs = qw /libm libcrypt/;
+	$xml -> addStrip ('libs', @newLibs);
+	my @libFiles = $xml -> getStripLibs();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedNames = qw /libdbus libnss libm libcrypt/;
+	$this -> assert_array_equal(\@expectedNames, \@libFiles);
+}
+
+#==========================================
+# test_addStripTools
+#------------------------------------------
+sub test_addStripTools {
+	# ...
+	# Verify proper operation of addStrip method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @newTools = qw /xfsrestore install-info/;
+	$xml -> addStrip ('tools', @newTools);
+	my @toolFiles = $xml -> getStripTools();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedNames = qw /megacli virt-mgr xfsrestore install-info/;
+	$this -> assert_array_equal(\@expectedNames, \@toolFiles);
+}
+
+#==========================================
 # test_getBootTheme
 #------------------------------------------
 sub test_getBootTheme {
