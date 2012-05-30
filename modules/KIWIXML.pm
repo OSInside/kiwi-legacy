@@ -2123,15 +2123,33 @@ sub addStrip {
 	my $type  = shift;
 	my @list  = @_;
 	my $kiwi  = $this->{kiwi};
+	my @supportedTypes = qw /delete libs tools/;
+	if (! grep /$type/, @supportedTypes ) {
+		my $msg = "Specified strip section type '$type' not supported.";
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return;
+	}
 	my $image = $this->{imgnameNodeList} -> get_node(1);
-	my $stripSection = new XML::LibXML::Element ("strip");
-	$stripSection -> setAttribute("type",$type);
+	my @stripNodes = $image -> getElementsByTagName ("strip");
+	my $stripSection;
+	for my $stripNode (@stripNodes) {
+		my $sectionType = $stripNode -> getAttribute ("type");
+		if ($type eq $sectionType) {
+			$stripSection = $stripNode;
+			last;
+		}
+	}
+	if (! $stripSection ) {
+		$stripSection = new XML::LibXML::Element ("strip");
+		$stripSection -> setAttribute("type",$type);
+		$image-> appendChild ($stripSection);
+	}
 	foreach my $name (@list) {
 		my $fileSection = new XML::LibXML::Element ("file");
 		$fileSection  -> setAttribute("name",$name);
 		$stripSection -> appendChild ($fileSection);
 	}
-	$image-> appendChild ($stripSection);
 	$this -> updateXML();
 	return $this;
 }
