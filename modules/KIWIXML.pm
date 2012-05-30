@@ -804,38 +804,6 @@ sub getPXEDeployKernel {
 	}
 }
 
-#==========================================
-# getStripFileList
-#------------------------------------------
-sub getStripFileList {
-	# ...
-	# return filelist from the strip section referencing $ftype
-	# ---
-	my $this   = shift;
-	my $ftype  = shift;
-	my $inode  = $this->{imgnameNodeList} -> get_node(1);
-	my @nodes  = $inode -> getElementsByTagName ("strip");
-	my @result = ();
-	my $tnode;
-	if (! @nodes) {
-		return @result;
-	}
-	foreach my $node (@nodes) {
-		my $type = $node -> getAttribute ("type");
-		if ($type eq $ftype) {
-			$tnode = $node; last
-		}
-	}
-	if (! $tnode) {
-		return @result;
-	}
-	my @fileNodeList = $tnode -> getElementsByTagName ("file");
-	foreach my $fileNode (@fileNodeList) {
-		my $name = $fileNode -> getAttribute ("name");
-		push @result, $name;
-	}
-	return @result;
-}
 
 #==========================================
 # getStripDelete
@@ -845,7 +813,7 @@ sub getStripDelete {
 	# return the type="delete" files from the strip section
 	# ---
 	my $this   = shift;
-	return $this -> getStripFileList ("delete");
+	return $this -> __getStripFileList ("delete");
 }
 
 #==========================================
@@ -856,7 +824,7 @@ sub getStripTools {
 	# return the type="tools" files from the strip section
 	# ---
 	my $this   = shift;
-	return $this -> getStripFileList ("tools");
+	return $this -> __getStripFileList ("tools");
 }
 
 #==========================================
@@ -867,7 +835,7 @@ sub getStripLibs {
 	# return the type="libs" files from the strip section
 	# ---
 	my $this   = shift;
-	return $this -> getStripFileList ("libs");
+	return $this -> __getStripFileList ("libs");
 }
 
 #==========================================
@@ -4997,6 +4965,39 @@ sub __addOptionsElement {
 	}
 	$this -> updateXML();
 	return $this;
+}
+
+#==========================================
+# __getStripFileList
+#------------------------------------------
+sub __getStripFileList {
+	# ...
+	# return filelist from the strip section referencing $ftype
+	# ---
+	my $this   = shift;
+	my $ftype  = shift;
+	my $inode  = $this->{imgnameNodeList} -> get_node(1);
+	my @nodes  = $inode -> getElementsByTagName ("strip");
+	my @result = ();
+	my $tnode;
+	if (! @nodes) {
+		return @result;
+	}
+	foreach my $node (@nodes) {
+		my $type = $node -> getAttribute ("type");
+		if ($type eq $ftype) {
+			$tnode = $node; last
+		}
+	}
+	if (! $tnode) {
+		return @result;
+	}
+	my @fileNodeList = $tnode -> getElementsByTagName ("file");
+	foreach my $fileNode (@fileNodeList) {
+		my $name = $fileNode -> getAttribute ("name");
+		push @result, $name;
+	}
+	return @result;
 }
 
 #==========================================
