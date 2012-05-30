@@ -850,14 +850,29 @@ sub createImageBTRFS {
 	# ...
 	# create BTRFS image from source tree
 	# ---
-	my $this = shift;
-	my $device  = shift;
+	my $this   = shift;
+	my $device = shift;
+	my $rename = shift;
+	my $kiwi   = $this->{kiwi};
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
 	my $name = $this -> preImage ($device);
 	if (! defined $name) {
 		return;
+	}
+	if (defined $rename) {
+		my $data = qxx (
+			"mv $this->{imageDest}/$name $this->{imageDest}/$rename 2>&1"
+		);
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("Can't rename image file");
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
+			return;
+		}
+		$name = $rename;
 	}
 	#==========================================
 	# Create filesystem on extend
@@ -868,7 +883,7 @@ sub createImageBTRFS {
 	#==========================================
 	# POST filesystem setup
 	#------------------------------------------
-	if (! $this -> postImage ($name,undef,undef,$device)) {
+	if (! $this -> postImage ($name,undef,'btrfs',$device)) {
 		return;
 	}
 	return $this;
@@ -3164,19 +3179,32 @@ sub postImage {
 	# dependant tasks after the logical extend has
 	# been created
 	# ---
-	my $this  = shift;
-	my $name  = shift;
-	my $nozip = shift;
-	my $fstype= shift;
-	my $device= shift;
-	my $kiwi  = $this->{kiwi};
-	my $xml   = $this->{xml};
+	my $this   = shift;
+	my $name   = shift;
+	my $nozip  = shift;
+	my $fstype = shift;
+	my $device = shift;
+	my $kiwi     = $this->{kiwi};
+	my $xml      = $this->{xml};
+	my $initCache= $this->{initCache};
 	#==========================================
 	# mount logical extend for data transfer
 	#------------------------------------------
 	my $extend = $this -> mountLogicalExtend ($name,undef,$device);
 	if (! defined $extend) {
 		return;
+	}
+	#==========================================
+	# Setup filesystem specific environment
+	#------------------------------------------
+	if (! defined $initCache) {
+		if (($fstype) && ($fstype eq 'btrfs')) {
+			$extend = $main::global -> setupBTRFSSubVolumes ($extend);
+			if (! $extend) {
+				$this -> cleanLuks();
+				return;
+			}
+		}
 	}
 	#==========================================
 	# copy physical to logical

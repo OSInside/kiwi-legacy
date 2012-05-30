@@ -664,4 +664,57 @@ sub checkFileSystem {
 	return %result;
 }
 
+#==========================================
+# setupBTRFSSubVolumes
+#------------------------------------------
+sub setupBTRFSSubVolumes {
+	# /.../
+	# create a btrfs subvolume setup as suggested
+	# by the community and compatible to a standard
+	# installation
+	# ----
+	#
+	my $this = shift;
+	my $path = shift;
+	my $kiwi = $this->{kiwi};
+	my @subvol = (
+		'tmp','opt','srv','var','var/crash',
+		'var/spool','var/log','var/run','var/tmp'
+	);
+	my $data = qxx ('btrfs subvolume create '.$path.'/@ 2>&1');
+	my $code = $? >> 8;
+	if ($code == 0) {
+		my $rootID=0;
+		$data = qxx ("btrfs subvolume list $path 2>&1");
+		if ($data =~ /^ID (\d+) /) {
+			$rootID=$1;
+		}
+		if ($rootID) {
+			$data = qxx (
+				"btrfs subvolume set-default $rootID $path 2>&1"
+			);
+			$code = $? >> 8;
+		} else {
+			$code = 1;
+		}
+	}
+	if ($code == 0) {
+		foreach my $vol (@subvol) {
+		$data = qxx (
+			'btrfs subvolume create '.$path.'/@/'.$vol.' 2>&1'
+		);
+		$code = $? >> 8;
+			last if $code != 0;
+		}
+	}
+	if ($code != 0) {
+		$kiwi -> error ("Failed to create btrfs subvolume: $data\n");
+		$kiwi -> failed();
+		$this -> cleanLuks();
+		return;
+	}
+	$path.='/@';
+	return $path;
+}
+
 1;

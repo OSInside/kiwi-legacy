@@ -2128,10 +2128,27 @@ sub setupBootDisk {
 			}
 		}
 		#==========================================
+		# Setup filesystem specific environment
+		#------------------------------------------
+		if ($FSTypeRW eq 'btrfs') {
+			if (! $main::global -> setupBTRFSSubVolumes ($loopdir)) {
+				$this -> cleanLoop ();
+				return;
+			}
+		}
+		#==========================================
 		# Copy root tree to disk
 		#------------------------------------------
 		$kiwi -> info ("Copying system image tree on disk");
-		$status = qxx ("rsync -aHXA --one-file-system $system/ $loopdir 2>&1");
+		if (-e $loopdir.'/@') {
+			$status = qxx (
+				'rsync -aHXA --one-file-system '.$system.'/ '.$loopdir.'/@ 2>&1'
+			);
+		} else {
+			$status = qxx (
+				"rsync -aHXA --one-file-system $system/ $loopdir 2>&1"
+			);
+		}
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
