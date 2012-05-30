@@ -4231,13 +4231,17 @@ sub getSize {
 	chomp $mini;
 	my $minsize= qxx ("du -s --block-size=1 $extend | cut -f1");
 	chomp $minsize;
-	my $fsohead= 1.4;
 	my $spare  = 100 * 1024 * 1024;
 	my $files  = $mini;
 	my $fsopts = $cmdL -> getFilesystemOptions();
 	my $isize  = $fsopts->[1];
 	my $iratio = $fsopts->[2];
+	my %type   = %{$xml->getImageTypeAndAttributes()};
+	my $fstype = $type{type};
 	my $xmlsize;
+	if ($type{filesystem}) {
+		$fstype .= ":$type{filesystem}";
+	}
 	#==========================================
 	# Double minimum inode count
 	#------------------------------------------
@@ -4247,10 +4251,17 @@ sub getSize {
 	#------------------------------------------
 	$kiwi -> loginfo ("getSize: files: $files\n");
 	$kiwi -> loginfo ("getSize: usage: $minsize Bytes\n");
-	$kiwi -> loginfo ("getSize: inode: $isize Bytes\n");
-	$minsize *= $fsohead;
-	$minsize += $mini * $isize;
-	$minsize += $spare;
+	if ($fstype =~ /btrfs/) {
+		my $fsohead= 2.0;
+		$kiwi -> loginfo ("getSize: multiply by $fsohead\n");
+		$minsize *= $fsohead;
+	} else {
+		my $fsohead= 1.4;
+		$kiwi -> loginfo ("getSize: inode: $isize Bytes\n");
+		$minsize *= $fsohead;
+		$minsize += $mini * $isize;
+	}
+	$minsize+= $spare;
 	$xmlsize = $minsize;
 	$kiwi -> loginfo ("getSize: minsz: $minsize Bytes\n");
 	#==========================================
