@@ -907,6 +907,35 @@ sub __checkVersionDefinition {
 }
 
 #==========================================
+# __checkVolAttrsConsist
+#------------------------------------------
+sub __checkVolAttrsConsist {
+	# ...
+	# Check that the attributes size and freespace are not used in
+	# combination on the <volume> element.
+	# ---
+	my $this        = shift;
+	my $systemTree  = $this -> {systemTree};
+	my @volumeNodes = $systemTree -> getElementsByTagName('volume');
+	if (! @volumeNodes ) {
+		return 1;
+	}
+	for my $volNode (@volumeNodes) {
+		my $size = $volNode -> getAttribute('size');
+		my $free = $volNode -> getAttribute('freespace');
+		if ($size && $free) {
+			my $kiwi = $this -> {kiwi};
+			my $msg = 'Found combination of "size" and "freespace" attribute '
+				. 'for volume element. This is not supported.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkVolNameNoWhitespace
 #------------------------------------------
 sub __checkVolNameNoWhitespace {
@@ -1057,6 +1086,9 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkVersionDefinition()) {
+		return;
+	}
+	if (! $this -> __checkVolAttrsConsist()) {
 		return;
 	}
 	if (! $this -> __checkVolNameNoWhitespace()) {
