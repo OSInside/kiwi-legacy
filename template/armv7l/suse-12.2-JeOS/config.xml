@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.3" name="LimeJeOS-Factory">
+<image schemaversion="5.3" name="LimeJeOS-12.2">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
 		<specification>
-			Factory JeOS image for arm (panda/beagle/efika) boards
+			12.2 JeOS image for arm (panda/beagle/efika) boards
 		</specification>
 	</description>
 	<profiles>
@@ -25,7 +25,7 @@
 		<boot-theme>openSUSE</boot-theme>
 	</preferences>
 	<preferences profiles="pandaFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-Factory" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="console=ttyO2 vram=16M">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="console=ttyO2 vram=16M">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
@@ -33,7 +33,7 @@
 		</type>
 	</preferences>
 	<preferences profiles="efikaFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-Factory" bootloader="uboot" bootkernel="imx51" kernelcmdline="console=ttymxc0,115200 vram=16M">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" bootkernel="imx51" kernelcmdline="console=ttymxc0,115200 vram=16M">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
@@ -41,7 +41,7 @@
 		</type>
 	</preferences>
 	<preferences profiles="beagleFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-Factory" bootloader="uboot" bootkernel="omap3beagle" kernelcmdline="console=ttyO2 vram=16M">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" bootkernel="omap3beagle" kernelcmdline="console=ttyO2 vram=16M">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>

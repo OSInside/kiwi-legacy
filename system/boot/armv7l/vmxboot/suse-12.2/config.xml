@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.3" name="initrd-oemboot-suse-Factory">
+<image schemaversion="5.3" name="initrd-vmxboot-suse-12.2">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
-		<specification>boot/initrd image used on OEM VMX disk</specification>
+		<specification>boot/initrd image for virtual machines</specification>
 	</description>
 	<preferences>
 		<type image="cpio" bootprofile="default" bootkernel="std"/>
@@ -23,33 +23,19 @@
 	<drivers type="drivers">
 		<file name="crypto/*"/>
 		<file name="drivers/mmc/*"/>
-		<file name="drivers/acpi/*"/>
 		<file name="drivers/acpi/dock.ko"/>
 		<file name="drivers/ata/*"/>
-		<file name="drivers/block/brd.ko"/>
-		<file name="drivers/block/cciss.ko"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/block/virtio_blk.ko"/>
-		<file name="drivers/cdrom/*"/>
 		<file name="drivers/char/hw_random/virtio-rng.ko"/>
-		<file name="drivers/char/lp.ko"/>
-		<file name="drivers/firmware/edd.ko"/>
 		<file name="drivers/gpu/drm/i915/i915.ko"/>
 		<file name="drivers/gpu/drm/nouveau/nouveau.ko"/>
 		<file name="drivers/gpu/drm/radeon/radeon.ko"/>
-		<file name="drivers/hid/*"/>
-		<file name="drivers/hwmon/*"/>
 		<file name="drivers/ide/*"/>
-		<file name="drivers/input/keyboard/*"/>
-		<file name="drivers/input/mouse/*"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/message/fusion/*"/>
-		<file name="drivers/net/*"/>
-		<file name="drivers/parport/*"/>
+		<file name="drivers/net/virtio_net.ko"/>
 		<file name="drivers/scsi/*"/>
-		<file name="drivers/staging/hv/*"/>
-		<file name="drivers/thermal/*"/>
-		<file name="drivers/usb/*"/>
 		<file name="drivers/virtio/*"/>
 		<file name="fs/binfmt_aout.ko"/>
 		<file name="fs/binfmt_misc.ko"/>
@@ -70,14 +56,12 @@
 		<file name="fs/quota_v1.ko"/>
 		<file name="fs/quota_v2.ko"/>
 		<file name="fs/squashfs/*"/>
-		<file name="fs/udf/*"/>
 		<file name="fs/vfat/*"/>
 		<file name="fs/xfs/*"/>
 		<file name="lib/crc-t10dif.ko"/>
 		<file name="lib/crc16.ko"/>
 		<file name="lib/libcrc32c.ko"/>
 		<file name="lib/zlib_deflate/zlib_deflate.ko"/>
-		<file name="net/packet/*"/>
 	</drivers>
 	<repository type="rpm-md" status="replaceable">
 		<source path="obs://openSUSE:/Factory:/ARM/standard"/>
@@ -101,33 +85,26 @@
 		<package name="x-loader-omap3beagle"/>
 	</packages>
 	<packages type="bootstrap">
-		<package name="atftp"/>
-		<package name="bc"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="bootsplash"/>
 		<package name="btrfsprogs"/>
-		<package name="busybox"/>
-		<package name="bzip2"/>
 		<package name="clicfs"/>
 		<package name="cryptsetup"/>
-		<package name="curl"/>
 		<package name="dhcpcd"/>
 		<package name="dialog"/>
-		<package name="dmraid"/>
-		<package name="dosfstools"/>
+		<package name="diffutils"/>
 		<package name="e2fsprogs"/>
-		<package name="eject"/>
 		<package name="fbiterm"/>
 		<package name="file"/>
+		<package name="filesystem"/>
 		<package name="fribidi"/>
-		<package name="genisoimage"/>
 		<package name="gettext-runtime"/>
+		<package name="glibc"/>
+		<package name="glibc-locale"/>
 		<package name="hwinfo"/>
-		<package name="iputils"/>
 		<package name="kernel-firmware"/>
 		<package name="kiwi-tools"/>
-		<package name="kpartx"/>
 		<package name="lvm2"/>
 		<package name="make"/>
 		<package name="module-init-tools"/>
@@ -135,6 +112,7 @@
 		<package name="netcfg"/>
 		<package name="parted"/>
 		<package name="pciutils"/>
+		<package name="procps"/>
 		<package name="psmisc"/>
 		<package name="squashfs"/>
 		<package name="sysconfig"/>
@@ -142,11 +120,6 @@
 		<package name="tar"/>
 		<package name="util-linux"/>
 		<package name="xfsprogs"/>
-		<package name="diffutils"/>
-		<package name="filesystem"/>
-		<package name="glibc"/>
-		<package name="glibc-locale"/>
-		<package name="procps"/>
 	</packages>
 	<packages type="delete">
 		<package name="PolicyKit"/>
@@ -154,9 +127,11 @@
 		<package name="blocxx"/>
 		<package name="cracklib-dict-full"/>
 		<package name="cracklib-dict-small"/>
+		<package name="cyrus-sasl"/>
 		<package name="db"/>
 		<package name="expat"/>
 		<package name="fillup"/>
+		<package name="gawk"/>
 		<package name="gdbm"/>
 		<package name="glib2"/>
 		<package name="gnome-filesystem"/>
@@ -175,6 +150,7 @@
 		<package name="mdadm"/>
 		<package name="mingetty"/>
 		<package name="openSUSE-release"/>
+		<package name="openldap2-client"/>
 		<package name="openslp"/>
 		<package name="pam"/>
 		<package name="pam-modules"/>
