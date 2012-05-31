@@ -706,6 +706,35 @@ sub test_sysdiskNameAttrNoWhiteSpace {
 }
 
 #==========================================
+# test_sysdiskInvalidAttrs
+#------------------------------------------
+sub test_sysdiskInvalidAttrs {
+	# ...
+	# Test that the use of the attributes size and freespace in combination
+	# is rejected.
+	# ---
+	my $this = shift;
+	my @invalidConfigs = $this -> __getInvalidFiles('sysdiskVolAttrs');
+	my $expectedMsg = 'Found combination of "size" and "freespace" attribute '
+		. 'for volume element. This is not supported.';
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $kiwi = $this -> {kiwi};
+		my $msg = $kiwi -> getMessage();
+			$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('sysdiskVolAttrs');
+	$this -> __verifyValid(@validConfigs);
+}
+
+#==========================================
 # test_typeConfigConsist
 #------------------------------------------
 sub test_typeConfigConsist {
