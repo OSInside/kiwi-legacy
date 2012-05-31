@@ -441,6 +441,9 @@ sub obsPath {
 		$module = "this://repos/$module"
 	}
 	my $path = $this -> thisPath ($module);
+	if (! -d $path) {
+		return;
+	}
 	return $path;
 }
 
@@ -565,10 +568,11 @@ sub openSUSEpath {
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
-	if ((! defined $module) || ($module !~ /^opensuse:\/\//)) {
+	if ((! defined $module) || ($module !~ /^(opensuse|obs):\/\//)) {
 		return;
 	}
 	$module =~ s/opensuse:\/\///;
+	$module =~ s/obs:\/\///;
 	$module =~ s/\/$//;
 	$module =~ s/^\///;
 	if ((! defined $module) || ($module eq "")) {
