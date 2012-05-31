@@ -20,7 +20,6 @@
 		<profile name="pae" description="KERNEL: pae kernel"/>
 		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
 		<profile name="desktop" description="KERNEL: Desktop kernel"/>
-		<profile name="rt" description="KERNEL: RealTime kernel"/>
 	</profiles>
 	<drivers type="drivers">
 		<file name="crypto/*"/>
@@ -79,9 +78,6 @@
 	</packages>
 	<packages type="image" profiles="pae">
 		<package name="kernel-pae"/>
-	</packages>
-	<packages type="image" profiles="rt">
-		<package name="kernel-rt"/>
 	</packages>
 	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>
