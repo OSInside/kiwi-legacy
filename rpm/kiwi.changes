@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Thu May 31 22:00:30 CEST 2012 - ms@suse.de
 
+- allow init=/path/to/program option for kiwi images
 - allow boottimeout of 0sec, also set the same default timeout
   of 10sec for the ext|syslinux setup
 
