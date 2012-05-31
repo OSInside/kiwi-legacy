@@ -499,6 +499,132 @@ sub test_getLocale {
 }
 
 #==========================================
+# test_getLVMGroupName
+#------------------------------------------
+sub test_getLVMGroupName {
+	# ...
+	# Verify proper return of getLVMGroupName method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'lvmConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $value = $xml -> getLVMGroupName();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_str_equals('test_Volume', $value);
+}
+
+#==========================================
+# test_getLVMVolumes
+#------------------------------------------
+sub test_getLVMVolumes {
+	# ...
+	# Verify proper return of getLVMVolumes method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'lvmConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %volumes = $xml -> getLVMVolumes();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedVolumes = qw /usr tmp var home/;
+	my @volNames = keys %volumes;
+	$this -> assert_array_equal(\@expectedVolumes, \@volNames);
+	my @volSettings = $volumes{usr};
+	$this -> assert_equals(4096, $volSettings[0][0]);
+	$this -> assert_equals(1, $volSettings[0][1]);
+	@volSettings = $volumes{tmp};
+	$this -> assert_str_equals('all', $volSettings[0][0]);
+	$this -> assert_equals(0, $volSettings[0][1]);
+	@volSettings = $volumes{var};
+	$this -> assert_equals(50, $volSettings[0][0]);
+	$this -> assert_equals(1, $volSettings[0][1]);
+	@volSettings = $volumes{home};
+	$this -> assert_equals(2048, $volSettings[0][0]);
+	$this -> assert_equals(0, $volSettings[0][1]);
+}
+
+#==========================================
+# test_getLVMVolumesDisallowed
+#------------------------------------------
+sub test_getLVMVolumesUsingDisallowed {
+	# ...
+	# Verify proper return of getLVMVolumes method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'lvmConfigDisallowedDir';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %volumes = $xml -> getLVMVolumes();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('LVM: Directory sbin is not allowed', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('warning', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	# Test this condition last to get potential error messages
+	my @expectedVolumes = qw /tmp var/;
+	my @volNames = keys %volumes;
+	$this -> assert_array_equal(\@expectedVolumes, \@volNames);
+	my @volSettings = $volumes{tmp};
+	$this -> assert_str_equals('all', $volSettings[0][0]);
+	$this -> assert_equals(0, $volSettings[0][1]);
+	@volSettings = $volumes{var};
+	$this -> assert_equals(50, $volSettings[0][0]);
+	$this -> assert_equals(1, $volSettings[0][1]);
+}
+
+#==========================================
+# test_getLVMVolumesRoot
+#------------------------------------------
+sub test_getLVMVolumesUsingRoot {
+	# ...
+	# Verify proper return of getLVMVolumes method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'lvmConfigWithRoot';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %volumes = $xml -> getLVMVolumes();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('LVM: Directory / is not allowed', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('warning', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	# Test this condition last to get potential error messages
+	my @expectedVolumes = qw /tmp var/;
+	my @volNames = keys %volumes;
+	$this -> assert_array_equal(\@expectedVolumes, \@volNames);
+	my @volSettings = $volumes{tmp};
+	$this -> assert_str_equals('all', $volSettings[0][0]);
+	$this -> assert_equals(0, $volSettings[0][1]);
+	@volSettings = $volumes{var};
+	$this -> assert_equals(50, $volSettings[0][0]);
+	$this -> assert_equals(1, $volSettings[0][1]);
+}
+
+#==========================================
 # test_getOEMAlignPartition
 #------------------------------------------
 sub test_getOEMAlignPartition {
