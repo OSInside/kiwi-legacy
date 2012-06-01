@@ -75,7 +75,7 @@
 		<package name="kernel-default"/>
 	</packages>
 	<packages type="bootstrap" profiles="pae">
-		<package name="kernel-pae"/>
+		<package name="kernel-pae" arch="i686"/>
 	</packages>
 	<packages type="bootstrap" profiles="xenk">
 		<package name="kernel-xen"/>

@@ -149,7 +149,6 @@
 		<package name="procps"/>
 	</packages>
 	<packages type="delete">
-		<package name="PolicyKit"/>
 		<package name="audit-libs"/>
 		<package name="blocxx"/>
 		<package name="cracklib-dict-full"/>
@@ -165,10 +164,7 @@
 		<package name="insserv"/>
 		<package name="iproute2"/>
 		<package name="iptables"/>
-		<package name="irqbalance"/>
-		<package name="licenses"/>
 		<package name="limal"/>
-		<package name="limal-bootloader"/>
 		<package name="limal-perl"/>
 		<package name="logrotate"/>
 		<package name="make"/>
@@ -184,7 +180,6 @@
 		<package name="perl-gettext"/>
 		<package name="permissions"/>
 		<package name="pm-utils"/>
-		<package name="pmtools"/>
 		<package name="suse-build-key"/>
 	</packages>
 </image>
