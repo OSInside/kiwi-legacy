@@ -1041,26 +1041,6 @@ sub getLicenseNames {
 }
 
 #==========================================
-# getXenDomain
-#------------------------------------------
-sub getXenDomain {
-	# ...
-	# Obtain the Xen domain information if set
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $domain = $node -> getAttribute ("domain");
-	if ((! defined $domain) || ("$domain" eq "")) {
-		return;
-	}
-	return $domain;
-}
-
-#==========================================
 # getOEMSwapSize
 #------------------------------------------
 sub getOEMSwapSize {
@@ -2557,9 +2537,14 @@ sub getImageConfig {
 	#==========================================
 	# machine
 	#------------------------------------------
-	my $xendomain = $this -> getXenDomain();
-	if (defined $xendomain) {
-		$result{kiwi_xendomain} = $xendomain;
+	my $xendomain;
+	my $tnode= $this->{typeNode};
+	my $xenNode = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	if ($xenNode) {
+		$xendomain = $xenNode -> getAttribute ("domain");
+		if (defined $xendomain) {
+			$result{kiwi_xendomain} = $xendomain;
+		}
 	}
 	#==========================================
 	# systemdisk
@@ -2589,7 +2574,6 @@ sub getImageConfig {
 	#==========================================
 	# oemconfig
 	#------------------------------------------
-	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (defined $node) {
 		my $oemswapMB= $node
