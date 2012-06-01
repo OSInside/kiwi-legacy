@@ -148,7 +148,7 @@
 		<package name="kernel-default"/>
 	</packages>
 	<packages type="image" profiles="pae">
-		<package name="kernel-pae"/>
+		<package name="kernel-pae" arch="i686"/>
 	</packages>
 	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>
