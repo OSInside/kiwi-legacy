@@ -2921,7 +2921,7 @@ sub getVMwareConfig {
 	#==========================================
 	# configuration file settings
 	#------------------------------------------
-	my @vmConfigOpts = $this -> getVMConfigOpts();
+	my @vmConfigOpts = $this -> __getVMConfigOpts();
 	#==========================================
 	# save hash
 	#------------------------------------------
@@ -2996,7 +2996,7 @@ sub getXenConfig {
 	#==========================================
 	# configuration file settings
 	#------------------------------------------
-	my @vmConfigOpts = $this -> getVMConfigOpts();
+	my @vmConfigOpts = $this -> __getVMConfigOpts();
 	#==========================================
 	# save hash
 	#------------------------------------------
@@ -4374,25 +4374,6 @@ sub getSingleInstSourceSatSolvable {
 }
 
 #==========================================
-# getVMConfigOpts
-#------------------------------------------
-sub getVMConfigOpts {
-	# ...
-	# Extract the <vmconfig-entry> information from the
-	# XML and return all options in a list
-	# ---
-	my $this = shift;
-	my @configOpts;
-	my @configNodes = $this->{systemTree}
-		->getElementsByTagName ("vmconfig-entry");
-	for my $node (@configNodes) {
-		my $value = $node->textContent();
-		push @configOpts, $node->textContent();
-	}
-	return @configOpts;
-}
-
-#==========================================
 # buildImageName
 #------------------------------------------
 sub buildImageName {
@@ -4613,6 +4594,25 @@ sub __getPreferencesNodeByTagName {
 		}
 	}
 	return $node[0];
+}
+
+#==========================================
+# __getVMConfigOpts
+#------------------------------------------
+sub __getVMConfigOpts {
+	# ...
+	# Extract the <vmconfig-entry> information from the
+	# XML and return all options in a list
+	# ---
+	my $this = shift;
+	my @configOpts;
+	my @configNodes = $this->{systemTree}
+		->getElementsByTagName ("vmconfig-entry");
+	for my $node (@configNodes) {
+		my $value = $node->textContent();
+		push @configOpts, $node->textContent();
+	}
+	return @configOpts;
 }
 
 #==========================================
