@@ -184,7 +184,7 @@ sub new {
 	#==========================================
 	# Check profile names
 	#------------------------------------------
-	if (! $this -> checkProfiles()) {
+	if (! $this -> __checkProfiles()) {
 		return;
 	}
 	#==========================================
@@ -1596,43 +1596,6 @@ sub getProfiles {
 	return @result;
 }
 
-#==========================================
-# checkProfiles
-#------------------------------------------
-sub checkProfiles {
-	# ...
-	# validate profile names. Wrong profile names are treated
-	# as fatal error because you can't know what the result of
-	# your image would be without the requested profile
-	# ---
-	my $this = shift;
-	my $pref = shift;
-	my $kiwi = $this->{kiwi};
-	my $rref = $this->{reqProfiles};
-	my @prequest;
-	my @profiles = $this -> getProfiles();
-	if (defined $pref) {
-		@prequest = @{$pref};
-	} elsif (defined $rref) {
-		@prequest = @{$rref};
-	}
-	if (@prequest) {
-		foreach my $requested (@prequest) {
-			my $ok = 0;
-			foreach my $profile (@profiles) {
-				if ($profile->{name} eq $requested) {
-					$ok=1; last;
-				}
-			}
-			if (! $ok) {
-				$kiwi -> error  ("Profile $requested: not found");
-				$kiwi -> failed ();
-				return;
-			}
-		}
-	}
-	return $this;
-}
 
 #==========================================
 # getInstSourceRepository
@@ -4568,6 +4531,44 @@ sub __addDefaultSplitNode {
 		);
 	}
 	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# __checkProfiles
+#------------------------------------------
+sub __checkProfiles {
+	# ...
+	# validate profile names. Wrong profile names are treated
+	# as fatal error because you can't know what the result of
+	# your image would be without the requested profile
+	# ---
+	my $this = shift;
+	my $pref = shift;
+	my $kiwi = $this->{kiwi};
+	my $rref = $this->{reqProfiles};
+	my @prequest;
+	my @profiles = $this -> getProfiles();
+	if (defined $pref) {
+		@prequest = @{$pref};
+	} elsif (defined $rref) {
+		@prequest = @{$rref};
+	}
+	if (@prequest) {
+		foreach my $requested (@prequest) {
+			my $ok = 0;
+			foreach my $profile (@profiles) {
+				if ($profile->{name} eq $requested) {
+					$ok=1; last;
+				}
+			}
+			if (! $ok) {
+				$kiwi -> error  ("Profile $requested: not found");
+				$kiwi -> failed ();
+				return;
+			}
+		}
+	}
 	return $this;
 }
 
