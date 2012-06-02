@@ -1641,6 +1641,42 @@ sub test_getStripTools {
 	$this -> assert_array_equal(\@expectedNames, \@toolFiles);
 }
 
+#==========================================
+# test_getUsers
+#------------------------------------------
+sub test_getUsers {
+	# ...
+	# Verify proper return of user information
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'userConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %usrData = $xml -> getUsers();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my @expectedUsers = qw /root auser buser/;
+	my @users = keys %usrData;
+	$this -> assert_array_equal(\@expectedUsers, \@users);
+	$this -> assert_str_equals('2000', $usrData{auser}{gid});
+	$this -> assert_str_equals('2000', $usrData{buser}{gid});
+	$this -> assert_str_equals('mygrp', $usrData{auser}{group});
+	$this -> assert_str_equals('mygrp', $usrData{buser}{group});
+	$this -> assert_str_equals('root', $usrData{root}{group});
+	$this -> assert_str_equals('2001', $usrData{auser}{uid});
+	$this -> assert_str_equals('/root', $usrData{root}{home});
+	$this -> assert_str_equals('linux', $usrData{buser}{pwd});
+	$this -> assert_str_equals('plain', $usrData{buser}{pwdformat});
+	$this -> assert_str_equals('Bert', $usrData{buser}{realname});
+	$this -> assert_str_equals('/bin/ksh', $usrData{auser}{shell});
+}
 
 #==========================================
 # test_getVMwareConfig
