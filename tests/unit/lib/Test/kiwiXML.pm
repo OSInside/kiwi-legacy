@@ -1322,6 +1322,42 @@ sub test_getPXEDeployUnionConfig {
 }
 
 #==========================================
+# test_getProfiles
+#------------------------------------------
+sub test_getProfiles {
+	# ...
+	# Verify proper storage of profile information
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my @profiles = $xml -> getProfiles();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Test these conditions last to get potential error messages
+	my $numProfiles = scalar @profiles;
+	$this -> assert_equals(3, $numProfiles);
+	for my $prof (@profiles) {
+		my $name = $prof -> {name};
+		if ($name eq 'profA') {
+			$this -> assert_str_equals('false', $prof -> {include});
+			$this -> assert_str_equals('Test prof A', $prof -> {description});
+		} elsif ($name eq 'profB') {
+			$this -> assert_str_equals('true', $prof -> {include});
+		} else {
+			$this -> assert_str_equals('profC', $prof -> {name});
+		}
+	}
+}
+
+#==========================================
 # test_getRPMCheckSignatures
 #------------------------------------------
 sub test_getRPMCheckSignaturesFalse {
@@ -1747,6 +1783,30 @@ sub test_getXenConfig {
 	$this -> assert_str_equals('128', $vmConfig{xen_memory});
 	$this -> assert_str_equals('3', $vmConfig{xen_ncpus});
 	$this -> assert_str_equals('00:0C:6E:AA:57:2F',$vmConfig{xen_bridge}{br0});
+}
+
+#==========================================
+# test_invalidProfileRequest
+#------------------------------------------
+sub test_invalidProfileRequest {
+	# ...
+	# Test the privat __checkProfiles method by passing an invalid
+	# profile name to the ctor.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfig';
+	my @reqProf = qw /profD/;
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, \@reqProf, $this->{cmdL}
+	);
+	$this -> assert_null($xml);
+	my $msg = $kiwi -> getErrorMessage();
+	$this -> assert_str_equals('Profile profD: not found', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getErrorState();
+	$this -> assert_str_equals('failed', $state);
 }
 
 #==========================================
