@@ -184,7 +184,7 @@ sub new {
 	#==========================================
 	# Check profile names
 	#------------------------------------------
-	if (! $this -> checkProfiles()) {
+	if (! $this -> __checkProfiles()) {
 		return;
 	}
 	#==========================================
@@ -388,31 +388,6 @@ sub getImageID {
 }
 
 #==========================================
-# getPreferencesNodeByTagName
-#------------------------------------------
-sub getPreferencesNodeByTagName {
-	# ...
-	# Searches in all nodes of the preferences sections
-	# and returns the first occurenc of the specified
-	# tag name. If the tag can't be found the function
-	# returns the first node reference
-	# ---
-	my $this = shift;
-	my $name = shift;
-	my @node = $this->{optionsNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		my $tag = $element -> getElementsByTagName ("$name");
-		if ($tag) {
-			return $element;
-		}
-	}
-	return $node[0];
-}
-
-#==========================================
 # getImageSize
 #------------------------------------------
 sub getImageSize {
@@ -559,7 +534,7 @@ sub getImageDefaultDestination {
 	# will use this path as destination
 	# ---
 	my $this = shift;
-	my $node = $this -> getPreferencesNodeByTagName ("defaultdestination");
+	my $node = $this -> __getPreferencesNodeByTagName ("defaultdestination");
 	my $dest = $node -> getElementsByTagName ("defaultdestination");
 	return $dest;
 }
@@ -575,7 +550,7 @@ sub getImageDefaultRoot {
 	# will use this path as root path.
 	# ---
 	my $this = shift;
-	my $node = $this -> getPreferencesNodeByTagName ("defaultroot");
+	my $node = $this -> __getPreferencesNodeByTagName ("defaultroot");
 	my $root = $node -> getElementsByTagName ("defaultroot");
 	return $root;
 }
@@ -607,7 +582,7 @@ sub getImageVersion {
 	# Get the version of the logical extend
 	# ---
 	my $this = shift;
-	my $node = $this -> getPreferencesNodeByTagName ("version");
+	my $node = $this -> __getPreferencesNodeByTagName ("version");
 	my $version = $node -> getElementsByTagName ("version");
 	return $version;
 }
@@ -982,7 +957,7 @@ sub setPackageManager {
 		$this -> {kiwi} -> failed();
 		return;
 	}
-	my $opts = $this -> getPreferencesNodeByTagName ("packagemanager");
+	my $opts = $this -> __getPreferencesNodeByTagName ("packagemanager");
 	my $pmgr = $opts -> getElementsByTagName ("packagemanager");
 	if (($pmgr) && ("$pmgr" eq "$value")) {
 		return $this;
@@ -1009,7 +984,7 @@ sub getPackageManager {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $node = $this -> getPreferencesNodeByTagName ("packagemanager");
+	my $node = $this -> __getPreferencesNodeByTagName ("packagemanager");
 	my @packMgrs = $node -> getElementsByTagName ("packagemanager");
 	my $pmgr = $packMgrs[0];
 	if (! $pmgr) {
@@ -1028,7 +1003,7 @@ sub getLicenseNames {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $node = $this -> getPreferencesNodeByTagName ("showlicense");
+	my $node = $this -> __getPreferencesNodeByTagName ("showlicense");
 	my @lics = $node -> getElementsByTagName ("showlicense");
 	my @names = ();
 	foreach my $node (@lics) {
@@ -1431,7 +1406,7 @@ sub getLocale {
 	# Obtain the locale value or return undef
 	# ---
 	my $this = shift;
-	my $node = $this -> getPreferencesNodeByTagName ("locale");
+	my $node = $this -> __getPreferencesNodeByTagName ("locale");
 	my $lang = $node -> getElementsByTagName ("locale");
 	if ((! defined $lang) || ("$lang" eq "")) {
 		return;
@@ -1447,7 +1422,7 @@ sub getBootTheme {
 	# Obtain the boot-theme value or return undef
 	# ---
 	my $this = shift;
-	my $node = $this -> getPreferencesNodeByTagName ("boot-theme");
+	my $node = $this -> __getPreferencesNodeByTagName ("boot-theme");
 	my $theme= $node -> getElementsByTagName ("boot-theme");
 	if ((! defined $theme) || ("$theme" eq "")) {
 		return;
@@ -1464,7 +1439,7 @@ sub getRPMCheckSignatures {
 	# RPM signatures or not
 	# ---
 	my $this = shift;
-	my $node = $this -> getPreferencesNodeByTagName ("rpm-check-signatures");
+	my $node = $this -> __getPreferencesNodeByTagName ("rpm-check-signatures");
 	my $sigs = $node -> getElementsByTagName ("rpm-check-signatures");
 	if ((! defined $sigs) || ("$sigs" eq "") || ("$sigs" eq "false")) {
 		return;
@@ -1481,7 +1456,7 @@ sub getRPMExcludeDocs {
 	# from installed files or not
 	# ---
 	my $this = shift;
-	my $node = $this-> getPreferencesNodeByTagName ("rpm-excludedocs");
+	my $node = $this-> __getPreferencesNodeByTagName ("rpm-excludedocs");
 	my $xdoc = $node -> getElementsByTagName ("rpm-excludedocs");
 	if ((! defined $xdoc) || ("$xdoc" eq "")) {
 		return;
@@ -1498,7 +1473,7 @@ sub getRPMForce {
 	# installing packages
 	# ---
 	my $this = shift;
-	my $node = $this -> getPreferencesNodeByTagName ("rpm-force");
+	my $node = $this -> __getPreferencesNodeByTagName ("rpm-force");
 	my $frpm = $node -> getElementsByTagName ("rpm-force");
 	if ((! defined $frpm) || ("$frpm" eq "") || ("$frpm" eq "false")) {
 		return;
@@ -1621,43 +1596,6 @@ sub getProfiles {
 	return @result;
 }
 
-#==========================================
-# checkProfiles
-#------------------------------------------
-sub checkProfiles {
-	# ...
-	# validate profile names. Wrong profile names are treated
-	# as fatal error because you can't know what the result of
-	# your image would be without the requested profile
-	# ---
-	my $this = shift;
-	my $pref = shift;
-	my $kiwi = $this->{kiwi};
-	my $rref = $this->{reqProfiles};
-	my @prequest;
-	my @profiles = $this -> getProfiles();
-	if (defined $pref) {
-		@prequest = @{$pref};
-	} elsif (defined $rref) {
-		@prequest = @{$rref};
-	}
-	if (@prequest) {
-		foreach my $requested (@prequest) {
-			my $ok = 0;
-			foreach my $profile (@profiles) {
-				if ($profile->{name} eq $requested) {
-					$ok=1; last;
-				}
-			}
-			if (! $ok) {
-				$kiwi -> error  ("Profile $requested: not found");
-				$kiwi -> failed ();
-				return;
-			}
-		}
-	}
-	return $this;
-}
 
 #==========================================
 # getInstSourceRepository
@@ -2946,7 +2884,7 @@ sub getVMwareConfig {
 	#==========================================
 	# configuration file settings
 	#------------------------------------------
-	my @vmConfigOpts = $this -> getVMConfigOpts();
+	my @vmConfigOpts = $this -> __getVMConfigOpts();
 	#==========================================
 	# save hash
 	#------------------------------------------
@@ -3021,7 +2959,7 @@ sub getXenConfig {
 	#==========================================
 	# configuration file settings
 	#------------------------------------------
-	my @vmConfigOpts = $this -> getVMConfigOpts();
+	my @vmConfigOpts = $this -> __getVMConfigOpts();
 	#==========================================
 	# save hash
 	#------------------------------------------
@@ -4399,25 +4337,6 @@ sub getSingleInstSourceSatSolvable {
 }
 
 #==========================================
-# getVMConfigOpts
-#------------------------------------------
-sub getVMConfigOpts {
-	# ...
-	# Extract the <vmconfig-entry> information from the
-	# XML and return all options in a list
-	# ---
-	my $this = shift;
-	my @configOpts;
-	my @configNodes = $this->{systemTree}
-		->getElementsByTagName ("vmconfig-entry");
-	for my $node (@configNodes) {
-		my $value = $node->textContent();
-		push @configOpts, $node->textContent();
-	}
-	return @configOpts;
-}
-
-#==========================================
 # buildImageName
 #------------------------------------------
 sub buildImageName {
@@ -4613,6 +4532,88 @@ sub __addDefaultSplitNode {
 	}
 	$this -> updateXML();
 	return $this;
+}
+
+#==========================================
+# __checkProfiles
+#------------------------------------------
+sub __checkProfiles {
+	# ...
+	# validate profile names. Wrong profile names are treated
+	# as fatal error because you can't know what the result of
+	# your image would be without the requested profile
+	# ---
+	my $this = shift;
+	my $pref = shift;
+	my $kiwi = $this->{kiwi};
+	my $rref = $this->{reqProfiles};
+	my @prequest;
+	my @profiles = $this -> getProfiles();
+	if (defined $pref) {
+		@prequest = @{$pref};
+	} elsif (defined $rref) {
+		@prequest = @{$rref};
+	}
+	if (@prequest) {
+		foreach my $requested (@prequest) {
+			my $ok = 0;
+			foreach my $profile (@profiles) {
+				if ($profile->{name} eq $requested) {
+					$ok=1; last;
+				}
+			}
+			if (! $ok) {
+				$kiwi -> error  ("Profile $requested: not found");
+				$kiwi -> failed ();
+				return;
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# __getPreferencesNodeByTagName
+#------------------------------------------
+sub __getPreferencesNodeByTagName {
+	# ...
+	# Searches in all nodes of the preferences sections
+	# and returns the first occurenc of the specified
+	# tag name. If the tag can't be found the function
+	# returns the first node reference
+	# ---
+	my $this = shift;
+	my $name = shift;
+	my @node = $this->{optionsNodeList} -> get_nodelist();
+	foreach my $element (@node) {
+		if (! $this -> __requestedProfile ($element)) {
+			next;
+		}
+		my $tag = $element -> getElementsByTagName ("$name");
+		if ($tag) {
+			return $element;
+		}
+	}
+	return $node[0];
+}
+
+#==========================================
+# __getVMConfigOpts
+#------------------------------------------
+sub __getVMConfigOpts {
+	# ...
+	# Extract the <vmconfig-entry> information from the
+	# XML and return all options in a list
+	# ---
+	my $this = shift;
+	my @configOpts;
+	my @configNodes = $this->{systemTree}
+		->getElementsByTagName ("vmconfig-entry");
+	for my $node (@configNodes) {
+		my $value = $node->textContent();
+		push @configOpts, $node->textContent();
+	}
+	return @configOpts;
 }
 
 #==========================================
@@ -4940,7 +4941,7 @@ sub __setOptionsElement {
 	$kiwi -> info ("Updating element $item: $value");
 	my $addElement = new XML::LibXML::Element ("$item");
 	$addElement -> appendText ($value);
-	my $opts = $this -> getPreferencesNodeByTagName ("$item");
+	my $opts = $this -> __getPreferencesNodeByTagName ("$item");
 	my $node = $opts -> getElementsByTagName ("$item");
 	if ($node) {
 		if ("$node" eq "$value") {
@@ -4977,7 +4978,7 @@ sub __addOptionsElement {
 		$kiwi -> info ("Adding element $item: $text");
 		my $addElement = new XML::LibXML::Element ("$item");
 		$addElement -> appendText ($text);
-		my $opts = $this -> getPreferencesNodeByTagName ("$item");
+		my $opts = $this -> __getPreferencesNodeByTagName ("$item");
 		$opts -> appendChild ($addElement);
 		$kiwi -> done ();
 	}
