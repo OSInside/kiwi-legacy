@@ -46,7 +46,7 @@ BuildRequires:  rpm-devel
 BuildRequires:  btrfsprogs
 BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
-BuildRequires:  perl-Test-Unit
+BuildRequires:  perl-Test-Unit-Lite
 BuildRequires:  squashfs
 BuildRequires:  zypper
 %endif
