@@ -2561,7 +2561,24 @@ sub cleanupRPMDatabase {
 	#------------------------------------------
 	if ($code != 0) {
 		$kiwi -> info ('Rebuild RPM package db...');
-		$data = qxx ("@kchroot /bin/rm -rf /var/lib/rpm/*");
+		my $nameIndex = "$root/var/lib/rpm/Name";
+		my $packIndex = "$root/var/lib/rpm/Packages";
+		if (! -x "/usr/bin/db_dump") {
+			$kiwi -> failed ();
+			$kiwi -> error ('db_dump tool required for rpm db rebuild');
+			return;
+		}
+		if (! -x "/usr/bin/db45_load") {
+			$kiwi -> failed ();
+			$kiwi -> error ('db45_load tool required for rpm db rebuild');
+			return;
+		}
+		qxx ('mv '.$packIndex.' '.$packIndex.'.bak');
+		qxx ('mv '.$nameIndex.' '.$nameIndex.'.bak');
+		qxx ('db_dump '.$packIndex.'.bak | db45_load '.$packIndex);
+		qxx ('db_dump '.$nameIndex.'.bak | db45_load '.$nameIndex);
+		qxx ('rm -f '.$packIndex.'.bak');
+		qxx ('rm -f '.$nameIndex.'.bak');
 		$data = qxx ("@kchroot /bin/rpm --rebuilddb 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
