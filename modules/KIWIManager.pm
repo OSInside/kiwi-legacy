@@ -1399,7 +1399,9 @@ sub removePackages {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Removing packages...");
-		$this -> rpmLibs();
+		if (! $this -> rpmLibs()) {
+			return;
+		}
 		my @removeOpts = (
 			"--nodeps --allmatches --noscripts"
 		);
@@ -2261,7 +2263,9 @@ sub setupRootSystem {
 	# setup baselibs
 	#------------------------------------------
 	if (! $chroot) {
-		$this -> rpmLibs();
+		if (! $this -> rpmLibs()) {
+			return;
+		}
 	}
 	return $this;
 }
@@ -2565,12 +2569,12 @@ sub cleanupRPMDatabase {
 		my $packIndex = "$root/var/lib/rpm/Packages";
 		if (! -x "/usr/bin/db_dump") {
 			$kiwi -> failed ();
-			$kiwi -> error ('db_dump tool required for rpm db rebuild');
+			$kiwi -> error ("db_dump tool required for rpm db rebuild\n");
 			return;
 		}
 		if (! -x "/usr/bin/db45_load") {
 			$kiwi -> failed ();
-			$kiwi -> error ('db45_load tool required for rpm db rebuild');
+			$kiwi -> error ("db45_load tool required for rpm db rebuild\n");
 			return;
 		}
 		qxx ('mv '.$packIndex.' '.$packIndex.'.bak');
@@ -2584,7 +2588,7 @@ sub cleanupRPMDatabase {
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error (
-				'Most likely we encountered an RPM version incompatibility'
+				"Most likely we encountered an RPM version incompatibility\n"
 			);
 			$kiwi -> error ("rpm: $data");
 			return;
@@ -2606,7 +2610,9 @@ sub rpmLibs {
 	#==========================================
 	# cleanup baselibs
 	#------------------------------------------
-	$this -> cleanupRPMDatabase();
+	if (! $this -> cleanupRPMDatabase()) {
+		return;
+	}
 	qxx ("@kchroot ldconfig 2>&1");
 	return $this;
 }
