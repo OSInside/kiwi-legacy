@@ -366,6 +366,24 @@ into the image after deployment.</db:para>
   </div>
   <!--
     ==========================================
+    common element <defaultprebuilt>
+    
+  -->
+  <div>
+    <define name="k.defaultprebuilt.attlist">
+      <empty/>
+    </define>
+    <define name="k.defaultprebuilt">
+      <element name="defaultprebuilt">
+        <a:documentation>Default directory name for pre-built boot images, used if
+the directory is not specified on the command line</a:documentation>
+        <ref name="k.defaultroot.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <defaultroot>
     
   -->
@@ -3661,6 +3679,9 @@ and also depends of the selected image output type.</db:para>
             <ref name="k.defaultdestination"/>
           </optional>
           <optional>
+            <ref name="k.defaultprebuilt"/>
+          </optional>
+          <optional>
             <ref name="k.defaultroot"/>
           </optional>
           <optional>
@@ -3684,14 +3705,14 @@ and also depends of the selected image output type.</db:para>
           <optional>
             <ref name="k.rpm-force"/>
           </optional>
+          <zeroOrMore>
+            <ref name="k.showlicense"/>
+          </zeroOrMore>
           <optional>
             <ref name="k.timezone"/>
           </optional>
           <zeroOrMore>
             <ref name="k.type"/>
-          </zeroOrMore>
-          <zeroOrMore>
-            <ref name="k.showlicense"/>
           </zeroOrMore>
           <optional>
             <ref name="k.version"/>

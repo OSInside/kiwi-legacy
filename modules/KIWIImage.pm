@@ -482,6 +482,11 @@ sub checkAndSetupPrebuiltBootImage {
 	my $prebuiltPath = $cmdL -> getPrebuiltBootImagePath();
 	if (defined $prebuiltPath) {
 		$lookup = $prebuiltPath."/";
+	} else {
+		my $defaultPath = $ixml -> getDefaultPrebuiltDir();
+		if ($defaultPath) {
+			$lookup =  $defaultPath . '/';
+		}
 	}
 	my $pinitrd = $lookup.$bootImageName.".gz";
 	my $psplash;

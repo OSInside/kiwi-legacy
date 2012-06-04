@@ -230,6 +230,20 @@ div {
 }
 
 #==========================================
+# common element <defaultprebuilt>
+#
+div {
+	k.defaultprebuilt.attlist = empty
+	k.defaultprebuilt =
+		## Default directory name for pre-built boot images, used if
+        ## the directory is not specified on the command line
+		element defaultprebuilt {
+			k.defaultroot.attlist,
+			text
+		}
+}
+
+#==========================================
 # common element <defaultroot>
 #
 div {
@@ -2498,6 +2512,7 @@ div {
 			k.preferences.attlist &
 			k.boot-theme? &
 			k.defaultdestination? &
+			k.defaultprebuilt? &
 			k.defaultroot? &
 			k.hwclock? &
 			k.keytable? &
@@ -2506,9 +2521,9 @@ div {
 			k.rpm-check-signatures? &
 			k.rpm-excludedocs? &
 			k.rpm-force? &
+			k.showlicense* &
 			k.timezone? &
 			k.type* &
-			k.showlicense* &
 			k.version?
 		}
 }

@@ -846,13 +846,15 @@ tar -cf kiwi-hooks.tgz kiwi-hooks/
       <para>The commands above result in the creation of the OEM boot image
         for openSUSE 12.1 in the directory
         <filename>/mystore/kiwiprebuiltboot</filename>. This boot image can
-        readily be used by any kiwi image build for an openSUSE 12.1 OEM image.
+        readily be used by any kiwi build for an openSUSE 12.1 OEM image.
         Using the pre-built image requires that the value of the
         <sgmltag class="attribute">checkprebuilt</sgmltag> attribute of the
         <sgmltag class="element">type</sgmltag> element be set to
         <sgmltag class="attvalue">true</sgmltag> and that the location of
-        the image is provided with the <option>--prebuiltbootimage</option>
-        command line argument.</para>
+        the boot image is provided with the 
+        <option>--prebuiltbootimage</option> command line argument, or
+        the <sgmltag class="element">defaultprebuilt</sgmltag> element in
+        the <filename>config.xml</filename> file.</para>
       
     <para>Using pre-built boot images has the advantage that the boot image
       does not have to be re-created every time a specific image type for
