@@ -1461,7 +1461,6 @@ sub createImageLiveCD {
 	# Get system image type information
 	#------------------------------------------
 	my %stype= %{$sxml->getImageTypeAndAttributes()};
-	my $pblt = $stype{checkprebuilt};
 	my $vga  = $stype{vga};
 	#==========================================
 	# Get boot image name and compressed flag
@@ -2261,7 +2260,6 @@ sub createImageSplit {
 	# Get system image type information
 	#------------------------------------------
 	my %type = %{$sxml->getImageTypeAndAttributes()};
-	my $pblt = $type{checkprebuilt};
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
