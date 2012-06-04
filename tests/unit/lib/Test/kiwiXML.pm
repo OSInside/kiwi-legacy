@@ -207,6 +207,28 @@ sub test_getBootTheme {
 }
 
 #==========================================
+# test_getDefaultPrebuiltDir
+#------------------------------------------
+sub test_getDefaultPrebuiltDir {
+	# ...
+	# Verify proper return of getDefaultPrebuiltDir method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettings';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $value = $xml -> getDefaultPrebuiltDir();
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_str_equals('/work/kiwibootimgs', $value);
+}
+
+#==========================================
 # test_getEc2Config
 #------------------------------------------
 sub test_getEc2Config {
@@ -1807,7 +1829,8 @@ sub test_invalidProfileRequest {
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getErrorState();
 	$this -> assert_str_equals('failed', $state);
-	$kiwi -> __reset();
+    # for this test, just make sure everything in the log object gets reset
+	$kiwi -> getState();;
 }
 
 #==========================================

@@ -8,6 +8,7 @@
 	<preferences>
 		<boot-theme>bluestar</boot-theme>
 		<defaultdestination>/work/tmp</defaultdestination>
+        <defaultprebuilt>/work/kiwibootimgs</defaultprebuilt>
 		<defaultroot>/var/tmp</defaultroot>
 		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1">
 			<size unit="G">20</size>

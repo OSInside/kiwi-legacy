@@ -291,6 +291,19 @@ sub getConfigName {
 }
 
 #==========================================
+# getDefaultPrebuiltDir
+#------------------------------------------
+sub getDefaultPrebuiltDir {
+	# ...
+	# Return the path of the default location for pre-built boot images
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ('defaultprebuilt');
+	my $imgDir = $node -> getElementsByTagName ('defaultprebuilt');
+	return $imgDir;
+}
+
+#==========================================
 # createURLList
 #------------------------------------------
 sub createURLList {

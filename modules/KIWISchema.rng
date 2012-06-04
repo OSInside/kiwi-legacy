@@ -366,6 +366,24 @@ into the image after deployment.</db:para>
   </div>
   <!--
     ==========================================
+    common element <defaultprebuilt>
+    
+  -->
+  <div>
+    <define name="k.defaultprebuilt.attlist">
+      <empty/>
+    </define>
+    <define name="k.defaultprebuilt">
+      <element name="defaultprebuilt">
+        <a:documentation>Default directory name for pre-built boot images, used if
+the directory is not specified on the command line</a:documentation>
+        <ref name="k.defaultroot.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <defaultroot>
     
   -->
@@ -1941,22 +1959,6 @@ the correct timezone and copy it to /etc/localtime.</db:para>
 to /usr/share/kiwi/image</a:documentation>
       </attribute>
     </define>
-    <define name="k.type.bootpartsize.attribute">
-      <attribute name="bootpartsize">
-        <a:documentation>For images with a separate boot partition this attribute
-specifies the size in MB. If not set the min bootpart
-size is set to 150 MB</a:documentation>
-        <data type="nonNegativeInteger"/>
-      </attribute>
-    </define>
-    <define name="k.type.editbootconfig.attribute">
-      <attribute name="editbootconfig">
-        <a:documentation>Specifies the path to a script which is called right
-before the bootloader is installed. The script runs
-relative to the directory which contains the image
-structure</a:documentation>
-      </attribute>
-    </define>
     <define name="k.type.bootkernel.attribute">
       <attribute name="bootkernel">
         <a:documentation>Specifies the kernel boot profile defined in the boot
@@ -1977,6 +1979,14 @@ At the moment grub, zipl and sys|extlinux are supported</a:documentation>
           <value>yaboot</value>
           <value>uboot</value>
         </choice>
+      </attribute>
+    </define>
+    <define name="k.type.bootpartsize.attribute">
+      <attribute name="bootpartsize">
+        <a:documentation>For images with a separate boot partition this attribute
+specifies the size in MB. If not set the min bootpart
+size is set to 150 MB</a:documentation>
+        <data type="nonNegativeInteger"/>
       </attribute>
     </define>
     <define name="k.type.bootprofile.attribute">
@@ -2019,6 +2029,14 @@ storage device names. By default by-id is used.</a:documentation>
           <value>by-label</value>
           <value>by-path</value>
         </choice>
+      </attribute>
+    </define>
+    <define name="k.type.editbootconfig.attribute">
+      <attribute name="editbootconfig">
+        <a:documentation>Specifies the path to a script which is called right
+before the bootloader is installed. The script runs
+relative to the directory which contains the image
+structure</a:documentation>
       </attribute>
     </define>
     <define name="k.type.filesystem.attribute">
@@ -2113,13 +2131,6 @@ to keep data persistent over a reboot</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
-    <define name="k.type.ramonly.attribute">
-      <attribute name="ramonly">
-        <a:documentation>for use with overlay filesystems only:
-will force any COW action to happen in RAM</a:documentation>
-        <data type="boolean"/>
-      </attribute>
-    </define>
     <define name="k.type.image.attribute">
       <attribute name="image">
         <a:documentation>Specifies the image type</a:documentation>
@@ -2195,6 +2206,13 @@ mount that filesystem while booting</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
+    <define name="k.type.ramonly.attribute">
+      <attribute name="ramonly">
+        <a:documentation>for use with overlay filesystems only:
+will force any COW action to happen in RAM</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.type.vga.attribute">
       <attribute name="vga">
         <a:documentation>Specifies the kernel framebuffer mode. More information
@@ -2215,16 +2233,13 @@ into the master block. There is space for 32 characters.</a:documentation>
           <ref name="k.type.boot.attribute"/>
         </optional>
         <optional>
-          <ref name="k.type.bootpartsize.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.type.editbootconfig.attribute"/>
-        </optional>
-        <optional>
           <ref name="k.type.bootkernel.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.bootloader.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.bootpartsize.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.bootprofile.attribute"/>
@@ -2240,6 +2255,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.devicepersistency.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.editbootconfig.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.filesystem.attribute"/>
@@ -2265,9 +2283,6 @@ into the master block. There is space for 32 characters.</a:documentation>
         <optional>
           <ref name="k.type.hybridpersistent.attribute"/>
         </optional>
-        <optional>
-          <ref name="k.type.ramonly.attribute"/>
-        </optional>
         <ref name="k.type.image.attribute"/>
         <optional>
           <ref name="k.type.installboot.attribute"/>
@@ -2289,6 +2304,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.primary.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.ramonly.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.vga.attribute"/>
@@ -3661,6 +3679,9 @@ and also depends of the selected image output type.</db:para>
             <ref name="k.defaultdestination"/>
           </optional>
           <optional>
+            <ref name="k.defaultprebuilt"/>
+          </optional>
+          <optional>
             <ref name="k.defaultroot"/>
           </optional>
           <optional>
@@ -3684,14 +3705,14 @@ and also depends of the selected image output type.</db:para>
           <optional>
             <ref name="k.rpm-force"/>
           </optional>
+          <zeroOrMore>
+            <ref name="k.showlicense"/>
+          </zeroOrMore>
           <optional>
             <ref name="k.timezone"/>
           </optional>
           <zeroOrMore>
             <ref name="k.type"/>
-          </zeroOrMore>
-          <zeroOrMore>
-            <ref name="k.showlicense"/>
           </zeroOrMore>
           <optional>
             <ref name="k.version"/>

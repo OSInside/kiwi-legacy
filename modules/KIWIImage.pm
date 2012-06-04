@@ -482,6 +482,11 @@ sub checkAndSetupPrebuiltBootImage {
 	my $prebuiltPath = $cmdL -> getPrebuiltBootImagePath();
 	if (defined $prebuiltPath) {
 		$lookup = $prebuiltPath."/";
+	} else {
+		my $defaultPath = $ixml -> getDefaultPrebuiltDir();
+		if ($defaultPath) {
+			$lookup =  $defaultPath . '/';
+		}
 	}
 	my $pinitrd = $lookup.$bootImageName.".gz";
 	my $psplash;
@@ -1456,7 +1461,6 @@ sub createImageLiveCD {
 	# Get system image type information
 	#------------------------------------------
 	my %stype= %{$sxml->getImageTypeAndAttributes()};
-	my $pblt = $stype{checkprebuilt};
 	my $vga  = $stype{vga};
 	#==========================================
 	# Get boot image name and compressed flag
@@ -2256,7 +2260,6 @@ sub createImageSplit {
 	# Get system image type information
 	#------------------------------------------
 	my %type = %{$sxml->getImageTypeAndAttributes()};
-	my $pblt = $type{checkprebuilt};
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
