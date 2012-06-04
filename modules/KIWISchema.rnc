@@ -1459,17 +1459,6 @@ div {
 		## Specifies the path of the boot image (initrd), relative
 		## to /usr/share/kiwi/image
 		attribute boot { text }
-	k.type.bootpartsize.attribute =
-		## For images with a separate boot partition this attribute
-		## specifies the size in MB. If not set the min bootpart
-		## size is set to 150 MB
-		attribute bootpartsize { xsd:nonNegativeInteger }
-	k.type.editbootconfig.attribute =
-		## Specifies the path to a script which is called right
-		## before the bootloader is installed. The script runs
-		## relative to the directory which contains the image
-		## structure
-		attribute editbootconfig { text }
 	k.type.bootkernel.attribute =
 		## Specifies the kernel boot profile defined in the boot
 		## image description. When kiwi builds the boot image the
@@ -1481,6 +1470,11 @@ div {
 		attribute bootloader {
 			"extlinux" | "grub" | "grub2" | "syslinux" | "zipl" | "yaboot" | "uboot"
 		}
+	k.type.bootpartsize.attribute =
+		## For images with a separate boot partition this attribute
+		## specifies the size in MB. If not set the min bootpart
+		## size is set to 150 MB
+		attribute bootpartsize { xsd:nonNegativeInteger }
 	k.type.bootprofile.attribute =
 		## Specifies the boot profile defined in the boot image
 		## description. When kiwi builds the boot image the
@@ -1505,6 +1499,12 @@ div {
 		## Specifies which method to use in order to get persistent
 		## storage device names. By default by-id is used.
 		attribute devicepersistency { "by-uuid" | "by-label" | "by-path" }
+	k.type.editbootconfig.attribute =
+		## Specifies the path to a script which is called right
+		## before the bootloader is installed. The script runs
+		## relative to the directory which contains the image
+		## structure
+		attribute editbootconfig { text }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
 		## btrfs, clicfs, ext2, ext3, ext4, reiserfs, squashfs, or xfs
@@ -1550,10 +1550,6 @@ div {
 		## will trigger the creation of a partition for a COW file
 		## to keep data persistent over a reboot
 		attribute hybridpersistent { xsd:boolean }
-	k.type.ramonly.attribute =
-		## for use with overlay filesystems only:
-		## will force any COW action to happen in RAM
-		attribute ramonly { xsd:boolean }
 	k.type.image.attribute =
 		## Specifies the image type
 		attribute image {
@@ -1591,6 +1587,10 @@ div {
 	k.type.primary.attribute =
 		## Specifies the primary type (choose KIWI option type)
 		attribute primary { xsd:boolean }
+	k.type.ramonly.attribute =
+		## for use with overlay filesystems only:
+		## will force any COW action to happen in RAM
+		attribute ramonly { xsd:boolean }
 	k.type.vga.attribute =
 		## Specifies the kernel framebuffer mode. More information
 		## about the possible values can be found by calling
@@ -1603,15 +1603,15 @@ div {
 		attribute volid { text }
 	k.type.attlist =
 		k.type.boot.attribute? &
-		k.type.bootpartsize.attribute? &
-		k.type.editbootconfig.attribute? &
 		k.type.bootkernel.attribute? &
 		k.type.bootloader.attribute? &
+		k.type.bootpartsize.attribute? &
 		k.type.bootprofile.attribute? &
 		k.type.boottimeout.attribute? &
 		k.type.checkprebuilt.attribute? &
 		k.type.compressed.attribute? &
 		k.type.devicepersistency.attribute? &
+		k.type.editbootconfig.attribute? &
 		k.type.filesystem.attribute? &
 		k.type.flags.attribute? &
 		k.type.format.attribute? &
@@ -1620,7 +1620,6 @@ div {
 		k.type.fsreadwrite.attribute? &
 		k.type.hybrid.attribute? &
 		k.type.hybridpersistent.attribute? &
-		k.type.ramonly.attribute? &
 		k.type.image.attribute &
 		k.type.installboot.attribute? &
 		k.type.installprovidefailsafe.attribute? &
@@ -1629,6 +1628,7 @@ div {
 		k.type.kernelcmdline.attribute? &
 		k.type.luks.attribute? &
 		k.type.primary.attribute? &
+		k.type.ramonly.attribute? &
 		k.type.vga.attribute? &
 		k.type.volid.attribute?
 	k.type =
