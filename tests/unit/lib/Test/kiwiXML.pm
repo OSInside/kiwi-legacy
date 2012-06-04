@@ -1829,7 +1829,8 @@ sub test_invalidProfileRequest {
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getErrorState();
 	$this -> assert_str_equals('failed', $state);
-	$kiwi -> __reset();
+	# for this test, just make sure everything in the log object gets reset
+	$kiwi -> getState();;
 }
 
 #==========================================
