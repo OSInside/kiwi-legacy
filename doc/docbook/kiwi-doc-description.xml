@@ -1475,31 +1475,6 @@
               directory. </para>
           </listitem>
         </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">netdrivers</sgmltag></term>
-          <listitem>
-            <para> Each file is specified relative to the <filename
-                class="directory"
-                  >/lib/modules/<replaceable>Version</replaceable>/kernel/drivers</filename>
-              directory. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">scsidrivers</sgmltag></term>
-          <listitem>
-            <para> Each file is specified relative to the
-                  <filename>/lib/modules/<replaceable>Version</replaceable>/kernel/drivers</filename>
-            </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">usbdrivers</sgmltag></term>
-          <listitem>
-            <para> Each file is specified relative to the
-                  <filename>/lib/modules/<replaceable>Version</replaceable>/kernel/drivers</filename>
-              directory. </para>
-          </listitem>
-        </varlistentry>
       </variablelist>
 
       <para>According to the <sgmltag>driver</sgmltag> element the

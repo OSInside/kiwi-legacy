@@ -265,8 +265,7 @@ exit</programlisting>
         <listitem>
           <para>
             A comma separated list of the driver entries as listed in the
-            drivers section of the <filename>config.xml</filename>. Similar variables exists for
-            the usbdrivers and scsidrivers sections
+            drivers section of the <filename>config.xml</filename>. 
           </para>
         </listitem>
       </varlistentry>
