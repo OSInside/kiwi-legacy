@@ -24,13 +24,11 @@
 	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>
 	</drivers>
-	<drivers type="usbdrivers" profiles="default,xen">
-		<file name="usb/core/usbcore.ko"/>
-		<file name="usb/host/*"/>
-		<file name="usb/storage/usb-storage.ko"/>
-	</drivers>
 	<drivers type="drivers" profiles="default,xen">
 		<file name="crypto/*"/>
+		<file name="drivers/usb/core/usbcore.ko"/>
+		<file name="drivers/usb/host/*"/>
+		<file name="drivers/usb/storage/usb-storage.ko"/>
 		<file name="drivers/acpi/dock.ko"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/block/aoe/aoe.ko"/>

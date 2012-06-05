@@ -25,13 +25,11 @@
 	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>
 	</drivers>
-	<drivers type="usbdrivers" profiles="default,xen,ppc64">
-		<file name="usb/core/usbcore.ko"/>
-		<file name="usb/host/*"/>
-		<file name="usb/storage/usb-storage.ko"/>
-	</drivers>
 	<drivers type="drivers" profiles="default,xen,ppc64">
 		<file name="crypto/*"/>
+		<file name="drivers/usb/core/usbcore.ko"/>
+		<file name="drivers/usb/host/*"/>
+		<file name="drivers/usb/storage/usb-storage.ko"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/net/e1000/e1000.ko"/>
 		<file name="drivers/net/e1000e/e1000e.ko"/>

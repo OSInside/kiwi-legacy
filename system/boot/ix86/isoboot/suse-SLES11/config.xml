@@ -21,13 +21,11 @@
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="rt" description="KERNEL: RealTime kernel"/>
 	</profiles>
-	<drivers type="usbdrivers">
-		<file name="usb/core/usbcore.ko"/>
-		<file name="usb/host/*"/>
-		<file name="usb/storage/usb-storage.ko"/>
-	</drivers>
 	<drivers type="drivers">
 		<file name="crypto/*"/>
+		<file name="drivers/usb/core/usbcore.ko"/>
+		<file name="drivers/usb/host/*"/>
+		<file name="drivers/usb/storage/usb-storage.ko"/>
 		<file name="drivers/acpi/dock.ko"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/block/brd.ko"/>
