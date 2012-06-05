@@ -5198,12 +5198,12 @@ sub __requestedProfile {
 	# ---
 	my $this      = shift;
 	my $element   = shift;
-	my $nodeName  = $element->nodeName();
 
 	if (! defined $element) {
 		# print "Element not defined\n";
 		return 1;
 	}
+	#my $nodeName  = $element->nodeName();
 	my $profiles = $element -> getAttribute ("profiles");
 	if (! defined $profiles) {
 		# If no profile is specified, then it is assumed to be in all profiles.
