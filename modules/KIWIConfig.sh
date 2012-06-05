@@ -1444,10 +1444,7 @@ function suseStripKernel {
 			#------------------------------------------
 			stripdir=/tmp/stripped_modules
 			IFS=,
-			for mod in \
-				$kiwi_usbdrivers $kiwi_scsidrivers \
-				$kiwi_netdrivers $kiwi_drivers
-			do
+			for mod in $kiwi_drivers; do
 				local path=`/usr/bin/dirname $mod`
 				local base=`/usr/bin/basename $mod`
 				for d in kernel;do

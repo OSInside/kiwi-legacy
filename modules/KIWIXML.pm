@@ -2463,20 +2463,15 @@ sub getImageConfig {
 	#------------------------------------------
 	@nodelist = $this->{driversNodeList} -> get_nodelist();
 	foreach my $element (@nodelist) {
-		my $type = $element -> getAttribute("type");
-		$type = "kiwi_".$type;
 		if (! $this -> __requestedProfile ($element)) {
 			next;
 		}
 		my @ntag = $element -> getElementsByTagName ("file");
+		my $type = "kiwi_drivers";
 		my $data = "";
-		my $prefix = "";
-		if ($type ne "kiwi_drivers") {
-			$prefix = "drivers/";
-		}
 		foreach my $element (@ntag) {
 			my $name =  $element -> getAttribute ("name");
-			$data = $data.",".$prefix.$name;
+			$data = $data.",".$name;
 		}
 		$data =~ s/^,+//;
 		if (defined $result{$type}) {
