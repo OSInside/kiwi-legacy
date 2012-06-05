@@ -2826,12 +2826,7 @@ a standard image description created by a kiwi user.</a:documentation>
   <div>
     <define name="k.drivers.type.attribute">
       <attribute name="type">
-        <choice>
-          <value>drivers</value>
-          <value>netdrivers</value>
-          <value>scsidrivers</value>
-          <value>usbdrivers</value>
-        </choice>
+        <value>drivers</value>
       </attribute>
     </define>
     <define name="k.drivers.profiles.attribute">

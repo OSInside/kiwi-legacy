@@ -1958,7 +1958,7 @@ div {
 #
 div {
 	k.drivers.type.attribute = attribute type {
-		"drivers" | "netdrivers" | "scsidrivers" | "usbdrivers"
+		"drivers"
 	}
 	k.drivers.profiles.attribute = k.profiles.attribute
 	k.drivers.attlist = 
