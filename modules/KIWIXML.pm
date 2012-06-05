@@ -3746,9 +3746,9 @@ sub getArchiveList {
 }
 
 #==========================================
-# getNodeList
+# getRepoNodeList
 #------------------------------------------
-sub getNodeList {
+sub getRepoNodeList {
 	# ...
 	# Return the current <repository> list which consists
 	# of XML::LibXML::Element object pointers
