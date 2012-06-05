@@ -1675,6 +1675,51 @@ sub test_getStripLibs {
 }
 
 #==========================================
+# test_getStripNodeList
+#------------------------------------------
+sub test_getStripNodeList {
+	# ...
+	# Verify the expected return of getStripNodeList
+	# Note, this method should eventually disappear from the XML object
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @stripNodes = $xml -> getStripNodeList() -> get_nodelist();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my @expectedDel = qw (/etc/resolv.conf /lib/libc.so);
+	my @expectedLibs = qw /libdbus libnss/;
+	my @expectedTools = qw /megacli virt-mgr/;
+	for my $node (@stripNodes) {
+		my $type  = $node -> getAttribute ("type");
+		my @files = $node -> getElementsByTagName ("file");
+		my @items = ();
+		for my $element (@files) {
+			my $name = $element -> getAttribute ("name");
+			push (@items,$name);
+		}
+		if ($type eq 'delete') {
+			$this -> assert_array_equal(\@expectedDel, \@items);
+		} elsif ($type eq 'libs') {
+			$this -> assert_array_equal(\@expectedLibs, \@items);
+		} elsif ($type eq 'tools') {
+			$this -> assert_array_equal(\@expectedTools, \@items);
+		} else {
+			$this -> assert_null(1);
+		}
+	}
+}
+
+#==========================================
 # test_getStripTools
 #------------------------------------------
 sub test_getStripTools {
