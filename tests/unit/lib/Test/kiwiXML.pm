@@ -47,6 +47,178 @@ sub new {
 }
 
 #==========================================
+# test_addRepositories
+#------------------------------------------
+sub test_addRepositories {
+	# ...
+	# Verify proper operation of addRepositories method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @addedTypes = qw /red-carpet urpmi/;
+	my @newLocs = ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
+	my @newAlia = qw /rc pubrepo/;
+	my @newPrios = qw /13 99/;
+	my @newUsr = qw /pablo/;
+	my @newPass = qw /ola/;
+	$xml = $xml -> addRepository(\@addedTypes, @newLocs, \@newAlia,
+								\@newPrios, \@newUsr, \@newPass);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my %repos = $xml -> getRepositories();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my $numRepos = scalar keys %repos;
+	$this -> assert_equals(6, $numRepos);
+	# Spot check that existing data was not modified
+	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	$this -> assert_str_equals('yast2', $repoInfo[0]);
+	$this -> assert_str_equals('2', $repoInfo[2]);
+	$this -> assert_str_equals('true', $repoInfo[-2]);
+	@repoInfo = @{$repos{'https//myreposerver/protectedrepos/12.1'}};
+	$this -> assert_str_equals('yast2', $repoInfo[0]);
+	$this -> assert_str_equals('foo', $repoInfo[3]);
+	$this -> assert_str_equals('bar', $repoInfo[4]);
+	# Verify that new data exists
+	@repoInfo = @{$repos{'/repos/rc/12.1'}};
+	$this -> assert_str_equals('red-carpet', $repoInfo[0]);
+	$this -> assert_str_equals('rc', $repoInfo[1]);
+	$this -> assert_str_equals('13', $repoInfo[2]);
+	$this -> assert_str_equals('pablo', $repoInfo[3]);
+	$this -> assert_str_equals('ola', $repoInfo[4]);
+	@repoInfo = @{$repos{'http://otherpublicrepos/12.1'}};
+	$this -> assert_str_equals('urpmi', $repoInfo[0]);
+	$this -> assert_str_equals('pubrepo', $repoInfo[1]);
+	$this -> assert_str_equals('99', $repoInfo[2]);
+}
+
+#==========================================
+# test_addRepositoriesInvalidTypeInf
+#------------------------------------------
+sub test_addRepositoriesInvalidTypeInf {
+	# ...
+	# Verify proper operation of addRepositories method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @addedTypes = qw /red-carpet ola/;
+	my @newLocs = ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
+	my @newAlia = qw /rc pubrepo/;
+	my @newPrios = qw /13 99/;
+	my @newUsr = qw /pablo/;
+	my @newPass = qw /ola/;
+	$xml = $xml -> addRepository(\@addedTypes, @newLocs, \@newAlia,
+								\@newPrios, \@newUsr, \@newPass);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'Addition of requested repo type [ola] not supported';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	my %repos = $xml -> getRepositories();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my $numRepos = scalar keys %repos;
+	$this -> assert_equals(5, $numRepos);
+	# Spot check that existing data was not modified
+	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	$this -> assert_str_equals('yast2', $repoInfo[0]);
+	$this -> assert_str_equals('2', $repoInfo[2]);
+	$this -> assert_str_equals('true', $repoInfo[-2]);
+	@repoInfo = @{$repos{'https//myreposerver/protectedrepos/12.1'}};
+	$this -> assert_str_equals('yast2', $repoInfo[0]);
+	$this -> assert_str_equals('foo', $repoInfo[3]);
+	$this -> assert_str_equals('bar', $repoInfo[4]);
+	# Verify that new data exists
+	@repoInfo = @{$repos{'/repos/rc/12.1'}};
+	$this -> assert_str_equals('red-carpet', $repoInfo[0]);
+	$this -> assert_str_equals('rc', $repoInfo[1]);
+	$this -> assert_str_equals('13', $repoInfo[2]);
+	$this -> assert_str_equals('pablo', $repoInfo[3]);
+	$this -> assert_str_equals('ola', $repoInfo[4]);
+}
+
+#==========================================
+# test_addRepositoriesNoTypeInf
+#------------------------------------------
+sub test_addRepositoriesNoTypeInf {
+	# ...
+	# Verify proper operation of addRepositories method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @addedTypes = qw /red-carpet/;
+	my @newLocs = ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
+	my @newAlia = qw /rc pubrepo/;
+	my @newPrios = qw /13 99/;
+	my @newUsr = qw /pablo/;
+	my @newPass = qw /ola/;
+	$xml = $xml -> addRepository(\@addedTypes, @newLocs, \@newAlia,
+								\@newPrios, \@newUsr, \@newPass);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'No type for repo [http://otherpublicrepos/12.1] '
+		. 'specified';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	my %repos = $xml -> getRepositories();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my $numRepos = scalar keys %repos;
+	$this -> assert_equals(5, $numRepos);
+	# Spot check that existing data was not modified
+	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	$this -> assert_str_equals('yast2', $repoInfo[0]);
+	$this -> assert_str_equals('2', $repoInfo[2]);
+	$this -> assert_str_equals('true', $repoInfo[-2]);
+	@repoInfo = @{$repos{'https//myreposerver/protectedrepos/12.1'}};
+	$this -> assert_str_equals('yast2', $repoInfo[0]);
+	$this -> assert_str_equals('foo', $repoInfo[3]);
+	$this -> assert_str_equals('bar', $repoInfo[4]);
+	# Verify that new data exists
+	@repoInfo = @{$repos{'/repos/rc/12.1'}};
+	$this -> assert_str_equals('red-carpet', $repoInfo[0]);
+	$this -> assert_str_equals('rc', $repoInfo[1]);
+	$this -> assert_str_equals('13', $repoInfo[2]);
+	$this -> assert_str_equals('pablo', $repoInfo[3]);
+	$this -> assert_str_equals('ola', $repoInfo[4]);
+}
+
+#==========================================
 # test_addStripConsistentCall
 #------------------------------------------
 sub test_addStripConsistentCall {
@@ -1551,6 +1723,44 @@ sub test_getRPMForceTrue {
 	$this -> assert_str_equals('true', $value);
 }
 
+#==========================================
+# test_getRepositories
+#------------------------------------------
+sub test_getRepositories {
+	# ...
+	# Verify proper return of getRepositories method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %repos = $xml -> getRepositories();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my $numRepos = scalar keys %repos;
+	$this -> assert_equals(4, $numRepos);
+	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	$this -> assert_str_equals('yast2', $repoInfo[0]);
+	$this -> assert_str_equals('2', $repoInfo[2]);
+	$this -> assert_str_equals('true', $repoInfo[-2]);
+	@repoInfo = @{$repos{'http://download.opensuse.org/update/12.1'}};
+	$this -> assert_str_equals('rpm-md', $repoInfo[0]);
+	$this -> assert_str_equals('update', $repoInfo[1]);
+	$this -> assert_str_equals('true', $repoInfo[-1]);
+	@repoInfo = @{$repos{'https//myreposerver/protectedrepos/12.1'}};
+	$this -> assert_str_equals('yast2', $repoInfo[0]);
+	$this -> assert_str_equals('foo', $repoInfo[3]);
+	$this -> assert_str_equals('bar', $repoInfo[4]);
+	@repoInfo = @{$repos{'/repos/12.1-additional'}};
+	$this -> assert_str_equals('rpm-dir', $repoInfo[0]);
+}
 
 #==========================================
 # test_getSplitPersistentExceptions
@@ -1881,6 +2091,33 @@ sub test_getXenConfig {
 }
 
 #==========================================
+# test_ignoreRepositories
+#------------------------------------------
+sub test_ignoreRepositories {
+	# ...
+	# Verify proper operation of ignoreRepositories method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	$xml = $xml -> ignoreRepositories();
+	my %repos = $xml -> getRepositories();
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'Ignoring all repositories previously configured';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Test this condition last to get potential error messages
+	my $numRepos = scalar keys %repos;
+	$this -> assert_equals(0, $numRepos);
+}
+
+#==========================================
 # test_invalidProfileRequest
 #------------------------------------------
 sub test_invalidProfileRequest {
@@ -2019,6 +2256,58 @@ sub test_packageManagerInfoHasProfs {
 	$this -> assert_not_null($res);
 	my $newPkgMgr = $xml -> getPackageManager();
 	$this -> assert_str_equals('yum', $newPkgMgr);
+}
+
+#==========================================
+# test_setRepository
+#------------------------------------------
+sub test_setRepository {
+	# ...
+	# Verify proper operation of setRepository method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	$xml = $xml -> setRepository('rpm-md', '/repos/newpckgs', 'replacement',
+								'5');
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'Replacing repository '
+	. 'http://download.opensuse.org/update/12.1';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my %repos = $xml -> getRepositories();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my $numRepos = scalar keys %repos;
+	$this -> assert_equals(4, $numRepos);
+	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	$this -> assert_str_equals('yast2', $repoInfo[0]);
+	$this -> assert_str_equals('2', $repoInfo[2]);
+	$this -> assert_str_equals('true', $repoInfo[-2]);
+	@repoInfo = @{$repos{'https//myreposerver/protectedrepos/12.1'}};
+	$this -> assert_str_equals('yast2', $repoInfo[0]);
+	$this -> assert_str_equals('foo', $repoInfo[3]);
+	$this -> assert_str_equals('bar', $repoInfo[4]);
+	@repoInfo = @{$repos{'/repos/12.1-additional'}};
+	$this -> assert_str_equals('rpm-dir', $repoInfo[0]);
+	@repoInfo = @{$repos{'/repos/newpckgs'}};
+	$this -> assert_str_equals('rpm-md', $repoInfo[0]);
+	$this -> assert_str_equals('replacement', $repoInfo[1]);
+	$this -> assert_str_equals('5', $repoInfo[2]);
+	# Assert the expected repo has been replaced
+	my $repoInfo = $repos{'http://download.opensuse.org/update/12.1'};
+	$this -> assert_null($repoInfo);
 }
 
 1;
