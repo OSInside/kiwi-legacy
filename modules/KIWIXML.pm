@@ -1889,6 +1889,9 @@ sub ignoreRepositories {
 	# Ignore all the repositories in the XML file.
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	$kiwi -> info ('Ignoring all repositories previously configured');
+	$kiwi -> done();
 	my @node = $this->{repositNodeList} -> get_nodelist();
 	foreach my $element (@node) {
 		$this->{imgnameNodeList}->get_node(1)->removeChild ($element);
