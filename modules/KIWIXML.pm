@@ -1889,6 +1889,9 @@ sub ignoreRepositories {
 	# Ignore all the repositories in the XML file.
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	$kiwi -> info ('Ignoring all repositories previously configured');
+	$kiwi -> done();
 	my @node = $this->{repositNodeList} -> get_nodelist();
 	foreach my $element (@node) {
 		$this->{imgnameNodeList}->get_node(1)->removeChild ($element);
@@ -1922,7 +1925,7 @@ sub setRepository {
 		}
 		my $kiwi = $this->{kiwi};
 		my $replRepo = $element -> getElementsByTagName ("source")
-								-> get_node(1) -> getAttribute ("path");
+			-> get_node(1) -> getAttribute ("path");
 		$kiwi -> info ("Replacing repository $replRepo");
 		$kiwi -> done();
 		if (defined $type) {
@@ -4659,8 +4662,8 @@ sub __updateDescriptionFromChangeSet {
 	# 1) merge/update repositories
 	#------------------------------------------
 	if ($changeset->{repositories}) {
-		$kiwi -> info ("Updating repository node(s):");
 		$this -> ignoreRepositories();
+		$kiwi -> info ("Updating repository node(s):");
 		# 1) add those repos which are marked as fixed in the boot xml
 		my @node = $repositNodeList -> get_nodelist();
 		foreach my $element (@node) {
