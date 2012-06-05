@@ -207,6 +207,34 @@ sub test_getBootTheme {
 }
 
 #==========================================
+# test_getConfigName
+#------------------------------------------
+sub test_getConfigName {
+	# ...
+	# Verify proper return of getConfigName method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettings';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $value = $xml -> getConfigName();
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @parts = split /\//x, $value;
+	$this -> assert_str_equals('config.xml', $parts[-1]);
+	$this -> assert_str_equals('preferenceSettings', $parts[-2]);
+	$this -> assert_str_equals('kiwiXML', $parts[-3]);
+	$this -> assert_str_equals('data', $parts[-4]);
+	$this -> assert_str_equals('unit', $parts[-5]);
+	$this -> assert_str_equals('tests', $parts[-6]);
+}
+
+#==========================================
 # test_getDefaultPrebuiltDir
 #------------------------------------------
 sub test_getDefaultPrebuiltDir {
