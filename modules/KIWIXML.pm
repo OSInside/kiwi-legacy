@@ -1980,6 +1980,9 @@ sub addRepository {
 	if ($_[5]) {
 		@pass = @{$_[5]};
 	}
+	my @supportedTypes = qw /apt-deb apt-rpm deb-dir mirrors red-carpet
+							rpm-dir rpm-md slack-site up2date-mirrors
+							urpmi yast2/;
 	foreach my $path (@path) {
 		my $type = shift @type;
 		my $alias= shift @alias;
@@ -1988,6 +1991,12 @@ sub addRepository {
 		my $pass = shift @pass;
 		if (! defined $type) {
 			$kiwi -> error   ("No type for repo [$path] specified");
+			$kiwi -> skipped ();
+			next;
+		}
+		if (! grep { /$type/x } @supportedTypes ) {
+			my $msg = "Addition of requested repo type [$type] not supported";
+			$kiwi -> error ($msg);
 			$kiwi -> skipped ();
 			next;
 		}
