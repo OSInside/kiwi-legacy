@@ -1907,8 +1907,8 @@ sub ignoreRepositories {
 #------------------------------------------
 sub setRepository {
 	# ...
-	# Overwerite the repository path and type of the first
-	# repository node with the given data
+	# Overwerite the first repository that does not have the status
+	# sttribute set to fixed.
 	# ---
 	my $this = shift;
 	my $type = shift;
@@ -1923,6 +1923,11 @@ sub setRepository {
 		if ((defined $status) && ($status eq "fixed")) {
 			next;
 		}
+		my $kiwi = $this->{kiwi};
+		my $replRepo = $element -> getElementsByTagName ("source")
+								-> get_node(1) -> getAttribute ("path");
+		$kiwi -> info ("Replacing repository $replRepo");
+		$kiwi -> done();
 		if (defined $type) {
 			$element -> setAttribute ("type",$type);
 		}
@@ -1953,7 +1958,7 @@ sub setRepository {
 sub addRepository {
 	# ...
 	# Add a repository section to the current list of
-	# repos and update repositNodeList accordingly. 
+	# repos and update repositNodeList accordingly.
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
