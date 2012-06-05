@@ -314,7 +314,7 @@ sub createURLList {
 	my @urllist     = ();
 	my %urlhash     = ();
 	my @sourcelist  = ();
-	%repository = $this->getRepository();
+	%repository = $this->getRepositories();
 	if (! %repository) {
 		%repository = $this->getInstSourceRepository();
 		foreach my $name (keys %repository) {
@@ -1822,9 +1822,9 @@ sub getInstSourceMetaFiles {
 }
 
 #==========================================
-# getRepository
+# getRepositories
 #------------------------------------------
-sub getRepository {
+sub getRepositories {
 	# ...
 	# Get the repository type used for building
 	# up the physical extend. For information on the available
@@ -3746,9 +3746,9 @@ sub getArchiveList {
 }
 
 #==========================================
-# getNodeList
+# getRepoNodeList
 #------------------------------------------
-sub getNodeList {
+sub getRepoNodeList {
 	# ...
 	# Return the current <repository> list which consists
 	# of XML::LibXML::Element object pointers
