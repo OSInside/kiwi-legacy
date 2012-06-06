@@ -977,7 +977,7 @@ sub __applyBaseXMLOverrides {
 	}
 	if ($this -> {addlRepos}) {
 		my %addlRepos = %{$this -> {addlRepos}};
-		$xml -> addRepository (
+		$xml -> addRepositories (
 			$addlRepos{repositoryTypes},
 			$addlRepos{repositories},
 			$addlRepos{repositoryAlia},

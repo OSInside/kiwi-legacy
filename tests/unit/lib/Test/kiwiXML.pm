@@ -47,6 +47,46 @@ sub new {
 }
 
 #==========================================
+# test_addDrivers
+#------------------------------------------
+sub test_addDrivers {
+	# ...
+	# Verify proper operation of addDrivers method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	$xml = $xml -> addDrivers('fglrx', 'wl2000');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @driversNodes = $xml -> getDriversNodeList() -> get_nodelist();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedDrivers = qw /usb e1000 rs232 fglrx wl2000/;
+	my @confDrivers;
+	for my $node (@driversNodes) {
+		my @files = $node -> getElementsByTagName ("file");
+		for my $element (@files) {
+			my $name = $element -> getAttribute ("name");
+			push (@confDrivers, $name);
+		}
+	}
+	$this -> assert_array_equal(\@expectedDrivers, \@confDrivers);
+}
+
+#==========================================
 # test_addRepositories
 #------------------------------------------
 sub test_addRepositories {
@@ -65,7 +105,7 @@ sub test_addRepositories {
 	my @newPrios = qw /13 99/;
 	my @newUsr = qw /pablo/;
 	my @newPass = qw /ola/;
-	$xml = $xml -> addRepository(\@addedTypes, @newLocs, \@newAlia,
+	$xml = $xml -> addRepositories(\@addedTypes, @newLocs, \@newAlia,
 								\@newPrios, \@newUsr, \@newPass);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -124,7 +164,7 @@ sub test_addRepositoriesInvalidTypeInf {
 	my @newPrios = qw /13 99/;
 	my @newUsr = qw /pablo/;
 	my @newPass = qw /ola/;
-	$xml = $xml -> addRepository(\@addedTypes, @newLocs, \@newAlia,
+	$xml = $xml -> addRepositories(\@addedTypes, @newLocs, \@newAlia,
 								\@newPrios, \@newUsr, \@newPass);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Addition of requested repo type [ola] not supported';
@@ -180,7 +220,7 @@ sub test_addRepositoriesNoTypeInf {
 	my @newPrios = qw /13 99/;
 	my @newUsr = qw /pablo/;
 	my @newPass = qw /ola/;
-	$xml = $xml -> addRepository(\@addedTypes, @newLocs, \@newAlia,
+	$xml = $xml -> addRepositories(\@addedTypes, @newLocs, \@newAlia,
 								\@newPrios, \@newUsr, \@newPass);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'No type for repo [http://otherpublicrepos/12.1] '
@@ -420,12 +460,47 @@ sub test_getDefaultPrebuiltDir {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getDefaultPrebuiltDir();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('/work/kiwibootimgs', $value);
+}
+
+#==========================================
+# test_getDriversNodeList
+#------------------------------------------
+sub test_getDriversNodeList {
+	# ...
+	# Verify proper return of getDriversNodeList method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @driversNodes = $xml -> getDriversNodeList() -> get_nodelist();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedDrivers = qw /usb e1000 rs232/;
+	my @confDrivers;
+	for my $node (@driversNodes) {
+		my @files = $node -> getElementsByTagName ("file");
+		for my $element (@files) {
+			my $name = $element -> getAttribute ("name");
+			push (@confDrivers, $name);
+		}
+	}
+	$this -> assert_array_equal(\@expectedDrivers, \@confDrivers);
 }
 
 #==========================================
@@ -1721,6 +1796,40 @@ sub test_getRPMForceTrue {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('true', $value);
+}
+
+#==========================================
+# test_getRepoNodeList
+#------------------------------------------
+sub test_getRepoNodeList {
+	# ...
+	# Verify proper return of getRepoNodeList method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @repoNodes = $xml -> getRepoNodeList() -> get_nodelist();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedPaths = ['opensuse://12.1/repo/oss/',
+						'http://download.opensuse.org/update/12.1',
+						'https//myreposerver/protectedrepos/12.1',
+						'/repos/12.1-additional'];
+	my @configPaths;
+	for my $element (@repoNodes) {
+		my $source= $element -> getElementsByTagName('source')
+			-> get_node(1) -> getAttribute ('path');
+		push @configPaths, $source;
+	}
+	$this -> assert_array_equal(@expectedPaths, \@configPaths);
 }
 
 #==========================================
