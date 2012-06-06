@@ -12,11 +12,10 @@
 </xsl:template>
 
 <!-- version update -->
-<!-- remove inherit attribute from image -->
 <para xmlns="http://docbook.org/ns/docbook">
 	Changed attribute <tag class="attribute">schemaversion</tag>
 	to <tag class="attribute">schemaversion</tag> from
-	<literal>5.2</literal> to <literal>5.2</literal>.
+	<literal>5.2</literal> to <literal>5.3</literal>.
 </para>
 <xsl:template match="image" mode="conv52to53">
 	<xsl:choose>
@@ -27,9 +26,9 @@
 		<!-- otherwise apply templates -->
 		<xsl:otherwise>
 			<image schemaversion="5.3">
-				<xsl:copy-of select="@*[local-name() != 'schemaversion' and local-name() != 'inherit']"/>
+				<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
 				<xsl:apply-templates  mode="conv52to53"/>
-            </image>
+			</image>
 		</xsl:otherwise>
 	</xsl:choose>
 </xsl:template>
