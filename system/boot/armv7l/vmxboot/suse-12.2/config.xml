@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.3" name="initrd-vmxboot-suse-12.2">
+<image schemaversion="5.4" name="initrd-vmxboot-suse-12.2">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -20,7 +20,7 @@
 		<profile name="omap3beagle" description="KERNEL: For beagle boards"/>
 		<profile name="imx51" description="KERNEL: For efika boards"/>
 	</profiles>
-	<drivers type="drivers">
+	<drivers>
 		<file name="crypto/*"/>
 		<file name="drivers/mmc/*"/>
 		<file name="drivers/acpi/dock.ko"/>

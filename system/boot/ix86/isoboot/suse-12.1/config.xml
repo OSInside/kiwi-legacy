@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.3" name="initrd-isoboot-suse-12.1">
+<image schemaversion="5.4" name="initrd-isoboot-suse-12.1">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -21,7 +21,7 @@
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="desktop" description="KERNEL: Desktop kernel"/>
 	</profiles>
-	<drivers type="drivers">
+	<drivers>
 		<file name="crypto/*"/>
 		<file name="drivers/acpi/dock.ko"/>
 		<file name="drivers/ata/*"/>
@@ -66,7 +66,7 @@
 		<file name="lib/crc-t10dif.ko"/>
 		<file name="lib/crc16.ko"/>
 	</drivers>
-	<drivers type="drivers" profiles="xen">
+	<drivers profiles="xen">
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">

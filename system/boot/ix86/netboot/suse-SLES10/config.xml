@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.3" name="initrd-netboot-suse-SLES10">
+<image schemaversion="5.4" name="initrd-netboot-suse-SLES10">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -17,7 +17,7 @@
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="smp" description="KERNEL: bigsmp kernel"/>
 	</profiles>
-	<drivers type="drivers">
+	<drivers>
 		<file name="crypto/*"/>
 		<file name="drivers/usb/core/usbcore.ko"/>
 		<file name="drivers/usb/host/*"/>

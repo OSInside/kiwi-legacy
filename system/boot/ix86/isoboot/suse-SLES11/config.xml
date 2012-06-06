@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.3" name="initrd-isoboot-suse-SLES11">
+<image schemaversion="5.4" name="initrd-isoboot-suse-SLES11">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -21,7 +21,7 @@
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="rt" description="KERNEL: RealTime kernel"/>
 	</profiles>
-	<drivers type="drivers">
+	<drivers>
 		<file name="crypto/*"/>
 		<file name="drivers/usb/core/usbcore.ko"/>
 		<file name="drivers/usb/host/*"/>
@@ -61,7 +61,7 @@
 		<file name="fs/squashfs/*"/>
 		<file name="fs/vfat/*"/>
 	</drivers>
-	<drivers type="drivers" profiles="xen">
+	<drivers profiles="xen">
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="rpm-md" status="replaceable">

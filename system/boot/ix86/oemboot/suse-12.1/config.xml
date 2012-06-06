@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.3" name="initrd-oemboot-suse-12.1">
+<image schemaversion="5.4" name="initrd-oemboot-suse-12.1">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -21,7 +21,7 @@
 		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
 		<profile name="desktop" description="KERNEL: Desktop kernel"/>
 	</profiles>
-	<drivers type="drivers">
+	<drivers>
 		<file name="crypto/*"/>
 		<file name="drivers/acpi/*"/>
 		<file name="drivers/acpi/dock.ko"/>
@@ -80,7 +80,7 @@
 		<file name="lib/zlib_deflate/zlib_deflate.ko"/>
 		<file name="net/packet/*"/>
 	</drivers>
-	<drivers type="drivers" profiles="xen">
+	<drivers profiles="xen">
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
