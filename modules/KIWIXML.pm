@@ -314,7 +314,7 @@ sub createURLList {
 	my @urllist     = ();
 	my %urlhash     = ();
 	my @sourcelist  = ();
-	%repository = $this->getRepository();
+	%repository = $this->getRepositories();
 	if (! %repository) {
 		%repository = $this->getInstSourceRepository();
 		foreach my $name (keys %repository) {
@@ -1822,9 +1822,9 @@ sub getInstSourceMetaFiles {
 }
 
 #==========================================
-# getRepository
+# getRepositories
 #------------------------------------------
-sub getRepository {
+sub getRepositories {
 	# ...
 	# Get the repository type used for building
 	# up the physical extend. For information on the available
@@ -1889,6 +1889,9 @@ sub ignoreRepositories {
 	# Ignore all the repositories in the XML file.
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	$kiwi -> info ('Ignoring all repositories previously configured');
+	$kiwi -> done();
 	my @node = $this->{repositNodeList} -> get_nodelist();
 	foreach my $element (@node) {
 		$this->{imgnameNodeList}->get_node(1)->removeChild ($element);
@@ -1904,8 +1907,8 @@ sub ignoreRepositories {
 #------------------------------------------
 sub setRepository {
 	# ...
-	# Overwerite the repository path and type of the first
-	# repository node with the given data
+	# Overwerite the first repository that does not have the status
+	# sttribute set to fixed.
 	# ---
 	my $this = shift;
 	my $type = shift;
@@ -1920,6 +1923,11 @@ sub setRepository {
 		if ((defined $status) && ($status eq "fixed")) {
 			next;
 		}
+		my $kiwi = $this->{kiwi};
+		my $replRepo = $element -> getElementsByTagName ("source")
+								-> get_node(1) -> getAttribute ("path");
+		$kiwi -> info ("Replacing repository $replRepo");
+		$kiwi -> done();
 		if (defined $type) {
 			$element -> setAttribute ("type",$type);
 		}
@@ -1950,7 +1958,7 @@ sub setRepository {
 sub addRepository {
 	# ...
 	# Add a repository section to the current list of
-	# repos and update repositNodeList accordingly. 
+	# repos and update repositNodeList accordingly.
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -1972,6 +1980,9 @@ sub addRepository {
 	if ($_[5]) {
 		@pass = @{$_[5]};
 	}
+	my @supportedTypes = qw /apt-deb apt-rpm deb-dir mirrors red-carpet
+							rpm-dir rpm-md slack-site up2date-mirrors
+							urpmi yast2/;
 	foreach my $path (@path) {
 		my $type = shift @type;
 		my $alias= shift @alias;
@@ -1980,6 +1991,12 @@ sub addRepository {
 		my $pass = shift @pass;
 		if (! defined $type) {
 			$kiwi -> error   ("No type for repo [$path] specified");
+			$kiwi -> skipped ();
+			next;
+		}
+		if (! grep { /$type/x } @supportedTypes ) {
+			my $msg = "Addition of requested repo type [$type] not supported";
+			$kiwi -> error ($msg);
 			$kiwi -> skipped ();
 			next;
 		}
@@ -3746,9 +3763,9 @@ sub getArchiveList {
 }
 
 #==========================================
-# getNodeList
+# getRepoNodeList
 #------------------------------------------
-sub getNodeList {
+sub getRepoNodeList {
 	# ...
 	# Return the current <repository> list which consists
 	# of XML::LibXML::Element object pointers
@@ -5198,12 +5215,12 @@ sub __requestedProfile {
 	# ---
 	my $this      = shift;
 	my $element   = shift;
-	my $nodeName  = $element->nodeName();
 
 	if (! defined $element) {
 		# print "Element not defined\n";
 		return 1;
 	}
+	#my $nodeName  = $element->nodeName();
 	my $profiles = $element -> getAttribute ("profiles");
 	if (! defined $profiles) {
 		# If no profile is specified, then it is assumed to be in all profiles.

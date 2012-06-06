@@ -86,7 +86,7 @@ sub new {
 		$kiwi -> failed ();
 		return;
 	}
-	my %repository = $xml -> getRepository();
+	my %repository = $xml -> getRepositories();
 	if (! %repository) {
 		$kiwi -> error ("No repository specified in XML tree");
 		$kiwi -> failed ();
@@ -1042,7 +1042,7 @@ sub setup {
 	}
 	$kiwi -> done();
 	my %config = $xml -> getImageConfig();
-	binmode($FD, ":utf8");
+	binmode($FD, ":encoding(UTF-8)");
 	foreach my $key (keys %config) {
 		$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
 		print $FD "$key=\"$config{$key}\"\n";

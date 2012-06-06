@@ -404,7 +404,7 @@ sub __getTree {
 			# sources
 			#------------------------------------------
 			/^sources/       && do {
-				my %repos = $xml -> getRepository();
+				my %repos = $xml -> getRepositories();
 				for my $url (keys %repos) {
 					my $source = new XML::LibXML::Element ("source");
 					$source -> setAttribute ("path","$url");
