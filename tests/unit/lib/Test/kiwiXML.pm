@@ -1799,6 +1799,40 @@ sub test_getRPMForceTrue {
 }
 
 #==========================================
+# test_getRepoNodeList
+#------------------------------------------
+sub test_getRepoNodeList {
+	# ...
+	# Verify proper return of getRepoNodeList method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @repoNodes = $xml -> getRepoNodeList() -> get_nodelist();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedPaths = ['opensuse://12.1/repo/oss/',
+						'http://download.opensuse.org/update/12.1',
+						'https//myreposerver/protectedrepos/12.1',
+						'/repos/12.1-additional'];
+	my @configPaths;
+	for my $element (@repoNodes) {
+		my $source= $element -> getElementsByTagName('source')
+			-> get_node(1) -> getAttribute ('path');
+		push @configPaths, $source;
+	}
+	$this -> assert_array_equal(@expectedPaths, \@configPaths);
+}
+
+#==========================================
 # test_getRepositories
 #------------------------------------------
 sub test_getRepositories {
