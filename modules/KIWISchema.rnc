@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 5.3" ]
+	db:releaseinfo [ "RNC Schema Version 5.4" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -60,7 +60,7 @@ div {
 		attribute xsi:schemaLocation { xsd:anyURI }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "5.3" }
+		attribute schemaversion { "5.4" }
 	k.image.kiwirevision.attribute =
 		## A kiwi git revision number which is known to build
 		## a working image from this description. If the kiwi git
@@ -1957,12 +1957,8 @@ div {
 # main block: <drivers>
 #
 div {
-	k.drivers.type.attribute = attribute type {
-		"drivers"
-	}
 	k.drivers.profiles.attribute = k.profiles.attribute
 	k.drivers.attlist = 
-		k.drivers.type.attribute &
 		k.drivers.profiles.attribute?
 		
 	k.drivers =
