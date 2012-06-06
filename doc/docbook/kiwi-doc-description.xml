@@ -1451,7 +1451,7 @@
 
     <sect2 id="sec.description.drivers">
       <title><sgmltag>drivers</sgmltag> Element</title>
-      <screen>&lt;drivers type="type" profiles="name"&gt; 
+      <screen>&lt;drivers profiles="name"&gt; 
   &lt;file name="filename"/&gt; 
   <sgmltag class="sgmlcomment"> ... </sgmltag> 
 &lt;/drivers&gt;</screen>
@@ -1462,20 +1462,8 @@
         the required drivers are part of the image. Therefore the
         drivers section exists. If present only the drivers which
         matches the file names or glob patterns will be included into
-        the boot image. The <sgmltag class="attribute">type</sgmltag>
-        attribute specifies one of the following driver types: </para>
-
-      <variablelist>
-        <varlistentry>
-          <term><sgmltag class="attribute">drivers</sgmltag></term>
-          <listitem>
-            <para> Each file is specified relative to the <filename
-                class="directory"
-                  >/lib/modules/<replaceable>Version</replaceable>/kernel</filename>
-              directory. </para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
+        the boot image. Each file is specified relative to the
+        <filename class="directory">/lib/modules/<replaceable>Version</replaceable>/kernel</filename> directory.</para>
 
       <para>According to the <sgmltag>driver</sgmltag> element the
         specified files are searched in the corresponding directory. The

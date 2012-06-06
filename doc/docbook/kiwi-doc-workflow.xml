@@ -719,7 +719,7 @@ tar -cf kiwi-hooks.tgz kiwi-hooks/
             section to the system image <filename>config.xml</filename> file,
             as shown below.
 <screen>
-&lt;drivers type="drivers"/&gt;
+&lt;drivers&gt;
     &lt;file name="drivers/..."/&gt;
 &lt;/drivers&gt;
 </screen>
