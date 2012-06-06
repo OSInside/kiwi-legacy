@@ -3676,7 +3676,10 @@ function setupNetwork {
 	# and the nameserver information is written to
 	# /etc/resolv.conf
 	# ----
-	IFS="
+	#======================================
+	# local variable setup
+	#--------------------------------------
+	local IFS="
 	"
 	local MAC=0
 	local DEV=0
@@ -3684,8 +3687,16 @@ function setupNetwork {
 	local dev_list=0
 	local index=0
 	local hwicmd=/usr/sbin/hwinfo
-	local iface=eth0
+	local prefer_iface=eth0
 	local opts="--noipv4ll -p"
+	local try_iface
+	#======================================
+	# global variable setup
+	#--------------------------------------
+	export DHCPCD_STARTED
+	#======================================
+	# detect network card(s)
+	#--------------------------------------
 	for i in `$hwicmd --netcard`;do
 		IFS=$IFS_ORIG
 		if echo $i | grep -q "HW Address:";then
@@ -3703,25 +3714,24 @@ function setupNetwork {
 	if [ -z $BOOTIF ];then
 		# /.../
 		# there is no PXE boot interface information. We will use
-		# the first detected interface as fallback solution
+		# the first interface that responds to dhcp
 		# ----
-		iface=${dev_list[0]}
+		prefer_iface=${dev_list[*]}
 	else
 		# /.../
 		# evaluate the information from the PXE boot interface
 		# if we found the MAC in the list the appropriate interface
-		# name is assigned. if not eth0 is used as fallback
+		# name is assigned.
 		# ----
 		index=0
 		BOOTIF=`echo $BOOTIF | cut -f2- -d - | tr "-" ":"`
 		for i in ${mac_list[*]};do
 			if [ $i = $BOOTIF ];then
-				iface=${dev_list[$index]}
+				prefer_iface=${dev_list[$index]}
 			fi
 			index=$((index + 1))
 		done
 	fi
-	export PXE_IFACE=$iface
 	if [ $DHCPCD_HAVE_PERSIST -eq 0 ];then
 		# /.../
 		# older version of dhcpd which doesn't have the
@@ -3729,38 +3739,51 @@ function setupNetwork {
 		# ----
 		unset opts
 	fi
-	if ! dhcpcd $opts $PXE_IFACE 1>&2;then
-		# /.../
-		# can't setup network on that interface, walk through
-		# the devlist and see if we get data from another device
-		# ----
-		PXE_IFACE=""
-		for iface in ${dev_list[*]};do
-			if dhcpcd $opts $iface 1>&2;then
-				PXE_IFACE=$iface
-				break
-			fi
-		done
-		if [ -z "$PXE_IFACE" ];then
-			if [ -e "$root" ];then
-				Echo "Failed to setup DHCP network interface !"
-				Echo "Try fallback to local boot on: $root"
-				LOCAL_BOOT=yes
-				return
-			else
-				systemException \
-					"Failed to setup DHCP network interface !" \
-				"reboot"
-			fi
+	for try_iface in ${dev_list[*]}; do
+		if dhcpcd $opts $try_iface 1>&2 ; then
+			DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
+		fi
+	done
+	if [ -z "$DHCPCD_STARTED" ];then
+		if [ -e "$root" ];then
+			Echo "Failed to setup DHCP network interface !"
+			Echo "Try fallback to local boot on: $root"
+			LOCAL_BOOT=yes
+			return
+		else
+			systemException \
+				"Failed to setup DHCP network interface !" \
+			"reboot"
 		fi
 	fi
+	#======================================
+	# wait for any preferred interface(s)
+	#--------------------------------------
 	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
-		if [ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ];then
-			break
-		fi
+		for try_iface in $prefer_iface ; do
+			if [ -s /var/lib/dhcpcd/dhcpcd-$try_iface.info ] &&
+				grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info
+			then
+				break 2
+			fi
+		done
 		sleep 2
 	done
-	if [ ! -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ];then
+	#======================================
+	# select interface from preferred list
+	#--------------------------------------
+	for try_iface in $prefer_iface $DHCPCD_STARTED; do
+		if [ -s /var/lib/dhcpcd/dhcpcd-$try_iface.info ] &&
+			grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info
+		then
+			export PXE_IFACE=$try_iface
+			break
+		fi
+	done
+	#======================================
+	# fallback to local boot if possible
+	#--------------------------------------
+	if [ -z "$PXE_IFACE" ];then
 		if [ -e "$root" ];then
 			Echo "Can't find DHCP info file: dhcpcd-$PXE_IFACE.info !"
 			Echo "Try fallback to local boot on: $root"
@@ -3772,6 +3795,9 @@ function setupNetwork {
 			"reboot"
 		fi
 	fi
+	#======================================
+	# setup selected interface
+	#--------------------------------------
 	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
 	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
 		importFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
@@ -3820,7 +3846,10 @@ function releaseNetwork {
 		#======================================
 		# free the lease and the cache
 		#--------------------------------------
-		dhcpcd -k $PXE_IFACE
+		local try_iface
+		for try_iface in $DHCPCD_STARTED; do
+			dhcpcd -k $try_iface
+		done
 		#======================================
 		# remove sysconfig state information
 		#--------------------------------------
