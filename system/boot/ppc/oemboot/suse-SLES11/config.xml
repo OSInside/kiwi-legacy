@@ -14,12 +14,7 @@
 	</preferences>
 	<profiles>
 		<profile name="default" description="Boot with default setup"/>
-		<profile name="xen" description="Boot with xen mboot.c32 setup"/>
 		<profile name="std" description="KERNEL: Default"/>
-		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
-		<profile name="pae" description="KERNEL: pae kernel"/>
-		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
-		<profile name="rt" description="KERNEL: RealTime kernel"/>
 		<profile name="ppc64" description="KERNEL: ppc64 kernel"/>
 	</profiles>
 	<drivers>
@@ -60,9 +55,6 @@
 		<file name="net/ipv6/*"/>
 		<file name="net/packet/*"/>
 	</drivers>
-	<drivers profiles="xen">
-		<file name="drivers/xen/*"/>
-	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>
 	</repository>
@@ -70,30 +62,11 @@
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
 	</packages>
-	<packages type="image" profiles="pae">
-		<package name="kernel-pae"/>
-		<package name="kernel-pae-base"/>
-	</packages>
-	<packages type="image" profiles="xenk">
-		<package name="kernel-xen"/>
-		<package name="kernel-xen-base"/>
-		<package name="xen"/>
-	</packages>
-	<packages type="image" profiles="ec2">
-		<package name="kernel-ec2"/>
-		<package name="kernel-ec2-base"/>
-		<package name="xen"/>
-	</packages>
-	<packages type="image" profiles="rt">
-		<package name="kernel-rt"/>
-		<package name="kernel-rt-base"/>
-	</packages>
 	<packages type="image" profiles="ppc64">
 		<package name="kernel-ppc64"/>
 		<package name="kernel-ppc64-base"/>
 	</packages>
 	<packages type="image">
-		<package name="adaptec-firmware"/>
 		<package name="atftp"/>
 		<package name="bc"/>
 		<package name="bind-libs"/>

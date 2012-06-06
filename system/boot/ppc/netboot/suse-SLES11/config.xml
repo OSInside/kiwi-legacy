@@ -15,17 +15,10 @@
 	<profiles>
 		<profile name="default" description="Boot with default kernel"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
-		<profile name="xen" description="Boot with xen mboot.c32 setup"/>
 		<profile name="std" description="KERNEL: Default"/>
-		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
-		<profile name="pae" description="KERNEL: pae kernel"/>
-		<profile name="rt" description="KERNEL: RealTime kernel"/>
 		<profile name="ppc64" description="KERNEL: PPC64 kernel"/>
 	</profiles>
-	<drivers profiles="xen">
-		<file name="drivers/xen/*"/>
-	</drivers>
-	<drivers profiles="default,xen,ppc64">
+	<drivers profiles="default,ppc64">
 		<file name="crypto/*"/>
 		<file name="drivers/usb/core/usbcore.ko"/>
 		<file name="drivers/usb/host/*"/>
@@ -132,26 +125,11 @@
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
 	</packages>
-	<packages type="image" profiles="pae">
-		<package name="kernel-pae"/>
-		<package name="kernel-pae-base"/>
-	</packages>
-	<packages type="image" profiles="rt">
-		<package name="kernel-rt"/>
-		<package name="kernel-rt-base"/>
-	</packages>
-	<packages type="image" profiles="xenk">
-		<package name="kernel-xen"/>
-		<package name="kernel-xen-base"/>
-	</packages>
-	<packages type="image" profiles="xen">
-		<package name="xen"/>
-	</packages>
 	<packages type="image" profiles="ppc64">
 		<package name="kernel-ppc64"/>
 		<package name="kernel-ppc64-base"/>
 	</packages>
-	<packages type="image" profiles="default,xen,ppc64">
+	<packages type="image" profiles="default,ppc64">
 		<package name="adaptec-firmware"/>
 		<package name="atftp"/>
 		<package name="bc"/>
@@ -216,7 +194,7 @@
 		<package name="glibc-locale"/>
 		<package name="openssl-certs"/>
 	</packages>
-	<packages type="delete" profiles="default,diskless,xen,ppc64">
+	<packages type="delete" profiles="default,diskless,ppc64">
 		<package name="PolicyKit"/>
 		<package name="audit-libs"/>
 		<package name="blocxx"/>
