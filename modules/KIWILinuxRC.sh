@@ -5040,10 +5040,15 @@ function fetchFile {
 	if [ -x /usr/bin/dcounter ] && [ -f /etc/image.md5 ] && [ -b "$dest" ];then
 		showProgress=1
 		read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
-		needBytes=`expr $blocks \* $blocksize`
-		needMByte=`expr $needBytes / 1048576`
+		needBytes=$((blocks * blocksize))
+		needMByte=$((needBytes / 1048576))
+		if [ ! -z "$zblocks" ];then
+			needZBytes=$((zblocks * zblocksize))
+			needZMByte=$((needZBytes / 1048576))
+		fi
 		progressBaseName=$(basename "$path")
 		TEXT_LOAD=$(getText "Loading %1" "$progressBaseName")
+		TEXT_GZIP=$(getText "Uncompressing %1" "$progressBaseName")
 		dump="dcounter -s $needMByte -l \"$TEXT_LOAD \" 2>/progress | $dump"
 	fi
 	#======================================
@@ -5093,13 +5098,56 @@ function fetchFile {
 			if test "$multicast" != "enable"; then 
 				multicast_atftp="disable multicast"
 			fi
+			havetemp_dir=1
+			if [ -z "$FETCH_FILE_TEMP_DIR" ];then
+				# we don't have a tmp dir available for downloading
+				havetemp_dir=0
+			elif [ -e "$FETCH_FILE_TEMP_DIR/${path##*/}" ];then
+				# temporary download data already exists
+				havetemp_dir=0
+			else
+				# prepare use of temp files for compressed download
+				FETCH_FILE_TEMP_FILE="$FETCH_FILE_TEMP_DIR/${path##*/}"
+				export FETCH_FILE_TEMP_FILE
+			fi
 			if test "$izip" = "compressed"; then
-				# mutlicast is disabled because you can't seek in a pipe
-				# atftp is disabled because it doesn't work with pipes
-				call="busybox tftp \
-					-b $imageBlkSize -g -r \"$path\" \
-					-l >(gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump) \
-					$host 2>>$TRANSFER_ERRORS_FILE"
+				if [ $havetemp_dir -eq 0 ];then
+					# /.../
+					# operate without temp files, standard case
+					# ----
+					call="busybox tftp \
+						-b $imageBlkSize -g -r \"$path\" \
+						-l >(gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump) \
+						$host 2>>$TRANSFER_ERRORS_FILE"
+				else
+					# /.../
+					# operate using temp files
+					# export the path to allow temp file management in a hook
+					# ----
+					if [ $showProgress -eq 1 ];then
+						call="(atftp \
+							--trace \
+							--option \"$multicast_atftp\"  \
+							--option \"blksize $imageBlkSize\" \
+							-g -r \"$path\" -l \"$FETCH_FILE_TEMP_FILE\" \
+							$host 2>&1 | \
+							atftpProgress \
+								$needZMByte \"$TEXT_LOAD\" \
+								$TRANSFER_ERRORS_FILE $imageBlkSize \
+							>&2 ; \
+							gzip -d < \"$FETCH_FILE_TEMP_FILE\" | \
+								dcounter -s $needMByte -l \"$TEXT_GZIP \" | \
+								dd bs=$chunk of=\"$dest\" ) 2>/progress "
+					else
+						call="atftp \
+							--option \"$multicast_atftp\"  \
+							--option \"blksize $imageBlkSize\" \
+							-g -r \"$path\" -l \"$FETCH_FILE_TEMP_FILE\" $host \
+							&> $TRANSFER_ERRORS_FILE ; \
+							gzip -d < \"$FETCH_FILE_TEMP_FILE\" | \
+							dd bs=$chunk of=\"$dest\" "
+					fi
+				fi
 			else
 				if [ $showProgress -eq 1 ];then
 					call="atftp \
