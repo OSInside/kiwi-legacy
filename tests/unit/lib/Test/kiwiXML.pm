@@ -65,8 +65,8 @@ sub test_addRepositories {
 	my @newPrios = qw /13 99/;
 	my @newUsr = qw /pablo/;
 	my @newPass = qw /ola/;
-	$xml = $xml -> addRepository(\@addedTypes, @newLocs, \@newAlia,
-								\@newPrios, \@newUsr, \@newPass);
+	$xml = $xml -> addRepositories(\@addedTypes, @newLocs, \@newAlia,
+                                   \@newPrios, \@newUsr, \@newPass);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -124,8 +124,8 @@ sub test_addRepositoriesInvalidTypeInf {
 	my @newPrios = qw /13 99/;
 	my @newUsr = qw /pablo/;
 	my @newPass = qw /ola/;
-	$xml = $xml -> addRepository(\@addedTypes, @newLocs, \@newAlia,
-								\@newPrios, \@newUsr, \@newPass);
+	$xml = $xml -> addRepositories(\@addedTypes, @newLocs, \@newAlia,
+                                   \@newPrios, \@newUsr, \@newPass);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Addition of requested repo type [ola] not supported';
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -180,8 +180,8 @@ sub test_addRepositoriesNoTypeInf {
 	my @newPrios = qw /13 99/;
 	my @newUsr = qw /pablo/;
 	my @newPass = qw /ola/;
-	$xml = $xml -> addRepository(\@addedTypes, @newLocs, \@newAlia,
-								\@newPrios, \@newUsr, \@newPass);
+	$xml = $xml -> addRepositories(\@addedTypes, @newLocs, \@newAlia,
+                                   \@newPrios, \@newUsr, \@newPass);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'No type for repo [http://otherpublicrepos/12.1] '
 		. 'specified';

@@ -1953,9 +1953,9 @@ sub setRepository {
 }
 
 #==========================================
-# addRepository
+# addRepositories
 #------------------------------------------
-sub addRepository {
+sub addRepositories {
 	# ...
 	# Add a repository section to the current list of
 	# repos and update repositNodeList accordingly.
@@ -4677,7 +4677,7 @@ sub __updateDescriptionFromChangeSet {
 					-> get_node(1) -> getAttribute ("path");
 				my $alias = $element -> getAttribute("alias");
 				my $prio = $element -> getAttribute("priority");
-				$this -> addRepository ([$type],[$source],[$alias],[$prio]);
+				$this -> addRepositories ([$type],[$source],[$alias],[$prio]);
 			}
 		}
 		# 2) add those repos which are part of the changeset
@@ -4688,7 +4688,7 @@ sub __updateDescriptionFromChangeSet {
 			my $prio  = $props->[2];
 			my $user  = $props->[3];
 			my $pass  = $props->[4];
-			$this -> addRepository (
+			$this -> addRepositories (
 				[$type],[$source],[$alias],[$prio],[$user],[$pass]
 			);
 		}
