@@ -1,4 +1,21 @@
 -------------------------------------------------------------------
+Wed Jun  6 16:20:51 CEST 2012 - ms@suse.de
+
+- netboot: allow multicast TFTP for compressed images (fate #313083)
+  * the predownload hook detects that it is possible to use service
+    partition for intermediate files and exports the temp dir path
+    in $FETCH_FILE_TEMP_DIR
+  * the fetchfile() method uses the temp directory and exports the
+    intermediate file path in $FETCH_FILE_TEMP_FILE if it was created
+  * the postdownload hook deletes $FETCH_FILE_TEMP_FILE. Later we can
+    extend it to manage a cache of several image files.
+
+- netboot: added robust detection of the active network interface
+  * call dhcpcd on all available network interfaces and select
+    either BOOTIF from pxe or one of the interfaces which got
+    a dhcp reply (fate #313338)
+
+-------------------------------------------------------------------
 Thu May 31 22:00:30 CEST 2012 - ms@suse.de
 
 - allow init=/path/to/program option for kiwi images
