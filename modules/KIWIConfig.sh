@@ -435,8 +435,7 @@ function baseStripLocales {
 	"
 	find $directories -mindepth 1 -maxdepth 1 -type d 2>/dev/null |\
 		baseStripAndKeep ${keepLocales}
-	directories="/usr/lib/gconv"
-	find $directories 2>/dev/null | xargs rm -f
+	rm -f /usr/lib/gconv/*
 }
 
 #======================================
