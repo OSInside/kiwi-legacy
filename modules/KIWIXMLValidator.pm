@@ -606,7 +606,7 @@ sub __checkPreferencesDefinition {
 	# ...
 	# Check that only one <preference> definition exists without
 	# use of the profiles attribute.
-	#
+	# ---
 	my $this            = shift;
 	my $kiwi            = $this->{kiwi};
 	my $numProfilesAttr = 0;
@@ -635,6 +635,64 @@ sub __checkPreferencesDefinition {
 			$kiwi -> failed();
 			return;
 		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkPreferLicenseUnique
+#------------------------------------------
+sub __checkPreferLicenseUnique {
+	# ...
+	# Check that the prefer-license attribute is set to true on only one
+	# repository per profile.
+	# ---
+	my $this            = shift;
+	my $kiwi            = $this->{kiwi};
+	my $systemTree      = $this->{systemTree};
+	my @repositories = $systemTree -> getElementsByTagName('repository');
+	my $errorCond;
+	my %definedPrefLic;
+	REPOLOOP:
+	for my $repo (@repositories) {
+		my $prefLic = $repo -> getAttribute('prefer-license');
+		if (defined $prefLic && $prefLic eq 'true') {
+			my $profiles = $repo -> getAttribute('profiles');
+			if (defined $profiles) {
+				my @profs = split /,/, $profiles;
+				PROFLOOP:
+				for my $prof (@profs) {
+					if (! defined $definedPrefLic{$prof}) {
+						if (defined $definedPrefLic{default}) {
+							$errorCond = 1;
+							last REPOLOOP;
+						}
+						$definedPrefLic{$prof} = 1;
+					}
+					else {
+						$errorCond = 1;
+						last REPOLOOP;
+					}
+				}
+			}
+			else {
+				if (! defined $definedPrefLic{default}) {
+					$definedPrefLic{default} = 1;
+				}
+				else {
+					$errorCond = 1;
+					last REPOLOOP;
+				}
+			}
+		}
+	}
+	if ($errorCond) {
+		my $kiwi = $this -> {kiwi};
+		my $msg = 'Ambiguous license preference defined. Cannot resolve '
+			. 'prefer-license=true for 2 or repositories.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
 	}
 	return 1;
 }
@@ -1065,6 +1123,9 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkPreferencesDefinition()) {
+		return;
+	}
+	if (! $this -> __checkPreferLicenseUnique()) {
 		return;
 	}
 	if (! $this -> __checkProfileNames()) {
