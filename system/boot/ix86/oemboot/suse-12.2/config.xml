@@ -158,6 +158,7 @@
 		<package name="glibc"/>
 		<package name="glibc-locale"/>
 		<package name="procps"/>
+		<package name="timezone"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>

@@ -87,5 +87,6 @@
 		<package name="glibc-locale"/>
 		<package name="cracklib-dict-full"/>
 		<package name="ca-certificates"/>
+		<package name="timezone"/>
 	</packages>
 </image>

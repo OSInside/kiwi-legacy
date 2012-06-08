@@ -121,6 +121,7 @@
 		<package name="sysfsutils"/>
 		<package name="syslinux"/>
 		<package name="tar"/>
+		<package name="timezone"/>
 	</packages>
 	<packages type="delete">
 		<package name="bind-libs"/>
