@@ -124,7 +124,7 @@ sub test_addRepositories {
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(6, $numRepos);
 	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'obs://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'/12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
@@ -184,7 +184,7 @@ sub test_addRepositoriesInvalidTypeInf {
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(5, $numRepos);
 	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'obs://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'/12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
@@ -241,7 +241,7 @@ sub test_addRepositoriesNoTypeInf {
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(5, $numRepos);
 	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'obs://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'/12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
@@ -1819,7 +1819,7 @@ sub test_getRepoNodeList {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	my @expectedPaths = ['obs://12.1/repo/oss/',
+	my @expectedPaths = ['/12.1/repo/oss/',
 						'/download.opensuse.org/update/12.1',
 						'/myreposerver/protectedrepos/12.1',
 						'/repos/12.1-additional'];
@@ -1855,7 +1855,7 @@ sub test_getRepositories {
 	# Test these conditions last to get potential error messages
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(4, $numRepos);
-	my @repoInfo = @{$repos{'obs://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'/12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
@@ -2400,7 +2400,7 @@ sub test_setRepository {
 	# Test these conditions last to get potential error messages
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(4, $numRepos);
-	my @repoInfo = @{$repos{'obs://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'/12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
