@@ -4,7 +4,7 @@
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2011 Novell Inc.
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -549,6 +549,36 @@ sub test_patternTattrUse {
 	my @validConfigs = $this -> __getValidFiles('patternTattrUse');
 	$this -> __verifyValid(@validConfigs);
 }
+
+#==========================================
+# test_preferLicenseUnique
+#------------------------------------------
+sub test_preferLicenseUnique {
+	# ...
+	# Test that the verification of the singular setting of prefer-license
+	# is enforced.
+	# ---
+	my $this = shift;
+	my @invalidConfigs = $this -> __getInvalidFiles('preferLic');
+	my $expectedMsg = 'Ambiguous license preference defined. Cannot resolve '
+		. 'prefer-license=true for 2 or repositories.';
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $kiwi = $this -> {kiwi};
+		my $msg = $kiwi -> getMessage();
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('preferLic');
+	$this -> __verifyValid(@validConfigs);
+}
+
 
 #==========================================
 # test_preferenceUnique
