@@ -124,11 +124,11 @@ sub test_addRepositories {
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(6, $numRepos);
 	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'obs://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
-	@repoInfo = @{$repos{'https//myreposerver/protectedrepos/12.1'}};
+	@repoInfo = @{$repos{'/myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
 	$this -> assert_str_equals('bar', $repoInfo[4]);
@@ -184,11 +184,11 @@ sub test_addRepositoriesInvalidTypeInf {
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(5, $numRepos);
 	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'obs://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
-	@repoInfo = @{$repos{'https//myreposerver/protectedrepos/12.1'}};
+	@repoInfo = @{$repos{'/myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
 	$this -> assert_str_equals('bar', $repoInfo[4]);
@@ -241,11 +241,11 @@ sub test_addRepositoriesNoTypeInf {
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(5, $numRepos);
 	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'obs://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
-	@repoInfo = @{$repos{'https//myreposerver/protectedrepos/12.1'}};
+	@repoInfo = @{$repos{'/myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
 	$this -> assert_str_equals('bar', $repoInfo[4]);
@@ -1819,9 +1819,9 @@ sub test_getRepoNodeList {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	my @expectedPaths = ['opensuse://12.1/repo/oss/',
-						'http://download.opensuse.org/update/12.1',
-						'https//myreposerver/protectedrepos/12.1',
+	my @expectedPaths = ['obs://12.1/repo/oss/',
+						'/download.opensuse.org/update/12.1',
+						'/myreposerver/protectedrepos/12.1',
 						'/repos/12.1-additional'];
 	my @configPaths;
 	for my $element (@repoNodes) {
@@ -1855,15 +1855,15 @@ sub test_getRepositories {
 	# Test these conditions last to get potential error messages
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(4, $numRepos);
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'obs://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
-	@repoInfo = @{$repos{'http://download.opensuse.org/update/12.1'}};
+	@repoInfo = @{$repos{'/download.opensuse.org/update/12.1'}};
 	$this -> assert_str_equals('rpm-md', $repoInfo[0]);
 	$this -> assert_str_equals('update', $repoInfo[1]);
 	$this -> assert_str_equals('true', $repoInfo[-1]);
-	@repoInfo = @{$repos{'https//myreposerver/protectedrepos/12.1'}};
+	@repoInfo = @{$repos{'/myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
 	$this -> assert_str_equals('bar', $repoInfo[4]);
@@ -2384,7 +2384,7 @@ sub test_setRepository {
 								'5');
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Replacing repository '
-	. 'http://download.opensuse.org/update/12.1';
+	. '/download.opensuse.org/update/12.1';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);
@@ -2400,11 +2400,11 @@ sub test_setRepository {
 	# Test these conditions last to get potential error messages
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(4, $numRepos);
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'obs://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
-	@repoInfo = @{$repos{'https//myreposerver/protectedrepos/12.1'}};
+	@repoInfo = @{$repos{'/myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
 	$this -> assert_str_equals('bar', $repoInfo[4]);
@@ -2415,7 +2415,7 @@ sub test_setRepository {
 	$this -> assert_str_equals('replacement', $repoInfo[1]);
 	$this -> assert_str_equals('5', $repoInfo[2]);
 	# Assert the expected repo has been replaced
-	my $repoInfo = $repos{'http://download.opensuse.org/update/12.1'};
+	my $repoInfo = $repos{'/download.opensuse.org/update/12.1'};
 	$this -> assert_null($repoInfo);
 }
 
