@@ -106,12 +106,6 @@ sub new {
 		qxx ("echo '[main]' > $zypperConf");
 		qxx ("echo '[main]' > $zyppConf");
 		$ENV{ZYPP_CONF} = $zyppConf;
-		# /.../
-		# Bug in aria2c causes loss of credentials, thus download will not
-		# work. Disable aria2c and use curl instead. curl is the default for
-		# SLES 11 and openSUSE 11.4
-		# ----
-		$ENV{ZYPP_ARIA2C} = 0;
 		$zconfig = new Config::IniFiles (
 			-file => $zyppConf, -allowedcommentchars => '#'
 		);
@@ -1278,7 +1272,6 @@ sub installPackages {
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
-		print $fd "export ZYPP_ARIA2C=0\n";
 		print $fd "@kchroot @zypper install ";
 		print $fd "@installOpts @addonPackages &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
@@ -1544,7 +1537,6 @@ sub setupUpgrade {
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
-		print $fd "export ZYPP_ARIA2C=0\n";
 		if (defined $delPacks) {
 			my @removePackages = @{$delPacks};
 			if (@removePackages) {
@@ -2004,7 +1996,6 @@ sub setupRootSystem {
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
 			print $fd "export ZYPP_CONF=".$root."/".$this->{zyppconf}."\n";
-			print $fd "export ZYPP_ARIA2C=0\n";
 			print $fd "export ZYPP_LOCKFILE_ROOT=$root\n";
 			if (@newprods) {
 				print $fd "@zypper --root $root install ";
@@ -2072,7 +2063,6 @@ sub setupRootSystem {
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
 			print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
-			print $fd "export ZYPP_ARIA2C=0\n";
 			if (@newprods) {
 				print $fd "@kchroot @zypper install ";
 				print $fd "@installOpts -t product @newprods &\n";
