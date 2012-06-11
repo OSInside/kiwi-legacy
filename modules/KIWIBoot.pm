@@ -4872,7 +4872,7 @@ sub setStoragePartition {
 				$kiwi -> loginfo ($status);
 				return;
 			}
-			if (! open (FD,"|/sbin/fdasd $device &> $tmpdir/fdasd.log")) {
+			if (! open (FD,"|fdasd $device &> $tmpdir/fdasd.log")) {
 				return;
 			}
 			print FD "y\n";
