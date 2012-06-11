@@ -1814,13 +1814,27 @@ sub setupBootDisk {
 		$kiwi -> failed ();
 		return;
 	}
-	if (! $haveDiskDevice) {
-		$kiwi -> info ("Creating virtual disk...");
-	} else {
-		$kiwi -> info ("Using disk device $haveDiskDevice...");
-	}
+	$kiwi -> info ("Setup disk image/device...");
 	while (1) {
-		if (! $haveDiskDevice) {
+		if (-x $this->{gdata}->{StudioNode}) {
+			#==========================================
+			# Call custom image creation tool...
+			#------------------------------------------
+			$status = qxx ("$this->{gdata}->{StudioNode} $this->{vmsize} 2>&1");
+			$result = $? >> 8;
+			chomp $status;
+			if (($result != 0) || (! -b $status)) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Failed creating Studio storage device: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$haveDiskDevice = $status;
+			$this->{loop} = $haveDiskDevice;
+		} elsif (! $haveDiskDevice) {
+			#==========================================
+			# loop setup a disk device as file...
+			#------------------------------------------
 			$status = qxx ("qemu-img create $diskname $this->{vmsize} 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -1836,14 +1850,9 @@ sub setupBootDisk {
 				return;
 			}
 		} else {
-			# /.../
-			# the following is required for suse studio to determine the
-			# size of the image target disk. It has no relevance for the
-			# standard build process and is therefore called without any
-			# return value check. 
-			qxx ("qemu-img create $diskname $this->{vmsize} 2>&1");
-			qxx ("rm -f $diskname");
-			# ----
+			#==========================================
+			# Use specified disk device...
+			#------------------------------------------
 			$this->{loop} = $haveDiskDevice;
 			if (! -b $this->{loop}) {
 				$kiwi -> failed ();
@@ -1985,6 +1994,14 @@ sub setupBootDisk {
 			#==========================================
 			# system partition(s) still too small
 			#------------------------------------------
+			if ($haveDiskDevice) {
+				$kiwi -> failed();
+				$kiwi -> error (
+					"Sorry given disk $haveDiskDevice is too small"
+				);
+				$kiwi -> failed();
+				return;
+			}
 			sleep (1);
 			$this -> deleteVolumeGroup();
 			$this -> cleanLoopMaps();
@@ -2158,7 +2175,7 @@ sub setupBootDisk {
 			return;
 		}
 		$kiwi -> done();
-		if ($haveDiskDevice) {
+		if (($haveDiskDevice) && (! $this->{gdata}->{StudioNode})) {
 			#==========================================
 			# fill disk device with zero bytes
 			#------------------------------------------
@@ -2316,7 +2333,7 @@ sub setupBootDisk {
 	# cleanup temp directory
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
-	if ($haveDiskDevice) {
+	if (($haveDiskDevice) && (! $this->{gdata}->{StudioNode})) {
 		if (($type{installiso} ne "true") && ($type{installstick} ne "true")) {
 			#==========================================
 			# create image file from disk device

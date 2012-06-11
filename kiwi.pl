@@ -644,6 +644,7 @@ sub init {
 	my $NoColor;               # don't use colored output (done/failed messages)
 	my $LogPort;               # specify alternative log server port
 	my $GzipCmd;               # command to run to gzip things
+	my $TargetStudio;          # command to run to create storage nodes for SuSE Studio
 	my $Verbosity;             # control the verbosity level
 	my $TargetArch;            # target architecture -> writes zypp.conf
 	my $Debug;                 # activates the internal stack trace output
@@ -757,6 +758,7 @@ sub init {
 		"strip|s"               => \$StripImage,
 		"target-arch=s"         => \$TargetArch,
 		"targetdevice=s"        => \$targetDevice,
+		"targetstudio=s"        => \$TargetStudio,
 		"type|t=s"              => \$SetImageType,
 		"upgrade|u=s"           => \$Upgrade,
 		"test-image=s"          => \$TestImage,
@@ -1293,6 +1295,11 @@ sub init {
 	if (defined $GzipCmd) {
 		$kiwi -> info ("Setting gzip command to: $GzipCmd");
 		$global -> setGlobals ("Gzip", $GzipCmd);
+		$kiwi -> done ();
+	}
+	if (defined $TargetStudio) {
+		$kiwi -> info ("Setting SuSE Studio img node creator to: $TargetStudio");
+		$global -> setGlobals ("StudioNode", $TargetStudio);
 		$kiwi -> done ();
 	}
 	if ((defined $BootVMDisk) && (! defined $BootVMSystem)) {
