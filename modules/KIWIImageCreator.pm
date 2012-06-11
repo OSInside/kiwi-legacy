@@ -705,7 +705,7 @@ sub createImage {
 			last SWITCH;
 		};
 		/^xfs/    && do {
-			$ok = $image -> createImageXFS ();
+			$ok = $image -> createImageXFS ( $targetDevice );
 			$checkFormat = 1;
 			last SWITCH;
 		};
