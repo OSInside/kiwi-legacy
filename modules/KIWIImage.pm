@@ -3491,8 +3491,9 @@ sub installLogicalExtend {
 	if ($device) {
 		$this -> cleanMount();
 		$name = $this -> buildImageName ();
+		my $dest = $this->{imageDest}."/".$name;
 		$kiwi -> info ("Dumping filesystem image from $device...");
-		$data = qxx ("dd if=$device of=$this->{imageDest}/$name bs=32k 2>&1");
+		$data = qxx ("qemu-img convert -f raw -O raw $device $dest 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
