@@ -4320,32 +4320,6 @@ sub getSingleInstSourceSatSolvable {
 }
 
 #==========================================
-# buildImageName
-#------------------------------------------
-sub buildImageName {
-	# ...
-	# build image file name from XML information
-	# ---
-	my $this      = shift;
-	my $separator = shift;
-	my $extension = shift;
-	my $arch = qxx ("uname -m"); chomp ( $arch );
-	$arch = ".$arch";
-	if (! defined $separator) {
-		$separator = "-";
-	}
-	my $name = $this -> getImageName();
-	my $iver = $this -> getImageVersion();
-	if (defined $extension) {
-		$name = $name.$extension.$arch.$separator.$iver;
-	} else {
-		$name = $name.$arch.$separator.$iver;
-	}
-	chomp  $name;
-	return $name;
-}
-
-#==========================================
 # hasDefaultPackages
 #------------------------------------------
 sub hasDefaultPackages {

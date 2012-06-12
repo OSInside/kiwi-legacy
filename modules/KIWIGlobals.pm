@@ -535,6 +535,34 @@ sub isize {
 }
 
 #==========================================
+# generateBuildImageName
+#------------------------------------------
+sub generateBuildImageName {
+	# ...
+	# Generate a name for the build image based on information configured
+	# in the config.xml file and provided parameters
+	# ---
+	my $this      = shift;
+	my $xml       = shift;
+	my $separator = shift;
+	my $extension = shift;
+	my $arch = qxx ("uname -m"); chomp ( $arch );
+	$arch = ".$arch";
+	if (! defined $separator) {
+		$separator = "-";
+	}
+	my $name = $xml -> getImageName();
+	my $iver = $xml -> getImageVersion();
+	if (defined $extension) {
+		$name = $name.$extension.$arch.$separator.$iver;
+	} else {
+		$name = $name.$arch.$separator.$iver;
+	}
+	chomp  $name;
+	return $name;
+}
+
+#==========================================
 # getMBRDiskLabel
 #------------------------------------------
 sub getMBRDiskLabel {

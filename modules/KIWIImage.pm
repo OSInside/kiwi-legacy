@@ -465,7 +465,7 @@ sub checkAndSetupPrebuiltBootImage {
 	if (! $bxml) {
 		return;
 	}
-	my $bootImageName = $bxml -> buildImageName();
+	my $bootImageName = $main::global ->generateBuildImageName($bxml);
 	undef $bxml;
 	$kiwi -> info ("Checking for pre-built boot image");
 	#==========================================
@@ -1321,7 +1321,7 @@ sub createImageRootAndBoot {
 	#==========================================
 	# Store meta data for subsequent calls
 	#------------------------------------------
-	$result{systemImage} = $sxml -> buildImageName();
+	$result{systemImage} = $main::global -> generateBuildImageName($sxml);
 	$result{bootImage}   = $bootdata[0];
 	if ($text eq "VMX") {
 		$result{format} = $stype{format};
@@ -1511,9 +1511,11 @@ sub createImageLiveCD {
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
-	my $namecd = $this -> buildImageName (";");
-	my $namerw = $this -> buildImageName ();
-	my $namero = $this -> buildImageName ("-","-read-only");
+	my $namecd = $main::global -> generateBuildImageName($this->{xml}, ';');
+	my $namerw = $main::global -> generateBuildImageName($this->{xml});
+	my $namero = $main::global -> generateBuildImageName(
+		$this->{xml},'-', '-read-only'
+	);
 	if (! defined $namerw) {
 		return;
 	}
@@ -2280,8 +2282,10 @@ sub createImageSplit {
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
-	my $namerw = $this -> buildImageName ("-","-read-write");
-	my $namero = $this -> buildImageName ();
+	my $namerw = $main::global -> generateBuildImageName(
+		$this->{xml},'-', '-read-write'
+	);
+	my $namero = $main::global -> generateBuildImageName($this->{xml});
 	if (! defined $namerw) {
 		return;
 	}
@@ -2900,7 +2904,7 @@ sub createImageSplit {
 	#==========================================
 	# Store meta data for subsequent calls
 	#------------------------------------------
-	$name->{systemImage} = $sxml -> buildImageName();
+	$name->{systemImage} = $main::global -> generateBuildImageName($sxml);
 	$name->{bootImage}   = $bootdata[0];
 	$name->{format}      = $type{format};
 	if ($boot =~ /vmxboot|oemboot/) {
@@ -3004,7 +3008,7 @@ sub preImage {
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
-	my $name = $this -> buildImageName ();
+	my $name = $main::global -> generateBuildImageName($this->{xml});
 	if (! defined $name) {
 		return;
 	}
@@ -3032,7 +3036,8 @@ sub writeImageConfig {
 	my $name = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
-	my $configName = $this -> buildImageName() . ".config";
+	my $configName = $main::global -> generateBuildImageName($this->{xml})
+		. '.config';
 	my $device = $xml -> getPXEDeployImageDevice ();
 	my %type = %{$xml -> getImageTypeAndAttributes()};
 	#==========================================
@@ -3047,8 +3052,10 @@ sub writeImageConfig {
 			$kiwi -> failed ();
 			return;
 		}
-		my $namecd = $this -> buildImageName(";");
-		my $namerw = $this -> buildImageName(";", "-read-write");
+		my $namecd = $main::global
+			-> generateBuildImageName($this->{xml}, ';');
+		my $namerw = $main::global
+			-> generateBuildImageName($this->{xml},';', '-read-write');
 		my $server = $xml -> getPXEDeployServer ();
 		my $blocks = $xml -> getPXEDeployBlockSize ();
 		if (! defined $server) {
@@ -3189,8 +3196,6 @@ sub writeImageConfig {
 		close $FD;
 		$kiwi -> done ();
 	}
-	# Reset main::ImageName...
-	$this -> buildImageName();
 	return $configName;
 }
 
@@ -3525,7 +3530,7 @@ sub installLogicalExtend {
 	#------------------------------------------
 	if (($device) && (! $this->{gdata}->{StudioNode})) {
 		$this -> cleanMount();
-		$name = $this -> buildImageName ();
+		$name = $main::global -> generateBuildImageName($this->{xml});
 		my $dest = $this->{imageDest}."/".$name;
 		$kiwi -> info ("Dumping filesystem image from $device...");
 		$data = qxx ("qemu-img convert -f raw -O raw $device $dest 2>&1");
@@ -4665,29 +4670,6 @@ sub cleanKernelFSMount {
 	foreach my $system (@kfs) {
 		qxx ("umount $this->{imageDest}/$system 2>&1");
 	}
-}
-
-#==========================================
-# buildImageName
-#------------------------------------------
-sub buildImageName {
-	my $this = shift;
-	my $xml  = $this->{xml};
-	my $arch = $this->{arch};
-	my $separator = shift;
-	my $extension = shift;
-	if (! defined $separator) {
-		$separator = "-";
-	}
-	my $name = $xml -> getImageName();
-	my $iver = $xml -> getImageVersion();
-	if (defined $extension) {
-		$name = $name.$extension.$arch.$separator.$iver;
-	} else {
-		$name = $name.$arch.$separator.$iver;
-	}
-	chomp  $name;
-	return $name;
 }
 
 #==========================================
