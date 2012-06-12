@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Mon Jun 11 23:40:37 CEST 2012 - ms@suse.de
 
-- added support for netboot on s390 via zPXE
+- added support for netboot on s390 via zPXE (fate #312134)
 
 -------------------------------------------------------------------
 Wed Jun  6 16:20:51 CEST 2012 - ms@suse.de
