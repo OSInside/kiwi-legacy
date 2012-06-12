@@ -1758,16 +1758,34 @@ sub setupBootDisk {
 	#==========================================
 	# create/use disk
 	#------------------------------------------
+	if (! defined $system) {
+		$kiwi -> error  ("No system image given");
+		$kiwi -> failed ();
+		return undef;
+	}
 	my $dmap; # device map
 	my $root; # root device
+	$kiwi -> info ("Setup disk image/device...");
 	while (1) {
-		if (! defined $system) {
-			$kiwi -> error  ("No system image given");
-			$kiwi -> failed ();
-			return undef;
-		}
-		if (! $haveDiskDevice) {
-			$kiwi -> info ("Creating virtual disk...");
+		if (($main::targetStudio) && (-x $main::targetStudio)) {
+			#==========================================
+			# Call custom image creation tool...
+			#------------------------------------------
+			$status = qxx ("$main::targetStudio $vmsize 2>&1");
+			$result = $? >> 8;
+			chomp $status;
+			if (($result != 0) || (! -b $status)) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Failed creating Studio storage device: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$haveDiskDevice = $status;
+			$this->{loop} = $haveDiskDevice;
+		} elsif (! $haveDiskDevice) {
+			#==========================================
+			# loop setup a disk device as file...
+			#------------------------------------------
 			$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -1783,14 +1801,6 @@ sub setupBootDisk {
 				return undef;
 			}
 		} else {
-			$kiwi -> info ("Using disk device $haveDiskDevice...");
-			# /.../
-			# the following is required for suse studio to determine the
-			# size of the image target disk. It has no relevance for the
-			# standard build process and is therefore called without any
-			# return value check. 
-			qxx ("qemu-img create $diskname $vmsize 2>&1");
-			# ----
 			$this->{loop} = $haveDiskDevice;
 			if (! -b $this->{loop}) {
 				$kiwi -> failed ();
@@ -2167,7 +2177,7 @@ sub setupBootDisk {
 			$this -> cleanLoop ();
 			return undef;
 		}
-		if ($haveDiskDevice) {
+		if (($haveDiskDevice) && (! $main::targetStudio)) {
 			#==========================================
 			# fill disk device with zero bytes
 			#------------------------------------------

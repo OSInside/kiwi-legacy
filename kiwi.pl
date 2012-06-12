@@ -219,6 +219,7 @@ our $Convert;               # convert image into given format/configuration
 our $Format;                # format to convert to, vmdk, ovf, etc...
 our $defaultAnswer;         # default answer to any questions
 our $targetDevice;          # alternative device instead of a loop device
+our $targetStudio;          # command to run to create nodes for SuSE Studio
 our %XMLChangeSet;          # internal data set for update of XML objects
 our $ImageDescription;      # uniq path to image description due to caller opts
 our $RecycleRoot;           # use existing root directory incl. contents
@@ -1246,6 +1247,7 @@ sub init {
 		"strip|s"               => \$StripImage,
 		"target-arch=s"         => \$TargetArch,
 		"targetdevice=s"        => \$targetDevice,
+		"targetstudio=s"        => \$targetStudio,
 		"type|t=s"              => \$SetImageType,
 		"upgrade|u=s"           => \$Upgrade,
 		"v|verbose+"            => \$Verbosity,
