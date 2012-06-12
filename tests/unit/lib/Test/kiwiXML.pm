@@ -501,6 +501,9 @@ sub test_addRepositories {
 	# ...
 	# Verify proper operation of addRepositories method
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
@@ -532,11 +535,11 @@ sub test_addRepositories {
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(6, $numRepos);
 	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'/12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
-	@repoInfo = @{$repos{'/myreposerver/protectedrepos/12.1'}};
+	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
 	$this -> assert_str_equals('bar', $repoInfo[4]);
@@ -560,6 +563,9 @@ sub test_addRepositoriesInvalidTypeInf {
 	# ...
 	# Verify proper operation of addRepositories method
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
@@ -592,11 +598,11 @@ sub test_addRepositoriesInvalidTypeInf {
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(5, $numRepos);
 	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'/12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
-	@repoInfo = @{$repos{'/myreposerver/protectedrepos/12.1'}};
+	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
 	$this -> assert_str_equals('bar', $repoInfo[4]);
@@ -649,11 +655,11 @@ sub test_addRepositoriesNoTypeInf {
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(5, $numRepos);
 	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'/12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
-	@repoInfo = @{$repos{'/myreposerver/protectedrepos/12.1'}};
+	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
 	$this -> assert_str_equals('bar', $repoInfo[4]);
@@ -828,11 +834,39 @@ sub test_getArchiveList {
 }
 
 #==========================================
+# test_getBaseList
+#------------------------------------------
+sub test_getBaseList {
+	# ...
+	# Verify proper return of getBaseList method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @basePcks = $xml -> getBaseList();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw /filesystem glibc-locale/;
+	$this -> assert_array_equal(\@expected, \@basePcks);
+}
+
+#==========================================
 # test_getBootIncludes
 #------------------------------------------
 sub test_getBootIncludes {
 	# ...
-	# Verify proper return of getBootIncludes  method
+	# Verify proper return of getBootIncludes method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -929,6 +963,62 @@ sub test_getDefaultPrebuiltDir {
 }
 
 #==========================================
+# test_getDeleteList
+#------------------------------------------
+sub test_getDeleteList {
+	# ...
+	# Verify proper return of getDeleteList method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @delPcks = $xml -> getDeleteList();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw /java/;
+	$this -> assert_array_equal(\@expected, \@delPcks);
+}
+
+#==========================================
+# test_getDeleteListInstallDelete
+#------------------------------------------
+sub test_getDeleteListInstallDelete {
+	# ...
+	# Verify proper return of getDeleteList method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettingsInstallDelete';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @delPcks = $xml -> getDeleteList();
+	my $msg = $kiwi -> getLogInfoMessage();
+	my $expectedMsg = "WARNING: package java ignored in delete list\n";
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null(@delPcks);
+}
+
+#==========================================
 # test_getDriversNodeList
 #------------------------------------------
 sub test_getDriversNodeList {
@@ -987,6 +1077,34 @@ sub test_getEc2Config {
 	$this -> assert_str_equals('pv-key.key', $ec2Info{EC2PrivateKeyFile});
 	my @expectedRegions = qw / EU-West US-West /;
 	$this -> assert_array_equal(\@expectedRegions, $ec2Info{EC2Regions});
+}
+
+#==========================================
+# test_getHttpsRepositoryCredentials
+#------------------------------------------
+sub test_getHttpsRepositoryCredentials {
+	# ...
+	# Verify proper return of getHttpsRepositoryCredentials
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my ($uname, $pass) = $xml->getHttpsRepositoryCredentials();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	$this -> assert_str_equals('foo', $uname);
+	$this -> assert_str_equals('bar', $pass);
 }
 
 #==========================================
@@ -1227,6 +1345,34 @@ sub test_getImageVersion {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('13.20.26', $value);
+}
+
+#==========================================
+# test_getInstallList
+#------------------------------------------
+sub test_getInstallList {
+	# ...
+	# Verify proper return of getInstallList method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettingsNoPattern';
+	my $xml = new KIWIXML(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @instPcks = $xml -> getInstallList();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw /ed kernel-default python vim/;
+	$this -> assert_array_equal(\@expected, \@instPcks);
 }
 
 #==========================================
@@ -2343,6 +2489,9 @@ sub test_getRepoNodeList {
 	# ...
 	# Verify proper return of getRepoNodeList method
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
@@ -2357,9 +2506,9 @@ sub test_getRepoNodeList {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	my @expectedPaths = ['/12.1/repo/oss/',
-						'/download.opensuse.org/update/12.1',
-						'/myreposerver/protectedrepos/12.1',
+	my @expectedPaths = ['opensuse://12.1/repo/oss/',
+						'http://download.opensuse.org/update/12.1',
+						'https://myreposerver/protectedrepos/12.1',
 						'/repos/12.1-additional'];
 	my @configPaths;
 	for my $element (@repoNodes) {
@@ -2377,6 +2526,9 @@ sub test_getRepositories {
 	# ...
 	# Verify proper return of getRepositories method
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
@@ -2393,15 +2545,15 @@ sub test_getRepositories {
 	# Test these conditions last to get potential error messages
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(4, $numRepos);
-	my @repoInfo = @{$repos{'/12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
-	@repoInfo = @{$repos{'/download.opensuse.org/update/12.1'}};
+	@repoInfo = @{$repos{'http://download.opensuse.org/update/12.1'}};
 	$this -> assert_str_equals('rpm-md', $repoInfo[0]);
 	$this -> assert_str_equals('update', $repoInfo[1]);
 	$this -> assert_str_equals('true', $repoInfo[-1]);
-	@repoInfo = @{$repos{'/myreposerver/protectedrepos/12.1'}};
+	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
 	$this -> assert_str_equals('bar', $repoInfo[4]);
@@ -2912,6 +3064,9 @@ sub test_setRepository {
 	# ...
 	# Verify proper operation of setRepository method
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
@@ -2922,7 +3077,7 @@ sub test_setRepository {
 								'5');
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Replacing repository '
-	. '/download.opensuse.org/update/12.1';
+		. 'http://download.opensuse.org/update/12.1';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);
@@ -2938,11 +3093,11 @@ sub test_setRepository {
 	# Test these conditions last to get potential error messages
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(4, $numRepos);
-	my @repoInfo = @{$repos{'/12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-2]);
-	@repoInfo = @{$repos{'/myreposerver/protectedrepos/12.1'}};
+	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
 	$this -> assert_str_equals('bar', $repoInfo[4]);
@@ -2953,7 +3108,7 @@ sub test_setRepository {
 	$this -> assert_str_equals('replacement', $repoInfo[1]);
 	$this -> assert_str_equals('5', $repoInfo[2]);
 	# Assert the expected repo has been replaced
-	my $repoInfo = $repos{'/download.opensuse.org/update/12.1'};
+	my $repoInfo = $repos{'http://download.opensuse.org/update/12.1'};
 	$this -> assert_null($repoInfo);
 }
 
