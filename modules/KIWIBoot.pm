@@ -1908,7 +1908,7 @@ sub setupBootDisk {
 			$this -> cleanLoop();
 			return;
 		}
-		if (! $haveDiskDevice ) {
+		if ((! $haveDiskDevice ) || ($haveDiskDevice =~ /nbd|aoe/)) {
 			#==========================================
 			# setup device mapper
 			#------------------------------------------
