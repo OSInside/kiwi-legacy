@@ -2401,19 +2401,23 @@ sub setupBootDisk {
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
 	if ($haveDiskDevice)  {
-		#==========================================
-		# create image file from disk device
-		#------------------------------------------
-		$kiwi -> info ("Dumping image file from $this->{loop}...");
-		$status = qxx ("dd if=$this->{loop} of=$diskname bs=32k 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Image dump failed: $status");
-			$kiwi -> failed ();
-			return undef;
+		if (($type{installiso} ne "true") && ($type{installstick} ne "true")) {
+			#==========================================
+			# create image file from disk device
+			#------------------------------------------
+			$kiwi -> info ("Dumping image file from $this->{loop}...");
+			$status = qxx (
+				"qemu-img convert -f raw -O raw $this->{loop} $diskname 2>&1"
+			);
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("Image dump failed: $status");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$kiwi -> done();
 		}
-		$kiwi -> done();
 	}
 	#==========================================
 	# Create image described by given format
