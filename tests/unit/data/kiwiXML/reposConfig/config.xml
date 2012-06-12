@@ -21,16 +21,16 @@
 	<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2" prefer-license="true" priority="2" status="fixed">
-		<source path="/12.1/repo/oss/"/>
+		<source path="opensuse://12.1/repo/oss/"/>
 	</repository>
 	<repository type="rpm-md" alias="update" imageinclude="true" >
-		<source path="/download.opensuse.org/update/12.1"/>
+		<source path="http://download.opensuse.org/update/12.1"/>
 	</repository>
 	<repository type="rpm-dir" status="replacable">
 		<source path="/repos/12.1-additional"/>
 	</repository>
 	<repository type="yast2" username="foo" password="bar" status="replacable">
-		<source path="/myreposerver/protectedrepos/12.1"/>
+		<source path="https://myreposerver/protectedrepos/12.1"/>
 	</repository>
 	<packages type="image">
 		<package name="kernel-default"/>
