@@ -322,6 +322,9 @@ Meta-package to pull in all requires to build a netboot media.
 
 %package -n kiwi-desc-oemboot
 Requires:       kiwi = %{version}
+%ifarch %arm
+Requires:       u-boot-tools
+%endif
 %ifarch ppc ppc64 s390 s390x
 Requires:       virt-utils
 %else
