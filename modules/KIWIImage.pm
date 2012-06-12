@@ -3006,15 +3006,16 @@ sub postImage {
 # buildLogicalExtend
 #------------------------------------------
 sub buildLogicalExtend {
-	my $this = shift;
-	my $name = shift;
-	my $size = shift;
-	my $kiwi = $this->{kiwi};
-	my $xml  = $this->{xml};
+	my $this   = shift;
+	my $name   = shift;
+	my $size   = shift;
+	my $device = shift;
+	my $kiwi   = $this->{kiwi};
+	my $xml    = $this->{xml};
 	my $encode = 0;
 	my $cipher = 0;
-	my $out  = $this->{imageDest}."/".$name;
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my $out    = $this->{imageDest}."/".$name;
+	my %type   = %{$xml->getImageTypeAndAttributes()};
 	#==========================================
 	# Check if luks encoding is requested
 	#------------------------------------------
@@ -3046,7 +3047,7 @@ sub buildLogicalExtend {
 			$kiwi -> failed ();
 			return;
 		}
-		my $device = $data;
+		$device = $data;
 		$this->{targetDevice} = $device;
 	} else {	
 		unlink ($out);
@@ -3063,7 +3064,7 @@ sub buildLogicalExtend {
 	# Setup encoding
 	#------------------------------------------
 	if ($encode) {
-		$this -> setupEncoding ($name,$out,$cipher);
+		$this -> setupEncoding ($name,$out,$cipher,$device);
 	}
 	return $name;
 }
@@ -3081,15 +3082,23 @@ sub setupEncoding {
 	my $name   = shift;
 	my $out    = shift;
 	my $cipher = shift;
+	my $device = shift;
 	my $kiwi   = $this->{kiwi};
 	my $data;
 	my $code;
-	$data = qxx ("/sbin/losetup -s -f $out 2>&1"); chomp $data;
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("Couldn't loop bind logical extend: $data");
-		$kiwi -> failed ();
-		return undef;
+	if ((defined $device) && (! -b $device)) {
+		return;
+	}
+	if (! defined $device) {
+		$data = qxx ("/sbin/losetup -s -f $out 2>&1"); chomp $data;
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("Couldn't loop bind logical extend: $data");
+			$kiwi -> failed ();
+			return undef;
+		}
+	} else {
+		$data = $device;
 	}
 	my $loop = $data;
 	my @luksloop;
