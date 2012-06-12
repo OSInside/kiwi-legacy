@@ -930,7 +930,11 @@ sub createImageFormat {
 	if (! $imageformat) {
 		return;
 	}
-	$imageformat -> createFormat();
+	if ($this->{gdata}->{StudioNode}) {
+		$kiwi -> loginfo ("Format conversion skipped in targetstudio mode\n");
+    } else {
+		$imageformat -> createFormat();
+	}
 	$imageformat -> createMaschineConfiguration();
 	return 1;
 }
