@@ -47,6 +47,10 @@ ifdef KIWIVERBTEST
 TESTVERBOSE = --verbose
 endif
 
+ifdef KIWINONETWORKTEST
+NONETWORKTEST = env KIWI_NO_NET=1
+endif
+
 all: modules/KIWISchema.rng
 	#============================================
 	# build tools
@@ -176,7 +180,7 @@ test:
 	for i in `find -name "*.t" | cut -d/ -f4`;do \
 		touch tests/.timestamps/$$i's';\
 	done
-	cd tests/unit && /usr/bin/prove ${TESTVERBOSE} -f .
+	cd tests/unit && ${NONETWORKTEST} /usr/bin/prove ${TESTVERBOSE} -f .
 	rm -f .revision
 
 %.t:
