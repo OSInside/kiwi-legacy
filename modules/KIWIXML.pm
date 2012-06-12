@@ -1612,7 +1612,7 @@ sub getInstSourceRepository {
 		my $pwd  = $element -> getAttribute("pwd");
 		my $islocal  = $element -> getAttribute("local");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
-		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
+		my $source = $this -> __resolveLink ( $stag -> getAttribute ("path") );
 		if (! defined $name) {
 			$name = "noname";
 		}
@@ -1851,7 +1851,7 @@ sub getRepositories {
 		my $pwd  = $element -> getAttribute("password");
 		my $plic = $element -> getAttribute("prefer-license");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
-		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
+		my $source = $this -> __resolveLink ( $stag -> getAttribute ("path") );
 		$result{$source} = [$type,$alias,$prio,$user,$pwd,$plic,$imgincl];
 	}
 	return %result;
@@ -3814,35 +3814,6 @@ sub getPackageNodeList {
 }
 
 #==========================================
-# resolveLink
-#------------------------------------------
-sub resolveLink {
-	my $this = shift;
-	my $data = $this -> resolveArchitectur ($_[0]);
-	my $cdir = qxx ("pwd"); chomp $cdir;
-	if (chdir $data) {
-		my $pdir = qxx ("pwd"); chomp $pdir;
-		chdir $cdir;
-		return $pdir
-	}
-	return $data;
-}
-
-#========================================== 
-# resolveArchitectur
-#------------------------------------------
-sub resolveArchitectur {
-	my $this = shift;
-	my $path = shift;
-	my $arch = $this->{arch};
-	if ($arch =~ /i.86/) {
-		$arch = "i386";
-	}
-	$path =~ s/\%arch/$arch/;
-	return $path;
-}
-
-#==========================================
 # getInstSourceFile
 #------------------------------------------
 sub getInstSourceFile {
@@ -5618,6 +5589,35 @@ sub __quote {
 	my $line = shift;
 	$line =~ s/([\"\$\`\\])/\\$1/g;
 	return $line;
+}
+
+#==========================================
+# __resolveLink
+#------------------------------------------
+sub __resolveLink {
+	my $this = shift;
+	my $data = $this -> __resolveArchitecture ($_[0]);
+	my $cdir = qxx ("pwd"); chomp $cdir;
+	if (chdir $data) {
+		my $pdir = qxx ("pwd"); chomp $pdir;
+		chdir $cdir;
+		return $pdir
+	}
+	return $data;
+}
+
+#==========================================
+# __resolveArchitecture
+#------------------------------------------
+sub __resolveArchitecture {
+	my $this = shift;
+	my $path = shift;
+	my $arch = $this->{arch};
+	if ($arch =~ /i.86/) {
+		$arch = "i386";
+	}
+	$path =~ s/\%arch/$arch/;
+	return $path;
 }
 
 1;
