@@ -3663,6 +3663,10 @@ sub buildMD5Sum {
 	my $this = shift;
 	my $name = shift;
 	my $kiwi = $this->{kiwi};
+	my $image = $this->{imageDest}."/".$name;
+	if ($this->{targetDevice}) {
+		$image = $this->{targetDevice};
+	}
 	#==========================================
 	# Skip this in init cache mode
 	#------------------------------------------
@@ -3676,7 +3680,7 @@ sub buildMD5Sum {
 	# Create image md5sum
 	#------------------------------------------
 	$kiwi -> info ("Creating image MD5 sum...");
-	my $size = main::isize ("$this->{imageDest}/$name");
+	my $size = main::isize ($image);
 	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
@@ -3684,7 +3688,7 @@ sub buildMD5Sum {
 		$blocksize *= $factor;
 	}
 	my $blocks = $size / $blocksize;
-	my $sum  = qxx ("cat $this->{imageDest}/$name | md5sum - | cut -f 1 -d-");
+	my $sum  = qxx ("cat $image | md5sum - | cut -f 1 -d-");
 	chomp $sum;
 	if ($name =~ /\.gz$/) {
 		$name =~ s/\.gz//;
@@ -3749,11 +3753,15 @@ sub compressImage {
 	my $this = shift;
 	my $name = shift;
 	my $kiwi = $this->{kiwi};
+	my $image = $this->{imageDest}."/".$name;
+	if ($this->{targetDevice}) {
+		$image = $this->{targetDevice};
+	}
 	#==========================================
 	# Compress image using gzip
 	#------------------------------------------
 	$kiwi -> info ("Compressing image...");
-	my $data = qxx ("$main::Gzip -f $this->{imageDest}/$name");
+	my $data = qxx ("cat $image | $main::Gzip > $this->{imageDest}/$name.gz");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
