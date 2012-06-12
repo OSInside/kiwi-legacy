@@ -281,7 +281,7 @@ sub createCache {
 	if (! $image -> createImageEXT2 ()) {
 		undef $kic; return;
 	}
-	my $name= $imageCacheDir."/".$xml -> buildImageName();
+	my $name= $imageCacheDir."/".$main::global -> generateBuildImageName($xml);
 	qxx ("mv $name $rootTarget.ext2");
 	qxx ("rm -f  $name.ext2");
 	qxx ("rm -f  $imageCacheDir/initrd-*");
