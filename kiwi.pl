@@ -55,7 +55,7 @@ binmode(STDOUT, ":utf8");
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "4.85.48";
+our $Version       = "4.85.49";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
