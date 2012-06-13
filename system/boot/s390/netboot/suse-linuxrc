@@ -69,6 +69,7 @@ function recreateVTOCTable {
 	Echo "Recreate VTOC table [ $imageDiskDevice ]"
 	createPartitionerInput r y w
 	callPartitioner $input
+	blockdev --rereadpt $imageDiskDevice
 	rm -f $input
 }
 
