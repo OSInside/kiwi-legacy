@@ -64,10 +64,10 @@ initialize
 #--------------------------------------
 function recreateVTOCTable {
 	# /.../
-	# re-create VTOC re-using existing partition sizes
+	# re-create VTOC and delete all partitions
 	# ----
 	Echo "Recreate VTOC table [ $imageDiskDevice ]"
-	createPartitionerInput u y w
+	createPartitionerInput r y w
 	callPartitioner $input
 	rm -f $input
 }
