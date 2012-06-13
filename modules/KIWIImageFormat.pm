@@ -62,7 +62,7 @@ sub new {
 	#==========================================
 	# check image file
 	#------------------------------------------
-	if (! (-f $image || -b $image)) {
+	if ((! $main::targetStudio) && (! (-f $image || -b $image))) {
 		$kiwi -> error ("no such image file: $image");
 		$kiwi -> failed ();
 		return undef;

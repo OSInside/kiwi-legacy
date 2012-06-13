@@ -1154,6 +1154,7 @@ sub createImageVMX {
 		undef $main::BootVMSystem;
 		$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
 		$main::Format  = $name->{format};
+		$main::ConvertXML = $xml;
 		if (! defined main::main()) {
 			&{$this->{resetvars}};
 			return undef;
@@ -2603,6 +2604,7 @@ sub createImageSplit {
 			undef $main::BootVMSystem;
 			$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
 			$main::Format  = $name->{format};
+			$main::ConvertXML = $sxml;
 			if (! defined main::main()) {
 				&{$this->{resetvars}};
 				return undef;

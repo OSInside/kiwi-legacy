@@ -863,7 +863,9 @@ sub main {
 			if (($checkFormat) && ($attr{format})) {
 				my $haveFormat = $attr{format};
 				my $imgfile= $main::Destination."/".$image -> buildImageName();
-				my $format = new KIWIImageFormat ($kiwi,$imgfile,$haveFormat);
+				my $format = new KIWIImageFormat (
+					$kiwi,$imgfile,$haveFormat,$xml
+				);
 				if (! $format) {
 					my $code = kiwiExit (1); return $code;
 				}
@@ -1146,7 +1148,9 @@ sub main {
 	#------------------------------------------
 	if (defined $Convert) {
 		$kiwi -> info ("Starting image format conversion...\n");
-		my $format = new KIWIImageFormat ($kiwi,$Convert,$Format);
+		my $format = new KIWIImageFormat (
+			$kiwi,$Convert,$Format,$main::ConvertXML
+		);
 		if (! $format) {
 			my $code = kiwiExit (1);
 			return $code;
