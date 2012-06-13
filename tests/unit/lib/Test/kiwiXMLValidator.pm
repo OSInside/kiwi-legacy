@@ -2,7 +2,7 @@
 # FILE          : xmlValidator.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 Novell Inc.
+# COPYRIGHT     : (c) 2012 Novell Inc.
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
@@ -32,7 +32,7 @@ sub new {
 	# ---
 	my $this = shift -> SUPER::new(@_);
 	$this -> {dataDir} = $this -> getDataDir() . '/kiwiXMLValidator/';
-	$this -> {kiwi} = new  Common::ktLog();
+	$this -> {kiwi} =  Common::ktLog -> new();
 	$this -> {schema} = $this -> getBaseDir() . '/../modules/KIWISchema.rng';
 	$this -> {xslt} =  $this -> getBaseDir() . '/../xsl/master.xsl';
 
@@ -77,6 +77,7 @@ sub test_bootDescriptSet {
 	}
 	my @validConfigs = $this -> __getValidFiles('bootDescript');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -88,7 +89,7 @@ sub test_ctorInvalidConfPath {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new(
 		$kiwi,
 		'/tmp',
 		$this -> {dataDir} . 'revision.txt',
@@ -104,6 +105,7 @@ sub test_ctorInvalidConfPath {
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
+	return;
 }
 
 #==========================================
@@ -115,7 +117,7 @@ sub test_ctorInvalidRevPath {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new(
 		$kiwi,
 		$this -> {dataDir} . 'genericValid.xml',
 		'/tmp',
@@ -131,6 +133,7 @@ sub test_ctorInvalidRevPath {
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
+	return;
 }
 
 #==========================================
@@ -142,7 +145,7 @@ sub test_ctorInvalidSchemaPath {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new(
 		$kiwi,
 		$this -> {dataDir} . 'genericValid.xml',
 		$this -> {dataDir} . 'revision.txt',
@@ -158,6 +161,7 @@ sub test_ctorInvalidSchemaPath {
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
+	return;
 }
 
 #==========================================
@@ -169,7 +173,7 @@ sub test_ctorInvalidXSLTPath {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new(
 		$kiwi,
 		$this -> {dataDir} . 'genericValid.xml',
 		$this -> {dataDir} . 'revision.txt',
@@ -185,6 +189,7 @@ sub test_ctorInvalidXSLTPath {
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
+	return;
 }
 
 #==========================================
@@ -196,7 +201,7 @@ sub test_ctorValid {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new(
 		$kiwi,
 		$this -> {dataDir} . 'genericValid.xml',
 		$this -> {dataDir} . 'revision.txt',
@@ -211,6 +216,7 @@ sub test_ctorValid {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($validator);
+	return;
 }
 
 #==========================================
@@ -240,6 +246,7 @@ sub test_defaultProfileSpec {
 	}
 	my @validConfigs = $this -> __getValidFiles('defaultProfile');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -270,6 +277,7 @@ sub test_defaultTypeSpec {
 	}
 	my @validConfigs = $this -> __getValidFiles('defaultType');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -298,6 +306,7 @@ sub test_displayName {
 	}
 	my @validConfigs = $this -> __getValidFiles('displayName');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -328,6 +337,7 @@ sub test_ec2IsFileSys {
 	}
 	my @validConfigs = $this -> __getValidFiles('ec2IsFS');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -365,6 +375,7 @@ sub test_ec2Regions {
 	}
 	my @validConfigs = $this -> __getValidFiles('ec2Region');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -411,6 +422,7 @@ sub test_httpsRepoCredentials {
 	}
 	my @validConfigs = $this -> __getValidFiles('httpsRepoCredentials');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -443,6 +455,7 @@ sub test_missingFilesysAttr {
 	}
 	my @validConfigs = $this -> __getValidFiles('missingFilesysAttr');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -472,6 +485,7 @@ sub test_oemPostDump {
 	}
 	my @validConfigs = $this -> __getValidFiles('oemPostDump');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -519,6 +533,7 @@ sub test_patternTattrConsistent {
 	}
 	my @validConfigs = $this -> __getValidFiles('patternTattrCons');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -548,6 +563,7 @@ sub test_patternTattrUse {
 	}
 	my @validConfigs = $this -> __getValidFiles('patternTattrUse');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -577,6 +593,7 @@ sub test_preferLicenseUnique {
 	}
 	my @validConfigs = $this -> __getValidFiles('preferLic');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 
@@ -613,6 +630,7 @@ sub test_preferenceUnique {
 	}
 	my @validConfigs = $this -> __getValidFiles('preferenceUnique');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -645,6 +663,7 @@ sub test_profileName {
 	}
 	my @validConfigs = $this -> __getValidFiles('profileName');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -679,6 +698,7 @@ sub test_profileReferenceExist {
 	}
 	my @validConfigs = $this -> __getValidFiles('profileReferenceExist');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -704,6 +724,7 @@ sub test_revisionMismatch {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($validator);
+	return;
 }
 
 #==========================================
@@ -733,6 +754,7 @@ sub test_sysdiskNameAttrNoWhiteSpace {
 	}
 	my @validConfigs = $this -> __getValidFiles('sysdiskWhitespace');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -762,6 +784,7 @@ sub test_sysdiskInvalidAttrs {
 	}
 	my @validConfigs = $this -> __getValidFiles('sysdiskVolAttrs');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -801,6 +824,7 @@ sub test_typeConfigConsist {
 	}
 	my @validConfigs = $this -> __getValidFiles('typeUnique');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -835,6 +859,7 @@ sub test_typeUnique {
 	}
 	my @validConfigs = $this -> __getValidFiles('typeUnique');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -863,6 +888,7 @@ sub test_versionFormat {
 	}
 	my @validConfigs = $this -> __getValidFiles('versionFormat');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -892,6 +918,7 @@ sub test_volumeNameAttrNoWhiteSpace {
 	}
 	my @validConfigs = $this -> __getValidFiles('volumeWhitespace');
 	$this -> __verifyValid(@validConfigs);
+	return;
 }
 
 #==========================================
@@ -919,7 +946,7 @@ sub __getValidator {
 	# ---
 	my $this         = shift;
 	my $confFileName = shift;
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new(
 		$this -> {kiwi},
 		$confFileName,
 		$this -> {dataDir} . 'revision.txt',
@@ -953,8 +980,7 @@ sub __verifyValid {
 	# the state of the logging mechanism is always the same, thus this is
 	# common to all test cases.
 	# ---
-	my $this = shift;
-	my @validConfigs = @_;
+	my ($this, @validConfigs) = @_;
 	for my $vConfFile (@validConfigs) {
 		my $validator = $this -> __getValidator($vConfFile);
 		$validator -> validate();
@@ -968,6 +994,7 @@ sub __verifyValid {
 		# Test this condition last to get potential error messages
 		$this -> assert_not_null($validator);
 	}
+	return;
 }
 
 1;
