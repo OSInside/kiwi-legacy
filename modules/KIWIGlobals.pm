@@ -745,4 +745,27 @@ sub setupBTRFSSubVolumes {
 	return $path;
 }
 
+#==========================================
+# umountSystemFileSystems
+#------------------------------------------
+sub umountSystemFileSystems {
+	# /.../
+	# umount system filesystems like proc within the given
+	# root tree. This is called after a custom script call
+	# to cleanup the environment
+	# ----
+	my $this = shift;
+	my $root = shift;
+	my @sysfs= (
+		"/dev/pts","/dev","/proc","/sys"
+	);
+	if (! -d $root) {
+		return;
+	}
+	foreach my $path (@sysfs) {
+		qxx ("chroot $root umount -l $path 2>&1");
+	}
+	return $this;
+}
+
 1;

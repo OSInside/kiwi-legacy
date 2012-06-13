@@ -1162,9 +1162,10 @@ sub setup {
 	if ((! $initCache) && (-e "$imageDesc/config.sh")) {
 		$kiwi -> info ("Calling image script: config.sh");
 		qxx (" cp $imageDesc/config.sh $root/tmp ");
-				qxx (" chmod u+x $root/tmp/config.sh ");
+		qxx (" chmod u+x $root/tmp/config.sh ");
 		my $data = qxx (" chroot $root /tmp/config.sh 2>&1 ");
 		my $code = $? >> 8;
+		$main::global -> umountSystemFileSystems ($root);
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
