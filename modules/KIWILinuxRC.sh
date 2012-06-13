@@ -76,6 +76,8 @@ if [ "$arch" = "ppc64" ];then
 	test -z "$loader" && export loader=yaboot
 elif [[ $arch =~ arm ]];then
 	test -z "$loader" && export loader=uboot
+elif [[ $arch =~ s390 ]];then
+	test -z "$loader" && export loader=zipl
 else
 	test -z "$loader" && export loader=grub
 fi
