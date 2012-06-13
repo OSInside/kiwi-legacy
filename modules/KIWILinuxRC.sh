@@ -77,6 +77,9 @@ if [ "$arch" = "ppc64" ];then
 	loader=lilo
 	export ELOG_BOOTSHELL=/dev/hvc0
 fi
+if [[ $arch =~ s390 ]];then
+	loader=zipl
+fi
 
 #======================================
 # Dialog
