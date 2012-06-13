@@ -6792,13 +6792,15 @@ function normalizeRepartInput {
 			;;
 			"n")
 				partid=${pcmds[$index + 2]}
-				if ! echo $partid | grep -q "^[0-4]$";then
-					# make sure there is a ID set for the creation
-					index_fix=$(($index_fix + 1))
-					pcmds_fix[$index_fix]=${pcmds[$index + 1]}
-					index_fix=$(($index_fix + 1))
-					pcmds_fix[$index_fix]=4
-					index=$(($index + 1))
+				if [ ! "$PARTITIONER" = "fdasd" ];then
+					if ! echo $partid | grep -q "^[0-4]$";then
+						# make sure there is a ID set for the creation
+						index_fix=$(($index_fix + 1))
+						pcmds_fix[$index_fix]=${pcmds[$index + 1]}
+						index_fix=$(($index_fix + 1))
+						pcmds_fix[$index_fix]=4
+						index=$(($index + 1))
+					fi
 				fi
 			;;
 			"t")
