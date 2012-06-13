@@ -40,8 +40,8 @@ sub new {
 	# ---
 	my $this = shift -> SUPER::new(@_);
 	$this -> {dataDir} = $this -> getDataDir() . '/kiwiXML/';
-	$this -> {kiwi} = new  Common::ktLog();
-	$this -> {cmdL} = new KIWICommandLine($this->{kiwi});
+	$this -> {kiwi} =  Common::ktLog -> new();
+	$this -> {cmdL} = KIWICommandLine -> new($this->{kiwi});
 
 	return $this;
 }
@@ -56,7 +56,7 @@ sub test_addArchives {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addArchives('image', undef, undef, 'archiveA.tgz',
@@ -90,6 +90,7 @@ sub test_addArchives {
 		}
 	}
 	$this -> assert_array_equal(\@expectedArchs, \@archives);
+	return;
 }
 
 #==========================================
@@ -102,7 +103,7 @@ sub test_addDrivers {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'driversConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addDrivers('fglrx', 'wl2000');
@@ -130,6 +131,7 @@ sub test_addDrivers {
 		}
 	}
 	$this -> assert_array_equal(\@expectedDrivers, \@confDrivers);
+	return;
 }
 
 #==========================================
@@ -142,7 +144,7 @@ sub test_addImagePackages {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addImagePackages('perl', 'emacs');
@@ -174,6 +176,7 @@ sub test_addImagePackages {
 		}
 	}
 	$this -> assert_array_equal(\@expectedPcks, \@packages);
+	return;
 }
 
 #==========================================
@@ -186,7 +189,7 @@ sub test_addImagePatterns {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addImagePatterns('gnome', 'kde');
@@ -219,6 +222,7 @@ sub test_addImagePatterns {
 		}
 	}
 	$this -> assert_array_equal(\@expectedPats, \@patterns);
+	return;
 }
 
 #==========================================
@@ -231,7 +235,7 @@ sub test_addPackagesBootstrap {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addPackages('bootstrap', undef, undef, 'perl', 'emacs');
@@ -263,6 +267,7 @@ sub test_addPackagesBootstrap {
 		}
 	}
 	$this -> assert_array_equal(\@expectedPcks, \@packages);
+	return;
 }
 
 #==========================================
@@ -275,7 +280,7 @@ sub test_addPackagesImage {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addPackages('image', undef, undef, 'perl', 'emacs');
@@ -307,6 +312,7 @@ sub test_addPackagesImage {
 		}
 	}
 	$this -> assert_array_equal(\@expectedPcks, \@packages);
+	return;
 }
 
 #==========================================
@@ -320,7 +326,7 @@ sub test_addPackagesNoBootstrap {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettingsNoBootstrap';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addPackages('bootstrap', undef, undef, 'perl', 'emacs');
@@ -332,6 +338,7 @@ sub test_addPackagesNoBootstrap {
 	$this -> assert_str_equals('warning', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('skipped', $state);
+	return;
 }
 
 #==========================================
@@ -345,7 +352,7 @@ sub test_addPackagesNoImage {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettingsNoImage';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addPackages('image', undef, undef, 'perl', 'emacs');
@@ -379,6 +386,7 @@ sub test_addPackagesNoImage {
 		}
 	}
 	$this -> assert_array_equal(\@expectedPcks, \@packages);
+	return;
 }
 
 #==========================================
@@ -391,7 +399,7 @@ sub test_addPackagesUnknownType {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addPackages('vmx', undef, undef, 'perl', 'emacs');
@@ -402,6 +410,7 @@ sub test_addPackagesUnknownType {
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
 }
 
 #==========================================
@@ -414,7 +423,7 @@ sub test_addPatterns {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addPatterns('image', undef, 'gnome', 'kde');
@@ -447,6 +456,7 @@ sub test_addPatterns {
 		}
 	}
 	$this -> assert_array_equal(\@expectedPats, \@patterns);
+	return;
 }
 
 #==========================================
@@ -459,7 +469,7 @@ sub test_addRemovePackages {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addRemovePackages('gnome-shell', 'cups');
@@ -491,6 +501,7 @@ sub test_addRemovePackages {
 		}
 	}
 	$this -> assert_array_equal(\@expectedDel, \@delPckgs);
+	return;
 }
 
 
@@ -507,17 +518,17 @@ sub test_addRepositories {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @addedTypes = qw /red-carpet urpmi/;
-	my @newLocs = ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
-	my @newAlia = qw /rc pubrepo/;
-	my @newPrios = qw /13 99/;
-	my @newUsr = qw /pablo/;
-	my @newPass = qw /ola/;
-	$xml = $xml -> addRepositories(\@addedTypes, @newLocs, \@newAlia,
-								\@newPrios, \@newUsr, \@newPass);
+	my @Locs= ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
+	my @Alia= qw /rc pubrepo/;
+	my @Prios= qw /13 99/;
+	my @Usr= qw /pablo/;
+	my @Pass= qw /ola/;
+	$xml = $xml -> addRepositories(\@addedTypes, @Locs,\@Alia,
+								\@Prios,\@Usr, \@Pass);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -554,6 +565,7 @@ sub test_addRepositories {
 	$this -> assert_str_equals('urpmi', $repoInfo[0]);
 	$this -> assert_str_equals('pubrepo', $repoInfo[1]);
 	$this -> assert_str_equals('99', $repoInfo[2]);
+	return;
 }
 
 #==========================================
@@ -569,17 +581,17 @@ sub test_addRepositoriesInvalidTypeInf {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @addedTypes = qw /red-carpet ola/;
-	my @newLocs = ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
-	my @newAlia = qw /rc pubrepo/;
-	my @newPrios = qw /13 99/;
-	my @newUsr = qw /pablo/;
-	my @newPass = qw /ola/;
-	$xml = $xml -> addRepositories(\@addedTypes, @newLocs, \@newAlia,
-								\@newPrios, \@newUsr, \@newPass);
+	my @Locs= ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
+	my @Alia= qw /rc pubrepo/;
+	my @Prios= qw /13 99/;
+	my @Usr= qw /pablo/;
+	my @Pass= qw /ola/;
+	$xml = $xml -> addRepositories(\@addedTypes, @Locs,\@Alia,
+								\@Prios,\@Usr, \@Pass);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Addition of requested repo type [ola] not supported';
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -613,6 +625,7 @@ sub test_addRepositoriesInvalidTypeInf {
 	$this -> assert_str_equals('13', $repoInfo[2]);
 	$this -> assert_str_equals('pablo', $repoInfo[3]);
 	$this -> assert_str_equals('ola', $repoInfo[4]);
+	return;
 }
 
 #==========================================
@@ -625,17 +638,17 @@ sub test_addRepositoriesNoTypeInf {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @addedTypes = qw /red-carpet/;
-	my @newLocs = ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
-	my @newAlia = qw /rc pubrepo/;
-	my @newPrios = qw /13 99/;
-	my @newUsr = qw /pablo/;
-	my @newPass = qw /ola/;
-	$xml = $xml -> addRepositories(\@addedTypes, @newLocs, \@newAlia,
-								\@newPrios, \@newUsr, \@newPass);
+	my @Locs= ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
+	my @Alia= qw /rc pubrepo/;
+	my @Prios= qw /13 99/;
+	my @Usr= qw /pablo/;
+	my @Pass= qw /ola/;
+	$xml = $xml -> addRepositories(\@addedTypes, @Locs,\@Alia,
+								\@Prios,\@Usr, \@Pass);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'No type for repo [http://otherpublicrepos/12.1] '
 		. 'specified';
@@ -670,6 +683,7 @@ sub test_addRepositoriesNoTypeInf {
 	$this -> assert_str_equals('13', $repoInfo[2]);
 	$this -> assert_str_equals('pablo', $repoInfo[3]);
 	$this -> assert_str_equals('ola', $repoInfo[4]);
+	return;
 }
 
 #==========================================
@@ -682,11 +696,11 @@ sub test_addStripConsistentCall {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @newDel = qw (/etc/hosts /bin/zsh);
-	$xml -> addStrip ('files', @newDel);
+	my @Del= qw (/etc/hosts /bin/zsh);
+	$xml -> addStrip ('files', @Del);
 	my @delFiles = $xml -> getStripDelete();
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Specified strip section type 'files' not supported.";
@@ -698,6 +712,7 @@ sub test_addStripConsistentCall {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw (/etc/resolv.conf /lib/libc.so);
 	$this -> assert_array_equal(\@expectedNames, \@delFiles);
+	return;
 }
 
 #==========================================
@@ -710,11 +725,11 @@ sub test_addStripDelete {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @newDel = qw (/etc/hosts /bin/zsh);
-	$xml -> addStrip ('delete', @newDel);
+	my @Del= qw (/etc/hosts /bin/zsh);
+	$xml -> addStrip ('delete', @Del);
 	my @delFiles = $xml -> getStripDelete();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -725,6 +740,7 @@ sub test_addStripDelete {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw (/etc/resolv.conf /lib/libc.so /etc/hosts /bin/zsh);
 	$this -> assert_array_equal(\@expectedNames, \@delFiles);
+	return;
 }
 
 #==========================================
@@ -737,11 +753,11 @@ sub test_addStripDeleteNoPreExist {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'specPkgMgr';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @newDel = qw (/etc/hosts /bin/zsh);
-	$xml -> addStrip ('delete', @newDel);
+	my @Del= qw (/etc/hosts /bin/zsh);
+	$xml -> addStrip ('delete', @Del);
 	my @delFiles = $xml -> getStripDelete();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -752,6 +768,7 @@ sub test_addStripDeleteNoPreExist {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw (/etc/hosts /bin/zsh);
 	$this -> assert_array_equal(\@expectedNames, \@delFiles);
+	return;
 }
 
 #==========================================
@@ -764,11 +781,11 @@ sub test_addStripLibs {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @newLibs = qw /libm libcrypt/;
-	$xml -> addStrip ('libs', @newLibs);
+	my @Libs= qw /libm libcrypt/;
+	$xml -> addStrip ('libs', @Libs);
 	my @libFiles = $xml -> getStripLibs();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -779,6 +796,7 @@ sub test_addStripLibs {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw /libdbus libnss libm libcrypt/;
 	$this -> assert_array_equal(\@expectedNames, \@libFiles);
+	return;
 }
 
 #==========================================
@@ -791,11 +809,11 @@ sub test_addStripTools {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @newTools = qw /xfsrestore install-info/;
-	$xml -> addStrip ('tools', @newTools);
+	my @Tools= qw /xfsrestore install-info/;
+	$xml -> addStrip ('tools', @Tools);
 	my @toolFiles = $xml -> getStripTools();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -806,6 +824,7 @@ sub test_addStripTools {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw /megacli virt-mgr xfsrestore install-info/;
 	$this -> assert_array_equal(\@expectedNames, \@toolFiles);
+	return;
 }
 
 #==========================================
@@ -818,7 +837,7 @@ sub test_getArchiveList {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @archives = $xml -> getArchiveList();
@@ -831,6 +850,7 @@ sub test_getArchiveList {
 	# Test this condition last to get potential error messages
 	my @expected = qw /myInitStuff.tar myImageStuff.tgz/;
 	$this -> assert_array_equal(\@expected, \@archives);
+	return;
 }
 
 #==========================================
@@ -846,7 +866,7 @@ sub test_getBaseList {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @basePcks = $xml -> getBaseList();
@@ -859,6 +879,7 @@ sub test_getBaseList {
 	# Test this condition last to get potential error messages
 	my @expected = qw /filesystem glibc-locale/;
 	$this -> assert_array_equal(\@expected, \@basePcks);
+	return;
 }
 
 #==========================================
@@ -871,7 +892,7 @@ sub test_getBootIncludes {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @bootInclP = $xml -> getBootIncludes();
@@ -884,6 +905,7 @@ sub test_getBootIncludes {
 	# Test this condition last to get potential error messages
 	my @expected = qw /python vim/;
 	$this -> assert_array_equal(\@expected, \@bootInclP);
+	return;
 }
 
 #==========================================
@@ -896,7 +918,7 @@ sub test_getBootTheme {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getBootTheme();
@@ -908,6 +930,7 @@ sub test_getBootTheme {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('bluestar', $value);
+	return;
 }
 
 #==========================================
@@ -920,7 +943,7 @@ sub test_getConfigName {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getConfigName();
@@ -936,6 +959,7 @@ sub test_getConfigName {
 	$this -> assert_str_equals('data', $parts[-4]);
 	$this -> assert_str_equals('unit', $parts[-5]);
 	$this -> assert_str_equals('tests', $parts[-6]);
+	return;
 }
 
 #==========================================
@@ -948,7 +972,7 @@ sub test_getDefaultPrebuiltDir {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getDefaultPrebuiltDir();
@@ -960,6 +984,7 @@ sub test_getDefaultPrebuiltDir {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('/work/kiwibootimgs', $value);
+	return;
 }
 
 #==========================================
@@ -975,7 +1000,7 @@ sub test_getDeleteList {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @delPcks = $xml -> getDeleteList();
@@ -988,6 +1013,7 @@ sub test_getDeleteList {
 	# Test this condition last to get potential error messages
 	my @expected = qw /java/;
 	$this -> assert_array_equal(\@expected, \@delPcks);
+	return;
 }
 
 #==========================================
@@ -1003,7 +1029,7 @@ sub test_getDeleteListInstallDelete {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettingsInstallDelete';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @delPcks = $xml -> getDeleteList();
@@ -1016,6 +1042,7 @@ sub test_getDeleteListInstallDelete {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null(@delPcks);
+	return;
 }
 
 #==========================================
@@ -1028,7 +1055,7 @@ sub test_getDriversNodeList {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'driversConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @driversNodes = $xml -> getDriversNodeList() -> get_nodelist();
@@ -1049,6 +1076,7 @@ sub test_getDriversNodeList {
 		}
 	}
 	$this -> assert_array_equal(\@expectedDrivers, \@confDrivers);
+	return;
 }
 
 #==========================================
@@ -1061,7 +1089,7 @@ sub test_getEc2Config {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'ec2ConfigSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my %ec2Info = $xml -> getEc2Config();
@@ -1077,6 +1105,7 @@ sub test_getEc2Config {
 	$this -> assert_str_equals('pv-key.key', $ec2Info{EC2PrivateKeyFile});
 	my @expectedRegions = qw / EU-West US-West /;
 	$this -> assert_array_equal(\@expectedRegions, $ec2Info{EC2Regions});
+	return;
 }
 
 #==========================================
@@ -1092,7 +1121,7 @@ sub test_getHttpsRepositoryCredentials {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my ($uname, $pass) = $xml->getHttpsRepositoryCredentials();
@@ -1105,6 +1134,7 @@ sub test_getHttpsRepositoryCredentials {
 	# Test these conditions last to get potential error messages
 	$this -> assert_str_equals('foo', $uname);
 	$this -> assert_str_equals('bar', $pass);
+	return;
 }
 
 #==========================================
@@ -1117,7 +1147,7 @@ sub test_getImageDefaultDestination {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageDefaultDestination();
@@ -1129,6 +1159,7 @@ sub test_getImageDefaultDestination {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('/work/tmp', $value);
+	return;
 }
 
 #==========================================
@@ -1141,7 +1172,7 @@ sub test_getImageDefaultRoot {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageDefaultRoot();
@@ -1153,6 +1184,7 @@ sub test_getImageDefaultRoot {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('/var/tmp', $value);
+	return;
 }
 
 #==========================================
@@ -1165,7 +1197,7 @@ sub test_getImageDisplayName {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageDisplayName();
@@ -1177,6 +1209,7 @@ sub test_getImageDisplayName {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('testcase', $value);
+	return;
 }
 
 #==========================================
@@ -1189,7 +1222,7 @@ sub test_getImageID {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageID();
@@ -1201,6 +1234,7 @@ sub test_getImageID {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('3030150', $value);
+	return;
 }
 
 #==========================================
@@ -1213,7 +1247,7 @@ sub test_getImageName {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageName();
@@ -1225,6 +1259,7 @@ sub test_getImageName {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('testCase-preference-settings', $value);
+	return;
 }
 
 #==========================================
@@ -1237,7 +1272,7 @@ sub test_getImageSizeNotAdditive {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageSize();
@@ -1249,6 +1284,7 @@ sub test_getImageSizeNotAdditive {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('20G', $value);
+	return;
 }
 
 #==========================================
@@ -1261,7 +1297,7 @@ sub test_getImageSizeAdditiveBytesNotAdditive {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageSizeAdditiveBytes();
@@ -1273,6 +1309,7 @@ sub test_getImageSizeAdditiveBytesNotAdditive {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('0', $value);
+	return;
 }
 
 #==========================================
@@ -1285,7 +1322,7 @@ sub test_getImageSizeBytesNotAdditive {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageSizeBytes();
@@ -1297,6 +1334,7 @@ sub test_getImageSizeBytesNotAdditive {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('21474836480', $value);
+	return;
 }
 
 #==========================================
@@ -1309,7 +1347,7 @@ sub test_getImageTypeAndAttributesSimple {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $typeInfo = $xml -> getImageTypeAndAttributes();
@@ -1321,6 +1359,7 @@ sub test_getImageTypeAndAttributesSimple {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('vmx', $typeInfo->{type});
+	return;
 }
 
 #==========================================
@@ -1333,7 +1372,7 @@ sub test_getImageVersion {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageVersion();
@@ -1345,6 +1384,7 @@ sub test_getImageVersion {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('13.20.26', $value);
+	return;
 }
 
 #==========================================
@@ -1360,7 +1400,7 @@ sub test_getInstallList {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettingsNoPattern';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @instPcks = $xml -> getInstallList();
@@ -1373,6 +1413,7 @@ sub test_getInstallList {
 	# Test this condition last to get potential error messages
 	my @expected = qw /ed kernel-default python vim/;
 	$this -> assert_array_equal(\@expected, \@instPcks);
+	return;
 }
 
 #==========================================
@@ -1385,7 +1426,7 @@ sub test_getListBootIncludes {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @bootInclPckgs = $xml -> getListBootIncludes();
@@ -1398,6 +1439,7 @@ sub test_getListBootIncludes {
 	# Test this condition last to get potential error messages
 	my @expected = qw /python vim/;
 	$this -> assert_array_equal(\@expected, \@bootInclPckgs);
+	return;
 }
 
 #==========================================
@@ -1410,7 +1452,7 @@ sub test_getLocale {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getLocale();
@@ -1422,6 +1464,7 @@ sub test_getLocale {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('en_US', $value);
+	return;
 }
 
 #==========================================
@@ -1434,7 +1477,7 @@ sub test_getLVMGroupName {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'lvmConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getLVMGroupName();
@@ -1446,6 +1489,7 @@ sub test_getLVMGroupName {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('test_Volume', $value);
+	return;
 }
 
 #==========================================
@@ -1458,7 +1502,7 @@ sub test_getLVMVolumes {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'lvmConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my %volumes = $xml -> getLVMVolumes();
@@ -1484,6 +1528,7 @@ sub test_getLVMVolumes {
 	@volSettings = $volumes{home};
 	$this -> assert_equals(2048, $volSettings[0][0]);
 	$this -> assert_equals(0, $volSettings[0][1]);
+	return;
 }
 
 #==========================================
@@ -1496,7 +1541,7 @@ sub test_getLVMVolumesUsingDisallowed {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'lvmConfigDisallowedDir';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my %volumes = $xml -> getLVMVolumes();
@@ -1516,6 +1561,7 @@ sub test_getLVMVolumesUsingDisallowed {
 	@volSettings = $volumes{var};
 	$this -> assert_equals(50, $volSettings[0][0]);
 	$this -> assert_equals(1, $volSettings[0][1]);
+	return;
 }
 
 #==========================================
@@ -1528,7 +1574,7 @@ sub test_getLVMVolumesUsingRoot {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'lvmConfigWithRoot';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my %volumes = $xml -> getLVMVolumes();
@@ -1548,6 +1594,7 @@ sub test_getLVMVolumesUsingRoot {
 	@volSettings = $volumes{var};
 	$this -> assert_equals(50, $volSettings[0][0]);
 	$this -> assert_equals(1, $volSettings[0][1]);
+	return;
 }
 
 #==========================================
@@ -1560,7 +1607,7 @@ sub test_getOEMAlignPartition {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMAlignPartition();
@@ -1572,6 +1619,7 @@ sub test_getOEMAlignPartition {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('true', $value);
+	return;
 }
 
 #==========================================
@@ -1584,7 +1632,7 @@ sub test_getOEMBootTitle {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMBootTitle();
@@ -1596,6 +1644,7 @@ sub test_getOEMBootTitle {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('Unit Test', $value);
+	return;
 }
 
 #==========================================
@@ -1608,7 +1657,7 @@ sub test_getOEMBootWait {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMBootWait();
@@ -1620,6 +1669,7 @@ sub test_getOEMBootWait {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('false', $value);
+	return;
 }
 
 #==========================================
@@ -1632,7 +1682,7 @@ sub test_getOEMKiwiInitrd {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMKiwiInitrd();
@@ -1644,6 +1694,7 @@ sub test_getOEMKiwiInitrd {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('true', $value);
+	return;
 }
 
 #==========================================
@@ -1656,7 +1707,7 @@ sub test_getOEMPartitionInstall {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMPartitionInstall();
@@ -1668,6 +1719,7 @@ sub test_getOEMPartitionInstall {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('false', $value);
+	return;
 }
 
 #==========================================
@@ -1680,7 +1732,7 @@ sub test_getOEMReboot {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMReboot();
@@ -1692,6 +1744,7 @@ sub test_getOEMReboot {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('false', $value);
+	return;
 }
 
 #==========================================
@@ -1704,7 +1757,7 @@ sub test_getOEMRebootInter {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMRebootInter();
@@ -1716,6 +1769,7 @@ sub test_getOEMRebootInter {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('false', $value);
+	return;
 }
 
 #==========================================
@@ -1728,7 +1782,7 @@ sub test_getOEMRecovery {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMRecovery();
@@ -1740,6 +1794,7 @@ sub test_getOEMRecovery {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('true', $value);
+	return;
 }
 
 #==========================================
@@ -1752,7 +1807,7 @@ sub test_getOEMRecoveryID {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMRecoveryID();
@@ -1764,6 +1819,7 @@ sub test_getOEMRecoveryID {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('20', $value);
+	return;
 }
 
 #==========================================
@@ -1776,7 +1832,7 @@ sub test_getOEMRecoveryInPlace {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMRecoveryInPlace();
@@ -1788,6 +1844,7 @@ sub test_getOEMRecoveryInPlace {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('true', $value);
+	return;
 }
 
 #==========================================
@@ -1800,7 +1857,7 @@ sub test_getOEMShutdown {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMShutdown();
@@ -1812,6 +1869,7 @@ sub test_getOEMShutdown {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('false', $value);
+	return;
 }
 
 #==========================================
@@ -1824,7 +1882,7 @@ sub test_getOEMShutdownInter {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMShutdownInter();
@@ -1836,6 +1894,7 @@ sub test_getOEMShutdownInter {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('true', $value);
+	return;
 }
 
 #==========================================
@@ -1848,7 +1907,7 @@ sub test_getOEMSilentBoot {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMSilentBoot();
@@ -1860,6 +1919,7 @@ sub test_getOEMSilentBoot {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('true', $value);
+	return;
 }
 
 #==========================================
@@ -1872,7 +1932,7 @@ sub test_getOEMSwap {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMSwap();
@@ -1884,6 +1944,7 @@ sub test_getOEMSwap {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('true', $value);
+	return;
 }
 
 #==========================================
@@ -1896,7 +1957,7 @@ sub test_getOEMSwapSize {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMSwapSize();
@@ -1908,6 +1969,7 @@ sub test_getOEMSwapSize {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('2048', $value);
+	return;
 }
 
 #==========================================
@@ -1920,7 +1982,7 @@ sub test_getOEMSystemSize {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMSystemSize();
@@ -1932,6 +1994,7 @@ sub test_getOEMSystemSize {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('20G', $value);
+	return;
 }
 
 #==========================================
@@ -1944,7 +2007,7 @@ sub test_getOEMUnattended {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMUnattended();
@@ -1956,6 +2019,7 @@ sub test_getOEMUnattended {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('true', $value);
+	return;
 }
 
 #==========================================
@@ -1968,7 +2032,7 @@ sub test_getOEMUnattendedID {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMUnattendedID();
@@ -1980,6 +2044,7 @@ sub test_getOEMUnattendedID {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('scsi-SATA_ST9500420AS_5VJ5JL6T-part1', $value);
+	return;
 }
 
 #==========================================
@@ -1992,7 +2057,7 @@ sub test_getOVFConfig {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'ovfConfigSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my %ovfConfig = $xml -> getOVFConfig();
@@ -2018,6 +2083,7 @@ sub test_getOVFConfig {
 	my %nicSetup = %$nicConfig;
 	my $nicInfo = $nicSetup{eth0};
 	$this -> assert_not_null($nicInfo);
+	return;
 }
 
 #==========================================
@@ -2030,7 +2096,7 @@ sub test_getPXEDeployBlockSize {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getPXEDeployBlockSize();
@@ -2042,6 +2108,7 @@ sub test_getPXEDeployBlockSize {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('4096', $value);
+	return;
 }
 
 #==========================================
@@ -2054,7 +2121,7 @@ sub test_getPXEDeployConfiguration {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my %config = $xml -> getPXEDeployConfiguration();
@@ -2067,6 +2134,7 @@ sub test_getPXEDeployConfiguration {
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null(%config);
 	$this -> assert_str_equals('target', $config{installSource});
+	return;
 }
 
 #==========================================
@@ -2079,7 +2147,7 @@ sub test_getPXEDeployImageDevice {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getPXEDeployImageDevice();
@@ -2091,6 +2159,7 @@ sub test_getPXEDeployImageDevice {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('/dev/sda', $value);
+	return;
 }
 
 #==========================================
@@ -2103,7 +2172,7 @@ sub test_getPXEDeployInitrd {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getPXEDeployInitrd();
@@ -2115,6 +2184,7 @@ sub test_getPXEDeployInitrd {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('/pxeSetup/specialInitrd', $value);
+	return;
 }
 
 #==========================================
@@ -2127,7 +2197,7 @@ sub test_getPXEDeployKernel {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getPXEDeployKernel();
@@ -2139,6 +2209,7 @@ sub test_getPXEDeployKernel {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('/pxeSetup/specialKernel', $value);
+	return;
 }
 
 #==========================================
@@ -2151,7 +2222,7 @@ sub test_getPXEDeployPartitions {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @partitions = $xml -> getPXEDeployPartitions();
@@ -2170,6 +2241,7 @@ sub test_getPXEDeployPartitions {
 	$partInfo = $partitions[1];
 	$this -> assert_str_equals('/', $partInfo -> {mountpoint});
 	$this -> assert_equals(1, $partInfo -> {target});
+	return;
 }
 
 #==========================================
@@ -2182,7 +2254,7 @@ sub test_getPXEDeployServer {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getPXEDeployServer();
@@ -2194,6 +2266,7 @@ sub test_getPXEDeployServer {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('192.168.100.2', $value);
+	return;
 }
 
 #==========================================
@@ -2206,7 +2279,7 @@ sub test_getPXEDeployTimeout {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getPXEDeployTimeout();
@@ -2218,6 +2291,7 @@ sub test_getPXEDeployTimeout {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('20', $value);
+	return;
 }
 
 #==========================================
@@ -2230,7 +2304,7 @@ sub test_getPXEDeployUnionConfig {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my %unionConfig = $xml -> getPXEDeployUnionConfig();
@@ -2245,6 +2319,7 @@ sub test_getPXEDeployUnionConfig {
 	$this -> assert_str_equals('/dev/sda2', $unionConfig{ro});
 	$this -> assert_str_equals('/dev/sda3', $unionConfig{rw});
 	$this -> assert_str_equals('clicfs', $unionConfig{type});
+	return;
 }
 
 #==========================================
@@ -2257,7 +2332,7 @@ sub test_getPackageNodeList {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @packNodes = $xml -> getPackageNodeList() -> get_nodelist();
@@ -2301,6 +2376,7 @@ sub test_getPackageNodeList {
 	$this -> assert_array_equal(\@expectedPcks, \@packages);
 	$this -> assert_array_equal(\@expectedArch, \@archives);
 	$this -> assert_array_equal(\@expectedPats, \@patterns);
+	return;
 }
 #==========================================
 # test_getProfiles
@@ -2312,7 +2388,7 @@ sub test_getProfiles {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'profilesConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
 	);
 	my @profiles = $xml -> getProfiles();
@@ -2336,6 +2412,7 @@ sub test_getProfiles {
 			$this -> assert_str_equals('profC', $prof -> {name});
 		}
 	}
+	return;
 }
 
 #==========================================
@@ -2348,7 +2425,7 @@ sub test_getRPMCheckSignaturesFalse {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getRPMCheckSignatures();
@@ -2360,6 +2437,7 @@ sub test_getRPMCheckSignaturesFalse {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($value);
+	return;
 }
 
 #==========================================
@@ -2372,7 +2450,7 @@ sub test_getRPMExcludeDocsFalse {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getRPMExcludeDocs();
@@ -2384,6 +2462,7 @@ sub test_getRPMExcludeDocsFalse {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($value);
+	return;
 }
 
 #==========================================
@@ -2396,7 +2475,7 @@ sub test_getRPMForceFalse {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getRPMForce();
@@ -2408,6 +2487,7 @@ sub test_getRPMForceFalse {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($value);
+	return;
 }
 
 #==========================================
@@ -2420,7 +2500,7 @@ sub test_getRPMCheckSignaturesTrue {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getRPMCheckSignatures();
@@ -2432,6 +2512,7 @@ sub test_getRPMCheckSignaturesTrue {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('true', $value);
+	return;
 }
 
 #==========================================
@@ -2444,7 +2525,7 @@ sub test_getRPMExcludeDocsTrue {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getRPMExcludeDocs();
@@ -2456,6 +2537,7 @@ sub test_getRPMExcludeDocsTrue {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('true', $value);
+	return;
 }
 
 #==========================================
@@ -2468,7 +2550,7 @@ sub test_getRPMForceTrue {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getRPMForce();
@@ -2480,6 +2562,7 @@ sub test_getRPMForceTrue {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals('true', $value);
+	return;
 }
 
 #==========================================
@@ -2495,7 +2578,7 @@ sub test_getRepoNodeList {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @repoNodes = $xml -> getRepoNodeList() -> get_nodelist();
@@ -2517,6 +2600,7 @@ sub test_getRepoNodeList {
 		push @configPaths, $source;
 	}
 	$this -> assert_array_equal(@expectedPaths, \@configPaths);
+	return;
 }
 
 #==========================================
@@ -2532,7 +2616,7 @@ sub test_getRepositories {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my %repos = $xml -> getRepositories();
@@ -2559,6 +2643,7 @@ sub test_getRepositories {
 	$this -> assert_str_equals('bar', $repoInfo[4]);
 	@repoInfo = @{$repos{'/repos/12.1-additional'}};
 	$this -> assert_str_equals('rpm-dir', $repoInfo[0]);
+	return;
 }
 
 #==========================================
@@ -2571,7 +2656,7 @@ sub test_getSplitPersistentExceptions {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'splitSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @persExcept = $xml -> getSplitPersistentExceptions();
@@ -2584,6 +2669,7 @@ sub test_getSplitPersistentExceptions {
 	# Test this condition last to get potential error messages
 	my @expectedExcept = qw / bar /;
 	$this -> assert_array_equal(\@expectedExcept, \@persExcept);
+	return;
 }
 
 #==========================================
@@ -2596,7 +2682,7 @@ sub test_getSplitPersistentFiles {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'splitSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @persFiles = $xml -> getSplitPersistentFiles();
@@ -2609,6 +2695,7 @@ sub test_getSplitPersistentFiles {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw /bar64 genericBar/;
 	$this -> assert_array_equal(\@expectedNames, \@persFiles);
+	return;
 }
 
 #==========================================
@@ -2621,7 +2708,7 @@ sub test_getSplitTempExceptions {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'splitSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @tmpExcept = $xml -> getSplitTempExceptions();
@@ -2634,6 +2721,7 @@ sub test_getSplitTempExceptions {
 	# Test this condition last to get potential error messages
 	my @expectedExcept = qw /foo anotherFoo/;
 	$this -> assert_array_equal(\@expectedExcept, \@tmpExcept);
+	return;
 }
 
 #==========================================
@@ -2646,7 +2734,7 @@ sub test_getSplitTempFiles {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'splitSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @tmpFiles = $xml -> getSplitTempFiles();
@@ -2659,6 +2747,7 @@ sub test_getSplitTempFiles {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw /foo64 genericFoo/;
 	$this -> assert_array_equal(\@expectedNames, \@tmpFiles);
+	return;
 }
 
 #==========================================
@@ -2671,7 +2760,7 @@ sub test_getStripDelete {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @delFiles = $xml -> getStripDelete();
@@ -2684,6 +2773,7 @@ sub test_getStripDelete {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw (/etc/resolv.conf /lib/libc.so);
 	$this -> assert_array_equal(\@expectedNames, \@delFiles);
+	return;
 }
 
 #==========================================
@@ -2696,7 +2786,7 @@ sub test_getStripLibs {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @libFiles = $xml -> getStripLibs();
@@ -2709,6 +2799,7 @@ sub test_getStripLibs {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw /libdbus libnss/;
 	$this -> assert_array_equal(\@expectedNames, \@libFiles);
+	return;
 }
 
 #==========================================
@@ -2722,7 +2813,7 @@ sub test_getStripNodeList {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @stripNodes = $xml -> getStripNodeList() -> get_nodelist();
@@ -2754,6 +2845,7 @@ sub test_getStripNodeList {
 			$this -> assert_null(1);
 		}
 	}
+	return;
 }
 
 #==========================================
@@ -2766,7 +2858,7 @@ sub test_getStripTools {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @toolFiles = $xml -> getStripTools();
@@ -2779,6 +2871,7 @@ sub test_getStripTools {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw /megacli virt-mgr/;
 	$this -> assert_array_equal(\@expectedNames, \@toolFiles);
+	return;
 }
 
 #==========================================
@@ -2791,7 +2884,7 @@ sub test_getUsers {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'userConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my %usrData = $xml -> getUsers();
@@ -2816,6 +2909,7 @@ sub test_getUsers {
 	$this -> assert_str_equals('plain', $usrData{buser}{pwdformat});
 	$this -> assert_str_equals('Bert', $usrData{buser}{realname});
 	$this -> assert_str_equals('/bin/ksh', $usrData{auser}{shell});
+	return;
 }
 
 #==========================================
@@ -2828,7 +2922,7 @@ sub test_getVMwareConfig {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'vmwareConfigSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my %vmConfig = $xml -> getVMwareConfig();
@@ -2857,6 +2951,7 @@ sub test_getVMwareConfig {
 	my %nicDetails = %$nicInfo;
 	$this -> assert_str_equals('e1000', $nicDetails{drv});
 	$this -> assert_str_equals('dhcp', $nicDetails{mode});
+	return;
 }
 
 #==========================================
@@ -2869,7 +2964,7 @@ sub test_getXenConfig {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'xenConfigSettings';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my %vmConfig = $xml -> getXenConfig();
@@ -2887,6 +2982,7 @@ sub test_getXenConfig {
 	$this -> assert_str_equals('128', $vmConfig{xen_memory});
 	$this -> assert_str_equals('3', $vmConfig{xen_ncpus});
 	$this -> assert_str_equals('00:0C:6E:AA:57:2F',$vmConfig{xen_bridge}{br0});
+	return;
 }
 
 #==========================================
@@ -2899,7 +2995,7 @@ sub test_ignoreRepositories {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> ignoreRepositories();
@@ -2914,6 +3010,7 @@ sub test_ignoreRepositories {
 	# Test this condition last to get potential error messages
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(0, $numRepos);
+	return;
 }
 
 #==========================================
@@ -2928,7 +3025,7 @@ sub test_invalidProfileRequest {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'profilesConfig';
 	my @reqProf = qw /profD/;
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, \@reqProf, $this->{cmdL}
 	);
 	$this -> assert_null($xml);
@@ -2939,7 +3036,8 @@ sub test_invalidProfileRequest {
 	my $state = $kiwi -> getErrorState();
 	$this -> assert_str_equals('failed', $state);
 	# for this test, just make sure everything in the log object gets reset
-	$kiwi -> getState();;
+	$kiwi -> getState();
+	return;
 }
 
 #==========================================
@@ -2953,7 +3051,7 @@ sub test_packageManagerInfoHasConfigValue {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'specPkgMgr';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $pkgMgr = $xml -> getPackageManager();
@@ -2964,6 +3062,7 @@ sub test_packageManagerInfoHasConfigValue {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
 }
 
 #==========================================
@@ -2976,7 +3075,7 @@ sub test_packageManagerSet_noArg {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'specPkgMgr';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	# Call set without argument, expect error
@@ -2991,6 +3090,7 @@ sub test_packageManagerSet_noArg {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($res);
+	return;
 }
 
 #==========================================
@@ -3003,7 +3103,7 @@ sub test_packageManagerSet_valid {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'specPkgMgr';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	# Set the package manager to be smart
@@ -3016,8 +3116,9 @@ sub test_packageManagerSet_valid {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
-	my $newPkgMgr = $xml -> getPackageManager();
-	$this -> assert_str_equals('smart', $newPkgMgr);
+	my $PkgMgr= $xml -> getPackageManager();
+	$this -> assert_str_equals('smart', $PkgMgr);
+	return;
 }
 
 #==========================================
@@ -3032,7 +3133,7 @@ sub test_packageManagerInfoHasProfs {
 	my $confDir = $this->{dataDir} . 'multiPkgMgrWithProf';
 	my @profiles = ('specPkgMgr');
 	# Verify we get the specified manager
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef,\@profiles,$this->{cmdL}
 	);
 	my $pkgMgr = $xml -> getPackageManager();
@@ -3053,8 +3154,9 @@ sub test_packageManagerInfoHasProfs {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
-	my $newPkgMgr = $xml -> getPackageManager();
-	$this -> assert_str_equals('yum', $newPkgMgr);
+	my $PkgMgr= $xml -> getPackageManager();
+	$this -> assert_str_equals('yum', $PkgMgr);
+	return;
 }
 
 #==========================================
@@ -3070,10 +3172,10 @@ sub test_setRepository {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	$xml = $xml -> setRepository('rpm-md', '/repos/newpckgs', 'replacement',
+	$xml = $xml -> setRepository('rpm-md', '/repos/pckgs','replacement',
 								'5');
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Replacing repository '
@@ -3103,13 +3205,14 @@ sub test_setRepository {
 	$this -> assert_str_equals('bar', $repoInfo[4]);
 	@repoInfo = @{$repos{'/repos/12.1-additional'}};
 	$this -> assert_str_equals('rpm-dir', $repoInfo[0]);
-	@repoInfo = @{$repos{'/repos/newpckgs'}};
+	@repoInfo = @{$repos{'/repos/pckgs'}};
 	$this -> assert_str_equals('rpm-md', $repoInfo[0]);
 	$this -> assert_str_equals('replacement', $repoInfo[1]);
 	$this -> assert_str_equals('5', $repoInfo[2]);
 	# Assert the expected repo has been replaced
 	my $repoInfo = $repos{'http://download.opensuse.org/update/12.1'};
 	$this -> assert_null($repoInfo);
+	return;
 }
 
 1;

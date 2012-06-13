@@ -2,9 +2,9 @@
 # FILE          : kiwiXMLInfo.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 Novell Inc.
+# COPYRIGHT     : (c) 2012 Novell Inc.
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -41,7 +41,7 @@ sub new {
 	my $this = shift -> SUPER::new(@_);
 	my $baseDir = $this -> getDataDir() . '/kiwiXMLInfo/';
 	$this -> {baseDir} = $baseDir;
-	$this -> {kiwi}    = new Common::ktLog();
+	$this -> {kiwi}    = Common::ktLog -> new();
 
 	return $this;
 }
@@ -55,9 +55,9 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $cmdL = new KIWICommandLine($kiwi);
+	my $cmdL = KIWICommandLine -> new($kiwi);
 	# No argument for CommandLine object
-	my $info = new KIWIXMLInfo($kiwi, $cmdL);
+	my $info = KIWIXMLInfo -> new($kiwi, $cmdL);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Invalid KIWICommandLine object, no configuration '
 		. 'directory.';
@@ -68,6 +68,7 @@ sub test_ctor_improperArg {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($info);
+	return;
 }
 
 #==========================================
@@ -80,7 +81,7 @@ sub test_ctor_missArg {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	# No argument for CommandLine object
-	my $info = new KIWIXMLInfo($kiwi);
+	my $info = KIWIXMLInfo -> new($kiwi);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLInfo: expecting KIWICommandLine object as '
 		. 'second argument.';
@@ -91,6 +92,7 @@ sub test_ctor_missArg {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($info);
+	return;
 }
 
 #==========================================
@@ -117,6 +119,7 @@ sub test_getTree_improperArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+	return;
 }
 
 #==========================================
@@ -159,6 +162,7 @@ sub test_getTree_invalidReq {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+	return;
 }
 
 #==========================================
@@ -183,6 +187,7 @@ sub test_getTree_noArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+	return;
 }
 
 #==========================================
@@ -222,6 +227,7 @@ sub test_packagesInfo {
 	$kiwi -> getState();
 	# Clean up
 	$this -> removeTestTmpDir();
+	return;
 }
 
 #==========================================
@@ -248,6 +254,7 @@ sub test_printTree_improperArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+	return;
 }
 
 #==========================================
@@ -290,6 +297,7 @@ sub test_printTree_invalidReq {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+	return;
 }
 
 #==========================================
@@ -314,6 +322,7 @@ sub test_printTree_noArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
+	return;
 }
 
 #==========================================
@@ -341,6 +350,7 @@ sub test_profileInfo {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
 }
 
 #==========================================
@@ -369,6 +379,7 @@ sub test_typesInfo {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
 }
 
 #==========================================
@@ -407,6 +418,7 @@ sub test_sizeInfo {
 	$kiwi -> getState();
 	# Clean up
 	$this -> removeTestTmpDir();
+	return;
 }
 
 #==========================================
@@ -433,6 +445,7 @@ sub test_sourcesInfo {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
 }
 
 #==========================================
@@ -459,6 +472,7 @@ sub test_versionInfo {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
 }
 
 #==========================================
@@ -473,7 +487,7 @@ sub __getInfoObj {
 	# ---
 	my $this = shift;
 	my $cmd  = shift;
-	my $info = new KIWIXMLInfo($this -> {kiwi}, $cmd);
+	my $info = KIWIXMLInfo -> new($this -> {kiwi}, $cmd);
 
 	return $info;
 }
@@ -486,7 +500,7 @@ sub __getCmdl {
 	# Helper to create a command line object
 	# ---
 	my $this = shift;
-	return new KIWICommandLine($this -> {kiwi});
+	return KIWICommandLine -> new($this -> {kiwi});
 }
 
 

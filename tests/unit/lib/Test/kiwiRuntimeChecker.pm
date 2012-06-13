@@ -2,9 +2,9 @@
 # FILE          : kiwiRuntimeChecker.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 Novell Inc.
+# COPYRIGHT     : (c) 2012 Novell Inc.
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -35,8 +35,8 @@ sub new {
 	# ---
 	my $this = shift -> SUPER::new(@_);
 	$this -> {dataDir} = $this -> getDataDir() . '/kiwiRuntimeChecker';
-	$this -> {kiwi} = new Common::ktLog();
-	$this -> {cmdL} = new KIWICommandLine($this->{kiwi});
+	$this -> {kiwi} = Common::ktLog -> new();
+	$this -> {cmdL} = KIWICommandLine -> new($this->{kiwi});
 
 	return $this;
 }
@@ -51,7 +51,7 @@ sub test_ctor_noArg1 {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	# Test missing second argument
-	my $checker = new KIWIRuntimeChecker($kiwi);
+	my $checker = KIWIRuntimeChecker -> new($kiwi);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting reference to KIWICommandLine object as second '
 		. 'argument.';
@@ -62,6 +62,7 @@ sub test_ctor_noArg1 {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($checker);
+	return;
 }
 
 #==========================================
@@ -75,7 +76,7 @@ sub test_ctor_noArg2 {
 	my $kiwi = $this -> {kiwi};
 	# Test missing third argument
 	my $cmd = $this -> __getCommandLineObj();
-	my $checker = new KIWIRuntimeChecker($kiwi, $cmd);
+	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting reference to KIWIXML object as third argument.';
 	$this -> assert_str_equals($expected, $msg);
@@ -85,6 +86,7 @@ sub test_ctor_noArg2 {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($checker);
+	return;
 }
 
 #==========================================
@@ -99,7 +101,7 @@ sub test_ctor_valid {
 	# No error construction
 	my $cmd = $this -> __getCommandLineObj();
 	my $xml = $this -> __getXMLObj( $this -> {dataDir} );
-	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -108,6 +110,7 @@ sub test_ctor_valid {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($checker);
+	return;
 }
 
 #==========================================
@@ -127,7 +130,7 @@ sub test_buildProfWithDefPackages {
 	$cmd -> setConfigDir ($configDir);
 	$cmd -> setBuildProfiles(\@profiles);
 	my $xml = $this -> __getXMLObj( $configDir );
-	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -137,6 +140,7 @@ sub test_buildProfWithDefPackages {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
+	return;
 }
 
 #==========================================
@@ -153,7 +157,7 @@ sub test_conflictingProfiles {
 	my $cmd = $this -> __getCommandLineObj();
 	$cmd -> setBuildProfiles(\@profiles);
 	my $xml = $this -> __getXMLObj( $this -> {dataDir} );
-	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Conflicting patternType attribute values for specified '
@@ -165,6 +169,7 @@ sub test_conflictingProfiles {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($res);
+	return;
 }
 
 #==========================================
@@ -184,7 +189,7 @@ sub test_fsToolCheckFsysImg {
 	my @fsTestDirs = glob "$dataBaseDir/*";
 	for my $fsTestName (@fsTestDirs) {
 		my $xml = $this -> __getXMLObj($fsTestName);
-		my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+		my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 		my $res = $checker -> createChecks();
 		my $eMsg = $kiwi -> getErrorMessage();
 		if ($eMsg) {
@@ -231,6 +236,7 @@ sub test_fsToolCheckFsysImg {
 			$this -> assert_not_null($res);
 		}
 	}
+	return;
 }
 
 #==========================================
@@ -250,7 +256,7 @@ sub test_fsToolCheckIsoImg {
 	my @fsTestDirs = glob "$dataBaseDir/*";
 	for my $fsTestName (@fsTestDirs) {
 		my $xml = $this -> __getXMLObj($fsTestName);
-		my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+		my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 		my $res = $checker -> createChecks();
 		my $eMsg = $kiwi -> getErrorMessage();
 		if ($eMsg) {
@@ -290,6 +296,7 @@ sub test_fsToolCheckIsoImg {
 			$this -> assert_not_null($res);
 		}
 	}
+	return;
 }
 
 #==========================================
@@ -307,7 +314,7 @@ sub test_fsToolCheckOemBtrfs {
 	my $cmd = $this -> __getCommandLineObj();
 	my $configPath = $this -> {dataDir} . '/oemBtrfs';
 	my $xml = $this -> __getXMLObj($configPath);
-	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 	my $res = $checker -> createChecks();
 	my $eMsg = $kiwi -> getErrorMessage();
 	if ($eMsg) {
@@ -336,6 +343,7 @@ sub test_fsToolCheckOemBtrfs {
 		# Test this condition last to get potential error messages
 		$this -> assert_not_null($res);
 	}
+	return;
 }
 
 #==========================================
@@ -353,9 +361,9 @@ sub test_fsToolCheckSplitImg {
 	my $cmd = $this -> __getCommandLineObj();
 	my $configPath = $this -> {dataDir} . '/splitImg';
 	my $xml = $this -> __getXMLObj($configPath);
-	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 	my $res = $checker -> createChecks();
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new($kiwi);
 	my $haveBtrfs = $locator -> getExecPath('mkfs.btrfs');
 	if ($haveBtrfs) {
 		# Filesystem tool is present
@@ -382,6 +390,7 @@ sub test_fsToolCheckSplitImg {
 		# Test this condition last to get potential error messages
 		$this -> assert_null($res);
 	}
+	return;
 }
 
 #==========================================
@@ -398,7 +407,7 @@ sub test_noBuildProfile {
 	my $configDir = $this -> {dataDir} . '/liveIsoImg/clic';
 	$cmd -> setConfigDir ($configDir);
 	my $xml = $this -> __getXMLObj( $configDir );
-	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -408,6 +417,7 @@ sub test_noBuildProfile {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
+	return;
 }
 
 #==========================================
@@ -427,7 +437,7 @@ sub test_noBuildType {
 	#my $xml = $this -> __getXMLObj($configDir);
 	#my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
 	#my $res = $checker -> prepareChecks();
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$kiwi, $configDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
@@ -438,6 +448,7 @@ sub test_noBuildType {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($xml);
+	return;
 }
 
 #==========================================
@@ -458,9 +469,9 @@ sub test_packageManagerCheck_ens {
 	$cmd -> setPackageManager('ensconce');
 	my $xml = $this -> __getXMLObj( $configDir );
 	$xml -> setPackageManager('ensconce');
-	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new($kiwi);
 	my $haveEnsconce = $locator -> getExecPath('ensconce');
 	if ($haveEnsconce) {
 		my $msg = $kiwi -> getMessage();
@@ -484,6 +495,7 @@ sub test_packageManagerCheck_ens {
 		$this -> assert_str_equals('failed', $state);
 		$this -> assert_null($res);
 	}
+	return;
 }
 
 #==========================================
@@ -502,10 +514,10 @@ sub test_packageManagerCheck_zypp {
 	# Test the most likely use case, zypper set as package manager in
 	# config.xml, this test should succeed
 	my $xml = $this -> __getXMLObj( $configDir );
-	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
 
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new($kiwi);
 	my $haveZypper = $locator -> getExecPath('zypper');
 	if ($haveZypper) {
 		my $msg = $kiwi -> getMessage();
@@ -532,6 +544,7 @@ sub test_packageManagerCheck_zypp {
 			. "anticipated success condition. This is NOT an error.\n";
 		print STDOUT $infoMsg;
 	}
+	return;
 }
 
 #==========================================
@@ -550,7 +563,7 @@ sub test_useSingleBuildProfile {
 	$cmd -> setConfigDir ($configDir);
 	$cmd -> setBuildProfiles(\@profiles);
 	my $xml = $this -> __getXMLObj( $configDir );
-	my $checker = new KIWIRuntimeChecker($kiwi, $cmd, $xml);
+	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -560,6 +573,7 @@ sub test_useSingleBuildProfile {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
+	return;
 }
 
 #==========================================
@@ -573,7 +587,7 @@ sub __getCommandLineObj {
 	# Create a command line object
 	# ---
 	my $this = shift;
-	return new KIWICommandLine( $this -> {kiwi} );
+	return KIWICommandLine -> new( $this -> {kiwi} );
 }
 
 #==========================================
@@ -587,7 +601,7 @@ sub __getXMLObj {
 	my $configDir = shift;
 	# TODO
 	# Fix the creation of the XML object once the ctor arguments change
-	my $xml = new KIWIXML(
+	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $configDir, undef, undef,$this->{cmdL}
 	);
 	if (! $xml) {

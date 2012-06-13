@@ -85,8 +85,7 @@ my @notClean4 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWIURL.pm KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm
 					KIWIXMLValidator.pm KIWICommandLine.t KIWIImageCreator.t
 					KIWILocator.t KIWIRuntimeChecker.t KIWIXML.t KIWIXMLInfo.t
-					kiwiImageCreator.pm kiwiRuntimeChecker.pm kiwiXML.pm
-					kiwiXMLInfo.pm kiwiXMLValidator.pm collector.pl);
+					collector.pl);
 
 # List of modules not clean to level 5 (gentel) of perlcritic
 my @notClean5 = qw (KIWIArchList.pm KIWIBoot.pm);
