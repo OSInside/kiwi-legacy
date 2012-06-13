@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Jun 13 15:46:29 CEST 2012 - ms@suse.de
+
+- s390: fixed normalizeRepartInput to work with fdasd
+- added option --targetstudio which is used to specify a program
+  which creates the target device node to create the image on.
+  In contrast to the targetdevice option there will be no image
+  file dumped from the specified device. This option is mainly
+  used in SuSE Studio
+
+-------------------------------------------------------------------
 Mon Jun 11 23:40:37 CEST 2012 - ms@suse.de
 
 - added support for netboot on s390 via zPXE (fate #312134)
