@@ -4017,8 +4017,8 @@ function partedGetPartitionID {
 	# /.../
 	# prints the partition ID for the given device and number
 	# ----
-	parted -m -s $1 print | grep ^$2: | cut -f2 -d, |\
-		cut -f2 -d= | tr -d ";" | tr -d 0
+	parted -m -s $1 print | grep ^$2: | cut -f2 -d= |\
+		sed -e 's@[,; ]@@g' | tr -d 0
 }
 #======================================
 # partitionID
