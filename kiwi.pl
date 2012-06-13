@@ -3211,7 +3211,7 @@ sub umountSystemFileSystems {
 	foreach my $path (@sysfs) {
 		qxx ("chroot $root umount -l $path 2>&1");
 	}
-	return $this;
+	return $root;
 }
 
 main();
