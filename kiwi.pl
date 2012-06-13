@@ -3201,7 +3201,6 @@ sub umountSystemFileSystems {
 	# root tree. This is called after a custom script call
 	# to cleanup the environment
 	# ----
-	my $this = shift;
 	my $root = shift;
 	my @sysfs= (
 		"/dev/pts","/dev","/proc","/sys"
