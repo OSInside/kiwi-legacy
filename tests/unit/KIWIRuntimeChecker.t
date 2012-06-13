@@ -15,7 +15,7 @@
 use strict;
 use warnings;
 use FindBin;
-use Test::Unit::Lite;
+use Test::Unit::HarnessUnit;
 
 # Location of test cases according to program path
 use lib "$FindBin::Bin/lib";
