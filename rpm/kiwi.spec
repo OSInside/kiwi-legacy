@@ -84,6 +84,9 @@ Recommends:     perl-satsolver >= 0.42
 Recommends:     jing
 Recommends:     zypper
 %endif
+%if %{suse_version} > 1140
+Recommends:     db45-utils
+%endif
 # obsoletes
 Obsoletes:      kiwi-desc-usbboot <= 4.81
 # sources
