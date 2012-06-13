@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jun 13 20:14:10 CEST 2012 - ms@suse.de
+
+- fixed partedGetPartitionID() function to return correct ID (bnc #766720)
+
+-------------------------------------------------------------------
 Wed Jun 13 18:43:48 CEST 2012 - ms@suse.de
 
 - reread partition table after recreation of the VTOC table
