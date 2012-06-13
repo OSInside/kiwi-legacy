@@ -61,9 +61,13 @@ sub new {
 		$kiwi = new KIWILog("tiny");
 	}
 	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{gdata} = $main::global -> getGlobals();
+	#==========================================
 	# check image file
 	#------------------------------------------
-	if (! (-f $image || -b $image)) {
+	if ((! $this->{gdata}->{StudioNode}) && (! (-f $image || -b $image))) {
 		$kiwi -> error ("no such image file: $image");
 		$kiwi -> failed ();
 		return;
@@ -122,7 +126,6 @@ sub new {
 	$this->{image}   = $image;
 	$this->{type}    = $type;
 	$this->{imgtype} = $type->{type};
-	$this->{gdata}   = $main::global -> getGlobals();
 	return $this;
 }
 

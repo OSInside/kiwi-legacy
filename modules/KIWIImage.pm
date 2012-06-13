@@ -1413,7 +1413,7 @@ sub createImageVMX {
 		);
 		$cmdL -> setImageFormat ($name->{format});
 		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-		if ((! $kic) || (! $kic->createImageFormat())) {
+		if ((! $kic) || (! $kic->createImageFormat($xml))) {
 			undef $kic;
 			return;
 		}
@@ -2931,7 +2931,7 @@ sub createImageSplit {
 			);
 			$cmdL -> setImageFormat ($name->{format});
 			my $kic = new KIWIImageCreator ($kiwi, $cmdL);
-			if ((! $kic) || (! $kic->createImageFormat())) {
+			if ((! $kic) || (! $kic->createImageFormat($sxml))) {
 				undef $kic;
 				return;
 			}

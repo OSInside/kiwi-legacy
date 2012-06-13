@@ -719,7 +719,7 @@ sub createImage {
 			my $haveFormat = $attr{format};
 			my $imgfile= $destination."/".$image -> buildImageName();
 			my $format = new KIWIImageFormat (
-				$kiwi,$imgfile,$cmdL,$haveFormat
+				$kiwi,$imgfile,$cmdL,$haveFormat,$xml
 			);
 			if (! $format) {
 				return;
@@ -925,13 +925,14 @@ sub createImageDisk {
 #------------------------------------------
 sub createImageFormat {
 	my $this   = shift;
+	my $xml    = shift;
 	my $kiwi   = $this->{kiwi};
 	my $format = $this->{format};
 	my $sys    = $this->{sysloc};
 	my $cmdL   = $this->{cmdL};
 	$kiwi -> info ("--> Starting image format conversion...\n");
 	my $imageformat = new KIWIImageFormat (
-		$kiwi,$sys,$cmdL,$format
+		$kiwi,$sys,$cmdL,$format,$xml
 	);
 	if (! $imageformat) {
 		return;
