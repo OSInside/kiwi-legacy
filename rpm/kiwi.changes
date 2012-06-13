@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jun 13 17:30:51 CEST 2012 - ms@suse.de
+
+- s390: initialize loader variable with zipl by default
+- s390 netboot: recreated the vtoc table with option 'r'
+  instead of 'u' which includes the deletion all partitions
+
+-------------------------------------------------------------------
 Wed Jun 13 15:46:29 CEST 2012 - ms@suse.de
 
 - s390: fixed normalizeRepartInput to work with fdasd
