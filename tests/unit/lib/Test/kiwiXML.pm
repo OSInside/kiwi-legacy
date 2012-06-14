@@ -2,7 +2,7 @@
 # FILE          : xml.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 Novell Inc.
+# COPYRIGHT     : (c) 2012 Novell Inc.
 #               :
 # AUTHOR        : Robert Schweikert <rschweikert@suse.com>
 #               :
@@ -1419,6 +1419,32 @@ sub test_getInstallList {
 	# Test this condition last to get potential error messages
 	my @expected = qw /ed kernel-default python vim/;
 	$this -> assert_array_equal(\@expected, \@instPcks);
+	return;
+}
+
+#==========================================
+# test_getLicenseNames
+#------------------------------------------
+sub test_getLicenseNames {
+	# ...
+	# Verify proper return of getLicenseNames method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $licNames = $xml -> getLicenseNames();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw (/opt/myApp/lic.txt /opt/myApp/thirdParty/appA/lic.txt);
+	$this -> assert_array_equal(\@expected, $licNames);
 	return;
 }
 
