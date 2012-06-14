@@ -22,7 +22,7 @@ package KIWISatSolver;
 use strict;
 use Carp qw (cluck);
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Plugins

@@ -27,7 +27,7 @@ use LWP;
 use XML::LibXML;
 use KIWILocator;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 use KIWIURL;
 use KIWIXMLValidator;
 use KIWISatSolver;

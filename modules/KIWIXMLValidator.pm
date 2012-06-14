@@ -23,7 +23,7 @@ require Exporter;
 use XML::LibXML;
 use KIWILocator;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 use Scalar::Util 'refaddr';
 
 #==========================================
