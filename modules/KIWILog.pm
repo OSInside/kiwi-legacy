@@ -24,7 +24,7 @@ use POSIX ":sys_wait_h";
 use KIWISocket;
 use KIWISharedMem;
 use FileHandle;
-use KIWIQX;
+use KIWIQX qw (qxx qxxLogOff qxxLogOn);
 
 #==========================================
 # Tracing

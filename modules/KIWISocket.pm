@@ -23,7 +23,7 @@ use strict;
 use Carp qw (cluck);
 use FileHandle;
 use Socket;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Constructor

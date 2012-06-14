@@ -2,9 +2,9 @@
 # FILE          : KIWIRuntimeChecker.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -25,13 +25,13 @@ use warnings;
 require Exporter;
 use KIWILocator;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Exports
 #------------------------------------------
 our @ISA    = qw (Exporter);
-our @EXPORT_OK = qw (createChecks prepareChecks);
+our @EXPORT_OK = qw ();
 
 #==========================================
 # Constructor

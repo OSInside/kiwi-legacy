@@ -2,7 +2,7 @@
 # FILE          : KIWIConfigure.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schaefer <ms@suse.de>
 #               :
@@ -20,7 +20,7 @@ package KIWIConfigure;
 use strict;
 use Carp qw (cluck);
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Constructor
@@ -344,7 +344,7 @@ sub setupAutoYaST {
 	qxx (
 		"cp $imageDesc/config-yast-autoyast.xml $root/$autodir/$autocnf 2>&1"
 	);
-    my $FD;
+	my $FD;
 	if ( ! open ($FD, '>', "$root/etc/install.inf")) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to create install.inf: $!");
@@ -407,7 +407,7 @@ sub setupFirstBootYaST {
 	# generic one (bnc#604705)
 	# ----
 	if ( ! -e "$root/etc/sysconfig/firstboot" ) {
-        my $FD;
+		my $FD;
 		if ( -e "$root/var/adm/fillup-templates/sysconfig.firstboot" ) {
 			my $template = "$root/var/adm/fillup-templates/sysconfig.firstboot";
 			my $data = qxx (
@@ -567,7 +567,7 @@ sub quoteFile {
 		$kiwi -> failed ();
 		return;
 	}
-	if (! open $FD, ">$tmpc") {
+	if (! open $FD, '>', "$tmpc") {
 		$kiwi -> error  ("Failed to open tmp file");
 		$kiwi -> failed ();
 		return

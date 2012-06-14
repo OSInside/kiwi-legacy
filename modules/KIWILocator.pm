@@ -22,7 +22,7 @@ use warnings;
 require Exporter;
 use IPC::Open3;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Exports

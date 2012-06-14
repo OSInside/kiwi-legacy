@@ -28,7 +28,7 @@ use KIWICommandLine;
 use KIWIImage;
 use KIWIImageCreator;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 use KIWIXMLInfo;
 
 #==========================================

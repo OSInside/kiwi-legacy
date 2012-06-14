@@ -2,15 +2,15 @@
 # FILE          : KIWIQX.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schaefer <ms@suse.de>
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : This module is used to provide the generic qxx 
+# DESCRIPTION   : This module is used to provide the generic qxx
 #               : method used for logging all exec calls
-#               : 
+#               :
 #               :
 # STATUS        : Development
 #----------------
@@ -21,12 +21,13 @@ package KIWIQX;
 require Exporter;
 use Carp qw (cluck);
 use strict;
+use warnings;
 
 #==========================================
 # Exports
 #------------------------------------------
-our @ISA    = qw (Exporter);
-our @EXPORT = qw (qxx qxxLogOff qxxLogOn);
+our @ISA       = qw (Exporter);
+our @EXPORT_OK = qw (qxx qxxLogOff qxxLogOn);
 our $QXXLOG = 1;
 
 #==========================================
@@ -50,6 +51,7 @@ sub new {
 #------------------------------------------
 sub qxxLogOff {
 	$QXXLOG = 0;
+	return;
 }
 
 #==========================================
@@ -57,6 +59,7 @@ sub qxxLogOff {
 #------------------------------------------
 sub qxxLogOn {
 	$QXXLOG = 1;
+	return;
 }
 
 #==========================================
@@ -102,7 +105,7 @@ sub qxx {
 		if ((defined $main::kiwi) && ($main::kiwi -> trace())) {
 			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
-		$? = 0xffff;
+		$? = 0xffff; ## no critic
 		return "$prog: command not found";
 	}
 	#==========================================

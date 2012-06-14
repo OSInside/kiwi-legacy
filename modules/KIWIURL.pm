@@ -2,7 +2,7 @@
 # FILE          : KIWIURL.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schaefer <ms@suse.de>
 #               :
@@ -22,12 +22,12 @@ use Carp qw (cluck);
 use File::Basename;
 use KIWILog;
 use LWP;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Constructor
 #------------------------------------------
-sub new { 
+sub new {
 	# ...
 	# Create a new KIWIURL object which is used to solve
 	# the high level location information into a low level
@@ -299,12 +299,12 @@ sub thisPath {
 	# extra path expansion by lookup file
 	#------------------------------------------
 	if (defined $lookup) {
-        my $FD;
+		my $FD;
 		if (! open $FD, '<', $lookup) {
 			return;
 		}
 		$thisPath = <$FD>;
-        close $FD;
+		close $FD;
 		$thisPath = $thisPath."/".$module;
 	}
 	#==========================================
@@ -387,7 +387,7 @@ sub smbPath {
 	}
 	if (($user) && ($pwd)) {
 		$status = qxx (
-			"mount -t cifs -o username=$user,passwort=$pwd $module $tmpdir 2>&1"
+	      "mount -t cifs -o username=$user,passwort=$pwd $module $tmpdir 2>&1"
 		);
 	} else {
 		$status = qxx ("mount -t cifs -o guest $module $tmpdir 2>&1");
@@ -583,7 +583,7 @@ sub openSUSEpath {
 		my @list = split (/\|/,$match);
 		my $repo = $module;
 		my $match= '$repo =~ '.$list[1];
-        # Violates "expression eval rule FIXME
+		# Violates "expression eval rule FIXME
 		eval $match; ## no critic
 		$matches{$repo} = $list[0];
 	}
