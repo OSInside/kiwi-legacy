@@ -635,6 +635,9 @@ sub test_addRepositoriesNoTypeInf {
 	# ...
 	# Verify proper operation of addRepositories method
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
@@ -834,6 +837,9 @@ sub test_getArchiveList {
 	# ...
 	# Verify proper return of getArchiveList method
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
