@@ -156,7 +156,6 @@
 		<package name="xen" arch="x86_64"/>
 	</packages>
 	<packages type="image" profiles="default,xen">
-		<package name="kernel-firmware"/>
 		<package name="cryptsetup"/>
 		<package name="bc"/>
 		<package name="curl"/>

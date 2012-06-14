@@ -162,7 +162,6 @@
 		<package name="cryptsetup"/>
 		<package name="bc"/>
 		<package name="adaptec-firmware"/>
-		<package name="kernel-firmware"/>
 		<package name="btrfsprogs"/>
 		<package name="curl"/>
 		<package name="psmisc"/>
