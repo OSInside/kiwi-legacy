@@ -25,7 +25,7 @@ use File::Basename;
 use Config::IniFiles;
 use KIWILog;
 use KIWILocator;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Exports

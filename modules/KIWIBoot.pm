@@ -33,7 +33,7 @@ use File::Basename;
 use File::Spec;
 use Math::BigFloat;
 use KIWILocator;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Constructor

@@ -22,7 +22,7 @@ use strict;
 use File::Glob ':glob';
 use File::Find;
 use File::Path;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Constructor
@@ -33,24 +33,24 @@ use KIWIQX;
 #------------------------------------------
 sub new
 {
-  my $class = shift;
-  my $this =
-  {
-    m_collect  => undef,
-    m_url     => undef,
-  };
-  bless ($this, $class);
+my $class = shift;
+my $this =
+{
+	m_collect  => undef,
+	m_url     => undef,
+};
+bless ($this, $class);
 
-  #==========================================
-  # Module Parameters
-  #------------------------------------------
-  $this->{m_collect} = shift;
-  if(not defined $this->{m_collect}) {
-    print "No parent defined!";
-    return;
-  }
+#==========================================
+# Module Parameters
+#------------------------------------------
+$this->{m_collect} = shift;
+if(not defined $this->{m_collect}) {
+	print "No parent defined!";
+	return;
+}
 
-  return $this;
+return $this;
 }
 
 
@@ -75,56 +75,56 @@ sub new
 #------------------------------------------
 sub splitPath
 {
-  my $this = shift;
-  my $targets = shift;
-  my $browser = shift;
-  my $path = shift;
-  my $pat = shift;
+my $this = shift;
+my $targets = shift;
+my $browser = shift;
+my $path = shift;
+my $pat = shift;
 
-  #==========================================
-  # cancel on missing parameters:
-  #------------------------------------------
-  if(!defined($browser) or !defined($targets) or !defined($path))
-  {
-    $this->{m_collect}->error("E", "Can't proceed request due to missing parameters!");
-    return;
-  }
+#==========================================
+# cancel on missing parameters:
+#------------------------------------------
+if(!defined($browser) or !defined($targets) or !defined($path))
+{
+	$this->{m_collect}->error("E", "Can't proceed request due to missing parameters!");
+	return;
+}
 
-  # ...
-  # optional: only shows directories matching the complete expression
-  # when set to 1. Default mode shows every step
-  # Example: /foo*/bar* may expand to
-  # /football, /football/bart, /fools, /fools/barbarian
-  # with leafonly, the folders /football and /fools are omitted.
-  # ----
-  my $leafonly = shift;
-  if(!defined($leafonly)) {
-    $leafonly = 0;
-  }
+# ...
+# optional: only shows directories matching the complete expression
+# when set to 1. Default mode shows every step
+# Example: /foo*/bar* may expand to
+# /football, /football/bart, /fools, /fools/barbarian
+# with leafonly, the folders /football and /fools are omitted.
+# ----
+my $leafonly = shift;
+if(!defined($leafonly)) {
+	$leafonly = 0;
+}
 
-  #==========================================
-  # now decide which method to call:
-  #------------------------------------------
-  if("$path$pat" =~ m{^(http|https)(://)([^/]*)(/.*$)}) {
-    my $basepath = $1.$2.$3;
-    my $pattern = $4;
-    $pattern =~ s{(.*)[/]{2,}(.*)}{$1/$2};
-    # remove double slashes
-    $this->{m_collect}->logMsg("I", "Examining HTTP path $basepath");
-    return $this->splitPathHTTP($targets, $browser, $basepath, $pattern, $leafonly);
-  }
-  elsif($path =~ m{^(ftp://)}) {
-    # warn and go, return undef
-    $this->{m_collect}->logMsg("W", "Protocol not yet supported. Stay tuned...");
-    return;
-  }
-  elsif($path =~ m{^(/|file://)(.*)}) {
-    # we deal with local files (including nfs)
-    my $basepath = "/$2";
-    #my $pattern = $2;
-    $this->{m_collect}->logMsg("I", "Examining local path $basepath");
-    return $this->splitPathLocal($targets, $basepath, $pat, $leafonly);
-  }
+#==========================================
+# now decide which method to call:
+#------------------------------------------
+if("$path$pat" =~ m{^(http|https)(://)([^/]*)(/.*$)}) {
+	my $basepath = $1.$2.$3;
+	my $pattern = $4;
+	$pattern =~ s{(.*)[/]{2,}(.*)}{$1/$2};
+	# remove double slashes
+	$this->{m_collect}->logMsg("I", "Examining HTTP path $basepath");
+	return $this->splitPathHTTP($targets, $browser, $basepath, $pattern, $leafonly);
+}
+elsif($path =~ m{^(ftp://)}) {
+	# warn and go, return undef
+	$this->{m_collect}->logMsg("W", "Protocol not yet supported. Stay tuned...");
+	return;
+}
+elsif($path =~ m{^(/|file://)(.*)}) {
+	# we deal with local files (including nfs)
+	my $basepath = "/$2";
+	#my $pattern = $2;
+	$this->{m_collect}->logMsg("I", "Examining local path $basepath");
+	return $this->splitPathLocal($targets, $basepath, $pat, $leafonly);
+}
 }
 
 
@@ -143,104 +143,104 @@ sub splitPath
 #------------------------------------------
 sub splitPathHTTP
 {
-  my $this	= shift;
-  my $targets	= shift;
-  # refers to the result list
-  my $browser	= shift;
-  my $basepath	= shift;
-  my $pattern	= shift;
-  my $leafonly	= shift;
+my $this	= shift;
+my $targets	= shift;
+# refers to the result list
+my $browser	= shift;
+my $basepath	= shift;
+my $pattern	= shift;
+my $leafonly	= shift;
 
-  #==========================================
-  # remove leading/trailing slashes if any
-  #------------------------------------------
-  $pattern =~ s{^/*(.*)/$}{$1}; 
+#==========================================
+# remove leading/trailing slashes if any
+#------------------------------------------
+$pattern =~ s{^/*(.*)/$}{$1}; 
 
-  my @testlist = split( "/", $pattern, 2);
-  my $prefix = $testlist[0];
-  my $rest   = $testlist[1];
+my @testlist = split( "/", $pattern, 2);
+my $prefix = $testlist[0];
+my $rest   = $testlist[1];
 
-  #==========================================
-  # Form LWP request
-  #------------------------------------------
-  my $request  = HTTP::Request->new( GET => $basepath );
-  my $response = $browser->request( $request );
-  # catch 3xx error codes from HTTP server
-  # is_error handles 400-599 http replies (according to "PERL in a nutshell")
-  if($response->is_error()) {
-    $this->{m_collect}->logMsg("E", "[E] HTTP request failed! Server down?");
-    $this->{m_collect}->logMsg("E", "\tThis repository can not be resolved at present.");
-    $this->{m_collect}->logMsg("E", "\tI recommend you try again later unless you know what you're doing.");
-    return;
-  }
+#==========================================
+# Form LWP request
+#------------------------------------------
+my $request  = HTTP::Request->new( GET => $basepath );
+my $response = $browser->request( $request );
+# catch 3xx error codes from HTTP server
+# is_error handles 400-599 http replies (according to "PERL in a nutshell")
+if($response->is_error()) {
+	$this->{m_collect}->logMsg("E", "[E] HTTP request failed! Server down?");
+	$this->{m_collect}->logMsg("E", "\tThis repository can not be resolved at present.");
+	$this->{m_collect}->logMsg("E", "\tI recommend you try again later unless you know what you're doing.");
+	return;
+}
 
-  my $content  = $response->content();
+my $content  = $response->content();
 
-  # descend if the root page doesn't do dir listing:
-  # FIXME: configurable message of server? find better way here!
-  # (works for now, but...)
-  if($response->title !~ m{(index of|repoview)}i) {
-    # this means that no dir listing is done here, try one descend.
-    $this->{m_collect}->logMsg("I", "Directory $basepath has no listings, descencding");
-    return $this->splitPathHTTP($targets, $browser, $basepath."/".$prefix, $rest, $leafonly);
-  }
+# descend if the root page doesn't do dir listing:
+# FIXME: configurable message of server? find better way here!
+# (works for now, but...)
+if($response->title !~ m{(index of|repoview)}i) {
+	# this means that no dir listing is done here, try one descend.
+	$this->{m_collect}->logMsg("I", "Directory $basepath has no listings, descencding");
+	return $this->splitPathHTTP($targets, $browser, $basepath."/".$prefix, $rest, $leafonly);
+}
 
-  my @links = ();
-  if($content =~ m{error 404}i) {
-    pop @{$targets};
-    return;
-  }
+my @links = ();
+if($content =~ m{error 404}i) {
+	pop @{$targets};
+	return;
+}
 
-  $this->{m_collect}->logMsg("I", "Current remote directory is $basepath");
+$this->{m_collect}->logMsg("I", "Current remote directory is $basepath");
 
-  #==========================================
-  # Evaluate LWP content
-  #------------------------------------------
-  # /.../
-  # do the actual work:
-  # get the current dir list, parse for links and match them to prefix
-  # for each match call splitPath with the correct parameters recursively
-  # ----
-  my @lines = split(/\n/,$content);
-  my $atleastonce = 0;
-  foreach my $line(@lines) {
-    # skip "parent dir" to avoid cycles
-    next if($line =~ m{parent.+directory}i);
-    next if($line !~ m{<(img|a).*href="(.*)\/">});
+#==========================================
+# Evaluate LWP content
+#------------------------------------------
+# /.../
+# do the actual work:
+# get the current dir list, parse for links and match them to prefix
+# for each match call splitPath with the correct parameters recursively
+# ----
+my @lines = split(/\n/,$content);
+my $atleastonce = 0;
+foreach my $line(@lines) {
+	# skip "parent dir" to avoid cycles
+	next if($line =~ m{parent.+directory}i);
+	next if($line !~ m{<(img|a).*href="(.*)\/">});
 
-    $atleastonce++; # at least ONE match means the dir contains subdirs!
+	$atleastonce++; # at least ONE match means the dir contains subdirs!
 
-    my $link = $2;
-    $link =~ s{^[./]+}{}g;
-    # remove leading path. This only happens once: if the root dir is read
-    # In that case the server puts the whole path into the link
-    # This is fatal for descending...
-    $link =~ s{.*/}{}g;
-    if($link =~ m{$prefix}) {
-      if(defined($rest)) {
+	my $link = $2;
+	$link =~ s{^[./]+}{}g;
+	# remove leading path. This only happens once: if the root dir is read
+	# In that case the server puts the whole path into the link
+	# This is fatal for descending...
+	$link =~ s{.*/}{}g;
+	if($link =~ m{$prefix}) {
+	if(defined($rest)) {
 	if($leafonly == 1) {
 	  # list directory even if the path is not finished
 	  push @{$targets}, $basepath."/".$link;
 	}
 	$this->{m_collect}->logMsg("I", "Descending into subdirectory $basepath/$link");
 	$this->splitPathHTTP($targets, $browser, $basepath."/".$link, $rest, $leafonly);
-      }
-      else {
+	}
+	else {
 	# if the path is finished the leaves are stored
 	push @{$targets}, $basepath."/".$link;
 	$this->{m_collect}->logMsg("I", "Storing directory $basepath/$link");
-      }
-    }
-  }
+	}
+	}
+}
 
-  if($atleastonce == 0 and $leafonly != 1) {
-    # we're in a dir where no subdirs are found but:
-    # $rest may be non-zero
-    push @{$targets}, $basepath;
-    $this->{m_collect}->logMsg("I", "Storing directory $basepath");
-  }
+if($atleastonce == 0 and $leafonly != 1) {
+	# we're in a dir where no subdirs are found but:
+	# $rest may be non-zero
+	push @{$targets}, $basepath;
+	$this->{m_collect}->logMsg("I", "Storing directory $basepath");
+}
 
-  return $this;
+return $this;
 }
 
 
@@ -259,60 +259,60 @@ sub splitPathHTTP
 #------------------------------------------
 sub splitPathLocal
 {
-  my $this	= shift;
-  my $targets	= shift; # refers to the result list
-  my $basepath	= shift;
-  my $pattern	= shift;
-  my $leafonly	= shift;
+my $this	= shift;
+my $targets	= shift; # refers to the result list
+my $basepath	= shift;
+my $pattern	= shift;
+my $leafonly	= shift;
 
-  #==========================================
-  # remove leading/trailing slashes if any
-  #------------------------------------------
-  $pattern =~ s{^/*(.*)/$}{$1}; 
-  my @testlist = split("/", $pattern, 2);
-  my $prefix = $testlist[0];
-  my $rest   = $testlist[1];
+#==========================================
+# remove leading/trailing slashes if any
+#------------------------------------------
+$pattern =~ s{^/*(.*)/$}{$1}; 
+my @testlist = split("/", $pattern, 2);
+my $prefix = $testlist[0];
+my $rest   = $testlist[1];
 
-  # read current dir to list before descent:
-  opendir(DIR, $basepath) or return;
-  my @dirlist = readdir(DIR);
-  closedir(DIR);
+# read current dir to list before descent:
+opendir(DIR, $basepath) or return;
+my @dirlist = readdir(DIR);
+closedir(DIR);
 
-  $this->{m_collect}->logMsg("I", "Current local directory is $basepath");
-  my $atleastonce = 0;
+$this->{m_collect}->logMsg("I", "Current local directory is $basepath");
+my $atleastonce = 0;
 
-  foreach my $entry(@dirlist) {
-    next if(!-d "$basepath/$entry");  # skip all non-directories
-    next if($entry =~ m{^[.]+});      # ignore . and ..
-    $atleastonce++; # at least ONE match means the dir contains subdirs!
-    next if($entry !~ m{$prefix});    # skip anything not matching the regexp parameter
+foreach my $entry(@dirlist) {
+	next if(!-d "$basepath/$entry");  # skip all non-directories
+	next if($entry =~ m{^[.]+});      # ignore . and ..
+	$atleastonce++; # at least ONE match means the dir contains subdirs!
+	next if($entry !~ m{$prefix});    # skip anything not matching the regexp parameter
 
-    if(defined($rest)) {
-      #	pattern contains subdirs -> descent necessary
-      if($leafonly == 1) {
+	if(defined($rest)) {
+	#	pattern contains subdirs -> descent necessary
+	if($leafonly == 1) {
 	# list directory even if the path is not finished
 	$this->{m_collect}->logMsg("I", "Storing directory $basepath/$entry");
 	push @{$targets}, "$basepath/$entry";
-      }
-      #$this->{m_collect}->logMsg("I", "Descending into subdirectory $basepath/$entry");
-      $this->splitPathLocal($targets, "$basepath/$entry", $rest, $leafonly);
-    }
-    else {
-      push @{$targets}, "$basepath/$entry";
-      #$this->{m_collect}->logMsg("I", "Storing directory $basepath/$entry");
-    }
+	}
+	#$this->{m_collect}->logMsg("I", "Descending into subdirectory $basepath/$entry");
+	$this->splitPathLocal($targets, "$basepath/$entry", $rest, $leafonly);
+	}
+	else {
+	push @{$targets}, "$basepath/$entry";
+	#$this->{m_collect}->logMsg("I", "Storing directory $basepath/$entry");
+	}
 
-  }
+}
 
-  if($atleastonce == 0 and $leafonly != 1) {
-    # we're in a dir where no subdirs are found
-    # but the regexp isn't used up yet; store last found dir
-    # ignoring the rest
-    push @{$targets}, $basepath;
-    #$this->{m_collect}->logMsg("I", "Storing directory $basepath");
-  }
+if($atleastonce == 0 and $leafonly != 1) {
+	# we're in a dir where no subdirs are found
+	# but the regexp isn't used up yet; store last found dir
+	# ignoring the rest
+	push @{$targets}, $basepath;
+	#$this->{m_collect}->logMsg("I", "Storing directory $basepath");
+}
 
-  return $this;
+return $this;
 }
 
 
@@ -329,34 +329,34 @@ sub splitPathLocal
 #------------------------------------------
 sub expandFilename
 {
-  my $this     = shift;
-  my $browser  = shift;
-  my $basepath = shift;
-  my $filename = shift;
-  #==========================================
-  # cancel on missing parameters:
-  #------------------------------------------
-  # saves the checks in the resp. specialised method
-  #------------------------------------------
-  if(!defined($browser)
-      or !defined($basepath)
-      or !defined($filename))
-  {
-    $this->{m_collect}->logMsg("E", "Can't proceed request due to missing parameters!");
-    return;
-  }
+my $this     = shift;
+my $browser  = shift;
+my $basepath = shift;
+my $filename = shift;
+#==========================================
+# cancel on missing parameters:
+#------------------------------------------
+# saves the checks in the resp. specialised method
+#------------------------------------------
+if(!defined($browser)
+	or !defined($basepath)
+	or !defined($filename))
+{
+	$this->{m_collect}->logMsg("E", "Can't proceed request due to missing parameters!");
+	return;
+}
 
-  $basepath =~ s{(.*)\/$}{$1}; # remove trailing slash
-  if($basepath =~ m{^(http|ftp|https)}) {
-    # we deal with a web request
-    $this->{m_collect}->logMsg("I", "Expanding remote filenames for $basepath");
-    return $this->expandFilenameHTTP($browser, $basepath, $filename);
-  }
-  elsif($basepath =~ m{^(/|file://)(.*)}) {
-    # we deal with a local directory
-    $this->{m_collect}->logMsg("I", "Expanding local filenames for $2");
-    return $this->expandFilenameLocal($browser, $2, $filename);
-  }
+$basepath =~ s{(.*)\/$}{$1}; # remove trailing slash
+if($basepath =~ m{^(http|ftp|https)}) {
+	# we deal with a web request
+	$this->{m_collect}->logMsg("I", "Expanding remote filenames for $basepath");
+	return $this->expandFilenameHTTP($browser, $basepath, $filename);
+}
+elsif($basepath =~ m{^(/|file://)(.*)}) {
+	# we deal with a local directory
+	$this->{m_collect}->logMsg("I", "Expanding local filenames for $2");
+	return $this->expandFilenameLocal($browser, $2, $filename);
+}
 }
 
 
@@ -375,45 +375,45 @@ sub expandFilename
 #------------------------------------------
 sub expandFilenameHTTP
 {
-  my $this     = shift;
-  my $browser  = shift;
-  my $basepath = shift;
-  my $filename = shift;
+my $this     = shift;
+my $browser  = shift;
+my $basepath = shift;
+my $filename = shift;
 
-  #==========================================
-  # form LWP request
-  #------------------------------------------
-  my @filelist = ();
-  my $request  = HTTP::Request->new( GET => $basepath );
-  my $response = $browser->request( $request );
-  my $content  = $response->content();
-  my @links    = ();
-  if ($content =~ m{error 404}i) {
-    return;
-  }
+#==========================================
+# form LWP request
+#------------------------------------------
+my @filelist = ();
+my $request  = HTTP::Request->new( GET => $basepath );
+my $response = $browser->request( $request );
+my $content  = $response->content();
+my @links    = ();
+if ($content =~ m{error 404}i) {
+	return;
+}
 
-  #==========================================
-  # Evaluate LWP content
-  #------------------------------------------
-  my @lines    = split (/\n/,$content);
-  foreach my $line (@lines) {
-    next if($line !~ /<(img|a).*?href="(.*?)">.*/);
-    # skip "parent dir" to avoid cycles
-    next if($line =~ /parent.+directory/i);
+#==========================================
+# Evaluate LWP content
+#------------------------------------------
+my @lines    = split (/\n/,$content);
+foreach my $line (@lines) {
+	next if($line !~ /<(img|a).*?href="(.*?)">.*/);
+	# skip "parent dir" to avoid cycles
+	next if($line =~ /parent.+directory/i);
 
-    my $link = $2;
-    $link =~ s{^[./]+}{}g;
-    # /.../
-    # remove leading path. This only happens once: if the root dir is read
-    # In that case the server puts the whole path into the link
-    # This is fatal for descending...
-    # ----
-    $link =~ s{.*/}{}g;
-    if($link =~ m{$filename}) {
-      push @filelist, $basepath."/".$link;}
-      #$this->{m_collect}->logMsg("I", "Storing path $basepath/$link");
-  }
-  return @filelist;
+	my $link = $2;
+	$link =~ s{^[./]+}{}g;
+	# /.../
+	# remove leading path. This only happens once: if the root dir is read
+	# In that case the server puts the whole path into the link
+	# This is fatal for descending...
+	# ----
+	$link =~ s{.*/}{}g;
+	if($link =~ m{$filename}) {
+	push @filelist, $basepath."/".$link;}
+	#$this->{m_collect}->logMsg("I", "Storing path $basepath/$link");
+}
+return @filelist;
 }
 
 
@@ -432,79 +432,79 @@ sub expandFilenameHTTP
 #------------------------------------------
 sub expandFilenameLocal
 {
-  my $this	= shift;
-  my $browser	= shift;  # unused
-  my $basepath	= shift;  # has already been stripped (usr/share/blablubb/)
-  my $filename	= shift;
+my $this	= shift;
+my $browser	= shift;  # unused
+my $basepath	= shift;  # has already been stripped (usr/share/blablubb/)
+my $filename	= shift;
 
-  $basepath =~ s{(.*)}{/$1};  # append a leading slash
+$basepath =~ s{(.*)}{/$1};  # append a leading slash
 
-  my @filelist = ();
+my @filelist = ();
 
-  find(sub{ findCallback($this, $filename, \@filelist) }, $basepath);
-  
-  return @filelist;
+find(sub{ findCallback($this, $filename, \@filelist) }, $basepath);
+
+return @filelist;
 }
 
 
 
 sub findCallback
 {
-  my $this = shift;
-  my $filename = shift;
-  my $listref = shift;
+my $this = shift;
+my $filename = shift;
+my $listref = shift;
 
-  if($_ =~ m{$filename}) {
-    push @{$listref}, $File::Find::name;
-    # uncomment for gigatons of output if program runs too fast ;)
-    #$this->{m_collect}->logMsg("I", "Storing path $File::Find::name");
-  }
+if($_ =~ m{$filename}) {
+	push @{$listref}, $File::Find::name;
+	# uncomment for gigatons of output if program runs too fast ;)
+	#$this->{m_collect}->logMsg("I", "Storing path $File::Find::name");
+}
 }
 
 
 
 sub set_intersect
 {
-  my $refA = shift;
-  my $refB = shift;
-  my @result;
+my $refA = shift;
+my $refB = shift;
+my @result;
 
-  A:foreach my $s(@{$refA}) {
-    B:foreach my $t(@{$refB}) {
-      if($s =~ m{$t}) {
+A:foreach my $s(@{$refA}) {
+	B:foreach my $t(@{$refB}) {
+	if($s =~ m{$t}) {
 	push @result, $s;
 	next A;
-      }
-    }
-  }
-  return @result;
+	}
+	}
+}
+return @result;
 }
 
 
 
 sub set_anob
 {
-  my $refA = shift;
-  my $refB = shift;
-  my @result;
+my $refA = shift;
+my $refB = shift;
+my @result;
 
-  A:foreach my $s(@{$refA}) {
-    foreach my $t(@{$refB}) {
-      if($s =~ m{$t}) {
+A:foreach my $s(@{$refA}) {
+	foreach my $t(@{$refB}) {
+	if($s =~ m{$t}) {
 	next A;
-      }
-    }
-    push @result, $s;
-  }
-  return @result;
+	}
+	}
+	push @result, $s;
+}
+return @result;
 }
 
 
 
 sub unify
 {
-  my %h = map {$_ => 1} @_;
-  return grep(delete($h{$_}), @_);
+my %h = map {$_ => 1} @_;
+return grep(delete($h{$_}), @_);
 }
 
 
@@ -523,49 +523,49 @@ sub unify
 #--------------------------------------
 sub unpac_package
 {
-  my $this = shift;
-  my $p_uri = shift;
-  my $dir = shift;
+my $this = shift;
+my $p_uri = shift;
+my $dir = shift;
 
-  my $retval = 0;
+my $retval = 0;
 
-  if(!($this and $p_uri and $dir)) {
-    $retval = 1;
-    goto up_failed;
-  }
+if(!($this and $p_uri and $dir)) {
+	$retval = 1;
+	goto up_failed;
+}
 
-  if(! -d $dir) {
-    if(!mkpath("$dir", { mode => oct(755) })) {
-      $this->{m_collect}->logMsg("E", "[E] unpac_package: cannot create directory <$dir>");
-      $retval = 2;
-      goto up_failed;
-    }
-  }
+if(! -d $dir) {
+	if(!mkpath("$dir", { mode => oct(755) })) {
+	$this->{m_collect}->logMsg("E", "[E] unpac_package: cannot create directory <$dir>");
+	$retval = 2;
+	goto up_failed;
+	}
+}
 
-  if($p_uri =~ m{(.*\.tgz|.*\.tar\.gz|.*\.taz|.*\.tar\.Z)}) {
-    my $out = qx(cd $dir && tar -zxvfp $p_uri);
-    my $status = $?>>8;
-    if($status != 0) {
-      $this->{m_collect}->logMsg("E", "[E] command cp $dir && tar xvzfp $p_uri failed!\n");
-      $this->{m_collect}->logMsg("E", "\t$out\n");
-      $retval = 5;
-      goto up_failed;
-    }
-    else {
-      $this->{m_collect}->logMsg("I", "[I] unpacked $p_uri in directory $dir\n");
-    }
-  }
-  elsif($p_uri =~ m{.*\.rpm}i) {
-    my $out = qx(cd $dir && unrpm -q $p_uri);
-  }
-  else {
-    $this->{m_collect}->logMsg("E", "[E] cannot process file $p_uri\n");
-    $retval = 4;
-    goto up_failed;
-  }
+if($p_uri =~ m{(.*\.tgz|.*\.tar\.gz|.*\.taz|.*\.tar\.Z)}) {
+	my $out = qx(cd $dir && tar -zxvfp $p_uri);
+	my $status = $?>>8;
+	if($status != 0) {
+	$this->{m_collect}->logMsg("E", "[E] command cp $dir && tar xvzfp $p_uri failed!\n");
+	$this->{m_collect}->logMsg("E", "\t$out\n");
+	$retval = 5;
+	goto up_failed;
+	}
+	else {
+	$this->{m_collect}->logMsg("I", "[I] unpacked $p_uri in directory $dir\n");
+	}
+}
+elsif($p_uri =~ m{.*\.rpm}i) {
+	my $out = qx(cd $dir && unrpm -q $p_uri);
+}
+else {
+	$this->{m_collect}->logMsg("E", "[E] cannot process file $p_uri\n");
+	$retval = 4;
+	goto up_failed;
+}
 
-  up_failed:
-  return $retval;
+up_failed:
+return $retval;
 }
 
 
@@ -587,27 +587,27 @@ sub unpac_package
 #------------------------------------------
 sub normaliseDirname
 {
-  my $this    = shift;
-  my $dirname = shift;
-  my $sepchar = shift;
-  if(!defined($sepchar)
-      or $sepchar =~ m{[\w\s:\(\)\[\]\$]}) {
-    $sepchar = "-";
-  }
+my $this    = shift;
+my $dirname = shift;
+my $sepchar = shift;
+if(!defined($sepchar)
+	or $sepchar =~ m{[\w\s:\(\)\[\]\$]}) {
+	$sepchar = "-";
+}
 
-  # remove leading protocol name:
-  $dirname =~ s{^(http|https|file|ftp)[:]/*}{};
-  # remove some annoying chars:
-  $dirname =~ s{[\/:]}{$sepchar}g;
-  # remove double sep chars:
-  $dirname =~ s{[$sepchar]+}{$sepchar}g;
-  # remove leading and trailing sepchars:
-  $dirname =~ s{^[$sepchar]}{}g;
-  $dirname =~ s{[$sepchar]$}{}g;
-  # remove trailing slashes:
-  $dirname =~ s{/+$}{}g;
+# remove leading protocol name:
+$dirname =~ s{^(http|https|file|ftp)[:]/*}{};
+# remove some annoying chars:
+$dirname =~ s{[\/:]}{$sepchar}g;
+# remove double sep chars:
+$dirname =~ s{[$sepchar]+}{$sepchar}g;
+# remove leading and trailing sepchars:
+$dirname =~ s{^[$sepchar]}{}g;
+$dirname =~ s{[$sepchar]$}{}g;
+# remove trailing slashes:
+$dirname =~ s{/+$}{}g;
 
-  return $dirname;
+return $dirname;
 }
 # /normaliseDirname
 

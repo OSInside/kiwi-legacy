@@ -28,7 +28,7 @@ use KIWILocator;
 use KIWILog;
 use KIWIManager;
 use KIWIOverlay;
-use KIWIQX;
+use KIWIQX qw (qxx);
 use KIWIURL;
 
 #==========================================

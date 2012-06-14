@@ -22,7 +22,7 @@ package KIWIImageFormat;
 #------------------------------------------
 use strict;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 use File::Basename;
 use KIWIBoot;
 use KIWILocator;

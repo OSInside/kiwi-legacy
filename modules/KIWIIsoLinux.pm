@@ -25,7 +25,7 @@ use File::Find;
 use File::Basename;
 use KIWILocator;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Constructor

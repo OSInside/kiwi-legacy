@@ -36,7 +36,7 @@ use Cwd qw (abs_path cwd);
 # KIWI Modules
 #------------------------------------------
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Constructor

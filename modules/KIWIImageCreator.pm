@@ -27,7 +27,7 @@ use KIWICommandLine;
 use KIWIImageFormat;
 use KIWILocator;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 use KIWIRoot;
 use KIWIRuntimeChecker;
 use KIWIXML;
@@ -933,7 +933,7 @@ sub createImageFormat {
 	}
 	if ($this->{gdata}->{StudioNode}) {
 		$kiwi -> loginfo ("Format conversion skipped in targetstudio mode\n");
-    } else {
+	} else {
 		$imageformat -> createFormat();
 	}
 	$imageformat -> createMaschineConfiguration();

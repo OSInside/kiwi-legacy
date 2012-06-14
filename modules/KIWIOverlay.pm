@@ -21,7 +21,7 @@ use strict;
 use Carp qw (cluck);
 use File::Spec;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Constructor

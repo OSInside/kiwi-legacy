@@ -24,7 +24,7 @@ use strict;
 use Carp qw (cluck);
 use IPC::SysV qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU);
 use IPC::Semaphore;
-use KIWIQX;
+use KIWIQX qw (qxx);
 sub MAXBUF { 2000 }
 
 #==========================================

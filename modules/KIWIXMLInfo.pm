@@ -28,7 +28,7 @@ use XML::LibXML;
 #------------------------------------------
 use KIWICommandLine;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 use KIWIXML;
 
 #==========================================

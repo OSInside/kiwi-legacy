@@ -2,7 +2,7 @@
 # FILE          : KIWIGlobals.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schaefer <ms@suse.de>
 #               :
@@ -20,12 +20,12 @@ package KIWIGlobals;
 use strict;
 use KIWILocator;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Constructor
 #------------------------------------------
-sub new { 
+sub new {
 	# ...
 	# Create a new KIWIGlobals object which is used to
 	# store global values

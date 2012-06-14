@@ -2,7 +2,7 @@
 # FILE          : KIWICommandLine.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
@@ -24,13 +24,13 @@ use Digest::MD5 qw (md5_hex);
 use File::Spec;
 use KIWILocator;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Exports
 #------------------------------------------
 our @ISA    = qw (Exporter);
-our @EXPORT = qw ();
+our @EXPORT_OK = qw ();
 
 #==========================================
 # Constructor
@@ -263,6 +263,7 @@ sub unsetRecycleRootDir {
 	# ---
 	my $this = shift;
 	undef $this -> {recycleRootDir};
+	return;
 }
 
 #==========================================
@@ -448,7 +449,7 @@ sub setAdditionalRepos {
 	}
 	my @supportedTypes = @{$this->{supportedRepoTypes}};
 	for my $type (@repositTypes) {
-		if (! grep /$type/, @supportedTypes ) {
+		if (! grep { /$type/x } @supportedTypes ) {
 			my $msg = "Specified repository type $type not supported.";
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
@@ -540,7 +541,7 @@ sub setCacheDir {
 		return;
 	}
 	if ( $dir !~ /^\//) {
-		my $locator = new KIWILocator($this -> {kiwi});
+		my $locator = KIWILocator -> new($this -> {kiwi});
 		$dir = $locator -> getDefaultCacheDir() . '/' . $dir;
 		my $msg = 'Specified relative path as cache location; moving cache to '
 		. "$dir\n";
@@ -637,7 +638,7 @@ sub setImageArchitecture {
 		$this -> {kiwi} -> failed();
 		return;
 	}
-	if (! grep /^$arch/, @supportedArch) {
+	if (! grep { /^$arch/x } @supportedArch) {
 		my $msg = 'Improper architecture setting, expecting on of: '
 			. "@supportedArch";
 		$this -> {kiwi} -> error ($msg);
@@ -712,7 +713,7 @@ sub setPackageManager {
 		$this -> {kiwi} -> failed();
 		return;
 	}
-	if (grep /$pkgMgr/, @supportedPkgMgrs) {
+	if (grep { /$pkgMgr/x } @supportedPkgMgrs) {
 		$this -> {packageMgr} = $pkgMgr;
 		return 1;
 	}
@@ -790,7 +791,8 @@ sub setReplacementRepo {
 		$kiwi -> loginfo ($msg);
 		$repoPrio = 10;
 	}
-	if (($repoType) && (! grep /$repoType/, @{$this->{supportedRepoTypes}})) {
+	if (($repoType) && (! grep { /$repoType/x }
+							@{$this->{supportedRepoTypes}})) {
 		my $msg = "Specified repository type $repoType not supported.";
 		$kiwi -> error ($msg);
 		$kiwi -> failed();

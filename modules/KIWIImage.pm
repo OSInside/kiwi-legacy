@@ -35,7 +35,7 @@ use KIWICommandLine;
 use KIWIImageCreator;
 use KIWIIsoLinux;
 use KIWILog;
-use KIWIQX;
+use KIWIQX qw (qxx);
 use KIWIXML;
 
 #==========================================
