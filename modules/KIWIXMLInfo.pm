@@ -57,12 +57,6 @@ sub new {
 	my $cmdL = shift;
 	my $xml  = shift;
 	#==========================================
-	# Constructor setup
-	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
-	#==========================================
 	# Check pre-conditions
 	#------------------------------------------
 	if (! defined $cmdL) {

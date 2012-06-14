@@ -70,9 +70,6 @@ sub new {
 	#------------------------------------------
 	my $code;
 	my $data;
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
 	if (! $main::global) {
 		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();

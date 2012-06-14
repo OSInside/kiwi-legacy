@@ -49,12 +49,6 @@ sub new {
 	# Module Parameters
 	#------------------------------------------
 	my $kiwi = shift;
-	#==========================================
-	# Constructor setup
-	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
 	my @supportedRepos = qw (
 		apt-deb apt-rpm deb-dir mirrors red-carpet
 		rpm-dir rpm-md slack-site up2date-mirrors

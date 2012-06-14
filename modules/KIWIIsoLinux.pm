@@ -72,9 +72,6 @@ sub new {
 	#==========================================
 	# create log object if not done
 	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog ("tiny");
-	}
 	if (! -d $source) {
 		$kiwi -> error  ("No such file or directory: $source");
 		$kiwi -> failed ();

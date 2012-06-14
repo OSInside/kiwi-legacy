@@ -72,9 +72,6 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	my $arch = qxx ("uname -m"); chomp $arch;
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
 	#==========================================
 	# Check pre condition
 	#------------------------------------------

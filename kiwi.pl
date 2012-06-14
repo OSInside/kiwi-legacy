@@ -64,9 +64,12 @@ our @BT;
 #============================================
 # Globals
 #--------------------------------------------
-our $global  = new KIWIGlobals();
-our $locator = new KIWILocator();
-our $kiwi;
+our $kiwi    = new KIWILog ();
+our $global  = new KIWIGlobals ($kiwi);
+our $locator = new KIWILocator ($kiwi);
+$kiwi -> setLogServer (
+	$global -> getGlobals() -> {LogServerPort}
+);
 
 #============================================
 # Variables (operation mode)
@@ -92,12 +95,6 @@ sub main {
 	# Initialize and check options
 	#------------------------------------------
 	init();
-	#==========================================
-	# Create logger object
-	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog ($gdata->{LogServerPort});
-	}
 	#==========================================
 	# remove pre-defined smart channels
 	#------------------------------------------
@@ -677,7 +674,6 @@ sub init {
 	#==========================================
 	# create logger and cmdline object
 	#------------------------------------------
-	$kiwi = new KIWILog("tiny");
 	$cmdL = new KIWICommandLine($kiwi);
 	if (! $cmdL) {
 		kiwiExit (1);
@@ -1326,7 +1322,6 @@ sub usage {
 	# image creation system
 	# ---
 	my $exit = shift;
-	my $kiwi = new KIWILog("tiny");
 	my $date = qxx ( "bash -c 'LANG=POSIX date -I'" ); chomp $date;
 	print "Linux KIWI setup  (image builder) ($date)\n";
 	print "Copyright (c) 2007 - SUSE LINUX Products GmbH\n";
@@ -1547,7 +1542,6 @@ sub listImage {
 	# ...
 	# list known image descriptions and exit
 	# ---
-	my $kiwi   = new KIWILog("tiny");
 	my $gdata  = $global -> getGlobals();
 	my $system = $gdata->{System};
 	opendir (FD,$system);
@@ -1589,7 +1583,6 @@ sub checkConfig {
 	# Check the specified configuration file
 	# ---
 	my $config = shift;
-	my $kiwi   = new KIWILog("tiny");
 	my $gdata  = $global -> getGlobals();
 	if (! -f $config) {
 		$kiwi -> error (
@@ -1635,7 +1628,6 @@ sub cloneImage {
 	#==========================================
 	# Check destination definition
 	#------------------------------------------
-	my $kiwi = new KIWILog("tiny");
 	if (! defined $destination) {
 		$kiwi -> error  ("No destination directory specified");
 		$kiwi -> failed ();
@@ -1718,12 +1710,6 @@ sub kiwiExit {
 	# ---
 	my $code = $_[0];
 	#==========================================
-	# Create log object if we don't have one...
-	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
-	#==========================================
 	# Reformat log file for human readers...
 	#------------------------------------------
 	$kiwi -> setLogHumanReadable();
@@ -1760,11 +1746,7 @@ sub quit {
 	# ...
 	# signal received, exit safely
 	# ---
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	} else {
-		$kiwi -> reopenRootChannel();
-	}
+	$kiwi -> reopenRootChannel();
 	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
 	kiwiExit (1);
 }
@@ -1799,9 +1781,6 @@ sub version {
 	if (! defined $exit) {
 		$exit = 0;
 	}
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
 	my $rev  = "unknown";
 	if (open FD,$gdata->{Revision}) {
 		$rev = <FD>; close FD;
@@ -1822,9 +1801,6 @@ sub createPassword {
 	# ----
 	my $pwd = shift;
 	my @legal_enc = ('.', '/', '0'..'9', 'A'..'Z', 'a'..'z');
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
 	my $word2 = 2;
 	my $word1 = 1;
 	my $tmp = (time + $$) % 65536;
@@ -1870,7 +1846,6 @@ sub createHash {
 	# command
 	# ----
 	my $idesc = shift;
-	$kiwi  = new KIWILog("tiny");
 	$kiwi -> info ("Creating MD5 sum for $idesc...");
 	if (! -d $idesc) {
 		$kiwi -> failed ();
@@ -1908,7 +1883,6 @@ sub createInstSource {
 	# ----
 	my $idesc = shift;
 	my $vlevel= shift;
-	$kiwi = new KIWILog("tiny");
 	$kiwi -> deactivateBackTrace();
 	my $mod = "KIWICollect";
 	eval "require $mod";

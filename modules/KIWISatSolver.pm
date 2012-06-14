@@ -78,9 +78,6 @@ sub new {
 	my $arch;      # system architecture
 	my $job;       # job queue
 	my $problems;  # solver problems
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
 	if (! defined $pool) {
 		if (! defined $quiet) {
 			$kiwi -> info ("Setting up SaT solver...\n");

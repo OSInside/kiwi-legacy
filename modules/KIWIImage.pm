@@ -76,9 +76,6 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
 	if (! defined $cmdL) {
 		$kiwi -> error ("No Commandline reference specified");
 		$kiwi -> failed ();

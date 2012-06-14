@@ -60,9 +60,6 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
 	if (! defined $xml) {
 		$kiwi -> error  ("Missing XML description pointer");
 		$kiwi -> failed ();

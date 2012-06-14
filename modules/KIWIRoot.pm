@@ -65,9 +65,6 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	my $code;
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
 	if (($imageDesc !~ /^\//) && (! -d $imageDesc)) {
 		$imageDesc = $this->{gdata}->{System}."/".$imageDesc;
 	}

@@ -47,10 +47,6 @@ sub new {
 	my $class = shift;
 	bless  $this,$class;
 	#==========================================
-	# Module Parameters
-	#------------------------------------------
-	my $port = shift;
-	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{showLevel} = [0,1,2,3,4,5];
@@ -59,26 +55,6 @@ sub new {
 	$this->{message}   = "initialize";
 	$this->{used}      = 1;
 	$this -> getPrefix (1);
-	#==========================================
-	# Check for tiny object
-	#------------------------------------------
-	if ((defined $port) && (int $port == 0)) {
-		return $this;
-	}
-	#==========================================
-	# Create shmem segment for log messages
-	#------------------------------------------
-	my $smem = new KIWISharedMem ( $this,$this->{message} );
-	if (! defined $smem) {
-		$this -> warning ("Can't create shared log memory segment");
-		$this -> skipped ();
-		return $this;
-	}
-	$this->{smem} = $smem;
-	#==========================================
-	# Create Log Server on $LogServerPort
-	#------------------------------------------
-	$this -> setLogServer ($port);
 	return $this;
 }
 
@@ -869,6 +845,25 @@ sub setLogServer {
 	# ---
 	my $this  = shift;
 	my $port  = shift;
+	#==========================================
+	# Check for tiny object
+	#------------------------------------------
+	if ((defined $port) && (int $port == 0)) {
+		return $this;
+	}
+	#==========================================
+	# Create shmem segment for log messages
+	#------------------------------------------
+	my $smem = new KIWISharedMem ( $this,$this->{message} );
+	if (! defined $smem) {
+		$this -> warning ("Can't create shared log memory segment");
+		$this -> skipped ();
+		return $this;
+	}
+	$this->{smem} = $smem;
+	#==========================================
+	# Fork new child
+	#------------------------------------------
 	my $child = fork();
 	if (! defined $child) {
 		$this -> warning ("Can't fork logserver process: $!");

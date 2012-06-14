@@ -36,6 +36,13 @@ sub new {
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
+	#==========================================
+	# Module Parameters
+	#------------------------------------------
+	my $kiwi = shift;
+	#==========================================
+	# Constructor setup
+	#------------------------------------------
 	my $arch = qxx ("uname -m");
 	chomp $arch;
 	#==========================================
@@ -65,7 +72,6 @@ sub new {
 	elsif (($ENV{'HOME'}) && (-f $ENV{'HOME'}.'/.kiwirc')) {
 		$file = "$ENV{'HOME'}/.kiwirc";
 	}
-	my $kiwi = new KIWILog("tiny");
 	if ($file) {
 		if (! do $file) {
 			$kiwi -> warning ("Invalid $file file...");

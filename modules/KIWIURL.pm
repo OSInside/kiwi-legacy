@@ -48,12 +48,6 @@ sub new {
 	my $user = shift;
 	my $pwd  = shift;
 	#==========================================
-	# Constructor setup
-	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
-	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi} = $kiwi;

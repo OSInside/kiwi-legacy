@@ -45,12 +45,6 @@ sub new {
 	my $root = shift;
 	my $imageDesc = shift;
 	my $imageDest = shift;
-	#==========================================
-	# Constructor setup
-	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
 	if (! defined $xml) {
 		$kiwi -> error ("No XML reference specified");
 		$kiwi -> failed ();

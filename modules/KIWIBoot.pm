@@ -81,12 +81,6 @@ sub new {
 	my $xengz;
 	my $xml;
 	#==========================================
-	# create log object if not done
-	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
-	}
-	#==========================================
 	# check initrd file parameter
 	#------------------------------------------
 	if ((defined $initrd) && (! -f $initrd)) {
