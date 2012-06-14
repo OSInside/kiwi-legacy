@@ -3202,9 +3202,7 @@ sub umountSystemFileSystems {
 	# to cleanup the environment
 	# ----
 	my $root = shift;
-	my @sysfs= (
-		"/dev/pts","/dev","/proc","/sys"
-	);
+	my @sysfs= ("/proc");
 	if (! -d $root) {
 		return;
 	}
