@@ -632,6 +632,7 @@ function recreateVTOCTable {
 	createPartitionerInput u y w
 	callPartitioner $input
 	blockdev --rereadpt $imageDiskDevice
+	sleep 2
 	rm -f $input
 }
 
