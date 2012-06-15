@@ -83,6 +83,7 @@ Requires:       clicfs >= 1.3.9
 Recommends:     perl-satsolver >= 0.42
 Recommends:     jing
 Recommends:     zypper
+Recommends:     lxc
 %endif
 %if %{suse_version} > 1140
 Recommends:     db45-utils
@@ -420,6 +421,7 @@ Recommends:     busybox
 Recommends:     atftp
 Recommends:     gfxboot
 Recommends:     memtest86+
+Recommends:     lxc
 %endif
 
 %description -n kiwi-media-requires
