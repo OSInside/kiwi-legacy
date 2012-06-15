@@ -24,7 +24,8 @@ use lib "$FindBin::Bin/lib";
 use lib "$FindBin::Bin/../../modules";
 
 use KIWIGlobals;
-our $global  = new KIWIGlobals();
+our $kiwi   = new KIWILog ();
+our $global = new KIWIGlobals($kiwi);
 
 my $runner = Test::Unit::HarnessUnit->new();
 $runner->start( 'Test::kiwiXMLInfo');
