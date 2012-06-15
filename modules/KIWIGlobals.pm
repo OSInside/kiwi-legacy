@@ -772,4 +772,119 @@ sub umountSystemFileSystems {
 	return $this;
 }
 
+#==========================================
+# callContained
+#------------------------------------------
+sub callContained {
+	# /.../
+	# call the given program in a contained way by using
+	# a lxc container or a simple chroot
+	# ----
+	my $this = shift;
+	my $root = shift;
+	my $prog = shift;
+	my $kiwi = $this->{kiwi};
+	my $data;
+	my $code;
+	my $FD;
+	if (! -d $root) {
+		$kiwi -> error  ("Can't find root directory: $root");
+		$kiwi -> failed ();
+		return;
+	}
+	if (! -e $root."/".$prog) {
+		$kiwi -> error  ("Can't find program $root/$prog");
+		$kiwi -> failed ();
+		return;
+	}
+	my $locator = new KIWILocator($kiwi);
+	my $lxcexec = $locator -> getExecPath('lxc-execute');
+	my $lxcbase = $root."/usr/lib/lxc/";
+	if (-d "/usr/lib64") {
+		$lxcbase = $root."/usr/lib64/lxc/";
+	}
+	my $lxcinit = $lxcbase."lxc-init";
+	my $legacy  = 0;
+	if (! $lxcexec ) {
+		#==========================================
+		# no lxc installed used chroot
+		#------------------------------------------
+		$kiwi -> loginfo ("lxc not installed\n");
+		$legacy = 1;
+	} else {
+		#==========================================
+		# check for lxc in the unpacked tree
+		#------------------------------------------
+		if (-e $lxcinit) {
+			qxx ("mv $lxcinit $lxcinit.orig 2>&1");
+		}
+		#==========================================
+		# create lxc config file
+		#------------------------------------------
+		if (! open ($FD,">","$root/config.lxc")) {
+			$kiwi -> loginfo ("Couldn't create lxc config file: $!\n");
+			$legacy = 1;
+		} else {
+			print $FD "lxc.utsname = kiwi-contained-script"."\n";
+			print $FD "lxc.rootfs  = $root"."\n";
+			close $FD;
+			#==========================================
+			# check if lxc works
+			#------------------------------------------
+			if (! -d $lxcbase) {
+				qxx ("mkdir -p $lxcbase");
+			}
+			if (! open ($FD, ">", $lxcinit)) {
+				$kiwi -> loginfo ("Couldn't create lxc-init test: $!\n");
+				$legacy = 1;
+			} else {
+				print $FD "#! /bin/bash"."\n";
+				print $FD "echo OK"."\n";
+				print $FD "exit 0"."\n";
+				close $FD;
+				$data = qxx ("chmod u+x $lxcinit 2>&1");
+				$data = qxx (
+					"lxc-execute -n kiwi -f $root/config.lxc true 2>&1"
+				);
+				$code = $? >> 8;
+				if ($code != 0) {
+					$kiwi -> loginfo ("Failed to execute lxc: $data\n");
+					$legacy = 1;
+				} else {
+					#==========================================
+					# call via lxc
+					#------------------------------------------
+					$data = qxx ("mv $root/$prog $lxcinit 2>&1");
+					$data = qxx (
+						"lxc-execute -n kiwi -f $root/config.lxc true 2>&1"
+					);
+					$code = $? >> 8;
+				}
+			}
+		}
+	}
+	if ($legacy) {
+		#==========================================
+		# cleanup lxc
+		#------------------------------------------
+		$kiwi -> loginfo ("Falling back to chroot method\n");
+		if (-e "$root/config.lxc") {
+			qxx ("rm -f $root/config.lxc 2>&1");
+		}
+		if (($lxcinit) && (-e "$root/$lxcinit")) {
+			qxx ("rm -f $root/$lxcinit 2>&1");
+		}
+		if (($lxcinit) && (-e "$lxcinit.orig")) {
+			qxx ("mv $lxcinit.orig $lxcinit 2>&1");
+		}
+		#==========================================
+		# call in chroot
+		#------------------------------------------
+		$data = qxx ("chroot $root $prog 2>&1 ");
+		$code = $? >> 8;
+		$this -> umountSystemFileSystems ($root);
+	}
+	return ($code,$data);
+}
+
 1;

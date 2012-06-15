@@ -1160,9 +1160,9 @@ sub setup {
 		$kiwi -> info ("Calling image script: config.sh");
 		qxx (" cp $imageDesc/config.sh $root/tmp ");
 		qxx (" chmod u+x $root/tmp/config.sh ");
-		my $data = qxx (" chroot $root /tmp/config.sh 2>&1 ");
-		my $code = $? >> 8;
-		$main::global -> umountSystemFileSystems ($root);
+		my ($code,$data) = $main::global -> callContained (
+			$root,"/tmp/config.sh"
+		);
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);

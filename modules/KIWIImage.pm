@@ -3560,9 +3560,9 @@ sub setupLogicalExtend {
 	#------------------------------------------
 	if ((! defined $initCache) && (-x "$imageTree/image/images.sh")) {
 		$kiwi -> info ("Calling image script: images.sh");
-		my $data = qxx (" chroot $imageTree /image/images.sh 2>&1 ");
-		my $code = $? >> 8;
-		$main::global -> umountSystemFileSystems ($imageTree);
+		my ($code,$data) = $main::global -> callContained (
+			$imageTree,"/image/images.sh"
+		);
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
@@ -4566,9 +4566,9 @@ sub checkKernel {
 	#==========================================
 	# 4) call images.sh script...
 	#------------------------------------------
-	$status = qxx ("chroot $tmpdir /images.sh 2>&1");
-	$result = $? >> 8;
-	$main::global -> umountSystemFileSystems ($tmpdir);
+	($result,$status) = $main::global -> callContained (
+		$tmpdir,"/images.sh"
+	);
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> info   ($status);
