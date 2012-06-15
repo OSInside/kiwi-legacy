@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Jun 15 15:55:35 CEST 2012 - ms@suse.de
+
+ - disable use of basePackBootIncludes/baseUnpackBootIncludes in boot
+   image descriptions. The bootincluded data can't be removed or
+   reduced that way which has a bad impact if only parts of e.g
+   kernel-firmware should be used (bnc #766720)
+
+-------------------------------------------------------------------
 Thu Jun 14 20:58:48 CEST 2012 - ms@suse.de
 
   - removed kernel-firmware from netboot descriptions for SLE (bnc #766720)
