@@ -5,6 +5,9 @@
 		<contact>rjschwei@suse.com</contact>
 		<specification>Test configuration to verify package settings are stored and returned properly in the XML object</specification>
 	</description>
+	<profiles>
+		<profile description="A test profile" name="profileA"/>
+	</profiles>
 	<preferences>
 		<type image="oem" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true"/>
 		<version>0.0.1</version>
@@ -19,22 +22,10 @@
 	<repository type="yast2">
 		<source path="opensuse://12.1/repo/oss/"/>
 	</repository>
-	<packages type="image">
-		<archive name="myInitStuff.tar" bootinclude="true"/>
-		<archive name="myImageStuff.tgz"/>
-		<opensusePattern name="base"/>
-		<opensusePattern name="xfce"/>
-		<package name="ed"/>
-		<package name="kernel-default"/>
-		<package name="python" bootinclude="true"/>
-		<package name="vim" bootinclude="true"/>
-	</packages>
-	<packages type="delete">
-		<package name="java"/>
-	</packages>
-	<packages type="oem">
-		<package name="kernel-firmware"/>
-		<package name="sane"/>
+	<packages type="image" profiles="profileA">
+		<package name="kernel-desktop" replaces="kernel-default"/>
+		<package name="python"/>
+		<package name="vim" replaces="ed"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
