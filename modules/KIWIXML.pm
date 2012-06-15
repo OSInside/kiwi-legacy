@@ -3511,7 +3511,7 @@ sub getInstallSize {
 	push @result,@packages;
 	@packages = $this -> getInstallList();
 	push @result,@packages;
-	@packages = $this -> getTypeList();
+	@packages = $this -> getTypeSpecificPackageList();
 	push @result,@packages;
 	#==========================================
 	# Handle package names to be deleted later
@@ -3597,7 +3597,10 @@ sub getReplacePackageDelList {
 	# a replace list setup
 	# ---
 	my $this = shift;
-	my @pacs = @{$this->{replDelList}};
+	my @pacs;
+	if ($this->{replDelList}) {
+		@pacs = @{$this->{replDelList}};
+	}
 	return @pacs;
 }
 
@@ -3610,7 +3613,10 @@ sub getReplacePackageAddList {
 	# a replace list setup
 	# ---
 	my $this = shift;
-	my @pacs = @{$this->{replAddList}};
+	my @pacs;
+	if ($this->{replAddList}) {
+		@pacs = @{$this->{replAddList}};
+	}
 	return @pacs;
 }
 
@@ -3734,9 +3740,9 @@ sub getInstallList {
 }
 
 #==========================================
-# getTypeList
+# getTypeSpecificPackageList
 #------------------------------------------
-sub getTypeList {
+sub getTypeSpecificPackageList {
 	# ...
 	# Create package list according to the selected
 	# image type

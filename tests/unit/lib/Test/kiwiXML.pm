@@ -2,7 +2,7 @@
 # FILE          : xml.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 Novell Inc.
+# COPYRIGHT     : (c) 2012 Novell Inc.
 #               :
 # AUTHOR        : Robert Schweikert <rschweikert@suse.com>
 #               :
@@ -1423,6 +1423,32 @@ sub test_getInstallList {
 }
 
 #==========================================
+# test_getLicenseNames
+#------------------------------------------
+sub test_getLicenseNames {
+	# ...
+	# Verify proper return of getLicenseNames method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $licNames = $xml -> getLicenseNames();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw (/opt/myApp/lic.txt /opt/myApp/thirdParty/appA/lic.txt);
+	$this -> assert_array_equal(\@expected, $licNames);
+	return;
+}
+
+#==========================================
 # test_getListBootIncludes
 #------------------------------------------
 sub test_getListBootIncludes {
@@ -2572,6 +2598,70 @@ sub test_getRPMForceTrue {
 }
 
 #==========================================
+# test_getReplacePackageAddList
+#------------------------------------------
+sub test_getReplacePackageAddList {
+	# ...
+	# Verify proper return of getReplacePackageAddList method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageReplSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	# Call getList to trigger the generation of the replace-add list as
+	# a side effect :(
+	my @gL = $xml -> getList('image');
+	my @replAdd = $xml -> getReplacePackageAddList();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw /kernel-desktop vim/;
+	$this -> assert_array_equal(\@expected, \@replAdd);
+	return;
+}
+
+#==========================================
+# test_getReplacePackageDelList
+#------------------------------------------
+sub test_getReplacePackageDelList {
+	# ...
+	# Verify proper return of getReplacePackageDelList method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageReplSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	# Call getList to trigger the generation of the replace-delete list as
+	# a side effect :(
+	my @gL = $xml -> getList('image');
+	my @replDel = $xml -> getReplacePackageDelList();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw /kernel-default ed/;
+	$this -> assert_array_equal(\@expected, \@replDel);
+	return;
+}
+
+#==========================================
 # test_getRepoNodeList
 #------------------------------------------
 sub test_getRepoNodeList {
@@ -2881,6 +2971,35 @@ sub test_getStripTools {
 }
 
 #==========================================
+# test_getTypeSpecificPackageList
+#------------------------------------------
+sub test_getTypeSpecificPackageList {
+	# ...
+	# Verify proper return of getTypeList method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @pckgs = $xml -> getTypeSpecificPackageList();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw /kernel-firmware sane/;
+	$this -> assert_array_equal(\@expected, \@pckgs);
+	return;
+}
+
+#==========================================
 # test_getUsers
 #------------------------------------------
 sub test_getUsers {
@@ -2988,6 +3107,56 @@ sub test_getXenConfig {
 	$this -> assert_str_equals('128', $vmConfig{xen_memory});
 	$this -> assert_str_equals('3', $vmConfig{xen_ncpus});
 	$this -> assert_str_equals('00:0C:6E:AA:57:2F',$vmConfig{xen_bridge}{br0});
+	return;
+}
+
+#==========================================
+# test_hasDefaultPackages
+#------------------------------------------
+sub test_hasDefaultPackages {
+	# ...
+	# Verify proper operation of hasDefaultPackages method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> hasDefaultPackages();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_equals(1, $res);
+	return;
+}
+
+#==========================================
+# test_hasDefaultPackagesNoDef
+#------------------------------------------
+sub test_hasDefaultPackagesNoDef {
+	# ...
+	# Verify proper operation of hasDefaultPackages method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettingsNoDefault';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> hasDefaultPackages();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_equals(0, $res);
 	return;
 }
 
