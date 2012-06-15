@@ -2,9 +2,9 @@
 # FILE          : KIWIImageCreator.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -521,7 +521,7 @@ sub createImage {
 	if (@replDel) {
 		push @deleteList,@replDel;
 	}
-	$xml -> getTypeList();
+	$xml -> getTypeSpecificPackageList();
 	@replAdd = $xml -> getReplacePackageAddList();
 	@replDel = $xml -> getReplacePackageDelList();
 	if (@replAdd) {

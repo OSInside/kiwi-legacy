@@ -2,7 +2,7 @@
 # FILE          : KIWIManager.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schaefer <ms@suse.de>
 #               :
@@ -1690,7 +1690,7 @@ sub setupInstallPackages {
 	#==========================================
 	# Get type specific packages if set
 	#------------------------------------------
-	my @typeList = $xml -> getTypeList();
+	my @typeList = $xml -> getTypeSpecificPackageList();
 	if (@typeList) {
 		push @packList,@typeList;
 	}
