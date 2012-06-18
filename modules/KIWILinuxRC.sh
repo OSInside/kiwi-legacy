@@ -4218,21 +4218,6 @@ function partitionSize {
 	echo $psizeKBytes
 }
 #======================================
-# linuxPartition
-#--------------------------------------
-function linuxPartition {
-	# /.../
-	# check for a linux partition on partition number 2
-	# using the given disk device. On success return 0
-	# ----
-	local diskDevice=$1
-	local diskPartitionType=`partitionID $diskDevice 2`
-	if [ "$diskPartitionType" = "83" ] || [ "$diskPartitionType" = "fd" ];then
-		return 0
-	fi
-	return 1
-}
-#======================================
 # kernelList
 #--------------------------------------
 function kernelList {
@@ -7602,6 +7587,124 @@ function pxeRaidSwapDevice {
 		fi
 		mdcount=$((mdcount + 1))
 	done
+}
+#======================================
+# pxeRaidPartCheck
+#--------------------------------------
+function pxeRaidPartCheck {
+	local count=0
+	local field=0
+	local n
+	local raidLevel
+	local raidDiskFirst
+	local raidDiskSecond
+	local device
+	local IFS=";"
+	local partSize
+	local partID
+	local partMount
+	local IdFirst
+	local IdSecond
+	local raidFirst
+	local raidSecond
+	local size
+	local maxDiffPlus=10240  # max 10MB bigger
+	local maxDiffMinus=10240 # max 10MB smaller
+	for n in $RAID;do
+		case $field in
+			0) raidLevel=$n     ; field=1 ;;
+			1) raidDiskFirst=$n ; field=2 ;;
+			2) raidDiskSecond=$n; field=3
+		esac
+	done
+	IFS=","
+	for i in $PART;do
+		count=$((count + 1))
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		IdFirst="$(partitionID $raidDiskFirst $count)"
+		IdSecond="$(partitionID $raidDiskSecond $count)"
+		raidFirst=$(ddn $raidDiskFirst $count)
+		raidSecond=$(ddn $raidDiskSecond $count)
+		if [ "$IdFirst" != "fd" ] || ! waitForStorageDevice $raidFirst;then
+			raidFirst=
+		fi
+		if [ "$IdSecond" != "fd" ] || ! waitForStorageDevice $raidSecond;then
+			raidSecond=
+		fi
+		# /.../
+		# RAID should be able to work in degraded mode when
+		# one of the disks is missing
+		# ----
+		if [ -z "$raidFirst" -a -z "$raidSecond" ]; then
+			return 1
+		fi
+		if [ "$partSize" == "x" ] ; then
+			# partition use all available space
+			continue
+		fi
+		for device in $raidFirst $raidSecond ; do
+			size=$(partitionSize $device)
+			if [ "$(( partSize * 1024 - size ))" -gt "$maxDiffMinus" -o \
+				"$(( size - partSize * 1024 ))" -gt "$maxDiffPlus" ]
+			then
+				return 1
+			fi
+		done
+	done
+	return 0
+}
+#======================================
+# pxePartCheck
+#--------------------------------------
+function pxePartCheck {
+	local count=0
+	local field=0
+	local n
+	local partSize
+	local partID
+	local partMount
+	local device
+	local size
+	local IFS
+	local maxDiffPlus=10240  # max 10MB bigger
+	local maxDiffMinus=10240 # max 10MB smaller
+	IFS=","
+	for i in $PART;do
+		count=$((count + 1))
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		device=$(ddn $DISK $count)
+		if [ "$(partitionID $DISK $count)" != "$partID" ]; then
+			return 1
+		fi
+		if ! waitForStorageDevice $device;then
+			return 1
+		fi
+		if [ "$partSize" == "x" ] ; then
+			# partition use all available space
+			continue
+		fi
+		size=$(partitionSize $device)
+		if [ "$(( partSize * 1024 - size ))" -gt "$maxDiffMinus" -o \
+			"$(( size - partSize * 1024 ))" -gt "$maxDiffPlus" ]
+		then
+			return 1
+		fi
+	done
+	return 0
 }
 #======================================
 # pxeBootDevice

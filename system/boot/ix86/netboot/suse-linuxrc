@@ -46,6 +46,7 @@ export SYSTEM_INTEGRITY
 export SYSTEM_MD5STATUS
 export systemIntegrity="unknown"
 export haveDisk=0
+export partOK=0
 export haveRamDisk=0
 
 #======================================
@@ -288,9 +289,14 @@ fi
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 	if [ ! -z "$RAID" ];then
-		pxeRaidAssemble
+		if pxeRaidPartCheck ; then
+			pxeRaidAssemble
+			partOK=1
+		fi
 	else
-		pxeRaidZeroSuperBlock
+		if pxePartCheck ; then
+			partOK=1
+		fi
 	fi
 	IMAGE_FIRST=$(echo $IMAGE | cut -f1 -d,)
 	for i in $IMAGE_FIRST;do
@@ -303,7 +309,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
 			esac
 		done
 		updateNeeded initialize
-		if linuxPartition $imageDiskDevice;then
+		if [ "$partOK" = "1" ] ;then
 			probeFileSystem $imageDevice
 			if [ "$FSTYPE" = "luks" ];then
 				luks_open_can_fail=yes
@@ -341,7 +347,11 @@ fi
 #======================================
 # 14) Create ptable on diskful system
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
+if \
+	[ $LOCAL_BOOT = "no" ]         && \
+	[ $systemIntegrity = "clean" ] && \
+	[ "$partOK" = "0" ]
+then
 	runHook prepartition
 	#======================================
 	# Create partition table
@@ -354,6 +364,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 		cleanPartitionTable
 		createPartitionerInput $(pxePartitionInput)
 		callPartitioner $input
+		pxeRaidZeroSuperBlock
 	else
 		#======================================
 		# Raid1 table
