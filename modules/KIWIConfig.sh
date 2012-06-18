@@ -985,7 +985,7 @@ function suseStripInitrd {
 		qeth_configure fdasd mkdosfs egrep mkfs.xfs mdadm yes fdisk
 		startproc zfcp_host_configure zfcp_disk_configure xfs_growfs
 		xfs_check vgrename kpartx_id mpath_id dmraid dmevent_tool
-		which mpath_wait seq route
+		which mpath_wait seq route haveged
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
