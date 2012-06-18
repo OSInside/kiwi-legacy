@@ -2492,9 +2492,7 @@ sub setupInstallFlags {
 #------------------------------------------
 sub setupSplash {
 	# ...
-	# we can either use bootsplash or splashy to display
-	# a splash screen. If /usr/sbin/splashy exists we will
-	# prefer splashy over bootsplash
+	# setup kernel based bootsplash
 	# ---
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};

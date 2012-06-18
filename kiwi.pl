@@ -608,7 +608,7 @@ sub init {
 	my $BootUSB;               # Boot initrd booting from Stick
 	my $TestImage;             # call end-to-end testsuite if installed
 	my $InstallStick;          # Installation initrd booting from USB stick
-	my $SetupSplash;           # setup splash screen (bootsplash or splashy)
+	my $SetupSplash;           # setup kernel splash screen
 	my $Migrate;               # migrate running system to image description
 	my $Convert;               # convert image into given format/configuration
 	my $MBRID;                 # custom mbrid value
