@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Mon Jun 18 16:54:32 CEST 2012 - ms@suse.de
+
+- netboot: added more sophisticated partition table check. The
+  partition table is analyzed to check if it's possible to
+  run the update check and also to verify partition order, types
+  and sizes with some tolerance (so for example the change to 4k
+  sectors would not cause repartitioning). Additionally in a
+  RAID setup the checks would check both disks.
+
+-------------------------------------------------------------------
 Mon Jun 18 13:52:35 CEST 2012 - ms@suse.de
 
 - preserve haveged, related to (bnc #766720) 
