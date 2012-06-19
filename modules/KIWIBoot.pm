@@ -2530,16 +2530,16 @@ sub setupSplash {
 	# setup splash in initrd
 	#------------------------------------------
 	if ($isxen) {
-		$status = "skip splash initrd attachment on xen domU";
+		$status = "--> skip splash initrd attachment on xen domU";
 		qxx ("rm -f $splfile");
 	} elsif (-f $splfile) {
 		qxx ("cat $initrd $splfile > $newird");
 		$status = "ok";
 	} elsif (-f $plymouth) {
-		$status = "plymouth splash system in use";
+		$status = "--> plymouth splash system in use";
 		qxx ("rm -f $plymouth");
 	} else {
-		$status = "Can't find splash file: $splfile";
+		$status = "--> Can't find splash file: $splfile";
 	}
 	#==========================================
 	# check status
