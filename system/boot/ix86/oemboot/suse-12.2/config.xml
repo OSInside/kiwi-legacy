@@ -128,6 +128,7 @@
 		<package name="genisoimage"/>
 		<package name="gettext-runtime"/>
 		<package name="grub"/>
+		<package name="grub2"/>
 		<package name="hwinfo"/>
 		<package name="iputils"/>
 		<package name="kernel-firmware"/>

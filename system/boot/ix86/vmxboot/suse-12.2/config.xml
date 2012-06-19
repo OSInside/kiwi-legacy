@@ -105,6 +105,7 @@
 		<package name="fribidi"/>
 		<package name="gettext-runtime"/>
 		<package name="grub"/>
+		<package name="grub2"/>
 		<package name="hwinfo"/>
 		<package name="kernel-firmware"/>
 		<package name="kexec-tools"/>
