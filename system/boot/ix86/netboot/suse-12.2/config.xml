@@ -174,14 +174,7 @@
 		<package name="clicfs"/>
 		<package name="cryptsetup"/>
 		<package name="curl"/>
-		<package name="cyrus-sasl"/>
-		<package name="dhcpcd"/>
-		<package name="diffutils"/>
 		<package name="dmraid"/>
-		<package name="e2fsprogs"/>
-		<package name="file"/>
-		<package name="fribidi"/>
-		<package name="gawk"/>
 		<package name="hwinfo"/>
 		<package name="iputils"/>
 		<package name="kernel-firmware"/>
@@ -189,19 +182,14 @@
 		<package name="lvm2"/>
 		<package name="make"/>
 		<package name="mdadm"/>
-		<package name="module-init-tools"/>
 		<package name="nbd"/>
-		<package name="net-tools"/>
 		<package name="netcfg"/>
 		<package name="nfs-client"/>
 		<package name="parted"/>
-		<package name="procps"/>
-		<package name="psmisc"/>
 		<package name="plymouth"/>
 		<package name="plymouth-scripts"/>
 		<package name="reiserfs"/>
 		<package name="tar"/>
-		<package name="util-linux"/>
 		<package name="xfsprogs"/>
 	</packages>
 	<packages type="image" profiles="diskless">
@@ -209,25 +197,15 @@
 		<package name="bc"/>
 		<package name="busybox"/>
 		<package name="clicfs"/>
-		<package name="cyrus-sasl"/>
-		<package name="dhcpcd"/>
-		<package name="diffutils"/>
-		<package name="file"/>
-		<package name="fribidi"/>
-		<package name="gawk"/>
 		<package name="hwinfo"/>
 		<package name="iputils"/>
 		<package name="kiwi-tools"/>
-		<package name="module-init-tools"/>
 		<package name="nbd"/>
-		<package name="net-tools"/>
 		<package name="netcfg"/>
 		<package name="nfs-client"/>
-		<package name="procps"/>
 		<package name="plymouth"/>
 		<package name="plymouth-scripts"/>
 		<package name="tar"/>
-		<package name="util-linux"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="dialog"/>

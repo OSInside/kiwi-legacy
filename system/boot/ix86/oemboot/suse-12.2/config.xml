@@ -117,7 +117,6 @@
 		<package name="clicfs"/>
 		<package name="cryptsetup"/>
 		<package name="curl"/>
-		<package name="dhcpcd"/>
 		<package name="dialog"/>
 		<package name="dmraid"/>
 		<package name="dosfstools"/>
@@ -129,7 +128,6 @@
 		<package name="genisoimage"/>
 		<package name="gettext-runtime"/>
 		<package name="grub"/>
-		<package name="gawk"/>
 		<package name="hwinfo"/>
 		<package name="iputils"/>
 		<package name="kernel-firmware"/>
@@ -145,7 +143,6 @@
 		<package name="pciutils"/>
 		<package name="plymouth"/>
 		<package name="plymouth-scripts"/>
-		<package name="psmisc"/>
 		<package name="squashfs"/>
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>

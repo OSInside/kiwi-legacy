@@ -98,7 +98,6 @@
 		<package name="btrfsprogs"/>
 		<package name="clicfs"/>
 		<package name="cryptsetup"/>
-		<package name="dhcpcd"/>
 		<package name="dialog"/>
 		<package name="e2fsprogs"/>
 		<package name="fbiterm"/>
@@ -106,7 +105,6 @@
 		<package name="fribidi"/>
 		<package name="gettext-runtime"/>
 		<package name="grub"/>
-		<package name="gawk"/>
 		<package name="hwinfo"/>
 		<package name="kernel-firmware"/>
 		<package name="kexec-tools"/>
@@ -118,7 +116,6 @@
 		<package name="netcfg"/>
 		<package name="parted"/>
 		<package name="pciutils"/>
-		<package name="psmisc"/>
 		<package name="plymouth"/>
 		<package name="plymouth-scripts"/>
 		<package name="squashfs"/>
