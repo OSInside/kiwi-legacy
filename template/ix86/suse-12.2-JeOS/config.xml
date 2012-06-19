@@ -79,6 +79,7 @@
 		<package name="cracklib-dict-full"/>
 		<package name="ca-certificates"/>
 		<package name="timezone"/>
+		<package name="glibc-locale"/>
 	</packages>
 	<packages type="bootstrap" profiles="xenFlavour">
 		<package name="kernel-xen" replaces="kernel-default"/>
