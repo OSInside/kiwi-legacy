@@ -86,26 +86,26 @@
 	<repository type="yast2" status="replaceable">
 		<source path="obs://12.2/repo/oss"/>
 	</repository>
-	<packages type="image" profiles="std">
+	<packages type="bootstrap" profiles="std">
 		<package name="kernel-default"/>
 	</packages>
-	<packages type="image" profiles="pae">
+	<packages type="bootstrap" profiles="pae">
 		<package name="kernel-pae" arch="i686"/>
 	</packages>
-	<packages type="image" profiles="xenk">
+	<packages type="bootstrap" profiles="xenk">
 		<package name="kernel-xen"/>
 <!-- xen dom0 support only on x86_64 -->
 		<package name="xen" arch="x86_64"/>
 	</packages>
-	<packages type="image" profiles="ec2">
+	<packages type="bootstrap" profiles="ec2">
 		<package name="kernel-ec2"/>
 <!-- xen dom0 support only on x86_64 -->
 		<package name="xen" arch="x86_64"/>
 	</packages>
-	<packages type="image" profiles="desktop">
+	<packages type="bootstrap" profiles="desktop">
 		<package name="kernel-desktop"/>
 	</packages>
-	<packages type="image">
+	<packages type="bootstrap">
 		<package name="adaptec-firmware"/>
 		<package name="atftp"/>
 		<package name="bc"/>
@@ -150,8 +150,6 @@
 		<package name="tar"/>
 		<package name="util-linux"/>
 		<package name="xfsprogs"/>
-	</packages>
-	<packages type="bootstrap">
 		<package name="diffutils"/>
 		<package name="filesystem"/>
 		<package name="glibc"/>

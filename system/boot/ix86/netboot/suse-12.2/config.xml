@@ -147,23 +147,23 @@
 	<repository type="yast2" status="replaceable">
 		<source path="obs://12.2/repo/oss"/>
 	</repository>
-	<packages type="image" profiles="std">
+	<packages type="bootstrap" profiles="std">
 		<package name="kernel-default"/>
 	</packages>
-	<packages type="image" profiles="pae">
+	<packages type="bootstrap" profiles="pae">
 		<package name="kernel-pae" arch="i686"/>
 	</packages>
-	<packages type="image" profiles="xenk">
+	<packages type="bootstrap" profiles="xenk">
 		<package name="kernel-xen"/>
 	</packages>
-	<packages type="image" profiles="desktop">
+	<packages type="bootstrap" profiles="desktop">
 		<package name="kernel-desktop"/>
 	</packages>
-	<packages type="image" profiles="xen">
+	<packages type="bootstrap" profiles="xen">
 <!-- xen dom0 support only on x86_64 -->
 		<package name="xen" arch="x86_64"/>
 	</packages>
-	<packages type="image" profiles="default,xen">
+	<packages type="bootstrap" profiles="default,xen">
 		<package name="adaptec-firmware"/>
 		<package name="atftp"/>
 		<package name="bc"/>
@@ -192,7 +192,7 @@
 		<package name="tar"/>
 		<package name="xfsprogs"/>
 	</packages>
-	<packages type="image" profiles="diskless">
+	<packages type="bootstrap" profiles="diskless">
 		<package name="atftp"/>
 		<package name="bc"/>
 		<package name="busybox"/>
@@ -206,8 +206,6 @@
 		<package name="plymouth"/>
 		<package name="plymouth-scripts"/>
 		<package name="tar"/>
-	</packages>
-	<packages type="bootstrap">
 		<package name="dialog"/>
 		<package name="fbiterm"/>
 		<package name="filesystem"/>
