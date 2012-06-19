@@ -111,7 +111,6 @@
 		<package name="bc"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
-		<package name="bootsplash"/>
 		<package name="btrfsprogs"/>
 		<package name="busybox"/>
 		<package name="bzip2"/>
@@ -130,6 +129,7 @@
 		<package name="genisoimage"/>
 		<package name="gettext-runtime"/>
 		<package name="grub"/>
+		<package name="gawk"/>
 		<package name="hwinfo"/>
 		<package name="iputils"/>
 		<package name="kernel-firmware"/>
@@ -143,6 +143,8 @@
 		<package name="netcfg"/>
 		<package name="parted"/>
 		<package name="pciutils"/>
+		<package name="plymouth"/>
+		<package name="plymouth-scripts"/>
 		<package name="psmisc"/>
 		<package name="squashfs"/>
 		<package name="sysconfig"/>
@@ -161,6 +163,7 @@
 		<package name="timezone"/>
 	</packages>
 	<packages type="delete">
+		<package name="bootsplash"/>
 		<package name="cracklib-dict-full"/>
 		<package name="fillup"/>
 		<package name="gdbm"/>

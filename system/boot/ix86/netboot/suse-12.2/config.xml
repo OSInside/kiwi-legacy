@@ -169,7 +169,6 @@
 		<package name="bc"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
-		<package name="bootsplash"/>
 		<package name="btrfsprogs"/>
 		<package name="busybox"/>
 		<package name="clicfs"/>
@@ -182,6 +181,7 @@
 		<package name="e2fsprogs"/>
 		<package name="file"/>
 		<package name="fribidi"/>
+		<package name="gawk"/>
 		<package name="hwinfo"/>
 		<package name="iputils"/>
 		<package name="kernel-firmware"/>
@@ -197,6 +197,8 @@
 		<package name="parted"/>
 		<package name="procps"/>
 		<package name="psmisc"/>
+		<package name="plymouth"/>
+		<package name="plymouth-scripts"/>
 		<package name="reiserfs"/>
 		<package name="tar"/>
 		<package name="util-linux"/>
@@ -205,7 +207,6 @@
 	<packages type="image" profiles="diskless">
 		<package name="atftp"/>
 		<package name="bc"/>
-		<package name="bootsplash"/>
 		<package name="busybox"/>
 		<package name="clicfs"/>
 		<package name="cyrus-sasl"/>
@@ -213,6 +214,7 @@
 		<package name="diffutils"/>
 		<package name="file"/>
 		<package name="fribidi"/>
+		<package name="gawk"/>
 		<package name="hwinfo"/>
 		<package name="iputils"/>
 		<package name="kiwi-tools"/>
@@ -222,6 +224,8 @@
 		<package name="netcfg"/>
 		<package name="nfs-client"/>
 		<package name="procps"/>
+		<package name="plymouth"/>
+		<package name="plymouth-scripts"/>
 		<package name="tar"/>
 		<package name="util-linux"/>
 	</packages>
@@ -235,6 +239,7 @@
 		<package name="timezone"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,xen">
+		<package name="bootsplash"/>
 		<package name="cracklib-dict-full"/>
 		<package name="diffutils"/>
 		<package name="fillup"/>

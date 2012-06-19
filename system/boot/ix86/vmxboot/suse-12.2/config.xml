@@ -95,7 +95,6 @@
 	<packages type="image">
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
-		<package name="bootsplash"/>
 		<package name="btrfsprogs"/>
 		<package name="clicfs"/>
 		<package name="cryptsetup"/>
@@ -107,6 +106,7 @@
 		<package name="fribidi"/>
 		<package name="gettext-runtime"/>
 		<package name="grub"/>
+		<package name="gawk"/>
 		<package name="hwinfo"/>
 		<package name="kernel-firmware"/>
 		<package name="kexec-tools"/>
@@ -119,6 +119,8 @@
 		<package name="parted"/>
 		<package name="pciutils"/>
 		<package name="psmisc"/>
+		<package name="plymouth"/>
+		<package name="plymouth-scripts"/>
 		<package name="squashfs"/>
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
@@ -136,10 +138,10 @@
 		<package name="timezone"/>
 	</packages>
 	<packages type="delete">
+		<package name="bootsplash"/>
 		<package name="cracklib-dict-full"/>
 		<package name="cyrus-sasl"/>
 		<package name="fillup"/>
-		<package name="gawk"/>
 		<package name="gdbm"/>
 		<package name="info"/>
 		<package name="insserv"/>

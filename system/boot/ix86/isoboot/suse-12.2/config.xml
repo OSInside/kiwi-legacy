@@ -89,7 +89,6 @@
 		<package name="adaptec-firmware"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
-		<package name="bootsplash"/>
 		<package name="checkmedia"/>
 		<package name="clicfs"/>
 		<package name="cryptsetup"/>
@@ -115,6 +114,8 @@
 		<package name="netcfg"/>
 		<package name="parted"/>
 		<package name="psmisc"/>
+		<package name="plymouth"/>
+		<package name="plymouth-scripts"/>
 		<package name="rpm"/>
 		<package name="squashfs"/>
 		<package name="sysconfig"/>
@@ -133,7 +134,6 @@
 		<package name="diffutils"/>
 		<package name="fillup"/>
 		<package name="fribidi"/>
-		<package name="gawk"/>
 		<package name="gdbm"/>
 		<package name="gfxboot"/>
 		<package name="glibc-locale"/>
