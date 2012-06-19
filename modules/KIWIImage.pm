@@ -3683,19 +3683,26 @@ sub extractSplash {
 	my $imageDest = $this->{imageDest};
 	my $zipper    = $this->{gdata}->{Gzip};
 	my $newspl    = $imageDest."/splash";
-	#==========================================
-	# check if boot image
-	#------------------------------------------
 	if (! defined $name) {
 		return $this;
 	}
+	#==========================================
+	# check if boot image
+	#------------------------------------------
 	if (! $this->isBootImage ($name)) {
+		return $this;
+	}
+	#==========================================
+	# check if plymouth is used and add flag
+	#------------------------------------------
+	if (-f "$imageTree/plymouth.splash.active") {
+		qxx ("touch $imageDest/plymouth.splash.active 2>&1");
 		return $this;
 	}
 	#==========================================
 	# move out all splash files
 	#------------------------------------------
-	$kiwi -> info ("Extracting splash files...");
+	$kiwi -> info ("Extracting kernel splash files...");
 	mkdir $newspl;
 	my $status = qxx ("mv $imageTree/image/loader/*.spl $newspl 2>&1");
 	my $result = $? >> 8;

@@ -93,6 +93,7 @@
 		<file name="ifconfig"/>
 		<file name="init"/>
 		<file name="insmod"/>
+		<file name="id"/>
 		<file name="kexec"/>
 		<file name="kill"/>
 		<file name="killall"/>
@@ -155,6 +156,9 @@
 		<file name="pvresize"/>
 		<file name="pvscan"/>
 		<file name="pwd"/>
+		<file name="plymouth"/>
+		<file name="plymouthd"/>
+		<file name="plymouth-set-default-theme"/>
 		<file name="qeth_configure"/>
 		<file name="readlink"/>
 		<file name="reboot"/>
@@ -182,7 +186,6 @@
 		<file name="sm-notify"/>
 		<file name="sort"/>
 		<file name="splash"/>
-		<file name="splashy"/>
 		<file name="startproc"/>
 		<file name="start-statd"/>
 		<file name="stat"/>
@@ -250,6 +253,12 @@
 		<file name="libselinux"/>
 		<file name="libsepol"/>
 		<file name="libdevmapper"/>
+		<file name="libply-boot-client"/>
+		<file name="libply-splash-graphics"/>
+		<file name="libsplashy"/>
+		<file name="libsplashycnf"/>
+		<file name="libjpeg"/>
+		<file name="libkms"/>
 	</strip>
 
 </initrd>

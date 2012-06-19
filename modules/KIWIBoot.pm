@@ -2497,6 +2497,7 @@ sub setupSplash {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $initrd = $this->{initrd};
+	my $destdir= dirname ($initrd);
 	my $isxen  = $this->{isxen};
 	my $zipped = 0;
 	my $status;
@@ -2516,6 +2517,7 @@ sub setupSplash {
 		$newird = $initrd.".splash.gz";
 		$splfile= $initrd.".spl";
 	}
+	my $plymouth = $destdir."/plymouth.splash.active";
 	#==========================================
 	# check if splash initrd is already there
 	#------------------------------------------
@@ -2523,7 +2525,7 @@ sub setupSplash {
 		# splash initrd already created...
 		return $newird;
 	}
-	$kiwi -> info ("Setting up splash screen...");
+	$kiwi -> info ("Setting up kernel splash screen...");
 	#==========================================
 	# setup splash in initrd
 	#------------------------------------------
@@ -2533,6 +2535,9 @@ sub setupSplash {
 	} elsif (-f $splfile) {
 		qxx ("cat $initrd $splfile > $newird");
 		$status = "ok";
+	} elsif (-f $plymouth) {
+		$status = "plymouth splash system in use";
+		qxx ("rm -f $plymouth");
 	} else {
 		$status = "Can't find splash file: $splfile";
 	}
@@ -2542,7 +2547,7 @@ sub setupSplash {
 	if ($status ne "ok") {
 		$kiwi -> skipped ();
 		$kiwi -> warning ($status);
-		$kiwi -> skipped ();
+		$kiwi -> done ();
 		$kiwi -> info ("Creating compat splash link...");
 		$status = $this -> setupSplashLink ($newird);
 		if ($status ne "ok") {

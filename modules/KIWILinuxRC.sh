@@ -606,8 +606,8 @@ function udevStart {
 	udevTrigger
 	# wait for events to finish
 	udevPending
-	# start splashy if configured
-	startSplashy
+	# start plymouth if it exists
+	startPlymouth
 }
 #======================================
 # moduleLoadBeforeUdev
@@ -646,11 +646,15 @@ function udevKill {
 	fi
 }
 #======================================
-# startSplashy
+# startPlymouth
 #--------------------------------------
-function startSplashy {
-	if [ -x /usr/sbin/splashy ];then
-		splashy boot
+function startPlymouth {
+	if which plymouthd &>/dev/null;then
+		mkdir --mode 755 /run/plymouth
+		plymouth-set-default-theme $kiwi_boottheme
+		plymouthd \
+			--attach-to-session --pid-file /run/plymouth/pid
+		plymouth show-splash
 	fi
 }
 #======================================
@@ -5950,6 +5954,12 @@ function bootImage {
 	chroot /mnt /bin/bash -c \
 		". /include ; exec 2>>$ELOG_FILE ; set -x 1>&2 ; cleanImage"
 	cd /mnt
+	#======================================
+	# tell plymouth the new root fs
+	#--------------------------------------
+	if which plymouthd &>/dev/null;then
+		plymouth update-root-fs --new-root-dir=/mnt
+	fi
 	#======================================
 	# hand over control to init
 	#--------------------------------------

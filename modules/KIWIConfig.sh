@@ -1160,7 +1160,7 @@ function suseGFXBoot {
 		mkdir /image/loader
 	fi
 	#======================================
-	# copy bootloader binaries of required
+	# copy bootloader binaries if required
 	#--------------------------------------
 	if [ "$loader" = "isolinux" ];then
 		# isolinux boot code...
@@ -1199,6 +1199,11 @@ function suseGFXBoot {
 	#======================================
 	# create splash screen
 	#--------------------------------------
+	if [ -d /usr/share/plymouth/themes/$theme ];then
+		echo "plymouth splash system is used"
+		touch "/plymouth.splash.active"
+		return
+	fi
 	if [ ! -f /sbin/splash ];then
 		echo "bootsplash not installed... skipped"
 		return
