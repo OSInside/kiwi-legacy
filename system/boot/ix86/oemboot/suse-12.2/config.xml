@@ -159,7 +159,6 @@
 		<package name="timezone"/>
 	</packages>
 	<packages type="delete">
-		<package name="bootsplash"/>
 		<package name="cracklib-dict-full"/>
 		<package name="fillup"/>
 		<package name="gdbm"/>

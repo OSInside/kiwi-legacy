@@ -127,7 +127,6 @@
 	<packages type="delete">
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
-		<package name="bootsplash"/>
 		<package name="cracklib-dict-full"/>
 		<package name="cyrus-sasl"/>
 		<package name="dhcpcd"/>

@@ -215,7 +215,6 @@
 		<package name="timezone"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,xen">
-		<package name="bootsplash"/>
 		<package name="cracklib-dict-full"/>
 		<package name="diffutils"/>
 		<package name="fillup"/>
