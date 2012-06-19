@@ -620,7 +620,7 @@ function recreateVTOCTable {
 		#======================================
 		# wait until volume group has settled
 		#--------------------------------------
-		sleep 2
+		udevPending
 		#======================================
 		# close open device mappings
 		#--------------------------------------
@@ -631,8 +631,6 @@ function recreateVTOCTable {
 	fi
 	createPartitionerInput u y w
 	callPartitioner $input
-	blockdev --rereadpt $imageDiskDevice
-	sleep 2
 	rm -f $input
 }
 

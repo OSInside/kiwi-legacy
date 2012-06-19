@@ -6641,6 +6641,8 @@ function callPartitioner {
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
 		fi
+		udevPending
+		blockdev --rereadpt $imageDiskDevice
 	else
 		# /.../
 		# nothing to do for parted here as we write
