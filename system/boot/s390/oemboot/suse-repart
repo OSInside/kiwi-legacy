@@ -650,6 +650,10 @@ function recreateVTOCTable {
 	Echo "Recreate VTOC table [ $imageDiskDevice ]"
 	if [ ! -z "$haveLVM" ];then
 		#======================================
+		# wait until volume group has settled
+		#--------------------------------------
+		udevPending
+		#======================================
 		# close open device mappings
 		#--------------------------------------
 		if [ "$haveLuks" = "yes" ];then
@@ -659,8 +663,6 @@ function recreateVTOCTable {
 	fi
 	createPartitionerInput u y w
 	callPartitioner $input
-	blockdev --rereadpt $imageDiskDevice
-	sleep 2
 	rm -f $input
 }
 
