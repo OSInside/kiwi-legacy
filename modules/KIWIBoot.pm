@@ -2823,7 +2823,7 @@ sub setupBootLoaderStages {
 		my $core    = "$tmpdir/boot/grub2/core.img";
 		my $modules = "biosdisk part_msdos part_gpt ext2 iso9660 chain";
 		$status = qxx (
-			"grub2-mkimage -v -o $core -c $bootfile $modules 2>&1"
+			"grub2-mkimage -O i386-pc -v -o $core -c $bootfile $modules 2>&1"
 		);
 		$result = $? >> 8;
 		if ($result != 0) {
