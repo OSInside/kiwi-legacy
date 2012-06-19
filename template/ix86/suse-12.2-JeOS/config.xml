@@ -60,7 +60,9 @@
 	<repository type="yast2">
 		<source path="obs://12.2/repo/oss"/>
 	</repository>
-	<packages type="image">
+	<packages type="bootstrap">
+		<opensusePattern name="base"/>
+		<opensuseProduct name="openSUSE"/>
 		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
@@ -71,24 +73,21 @@
 		<package name="syslinux"/>
 		<package name="lvm2"/>
 		<package name="plymouth"/>
-		<opensusePattern name="base"/>
-		<opensuseProduct name="openSUSE"/>
+		<package name="fontconfig"/>
+		<package name="fonts-config"/>
+		<package name="zypper"/>
+		<package name="cracklib-dict-full"/>
+		<package name="ca-certificates"/>
+		<package name="timezone"/>
 	</packages>
-	<packages type="image" profiles="xenFlavour">
+	<packages type="bootstrap" profiles="xenFlavour">
 		<package name="kernel-xen" replaces="kernel-default"/>
 		<package name="xen-tools" arch="x86_64" replaces=""/>
 		<package name="xen" arch="x86_64" replaces=""/>
 	</packages>
-	<packages type="image" profiles="vmxFlavour">
+	<packages type="bootstrap" profiles="vmxFlavour">
 		<package name="kernel-default" replaces="kernel-xen"/>
 		<package name="kernel-default" replaces="xen-tools"/>
 		<package name="kernel-default" replaces="xen"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-		<package name="cracklib-dict-full"/>
-		<package name="ca-certificates"/>
-		<package name="timezone"/>
 	</packages>
 </image>
