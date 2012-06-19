@@ -69,6 +69,7 @@
 		<package name="grub"/>
 		<package name="syslinux"/>
 		<package name="lvm2"/>
+		<package name="plymouth"/>
 		<opensusePattern name="base"/>
 		<opensuseProduct name="openSUSE"/>
 	</packages>
