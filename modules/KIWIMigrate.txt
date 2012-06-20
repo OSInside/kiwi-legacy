@@ -3,8 +3,11 @@
 # ----
 SUSE-Linux-Enterprise-Server-10-SP1=suse-SLES10
 SUSE-Linux-Enterprise-Server-10-SP2=suse-SLES10
+SUSE-Linux-Enterprise-Server-10-SP3=suse-SLES10
+SUSE-Linux-Enterprise-Server-10-SP4=suse-SLES10
 SUSE-Linux-Enterprise-Server-10=suse-SLES10
 SUSE-Linux-Enterprise-Server-11-SP1=suse-SLES11
+SUSE-Linux-Enterprise-Server-11-SP2=suse-SLES11
 SUSE-Linux-Enterprise-Server-11=suse-SLES11
 openSUSE-10.3=suse-10.3
 openSUSE-11.0=suse-11.0
@@ -13,3 +16,4 @@ openSUSE-11.2=suse-11.2
 openSUSE-11.3=suse-11.3
 openSUSE-11.4=suse-11.4
 openSUSE-12.1=suse-12.1
+openSUSE-12.2=suse-12.2
