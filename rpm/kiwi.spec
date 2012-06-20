@@ -251,7 +251,11 @@ Requires:       parted
 %endif
 
 %ifarch %ix86 x86_64
+%if 0%{?suse_version} >= 1220
+Requires:       grub2
+%else
 Requires:       grub
+%endif
 %endif
 %ifarch ppc ppc64 s390 s390x
 Requires:       virt-utils
