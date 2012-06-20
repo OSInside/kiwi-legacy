@@ -35,7 +35,7 @@ use KIWIXML;
 # Exports
 #------------------------------------------
 our @ISA    = qw (Exporter);
-our @EXPORT = qw ();
+our @EXPORT_OK = qw ();
 
 #==========================================
 # Constructor
@@ -279,7 +279,7 @@ sub __getTree {
 	#==========================================
 	# Initialize XML imagescan element
 	#------------------------------------------
-	my $scan = new XML::LibXML::Element ("imagescan");
+	my $scan = XML::LibXML::Element -> new("imagescan");
 	$scan -> setAttribute ("description",$this->{configDir});
 	#==========================================
 	# Walk through selection list
@@ -316,7 +316,7 @@ sub __getTree {
 						$kiwi -> info ("No overlay files found\n");
 					} else {
 						foreach my $file (sort keys %result) {
-							my $overlay = new XML::LibXML::Element ("overlay");
+							my $overlay = XML::LibXML::Element -> new("overlay");
 							$overlay -> setAttribute ("file","$file");
 							$scan -> appendChild ($overlay);
 						}
@@ -344,7 +344,7 @@ sub __getTree {
 						next if ($p eq "\n");
 						$p =~ s/^\s+//;
 						$p =~ s/\s+$//;
-						my $pattern = new XML::LibXML::Element ("repopattern");
+						my $pattern = XML::LibXML::Element -> new("repopattern");
 						$pattern -> setAttribute ("name","$p");
 						$scan -> appendChild ($pattern);
 					}
@@ -370,7 +370,7 @@ sub __getTree {
 					foreach my $p (sort keys %{$meta}) {
 						if ($p =~ /pattern:(.*)/) {
 							my $name = $1;
-							my $pattern = new XML::LibXML::Element ("pattern");
+							my $pattern = XML::LibXML::Element -> new("pattern");
 							$pattern -> setAttribute ("name","$name");
 							$scan -> appendChild ($pattern);
 						}
@@ -384,7 +384,7 @@ sub __getTree {
 			/^types/         && do {
 				foreach my $t ($xml -> getTypes()) {
 					my %type = %{$t};
-					my $type = new XML::LibXML::Element ("type");
+					my $type = XML::LibXML::Element -> new("type");
 					$type -> setAttribute ("name","$type{type}");
 					$type -> setAttribute ("primary","$type{primary}");
 					if (defined $type{boot}) {
@@ -400,7 +400,7 @@ sub __getTree {
 			/^sources/       && do {
 				my %repos = $xml -> getRepositories();
 				for my $url (keys %repos) {
-					my $source = new XML::LibXML::Element ("source");
+					my $source = XML::LibXML::Element -> new("source");
 					$source -> setAttribute ("path","$url");
 					$source -> setAttribute ("type",$repos{$url}->[0]);
 					if ($repos{$url}->[2]) {
@@ -435,7 +435,7 @@ sub __getTree {
 					my @metalist = split (/:/,$meta{$p});
 					$size += $metalist[0];
 				}
-				my $sizenode = new XML::LibXML::Element ("size");
+				my $sizenode = XML::LibXML::Element -> new("size");
 				if ($size > 0) {
 					$sizenode -> setAttribute ("rootsizeKB","$size");
 				}
@@ -476,7 +476,7 @@ sub __getTree {
 						}
 						my @m = split (/:/,$meta->{$p});
 						my $repo = $m[4]; $repo =~ s/ /:/g;
-						my $pacnode = new XML::LibXML::Element ("package");
+						my $pacnode = XML::LibXML::Element -> new("package");
 						$pacnode -> setAttribute ("name","$p");
 						$pacnode -> setAttribute ("arch","$m[1]");
 						$pacnode -> setAttribute ("version","$m[2]");
@@ -493,7 +493,7 @@ sub __getTree {
 					$kiwi -> info ("No archives available\n");
 				} else {
 					foreach my $archive (@archives) {
-						my $anode = new XML::LibXML::Element ("archive");
+						my $anode = XML::LibXML::Element -> new("archive");
 						$anode -> setAttribute ("name","$archive");
 						$scan -> appendChild ($anode);
 					}
@@ -511,7 +511,7 @@ sub __getTree {
 					foreach my $profile (@profiles) {
 						my $name = $profile -> {name};
 						my $desc = $profile -> {description};
-						my $pnode = new XML::LibXML::Element ("profile");
+						my $pnode = XML::LibXML::Element -> new("profile");
 						$pnode -> setAttribute ("name","$name");
 						$pnode -> setAttribute ("description","$desc");
 						$scan -> appendChild ($pnode);
@@ -525,7 +525,7 @@ sub __getTree {
 			/^version/       && do {
 				my $version = $xml -> getImageVersion();
 				my $appname = $xml -> getImageName();
-				my $vnode = new XML::LibXML::Element ("image");
+				my $vnode = XML::LibXML::Element -> new("image");
 				$vnode -> setAttribute ("version","$version");
 				$vnode -> setAttribute ("name","$appname");
 				$scan -> appendChild ($vnode);
@@ -594,12 +594,12 @@ sub __xmlSetup {
 	#------------------------------------------
 	my $buildProfs = $this -> {buildProfiles};
 	my $configDir  = $this -> {configDir};
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new($kiwi);
 	my $controlFile = $locator -> getControlFile ($configDir);
 	if (! $controlFile) {
 		return;
 	}
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new(
 		$kiwi,$controlFile,
 		$this->{gdata}->{Revision},
 		$this->{gdata}->{Schema},
@@ -609,7 +609,7 @@ sub __xmlSetup {
 	if (! $isValid) {
 		return;
 	}
-	my $xml = new KIWIXML (
+	my $xml = KIWIXML -> new(
 		$kiwi, $configDir, $cmdL->getBuildType(), $buildProfs, $cmdL
 	);
 	if (! defined $xml) {

@@ -35,7 +35,7 @@ use KIWIXMLInfo;
 # Exports
 #------------------------------------------
 our @ISA    = qw (Exporter);
-our @EXPORT = qw ();
+our @EXPORT_OK = qw ();
 
 #==========================================
 # Constructor
@@ -181,7 +181,7 @@ sub initializeCache {
 	#------------------------------------------
 	if (! $createCache) {
 		$cmdL -> setConfigDir ($conf);
-		my $info = new KIWIXMLInfo ($kiwi,$cmdL,$xml);
+		my $info = KIWIXMLInfo -> new($kiwi,$cmdL,$xml);
 		my @infoReq = ('packages', 'sources');
 		$CacheScan = $info -> getXMLInfoTree(\@infoReq);
 		if (! $CacheScan) {
@@ -235,7 +235,7 @@ sub createCache {
 	$cmdL -> setOperationMode ("prepare", $cmdL->getConfigDir());
 	$cmdL -> setBuildType ("ext2");
 	$cmdL -> setForceNewRoot (1);
-	my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+	my $kic = KIWIImageCreator -> new($kiwi, $cmdL);
 	if (! $kic) {
 		return;
 	}
@@ -265,7 +265,7 @@ sub createCache {
 	# the 'active' flag and therefore prevent kernel
 	# extraction from image cache
 	# ----
-	my $image = new KIWIImage (
+	my $image = KIWIImage -> new(
 		$kiwi,$xml,$root,$imageCacheDir,
 		undef,"/base-system",undef,"active",$cmdL
 	);
@@ -346,8 +346,10 @@ sub selectCache {
 		#==========================================
 		# read cache file
 		#------------------------------------------
-		my @cpac = <$CACHE_FD>; chomp @cpac;
-		my $ccnt = @cpac; close $CACHE_FD;
+		my @cpac = <$CACHE_FD>;
+		close $CACHE_FD;
+		chomp @cpac;
+		my $ccnt = @cpac;
 		$kiwi -> loginfo (
 			"Cache: $meta $ccnt packages, Image: $pcnt packages\n"
 		);
@@ -416,6 +418,7 @@ sub DESTROY {
 	if ($kic) {
 		undef $kic;
 	}
+	return;
 }
 
 1;

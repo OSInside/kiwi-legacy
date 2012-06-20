@@ -18,6 +18,7 @@ package KIWIGlobals;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 use KIWILocator;
 use KIWILog;
 use KIWIQX qw (qxx);
@@ -127,7 +128,7 @@ sub new {
 	# Globals (Supported filesystem names)
 	#------------------------------------------
 	my %KnownFS;
-	my $locator = new KIWILocator();
+	my $locator = KIWILocator -> new();
 	$KnownFS{ext4}{tool}      = $locator -> getExecPath("mkfs.ext4");
 	$KnownFS{ext3}{tool}      = $locator -> getExecPath("mkfs.ext3");
 	$KnownFS{ext2}{tool}      = $locator -> getExecPath("mkfs.ext2");
@@ -511,6 +512,7 @@ sub umount {
 		}
 	}
 	$this->{UmountStack} = [];
+	return;
 }
 
 #==========================================
@@ -797,7 +799,7 @@ sub callContained {
 		$kiwi -> failed ();
 		return;
 	}
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new($kiwi);
 	my $lxcexec = $locator -> getExecPath('lxc-execute');
 	my $lxcbase = $root."/usr/lib/lxc/";
 	if (-d "/usr/lib64") {
