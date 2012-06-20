@@ -1535,10 +1535,13 @@ sub getTypes {
 	foreach my $node (@tnodes) {
 		my %record  = ();
 		$record{type} = $node -> getAttribute("image");
-		$record{boot} = $node -> getAttribute("boot");
-		my $bootpath = $urlhd -> normalizeBootPath ($record{boot});
-		if (defined $bootpath) {
-			$record{boot} = $bootpath;
+		my $bootSpec = $node -> getAttribute("boot");
+		if ($bootSpec) {
+			$record{boot} = $bootSpec;
+			my $bootpath = $urlhd -> normalizeBootPath ($bootSpec);
+			if (defined $bootpath) {
+				$record{boot} = $bootpath;
+			}
 		}
 		my $primary = $node -> getAttribute("primary");
 		if ((defined $primary) && ("$primary" eq "true")) {
