@@ -37,7 +37,7 @@ use KIWIXMLValidator;
 # Exports
 #------------------------------------------
 our @ISA    = qw (Exporter);
-our @EXPORT = qw ();
+our @EXPORT_OK = qw ();
 
 #==========================================
 # Constructor
@@ -158,7 +158,7 @@ sub prepareBootImage {
 		return;
 	}
 	$kiwi -> info ("--> Prepare boot image (initrd)...\n");
-	my $xml = new KIWIXML (
+	my $xml = KIWIXML -> new(
 		$kiwi,$configDir,undef,undef,$cmdL,$changeset
 	);
 	if (! defined $xml) {
@@ -194,12 +194,12 @@ sub upgradeImage {
 	# Setup the image XML description
 	#------------------------------------------
 	$configDir .= "/image";
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new($kiwi);
 	my $controlFile = $locator -> getControlFile ($configDir);
 	if (! $controlFile) {
 		return;
 	}
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new(
 		$kiwi,$controlFile,
 		$this->{gdata}->{Revision},
 		$this->{gdata}->{Schema},
@@ -211,13 +211,13 @@ sub upgradeImage {
 	}
 	$kiwi -> info ("Reading image description [Upgrade]...\n");
 	my $buildProfs = $this -> {buildProfiles};
-	my $xml = new KIWIXML (
+	my $xml = KIWIXML -> new(
 		$kiwi, $configDir, undef, $buildProfs,$cmdL
 	);
 	if (! defined $xml) {
 		return;
 	}
-	my $krc = new KIWIRuntimeChecker (
+	my $krc = KIWIRuntimeChecker -> new(
 		$kiwi, $this -> {cmdL}, $xml
 	);
 	#==========================================
@@ -257,12 +257,12 @@ sub prepareImage {
 	#==========================================
 	# Setup the image XML description
 	#------------------------------------------
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new($kiwi);
 	my $controlFile = $locator -> getControlFile ($configDir);;
 	if (! $controlFile) {
 		return;
 	}
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new(
 		$kiwi,$controlFile,
 		$this->{gdata}->{Revision},
 		$this->{gdata}->{Schema},
@@ -274,13 +274,13 @@ sub prepareImage {
 	}
 	$kiwi -> info ("Reading image description [Prepare]...\n");
 	my $buildProfs = $this -> {buildProfiles};
-	my $xml = new KIWIXML (
+	my $xml = KIWIXML -> new(
 		$kiwi, $configDir, undef, $buildProfs,$cmdL
 	);
 	if (! defined $xml) {
 		return;
 	}
-	my $krc = new KIWIRuntimeChecker (
+	my $krc = KIWIRuntimeChecker -> new(
 		$kiwi, $this -> {cmdL}, $xml
 	);
 	#==========================================
@@ -332,12 +332,12 @@ sub createBootImage {
 	#==========================================
 	# Setup the image XML description
 	#------------------------------------------
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new($kiwi);
 	my $controlFile = $locator -> getControlFile ($configDir);;
 	if (! $controlFile) {
 		return;
 	}
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new(
 		$kiwi,$controlFile,
 		$this->{gdata}->{Revision},
 		$this->{gdata}->{Schema},
@@ -351,7 +351,7 @@ sub createBootImage {
 		return;
 	}
 	$kiwi -> info ("--> Create boot image (initrd)...\n");
-	my $xml = new KIWIXML (
+	my $xml = KIWIXML -> new(
 		$kiwi,$configDir,"cpio",undef,$cmdL
 	);
 	if (! defined $xml) {
@@ -374,7 +374,7 @@ sub createBootImage {
 	#==========================================
 	# Create KIWIImage object
 	#------------------------------------------
-	my $image = new KIWIImage (
+	my $image = KIWIImage -> new(
 		$kiwi,$xml,$configDir,$destination,undef,
 		"/base-system",$configDir,undef,$cmdL
 	);
@@ -425,12 +425,12 @@ sub createImage {
 	#==========================================
 	# Setup the image XML description
 	#------------------------------------------
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new($kiwi);
 	my $controlFile = $locator -> getControlFile ($configDir);;
 	if (! $controlFile) {
 		return;
 	}
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new(
 		$kiwi,$controlFile,
 		$this->{gdata}->{Revision},
 		$this->{gdata}->{Schema},
@@ -441,7 +441,7 @@ sub createImage {
 		return;
 	}
 	$kiwi -> info ("Reading image description [Create]...\n");
-	my $xml = new KIWIXML (
+	my $xml = KIWIXML -> new(
 		$kiwi,$configDir,$this->{buildType},
 		$buildProfs,$cmdL
 	);
@@ -449,7 +449,7 @@ sub createImage {
 		return;
 	}
 	my %attr = %{$xml->getImageTypeAndAttributes()};
-	my $krc = new KIWIRuntimeChecker (
+	my $krc = KIWIRuntimeChecker -> new(
 		$kiwi,$cmdL,$xml
 	);
 	#==========================================
@@ -561,7 +561,7 @@ sub createImage {
 		}
 		$cmdL -> setAdditionalPackages (\@addonList);
 		$cmdL -> setPackagesToRemove (\@deleteList);
-		my $kic  = new KIWIImageCreator ($kiwi, $cmdL);
+		my $kic  = KIWIImageCreator -> new($kiwi, $cmdL);
 		if (! $kic) {
 			return;
 		}
@@ -574,7 +574,7 @@ sub createImage {
 	#==========================================
 	# Create KIWIImage object
 	#------------------------------------------
-	my $image = new KIWIImage (
+	my $image = KIWIImage -> new(
 		$kiwi,$xml,$configDir,$destination,$cmdL->getStripImage(),
 		"/base-system",$configDir,undef,$cmdL
 	);
@@ -621,7 +621,7 @@ sub createImage {
 	# Create recovery archive if specified
 	#------------------------------------------
 	if ($attr{type} eq "oem") {
-		my $configure = new KIWIConfigure (
+		my $configure = KIWIConfigure -> new(
 			$kiwi,$xml,$tree,$tree."/image",$destination
 		);
 		if (! defined $configure) {
@@ -712,7 +712,7 @@ sub createImage {
 		if (($checkFormat) && ($attr{format})) {
 			my $haveFormat = $attr{format};
 			my $imgfile= $destination."/".$image -> buildImageName();
-			my $format = new KIWIImageFormat (
+			my $format = KIWIImageFormat -> new(
 				$kiwi,$imgfile,$cmdL,$haveFormat,$xml
 			);
 			if (! $format) {
@@ -747,7 +747,7 @@ sub createSplash {
 	my $kiwi = $this->{kiwi};
 	my $ird  = $this->{initrd};
 	my $cmdL = $this->{cmdL};
-	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL);
+	my $boot = KIWIBoot -> new($kiwi,$ird,$cmdL);
 	if (! defined $boot) {
 		return;
 	}
@@ -771,7 +771,7 @@ sub createImageBootUSB {
 	my $ird  = $this->{initrd};
 	my $cmdL = $this->{cmdL};
 	$kiwi -> info ("Creating boot USB stick from: $ird...\n");
-	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL);
+	my $boot = KIWIBoot -> new($kiwi,$ird,$cmdL);
 	if (! defined $boot) {
 		return;
 	}
@@ -798,7 +798,7 @@ sub createImageBootCD {
 	my $ird  = $this->{initrd};
 	my $cmdL = $this->{cmdL};
 	$kiwi -> info ("Creating boot ISO from: $ird...\n");
-	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL);
+	my $boot = KIWIBoot -> new($kiwi,$ird,$cmdL);
 	if (! defined $boot) {
 		return;
 	}
@@ -829,7 +829,7 @@ sub createImageInstallCD {
 		$kiwi -> failed ();
 		return;
 	}
-	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL,$sys);
+	my $boot = KIWIBoot -> new($kiwi,$ird,$cmdL,$sys);
 	if (! defined $boot) {
 		return;
 	}
@@ -860,7 +860,7 @@ sub createImageInstallStick {
 		$kiwi -> failed ();
 		return;
 	}
-	my $boot = new KIWIBoot ($kiwi,$ird,$cmdL,$sys);
+	my $boot = KIWIBoot -> new($kiwi,$ird,$cmdL,$sys);
 	if (! defined $boot) {
 		return;
 	}
@@ -899,7 +899,7 @@ sub createImageDisk {
 		$kiwi -> failed ();
 		return;
 	}
-	my $boot = new KIWIBoot (
+	my $boot = KIWIBoot -> new(
 		$kiwi,$ird,$cmdL,$sys,$size,undef,$prof
 	);
 	if (! defined $boot) {
@@ -925,7 +925,7 @@ sub createImageFormat {
 	my $sys    = $this->{sysloc};
 	my $cmdL   = $this->{cmdL};
 	$kiwi -> info ("--> Starting image format conversion...\n");
-	my $imageformat = new KIWIImageFormat (
+	my $imageformat = KIWIImageFormat -> new(
 		$kiwi,$sys,$cmdL,$format,$xml
 	);
 	if (! $imageformat) {
@@ -1048,7 +1048,7 @@ sub __upgradeTree {
 	#==========================================
 	# Initialize root system
 	#------------------------------------------
-	my $root = new KIWIRoot (
+	my $root = KIWIRoot -> new(
 		$kiwi,$xml,$configDir,undef,'/base-system',
 		$configDir,$this->{addlPackages},$this->{removePackages},
 		$cacheRoot,$this->{imageArch},
@@ -1091,7 +1091,7 @@ sub __selectCache {
 	if (($cacheMode eq "remount") && (! -f "$configDir/kiwi-root.cache")) {
 		return;
 	}
-	my $icache = new KIWICache (
+	my $icache = KIWICache -> new(
 		$kiwi,$xml,$this->{cacheDir},$this->{gdata}->{BasePath},
 		$this->{buildProfiles},$configDir,$cmdL
 	);
@@ -1149,7 +1149,7 @@ sub __prepareTree {
 	#==========================================
 	# Initialize root system
 	#------------------------------------------
-	my $root = new KIWIRoot (
+	my $root = KIWIRoot -> new(
 		$kiwi,$xml,$configDir,$rootTgtDir,'/base-system',
 		$this -> {recycleRootDir},undef,undef,$cacheRoot,
 		$this -> {imageArch},
@@ -1206,12 +1206,10 @@ sub __prepareTree {
 # checkType
 #------------------------------------------
 sub checkType {
-	my $this   = shift;
+	my ($this, $xml, $typeInfo, $root) = @_;
 	my $kiwi   = $this->{kiwi};
 	my $cmdL   = $this->{cmdL};
-	my $xml    = $_[0];
-	my (%type) = %{$_[1]};
-	my $root   = $_[2];
+	my (%type) = %{$typeInfo};
 	my $para   = "ok";
 	my $type   = $type{type};
 	my $flags  = $type{flags};
@@ -1381,6 +1379,7 @@ sub DESTROY {
 	if ($image) {
 		$image -> cleanMount ();
 	}
+	return;
 }
 
 1;

@@ -18,6 +18,7 @@ package KIWIURL;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 use Carp qw (cluck);
 use File::Basename;
 use KIWILog;
@@ -134,6 +135,9 @@ sub normalizeBootPath {
 	my $module = shift;
 	my $kiwi   = $this->{kiwi};
 	my $path;
+	if (! $module) {
+		return;
+	}
 	$module = $this -> quote ($module);
 	$path = $this -> thisPath ($module);
 	if (defined $path) {
@@ -192,7 +196,7 @@ sub quote {
 	my $safe = (
 		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-'
 	);
-	my %safe = {};
+	my %safe;
 	foreach my $key (split (//,$safe)) {
 		$safe{$key} = $key;
 	}
