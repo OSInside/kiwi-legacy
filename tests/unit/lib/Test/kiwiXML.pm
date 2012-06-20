@@ -1,5 +1,5 @@
 #================
-# FILE          : xml.pm
+# FILE          : kiwiXML.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2012 Novell Inc.
@@ -1115,11 +1115,37 @@ sub test_getEc2Config {
 }
 
 #==========================================
+# test_getEditBootConfig
+#------------------------------------------
+sub test_getEditBootConfig {
+	# ...
+	# Verify proper return of getEditBootConfig method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'typeSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $path = $xml -> getEditBootConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my $fileName = (split /\//, $path)[-1];
+	$this -> assert_str_equals('fixupBootEnter', $fileName);
+	return;
+}
+
+#==========================================
 # test_getHttpsRepositoryCredentials
 #------------------------------------------
 sub test_getHttpsRepositoryCredentials {
 	# ...
-	# Verify proper return of getHttpsRepositoryCredentials
+	# Verify proper return of getHttpsRepositoryCredentials method
 	# ---
 	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
 		return; # skip the test if there is no network connection
@@ -2967,6 +2993,33 @@ sub test_getStripTools {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw /megacli virt-mgr/;
 	$this -> assert_array_equal(\@expectedNames, \@toolFiles);
+	return;
+}
+
+#==========================================
+# test_getTypes
+#------------------------------------------
+sub test_getTypes {
+	# ...
+	# Verify proper return of getTypes method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'typeSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @types = $xml -> getTypes();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_str_equals('vmx', $types[0]->{type});
+	$this -> assert_str_equals('true', $types[0]->{primary});
+	$this -> assert_str_equals('oem', $types[1]->{type});
 	return;
 }
 
