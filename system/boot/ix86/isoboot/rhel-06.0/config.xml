@@ -135,5 +135,6 @@
 		<package name="postfix"/>
 		<package name="setserial"/>
 		<package name="syslinux"/>
+		<package name="groff"/>
 	</packages>
 </image>

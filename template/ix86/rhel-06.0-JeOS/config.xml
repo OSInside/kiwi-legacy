@@ -10,6 +10,14 @@
 		<profile name="RedHat" description="Build for RHEL" import="true"/>
 		<profile name="CentOS" description="Build for CentOS"/>
 	</profiles>
+	<strip type="delete">
+		<file name="/usr/lib*/python2.6"/>
+		<file name="/usr/lib*/gconv"/>
+		<file name="/usr/share/zoneinfo"/>
+		<file name="/usr/share/i18n"/>
+		<file name="/lib/i686/nosegneg"/>
+		<file name="/lib/kbd"/>
+	</strip>
 	<preferences>
 		<version>1.1.0</version>
 		<packagemanager>yum</packagemanager>

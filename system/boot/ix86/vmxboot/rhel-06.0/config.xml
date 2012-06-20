@@ -130,5 +130,6 @@
 		<package name="syslinux"/>
 		<package name="postfix"/>
 		<package name="keyutils-libs"/>
+		<package name="groff"/>
 	</packages>
 </image>
