@@ -1322,7 +1322,7 @@ sub usage {
 	# image creation system
 	# ---
 	my $exit = shift;
-	my $date = qx (/bash -c 'LANG=POSIX date -I'/); chomp $date;
+	my $date = qx ( date -I ); chomp $date;
 	print "Linux KIWI setup  (image builder) ($date)\n";
 	print "Copyright (c) 2007 - SUSE LINUX Products GmbH\n";
 	print "\n";
