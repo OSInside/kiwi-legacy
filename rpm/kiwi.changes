@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jun 21 15:15:42 CEST 2012 - ms@suse.de
+
+- make sure wpa_supplicant stays inside the initrd (bnc #766720)
+
+-------------------------------------------------------------------
 Tue Jun 19 14:55:34 CEST 2012 - ms@suse.de
 
 - s390: make sure we wait for udev to finish after fdasd is done
