@@ -20,10 +20,14 @@ package KIWISocket;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
+use base qw (Exporter);
 use Carp qw (cluck);
 use FileHandle;
 use Socket;
 use KIWIQX qw (qxx);
+
+my @EXPORT_OK = qw ();
 
 #==========================================
 # Constructor
@@ -107,12 +111,13 @@ sub closeConnection {
 	if (defined $client) {
 		close $client;
 	}
+	return;
 }
 
 #==========================================
 # write
 #------------------------------------------
-sub write {
+sub writeTo {
 	my $this    = shift;
 	my $message = shift;
 	my $client  = $this->{client};
@@ -124,7 +129,7 @@ sub write {
 #==========================================
 # read
 #------------------------------------------
-sub read {
+sub readFrom {
 	my $this    = shift;
 	my $client  = $this->{client};
 	if (! defined $client) {

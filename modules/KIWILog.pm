@@ -927,18 +927,18 @@ sub setLogServer {
 				# Handle log requests...
 				#------------------------------------------
 				$SIG{PIPE} = sub {
-					$logServer -> write ( $this -> getLogServerMessage() );
+					$logServer -> writeTo ( $this -> getLogServerMessage() );
 					$logServer -> closeConnection();
 					$sharedMem -> closeSegment();
 					undef $this-> {smem};
 					exit 1;
 				};
-				while (my $command = $logServer -> read()) {
+				while (my $command = $logServer -> readFrom()) {
 					#==========================================
 					# Handle command: status
 					#------------------------------------------
 					if ($command eq "status") {
-						$logServer -> write (
+						$logServer -> writeTo (
 							$this -> getLogServerMessage()
 						);
 						next;
@@ -956,7 +956,7 @@ sub setLogServer {
 					#==========================================
 					# Invalid command...
 					#------------------------------------------
-					$logServer -> write (
+					$logServer -> writeTo (
 						$this -> getLogServerDefaultErrorMessage()
 					);
 				}
