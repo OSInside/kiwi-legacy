@@ -2180,7 +2180,7 @@ sub addPackages {
 		next if ($pack eq "");
 		my $addElement = new XML::LibXML::Element ("package");
 		$addElement -> setAttribute("name",$pack);
-		if (($bincl) && ($bincl->{$pack} == 1)) {
+		if (($bincl) && ($bincl->{$pack}) && ($bincl->{$pack} == 1)) {
 			$addElement -> setAttribute("bootinclude","true");
 		}
 		$nodes -> get_node($nodeNumber)
