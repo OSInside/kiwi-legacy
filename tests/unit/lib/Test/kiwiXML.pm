@@ -94,6 +94,112 @@ sub test_addArchives {
 }
 
 #==========================================
+# test_addArchivesBootIncl
+#------------------------------------------
+sub test_addArchivesBootIncl {
+	# ...
+	# Verify proper operation of addArchives method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	$xml = $xml -> addArchives('image', 'true', undef, 'archiveA.tgz',
+							'archiveB.tar.bz2');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedArchs = qw /myInitStuff.tar myImageStuff.tgz archiveA.tgz
+							archiveB.tar.bz2/;
+	my @packNodes = $xml -> getPackageNodeList() -> get_nodelist();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @archives;
+	IMGARCHS:
+	for my $node (@packNodes) {
+		my $type = $node -> getAttribute('type');
+		if ($type eq 'image') {
+			my @archiveNodes = $node -> getElementsByTagName('archive');
+			for my $archNode (@archiveNodes) {
+				my $archName = $archNode -> getAttribute('name');
+				push @archives, $archName;
+				if ($archName eq 'archiveA.tgz'
+					or $archName eq 'archiveB.tar.bz2' ) {
+					$this -> assert_str_equals('true',
+								$archNode -> getAttribute('bootinclude'));
+				}
+			}
+			last IMGARCHS;
+		}
+	}
+	$this -> assert_array_equal(\@expectedArchs, \@archives);
+	return;
+}
+
+#==========================================
+# test_addArchivesUseProf
+#------------------------------------------
+sub test_addArchivesUseProf {
+	# ...
+	# Verify proper operation of addArchives method
+	# ---
+	#
+	# The handling is broken -- BUG --
+	# We should either find all archives, or only the patterns specific
+	# archives. The behavior at present is that the archives outside of the
+	# profile are found.
+	# disable test
+#	my $this = shift;
+#	my $kiwi = $this -> {kiwi};
+#	my $confDir = $this->{dataDir} . 'packageSettings';
+#    my @patterns = qw (aTest);
+#	my $xml = KIWIXML -> new(
+#		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+#	);
+#	$xml = $xml -> addArchives('image', undef, undef, 'archiveC.tgz',
+#							'archiveD.tar.bz2');
+#	my $msg = $kiwi -> getMessage();
+#	$this -> assert_str_equals('Using profile(s): aTest', $msg);
+#	my $msgT = $kiwi -> getMessageType();
+#	$this -> assert_str_equals('info', $msgT);
+#	my $state = $kiwi -> getState();
+#	$this -> assert_str_equals('completed', $state);
+#	# Test this condition last to get potential error messages
+#	my @expectedArchs = qw /myAppArch.tgz archiveC.tgz archiveD.tar.bz2/;
+#	my @packNodes = $xml -> getPackageNodeList() -> get_nodelist();
+#	$msg = $kiwi -> getMessage();
+#	$this -> assert_str_equals('No messages set', $msg);
+#	$msgT = $kiwi -> getMessageType();
+#	$this -> assert_str_equals('none', $msgT);
+#	$state = $kiwi -> getState();
+#	$this -> assert_str_equals('No state set', $state);
+#	my @archives;
+#	IMGARCHS:
+#	for my $node (@packNodes) {
+#		my $type = $node -> getAttribute('type');
+#		if ($type eq 'image') {
+#			my @archiveNodes = $node -> getElementsByTagName('archive');
+#			for my $archNode (@archiveNodes) {
+#				push @archives, $archNode -> getAttribute('name');
+#			}
+#			last IMGARCHS;
+#		}
+#	}
+#	$this -> assert_array_equal(\@expectedArchs, \@archives);
+	return;
+}
+
+#==========================================
 # test_addDrivers
 #------------------------------------------
 sub test_addDrivers {
@@ -307,6 +413,58 @@ sub test_addPackagesImage {
 			my @bootPckgsNodes = $node -> getElementsByTagName('package');
 			for my $pckNode (@bootPckgsNodes) {
 				push @packages, $pckNode -> getAttribute('name');
+			}
+			last IMGPCKG;
+		}
+	}
+	$this -> assert_array_equal(\@expectedPcks, \@packages);
+	return;
+}
+
+#==========================================
+# test_addPackagesImageBootIncl
+#------------------------------------------
+sub test_addPackagesImageBootIncl {
+	# ...
+	# Verify proper operation of addPackages method for image type
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %bootInclPacks = ( emacs => 1 );
+	$xml = $xml -> addPackages('image', \%bootInclPacks, undef,'perl','emacs');
+	#$xml = $xml -> addPackages('image', undef, undef,'perl','emacs');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expectedPcks = qw /ed emacs kernel-default perl python vim/;
+	my @packNodes = $xml -> getPackageNodeList() -> get_nodelist();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @packages;
+	IMGPCKG:
+	for my $node (@packNodes) {
+		my $type = $node -> getAttribute('type');
+		if ($type eq 'image') {
+			my @bootPckgsNodes = $node -> getElementsByTagName('package');
+			for my $pckNode (@bootPckgsNodes) {
+				my $pckgName = $pckNode -> getAttribute('name');
+				push @packages, $pckgName;
+				if ($pckgName eq 'emacs') {
+					$this -> assert_str_equals('true',
+								$pckNode -> getAttribute('bootinclude'));
+				}
 			}
 			last IMGPCKG;
 		}
@@ -860,6 +1018,36 @@ sub test_getArchiveList {
 }
 
 #==========================================
+# test_getArchiveListUseProf
+#------------------------------------------
+sub test_getArchiveListUseProf {
+	# ...
+	# Verify proper return of getArchiveList method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my @patterns = qw (aTest);
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+	);
+	my @archives = $xml -> getArchiveList();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): aTest', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw /myAppArch.tgz myInitStuff.tar myImageStuff.tgz/;
+	$this -> assert_array_equal(\@expected, \@archives);
+	return;
+}
+
+#==========================================
 # test_getBaseList
 #------------------------------------------
 sub test_getBaseList {
@@ -910,6 +1098,33 @@ sub test_getBootIncludes {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	my @expected = qw /python vim/;
+	$this -> assert_array_equal(\@expected, \@bootInclP);
+	return;
+}
+
+#==========================================
+# test_getBootIncludesUseProf
+#------------------------------------------
+sub test_getBootIncludesUseProf {
+	# ...
+	# Verify proper return of getBootIncludes method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my @patterns = qw (aTest);
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+	);
+	my @bootInclP = $xml -> getBootIncludes();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): aTest', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw /perl python vim/;
 	$this -> assert_array_equal(\@expected, \@bootInclP);
 	return;
 }
@@ -1018,6 +1233,36 @@ sub test_getDeleteList {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	my @expected = qw /java/;
+	$this -> assert_array_equal(\@expected, \@delPcks);
+	return;
+}
+
+#==========================================
+# test_getDeleteListUseProf
+#------------------------------------------
+sub test_getDeleteListUseProf {
+	# ...
+	# Verify proper return of getDeleteList method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my @patterns = qw (aTest);
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+	);
+	my @delPcks = $xml -> getDeleteList();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): aTest', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw /java libreOffice/;
 	$this -> assert_array_equal(\@expected, \@delPcks);
 	return;
 }
@@ -1496,6 +1741,33 @@ sub test_getListBootIncludes {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	my @expected = qw /python vim/;
+	$this -> assert_array_equal(\@expected, \@bootInclPckgs);
+	return;
+}
+
+#==========================================
+# test_getListBootIncludesUseProf
+#------------------------------------------
+sub test_getListBootIncludesUseProf {
+	# ...
+	# Verify proper return of getListBootIncludes method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my @patterns = qw (aTest);
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+	);
+	my @bootInclPckgs = $xml -> getListBootIncludes();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): aTest', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw /perl python vim/;
 	$this -> assert_array_equal(\@expected, \@bootInclPckgs);
 	return;
 }
@@ -2381,6 +2653,59 @@ sub test_getPXEDeployUnionConfig {
 }
 
 #==========================================
+# test_getPackageAttributes
+#------------------------------------------
+sub test_getPackageAttributes {
+	# ...
+	# Verify proper return of getPackageAttributes method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my %pattr = $xml -> getPackageAttributes('image');;
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_str_equals('image', $pattr{type});
+	$this -> assert_str_equals('onlyRequired', $pattr{patternType});
+	return;
+}
+
+#==========================================
+# test_getPackageAttributesUseProf
+#------------------------------------------
+sub test_getPackageAttributesUseProf {
+	# ...
+	# Verify proper return of getPackageAttributes method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my @patterns = qw (aTest);
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+	);
+	my %pattr = $xml -> getPackageAttributes('image');;
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): aTest', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_str_equals('image', $pattr{type});
+	$this -> assert_str_equals('plusRecommended', $pattr{patternType});
+	return;
+}
+
+#==========================================
 # test_getPackageNodeList
 #------------------------------------------
 sub test_getPackageNodeList {
@@ -2391,7 +2716,7 @@ sub test_getPackageNodeList {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
 	);
 	my @packNodes = $xml -> getPackageNodeList() -> get_nodelist();
 	my $msg = $kiwi -> getMessage();
@@ -2401,10 +2726,10 @@ sub test_getPackageNodeList {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	my @expectedPcks = qw /ed filesystem glibc-locale kernel-default
-						python vim/;
-	my @expectedArch = qw /myInitStuff.tar myImageStuff.tgz/;
-	my @expectedPats = qw /base xfce/;
+	my @expectedPcks = qw /ed emacs filesystem glibc-locale kernel-default
+						kernel-desktop perl python vim/;
+	my @expectedArch = qw /myInitStuff.tar myImageStuff.tgz myAppArch.tgz/;
+	my @expectedPats = qw /base xfce kde/;
 	my @packages;
 	my @archives;
 	my @patterns;
@@ -3024,6 +3349,36 @@ sub test_getTypes {
 }
 
 #==========================================
+# test_getTypesUseProf
+#------------------------------------------
+sub test_getTypesUseProf {
+	# ...
+	# Verify proper return of getTypes method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'typeSettings';
+	my @patterns = qw (aTest);
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+	);
+	my @types = $xml -> getTypes();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): aTest', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_str_equals('vmx', $types[0]->{type});
+	$this -> assert_str_equals('true', $types[0]->{primary});
+	$this -> assert_str_equals('oem', $types[1]->{type});
+	$this -> assert_str_equals('pxe', $types[2]->{type});
+	$this -> assert_str_equals('vmx', $types[3]->{type});
+	return;
+}
+
+#==========================================
 # test_getTypeSpecificPackageList
 #------------------------------------------
 sub test_getTypeSpecificPackageList {
@@ -3048,6 +3403,36 @@ sub test_getTypeSpecificPackageList {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	my @expected = qw /kernel-firmware sane/;
+	$this -> assert_array_equal(\@expected, \@pckgs);
+	return;
+}
+
+#==========================================
+# test_getTypeSpecificPackageListUseProf
+#------------------------------------------
+sub test_getTypeSpecificPackageListUseProf {
+	# ...
+	# Verify proper return of getTypeList method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'packageSettings';
+	my @patterns = qw (aTest);
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+	);
+	my @pckgs = $xml -> getTypeSpecificPackageList();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): aTest', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Test this condition last to get potential error messages
+	my @expected = qw /gimp kernel-firmware sane/;
 	$this -> assert_array_equal(\@expected, \@pckgs);
 	return;
 }
