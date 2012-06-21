@@ -19,7 +19,8 @@ package KIWILocator;
 #------------------------------------------
 use strict;
 use warnings;
-require Exporter;
+use base qw (Exporter);
+
 use IPC::Open3;
 use KIWILog;
 use KIWIQX qw (qxx);
@@ -27,8 +28,7 @@ use KIWIQX qw (qxx);
 #==========================================
 # Exports
 #------------------------------------------
-our @ISA    = qw (Exporter);
-our @EXPORT_OK = qw (createTmpDirectory getExecPath getControlFile );
+our @EXPORT_OK = qw ();
 
 #==========================================
 # Constructor

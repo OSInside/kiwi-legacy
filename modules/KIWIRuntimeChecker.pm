@@ -22,7 +22,8 @@ package KIWIRuntimeChecker;
 #------------------------------------------
 use strict;
 use warnings;
-require Exporter;
+use base qw (Exporter);
+
 use KIWILocator;
 use KIWILog;
 use KIWIQX qw (qxx);
@@ -30,7 +31,6 @@ use KIWIQX qw (qxx);
 #==========================================
 # Exports
 #------------------------------------------
-our @ISA    = qw (Exporter);
 our @EXPORT_OK = qw ();
 
 #==========================================
@@ -101,6 +101,9 @@ sub createChecks {
 	if (! $this -> __checkPackageManagerExists()) {
 		return;
 	}
+	if (! $this -> __checkVMscsiCapable()) {
+		return;
+	}
 	if (! $this -> __hasValidLVMName()) {
 		return;
 	}
@@ -157,8 +160,8 @@ sub __hasValidLVMName {
 	my @hostGroups = qxx ("vgs --noheadings -o vg_name 2>/dev/null");
 	chomp @hostGroups;
 	foreach my $hostGroup (@hostGroups) {
-		$hostGroup =~ s/^\s+//g;
-		$hostGroup =~ s/\s+$//g;
+		$hostGroup =~ s/^\s+//xg;
+		$hostGroup =~ s/\s+$//xg;
 		if ($hostGroup eq $vgroupName) {
 			my $msg = "There is already a volume group ";
 			$msg .= "named \"$vgroupName\" on this build host";
@@ -328,7 +331,7 @@ sub __checkFilesystemTool {
 		}
 	} else {
 		my @fsType = ($type{filesystem});
-		if ($type{filesystem} =~ /(.*),(.*)/) {
+		if ($type{filesystem} =~ /(.*),(.*)/x) {
 			@fsType = ($1,$2);
 		}
 		foreach my $fs (@fsType) {
@@ -425,13 +428,13 @@ sub __checkPatternTypeAttrrValueConsistent {
 		if (! $profiles) {
 			next;
 		}
-		my @profNames = split /,/, $profiles;
+		my @profNames = split /,/x, $profiles;
 		my $patternType = $pkgs -> getAttribute( 'patternType' );
 		if (! $patternType) {
 			$patternType = 'onlyRequired';
 		}
 		for my $profName (@profNames) {
-			if (grep { /^$profName/ } @buildProfiles) {
+			if (grep { /^$profName/x } @buildProfiles) {
 				if (! $reqPatternTypeVal) {
 					$reqPatternTypeVal = $patternType;
 				} elsif ($reqPatternTypeVal ne $patternType) {
@@ -483,7 +486,7 @@ sub __checkVMscsiCapable {
 			return;
 		}
 		while (<$QEMU_IMG_CAP>) {
-			if ($_ =~ /^scsi/) {
+			if ($_ =~ /^scsi/x) {
 				close $QEMU_IMG_CAP;
 				return 1;
 			}
