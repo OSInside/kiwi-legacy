@@ -19,6 +19,8 @@ package KIWIIsoLinux;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
+use base qw (Exporter);
 use Carp qw (cluck);
 use Fcntl; # needed for some constants for sysopen
 use File::Find;
@@ -26,6 +28,8 @@ use File::Basename;
 use KIWILocator;
 use KIWILog;
 use KIWIQX qw (qxx);
+
+my @EXPORT_OK = qw ();
 
 #==========================================
 # Constructor
@@ -90,7 +94,7 @@ sub new {
 	#==========================================
 	# Find iso tool to use on this system
 	#------------------------------------------
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new($kiwi);
 	my $genTool = $locator -> getExecPath('genisoimage');
 	my $mkTool = $locator -> getExecPath('mkisofs');
 	if ($genTool && -x $genTool) {
@@ -224,6 +228,7 @@ sub x86_64_legacy {
 	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
 	$this -> {params} = $para;
 	$this -> createISOLinuxConfig ($boot);
+	return $this;
 }
 
 #==========================================
@@ -242,6 +247,7 @@ sub ix86_legacy {
 	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
 	$this -> {params} = $para;
 	$this -> createISOLinuxConfig ($boot);
+	return $this;
 }
 
 #==========================================
@@ -259,6 +265,7 @@ sub x86_64_efi {
 	$para.= " -boot-load-size 1";
 	$para.= " -b $loader";
 	$this -> {params} = $para;
+	return $this;
 }
 
 #==========================================
@@ -276,6 +283,7 @@ sub ix86_efi {
 	$para.= " -boot-load-size 1";
 	$para.= " -b $loader";
 	$this -> {params} = $para;
+	return $this;
 }
 
 #==========================================
@@ -298,6 +306,7 @@ sub ia64_efi {
 	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
 
 	$this -> {params} = $para;
+	return $this;
 }
 
 #==========================================
@@ -315,6 +324,7 @@ sub s390_ikr {
 	$para.= " -no-emul-boot";
 	$para.= " -b $ikr";
 	$this -> {params} = $para;
+	return $this;
 }
 
 #==========================================
@@ -331,7 +341,8 @@ sub s390x_ikr {
 	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
 	$para.= " -no-emul-boot";
 	$para.= " -b $ikr";
-	$this -> {params} = $para; 
+	$this -> {params} = $para;
+	return $this;
 }
 
 #==========================================
@@ -346,7 +357,7 @@ sub ppc64_default {
 	my $boot  = $base{$arch}{boot};
 
 	$para.= " -chrp-boot";
-		$para.= " -hfs-bless $src/$boot"; # CHECK: maybe $src is not necessary
+	$para.= " -hfs-bless $src/$boot"; # CHECK: maybe $src is not necessary
 	$para.= " -hfs-volid FIXME"; # FIXME should be same as value of -A
 	$para.= " -l";
 	$para.= " --macbin";
@@ -357,6 +368,7 @@ sub ppc64_default {
 	$para.= " -T";
 	$para.= " -U";
 	$this -> {params} = $para;
+	return $this;
 }
 
 #==========================================
@@ -400,14 +412,14 @@ sub createLegacySortFile {
 	if (! -d $src."/".$base{$arch}{boot}) {
 		return;
 	}
+	my @list = ();
+	my $wref = $this -> __generateWanted (\@list);
 	if (! open $FD, '>', "$sort") {
 		$kiwi -> error  ("Failed to open sort file: $!");
 		$kiwi -> failed ();
 		$this -> cleanISO();
 		return;
 	}
-	my @list = ();
-	my $wref = $this -> __generateWanted (\@list);
 	find ({wanted => $wref,follow => 0 },$src."/".$base{$arch}{boot}."/loader");
 	print $FD "$ldir/".$base{$arch}{boot}."/boot.catalog 3"."\n";
 	print $FD $base{$arch}{boot}."/boot.catalog 3"."\n";
@@ -606,7 +618,7 @@ sub createVolumeID {
 			}
 		}
 		open ($FD, '<', "$src/content");
-		foreach my $line (<$FD>) {
+		while (my $line = <$FD>) {
 			if (($version) && ($name)) {
 				last;
 			}
@@ -630,7 +642,8 @@ sub createVolumeID {
 				$hfsvolid.= " $number";
 			}
 		} elsif (open ($FD, '<', $src."media.1/build")) {
-			my $line = <$FD>; close $FD;
+			my $line = <$FD>;
+			close $FD;
 			if ($line =~ /(\w+)-(\d+)-/) {
 				$hfsvolid = "$1 $2 $number";
 			}
@@ -640,7 +653,7 @@ sub createVolumeID {
 }
 
 #==========================================
-# createISOLinuxConfig 
+# createISOLinuxConfig
 #------------------------------------------
 sub createISOLinuxConfig {
 	my $this = shift;

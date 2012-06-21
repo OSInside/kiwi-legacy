@@ -1,5 +1,4 @@
 [-Miscellanea::RequireRcsKeywords]
 [-Modules::RequireVersionVar]
 [-NamingConventions::Capitalization]
-[InputOutput::RequireBriefOpen]
-lines = 15
+[-InputOutput::RequireBriefOpen]

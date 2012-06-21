@@ -9,7 +9,7 @@
 # BELONGS TO    : Operating System images
 #               :
 # DESCRIPTION   : This module is used for directory overlay techniques
-#               : 
+#               :
 #               :
 # STATUS        : Development
 #----------------
@@ -18,6 +18,7 @@ package KIWIOverlay;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 use Carp qw (cluck);
 use File::Spec;
 use KIWILog;
