@@ -2321,14 +2321,14 @@ sub getBootIncludes {
 			next;
 		}
 		if (($type eq "image") || ($type eq "bootstrap")) {
-			push (@plist,$element->getElementsByTagName ("package"));
-		}
-	}
-	foreach my $element (@plist) {
-		my $itemname= $element -> getAttribute ("name");
-		my $bootinc = $element -> getAttribute ("bootinclude");
-		if ((defined $bootinc) && ("$bootinc" eq "true")) {
-			push (@result,$itemname);
+			my @plist = $element->getElementsByTagName ("package");
+			for my $element (@plist) {
+				my $pckName = $element -> getAttribute ("name");
+				my $bootinc = $element -> getAttribute ("bootinclude");
+				if ((defined $bootinc) && ("$bootinc" eq "true")) {
+					push (@result, $pckName);
+				}
+			}
 		}
 	}
 	return @result;
@@ -3158,41 +3158,6 @@ sub isArchAllowed {
 }
 
 #==========================================
-# getListBootIncludes
-#------------------------------------------
-sub getListBootIncludes {
-	# ...
-	# Return list of packages from image and bootstrap typed
-	# packages sections which are flaged as bootinclude
-	# ---
-	my $this  = shift;
-	my $nodes = $this->{packageNodeList};
-	my @result;
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node  = $nodes -> get_node($i);
-		my $type = $node -> getAttribute ("type");
-		#============================================
-		# Check to see if node is in included profile
-		#--------------------------------------------
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		if (($type ne "bootstrap") && ($type ne "image")) {
-			next;
-		}
-		my @plist = $node -> getElementsByTagName ("package");
-		foreach my $element (@plist) {
-			my $package = $element -> getAttribute ("name");
-			my $bootinc = $element -> getAttribute ("bootinclude");
-			if (($bootinc) && ($bootinc eq "true")) {
-				push @result,$package
-			}
-		}
-	}
-	return @result;
-}
-
-#==========================================
 # getList
 #------------------------------------------
 sub getList {
@@ -3690,8 +3655,8 @@ sub getDeleteList {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my @inc  = getListBootIncludes ($this);
-	my @del  = getList ($this,"delete");
+	my @inc  = $this -> getBootIncludes();
+	my @del  = $this -> getList ("delete");
 	my @ret  = ();
 	#==========================================
 	# check delete list for conflicts

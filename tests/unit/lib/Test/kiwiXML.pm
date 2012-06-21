@@ -1720,59 +1720,6 @@ sub test_getLicenseNames {
 }
 
 #==========================================
-# test_getListBootIncludes
-#------------------------------------------
-sub test_getListBootIncludes {
-	# ...
-	# Verify proper return of getListBootIncludes method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
-	);
-	my @bootInclPckgs = $xml -> getListBootIncludes();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	my @expected = qw /python vim/;
-	$this -> assert_array_equal(\@expected, \@bootInclPckgs);
-	return;
-}
-
-#==========================================
-# test_getListBootIncludesUseProf
-#------------------------------------------
-sub test_getListBootIncludesUseProf {
-	# ...
-	# Verify proper return of getListBootIncludes method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'packageSettings';
-	my @patterns = qw (aTest);
-	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
-	);
-	my @bootInclPckgs = $xml -> getListBootIncludes();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('Using profile(s): aTest', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('info', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('completed', $state);
-	# Test this condition last to get potential error messages
-	my @expected = qw /perl python vim/;
-	$this -> assert_array_equal(\@expected, \@bootInclPckgs);
-	return;
-}
-
-#==========================================
 # test_getLocale
 #------------------------------------------
 sub test_getLocale {
