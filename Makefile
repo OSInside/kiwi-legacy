@@ -203,5 +203,10 @@ clean:
 	rm -f tools/burner/imagewriter
 	rm -f .revision
 
+uninstall:
+	rm -rf /usr/share/kiwi
+	rm -rf /usr/share/doc/packages/kiwi
+	rm -f /usr/sbin/kiwi
+	
 build:
 	./.doit -p --local
