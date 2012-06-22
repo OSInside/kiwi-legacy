@@ -275,7 +275,10 @@ sub getExecPath {
 	my $this     = shift;
 	my $execName = shift;
 	my $kiwi     = $this->{kiwi};
-	my $execPath = qxx ("which $execName 2>&1"); chomp $execPath;
+	my $execPath = qxx (
+		"bash -c \"PATH=\$PATH:/sbin which $execName\" 2>&1"
+	);
+	chomp $execPath;
 	my $code = $? >> 8;
 	if ($code != 0) {
 		if ($kiwi) {
