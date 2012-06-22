@@ -5944,12 +5944,17 @@ function bootImage {
 	# run resetBootBind preinit cleanImage
 	#--------------------------------------
 	chroot /mnt /bin/bash -c \
-		". /include ; exec 2>>$ELOG_FILE ; set -x 1>&2 ; resetBootBind"
+		". /include ; exec 2>>$ELOG_FILE ; set -x ; resetBootBind"
 	chroot /mnt /bin/bash -c \
 		"/preinit"
 	chroot /mnt /bin/bash -c \
-		". /include ; exec 2>>$ELOG_FILE ; set -x 1>&2 ; cleanImage"
+		". /include ; exec 2>>$ELOG_FILE ; set -x ; cleanImage"
 	cd /mnt
+	#======================================
+	# tell logging the new root fs
+	#--------------------------------------
+	exec 2>>/mnt/$ELOG_FILE
+	set -x
 	#======================================
 	# tell plymouth the new root fs
 	#--------------------------------------
