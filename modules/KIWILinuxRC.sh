@@ -2607,28 +2607,12 @@ function setupKernelModules {
 		srcprefix=/mnt
 	fi
 	local sysimg_ktempl=$srcprefix/var/adm/fillup-templates/sysconfig.kernel
-	local sysimg_ktempl2=$sysimg_ktempl-mkinitrd
-	local sysimg_ktempl3=/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
-	local sysimg_ktempl4=/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-Security-6
 	local sysimg_syskernel=$srcprefix/etc/sysconfig/kernel
 	local syskernel=$destprefix/etc/sysconfig/kernel
 	local newstyle_mkinitrd=$srcprefix/lib/mkinitrd/scripts/boot-usb.sh
 	local key
 	local val
 	mkdir -p $destprefix/etc/sysconfig
-	#======================================
-	# check for sysconfig template file
-	#--------------------------------------
-	if \
-		[ ! -f $sysimg_ktempl ]  && \
-		[ ! -f $sysimg_ktempl2 ] && \
-		[ ! -f $sysimg_ktempl3 ] && \
-		[ ! -f $sysimg_ktempl4 ]
-	then
-		systemException \
-			"Can't find kernel sysconfig template in system image !" \
-		"reboot"
-	fi
 	#======================================
 	# check for mkinitrd capabilities
 	#--------------------------------------
@@ -2647,7 +2631,7 @@ function setupKernelModules {
 	#--------------------------------------
 	if [ -f $sysimg_syskernel ];then
 		cp $sysimg_syskernel $syskernel
-	else
+	elif [ -f $sysimg_ktempl ];then
 		cp $sysimg_ktempl $syskernel
 	fi
 	#======================================
@@ -6002,13 +5986,12 @@ function bootImage {
 	if \
 		[ ! "$haveClicFS" = "yes" ] && \
 		[ -z "$NFSROOT" ]           && \
-		[ ! -e $sysimg_ktempl3 ]    && \
-		[ ! -e $sysimg_ktempl4 ]
+		[[ $kiwi_iname =~ initrd-.*-suse ]]
 	then
 		# for systemd debugging set: --log-level=debug --log-target=kmsg
 		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt $init $option
 	else
-		# FIXME: clicfs / nfsroot / RHEL doesn't like run-init
+		# FIXME: clicfs / nfsroot / non-suse doesn't like run-init
 		exec chroot . $init $option
 	fi
 }
