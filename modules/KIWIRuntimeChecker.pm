@@ -101,6 +101,9 @@ sub createChecks {
 	if (! $this -> __checkPackageManagerExists()) {
 		return;
 	}
+	if (! $this -> __checkKernelVersionToolExists()) {
+		return;
+	}
 	if (! $this -> __checkVMscsiCapable()) {
 		return;
 	}
@@ -386,6 +389,27 @@ sub __checkPackageManagerExists {
 		my $msg = "Executable for specified package manager, $pkgMgr, "
 			. 'could not be found.';
 		$this -> {kiwi} -> error($msg);
+		$this -> {kiwi} -> failed();
+		return;
+	}
+	return 1;
+}
+
+#==========================================
+# __checkKernelVersionToolExists
+#------------------------------------------
+sub __checkKernelVersionToolExists {
+	# ...
+	# Check that the build host has get_kernel_version. This is
+	# a suse extension but the kiwi git provides the source
+	# So other distros can at least install it
+	# ---
+	my $this = shift;
+	my $tool = "get_kernel_version";
+	my $haveExec = $this -> {locator} -> getExecPath($tool);
+	if (! $haveExec) {
+		my $msg = "Executable $tool could not be found";
+		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
 		return;
 	}
