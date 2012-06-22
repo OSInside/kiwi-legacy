@@ -5,6 +5,11 @@ test -f /.profile && . /.profile
 echo "Configure image: [$kiwi_iname]..."
 
 #==========================================
+# pack boot includes
+#------------------------------------------
+basePackBootIncludes
+
+#==========================================
 # remove unneded kernel files
 #------------------------------------------
 rhelStripKernel
@@ -24,6 +29,11 @@ rpm -e --nodeps --noscripts \
 # remove unneeded files
 #------------------------------------------
 rhelStripInitrd
+
+#==========================================
+# unpack boot includes
+#------------------------------------------
+baseUnpackBootIncludes
 
 #==========================================
 # umount /proc
