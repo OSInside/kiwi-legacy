@@ -607,7 +607,11 @@ function udevStart {
 	# load modules required before udev
 	moduleLoadBeforeUdev
 	# start the udev daemon
-	/sbin/udevd --daemon
+	if [ -x /sbin/udevd ];then
+		/sbin/udevd --daemon
+	else
+		/lib/udev/udevd --daemon
+	fi
 	UDEVD_PID=$(pidof /sbin/udevd)
 	echo UDEVD_PID=$UDEVD_PID >> /iprocs
 	# trigger events for all devices
