@@ -555,7 +555,11 @@ function udevSystemStart {
 	# start udev while in pre-init phase. This means we can
 	# run udev from the standard runlevel script
 	# ----
-	/etc/init.d/boot.udev start
+	if [ -e /etc/init.d/boot.udev ];then
+		/etc/init.d/boot.udev start
+	elif which systemctl &>/dev/null;then
+		systemctl start udev.service
+	fi
 	echo
 }
 #======================================
@@ -565,7 +569,11 @@ function udevSystemStop {
 	# /.../
 	# stop udev while in pre-init phase.
 	# ----
-	/etc/init.d/boot.udev stop
+	if [ -e /etc/init.d/boot.udev ];then
+		/etc/init.d/boot.udev stop
+	elif which systemctl &>/dev/null;then
+		systemctl stop udev.service
+	fi
 	echo
 }
 #======================================
