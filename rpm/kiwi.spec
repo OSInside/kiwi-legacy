@@ -21,7 +21,7 @@ Name:           kiwi
 Summary:        OpenSuSE - KIWI Image System
 License:        GPL-2.0
 Group:          System/Management
-Version:        5.03.23
+Version:        5.03.24
 Release:        0
 # requirements to build packages
 BuildRequires:  gcc-c++
