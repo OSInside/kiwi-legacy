@@ -5,9 +5,9 @@ test -f /.profile && . /.profile
 echo "Configure image: [$kiwi_iname]..."
 
 #==========================================
-# remove unneded kernel files
+# pack boot includes
 #------------------------------------------
-suseStripKernel
+basePackBootIncludes
 
 #==========================================
 # setup gfxboot
@@ -24,6 +24,16 @@ rpm -e --nodeps --noscripts \
 # remove unneeded files
 #------------------------------------------
 suseStripInitrd
+
+#==========================================
+# unpack boot includes
+#------------------------------------------
+baseUnpackBootIncludes
+
+#==========================================
+# remove unneded kernel files
+#------------------------------------------
+suseStripKernel
 
 #==========================================
 # umount /proc

@@ -10,11 +10,6 @@ echo "Configure image: [$kiwi_iname]..."
 basePackBootIncludes
 
 #==========================================
-# remove unneded kernel files
-#------------------------------------------
-rhelStripKernel
-
-#==========================================
 # setup gfxboot
 #------------------------------------------
 rhelGFXBoot SLES isolinux
@@ -34,6 +29,11 @@ rhelStripInitrd
 # unpack boot includes
 #------------------------------------------
 baseUnpackBootIncludes
+
+#==========================================
+# remove unneded kernel files
+#------------------------------------------
+rhelStripKernel
 
 #==========================================
 # umount /proc
