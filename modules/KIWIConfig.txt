@@ -228,6 +228,7 @@
 		<file name="yes"/>
 		<file name="zfcp_disk_configure"/>
 		<file name="zfcp_host_configure"/>
+		<file name="kmod"/>
 	</strip>
 
 	<!--
