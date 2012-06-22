@@ -7,7 +7,7 @@
 		<specification>openSUSE 12.1 Live system for CD/DVD and USB Stick</specification>
 	</description>
 	<preferences>
-		<type image="oem" boot="oemboot/suse-11.3" filesystem="clicfs" bootloader="syslinux" ramonly="true">
+		<type image="oem" boot="oemboot/suse-12.1" filesystem="clicfs" bootloader="syslinux" ramonly="true">
 			<oemconfig>
 				<oem-swap>false</oem-swap>
 				<oem-systemsize>2048</oem-systemsize>
