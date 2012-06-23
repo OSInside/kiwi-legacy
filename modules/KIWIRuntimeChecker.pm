@@ -524,7 +524,7 @@ sub __checkVMscsiCapable {
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed ();
 	}
-	return;
+	return 1;
 }
 
 #==========================================
