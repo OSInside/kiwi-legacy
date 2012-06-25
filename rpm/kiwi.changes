@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jun 25 16:07:52 CEST 2012 - ms@suse.de
+
+- netboot: improved testing for networks by using -T option (fate #313338)
+
+-------------------------------------------------------------------
 Fri Jun 22 10:28:22 CEST 2012 - ms@suse.de
 
 - strip kernel modules and firmware after the function
