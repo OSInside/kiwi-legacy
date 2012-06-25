@@ -523,6 +523,7 @@ sub __checkVMscsiCapable {
 		. "\nto a newer version of qemu-img or change the controller to ide";
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed ();
+        return;
 	}
 	return 1;
 }
