@@ -28,6 +28,9 @@
 		<file name="blockdev"/>
 		<file name="blogd"/>
 		<file name="btrfsctl"/>
+		<file name="btrfs"/>
+		<file name="btrfstune"/>
+		<file name="btrfsck"/>
 		<file name="busybox"/>
 		<file name="bzip2"/>
 		<file name="cat"/>
@@ -76,6 +79,7 @@
 		<file name="fsck.ext2"/>
 		<file name="fsck.ext3"/>
 		<file name="fsck.ext4"/>
+		<file name="fsck.btrfs"/>
 		<file name="fuser"/>
 		<file name="gawk"/>
 		<file name="gettext"/>
