@@ -3741,10 +3741,11 @@ function setupNetwork {
 		# ----
 		unset opts
 	fi
+	mkdir -p /var/lib/dhcpcd
 	for try_iface in ${dev_list[*]}; do
-		if dhcpcd $opts $try_iface 1>&2 ; then
-			DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
-		fi
+		# try DHCP_DISCOVER on all interfaces
+		dhcpcd $opts -T $try_iface > /var/lib/dhcpcd/dhcpcd-$try_iface.info &
+		DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
 	done
 	if [ -z "$DHCPCD_STARTED" ];then
 		if [ -e "$root" ];then
@@ -3779,6 +3780,10 @@ function setupNetwork {
 			grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info
 		then
 			export PXE_IFACE=$try_iface
+			eval `grep "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info`
+			rm /var/lib/dhcpcd/dhcpcd-$try_iface.info
+			# continue with the DHCP protocol on the selected interface
+			dhcpcd $opts -r $IPADDR $PXE_IFACE 2>&1
 			break
 		fi
 	done
@@ -3787,27 +3792,35 @@ function setupNetwork {
 	#--------------------------------------
 	if [ -z "$PXE_IFACE" ];then
 		if [ -e "$root" ];then
-			Echo "Can't find DHCP info file: dhcpcd-$PXE_IFACE.info !"
+			Echo "Can't get DHCP reply on any interface !"
 			Echo "Try fallback to local boot on: $root"
 			LOCAL_BOOT=yes
 			return
 		else
 			systemException \
-				"Can't find DHCP info file: dhcpcd-$PXE_IFACE.info !" \
+				"Can't get DHCP reply on any interface !" \
 			"reboot"
 		fi
 	fi
 	#======================================
-	# setup selected interface
+	# wait for iface to finish negotiation
 	#--------------------------------------
-	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
 	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
-		importFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
-		if [ ! -z "$IPADDR" ];then
+		if [ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ] &&
+			grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
+		then
 			break
 		fi
 		sleep 2
 	done
+	#======================================
+	# setup selected interface
+	#--------------------------------------
+	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
+	if [ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ] &&
+		grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info; then
+		importFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
+	fi
 	if [ -z "$IPADDR" ];then
 		if [ -e "$root" ];then
 			Echo "Can't assign IP addr via dhcp info: dhcpcd-$PXE_IFACE.info !"
@@ -3848,10 +3861,7 @@ function releaseNetwork {
 		#======================================
 		# free the lease and the cache
 		#--------------------------------------
-		local try_iface
-		for try_iface in $DHCPCD_STARTED; do
-			dhcpcd -k $try_iface
-		done
+		dhcpcd -k $PXE_IFACE
 		#======================================
 		# remove sysconfig state information
 		#--------------------------------------
