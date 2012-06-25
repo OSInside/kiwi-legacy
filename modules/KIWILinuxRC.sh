@@ -8246,11 +8246,14 @@ function createOriginSnapshot {
 	if [ ! "$FSTYPE" = "btrfs" ];then
 		return
 	fi
-	if [ ! -x /sbin/btrfsctl ];then
-		echo "btrfsprogs not installed... skipped"
+	if which btrfs &>/dev/null;then
+		btrfs subvolume snapshot / /origin
+	elif which btrfsctl &>/dev/null;then 
+		btrfsctl -s /origin /
+	else
+		echo "Can't find btrfs tools, creation of origin snapshot skipped !"
 		return
 	fi
-	btrfsctl -s origin /
 }
 #======================================
 # initialize
