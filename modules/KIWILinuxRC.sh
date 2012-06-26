@@ -88,6 +88,9 @@ fi
 function Dialog {
 	local code=1
 	export DIALOG_CANCEL=1
+	if which plymouthd &>/dev/null;then
+		plymouth hide-splash
+	fi
 	cat > /tmp/fbcode <<- EOF
 		dialog \
 			--ok-label "$TEXT_OK" \
@@ -6545,6 +6548,9 @@ function runInteractive {
 	# tty first. The output of the dialog call is stored in
 	# a file and printed as result to this function
 	# ----
+	if which plymouthd &>/dev/null;then
+		plymouth hide-splash
+	fi
 	local r=/tmp/rid
 	local code
 	echo "dialog $@ > /tmp/out" > $r
