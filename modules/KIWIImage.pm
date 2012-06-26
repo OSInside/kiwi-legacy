@@ -330,7 +330,7 @@ sub updateDescription {
 			next;
 		}
 		my $type = $element  -> getAttribute ("type");
-		if ($type eq "bootstrap") {
+		if ($type =~ /^(bootstrap|$src_type{type})$/x) {
 			push (@bootstrap_plist,$element->getElementsByTagName ("package"));
 			push (@bootstrap_alist,$element->getElementsByTagName ("archive"));
 		}
