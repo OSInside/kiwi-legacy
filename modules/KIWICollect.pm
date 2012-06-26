@@ -1544,7 +1544,7 @@ sub unpackMetapackages
 				      "IGNORE_MISSING_META_PACKAGES")
 			     ne "true" ) {
 				# abort
-				my $msg = 'Metapackage <$metapack> not available for '
+				my $msg = "Metapackage <$metapack> not available for "
 				    . "required $reqArch architecture!";
 				$this->logMsg('E', $msg);
 			}
