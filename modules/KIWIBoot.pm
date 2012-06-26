@@ -3122,6 +3122,18 @@ sub setupBootLoaderConfiguration {
 	#------------------------------------------
 	if ($loader eq "grub2") {
 		# TODO: xen dom0 boot still missing
+		#==========================================
+		# Theme and Fonts table
+		#------------------------------------------
+		my $theme = $xml -> getBootTheme();
+		my $fodir = '($root)/boot/grub2/themes/';
+		my $ascii = 'ascii.pf2';
+		my @fonts = (
+			"DejaVuSans-Bold14.pf2",
+			"DejaVuSans10.pf2",
+			"DejaVuSans12.pf2",
+			"ascii.pf2"
+		);
 		my %vesa;
 		#==========================================
 		# gfxpayload mapping table
@@ -3173,19 +3185,29 @@ sub setupBootLoaderConfiguration {
 		print FD 'insmod part_msdos'."\n";
 		print FD 'insmod part_gpt'."\n";
 		print FD 'insmod chain'."\n";
+		print FD 'insmod vbe'."\n";
+		print FD 'insmod vga'."\n";
+		print FD 'insmod video_bochs'."\n";
+		print FD 'insmod video_cirrus'."\n";
+		print FD 'insmod png'."\n";
 		print FD "set default=$defaultBootNr\n";
 		if ($type !~ /^KIWI (CD|USB)/) {
 			print FD "set root=\"(hd0,1)\""."\n";
 		}
 		print FD 'set locale_dir=($root)/boot/grub2/locale'."\n";
 		print FD 'set lang=en'."\n";
-		print FD "if loadfont /usr/share/grub2/unicode.pf2 ; then"."\n";
+		print FD 'if loadfont '.$fodir.$theme.'/'.$ascii.';then'."\n";
 		print FD "\t"."set gfxmode=$vesa{$vga}->[0]"."\n";
 		print FD "\t".'insmod gfxterm'."\n";
-		print FD "\t".'insmod vbe'."\n";
-		print FD "\t".'if terminal_output gfxterm ; then true ; else'."\n";
+		print FD "\t".'insmod gfxmenu'."\n";
+		print FD "\t".'terminal_input gfxterm'."\n";
+		print FD "\t".'if terminal_output gfxterm; then true; else'."\n";
 		print FD "\t\t".'terminal gfxterm'."\n";
 		print FD "\t".'fi'."\n";
+		foreach my $font (@fonts) {
+			print FD "\t".'loadfont '.$fodir.$theme.'/'.$font."\n";
+		}
+		print FD "\t".'set theme='.$fodir.$theme.'/theme.txt'."\n";
 		print FD 'fi'."\n";
 		my $bootTimeout = 10;
 		my $gfxpayload  = $vesa{$vga}->[0].",".$vesa{$vga}->[1];
@@ -3210,6 +3232,7 @@ sub setupBootLoaderConfiguration {
 					$kiwi -> failed ();
 					$kiwi -> error  ("Failed to write bootnext\n");
 					$kiwi -> failed ();
+					close FD;
 					return;
 				}
 			}
@@ -3259,6 +3282,7 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			$kiwi -> error  ("*** not implemented ***");
 			$kiwi -> failed ();
+			close FD;
 			return;
 		}
 		#==========================================
@@ -3306,6 +3330,7 @@ sub setupBootLoaderConfiguration {
 				$kiwi -> failed ();
 				$kiwi -> error  ("*** not implemented ***");
 				$kiwi -> failed ();
+				close FD;
 				return;
 			}
 		}
