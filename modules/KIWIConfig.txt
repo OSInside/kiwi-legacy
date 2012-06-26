@@ -4,6 +4,7 @@
 	-->
 	<strip type="delete">
 		<file name="/usr/share/info"/>
+		<file name="/usr/share/splashy"/>
 		<file name="/usr/share/X11/locale"/>
 		<file name="/usr/share/backgrounds"/>
 		<file name="/var/log/*"/>
