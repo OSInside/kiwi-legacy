@@ -641,7 +641,7 @@ sub init {
 	my $NoColor;               # don't use colored output (done/failed messages)
 	my $LogPort;               # specify alternative log server port
 	my $GzipCmd;               # command to run to gzip things
-	my $TargetStudio;          # command to run to create storage nodes for SuSE Studio
+	my $TargetStudio;          # command to run to create on demand storage
 	my $Verbosity;             # control the verbosity level
 	my $TargetArch;            # target architecture -> writes zypp.conf
 	my $Debug;                 # activates the internal stack trace output
@@ -1294,7 +1294,7 @@ sub init {
 		$kiwi -> done ();
 	}
 	if (defined $TargetStudio) {
-		$kiwi -> info ("Setting SuSE Studio img node creator to: $TargetStudio");
+		$kiwi -> info ("Setting SuSE Studio storage creator to: $TargetStudio");
 		$global -> setGlobals ("StudioNode", $TargetStudio);
 		$kiwi -> done ();
 	}
