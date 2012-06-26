@@ -7079,7 +7079,11 @@ function resizeFilesystem {
 	elif [ "$FSTYPE" = "btrfs" ];then
 		Echo "Resize BTRFS filesystem to full partition space..."
 		resize_fs="mount $deviceResize /mnt &&"
-		resize_fs="$resize_fs btrfsctl -r max /mnt;umount /mnt"
+		if which btrfs &>/dev/null;then
+			resize_fs="$resize_fs btrfs filesystem resize max /mnt;umount /mnt"
+		else
+			resize_fs="$resize_fs btrfsctl -r max /mnt;umount /mnt"
+		fi
 		check="btrfsck $deviceResize"
 	elif [ "$FSTYPE" = "xfs" ];then
 		Echo "Resize XFS filesystem to full partition space..."
