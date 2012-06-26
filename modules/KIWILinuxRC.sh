@@ -275,6 +275,9 @@ function systemException {
 		ttydev=/mnt/$ttydev
 	fi
 	test -e /proc/splash && echo verbose > /proc/splash
+	if which plymouthd &>/dev/null;then
+		plymouth hide-splash
+	fi
 	if [ $what = "reboot" ];then
 		if cat /proc/cmdline 2>/dev/null | grep -qi "kiwidebug=1";then
 			what="shell"
