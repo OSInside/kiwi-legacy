@@ -2739,6 +2739,7 @@ sub setupBootLoaderStages {
 	if ($loader eq "grub2") {
 		my $grubpc = "i386-pc";
 		my $stages = "'usr/lib/grub2/$grubpc/*'";
+		my $figure = "'usr/share/grub2/themes/*'";
 		my $unzip  = "$zipper -cd $initrd 2>&1";
 		$status = qxx ("mkdir -p $tmpdir/boot/grub2 $tmpdir/boot/grub 2>&1");
 		$result = $? >> 8;
@@ -2768,22 +2769,25 @@ sub setupBootLoaderStages {
 		$bpfd -> close();
 		$kiwi -> done();
 		#==========================================
-		# Get Grub2 stage files
+		# Get Grub2 stage and theming files
 		#------------------------------------------
-		$kiwi -> info ("Importing grub2 stage files");
+		$kiwi -> info ("Importing grub2 stage and theming files");
 		if ($zipped) {
 			$status= qxx (
-				"$unzip | (cd $tmpdir && cpio -i -d $stages 2>&1)"
+				"$unzip | (cd $tmpdir && cpio -i -d $figure -d $stages 2>&1)"
 			);
 		} else {
 			$status= qxx (
-				"cat $initrd|(cd $tmpdir && cpio -i -d $stages 2>&1)"
+				"cat $initrd|(cd $tmpdir && cpio -i -d $figure -d $stages 2>&1)"
 			);
 		}
 		#==========================================
 		# check Grub2 stage files...
 		#------------------------------------------
 		if (glob($tmpdir."/usr/lib/grub2/$grubpc/*")) {
+			$status = qxx (
+				"mv $tmpdir/usr/share/grub2/themes $tmpdir/boot/grub2 2>&1"
+			);
 			$status = qxx (
 				"mv $tmpdir/usr/lib/grub2/$grubpc/* $tmpdir/boot/grub2 2>&1"
 			);
