@@ -64,7 +64,7 @@
 		<opensusePattern name="base"/>
 		<opensuseProduct name="openSUSE"/>
 		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
-		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="grub2-branding-openSUSE"/>
 		<package name="ifplugd"/>
 		<package name="iputils"/>
 		<package name="vim"/>
