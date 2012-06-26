@@ -5845,7 +5845,6 @@ function cleanImage {
 		[ ! -z "$AOEROOT" ]       || \
 		[ ! -z "$COMBINED_IMAGE" ]
 	then
-		export ROOTFS_FSCK="0"
 		return
 	fi
 	#======================================
@@ -5971,6 +5970,16 @@ function bootImage {
 	if which plymouthd &>/dev/null;then
 		plymouth update-root-fs --new-root-dir=/mnt
 	fi
+	#======================================
+	# export root block device
+	#--------------------------------------
+	if [ -b "$imageRootDevice" ];then
+		export ROOTFS_BLKDEV=$imageRootDevice
+	fi
+	#======================================
+	# rootfs is clean, skip check
+	#--------------------------------------
+	export ROOTFS_FSCK="0"
 	#======================================
 	# hand over control to init
 	#--------------------------------------
