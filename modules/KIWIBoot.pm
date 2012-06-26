@@ -3045,6 +3045,10 @@ sub setupBootLoaderConfiguration {
 	my %type;
 	my $title;
 	#==========================================
+	# store loader type in object instance
+	#------------------------------------------
+	$this->{loader} = $loader;
+	#==========================================
 	# setup boot loader default boot label/nr
 	#------------------------------------------
 	my $defaultBootNr = 0;
@@ -5222,9 +5226,12 @@ sub makeLabel {
 	# grub handles spaces as "_", so we replace
 	# each space with an underscore
 	# ----
-	my $this = shift;
+	my $this  = shift;
 	my $label = shift;
-	$label =~ s/ /_/g;
+	my $loader= $this->{loader};
+	if ($loader ne "grub2") {
+		$label =~ s/ /_/g;
+	}
 	return $label;
 }
 
