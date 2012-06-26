@@ -2444,6 +2444,9 @@ sub getImageConfig {
 	}
 	if ($name) {
 		$result{kiwi_iname} = $name;
+		if ($type{type} eq "cpio") {
+			$result{kiwi_cpio_name} = $name;
+		}
 	}
 	if ($dname) {
 		$result{kiwi_displayname} = quotemeta $dname;

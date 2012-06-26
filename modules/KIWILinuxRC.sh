@@ -6013,7 +6013,7 @@ function bootImage {
 	if \
 		[ ! "$haveClicFS" = "yes" ] && \
 		[ -z "$NFSROOT" ]           && \
-		[[ $kiwi_iname =~ initrd-.*-suse ]]
+		[[ $kiwi_cpio_name =~ initrd-.*-suse ]]
 	then
 		# for systemd debugging set: --log-level=debug --log-target=kmsg
 		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt $init $option
