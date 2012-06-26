@@ -1150,6 +1150,14 @@ function suseGFXBoot {
 					$(echo $kiwi_language | tr "," " ") --default-language en_US
 			fi
 		fi
+	elif [ -d /usr/share/grub2/themes/$theme ];then
+		#======================================
+		# use boot theme from grub2-branding
+		#--------------------------------------
+		echo "using grub2 branding data"
+		mv /boot/grub2/themes/$theme/background.png \
+			/usr/share/grub2/themes/$theme
+		mkdir /image/loader
 	else
 		#======================================
 		# no graphics boot possible
