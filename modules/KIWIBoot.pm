@@ -2739,7 +2739,6 @@ sub setupBootLoaderStages {
 	if ($loader eq "grub2") {
 		my $grubpc = "i386-pc";
 		my $stages = "'usr/lib/grub2/$grubpc/*'";
-		my $figure = "'image/loader/message'";
 		my $unzip  = "$zipper -cd $initrd 2>&1";
 		$status = qxx ("mkdir -p $tmpdir/boot/grub2 $tmpdir/boot/grub 2>&1");
 		$result = $? >> 8;
@@ -2769,24 +2768,17 @@ sub setupBootLoaderStages {
 		$bpfd -> close();
 		$kiwi -> done();
 		#==========================================
-		# Get Grub graphics boot message
+		# Get Grub2 stage files
 		#------------------------------------------
-		$kiwi -> info ("Importing graphics boot message and stage files");
+		$kiwi -> info ("Importing grub2 stage files");
 		if ($zipped) {
 			$status= qxx (
-				"$unzip | (cd $tmpdir && cpio -i -d $figure -d $stages 2>&1)"
+				"$unzip | (cd $tmpdir && cpio -i -d $stages 2>&1)"
 			);
 		} else {
 			$status= qxx (
-				"cat $initrd|(cd $tmpdir && cpio -i -d $figure -d $stages 2>&1)"
+				"cat $initrd|(cd $tmpdir && cpio -i -d $stages 2>&1)"
 			);
-		}
-		if (-e $tmpdir."/image/loader/message") {
-			$status = qxx ("mv $tmpdir/$figure $tmpdir/boot/message 2>&1");
-			$result = $? >> 8;
-			$kiwi -> done();
-		} else {
-			$kiwi -> skipped();
 		}
 		#==========================================
 		# check Grub2 stage files...
@@ -2795,26 +2787,24 @@ sub setupBootLoaderStages {
 			$status = qxx (
 				"mv $tmpdir/usr/lib/grub2/$grubpc/* $tmpdir/boot/grub2 2>&1"
 			);
-			$result = $? >> 8;
 		} else {
 			chomp $status;
-			$kiwi -> error   ("Failed importing grub2 stages: $status");
+			$kiwi -> skipped ();
+			$kiwi -> warning ("Failed importing grub2 stages: $status");
 			$kiwi -> skipped ();
 			$kiwi -> info    ("Trying to use grub2 stages from local machine");
 			$status = qxx (
 				"cp /usr/lib/grub2/$grubpc/* $tmpdir/boot/grub2 2>&1"
 			);
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed();
-			} else {
-				$kiwi -> done();
-			}
 		}
+		$result = $? >> 8;
 		if ($result != 0) {
+			$kiwi -> failed ();
 			$kiwi -> error  ("Failed importing grub2 stages: $status");
 			$kiwi -> failed ();
 			return;
+		} else {
+			$kiwi -> done();
 		}
 		#==========================================
 		# Create core/eltorito grub2 boot images
