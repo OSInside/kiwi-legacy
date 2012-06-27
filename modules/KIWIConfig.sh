@@ -919,7 +919,10 @@ function suseStripInitrd {
 	#==========================================
 	# Remove unneeded files
 	#------------------------------------------
-	echo "$kiwi_strip_delete" | xargs rm -rfv
+	for delete in $kiwi_strip_delete;do
+		echo "Removing file/directory: $delete"
+		rm -rf $delete
+	done
 	#==========================================
 	# remove unneeded tools
 	#------------------------------------------
