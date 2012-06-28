@@ -3627,13 +3627,24 @@ function setupNetwork {
 	#======================================
 	# wait for any preferred interface(s)
 	#--------------------------------------
-	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
-		for try_iface in $prefer_iface ; do
-			if [ -s /var/lib/dhcpcd/dhcpcd-$try_iface.info ] &&
-				grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info
-			then
-				break 2
-			fi
+	for j in 1 2 ;do
+		for i in 1 2 3 4 5 6 7 8 9 10 11;do
+			for try_iface in $prefer_iface ; do
+				if [ -s /var/lib/dhcpcd/dhcpcd-$try_iface.info ] &&
+					grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info
+				then
+					break 3
+				fi
+			done
+			sleep 2
+		done
+		# /.../
+		# we are behind the dhcpcd timeout 20s so the only thing
+		# we can do now is to try again
+		# ----
+		for try_iface in $DHCPCD_STARTED; do
+			dhcpcd $opts -T $try_iface \
+				> /var/lib/dhcpcd/dhcpcd-$try_iface.info &
 		done
 		sleep 2
 	done
