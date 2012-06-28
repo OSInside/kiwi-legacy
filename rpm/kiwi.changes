@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Jun 28 14:13:54 CEST 2012 - ms@suse.de
+
+- netboot: dhcpcd works with timeout 20s, kiwi used 40s, so one half
+  of the time it waited with no reason. This patch runs 'dhcpcd -T'
+  again after 22s, so the time is used effectively. It also helps in
+  situatios when the link needs more time to start, e.g with
+  wpa_supplicant and the first dhcp packets are lost.
+
+-------------------------------------------------------------------
 Mon Jun 25 16:07:52 CEST 2012 - ms@suse.de
 
 - netboot: improved testing for networks by using -T option (fate #313338)
