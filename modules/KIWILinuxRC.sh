@@ -3266,7 +3266,17 @@ function setupHybridPersistent {
 	#======================================
 	# store hybrid write partition device
 	#--------------------------------------
-	export HYBRID_RW=$(ddn $biosBootDevice $HYBRID_PERSISTENT_PART)
+	# /.../
+	# use a loop device here because kernel 3.x refuses
+	# to mount a partition if the disk itself was already
+	# mounted. In case of a hybrid iso the disk device
+	# e.g /dev/sda represents the iso and is therefore
+	# mounted in any case. The same trick is used in
+	# createHybridPersistent when creating the filesystem
+	# ----
+	HYBRID_RW=$(ddn $biosBootDevice $HYBRID_PERSISTENT_PART)
+	HYBRID_RW=$(losetup -f --show $HYBRID_RW)
+	export HYBRID_RW
 }
 #======================================
 # CDUmount
@@ -6661,11 +6671,13 @@ function createHybridPersistent {
 	#======================================
 	# create filesystem on write partition
 	#--------------------------------------
-	if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid $(ddn $device $disknr);then
+	local loop_dev=$(losetup -f --show $(ddn $device $disknr))
+	if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid $loop_dev;then
 		Echo "Failed to create hybrid persistent filesystem"
 		Echo "Persistent writing deactivated"
 		unset kiwi_hybridpersistent
 	fi
+	losetup -d $loop_dev
 }
 #======================================
 # callPartitioner
