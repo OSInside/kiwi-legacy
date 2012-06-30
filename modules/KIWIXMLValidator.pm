@@ -2,9 +2,9 @@
 # FILE          : KIWIXMLValidator.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -716,9 +716,10 @@ sub __checkProfileNames {
 			$kiwi -> failed();
 			return;
 		}
-		if ($name =~ /^all$/) {
+		if ($name =~ /(^all$)|(^kiwi_default$)/) {
+			my $match = $1 || $2;
 			my $kiwi = $this -> {kiwi};
-			my $msg = 'Name of a profile may not be set to "all".';
+			my $msg = "Name of a profile may not be set to '$match'.";
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
 			return;

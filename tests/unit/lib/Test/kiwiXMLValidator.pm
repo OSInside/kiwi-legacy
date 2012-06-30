@@ -649,7 +649,10 @@ sub test_profileName {
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg ;
 		if ($iConfFile =~ /profileNameInvalid_2.xml/) {
-			$expectedMsg = 'Name of a profile may not be set to "all".';
+			$expectedMsg = "Name of a profile may not be set to 'all'.";
+		} elsif ($iConfFile =~ /profileNameInvalid_3.xml/) {
+			$expectedMsg = 'Name of a profile may not be set to '
+				. "'kiwi_default'.";
 		} else {
 			$expectedMsg = 'Name of a profile may not contain whitespace.';
 		}
