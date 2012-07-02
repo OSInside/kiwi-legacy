@@ -5956,6 +5956,10 @@ function bootImage {
 		fi
 	fi
 	#======================================
+	# run resetBootBind
+	#--------------------------------------
+	resetBootBind /mnt
+	#======================================
 	# kill initial tail and utimer
 	#--------------------------------------
 	. /iprocs
@@ -5977,10 +5981,8 @@ function bootImage {
 	umount proc &>/dev/null && \
 	umount proc &>/dev/null
 	#======================================
-	# run resetBootBind preinit cleanImage
+	# run preinit and cleanImage
 	#--------------------------------------
-	chroot /mnt /bin/bash -c \
-		". /include ; exec 2>>$ELOG_FILE ; set -x ; resetBootBind"
 	chroot /mnt /bin/bash -c \
 		"/preinit"
 	chroot /mnt /bin/bash -c \
@@ -8153,7 +8155,11 @@ function resetBootBind {
 	# symbolic link to make the suse kernel update process
 	# to work correctly
 	# ----
-	local bootdir=boot_bind
+	local bprefix=$1
+	local bootdir=$bprefix/boot_bind
+	if [ ! -e /proc/mounts ];then
+		mount -t proc proc /proc
+	fi
 	#======================================
 	# find bind boot dir
 	#--------------------------------------
@@ -8163,7 +8169,7 @@ function resetBootBind {
 	#======================================
 	# reset bind mount to standard boot dir
 	#--------------------------------------
-	umount /boot
+	umount $bprefix/boot
 	mv /$bootdir/boot /$bootdir/tmp
 	mv /$bootdir/tmp/* /$bootdir
 	rmdir /$bootdir/tmp
@@ -8172,14 +8178,13 @@ function resetBootBind {
 	#======================================
 	# update fstab entry
 	#--------------------------------------
-	cat /etc/fstab | grep -v ^boot_bind > /etc/fstab.new
-	mv /etc/fstab.new /etc/fstab
-	cat /etc/fstab | sed -e s@/$bootdir@/boot@ > /etc/fstab.new
-	mv /etc/fstab.new /etc/fstab
+	grep -v ^boot_bind $bprefix/etc/fstab > $bprefix/etc/fstab.new
+	mv $bprefix/etc/fstab.new $bprefix/etc/fstab
+	sed -i -e s@/boot_bind@/boot@ $bprefix/etc/fstab
 	#======================================
 	# mount boot again
 	#--------------------------------------
-	mount $imageBootDevice /boot
+	chroot $bprefix mount $imageBootDevice /boot
 	#======================================
 	# check for syslinux requirements
 	#--------------------------------------	
@@ -8199,9 +8204,9 @@ function resetBootBind {
 			break
 		done
 		IFS=$IFS_ORIG
-		mkdir -p /boot/boot
-		mv /boot/$kernel /boot/boot/
-		mv /boot/$initrd /boot/boot/
+		mkdir -p $bprefix/boot/boot
+		mv $bprefix/boot/$kernel $bprefix/boot/boot/
+		mv $bprefix/boot/$initrd $bprefix/boot/boot/
 	fi
 }
 #======================================
