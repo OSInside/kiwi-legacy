@@ -20,6 +20,7 @@ package KIWIManager;
 require Exporter;
 use strict;
 use Carp qw (cluck);
+use Env;
 use FileHandle;
 use File::Basename;
 use Config::IniFiles;
@@ -262,12 +263,25 @@ sub setupScreen {
 	print $cd "logfile $screenLogs\n";
 	print $cd "logfile flush 1\n";
 	$cd -> close();
-
 	#==========================================
 	# Global exports
 	#------------------------------------------
 	print $fd "export PBL_SKIP_BOOT_TEST=1"."\n";
-
+	#==========================================
+	# Global exports [ proxy setup ]
+	#------------------------------------------
+	if ($ENV{http_proxy}) {
+		print $fd "export http_proxy=\"$ENV{http_proxy}\""."\n";
+	}
+	if ($ENV{ftp_proxy}) {
+		print $fd "export ftp_proxy=\"$ENV{ftp_proxy}\""."\n";
+	}
+	if ($ENV{https_proxy}) {
+		print $fd "export https_proxy=\"$ENV{https_proxy}\""."\n";
+	}
+	if ($ENV{no_proxy}) {
+		print $fd "export no_proxy=\"$ENV{no_proxy}\""."\n";
+	}
 	#==========================================
 	# return screen call file handle
 	#------------------------------------------
