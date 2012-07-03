@@ -450,6 +450,8 @@ sub init {
 	# need resolv.conf/hosts for internal chroot name resolution
 	qxx (" cp /etc/resolv.conf $root/etc 2>&1 ");
 	qxx (" cp /etc/hosts $root/etc 2>&1 ");
+	# need /etc/sysconfig/proxy for internal chroot proxy usage
+	qxx (" cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1 ");
 	$kiwi -> done();
 	#==========================================
 	# Create package keys
@@ -556,6 +558,14 @@ sub upgrade {
 		$this->{needHosts} = 1;
 	}
 	#==========================================
+	# make sure proxy works
+	#------------------------------------------
+	$this->{needProxy} = 0;
+	if (! -f "$root/etc/sysconfig/proxy") {
+		qxx ("cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1");
+		$this->{needProxy} = 1;
+	}
+	#==========================================
 	# Check and set lock
 	#------------------------------------------
 	$manager -> checkExclusiveLock();
@@ -627,6 +637,14 @@ sub prepareTestingEnvironment {
 		$this->{needHosts} = 1;
 	}
 	#==========================================
+	# make sure proxy works
+	#------------------------------------------
+	$this->{needProxy} = 0;
+	if (! -f "$root/etc/sysconfig/proxy") {
+		qxx ("cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1");
+		$this->{needProxy} = 1;
+	}
+	#==========================================
 	# Check and set lock
 	#------------------------------------------
 	$manager -> checkExclusiveLock();
@@ -677,6 +695,7 @@ sub cleanupResolvConf {
 	my $root = $this->{root};
 	my $needResolvConf = $this->{needResolvConf};
 	my $needHosts = $this->{needHosts};
+	my $needProxy = $this->{needProxy};
 	if ($needResolvConf) {
 		qxx ("rm -f $root/etc/resolv.conf");
 		undef $this->{needResolvConf};
@@ -684,6 +703,10 @@ sub cleanupResolvConf {
 	if ($needHosts) {
 		qxx ("rm -f $root/etc/hosts");
 		undef $this->{needHosts};
+	}
+	if ($needProxy) {
+		qxx ("rm -f $root/etc/sysconfig/proxy");
+		undef $this->{needProxy};
 	}
 }
 
@@ -1227,6 +1250,23 @@ sub setup {
 			$kiwi -> info ("Cleanup temporary copy of hosts");
 			qxx ("mv $root/etc/hosts.rpmnew $root/etc/hosts");
 			$kiwi -> done ();
+		}
+	}
+	#========================================
+	# cleanup temporary copy of proxy
+	#----------------------------------------
+	if (! -e "$imageDesc/root/etc/sysconfig/proxy") {
+		# restore only if overlay tree doesn't contain a proxy setup
+		if ((-f "$root/etc/sysconfig/proxy") && (-f "/etc/sysconfig/proxy")) {
+			my $data = qxx (
+				"diff -q /etc/sysconfig/proxy $root/etc/sysconfig/proxy"
+			);
+			my $code = $? >> 8;
+			if ($code == 0) {
+				$kiwi -> info ("Cleanup temporary copy of sysconfig/proxy");
+				qxx ("rm -f $root/etc/sysconfig/proxy");
+				$kiwi -> done ();
+			}
 		}
 	}
 	#========================================
