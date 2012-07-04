@@ -2410,7 +2410,7 @@ sub setupBootDisk {
 	# cleanup temp directory
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
-	if ($haveDiskDevice)  {
+	if (($haveDiskDevice) && (! $main::targetStudio)) {
 		if (($type{installiso} ne "true") && ($type{installstick} ne "true")) {
 			#==========================================
 			# create image file from disk device
