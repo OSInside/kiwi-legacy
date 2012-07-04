@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jul  4 16:48:45 CEST 2012 - ms@suse.de
+
+- don't dump an image file when in --targetstudio mode
+
+-------------------------------------------------------------------
 Thu Jun 28 14:13:54 CEST 2012 - ms@suse.de
 
 - netboot: dhcpcd works with timeout 20s, kiwi used 40s, so one half
