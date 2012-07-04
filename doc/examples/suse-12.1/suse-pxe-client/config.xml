@@ -60,6 +60,9 @@
 		<package name="xorg-x11"/>
 		<package name="xorg-x11-server"/>
 		<package name="xorg-x11-driver-video"/>
+		<package name="xorg-x11-fonts"/>
+		<package name="xorg-x11-fonts-core"/>
+		<package name="xorg-x11-driver-input"/>
 		<package name="xterm"/>
 		<package name="xdmbgrd"/>
 		<package name="xkeyboard-config"/>
