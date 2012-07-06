@@ -218,6 +218,7 @@ Requires:       virt-utils
 %if 0%{?suse_version} >= 1130
 Requires:       virt-utils
 %endif
+%endif
 Summary:        OpenSuSE - KIWI Image System ISO boot
 License:        GPL-2.0+
 Group:          System/Management
@@ -312,6 +313,7 @@ Requires:       virt-utils
 %else
 %if 0%{?suse_version} >= 1130
 Requires:       virt-utils
+%endif
 %endif
 License:        GPL-2.0+
 Group:          System/Management
