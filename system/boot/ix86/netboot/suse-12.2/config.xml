@@ -192,7 +192,7 @@
 		<package name="tar"/>
 		<package name="xfsprogs"/>
 	</packages>
-	<packages type="bootstrap" profiles="diskless">
+	<packages type="bootstrap">
 		<package name="atftp"/>
 		<package name="bc"/>
 		<package name="busybox"/>
