@@ -206,10 +206,17 @@ Authors:
 %package -n kiwi-desc-isoboot
 Requires:       kiwi = %{version}
 Requires:       syslinux
+Requires:       e2fsprogs
 %if %{suse_version} > 1010
 Requires:       genisoimage
 %else
 Requires:       mkisofs
+%endif
+%ifarch ppc ppc64 s390 s390x
+Requires:       virt-utils
+%else
+%if 0%{?suse_version} >= 1130
+Requires:       virt-utils
 %endif
 Summary:        OpenSuSE - KIWI Image System ISO boot
 License:        GPL-2.0+
@@ -249,7 +256,6 @@ Requires:       parted
 Requires:       device-mapper-multipath
 Requires:       parted
 %endif
-
 %ifarch %ix86 x86_64
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
@@ -301,6 +307,12 @@ Meta-package to pull in all requires to build a vmxboot media.
 %package -n kiwi-desc-netboot
 Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System PXE network boot
+%ifarch ppc ppc64 s390 s390x
+Requires:       virt-utils
+%else
+%if 0%{?suse_version} >= 1130
+Requires:       virt-utils
+%endif
 License:        GPL-2.0+
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -354,7 +366,6 @@ Requires:       parted
 Requires:       device-mapper-multipath
 Requires:       parted
 %endif
-
 %ifarch %ix86 x86_64
 Requires:       grub
 %endif
