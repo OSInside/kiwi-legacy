@@ -26,7 +26,8 @@ for os in $oses; do
 			echo -n "$package "
 			unset MISSING
 		fi
-		done < <( sed '/<packages type="delete">/,/<\/packages>/d' "$file" | sed -En 's,.*package name="([^"]*)"( arch="([^"]*)")?.*,\1 \3,p' )
+		done < <( sed '/<packages type="delete">/,/<\/packages>/d' "$file" | perl -e 'while (<STDIN>) { if ($_ =~ /.*package name="([^"]*)"( arch="([^"]*)")?.*/ ) { print $1." ".$3."\n"; }; }' 
+ )
 done
 
 [ -z "$MISSING" ] || echo "ERROR_NO_DEPENDENCIES_FOUND"
