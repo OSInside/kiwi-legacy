@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Jul 10 15:43:53 CEST 2012 - ms@suse.de
+
+- suseStripKernel has to be called before suseStripInitrd when
+  inside the old studio containment. That's because all the
+  cmd_real overwrites studio does are removed by suseStripInitrd
+  which causes trouble on all subsequent calls. In order to
+  change that with respect to commit 8eaf7ea6f (bnc #766720)
+  I had also had to move out suseStripModules and suseStripFirmware
+  as extra calls inside the images.sh scripts
+
+-------------------------------------------------------------------
 Wed Jul  4 16:48:45 CEST 2012 - ms@suse.de
 
 - don't dump an image file when in --targetstudio mode
