@@ -1578,8 +1578,6 @@ function suseStripKernel {
 			popd
 		done
 	done
-	suseStripModules
-	suseStripFirmware
 }
 
 #======================================

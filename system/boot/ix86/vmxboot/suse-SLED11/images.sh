@@ -10,6 +10,11 @@ echo "Configure image: [$kiwi_iname]..."
 basePackBootIncludes
 
 #==========================================
+# remove unneded kernel files
+#------------------------------------------
+suseStripKernel
+
+#==========================================
 # setup gfxboot
 #------------------------------------------
 suseGFXBoot SLED grub
@@ -33,7 +38,8 @@ baseUnpackBootIncludes
 #==========================================
 # remove unneded kernel files
 #------------------------------------------
-suseStripKernel
+suseStripModules
+suseStripFirmware
 
 #==========================================
 # umount /proc
