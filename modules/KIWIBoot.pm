@@ -2815,9 +2815,12 @@ sub setupBootLoaderStages {
 		#------------------------------------------
 		$kiwi -> info ("Creating grub2 core boot image");
 		my $core    = "$tmpdir/boot/grub2/core.img";
-		my $modules = "biosdisk part_msdos part_gpt ext2 iso9660 chain";
+		my @modules = (
+			'biosdisk','part_msdos','part_gpt','ext2',
+			'iso9660','chain','normal','linux','echo'
+		);
 		$status = qxx (
-			"grub2-mkimage -O i386-pc -v -o $core -c $bootfile $modules 2>&1"
+			"grub2-mkimage -O i386-pc -v -o $core -c $bootfile @modules 2>&1"
 		);
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -4173,7 +4176,7 @@ sub installBootLoader {
 			# install grub2 into MBR
 			#------------------------------------------
 			$status = qxx (
-				"grub2-setup -vr '(hd0)' -d $stages -m $dmfile $diskname 2>&1"
+				"grub2-bios-setup -v -d $stages -m $dmfile $diskname 2>&1"
 			);
 			$result = $? >> 8;
 		} else {
@@ -4184,7 +4187,7 @@ sub installBootLoader {
 			$rdev = readlink ($rdev);
 			$rdev =~ s/\.\./\/dev/;
 			$status = qxx (
-				"grub2-setup -vfr '(hd0,1)' -d $stages -m $dmfile $rdev 2>&1"
+				"grub2-bios-setup -vf -d $stages -m $dmfile $rdev 2>&1"
 			);
 			$result = $? >> 8;
 		}
