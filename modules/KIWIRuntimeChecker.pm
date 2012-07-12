@@ -322,7 +322,7 @@ sub __checkFilesystemTool {
 			$toolError = 1;
 		}
 		my $haveTool;
-		if ($flag && $flag eq 'clic') {
+		if ($flag && $flag =~ /clic|clic_udf/) {
 			$haveTool = $this -> __isFsToolAvailable('clicfs');
 			$checkedFS = 'clicfs';
 		} elsif ($flag && $flag eq 'compressed') {

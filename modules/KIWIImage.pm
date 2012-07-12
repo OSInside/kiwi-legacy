@@ -1641,7 +1641,7 @@ sub createImageLiveCD {
 				$namero = $namerw;
 				last SWITCH;
 			};
-			/^clic$/ && do {
+			/^(clic|clic_udf)$/ && do {
 				$kiwi -> info ("Creating clicfs read only filesystem...\n");
 				if (! $this -> createImageClicFS ( $namero )) {
 					$this -> restoreSplitExtend ();
@@ -2139,6 +2139,9 @@ sub createImageLiveCD {
 	}
 	$attr .= ' -p "'.$this->{gdata}->{Preparer}.'"';
 	$attr .= ' -publisher "'.$this->{gdata}->{Publisher}.'"';
+	if ((defined $stype{flags}) && ($stype{flags} eq "clic_udf")) {
+		$attr .= " -allow-limited-size -udf";
+	}
 	if (! defined $gzip) {
 		$attr .= " -iso-level 4"; 
 	}

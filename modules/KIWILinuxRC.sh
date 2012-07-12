@@ -2820,6 +2820,7 @@ function probeFileSystem {
 		vfat)        FSTYPE=vfat ;;
 		clicfs)      FSTYPE=clicfs ;;
 		xfs)         FSTYPE=xfs ;;
+		udf)         FSTYPE=udf ;;
 		*)
 			FSTYPE=unknown
 		;;
@@ -3155,6 +3156,9 @@ function CDMountOption {
 	local id=$(blkid -o value -s TYPE $1)
 	if [ "$id" = "iso9660" ];then
 		echo "-t iso9660"
+	fi
+	if [ "$id" = "udf" ]; then
+		echo "-t udf"
 	fi
 }
 #======================================

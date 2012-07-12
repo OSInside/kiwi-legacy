@@ -54,6 +54,7 @@
 		<file name="fs/fuse/*"/>
 		<file name="fs/jbd/*"/>
 		<file name="fs/jbd2/*"/>
+		<file name="fs/udf/*"/>
 		<file name="fs/mbcache.ko"/>
 		<file name="fs/nls/nls_cp437.ko"/>
 		<file name="fs/nls/nls_iso8859-1.ko"/>
