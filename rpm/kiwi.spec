@@ -439,7 +439,9 @@ Recommends:     atftp
 Recommends:     gfxboot
 Recommends:     memtest86+
 Recommends:     lxc
+%if 0%{?suse_version} > 1210
 Recommends:     grub2-branding-openSUSE
+%endif
 %endif
 
 %description -n kiwi-media-requires
