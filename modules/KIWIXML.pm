@@ -81,12 +81,12 @@ sub new {
 		return;
 	}
 	if (! $main::global) {
-		$kiwi -> error  ("Globals object not found");
+		$kiwi -> error  ('Globals object not found');
 		$kiwi -> failed ();
 		return;
 	}
 	if (! $cmdL) {
-		$kiwi -> error  ("No commandline reference specified");
+		$kiwi -> error  ('No commandline reference specified');
 		$kiwi -> failed ();
 		return;
 	}
@@ -97,6 +97,15 @@ sub new {
 	$this->{arch} = $arch;
 	$this->{gdata}= $main::global -> getGlobals();
 	$this->{cmdL} = $cmdL;
+	$this->{buildType} = $imageType;
+	my @selectProfs;
+	if ($reqProfiles) {
+		@selectProfs = @{$reqProfiles};
+		push @selectProfs, 'kiwi_default';
+	} else {
+		@selectProfs = ('kiwi_default',);
+	}
+	$this->{selectedProfiles} = \@selectProfs;
 	#==========================================
 	# Lookup XML configuration file
 	#------------------------------------------
@@ -155,6 +164,18 @@ sub new {
 	if ($addType) {
 		$this -> addSimpleType ($imageType);
 	}
+	#==========================================
+	# Data structure containing the XML file information
+	#------------------------------------------
+	$this->{imageConfig} = {};
+	my %kDefProfile = (
+		'description' => 'KIWI default profile, store non quilified data',
+		'import'      => 'true' );
+	$this->{imageConfig}{kiwi_default}{profInfo} = \%kDefProfile;
+	#==========================================
+	# Populate imageConfig with profile data from config tree
+	#------------------------------------------
+	$this -> __populateProfileInfo();
 	#==========================================
 	# Read and create profile hash
 	#------------------------------------------
@@ -952,6 +973,50 @@ sub getPXEDeployInitrd {
 }
 
 #==========================================
+# setBuildProfiles
+#------------------------------------------
+sub setSelectionProfiles {
+	# ...
+	# Set the profiles for which AML data information is to be returned
+	# by this object
+	# ---
+	my $this    = shift;
+	my $profRef = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $profRef) {
+		$kiwi -> info ('No profiles specified, nothing selecetd');
+		$kiwi -> skipped();
+		return $this;
+	}
+	if (ref($profRef) ne "ARRAY") {
+		my $msg = 'Expecting array ref as argument for setSelectionProfiles';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my @profSelect = @{$profRef};
+	my @specProfs = @{$this->{availableProfiles}};
+	my @useProfs;
+	for my $prof (@profSelect) {
+		if (! grep { /^$prof$/x } @specProfs ) {
+			my $msg = "Cannot select profile '$prof', not specified in XML";
+			$kiwi -> info ($msg);
+			$kiwi -> skipped();
+			next;
+		}
+		push @useProfs, $prof;
+	}
+	if (@useProfs) {
+		my $info = join ', ', @useProfs;
+		$kiwi -> info ("Using profile(s): $info");
+		$kiwi -> done ();
+		push @useProfs, 'kiwi_default';
+		$this->{selectedProfiles} = \@useProfs;
+	}
+	return $this;
+}
+
+#==========================================
 # setPackageManager
 #------------------------------------------
 sub setPackageManager {
@@ -1563,28 +1628,38 @@ sub getTypes {
 #------------------------------------------
 sub getProfiles {
 	# ...
-	# Receive a list of profiles available for this image
+	# Return a list of profiles available for this image
 	# ---
 	my $this   = shift;
-	my $import = shift;
+	my %imgConf = %{ $this->{imageConfig} };
 	my @result;
-	if (! defined $this->{profilesNodeList}) {
-		return @result;
-	}
-	my $base = $this->{profilesNodeList} -> get_node(1);
-	if (! defined $base) {
-		return @result;
-	}
-	my @node = $base -> getElementsByTagName ("profile");
-	foreach my $element (@node) {
-		my $name = $element -> getAttribute ("name");
-		my $desc = $element -> getAttribute ("description");
-		my $incl = $element -> getAttribute ("import");
+	for my $prof (@{$this->{availableProfiles}}) {
 		my %profile = ();
-		$profile{name} = $name;
-		$profile{description} = $desc;
-		$profile{include} = $incl;
+		$profile{name}        = $prof;
+		$profile{description} = $imgConf{$prof}->{profInfo}->{description};
+		$profile{include}     = $imgConf{$prof}->{profInfo}->{import};
 		push @result, { %profile };
+	}
+	if ( $ENV{KIWI_OLD_XML_PROC} ) {
+		@result = ();
+		if (! defined $this->{profilesNodeList}) {
+			return @result;
+		}
+		my $base = $this->{profilesNodeList} -> get_node(1);
+		if (! defined $base) {
+			return @result;
+		}
+		my @node = $base -> getElementsByTagName ("profile");
+		foreach my $element (@node) {
+			my $name = $element -> getAttribute ("name");
+			my $desc = $element -> getAttribute ("description");
+			my $incl = $element -> getAttribute ("import");
+			my %profile = ();
+			$profile{name} = $name;
+			$profile{description} = $desc;
+			$profile{include} = $incl;
+			push @result, { %profile };
+		}
 	}
 	return @result;
 }
@@ -5264,6 +5339,42 @@ sub __populateDefaultProfiles {
 }
 
 #==========================================
+# __populateProfileInfo
+#------------------------------------------
+sub __populateProfileInfo {
+	# ...
+	# Populate the imageConfig member with the profile data from the XML file.
+	# ---
+	my $this = shift;
+	my @profNodes = $this->{systemTree} -> getElementsByTagName ('profile');
+	if (! @profNodes ) {
+		return $this;
+	}
+	my @availableProfiles;
+	for my $element (@profNodes) {
+		# Extract attributes
+		my $descript = $element -> getAttribute ('description');
+		my $import = $element -> getAttribute ('import');
+		if (! defined $import) {
+			$import = 'false'
+		}
+		my $profName = $element -> getAttribute ('name');
+		push @availableProfiles, $profName;
+		# Insert into internal data structure
+		my %profile = ( 'description' => $descript,
+						'import'      => $import );
+		$this->{imageConfig}{$profName}{profInfo} = \%profile;
+		# Handle default profile setting
+		if ( $import eq 'true') {
+			my @profs = ('kiwi_default', $profName);
+			$this->{selectedProfiles} = \@profs;
+		}
+	}
+	$this->{availableProfiles} = \@availableProfiles;
+	return $this;
+}
+
+#==========================================
 # __populateTypeInfo
 #------------------------------------------
 sub __populateTypeInfo {
@@ -5568,5 +5679,58 @@ sub __resolveArchitecture {
 }
 
 1;
+
+__END__
+
+=head1 KIWI XML processor and data store
+
+The XML object processes the configuration file and stores that data in the
+imageConf hash. The hash is layed out as a data structure that resembles the
+XML file and allows easy access to the data for the use by other objects.
+
+Other objects never get access to the internal structure and can only
+manipulate data via set methods or retrieve data via get methods. Wherever
+access to complex information is required the XML object will provide a
+specific object for this data. The provided object in turn has get and set
+methods to access the data.
+
+=cut
+
+=head1 imageConf data structure
+
+	imageConf = { profName =
+					{ info = { description = '',
+								import      = '' }
+					type = { bootPkgs    = (),
+								bootDelPkgs = (),
+								delPkgs     = (),
+								pkgs        = (),
+								arch = { bootPkgs    = (),
+										bootDelPkgs = (),
+										delPkgs     = (),
+										pkgs        = ()
+									}
+								arch = { ..... }
+								boot = '',
+								bootkernel = '',
+								......
+							}
+					type = { ........ }
+					bootPkgs    = (),
+					bootDelPkgs = (),
+					delPkgs     = (),
+					pkgs        = (),
+					arch = { ....... }
+					repoData = { 1 = { alias    = '',
+										location = (),
+										status   = '',
+										priority = '',
+										.....
+										}
+									2 = { ......... }
+								}
+					}
+				profName = { ....... }
+				}
 
 # vim: set noexpandtab:

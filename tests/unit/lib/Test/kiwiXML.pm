@@ -3775,4 +3775,111 @@ sub test_setRepository {
 	return;
 }
 
+#==========================================
+# test_setSelectionProfiles
+#------------------------------------------
+sub test_setSelectionProfiles {
+	# ...
+	# Verify proper operation of setSelectionProfiles method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfigNoDef';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @profsToUse = qw /profA profB/;
+	$xml = $xml -> setSelectionProfiles(\@profsToUse);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'Using profile(s): profA, profB';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	return;
+}
+
+#==========================================
+# test_setSelectionProfilesInvalidProf
+#------------------------------------------
+sub test_setSelectionProfilesInvalidProf {
+	# ...
+	# Verify proper operation of setSelectionProfiles method when called with
+	# improper selection
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @profsToUse = ('profTest',);
+	$xml = $xml -> setSelectionProfiles(\@profsToUse);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = "Cannot select profile 'profTest', "
+		. 'not specified in XML';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_not_null($xml);
+	return;
+}
+
+#==========================================
+# test_setSelectionProfilesNoArg
+#------------------------------------------
+sub test_setSelectionProfilesNoArg {
+	# ...
+	# Verify proper operation of setSelectionProfiles method when called with
+	# no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	$xml = $xml -> setSelectionProfiles();
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'No profiles specified, nothing selecetd';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_not_null($xml);
+	return;
+}
+
+#==========================================
+# test_setSelectionProfilesWrongArg
+#------------------------------------------
+sub test_setSelectionProfilesWrongArg {
+	# ...
+	# Verify proper operation of setSelectionProfiles method when called with
+	# an icorrect type argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	$xml = $xml -> setSelectionProfiles(1);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'Expecting array ref as argument for '
+		. 'setSelectionProfiles';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($xml);
+	return;
+}
+
 1;
