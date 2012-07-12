@@ -18,7 +18,7 @@
 
 Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
-Summary:        OpenSuSE - KIWI Image System
+Summary:        OpenSUSE - KIWI Image System
 License:        GPL-2.0
 Group:          System/Management
 Version:        5.03.32
@@ -120,7 +120,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %endif
 
 %description
-The OpenSuSE KIWI Image System provides a complete operating system
+The OpenSUSE KIWI Image System provides a complete operating system
 image solution for Linux supported hardware platforms as well as for
 virtualization systems like Xen.
 
@@ -153,7 +153,7 @@ Authors:
 	Jan Bornschlegel <jcborn@suse.com>
 
 %package -n kiwi-doc
-Summary:        OpenSuSE - KIWI Image System Documentation
+Summary:        OpenSUSE - KIWI Image System Documentation
 License:        LGPL-2.0+
 Group:          Documentation/Howto
 %if 0%{?suse_version} > 1120
@@ -170,12 +170,12 @@ Authors:
     Marcus Schaefer
 
 %package -n kiwi-tools
-Summary:        OpenSuSE - KIWI tools collection
+Summary:        OpenSUSE - KIWI tools collection
 License:        GPL-2.0+
 Group:          System/Management
 
 %description -n kiwi-tools
-This package contains the OpenSuSE - KIWI tools set usable in and
+This package contains the OpenSUSE - KIWI tools set usable in and
 outside of operating system images
 
 Authors:
@@ -186,7 +186,7 @@ Authors:
 
 %package -n kiwi-pxeboot
 Requires:       syslinux
-Summary:        OpenSuSE - KIWI Image System PXE boot structure
+Summary:        OpenSUSE - KIWI Image System PXE boot structure
 License:        GPL-2.0+
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -219,7 +219,7 @@ Requires:       virt-utils
 Requires:       virt-utils
 %endif
 %endif
-Summary:        OpenSuSE - KIWI Image System ISO boot
+Summary:        OpenSUSE - KIWI Image System ISO boot
 License:        GPL-2.0+
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -236,7 +236,7 @@ Authors:
 %package -n kiwi-desc-isoboot-requires
 Requires:       kiwi-desc-isoboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} isoboot %{myarch} %{mysystems}`)
-Summary:        OpenSuSE - KIWI Image System ISO boot required packages
+Summary:        OpenSUSE - KIWI Image System ISO boot required packages
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -277,7 +277,7 @@ Requires:       qemu
 Requires:       qemu-img
 %endif
 %endif
-Summary:        OpenSuSE - KIWI Image System Virtual Machine boot
+Summary:        OpenSUSE - KIWI Image System Virtual Machine boot
 License:        GPL-2.0+
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -294,7 +294,7 @@ Authors:
 %package -n kiwi-desc-vmxboot-requires
 Requires:       kiwi-desc-vmxboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}`)
-Summary:        OpenSuSE - KIWI Image System VMX boot required packages
+Summary:        OpenSUSE - KIWI Image System VMX boot required packages
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -307,7 +307,7 @@ Meta-package to pull in all requires to build a vmxboot media.
 
 %package -n kiwi-desc-netboot
 Requires:       kiwi = %{version}
-Summary:        OpenSuSE - KIWI Image System PXE network boot
+Summary:        OpenSUSE - KIWI Image System PXE network boot
 %ifarch ppc ppc64 s390 s390x
 Requires:       virt-utils
 %else
@@ -331,7 +331,7 @@ Authors:
 %package -n kiwi-desc-netboot-requires
 Requires:       kiwi-desc-netboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} netboot %{myarch} %{mysystems}`)
-Summary:        OpenSuSE - KIWI Image System NET boot required packages
+Summary:        OpenSUSE - KIWI Image System NET boot required packages
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -376,7 +376,7 @@ Requires:       genisoimage
 %else
 Requires:       mkisofs
 %endif
-Summary:        OpenSuSE - KIWI image descriptions
+Summary:        OpenSUSE - KIWI image descriptions
 License:        GPL-2.0
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -384,7 +384,7 @@ BuildArch:      noarch
 %endif
 
 %description -n kiwi-desc-oemboot
-This package contains the OpenSuSE - KIWI image descriptions. Each
+This package contains the OpenSUSE - KIWI image descriptions. Each
 image description exists in a single directory and contains an oemboot
 image description
 
@@ -395,7 +395,7 @@ Authors:
 %package -n kiwi-desc-oemboot-requires
 Requires:       kiwi-desc-oemboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} oemboot %{myarch} %{mysystems}`)
-Summary:        OpenSuSE - KIWI Image System oem boot required packages
+Summary:        OpenSUSE - KIWI Image System oem boot required packages
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -408,7 +408,7 @@ Meta-package to pull in all requires to build a oemboot media.
 
 %package -n kiwi-templates
 Requires:       kiwi-desc-vmxboot = %{version}
-Summary:        OpenSuSE - KIWI JeOS system image templates
+Summary:        OpenSUSE - KIWI JeOS system image templates
 License:        GPL-2.0+
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -427,7 +427,7 @@ Authors:
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
 
 %package -n kiwi-media-requires
-Summary:        OpenSuSE - packages which should be part of the DVD
+Summary:        OpenSUSE - packages which should be part of the DVD
 License:        GPL-2.0+
 Group:          System/Management
 %if 0%{?suse_version} > 1120
