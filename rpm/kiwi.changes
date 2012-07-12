@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jul 12 11:35:11 CEST 2012 - ms@suse.de
+
+- don't use cat when reading data from a disk block device
+  use qemu-img convert instead which takes care for sparse
+  information
+
+-------------------------------------------------------------------
 Tue Jul 10 15:43:53 CEST 2012 - ms@suse.de
 
 - suseStripKernel has to be called before suseStripInitrd when
