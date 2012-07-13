@@ -21,7 +21,7 @@ Name:           kiwi
 Summary:        OpenSUSE - KIWI Image System
 License:        GPL-2.0
 Group:          System/Management
-Version:        5.03.34
+Version:        5.03.35
 Release:        0
 # requirements to build packages
 BuildRequires:  gcc-c++
@@ -104,7 +104,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %if 0%{?sles_version}
 %define mysystems suse-SLES%{sles_version} suse-SLED%{sles_version}
 %else
-%define mysystems %(echo `export VER=%{suse_version}; echo "suse-${VER:0:2}.${VER:2:1}"`)
+%define mysystems %(echo `export VER=%{suse_version}; [ "$VER" == "1230" ] && VER="1220"; echo "suse-${VER:0:2}.${VER:2:1}"`)
 %endif
 %endif
 %if 0%{?rhel_version}
@@ -204,9 +204,9 @@ Authors:
 %ifarch %ix86 x86_64
 
 %package -n kiwi-desc-isoboot
+Requires:       e2fsprogs
 Requires:       kiwi = %{version}
 Requires:       syslinux
-Requires:       e2fsprogs
 %if %{suse_version} > 1010
 Requires:       genisoimage
 %else
@@ -308,6 +308,8 @@ Meta-package to pull in all requires to build a vmxboot media.
 %package -n kiwi-desc-netboot
 Requires:       kiwi = %{version}
 Summary:        OpenSUSE - KIWI Image System PXE network boot
+License:        GPL-2.0+
+Group:          System/Management
 %ifarch ppc ppc64 s390 s390x
 Requires:       virt-utils
 %else
@@ -315,8 +317,6 @@ Requires:       virt-utils
 Requires:       virt-utils
 %endif
 %endif
-License:        GPL-2.0+
-Group:          System/Management
 %if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
