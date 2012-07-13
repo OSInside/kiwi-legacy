@@ -5359,7 +5359,12 @@ function fetchFile {
 	#--------------------------------------
 	dump="dd bs=$chunk of=\"$dest\""
 	showProgress=0
-	if [ -x /usr/bin/dcounter ] && [ -f /etc/image.md5 ] && [ -b "$dest" ];then
+	if \
+		[ -x /usr/bin/dcounter ]      && \
+		[ -f /etc/image.md5 ]         && \
+		[ -b "$dest" ]                && \
+		[ -z "$disableProgressInfo" ]
+	then
 		showProgress=1
 		read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
 		needBytes=$((blocks * blocksize))
