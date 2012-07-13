@@ -85,22 +85,20 @@ sub new {
 		$kiwi -> skipped ();
 	}
 	my $locator = new KIWILocator($kiwi);
-	#==========================================
-	# Clean out any potential previous data
-	#------------------------------------------
 	my $dataDir = "/var/cache/kiwi/$manager";
-	if (! -d $dataDir) {
-		qxx ("mkdir -p $dataDir");
-	}
 	my $zyppConf;   # Configuration file for libzypp
 	my $zypperConf; # Configuration file for zypper
 	my $zconfig;
 	#==========================================
-	# Create package manager conf files
+	# Create package manager conf files/dirs
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		$zypperConf = "$dataDir/zypper.conf.$$";
-		$zyppConf = "$dataDir/zypp.conf.$$";
+		#==========================================
+		# zypper
+		#------------------------------------------
+		qxx ("mkdir -p $root/$dataDir");
+		$zypperConf = "$root/$dataDir/zypper.conf.$$";
+		$zyppConf = "$root/$dataDir/zypp.conf.$$";
 		qxx ("echo '[main]' > $zypperConf");
 		qxx ("echo '[main]' > $zyppConf");
 		$ENV{ZYPP_CONF} = $zyppConf;
@@ -132,6 +130,13 @@ sub new {
 			$zconfig->newval('main', 'arch', $targetArch);
 			$zconfig->RewriteConfig();
 			$kiwi -> done ();
+		}
+	} else {
+		#==========================================
+		# others...
+		#------------------------------------------
+		if (! -d $dataDir) {
+			qxx ("mkdir -p $dataDir");
 		}
 	}
 	my @channelList = ();
@@ -175,14 +180,16 @@ sub new {
 			$locator -> getExecPath('zypper'),
 			'--non-interactive',
 			'--no-gpg-checks',
-			"--reposd-dir $dataDir/repos",
-			"--cache-dir $dataDir",
+			'--pkg-cache-dir /var/cache/kiwi/packages',
+			"--reposd-dir $root/$dataDir/repos",
+			"--cache-dir $root/$dataDir",
 			"--config $zypperConf"
 		];
 		$this->{zypper_chroot} = [
 			"zypper",
 			'--non-interactive',
 			'--no-gpg-checks',
+			'--pkg-cache-dir /var/cache/kiwi/packages',
 			"--reposd-dir $dataDir/repos",
 			"--cache-dir $dataDir",
 			"--config $zypperConf"
@@ -850,16 +857,11 @@ sub setupInstallationSource {
 				}
 			}
 			my $sadd = "addrepo -f @zopts $alias";
-			my $sdel = "removerepo $alias";
 			if (! $chroot) {
 				$kiwi -> info ("Adding bootstrap zypper service: $alias");
-				my $repo = "$dataDir/repos/$alias.repo";
-				if (-f $repo) {
-					# /.../
-					# repo already exists. might be a leftover from an
-					# earlier attempt so we remove it first
-					# ----
-					$data = qxx ("@zypper --root \"$root\" $sdel 2>&1");
+				my $repo = "$root/$dataDir/repos/$alias.repo";
+				if (! -f $repo) {
+					$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
 					$code = $? >> 8;
 					if ($code != 0) {
 						$kiwi -> failed ();
@@ -867,27 +869,24 @@ sub setupInstallationSource {
 						return;
 					}
 				}
-				$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
-				$code = $? >> 8;
-				if ($code != 0) {
-					$kiwi -> failed ();
-					$kiwi -> error  ("zypper: $data");
-					return;
-				}
 				$kiwi -> done ();
 			} else {
 				my @zypper= @{$this->{zypper_chroot}};
 				my $alias_filename = $alias;
 				$alias_filename =~ s/\//_/g;
-				my $repo = "$dataDir/repos/$alias_filename.repo";
+				my $repo = "$root/$dataDir/repos/$alias_filename.repo";
 				if (! -f $repo) {
 					$kiwi -> info ("Adding chroot zypper service: $alias");
 					$data = qxx ("@kchroot @zypper $sadd 2>&1");
 				} else {
 					$kiwi -> info ("Updating chroot zypper service: $alias");
-					$data = qxx (
-					  'sed -i -e s"@\(baseurl=file:/\)@\1base-system/@" '.$repo
-					);
+					$data = qxx ("grep -q 'baseurl=file:/base-system' $repo");
+					$code = $? >> 8;
+					if ($code != 0) {
+						$data = qxx (
+							'sed -i -e s"@\(baseurl=file:/\)@\1base-system/@" '.$repo
+						);
+					}
 				}
 				$code = $? >> 8;
 				if ($code != 0) {
@@ -1053,47 +1052,6 @@ sub resetInstallationSource {
 			$kiwi -> info ("Removing smart channel(s): @channelList");
 			$data = qxx ("@kchroot $cmds @list -y 2>&1");
 			$code = $? >> 8;
-		}
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ($data);
-			return;
-		}
-		$kiwi -> done ();
-	}
-	#==========================================
-	# zypper
-	#------------------------------------------
-	if ($manager eq "zypper") {
-		my @zypper = @{$this->{zypper}};
-		my @list = @channelList;
-		my $cmds;
-		undef $ENV{ZYPP_LOCKFILE_ROOT};
-		if (! $chroot) {
-			$ENV{ZYPP_LOCKFILE_ROOT} = $root;
-			$cmds = "@zypper --root $root removerepo";
-		} else {
-			@zypper = @{$this->{zypper_chroot}};
-			$cmds = "@zypper removerepo";
-		}
-		if (! $chroot) {
-			$kiwi -> info ("Removing zypper service(s): @channelList");
-			foreach my $chl (@list) {
-				$data = qxx ("bash -c \"$cmds $chl 2>&1\"");
-				$code = $? >> 8;
-				if ($code != 0) {
-					last;
-				}
-			}
-		} else {
-			$kiwi -> info ("Removing zypper service(s): @channelList");
-			foreach my $chl (@list) {
-				$data = qxx ("@kchroot bash -c \"$cmds $chl 2>&1\"");
-				$code = $? >> 8;
-				if ($code != 0) {
-					last;
-				}
-			}
 		}
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -2295,16 +2253,6 @@ sub resetSource {
 		}
 	}
 	#==========================================
-	# zypper
-	#------------------------------------------
-	if ($manager eq "zypper") {
-		my @zypper = @{$this->{zypper}};
-		foreach my $channel (keys %{$source{public}}) {
-			$kiwi -> info ("Removing zypper service: $channel\n");
-			qxx ("@zypper removerepo $channel 2>&1");
-		}
-	}
-	#==========================================
 	# ensconce
 	#------------------------------------------
 	if ($manager eq "ensconce") {
@@ -2646,8 +2594,9 @@ sub createYumConfig {
 sub DESTROY {
 	my $this   = shift;
 	my $meta   = $this->{dataDir};
-	my $zypperConf = "$meta/zypper.conf.$$";
-	my $zyppConf   = "$meta/zypp.conf.$$";
+	my $root   = $this->{root};
+	my $zypperConf = "$root/$meta/zypper.conf.$$";
+	my $zyppConf   = "$root/$meta/zypp.conf.$$";
 	qxx ("rm -f $zypperConf $zyppConf");
 }
 
