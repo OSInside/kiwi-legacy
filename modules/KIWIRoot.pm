@@ -1248,7 +1248,7 @@ sub setupCacheMount {
 	# ---
 	my $this  = shift;
 	my $root  = $this->{root};
-	my @cache = ("/var/cache/kiwi/packages");
+	my @cache = ("/var/cache/kiwi");
 	my @mountList;
 	if (defined $this->{mountList}) {
 		@mountList = @{$this->{mountList}};
@@ -1409,7 +1409,7 @@ sub cleanMount {
 		my $code = $? >> 8;
 		if (($code != 0) && ($data !~ "not mounted")) {
 			$kiwi -> loginfo ("Umount failed: $data");
-			$kiwi -> warning ("Umount failed: calling lazy umount");
+			$kiwi -> warning ("Umount of $item failed: calling lazy umount");
 			my $data = qxx ("umount -l \"$item\" 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {

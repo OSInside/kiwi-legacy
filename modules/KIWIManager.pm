@@ -96,9 +96,9 @@ sub new {
 		#==========================================
 		# zypper
 		#------------------------------------------
-		qxx ("mkdir -p $root/$dataDir");
-		$zypperConf = "$root/$dataDir/zypper.conf.$$";
-		$zyppConf = "$root/$dataDir/zypp.conf.$$";
+		qxx ("mkdir -p $dataDir");
+		$zypperConf = "$dataDir/zypper.conf.$$";
+		$zyppConf = "$dataDir/zypp.conf.$$";
 		qxx ("echo '[main]' > $zypperConf");
 		qxx ("echo '[main]' > $zyppConf");
 		$ENV{ZYPP_CONF} = $zyppConf;
@@ -857,38 +857,47 @@ sub setupInstallationSource {
 				}
 			}
 			my $sadd = "addrepo -f @zopts $alias";
+			my $alias_filename = $alias;
+			$alias_filename =~ s/\//_/g;
+			my $repo = "$root/$dataDir/repos/$alias_filename.repo";
+			my $sed;
 			if (! $chroot) {
-				$kiwi -> info ("Adding bootstrap zypper service: $alias");
-				my $repo = "$root/$dataDir/repos/$alias.repo";
 				if (! -f $repo) {
+					$kiwi -> info ("Adding bootstrap zypper service: $alias");
 					$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
+				} else {
+					$kiwi -> info ("Updating bootstrap zypper service: $alias");
+					$data = qxx ("grep -q '^baseurl=file:/base-system' $repo");
 					$code = $? >> 8;
-					if ($code != 0) {
-						$kiwi -> failed ();
-						$kiwi -> error  ("zypper: $data");
-						return;
+					if ($code == 0) {
+						$sed = '@\(baseurl=file:/base-system\)@baseurl=file:@';
+						$data = qxx ('sed -i -e s"'.$sed.'" '.$repo);
+						$code = $? >> 8;
+					} else {
+						$code = 0;
 					}
+				}
+				if ($code != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("zypper: $data");
+					return;
 				}
 				$kiwi -> done ();
 			} else {
 				my @zypper= @{$this->{zypper_chroot}};
-				my $alias_filename = $alias;
-				$alias_filename =~ s/\//_/g;
-				my $repo = "$root/$dataDir/repos/$alias_filename.repo";
 				if (! -f $repo) {
 					$kiwi -> info ("Adding chroot zypper service: $alias");
 					$data = qxx ("@kchroot @zypper $sadd 2>&1");
 				} else {
 					$kiwi -> info ("Updating chroot zypper service: $alias");
-					$data = qxx ("grep -q 'baseurl=file:/base-system' $repo");
+					$data = qxx ("grep -q '^baseurl=file:/base-system' $repo");
 					$code = $? >> 8;
 					if ($code != 0) {
-						$data = qxx (
-							'sed -i -e s"@\(baseurl=file:/\)@\1base-system/@" '.$repo
-						);
+						$sed = '@\(baseurl=file:/\)@\1base-system/@';
+						$data = qxx ('sed -i -e s"'.$sed.'" '.$repo);
+						$code = $? >> 8;
 					}
 				}
-				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
 					$kiwi -> error  ("zypper: $data");
@@ -2594,9 +2603,8 @@ sub createYumConfig {
 sub DESTROY {
 	my $this   = shift;
 	my $meta   = $this->{dataDir};
-	my $root   = $this->{root};
-	my $zypperConf = "$root/$meta/zypper.conf.$$";
-	my $zyppConf   = "$root/$meta/zypp.conf.$$";
+	my $zypperConf = "$meta/zypper.conf.$$";
+	my $zyppConf   = "$meta/zypp.conf.$$";
 	qxx ("rm -f $zypperConf $zyppConf");
 }
 
