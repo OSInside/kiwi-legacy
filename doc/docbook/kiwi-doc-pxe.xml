@@ -124,8 +124,8 @@ DHCPD_INTERFACE="eth0"
       creates an image for a Wyse VX0 terminal with a 128MB flash card
       and 512MB of RAM. The image makes use of the <systemitem
         class="filesystem">squashfs</systemitem> compressed
-      filesystem and its root tree is deployed as unified (aufs) based
-      system. </para>
+      filesystem and its root tree is deployed as clicfs based
+      overlay system. </para>
 
 <screen>
 <command>cd</command> /usr/share/doc/packages/kiwi/examples

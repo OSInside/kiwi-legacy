@@ -82,23 +82,6 @@
     <variablelist>
       <varlistentry>
         <term><sgmltag class="attribute">flags</sgmltag>="<sgmltag
-            class="attvalue">unified</sgmltag>"</term>
-        <listitem>
-          <para>
-			Compressed and unified root tree based on squashfs and aufs.
-      		By design of the squashfs filesystem it is not possible
-			to write data on it. To be able to write on the filesystem another
-			filesystem called aufs is used. <systemitem class="filesystem"
-			>aufs</systemitem> is an overlay filesystem which allows to
-			combine two different filesystems into one. In case of a live
-			system <systemitem class="filesystem">aufs</systemitem> is used to
-			combine the squashfs compressed read only root tree with a tmpfs
-			RAM filesystem.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><sgmltag class="attribute">flags</sgmltag>="<sgmltag
             class="attvalue">compressed</sgmltag>"</term>
         <listitem>
           <para> Does filesystem compression with squashfs, but don’t
@@ -110,12 +93,14 @@
       </varlistentry>
       <varlistentry>
         <term><sgmltag class="attribute">flags</sgmltag>="<sgmltag
-            class="attvalue">clic</sgmltag>"</term>
+            class="attvalue">clic|clic_udf</sgmltag>"</term>
         <listitem>
           <para> Creates a FUSE based <systemitem class="filesystem"
               >clicfs</systemitem> image and allows write operations
             into a cow file. In case of an ISO the write happens into a
-            ramdisk. </para>
+            ramdisk. If clic_udf is specified the the iso is created
+			with an udf filesystem and thus this allows to create
+			live systems bigger than 4G</para>
         </listitem>
       </varlistentry>
       <varlistentry>

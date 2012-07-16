@@ -898,7 +898,40 @@ tar -cf kiwi-hooks.tgz kiwi-hooks/
             contains the standard basic commands. The
             <filename>/var/log/kiwi.boot</filename> boot log file may be
             consulted to develop a better understanding of the boot
-            failure.</para>
+            failure. In addition to the spawned shell process kiwi
+            also starts the dropbear ssh server if the environment
+            is suitable. Support for ssh into the boot image is possible
+            in the netboot and oemboot (in PXE boot mode) boot images.
+            For isoboot and vmxboot boot images there is no remote login
+            support because they don't setup a network. In order to have
+            dropbear installed as part of the boot image the following
+            needs to be added to the system image configuration:
+<screen>
+&lt;packages type="image"/&gt;
+    &lt;package name="dropbear" bootinclude="true"/&gt;
+&lt;/packages&gt;
+</screen>
+            It's required that the repo setup provides dropbear. Once
+            dropbear is there the kiwi boot code will start the service.
+            In order to access the boot image passwordless via ssh kiwi
+            provides a key pair whereas the pubkey is stored in the
+            authorized_keys file inside of the oem- and netboot images
+            for all supported OS versions. For login type:
+<screen>    
+ssh -i /usr/share/kiwi/keys/id_dropbear root@&lt;ip&gt;
+</screen>
+
+            It might be useful to have a copy tool like scp or rsync
+            as part of the boot image as well. Adding rsync as
+            bootincluded package does not increase the size of the
+            initrd much and would allow to extract e.g the kiwi boot
+            log as follows:
+
+<screen>
+RSYNC_RSH='ssh -i /usr/share/kiwi/keys/id_dropbear -l root'
+rsync -avz &lt;ip&gt;:/var/log/boot.kiwi . 
+</screen>
+            </para>
         </formalpara>
       </listitem>
       <listitem>

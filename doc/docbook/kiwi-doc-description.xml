@@ -427,14 +427,6 @@
                     access. </para>
                 </listitem>
               </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="attvalue">unified</sgmltag></term>
-                <listitem>
-                  <para>Compressed filesystem with squashfs mounted with
-                    an aufs based overlay mount to allow read-write
-                    access.</para>
-                </listitem>
-              </varlistentry>
             </variablelist>
             <para>If the flags attribute is not used the filesystem will
               not be compressed and no union filesystem is used. In this
