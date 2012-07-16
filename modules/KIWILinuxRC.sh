@@ -296,6 +296,10 @@ function systemException {
 	;;
 	"shell")
 		Echo "shellException: providing shell..."
+		if [ ! -z "$DROPBEAR_PID" ];then
+			Echo "You can connect via ssh to this system"
+			Echo "ssh -i /usr/share/kiwi/keys/id_dropbear root@${IPADDR}"
+		fi
 		if ! setctsid $ttydev /bin/true;then
 			/bin/bash -i
 		else
@@ -673,6 +677,27 @@ function startPlymouth {
 		plymouthd \
 			--attach-to-session --pid-file /run/plymouth/pid
 		plymouth show-splash
+	fi
+}
+#======================================
+# startDropBear
+#--------------------------------------
+function startDropBear {
+	# /.../
+	# start dropbear ssh server if installed
+	# ---
+	if which dropbear &>/dev/null;then
+		mkdir -p /etc/dropbear
+		if [ ! -f /etc/dropbear/dropbear_dss_host_key ];then
+			dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key
+		fi
+		if [ ! -f /etc/dropbear/dropbear_rsa_host_key ];then
+			dropbearkey -t rsa -f /etc/dropbear/dropbear_rsa_host_key
+		fi
+		Echo "Starting dropbear ssh server"
+		dropbear
+		export DROPBEAR_PID=$(pidof /usr/sbin/dropbear)
+		echo DROPBEAR_PID=$DROPBEAR_PID >> /iprocs
 	fi
 }
 #======================================
@@ -5168,6 +5193,7 @@ function startShell {
 		setctsid -f $ELOG_BOOTSHELL /bin/bash -i
 		ELOGSHELL_PID=$(fuser $ELOG_BOOTSHELL | tr -d " ")
 		echo ELOGSHELL_PID=$ELOGSHELL_PID >> /iprocs
+		startDropBear
 	fi
 }
 #======================================
@@ -6018,6 +6044,12 @@ function bootImage {
 	# rootfs is clean, skip check
 	#--------------------------------------
 	export ROOTFS_FSCK="0"
+	#======================================
+	# stop dropbear ssh server
+	#--------------------------------------
+	if [ ! -z "$DROPBEAR_PID" ];then
+		kill $DROPBEAR_PID
+	fi
 	#======================================
 	# hand over control to init
 	#--------------------------------------

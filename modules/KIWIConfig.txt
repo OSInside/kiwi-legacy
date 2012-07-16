@@ -63,6 +63,8 @@
 		<file name="dmraid"/>
 		<file name="dmsetup"/>
 		<file name="driveready"/>
+		<file name="dropbear"/>
+		<file name="dropbearkey"/>
 		<file name="du"/>
 		<file name="dumpe2fs"/>
 		<file name="e2fsck"/>
@@ -183,6 +185,7 @@
 		<file name="rpc.statd"/>
 		<file name="scsi_id"/>
 		<file name="scsi_tur"/>
+		<file name="rsync"/>
 		<file name="sed"/>
 		<file name="seq"/>
 		<file name="setctsid"/>

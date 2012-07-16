@@ -942,7 +942,6 @@ function suseStripInitrd {
 	#==========================================
 	# remove unused root directories
 	#------------------------------------------
-	rm -rf /root
 	rm -rf /home
 	rm -rf /media
 	rm -rf /srv
