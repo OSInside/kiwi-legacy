@@ -121,7 +121,7 @@ sub new {
 		}
 		my $private_url = $publics_url;
 		if ($private_url =~ /^\//) {
-			$private_url = $baseSystem."/".$private_url;
+			$private_url = $baseSystem.$private_url;
 		}
 		my $publics_type = $urlHandler -> getRepoType();
 		if (($publics_type ne "unknown") && ($publics_type ne $type)) {
@@ -1346,7 +1346,7 @@ sub setupMount {
 	foreach my $chl (keys %{$this->{sourceChannel}{private}}) {
 		my @opts = @{$this->{sourceChannel}{private}{$chl}};
 		my $path = $opts[2];
-		if ($path =~ /='$baseSystem\/(.*)'$/) {
+		if ($path =~ /='$baseSystem(\/.*)'$/) {
 			$path = $1;
 		} else {
 			next;
