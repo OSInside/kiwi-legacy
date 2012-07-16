@@ -952,12 +952,12 @@ sub setup {
 		#========================================
 		# copy user defined files to tmproot
 		#----------------------------------------
-		mkdir $root."/tmproot";
 		if ((-l "$imageDesc/root/linuxrc") || (-l "$imageDesc/root/include")) {
 			$data = qxx (
-				"cp -LR --force $imageDesc/root/* $root/tmproot 2>&1"
+				"cp -LR --force $imageDesc/root/ $root/tmproot 2>&1"
 			);
 		} else {
+			mkdir $root."/tmproot";
 			$data = qxx (
 				"tar -cf - -C $imageDesc/root . | tar -x -C $root/tmproot 2>&1"
 			);
