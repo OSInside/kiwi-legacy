@@ -330,12 +330,10 @@ sub mount {
 	# Check for DISK file / device
 	#------------------------------------------
 	if ((-f $source) || (-b $source)) {
-		my $boot = "'boot sector'";
-		$status= qxx (
-			"dd if=$source bs=512 count=1 2>/dev/null | file - | grep -q $boot"
-		);
+		$status= qxx ("blkid $source 2>&1");
 		$result= $? >> 8;
-		if ($result == 0) {
+		if ($result != 0) {
+			# no block id information, handle this as a disk 
 			$this->{isdisk} = 1;
 			if (-b $source) {
 				my $devcopy = $source;
