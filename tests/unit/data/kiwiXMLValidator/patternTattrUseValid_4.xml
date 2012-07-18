@@ -38,7 +38,7 @@
         <package name="filesystem"/>
         <package name="glibc-locale"/>
     </packages>
-    <packages type="iso" patternType="plusRecommended">
+    <packages type="vmx" patternType="plusRecommended">
         <package name="evolution"/>
         <package name="firefox"/>
     </packages>
