@@ -904,6 +904,77 @@ sub __checkTypeConfigConsist {
 }
 
 #==========================================
+# __checkTypePckgsTypeExists
+#------------------------------------------
+sub __checkTypePckgsTypeExists {
+	# ...
+	# Check that the type for which packages are specified exists
+	# for each profile
+	# ---
+	my $this = shift;
+	my @prefs = $this->{systemTree} -> getElementsByTagName('preferences');
+	my %typeInfo;
+	for my $pref (@prefs) {
+		my @specTypes;
+		my @types = $pref -> getElementsByTagName('type');
+		for my $type (@types) {
+			my $name = $type -> getAttribute('image');
+			push @specTypes, $name;
+		}
+		my $profNames = $pref -> getAttribute('profiles');
+		if ($profNames) {
+			my @pNames = split /,/, $profNames;
+			for my $pName (@pNames) {
+				if (defined $typeInfo{$pName}) {
+					my @typeLst = @{$typeInfo{$pName}};
+					push @typeLst, @specTypes;
+					$typeInfo{$pName} = \@typeLst
+				} else {
+					$typeInfo{$pName} = \@specTypes;
+				}
+			}
+		} else {
+			$typeInfo{default} = \@specTypes;
+		}
+	}
+	my @pckNodes = $this->{systemTree} -> getElementsByTagName('packages');
+	for my $pckNode (@pckNodes) {
+		my $pckTypeName = $pckNode -> getAttribute('type');
+		if ($pckTypeName =~ /bootstrap|delete|image|testsuite/x) {
+			next;
+		}
+		my $profNames = $pckNode -> getAttribute('profiles');
+		if ($profNames) {
+			my @pNames = split /,/, $profNames;
+			for my $pName (@pNames) {
+				my @typeLst = @{$typeInfo{$pName}};
+				if (! grep { /^$pckTypeName$/x } @typeLst ) {
+					my $kiwi = $this -> {kiwi};
+					my $msg = "Specified packages for type '$pckTypeName'"
+						. ' but this type is not defined for profile '
+						. "'$pName'";
+					$kiwi -> error($msg);
+					$kiwi -> failed();
+					return;
+				}
+			}
+		} else {
+			my @typeLst = @{$typeInfo{default}};
+			if (! grep { /^$pckTypeName$/x } @typeLst ) {
+				my $kiwi = $this -> {kiwi};
+				my $msg = "Specified packages for type '$pckTypeName'"
+					. ' but this type is not defined for the default '
+					. 'image';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkTypeUnique
 #------------------------------------------
 sub __checkTypeUnique {
@@ -1142,6 +1213,9 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkTypeConfigConsist()) {
+		return;
+	}
+	if (! $this -> __checkTypePckgsTypeExists()) {
 		return;
 	}
 	if (! $this -> __checkTypeUnique()) {
