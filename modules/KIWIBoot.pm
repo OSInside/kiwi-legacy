@@ -623,6 +623,7 @@ sub setupInstallCD {
 	my $mbrid = sprintf "0x%08x", unpack "V", <$FD>;
 	if (($this->{mbrid}) && ($mbrid ne $this->{mbrid})) {
 		$this->{mbrid} = $mbrid;
+		$appid = $this->{mbrid};
 	}
 	close $FD;
 	#==========================================
