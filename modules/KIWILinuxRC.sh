@@ -296,7 +296,7 @@ function systemException {
 	;;
 	"shell")
 		Echo "shellException: providing shell..."
-		if [ ! -z "$DROPBEAR_PID" ];then
+		if [ ! -z "$DROPBEAR_PID" ] && [ ! -z "$IPADDR" ];then
 			Echo "You can connect via ssh to this system"
 			Echo "ssh -i /usr/share/kiwi/keys/id_dropbear root@${IPADDR}"
 		fi
