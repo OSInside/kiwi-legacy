@@ -831,6 +831,47 @@ sub test_typeConfigConsist {
 }
 
 #==========================================
+# test_typePackTypeExists
+#------------------------------------------
+sub test_typePackTypeExists {
+	# ...
+	# Test that packages can only be specified for types that
+	# have been defined
+	# ---
+	my $this = shift;
+	my @invalidConfigs = $this -> __getInvalidFiles('typePcksTypeExists');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $kiwi = $this -> {kiwi};
+		my $msg = $kiwi -> getMessage();
+		my $expectedMsg;
+		if ( $iConfFile =~ 'typePcksTypeExistsInvalid_1.xml' ) {
+			$expectedMsg = "Specified packages for type 'oem' "
+				. 'but this type is not defined for the default image';
+		}
+		if ( $iConfFile =~ 'typePcksTypeExistsInvalid_2.xml' ) {
+			$expectedMsg = 'Found reference to profile "profD" '
+				. "but this profile is not defined.";
+		}
+		if ( $iConfFile =~ 'typePcksTypeExistsInvalid_3.xml' ) {
+			$expectedMsg = "Specified packages for type 'split' "
+				. "but this type is not defined for profile 'profA'";
+		}
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('typePcksTypeExists');
+	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
 # test_typeUnique
 #------------------------------------------
 sub test_typeUnique {
