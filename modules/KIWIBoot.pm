@@ -3405,7 +3405,8 @@ sub setupBootLoaderConfiguration {
 				my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
 				print FD 'menuentry "Boot from Hard Disk" {'."\n";
 				if ($dev eq '(cd)') {
-					print FD ' chainloader (hd0)+1'."\n";
+					print FD ' set root=(hd0,1)'."\n";
+					print FD ' chainloader +1'."\n";
 				} else {
 					print FD " chainloader /boot/grub2/bootnext\n";
 					my $bootnext = $this -> addBootNext (
