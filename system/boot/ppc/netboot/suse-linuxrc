@@ -500,15 +500,8 @@ then
 			# /.../
 			# now load the image into the imageDevice
 			# ---
-			multicast_old=$multicast
-			multicast="enable"
-			if test "$imageZipped" = "compressed"; then
-				Echo "Compressed image found: Disable multicast download"
-				multicast="disable"
-			fi
 			Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
 			fetchFile $imageName $imageDevice $imageZipped $imageServer
-			multicast=$multicast_old
 			if test $loadCode != 0 || ! loadOK "$loadStatus";then
 				if [ "$imageZipped" = "compressed" ]; then
 					Echo "Download of compressed $imageName.gz failed:"

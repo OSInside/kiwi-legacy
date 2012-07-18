@@ -5448,9 +5448,6 @@ function fetchFile {
 			# and deactivates it again  by '--option "disable multicast"'
 			# ----
 			multicast_atftp="multicast"
-			if test "$multicast" != "enable"; then 
-				multicast_atftp="disable multicast"
-			fi
 			havetemp_dir=1
 			if [ -z "$FETCH_FILE_TEMP_DIR" ];then
 				# we don't have a tmp dir available for downloading
