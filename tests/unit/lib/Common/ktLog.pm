@@ -71,6 +71,7 @@ sub new {
 	$this -> {completed} = 0;
 	$this -> {failed}    = 0;
 	$this -> {msgType}   = 'none';
+	$this -> {oops}      = 0;
 	$this -> {skipped}   = 0;
 	#==========================================
 	# A "fake" log file
@@ -281,6 +282,10 @@ sub getState {
 		$state = 'failed';
 		$stateCnt += 1;
 	}
+	if ( $this -> {oops} ) {
+		$state = 'oops';
+		$stateCnt += 1;
+	}
 	if ( $this -> {skipped} ) {
 		$state = 'skipped';
 		$stateCnt += 1;
@@ -395,6 +400,18 @@ sub setRootLog {
 	my $log = $this -> {rootLog};
 	system "touch $log";
 	return;
+}
+
+#==========================================
+# oops
+#------------------------------------------
+sub oops {
+	# ...
+	# Set the opps state
+	# ---
+	my $this = shift;
+	$this -> {oops} = 1;
+	return $this;
 }
 
 #==========================================
@@ -541,6 +558,7 @@ sub __resetState {
 	$this -> {completed} = 0;
 	$this -> {failed}    = 0;
 	$this -> {msgType}   = 'none';
+	$this -> {oops}      = 0;
 	$this -> {skipped}   = 0;
 	return $this;
 }
