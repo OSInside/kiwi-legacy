@@ -2,7 +2,7 @@
 # FILE          : KIWIXML.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 20012 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schaefer <ms@suse.de>
 #               :
@@ -63,20 +63,37 @@ sub new {
 	# imageConfig data structure
 	#
 	# imageConfig = {
+	#	description = {
+	#		author = '',
+	#		contact = '',
+	#		specification = '',
+	#		type = ''
+	#	}
 	#	profName[+] = {
-	#		profInfo = {
-	#			description = '',
-	#			import      = ''
-	#		}
 	#		bootPkgs    = (),
 	#		bootDelPkgs = (),
 	#		delPkgs     = (),
+	#		drivers     = (),
 	#		pkgs        = (),
 	#		arch[+] = {
 	#			bootPkgs    = (),
 	#			bootDelPkgs = (),
 	#			delPkgs     = (),
+	#			drivers     = (),
 	#			pkgs        = ()
+	#		}
+	#		profInfo = {
+	#			description = '',
+	#			import      = ''
+	#		}
+	#		repoData = {
+	#			ID[+] {
+	#				alias    = '',
+	#				location = (),
+	#				status   = '',
+	#				priority = '',
+	#				...
+	#			}
 	#		}
 	#		type[+] = {
 	#			bootPkgs    = (),
@@ -89,15 +106,6 @@ sub new {
 	#			boot       = '',
 	#			bootkernel = '',
 	#			...
-	#		}
-	#		repoData = {
-	#			ID[+] {
-	#				alias    = '',
-	#				location = (),
-	#				status   = '',
-	#				priority = '',
-	#				...
-	#			}
 	#		}
 	#		...
 	#	}
@@ -220,22 +228,30 @@ sub new {
 	#------------------------------------------
 	$this->{imageConfig} = {};
 	my %kDefProfile = (
-		'description' => 'KIWI default profile, store non quilified data',
+		'description' => 'KIWI default profile, store non qualified data',
 		'import'      => 'true'
 	);
 	$this->{imageConfig}{kiwi_default}{profInfo} = \%kDefProfile;
+	#==========================================
+	# Populate imageConfig with description data from config tree
+	#------------------------------------------
+	$this -> __populateDescriptionInfo();
 	#==========================================
 	# Populate imageConfig with profile data from config tree
 	#------------------------------------------
 	$this -> __populateProfileInfo();
 	#==========================================
+	# Populate imageConfig with diver data from config tree
+	#------------------------------------------
+	$this -> __populateDriverInfo();
+	#==========================================
 	# Read and create profile hash
 	#------------------------------------------
-	$this->{profileHash} = $this -> __populateProfiles();
+	$this->{profileHash} = $this -> __populateProfiles_legacy();
 	#==========================================
 	# Read and create type hash
 	#------------------------------------------
-	$this->{typeList} = $this -> __populateTypeInfo();
+	$this->{typeList} = $this -> __populateTypeInfo_legacy();
 	#==========================================
 	# Update XML data from changeset if exists
 	#------------------------------------------
@@ -297,7 +313,7 @@ sub updateTypeList {
 	# internal typeInfo hash too
 	# ---
 	my $this = shift;
-	$this->{typeList} = $this -> __populateTypeInfo();
+	$this->{typeList} = $this -> __populateTypeInfo_legacy();
 	$this -> __populateProfiledTypeInfo();
 }
 
@@ -1692,31 +1708,38 @@ sub getProfiles {
 		$profile{include}     = $imgConf{$prof}->{profInfo}->{import};
 		push @result, { %profile };
 	}
-	# TODO: replaced by new data structure, will be deleted soon
-	if ( $ENV{KIWI_OLD_XML_PROC} ) {
-		@result = ();
-		if (! defined $this->{profilesNodeList}) {
-			return @result;
-		}
-		my $base = $this->{profilesNodeList} -> get_node(1);
-		if (! defined $base) {
-			return @result;
-		}
-		my @node = $base -> getElementsByTagName ("profile");
-		foreach my $element (@node) {
-			my $name = $element -> getAttribute ("name");
-			my $desc = $element -> getAttribute ("description");
-			my $incl = $element -> getAttribute ("import");
-			my %profile = ();
-			$profile{name} = $name;
-			$profile{description} = $desc;
-			$profile{include} = $incl;
-			push @result, { %profile };
-		}
-	}
 	return @result;
 }
 
+#==========================================
+# getProfiles_legacy
+#------------------------------------------
+sub getProfiles_legacy {
+	# ...
+	# Return a list of profiles available for this image
+	# ---
+	my $this   = shift;
+	my @result = ();
+	if (! defined $this->{profilesNodeList}) {
+		return @result;
+	}
+	my $base = $this->{profilesNodeList} -> get_node(1);
+	if (! defined $base) {
+		return @result;
+	}
+	my @node = $base -> getElementsByTagName ("profile");
+	foreach my $element (@node) {
+		my $name = $element -> getAttribute ("name");
+		my $desc = $element -> getAttribute ("description");
+		my $incl = $element -> getAttribute ("import");
+		my %profile = ();
+		$profile{name} = $name;
+		$profile{description} = $desc;
+		$profile{include} = $incl;
+		push @result, { %profile };
+	}
+	return @result;
+}
 
 #==========================================
 # getInstSourceRepository
@@ -4631,6 +4654,23 @@ sub __checkProfiles {
 }
 
 #==========================================
+# __getChildNodeTextValue
+#------------------------------------------
+sub __getChildNodeTextValue {
+	# ...
+	# Return the value of the node identified by the
+	# given name as text.
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $childName = shift;
+	return $node
+		-> getChildrenByTagName ($childName)
+		-> get_node(1)
+		-> textContent();
+}
+
+#==========================================
 # __getPreferencesNodeByTagName
 #------------------------------------------
 sub __getPreferencesNodeByTagName {
@@ -5302,15 +5342,15 @@ sub __requestedProfile {
 }
 
 #==========================================
-# __populateProfiles
+# __populateProfiles_legacy
 #------------------------------------------
-sub __populateProfiles {
+sub __populateProfiles_legacy {
 	# ...
 	# import profiles section if specified
 	# ---
 	my $this     = shift;
 	my %result   = ();
-	my @profiles = $this -> getProfiles ();
+	my @profiles = $this -> getProfiles_legacy();
 	foreach my $profile (@profiles) {
 		if ($profile->{include}) {
 			$result{$profile->{name}} = "$profile->{include}";
@@ -5392,6 +5432,102 @@ sub __populateDefaultProfiles {
 }
 
 #==========================================
+# __populateDescriptionInfo
+#------------------------------------------
+sub __populateDescriptionInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# description data from the XML file.
+	# ---
+	my $this = shift;
+	my $descrNode = $this->{systemTree}
+		-> getElementsByTagName ('description')
+		-> get_node(1);
+	my $author  = $this
+		-> __getChildNodeTextValue ($descrNode, 'author');
+	my $contact = $this
+		-> __getChildNodeTextValue ($descrNode, 'contact');
+	my $spec    = $this
+		-> __getChildNodeTextValue($descrNode,'specification');
+	my $type    = $descrNode
+		-> getAttribute ('type');
+	my %descript = (
+		author        => $author,
+		contact       => $contact,
+		specification => $spec,
+		type          => $type
+	);
+	$this->{imageConfig}{description} = \%descript;
+	return $this;
+}
+
+#==========================================
+# __populateDriverInfo
+#------------------------------------------
+sub __populateDriverInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# drivers data from the XML file.
+	# ---
+	my $this = shift;
+	my @drvNodes = $this->{systemTree}
+		-> getElementsByTagName ('drivers');
+	for my $drvNode (@drvNodes) {
+		my @drivers = $drvNode -> getElementsByTagName ('file');
+		my %archDrvs;
+		my @drvNames;
+		for my $drv (@drivers) {
+			my $name = $drv -> getAttribute('name');
+			my $arch = $drv -> getAttribute('arch');
+			if (! $arch) {
+				push @drvNames, $name
+			} else {
+				if (defined $archDrvs{$arch}) {
+					my @dLst = @{$archDrvs{$arch}};
+					push @dLst, $name;
+					$archDrvs{$arch} = \@dLst;
+				} else {
+					my @dLst = ($name, );
+					$archDrvs{$arch} = \@dLst;
+				}
+			}
+		}
+		my @pNameLst = ('kiwi-default');
+		my $profNames = $drvNode -> getAttribute('profiles');
+		if ($profNames) {
+			@pNameLst = split /,/, $profNames;
+		}
+		for my $profName (@pNameLst) {
+			my $drivers = $this->{imageConfig}
+				->{$profName}->{drivers};
+			if (defined $drivers) {
+				my @dLst = @{$this->{imageConfig}->{$profName}->{drivers}};
+				push @dLst, @drvNames;
+				$this->{imageConfig}->{$profName}->{drivers} = \@dLst;
+			} else {
+				$this->{imageConfig}->{$profName}->{drivers} = \@drvNames;
+			}
+			for my $arch (keys %archDrvs) {
+				my $drivers = $this->{imageConfig}
+					->{$profName}->{$arch}->{drivers};
+				if (defined $drivers) {
+					my @dLst = @{$this->{imageConfig}
+						->{$profName}->{$arch}->{drivers}};
+					my @archLst = @{$archDrvs{$arch}};
+					push @dLst, @archLst;
+					$this->{imageConfig}->{$profName}
+						->{$arch}->{drivers} =	\@dLst;
+				} else {
+					$this->{imageConfig}->{$profName}
+						->{$arch}->{drivers} =	$archDrvs{$arch};
+				}
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
 # __populateProfileInfo
 #------------------------------------------
 sub __populateProfileInfo {
@@ -5431,9 +5567,9 @@ sub __populateProfileInfo {
 }
 
 #==========================================
-# __populateTypeInfo
+# __populateTypeInfo_legacy
 #------------------------------------------
-sub __populateTypeInfo {
+sub __populateTypeInfo_legacy {
 	# ...
 	# Extract the information contained in the <type> elements
 	# and store the type descriptions in a list of hash references
