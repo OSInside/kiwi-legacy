@@ -2,7 +2,7 @@
 # FILE          : KIWIXML.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 20012 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schaefer <ms@suse.de>
 #               :
@@ -63,20 +63,37 @@ sub new {
 	# imageConfig data structure
 	#
 	# imageConfig = {
+	#   description = {
+	#       author = '',
+	#       contact = '',
+	#       specification = '',
+	#       type = ''
+	#   }
 	#	profName[+] = {
-	#		profInfo = {
-	#			description = '',
-	#			import      = ''
-	#		}
 	#		bootPkgs    = (),
 	#		bootDelPkgs = (),
 	#		delPkgs     = (),
+	#       drivers     = (),
 	#		pkgs        = (),
 	#		arch[+] = {
 	#			bootPkgs    = (),
 	#			bootDelPkgs = (),
 	#			delPkgs     = (),
+	#           drivers     = (),
 	#			pkgs        = ()
+	#		}
+	#		profInfo = {
+	#			description = '',
+	#			import      = ''
+	#		}
+	#		repoData = {
+	#			ID[+] {
+	#				alias    = '',
+	#				location = (),
+	#				status   = '',
+	#				priority = '',
+	#				...
+	#			}
 	#		}
 	#		type[+] = {
 	#			bootPkgs    = (),
@@ -89,15 +106,6 @@ sub new {
 	#			boot       = '',
 	#			bootkernel = '',
 	#			...
-	#		}
-	#		repoData = {
-	#			ID[+] {
-	#				alias    = '',
-	#				location = (),
-	#				status   = '',
-	#				priority = '',
-	#				...
-	#			}
 	#		}
 	#		...
 	#	}
@@ -220,14 +228,48 @@ sub new {
 	#------------------------------------------
 	$this->{imageConfig} = {};
 	my %kDefProfile = (
-		'description' => 'KIWI default profile, store non quilified data',
+		'description' => 'KIWI default profile, store non qualified data',
 		'import'      => 'true'
 	);
 	$this->{imageConfig}{kiwi_default}{profInfo} = \%kDefProfile;
 	#==========================================
+	# Populate imageConfig with description data from config tree
+	#------------------------------------------
+	$this -> __populateDescriptionInfo();
+	#==========================================
+	# Populate imageConfig with instsource data from config tree
+	#------------------------------------------
+	$this -> __populateInstsourceInfo();
+	#==========================================
 	# Populate imageConfig with profile data from config tree
 	#------------------------------------------
 	$this -> __populateProfileInfo();
+	#==========================================
+	# Populate imageConfig with diver data from config tree
+	#------------------------------------------
+	$this -> __populateDriverInfo();
+	#==========================================
+	# Populate imageConfig with preferences data from config tree
+	#------------------------------------------
+	$this -> __populatePreferenceInfo();
+	#==========================================
+	# Populate imageConfig with package data from config tree
+	# package processing must take place after preferences
+	# as packages may be image type specific
+	#------------------------------------------
+	$this -> __populatePackageInfo();
+	#==========================================
+	# Populate imageConfig with repository data from config tree
+	#------------------------------------------
+	$this -> __populateRepositoryInfo();
+	#==========================================
+	# Populate imageConfig with strip data from config tree
+	#------------------------------------------
+	$this -> __populateStripInfo();
+	#==========================================
+	# Populate imageConfig with user data from config tree
+	#------------------------------------------
+	$this -> __populateUserInfo();
 	#==========================================
 	# Read and create profile hash
 	#------------------------------------------
@@ -235,7 +277,7 @@ sub new {
 	#==========================================
 	# Read and create type hash
 	#------------------------------------------
-	$this->{typeList} = $this -> __populateTypeInfo();
+	$this->{typeList} = $this -> __populateTypeInfo_old();
 	#==========================================
 	# Update XML data from changeset if exists
 	#------------------------------------------
@@ -297,7 +339,7 @@ sub updateTypeList {
 	# internal typeInfo hash too
 	# ---
 	my $this = shift;
-	$this->{typeList} = $this -> __populateTypeInfo();
+	$this->{typeList} = $this -> __populateTypeInfo_old();
 	$this -> __populateProfiledTypeInfo();
 }
 
@@ -4631,6 +4673,24 @@ sub __checkProfiles {
 }
 
 #==========================================
+# __getChildNodeTextValue
+#------------------------------------------
+sub __getChildNodeTextValue {
+	# ...
+	# Return the value of the node identified by the given name as
+	# text.
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $childName = shift;
+
+	return $node
+		-> getChildrenByTagName ($childName)
+		-> get_node(1)
+		-> textContent();
+}
+
+#==========================================
 # __getPreferencesNodeByTagName
 #------------------------------------------
 sub __getPreferencesNodeByTagName {
@@ -5392,6 +5452,136 @@ sub __populateDefaultProfiles {
 }
 
 #==========================================
+# __populateDescriptionInfo
+#------------------------------------------
+sub __populateDescriptionInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# description data from the XML file.
+	# ---
+	my $this     = shift;
+	my $descrNode = $this
+					-> {systemTree}
+					-> getElementsByTagName ('description')
+					-> get_node(1);
+	my $author = $this -> __getChildNodeTextValue ($descrNode, 'author');
+	my $contact = $this -> __getChildNodeTextValue ($descrNode, 'contact');
+	my $spec = $this -> __getChildNodeTextValue($descrNode,'specification');
+	my $type = $descrNode -> getAttribute ('type');
+	my %descript = (
+					author        => $author,
+					contact       => $contact,
+					specification => $spec,
+					type          => $type
+				);
+	$this->{imageConfig}{description} = \%descript;
+	return $this;
+}
+
+#==========================================
+# __populateDriverInfo
+#------------------------------------------
+sub __populateDriverInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# drivers data from the XML file.
+	# ---
+	my $this     = shift;
+	my @drvNodes = $this->{systemTree} -> getElementsByTagName ('drivers');
+	for my $drvNode (@drvNodes) {
+		my @drivers = $drvNode -> getElementsByTagName ('file');
+		my %archDrvs;
+		my @drvNames;
+		for my $drv (@drivers) {
+			my $name = $drv -> getAttribute('name');
+			my $arch = $drv -> getAttribute('arch');
+			if (! $arch) {
+				push @drvNames, $name
+			} else {
+				if (defined $archDrvs{$arch}) {
+					my @dLst = @{$archDrvs{$arch}};
+					push @dLst, $name;
+					$archDrvs{$arch} = \@dLst;
+				} else {
+					my @dLst = ($name, );
+					$archDrvs{$arch} = \@dLst;
+				}
+			}
+		}
+		my @pNameLst = ('kiwi-default', );
+		my $profNames = $drvNode -> getAttribute('profiles');
+		if ($profNames) {
+			@pNameLst = split /,/, $profNames;
+		}
+		for my $profName (@pNameLst) {
+			if (defined $this->{imageConfig}->{$profName}->{drivers}) {
+				my @dLst = @{$this->{imageConfig}->{$profName}->{drivers}};
+				push @dLst, @drvNames;
+				$this->{imageConfig}->{$profName}->{drivers} = \@dLst;
+			} else {
+				$this->{imageConfig}->{$profName}->{drivers} = \@drvNames;
+			}
+			for my $arch (keys %archDrvs) {
+				if (defined $this->{imageConfig}
+					->{$profName}->{$arch}->{drivers}) {
+					my @dLst = @{$this->{imageConfig}
+									->{$profName}
+									->{$arch}
+									->{drivers}};
+					my @archLst = @{$archDrvs{$arch}};
+					push @dLst, @archLst;
+					$this->{imageConfig}->{$profName}->{$arch}->{drivers} =
+						\@dLst;
+				} else {
+					$this->{imageConfig}->{$profName}->{$arch}->{drivers} =
+					$archDrvs{$arch};
+				}
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# __populateInstsourceInfo
+#------------------------------------------
+sub __populateInstsourceInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# instsource data from the XML file.
+	# ---
+	my $this     = shift;
+	my @drvNodes = $this->{systemTree} -> getElementsByTagName ('instsource');
+	return $this;
+}
+
+#==========================================
+# __populatePackageInfo
+#------------------------------------------
+sub __populatePackageInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# packages data from the XML file.
+	# ---
+	my $this = shift;
+	my @packNodes = $this->{systemTree} -> getElementsByTagName ('packages');
+	return $this;
+}
+
+#==========================================
+# __populatePreferenceInfo
+#------------------------------------------
+sub __populatePreferenceInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# preferences data from the XML file.
+	# ---
+	my $this = shift;
+	my @prefNodes = $this->{systemTree} ->getElementsByTagName ('preferences');
+	return $this;
+}
+
+#==========================================
 # __populateProfileInfo
 #------------------------------------------
 sub __populateProfileInfo {
@@ -5431,9 +5621,35 @@ sub __populateProfileInfo {
 }
 
 #==========================================
-# __populateTypeInfo
+# __populateRepositoryInfo
 #------------------------------------------
-sub __populateTypeInfo {
+sub __populateRepositoryInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# repository data from the XML file.
+	# ---
+	my $this = shift;
+	my @repoNodes = $this->{systemTree} ->getElementsByTagName ('repository');
+	return $this;
+}
+
+#==========================================
+# __populateStripInfo
+#------------------------------------------
+sub __populateStripInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# strip data from the XML file.
+	# ---
+	my $this     = shift;
+	my @drvNodes = $this->{systemTree} -> getElementsByTagName ('strip');
+	return $this;
+}
+
+#==========================================
+# __populateTypeInfo_old
+#------------------------------------------
+sub __populateTypeInfo_old {
 	# ...
 	# Extract the information contained in the <type> elements
 	# and store the type descriptions in a list of hash references
@@ -5692,6 +5908,19 @@ sub __populateImageTypeAndNode {
 	#------------------------------------------
 	$this->{imageType} = $typeinfo->{$select}{type};
 	$this->{typeNode}  = $typeinfo->{$select}{node};
+	return $this;
+}
+
+#==========================================
+# __populateUserInfo
+#------------------------------------------
+sub __populateUserInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# user data from the XML file.
+	# ---
+	my $this = shift;
+	my @userNodes = $this->{systemTree} ->getElementsByTagName ('users');
 	return $this;
 }
 
