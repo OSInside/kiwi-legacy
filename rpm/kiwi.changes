@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Jul 20 21:07:13 CEST 2012 - ms@suse.de
+
+- netboot: fixed use of multicast for compressed images.
+  With commit 7a7389f2e3f2b3d92b38c08455b0c6da15569269
+  support for multicast based transfer of compressed
+  images was added. Thus the checks which disable it
+  are obsolete now (bnc #771898)
+
+-------------------------------------------------------------------
 Thu Jul 12 11:35:11 CEST 2012 - ms@suse.de
 
 - don't use cat when reading data from a disk block device
