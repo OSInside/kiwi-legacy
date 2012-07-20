@@ -334,6 +334,7 @@ sub init {
 	#==================================
 	# Create /etc/ImageVersion file
 	#----------------------------------
+	my $packager = $xml -> getPackageManager();
 	my $imageVersionFile = "$root/etc/ImageVersion";
 	my $imageVersion = $xml -> getImageVersion();
 	my $imageName    = $xml -> getImageName();
@@ -410,12 +411,17 @@ sub init {
 		qxx ("mknod -m 640 $root/dev/loop2 b 7 2");
 		qxx ("mknod -m 640 $root/dev/loop3 b 7 3");
 		qxx ("mkdir -p $root/etc/sysconfig");
-		qxx ("mkdir -p $root/var/log/YaST2");
+		# for zypper we need a yast log dir
+		if ($packager eq "zypper") {
+			qxx ("mkdir -p $root/var/log/YaST2");
+		}
 		# for smart we need the dpkg default file
-		qxx ("mkdir -p $root/var/lib/dpkg");
-		qxx ("touch $root/var/lib/dpkg/status");
-		qxx ("mkdir -p $root/var/lib/dpkg/updates");
-		qxx ("touch $root/var/lib/dpkg/available");
+		if ($packager eq "smart") {
+			qxx ("mkdir -p $root/var/lib/dpkg");
+			qxx ("touch $root/var/lib/dpkg/status");
+			qxx ("mkdir -p $root/var/lib/dpkg/updates");
+			qxx ("touch $root/var/lib/dpkg/available");
+		}
 		# for building in suse autobuild we need the following file
 		if (-f '/.buildenv') {
 			qxx ("touch $root/.buildenv");
