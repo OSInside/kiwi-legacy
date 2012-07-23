@@ -15,8 +15,9 @@ my @kiwiModules = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
 					KIWIRoot.pm KIWIRuntimeChecker.pm
 					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
-					KIWIURL.pm KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm
-					KIWIXMLValidator.pm KIWICommandLine.t KIWIImageCreator.t
+					KIWIURL.pm KIWIUtil.pm KIWIXML.pm KIWIXMLInfo.pm
+					KIWIXMLDescriptionData.pm KIWIXMLValidator.pm
+					KIWICommandLine.t KIWIImageCreator.t
 					KIWILocator.t KIWIRuntimeChecker.t KIWIXML.t KIWIXMLInfo.t
 					KIWIXMLValidator.t ktLog.pm ktTestCase.pm
 					kiwiCommandLine.pm kiwiLocator.pm kiwiImageCreator.pm
@@ -32,8 +33,9 @@ my @notClean1 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
 					KIWIRoot.pm KIWIRuntimeChecker.pm
 					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
-					KIWIURL.pm KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm
-					KIWIXMLValidator.pm KIWICommandLine.t KIWIImageCreator.t
+					KIWIURL.pm KIWIUtil.pm KIWIXML.pm KIWIXMLInfo.pm
+					KIWIXMLDescriptionData.pm KIWIXMLValidator.pm
+					KIWICommandLine.t KIWIImageCreator.t
 					KIWILocator.t KIWIRuntimeChecker.t KIWIXML.t KIWIXMLInfo.t
 					KIWIXMLValidator.t ktLog.pm ktTestCase.pm
 					kiwiCommandLine.pm kiwiLocator.pm kiwiImageCreator.pm
@@ -49,8 +51,9 @@ my @notClean2 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
 					KIWIRoot.pm KIWIRuntimeChecker.pm
 					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
-					KIWIURL.pm KIWIUtil.pm KIWIXMLInfo.pm KIWIXML.pm
-					KIWIXMLValidator.pm KIWICommandLine.t KIWIImageCreator.t
+					KIWIURL.pm KIWIUtil.pm KIWIXML.pm KIWIXMLInfo.pm
+					KIWIXMLDescriptionData.pm KIWIXMLValidator.pm
+					KIWICommandLine.t KIWIImageCreator.t
 					KIWILocator.t KIWIRuntimeChecker.t KIWIXML.t KIWIXMLInfo.t
 					KIWIXMLValidator.t ktTestCase.pm
 					kiwiCommandLine.pm kiwiLocator.pm kiwiImageCreator.pm
