@@ -1937,7 +1937,7 @@ sub createImageLiveCD {
 	$kiwi -> info ("Saving hybrid disk label in initrd: $this->{mbrid}...");
 	qxx ("mkdir -p $tmpdir/boot/grub");
 	my $FD;
-	if (! open ($FD, '>', "$tmpdir/boot/grub/mbrid")) {
+	if (! open ($FD, '>', "$tmpdir/boot/mbrid")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create mbrid file: $!");
 		$kiwi -> failed ();

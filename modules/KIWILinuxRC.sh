@@ -730,7 +730,7 @@ function installBootLoader {
 	esac
 	masterBootID=$(printf 0x%04x%04x $RANDOM $RANDOM)
 	Echo "writing new MBR ID to master boot record: $masterBootID"
-	echo $masterBootID > /boot/grub/mbrid
+	echo $masterBootID > /boot/mbrid
 	masterBootIDHex=$(echo $masterBootID |\
 		sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/\\x\4\\x\3\\x\2\\x\1/')
 	echo -e -n $masterBootIDHex | dd of=$imageDiskDevice \
@@ -3201,12 +3201,12 @@ function searchImageISODevice {
 	local isofrom_device
 	local isofrom_system
 	mkdir -p /cdrom
-	if [ ! -f /boot/grub/mbrid ];then
+	if [ ! -f /boot/mbrid ];then
 		systemException \
 			"Can't find MBR id file in initrd" \
 		"reboot"
 	fi
-	mbrIID=$(cat /boot/grub/mbrid)
+	mbrIID=$(cat /boot/mbrid)
 	Echo -n "Searching for boot device in Application ID..."
 	udevPending
 	#======================================
@@ -3482,8 +3482,8 @@ function storeIDFiles {
 			if ! mount -o ro $dev /mnt;then
 				continue
 			fi
-			if [ -f /mnt/boot/grub/mbrid ];then
-				cp -a /mnt/boot/grub/mbrid $cmpd/mbrid$ifix
+			if [ -f /mnt/boot/mbrid ];then
+				cp -a /mnt/boot/mbrid $cmpd/mbrid$ifix
 				ifix=$((ifix + 1))
 				umount /mnt
 				break
@@ -6000,7 +6000,7 @@ function bootImage {
 	# copy boot log file into system image
 	#--------------------------------------
 	mkdir -p /mnt/var/log
-	rm -f /mnt/boot/grub/mbrid
+	rm -f /mnt/boot/mbrid
 	if [ -e /mnt/dev/shm/initrd.msg ];then
 		cp -f /mnt/dev/shm/initrd.msg /mnt/var/log/boot.msg
 	fi

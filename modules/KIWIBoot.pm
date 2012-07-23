@@ -2499,8 +2499,8 @@ sub setupInstallFlags {
 	# Include MBR ID to initrd
 	#------------------------------------------
 	my $FD;
-	qxx ("mkdir -p $irddir/boot/grub");
-	if (! open ($FD, '>', "$irddir/boot/grub/mbrid")) {
+	qxx ("mkdir -p $irddir/boot");
+	if (! open ($FD, '>', "$irddir/boot/mbrid")) {
 		$kiwi -> error  ("Couldn't create mbrid file: $!");
 		$kiwi -> failed ();
 		qxx ("rm -rf $irddir");
@@ -2838,9 +2838,7 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Boot directories
 		#------------------------------------------
-		my @bootdir = (
-			"$tmpdir/boot/grub"
-		);
+		my @bootdir = ();
 		if ($efi) {
 			push @bootdir,"$tmpdir/boot/grub2-efi/$efipc";
 			push @bootdir,"$tmpdir/boot/grub2/$grubpc";
@@ -3268,13 +3266,26 @@ sub setupBootLoaderConfiguration {
 	$cmdline .= " showopts\n";
 	# ensure exactly one space at start
 	$cmdline =~ s/^\s*/ /;
-
 	#==========================================
 	# Check boot partition number
 	#------------------------------------------
 	if (! defined $bootpart) {
 		$bootpart = 0;
 	}
+	#==========================================
+	# Create MBR id file for boot device check
+	#------------------------------------------
+	$kiwi -> info ("Saving disk label boot/mbrid: $this->{mbrid}...");
+	qxx ("mkdir -p $tmpdir/boot");
+	if (! open (FD,">$tmpdir/boot/mbrid")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create mbrid file: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	print FD "$this->{mbrid}";
+	close FD;
+	$kiwi -> done();
 	#==========================================
 	# Grub2
 	#------------------------------------------
@@ -3335,23 +3346,11 @@ sub setupBootLoaderConfiguration {
 		$vesa{'0x31a'} = ["1280x1024x24", "1280x1024"];
 		$vesa{'0x31b'} = ["1280x1024x32", "1280x1024"];
 		#==========================================
-		# Create MBR id file for boot device check
-		#------------------------------------------
-		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
-		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create mbrid file: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		print FD "$this->{mbrid}";
-		close FD;
-		$kiwi -> done();
-		#==========================================
 		# Create grub.cfg file
 		#------------------------------------------
 		$kiwi -> info ("Creating grub2 configuration file...");
 		foreach my $config (@config) {
+			qxx ("mkdir -p $tmpdir/boot/$config");
 			if (! open (FD,">$tmpdir/boot/$config/grub.cfg")) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't create $config/grub.cfg: $!");
@@ -3533,22 +3532,10 @@ sub setupBootLoaderConfiguration {
 	#------------------------------------------
 	if ($loader eq "grub") {
 		#==========================================
-		# Create MBR id file for boot device check
-		#------------------------------------------
-		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
-		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create mbrid file: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		print FD "$this->{mbrid}";
-		close FD;
-		$kiwi -> done();
-		#==========================================
 		# Create menu.lst file
 		#------------------------------------------
 		$kiwi -> info ("Creating grub menu list file...");
+		qxx ("mkdir -p $tmpdir/boot/grub");
 		if (! open (FD,">$tmpdir/boot/grub/menu.lst")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create menu.lst: $!");
@@ -3726,20 +3713,6 @@ sub setupBootLoaderConfiguration {
 	# syslinux
 	#------------------------------------------
 	if ($loader =~ /(sys|ext)linux/) {
-		#==========================================
-		# Create MBR id file for boot device check
-		#------------------------------------------
-		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
-		qxx ("mkdir -p $tmpdir/boot/grub");
-		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create mbrid file: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		print FD "$this->{mbrid}";
-		close FD;
-		$kiwi -> done();
 		#==========================================
 		# Create syslinux config file
 		#------------------------------------------
@@ -3936,23 +3909,9 @@ sub setupBootLoaderConfiguration {
 	#------------------------------------------
 	if ($loader eq "zipl") {
 		#==========================================
-		# Create MBR id file for boot device check
-		#------------------------------------------
-		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
-		qxx ("mkdir -p $tmpdir/boot/grub");
-		qxx ("mkdir -p $tmpdir/boot/zipl");
-		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create mbrid file: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		print FD "$this->{mbrid}";
-		close FD;
-		$kiwi -> done();
-		#==========================================
 		# Create zipl.conf
 		#------------------------------------------
+		qxx ("mkdir -p $tmpdir/boot/zipl");
 		$cmdline =~ s/\n//g;
 		my $ziplconfig = "zipl.conf";
 		$kiwi -> info ("Creating $ziplconfig config file...");
@@ -4130,20 +4089,6 @@ sub setupBootLoaderConfiguration {
 	# uboot
 	#------------------------------------------
 	if ($loader eq "uboot") {
-		#==========================================
-		# Create MBR id file for boot device check
-		#------------------------------------------
-		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
-		qxx ("mkdir -p $tmpdir/boot/grub");
-		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create mbrid file: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		print FD "$this->{mbrid}";
-		close FD;
-		$kiwi -> done();
 		#==========================================
 		# Create uboot image file from initrd
 		#------------------------------------------
