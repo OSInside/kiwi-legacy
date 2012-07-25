@@ -4283,7 +4283,7 @@ sub installBootLoader {
 	#------------------------------------------
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootConfig();
-		if (! $editBoot) {
+		if ((! $editBoot) && ($xml)) {
 			$editBoot = $xml -> getEditBootConfig();
 		}
 		if (($editBoot) && (-e $editBoot)) {
