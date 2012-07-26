@@ -42,7 +42,7 @@ use KIWIImage;
 use KIWIImageCreator;
 use KIWIBoot;
 use KIWIMigrate;
-use KIWIQX;
+use KIWIQX qw (qxx);
 use KIWIRuntimeChecker;
 use KIWIImageFormat;
 use KIWIXMLInfo;
