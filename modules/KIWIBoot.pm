@@ -788,14 +788,16 @@ sub setupInstallCD {
 	#==========================================
 	# Setup initrd for install purpose
 	#------------------------------------------
+	$kiwi -> info ("Repack initrd with install flags...");
 	$initrd = $this -> setupInstallFlags();
 	if (! defined $initrd) {
 		return;
 	}
+	$this->{initrd} = $initrd;
+	$kiwi -> done();
 	#==========================================
 	# Create CD structure
 	#------------------------------------------
-	$this->{initrd} = $initrd;
 	if (! $this -> createBootStructure()) {
 		$this->{initrd} = $oldird;
 		return;
@@ -1057,6 +1059,10 @@ sub setupInstallStick {
 	my %type;
 	my $stick;
 	#==========================================
+	# Create new MBR label for install disk
+	#------------------------------------------
+	$this->{mbrid} = $main::global -> getMBRDiskLabel();
+	#==========================================
 	# Check for disk device
 	#------------------------------------------
 	if (-b $system) {
@@ -1225,11 +1231,13 @@ sub setupInstallStick {
 	#==========================================
 	# Setup initrd for install purpose
 	#------------------------------------------
+	$kiwi -> info ("Repack initrd with install flags...");
 	$initrd = $this -> setupInstallFlags();
 	if (! defined $initrd) {
 		return;
 	}
 	$this->{initrd} = $initrd;
+	$kiwi -> done();
 	#==========================================
 	# Create Disk boot structure
 	#------------------------------------------
@@ -1822,6 +1830,14 @@ sub setupBootDisk {
 			return;
 		}
 	}
+	#==========================================
+	# Setup initrd for boot
+	#------------------------------------------
+	$kiwi -> info ("Repack initrd with boot flags...");
+	if (! $this -> setupBootFlags()) {
+		return;
+	}
+	$kiwi -> done();
 	#==========================================
 	# Create Disk boot structure
 	#------------------------------------------
@@ -2479,6 +2495,7 @@ sub setupInstallFlags {
 	my $irddir = qxx ("mktemp -q -d /tmp/kiwiird.XXXXXX"); chomp $irddir;
 	my $result = $? >> 8;
 	if ($result != 0) {
+		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create tmp dir: $irddir: $!");
 		$kiwi -> failed ();
 		return;
@@ -2490,6 +2507,7 @@ sub setupInstallFlags {
 	my $status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
 	$result = $? >> 8;
 	if ($result != 0) {
+		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to extract initrd data: $status");
 		$kiwi -> failed ();
 		qxx ("rm -rf $irddir");
@@ -2501,6 +2519,7 @@ sub setupInstallFlags {
 	my $FD;
 	qxx ("mkdir -p $irddir/boot");
 	if (! open ($FD, '>', "$irddir/boot/mbrid")) {
+		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create mbrid file: $!");
 		$kiwi -> failed ();
 		qxx ("rm -rf $irddir");
@@ -2517,18 +2536,21 @@ sub setupInstallFlags {
 		my $status = qxx ("cp $imd5 $irddir/etc/image.md5 2>&1");
 		my $result = $? >> 8;
 		if ($result != 0) {
+			$kiwi -> failed ();
 			$kiwi -> error  ("Failed importing md5 file: $status");
 			$kiwi -> failed ();
 			qxx ("rm -rf $irddir");
 			return;
 		}
 		if (! open (FD,">$irddir/config.vmxsystem")) {
+			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create image boot configuration");
 			$kiwi -> failed ();
 			return;
 		}
 		my $namecd = basename ($system);
 		if (! -f $imd5) {
+			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't find md5 file");
 			$kiwi -> failed ();
 			qxx ("rm -rf $irddir");
@@ -2547,6 +2569,7 @@ sub setupInstallFlags {
 	);
 	$result = $? >> 8;
 	if ($result != 0) {
+		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to re-create initrd: $status");
 		$kiwi -> failed ();
 		qxx ("rm -rf $irddir");
@@ -2564,6 +2587,81 @@ sub setupInstallFlags {
 		qxx ("cat $splash >> $newird");
 	}
 	return $newird;
+}
+
+#==========================================
+# setupBootFlags
+#------------------------------------------
+sub setupBootFlags {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $initrd = $this->{initrd};
+	my $zipper = $this->{gdata}->{Gzip};
+	my $newird;
+	my $irddir = qxx ("mktemp -q -d /tmp/kiwiird.XXXXXX"); chomp $irddir;
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Couldn't create tmp dir: $irddir: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# resolve if link
+	#------------------------------------------
+	if (-l $initrd) {
+		my $dirname = dirname $initrd;
+		my $lnkname = readlink $initrd;
+		$initrd = $dirname.'/'.$lnkname;
+	}
+	#==========================================
+	# unpack initrd files
+	#------------------------------------------
+	my $unzip  = "$this->{gdata}->{Gzip} -cd $initrd 2>&1";
+	my $status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to extract initrd data: $status");
+		$kiwi -> failed ();
+		qxx ("rm -rf $irddir");
+		return;
+	}
+	#==========================================
+	# Include MBR ID to initrd
+	#------------------------------------------
+	my $FD;
+	qxx ("mkdir -p $irddir/boot");
+	if (! open ($FD, '>', "$irddir/boot/mbrid")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create mbrid file: $!");
+		$kiwi -> failed ();
+		qxx ("rm -rf $irddir");
+		return;
+	}
+	print $FD "$this->{mbrid}";
+	close $FD;
+	#==========================================
+	# create new initrd with mbr information
+	#------------------------------------------
+	$newird = $initrd;
+	$newird =~ s/\.gz/\.mbrinfo\.gz/;
+	$status = qxx (
+		"(cd $irddir && find|cpio --quiet -oH newc | $zipper) > $newird"
+	);
+	$result = $? >> 8;
+	if ($result == 0) {
+		$status = qxx ("mv $newird $initrd 2>&1");
+		$result = $? >> 8;
+	}
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to re-create initrd: $status");
+		$kiwi -> failed ();
+		qxx ("rm -rf $irddir");
+		return;
+	}
+	qxx ("rm -rf $irddir");	
+	return $this->{initrd};
 }
 
 #==========================================
@@ -3373,7 +3471,7 @@ sub setupBootLoaderConfiguration {
 			}
 			my $fodir = "($rprefix)/boot/grub2/themes/";
 			print FD "set default=$defaultBootNr\n";
-			if ($type !~ /^KIWI (CD|USB)/) {
+			if ($type !~ /^KIWI CD/) {
 				print FD "set root=\"(hd0,1)\""."\n";
 			}
 			print FD "set locale_dir=($rprefix)/boot/grub2/locale"."\n";

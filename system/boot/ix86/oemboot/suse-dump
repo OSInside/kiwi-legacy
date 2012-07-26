@@ -167,25 +167,23 @@ function OEMInstall {
 	#--------------------------------------
 	runHook preHWdetect
 	#======================================
-	# Search CD/DVD/USB stick and mount it
+	# Search CD/DVD/DISK and mount it
 	#--------------------------------------
 	waitForIdleEventQueue
 	if [ -z "$pxe" ];then
-		Echo "Searching for install media on USB drive..."
-		USBStickDevice install
-		if [ $stickFound = 0 ];then
+		Echo "Searching for install media on disk drive(s)..."
+		if ! searchBIOSBootDevice;then
 			Echo "Searching for install media on CD/DVD drive"
 			searchImageISODevice
-			Echo "Found CD/DVD: $biosBootDevice"
+			Echo "Found Install CD/DVD: $biosBootDevice"
 			kiwiMount "$biosBootDevice" "/cdrom" "-o ro" 1>&2
 			export OEMInstallType=CD
 			export imageDiskDevice=$biosBootDevice
 		else
-			Echo "Found Stick: $stickRoot -> $stickSerial"
-			mkdir -p /cdrom && mount $(ddn $stickRoot 2) /cdrom
-			export OEMInstallType=USB
-			export imageDiskDevice=$stickRoot
-			unset stickSerial
+			Echo "Found Install Disk: $biosBootDevice"
+			mkdir -p /cdrom && mount $(ddn $biosBootDevice 2) /cdrom
+			export OEMInstallType=DISK
+			export imageDiskDevice=$biosBootDevice
 		fi
 	else
 		OEMNetwork

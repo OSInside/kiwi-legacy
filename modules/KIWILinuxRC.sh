@@ -3461,38 +3461,6 @@ function lookupBiosBootDevice {
 	done
 }
 #======================================
-# storeIDFiles
-#--------------------------------------
-function storeIDFiles {
-	# /.../
-	# store mbrid from the devices into files
-	# ----
-	local cmpd=/tmp/mbrids
-	local ifix=0
-	local curd
-	local id
-	local dev
-	mkdir -p $cmpd
-	for curd in $diskDevices;do
-		if [ ! $(echo $curd | cut -c 1) = "/" ];then
-			continue
-		fi
-		for id in 1 2 3;do
-			dev=$(ddn $curd $id)
-			if ! mount -o ro $dev /mnt;then
-				continue
-			fi
-			if [ -f /mnt/boot/mbrid ];then
-				cp -a /mnt/boot/mbrid $cmpd/mbrid$ifix
-				ifix=$((ifix + 1))
-				umount /mnt
-				break
-			fi
-			umount /mnt
-		done
-	done
-}
-#======================================
 # searchBIOSBootDevice
 #--------------------------------------
 function searchBIOSBootDevice {
@@ -3503,16 +3471,23 @@ function searchBIOSBootDevice {
 	# mbrid file in /boot/grub/ of the system image
 	# ----
 	IFS=$IFS_ORIG
-	local cmpd=/tmp/mbrids
+	local file=/boot/mbrid
 	local ifix
 	local match_count
 	local matched
 	local curd
-	local file
 	local mbrML
 	local mbrMB
 	local mbrI
 	local try_count=0
+	#======================================
+	# Read mbrid from initrd
+	#--------------------------------------
+	if [ ! -e $file ];then
+		export biosBootDevice="Failed to find MBR identifier !"
+		return 1
+	fi
+	read mbrI < $file
 	#======================================
 	# Lookup until found
 	#--------------------------------------
@@ -3526,7 +3501,7 @@ function searchBIOSBootDevice {
 		#======================================
 		# stop after a long time of retry
 		#--------------------------------------
-		if [ $try_count -eq 30 ];then
+		if [ $try_count -eq 15 ];then
 			export biosBootDevice="Failed to find boot device !"
 			return 1
 		fi
@@ -3536,21 +3511,8 @@ function searchBIOSBootDevice {
 		lookupDiskDevices
 		lookupBiosBootDevice
 		#======================================
-		# store MBR id files from device list
-		#--------------------------------------
-		storeIDFiles
-		#======================================
-		# Read mbrid from the newest mbrid file
-		#--------------------------------------
-		file=$(ls -1t $cmpd 2>/dev/null | head -n 1)
-		if [ -z "$file" ];then
-			export biosBootDevice="Failed to find MBR identifier !"
-			sleep 1; continue
-		fi
-		#======================================
 		# Compare ID with MBR entry
 		#--------------------------------------
-		read mbrI < $cmpd/$file
 		for curd in $diskDevices;do
 			if [ ! -b $curd ];then
 				continue
@@ -8390,6 +8352,12 @@ function initialize {
 	# Start boot timer (first stage)
 	#--------------------------------------
 	startUtimer
+	#======================================
+	# Set kernel log level
+	#--------------------------------------
+	if which klogconsole;then
+		klogconsole -l 6
+	fi
 }
 
 # vim: set noexpandtab:
