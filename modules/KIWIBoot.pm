@@ -2135,7 +2135,7 @@ sub setupBootDisk {
 		if (! $expanded ) {
 			return;
 		}
-		if ($haveSplit) {
+		if (($haveSplit) && (-f $splitfile)) {
 			$kiwi -> info ("Dumping split read/write part on disk");
 			$root = $deviceMap{3};
 			$status = qxx ("dd if=$splitfile of=$root bs=32k 2>&1");
