@@ -21,8 +21,9 @@ use Common::ktLog;
 use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
 
-use KIWIXML;
 use KIWICommandLine;
+use KIWIXML;
+use KIWIXMLDescriptionData;
 
 # All tests will need to be adjusted once KIWXML turns into a stateless
 # container and the ctor receives the config.xml file name as an argument.
@@ -1293,6 +1294,39 @@ sub test_getDeleteListInstallDelete {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null(@delPcks);
+	return;
+}
+
+#==========================================
+# test_getDescriptionInfo
+#------------------------------------------
+sub test_getDescriptionInfo {
+	# ...
+	# Verify the proper return of getDescriptionInfo methof
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'descriptData';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my $descrpObj = $xml -> getDescriptionInfo();
+	$this -> assert_not_null($descrpObj);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $author = $descrpObj -> getAuthor();
+	$this -> assert_str_equals('Robert Schweikert', $author);
+	my $contact = $descrpObj -> getContactInfo();
+	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	my $spec = $descrpObj -> getSpecificationDescript();
+	my $expected = 'Verify proper handling of description in XML obj';
+	$this -> assert_str_equals($expected, $spec);
+	my $type = $descrpObj -> getType();
+	$this -> assert_str_equals('system', $type);
 	return;
 }
 
