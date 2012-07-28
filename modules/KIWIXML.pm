@@ -29,6 +29,7 @@ use KIWILocator;
 use KIWILog;
 use KIWIQX qw (qxx);
 use KIWIURL;
+use KIWIXMLDescriptionData;
 use KIWIXMLValidator;
 use KIWISatSolver;
 
@@ -387,6 +388,21 @@ sub getDefaultPrebuiltDir {
 	my $node = $this -> __getPreferencesNodeByTagName ('defaultprebuilt');
 	my $imgDir = $node -> getElementsByTagName ('defaultprebuilt');
 	return $imgDir;
+}
+
+#==========================================
+# getDescriptionInfo
+#------------------------------------------
+sub getDescriptionInfo {
+	# ...
+	# Return an object that encapsulates the description information
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $descriptObj = KIWIXMLDescriptionData -> new (
+		$kiwi,$this->{imageConfig}->{description}
+	);
+	return $descriptObj;
 }
 
 #==========================================
