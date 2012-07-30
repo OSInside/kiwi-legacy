@@ -36,7 +36,7 @@ $Carp::Internal{KIWILog}++;
 #------------------------------------------
 sub new {
 	# ...
-	# Construct a new KIWILog object. The log object
+	# Construct a KIWILog object. The log object
 	# is used to print out info, error and warning
 	# messages
 	# ---

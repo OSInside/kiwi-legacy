@@ -69,13 +69,10 @@ sub new {
 		return;
 	}
 	#==========================================
-	# Constructor setup
+	# Store module parameters
 	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = KIWILog -> new("tiny");
-	}
 	$this->{cmdArgs} = $cmdArgs;
-	$this->{locator} = KIWILocator -> new($kiwi);
+	$this->{locator} = KIWILocator -> new ($kiwi);
 	$this->{kiwi}    = $kiwi;
 	$this->{xml}     = $xml;
 	return $this;

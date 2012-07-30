@@ -54,12 +54,6 @@ sub new {
 	my $schemaPath = shift;
 	my $xsltPath   = shift;
 	#==========================================
-	# Constructor setup
-	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = KIWILog -> new ( 'tiny' );
-	}
-	#==========================================
 	# Check pre-conditions
 	#------------------------------------------
 	if ((! $configPath) || (! -f $configPath)) {
