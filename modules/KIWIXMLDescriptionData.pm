@@ -41,14 +41,17 @@ sub new {
 	my $class = shift;
 	bless $this,$class;
 	#==========================================
-	# Arg processing
+	# Module Parameters
 	#------------------------------------------
 	my $kiwi   = shift;
-	if (! defined $kiwi) {
-		$kiwi = KIWILog -> new("tiny");
-	}
-	$this->{kiwi} = $kiwi;
 	my $author = shift;
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi} = $kiwi;
+	#==========================================
+	# Parameter processing, Store object data
+	#------------------------------------------
 	if (defined $author) {
 		if (ref $author eq 'HASH') {
 			$this->{author}        = $author->{author};
