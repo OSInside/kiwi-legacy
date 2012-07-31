@@ -318,9 +318,10 @@ sub mount {
 	# supported file system/image types
 	# ---
 	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
 	my $source = shift;
 	my $dest   = shift;
+	my $opts   = shift;
+	my $kiwi   = $this->{kiwi};
 	my $salt   = int (rand(20));
 	my $cipher = $this->{data}->{LuksCipher};
 	my @UmountStack = @{$this->{UmountStack}};
@@ -435,7 +436,11 @@ sub mount {
 	# Mount device or loop mount file
 	#------------------------------------------
 	if ((-f $source) && ($type ne "clicfs")) {
-		$status = qxx ("mount -o loop $source $dest 2>&1");
+		if ($opts) {
+			$status = qxx ("mount -o loop,$opts $source $dest 2>&1");
+		} else {
+			$status = qxx ("mount -o loop $source $dest 2>&1");
+		}
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error ("Failed to loop mount $source to: $dest: $status");
@@ -452,7 +457,11 @@ sub mount {
 				$result = $? >> 8;
 			}
 		} else {
-			$status = qxx ("mount $source $dest 2>&1");
+			if ($opts) {
+				$status = qxx ("mount -o $opts $source $dest 2>&1");
+			} else {
+				$status = qxx ("mount $source $dest 2>&1");
+			}
 			$result = $? >> 8;
 		}
 		if ($result != 0) {

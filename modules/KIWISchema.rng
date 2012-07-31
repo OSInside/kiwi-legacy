@@ -2117,6 +2117,12 @@ or clic and applies to the iso type only</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.type.fsmountoptions.attribute">
+      <attribute name="fsmountoptions">
+        <a:documentation>Specifies the filesystem mount options which also ends up in fstab
+The string given here is passed as value to the -o option of mount</a:documentation>
+      </attribute>
+    </define>
     <define name="k.type.hybrid.attribute">
       <attribute name="hybrid">
         <a:documentation>for the iso type only:
@@ -2279,6 +2285,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.fsreadwrite.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.fsmountoptions.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.hybrid.attribute"/>

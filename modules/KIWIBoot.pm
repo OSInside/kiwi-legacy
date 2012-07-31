@@ -730,7 +730,7 @@ sub setupInstallCD {
 		#==========================================
 		# perform mount call
 		#------------------------------------------
-		if (! $main::global -> mount ($sdev, $tmpdir)) {
+		if (! $main::global -> mount ($sdev,$tmpdir,$type{fsmountoptions})) {
 			$kiwi -> error ("Failed to mount system partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
@@ -1168,7 +1168,7 @@ sub setupInstallStick {
 		#==========================================
 		# perform mount call
 		#------------------------------------------
-		if (! $main::global -> mount ($sdev, $tmpdir)) {
+		if (! $main::global -> mount ($sdev,$tmpdir,$type{fsmountoptions})) {
 			$kiwi -> error  ("Failed to mount system partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
@@ -1486,7 +1486,7 @@ sub setupInstallStick {
 	#------------------------------------------
 	if ($gotsys) {
 		$kiwi -> info ("Installing image data to disk");
-		if (! $main::global -> mount($data, $loopdir)) {
+		if (! $main::global -> mount ($data, $loopdir,$type{fsmountoptions})) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount data partition: $status");
 			$kiwi -> failed ();
@@ -2176,7 +2176,7 @@ sub setupBootDisk {
 		#==========================================
 		# Mount system image partition
 		#------------------------------------------
-		if (! $main::global -> mount ($root, $loopdir)) {
+		if (! $main::global -> mount ($root,$loopdir,$type{fsmountoptions})) {
 			$this -> cleanLoop ();
 			return;
 		}
@@ -2224,7 +2224,9 @@ sub setupBootDisk {
 						return;
 					}
 					$kiwi -> loginfo ("Mounting logical volume: $pname\n");
-					if (! $main::global -> mount ($device, "$loopdir/$pname")) {
+					if (! $main::global ->
+						mount ($device,"$loopdir/$pname",$type{fsmountoptions})
+					) {
 						$this -> cleanLoop ();
 						return;
 					}

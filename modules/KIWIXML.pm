@@ -2583,6 +2583,9 @@ sub getImageConfig {
 	if ((%type) && ($type{installboot})) {
 		$result{kiwi_installboot} = $type{installboot};
 	}
+	if ((%type) && ($type{fsmountoptions})) {
+		$result{kiwi_fsmountoptions} = $type{fsmountoptions};
+	}
 	if ((%type)
 		&& (defined $type{luks})
 		&& ($type{luks} eq "true")) {
@@ -4977,6 +4980,11 @@ sub __updateDescriptionFromChangeSet {
 			"bootkernel",$changeset->{"bootkernel"}
 		);
 	}
+	if (defined $changeset->{"fsmountoptions"}) {
+		$this -> __setTypeAttribute (
+			"fsmountoptions",$changeset->{"fsmountoptions"}
+		);
+	}
 	if (defined $changeset->{"bootprofile"}) {
 		$this -> __setTypeAttribute (
 			"bootprofile",$changeset->{"bootprofile"}
@@ -5640,6 +5648,8 @@ sub __populateTypeInfo_legacy {
 			#------------------------------------------
 			$record{type}          = $node
 				-> getAttribute("image");
+			$record{fsmountoptions}= $node
+				-> getAttribute("fsmountoptions");
 			$record{luks}          = $node
 				-> getAttribute("luks");
 			$record{cmdline}       = $node

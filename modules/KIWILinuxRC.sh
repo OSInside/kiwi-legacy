@@ -2502,6 +2502,16 @@ function updateRootDeviceFstab {
 	local rdev=$2
 	local nfstab=$prefix/etc/fstab
 	local diskByID=`getDiskID $rdev`
+	local opts=defaults
+	#======================================
+	# check for custom options
+	#--------------------------------------
+	if [ ! -z "$kiwi_fsmountoptions" ];then
+		opts=$kiwi_fsmountoptions
+	fi
+	#======================================
+	# check for NFSROOT
+	#--------------------------------------
 	if [ ! -z "$NFSROOT" ];then
 		local server=`echo $rdev | cut -f3 -d" "`
 		local option=`echo $rdev | cut -f2 -d" "`
@@ -2512,7 +2522,7 @@ function updateRootDeviceFstab {
 	# check for device by ID
 	#--------------------------------------
 	if [ -z "$UNIONFS_CONFIG" ]; then
-		echo "$diskByID / $FSTYPE defaults 1 1" >> $nfstab
+		echo "$diskByID / $FSTYPE $opts 1 1" >> $nfstab
 	else
 		echo "/dev/root / auto defaults 1 1" >> $nfstab
 	fi
@@ -2531,7 +2541,7 @@ function updateRootDeviceFstab {
 				[ ! $volume = "Comp" ] && \
 				[ ! $volume = "Swap" ]
 			then
-				echo "/dev/$VGROUP/LV$volume /$mpoint $FSTYPE defaults 1 2" \
+				echo "/dev/$VGROUP/LV$volume /$mpoint $FSTYPE $opts 1 2" \
 				>> $nfstab
 			fi
 		done

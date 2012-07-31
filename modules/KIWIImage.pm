@@ -224,6 +224,9 @@ sub updateDescription {
 	if ($src_type{bootkernel}) {
 		$changeset{"bootkernel"} = $src_type{bootkernel};
 	}
+	if ($src_type{fsmountoptions}) {
+		$changeset{"fsmountoptions"} = $src_type{fsmountoptions};
+	}
 	if ($src_xml->{reqProfiles}) {
 		push @profiles,@{$src_xml->{reqProfiles}};
 		$changeset{"profiles"} = \@profiles;
@@ -3631,18 +3634,21 @@ sub mountLogicalExtend {
 	my $opts   = shift;
 	my $device = shift;
 	my $kiwi   = $this->{kiwi};
+	my $xml    = $this->{xml};
+	my %type   = %{$xml->getImageTypeAndAttributes()};
+	my $data;
+	my $code;
 	#==========================================
 	# mount logical extend for data transfer
 	#------------------------------------------
 	my $target = "$this->{imageDest}/$name";
-	my $mount  = "mount";
-	if (defined $opts) {
-		$mount = "mount $opts";
+	if (defined $type{fsmountoptions}) {
+		$opts .= ','.$type{fsmountoptions};
 	}
 	if ($device) {
 		$target = $device;
 	} else {
-		$mount .= " -o loop";
+		$opts .= ",loop";
 	}
 	mkdir "$this->{imageDest}/mnt-$$";
 	#==========================================
@@ -3657,12 +3663,19 @@ sub mountLogicalExtend {
 		# ext4 (currently) should be mounted with 'nodelalloc';
 		# else we might run out of space unexpectedly...
 		# ----
-		$mount .= ",nodelalloc";
+		$opts .= ",nodelalloc";
 	}
-	my $data= qxx (
-		"$mount $target $this->{imageDest}/mnt-$$ 2>&1"
-	);
-	my $code= $? >> 8;
+	if ($opts) {
+		$opts =~ s/^,//;
+		$data= qxx (
+			"mount -o $opts $target $this->{imageDest}/mnt-$$ 2>&1"
+		);
+	} else {
+		$data= qxx (
+			"mount $target $this->{imageDest}/mnt-$$ 2>&1"
+		);
+	}
+	$code= $? >> 8;
 	if ($code != 0) {
 		chomp $data;
 		$kiwi -> error  ("Image loop mount failed:");
