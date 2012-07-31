@@ -4634,6 +4634,61 @@ function setupReadWrite {
 	return 0
 }
 #======================================
+# mountSystemSeedBtrFS
+#--------------------------------------
+function mountSystemSeedBtrFS {
+	local loopf=$1
+	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
+	#======================================
+	# check read/only device location
+	#--------------------------------------
+	if [ ! -z "$NFSROOT" ];then
+		roDevice="$imageRootDevice"
+	fi
+	#======================================
+	# check read/write device location
+	#--------------------------------------
+	if [ ! -e $rwDevice ];then
+		rwDevice=/dev/ram1
+	fi
+	#======================================
+	# mount/check btrfs file
+	#--------------------------------------
+	if [ ! -z "$NFSROOT" ];then
+		#======================================
+		# btrfs exported via NFS
+		#--------------------------------------
+		if ! kiwiMount "$roDevice" "/mnt" "" $loopf;then
+			Echo "Failed to mount NFS filesystem"
+			return 1
+		fi
+	else
+		#======================================
+		# mount btrfs container
+		#--------------------------------------
+		if [ -z "$loopf" ];then
+			loopf=$roDevice
+		fi
+		if ! mount -o loop,$kiwi_fsmountoptions $loopf /mnt; then
+			Echo "Failed to mount btrfs filesystem"
+			return 1
+		fi
+	fi
+	#======================================
+	# add seed device
+	#--------------------------------------
+	if ! btrfs device add $rwDevice /mnt; then
+		Echo "Failed to attach btrfs seed device"
+		return 1
+	fi
+	if ! mount -o remount,rw /mnt; then
+		Echo "Failed to remount read-write"
+		return 1
+	fi
+	return 0
+}
+#======================================
 # mountSystemClicFS
 #--------------------------------------
 function mountSystemClicFS {
@@ -4937,6 +4992,8 @@ function mountSystem {
 		local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
 		if [ "$unionFST" = "clicfs" ];then
 			mountSystemClicFS $2
+		elif [ "$unionFST" = "seed" ];then
+			mountSystemSeedBtrFS $2
 		else
 			systemException \
 				"Unknown overlay mount method: $unionFST" \

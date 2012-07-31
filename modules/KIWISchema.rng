@@ -2067,6 +2067,7 @@ or clic and applies to the iso type only</a:documentation>
           <value>clic</value>
           <value>compressed</value>
           <value>clic_udf</value>
+          <value>seed</value>
         </choice>
       </attribute>
     </define>

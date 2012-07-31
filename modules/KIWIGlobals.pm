@@ -135,6 +135,7 @@ sub new {
 	$KnownFS{squashfs}{tool}  = $locator -> getExecPath("mksquashfs");
 	$KnownFS{clicfs}{tool}    = $locator -> getExecPath("mkclicfs");
 	$KnownFS{clic}{tool}      = $locator -> getExecPath("mkclicfs");
+	$KnownFS{seed}{tool}      = $locator -> getExecPath("mkfs.btrfs");
 	$KnownFS{clic_udf}{tool}  = $locator -> getExecPath("mkclicfs");
 	$KnownFS{compressed}{tool}= $locator -> getExecPath("mksquashfs");
 	$KnownFS{reiserfs}{tool}  = $locator -> getExecPath("mkreiserfs");

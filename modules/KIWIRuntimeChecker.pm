@@ -322,6 +322,9 @@ sub __checkFilesystemTool {
 		if ($flag && $flag =~ /clic|clic_udf/) {
 			$haveTool = $this -> __isFsToolAvailable('clicfs');
 			$checkedFS = 'clicfs';
+		} elsif ($flag && $flag eq 'seed') {
+			$haveTool = $this -> __isFsToolAvailable('btrfs');
+			$checkedFS = 'btrfs';
 		} elsif ($flag && $flag eq 'compressed') {
 			$haveTool = $this -> __isFsToolAvailable('squashfs');
 			$checkedFS = 'squashfs';

@@ -1652,6 +1652,23 @@ sub createImageLiveCD {
 				}
 				last SWITCH;
 			};
+			/^seed$/ && do {
+				$kiwi -> info ("Creating btrfs read only filesystem...\n");
+				if (! $this -> createImageBTRFS ( undef,$namero )) {
+					$this -> restoreSplitExtend ();
+					return;
+				}
+				$data = qxx ("btrfstune -S 1 $this->{imageDest}/$namero 2>&1");
+				$code = $? >> 8;
+				if ($code != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error ("Write protection failed: $data");
+					$kiwi -> failed ();
+					$this -> restoreSplitExtend ();
+					return;
+				}
+				last SWITCH;
+			};
 			# invalid flag setup...
 			$kiwi -> error  ("Invalid iso flags: $gzip");
 			$kiwi -> failed ();
@@ -2125,6 +2142,8 @@ sub createImageLiveCD {
 	if (defined $gzip) {
 		if ($gzip =~ /^clic/) {
 			print $FD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,clicfs'\n";
+		} elsif ($gzip =~ /^seed/) {
+			print $FD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,seed'\n";
 		} else {
 			print $FD "COMBINED_IMAGE=yes\n";
 		}
@@ -2142,7 +2161,7 @@ sub createImageLiveCD {
 	}
 	$attr .= ' -p "'.$this->{gdata}->{Preparer}.'"';
 	$attr .= ' -publisher "'.$this->{gdata}->{Publisher}.'"';
-	if ((defined $stype{flags}) && ($stype{flags} eq "clic_udf")) {
+	if ((defined $stype{flags}) && ($stype{flags} =~ /clic_udf|seed/)) {
 		$attr .= " -allow-limited-size -udf";
 	}
 	if (! defined $gzip) {

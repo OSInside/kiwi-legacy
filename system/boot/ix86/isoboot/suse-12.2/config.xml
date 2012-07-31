@@ -47,6 +47,7 @@
 		<file name="drivers/virtio/*"/>
 		<file name="fs/binfmt_aout.ko"/>
 		<file name="fs/binfmt_misc.ko"/>
+		<file name="fs/btrfs/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext4/*"/>
@@ -88,6 +89,7 @@
 	</packages>
 	<packages type="bootstrap">
 		<package name="adaptec-firmware"/>
+		<package name="btrfsprogs"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="checkmedia"/>
