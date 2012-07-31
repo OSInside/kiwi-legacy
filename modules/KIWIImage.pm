@@ -2984,13 +2984,13 @@ sub getBlocks {
 		# big image...
 		$count = $number / $bigimage;
 		$count = Math::BigFloat->new($count)->ffround(0);
-		$seek  = $count*$bigimage - $bigimage;
+		$seek  = $count*$bigimage;
 		return (($bigimage,$count,$seek));
 	} else {
 		# small image...
 		$count = $number / $smallimage;
 		$count = Math::BigFloat->new($count)->ffround(0);
-		$seek  = $count*$smallimage - $smallimage;
+		$seek  = $count*$smallimage;
 		return (($smallimage,$count,$seek));
 	}
 }
@@ -4353,26 +4353,25 @@ sub getSize {
 	# calculate size of the logical extend. The
 	# method returns the size value in MegaByte
 	# ---
-	my $this   = shift;
-	my $extend = shift;
-	my $kiwi   = $this->{kiwi};
-	my $cmdL   = $this->{cmdL};
-	my $xml    = $this->{xml};
-	my $mini   = qxx ("find $extend | wc -l");
-	chomp $mini;
-	my $minsize= qxx ("du -s --block-size=1 $extend | cut -f1");
-	chomp $minsize;
-	my $spare  = 100 * 1024 * 1024;
-	my $files  = $mini;
-	my $fsopts = $cmdL -> getFilesystemOptions();
-	my $isize  = $fsopts->[1];
-	my $iratio = $fsopts->[2];
-	my %type   = %{$xml->getImageTypeAndAttributes()};
-	my $fstype = $type{type};
+	my $this    = shift;
+	my $extend  = shift;
+	my $kiwi    = $this->{kiwi};
+	my $cmdL    = $this->{cmdL};
+	my $xml     = $this->{xml};
+	my $mini    = qxx ("find $extend | wc -l"); chomp $mini;
+	my $minsize = qxx ("du -s --block-size=1 $extend | cut -f1");
+	my $spare   = 100 * 1024 * 1024;
+	my $files   = $mini;
+	my $fsopts  = $cmdL -> getFilesystemOptions();
+	my $isize   = $fsopts->[1];
+	my $iratio  = $fsopts->[2];
+	my %type    = %{$xml->getImageTypeAndAttributes()};
+	my $fstype  = $type{type};
 	my $xmlsize;
 	if ($type{filesystem}) {
 		$fstype .= ":$type{filesystem}";
 	}
+	$minsize = sprintf ("%.0f",$minsize);
 	#==========================================
 	# Double minimum inode count
 	#------------------------------------------
@@ -4391,6 +4390,7 @@ sub getSize {
 		$kiwi -> loginfo ("getSize: inode: $isize Bytes\n");
 		$minsize *= $fsohead;
 		$minsize += $mini * $isize;
+		$minsize = sprintf ("%.0f",$minsize);
 	}
 	$minsize+= $spare;
 	$xmlsize = $minsize;
@@ -4418,11 +4418,13 @@ sub getSize {
 			$xmlsize = $value * 1048576;
 			# check the size value with what kiwi thinks is the minimum
 			if ($xmlsize < $minsize) {
+				my $s1 = sprintf ("%.0f", $minsize / 1048576);
+				my $s2 = sprintf ("%.0f", $xmlsize / 1048576);
 				$kiwi -> warning (
 					"--> given xml size might be too small, using it anyhow!\n"
 				);
 				$kiwi -> warning (
-					"--> min size changed from $minsize to $xmlsize bytes\n"
+					"--> min size changed from $s1 to $s2 MB\n"
 				);
 				$minsize = $xmlsize;
 			}
