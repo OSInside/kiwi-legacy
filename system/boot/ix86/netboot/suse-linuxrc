@@ -354,6 +354,11 @@ if \
 then
 	runHook prepartition
 	#======================================
+	# Validate partition table
+	#--------------------------------------
+	Echo "Validating partition setup"
+	pxePartitionSetupCheck
+	#======================================
 	# Create partition table
 	#--------------------------------------
 	Echo "Creating partition table..."
