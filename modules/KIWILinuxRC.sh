@@ -7544,9 +7544,63 @@ function pxeRaidPartCheck {
 	return 0
 }
 #======================================
+# pxePartitionSetupCheck
+#--------------------------------------
+function pxePartitionSetupCheck {
+	# /.../
+	# validation check for the PART line. So far this
+	# function counts the given partition sizes and
+	# checks if it's possible to setup those partitions
+	# with respect to the available disk size
+	# ----
+	local field=0
+	local count=0
+	local IFS=","
+	local reqsizeMB=0
+	if [ -z "$DISK" ];then
+		# no disk device available, might be a ram only
+		# or diskless client
+		return
+	fi
+	local haveKBytes=$(partitionSize $DISK)
+	local haveMBytes=$((haveKBytes / 1024))
+	for i in $PART;do
+		field=0
+		count=$((count + 1))
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n; field=1 ;;
+		esac
+		done
+		if [ "$partSize" == "x" ] ; then
+			# partition requests all available space
+			# use a fake value of 10 MB as minimum
+			reqsizeMB=$((reqsizeMB + 10))
+		else
+			# some size was requested, use value as MB size
+			reqsizeMB=$((reqsizeMB + partSize))
+		fi
+	done
+	if [ $reqsizeMB -gt $haveMBytes ];then
+		systemException \
+			"Requested partition sizes exceeds disk size" \
+		"reboot"
+	fi
+}
+#======================================
 # pxePartCheck
 #--------------------------------------
 function pxePartCheck {
+	# /.../
+	# check the current partition table according to the
+	# current setup of the PART line. Thus this function
+	# checks if a new partition table setup compared to
+	# the existing one was requested. Additionally the check
+	# is clever enough to find out if the new partition
+	# table setup would destroy data on the existing one
+	# or if it only increases the partitions so that no
+	# data loss is expected.
+	# ----
 	local count=0
 	local field=0
 	local n
