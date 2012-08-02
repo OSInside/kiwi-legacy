@@ -3443,6 +3443,7 @@ function storeIDFiles {
 	local curd
 	local id
 	local dev
+	local fst
 	mkdir -p $cmpd
 	for curd in $diskDevices;do
 		if [ ! $(echo $curd | cut -c 1) = "/" ];then
@@ -3450,6 +3451,10 @@ function storeIDFiles {
 		fi
 		for id in 1 2 3;do
 			dev=$(ddn $curd $id)
+			fst=$(blkid $dev -s TYPE -o value)
+			if [ -z "$fst" ];then
+				continue
+			fi
 			if ! mount -o ro $dev /mnt;then
 				continue
 			fi
