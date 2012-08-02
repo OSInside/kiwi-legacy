@@ -7,6 +7,9 @@ addFilter("hidden-file-or-dir /usr/share/kiwi/image/.*\/\.checksum.md5")
 # kiwi includes the SVN revision of this build as hidden file
 addFilter("hidden-file-or-dir /usr/share/kiwi/.revision")
 
+# kiwi includes pub keys in .ssh as hidden file
+addFilter("hidden-file-or-dir /usr/share/kiwi/image/.*/.*/root/root/.ssh")
+
 # don't apply perl naming policy on kiwi
 addFilter("kiwi.* perl5-naming-policy-not-applied")
 
