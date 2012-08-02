@@ -98,6 +98,7 @@ install:
 	# kiwi dropbear keys
 	#--------------------------------------------
 	cp -a keys/* ${KIWIKEYVZ}
+	chmod 0600 ${KIWIKEYVZ}/*
 
 	#============================================
 	# kiwi manual pages
