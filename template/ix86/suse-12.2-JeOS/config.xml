@@ -14,7 +14,7 @@
 	</profiles>
 	<preferences>
 		<type image="iso" primary="true" boot="isoboot/suse-12.2" flags="seed" hybrid="true" fsmountoptions="compress=lzo">
-			<size unit="M">400</size>
+			<size unit="M">450</size>
 		</type>
 		<version>1.12.2</version>
 		<packagemanager>zypper</packagemanager>
