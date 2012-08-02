@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Aug  2 10:59:22 CEST 2012 - ms@suse.de
+
+- check blkid before mounting in searchBiosBootDevice (bnc #773861)
+- netboot: added function pxePartitionSetupCheck() which is
+  used to validate the PART information whether the requested
+  partition sizes can be reached according to the size of the
+  disk. This implements the request in (bnc #771592)
+
+-------------------------------------------------------------------
 Fri Jul 20 21:07:13 CEST 2012 - ms@suse.de
 
 - netboot: fixed use of multicast for compressed images.
