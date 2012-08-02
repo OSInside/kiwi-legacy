@@ -5214,6 +5214,7 @@ function startShell {
 	# start a debugging shell on ELOG_BOOTSHELL
 	# ----
 	if [ ! -z $kiwidebug ];then
+		startDropBear
 		if [ ! -e $ELOG_BOOTSHELL ];then
 			Echo "No terminal $ELOG_BOOTSHELL available for debug shell"
 			return
@@ -5222,7 +5223,6 @@ function startShell {
 		setctsid -f $ELOG_BOOTSHELL /bin/bash -i
 		ELOGSHELL_PID=$(fuser $ELOG_BOOTSHELL | tr -d " ")
 		echo ELOGSHELL_PID=$ELOGSHELL_PID >> /iprocs
-		startDropBear
 	fi
 }
 #======================================
