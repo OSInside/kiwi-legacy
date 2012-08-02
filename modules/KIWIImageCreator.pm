@@ -310,6 +310,19 @@ sub prepareImage {
 	if (! $krc -> prepareChecks()) {
 		return;
 	}
+	#==========================================
+	# Remove cached repos for new build
+	#------------------------------------------
+	# The repo setup for the package managers smart and yum are cleaned
+	# up at the end of each build by resetInstallationSource(). zypper
+	# makes an exception here and we keep the repo setup for performance
+	# reasons. Thus at the beginning a a new prepare run we should clean
+	# up the repo files to match the new repos from the XML setup
+	# ----
+	qxx ("rm -f /var/cache/kiwi/zypper/repos/* 2>&1");
+	#==========================================
+	# Run prepare
+	#------------------------------------------
 	return $this -> __prepareTree(
 		$xml,$this->{configDir},$rootTgtDir
 	);
