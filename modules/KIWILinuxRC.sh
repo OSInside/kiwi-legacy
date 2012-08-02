@@ -3330,6 +3330,7 @@ function searchBIOSBootDevice {
 	local matched
 	local bios
 	local file
+	local fst
 	local pred
 	#======================================
 	# Store device with BIOS id 0x80
@@ -3360,6 +3361,10 @@ function searchBIOSBootDevice {
 		fi
 		for id in 1 2 3;do
 			dev=$(ddn $curd $id)
+			fst=$(blkid $dev -s TYPE -o value)
+			if [ -z "$fst" ];then
+				continue
+			fi
 			if ! mount -o ro $dev /mnt;then
 				continue
 			fi
