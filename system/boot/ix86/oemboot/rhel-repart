@@ -116,6 +116,12 @@ function OEMRepartStandard {
 		swapParam=no
 		cowpParam=no
 		#======================================
+		# close open device mappings
+		#--------------------------------------
+		if [ "$haveLuks" = "yes" ];then
+			luksClose
+		fi
+		#======================================
 		# clean/backup boot partition
 		#--------------------------------------
 		if [ "$haveBootPartition" = "yes" ];then
@@ -246,6 +252,12 @@ function OEMRepartSplit {
 		cowpParam=3
 		swapParam=no
 		recoParam=no
+		#======================================
+		# close open device mappings
+		#--------------------------------------
+		if [ "$haveLuks" = "yes" ];then
+			luksClose
+		fi
 		#======================================
 		# count partitions to be created
 		#--------------------------------------
@@ -383,12 +395,19 @@ function OEMRepartLVM {
 			swapParam=yes
 		fi
 		#======================================
-		# Extend all free volume...
+		# Resize volumes to requested size
+		#--------------------------------------
+		resizeLVMVolumes
+		#======================================
+		# Extend root + optional allFreeVolume
 		#--------------------------------------
 		if [ -z "$OEM_SYSTEMSIZE" ];then
 			lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
 		else
-			lvextend --size $OEM_SYSTEMSIZE"M" /dev/$VGROUP/$allFreeVolume
+			lvextend --size $OEM_SYSTEMSIZE"M" /dev/$VGROUP/LVRoot
+			if [ "$allFreeVolume" != "LVRoot" ];then
+				lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
+			fi
 		fi
 		#======================================
 		# setup new device names
@@ -415,13 +434,31 @@ function OEMPartitionInstall {
 	#--------------------------------------
 	if searchVolumeGroup;then
 		#======================================
+		# setup all free volume name
+		#--------------------------------------
+		export allFreeVolume=LVRoot
+		if [ ! -z "$kiwi_allFreeVolume" ];then
+			allFreeVolume=$kiwi_allFreeVolume
+		fi
+		#======================================
 		# resize PV's
 		#--------------------------------------
 		pvresize $(ddn $imageDiskDevice $rID)
 		#======================================
-		# resize LV's
+		# Resize volumes to requested size
 		#--------------------------------------
-		lvresize -l +100%FREE $imageRootDevice
+		resizeLVMVolumes
+		#======================================
+		# Extend root + optional allFreeVolume
+		#--------------------------------------
+		if [ -z "$OEM_SYSTEMSIZE" ];then
+			lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
+		else
+			lvextend --size $OEM_SYSTEMSIZE"M" /dev/$VGROUP/LVRoot
+			if [ "$allFreeVolume" != "LVRoot" ];then
+				lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
+			fi
+		fi
 	fi
 	#======================================
 	# resize boot filesystem if needed
@@ -705,3 +742,32 @@ function disableRepart {
 	DONT_PARTITION=1
 }
 
+#======================================
+# resizeLVMVolumes
+#--------------------------------------
+function resizeLVMVolumes {
+	local variable
+	local volume
+	local content
+	local mode
+	local size
+	for i in $(cat /.profile | grep kiwi_LVM_);do
+		variable=$(echo $i|cut -f1 -d=)
+		volume=$(echo $i| cut -f3 -d_ | cut -f1 -d=)
+		content=$(eval echo \$$variable)
+		mode=$(echo $content | cut -f1 -d:)
+		size=$(echo $content | cut -f2 -d:)
+		Echo "Resizing volume $volume..."
+		if [ $mode = "size" ];then
+			lvextend -L ${size}M /dev/$VGROUP/$volume
+		else
+			lvextend -L +${size}M /dev/$VGROUP/$volume
+		fi
+		if [ $? = 0 ];then
+			unset FSTYPE
+			resizeFilesystem /dev/$VGROUP/$volume
+		else
+			Echo "Warning: requested size cannot be reached !"
+		fi
+	done
+}

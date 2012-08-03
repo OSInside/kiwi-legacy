@@ -88,8 +88,10 @@ function OEMFindPartitions {
 	# disk device and return a list containing the information
 	# device:size-KB,device:size-KB,...
 	# ----
+	unset OEMPartitions
 	local disk=$1
-	local result
+	local rids=$2
+	local IFS
 	disk=$(echo $disk | sed -e s@^/dev/@@)
 	for i in $(cat /proc/partitions |\
 		grep -E $disk.+ | sed "s/^ *//;s/ *$//;s/ \{1,\}/:/g" |\
@@ -99,20 +101,34 @@ function OEMFindPartitions {
 		local kbsize=$(echo $i | cut -f1 -d:)
 		local mbsize=$((kbsize / 1024))
 		local partid=$(partitionID /dev/$disk $(nd $device))
-		if [ ! "$partid" = "83" ];then
+		local deviceOK=0
+		IFS=","
+		for i in $rids;do
+			req_psize=$(echo $i | cut -f2 -d:)
+			req_partid=$(echo $i | cut -f1 -d:)
+			if [ $partid = $req_partid ] && [ $req_psize -lt $mbsize ];then
+				deviceOK=1 ; break
+			fi
+		done
+		IFS=$IFS_ORIG
+		if [ $deviceOK -eq 0 ];then
+			Echo "Partition $device with ID $partid and size $mbsize skipped"
+			Echo "Partition ID mismatch and/or size too small"
+			Echo "Searching in range: $rids"
 			continue
 		fi
 		probeFileSystem $device
 		if [ ! -z "$FSTYPE" ] && [ ! "$FSTYPE" = "unknown" ];then
+			Echo "Partition $device with ID $partid and size $mbsize skipped"
+			Echo "Partition contains a filesystem"
 			continue
 		fi
-		if [ -z "$result" ];then
-			result=$device:$mbsize
+		if [ -z "$OEMPartitions" ];then
+			OEMPartitions=$device:$mbsize:$partid
 		else
-			result=$result,$device:$mbsize
+			OEMPartitions=$OEMPartitions,$device:$mbsize:$partid
 		fi
 	done
-	echo $result
 }
 #======================================
 # OEMInstall
@@ -151,28 +167,27 @@ function OEMInstall {
 	#--------------------------------------
 	runHook preHWdetect
 	#======================================
-	# Search CD/DVD/USB stick and mount it
+	# Search CD/DVD/DISK and mount it
 	#--------------------------------------
 	waitForIdleEventQueue
 	if [ -z "$pxe" ];then
-		Echo "Searching for install media on USB drive..."
-		USBStickDevice install
-		if [ $stickFound = 0 ];then
+		Echo "Searching for install media on disk drive(s)..."
+		if ! searchBIOSBootDevice;then
 			Echo "Searching for install media on CD/DVD drive"
 			searchImageISODevice
-			Echo "Found CD/DVD: $biosBootDevice"
+			Echo "Found Install CD/DVD: $biosBootDevice"
 			kiwiMount "$biosBootDevice" "/cdrom" "-o ro" 1>&2
 			export OEMInstallType=CD
 			export imageDiskDevice=$biosBootDevice
 		else
-			Echo "Found Stick: $stickRoot -> $stickSerial"
-			mkdir -p /cdrom && mount $(ddn $stickRoot 2) /cdrom
-			export OEMInstallType=USB
-			export imageDiskDevice=$stickRoot
-			unset stickSerial
+			Echo "Found Install Disk: $biosBootDevice"
+			mkdir -p /cdrom && mount $(ddn $biosBootDevice 2) /cdrom
+			export OEMInstallType=DISK
+			export imageDiskDevice=$biosBootDevice
 		fi
 	else
 		OEMNetwork
+		startDropBear
 		export OEMInstallType=PXE
 	fi
 	#======================================
@@ -201,12 +216,14 @@ function OEMInstall {
 	fi
 	Echo "Found following disk device(s)"
 	count=0
+	deviceDisks=$(for i in $deviceDisks; do echo $i;done | sort | xargs)
 	for i in $deviceDisks;do
 		dbyid=$(getDiskID $i)
-		dsize=`partitionSize $dbyid`
+		dsize=$(partitionSize $dbyid)
 		dsizeMB=$((dsize / 1024))
 		if [ "$dsizeMB" -gt 0 ];then
 			Echo -b "Disk $count -> $i [ $dsizeMB MB ]"
+			deviceLinux[$count]=$i
 			deviceArray[$count]=$dbyid
 			deviceDSize[$count]=$dsize
 			count=$((count + 1))
@@ -219,9 +236,12 @@ function OEMInstall {
 		instDisk=${deviceArray[0]}
 	elif [ ! -z "$kiwi_oemunattended" ];then
 		#======================================
-		# Unattended mode... use first disk
+		# Unattended mode... first disk or id
 		#--------------------------------------
 		instDisk=${deviceArray[0]}
+		if [ ! -z "$kiwi_oemunattended_id" ];then
+			identifyDevice
+		fi
 	else
 		#======================================
 		# Found multiple disks...
@@ -230,7 +250,7 @@ function OEMInstall {
 		count=0
 		for i in $deviceDisks;do
 			dbyid=$(getDiskID $i)
-			dsize=`partitionSize $dbyid`
+			dsize=$(partitionSize $dbyid)
 			dsizeMB=$((dsize / 1024))
 			if [ "$dsizeMB" -gt 0 ];then
 				if [ $count = 0 ];then
@@ -312,7 +332,7 @@ function OEMInstall {
 			reqpart=2
 		fi
 		#======================================
-		# Lookup/Check available partitions
+		# Check if we can proceed
 		#--------------------------------------
 		if [ $reqpart -gt 2 ];then
 			Echo "Sorry only disk images with a root and optional boot"
@@ -322,8 +342,26 @@ function OEMInstall {
 				"Installation aborted..." \
 			"reboot"
 		fi
+		#======================================
+		# Create partition ID search list
+		#--------------------------------------
+		for i in /dev/mapper/${loop}*;do
+			psize=`partitionSize $i`
+			psize=$((psize / 1024))
+			partnr=$(echo $i | rev | cut -c1)
+			partid=$(partitionID /dev/$loop $partnr)
+			if [ -z "$req_partids" ];then
+				req_partids=$partid:$psize
+			else
+				req_partids=$req_partids,$partid:$psize
+			fi
+		done
+		#======================================
+		# Check ptable and provide service mode
+		#--------------------------------------
 		while true;do
-			partitions=$(OEMFindPartitions $instDisk)
+			OEMFindPartitions $(getDiskDevice $instDisk) $req_partids
+			partitions=$OEMPartitions
 			if [ ! -z "$partitions" ];then
 				count=0
 				IFS=","
@@ -350,10 +388,10 @@ function OEMInstall {
 				echo "types below without any filesystem inside !" >> $info
 				echo >> $info
 				count=0
-				for i in /dev/mapper/${loop}*;do
-					psize=`partitionSize $i`
-					psize=$((psize / 1024))
-					partid=$(partitionID /dev/$loop $(nd $i))
+				IFS=","
+				for i in $req_partids;do
+					psize=$(echo $i | cut -f2 -d:)
+					partid=$(echo $i | cut -f1 -d:)
 					partname=Root
 					if [ $reqpart -eq 2 ] && [ $count = 0 ];then
 						partname=Boot
@@ -363,6 +401,9 @@ function OEMInstall {
 					echo "  Partition Type: 0x$partid" >> $info
 					count=$((count + 1))
 				done
+				IFS=$IFS_ORIG
+				cat $info
+				Echo "Overlay mounting system on install media..."
 				#======================================
 				# Mount OEM root image read-write
 				#--------------------------------------
@@ -429,12 +470,9 @@ function OEMInstall {
 		#======================================
 		# Do we have a LVM image...
 		#--------------------------------------
-		for i in /dev/mapper/${loop}*;do
-			partid=$(partitionID /dev/$loop $(nd $i))
-			if [ "$partid" = "8e" ];then
-				export haveLVM=yes
-			fi
-		done
+		if [ "$kiwi_lvm" = "true" ];then
+			export haveLVM=yes
+		fi
 		#======================================
 		# Select all required partitions
 		#--------------------------------------
@@ -445,8 +483,47 @@ function OEMInstall {
 			pname=`echo $partitions | cut -f1 -d:`
 			imageDevice=$pname
 			rID=$(nd $pname)
-			instItems[0]=$imageName
+			instItems[0]=/dev/mapper/${loop}p1
 			instPaths[0]=$imageDevice
+		elif [ $count -eq $reqpart ] && [ $reqpart -eq 2 ];then
+			#======================================
+			# There are two free and required
+			#--------------------------------------
+			# provided data from real disk
+			p1=$(echo $partitions | cut -f1 -d,)
+			p2=$(echo $partitions | cut -f2 -d,)
+			p1_device=$(echo $p1 | cut -f1 -d:)
+			p1_partid=$(echo $p1 | cut -f3 -d:)
+			p2_device=$(echo $p2 | cut -f1 -d:)
+			p2_partid=$(echo $p2 | cut -f3 -d:)
+			# requested data from image
+			req_p1=$(echo $req_partids | cut -f1 -d,)
+			req_p2=$(echo $req_partids | cut -f2 -d,)
+			req_p1_partid=$(echo $req_p1 | cut -f1 -d:)
+			req_p2_partid=$(echo $req_p2 | cut -f1 -d:)
+			# /.../
+			# if the first partition id matches the requested first
+			# partition id, make the first partition the boot partition
+			# and the second partition the root partition. if not
+			# set it up vice versa
+			# ----
+			if [ $req_p1_partid = $p1_partid ];then
+				imageDevice=$p2_device
+				rID=$(nd $p2_device)
+				instItems[0]=/dev/mapper/${loop}p2
+				instPaths[0]=$imageDevice
+				bID=$(nd $p1_device)
+				instItems[1]=/dev/mapper/${loop}p1
+				instPaths[1]=$p1_device
+			else
+				imageDevice=$p1_device
+				rID=$(nd $p1_device)
+				instItems[0]=/dev/mapper/${loop}p1
+				instPaths[0]=$imageDevice
+				bID=$(nd $p2_device)
+				instItems[1]=/dev/mapper/${loop}p2
+				instPaths[1]=$p2_device
+			fi
 		else
 			#======================================
 			# There is a choice, let the user do it
@@ -603,8 +680,13 @@ function OEMInstall {
 	items=$(echo $items | sed -e s@^,@@)
 	Echo "Entering installation mode for disk: $items"
 	if [ -z "$kiwi_oemunattended" ];then
+		inst_info=$items
+		if [ -z "$OEM_PARTITION_INSTALL" ];then
+			inst_info=$(basename $items)
+		fi
 		TEXT_INST=$(
-			getText "Destroying ALL data on %1, continue ?" $(basename $items))
+			getText "Destroying ALL data on %1, continue ?" $inst_info)
+
 		Dialog --yesno "\"$TEXT_INST\"" 5 80
 		if [ ! $? = 0 ];then
 			systemException \
@@ -672,6 +754,7 @@ function OEMInstall {
 			Echo "Loading $Source [$Target] "
 			if [ -x /usr/bin/dcounter ];then
 				test -e /progress || mkfifo /progress
+				Echo "Calling: eval $dump 2>/progress|dd bs=32k of=$Target"
 				errorLogStop
 				(
 					if ! eval $dump 2>/progress|dd bs=32k of=$Target &>/dev/null
@@ -884,6 +967,49 @@ function OEMInstall {
 			--msgbox "\"$TEXT_DUMP\"" 5 70
         systemException "Reboot requested after image installation" \
             "user_reboot"
+	fi
+}
+
+#======================================
+# identifyDevice
+#--------------------------------------
+function identifyDevice {
+	local ux_device
+	local id_device
+	local prefix
+	local device
+	local count=0
+	local found=0
+	#======================================
+	# search for given id
+	#--------------------------------------
+	for prefix in by-id by-path;do
+		id_device=/dev/disk/$prefix/$kiwi_oemunattended_id
+		if [ -e $id_device ];then
+			ux_device=$(getDiskDevice $id_device)
+			found=1
+			break
+		fi
+	done
+	if [ $found -eq 0 ];then
+		systemException \
+			"Storage ID: $kiwi_oemunattended_id not found" \
+		"reboot"
+	fi
+	#======================================
+	# find index for device in deviceArray
+	#--------------------------------------
+	for device in ${deviceLinux[*]}; do
+		if [ "$device" = "$ux_device" ];then
+			instDisk=${deviceArray[$count]}
+			break
+		fi
+		count=$((count + 1))
+	done
+	if [ ! -e "$instDisk" ];then
+		systemException \
+			"Storage ID: $instDisk not found" \
+		"reboot"
 	fi
 }
 
