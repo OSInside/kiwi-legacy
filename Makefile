@@ -30,7 +30,6 @@ KIWIBINVZ   = ${buildroot}/usr/sbin
 KIWIMODVZ   = ${kiwi_prefix}/modules
 KIWILOCVZ   = ${kiwi_prefix}/locale
 KIWIXSLVZ   = ${kiwi_prefix}/xsl
-KIWIKEYVZ   = ${kiwi_prefix}/keys
 TOOLSVZ     = ${bin_prefix}
 INITVZ      = ${init_prefix}
 KIWIIMAGE   = ${kiwi_prefix}/image
@@ -93,12 +92,6 @@ install:
 	test -e doc/ChangeLog && cp -a doc/ChangeLog ${PACKDOCVZ} || true
 	rm -f ${PACKDOCVZ}/schema/Makefile
 	rm -f ${PACKDOCVZ}/schema/susesync
-
-	#============================================
-	# kiwi dropbear keys
-	#--------------------------------------------
-	cp -a keys/* ${KIWIKEYVZ}
-	chmod 0600 ${KIWIKEYVZ}/*
 
 	#============================================
 	# kiwi manual pages

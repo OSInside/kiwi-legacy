@@ -142,6 +142,7 @@ runHook postnetwork
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	pxeSetupDownloadServer
+	startDropBear
 fi
 
 #======================================

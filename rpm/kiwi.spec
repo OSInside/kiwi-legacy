@@ -572,7 +572,6 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
 %exclude %{_datadir}/kiwi/modules/KIWIUtil.pm
 %{_datadir}/kiwi/xsl
-%{_datadir}/kiwi/keys
 %{_sbindir}/kiwi
 #=================================================
 # KIWI doc...      

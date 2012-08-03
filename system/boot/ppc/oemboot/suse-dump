@@ -187,6 +187,7 @@ function OEMInstall {
 		fi
 	else
 		OEMNetwork
+		startDropBear
 		export OEMInstallType=PXE
 	fi
 	#======================================

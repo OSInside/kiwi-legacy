@@ -298,7 +298,7 @@ function systemException {
 		Echo "shellException: providing shell..."
 		if [ ! -z "$DROPBEAR_PID" ] && [ ! -z "$IPADDR" ];then
 			Echo "You can connect via ssh to this system"
-			Echo "ssh -i /usr/share/kiwi/keys/id_dropbear root@${IPADDR}"
+			Echo "ssh root@${IPADDR}"
 		fi
 		if ! setctsid $ttydev /bin/true;then
 			/bin/bash -i
@@ -686,7 +686,16 @@ function startDropBear {
 	# /.../
 	# start dropbear ssh server if installed
 	# ---
+	local auth_keys="/root/.ssh/authorized_keys"
+	if [ -z "$kiwidebug" ];then
+		return
+	fi
 	if which dropbear &>/dev/null;then
+		mkdir -p /root/.ssh
+		fetchFile KIWI/debug_ssh.pub $auth_keys
+		if [ ! -e $auth_keys ]; then
+			return
+		fi
 		mkdir -p /etc/dropbear
 		if [ ! -f /etc/dropbear/dropbear_dss_host_key ];then
 			dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key
@@ -5214,7 +5223,6 @@ function startShell {
 	# start a debugging shell on ELOG_BOOTSHELL
 	# ----
 	if [ ! -z $kiwidebug ];then
-		startDropBear
 		if [ ! -e $ELOG_BOOTSHELL ];then
 			Echo "No terminal $ELOG_BOOTSHELL available for debug shell"
 			return
