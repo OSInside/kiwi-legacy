@@ -6680,11 +6680,20 @@ function createHybridPersistent {
 	local device=$1
 	local input=/part.input
 	local disknr=$HYBRID_PERSISTENT_PART
-	mkdir -p /cow
+	local rwdev=$(ddn $biosBootDevice $disknr)
+	local rwid=$(blkid $rwdev -s TYPE -o value)
+	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
 	rm -f $input
 	#======================================
 	# check persistent write partition
 	#--------------------------------------
+	if [ "$rwid" = "btrfs" ];then
+		return
+	fi
+	#======================================
+	# check persistent write partition
+	#--------------------------------------
+	mkdir -p /cow
 	if mount -L hybrid /cow;then
 		Echo "Existing persistent hybrid partition found"
 		#======================================
@@ -6748,13 +6757,15 @@ function createHybridPersistent {
 	#======================================
 	# create filesystem on write partition
 	#--------------------------------------
-	local loop_dev=$(losetup -f --show $(ddn $device $disknr))
-	if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid $loop_dev;then
-		Echo "Failed to create hybrid persistent filesystem"
-		Echo "Persistent writing deactivated"
-		unset kiwi_hybridpersistent
+	if [ "$unionFST" = "clicfs" ];then
+		local loop_dev=$(losetup -f --show $(ddn $device $disknr))
+		if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid $loop_dev;then
+			Echo "Failed to create hybrid persistent filesystem"
+			Echo "Persistent writing deactivated"
+			unset kiwi_hybridpersistent
+		fi
+		losetup -d $loop_dev
 	fi
-	losetup -d $loop_dev
 }
 #======================================
 # callPartitioner
