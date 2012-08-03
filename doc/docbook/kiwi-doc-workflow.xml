@@ -913,12 +913,20 @@ tar -cf kiwi-hooks.tgz kiwi-hooks/
 </screen>
             It's required that the repo setup provides dropbear. Once
             dropbear is there the kiwi boot code will start the service.
-            In order to access the boot image passwordless via ssh kiwi
-            provides a key pair whereas the pubkey is stored in the
-            authorized_keys file inside of the oem- and netboot images
-            for all supported OS versions. For login type:
+            In order to access the boot image passwordless via ssh
+            it's required to provide a public key on the pxe server
+            in the directory: <filename>server-root/KIWI/debug_ssh.pub</filename>.
+            kiwi only searches for that filename so it's required to
+            name the key <quote>debug_ssh.pub</quote>. The path
+            <quote>server-root</quote> depends on what server type
+            was configured to download the image. By default this is
+            done via tftp. In that case the complete path to put the
+            public key to is <filename>/srv/tftpboot/KIWI/debug_ssh.pub</filename>.
+            on the pxe server. If ftp or http is used the server-root
+            path is different. If a public was found you can login
+            as follows:
 <screen>    
-ssh -i /usr/share/kiwi/keys/id_dropbear root@&lt;ip&gt;
+ssh root@&lt;ip&gt;
 </screen>
 
             It might be useful to have a copy tool like scp or rsync
@@ -928,7 +936,7 @@ ssh -i /usr/share/kiwi/keys/id_dropbear root@&lt;ip&gt;
             log as follows:
 
 <screen>
-RSYNC_RSH='ssh -i /usr/share/kiwi/keys/id_dropbear -l root'
+RSYNC_RSH='ssh -l root'
 rsync -avz &lt;ip&gt;:/var/log/boot.kiwi . 
 </screen>
             </para>
