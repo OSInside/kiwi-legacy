@@ -1176,7 +1176,6 @@ sub setupInstallStick {
 		}
 		$this -> cleanLoop();
 	}
-	$this->{bootpart}= 0;
 	#==========================================
 	# Build md5sum of system image
 	#------------------------------------------
@@ -1754,7 +1753,6 @@ sub setupBootDisk {
 		$needBootP = 1;
 		$needParts = 2;
 	}
-	$this->{bootpart} = 0;
 	#==========================================
 	# setup boot partition type
 	#------------------------------------------
@@ -3284,7 +3282,6 @@ sub setupBootLoaderConfiguration {
 	my $isxen    = $this->{isxen};
 	my $xendomain= $this->{xendomain};
 	my $imgtype  = $this->{imgtype};
-	my $bootpart = $this->{bootpart};
 	my $label    = $this->{bootlabel};
 	my $vga      = $this->{vga};
 	my $lvm      = $this->{lvm};
@@ -3366,12 +3363,6 @@ sub setupBootLoaderConfiguration {
 	$cmdline .= " showopts\n";
 	# ensure exactly one space at start
 	$cmdline =~ s/^\s*/ /;
-	#==========================================
-	# Check boot partition number
-	#------------------------------------------
-	if (! defined $bootpart) {
-		$bootpart = 0;
-	}
 	#==========================================
 	# Create MBR id file for boot device check
 	#------------------------------------------
@@ -3690,9 +3681,9 @@ sub setupBootLoaderConfiguration {
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
 			if (-e "$tmpdir/boot/grub/splash.xpm.gz") {
-				print FD "splashimage=(hd0,$bootpart)/boot/grub/splash.xpm.gz\n"
+				print FD "splashimage=(hd0,0)/boot/grub/splash.xpm.gz\n"
 			} elsif (-e "$tmpdir/boot/message") {
-				print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
+				print FD "gfxmenu (hd0,0)/boot/message\n";
 			}
 			print FD "title $title\n";
 		}
@@ -3705,11 +3696,11 @@ sub setupBootLoaderConfiguration {
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 				print FD " cdinst=1 loader=$bloader";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				print FD " root (hd0,$bootpart)\n";
+				print FD " root (hd0,0)\n";
 				print FD " kernel /boot/linux.vmx vga=$vga";
 				print FD " loader=$bloader splash=silent";
 			} else {
-				print FD " root (hd0,$bootpart)\n";
+				print FD " root (hd0,0)\n";
 				print FD " kernel /boot/linux vga=$vga";
 				print FD " loader=$bloader splash=silent";
 			}
@@ -3728,12 +3719,12 @@ sub setupBootLoaderConfiguration {
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 				print FD " cdinst=1 loader=$bloader";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				print FD " root (hd0,$bootpart)\n";
+				print FD " root (hd0,0)\n";
 				print FD " kernel /boot/xen.gz.vmx\n";
 				print FD " module /boot/linux.vmx vga=$vga";
 				print FD " loader=$bloader splash=silent";
 			} else {
-				print FD " root (hd0,$bootpart)\n";
+				print FD " root (hd0,0)\n";
 				print FD " kernel /boot/xen.gz\n";
 				print FD " module /boot/linux vga=$vga";
 				print FD " loader=$bloader splash=silent";
@@ -3759,11 +3750,11 @@ sub setupBootLoaderConfiguration {
 					print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 					print FD " cdinst=1 loader=$bloader";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-					print FD " root (hd0,$bootpart)\n";
+					print FD " root (hd0,0)\n";
 					print FD " kernel /boot/linux.vmx vga=$vga";
 					print FD " loader=$bloader splash=silent";
 				} else {
-					print FD " root (hd0,$bootpart)\n";
+					print FD " root (hd0,0)\n";
 					print FD " kernel /boot/linux vga=$vga";
 					print FD " loader=$bloader splash=silent";
 				}
@@ -3784,12 +3775,12 @@ sub setupBootLoaderConfiguration {
 					print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 					print FD " cdinst=1 loader=$bloader";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-					print FD " root (hd0,$bootpart)\n";
+					print FD " root (hd0,0)\n";
 					print FD " kernel /boot/xen.gz.vmx\n";
 					print FD " module /boot/linux.vmx vga=$vga";
 					print FD " loader=$bloader splash=silent";
 				} else {
-					print FD " root (hd0,$bootpart)\n";
+					print FD " root (hd0,0)\n";
 					print FD " kernel /boot/xen.gz\n";
 					print FD " module /boot/linux vga=$vga";
 					print FD " loader=$bloader splash=silent";
@@ -4369,7 +4360,6 @@ sub installBootLoader {
 	my $deviceMap= shift;
 	my $kiwi     = $this->{kiwi};
 	my $tmpdir   = $this->{tmpdir};
-	my $bootpart = $this->{bootpart};
 	my $chainload= $this->{chainload};
 	my $lvm	     = $this->{lvm};
 	my $cmdL     = $this->{cmdL};
@@ -4389,12 +4379,6 @@ sub installBootLoader {
 		if (($editBoot) && (-e $editBoot)) {
 			system ("cd $tmpdir && bash --norc -c $editBoot");
 		}
-	}
-	#==========================================
-	# Check boot partition number
-	#------------------------------------------
-	if (! defined $bootpart) {
-		$bootpart = 0;
 	}
 	#==========================================
 	# Grub2
@@ -4530,7 +4514,7 @@ sub installBootLoader {
 			return;
 		}
 		print $dmfd "device (hd0) $diskname\n";
-		print $dmfd "root (hd0,$bootpart)\n";
+		print $dmfd "root (hd0,0)\n";
 		if ($chainload) {
 			print $dmfd "setup (hd0,0)\n";
 		} else {
@@ -4646,7 +4630,7 @@ sub installBootLoader {
 			return;
 		}
 		my %deviceMap = %{$deviceMap};
-		my $device = $deviceMap{$bootpart+1};
+		my $device = $deviceMap{1};
 		if ($lvm) {
 			$device = $deviceMap{0};
 		}
@@ -4830,7 +4814,7 @@ sub installBootLoader {
 			return;
 		}
 		my %deviceMap = %{$deviceMap};
-		my $device = $deviceMap{$bootpart+1};
+		my $device = $deviceMap{1};
 
 		#==========================================
 		# mount boot device...
