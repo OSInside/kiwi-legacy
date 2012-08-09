@@ -4631,7 +4631,7 @@ sub installBootLoader {
 		}
 		my %deviceMap = %{$deviceMap};
 		my $device = $deviceMap{1};
-		if ($lvm) {
+		if (($lvm) && ($deviceMap{0})) {
 			$device = $deviceMap{0};
 		}
 		if (($device =~ /mapper/) && (! -e $device)) {
