@@ -134,8 +134,8 @@ sub new {
 	#------------------------------------------
 	my $arch = qxx ("uname -m"); chomp $arch;
 	my %supported = map { ($_ => 1) } qw(
-					armv7l  ia64  ix86  ppc  ppc64 s390  s390x  x86_64
-					);
+		armv7l ia64 ix86 ppc ppc64 s390 s390x x86_64
+	);
 	$this->{supportedArch} = \%supported;
 	if (! $supported{$arch} ) {
 		my $msg = "Attempt to run KIWI on unsupported architecture '$arch'";
@@ -2344,7 +2344,7 @@ sub addDrivers {
 	# Verify arguments
 	#------------------------------------------
 	if (! $drivers) {
-		$kiwi -> info ('addDrivers: no dirvers specified, nothing to do');
+		$kiwi -> info ('addDrivers: no drivers specified, nothing to do');
 		$kiwi -> skipped ();
 		return $this;
 	}
@@ -2356,7 +2356,7 @@ sub addDrivers {
 		return;
 	}
 	#==========================================
-	# Remeber drivers to add and verify the type
+	# Remeber drivers to add + verify the type
 	#------------------------------------------
 	my @drvsToAdd = @{$drivers};
 	for my $drv (@drvsToAdd) {
@@ -2369,10 +2369,11 @@ sub addDrivers {
 		}
 	}
 	#==========================================
-	# Figure out what profiles are getting changed
+	# Figure out what profiles to change
 	#------------------------------------------
 	my @profsToUse;
 	if ($profNames) {
+		# operate on value of profile argument
 		if ( ref($profNames) eq 'ARRAY' ) {
 			# Multiple profiles, verify that all names are valid
 			my $msg = 'Attempting to add drivers to "PROF_NAME", but '
@@ -2386,8 +2387,8 @@ sub addDrivers {
 			@profsToUse = ('kiwi_default');
 		}
 	} else {
-		# No profile argument was given, operate on the currently active
-		# profiles (minus kiwi_default)
+		# No profile argument was given, operate on the currently
+		# active profiles (minus kiwi_default)
 		my @selected = @{$this->{selectedProfiles}};
 		for my $prof (@selected) {
 			if ($prof eq 'kiwi_default') {
@@ -2403,9 +2404,8 @@ sub addDrivers {
 			if ($arch) {
 				if ($this->{imageConfig}->{$prof}->{$arch} &&
 					$this->{imageConfig}->{$prof}->{$arch}{drivers}) {
-					my @existDrv = @{$this->{imageConfig}
-										->{$prof}
-										->{$arch}{drivers}};
+					my @existDrv = 
+						@{$this->{imageConfig}->{$prof}->{$arch}{drivers}};
 					push @existDrv, $name;
 					$this->{imageConfig}->{$prof}->{$arch}{drivers} =
 						\@existDrv;
@@ -2415,8 +2415,7 @@ sub addDrivers {
 				}
 			} else {
 				if ($this->{imageConfig}->{$prof}{drivers}) {
-					my @existDrv = @{$this->{imageConfig}
-										->{$prof}{drivers}};
+					my @existDrv = @{$this->{imageConfig}->{$prof}{drivers}};
 					push @existDrv, $name;
 					$this->{imageConfig}->{$prof}{drivers} =  \@existDrv;
 				} else {
@@ -2426,7 +2425,6 @@ sub addDrivers {
 			}
 		}
 	}
-
 	return $this;
 }
 
