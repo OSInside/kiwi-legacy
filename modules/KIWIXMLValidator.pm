@@ -147,6 +147,37 @@ sub validate {
 # Private helper methods
 #------------------------------------------
 #==========================================
+# __checkArchiveUnique
+#------------------------------------------
+sub __checkArchiveUnique {
+	# ...
+	# Check that a specified archive is unique, i.e. specified only
+	# once per architecture per <packages> section
+	# ---
+	my $this = shift;
+	my $uniqueCheck = $this -> __uniqueInPackages('archive');
+	if ($uniqueCheck) {
+		my $kiwi = $this -> {kiwi};
+		my ($name, $arch) = split /,/, $uniqueCheck;
+		if ($arch) {
+			my $msg = "Archive '$name' specified multiple "
+				. "times for architecture '$arch' in same "
+				. '<packages> section.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		} else {
+			my $msg = "Archive '$name' specified multiple times in "
+				. 'same <packages> section.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkBootSpecPresent
 #------------------------------------------
 sub __checkBootSpecPresent {
@@ -366,7 +397,7 @@ sub __checkFilesysSpec {
 }
 
 #==========================================
-# __checkHttpsCredentialsrConsistent
+# __checkHttpsCredentialsConsistent
 #------------------------------------------
 sub __checkHttpsCredentialsConsistent {
 	# ...
@@ -422,6 +453,68 @@ sub __checkHttpsCredentialsConsistent {
 				$kiwi -> failed();
 				return;
 			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkPackageUnique
+#------------------------------------------
+sub __checkPackageUnique {
+	# ...
+	# Check that a specified package is unique, i.e. specified only
+	# once per architecture per <packages> section
+	# ---
+	my $this = shift;
+	my $uniqueCheck = $this -> __uniqueInPackages('package');
+	if ($uniqueCheck) {
+		my $kiwi = $this -> {kiwi};
+		my ($name, $arch) = split /,/, $uniqueCheck;
+		if ($arch) {
+			my $msg = "Package '$name' specified multiple "
+				. "times for architecture '$arch' in same "
+				. '<packages> section.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		} else {
+			my $msg = "Package '$name' specified multiple times in "
+				. 'same <packages> section.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkPatternUnique
+#------------------------------------------
+sub __checkPatternUnique {
+	# ...
+	# Check that a specified opensusePattern is unique, i.e. specified only
+	# once per architecture per <packages> section
+	# ---
+	my $this = shift;
+	my $uniqueCheck = $this -> __uniqueInPackages('opensusePattern');
+	if ($uniqueCheck) {
+		my $kiwi = $this -> {kiwi};
+		my ($name, $arch) = split /,/, $uniqueCheck;
+		if ($arch) {
+			my $msg = "Package pattern '$name' specified multiple "
+				. "times for architecture '$arch' in same "
+				. '<packages> section.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		} else {
+			my $msg = "Package pattern '$name' specified multiple times in "
+				. 'same <packages> section.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
 		}
 	}
 	return 1;
@@ -1150,6 +1243,45 @@ sub __loadControlfile {
 	binmode $XML;
 	return $XML;
 }
+
+#==========================================
+# __uniqueInPackages
+#------------------------------------------
+sub __uniqueInPackages {
+	# ...
+	# Loop through all packages sections and check that specified names
+	# are unique for the given child element.
+	# ---
+	my $this     = shift;
+	my $chldName = shift;
+	my @chldNodes = $this->{systemTree} -> getElementsByTagName('packages');
+	for my $chld (@chldNodes) {
+		my %archEntries;
+		my @names = ();
+		my @children = $chld -> getElementsByTagName($chldName);
+		for my $entry (@children) {
+			my $arch = $entry -> getAttribute('arch');
+			my $name = $entry -> getAttribute('name');
+			if ($arch) {
+				my @usedPckgs = ();
+				if ( grep { /^$arch$/x } keys %archEntries ) {
+					@usedPckgs = @{$archEntries{$arch}};
+					if ( grep { /^$name$/x } @usedPckgs) {
+						return "$name,$arch";
+					}
+				}
+				push @usedPckgs, $name;
+				$archEntries{$arch} = \@usedPckgs;
+			} elsif (grep { /^$name$/x } @names) {
+				return "$name,"
+			} else {
+				push @names, $name;
+			}
+		}
+	}
+	return;
+}
+
 #==========================================
 # __validateConsistency
 #------------------------------------------
@@ -1164,6 +1296,9 @@ sub __validateConsistency {
 	# in any code that populates this object from XML data.
 	# ---
 	my $this = shift;
+	if (! $this -> __checkArchiveUnique()) {
+		return;
+	}
 	if (! $this -> __checkBootSpecPresent()) {
 		return;
 	}
@@ -1186,6 +1321,12 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkHttpsCredentialsConsistent()) {
+		return;
+	}
+	if (! $this -> __checkPackageUnique()) {
+		return;
+	}
+	if (! $this -> __checkPatternUnique()) {
 		return;
 	}
 	if (! $this -> __checkPatternTypeAttrUse()) {
