@@ -40,6 +40,44 @@ sub new {
 }
 
 #==========================================
+# test_archiveUnique
+#------------------------------------------
+sub test_archiveUnique {
+	# ...
+	# Test that the package uniqueness criteria is properly enforced
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('archiveUnique');
+	my $expectedMsg;
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		if ($iConfFile =~ /archiveUniqueInvalid_1.xml/) {
+			$expectedMsg = "Archive 'myBins.tar' specified multiple times in "
+				. 'same <packages> section.';
+		}
+		# TODO
+		# implamenet archive with arch= test once 775603 is implemented
+		#elsif ($iConfFile =~ /packageUniqueInvalid_2.xml/) {
+		#    $expectedMsg = "Package 'myBins.' specified multiple times for "
+		#        . "architecture 'ppc64' in same <packages> section.";
+		#}
+		my $msg = $kiwi -> getMessage();
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('archiveUnique');
+	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
 # test_bootDescriptSet
 #------------------------------------------
 sub test_bootDescriptSet {
@@ -47,11 +85,11 @@ sub test_bootDescriptSet {
 	# Test that required boot attribute requirement is properly enforced
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('bootDescript');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $specType;
 		if ( $iConfFile =~ 'bootDescriptInvalid_1.xml' ) {
@@ -228,11 +266,11 @@ sub test_defaultProfileSpec {
 	# enforced
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('defaultProfile');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'Only one profile may be set as the default '
 		. 'profile by using the "import" attribute.';
@@ -258,11 +296,11 @@ sub test_defaultTypeSpec {
 	# enforced
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('defaultType');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		$this -> assert_str_equals(
 			'Only one primary type may be specified per preferences section.',
@@ -288,11 +326,11 @@ sub test_displayName {
 	# Test that the display name condition is properly checked.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('displayName');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'Found white space in string provided as '
 		. 'displayname. No white space permitted';
@@ -317,11 +355,11 @@ sub test_ec2IsFileSys {
 	# Test that the image type for the EC2 format is a file system image
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('ec2IsFS');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'For EC2 image creation the image type must be '
 			. 'one of the following supported file systems: ext2 ext3 '
@@ -349,11 +387,11 @@ sub test_ec2Regions {
 	# enforced.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('ec2Region');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg;
 		my @supportedRegions =
@@ -389,12 +427,12 @@ sub test_httpsRepoCredentials {
 	# All https repositories must have the same credentials.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('httpsRepoCredentials');
 	my $expectedMsg;
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		if ($iConfFile =~ /httpsRepoCredentialsInvalid_1|5.xml/) {
 			$expectedMsg = 'Specified username without password on repository';
@@ -433,11 +471,11 @@ sub test_missingFilesysAttr {
 	# Test that the filesystem attribute is set when required
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('missingFilesysAttr');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'filesystem attribute must be set for image="';
 		if ($iConfFile =~ /missingFilesysAttrInvalid_1.xml/) {
@@ -467,11 +505,11 @@ sub test_oemPostDump {
 	# enforced.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('oemPostDump');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'Use one of oem-reboot '
 		. 'oem-reboot-interactive oem-shutdown oem-shutdown-interactive';
@@ -489,6 +527,76 @@ sub test_oemPostDump {
 }
 
 #==========================================
+# test_packageUnique
+#------------------------------------------
+sub test_packageUnique {
+	# ...
+	# Test that the package uniqueness criteria is properly enforced
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('packageUnique');
+	my $expectedMsg;
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		if ($iConfFile =~ /packageUniqueInvalid_1.xml/) {
+			$expectedMsg = "Package 'vim' specified multiple times in "
+				. 'same <packages> section.';
+		} elsif ($iConfFile =~ /packageUniqueInvalid_2.xml/) {
+			$expectedMsg = "Package 'vim' specified multiple times for "
+				. "architecture 'ppc64' in same <packages> section.";
+		}
+		my $msg = $kiwi -> getMessage();
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('packageUnique');
+	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
+# test_patternUnique
+#------------------------------------------
+sub test_patternUnique {
+	# ...
+	# Test that the package uniqueness criteria is properly enforced
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('patternUnique');
+	my $expectedMsg;
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		if ($iConfFile =~ /patternUniqueInvalid_1.xml/) {
+			$expectedMsg = "Package pattern 'kde' specified multiple times in "
+				. 'same <packages> section.';
+		} elsif ($iConfFile =~ /patternUniqueInvalid_2.xml/) {
+			$expectedMsg = "Package pattern 'kde' specified multiple times "
+				. "for architecture 's390' in same <packages> section.";
+		}
+		my $msg = $kiwi -> getMessage();
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('patternUnique');
+	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
 # test_patternTattrConsistent
 #------------------------------------------
 sub test_patternTattrConsistent {
@@ -497,11 +605,11 @@ sub test_patternTattrConsistent {
 	# properly enforced.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('patternTattrCons');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg;
 		if ($iConfFile =~ /patternTattrConsInvalid_1.xml/) {
@@ -545,11 +653,11 @@ sub test_patternTattrUse {
 	# enforced.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('patternTattrUse');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'The patternType atribute is not allowed on a '
 		. '<packages> specification of type delete.';
@@ -575,13 +683,13 @@ sub test_preferLicenseUnique {
 	# is enforced.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('preferLic');
 	my $expectedMsg = 'Ambiguous license preference defined. Cannot resolve '
 		. 'prefer-license=true for 2 or repositories.';
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
@@ -606,11 +714,11 @@ sub test_preferenceUnique {
 	# enforced.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('preferenceUnique');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg;
 		if ($iConfFile =~ /preferenceUniqueInvalid_1.xml/) {
@@ -641,11 +749,11 @@ sub test_profileName {
 	# Test that the profile name convention is enforced properly.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('profileName');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg ;
 		if ($iConfFile =~ /profileNameInvalid_2.xml/) {
@@ -678,11 +786,11 @@ sub test_profileReferenceExist {
 	# properly enforced.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('profileReferenceExist');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'Found reference to profile "';
 		if ($iConfFile =~ /profileReferenceExistInvalid_(1|2).xml/) {
@@ -739,13 +847,13 @@ sub test_sysdiskNameAttrNoWhiteSpace {
 	# element does not contain whitespace.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('sysdiskWhitespace');
 	my $expectedMsg = 'Found whitespace in name given for systemdisk. '
 		. 'Provided name may not contain whitespace.';
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 			$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
@@ -769,13 +877,13 @@ sub test_sysdiskInvalidAttrs {
 	# is rejected.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('sysdiskVolAttrs');
 	my $expectedMsg = 'Found combination of "size" and "freespace" attribute '
 		. 'for volume element. This is not supported.';
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 			$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
@@ -799,11 +907,11 @@ sub test_typeConfigConsist {
 	# properly enforced.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('typeConfigConsist');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'Inconsistent configuration: Found ';
 		if ($iConfFile =~ /typeConfigConsistInvalid_1.xml/) {
@@ -839,11 +947,11 @@ sub test_typePackTypeExists {
 	# have been defined
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('typePcksTypeExists');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg;
 		if ( $iConfFile =~ 'typePcksTypeExistsInvalid_1.xml' ) {
@@ -880,11 +988,11 @@ sub test_typeUnique {
 	# properly enforced.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('typeUnique');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'Multiple definition of <type image="';
 		if ($iConfFile =~ /typeUniqueInvalid_1.xml/) {
@@ -915,11 +1023,11 @@ sub test_versionFormat {
 	# properly enforced.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('versionFormat');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = "Expected 'Major.Minor.Release'";
 		$this -> assert_str_equals($expectedMsg, $msg);
@@ -944,13 +1052,13 @@ sub test_volumeNameAttrNoWhiteSpace {
 	# element does not contain whitespace.
 	# ---
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my @invalidConfigs = $this -> __getInvalidFiles('volumeWhitespace');
 	my $expectedMsg = 'Found whitespace in given volume name. '
 		. 'Provided name may not contain whitespace.';
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 			$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
@@ -1025,10 +1133,10 @@ sub __verifyValid {
 	# common to all test cases.
 	# ---
 	my ($this, @validConfigs) = @_;
+	my $kiwi = $this -> {kiwi};
 	for my $vConfFile (@validConfigs) {
 		my $validator = $this -> __getValidator($vConfFile);
 		$validator -> validate();
-		my $kiwi = $this -> {kiwi};
 		my $msg = $kiwi -> getMessage();
 		$this -> assert_str_equals('No messages set', $msg);
 		my $msgT = $kiwi -> getMessageType();
