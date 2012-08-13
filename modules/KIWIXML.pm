@@ -30,6 +30,7 @@ use KIWILog;
 use KIWIQX qw (qxx);
 use KIWIURL;
 use KIWIXMLDescriptionData;
+use KIWIXMLDriverData;
 use KIWIXMLValidator;
 use KIWISatSolver;
 
@@ -3956,15 +3957,43 @@ sub getRepoNodeList {
 }
 
 #==========================================
-# getDriversNodeList
+# getDriversNodeList_legacy
 #------------------------------------------
-sub getDriversNodeList {
+sub getDriversNodeList_legacy {
 	# ...
 	# Return a list of all <drivers> nodes. Each list member
 	# is an XML::LibXML::Element object pointer
 	# ---
 	my $this = shift;
 	return $this->{driversNodeList};
+}
+
+#==========================================
+# getDrivers
+#------------------------------------------
+sub getDrivers {
+	# ...
+	# Return a list reference of KIWIXMLDriverData objects that are
+	# specified to be part of the current profile and architecture
+	# ---
+	my $this = shift;
+	my $arch = $this->{arch};
+	my $kiwi = $this->{kiwi};
+	my @activeProfs = @{$this->{selectedProfiles}};
+	my @drvs = ();
+	for my $prof (@activeProfs) {
+		if ($this->{imageConfig}->{$prof}{drivers}) {
+			push @drvs, @{$this->{imageConfig}->{$prof}{drivers}};
+		}
+		if ($this->{imageConfig}{$prof}{$arch}{drivers}) {
+			push @drvs, @{$this->{imageConfig}->{$prof}->{$arch}{drivers}};
+		}
+	}
+	my @driverInfo;
+	for my $drv (@drvs) {
+		push @driverInfo, KIWIXMLDriverData -> new($kiwi, $drv);
+	}
+	return \@driverInfo;
 }
 
 #==========================================
@@ -5551,7 +5580,7 @@ sub __populateDriverInfo {
 				}
 			}
 		}
-		my @pNameLst = ('kiwi-default');
+		my @pNameLst = ('kiwi_default');
 		my $profNames = $drvNode -> getAttribute('profiles');
 		if ($profNames) {
 			@pNameLst = split /,/, $profNames;
