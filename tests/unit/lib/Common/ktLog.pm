@@ -253,6 +253,23 @@ sub getMessageType {
 }
 
 #==========================================
+# getOopsState
+#------------------------------------------
+sub getOopsState {
+	# ...
+	# Retrieve the state of the oops flag.
+	# Generally the getState method should be used. However, under certain
+	# circumstances the code issues a set of messages together. The individual
+	# get*State methods allow to retrieve the expected state and clear the
+	# flag for this state. THe final call in any test should always be to
+	# getState to assure there are no unexpected messages.
+	my $this = shift;
+	my $val = $this -> {oops} ? 'oops' : 0;
+	$this -> {oops} = 0;
+	return $val;
+}
+
+#==========================================
 # getRootLog
 #------------------------------------------
 sub getRootLog {
