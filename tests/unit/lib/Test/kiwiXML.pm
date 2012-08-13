@@ -3754,6 +3754,187 @@ sub test_packageManagerInfoHasProfs {
 }
 
 #==========================================
+# test_setDescriptionInfo
+#------------------------------------------
+sub test_setDescriptionInfo {
+	# ...
+	# verify that setting the description information has the expected results
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'descriptData';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi,
+													'Robert Schweikert',
+													'rjschwei@suse.com',
+													'test set method',
+													'system'
+													);
+	$xml = $xml -> setDescriptionInfo($descriptObj);
+	$this -> assert_not_null($xml);
+	my $descrpObj = $xml -> getDescriptionInfo();
+	$this -> assert_not_null($descrpObj);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $author = $descrpObj -> getAuthor();
+	$this -> assert_str_equals('Robert Schweikert', $author);
+	my $contact = $descrpObj -> getContactInfo();
+	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	my $spec = $descrpObj -> getSpecificationDescript();
+	$this -> assert_str_equals('test set method', $spec);
+	my $type = $descrpObj -> getType();
+	$this -> assert_str_equals('system', $type);
+	return;
+}
+
+#==========================================
+# test_setDescriptionInfoImproperArg
+#------------------------------------------
+sub test_setDescriptionInfoImproperArg {
+	# ...
+	# Verify that setting the description information with an improper
+	# argument type fails as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'descriptData';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my $res = $xml -> setDescriptionInfo($xml);
+	$this -> assert_null($res);
+	my $expected = 'setDescriptionInfo: Expecting KIWIXMLDescriptionData '
+		. 'instance as argument.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	my $descrpObj = $xml -> getDescriptionInfo();
+	$this -> assert_not_null($descrpObj);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $author = $descrpObj -> getAuthor();
+	$this -> assert_str_equals('Robert Schweikert', $author);
+	my $contact = $descrpObj -> getContactInfo();
+	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	my $spec = $descrpObj -> getSpecificationDescript();
+	$expected = 'Verify proper handling of description in XML obj';
+	$this -> assert_str_equals($expected, $spec);
+	my $type = $descrpObj -> getType();
+	$this -> assert_str_equals('system', $type);
+	return;
+}
+
+#==========================================
+# test_setDescriptionInfoInvalArg
+#------------------------------------------
+sub test_setDescriptionInfoInvalArg {
+	# ...
+	# Verify that setting the description information with an invalid
+	# DescriptionData object fails as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'descriptData';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi,
+													'Robert Schweikert',
+													'rjschwei@suse.com',
+													);
+	my $res = $xml -> setDescriptionInfo($descriptObj);
+	$this -> assert_null($res);
+	my $msg =  $kiwi -> getWarningMessage();
+	my $expected = 'XMLDescriptionData object in invalid state';
+	$this -> assert_str_equals($expected, $msg);
+	my $state = $kiwi -> getOopsState();
+	$this -> assert_str_equals('oops', $state);
+	$expected = 'setDescriptionInfo: Provided KIWIXMLDescriptionData '
+		. 'instance is not valid.';
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	my $descrpObj = $xml -> getDescriptionInfo();
+	$this -> assert_not_null($descrpObj);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $author = $descrpObj -> getAuthor();
+	$this -> assert_str_equals('Robert Schweikert', $author);
+	my $contact = $descrpObj -> getContactInfo();
+	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	my $spec = $descrpObj -> getSpecificationDescript();
+	$expected = 'Verify proper handling of description in XML obj';
+	$this -> assert_str_equals($expected, $spec);
+	my $type = $descrpObj -> getType();
+	$this -> assert_str_equals('system', $type);
+	return;
+}
+
+#==========================================
+# test_setDescriptionInfoNoArg
+#------------------------------------------
+sub test_setDescriptionInfoNoArg {
+	# ...
+	# Verify that setting the description information with no provided
+	# DescriptionData object fails as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'descriptData';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my $res = $xml -> setDescriptionInfo();
+	$this -> assert_null($res);
+	my $expected = 'setDescriptionInfo: Expecting KIWIXMLDescriptionData '
+			. 'instance as argument.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	my $descrpObj = $xml -> getDescriptionInfo();
+	$this -> assert_not_null($descrpObj);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $author = $descrpObj -> getAuthor();
+	$this -> assert_str_equals('Robert Schweikert', $author);
+	my $contact = $descrpObj -> getContactInfo();
+	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	my $spec = $descrpObj -> getSpecificationDescript();
+	$expected = 'Verify proper handling of description in XML obj';
+	$this -> assert_str_equals($expected, $spec);
+	my $type = $descrpObj -> getType();
+	$this -> assert_str_equals('system', $type);
+	return;
+}
+
+#==========================================
 # test_setRepository
 #------------------------------------------
 sub test_setRepository {
