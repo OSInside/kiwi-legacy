@@ -1055,9 +1055,44 @@ sub getPXEDeployInitrd {
 		return;
 	}
 }
+#==========================================
+# setDescriptionInfo
+#------------------------------------------
+sub setDescriptionInfo {
+	# ...
+	# Set the description information for this configuration
+	# ---
+	my $this              = shift;
+	my $xmlDescripDataObj = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $xmlDescripDataObj ||
+		ref($xmlDescripDataObj) ne 'KIWIXMLDescriptionData') {
+		my $msg = 'setDescriptionInfo: Expecting KIWIXMLDescriptionData '
+			. 'instance as argument.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my $author = $xmlDescripDataObj->getAuthor();
+	if (! $author) {
+		my $msg = 'setDescriptionInfo: Provided KIWIXMLDescriptionData '
+			. 'instance is not valid.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my %descript = (
+		author        => $author,
+		contact       => $xmlDescripDataObj->getContactInfo(),
+		specification => $xmlDescripDataObj->getSpecificationDescript(),
+		type          => $xmlDescripDataObj->getType
+	);
+	$this->{imageConfig}{description} = \%descript;
+	return $this;
+}
 
 #==========================================
-# setBuildProfiles
+# setSelectionProfiles
 #------------------------------------------
 sub setSelectionProfiles {
 	# ...
