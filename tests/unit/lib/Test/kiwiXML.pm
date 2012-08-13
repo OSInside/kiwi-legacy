@@ -220,7 +220,7 @@ sub test_addDrivers {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my @driversNodes = $xml -> getDriversNodeList() -> get_nodelist();
+	my @driversNodes = $xml -> getDriversNodeList_legacy() -> get_nodelist();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -1331,6 +1331,35 @@ sub test_getDescriptionInfo {
 }
 
 #==========================================
+# test_getDrivers
+#------------------------------------------
+sub test_getDrivers {
+	# ...
+	# Verify proper return of getDrivers method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @drivers = @{$xml -> getDrivers()};
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expectedDrivers = qw /usb e1000 rs232/;
+	my @confDrivers;
+	for my $drvData (@drivers) {
+		push @confDrivers, $drvData -> getName();
+	}
+	$this -> assert_array_equal(\@expectedDrivers, \@confDrivers);
+	return;
+}
+
+#==========================================
 # test_getDriversNodeList
 #------------------------------------------
 sub test_getDriversNodeList {
@@ -1343,7 +1372,7 @@ sub test_getDriversNodeList {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @driversNodes = $xml -> getDriversNodeList() -> get_nodelist();
+	my @driversNodes = $xml -> getDriversNodeList_legacy() -> get_nodelist();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
