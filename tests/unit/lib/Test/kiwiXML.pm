@@ -201,9 +201,9 @@ sub test_addArchivesUseProf {
 }
 
 #==========================================
-# test_addDrivers
+# test_addDrivers_legacy
 #------------------------------------------
-sub test_addDrivers {
+sub test_addDrivers_legacy {
 	# ...
 	# Verify proper operation of addDrivers method
 	# ---
@@ -213,7 +213,7 @@ sub test_addDrivers {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	$xml = $xml -> addDrivers('fglrx', 'wl2000');
+	$xml = $xml -> addDrivers_legacy('fglrx', 'wl2000');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -986,6 +986,39 @@ sub test_addStripTools {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw /megacli virt-mgr xfsrestore install-info/;
 	$this -> assert_array_equal(\@expectedNames, \@toolFiles);
+	return;
+}
+
+#==========================================
+# test_getActiveProfileNames
+#------------------------------------------
+sub test_getActiveProfileNames {
+	# ...
+	# Verify the the names returned by the getActiveProfileNames method are
+	# correct.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $profNames = $xml -> getActiveProfileNames();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expected = ('profB');
+	$this -> assert_array_equal(\@expected, $profNames);
 	return;
 }
 
@@ -3783,11 +3816,159 @@ sub test_packageManagerInfoHasProfs {
 }
 
 #==========================================
+# test_setActiveProfilNames
+#------------------------------------------
+sub test_setActiveProfileNames {
+	# ...
+	# Verify that setting the active profiles works as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	# Clear out the initial setup message
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @newProfs = qw /profA profC/;
+	$xml = $xml -> setActiveProfileNames(\@newProfs);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA, profC', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	my $profNames = $xml -> getActiveProfileNames();
+	# Test this condition last to get potential error messages
+	$this -> assert_array_equal(\@newProfs, $profNames);
+	return;
+}
+
+#==========================================
+# test_setActiveProfilNamesImpropProf
+#------------------------------------------
+sub test_setActiveProfileNamesImpropProf {
+	# ...
+	# Verify that setActiveProfiles generates the expected error
+	# when called with an improper profile name
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	# Clear out the initial setup message
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @newProfs = qw /profA timbuktu/;
+	my $res = $xml -> setActiveProfileNames(\@newProfs);
+	$msg = $kiwi -> getMessage();
+	my $expected = "Attempting to set active profile to 'timbuktu', "
+		. 'but this profile is not specified in the configuration.';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_not_null($xml);
+	my $profNames = $xml -> getActiveProfileNames();
+	# Test this condition last to get potential error messages
+	my @expectedProf = ('profB');
+	$this -> assert_array_equal(\@expectedProf, $profNames);
+	return;
+}
+
+#==========================================
+# test_setActiveProfilNamesInvalidArg
+#------------------------------------------
+sub test_setActiveProfileNamesInvalidArg {
+	# ...
+	# Verify that setActiveProfiles generates the expected error
+	# when called with an invalid argument type
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	# Clear out the initial setup message
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $res = $xml -> setActiveProfileNames('profA,profB');
+	$msg = $kiwi -> getMessage();
+	my $expected = 'setActiveProfiles, expecting array ref argument';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $profNames = $xml -> getActiveProfileNames();
+	# Test this condition last to get potential error messages
+	my @expectedProf = ('profB');
+	$this -> assert_array_equal(\@expectedProf, $profNames);
+	return;
+}
+
+#==========================================
+# test_setActiveProfilNamesNoArg
+#------------------------------------------
+sub test_setActiveProfileNamesNoArg {
+	# ...
+	# Verify that setActiveProfiles generates the expected error
+	# when called with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	# Clear out the initial setup message
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $res = $xml -> setActiveProfileNames();
+	$msg = $kiwi -> getMessage();
+	my $expected = 'setActiveProfiles must be called with 1 argument';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $profNames = $xml -> getActiveProfileNames();
+	# Test this condition last to get potential error messages
+	my @expectedProf = ('profB');
+	$this -> assert_array_equal(\@expectedProf, $profNames);
+	return;
+}
+
+#==========================================
 # test_setDescriptionInfo
 #------------------------------------------
 sub test_setDescriptionInfo {
 	# ...
-	# verify that setting the description information has the expected results
+	# Verify that setting the description information has the expected results
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};

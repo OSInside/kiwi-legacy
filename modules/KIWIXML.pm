@@ -370,6 +370,27 @@ sub writeXMLDescription {
 }
 
 #==========================================
+# getActiveProfileNames
+#------------------------------------------
+sub getActiveProfileNames {
+	# ...
+	# Return an array ref containing the names of the active profiles;
+	# this does not reveal the default (kiwi_default) name, as this is
+	# always active
+	# ---
+	my $this = shift;
+	my @selected = @{$this->{selectedProfiles}};
+	my @active = ();
+	for my $prof (@selected) {
+		if ($prof eq 'kiwi_default') {
+			next;
+		}
+		push @active, $prof;
+	}
+	return \@active;
+}
+
+#==========================================
 # getConfigName
 #------------------------------------------
 sub getConfigName {
@@ -1056,6 +1077,55 @@ sub getPXEDeployInitrd {
 		return;
 	}
 }
+
+#==========================================
+# setActiveProfileNames
+#------------------------------------------
+sub setActiveProfileNames {
+	# ...
+	# Set the information about which profiles to use for data access
+	# ---
+	my $this     = shift;
+	my $profiles = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $profiles) {
+		my $msg = 'setActiveProfiles must be called with 1 argument';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if ( ref($profiles) ne 'ARRAY' ) {
+		my $msg = 'setActiveProfiles, expecting array ref argument';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my @newProfs = @{$profiles};
+	my %specProfs = map { ($_ => 1 ) } @{$this->{availableProfiles}};
+	my $hasDef;
+	for my $prof (@newProfs) {
+		if ($prof eq 'kiwi_default' ) {
+			$hasDef = 1;
+			next;
+		}
+		if (! $specProfs{$prof} ) {
+			my $msg = "Attempting to set active profile to '$prof', but "
+				. 'this profile is not specified in the configuration.';
+			$kiwi -> error($msg);
+			$kiwi ->  failed();
+			return;
+		}
+	}
+	my $info = join ', ', @newProfs;
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
+	if (! $hasDef ) {
+		push @newProfs, 'kiwi_default';
+	}
+	$this->{selectedProfiles} = \@newProfs;
+	return $this;
+}
+
 #==========================================
 # setDescriptionInfo
 #------------------------------------------
@@ -2232,9 +2302,9 @@ sub addRepositories {
 }
 
 #==========================================
-# addDrivers
+# addDrivers_legacy
 #------------------------------------------
-sub addDrivers {
+sub addDrivers_legacy {
 	# ...
 	# Add the given driver list to the specified drivers
 	# section of the xml description parse tree.
@@ -3989,7 +4059,7 @@ sub getDrivers {
 			push @drvs, @{$this->{imageConfig}->{$prof}->{$arch}{drivers}};
 		}
 	}
-	my @driverInfo;
+	my @driverInfo = ();
 	for my $drv (@drvs) {
 		push @driverInfo, KIWIXMLDriverData -> new($kiwi, $drv);
 	}
@@ -4872,7 +4942,7 @@ sub __updateDescriptionFromChangeSet {
 		foreach my $d (@drivers) {
 			$kiwi -> info ("--> $d\n");
 		}
-		$this -> addDrivers (@drivers);
+		$this -> addDrivers_legacy (@drivers);
 	}
 	#==========================================
 	# 3) merge/update strip
