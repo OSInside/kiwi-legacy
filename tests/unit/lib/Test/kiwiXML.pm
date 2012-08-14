@@ -2,9 +2,9 @@
 # FILE          : kiwiXML.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2012 Novell Inc.
+# COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@suse.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -22,6 +22,7 @@ use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
 
 use KIWICommandLine;
+use KIWIQX qw (qxx);
 use KIWIXML;
 use KIWIXMLDescriptionData;
 
@@ -3874,7 +3875,7 @@ sub test_setActiveProfileNamesImpropProf {
 	my @newProfs = qw /profA timbuktu/;
 	my $res = $xml -> setActiveProfileNames(\@newProfs);
 	$msg = $kiwi -> getMessage();
-	my $expected = "Attempting to set active profile to 'timbuktu', "
+	my $expected = 'Attempting to set active profile to "timbuktu", '
 		. 'but this profile is not specified in the configuration.';
 	$this -> assert_str_equals($expected, $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -3960,6 +3961,73 @@ sub test_setActiveProfileNamesNoArg {
 	# Test this condition last to get potential error messages
 	my @expectedProf = ('profB');
 	$this -> assert_array_equal(\@expectedProf, $profNames);
+	return;
+}
+
+#==========================================
+# test_setArch
+#------------------------------------------
+sub test_setArch {
+	# ...
+	# Verify that the setArch implementation behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'defPkgMgr';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	$xml = $xml -> setArch('s390');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	my $arch = $xml -> getArch();
+	$this -> assert_str_equals('s390', $arch);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	return;
+}
+
+#==========================================
+# test_setArchInvalid
+#------------------------------------------
+sub test_setArchInvalid {
+	# ...
+	# Verify that the setArch implementation behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'defPkgMgr';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> setArch('mips');
+	my $msg = $kiwi -> getMessage();
+	my $expected = "setArch: Specified arch 'mips' is not supported";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $arch = $xml -> getArch();
+	my $curArch = qxx ("uname -m");
+	chomp $curArch;
+	$this -> assert_str_equals($curArch, $arch);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
 	return;
 }
 
