@@ -1093,16 +1093,18 @@ sub getPXEDeployInitrd {
 #------------------------------------------
 sub setActiveProfileNames {
 	# ...
-	# Set the information about which profiles to use for data access
+	# Set the information about which profiles to use for data access,
+	# if no argument is given set to the default profile(s)
 	# ---
 	my $this     = shift;
 	my $profiles = shift;
 	my $kiwi = $this->{kiwi};
 	if (! $profiles) {
-		my $msg = 'setActiveProfiles must be called with 1 argument';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
+		delete $this->{availableProfiles};
+		my @def = ('kiwi_default');
+		$this->{selectedProfiles} = \@def;
+		$this->__populateProfileInfo();
+		return $this;
 	}
 	if ( ref($profiles) ne 'ARRAY' ) {
 		my $msg = 'setActiveProfiles, expecting array ref argument';
