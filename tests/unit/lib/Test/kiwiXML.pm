@@ -25,6 +25,7 @@ use KIWICommandLine;
 use KIWIQX qw (qxx);
 use KIWIXML;
 use KIWIXMLDescriptionData;
+use KIWIXMLDriverData;
 
 # All tests will need to be adjusted once KIWXML turns into a stateless
 # container and the ctor receives the config.xml file name as an argument.
@@ -200,6 +201,244 @@ sub test_addArchivesUseProf {
 #	$this -> assert_array_equal(\@expectedArchs, \@archives);
 	return;
 }
+
+#==========================================
+# test_addDriversImproperDataT
+#------------------------------------------
+sub test_addDriversImproperDataT {
+	# ...
+	# Verify addDrivers behaves as expected, pass an array ref containing
+	# a string
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @drvNames = qw /vboxsf epat dcdbas/;
+	my @drvsToAdd = ();
+	for my $drv (@drvNames) {
+		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, $drv);
+	}
+	push @drvsToAdd, 'slip';
+	push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, 'x25_asy');
+	my $res = $xml -> addDrivers(\@drvsToAdd, 'default');
+	my $expected = 'addDrivers: found list item not of type '
+		. 'KIWIXMLDriverData in driver list';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addDriversInvalidProf
+#------------------------------------------
+sub test_addDriversInvalidProf {
+	# ...
+	# Verify addDrivers behaves as expected, pass a profile name that
+	# is not defined.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @drvNames = qw /vboxsf epat dcdbas/;
+	my @drvsToAdd = ();
+	for my $drv (@drvNames) {
+		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, $drv);
+	}
+	my @profs = qw \profA timbuktu profB\;
+	my $res = $xml -> addDrivers(\@drvsToAdd, \@profs);
+	my $expected = 'Attempting to add drivers to "timbuktu", but '
+		. 'this profile is not specified in the configuration.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addDriversNoArgs
+#------------------------------------------
+sub test_addDriversNoArgs {
+	# ...
+	# Verify addDrivers behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addDrivers();
+	my $expected = 'addDrivers: no drivers specified, nothing to do';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_not_null($res);
+	return;
+}
+
+#==========================================
+# test_addDriversToCurrentProf
+#------------------------------------------
+sub test_addDriversToCurrentProf {
+	# ...
+	# Verify addDrivers behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	# Set up the profile to which the drivers are to be added
+	my @useProf = ('profA');
+	$xml = $xml -> setActiveProfileNames(\@useProf);
+	my $expected = 'Using profile(s): profA';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	# Add the drivers, using no 2nd arg results in drivers to be added to
+	# profA only
+	my @drvNames = qw /vboxsf epat dcdbas/;
+	my @drvsToAdd = ();
+	for my $drv (@drvNames) {
+		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, $drv);
+	}
+	$xml = $xml -> addDrivers(\@drvsToAdd);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	# Verify this has the expected results, we should get the default drivers
+	# plus the arch specific profile drivers plus the ones added
+	my @defDrvs = qw /e1000 rs232 usb/;
+	my @expectedDrvs = @defDrvs;
+	push @expectedDrvs, @drvNames;
+	my $arch = $xml -> getArch();
+	if ($arch eq 'ppc64') {
+		push @expectedDrvs, 'at76c50x-usb';
+	} elsif ($arch eq 's390') {
+		push @expectedDrvs, 'loop';
+	} else {
+		push @expectedDrvs, 'pc300too';
+	}
+	my @drvsUsed = @{$xml -> getDrivers()};
+	my @drvNamesUsed = ();
+	for my $drv (@drvsUsed) {
+		push @drvNamesUsed, $drv -> getName();
+	}
+	$this -> assert_array_equal(\@drvNamesUsed, \@expectedDrvs);
+	# Check that the drivers were not added anywhere else
+	# reset the active profiles and we should only get the default drivers
+	$xml = $xml -> setActiveProfileNames();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	@drvsUsed = @{$xml -> getDrivers()};
+	@drvNamesUsed = ();
+	for my $drv (@drvsUsed) {
+		push @drvNamesUsed, $drv -> getName();
+	}
+	$this -> assert_array_equal(\@drvNamesUsed, \@defDrvs);
+	return;
+}
+
+#==========================================
+# test_addDriversToDefault
+#------------------------------------------
+sub test_addDriversToDefault {
+	# ...
+	# Verify addDrivers behaves as expected when the keyword "default" is used
+	# as the second argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	# Add the drivers, using the keyword "default" as 2nd arg
+	my @drvNames = qw /vboxsf epat dcdbas/;
+	my @drvsToAdd = ();
+	for my $drv (@drvNames) {
+		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, $drv);
+	}
+	$xml = $xml -> addDrivers(\@drvsToAdd, 'default');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	# Verify this has the expected results, we should get the default drivers
+	# plus the arch specific profile drivers plus the ones added
+	my @defDrvs = qw /e1000 rs232 usb/;
+	my @expectedDrvs = @defDrvs;
+	push @expectedDrvs, @drvNames;
+	my @drvsUsed = @{$xml -> getDrivers()};
+	my @drvNamesUsed = ();
+	for my $drv (@drvsUsed) {
+		push @drvNamesUsed, $drv -> getName();
+	}
+	$this -> assert_array_equal(\@drvNamesUsed, \@expectedDrvs);
+	return;
+}
+
+#==========================================
+# test_addDriversWrongArgs
+#------------------------------------------
+sub test_addDriversWrongArgs {
+	# ...
+	# Verify addDrivers behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addDrivers ('loop', 'default');
+	my $expected = 'addDrivers: expecting array ref for XMLDriverData array '
+		. 'as first argument';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
 
 #==========================================
 # test_addDrivers_legacy
@@ -3817,7 +4056,7 @@ sub test_packageManagerInfoHasProfs {
 }
 
 #==========================================
-# test_setActiveProfilNames
+# test_setActiveProfileNames
 #------------------------------------------
 sub test_setActiveProfileNames {
 	# ...
@@ -3932,7 +4171,7 @@ sub test_setActiveProfileNamesInvalidArg {
 #------------------------------------------
 sub test_setActiveProfileNamesNoArg {
 	# ...
-	# Verify that setActiveProfiles generates the expected error
+	# Verify that setActiveProfiles resets to the default state
 	# when called with no argument
 	# ---
 	my $this = shift;
@@ -3948,15 +4187,27 @@ sub test_setActiveProfileNamesNoArg {
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('completed', $state);
-	my $res = $xml -> setActiveProfileNames();
+	# Set the profile to someting else
+	my @newProfs = qw /profA profC/;
+	$xml = $xml -> setActiveProfileNames(\@newProfs);
 	$msg = $kiwi -> getMessage();
-	my $expected = 'setActiveProfiles must be called with 1 argument';
-	$this -> assert_str_equals($expected, $msg);
+	$this -> assert_str_equals('Using profile(s): profA, profC', $msg);
 	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
+	$this -> assert_str_equals('info', $msgT);
 	$state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	# Reset to the default configured state
+	#TODO when the legacy profiles are removed from the XML this
+	# message has to change to "Using...."
+	$xml = $xml -> setActiveProfileNames();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
 	my $profNames = $xml -> getActiveProfileNames();
 	# Test this condition last to get potential error messages
 	my @expectedProf = ('profB');
