@@ -39,12 +39,6 @@ export LOCAL_BOOT="no"
 initialize
 
 #======================================
-# Beautify Startup
-#--------------------------------------
-echo "Loading KIWI CD Boot-System..."
-echo "------------------------------"
-
-#======================================
 # Update library path
 #--------------------------------------
 ldconfig

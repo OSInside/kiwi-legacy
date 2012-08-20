@@ -498,7 +498,7 @@ function errorLogContinue {
 #--------------------------------------
 function errorLogStart {
 	# /.../
-	# Log all errors and the bas debug information to the
+	# Log all errors and the debug information to the
 	# file set in ELOG_FILE.
 	# ----
 	if [ ! -f $ELOG_FILE ];then
@@ -524,6 +524,12 @@ function errorLogStart {
 	# Redirect stderr to ELOG_FILE
 	#--------------------------------------
 	exec 2>>$ELOG_FILE
+	#======================================
+	# Redirect stdout if quiet is set
+	#--------------------------------------
+	if cat /proc/cmdline | grep -qi "quiet";then
+		exec 1>>/dev/null
+	fi
 	#======================================
 	# Enable shell debugging and redirect
 	#--------------------------------------
@@ -589,7 +595,6 @@ function udevStart {
 	# /.../
 	# start the udev daemon.
 	# ----
-	echo "Creating device nodes with udev"
 	# disable hotplug helper, udevd listens to netlink
 	if [ -e /proc/sys/kernel/hotplug ];then
 		echo "" > /proc/sys/kernel/hotplug
@@ -669,10 +674,10 @@ function udevKill {
 function startPlymouth {
 	if which plymouthd &>/dev/null;then
 		mkdir --mode 755 /run/plymouth
-		plymouth-set-default-theme $kiwi_boottheme
+		plymouth-set-default-theme $kiwi_boottheme &>/dev/null
 		plymouthd \
-			--attach-to-session --pid-file /run/plymouth/pid
-		plymouth show-splash
+			--attach-to-session --pid-file /run/plymouth/pid &>/dev/null
+		plymouth show-splash &>/dev/null
 	fi
 }
 #======================================

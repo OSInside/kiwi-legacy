@@ -74,12 +74,6 @@ function recreateVTOCTable {
 }
 
 #======================================
-# Beautify Startup
-#--------------------------------------
-echo "Loading KIWI PXE Boot-System..."
-echo "-------------------------------"
-
-#======================================
 # Update library path
 #--------------------------------------
 ldconfig
