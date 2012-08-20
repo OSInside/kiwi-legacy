@@ -42,7 +42,7 @@ sub new {
 #------------------------------------------
 sub test_ctor_argsIncomplete {
 	# ...
-	# Test the descriptiondata constructor only partialli initialized
+	# Test the DescriptionData constructor only partially initialized
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -86,7 +86,7 @@ sub test_ctor_argsIncomplete {
 #------------------------------------------
 sub test_ctor_incompleteHashRef {
 	# ...
-	# Test the descriptiondata constructor with an invalid hashRef as argument
+	# Test the DescriptionData constructor with an invalid hashRef as argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -140,7 +140,7 @@ sub test_ctor_incompleteHashRef {
 #------------------------------------------
 sub test_ctor_invalidHashRef {
 	# ...
-	# Test the descriptiondata constructor with an invalid hashRef as argument
+	# Test the DescriptionData constructor with an invalid hashRef as argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -167,7 +167,7 @@ sub test_ctor_invalidHashRef {
 #------------------------------------------
 sub test_ctor_noArgs {
 	# ...
-	# Test the descriptiondata constructor
+	# Test the DescriptionData constructor
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -211,7 +211,7 @@ sub test_ctor_noArgs {
 #------------------------------------------
 sub test_ctor_typeArgInvalid {
 	# ...
-	# Test the descriptiondata constructor with an invalid string argument
+	# Test the DescriptionData constructor with an invalid string argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -265,7 +265,7 @@ sub test_ctor_typeArgInvalid {
 #------------------------------------------
 sub test_ctor_validStrings {
 	# ...
-	# Test the descriptiondata constructor with valid string args
+	# Test the DescriptionData constructor with valid string args
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -321,7 +321,7 @@ sub test_ctor_validStrings {
 #------------------------------------------
 sub test_ctor_validHashRef {
 	# ...
-	# Test the descriptiondata constructor with a valid hashRef as argument
+	# Test the DescriptionData constructor with a valid hashRef as argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -379,7 +379,7 @@ sub test_ctor_validHashRef {
 #------------------------------------------
 sub test_incompleteSetOnly1 {
 	# ...
-	# Test the descriptiondata constructor
+	# Test the DescriptionData constructor
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -431,7 +431,7 @@ sub test_incompleteSetOnly1 {
 #------------------------------------------
 sub test_incompleteSetOnly2 {
 	# ...
-	# Test the descriptiondata constructor
+	# Test the DescriptionData constructor
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -491,7 +491,7 @@ sub test_incompleteSetOnly2 {
 #------------------------------------------
 sub test_incompleteSetOnly3 {
 	# ...
-	# Test the descriptiondata constructor
+	# Test the DescriptionData constructor
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};

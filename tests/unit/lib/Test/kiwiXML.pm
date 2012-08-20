@@ -2,9 +2,9 @@
 # FILE          : kiwiXML.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2012 Novell Inc.
+# COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@suse.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -22,8 +22,10 @@ use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
 
 use KIWICommandLine;
+use KIWIQX qw (qxx);
 use KIWIXML;
 use KIWIXMLDescriptionData;
+use KIWIXMLDriverData;
 
 # All tests will need to be adjusted once KIWXML turns into a stateless
 # container and the ctor receives the config.xml file name as an argument.
@@ -201,9 +203,247 @@ sub test_addArchivesUseProf {
 }
 
 #==========================================
-# test_addDrivers
+# test_addDriversImproperDataT
 #------------------------------------------
-sub test_addDrivers {
+sub test_addDriversImproperDataT {
+	# ...
+	# Verify addDrivers behaves as expected, pass an array ref containing
+	# a string
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @drvNames = qw /vboxsf epat dcdbas/;
+	my @drvsToAdd = ();
+	for my $drv (@drvNames) {
+		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, $drv);
+	}
+	push @drvsToAdd, 'slip';
+	push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, 'x25_asy');
+	my $res = $xml -> addDrivers(\@drvsToAdd, 'default');
+	my $expected = 'addDrivers: found list item not of type '
+		. 'KIWIXMLDriverData in driver list';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addDriversInvalidProf
+#------------------------------------------
+sub test_addDriversInvalidProf {
+	# ...
+	# Verify addDrivers behaves as expected, pass a profile name that
+	# is not defined.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @drvNames = qw /vboxsf epat dcdbas/;
+	my @drvsToAdd = ();
+	for my $drv (@drvNames) {
+		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, $drv);
+	}
+	my @profs = qw \profA timbuktu profB\;
+	my $res = $xml -> addDrivers(\@drvsToAdd, \@profs);
+	my $expected = 'Attempting to add drivers to "timbuktu", but '
+		. 'this profile is not specified in the configuration.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addDriversNoArgs
+#------------------------------------------
+sub test_addDriversNoArgs {
+	# ...
+	# Verify addDrivers behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addDrivers();
+	my $expected = 'addDrivers: no dirvers specified, nothing to do';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_not_null($res);
+	return;
+}
+
+#==========================================
+# test_addDriversToCurrentProf
+#------------------------------------------
+sub test_addDriversToCurrentProf {
+	# ...
+	# Verify addDrivers behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	# Set up the profile to which the drivers are to be added
+	my @useProf = ('profA');
+	$xml = $xml -> setActiveProfileNames(\@useProf);
+	my $expected = 'Using profile(s): profA';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	# Add the drivers, using no 2nd arg results in drivers to be added to
+	# profA only
+	my @drvNames = qw /vboxsf epat dcdbas/;
+	my @drvsToAdd = ();
+	for my $drv (@drvNames) {
+		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, $drv);
+	}
+	$xml = $xml -> addDrivers(\@drvsToAdd);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	# Verify this has the expected results, we should get the default drivers
+	# plus the arch specific profile drivers plus the ones added
+	my @defDrvs = qw /e1000 rs232 usb/;
+	my @expectedDrvs = @defDrvs;
+	push @expectedDrvs, @drvNames;
+	my $arch = $xml -> getArch();
+	if ($arch eq 'ppc64') {
+		push @expectedDrvs, 'at76c50x-usb';
+	} elsif ($arch eq 's390') {
+		push @expectedDrvs, 'loop';
+	} else {
+		push @expectedDrvs, 'pc300too';
+	}
+	my @drvsUsed = @{$xml -> getDrivers()};
+	my @drvNamesUsed = ();
+	for my $drv (@drvsUsed) {
+		push @drvNamesUsed, $drv -> getName();
+	}
+	$this -> assert_array_equal(\@drvNamesUsed, \@expectedDrvs);
+	# Check that the drivers were not added anywhere else
+	# reset the active profiles and we should only get the default drivers
+	$xml = $xml -> setActiveProfileNames();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	@drvsUsed = @{$xml -> getDrivers()};
+	@drvNamesUsed = ();
+	for my $drv (@drvsUsed) {
+		push @drvNamesUsed, $drv -> getName();
+	}
+	$this -> assert_array_equal(\@drvNamesUsed, \@defDrvs);
+	return;
+}
+
+#==========================================
+# test_addDriversToDefault
+#------------------------------------------
+sub test_addDriversToDefault {
+	# ...
+	# Verify addDrivers behaves as expected when the keyword "default" is used
+	# as the second argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	# Add the drivers, using the keyword "default" as 2nd arg
+	my @drvNames = qw /vboxsf epat dcdbas/;
+	my @drvsToAdd = ();
+	for my $drv (@drvNames) {
+		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, $drv);
+	}
+	$xml = $xml -> addDrivers(\@drvsToAdd, 'default');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	# Verify this has the expected results, we should get the default drivers
+	# plus the arch specific profile drivers plus the ones added
+	my @defDrvs = qw /e1000 rs232 usb/;
+	my @expectedDrvs = @defDrvs;
+	push @expectedDrvs, @drvNames;
+	my @drvsUsed = @{$xml -> getDrivers()};
+	my @drvNamesUsed = ();
+	for my $drv (@drvsUsed) {
+		push @drvNamesUsed, $drv -> getName();
+	}
+	$this -> assert_array_equal(\@drvNamesUsed, \@expectedDrvs);
+	return;
+}
+
+#==========================================
+# test_addDriversWrongArgs
+#------------------------------------------
+sub test_addDriversWrongArgs {
+	# ...
+	# Verify addDrivers behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addDrivers ('loop', 'default');
+	my $expected = 'addDrivers: expecting array ref for XMLDriverData array '
+		. 'as first argument';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+
+#==========================================
+# test_addDrivers_legacy
+#------------------------------------------
+sub test_addDrivers_legacy {
 	# ...
 	# Verify proper operation of addDrivers method
 	# ---
@@ -213,14 +453,14 @@ sub test_addDrivers {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	$xml = $xml -> addDrivers('fglrx', 'wl2000');
+	$xml = $xml -> addDrivers_legacy('fglrx', 'wl2000');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my @driversNodes = $xml -> getDriversNodeList() -> get_nodelist();
+	my @driversNodes = $xml -> getDriversNodeList_legacy() -> get_nodelist();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -990,6 +1230,39 @@ sub test_addStripTools {
 }
 
 #==========================================
+# test_getActiveProfileNames
+#------------------------------------------
+sub test_getActiveProfileNames {
+	# ...
+	# Verify the the names returned by the getActiveProfileNames method are
+	# correct.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $profNames = $xml -> getActiveProfileNames();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my @expected = ('profB');
+	$this -> assert_array_equal(\@expected, $profNames);
+	return;
+}
+
+#==========================================
 # test_getArchiveList
 #------------------------------------------
 sub test_getArchiveList {
@@ -1331,6 +1604,35 @@ sub test_getDescriptionInfo {
 }
 
 #==========================================
+# test_getDrivers
+#------------------------------------------
+sub test_getDrivers {
+	# ...
+	# Verify proper return of getDrivers method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @drivers = @{$xml -> getDrivers()};
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expectedDrivers = qw /usb e1000 rs232/;
+	my @confDrivers;
+	for my $drvData (@drivers) {
+		push @confDrivers, $drvData -> getName();
+	}
+	$this -> assert_array_equal(\@expectedDrivers, \@confDrivers);
+	return;
+}
+
+#==========================================
 # test_getDriversNodeList
 #------------------------------------------
 sub test_getDriversNodeList {
@@ -1343,7 +1645,7 @@ sub test_getDriversNodeList {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @driversNodes = $xml -> getDriversNodeList() -> get_nodelist();
+	my @driversNodes = $xml -> getDriversNodeList_legacy() -> get_nodelist();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3750,6 +4052,414 @@ sub test_packageManagerInfoHasProfs {
 	$this -> assert_not_null($res);
 	my $PkgMgr= $xml -> getPackageManager();
 	$this -> assert_str_equals('yum', $PkgMgr);
+	return;
+}
+
+#==========================================
+# test_setActiveProfileNames
+#------------------------------------------
+sub test_setActiveProfileNames {
+	# ...
+	# Verify that setting the active profiles works as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	# Clear out the initial setup message
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @newProfs = qw /profA profC/;
+	$xml = $xml -> setActiveProfileNames(\@newProfs);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA, profC', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	my $profNames = $xml -> getActiveProfileNames();
+	# Test this condition last to get potential error messages
+	$this -> assert_array_equal(\@newProfs, $profNames);
+	return;
+}
+
+#==========================================
+# test_setActiveProfilNamesImpropProf
+#------------------------------------------
+sub test_setActiveProfileNamesImpropProf {
+	# ...
+	# Verify that setActiveProfiles generates the expected error
+	# when called with an improper profile name
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	# Clear out the initial setup message
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @newProfs = qw /profA timbuktu/;
+	my $res = $xml -> setActiveProfileNames(\@newProfs);
+	$msg = $kiwi -> getMessage();
+	my $expected = 'Attempting to set active profile to "timbuktu", '
+		. 'but this profile is not specified in the configuration.';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_not_null($xml);
+	my $profNames = $xml -> getActiveProfileNames();
+	# Test this condition last to get potential error messages
+	my @expectedProf = ('profB');
+	$this -> assert_array_equal(\@expectedProf, $profNames);
+	return;
+}
+
+#==========================================
+# test_setActiveProfilNamesInvalidArg
+#------------------------------------------
+sub test_setActiveProfileNamesInvalidArg {
+	# ...
+	# Verify that setActiveProfiles generates the expected error
+	# when called with an invalid argument type
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	# Clear out the initial setup message
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $res = $xml -> setActiveProfileNames('profA,profB');
+	$msg = $kiwi -> getMessage();
+	my $expected = 'setActiveProfiles, expecting array ref argument';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $profNames = $xml -> getActiveProfileNames();
+	# Test this condition last to get potential error messages
+	my @expectedProf = ('profB');
+	$this -> assert_array_equal(\@expectedProf, $profNames);
+	return;
+}
+
+#==========================================
+# test_setActiveProfilNamesNoArg
+#------------------------------------------
+sub test_setActiveProfileNamesNoArg {
+	# ...
+	# Verify that setActiveProfiles resets to the default state
+	# when called with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'profilesConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	# Clear out the initial setup message
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Set the profile to someting else
+	my @newProfs = qw /profA profC/;
+	$xml = $xml -> setActiveProfileNames(\@newProfs);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA, profC', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	# Reset to the default configured state
+	#TODO when the legacy profiles are removed from the XML this
+	# message has to change to "Using...."
+	$xml = $xml -> setActiveProfileNames();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	my $profNames = $xml -> getActiveProfileNames();
+	# Test this condition last to get potential error messages
+	my @expectedProf = ('profB');
+	$this -> assert_array_equal(\@expectedProf, $profNames);
+	return;
+}
+
+#==========================================
+# test_setArch
+#------------------------------------------
+sub test_setArch {
+	# ...
+	# Verify that the setArch implementation behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'defPkgMgr';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	$xml = $xml -> setArch('s390');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	my $arch = $xml -> getArch();
+	$this -> assert_str_equals('s390', $arch);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	return;
+}
+
+#==========================================
+# test_setArchInvalid
+#------------------------------------------
+sub test_setArchInvalid {
+	# ...
+	# Verify that the setArch implementation behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'defPkgMgr';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> setArch('mips');
+	my $msg = $kiwi -> getMessage();
+	my $expected = "setArch: Specified arch 'mips' is not supported";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $arch = $xml -> getArch();
+	my $curArch = qxx ("uname -m");
+	chomp $curArch;
+	$this -> assert_str_equals($curArch, $arch);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	return;
+}
+
+#==========================================
+# test_setDescriptionInfo
+#------------------------------------------
+sub test_setDescriptionInfo {
+	# ...
+	# Verify that setting the description information has the expected results
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'descriptData';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi,
+													'Robert Schweikert',
+													'rjschwei@suse.com',
+													'test set method',
+													'system'
+													);
+	$xml = $xml -> setDescriptionInfo($descriptObj);
+	$this -> assert_not_null($xml);
+	my $descrpObj = $xml -> getDescriptionInfo();
+	$this -> assert_not_null($descrpObj);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $author = $descrpObj -> getAuthor();
+	$this -> assert_str_equals('Robert Schweikert', $author);
+	my $contact = $descrpObj -> getContactInfo();
+	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	my $spec = $descrpObj -> getSpecificationDescript();
+	$this -> assert_str_equals('test set method', $spec);
+	my $type = $descrpObj -> getType();
+	$this -> assert_str_equals('system', $type);
+	return;
+}
+
+#==========================================
+# test_setDescriptionInfoImproperArg
+#------------------------------------------
+sub test_setDescriptionInfoImproperArg {
+	# ...
+	# Verify that setting the description information with an improper
+	# argument type fails as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'descriptData';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my $res = $xml -> setDescriptionInfo($xml);
+	$this -> assert_null($res);
+	my $expected = 'setDescriptionInfo: Expecting KIWIXMLDescriptionData '
+		. 'instance as argument.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	my $descrpObj = $xml -> getDescriptionInfo();
+	$this -> assert_not_null($descrpObj);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $author = $descrpObj -> getAuthor();
+	$this -> assert_str_equals('Robert Schweikert', $author);
+	my $contact = $descrpObj -> getContactInfo();
+	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	my $spec = $descrpObj -> getSpecificationDescript();
+	$expected = 'Verify proper handling of description in XML obj';
+	$this -> assert_str_equals($expected, $spec);
+	my $type = $descrpObj -> getType();
+	$this -> assert_str_equals('system', $type);
+	return;
+}
+
+#==========================================
+# test_setDescriptionInfoInvalArg
+#------------------------------------------
+sub test_setDescriptionInfoInvalArg {
+	# ...
+	# Verify that setting the description information with an invalid
+	# DescriptionData object fails as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'descriptData';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi,
+													'Robert Schweikert',
+													'rjschwei@suse.com',
+													);
+	my $res = $xml -> setDescriptionInfo($descriptObj);
+	$this -> assert_null($res);
+	my $msg =  $kiwi -> getWarningMessage();
+	my $expected = 'XMLDescriptionData object in invalid state';
+	$this -> assert_str_equals($expected, $msg);
+	my $state = $kiwi -> getOopsState();
+	$this -> assert_str_equals('oops', $state);
+	$expected = 'setDescriptionInfo: Provided KIWIXMLDescriptionData '
+		. 'instance is not valid.';
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	my $descrpObj = $xml -> getDescriptionInfo();
+	$this -> assert_not_null($descrpObj);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $author = $descrpObj -> getAuthor();
+	$this -> assert_str_equals('Robert Schweikert', $author);
+	my $contact = $descrpObj -> getContactInfo();
+	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	my $spec = $descrpObj -> getSpecificationDescript();
+	$expected = 'Verify proper handling of description in XML obj';
+	$this -> assert_str_equals($expected, $spec);
+	my $type = $descrpObj -> getType();
+	$this -> assert_str_equals('system', $type);
+	return;
+}
+
+#==========================================
+# test_setDescriptionInfoNoArg
+#------------------------------------------
+sub test_setDescriptionInfoNoArg {
+	# ...
+	# Verify that setting the description information with no provided
+	# DescriptionData object fails as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'descriptData';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	my $res = $xml -> setDescriptionInfo();
+	$this -> assert_null($res);
+	my $expected = 'setDescriptionInfo: Expecting KIWIXMLDescriptionData '
+			. 'instance as argument.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	my $descrpObj = $xml -> getDescriptionInfo();
+	$this -> assert_not_null($descrpObj);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $author = $descrpObj -> getAuthor();
+	$this -> assert_str_equals('Robert Schweikert', $author);
+	my $contact = $descrpObj -> getContactInfo();
+	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	my $spec = $descrpObj -> getSpecificationDescript();
+	$expected = 'Verify proper handling of description in XML obj';
+	$this -> assert_str_equals($expected, $spec);
+	my $type = $descrpObj -> getType();
+	$this -> assert_str_equals('system', $type);
 	return;
 }
 

@@ -276,7 +276,7 @@ sub updateDescription {
 	#==========================================
 	# Store drivers section if any
 	#------------------------------------------
-	@node = $src_xml->getDriversNodeList() -> get_nodelist();
+	@node = $src_xml->getDriversNodeList_legacy() -> get_nodelist();
 	foreach my $element (@node) {
 		if (! $src_xml -> __requestedProfile ($element)) {
 			next;

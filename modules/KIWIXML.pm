@@ -30,6 +30,7 @@ use KIWILog;
 use KIWIQX qw (qxx);
 use KIWIURL;
 use KIWIXMLDescriptionData;
+use KIWIXMLDriverData;
 use KIWIXMLValidator;
 use KIWISatSolver;
 
@@ -132,6 +133,16 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	my $arch = qxx ("uname -m"); chomp $arch;
+	my %supported = map { ($_ => 1) } qw(
+					armv7l  ia64  ix86  ppc  ppc64 s390  s390x  x86_64
+					);
+	$this->{supportedArch} = \%supported;
+	if (! $supported{$arch} ) {
+		my $msg = "Attempt to run KIWI on unsupported architecture '$arch'";
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
 	#==========================================
 	# Check pre condition
 	#------------------------------------------
@@ -366,6 +377,27 @@ sub writeXMLDescription {
 		);
 	}
 	return $this;
+}
+
+#==========================================
+# getActiveProfileNames
+#------------------------------------------
+sub getActiveProfileNames {
+	# ...
+	# Return an array ref containing the names of the active profiles;
+	# this does not reveal the default (kiwi_default) name, as this is
+	# always active
+	# ---
+	my $this = shift;
+	my @selected = @{$this->{selectedProfiles}};
+	my @active = ();
+	for my $prof (@selected) {
+		if ($prof eq 'kiwi_default') {
+			next;
+		}
+		push @active, $prof;
+	}
+	return \@active;
 }
 
 #==========================================
@@ -1057,7 +1089,103 @@ sub getPXEDeployInitrd {
 }
 
 #==========================================
-# setBuildProfiles
+# setActiveProfileNames
+#------------------------------------------
+sub setActiveProfileNames {
+	# ...
+	# Set the information about which profiles to use for data access,
+	# if no argument is given set to the default profile(s)
+	# ---
+	my $this     = shift;
+	my $profiles = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $profiles) {
+		delete $this->{availableProfiles};
+		my @def = ('kiwi_default');
+		$this->{selectedProfiles} = \@def;
+		$this->__populateProfileInfo();
+		return $this;
+	}
+	if ( ref($profiles) ne 'ARRAY' ) {
+		my $msg = 'setActiveProfiles, expecting array ref argument';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $msg = 'Attempting to set active profile to "PROF_NAME", but '
+		. 'this profile is not specified in the configuration.';
+	if (! $this -> __verifyProfNames($profiles, $msg)) {
+		return;
+	}
+	my @newProfs = @{$profiles};
+	my $info = join ', ', @newProfs;
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
+	if (! $this->__hasDefaultProfName($profiles) ) {
+		push @newProfs, 'kiwi_default';
+	}
+	$this->{selectedProfiles} = \@newProfs;
+	return $this;
+}
+
+#==========================================
+# setArch
+#------------------------------------------
+sub setArch {
+	# ...
+	# Set the architecture to use to retrieve information
+	# ---
+	my $this    = shift;
+	my $newArch = shift;
+	my %supported = %{ $this->{supportedArch} };
+	if (! $supported{$newArch} ) {
+		my $kiwi = $this->{kiwi};
+		$kiwi -> error ("setArch: Specified arch '$newArch' is not supported");
+		$kiwi -> failed ();
+		return;
+	}
+	$this->{arch} = $newArch;
+	return $this;
+}
+
+#==========================================
+# setDescriptionInfo
+#------------------------------------------
+sub setDescriptionInfo {
+	# ...
+	# Set the description information for this configuration
+	# ---
+	my $this              = shift;
+	my $xmlDescripDataObj = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $xmlDescripDataObj ||
+		ref($xmlDescripDataObj) ne 'KIWIXMLDescriptionData') {
+		my $msg = 'setDescriptionInfo: Expecting KIWIXMLDescriptionData '
+			. 'instance as argument.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my $author = $xmlDescripDataObj->getAuthor();
+	if (! $author) {
+		my $msg = 'setDescriptionInfo: Provided KIWIXMLDescriptionData '
+			. 'instance is not valid.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my %descript = (
+		author        => $author,
+		contact       => $xmlDescripDataObj->getContactInfo(),
+		specification => $xmlDescripDataObj->getSpecificationDescript(),
+		type          => $xmlDescripDataObj->getType
+	);
+	$this->{imageConfig}{description} = \%descript;
+	return $this;
+}
+
+#==========================================
+# setSelectionProfiles
 #------------------------------------------
 sub setSelectionProfiles {
 	# ...
@@ -2199,6 +2327,113 @@ sub addRepositories {
 # addDrivers
 #------------------------------------------
 sub addDrivers {
+	# ...
+	# Add the given drivers to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	# ---
+	my $this      = shift;
+	my $drivers   = shift;
+	my $profNames = shift;
+	my $kiwi = $this->{kiwi};
+	#==========================================
+	# Verify arguments
+	#------------------------------------------
+	if (! $drivers) {
+		$kiwi -> info ('addDrivers: no dirvers specified, nothing to do');
+		$kiwi -> skipped ();
+		return $this;
+	}
+	if ( ref($drivers) ne 'ARRAY' ) {
+		my $msg = 'addDrivers: expecting array ref for XMLDriverData array '
+			. 'as first argument';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# Remeber drivers to add and verify the type
+	#------------------------------------------
+	my @drvsToAdd = @{$drivers};
+	for my $drv (@drvsToAdd) {
+		if ( ref($drv) ne 'KIWIXMLDriverData' ) {
+			my $msg = 'addDrivers: found list item not of type '
+				. 'KIWIXMLDriverData in driver list';
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
+			return;
+		}
+	}
+	#==========================================
+	# Figure out what profiles are getting changed
+	#------------------------------------------
+	my @profsToUse;
+	if ($profNames) {
+		if ( ref($profNames) eq 'ARRAY' ) {
+			# Multiple profiles, verify that all names are valid
+			my $msg = 'Attempting to add drivers to "PROF_NAME", but '
+				. 'this profile is not specified in the configuration.';
+			if (! $this -> __verifyProfNames($profNames, $msg)) {
+				return;
+			}
+			@profsToUse = @{$profNames};
+		} elsif ($profNames eq 'default') {
+			# Only the default profile is affected by change
+			@profsToUse = ('kiwi_default');
+		}
+	} else {
+		# No profile argument was given, operate on the currently active
+		# profiles (minus kiwi_default)
+		my @selected = @{$this->{selectedProfiles}};
+		for my $prof (@selected) {
+			if ($prof eq 'kiwi_default') {
+				next;
+			}
+			push @profsToUse, $prof;
+		}
+	}
+	for my $prof (@profsToUse) {
+		for my $drvData (@drvsToAdd) {
+			my $arch = $drvData -> getArch();
+			my $name = $drvData -> getName();
+			if ($arch) {
+				if ($this->{imageConfig}->{$prof}->{$arch} &&
+					$this->{imageConfig}->{$prof}->{$arch}{drivers}) {
+					my @existDrv = @{$this->{imageConfig}
+										->{$prof}
+										->{$arch}{drivers}};
+					push @existDrv, $name;
+					$this->{imageConfig}->{$prof}->{$arch}{drivers} =
+						\@existDrv;
+				} else {
+					my @newDrv = ($name);
+					$this->{imageConfig}->{$prof}->{$arch}{drivers} = \@newDrv;
+				}
+			} else {
+				if ($this->{imageConfig}->{$prof}{drivers}) {
+					my @existDrv = @{$this->{imageConfig}
+										->{$prof}{drivers}};
+					push @existDrv, $name;
+					$this->{imageConfig}->{$prof}{drivers} =  \@existDrv;
+				} else {
+					my @newDrv = ($name);
+					$this->{imageConfig}->{$prof}{drivers} = \@newDrv;
+				}
+			}
+		}
+	}
+
+	return $this;
+}
+
+#==========================================
+# addDrivers_legacy
+#------------------------------------------
+sub addDrivers_legacy {
 	# ...
 	# Add the given driver list to the specified drivers
 	# section of the xml description parse tree.
@@ -3894,6 +4129,17 @@ sub getTypeSpecificPackageList {
 }
 
 #==========================================
+# getArch
+#------------------------------------------
+sub getArch {
+	# ...
+	# Return the architecture currently used for data selection
+	# ---
+	my $this = shift;
+	return $this->{arch};
+}
+
+#==========================================
 # getArchiveList
 #------------------------------------------
 sub getArchiveList {
@@ -3921,15 +4167,43 @@ sub getRepoNodeList {
 }
 
 #==========================================
-# getDriversNodeList
+# getDriversNodeList_legacy
 #------------------------------------------
-sub getDriversNodeList {
+sub getDriversNodeList_legacy {
 	# ...
 	# Return a list of all <drivers> nodes. Each list member
 	# is an XML::LibXML::Element object pointer
 	# ---
 	my $this = shift;
 	return $this->{driversNodeList};
+}
+
+#==========================================
+# getDrivers
+#------------------------------------------
+sub getDrivers {
+	# ...
+	# Return a list reference of KIWIXMLDriverData objects that are
+	# specified to be part of the current profile and architecture
+	# ---
+	my $this = shift;
+	my $arch = $this->{arch};
+	my $kiwi = $this->{kiwi};
+	my @activeProfs = @{$this->{selectedProfiles}};
+	my @drvs = ();
+	for my $prof (@activeProfs) {
+		if ($this->{imageConfig}->{$prof}{drivers}) {
+			push @drvs, @{$this->{imageConfig}->{$prof}{drivers}};
+		}
+		if ($this->{imageConfig}{$prof}{$arch}{drivers}) {
+			push @drvs, @{$this->{imageConfig}->{$prof}->{$arch}{drivers}};
+		}
+	}
+	my @driverInfo = ();
+	for my $drv (@drvs) {
+		push @driverInfo, KIWIXMLDriverData -> new($kiwi, $drv);
+	}
+	return \@driverInfo;
 }
 
 #==========================================
@@ -4808,7 +5082,7 @@ sub __updateDescriptionFromChangeSet {
 		foreach my $d (@drivers) {
 			$kiwi -> info ("--> $d\n");
 		}
-		$this -> addDrivers (@drivers);
+		$this -> addDrivers_legacy (@drivers);
 	}
 	#==========================================
 	# 3) merge/update strip
@@ -5045,6 +5319,25 @@ sub __addVolume {
 	$disk -> appendChild ($addElement);
 	$this -> updateXML();
 	return $this;
+}
+
+#==========================================
+# __hasDefaultProfName
+#------------------------------------------
+sub __hasDefaultProfName {
+	# ...
+	# Check whether the default profile name "kiwi_default" is in the
+	# provided array ref of strings
+	# ---
+	my $this      = shift;
+	my $profNames = shift;
+	my @names = @{$profNames};
+	for my $name (@names) {
+		if ($name =~ /^kiwi_default$/x) {
+			return 1;
+		}
+	}
+	return;
 }
 
 #==========================================
@@ -5516,7 +5809,7 @@ sub __populateDriverInfo {
 				}
 			}
 		}
-		my @pNameLst = ('kiwi-default');
+		my @pNameLst = ('kiwi_default');
 		my $profNames = $drvNode -> getAttribute('profiles');
 		if ($profNames) {
 			@pNameLst = split /,/, $profNames;
@@ -5894,6 +6187,35 @@ sub __resolveArchitecture {
 	}
 	$path =~ s/\%arch/$arch/;
 	return $path;
+}
+
+#==========================================
+# __verifyProfNames
+#------------------------------------------
+sub __verifyProfNames {
+	# ...
+	# Verify that the profile names in the given array ref are available,
+	# if not print the given msg substituting PROF_NAME in the message
+	# with the name that is in violation.
+	# ---
+	my $this  = shift;
+	my $names = shift;
+	my $msg   = shift;
+	my @namesToCheck = @{$names};
+	my %specProfs = map { ($_ => 1 ) } @{$this->{availableProfiles}};
+	for my $name (@namesToCheck) {
+		if ($name eq 'kiwi_default') {
+			next;
+		}
+		if (! $specProfs{$name} ) {
+			my $kiwi = $this->{kiwi};
+			$msg =~ s/PROF_NAME/$name/;
+			$kiwi -> error($msg);
+			$kiwi ->  failed();
+			return;
+		}
+	}
+	return 1;
 }
 
 1;
