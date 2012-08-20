@@ -64,12 +64,6 @@ export SYSTEM_MD5STATUS
 initialize
 
 #======================================
-# Beautify Startup
-#--------------------------------------
-echo "Loading KIWI VMX Boot-System..."
-echo "-------------------------------"
-
-#======================================
 # Update library path
 #--------------------------------------
 ldconfig

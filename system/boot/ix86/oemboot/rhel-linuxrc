@@ -138,12 +138,6 @@ function setupInitialDeviceNames {
 }
 
 #======================================
-# Beautify Startup
-#--------------------------------------
-echo "Loading KIWI OEM Boot-System..."
-echo "-------------------------------"
-
-#======================================
 # Update library path
 #--------------------------------------
 ldconfig
