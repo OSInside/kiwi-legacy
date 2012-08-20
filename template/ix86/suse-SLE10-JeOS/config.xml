@@ -82,7 +82,6 @@
 		<package name="module-init-tools"/>
 		<package name="netcfg"/>
 		<package name="openssh"/>
-		<package name="procps"/>
 		<package name="pwdutils"/>
 		<package name="rpm"/>
 		<package name="sles-release"/>
