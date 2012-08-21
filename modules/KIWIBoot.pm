@@ -366,6 +366,7 @@ sub new {
 		#==========================================
 		# Decide for a size prefer 1)cmdline 2)XML
 		#------------------------------------------
+		$this->{sizeSetByUser} = 0;
 		my $sizeXMLAddBytes = $xml -> getImageSizeAdditiveBytes();
 		if ($sizeXMLAddBytes) {
 			$sizeXMLBytes = $sizeBytes + $sizeXMLAddBytes;
@@ -385,9 +386,11 @@ sub new {
 		if ($cmdlBytes > $sizeBytes) {
 			$sizeBytes = $cmdlBytes;
 			$vmsize = $sizeBytes;
+			$this->{sizeSetByUser} = 1;
 		} elsif ($sizeXMLBytes > $sizeBytes) {
 			$sizeBytes = $sizeXMLBytes;
 			$vmsize = $sizeBytes;
+			$this->{sizeSetByUser} = 1;
 		} else {
 			#==========================================
 			# Sum up system + kernel + initrd
@@ -1711,7 +1714,7 @@ sub setupBootDisk {
 	#==========================================
 	# increase vmsize if single boot partition
 	#------------------------------------------
-	if ($bootsize) {
+	if (($bootsize) && (! $this->{sizeSetByUser})) {
 		$vmsize = $this->{vmmbyte} + ($bootsize * 1.3);
 		$vmsize = sprintf ("%.0f", $vmsize);
 		$this->{vmmbyte} = $vmsize;
