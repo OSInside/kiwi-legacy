@@ -21,6 +21,7 @@ use strict;
 use warnings;
 require Exporter;
 use Carp qw (cluck);
+use Data::Dumper;
 use File::Glob ':glob';
 use File::Basename;
 use LWP;
@@ -312,6 +313,21 @@ sub new {
 	# Store object data
 	#------------------------------------------
 	$this -> updateXML();
+	#==========================================
+	# Dump imageConfig to log
+	#------------------------------------------
+	$Data::Dumper::Terse  = 1;
+	$Data::Dumper::Indent = 1;
+	$Data::Dumper::Useqq  = 1;
+	my $dd = Data::Dumper->new([ %{$this->{imageConfig}} ]);
+	my $cd = $dd->Dump;
+	$kiwi -> loginfo (
+		"BEGIN imageConfig internal data structure:\n"
+	);
+	$kiwi -> loginfo ("\n$cd");
+	$kiwi -> loginfo (
+		"END imageConfig internal data structure:\n"
+	);
 	return $this;
 }
 
