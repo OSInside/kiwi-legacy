@@ -275,7 +275,7 @@ sub prepareImage {
 	$kiwi -> info ("Reading image description [Prepare]...\n");
 	my $buildProfs = $this -> {buildProfiles};
 	my $xml = KIWIXML -> new(
-		$kiwi, $configDir, undef, $buildProfs,$cmdL
+		$kiwi, $configDir, $this->{buildType}, $buildProfs,$cmdL
 	);
 	if (! defined $xml) {
 		return;
