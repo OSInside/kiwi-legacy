@@ -383,12 +383,22 @@ sub new {
 			# convert MB to Byte
 			$cmdlBytes = $value * 1048576;
 		}
-		if ($cmdlBytes > $sizeBytes) {
-			$sizeBytes = $cmdlBytes;
-			$vmsize = $sizeBytes;
-			$this->{sizeSetByUser} = 1;
-		} elsif ($sizeXMLBytes > $sizeBytes) {
-			$sizeBytes = $sizeXMLBytes;
+		if (($cmdlBytes > 0) || ($sizeXMLBytes > 0)) {
+			my $newsize = 0;
+			if ($cmdlBytes > 0) {
+				$newsize = $cmdlBytes;
+			} elsif ($sizeXMLBytes > 0) {
+				$newsize = $sizeXMLBytes;
+			}
+			if ($newsize < $sizeBytes) {
+				$kiwi -> warning (
+					"--> given size might be too small, using it anyhow !\n"
+				);
+				$kiwi -> warning (
+					"--> min size changed from $sizeBytes to $newsize bytes\n"
+				);
+			}
+			$sizeBytes = $newsize;
 			$vmsize = $sizeBytes;
 			$this->{sizeSetByUser} = 1;
 		} else {
