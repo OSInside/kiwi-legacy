@@ -316,18 +316,7 @@ sub new {
 	#==========================================
 	# Dump imageConfig to log
 	#------------------------------------------
-	$Data::Dumper::Terse  = 1;
-	$Data::Dumper::Indent = 1;
-	$Data::Dumper::Useqq  = 1;
-	my $dd = Data::Dumper->new([ %{$this->{imageConfig}} ]);
-	my $cd = $dd->Dump;
-	$kiwi -> loginfo (
-		"BEGIN imageConfig internal data structure:\n"
-	);
-	$kiwi -> loginfo ("\n$cd");
-	$kiwi -> loginfo (
-		"END imageConfig internal data structure:\n"
-	);
+	# print $this->dumpInternalXMLDescription;
 	return $this;
 }
 
@@ -360,6 +349,24 @@ sub updateXML {
 	my $xmlf = $this->{xmlOrigFile};
 	$kiwi -> storeXML ( $xmlu,$xmlf );
 	return $this;
+}
+
+#==========================================
+# dumpInternalXMLDescription
+#------------------------------------------
+sub dumpInternalXMLDescription {
+	# ...
+	# return the contents of the imageConfig data
+	# structure in a readable format
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	$Data::Dumper::Terse  = 1;
+	$Data::Dumper::Indent = 1;
+	$Data::Dumper::Useqq  = 1;
+	my $dd = Data::Dumper->new([ %{$this->{imageConfig}} ]);
+	my $cd = $dd->Dump;
+	return $cd;
 }
 
 #==========================================
