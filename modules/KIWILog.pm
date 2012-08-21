@@ -179,26 +179,60 @@ sub doNorm {
 }
 
 #==========================================
+# setFlag
+#------------------------------------------
+sub setFlag {
+	# ...
+	# set status flag
+	# ---
+	my $this    = shift;
+	my $flag    = shift;
+	my $rootEFD = $this->{rootefd};
+	my $FD      = $this->{channel};
+	#==========================================
+	# no flag in file logging mode
+	#------------------------------------------
+	if (defined $this->{fileLog}) {
+		# Don't set progress info to log file
+		return;
+	}
+	#==========================================
+	# setup flag color
+	#------------------------------------------
+	my %color;
+	$color{done}    = 32;
+	$color{failed}  = 31;
+	$color{skipped} = 33;
+	$color{notset}  = 36;
+	$color{oops}    = 36;
+	#==========================================
+	# print flag
+	#------------------------------------------
+	if (! defined $this->{nocolor}) {
+		$this -> doStat();
+		print $FD "\033[1;".$color{$flag}."m".$flag."\n";
+		$this -> doNorm();
+		if ($this->{errorOk}) {
+			# Don't set progress info to default log file
+		}
+	} else {
+		print $FD "   $flag\n";
+	}
+	#==========================================
+	# save current flag value in cache
+	#------------------------------------------
+	$this -> saveInCache ("   $flag\n");
+}
+
+#==========================================
 # done
 #------------------------------------------
 sub done {
 	# ...
 	# This is the green "done" flag
 	# ---
-	my $this    = shift;
-	my $rootEFD = $this->{rootefd};
-	my $FD      = $this->{channel};
-	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
-	    $this -> doStat();
-		print $FD "\033[1;32mdone\n";
-		$this -> doNorm();
-		if ($this->{errorOk}) {
-			print $rootEFD "   done\n";
-		}
-	} else {
-		print $FD "   done\n";
-	}
-	$this -> saveInCache ("   done\n");
+	my $this = shift;
+	$this -> setFlag ("done");
 }
 
 #==========================================
@@ -208,20 +242,8 @@ sub failed {
 	# ...
 	# This is the red "failed" flag
 	# ---
-	my $this    = shift;
-	my $rootEFD = $this->{rootefd};
-	my $FD      = $this->{channel};
-	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
-		$this -> doStat();
-		print $FD "\033[1;31mfailed\n";
-		$this -> doNorm();
-		if ($this->{errorOk}) {
-			print $rootEFD "   failed\n";
-		}
-	} else {
-		print $FD "   failed\n";
-	}
-	$this -> saveInCache ("   failed\n");
+	my $this = shift;
+	$this -> setFlag ("failed");
 }
 
 #==========================================
@@ -231,20 +253,8 @@ sub skipped {
 	# ...
 	# This is the yellow "skipped" flag
 	# ---
-	my $this    = shift;
-	my $rootEFD = $this->{rootefd};
-	my $FD      = $this->{channel};
-	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
-		$this -> doStat();
-		print $FD "\033[1;33mskipped\n";
-		$this -> doNorm();
-		if ($this->{errorOk}) {
-			print $rootEFD "   skipped\n";
-		}
-	} else {
-		print $FD "   skipped\n";
-	}
-	$this -> saveInCache ("   skipped\n");
+	my $this = shift;
+	$this -> setFlag ("skipped");
 }
 
 #==========================================
@@ -254,20 +264,8 @@ sub notset {
 	# ...
 	# This is the cyan "notset" flag
 	# ---
-	my $this    = shift;
-	my $rootEFD = $this->{rootefd};
-	my $FD      = $this->{channel};
-	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
-		$this -> doStat();
-		print $FD "\033[1;36mnotset\n";
-		$this -> doNorm();
-		if ($this->{errorOk}) {
-			print $rootEFD "   notset\n";
-		}
-	} else {
-		print $FD "   notset\n";
-	}
-	$this -> saveInCache ("   notset\n");
+	my $this = shift;
+	$this -> setFlag ("notset");
 }
 
 #==========================================
@@ -277,20 +275,8 @@ sub oops {
 	# ...
 	# This is the cyan "oops" flag
 	# ---
-	my $this    = shift;
-	my $rootEFD = $this->{rootefd};
-	my $FD      = $this->{channel};
-	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
-		$this -> doStat();
-		print $FD "\033[1;36moops\n";
-		$this -> doNorm();
-		if ($this->{errorOk}) {
-			print $rootEFD "   notset\n";
-		}
-	} else {
-		print $FD "   oops\n";
-	}
-	$this -> saveInCache ("   oops\n");
+	my $this = shift;
+	$this -> setFlag ("oops");
 }
 
 #==========================================
@@ -298,7 +284,7 @@ sub oops {
 #------------------------------------------
 sub step {
 	# ...
-	# This is the green "(...)" flag
+	# This is the green "(...%)" flag
 	# ---
 	my $this = shift;
 	my $data = shift;
@@ -306,15 +292,19 @@ sub step {
 	if ($data > 100) {
 		$data = 100;
 	}
-	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
+	if (defined $this->{fileLog}) {
+		# Don't set progress info to log file
+		return;
+	}
+	if (! defined $this->{nocolor}) {
 		$this -> doStat();
 		print $FD "\033[1;32m($data%)";
 		$this -> doStat();
 		if ($this->{errorOk}) {
-			# Don't set progress info to log file
+			# Don't set progress info to default log file
 		}
 	} else {
-		# Don't set progress info to log file
+		# Don't set progress info in no-curses mode
 	}
 }
 
