@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Aug 21 12:30:58 CEST 2012 - ms@suse.de
+
+- auto adapt image size only if size was not explicitly set (bnc #775278)
+- make sure specified size is used for virtual disk images even
+  if the calculated minimum size is bigger than the specified
+  value (bnc #775278)
+
+-------------------------------------------------------------------
 Thu Aug  2 10:59:22 CEST 2012 - ms@suse.de
 
 - check blkid before mounting in searchBiosBootDevice (bnc #773861)
