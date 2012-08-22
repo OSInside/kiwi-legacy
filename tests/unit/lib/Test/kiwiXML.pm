@@ -905,9 +905,9 @@ sub test_addRemovePackages {
 
 
 #==========================================
-# test_addRepositories
+# test_addRepositories_legacy
 #------------------------------------------
-sub test_addRepositories {
+sub test_addRepositories_legacy {
 	# ...
 	# Verify proper operation of addRepositories method
 	# ---
@@ -926,7 +926,7 @@ sub test_addRepositories {
 	my @Prios= qw /13 99/;
 	my @Usr= qw /pablo/;
 	my @Pass= qw /ola/;
-	$xml = $xml -> addRepositories(\@addedTypes, @Locs,\@Alia,
+	$xml = $xml -> addRepositories_legacy(\@addedTypes, @Locs,\@Alia,
 								\@Prios,\@Usr, \@Pass);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -934,7 +934,7 @@ sub test_addRepositories {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my %repos = $xml -> getRepositories();
+	my %repos = $xml -> getRepositories_legacy();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -968,9 +968,9 @@ sub test_addRepositories {
 }
 
 #==========================================
-# test_addRepositoriesInvalidTypeInf
+# test_addRepositoriesInvalidTypeInf_legacy
 #------------------------------------------
-sub test_addRepositoriesInvalidTypeInf {
+sub test_addRepositoriesInvalidTypeInf_legacy {
 	# ...
 	# Verify proper operation of addRepositories method
 	# ---
@@ -989,7 +989,7 @@ sub test_addRepositoriesInvalidTypeInf {
 	my @Prios= qw /13 99/;
 	my @Usr= qw /pablo/;
 	my @Pass= qw /ola/;
-	$xml = $xml -> addRepositories(\@addedTypes, @Locs,\@Alia,
+	$xml = $xml -> addRepositories_legacy(\@addedTypes, @Locs,\@Alia,
 								\@Prios,\@Usr, \@Pass);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Addition of requested repo type [ola] not supported';
@@ -998,7 +998,7 @@ sub test_addRepositoriesInvalidTypeInf {
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('skipped', $state);
-	my %repos = $xml -> getRepositories();
+	my %repos = $xml -> getRepositories_legacy();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -1028,9 +1028,9 @@ sub test_addRepositoriesInvalidTypeInf {
 }
 
 #==========================================
-# test_addRepositoriesNoTypeInf
+# test_addRepositoriesNoTypeInf_legacy
 #------------------------------------------
-sub test_addRepositoriesNoTypeInf {
+sub test_addRepositoriesNoTypeInf_legacy {
 	# ...
 	# Verify proper operation of addRepositories method
 	# ---
@@ -1049,7 +1049,7 @@ sub test_addRepositoriesNoTypeInf {
 	my @Prios= qw /13 99/;
 	my @Usr= qw /pablo/;
 	my @Pass= qw /ola/;
-	$xml = $xml -> addRepositories(\@addedTypes, @Locs,\@Alia,
+	$xml = $xml -> addRepositories_legacy(\@addedTypes, @Locs,\@Alia,
 								\@Prios,\@Usr, \@Pass);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'No type for repo [http://otherpublicrepos/12.1] '
@@ -1059,7 +1059,7 @@ sub test_addRepositoriesNoTypeInf {
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('skipped', $state);
-	my %repos = $xml -> getRepositories();
+	my %repos = $xml -> getRepositories_legacy();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -1722,9 +1722,9 @@ sub test_getEditBootConfig {
 }
 
 #==========================================
-# test_getHttpsRepositoryCredentials
+# test_getHttpsRepositoryCredentials_legacy
 #------------------------------------------
-sub test_getHttpsRepositoryCredentials {
+sub test_getHttpsRepositoryCredentials_legacy {
 	# ...
 	# Verify proper return of getHttpsRepositoryCredentials method
 	# ---
@@ -1737,7 +1737,7 @@ sub test_getHttpsRepositoryCredentials {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my ($uname, $pass) = $xml->getHttpsRepositoryCredentials();
+	my ($uname, $pass) = $xml->getHttpsRepositoryCredentials_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3296,9 +3296,9 @@ sub test_getReplacePackageDelList {
 }
 
 #==========================================
-# test_getRepoNodeList
+# test_getRepoNodeList_legacy
 #------------------------------------------
-sub test_getRepoNodeList {
+sub test_getRepoNodeList_legacy {
 	# ...
 	# Verify proper return of getRepoNodeList method
 	# ---
@@ -3311,7 +3311,7 @@ sub test_getRepoNodeList {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @repoNodes = $xml -> getRepoNodeList() -> get_nodelist();
+	my @repoNodes = $xml -> getRepoNodeList_legacy() -> get_nodelist();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3334,9 +3334,9 @@ sub test_getRepoNodeList {
 }
 
 #==========================================
-# test_getRepositories
+# test_getRepositories_legacy
 #------------------------------------------
-sub test_getRepositories {
+sub test_getRepositories_legacy {
 	# ...
 	# Verify proper return of getRepositories method
 	# ---
@@ -3349,7 +3349,7 @@ sub test_getRepositories {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %repos = $xml -> getRepositories();
+	my %repos = $xml -> getRepositories_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3882,9 +3882,9 @@ sub test_hasDefaultPackagesNoDef {
 }
 
 #==========================================
-# test_ignoreRepositories
+# test_ignoreRepositories_legacy
 #------------------------------------------
-sub test_ignoreRepositories {
+sub test_ignoreRepositories_legacy {
 	# ...
 	# Verify proper operation of ignoreRepositories method
 	# ---
@@ -3894,8 +3894,8 @@ sub test_ignoreRepositories {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	$xml = $xml -> ignoreRepositories();
-	my %repos = $xml -> getRepositories();
+	$xml = $xml -> ignoreRepositories_legacy();
+	my %repos = $xml -> getRepositories_legacy();
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Ignoring all repositories previously configured';
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -4467,9 +4467,9 @@ sub test_setDescriptionInfoNoArg {
 }
 
 #==========================================
-# test_setRepository
+# test_setRepository_legacy
 #------------------------------------------
-sub test_setRepository {
+sub test_setRepository_legacy {
 	# ...
 	# Verify proper operation of setRepository method
 	# ---
@@ -4482,7 +4482,7 @@ sub test_setRepository {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	$xml = $xml -> setRepository('rpm-md', '/repos/pckgs','replacement',
+	$xml = $xml -> setRepository_legacy('rpm-md', '/repos/pckgs','replacement',
 								'5');
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Replacing repository '
@@ -4492,7 +4492,7 @@ sub test_setRepository {
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('completed', $state);
-	my %repos = $xml -> getRepositories();
+	my %repos = $xml -> getRepositories_legacy();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();

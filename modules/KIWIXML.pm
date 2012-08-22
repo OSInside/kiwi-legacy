@@ -478,7 +478,7 @@ sub createURLList {
 	my @urllist     = ();
 	my %urlhash     = ();
 	my @sourcelist  = ();
-	%repository = $this->getRepositories();
+	%repository = $this->getRepositories_legacy();
 	if (! %repository) {
 		%repository = $this->getInstSourceRepository();
 		foreach my $name (keys %repository) {
@@ -2147,9 +2147,9 @@ sub getInstSourceMetaFiles {
 }
 
 #==========================================
-# getRepositories
+# getRepositories_legacy
 #------------------------------------------
-sub getRepositories {
+sub getRepositories_legacy {
 	# ...
 	# Get the repository type used for building
 	# up the physical extend. For information on the available
@@ -2183,12 +2183,14 @@ sub getRepositories {
 }
 
 #==========================================
-# getHttpsRepositoryCredentials
+# getHttpsRepositoryCredentials_legacy
 #------------------------------------------
-sub getHttpsRepositoryCredentials {
+sub getHttpsRepositoryCredentials_legacy {
 	# ...
 	# If any repository is configered with credentials return the username
 	# and password
+	# TODO: This method is to be deleted with the switch to the new data
+	#       model
 	# ---
 	my $this = shift;
 	my @repoNodes = $this->{repositNodeList} -> get_nodelist();
@@ -2207,9 +2209,9 @@ sub getHttpsRepositoryCredentials {
 }
 
 #==========================================
-# ignoreRepositories
+# ignoreRepositories_legacy
 #------------------------------------------
-sub ignoreRepositories {
+sub ignoreRepositories_legacy {
 	# ...
 	# Ignore all the repositories in the XML file.
 	# ---
@@ -2228,9 +2230,9 @@ sub ignoreRepositories {
 }
 
 #==========================================
-# setRepository
+# setRepository_legacy
 #------------------------------------------
-sub setRepository {
+sub setRepository_legacy {
 	# ...
 	# Overwerite the first repository that does not have the status
 	# sttribute set to fixed.
@@ -2278,9 +2280,9 @@ sub setRepository {
 }
 
 #==========================================
-# addRepositories
+# addRepositories_legacy
 #------------------------------------------
-sub addRepositories {
+sub addRepositories_legacy {
 	# ...
 	# Add a repository section to the current list of
 	# repos and update repositNodeList accordingly.
@@ -4183,12 +4185,13 @@ sub getArchiveList {
 }
 
 #==========================================
-# getRepoNodeList
+# getRepoNodeList_legacy
 #------------------------------------------
-sub getRepoNodeList {
+sub getRepoNodeList_legacy {
 	# ...
 	# Return the current <repository> list which consists
 	# of XML::LibXML::Element object pointers
+	# TODO: This method is to be eliminated when we move to the new data model
 	# ---
 	my $this = shift;
 	return $this->{repositNodeList};
@@ -5069,7 +5072,7 @@ sub __updateDescriptionFromChangeSet {
 	# 1) merge/update repositories
 	#------------------------------------------
 	if ($changeset->{repositories}) {
-		$this -> ignoreRepositories();
+		$this -> ignoreRepositories_legacy();
 		$kiwi -> info ("Updating repository node(s):");
 		# 1) add those repos which are marked as fixed in the boot xml
 		my @node = $repositNodeList -> get_nodelist();
@@ -5084,7 +5087,9 @@ sub __updateDescriptionFromChangeSet {
 					-> get_node(1) -> getAttribute ("path");
 				my $alias = $element -> getAttribute("alias");
 				my $prio = $element -> getAttribute("priority");
-				$this -> addRepositories ([$type],[$source],[$alias],[$prio]);
+				$this -> addRepositories_legacy (
+					[$type],[$source],[$alias],[$prio]
+				);
 			}
 		}
 		# 2) add those repos which are part of the changeset
@@ -5095,7 +5100,7 @@ sub __updateDescriptionFromChangeSet {
 			my $prio  = $props->[2];
 			my $user  = $props->[3];
 			my $pass  = $props->[4];
-			$this -> addRepositories (
+			$this -> addRepositories_legacy (
 				[$type],[$source],[$alias],[$prio],[$user],[$pass]
 			);
 		}

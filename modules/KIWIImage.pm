@@ -258,7 +258,7 @@ sub updateDescription {
 	#==========================================
 	# Store repositories
 	#------------------------------------------
-	@node = $src_xml->getRepoNodeList() -> get_nodelist();
+	@node = $src_xml->getRepoNodeList_legacy() -> get_nodelist();
 	foreach my $element (@node) {
 		if (! $src_xml -> __requestedProfile ($element)) {
 			next;
