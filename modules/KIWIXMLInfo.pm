@@ -2,9 +2,9 @@
 # FILE          : KIWIXMLInfo.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2011 SUSE LLC
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -398,7 +398,7 @@ sub __getTree {
 			# sources
 			#------------------------------------------
 			/^sources/       && do {
-				my %repos = $xml -> getRepositories();
+				my %repos = $xml -> getRepositories_legacy();
 				for my $url (keys %repos) {
 					my $source = XML::LibXML::Element -> new("source");
 					$source -> setAttribute ("path","$url");
@@ -621,11 +621,11 @@ sub __xmlSetup {
 	}
 	my $ignore = $this -> {ignoreRepos};
 	if ($ignore) {
-		$xml -> ignoreRepositories ();
+		$xml -> ignoreRepositories_legacy ();
 	}
 	if ($this -> {replRepo}) {
 		my %replRepo = %{$this -> {replRepo}};
-		$xml -> setRepository (
+		$xml -> setRepository_legacy (
 			$replRepo{repositoryType},
 			$replRepo{repository},
 			$replRepo{repositoryAlias},
@@ -634,7 +634,7 @@ sub __xmlSetup {
 	}
 	if ($this -> {addlRepos}) {
 		my %addlRepos = %{$this -> {addlRepos}};
-		$xml -> addRepositories (
+		$xml -> addRepositories_legacy (
 			$addlRepos{repositoryTypes},
 			$addlRepos{repositories},
 			$addlRepos{repositoryAlia},

@@ -2,7 +2,7 @@
 # FILE          : KIWIRoot.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schaefer <ms@suse.de>
 #               :
@@ -83,7 +83,7 @@ sub new {
 		$kiwi -> failed ();
 		return;
 	}
-	my %repository = $xml -> getRepositories();
+	my %repository = $xml -> getRepositories_legacy();
 	if (! %repository) {
 		$kiwi -> error ("No repository specified in XML tree");
 		$kiwi -> failed ();
