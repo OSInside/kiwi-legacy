@@ -92,9 +92,9 @@ sub new {
 	#		repoData = {
 	#			ID[+] {
 	#				alias    = '',
-	#				location = (),
-	#				status   = '',
+	#				path     = '',
 	#				priority = '',
+	#				status   = '',
 	#				...
 	#			}
 	#		}
@@ -260,6 +260,10 @@ sub new {
 	# Populate imageConfig with diver data from config tree
 	#------------------------------------------
 	$this -> __populateDriverInfo();
+	#==========================================
+	# Populate imageConfig with repository data from config tree
+	#------------------------------------------
+	$this -> __populateRepositoryInfo();
 	#==========================================
 	# Read and create profile hash
 	#------------------------------------------
@@ -5904,6 +5908,78 @@ sub __populateProfileInfo {
 		}
 	}
 	$this->{availableProfiles} = \@availableProfiles;
+	return $this;
+}
+
+#==========================================
+# __populateRepositoryInfo
+#------------------------------------------
+sub __populateRepositoryInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# repository data from the XML file.
+	# ---
+	my $this = shift;
+	my @repoNodes = $this->{systemTree} ->getElementsByTagName ('repository');
+	my $idCntr = 1;
+	for my $repoNode (@repoNodes) {
+		my %repoData;
+		my $alias         = $repoNode -> getAttribute ('alias');
+		my $imageinclude  = $repoNode -> getAttribute ('imageinclude');
+		my $password      = $repoNode -> getAttribute ('password');
+		my $path          = $repoNode -> getChildrenByTagName('source')
+									-> get_node(1)
+									-> getAttribute ('path');
+		my $preferlicense = $repoNode -> getAttribute ('prefer-license');
+		my $priority      = $repoNode -> getAttribute ('priority');
+		my $profiles      = $repoNode -> getAttribute ('profiles');
+		my $status        = $repoNode -> getAttribute ('status');
+		my $type          = $repoNode -> getAttribute ('type');
+		my $username      = $repoNode -> getAttribute ('username');
+		if ($alias) {
+			$repoData{alias} = $alias;
+		}
+		if ($imageinclude) {
+			$repoData{imageinclude} = $imageinclude;
+		}
+		if ($password) {
+			$repoData{password} = $password;
+		}
+		if ($path) {
+			$repoData{path} = $path;
+		}
+		if ($preferlicense) {
+			$repoData{preferlicense} = $preferlicense;
+		}
+		if ($priority) {
+			$repoData{priority} = $priority;
+		}
+		if ($status) {
+			$repoData{status} = $status;
+		}
+		if ($type) {
+			$repoData{type} = $type;
+		}
+		if ($username) {
+			$repoData{username} = $username;
+		}
+		if (! $profiles) {
+			$profiles = 'kiwi_default';
+		}
+		my @profNames = split /','/, $profiles;
+		for my $profName (@profNames) {
+			my $repoRef = $this->{imageConfig}->{$profName}->{repoData};
+			if (! $repoRef) {
+				my %repoInfo = ( $idCntr => \%repoData);
+				$this->{imageConfig}->{repoData} = \%repoInfo;
+			} else {
+				my %repoInfo = %{$repoRef};
+				$repoInfo{$idCntr} = \%repoData;
+				$this->{imageConfig}->{repoData} = \%repoInfo;
+			}
+			$idCntr += 1;
+		}
+	}
 	return $this;
 }
 
