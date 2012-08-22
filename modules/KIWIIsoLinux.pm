@@ -776,32 +776,29 @@ sub createHybrid {
 	my $code;
 	my $loop;
 	my $FD;
-
-	my $locator = KIWILocator -> new($kiwi);
-	my $isoHybrid = $locator -> getExecPath('isohybrid');
-
+	my $locator = KIWILocator -> new ($kiwi);
+	my $isoHybrid = $locator -> getExecPath ('isohybrid');
 	if (! $isoHybrid) {
 		$kiwi -> error ("Can't find isohybrid, check your syslinux version");
 		$kiwi -> failed ();
 		return;
 	}
-
-	my @neededOpts = qw(id offset type);
-	my %optNames = %{$locator -> getExecArgsFormat($isoHybrid, \@neededOpts)};
+	my @neededOpts = qw(id offset type partok);
+	my %optNames = %{$locator -> getExecArgsFormat ($isoHybrid, \@neededOpts)};
 	if (! $optNames{'status'}) {
 		$kiwi -> error ($optNames{'error'});
 		$kiwi -> failed ();
 		return;
 	}
-
-	my $idOpt = $optNames{'id'};
+	my $idOpt     = $optNames{'id'};
 	my $offsetOpt = $optNames{'offset'};
-	my $typeOpt = $optNames{'type'};
+	my $typeOpt   = $optNames{'type'};
+	my $partOpt   = $optNames{'partok'};
 	#==========================================
 	# Create partition table on iso
 	#------------------------------------------
 	if ($mbrid) {
-		my $cmd = "$isoHybrid $idOpt $mbrid $typeOpt 0x83 "
+		my $cmd = "$isoHybrid $partOpt $idOpt $mbrid $typeOpt 0x83 "
 		. "$offsetOpt 64 $iso 2>&1";
 		$data = qxx ($cmd)
 	} else {
