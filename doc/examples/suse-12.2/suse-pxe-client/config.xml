@@ -32,8 +32,6 @@
 		<source path="opensuse://12.2/repo/oss/"/>
 	</repository>
 	<packages type="image">
-		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="binutils"/>
 		<package name="file"/>
 		<package name="gawk"/>

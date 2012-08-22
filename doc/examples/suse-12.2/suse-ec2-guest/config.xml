@@ -32,13 +32,13 @@
 		<source path="opensuse://12.2/repo/non-oss"/>
 	</repository>
 	<packages type="image">
-		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
 		<package name="ifplugd"/>
 		<package name="kernel-ec2"/>
 		<package name="kernel-ec2-base"/>
 		<package name="suse-ami-tools"/>
 		<package name="vim"/>
+		<package name="plymouth"/>
 		<package name="xen-tools-domU"/>
 		<package name="xen"/>
 		<package name="grub"/>

@@ -27,13 +27,15 @@
 		<source path="opensuse://12.2/repo/oss/"/>
 	</repository>
 	<packages type="image">
-		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
+
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
 		<package name="kernel-xen" replaces="kernel-ec2"/>
 		<package name="vim"/>
 		<package name="xen-tools"/>
 		<package name="xen"/>
+		<package name="plymouth"/>
 		<opensusePattern name="base"/>
 	</packages>
 	<packages type="bootstrap">
