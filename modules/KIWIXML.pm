@@ -282,7 +282,7 @@ sub new {
 	#==========================================
 	# Populate default profiles from XML if set
 	#------------------------------------------
-	$this -> __populateDefaultProfiles();
+	$this -> __populateDefaultProfiles_legacy();
 	#==========================================
 	# Populate typeInfo hash
 	#------------------------------------------
@@ -290,7 +290,7 @@ sub new {
 	#==========================================
 	# Check profile names
 	#------------------------------------------
-	if (! $this -> __checkProfiles()) {
+	if (! $this -> __checkProfiles_legacy()) {
 		return;
 	}
 	#==========================================
@@ -323,10 +323,478 @@ sub new {
 	#==========================================
 	# Dump imageConfig to log
 	#------------------------------------------
-	# print $this->dumpInternalXMLDescription;
+	# print $this->__dumpInternalXMLDescription;
 	return $this;
 }
 
+#==========================================
+# Methods that use the "new" imageConfig data structure
+# These are replcements for "old" methods and represent the
+# eventual interface of this object
+#------------------------------------------
+#==========================================
+# addDrivers
+#------------------------------------------
+sub addDrivers {
+	# ...
+	# Add the given drivers to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	# ---
+	my $this      = shift;
+	my $drivers   = shift;
+	my $profNames = shift;
+	my $kiwi = $this->{kiwi};
+	#==========================================
+	# Verify arguments
+	#------------------------------------------
+	if (! $drivers) {
+		$kiwi -> info ('addDrivers: no drivers specified, nothing to do');
+		$kiwi -> skipped ();
+		return $this;
+	}
+	if ( ref($drivers) ne 'ARRAY' ) {
+		my $msg = 'addDrivers: expecting array ref for XMLDriverData array '
+			. 'as first argument';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# Remeber drivers to add + verify the type
+	#------------------------------------------
+	my @drvsToAdd = @{$drivers};
+	for my $drv (@drvsToAdd) {
+		if ( ref($drv) ne 'KIWIXMLDriverData' ) {
+			my $msg = 'addDrivers: found list item not of type '
+				. 'KIWIXMLDriverData in driver list';
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
+			return;
+		}
+	}
+	#==========================================
+	# Figure out what profiles to change
+	#------------------------------------------
+	my @profsToUse;
+	if ($profNames) {
+		# operate on value of profile argument
+		if ( ref($profNames) eq 'ARRAY' ) {
+			# Multiple profiles, verify that all names are valid
+			my $msg = 'Attempting to add drivers to "PROF_NAME", but '
+				. 'this profile is not specified in the configuration.';
+			if (! $this -> __verifyProfNames($profNames, $msg)) {
+				return;
+			}
+			@profsToUse = @{$profNames};
+		} elsif ($profNames eq 'default') {
+			# Only the default profile is affected by change
+			@profsToUse = ('kiwi_default');
+		}
+	} else {
+		# No profile argument was given, operate on the currently
+		# active profiles (minus kiwi_default)
+		my @selected = @{$this->{selectedProfiles}};
+		for my $prof (@selected) {
+			if ($prof eq 'kiwi_default') {
+				next;
+			}
+			push @profsToUse, $prof;
+		}
+	}
+	for my $prof (@profsToUse) {
+		for my $drvData (@drvsToAdd) {
+			my $arch = $drvData -> getArch();
+			my $name = $drvData -> getName();
+			if ($arch) {
+				if ($this->{imageConfig}->{$prof}->{$arch} &&
+					$this->{imageConfig}->{$prof}->{$arch}{drivers}) {
+					my @existDrv = 
+						@{$this->{imageConfig}->{$prof}->{$arch}{drivers}};
+					push @existDrv, $name;
+					$this->{imageConfig}->{$prof}->{$arch}{drivers} =
+						\@existDrv;
+				} else {
+					my @newDrv = ($name);
+					$this->{imageConfig}->{$prof}->{$arch}{drivers} = \@newDrv;
+				}
+			} else {
+				if ($this->{imageConfig}->{$prof}{drivers}) {
+					my @existDrv = @{$this->{imageConfig}->{$prof}{drivers}};
+					push @existDrv, $name;
+					$this->{imageConfig}->{$prof}{drivers} =  \@existDrv;
+				} else {
+					my @newDrv = ($name);
+					$this->{imageConfig}->{$prof}{drivers} = \@newDrv;
+				}
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# getDescriptionInfo
+#------------------------------------------
+sub getDescriptionInfo {
+	# ...
+	# Return an object that encapsulates the description information
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $descriptObj = KIWIXMLDescriptionData -> new (
+		$kiwi,$this->{imageConfig}->{description}
+	);
+	return $descriptObj;
+}
+
+#==========================================
+# getDrivers
+#------------------------------------------
+sub getDrivers {
+	# ...
+	# Return a list reference of KIWIXMLDriverData objects that are
+	# specified to be part of the current profile and architecture
+	# ---
+	my $this = shift;
+	my $arch = $this->{arch};
+	my $kiwi = $this->{kiwi};
+	my @activeProfs = @{$this->{selectedProfiles}};
+	my @drvs = ();
+	for my $prof (@activeProfs) {
+		if ($this->{imageConfig}->{$prof}{drivers}) {
+			push @drvs, @{$this->{imageConfig}->{$prof}{drivers}};
+		}
+		if ($this->{imageConfig}{$prof}{$arch}{drivers}) {
+			push @drvs, @{$this->{imageConfig}->{$prof}->{$arch}{drivers}};
+		}
+	}
+	my @driverInfo = ();
+	for my $drv (@drvs) {
+		push @driverInfo, KIWIXMLDriverData -> new($kiwi, $drv);
+	}
+	return \@driverInfo;
+}
+
+#==========================================
+# getProfiles
+#------------------------------------------
+sub getProfiles {
+	# ...
+	# Return a list of profiles available for this image
+	# ---
+	my $this   = shift;
+	my %imgConf = %{ $this->{imageConfig} };
+	my @result;
+	for my $prof (@{$this->{availableProfiles}}) {
+		my %profile = ();
+		$profile{name}        = $prof;
+		$profile{description} = $imgConf{$prof}->{profInfo}->{description};
+		$profile{include}     = $imgConf{$prof}->{profInfo}->{import};
+		push @result, { %profile };
+	}
+	return @result;
+}
+
+#==========================================
+# setDescriptionInfo
+#------------------------------------------
+sub setDescriptionInfo {
+	# ...
+	# Set the description information for this configuration
+	# ---
+	my $this              = shift;
+	my $xmlDescripDataObj = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $xmlDescripDataObj ||
+		ref($xmlDescripDataObj) ne 'KIWIXMLDescriptionData') {
+		my $msg = 'setDescriptionInfo: Expecting KIWIXMLDescriptionData '
+			. 'instance as argument.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my $author = $xmlDescripDataObj->getAuthor();
+	if (! $author) {
+		my $msg = 'setDescriptionInfo: Provided KIWIXMLDescriptionData '
+			. 'instance is not valid.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my %descript = (
+		author        => $author,
+		contact       => $xmlDescripDataObj->getContactInfo(),
+		specification => $xmlDescripDataObj->getSpecificationDescript(),
+		type          => $xmlDescripDataObj->getType
+	);
+	$this->{imageConfig}{description} = \%descript;
+	return $this;
+}
+
+#==========================================
+# Private helper methods
+#------------------------------------------
+#==========================================
+# __dumpInternalXMLDescription
+#------------------------------------------
+sub __dumpInternalXMLDescription {
+	# ...
+	# return the contents of the imageConfig data
+	# structure in a readable format
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	$Data::Dumper::Terse  = 1;
+	$Data::Dumper::Indent = 1;
+	$Data::Dumper::Useqq  = 1;
+	my $dd = Data::Dumper->new([ %{$this->{imageConfig}} ]);
+	my $cd = $dd->Dump;
+	return $cd;
+}
+
+#==========================================
+# __populateDescriptionInfo
+#------------------------------------------
+sub __populateDescriptionInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# description data from the XML file.
+	# ---
+	my $this = shift;
+	my $descrNode = $this->{systemTree}
+		-> getElementsByTagName ('description')
+		-> get_node(1);
+	my $author  = $this
+		-> __getChildNodeTextValue ($descrNode, 'author');
+	my $contact = $this
+		-> __getChildNodeTextValue ($descrNode, 'contact');
+	my $spec    = $this
+		-> __getChildNodeTextValue($descrNode,'specification');
+	my $type    = $descrNode
+		-> getAttribute ('type');
+	my %descript = (
+		author        => $author,
+		contact       => $contact,
+		specification => $spec,
+		type          => $type
+	);
+	$this->{imageConfig}{description} = \%descript;
+	return $this;
+}
+
+#==========================================
+# __populateDriverInfo
+#------------------------------------------
+sub __populateDriverInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# drivers data from the XML file.
+	# ---
+	my $this = shift;
+	my @drvNodes = $this->{systemTree}
+		-> getElementsByTagName ('drivers');
+	for my $drvNode (@drvNodes) {
+		my @drivers = $drvNode -> getElementsByTagName ('file');
+		my %archDrvs;
+		my @drvNames;
+		for my $drv (@drivers) {
+			my $name = $drv -> getAttribute('name');
+			my $arch = $drv -> getAttribute('arch');
+			if (! $arch) {
+				push @drvNames, $name
+			} else {
+				if (defined $archDrvs{$arch}) {
+					my @dLst = @{$archDrvs{$arch}};
+					push @dLst, $name;
+					$archDrvs{$arch} = \@dLst;
+				} else {
+					my @dLst = ($name, );
+					$archDrvs{$arch} = \@dLst;
+				}
+			}
+		}
+		my @pNameLst = ('kiwi_default');
+		my $profNames = $drvNode -> getAttribute('profiles');
+		if ($profNames) {
+			@pNameLst = split /,/, $profNames;
+		}
+		for my $profName (@pNameLst) {
+			my $drivers = $this->{imageConfig}
+				->{$profName}->{drivers};
+			if (defined $drivers) {
+				my @dLst = @{$this->{imageConfig}->{$profName}->{drivers}};
+				push @dLst, @drvNames;
+				$this->{imageConfig}->{$profName}->{drivers} = \@dLst;
+			} else {
+				$this->{imageConfig}->{$profName}->{drivers} = \@drvNames;
+			}
+			for my $arch (keys %archDrvs) {
+				my $drivers = $this->{imageConfig}
+					->{$profName}->{$arch}->{drivers};
+				if (defined $drivers) {
+					my @dLst = @{$this->{imageConfig}
+						->{$profName}->{$arch}->{drivers}};
+					my @archLst = @{$archDrvs{$arch}};
+					push @dLst, @archLst;
+					$this->{imageConfig}->{$profName}
+						->{$arch}->{drivers} =	\@dLst;
+				} else {
+					$this->{imageConfig}->{$profName}
+						->{$arch}->{drivers} =	$archDrvs{$arch};
+				}
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# __populateProfileInfo
+#------------------------------------------
+sub __populateProfileInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# profile data from the XML file.
+	# ---
+	my $this = shift;
+	my @profNodes = $this->{systemTree} -> getElementsByTagName ('profile');
+	if (! @profNodes ) {
+		return $this;
+	}
+	my @availableProfiles;
+	for my $element (@profNodes) {
+		# Extract attributes
+		my $descript = $element -> getAttribute ('description');
+		my $import = $element -> getAttribute ('import');
+		if (! defined $import) {
+			$import = 'false'
+		}
+		my $profName = $element -> getAttribute ('name');
+		push @availableProfiles, $profName;
+		# Insert into internal data structure
+		my %profile = (
+			'description' => $descript,
+			'import'      => $import
+		);
+		$this->{imageConfig}{$profName}{profInfo} = \%profile;
+		# Handle default profile setting
+		if ( $import eq 'true') {
+			my @profs = ('kiwi_default', $profName);
+			$this->{selectedProfiles} = \@profs;
+		}
+	}
+	$this->{availableProfiles} = \@availableProfiles;
+	return $this;
+}
+
+#==========================================
+# __populateRepositoryInfo
+#------------------------------------------
+sub __populateRepositoryInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# repository data from the XML file.
+	# ---
+	my $this = shift;
+	my @repoNodes = $this->{systemTree} ->getElementsByTagName ('repository');
+	my $idCntr = 1;
+	for my $repoNode (@repoNodes) {
+		my %repoData;
+		my $alias         = $repoNode -> getAttribute ('alias');
+		my $imageinclude  = $repoNode -> getAttribute ('imageinclude');
+		my $password      = $repoNode -> getAttribute ('password');
+		my $path          = $repoNode -> getChildrenByTagName('source')
+									-> get_node(1)
+									-> getAttribute ('path');
+		my $preferlicense = $repoNode -> getAttribute ('prefer-license');
+		my $priority      = $repoNode -> getAttribute ('priority');
+		my $profiles      = $repoNode -> getAttribute ('profiles');
+		my $status        = $repoNode -> getAttribute ('status');
+		my $type          = $repoNode -> getAttribute ('type');
+		my $username      = $repoNode -> getAttribute ('username');
+		if ($alias) {
+			$repoData{alias} = $alias;
+		}
+		if ($imageinclude) {
+			$repoData{imageinclude} = $imageinclude;
+		}
+		if ($password) {
+			$repoData{password} = $password;
+		}
+		if ($path) {
+			$repoData{path} = $path;
+		}
+		if ($preferlicense) {
+			$repoData{preferlicense} = $preferlicense;
+		}
+		if ($priority) {
+			$repoData{priority} = $priority;
+		}
+		if ($status) {
+			$repoData{status} = $status;
+		}
+		if ($type) {
+			$repoData{type} = $type;
+		}
+		if ($username) {
+			$repoData{username} = $username;
+		}
+		if (! $profiles) {
+			$profiles = 'kiwi_default';
+		}
+		my @profNames = split /','/, $profiles;
+		for my $profName (@profNames) {
+			my $repoRef = $this->{imageConfig}->{$profName}->{repoData};
+			if (! $repoRef) {
+				my %repoInfo = ( $idCntr => \%repoData);
+				$this->{imageConfig}->{repoData} = \%repoInfo;
+			} else {
+				my %repoInfo = %{$repoRef};
+				$repoInfo{$idCntr} = \%repoData;
+				$this->{imageConfig}->{repoData} = \%repoInfo;
+			}
+			$idCntr += 1;
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# __verifyProfNames
+#------------------------------------------
+sub __verifyProfNames {
+	# ...
+	# Verify that the profile names in the given array ref are available,
+	# if not print the given msg substituting PROF_NAME in the message
+	# with the name that is in violation.
+	# ---
+	my $this  = shift;
+	my $names = shift;
+	my $msg   = shift;
+	my @namesToCheck = @{$names};
+	my %specProfs = map { ($_ => 1 ) } @{$this->{availableProfiles}};
+	for my $name (@namesToCheck) {
+		if ($name eq 'kiwi_default') {
+			next;
+		}
+		if (! $specProfs{$name} ) {
+			my $kiwi = $this->{kiwi};
+			$msg =~ s/PROF_NAME/$name/;
+			$kiwi -> error($msg);
+			$kiwi ->  failed();
+			return;
+		}
+	}
+	return 1;
+}
+#==========================================
+# End "new" methods section
+#------------------------------------------
 #==========================================
 # updateTypeList
 #------------------------------------------
@@ -356,24 +824,6 @@ sub updateXML {
 	my $xmlf = $this->{xmlOrigFile};
 	$kiwi -> storeXML ( $xmlu,$xmlf );
 	return $this;
-}
-
-#==========================================
-# dumpInternalXMLDescription
-#------------------------------------------
-sub dumpInternalXMLDescription {
-	# ...
-	# return the contents of the imageConfig data
-	# structure in a readable format
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	$Data::Dumper::Terse  = 1;
-	$Data::Dumper::Indent = 1;
-	$Data::Dumper::Useqq  = 1;
-	my $dd = Data::Dumper->new([ %{$this->{imageConfig}} ]);
-	my $cd = $dd->Dump;
-	return $cd;
 }
 
 #==========================================
@@ -450,21 +900,6 @@ sub getDefaultPrebuiltDir {
 	my $node = $this -> __getPreferencesNodeByTagName ('defaultprebuilt');
 	my $imgDir = $node -> getElementsByTagName ('defaultprebuilt');
 	return $imgDir;
-}
-
-#==========================================
-# getDescriptionInfo
-#------------------------------------------
-sub getDescriptionInfo {
-	# ...
-	# Return an object that encapsulates the description information
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $descriptObj = KIWIXMLDescriptionData -> new (
-		$kiwi,$this->{imageConfig}->{description}
-	);
-	return $descriptObj;
 }
 
 #==========================================
@@ -1178,41 +1613,6 @@ sub setArch {
 	return $this;
 }
 
-#==========================================
-# setDescriptionInfo
-#------------------------------------------
-sub setDescriptionInfo {
-	# ...
-	# Set the description information for this configuration
-	# ---
-	my $this              = shift;
-	my $xmlDescripDataObj = shift;
-	my $kiwi = $this->{kiwi};
-	if (! $xmlDescripDataObj ||
-		ref($xmlDescripDataObj) ne 'KIWIXMLDescriptionData') {
-		my $msg = 'setDescriptionInfo: Expecting KIWIXMLDescriptionData '
-			. 'instance as argument.';
-		$kiwi -> error ($msg);
-		$kiwi -> failed ();
-		return;
-	}
-	my $author = $xmlDescripDataObj->getAuthor();
-	if (! $author) {
-		my $msg = 'setDescriptionInfo: Provided KIWIXMLDescriptionData '
-			. 'instance is not valid.';
-		$kiwi -> error ($msg);
-		$kiwi -> failed ();
-		return;
-	}
-	my %descript = (
-		author        => $author,
-		contact       => $xmlDescripDataObj->getContactInfo(),
-		specification => $xmlDescripDataObj->getSpecificationDescript(),
-		type          => $xmlDescripDataObj->getType
-	);
-	$this->{imageConfig}{description} = \%descript;
-	return $this;
-}
 
 #==========================================
 # setSelectionProfiles
@@ -1866,56 +2266,6 @@ sub getTypes {
 }
 
 #==========================================
-# getProfiles
-#------------------------------------------
-sub getProfiles {
-	# ...
-	# Return a list of profiles available for this image
-	# ---
-	my $this   = shift;
-	my %imgConf = %{ $this->{imageConfig} };
-	my @result;
-	for my $prof (@{$this->{availableProfiles}}) {
-		my %profile = ();
-		$profile{name}        = $prof;
-		$profile{description} = $imgConf{$prof}->{profInfo}->{description};
-		$profile{include}     = $imgConf{$prof}->{profInfo}->{import};
-		push @result, { %profile };
-	}
-	return @result;
-}
-
-#==========================================
-# getProfiles_legacy
-#------------------------------------------
-sub getProfiles_legacy {
-	# ...
-	# Return a list of profiles available for this image
-	# ---
-	my $this   = shift;
-	my @result = ();
-	if (! defined $this->{profilesNodeList}) {
-		return @result;
-	}
-	my $base = $this->{profilesNodeList} -> get_node(1);
-	if (! defined $base) {
-		return @result;
-	}
-	my @node = $base -> getElementsByTagName ("profile");
-	foreach my $element (@node) {
-		my $name = $element -> getAttribute ("name");
-		my $desc = $element -> getAttribute ("description");
-		my $incl = $element -> getAttribute ("import");
-		my %profile = ();
-		$profile{name} = $name;
-		$profile{description} = $desc;
-		$profile{include} = $incl;
-		push @result, { %profile };
-	}
-	return @result;
-}
-
-#==========================================
 # getInstSourceRepository
 #------------------------------------------
 sub getInstSourceRepository {
@@ -2146,354 +2496,8 @@ sub getInstSourceMetaFiles {
 	return %result;
 }
 
-#==========================================
-# getRepositories_legacy
-#------------------------------------------
-sub getRepositories_legacy {
-	# ...
-	# Get the repository type used for building
-	# up the physical extend. For information on the available
-	# types refer to the package manager documentation
-	# ---
-	my $this = shift;
-	my @node = $this->{repositNodeList} -> get_nodelist();
-	my %result;
-	foreach my $element (@node) {
-		#============================================
-		# Check to see if node is in included profile
-		#--------------------------------------------
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		#============================================
-		# Store repo information in hash
-		#--------------------------------------------
-		my $type = $element -> getAttribute("type");
-		my $alias= $element -> getAttribute("alias");
-		my $imgincl = $element -> getAttribute("imageinclude");
-		my $prio = $element -> getAttribute("priority");
-		my $user = $element -> getAttribute("username");
-		my $pwd  = $element -> getAttribute("password");
-		my $plic = $element -> getAttribute("prefer-license");
-		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
-		my $source = $this -> __resolveLink ( $stag -> getAttribute ("path") );
-		$result{$source} = [$type,$alias,$prio,$user,$pwd,$plic,$imgincl];
-	}
-	return %result;
-}
 
-#==========================================
-# getHttpsRepositoryCredentials_legacy
-#------------------------------------------
-sub getHttpsRepositoryCredentials_legacy {
-	# ...
-	# If any repository is configered with credentials return the username
-	# and password
-	# TODO: This method is to be deleted with the switch to the new data
-	#       model
-	# ---
-	my $this = shift;
-	my @repoNodes = $this->{repositNodeList} -> get_nodelist();
-	for my $repo (@repoNodes) {
-		my $uname = $repo -> getAttribute('username');
-		my $pass = $repo -> getAttribute('password');
-		if ($uname) {
-			my @sources = $repo -> getElementsByTagName ('source');
-			my $path = $sources[0] -> getAttribute('path');
-			if ( $path =~ /^https:/) {
-				return ($uname, $pass);
-			}
-		}
-	}
-	return;
-}
 
-#==========================================
-# ignoreRepositories_legacy
-#------------------------------------------
-sub ignoreRepositories_legacy {
-	# ...
-	# Ignore all the repositories in the XML file.
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	$kiwi -> info ('Ignoring all repositories previously configured');
-	$kiwi -> done();
-	my @node = $this->{repositNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		$this->{imgnameNodeList}->get_node(1)->removeChild ($element);
-	}
-	$this->{repositNodeList} = 
-		$this->{systemTree}->getElementsByTagName ("repository");
-	$this-> updateXML();
-	return $this;
-}
-
-#==========================================
-# setRepository_legacy
-#------------------------------------------
-sub setRepository_legacy {
-	# ...
-	# Overwerite the first repository that does not have the status
-	# sttribute set to fixed.
-	# ---
-	my $this = shift;
-	my $type = shift;
-	my $path = shift;
-	my $alias= shift;
-	my $prio = shift;
-	my $user = shift;
-	my $pass = shift;
-	my @node = $this->{repositNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		my $status = $element -> getAttribute("status");
-		if ((defined $status) && ($status eq "fixed")) {
-			next;
-		}
-		my $kiwi = $this->{kiwi};
-		my $replRepo = $element -> getElementsByTagName ("source")
-			-> get_node(1) -> getAttribute ("path");
-		$kiwi -> info ("Replacing repository $replRepo");
-		$kiwi -> done();
-		if (defined $type) {
-			$element -> setAttribute ("type",$type);
-		}
-		if (defined $path) {
-			$element -> getElementsByTagName ("source")
-				-> get_node (1) -> setAttribute ("path",$path);
-		}
-		if (defined $alias) {
-			$element -> setAttribute ("alias",$alias);
-		}
-		if ((defined $prio) && ($prio != 0)) {
-			$element -> setAttribute ("priority",$prio);
-		}
-		if ((defined $user) && (defined $pass)) {
-			$element -> setAttribute ("username",$user);
-			$element -> setAttribute ("password",$pass);
-		}
-		last;
-	}
-	$this -> createURLList();
-	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
-# addRepositories_legacy
-#------------------------------------------
-sub addRepositories_legacy {
-	# ...
-	# Add a repository section to the current list of
-	# repos and update repositNodeList accordingly.
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my @type = @{$_[0]};
-	my @path = @{$_[1]};
-	my @alias;
-	my @prio;
-	my @user;
-	my @pass;
-	if ($_[2]) {
-		@alias= @{$_[2]};
-	}
-	if ($_[3]) {
-		@prio = @{$_[3]};
-	}
-	if ($_[4]) {
-		@user = @{$_[4]};
-	}
-	if ($_[5]) {
-		@pass = @{$_[5]};
-	}
-	my @supportedTypes = (
-		'rpm-dir','rpm-md', 'yast2',
-		'apt-deb','apt-rpm','deb-dir',
-		'mirrors','red-carpet','slack-site',
-		'up2date-mirrors','urpmi'
-	);
-	foreach my $path (@path) {
-		my $type = shift @type;
-		my $alias= shift @alias;
-		my $prio = shift @prio;
-		my $user = shift @user;
-		my $pass = shift @pass;
-		if (! defined $type) {
-			$kiwi -> error   ("No type for repo [$path] specified");
-			$kiwi -> skipped ();
-			next;
-		}
-		if (! grep { /$type/x } @supportedTypes ) {
-			my $msg = "Addition of requested repo type [$type] not supported";
-			$kiwi -> error ($msg);
-			$kiwi -> skipped ();
-			next;
-		}
-		my $addrepo = new XML::LibXML::Element ("repository");
-		$addrepo -> setAttribute ("type",$type);
-		$addrepo -> setAttribute ("status","fixed");
-		if (defined $alias) {
-			$addrepo -> setAttribute ("alias",$alias);
-		}
-		if ((defined $prio) && ($prio != 0)) {
-			$addrepo -> setAttribute ("priority",$prio);
-		}
-		if ((defined $user) && (defined $pass)) {
-			$addrepo -> setAttribute ("username",$user);
-			$addrepo -> setAttribute ("password",$pass);
-		}
-		my $addsrc  = new XML::LibXML::Element ("source");
-		$addsrc -> setAttribute ("path",$path);
-		$addrepo -> appendChild ($addsrc);
-		$this->{imgnameNodeList}->get_node(1)->appendChild ($addrepo);
-	}
-	$this->{repositNodeList} =
-		$this->{systemTree}->getElementsByTagName ("repository");
-	$this -> createURLList();
-	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
-# addDrivers
-#------------------------------------------
-sub addDrivers {
-	# ...
-	# Add the given drivers to
-	#   - the currently active profiles (not default)
-	#       ~ if the second argument is undefined
-	#   - the default profile
-	#       ~ if second argument is the keyword "default"
-	#   - the specified profiles
-	#       ~ if the second argument is a reference to an array
-	# ---
-	my $this      = shift;
-	my $drivers   = shift;
-	my $profNames = shift;
-	my $kiwi = $this->{kiwi};
-	#==========================================
-	# Verify arguments
-	#------------------------------------------
-	if (! $drivers) {
-		$kiwi -> info ('addDrivers: no drivers specified, nothing to do');
-		$kiwi -> skipped ();
-		return $this;
-	}
-	if ( ref($drivers) ne 'ARRAY' ) {
-		my $msg = 'addDrivers: expecting array ref for XMLDriverData array '
-			. 'as first argument';
-		$kiwi -> error ($msg);
-		$kiwi -> failed ();
-		return;
-	}
-	#==========================================
-	# Remeber drivers to add + verify the type
-	#------------------------------------------
-	my @drvsToAdd = @{$drivers};
-	for my $drv (@drvsToAdd) {
-		if ( ref($drv) ne 'KIWIXMLDriverData' ) {
-			my $msg = 'addDrivers: found list item not of type '
-				. 'KIWIXMLDriverData in driver list';
-			$kiwi -> error ($msg);
-			$kiwi -> failed ();
-			return;
-		}
-	}
-	#==========================================
-	# Figure out what profiles to change
-	#------------------------------------------
-	my @profsToUse;
-	if ($profNames) {
-		# operate on value of profile argument
-		if ( ref($profNames) eq 'ARRAY' ) {
-			# Multiple profiles, verify that all names are valid
-			my $msg = 'Attempting to add drivers to "PROF_NAME", but '
-				. 'this profile is not specified in the configuration.';
-			if (! $this -> __verifyProfNames($profNames, $msg)) {
-				return;
-			}
-			@profsToUse = @{$profNames};
-		} elsif ($profNames eq 'default') {
-			# Only the default profile is affected by change
-			@profsToUse = ('kiwi_default');
-		}
-	} else {
-		# No profile argument was given, operate on the currently
-		# active profiles (minus kiwi_default)
-		my @selected = @{$this->{selectedProfiles}};
-		for my $prof (@selected) {
-			if ($prof eq 'kiwi_default') {
-				next;
-			}
-			push @profsToUse, $prof;
-		}
-	}
-	for my $prof (@profsToUse) {
-		for my $drvData (@drvsToAdd) {
-			my $arch = $drvData -> getArch();
-			my $name = $drvData -> getName();
-			if ($arch) {
-				if ($this->{imageConfig}->{$prof}->{$arch} &&
-					$this->{imageConfig}->{$prof}->{$arch}{drivers}) {
-					my @existDrv = 
-						@{$this->{imageConfig}->{$prof}->{$arch}{drivers}};
-					push @existDrv, $name;
-					$this->{imageConfig}->{$prof}->{$arch}{drivers} =
-						\@existDrv;
-				} else {
-					my @newDrv = ($name);
-					$this->{imageConfig}->{$prof}->{$arch}{drivers} = \@newDrv;
-				}
-			} else {
-				if ($this->{imageConfig}->{$prof}{drivers}) {
-					my @existDrv = @{$this->{imageConfig}->{$prof}{drivers}};
-					push @existDrv, $name;
-					$this->{imageConfig}->{$prof}{drivers} =  \@existDrv;
-				} else {
-					my @newDrv = ($name);
-					$this->{imageConfig}->{$prof}{drivers} = \@newDrv;
-				}
-			}
-		}
-	}
-	return $this;
-}
-
-#==========================================
-# addDrivers_legacy
-#------------------------------------------
-sub addDrivers_legacy {
-	# ...
-	# Add the given driver list to the specified drivers
-	# section of the xml description parse tree.
-	# ----
-	my $this  = shift;
-	my @drvs  = @_;
-	my $kiwi  = $this->{kiwi};
-	my $nodes = $this->{driversNodeList};
-	my $nodeNumber = -1;
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node = $nodes -> get_node($i);
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		$nodeNumber = $i;
-	}
-	if ($nodeNumber < 0) {
-		$kiwi -> loginfo ("addDrivers: no drivers section found... skipped\n");
-		return $this;
-	}
-	foreach my $driver (@drvs) {
-		next if ($driver eq "");
-		my $addElement = new XML::LibXML::Element ("file");
-		$addElement -> setAttribute("name",$driver);
-		$nodes -> get_node($nodeNumber)
-			-> appendChild ($addElement);
-	}
-	$this -> updateXML();
-	return $this;
-}
 
 #==========================================
 # addStrip
@@ -4184,58 +4188,6 @@ sub getArchiveList {
 	return (@bootarchives,@imagearchive);
 }
 
-#==========================================
-# getRepoNodeList_legacy
-#------------------------------------------
-sub getRepoNodeList_legacy {
-	# ...
-	# Return the current <repository> list which consists
-	# of XML::LibXML::Element object pointers
-	# TODO: This method is to be eliminated when we move to the new data model
-	# ---
-	my $this = shift;
-	return $this->{repositNodeList};
-}
-
-#==========================================
-# getDriversNodeList_legacy
-#------------------------------------------
-sub getDriversNodeList_legacy {
-	# ...
-	# Return a list of all <drivers> nodes. Each list member
-	# is an XML::LibXML::Element object pointer
-	# ---
-	my $this = shift;
-	return $this->{driversNodeList};
-}
-
-#==========================================
-# getDrivers
-#------------------------------------------
-sub getDrivers {
-	# ...
-	# Return a list reference of KIWIXMLDriverData objects that are
-	# specified to be part of the current profile and architecture
-	# ---
-	my $this = shift;
-	my $arch = $this->{arch};
-	my $kiwi = $this->{kiwi};
-	my @activeProfs = @{$this->{selectedProfiles}};
-	my @drvs = ();
-	for my $prof (@activeProfs) {
-		if ($this->{imageConfig}->{$prof}{drivers}) {
-			push @drvs, @{$this->{imageConfig}->{$prof}{drivers}};
-		}
-		if ($this->{imageConfig}{$prof}{$arch}{drivers}) {
-			push @drvs, @{$this->{imageConfig}->{$prof}->{$arch}{drivers}};
-		}
-	}
-	my @driverInfo = ();
-	for my $drv (@drvs) {
-		push @driverInfo, KIWIXMLDriverData -> new($kiwi, $drv);
-	}
-	return \@driverInfo;
-}
 
 #==========================================
 # getStripNodeList
@@ -4789,6 +4741,572 @@ sub hasDefaultPackages {
 }
 
 #==========================================
+# Methods to using "old" data structure that are to be
+# eliminated or replaced
+#------------------------------------------
+#==========================================
+# addDrivers_legacy
+#------------------------------------------
+sub addDrivers_legacy {
+	# ...
+	# Add the given driver list to the specified drivers
+	# section of the xml description parse tree.
+	# ----
+	my $this  = shift;
+	my @drvs  = @_;
+	my $kiwi  = $this->{kiwi};
+	my $nodes = $this->{driversNodeList};
+	my $nodeNumber = -1;
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node = $nodes -> get_node($i);
+		if (! $this -> __requestedProfile ($node)) {
+			next;
+		}
+		$nodeNumber = $i;
+	}
+	if ($nodeNumber < 0) {
+		$kiwi -> loginfo ("addDrivers: no drivers section found... skipped\n");
+		return $this;
+	}
+	foreach my $driver (@drvs) {
+		next if ($driver eq "");
+		my $addElement = new XML::LibXML::Element ("file");
+		$addElement -> setAttribute("name",$driver);
+		$nodes -> get_node($nodeNumber)
+			-> appendChild ($addElement);
+	}
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# getProfiles_legacy
+#------------------------------------------
+sub getProfiles_legacy {
+	# ...
+	# Return a list of profiles available for this image
+	# ---
+	my $this   = shift;
+	my @result = ();
+	if (! defined $this->{profilesNodeList}) {
+		return @result;
+	}
+	my $base = $this->{profilesNodeList} -> get_node(1);
+	if (! defined $base) {
+		return @result;
+	}
+	my @node = $base -> getElementsByTagName ("profile");
+	foreach my $element (@node) {
+		my $name = $element -> getAttribute ("name");
+		my $desc = $element -> getAttribute ("description");
+		my $incl = $element -> getAttribute ("import");
+		my %profile = ();
+		$profile{name} = $name;
+		$profile{description} = $desc;
+		$profile{include} = $incl;
+		push @result, { %profile };
+	}
+	return @result;
+}
+
+#==========================================
+# getRepositories_legacy
+#------------------------------------------
+sub getRepositories_legacy {
+	# ...
+	# Get the repository type used for building
+	# up the physical extend. For information on the available
+	# types refer to the package manager documentation
+	# ---
+	my $this = shift;
+	my @node = $this->{repositNodeList} -> get_nodelist();
+	my %result;
+	foreach my $element (@node) {
+		#============================================
+		# Check to see if node is in included profile
+		#--------------------------------------------
+		if (! $this -> __requestedProfile ($element)) {
+			next;
+		}
+		#============================================
+		# Store repo information in hash
+		#--------------------------------------------
+		my $type = $element -> getAttribute("type");
+		my $alias= $element -> getAttribute("alias");
+		my $imgincl = $element -> getAttribute("imageinclude");
+		my $prio = $element -> getAttribute("priority");
+		my $user = $element -> getAttribute("username");
+		my $pwd  = $element -> getAttribute("password");
+		my $plic = $element -> getAttribute("prefer-license");
+		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
+		my $source = $this -> __resolveLink ( $stag -> getAttribute ("path") );
+		$result{$source} = [$type,$alias,$prio,$user,$pwd,$plic,$imgincl];
+	}
+	return %result;
+}
+
+#==========================================
+# getHttpsRepositoryCredentials_legacy
+#------------------------------------------
+sub getHttpsRepositoryCredentials_legacy {
+	# ...
+	# If any repository is configered with credentials return the username
+	# and password
+	# TODO: This method is to be deleted with the switch to the new data
+	#       model
+	# ---
+	my $this = shift;
+	my @repoNodes = $this->{repositNodeList} -> get_nodelist();
+	for my $repo (@repoNodes) {
+		my $uname = $repo -> getAttribute('username');
+		my $pass = $repo -> getAttribute('password');
+		if ($uname) {
+			my @sources = $repo -> getElementsByTagName ('source');
+			my $path = $sources[0] -> getAttribute('path');
+			if ( $path =~ /^https:/) {
+				return ($uname, $pass);
+			}
+		}
+	}
+	return;
+}
+
+#==========================================
+# ignoreRepositories_legacy
+#------------------------------------------
+sub ignoreRepositories_legacy {
+	# ...
+	# Ignore all the repositories in the XML file.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	$kiwi -> info ('Ignoring all repositories previously configured');
+	$kiwi -> done();
+	my @node = $this->{repositNodeList} -> get_nodelist();
+	foreach my $element (@node) {
+		$this->{imgnameNodeList}->get_node(1)->removeChild ($element);
+	}
+	$this->{repositNodeList} = 
+		$this->{systemTree}->getElementsByTagName ("repository");
+	$this-> updateXML();
+	return $this;
+}
+
+#==========================================
+# setRepository_legacy
+#------------------------------------------
+sub setRepository_legacy {
+	# ...
+	# Overwerite the first repository that does not have the status
+	# sttribute set to fixed.
+	# ---
+	my $this = shift;
+	my $type = shift;
+	my $path = shift;
+	my $alias= shift;
+	my $prio = shift;
+	my $user = shift;
+	my $pass = shift;
+	my @node = $this->{repositNodeList} -> get_nodelist();
+	foreach my $element (@node) {
+		my $status = $element -> getAttribute("status");
+		if ((defined $status) && ($status eq "fixed")) {
+			next;
+		}
+		my $kiwi = $this->{kiwi};
+		my $replRepo = $element -> getElementsByTagName ("source")
+			-> get_node(1) -> getAttribute ("path");
+		$kiwi -> info ("Replacing repository $replRepo");
+		$kiwi -> done();
+		if (defined $type) {
+			$element -> setAttribute ("type",$type);
+		}
+		if (defined $path) {
+			$element -> getElementsByTagName ("source")
+				-> get_node (1) -> setAttribute ("path",$path);
+		}
+		if (defined $alias) {
+			$element -> setAttribute ("alias",$alias);
+		}
+		if ((defined $prio) && ($prio != 0)) {
+			$element -> setAttribute ("priority",$prio);
+		}
+		if ((defined $user) && (defined $pass)) {
+			$element -> setAttribute ("username",$user);
+			$element -> setAttribute ("password",$pass);
+		}
+		last;
+	}
+	$this -> createURLList();
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# addRepositories_legacy
+#------------------------------------------
+sub addRepositories_legacy {
+	# ...
+	# Add a repository section to the current list of
+	# repos and update repositNodeList accordingly.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @type = @{$_[0]};
+	my @path = @{$_[1]};
+	my @alias;
+	my @prio;
+	my @user;
+	my @pass;
+	if ($_[2]) {
+		@alias= @{$_[2]};
+	}
+	if ($_[3]) {
+		@prio = @{$_[3]};
+	}
+	if ($_[4]) {
+		@user = @{$_[4]};
+	}
+	if ($_[5]) {
+		@pass = @{$_[5]};
+	}
+	my @supportedTypes = (
+		'rpm-dir','rpm-md', 'yast2',
+		'apt-deb','apt-rpm','deb-dir',
+		'mirrors','red-carpet','slack-site',
+		'up2date-mirrors','urpmi'
+	);
+	foreach my $path (@path) {
+		my $type = shift @type;
+		my $alias= shift @alias;
+		my $prio = shift @prio;
+		my $user = shift @user;
+		my $pass = shift @pass;
+		if (! defined $type) {
+			$kiwi -> error   ("No type for repo [$path] specified");
+			$kiwi -> skipped ();
+			next;
+		}
+		if (! grep { /$type/x } @supportedTypes ) {
+			my $msg = "Addition of requested repo type [$type] not supported";
+			$kiwi -> error ($msg);
+			$kiwi -> skipped ();
+			next;
+		}
+		my $addrepo = new XML::LibXML::Element ("repository");
+		$addrepo -> setAttribute ("type",$type);
+		$addrepo -> setAttribute ("status","fixed");
+		if (defined $alias) {
+			$addrepo -> setAttribute ("alias",$alias);
+		}
+		if ((defined $prio) && ($prio != 0)) {
+			$addrepo -> setAttribute ("priority",$prio);
+		}
+		if ((defined $user) && (defined $pass)) {
+			$addrepo -> setAttribute ("username",$user);
+			$addrepo -> setAttribute ("password",$pass);
+		}
+		my $addsrc  = new XML::LibXML::Element ("source");
+		$addsrc -> setAttribute ("path",$path);
+		$addrepo -> appendChild ($addsrc);
+		$this->{imgnameNodeList}->get_node(1)->appendChild ($addrepo);
+	}
+	$this->{repositNodeList} =
+		$this->{systemTree}->getElementsByTagName ("repository");
+	$this -> createURLList();
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# getRepoNodeList_legacy
+#------------------------------------------
+sub getRepoNodeList_legacy {
+	# ...
+	# Return the current <repository> list which consists
+	# of XML::LibXML::Element object pointers
+	# TODO: This method is to be eliminated when we move to the new data model
+	# ---
+	my $this = shift;
+	return $this->{repositNodeList};
+}
+
+#==========================================
+# getDriversNodeList_legacy
+#------------------------------------------
+sub getDriversNodeList_legacy {
+	# ...
+	# Return a list of all <drivers> nodes. Each list member
+	# is an XML::LibXML::Element object pointer
+	# ---
+	my $this = shift;
+	return $this->{driversNodeList};
+}
+
+#==========================================
+# __populateProfiles_legacy
+#------------------------------------------
+sub __populateProfiles_legacy {
+	# ...
+	# import profiles section if specified
+	# ---
+	my $this     = shift;
+	my %result   = ();
+	my @profiles = $this -> getProfiles_legacy();
+	foreach my $profile (@profiles) {
+		if ($profile->{include}) {
+			$result{$profile->{name}} = "$profile->{include}";
+		} else {
+			$result{$profile->{name}} = "false";
+		}
+	}
+	return \%result;
+}
+
+#==========================================
+# __populateTypeInfo_legacy
+#------------------------------------------
+sub __populateTypeInfo_legacy {
+	# ...
+	# Extract the information contained in the <type> elements
+	# and store the type descriptions in a list of hash references
+	# ---
+	# list = (
+	#   {
+	#      'key' => 'value'
+	#      'key' => 'value'
+	#   },
+	#   {
+	#      'key' => 'value'
+	#      'key' => 'value'
+	#   }
+	# )
+	# ---
+	#
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $cmdL   = $this->{cmdL};
+	my $urlhd  = new KIWIURL ($kiwi,$cmdL);
+	my @node   = $this->{optionsNodeList} -> get_nodelist();
+	my @result = ();
+	my $first  = 1;
+	#==========================================
+	# select types
+	#------------------------------------------
+	foreach my $element (@node) {
+		my @types    = $element -> getElementsByTagName ("type");
+		my $profiles = $element -> getAttribute("profiles");
+		my @assigned = ("all");
+		if ($profiles) {
+			@assigned = split (/,/,$profiles);
+		}
+		foreach my $node (@types) {
+			my %record = ();
+			my $prim   = $node -> getAttribute("primary");
+			if (! defined $prim) {
+				$record{primary} = "false";
+			} else {
+				$record{primary} = $prim;
+			}
+			my $disk = $node->getElementsByTagName("systemdisk")->get_node(1);
+			#==========================================
+			# meta data
+			#------------------------------------------
+			$record{first}    = $first;
+			$record{node}     = $node;
+			$record{assigned} = \@assigned;
+			$first = 0;
+			#==========================================
+			# type attributes
+			#------------------------------------------
+			$record{type}          = $node
+				-> getAttribute("image");
+			$record{fsmountoptions}= $node
+				-> getAttribute("fsmountoptions");
+			$record{luks}          = $node
+				-> getAttribute("luks");
+			$record{cmdline}       = $node
+				-> getAttribute("kernelcmdline");
+			$record{compressed}    = $node
+				-> getAttribute("compressed");
+			$record{boot}          = $node
+				-> getAttribute("boot");
+			$record{bootpartsize}  = $node
+				-> getAttribute("bootpartsize");
+			$record{volid}         = $node
+				-> getAttribute("volid");
+			$record{flags}         = $node
+				-> getAttribute("flags");
+			$record{hybrid}        = $node
+				-> getAttribute("hybrid");
+			$record{format}        = $node
+				-> getAttribute("format");
+			$record{installiso}    = $node
+				-> getAttribute("installiso");
+			$record{installstick}  = $node
+				-> getAttribute("installstick");
+			$record{vga}           = $node
+				-> getAttribute("vga");
+			$record{bootloader}    = $node
+				-> getAttribute("bootloader");
+			$record{devicepersistency} = $node
+				-> getAttribute("devicepersistency");
+			$record{boottimeout}   = $node
+				-> getAttribute("boottimeout");
+			$record{installboot}   = $node
+				-> getAttribute("installboot");
+			$record{installprovidefailsafe} = $node
+				-> getAttribute("installprovidefailsafe");
+			$record{checkprebuilt} = $node
+				-> getAttribute("checkprebuilt");
+			$record{bootprofile}   = $node
+				-> getAttribute("bootprofile");
+			$record{bootkernel}    = $node
+				-> getAttribute("bootkernel");
+			$record{filesystem}    = $node
+				-> getAttribute("filesystem");
+			$record{fsnocheck}     = $node
+				-> getAttribute("fsnocheck");
+			$record{hybridpersistent}  = $node
+				-> getAttribute("hybridpersistent");
+			$record{ramonly}       = $node
+				-> getAttribute("ramonly");
+			if (defined $disk) {
+				$record{lvm} = "true";
+			}
+			if ($record{type} eq "split") {
+				my $filesystemRO = $node -> getAttribute("fsreadonly");
+				my $filesystemRW = $node -> getAttribute("fsreadwrite");
+				if ((defined $filesystemRO) && (defined $filesystemRW)) {
+					$record{filesystem} = "$filesystemRW,$filesystemRO";
+				}
+			}
+			my $bootpath = $urlhd -> normalizeBootPath ($record{boot});
+			if (defined $bootpath) {
+				$record{boot} = $bootpath;
+			}
+			#==========================================
+			# push to list
+			#------------------------------------------
+			push @result,\%record;
+		}
+	}
+	return \@result;
+}
+
+#==========================================
+# __populateDefaultProfiles_legacy
+#------------------------------------------
+sub __populateDefaultProfiles_legacy {
+	# ...
+	# import default profiles if no other profiles
+	# were set on the commandline
+	# ---
+	my $this     = shift;
+	my $kiwi     = $this->{kiwi};
+	my $profiles = $this->{profileHash};
+	my @list     = ();
+	#==========================================
+	# check for profiles already processed
+	#------------------------------------------
+	if ((defined $this->{reqProfiles}) && (@{$this->{reqProfiles}})) {
+		my $info = join (",",@{$this->{reqProfiles}});
+		$kiwi -> info ("Using profile(s): $info");
+		$kiwi -> done ();
+		return $this;
+	}
+	#==========================================
+	# select profiles marked to become included
+	#------------------------------------------
+	foreach my $name (keys %{$profiles}) {
+		if ($profiles->{$name} eq "true") {
+			push @list,$name;
+		}
+	}
+	#==========================================
+	# read default type: bootprofile,bootkernel
+	#------------------------------------------
+	# /.../
+	# read the first <type> element which is always the one and only
+	# type element in a boot image description. The check made here
+	# applies only to boot image descriptions:
+	# ----
+	my $node = $this->{optionsNodeList}
+		-> get_node(1) -> getElementsByTagName ("type") -> get_node(1);
+	if (defined $node) {
+		my $type = $node -> getAttribute("image");
+		if ((defined $type) && ($type eq "cpio")) {
+			my $bootprofile = $node -> getAttribute("bootprofile");
+			my $bootkernel  = $node -> getAttribute("bootkernel");
+			if ($bootprofile) {
+				push @list, split (/,/,$bootprofile);
+			} else {
+				# apply 'default' profile required for boot images
+				push @list, "default";
+			}
+			if ($bootkernel) {
+				push @list, split (/,/,$bootkernel);
+			} else {
+				# apply 'std' kernel profile required for boot images
+				push @list, "std";
+			}
+		}
+	}
+	#==========================================
+	# store list of requested profiles
+	#------------------------------------------
+	if (@list) {
+		my $info = join (",",@list);
+		$kiwi -> info ("Using profile(s): $info");
+		$this -> {reqProfiles} = \@list;
+		$kiwi -> done ();
+	}
+	return $this;
+}
+
+#==========================================
+# __checkProfiles_legacy
+#------------------------------------------
+sub __checkProfiles_legacy {
+	# ...
+	# validate profile names. Wrong profile names are treated
+	# as fatal error because you can't know what the result of
+	# your image would be without the requested profile
+	# ---
+	my $this = shift;
+	my $pref = shift;
+	my $kiwi = $this->{kiwi};
+	my $rref = $this->{reqProfiles};
+	my @prequest;
+	my @profiles = $this -> getProfiles();
+	if (defined $pref) {
+		@prequest = @{$pref};
+	} elsif (defined $rref) {
+		@prequest = @{$rref};
+	}
+	if (@prequest) {
+		foreach my $requested (@prequest) {
+			my $ok = 0;
+			foreach my $profile (@profiles) {
+				if ($profile->{name} eq $requested) {
+					$ok=1; last;
+				}
+			}
+			if (! $ok) {
+				$kiwi -> error  ("Profile $requested: not found");
+				$kiwi -> failed ();
+				return;
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# End "old" methods section
+#------------------------------------------
+
+#==========================================
 # Private helper methods
 #------------------------------------------
 sub __addDefaultStripNode {
@@ -4936,44 +5454,6 @@ sub __addDefaultSplitNode {
 		);
 	}
 	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
-# __checkProfiles
-#------------------------------------------
-sub __checkProfiles {
-	# ...
-	# validate profile names. Wrong profile names are treated
-	# as fatal error because you can't know what the result of
-	# your image would be without the requested profile
-	# ---
-	my $this = shift;
-	my $pref = shift;
-	my $kiwi = $this->{kiwi};
-	my $rref = $this->{reqProfiles};
-	my @prequest;
-	my @profiles = $this -> getProfiles();
-	if (defined $pref) {
-		@prequest = @{$pref};
-	} elsif (defined $rref) {
-		@prequest = @{$rref};
-	}
-	if (@prequest) {
-		foreach my $requested (@prequest) {
-			my $ok = 0;
-			foreach my $profile (@profiles) {
-				if ($profile->{name} eq $requested) {
-					$ok=1; last;
-				}
-			}
-			if (! $ok) {
-				$kiwi -> error  ("Profile $requested: not found");
-				$kiwi -> failed ();
-				return;
-			}
-		}
-	}
 	return $this;
 }
 
@@ -5691,433 +6171,7 @@ sub __requestedProfile {
 	return 0;
 }
 
-#==========================================
-# __populateProfiles_legacy
-#------------------------------------------
-sub __populateProfiles_legacy {
-	# ...
-	# import profiles section if specified
-	# ---
-	my $this     = shift;
-	my %result   = ();
-	my @profiles = $this -> getProfiles_legacy();
-	foreach my $profile (@profiles) {
-		if ($profile->{include}) {
-			$result{$profile->{name}} = "$profile->{include}";
-		} else {
-			$result{$profile->{name}} = "false";
-		}
-	}
-	return \%result;
-}
 
-#==========================================
-# __populateDefaultProfiles
-#------------------------------------------
-sub __populateDefaultProfiles {
-	# ...
-	# import default profiles if no other profiles
-	# were set on the commandline
-	# ---
-	my $this     = shift;
-	my $kiwi     = $this->{kiwi};
-	my $profiles = $this->{profileHash};
-	my @list     = ();
-	#==========================================
-	# check for profiles already processed
-	#------------------------------------------
-	if ((defined $this->{reqProfiles}) && (@{$this->{reqProfiles}})) {
-		my $info = join (",",@{$this->{reqProfiles}});
-		$kiwi -> info ("Using profile(s): $info");
-		$kiwi -> done ();
-		return $this;
-	}
-	#==========================================
-	# select profiles marked to become included
-	#------------------------------------------
-	foreach my $name (keys %{$profiles}) {
-		if ($profiles->{$name} eq "true") {
-			push @list,$name;
-		}
-	}
-	#==========================================
-	# read default type: bootprofile,bootkernel
-	#------------------------------------------
-	# /.../
-	# read the first <type> element which is always the one and only
-	# type element in a boot image description. The check made here
-	# applies only to boot image descriptions:
-	# ----
-	my $node = $this->{optionsNodeList}
-		-> get_node(1) -> getElementsByTagName ("type") -> get_node(1);
-	if (defined $node) {
-		my $type = $node -> getAttribute("image");
-		if ((defined $type) && ($type eq "cpio")) {
-			my $bootprofile = $node -> getAttribute("bootprofile");
-			my $bootkernel  = $node -> getAttribute("bootkernel");
-			if ($bootprofile) {
-				push @list, split (/,/,$bootprofile);
-			} else {
-				# apply 'default' profile required for boot images
-				push @list, "default";
-			}
-			if ($bootkernel) {
-				push @list, split (/,/,$bootkernel);
-			} else {
-				# apply 'std' kernel profile required for boot images
-				push @list, "std";
-			}
-		}
-	}
-	#==========================================
-	# store list of requested profiles
-	#------------------------------------------
-	if (@list) {
-		my $info = join (",",@list);
-		$kiwi -> info ("Using profile(s): $info");
-		$this -> {reqProfiles} = \@list;
-		$kiwi -> done ();
-	}
-	return $this;
-}
-
-#==========================================
-# __populateDescriptionInfo
-#------------------------------------------
-sub __populateDescriptionInfo {
-	# ...
-	# Populate the imageConfig member with the
-	# description data from the XML file.
-	# ---
-	my $this = shift;
-	my $descrNode = $this->{systemTree}
-		-> getElementsByTagName ('description')
-		-> get_node(1);
-	my $author  = $this
-		-> __getChildNodeTextValue ($descrNode, 'author');
-	my $contact = $this
-		-> __getChildNodeTextValue ($descrNode, 'contact');
-	my $spec    = $this
-		-> __getChildNodeTextValue($descrNode,'specification');
-	my $type    = $descrNode
-		-> getAttribute ('type');
-	my %descript = (
-		author        => $author,
-		contact       => $contact,
-		specification => $spec,
-		type          => $type
-	);
-	$this->{imageConfig}{description} = \%descript;
-	return $this;
-}
-
-#==========================================
-# __populateDriverInfo
-#------------------------------------------
-sub __populateDriverInfo {
-	# ...
-	# Populate the imageConfig member with the
-	# drivers data from the XML file.
-	# ---
-	my $this = shift;
-	my @drvNodes = $this->{systemTree}
-		-> getElementsByTagName ('drivers');
-	for my $drvNode (@drvNodes) {
-		my @drivers = $drvNode -> getElementsByTagName ('file');
-		my %archDrvs;
-		my @drvNames;
-		for my $drv (@drivers) {
-			my $name = $drv -> getAttribute('name');
-			my $arch = $drv -> getAttribute('arch');
-			if (! $arch) {
-				push @drvNames, $name
-			} else {
-				if (defined $archDrvs{$arch}) {
-					my @dLst = @{$archDrvs{$arch}};
-					push @dLst, $name;
-					$archDrvs{$arch} = \@dLst;
-				} else {
-					my @dLst = ($name, );
-					$archDrvs{$arch} = \@dLst;
-				}
-			}
-		}
-		my @pNameLst = ('kiwi_default');
-		my $profNames = $drvNode -> getAttribute('profiles');
-		if ($profNames) {
-			@pNameLst = split /,/, $profNames;
-		}
-		for my $profName (@pNameLst) {
-			my $drivers = $this->{imageConfig}
-				->{$profName}->{drivers};
-			if (defined $drivers) {
-				my @dLst = @{$this->{imageConfig}->{$profName}->{drivers}};
-				push @dLst, @drvNames;
-				$this->{imageConfig}->{$profName}->{drivers} = \@dLst;
-			} else {
-				$this->{imageConfig}->{$profName}->{drivers} = \@drvNames;
-			}
-			for my $arch (keys %archDrvs) {
-				my $drivers = $this->{imageConfig}
-					->{$profName}->{$arch}->{drivers};
-				if (defined $drivers) {
-					my @dLst = @{$this->{imageConfig}
-						->{$profName}->{$arch}->{drivers}};
-					my @archLst = @{$archDrvs{$arch}};
-					push @dLst, @archLst;
-					$this->{imageConfig}->{$profName}
-						->{$arch}->{drivers} =	\@dLst;
-				} else {
-					$this->{imageConfig}->{$profName}
-						->{$arch}->{drivers} =	$archDrvs{$arch};
-				}
-			}
-		}
-	}
-	return $this;
-}
-
-#==========================================
-# __populateProfileInfo
-#------------------------------------------
-sub __populateProfileInfo {
-	# ...
-	# Populate the imageConfig member with the
-	# profile data from the XML file.
-	# ---
-	my $this = shift;
-	my @profNodes = $this->{systemTree} -> getElementsByTagName ('profile');
-	if (! @profNodes ) {
-		return $this;
-	}
-	my @availableProfiles;
-	for my $element (@profNodes) {
-		# Extract attributes
-		my $descript = $element -> getAttribute ('description');
-		my $import = $element -> getAttribute ('import');
-		if (! defined $import) {
-			$import = 'false'
-		}
-		my $profName = $element -> getAttribute ('name');
-		push @availableProfiles, $profName;
-		# Insert into internal data structure
-		my %profile = (
-			'description' => $descript,
-			'import'      => $import
-		);
-		$this->{imageConfig}{$profName}{profInfo} = \%profile;
-		# Handle default profile setting
-		if ( $import eq 'true') {
-			my @profs = ('kiwi_default', $profName);
-			$this->{selectedProfiles} = \@profs;
-		}
-	}
-	$this->{availableProfiles} = \@availableProfiles;
-	return $this;
-}
-
-#==========================================
-# __populateRepositoryInfo
-#------------------------------------------
-sub __populateRepositoryInfo {
-	# ...
-	# Populate the imageConfig member with the
-	# repository data from the XML file.
-	# ---
-	my $this = shift;
-	my @repoNodes = $this->{systemTree} ->getElementsByTagName ('repository');
-	my $idCntr = 1;
-	for my $repoNode (@repoNodes) {
-		my %repoData;
-		my $alias         = $repoNode -> getAttribute ('alias');
-		my $imageinclude  = $repoNode -> getAttribute ('imageinclude');
-		my $password      = $repoNode -> getAttribute ('password');
-		my $path          = $repoNode -> getChildrenByTagName('source')
-									-> get_node(1)
-									-> getAttribute ('path');
-		my $preferlicense = $repoNode -> getAttribute ('prefer-license');
-		my $priority      = $repoNode -> getAttribute ('priority');
-		my $profiles      = $repoNode -> getAttribute ('profiles');
-		my $status        = $repoNode -> getAttribute ('status');
-		my $type          = $repoNode -> getAttribute ('type');
-		my $username      = $repoNode -> getAttribute ('username');
-		if ($alias) {
-			$repoData{alias} = $alias;
-		}
-		if ($imageinclude) {
-			$repoData{imageinclude} = $imageinclude;
-		}
-		if ($password) {
-			$repoData{password} = $password;
-		}
-		if ($path) {
-			$repoData{path} = $path;
-		}
-		if ($preferlicense) {
-			$repoData{preferlicense} = $preferlicense;
-		}
-		if ($priority) {
-			$repoData{priority} = $priority;
-		}
-		if ($status) {
-			$repoData{status} = $status;
-		}
-		if ($type) {
-			$repoData{type} = $type;
-		}
-		if ($username) {
-			$repoData{username} = $username;
-		}
-		if (! $profiles) {
-			$profiles = 'kiwi_default';
-		}
-		my @profNames = split /','/, $profiles;
-		for my $profName (@profNames) {
-			my $repoRef = $this->{imageConfig}->{$profName}->{repoData};
-			if (! $repoRef) {
-				my %repoInfo = ( $idCntr => \%repoData);
-				$this->{imageConfig}->{repoData} = \%repoInfo;
-			} else {
-				my %repoInfo = %{$repoRef};
-				$repoInfo{$idCntr} = \%repoData;
-				$this->{imageConfig}->{repoData} = \%repoInfo;
-			}
-			$idCntr += 1;
-		}
-	}
-	return $this;
-}
-
-#==========================================
-# __populateTypeInfo_legacy
-#------------------------------------------
-sub __populateTypeInfo_legacy {
-	# ...
-	# Extract the information contained in the <type> elements
-	# and store the type descriptions in a list of hash references
-	# ---
-	# list = (
-	#   {
-	#      'key' => 'value'
-	#      'key' => 'value'
-	#   },
-	#   {
-	#      'key' => 'value'
-	#      'key' => 'value'
-	#   }
-	# )
-	# ---
-	#
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $cmdL   = $this->{cmdL};
-	my $urlhd  = new KIWIURL ($kiwi,$cmdL);
-	my @node   = $this->{optionsNodeList} -> get_nodelist();
-	my @result = ();
-	my $first  = 1;
-	#==========================================
-	# select types
-	#------------------------------------------
-	foreach my $element (@node) {
-		my @types    = $element -> getElementsByTagName ("type");
-		my $profiles = $element -> getAttribute("profiles");
-		my @assigned = ("all");
-		if ($profiles) {
-			@assigned = split (/,/,$profiles);
-		}
-		foreach my $node (@types) {
-			my %record = ();
-			my $prim   = $node -> getAttribute("primary");
-			if (! defined $prim) {
-				$record{primary} = "false";
-			} else {
-				$record{primary} = $prim;
-			}
-			my $disk = $node->getElementsByTagName("systemdisk")->get_node(1);
-			#==========================================
-			# meta data
-			#------------------------------------------
-			$record{first}    = $first;
-			$record{node}     = $node;
-			$record{assigned} = \@assigned;
-			$first = 0;
-			#==========================================
-			# type attributes
-			#------------------------------------------
-			$record{type}          = $node
-				-> getAttribute("image");
-			$record{fsmountoptions}= $node
-				-> getAttribute("fsmountoptions");
-			$record{luks}          = $node
-				-> getAttribute("luks");
-			$record{cmdline}       = $node
-				-> getAttribute("kernelcmdline");
-			$record{compressed}    = $node
-				-> getAttribute("compressed");
-			$record{boot}          = $node
-				-> getAttribute("boot");
-			$record{bootpartsize}  = $node
-				-> getAttribute("bootpartsize");
-			$record{volid}         = $node
-				-> getAttribute("volid");
-			$record{flags}         = $node
-				-> getAttribute("flags");
-			$record{hybrid}        = $node
-				-> getAttribute("hybrid");
-			$record{format}        = $node
-				-> getAttribute("format");
-			$record{installiso}    = $node
-				-> getAttribute("installiso");
-			$record{installstick}  = $node
-				-> getAttribute("installstick");
-			$record{vga}           = $node
-				-> getAttribute("vga");
-			$record{bootloader}    = $node
-				-> getAttribute("bootloader");
-			$record{devicepersistency} = $node
-				-> getAttribute("devicepersistency");
-			$record{boottimeout}   = $node
-				-> getAttribute("boottimeout");
-			$record{installboot}   = $node
-				-> getAttribute("installboot");
-			$record{installprovidefailsafe} = $node
-				-> getAttribute("installprovidefailsafe");
-			$record{checkprebuilt} = $node
-				-> getAttribute("checkprebuilt");
-			$record{bootprofile}   = $node
-				-> getAttribute("bootprofile");
-			$record{bootkernel}    = $node
-				-> getAttribute("bootkernel");
-			$record{filesystem}    = $node
-				-> getAttribute("filesystem");
-			$record{fsnocheck}     = $node
-				-> getAttribute("fsnocheck");
-			$record{hybridpersistent}  = $node
-				-> getAttribute("hybridpersistent");
-			$record{ramonly}       = $node
-				-> getAttribute("ramonly");
-			if (defined $disk) {
-				$record{lvm} = "true";
-			}
-			if ($record{type} eq "split") {
-				my $filesystemRO = $node -> getAttribute("fsreadonly");
-				my $filesystemRW = $node -> getAttribute("fsreadwrite");
-				if ((defined $filesystemRO) && (defined $filesystemRW)) {
-					$record{filesystem} = "$filesystemRW,$filesystemRO";
-				}
-			}
-			my $bootpath = $urlhd -> normalizeBootPath ($record{boot});
-			if (defined $bootpath) {
-				$record{boot} = $bootpath;
-			}
-			#==========================================
-			# push to list
-			#------------------------------------------
-			push @result,\%record;
-		}
-	}
-	return \@result;
-}
 
 #==========================================
 # __populateProfiledTypeInfo
@@ -6294,34 +6348,6 @@ sub __resolveArchitecture {
 	return $path;
 }
 
-#==========================================
-# __verifyProfNames
-#------------------------------------------
-sub __verifyProfNames {
-	# ...
-	# Verify that the profile names in the given array ref are available,
-	# if not print the given msg substituting PROF_NAME in the message
-	# with the name that is in violation.
-	# ---
-	my $this  = shift;
-	my $names = shift;
-	my $msg   = shift;
-	my @namesToCheck = @{$names};
-	my %specProfs = map { ($_ => 1 ) } @{$this->{availableProfiles}};
-	for my $name (@namesToCheck) {
-		if ($name eq 'kiwi_default') {
-			next;
-		}
-		if (! $specProfs{$name} ) {
-			my $kiwi = $this->{kiwi};
-			$msg =~ s/PROF_NAME/$name/;
-			$kiwi -> error($msg);
-			$kiwi ->  failed();
-			return;
-		}
-	}
-	return 1;
-}
 
 1;
 
