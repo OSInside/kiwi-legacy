@@ -35,9 +35,11 @@ suseSetupProduct
 # Activate services
 #--------------------------------------
 suseInsertService sshd
-suseInsertService boot.device-mapper
-suseRemoveService avahi-dnsconfd
-suseRemoveService avahi-daemon
+
+#======================================
+# Activate services
+#--------------------------------------
+systemctl enable console-setup.service
 
 #==========================================
 # remove package docs
