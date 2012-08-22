@@ -32,6 +32,7 @@ use KIWIQX qw (qxx);
 use KIWIURL;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
+use KIWIXMLRepositoryData;
 use KIWIXMLValidator;
 use KIWISatSolver;
 
@@ -323,7 +324,7 @@ sub new {
 	#==========================================
 	# Dump imageConfig to log
 	#------------------------------------------
-	# print $this->__dumpInternalXMLDescription;
+	# print $this->__dumpInternalXMLDescription();
 	return $this;
 }
 
@@ -457,8 +458,8 @@ sub getDescriptionInfo {
 #------------------------------------------
 sub getDrivers {
 	# ...
-	# Return a list reference of KIWIXMLDriverData objects that are
-	# specified to be part of the current profile and architecture
+	# Return an array reference of KIWIXMLDriverData objects that are
+	# specified to be part of the current profile(s) and architecture
 	# ---
 	my $this = shift;
 	my $arch = $this->{arch};
@@ -498,6 +499,32 @@ sub getProfiles {
 		push @result, { %profile };
 	}
 	return @result;
+}
+
+#==========================================
+# getRepositories
+#------------------------------------------
+sub getRepositories {
+	# ...
+	# Return an array reference of KIWIXMLRepositories objects that are
+	# specified to be part of the current profile(s)
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @activeProfs = @{$this->{selectedProfiles}};
+	my @repoData = ();
+	for my $prof (@activeProfs) {
+		if ($this->{imageConfig}->{$prof}{repoData}) {
+			for my $key (keys %{$this->{imageConfig}->{$prof}{repoData}}) {
+				push @repoData,
+					KIWIXMLRepositoryData -> new (
+						$kiwi,
+						$this->{imageConfig}->{$prof}{repoData}->{$key}
+					);
+			}
+		}
+	}
+	return \@repoData;
 }
 
 #==========================================
@@ -553,7 +580,7 @@ sub __dumpInternalXMLDescription {
 	$Data::Dumper::Indent = 1;
 	$Data::Dumper::Useqq  = 1;
 	my $dd = Data::Dumper->new([ %{$this->{imageConfig}} ]);
-	my $cd = $dd->Dump;
+	my $cd = $dd->Dump();
 	return $cd;
 }
 
@@ -747,16 +774,16 @@ sub __populateRepositoryInfo {
 		if (! $profiles) {
 			$profiles = 'kiwi_default';
 		}
-		my @profNames = split /','/, $profiles;
+		my @profNames = split /,/, $profiles;
 		for my $profName (@profNames) {
-			my $repoRef = $this->{imageConfig}->{$profName}->{repoData};
+			my $repoRef = $this->{imageConfig}->{$profName}{repoData};
 			if (! $repoRef) {
 				my %repoInfo = ( $idCntr => \%repoData);
-				$this->{imageConfig}->{repoData} = \%repoInfo;
+				$this->{imageConfig}->{$profName}{repoData} = \%repoInfo;
 			} else {
 				my %repoInfo = %{$repoRef};
 				$repoInfo{$idCntr} = \%repoData;
-				$this->{imageConfig}->{repoData} = \%repoInfo;
+				$this->{imageConfig}->{$profName}{repoData} = \%repoInfo;
 			}
 			$idCntr += 1;
 		}
