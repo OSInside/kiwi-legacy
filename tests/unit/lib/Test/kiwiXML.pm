@@ -3334,6 +3334,163 @@ sub test_getRepoNodeList_legacy {
 }
 
 #==========================================
+# test_getRepositories
+#------------------------------------------
+sub test_getRepositories {
+	# ...
+	# Verify proper return of getRepositories method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		# TODO: Eliminate the net check once we eliminate
+		#       URL resolution in the XML Object
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @repoData = @{$xml -> getRepositories()};
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $numRepos = @repoData;
+	$this -> assert_equals(4, $numRepos);
+	for my $repoDataObj (@repoData) {
+		if ( $repoDataObj -> getPath() eq 'opensuse://12.1/repo/oss/' ) {
+			$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
+			$this -> assert_str_equals('2', $repoDataObj -> getPriority() );
+			$this -> assert_str_equals('true',
+									$repoDataObj -> getPreferLicense()
+									);
+			$this -> assert_str_equals('fixed', $repoDataObj -> getStatus() );
+		}
+		if ( $repoDataObj -> getPath() eq
+			'http://download.opensuse.org/update/12.1' ) {
+			$this -> assert_str_equals('rpm-md', $repoDataObj -> getType() );
+			$this -> assert_str_equals('update', $repoDataObj -> getAlias() );
+			$this -> assert_str_equals('true',
+									$repoDataObj -> getImageInclude()
+									);
+		}
+		if ( $repoDataObj -> getPath() eq
+			'https://myreposerver/protectedrepos/12.1' ) {
+			$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
+			my ($uname, $passwd) =  $repoDataObj -> getCredentials();
+			$this -> assert_str_equals('foo', $uname );
+			$this -> assert_str_equals('bar', $passwd );
+		}
+		if ( $repoDataObj -> getPath() eq '/repos/12.1-additional' ) {
+			$this -> assert_str_equals('rpm-dir', $repoDataObj -> getType() );
+		}
+	}
+	return;
+}
+
+#==========================================
+# test_getRepositoriesWithProf
+#------------------------------------------
+sub test_getRepositoriesWithProf {
+	# ...
+	# Verify proper return of getRepositories method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		# TODO: Eliminate the net check once we eliminate
+		#       URL resolution in the XML Object
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @repoData = @{$xml -> getRepositories()};
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $numRepos = @repoData;
+	$this -> assert_equals(1, $numRepos);
+	for my $repoDataObj (@repoData) {
+		$this -> assert_str_equals('opensuse://12.1/repo/oss/',
+								$repoDataObj -> getPath()
+								);
+		$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
+		$this -> assert_str_equals('2', $repoDataObj -> getPriority() );
+		$this -> assert_str_equals('true',
+								$repoDataObj -> getPreferLicense()
+								);
+		$this -> assert_str_equals('fixed', $repoDataObj -> getStatus() );
+	}
+	my @useProf = ('profA');
+	$xml -> setActiveProfileNames(\@useProf);
+	my $expected = 'Using profile(s): profA';
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	@repoData = @{$xml -> getRepositories()};
+	$numRepos = @repoData;
+	$this -> assert_equals(3, $numRepos);
+	for my $repoDataObj (@repoData) {
+		if ( $repoDataObj -> getPath() eq 'opensuse://12.1/repo/oss/' ) {
+			$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
+			$this -> assert_str_equals('2', $repoDataObj -> getPriority() );
+			$this -> assert_str_equals('true',
+									$repoDataObj -> getPreferLicense()
+									);
+			$this -> assert_str_equals('fixed', $repoDataObj -> getStatus() );
+		}
+		if ( $repoDataObj -> getPath() eq
+			'http://download.opensuse.org/update/12.1' ) {
+			$this -> assert_str_equals('rpm-md', $repoDataObj -> getType() );
+			$this -> assert_str_equals('update', $repoDataObj -> getAlias() );
+			$this -> assert_str_equals('true',
+									$repoDataObj -> getImageInclude()
+									);
+		}
+		if ( $repoDataObj -> getPath() eq '/repos/12.1-additional' ) {
+			$this -> assert_str_equals('rpm-dir', $repoDataObj -> getType() );
+		}
+	}
+	@useProf = ('profC');
+	$xml -> setActiveProfileNames(\@useProf);
+	$expected = 'Using profile(s): profC';
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	@repoData = @{$xml -> getRepositories()};
+	$numRepos = @repoData;
+	$this -> assert_equals(2, $numRepos);
+	for my $repoDataObj (@repoData) {
+		if ( $repoDataObj -> getPath() eq 'opensuse://12.1/repo/oss/' ) {
+			$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
+			$this -> assert_str_equals('2', $repoDataObj -> getPriority() );
+			$this -> assert_str_equals('true',
+									$repoDataObj -> getPreferLicense()
+									);
+			$this -> assert_str_equals('fixed', $repoDataObj -> getStatus() );
+		}
+		if ( $repoDataObj -> getPath() eq '/repos/12.1-additional' ) {
+			$this -> assert_str_equals('rpm-dir', $repoDataObj -> getType() );
+		}
+	}
+	return;
+}
+
+#==========================================
 # test_getRepositories_legacy
 #------------------------------------------
 sub test_getRepositories_legacy {
