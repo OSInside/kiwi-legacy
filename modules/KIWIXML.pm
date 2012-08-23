@@ -661,6 +661,25 @@ sub getRepositories {
 }
 
 #==========================================
+# ignoreRepositories
+#------------------------------------------
+sub ignoreRepositories {
+	# ...
+	# Ignore all the repositories in the XML file.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	$kiwi -> info ('Ignoring all repositories previously configured');
+	my @allProfs = @{$this->{availableProfiles}};
+	push @allProfs, 'kiwi_default';
+	for my $profName (@allProfs) {
+		delete $this->{imageConfig}->{$profName}{repoData}
+	}
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
 # setDescriptionInfo
 #------------------------------------------
 sub setDescriptionInfo {
