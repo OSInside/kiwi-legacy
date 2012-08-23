@@ -4522,6 +4522,48 @@ sub test_hasDefaultPackagesNoDef {
 }
 
 #==========================================
+# test_ignoreRepositories
+#------------------------------------------
+sub test_ignoreRepositories {
+	# ...
+	# Verify proper operation of ignoreRepositories method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	$xml = $xml -> ignoreRepositories();
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'Ignoring all repositories previously configured';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	my @repos = @{$xml -> getRepositories()};
+	my $numRepos = scalar @repos;
+	$this -> assert_equals(0, $numRepos);
+	# Verify that all repositories have been removed
+	my @profs = qw \profA profB profC\;
+	$xml = $xml -> setActiveProfileNames(\@profs);
+	my $expected = 'Using profile(s): profA, profB, profC';
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	@repos = @{$xml -> getRepositories()};
+	$numRepos = scalar @repos;
+	$this -> assert_equals(0, $numRepos);
+	return;
+}
+
+#==========================================
 # test_ignoreRepositories_legacy
 #------------------------------------------
 sub test_ignoreRepositories_legacy {
