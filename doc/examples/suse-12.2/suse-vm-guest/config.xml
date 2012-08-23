@@ -28,7 +28,6 @@
 	<packages type="image">
 		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-
 		<package name="kernel-default"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>

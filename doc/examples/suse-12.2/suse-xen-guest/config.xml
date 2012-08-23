@@ -28,7 +28,6 @@
 	</repository>
 	<packages type="image">
 		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
-
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
 		<package name="kernel-xen" replaces="kernel-ec2"/>
