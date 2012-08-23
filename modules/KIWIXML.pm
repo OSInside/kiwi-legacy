@@ -371,8 +371,8 @@ sub addDrivers {
 	my @drvsToAdd = @{$drivers};
 	for my $drv (@drvsToAdd) {
 		if ( ref($drv) ne 'KIWIXMLDriverData' ) {
-			my $msg = 'addDrivers: found list item not of type '
-				. 'KIWIXMLDriverData in driver list';
+			my $msg = 'addDrivers: found array item not of type '
+				. 'KIWIXMLDriverData in driver array';
 			$kiwi -> error ($msg);
 			$kiwi -> failed ();
 			return;
@@ -381,31 +381,9 @@ sub addDrivers {
 	#==========================================
 	# Figure out what profiles to change
 	#------------------------------------------
-	my @profsToUse;
-	if ($profNames) {
-		# operate on value of profile argument
-		if ( ref($profNames) eq 'ARRAY' ) {
-			# Multiple profiles, verify that all names are valid
-			my $msg = 'Attempting to add drivers to "PROF_NAME", but '
-				. 'this profile is not specified in the configuration.';
-			if (! $this -> __verifyProfNames($profNames, $msg)) {
-				return;
-			}
-			@profsToUse = @{$profNames};
-		} elsif ($profNames eq 'default') {
-			# Only the default profile is affected by change
-			@profsToUse = ('kiwi_default');
-		}
-	} else {
-		# No profile argument was given, operate on the currently
-		# active profiles (minus kiwi_default)
-		my @selected = @{$this->{selectedProfiles}};
-		for my $prof (@selected) {
-			if ($prof eq 'kiwi_default') {
-				next;
-			}
-			push @profsToUse, $prof;
-		}
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'driver(s)');
+	if (! @profsToUse) {
+		return;
 	}
 	for my $prof (@profsToUse) {
 		for my $drvData (@drvsToAdd) {
@@ -435,6 +413,161 @@ sub addDrivers {
 			}
 		}
 	}
+	return $this;
+}
+
+#==========================================
+# addRepositories
+#------------------------------------------
+sub addRepositories {
+	# ...
+	# Add the given repositories to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	# ---
+	my $this      = shift;
+	my $repos     = shift;
+	my $profNames = shift;
+	my $kiwi = $this->{kiwi};
+	#==========================================
+	# Verify arguments
+	#------------------------------------------
+	if (! $repos) {
+		$kiwi -> info ('addRepositories: no repos specified, nothing to do');
+		$kiwi -> skipped ();
+		return $this;
+	}
+	if ( ref($repos) ne 'ARRAY' ) {
+		my $msg = 'addRepositories: expecting array ref for '
+			. 'XMLRepositoryData array as first argument';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# Remeber repos to add + verify the type
+	#------------------------------------------
+	my @reposToAdd = @{$repos};
+	for my $repo (@reposToAdd) {
+		if (ref($repo) ne 'KIWIXMLRepositoryData' ) {
+			my $msg = 'addRepositories: found array item not of type '
+				. 'KIWIXMLRepositoryData in repository array';
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
+			return;
+		}
+	}
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'repositorie(s)');
+	if (! @profsToUse) {
+		return;
+	}
+	my $idCntr = $this -> {repoCounter};
+	for my $prof (@profsToUse) {
+		REPO:
+		for my $repo (@reposToAdd) {
+			my %repoData;
+			my $alias                 = $repo -> getAlias();
+			my $imageinclude          = $repo -> getImageInclude();
+			my $path                  = $repo -> getPath();
+			my $preferlicense         = $repo -> getPreferLicense();
+			my $priority              = $repo -> getPriority();
+			my $status                = $repo -> getStatus();
+			my $type                  = $repo -> getType();
+			my ($username, $password) = $repo -> getCredentials();
+			if ($alias) {
+				$repoData{alias} = $alias;
+			}
+			if ($imageinclude) {
+				$repoData{imageinclude} = $imageinclude;
+			}
+			if ($password) {
+				$repoData{password} = $password;
+			}
+			if ($path) {
+				$repoData{path} = $path;
+			}
+			if ($preferlicense) {
+				$repoData{preferlicense} = $preferlicense;
+			}
+			if ($priority) {
+				$repoData{priority} = $priority;
+			}
+			if ($status) {
+				$repoData{status} = $status;
+			}
+			if ($type) {
+				$repoData{type} = $type;
+			}
+			if ($username) {
+				$repoData{username} = $username;
+			}
+			my $repoRef = $this->{imageConfig}->{$prof}{repoData};
+			if ($repoRef) {
+				my %repoInfo = %{$repoRef};
+				# Verify uniqueness conditions
+				for my $entry (values %repoInfo) {
+					if ($entry->{alias}
+						&& $alias
+						&& $entry->{alias} eq $alias) {
+						my $msg = 'addRepositories: attempting to add '
+							. 'repo, but a repo with same alias already '
+							. 'exists';
+						$kiwi -> info($msg);
+						$kiwi -> skipped();
+						next REPO;
+					}
+					if ($entry->{password}
+						&& $password
+						&& $entry->{password} ne $password) {
+						my $msg = 'addRepositories: attempting to add '
+							. 'repo, but a repo with a different password '
+							.  'already exists';
+						$kiwi -> info($msg);
+						$kiwi -> skipped();
+						next REPO;
+					}
+					if ($entry->{path} eq $path) {
+						my $msg = 'addRepositories: attempting to add '
+							. 'repo, but a repo with same path already '
+							. 'exists';
+						$kiwi -> info($msg);
+						$kiwi -> skipped();
+						next REPO;
+					}
+					if ($entry->{preferlicense} && $preferlicense) {
+						my $msg = 'addRepositories: attempting to add '
+							. 'repo, but a repo with license preference '
+							. 'indicator set already exists';
+						$kiwi -> info($msg);
+						$kiwi -> skipped();
+						next REPO;
+					}
+					if ($entry->{username}
+						&& $username
+						&& $entry->{username} ne $username) {
+						my $msg = 'addRepositories: attempting to add '
+							. 'repo, but a repo with a different username '
+							. 'already exists';
+						$kiwi -> info($msg);
+						$kiwi -> skipped();
+						next REPO;
+					}
+				}
+				$repoInfo{$idCntr} = \%repoData;
+				$this->{imageConfig}->{$prof}{repoData} = \%repoInfo;
+			} else {
+				my %repoInfo = ( $idCntr => \%repoData);
+				$this->{imageConfig}->{$prof}{repoData} = \%repoInfo;
+			}
+			$idCntr += 1;
+		}
+	}
+	# Store the next counter to be used as repo ID
+	$this -> {repoCounter} = $idCntr;
 	return $this;
 }
 
@@ -582,6 +715,46 @@ sub __dumpInternalXMLDescription {
 	my $dd = Data::Dumper->new([ %{$this->{imageConfig}} ]);
 	my $cd = $dd->Dump();
 	return $cd;
+}
+
+#==========================================
+# __getProfsToModify
+#------------------------------------------
+sub __getProfsToModify {
+	# ...
+	# Given an array ref, the keyword "default", or no argument
+	# generate an array of profile names
+	# ---
+	my $this      = shift;
+	my $profNames = shift;
+	my $msgData   = shift;
+	my @profsToUse;
+	if ($profNames) {
+		# operate on value of profile argument
+		if ( ref($profNames) eq 'ARRAY' ) {
+			# Multiple profiles, verify that all names are valid
+			my $msg = "Attempting to add $msgData to 'PROF_NAME', but "
+				. 'this profile is not specified in the configuration.';
+			if (! $this -> __verifyProfNames($profNames, $msg)) {
+				return;
+			}
+			@profsToUse = @{$profNames};
+		} elsif ($profNames eq 'default') {
+			# Only the default profile is affected by change
+			@profsToUse = ('kiwi_default');
+		}
+	} else {
+		# No profile argument was given, operate on the currently
+		# active profiles (minus kiwi_default)
+		my @selected = @{$this->{selectedProfiles}};
+		for my $prof (@selected) {
+			if ($prof eq 'kiwi_default') {
+				next;
+			}
+			push @profsToUse, $prof;
+		}
+	}
+	return @profsToUse;
 }
 
 #==========================================
@@ -788,6 +961,8 @@ sub __populateRepositoryInfo {
 			$idCntr += 1;
 		}
 	}
+	# Store the next counter to be used as repo ID
+	$this -> {repoCounter} = $idCntr;
 	return $this;
 }
 

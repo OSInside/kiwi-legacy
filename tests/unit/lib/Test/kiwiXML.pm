@@ -26,6 +26,7 @@ use KIWIQX qw (qxx);
 use KIWIXML;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
+use KIWIXMLRepositoryData;
 
 # All tests will need to be adjusted once KIWXML turns into a stateless
 # container and the ctor receives the config.xml file name as an argument.
@@ -224,8 +225,8 @@ sub test_addDriversImproperDataT {
 	push @drvsToAdd, 'slip';
 	push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, 'x25_asy');
 	my $res = $xml -> addDrivers(\@drvsToAdd, 'default');
-	my $expected = 'addDrivers: found list item not of type '
-		. 'KIWIXMLDriverData in driver list';
+	my $expected = 'addDrivers: found array item not of type '
+		. 'KIWIXMLDriverData in driver array';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -257,7 +258,7 @@ sub test_addDriversInvalidProf {
 	}
 	my @profs = qw \profA timbuktu profB\;
 	my $res = $xml -> addDrivers(\@drvsToAdd, \@profs);
-	my $expected = 'Attempting to add drivers to "timbuktu", but '
+	my $expected = "Attempting to add driver(s) to 'timbuktu', but "
 		. 'this profile is not specified in the configuration.';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
@@ -903,6 +904,488 @@ sub test_addRemovePackages {
 	return;
 }
 
+#==========================================
+# test_addRepositoriesDefault
+#------------------------------------------
+sub test_addRepositoriesDefault {
+	# ...
+	# Verify proper operation of addRepositories method
+	# existing repo alias
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @reposToAdd = ();
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+												'/work/repos/md',
+												'rpm-md');
+	my $res = $xml -> addRepositories(\@reposToAdd, 'default');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	# Verify the non conflicting repo got added
+	my @repoData = @{$xml -> getRepositories()};
+	my $numRepos = @repoData;
+	$this -> assert_equals(2, $numRepos);
+	for my $repo (@repoData) {
+		my $path = $repo -> getPath();
+		if ($path ne 'opensuse://12.1/repo/oss/' &&
+			$path ne '/work/repos/md') {
+			$this -> assert_str_equals('No path match', $path);
+		}
+	}
+	# Verify that the repo added as default also is used in other profiles
+	my @profs = ('profB');
+	$xml -> setActiveProfileNames(\@profs);
+	my $expected = 'Using profile(s): profB';
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	@repoData = @{$xml -> getRepositories()};
+	$numRepos = @repoData;
+	$this -> assert_equals(3, $numRepos);
+	my $found;
+	for my $repo (@repoData) {
+		my $path = $repo -> getPath();
+		if ($path eq '/work/repos/md') {
+			$found = 1;
+			last;
+		}
+	}
+	if (! $found) {
+		$this -> assert_str_equals('repo not found',  '/work/repos/md');
+	}
+	return;
+}
+
+#==========================================
+# test_addRepositoriesExistAlias
+#------------------------------------------
+sub test_addRepositoriesExistAlias {
+	# ...
+	# Verify proper operation of addRepositories method, add repo with
+	# existing repo alias
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %dupAliasData = ( alias => 'update',
+						path  => 'http://download.opensuse.org/update/12.2',
+						type  => 'rpm-md'
+					);
+	my @reposToAdd = ();
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+													'/work/repos/md',
+													'rpm-md');
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%dupAliasData);
+	my @profs = ('profA');
+	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
+	my $expected = 'addRepositories: attempting to add repo, but a repo '
+		. 'with same alias already exists';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_not_null($res);
+	# Verify the non conflicting repo got added
+	$xml -> setActiveProfileNames(\@profs);
+	$expected = 'Using profile(s): profA';
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @repoData = @{$xml -> getRepositories()};
+	my $numRepos = @repoData;
+	$this -> assert_equals(4, $numRepos);
+	return;
+}
+
+#==========================================
+# test_addRepositoriesExistPass
+#------------------------------------------
+sub test_addRepositoriesExistPass {
+	# ...
+	# Verify proper operation of addRepositories method, add repo with
+	# conflicting password
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %confPass = ( password => 'foo',
+					path     => '/work/repos/pckgs',
+					type     => 'rpm-dir',
+					username => 'foo'
+				);
+	my @reposToAdd = ();
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+													'/work/repos/md',
+													'rpm-md');
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%confPass);
+	my @profs = ('profB');
+	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
+	my $expected = 'addRepositories: attempting to add repo, but a repo '
+		. 'with a different password already exists';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_not_null($res);
+	# Verify the non conflicting repo got added
+	$xml -> setActiveProfileNames(\@profs);
+	$expected = 'Using profile(s): profB';
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @repoData = @{$xml -> getRepositories()};
+	my $numRepos = @repoData;
+	$this -> assert_equals(3, $numRepos);
+	return;
+}
+
+#==========================================
+# test_addRepositoriesExistPath
+#------------------------------------------
+sub test_addRepositoriesExist {
+	# ...
+	# Verify proper operation of addRepositories method, pass a profile
+	# name that is not defined.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @reposToAdd = ();
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+													'/work/repos/md',
+													'rpm-md');
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+											'opensuse://12.1/repo/oss/',
+											'rpm-dir');
+	my $res = $xml -> addRepositories(\@reposToAdd, 'default');
+	my $expected = 'addRepositories: attempting to add repo, but a repo '
+		. 'with same path already exists';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_not_null($res);
+	# Verify the non conflicting repo got added
+	my @repoData = @{$xml -> getRepositories()};
+	my $numRepos = @repoData;
+	$this -> assert_equals(2, $numRepos);
+	return;
+}
+
+#==========================================
+# test_addRepositoriesExistPrefLic
+#------------------------------------------
+sub test_addRepositoriesExistPrefLic {
+	# ...
+	# Verify proper operation of addRepositories method, add repo
+	# when existing repo has prefer-license set
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %prefLic = ( path          => '/work/repos/pckgs',
+					preferlicense => 1,
+					type          => 'rpm-dir'
+				);
+	my @reposToAdd = ();
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+													'/work/repos/md',
+													'rpm-md');
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%prefLic);
+	my $res = $xml -> addRepositories(\@reposToAdd, 'default');
+	my $expected = 'addRepositories: attempting to add repo, but a repo '
+		. 'with license preference indicator set already exists';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_not_null($res);
+	# Verify the non conflicting repo got added
+	my @repoData = @{$xml -> getRepositories()};
+	my $numRepos = @repoData;
+	$this -> assert_equals(2, $numRepos);
+	return;
+}
+
+#==========================================
+# test_addRepositoriesExistUsr
+#------------------------------------------
+sub test_addRepositoriesExistUsr {
+	# ...
+	# Verify proper operation of addRepositories method, add repo with
+	# conflicting username
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %confUser = ( password => 'bar',
+					path     => '/work/repos/pckgs',
+					type     => 'rpm-dir',
+					username => 'bar'
+				);
+	my @reposToAdd = ();
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+													'/work/repos/md',
+													'rpm-md');
+push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%confUser);
+	my @profs = ('profB');
+	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
+	my $expected = 'addRepositories: attempting to add repo, but a repo '
+		. 'with a different username already exists';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_not_null($res);
+	# Verify the non conflicting repo got added
+	$xml -> setActiveProfileNames(\@profs);
+	$expected = 'Using profile(s): profB';
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @repoData = @{$xml -> getRepositories()};
+	my $numRepos = @repoData;
+	$this -> assert_equals(3, $numRepos);
+	return;
+}
+
+#==========================================
+# test_addRepositoriesImproperDataT
+#------------------------------------------
+sub test_addRepositoriesImproperDataT {
+	# ...
+	# Verify addRepositories behaves as expected, pass an array ref containing
+	# a string
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @reposToAdd = ();
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+													'/work/repos/md',
+													'rpm-md');
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+													'/work/repos/pckgs',
+													'rpm-dir');
+	push @reposToAdd, 'slip';
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+													'/work/repos/debs',
+													'deb-dir');
+	my $res = $xml -> addRepositories(\@reposToAdd, 'default');
+	my $expected = 'addRepositories: found array item not of type '
+		. 'KIWIXMLRepositoryData in repository array';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addRepositoriesInvalidProf
+#------------------------------------------
+sub test_addRepositoriesInvalidProf {
+	# ...
+	# Verify proper operation of addRepositories method, pass a profile
+	# name that is not defined.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @reposToAdd = ();
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+													'/work/repos/md',
+													'rpm-md');
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+													'/work/repos/pckgs',
+													'rpm-dir');
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+													'/work/repos/debs',
+													'deb-dir');
+	my @profs = qw \profA timbuktu profB\;
+	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
+	my $expected = "Attempting to add repositorie(s) to 'timbuktu', but "
+		. 'this profile is not specified in the configuration.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addRepositoriesNoArgs
+#------------------------------------------
+sub test_addRepositoriesNoArgs {
+	# ...
+	# Verify proper operation of addRepositories method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addRepositories();
+	my $expected = 'addRepositories: no repos specified, nothing to do';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_not_null($res);
+	return;
+}
+
+#==========================================
+# test_addRepositoriesToProf
+#------------------------------------------
+sub test_addRepositoriesToProf {
+	# ...
+	# Verify  proper operation of addRepositories method, adding repo
+	# to active profile
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @reposToAdd = ();
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
+												'/work/repos/md',
+												'rpm-md');
+	my @profs = ('profC');
+	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify the repo got added to the proper profile
+	$xml -> setActiveProfileNames(\@profs);
+	my $expected = 'Using profile(s): profC';
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @repoData = @{$xml -> getRepositories()};
+	my $numRepos = @repoData;
+	$this -> assert_equals(3, $numRepos);
+	my $found;
+	for my $repo (@repoData) {
+		my $path = $repo -> getPath();
+		if ($path eq '/work/repos/md') {
+			$found = 1;
+			last;
+		}
+	}
+	if (! $found) {
+		$this -> assert_str_equals('repo not found',  '/work/repos/md');
+	}
+	# Verify the repo is not available in any other profile
+	@profs = ('profA');
+	$xml -> setActiveProfileNames(\@profs);
+	$expected = 'Using profile(s): profA';
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	@repoData = @{$xml -> getRepositories()};
+	$numRepos = @repoData;
+	$this -> assert_equals(3, $numRepos);
+	return;
+}
+
+#==========================================
+# test_addRepositoriesWrongArgs
+#------------------------------------------
+sub test_addRepositoriesWrongArgs {
+	# ...
+	# Verify  proper operation of addRepositories method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addRepositories('opensuse:///', 'profA');
+	my $expected = 'addRepositories: expecting array ref for '
+		. 'XMLRepositoryData array as first argument';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
 
 #==========================================
 # test_addRepositories_legacy
