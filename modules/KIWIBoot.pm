@@ -885,10 +885,10 @@ sub setupInstallCD {
 	my $opts;
 	if ($bootloader eq "grub2") {
 		# let mkisofs run grub2 eltorito image...
-		$base = "-R -J -f -b boot/grub2/eltorito.img -no-emul-boot ";
+		$base = "-R -J -f -b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
 		$base.= "-V \"$volid\" -A \"$appid\"";
 		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
-		$opts.= "-pad -joliet-long";
+		$opts.= "-joliet-long";
 	} elsif ($bootloader eq "grub") {
 		# let isolinux run grub second stage...
 		$base = "-R -J -f -b boot/grub/stage2 -no-emul-boot ";
@@ -2737,11 +2737,24 @@ sub setupBootLoaderStages {
 	# Grub2
 	#------------------------------------------
 	if ($loader eq "grub2") {
-		my $grubpc = "i386-pc";
-		my $stages = "'usr/lib/grub2/$grubpc/*'";
-		my $figure = "'usr/share/grub2/themes/*'";
-		my $unzip  = "$zipper -cd $initrd 2>&1";
-		$status = qxx ("mkdir -p $tmpdir/boot/grub2 $tmpdir/boot/grub 2>&1");
+		my $grubpc   = 'i386-pc';
+		my $figure   = "'usr/share/grub2/themes/*'";
+		my $bootbios = "$tmpdir/boot/grub2/bootpart.cfg";
+		my $unzip    = "$zipper -cd $initrd 2>&1";
+		my %stages   = ();
+		#==========================================
+		# Stage files
+		#------------------------------------------
+		$stages{bios}{initrd}   = "'usr/lib/grub2/$grubpc/*'";
+		$stages{bios}{stageSRC} = "/usr/lib/grub2/$grubpc";
+		$stages{bios}{stageDST} = "/boot/grub2/$grubpc";
+		#==========================================
+		# Boot directories
+		#------------------------------------------
+		my @bootdir = ();
+		push @bootdir,"$tmpdir/boot/grub2/$grubpc";
+		push @bootdir,"$tmpdir/boot/grub";
+		$status = qxx ("mkdir -p @bootdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -2753,9 +2766,8 @@ sub setupBootLoaderStages {
 		# Create boot partition file
 		#------------------------------------------
 		$kiwi -> info ("Creating grub2 boot partition map");
-		my $bootfile = "$tmpdir/boot/grub2/bootpart.cfg";
 		my $bpfd = new FileHandle;
-		if (! $bpfd -> open(">$bootfile")) {
+		if (! $bpfd -> open(">$bootbios")) {
 			$kiwi -> failed ();
 			$kiwi -> error ("Couldn't create grub2 bootpart map: $!");
 			$kiwi -> failed ();
@@ -2772,33 +2784,45 @@ sub setupBootLoaderStages {
 		# Get Grub2 stage and theming files
 		#------------------------------------------
 		$kiwi -> info ("Importing grub2 stage and theming files");
+		my $s_bio = $stages{bios}{initrd};
 		if ($zipped) {
 			$status= qxx (
-				"$unzip | (cd $tmpdir && cpio -i -d $figure -d $stages 2>&1)"
+				"$unzip | \\
+				(cd $tmpdir && cpio -i -d $figure -d $s_bio 2>&1)"
 			);
 		} else {
 			$status= qxx (
-				"cat $initrd|(cd $tmpdir && cpio -i -d $figure -d $stages 2>&1)"
+				"cat $initrd | \\
+				(cd $tmpdir && cpio -i -d $figure -d $s_bio 2>&1)"
 			);
 		}
 		#==========================================
-		# check Grub2 stage files...
+		# import Grub2 theme files...
 		#------------------------------------------
-		if (glob($tmpdir."/usr/lib/grub2/$grubpc/*")) {
+		if (-d "$tmpdir/usr/share/grub2/themes") {
 			$status = qxx (
 				"mv $tmpdir/usr/share/grub2/themes $tmpdir/boot/grub2 2>&1"
 			);
+		}
+		#==========================================
+		# import Grub2 stage files...
+		#------------------------------------------
+		my $stage  = 'bios';
+		my $stageD = $stages{$stage}{stageSRC};
+		my $stageT = $stages{$stage}{stageDST};
+		if (glob($tmpdir.$stageD.'/*')) {
 			$status = qxx (
-				"mv $tmpdir/usr/lib/grub2/$grubpc/* $tmpdir/boot/grub2 2>&1"
+				'mv '.$tmpdir.$stageD.'/* '.$tmpdir.$stageT.' 2>&1'
 			);
 		} else {
-			chomp $status;
 			$kiwi -> skipped ();
-			$kiwi -> warning ("Failed importing grub2 stages: $status");
+			$kiwi -> warning ("No grub2 stage files found in boot image");
 			$kiwi -> skipped ();
-			$kiwi -> info    ("Trying to use grub2 stages from local machine");
+			$kiwi -> info (
+				"Trying to use grub2 stages from local machine"
+			);
 			$status = qxx (
-				"cp /usr/lib/grub2/$grubpc/* $tmpdir/boot/grub2 2>&1"
+				'cp '.$stageD.'/* '.$tmpdir.$stageT.' 2>&1'
 			);
 		}
 		$result = $? >> 8;
@@ -2807,20 +2831,20 @@ sub setupBootLoaderStages {
 			$kiwi -> error  ("Failed importing grub2 stages: $status");
 			$kiwi -> failed ();
 			return;
-		} else {
-			$kiwi -> done();
 		}
+		$kiwi -> done();
 		#==========================================
 		# Create core/eltorito grub2 boot images
 		#------------------------------------------
 		$kiwi -> info ("Creating grub2 core boot image");
-		my $core    = "$tmpdir/boot/grub2/core.img";
+		my $core    = "$tmpdir/boot/grub2/$grubpc/core.img";
 		my @modules = (
 			'biosdisk','part_msdos','part_gpt','ext2',
-			'iso9660','chain','normal','linux','echo'
+			'iso9660','chain','normal','linux','echo',
+			'vga','vbe','png','video_bochs','video_cirrus'
 		);
 		$status = qxx (
-			"grub2-mkimage -O i386-pc -v -o $core -c $bootfile @modules 2>&1"
+			"grub2-mkimage -O i386-pc -o $core -c $bootbios @modules 2>&1"
 		);
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -2832,8 +2856,8 @@ sub setupBootLoaderStages {
 		$kiwi -> done();
 		if ((defined $type) && ($type eq "iso")) {
 			$kiwi -> info ("Creating grub2 eltorito boot image");
-			my $cdimg  = "$tmpdir/boot/grub2/eltorito.img";
-			my $cdcore = "$tmpdir/boot/grub2/cdboot.img";
+			my $cdimg  = "$tmpdir/boot/grub2/$grubpc/eltorito.img";
+			my $cdcore = "$tmpdir/boot/grub2/$grubpc/cdboot.img";
 			$status = qxx ("cat $cdcore $core > $cdimg 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -3192,7 +3216,7 @@ sub setupBootLoaderConfiguration {
 		print FD 'insmod video_cirrus'."\n";
 		print FD 'insmod png'."\n";
 		print FD "set default=$defaultBootNr\n";
-		if ($type !~ /^KIWI (CD|USB)/) {
+		if ($type !~ /^KIWI CD/) {
 			print FD "set root=\"(hd0,1)\""."\n";
 		}
 		print FD 'set locale_dir=($root)/boot/grub2/locale'."\n";
@@ -4161,7 +4185,7 @@ sub installBootLoader {
 		#==========================================
 		# Install grub2
 		#------------------------------------------
-		my $stages = "/mnt/boot/grub2";
+		my $stages = "/mnt/boot/grub2/i386-pc";
 		my $rdev = $this->{bindloop}."1";
 		$status = qxx ("mount $rdev /mnt 2>&1");
 		$result = $? >> 8;
