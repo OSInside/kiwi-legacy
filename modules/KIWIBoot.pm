@@ -230,14 +230,16 @@ sub new {
 	my $zipper = $this->{gdata}->{Gzip};
 	my $unzip = "$zipper -cd $initrd 2>&1";
 	my $efi   = 0;
-	if ($zipped) {
-		$status= qxx ("$unzip | cpio -it | grep efi_gop.module 2>&1");
-	} else {
-		$status= qxx ("cat $initrd | cpio -it | grep efi_gop.module 2>&1");
-	}
-	$result = $? >> 8;
-	if ($result == 0) {
-		$efi = 1;
+	if (defined $initrd) {
+		if ($zipped) {
+			$status= qxx ("$unzip | cpio -it | grep efi_gop.module 2>&1");
+		} else {
+			$status= qxx ("cat $initrd | cpio -it | grep efi_gop.module 2>&1");
+		}
+		$result = $? >> 8;
+		if ($result == 0) {
+			$efi = 1;
+		}
 	}
 	#==========================================
 	# setup pointer to XML configuration
