@@ -134,6 +134,9 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	my $arch = qxx ("uname -m"); chomp $arch;
+	if ($arch =~ /i.86/) {
+		$arch = "ix86";
+	}
 	my %supported = map { ($_ => 1) } qw(
 		armv7l ia64 ix86 ppc ppc64 s390 s390x x86_64
 	);
