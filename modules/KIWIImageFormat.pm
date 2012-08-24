@@ -386,7 +386,25 @@ sub createVHDSubFormatFixed {
 #------------------------------------------
 sub createQCOW2 {
 	my $this   = shift;
-	return $this -> createVMDK();
+	my $kiwi   = $this->{kiwi};
+	my $source = $this->{image};
+	my $target = $source;
+	my $convert;
+	my $status;
+	my $result;
+	$kiwi -> info ("Creating qcow2 image...");
+	$target  =~ s/\.raw$/\.qcow2/;
+	$convert = "convert -c -f raw $source -O qcow2";
+	$status = qxx ("qemu-img $convert $target 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create qcow2 image: $status");
+		$kiwi -> failed ();
+		return;
+	}
+	$kiwi -> done ();
+	return $target;
 }
 
 #==========================================
