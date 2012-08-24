@@ -50,7 +50,7 @@ sub new {
 	# Globals (generic)
 	#------------------------------------------
 	my %data;
-	$data{Version}         = "5.03.41";
+	$data{Version}         = "5.03.42";
 	$data{Publisher}       = "SUSE LINUX Products GmbH";
 	$data{Preparer}        = "KIWI - http://kiwi.berlios.de";
 	$data{ConfigName}      = "config.xml";
