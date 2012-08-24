@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 24 14:46:42 CEST 2012 - ms@suse.de
+
+- fixed qcow2 format creation. Invalid options are passed and
+  option -c was missing to indicate compression
+
+-------------------------------------------------------------------
 Tue Aug 21 12:30:58 CEST 2012 - ms@suse.de
 
 - auto adapt image size only if size was not explicitly set (bnc #775278)
