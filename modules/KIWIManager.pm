@@ -105,7 +105,7 @@ sub new {
 		$zconfig = new Config::IniFiles (
 			-file => $zyppConf, -allowedcommentchars => '#'
 		);
-		my ($uname, $pass) = $xml->getHttpsRepositoryCredentials();
+		my ($uname, $pass) = $xml->getHttpsRepositoryCredentials_legacy();
 		if ($uname) {
 			$kiwi -> info ('Creating credentials data');
 			my $credDir = "$dataDir/credentials.d";
@@ -826,7 +826,7 @@ sub setupInstallationSource {
 					}
 					if ($val =~ /^'https:/) {
 						my ($uname, $pass) = $this->{xml}
-									->getHttpsRepositoryCredentials();
+									->getHttpsRepositoryCredentials_legacy();
 						if ($uname) {
 							chop $val;
 							$val .= "?credentials=kiwiRepoCredentials'";

@@ -991,11 +991,11 @@ sub __applyBaseXMLOverrides {
 		$xml -> setPackageManager($this -> {packageManager});
 	}
 	if ($this -> {ignoreRepos}) {
-		$xml -> ignoreRepositories ();
+		$xml -> ignoreRepositories_legacy ();
 	}
 	if ($this -> {addlRepos}) {
 		my %addlRepos = %{$this -> {addlRepos}};
-		$xml -> addRepositories (
+		$xml -> addRepositories_legacy (
 			$addlRepos{repositoryTypes},
 			$addlRepos{repositories},
 			$addlRepos{repositoryAlia},
@@ -1004,7 +1004,7 @@ sub __applyBaseXMLOverrides {
 	}
 	if ($this -> {replRepo}) {
 		my %replRepo = %{$this -> {replRepo}};
-		$xml -> setRepository (
+		$xml -> setRepository_legacy (
 			$replRepo{repositoryType},
 			$replRepo{repository},
 			$replRepo{repositoryAlias},
