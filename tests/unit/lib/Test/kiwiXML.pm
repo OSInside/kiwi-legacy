@@ -912,6 +912,9 @@ sub test_addRepositoriesDefault {
 	# Verify proper operation of addRepositories method
 	# existing repo alias
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
@@ -976,6 +979,9 @@ sub test_addRepositoriesExistAlias {
 	# Verify proper operation of addRepositories method, add repo with
 	# existing repo alias
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
@@ -1025,6 +1031,9 @@ sub test_addRepositoriesExistPass {
 	# Verify proper operation of addRepositories method, add repo with
 	# conflicting password
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
@@ -1075,6 +1084,9 @@ sub test_addRepositoriesExist {
 	# Verify proper operation of addRepositories method, pass a profile
 	# name that is not defined.
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
@@ -1113,6 +1125,9 @@ sub test_addRepositoriesExistPrefLic {
 	# Verify proper operation of addRepositories method, add repo
 	# when existing repo has prefer-license set
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
@@ -1153,6 +1168,9 @@ sub test_addRepositoriesExistUsr {
 	# Verify proper operation of addRepositories method, add repo with
 	# conflicting username
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
@@ -1203,6 +1221,9 @@ sub test_addRepositoriesImproperDataT {
 	# Verify addRepositories behaves as expected, pass an array ref containing
 	# a string
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
@@ -1241,6 +1262,9 @@ sub test_addRepositoriesInvalidProf {
 	# Verify proper operation of addRepositories method, pass a profile
 	# name that is not defined.
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
@@ -1278,6 +1302,9 @@ sub test_addRepositoriesNoArgs {
 	# ...
 	# Verify proper operation of addRepositories method
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
@@ -1304,6 +1331,9 @@ sub test_addRepositoriesToProf {
 	# Verify  proper operation of addRepositories method, adding repo
 	# to active profile
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
@@ -1368,6 +1398,9 @@ sub test_addRepositoriesWrongArgs {
 	# ...
 	# Verify  proper operation of addRepositories method
 	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
@@ -5149,6 +5182,172 @@ sub test_setDescriptionInfoNoArg {
 }
 
 #==========================================
+# test_setRepositoryBasic
+#------------------------------------------
+sub test_setRepositoryBasic {
+	# ...
+	# Verify proper behavior of setRepository method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $repoData = KIWIXMLRepositoryData -> new($kiwi,
+												'/work/repos/md',
+												'rpm-md');
+	$xml = $xml -> setRepository($repoData);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'Replacing repository /repos/12.1-additional';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Verify that the proper repo got replaced
+	my @repoData = @{$xml -> getRepositories()};
+	my $numRepos = @repoData;
+	$this -> assert_equals(4, $numRepos);
+	for my $repo (@repoData) {
+		my $path = $repo -> getPath();
+		if ($path eq '/repos/12.1-additional') {
+			$this -> assert_str_equals('Improper repo replace', $path);
+		}
+	}
+	return;
+}
+
+#==========================================
+# test_setRepositoryImproperArg
+#------------------------------------------
+sub test_setRepositoryImproperArg {
+	# ...
+	# Verify proper behavior of setRepository method when
+	# called with an invalid argument type
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> setRepository('norepo');
+	my $expected = 'setRepository: expecting ref to KIWIXMLRepositoryData '
+		. ' as first argument';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_setRepositoryNoArg
+#------------------------------------------
+sub test_setRepositoryNoArg {
+	# ...
+	# Verify proper behavior of setRepository method when
+	# called with an invalid argument type
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> setRepository();
+	my $expected = 'setRepository: expecting ref to KIWIXMLRepositoryData '
+		. ' as first argument';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_setRepositoryNoReplace
+#------------------------------------------
+sub test_setRepositoryNoReplace {
+	# ...
+	# Verify proper behavior of setRepository method and there is
+	# repository marked as replacable
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfigNoRepl';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $repoData = KIWIXMLRepositoryData -> new($kiwi,
+												'/work/repos/md',
+												'rpm-md');
+	my $res = $xml -> setRepository($repoData);
+	my $expected = 'No replacable repository configured, not using repo with '
+			. "path: '/work/repos/md'";
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_not_null($res);
+	return;
+}
+
+#==========================================
+# test_setRepositoryNoReplaceWithProf
+#------------------------------------------
+sub test_setRepositoryNoReplaceWithProf {
+	# ...
+	# Verify proper behavior of setRepository method and there is
+	# no repository marked as replacable in the active profile
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $repoData = KIWIXMLRepositoryData -> new($kiwi,
+												'/work/repos/md',
+												'rpm-md');
+	my $res = $xml -> setRepository($repoData);
+	my $expected = 'No replacable repository configured, not using repo with '
+			. "path: '/work/repos/md'";
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_not_null($res);
+	return;
+}
+
+#==========================================
 # test_setRepository_legacy
 #------------------------------------------
 sub test_setRepository_legacy {
@@ -5274,7 +5473,7 @@ sub test_setSelectionProfilesNoArg {
 	);
 	$xml = $xml -> setSelectionProfiles();
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'No profiles specified, nothing selecetd';
+	my $expectedMsg = 'No profiles specified, nothing selected';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);
