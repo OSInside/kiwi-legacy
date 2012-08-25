@@ -469,42 +469,11 @@ sub addRepositories {
 	for my $prof (@profsToUse) {
 		REPO:
 		for my $repo (@reposToAdd) {
-			my %repoData;
+			my %repoData = %{$this->__convertRepoDataToHash($repo)};
 			my $alias                 = $repo -> getAlias();
-			my $imageinclude          = $repo -> getImageInclude();
 			my $path                  = $repo -> getPath();
 			my $preferlicense         = $repo -> getPreferLicense();
-			my $priority              = $repo -> getPriority();
-			my $status                = $repo -> getStatus();
-			my $type                  = $repo -> getType();
 			my ($username, $password) = $repo -> getCredentials();
-			if ($alias) {
-				$repoData{alias} = $alias;
-			}
-			if ($imageinclude) {
-				$repoData{imageinclude} = $imageinclude;
-			}
-			if ($password) {
-				$repoData{password} = $password;
-			}
-			if ($path) {
-				$repoData{path} = $path;
-			}
-			if ($preferlicense) {
-				$repoData{preferlicense} = $preferlicense;
-			}
-			if ($priority) {
-				$repoData{priority} = $priority;
-			}
-			if ($status) {
-				$repoData{status} = $status;
-			}
-			if ($type) {
-				$repoData{type} = $type;
-			}
-			if ($username) {
-				$repoData{username} = $username;
-			}
 			my $repoRef = $this->{imageConfig}->{$prof}{repoData};
 			if ($repoRef) {
 				my %repoInfo = %{$repoRef};
@@ -716,8 +685,115 @@ sub setDescriptionInfo {
 }
 
 #==========================================
+# setRepository
+#------------------------------------------
+sub setRepository {
+	# ...
+	# Overwrite the first repository marked as replacable for the currently
+	# active profiles, the search starts with the default profile
+	# ---
+	my $this = shift;
+	my $repo = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $repo || ref($repo) ne 'KIWIXMLRepositoryData') {
+		my $msg = 'setRepository: expecting ref to KIWIXMLRepositoryData '
+			. ' as first argument';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my @profsToUse = ('kiwi_default');
+	for my $prof (@{$this->{selectedProfiles}}) {
+		if ($prof eq 'kiwi_default') {
+			next;
+		}
+		push @profsToUse, $prof;
+	}
+	my $foundReplacable;
+	PROFLOOP: for my $profName (@profsToUse) {
+		my $confRepos = $this->{imageConfig}->{$profName}{repoData};
+		if ($confRepos) {
+			my %repoInfo = %{$confRepos};
+			my @orderedIDs = sort (keys %repoInfo);
+			for my $key (@orderedIDs) {
+				my @entries = keys %repoInfo;
+				my $repoStatus = $repoInfo{$key}->{status};
+				if ($repoStatus && $repoStatus eq 'replacable') {
+					my %repoData = %{$this->__convertRepoDataToHash($repo)};
+					my $replRepoPath = $repoInfo{$key}->{path};
+					$kiwi -> info ("Replacing repository $replRepoPath");
+					$kiwi -> done();
+					$this->{imageConfig}->
+						{$profName}{repoData}->
+						{$key} = \%repoData;
+					$foundReplacable = 1;
+					last PROFLOOP;
+				}
+			}
+		}
+	}
+	if (!$foundReplacable) {
+		my $path = $repo-> getPath();
+		my $msg = 'No replacable repository configured, not using repo with '
+			. "path: '$path'";
+		$kiwi -> info($msg);
+		$kiwi -> skipped();
+	}
+	return $this;
+}
+
+#==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __convertRepoDataToHash
+#------------------------------------------
+sub __convertRepoDataToHash {
+	# ...
+	# Convert a KIWIXMLRepositoryData object to a hash that fits the internal
+	# data description of this object
+	# ---
+	my $this = shift;
+	my $repo = shift;
+	my %repoData;
+	my $alias                 = $repo -> getAlias();
+	my $imageinclude          = $repo -> getImageInclude();
+	my $path                  = $repo -> getPath();
+	my $preferlicense         = $repo -> getPreferLicense();
+	my $priority              = $repo -> getPriority();
+	my $status                = $repo -> getStatus();
+	my $type                  = $repo -> getType();
+	my ($username, $password) = $repo -> getCredentials();
+	if ($alias) {
+		$repoData{alias} = $alias;
+	}
+	if ($imageinclude) {
+		$repoData{imageinclude} = $imageinclude;
+	}
+	if ($password) {
+		$repoData{password} = $password;
+	}
+	if ($path) {
+		$repoData{path} = $path;
+	}
+	if ($preferlicense) {
+		$repoData{preferlicense} = $preferlicense;
+	}
+	if ($priority) {
+		$repoData{priority} = $priority;
+	}
+	if ($status) {
+		$repoData{status} = $status;
+	}
+	if ($type) {
+		$repoData{type} = $type;
+	}
+	if ($username) {
+		$repoData{username} = $username;
+	}
+	return \%repoData;
+}
+
 #==========================================
 # __dumpInternalXMLDescription
 #------------------------------------------
@@ -1847,7 +1923,7 @@ sub setSelectionProfiles {
 	my $profRef = shift;
 	my $kiwi = $this->{kiwi};
 	if (! $profRef) {
-		$kiwi -> info ('No profiles specified, nothing selecetd');
+		$kiwi -> info ('No profiles specified, nothing selected');
 		$kiwi -> skipped();
 		return $this;
 	}
