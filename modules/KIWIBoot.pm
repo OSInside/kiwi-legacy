@@ -2746,7 +2746,6 @@ sub setupSplash {
 		}
 		return $initrd;
 	}
-	$kiwi -> done();
 	#==========================================
 	# build md5 sum for real new splash initrd
 	#------------------------------------------
