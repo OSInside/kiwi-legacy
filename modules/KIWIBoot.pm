@@ -2667,7 +2667,17 @@ sub setupBootFlags {
 		return;
 	}
 	qxx ("rm -rf $irddir");	
-	return $this->{initrd};
+	#==========================================
+	# recreate splash data to initrd
+	#------------------------------------------
+	my $splash = $initrd;
+	if (! ($splash =~ s/splash\.gz/spl/)) {
+		$splash =~ s/gz/spl/;
+	}
+	if (-f $splash) {
+		qxx ("cat $splash >> $initrd");
+	}
+	return $initrd;
 }
 
 #==========================================
