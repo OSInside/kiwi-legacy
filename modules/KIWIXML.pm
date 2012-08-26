@@ -324,7 +324,7 @@ sub new {
 	#==========================================
 	# Dump imageConfig to log
 	#------------------------------------------
-	# print $this->__dumpInternalXMLDescription();
+	print $this->__dumpInternalXMLDescription();
 	return $this;
 }
 
