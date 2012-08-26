@@ -232,9 +232,13 @@ sub new {
 	my $efi   = 0;
 	if (defined $initrd) {
 		if ($zipped) {
-			$status= qxx ("$unzip | cpio -it | grep efi_gop.module 2>&1");
+			$status= qxx (
+				"$unzip | cpio -it 2>/dev/null | grep efi_gop.module 2>&1"
+			);
 		} else {
-			$status= qxx ("cat $initrd | cpio -it | grep efi_gop.module 2>&1");
+			$status= qxx (
+				"cat $initrd | cpio -it 2>/dev/null | grep efi_gop.module 2>&1"
+			);
 		}
 		$result = $? >> 8;
 		if ($result == 0) {
@@ -2704,29 +2708,33 @@ sub setupSplash {
 		# splash initrd already created...
 		return $newird;
 	}
-	$kiwi -> info ("Setting up kernel splash screen...");
+	$kiwi -> info ("Setting up splash screen...\n");
 	#==========================================
 	# setup splash in initrd
 	#------------------------------------------
+	my $spllink = 0;
 	if ($isxen) {
 		$status = "--> skip splash initrd attachment on xen domU";
+		$spllink= 1;
 		qxx ("rm -f $splfile");
 	} elsif (-f $splfile) {
 		qxx ("cat $initrd $splfile > $newird");
-		$status = "ok";
+		$status = "--> kernel splash system will be used";
+		$spllink= 0;
 	} elsif (-f $plymouth) {
-		$status = "--> plymouth splash system in use";
+		$status = "--> plymouth splash system will be used";
 		qxx ("rm -f $plymouth");
+		$spllink= 1;
 	} else {
 		$status = "--> Can't find splash file: $splfile";
+		$spllink= 1;
 	}
+	$kiwi -> info ($status);
+	$kiwi -> done ();
 	#==========================================
-	# check status
+	# check splash compat status
 	#------------------------------------------
-	if ($status ne "ok") {
-		$kiwi -> skipped ();
-		$kiwi -> warning ($status);
-		$kiwi -> done ();
+	if ($spllink) {
 		$kiwi -> info ("Creating compat splash link...");
 		$status = $this -> setupSplashLink ($newird);
 		if ($status ne "ok") {
