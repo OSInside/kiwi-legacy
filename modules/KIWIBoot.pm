@@ -597,18 +597,12 @@ sub setupInstallCD {
 		$this->{system} = $system;
 	}
 	#==========================================
-	# read MBR disk label
+	# Create new MBR label for install ISO
 	#------------------------------------------
-	if (! open $FD,"dd 2>/dev/null if=$system bs=1 count=4 skip=\$((0x1b8))|") {
-		$kiwi -> error  ("Couldn't open: $system: $!");
-		$kiwi -> failed ();
-		return;
-	}
-	my $mbrid = sprintf "0x%08x", unpack "V", <$FD>;
-	if (($this->{mbrid}) && ($mbrid ne $this->{mbrid})) {
-		$this->{mbrid} = $mbrid;
-	}
-	close $FD;
+	$this->{mbrid} = $main::global -> getMBRDiskLabel();
+	$appid = $this->{mbrid};
+	$kiwi -> info ("Using ISO Application ID: $appid");
+	$kiwi -> done();
 	#==========================================
 	# read config XML attributes
 	#------------------------------------------
