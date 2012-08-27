@@ -714,11 +714,19 @@ sub setupInstallCD {
 		} else {
 			$kiwi -> info ("Using disk device: $haveDiskDevice");
 			$this->{loop}     = $haveDiskDevice;
-			$this->{bindloop} = $haveDiskDevice;
-			my $devcopy = $this->{bindloop};
-			my $lastc = chop $devcopy;
-			if ($lastc =~ /\d/) {
-				$this->{bindloop} = $haveDiskDevice."p";
+			$this->{bindloop} = $this -> __getPartBase ($haveDiskDevice);
+			if (! $this->{bindloop}) {
+				if (! $this -> bindDiskPartitions ($haveDiskDevice)) {
+					$kiwi -> failed ();
+					return;
+				}
+				$this->{bindloop} = $this -> __getPartBase (
+					$haveDiskDevice
+				);
+				if (! $this->{bindloop}) {
+					$kiwi -> failed ();
+					return;
+				}
 			}
 			$kiwi -> done();
 		}
@@ -1152,11 +1160,19 @@ sub setupInstallStick {
 		} else {
 			$kiwi -> info ("Using disk device: $haveDiskDevice");
 			$this->{loop}     = $haveDiskDevice;
-			$this->{bindloop} = $haveDiskDevice;
-			my $devcopy = $this->{bindloop};
-			my $lastc = chop $devcopy;
-			if ($lastc =~ /\d/) {
-				$this->{bindloop} = $haveDiskDevice."p";
+			$this->{bindloop} = $this -> __getPartBase ($haveDiskDevice);
+			if (! $this->{bindloop}) {
+				if (! $this -> bindDiskPartitions ($haveDiskDevice)) {
+					$kiwi -> failed ();
+					return;
+				}
+				$this->{bindloop} = $this -> __getPartBase (
+					$haveDiskDevice
+				);
+				if (! $this->{bindloop}) {
+					$kiwi -> failed ();
+					return;
+				}
 			}
 			$kiwi -> done();
 		}
@@ -6092,6 +6108,35 @@ sub __getPartID {
 		$fd -> close();
 	}
 	return 0;
+}
+
+#==========================================
+# __getPartBase
+#------------------------------------------
+sub __getPartBase {
+	# ...
+	# find the correct partition device for a
+	# given disk device by checking for the first
+	# two partitions
+	# ---
+	my $this = shift;
+	my $disk = shift;
+	my $devcopy = $disk;
+	my $devbase = basename $devcopy;
+	my @checklist = (
+		"/dev/".$devbase."1",
+		"/dev/".$devbase."2",
+		"/dev/".$devbase."p1",
+		"/dev/".$devbase."p2",
+		"/dev/mapper/".$devbase."p1",
+		"/dev/mapper/".$devbase."p2"
+	);
+	foreach my $device (@checklist) {
+		if (-b $device) {
+			chop $device;
+			return $device;
+		}
+	}
 }
 
 1;
