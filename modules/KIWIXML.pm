@@ -743,6 +743,46 @@ sub setRepository {
 }
 
 #==========================================
+# setSelectionProfileNames
+#------------------------------------------
+sub setSelectionProfileNames {
+	# ...
+	# Set the information about which profiles to use for data access,
+	# if no argument is given set to the default profile(s)
+	# ---
+	my $this     = shift;
+	my $profiles = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $profiles) {
+		delete $this->{availableProfiles};
+		my @def = ('kiwi_default');
+		$this->{selectedProfiles} = \@def;
+		$this->__populateProfileInfo();
+		return $this;
+	}
+	if ( ref($profiles) ne 'ARRAY' ) {
+		my $msg = 'setActiveProfiles, expecting array ref argument';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $msg = 'Attempting to set active profile to "PROF_NAME", but '
+		. 'this profile is not specified in the configuration.';
+	if (! $this -> __verifyProfNames($profiles, $msg)) {
+		return;
+	}
+	my @newProfs = @{$profiles};
+	my $info = join ', ', @newProfs;
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
+	if (! $this->__hasDefaultProfName($profiles) ) {
+		push @newProfs, 'kiwi_default';
+	}
+	$this->{selectedProfiles} = \@newProfs;
+	return $this;
+}
+
+#==========================================
 # Private helper methods
 #------------------------------------------
 #==========================================
@@ -1851,46 +1891,6 @@ sub getPXEDeployInitrd {
 }
 
 #==========================================
-# setActiveProfileNames
-#------------------------------------------
-sub setActiveProfileNames {
-	# ...
-	# Set the information about which profiles to use for data access,
-	# if no argument is given set to the default profile(s)
-	# ---
-	my $this     = shift;
-	my $profiles = shift;
-	my $kiwi = $this->{kiwi};
-	if (! $profiles) {
-		delete $this->{availableProfiles};
-		my @def = ('kiwi_default');
-		$this->{selectedProfiles} = \@def;
-		$this->__populateProfileInfo();
-		return $this;
-	}
-	if ( ref($profiles) ne 'ARRAY' ) {
-		my $msg = 'setActiveProfiles, expecting array ref argument';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	my $msg = 'Attempting to set active profile to "PROF_NAME", but '
-		. 'this profile is not specified in the configuration.';
-	if (! $this -> __verifyProfNames($profiles, $msg)) {
-		return;
-	}
-	my @newProfs = @{$profiles};
-	my $info = join ', ', @newProfs;
-	$kiwi -> info ("Using profile(s): $info");
-	$kiwi -> done ();
-	if (! $this->__hasDefaultProfName($profiles) ) {
-		push @newProfs, 'kiwi_default';
-	}
-	$this->{selectedProfiles} = \@newProfs;
-	return $this;
-}
-
-#==========================================
 # setArch
 #------------------------------------------
 sub setArch {
@@ -1907,51 +1907,6 @@ sub setArch {
 		return;
 	}
 	$this->{arch} = $newArch;
-	return $this;
-}
-
-
-#==========================================
-# setSelectionProfiles
-#------------------------------------------
-sub setSelectionProfiles {
-	# ...
-	# Set the profiles for which AML data information
-	# is to be returned by this object
-	# ---
-	my $this    = shift;
-	my $profRef = shift;
-	my $kiwi = $this->{kiwi};
-	if (! $profRef) {
-		$kiwi -> info ('No profiles specified, nothing selected');
-		$kiwi -> skipped();
-		return $this;
-	}
-	if (ref($profRef) ne "ARRAY") {
-		my $msg = 'Expecting array ref as argument for setSelectionProfiles';
-		$kiwi -> error ($msg);
-		$kiwi -> failed ();
-		return;
-	}
-	my @profSelect = @{$profRef};
-	my @specProfs = @{$this->{availableProfiles}};
-	my @useProfs;
-	for my $prof (@profSelect) {
-		if (! grep { /^$prof$/x } @specProfs ) {
-			my $msg = "Cannot select profile '$prof', not specified in XML";
-			$kiwi -> info ($msg);
-			$kiwi -> skipped();
-			next;
-		}
-		push @useProfs, $prof;
-	}
-	if (@useProfs) {
-		my $info = join ', ', @useProfs;
-		$kiwi -> info ("Using profile(s): $info");
-		$kiwi -> done ();
-		push @useProfs, 'kiwi_default';
-		$this->{selectedProfiles} = \@useProfs;
-	}
 	return $this;
 }
 
