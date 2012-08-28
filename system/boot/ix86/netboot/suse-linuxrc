@@ -234,6 +234,12 @@ if [ $LOCAL_BOOT = "no" ];then
 	# restore values from cmdline
 	#--------------------------------------
 	if [ ! -z "$ALLOW_CMDLINE_OVERWRITE" ];then
+		# if cmdline had *ROOT entries cleanup *ROOT entries from config.mac
+		if echo " ${KLIST[@]} " | grep -qE "[ \t](NFS|NBD|AOE)ROOT=" ;then
+			unset NBDROOT
+			unset NFSROOT
+			unset AOEROOT
+		fi
 		for i in ${KLIST[@]};do
 			eval export \"$i\"
 		done
