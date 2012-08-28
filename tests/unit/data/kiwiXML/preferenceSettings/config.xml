@@ -6,7 +6,8 @@
 		<specification>Test configuration to verify preferences settings and image attributes are stored and returned properly in the XML object</specification>
 	</description>
 	<preferences>
-		<boot-theme>bluestar</boot-theme>
+		<bootsplash-theme>bluestar</bootsplash-theme>
+		<bootloader-theme>silverlining</bootloader-theme>
 		<defaultdestination>/work/tmp</defaultdestination>
 		<defaultprebuilt>/work/kiwibootimgs</defaultprebuilt>
 		<defaultroot>/var/tmp</defaultroot>
