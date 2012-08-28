@@ -808,7 +808,8 @@ sub setTemplate {
 	print $FD "\t\t".'<locale>en_US</locale>'."\n";
 	print $FD "\t\t".'<keytable>us.map.gz</keytable>'."\n";
 	print $FD "\t\t".'<timezone>Europe/Berlin</timezone>'."\n";
-	print $FD "\t\t".'<boot-theme>openSUSE</boot-theme>'."\n";
+	print $FD "\t\t".'<bootloader-theme>openSUSE</bootloader-theme>'."\n";
+	print $FD "\t\t".'<bootsplash-theme>openSUSE</bootsplash-theme>'."\n";
 	print $FD "\t".'</preferences>'."\n";
 	#==========================================
 	# <repository>

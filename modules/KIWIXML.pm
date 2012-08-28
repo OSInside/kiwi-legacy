@@ -2413,15 +2413,23 @@ sub getLocale {
 #------------------------------------------
 sub getBootTheme {
 	# ...
-	# Obtain the boot-theme value or return undef
+	# Obtain the theme values for splash and bootloader
 	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("boot-theme");
-	my $theme= $node -> getElementsByTagName ("boot-theme");
-	if ((! defined $theme) || ("$theme" eq "")) {
-		return;
+	my $this   = shift;
+	my $snode  = $this -> __getPreferencesNodeByTagName ("bootsplash-theme");
+	my $lnode  = $this -> __getPreferencesNodeByTagName ("bootloader-theme");
+	my $splash = $snode -> getElementsByTagName ("bootsplash-theme");
+	my $loader = $lnode -> getElementsByTagName ("bootloader-theme");
+	my @result = (
+		"openSUSE","openSUSE"
+	);
+	if ((defined $splash) || ("$splash" ne "")) {
+		$result[0] = $splash;
 	}
-	return $theme;
+	if ((defined $loader) || ("$loader" ne "")) {
+		$result[1] = $loader;
+	}
+	return @result;
 }
 
 #==========================================
@@ -3195,11 +3203,12 @@ sub getImageConfig {
 		if (! $this -> __requestedProfile ($element)) {
 			next;
 		}
-		my $keytable = $element -> getElementsByTagName ("keytable");
-		my $timezone = $element -> getElementsByTagName ("timezone");
-		my $hwclock  = $element -> getElementsByTagName ("hwclock");
-		my $language = $element -> getElementsByTagName ("locale");
-		my $boottheme= $element -> getElementsByTagName ("boot-theme");
+		my $keytable    = $element -> getElementsByTagName ("keytable");
+		my $timezone    = $element -> getElementsByTagName ("timezone");
+		my $hwclock     = $element -> getElementsByTagName ("hwclock");
+		my $language    = $element -> getElementsByTagName ("locale");
+		my $splashtheme = $element -> getElementsByTagName ("bootsplash-theme");
+		my $loadertheme = $element -> getElementsByTagName ("bootloader-theme");
 		if ((defined $keytable) && ("$keytable" ne "")) {
 			$result{kiwi_keytable} = $keytable;
 		}
@@ -3212,8 +3221,11 @@ sub getImageConfig {
 		if ((defined $language) && ("$language" ne "")) {
 			$result{kiwi_language} = $language;
 		}
-		if ((defined $boottheme) && ("$boottheme" ne "")) {
-			$result{kiwi_boottheme}= $boottheme;
+		if ((defined $splashtheme) && ("$splashtheme" ne "")) {
+			$result{kiwi_splash_theme}= $splashtheme;
+		}
+		if ((defined $loadertheme) && ("$loadertheme" ne "")) {
+			$result{kiwi_loader_theme}= $loadertheme;
 		}
 	}
 	#==========================================
@@ -5955,8 +5967,11 @@ sub __updateDescriptionFromChangeSet {
 	if (defined $changeset->{"locale"}) {
 		$this -> __setOptionsElement ("locale",$changeset);
 	}
-	if (defined $changeset->{"boot-theme"}) {
-		$this -> __setOptionsElement ("boot-theme",$changeset);
+	if (defined $changeset->{"bootloader-theme"}) {
+		$this -> __setOptionsElement ("bootloader-theme",$changeset);
+	}
+	if (defined $changeset->{"bootsplash-theme"}) {
+		$this -> __setOptionsElement ("bootsplash-theme",$changeset);
 	}
 	if (defined $changeset->{"packagemanager"}) {
 		$this -> __setOptionsElement ("packagemanager",$changeset);

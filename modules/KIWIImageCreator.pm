@@ -1151,9 +1151,10 @@ sub __prepareTree {
 	# Check for setup of boot theme
 	#------------------------------------------
 	if ($attr{"type"} eq "cpio") {
-		my $theme = $xml -> getBootTheme();
-		if ($theme) {
-			$kiwi -> info ("Using boot theme: $theme");
+		my @theme = $xml -> getBootTheme();
+		if (@theme) {
+			$kiwi -> info ("Using bootsplash theme: $theme[0]");
+			$kiwi -> info ("Using bootloader theme: $theme[1]");
 		} else {
 			$kiwi -> warning ("No boot theme set, default is openSUSE");
 		}

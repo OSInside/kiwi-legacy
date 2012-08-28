@@ -678,7 +678,7 @@ function udevKill {
 function startPlymouth {
 	if which plymouthd &>/dev/null;then
 		mkdir --mode 755 /run/plymouth
-		plymouth-set-default-theme $kiwi_boottheme &>/dev/null
+		plymouth-set-default-theme $kiwi_splash_theme &>/dev/null
 		plymouthd \
 			--attach-to-session --pid-file /run/plymouth/pid &>/dev/null
 		plymouth show-splash &>/dev/null
@@ -1164,7 +1164,7 @@ function setupBootLoaderTheme {
 	#======================================
 	# no boot theme set, return
 	#--------------------------------------
-	if [ -z "$kiwi_boottheme" ];then
+	if [ -z "$kiwi_loader_theme" ];then
 		return
 	fi
 	#======================================
@@ -1184,9 +1184,9 @@ function setupBootLoaderTheme {
 	# change/create bootsplash config
 	#--------------------------------------
 	if cat $sysbootsplash | grep -q -E "^THEME"; then
-		sed -i "s/^THEME=.*/THEME=\"$kiwi_boottheme\"/" $sysbootsplash
+		sed -i "s/^THEME=.*/THEME=\"$kiwi_loader_theme\"/" $sysbootsplash
 	else
-		echo "THEME=\"$kiwi_boottheme\"" >> $sysbootsplash
+		echo "THEME=\"$kiwi_loader_theme\"" >> $sysbootsplash
 	fi
 }
 #======================================

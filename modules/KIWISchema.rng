@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 5.4</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 5.5</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -91,7 +91,7 @@ second the location of the XSD Schema
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>5.4</value>
+        <value>5.5</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -676,19 +676,36 @@ specifies the where to find the boot kernel.</db:para>
   </div>
   <!--
     ==========================================
-    common element <boot-theme>
+    common element <bootloader-theme>
     
   -->
   <div>
-    <!-- boot-theme -->
-    <define name="k.boot-theme.attlist">
+    <define name="k.bootloader-theme.attlist">
       <empty/>
     </define>
-    <define name="k.boot-theme">
-      <element name="boot-theme">
-        <a:documentation>Image bootsplash/gfxboot theme setup.</a:documentation>
-        <db:para>The value will be part used in suseGFXBoot</db:para>
-        <ref name="k.boot-theme.attlist"/>
+    <define name="k.bootloader-theme">
+      <element name="bootloader-theme">
+        <a:documentation>Image bootloader theme setup.</a:documentation>
+        <db:para>The value will be used in KIWIConfig.sh::suseGFXBoot</db:para>
+        <ref name="k.bootloader-theme.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <bootsplash-theme>
+    
+  -->
+  <div>
+    <define name="k.bootsplash-theme.attlist">
+      <empty/>
+    </define>
+    <define name="k.bootsplash-theme">
+      <element name="bootsplash-theme">
+        <a:documentation>Image bootsplash theme setup.</a:documentation>
+        <db:para>The value will be used in KIWIConfig.sh::suseGFXBoot</db:para>
+        <ref name="k.bootsplash-theme.attlist"/>
         <text/>
       </element>
     </define>
@@ -3673,7 +3690,10 @@ and also depends of the selected image output type.</db:para>
         <interleave>
           <ref name="k.preferences.attlist"/>
           <optional>
-            <ref name="k.boot-theme"/>
+            <ref name="k.bootsplash-theme"/>
+          </optional>
+          <optional>
+            <ref name="k.bootloader-theme"/>
           </optional>
           <optional>
             <ref name="k.defaultdestination"/>

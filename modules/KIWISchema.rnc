@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 5.4" ]
+	db:releaseinfo [ "RNC Schema Version 5.5" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -60,7 +60,7 @@ div {
 		attribute xsi:schemaLocation { xsd:anyURI }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "5.4" }
+		attribute schemaversion { "5.5" }
 	k.image.kiwirevision.attribute =
 		## A kiwi git revision number which is known to build
 		## a working image from this description. If the kiwi git
@@ -478,21 +478,39 @@ div { # locale
 }
 
 #==========================================
-# common element <boot-theme>
+# common element <bootloader-theme>
 #
-div { # boot-theme
-	k.boot-theme.attlist = empty
-	k.boot-theme =
-		## Image bootsplash/gfxboot theme setup.
+div {
+	k.bootloader-theme.attlist = empty
+	k.bootloader-theme =
+		## Image bootloader theme setup.
 		[
 		db:para [
-			"The value will be part used in suseGFXBoot"
+			"The value will be used in KIWIConfig.sh::suseGFXBoot"
 		]
 		]
-		element boot-theme {
-			k.boot-theme.attlist,
+		element bootloader-theme {
+			k.bootloader-theme.attlist,
 			text
 		}
+}
+
+#==========================================
+# common element <bootsplash-theme>
+#
+div {
+    k.bootsplash-theme.attlist = empty
+    k.bootsplash-theme =
+        ## Image bootsplash theme setup.
+        [
+        db:para [
+            "The value will be used in KIWIConfig.sh::suseGFXBoot"
+        ]
+        ]
+        element bootsplash-theme {
+            k.bootsplash-theme.attlist,
+            text
+        }
 }
 
 #==========================================
@@ -2513,7 +2531,8 @@ div {
 		## Configuration Information Needed for Logical Extend
 		element preferences {
 			k.preferences.attlist &
-			k.boot-theme? &
+			k.bootsplash-theme? &
+			k.bootloader-theme? &
 			k.defaultdestination? &
 			k.defaultprebuilt? &
 			k.defaultroot? &

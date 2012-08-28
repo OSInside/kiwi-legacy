@@ -3413,7 +3413,8 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Theme and Fonts table
 		#------------------------------------------
-		my $theme = $xml -> getBootTheme();
+		my @theme = $xml -> getBootTheme();
+		my $theme = $theme[1];
 		my $ascii = 'ascii.pf2';
 		my @fonts = (
 			"DejaVuSans-Bold14.pf2",

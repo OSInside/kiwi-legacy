@@ -993,9 +993,14 @@ function rhelSplashToGrub {
 function suseGFXBoot {
 	local theme=$1
 	local loader=$2
+	local loader_theme=$theme
+	local splash_theme=$theme
 	export PATH=$PATH:/usr/sbin
-	if [ ! -z "$kiwi_boottheme" ];then
-		theme=$kiwi_boottheme
+	if [ ! -z "$kiwi_splash_theme" ];then
+		splash_theme=$kiwi_splash_theme
+	fi
+	if [ ! -z "$kiwi_loader_theme"  ];then
+		loader_theme=$kiwi_loader_theme
 	fi
 	if [ ! -z "$kiwi_bootloader" ];then
 		loader=$kiwi_bootloader
@@ -1021,20 +1026,20 @@ function suseGFXBoot {
 		cd /usr/share/gfxboot
 		# check for new source layout
 		local newlayout=
-		[ -f themes/$theme/config ] && newlayout=1
+		[ -f themes/$loader_theme/config ] && newlayout=1
 		# create the archive [1]
-		[ "$newlayout" ] || make -C themes/$theme prep
-		make -C themes/$theme
+		[ "$newlayout" ] || make -C themes/$loader_theme prep
+		make -C themes/$loader_theme
 		# find gfxboot.cfg file
 		local gfxcfg=
 		if [ "$newlayout" ];then
 			if [ $loader = "isolinux" ];then
-				gfxcfg=themes/$theme/data-install/gfxboot.cfg
+				gfxcfg=themes/$loader_theme/data-install/gfxboot.cfg
 			else
-				gfxcfg=themes/$theme/data-boot/gfxboot.cfg
+				gfxcfg=themes/$loader_theme/data-boot/gfxboot.cfg
 			fi
 			if [ ! -f $gfxcfg ];then
-				gfxcfg=themes/$theme/src/gfxboot.cfg
+				gfxcfg=themes/$loader_theme/src/gfxboot.cfg
 			fi
 			if [ ! -f $gfxcfg ];then
 				echo "gfxboot.cfg not found !"
@@ -1067,23 +1072,23 @@ function suseGFXBoot {
 				if [ ! -z "$kiwi_language" ];then
 					for l in `echo $kiwi_language | tr "," " "`;do
 						echo "Adding language: $l"
-						echo $l >> themes/$theme/data-boot/languages
+						echo $l >> themes/$loader_theme/data-boot/languages
 					done
 				fi
 			fi
 		fi
 		# create the archive [2]
-		[ "$newlayout" ] || make -C themes/$theme prep
-		make -C themes/$theme
+		[ "$newlayout" ] || make -C themes/$loader_theme prep
+		make -C themes/$loader_theme
 		mkdir /image/loader
 		local gfximage=
 		local bootimage=
 		if [ "$newlayout" ] ; then
-			gfximage=themes/$theme/bootlogo
-			bootimage=themes/$theme/message
+			gfximage=themes/$loader_theme/bootlogo
+			bootimage=themes/$loader_theme/message
 		else
-			gfximage=themes/$theme/install/bootlogo
-			bootimage=themes/$theme/boot/message
+			gfximage=themes/$loader_theme/install/bootlogo
+			bootimage=themes/$loader_theme/boot/message
 		fi
 		if [ $loader = "isolinux" ];then
 			# isolinux boot data...
@@ -1098,14 +1103,14 @@ function suseGFXBoot {
 				if [ "$newlayout" ];then
 					for l in `echo $kiwi_language | tr "," " "`;do
 						l=$(echo $l | cut -f1 -d_)
-						cp themes/$theme/po/$l*.tr $msgdir
-						cp themes/$theme/help-boot/$l*.hlp $msgdir
+						cp themes/$loader_theme/po/$l*.tr $msgdir
+						cp themes/$loader_theme/help-boot/$l*.hlp $msgdir
 					done
 				else
 					for l in `echo $kiwi_language | tr "," " "`;do
 						l=$(echo $l | cut -f1 -d_)
-						cp themes/$theme/boot/$l*.tr  $msgdir
-						cp themes/$theme/boot/$l*.hlp $msgdir
+						cp themes/$loader_theme/boot/$l*.tr  $msgdir
+						cp themes/$loader_theme/boot/$l*.hlp $msgdir
 						echo $l >> $msgdir/languages
 					done
 				fi
@@ -1115,8 +1120,8 @@ function suseGFXBoot {
 				mv $bootimage /image/loader
 			fi
 		fi
-		make -C themes/$theme clean
-	elif [ -f /etc/bootsplash/themes/$theme/bootloader/message ];then
+		make -C themes/$loader_theme clean
+	elif [ -f /etc/bootsplash/themes/$loader_theme/bootloader/message ];then
 		#======================================
 		# use boot theme from gfxboot-branding
 		#--------------------------------------
@@ -1125,7 +1130,7 @@ function suseGFXBoot {
 		mkdir /image/loader
 		if [ $loader = "isolinux" ];then
 			# isolinux boot data...
-			mv /etc/bootsplash/themes/$theme/cdrom/* /image/loader
+			mv /etc/bootsplash/themes/$loader_theme/cdrom/* /image/loader
 			local gfxcfg=/image/loader/gfxboot.cfg
 			# tell the bootloader about live CD setup
 			gfxboot --config-file $gfxcfg \
@@ -1138,7 +1143,8 @@ function suseGFXBoot {
 				--change-config live::addopt.lang=1
 		else
 			# boot loader graphics image file...
-			mv /etc/bootsplash/themes/$theme/bootloader/message /image/loader
+			mv /etc/bootsplash/themes/$loader_theme/bootloader/message \
+				/image/loader
 			local archive=/image/loader/message
 			# tell the bootloader to hand over keytable to cmdline 
 			gfxboot --archive $archive \
@@ -1152,13 +1158,13 @@ function suseGFXBoot {
 					$(echo $kiwi_language | tr "," " ") --default-language en_US
 			fi
 		fi
-	elif [ -d /usr/share/grub2/themes/$theme ];then
+	elif [ -d /usr/share/grub2/themes/$loader_theme ];then
 		#======================================
 		# use boot theme from grub2-branding
 		#--------------------------------------
 		echo "using grub2 branding data"
-		mv /boot/grub2/themes/$theme/background.png \
-			/usr/share/grub2/themes/$theme
+		mv /boot/grub2/themes/$loader_theme/background.png \
+			/usr/share/grub2/themes/$loader_theme
 		mkdir /image/loader
 	else
 		#======================================
@@ -1209,7 +1215,7 @@ function suseGFXBoot {
 	#======================================
 	# create splash screen
 	#--------------------------------------
-	if [ -d /usr/share/plymouth/themes/$theme ];then
+	if [ -d /usr/share/plymouth/themes/$splash_theme ];then
 		echo "plymouth splash system is used"
 		touch "/plymouth.splash.active"
 		return
@@ -1222,37 +1228,41 @@ function suseGFXBoot {
 	sname[1]="10240768.spl"
 	sname[2]="12801024.spl"
 	index=0
-	if [ ! -d /etc/bootsplash/themes/$theme ];then
-		theme="SuSE-$theme"
+	if [ ! -d /etc/bootsplash/themes/$splash_theme ];then
+		theme="SuSE-$splash_theme"
 	fi
-	if [ ! -d /etc/bootsplash/themes/$theme ];then
+	if [ ! -d /etc/bootsplash/themes/$splash_theme ];then
 		echo "bootsplash branding not installed... skipped"
 		return
 	fi
 	mkdir -p /image/loader/branding
-	cp /etc/bootsplash/themes/$theme/images/logo.mng  /image/loader/branding
-	cp /etc/bootsplash/themes/$theme/images/logov.mng /image/loader/branding
+	cp /etc/bootsplash/themes/$splash_theme/images/logo.mng \
+		/image/loader/branding
+	cp /etc/bootsplash/themes/$splash_theme/images/logov.mng \
+		/image/loader/branding
 	for cfg in 800x600 1024x768 1280x1024;do
-		cp /etc/bootsplash/themes/$theme/images/bootsplash-$cfg.jpg \
+		cp /etc/bootsplash/themes/$splash_theme/images/bootsplash-$cfg.jpg \
 		/image/loader/branding
-		cp /etc/bootsplash/themes/$theme/images/silent-$cfg.jpg \
+		cp /etc/bootsplash/themes/$splash_theme/images/silent-$cfg.jpg \
 		/image/loader/branding
-		cp /etc/bootsplash/themes/$theme/config/bootsplash-$cfg.cfg \
+		cp /etc/bootsplash/themes/$splash_theme/config/bootsplash-$cfg.cfg \
 		/image/loader/branding
 	done
 	mkdir -p /image/loader/animations
-	cp /etc/bootsplash/themes/$theme/animations/* \
+	cp /etc/bootsplash/themes/$splash_theme/animations/* \
 		/image/loader/animations &>/dev/null
 	for cfg in 800x600 1024x768 1280x1024;do
 		/sbin/splash -s -c -f \
-			/etc/bootsplash/themes/$theme/config/bootsplash-$cfg.cfg |\
+			/etc/bootsplash/themes/$splash_theme/config/bootsplash-$cfg.cfg |\
 			gzip -9c \
 		> /image/loader/${sname[$index]}
 		tdir=/image/loader/xxx
 		mkdir $tdir
-		cp -a --parents /etc/bootsplash/themes/$theme/config/*-$cfg.* $tdir
-		cp -a --parents /etc/bootsplash/themes/$theme/images/*-$cfg.* $tdir
-		ln -s /etc/bootsplash/themes/$theme/config/bootsplash-$cfg.cfg \
+		cp -a --parents /etc/bootsplash/themes/$splash_theme/config/*-$cfg.* \
+			$tdir
+		cp -a --parents /etc/bootsplash/themes/$splash_theme/images/*-$cfg.* \
+			$tdir
+		ln -s /etc/bootsplash/themes/$splash_theme/config/bootsplash-$cfg.cfg \
 				$tdir/etc/splash.cfg
 		pushd $tdir
 		chmod -R a+rX .

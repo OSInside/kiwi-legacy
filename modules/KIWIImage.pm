@@ -246,7 +246,12 @@ sub updateDescription {
 	$changeset{"domain"}         = $domain;
 	$changeset{"displayname"}    = $src_xml->getImageDisplayName();
 	$changeset{"locale"}         = $src_xml->getLocale();
-	$changeset{"boot-theme"}     = $src_xml->getBootTheme();
+	#==========================================
+	# Store Theme data
+	#------------------------------------------
+	my @theme = $src_xml->getBootTheme();
+	$changeset{"bootsplash-theme"} = $theme[0];
+	$changeset{"bootloader-theme"} = $theme[1];
 	#==========================================
 	# Store LVM volumes
 	#------------------------------------------
