@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Aug 28 15:48:00 CEST 2012 - ms@suse.de
+
+- allow to overwrite the architecture when computing
+  package dependencies in the KIWIXMLInfo module. This
+  allows to provide package information for other than
+  the real architecture. In order to set the value the
+  environment variable: KIWI_REPO_INFO_ARCH must be set.
+
+-------------------------------------------------------------------
 Fri Aug 24 14:46:42 CEST 2012 - ms@suse.de
 
 - fixed qcow2 format creation. Invalid options are passed and
