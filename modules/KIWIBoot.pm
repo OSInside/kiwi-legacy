@@ -3409,7 +3409,6 @@ sub setupBootLoaderConfiguration {
 	# Grub2
 	#------------------------------------------
 	if ($loader eq "grub2") {
-		# TODO: xen dom0 boot still missing
 		#==========================================
 		# Theme and Fonts table
 		#------------------------------------------
@@ -3582,11 +3581,43 @@ sub setupBootLoaderConfiguration {
 				}
 				print FD "}\n";
 			} else {
-				$kiwi -> failed ();
-				$kiwi -> error  ("*** not implemented ***");
-				$kiwi -> failed ();
-				close FD;
-				return;
+				if ($type =~ /^KIWI CD/) {
+					print FD "echo Loading Xen\n";
+					print FD "multiboot ($rprefix)/boot/xen.gz dummy\n";
+					print FD "echo Loading linux...\n";
+					print FD "set gfxpayload=$gfxpayload"."\n";
+					print FD "module ($rprefix)/boot/linux dummy";
+					print FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
+					print FD " cdinst=1 loader=$bloader splash=silent";
+				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+					print FD "set root=\"(hd0,1)\"\n";
+					print FD "echo Loading Xen\n";
+					print FD "multiboot ($rprefix)/boot/xen.gz dummy\n";
+					print FD "echo Loading linux.vmx...\n";
+					print FD "set gfxpayload=$gfxpayload"."\n";
+					print FD 'module /boot/linux.vmx dummy';
+					print FD " loader=$bloader splash=silent";
+				} else {
+					print FD "set root=\"(hd0,1)\"\n";
+					print FD "echo Loading Xen\n";
+					print FD "multiboot ($rprefix)/boot/xen.gz dummy\n";
+					print FD "echo Loading linux...\n";
+					print FD "set gfxpayload=$gfxpayload"."\n";
+					print FD 'module /boot/linux dummy';
+					print FD " loader=$bloader splash=silent";
+				}
+				print FD $cmdline;
+				if ($type =~ /^KIWI CD/) {
+					print FD "echo Loading initrd...\n";
+					print FD "module ($rprefix)/boot/initrd dummy\n";
+				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+					print FD "echo Loading initrd.vmx...\n";
+					print FD "module /boot/initrd.vmx dummy\n";
+				} else {
+					print FD "echo Loading initrd...\n";
+					print FD "module /boot/initrd dummy\n";
+				}
+				print FD "}\n";
 			}
 			#==========================================
 			# Failsafe boot
@@ -3636,11 +3667,51 @@ sub setupBootLoaderConfiguration {
 					}
 					print FD "}\n";
 				} else {
-					$kiwi -> failed ();
-					$kiwi -> error  ("*** not implemented ***");
-					$kiwi -> failed ();
-					close FD;
-					return;
+					if ($type =~ /^KIWI CD/) {
+						print FD "echo Loading Xen\n";
+						print FD "multiboot ($rprefix)/boot/xen.gz dummy\n";
+						print FD "echo Loading linux...\n";
+						print FD "set gfxpayload=$gfxpayload"."\n";
+						print FD "module ($rprefix)/boot/linux dummy";
+						print FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
+						print FD " cdinst=1 loader=$bloader splash=silent";
+					} elsif (
+						($type=~ /^KIWI USB/) || 
+						($imgtype=~ /vmx|oem|split/)
+					) {
+						print FD "set root=\"(hd0,1)\"\n";
+						print FD "echo Loading Xen\n";
+						print FD "multiboot ($rprefix)/boot/xen.gz dummy\n";
+						print FD "echo Loading linux.vmx...\n";
+						print FD "set gfxpayload=$gfxpayload"."\n";
+						print FD 'module /boot/linux.vmx dummy';
+						print FD " loader=$bloader splash=silent";
+					} else {
+						print FD "set root=\"(hd0,1)\"\n";
+						print FD "echo Loading Xen\n";
+						print FD "multiboot ($rprefix)/boot/xen.gz dummy\n";
+						print FD "echo Loading linux...\n";
+						print FD "set gfxpayload=$gfxpayload"."\n";
+						print FD 'module /boot/linux dummy';
+						print FD " loader=$bloader splash=silent";
+					}
+					print FD " ide=nodma apm=off acpi=off noresume selinux=0";
+					print FD " nosmp noapic maxcpus=0 edd=off";
+					print FD $cmdline;
+					if ($type =~ /^KIWI CD/) {
+						print FD "echo Loading initrd...\n";
+						print FD "module ($rprefix)/boot/initrd dummy\n";
+					} elsif (
+						($type=~ /^KIWI USB/) || 
+						($imgtype=~ /vmx|oem|split/)
+					) {
+						print FD "echo Loading initrd.vmx...\n";
+						print FD "module /boot/initrd.vmx dummy\n";
+					} else {
+						print FD "echo Loading initrd...\n";
+						print FD "module /boot/initrd dummy\n";
+					}
+					print FD "}\n";
 				}
 			}
 			close FD;
