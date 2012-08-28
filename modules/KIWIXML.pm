@@ -4702,6 +4702,12 @@ sub getSingleInstSourceSatSolvable {
 	my $error    = 0;
 	my $RXML;
 	#==========================================
+	# allow arch overwrite
+	#------------------------------------------
+	if ($ENV{KIWI_REPO_INFO_ARCH}) {
+		$arch = $ENV{KIWI_REPO_INFO_ARCH};
+	}
+	#==========================================
 	# check for sat tools
 	#------------------------------------------
 	if ((! -x "/usr/bin/mergesolv") ||
