@@ -646,10 +646,15 @@
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term><sgmltag class="attribute">boot-theme</sgmltag></term>
+          <term><sgmltag class="attribute">bootsplash-theme</sgmltag></term>
           <listitem>
-            <para>Specifies the name of the gfxboot and bootsplash theme
-              to use </para>
+            <para>Specifies the name of the bootsplash theme to use </para>
+          </listitem>
+        </varlistentry>
+		<varlistentry>
+          <term><sgmltag class="attribute">bootloader-theme</sgmltag></term>
+          <listitem>
+            <para>Specifies the name of the gfxboot theme to use </para>
           </listitem>
         </varlistentry>
         <varlistentry>
