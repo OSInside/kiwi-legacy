@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.4" name="LimeJeOS-12.2">
+<image schemaversion="5.5" name="LimeJeOS-12.2">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -22,7 +22,8 @@
 		<timezone>Europe/Berlin</timezone>
 		<hwclock>utc</hwclock>
 		<rpm-excludedocs>true</rpm-excludedocs>
-		<boot-theme>openSUSE</boot-theme>
+		<bootsplash-theme>openSUSE</bootsplash-theme>
+		<bootloader-theme>openSUSE</bootloader-theme>
 	</preferences>
 	<preferences profiles="pandaFlavour">
 		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="console=ttyO2 vram=16M">

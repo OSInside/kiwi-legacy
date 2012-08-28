@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.4" name="LimeJeOS-SLE11">
+<image schemaversion="5.5" name="LimeJeOS-SLE11">
 	<description type="system">
 		<author>Marcus Schaefer</author>
 		<contact>cthiel@novell.com</contact>
@@ -9,7 +9,8 @@
 	<preferences>
 		<version>1.1.0</version>
 		<packagemanager>zypper</packagemanager>
-		<boot-theme>SLES</boot-theme>
+		<bootsplash-theme>SLES</bootsplash-theme>
+		<bootloader-theme>SLES</bootloader-theme>
 		<rpm-excludedocs>true</rpm-excludedocs>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>

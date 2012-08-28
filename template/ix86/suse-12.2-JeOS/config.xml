@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.4" name="LimeJeOS-openSUSE-12.2">
+<image schemaversion="5.5" name="LimeJeOS-openSUSE-12.2">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -23,7 +23,8 @@
 		<timezone>Europe/Berlin</timezone>
 		<hwclock>utc</hwclock>
 		<rpm-excludedocs>true</rpm-excludedocs>
-		<boot-theme>openSUSE</boot-theme>
+		<bootsplash-theme>openSUSE</bootsplash-theme>
+		<bootloader-theme>openSUSE</bootloader-theme>
 	</preferences>
 	<preferences profiles="xenFlavour">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.2" bootprofile="xen" bootkernel="xenk" bootloader="grub">

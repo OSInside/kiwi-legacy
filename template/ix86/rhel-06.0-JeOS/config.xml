@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.4" name="LimeJeOS-RHEL-06.2">
+<image schemaversion="5.5" name="LimeJeOS-RHEL-06.2">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@suse.com</contact>
@@ -21,7 +21,8 @@
 	<preferences>
 		<version>1.1.0</version>
 		<packagemanager>yum</packagemanager>
-		<boot-theme>upstream</boot-theme>
+		<bootsplash-theme>upstream</bootsplash-theme>
+		<bootloader-theme>upstream</bootloader-theme>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
