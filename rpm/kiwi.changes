@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Aug 29 17:48:31 CEST 2012 - ms@suse.de
+
+- fixed XSL stylesheets to correctly convert the schema
+
+-------------------------------------------------------------------
 Tue Aug 28 15:48:00 CEST 2012 - ms@suse.de
 
 - allow to overwrite the architecture when computing
