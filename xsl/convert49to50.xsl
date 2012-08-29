@@ -59,7 +59,7 @@
 						<xsl:copy-of select="@boot"/>
 					</xsl:otherwise>
 				</xsl:choose>
-				<xsl:apply-templates mode="xenmode"/>
+				<xsl:apply-templates mode="conv49to50"/>
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy-of select="@*"/>
@@ -69,15 +69,23 @@
 	</type>
 </xsl:template>
 
-<!-- add domain="domU" to machine section if in xen mode -->
-<xsl:template match="machine" mode="xenmode">
-	<machine>
-		<xsl:attribute name="domain">
-			<xsl:text>domU</xsl:text>
-		</xsl:attribute>
-		<xsl:copy-of select="@*"/>
-		<xsl:apply-templates mode="conv49to50"/>
-	</machine>
+<!-- add domain="domU" to machine section if parent is in xen mode -->
+<xsl:template match="type/machine" mode="conv49to50">
+		<machine>
+			<xsl:choose>
+				<xsl:when test="../@image='xen'">
+					<xsl:attribute name="domain">
+						<xsl:text>domU</xsl:text>
+					</xsl:attribute>
+					<xsl:copy-of select="@*"/>
+					<xsl:apply-templates mode="conv49to50"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:copy-of select="@*"/>
+					<xsl:apply-templates mode="conv49to50"/>
+				</xsl:otherwise>
+			</xsl:choose>
+		</machine>
 </xsl:template>
 
 </xsl:stylesheet>

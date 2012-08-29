@@ -46,7 +46,10 @@
 	<xsl:variable name="home" select="/image/preferences/oem-home"/>
 	<xsl:variable name="initrd" select="/image/preferences/oem-kiwi-initrd"/>
 	<xsl:variable name="reboot" select="/image/preferences/oem-reboot"/>
+	<xsl:variable name="inplace" select="/image/preferences/oem-inplace-recovery"/>
+	<xsl:variable name="align" select="/image/preferences/oem-align-partition"/>
 	<xsl:variable name="recovery" select="/image/preferences/oem-recovery"/>
+	<xsl:variable name="dumphalt" select="/image/preferences/oem-dumphalt"/>
 	<xsl:variable name="recoveryid" select="/image/preferences/oem-recoveryID"/>
 	<xsl:variable name="sapinstall" select="/image/preferences/oem-sap-install"/>
 	<xsl:variable name="swap" select="/image/preferences/oem-swap"/>
@@ -62,12 +65,15 @@
 				<xsl:copy-of select="$home"/>
 				<xsl:copy-of select="$initrd"/>
 				<xsl:copy-of select="$reboot"/>
+				<xsl:copy-of select="$align"/>
+				<xsl:copy-of select="$inplace"/>
 				<xsl:copy-of select="$recovery"/>
 				<xsl:copy-of select="$recoveryid"/>
 				<xsl:copy-of select="$sapinstall"/>
 				<xsl:copy-of select="$swap"/>
 				<xsl:copy-of select="$swapsize"/>
 				<xsl:copy-of select="$systemsize"/>
+				<xsl:copy-of select="$dumphalt"/>
 			</oemconfig>
 		</xsl:if>
 	</image>
@@ -78,11 +84,14 @@
 <xsl:template match="preferences/oem-home" mode="conv38to39"/>
 <xsl:template match="preferences/oem-kiwi-initrd" mode="conv38to39"/>
 <xsl:template match="preferences/oem-reboot" mode="conv38to39"/>
+<xsl:template match="preferences/oem-inplace-recovery" mode="conv38to39"/>
+<xsl:template match="preferences/oem-align-partition" mode="conv38to39"/>
 <xsl:template match="preferences/oem-recovery" mode="conv38to39"/>
 <xsl:template match="preferences/oem-recoveryID" mode="conv38to39"/>
 <xsl:template match="preferences/oem-sap-install" mode="conv38to39"/>
 <xsl:template match="preferences/oem-swap" mode="conv38to39"/>
 <xsl:template match="preferences/oem-swapsize" mode="conv38to39"/>
 <xsl:template match="preferences/oem-systemsize" mode="conv38to39"/>
+<xsl:template match="preferences/oem-dumphalt" mode="conv38to39"/>
 
 </xsl:stylesheet>

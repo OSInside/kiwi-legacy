@@ -49,63 +49,63 @@
     <xsl:choose>
         <xsl:when test="text()='ec2'">
             <type>
-                <xsl:call-template name="insertcomprops" mode="conv39to41"/>
+                <xsl:call-template name="insertcomprops"/>
             </type>
         </xsl:when>
         <xsl:when test="text()='iso'">
             <type>
-                <xsl:call-template name="insertcomprops" mode="conv39to41"/>
-				<xsl:call-template name="insertvmconfig" mode="conv39to41"/>
-				<xsl:call-template name="insertxenconfig" mode="conv39to41"/>
+                <xsl:call-template name="insertcomprops"/>
+				<xsl:call-template name="insertvmconfig"/>
+				<xsl:call-template name="insertxenconfig"/>
             </type>
         </xsl:when>
         <xsl:when test="text()='oem'">
             <type>
-                <xsl:call-template name="insertcomprops" mode="conv39to41"/>
+                <xsl:call-template name="insertcomprops"/>
                 <xsl:call-template name="insertlvm"/>
-                <xsl:call-template name="insertoemconfig" mode="conv39to41"/>
-                <xsl:call-template name="insertvmconfig" mode="conv39to41"/>
-                <xsl:call-template name="insertxenconfig" mode="conv39to41"/>
+                <xsl:call-template name="insertoemconfig"/>
+                <xsl:call-template name="insertvmconfig"/>
+                <xsl:call-template name="insertxenconfig"/>
             </type>
         </xsl:when>
         <xsl:when test="text()='split'">
             <type>
-                <xsl:call-template name="insertcomprops" mode="conv39to41"/>
-                <xsl:call-template name="insertoemconfig" mode="conv39to41"/>
-                <xsl:call-template name="insertsplit" mode="conv39to41"/>
-                <xsl:call-template name="insertvmconfig" mode="conv39to41"/>
-                <xsl:call-template name="insertxenconfig" mode="conv39to41"/>
+                <xsl:call-template name="insertcomprops"/>
+                <xsl:call-template name="insertoemconfig"/>
+                <xsl:call-template name="insertsplit"/>
+                <xsl:call-template name="insertvmconfig"/>
+                <xsl:call-template name="insertxenconfig"/>
             </type>
         </xsl:when>
         <xsl:when test="text()='usb'">
             <type>
-                <xsl:call-template name="insertcomprops" mode="conv39to41"/>
-                <xsl:call-template name="insertlvm" mode="conv39to41"/>
+                <xsl:call-template name="insertcomprops"/>
+                <xsl:call-template name="insertlvm"/>
             </type>
         </xsl:when>
         <xsl:when test="text()='vmx'">
             <type>
-                <xsl:call-template name="insertcomprops" mode="conv39to41"/>
-                <xsl:call-template name="insertlvm" mode="conv39to41"/>
-                <xsl:call-template name="insertvmconfig" mode="conv39to41"/>
-                <xsl:call-template name="insertxenconfig" mode="conv39to41"/>
+                <xsl:call-template name="insertcomprops"/>
+                <xsl:call-template name="insertlvm"/>
+                <xsl:call-template name="insertvmconfig"/>
+                <xsl:call-template name="insertxenconfig"/>
             </type>
         </xsl:when>
         <xsl:when test="text()='xen'">
             <type>
-                <xsl:call-template name="insertcomprops" mode="conv39to41"/>
-                <xsl:call-template name="insertxenconfig" mode="conv39to41"/>
+                <xsl:call-template name="insertcomprops"/>
+                <xsl:call-template name="insertxenconfig"/>
             </type>
         </xsl:when>
         <xsl:when test="text()='pxe'">
             <type>
-                <xsl:call-template name="insertcomprops" mode="conv39to41"/>
-                <xsl:call-template name="insertpxe" mode="conv39to41"/>
+                <xsl:call-template name="insertcomprops"/>
+                <xsl:call-template name="insertpxe"/>
             </type>
         </xsl:when>
         <xsl:otherwise>
             <type>
-                <xsl:call-template name="insertcomprops" mode="conv39to41"/>
+                <xsl:call-template name="insertcomprops" />
                 <xsl:apply-templates select="*"/>
             </type>
         </xsl:otherwise>
@@ -135,7 +135,7 @@
 <xsl:template name="insertlvm" mode="conv39to41">
     <xsl:if test="/image/lvmvolumes">
         <lvmvolumes>
-        <xsl:call-template name="insertblockchldnodes" mode="conv39to41">
+        <xsl:call-template name="insertblockchldnodes">
             <xsl:with-param name="blockname" select="/image/lvmvolumes"/>
         </xsl:call-template>
         </lvmvolumes>
@@ -146,7 +146,7 @@
 <xsl:template name="insertoemconfig" mode="conv39to41">
     <xsl:if test="/image/oemconfig">
         <oemconfig>
-        <xsl:call-template name="insertblockchldnodes" mode="conv39to41">
+        <xsl:call-template name="insertblockchldnodes">
           <xsl:with-param name="blockname" select="/image/oemconfig"/>
         </xsl:call-template>
         </oemconfig>
@@ -158,7 +158,7 @@
     <xsl:if test="/image/pxedeploy">
         <pxedeploy>
         <xsl:copy-of select="/image/pxedeploy/@*"/>
-        <xsl:call-template name="insertblockchldnodes" mode="conv39to41">
+        <xsl:call-template name="insertblockchldnodes">
             <xsl:with-param name="blockname" select="/image/pxedeploy"/>
         </xsl:call-template>  
         </pxedeploy>
@@ -169,7 +169,7 @@
 <xsl:template name="insertsplit" mode="conv39to41">
     <xsl:if test="/image/split">
         <split>
-        <xsl:call-template name="insertblockchldnodes" mode="conv39to41">
+        <xsl:call-template name="insertblockchldnodes">
             <xsl:with-param name="blockname" select="/image/split"/>
         </xsl:call-template>
         </split>
@@ -181,7 +181,7 @@
     <xsl:if test="/image/vmwareconfig">
         <vmwareconfig>
         <xsl:copy-of select="/image/vmwareconfig/@*"/>
-        <xsl:call-template name="insertblockchldnodes" mode="conv39to41">
+        <xsl:call-template name="insertblockchldnodes">
             <xsl:with-param name="blockname" select="/image/vmwareconfig"/>
         </xsl:call-template>
         </vmwareconfig>
@@ -193,7 +193,7 @@
     <xsl:if test="/image/xenconfig">
         <xenconfig>
         <xsl:copy-of select="/image/xenconfig/@*"/>
-        <xsl:call-template name="insertblockchldnodes" mode="conv39to41">
+        <xsl:call-template name="insertblockchldnodes">
             <xsl:with-param name="blockname" select="/image/xenconfig"/>
         </xsl:call-template>
         </xenconfig>
