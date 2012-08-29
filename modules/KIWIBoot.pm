@@ -4177,6 +4177,17 @@ sub installBootLoader {
 		print $dmfd "(hd0) $diskname\n";
 		$dmfd -> close();
 		#==========================================
+		# Setup device names
+		#------------------------------------------
+		if ((! $this->{bindloop}) && (-b $diskname)) {
+			$this->{bindloop} = $diskname;
+			my $devcopy = $this->{bindloop};
+			my $lastc = chop $devcopy;
+			if ($lastc =~ /\d/) {
+				$this->{bindloop} = $diskname."p";
+			}
+		}
+		#==========================================
 		# Install grub2
 		#------------------------------------------
 		my $stages = "/mnt/boot/grub2/i386-pc";
@@ -4201,7 +4212,6 @@ sub installBootLoader {
 			#==========================================
 			# install grub2 into partition
 			#------------------------------------------
-			my $rdev = $this->{bindloop}."1";
 			$rdev = readlink ($rdev);
 			$rdev =~ s/\.\./\/dev/;
 			$status = qxx (
