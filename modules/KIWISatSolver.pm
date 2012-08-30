@@ -155,6 +155,12 @@ sub new {
 		#------------------------------------------
 		$pool = new satsolver::Pool;
 		$arch = qx (uname -m); chomp $arch;
+		#==========================================
+		# allow arch overwrite
+		#------------------------------------------
+		if ($ENV{KIWI_REPO_INFO_ARCH}) {
+			$arch = $ENV{KIWI_REPO_INFO_ARCH};
+		}
 		$pool -> set_arch ($arch);
 		foreach my $solv (keys %{$solvable}) {
 			my $FD;
