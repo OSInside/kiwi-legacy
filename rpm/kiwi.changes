@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Aug 30 12:55:20 CEST 2012 - ms@suse.de
+
+- allow to overwrite the architecture when computing
+  package dependencies in the KIWISatSolver module. This
+  allows to provide package information for other than
+  the real architecture. In order to set the value the
+  environment variable: KIWI_REPO_INFO_ARCH must be set
+
+-------------------------------------------------------------------
 Wed Aug 29 17:48:31 CEST 2012 - ms@suse.de
 
 - fixed XSL stylesheets to correctly convert the schema
