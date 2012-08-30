@@ -1,8 +1,0 @@
-[Unit]
-Description=Show Console
-
-[Service]
-ExecStart=-/bin/plymouth --hide-splash
-
-[Install]
-WantedBy=runlevel3.target
