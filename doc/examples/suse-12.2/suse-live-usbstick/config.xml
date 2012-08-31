@@ -7,10 +7,10 @@
 		<specification>openSUSE 12.2 Live system for CD/DVD and USB Stick</specification>
 	</description>
 	<preferences>
-		<type image="oem" boot="oemboot/suse-12.2" filesystem="clicfs" bootloader="syslinux" ramonly="true">
+		<type image="oem" boot="oemboot/suse-12.2" filesystem="btrfs" fsmountoptions="compress=lzo" bootloader="syslinux">
+			<size unit="G">3</size>
 			<oemconfig>
-				<oem-swap>false</oem-swap>
-				<oem-systemsize>2048</oem-systemsize>
+				<oem-swapsize>512</oem-swapsize>
 				<oem-silent-boot>true</oem-silent-boot>
 			</oemconfig>
 			<systemdisk/>
@@ -31,7 +31,7 @@
 	<repository type="yast2">
 		<source path="opensuse://12.2/repo/oss/"/>
 	</repository>
-	<packages type="image">
+	<packages type="image" patternType="plusRecommended">
 		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default"/>
@@ -39,6 +39,7 @@
 		<package name="plymouth"/>
 		<package name="vim"/>
 		<package name="yast2-firstboot"/>
+		<package name="syslinux"/>
 		<opensusePattern name="base"/>
 		<opensusePattern name="kde4"/>
 	</packages>
