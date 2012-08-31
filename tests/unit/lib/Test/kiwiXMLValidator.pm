@@ -827,7 +827,7 @@ sub test_revisionMismatch {
 	my $kiwi = $this -> {kiwi};
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals(
-		"KIWI revision mismatch, require r3 got r1\n",$msg
+		"--> got: 1\n",$msg
 	);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);

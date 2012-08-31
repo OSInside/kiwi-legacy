@@ -879,10 +879,10 @@ sub __checkRevision {
 		my $req_rev = $imgnameNodeList
 			-> get_node(1) -> getAttribute ("kiwirevision");
 		if ((defined $req_rev) && ($cur_rev ne $req_rev)) {
-			$kiwi -> error  ("KIWI revision mismatch");
+			$kiwi -> error  ("KIWI revision check");
 			$kiwi -> failed ();
-			$kiwi -> info ("--> req: $req_rev\n");
-			$kiwi -> info ("--> got: $cur_rev\n");
+			$kiwi -> error ("--> req: $req_rev\n");
+			$kiwi -> error ("--> got: $cur_rev\n");
 			return;
 		}
 	}
