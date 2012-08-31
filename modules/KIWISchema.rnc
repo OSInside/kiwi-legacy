@@ -64,9 +64,9 @@ div {
 	k.image.kiwirevision.attribute =
 		## A kiwi git revision number which is known to build
 		## a working image from this description. If the kiwi git
-		## revision is less than the specified value the
+		## revision doesn't match the installed kiwi revision the
 		## process will exit.
-		attribute kiwirevision { xsd:nonNegativeInteger }
+		attribute kiwirevision { text }
 	k.image.id =
 		## An identification number which is represented in a file
 		## named /etc/ImageID

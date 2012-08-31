@@ -98,9 +98,8 @@ second the location of the XSD Schema
       <attribute name="kiwirevision">
         <a:documentation>A kiwi git revision number which is known to build
 a working image from this description. If the kiwi git
-revision is less than the specified value the
+revision doesn't match the installed kiwi revision the
 process will exit.</a:documentation>
-        <data type="nonNegativeInteger"/>
       </attribute>
     </define>
     <define name="k.image.id">
