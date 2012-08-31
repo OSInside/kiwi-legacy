@@ -1150,43 +1150,97 @@ function setupBootLoader {
 			"*** boot loader setup for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
-	setupBootLoaderTheme "/config"
+	setupBootThemes "/config"
 }
 #======================================
-# setupBootLoaderTheme
+# setupBootThemes
 #--------------------------------------
-function setupBootLoaderTheme {
+function setupBootThemes {
 	local destprefix=$1
 	local srcprefix=$2
 	if [ -z "$srcprefix" ];then
 		srcprefix=/mnt
 	fi
 	#======================================
-	# no boot theme set, return
+	# Splash theme setup
 	#--------------------------------------
-	if [ -z "$kiwi_loader_theme" ];then
-		return
+	if [ ! -z "$kiwi_splash_theme" ];then
+		local theme=$kiwi_splash_theme
+		#======================================
+		# gfxboot default setup
+		#--------------------------------------
+		local orig_bootsplash=$srcprefix/etc/sysconfig/bootsplash
+		local inst_bootsplash=$destprefix/etc/sysconfig/bootsplash
+		mkdir -p $destprefix/etc/sysconfig
+		touch $inst_bootsplash
+		#======================================
+		# check for bootsplash config in sysimg
+		#--------------------------------------
+		if [ -f $orig_bootsplash ];then
+			cp $orig_bootsplash $inst_bootsplash
+		fi
+		#======================================
+		# change/create bootsplash config
+		#--------------------------------------
+		if cat $inst_bootsplash | grep -q -E "^THEME"; then
+			sed -i "s/^THEME=.*/THEME=\"$theme\"/" $inst_bootsplash
+		else
+			echo "THEME=\"$theme\"" >> $inst_bootsplash
+		fi
+		#======================================
+		# plymouth splash
+		#--------------------------------------
+		if which plymouthd &>/dev/null;then
+			local orig_plymouthconf=$srcprefix/etc//plymouth/plymouth.conf
+			local inst_plymouthconf=$destprefix/etc//plymouth/plymouth.conf
+			mkdir -p $destprefix/etc/sysconfig
+			touch $inst_plymouthconf
+			#======================================
+			# check for plymouth config in sysimg
+			#--------------------------------------
+			if [ -f $orig_plymouthconf ];then
+				cp $orig_plymouthconf $inst_plymouthconf
+			fi
+			#======================================
+			# change/create plymouth config
+			#--------------------------------------
+			if cat $inst_plymouthconf | grep -q -E "^Theme"; then
+				sed -i "s/^Theme=.*/Theme=\"$theme\"/" $inst_plymouthconf
+			else
+				echo "[Daemon]" > $inst_plymouthconf
+				echo "Theme=\"$theme\"" >> $inst_plymouthconf
+			fi
+		fi
 	fi
 	#======================================
-	# prepare paths
+	# Bootloader theme setup
 	#--------------------------------------
-	local sysimg_bootsplash=$srcprefix/etc/sysconfig/bootsplash
-	local sysbootsplash=$destprefix/etc/sysconfig/bootsplash
-	mkdir -p $destprefix/etc/sysconfig
-	touch $sysbootsplash
-	#======================================
-	# check for bootsplash config in sysimg
-	#--------------------------------------
-	if [ -f $sysimg_bootsplash ];then
-		cp $sysimg_bootsplash $sysbootsplash
-	fi
-	#======================================
-	# change/create bootsplash config
-	#--------------------------------------
-	if cat $sysbootsplash | grep -q -E "^THEME"; then
-		sed -i "s/^THEME=.*/THEME=\"$kiwi_loader_theme\"/" $sysbootsplash
-	else
-		echo "THEME=\"$kiwi_loader_theme\"" >> $sysbootsplash
+	if [ ! -z "$kiwi_loader_theme" ];then
+		local theme=/boot/grub2/themes/$kiwi_loader_theme/theme.txt
+		#======================================
+		# grub2
+		#--------------------------------------
+		if [ "$kiwi_bootloader" = "grub2" ];then
+			local orig_default_grub=$srcprefix/etc/default/grub
+			local inst_default_grub=$destprefix/etc/default/grub
+			mkdir -p $destprefix/etc/sysconfig
+			touch $inst_default_grub
+			#======================================
+			# check for default config in sysimg
+			#--------------------------------------
+			if [ -f $orig_default_grub ];then
+				cp $orig_default_grub $inst_default_grub
+			fi
+			#======================================
+			# change/create default grub config
+			#--------------------------------------
+			if cat $inst_default_grub | grep -q -E "^GRUB_THEME"; then
+				sed -i "s/^GRUB_THEME=.*/GRUB_THEME=\"$theme\"/" \
+					$inst_default_grub
+			else
+				echo "GRUB_THEME=\"$theme\"" >> $inst_default_grub
+			fi
+		fi
 	fi
 }
 #======================================
