@@ -1099,6 +1099,26 @@ function setupSUSEInitrd {
 				rm -f /boot/linux.vmx
 			fi
 		fi
+		if [ "$loader" = "syslinux" ];then
+			# /.../
+			# if syslinux is used we need to make sure to copy
+			# the kernel and initrd to /boot on the boot partition.
+			# This is normally done by the boot -> . link but we
+			# can't create links on fat
+			# ----
+			IFS="," ; for i in $KERNEL_LIST;do
+				if test -z "$i";then
+					continue
+				fi
+				kernel=`echo $i | cut -f1 -d:`
+				initrd=`echo $i | cut -f2 -d:`
+				break
+			done
+			IFS=$IFS_ORIG
+			mkdir -p /boot/boot
+			cp /boot/$kernel /boot/boot/
+			cp /boot/$initrd /boot/boot/
+		fi
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper stop
 		fi
@@ -8391,7 +8411,7 @@ function resetBootBind {
 	#--------------------------------------	
 	if [ "$loader" = "syslinux" ];then
 		# /.../
-		# if syslinux is used we need to make sure to move
+		# if syslinux is used we need to make sure to copy
 		# the kernel and initrd to /boot on the boot partition.
 		# This is normally done by the boot -> . link but we
 		# can't create links on fat
@@ -8406,8 +8426,8 @@ function resetBootBind {
 		done
 		IFS=$IFS_ORIG
 		mkdir -p $bprefix/boot/boot
-		mv $bprefix/boot/$kernel $bprefix/boot/boot/
-		mv $bprefix/boot/$initrd $bprefix/boot/boot/
+		cp $bprefix/boot/$kernel $bprefix/boot/boot/
+		cp $bprefix/boot/$initrd $bprefix/boot/boot/
 	fi
 }
 #======================================
