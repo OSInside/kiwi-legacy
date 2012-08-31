@@ -4795,7 +4795,9 @@ function mountSystemClicFS {
 	#======================================
 	# check read/write device location
 	#--------------------------------------
-	if [ ! -e $rwDevice ];then
+	if [ ! -z "$kiwi_ramonly" ];then
+		ramOnly=1
+	elif [ ! -e $rwDevice ];then
 		ramOnly=1
 	elif getDiskDevice $rwDevice | grep -q ram;then
 		ramOnly=1
