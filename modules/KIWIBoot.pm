@@ -6102,20 +6102,18 @@ sub __initDiskSize {
 	if ($cmdlBytes > 0) {
 		if ($cmdlBytes < $minBytes) {
 			$kiwi -> warning (
-				"given size is smaller than calculated min size, fixing"
+				"given size is smaller than calculated min size"
 			);
 			$kiwi -> oops();
-			$cmdlBytes = $minBytes;
 		}
 		$minBytes = $cmdlBytes;
 		$this->{sizeSetByUser} = 1;
 	} elsif ($XMLBytes > 0) {
 		if ($XMLBytes < $minBytes) {
 			$kiwi -> warning (
-				"given size is smaller than calculated min size, fixing"
+				"given size is smaller than calculated min size"
 			);
 			$kiwi -> oops();
-			$XMLBytes = $minBytes;
 		}
 		$this->{sizeSetByUser} = 1;
 		$minBytes = $XMLBytes;
