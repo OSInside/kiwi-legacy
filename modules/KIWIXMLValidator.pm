@@ -875,15 +875,14 @@ sub __checkRevision {
 	my $systemTree = $this->{systemTree};
 	my $imgnameNodeList = $systemTree -> getElementsByTagName ("image");
 	if (open (my $FD, '<', $this->{revision})) {
-		my $cur_rev = <$FD>; close $FD;
+		my $cur_rev = <$FD>; close $FD; chomp $cur_rev;
 		my $req_rev = $imgnameNodeList
 			-> get_node(1) -> getAttribute ("kiwirevision");
 		if ((defined $req_rev) && ($cur_rev ne $req_rev)) {
+			$kiwi -> error  ("KIWI revision mismatch");
 			$kiwi -> failed ();
-			$kiwi -> error  (
-				"KIWI revision mismatch, require r$req_rev got r$cur_rev"
-			);
-			$kiwi -> failed ();
+			$kiwi -> info ("--> req: $req_rev\n");
+			$kiwi -> info ("--> got: $cur_rev\n");
 			return;
 		}
 	}
