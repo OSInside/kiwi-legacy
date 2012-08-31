@@ -328,12 +328,22 @@ sub mount {
 	my @UmountStack = @{$this->{UmountStack}};
 	my $status;
 	my $result;
+	my %fsattr;
+	my $type;
 	#==========================================
 	# Check for DISK file / device
 	#------------------------------------------
 	if ((-f $source) || (-b $source)) {
 		$status= qxx ("blkid $source 2>&1");
 		$result= $? >> 8;
+		if ($result != 0) {
+			# no block id information, check deeper for filesystem
+			%fsattr = $this -> checkFileSystem ($source);
+			$type   = $fsattr{type};
+			if ($type) {
+				$result = 0;
+			}
+		}
 		if ($result != 0) {
 			# no block id information, handle this as a disk 
 			$this->{isdisk} = 1;
@@ -390,12 +400,14 @@ sub mount {
 	#==========================================
 	# Check source filesystem
 	#------------------------------------------
-	my %fsattr = $this -> checkFileSystem ($source);
-	my $type   = $fsattr{type};
 	if (! %fsattr) {
-		$kiwi -> error  ("Couldn't detect filesystem on: $source");
-		$kiwi -> failed ();
-		return;
+		%fsattr = $this -> checkFileSystem ($source);
+		$type   = $fsattr{type};
+		if (! %fsattr) {
+			$kiwi -> error  ("Couldn't detect filesystem on: $source");
+			$kiwi -> failed ();
+			return;
+		}
 	}
 	#==========================================
 	# Check for LUKS extension
@@ -637,51 +649,49 @@ sub checkFileSystem {
 		# got a file, block special or something
 		#------------------------------------------
 		if (-e $fs) {
-			my $data = qxx ("dd if=$fs bs=128k count=1 2>/dev/null | file -");
+			my $data = qxx ("blkid -o value -s TYPE $fs");
 			my $code = $? >> 8;
 			my $type;
-			if ($code != 0) {
-				if ($main::kiwi -> trace()) {
-					$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
-				}
-				return;
-			}
 			SWITCH: for ($data) {
-				/ext4/      && do {
+				/ext4/         && do {
 					$type = "ext4";
 					last SWITCH;
 				};
-				/ext3/      && do {
+				/ext3/         && do {
 					$type = "ext3";
 					last SWITCH;
 				};
-				/ext2/      && do {
+				/ext2/         && do {
 					$type = "ext2";
 					last SWITCH;
 				};
-				/ReiserFS/  && do {
+				/reiserfs/     && do {
 					$type = "reiserfs";
 					last SWITCH;
 				};
-				/BTRFS/     && do {
+				/btrfs/        && do {
 					$type = "btrfs";
 					last SWITCH;
 				};
-				/Squashfs/  && do {
+				/squashfs/     && do {
 					$type = "squashfs";
 					last SWITCH;
 				};
-				/LUKS/      && do {
+				/luks/         && do {
 					$type = "luks";
 					last SWITCH;
 				};
-				/XFS/     && do {
+				/crypto_LUKS/  && do {
+					$type = "luks";
+					last SWITCH;
+				};
+				/xfs/          && do {
 					$type = "xfs";
 					last SWITCH;
 				};
 				# unknown filesystem type check clicfs...
 				$data = qxx (
-					"dd if=$fs bs=128k count=1 2>/dev/null | grep -q CLIC"
+					"dd if=$fs bs=128k count=1 2>/dev/null | grep -qi CLIC"
 				);
 				$code = $? >> 8;
 				if ($code == 0) {
