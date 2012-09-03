@@ -232,6 +232,7 @@
 		<file name="vgremove"/>
 		<file name="vgrename"/>
 		<file name="vgscan"/>
+		<file name="vgs"/>
 		<file name="vol_id"/>
 		<file name="wc"/>
 		<file name="which"/>
