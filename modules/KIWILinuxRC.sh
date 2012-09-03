@@ -677,6 +677,9 @@ function udevKill {
 #--------------------------------------
 function startPlymouth {
 	if which plymouthd &>/dev/null;then
+		if ! dd if=/dev/fb0 of=/dev/null bs=1 count=1 &>/dev/null;then
+			return
+		fi
 		mkdir --mode 755 /run/plymouth
 		plymouth-set-default-theme $kiwi_splash_theme &>/dev/null
 		plymouthd \
