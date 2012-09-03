@@ -1154,11 +1154,13 @@ sub __prepareTree {
 		my @theme = $xml -> getBootTheme();
 		if (@theme) {
 			$kiwi -> info ("Using bootsplash theme: $theme[0]");
+			$kiwi -> done ();
 			$kiwi -> info ("Using bootloader theme: $theme[1]");
+			$kiwi -> done ();
 		} else {
 			$kiwi -> warning ("No boot theme set, default is openSUSE");
+			$kiwi -> done ();
 		}
-		$kiwi -> done ();
 	}
 	#==========================================
 	# Initialize root system
