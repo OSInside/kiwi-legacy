@@ -22,6 +22,7 @@ kiwi_prefix = ${buildroot}/usr/share/kiwi
 tftp_prefix = ${buildroot}/srv/tftpboot
 doc_prefix  = ${buildroot}/usr/share/doc/packages
 man_prefix  = ${buildroot}/usr/share/man
+emacs_prefix= ${buildroot}/usr/share/emacs
 
 #============================================
 # Variables... 
@@ -33,6 +34,8 @@ KIWIXSLVZ   = ${kiwi_prefix}/xsl
 TOOLSVZ     = ${bin_prefix}
 INITVZ      = ${init_prefix}
 KIWIIMAGE   = ${kiwi_prefix}/image
+KIWIEDITING = ${kiwi_prefix}/editing
+KIWIEMACS   = ${emacs_prefix}/site-lisp
 KIWIREPO    = ${kiwi_prefix}/repo
 TFTPKIWI    = ${tftp_prefix}/KIWI
 TFTPBOOT    = ${tftp_prefix}/
@@ -73,6 +76,14 @@ install:
 	install -d -m 755 ${TFTPUPLOAD} ${KIWIREPO}
 	install -d -m 755 ${PACKDOCVZ} ${MANVZ}
 	install -d -m 755 ${TOOLSVZ} ${INITVZ}
+	install -d -m 755 ${KIWIEDITING} ${KIWIEMACS}
+
+	#============================================
+	# install XML editor support
+	#--------------------------------------------
+	# for Emacs
+	install -m 644 ./editing/suse-start-kiwi-mode.el ${KIWIEMACS}
+	install -m 644 ./editing/suse-start-kiwi-xmllocator.xml ${KIWIEDITING}
 
 	#============================================
 	# install .revision file
@@ -207,6 +218,7 @@ uninstall:
 	rm -rf /usr/share/kiwi
 	rm -rf /usr/share/doc/packages/kiwi
 	rm -f /usr/sbin/kiwi
+	rm -f /usr/share/emacs/site-lisp/suse-start-kiwi-mode.el
 	
 build:
 	./.doit -p --local
