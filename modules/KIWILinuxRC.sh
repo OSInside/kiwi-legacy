@@ -1157,9 +1157,9 @@ function setupBootThemes {
 		# plymouth splash
 		#--------------------------------------
 		if which plymouthd &>/dev/null;then
-			local orig_plymouthconf=$srcprefix/etc//plymouth/plymouth.conf
-			local inst_plymouthconf=$destprefix/etc//plymouth/plymouth.conf
-			mkdir -p $destprefix/etc/sysconfig
+			local orig_plymouthconf=$srcprefix/etc/plymouth/plymouth.conf
+			local inst_plymouthconf=$destprefix/etc/plymouth/plymouth.conf
+			mkdir -p $destprefix/etc/plymouth
 			touch $inst_plymouthconf
 			#======================================
 			# check for plymouth config in sysimg
@@ -1189,7 +1189,7 @@ function setupBootThemes {
 		if [ "$kiwi_bootloader" = "grub2" ];then
 			local orig_default_grub=$srcprefix/etc/default/grub
 			local inst_default_grub=$destprefix/etc/default/grub
-			mkdir -p $destprefix/etc/sysconfig
+			mkdir -p $destprefix/etc/default
 			touch $inst_default_grub
 			#======================================
 			# check for default config in sysimg
