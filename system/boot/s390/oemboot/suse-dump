@@ -209,14 +209,43 @@ function OEMInstall {
 	if [ ! -z "$ramdisk" ];then
 		deviceDisks="$deviceDisks /dev/ram1"
 	fi
+	#======================================
+	# Sort devices by capabilities
+	#--------------------------------------
+	for i in $deviceDisks;do
+		#======================================
+		# Can we read chunks from it
+		#--------------------------------------
+		if ! dd if=$i of=/dev/null bs=1 count=1 &>/dev/null;then
+			Echo "Can't read from device $i... skipped"
+			continue
+		fi
+		#======================================
+		# Does it provide a real serial ID
+		#--------------------------------------
+		serial=$(dmraid -b $i | cut -f2 -d,)
+		if [ "$serial" = "N/A" ];then
+			Echo "Can't find serial device identifier for $i... skipped"
+			continue
+		fi
+		deviceDisks_new="$deviceDisks_new $i"
+	done
+	#======================================
+	# Sort devices by name
+	#--------------------------------------
+	deviceDisks=$(for i in $deviceDisks_new; do echo $i;done | sort | xargs)
+	#======================================
+	# We need at least one device left
+	#--------------------------------------
 	if [ -z "$deviceDisks" ];then
 		systemException \
 			"No device(s) for installation found... abort" \
 		"reboot"
 	fi
-	Echo "Found following disk device(s)"
+	#======================================
+	# Process devices for user selection
+	#--------------------------------------
 	count=0
-	deviceDisks=$(for i in $deviceDisks; do echo $i;done | sort | xargs)
 	for i in $deviceDisks;do
 		dbyid=$(getDiskID $i)
 		dsize=$(partitionSize $dbyid)
