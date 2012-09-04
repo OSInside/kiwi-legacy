@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Sep  4 11:59:54 CEST 2012 - ms@suse.de
+
+- netboot: enable multicast for system image and transfer
+  to a block device, respectively disable it for any other
+  transfer (bnc #773649)
+
+-------------------------------------------------------------------
 Thu Aug 30 12:55:20 CEST 2012 - ms@suse.de
 
 - allow to overwrite the architecture when computing
