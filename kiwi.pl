@@ -1037,6 +1037,19 @@ sub init {
 	#--------------------------------------------
 	if (defined $TargetArch) {
 		$cmdL -> setImageArchitecture ($TargetArch);
+		$kiwi -> warning ("--target-arch option set:\n".
+			"  This option influences the behavior of zypper\n".
+			"  Thus it has no effect on other package managers !\n".
+			"  This option is used to force the installation of packages\n".
+			"  for a specific architecture and is not the right choice when\n".
+			"  a complete image should be build for a specific architecture\n".
+			"  Building 32bit images on a 64bit host should be done by\n".
+			"  prefixing the kiwi call with 'linux32'. Cross building\n".
+			"  images for other architectures requires a build root\n".
+			"  environment of the target architecture and a virtualization\n".
+			"  layer handling the binary format. The qemu-binfmt-conf.sh\n".
+			"  and the openSUSE buildservice tool osc helps you here\n"
+		);
 	}
 	#============================================
 	# check if a partitioner is used
