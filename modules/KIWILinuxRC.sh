@@ -1007,6 +1007,7 @@ function setupRHELInitrd {
 	for i in `find /boot/ -name "System.map*"`;do
 		systemMap=1
 	done
+	setupDefaultTheme
 	if [ $systemMap -eq 1 ];then
 		if [ ! -e /proc/mounts ];then
 			mount -t proc proc /proc
@@ -1075,6 +1076,7 @@ function setupSUSEInitrd {
 	for i in `find /boot/ -name "System.map*"`;do
 		systemMap=1
 	done
+	setupDefaultTheme
 	if [ $systemMap -eq 1 ];then
 		if [ ! -e /proc/mounts ];then
 			mount -t proc proc /proc
@@ -1136,6 +1138,14 @@ function setupSUSEInitrd {
 		Echo "Can't create initrd"
 		systemIntegrity=unknown
 		bootLoaderOK=0
+	fi
+}
+#======================================
+# setupDefaultTheme
+#--------------------------------------
+function setupDefaultTheme {
+	if which plymouthd &>/dev/null;then
+		plymouth-set-default-theme $kiwi_splash_theme &>/dev/null
 	fi
 }
 #======================================
