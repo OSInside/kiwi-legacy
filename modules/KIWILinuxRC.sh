@@ -1088,7 +1088,7 @@ function setupSUSEInitrd {
 #--------------------------------------
 function setupDefaultTheme {
 	if which plymouthd &>/dev/null;then
-		plymouth-set-default-theme $kiwi_splash_theme &>/dev/null
+		plymouth-set-default-theme $kiwi_boottheme &>/dev/null
 	fi
 }
 #======================================
