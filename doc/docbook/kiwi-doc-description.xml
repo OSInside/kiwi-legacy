@@ -415,27 +415,35 @@
                 <listitem>
                   <para>Creates a fuse based compressed read-only
                     filesystem which allows write operations into a cow
-                    file. </para>
+                    file. If the iso is bigger than 4G you can use the
+					clic_udf flag instead</para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><sgmltag class="attvalue">seed</sgmltag></term>
+                <listitem>
+                  <para>Creates a btrfs based compressed read-only
+                    filesystem which allows write operations into a btrfs
+                    seed device. </para>
                 </listitem>
               </varlistentry>
               <varlistentry>
                 <term><sgmltag class="attvalue"
                   >compressed</sgmltag></term>
                 <listitem>
-                  <para>Compressed filesystem with squashfs mounted with
-                    an aufs based overlay mount to allow read-write
-                    access. </para>
+                  <para>Creates a split ext3 plus squashfs filesystem and
+                    combines them via a symlink system to a complete system
+                    it is recommended to specify a <sgmltag>split</sgmltag>
+                    section as a child of this type element.     
+                  </para>
                 </listitem>
               </varlistentry>
             </variablelist>
-            <para>If the flags attribute is not used the filesystem will
-              not be compressed and no union filesystem is used. In this
-              case it is recommended to specify a
-                <sgmltag>split</sgmltag> section as a child of this type
-              element. The specification of a split block is also
-              recommended when <sgmltag class="attribute"
-                >flags</sgmltag>="<sgmltag class="attvalue"
-                >compressed</sgmltag>" is used. </para>
+            <para>If the flags attribute is not used the filesystem
+              will be squashfs compressed for /bin /boot /lib /lib64 /opt /sbin
+              and /usr. The rest of the filesystem is packed into a tmpfs
+              and linked via symbolic links 
+            </para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -1044,7 +1052,7 @@
               mountpoint="/" target="true"/&gt; 
      &lt;partition type="fd"  number="3"/&gt; 
    &lt;/partitions&gt; 
-   &lt;union ro="dev" rw="dev" type="aufs|clicfs|unionfs"/&gt; 
+   &lt;union ro="dev" rw="dev" type="clicfs"/&gt; 
    &lt;configuration source="/KIWI/../file" dest="/../file" arch="..."/&gt;
    &lt;configuration .../&gt; 
 &lt;/pxedeploy&gt; </screen>
@@ -1123,10 +1131,8 @@
                   filesystem such as squashfs and should be mounted in
                   read-write mode use the optional union element. The
                   type attribute is used to specify one of the supported
-                  overlay filesystem (<systemitem class="filesystem"
-                    >aufs</systemitem>, <systemitem class="filesystem"
-                    >clicfs</systemitem>, or <systemitem
-                    class="filesystem">unionfs</systemitem>). Use the ro
+                  overlay filesystem <systemitem class="filesystem">clicfs</systemitem>
+                  Use the ro
                   attribute to point to the read only device and the rw
                   attribute to point to the read-write device. </para>
               </listitem>

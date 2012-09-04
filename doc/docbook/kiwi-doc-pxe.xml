@@ -542,7 +542,7 @@ KIWI_INITRD=/boot/<replaceable>name-of-initrd-file</replaceable>
           <term><varname>UNIONFS_CONFIG</varname></term>
           <listitem>
             <para>For netboot images there is the
-              possibility to use clicfs or aufs as container filesystem
+              possibility to use clicfs as container filesystem
               in combination with a compressed system image. The
               recommended compressed filesystem type for the system
               image is <emphasis role="bold">clicfs</emphasis>.
@@ -555,7 +555,7 @@ UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs
               read/write filesystem and the second device <filename
                 class="devicefile">/dev/sda3</filename> represents the
               compressed system image filesystem. The container
-              filesystem aufs is then used to cover the read/write layer
+              filesystem clicfs is then used to cover the read/write layer
               with the read-only device to one read/write filesystem. If
               a file on the read-only device is going to be written the
               changes inodes are part of the read/write filesystem.
@@ -567,7 +567,7 @@ UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs
 <screen>
 IMAGE='/dev/sda3;image/myImage;1.1.1;192.168.1.1;4096'
 PART='200;S;x,300;L;/,x;L;x'
-UNIONFS_CONFIG=/dev/sda2,/dev/sda3,aufs
+UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs
 DISK=/dev/sda
 </screen>
 
@@ -632,7 +632,7 @@ NBD-Write-Port-Number;/dev/NBD-Write-Device
               a network block device is only established if the client
               has less than 48 MB of RAM. The optional
               NBD-Write-Port-Number and NBD-Write-Device specifies a
-              write COW location for the root filesystem. aufs is used
+              write COW location for the root filesystem. clicfs is used
               as overlay filesystem in this case. </para>
           </listitem>
         </varlistentry>
@@ -676,8 +676,7 @@ AOEROOT=/dev/etherd/e0.1
 
             <para> KIWI is now able to mount and use the specified AoE
               device as the remote root filesystem. In case of a
-              compressed read-only image with <systemitem class="filesystem">aufs</systemitem> 
-              or <systemitem class="filesystem">clicfs</systemitem>, the
+              compressed read-only image with <systemitem class="filesystem">clicfs</systemitem>, the
               AOEROOT variable can also contain a device for the write
               actions: </para>
 
@@ -706,17 +705,6 @@ AOEROOT=/dev/etherd/e0.1,/dev/ram1
 NFSROOT=NFS.Server.IP.address;/path/to/root/tree
 </screen>
 
-            <para> Optionally you can set a <varname>UNIONFS_CONFIG</varname> variable
-              which defines an aufs based overlay NFS directory or
-              device like: </para>
-
-<screen>
-UNIONFS_CONFIG=/tmp/kiwi-cow,nfs,aufs # write to NFS directory
-UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM
-</screen>
-
-            <para> This way you can keep the original root tree clean
-              from any modifications </para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -842,7 +830,7 @@ IMAGE='/dev/ram1;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
         <secondary>union image</secondary>
       </indexterm>
       <para>As used in the suse-pxe-client example it is possible to
-        make use of the aufs or clicfs overlay filesystems to combine
+        make use of the clicfs overlay filesystems to combine
         two filesystems into one. In case of thin clients there is often
         the need for a compressed filesystem due to space limitations.
         Unfortunately all common compressed filesystems provides only
@@ -858,7 +846,7 @@ DISK=/dev/sda
 PART='5;S;x,62;L;/,x;L;x'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;\
       1.2.8;192.168.100.2;4096'
-UNIONFS_CONFIG=/dev/sda3,/dev/sda2,aufs
+UNIONFS_CONFIG=/dev/sda3,/dev/sda2,clicfs
 KIWI_INITRD=/boot/initrd
 </screen>
 
