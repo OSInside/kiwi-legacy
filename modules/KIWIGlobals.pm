@@ -340,7 +340,7 @@ sub mount {
 			# no block id information, check deeper for filesystem
 			%fsattr = $this -> checkFileSystem ($source);
 			$type   = $fsattr{type};
-			if ($type) {
+			if (($type) && ($type ne "auto")) {
 				$result = 0;
 			}
 		}
