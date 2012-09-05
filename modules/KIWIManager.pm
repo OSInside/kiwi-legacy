@@ -2387,28 +2387,33 @@ sub setupPackageKeys {
 	$kiwi -> info ("Importing build keys...");
 	my $dumsigsExec = '/usr/lib/rpm/gnupg/dumpsigs';
 	my $keyringFile = '/usr/lib/rpm/gnupg/pubring.gpg';
-	if (! -x $dumsigsExec) {
-		$kiwi -> skipped ();
-		$kiwi -> warning ("Can't find dumpsigs on host system");
-		$kiwi -> skipped ();
-		return $this;
-	}
-	if (! -f $keyringFile) {
-		$kiwi -> skipped ();
-		$kiwi -> warning ("Can't find build keys on host system");
-		$kiwi -> skipped ();
-		return $this;
-	}
-	my $dump = $dumsigsExec . ' ' . $keyringFile;
-	my $sigs = "$root/rpm-sigs";
-	$data = qxx ("mkdir -p $sigs && cd $sigs && $dump 2>&1");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> skipped ();
-		$kiwi -> error  ("Can't dump pubkeys: $data");
-		$kiwi -> failed ();
-		qxx ("rm -rf $sigs");
-		return $this;
+	my $keydir      = '/usr/lib/rpm/gnupg/keys';
+	my $sigs        = "$root/rpm-sigs";
+	if (! -d $keydir) {
+		if (! -x $dumsigsExec) {
+			$kiwi -> skipped ();
+			$kiwi -> warning ("Can't find dumpsigs on host system");
+			$kiwi -> skipped ();
+			return $this;
+		}
+		if (! -f $keyringFile) {
+			$kiwi -> skipped ();
+			$kiwi -> warning ("Can't find build keys on host system");
+			$kiwi -> skipped ();
+			return $this;
+		}
+		my $dump = $dumsigsExec . ' ' . $keyringFile;
+		$data = qxx ("mkdir -p $sigs && cd $sigs && $dump 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> skipped ();
+			$kiwi -> error  ("Can't dump pubkeys: $data");
+			$kiwi -> failed ();
+			qxx ("rm -rf $sigs");
+			return $this;
+		}
+	} else {
+		$sigs = $keydir;
 	}
 	$data.= qxx ("rpm -r $root --import $sigs/gpg-pubke* 2>&1");
 	$code = $? >> 8;
