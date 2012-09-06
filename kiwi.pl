@@ -590,6 +590,7 @@ sub init {
 	#------------------------------------------
 	my $gdata = $global -> getGlobals();
 	my $Help;
+	my $ArchiveImage;          # archive image results into a tarball
 	my $FSBlockSize;           # filesystem block size
 	my $FSInodeSize;           # filesystem inode size
 	my $FSJournalSize;         # filesystem journal size
@@ -682,6 +683,7 @@ sub init {
 	# get options and call non-root tasks
 	#------------------------------------------
 	my $result = GetOptions(
+		"archive-image"         => \$ArchiveImage,
 		"add-package=s"         => \@AddPackage,
 		"add-pattern=s"         => \@AddPattern,
 		"add-profile=s"         => \@Profiles,
@@ -803,6 +805,12 @@ sub init {
 	$cmdL -> setMigrationOptions (
 		\@Exclude,\@Skip,$MigrateNoFiles,$MigrateNoTemplate
 	);
+	#========================================
+	# check if archive-image option is set
+	#----------------------------------------
+	if (defined $ArchiveImage) {
+		$cmdL -> setArchiveImage ($ArchiveImage);
+	}
 	#========================================
 	# check if edit-bootconfig option is set
 	#----------------------------------------
@@ -1489,6 +1497,10 @@ sub usage {
 	print "\n";
 	print "    [ --prebuiltbootimage <directory> ]\n";
 	print "      search in <directory> for pre-built boot images\n";
+	print "\n";
+	print "    [ --archive-image ]\n";
+	print "      When calling kiwi --create this option allows to pack\n";
+	print "      the build result(s) into a tar archive\n";
 	print "\n";
 	print "    [ --isocheck ]\n";
 	print "      in case of an iso image the checkmedia program generates\n";

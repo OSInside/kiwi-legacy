@@ -23,6 +23,7 @@ require Exporter;
 #==========================================
 # KIWI Modules
 #------------------------------------------
+use File::Basename;
 use KIWICommandLine;
 use KIWIImageFormat;
 use KIWILocator;
@@ -500,6 +501,19 @@ sub createImage {
 	if (! defined $dirCreated) {
 		return;
 	}
+	my $profileNames = join ("-",@{$xml->{reqProfiles}});
+	if ($profileNames) {
+		$destination.="/".$attr{type}."-".$profileNames;
+	} else {
+		$destination.="/".$attr{type};
+	}
+	if ((! -d $destination) && (! mkdir $destination)) {
+		$kiwi -> error  ("Failed to create destination subdir: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	$this -> {imageTgtDir} = $destination;
+	$cmdL -> setImagetargetDir ($destination);
 	#==========================================
 	# Check tool set
 	#------------------------------------------
@@ -722,9 +736,10 @@ sub createImage {
 		return;
 	}
 	if ($ok) {
+		my $imgName = $main::global -> generateBuildImageName ($xml);
 		if (($checkFormat) && ($attr{format})) {
 			my $haveFormat = $attr{format};
-			my $imgfile= $destination."/".$image -> buildImageName();
+			my $imgfile= $destination."/".$imgName;
 			my $format = KIWIImageFormat -> new(
 				$kiwi,$imgfile,$cmdL,$haveFormat,$xml
 			);
@@ -742,6 +757,38 @@ sub createImage {
 			}
 		}
 		undef $image;
+		#==========================================
+		# Package build result into an archive
+		#------------------------------------------
+		my $basedest = dirname  $destination;
+		my $basesubd = basename $destination;
+		my $tarfile  = $basedest."/".$imgName."-".$basesubd.".tgz";
+		if ($cmdL -> getArchiveImage()) {
+			$kiwi -> info ("Archiving image build result...");
+			my $status = qxx ("tar -C $destination -czSf $tarfile . 2>&1");
+			my $result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> error (
+					"Failed to archive image build result: $status"
+				);
+				$kiwi -> failed ();
+				return;
+			}
+			$kiwi -> done();
+		}
+		#==========================================
+		# Move build result(s) to destination dir
+		#------------------------------------------
+		my $status = qxx ("mv -f $destination/* $basedest 2>&1");
+		my $result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error (
+				"Failed to move result image file(s) to destination: $status"
+			);
+			$kiwi -> failed ();
+			return;
+		}
+		rmdir $destination;
 		return 1;
 	} else {
 		undef $image;
