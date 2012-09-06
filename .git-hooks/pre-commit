@@ -17,17 +17,20 @@ my @kiwiModules = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
 					KIWIURL.pm KIWIUtil.pm KIWIXML.pm
 					KIWIXMLDescriptionData.pm KIWIXMLDriverData.pm
-					KIWIXMLFileData.pm KIWIXMLInfo.pm KIWIXMLRepositoryData.pm
+					KIWIXMLEC2ConfigData.pm KIWIXMLFileData.pm KIWIXMLInfo.pm
+					KIWIXMLRepositoryData.pm
 					KIWIXMLValidator.pm
 					KIWICommandLine.t KIWIImageCreator.t
 					KIWILocator.t KIWIRuntimeChecker.t KIWIXML.t
 					KIWIXMLDescriptionData.t KIWIXMLDriverData.t
-					KIWIXMLFileData.t KIWIXMLInfo.t KIWIXMLRepositoryData.t
+					KIWIXMLEC2ConfigData.t KIWIXMLFileData.t KIWIXMLInfo.t
+					KIWIXMLRepositoryData.t
 					KIWIXMLValidator.t ktLog.pm ktTestCase.pm
 					kiwiCommandLine.pm kiwiLocator.pm kiwiImageCreator.pm
 					kiwiRuntimeChecker.pm kiwiXML.pm
 					kiwiXMLDescriptionData.pm kiwiXMLDriverData.pm
-					kiwiXMLFileData.pm kiwiXMLInfo.pm kiwiXMLRepositoryData.pm
+					kiwiXMLEC2ConfigData.pm kiwiXMLFileData.pm kiwiXMLInfo.pm
+					kiwiXMLRepositoryData.pm
 					kiwiXMLValidator.pm collector.pl);
 
 # List of modules not clean to level 1 (brutal) of perlcritic
@@ -41,17 +44,20 @@ my @notClean1 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
 					KIWIURL.pm KIWIUtil.pm KIWIXML.pm
 					KIWIXMLDescriptionData.pm KIWIXMLDriverData.pm
-					KIWIXMLFileData.pm KIWIXMLInfo.pm KIWIXMLRepositoryData.pm
+					KIWIXMLEC2ConfigData.pm KIWIXMLFileData.pm KIWIXMLInfo.pm
+					KIWIXMLRepositoryData.pm
 					KIWIXMLValidator.pm
 					KIWICommandLine.t KIWIImageCreator.t
 					KIWILocator.t KIWIRuntimeChecker.t KIWIXML.t
 					KIWIXMLDescriptionData.t KIWIXMLDriverData.t
-					KIWIXMLFileData.t KIWIXMLInfo.t KIWIXMLRepositoryData.t
+					KIWIXMLEC2ConfigData.t KIWIXMLFileData.t KIWIXMLInfo.t
+					KIWIXMLRepositoryData.t
 					KIWIXMLValidator.t ktLog.pm ktTestCase.pm
 					kiwiCommandLine.pm kiwiLocator.pm kiwiImageCreator.pm
 					kiwiRuntimeChecker.pm kiwiXML.pm
 					kiwiXMLDescriptionData.pm kiwiXMLDriverData.pm
-					kiwiXMLFileData.pm kiwiXMLInfo.pm kiwiXMLRepositoryData.pm
+					kiwiXMLEC2ConfigData.pm kiwiXMLFileData.pm kiwiXMLInfo.pm
+					kiwiXMLRepositoryData.pm
 					kiwiXMLValidator.pm collector.pl);
 
 # List of modules not clean to level 2 (cruel) of perlcritic
@@ -70,7 +76,8 @@ my @notClean2 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWICommandLine.t KIWIImageCreator.t
 					KIWILocator.t KIWIRuntimeChecker.t KIWIXML.t
 					KIWIXMLDescriptionData.t KIWIXMLDriverData.t
-					KIWIXMLFileData.t KIWIXMLInfo.t KIWIXMLRepositoryData.t
+					KIWIXMLEC2ConfigData.t KIWIXMLFileData.t KIWIXMLInfo.t
+					KIWIXMLRepositoryData.t
 					KIWIXMLValidator.t ktTestCase.pm
 					kiwiCommandLine.pm kiwiLocator.pm kiwiImageCreator.pm
 					kiwiRuntimeChecker.pm kiwiXML.pm kiwiXMLInfo.pm
@@ -90,7 +97,8 @@ my @notClean3 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWIXMLValidator.pm KIWICommandLine.t KIWIImageCreator.t
 					KIWILocator.t KIWIRuntimeChecker.t KIWIXML.t
 					KIWIXMLDescriptionData.t KIWIXMLDriverData.t
-					KIWIXMLFileData.t KIWIXMLInfo.t KIWIXMLRepositoryData.t
+					KIWIXMLEC2ConfigData.t KIWIXMLFileData.t KIWIXMLInfo.t
+					KIWIXMLRepositoryData.t
 					KIWIXMLValidator.t kiwiCommandLine.pm kiwiLocator.pm
 					kiwiImageCreator.pm kiwiRuntimeChecker.pm kiwiXML.pm
 					kiwiXMLInfo.pm kiwiXMLValidator.pm collector.pl);
@@ -106,7 +114,8 @@ my @notClean4 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm
 					KIWICommandLine.t KIWIImageCreator.t
 					KIWILocator.t KIWIRuntimeChecker.t KIWIXML.t
 					KIWIXMLDescriptionData.t KIWIXMLDriverData.t
-					KIWIXMLFileData.t KIWIXMLInfo.t KIWIXMLRepositoryData.t
+					KIWIXMLEC2ConfigData.t KIWIXMLFileData.t KIWIXMLInfo.t
+					KIWIXMLRepositoryData.t
 					collector.pl);
 
 # List of modules not clean to level 5 (gentel) of perlcritic

@@ -1,5 +1,6 @@
 KIWIXML.t
 KIWIXMLDescriptionData.t
 KIWIXMLDriverData.t
+KIWIXMLEC2ConfigData.t
 KIWIXMLFileData.t
 KIWIXMLRepositoryData.t
