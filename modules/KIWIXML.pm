@@ -32,8 +32,16 @@ use KIWIQX qw (qxx);
 use KIWIURL;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
+use KIWIXMLEC2ConfigData;
+use KIWIXMLOEMConfigData;
+use KIWIXMLPreferenceData;
+use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
+use KIWIXMLSplitData;
+use KIWIXMLSystemdiskData;
+use KIWIXMLTypeData;
 use KIWIXMLValidator;
+use KIWIXMLVMachineData;
 use KIWISatSolver;
 
 #==========================================
@@ -86,6 +94,32 @@ sub new {
 	#			drivers     = (),
 	#			pkgs        = ()
 	#		}
+	#       preferences = {
+	#           bootloader_theme = '',
+	#           bootsplash_theme = '',
+	#           ........
+	#           types = {
+	#               type[+] = {
+	#                   arch[+] = {
+	#                       bootPkgs    = (),
+	#			            bootDelPkgs = (),
+	#			            delPkgs     = (),
+	#			            drivers     = (),
+	#			            pkgs        = ()
+	#		            }
+	#                   boot       = '',
+	#                   bootkernel = '',
+	#                   bootDelPkgs = (),
+	#                   bootPkgs    = (),
+	#                   delPkgs     = (),
+	#                   .......
+	#                   packages   = (),
+	#                   vga        = '',
+	#                   volid      = ''
+	#               }
+	#           }
+	#           version = ''
+	#       }
 	#		profInfo = {
 	#			description = '',
 	#			import      = ''
@@ -99,20 +133,8 @@ sub new {
 	#				...
 	#			}
 	#		}
-	#		type[+] = {
-	#			bootPkgs    = (),
-	#			bootDelPkgs = (),
-	#			delPkgs     = (),
-	#			pkgs        = (),
-	#			arch[+] = {
-	#				...
-	#			}
-	#			boot       = '',
-	#			bootkernel = '',
-	#			...
-	#		}
 	#		...
-	#	}
+	#     }
 	# }
 	# ---
 	#==========================================
@@ -254,6 +276,18 @@ sub new {
 	# Populate imageConfig with diver data from config tree
 	#------------------------------------------
 	$this -> __populateDriverInfo();
+	#==========================================
+	# Populate imageConfig with preferences data from config tree
+	#------------------------------------------
+	if (! $this -> __populatePreferenceInfo() ) {
+		return;
+	}
+	#==========================================
+	# Set the default build type
+	#------------------------------------------
+	if (! $this -> __setDefaultBuildType() ) {
+		return;
+	}
 	#==========================================
 	# Populate imageConfig with repository data from config tree
 	#------------------------------------------
@@ -534,6 +568,55 @@ sub addRepositories {
 }
 
 #==========================================
+# getActiveProfileNames
+#------------------------------------------
+sub getActiveProfileNames {
+	# ...
+	# Return an array ref containing the names of the active profiles;
+	# this does not reveal the default (kiwi_default) name, as this is
+	# always active
+	# ---
+	my $this = shift;
+	my @selected = @{$this->{selectedProfiles}};
+	my @active = ();
+	for my $prof (@selected) {
+		if ($prof eq 'kiwi_default') {
+			next;
+		}
+		push @active, $prof;
+	}
+	return \@active;
+}
+
+#==========================================
+# getConfiguredTypeNames
+#------------------------------------------
+sub getConfiguredTypeNames {
+	# ...
+	# Return an array ref of image type names avaliable across the
+	# selected profiles.
+	# ---
+	my $this = shift;
+	my @typeNames;
+	for my $profName ( @{$this->{selectedProfiles}} ) {
+		if ( $this->{imageConfig}{$profName}{preferences}{types} ) {
+			my @names = keys %{ $this->{imageConfig}
+									->{$profName}
+									->{preferences}
+									->{types}
+								};
+			for my $name (@names) {
+				if ($name eq 'defaultType') {
+					next;
+				}
+				push @typeNames, $name;
+			}
+		}
+	}
+	return \@typeNames;
+}
+
+#==========================================
 # getDescriptionInfo
 #------------------------------------------
 sub getDescriptionInfo {
@@ -577,6 +660,80 @@ sub getDrivers {
 }
 
 #==========================================
+# getEC2Config
+#------------------------------------------
+sub getEC2Config {
+	# ...
+	# Return an EC2ConfigData object for the EC2 configuration of the current
+	# build type.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $ec2ConfObj = KIWIXMLEC2ConfigData -> new(
+		$kiwi,$this->{selectedType}{ec2config}
+	);
+	return $ec2ConfObj;
+}
+
+#==========================================
+# getImageType
+#------------------------------------------
+sub getImageType {
+	# ...
+	# Return a TypeData object for the selected build type
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $typeObj = KIWIXMLTypeData -> new(
+		$kiwi, $this->{selectedType}
+	);
+	return $typeObj;
+}
+
+#==========================================
+# getOEMConfig
+#------------------------------------------
+sub getOEMConfig {
+	# ...
+	# Return a OEMConfigData object for the selected build type
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $oemConfObj = KIWIXMLOEMConfigData -> new(
+		$kiwi,$this->{selectedType}{oemconfig}
+	);
+	return $oemConfObj;
+}
+
+#==========================================
+# getPreferences
+#------------------------------------------
+sub getPreferences {
+	# ...
+	# Return a PreferenceData object for the current selected build
+	# profile(s)
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $mergedPref = $this->{imageConfig}{kiwi_default}{preferences};
+	my @activeProfs = @{$this->{selectedProfiles}};
+	for my $prof (@activeProfs) {
+		if ($prof eq 'kiwi_default') {
+			next;
+		}
+		$mergedPref = $this -> __mergePreferenceData(
+			$mergedPref,$this->{imageConfig}{$prof}{preferences}						);
+		if (! $mergedPref ) {
+			return;
+		}
+	}
+	my $prefObj = KIWIXMLPreferenceData -> new(
+		$kiwi, $mergedPref
+	);
+	return $prefObj;
+}
+
+#==========================================
 # getProfiles
 #------------------------------------------
 sub getProfiles {
@@ -594,6 +751,22 @@ sub getProfiles {
 		push @result, { %profile };
 	}
 	return @result;
+}
+
+#==========================================
+# getPXEConfig
+#------------------------------------------
+sub getPXEConfig {
+	# ...
+	# Return a PXEDeployData object for the PXE boot configuration of the
+	# current build type.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(
+		$kiwi,$this->{selectedType}{pxedeploy}
+	);
+	return $pxeDataObj;
 }
 
 #==========================================
@@ -623,6 +796,54 @@ sub getRepositories {
 }
 
 #==========================================
+# getSplitConfig
+#------------------------------------------
+sub getSplitConfig {
+	# ...
+	# Return a SplitData object for the <split> configuration of
+	# the current build type
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $spltObj = KIWIXMLSplitData -> new(
+		$kiwi, $this->{selectedType}{split}
+	);
+	return $spltObj;
+}
+
+#==========================================
+# getSystemDiskConfig
+#------------------------------------------
+sub getSystemDiskConfig {
+	# ...
+	# Return a SystemdiskData object for the <systemdisk> configuration of
+	# the current build type
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $sysDiskObj = KIWIXMLSystemdiskData -> new(
+		$kiwi,$this->{selectedType}{systemdisk}
+	);
+	return $sysDiskObj;
+}
+
+#==========================================
+# getVMachineConfig
+#------------------------------------------
+sub getVMachineConfig {
+	# ...
+	# Return a VMachineData object for the virtual machine configuration of
+	# the current build type
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $vmConfObj = KIWIXMLVMachineData -> new(
+		$kiwi,$this->{selectedType}{machine}
+	);
+	return $vmConfObj;
+}
+
+#==========================================
 # ignoreRepositories
 #------------------------------------------
 sub ignoreRepositories {
@@ -642,13 +863,54 @@ sub ignoreRepositories {
 }
 
 #==========================================
+# setBuildType
+#------------------------------------------
+sub setBuildType {
+	# ...
+	# Set the type to be used as the build type
+	# ---
+	my $this     = shift;
+	my $typeName = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $typeName ) {
+		my $msg = 'setBuildType: no type name given, retaining current '
+			. 'build type setting.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my %availTypes = map { ($_ => 1) } @{ $this->getConfiguredTypeNames() };
+	if (! $availTypes{$typeName} ) {
+		my $msg = 'setBuildType: no type configuration exists for the '
+			. "given type '$typeName' in the current active profiles.";
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	for my $profName ( @{$this->{selectedProfiles}} ) {
+		if ( $this->{imageConfig}{$profName}{preferences}{types} ) {
+			my $typeDef = $this->{imageConfig}
+				->{$profName}
+				->{preferences}
+				->{types}
+				->{$typeName};
+			if ( $typeDef ) {
+				$this->{selectedType} = $typeDef;
+				last;
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
 # setDescriptionInfo
 #------------------------------------------
 sub setDescriptionInfo {
 	# ...
 	# Set the description information for this configuration
 	# ---
-	my $this              = shift;
+	my $this = shift;
 	my $xmlDescripDataObj = shift;
 	my $kiwi = $this->{kiwi};
 	if (! $xmlDescripDataObj ||
@@ -828,6 +1090,32 @@ sub __convertRepoDataToHash {
 }
 
 #==========================================
+# __convertSizeStrToMBVal
+#------------------------------------------
+sub __convertSizeStrToMBVal {
+	# ...
+	# Convert a given size string that contains M or G into a value
+	# that is a representation in MB.
+	#
+	my $this    = shift;
+	my $sizeStr = shift;
+	if (! $sizeStr ) {
+		return;
+	}
+	my $size = $sizeStr;
+	if ($sizeStr =~ /(\d+)([MG]*)/) {
+		my $byte = int $1;
+		my $unit = $2;
+		if ($unit eq "G") {
+			$size =  $byte * 1024;
+		} else {
+			$size =  $byte;
+		}
+	}
+	return $size;
+}
+
+#==========================================
 # __dumpInternalXMLDescription
 #------------------------------------------
 sub __dumpInternalXMLDescription {
@@ -843,6 +1131,538 @@ sub __dumpInternalXMLDescription {
 	my $dd = Data::Dumper->new([ %{$this->{imageConfig}} ]);
 	my $cd = $dd->Dump();
 	return $cd;
+}
+
+#==========================================
+# __genEC2ConfigHash
+#------------------------------------------
+sub __genEC2ConfigHash {
+	# ...
+	# Return a ref to a hash that contains the EC2 configuration data for the
+	# given XML:ELEMENT object. Build a data structure that matches the
+	# structure defined in KIWIXMLEC2ConfigData
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $ec2Config = $node -> getChildrenByTagName('ec2config') -> get_node(1);
+	if (! $ec2Config ) {
+		return;
+	}
+	my %ec2ConfigData;
+	$ec2ConfigData{ec2accountnr} = $this -> __getChildNodeTextValue(
+		$ec2Config, 'ec2accountnr'
+	);
+	$ec2ConfigData{ec2certfile}  = $this -> __getChildNodeTextValue(
+		$ec2Config, 'ec2certfile'
+	);
+	$ec2ConfigData{ec2privatekeyfile} =	$this -> __getChildNodeTextValue(
+		$ec2Config, 'ec2privatekeyfile'
+	);
+	my @ec2Regions = $ec2Config -> getChildrenByTagName('ec2region');
+	my @regions;
+	for my $regNode (@ec2Regions) {
+		push @regions, $regNode -> textContent();
+	}
+	my $selectedRegions;
+	if (@regions) {
+		$selectedRegions = \@regions;
+	}
+	$ec2ConfigData{ec2region} = $selectedRegions;
+	return \%ec2ConfigData;
+}
+
+#==========================================
+# __genOEMConfigHash
+#------------------------------------------
+sub __genOEMConfigHash {
+	# ...
+	# Return a ref to a hash containing the configuration for <oemconfig>
+	# of the given XML:ELEMENT object. Build a data structure that
+	# matches the structure defined in
+	# KIWIXMLOEMConfigData
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $oemConfNode = $node -> getChildrenByTagName('oemconfig');
+	if (! $oemConfNode ) {
+		return;
+	}
+	my $config = $oemConfNode -> get_node(1);
+	my %oemConfig;
+	$oemConfig{oem_align_partition}      =
+		$this -> __getChildNodeTextValue($config, 'oem-align-partition');
+	$oemConfig{oem_boot_title}           =
+		$this -> __getChildNodeTextValue($config, 'oem-boot-title');
+	$oemConfig{oem_bootwait}             =
+		$this -> __getChildNodeTextValue($config, 'oem-bootwait');
+	$oemConfig{oem_inplace_recovery}     =
+		$this -> __getChildNodeTextValue($config, 'oem-inplace-recovery');
+	$oemConfig{oem_kiwi_initrd}          =
+		$this -> __getChildNodeTextValue($config, 'oem-kiwi-initrd');
+	$oemConfig{oem_partition_install}    =
+		$this -> __getChildNodeTextValue($config, 'oem-partition-install');
+	$oemConfig{oem_reboot}               =
+		$this -> __getChildNodeTextValue($config, 'oem-reboot');
+	$oemConfig{oem_reboot_interactive}   =
+		$this -> __getChildNodeTextValue($config, 'oem-reboot-interactive');
+	$oemConfig{oem_recovery}             =
+		$this -> __getChildNodeTextValue($config, 'oem-recovery');
+	$oemConfig{oem_recoveryID}           =
+		$this -> __getChildNodeTextValue($config, 'oem-recoveryID');
+	$oemConfig{oem_shutdown}             =
+		$this -> __getChildNodeTextValue($config, 'oem-shutdown');
+	$oemConfig{oem_shutdown_interactive} =
+		$this -> __getChildNodeTextValue($config, 'oem-shutdown-interactive');
+	$oemConfig{oem_silent_boot}          =
+		$this -> __getChildNodeTextValue($config, 'oem-silent-boot');
+	$oemConfig{oem_swap}                 =
+		$this -> __getChildNodeTextValue($config, 'oem-swap');
+	$oemConfig{oem_swapsize}             =
+		$this -> __getChildNodeTextValue($config, 'oem-swapsize');
+	$oemConfig{oem_systemsize}           =
+		$this -> __getChildNodeTextValue($config, 'oem-systemsize');
+	$oemConfig{oem_unattended}           = 
+	$this -> __getChildNodeTextValue($config, 'oem-unattended');
+	$oemConfig{oem_unattended_id}        =
+		$this -> __getChildNodeTextValue($config, 'oem-unattended-id');
+	return \%oemConfig;
+}
+
+#==========================================
+# __genPXEDeployHash
+#------------------------------------------
+sub __genPXEDeployHash {
+	# ...
+	# Return a ref to a hash containing the configuration for <pxedeploy>
+	# of the given XML:ELEMENT object. Build a data structure that matches
+	# the structure defined in KIWIXMLPXEDeployData
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my %pxeConfig;
+	my $pxeDeployNode = $node -> getChildrenByTagName('pxedeploy');
+	if (! $pxeDeployNode ) {
+		return;
+	}
+	my $pxeNode = $pxeDeployNode -> get_node(1);
+	$pxeConfig{blocksize} = $pxeNode -> getAttribute('blocksize');
+	#==========================================
+	# Process <configuration>
+	#------------------------------------------
+	my $configNode = $pxeNode -> getChildrenByTagName('configuration');
+	if ( $configNode ) {
+		my $configSet = $configNode -> get_node(1);
+		my $archDef = $configSet -> getAttribute('arch');
+		if ($archDef) {
+			my @arches = split /,/, $archDef;
+			for my $arch (@arches) {
+				if (! $this->{supportedArch}{$arch} ) {
+					my $kiwi = $this->{kiwi};
+					my $msg = "Unsupported arch '$arch' in PXE setup.";
+					$kiwi -> error ($msg);
+					$kiwi -> failed ();
+					return -1;
+				}
+			}
+			$pxeConfig{configArch}   = \@arches;
+		}
+		$pxeConfig{configDest}   = $configSet -> getAttribute('dest');
+		$pxeConfig{configSource} = $configSet -> getAttribute('source');
+	}
+	$pxeConfig{initrd} = $this -> __getChildNodeTextValue($pxeNode, 'initrd');
+	$pxeConfig{kernel} = $this -> __getChildNodeTextValue($pxeNode, 'kernel');
+	#==========================================
+	# Process <partitions>
+	#------------------------------------------
+	my $partNode = $pxeNode -> getChildrenByTagName('partitions');
+	if ( $partNode ) {
+		my $partData = $partNode -> get_node(1);
+		$pxeConfig{device} = $partData -> getAttribute('device');
+		my %partData;
+		my @parts = $partData -> getChildrenByTagName('partition');
+		for my $part (@parts) {
+			my %partSet;
+			$partSet{mountpoint} = $part -> getAttribute('mountpoint');
+			my $id               = int $part -> getAttribute('number');
+			$partSet{size}       = $part -> getAttribute('size');
+			$partSet{target}     = $part -> getAttribute('target');
+			$partSet{type}       = $part -> getAttribute('type');
+			$partData{$id} = \%partSet;
+		}
+		$pxeConfig{partitions}   = \%partData
+	}
+	$pxeConfig{server}  = $pxeNode -> getAttribute('server');
+	$pxeConfig{timeout} =$this -> __getChildNodeTextValue($pxeNode, 'timeout');
+	#==========================================
+	# Process <union>
+	#------------------------------------------
+	my $unionNode = $pxeNode -> getChildrenByTagName('union');
+	if ( $unionNode ) {
+		my $unionData = $unionNode -> get_node(1);
+		$pxeConfig{unionRO}   = $unionData -> getAttribute('ro');
+		$pxeConfig{unionRW}   = $unionData -> getAttribute('rw');
+		$pxeConfig{unionType} = $unionData -> getAttribute('type');
+	}
+	return \%pxeConfig;
+}
+
+#==========================================
+# __genSplitDataHash
+#------------------------------------------
+sub __genSplitDataHash {
+	# ...
+	# Return a ref to a hash containing the configuration for <split>
+	# of the given XML:ELEMENT object. Build a data structure that
+	# matches the structure defined in KIWIXMLSplitData
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $splitNode = $node -> getChildrenByTagName('split');
+	if (! $splitNode ) {
+		return;
+	}
+	my $splitData = $splitNode -> get_node(1);
+	my %splitConf;
+	my @children = qw /persistent temporary/;
+	my @splitBehave = qw /file except/;
+	for my $child (@children) {
+		my $chldNodeLst = $splitData -> getChildrenByTagName($child);
+		if (! $chldNodeLst ) {
+			next;
+		}
+		my $chldNode = $chldNodeLst -> get_node(1);
+		# Build the behavior layer of the structure i.e. file or exclusion
+		# behaveData = {
+		#                except = {...}
+		#                files  = {...}
+		#              }
+		my %behaveData;
+		for my $split (@splitBehave) {
+			my @splitSet = $chldNode -> getChildrenByTagName($split);
+			if (! @splitSet ) {
+				next;
+			}
+			my $key;
+			if ($split eq 'file') {
+				$key = 'files';
+			} else {
+				$key = $split;
+			}
+			# Build inner most part of structure
+			# dataCollect = {
+			#                 all     = (),
+			#                 arch[+] = ()
+			#               }
+			my %dataCollect;
+			for my $entry (@splitSet) {
+				my $arch = $entry -> getAttribute('arch');
+				if (! $arch ) {
+					$arch = 'all';
+				} else {
+					if (! $this->{supportedArch}{$arch} ) {
+						my $kiwi = $this->{kiwi};
+						my $msg = "Unsupported arch '$arch' in split setup";
+						$kiwi -> error ($msg);
+						$kiwi -> failed ();
+						return -1;
+					}
+				}
+				my $name = $entry -> getAttribute('name');
+				if ( $dataCollect{$arch} ) {
+					push @{$dataCollect{$arch}}, $name;
+				} else {
+					my @dataLst = ( $name );
+					$dataCollect{$arch} = \@dataLst;
+				}
+			}
+			$behaveData{$key} = \%dataCollect;
+		}
+		$splitConf{$child} = \%behaveData;
+	}
+	return \%splitConf;
+}
+
+#==========================================
+# __genSystemDiskHash
+#------------------------------------------
+sub __genSystemDiskHash {
+	# ...
+	# Return a ref to a hash containing the configuration for <systemdisk>
+	# of the given XML:ELEMENT object. Build a data structure that
+	# matches the structure defined in KIWIXMLSystemdiskData
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $lvmNode = $node -> getChildrenByTagName('systemdisk');
+	if (! $lvmNode ) {
+		return;
+	}
+	my $kiwi = $this->{kiwi};
+	my $lvmDataNode = $lvmNode -> get_node(1);
+	my %lvmData;
+	$lvmData{name} = $lvmDataNode -> getAttribute('name');
+	my @volumes = $lvmDataNode -> getChildrenByTagName('volume');
+	my %volData;
+	my $cntr = 1;
+	for my $vol (@volumes) {
+		my %volInfo;
+		$volInfo{freespace} = $this->__convertSizeStrToMBVal(
+			$vol -> getAttribute('freespace')
+		);
+		my $name = $vol -> getAttribute('name');
+		my $msg = "Invalid name '$name' for LVM volume setup";
+		$name =~ s/\s+//g;
+		if ($name eq '/') {
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return -1;
+		}
+		$name =~ s/^\///;
+		if ($name
+		 =~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)/sxm
+		) {
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return -1;
+		}
+		$volInfo{name} = $name;
+		$volInfo{size} = $this->__convertSizeStrToMBVal(
+			$vol -> getAttribute('size')
+		);
+		$volData{$cntr} = \%volInfo;
+		$cntr += 1;
+	}
+	$lvmData{volumes} = \%volData;
+	return \%lvmData;
+}
+
+#==========================================
+# __genTypeHash
+#------------------------------------------
+sub __genTypeHash {
+	# ...
+	# Return a ref to a hash keyed by the image type values for all <type>
+	# definitions that are children of the given XML:ELEMENT object
+	# Build a data structure that matches the structure defined in
+	# KIWIXMLTypeData
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my @typeNodes = $node -> getChildrenByTagName('type');
+	my %types = ();
+	if (! @typeNodes) {
+		# no types specified in this preferences section
+		return;
+	}
+	#==========================================
+	# list of type attributes to store
+	#------------------------------------------
+	my @attrlist = (
+		'boot',
+		'bootkernel',
+		'bootloader',
+		'bootpartsize',
+		'bootprofile',
+		'boottimeout',
+		'checkprebuilt',
+		'compressed',
+		'devicepersistency',
+		'editbootconfig',
+		'editbootinstall',
+		'filesystem',
+		'flags',
+		'format',
+		'fsmountoptions',
+		'fsnocheck',
+		'fsreadonly',
+		'fsreadwrite',
+		'hybrid',
+		'hybridpersistent',
+		'image',
+		'installboot',
+		'installiso',
+		'installprovidefailsafe',
+		'installstick',
+		'kernelcmdline',
+		'luks',
+		'ramonly',
+		'vga',
+		'volid'
+	);
+	#==========================================
+	# store a value for the default type
+	#------------------------------------------
+	my $defaultType = $typeNodes[0] -> getAttribute('image');
+	#==========================================
+	# walk through all types of this prefs
+	#------------------------------------------
+	foreach my $type (@typeNodes) {
+		my %typeData;
+		#==========================================
+		# store a value for the primary attribute
+		#------------------------------------------
+		my $prim = $type -> getAttribute('primary');
+		if ($prim && $prim eq 'true') {
+			$typeData{primary} = 'true';
+			$defaultType = $type -> getAttribute('image');
+		} else {
+			$typeData{primary} = 'false';
+		}
+		#==========================================
+		# store attributes
+		#------------------------------------------
+		foreach my $attr (@attrlist) {
+			$typeData{$attr} = $type -> getAttribute($attr);
+		}
+		#==========================================
+		# store <ec2config> child
+		#------------------------------------------
+		$typeData{ec2config} = $this -> __genEC2ConfigHash($type);
+		#==========================================
+		# store <machine> child
+		#------------------------------------------
+		$typeData{machine}   = $this -> __genVMachineHash($type);
+		#==========================================
+		# store <oemconfig> child
+		#------------------------------------------
+		$typeData{oemconfig} = $this -> __genOEMConfigHash($type);
+		#==========================================
+		# store <size>...</size> text
+		#------------------------------------------
+		$typeData{size} = $this -> __getChildNodeTextValue($type, 'size');
+		#==========================================
+		# store <pxeconfig> child
+		#------------------------------------------
+		$typeData{pxedeploy} = $this -> __genPXEDeployHash($type);
+		if ($typeData{pxedeploy} && $typeData{pxedeploy} == -1) {
+			return -1;
+		}
+		#==========================================
+		# store <split> child
+		#------------------------------------------
+		$typeData{split} = $this -> __genSplitDataHash($type);
+		if ($typeData{split} && $typeData{split} == -1) {
+			return -1;
+		}
+		#==========================================
+		# store <systemdisk> child
+		#------------------------------------------
+		$typeData{systemdisk} = $this -> __genSystemDiskHash($type);
+		if ($typeData{systemdisk} && $typeData{systemdisk} == -1) {
+			return -1;
+		}
+		#==========================================
+		# store this type in %types
+		#------------------------------------------
+		$types{$typeData{image}} = \%typeData;
+	}
+	$types{defaultType} = $defaultType;
+	return \%types;
+}
+
+#==========================================
+# __genVMachineHash
+#------------------------------------------
+sub __genVMachineHash {
+	# ...
+	# Return a ref to a hash that contains the configuration data
+	# for the <machine> element and it's children for the
+	# given XML:ELEMENT object
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $vmConfig = $node -> getChildrenByTagName('machine') -> get_node(1);
+	if (! $vmConfig ) {
+		return;
+	}
+	my %vmConfigData;
+	$vmConfigData{HWversion}  = $vmConfig -> getAttribute('HWversion');
+	$vmConfigData{arch}       = $vmConfig -> getAttribute('arch');
+	$vmConfigData{des_cpu}    = $vmConfig -> getAttribute('des_cpu');
+	$vmConfigData{des_memory} = $vmConfig -> getAttribute('des_memory');
+	$vmConfigData{domain}     = $vmConfig -> getAttribute('domain');
+	$vmConfigData{guestOS}    = $vmConfig -> getAttribute('guestOS');
+	$vmConfigData{max_cpu}    = $vmConfig -> getAttribute('max_cpu');
+	$vmConfigData{max_memory} = $vmConfig -> getAttribute('max_memory');
+	$vmConfigData{memory}     = $vmConfig -> getAttribute('memory');
+	$vmConfigData{min_cpu}    = $vmConfig -> getAttribute('min_cpu');
+	$vmConfigData{min_memory} = $vmConfig -> getAttribute('min_memory');
+	$vmConfigData{ncpus}      = $vmConfig -> getAttribute('ncpus');
+	$vmConfigData{ovftype}    = $vmConfig -> getAttribute('ovftype');
+	#==========================================
+	# Configuration text
+	#------------------------------------------
+	my @confNodes = $vmConfig -> getChildrenByTagName('vmconfig-entry');
+	my @confData;
+	for my $conf (@confNodes) {
+		push @confData, $conf -> textContent();
+	}
+	my $configSttings;
+	if (@confData) {
+		$configSttings = \@confData;
+	}
+	$vmConfigData{vmconfig_entries} = $configSttings;
+	#==========================================
+	# System Disk
+	#------------------------------------------
+	my @diskNodes = $vmConfig -> getChildrenByTagName('vmdisk');
+	my %diskData;
+	for my $disk (@diskNodes) {
+		my %diskSet;
+		$diskSet{controller} = $disk -> getAttribute('controller');
+		$diskSet{device}     = $disk -> getAttribute('device');
+		$diskSet{disktype}   = $disk -> getAttribute('disktype');
+		$diskSet{id}         = $disk -> getAttribute('id');
+		# Currently there is only one disk, the system disk
+		$diskData{system} = \%diskSet;
+	}
+	$vmConfigData{vmdisks} = \%diskData;
+	#==========================================
+	# CD/DVD
+	#------------------------------------------
+	my $dvdNodes = $vmConfig -> getChildrenByTagName('vmdvd');
+	if ($dvdNodes) {
+		my $dvdNode = $dvdNodes -> get_node(1);
+		my %dvdData;
+		$dvdData{controller} = $dvdNode -> getAttribute('controller');
+		$dvdData{id}         = $dvdNode -> getAttribute('id');
+		$vmConfigData{vmdvd} = \%dvdData;
+	}
+	#==========================================
+	# Network interfaces
+	#------------------------------------------
+	my @nicNodes = $vmConfig -> getChildrenByTagName('vmnic');
+	my %nicData;
+	my $cntr = 1;
+	for my $nic (@nicNodes) {
+		my %nicSet;
+		$nicSet{driver}    = $nic -> getAttribute('driver');
+		$nicSet{interface} = $nic -> getAttribute('interface');
+		$nicSet{mac}       = $nic -> getAttribute('mac');
+		$nicSet{mode}      = $nic -> getAttribute('mode');
+		$nicData{$cntr} = \%nicSet;
+		$cntr += 1;
+	}
+	$vmConfigData{vmnics} = \%nicData;
+	return \%vmConfigData;
+}
+
+#==========================================
+# __getChildNodeTextValue
+#------------------------------------------
+sub __getChildNodeTextValue {
+	# ...
+	# Return the value of the node identified by the
+	# given name as text.
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $childName = shift;
+	my $cNode = $node -> getChildrenByTagName($childName);
+	if ($cNode) {
+		return $cNode -> get_node(1) -> textContent();
+	}
+	return;
 }
 
 #==========================================
@@ -883,6 +1703,81 @@ sub __getProfsToModify {
 		}
 	}
 	return @profsToUse;
+}
+
+#==========================================
+# __mergePreferenceData
+#------------------------------------------
+sub __mergePreferenceData {
+	# ...
+	# Merge two hashes that represent <preferemces> data into one.
+	# Expecting a two hash refs as arguments and return a hashref to
+	# the merged data. If both hashes have definitions for the
+	# same data issues an error.
+	# ---
+	my $this = shift;
+	my $base = shift;
+	my $ext  = shift;
+	my $kiwi = $this->{kiwi};
+	my %merged;
+	my @attrs = qw(
+		bootloader_theme bootsplash_theme defaultdestination
+		defaultprebuilt defaultroot hwclock keymap locale
+		packagemanager rpm_check_signatures rpm_excludedocs rpm_force
+		showlicense timezone types version
+	);
+	for my $attr (@attrs) {
+		if ($attr eq 'types') {
+			my %types;
+			my $baseTypes = $base->{types};
+			my $extTypes  = $ext->{types};
+			if ($baseTypes && $extTypes) {
+				my @defTypes = keys %{$baseTypes};
+				for my $type (@defTypes) {
+					# Ignore the internal indicator for the default built type
+					if ($type eq 'defaultType') {
+						next;
+					}
+					if ( $extTypes->{$type} ) {
+						my $msg = 'Error merging preferences data, found '
+							. "definition for type '$type' in both "
+							. 'preference definitions, ambiguous operation.';
+						$kiwi -> error($msg);
+						$kiwi -> failed();
+						return;
+					}
+				}
+			}
+			if ($baseTypes) {
+				my @defTypes = keys %{$baseTypes};
+				for my $type (@defTypes) {
+					$types{$type} = $baseTypes->{$type};
+				}
+			}
+			if ($extTypes) {
+				my @defTypes = keys %{$extTypes};
+				for my $type (@defTypes) {
+					$types{$type} = $extTypes->{$type};
+				}
+			}
+			next;
+		}
+		if ( $base->{$attr} && $ext->{$attr} ) {
+			my $msg = 'Error merging preferences data, found data for '
+				. "'$attr' in both preference definitions, ambiguous "
+				. 'operation.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+		if ($base->{$attr}) {
+			$merged{$attr} = $base->{$attr};
+		}
+		if ($ext->{$attr}) {
+			$merged{$attr} = $ext->{$attr};
+		}
+	}
+	return \%merged;
 }
 
 #==========================================
@@ -982,6 +1877,121 @@ sub __populateDriverInfo {
 }
 
 #==========================================
+# __populatePreferenceInfo
+#------------------------------------------
+sub __populatePreferenceInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# preferences data from the XML file.
+	# ---
+	my $this = shift;
+	my @prefNodes = $this->{systemTree} ->getElementsByTagName ('preferences');
+	if (! @prefNodes ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'No <preference> element data found, cannot construct '
+			. 'XML data object.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	for my $prefInfo (@prefNodes) {
+		my $profNames = $prefInfo -> getAttribute ('profiles');
+		my @pNameLst = ('kiwi_default');
+		if ($profNames) {
+			@pNameLst = split /,/, $profNames;
+		}
+		my $bootLoaderTheme = $this -> __getChildNodeTextValue(
+			$prefInfo, 'bootloader-theme'
+		);
+		my $booSplashTheme  = $this -> __getChildNodeTextValue(
+			$prefInfo, 'bootsplash-theme'
+		);
+		my $defaultDest     = $this -> __getChildNodeTextValue(
+			$prefInfo, 'defaultdestination'
+		);
+		my $defaultPreBlt   = $this -> __getChildNodeTextValue(
+			$prefInfo, 'defaultprebuilt'
+		);
+		my $defaultRoot     = $this -> __getChildNodeTextValue(
+			$prefInfo, 'defaultroot'
+		);
+		my $hwclock         = $this -> __getChildNodeTextValue(
+			$prefInfo, 'hwclock'
+		);
+		my $keymap          = $this -> __getChildNodeTextValue(
+			$prefInfo, 'keytable'
+		);
+		my $locale          = $this -> __getChildNodeTextValue(
+			$prefInfo, 'locale'
+		);
+		my $pckMgr          = $this -> __getChildNodeTextValue(
+			$prefInfo, 'packagemanager'
+		);
+		my $rpmSigCheck     = $this -> __getChildNodeTextValue(
+			$prefInfo, 'rpm-check-signatures'
+		);
+		my $rpmExclDoc      = $this -> __getChildNodeTextValue(
+			$prefInfo, 'rpm-excludedocs'
+		);
+		my $rpmForce        = $this -> __getChildNodeTextValue(
+			$prefInfo, 'rpm-force'
+		);
+		my @showLicNodes = $prefInfo -> getChildrenByTagName('showlicense');
+		my @licensesToShow;
+		for my $licNode (@showLicNodes) {
+			push @licensesToShow, $licNode -> textContent();
+		}
+		my $showLic;
+		if (@licensesToShow) {
+			$showLic  = \@licensesToShow;
+		}
+		my $tz = $this -> __getChildNodeTextValue(
+			$prefInfo, 'timezone'
+		);
+		my $types = $this -> __genTypeHash ($prefInfo);
+		if ($types && $types == -1) {
+			return;
+		}
+		my $vers  = $this -> __getChildNodeTextValue(
+			$prefInfo, 'version'
+		);
+		my %prefs = (
+			bootloader_theme     => $bootLoaderTheme,
+			bootsplash_theme     => $booSplashTheme,
+			defaultdestination   => $defaultDest,
+			defaultprebuilt      => $defaultPreBlt,
+			defaultroot          => $defaultRoot,
+			hwclock              => $hwclock,
+			keymap               => $keymap,
+			locale               => $locale,
+			packagemanager       => $pckMgr,
+			rpm_check_signatures => $rpmSigCheck,
+			rpm_excludedocs      => $rpmExclDoc,
+			rpm_force            => $rpmForce,
+			showlicense          => $showLic,
+			timezone             => $tz,
+			types                => $types,
+			version              => $vers
+		);
+		for my $profName (@pNameLst) {
+			if (! $this->{imageConfig}{$profName}{preferences} ) {
+				$this->{imageConfig}{$profName}{preferences} = \%prefs;
+			} else {
+				my $mergedPrefs = $this -> __mergePreferenceData(
+					$this->{imageConfig}{$profName}{preferences},
+					\%prefs
+				);
+				if (! $mergedPrefs ) {
+					return;
+				}
+				$this->{imageConfig}{$profName}{preferences} = $mergedPrefs
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
 # __populateProfileInfo
 #------------------------------------------
 sub __populateProfileInfo {
@@ -1029,22 +2039,23 @@ sub __populateRepositoryInfo {
 	# repository data from the XML file.
 	# ---
 	my $this = shift;
-	my @repoNodes = $this->{systemTree} ->getElementsByTagName ('repository');
+	my @repoNodes = $this->{systemTree} 
+		-> getElementsByTagName ('repository');
 	my $idCntr = 1;
 	for my $repoNode (@repoNodes) {
 		my %repoData;
 		my $alias         = $repoNode -> getAttribute ('alias');
 		my $imageinclude  = $repoNode -> getAttribute ('imageinclude');
 		my $password      = $repoNode -> getAttribute ('password');
-		my $path          = $repoNode -> getChildrenByTagName('source')
-									-> get_node(1)
-									-> getAttribute ('path');
 		my $preferlicense = $repoNode -> getAttribute ('prefer-license');
 		my $priority      = $repoNode -> getAttribute ('priority');
 		my $profiles      = $repoNode -> getAttribute ('profiles');
 		my $status        = $repoNode -> getAttribute ('status');
 		my $type          = $repoNode -> getAttribute ('type');
 		my $username      = $repoNode -> getAttribute ('username');
+		my $path          = $repoNode
+			-> getChildrenByTagName('source') -> get_node(1)
+			-> getAttribute ('path');
 		if ($alias) {
 			$repoData{alias} = $alias;
 		}
@@ -1095,6 +2106,61 @@ sub __populateRepositoryInfo {
 }
 
 #==========================================
+# __setDefaultBuildType
+#------------------------------------------
+sub __setDefaultBuildType {
+	# ...
+	# Set the default built type, which upon object construction is also the
+	# the selected built type. The default built type is the first <type>
+	# specification processed or the one type marked with primary="true"
+	# across all the selected profiles. Unless a type is marked primary,
+	# the default type of the default profile always wins. The default
+	# type is a ref to a hash that is set as the default type as
+	# differentiation by name is not sufficient, as multiple profiles
+	# my have the same image type definition, which is valid as long as
+	# those profiles are not processed together.
+	# ---
+	my $this = shift;
+	my $primaryCount = 0;
+	my %defType = ();
+	for my $profName (@{$this->{selectedProfiles}}) {
+		my $profDefTypeName = $this->{imageConfig}
+			->{$profName}->{preferences}->{types}
+			->{defaultType};
+		if (! $profDefTypeName ) {
+			# This preferences section has no type(s) defined
+			next;
+		}
+		my $profDefTypeIsPrim = $this->{imageConfig}
+			->{$profName}->{preferences}->{types}
+			->{$profDefTypeName}->{primary};
+		if ($primaryCount > 1) {
+			my $kiwi = $this->{kiwi};
+				my $msg = 'Prosessing more than one type marked as '
+					. '"primary", cannot resolve build type.';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+		}
+		if ($profDefTypeIsPrim && $profDefTypeIsPrim eq 'true') {
+			$primaryCount++;
+			$defType{primary} = $this->{imageConfig}
+				->{$profName}->{preferences}->{types}
+				->{$profDefTypeName};
+		} else {
+			$defType{standard} = $this->{imageConfig}
+				->{$profName}->{preferences}->{types}
+				->{$profDefTypeName};
+		}
+	}
+	if ($defType{primary}) {
+		$this->{selectedType} = $defType{primary};
+	} else {
+		$this->{selectedType} = $defType{standard};
+	}
+	return $this;
+}
+#==========================================
 # __verifyProfNames
 #------------------------------------------
 sub __verifyProfNames {
@@ -1122,6 +2188,7 @@ sub __verifyProfNames {
 	}
 	return 1;
 }
+
 #==========================================
 # End "new" methods section
 #------------------------------------------
@@ -1190,46 +2257,12 @@ sub writeXMLDescription {
 }
 
 #==========================================
-# getActiveProfileNames
-#------------------------------------------
-sub getActiveProfileNames {
-	# ...
-	# Return an array ref containing the names of the active profiles;
-	# this does not reveal the default (kiwi_default) name, as this is
-	# always active
-	# ---
-	my $this = shift;
-	my @selected = @{$this->{selectedProfiles}};
-	my @active = ();
-	for my $prof (@selected) {
-		if ($prof eq 'kiwi_default') {
-			next;
-		}
-		push @active, $prof;
-	}
-	return \@active;
-}
-
-#==========================================
 # getConfigName
 #------------------------------------------
 sub getConfigName {
 	my $this = shift;
 	my $name = $this->{controlFile};
 	return ($name);
-}
-
-#==========================================
-# getDefaultPrebuiltDir
-#------------------------------------------
-sub getDefaultPrebuiltDir {
-	# ...
-	# Return the path of the default location for pre-built boot images
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ('defaultprebuilt');
-	my $imgDir = $node -> getElementsByTagName ('defaultprebuilt');
-	return $imgDir;
 }
 
 #==========================================
@@ -1444,91 +2477,6 @@ sub getImageSizeBytes {
 }
 
 #==========================================
-# getEditBootConfig
-#------------------------------------------
-sub getEditBootConfig {
-	# ...
-	# Get the type specific editbootconfig value.
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $editBoot = $tnode -> getAttribute ("editbootconfig");
-	if ((! defined $editBoot) || ("$editBoot" eq "")) {
-		return;
-	}
-	return $editBoot;
-}
-
-#==========================================
-# getEditBootInstall
-#------------------------------------------
-sub getEditBootInstall {
-	# ...
-	# Get the type specific editbootinstall value.
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $editBoot = $tnode -> getAttribute ("editbootinstall");
-	if ((! defined $editBoot) || ("$editBoot" eq "")) {
-		return;
-	}
-	return $editBoot;
-}
-
-#==========================================
-# getImageDefaultDestination
-#------------------------------------------
-sub getImageDefaultDestination {
-	# ...
-	# Get the default destination to store the images below
-	# normally this is given by the --destination option but if
-	# not and defaultdestination is specified in xml descr. we
-	# will use this path as destination
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("defaultdestination");
-	my $dest = $node -> getElementsByTagName ("defaultdestination");
-	return $dest;
-}
-
-#==========================================
-# getImageDefaultRoot
-#------------------------------------------
-sub getImageDefaultRoot {
-	# ...
-	# Get the default root directory name to build up a new image
-	# normally this is given by the --root option but if
-	# not and defaultroot is specified in xml descr. we
-	# will use this path as root path.
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("defaultroot");
-	my $root = $node -> getElementsByTagName ("defaultroot");
-	return $root;
-}
-
-#==========================================
-# getImageTypeAndAttributes
-#------------------------------------------
-sub getImageTypeAndAttributes {
-	# ...
-	# return typeinfo hash for selected build type
-	# ---
-	my $this     = shift;
-	my $typeinfo = $this->{typeInfo};
-	my $imageType= $this->{imageType};
-	if (! $typeinfo) {
-		return;
-	}
-	if (! $imageType) {
-		return;
-	}
-	return $typeinfo->{$imageType};
-}
-
-#==========================================
 # getImageVersion
 #------------------------------------------
 sub getImageVersion {
@@ -1539,198 +2487,6 @@ sub getImageVersion {
 	my $node = $this -> __getPreferencesNodeByTagName ("version");
 	my $version = $node -> getElementsByTagName ("version");
 	return $version;
-}
-
-#==========================================
-# getPXEDeployUnionConfig
-#------------------------------------------
-sub getPXEDeployUnionConfig {
-	# ...
-	# Get the union file system configuration, if any
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("union") -> get_node(1);
-	my %config = ();
-	if (! $node) {
-		return %config;
-	}
-	$config{ro}   = $node -> getAttribute ("ro");
-	$config{rw}   = $node -> getAttribute ("rw");
-	$config{type} = $node -> getAttribute ("type");
-	return %config;
-}
-
-#==========================================
-# getPXEDeployImageDevice
-#------------------------------------------
-sub getPXEDeployImageDevice {
-	# ...
-	# Get the device the image will be installed to
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("partitions") -> get_node(1);
-	if (defined $node) {
-		return $node -> getAttribute ("device");
-	} else {
-		return;
-	}
-}
-
-#==========================================
-# getPXEDeployServer
-#------------------------------------------
-sub getPXEDeployServer {
-	# ...
-	# Get the server the config data is obtained from
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	if (defined $node) {
-		return $node -> getAttribute ("server");
-	} else {
-		return "192.168.1.1";
-	}
-}
-
-#==========================================
-# getPXEDeployBlockSize
-#------------------------------------------
-sub getPXEDeployBlockSize {
-	# ...
-	# Get the block size the deploy server should use
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	if (defined $node) {
-		return $node -> getAttribute ("blocksize");
-	} else {
-		return "4096";
-	}
-}
-
-#==========================================
-# getPXEDeployPartitions
-#------------------------------------------
-sub getPXEDeployPartitions {
-	# ...
-	# Get the partition configuration for this image
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $partitions = $tnode -> getElementsByTagName ("partitions") -> get_node(1);
-	my @result = ();
-	if (! $partitions) {
-		return @result;
-	}
-	my $partitionNodes = $partitions -> getElementsByTagName ("partition");
-	for (my $i=1;$i<= $partitionNodes->size();$i++) {
-		my $node = $partitionNodes -> get_node($i);
-		my $number = $node -> getAttribute ("number");
-		my $type = $node -> getAttribute ("type");
-		if (! defined $type) {
-			$type = "L";
-		}
-		my $size = $node -> getAttribute ("size");
-		if (! defined $size) {
-			$size = "x";
-		}
-		my $mountpoint = $node -> getAttribute ("mountpoint");
-		if (! defined $mountpoint) {
-			$mountpoint = "x";
-		}
-		my $target = $node -> getAttribute ("target");
-		if (! defined $target or $target eq "false" or $target eq "0") {
-			$target = 0;
-		} else {
-			$target = 1
-		}
-		
-		my %part = ();
-		$part{number} = $number;
-		$part{type} = $type;
-		$part{size} = $size;
-		$part{mountpoint} = $mountpoint;
-		$part{target} = $target;
-
-		push @result, { %part };
-	}
-	my @ordered = sort { $a->{number} cmp $b->{number} } @result;
-	return @ordered;
-}
-
-#==========================================
-# getPXEDeployConfiguration
-#------------------------------------------
-sub getPXEDeployConfiguration {
-	# ...
-	# Get the configuration file information for this image
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my @node = $tnode -> getElementsByTagName ("configuration");
-	my %result;
-	foreach my $element (@node) {
-		my $source = $element -> getAttribute("source");
-		my $dest   = $element -> getAttribute("dest");
-		my $forarch= $element -> getAttribute("arch");
-		my $allowed= 1;
-		if (defined $forarch) {
-			my @archlst = split (/,/,$forarch);
-			my $foundit = 0;
-			foreach my $archok (@archlst) {
-				if ($archok eq $this->{arch}) {
-					$foundit = 1; last;
-				}
-			}
-			if (! $foundit) {
-				$allowed = 0;
-			}
-		}
-		if ($allowed) {
-			$result{$source} = $dest;
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getPXEDeployTimeout
-#------------------------------------------
-sub getPXEDeployTimeout {
-	# ...
-	# Get the boot timeout, if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	my $timeout = $node -> getElementsByTagName ("timeout");
-	if ((defined $timeout) && ! ("$timeout" eq "")) {
-		return $timeout;
-	} else {
-		return;
-	}
-}
-
-#==========================================
-# getPXEDeployKernel
-#------------------------------------------
-sub getPXEDeployKernel {
-	# ...
-	# Get the deploy kernel, if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	my $kernel = $node -> getElementsByTagName ("kernel");
-	if ((defined $kernel) && ! ("$kernel" eq "")) {
-		return $kernel;
-	} else {
-		return;
-	}
 }
 
 
@@ -1765,134 +2521,6 @@ sub getStripLibs {
 	# ---
 	my $this   = shift;
 	return $this -> __getStripFileList ("libs");
-}
-
-#==========================================
-# getSplitPersistentFiles
-#------------------------------------------
-sub getSplitPersistentFiles {
-	# ...
-	# Get the persistent files/directories for split image
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
-	my @result = ();
-	if (! defined $node) {
-		return @result;
-	}
-	my $persistNode = $node -> getElementsByTagName ("persistent")
-		-> get_node(1);
-	if (! defined $persistNode) {
-		return @result;
-	}
-	my @fileNodeList = $persistNode -> getElementsByTagName ("file");
-	foreach my $fileNode (@fileNodeList) {
-		my $name = $fileNode -> getAttribute ("name");
-		$name =~ s/\/$//;
-		push @result, $name;
-	}
-	return @result;
-}
-
-#==========================================
-# getSplitTempFiles
-#------------------------------------------
-sub getSplitTempFiles {
-	# ...
-	# Get the persistent files/directories for split image
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
-	my @result = ();
-	if (! defined $node) {
-		return @result;
-	}
-	my $tempNode = $node -> getElementsByTagName ("temporary") -> get_node(1);
-	if (! defined $tempNode) {
-		return @result;
-	}
-	my @fileNodeList = $tempNode -> getElementsByTagName ("file");
-	foreach my $fileNode (@fileNodeList) {
-		my $name = $fileNode -> getAttribute ("name");
-		$name =~ s/\/$//;
-		push @result, $name;
-	}
-	return @result;
-}
-
-#==========================================
-# getSplitTempExceptions
-#------------------------------------------
-sub getSplitTempExceptions {
-	# ...
-	# Get the exceptions defined for temporary
-	# split portions. If there are no exceptions defined
-	# return an empty list
-	# ----
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
-	my @result = ();
-	if (! defined $node) {
-		return @result;
-	}
-	my $tempNode = $node -> getElementsByTagName ("temporary") -> get_node(1);
-	if (! defined $tempNode) {
-		return @result;
-	}
-	my @fileNodeList = $tempNode -> getElementsByTagName ("except");
-	foreach my $fileNode (@fileNodeList) {
-		push @result, $fileNode -> getAttribute ("name");
-	}
-	return @result;
-}
-
-#==========================================
-# getSplitPersistentExceptions
-#------------------------------------------
-sub getSplitPersistentExceptions {
-	# ...
-	# Get the exceptions defined for persistent
-	# split portions. If there are no exceptions defined
-	# return an empty list
-	# ----
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
-	my @result = ();
-	if (! defined $node) {
-		return @result;
-	}
-	my $persistNode = $node -> getElementsByTagName ("persistent")
-		-> get_node(1);
-	if (! defined $persistNode) {
-		return @result;
-	}
-	my @fileNodeList = $persistNode -> getElementsByTagName ("except");
-	foreach my $fileNode (@fileNodeList) {
-		push @result, $fileNode -> getAttribute ("name");
-	}
-	return @result;
-}
-
-#==========================================
-# getPXEDeployInitrd
-#------------------------------------------
-sub getPXEDeployInitrd {
-	# ...
-	# Get the deploy initrd, if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	my $initrd = $node -> getElementsByTagName ("initrd");
-	if ((defined $initrd) && ! ("$initrd" eq "")) {
-		return $initrd;
-	} else {
-		return;
-	}
 }
 
 #==========================================
@@ -1948,411 +2576,6 @@ sub setPackageManager {
 }
 
 #==========================================
-# getPackageManager
-#------------------------------------------
-sub getPackageManager {
-	# ...
-	# Get the name of the package manager if set.
-	# if not set return the default package
-	# manager name
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $node = $this -> __getPreferencesNodeByTagName ("packagemanager");
-	my @packMgrs = $node -> getElementsByTagName ("packagemanager");
-	my $pmgr = $packMgrs[0];
-	if (! $pmgr) {
-		return 'zypper';
-	}
-	return $pmgr -> textContent();
-}
-
-#==========================================
-# getLicenseNames
-#------------------------------------------
-sub getLicenseNames {
-	# ...
-	# Get the names of all showlicense elements and return
-	# them as a list to the caller
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $node = $this -> __getPreferencesNodeByTagName ("showlicense");
-	my @lics = $node -> getElementsByTagName ("showlicense");
-	my @names = ();
-	foreach my $node (@lics) {
-		push (@names,$node -> textContent());
-	}
-	if (@names) {
-		return \@names;
-	}
-	return;
-}
-
-#==========================================
-# getOEMSwapSize
-#------------------------------------------
-sub getOEMSwapSize {
-	# ...
-	# Obtain the oem-swapsize value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $size = $node -> getElementsByTagName ("oem-swapsize");
-	if ((! defined $size) || ("$size" eq "")) {
-		return;
-	}
-	return $size;
-}
-
-#==========================================
-# getOEMSystemSize
-#------------------------------------------
-sub getOEMSystemSize {
-	# ...
-	# Obtain the oem-systemsize value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $size = $node -> getElementsByTagName ("oem-systemsize");
-	if ((! defined $size) || ("$size" eq "")) {
-		return;
-	}
-	return $size;
-}
-
-#==========================================
-# getOEMBootTitle
-#------------------------------------------
-sub getOEMBootTitle {
-	# ...
-	# Obtain the oem-boot-title value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $title= $node -> getElementsByTagName ("oem-boot-title");
-	if ((! defined $title) || ("$title" eq "")) {
-		$title = $this -> getImageDisplayName();
-		if ((! defined $title) || ("$title" eq "")) {
-			return;
-		}
-	}
-	return $title;
-}
-
-#==========================================
-# getOEMKiwiInitrd
-#------------------------------------------
-sub getOEMKiwiInitrd {
-	# ...
-	# Obtain the oem-kiwi-initrd value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $kboot= $node -> getElementsByTagName ("oem-kiwi-initrd");
-	if ((! defined $kboot) || ("$kboot" eq "")) {
-		return;
-	}
-	return $kboot;
-}
-
-#==========================================
-# getOEMReboot
-#------------------------------------------
-sub getOEMReboot {
-	# ...
-	# Obtain the oem-reboot value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $boot = $node -> getElementsByTagName ("oem-reboot");
-	if ((! defined $boot) || ("$boot" eq "")) {
-		return;
-	}
-	return $boot;
-}
-
-#==========================================
-# getOEMRebootInter
-#------------------------------------------
-sub getOEMRebootInter {
-	# ...
-	# Obtain the oem-reboot-interactive value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $boot = $node -> getElementsByTagName ("oem-reboot-interactive");
-	if ((! defined $boot) || ("$boot" eq "")) {
-		return;
-	}
-	return $boot;
-}
-
-#==========================================
-# getOEMShutdown
-#------------------------------------------
-sub getOEMSilentBoot {
-	# ...
-	# Obtain the oem-silent-boot value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $silent = $node -> getElementsByTagName ("oem-silent-boot");
-	if ((! defined $silent) || ("$silent" eq "")) {
-		return;
-	}
-	return $silent;
-}
-
-#==========================================
-# getOEMShutdown
-#------------------------------------------
-sub getOEMShutdown {
-	# ...
-	# Obtain the oem-shutdown value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $down = $node -> getElementsByTagName ("oem-shutdown");
-	if ((! defined $down) || ("$down" eq "")) {
-		return;
-	}
-	return $down;
-}
-
-#==========================================
-# getOEMRebootInter
-#------------------------------------------
-sub getOEMShutdownInter {
-	# ...
-	# Obtain the oem-shutdown-interactive value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $down = $node -> getElementsByTagName ("oem-shutdown-interactive");
-	if ((! defined $down) || ("$down" eq "")) {
-		return;
-	}
-	return $down;
-}
-
-#==========================================
-# getOEMBootWait
-#------------------------------------------
-sub getOEMBootWait {
-	# ...
-	# Obtain the oem-bootwait value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $wait = $node -> getElementsByTagName ("oem-bootwait");
-	if ((! defined $wait) || ("$wait" eq "")) {
-		return;
-	}
-	return $wait;
-}
-
-#==========================================
-# getOEMUnattended
-#------------------------------------------
-sub getOEMUnattended {
-	# ...
-	# Obtain the oem-unattended value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $unattended = $node -> getElementsByTagName ("oem-unattended");
-	if ((! defined $unattended) || ("$unattended" eq "")) {
-		return;
-	}
-	return $unattended;
-}
-
-#==========================================
-# getOEMUnattendedID
-#------------------------------------------
-sub getOEMUnattendedID {
-	# ...
-	# Obtain the oem-unattended-id value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $unattended_id = $node -> getElementsByTagName ("oem-unattended-id");
-	if ((! defined $unattended_id) || ("$unattended_id" eq "")) {
-		return;
-	}
-	return $unattended_id;
-}
-
-#==========================================
-# getOEMSwap
-#------------------------------------------
-sub getOEMSwap {
-	# ...
-	# Obtain the oem-swap value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $swap = $node -> getElementsByTagName ("oem-swap");
-	if ((! defined $swap) || ("$swap" eq "")) {
-		return;
-	}
-	return $swap;
-}
-
-#==========================================
-# getOEMAlignPartition
-#------------------------------------------
-sub getOEMAlignPartition {
-	# ...
-	# Obtain the oem-align-partition value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $align = $node -> getElementsByTagName ("oem-align-partition");
-	if ((! defined $align) || ("$align" eq "")) {
-		return;
-	}
-	return $align;
-}
-
-#==========================================
-# getOEMPartitionInstall
-#------------------------------------------
-sub getOEMPartitionInstall {
-	# ...
-	# Obtain the oem-partition-install value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $pinst = $node -> getElementsByTagName ("oem-partition-install");
-	if ((! defined $pinst) || ("$pinst" eq "")) {
-		return;
-	}
-	return $pinst;
-}
-
-#==========================================
-# getOEMRecovery
-#------------------------------------------
-sub getOEMRecovery {
-	# ...
-	# Obtain the oem-recovery value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $reco = $node -> getElementsByTagName ("oem-recovery");
-	if ((! defined $reco) || ("$reco" eq "")) {
-		return;
-	}
-	return $reco;
-}
-
-#==========================================
-# getOEMRecoveryID
-#------------------------------------------
-sub getOEMRecoveryID {
-	# ...
-	# Obtain the oem-recovery partition ID value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $reco = $node -> getElementsByTagName ("oem-recoveryID");
-	if ((! defined $reco) || ("$reco" eq "")) {
-		return;
-	}
-	return $reco;
-}
-
-#==========================================
-# getOEMRecoveryInPlace
-#------------------------------------------
-sub getOEMRecoveryInPlace {
-	# ...
-	# Obtain the oem-inplace-recovery value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $inplace = $node -> getElementsByTagName ("oem-inplace-recovery");
-	if ((! defined $inplace) || ("$inplace" eq "")) {
-		return;
-	}
-	return $inplace;
-}
-
-#==========================================
 # getLocale
 #------------------------------------------
 sub getLocale {
@@ -2366,81 +2589,6 @@ sub getLocale {
 		return;
 	}
 	return $lang;
-}
-
-#==========================================
-# getBootTheme
-#------------------------------------------
-sub getBootTheme {
-	# ...
-	# Obtain the theme values for splash and bootloader
-	# ---
-	my $this   = shift;
-	my $snode  = $this -> __getPreferencesNodeByTagName ("bootsplash-theme");
-	my $lnode  = $this -> __getPreferencesNodeByTagName ("bootloader-theme");
-	my $splash = $snode -> getElementsByTagName ("bootsplash-theme");
-	my $loader = $lnode -> getElementsByTagName ("bootloader-theme");
-	my @result = (
-		"openSUSE","openSUSE"
-	);
-	if ((defined $splash) || ("$splash" ne "")) {
-		$result[0] = $splash;
-	}
-	if ((defined $loader) || ("$loader" ne "")) {
-		$result[1] = $loader;
-	}
-	return @result;
-}
-
-#==========================================
-# getRPMCheckSignatures
-#------------------------------------------
-sub getRPMCheckSignatures {
-	# ...
-	# Check if the package manager should check for
-	# RPM signatures or not
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("rpm-check-signatures");
-	my $sigs = $node -> getElementsByTagName ("rpm-check-signatures");
-	if ((! defined $sigs) || ("$sigs" eq "") || ("$sigs" eq "false")) {
-		return;
-	}
-	return $sigs;
-}
-
-#==========================================
-# getRPMExcludeDocs
-#------------------------------------------
-sub getRPMExcludeDocs {
-	# ...
-	# Check if the package manager should exclude docs
-	# from installed files or not
-	# ---
-	my $this = shift;
-	my $node = $this-> __getPreferencesNodeByTagName ("rpm-excludedocs");
-	my $xdoc = $node -> getElementsByTagName ("rpm-excludedocs");
-	if ((! defined $xdoc) || ("$xdoc" eq "")) {
-		return;
-	}
-	return $xdoc;
-}
-
-#==========================================
-# getRPMForce
-#------------------------------------------
-sub getRPMForce {
-	# ...
-	# Check if the package manager should force
-	# installing packages
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("rpm-force");
-	my $frpm = $node -> getElementsByTagName ("rpm-force");
-	if ((! defined $frpm) || ("$frpm" eq "") || ("$frpm" eq "false")) {
-		return;
-	}
-	return $frpm;
 }
 
 #==========================================
@@ -3072,13 +3220,13 @@ sub getImageConfig {
 	#==========================================
 	# preferences attributes and text elements
 	#------------------------------------------
-	my %type  = %{$this->getImageTypeAndAttributes()};
+	my %type  = %{$this->getImageTypeAndAttributes_legacy()};
 	my @delp  = $this -> getDeleteList();
-	my $iver  = getImageVersion ($this);
-	my $size  = getImageSize    ($this);
-	my $name  = getImageName    ($this);
-	my $dname = getImageDisplayName ($this);
-	my $lics  = getLicenseNames ($this);
+	my $iver  = $this -> getImageVersion();
+	my $size  = $this -> getImageSize();
+	my $name  = $this -> getImageName();
+	my $dname = $this -> getImageDisplayName ($this);
+	my $lics  = $this -> getLicenseNames_legacy();
 	my @s_del = $this -> getStripDelete();
 	my @s_tool= $this -> getStripTools();
 	my @s_lib = $this -> getStripLibs();
@@ -3232,7 +3380,7 @@ sub getImageConfig {
 	#==========================================
 	# systemdisk
 	#------------------------------------------
-	my %lvmparts = $this -> getLVMVolumes();
+	my %lvmparts = $this -> getLVMVolumes_legacy();
 	if (%lvmparts) {
 		foreach my $vol (keys %lvmparts) {
 			if (! $lvmparts{$vol}) {
@@ -3401,392 +3549,6 @@ sub getPackageAttributes {
 }
 
 #==========================================
-# getLVMGroupName
-#------------------------------------------
-sub getLVMGroupName {
-	# ...
-	# Return the name of the volume group if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	return $node -> getAttribute ("name");
-}
-
-#==========================================
-# getLVMVolumes
-#------------------------------------------
-sub getLVMVolumes {
-	# ...
-	# Create list of LVM volume names for sub volume
-	# setup. Each volume name will end up in an own
-	# LVM volume when the LVM setup is requested
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
-	my %result = ();
-	if (! defined $node) {
-		return %result;
-	}
-	my @vollist = $node -> getElementsByTagName ("volume");
-	foreach my $volume (@vollist) {
-		my $name = $volume -> getAttribute ("name");
-		my $free = $volume -> getAttribute ("freespace");
-		my $size = $volume -> getAttribute ("size");
-		my $haveAbsolute;
-		my $usedValue;
-		if ($size) {
-			$haveAbsolute = 1;
-			$usedValue = $size;
-		} elsif ($free) {
-			$usedValue = $free;
-			$haveAbsolute = 0;
-		}
-		if (($usedValue) && ($usedValue =~ /(\d+)([MG]*)/)) {
-			my $byte = int $1;
-			my $unit = $2;
-			if ($unit eq "G") {
-				$usedValue = $byte * 1024;
-			} else {
-				# no or unknown unit, assume MB...
-				$usedValue = $byte;
-			}
-		}
-		$name =~ s/\s+//g;
-		if ($name eq "/") {
-			$kiwi -> warning ("LVM: Directory $name is not allowed");
-			$kiwi -> skipped ();
-			next;
-		}
-		$name =~ s/^\///;
-		if ($name
-			=~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)/) {
-			$kiwi -> warning ("LVM: Directory $name is not allowed");
-			$kiwi -> skipped ();
-			next;
-		}
-		$name =~ s/\//_/g;
-		$result{$name} = [ $usedValue,$haveAbsolute ];
-	}
-	return %result;
-}
-
-#==========================================
-# getEc2Config
-#------------------------------------------
-sub getEc2Config {
-	# ...
-	# Create a hash for the <ec2config>
-	# section if it exists
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("ec2config") -> get_node(1);
-	my %result = ();
-	if (! defined $node) {
-		return %result;
-	}
-	#==========================================
-	# AWS account Nr
-	#------------------------------------------
-	my $awsacctno = $node -> getElementsByTagName ("ec2accountnr");
-	if ($awsacctno) {
-		$result{AWSAccountNr} = $awsacctno;
-	}
-	#==========================================
-	# EC2 path to public key file
-	#------------------------------------------
-	my $certfile = $node -> getElementsByTagName ("ec2certfile");
-	if ($certfile) {
-		$result{EC2CertFile} = $certfile;
-	}
-	#==========================================
-	# EC2 path to private key file
-	#------------------------------------------
-	my $privkeyfile = $node -> getElementsByTagName ("ec2privatekeyfile");
-	if ($privkeyfile) {
-		$result{EC2PrivateKeyFile} = $privkeyfile;
-	}
-	#==========================================
-	# EC2 region
-	#------------------------------------------
-	my @regionNodes = $node -> getElementsByTagName ("ec2region");
-	my @regions = ();
-	for my $regNode (@regionNodes) {
-		push @regions, $regNode -> textContent();
-	}
-	$result{EC2Regions} = \@regions;
-	return %result;
-}
-
-#==========================================
-# getVMwareConfig
-#------------------------------------------
-sub getVMwareConfig {
-	# ...
-	# Create an Attribute hash from the <machine>
-	# section if it exists suitable for the VMware configuration
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	my %result = ();
-	my %guestos= ();
-	if (! defined $node) {
-		return %result;
-	}
-	#==========================================
-	# global setup
-	#------------------------------------------
-	my $arch = $node -> getAttribute ("arch");
-	if (! defined $arch) {
-		$arch = "ix86";
-	} elsif ($arch eq "%arch") {
-		my $sysarch = qxx ("uname -m"); chomp $sysarch;
-		if ($sysarch =~ /i.86/) {
-			$arch = "ix86";
-		} else {
-			$arch = $sysarch;
-		}
-	}
-	my $hwver= $node -> getAttribute ("HWversion");
-	if (! defined $hwver) {
-		$hwver = 4;
-	}
-	$guestos{suse}{ix86}     = "suse";
-	$guestos{suse}{x86_64}   = "suse-64";
-	$guestos{sles}{ix86}     = "sles";
-	$guestos{sles}{x86_64}   = "sles-64";
-	$guestos{rhel6}{x86_64}  = "rhel6-64";
-	$guestos{rhel6}{ix86}    = "rhel6";
-	$guestos{rhel5}{x86_64}  = "rhel5-64";
-	$guestos{rhel5}{ix86}    = "rhel5";
-	$guestos{centos}{ix86}   = "centos";
-	$guestos{centos}{x86_64} = "centos-64";
-	my $guest= $node -> getAttribute ("guestOS");
-	if ((!defined $guest) || (! defined $guestos{$guest}{$arch})) {
-		if ($arch eq "ix86") {
-			$guest = "suse";
-		} else {
-			$guest = "suse-64";
-		}
-	} else {
-		$guest = $guestos{$guest}{$arch};
-	}
-	my $memory = $node -> getAttribute ("memory");
-	my $ncpus  = $node -> getAttribute ("ncpus");
-	#==========================================
-	# storage setup disk
-	#------------------------------------------
-	my $disk = $node -> getElementsByTagName ("vmdisk");
-	my ($type,$id);
-	if ($disk) {
-		my $node = $disk -> get_node(1);
-		$type = $node -> getAttribute ("controller");
-		$id   = $node -> getAttribute ("id");
-	}
-	#==========================================
-	# storage setup CD rom
-	#------------------------------------------
-	my $cd = $node -> getElementsByTagName ("vmdvd");
-	my ($cdtype,$cdid);
-	if ($cd) {
-		my $node = $cd -> get_node(1);
-		$cdtype = $node -> getAttribute ("controller");
-		$cdid   = $node -> getAttribute ("id");
-	}
-	#==========================================
-	# network setup
-	#------------------------------------------
-	my $nic  = $node -> getElementsByTagName ("vmnic");
-	my %vmnics;
-	for (my $i=1; $i<= $nic->size(); $i++) {
-		my $node = $nic  -> get_node($i);
-		$vmnics{$node -> getAttribute ("interface")} =
-		{
-			drv  => $node -> getAttribute ("driver"),
-			mode => $node -> getAttribute ("mode")
-		};
-	}
-	#==========================================
-	# configuration file settings
-	#------------------------------------------
-	my @vmConfigOpts = $this -> __getVMConfigOpts();
-	#==========================================
-	# save hash
-	#------------------------------------------
-	$result{vmware_arch}  = $arch;
-	if (@vmConfigOpts) {
-		$result{vmware_config} = \@vmConfigOpts;
-	}
-	$result{vmware_hwver} = $hwver;
-	$result{vmware_guest} = $guest;
-	$result{vmware_memory}= $memory;
-	$result{vmware_ncpus} = $ncpus;
-	if ($disk) {
-		$result{vmware_disktype} = $type;
-		$result{vmware_diskid}   = $id;
-	}
-	if ($cd) {
-		$result{vmware_cdtype} = $cdtype;
-		$result{vmware_cdid}   = $cdid;
-	}
-	if (%vmnics) {
-		$result{vmware_nic}= \%vmnics;
-	}
-	return %result;
-}
-
-#==========================================
-# getXenConfig
-#------------------------------------------
-sub getXenConfig {
-	# ...
-	# Create an Attribute hash from the <machine>
-	# section if it exists suitable for the xen domU configuration
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	my %result = ();
-	if (! defined $node) {
-		return %result;
-	}
-	#==========================================
-	# global setup
-	#------------------------------------------
-	my $memory = $node -> getAttribute ("memory");
-	my $ncpus  = $node -> getAttribute ("ncpus");
-	my $domain = $node -> getAttribute ("domain");
-	#==========================================
-	# storage setup
-	#------------------------------------------
-	my $disk = $node -> getElementsByTagName ("vmdisk");
-	my $device;
-	if ($disk) {
-		my $node  = $disk -> get_node(1);
-		$device= $node -> getAttribute ("device");
-	}
-	#==========================================
-	# network setup (bridge)
-	#------------------------------------------
-	my $bridges = $node -> getElementsByTagName ("vmnic");
-	my %vifs = ();
-	for (my $i=1;$i<= $bridges->size();$i++) {
-		my $bridge = $bridges -> get_node($i);
-		if ($bridge) {
-			my $mac   = $bridge -> getAttribute ("mac");
-			my $bname = $bridge -> getAttribute ("interface");
-			if (! $bname) {
-				$bname = "undef";
-			}
-			$vifs{$bname} = $mac;
-		}
-	}
-	#==========================================
-	# configuration file settings
-	#------------------------------------------
-	my @vmConfigOpts = $this -> __getVMConfigOpts();
-	#==========================================
-	# save hash
-	#------------------------------------------
-	if (@vmConfigOpts) {
-		$result{xen_config} = \@vmConfigOpts
-	}
-	$result{xen_memory}= $memory;
-	$result{xen_ncpus} = $ncpus;
-	$result{xen_domain}= $domain;
-	if ($disk) {
-		$result{xen_diskdevice} = $device;
-	}
-	foreach my $bname (keys %vifs) {
-		$result{xen_bridge}{$bname} = $vifs{$bname};
-	}
-	return %result;
-}
-
-#==========================================
-# getOVFConfig
-#------------------------------------------
-sub getOVFConfig {
-	# ...
-	# Create an Attribute hash from the <machine>
-	# section if it exists suitable for the OVM
-	# configuration
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	my %result = ();
-	my $device;
-	my $disktype;
-	if (! defined $node) {
-		return %result;
-	}
-	#==========================================
-	# global setup
-	#------------------------------------------
-	my $minmemory = $node -> getAttribute ("min_memory");
-	my $desmemory = $node -> getAttribute ("des_memory");
-	my $maxmemory = $node -> getAttribute ("max_memory");
-	my $memory    = $node -> getAttribute ("memory");
-	my $ncpus     = $node -> getAttribute ("ncpus");
-	my $mincpu    = $node -> getAttribute ("min_cpu");
-	my $descpu    = $node -> getAttribute ("des_cpu");
-	my $maxcpu    = $node -> getAttribute ("max_cpu");
-	my $type      = $node -> getAttribute ("ovftype");
-	#==========================================
-	# storage setup
-	#------------------------------------------
-	my $disk = $node -> getElementsByTagName ("vmdisk");
-	if ($disk) {
-		my $node  = $disk -> get_node(1);
-		$device = $node -> getAttribute ("device");
-		$disktype = $node -> getAttribute ("disktype");
-	}
-	#==========================================
-	# network setup
-	#------------------------------------------
-	my $bridges = $node -> getElementsByTagName ("vmnic");
-	my %vifs = ();
-	for (my $i=1;$i<= $bridges->size();$i++) {
-		my $bridge = $bridges -> get_node($i);
-		if ($bridge) {
-			my $bname = $bridge -> getAttribute ("interface");
-			if (! $bname) {
-				$bname = "undef";
-			}
-			$vifs{$bname} = $i;
-		}
-	}
-	#==========================================
-	# save hash
-	#------------------------------------------
-	$result{ovf_minmemory} = $minmemory;
-	$result{ovf_desmemory} = $desmemory;
-	$result{ovf_maxmemory} = $maxmemory;
-	$result{ovf_memory}    = $memory;
-	$result{ovf_ncpus}     = $ncpus;
-	$result{ovf_mincpu}    = $mincpu;
-	$result{ovf_descpu}    = $descpu;
-	$result{ovf_maxcpu}    = $maxcpu;
-	$result{ovf_type}      = $type;
-	if ($disk) {
-		$result{ovf_disk}    = $device;
-		$result{ovf_disktype}= $disktype;
-	}
-	foreach my $bname (keys %vifs) {
-		$result{ovf_bridge}{$bname} = $vifs{$bname};
-	}
-	return %result;
-}
-
-#==========================================
 # getInstSourcePackageAttributes
 #------------------------------------------
 sub getInstSourcePackageAttributes {
@@ -3907,7 +3669,7 @@ sub getList {
 		$nodes = $this->{packageNodeList};
 	}
 	my @result;
-	my $manager = $this -> getPackageManager();
+	my $manager = $this -> getPackageManager_legacy();
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		#==========================================
 		# Get type and packages
@@ -4182,7 +3944,7 @@ sub getInstallSize {
 	my $this    = shift;
 	my $kiwi    = $this->{kiwi};
 	my $nodes   = $this->{packageNodeList};
-	my $manager = $this->getPackageManager();
+	my $manager = $this->getPackageManager_legacy();
 	my $urllist = $this -> getURLList();
 	my @result  = ();
 	my @delete  = ();
@@ -5026,7 +4788,7 @@ sub hasDefaultPackages {
 }
 
 #==========================================
-# Methods to using "old" data structure that are to be
+# Methods using the "old" data structure that are to be
 # eliminated or replaced
 #------------------------------------------
 #==========================================
@@ -5065,6 +4827,757 @@ sub addDrivers_legacy {
 }
 
 #==========================================
+# getBootTheme_legacy
+#------------------------------------------
+sub getBootTheme_legacy {
+	# ...
+	# Obtain the theme values for splash and bootloader
+	# ---
+	my $this   = shift;
+	my $snode  = $this -> __getPreferencesNodeByTagName ("bootsplash-theme");
+	my $lnode  = $this -> __getPreferencesNodeByTagName ("bootloader-theme");
+	my $splash = $snode -> getElementsByTagName ("bootsplash-theme");
+	my $loader = $lnode -> getElementsByTagName ("bootloader-theme");
+	my @result = (
+		"openSUSE","openSUSE"
+	);
+	if ((defined $splash) || ("$splash" ne "")) {
+		$result[0] = $splash;
+	}
+	if ((defined $loader) || ("$loader" ne "")) {
+		$result[1] = $loader;
+	}
+	return @result;
+}
+
+#==========================================
+# getDefaultPrebuiltDir_legacy
+#------------------------------------------
+sub getDefaultPrebuiltDir_legacy {
+	# ...
+	# Return the path of the default location for pre-built boot images
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ('defaultprebuilt');
+	my $imgDir = $node -> getElementsByTagName ('defaultprebuilt');
+	return $imgDir;
+}
+
+#==========================================
+# getEc2Config_legacy
+#------------------------------------------
+sub getEc2Config_legacy {
+	# ...
+	# Create a hash for the <ec2config>
+	# section if it exists
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("ec2config") -> get_node(1);
+	my %result = ();
+	if (! defined $node) {
+		return %result;
+	}
+	#==========================================
+	# AWS account Nr
+	#------------------------------------------
+	my $awsacctno = $node -> getElementsByTagName ("ec2accountnr");
+	if ($awsacctno) {
+		$result{AWSAccountNr} = $awsacctno;
+	}
+	#==========================================
+	# EC2 path to public key file
+	#------------------------------------------
+	my $certfile = $node -> getElementsByTagName ("ec2certfile");
+	if ($certfile) {
+		$result{EC2CertFile} = $certfile;
+	}
+	#==========================================
+	# EC2 path to private key file
+	#------------------------------------------
+	my $privkeyfile = $node -> getElementsByTagName ("ec2privatekeyfile");
+	if ($privkeyfile) {
+		$result{EC2PrivateKeyFile} = $privkeyfile;
+	}
+	#==========================================
+	# EC2 region
+	#------------------------------------------
+	my @regionNodes = $node -> getElementsByTagName ("ec2region");
+	my @regions = ();
+	for my $regNode (@regionNodes) {
+		push @regions, $regNode -> textContent();
+	}
+	$result{EC2Regions} = \@regions;
+	return %result;
+}
+
+#==========================================
+# getEditBootConfig_legacy
+#------------------------------------------
+sub getEditBootConfig_legacy {
+	# ...
+	# Get the type specific editbootconfig value.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $editBoot = $tnode -> getAttribute ("editbootconfig");
+	if ((! defined $editBoot) || ("$editBoot" eq "")) {
+		return;
+	}
+	return $editBoot;
+}
+
+#==========================================
+# getEditBootInstall_legacy
+#------------------------------------------
+sub getEditBootInstall_legacy {
+	# ...
+	# Get the type specific editbootinstall value.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $editBoot = $tnode -> getAttribute ("editbootinstall");
+	if ((! defined $editBoot) || ("$editBoot" eq "")) {
+		return;
+	}
+	return $editBoot;
+}
+
+#==========================================
+# getHttpsRepositoryCredentials_legacy
+#------------------------------------------
+sub getHttpsRepositoryCredentials_legacy {
+	# ...
+	# If any repository is configered with credentials return the username
+	# and password
+	# ---
+	my $this = shift;
+	my @repoNodes = $this->{repositNodeList} -> get_nodelist();
+	for my $repo (@repoNodes) {
+		my $uname = $repo -> getAttribute('username');
+		my $pass = $repo -> getAttribute('password');
+		if ($uname) {
+			my @sources = $repo -> getElementsByTagName ('source');
+			my $path = $sources[0] -> getAttribute('path');
+			if ( $path =~ /^https:/) {
+				return ($uname, $pass);
+			}
+		}
+	}
+	return;
+}
+
+#==========================================
+# getImageDefaultDestination_legacy
+#------------------------------------------
+sub getImageDefaultDestination_legacy {
+	# ...
+	# Get the default destination to store the images below
+	# normally this is given by the --destination option but if
+	# not and defaultdestination is specified in xml descr. we
+	# will use this path as destination
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ("defaultdestination");
+	my $dest = $node -> getElementsByTagName ("defaultdestination");
+	return $dest;
+}
+
+#==========================================
+# getImageDefaultRoot_legacy
+#------------------------------------------
+sub getImageDefaultRoot_legacy {
+	# ...
+	# Get the default root directory name to build up a new image
+	# normally this is given by the --root option but if
+	# not and defaultroot is specified in xml descr. we
+	# will use this path as root path.
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ("defaultroot");
+	my $root = $node -> getElementsByTagName ("defaultroot");
+	return $root;
+}
+
+#==========================================
+# getImageTypeAndAttributes_legacy
+#------------------------------------------
+sub getImageTypeAndAttributes_legacy {
+	# ...
+	# return typeinfo hash for selected build type
+	# ---
+	my $this     = shift;
+	my $typeinfo = $this->{typeInfo};
+	my $imageType= $this->{imageType};
+	if (! $typeinfo) {
+		return;
+	}
+	if (! $imageType) {
+		return;
+	}
+	return $typeinfo->{$imageType};
+}
+
+#==========================================
+# getLicenseNames_legacy
+#------------------------------------------
+sub getLicenseNames_legacy {
+	# ...
+	# Get the names of all showlicense elements and return
+	# them as a list to the caller
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $node = $this -> __getPreferencesNodeByTagName ("showlicense");
+	my @lics = $node -> getElementsByTagName ("showlicense");
+	my @names = ();
+	foreach my $node (@lics) {
+		push (@names,$node -> textContent());
+	}
+	if (@names) {
+		return \@names;
+	}
+	return;
+}
+
+#==========================================
+# getLVMGroupName_legacy
+#------------------------------------------
+sub getLVMGroupName_legacy {
+	# ...
+	# Return the name of the volume group if specified
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	return $node -> getAttribute ("name");
+}
+
+#==========================================
+# getLVMVolumes_legacy
+#------------------------------------------
+sub getLVMVolumes_legacy {
+	# ...
+	# Create list of LVM volume names for sub volume
+	# setup. Each volume name will end up in an own
+	# LVM volume when the LVM setup is requested
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
+	my %result = ();
+	if (! defined $node) {
+		return %result;
+	}
+	my @vollist = $node -> getElementsByTagName ("volume");
+	foreach my $volume (@vollist) {
+		my $name = $volume -> getAttribute ("name");
+		my $free = $volume -> getAttribute ("freespace");
+		my $size = $volume -> getAttribute ("size");
+		my $haveAbsolute;
+		my $usedValue;
+		if ($size) {
+			$haveAbsolute = 1;
+			$usedValue = $size;
+		} elsif ($free) {
+			$usedValue = $free;
+			$haveAbsolute = 0;
+		}
+		if (($usedValue) && ($usedValue =~ /(\d+)([MG]*)/)) {
+			my $byte = int $1;
+			my $unit = $2;
+			if ($unit eq "G") {
+				$usedValue = $byte * 1024;
+			} else {
+				# no or unknown unit, assume MB...
+				$usedValue = $byte;
+			}
+		}
+		$name =~ s/\s+//g;
+		if ($name eq "/") {
+			$kiwi -> warning ("LVM: Directory $name is not allowed");
+			$kiwi -> skipped ();
+			next;
+		}
+		$name =~ s/^\///;
+		if ($name
+			=~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)/) {
+			$kiwi -> warning ("LVM: Directory $name is not allowed");
+			$kiwi -> skipped ();
+			next;
+		}
+		$name =~ s/\//_/g;
+		$result{$name} = [ $usedValue,$haveAbsolute ];
+	}
+	return %result;
+}
+
+#==========================================
+# getOEMAlignPartition_legacy
+#------------------------------------------
+sub getOEMAlignPartition_legacy {
+	# ...
+	# Obtain the oem-align-partition value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $align = $node -> getElementsByTagName ("oem-align-partition");
+	if ((! defined $align) || ("$align" eq "")) {
+		return;
+	}
+	return $align;
+}
+
+#==========================================
+# getOEMBootTitle_legacy
+#------------------------------------------
+sub getOEMBootTitle_legacy {
+	# ...
+	# Obtain the oem-boot-title value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $title= $node -> getElementsByTagName ("oem-boot-title");
+	if ((! defined $title) || ("$title" eq "")) {
+		$title = $this -> getImageDisplayName();
+		if ((! defined $title) || ("$title" eq "")) {
+			return;
+		}
+	}
+	return $title;
+}
+
+#==========================================
+# getOEMBootWait_legacy
+#------------------------------------------
+sub getOEMBootWait_legacy {
+	# ...
+	# Obtain the oem-bootwait value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $wait = $node -> getElementsByTagName ("oem-bootwait");
+	if ((! defined $wait) || ("$wait" eq "")) {
+		return;
+	}
+	return $wait;
+}
+
+#==========================================
+# getOEMKiwiInitrd_legacy
+#------------------------------------------
+sub getOEMKiwiInitrd_legacy {
+	# ...
+	# Obtain the oem-kiwi-initrd value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $kboot= $node -> getElementsByTagName ("oem-kiwi-initrd");
+	if ((! defined $kboot) || ("$kboot" eq "")) {
+		return;
+	}
+	return $kboot;
+}
+
+#==========================================
+# getOEMPartitionInstall_legacy
+#------------------------------------------
+sub getOEMPartitionInstall_legacy {
+	# ...
+	# Obtain the oem-partition-install value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $pinst = $node -> getElementsByTagName ("oem-partition-install");
+	if ((! defined $pinst) || ("$pinst" eq "")) {
+		return;
+	}
+	return $pinst;
+}
+
+#==========================================
+# getOEMReboot_legacy
+#------------------------------------------
+sub getOEMReboot_legacy {
+	# ...
+	# Obtain the oem-reboot value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $boot = $node -> getElementsByTagName ("oem-reboot");
+	if ((! defined $boot) || ("$boot" eq "")) {
+		return;
+	}
+	return $boot;
+}
+
+#==========================================
+# getOEMRebootInter_legacy
+#------------------------------------------
+sub getOEMRebootInter_legacy {
+	# ...
+	# Obtain the oem-reboot-interactive value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $boot = $node -> getElementsByTagName ("oem-reboot-interactive");
+	if ((! defined $boot) || ("$boot" eq "")) {
+		return;
+	}
+	return $boot;
+}
+
+#==========================================
+# getOEMRecovery_legacy
+#------------------------------------------
+sub getOEMRecovery_legacy {
+	# ...
+	# Obtain the oem-recovery value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $reco = $node -> getElementsByTagName ("oem-recovery");
+	if ((! defined $reco) || ("$reco" eq "")) {
+		return;
+	}
+	return $reco;
+}
+
+#==========================================
+# getOEMRecoveryID_legacy
+#------------------------------------------
+sub getOEMRecoveryID_legacy {
+	# ...
+	# Obtain the oem-recovery partition ID value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $reco = $node -> getElementsByTagName ("oem-recoveryID");
+	if ((! defined $reco) || ("$reco" eq "")) {
+		return;
+	}
+	return $reco;
+}
+
+#==========================================
+# getOEMRecoveryInPlace_legacy
+#------------------------------------------
+sub getOEMRecoveryInPlace_legacy {
+	# ...
+	# Obtain the oem-inplace-recovery value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $inplace = $node -> getElementsByTagName ("oem-inplace-recovery");
+	if ((! defined $inplace) || ("$inplace" eq "")) {
+		return;
+	}
+	return $inplace;
+}
+
+#==========================================
+# getOEMShutdown_legacy
+#------------------------------------------
+sub getOEMShutdown_legacy {
+	# ...
+	# Obtain the oem-shutdown value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $down = $node -> getElementsByTagName ("oem-shutdown");
+	if ((! defined $down) || ("$down" eq "")) {
+		return;
+	}
+	return $down;
+}
+
+#==========================================
+# getOEMShutdownInter_legacy
+#------------------------------------------
+sub getOEMShutdownInter_legacy {
+	# ...
+	# Obtain the oem-shutdown-interactive value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $down = $node -> getElementsByTagName ("oem-shutdown-interactive");
+	if ((! defined $down) || ("$down" eq "")) {
+		return;
+	}
+	return $down;
+}
+
+#==========================================
+# getOEMSilentBoot_legacy
+#------------------------------------------
+sub getOEMSilentBoot_legacy {
+	# ...
+	# Obtain the oem-silent-boot value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $silent = $node -> getElementsByTagName ("oem-silent-boot");
+	if ((! defined $silent) || ("$silent" eq "")) {
+		return;
+	}
+	return $silent;
+}
+
+#==========================================
+# getOEMSwap_legacy
+#------------------------------------------
+sub getOEMSwap_legacy {
+	# ...
+	# Obtain the oem-swap value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $swap = $node -> getElementsByTagName ("oem-swap");
+	if ((! defined $swap) || ("$swap" eq "")) {
+		return;
+	}
+	return $swap;
+}
+
+#==========================================
+# getOEMSwapSize_legacy
+#------------------------------------------
+sub getOEMSwapSize_legacy {
+	# ...
+	# Obtain the oem-swapsize value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $size = $node -> getElementsByTagName ("oem-swapsize");
+	if ((! defined $size) || ("$size" eq "")) {
+		return;
+	}
+	return $size;
+}
+
+#==========================================
+# getOEMSystemSize_legacy
+#------------------------------------------
+sub getOEMSystemSize_legacy {
+	# ...
+	# Obtain the oem-systemsize value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $size = $node -> getElementsByTagName ("oem-systemsize");
+	if ((! defined $size) || ("$size" eq "")) {
+		return;
+	}
+	return $size;
+}
+
+#==========================================
+# getOEMUnattended_legacy
+#------------------------------------------
+sub getOEMUnattended_legacy {
+	# ...
+	# Obtain the oem-unattended value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $unattended = $node -> getElementsByTagName ("oem-unattended");
+	if ((! defined $unattended) || ("$unattended" eq "")) {
+		return;
+	}
+	return $unattended;
+}
+
+#==========================================
+# getOEMUnattendedID_legacy
+#------------------------------------------
+sub getOEMUnattendedID_legacy {
+	# ...
+	# Obtain the oem-unattended-id value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $unattended_id = $node -> getElementsByTagName ("oem-unattended-id");
+	if ((! defined $unattended_id) || ("$unattended_id" eq "")) {
+		return;
+	}
+	return $unattended_id;
+}
+
+#==========================================
+# getOVFConfig_legacy
+#------------------------------------------
+sub getOVFConfig_legacy {
+	# ...
+	# Create an Attribute hash from the <machine>
+	# section if it exists suitable for the OVM
+	# configuration
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	my %result = ();
+	my $device;
+	my $disktype;
+	if (! defined $node) {
+		return %result;
+	}
+	#==========================================
+	# global setup
+	#------------------------------------------
+	my $minmemory = $node -> getAttribute ("min_memory");
+	my $desmemory = $node -> getAttribute ("des_memory");
+	my $maxmemory = $node -> getAttribute ("max_memory");
+	my $memory    = $node -> getAttribute ("memory");
+	my $ncpus     = $node -> getAttribute ("ncpus");
+	my $mincpu    = $node -> getAttribute ("min_cpu");
+	my $descpu    = $node -> getAttribute ("des_cpu");
+	my $maxcpu    = $node -> getAttribute ("max_cpu");
+	my $type      = $node -> getAttribute ("ovftype");
+	#==========================================
+	# storage setup
+	#------------------------------------------
+	my $disk = $node -> getElementsByTagName ("vmdisk");
+	if ($disk) {
+		my $node  = $disk -> get_node(1);
+		$device = $node -> getAttribute ("device");
+		$disktype = $node -> getAttribute ("disktype");
+	}
+	#==========================================
+	# network setup
+	#------------------------------------------
+	my $bridges = $node -> getElementsByTagName ("vmnic");
+	my %vifs = ();
+	for (my $i=1;$i<= $bridges->size();$i++) {
+		my $bridge = $bridges -> get_node($i);
+		if ($bridge) {
+			my $bname = $bridge -> getAttribute ("interface");
+			if (! $bname) {
+				$bname = "undef";
+			}
+			$vifs{$bname} = $i;
+		}
+	}
+	#==========================================
+	# save hash
+	#------------------------------------------
+	$result{ovf_minmemory} = $minmemory;
+	$result{ovf_desmemory} = $desmemory;
+	$result{ovf_maxmemory} = $maxmemory;
+	$result{ovf_memory}    = $memory;
+	$result{ovf_ncpus}     = $ncpus;
+	$result{ovf_mincpu}    = $mincpu;
+	$result{ovf_descpu}    = $descpu;
+	$result{ovf_maxcpu}    = $maxcpu;
+	$result{ovf_type}      = $type;
+	if ($disk) {
+		$result{ovf_disk}    = $device;
+		$result{ovf_disktype}= $disktype;
+	}
+	foreach my $bname (keys %vifs) {
+		$result{ovf_bridge}{$bname} = $vifs{$bname};
+	}
+	return %result;
+}
+
+#==========================================
+# getPackageManager_legacy
+#------------------------------------------
+sub getPackageManager_legacy {
+	# ...
+	# Get the name of the package manager if set.
+	# if not set return the default package
+	# manager name
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $node = $this -> __getPreferencesNodeByTagName ("packagemanager");
+	my @packMgrs = $node -> getElementsByTagName ("packagemanager");
+	my $pmgr = $packMgrs[0];
+	if (! $pmgr) {
+		return 'zypper';
+	}
+	return $pmgr -> textContent();
+}
+
+#==========================================
 # getProfiles_legacy
 #------------------------------------------
 sub getProfiles_legacy {
@@ -5092,6 +5605,267 @@ sub getProfiles_legacy {
 		push @result, { %profile };
 	}
 	return @result;
+}
+
+#==========================================
+# getPXEDeployInitrd_legacy
+#------------------------------------------
+sub getPXEDeployInitrd_legacy {
+	# ...
+	# Get the deploy initrd, if specified
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
+	my $initrd = $node -> getElementsByTagName ("initrd");
+	if ((defined $initrd) && ! ("$initrd" eq "")) {
+		return $initrd;
+	} else {
+		return;
+	}
+}
+
+#==========================================
+# getPXEDeployUnionConfig_legacy
+#------------------------------------------
+sub getPXEDeployUnionConfig_legacy {
+	# ...
+	# Get the union file system configuration, if any
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("union") -> get_node(1);
+	my %config = ();
+	if (! $node) {
+		return %config;
+	}
+	$config{ro}   = $node -> getAttribute ("ro");
+	$config{rw}   = $node -> getAttribute ("rw");
+	$config{type} = $node -> getAttribute ("type");
+	return %config;
+}
+
+#==========================================
+# getPXEDeployImageDevice_legacy
+#------------------------------------------
+sub getPXEDeployImageDevice_legacy {
+	# ...
+	# Get the device the image will be installed to
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("partitions") -> get_node(1);
+	if (defined $node) {
+		return $node -> getAttribute ("device");
+	} else {
+		return;
+	}
+}
+
+#==========================================
+# getPXEDeployServer_legacy
+#------------------------------------------
+sub getPXEDeployServer_legacy {
+	# ...
+	# Get the server the config data is obtained from
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
+	if (defined $node) {
+		return $node -> getAttribute ("server");
+	} else {
+		return "192.168.1.1";
+	}
+}
+
+#==========================================
+# getPXEDeployBlockSize_legacy
+#------------------------------------------
+sub getPXEDeployBlockSize_legacy {
+	# ...
+	# Get the block size the deploy server should use
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
+	if (defined $node) {
+		return $node -> getAttribute ("blocksize");
+	} else {
+		return "4096";
+	}
+}
+
+#==========================================
+# getPXEDeployPartitions_legacy
+#------------------------------------------
+sub getPXEDeployPartitions_legacy {
+	# ...
+	# Get the partition configuration for this image
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $partitions = $tnode -> getElementsByTagName ("partitions") -> get_node(1);
+	my @result = ();
+	if (! $partitions) {
+		return @result;
+	}
+	my $partitionNodes = $partitions -> getElementsByTagName ("partition");
+	for (my $i=1;$i<= $partitionNodes->size();$i++) {
+		my $node = $partitionNodes -> get_node($i);
+		my $number = $node -> getAttribute ("number");
+		my $type = $node -> getAttribute ("type");
+		if (! defined $type) {
+			$type = "L";
+		}
+		my $size = $node -> getAttribute ("size");
+		if (! defined $size) {
+			$size = "x";
+		}
+		my $mountpoint = $node -> getAttribute ("mountpoint");
+		if (! defined $mountpoint) {
+			$mountpoint = "x";
+		}
+		my $target = $node -> getAttribute ("target");
+		if (! defined $target or $target eq "false" or $target eq "0") {
+			$target = 0;
+		} else {
+			$target = 1
+		}
+		
+		my %part = ();
+		$part{number} = $number;
+		$part{type} = $type;
+		$part{size} = $size;
+		$part{mountpoint} = $mountpoint;
+		$part{target} = $target;
+
+		push @result, { %part };
+	}
+	my @ordered = sort { $a->{number} cmp $b->{number} } @result;
+	return @ordered;
+}
+
+#==========================================
+# getPXEDeployConfiguration_legacy
+#------------------------------------------
+sub getPXEDeployConfiguration_legacy {
+	# ...
+	# Get the configuration file information for this image
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my @node = $tnode -> getElementsByTagName ("configuration");
+	my %result;
+	foreach my $element (@node) {
+		my $source = $element -> getAttribute("source");
+		my $dest   = $element -> getAttribute("dest");
+		my $forarch= $element -> getAttribute("arch");
+		my $allowed= 1;
+		if (defined $forarch) {
+			my @archlst = split (/,/,$forarch);
+			my $foundit = 0;
+			foreach my $archok (@archlst) {
+				if ($archok eq $this->{arch}) {
+					$foundit = 1; last;
+				}
+			}
+			if (! $foundit) {
+				$allowed = 0;
+			}
+		}
+		if ($allowed) {
+			$result{$source} = $dest;
+		}
+	}
+	return %result;
+}
+
+#==========================================
+# getPXEDeployTimeout_legacy
+#------------------------------------------
+sub getPXEDeployTimeout_legacy {
+	# ...
+	# Get the boot timeout, if specified
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
+	my $timeout = $node -> getElementsByTagName ("timeout");
+	if ((defined $timeout) && ! ("$timeout" eq "")) {
+		return $timeout;
+	} else {
+		return;
+	}
+}
+
+#==========================================
+# getPXEDeployKernel_legacy
+#------------------------------------------
+sub getPXEDeployKernel_legacy {
+	# ...
+	# Get the deploy kernel, if specified
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
+	my $kernel = $node -> getElementsByTagName ("kernel");
+	if ((defined $kernel) && ! ("$kernel" eq "")) {
+		return $kernel;
+	} else {
+		return;
+	}
+}
+
+#==========================================
+# getRPMCheckSignatures_legacy
+#------------------------------------------
+sub getRPMCheckSignatures_legacy {
+	# ...
+	# Check if the package manager should check for
+	# RPM signatures or not
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ("rpm-check-signatures");
+	my $sigs = $node -> getElementsByTagName ("rpm-check-signatures");
+	if ((! defined $sigs) || ("$sigs" eq "") || ("$sigs" eq "false")) {
+		return;
+	}
+	return $sigs;
+}
+
+#==========================================
+# getRPMExcludeDocs_legacy
+#------------------------------------------
+sub getRPMExcludeDocs_legacy {
+	# ...
+	# Check if the package manager should exclude docs
+	# from installed files or not
+	# ---
+	my $this = shift;
+	my $node = $this-> __getPreferencesNodeByTagName ("rpm-excludedocs");
+	my $xdoc = $node -> getElementsByTagName ("rpm-excludedocs");
+	if ((! defined $xdoc) || ("$xdoc" eq "")) {
+		return;
+	}
+	return $xdoc;
+}
+
+#==========================================
+# getRPMForce_legacy
+#------------------------------------------
+sub getRPMForce_legacy {
+	# ...
+	# Check if the package manager should force
+	# installing packages
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ("rpm-force");
+	my $frpm = $node -> getElementsByTagName ("rpm-force");
+	if ((! defined $frpm) || ("$frpm" eq "") || ("$frpm" eq "false")) {
+		return;
+	}
+	return $frpm;
 }
 
 #==========================================
@@ -5131,27 +5905,299 @@ sub getRepositories_legacy {
 }
 
 #==========================================
-# getHttpsRepositoryCredentials_legacy
+# getSplitPersistentFiles_legacy
 #------------------------------------------
-sub getHttpsRepositoryCredentials_legacy {
+sub getSplitPersistentFiles_legacy {
 	# ...
-	# If any repository is configered with credentials return the username
-	# and password
+	# Get the persistent files/directories for split image
 	# ---
 	my $this = shift;
-	my @repoNodes = $this->{repositNodeList} -> get_nodelist();
-	for my $repo (@repoNodes) {
-		my $uname = $repo -> getAttribute('username');
-		my $pass = $repo -> getAttribute('password');
-		if ($uname) {
-			my @sources = $repo -> getElementsByTagName ('source');
-			my $path = $sources[0] -> getAttribute('path');
-			if ( $path =~ /^https:/) {
-				return ($uname, $pass);
-			}
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
+	my @result = ();
+	if (! defined $node) {
+		return @result;
+	}
+	my $persistNode = $node -> getElementsByTagName ("persistent")
+		-> get_node(1);
+	if (! defined $persistNode) {
+		return @result;
+	}
+	my @fileNodeList = $persistNode -> getElementsByTagName ("file");
+	foreach my $fileNode (@fileNodeList) {
+		my $name = $fileNode -> getAttribute ("name");
+		$name =~ s/\/$//;
+		push @result, $name;
+	}
+	return @result;
+}
+
+#==========================================
+# getSplitTempFiles_legacy
+#------------------------------------------
+sub getSplitTempFiles_legacy {
+	# ...
+	# Get the persistent files/directories for split image
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
+	my @result = ();
+	if (! defined $node) {
+		return @result;
+	}
+	my $tempNode = $node -> getElementsByTagName ("temporary") -> get_node(1);
+	if (! defined $tempNode) {
+		return @result;
+	}
+	my @fileNodeList = $tempNode -> getElementsByTagName ("file");
+	foreach my $fileNode (@fileNodeList) {
+		my $name = $fileNode -> getAttribute ("name");
+		$name =~ s/\/$//;
+		push @result, $name;
+	}
+	return @result;
+}
+
+#==========================================
+# getSplitTempExceptions_legacy
+#------------------------------------------
+sub getSplitTempExceptions_legacy {
+	# ...
+	# Get the exceptions defined for temporary
+	# split portions. If there are no exceptions defined
+	# return an empty list
+	# ----
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
+	my @result = ();
+	if (! defined $node) {
+		return @result;
+	}
+	my $tempNode = $node -> getElementsByTagName ("temporary") -> get_node(1);
+	if (! defined $tempNode) {
+		return @result;
+	}
+	my @fileNodeList = $tempNode -> getElementsByTagName ("except");
+	foreach my $fileNode (@fileNodeList) {
+		push @result, $fileNode -> getAttribute ("name");
+	}
+	return @result;
+}
+
+#==========================================
+# getSplitPersistentExceptions_legacy
+#------------------------------------------
+sub getSplitPersistentExceptions_legacy {
+	# ...
+	# Get the exceptions defined for persistent
+	# split portions. If there are no exceptions defined
+	# return an empty list
+	# ----
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
+	my @result = ();
+	if (! defined $node) {
+		return @result;
+	}
+	my $persistNode = $node -> getElementsByTagName ("persistent")
+		-> get_node(1);
+	if (! defined $persistNode) {
+		return @result;
+	}
+	my @fileNodeList = $persistNode -> getElementsByTagName ("except");
+	foreach my $fileNode (@fileNodeList) {
+		push @result, $fileNode -> getAttribute ("name");
+	}
+	return @result;
+}
+
+#==========================================
+# getVMwareConfig_legacy
+#------------------------------------------
+sub getVMwareConfig_legacy {
+	# ...
+	# Create an Attribute hash from the <machine>
+	# section if it exists suitable for the VMware configuration
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	my %result = ();
+	my %guestos= ();
+	if (! defined $node) {
+		return %result;
+	}
+	#==========================================
+	# global setup
+	#------------------------------------------
+	my $arch = $node -> getAttribute ("arch");
+	if (! defined $arch) {
+		$arch = "ix86";
+	} elsif ($arch eq "%arch") {
+		my $sysarch = qxx ("uname -m"); chomp $sysarch;
+		if ($sysarch =~ /i.86/) {
+			$arch = "ix86";
+		} else {
+			$arch = $sysarch;
 		}
 	}
-	return;
+	my $hwver= $node -> getAttribute ("HWversion");
+	if (! defined $hwver) {
+		$hwver = 4;
+	}
+	$guestos{suse}{ix86}     = "suse";
+	$guestos{suse}{x86_64}   = "suse-64";
+	$guestos{sles}{ix86}     = "sles";
+	$guestos{sles}{x86_64}   = "sles-64";
+	$guestos{rhel6}{x86_64}  = "rhel6-64";
+	$guestos{rhel6}{ix86}    = "rhel6";
+	$guestos{rhel5}{x86_64}  = "rhel5-64";
+	$guestos{rhel5}{ix86}    = "rhel5";
+	$guestos{centos}{ix86}   = "centos";
+	$guestos{centos}{x86_64} = "centos-64";
+	my $guest= $node -> getAttribute ("guestOS");
+	if ((!defined $guest) || (! defined $guestos{$guest}{$arch})) {
+		if ($arch eq "ix86") {
+			$guest = "suse";
+		} else {
+			$guest = "suse-64";
+		}
+	} else {
+		$guest = $guestos{$guest}{$arch};
+	}
+	my $memory = $node -> getAttribute ("memory");
+	my $ncpus  = $node -> getAttribute ("ncpus");
+	#==========================================
+	# storage setup disk
+	#------------------------------------------
+	my $disk = $node -> getElementsByTagName ("vmdisk");
+	my ($type,$id);
+	if ($disk) {
+		my $node = $disk -> get_node(1);
+		$type = $node -> getAttribute ("controller");
+		$id   = $node -> getAttribute ("id");
+	}
+	#==========================================
+	# storage setup CD rom
+	#------------------------------------------
+	my $cd = $node -> getElementsByTagName ("vmdvd");
+	my ($cdtype,$cdid);
+	if ($cd) {
+		my $node = $cd -> get_node(1);
+		$cdtype = $node -> getAttribute ("controller");
+		$cdid   = $node -> getAttribute ("id");
+	}
+	#==========================================
+	# network setup
+	#------------------------------------------
+	my $nic  = $node -> getElementsByTagName ("vmnic");
+	my %vmnics;
+	for (my $i=1; $i<= $nic->size(); $i++) {
+		my $node = $nic  -> get_node($i);
+		$vmnics{$node -> getAttribute ("interface")} =
+		{
+			drv  => $node -> getAttribute ("driver"),
+			mode => $node -> getAttribute ("mode")
+		};
+	}
+	#==========================================
+	# configuration file settings
+	#------------------------------------------
+	my @vmConfigOpts = $this -> __getVMConfigOpts();
+	#==========================================
+	# save hash
+	#------------------------------------------
+	$result{vmware_arch}  = $arch;
+	if (@vmConfigOpts) {
+		$result{vmware_config} = \@vmConfigOpts;
+	}
+	$result{vmware_hwver} = $hwver;
+	$result{vmware_guest} = $guest;
+	$result{vmware_memory}= $memory;
+	$result{vmware_ncpus} = $ncpus;
+	if ($disk) {
+		$result{vmware_disktype} = $type;
+		$result{vmware_diskid}   = $id;
+	}
+	if ($cd) {
+		$result{vmware_cdtype} = $cdtype;
+		$result{vmware_cdid}   = $cdid;
+	}
+	if (%vmnics) {
+		$result{vmware_nic}= \%vmnics;
+	}
+	return %result;
+}
+
+#==========================================
+# getXenConfig_legacy
+#------------------------------------------
+sub getXenConfig_legacy {
+	# ...
+	# Create an Attribute hash from the <machine>
+	# section if it exists suitable for the xen domU configuration
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	my %result = ();
+	if (! defined $node) {
+		return %result;
+	}
+	#==========================================
+	# global setup
+	#------------------------------------------
+	my $memory = $node -> getAttribute ("memory");
+	my $ncpus  = $node -> getAttribute ("ncpus");
+	my $domain = $node -> getAttribute ("domain");
+	#==========================================
+	# storage setup
+	#------------------------------------------
+	my $disk = $node -> getElementsByTagName ("vmdisk");
+	my $device;
+	if ($disk) {
+		my $node  = $disk -> get_node(1);
+		$device= $node -> getAttribute ("device");
+	}
+	#==========================================
+	# network setup (bridge)
+	#------------------------------------------
+	my $bridges = $node -> getElementsByTagName ("vmnic");
+	my %vifs = ();
+	for (my $i=1;$i<= $bridges->size();$i++) {
+		my $bridge = $bridges -> get_node($i);
+		if ($bridge) {
+			my $mac   = $bridge -> getAttribute ("mac");
+			my $bname = $bridge -> getAttribute ("interface");
+			if (! $bname) {
+				$bname = "undef";
+			}
+			$vifs{$bname} = $mac;
+		}
+	}
+	#==========================================
+	# configuration file settings
+	#------------------------------------------
+	my @vmConfigOpts = $this -> __getVMConfigOpts();
+	#==========================================
+	# save hash
+	#------------------------------------------
+	if (@vmConfigOpts) {
+		$result{xen_config} = \@vmConfigOpts
+	}
+	$result{xen_memory}= $memory;
+	$result{xen_ncpus} = $ncpus;
+	$result{xen_domain}= $domain;
+	if ($disk) {
+		$result{xen_diskdevice} = $device;
+	}
+	foreach my $bname (keys %vifs) {
+		$result{xen_bridge}{$bname} = $vifs{$bname};
+	}
+	return %result;
 }
 
 #==========================================
@@ -5600,7 +6646,7 @@ sub __addDefaultStripNode {
 	my $kiwi   = $this->{kiwi};
 	my $image  = $this->{imgnameNodeList} -> get_node(1);
 	my @snodes = $image -> getElementsByTagName ("strip");
-	my %attr   = %{$this->getImageTypeAndAttributes()};
+	my %attr   = %{$this->getImageTypeAndAttributes_legacy()};
 	my $haveDelete = 0;
 	my $haveTools  = 0;
 	my $haveLibs   = 0;
@@ -5737,23 +6783,6 @@ sub __addDefaultSplitNode {
 	}
 	$this -> updateXML();
 	return $this;
-}
-
-#==========================================
-# __getChildNodeTextValue
-#------------------------------------------
-sub __getChildNodeTextValue {
-	# ...
-	# Return the value of the node identified by the
-	# given name as text.
-	# ---
-	my $this = shift;
-	my $node = shift;
-	my $childName = shift;
-	return $node
-		-> getChildrenByTagName ($childName)
-		-> get_node(1)
-		-> textContent();
 }
 
 #==========================================
@@ -6459,8 +7488,6 @@ sub __requestedProfile {
 	return 0;
 }
 
-
-
 #==========================================
 # __populateProfiledTypeInfo
 #------------------------------------------
@@ -6635,7 +7662,6 @@ sub __resolveArchitecture {
 	$path =~ s/\%arch/$arch/;
 	return $path;
 }
-
 
 1;
 

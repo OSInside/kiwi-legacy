@@ -1,13 +1,11 @@
-KIWIXML.t
 KIWIXMLDescriptionData.t
 KIWIXMLDriverData.t
-KIWIXMLEC2ConfigData.t
 KIWIXMLFileData.t
+KIWIXMLEC2ConfigData.t
 KIWIXMLOEMConfigData.t
-KIWIXMLPXEDeployData.t
 KIWIXMLPreferenceData.t
+KIWIXMLPXEDeployData.t
 KIWIXMLRepositoryData.t
 KIWIXMLSplitData.t
 KIWIXMLSystemdiskData.t
 KIWIXMLTypeData.t
-KIWIXMLVMachineData.t

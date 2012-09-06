@@ -85,9 +85,9 @@ sub new {
 	my $logFile = $cmdL -> getLogFile();
 	if ($logFile) {
 		$kiwi -> info ("Setting log file to: $logFile\n");
-			if (! $kiwi -> setLogFile ( $logFile )) {
-				return;
-			}
+		if (! $kiwi -> setLogFile ( $logFile )) {
+			return;
+		}
 	}
 	#==========================================
 	# Store object data
@@ -316,7 +316,7 @@ sub __getTree {
 						$kiwi -> info ("No overlay files found\n");
 					} else {
 						foreach my $file (sort keys %result) {
-							my $overlay = XML::LibXML::Element -> new("overlay");
+							my $overlay = XML::LibXML::Element->new("overlay");
 							$overlay -> setAttribute ("file","$file");
 							$scan -> appendChild ($overlay);
 						}
@@ -344,7 +344,7 @@ sub __getTree {
 						next if ($p eq "\n");
 						$p =~ s/^\s+//;
 						$p =~ s/\s+$//;
-						my $pattern = XML::LibXML::Element -> new("repopattern");
+						my $pattern = XML::LibXML::Element->new("repopattern");
 						$pattern -> setAttribute ("name","$p");
 						$scan -> appendChild ($pattern);
 					}
@@ -370,7 +370,7 @@ sub __getTree {
 					foreach my $p (sort keys %{$meta}) {
 						if ($p =~ /pattern:(.*)/) {
 							my $name = $1;
-							my $pattern = XML::LibXML::Element -> new("pattern");
+							my $pattern = XML::LibXML::Element->new("pattern");
 							$pattern -> setAttribute ("name","$name");
 							$scan -> appendChild ($pattern);
 						}
@@ -533,7 +533,6 @@ sub __getTree {
 		}
 	}
 	$this -> __cleanMountPnts($mountDirs);
-
 	return $scan;
 }
 

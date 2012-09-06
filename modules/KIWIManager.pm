@@ -78,7 +78,7 @@ sub new {
 		return;
 	}
 	if (! defined $manager) {
-		$manager = $xml -> getPackageManager();
+		$manager = $xml -> getPackageManager_legacy();
 	}
 	if (defined $targetArch && $manager ne 'zypper') {
 		$kiwi -> warning ("Target architecture not supported for $manager");
@@ -428,7 +428,7 @@ sub setupSignatureCheck {
 	#==========================================
 	# Get signature information
 	#------------------------------------------
-	my $imgCheckSig = $xml -> getRPMCheckSignatures();
+	my $imgCheckSig = $xml -> getRPMCheckSignatures_legacy();
 	$this->{imgCheckSig} = $imgCheckSig;
 	#==========================================
 	# smart
@@ -576,7 +576,7 @@ sub setupExcludeDocs {
 	#==========================================
 	# Get docs information
 	#------------------------------------------
-	my $imgExclDocs = $xml -> getRPMExcludeDocs();
+	my $imgExclDocs = $xml -> getRPMExcludeDocs_legacy();
 	$this->{imgExclDocs} = $imgExclDocs;
 
 	#==========================================
@@ -1435,7 +1435,7 @@ sub setupUpgrade {
 			"--log-level=error",
 			"-y"
 		);
-		my $force = $xml -> getRPMForce();
+		my $force = $xml -> getRPMForce_legacy();
 		if (defined $force) {
 			push (@opts,"-o rpm-force=yes");
 		}
@@ -1848,7 +1848,7 @@ sub setupRootSystem {
 				"--log-level=error",
 				"-y"
 			);
-			my $force = $xml -> getRPMForce();
+			my $force = $xml -> getRPMForce_legacy();
 			if (defined $force) {
 				push (@installOpts,"-o rpm-force=yes");
 			}
@@ -1893,7 +1893,7 @@ sub setupRootSystem {
 				"--log-level=error",
 				"-y"
 			);
-			my $force = $xml -> getRPMForce();
+			my $force = $xml -> getRPMForce_legacy();
 			if (defined $force) {
 				push (@installOpts,"-o rpm-force=yes");
 			}

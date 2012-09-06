@@ -10,7 +10,7 @@
 #               :
 # DESCRIPTION   : This module represents the data contained in the KIWI
 #               : configuration file marked with the <repository> element
-#               : and it's child element <source>..
+#               : and it's child element <source>.
 #               :
 # STATUS        : Development
 #----------------
@@ -372,6 +372,9 @@ sub setType {
 
 #==========================================
 # Private helper methods
+#------------------------------------------
+#==========================================
+# __isSupportedRepoType
 #------------------------------------------
 sub __isSupportedRepoType {
 	# ...
