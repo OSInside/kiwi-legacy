@@ -3327,12 +3327,13 @@ function searchImageISODevice {
 		isofrom_device=$(echo $isofrom | cut -f1 -d:)
 		isofrom_system=$(echo $isofrom | cut -f2 -d:)
 		waitForStorageDevice $isofrom_device
-		if ! mount $isofrom_device /mnt;then
+		mkdir /isofrom
+		if ! mount $isofrom_device /isofrom;then
 			systemException \
 				"Failed to mount ISO storage device !" \
 			"reboot"
 		fi
-		biosBootDevice=$(losetup -f --show /mnt/$isofrom_system)
+		biosBootDevice=$(losetup -f --show /isofrom/$isofrom_system)
 		if [ ! $? = 0 ];then
 			systemException \
 				"Failed to loop setup ISO system !" \
