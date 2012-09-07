@@ -762,10 +762,12 @@ sub createImage {
 		#------------------------------------------
 		my $basedest = dirname  $destination;
 		my $basesubd = basename $destination;
-		my $tarfile  = $basedest."/".$imgName."-".$basesubd.".tgz";
+		my $tarfile  = $imgName."-".$basesubd.".tgz";
 		if ($cmdL -> getArchiveImage()) {
 			$kiwi -> info ("Archiving image build result...");
-			my $status = qxx ("tar -C $destination -czSf $tarfile . 2>&1");
+			my $status = qxx (
+				"cd $basedest && tar -czSf $tarfile $basesubd 2>&1"
+			);
 			my $result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> error (
