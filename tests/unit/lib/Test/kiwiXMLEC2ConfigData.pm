@@ -110,6 +110,36 @@ sub test_ctor_improperHashMemb {
 }
 
 #==========================================
+# test_ctor_initUnsupportedData
+#------------------------------------------
+sub test_ctor_initUnsupportedData {
+	# ...
+	# Test the EC2ConfigData constructor with an initialization hash
+	# that contains unsupported data
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @regions = qw /US-East EU-West AP-South/;
+	my %args = ( ec2accountnr      => '1234567890',
+				certfile          => '/work/ec2/myaccount.cert',
+				ec2privatekeyfile => '/work/ec2/mykey.pem',
+				ec2region         => \@regions
+			);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi, \%args);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Unsupported option in initialization structure found '
+		. "'certfile'";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	return;
+}
+
+#==========================================
 # test_ctor_wInit
 #------------------------------------------
 sub test_ctor_wInit {

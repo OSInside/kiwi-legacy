@@ -55,6 +55,19 @@ sub new {
 		return;
 	}
 	if ($init) {
+		# Check for unsupported entries
+		my %initStruct = %{$init};
+		my %supported = map { ($_ => 1) } qw(
+			ec2accountnr ec2certfile ec2privatekeyfile ec2region
+		);
+		for my $key (keys %initStruct) {
+			if (! $supported{$key} ) {
+				my $msg = 'Unsupported option in initialization structure '
+					. "found '$key'";
+				$kiwi -> info($msg);
+				$kiwi -> skipped();
+			}
+		}
 		$this->{acctno}         = $init->{ec2accountnr};
 		$this->{certfile}       = $init->{ec2certfile};
 		$this->{privatekeyfile} = $init->{ec2privatekeyfile};
