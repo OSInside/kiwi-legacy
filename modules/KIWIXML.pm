@@ -2872,15 +2872,22 @@ sub addPackages {
 		$kiwi -> loginfo ("addPackages: no $ptype section found... skipped\n");
 		return $this;
 	}
+	my $addToNode = $nodes -> get_node($nodeNumber);
+	my @packnodes = $addToNode -> getElementsByTagName ("package");
+	my %packhash  = ();
+	foreach my $element (@packnodes) {
+		my $package = $element -> getAttribute ("name");
+		$packhash{$package} = $package;
+	}
 	foreach my $pack (@packs) {
 		next if ($pack eq "");
+		next if ($packhash{$pack});
 		my $addElement = new XML::LibXML::Element ("package");
 		$addElement -> setAttribute("name",$pack);
 		if (($bincl) && ($bincl->{$pack}) && ($bincl->{$pack} == 1)) {
 			$addElement -> setAttribute("bootinclude","true");
 		}
-		$nodes -> get_node($nodeNumber)
-			-> appendChild ($addElement);
+		$addToNode -> appendChild ($addElement);
 	}
 	$this -> updateXML();
 	return $this;
