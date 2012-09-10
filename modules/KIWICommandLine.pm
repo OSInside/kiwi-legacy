@@ -563,4 +563,22 @@ sub setTargetDirsForBuild {
 	return 1;
 }
 
+#==========================================
+# setArchiveImage
+#------------------------------------------
+sub setArchiveImage {
+	my $this  = shift;
+	my $value = shift;
+	$this->{archiveimage} = $value;
+	return 1;
+}
+
+#==========================================
+# getArchiveImage
+#------------------------------------------
+sub getArchiveImage {
+	my $this = shift;
+	return $this->{archiveimage};
+}
+
 1;

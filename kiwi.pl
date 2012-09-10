@@ -29,6 +29,8 @@ $DB::inhibit_exit = 0;
 # Modules
 #--------------------------------------------
 use warnings;
+use File::Basename;
+use KIWIQX qw (qxx);
 use Carp qw (cluck);
 use Getopt::Long;
 use File::Spec;
@@ -149,6 +151,7 @@ $KnownFS{cpio}{ro}        = 0;
 # Globals
 #--------------------------------------------
 our $Build;                 # run prepare and create in one step
+our $ArchiveImage;          # archive image results into a tarball
 our $Prepare;               # control XML file for building chroot extend
 our $Create;                # image description for building image extend
 our $CheckConfig;           # Configuration file to check
@@ -453,7 +456,7 @@ sub main {
 		#==========================================
 		# Check for add-repo option
 		#------------------------------------------
-		if (defined @AddRepository) {
+		if (@AddRepository) {
 			$xml -> addRepository (
 				\@AddRepositoryType,\@AddRepository,
 				\@AddRepositoryAlias,\@AddRepositoryPriority
@@ -462,19 +465,19 @@ sub main {
 		#==========================================
 		# Check for add-package option
 		#------------------------------------------
-		if (defined @AddPackage) {
+		if (@AddPackage) {
 			$xml -> addImagePackages (@AddPackage);
 		}
 		#==========================================
 		# Check for add-pattern option
 		#------------------------------------------
-		if (defined @AddPattern) {
+		if (@AddPattern) {
 			$xml -> addImagePatterns (@AddPattern);
 		}
 		#==========================================
 		# Check for del-package option
 		#------------------------------------------
-		if (defined @RemovePackage) {
+		if (@RemovePackage) {
 			$xml -> addRemovePackages (@RemovePackage);
 		}
 		#==========================================
@@ -641,7 +644,7 @@ sub main {
 		#==========================================
 		# Check for add-repo option
 		#------------------------------------------
-		if (defined @AddRepository) {
+		if (@AddRepository) {
 			$xml -> addRepository (
 				\@AddRepositoryType,\@AddRepository,
 				\@AddRepositoryAlias,\@AddRepositoryPriority
@@ -653,6 +656,19 @@ sub main {
 		my $dirCreated = createDirInteractive($kiwi, $Destination);
 		if (! defined $dirCreated) {
 			my $code = kiwiExit (1); return $code;
+		}
+		if ($attr{type} ne "cpio") {
+			my $profileNames = join ("-",@{$xml->{reqProfiles}});
+			if ($profileNames) {
+				$Destination.="/".$attr{type}."-".$profileNames;
+			} else {
+				$Destination.="/".$attr{type};
+			}
+			if ((! -d $Destination) && (! mkdir $Destination)) {
+				$kiwi -> error  ("Failed to create destination subdir: $!");
+				$kiwi -> failed ();
+				my $code = kiwiExit (1); return $code;
+			}
 		}
 		#==========================================
 		# Check tool set
@@ -791,6 +807,7 @@ sub main {
 		#------------------------------------------
 		my $ok;
 		my $checkFormat = 0;
+		my $imgName = $image -> buildImageName();
 		SWITCH: for ($attr{type}) {
 			/^ext2/     && do {
 				$ok = $image -> createImageEXT2 ( $targetDevice );
@@ -862,7 +879,7 @@ sub main {
 		if ($ok) {
 			if (($checkFormat) && ($attr{format})) {
 				my $haveFormat = $attr{format};
-				my $imgfile= $main::Destination."/".$image -> buildImageName();
+				my $imgfile= $main::Destination."/".$imgName;
 				my $format = new KIWIImageFormat (
 					$kiwi,$imgfile,$haveFormat,$xml
 				);
@@ -880,7 +897,43 @@ sub main {
 				}
 			}
 			undef $image;
-			my $code = kiwiExit (0); return $code;
+			if ($attr{type} ne "cpio") {
+				#==========================================
+				# Package build result into an archive
+				#------------------------------------------
+				my $basedest = dirname  $Destination;
+				my $basesubd = basename $Destination;
+				my $tarfile  = $imgName."-".$basesubd.".tgz";
+				if ($cmdL -> getArchiveImage()) {
+					$kiwi -> info ("Archiving image build result...");
+					my $status = qxx (
+						"cd $basedest && tar -czSf $tarfile $basesubd 2>&1"
+					);
+					my $result = $? >> 8;
+					if ($result != 0) {
+						$kiwi -> error (
+							"Failed to archive image build result: $status"
+						);
+						$kiwi -> failed ();
+						my $code = kiwiExit (1); return $code;
+					}
+					$kiwi -> done();
+				}
+				#==========================================
+				# Move build result(s) to destination dir
+				#------------------------------------------
+				my $status = qxx ("mv -f $Destination/* $basedest 2>&1");
+				my $result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error (
+						"Failed to move image file(s) to destination: $status"
+					);
+					$kiwi -> failed ();
+					my $code = kiwiExit (1); return $code;
+				}
+				rmdir $Destination;
+				my $code = kiwiExit (0); return $code;
+			}
 		} else {
 			undef $image;
 			my $code = kiwiExit (1); return $code;
@@ -920,7 +973,7 @@ sub main {
 		#==========================================
 		# Check for add-repo option
 		#------------------------------------------
-		if (defined @AddRepository) {
+		if (@AddRepository) {
 			$xml -> addRepository (
 				\@AddRepositoryType,\@AddRepository,
 				\@AddRepositoryAlias,\@AddRepositoryPriority
@@ -929,7 +982,7 @@ sub main {
 		#==========================================
 		# Check for add-pattern option
 		#------------------------------------------
-		if (defined @AddPattern) {
+		if (@AddPattern) {
 			foreach my $pattern (@AddPattern) {
 				push (@AddPackage,"pattern:$pattern");
 			}
@@ -1191,6 +1244,7 @@ sub init {
 	# get options and call non-root tasks
 	#------------------------------------------
 	my $result = GetOptions(
+		"archive-image"         => \$ArchiveImage,
 		"add-package=s"         => \@AddPackage,
 		"add-pattern=s"         => \@AddPattern,
 		"add-profile=s"         => \@Profiles,
@@ -1273,7 +1327,7 @@ sub init {
 	#========================================
 	# check if repositories are to be added
 	#----------------------------------------
-	if (defined @AddRepository) {
+	if (@AddRepository) {
 		my $res = $cmdL -> setAdditionalRepos(
 			\@AddRepository,
 			\@AddRepositoryAlias,
@@ -1283,6 +1337,12 @@ sub init {
 		if (! $res) {
 			my $code = kiwiExit (1); return $code;
 		}
+	}
+	#========================================
+	# check if archive-image option is set
+	#----------------------------------------
+	if (defined $ArchiveImage) {
+		$cmdL -> setArchiveImage ($ArchiveImage);
 	}
 	#========================================
 	# check if repositories are to be ignored
@@ -1775,6 +1835,10 @@ sub usage {
 	print "\n";
 	print "    [ --prebuiltbootimage <directory> ]\n";
 	print "      search in <directory> for pre-built boot images\n";
+	print "\n";
+	print "    [ --archive-image ]\n";
+	print "      When calling kiwi --create this option allows to pack\n";
+	print "      the build result(s) into a tar archive\n";
 	print "\n";
 	print "    [ --isocheck ]\n";
 	print "      in case of an iso image the checkmedia program generates\n";
