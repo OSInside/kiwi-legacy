@@ -2451,16 +2451,21 @@ sub setupPackageKeys {
 		$kiwi -> skipped ();
 		return $this;
 	}
-	my $dump = "/usr/lib/rpm/gnupg/dumpsigs";
-	my $sigs = "$root/rpm-sigs";
-	$data = qxx ("mkdir -p $sigs && cd $sigs && $dump 2>&1");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> skipped ();
-		$kiwi -> error  ("Can't dump pubkeys: $data");
-		$kiwi -> failed ();
-		qxx ("rm -rf $sigs");
-		return $this;
+	my $dump   = "/usr/lib/rpm/gnupg/dumpsigs";
+	my $keydir = '/usr/lib/rpm/gnupg/keys';
+	my $sigs   = "$root/rpm-sigs";
+	if (! -d $keydir) {
+		$data = qxx ("mkdir -p $sigs && cd $sigs && $dump 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> skipped ();
+			$kiwi -> error  ("Can't dump pubkeys: $data");
+			$kiwi -> failed ();
+			qxx ("rm -rf $sigs");
+			return $this;
+		}
+	} else {
+		$sigs = $keydir;
 	}
 	$data.= qxx ("rpm -r $root --import $sigs/gpg-pubke* 2>&1");
 	$code = $? >> 8;
@@ -2468,11 +2473,15 @@ sub setupPackageKeys {
 		$kiwi -> skipped ();
 		$kiwi -> error  ("Can't import pubkeys: $data");
 		$kiwi -> failed ();
-		qxx ("rm -rf $sigs");
+		if (-d "$root/rpm-sigs") {
+			qxx ("rm -rf $root/rpm-sigs");
+		}
 		return $this;
 	}
 	$kiwi -> done();
-	qxx ("rm -rf $sigs");
+	if (-d "$root/rpm-sigs") {
+		qxx ("rm -rf $root/rpm-sigs");
+	}
 	return $this;
 }
 
