@@ -1,4 +1,21 @@
 -------------------------------------------------------------------
+Mon Sep 10 10:54:11 CEST 2012 - ms@suse.de
+
+- changed processing of build results:
+  * build within a subdirectory created below the specified
+    destination directory. The name of this subdir is build
+    out of the image type and the used profile(s)
+  * at the end of the build move the result files to the
+    specified destination directory to keep the system
+    backward compatible
+  * add option --archive-image which allows to pack the
+    build results into a tar archive. The name of the archive
+    is build out of the image name, type and used profile(s)
+    This functionality was requested by (bnc #778787)
+- fixed startshell.c to compile without warnings
+- fixed setupPackageKeys() to work without pubring.gpg
+
+-------------------------------------------------------------------
 Tue Sep  4 11:59:54 CEST 2012 - ms@suse.de
 
 - netboot: enable multicast for system image and transfer
