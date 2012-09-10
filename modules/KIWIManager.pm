@@ -2421,11 +2421,15 @@ sub setupPackageKeys {
 		$kiwi -> skipped ();
 		$kiwi -> error  ("Can't import pubkeys: $data");
 		$kiwi -> failed ();
-		qxx ("rm -rf $sigs");
+		if (-d "$root/rpm-sigs") {
+			qxx ("rm -rf $root/rpm-sigs");
+		}
 		return $this;
 	}
 	$kiwi -> done();
-	qxx ("rm -rf $sigs");
+	if (-d "$root/rpm-sigs") {
+		qxx ("rm -rf $root/rpm-sigs");
+	}
 	return $this;
 }
 
