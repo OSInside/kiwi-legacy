@@ -1269,6 +1269,7 @@ sub __uniqueInPackages {
 			if ($repl) {
 				$item .= ",$repl";
 			}
+			$item = quotemeta $item;
 			if (grep { /^$item$/x } @names) {
 				return $item;
 			} else {
