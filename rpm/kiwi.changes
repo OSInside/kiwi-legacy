@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Sep 11 11:18:23 CEST 2012 - ms@suse.de
+
+- The fetchFile() return value is broken: it returns status of the
+  last command in the pipe. With atftp it works ok, but with curl
+  it returns the status of the final dd command, which is always
+  zero (bnc #779701)
+
+-------------------------------------------------------------------
 Mon Sep 10 10:54:11 CEST 2012 - ms@suse.de
 
 - changed processing of build results:
