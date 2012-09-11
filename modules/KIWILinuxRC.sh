@@ -5391,8 +5391,7 @@ function fetchFile {
 		test -e /tmp/load_code && rm -f /tmp/load_code
 		errorLogStop
 		(
-			eval $call &>/dev/null
-			echo $? > /tmp/load_code
+			eval $call \; 'echo ${PIPESTATUS[0]} > /tmp/load_code' &>/dev/null
 		)&
 		call_pid=$!
 		echo "cat /progress | dialog \
@@ -5414,8 +5413,7 @@ function fetchFile {
 			"reboot"
 		fi
 	else
-		eval $call
-		loadCode=$?
+		eval $call \; 'loadCode=${PIPESTATUS[0]}'
 	fi
 	if [ $showProgress -eq 1 ];then
 		errorLogContinue
