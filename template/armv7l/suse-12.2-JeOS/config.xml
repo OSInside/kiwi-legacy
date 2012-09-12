@@ -15,7 +15,7 @@
 	</profiles>
 	<preferences>
 		<type image="tbz" primary="true"/>
-		<version>1.12.1</version>
+		<version>1.12.2</version>
 		<packagemanager>zypper</packagemanager>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
@@ -26,7 +26,7 @@
 		<bootloader-theme>openSUSE</bootloader-theme>
 	</preferences>
 	<preferences profiles="pandaFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" bootkernel="omap4panda" kernelcmdline="console=ttyO2 vram=16M">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" kernelcmdline="console=ttyO2 vram=16M">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
@@ -34,7 +34,7 @@
 		</type>
 	</preferences>
 	<preferences profiles="efikaFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" bootkernel="imx51" kernelcmdline="console=ttymxc0,115200 vram=16M">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" kernelcmdline="console=ttymxc0,115200 vram=16M">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
@@ -42,7 +42,7 @@
 		</type>
 	</preferences>
 	<preferences profiles="beagleFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" bootkernel="omap3beagle" kernelcmdline="console=ttyO2 vram=16M">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" kernelcmdline="console=ttyO2 vram=16M">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
@@ -56,16 +56,16 @@
 		<source path="obs://openSUSE:/Factory:/ARM/standard"/>
 	</repository>
 	<packages type="bootstrap" profiles="pandaFlavour">
-		<package name="kernel-omap2plus"/>
-		<package name="u-boot-omap4panda"/>
+		<package name="kernel-omap2plus" bootinclude="true"/>
+		<package name="u-boot-omap4panda" bootinclude="true"/>
 	</packages>
 	<packages type="bootstrap" profiles="efikaFlavour">
-		<package name="kernel-imx51"/>
+		<package name="kernel-imx51" bootinclude="true"/>
 	</packages>
 	<packages type="bootstrap" profiles="beagleFlavour">
-		<package name="kernel-omap2plus"/>
-		<package name="u-boot-omap3beagle"/>
-		<package name="x-loader-omap3beagle"/>
+		<package name="kernel-omap2plus" bootinclude="true"/>
+		<package name="u-boot-omap3beagle" bootinclude="true"/>
+		<package name="x-loader-omap3beagle" bootinclude="true"/>
 	</packages>
 <!-- don't remove qemu binfmt helpers from initrd -->
 	<strip type="tools">

@@ -14,11 +14,7 @@
 	</preferences>
 	<profiles>
 		<profile name="default" description="Booting default setup"/>
-		<profile name="std" description="KERNEL: For Qemu"/>
-		<profile name="tegra" description="KERNEL: For tegra boards"/>
-		<profile name="omap4panda" description="KERNEL: For panda boards"/>
-		<profile name="omap3beagle" description="KERNEL: For beagle boards"/>
-		<profile name="imx51" description="KERNEL: For efika boards"/>
+		<profile name="std" description="KERNEL: dummy entry"/>
 	</profiles>
 	<drivers>
 		<file name="crypto/*"/>
@@ -66,24 +62,6 @@
 	<repository type="rpm-md" status="replaceable">
 		<source path="obs://openSUSE:/Factory:/ARM/standard"/>
 	</repository>
-	<packages type="bootstrap" profiles="std">
-		<package name="kernel-default"/>
-	</packages>
-	<packages type="bootstrap" profiles="tegra">
-		<package name="kernel-tegra"/>
-	</packages>
-	<packages type="bootstrap" profiles="imx51">
-		<package name="kernel-imx51"/>
-	</packages>
-	<packages type="bootstrap" profiles="omap4panda">
-		<package name="kernel-omap2plus"/>
-		<package name="u-boot-omap4panda"/>
-	</packages>
-	<packages type="bootstrap" profiles="omap3beagle">
-		<package name="kernel-omap2plus"/>
-		<package name="u-boot-omap3beagle"/>
-		<package name="x-loader-omap3beagle"/>
-	</packages>
 	<packages type="bootstrap">
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
