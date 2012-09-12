@@ -784,38 +784,12 @@ function installBootLoaderRecovery {
 # installBootLoaderUBoot
 #--------------------------------------
 function installBootLoaderUBoot {
-	if [ -x /usr/bin/mkimage ];then
-		#======================================
-		# create u-boot script and image
-		#--------------------------------------
-		mkimage -A arm -O linux -a 0 -e 0 -T script -C none \
-			-n 'Boot-Script' -d /boot/boot.script /boot/boot.scr
-		if [ ! $? = 0 ];then
-			Echo "Failed to create boot script image"
-		fi
-		#======================================
-		# install MLO
-		#--------------------------------------
-		if [ -e /boot/MLO ];then
-			dd if=/boot/MLO of=$imageDiskDevice bs=128k count=1 seek=1 1>&2
-			if [ ! $? = 0 ];then
-				Echo "Failed to install MLO"
-			fi
-		else
-			Echo "No MLO loader present in system image"
-			Echo "Install of MLO skipped"
-		fi
-		#======================================
-		# avoid x86 boot code in the MBR
-		#--------------------------------------
-		dd if=/dev/zero of=$imageDiskDevice bs=440 count=1 1>&2
-		if [ ! $? = 0 ];then
-			Echo "Failed to clear MBR"
-		fi
-	else
-		Echo "Image doesn't have u-boot-tools installed"
-		Echo "Can't create boot script image"
-	fi
+	# /.../
+	# installation of uboot can't be done in a generic
+	# way because each arm board behaves differently.
+	# Thus we are only calling a hook script here
+	# ----
+	runHook installUBoot "$@"
 }
 #======================================
 # installBootLoaderS390
@@ -1570,93 +1544,12 @@ function setupBootLoaderGrub2Recovery {
 #--------------------------------------
 function setupBootLoaderUBoot {
 	# /.../
-	# create boot.script used for the uboot
-	# bootloader
+	# The setup of the uboot boot.script can't be done
+	# in a generic way because each arm board behaves
+	# differently. Thus we are only calling a hook
+	# script here
 	# ----
-	local IFS
-	local mountPrefix=$1  # mount path of the image
-	local destsPrefix=$2  # base dir for the config files
-	local unum=$3         # boot partition ID
-	local rdev=$4         # root partition
-	local ufix=$5         # title postfix
-	local swap=$6         # optional swap partition
-	local conf=$destsPrefix/boot/boot.script
-	local kernel=""
-	local initrd=""
-	#======================================
-	# make sure conf dir exists
-	#--------------------------------------
-	mkdir -p $destsPrefix/boot
-	#======================================
-	# check for device by ID
-	#--------------------------------------
-	local diskByID=`getDiskID $rdev`
-	local swapByID=`getDiskID $swap swap`
-	#======================================
-	# check for system image .profile
-	#--------------------------------------
-	if [ -f $mountPrefix/image/.profile ];then
-		importFile < $mountPrefix/image/.profile
-	fi
-	#======================================
-	# check for kernel options
-	#--------------------------------------
-	if [ ! -z "$kiwi_cmdline" ];then
-		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
-	fi
-	#======================================
-	# create standard entry
-	#--------------------------------------
-	IFS="," ; for i in $KERNEL_LIST;do
-		if test -z "$i";then
-			continue
-		fi
-		# /.../
-		# On other systems which supports a boot menu we add
-		# the linux kernel and initrd with its file names
-		# like this:
-		#
-		#   kernel=`echo $i | cut -f1 -d:`
-		#   initrd=`echo $i | cut -f2 -d:`
-		#
-		# But on arm systems there can only be one kernel because
-		# uboot doesn't support a menu. Thus perl-bootloader also
-		# doesn't support updating the uboot configuration and
-		# that's the reason why we use the links created by
-		# mkinitrd to point to the kernel and initrd in order
-		# to support kernel updates
-		# ----
-		kernel=uImage
-		initrd=initrd
-		echo "setenv ramdisk $initrd" > $conf
-		echo "setenv kernel $kernel" >> $conf
-		echo "setenv initrd_high \"0xffffffff\"" >> $conf
-		echo "setenv fdt_high \"0xffffffff\""    >> $conf
-		echo 'printenv kerneladdr || setenv kerneladdr ${kernel_addr_r}' \
-			>> $conf
-		echo 'printenv ramdiskaddr|| setenv ramdiskaddr ${ramdisk_addr_r}' \
-			>> $conf
-		echo -n "setenv bootcmd \"" >> $conf
-		echo -n "ext2load mmc 0:1 \${kerneladdr} $kernel; " >> $conf
-		echo -n "ext2load mmc 0:1 \${ramdiskaddr} $initrd; " >> $conf
-		echo "bootm \${kerneladdr} \${ramdiskaddr}\"" >> $conf
-		echo -n "setenv bootargs root=$diskByID loader=$loader" >> $conf
-		if [ ! -z "$imageDiskDevice" ];then
-			echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
-		fi
-		if [ ! -z "$swap" ];then
-			echo -n " resume=$swapByID" >> $conf
-		fi
-		if [ "$haveLVM" = "yes" ];then
-			echo -n " VGROUP=$VGROUP" >> $conf
-		fi
-		echo -n " $KIWI_INITRD_PARAMS"  >> $conf
-		echo -n " $KIWI_KERNEL_OPTIONS" >> $conf
-		echo ";"    >> $conf
-		echo "boot" >> $conf
-		# only one entry...
-		break
-	done
+	runHook setupUBoot "$@"
 }
 #======================================
 # setupBootLoaderS390

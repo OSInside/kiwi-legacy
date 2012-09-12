@@ -4306,6 +4306,10 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Standard boot
 		#------------------------------------------
+		# this is only the generic part of the boot script. The
+		# custom parts needs to be added via the editbootconfig
+		# script hook
+		# ----
 		if (! open (FD,">$tmpdir/boot/boot.script")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create boot.script: $!");
@@ -4316,14 +4320,6 @@ sub setupBootLoaderConfiguration {
 		print FD 'setenv kernel boot/linux.vmx'."\n";
 		print FD 'setenv initrd_high "0xffffffff"'."\n";
 		print FD 'setenv fdt_high "0xffffffff"'."\n";
-		print FD 'printenv kerneladdr || setenv kerneladdr ${kernel_addr_r}';
-		print FD "\n";
-		print FD 'printenv ramdiskaddr|| setenv ramdiskaddr ${ramdisk_addr_r}';
-		print FD "\n";
-		print FD 'setenv bootcmd "';
-		print FD 'ext2load mmc 0:1 ${kerneladdr} boot/linux.vmx; ';
-		print FD 'ext2load mmc 0:1 ${ramdiskaddr} boot/initrd.uboot; ';
-		print FD 'bootm ${kerneladdr} ${ramdiskaddr}";'."\n";
 		if ($type =~ /^KIWI CD/) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("*** uboot: CD boot not supported ***");
@@ -4334,22 +4330,7 @@ sub setupBootLoaderConfiguration {
 		} else {
 			print FD "setenv bootargs loader=$bloader $cmdline \${append}\n"
 		}
-		print FD 'boot'."\n";
 		close FD;
-		#==========================================
-		# Create machine readable uboot format
-		#------------------------------------------
-		$mkopts = "-A arm -O linux -a 0 -e 0 -T script -C none";
-		$inputf = "$tmpdir/boot/boot.script";
-		$result = "$tmpdir/boot/boot.scr";
-		$data = qxx ("mkimage $mkopts -n 'Boot-Script' -d $inputf $result");
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to create uboot script image: $data");
-			$kiwi -> failed ();
-			return;
-		}
 		$kiwi -> done();
 	}
 	#==========================================
@@ -4914,62 +4895,7 @@ sub installBootLoader {
 	# install uboot
 	#------------------------------------------
 	if ($loader eq "uboot") {
-		if (! $deviceMap) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("No device map available");
-			$kiwi -> failed ();
-			return;
-		}
-		my %deviceMap = %{$deviceMap};
-		my $device = $deviceMap{1};
-
-		#==========================================
-		# mount boot device...
-		#------------------------------------------
-		$status = qxx ("mount $device /mnt 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Can't mount boot partition: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return;
-		}
-		#==========================================
-		# install MLO as raw
-		#------------------------------------------
-		if (-e "$tmpdir/boot/MLO") {
-			$kiwi -> info ("Installing MLO on device: $diskname");
-			my $MLO = "$tmpdir/boot/MLO";
-			my $opt = "count=1 seek=1 conv=notrunc";
-			$status = qxx (
-				"dd if=$MLO of=$diskname bs=128k $opt 2>&1"
-			);
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't install MLO on $diskname: $status");
-				$kiwi -> failed ();
-				qxx ("umount /mnt 2>&1");
-				$this -> cleanLoop ();
-				return;
-			}
-			# To avoid any issues when parted leaves x86 boot code
-			# in the MBR we better clear that part of the image
-			$status = qxx (
-				"dd if=/dev/zero of=$diskname bs=440 count=1 conv=notrunc 2>&1"
-			);
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't clear MBR on $diskname: $status");
-				$kiwi -> failed ();
-				qxx ("umount /mnt 2>&1");
-				$this -> cleanLoop ();
-				return;
-			}
-		}
-		qxx ("umount /mnt 2>&1");
+		# There is no generic way to do this, use editbootinstall script hook
 	}
 	#==========================================
 	# more boot managers to come...

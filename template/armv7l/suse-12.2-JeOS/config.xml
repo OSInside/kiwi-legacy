@@ -26,7 +26,7 @@
 		<bootloader-theme>openSUSE</bootloader-theme>
 	</preferences>
 	<preferences profiles="pandaFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" kernelcmdline="console=ttyO2 vram=16M">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" kernelcmdline="console=ttyO2 vram=16M" editbootconfig="uboot-image-setup" editbootinstall="uboot-image-install">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
@@ -34,7 +34,7 @@
 		</type>
 	</preferences>
 	<preferences profiles="efikaFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" kernelcmdline="console=ttymxc0,115200 vram=16M">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" kernelcmdline="console=ttymxc0,115200 vram=16M" editbootconfig="uboot-image-setup" editbootinstall="uboot-image-install">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
@@ -42,7 +42,7 @@
 		</type>
 	</preferences>
 	<preferences profiles="beagleFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" kernelcmdline="console=ttyO2 vram=16M">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootloader="uboot" kernelcmdline="console=ttyO2 vram=16M" editbootconfig="uboot-image-setup" editbootinstall="uboot-image-install">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
@@ -103,5 +103,7 @@
 		<package name="u-boot-tools"/>
 		<package name="less"/>
 		<package name="zypper"/>
+<!-- custom hook scripts for uboot -->
+		<archive name="uboot-setup.tgz" bootinclude="true"/>
 	</packages>
 </image>
