@@ -4478,6 +4478,7 @@ sub installBootLoader {
 			$editBoot = $xml -> getEditBootConfig();
 		}
 		if (($editBoot) && (-e $editBoot)) {
+			$kiwi -> info ("Calling pre bootloader install script...\n");
 			system ("cd $tmpdir && bash --norc -c $editBoot");
 		}
 	}
@@ -4975,6 +4976,20 @@ sub installBootLoader {
 	#------------------------------------------
 	# ...
 	#==========================================
+	# Check for edit boot install
+	#------------------------------------------
+	if ($cmdL) {
+		my $editBoot = $cmdL -> getEditBootInstall();
+		if ((! $editBoot) && ($xml)) {
+			$editBoot = $xml -> getEditBootInstall();
+		}
+		if (($editBoot) && (-e $editBoot)) {
+			$kiwi -> info ("Calling post bootloader install script...\n");
+			my @opts = ($diskname,$deviceMap->{1});
+			system ("cd $tmpdir && bash --norc -c \"$editBoot @opts\"");
+		}
+	}
+	#==========================================
 	# Write custom disk label ID to MBR
 	#------------------------------------------
 	if ($loader ne "yaboot") {
@@ -4982,8 +4997,8 @@ sub installBootLoader {
 		if (! $this -> writeMBRDiskLabel ($diskname)) {
 			return;
 		}
+		$kiwi -> done();
 	}
-	$kiwi -> done();
 	return $this;
 }
 

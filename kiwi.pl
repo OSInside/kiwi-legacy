@@ -668,6 +668,7 @@ sub init {
 	my $FatStorage;            # size of fat partition if syslinux is used
 	my $DiskStartSector;       # location of start sector (default is 32)
 	my $EditBootConfig;        # allow to run script before bootloader install
+	my $EditBootInstall;       # allow to run script after bootloader install
 	my $PackageManager;        # package manager to use
 	my $DiskAlignment;         # partition alignment, default is 4096
 	my $DiskBIOSSectorSize;    # sector size default is 512 bytes
@@ -720,6 +721,7 @@ sub init {
 		"fs-journalsize=i"      => \$FSJournalSize,
 		"fs-max-mount-count=i"  => \$FSMaxMountCount,
 		"edit-bootconfig=s"     => \$EditBootConfig,
+		"edit-bootinstall=s"    => \$EditBootInstall,
 		"grub-chainload"        => \$GrubChainload,
 		"gzip-cmd=s"            => \$GzipCmd,
 		"help|h"                => \$Help,
@@ -816,6 +818,12 @@ sub init {
 	#----------------------------------------
 	if (defined $EditBootConfig) {
 		$cmdL -> setEditBootConfig ($EditBootConfig);
+	}
+	#========================================
+	# check if edit-bootinstall option is set
+	#----------------------------------------
+	if (defined $EditBootInstall) {
+		$cmdL -> setEditBootInstall ($EditBootInstall);
 	}
 	#========================================
 	# check if fat-storage option is set
@@ -1291,6 +1299,11 @@ sub init {
 	}
 	if (($EditBootConfig) && (! -e $EditBootConfig)) {
 		$kiwi -> error ("Boot config script $EditBootConfig doesn't exist");
+		$kiwi -> failed ();
+		kiwiExit (1);
+	}
+	if (($EditBootInstall) && (! -e $EditBootInstall)) {
+		$kiwi -> error ("Boot config script $EditBootInstall doesn't exist");
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}

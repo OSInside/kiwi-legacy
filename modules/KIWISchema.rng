@@ -2057,6 +2057,14 @@ relative to the directory which contains the image
 structure</a:documentation>
       </attribute>
     </define>
+    <define name="k.type.editbootinstall.attribute">
+      <attribute name="editbootinstall">
+        <a:documentation>Specifies the path to a script which is called right
+after the bootloader is installed. The script runs
+relative to the directory which contains the image
+structure</a:documentation>
+      </attribute>
+    </define>
     <define name="k.type.filesystem.attribute">
       <attribute name="filesystem">
         <a:documentation>Specifies the filesystem which can be one of:
@@ -2284,6 +2292,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.editbootconfig.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.editbootinstall.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.filesystem.attribute"/>

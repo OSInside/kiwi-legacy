@@ -1539,6 +1539,12 @@ div {
 		## relative to the directory which contains the image
 		## structure
 		attribute editbootconfig { text }
+	k.type.editbootinstall.attribute =
+		## Specifies the path to a script which is called right
+		## after the bootloader is installed. The script runs
+		## relative to the directory which contains the image
+		## structure
+		attribute editbootinstall { text }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
 		## btrfs, clicfs, ext2, ext3, ext4, reiserfs, squashfs, or xfs
@@ -1650,6 +1656,7 @@ div {
 		k.type.compressed.attribute? &
 		k.type.devicepersistency.attribute? &
 		k.type.editbootconfig.attribute? &
+		k.type.editbootinstall.attribute? &
 		k.type.filesystem.attribute? &
 		k.type.flags.attribute? &
 		k.type.format.attribute? &

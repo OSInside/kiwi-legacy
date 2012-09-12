@@ -1473,6 +1473,28 @@ sub getEditBootConfig {
 }
 
 #==========================================
+# getEditBootInstall
+#------------------------------------------
+sub getEditBootInstall {
+	# ...
+	# Get the type specific editbootinstall value.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $editBoot = $tnode -> getAttribute ("editbootinstall");
+	if ((! defined $editBoot) || ("$editBoot" eq "")) {
+		return;
+	}
+	if (! -e $editBoot) {
+		$kiwi -> warning ("Boot config script $editBoot doesn't exist");
+		$kiwi -> skipped ();
+		return;
+	}
+	return File::Spec->rel2abs($editBoot);
+}
+
+#==========================================
 # getImageDefaultDestination
 #------------------------------------------
 sub getImageDefaultDestination {

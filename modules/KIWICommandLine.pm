@@ -1384,6 +1384,24 @@ sub getEditBootConfig {
 }
 
 #==========================================
+# setEditBootInstall
+#------------------------------------------
+sub setEditBootInstall {
+	my $this  = shift;
+	my $value = shift;
+	$this->{editbootinstall} = File::Spec->rel2abs($value);
+	return 1;
+}
+
+#==========================================
+# getEditBootInstall
+#------------------------------------------
+sub getEditBootInstall {
+	my $this = shift;
+	return $this->{editbootinstall};
+}
+
+#==========================================
 # setArchiveImage
 #------------------------------------------
 sub setArchiveImage {
