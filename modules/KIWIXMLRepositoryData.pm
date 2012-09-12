@@ -373,6 +373,9 @@ sub setType {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __isSupportedRepoType
+#------------------------------------------
 sub __isSupportedRepoType {
 	# ...
 	# Check if the specified repository type is supported
