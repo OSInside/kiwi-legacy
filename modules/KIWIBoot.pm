@@ -2732,18 +2732,18 @@ sub setupSplash {
 	# setup splash in initrd
 	#------------------------------------------
 	my $spllink = 0;
-	if ($isxen) {
-		$status = "--> skip splash initrd attachment on xen domU";
+	if (-f $plymouth) {
+		$status = "--> plymouth splash system will be used";
+		qxx ("rm -f $plymouth");
+		$spllink= 1;
+	} elsif ($isxen) {
+		$status = "--> skip splash initrd attachment for xen";
 		$spllink= 1;
 		qxx ("rm -f $splfile");
 	} elsif (-f $splfile) {
 		qxx ("cat $initrd $splfile > $newird");
 		$status = "--> kernel splash system will be used";
 		$spllink= 0;
-	} elsif (-f $plymouth) {
-		$status = "--> plymouth splash system will be used";
-		qxx ("rm -f $plymouth");
-		$spllink= 1;
 	} else {
 		$status = "--> Can't find splash file: $splfile";
 		$spllink= 1;
@@ -3073,7 +3073,8 @@ sub setupBootLoaderStages {
 		my @modules = (
 			'biosdisk','part_msdos','part_gpt','ext2',
 			'iso9660','chain','normal','linux','echo',
-			'vga','vbe','png','video_bochs','video_cirrus'
+			'vga','vbe','png','video_bochs','video_cirrus',
+			'gzio','multiboot'
 		);
 		$status = qxx (
 			"grub2-mkimage -O i386-pc -o $core -c $bootbios @modules 2>&1"
@@ -3427,7 +3428,7 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		my @x86mods = (
 			'ext2','gettext','part_msdos','chain','png',
-			'vbe','vga','video_bochs','video_cirrus'
+			'vbe','vga','video_bochs','video_cirrus','gzio'
 		);
 		#==========================================
 		# EFI modules
@@ -3435,7 +3436,7 @@ sub setupBootLoaderConfiguration {
 		my @efimods = (
 			'fat','gettext','part_gpt','efi_gop','png',
 			'chain','video','video_fb','video_bochs',
-			'video_cirrus'
+			'video_cirrus','gzio'
 		);
 		#==========================================
 		# config file name
