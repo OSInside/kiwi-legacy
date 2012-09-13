@@ -1269,12 +1269,12 @@ sub __uniqueInPackages {
 			if ($repl) {
 				$item .= ",$repl";
 			}
-			$item = quotemeta $item;
-			if (grep { /^$item$/x } @names) {
-				return $item;
-			} else {
-				push @names,$item;
+			foreach my $name (@names) {
+				if ($name eq $item) {
+					return $item;
+				}
 			}
+			push @names,$item;
 		}
 	}
 	return;
