@@ -155,6 +155,9 @@ sub new {
 		#------------------------------------------
 		$pool = new satsolver::Pool;
 		$arch = qx (uname -m); chomp $arch;
+		if ($arch eq "armv7l") {
+			$arch = "armv7hl";
+		}
 		#==========================================
 		# allow arch overwrite
 		#------------------------------------------
