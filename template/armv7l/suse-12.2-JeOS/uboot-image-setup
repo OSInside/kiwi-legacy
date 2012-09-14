@@ -13,9 +13,9 @@ echo 'boot'                                                        >> $file
 #==========================================
 # Create machine readable uboot format
 #------------------------------------------
-mkopts = "-A arm -O linux -a 0 -e 0 -T script -C none";
-inputf = "boot/boot.script";
-result = "boot/boot.scr";
+mkopts="-A arm -O linux -a 0 -e 0 -T script -C none";
+inputf="boot/boot.script";
+result="boot/boot.scr";
 if ! mkimage $mkopts -n 'Boot-Script' -d $inputf $result;then
 	echo "Failed to create uboot script image"
 	exit 1
