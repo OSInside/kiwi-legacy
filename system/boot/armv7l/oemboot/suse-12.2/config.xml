@@ -103,7 +103,6 @@
 		<package name="gettext-runtime"/>
 		<package name="hwinfo"/>
 		<package name="iputils"/>
-		<package name="kernel-firmware"/>
 		<package name="kiwi-tools"/>
 		<package name="kpartx"/>
 		<package name="lvm2"/>

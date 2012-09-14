@@ -81,7 +81,6 @@
 		<package name="glibc"/>
 		<package name="glibc-locale"/>
 		<package name="hwinfo"/>
-		<package name="kernel-firmware"/>
 		<package name="kiwi-tools"/>
 		<package name="lvm2"/>
 		<package name="make"/>
