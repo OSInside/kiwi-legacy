@@ -1,5 +1,7 @@
 #!/bin/bash     
 
+set -x
+
 file=boot/boot.script
 
 echo 'printenv kerneladdr || setenv kerneladdr ${kernel_addr_r}'   >> $file
