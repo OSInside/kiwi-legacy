@@ -154,6 +154,11 @@ sub createFormat {
 	#==========================================
 	# convert disk into specified format
 	#------------------------------------------
+	if (($this->{gdata}->{StudioNode}) && ($format ne "ec2")) {
+		$kiwi -> warning ("Format conversion skipped in targetstudio mode");
+		$kiwi -> skipped ();
+		return;
+	}
 	if ($format eq "vmdk") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createVMDK();
@@ -481,7 +486,6 @@ sub createEC2 {
 		$arch = "i386";
 	}
 	if (($arch ne "i386") && ($arch ne "x86_64")) {
-		$kiwi->failed ();
 		$kiwi->error  ("Unsupport AWS EC2 architecture: $arch");
 		$kiwi->failed ();
 		return;
@@ -490,9 +494,9 @@ sub createEC2 {
 	# loop mount root image and create config
 	#------------------------------------------
 	$tmpdir = qxx ("mktemp -q -d $destdir/ec2.XXXXXX"); chomp $tmpdir;
+	$this->{tmpdir} = $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
 		$kiwi -> failed ();
 		return;
@@ -500,7 +504,6 @@ sub createEC2 {
 	$status = qxx ("mount -o loop $source $tmpdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't loop mount $source: $status");
 		$kiwi -> failed ();
 		return;
@@ -510,7 +513,6 @@ sub createEC2 {
 	#------------------------------------------
 	$this -> __copy_origin ("$tmpdir/etc/inittab");
 	if (! open $FD, '>>', "$tmpdir/etc/inittab") {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/etc/inittab: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
@@ -520,7 +522,6 @@ sub createEC2 {
 	print $FD 'X0:12345:respawn:/sbin/agetty -L 9600 xvc0 xterm'."\n";
 	close $FD;
 	if (! open $FD, '>>', "$tmpdir/etc/securetty") {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/etc/securetty: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
@@ -533,7 +534,6 @@ sub createEC2 {
 	# create initrd
 	#------------------------------------------
 	if (! open $FD, '>', "$tmpdir/create_initrd.sh") {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/create_initrd.sh: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
@@ -556,7 +556,6 @@ sub createEC2 {
 	$status = qxx ("chroot $tmpdir bash -c ./create_initrd.sh 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create initrd: $status");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
@@ -570,7 +569,6 @@ sub createEC2 {
 	qxx ("cp $tmpdir/usr/lib/grub/* $tmpdir/boot/grub");
 	# boot/grub/device.map
 	if (! open $FD, '>', "$tmpdir/boot/grub/device.map") {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/boot/grub/device.map: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
@@ -580,7 +578,6 @@ sub createEC2 {
 	close $FD;
 	# etc/grub.conf
 	if (! open $FD, '>', "$tmpdir/etc/grub.conf") {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/etc/grub.conf: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
@@ -592,7 +589,6 @@ sub createEC2 {
 	# boot/grub/menu.lst
 	my $args="xencons=xvc0 console=xvc0 splash=silent showopts";
 	if (! open $FD, '>', "$tmpdir/create_bootmenu.sh") {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/create_bootmenu.sh: $!");
 		$kiwi -> failed ();
 		return;
@@ -624,7 +620,6 @@ sub createEC2 {
 	$status = qxx ("chroot $tmpdir bash -c ./create_bootmenu.sh 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create boot menu: $status");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
@@ -653,7 +648,6 @@ sub createEC2 {
 	#------------------------------------------
 	$this -> __copy_origin ("$tmpdir/etc/fstab");
 	if (! open $FD, '+<', "$tmpdir/etc/fstab") {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to open $tmpdir/etc/fstab: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
@@ -720,7 +714,6 @@ sub createEC2 {
 		$status = qxx ( "$bundleCmd $amiopts -d $regionTgt -r $arch 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
-			$kiwi -> failed ();
 			$kiwi -> error  ("$bundleCmd: $status");
 			$kiwi -> failed ();
 			return;
@@ -1271,6 +1264,18 @@ sub __clean_loop {
 	my $dir = shift;
 	qxx ("umount $dir 2>&1");
 	qxx ("rmdir  $dir 2>&1");
+}
+
+#==========================================
+# Destructor
+#------------------------------------------
+sub DESTROY {
+	my $this   = shift;
+	my $tmpdir = $this->{tmpdir};
+	if (-d $tmpdir) {
+		qxx ("rm -rf $tmpdir 2>&1");
+	}
+	return $this;
 }
 
 1;
