@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 14 21:15:15 CEST 2012 - ms@suse.de
+
+- allow ec2 format creation when in --targetstudio mode (bnc #779360)
+
+-------------------------------------------------------------------
 Tue Sep 11 11:18:23 CEST 2012 - ms@suse.de
 
 - The fetchFile() return value is broken: it returns status of the
