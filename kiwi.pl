@@ -886,14 +886,8 @@ sub main {
 				if (! $format) {
 					my $code = kiwiExit (1); return $code;
 				}
-				if ($main::targetStudio) {
-					$kiwi -> loginfo (
-						"Format conversion skipped in targetstudio mode\n"
-					);
-				} else {
-					if (! $format -> createFormat()) {
-						my $code = kiwiExit (1); return $code;
-					}
+				if (! $format -> createFormat()) {
+					my $code = kiwiExit (1); return $code;
 				}
 			}
 			undef $image;
@@ -1208,13 +1202,7 @@ sub main {
 			my $code = kiwiExit (1);
 			return $code;
 		}
-		if ($main::targetStudio) {
-			$kiwi -> loginfo (
-				"Format conversion skipped in targetstudio mode\n"
-			);
-		} else {
-			$format -> createFormat();
-		}
+		$format -> createFormat();
 		$format -> createMaschineConfiguration();
 		my $code = kiwiExit (0); return $code;
 	}
