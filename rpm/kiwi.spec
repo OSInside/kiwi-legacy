@@ -185,6 +185,7 @@ Authors:
 %ifarch %ix86 x86_64
 
 %package -n kiwi-pxeboot
+PreReq:         coreutils
 Requires:       syslinux
 Summary:        openSUSE - KIWI Image System PXE boot structure
 License:        GPL-2.0+
@@ -407,6 +408,7 @@ Meta-package to pull in all requires to build a oemboot media.
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
 
 %package -n kiwi-templates
+PreReq:         coreutils
 Requires:       kiwi-desc-vmxboot = %{version}
 Summary:        openSUSE - KIWI JeOS system image templates
 License:        GPL-2.0+
