@@ -4355,9 +4355,8 @@ sub setupBootLoaderConfiguration {
 				$editBoot = "$idesc/$editBoot";
 			}
 			if (-f $editBoot) {
-				$kiwi -> info (
-					"Calling pre bootloader install script: $editBoot...\n"
-				);
+				$kiwi -> info ("Calling pre bootloader install script:\n");
+				$kiwi -> info ("--> $editBoot\n");
 				system ("cd $tmpdir && bash --norc -c $editBoot");
 				my $result = $? >> 8;
 				if ($result != 0) {
@@ -4940,9 +4939,8 @@ sub installBootLoader {
 				$editBoot = "$idesc/$editBoot";
 			}
 			if (-f $editBoot) {
-				$kiwi -> info (
-					"Calling post bootloader install script: $editBoot...\n"
-				);
+				$kiwi -> info ("Calling post bootloader install script:\n");
+				$kiwi -> info ("--> $editBoot\n");
 				my @opts = ($diskname,$deviceMap->{1});
 				system ("cd $tmpdir && bash --norc -c \"$editBoot @opts\"");
 				my $result = $? >> 8;
