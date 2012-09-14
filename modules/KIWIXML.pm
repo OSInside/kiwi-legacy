@@ -1464,12 +1464,7 @@ sub getEditBootConfig {
 	if ((! defined $editBoot) || ("$editBoot" eq "")) {
 		return;
 	}
-	if (! -e $editBoot) {
-		$kiwi -> warning ("Boot config script $editBoot doesn't exist");
-		$kiwi -> skipped ();
-		return;
-	}
-	return File::Spec->rel2abs($editBoot);
+	return $editBoot;
 }
 
 #==========================================
@@ -1486,12 +1481,7 @@ sub getEditBootInstall {
 	if ((! defined $editBoot) || ("$editBoot" eq "")) {
 		return;
 	}
-	if (! -e $editBoot) {
-		$kiwi -> warning ("Boot config script $editBoot doesn't exist");
-		$kiwi -> skipped ();
-		return;
-	}
-	return File::Spec->rel2abs($editBoot);
+	return $editBoot;
 }
 
 #==========================================

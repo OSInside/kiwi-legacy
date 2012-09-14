@@ -3305,6 +3305,8 @@ sub setupBootLoaderConfiguration {
 	my $loader   = shift;
 	my $type     = shift;
 	my $extra    = shift;
+	my $cmdL     = $this->{cmdL};
+	my $system   = $this->{system};
 	my $kiwi     = $this->{kiwi};
 	my $tmpdir   = $this->{tmpdir};
 	my $initrd   = $this->{initrd};
@@ -4338,6 +4340,33 @@ sub setupBootLoaderConfiguration {
 	# more boot managers to come...
 	#------------------------------------------
 	# ...
+	#==========================================
+	# Check for edit boot config
+	#------------------------------------------
+	if ($cmdL) {
+		my $editBoot = $cmdL -> getEditBootConfig();
+		my $idesc;
+		if ((! $editBoot) && ($xml)) {
+			$editBoot = $xml -> getEditBootConfig();
+		}
+		if ($editBoot) {
+			if (open my $FD, '<', "$system/image/main::Prepare") {
+				$idesc = <$FD>; close $FD;
+				$editBoot = "$idesc/$editBoot";
+			}
+			if (-f $editBoot) {
+				$kiwi -> info (
+					"Calling pre bootloader install script: $editBoot...\n"
+				);
+				system ("cd $tmpdir && bash --norc -c $editBoot");
+			} else {
+				$kiwi -> warning (
+					"Can't find pre bootloader install script: $editBoot...\n"
+				);
+				$kiwi -> skipped ();
+			}
+		}
+	}
 	return $this;
 }
 
@@ -4448,22 +4477,10 @@ sub installBootLoader {
 	my $cmdL     = $this->{cmdL};
 	my $xml      = $this->{xml};
 	my $efi      = $this->{efi};
+	my $system   = $this->{system};
 	my $locator  = new KIWILocator($kiwi);
 	my $result;
 	my $status;
-	#==========================================
-	# Check for edit boot config
-	#------------------------------------------
-	if ($cmdL) {
-		my $editBoot = $cmdL -> getEditBootConfig();
-		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootConfig();
-		}
-		if (($editBoot) && (-e $editBoot)) {
-			$kiwi -> info ("Calling pre bootloader install script...\n");
-			system ("cd $tmpdir && bash --norc -c $editBoot");
-		}
-	}
 	#==========================================
 	# Grub2
 	#------------------------------------------
@@ -4907,13 +4924,27 @@ sub installBootLoader {
 	#------------------------------------------
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootInstall();
+		my $idesc;
 		if ((! $editBoot) && ($xml)) {
 			$editBoot = $xml -> getEditBootInstall();
 		}
-		if (($editBoot) && (-e $editBoot)) {
-			$kiwi -> info ("Calling post bootloader install script...\n");
-			my @opts = ($diskname,$deviceMap->{1});
-			system ("cd $tmpdir && bash --norc -c \"$editBoot @opts\"");
+		if ($editBoot) {
+			if (open my $FD, '<', "$system/image/main::Prepare") {
+				$idesc = <$FD>; close $FD;
+				$editBoot = "$idesc/$editBoot";
+			}
+			if (-f $editBoot) {
+				$kiwi -> info (
+					"Calling post bootloader install script: $editBoot...\n"
+				);
+				my @opts = ($diskname,$deviceMap->{1});
+				system ("cd $tmpdir && bash --norc -c \"$editBoot @opts\"");
+			} else {
+				$kiwi -> warning (
+					"Can't find post bootloader install script: $editBoot...\n"
+				);
+				$kiwi -> skipped ();
+			}
 		}
 	}
 	#==========================================
