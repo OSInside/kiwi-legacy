@@ -4359,6 +4359,12 @@ sub setupBootLoaderConfiguration {
 					"Calling pre bootloader install script: $editBoot...\n"
 				);
 				system ("cd $tmpdir && bash --norc -c $editBoot");
+				my $result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error ("Call failed, see console log");
+					$kiwi -> failed ();
+					return;
+				}
 			} else {
 				$kiwi -> warning (
 					"Can't find pre bootloader install script: $editBoot...\n"
@@ -4939,6 +4945,12 @@ sub installBootLoader {
 				);
 				my @opts = ($diskname,$deviceMap->{1});
 				system ("cd $tmpdir && bash --norc -c \"$editBoot @opts\"");
+				my $result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error ("Call failed, see console log");
+					$kiwi -> failed ();
+					return;
+				}
 			} else {
 				$kiwi -> warning (
 					"Can't find post bootloader install script: $editBoot...\n"
