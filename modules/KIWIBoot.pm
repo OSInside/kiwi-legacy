@@ -1535,7 +1535,7 @@ sub setupInstallStick {
 	if ($haveDiskDevice) {
 		$bootdevice = $this->{loop};
 	}
-	if (! $this -> installBootLoader ($bootloader, $bootdevice, \%deviceMap)) {
+	if (! $this -> installBootLoader ($bootloader, $bootdevice)) {
 		$this -> cleanLoopMaps();
 		$this -> cleanLoop ();
 		return;
@@ -2422,7 +2422,7 @@ sub setupBootDisk {
 	if ($haveDiskDevice) {
 		$bootdevice = $this->{loop};
 	}
-	if (! $this->installBootLoader ($bootloader,$bootdevice,\%deviceMap)) {
+	if (! $this->installBootLoader ($bootloader,$bootdevice)) {
 		$this -> cleanLoop ();
 		return;
 	}
@@ -4474,7 +4474,6 @@ sub installBootLoader {
 	my $this     = shift;
 	my $loader   = shift;
 	my $diskname = shift;
-	my $deviceMap= shift;
 	my $kiwi     = $this->{kiwi};
 	my $tmpdir   = $this->{tmpdir};
 	my $chainload= $this->{chainload};
@@ -4484,8 +4483,16 @@ sub installBootLoader {
 	my $efi      = $this->{efi};
 	my $system   = $this->{system};
 	my $locator  = new KIWILocator($kiwi);
+	my $bootdev;
 	my $result;
 	my $status;
+	#==========================================
+	# Setup boot device name
+	#------------------------------------------
+	$bootdev = $this->{bindloop}."1";
+	if ((! $bootdev) && (-b $diskname)) {
+		$bootdev = $this -> __getPartBase ($diskname)."1";
+	}
 	#==========================================
 	# Grub2
 	#------------------------------------------
@@ -4509,17 +4516,10 @@ sub installBootLoader {
 			print $dmfd "(hd0) $diskname\n";
 			$dmfd -> close();
 			#==========================================
-			# Setup device names
-			#------------------------------------------
-			if ((! $this->{bindloop}) && (-b $diskname)) {
-				$this->{bindloop} = $this -> __getPartBase ($diskname);
-			}
-			#==========================================
 			# Install grub2
 			#------------------------------------------
 			my $stages = "/mnt/boot/grub2/i386-pc";
-			my $rdev = $this->{bindloop}."1";
-			$status = qxx ("mount $rdev /mnt 2>&1");
+			$status = qxx ("mount $bootdev /mnt 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -4539,10 +4539,10 @@ sub installBootLoader {
 				#==========================================
 				# install grub2 into partition
 				#------------------------------------------
-				$rdev = readlink ($rdev);
-				$rdev =~ s/\.\./\/dev/;
+				my $bdev = readlink ($bootdev);
+				$bdev =~ s/\.\./\/dev/;
 				$status = qxx (
-					"grub2-bios-setup -vf -d $stages -m $dmfile $rdev 2>&1"
+					"grub2-bios-setup -vf -d $stages -m $dmfile $bdev 2>&1"
 				);
 				$result = $? >> 8;
 			}
@@ -4553,8 +4553,18 @@ sub installBootLoader {
 					"Couldn't install $loader on $diskname: $status"
 				);
 				$kiwi -> failed ();
+				$this -> cleanLoopMaps();
+				$this -> cleanLoop();
 				return;
 			}
+			#==========================================
+			# Clean loop maps
+			#------------------------------------------
+			$this -> cleanLoopMaps();
+			$this -> cleanLoop();
+			#==========================================
+			# Check for chainloading
+			#------------------------------------------
 			if ($chainload) {
 				# /.../
 				# chainload grub with master-boot-code
@@ -4734,31 +4744,16 @@ sub installBootLoader {
 	# syslinux
 	#------------------------------------------
 	if ($loader =~ /(sys|ext)linux/) {
-		if (! $deviceMap) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("No device map available");
-			$kiwi -> failed ();
-			return;
-		}
-		my %deviceMap = %{$deviceMap};
-		my $device = $deviceMap{1};
-		if (($lvm) && ($deviceMap{0})) {
-			$device = $deviceMap{0};
-		}
-		if (($device =~ /mapper/) && (! -e $device)) {
-			if (! $this -> bindDiskPartitions ($diskname)) {
-				$kiwi -> failed ();
-				$this -> cleanLoop ();
-				return;
-			}
-		}
+		#==========================================
+		# Install sys/extlinux on boot device
+		#------------------------------------------
 		if ($loader eq "syslinux") {
-			$kiwi -> info ("Installing syslinux on device: $device");
-			$status = qxx ("syslinux $device 2>&1");
+			$kiwi -> info ("Installing syslinux on device: $bootdev");
+			$status = qxx ("syslinux $bootdev 2>&1");
 			$result = $? >> 8;
 		} else {
-			$kiwi -> info ("Installing extlinux on device: $device");
-			$status = qxx ("mount $device /mnt 2>&1");
+			$kiwi -> info ("Installing extlinux on device: $bootdev");
+			$status = qxx ("mount $bootdev /mnt 2>&1");
 			$result = $? >> 8;
 			if ($result == 0) {
 				$status = qxx ("extlinux --install /mnt/boot/syslinux 2>&1");
@@ -4766,15 +4761,22 @@ sub installBootLoader {
 			}
 			$status = qxx ("umount /mnt 2>&1");
 		}
-		if ($device =~ /mapper/) {
-			$this -> cleanLoopMaps ();
-		}
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't install $loader on $device: $status");
+			$kiwi -> error  ("Couldn't install $loader on $bootdev: $status");
 			$kiwi -> failed ();
+			$this -> cleanLoopMaps();
+			$this -> cleanLoop();
 			return;
 		}
+		#==========================================
+		# Clean loop maps
+		#------------------------------------------
+		$this -> cleanLoopMaps();
+		$this -> cleanLoop();
+		#==========================================
+		# Write syslinux master boot record
+		#------------------------------------------
 		my $syslmbr = "/usr/share/syslinux/mbr.bin";
 		$status = qxx (
 			"dd if=$syslmbr of=$diskname bs=512 count=1 conv=notrunc 2>&1"
@@ -4793,14 +4795,9 @@ sub installBootLoader {
 	#------------------------------------------
 	if ($loader eq "zipl") {
 		$kiwi -> info ("Installing zipl on device: $diskname");
-		my $bootdev;
 		my $offset;
-		my $haveRealDevice = 0;
-		if ($diskname !~ /\/dev\//) {
-			#==========================================
-			# clean loop maps
-			#------------------------------------------
-			$this -> cleanLoop ();
+		my $haveRealDevice = 1;
+		if (! -b $diskname) {
 			#==========================================
 			# detect disk offset of disk image file
 			#------------------------------------------
@@ -4811,34 +4808,7 @@ sub installBootLoader {
 				$kiwi -> failed ();
 				return;
 			}
-			#==========================================
-			# loop mount disk image file
-			#------------------------------------------
-			if (! $this->bindDiskDevice ($diskname)) {
-				return;
-			}
-			if (! $this -> bindDiskPartitions ($this->{loop})) {
-				$kiwi -> failed ();
-				$this -> cleanLoop ();
-				return;
-			}
-			#==========================================
-			# find boot partition
-			#------------------------------------------
-			$bootdev = $this->{bindloop}."1";
-			if (! -e $bootdev) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Can't find loop map: $bootdev");
-				$kiwi -> failed ();
-				$this -> cleanLoop ();
-				return;
-			}
-		} else {
-			#==========================================
-			# find boot partition
-			#------------------------------------------
-			$bootdev = $diskname."1";
-			$haveRealDevice = 1;
+			$haveRealDevice = 0;
 		}
 		#==========================================
 		# mount boot device...
@@ -4905,8 +4875,12 @@ sub installBootLoader {
 			return;
 		}
 		qxx ("umount $mount 2>&1");
-		$this -> cleanLoop ();
 		$kiwi -> done();
+		#==========================================
+		# clean loop maps
+		#------------------------------------------
+		$this -> cleanLoopMaps();
+		$this -> cleanLoop ();
 	}
 	#==========================================
 	# install yaboot/lilo
@@ -4941,7 +4915,7 @@ sub installBootLoader {
 			if (-f $editBoot) {
 				$kiwi -> info ("Calling post bootloader install script:\n");
 				$kiwi -> info ("--> $editBoot\n");
-				my @opts = ($diskname,$deviceMap->{1});
+				my @opts = ($diskname,$bootdev);
 				system ("cd $tmpdir && bash --norc -c \"$editBoot @opts\"");
 				my $result = $? >> 8;
 				if ($result != 0) {
@@ -4957,6 +4931,11 @@ sub installBootLoader {
 			}
 		}
 	}
+	#==========================================
+	# clean loop maps
+	#------------------------------------------
+	$this -> cleanLoopMaps();
+	$this -> cleanLoop ();
 	#==========================================
 	# Write custom disk label ID to MBR
 	#------------------------------------------
@@ -5396,14 +5375,8 @@ sub setDefaultDeviceMap {
 	if (! defined $device) {
 		return;
 	}
-	my $devcopy= $device;
-	my $lastc  = chop $devcopy;
 	for (my $i=1;$i<=3;$i++) {
-		if ($lastc =~ /\d/) {
-			$result{$i} = $device."p".$i;
-		} else {
-			$result{$i} = $device.$i;
-		}
+		$result{$i} = $this -> __getPartDevice ($device,$i);
 	}
 	return %result;
 }
@@ -5422,9 +5395,8 @@ sub setLoopDeviceMap {
 	if (! defined $device) {
 		return;
 	}
-	my $dmap = $device; $dmap =~ s/dev\///;
 	for (my $i=1;$i<=3;$i++) {
-		$result{$i} = "/dev/mapper".$dmap."p$i";
+		$result{$i} = $this -> __getPartDevice ($device,$i);
 	}
 	return %result;
 }
@@ -5446,12 +5418,7 @@ sub setLVMDeviceMap {
 	if (! defined $group) {
 		return;
 	}
-	if ($device =~ /loop/) {
-		my $dmap = $device; $dmap =~ s/dev\///;
-		$result{0} = "/dev/mapper".$dmap."p1";
-	} else {
-		$result{0} = $device."1";
-	}
+	$result{0} = $this -> __getPartDevice ($device,1);
 	for (my $i=0;$i<@names;$i++) {
 		$result{$i+1} = "/dev/$group/".$names[$i];
 	}
@@ -6186,6 +6153,31 @@ sub __getPartBase {
 	foreach my $device (@checklist) {
 		if (-b $device) {
 			chop $device;
+			return $device;
+		}
+	}
+}
+
+#==========================================
+# __getPartDevice
+#------------------------------------------
+sub __getPartDevice {
+	# ...
+	# find the correct partition device according
+	# to the disk device and partition number
+	# ---
+	my $this = shift;
+	my $disk = shift;
+	my $part = shift;
+	my $devcopy = $disk;
+	my $devbase = basename $devcopy;
+	my @checklist = (
+		"/dev/".$devbase.$part,
+		"/dev/".$devbase."p".$part,
+		"/dev/mapper/".$devbase."p".$part
+	);
+	foreach my $device (@checklist) {
+		if (-b $device) {
 			return $device;
 		}
 	}
