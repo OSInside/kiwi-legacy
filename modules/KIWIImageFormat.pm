@@ -1264,6 +1264,7 @@ sub __copy_origin {
 sub __clean_loop {
 	my $this = shift;
 	my $dir = shift;
+	qxx ("umount $dir/sys 2>&1");
 	qxx ("umount $dir 2>&1");
 	qxx ("rmdir  $dir 2>&1");
 }
