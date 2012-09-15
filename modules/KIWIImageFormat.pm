@@ -51,6 +51,7 @@ sub new {
 	#------------------------------------------
 	my $format = shift;
 	my $xml    = shift;
+	my $tdev   = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -109,6 +110,7 @@ sub new {
 	$this->{image}   = $image;
 	$this->{type}    = $type;
 	$this->{imgtype} = $type->{type};
+	$this->{targetDevice} = $tdev;
 	return $this;
 }
 
@@ -121,6 +123,21 @@ sub createFormat {
 	my $format = $this->{format};
 	my $image  = $this->{image};
 	my $imgtype= $this->{imgtype};
+	my $targetDevice = $this->{targetDevice};
+	#==========================================
+	# convert disk into specified format
+	#------------------------------------------
+	if (($main::targetStudio) && ($format ne "ec2")) {
+		$kiwi -> warning ("Format conversion skipped in targetstudio mode");
+		$kiwi -> skipped ();
+		return $this;
+	}
+	#==========================================
+	# check for target device or file
+	#------------------------------------------
+	if (($targetDevice) && (-b $targetDevice)) {
+		$image = $targetDevice;
+	}
 	#==========================================
 	# check if format is a disk
 	#------------------------------------------
@@ -136,14 +153,6 @@ sub createFormat {
 			$kiwi -> failed ();
 			return undef
 		}
-	}
-	#==========================================
-	# convert disk into specified format
-	#------------------------------------------
-	if (($main::targetStudio) && ($format ne "ec2")) {
-		$kiwi -> warning ("Format conversion skipped in targetstudio mode");
-		$kiwi -> skipped ();
-		return undef;
 	}
 	if ($format eq "vmdk") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
@@ -483,7 +492,11 @@ sub createEC2 {
 		$kiwi -> failed ();
 		return undef;
 	}
-	$status = qxx ("mount -o loop $source $tmpdir 2>&1");
+	if (($this->{targetDevice}) && (-b $this->{targetDevice})) {
+		$status = qxx ("mount $this->{targetDevice} $tmpdir 2>&1");
+	} else {
+		$status = qxx ("mount -o loop $source $tmpdir 2>&1");
+	}
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't loop mount $source: $status");
