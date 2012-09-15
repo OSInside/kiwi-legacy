@@ -552,8 +552,10 @@ sub createEC2 {
 	#==========================================
 	# create grub bootloader setup
 	#------------------------------------------
+	# setup directory for grub loader
+	qxx ("mkdir -p $tmpdir/boot/grub");
 	# copy grub image files
-	qxx ("cp $tmpdir/usr/lib/grub/* $tmpdir/boot/grub");
+	qxx ("cp $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1");
 	# boot/grub/device.map
 	if (! open $FD, ">$tmpdir/boot/grub/device.map") {
 		$kiwi -> error  ("Failed to open $tmpdir/boot/grub/device.map: $!");
