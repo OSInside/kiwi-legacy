@@ -714,7 +714,7 @@ sub createImage {
 			my $haveFormat = $attr{format};
 			my $imgfile= $destination."/".$imgName;
 			my $format = KIWIImageFormat -> new(
-				$kiwi,$imgfile,$cmdL,$haveFormat,$xml
+				$kiwi,$imgfile,$cmdL,$haveFormat,$xml,$image->{targetDevice}
 			);
 			if (! $format) {
 				return;
@@ -922,7 +922,7 @@ sub createImageFormat {
 	my $cmdL   = $this->{cmdL};
 	$kiwi -> info ("--> Starting image format conversion...\n");
 	my $imageformat = KIWIImageFormat -> new(
-		$kiwi,$sys,$cmdL,$format,$xml
+		$kiwi,$sys,$cmdL,$format,$xml,$this->{targetdevice}
 	);
 	if (! $imageformat) {
 		return;
