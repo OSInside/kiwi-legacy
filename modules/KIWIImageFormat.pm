@@ -144,7 +144,7 @@ sub createFormat {
 	if (($this->{gdata}->{StudioNode}) && ($format ne "ec2")) {
 		$kiwi -> warning ("Format conversion skipped in targetstudio mode");
 		$kiwi -> skipped ();
-		return;
+		return $this;
 	}
 	#==========================================
 	# check for target device or file
