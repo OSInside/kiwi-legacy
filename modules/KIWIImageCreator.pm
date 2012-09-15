@@ -709,9 +709,10 @@ sub createImage {
 		return;
 	}
 	if ($ok) {
+		my $imgName = $main::global -> generateBuildImageName ($xml);
 		if (($checkFormat) && ($attr{format})) {
 			my $haveFormat = $attr{format};
-			my $imgfile= $destination."/".$image -> buildImageName();
+			my $imgfile= $destination."/".$imgName;
 			my $format = KIWIImageFormat -> new(
 				$kiwi,$imgfile,$cmdL,$haveFormat,$xml
 			);
