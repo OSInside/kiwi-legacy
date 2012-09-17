@@ -4489,9 +4489,10 @@ sub installBootLoader {
 	#==========================================
 	# Setup boot device name
 	#------------------------------------------
-	$bootdev = $this->{bindloop}."1";
-	if ((! $bootdev) && (-b $diskname)) {
+	if ((! $this->{bindloop}) && (-b $diskname)) {
 		$bootdev = $this -> __getPartBase ($diskname)."1";
+	} else {
+		$bootdev = $this->{bindloop}."1";
 	}
 	#==========================================
 	# Grub2
