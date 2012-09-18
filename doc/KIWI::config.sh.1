@@ -1,13 +1,22 @@
 '\" t
 .\"     Title: kiwi::config.sh
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: Created: 09/04/2012
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: Created: 09/18/2012
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 5.04
 .\"  Language: English
 .\"
-.TH "KIWI::CONFIG\&.SH" "1" "Created: 09/04/2012" "KIWI 5\&.04" "KIWI Manualpage"
+.TH "KIWI::CONFIG\&.SH" "1" "Created: 09/18/2012" "KIWI 5\&.04" "KIWI Manualpage"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -24,7 +33,7 @@ KIWI::config.sh \- Configuration File for KIWI image description
 .PP
 The KIWI image description allows to have an optional
 config\&.sh
-script in place\&. This script should be designed to take over control of adding the image operating system configuration\&. Configuration in that sense means stuff like activating services, creating configuration files, prepare an environment for a firstboot workflow, etc\&. What you shouldn\'t do in
+script in place\&. This script should be designed to take over control of adding the image operating system configuration\&. Configuration in that sense means stuff like activating services, creating configuration files, prepare an environment for a firstboot workflow, etc\&. What you shouldn\*(Aqt do in
 config\&.sh
 is breaking your systems integrity by for example removing packages or pieces of software\&. Something like that can be done in
 images\&.sh\&. The

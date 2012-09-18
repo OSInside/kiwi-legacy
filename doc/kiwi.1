@@ -1,13 +1,22 @@
 '\" t
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: Created: 09/04/2012
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: Created: 09/18/2012
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 5.04
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 09/04/2012" "KIWI 5\&.04" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 09/18/2012" "KIWI 5\&.04" "KIWI Manualpage"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -60,7 +69,7 @@ representing a live system on CD or DVD\&. Other than that KIWI is able to creat
 .PP
 If the image root tree is stored and not removed, it can be used for upgrading the image according to the changes made in the repositories used for this image\&. If a distributor provides an update channel for package updates and an image
 config\&.xml
-includes this update channel as repository, it is useful to store the image root tree and upgrade the tree according to changes on the update channel\&. Given that the root tree exists it\'s also possible to add or remove software and recreate the image of the desired type\&.
+includes this update channel as repository, it is useful to store the image root tree and upgrade the tree according to changes on the update channel\&. Given that the root tree exists it\*(Aqs also possible to add or remove software and recreate the image of the desired type\&.
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-u | \-\-upgrade} \fIimage\-root\fR [\-\-add\-package\fIname\fR] [\-\-add\-pattern\fIname\fR]
 .SH "SYSTEM TO IMAGE MIGRATION"
@@ -77,7 +86,7 @@ and
 \fB\-\-skip\fR
 you can tell the system to ignore specific directories and/or packages\&. This makes sense if you know before that some data is not worth to become migrated or can be restored easily later inside the cloned image like software repositories\&.
 .PP
-The migration process will always place it\'s result into the
+The migration process will always place it\*(Aqs result into the
 /tmp/$OptionValueOf\-m
 directory\&. The reason for this is because
 /tmp
@@ -88,7 +97,7 @@ As one result a HTML based report file is created which contains important infor
 \fBkiwi\fR {\-m | \-\-migrate} \fIname\fR [\-\-exclude\ \fIdirectory\fR...] [\-\-skip\ \fIpackage\fR...] [\-\-nofiles] [\-\-notemplate]
 .SH "IMAGE POSTPROCESSING MODES"
 .PP
-The KIWI post\-processing modes are used for special image deployment tasks, like installing the image on a USB stick\&. So to say they are the third step after preparation and creation\&. KIWI calls the postprocessing modules automatically according to the specified output image type and attributes but it\'s also possible to call them manually\&.
+The KIWI post\-processing modes are used for special image deployment tasks, like installing the image on a USB stick\&. So to say they are the third step after preparation and creation\&. KIWI calls the postprocessing modules automatically according to the specified output image type and attributes but it\*(Aqs also possible to call them manually\&.
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-bootvm\ \fIinitrd\fR \-\-bootvm\-system\ \fIsystemImage\fR [\-\-bootvm\-disksize\ \fIsize\fR]
 .HP \w'\fBkiwi\fR\ 'u
@@ -169,7 +178,7 @@ Set/Overwrite repo type for the first listed repo\&. The supported repo types de
 Set/Overwrite alias name for the first listed repo\&. Alias names are optional free form text\&. If not set the source attribute value is used and builds the alias name by replacing each
 \(lq/\(rq
 with a
-\(lq_\(rq\&. An alias name should be set if the source argument doesn\'t really explain what this repository contains\&. The change is temporary and will not be written to the XML file\&.
+\(lq_\(rq\&. An alias name should be set if the source argument doesn\*(Aqt really explain what this repository contains\&. The change is temporary and will not be written to the XML file\&.
 .RE
 .PP
 [\fB\-\-set\-repoprio\fR \fInumber\fR]
@@ -209,7 +218,7 @@ options\&.
 .PP
 [\fB\-\-log\-port \fR\fB\fIPortNumber\fR\fR]
 .RS 4
-Set the log server port\&. By default port 9000 is used\&. If multiple KIWI processes runs on one system it\'s recommended to set the logging port per process\&.
+Set the log server port\&. By default port 9000 is used\&. If multiple KIWI processes runs on one system it\*(Aqs recommended to set the logging port per process\&.
 .RE
 .PP
 [\fB\-\-package\-manager \fR\fB\fIsmart|zypper\fR\fR ]
@@ -220,7 +229,7 @@ Set the package manager to use for this image\&. If set it will temporarily over
 [\fB\-A\fR | \fB\-\-target\-arch \fR\fB\fIi586|x86_64|armv5tel|ppc\fR\fR ]
 .RS 4
 Set a special target\-architecture\&. This overrides the used architecture for the image\-packages in
-zypp\&.conf\&. When used with smart this option doesn\'t have any effect\&.
+zypp\&.conf\&. When used with smart this option doesn\*(Aqt have any effect\&.
 .RE
 .PP
 [\fB\-\-debug\fR]
