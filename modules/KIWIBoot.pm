@@ -6144,12 +6144,12 @@ sub __getPartBase {
 	my $devcopy = $disk;
 	my $devbase = basename $devcopy;
 	my @checklist = (
-		"/dev/".$devbase."1",
-		"/dev/".$devbase."2",
+		"/dev/mapper/".$devbase."p1",
+		"/dev/mapper/".$devbase."p2",
 		"/dev/".$devbase."p1",
 		"/dev/".$devbase."p2",
-		"/dev/mapper/".$devbase."p1",
-		"/dev/mapper/".$devbase."p2"
+		"/dev/".$devbase."1",
+		"/dev/".$devbase."2"
 	);
 	foreach my $device (@checklist) {
 		if (-b $device) {
@@ -6173,9 +6173,9 @@ sub __getPartDevice {
 	my $devcopy = $disk;
 	my $devbase = basename $devcopy;
 	my @checklist = (
-		"/dev/".$devbase.$part,
+		"/dev/mapper/".$devbase."p".$part,
 		"/dev/".$devbase."p".$part,
-		"/dev/mapper/".$devbase."p".$part
+		"/dev/".$devbase.$part
 	);
 	foreach my $device (@checklist) {
 		if (-b $device) {

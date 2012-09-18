@@ -30,6 +30,7 @@ BuildRequires:  module-init-tools
 BuildRequires:  perl-Config-IniFiles
 BuildRequires:  perl-XML-LibXML
 BuildRequires:  perl-libwww-perl
+BuildRequires:  perl-File-Stat-Bits
 BuildRequires:  screen
 BuildRequires:  zlib-devel
 %if %{suse_version} > 1020
@@ -61,6 +62,7 @@ Requires:       perl-XML-LibXML
 Requires:       perl-XML-LibXML-Common
 Requires:       perl-XML-SAX
 Requires:       perl-libwww-perl
+Requires:       perl-File-Stat-Bits
 Requires:       rsync
 Requires:       screen
 Requires:       util-linux

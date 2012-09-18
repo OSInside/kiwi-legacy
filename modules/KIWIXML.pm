@@ -130,7 +130,6 @@ sub new {
 	my $reqProfiles = shift;
 	my $cmdL        = shift;
 	my $changeset   = shift;
-	my $addType     = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -234,12 +233,6 @@ sub new {
 	$this->{instsrcNodeList} = $instsrcNodeList;
 	$this->{driversNodeList} = $driversNodeList;
 	$this->{stripNodeList}   = $stripNodeList;
-	#==========================================
-	# add specified type if requested
-	#------------------------------------------
-	if ($addType) {
-		$this -> addSimpleType ($imageType);
-	}
 	#==========================================
 	# Data structure containing the XML file information
 	#------------------------------------------

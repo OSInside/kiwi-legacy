@@ -169,10 +169,10 @@ sub main {
 		# Process system image description
 		#------------------------------------------
 		$kiwi -> info ("Reading image description [Cache]...\n");
-		my $cacheType = "ext2";
+		my $cacheType = "btrfs";
 		my $xml = new KIWIXML (
 			$kiwi,$cmdL->getOperationMode("initCache"),
-			$cacheType,$cmdL->getBuildProfiles(),$cmdL,undef,"addType"
+			$cacheType,$cmdL->getBuildProfiles(),$cmdL,undef
 		);
 		if (! defined $xml) {
 			kiwiExit (1);

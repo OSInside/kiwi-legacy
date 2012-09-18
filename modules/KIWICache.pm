@@ -233,7 +233,7 @@ sub createCache {
 	$cmdL -> setBuildProfiles ($prof);
 	$cmdL -> setRootTargetDir ($rootTarget);
 	$cmdL -> setOperationMode ("prepare", $cmdL->getConfigDir());
-	$cmdL -> setBuildType ("ext2");
+	$cmdL -> setBuildType ("btrfs");
 	$cmdL -> setForceNewRoot (1);
 	my $kic = KIWIImageCreator -> new($kiwi, $cmdL);
 	if (! $kic) {
@@ -255,10 +255,10 @@ sub createCache {
 	qxx ("rm -f $root/image/config.xml");
 	qxx ("rm -f $root/image/*.kiwi");
 	#==========================================
-	# Turn cache into ext2 fs image
+	# Turn cache into btrfs fs image
 	#------------------------------------------
 	$kiwi -> info (
-		"--> Building ext2 cache...\n"
+		"--> Building btrfs cache...\n"
 	);
 	# /.../
 	# tell the system that we are in cache mode with
@@ -272,12 +272,38 @@ sub createCache {
 	if (! defined $image) {
 		undef $kic; return;
 	}
-	if (! $image -> createImageEXT2 ()) {
+	if (! $image -> createImageBTRFS ()) {
 		undef $kic; return;
 	}
 	my $name= $imageCacheDir."/".$main::global -> generateBuildImageName($xml);
-	qxx ("mv $name $rootTarget.ext2");
-	qxx ("rm -f  $name.ext2");
+	#==========================================
+	# Turn cache into read-only image
+	#------------------------------------------
+	my $data = qxx ("/sbin/losetup -f --show $name 2>&1");
+	my $code = $? >> 8;
+	chomp $data;
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't loopsetup BTRFS cache");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return;
+	}
+	my $loop = $data;
+	$data = qxx ("/sbin/btrfstune -S 1 $loop 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		qxx ("losetup -d $loop 2>&1");
+		$kiwi -> error  ("Failed to turn BTRFS cache to read-only");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return;
+	}
+	qxx ("losetup -d $loop 2>&1");
+	#==========================================
+	# Cleanup
+	#------------------------------------------
+	qxx ("mv $name $rootTarget.btrfs");
+	qxx ("rm -f  $name.btrfs");
 	qxx ("rm -f  $imageCacheDir/initrd-*");
 	qxx ("rm -rf $rootTarget");
 	#==========================================
@@ -326,13 +352,13 @@ sub selectCache {
 	#==========================================
 	# setup cache file names...
 	#------------------------------------------
-	@file = glob ($this->{cdir}.'/'.$CacheDistro.'*.ext2');
+	@file = glob ($this->{cdir}.'/'.$CacheDistro.'*.btrfs');
 	#==========================================
 	# walk through cache files
 	#------------------------------------------
 	foreach my $clic (@file) {
 		my $meta = $clic;
-		$meta =~ s/\.ext2$/\.cache/;
+		$meta =~ s/\.btrfs$/\.cache/;
 		#==========================================
 		# check cache files
 		#------------------------------------------
