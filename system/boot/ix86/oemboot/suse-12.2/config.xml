@@ -86,23 +86,23 @@
 	<repository type="yast2" status="replaceable">
 		<source path="obs://12.2/repo/oss"/>
 	</repository>
-	<packages type="bootstrap" profiles="std">
+	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
 	</packages>
-	<packages type="bootstrap" profiles="pae">
+	<packages type="image" profiles="pae">
 		<package name="kernel-pae" arch="i686"/>
 	</packages>
-	<packages type="bootstrap" profiles="xenk">
+	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>
 <!-- xen dom0 support only on x86_64 -->
 		<package name="xen" arch="x86_64"/>
 	</packages>
-	<packages type="bootstrap" profiles="ec2">
+	<packages type="image" profiles="ec2">
 		<package name="kernel-ec2"/>
 <!-- xen dom0 support only on x86_64 -->
 		<package name="xen" arch="x86_64"/>
 	</packages>
-	<packages type="bootstrap" profiles="desktop">
+	<packages type="image" profiles="desktop">
 		<package name="kernel-desktop"/>
 	</packages>
 	<packages type="bootstrap">

@@ -63,10 +63,10 @@
 	<repository type="rpm-md" status="replaceable">
 		<source path="iso:///image/CDs/RHEL-6.0-%arch-DVD.iso"/>
 	</repository>
-	<packages type="bootstrap" profiles="std">
+	<packages type="image" profiles="std">
 		<package name="kernel"/>
 	</packages>
-	<packages type="bootstrap" profiles="pae">
+	<packages type="image" profiles="pae">
 		<package name="kernel-PAE"/>
 	</packages>
 	<packages type="bootstrap">

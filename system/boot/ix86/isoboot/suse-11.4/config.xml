@@ -72,17 +72,17 @@
 	<repository type="yast2" status="replaceable">
 		<source path="obs://11.4/repo/oss"/>
 	</repository>
-	<packages type="bootstrap" profiles="std">
+	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
 	</packages>
-	<packages type="bootstrap" profiles="pae">
+	<packages type="image" profiles="pae">
 		<package name="kernel-pae" arch="i686"/>
 	</packages>
-	<packages type="bootstrap" profiles="xenk">
+	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>
 		<package name="xen"/>
 	</packages>
-	<packages type="bootstrap" profiles="desktop">
+	<packages type="image" profiles="desktop">
 		<package name="kernel-desktop"/>
 	</packages>
 	<packages type="bootstrap">

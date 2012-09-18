@@ -67,19 +67,19 @@
 	<repository type="rpm-md" status="replaceable">
 		<source path="obs://SUSE:SLE-11:GA/standard"/>
 	</repository>
-	<packages type="bootstrap" profiles="std">
+	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
 	</packages>
-	<packages type="bootstrap" profiles="pae">
+	<packages type="image" profiles="pae">
 		<package name="kernel-pae" arch="i686"/>
 		<package name="kernel-pae-base" arch="i686"/>
 	</packages>
-	<packages type="bootstrap" profiles="rt">
+	<packages type="image" profiles="rt">
 		<package name="kernel-rt"/>
 		<package name="kernel-rt-base"/>
 	</packages>
-	<packages type="bootstrap" profiles="xenk">
+	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
 <!-- xen dom0 support only on x86_64 -->
