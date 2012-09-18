@@ -51,18 +51,35 @@
 		<title>Example</title>
 		<para>
 			Let's say we know that we want to build some images of type 'vmx'
-			and based on the openSUSE 12.1 JeOS image description. In order to
+			and based on the openSUSE 12.2 JeOS image description. In order to
 			create image caches for the system and the boot image the following
-			commands are used:
+			steps needs to be done:
 			<screen>
-kiwi --init-cache suse-12.1-JeOS
-kiwi --init-cache /usr/share/kiwi/image/vmxboot/suse-12.1
+1) copy the base image descriptions used in the build:
+   cp -a /usr/share/kiwi/image/vmxboot/suse-12.2 /tmp/boot-cache
+   cp -a /usr/share/kiwi/image/suse-12.2-JeOS /tmp/image-cache
+
+2) modify boot-cache and image-cache config.xml files to add a
+   btrfs type and size
+
+   &lt;type image="btrfs"&gt;
+       &lt;size unit="G">5&lt;/size&gt;
+   &lt;/type&gt;
+
+3) modify boot-cache and image-cache to contain the packagemanager.
+   This is required for the later use of the caches
+  
+   &lt;package name="zypper"/&gt;
+
+4) now build the caches:
+   kiwi --init-cache /tmp/image-cache
+   kiwi --init-cache /tmp/boot-cache
 			</screen>
 			By default those caches will be created in '/var/cache/kiwi/image'.
 			To run a build which makes use of the cache the following command
 			is used:
 			<screen>
-kiwi --build suse-12.1-JeOS -d /tmp/myimage --type vmx \
+kiwi --build suse-12.2-JeOS -d /tmp/myimage --type vmx \
      --cache /var/cache/kiwi/image
 			</screen>
 			This call is about 50% faster compared to the creation without a
