@@ -162,29 +162,33 @@ sub unionOverlay {
 		$haveCow=1;
 	}
 	#==========================================
-	# Create snapshot map if not done
-	#------------------------------------------
-	if (! $haveCow) {
-		%snapshot = $this -> createBTRFSSeed ($cowdev);
-		if (! %snapshot) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Failed to snapshot $baseRO");
-			return;
-		}
-		push @mount,@{$snapshot{stack}};
-		$this->{mount} = \@mount;
-	}
-	#==========================================
 	# Mount cache as snapshot
 	#------------------------------------------
 	$kiwi -> info("Creating overlay path\n");
 	$kiwi -> info("--> Base: $baseRO(ro)\n");
 	$kiwi -> info("--> COW:  $cowdev(rw)\n");
 	if (! $haveCow) {
+		#==========================================
+		# Create uuid loop node for base cache
+		#------------------------------------------
 		$baseLoop = $this -> createLoopNode ($baseRO);
 		if (! $baseLoop) {
 			return;
 		}
+		#==========================================
+		# Create cow/seed file and loop setup it
+		#------------------------------------------
+		%snapshot = $this -> createBTRFSSeed ($cowdev);
+		if (! %snapshot) {
+			$kiwi -> error ("Failed to snapshot $baseRO");
+			$kiwi -> failed ();
+			return;
+		}
+		push @mount,@{$snapshot{stack}};
+		$this->{mount} = \@mount;
+		#==========================================
+		# loop setup base cache with uuid node
+		#------------------------------------------
 		$status = qxx ("losetup $baseLoop $baseRO 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -194,6 +198,9 @@ sub unionOverlay {
 		}
 		push @mount,"losetup -d $baseLoop";
 		$this->{mount} = \@mount;
+		#==========================================
+		# mount base cache
+		#------------------------------------------
 		$status = qxx ("mount $baseLoop $tmpdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -203,6 +210,9 @@ sub unionOverlay {
 		}
 		push @mount,"umount $tmpdir";
 		$this->{mount} = \@mount;
+		#==========================================
+		# add cow/seed device
+		#------------------------------------------
 		$status = qxx ("btrfs device add $snapshot{seed} $tmpdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -210,6 +220,9 @@ sub unionOverlay {
 			$kiwi -> failed ();
 			return;
 		}
+		#==========================================
+		# remount read-write
+		#------------------------------------------
 		$status = qxx ("mount -o remount,rw $tmpdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -218,6 +231,9 @@ sub unionOverlay {
 			return;
 		}
 	} else {
+		#==========================================
+		# construct uuid device node name
+		#------------------------------------------
 		$uuid = qxx ("blkid -s UUID -o value $baseRO 2>&1"); chomp $uuid;
 		$baseLoop = "/dev/loop-".$uuid;
 		if (! -e $baseLoop) {
@@ -225,6 +241,9 @@ sub unionOverlay {
 			$kiwi -> failed ();
 			return;
 		}
+		#==========================================
+		# loop setup base cache with uuid node
+		#------------------------------------------
 		$status = qxx ("losetup $baseLoop $baseRO 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -234,6 +253,9 @@ sub unionOverlay {
 		}
 		push @mount,"losetup -d $baseLoop";
 		$this->{mount} = \@mount;
+		#==========================================
+		# mount cow/seed device
+		#------------------------------------------
 		$status = qxx ("mount -o loop $cowdev $tmpdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -334,33 +356,14 @@ sub createLoopNode {
 	# create new loop device node with an
 	# unused minor number
 	# ----
-	my $this       = shift;
-	my $loop_file  = shift;
-	my $kiwi       = $this->{kiwi};
-	my $loop_major = 7;
-	my $loop_minor = 0;
-	my $FD;
+	my $this      = shift;
+	my $loop_file = shift;
+	my $kiwi      = $this->{kiwi};
 	my $data;
 	my $uuid;
 	my $code;
-	#==========================================
-	# search free minor number
-	#------------------------------------------
-	opendir ($FD,"/dev");
-	while (my $file = readdir ($FD)) {
-		if ($file =~ /^loop/) {
-			my $attr = stat ("/dev/$file");
-			my ($major, $minor) = dev_split( $attr->rdev );
-			if ($major != $loop_major) {
-				next;
-			}
-			if ($minor > $loop_minor) {
-				$loop_minor = $minor;
-			}
-		}
-	}
-	closedir ($FD);
-	$loop_minor++;
+	my $free;
+	my $loop_dev;
 	#==========================================
 	# create node name
 	#------------------------------------------
@@ -372,18 +375,27 @@ sub createLoopNode {
 		return;
 	}
 	chomp $uuid;
-	my $loop_dev = "/dev/loop-".$uuid;
+	$loop_dev = "/dev/loop-".$uuid;
+	if (-e $loop_dev) {
+		return $loop_dev;
+	}
 	#==========================================
-	# create node and return
+	# bind free loop and rename
 	#------------------------------------------
-	if (! -e $loop_dev) {
-		$data = qxx ("mknod $loop_dev b $loop_major $loop_minor 2>&1");
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("Failed to create loop node: $data");
-			$kiwi -> failed ();
-			return;
-		}
+	$free = qxx ("losetup -f --show $loop_file");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Failed to loop setup $loop_file");
+		$kiwi -> failed ();
+		return;
+	}
+	chomp $free;
+	$data = qxx ("losetup -d $free && mv $free $loop_dev 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Failed to create UUID loop device");
+		$kiwi -> failed ();
+		return;
 	}
 	return $loop_dev;
 }
