@@ -219,10 +219,12 @@ sub new {
 	$this->{origtree}= $root;
 	$this->{overlay} = new KIWIOverlay ($kiwi,$root,$cacheRoot);
 	if (! $this->{overlay}) {
+		$this -> cleanMount();
 		return;
 	}
 	$root = $this->{overlay} -> mountOverlay();
 	if (! -d $root) {
+		$this -> cleanMount();
 		return;
 	}
 	#==========================================
