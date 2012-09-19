@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Sep 19 17:36:06 CEST 2012 - ms@suse.de
+
+- make sure /etc/sysconfig/kernel contains the virtio modules
+  so that SLE10 mkinitrd picks it up correctly (bnc #747346)
+
+-------------------------------------------------------------------
 Sat Sep 15 23:48:54 CEST 2012 - ms@suse.de
 
 - fixed KIWIImageFormat to work with a targetdevice as well
