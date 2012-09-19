@@ -2477,6 +2477,13 @@ function setupKernelModules {
 		# ----
 		local USB_MODULES="ehci-hcd ohci-hcd uhci-hcd usbcore usb-storage sd"
 		INITRD_MODULES="$INITRD_MODULES $USB_MODULES"
+		# /.../
+		# old mkinitrd cannot figure this out on its own
+		# ---
+		if [ -e /sys/devices/virtio-pci ];then
+			Echo 'Adding virtio kernel modules to initrd.'
+			INITRD_MODULES="$INITRD_MODULES virtio-blk virtio-pci"
+		fi
 	fi
 	#======================================
 	# use system image config or template
