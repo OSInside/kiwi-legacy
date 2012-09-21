@@ -15,7 +15,7 @@ suseStripKernel
 suseStripInitrd
 
 #==========================================
-# umount /proc
+# umount
 #------------------------------------------
 umount /proc &>/dev/null
 

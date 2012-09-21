@@ -20,8 +20,8 @@ suseStripKernel
 suseStripInitrd
 
 #==========================================
-# umount /proc
+# umount
 #------------------------------------------
-umount /proc &>/dev/null
+baseCleanMount
 
 exit 0
