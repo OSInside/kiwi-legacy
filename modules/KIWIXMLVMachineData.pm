@@ -71,6 +71,7 @@ sub new {
 	#        }
 	#    }
 	#    ovftype       = ''
+	# }
 	#
 	# Having the disks as a two level hashref allows us to support
 	# specification of storage images at a later point without having to
@@ -104,7 +105,6 @@ sub new {
 		if (! $this -> __isInitHashValid($init)) {
 			return;
 		}
-		my %initStruct = %{$init};
 		$this->{HWversion}     = $init->{HWversion};
 		$this->{arch}          = $init->{arch};
 		$this->{desiredCPUCnt} = $init->{des_cpu};
