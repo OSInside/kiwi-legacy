@@ -208,17 +208,12 @@ Authors:
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
 Requires:       syslinux
-%if %{suse_version} > 1010
+%if 0%{?suse_version}
+Requires:       virt-utils
 Requires:       genisoimage
-%else
-Requires:       mkisofs
 %endif
-%ifarch ppc ppc64 s390 s390x
-Requires:       virt-utils
-%else
-%if 0%{?suse_version} >= 1130
-Requires:       virt-utils
-%endif
+%if 0%{?rhel_version}
+Requires:       qemu-img
 %endif
 Summary:        openSUSE - KIWI Image System ISO boot
 License:        GPL-2.0+
@@ -250,32 +245,20 @@ Meta-package to pull in all requires to build a isoboot media.
 
 %package -n kiwi-desc-vmxboot
 Requires:       kiwi = %{version}
+Requires:       parted
 %if 0%{?suse_version}
 Requires:       multipath-tools
-Requires:       parted
+Requires:       virt-utils
 %endif
 %if 0%{?rhel_version}
 Requires:       device-mapper-multipath
-Requires:       parted
+Requires:       qemu-img
 %endif
 %ifarch %ix86 x86_64
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %else
 Requires:       grub
-%endif
-%endif
-%ifarch ppc ppc64 s390 s390x
-Requires:       virt-utils
-%else
-%if 0%{?suse_version} >= 1130
-Requires:       virt-utils
-%endif
-%if 0%{?suse_version} < 1130
-Requires:       qemu
-%endif
-%if 0%{?rhel_version}
-Requires:       qemu-img
 %endif
 %endif
 Summary:        openSUSE - KIWI Image System Virtual Machine boot
@@ -345,37 +328,25 @@ Meta-package to pull in all requires to build a netboot media.
 
 %package -n kiwi-desc-oemboot
 Requires:       kiwi = %{version}
-%ifarch %arm
-Requires:       u-boot-tools
-%endif
-%ifarch ppc ppc64 s390 s390x
-Requires:       virt-utils
-%else
-%if 0%{?suse_version} >= 1130
-Requires:       virt-utils
-%endif
-%if 0%{?suse_version} < 1130
-Requires:       qemu
-%endif
-%if 0%{?rhel_version}
-Requires:       qemu-img
-%endif
-%endif
+Requires:       parted
 %if 0%{?suse_version}
 Requires:       multipath-tools
-Requires:       parted
+Requires:       virt-utils
+Requires:       genisoimage
 %endif
 %if 0%{?rhel_version}
 Requires:       device-mapper-multipath
-Requires:       parted
+Requires:       qemu-img
 %endif
 %ifarch %ix86 x86_64
+%if 0%{?suse_version} >= 1220
+Requires:       grub2
+%else
 Requires:       grub
 %endif
-%if %{suse_version} > 1010
-Requires:       genisoimage
-%else
-Requires:       mkisofs
+%endif
+%ifarch %arm
+Requires:       u-boot-tools
 %endif
 Summary:        openSUSE - KIWI image descriptions
 License:        GPL-2.0
