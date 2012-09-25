@@ -3577,11 +3577,17 @@ function searchVolumeGroup {
 	# /dev/$VGROUP/LVRoot and/or /dev/$VGROUP/LVComp
 	# return zero on success
 	# ----
-	local vg_count
+	local vg_count=0
+	local vg_found
 	if [ ! "$kiwi_lvm" = "true" ];then
 		return 1
 	fi
-	vg_count=$(vgs --noheadings -o vg_name 2>/dev/null | grep $VGROUP | wc -l)
+	for i in $(vgs --noheadings -o vg_name 2>/dev/null);do
+		vg_found=$(echo $i)
+		if [ "$vg_found" = "$VGROUP" ];then
+			vg_count=$((vg_count + 1))
+		fi
+	done
 	if [ $vg_count -gt 1 ];then
 		Echo "Duplicate VolumeGroup name $VGROUP found !"
 		Echo "$vg_count versions of this volume group exists"
