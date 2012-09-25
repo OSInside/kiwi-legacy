@@ -3581,7 +3581,7 @@ function searchVolumeGroup {
 	if [ ! "$kiwi_lvm" = "true" ];then
 		return 1
 	fi
-	vg_count=$(vgs --noheadings -o vg_name 2>/dev/null | wc -l)
+	vg_count=$(vgs --noheadings -o vg_name 2>/dev/null | grep $VGROUP | wc -l)
 	if [ $vg_count -gt 1 ];then
 		Echo "Duplicate VolumeGroup name $VGROUP found !"
 		Echo "$vg_count versions of this volume group exists"
