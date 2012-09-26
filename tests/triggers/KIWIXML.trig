@@ -4,4 +4,5 @@ KIWIXMLDriverData.t
 KIWIXMLEC2ConfigData.t
 KIWIXMLFileData.t
 KIWIXMLOEMConfigData.t
+KIWIXMLPXEDeployData.t
 KIWIXMLRepositoryData.t
