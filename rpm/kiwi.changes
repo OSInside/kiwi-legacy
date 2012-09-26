@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Sep 26 11:47:30 CEST 2012 - ms@suse.de
+
+- cleanup spec file, correctly set virt-utils Requires (bnc #782092)
+
+-------------------------------------------------------------------
 Wed Sep 19 17:36:06 CEST 2012 - ms@suse.de
 
 - make sure /etc/sysconfig/kernel contains the virtio modules
