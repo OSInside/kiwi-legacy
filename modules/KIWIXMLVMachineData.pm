@@ -485,15 +485,15 @@ sub setArch {
 	if (! $arch) {
 		my $msg = 'setArch: no architecture argument provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	if (! $this -> __isArchValid($arch) ) {
 		my $msg = "setArch: unsupported architecture '$arch' provided, "
 			. 'retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{arch} = $arch;
@@ -513,15 +513,15 @@ sub setConfigEntries {
 	if (! $config ) {
 		my $msg = 'setConfigEntries: no configuration file entries provided, '
 			. 'retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	if (ref($config) ne 'ARRAY') {
 		my $msg = 'setConfigEntries: expecting ARRAY ref as argument, '
 			. 'retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{confEntries} = $config;
@@ -541,8 +541,8 @@ sub setDVDController {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setDVDController: no controller data provided, '
 			. 'retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	if ($this->{dvd}) {
@@ -566,8 +566,8 @@ sub setDVDID {
 	if (! $id ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setDVDID: no ID data provided, retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	if ($this->{dvd}) {
@@ -592,8 +592,8 @@ sub setDesiredCPUCnt {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setDesiredCPUCnt: no cpu count provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{desiredCPUCnt} = $dcpus;
@@ -613,8 +613,8 @@ sub setDesiredMemory {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setDesiredMemory: no memory amount provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{desiredMemory} = $dmem;
@@ -633,8 +633,8 @@ sub setDomain {
 	if (! $domain ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setDomain: no domain provided, retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{domain} = $domain;
@@ -654,8 +654,8 @@ sub setGuestOS {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setGuestOS: no guest OS name provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{guestOS} = $guest;
@@ -675,8 +675,8 @@ sub setHardwareVersion {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setHardwareVersion: no version data provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{HWversion} = $hwv;
@@ -695,8 +695,8 @@ sub setMaxCPUCnt {
 	if (! $maxCPU ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setMaxCPUCnt: no value provided, retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{maxCPUCnt} = $maxCPU;
@@ -715,8 +715,8 @@ sub setMaxMemory {
 	if (! $maxMem ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setMaxMemory: no value provided, retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{maxMemory} = $maxMem;
@@ -735,8 +735,8 @@ sub setMemory {
 	if (! $mem ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setMemory: no value provided, retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{memory} = $mem;
@@ -755,8 +755,8 @@ sub setMinCPUCnt {
 	if (! $minCPU ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setMinCPUCnt: no value provided, retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{minCPUCnt} = $minCPU;
@@ -775,8 +775,8 @@ sub setMinMemory {
 	if (! $minMem ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setMinMemory: no value provided, retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{minMemory} = $minMem;
@@ -807,8 +807,8 @@ sub setNICDriver {
 	if (! $driver ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setNICDriver: no driver provided, retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{nics}{$id}{driver} = $driver;
@@ -840,8 +840,8 @@ sub setNICInterface {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setNICInterface: no interface provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{nics}{$id}{interface} = $interface;
@@ -873,8 +873,8 @@ sub setNICMAC {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setNICMAC: no MAC provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{nics}{$id}{mac} = $mac;
@@ -906,8 +906,8 @@ sub setNICMode {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setNICMode: no mode provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{nics}{$id}{mode} = $mode;
@@ -926,8 +926,8 @@ sub setNumCPUs {
 	if (! $cpus ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setNumCPUs: no value provided, retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{ncpus} = $cpus;
@@ -947,15 +947,15 @@ sub setOVFType {
 	if (! $ovfT) {
 		my $msg = 'setOVFtype: no OVF type argument provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	if (! $this -> __isOVFTypeValid($ovfT) ) {
 		my $msg = "setOVFtype: unsupported OVF type '$ovfT' provided, "
 			. 'retaining current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{ovftype} = $ovfT;
@@ -975,8 +975,8 @@ sub setSystemDiskController {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setSystemDiskController: no value provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	if (! $this->{disks} ) {
@@ -1005,8 +1005,8 @@ sub setSystemDiskDevice {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setSystemDiskDevice: no value provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	if (! $this->{disks} ) {
@@ -1035,8 +1035,8 @@ sub setSystemDiskType {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setSystemDiskType: no value provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	if (! $this->{disks} ) {
@@ -1065,8 +1065,8 @@ sub setSystemDiskID {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setSystemDiskID: no value provided, retaining '
 			. 'current data.';
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	if (! $this->{disks} ) {
