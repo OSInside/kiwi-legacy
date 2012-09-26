@@ -185,17 +185,9 @@ Authors:
 License:        GPLv2+
 Requires:       kiwi = %{version}
 Requires:       multipath-tools parted
+Requires:       virt-utils
 %ifarch %ix86 x86_64
 Requires:       grub
-%endif
-%ifarch ppc ppc64 s390 s390x
-Requires:       virt-utils
-%else
-%if 0%{?suse_version} >= 1130
-Requires:       virt-utils
-%else
-Requires:       qemu
-%endif
 %endif
 Summary:        OpenSuSE - KIWI Image System Virtual Machine boot
 Group:          System/Management
@@ -235,16 +227,8 @@ Authors:
 %package -n kiwi-desc-oemboot
 License:        GPLv2
 Requires:       kiwi = %{version}
-%ifarch ppc ppc64 s390 s390x
-Requires:       virt-utils
-%else
-%if 0%{?suse_version} >= 1130
-Requires:       virt-utils
-%else
-Requires:       qemu
-%endif
-%endif
 Requires:       multipath-tools parted
+Requires:       virt-utils
 %ifarch %ix86 x86_64
 Requires:       grub
 %endif
