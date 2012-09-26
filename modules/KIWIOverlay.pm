@@ -174,6 +174,8 @@ sub unionOverlay {
 		if (! $baseLoop) {
 			return;
 		}
+		push @mount,"losetup -d $baseLoop";
+		$this->{mount} = \@mount;
 		#==========================================
 		# Create cow/seed file and loop setup it
 		#------------------------------------------
@@ -184,18 +186,6 @@ sub unionOverlay {
 			return;
 		}
 		push @mount,@{$snapshot{stack}};
-		$this->{mount} = \@mount;
-		#==========================================
-		# loop setup base cache with uuid node
-		#------------------------------------------
-		$status = qxx ("losetup $baseLoop $baseRO 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error  ("Failed to loop $baseRO to: $baseLoop: $status");
-			$kiwi -> failed ();
-			return;
-		}
-		push @mount,"losetup -d $baseLoop";
 		$this->{mount} = \@mount;
 		#==========================================
 		# mount base cache
@@ -375,11 +365,8 @@ sub createLoopNode {
 	}
 	chomp $uuid;
 	$loop_dev = "/dev/loop-".$uuid;
-	if (-e $loop_dev) {
-		return $loop_dev;
-	}
 	#==========================================
-	# bind free loop and rename
+	# bind loop_file to free loop
 	#------------------------------------------
 	$free = qxx ("losetup -f --show $loop_file");
 	$code = $? >> 8;
@@ -389,14 +376,20 @@ sub createLoopNode {
 		return;
 	}
 	chomp $free;
-	$data = qxx ("losetup -d $free && mv $free $loop_dev 2>&1");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("Failed to create UUID loop device");
-		$kiwi -> failed ();
-		return;
+	#==========================================
+	# link loop if not already done
+	#------------------------------------------
+	if (! -e $loop_dev) {
+		$data = qxx ("ln $free $loop_dev 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			qxx ("losetup -d $free");
+			$kiwi -> error  ("Failed to create UUID loop device");
+			$kiwi -> failed ();
+			return;
+		}
 	}
-	return $loop_dev;
+	return $free;
 }
 
 #==========================================
