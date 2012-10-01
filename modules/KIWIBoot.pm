@@ -825,7 +825,9 @@ sub setupInstallCD {
 	if (! $gotsys) {
 		$title = "KIWI CD Boot: $namecd";
 	}
-	if (! $this -> setupBootLoaderConfiguration ($bootloader,$title)) {
+	if (! $this -> setupBootLoaderConfiguration (
+		$bootloader,$title,undef,"ISO")
+	) {
 		return;
 	}
 	#==========================================
@@ -3305,6 +3307,7 @@ sub setupBootLoaderConfiguration {
 	my $loader   = shift;
 	my $type     = shift;
 	my $extra    = shift;
+	my $iso      = shift;
 	my $cmdL     = $this->{cmdL};
 	my $system   = $this->{system};
 	my $kiwi     = $this->{kiwi};
@@ -3482,10 +3485,16 @@ sub setupBootLoaderConfiguration {
 			#==========================================
 			# General grub2 setup
 			#------------------------------------------
-			if ($config eq "grub2") {
+			if (! $iso) {
 				$rprefix = '$root';
-				foreach my $module (@x86mods) {
-					print FD "insmod $module"."\n";
+				if ($config eq "grub2") {
+					foreach my $module (@x86mods) {
+						print FD "insmod $module"."\n";
+					}
+				} else {
+					foreach my $module (@efimods) {
+						print FD "insmod $module"."\n";
+					}
 				}
 			} else {
 				$rprefix = 'cd0';
@@ -3495,7 +3504,7 @@ sub setupBootLoaderConfiguration {
 			}
 			my $fodir = "($rprefix)/boot/grub2/themes/";
 			print FD "set default=$defaultBootNr\n";
-			if ($type !~ /^KIWI CD/) {
+			if (! $iso) {
 				print FD "set root=\"(hd0,1)\""."\n";
 			}
 			print FD "set locale_dir=($rprefix)/boot/grub2/locale"."\n";
@@ -3553,7 +3562,7 @@ sub setupBootLoaderConfiguration {
 			# Standard boot
 			#------------------------------------------
 			if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
-				if ($type =~ /^KIWI CD/) {
+				if ($iso) {
 					print FD "echo Loading linux...\n";
 					print FD "set gfxpayload=keep"."\n";
 					print FD "linux ($rprefix)/boot/linux";
@@ -3573,7 +3582,7 @@ sub setupBootLoaderConfiguration {
 					print FD " loader=$bloader splash=silent";
 				}
 				print FD $cmdline;
-				if ($type =~ /^KIWI CD/) {
+				if ($iso) {
 					print FD "echo Loading initrd...\n";
 					print FD "initrd ($rprefix)/boot/initrd\n";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
@@ -3585,7 +3594,7 @@ sub setupBootLoaderConfiguration {
 				}
 				print FD "}\n";
 			} else {
-				if ($type =~ /^KIWI CD/) {
+				if ($iso) {
 					print FD "echo Loading Xen\n";
 					print FD "multiboot ($rprefix)/boot/xen.gz dummy\n";
 					print FD "echo Loading linux...\n";
@@ -3611,7 +3620,7 @@ sub setupBootLoaderConfiguration {
 					print FD " loader=$bloader splash=silent";
 				}
 				print FD $cmdline;
-				if ($type =~ /^KIWI CD/) {
+				if ($iso) {
 					print FD "echo Loading initrd...\n";
 					print FD "module ($rprefix)/boot/initrd dummy\n";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
@@ -3631,7 +3640,7 @@ sub setupBootLoaderConfiguration {
 				print FD 'menuentry "'.$title.'"';
 				print FD ' --class opensuse --class os {'."\n";
 				if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
-					if ($type =~ /^KIWI CD/) {
+					if ($iso) {
 						print FD "echo Loading linux...\n";
 						print FD "set gfxpayload=keep"."\n";
 						print FD "linux ($rprefix)/boot/linux";
@@ -3656,7 +3665,7 @@ sub setupBootLoaderConfiguration {
 					print FD " ide=nodma apm=off acpi=off noresume selinux=0";
 					print FD " nosmp noapic maxcpus=0 edd=off";
 					print FD $cmdline;
-					if ($type =~ /^KIWI CD/) {
+					if ($iso) {
 						print FD "echo Loading initrd...\n";
 						print FD "initrd ($rprefix)/boot/initrd\n";
 					} elsif (
@@ -3671,7 +3680,7 @@ sub setupBootLoaderConfiguration {
 					}
 					print FD "}\n";
 				} else {
-					if ($type =~ /^KIWI CD/) {
+					if ($iso) {
 						print FD "echo Loading Xen\n";
 						print FD "multiboot ($rprefix)/boot/xen.gz dummy\n";
 						print FD "echo Loading linux...\n";
@@ -3702,7 +3711,7 @@ sub setupBootLoaderConfiguration {
 					print FD " ide=nodma apm=off acpi=off noresume selinux=0";
 					print FD " nosmp noapic maxcpus=0 edd=off";
 					print FD $cmdline;
-					if ($type =~ /^KIWI CD/) {
+					if ($iso) {
 						print FD "echo Loading initrd...\n";
 						print FD "module ($rprefix)/boot/initrd dummy\n";
 					} elsif (
@@ -3795,7 +3804,7 @@ sub setupBootLoaderConfiguration {
 		# Standard boot
 		#------------------------------------------
 		if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
-			if ($type =~ /^KIWI CD/) {
+			if ($iso) {
 				print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 				print FD " cdinst=1 loader=$bloader";
@@ -3809,7 +3818,7 @@ sub setupBootLoaderConfiguration {
 				print FD " loader=$bloader splash=silent";
 			}
 			print FD $cmdline;
-			if ($type =~ /^KIWI CD/) {
+			if ($iso) {
 				print FD " initrd (cd)/boot/initrd\n";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD " initrd /boot/initrd.vmx\n";
@@ -3817,7 +3826,7 @@ sub setupBootLoaderConfiguration {
 				print FD " initrd /boot/initrd\n";
 			}
 		} else {
-			if ($type =~ /^KIWI CD/) {
+			if ($iso) {
 				print FD " kernel (cd)/boot/xen.gz\n";
 				print FD " module /boot/linux vga=$vga splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
@@ -3834,7 +3843,7 @@ sub setupBootLoaderConfiguration {
 				print FD " loader=$bloader splash=silent";
 			}
 			print FD $cmdline;
-			if ($type =~ /^KIWI CD/) {
+			if ($iso) {
 				print FD " module (cd)/boot/initrd\n";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print FD " module /boot/initrd.vmx\n";
@@ -3849,7 +3858,7 @@ sub setupBootLoaderConfiguration {
 			$title = $this -> makeLabel ("Failsafe -- $title");
 			print FD "title $title\n";
 			if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
-				if ($type =~ /^KIWI CD/) {
+				if ($iso) {
 					print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
 					print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 					print FD " cdinst=1 loader=$bloader";
@@ -3865,7 +3874,7 @@ sub setupBootLoaderConfiguration {
 				print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 				print FD " noapic maxcpus=0 edd=off";
 				print FD $cmdline;
-				if ($type =~ /^KIWI CD/) {
+				if ($iso) {
 					print FD " initrd (cd)/boot/initrd\n";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print FD " initrd /boot/initrd.vmx\n";
@@ -3873,7 +3882,7 @@ sub setupBootLoaderConfiguration {
 					print FD " initrd /boot/initrd\n";
 				}
 			} else {
-				if ($type =~ /^KIWI CD/) {
+				if ($iso) {
 					print FD " kernel (cd)/boot/xen.gz\n";
 					print FD " module (cd)/boot/linux vga=$vga splash=silent";
 					print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
@@ -3892,7 +3901,7 @@ sub setupBootLoaderConfiguration {
 				print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 				print FD " noapic maxcpus=0 edd=off";
 				print FD $cmdline;
-				if ($type =~ /^KIWI CD/) {
+				if ($iso) {
 					print FD " module (cd)/boot/initrd\n"
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print FD " module /boot/initrd.vmx\n"
@@ -3985,7 +3994,7 @@ sub setupBootLoaderConfiguration {
 		# Standard boot
 		#------------------------------------------
 		if (! $isxen) {
-			if ($type =~ /^KIWI CD/) {
+			if ($iso) {
 				print FD "kernel linux\n";
 				print FD "append initrd=initrd ";
 				print FD "vga=$vga loader=$bloader splash=silent ";
@@ -4001,7 +4010,7 @@ sub setupBootLoaderConfiguration {
 				print FD "vga=$vga loader=$bloader splash=silent";
 			}
 		} else {
-			if ($type =~ /^KIWI CD/) {
+			if ($iso) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("*** syslinux: Xen cdinst not supported ***");
 				$kiwi -> failed ();
@@ -4023,7 +4032,7 @@ sub setupBootLoaderConfiguration {
 		# Failsafe boot
 		#------------------------------------------
 		if ($failsafe) {
-			if ($type =~ /^KIWI CD/) {
+			if ($iso) {
 				$title = $this -> makeLabel ("Failsafe -- Install $label");
 				print FD "label $title"."\n";
 			} elsif ($type =~ /^KIWI USB/) {
@@ -4035,7 +4044,7 @@ sub setupBootLoaderConfiguration {
 			}
 			push @labels,$title;
 			if (! $isxen) {
-				if ($type =~ /^KIWI CD/) {
+				if ($iso) {
 					print FD "kernel linux\n";
 					print FD "append initrd=initrd ";
 					print FD "vga=$vga loader=$bloader splash=silent ";
@@ -4053,7 +4062,7 @@ sub setupBootLoaderConfiguration {
 				print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 				print FD " noapic maxcpus=0 edd=off";
 			} else {
-				if ($type =~ /^KIWI CD/) {
+				if ($iso) {
 					$kiwi -> failed ();
 					$kiwi -> error  (
 						"*** syslinux: Xen cdinst not supported ***"
@@ -4161,7 +4170,7 @@ sub setupBootLoaderConfiguration {
 		# Standard boot
 		#------------------------------------------
 		print FD "[$title_standard]"."\n";
-		if ($type =~ /^KIWI CD/) {
+		if ($iso) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("*** zipl: CD boot not supported ***");
 			$kiwi -> failed ();
@@ -4182,7 +4191,7 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		if ($failsafe) {
 			print FD "[$title_failsafe]"."\n";
-			if ($type =~ /^KIWI CD/) {
+			if ($iso) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("*** zipl: CD boot not supported ***");
 				$kiwi -> failed ();
@@ -4238,7 +4247,7 @@ sub setupBootLoaderConfiguration {
 		# Standard boot
 		#------------------------------------------
 		if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
-			if ($type =~ /^KIWI CD/) {
+			if ($iso) {
 				print FD "\t"."label = $title\n";
 				print FD "\t"."image  = /boot/linux\n";
 				print FD "\t"."initrd = /boot/initrd\n";
@@ -4323,7 +4332,7 @@ sub setupBootLoaderConfiguration {
 		print FD 'setenv kernel boot/linux.vmx'."\n";
 		print FD 'setenv initrd_high "0xffffffff"'."\n";
 		print FD 'setenv fdt_high "0xffffffff"'."\n";
-		if ($type =~ /^KIWI CD/) {
+		if ($iso) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("*** uboot: CD boot not supported ***");
 			$kiwi -> failed ();
