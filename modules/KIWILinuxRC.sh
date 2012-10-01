@@ -666,7 +666,7 @@ function udevKill {
 		udevadm control --exit &>/dev/null
 		udevadm info --cleanup-db &>/dev/null
 	fi
-	sleep 2
+	sleep 3
 	if kill -0 $UDEVD_PID &>/dev/null;then
 		Echo "udevd: still running, killing it the hard way"
 		kill $UDEVD_PID
@@ -851,17 +851,23 @@ function installBootLoaderGrub2 {
 	# configure and install grub2 according to the
 	# contents of /boot/grub2/grub.cfg
 	# ----
-	if ! which grub2-mkconfig &>/dev/null;then
+	local confTool=grub2-mkconfig
+	local instTool=grub2-install
+	if [ "$partedTableType" = "gpt" ];then
+		confTool=grub2-efi-mkconfig
+		instTool=grub2-efi-install
+	fi
+	if ! which $confTool &>/dev/null;then
 		Echo "Image doesn't have grub2 installed"
 		Echo "Can't install boot loader"
 		return 1
 	fi
-	grub2-mkconfig -o $destsPrefix/boot/grub2/grub.cfg 1>&2
+	$confTool -o $destsPrefix/boot/grub2/grub.cfg 1>&2
 	if [ ! $? = 0 ];then
 		Echo "Failed to create grub2 boot configuration"
 		return 1
 	fi
-	grub2-install $imageDiskDevice 1>&2
+	$instTool $imageDiskDevice 1>&2
 	if [ ! $? = 0 ];then
 		Echo "Failed to install boot loader"
 	fi
@@ -6819,6 +6825,7 @@ function createPartitionerInput {
 	if [ $PARTITIONER = "fdasd" ];then
 		createFDasdInput $@
 	else
+		updatePartitionTable $imageDiskDevice
 		Echo "Repartition the disk according to real geometry [ parted ]"
 		partedInit $imageDiskDevice
 		partedSectorInit $imageDiskDevice
@@ -6875,10 +6882,16 @@ function partedInit {
 	# ----
 	local device=$1
 	local IFS=""
-	local parted=$(parted -m $device unit cyl print)
+	local parted=$(parted -m -s $device unit cyl print | grep -v Warning:)
 	local header=$(echo $parted | head -n 3 | tail -n 1)
 	local ccount=$(echo $header | cut -f1 -d:)
 	local cksize=$(echo $header | cut -f4 -d: | cut -f1 -dk)
+	local diskhd=$(echo $parted | head -n 3 | tail -n 2 | head -n 1)
+	local plabel=$(echo $diskhd | cut -f6 -d:)
+	if [[ $plabel =~ gpt ]];then
+		plabel=gpt
+	fi
+	export partedTableType=$plabel
 	export partedOutput=$parted
 	export partedCylCount=$ccount
 	export partedCylKSize=$cksize
@@ -6897,7 +6910,7 @@ function partedWrite {
 	if [ $PARTED_HAVE_ALIGN -eq 1 ];then
 		opts="-a cyl"
 	fi
-	if ! parted $opts -m $device unit cyl $cmds;then
+	if ! parted $opts -m -s $device unit cyl $cmds;then
 		systemException "Failed to create partition table" "reboot"
 	fi
 	partedInit $device
@@ -6916,7 +6929,7 @@ function partedSectorInit {
 	unset startSectors
 	unset endSectors
 	for i in $(
-		parted -m $disk unit s print | grep ^[1-4]: | cut -f2-3 -d: | tr -d s
+		parted -m -s $disk unit s print | grep ^[1-4]: | cut -f2-3 -d: | tr -d s
 	);do
 		s_start=$(echo $i | cut -f1 -d:)
 		s_stopp=$(echo $i | cut -f2 -d:)
@@ -7047,7 +7060,10 @@ function createPartedInput {
 				ptypex=${pcmds[$index + 2]}
 				partid=${pcmds[$index + 1]}
 				cmdq="$cmdq set $partid type 0x$ptypex"
-				partedWrite "$disk" "$cmdq"
+				if [ ! "$partedTableType" = "gpt" ];then
+					# disabled with GPT, feels like a parted bug
+					partedWrite "$disk" "$cmdq"
+				fi
 				cmdq=""
 				;;
 		esac
@@ -8195,6 +8211,25 @@ function cleanPartitionTable {
 	dd if=/dev/zero of=$imageDiskDevice bs=512 count=1 >/dev/null
 	if [ $PARTITIONER = "parted" ];then
 		parted -s $imageDiskDevice mklabel msdos
+	fi
+}
+#======================================
+# updatePartitionTable
+#--------------------------------------
+function updatePartitionTable {
+	# /.../
+	# fix gpt geometry and backup gpt by using parted. parted asks
+	# for fixing the table when e.g the print command is called.
+	# We tell parted to fix the table
+	# ----
+	local device=$1
+	if parted -m -s $device unit cyl print | grep -qE 'Warning:|Error:';then
+		Echo "Updating GPT metadata..."
+		if ! parted $device print Fix Fix &>/dev/null;then
+			systemException \
+				"Failed to update GPT metadata, please check with parted" \
+			"reboot"
+		fi
 	fi
 }
 #======================================
