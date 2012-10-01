@@ -853,16 +853,18 @@ function installBootLoaderGrub2 {
 	# ----
 	local confTool=grub2-mkconfig
 	local instTool=grub2-install
+	local confPath=$destsPrefix/boot/grub2/grub.cfg
 	if [ "$partedTableType" = "gpt" ];then
 		confTool=grub2-efi-mkconfig
 		instTool=grub2-efi-install
+		confPath=$destsPrefix/boot/grub2-efi/grub.cfg
 	fi
 	if ! which $confTool &>/dev/null;then
 		Echo "Image doesn't have grub2 installed"
 		Echo "Can't install boot loader"
 		return 1
 	fi
-	$confTool -o $destsPrefix/boot/grub2/grub.cfg 1>&2
+	$confTool -o $confPath 1>&2
 	if [ ! $? = 0 ];then
 		Echo "Failed to create grub2 boot configuration"
 		return 1
