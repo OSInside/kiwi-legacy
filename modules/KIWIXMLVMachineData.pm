@@ -20,6 +20,7 @@ package KIWIXMLVMachineData;
 #------------------------------------------
 use strict;
 use warnings;
+use Scalar::Util qw /looks_like_number/;
 require Exporter;
 
 #==========================================
@@ -140,7 +141,10 @@ sub createNICConfig {
 	my $nicInit = shift;
 	my $kiwi = $this->{kiwi};
 	my @existIDs = @{$this->getNICIDs()};
-	my $newID = $existIDs[-1] + 1;
+	my $newID = 1;
+	if (@existIDs) {
+		$newID = $existIDs[-1] + 1;
+	}
 	if (! $nicInit ) {
 		my $msg = 'createNICConfig: expecting interface ID or hash ref '
 			. ' as argument.';
@@ -164,8 +168,15 @@ sub createNICConfig {
 			$kiwi -> failed();
 			return;
 		}
+		if (! $this->__interfaceIsUnique($givenConfig{interface},
+										'createNICConfig')) {
+			return;
+		}
 		$this->{nics}{$newID} = $nicInit;
 		return $newID;
+	}
+	if (! $this->__interfaceIsUnique($nicInit, 'createNICConfig')) {
+		return;
 	}
 	my %newConfig = ( interface => $nicInit );
 	$this->{nics}{$newID} = \%newConfig;
@@ -1135,6 +1146,44 @@ sub __hasUnsuportedVMSettings {
 }
 
 #==========================================
+# __interfaceIsUnique
+#------------------------------------------
+sub __interfaceIsUnique {
+	# ...
+	# Verify that the interface given is unique
+	# ---
+	my $this   = shift;
+	my $iFace  = shift;
+	my $caller = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller ) {
+		my $msg = 'Internal error __interfaceIsUnique called without '
+			. 'call origin argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if (! $iFace ) {
+		my $msg = 'Internal error __interfaceIsUnique called without '
+			. 'interface argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+		return 1;
+	}
+	if ($this->{nics}) {
+		for my $nicInfo (values %{$this->{nics}}) {
+			if ($nicInfo->{interface} eq $iFace) {
+				my $msg = "$caller: interface device for '$iFace' "
+					. 'already exists, ambiguous operation.';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __isArchValid
 #------------------------------------------
 sub __isArchValid {
@@ -1259,19 +1308,35 @@ sub __isNICInitValid {
 		$kiwi -> failed();
 		return;
 	}
-	my %nicInfo = %{$nics};
-	for my $entry (values%nicInfo) {
-		my %nicData = %{$entry};
-		if (! $nicData{interface} ) {
+	my %usedIface = ();
+	for my $entry (values %{$nics}) {
+		if (! $entry->{interface} ) {
 			my $msg = 'Initialization data for nic incomplete, '
 				. 'must provide "interface" key-value pair.';
 			$kiwi -> error($msg);
 			$kiwi -> failed();
 			return;
 		}
+		if ( $usedIface{$entry->{interface}} ) {
+			my $msg = 'Duplicate interface device ID definition, ambiguous '
+				. 'operation.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+		$usedIface{$entry->{interface}} = 1;
 		if (! $this -> __areNICSettingsSupported($entry)) {
 			my $msg = 'Unsupported option in initialization '
 				. 'structure for nic configuration';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+	}
+	for my $id (keys %{$nics}) {
+		if (! looks_like_number($id) ) {
+			my $msg = 'Expecting integer as key for "vmnics" '
+				. 'initialization.';
 			$kiwi -> error($msg);
 			$kiwi -> failed();
 			return;

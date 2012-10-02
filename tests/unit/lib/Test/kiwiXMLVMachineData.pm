@@ -67,6 +67,58 @@ sub test_createNICConfig {
 }
 
 #==========================================
+# test_createNICConfigDuplicateIface
+#------------------------------------------
+sub test_createNICConfigDuplicateIface {
+	# ...
+	# Test the createNICConfig method when passing interface name
+	# that already exists
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $machDataObj = $this -> __getVMachineObj();
+	my $newID = $machDataObj -> createNICConfig('eth0');
+	my $msg = $kiwi -> getMessage();
+	my $expected = "createNICConfig: interface device for 'eth0' "
+		. 'already exists, ambiguous operation.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($newID);
+	return;
+}
+
+#==========================================
+# test_createNICConfigDuplicateIfaceInInit
+#------------------------------------------
+sub test_createNICConfigDuplicateIfaceInInit {
+	# ...
+	# Test the createNICConfig method when passing interface name
+	# in the init data that already exists
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %nicData = ( driver    => 'e1000',
+					interface => 'eth0',
+					mac       => 'FE:C0:B1:96:64:AD'
+				);
+	my $machDataObj = $this -> __getVMachineObj();
+	my $newID = $machDataObj -> createNICConfig(\%nicData);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "createNICConfig: interface device for 'eth0' "
+		. 'already exists, ambiguous operation.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($newID);
+	return;
+}
+
+#==========================================
 # test__createNICConfigInsufficientData
 #------------------------------------------
 sub test__createNICConfigInsufficientData {
@@ -135,9 +187,9 @@ sub test_createNICConfigNoArg {
 }
 
 #==========================================
-# test__createNICConfigUnsupportedData
+# test_createNICConfigUnsupportedData
 #------------------------------------------
-sub test__createNICConfigUnsupportedData {
+sub test_createNICConfigUnsupportedData {
 	# ...
 	# Test the createNICConfig method with an initialization hash
 	# that contains unsupported data in the NIC setup
@@ -190,6 +242,42 @@ sub test_ctor {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($machDataObj);
+	return;
+}
+
+#==========================================
+# test_ctor_duplicateIfaceEntry
+#------------------------------------------
+sub test_ctor_duplicateIfaceEntry  {
+	# ...
+	# Test the VMachineData constructor with an initialization hash
+	# that contains duplicate interface names
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %nicData1 = ( driver    => 'e1000',
+					interface => 'eth0',
+					mac       => 'FE:C0:B1:96:64:AC'
+				);
+	my %nicData2 = ( driver    => 'r8169',
+					interface => 'eth0',
+					mac       => 'FE:C0:B1:96:64:AD',
+					mode      => 'bridge'
+				);
+	my %nics = ( 1 => \%nicData1,
+				2 => \%nicData2
+			);
+	my %init = ( vmnics => \%nics );
+	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Duplicate interface device ID definition, ambiguous '
+		. 'operation.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($machDataObj);
 	return;
 }
 
@@ -502,6 +590,44 @@ sub test_ctor_initImproperNoInterf {
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Initialization data for nic incomplete, must provide '
 		. '"interface" key-value pair.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($machDataObj);
+	return;
+}
+
+#==========================================
+# test_ctor_initImproperNICID
+#------------------------------------------
+sub test_ctor_initImproperNICID {
+	# ...
+	# # Test the VMachineData constructor with an initialization hash
+	# that contains an improper type for the index of the nic data
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @confEntries = qw /foo=bar cd=none/;
+	my %diskData = ( controller => 'scsi',
+					id         => 1
+				);
+	my %disks = ( system => \%diskData );
+	my %nicData = ( driver    => 'e1000',
+					interface => 'eth9',
+					mac       => 'FE:C0:B1:96:64:AC'
+				);
+	my %nics = ( 'foo' => \%nicData );
+	my %init = ( arch               => 'x86_64',
+				'vmconfig-entries' => \@confEntries,
+				vmdisks            => \%disks,
+				vmnics             => \%nics
+			);
+	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Expecting integer as key for "vmnics" initialization.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
