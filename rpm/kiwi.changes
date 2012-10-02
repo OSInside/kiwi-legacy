@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct  2 15:24:44 CEST 2012 - ms@suse.de
+
+- added a 10sec timeout for the language selection (bnc #778570)
+
+-------------------------------------------------------------------
 Wed Sep 26 11:47:30 CEST 2012 - ms@suse.de
 
 - cleanup spec file, correctly set virt-utils Requires (bnc #782092)
