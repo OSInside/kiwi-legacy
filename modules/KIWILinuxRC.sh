@@ -6504,7 +6504,8 @@ function selectLanguage {
 			DIALOG_LANG=en_US
 		else
 			DIALOG_LANG=$(runInteractive \
-				"--stdout --no-cancel --radiolist $title 20 40 10 $list"
+				"--stdout --timeout 10 --no-cancel \
+				 --radiolist $title 20 40 10 $list"
 			)
 		fi
 	fi
