@@ -711,7 +711,7 @@ sub createISO {
 			system ("cd $src && bash --norc -c $editBoot");
 		}
 	}
-	$kiwi -> loginfo ( "Calling: $cmdln\n" );
+	$kiwi -> info ( "Calling: $cmdln\n" );
 	my $data = qxx ( $cmdln	);
 	my $code = $? >> 8;
 	if ($code != 0) {
