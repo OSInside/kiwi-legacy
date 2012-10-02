@@ -3010,15 +3010,15 @@ sub setupBootLoaderStages {
 			}
 			if ($bootfile =~ /grub2-efi/) {
 				if ((defined $type) && ($type eq "iso")) {
-					print $bpfd "prefix=(cd0)/boot/grub2-efi\n";
+					print $bpfd 'prefix=(cd0)/boot/grub2-efi'."\n";
 				} else {
-					print $bpfd "prefix=(hd0,1)/boot/grub2-efi\n";
+					print $bpfd 'prefix=(hd0,1)/boot/grub2-efi'."\n";
 				}
 			} else {
 				if ((defined $type) && ($type eq "iso")) {
-					print $bpfd "prefix=(\${root})/boot/grub2\n";
+					print $bpfd 'prefix=($root)/boot/grub2'."\n";
 				} else {
-					print $bpfd "prefix=(hd0,1)/boot/grub2\n";
+					print $bpfd 'prefix=(hd0,1)/boot/grub2'."\n";
 				}
 			}
 			$bpfd -> close();
@@ -3510,17 +3510,14 @@ sub setupBootLoaderConfiguration {
 			#------------------------------------------
 			if (! $iso) {
 				$rprefix = 'hd0';
-				if ($config eq "grub2") {
-					foreach my $module (@x86mods) {
-						print FD "insmod $module"."\n";
-					}
-				} else {
-					foreach my $module (@efimods) {
-						print FD "insmod $module"."\n";
-					}
-				}
 			} else {
 				$rprefix = 'cd0';
+			}
+			if ($config eq "grub2") {
+				foreach my $module (@x86mods) {
+					print FD "insmod $module"."\n";
+				}
+			} else {
 				foreach my $module (@efimods) {
 					print FD "insmod $module"."\n";
 				}
@@ -3530,7 +3527,9 @@ sub setupBootLoaderConfiguration {
 				print FD "set root='$rprefix,$root_id'"."\n";
 				print FD "set font=/usr/share/grub2/unicode.pf2"."\n";
 			} else {
-				print FD "set root='$rprefix'"."\n";
+				if ($efi) {
+					print FD "set root='$rprefix'"."\n";
+				}
 				print FD "set font=/boot/unicode.pf2"."\n";
 			}
 			print FD 'if loadfont $font ;then'."\n";
@@ -3560,10 +3559,12 @@ sub setupBootLoaderConfiguration {
 			print FD "set timeout=$bootTimeout\n";
 			if ($type =~ /^KIWI (CD|USB)/) {
 				my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
-				print FD 'menuentry "Boot from Hard Disk"'."\n";
+				print FD 'menuentry "Boot from Hard Disk"';
 				print FD ' --class opensuse --class os {'."\n";
 				if ($dev eq '(cd)') {
-					print FD "\t"."set root='cd0'"."\n";
+					if ($efi) {
+						print FD "\t"."set root='cd0'"."\n";
+					}
 					print FD "\t".'chainloader +1'."\n";
 				} else {
 					print FD "\t"."set root='hd0,1'"."\n";
@@ -3589,7 +3590,9 @@ sub setupBootLoaderConfiguration {
 			if (! $iso) {
 				print FD "\t"."set root='$rprefix,$boot_id'"."\n";
 			} else {
-				print FD "\t"."set root='$rprefix'"."\n";
+				if ($efi) {
+					print FD "\t"."set root='$rprefix'"."\n";
+				}
 			}
 			#==========================================
 			# Standard boot
@@ -3671,7 +3674,9 @@ sub setupBootLoaderConfiguration {
 				if (! $iso) {
 					print FD "\t"."set root='$rprefix,$boot_id'"."\n";
 				} else {
-					print FD "\t"."set root='$rprefix'"."\n";
+					if ($efi) {
+						print FD "\t"."set root='$rprefix'"."\n";
+					}
 				}
 				if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 					if ($iso) {
