@@ -3561,13 +3561,10 @@ sub setupBootLoaderConfiguration {
 				my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
 				print FD 'menuentry "Boot from Hard Disk"';
 				print FD ' --class opensuse --class os {'."\n";
+				print FD "\t"."set root='hd0'"."\n";
 				if ($dev eq '(cd)') {
-					if ($efi) {
-						print FD "\t"."set root='cd0'"."\n";
-					}
 					print FD "\t".'chainloader +1'."\n";
 				} else {
-					print FD "\t"."set root='hd0,1'"."\n";
 					print FD "\t".'chainloader /boot/grub2/bootnext'."\n";
 					my $bootnext = $this -> addBootNext (
 						"$tmpdir/boot/grub2/bootnext", hex $this->{mbrid}
@@ -3580,6 +3577,7 @@ sub setupBootLoaderConfiguration {
 						return;
 					}
 				}
+				print FD "\t".'boot'."\n";
 				print FD '}'."\n";
 				$title = $this -> makeLabel ("Install $label");
 			} else {
