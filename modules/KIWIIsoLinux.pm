@@ -700,7 +700,7 @@ sub createISO {
 	my $prog = $this -> {tool};
 	my $cmdL = $this -> {cmdL};
 	my $xml  = $this -> {xml};
-	my $cmdln= "$prog $para -o $dest $ldir $src 2>&1";
+	my $cmdln= "$prog $para -o $dest $src $ldir 2>&1";
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootConfig();
 		if ((! $editBoot) && ($xml)) {
