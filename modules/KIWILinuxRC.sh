@@ -2591,7 +2591,7 @@ function updateBootDeviceFstab {
 		FSTYPE="auto"
 	fi
 	echo "$diskByID /$mount $FSTYPE defaults 1 2" >> $nfstab
-	echo "$mount/boot /boot none bind 0 0" >> $nfstab
+	echo "/$mount/boot /boot none bind 0 0" >> $nfstab
 	if [ ! -z "$FSTYPE_SAVE" ];then
 		FSTYPE=$FSTYPE_SAVE
 	fi
@@ -6051,7 +6051,17 @@ function bootImage {
 	#======================================
 	# run resetBootBind
 	#--------------------------------------
-	resetBootBind /mnt
+	if [ ! "$partedTableType" = "gpt" ];then
+		# /.../
+		# if GPT is used we boot via EFI which means we use a fat
+		# boot partition. Such a boot partition doesn't allow links
+		# which prevents the 'boot -> .' which is required to find
+		# the bootloader configuration data on the boot partition
+		# Thus the bind mount system is not reseted when we use
+		# the GPT/EFI boot method
+		# ----
+		resetBootBind /mnt
+	fi
 	#======================================
 	# kill initial tail and utimer
 	#--------------------------------------
