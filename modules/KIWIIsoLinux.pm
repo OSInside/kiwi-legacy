@@ -353,12 +353,13 @@ sub ppc64_default {
 	my $arch  = shift;
 	my %base  = %{$this->{base}};
 	my $para  = $this -> {params};
-	my $src  = $this -> {source};
+	my $src   = $this -> {source};
 	my $boot  = $base{$arch}{boot};
+	my $volid = $this -> createVolumeID();
 
 	$para.= " -chrp-boot";
 	$para.= " -hfs-bless $src/$boot"; # CHECK: maybe $src is not necessary
-	$para.= " -hfs-volid FIXME"; # FIXME should be same as value of -A
+	$para.= " -hfs-volid '$volid'";
 	$para.= " -l";
 	$para.= " --macbin";
 	$para.= " -map $this->{gdata}->{BasePath}";
