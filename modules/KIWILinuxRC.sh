@@ -6489,29 +6489,11 @@ function selectLanguage {
 	local en_GB=English
 	local code
 	local lang
-	if [ ! -z "$kiwi_oemunattended" ] && [ "$DIALOG_LANG" = "ask" ];then
-		DIALOG_LANG=en_US
-	fi
-	if [ "$DIALOG_LANG" = "ask" ];then
-		for code in $(echo $kiwi_language | tr "," " ");do
-			if [ $code = "en_US" ];then
-				continue
-			fi
-			eval lang=\$$code
-			list="$list $code \"[ $lang ]\" off"
-		done
-		if [ "$list" = "$list_orig" ];then
-			DIALOG_LANG=en_US
-		else
-			DIALOG_LANG=$(runInteractive \
-				"--stdout --timeout 10 --no-cancel \
-				 --radiolist $title 20 40 10 $list"
-			)
-		fi
-	fi
 	#======================================
 	# Exports (Texts)
 	#--------------------------------------
+	export TEXT_TIMEOUT=$(
+		getText "Boot continues in 10 sec...")
 	export TEXT_OK=$(
 		getText "OK")
 	export TEXT_CANCEL=$(
@@ -6544,6 +6526,30 @@ function selectLanguage {
 		getText "System will be shutdown. Remove USB stick before power on")
 	export TEXT_SELECT=$(
 		getText "Select disk for installation:")
+	#======================================
+	# Check language environment
+	#--------------------------------------
+	if [ ! -z "$kiwi_oemunattended" ] && [ "$DIALOG_LANG" = "ask" ];then
+		DIALOG_LANG=en_US
+	fi
+	if [ "$DIALOG_LANG" = "ask" ];then
+		for code in $(echo $kiwi_language | tr "," " ");do
+			if [ $code = "en_US" ];then
+				continue
+			fi
+			eval lang=\$$code
+			list="$list $code \"[ $lang ]\" off"
+		done
+		if [ "$list" = "$list_orig" ];then
+			DIALOG_LANG=en_US
+		else
+			DIALOG_LANG=$(runInteractive \
+				"--stdout --timeout 10 --no-cancel \
+				 --backtitle \"$TEXT_TIMEOUT\" \
+				 --radiolist $title 20 40 10 $list"
+			)
+		fi
+	fi
 }
 #======================================
 # getText
