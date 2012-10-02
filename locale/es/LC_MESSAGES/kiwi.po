@@ -25,6 +25,9 @@ msgstr ""
 #. This file contains the gettext keys used within a gettext call in the
 #. boot code for KIWI 
 #.
+msgid "Boot continues in 10 sec"
+msgstr ""
+
 msgid "Enter LUKS passphrase"
 msgstr "Introduzca la frase de paso de LUKS"
 
