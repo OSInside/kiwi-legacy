@@ -929,6 +929,11 @@ sub setupInstallCD {
 			$kiwi -> failed ();
 			return;
 		}
+	}
+	#==========================================
+	# add font for grub2 if required
+	#------------------------------------------
+	if ($bootloader eq "grub2") {
 		my $font = "/usr/share/grub2/unicode.pf2";
 		if (-e $font) {
 			qxx ("cp $font $tmpdir/boot");
