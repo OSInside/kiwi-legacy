@@ -353,12 +353,13 @@ sub ppc64_default {
 	my $arch  = shift;
 	my %base  = %{$this->{base}};
 	my $para  = $this -> {params};
-	my $src  = $this -> {source};
+	my $src   = $this -> {source};
 	my $boot  = $base{$arch}{boot};
+	my $volid = $this -> createVolumeID();
 
 	$para.= " -chrp-boot";
 	$para.= " -hfs-bless $src/$boot"; # CHECK: maybe $src is not necessary
-	$para.= " -hfs-volid FIXME"; # FIXME should be same as value of -A
+	$para.= " -hfs-volid '$volid'";
 	$para.= " -l";
 	$para.= " --macbin";
 	$para.= " -map $this->{gdata}->{BasePath}";
@@ -699,7 +700,7 @@ sub createISO {
 	my $prog = $this -> {tool};
 	my $cmdL = $this -> {cmdL};
 	my $xml  = $this -> {xml};
-	my $cmdln= "$prog $para -o $dest $ldir $src 2>&1";
+	my $cmdln= "$prog $para -o $dest $src $ldir 2>&1";
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootConfig();
 		if ((! $editBoot) && ($xml)) {
@@ -710,7 +711,7 @@ sub createISO {
 			system ("cd $src && bash --norc -c $editBoot");
 		}
 	}
-	$kiwi -> loginfo ( "Calling: $cmdln\n" );
+	$kiwi -> info ( "Calling: $cmdln\n" );
 	my $data = qxx ( $cmdln	);
 	my $code = $? >> 8;
 	if ($code != 0) {
