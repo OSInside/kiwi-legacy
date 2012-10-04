@@ -8,3 +8,5 @@ KIWIXMLPXEDeployData.t
 KIWIXMLRepositoryData.t
 KIWIXMLSplitData.t
 KIWIXMLSystemdiskData.t
+KIWIXMLTypeData.t
+KIWIXMLVMachineData.t
