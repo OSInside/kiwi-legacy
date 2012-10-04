@@ -3527,7 +3527,7 @@ sub setupBootLoaderConfiguration {
 				print FD "set root='$rprefix,$root_id'"."\n";
 				print FD "set font=/usr/share/grub2/unicode.pf2"."\n";
 			} else {
-				if ($efi) {
+				if ($config eq "grub2-efi") {
 					print FD "set root='$rprefix'"."\n";
 				}
 				print FD "set font=/boot/unicode.pf2"."\n";
@@ -3588,7 +3588,7 @@ sub setupBootLoaderConfiguration {
 			if (! $iso) {
 				print FD "\t"."set root='$rprefix,$boot_id'"."\n";
 			} else {
-				if ($efi) {
+				if ($config eq "grub2-efi") {
 					print FD "\t"."set root='$rprefix'"."\n";
 				}
 			}
@@ -3672,7 +3672,7 @@ sub setupBootLoaderConfiguration {
 				if (! $iso) {
 					print FD "\t"."set root='$rprefix,$boot_id'"."\n";
 				} else {
-					if ($efi) {
+					if ($config eq "grub2-efi") {
 						print FD "\t"."set root='$rprefix'"."\n";
 					}
 				}
