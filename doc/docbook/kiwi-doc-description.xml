@@ -2034,12 +2034,20 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
           feature is most often used to specify bootsplash and/or
           graphics boot related packages inside the system image
           description but they are required to be part of the boot image
-          as the data is used at boot time of the image. If the
+          as the data is used at boot time of the image.</para>
+        <para>Packages included into the boot image with the <sgmltag
+          class="attribute">bootinclude</sgmltag> are still included into
+          the system image as well. If packages should only be included into
+          the boot image, but not the system image, they need to be added to
+          the <sgmltag class="element">packages</sgmltag> section of
+          <sgmltag class="attribute">type</sgmltag>=<sgmltag
+          class="attvalue">delete</sgmltag>.</para>
+        <para>If the
           bootdelete attribute is specified along with the bootinclude
           attribute this means that the selected package will be marked
           as a <quote>to become deleted</quote> package and is removed
           by the contents of the <command>images.sh</command> script of
-          the corresponding boot image description </para>
+          the corresponding boot image description.</para>
       </sect3>
 
       <sect3 id="sec.description.data.not.available">
