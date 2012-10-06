@@ -81,6 +81,276 @@ sub test_ctor_improperArg {
 }
 
 #==========================================
+# test_ctor_initInvalidCheckprebuiltValue
+#------------------------------------------
+sub test_ctor_initInvalidCheckprebuiltValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized boolen initialization for
+	# the checkprebuilt value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = ( checkprebuilt => 'foo' );
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'Unrecognized value for boolean '
+		 . "'checkprebuilt' in initialization hash, expecting "
+	     . '"true" or "false".';
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
+# test_ctor_initInvalidCompressedValue
+#------------------------------------------
+sub test_ctor_initInvalidCompressedValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized boolen initialization for
+	# the compressed value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = ( compressed => 'foo' );
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'Unrecognized value for boolean '
+		 . "'compressed' in initialization hash, expecting "
+	     . '"true" or "false".';
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
+# test_ctor_initInvalidFsnocheckValue
+#------------------------------------------
+sub test_ctor_initInvalidFsnocheckValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized boolen initialization for
+	# the fsnocheck value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = ( fsnocheck => 'foo' );
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'Unrecognized value for boolean '
+		 . "'fsnocheck' in initialization hash, expecting "
+	     . '"true" or "false".';
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
+# test_ctor_initInvalidHybridValue
+#------------------------------------------
+sub test_ctor_initInvalidHybridValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized boolen initialization for
+	# the hybrid value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = ( hybrid => 'foo' );
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'Unrecognized value for boolean '
+		 . "'hybrid' in initialization hash, expecting "
+	     . '"true" or "false".';
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
+# test_ctor_initInvalidHybridpersistentValue
+#------------------------------------------
+sub test_ctor_initInvalidHybridpersistentValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized boolen initialization for
+	# the hybridpersistent value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = ( hybridpersistent => 'foo' );
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'Unrecognized value for boolean '
+		 . "'hybridpersistent' in initialization hash, expecting "
+	     . '"true" or "false".';
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
+# test_ctor_initInvalidInstallisoValue
+#------------------------------------------
+sub test_ctor_initInvalidInstallisoValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized boolen initialization for
+	# the installiso value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = ( installiso => 'foo' );
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'Unrecognized value for boolean '
+		 . "'installiso' in initialization hash, expecting "
+	     . '"true" or "false".';
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
+# test_ctor_initInvalidInstallprovidefailsafeValue
+#------------------------------------------
+sub test_ctor_initInvalidInstallprovidefailsafeValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized boolen initialization for
+	# the installprovidefailsafe value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = ( installprovidefailsafe => 'foo' );
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'Unrecognized value for boolean '
+		 . "'installprovidefailsafe' in initialization hash, expecting "
+	     . '"true" or "false".';
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
+# test_ctor_initInvalidInstallstickValue
+#------------------------------------------
+sub test_ctor_initInvalidInstallstickValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized boolen initialization for
+	# the installstick value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = ( installstick => 'foo' );
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'Unrecognized value for boolean '
+		 . "'installstick' in initialization hash, expecting "
+	     . '"true" or "false".';
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
+# test_ctor_initInvalidPrimaryValue
+#------------------------------------------
+sub test_ctor_initInvalidPrimaryValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized boolen initialization for
+	# the primary value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = ( primary => 'foo' );
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'Unrecognized value for boolean '
+		 . "'primary' in initialization hash, expecting "
+	     . '"true" or "false".';
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
+# test_ctor_initInvalidRamonlyValue
+#------------------------------------------
+sub test_ctor_initInvalidRamonlyValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized boolen initialization for
+	# the ramonly value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = ( ramonly => 'foo' );
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'Unrecognized value for boolean '
+		 . "'ramonly' in initialization hash, expecting "
+	     . '"true" or "false".';
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
 # test_ctor_initUnsupportedBootLoad
 #------------------------------------------
 sub test_ctor_initUnsupportedBootLoad {

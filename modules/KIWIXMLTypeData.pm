@@ -93,50 +93,32 @@ sub new {
 		$this->{bootpartsize}           = $init->{bootpartsize};
 		$this->{bootprofile}            = $init->{bootprofile};
 		$this->{boottimeout}            = $init->{boottimeout};
-		if ($init->{checkprebuilt} && $init->{checkprebuilt} eq 'true') {
-			$this->{checkprebuilt}       = 'true';
-		}
-		if ($init->{compressed} && $init->{compressed} eq 'true') {
-			$this->{compressed}         = 'true';
-		}
+		$this->{checkprebuilt}          = $init->{checkprebuilt};
+		$this->{compressed}             = $init->{compressed};
 		$this->{devicepersistency}      = $init->{devicepersistency};
 		$this->{editbootconfig}         = $init->{editbootconfig};
 		$this->{filesystem}             = $init->{filesystem};
 		$this->{flags}                  = $init->{flags};
 		$this->{format}                 = $init->{format};
 		$this->{fsmountoptions}         = $init->{fsmountoptions};
-		if ($init->{fsnocheck} && $init->{fsnocheck} eq 'true') {
-			$this->{fsnocheck}          = 'true';
-		}
+		$this->{fsnocheck}              = $init->{fsnocheck};
 		$this->{fsreadonly}             = $init->{fsreadonly};
 		$this->{fsreadwrite}            = $init->{fsreadwrite};
-		if ($init->{hybrid} && $init->{hybrid} eq 'true') {
-			$this->{hybrid}             = 'true';
-		}
-		if ($init->{hybridpersistent} && $init->{hybridpersistent} eq 'true') {
-			$this->{hybridpersistent}   = 'true';
-		}
+		$this->{hybrid}                 = $init->{hybrid};
+		$this->{hybridpersistent}       = $init->{hybridpersistent};
 		$this->{image}                  = $init->{image};
 		$this->{installboot}            = $init->{installboot};
-		if ($init->{installiso} && $init->{installiso} eq 'true') {
-			$this->{installiso}         = 'true';
-		}
+		$this->{installiso}             = $init->{installiso};
 		if (! $init->{installprovidefailsafe} ) {
 			$this->{installprovidefailsafe} = 'true';
 		} else {
 			$this->{installprovidefailsafe} = $init->{installprovidefailsafe};
 		}
-		if ($init->{installstick} && $init->{installstick} eq 'true') {
-			$this->{installstick}       = 'true';
-		}
+		$this->{installstick}           = $init->{installstick};
 		$this->{kernelcmdline}          = $init->{kernelcmdline};
 		$this->{luks}                   = $init->{luks};
-		if ($init->{primary} && $init->{primary} eq 'true') {
-			$this->{primary}            = 'true';
-		}
-		if ($init->{ramonly} && $init->{ramonly} eq 'true') {
-			$this->{ramonly}            = 'true';
-		}
+		$this->{primary}                = $init->{primary};
+		$this->{ramonly}                = $init->{ramonly};
 		$this->{vga}                    = $init->{vga};
 		$this->{volid}                  = $init->{volid};
 	}
@@ -608,19 +590,11 @@ sub setCheckPrebuilt {
 	# ---
 	my $this  = shift;
 	my $check = shift;
-	if (! $check || $check eq 'false') {
-		$this->{checkprebuilt} = 'false';
-	} elsif ($check eq 'true') {
-		$this->{checkprebuilt} = 'true';
-	} else {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setCheckPrebuilt: unrecognized argument expecting "true" '
-			. 'or "false".';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return $this;
+	my %settings = ( attr   => 'checkprebuilt',
+					value  => $check,
+					caller => 'setCheckPrebuilt'
+				);
+	return $this -> __setBoolean(\%settings);
 }
 
 #==========================================
@@ -632,19 +606,11 @@ sub setCompressed {
 	# ---
 	my $this = shift;
 	my $comp = shift;
-	if (! $comp || $comp eq 'false') {
-		$this->{compressed} = 'false';
-	} elsif ($comp eq 'true') {
-		$this->{compressed} = 'true';
-	} else {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setCompressed: unrecognized argument expecting "true" '
-			. 'or "false".';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return $this;
+	my %settings = ( attr   => 'compressed',
+					value  => $comp,
+					caller => 'setCompressed'
+				);
+	return $this -> __setBoolean(\%settings);
 }
 
 #==========================================
@@ -762,19 +728,11 @@ sub setFSNoCheck {
 	# ---
 	my $this  = shift;
 	my $check = shift;
-	if (! $check || $check eq 'false') {
-		$this->{fsnocheck} = 'false';
-	} elsif ($check eq 'true') {
-		$this->{fsnocheck} = 'true';
-	} else {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setFSNoCheck: unrecognized argument expecting "true" '
-			. 'or "false".';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return $this;
+	my %settings = ( attr   => 'fsnocheck',
+					value  => $check,
+					caller => 'setFSNoCheck'
+				);
+	return $this -> __setBoolean(\%settings);
 }
 
 #==========================================
@@ -818,19 +776,11 @@ sub setHybrid {
 	# ---
 	my $this   = shift;
 	my $hybrid = shift;
-	if (! $hybrid || $hybrid eq 'false') {
-		$this->{hybrid} = 'false';
-	} elsif ($hybrid eq 'true') {
-		$this->{hybrid} = 'true';
-	} else {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setHybrid: unrecognized argument expecting "true" '
-			. 'or "false".';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return $this;
+	my %settings = ( attr   => 'hybrid',
+					value  => $hybrid,
+					caller => 'setHybrid'
+				);
+	return $this -> __setBoolean(\%settings);
 }
 
 #==========================================
@@ -843,19 +793,11 @@ sub setHybridPersistent {
 	# ---
 	my $this = shift;
 	my $hybridP = shift;
-	if (! $hybridP || $hybridP eq 'false') {
-		$this->{hybridpersistent} = 'false';
-	} elsif ($hybridP eq 'true') {
-		$this->{hybridpersistent} = 'true';
-	} else {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setHybridPersistent: unrecognized argument expecting '
-			. '"true" or "false".';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return $this;
+	my %settings = ( attr   => 'hybridpersistent',
+					value  => $hybridP,
+					caller => 'setHybridPersistent'
+				);
+	return $this -> __setBoolean(\%settings);
 }
 
 #==========================================
@@ -900,19 +842,11 @@ sub setInstallFailsafe {
 	# ---
 	my $this  = shift;
 	my $instF = shift;
-	if (! $instF || $instF eq 'false') {
-		$this->{installprovidefailsafe} = 'false';
-	} elsif ($instF eq 'true') {
-		$this->{installprovidefailsafe} = 'true';
-	} else {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setInstallFailsafe: unrecognized argument expecting "true" '
-			. 'or "false".';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return $this;
+	my %settings = ( attr   => 'installprovidefailsafe',
+					value  => $instF,
+					caller => 'setInstallFailsafe'
+				);
+	return $this -> __setBoolean(\%settings);
 }
 
 #==========================================
@@ -925,19 +859,11 @@ sub setInstallIso {
 	# ---
 	my $this  = shift;
 	my $instI = shift;
-	if (! $instI || $instI eq 'false') {
-		$this->{installiso} = 'false';
-	} elsif ($instI eq 'true') {
-		$this->{installiso} = 'true';
-	} else {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setInstallIso: unrecognized argument expecting "true" '
-			. 'or "false".';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return $this;
+	my %settings = ( attr   => 'installiso',
+					value  => $instI,
+					caller => 'setInstallIso'
+				);
+	return $this -> __setBoolean(\%settings);
 }
 
 #==========================================
@@ -950,19 +876,11 @@ sub setInstallStick {
 	# ---
 	my $this = shift;
 	my $instS = shift;
-	if (! $instS || $instS eq 'false') {
-		$this->{installstick} = 'false';
-	} elsif ($instS eq 'true') {
-		$this->{installstick} = 'true';
-	} else {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setInstallStick: unrecognized argument expecting "true" '
-			. 'or "false".';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return $this;
+	my %settings = ( attr   => 'installstick',
+					value  => $instS,
+					caller => 'setInstallStick'
+				);
+	return $this -> __setBoolean(\%settings);
 }
 
 #==========================================
@@ -1016,19 +934,11 @@ sub setPrimary {
 	# ---
 	my $this = shift;
 	my $prim = shift;
-	if (! $prim || $prim eq 'false') {
-		$this->{primary} = 'false';
-	} elsif ($prim eq 'true') {
-		$this->{primary} = 'true';
-	} else {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setPrimary: unrecognized argument expecting "true" '
-			. 'or "false".';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return $this;
+	my %settings = ( attr   => 'primary',
+					value  => $prim,
+					caller => 'setPrimary'
+				);
+	return $this -> __setBoolean(\%settings);
 }
 
 #==========================================
@@ -1041,19 +951,11 @@ sub setRAMOnly {
 	# ---
 	my $this = shift;
 	my $ramO = shift;
-	if (! $ramO || $ramO eq 'false') {
-		$this->{ramonly} = 'false';
-	} elsif ($ramO eq 'true') {
-		$this->{ramonly} = 'true';
-	} else {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setRAMOnly: unrecognized argument expecting "true" '
-			. 'or "false".';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return $this;
+	my %settings = ( attr   => 'ramonly',
+					value  => $ramO,
+					caller => 'setRAMOnly'
+				);
+	return $this -> __setBoolean(\%settings);
 }
 
 #==========================================
@@ -1101,6 +1003,49 @@ sub setVolID {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __checkBools
+#------------------------------------------
+sub __checkBools {
+	# ...
+	# Check all the boolean values in the ctor initialization hash
+	# to verify if the values are valid.
+	# ---
+	my $this = shift;
+	my $init = shift;
+	my @boolAttrs = qw (checkprebuilt compressed fsnocheck hybrid
+						hybridpersistent installiso installprovidefailsafe
+						installstick primary ramonly
+					);
+	for my $attr (@boolAttrs) {
+		if (! $this -> __isValidBool($init->{$attr}) ) {
+			my $kiwi = $this->{kiwi};
+			my $msg = "Unrecognized value for boolean '$attr' in "
+				. 'initialization hash, expecting "true" or "false".';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __isValidBool
+#------------------------------------------
+sub __isValidBool {
+	# ...
+	# Verify that the given boolean is set with a recognized value
+	# true, false, or undef (undef maps to false
+	# ---
+	my $this = shift;
+	my $bVal = shift;
+	if (! $bVal || $bVal eq 'false' || $bVal eq 'true') {
+		return 1;
+	}
+	return;
+}
+
 #==========================================
 # __isValidBootloader
 #------------------------------------------
@@ -1422,7 +1367,52 @@ sub __isValidInit {
 			return;
 		}
 	}
+	if (! $this -> __checkBools($init) ) {
+		return;
+	}
 	return 1;
+}
+
+#==========================================
+# __setBoolean
+#------------------------------------------
+sub __setBoolean {
+	# ...
+	# Generic code to set the given boolean attribute on the object
+	# ---
+	my $this     = shift;
+	my $settings = shift;
+	my $attr   = $settings->{attr};
+	my $bVal   = $settings->{value};
+	my $caller = $settings->{caller};
+	my $kiwi   = $this->{kiwi};
+	if (! $attr ) {
+		my $msg = 'Internal error __setBoolean called without '
+			. 'attribute to set.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $caller ) {
+		my $msg = 'Internal error __setBoolean called without '
+			. 'call origin argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if (! $this -> __isValidBool($bVal) ) {
+		my $msg = "$caller: unrecognized argument expecting "
+			. '"true" or "false".';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $bVal) {
+		$this->{$attr} = 'false';
+	} else {
+		$this->{$attr} = $bVal;
+	}
+		
+	return $this;
 }
 
 1;
