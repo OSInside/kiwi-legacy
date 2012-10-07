@@ -85,11 +85,7 @@ sub new {
 		}
 		$this->{boot}                   = $init->{boot};
 		$this->{bootkernel}             = $init->{bootkernel};
-		if (! $init->{bootloader} ) {
-			$this->{bootloader}         = 'grub';
-		} else {
-			$this->{bootloader}         = $init->{bootloader};
-		}
+		$this->{bootloader}             = $init->{bootloader};
 		$this->{bootpartsize}           = $init->{bootpartsize};
 		$this->{bootprofile}            = $init->{bootprofile};
 		$this->{boottimeout}            = $init->{boottimeout};
@@ -109,11 +105,7 @@ sub new {
 		$this->{image}                  = $init->{image};
 		$this->{installboot}            = $init->{installboot};
 		$this->{installiso}             = $init->{installiso};
-		if (! $init->{installprovidefailsafe} ) {
-			$this->{installprovidefailsafe} = 'true';
-		} else {
-			$this->{installprovidefailsafe} = $init->{installprovidefailsafe};
-		}
+		$this->{installprovidefailsafe} = $init->{installprovidefailsafe};
 		$this->{installstick}           = $init->{installstick};
 		$this->{kernelcmdline}          = $init->{kernelcmdline};
 		$this->{luks}                   = $init->{luks};
@@ -121,6 +113,13 @@ sub new {
 		$this->{ramonly}                = $init->{ramonly};
 		$this->{vga}                    = $init->{vga};
 		$this->{volid}                  = $init->{volid};
+	}
+	# Set default values
+	if (! $this->{bootloader} ) {
+		$this->{bootloader} = 'grub';
+	}
+	if (! $this->{installprovidefailsafe} ) {
+	$this->{installprovidefailsafe} = 'true';
 	}
 	return $this;
 }

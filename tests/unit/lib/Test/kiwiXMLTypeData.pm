@@ -559,7 +559,7 @@ sub test_ctor_withInit {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-my %init = ( boot        => 'oem/suse-12.2',
+	my %init = ( boot        => 'oem/suse-12.2',
 				boottimeout => '2',
 				fsreadonly  => 'btrfs',
 				hybrid      => 'false'
@@ -628,6 +628,27 @@ sub test_getBootLoader {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $typeDataObj = $this -> __getTypeObj();
+	my $name = $typeDataObj -> getBootLoader();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('grub2', $name);
+	return;
+}
+
+#==========================================
+# test_getBootLoaderDefault
+#------------------------------------------
+sub test_getBootLoaderDefault {
+	# ...
+	# Test the getBootLoader method, verify the default setting
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
 	my $name = $typeDataObj -> getBootLoader();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1060,6 +1081,27 @@ sub test_getInstallFailsafe {
 }
 
 #==========================================
+# test_getInstallFailsafeDefault
+#------------------------------------------
+sub test_getInstallFailsafeDefault {
+	# ...
+	# Test the getInstallFailsafe method, verify the default setting
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $instFS = $typeDataObj -> getInstallFailsafe();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('true', $instFS);
+	return;
+}
+
+#==========================================
 # test_getInstallStick
 #------------------------------------------
 sub test_getInstallStick {
@@ -1382,7 +1424,7 @@ sub test_setBootLoaderInvalidArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('grub', $loader);
+	$this -> assert_str_equals('grub2', $loader);
 	return;
 }
 
@@ -1413,7 +1455,7 @@ sub test_setBootLoaderNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('grub', $loader);
+	$this -> assert_str_equals('grub2', $loader);
 	return;
 }
 
@@ -3589,7 +3631,7 @@ sub __getTypeObj {
 	my $kiwi = $this->{kiwi};
 	my %init = ( boot                   => '/oem/suse-12.2',
 				bootkernel             => 'xenk',
-				bootloader             => 'grub',
+				bootloader             => 'grub2',
 				bootpartsize           => '512M',
 				bootprofile            => 'std',
 				boottimeout            => '5',
