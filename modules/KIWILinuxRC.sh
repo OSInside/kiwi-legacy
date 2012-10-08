@@ -557,8 +557,9 @@ function udevPending {
 # udevTrigger
 #--------------------------------------
 function udevTrigger {
-	if [ -x /sbin/udevadm ];then
-		/sbin/udevadm trigger
+	local udevadmExec=$(which udevadm 2>/dev/null)
+	if [ -x $udevadmExec ];then
+		$udevadmExec trigger
 	else
 		/sbin/udevtrigger
 	fi
@@ -661,14 +662,7 @@ function loadAGPModules {
 #--------------------------------------
 function udevKill {
 	. /iprocs
-	if [ -x /sbin/udevadm ];then
-		Echo "udevd: stop via control signal..."
-		udevadm control --exit &>/dev/null
-		udevadm info --cleanup-db &>/dev/null
-	fi
-	sleep 3
 	if kill -0 $UDEVD_PID &>/dev/null;then
-		Echo "udevd: still running, killing it the hard way"
 		kill $UDEVD_PID
 	fi
 }
