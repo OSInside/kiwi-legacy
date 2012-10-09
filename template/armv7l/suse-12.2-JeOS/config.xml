@@ -53,7 +53,7 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="rpm-md">
-		<source path="obs://openSUSE:/Factory:/ARM/standard"/>
+		<source path="obs://openSUSE:/12.2:/ARM/standard"/>
 	</repository>
 	<packages type="bootstrap" profiles="pandaFlavour">
 		<package name="kernel-omap2plus" bootinclude="true"/>
