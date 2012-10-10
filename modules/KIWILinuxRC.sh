@@ -6376,11 +6376,30 @@ function ddn {
 	# linux device node specs: If the last character of the
 	# device is a letter, attach the partition number. If the
 	# last character is a number, attach a 'p' and then the
-	# partition number. If the device name starts with /dev/disk
-	# the /dev/disk/<name>-partN schema is used
+	# partition number. Exceptions:
+	# a) If the device name starts with /dev/disk
+	#    the /dev/disk/<name>[-_]partN schema is used exclusively
+	# b) If the device name starts with /dev/ram
+	#    the /dev/mapper/<name>pN schema is used exclusively
+	# c) If the device name starts with /dev/mapper
+	#    the /dev/mapper/<name>_partN schema is checked optionally
+	#    if it does not exist the default device node specs applies
 	# ----
 	if echo $1 | grep -q "^\/dev\/disk\/" ; then
+		if [ -e $1"_part"$2 ]; then
+			echo $1"_part"$2
+			return
+		fi
 		echo $1"-part"$2
+		return
+	elif echo $1 | grep -q "^\/dev\/mapper\/" ; then
+		if [ -e $1"_part"$2 ]; then
+			echo $1"_part"$2
+			return
+		fi
+	elif echo $1 | grep -q "^\/dev\/ram";then
+		name=$(echo $1 | tr -d /dev)
+		echo /dev/mapper/${name}p$2
 		return
 	fi
 	local lastc=$(echo $1 | sed -e 's@\(^.*\)\(.$\)@\2@')

@@ -185,12 +185,26 @@ function OEMInstall {
 			cut -f1 -d"("`
 	fi
 	export deviceDisks=`echo $deviceDisks`
+	#======================================
+	# Add optional dmraid device(s)
+	#--------------------------------------
+	if [ -x /sbin/dmraid ] && dmraid -s &>/dev/null;then
+		dmraid -a y
+		udevPending
+		identifyDMRaid
+	fi
+	#======================================
+	# We need at least one device left
+	#--------------------------------------
 	if [ -z "$deviceDisks" ];then
 		systemException \
 			"No device(s) for installation found... abort" \
 		"reboot"
 	fi
 	Echo "Found following disk device(s)"
+	#======================================
+	# Process devices for user selection
+	#--------------------------------------
 	count=0
 	for i in $deviceDisks;do
 		dsize=`partitionSize $i`
@@ -851,6 +865,75 @@ function OEMInstall {
         systemException "Reboot requested after image installation" \
             "user_reboot"
 	fi
+}
+
+#======================================
+# identifyDMRaid
+#--------------------------------------
+function identifyDMRaid {
+	local count=-1
+	local index=0
+	local found=0
+	local mapped=0
+	local dmdevs
+	local dmraid
+	local device
+	local device_clean
+	local device_disks
+	local device_disks_new
+	#======================================
+	# search raid devices and store them
+	#--------------------------------------
+	for i in $(dmraid -s -ccc);do
+		if [ $(echo $i | cut -c1) = "/" ];then
+			device=$(echo $i | cut -f1 -d:)
+			if [ ! -z "${dmdevs[$count]}" ];then
+				dmdevs[$count]="${dmdevs[$count]} $device"
+			else
+				dmdevs[$count]="$device"
+			fi
+		else
+			count=$((count + 1))
+			dmraid[$count]=$(echo $i | cut -f1 -d:)
+		fi
+	done
+	if [ $count -eq -1 ];then
+		return
+	fi
+	#======================================
+	# lookup raid devices and add them
+	#--------------------------------------
+	device_disks=$deviceDisks
+	while true;do
+		if [ -b /dev/mapper/${dmraid[$index]} ];then
+			device_disks="$device_disks /dev/mapper/${dmraid[$index]}"
+			device_clean="$device_clean ${dmdevs[$index]}"
+			mapped=$((mapped + 1))
+		fi
+		if [ $index -eq $count ];then
+			break
+		fi
+		index=$((index + 1))
+	done
+	if [ $mapped -eq 0 ];then
+		dmraid -a n
+		return
+	fi
+	#======================================
+	# remove mapped devices from list
+	#--------------------------------------
+	for i in $device_disks;do
+		found=0
+		for n in $device_clean;do
+			if [ $i = $n ];then
+				found=1; break
+			fi
+		done
+		if [ $found -eq 0 ];then
+			device_disks_new="$device_disks_new $i"
+		fi
+	done
+	deviceDisks=$device_disks_new
 }
 
 # vim: set noexpandtab:
