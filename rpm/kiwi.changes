@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Oct 10 16:48:43 CEST 2012 - ms@suse.de
+
+- added support for dmraid fake-raid controllers (bnc #708712)
+
+-------------------------------------------------------------------
 Tue Oct  2 15:24:44 CEST 2012 - ms@suse.de
 
 - added a 10sec timeout for the language selection (bnc #778570)
