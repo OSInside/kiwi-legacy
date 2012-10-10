@@ -234,8 +234,8 @@ sub updateDescription {
 	#==========================================
 	# Store general data
 	#------------------------------------------
-	$changeset{"packagemanager"} = $src_xml->getPackageManager();
-	$changeset{"showlicense"}    = $src_xml->getLicenseNames();
+	$changeset{"packagemanager"} = $src_xml->getPackageManager_legacy();
+	$changeset{"showlicense"}    = $src_xml->getLicenseNames_legacy();
 	my $domain;
 	my %xenc = $src_xml -> getXenConfig();
 	if (%xenc) {
@@ -249,7 +249,7 @@ sub updateDescription {
 	#==========================================
 	# Store Theme data
 	#------------------------------------------
-	my @theme = $src_xml->getBootTheme();
+	my @theme = $src_xml->getBootTheme_legacy();
 	$changeset{"bootsplash-theme"} = $theme[0];
 	$changeset{"bootloader-theme"} = $theme[1];
 	#==========================================
@@ -488,7 +488,7 @@ sub checkAndSetupPrebuiltBootImage {
 	if (defined $prebuiltPath) {
 		$lookup = $prebuiltPath."/";
 	} else {
-		my $defaultPath = $ixml -> getDefaultPrebuiltDir();
+		my $defaultPath = $ixml -> getDefaultPrebuiltDir_legacy();
 		if ($defaultPath) {
 			$lookup =  $defaultPath . '/';
 		}

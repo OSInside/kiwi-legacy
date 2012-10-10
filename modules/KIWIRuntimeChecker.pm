@@ -319,7 +319,7 @@ sub __checkFilesystemTool {
 			$toolError = 1;
 		}
 		my $haveTool;
-		if ($flag && $flag =~ /clic|clic_udf/) {
+		if ($flag && $flag =~ /clic|clic_udf/x) {
 			$haveTool = $this -> __isFsToolAvailable('clicfs');
 			$checkedFS = 'clicfs';
 		} elsif ($flag && $flag eq 'seed') {
@@ -383,7 +383,7 @@ sub __checkPackageManagerExists {
 	# Check that the specified package manager exists
 	# ---
 	my $this = shift;
-	my $pkgMgr = $this -> {xml} -> getPackageManager();
+	my $pkgMgr = $this -> {xml} -> getPackageManager_legacy();
 	my $haveExec = $this -> {locator} -> getExecPath($pkgMgr);
 	if (! $haveExec) {
 		my $msg = "Executable for specified package manager, $pkgMgr, "
@@ -523,7 +523,7 @@ sub __checkVMscsiCapable {
 		. "\nto a newer version of qemu-img or change the controller to ide";
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed ();
-        return;
+		return;
 	}
 	return 1;
 }

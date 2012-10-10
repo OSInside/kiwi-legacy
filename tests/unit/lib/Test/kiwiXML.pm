@@ -26,6 +26,7 @@ use KIWIQX qw (qxx);
 use KIWIXML;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
+use KIWIXMLPreferenceData;
 use KIWIXMLRepositoryData;
 
 # All tests will need to be adjusted once KIWXML turns into a stateless
@@ -1920,11 +1921,11 @@ sub test_getBootIncludesUseProf {
 }
 
 #==========================================
-# test_getBootTheme
+# test_getBootTheme_legacy
 #------------------------------------------
-sub test_getBootTheme {
+sub test_getBootTheme_legacy {
 	# ...
-	# Verify proper return of getBootTheme method
+	# Verify proper return of getBootTheme_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -1932,7 +1933,7 @@ sub test_getBootTheme {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @values = $xml -> getBootTheme();
+	my @values = $xml -> getBootTheme_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1975,11 +1976,11 @@ sub test_getConfigName {
 }
 
 #==========================================
-# test_getDefaultPrebuiltDir
+# test_getDefaultPrebuiltDir_legacy
 #------------------------------------------
-sub test_getDefaultPrebuiltDir {
+sub test_getDefaultPrebuiltDir_legacy {
 	# ...
-	# Verify proper return of getDefaultPrebuiltDir method
+	# Verify proper return of getDefaultPrebuiltDir_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -1987,7 +1988,7 @@ sub test_getDefaultPrebuiltDir {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getDefaultPrebuiltDir();
+	my $value = $xml -> getDefaultPrebuiltDir_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2268,11 +2269,11 @@ sub test_getHttpsRepositoryCredentials_legacy {
 }
 
 #==========================================
-# test_getImageDefaultDestination
+# test_getImageDefaultDestination_legacy
 #------------------------------------------
-sub test_getImageDefaultDestination {
+sub test_getImageDefaultDestination_legacy {
 	# ...
-	# Verify proper return of getImageDefaultDestination method
+	# Verify proper return of getImageDefaultDestination_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -2280,7 +2281,7 @@ sub test_getImageDefaultDestination {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getImageDefaultDestination();
+	my $value = $xml -> getImageDefaultDestination_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2293,11 +2294,11 @@ sub test_getImageDefaultDestination {
 }
 
 #==========================================
-# test_getImageDefaultRoot
+# test_getImageDefaultRoot_legacy
 #------------------------------------------
-sub test_getImageDefaultRoot {
+sub test_getImageDefaultRoot_legacy {
 	# ...
-	# Verify proper return of getImageDefaultRoot method
+	# Verify proper return of getImageDefaultRoot_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -2305,7 +2306,7 @@ sub test_getImageDefaultRoot {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getImageDefaultRoot();
+	my $value = $xml -> getImageDefaultRoot_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2547,11 +2548,11 @@ sub test_getInstallList {
 }
 
 #==========================================
-# test_getLicenseNames
+# test_getLicenseNames_legacy
 #------------------------------------------
-sub test_getLicenseNames {
+sub test_getLicenseNames_legacy {
 	# ...
-	# Verify proper return of getLicenseNames method
+	# Verify proper return of getLicenseNames_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -2559,7 +2560,7 @@ sub test_getLicenseNames {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $licNames = $xml -> getLicenseNames();
+	my $licNames = $xml -> getLicenseNames_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3561,6 +3562,165 @@ sub test_getPackageNodeList {
 	$this -> assert_array_equal(\@expectedPats, \@patterns);
 	return;
 }
+
+#==========================================
+# test_getPreferences
+#------------------------------------------
+sub test_getPreferences {
+	# ...
+	# Verify that a proper PreferenceData object is returned
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $prefDataObj = $xml -> getPreferences();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify some of the data, complete data verification is accomplished
+	# with the unit test for the PreferenceData object
+	my $blTheme = $prefDataObj -> getBootLoaderTheme();
+	$this -> assert_str_equals('silverlining', $blTheme);
+	my $ver = $prefDataObj -> getVersion();
+	$this -> assert_str_equals('13.20.26', $ver);
+	return;
+}
+
+#==========================================
+# test_getPreferencesProfiles
+#------------------------------------------
+sub test_getPreferencesProfiles {
+	# ...
+	# Verify that a proper PreferenceData object is returned when
+	# preference data in profiles need to be merged
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $prefDataObj = $xml -> getPreferences();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify some of the data, complete data verification is accomplished
+	# with the unit test for the PreferenceData object
+	# Should have data for settings in the default profile and data for
+	# settings in profA
+	my $blTheme = $prefDataObj -> getBootLoaderTheme();
+	$this -> assert_str_equals('silverlining', $blTheme);
+	my $ver = $prefDataObj -> getVersion();
+	$this -> assert_str_equals('0.0.1', $ver);
+	return;
+}
+
+#==========================================
+# test_getPreferencesProfilesNoPref
+#------------------------------------------
+sub test_getPreferencesProfilesNoPref {
+	# ...
+	# Verify that a proper PreferenceData object is returned when
+	# getting preferences for a profile that has no specific
+	# preferences settings, i.e. the dafult should be returned
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @newProfs = ( 'profD' );
+	$xml = $xml -> setSelectionProfileNames(\@newProfs);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profD', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	my $prefDataObj = $xml -> getPreferences();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify some of the data, complete data verification is accomplished
+	# with the unit test for the PreferenceData object
+	# Should have data for settings in the default profile
+	my $blTheme = $prefDataObj -> getBootLoaderTheme();
+	$this -> assert_null($blTheme);
+	my $locale = $prefDataObj -> getLocale();
+	$this -> assert_str_equals('en_US', $locale);
+	my $ver = $prefDataObj -> getVersion();
+	$this -> assert_str_equals('0.0.1', $ver);
+	return;
+}
+
+#==========================================
+# test_getPreferencesProfilesWithConflict
+#------------------------------------------
+sub test_getPreferencesProfilesWithConflict {
+	# ...
+	# Verify that getPreferences reports the proper error for
+	# preference data in profiles that conflicts
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @newProfs = qw /profA profC/;
+	$xml = $xml -> setSelectionProfileNames(\@newProfs);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA, profC', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $prefDataObj = $xml -> getPreferences();
+	$msg = $kiwi -> getMessage();
+	my $expected = 'Error merging preferences data, found data for '
+		. "'defaultroot' in both preference definitions, ambiguous "
+		. 'operation.';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($prefDataObj);
+	return;
+}
+
 #==========================================
 # test_getProfiles
 #------------------------------------------
@@ -3599,11 +3759,11 @@ sub test_getProfiles {
 }
 
 #==========================================
-# test_getRPMCheckSignatures
+# test_getRPMCheckSignatures_legacy
 #------------------------------------------
-sub test_getRPMCheckSignaturesFalse {
+sub test_getRPMCheckSignatures_legacyFalse {
 	# ...
-	# Verify proper return of getRPMCheckSignatures method
+	# Verify proper return of getRPMCheckSignatures_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -3611,7 +3771,7 @@ sub test_getRPMCheckSignaturesFalse {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getRPMCheckSignatures();
+	my $value = $xml -> getRPMCheckSignatures_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3624,11 +3784,11 @@ sub test_getRPMCheckSignaturesFalse {
 }
 
 #==========================================
-# test_getRPMExcludeDocs
+# test_getRPMExcludeDocs_legacy
 #------------------------------------------
-sub test_getRPMExcludeDocsFalse {
+sub test_getRPMExcludeDocs_legacyFalse {
 	# ...
-	# Verify proper return of getRPMExcludeDocs method
+	# Verify proper return of getRPMExcludeDocs_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -3636,7 +3796,7 @@ sub test_getRPMExcludeDocsFalse {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getRPMExcludeDocs();
+	my $value = $xml -> getRPMExcludeDocs_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3649,11 +3809,11 @@ sub test_getRPMExcludeDocsFalse {
 }
 
 #==========================================
-# test_getRPMForce
+# test_getRPMForce_legacy
 #------------------------------------------
-sub test_getRPMForceFalse {
+sub test_getRPMForce_legacyFalse {
 	# ...
-	# Verify proper return of getRPMForce method
+	# Verify proper return of getRPMForce_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -3661,7 +3821,7 @@ sub test_getRPMForceFalse {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getRPMForce();
+	my $value = $xml -> getRPMForce_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3674,11 +3834,11 @@ sub test_getRPMForceFalse {
 }
 
 #==========================================
-# test_getRPMCheckSignatures
+# test_getRPMCheckSignatures_legacy
 #------------------------------------------
-sub test_getRPMCheckSignaturesTrue {
+sub test_getRPMCheckSignatures_legacyTrue {
 	# ...
-	# Verify proper return of getRPMCheckSignatures method
+	# Verify proper return of getRPMCheckSignatures_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -3686,7 +3846,7 @@ sub test_getRPMCheckSignaturesTrue {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getRPMCheckSignatures();
+	my $value = $xml -> getRPMCheckSignatures_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3699,11 +3859,11 @@ sub test_getRPMCheckSignaturesTrue {
 }
 
 #==========================================
-# test_getRPMExcludeDocs
+# test_getRPMExcludeDocs_legacy
 #------------------------------------------
-sub test_getRPMExcludeDocsTrue {
+sub test_getRPMExcludeDocs_legacyTrue {
 	# ...
-	# Verify proper return of getRPMExcludeDocs method
+	# Verify proper return of getRPMExcludeDocs_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -3711,7 +3871,7 @@ sub test_getRPMExcludeDocsTrue {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getRPMExcludeDocs();
+	my $value = $xml -> getRPMExcludeDocs_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3724,11 +3884,11 @@ sub test_getRPMExcludeDocsTrue {
 }
 
 #==========================================
-# test_getRPMForce
+# test_getRPMForce_legacy
 #------------------------------------------
-sub test_getRPMForceTrue {
+sub test_getRPMForce_legacyTrue {
 	# ...
-	# Verify proper return of getRPMForce method
+	# Verify proper return of getRPMForce_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -3736,7 +3896,7 @@ sub test_getRPMForceTrue {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getRPMForce();
+	my $value = $xml -> getRPMForce_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4666,7 +4826,7 @@ sub test_packageManagerInfoHasConfigValue {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $pkgMgr = $xml -> getPackageManager();
+	my $pkgMgr = $xml -> getPackageManager_legacy();
 	$this -> assert_str_equals('zypper', $pkgMgr);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -4728,7 +4888,7 @@ sub test_packageManagerSet_valid {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
-	my $PkgMgr= $xml -> getPackageManager();
+	my $PkgMgr= $xml -> getPackageManager_legacy();
 	$this -> assert_str_equals('smart', $PkgMgr);
 	return;
 }
@@ -4748,7 +4908,7 @@ sub test_packageManagerInfoHasProfs {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef,\@profiles,$this->{cmdL}
 	);
-	my $pkgMgr = $xml -> getPackageManager();
+	my $pkgMgr = $xml -> getPackageManager_legacy();
 	$this -> assert_str_equals('smart', $pkgMgr);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): specPkgMgr', $msg);
@@ -4766,7 +4926,7 @@ sub test_packageManagerInfoHasProfs {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
-	my $PkgMgr= $xml -> getPackageManager();
+	my $PkgMgr= $xml -> getPackageManager_legacy();
 	$this -> assert_str_equals('yum', $PkgMgr);
 	return;
 }

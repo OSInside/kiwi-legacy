@@ -3469,7 +3469,7 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Theme and Fonts table
 		#------------------------------------------
-		my @theme = $xml -> getBootTheme();
+		my @theme = $xml -> getBootTheme_legacy();
 		my $theme = $theme[1];
 		my $ascii = 'ascii.pf2';
 		my $fodir = '/boot/grub2/themes/';

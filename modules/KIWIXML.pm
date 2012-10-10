@@ -32,6 +32,7 @@ use KIWIQX qw (qxx);
 use KIWIURL;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
+use KIWIXMLPreferenceData;
 use KIWIXMLRepositoryData;
 use KIWIXMLValidator;
 use KIWISatSolver;
@@ -86,6 +87,32 @@ sub new {
 	#			drivers     = (),
 	#			pkgs        = ()
 	#		}
+	#       preferences = {
+	#           bootloader_theme = '',
+	#           bootsplash_theme = '',
+	#           ........
+	#           types = {
+	#               type[+] = {
+	#                   arch[+] = {
+	#                       bootPkgs    = (),
+	#			            bootDelPkgs = (),
+	#			            delPkgs     = (),
+	#			            drivers     = (),
+	#			            pkgs        = ()
+	#		            }
+	#                   boot       = '',
+	#                   bootkernel = '',
+	#                   bootDelPkgs = (),
+	#                   bootPkgs    = (),
+	#                   delPkgs     = (),
+	#                   .......
+	#                   packages   = (),
+	#                   vga        = '',
+	#                   volid      = ''
+	#               }
+	#           }
+	#           version = ''
+	#       }
 	#		profInfo = {
 	#			description = '',
 	#			import      = ''
@@ -99,20 +126,8 @@ sub new {
 	#				...
 	#			}
 	#		}
-	#		type[+] = {
-	#			bootPkgs    = (),
-	#			bootDelPkgs = (),
-	#			delPkgs     = (),
-	#			pkgs        = (),
-	#			arch[+] = {
-	#				...
-	#			}
-	#			boot       = '',
-	#			bootkernel = '',
-	#			...
-	#		}
 	#		...
-	#	}
+	#     }
 	# }
 	# ---
 	#==========================================
@@ -254,6 +269,12 @@ sub new {
 	# Populate imageConfig with diver data from config tree
 	#------------------------------------------
 	$this -> __populateDriverInfo();
+	#==========================================
+	# Populate imageConfig with preferences data from config tree
+	#------------------------------------------
+	if (! $this -> __populatePreferenceInfo() ) {
+		return;
+	}
 	#==========================================
 	# Populate imageConfig with repository data from config tree
 	#------------------------------------------
@@ -577,6 +598,34 @@ sub getDrivers {
 }
 
 #==========================================
+# getPreferences
+#------------------------------------------
+sub getPreferences {
+	# ...
+	# Return a KIWIXMLPreferenceData object for the current selected build
+	# profile(s)
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $mergedPref = $this->{imageConfig}{kiwi_default}{preferences};
+	my @activeProfs = @{$this->{selectedProfiles}};
+	for my $prof (@activeProfs) {
+		if ($prof eq 'kiwi_default') {
+			next;
+		}
+		$mergedPref = $this -> __mergePreferenceData(
+									$mergedPref,
+									$this->{imageConfig}{$prof}{preferences}
+									);
+		if (! $mergedPref ) {
+			return;
+		}
+	}
+	my $prefObj = KIWIXMLPreferenceData -> new($kiwi, $mergedPref);
+	return $prefObj;
+}
+
+#==========================================
 # getProfiles
 #------------------------------------------
 sub getProfiles {
@@ -846,6 +895,24 @@ sub __dumpInternalXMLDescription {
 }
 
 #==========================================
+# __getChildNodeTextValue
+#------------------------------------------
+sub __getChildNodeTextValue {
+	# ...
+	# Return the value of the node identified by the
+	# given name as text.
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $childName = shift;
+	my $cNode = $node -> getChildrenByTagName($childName);
+	if ($cNode) {
+		return $cNode -> get_node(1) -> textContent();
+	}
+	return;
+}
+
+#==========================================
 # __getProfsToModify
 #------------------------------------------
 sub __getProfsToModify {
@@ -883,6 +950,77 @@ sub __getProfsToModify {
 		}
 	}
 	return @profsToUse;
+}
+
+#==========================================
+# __mergePreferenceData
+#------------------------------------------
+sub __mergePreferenceData {
+	# ...
+	# Merge two hashes that represent <preferemces> data into one.
+	# Expecting a two hash refs as arguments and return a hashref to
+	# the merged data. If both hashes have definitions for the
+	# same data issues an error.
+	# ---
+	my $this = shift;
+	my $base = shift;
+	my $ext  = shift;
+	my $kiwi = $this->{kiwi};
+	my %merged;
+	my @attrs = qw(
+			bootloader_theme bootsplash_theme defaultdestination
+			defaultprebuilt defaultroot hwclock keymap locale
+			packagemanager rpm_check_signatures rpm_excludedocs rpm_force
+			showlicense timezone types version
+		);
+	for my $attr (@attrs) {
+		if ($attr eq 'types') {
+			my %types;
+			my $baseTypes = $base->{types};
+			my $extTypes  = $ext->{types};
+			if ($baseTypes && $extTypes) {
+				my @defTypes = keys %{$baseTypes};
+				for my $type (@defTypes) {
+					if ( $extTypes->{$type} ) {
+						my $msg = 'Error merging preferences data, found '
+							. "definition for type '$type' in both "
+							. 'preference definitions, ambiguous operation.';
+						$kiwi -> error($msg);
+						$kiwi -> failed();
+						return;
+					}
+				}
+			}
+			if ($baseTypes) {
+				my @defTypes = keys %{$baseTypes};
+				for my $type (@defTypes) {
+					$types{$type} = $baseTypes->{$type};
+				}
+			}
+			if ($extTypes) {
+				my @defTypes = keys %{$extTypes};
+				for my $type (@defTypes) {
+					$types{$type} = $extTypes->{$type};
+				}
+			}
+			next;
+		}
+		if ( $base->{$attr} && $ext->{$attr} ) {
+			my $msg = 'Error merging preferences data, found data for '
+				. "'$attr' in both preference definitions, ambiguous "
+				. 'operation.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+		if ($base->{$attr}) {
+			$merged{$attr} = $base->{$attr};
+		}
+		if ($ext->{$attr}) {
+			$merged{$attr} = $ext->{$attr};
+		}
+	}
+	return \%merged;
 }
 
 #==========================================
@@ -975,6 +1113,105 @@ sub __populateDriverInfo {
 					$this->{imageConfig}->{$profName}
 						->{$arch}->{drivers} =	$archDrvs{$arch};
 				}
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# __populatePreferenceInfo
+#------------------------------------------
+sub __populatePreferenceInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# preferences data from the XML file.
+	# ---
+	my $this = shift;
+	my @prefNodes = $this->{systemTree} ->getElementsByTagName ('preferences');
+	if (! @prefNodes ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'No <preference> element data found, cannot construct '
+			. 'XML data object.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	for my $prefInfo (@prefNodes) {
+		my $profNames = $prefInfo -> getAttribute ('profiles');
+		my @pNameLst = ('kiwi_default');
+		if ($profNames) {
+			@pNameLst = split /,/, $profNames;
+		}
+		my $bootLoaderTheme = $this -> __getChildNodeTextValue(
+										$prefInfo, 'bootloader-theme');
+		my $booSplashTheme  = $this -> __getChildNodeTextValue(
+										$prefInfo, 'bootsplash-theme');
+		my $defaultDest     = $this -> __getChildNodeTextValue(
+										$prefInfo, 'defaultdestination');
+		my $defaultPreBlt   = $this -> __getChildNodeTextValue(
+										$prefInfo, 'defaultprebuilt');
+		my $defaultRoot     = $this -> __getChildNodeTextValue(
+										$prefInfo, 'defaultroot');
+		my $hwclock         = $this -> __getChildNodeTextValue(
+										$prefInfo, 'hwclock');
+		my $keymap          = $this -> __getChildNodeTextValue(
+										$prefInfo, 'keytable');
+		my $locale          = $this -> __getChildNodeTextValue(
+										$prefInfo, 'locale');
+		my $pckMgr          = $this -> __getChildNodeTextValue(
+										$prefInfo, 'packagemanager');
+		my $rpmSigCheck     = $this -> __getChildNodeTextValue(
+										$prefInfo, 'rpm-check-signatures');
+		my $rpmExclDoc      = $this -> __getChildNodeTextValue(
+										$prefInfo, 'rpm-excludedocs');
+		my $rpmForce        = $this -> __getChildNodeTextValue(
+										$prefInfo, 'rpm-force');
+
+		my @showLicNodes = $prefInfo -> getChildrenByTagName('showlicense');
+		my @licensesToShow;
+		for my $licNode (@showLicNodes) {
+			push @licensesToShow, $licNode -> textContent();
+		}
+		my $showLic;
+		if (@licensesToShow) {
+			$showLic        = \@licensesToShow;
+		}
+
+		my $tz              = $this -> __getChildNodeTextValue(
+										$prefInfo, 'timezone');
+		#my $types = $this -> __genTypeHash($prefInfo);
+		my $vers            = $this -> __getChildNodeTextValue(
+										$prefInfo, 'version');
+		my %prefs = ( bootloader_theme     => $bootLoaderTheme,
+					bootsplash_theme     => $booSplashTheme,
+					defaultdestination   => $defaultDest,
+					defaultprebuilt      => $defaultPreBlt,
+					defaultroot          => $defaultRoot,
+					hwclock              => $hwclock,
+					keymap               => $keymap,
+					locale               => $locale,
+					packagemanager       => $pckMgr,
+					rpm_check_signatures => $rpmSigCheck,
+					rpm_excludedocs      => $rpmExclDoc,
+					rpm_force            => $rpmForce,
+					showlicense          => $showLic,
+					timezone             => $tz,
+#                      types                => $types,
+					version              => $vers
+					);
+		for my $profName (@pNameLst) {
+			if (! $this->{imageConfig}{$profName}{preferences} ) {
+				$this->{imageConfig}{$profName}{preferences} = \%prefs;
+			} else {
+				my $mergedPrefs = $this -> __mergePreferenceData(
+								$this->{imageConfig}{$profName}{preferences},
+								\%prefs
+							);
+				if (! $mergedPrefs ) {
+					return;
+				}
+				$this->{imageConfig}{$profName}{preferences} = $mergedPrefs
 			}
 		}
 	}
@@ -1122,6 +1359,7 @@ sub __verifyProfNames {
 	}
 	return 1;
 }
+
 #==========================================
 # End "new" methods section
 #------------------------------------------
@@ -1217,19 +1455,6 @@ sub getConfigName {
 	my $this = shift;
 	my $name = $this->{controlFile};
 	return ($name);
-}
-
-#==========================================
-# getDefaultPrebuiltDir
-#------------------------------------------
-sub getDefaultPrebuiltDir {
-	# ...
-	# Return the path of the default location for pre-built boot images
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ('defaultprebuilt');
-	my $imgDir = $node -> getElementsByTagName ('defaultprebuilt');
-	return $imgDir;
 }
 
 #==========================================
@@ -1475,38 +1700,6 @@ sub getEditBootInstall {
 		return;
 	}
 	return $editBoot;
-}
-
-#==========================================
-# getImageDefaultDestination
-#------------------------------------------
-sub getImageDefaultDestination {
-	# ...
-	# Get the default destination to store the images below
-	# normally this is given by the --destination option but if
-	# not and defaultdestination is specified in xml descr. we
-	# will use this path as destination
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("defaultdestination");
-	my $dest = $node -> getElementsByTagName ("defaultdestination");
-	return $dest;
-}
-
-#==========================================
-# getImageDefaultRoot
-#------------------------------------------
-sub getImageDefaultRoot {
-	# ...
-	# Get the default root directory name to build up a new image
-	# normally this is given by the --root option but if
-	# not and defaultroot is specified in xml descr. we
-	# will use this path as root path.
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("defaultroot");
-	my $root = $node -> getElementsByTagName ("defaultroot");
-	return $root;
 }
 
 #==========================================
@@ -1948,48 +2141,6 @@ sub setPackageManager {
 }
 
 #==========================================
-# getPackageManager
-#------------------------------------------
-sub getPackageManager {
-	# ...
-	# Get the name of the package manager if set.
-	# if not set return the default package
-	# manager name
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $node = $this -> __getPreferencesNodeByTagName ("packagemanager");
-	my @packMgrs = $node -> getElementsByTagName ("packagemanager");
-	my $pmgr = $packMgrs[0];
-	if (! $pmgr) {
-		return 'zypper';
-	}
-	return $pmgr -> textContent();
-}
-
-#==========================================
-# getLicenseNames
-#------------------------------------------
-sub getLicenseNames {
-	# ...
-	# Get the names of all showlicense elements and return
-	# them as a list to the caller
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $node = $this -> __getPreferencesNodeByTagName ("showlicense");
-	my @lics = $node -> getElementsByTagName ("showlicense");
-	my @names = ();
-	foreach my $node (@lics) {
-		push (@names,$node -> textContent());
-	}
-	if (@names) {
-		return \@names;
-	}
-	return;
-}
-
-#==========================================
 # getOEMSwapSize
 #------------------------------------------
 sub getOEMSwapSize {
@@ -2366,81 +2517,6 @@ sub getLocale {
 		return;
 	}
 	return $lang;
-}
-
-#==========================================
-# getBootTheme
-#------------------------------------------
-sub getBootTheme {
-	# ...
-	# Obtain the theme values for splash and bootloader
-	# ---
-	my $this   = shift;
-	my $snode  = $this -> __getPreferencesNodeByTagName ("bootsplash-theme");
-	my $lnode  = $this -> __getPreferencesNodeByTagName ("bootloader-theme");
-	my $splash = $snode -> getElementsByTagName ("bootsplash-theme");
-	my $loader = $lnode -> getElementsByTagName ("bootloader-theme");
-	my @result = (
-		"openSUSE","openSUSE"
-	);
-	if ((defined $splash) || ("$splash" ne "")) {
-		$result[0] = $splash;
-	}
-	if ((defined $loader) || ("$loader" ne "")) {
-		$result[1] = $loader;
-	}
-	return @result;
-}
-
-#==========================================
-# getRPMCheckSignatures
-#------------------------------------------
-sub getRPMCheckSignatures {
-	# ...
-	# Check if the package manager should check for
-	# RPM signatures or not
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("rpm-check-signatures");
-	my $sigs = $node -> getElementsByTagName ("rpm-check-signatures");
-	if ((! defined $sigs) || ("$sigs" eq "") || ("$sigs" eq "false")) {
-		return;
-	}
-	return $sigs;
-}
-
-#==========================================
-# getRPMExcludeDocs
-#------------------------------------------
-sub getRPMExcludeDocs {
-	# ...
-	# Check if the package manager should exclude docs
-	# from installed files or not
-	# ---
-	my $this = shift;
-	my $node = $this-> __getPreferencesNodeByTagName ("rpm-excludedocs");
-	my $xdoc = $node -> getElementsByTagName ("rpm-excludedocs");
-	if ((! defined $xdoc) || ("$xdoc" eq "")) {
-		return;
-	}
-	return $xdoc;
-}
-
-#==========================================
-# getRPMForce
-#------------------------------------------
-sub getRPMForce {
-	# ...
-	# Check if the package manager should force
-	# installing packages
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("rpm-force");
-	my $frpm = $node -> getElementsByTagName ("rpm-force");
-	if ((! defined $frpm) || ("$frpm" eq "") || ("$frpm" eq "false")) {
-		return;
-	}
-	return $frpm;
 }
 
 #==========================================
@@ -3074,11 +3150,11 @@ sub getImageConfig {
 	#------------------------------------------
 	my %type  = %{$this->getImageTypeAndAttributes()};
 	my @delp  = $this -> getDeleteList();
-	my $iver  = getImageVersion ($this);
-	my $size  = getImageSize    ($this);
-	my $name  = getImageName    ($this);
-	my $dname = getImageDisplayName ($this);
-	my $lics  = getLicenseNames ($this);
+	my $iver  = $this -> getImageVersion();
+	my $size  = $this -> getImageSize();
+	my $name  = $this -> getImageName();
+	my $dname = $this -> getImageDisplayName ($this);
+	my $lics  = $this -> getLicenseNames_legacy();
 	my @s_del = $this -> getStripDelete();
 	my @s_tool= $this -> getStripTools();
 	my @s_lib = $this -> getStripLibs();
@@ -3907,7 +3983,7 @@ sub getList {
 		$nodes = $this->{packageNodeList};
 	}
 	my @result;
-	my $manager = $this -> getPackageManager();
+	my $manager = $this -> getPackageManager_legacy();
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		#==========================================
 		# Get type and packages
@@ -4182,7 +4258,7 @@ sub getInstallSize {
 	my $this    = shift;
 	my $kiwi    = $this->{kiwi};
 	my $nodes   = $this->{packageNodeList};
-	my $manager = $this->getPackageManager();
+	my $manager = $this->getPackageManager_legacy();
 	my $urllist = $this -> getURLList();
 	my @result  = ();
 	my @delete  = ();
@@ -5026,7 +5102,7 @@ sub hasDefaultPackages {
 }
 
 #==========================================
-# Methods to using "old" data structure that are to be
+# Methods using the "old" data structure that are to be
 # eliminated or replaced
 #------------------------------------------
 #==========================================
@@ -5065,6 +5141,117 @@ sub addDrivers_legacy {
 }
 
 #==========================================
+# getBootTheme_legacy
+#------------------------------------------
+sub getBootTheme_legacy {
+	# ...
+	# Obtain the theme values for splash and bootloader
+	# ---
+	my $this   = shift;
+	my $snode  = $this -> __getPreferencesNodeByTagName ("bootsplash-theme");
+	my $lnode  = $this -> __getPreferencesNodeByTagName ("bootloader-theme");
+	my $splash = $snode -> getElementsByTagName ("bootsplash-theme");
+	my $loader = $lnode -> getElementsByTagName ("bootloader-theme");
+	my @result = (
+		"openSUSE","openSUSE"
+	);
+	if ((defined $splash) || ("$splash" ne "")) {
+		$result[0] = $splash;
+	}
+	if ((defined $loader) || ("$loader" ne "")) {
+		$result[1] = $loader;
+	}
+	return @result;
+}
+
+#==========================================
+# getDefaultPrebuiltDir_legacy
+#------------------------------------------
+sub getDefaultPrebuiltDir_legacy {
+	# ...
+	# Return the path of the default location for pre-built boot images
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ('defaultprebuilt');
+	my $imgDir = $node -> getElementsByTagName ('defaultprebuilt');
+	return $imgDir;
+}
+
+#==========================================
+# getImageDefaultDestination_legacy
+#------------------------------------------
+sub getImageDefaultDestination_legacy {
+	# ...
+	# Get the default destination to store the images below
+	# normally this is given by the --destination option but if
+	# not and defaultdestination is specified in xml descr. we
+	# will use this path as destination
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ("defaultdestination");
+	my $dest = $node -> getElementsByTagName ("defaultdestination");
+	return $dest;
+}
+
+#==========================================
+# getImageDefaultRoot_legacy
+#------------------------------------------
+sub getImageDefaultRoot_legacy {
+	# ...
+	# Get the default root directory name to build up a new image
+	# normally this is given by the --root option but if
+	# not and defaultroot is specified in xml descr. we
+	# will use this path as root path.
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ("defaultroot");
+	my $root = $node -> getElementsByTagName ("defaultroot");
+	return $root;
+}
+
+#==========================================
+# getLicenseNames_legacy
+#------------------------------------------
+sub getLicenseNames_legacy {
+	# ...
+	# Get the names of all showlicense elements and return
+	# them as a list to the caller
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $node = $this -> __getPreferencesNodeByTagName ("showlicense");
+	my @lics = $node -> getElementsByTagName ("showlicense");
+	my @names = ();
+	foreach my $node (@lics) {
+		push (@names,$node -> textContent());
+	}
+	if (@names) {
+		return \@names;
+	}
+	return;
+}
+
+#==========================================
+# getPackageManager_legacy
+#------------------------------------------
+sub getPackageManager_legacy {
+	# ...
+	# Get the name of the package manager if set.
+	# if not set return the default package
+	# manager name
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $node = $this -> __getPreferencesNodeByTagName ("packagemanager");
+	my @packMgrs = $node -> getElementsByTagName ("packagemanager");
+	my $pmgr = $packMgrs[0];
+	if (! $pmgr) {
+		return 'zypper';
+	}
+	return $pmgr -> textContent();
+}
+
+#==========================================
 # getProfiles_legacy
 #------------------------------------------
 sub getProfiles_legacy {
@@ -5092,6 +5279,57 @@ sub getProfiles_legacy {
 		push @result, { %profile };
 	}
 	return @result;
+}
+
+#==========================================
+# getRPMCheckSignatures_legacy
+#------------------------------------------
+sub getRPMCheckSignatures_legacy {
+	# ...
+	# Check if the package manager should check for
+	# RPM signatures or not
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ("rpm-check-signatures");
+	my $sigs = $node -> getElementsByTagName ("rpm-check-signatures");
+	if ((! defined $sigs) || ("$sigs" eq "") || ("$sigs" eq "false")) {
+		return;
+	}
+	return $sigs;
+}
+
+#==========================================
+# getRPMExcludeDocs_legacy
+#------------------------------------------
+sub getRPMExcludeDocs_legacy {
+	# ...
+	# Check if the package manager should exclude docs
+	# from installed files or not
+	# ---
+	my $this = shift;
+	my $node = $this-> __getPreferencesNodeByTagName ("rpm-excludedocs");
+	my $xdoc = $node -> getElementsByTagName ("rpm-excludedocs");
+	if ((! defined $xdoc) || ("$xdoc" eq "")) {
+		return;
+	}
+	return $xdoc;
+}
+
+#==========================================
+# getRPMForce_legacy
+#------------------------------------------
+sub getRPMForce_legacy {
+	# ...
+	# Check if the package manager should force
+	# installing packages
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ("rpm-force");
+	my $frpm = $node -> getElementsByTagName ("rpm-force");
+	if ((! defined $frpm) || ("$frpm" eq "") || ("$frpm" eq "false")) {
+		return;
+	}
+	return $frpm;
 }
 
 #==========================================
@@ -5737,23 +5975,6 @@ sub __addDefaultSplitNode {
 	}
 	$this -> updateXML();
 	return $this;
-}
-
-#==========================================
-# __getChildNodeTextValue
-#------------------------------------------
-sub __getChildNodeTextValue {
-	# ...
-	# Return the value of the node identified by the
-	# given name as text.
-	# ---
-	my $this = shift;
-	my $node = shift;
-	my $childName = shift;
-	return $node
-		-> getChildrenByTagName ($childName)
-		-> get_node(1)
-		-> textContent();
 }
 
 #==========================================
@@ -6458,8 +6679,6 @@ sub __requestedProfile {
 	# print "Section $nodeName not selected\n";
 	return 0;
 }
-
-
 
 #==========================================
 # __populateProfiledTypeInfo
