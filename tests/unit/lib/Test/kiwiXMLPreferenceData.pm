@@ -38,6 +38,68 @@ sub new {
 }
 
 #==========================================
+# test_addShowLic
+#------------------------------------------
+sub test_addShowLic {
+	# ...
+	# Test the addShowLic method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $prefDataObj = $this -> __getPrefObj();
+	$prefDataObj = $prefDataObj -> addShowLic('/tmp/lic.en.txt');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($prefDataObj);
+	my $lic = $prefDataObj -> getShowLic();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expected = ( '/tmp/lic.en.txt', '/wrk/mylic.txt', '/wrk/prodlic.txt' );
+	$this -> assert_array_equal(\@expected, $lic);
+	return;
+}
+
+#==========================================
+# test_addShowLicNoArg
+#------------------------------------------
+sub test_addShowLicNoArg {
+	# ...
+	# Test the setShowLic method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $prefDataObj = $this -> __getPrefObj();
+	my $res = $prefDataObj -> addShowLic();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'addShowLic: no path for the license given, '
+		. 'retaining current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $lic = $prefDataObj -> getShowLic();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expected = ('/wrk/mylic.txt', '/wrk/prodlic.txt');
+	$this -> assert_array_equal(\@expected, $lic);
+	return;
+}
+
+#==========================================
 # test_ctor
 #------------------------------------------
 sub test_ctor {
@@ -553,7 +615,8 @@ sub test_getShowLic {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('/wrk/mylic.txt', $lic);
+	my @expected = ('/wrk/mylic.txt', '/wrk/prodlic.txt');
+	$this -> assert_array_equal(\@expected, $lic);
 	return;
 }
 
@@ -1462,7 +1525,8 @@ sub test_setShowLic {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('/tmp/lic.en.txt', $lic);
+	my @expected = ( '/tmp/lic.en.txt' );
+	$this -> assert_array_equal(\@expected, $lic);
 	return;
 }
 
@@ -1493,7 +1557,8 @@ sub test_setShowLicNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('/wrk/mylic.txt', $lic);
+	my @expected = ('/wrk/mylic.txt', '/wrk/prodlic.txt');
+	$this -> assert_array_equal(\@expected, $lic);
 	return;
 }
 
@@ -1660,19 +1725,20 @@ sub __getPrefObj {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
+	my @licenses = ('/wrk/mylic.txt', '/wrk/prodlic.txt');
 	my %init = ( bootloader_theme     => 'openSUSE',
 				bootsplash_theme     => 'openSUSE',
 				defaultdestination   => '/wrk/images',
 				defaultprebuilt      => '/wrk/bootimgs',
 				defaultroot          => '/wrk/myunpacked',
 				hwclock              => 'utc',
-				keytable             => 'us.map.gz',
+				keymap               => 'us.map.gz',
 				locale               => 'en_us',
 				packagemanager       => 'smart',
 				rpm_check_signatures => 'true',
 				rpm_excludedocs      => 'true',
 				rpm_force            => 'true',
-				showlicense          => '/wrk/mylic.txt',
+				showlicense          => \@licenses,
 				timezone             => 'America/NewYork',
 				version              => '1.1.1'
 			);

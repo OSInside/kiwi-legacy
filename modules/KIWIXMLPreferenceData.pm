@@ -61,11 +61,16 @@ sub new {
 	}
 	if ($init) {
 		# Check for unsupported entries
+		# Allow a types entry in the initialization hash, however this
+		# entry is completely ignored as it has it's own data storage object.
+		# The entry is allowed to facilitate creation of this type
+		# from the XML object using the XML objects hash representation of the
+		# prefernce data storage
 		my %supported = map { ($_ => 1) } qw(
 			bootloader_theme bootsplash_theme defaultdestination
-			defaultprebuilt defaultroot hwclock keytable locale
+			defaultprebuilt defaultroot hwclock keymap locale
 			packagemanager rpm_check_signatures rpm_excludedocs rpm_force
-			showlicense timezone version
+			showlicense timezone types version
 		);
 		for my $key (keys %{$init}) {
 			if (! $supported{$key} ) {
@@ -85,7 +90,7 @@ sub new {
 		$this->{defaultprebuilt}      = $init->{defaultprebuilt};
 		$this->{defaultroot}          = $init->{defaultroot};
 		$this->{hwclock}              = $init->{hwclock};
-		$this->{keytable}             = $init->{keytable};
+		$this->{keymap}               = $init->{keymap};
 		$this->{locale}               = $init->{locale};
 		$this->{packagemanager}       = $init->{packagemanager};
 		$this->{rpm_check_signatures} = $init->{rpm_check_signatures};
@@ -98,6 +103,34 @@ sub new {
 	# Set default values
 	if (! $this->{packagemanager} ) {
 		$this->{packagemanager}   = 'zypper';
+	}
+	return $this;
+}
+
+#==========================================
+# addShowLic
+#------------------------------------------
+sub addShowLic {
+	# ...
+	# Add a license to the configured licenses
+	# ---
+	my $this = shift;
+	my $lic  = shift;
+	if (! $lic ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'addShowLic: no path for the license given, '
+			. 'retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $this->{showlicense} ) {
+		my @licenses = ( $lic );
+		$this->{showlicense} = \@licenses;
+	} else {
+		my @licenses = @{$this->{showlicense}};
+		push @licenses, $lic;
+		$this->{showlicense} = \@licenses;
 	}
 	return $this;
 }
@@ -176,7 +209,7 @@ sub getKeymap {
 	# Return the configured keyboard layout
 	# ---
 	my $this = shift;
-	return $this->{keytable};
+	return $this->{keymap};
 }
 
 #==========================================
@@ -239,7 +272,8 @@ sub getRPMForce {
 #------------------------------------------
 sub getShowLic {
 	# ...
-	# Return the configured path for the license to be shown
+	# Return an array ref containing the configured paths for the
+	# license to be shown
 	# ---
 	my $this = shift;
 	return $this->{showlicense};
@@ -410,7 +444,7 @@ sub setKeymap {
 		$kiwi -> failed();
 		return;
 	}
-	$this->{keytable} = $kmap;
+	$this->{keymap} = $kmap;
 	return $this;
 }
 
@@ -525,7 +559,12 @@ sub setShowLic {
 		$kiwi -> failed();
 		return;
 	}
-	$this->{showlicense} = $lic;
+	if (ref($lic) eq 'ARRAY') {
+		$this->{showlicense} = $lic;
+	} else {
+		my @licenses = ( $lic );
+		$this->{showlicense} = \@licenses;
+	}
 	return $this;
 }
 
@@ -625,6 +664,16 @@ sub __isValidInit {
 	if ($init->{packagemanager}) {
 		if (! $this->__isValidPckgMgr($init->{packagemanager},
 										'object initialization')) {
+			return;
+		}
+	}
+	if ($init->{showlicense}) {
+		if (ref($init->{showlicense}) ne 'ARRAY') {
+			my $kiwi = $this->{kiwi};
+			my $msg = 'Expecting array ref as value of "showlicense" entry '
+				. 'if defined.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
 			return;
 		}
 	}
