@@ -63,13 +63,19 @@ sub new {
 	}
 	if ($init) {
 		# Check for unsupported entries
+		# Allow ec2config, machine, oemconfig, pxedeploy, split and
+		# systemdisk data entries but ignore them. These entries are
+		# allowed to facilitate creation of this type
+		# from the XML object using the XML objects hash representation of the
+		# type data
 		my %supported = map { ($_ => 1) } qw(
 			boot bootkernel bootloader bootpartsize bootprofile
 			boottimeout checkprebuilt compressed devicepersistency
-			editbootconfig filesystem flags format fsmountoptions
+			ec2config editbootconfig filesystem flags format fsmountoptions
 			fsnocheck fsreadonly fsreadwrite hybrid hybridpersistent image
 			installboot installiso installprovidefailsafe installstick
-			kernelcmdline luks primary ramonly vga volid
+			kernelcmdline luks machine oemconfig primary pxedeploy ramonly
+			size split systemdisk vga volid
 		);
 		for my $key (keys %{$init}) {
 			if (! $supported{$key} ) {
@@ -111,6 +117,7 @@ sub new {
 		$this->{luks}                   = $init->{luks};
 		$this->{primary}                = $init->{primary};
 		$this->{ramonly}                = $init->{ramonly};
+		$this->{size}                   = $init->{size};
 		$this->{vga}                    = $init->{vga};
 		$this->{volid}                  = $init->{volid};
 	}
@@ -435,6 +442,17 @@ sub getRAMOnly {
 	# ---
 	my $this = shift;
 	return $this->{ramonly};
+}
+
+#==========================================
+# getSize
+#------------------------------------------
+sub getSize {
+	# ...
+	# Return the systemsize for this type
+	# ---
+	my $this = shift;
+	return $this->{size}
 }
 
 #==========================================
@@ -958,6 +976,27 @@ sub setRAMOnly {
 }
 
 #==========================================
+# setSize
+#------------------------------------------
+sub setSize {
+	# ...
+	# Set the systemsize for this type
+	# ---
+	my $this = shift;
+	my $size = shift;
+	if (! $size ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setSize: no systemsize value given, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{size} = $size;
+	return $this;
+}
+
+#==========================================
 # setVGA
 #------------------------------------------
 sub setVGA {
@@ -1354,11 +1393,9 @@ sub __isValidInit {
 			return;
 		}
 	}
-	if ($init->{image}) {
-		if (! $this->__isValidImage($init->{image},
-									'object initialization')) {
-			return;
-		}
+	if (! $this->__isValidImage($init->{image},
+								'object initialization')) {
+		return;
 	}
 	if ($init->{installboot}) {
 		if (! $this->__isValidInstBoot($init->{installboot},

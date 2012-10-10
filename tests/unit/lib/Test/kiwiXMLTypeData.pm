@@ -91,7 +91,10 @@ sub test_ctor_initInvalidCheckprebuiltValue {
 	# ----
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
-	 my %init = ( checkprebuilt => 'foo' );
+	 my %init = (
+				checkprebuilt => 'foo',
+				image         => 'iso'
+				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'Unrecognized value for boolean '
@@ -118,7 +121,10 @@ sub test_ctor_initInvalidCompressedValue {
 	# ----
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
-	 my %init = ( compressed => 'foo' );
+	 my %init = (
+				compressed => 'foo',
+				image      => 'oem'
+				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'Unrecognized value for boolean '
@@ -145,7 +151,10 @@ sub test_ctor_initInvalidFsnocheckValue {
 	# ----
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
-	 my %init = ( fsnocheck => 'foo' );
+	 my %init = (
+				fsnocheck => 'foo',
+				image     => 'ext3'
+				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'Unrecognized value for boolean '
@@ -172,7 +181,10 @@ sub test_ctor_initInvalidHybridValue {
 	# ----
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
-	 my %init = ( hybrid => 'foo' );
+	 my %init = (
+				hybrid => 'foo',
+				image  => 'xfs'
+				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'Unrecognized value for boolean '
@@ -199,7 +211,10 @@ sub test_ctor_initInvalidHybridpersistentValue {
 	# ----
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
-	 my %init = ( hybridpersistent => 'foo' );
+	 my %init = (
+				hybridpersistent => 'foo',
+				image            => 'cpio'
+				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'Unrecognized value for boolean '
@@ -226,7 +241,10 @@ sub test_ctor_initInvalidInstallisoValue {
 	# ----
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
-	 my %init = ( installiso => 'foo' );
+	 my %init = (
+				image      => 'tbz',
+				installiso => 'foo'
+				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'Unrecognized value for boolean '
@@ -253,7 +271,10 @@ sub test_ctor_initInvalidInstallprovidefailsafeValue {
 	# ----
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
-	 my %init = ( installprovidefailsafe => 'foo' );
+	 my %init = (
+				image                  => 'vmx',
+				installprovidefailsafe => 'foo'
+				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'Unrecognized value for boolean '
@@ -280,7 +301,10 @@ sub test_ctor_initInvalidInstallstickValue {
 	# ----
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
-	 my %init = ( installstick => 'foo' );
+	 my %init = (
+				image        => 'iso',
+				installstick => 'foo'
+				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'Unrecognized value for boolean '
@@ -307,7 +331,10 @@ sub test_ctor_initInvalidPrimaryValue {
 	# ----
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
-	 my %init = ( primary => 'foo' );
+	 my %init = (
+				image   => 'oem',
+				primary => 'foo'
+				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'Unrecognized value for boolean '
@@ -334,7 +361,10 @@ sub test_ctor_initInvalidRamonlyValue {
 	# ----
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
-	 my %init = ( ramonly => 'foo' );
+	 my %init = (
+				image   => 'vmx',
+				ramonly => 'foo'
+				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'Unrecognized value for boolean '
@@ -535,7 +565,10 @@ sub test_ctor_initUnsupportedInstBoot {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( installboot => 'drive' );
+	my %init = (
+				image       => 'pxe',
+				installboot => 'drive'
+			);
 	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified installboot option '
@@ -559,10 +592,12 @@ sub test_ctor_withInit {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( boot        => 'oem/suse-12.2',
+	my %init = (
+				boot        => 'oem/suse-12.2',
 				boottimeout => '2',
 				fsreadonly  => 'btrfs',
-				hybrid      => 'false'
+				hybrid      => 'false',
+				image       => 'oem'
 			);
 	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
@@ -573,6 +608,35 @@ sub test_ctor_withInit {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($typeDataObj);
+	return;
+}
+
+#==========================================
+# test_ctor_withInitIncomplete
+#------------------------------------------
+sub test_ctor_withInitIncomplete {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+				boot        => 'oem/suse-12.2',
+				boottimeout => '2',
+				fsreadonly  => 'btrfs',
+				hybrid      => 'false',
+			);
+	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'object initialization: no image argument specified, '
+		. 'retaining current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($typeDataObj);
 	return;
 }
 
@@ -1203,6 +1267,27 @@ sub test_getRAMOnly {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('true', $rOnly);
+	return;
+}
+
+#==========================================
+# test_getSize
+#------------------------------------------
+sub test_getSize {
+	# ...
+	# Test the getSize method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $size = $typeDataObj -> getSize();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('16384', $size);
 	return;
 }
 
@@ -3497,6 +3582,66 @@ sub test_setRAMOnlyUnknownArg {
 }
 
 #==========================================
+# test_setSize
+#------------------------------------------
+sub test_setSize {
+	# ...
+	# Test the setSize method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	$typeDataObj = $typeDataObj -> setSize('4096');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $size = $typeDataObj -> getSize();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('4096', $size);
+	return;
+}
+
+#==========================================
+# test_setSizeNoArg
+#------------------------------------------
+sub test_setSizeNoArg {
+	# ...
+	# Test the setSize method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setSize();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setSize: no systemsize value given, retaining '
+		. 'current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $size = $typeDataObj -> getSize();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('16384', $size);
+	return;
+}
+
+#==========================================
 # test_setVGA
 #------------------------------------------
 sub test_setVGA {
@@ -3657,6 +3802,7 @@ sub __getTypeObj {
 				luks                   => 'notApass',
 				primary                => 'true',
 				ramonly                => 'true',
+				size                   => '16384',
 				vga                    => '0x344',
 				volid                  => 'myImg'
 			);
