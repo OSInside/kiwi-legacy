@@ -1707,4 +1707,12 @@ function baseQuoteFile {
 	mv $conf $file
 }
 
+#======================================
+# baseSetupBuildDay
+#--------------------------------------
+function baseSetupBuildDay {
+	local buildDay="$(LC_ALL=C date -u '+%Y%m%d')"
+	echo "build_day=$buildDay" > /build_day
+}
+
 # vim: set noexpandtab:

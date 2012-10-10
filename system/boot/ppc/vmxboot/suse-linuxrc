@@ -64,6 +64,11 @@ export SYSTEM_MD5STATUS
 initialize
 
 #======================================
+# Start logging
+#--------------------------------------
+errorLogStart
+
+#======================================
 # Update library path
 #--------------------------------------
 ldconfig
@@ -101,7 +106,6 @@ fi
 # 5) start boot shell
 #--------------------------------------
 startShell
-errorLogStart
 
 #======================================
 # 6) Including required kernel modules

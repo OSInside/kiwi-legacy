@@ -48,6 +48,11 @@ export OEM_PARTITION_CONFIG="/config.oempartition"
 initialize
 
 #======================================
+# Start logging
+#--------------------------------------
+errorLogStart
+
+#======================================
 # Functions...
 #--------------------------------------
 function setupInitialDeviceNames {
@@ -182,7 +187,6 @@ fi
 # 5) start boot shell
 #--------------------------------------
 startShell
-errorLogStart
 
 #======================================
 # 6) Including required kernel modules

@@ -600,10 +600,21 @@ function udevStart {
 	# /.../
 	# start the udev daemon.
 	# ----
-	# disable hotplug helper, udevd listens to netlink
-	if [ -e /proc/sys/kernel/hotplug ];then
-		echo "" > /proc/sys/kernel/hotplug
+	#======================================
+	# Check time according to build day
+	#--------------------------------------
+	if [ -f /build_day ];then
+		importFile < /build_day
+		current_day="$(LC_ALL=C date -u '+%Y%m%d')"
+		if [ "$current_day" -lt "$build_day" ] ; then
+			LC_ALL=C date -us "$build_day"
+			sleep 3
+			export SYSTEM_TIME_INCORRECT=$current_day
+		fi
 	fi
+	#======================================
+	# Check for modules.order
+	#--------------------------------------
 	if ! ls /lib/modules/*/modules.order &>/dev/null;then
 		# /.../
 		# without modules.order in place we prevent udev from loading
@@ -618,6 +629,9 @@ function udevStart {
 		rm -f /lib/udev/rules.d/*-drivers.rules
 		HAVE_MODULES_ORDER=0
 	fi
+	#======================================
+	# Start the daemon
+	#--------------------------------------
 	# static nodes
 	createInitialDevices /dev
 	# load modules required before udev

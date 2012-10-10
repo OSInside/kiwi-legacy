@@ -61,6 +61,11 @@ export kiwi_hybridpersistent=yes
 initialize
 
 #======================================
+# Start logging
+#--------------------------------------
+errorLogStart
+
+#======================================
 # recreateVTOCTable
 #--------------------------------------
 function recreateVTOCTable {
@@ -112,7 +117,6 @@ fi
 # 5) start boot shell
 #--------------------------------------
 startShell
-errorLogStart
 
 #======================================
 # 6) probe/load network module

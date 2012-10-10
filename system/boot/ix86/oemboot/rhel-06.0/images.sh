@@ -10,6 +10,11 @@ echo "Configure image: [$kiwi_iname]..."
 baseSetupOEMPartition
 
 #==========================================
+# setup build day
+#------------------------------------------
+baseSetupBuildDay
+
+#==========================================
 # remove unneded kernel files
 #------------------------------------------
 rhelStripKernel

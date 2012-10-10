@@ -62,6 +62,11 @@ export kiwi_hybridpersistent=yes
 initialize
 
 #======================================
+# Start logging
+#--------------------------------------
+errorLogStart
+
+#======================================
 # Update library path
 #--------------------------------------
 ldconfig
@@ -100,7 +105,6 @@ fi
 # 5) start boot shell
 #--------------------------------------
 startShell
-errorLogStart
 
 #======================================
 # 6) probe/load network module

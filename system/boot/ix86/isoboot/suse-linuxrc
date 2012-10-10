@@ -39,6 +39,11 @@ export LOCAL_BOOT="no"
 initialize
 
 #======================================
+# Start logging
+#--------------------------------------
+errorLogStart
+
+#======================================
 # Update library path
 #--------------------------------------
 ldconfig
@@ -71,7 +76,6 @@ udevStart
 # 5) start boot shell and logging
 #--------------------------------------
 startShell
-errorLogStart
 
 #======================================
 # 6) Including required kernel modules
