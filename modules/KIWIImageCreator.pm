@@ -462,7 +462,7 @@ sub createImage {
 	if (! defined $xml) {
 		return;
 	}
-	my %attr = %{$xml->getImageTypeAndAttributes()};
+	my %attr = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $krc = KIWIRuntimeChecker -> new(
 		$kiwi,$cmdL,$xml
 	);
@@ -1174,7 +1174,7 @@ sub __prepareTree {
 	my $systemTree = shift;
 	my $kiwi       = $this -> {kiwi};
 	my $cmdL       = $this -> {cmdL};
-	my %attr       = %{$xml->getImageTypeAndAttributes()};
+	my %attr       = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $cacheMode  = "initial";
 	#==========================================
 	# Select cache if requested and exists

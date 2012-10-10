@@ -30,7 +30,7 @@
 		<defaultdestination>/work/tmp</defaultdestination>
 		<defaultprebuilt>/work/kiwibootimgs</defaultprebuilt>
 		<defaultroot>/var/tmp</defaultroot>
-		<type image="oem" filesystem="ext4" boot="oemboot/suse-12.1">
+		<type image="oem" primary="true" filesystem="ext4" boot="oemboot/suse-12.1">
 			<size unit="G">20</size>
 			<oemconfig>
 				<oem-align-partition>true</oem-align-partition>

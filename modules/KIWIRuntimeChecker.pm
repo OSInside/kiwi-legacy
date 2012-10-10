@@ -291,7 +291,7 @@ sub __checkFilesystemTool {
 	my $this = shift;
 	my $cmdL = $this -> {cmdArgs};
 	my $xml  = $this -> {xml};
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $typeName = $type{type};
 	my $flag     = $type{flags};
 	my $toolError;
@@ -488,7 +488,7 @@ sub __checkVMscsiCapable {
 	# ---
 	my $this = shift;
 	my $xml = $this -> {xml};
-	my $typeInfo = $xml -> getImageTypeAndAttributes();
+	my $typeInfo = $xml -> getImageTypeAndAttributes_legacy();
 	my $type = $typeInfo -> {type};
 	if ($type ne 'vmx') {
 		# Nothing to do

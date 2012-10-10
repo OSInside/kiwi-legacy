@@ -175,7 +175,7 @@ sub updateDescription {
 	# ---
 	my $this      = shift;
 	my $src_xml   = shift;
-	my %src_type  = %{$src_xml->getImageTypeAndAttributes()};
+	my %src_type  = %{$src_xml->getImageTypeAndAttributes_legacy()};
 	my %changeset = ();
 	my @profiles;
 	my %repos;
@@ -440,7 +440,7 @@ sub checkAndSetupPrebuiltBootImage {
 	my $kiwi = $this->{kiwi};
 	my $cmdL = $this->{cmdL};
 	my $idest= $cmdL->getImageTargetDir();
-	my %type = %{$ixml->getImageTypeAndAttributes()};
+	my %type = %{$ixml->getImageTypeAndAttributes_legacy()};
 	my $pblt = $type{checkprebuilt};
 	my $boot = $type{boot};
 	my $ok   = 0;
@@ -959,7 +959,7 @@ sub createImageSquashFS {
 	my $this  = shift;
 	my $kiwi  = $this->{kiwi};
 	my $xml   = $this->{xml};
-	my %type  = %{$xml->getImageTypeAndAttributes()};
+	my %type  = %{$xml->getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
@@ -1133,7 +1133,7 @@ sub createImageRootAndBoot {
 	my $sxml       = $this->{xml};
 	my $cmdL       = $this->{cmdL};
 	my $idest      = $cmdL->getImageTargetDir();
-	my %stype      = %{$sxml->getImageTypeAndAttributes()};
+	my %stype      = %{$sxml->getImageTypeAndAttributes_legacy()};
 	my $imageTree  = $this->{imageTree};
 	my $baseSystem = $this->{baseSystem};
 	my $checkBase  = $cmdL->getRootTargetDir()."/".$baseSystem;
@@ -1482,7 +1482,7 @@ sub createImageLiveCD {
 	#==========================================
 	# Get system image type information
 	#------------------------------------------
-	my %stype= %{$sxml->getImageTypeAndAttributes()};
+	my %stype= %{$sxml->getImageTypeAndAttributes_legacy()};
 	my $vga  = $stype{vga};
 	#==========================================
 	# Get boot image name and compressed flag
@@ -2309,7 +2309,7 @@ sub createImageSplit {
 	#==========================================
 	# Get system image type information
 	#------------------------------------------
-	my %type = %{$sxml->getImageTypeAndAttributes()};
+	my %type = %{$sxml->getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
@@ -3070,7 +3070,7 @@ sub writeImageConfig {
 	my $configName = $main::global -> generateBuildImageName($this->{xml})
 		. '.config';
 	my $device = $xml -> getPXEDeployImageDevice ();
-	my %type = %{$xml -> getImageTypeAndAttributes()};
+	my %type = %{$xml -> getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# create .config for types which needs it
 	#------------------------------------------
@@ -3278,7 +3278,7 @@ sub postImage {
 	#==========================================
 	# Check image file system
 	#------------------------------------------
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	if ((! $type{filesystem}) && ($fstype)) {
 		$type{filesystem} = $fstype;
 	}
@@ -3396,7 +3396,7 @@ sub buildLogicalExtend {
 	my $encode = 0;
 	my $cipher = 0;
 	my $out    = $this->{imageDest}."/".$name;
-	my %type   = %{$xml->getImageTypeAndAttributes()};
+	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# a size is required
 	#------------------------------------------
@@ -3663,7 +3663,7 @@ sub mountLogicalExtend {
 	my $device = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
-	my %type   = %{$xml->getImageTypeAndAttributes()};
+	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $data;
 	my $code;
 	#==========================================
@@ -3802,7 +3802,7 @@ sub isBootImage {
 	if (! defined $name) {
 		return $this;
 	}
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $para = $type{type};
 	if (defined $type{filesystem}) {
 		$para = $para.":".$type{filesystem};
@@ -3962,7 +3962,7 @@ sub setupEXT2 {
 	my $cmdL    = $this->{cmdL};
 	my $kiwi    = $this->{kiwi};
 	my $xml     = $this->{xml};
-	my %type    = %{$xml->getImageTypeAndAttributes()};
+	my %type    = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $fsopts;
 	my $tuneopts;
 	my %FSopts = $main::global -> checkFSOptions(
@@ -4100,7 +4100,7 @@ sub setupSquashFS {
 	my $tree = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $imageTree = $this->{imageTree};
 	my $locator = new KIWILocator($kiwi);
 	if (! defined $tree) {
@@ -4393,7 +4393,7 @@ sub getSize {
 	my $fsopts  = $cmdL -> getFilesystemOptions();
 	my $isize   = $fsopts->[1];
 	my $iratio  = $fsopts->[2];
-	my %type    = %{$xml->getImageTypeAndAttributes()};
+	my %type    = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $fstype  = $type{type};
 	my $xmlsize;
 	if ($type{filesystem}) {

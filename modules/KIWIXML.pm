@@ -34,6 +34,7 @@ use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
 use KIWIXMLPreferenceData;
 use KIWIXMLRepositoryData;
+use KIWIXMLTypeData;
 use KIWIXMLValidator;
 use KIWISatSolver;
 
@@ -273,6 +274,12 @@ sub new {
 	# Populate imageConfig with preferences data from config tree
 	#------------------------------------------
 	if (! $this -> __populatePreferenceInfo() ) {
+		return;
+	}
+	#==========================================
+	# Set the default built type
+	#------------------------------------------
+	if (! $this -> __setDefaultBuiltType() ) {
 		return;
 	}
 	#==========================================
@@ -555,6 +562,55 @@ sub addRepositories {
 }
 
 #==========================================
+# getActiveProfileNames
+#------------------------------------------
+sub getActiveProfileNames {
+	# ...
+	# Return an array ref containing the names of the active profiles;
+	# this does not reveal the default (kiwi_default) name, as this is
+	# always active
+	# ---
+	my $this = shift;
+	my @selected = @{$this->{selectedProfiles}};
+	my @active = ();
+	for my $prof (@selected) {
+		if ($prof eq 'kiwi_default') {
+			next;
+		}
+		push @active, $prof;
+	}
+	return \@active;
+}
+
+#==========================================
+# getConfiguredTypeNames
+#------------------------------------------
+sub getConfiguredTypeNames {
+	# ...
+	# Return an array ref of image type names avaliable across the
+	# selected profiles.
+	# ---
+	my $this = shift;
+	my @typeNames;
+	for my $profName ( @{$this->{selectedProfiles}} ) {
+		if ( $this->{imageConfig}{$profName}{preferences}{types} ) {
+			my @names = keys %{ $this->{imageConfig}
+									->{$profName}
+									->{preferences}
+									->{types}
+								};
+			for my $name (@names) {
+				if ($name eq 'defaultType') {
+					next;
+				}
+				push @typeNames, $name;
+			}
+		}
+	}
+	return \@typeNames;
+}
+
+#==========================================
 # getDescriptionInfo
 #------------------------------------------
 sub getDescriptionInfo {
@@ -595,6 +651,19 @@ sub getDrivers {
 		push @driverInfo, KIWIXMLDriverData -> new($kiwi, $drv);
 	}
 	return \@driverInfo;
+}
+
+#==========================================
+# getImageType
+#------------------------------------------
+sub getImageType {
+	# ...
+	# Return a TypeData object for the selected build type
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $typeObj = KIWIXMLTypeData -> new($kiwi, $this->{selectedType});
+	return $typeObj;
 }
 
 #==========================================
@@ -687,6 +756,47 @@ sub ignoreRepositories {
 		delete $this->{imageConfig}->{$profName}{repoData}
 	}
 	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
+# setBuildType
+#------------------------------------------
+sub setBuildType {
+	# ...
+	# Set the type to be used as the build type
+	# ---
+	my $this     = shift;
+	my $typeName = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $typeName ) {
+		my $msg = 'setBuildType: no type name given, retaining current '
+			. 'build type setting.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my %availTypes = map { ($_ => 1) } @{ $this->getConfiguredTypeNames() };
+	if (! $availTypes{$typeName} ) {
+		my $msg = 'setBuildType: no type configuration exists for the '
+			. "given type '$typeName' in the current active profiles.";
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	for my $profName ( @{$this->{selectedProfiles}} ) {
+		if ( $this->{imageConfig}{$profName}{preferences}{types} ) {
+			my $typeDef = $this->{imageConfig}
+							->{$profName}
+							->{preferences}
+							->{types}
+							->{$typeName};
+			if ( $typeDef ) {
+				$this->{selectedType} = $typeDef;
+				last;
+			}
+		}
+	}
 	return $this;
 }
 
@@ -895,6 +1005,82 @@ sub __dumpInternalXMLDescription {
 }
 
 #==========================================
+# __genTypeHash
+#------------------------------------------
+sub __genTypeHash {
+	# ...
+	# Return a ref to a hash keyed by the image type values for all <type>
+	# definitions that are children of the given XML:ELEMENT object
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my @typeNodes = $node -> getChildrenByTagName('type');
+	my %types;
+	my $defType;
+	for my $type (@typeNodes) {
+		if (! $defType ) {
+			# If no type is marked as primary, the first type found is the
+			# default type
+			$defType = $type -> getAttribute('image');
+		}
+		my %typeData;
+		$typeData{boot}              = $type -> getAttribute('boot');
+		$typeData{bootkernel}        = $type -> getAttribute('bootkernel');
+		$typeData{bootloader}        = $type -> getAttribute('bootloader');
+		$typeData{bootpartsize}      = $type -> getAttribute('bootpartsize');
+		$typeData{bootprofile}       = $type -> getAttribute('bootprofile');
+		$typeData{boottimeout}       = $type -> getAttribute('boottimeout');
+		$typeData{checkprebuilt}     = $type -> getAttribute('checkprebuilt');
+		$typeData{compressed}        = $type -> getAttribute('compressed');
+		$typeData{devicepersistency} =
+					$type -> getAttribute('devicepersistency');
+#        $typeData{ec2config} = $this -> __genEC2ConfigHash($type);
+		$typeData{editbootconfig}    = $type -> getAttribute('editbootconfig');
+		$typeData{filesystem}        = $type -> getAttribute('filesystem');
+		$typeData{flags}             = $type -> getAttribute('flags');
+		$typeData{format}            = $type -> getAttribute('format');
+		$typeData{fsmountoptions}    = $type -> getAttribute('fsmountoptions');
+		$typeData{fsnocheck}         = $type -> getAttribute('fsnocheck');
+		$typeData{fsreadonly}        = $type -> getAttribute('fsreadonly');
+		$typeData{fsreadwrite}       = $type -> getAttribute('fsreadwrite');
+		$typeData{hybrid}            = $type -> getAttribute('hybrid');
+		$typeData{hybridpersistent}  =
+					$type -> getAttribute('hybridpersistent');
+		$typeData{image}             = $type -> getAttribute('image');
+		$typeData{installboot}       = $type -> getAttribute('installboot');
+		$typeData{installiso}        = $type -> getAttribute('installiso');
+		$typeData{installprovidefailsafe} =
+					$type -> getAttribute('installprovidefailsafe');
+		$typeData{installstick}      = $type -> getAttribute('installstick');
+		$typeData{kernelcmdline}     = $type -> getAttribute('kernelcmdline');
+		$typeData{luks}              = $type -> getAttribute('luks');
+#        $typeData{machine} = $this -> __genVMachineHash($type);
+#        $typeData{oemconfig} = $this -> __genOEMConfigHash($type);
+
+		my $prim = $type -> getAttribute('primary');
+		if ($prim && $prim eq 'true') {
+			$defType           = $typeData{image};
+			$typeData{primary} = 'true';
+		} else {
+			$typeData{primary} = 'false';
+		}
+
+#        $typeData{pxedeploy} = $this -> __genPXEDeployHash($type);
+		$typeData{ramonly}           = $type -> getAttribute('ramonly');
+
+		$typeData{size}  = $this -> __getChildNodeTextValue($type, 'size');
+
+#        $typeData{split} = $this -> __genSplitDataHash($type);
+#        $typeData{systemdisk} = $this -> __genSystemDiskHash($type);
+		$typeData{vga}               = $type -> getAttribute('vga');
+		$typeData{volid}             = $type -> getAttribute('volid');
+		$types{$typeData{image}} = \%typeData;
+	}
+	$types{defaultType} = $defType;
+	return \%types;
+}
+
+#==========================================
 # __getChildNodeTextValue
 #------------------------------------------
 sub __getChildNodeTextValue {
@@ -981,6 +1167,10 @@ sub __mergePreferenceData {
 			if ($baseTypes && $extTypes) {
 				my @defTypes = keys %{$baseTypes};
 				for my $type (@defTypes) {
+					# Ignore the internal indicator for the default built type
+					if ($type eq 'defaultType') {
+						next;
+					}
 					if ( $extTypes->{$type} ) {
 						my $msg = 'Error merging preferences data, found '
 							. "definition for type '$type' in both "
@@ -1180,10 +1370,13 @@ sub __populatePreferenceInfo {
 
 		my $tz              = $this -> __getChildNodeTextValue(
 										$prefInfo, 'timezone');
-		#my $types = $this -> __genTypeHash($prefInfo);
+
+		my $types = $this -> __genTypeHash($prefInfo);
+
 		my $vers            = $this -> __getChildNodeTextValue(
 										$prefInfo, 'version');
-		my %prefs = ( bootloader_theme     => $bootLoaderTheme,
+		my %prefs = (
+					bootloader_theme     => $bootLoaderTheme,
 					bootsplash_theme     => $booSplashTheme,
 					defaultdestination   => $defaultDest,
 					defaultprebuilt      => $defaultPreBlt,
@@ -1197,7 +1390,7 @@ sub __populatePreferenceInfo {
 					rpm_force            => $rpmForce,
 					showlicense          => $showLic,
 					timezone             => $tz,
-#                      types                => $types,
+					types                => $types,
 					version              => $vers
 					);
 		for my $profName (@pNameLst) {
@@ -1332,6 +1525,78 @@ sub __populateRepositoryInfo {
 }
 
 #==========================================
+# __setDefaultBuiltType
+#------------------------------------------
+sub __setDefaultBuiltType {
+	# ...
+	# Set the default built type, which upon object construction is also the
+	# the selected built type.
+	# The default built type is the first <type> specification processed or
+	# the one type marked with primary="true" across all the selected
+	# profiles. Unless a type is marked primary, the default type of the
+	# default profile always wins.
+	# The default type is a ref to a hash that is set as the default
+	# type as differentiation by name is not sufficient, as multiple profiles
+	# my have the same image type definition, which is valid as long as those
+	# profiles are not processed together.
+	# ---
+	my $this = shift;
+	my $defTypeName = $this->{imageConfig}
+						->{kiwi_default}
+						->{preferences}
+						->{types}
+						->{defaultType};
+	my $defType = $this->{imageConfig}
+					->{kiwi_default}
+					->{preferences}
+					->{types}
+					->{$defTypeName};
+	my $isPrimary;
+	if ($defType->{primary} && $defType->{primary} eq 'true') {
+		$isPrimary = 1;
+	}
+	for my $profName ( @{$this->{selectedProfiles}} ) {
+		if ($profName eq 'kiwi_default') {
+			# Already used
+			next;
+		}
+		if ( $this->{imageConfig}{$profName}{preferences}{types} ) {
+			my $profDefTypeName = $this->{imageConfig}
+									->{$profName}
+									->{preferences}
+									->{types}
+									->{defaultType};
+			if (! $profDefTypeName ) {
+				# This profile has no types defined
+				next;
+			}
+			my $profDefTypeIsPrim = $this->{imageConfig}
+										->{$profName}
+										->{preferences}
+										->{types}
+										->{$profDefTypeName}
+										->{primary};
+			if ($profDefTypeIsPrim && $profDefTypeIsPrim eq 'true') {
+				if ($isPrimary) {
+					my $kiwi = $this->{kiwi};
+					my $msg = 'Prosessing two profiles with a type marked as '
+						. '"primary", cannot resolve build type.';
+					$kiwi -> error($msg);
+					$kiwi -> failed();
+					return;
+				}
+				$defType = $this->{imageConfig}
+								->{$profName}
+								->{preferences}
+								->{types}
+								->{$profDefTypeName};
+			}
+		}
+	}
+	$this->{selectedType} = $defType;
+	return $this;
+}
+#==========================================
 # __verifyProfNames
 #------------------------------------------
 sub __verifyProfNames {
@@ -1425,27 +1690,6 @@ sub writeXMLDescription {
 		);
 	}
 	return $this;
-}
-
-#==========================================
-# getActiveProfileNames
-#------------------------------------------
-sub getActiveProfileNames {
-	# ...
-	# Return an array ref containing the names of the active profiles;
-	# this does not reveal the default (kiwi_default) name, as this is
-	# always active
-	# ---
-	my $this = shift;
-	my @selected = @{$this->{selectedProfiles}};
-	my @active = ();
-	for my $prof (@selected) {
-		if ($prof eq 'kiwi_default') {
-			next;
-		}
-		push @active, $prof;
-	}
-	return \@active;
 }
 
 #==========================================
@@ -1669,23 +1913,6 @@ sub getImageSizeBytes {
 }
 
 #==========================================
-# getEditBootConfig
-#------------------------------------------
-sub getEditBootConfig {
-	# ...
-	# Get the type specific editbootconfig value.
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $editBoot = $tnode -> getAttribute ("editbootconfig");
-	if ((! defined $editBoot) || ("$editBoot" eq "")) {
-		return;
-	}
-	return $editBoot;
-}
-
-#==========================================
 # getEditBootInstall
 #------------------------------------------
 sub getEditBootInstall {
@@ -1700,25 +1927,6 @@ sub getEditBootInstall {
 		return;
 	}
 	return $editBoot;
-}
-
-#==========================================
-# getImageTypeAndAttributes
-#------------------------------------------
-sub getImageTypeAndAttributes {
-	# ...
-	# return typeinfo hash for selected build type
-	# ---
-	my $this     = shift;
-	my $typeinfo = $this->{typeInfo};
-	my $imageType= $this->{imageType};
-	if (! $typeinfo) {
-		return;
-	}
-	if (! $imageType) {
-		return;
-	}
-	return $typeinfo->{$imageType};
 }
 
 #==========================================
@@ -3148,7 +3356,7 @@ sub getImageConfig {
 	#==========================================
 	# preferences attributes and text elements
 	#------------------------------------------
-	my %type  = %{$this->getImageTypeAndAttributes()};
+	my %type  = %{$this->getImageTypeAndAttributes_legacy()};
 	my @delp  = $this -> getDeleteList();
 	my $iver  = $this -> getImageVersion();
 	my $size  = $this -> getImageSize();
@@ -5178,6 +5386,23 @@ sub getDefaultPrebuiltDir_legacy {
 }
 
 #==========================================
+# getEditBootConfig_legacy
+#------------------------------------------
+sub getEditBootConfig_legacy {
+	# ...
+	# Get the type specific editbootconfig value.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $editBoot = $tnode -> getAttribute ("editbootconfig");
+	if ((! defined $editBoot) || ("$editBoot" eq "")) {
+		return;
+	}
+	return $editBoot;
+}
+
+#==========================================
 # getImageDefaultDestination_legacy
 #------------------------------------------
 sub getImageDefaultDestination_legacy {
@@ -5207,6 +5432,25 @@ sub getImageDefaultRoot_legacy {
 	my $node = $this -> __getPreferencesNodeByTagName ("defaultroot");
 	my $root = $node -> getElementsByTagName ("defaultroot");
 	return $root;
+}
+
+#==========================================
+# getImageTypeAndAttributes_legacy
+#------------------------------------------
+sub getImageTypeAndAttributes_legacy {
+	# ...
+	# return typeinfo hash for selected build type
+	# ---
+	my $this     = shift;
+	my $typeinfo = $this->{typeInfo};
+	my $imageType= $this->{imageType};
+	if (! $typeinfo) {
+		return;
+	}
+	if (! $imageType) {
+		return;
+	}
+	return $typeinfo->{$imageType};
 }
 
 #==========================================
@@ -5838,7 +6082,7 @@ sub __addDefaultStripNode {
 	my $kiwi   = $this->{kiwi};
 	my $image  = $this->{imgnameNodeList} -> get_node(1);
 	my @snodes = $image -> getElementsByTagName ("strip");
-	my %attr   = %{$this->getImageTypeAndAttributes()};
+	my %attr   = %{$this->getImageTypeAndAttributes_legacy()};
 	my $haveDelete = 0;
 	my $haveTools  = 0;
 	my $haveLibs   = 0;

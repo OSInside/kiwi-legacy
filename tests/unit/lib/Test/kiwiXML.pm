@@ -1976,6 +1976,37 @@ sub test_getConfigName {
 }
 
 #==========================================
+# test_getConfiguredTypeNames
+#------------------------------------------
+sub test_getConfiguredTypeNames {
+	# ...
+	# Test the getConfiguredTypeNames method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $typeNames = $xml -> getConfiguredTypeNames();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expected = ( 'oem', 'vmx' );
+	$this -> assert_array_equal(\@expected, $typeNames);
+	return;
+}
+
+#==========================================
 # test_getDefaultPrebuiltDir_legacy
 #------------------------------------------
 sub test_getDefaultPrebuiltDir_legacy {
@@ -2214,9 +2245,9 @@ sub test_getEc2Config {
 }
 
 #==========================================
-# test_getEditBootConfig
+# test_getEditBootConfig_legacy
 #------------------------------------------
-sub test_getEditBootConfig {
+sub test_getEditBootConfig_legacy {
 	# ...
 	# Verify proper return of getEditBootConfig method
 	# ---
@@ -2226,7 +2257,7 @@ sub test_getEditBootConfig {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $path = $xml -> getEditBootConfig();
+	my $path = $xml -> getEditBootConfig_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2469,11 +2500,11 @@ sub test_getImageSizeBytesNotAdditive {
 }
 
 #==========================================
-# test_getImageTypeAndAttributes
+# test_getImageType
 #------------------------------------------
-sub test_getImageTypeAndAttributesSimple {
+sub test_getImageType {
 	# ...
-	# Verify proper return of getImageTypeAndAttributes method
+	# Verify proper return of getImageType method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -2481,7 +2512,66 @@ sub test_getImageTypeAndAttributesSimple {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $typeInfo = $xml -> getImageTypeAndAttributes();
+	my $typeInfo = $xml -> getImageType();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify that we got the expected type
+	my $imageType = $typeInfo -> getImageType();
+	$this -> assert_str_equals('vmx', $imageType);
+	return;
+}
+
+#==========================================
+# test_getImageTypeProfiles
+#------------------------------------------
+sub test_getImageTypeProfiles {
+	# ...
+	# Verify proper return of getImageType method with multiple type
+	# definitions and profiles.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $typeInfo = $xml -> getImageType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify that we got the expected type
+	my $imageType = $typeInfo -> getImageType();
+	$this -> assert_str_equals('oem', $imageType);
+	return;
+}
+
+#==========================================
+# test_getImageTypeAndAttributes_legacy
+#------------------------------------------
+sub test_getImageTypeAndAttributes_legacy {
+	# ...
+	# Verify proper return of getImageTypeAndAttributes_legacy method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $typeInfo = $xml -> getImageTypeAndAttributes_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3712,6 +3802,47 @@ sub test_getPreferencesProfilesWithConflict {
 	my $expected = 'Error merging preferences data, found data for '
 		. "'defaultroot' in both preference definitions, ambiguous "
 		. 'operation.';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($prefDataObj);
+	return;
+}
+
+#==========================================
+# test_getPreferencesProfilesWithConflictType
+#------------------------------------------
+sub test_getPreferencesProfilesWithConflictType {
+	# ...
+	# Verify that getPreferences reports the proper error for
+	# preference data in profiles that conflicts for type definitions
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @newProfs = ( 'profB' );
+	$xml = $xml -> setSelectionProfileNames(\@newProfs);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $prefDataObj = $xml -> getPreferences();
+	$msg = $kiwi -> getMessage();
+	my $expected = 'Error merging preferences data, found definition for '
+		. "type 'vmx' in both preference definitions, ambiguous operation.";
 	$this -> assert_str_equals($expected, $msg);
 	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -4999,6 +5130,129 @@ sub test_setArchInvalid {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
+}
+
+#==========================================
+# test_setBuildType
+#------------------------------------------
+sub test_setBuildType {
+	# ...
+	# Test the setBuildType method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$xml = $xml -> setBuildType('vmx');
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $typeInfo = $xml -> getImageType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify that we got the expected type
+	my $imageType = $typeInfo -> getImageType();
+	$this -> assert_str_equals('vmx', $imageType);
+	return;
+}
+
+#==========================================
+# test_setBuildTypeInvalidArg
+#------------------------------------------
+sub test_setBuildTypeInvalidArg {
+	# ...
+	# Test the setBuildType method with an invalid argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $res = $xml -> setBuildType('iso');
+	$msg = $kiwi -> getMessage();
+	my $expected = 'setBuildType: no type configuration exists for the '
+			. "given type 'iso' in the current active profiles.";
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $typeInfo = $xml -> getImageType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify that we got the expected type
+	my $imageType = $typeInfo -> getImageType();
+	$this -> assert_str_equals('oem', $imageType);
+	return;
+}
+
+#==========================================
+# test_setBuildTypeNoArg
+#------------------------------------------
+sub test_setBuildTypeNoArg {
+	# ...
+	# Test the setBuildType method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $res = $xml -> setBuildType();
+	$msg = $kiwi -> getMessage();
+	my $expected = 'setBuildType: no type name given, retaining current '
+		. 'build type setting.';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $typeInfo = $xml -> getImageType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify that we got the expected type
+	my $imageType = $typeInfo -> getImageType();
+	$this -> assert_str_equals('oem', $imageType);
 	return;
 }
 

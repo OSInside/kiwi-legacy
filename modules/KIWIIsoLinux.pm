@@ -702,9 +702,9 @@ sub createISO {
 	my $xml  = $this -> {xml};
 	my $cmdln= "$prog $para -o $dest $src $ldir 2>&1";
 	if ($cmdL) {
-		my $editBoot = $cmdL -> getEditBootConfig();
+		my $editBoot = $cmdL -> getEditBootConfig_legacy();
 		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootConfig();
+			$editBoot = $xml -> getEditBootConfig_legacy();
 		}
 		if (($editBoot) && (-e $editBoot)) {
 			$kiwi -> info ("Calling pre bootloader install script...\n");
@@ -730,7 +730,7 @@ sub createISO {
 			my @opts = ("'".$cmdln."'");
 			system ("cd $src && bash --norc -c \"$editBoot @opts\"");
 		}
-    }
+	}
 	$this -> cleanISO();
 	return $this;
 }

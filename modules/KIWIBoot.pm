@@ -419,7 +419,7 @@ sub new {
 	# check framebuffer vga value
 	#------------------------------------------
 	if (defined $xml) {
-		my %type = %{$xml->getImageTypeAndAttributes()};
+		my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 		if ($type{vga}) {
 			$vga = $type{vga};
 		}
@@ -636,7 +636,7 @@ sub setupInstallCD {
 	# read config XML attributes
 	#------------------------------------------
 	if (defined $xml) {
-		%type = %{$xml->getImageTypeAndAttributes()};
+		%type = %{$xml->getImageTypeAndAttributes_legacy()};
 	}
 	#==========================================
 	# check for volume id
@@ -1110,7 +1110,7 @@ sub setupInstallStick {
 	# read config XML attributes
 	#------------------------------------------
 	if (defined $xml) {
-		%type = %{$xml->getImageTypeAndAttributes()};
+		%type = %{$xml->getImageTypeAndAttributes_legacy()};
 	}
 	#==========================================
 	# setup boot loader type
@@ -1654,7 +1654,7 @@ sub setupBootDisk {
 	#==========================================
 	# load type attributes...
 	#------------------------------------------
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# Check for LVM...
 	#------------------------------------------
@@ -3379,7 +3379,7 @@ sub setupBootLoaderConfiguration {
 	#------------------------------------------
 	my $defaultBootNr = 0;
 	if ($xml) {
-		%type = %{$xml->getImageTypeAndAttributes()};
+		%type = %{$xml->getImageTypeAndAttributes_legacy()};
 		$cmdline  = $type{cmdline};
 	}
 	if ($type =~ /^KIWI CD Boot/) {
@@ -4415,10 +4415,10 @@ sub setupBootLoaderConfiguration {
 	# Check for edit boot config
 	#------------------------------------------
 	if ($cmdL) {
-		my $editBoot = $cmdL -> getEditBootConfig();
+		my $editBoot = $cmdL -> getEditBootConfig_legacy();
 		my $idesc;
 		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootConfig();
+			$editBoot = $xml -> getEditBootConfig_legacy();
 		}
 		if ($editBoot) {
 			if ($this->{originXMLPath}) {
@@ -5697,7 +5697,7 @@ sub setupFilesystem {
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my $cmdL   = $this->{cmdL};
-	my %type   = %{$xml->getImageTypeAndAttributes()};
+	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
 	my %FSopts = $main::global -> checkFSOptions(
 		@{$cmdL -> getFilesystemOptions()}
 	);
@@ -5955,7 +5955,7 @@ sub __getBootSize {
 	my $arch   = qxx ("uname -m"); chomp $arch;
 	my $bbytes = qxx ("du -s --block-size=1 $boot | cut -f1"); chomp $bbytes;
 	my $needMB = sprintf ("%.0f",($bbytes / 1048576) + 15);
-	my %type   = %{$xml->getImageTypeAndAttributes()};
+	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $minMB  = 150;
 	if (defined $type{bootpartsize}) {
 		$minMB = $type{bootpartsize};
