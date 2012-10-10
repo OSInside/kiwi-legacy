@@ -5134,8 +5134,6 @@ sub getHttpsRepositoryCredentials_legacy {
 	# ...
 	# If any repository is configered with credentials return the username
 	# and password
-	# TODO: This method is to be deleted with the switch to the new data
-	#       model
 	# ---
 	my $this = shift;
 	my @repoNodes = $this->{repositNodeList} -> get_nodelist();
@@ -5307,7 +5305,6 @@ sub getRepoNodeList_legacy {
 	# ...
 	# Return the current <repository> list which consists
 	# of XML::LibXML::Element object pointers
-	# TODO: This method is to be eliminated when we move to the new data model
 	# ---
 	my $this = shift;
 	return $this->{repositNodeList};
