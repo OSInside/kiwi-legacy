@@ -3241,6 +3241,9 @@ sub getImageConfig {
 			my $attrname = "size";
 			my $attrval  = $lvmparts{$vol}->[0];
 			my $absolute = $lvmparts{$vol}->[1];
+			if (! $attrval) {
+				next;
+			}
 			if (! $absolute) {
 				$attrname = "freespace";
 			}
@@ -6079,6 +6082,9 @@ sub __updateDescriptionFromChangeSet {
 			my $attrname = "size";
 			my $attrval  = $lvmparts{$vol}->[0];
 			my $absolute = $lvmparts{$vol}->[1];
+			if (! $attrval) {
+				next;
+			}
 			if (! $absolute) {
 				$attrname = "freespace";
 			}
