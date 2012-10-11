@@ -90,14 +90,15 @@ sub test_ctor_initConflictsPostInst {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( 'oem-bootwait' => 1,
-				'oem-shutdown' => 1
+	my %init = (
+				oem_bootwait => 1,
+				oem_shutdown => 1
 			);
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Conflicting post-install settings only one of '
-				. "'oem-bootwait oem-reboot oem-reboot-interactive "
-				. "oem-shutdown oem-shutdown-interactive' may be set.";
+				. "'oem_bootwait oem_reboot oem_reboot_interactive "
+				. "oem_shutdown oem_shutdown_interactive' may be set.";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -118,7 +119,7 @@ sub test_ctor_initConflictsSwap {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ('oem-swapsize' => '4096');
+	my %init = (oem_swapsize => '4096');
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Conflicting swap settings, specified swap size, but '
@@ -143,8 +144,9 @@ sub test_ctor_initConflictsSwapFalse {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( 'oem-swap'     => 'false',
-				'oem-swapsize' => '4096'
+	my %init = (
+				oem_swap     => 'false',
+				oem_swapsize => '4096'
 			);
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
@@ -170,7 +172,7 @@ sub test_ctor_initConflictsUnattended {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ('oem-unattended-id' => '/dev/sdc');
+	my %init = (oem_unattended_id => '/dev/sdc');
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Conflicting unattended install settings, specified '
@@ -195,8 +197,9 @@ sub test_ctor_initConflictsUnattendedFalse {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( 'oem-unattended'    => 'false',
-				'oem-unattended-id' => '/dev/sdb'
+	my %init = (
+				oem_unattended    => 'false',
+				oem_unattended_id => '/dev/sdb'
 			);
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
@@ -222,8 +225,9 @@ sub test_ctor_initUnsupportedData {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( firmwaredriver => 'b43',
-				'oem-swapsize' => '2048',
+	my %init = (
+				firmwaredriver => 'b43',
+				oem_swapsize   => '2048',
 			);
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
@@ -248,11 +252,12 @@ sub test_ctor_wInit {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( 'oem-boot-title' => 'test-system',
-				'oem-bootwait'   => 'true',
-				'oem-shutdown'   => 'false',
-				'oem-swap'       => 'true',
-				'oem-swapsize'   => '2048',
+	my %init = (
+				oem_boot_title => 'test-system',
+				oem_bootwait   => 'true',
+				oem_shutdown   => 'false',
+				oem_swap       => 'true',
+				oem_swapsize   => '2048',
 			);
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
@@ -336,7 +341,7 @@ sub test_getBootwait {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	$init->{'oem-bootwait'} = 'false';
+	$init->{oem_bootwait} = 'false';
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -457,7 +462,7 @@ sub test_getReboot {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	$init->{'oem-reboot'} = 'true';
+	$init->{oem_reboot} = 'true';
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -488,7 +493,7 @@ sub test_getRebootInteractive {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	$init->{'oem-reboot-interactive'} = 'false';
+	$init->{oem_reboot_interactive} = 'false';
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -579,7 +584,7 @@ sub test_getShutdown {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	$init->{'oem-shutdown'} = 'true';
+	$init->{oem_shutdown} = 'true';
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -610,7 +615,7 @@ sub test_getShutdownInteractive {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	$init->{'oem-shutdown-interactive'} = 'false';
+	$init->{oem_shutdown_interactive} = 'false';
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -988,7 +993,7 @@ sub test_setBootwaitNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	$init->{'oem-reboot'} = 'true';
+	$init->{oem_reboot} = 'true';
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
 	$confDataObj = $confDataObj -> setBootwait();
 	my $msg = $kiwi -> getMessage();
@@ -1263,7 +1268,7 @@ sub test_setRebootNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	$init->{'oem-shutdown'} = 'true';
+	$init->{oem_shutdown} = 'true';
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
 	$confDataObj = $confDataObj -> setReboot();
 	my $msg = $kiwi -> getMessage();
@@ -1355,7 +1360,7 @@ sub test_setRebootInteractiveNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	$init->{'oem-bootwait'} = 'true';
+	$init->{oem_bootwait} = 'true';
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
 	$confDataObj = $confDataObj -> setRebootInteractive();
 	my $msg = $kiwi -> getMessage();
@@ -1569,7 +1574,7 @@ sub test_setShutdownNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	$init->{'oem-reboot'} = 'true';
+	$init->{oem_reboot} = 'true';
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
 	$confDataObj = $confDataObj -> setShutdown();
 	my $msg = $kiwi -> getMessage();
@@ -1661,7 +1666,7 @@ sub test_setShutdownInteractiveNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	$init->{'oem-bootwait'} = 'true';
+	$init->{oem_bootwait} = 'true';
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
 	$confDataObj = $confDataObj -> setShutdownInteractive();
 	my $msg = $kiwi -> getMessage();
@@ -2087,19 +2092,20 @@ sub __getBaseInitHash {
 	# settings.
 	# ---
 	my $this = shift;
-	my %init = ( 'oem-align-partition'   => '4k',
-				'oem-boot-title'        => 'test build',
-				'oem-inplace-recovery'  => 'true',
-				'oem-kiwi-initrd'       => 'false',
-				'oem-partition-install' => 'false',
-				'oem-recovery'          => 'true',
-				'oem-recoveryID'        => '1234',
-				'oem-silent-boot'       => 'true',
-				'oem-swap'              => 'true',
-				'oem-swapsize'          => '2048',
-				'oem-systemsize'        => '8192',
-				'oem-unattended'        => 'true',
-				'oem-unattended-id'     => '1'
+	my %init = (
+				oem_align_partition   => '4k',
+				oem_boot_title        => 'test build',
+				oem_inplace_recovery  => 'true',
+				oem_kiwi_initrd       => 'false',
+				oem_partition_install => 'false',
+				oem_recovery          => 'true',
+				oem_recoveryID        => '1234',
+				oem_silent_boot       => 'true',
+				oem_swap              => 'true',
+				oem_swapsize          => '2048',
+				oem_systemsize        => '8192',
+				oem_unattended        => 'true',
+				oem_unattended_id     => '1'
 			);
 	return \%init;
 }

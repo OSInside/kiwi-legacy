@@ -59,11 +59,11 @@ sub new {
 		# Check for unsupported entries
 		my %initStruct = %{$init};
 		my %supported = map { ($_ => 1) } qw(
-			oem-align-partition oem-boot-title oem-bootwait
-			oem-inplace-recovery oem-kiwi-initrd oem-partition-install
-			oem-reboot oem-reboot-interactive oem-recovery oem-recoveryID
-			oem-shutdown oem-shutdown-interactive oem-silent-boot oem-swap
-			oem-swapsize oem-systemsize oem-unattended oem-unattended-id
+			oem_align_partition oem_boot_title oem_bootwait
+			oem_inplace_recovery oem_kiwi_initrd oem_partition_install
+			oem_reboot oem_reboot_interactive oem_recovery oem_recoveryID
+			oem_shutdown oem_shutdown_interactive oem_silent_boot oem_swap
+			oem_swapsize oem_systemsize oem_unattended oem_unattended_id
 		);
 		for my $key (keys %initStruct) {
 			if (! $supported{"$key"} ) {
@@ -83,24 +83,24 @@ sub new {
 		if (! $this -> __noConflictingSettingUnattended($init)) {
 			return;
 		}
-		$this->{alignPart}      = $init->{'oem-align-partition'};
-		$this->{bootTitle}      = $init->{'oem-boot-title'};
-		$this->{bootwait}       = $init->{'oem-bootwait'};
-		$this->{inplaceRecover} = $init->{'oem-inplace-recovery'};
-		$this->{kiwiInitrd}     = $init->{'oem-kiwi-initrd'};
-		$this->{partInstall}    = $init->{'oem-partition-install'};
-		$this->{reboot}         = $init->{'oem-reboot'};
-		$this->{rebootInter}    = $init->{'oem-reboot-interactive'};
-		$this->{recovery}       = $init->{'oem-recovery'};
-		$this->{recoveryID}     = $init->{'oem-recoveryID'};
-		$this->{shutdown}       = $init->{'oem-shutdown'};
-		$this->{shutdownInter}  = $init->{'oem-shutdown-interactive'};
-		$this->{silentBoot}     = $init->{'oem-silent-boot'};
-		$this->{swap}           = $init->{'oem-swap'};
-		$this->{swapSize}       = $init->{'oem-swapsize'};
-		$this->{systemSize}     = $init->{'oem-systemsize'};
-		$this->{unattended}     = $init->{'oem-unattended'};
-		$this->{unattendedID}   = $init->{'oem-unattended-id'};
+		$this->{alignPart}      = $init->{oem_align_partition};
+		$this->{bootTitle}      = $init->{oem_boot_title};
+		$this->{bootwait}       = $init->{oem_bootwait};
+		$this->{inplaceRecover} = $init->{oem_inplace_recovery};
+		$this->{kiwiInitrd}     = $init->{oem_kiwi_initrd};
+		$this->{partInstall}    = $init->{oem_partition_install};
+		$this->{reboot}         = $init->{oem_reboot};
+		$this->{rebootInter}    = $init->{oem_reboot_interactive};
+		$this->{recovery}       = $init->{oem_recovery};
+		$this->{recoveryID}     = $init->{oem_recoveryID};
+		$this->{shutdown}       = $init->{oem_shutdown};
+		$this->{shutdownInter}  = $init->{oem_shutdown_interactive};
+		$this->{silentBoot}     = $init->{oem_silent_boot};
+		$this->{swap}           = $init->{oem_swap};
+		$this->{swapSize}       = $init->{oem_swapsize};
+		$this->{systemSize}     = $init->{oem_systemsize};
+		$this->{unattended}     = $init->{oem_unattended};
+		$this->{unattendedID}   = $init->{oem_unattended_id};
 	}
 
 	return $this;
@@ -684,8 +684,8 @@ sub __noConflictingSettingPostInst {
 	# ---
 	my $this = shift;
 	my $init = shift;
-	my @potConflict = qw ( oem-bootwait oem-reboot oem-reboot-interactive
-						oem-shutdown oem-shutdown-interactive
+	my @potConflict = qw ( oem_bootwait oem_reboot oem_reboot_interactive
+						oem_shutdown oem_shutdown_interactive
 						);
 	my $found = 0;
 	for my $setting (@potConflict) {
@@ -713,8 +713,8 @@ sub __noConflictingSettingSwap {
 	# ---
 	my $this = shift;
 	my $init = shift;
-	if ($init->{'oem-swapsize'}) {
-		if (! $init->{'oem-swap'} || $init->{'oem-swap'} eq 'false') {
+	if ($init->{oem_swapsize}) {
+		if (! $init->{oem_swap} || $init->{oem_swap} eq 'false') {
 			my $kiwi = $this -> {kiwi};
 			my $msg = 'Conflicting swap settings, specified swap size, but '
 				. 'swap is disabled.';
@@ -735,9 +735,9 @@ sub __noConflictingSettingUnattended  {
 	# ---
 	my $this = shift;
 	my $init = shift;
-	if ($init->{'oem-unattended-id'}) {
-		if (! $init->{'oem-unattended'}
-			|| $init->{'oem-unattended'}  eq 'false') {
+	if ($init->{oem_unattended_id}) {
+		if (! $init->{oem_unattended}
+			|| $init->{oem_unattended}  eq 'false') {
 			my $kiwi = $this -> {kiwi};
 			my $msg = 'Conflicting unattended install settings, specified '
 				. 'unattended target ID but unattended install is disabled.';
