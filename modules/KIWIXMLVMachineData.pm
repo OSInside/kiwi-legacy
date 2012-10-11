@@ -43,19 +43,7 @@ sub new {
 	#    confEntries   = (),
 	#    desiredCPUCnt = '',
 	#    desiredMemory = '',
-	#    disks         = {
-	#        system = {
-	#            controller = '',
-	#            device     = '',
-	#            disktype 	= '',
-	#            id         = ''
-	#        }
-	#    }
 	#    domain        = '',
-	#    dvd           = {
-	#        controller = '',
-	#        id         = ''
-	#    }
 	#    guestOS       = '',
 	#    maxCPUCnt     = '',
 	#    maxMemory     = '',
@@ -63,7 +51,20 @@ sub new {
 	#    minCPUCnt     = '',
 	#    minMemory     = '',
 	#    ncpus         = '',
-	#    nics          = {
+	#    ovftype       = ''
+	#    vmdisks = {
+	#        system = {
+	#            controller = '',
+	#            device     = '',
+	#            disktype 	= '',
+	#            id         = ''
+	#        }
+	#    }
+	#    vmdvd  = {
+	#        controller = '',
+	#        id         = ''
+	#    }
+	#    vmnics = {
 	#        ID[+] = {
 	#            driver    = '',
 	#            interface = '',
@@ -71,7 +72,6 @@ sub new {
 	#            mode      = ''
 	#        }
 	#    }
-	#    ovftype       = ''
 	# }
 	#
 	# Having the disks as a two level hashref allows us to support
@@ -119,12 +119,15 @@ sub new {
 		$this->{minMemory}     = $init->{min_memory};
 		$this->{ncpus}         = $init->{ncpus};
 		$this->{ovftype}       = $init->{ovftype};
-		$this->{confEntries}   = $init->{'vmconfig-entries'};
-		$this->{disks}         = $init->{vmdisks};
-		$this->{dvd}           = $init->{vmdvd};
-		$this->{nics}          = $init->{vmnics}
+		$this->{confEntries}   = $init->{vmconfig_entries};
+		$this->{vmdisks}       = $init->{vmdisks};
+		$this->{vmdvd}         = $init->{vmdvd};
+		$this->{vmnics}        = $init->{vmnics}
 	}
 	
+	if (! $this->{HWversion} ) {
+		$this->{HWversion} = '4';
+	}
 	return $this;
 }
 
@@ -172,14 +175,14 @@ sub createNICConfig {
 										'createNICConfig')) {
 			return;
 		}
-		$this->{nics}{$newID} = $nicInit;
+		$this->{vmnics}{$newID} = $nicInit;
 		return $newID;
 	}
 	if (! $this->__interfaceIsUnique($nicInit, 'createNICConfig')) {
 		return;
 	}
 	my %newConfig = ( interface => $nicInit );
-	$this->{nics}{$newID} = \%newConfig;
+	$this->{vmnics}{$newID} = \%newConfig;
 	return $newID;
 }
 
@@ -213,10 +216,10 @@ sub getDVDController {
 	# Return the DVD controller setting
 	# ---
 	my $this = shift;
-	if (! $this->{dvd}) {
+	if (! $this->{vmdvd}) {
 		return;
 	}
-	return $this->{dvd}{controller};
+	return $this->{vmdvd}{controller};
 }
 
 #==========================================
@@ -227,10 +230,10 @@ sub getDVDID {
 	# Return the DVD ID setting
 	# ---
 	my $this = shift;
-	if (! $this->{dvd}) {
+	if (! $this->{vmdvd}) {
 		return;
 	}
-	return $this->{dvd}{id};
+	return $this->{vmdvd}{id};
 }
 
 #==========================================
@@ -355,7 +358,7 @@ sub getNICDriver {
 	if (! $this->__isNICIDValid($id, 'getNICDriver')) {
 		return;
 	}
-	return $this->{nics}{$id}{driver};
+	return $this->{vmnics}{$id}{driver};
 }
 
 #==========================================
@@ -366,7 +369,7 @@ sub getNICIDs {
 	# Return an array ref of IDs for configured NICs
 	# ---
 	my $this = shift;
-	my @nicIDs = keys %{$this->{nics}};
+	my @nicIDs = keys %{$this->{vmnics}};
 	my @sorted = sort @nicIDs;
 	return \@sorted;
 }
@@ -383,7 +386,7 @@ sub getNICInterface {
 	if (! $this->__isNICIDValid($id, 'getNICInterface')) {
 		return;
 	}
-	return $this->{nics}{$id}{interface};
+	return $this->{vmnics}{$id}{interface};
 }
 
 #==========================================
@@ -399,7 +402,7 @@ sub getNICMAC {
 	if (! $this->__isNICIDValid($id, 'getNICMAC')) {
 		return;
 	}
-	return $this->{nics}{$id}{mac};
+	return $this->{vmnics}{$id}{mac};
 }
 
 #==========================================
@@ -414,7 +417,7 @@ sub getNICMode {
 	if (! $this->__isNICIDValid($id, 'getNICMode')) {
 		return;
 	}
-	return $this->{nics}{$id}{mode};
+	return $this->{vmnics}{$id}{mode};
 }
 
 #==========================================
@@ -447,7 +450,7 @@ sub getSystemDiskController {
 	# Return the controller configured for the system disk
 	# ---
 	my $this = shift;
-	return $this->{disks}{system}{controller};
+	return $this->{vmdisks}{system}{controller};
 }
 
 #==========================================
@@ -458,7 +461,7 @@ sub getSystemDiskDevice {
 	# Return the configured device ID for the system disk
 	# ---
 	my $this = shift;
-	return $this->{disks}{system}{device};
+	return $this->{vmdisks}{system}{device};
 }
 
 #==========================================
@@ -469,7 +472,7 @@ sub getSystemDiskType {
 	# Return the configured device type for the system disk
 	# ---
 	my $this = shift;
-	return $this->{disks}{system}{disktype};
+	return $this->{vmdisks}{system}{disktype};
 }
 
 #==========================================
@@ -480,7 +483,7 @@ sub getSystemDiskID {
 	# Return the disk ID configured for the system disk
 	# ---
 	my $this = shift;
-	return $this->{disks}{system}{id};
+	return $this->{vmdisks}{system}{id};
 }
 
 #==========================================
@@ -556,11 +559,11 @@ sub setDVDController {
 		$kiwi -> failed();
 		return;
 	}
-	if ($this->{dvd}) {
-		$this->{dvd}{controller} = $controller;
+	if ($this->{vmdvd}) {
+		$this->{vmdvd}{controller} = $controller;
 	} else {
 		my %dvdInfo = ( controller => $controller );
-		$this->{dvd} = \%dvdInfo;
+		$this->{vmdvd} = \%dvdInfo;
 	}
 	return $this;
 }
@@ -581,11 +584,11 @@ sub setDVDID {
 		$kiwi -> failed();
 		return;
 	}
-	if ($this->{dvd}) {
-		$this->{dvd}{id} = $id;
+	if ($this->{vmdvd}) {
+		$this->{vmdvd}{id} = $id;
 	} else {
 		my %dvdInfo = ( id => $id );
-		$this->{dvd} = \%dvdInfo;
+		$this->{vmdvd} = \%dvdInfo;
 	}
 	return $this;
 }
@@ -804,7 +807,7 @@ sub setNICDriver {
 	my $this   = shift;
 	my $id     = shift;
 	my $driver = shift;
-	if (! $this->{nics} ) {
+	if (! $this->{vmnics} ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setNICDriver: no NICS configured, call createNICConfig '
 			. 'first';
@@ -822,7 +825,7 @@ sub setNICDriver {
 		$kiwi -> failed();
 		return;
 	}
-	$this->{nics}{$id}{driver} = $driver;
+	$this->{vmnics}{$id}{driver} = $driver;
 	return $this;
 }
 
@@ -836,7 +839,7 @@ sub setNICInterface {
 	my $this      = shift;
 	my $id        = shift;
 	my $interface = shift;
-	if (! $this->{nics} ) {
+	if (! $this->{vmnics} ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setNICInterface: no NICS configured, call createNICConfig '
 			. 'first';
@@ -855,7 +858,7 @@ sub setNICInterface {
 		$kiwi -> failed();
 		return;
 	}
-	$this->{nics}{$id}{interface} = $interface;
+	$this->{vmnics}{$id}{interface} = $interface;
 	return $this;
 }
 
@@ -869,7 +872,7 @@ sub setNICMAC {
 	my $this = shift;
 	my $id   = shift;
 	my $mac  = shift;
-	if (! $this->{nics} ) {
+	if (! $this->{vmnics} ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setNICMAC: no NICS configured, call createNICConfig '
 			. 'first';
@@ -888,7 +891,7 @@ sub setNICMAC {
 		$kiwi -> failed();
 		return;
 	}
-	$this->{nics}{$id}{mac} = $mac;
+	$this->{vmnics}{$id}{mac} = $mac;
 	return $this;
 }
 
@@ -902,7 +905,7 @@ sub setNICMode {
 	my $this = shift;
 	my $id   = shift;
 	my $mode = shift;
-	if (! $this->{nics} ) {
+	if (! $this->{vmnics} ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setNICMode: no NICS configured, call createNICConfig '
 			. 'first';
@@ -921,7 +924,7 @@ sub setNICMode {
 		$kiwi -> failed();
 		return;
 	}
-	$this->{nics}{$id}{mode} = $mode;
+	$this->{vmnics}{$id}{mode} = $mode;
 	return $this;
 }
 
@@ -990,15 +993,15 @@ sub setSystemDiskController {
 		$kiwi -> failed();
 		return;
 	}
-	if (! $this->{disks} ) {
+	if (! $this->{vmdisks} ) {
 		my %diskInfo = ( controller => $controller );
 		my %sysDisk = ( 'system' => \%diskInfo );
-		$this->{disks} = \%sysDisk;
-	} elsif (! $this->{disks}{system} ) {
+		$this->{vmdisks} = \%sysDisk;
+	} elsif (! $this->{vmdisks}{system} ) {
 		my %diskInfo = ( controller => $controller );
-		$this->{disks}{system} = \%diskInfo;
+		$this->{vmdisks}{system} = \%diskInfo;
 	} else {
-		$this->{disks}{system}{controller} = $controller;
+		$this->{vmdisks}{system}{controller} = $controller;
 	}
 	return $this;
 }
@@ -1020,15 +1023,15 @@ sub setSystemDiskDevice {
 		$kiwi -> failed();
 		return;
 	}
-	if (! $this->{disks} ) {
+	if (! $this->{vmdisks} ) {
 		my %diskInfo = ( device => $device );
 		my %sysDisk = ( 'system' => \%diskInfo );
-		$this->{disks} = \%sysDisk;
-	} elsif (! $this->{disks}{system} ) {
+		$this->{vmdisks} = \%sysDisk;
+	} elsif (! $this->{vmdisks}{system} ) {
 		my %diskInfo = ( device => $device );
-		$this->{disks}{system} = \%diskInfo;
+		$this->{vmdisks}{system} = \%diskInfo;
 	} else {
-		$this->{disks}{system}{device} = $device;
+		$this->{vmdisks}{system}{device} = $device;
 	}
 	return $this;
 }
@@ -1050,15 +1053,15 @@ sub setSystemDiskType {
 		$kiwi -> failed();
 		return;
 	}
-	if (! $this->{disks} ) {
+	if (! $this->{vmdisks} ) {
 		my %diskInfo = ( disktype => $type );
 		my %sysDisk = ( 'system' => \%diskInfo );
-		$this->{disks} = \%sysDisk;
-	} elsif (! $this->{disks}{system} ) {
+		$this->{vmdisks} = \%sysDisk;
+	} elsif (! $this->{vmdisks}{system} ) {
 		my %diskInfo = ( disktype => $type );
-		$this->{disks}{system} = \%diskInfo;
+		$this->{vmdisks}{system} = \%diskInfo;
 	} else {
-		$this->{disks}{system}{disktype} = $type;
+		$this->{vmdisks}{system}{disktype} = $type;
 	}
 	return $this;
 }
@@ -1080,15 +1083,15 @@ sub setSystemDiskID {
 		$kiwi -> failed();
 		return;
 	}
-	if (! $this->{disks} ) {
+	if (! $this->{vmdisks} ) {
 		my %diskInfo = ( id => $id );
 		my %sysDisk = ( 'system' => \%diskInfo );
-		$this->{disks} = \%sysDisk;
-	} elsif (! $this->{disks}{system} ) {
+		$this->{vmdisks} = \%sysDisk;
+	} elsif (! $this->{vmdisks}{system} ) {
 		my %diskInfo = ( id => $id );
-		$this->{disks}{system} = \%diskInfo;
+		$this->{vmdisks}{system} = \%diskInfo;
 	} else {
-		$this->{disks}{system}{id} = $id;
+		$this->{vmdisks}{system}{id} = $id;
 	}
 	return $this;
 }
@@ -1130,7 +1133,7 @@ sub __hasUnsuportedVMSettings {
 	my %initStruct = %{$init};
 	my %supported = map { ($_ => 1) } qw(
 		HWversion arch des_cpu des_memory domain guestOS max_cpu max_memory
-		memory min_cpu min_memory ncpus ovftype vmconfig-entries vmdisks
+		memory min_cpu min_memory ncpus ovftype vmconfig_entries vmdisks
 		vmdvd vmnics
 	);
 	for my $key (keys %initStruct) {
@@ -1169,8 +1172,8 @@ sub __interfaceIsUnique {
 		$kiwi -> oops();
 		return 1;
 	}
-	if ($this->{nics}) {
-		for my $nicInfo (values %{$this->{nics}}) {
+	if ($this->{vmnics}) {
+		for my $nicInfo (values %{$this->{vmnics}}) {
 			if ($nicInfo->{interface} eq $iFace) {
 				my $msg = "$caller: interface device for '$iFace' "
 					. 'already exists, ambiguous operation.';
@@ -1378,10 +1381,10 @@ sub __isInitHashValid {
 			return;
 		}
 	}
-	if ($init->{'vmconfig-entries'}) {
-		if (ref($init->{'vmconfig-entries'}) ne 'ARRAY') {
+	if ($init->{vmconfig_entries}) {
+		if (ref($init->{vmconfig_entries}) ne 'ARRAY') {
 			my $msg = 'Expecting an array ref as entry of '
-				. '"vmconfig-entries" in the initialization hash.';
+				. '"vmconfig_entries" in the initialization hash.';
 			$kiwi -> error($msg);
 			$kiwi -> failed();
 			return;
@@ -1428,7 +1431,7 @@ sub __isNICIDValid {
 		$kiwi -> failed ();
 		return;
 	}
-	if (! $this->{nics}{$id} ) {
+	if (! $this->{vmnics}{$id} ) {
 		my $msg = "$caller: invalid ID for NIC query given, no data exists.";
 		$kiwi -> error($msg);
 		$kiwi -> failed ();
@@ -1447,7 +1450,7 @@ sub __isOVFTypeValid {
 	my $this = shift;
 	my $ovft = shift;
 	my %supportedOVFtype = map { ($_ => 1) } qw(
-		povervm vmware xen zvm
+		powervm vmware xen zvm
 	);
 	if (! $supportedOVFtype{$ovft} ) {
 		return;

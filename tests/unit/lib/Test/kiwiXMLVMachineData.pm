@@ -334,16 +334,16 @@ sub test_ctor_initImproperArch {
 sub test_ctor_initImproperConfEntry {
 	# ...
 	# Test the VMachineData constructor with an initialization hash
-	# that contains an improper type for the vmconfig-entries key
+	# that contains an improper type for the vmconfig_entries key
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => 'foo'
+				 vmconfig_entries   => 'foo'
 			);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Expecting an array ref as entry of "vmconfig-entries" '
+	my $expected = 'Expecting an array ref as entry of "vmconfig_entries" '
 		. 'in the initialization hash.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -367,7 +367,7 @@ sub test_ctor_initImproperDisksEntry {
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => 'foo'
 			);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
@@ -400,7 +400,7 @@ sub test_ctor_initImproperDisksHash {
 				);
 	my %disks = ( storage => \%diskData );
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => \%disks
 			);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
@@ -433,7 +433,7 @@ sub test_ctor_initImproperDVDEntry {
 				);
 	my %disks = ( system => \%diskData );
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => \%disks,
 				vmdvd              => 'foo'
 			);
@@ -469,7 +469,7 @@ sub test_ctor_initImproperDVDHashNoCont {
 	my %disks       = ( system => \%diskData );
 	my %dvd         = ( id => 9 );
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => \%disks,
 				vmdvd              => \%dvd
 			);
@@ -505,7 +505,7 @@ sub test_ctor_initImproperDVDHashNoId {
 	my %disks       = ( system => \%diskData );
 	my %dvd         = ( controller => 'ide' );
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => \%disks,
 				vmdvd              => \%dvd
 			);
@@ -539,7 +539,7 @@ sub test_ctor_initImproperNICEntry {
 				);
 	my %disks = ( system => \%diskData );
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => \%disks,
 				vmnics             => 'foo'
 			);
@@ -581,7 +581,7 @@ sub test_ctor_initImproperNoInterf {
 				);
 	my %nics = ( 1 => \%nicData );
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => \%disks,
 				vmdvd              => \%dvd,
 				vmnics             => \%nics
@@ -621,7 +621,7 @@ sub test_ctor_initImproperNICID {
 				);
 	my %nics = ( 'foo' => \%nicData );
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => \%disks,
 				vmnics             => \%nics
 			);
@@ -650,7 +650,7 @@ sub test_ctor_initUnsupportedData {
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				disks              => 'foo'
 			);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
@@ -684,7 +684,7 @@ sub test_ctor_initUnsupportedDataDisk {
 				);
 	my %disks = ( system => \%diskData );
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => \%disks
 			);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
@@ -721,7 +721,7 @@ sub test_ctor_initUnsupportedDataDvd {
 						opticont   => 'specialdev'
 					);
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => \%disks,
 				vmdvd              => \%dvd
 			);
@@ -770,7 +770,7 @@ sub test_ctor_initUnsupportedDataNic {
 				2 => \%nicData2
 			);
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => \%disks,
 				vmdvd              => \%dvd,
 				vmnics             => \%nics
@@ -820,7 +820,7 @@ sub test_ctor_initUnsupportedDataOVFType {
 			);
 	my %init = ( arch               => 'x86_64',
 				ovftype            => 'ibm',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => \%disks,
 				vmdvd              => \%dvd,
 				vmnics             => \%nics
@@ -868,7 +868,7 @@ sub test_ctor_withInit {
 				2 => \%nicData2
 			);
 	my %init = ( arch               => 'x86_64',
-				'vmconfig-entries' => \@confEntries,
+				'vmconfig_entries' => \@confEntries,
 				vmdisks            => \%disks,
 				vmdvd              => \%dvd,
 				vmnics             => \%nics
@@ -3337,7 +3337,7 @@ sub __getVMachineObj {
 				min_memory         => '2048',
 				ncpus              => '4',
 				ovftype            => 'zvm',
-				'vmconfig-entries' => \@confEntries,
+				vmconfig_entries   => \@confEntries,
 				vmdisks            => \%disks,
 				vmdvd              => \%dvd,
 				vmnics             => \%nics
