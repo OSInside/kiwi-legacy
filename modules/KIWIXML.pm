@@ -32,6 +32,7 @@ use KIWIQX qw (qxx);
 use KIWIURL;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
+use KIWIXMLEC2ConfigData;
 use KIWIXMLPreferenceData;
 use KIWIXMLRepositoryData;
 use KIWIXMLTypeData;
@@ -654,6 +655,21 @@ sub getDrivers {
 }
 
 #==========================================
+# getEC2Config
+#------------------------------------------
+sub getEC2Config {
+	# ...
+	# Return an EC2Data object for the EC2 configuration of the current
+	# build type.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $ec2ConfObj = KIWIXMLEC2ConfigData -> new($kiwi,
+											$this->{selectedType}{ec2config});
+	return $ec2ConfObj;
+}
+
+#==========================================
 # getImageType
 #------------------------------------------
 sub getImageType {
@@ -1005,6 +1021,42 @@ sub __dumpInternalXMLDescription {
 }
 
 #==========================================
+# __genEC2ConfigHash
+#------------------------------------------
+sub __genEC2ConfigHash {
+	# ...
+	# Return a ref to a hash that contains the EC2 configuration data for the
+	# given XML:ELEMENT object
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $ec2Config = $node -> getChildrenByTagName('ec2config') -> get_node(1);
+	if (! $ec2Config ) {
+		return;
+	}
+	my %ec2ConfigData;
+	$ec2ConfigData{ec2accountnr}      =
+			$this -> __getChildNodeTextValue($ec2Config, 'ec2accountnr');
+	$ec2ConfigData{ec2certfile}       =
+			$this -> __getChildNodeTextValue($ec2Config, 'ec2certfile');
+	$ec2ConfigData{ec2privatekeyfile} =
+			$this -> __getChildNodeTextValue($ec2Config, 'ec2privatekeyfile');
+
+	my @ec2Regions = $ec2Config -> getChildrenByTagName('ec2region');
+	my @regions;
+	for my $regNode (@ec2Regions) {
+		push @regions, $regNode -> textContent();
+	}
+	my $selectedRegions;
+	if (@regions) {
+		$selectedRegions = \@regions;
+	}
+
+	$ec2ConfigData{ec2region} = $selectedRegions;
+	return \%ec2ConfigData;
+}
+
+#==========================================
 # __genTypeHash
 #------------------------------------------
 sub __genTypeHash {
@@ -1034,7 +1086,7 @@ sub __genTypeHash {
 		$typeData{compressed}        = $type -> getAttribute('compressed');
 		$typeData{devicepersistency} =
 					$type -> getAttribute('devicepersistency');
-#        $typeData{ec2config} = $this -> __genEC2ConfigHash($type);
+		$typeData{ec2config} = $this -> __genEC2ConfigHash($type);
 		$typeData{editbootconfig}    = $type -> getAttribute('editbootconfig');
 		$typeData{filesystem}        = $type -> getAttribute('filesystem');
 		$typeData{flags}             = $type -> getAttribute('flags');
@@ -3761,54 +3813,6 @@ sub getLVMVolumes {
 }
 
 #==========================================
-# getEc2Config
-#------------------------------------------
-sub getEc2Config {
-	# ...
-	# Create a hash for the <ec2config>
-	# section if it exists
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("ec2config") -> get_node(1);
-	my %result = ();
-	if (! defined $node) {
-		return %result;
-	}
-	#==========================================
-	# AWS account Nr
-	#------------------------------------------
-	my $awsacctno = $node -> getElementsByTagName ("ec2accountnr");
-	if ($awsacctno) {
-		$result{AWSAccountNr} = $awsacctno;
-	}
-	#==========================================
-	# EC2 path to public key file
-	#------------------------------------------
-	my $certfile = $node -> getElementsByTagName ("ec2certfile");
-	if ($certfile) {
-		$result{EC2CertFile} = $certfile;
-	}
-	#==========================================
-	# EC2 path to private key file
-	#------------------------------------------
-	my $privkeyfile = $node -> getElementsByTagName ("ec2privatekeyfile");
-	if ($privkeyfile) {
-		$result{EC2PrivateKeyFile} = $privkeyfile;
-	}
-	#==========================================
-	# EC2 region
-	#------------------------------------------
-	my @regionNodes = $node -> getElementsByTagName ("ec2region");
-	my @regions = ();
-	for my $regNode (@regionNodes) {
-		push @regions, $regNode -> textContent();
-	}
-	$result{EC2Regions} = \@regions;
-	return %result;
-}
-
-#==========================================
 # getVMwareConfig
 #------------------------------------------
 sub getVMwareConfig {
@@ -5383,6 +5387,54 @@ sub getDefaultPrebuiltDir_legacy {
 	my $node = $this -> __getPreferencesNodeByTagName ('defaultprebuilt');
 	my $imgDir = $node -> getElementsByTagName ('defaultprebuilt');
 	return $imgDir;
+}
+
+#==========================================
+# getEc2Config_legacy
+#------------------------------------------
+sub getEc2Config_legacy {
+	# ...
+	# Create a hash for the <ec2config>
+	# section if it exists
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("ec2config") -> get_node(1);
+	my %result = ();
+	if (! defined $node) {
+		return %result;
+	}
+	#==========================================
+	# AWS account Nr
+	#------------------------------------------
+	my $awsacctno = $node -> getElementsByTagName ("ec2accountnr");
+	if ($awsacctno) {
+		$result{AWSAccountNr} = $awsacctno;
+	}
+	#==========================================
+	# EC2 path to public key file
+	#------------------------------------------
+	my $certfile = $node -> getElementsByTagName ("ec2certfile");
+	if ($certfile) {
+		$result{EC2CertFile} = $certfile;
+	}
+	#==========================================
+	# EC2 path to private key file
+	#------------------------------------------
+	my $privkeyfile = $node -> getElementsByTagName ("ec2privatekeyfile");
+	if ($privkeyfile) {
+		$result{EC2PrivateKeyFile} = $privkeyfile;
+	}
+	#==========================================
+	# EC2 region
+	#------------------------------------------
+	my @regionNodes = $node -> getElementsByTagName ("ec2region");
+	my @regions = ();
+	for my $regNode (@regionNodes) {
+		push @regions, $regNode -> textContent();
+	}
+	$result{EC2Regions} = \@regions;
+	return %result;
 }
 
 #==========================================

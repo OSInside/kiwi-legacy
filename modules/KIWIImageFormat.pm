@@ -466,7 +466,7 @@ sub createEC2 {
 	my $title= $xml -> getImageDisplayName();
 	my $arch = qxx ("uname -m"); chomp ( $arch );
 	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
-	my %ec2  = $xml->getEc2Config();
+	my %ec2  = $xml->getEc2Config_legacy();
 	my $have_account = 1;
 	if (! defined $ec2{AWSAccountNr}) {
 		$kiwi->warning ("Missing AWS account number");

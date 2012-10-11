@@ -26,8 +26,10 @@ use KIWIQX qw (qxx);
 use KIWIXML;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
+use KIWIXMLEC2ConfigData;
 use KIWIXMLPreferenceData;
 use KIWIXMLRepositoryData;
+use KIWIXMLTypeData;
 
 # All tests will need to be adjusted once KIWXML turns into a stateless
 # container and the ctor receives the config.xml file name as an argument.
@@ -2216,9 +2218,9 @@ sub test_getDriversNodeList {
 }
 
 #==========================================
-# test_getEc2Config
+# test_getEC2Config
 #------------------------------------------
-sub test_getEc2Config {
+sub test_getEC2Config {
 	# ...
 	# Verify proper return of EC2 configuration settings
 	# ---
@@ -2228,7 +2230,36 @@ sub test_getEc2Config {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %ec2Info = $xml -> getEc2Config();
+	my $ec2ConfObj = $xml -> getEC2Config();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my $acctNr = $ec2ConfObj -> getAccountNumber();
+	$this -> assert_str_equals('12345678911', $acctNr);
+	my $regions = $ec2ConfObj -> getRegions();
+	my @expectedRegions = qw / EU-West US-West /;
+	$this -> assert_array_equal(\@expectedRegions, $regions);
+	return;
+}
+
+#==========================================
+# test_getEc2Config_legacy
+#------------------------------------------
+sub test_getEc2Config_legacy {
+	# ...
+	# Verify proper return of EC2 configuration settings
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'ec2ConfigSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %ec2Info = $xml -> getEc2Config_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
