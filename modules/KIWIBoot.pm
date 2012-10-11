@@ -1679,11 +1679,24 @@ sub setupBootDisk {
 					return;
 				}
 				#==========================================
-				# store volume sizes in lvmparts
+				# calculate size required by volume
 				#------------------------------------------
-				my $space = 0;
-				my $diff  = 0;
-				my $haveAbsolute;
+				my $lvsize = qxx (
+					"du -s --block-size=1 $system/$pname | cut -f1"
+				);
+				chomp $lvsize;
+				$lvsize /= 1048576;
+				#==========================================
+				# is requested size absolute or relative
+				#------------------------------------------
+				my $reqAbsolute = 0;
+				if ($lvmparts{$vol}) {
+					$reqAbsolute = $lvmparts{$vol}->[1];
+				}
+				#==========================================
+				# requested size value
+				#------------------------------------------
+				my $reqSize = 0;
 				# /.../
 				# The requested volume size is only used if the image
 				# type is _not_ oem. That's because for oem images the
@@ -1691,37 +1704,38 @@ sub setupBootDisk {
 				# on first boot of the appliance
 				# ----
 				if (($type{type} ne "oem") && ($lvmparts{$vol})) {
-					$space = $lvmparts{$vol}->[0];
-					if ($space eq "all") {
-						$space = 0;
+					$reqSize = $lvmparts{$vol}->[0];
+					if ($reqSize eq "all") {
+						$reqSize = 0;
 					}
-					$haveAbsolute = $lvmparts{$vol}->[1];
 				}
-				my $lvsize = qxx (
-					"du -s --block-size=1 $system/$pname | cut -f1"
-				);
-				chomp $lvsize;
-				$lvsize /= 1048576;
-				if ($haveAbsolute) {
-					if ($space > ($lvsize + 30)) {
-						$diff = $space - $lvsize;
-						$lvsize = $space;
+				#==========================================
+				# calculate volume size
+				#------------------------------------------
+				my $addToDisk = 0;
+				if ($reqAbsolute) {
+					# process absolute size value from XML
+					if ($reqSize > ($lvsize + 30)) {
+						$addToDisk = $reqSize - $lvsize;
+						$lvsize = $reqSize;
 					} else {
+						$addToDisk = 30;
 						$lvsize += 30;
 					}
 				} else {
-					$lvsize = int ( 30 + $lvsize + $space);
+					# process relative size value from XML
+					$lvsize = int ( 30 + $lvsize + $reqSize);
+					$addToDisk = $reqSize + 30;
 				}
+				#==========================================
+				# add calculated volume size to lvmparts
+				#------------------------------------------
 				$lvmparts{$vol}->[2] = $lvsize;
 				#==========================================
 				# increase total vm disk size
 				#------------------------------------------
 				$kiwi->loginfo ("Increasing disk size for volume $pname\n");
-				if ($haveAbsolute) {
-					$this -> __updateDiskSize ($diff + 30);
-				} else {
-					$this -> __updateDiskSize ($space+ 30);
-				}
+				$this -> __updateDiskSize ($addToDisk);
 			}
 		}
 	}
