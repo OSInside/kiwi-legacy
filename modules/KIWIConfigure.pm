@@ -87,8 +87,8 @@ sub setupRecoveryArchive {
 	my $dest    = $this->{imageDest};
 	my $xml     = $this->{xml};
 	my $root    = $this->{root};
-	my $start   = $xml -> getOEMRecovery();
-	my $inplace = $xml -> getOEMRecoveryInPlace();
+	my $start   = $xml -> getOEMRecovery_legacy();
+	my $inplace = $xml -> getOEMRecoveryInPlace_legacy();
 	my $FD;
 	if ((! defined $start) || ("$start" eq "false")) {
 		return $this;

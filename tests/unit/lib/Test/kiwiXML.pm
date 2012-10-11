@@ -27,6 +27,7 @@ use KIWIXML;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
 use KIWIXMLEC2ConfigData;
+use KIWIXMLOEMConfigData;
 use KIWIXMLPreferenceData;
 use KIWIXMLRepositoryData;
 use KIWIXMLTypeData;
@@ -2851,9 +2852,67 @@ sub test_getLVMVolumesUsingRoot {
 }
 
 #==========================================
-# test_getOEMAlignPartition
+# test_getOEMConfig
 #------------------------------------------
-sub test_getOEMAlignPartition {
+sub test_getOEMConfig {
+	# ...
+	# Test the getOEMConfig method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'oemSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $oemConfObj = $xml -> getOEMConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $align   = $oemConfObj -> getAlignPartition();
+	my $booT    = $oemConfObj -> getBootTitle();
+	my $bootW   = $oemConfObj -> getBootwait();
+	my $inplRec = $oemConfObj -> getInplaceRecovery();
+	my $kInit   = $oemConfObj -> getKiwiInitrd();
+	my $pInst   = $oemConfObj -> getPartitionInstall();
+	my $reboot  = $oemConfObj -> getReboot();
+	my $rebootI = $oemConfObj -> getRebootInteractive();
+	my $recover = $oemConfObj -> getRecovery();
+	my $recovI  = $oemConfObj -> getRecoveryID();
+	my $sDown   = $oemConfObj -> getShutdown();
+	my $sDownI  = $oemConfObj -> getShutdownInteractive();
+	my $sBoot   = $oemConfObj -> getSilentBoot();
+	my $swap    = $oemConfObj -> getSwap();
+	my $swapS   = $oemConfObj -> getSwapSize();
+	my $sysS    = $oemConfObj -> getSystemSize();
+	my $unat    = $oemConfObj -> getUnattended();
+	my $unatI   = $oemConfObj -> getUnattendedID();
+	$this -> assert_str_equals('true', $align);
+	$this -> assert_str_equals('Unit Test', $booT);
+	$this -> assert_str_equals('false', $bootW);
+	$this -> assert_str_equals('true', $kInit);
+	$this -> assert_str_equals('false', $pInst);
+	$this -> assert_str_equals('false', $reboot);
+	$this -> assert_str_equals('false', $rebootI);
+	$this -> assert_str_equals('true', $recover);
+	$this -> assert_str_equals('20', $recovI);
+	$this -> assert_str_equals('false', $sDown);
+	$this -> assert_str_equals('true', $sDownI);
+	$this -> assert_str_equals('true', $sBoot);
+	$this -> assert_str_equals('true', $swap);
+	$this -> assert_str_equals('2048', $swapS);
+	$this -> assert_str_equals('20G', $sysS);
+	$this -> assert_str_equals('true', $unat);
+	$this -> assert_str_equals('scsi-SATA_ST9500420AS_5VJ5JL6T-part1', $unatI);
+	return;
+}
+
+#==========================================
+# test_getOEMAlignPartition_legacy
+#------------------------------------------
+sub test_getOEMAlignPartition_legacy {
 	# ...
 	# Verify proper return of getOEMAlignPartition method
 	# ---
@@ -2863,7 +2922,7 @@ sub test_getOEMAlignPartition {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMAlignPartition();
+	my $value = $xml -> getOEMAlignPartition_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2876,9 +2935,9 @@ sub test_getOEMAlignPartition {
 }
 
 #==========================================
-# test_getOEMBootTitle
+# test_getOEMBootTitle_legacy
 #------------------------------------------
-sub test_getOEMBootTitle {
+sub test_getOEMBootTitle_legacy {
 	# ...
 	# Verify proper return of getOEMBootTitle method
 	# ---
@@ -2888,7 +2947,7 @@ sub test_getOEMBootTitle {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMBootTitle();
+	my $value = $xml -> getOEMBootTitle_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2901,9 +2960,9 @@ sub test_getOEMBootTitle {
 }
 
 #==========================================
-# test_getOEMBootWait
+# test_getOEMBootWait_legacy
 #------------------------------------------
-sub test_getOEMBootWait {
+sub test_getOEMBootWait_legacy {
 	# ...
 	# Verify proper return of getOEMBootWait method
 	# ---
@@ -2913,7 +2972,7 @@ sub test_getOEMBootWait {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMBootWait();
+	my $value = $xml -> getOEMBootWait_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2926,9 +2985,9 @@ sub test_getOEMBootWait {
 }
 
 #==========================================
-# test_getOEMKiwiInitrd
+# test_getOEMKiwiInitrd_legacy
 #------------------------------------------
-sub test_getOEMKiwiInitrd {
+sub test_getOEMKiwiInitrd_legacy {
 	# ...
 	# Verify proper return of getOEMKiwiInitrd method
 	# ---
@@ -2938,7 +2997,7 @@ sub test_getOEMKiwiInitrd {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMKiwiInitrd();
+	my $value = $xml -> getOEMKiwiInitrd_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2951,9 +3010,9 @@ sub test_getOEMKiwiInitrd {
 }
 
 #==========================================
-# test_getOEMPartitionInstall
+# test_getOEMPartitionInstall_legacy
 #------------------------------------------
-sub test_getOEMPartitionInstall {
+sub test_getOEMPartitionInstall_legacy {
 	# ...
 	# Verify proper return of getOEMPartitionInstall method
 	# ---
@@ -2963,7 +3022,7 @@ sub test_getOEMPartitionInstall {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMPartitionInstall();
+	my $value = $xml -> getOEMPartitionInstall_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2976,9 +3035,9 @@ sub test_getOEMPartitionInstall {
 }
 
 #==========================================
-# test_getOEMReboot
+# test_getOEMReboot_legacy
 #------------------------------------------
-sub test_getOEMReboot {
+sub test_getOEMReboot_legacy {
 	# ...
 	# Verify proper return of getOEMReboot method
 	# ---
@@ -2988,7 +3047,7 @@ sub test_getOEMReboot {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMReboot();
+	my $value = $xml -> getOEMReboot_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3001,9 +3060,9 @@ sub test_getOEMReboot {
 }
 
 #==========================================
-# test_getOEMRebootInter
+# test_getOEMRebootInter_legacy
 #------------------------------------------
-sub test_getOEMRebootInter {
+sub test_getOEMRebootInter_legacy {
 	# ...
 	# Verify proper return of getOEMRebootInter method
 	# ---
@@ -3013,7 +3072,7 @@ sub test_getOEMRebootInter {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMRebootInter();
+	my $value = $xml -> getOEMRebootInter_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3026,9 +3085,9 @@ sub test_getOEMRebootInter {
 }
 
 #==========================================
-# test_getOEMRecovery
+# test_getOEMRecovery_legacy
 #------------------------------------------
-sub test_getOEMRecovery {
+sub test_getOEMRecovery_legacy {
 	# ...
 	# Verify proper return of getOEMRecovery method
 	# ---
@@ -3038,7 +3097,7 @@ sub test_getOEMRecovery {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMRecovery();
+	my $value = $xml -> getOEMRecovery_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3051,9 +3110,9 @@ sub test_getOEMRecovery {
 }
 
 #==========================================
-# test_getOEMRecoveryID
+# test_getOEMRecoveryID_legacy
 #------------------------------------------
-sub test_getOEMRecoveryID {
+sub test_getOEMRecoveryID_legacy {
 	# ...
 	# Verify proper return of getOEMRecoveryID method
 	# ---
@@ -3063,7 +3122,7 @@ sub test_getOEMRecoveryID {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMRecoveryID();
+	my $value = $xml -> getOEMRecoveryID_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3076,9 +3135,9 @@ sub test_getOEMRecoveryID {
 }
 
 #==========================================
-# test_getOEMRecoveryInPlace
+# test_getOEMRecoveryInPlace_legacy
 #------------------------------------------
-sub test_getOEMRecoveryInPlace {
+sub test_getOEMRecoveryInPlace_legacy {
 	# ...
 	# Verify proper return of getOEMRecoveryInPlace method
 	# ---
@@ -3088,7 +3147,7 @@ sub test_getOEMRecoveryInPlace {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMRecoveryInPlace();
+	my $value = $xml -> getOEMRecoveryInPlace_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3101,9 +3160,9 @@ sub test_getOEMRecoveryInPlace {
 }
 
 #==========================================
-# test_getOEMShutdown
+# test_getOEMShutdown_legacy
 #------------------------------------------
-sub test_getOEMShutdown {
+sub test_getOEMShutdown_legacy {
 	# ...
 	# Verify proper return of getOEMShutdown method
 	# ---
@@ -3113,7 +3172,7 @@ sub test_getOEMShutdown {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMShutdown();
+	my $value = $xml -> getOEMShutdown_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3126,9 +3185,9 @@ sub test_getOEMShutdown {
 }
 
 #==========================================
-# test_getOEMShutdownInter
+# test_getOEMShutdownInter_legacy
 #------------------------------------------
-sub test_getOEMShutdownInter {
+sub test_getOEMShutdownInter_legacy {
 	# ...
 	# Verify proper return of getOEMShutdownInter method
 	# ---
@@ -3138,7 +3197,7 @@ sub test_getOEMShutdownInter {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMShutdownInter();
+	my $value = $xml -> getOEMShutdownInter_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3151,9 +3210,9 @@ sub test_getOEMShutdownInter {
 }
 
 #==========================================
-# test_getOEMSilentBoot
+# test_getOEMSilentBoot_legacy
 #------------------------------------------
-sub test_getOEMSilentBoot {
+sub test_getOEMSilentBoot_legacy {
 	# ...
 	# Verify proper return of getOEMSilentBoot method
 	# ---
@@ -3163,7 +3222,7 @@ sub test_getOEMSilentBoot {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMSilentBoot();
+	my $value = $xml -> getOEMSilentBoot_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3176,9 +3235,9 @@ sub test_getOEMSilentBoot {
 }
 
 #==========================================
-# test_getOEMSwap
+# test_getOEMSwap_legacy
 #------------------------------------------
-sub test_getOEMSwap {
+sub test_getOEMSwap_legacy {
 	# ...
 	# Verify proper return of getOEMSwap method
 	# ---
@@ -3188,7 +3247,7 @@ sub test_getOEMSwap {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMSwap();
+	my $value = $xml -> getOEMSwap_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3201,9 +3260,9 @@ sub test_getOEMSwap {
 }
 
 #==========================================
-# test_getOEMSwapSize
+# test_getOEMSwapSize_legacy
 #------------------------------------------
-sub test_getOEMSwapSize {
+sub test_getOEMSwapSize_legacy {
 	# ...
 	# Verify proper return of getOEMSwapSize method
 	# ---
@@ -3213,7 +3272,7 @@ sub test_getOEMSwapSize {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMSwapSize();
+	my $value = $xml -> getOEMSwapSize_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3226,9 +3285,9 @@ sub test_getOEMSwapSize {
 }
 
 #==========================================
-# test_getOEMSystemSize
+# test_getOEMSystemSize_legacy
 #------------------------------------------
-sub test_getOEMSystemSize {
+sub test_getOEMSystemSize_legacy {
 	# ...
 	# Verify proper return of getOEMSystemSize method
 	# ---
@@ -3238,7 +3297,7 @@ sub test_getOEMSystemSize {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMSystemSize();
+	my $value = $xml -> getOEMSystemSize_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3251,9 +3310,9 @@ sub test_getOEMSystemSize {
 }
 
 #==========================================
-# test_getOEMUnattended
+# test_getOEMUnattended_legacy
 #------------------------------------------
-sub test_getOEMUnattended {
+sub test_getOEMUnattended_legacy {
 	# ...
 	# Verify proper return of getOEMUnattended method
 	# ---
@@ -3263,7 +3322,7 @@ sub test_getOEMUnattended {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMUnattended();
+	my $value = $xml -> getOEMUnattended_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3276,9 +3335,9 @@ sub test_getOEMUnattended {
 }
 
 #==========================================
-# test_getOEMUnattendedID
+# test_getOEMUnattendedID_legacy
 #------------------------------------------
-sub test_getOEMUnattendedID {
+sub test_getOEMUnattendedID_legacy {
 	# ...
 	# Verify proper return of getOEMUnattendedID method
 	# ---
@@ -3288,7 +3347,7 @@ sub test_getOEMUnattendedID {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMUnattendedID();
+	my $value = $xml -> getOEMUnattendedID_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

@@ -33,6 +33,7 @@ use KIWIURL;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
 use KIWIXMLEC2ConfigData;
+use KIWIXMLOEMConfigData;
 use KIWIXMLPreferenceData;
 use KIWIXMLRepositoryData;
 use KIWIXMLTypeData;
@@ -352,7 +353,7 @@ sub new {
 }
 
 #==========================================
-# Methods that use the "new" imageConfig data structure
+# Methods that use the "new"imageConfig data structure
 # These are replcements for "old" methods and represent the
 # eventual interface of this object
 #------------------------------------------
@@ -684,11 +685,25 @@ sub getImageType {
 }
 
 #==========================================
+# getOEMConfig
+#------------------------------------------
+sub getOEMConfig {
+	# ...
+	# Return a OEMConfigData object for the selected build type
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $oemConfObj = KIWIXMLOEMConfigData -> new($kiwi,
+									$this->{selectedType}{oemconfig});
+	return $oemConfObj;
+}
+
+#==========================================
 # getPreferences
 #------------------------------------------
 sub getPreferences {
 	# ...
-	# Return a KIWIXMLPreferenceData object for the current selected build
+	# Return a PreferenceData object for the current selected build
 	# profile(s)
 	# ---
 	my $this = shift;
@@ -1073,6 +1088,62 @@ sub __genEC2ConfigHash {
 }
 
 #==========================================
+# __genOEMConfigHash
+#------------------------------------------
+sub __genOEMConfigHash {
+	# ...
+	# Return a ref to a hash containing the configuration for <oemconfig>
+	# of the given XML:ELEMENT object
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $oemConfNode = $node -> getChildrenByTagName('oemconfig');
+	if (! $oemConfNode ) {
+		return;
+	}
+	my $config = $oemConfNode -> get_node(1);
+	my %oemConfig;
+	$oemConfig{oem_align_partition}      =
+		$this -> __getChildNodeTextValue($config, 'oem-align-partition');
+	$oemConfig{oem_boot_title}           =
+		$this -> __getChildNodeTextValue($config, 'oem-boot-title');
+	$oemConfig{oem_bootwait}             =
+		$this -> __getChildNodeTextValue($config, 'oem-bootwait');
+	$oemConfig{oem_inplace_recovery}     =
+		$this -> __getChildNodeTextValue($config, 'oem-inplace-recovery');
+	$oemConfig{oem_kiwi_initrd}          =
+		$this -> __getChildNodeTextValue($config, 'oem-kiwi-initrd');
+	$oemConfig{oem_partition_install}    =
+		$this -> __getChildNodeTextValue($config, 'oem-partition-install');
+	$oemConfig{oem_reboot}               =
+		$this -> __getChildNodeTextValue($config, 'oem-reboot');
+	$oemConfig{oem_reboot_interactive}   =
+		$this -> __getChildNodeTextValue($config, 'oem-reboot-interactive');
+	$oemConfig{oem_recovery}             =
+		$this -> __getChildNodeTextValue($config, 'oem-recovery');
+	$oemConfig{oem_recoveryID}           =
+		$this -> __getChildNodeTextValue($config, 'oem-recoveryID');
+	$oemConfig{oem_shutdown}             =
+		$this -> __getChildNodeTextValue($config, 'oem-shutdown');
+	$oemConfig{oem_shutdown_interactive} =
+		$this -> __getChildNodeTextValue($config, 'oem-shutdown-interactive');
+	$oemConfig{oem_silent_boot}          =
+		$this -> __getChildNodeTextValue($config, 'oem-silent-boot');
+	$oemConfig{oem_swap}                 =
+		$this -> __getChildNodeTextValue($config, 'oem-swap');
+	$oemConfig{oem_swapsize}             =
+		$this -> __getChildNodeTextValue($config, 'oem-swapsize');
+	$oemConfig{oem_systemsize}           =
+		$this -> __getChildNodeTextValue($config, 'oem-systemsize');
+	$oemConfig{oem_unattended}           = 
+	$this -> __getChildNodeTextValue($config, 'oem-unattended');
+	$oemConfig{oem_unattended_id}        =
+		$this -> __getChildNodeTextValue($config, 'oem-unattended-id');
+
+	return \%oemConfig;
+}
+
+#==========================================
 # __genTypeHash
 #------------------------------------------
 sub __genTypeHash {
@@ -1123,7 +1194,7 @@ sub __genTypeHash {
 		$typeData{kernelcmdline}     = $type -> getAttribute('kernelcmdline');
 		$typeData{luks}              = $type -> getAttribute('luks');
 		$typeData{machine} = $this -> __genVMachineHash($type);
-#        $typeData{oemconfig} = $this -> __genOEMConfigHash($type);
+		$typeData{oemconfig} = $this -> __genOEMConfigHash($type);
 
 		my $prim = $type -> getAttribute('primary');
 		if ($prim && $prim eq 'true') {
@@ -2494,369 +2565,6 @@ sub setPackageManager {
 	$opts -> appendChild ($addElement);
 	$this -> updateXML();
 	return $this;
-}
-
-#==========================================
-# getOEMSwapSize
-#------------------------------------------
-sub getOEMSwapSize {
-	# ...
-	# Obtain the oem-swapsize value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $size = $node -> getElementsByTagName ("oem-swapsize");
-	if ((! defined $size) || ("$size" eq "")) {
-		return;
-	}
-	return $size;
-}
-
-#==========================================
-# getOEMSystemSize
-#------------------------------------------
-sub getOEMSystemSize {
-	# ...
-	# Obtain the oem-systemsize value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $size = $node -> getElementsByTagName ("oem-systemsize");
-	if ((! defined $size) || ("$size" eq "")) {
-		return;
-	}
-	return $size;
-}
-
-#==========================================
-# getOEMBootTitle
-#------------------------------------------
-sub getOEMBootTitle {
-	# ...
-	# Obtain the oem-boot-title value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $title= $node -> getElementsByTagName ("oem-boot-title");
-	if ((! defined $title) || ("$title" eq "")) {
-		$title = $this -> getImageDisplayName();
-		if ((! defined $title) || ("$title" eq "")) {
-			return;
-		}
-	}
-	return $title;
-}
-
-#==========================================
-# getOEMKiwiInitrd
-#------------------------------------------
-sub getOEMKiwiInitrd {
-	# ...
-	# Obtain the oem-kiwi-initrd value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $kboot= $node -> getElementsByTagName ("oem-kiwi-initrd");
-	if ((! defined $kboot) || ("$kboot" eq "")) {
-		return;
-	}
-	return $kboot;
-}
-
-#==========================================
-# getOEMReboot
-#------------------------------------------
-sub getOEMReboot {
-	# ...
-	# Obtain the oem-reboot value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $boot = $node -> getElementsByTagName ("oem-reboot");
-	if ((! defined $boot) || ("$boot" eq "")) {
-		return;
-	}
-	return $boot;
-}
-
-#==========================================
-# getOEMRebootInter
-#------------------------------------------
-sub getOEMRebootInter {
-	# ...
-	# Obtain the oem-reboot-interactive value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $boot = $node -> getElementsByTagName ("oem-reboot-interactive");
-	if ((! defined $boot) || ("$boot" eq "")) {
-		return;
-	}
-	return $boot;
-}
-
-#==========================================
-# getOEMShutdown
-#------------------------------------------
-sub getOEMSilentBoot {
-	# ...
-	# Obtain the oem-silent-boot value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $silent = $node -> getElementsByTagName ("oem-silent-boot");
-	if ((! defined $silent) || ("$silent" eq "")) {
-		return;
-	}
-	return $silent;
-}
-
-#==========================================
-# getOEMShutdown
-#------------------------------------------
-sub getOEMShutdown {
-	# ...
-	# Obtain the oem-shutdown value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $down = $node -> getElementsByTagName ("oem-shutdown");
-	if ((! defined $down) || ("$down" eq "")) {
-		return;
-	}
-	return $down;
-}
-
-#==========================================
-# getOEMRebootInter
-#------------------------------------------
-sub getOEMShutdownInter {
-	# ...
-	# Obtain the oem-shutdown-interactive value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $down = $node -> getElementsByTagName ("oem-shutdown-interactive");
-	if ((! defined $down) || ("$down" eq "")) {
-		return;
-	}
-	return $down;
-}
-
-#==========================================
-# getOEMBootWait
-#------------------------------------------
-sub getOEMBootWait {
-	# ...
-	# Obtain the oem-bootwait value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $wait = $node -> getElementsByTagName ("oem-bootwait");
-	if ((! defined $wait) || ("$wait" eq "")) {
-		return;
-	}
-	return $wait;
-}
-
-#==========================================
-# getOEMUnattended
-#------------------------------------------
-sub getOEMUnattended {
-	# ...
-	# Obtain the oem-unattended value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $unattended = $node -> getElementsByTagName ("oem-unattended");
-	if ((! defined $unattended) || ("$unattended" eq "")) {
-		return;
-	}
-	return $unattended;
-}
-
-#==========================================
-# getOEMUnattendedID
-#------------------------------------------
-sub getOEMUnattendedID {
-	# ...
-	# Obtain the oem-unattended-id value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $unattended_id = $node -> getElementsByTagName ("oem-unattended-id");
-	if ((! defined $unattended_id) || ("$unattended_id" eq "")) {
-		return;
-	}
-	return $unattended_id;
-}
-
-#==========================================
-# getOEMSwap
-#------------------------------------------
-sub getOEMSwap {
-	# ...
-	# Obtain the oem-swap value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $swap = $node -> getElementsByTagName ("oem-swap");
-	if ((! defined $swap) || ("$swap" eq "")) {
-		return;
-	}
-	return $swap;
-}
-
-#==========================================
-# getOEMAlignPartition
-#------------------------------------------
-sub getOEMAlignPartition {
-	# ...
-	# Obtain the oem-align-partition value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $align = $node -> getElementsByTagName ("oem-align-partition");
-	if ((! defined $align) || ("$align" eq "")) {
-		return;
-	}
-	return $align;
-}
-
-#==========================================
-# getOEMPartitionInstall
-#------------------------------------------
-sub getOEMPartitionInstall {
-	# ...
-	# Obtain the oem-partition-install value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $pinst = $node -> getElementsByTagName ("oem-partition-install");
-	if ((! defined $pinst) || ("$pinst" eq "")) {
-		return;
-	}
-	return $pinst;
-}
-
-#==========================================
-# getOEMRecovery
-#------------------------------------------
-sub getOEMRecovery {
-	# ...
-	# Obtain the oem-recovery value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $reco = $node -> getElementsByTagName ("oem-recovery");
-	if ((! defined $reco) || ("$reco" eq "")) {
-		return;
-	}
-	return $reco;
-}
-
-#==========================================
-# getOEMRecoveryID
-#------------------------------------------
-sub getOEMRecoveryID {
-	# ...
-	# Obtain the oem-recovery partition ID value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $reco = $node -> getElementsByTagName ("oem-recoveryID");
-	if ((! defined $reco) || ("$reco" eq "")) {
-		return;
-	}
-	return $reco;
-}
-
-#==========================================
-# getOEMRecoveryInPlace
-#------------------------------------------
-sub getOEMRecoveryInPlace {
-	# ...
-	# Obtain the oem-inplace-recovery value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	my $inplace = $node -> getElementsByTagName ("oem-inplace-recovery");
-	if ((! defined $inplace) || ("$inplace" eq "")) {
-		return;
-	}
-	return $inplace;
 }
 
 #==========================================
@@ -5360,6 +5068,369 @@ sub getLicenseNames_legacy {
 		return \@names;
 	}
 	return;
+}
+
+#==========================================
+# getOEMAlignPartition_legacy
+#------------------------------------------
+sub getOEMAlignPartition_legacy {
+	# ...
+	# Obtain the oem-align-partition value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $align = $node -> getElementsByTagName ("oem-align-partition");
+	if ((! defined $align) || ("$align" eq "")) {
+		return;
+	}
+	return $align;
+}
+
+#==========================================
+# getOEMBootTitle_legacy
+#------------------------------------------
+sub getOEMBootTitle_legacy {
+	# ...
+	# Obtain the oem-boot-title value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $title= $node -> getElementsByTagName ("oem-boot-title");
+	if ((! defined $title) || ("$title" eq "")) {
+		$title = $this -> getImageDisplayName();
+		if ((! defined $title) || ("$title" eq "")) {
+			return;
+		}
+	}
+	return $title;
+}
+
+#==========================================
+# getOEMBootWait_legacy
+#------------------------------------------
+sub getOEMBootWait_legacy {
+	# ...
+	# Obtain the oem-bootwait value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $wait = $node -> getElementsByTagName ("oem-bootwait");
+	if ((! defined $wait) || ("$wait" eq "")) {
+		return;
+	}
+	return $wait;
+}
+
+#==========================================
+# getOEMKiwiInitrd_legacy
+#------------------------------------------
+sub getOEMKiwiInitrd_legacy {
+	# ...
+	# Obtain the oem-kiwi-initrd value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $kboot= $node -> getElementsByTagName ("oem-kiwi-initrd");
+	if ((! defined $kboot) || ("$kboot" eq "")) {
+		return;
+	}
+	return $kboot;
+}
+
+#==========================================
+# getOEMPartitionInstall_legacy
+#------------------------------------------
+sub getOEMPartitionInstall_legacy {
+	# ...
+	# Obtain the oem-partition-install value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $pinst = $node -> getElementsByTagName ("oem-partition-install");
+	if ((! defined $pinst) || ("$pinst" eq "")) {
+		return;
+	}
+	return $pinst;
+}
+
+#==========================================
+# getOEMReboot_legacy
+#------------------------------------------
+sub getOEMReboot_legacy {
+	# ...
+	# Obtain the oem-reboot value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $boot = $node -> getElementsByTagName ("oem-reboot");
+	if ((! defined $boot) || ("$boot" eq "")) {
+		return;
+	}
+	return $boot;
+}
+
+#==========================================
+# getOEMRebootInter_legacy
+#------------------------------------------
+sub getOEMRebootInter_legacy {
+	# ...
+	# Obtain the oem-reboot-interactive value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $boot = $node -> getElementsByTagName ("oem-reboot-interactive");
+	if ((! defined $boot) || ("$boot" eq "")) {
+		return;
+	}
+	return $boot;
+}
+
+#==========================================
+# getOEMRecovery_legacy
+#------------------------------------------
+sub getOEMRecovery_legacy {
+	# ...
+	# Obtain the oem-recovery value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $reco = $node -> getElementsByTagName ("oem-recovery");
+	if ((! defined $reco) || ("$reco" eq "")) {
+		return;
+	}
+	return $reco;
+}
+
+#==========================================
+# getOEMRecoveryID_legacy
+#------------------------------------------
+sub getOEMRecoveryID_legacy {
+	# ...
+	# Obtain the oem-recovery partition ID value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $reco = $node -> getElementsByTagName ("oem-recoveryID");
+	if ((! defined $reco) || ("$reco" eq "")) {
+		return;
+	}
+	return $reco;
+}
+
+#==========================================
+# getOEMRecoveryInPlace_legacy
+#------------------------------------------
+sub getOEMRecoveryInPlace_legacy {
+	# ...
+	# Obtain the oem-inplace-recovery value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $inplace = $node -> getElementsByTagName ("oem-inplace-recovery");
+	if ((! defined $inplace) || ("$inplace" eq "")) {
+		return;
+	}
+	return $inplace;
+}
+
+#==========================================
+# getOEMShutdown_legacy
+#------------------------------------------
+sub getOEMShutdown_legacy {
+	# ...
+	# Obtain the oem-shutdown value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $down = $node -> getElementsByTagName ("oem-shutdown");
+	if ((! defined $down) || ("$down" eq "")) {
+		return;
+	}
+	return $down;
+}
+
+#==========================================
+# getOEMShutdownInter_legacy
+#------------------------------------------
+sub getOEMShutdownInter_legacy {
+	# ...
+	# Obtain the oem-shutdown-interactive value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $down = $node -> getElementsByTagName ("oem-shutdown-interactive");
+	if ((! defined $down) || ("$down" eq "")) {
+		return;
+	}
+	return $down;
+}
+
+#==========================================
+# getOEMSilentBoot_legacy
+#------------------------------------------
+sub getOEMSilentBoot_legacy {
+	# ...
+	# Obtain the oem-silent-boot value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $silent = $node -> getElementsByTagName ("oem-silent-boot");
+	if ((! defined $silent) || ("$silent" eq "")) {
+		return;
+	}
+	return $silent;
+}
+
+#==========================================
+# getOEMSwap_legacy
+#------------------------------------------
+sub getOEMSwap_legacy {
+	# ...
+	# Obtain the oem-swap value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $swap = $node -> getElementsByTagName ("oem-swap");
+	if ((! defined $swap) || ("$swap" eq "")) {
+		return;
+	}
+	return $swap;
+}
+
+#==========================================
+# getOEMSwapSize_legacy
+#------------------------------------------
+sub getOEMSwapSize_legacy {
+	# ...
+	# Obtain the oem-swapsize value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $size = $node -> getElementsByTagName ("oem-swapsize");
+	if ((! defined $size) || ("$size" eq "")) {
+		return;
+	}
+	return $size;
+}
+
+#==========================================
+# getOEMSystemSize_legacy
+#------------------------------------------
+sub getOEMSystemSize_legacy {
+	# ...
+	# Obtain the oem-systemsize value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $size = $node -> getElementsByTagName ("oem-systemsize");
+	if ((! defined $size) || ("$size" eq "")) {
+		return;
+	}
+	return $size;
+}
+
+#==========================================
+# getOEMUnattended_legacy
+#------------------------------------------
+sub getOEMUnattended_legacy {
+	# ...
+	# Obtain the oem-unattended value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $unattended = $node -> getElementsByTagName ("oem-unattended");
+	if ((! defined $unattended) || ("$unattended" eq "")) {
+		return;
+	}
+	return $unattended;
+}
+
+#==========================================
+# getOEMUnattendedID_legacy
+#------------------------------------------
+sub getOEMUnattendedID_legacy {
+	# ...
+	# Obtain the oem-unattended-id value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $unattended_id = $node -> getElementsByTagName ("oem-unattended-id");
+	if ((! defined $unattended_id) || ("$unattended_id" eq "")) {
+		return;
+	}
+	return $unattended_id;
 }
 
 #==========================================

@@ -402,24 +402,42 @@ sub updateDescription {
 	#==========================================
 	# Store OEM data
 	#------------------------------------------
-	$changeset{"oem-partition-install"}    = $src_xml->getOEMPartitionInstall();
-	$changeset{"oem-swap"}                 = $src_xml->getOEMSwap();
-	$changeset{"oem-align-partition"}      = $src_xml->getOEMAlignPartition();
-	$changeset{"oem-swapsize"}             = $src_xml->getOEMSwapSize();
-	$changeset{"oem-systemsize"}           = $src_xml->getOEMSystemSize();
-	$changeset{"oem-boot-title"}           = $src_xml->getOEMBootTitle();
-	$changeset{"oem-kiwi-initrd"}          = $src_xml->getOEMKiwiInitrd();
-	$changeset{"oem-reboot"}               = $src_xml->getOEMReboot();
-	$changeset{"oem-reboot-interactive"}   = $src_xml->getOEMRebootInter();
-	$changeset{"oem-silent-boot"}          = $src_xml->getOEMSilentBoot();
-	$changeset{"oem-shutdown"}             = $src_xml->getOEMShutdown();
-	$changeset{"oem-shutdown-interactive"} = $src_xml->getOEMShutdownInter();
-	$changeset{"oem-bootwait"}             = $src_xml->getOEMBootWait();
-	$changeset{"oem-unattended"}           = $src_xml->getOEMUnattended();
-	$changeset{"oem-unattended-id"}        = $src_xml->getOEMUnattendedID();
-	$changeset{"oem-recovery"}             = $src_xml->getOEMRecovery();
-	$changeset{"oem-recoveryID"}           = $src_xml->getOEMRecoveryID();
-	$changeset{"oem-inplace-recovery"}     = $src_xml->getOEMRecoveryInPlace();
+	$changeset{"oem-partition-install"}    =
+		$src_xml->getOEMPartitionInstall_legacy();
+	$changeset{"oem-swap"}                 =
+		$src_xml->getOEMSwap_legacy();
+	$changeset{"oem-align-partition"}      =
+		$src_xml->getOEMAlignPartition_legacy();
+	$changeset{"oem-swapsize"}             =
+		$src_xml->getOEMSwapSize_legacy();
+	$changeset{"oem-systemsize"}           =
+		$src_xml->getOEMSystemSize_legacy();
+	$changeset{"oem-boot-title"}           =
+		$src_xml->getOEMBootTitle_legacy();
+	$changeset{"oem-kiwi-initrd"}          =
+		$src_xml->getOEMKiwiInitrd_legacy();
+	$changeset{"oem-reboot"}               =
+		$src_xml->getOEMReboot_legacy();
+	$changeset{"oem-reboot-interactive"}   =
+		$src_xml->getOEMRebootInter_legacy();
+	$changeset{"oem-silent-boot"}          =
+		$src_xml->getOEMSilentBoot_legacy();
+	$changeset{"oem-shutdown"}             =
+		$src_xml->getOEMShutdown_legacy();
+	$changeset{"oem-shutdown-interactive"} =
+		$src_xml->getOEMShutdownInter_legacy();
+	$changeset{"oem-bootwait"}             =
+		$src_xml->getOEMBootWait_legacy();
+	$changeset{"oem-unattended"}           =
+		$src_xml->getOEMUnattended_legacy();
+	$changeset{"oem-unattended-id"}        =
+		$src_xml->getOEMUnattendedID_legacy();
+	$changeset{"oem-recovery"}             =
+		$src_xml->getOEMRecovery_legacy();
+	$changeset{"oem-recoveryID"}           =
+		$src_xml->getOEMRecoveryID_legacy();
+	$changeset{"oem-inplace-recovery"}     =
+		$src_xml->getOEMRecoveryInPlace_legacy();
 	#==========================================
 	# Return changeset hash
 	#------------------------------------------
