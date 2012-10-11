@@ -37,6 +37,7 @@ use KIWIXMLPreferenceData;
 use KIWIXMLRepositoryData;
 use KIWIXMLTypeData;
 use KIWIXMLValidator;
+use KIWIXMLVMachineData;
 use KIWISatSolver;
 
 #==========================================
@@ -757,6 +758,21 @@ sub getRepositories {
 }
 
 #==========================================
+# getVMachineConfig
+#------------------------------------------
+sub getVMachineConfig {
+	# ...
+	# Return a VMachineData object for the virtual machine configuration of
+	# the current build type
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $vmConfObj = KIWIXMLVMachineData -> new($kiwi,
+										$this->{selectedType}{machine});
+	return $vmConfObj;
+}
+
+#==========================================
 # ignoreRepositories
 #------------------------------------------
 sub ignoreRepositories {
@@ -1106,7 +1122,7 @@ sub __genTypeHash {
 		$typeData{installstick}      = $type -> getAttribute('installstick');
 		$typeData{kernelcmdline}     = $type -> getAttribute('kernelcmdline');
 		$typeData{luks}              = $type -> getAttribute('luks');
-#        $typeData{machine} = $this -> __genVMachineHash($type);
+		$typeData{machine} = $this -> __genVMachineHash($type);
 #        $typeData{oemconfig} = $this -> __genOEMConfigHash($type);
 
 		my $prim = $type -> getAttribute('primary');
@@ -1130,6 +1146,86 @@ sub __genTypeHash {
 	}
 	$types{defaultType} = $defType;
 	return \%types;
+}
+
+#==========================================
+# __genVMachineHash
+#------------------------------------------
+sub __genVMachineHash {
+	# ...
+	# Return a ref to a hash that contains the configuration data for the
+	# <machine> element and it's children for the
+	# given XML:ELEMENT object
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $vmConfig = $node -> getChildrenByTagName('machine') -> get_node(1);
+	if (! $vmConfig ) {
+		return;
+	}
+	my %vmConfigData;
+	$vmConfigData{HWversion}  = $vmConfig -> getAttribute('HWversion');
+	$vmConfigData{arch}       = $vmConfig -> getAttribute('arch');
+	$vmConfigData{des_cpu}    = $vmConfig -> getAttribute('des_cpu');
+	$vmConfigData{des_memory} = $vmConfig -> getAttribute('des_memory');
+	$vmConfigData{domain}     = $vmConfig -> getAttribute('domain');
+	$vmConfigData{guestOS}    = $vmConfig -> getAttribute('guestOS');
+	$vmConfigData{max_cpu}    = $vmConfig -> getAttribute('max_cpu');
+	$vmConfigData{max_memory} = $vmConfig -> getAttribute('max_memory');
+	$vmConfigData{memory}     = $vmConfig -> getAttribute('memory');
+	$vmConfigData{min_cpu}    = $vmConfig -> getAttribute('min_cpu');
+	$vmConfigData{min_memory} = $vmConfig -> getAttribute('min_memory');
+	$vmConfigData{ncpus}      = $vmConfig -> getAttribute('ncpus');
+	$vmConfigData{ovftype}    = $vmConfig -> getAttribute('ovftype');
+
+	my @confNodes = $vmConfig -> getChildrenByTagName('vmconfig-entry');
+	my @confData;
+	for my $conf (@confNodes) {
+		push @confData, $conf -> textContent();
+	}
+	my $configSttings;
+	if (@confData) {
+		$configSttings = \@confData;
+	}
+	$vmConfigData{vmconfig_entries} = $configSttings;
+
+	my @diskNodes = $vmConfig -> getChildrenByTagName('vmdisk');
+	my %diskData;
+	for my $disk (@diskNodes) {
+		my %diskSet;
+		$diskSet{controller} = $disk -> getAttribute('controller');
+		$diskSet{device}     = $disk -> getAttribute('device');
+		$diskSet{disktype}   = $disk -> getAttribute('disktype');
+		$diskSet{id}         = $disk -> getAttribute('id');
+		# Currently there is only one disk, the system disk
+		$diskData{system} = \%diskSet;
+	}
+	$vmConfigData{vmdisks} = \%diskData;
+
+	my $dvdNodes = $vmConfig -> getChildrenByTagName('vmdvd');
+	if ($dvdNodes) {
+		my $dvdNode = $dvdNodes -> get_node(1);
+		my %dvdData;
+		$dvdData{controller} = $dvdNode -> getAttribute('controller');
+		$dvdData{id}         = $dvdNode -> getAttribute('id');
+		$vmConfigData{vmdvd} = \%dvdData;
+	}
+
+	my @nicNodes = $vmConfig -> getChildrenByTagName('vmnic');
+	my %nicData;
+	my $cntr = 1;
+	for my $nic (@nicNodes) {
+		my %nicSet;
+		$nicSet{driver}    = $nic -> getAttribute('driver');
+		$nicSet{interface} = $nic -> getAttribute('interface');
+		$nicSet{mac}       = $nic -> getAttribute('mac');
+		$nicSet{mode}      = $nic -> getAttribute('mode');
+		$nicData{$cntr} = \%nicSet;
+		$cntr += 1;
+	}
+	$vmConfigData{vmnics} = \%nicData;
+
+	return \%vmConfigData;
 }
 
 #==========================================
@@ -3812,267 +3908,6 @@ sub getLVMVolumes {
 	return %result;
 }
 
-#==========================================
-# getVMwareConfig
-#------------------------------------------
-sub getVMwareConfig {
-	# ...
-	# Create an Attribute hash from the <machine>
-	# section if it exists suitable for the VMware configuration
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	my %result = ();
-	my %guestos= ();
-	if (! defined $node) {
-		return %result;
-	}
-	#==========================================
-	# global setup
-	#------------------------------------------
-	my $arch = $node -> getAttribute ("arch");
-	if (! defined $arch) {
-		$arch = "ix86";
-	} elsif ($arch eq "%arch") {
-		my $sysarch = qxx ("uname -m"); chomp $sysarch;
-		if ($sysarch =~ /i.86/) {
-			$arch = "ix86";
-		} else {
-			$arch = $sysarch;
-		}
-	}
-	my $hwver= $node -> getAttribute ("HWversion");
-	if (! defined $hwver) {
-		$hwver = 4;
-	}
-	$guestos{suse}{ix86}     = "suse";
-	$guestos{suse}{x86_64}   = "suse-64";
-	$guestos{sles}{ix86}     = "sles";
-	$guestos{sles}{x86_64}   = "sles-64";
-	$guestos{rhel6}{x86_64}  = "rhel6-64";
-	$guestos{rhel6}{ix86}    = "rhel6";
-	$guestos{rhel5}{x86_64}  = "rhel5-64";
-	$guestos{rhel5}{ix86}    = "rhel5";
-	$guestos{centos}{ix86}   = "centos";
-	$guestos{centos}{x86_64} = "centos-64";
-	my $guest= $node -> getAttribute ("guestOS");
-	if ((!defined $guest) || (! defined $guestos{$guest}{$arch})) {
-		if ($arch eq "ix86") {
-			$guest = "suse";
-		} else {
-			$guest = "suse-64";
-		}
-	} else {
-		$guest = $guestos{$guest}{$arch};
-	}
-	my $memory = $node -> getAttribute ("memory");
-	my $ncpus  = $node -> getAttribute ("ncpus");
-	#==========================================
-	# storage setup disk
-	#------------------------------------------
-	my $disk = $node -> getElementsByTagName ("vmdisk");
-	my ($type,$id);
-	if ($disk) {
-		my $node = $disk -> get_node(1);
-		$type = $node -> getAttribute ("controller");
-		$id   = $node -> getAttribute ("id");
-	}
-	#==========================================
-	# storage setup CD rom
-	#------------------------------------------
-	my $cd = $node -> getElementsByTagName ("vmdvd");
-	my ($cdtype,$cdid);
-	if ($cd) {
-		my $node = $cd -> get_node(1);
-		$cdtype = $node -> getAttribute ("controller");
-		$cdid   = $node -> getAttribute ("id");
-	}
-	#==========================================
-	# network setup
-	#------------------------------------------
-	my $nic  = $node -> getElementsByTagName ("vmnic");
-	my %vmnics;
-	for (my $i=1; $i<= $nic->size(); $i++) {
-		my $node = $nic  -> get_node($i);
-		$vmnics{$node -> getAttribute ("interface")} =
-		{
-			drv  => $node -> getAttribute ("driver"),
-			mode => $node -> getAttribute ("mode")
-		};
-	}
-	#==========================================
-	# configuration file settings
-	#------------------------------------------
-	my @vmConfigOpts = $this -> __getVMConfigOpts();
-	#==========================================
-	# save hash
-	#------------------------------------------
-	$result{vmware_arch}  = $arch;
-	if (@vmConfigOpts) {
-		$result{vmware_config} = \@vmConfigOpts;
-	}
-	$result{vmware_hwver} = $hwver;
-	$result{vmware_guest} = $guest;
-	$result{vmware_memory}= $memory;
-	$result{vmware_ncpus} = $ncpus;
-	if ($disk) {
-		$result{vmware_disktype} = $type;
-		$result{vmware_diskid}   = $id;
-	}
-	if ($cd) {
-		$result{vmware_cdtype} = $cdtype;
-		$result{vmware_cdid}   = $cdid;
-	}
-	if (%vmnics) {
-		$result{vmware_nic}= \%vmnics;
-	}
-	return %result;
-}
-
-#==========================================
-# getXenConfig
-#------------------------------------------
-sub getXenConfig {
-	# ...
-	# Create an Attribute hash from the <machine>
-	# section if it exists suitable for the xen domU configuration
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	my %result = ();
-	if (! defined $node) {
-		return %result;
-	}
-	#==========================================
-	# global setup
-	#------------------------------------------
-	my $memory = $node -> getAttribute ("memory");
-	my $ncpus  = $node -> getAttribute ("ncpus");
-	my $domain = $node -> getAttribute ("domain");
-	#==========================================
-	# storage setup
-	#------------------------------------------
-	my $disk = $node -> getElementsByTagName ("vmdisk");
-	my $device;
-	if ($disk) {
-		my $node  = $disk -> get_node(1);
-		$device= $node -> getAttribute ("device");
-	}
-	#==========================================
-	# network setup (bridge)
-	#------------------------------------------
-	my $bridges = $node -> getElementsByTagName ("vmnic");
-	my %vifs = ();
-	for (my $i=1;$i<= $bridges->size();$i++) {
-		my $bridge = $bridges -> get_node($i);
-		if ($bridge) {
-			my $mac   = $bridge -> getAttribute ("mac");
-			my $bname = $bridge -> getAttribute ("interface");
-			if (! $bname) {
-				$bname = "undef";
-			}
-			$vifs{$bname} = $mac;
-		}
-	}
-	#==========================================
-	# configuration file settings
-	#------------------------------------------
-	my @vmConfigOpts = $this -> __getVMConfigOpts();
-	#==========================================
-	# save hash
-	#------------------------------------------
-	if (@vmConfigOpts) {
-		$result{xen_config} = \@vmConfigOpts
-	}
-	$result{xen_memory}= $memory;
-	$result{xen_ncpus} = $ncpus;
-	$result{xen_domain}= $domain;
-	if ($disk) {
-		$result{xen_diskdevice} = $device;
-	}
-	foreach my $bname (keys %vifs) {
-		$result{xen_bridge}{$bname} = $vifs{$bname};
-	}
-	return %result;
-}
-
-#==========================================
-# getOVFConfig
-#------------------------------------------
-sub getOVFConfig {
-	# ...
-	# Create an Attribute hash from the <machine>
-	# section if it exists suitable for the OVM
-	# configuration
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	my %result = ();
-	my $device;
-	my $disktype;
-	if (! defined $node) {
-		return %result;
-	}
-	#==========================================
-	# global setup
-	#------------------------------------------
-	my $minmemory = $node -> getAttribute ("min_memory");
-	my $desmemory = $node -> getAttribute ("des_memory");
-	my $maxmemory = $node -> getAttribute ("max_memory");
-	my $memory    = $node -> getAttribute ("memory");
-	my $ncpus     = $node -> getAttribute ("ncpus");
-	my $mincpu    = $node -> getAttribute ("min_cpu");
-	my $descpu    = $node -> getAttribute ("des_cpu");
-	my $maxcpu    = $node -> getAttribute ("max_cpu");
-	my $type      = $node -> getAttribute ("ovftype");
-	#==========================================
-	# storage setup
-	#------------------------------------------
-	my $disk = $node -> getElementsByTagName ("vmdisk");
-	if ($disk) {
-		my $node  = $disk -> get_node(1);
-		$device = $node -> getAttribute ("device");
-		$disktype = $node -> getAttribute ("disktype");
-	}
-	#==========================================
-	# network setup
-	#------------------------------------------
-	my $bridges = $node -> getElementsByTagName ("vmnic");
-	my %vifs = ();
-	for (my $i=1;$i<= $bridges->size();$i++) {
-		my $bridge = $bridges -> get_node($i);
-		if ($bridge) {
-			my $bname = $bridge -> getAttribute ("interface");
-			if (! $bname) {
-				$bname = "undef";
-			}
-			$vifs{$bname} = $i;
-		}
-	}
-	#==========================================
-	# save hash
-	#------------------------------------------
-	$result{ovf_minmemory} = $minmemory;
-	$result{ovf_desmemory} = $desmemory;
-	$result{ovf_maxmemory} = $maxmemory;
-	$result{ovf_memory}    = $memory;
-	$result{ovf_ncpus}     = $ncpus;
-	$result{ovf_mincpu}    = $mincpu;
-	$result{ovf_descpu}    = $descpu;
-	$result{ovf_maxcpu}    = $maxcpu;
-	$result{ovf_type}      = $type;
-	if ($disk) {
-		$result{ovf_disk}    = $device;
-		$result{ovf_disktype}= $disktype;
-	}
-	foreach my $bname (keys %vifs) {
-		$result{ovf_bridge}{$bname} = $vifs{$bname};
-	}
-	return %result;
-}
 
 #==========================================
 # getInstSourcePackageAttributes
@@ -5686,6 +5521,268 @@ sub getHttpsRepositoryCredentials_legacy {
 		}
 	}
 	return;
+}
+
+#==========================================
+# getOVFConfig_legacy
+#------------------------------------------
+sub getOVFConfig_legacy {
+	# ...
+	# Create an Attribute hash from the <machine>
+	# section if it exists suitable for the OVM
+	# configuration
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	my %result = ();
+	my $device;
+	my $disktype;
+	if (! defined $node) {
+		return %result;
+	}
+	#==========================================
+	# global setup
+	#------------------------------------------
+	my $minmemory = $node -> getAttribute ("min_memory");
+	my $desmemory = $node -> getAttribute ("des_memory");
+	my $maxmemory = $node -> getAttribute ("max_memory");
+	my $memory    = $node -> getAttribute ("memory");
+	my $ncpus     = $node -> getAttribute ("ncpus");
+	my $mincpu    = $node -> getAttribute ("min_cpu");
+	my $descpu    = $node -> getAttribute ("des_cpu");
+	my $maxcpu    = $node -> getAttribute ("max_cpu");
+	my $type      = $node -> getAttribute ("ovftype");
+	#==========================================
+	# storage setup
+	#------------------------------------------
+	my $disk = $node -> getElementsByTagName ("vmdisk");
+	if ($disk) {
+		my $node  = $disk -> get_node(1);
+		$device = $node -> getAttribute ("device");
+		$disktype = $node -> getAttribute ("disktype");
+	}
+	#==========================================
+	# network setup
+	#------------------------------------------
+	my $bridges = $node -> getElementsByTagName ("vmnic");
+	my %vifs = ();
+	for (my $i=1;$i<= $bridges->size();$i++) {
+		my $bridge = $bridges -> get_node($i);
+		if ($bridge) {
+			my $bname = $bridge -> getAttribute ("interface");
+			if (! $bname) {
+				$bname = "undef";
+			}
+			$vifs{$bname} = $i;
+		}
+	}
+	#==========================================
+	# save hash
+	#------------------------------------------
+	$result{ovf_minmemory} = $minmemory;
+	$result{ovf_desmemory} = $desmemory;
+	$result{ovf_maxmemory} = $maxmemory;
+	$result{ovf_memory}    = $memory;
+	$result{ovf_ncpus}     = $ncpus;
+	$result{ovf_mincpu}    = $mincpu;
+	$result{ovf_descpu}    = $descpu;
+	$result{ovf_maxcpu}    = $maxcpu;
+	$result{ovf_type}      = $type;
+	if ($disk) {
+		$result{ovf_disk}    = $device;
+		$result{ovf_disktype}= $disktype;
+	}
+	foreach my $bname (keys %vifs) {
+		$result{ovf_bridge}{$bname} = $vifs{$bname};
+	}
+	return %result;
+}
+
+#==========================================
+# getVMwareConfig_legacy
+#------------------------------------------
+sub getVMwareConfig_legacy {
+	# ...
+	# Create an Attribute hash from the <machine>
+	# section if it exists suitable for the VMware configuration
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	my %result = ();
+	my %guestos= ();
+	if (! defined $node) {
+		return %result;
+	}
+	#==========================================
+	# global setup
+	#------------------------------------------
+	my $arch = $node -> getAttribute ("arch");
+	if (! defined $arch) {
+		$arch = "ix86";
+	} elsif ($arch eq "%arch") {
+		my $sysarch = qxx ("uname -m"); chomp $sysarch;
+		if ($sysarch =~ /i.86/) {
+			$arch = "ix86";
+		} else {
+			$arch = $sysarch;
+		}
+	}
+	my $hwver= $node -> getAttribute ("HWversion");
+	if (! defined $hwver) {
+		$hwver = 4;
+	}
+	$guestos{suse}{ix86}     = "suse";
+	$guestos{suse}{x86_64}   = "suse-64";
+	$guestos{sles}{ix86}     = "sles";
+	$guestos{sles}{x86_64}   = "sles-64";
+	$guestos{rhel6}{x86_64}  = "rhel6-64";
+	$guestos{rhel6}{ix86}    = "rhel6";
+	$guestos{rhel5}{x86_64}  = "rhel5-64";
+	$guestos{rhel5}{ix86}    = "rhel5";
+	$guestos{centos}{ix86}   = "centos";
+	$guestos{centos}{x86_64} = "centos-64";
+	my $guest= $node -> getAttribute ("guestOS");
+	if ((!defined $guest) || (! defined $guestos{$guest}{$arch})) {
+		if ($arch eq "ix86") {
+			$guest = "suse";
+		} else {
+			$guest = "suse-64";
+		}
+	} else {
+		$guest = $guestos{$guest}{$arch};
+	}
+	my $memory = $node -> getAttribute ("memory");
+	my $ncpus  = $node -> getAttribute ("ncpus");
+	#==========================================
+	# storage setup disk
+	#------------------------------------------
+	my $disk = $node -> getElementsByTagName ("vmdisk");
+	my ($type,$id);
+	if ($disk) {
+		my $node = $disk -> get_node(1);
+		$type = $node -> getAttribute ("controller");
+		$id   = $node -> getAttribute ("id");
+	}
+	#==========================================
+	# storage setup CD rom
+	#------------------------------------------
+	my $cd = $node -> getElementsByTagName ("vmdvd");
+	my ($cdtype,$cdid);
+	if ($cd) {
+		my $node = $cd -> get_node(1);
+		$cdtype = $node -> getAttribute ("controller");
+		$cdid   = $node -> getAttribute ("id");
+	}
+	#==========================================
+	# network setup
+	#------------------------------------------
+	my $nic  = $node -> getElementsByTagName ("vmnic");
+	my %vmnics;
+	for (my $i=1; $i<= $nic->size(); $i++) {
+		my $node = $nic  -> get_node($i);
+		$vmnics{$node -> getAttribute ("interface")} =
+		{
+			drv  => $node -> getAttribute ("driver"),
+			mode => $node -> getAttribute ("mode")
+		};
+	}
+	#==========================================
+	# configuration file settings
+	#------------------------------------------
+	my @vmConfigOpts = $this -> __getVMConfigOpts();
+	#==========================================
+	# save hash
+	#------------------------------------------
+	$result{vmware_arch}  = $arch;
+	if (@vmConfigOpts) {
+		$result{vmware_config} = \@vmConfigOpts;
+	}
+	$result{vmware_hwver} = $hwver;
+	$result{vmware_guest} = $guest;
+	$result{vmware_memory}= $memory;
+	$result{vmware_ncpus} = $ncpus;
+	if ($disk) {
+		$result{vmware_disktype} = $type;
+		$result{vmware_diskid}   = $id;
+	}
+	if ($cd) {
+		$result{vmware_cdtype} = $cdtype;
+		$result{vmware_cdid}   = $cdid;
+	}
+	if (%vmnics) {
+		$result{vmware_nic}= \%vmnics;
+	}
+	return %result;
+}
+
+#==========================================
+# getXenConfig_legacy
+#------------------------------------------
+sub getXenConfig_legacy {
+	# ...
+	# Create an Attribute hash from the <machine>
+	# section if it exists suitable for the xen domU configuration
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	my %result = ();
+	if (! defined $node) {
+		return %result;
+	}
+	#==========================================
+	# global setup
+	#------------------------------------------
+	my $memory = $node -> getAttribute ("memory");
+	my $ncpus  = $node -> getAttribute ("ncpus");
+	my $domain = $node -> getAttribute ("domain");
+	#==========================================
+	# storage setup
+	#------------------------------------------
+	my $disk = $node -> getElementsByTagName ("vmdisk");
+	my $device;
+	if ($disk) {
+		my $node  = $disk -> get_node(1);
+		$device= $node -> getAttribute ("device");
+	}
+	#==========================================
+	# network setup (bridge)
+	#------------------------------------------
+	my $bridges = $node -> getElementsByTagName ("vmnic");
+	my %vifs = ();
+	for (my $i=1;$i<= $bridges->size();$i++) {
+		my $bridge = $bridges -> get_node($i);
+		if ($bridge) {
+			my $mac   = $bridge -> getAttribute ("mac");
+			my $bname = $bridge -> getAttribute ("interface");
+			if (! $bname) {
+				$bname = "undef";
+			}
+			$vifs{$bname} = $mac;
+		}
+	}
+	#==========================================
+	# configuration file settings
+	#------------------------------------------
+	my @vmConfigOpts = $this -> __getVMConfigOpts();
+	#==========================================
+	# save hash
+	#------------------------------------------
+	if (@vmConfigOpts) {
+		$result{xen_config} = \@vmConfigOpts
+	}
+	$result{xen_memory}= $memory;
+	$result{xen_ncpus} = $ncpus;
+	$result{xen_domain}= $domain;
+	if ($disk) {
+		$result{xen_diskdevice} = $device;
+	}
+	foreach my $bname (keys %vifs) {
+		$result{xen_bridge}{$bname} = $vifs{$bname};
+	}
+	return %result;
 }
 
 #==========================================

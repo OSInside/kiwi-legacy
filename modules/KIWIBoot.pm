@@ -327,7 +327,7 @@ sub new {
 	# find Xen domain configuration
 	#------------------------------------------
 	if ($isxen && defined $xml) {
-		my %xenc = $xml -> getXenConfig();
+		my %xenc = $xml -> getXenConfig_legacy();
 		if (defined $xenc{xen_domain}) {
 			$xendomain = $xenc{xen_domain};
 		} else {

@@ -30,6 +30,7 @@ use KIWIXMLEC2ConfigData;
 use KIWIXMLPreferenceData;
 use KIWIXMLRepositoryData;
 use KIWIXMLTypeData;
+use KIWIXMLVMachineData;
 
 # All tests will need to be adjusted once KIWXML turns into a stateless
 # container and the ctor receives the config.xml file name as an argument.
@@ -3300,9 +3301,9 @@ sub test_getOEMUnattendedID {
 }
 
 #==========================================
-# test_getOVFConfig
+# test_getOVFConfig_legacy
 #------------------------------------------
-sub test_getOVFConfig {
+sub test_getOVFConfig_legacy {
 	#...
 	# Verify proper return of the OVF data
 	#---
@@ -3312,7 +3313,7 @@ sub test_getOVFConfig {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %ovfConfig = $xml -> getOVFConfig();
+	my %ovfConfig = $xml -> getOVFConfig_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4755,9 +4756,142 @@ sub test_getUsers {
 }
 
 #==========================================
-# test_getVMwareConfig
+# test_getVMachineConfigOVF
 #------------------------------------------
-sub test_getVMwareConfig {
+sub test_getVMachineConfigOVF {
+	# ...
+	# Test the getVMachineConfig method with a config set up for OVF
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'ovfConfigSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $vmConfig = $xml -> getVMachineConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $desMem = $vmConfig -> getDesiredMemory();
+	my $maxMem = $vmConfig -> getMaxMemory();
+	my $mem    = $vmConfig -> getMemory();
+	my $minMem = $vmConfig -> getMinMemory();
+	my $desCPU = $vmConfig -> getDesiredCPUCnt();
+	my $maxCPU = $vmConfig -> getMaxCPUCnt();
+	my $cpu    = $vmConfig -> getNumCPUs();
+	my $minCPU = $vmConfig -> getMinCPUCnt();
+	my $oType  = $vmConfig -> getOVFType();
+	my $diskID = $vmConfig -> getSystemDiskDevice();
+	my $diskT  = $vmConfig -> getSystemDiskType();
+	my $nicIf  = $vmConfig -> getNICInterface(1);
+	$this -> assert_str_equals('1024', $desMem);
+	$this -> assert_str_equals('2048', $maxMem);
+	$this -> assert_str_equals('1024', $mem);
+	$this -> assert_str_equals('512', $minMem);
+	$this -> assert_str_equals('2', $desCPU);
+	$this -> assert_str_equals('4', $maxCPU);
+	$this -> assert_str_equals('2', $cpu);
+	$this -> assert_str_equals('1', $minCPU);
+	$this -> assert_str_equals('powervm', $oType);
+	$this -> assert_str_equals('/dev/sda', $diskID);
+	$this -> assert_str_equals('scsi', $diskT);
+	$this -> assert_str_equals('eth0', $nicIf);
+	return;
+}
+
+#==========================================
+# test_getVMachineConfigVMW
+#------------------------------------------
+sub test_getVMachineConfigVMW {
+	# ...
+	# Test the getVMachineConfig method with a config set up for VMware
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'vmwareConfigSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $vmConfig = $xml -> getVMachineConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $arch    = $vmConfig -> getArch();
+	my $confEnt = $vmConfig -> getConfigEntries();
+	my $dvdID   = $vmConfig -> getDVDID();
+	my $dvdCnt  = $vmConfig -> getDVDController();
+	my $diskCnt = $vmConfig -> getSystemDiskController();
+	my $diskID  = $vmConfig -> getSystemDiskID();
+	my $guest   = $vmConfig -> getGuestOS();
+	my $hwver   = $vmConfig -> getHardwareVersion();
+	my $mem     = $vmConfig -> getMemory();
+	my $numCPU  = $vmConfig -> getNumCPUs();
+	my $nicIF   = $vmConfig -> getNICInterface(1);
+	my $nicDr   = $vmConfig -> getNICDriver(1);
+	my $nicMod  = $vmConfig -> getNICMode(1);
+	$this -> assert_str_equals('x86_64', $arch);
+	my @expectedOpts = qw / ola pablo /;
+	$this -> assert_array_equal(\@expectedOpts, $confEnt);
+	$this -> assert_str_equals('2', $dvdID);
+	$this -> assert_str_equals('ide', $dvdCnt);
+	$this -> assert_str_equals('1', $diskID);
+	$this -> assert_str_equals('scsi', $diskCnt);
+	$this -> assert_str_equals('sles', $guest);
+	$this -> assert_str_equals('7', $hwver);
+	$this -> assert_str_equals('1024', $mem);
+	$this -> assert_str_equals('2', $numCPU);
+	$this -> assert_str_equals('eth0', $nicIF);
+	$this -> assert_str_equals('e1000', $nicDr);
+	$this -> assert_str_equals('dhcp', $nicMod);
+	return;
+}
+
+#==========================================
+# test_getVMachineConfigXen
+#------------------------------------------
+sub test_getVMachineConfigXen {
+	# ...
+	# Test the getVMachineConfig method with a config set up for Xen
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'xenConfigSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $vmConfig = $xml -> getVMachineConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $confEnt = $vmConfig -> getConfigEntries();
+	my $dev     = $vmConfig -> getSystemDiskDevice();
+	my $dom     = $vmConfig -> getDomain();
+	my $mem     = $vmConfig -> getMemory();
+	my $numCPU  = $vmConfig -> getNumCPUs();
+	my $nicMac  = $vmConfig -> getNICMAC(1);
+	my @expectedOpts = qw / foo bar /;
+	$this -> assert_array_equal(\@expectedOpts, $confEnt);
+	$this -> assert_str_equals('/dev/xvda', $dev);
+	$this -> assert_str_equals('domU', $dom);
+	$this -> assert_str_equals('128', $mem);
+	$this -> assert_str_equals('3', $numCPU);
+	$this -> assert_str_equals('00:0C:6E:AA:57:2F', $nicMac);
+	return ;
+}
+
+#==========================================
+# test_getVMwareConfig_legacy
+#------------------------------------------
+sub test_getVMwareConfig_legacy {
 	# ...
 	# Verify proper return of VMWare configuration data
 	# ---
@@ -4767,7 +4901,7 @@ sub test_getVMwareConfig {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %vmConfig = $xml -> getVMwareConfig();
+	my %vmConfig = $xml -> getVMwareConfig_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4797,9 +4931,9 @@ sub test_getVMwareConfig {
 }
 
 #==========================================
-# test_getXenConfig
+# test_getXenConfig_legacy
 #------------------------------------------
-sub test_getXenConfig {
+sub test_getXenConfig_legacy {
 	# ...
 	# Verify proper return of Xen  configuration data
 	# ---
@@ -4809,7 +4943,7 @@ sub test_getXenConfig {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %vmConfig = $xml -> getXenConfig();
+	my %vmConfig = $xml -> getXenConfig_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

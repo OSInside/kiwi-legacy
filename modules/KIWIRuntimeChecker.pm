@@ -494,7 +494,7 @@ sub __checkVMscsiCapable {
 		# Nothing to do
 		return 1;
 	}
-	my %vmConfig = $xml -> getVMwareConfig();
+	my %vmConfig = $xml -> getVMwareConfig_legacy();
 	if (defined $vmConfig{vmware_disktype} ) {
 		my $diskType = $vmConfig{vmware_disktype};
 		if ($diskType ne 'scsi') {

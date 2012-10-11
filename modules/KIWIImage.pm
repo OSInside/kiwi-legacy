@@ -237,7 +237,7 @@ sub updateDescription {
 	$changeset{"packagemanager"} = $src_xml->getPackageManager_legacy();
 	$changeset{"showlicense"}    = $src_xml->getLicenseNames_legacy();
 	my $domain;
-	my %xenc = $src_xml -> getXenConfig();
+	my %xenc = $src_xml -> getXenConfig_legacy();
 	if (%xenc) {
 		if (defined $xenc{xen_domain} && $xenc{xen_domain} ne '') {
 			$domain = $xenc{xen_domain};
@@ -1378,7 +1378,7 @@ sub createImageVMX {
 	my $xml  = $this->{xml};
 	my $cmdL = $this->{cmdL};
 	my $idest= $cmdL->getImageTargetDir();
-	my %xenc = $xml  -> getXenConfig();
+	my %xenc = $xml  -> getXenConfig_legacy();
 	my $name = $this -> createImageRootAndBoot ($para,"VMX");
 	my $xendomain;
 	if (! defined $name) {
@@ -2253,7 +2253,7 @@ sub createImageSplit {
 	my $checkBase  = $cmdL->getRootTargetDir()."/".$baseSystem;
 	my $sxml       = $this->{xml};
 	my $idest      = $cmdL->getImageTargetDir();
-	my %xenc       = $sxml->getXenConfig();
+	my %xenc       = $sxml->getXenConfig_legacy();
 	my $fsopts     = $cmdL -> getFilesystemOptions();
 	my $inodesize  = $fsopts->[1];
 	my $FSTypeRW;
@@ -3888,7 +3888,7 @@ sub extractLinux {
 	my $dest      = shift;
 	my $kiwi      = $this->{kiwi};
 	my $xml       = $this->{xml};
-	my %xenc      = $xml->getXenConfig();
+	my %xenc      = $xml->getXenConfig_legacy();
 	if ((-f "$imageTree/boot/vmlinux.gz")  ||
 		(-f "$imageTree/boot/vmlinuz.el5") ||
 		(-f "$imageTree/boot/vmlinux")     ||

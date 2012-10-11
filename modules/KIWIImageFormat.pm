@@ -108,9 +108,9 @@ sub new {
 	#==========================================
 	# Read some XML data
 	#------------------------------------------
-	my %xenref = $xml -> getXenConfig();
-	my %vmwref = $xml -> getVMwareConfig();
-	my %ovfref = $xml -> getOVFConfig();
+	my %xenref = $xml -> getXenConfig_legacy();
+	my %vmwref = $xml -> getVMwareConfig_legacy();
+	my %ovfref = $xml -> getOVFConfig_legacy();
 	#==========================================
 	# Store object data
 	#------------------------------------------
