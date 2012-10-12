@@ -3087,7 +3087,7 @@ sub writeImageConfig {
 	my $xml  = $this->{xml};
 	my $configName = $main::global -> generateBuildImageName($this->{xml})
 		. '.config';
-	my $device = $xml -> getPXEDeployImageDevice ();
+	my $device = $xml -> getPXEDeployImageDevice_legacy ();
 	my %type = %{$xml -> getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# create .config for types which needs it
@@ -3105,8 +3105,8 @@ sub writeImageConfig {
 			-> generateBuildImageName($this->{xml}, ';');
 		my $namerw = $main::global
 			-> generateBuildImageName($this->{xml},';', '-read-write');
-		my $server = $xml -> getPXEDeployServer ();
-		my $blocks = $xml -> getPXEDeployBlockSize ();
+		my $server = $xml -> getPXEDeployServer_legacy ();
+		my $blocks = $xml -> getPXEDeployBlockSize_legacy ();
 		if (! defined $server) {
 			$server = "";
 		}
@@ -3119,7 +3119,7 @@ sub writeImageConfig {
 		#==========================================
 		# PART information
 		#------------------------------------------
-		my @parts = $xml -> getPXEDeployPartitions ();
+		my @parts = $xml -> getPXEDeployPartitions_legacy ();
 		if ((scalar @parts) > 0) {
 			print $FD "PART=";
 			for my $href (@parts) {
@@ -3179,7 +3179,7 @@ sub writeImageConfig {
 		#==========================================
 		# CONF information
 		#------------------------------------------
-		my %confs = $xml -> getPXEDeployConfiguration ();
+		my %confs = $xml -> getPXEDeployConfiguration_legacy ();
 		if ((scalar keys %confs) > 0) {
 			print $FD "CONF=";
 			foreach my $source (keys %confs) {
@@ -3196,7 +3196,7 @@ sub writeImageConfig {
 		#==========================================
 		# UNIONFS_CONFIG information
 		#------------------------------------------
-		my %unionConfig = $xml -> getPXEDeployUnionConfig ();
+		my %unionConfig = $xml -> getPXEDeployUnionConfig_legacy ();
 		if (%unionConfig) {
 			my $valid = 0;
 			my $value;
@@ -3214,7 +3214,7 @@ sub writeImageConfig {
 		#==========================================
 		# KIWI_BOOT_TIMEOUT information
 		#------------------------------------------
-		my $timeout = $xml -> getPXEDeployTimeout ();
+		my $timeout = $xml -> getPXEDeployTimeout_legacy ();
 		if (defined $timeout) {
 			print $FD "KIWI_BOOT_TIMEOUT=$timeout\n";
 		}
@@ -3228,14 +3228,14 @@ sub writeImageConfig {
 		#==========================================
 		# KIWI_KERNEL information
 		#------------------------------------------
-		my $kernel = $xml -> getPXEDeployKernel ();
+		my $kernel = $xml -> getPXEDeployKernel_legacy ();
 		if (defined $kernel) {
 			print $FD "KIWI_KERNEL=$kernel\n";
 		}
 		#==========================================
 		# KIWI_INITRD information
 		#------------------------------------------
-		my $initrd = $xml -> getPXEDeployInitrd ();
+		my $initrd = $xml -> getPXEDeployInitrd_legacy ();
 		if (defined $initrd) {
 			print $FD "KIWI_INITRD=$initrd\n";
 		}

@@ -29,6 +29,7 @@ use KIWIXMLDriverData;
 use KIWIXMLEC2ConfigData;
 use KIWIXMLOEMConfigData;
 use KIWIXMLPreferenceData;
+use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
 use KIWIXMLTypeData;
 use KIWIXMLVMachineData;
@@ -1751,6 +1752,31 @@ sub test_addStripTools {
 }
 
 #==========================================
+# test_ctor_InvalidPXEConfigArch
+#------------------------------------------
+sub test_ctor_InvalidPXEConfigArch {
+	# ...
+	# Test the construction of the XML object with an invalid architecture
+	# setting for the pxe configuration
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'pxeSettingsInvArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Unsupported arch 'armv95' in PXE setup.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($xml);
+	return;
+}
+
+#==========================================
 # test_getActiveProfileNames
 #------------------------------------------
 sub test_getActiveProfileNames {
@@ -3399,9 +3425,67 @@ sub test_getOVFConfig_legacy {
 }
 
 #==========================================
-# test_getPXEDeployBlockSize
+# test_getPXEConfig
 #------------------------------------------
-sub test_getPXEDeployBlockSize {
+sub test_getPXEConfig {
+	# ...
+	# Test the getPXEConfig method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'pxeSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $pxeConfObj = $xml -> getPXEConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $blockS   = $pxeConfObj -> getBlocksize();
+	my $confArch = $pxeConfObj -> getConfigurationArch();
+	my $confDest = $pxeConfObj -> getConfigurationDestination();
+	my $confSrc  = $pxeConfObj -> getConfigurationSource();
+	my $target   = $pxeConfObj -> getDevice();
+	my $initrd   = $pxeConfObj -> getInitrd();
+	my $kernel   = $pxeConfObj -> getKernel();
+	my $mntP     = $pxeConfObj -> getPartitionMountpoint(2);
+	my $partN    = $pxeConfObj -> getPartitionNumber(2);
+	my $partS    = $pxeConfObj -> getPartitionSize(2);
+	my $partT    = $pxeConfObj -> getPartitionTarget(2);
+	my $partTy   = $pxeConfObj -> getPartitionType(2);
+	my $server   = $pxeConfObj -> getServer();
+	my $timeout  = $pxeConfObj -> getTimeout();
+	my $unionRO  = $pxeConfObj -> getUnionRO();
+	my $unionRW  = $pxeConfObj -> getUnionRW();
+	my $unionT   = $pxeConfObj -> getUnionType();
+	$this -> assert_str_equals('4096', $blockS);
+	my @expectedArch = qw /x86_64 ix86 armv7l ppc64 ppc/;
+	$this -> assert_array_equal(\@expectedArch, $confArch);
+	$this -> assert_str_equals('target', $confDest);
+	$this -> assert_str_equals('installSource', $confSrc);
+	$this -> assert_str_equals('/dev/sda', $target);
+	$this -> assert_str_equals('/pxeSetup/specialInitrd', $initrd);
+	$this -> assert_str_equals('/pxeSetup/specialKernel', $kernel);
+	$this -> assert_str_equals('/', $mntP);
+	$this -> assert_equals(2, $partN);
+	$this -> assert_str_equals('image', $partS);
+	$this -> assert_str_equals('true', $partT);
+	$this -> assert_str_equals('L', $partTy);
+	$this -> assert_str_equals('192.168.100.2', $server);
+	$this -> assert_str_equals('20', $timeout);
+	$this -> assert_str_equals('/dev/sda2', $unionRO);
+	$this -> assert_str_equals('/dev/sda3', $unionRW);
+	$this -> assert_str_equals('clicfs', $unionT);
+	return;
+}
+
+#==========================================
+# test_getPXEDeployBlockSize_legacy
+#------------------------------------------
+sub test_getPXEDeployBlockSize_legacy {
 	# ...
 	# Verify proper return of getPXEDeployBlockSize method
 	# ---
@@ -3411,7 +3495,7 @@ sub test_getPXEDeployBlockSize {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployBlockSize();
+	my $value = $xml -> getPXEDeployBlockSize_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3424,9 +3508,9 @@ sub test_getPXEDeployBlockSize {
 }
 
 #==========================================
-# test_getPXEDeployConfiguration
+# test_getPXEDeployConfiguration_legacy
 #------------------------------------------
-sub test_getPXEDeployConfiguration {
+sub test_getPXEDeployConfiguration_legacy {
 	# ...
 	# Verify proper return of getPXEDeployConfiguration method
 	# ---
@@ -3436,7 +3520,7 @@ sub test_getPXEDeployConfiguration {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %config = $xml -> getPXEDeployConfiguration();
+	my %config = $xml -> getPXEDeployConfiguration_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3450,9 +3534,9 @@ sub test_getPXEDeployConfiguration {
 }
 
 #==========================================
-# test_getPXEDeployImageDevice
+# test_getPXEDeployImageDevice_legacy
 #------------------------------------------
-sub test_getPXEDeployImageDevice {
+sub test_getPXEDeployImageDevice_legacy {
 	# ...
 	# Verify proper return of getPXEDeployImageDevice method
 	# ---
@@ -3462,7 +3546,7 @@ sub test_getPXEDeployImageDevice {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployImageDevice();
+	my $value = $xml -> getPXEDeployImageDevice_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3475,9 +3559,9 @@ sub test_getPXEDeployImageDevice {
 }
 
 #==========================================
-# test_getPXEDeployInitrd
+# test_getPXEDeployInitrd_legacy
 #------------------------------------------
-sub test_getPXEDeployInitrd {
+sub test_getPXEDeployInitrd_legacy {
 	# ...
 	# Verify proper return of getPXEDeployInitrd method
 	# ---
@@ -3487,7 +3571,7 @@ sub test_getPXEDeployInitrd {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployInitrd();
+	my $value = $xml -> getPXEDeployInitrd_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3500,9 +3584,9 @@ sub test_getPXEDeployInitrd {
 }
 
 #==========================================
-# test_getPXEDeployKernel
+# test_getPXEDeployKernel_legacy
 #------------------------------------------
-sub test_getPXEDeployKernel {
+sub test_getPXEDeployKernel_legacy {
 	# ...
 	# Verify proper return of getPXEDeployKernel method
 	# ---
@@ -3512,7 +3596,7 @@ sub test_getPXEDeployKernel {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployKernel();
+	my $value = $xml -> getPXEDeployKernel_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3525,9 +3609,9 @@ sub test_getPXEDeployKernel {
 }
 
 #==========================================
-# test_getPXEDeployPartitions
+# test_getPXEDeployPartitions_legacy
 #------------------------------------------
-sub test_getPXEDeployPartitions {
+sub test_getPXEDeployPartitions_legacy {
 	# ...
 	# Verify proper return of getPXEDeployPartitions method
 	# ---
@@ -3537,7 +3621,7 @@ sub test_getPXEDeployPartitions {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @partitions = $xml -> getPXEDeployPartitions();
+	my @partitions = $xml -> getPXEDeployPartitions_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3557,9 +3641,9 @@ sub test_getPXEDeployPartitions {
 }
 
 #==========================================
-# test_getPXEDeployServer
+# test_getPXEDeployServer_legacy
 #------------------------------------------
-sub test_getPXEDeployServer {
+sub test_getPXEDeployServer_legacy {
 	# ...
 	# Verify proper return of getPXEDeployServer method
 	# ---
@@ -3569,7 +3653,7 @@ sub test_getPXEDeployServer {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployServer();
+	my $value = $xml -> getPXEDeployServer_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3582,9 +3666,9 @@ sub test_getPXEDeployServer {
 }
 
 #==========================================
-# test_getPXEDeployTimeout
+# test_getPXEDeployTimeout_legacy
 #------------------------------------------
-sub test_getPXEDeployTimeout {
+sub test_getPXEDeployTimeout_legacy {
 	# ...
 	# Verify proper return of getPXEDeployTimeout method
 	# ---
@@ -3594,7 +3678,7 @@ sub test_getPXEDeployTimeout {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployTimeout();
+	my $value = $xml -> getPXEDeployTimeout_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3607,9 +3691,9 @@ sub test_getPXEDeployTimeout {
 }
 
 #==========================================
-# test_getPXEDeployUnionConfig
+# test_getPXEDeployUnionConfig_legacy
 #------------------------------------------
-sub test_getPXEDeployUnionConfig {
+sub test_getPXEDeployUnionConfig_legacy {
 	# ...
 	# Verify proper return of getPXEDeployUnionConfig method
 	# ---
@@ -3619,7 +3703,7 @@ sub test_getPXEDeployUnionConfig {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %unionConfig = $xml -> getPXEDeployUnionConfig();
+	my %unionConfig = $xml -> getPXEDeployUnionConfig_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

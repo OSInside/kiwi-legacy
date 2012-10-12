@@ -35,6 +35,7 @@ use KIWIXMLDriverData;
 use KIWIXMLEC2ConfigData;
 use KIWIXMLOEMConfigData;
 use KIWIXMLPreferenceData;
+use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
 use KIWIXMLTypeData;
 use KIWIXMLValidator;
@@ -661,7 +662,7 @@ sub getDrivers {
 #------------------------------------------
 sub getEC2Config {
 	# ...
-	# Return an EC2Data object for the EC2 configuration of the current
+	# Return an EC2ConfigData object for the EC2 configuration of the current
 	# build type.
 	# ---
 	my $this = shift;
@@ -744,6 +745,21 @@ sub getProfiles {
 		push @result, { %profile };
 	}
 	return @result;
+}
+
+#==========================================
+# getPXEConfig
+#------------------------------------------
+sub getPXEConfig {
+	# ...
+	# Return a PXEDeployData object for the PXE boot configuration of the
+	# current build type.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi,
+										$this->{selectedType}{pxedeploy});
+	return $pxeDataObj;
 }
 
 #==========================================
@@ -1144,6 +1160,84 @@ sub __genOEMConfigHash {
 }
 
 #==========================================
+# __genPXEDeployHash
+#------------------------------------------
+sub __genPXEDeployHash {
+	# ...
+	# Return a ref to a hash containing the configuration for <pxedeploy>
+	# of the given XML:ELEMENT object
+	# NOTE: return -1 on error as undef is an OK return state
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $pxeDeployNode = $node -> getChildrenByTagName('pxedeploy');
+	if (! $pxeDeployNode ) {
+		return;
+	}
+	my $pxeNode = $pxeDeployNode -> get_node(1);
+	my %pxeConfig;
+	$pxeConfig{blocksize}    = $pxeNode -> getAttribute('blocksize');
+
+	# Process <configuration>
+	my $configNode = $pxeNode -> getChildrenByTagName('configuration');
+	if ( $configNode ) {
+		my $configSet = $configNode -> get_node(1);
+		my $archDef = $configSet -> getAttribute('arch');
+		if ($archDef) {
+			my @arches = split /,/, $archDef;
+			for my $arch (@arches) {
+				if (! $this->{supportedArch}{$arch} ) {
+					my $kiwi = $this->{kiwi};
+					my $msg = "Unsupported arch '$arch' in PXE setup.";
+					$kiwi -> error ($msg);
+					$kiwi -> failed ();
+					return -1;
+				}
+			}
+			$pxeConfig{configArch}   = \@arches;
+		}
+		$pxeConfig{configDest}   = $configSet -> getAttribute('dest');
+		$pxeConfig{configSource} = $configSet -> getAttribute('source');
+	}
+
+	$pxeConfig{initrd} = $this -> __getChildNodeTextValue($pxeNode, 'initrd');
+	$pxeConfig{kernel} = $this -> __getChildNodeTextValue($pxeNode, 'kernel');
+
+	# Process <partitions>
+	my $partNode = $pxeNode -> getChildrenByTagName('partitions');
+	if ( $partNode ) {
+		my $partData = $partNode -> get_node(1);
+		$pxeConfig{device} = $partData -> getAttribute('device');
+		my %partData;
+		my @parts = $partData -> getChildrenByTagName('partition');
+		for my $part (@parts) {
+			my %partSet;
+			$partSet{mountpoint} = $part -> getAttribute('mountpoint');
+			my $id               = int $part -> getAttribute('number');
+			$partSet{size}       = $part -> getAttribute('size');
+			$partSet{target}     = $part -> getAttribute('target');
+			$partSet{type}       = $part -> getAttribute('type');
+			$partData{$id} = \%partSet;
+		}
+		$pxeConfig{partitions}   = \%partData
+	}
+
+	$pxeConfig{server}  = $pxeNode -> getAttribute('server');
+	$pxeConfig{timeout} =$this -> __getChildNodeTextValue($pxeNode, 'timeout');
+
+	# Process <union>
+	my $unionNode = $pxeNode -> getChildrenByTagName('union');
+	if ( $unionNode ) {
+		my $unionData = $unionNode -> get_node(1);
+		$pxeConfig{unionRO}   = $unionData -> getAttribute('ro');
+		$pxeConfig{unionRW}   = $unionData -> getAttribute('rw');
+		$pxeConfig{unionType} = $unionData -> getAttribute('type');
+	}
+
+	return \%pxeConfig;
+}
+
+#==========================================
 # __genTypeHash
 #------------------------------------------
 sub __genTypeHash {
@@ -1193,7 +1287,7 @@ sub __genTypeHash {
 		$typeData{installstick}      = $type -> getAttribute('installstick');
 		$typeData{kernelcmdline}     = $type -> getAttribute('kernelcmdline');
 		$typeData{luks}              = $type -> getAttribute('luks');
-		$typeData{machine} = $this -> __genVMachineHash($type);
+		$typeData{machine}   = $this -> __genVMachineHash($type);
 		$typeData{oemconfig} = $this -> __genOEMConfigHash($type);
 
 		my $prim = $type -> getAttribute('primary');
@@ -1204,10 +1298,14 @@ sub __genTypeHash {
 			$typeData{primary} = 'false';
 		}
 
-#        $typeData{pxedeploy} = $this -> __genPXEDeployHash($type);
-		$typeData{ramonly}           = $type -> getAttribute('ramonly');
+		my $pxeConf = $this -> __genPXEDeployHash($type);
+		if ( $pxeConf && $pxeConf == -1) {
+			return;
+		}
+		$typeData{pxedeploy} = $pxeConf;
+		$typeData{ramonly}   = $type -> getAttribute('ramonly');
 
-		$typeData{size}  = $this -> __getChildNodeTextValue($type, 'size');
+		$typeData{size}      = $this -> __getChildNodeTextValue($type, 'size');
 
 #        $typeData{split} = $this -> __genSplitDataHash($type);
 #        $typeData{systemdisk} = $this -> __genSystemDiskHash($type);
@@ -1591,6 +1689,9 @@ sub __populatePreferenceInfo {
 										$prefInfo, 'timezone');
 
 		my $types = $this -> __genTypeHash($prefInfo);
+		if (! $types ) {
+			return;
+		}
 
 		my $vers            = $this -> __getChildNodeTextValue(
 										$prefInfo, 'version');
@@ -2161,198 +2262,6 @@ sub getImageVersion {
 	return $version;
 }
 
-#==========================================
-# getPXEDeployUnionConfig
-#------------------------------------------
-sub getPXEDeployUnionConfig {
-	# ...
-	# Get the union file system configuration, if any
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("union") -> get_node(1);
-	my %config = ();
-	if (! $node) {
-		return %config;
-	}
-	$config{ro}   = $node -> getAttribute ("ro");
-	$config{rw}   = $node -> getAttribute ("rw");
-	$config{type} = $node -> getAttribute ("type");
-	return %config;
-}
-
-#==========================================
-# getPXEDeployImageDevice
-#------------------------------------------
-sub getPXEDeployImageDevice {
-	# ...
-	# Get the device the image will be installed to
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("partitions") -> get_node(1);
-	if (defined $node) {
-		return $node -> getAttribute ("device");
-	} else {
-		return;
-	}
-}
-
-#==========================================
-# getPXEDeployServer
-#------------------------------------------
-sub getPXEDeployServer {
-	# ...
-	# Get the server the config data is obtained from
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	if (defined $node) {
-		return $node -> getAttribute ("server");
-	} else {
-		return "192.168.1.1";
-	}
-}
-
-#==========================================
-# getPXEDeployBlockSize
-#------------------------------------------
-sub getPXEDeployBlockSize {
-	# ...
-	# Get the block size the deploy server should use
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	if (defined $node) {
-		return $node -> getAttribute ("blocksize");
-	} else {
-		return "4096";
-	}
-}
-
-#==========================================
-# getPXEDeployPartitions
-#------------------------------------------
-sub getPXEDeployPartitions {
-	# ...
-	# Get the partition configuration for this image
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $partitions = $tnode -> getElementsByTagName ("partitions") -> get_node(1);
-	my @result = ();
-	if (! $partitions) {
-		return @result;
-	}
-	my $partitionNodes = $partitions -> getElementsByTagName ("partition");
-	for (my $i=1;$i<= $partitionNodes->size();$i++) {
-		my $node = $partitionNodes -> get_node($i);
-		my $number = $node -> getAttribute ("number");
-		my $type = $node -> getAttribute ("type");
-		if (! defined $type) {
-			$type = "L";
-		}
-		my $size = $node -> getAttribute ("size");
-		if (! defined $size) {
-			$size = "x";
-		}
-		my $mountpoint = $node -> getAttribute ("mountpoint");
-		if (! defined $mountpoint) {
-			$mountpoint = "x";
-		}
-		my $target = $node -> getAttribute ("target");
-		if (! defined $target or $target eq "false" or $target eq "0") {
-			$target = 0;
-		} else {
-			$target = 1
-		}
-		
-		my %part = ();
-		$part{number} = $number;
-		$part{type} = $type;
-		$part{size} = $size;
-		$part{mountpoint} = $mountpoint;
-		$part{target} = $target;
-
-		push @result, { %part };
-	}
-	my @ordered = sort { $a->{number} cmp $b->{number} } @result;
-	return @ordered;
-}
-
-#==========================================
-# getPXEDeployConfiguration
-#------------------------------------------
-sub getPXEDeployConfiguration {
-	# ...
-	# Get the configuration file information for this image
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my @node = $tnode -> getElementsByTagName ("configuration");
-	my %result;
-	foreach my $element (@node) {
-		my $source = $element -> getAttribute("source");
-		my $dest   = $element -> getAttribute("dest");
-		my $forarch= $element -> getAttribute("arch");
-		my $allowed= 1;
-		if (defined $forarch) {
-			my @archlst = split (/,/,$forarch);
-			my $foundit = 0;
-			foreach my $archok (@archlst) {
-				if ($archok eq $this->{arch}) {
-					$foundit = 1; last;
-				}
-			}
-			if (! $foundit) {
-				$allowed = 0;
-			}
-		}
-		if ($allowed) {
-			$result{$source} = $dest;
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getPXEDeployTimeout
-#------------------------------------------
-sub getPXEDeployTimeout {
-	# ...
-	# Get the boot timeout, if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	my $timeout = $node -> getElementsByTagName ("timeout");
-	if ((defined $timeout) && ! ("$timeout" eq "")) {
-		return $timeout;
-	} else {
-		return;
-	}
-}
-
-#==========================================
-# getPXEDeployKernel
-#------------------------------------------
-sub getPXEDeployKernel {
-	# ...
-	# Get the deploy kernel, if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	my $kernel = $node -> getElementsByTagName ("kernel");
-	if ((defined $kernel) && ! ("$kernel" eq "")) {
-		return $kernel;
-	} else {
-		return;
-	}
-}
-
 
 #==========================================
 # getStripDelete
@@ -2495,24 +2404,6 @@ sub getSplitPersistentExceptions {
 		push @result, $fileNode -> getAttribute ("name");
 	}
 	return @result;
-}
-
-#==========================================
-# getPXEDeployInitrd
-#------------------------------------------
-sub getPXEDeployInitrd {
-	# ...
-	# Get the deploy initrd, if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	my $initrd = $node -> getElementsByTagName ("initrd");
-	if ((defined $initrd) && ! ("$initrd" eq "")) {
-		return $initrd;
-	} else {
-		return;
-	}
 }
 
 #==========================================
@@ -5481,6 +5372,216 @@ sub getProfiles_legacy {
 		push @result, { %profile };
 	}
 	return @result;
+}
+
+#==========================================
+# getPXEDeployInitrd_legacy
+#------------------------------------------
+sub getPXEDeployInitrd_legacy {
+	# ...
+	# Get the deploy initrd, if specified
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
+	my $initrd = $node -> getElementsByTagName ("initrd");
+	if ((defined $initrd) && ! ("$initrd" eq "")) {
+		return $initrd;
+	} else {
+		return;
+	}
+}
+
+#==========================================
+# getPXEDeployUnionConfig_legacy
+#------------------------------------------
+sub getPXEDeployUnionConfig_legacy {
+	# ...
+	# Get the union file system configuration, if any
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("union") -> get_node(1);
+	my %config = ();
+	if (! $node) {
+		return %config;
+	}
+	$config{ro}   = $node -> getAttribute ("ro");
+	$config{rw}   = $node -> getAttribute ("rw");
+	$config{type} = $node -> getAttribute ("type");
+	return %config;
+}
+
+#==========================================
+# getPXEDeployImageDevice_legacy
+#------------------------------------------
+sub getPXEDeployImageDevice_legacy {
+	# ...
+	# Get the device the image will be installed to
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("partitions") -> get_node(1);
+	if (defined $node) {
+		return $node -> getAttribute ("device");
+	} else {
+		return;
+	}
+}
+
+#==========================================
+# getPXEDeployServer_legacy
+#------------------------------------------
+sub getPXEDeployServer_legacy {
+	# ...
+	# Get the server the config data is obtained from
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
+	if (defined $node) {
+		return $node -> getAttribute ("server");
+	} else {
+		return "192.168.1.1";
+	}
+}
+
+#==========================================
+# getPXEDeployBlockSize_legacy
+#------------------------------------------
+sub getPXEDeployBlockSize_legacy {
+	# ...
+	# Get the block size the deploy server should use
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
+	if (defined $node) {
+		return $node -> getAttribute ("blocksize");
+	} else {
+		return "4096";
+	}
+}
+
+#==========================================
+# getPXEDeployPartitions_legacy
+#------------------------------------------
+sub getPXEDeployPartitions_legacy {
+	# ...
+	# Get the partition configuration for this image
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $partitions = $tnode -> getElementsByTagName ("partitions") -> get_node(1);
+	my @result = ();
+	if (! $partitions) {
+		return @result;
+	}
+	my $partitionNodes = $partitions -> getElementsByTagName ("partition");
+	for (my $i=1;$i<= $partitionNodes->size();$i++) {
+		my $node = $partitionNodes -> get_node($i);
+		my $number = $node -> getAttribute ("number");
+		my $type = $node -> getAttribute ("type");
+		if (! defined $type) {
+			$type = "L";
+		}
+		my $size = $node -> getAttribute ("size");
+		if (! defined $size) {
+			$size = "x";
+		}
+		my $mountpoint = $node -> getAttribute ("mountpoint");
+		if (! defined $mountpoint) {
+			$mountpoint = "x";
+		}
+		my $target = $node -> getAttribute ("target");
+		if (! defined $target or $target eq "false" or $target eq "0") {
+			$target = 0;
+		} else {
+			$target = 1
+		}
+		
+		my %part = ();
+		$part{number} = $number;
+		$part{type} = $type;
+		$part{size} = $size;
+		$part{mountpoint} = $mountpoint;
+		$part{target} = $target;
+
+		push @result, { %part };
+	}
+	my @ordered = sort { $a->{number} cmp $b->{number} } @result;
+	return @ordered;
+}
+
+#==========================================
+# getPXEDeployConfiguration_legacy
+#------------------------------------------
+sub getPXEDeployConfiguration_legacy {
+	# ...
+	# Get the configuration file information for this image
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my @node = $tnode -> getElementsByTagName ("configuration");
+	my %result;
+	foreach my $element (@node) {
+		my $source = $element -> getAttribute("source");
+		my $dest   = $element -> getAttribute("dest");
+		my $forarch= $element -> getAttribute("arch");
+		my $allowed= 1;
+		if (defined $forarch) {
+			my @archlst = split (/,/,$forarch);
+			my $foundit = 0;
+			foreach my $archok (@archlst) {
+				if ($archok eq $this->{arch}) {
+					$foundit = 1; last;
+				}
+			}
+			if (! $foundit) {
+				$allowed = 0;
+			}
+		}
+		if ($allowed) {
+			$result{$source} = $dest;
+		}
+	}
+	return %result;
+}
+
+#==========================================
+# getPXEDeployTimeout_legacy
+#------------------------------------------
+sub getPXEDeployTimeout_legacy {
+	# ...
+	# Get the boot timeout, if specified
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
+	my $timeout = $node -> getElementsByTagName ("timeout");
+	if ((defined $timeout) && ! ("$timeout" eq "")) {
+		return $timeout;
+	} else {
+		return;
+	}
+}
+
+#==========================================
+# getPXEDeployKernel_legacy
+#------------------------------------------
+sub getPXEDeployKernel_legacy {
+	# ...
+	# Get the deploy kernel, if specified
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
+	my $kernel = $node -> getElementsByTagName ("kernel");
+	if ((defined $kernel) && ! ("$kernel" eq "")) {
+		return $kernel;
+	} else {
+		return;
+	}
 }
 
 #==========================================
