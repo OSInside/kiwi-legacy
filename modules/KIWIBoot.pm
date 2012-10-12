@@ -258,10 +258,10 @@ sub new {
 				return;
 			}
 			my $sdev = $main::global -> getMountDevice();
-			#==========================================
-			# check for activated volume group
-			#------------------------------------------
-			$sdev = $this -> checkLVMbind ($sdev);
+			if ($main::global -> isMountLVM()) {
+				$this->{lvmgroup} = $main::global -> getMountLVMGroup();
+				$this->{lvm} = 1;
+			}
 			#==========================================
 			# check for read-only root
 			#------------------------------------------
@@ -733,12 +733,16 @@ sub setupInstallCD {
 		#==========================================
 		# check for activated volume group
 		#------------------------------------------
-		$sdev = $this -> checkLVMbind ($sdev);
+		$sdev = $main::global -> checkLVMbind ($sdev);
+		if ($main::global -> isMountLVM()) {
+			$this->{lvmgroup} = $main::global -> getMountLVMGroup();
+			$this->{lvm} = 1;
+		}
 		#==========================================
 		# perform mount call
 		#------------------------------------------
 		if (! $main::global -> mount ($sdev,$tmpdir,$type{fsmountoptions})) {
-			$kiwi -> error ("Failed to mount system partition: $status");
+			$kiwi -> error  ("Failed to mount system partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
 			return;
@@ -1193,7 +1197,11 @@ sub setupInstallStick {
 		#==========================================
 		# check for activated volume group
 		#------------------------------------------
-		$sdev = $this -> checkLVMbind ($sdev);
+		$sdev = $main::global -> checkLVMbind ($sdev);
+		if ($main::global -> isMountLVM()) {
+			$this->{lvmgroup} = $main::global -> getMountLVMGroup();
+			$this->{lvm} = 1;
+		}
 		#==========================================
 		# perform mount call
 		#------------------------------------------
@@ -5075,34 +5083,6 @@ sub bindDiskPartitions {
 	$part = "/dev/mapper".$disk."p";
 	$this->{bindloop} = $part;
 	return $this;
-}
-
-#==========================================
-# checkLVMbind
-#------------------------------------------
-sub checkLVMbind {
-	# ...
-	# check if sdev points to LVM, if yes activate it and
-	# rebuild sdev to point to the right logical volume
-	# ---
-	my $this = shift;
-	my $sdev = shift;
-	my $vgname = qxx ("pvs --noheadings -o vg_name $sdev 2>/dev/null");
-	my $result = $? >> 8;
-	if ($result != 0) {
-		return $sdev;
-	}
-	chomp $vgname;
-	$vgname =~ s/^\s+//;
-	$vgname =~ s/\s+$//;
-	$this->{lvm} = 1;
-	$this->{lvmgroup} = $vgname;
-	qxx ("vgchange -a y $vgname 2>&1");
-	$sdev = "/dev/mapper/$vgname-LVComp";
-	if (! -e $sdev) {
-		$sdev = "/dev/mapper/$vgname-LVRoot";
-	}
-	return $sdev;
 }
 
 #==========================================

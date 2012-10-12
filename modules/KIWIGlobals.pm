@@ -299,6 +299,22 @@ sub getMountDevice {
 }
 
 #==========================================
+# getMountLVMGroup
+#------------------------------------------
+sub getMountLVMGroup {
+	my $this = shift;
+	return $this->{lvmgroup}
+}
+
+#==========================================
+# isMountLVM
+#------------------------------------------
+sub isMountLVM {
+	my $this = shift;
+	return $this->{lvm};
+}
+
+#==========================================
 # isDisk
 #------------------------------------------
 sub isDisk {
@@ -379,7 +395,8 @@ sub mount {
 					$kiwi -> error (
 						"Couldn't loop bind disk partition(s): $status"
 					);
-					$kiwi -> failed (); umount();
+					$kiwi -> failed ();
+					$this -> umount();
 					return;
 				}
 				push @UmountStack,"kpartx -d $loop";
@@ -392,10 +409,22 @@ sub mount {
 			}
 			if (! -b $source) {
 				$kiwi -> error ("No such block device $source");
-				$kiwi -> failed (); umount();
+				$kiwi -> failed ();
+				$this -> umount();
 				return;
 			}
 		}
+	}
+	#==========================================
+	# check for activated volume group
+	#------------------------------------------
+	$source = $this -> checkLVMbind ($source);
+	@UmountStack = @{$this->{UmountStack}};
+	if (! $source) {
+		$kiwi -> error ("Failed to bind disk to LVM group");
+		$kiwi -> failed ();
+		$this -> umount();
+		return;
 	}
 	#==========================================
 	# Check source filesystem
@@ -906,6 +935,44 @@ sub callContained {
 		$this -> umountSystemFileSystems ($root);
 	}
 	return ($code,$data);
+}
+
+#==========================================
+# checkLVMbind
+#------------------------------------------
+sub checkLVMbind {
+	# ...
+	# check if sdev points to LVM, if yes activate it and
+	# rebuild sdev to point to the right logical volume
+	# ---
+	my $this = shift;
+	my $sdev = shift;
+	my @UmountStack = @{$this->{UmountStack}};
+	my $vgname = qxx ("pvs --noheadings -o vg_name $sdev 2>/dev/null");
+	my $result = $? >> 8;
+	if ($result != 0) {
+		return $sdev;
+	}
+	chomp $vgname;
+	$vgname =~ s/^\s+//;
+	$vgname =~ s/\s+$//;
+	$this->{lvm} = 1;
+	$this->{lvmgroup} = $vgname;
+	my $status = qxx ("vgchange -a y $vgname 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		return;
+	}
+	push @UmountStack,"vgchange -a n $vgname";
+	$this->{UmountStack} = \@UmountStack;
+	$sdev = "/dev/mapper/$vgname-LVComp";
+	if (! -e $sdev) {
+		$sdev = "/dev/mapper/$vgname-LVRoot";
+	}
+	if (! -e $sdev) {
+		return;
+	}
+	return $sdev;
 }
 
 1;
