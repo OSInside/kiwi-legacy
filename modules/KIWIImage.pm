@@ -2390,7 +2390,7 @@ sub createImageSplit {
 	# walk through except files if any
 	#------------------------------------------
 	my %exceptHash;
-	foreach my $except ($sxml -> getSplitTempExceptions()) {
+	foreach my $except ($sxml -> getSplitTempExceptions_legacy()) {
 		my $globsource = "${imageTree}${except}";
 		my @files = qxx ("find $globsource -xtype f 2>/dev/null");
 		my $code  = $? >> 8;
@@ -2431,8 +2431,8 @@ sub createImageSplit {
 		}
 	};
 	find(\&$createTmpTree, $imageTree);
-	my @tempFiles    = $sxml -> getSplitTempFiles ();
-	my @persistFiles = $sxml -> getSplitPersistentFiles ();
+	my @tempFiles    = $sxml -> getSplitTempFiles_legacy ();
+	my @persistFiles = $sxml -> getSplitPersistentFiles_legacy ();
 	if ($nopersistent) {
 		push (@tempFiles, @persistFiles);
 		undef @persistFiles;
@@ -2494,7 +2494,7 @@ sub createImageSplit {
 		# walk through except files if any
 		#------------------------------------------
 		my %exceptHash;
-		foreach my $except ($sxml -> getSplitPersistentExceptions()) {
+		foreach my $except ($sxml -> getSplitPersistentExceptions_legacy()) {
 			my $globsource = "${imageTree}${except}";
 			my @files = qxx ("find $globsource -xtype f 2>/dev/null");
 			my $code  = $? >> 8;
@@ -2568,7 +2568,7 @@ sub createImageSplit {
 		#==========================================
 		# relink if entire directory was set
 		#------------------------------------------
-		foreach my $persist ($sxml -> getSplitPersistentFiles()) {
+		foreach my $persist ($sxml -> getSplitPersistentFiles_legacy()) {
 			my $globsource = "${imageTree}${persist}";
 			if (-d $globsource) {
 				my $link = $globsource;

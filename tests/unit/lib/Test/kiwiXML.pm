@@ -31,6 +31,7 @@ use KIWIXMLOEMConfigData;
 use KIWIXMLPreferenceData;
 use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
+use KIWIXMLSplitData;
 use KIWIXMLTypeData;
 use KIWIXMLVMachineData;
 
@@ -1767,6 +1768,31 @@ sub test_ctor_InvalidPXEConfigArch {
 	);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Unsupported arch 'armv95' in PXE setup.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($xml);
+	return;
+}
+
+#==========================================
+# test_ctor_InvalidSplitArch
+#------------------------------------------
+sub test_ctor_InvalidSplitArch {
+	# ...
+	# Test the construction of the XML object with an invalid architecture
+	# setting for a file in the split definition
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'splitSettingsInvArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Unsupported arch 'arm95' in split setup";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -4517,9 +4543,44 @@ sub test_getRepositories_legacy {
 }
 
 #==========================================
-# test_getSplitPersistentExceptions
+# test_getSplitConfig
 #------------------------------------------
-sub test_getSplitPersistentExceptions {
+sub test_getSplitConfig {
+	# ...
+	# Test the getSplitConfig method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'splitSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $spltConfObj = $xml -> getSplitConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $persExcept = $spltConfObj -> getPersistentExceptions('x86_64');
+	my $persFiles  = $spltConfObj -> getPersistentFiles('x86_64');
+	my $tmpExcept  = $spltConfObj -> getTemporaryExceptions('x86_64');
+	my $tmpFiles   = $spltConfObj -> getTemporaryFiles('x86_64');
+	my @persExceptExpect = ( 'bar' );;
+	my @persFilesExpect = qw /bar64 genericBar/;
+	my @tmpExceptExpect = qw /foo anotherFoo/;
+	my @tmpFilesExpect = qw /foo64 genericFoo/;
+	$this -> assert_array_equal(\@persExceptExpect, $persExcept);
+	$this -> assert_array_equal(\@persFilesExpect, $persFiles);
+	$this -> assert_array_equal(\@tmpExceptExpect, $tmpExcept);
+	$this -> assert_array_equal(\@tmpFilesExpect, $tmpFiles);
+	return;
+}
+
+#==========================================
+# test_getSplitPersistentExceptions_legacy
+#------------------------------------------
+sub test_getSplitPersistentExceptions_legacy {
 	# ...
 	# Verify proper return of getSplitPersistentExceptions method
 	# ---
@@ -4529,7 +4590,7 @@ sub test_getSplitPersistentExceptions {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @persExcept = $xml -> getSplitPersistentExceptions();
+	my @persExcept = $xml -> getSplitPersistentExceptions_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4543,9 +4604,9 @@ sub test_getSplitPersistentExceptions {
 }
 
 #==========================================
-# test_getSplitPersistentFiles
+# test_getSplitPersistentFiles_legacy
 #------------------------------------------
-sub test_getSplitPersistentFiles {
+sub test_getSplitPersistentFiles_legacy {
 	# ...
 	# Verify proper return of getSplitPersistentFiles method
 	# ---
@@ -4555,7 +4616,7 @@ sub test_getSplitPersistentFiles {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @persFiles = $xml -> getSplitPersistentFiles();
+	my @persFiles = $xml -> getSplitPersistentFiles_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4569,9 +4630,9 @@ sub test_getSplitPersistentFiles {
 }
 
 #==========================================
-# test_getSplitTempExceptions
+# test_getSplitTempExceptions_legacy
 #------------------------------------------
-sub test_getSplitTempExceptions {
+sub test_getSplitTempExceptions_legacy {
 	# ...
 	# Verify proper return of getSplitTempExceptions method
 	# ---
@@ -4581,7 +4642,7 @@ sub test_getSplitTempExceptions {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @tmpExcept = $xml -> getSplitTempExceptions();
+	my @tmpExcept = $xml -> getSplitTempExceptions_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4595,9 +4656,9 @@ sub test_getSplitTempExceptions {
 }
 
 #==========================================
-# test_getSplitTempFiles
+# test_getSplitTempFiles_legacy
 #------------------------------------------
-sub test_getSplitTempFiles {
+sub test_getSplitTempFiles_legacy {
 	# ...
 	# Verify proper return of getSplitTempFiles method
 	# ---
@@ -4607,7 +4668,7 @@ sub test_getSplitTempFiles {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @tmpFiles = $xml -> getSplitTempFiles();
+	my @tmpFiles = $xml -> getSplitTempFiles_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

@@ -37,6 +37,7 @@ use KIWIXMLOEMConfigData;
 use KIWIXMLPreferenceData;
 use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
+use KIWIXMLSplitData;
 use KIWIXMLTypeData;
 use KIWIXMLValidator;
 use KIWIXMLVMachineData;
@@ -354,7 +355,7 @@ sub new {
 }
 
 #==========================================
-# Methods that use the "new"imageConfig data structure
+# Methods that use the "new" imageConfig data structure
 # These are replcements for "old" methods and represent the
 # eventual interface of this object
 #------------------------------------------
@@ -789,6 +790,20 @@ sub getRepositories {
 }
 
 #==========================================
+# getSplitConfig
+#------------------------------------------
+sub getSplitConfig {
+	# ...
+	# Return a SplitData object for the <split> configuration of
+	# the current build type
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $spltObj = KIWIXMLSplitData -> new($kiwi, $this->{selectedType}{split});
+	return $spltObj;
+}
+
+#==========================================
 # getVMachineConfig
 #------------------------------------------
 sub getVMachineConfig {
@@ -1074,6 +1089,8 @@ sub __genEC2ConfigHash {
 	# ...
 	# Return a ref to a hash that contains the EC2 configuration data for the
 	# given XML:ELEMENT object
+	# Build a data structure that matches the structure defined in
+	# KIWIXMLEC2ConfigData
 	# ---
 	my $this = shift;
 	my $node = shift;
@@ -1110,6 +1127,8 @@ sub __genOEMConfigHash {
 	# ...
 	# Return a ref to a hash containing the configuration for <oemconfig>
 	# of the given XML:ELEMENT object
+	# Build a data structure that matches the structure defined in
+	# KIWIXMLOEMConfigData
 	# ---
 	my $this = shift;
 	my $node = shift;
@@ -1166,6 +1185,8 @@ sub __genPXEDeployHash {
 	# ...
 	# Return a ref to a hash containing the configuration for <pxedeploy>
 	# of the given XML:ELEMENT object
+	# Build a data structure that matches the structure defined in
+	# KIWIXMLPXEDeployData
 	# NOTE: return -1 on error as undef is an OK return state
 	# ---
 	my $this = shift;
@@ -1238,12 +1259,92 @@ sub __genPXEDeployHash {
 }
 
 #==========================================
+# __genSplitDataHash
+#------------------------------------------
+sub __genSplitDataHash {
+	# ...
+	# Return a ref to a hash containing the configuration for <split>
+	# of the given XML:ELEMENT object
+	# Build a data structure that matches the structure defined in
+	# KIWIXMLSplitData
+	# NOTE: return -1 on error as undef is an OK return state
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $splitNode = $node -> getChildrenByTagName('split');
+	if (! $splitNode ) {
+		return;
+	}
+	my $splitData = $splitNode -> get_node(1);
+	my %splitConf;
+	my @children = qw /persistent temporary/;
+	my @splitBehave = qw /file except/;
+	for my $child (@children) {
+		my $chldNodeLst = $splitData -> getChildrenByTagName($child);
+		if (! $chldNodeLst ) {
+			next;
+		}
+		my $chldNode = $chldNodeLst -> get_node(1);
+		# Build the behavior layer of the structure i.e. file or exclusion
+		# behaveData = {
+		#                except = {...}
+		#                files  = {...}
+		#              }
+		my %behaveData;
+		for my $split (@splitBehave) {
+			my @splitSet = $chldNode -> getChildrenByTagName($split);
+			if (! @splitSet ) {
+				next;
+			}
+			my $key;
+			if ($split eq 'file') {
+				$key = 'files';
+			} else {
+				$key = $split;
+			}
+			# Build inner most part of structure
+			# dataCollect = {
+			#                 all     = (),
+			#                 arch[+] = ()
+			#               }
+			my %dataCollect;
+			for my $entry (@splitSet) {
+				my $arch = $entry -> getAttribute('arch');
+				if (! $arch ) {
+					$arch = 'all';
+				} else {
+					if (! $this->{supportedArch}{$arch} ) {
+						my $kiwi = $this->{kiwi};
+						my $msg = "Unsupported arch '$arch' in split setup";
+						$kiwi -> error ($msg);
+						$kiwi -> failed ();
+						return -1;
+					}
+				}
+				my $name = $entry -> getAttribute('name');
+				if ( $dataCollect{$arch} ) {
+					push @{$dataCollect{$arch}}, $name;
+				} else {
+					my @dataLst = ( $name );
+					$dataCollect{$arch} = \@dataLst;
+				}
+			}
+			$behaveData{$key} = \%dataCollect;
+		}
+		$splitConf{$child} = \%behaveData;
+	}
+	return \%splitConf;
+}
+
+#==========================================
 # __genTypeHash
 #------------------------------------------
 sub __genTypeHash {
 	# ...
 	# Return a ref to a hash keyed by the image type values for all <type>
 	# definitions that are children of the given XML:ELEMENT object
+	# Build a data structure that matches the structure defined in
+	# KIWIXMLTypeData
 	# ---
 	my $this = shift;
 	my $node = shift;
@@ -1307,7 +1408,11 @@ sub __genTypeHash {
 
 		$typeData{size}      = $this -> __getChildNodeTextValue($type, 'size');
 
-#        $typeData{split} = $this -> __genSplitDataHash($type);
+		my $splitConf = $this -> __genSplitDataHash($type);
+		if ($splitConf && $splitConf == -1) {
+			return;
+		}
+		$typeData{split}      = $splitConf;
 #        $typeData{systemdisk} = $this -> __genSystemDiskHash($type);
 		$typeData{vga}               = $type -> getAttribute('vga');
 		$typeData{volid}             = $type -> getAttribute('volid');
@@ -2294,116 +2399,6 @@ sub getStripLibs {
 	# ---
 	my $this   = shift;
 	return $this -> __getStripFileList ("libs");
-}
-
-#==========================================
-# getSplitPersistentFiles
-#------------------------------------------
-sub getSplitPersistentFiles {
-	# ...
-	# Get the persistent files/directories for split image
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
-	my @result = ();
-	if (! defined $node) {
-		return @result;
-	}
-	my $persistNode = $node -> getElementsByTagName ("persistent")
-		-> get_node(1);
-	if (! defined $persistNode) {
-		return @result;
-	}
-	my @fileNodeList = $persistNode -> getElementsByTagName ("file");
-	foreach my $fileNode (@fileNodeList) {
-		my $name = $fileNode -> getAttribute ("name");
-		$name =~ s/\/$//;
-		push @result, $name;
-	}
-	return @result;
-}
-
-#==========================================
-# getSplitTempFiles
-#------------------------------------------
-sub getSplitTempFiles {
-	# ...
-	# Get the persistent files/directories for split image
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
-	my @result = ();
-	if (! defined $node) {
-		return @result;
-	}
-	my $tempNode = $node -> getElementsByTagName ("temporary") -> get_node(1);
-	if (! defined $tempNode) {
-		return @result;
-	}
-	my @fileNodeList = $tempNode -> getElementsByTagName ("file");
-	foreach my $fileNode (@fileNodeList) {
-		my $name = $fileNode -> getAttribute ("name");
-		$name =~ s/\/$//;
-		push @result, $name;
-	}
-	return @result;
-}
-
-#==========================================
-# getSplitTempExceptions
-#------------------------------------------
-sub getSplitTempExceptions {
-	# ...
-	# Get the exceptions defined for temporary
-	# split portions. If there are no exceptions defined
-	# return an empty list
-	# ----
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
-	my @result = ();
-	if (! defined $node) {
-		return @result;
-	}
-	my $tempNode = $node -> getElementsByTagName ("temporary") -> get_node(1);
-	if (! defined $tempNode) {
-		return @result;
-	}
-	my @fileNodeList = $tempNode -> getElementsByTagName ("except");
-	foreach my $fileNode (@fileNodeList) {
-		push @result, $fileNode -> getAttribute ("name");
-	}
-	return @result;
-}
-
-#==========================================
-# getSplitPersistentExceptions
-#------------------------------------------
-sub getSplitPersistentExceptions {
-	# ...
-	# Get the exceptions defined for persistent
-	# split portions. If there are no exceptions defined
-	# return an empty list
-	# ----
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
-	my @result = ();
-	if (! defined $node) {
-		return @result;
-	}
-	my $persistNode = $node -> getElementsByTagName ("persistent")
-		-> get_node(1);
-	if (! defined $persistNode) {
-		return @result;
-	}
-	my @fileNodeList = $persistNode -> getElementsByTagName ("except");
-	foreach my $fileNode (@fileNodeList) {
-		push @result, $fileNode -> getAttribute ("name");
-	}
-	return @result;
 }
 
 #==========================================
@@ -4889,6 +4884,30 @@ sub getEditBootConfig_legacy {
 }
 
 #==========================================
+# getHttpsRepositoryCredentials_legacy
+#------------------------------------------
+sub getHttpsRepositoryCredentials_legacy {
+	# ...
+	# If any repository is configered with credentials return the username
+	# and password
+	# ---
+	my $this = shift;
+	my @repoNodes = $this->{repositNodeList} -> get_nodelist();
+	for my $repo (@repoNodes) {
+		my $uname = $repo -> getAttribute('username');
+		my $pass = $repo -> getAttribute('password');
+		if ($uname) {
+			my @sources = $repo -> getElementsByTagName ('source');
+			my $path = $sources[0] -> getAttribute('path');
+			if ( $path =~ /^https:/) {
+				return ($uname, $pass);
+			}
+		}
+	}
+	return;
+}
+
+#==========================================
 # getImageDefaultDestination_legacy
 #------------------------------------------
 sub getImageDefaultDestination_legacy {
@@ -5325,6 +5344,82 @@ sub getOEMUnattendedID_legacy {
 }
 
 #==========================================
+# getOVFConfig_legacy
+#------------------------------------------
+sub getOVFConfig_legacy {
+	# ...
+	# Create an Attribute hash from the <machine>
+	# section if it exists suitable for the OVM
+	# configuration
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	my %result = ();
+	my $device;
+	my $disktype;
+	if (! defined $node) {
+		return %result;
+	}
+	#==========================================
+	# global setup
+	#------------------------------------------
+	my $minmemory = $node -> getAttribute ("min_memory");
+	my $desmemory = $node -> getAttribute ("des_memory");
+	my $maxmemory = $node -> getAttribute ("max_memory");
+	my $memory    = $node -> getAttribute ("memory");
+	my $ncpus     = $node -> getAttribute ("ncpus");
+	my $mincpu    = $node -> getAttribute ("min_cpu");
+	my $descpu    = $node -> getAttribute ("des_cpu");
+	my $maxcpu    = $node -> getAttribute ("max_cpu");
+	my $type      = $node -> getAttribute ("ovftype");
+	#==========================================
+	# storage setup
+	#------------------------------------------
+	my $disk = $node -> getElementsByTagName ("vmdisk");
+	if ($disk) {
+		my $node  = $disk -> get_node(1);
+		$device = $node -> getAttribute ("device");
+		$disktype = $node -> getAttribute ("disktype");
+	}
+	#==========================================
+	# network setup
+	#------------------------------------------
+	my $bridges = $node -> getElementsByTagName ("vmnic");
+	my %vifs = ();
+	for (my $i=1;$i<= $bridges->size();$i++) {
+		my $bridge = $bridges -> get_node($i);
+		if ($bridge) {
+			my $bname = $bridge -> getAttribute ("interface");
+			if (! $bname) {
+				$bname = "undef";
+			}
+			$vifs{$bname} = $i;
+		}
+	}
+	#==========================================
+	# save hash
+	#------------------------------------------
+	$result{ovf_minmemory} = $minmemory;
+	$result{ovf_desmemory} = $desmemory;
+	$result{ovf_maxmemory} = $maxmemory;
+	$result{ovf_memory}    = $memory;
+	$result{ovf_ncpus}     = $ncpus;
+	$result{ovf_mincpu}    = $mincpu;
+	$result{ovf_descpu}    = $descpu;
+	$result{ovf_maxcpu}    = $maxcpu;
+	$result{ovf_type}      = $type;
+	if ($disk) {
+		$result{ovf_disk}    = $device;
+		$result{ovf_disktype}= $disktype;
+	}
+	foreach my $bname (keys %vifs) {
+		$result{ovf_bridge}{$bname} = $vifs{$bname};
+	}
+	return %result;
+}
+
+#==========================================
 # getPackageManager_legacy
 #------------------------------------------
 sub getPackageManager_legacy {
@@ -5672,103 +5767,113 @@ sub getRepositories_legacy {
 }
 
 #==========================================
-# getHttpsRepositoryCredentials_legacy
+# getSplitPersistentFiles_legacy
 #------------------------------------------
-sub getHttpsRepositoryCredentials_legacy {
+sub getSplitPersistentFiles_legacy {
 	# ...
-	# If any repository is configered with credentials return the username
-	# and password
-	# ---
-	my $this = shift;
-	my @repoNodes = $this->{repositNodeList} -> get_nodelist();
-	for my $repo (@repoNodes) {
-		my $uname = $repo -> getAttribute('username');
-		my $pass = $repo -> getAttribute('password');
-		if ($uname) {
-			my @sources = $repo -> getElementsByTagName ('source');
-			my $path = $sources[0] -> getAttribute('path');
-			if ( $path =~ /^https:/) {
-				return ($uname, $pass);
-			}
-		}
-	}
-	return;
-}
-
-#==========================================
-# getOVFConfig_legacy
-#------------------------------------------
-sub getOVFConfig_legacy {
-	# ...
-	# Create an Attribute hash from the <machine>
-	# section if it exists suitable for the OVM
-	# configuration
+	# Get the persistent files/directories for split image
 	# ---
 	my $this = shift;
 	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	my %result = ();
-	my $device;
-	my $disktype;
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
+	my @result = ();
 	if (! defined $node) {
-		return %result;
+		return @result;
 	}
-	#==========================================
-	# global setup
-	#------------------------------------------
-	my $minmemory = $node -> getAttribute ("min_memory");
-	my $desmemory = $node -> getAttribute ("des_memory");
-	my $maxmemory = $node -> getAttribute ("max_memory");
-	my $memory    = $node -> getAttribute ("memory");
-	my $ncpus     = $node -> getAttribute ("ncpus");
-	my $mincpu    = $node -> getAttribute ("min_cpu");
-	my $descpu    = $node -> getAttribute ("des_cpu");
-	my $maxcpu    = $node -> getAttribute ("max_cpu");
-	my $type      = $node -> getAttribute ("ovftype");
-	#==========================================
-	# storage setup
-	#------------------------------------------
-	my $disk = $node -> getElementsByTagName ("vmdisk");
-	if ($disk) {
-		my $node  = $disk -> get_node(1);
-		$device = $node -> getAttribute ("device");
-		$disktype = $node -> getAttribute ("disktype");
+	my $persistNode = $node -> getElementsByTagName ("persistent")
+		-> get_node(1);
+	if (! defined $persistNode) {
+		return @result;
 	}
-	#==========================================
-	# network setup
-	#------------------------------------------
-	my $bridges = $node -> getElementsByTagName ("vmnic");
-	my %vifs = ();
-	for (my $i=1;$i<= $bridges->size();$i++) {
-		my $bridge = $bridges -> get_node($i);
-		if ($bridge) {
-			my $bname = $bridge -> getAttribute ("interface");
-			if (! $bname) {
-				$bname = "undef";
-			}
-			$vifs{$bname} = $i;
-		}
+	my @fileNodeList = $persistNode -> getElementsByTagName ("file");
+	foreach my $fileNode (@fileNodeList) {
+		my $name = $fileNode -> getAttribute ("name");
+		$name =~ s/\/$//;
+		push @result, $name;
 	}
-	#==========================================
-	# save hash
-	#------------------------------------------
-	$result{ovf_minmemory} = $minmemory;
-	$result{ovf_desmemory} = $desmemory;
-	$result{ovf_maxmemory} = $maxmemory;
-	$result{ovf_memory}    = $memory;
-	$result{ovf_ncpus}     = $ncpus;
-	$result{ovf_mincpu}    = $mincpu;
-	$result{ovf_descpu}    = $descpu;
-	$result{ovf_maxcpu}    = $maxcpu;
-	$result{ovf_type}      = $type;
-	if ($disk) {
-		$result{ovf_disk}    = $device;
-		$result{ovf_disktype}= $disktype;
+	return @result;
+}
+
+#==========================================
+# getSplitTempFiles_legacy
+#------------------------------------------
+sub getSplitTempFiles_legacy {
+	# ...
+	# Get the persistent files/directories for split image
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
+	my @result = ();
+	if (! defined $node) {
+		return @result;
 	}
-	foreach my $bname (keys %vifs) {
-		$result{ovf_bridge}{$bname} = $vifs{$bname};
+	my $tempNode = $node -> getElementsByTagName ("temporary") -> get_node(1);
+	if (! defined $tempNode) {
+		return @result;
 	}
-	return %result;
+	my @fileNodeList = $tempNode -> getElementsByTagName ("file");
+	foreach my $fileNode (@fileNodeList) {
+		my $name = $fileNode -> getAttribute ("name");
+		$name =~ s/\/$//;
+		push @result, $name;
+	}
+	return @result;
+}
+
+#==========================================
+# getSplitTempExceptions_legacy
+#------------------------------------------
+sub getSplitTempExceptions_legacy {
+	# ...
+	# Get the exceptions defined for temporary
+	# split portions. If there are no exceptions defined
+	# return an empty list
+	# ----
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
+	my @result = ();
+	if (! defined $node) {
+		return @result;
+	}
+	my $tempNode = $node -> getElementsByTagName ("temporary") -> get_node(1);
+	if (! defined $tempNode) {
+		return @result;
+	}
+	my @fileNodeList = $tempNode -> getElementsByTagName ("except");
+	foreach my $fileNode (@fileNodeList) {
+		push @result, $fileNode -> getAttribute ("name");
+	}
+	return @result;
+}
+
+#==========================================
+# getSplitPersistentExceptions_legacy
+#------------------------------------------
+sub getSplitPersistentExceptions_legacy {
+	# ...
+	# Get the exceptions defined for persistent
+	# split portions. If there are no exceptions defined
+	# return an empty list
+	# ----
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
+	my @result = ();
+	if (! defined $node) {
+		return @result;
+	}
+	my $persistNode = $node -> getElementsByTagName ("persistent")
+		-> get_node(1);
+	if (! defined $persistNode) {
+		return @result;
+	}
+	my @fileNodeList = $persistNode -> getElementsByTagName ("except");
+	foreach my $fileNode (@fileNodeList) {
+		push @result, $fileNode -> getAttribute ("name");
+	}
+	return @result;
 }
 
 #==========================================

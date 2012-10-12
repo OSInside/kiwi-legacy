@@ -93,7 +93,7 @@ sub new {
 }
 
 #==========================================
-# getPersistentExecptions
+# getPersistentExceptions
 #------------------------------------------
 sub getPersistentExceptions {
 	# ...
