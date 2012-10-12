@@ -282,6 +282,13 @@ sub new {
 			$haveSplit = 1;
 		}
 		#==========================================
+		# read origin path of XML description
+		#------------------------------------------
+		if (open my $FD, '<', "$rootpath/image/main::Prepare") {
+			my $idesc = <$FD>; close $FD;
+			$this->{originXMLPath} = $idesc;
+		}
+		#==========================================
 		# read and validate XML description
 		#------------------------------------------
 		my $locator = new KIWILocator($kiwi);
@@ -4414,9 +4421,8 @@ sub setupBootLoaderConfiguration {
 			$editBoot = $xml -> getEditBootConfig();
 		}
 		if ($editBoot) {
-			if (open my $FD, '<', "$system/image/main::Prepare") {
-				$idesc = <$FD>; close $FD;
-				$editBoot = "$idesc/$editBoot";
+			if ($this->{originXMLPath}) {
+				$editBoot = $this->{originXMLPath}."/".$editBoot;
 			}
 			if (-f $editBoot) {
 				$kiwi -> info ("Calling pre bootloader install script:\n");
@@ -4973,9 +4979,8 @@ sub installBootLoader {
 			$editBoot = $xml -> getEditBootInstall();
 		}
 		if ($editBoot) {
-			if (open my $FD, '<', "$system/image/main::Prepare") {
-				$idesc = <$FD>; close $FD;
-				$editBoot = "$idesc/$editBoot";
+			if ($this->{originXMLPath}) {
+				$editBoot = $this->{originXMLPath}."/".$editBoot;
 			}
 			if (-f $editBoot) {
 				$kiwi -> info ("Calling post bootloader install script:\n");
