@@ -68,6 +68,58 @@ sub test_createVolume {
 }
 
 #==========================================
+# test_createVolumeDisallowedName
+#------------------------------------------
+sub test_createVolumeDisallowedName {
+	# ...
+	# Test the SystemdiskData createVolume method with a disallowed
+	# volume name
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $sysdDataObj = $this -> __getSystemdiskObj();
+	my $id = $sysdDataObj -> createVolume('boot');
+	my $msg = $kiwi -> getMessage();
+	my $expected = "createVolume: found disallowed name 'boot'.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($id);
+	return;
+}
+
+#==========================================
+# test_createVolumeNameDisallowedInInit
+#------------------------------------------
+sub test_createVolumeNameDisallowedInInit {
+	# ...
+	# Test the SystemdiskData createVolume method with an existsing
+	# volume name in the initialization hash
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+				name => 'proc',
+				size => '50G'
+			);
+	my $sysdDataObj = $this -> __getSystemdiskObj();
+	my $id = $sysdDataObj -> createVolume(\%init);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "createVolume: found disallowed name 'proc'.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($id);
+	return;
+}
+
+#==========================================
 # test_createVolumeDuplicateName
 #------------------------------------------
 sub test_createVolumeDuplicateName {
@@ -102,7 +154,8 @@ sub test_createVolumeDuplicateNameInInit {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'data_VOL',
+	my %init = (
+				name => 'data_VOL',
 				size => '50G'
 			);
 	my $sysdDataObj = $this -> __getSystemdiskObj();
@@ -153,7 +206,8 @@ sub test_createVolumeInvalidNameInit {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'test VG',
+	my %init = (
+				name => 'test VG',
 				size => '50G'
 			);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
@@ -204,7 +258,8 @@ sub test_createVolumeMissingNameData {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( freespace => '5G',
+	my %init = (
+				freespace => '5G',
 				size      => '50G'
 			);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
@@ -232,7 +287,8 @@ sub test_createVolumeUnsupportedData {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( volName => 'test VG',
+	my %init = (
+				volName => 'test VG',
 				size    => '50G'
 			);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
@@ -260,7 +316,8 @@ sub test_createVolumeWInit {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( freespace => '20M',
+	my %init = (
+				freespace => '20M',
 				name      => 'new_VOL',
 				size      => '50G'
 			);
@@ -321,6 +378,45 @@ sub test_ctor {
 }
 
 #==========================================
+# test_ctor_disallowedVoName
+#------------------------------------------
+sub test_ctor_disallowedVoName {
+	# ...
+	# Test the SystemdiskData constructor with disallowed volume names in
+	# the initialization hash
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %vol1 = (
+				freespace => '20M',
+				name      => 'sys',
+				size      => '30G'
+			);
+	my %vol2 = (
+				name      => 'data_VOL',
+				size      => '100G'
+			);
+	my %volumes = ( 1 => \%vol1,
+					2 => \%vol2
+				);
+	my %init = (
+				name => 'testVG',
+				volumes => \%volumes
+			);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "object initialization: found disallowed name 'sys'.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($sysdDataObj);
+	return;
+}
+
+#==========================================
 # test_ctor_duplicateVoName
 #------------------------------------------
 sub test_ctor_duplicateVoName {
@@ -330,17 +426,20 @@ sub test_ctor_duplicateVoName {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %vol1 = ( freespace => '20M',
+	my %vol1 = (
+				freespace => '20M',
 				name      => 'data_VOL',
 				size      => '30G'
 			);
-	my %vol2 = ( name      => 'data_VOL',
+	my %vol2 = (
+				name      => 'data_VOL',
 				size      => '100G'
 			);
 	my %volumes = ( 1 => \%vol1,
 					2 => \%vol2
 				);
-	my %init = ( name => 'testVG',
+	my %init = (
+				name => 'testVG',
 				volumes => \%volumes
 			);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
@@ -389,7 +488,8 @@ sub test_ctor_improperDataArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( name    => 'testVG',
+	my %init = (
+				name    => 'testVG',
 				volumes => 'foo'
 			);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
@@ -417,11 +517,13 @@ sub test_ctor_improperIDDataEntry {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %vol = ( freespace => '20M',
+	my %vol = (
+			freespace => '20M',
 				name      => 'test_VOL'
 			);
 	my %volumes = ( 'foo' => \%vol );
-	my %init = ( name => 'testVG',
+	my %init = (
+				name => 'testVG',
 				volumes => \%volumes
 			);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
@@ -449,7 +551,8 @@ sub test_ctor_incompleteData {
 	my $kiwi = $this -> {kiwi};
 	my %vol = ( freespace => '20M' );
 	my %volumes = ( 1 => \%vol );
-	my %init = ( name => 'testVG',
+	my %init = (
+				name => 'testVG',
 				volumes => \%volumes
 			);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
@@ -476,11 +579,13 @@ sub test_ctor_invalidVolName {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %vol = ( freespace => '20M',
-				name      => 'foo!bar'
+	my %vol = (
+			freespace => '20M',
+			name      => 'foo!bar'
 			);
 	my %volumes = ( 1 => \%vol );
-	my %init = ( name => 'testVG',
+	my %init = (
+				name => 'testVG',
 				volumes => \%volumes
 			);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
@@ -534,12 +639,14 @@ sub test_ctor_initUnsupportedVolDataEntry{
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %vol = ( filesys   => 'ext4',
-				freespace => '20M',
-				name      => 'test_VOL'
+	my %vol = (
+			filesys   => 'ext4',
+			freespace => '20M',
+			name      => 'test_VOL'
 			);
 	my %volumes = ( 1 => \%vol );
-	my %init = ( name => 'testVG',
+	my %init = (
+				name => 'testVG',
 				volumes => \%volumes
 			);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
@@ -565,11 +672,13 @@ sub test_ctor_wIni {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %vol = ( freespace => '20M',
-				name      => 'test_VOL'
+	my %vol = (
+			freespace => '20M',
+			name      => 'test_VOL'
 			);
 	my %volumes = ( 1 => \%vol );
-	my %init = ( name => 'testVG',
+	my %init = (
+				name => 'testVG',
 				volumes => \%volumes
 			);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
@@ -1098,6 +1207,29 @@ sub test_setVolumeName {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('newVOL', $name);
+	return;
+}
+
+#==========================================
+# test_setVolumeNameDisallowedName
+#------------------------------------------
+sub test_setVolumeNameDisallowedName {
+	# ...
+	# Test the setVolumeName method with an invalid Name arg
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $sysdDataObj = $this -> __getSystemdiskObj();
+	my $res = $sysdDataObj -> setVolumeName('2', 'etc');
+	my $msg = $kiwi -> getMessage();
+	my $expected =  "setVolumeName: found disallowed name 'etc'.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 

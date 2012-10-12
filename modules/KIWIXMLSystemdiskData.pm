@@ -446,6 +446,13 @@ sub __isNameValid {
 		$kiwi -> failed();
 		return;
 	}
+	if ($name
+		=~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc)/smx) {
+		my $msg = "$caller: found disallowed name '$name'.";
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
 	return 1;
 }
 
