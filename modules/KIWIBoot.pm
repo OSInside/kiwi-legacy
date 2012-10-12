@@ -4430,7 +4430,7 @@ sub setupBootLoaderConfiguration {
 				}
 			} else {
 				$kiwi -> warning (
-					"Can't find pre bootloader install script: $editBoot...\n"
+					"Can't find pre bootloader install script: $editBoot..."
 				);
 				$kiwi -> skipped ();
 			}
@@ -4990,7 +4990,7 @@ sub installBootLoader {
 				}
 			} else {
 				$kiwi -> warning (
-					"Can't find post bootloader install script: $editBoot...\n"
+					"Can't find post bootloader install script: $editBoot..."
 				);
 				$kiwi -> skipped ();
 			}
