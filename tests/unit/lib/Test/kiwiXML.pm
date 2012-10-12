@@ -32,6 +32,7 @@ use KIWIXMLPreferenceData;
 use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
 use KIWIXMLSplitData;
+use KIWIXMLSystemdiskData;
 use KIWIXMLTypeData;
 use KIWIXMLVMachineData;
 
@@ -1801,6 +1802,55 @@ sub test_ctor_InvalidSplitArch {
 	$this -> assert_null($xml);
 	return;
 }
+#==========================================
+# test_ctor_InvalidSysdiskVolNameDisallowed
+#------------------------------------------
+sub test_ctor_InvalidSysdiskVolNameDisallowed {
+	# ...
+	# Test the construction of the XML object with an invalid name setting
+	# for one of the volume definitions.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'lvmConfigDisallowedDir';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Invalid name 'sbin' for LVM volume setup";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($xml);
+	return;
+}
+
+#==========================================
+# test_ctor_InvalidSysdiskVolNameRoot
+#------------------------------------------
+sub test_ctor_InvalidSysdiskVolNameRoot {
+	# ...
+	# Test the construction of the XML object with an invalid name setting
+	# for one of the volume definitions.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'lvmConfigWithRoot';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Invalid name '/' for LVM volume setup";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($xml);
+	return;
+}
 
 #==========================================
 # test_getActiveProfileNames
@@ -2774,9 +2824,9 @@ sub test_getLocale {
 }
 
 #==========================================
-# test_getLVMGroupName
+# test_getLVMGroupName_legacy
 #------------------------------------------
-sub test_getLVMGroupName {
+sub test_getLVMGroupName_legacy {
 	# ...
 	# Verify proper return of getLVMGroupName method
 	# ---
@@ -2786,7 +2836,7 @@ sub test_getLVMGroupName {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getLVMGroupName();
+	my $value = $xml -> getLVMGroupName_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2799,9 +2849,9 @@ sub test_getLVMGroupName {
 }
 
 #==========================================
-# test_getLVMVolumes
+# test_getLVMVolumes_legacy
 #------------------------------------------
-sub test_getLVMVolumes {
+sub test_getLVMVolumes_legacy {
 	# ...
 	# Verify proper return of getLVMVolumes method
 	# ---
@@ -2811,7 +2861,7 @@ sub test_getLVMVolumes {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %volumes = $xml -> getLVMVolumes();
+	my %volumes = $xml -> getLVMVolumes_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2834,72 +2884,6 @@ sub test_getLVMVolumes {
 	@volSettings = $volumes{home};
 	$this -> assert_equals(2048, $volSettings[0][0]);
 	$this -> assert_equals(0, $volSettings[0][1]);
-	return;
-}
-
-#==========================================
-# test_getLVMVolumesDisallowed
-#------------------------------------------
-sub test_getLVMVolumesUsingDisallowed {
-	# ...
-	# Verify proper return of getLVMVolumes method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'lvmConfigDisallowedDir';
-	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
-	);
-	my %volumes = $xml -> getLVMVolumes();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('LVM: Directory sbin is not allowed', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('warning', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('skipped', $state);
-	# Test this condition last to get potential error messages
-	my @expectedVolumes = qw /tmp var/;
-	my @volNames = keys %volumes;
-	$this -> assert_array_equal(\@expectedVolumes, \@volNames);
-	my @volSettings = $volumes{tmp};
-	$this -> assert_str_equals('all', $volSettings[0][0]);
-	$this -> assert_equals(0, $volSettings[0][1]);
-	@volSettings = $volumes{var};
-	$this -> assert_equals(50, $volSettings[0][0]);
-	$this -> assert_equals(1, $volSettings[0][1]);
-	return;
-}
-
-#==========================================
-# test_getLVMVolumesRoot
-#------------------------------------------
-sub test_getLVMVolumesUsingRoot {
-	# ...
-	# Verify proper return of getLVMVolumes method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'lvmConfigWithRoot';
-	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
-	);
-	my %volumes = $xml -> getLVMVolumes();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('LVM: Directory / is not allowed', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('warning', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('skipped', $state);
-	# Test this condition last to get potential error messages
-	my @expectedVolumes = qw /tmp var/;
-	my @volNames = keys %volumes;
-	$this -> assert_array_equal(\@expectedVolumes, \@volNames);
-	my @volSettings = $volumes{tmp};
-	$this -> assert_str_equals('all', $volSettings[0][0]);
-	$this -> assert_equals(0, $volSettings[0][1]);
-	@volSettings = $volumes{var};
-	$this -> assert_equals(50, $volSettings[0][0]);
-	$this -> assert_equals(1, $volSettings[0][1]);
 	return;
 }
 
@@ -4802,6 +4786,51 @@ sub test_getStripTools {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw /megacli virt-mgr/;
 	$this -> assert_array_equal(\@expectedNames, \@toolFiles);
+	return;
+}
+
+#==========================================
+# test_getSystemDiskConfig
+#------------------------------------------
+sub test_getSystemDiskConfig {
+	# ...
+	# Test the getSystemDiskConfig method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'lvmConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $sysDiskObj = $xml -> getSystemDiskConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $vgName = $sysDiskObj -> getVGName();
+	$this -> assert_str_equals('test_Volume', $vgName);
+	my $volIDs = $sysDiskObj -> getVolumeIDs();
+	my @expectedIDs = ( 1, 2, 3, 4);
+	$this -> assert_array_equal(\@expectedIDs, $volIDs);
+	for my $id (@expectedIDs) {
+		my $free = $sysDiskObj -> getVolumeFreespace($id);
+		my $name = $sysDiskObj -> getVolumeName($id);
+		my $size = $sysDiskObj -> getVolumeSize($id);
+	if ($name eq 'home') {
+		$this -> assert_equals(2048, $free);
+	}
+	if ($name eq 'tmp') {
+		$this -> assert_str_equals('all', $free);
+	}
+	if ($name eq 'usr') {
+		$this -> assert_equals(4096, $size);
+	}
+	if ($name eq 'var') {
+		$this -> assert_equals(50, $size);
+	}
+	}
 	return;
 }
 

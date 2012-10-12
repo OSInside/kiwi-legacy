@@ -38,6 +38,7 @@ use KIWIXMLPreferenceData;
 use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
 use KIWIXMLSplitData;
+use KIWIXMLSystemdiskData;
 use KIWIXMLTypeData;
 use KIWIXMLValidator;
 use KIWIXMLVMachineData;
@@ -804,6 +805,21 @@ sub getSplitConfig {
 }
 
 #==========================================
+# getSystemDiskConfig
+#------------------------------------------
+sub getSystemDiskConfig {
+	# ...
+	# Return a SystemdiskData object for the <systemdisk> configuration of
+	# the current build type
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $sysDiskObj = KIWIXMLSystemdiskData -> new($kiwi,
+										$this->{selectedType}{systemdisk});
+	return $sysDiskObj;
+}
+
+#==========================================
 # getVMachineConfig
 #------------------------------------------
 sub getVMachineConfig {
@@ -1062,6 +1078,32 @@ sub __convertRepoDataToHash {
 		$repoData{username} = $username;
 	}
 	return \%repoData;
+}
+
+#==========================================
+# __convertSizeStrToMBVal
+#------------------------------------------
+sub __convertSizeStrToMBVal {
+	# ...
+	# Convert a given size string that contains M or G into a value
+	# that is a representation in MB.
+	#
+	my $this    = shift;
+	my $sizeStr = shift;
+	if (! $sizeStr ) {
+		return;
+	}
+	my $size = $sizeStr;
+	if ($sizeStr =~ /(\d+)([MG]*)/) {
+		my $byte = int $1;
+		my $unit = $2;
+		if ($unit eq "G") {
+			$size =  $byte * 1024;
+		} else {
+			$size =  $byte;
+		}
+	}
+	return $size;
 }
 
 #==========================================
@@ -1337,6 +1379,63 @@ sub __genSplitDataHash {
 }
 
 #==========================================
+# __genSystemDiskHash
+#------------------------------------------
+sub __genSystemDiskHash {
+	# ...
+	# Return a ref to a hash containing the configuration for <systemdisk>
+	# of the given XML:ELEMENT object
+	# Build a data structure that matches the structure defined in
+	# KIWIXMLSystemdiskData
+	# NOTE: return -1 on error as undef is an OK return state
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $lvmNode = $node -> getChildrenByTagName('systemdisk');
+	if (! $lvmNode ) {
+		return;
+	}
+	my $kiwi = $this->{kiwi};
+	my $lvmDataNode = $lvmNode -> get_node(1);
+	my %lvmData;
+	$lvmData{name} = $lvmDataNode -> getAttribute('name');
+	my @volumes = $lvmDataNode -> getChildrenByTagName('volume');
+	my %volData;
+	my $cntr = 1;
+	for my $vol (@volumes) {
+		my %volInfo;
+		$volInfo{freespace} = $this->__convertSizeStrToMBVal(
+										$vol -> getAttribute('freespace'));
+
+		my $name = $vol -> getAttribute('name');
+		my $msg = "Invalid name '$name' for LVM volume setup";
+		$name =~ s/\s+//g;
+		if ($name eq '/') {
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return -1;
+		}
+		$name =~ s/^\///;
+		if ($name
+		 =~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)/sxm)
+		{
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return -1;
+		}
+		$volInfo{name}      = $name;
+
+
+		$volInfo{size}  = $this->__convertSizeStrToMBVal(
+											$vol -> getAttribute('size'));
+		$volData{$cntr} = \%volInfo;
+		$cntr += 1;
+	}
+	$lvmData{volumes} = \%volData;
+	return \%lvmData;
+}
+
+#==========================================
 # __genTypeHash
 #------------------------------------------
 sub __genTypeHash {
@@ -1412,10 +1511,15 @@ sub __genTypeHash {
 		if ($splitConf && $splitConf == -1) {
 			return;
 		}
-		$typeData{split}      = $splitConf;
-#        $typeData{systemdisk} = $this -> __genSystemDiskHash($type);
-		$typeData{vga}               = $type -> getAttribute('vga');
-		$typeData{volid}             = $type -> getAttribute('volid');
+		$typeData{split}         = $splitConf;
+
+		my $sysDisk = $this -> __genSystemDiskHash($type);
+		if ($sysDisk && $sysDisk == -1) {
+			return;
+		}
+		$typeData{systemdisk}    = $sysDisk;
+		$typeData{vga}           = $type -> getAttribute('vga');
+		$typeData{volid}         = $type -> getAttribute('volid');
 		$types{$typeData{image}} = \%typeData;
 	}
 	$types{defaultType} = $defType;
@@ -3258,7 +3362,7 @@ sub getImageConfig {
 	#==========================================
 	# systemdisk
 	#------------------------------------------
-	my %lvmparts = $this -> getLVMVolumes();
+	my %lvmparts = $this -> getLVMVolumes_legacy();
 	if (%lvmparts) {
 		foreach my $vol (keys %lvmparts) {
 			if (! $lvmparts{$vol}) {
@@ -3425,83 +3529,6 @@ sub getPackageAttributes {
 	}
 	return %result;
 }
-
-#==========================================
-# getLVMGroupName
-#------------------------------------------
-sub getLVMGroupName {
-	# ...
-	# Return the name of the volume group if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	return $node -> getAttribute ("name");
-}
-
-#==========================================
-# getLVMVolumes
-#------------------------------------------
-sub getLVMVolumes {
-	# ...
-	# Create list of LVM volume names for sub volume
-	# setup. Each volume name will end up in an own
-	# LVM volume when the LVM setup is requested
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
-	my %result = ();
-	if (! defined $node) {
-		return %result;
-	}
-	my @vollist = $node -> getElementsByTagName ("volume");
-	foreach my $volume (@vollist) {
-		my $name = $volume -> getAttribute ("name");
-		my $free = $volume -> getAttribute ("freespace");
-		my $size = $volume -> getAttribute ("size");
-		my $haveAbsolute;
-		my $usedValue;
-		if ($size) {
-			$haveAbsolute = 1;
-			$usedValue = $size;
-		} elsif ($free) {
-			$usedValue = $free;
-			$haveAbsolute = 0;
-		}
-		if (($usedValue) && ($usedValue =~ /(\d+)([MG]*)/)) {
-			my $byte = int $1;
-			my $unit = $2;
-			if ($unit eq "G") {
-				$usedValue = $byte * 1024;
-			} else {
-				# no or unknown unit, assume MB...
-				$usedValue = $byte;
-			}
-		}
-		$name =~ s/\s+//g;
-		if ($name eq "/") {
-			$kiwi -> warning ("LVM: Directory $name is not allowed");
-			$kiwi -> skipped ();
-			next;
-		}
-		$name =~ s/^\///;
-		if ($name
-			=~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)/) {
-			$kiwi -> warning ("LVM: Directory $name is not allowed");
-			$kiwi -> skipped ();
-			next;
-		}
-		$name =~ s/\//_/g;
-		$result{$name} = [ $usedValue,$haveAbsolute ];
-	}
-	return %result;
-}
-
 
 #==========================================
 # getInstSourcePackageAttributes
@@ -4978,6 +5005,82 @@ sub getLicenseNames_legacy {
 		return \@names;
 	}
 	return;
+}
+
+#==========================================
+# getLVMGroupName_legacy
+#------------------------------------------
+sub getLVMGroupName_legacy {
+	# ...
+	# Return the name of the volume group if specified
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	return $node -> getAttribute ("name");
+}
+
+#==========================================
+# getLVMVolumes_legacy
+#------------------------------------------
+sub getLVMVolumes_legacy {
+	# ...
+	# Create list of LVM volume names for sub volume
+	# setup. Each volume name will end up in an own
+	# LVM volume when the LVM setup is requested
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
+	my %result = ();
+	if (! defined $node) {
+		return %result;
+	}
+	my @vollist = $node -> getElementsByTagName ("volume");
+	foreach my $volume (@vollist) {
+		my $name = $volume -> getAttribute ("name");
+		my $free = $volume -> getAttribute ("freespace");
+		my $size = $volume -> getAttribute ("size");
+		my $haveAbsolute;
+		my $usedValue;
+		if ($size) {
+			$haveAbsolute = 1;
+			$usedValue = $size;
+		} elsif ($free) {
+			$usedValue = $free;
+			$haveAbsolute = 0;
+		}
+		if (($usedValue) && ($usedValue =~ /(\d+)([MG]*)/)) {
+			my $byte = int $1;
+			my $unit = $2;
+			if ($unit eq "G") {
+				$usedValue = $byte * 1024;
+			} else {
+				# no or unknown unit, assume MB...
+				$usedValue = $byte;
+			}
+		}
+		$name =~ s/\s+//g;
+		if ($name eq "/") {
+			$kiwi -> warning ("LVM: Directory $name is not allowed");
+			$kiwi -> skipped ();
+			next;
+		}
+		$name =~ s/^\///;
+		if ($name
+			=~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)/) {
+			$kiwi -> warning ("LVM: Directory $name is not allowed");
+			$kiwi -> skipped ();
+			next;
+		}
+		$name =~ s/\//_/g;
+		$result{$name} = [ $usedValue,$haveAbsolute ];
+	}
+	return %result;
 }
 
 #==========================================

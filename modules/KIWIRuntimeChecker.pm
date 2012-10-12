@@ -153,7 +153,7 @@ sub __hasValidLVMName {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
-	my $vgroupName = $xml -> getLVMGroupName();
+	my $vgroupName = $xml -> getLVMGroupName_legacy();
 	if (! $vgroupName) {
 		return 1;
 	}

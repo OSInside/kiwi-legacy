@@ -256,7 +256,7 @@ sub updateDescription {
 	# Store LVM volumes
 	#------------------------------------------
 	if ($src_type{lvm}) {
-		my %lvmparts = $src_xml -> getLVMVolumes();
+		my %lvmparts = $src_xml -> getLVMVolumes_legacy();
 		$changeset{"lvm"} = $src_type{lvm};
 		$changeset{"lvmparts"} = \%lvmparts;
 	}

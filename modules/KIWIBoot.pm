@@ -1667,14 +1667,14 @@ sub setupBootDisk {
 		#==========================================
 		# set volume group name
 		#------------------------------------------
-		my $vgroupName = $xml -> getLVMGroupName();
+		my $vgroupName = $xml -> getLVMGroupName_legacy();
 		if ($vgroupName) {
 			$this->{lvmgroup} = $vgroupName;
 		}
 		#==========================================
 		# check and set LVM volumes setup
 		#------------------------------------------
-		%lvmparts = $xml -> getLVMVolumes();
+		%lvmparts = $xml -> getLVMVolumes_legacy();
 		if (%lvmparts) {
 			if ( ! -d $system ) {
 				$kiwi -> error (
