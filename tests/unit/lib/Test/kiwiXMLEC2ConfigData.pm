@@ -482,7 +482,7 @@ sub test_setRegionsImproperArg {
 	$this -> assert_null($regions);
 	my $res = $confDataObj -> setRegions('foo');
 	$msg = $kiwi -> getMessage();
-	my $expected = 'setRegions: expecting array ref as second argument.';
+	my $expected = 'setRegions: expecting array ref as argument.';
 	$this -> assert_str_equals($expected, $msg);
 	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);

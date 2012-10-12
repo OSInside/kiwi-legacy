@@ -705,15 +705,18 @@ sub test_ctor_initIncompletePartitionNoType {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %diskData1  = ( mountpoint => q{/},
+	my %diskData1  = (
+					mountpoint => q{/},
 					size       => '20G',
 					target     => 'true'
 					);
-	my %diskData2  = ( mountpoint => '/home',
+	my %diskData2  = (
+					mountpoint => '/home',
 					size       => '50G',
 					type       => '0x83'
 					);
-	my %partitions = ( 1 => \%diskData1,
+	my %partitions = (
+					1 => \%diskData1,
 					2 => \%diskData2
 					);
 	my %init = ( partitions   => \%partitions );
@@ -741,7 +744,8 @@ sub test_ctor_initIncompleteUnionRONoType {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( unionRO => '/dev/sdb1',
+	my %init = (
+				unionRO => '/dev/sdb1',
 				unionRW => '/dev/sdb2'
 			);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
@@ -768,7 +772,8 @@ sub test_ctor_initIncompleteUnionRWNoRO {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( unionRW   => '/dev/sdb2',
+	my %init = (
+				unionRW   => '/dev/sdb2',
 				unionType => 'clicfs'
 			);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
@@ -795,7 +800,8 @@ sub test_ctor_initIncompleteUnionRWNoType {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( unionRO => '/dev/sdb1',
+	my %init = (
+				unionRO => '/dev/sdb1',
 				unionRW => '/dev/sdb2'
 			);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
@@ -822,7 +828,8 @@ sub test_ctor_initIncompleteUnionRONoRW {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( unionRO   => '/dev/sdb1',
+	my %init = (
+				unionRO   => '/dev/sdb1',
 				unionType => 'clicfs'
 			);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
@@ -849,7 +856,8 @@ sub test_ctor_initIncompleteUnionTypeNoRO {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( unionRW   => '/dev/sdb2',
+	my %init = (
+				unionRW   => '/dev/sdb2',
 				unionType => 'clicfs'
 			);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
@@ -876,7 +884,8 @@ sub test_ctor_initIncompleteUnionTypeNoRW {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( unionRO   => '/dev/sdb1',
+	my %init = (
+				unionRO   => '/dev/sdb1',
 				unionType => 'clicfs'
 			);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
@@ -969,6 +978,41 @@ sub test_ctor_initIncompleteUnionOnlyType {
 }
 
 #==========================================
+# test_ctor_initInvalidDataArch
+#------------------------------------------
+sub test_ctor_initInvalidDataArch {
+	# ...
+	# Test the PXEDeployData constructor with an initialization hash
+	# that contains invalid data type for the configArch data
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %diskData = (
+					mountpoint => '/dev/sda',
+					size       => '30G',
+					unit       => 'GB'
+	);
+	my %disks = ( 1 => \%diskData );
+	my %init = (
+				blocksize  => '4096',
+				configArch => 'x86_64',
+				partitions => \%disks
+	);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Expecting an array ref as entry of "configArch" in  '
+		. 'the initialization hash.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($pxeDataObj);
+	return;
+}
+
+#==========================================
 # test_ctor_initUnsupportedData
 #------------------------------------------
 sub test_ctor_initUnsupportedData {
@@ -978,10 +1022,11 @@ sub test_ctor_initUnsupportedData {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( blocksize => '4096',
+	my %init = (
+				blocksize => '4096',
 				kernel    => 'myKernel',
 				disks     => 'foo'
-	    );
+			);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Unsupported option in initialization structure found '
@@ -1006,13 +1051,16 @@ sub test_ctor_initUnsupportedDataPartitions {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %diskData = ( mountpoint => '/dev/sda',
+	my %diskData = (
+					mountpoint => '/dev/sda',
 					size       => '30G',
 					unit       => 'GB'
 	);
 	my %disks = ( 1 => \%diskData );
-	my %init = ( blocksize  => '4096',
-				configArch => 'x86_64',
+	my @arches = qw / ppc64 x86_64/;
+	my %init = (
+				blocksize  => '4096',
+				configArch => \@arches,
 				partitions => \%disks
 	);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
@@ -1043,8 +1091,10 @@ sub test_ctor_withInit {
 					type      => '0x83'
 	);
 	my %disks = ( 1 => \%diskData );
-	my %init = ( blocksize  => '4096',
-				configArch => 'x86_64',
+	my @arches = qw / ppc64 x86_64/;
+	my %init = (
+				blocksize  => '4096',
+				configArch => \@arches,
 				partitions => \%disks
 	);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
@@ -1097,7 +1147,8 @@ sub test_getConfigurationArch {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('x86_64', $arch);
+	my @expected = qw / ppc64 x86_64/;
+	$this -> assert_array_equal(\@expected, $arch);
 	return;
 }
 
@@ -2071,7 +2122,8 @@ sub test_setConfigurationArch {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $pxeDataObj = $this -> __getPXEDeployObj();
-	$pxeDataObj = $pxeDataObj -> setConfigurationArch('s390x');
+	my @archSet = ( 's390x' );
+	$pxeDataObj = $pxeDataObj -> setConfigurationArch(\@archSet);
 	$this -> assert_not_null($pxeDataObj);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2086,7 +2138,40 @@ sub test_setConfigurationArch {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('s390x', $arch);
+	$this -> assert_array_equal(\@archSet, $arch);
+	return;
+}
+
+#==========================================
+# test_setConfigurationArchInvalidArch
+#------------------------------------------
+sub test_setConfigurationArchInvalidArch {
+	# ...
+	# Test the setConfigurationArch method with an invalid architecture
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $pxeDataObj = $this -> __getPXEDeployObj();
+	my @invArch = ( 'arm95' );
+	my $res = $pxeDataObj -> setConfigurationArch(\@invArch);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "setConfigurationArch: given architecture 'arm95' not "
+		. 'supported retaining current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $arch = $pxeDataObj -> getConfigurationArch();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expected = qw / ppc64 x86_64/;
+	$this -> assert_array_equal(\@expected, $arch);
 	return;
 }
 
@@ -2102,8 +2187,7 @@ sub test_setConfigurationArchInvalidArg {
 	my $pxeDataObj = $this -> __getPXEDeployObj();
 	my $res = $pxeDataObj -> setConfigurationArch('arm95');
 	my $msg = $kiwi -> getMessage();
-	my $expected = "setConfigurationArch: given architecture 'arm95' not "
-			. 'supported retaining current data.';
+	my $expected = 'setConfigurationArch: expecting array ref as argument.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -2117,7 +2201,8 @@ sub test_setConfigurationArchInvalidArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('x86_64', $arch);
+	my @expected = qw / ppc64 x86_64/;
+	$this -> assert_array_equal(\@expected, $arch);
 	return;
 }
 
@@ -2148,7 +2233,8 @@ sub test_setConfigurationArchNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('x86_64', $arch);
+	my @expected = qw / ppc64 x86_64/;
+	$this -> assert_array_equal(\@expected, $arch);
 	return;
 }
 
@@ -3085,20 +3171,25 @@ sub __getPXEDeployObj {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my %diskData1  = ( mountpoint => q{/},
+	my %diskData1  = (
+					mountpoint => q{/},
 					size       => '20G',
 					target     => 'true',
 					type       => '0x83'
 					);
-	my %diskData2  = ( mountpoint => '/home',
+	my %diskData2  = (
+					mountpoint => '/home',
 					size       => '50G',
 					type       => '0x83'
 					);
-	my %partitions = ( 1 => \%diskData1,
+	my %partitions = (
+					1 => \%diskData1,
 					2 => \%diskData2
 					);
-	my %init = ( blocksize    => '8192',
-				configArch   => 'x86_64',
+	my @arches = qw / ppc64 x86_64/;
+	my %init = (
+				blocksize    => '8192',
+				configArch   => \@arches,
 				configDest   => '/srv/atftp/config',
 				configSource => '/wrk/packages',
 				device       => '/dev/sdb1',

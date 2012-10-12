@@ -211,7 +211,7 @@ sub setRegions {
 	}
 	if (ref($regions) ne 'ARRAY') {
 		my $kiwi = $this->{kiwi};
-		my $msg = 'setRegions: expecting array ref as second argument.';
+		my $msg = 'setRegions: expecting array ref as argument.';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;

@@ -518,12 +518,20 @@ sub setConfigurationArch {
 		$kiwi -> failed();
 		return;
 	}
-	if (! $supportedArch{$arch} ) {
-		my $msg = "setConfigurationArch: given architecture '$arch' not "
-			. 'supported retaining current data.';
+	if (ref($arch) ne 'ARRAY') {
+		my $msg = 'setConfigurationArch: expecting array ref as argument.';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;
+	}
+	for my $ar (@{$arch}) {
+		if (! $supportedArch{$ar} ) {
+			my $msg = "setConfigurationArch: given architecture '$ar' not "
+			. 'supported retaining current data.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
 	}
 	$this->{configArch} = $arch;
 	return $this;
@@ -791,6 +799,13 @@ sub __isInitHashValid {
 			$kiwi -> failed();
 			return;
 		}
+	}
+	if ( $init->{configArch} && ref($init->{configArch}) ne 'ARRAY' ) {
+		my $msg = 'Expecting an array ref as entry of "configArch" in  '
+			. 'the initialization hash.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
 	}
 	if (! $this -> __isConfigSettingValid($init) ) {
 		return;
