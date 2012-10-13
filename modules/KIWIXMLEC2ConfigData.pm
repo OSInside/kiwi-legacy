@@ -22,6 +22,7 @@ use strict;
 use warnings;
 require Exporter;
 
+use base qw /KIWIXMLDataBase/;
 #==========================================
 # Exports
 #------------------------------------------
@@ -37,9 +38,8 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my $this  = {};
 	my $class = shift;
-	bless $this,$class;
+	my $this  = $class->SUPER::new(@_);
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
@@ -48,26 +48,18 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	if ($init && ref($init) ne 'HASH') {
-		my $msg = 'Expecting a hash ref as second argument if provided';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
+	my %keywords = map { ($_ => 1) } qw(
+			ec2accountnr ec2certfile ec2privatekeyfile ec2region
+	);
+	$this->{supportedKeywords} = \%keywords;
+	if (! $this -> __isInitHashRef($init) ) {
 		return;
 	}
+	if (! $this -> __areKeywordArgsValid($init) ) {
+		return;
+	}
+
 	if ($init) {
-		# Check for unsupported entries
-		my %initStruct = %{$init};
-		my %supported = map { ($_ => 1) } qw(
-			ec2accountnr ec2certfile ec2privatekeyfile ec2region
-		);
-		for my $key (keys %initStruct) {
-			if (! $supported{$key} ) {
-				my $msg = 'Unsupported option in initialization structure '
-					. "found '$key'";
-				$kiwi -> info($msg);
-				$kiwi -> skipped();
-			}
-		}
 		$this->{acctno}         = $init->{ec2accountnr};
 		$this->{certfile}       = $init->{ec2certfile};
 		$this->{privatekeyfile} = $init->{ec2privatekeyfile};

@@ -109,9 +109,9 @@ sub __areKeywordArgsValid {
 }
 
 #==========================================
-# __isHashRef
+# __isInitHashRef
 #------------------------------------------
-sub __isHashRef {
+sub __isInitHashRef {
 	# ...
 	# Verify that the given argument is a hashref
 	# ---

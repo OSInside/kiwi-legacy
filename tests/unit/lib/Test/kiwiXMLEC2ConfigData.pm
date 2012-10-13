@@ -127,15 +127,15 @@ sub test_ctor_initUnsupportedData {
 			);
 	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi, \%args);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Unsupported option in initialization structure found '
-		. "'certfile'";
+	my $expected = 'KIWIXMLEC2ConfigData: Unsupported keyword argument '
+		. "'certfile' in initialization structure";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('info', $msgT);
+	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($confDataObj);
+	$this -> assert_null($confDataObj);
 	return;
 }
 

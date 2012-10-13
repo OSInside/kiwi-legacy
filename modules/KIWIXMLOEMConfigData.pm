@@ -62,7 +62,7 @@ sub new {
 			oem_reboot_interactive oem_recovery oem_shutdown
 			oem_shutdown_interactive oem_silent_boot oem_swap oem_unattended
 	);
-	if (! $this -> __isHashRef($init) ) {
+	if (! $this -> __isInitHashRef($init) ) {
 		return;
 	}
 	if (! $this -> __areKeywordArgsValid($init) ) {
