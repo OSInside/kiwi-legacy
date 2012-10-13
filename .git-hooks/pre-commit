@@ -15,7 +15,7 @@ my @kiwiModules = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
 					KIWIRoot.pm KIWIRuntimeChecker.pm
 					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
-					KIWIURL.pm KIWIUtil.pm KIWIXML.pm
+					KIWIURL.pm KIWIUtil.pm KIWIXML.pm KIWIXMLDataBase.pm
 					KIWIXMLDescriptionData.pm KIWIXMLDriverData.pm
 					KIWIXMLEC2ConfigData.pm KIWIXMLFileData.pm KIWIXMLInfo.pm
 					KIWIXMLOEMConfigData.pm KIWIXMLPXEDeployData.pm
@@ -53,7 +53,7 @@ my @notClean1 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
 					KIWIRoot.pm KIWIRuntimeChecker.pm
 					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
-					KIWIURL.pm KIWIUtil.pm KIWIXML.pm
+					KIWIURL.pm KIWIUtil.pm KIWIXML.pm KIWIXMLDataBase.pm
 					KIWIXMLDescriptionData.pm KIWIXMLDriverData.pm
 					KIWIXMLEC2ConfigData.pm KIWIXMLFileData.pm KIWIXMLInfo.pm
 					KIWIXMLOEMConfigData.pm KIWIXMLPXEDeployData.pm
@@ -91,7 +91,7 @@ my @notClean2 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
 					KIWIRoot.pm KIWIRuntimeChecker.pm
 					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
-					KIWIURL.pm KIWIUtil.pm KIWIXML.pm
+					KIWIURL.pm KIWIUtil.pm KIWIXML.pm KIWIXMLDataBase.pm
 					KIWIXMLDescriptionData.pm KIWIXMLDriverData.pm
 					KIWIXMLFileData.pm KIWIXMLInfo.pm KIWIXMLOEMConfigData.pm
 					KIWIXMLRepositoryData.pm KIWIXMLTypeData.pm
@@ -120,7 +120,8 @@ my @notClean3 = qw (KIWIArchList.pm KIWIArch.pm KIWIBoot.pm KIWICache.pm
 					KIWIProductData.pm KIWIQX.pm KIWIRepoMetaHandler.pm
 					KIWIRoot.pm KIWIRuntimeChecker.pm
 					KIWISatSolver.pm KIWISharedMem.pm KIWISocket.pm
-					KIWIURL.pm KIWIUtil.pm KIWIXML.pm KIWIXMLInfo.pm
+					KIWIURL.pm KIWIUtil.pm KIWIXML.pm KIWIXMLDataBase.pm
+					KIWIXMLInfo.pm
 					KIWIXMLRepositoryData.pm KIWIXMLValidator.pm
 					KIWICommandLine.t KIWIImageCreator.t
 					KIWILocator.t KIWIRuntimeChecker.t KIWIXML.t

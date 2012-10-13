@@ -231,8 +231,8 @@ sub test_ctor_initUnsupportedData {
 			);
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Unsupported option in initialization structure '
-		. "found 'firmwaredriver'";
+	my $expected = 'KIWIXMLOEMConfigData: Unsupported keyword argument '
+		. "'firmwaredriver' in initialization structure";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -826,7 +826,7 @@ sub test_setAlignPartition {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setAlignPartition('16k');
+	$confDataObj = $confDataObj -> setAlignPartition('false');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -842,7 +842,31 @@ sub test_setAlignPartition {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('16k', $align);
+	$this -> assert_str_equals('false', $align);
+	return;
+}
+
+#==========================================
+# test_setAlignPartitionInvalidArg
+#------------------------------------------
+sub test_setAlignPartitionInvalidArg {
+	# ...
+	# Test the set AlignPartition method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setAlignPartition(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setAlignPartition: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -948,7 +972,7 @@ sub test_setBootwait {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setBootwait(1);
+	$confDataObj = $confDataObj -> setBootwait('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -980,6 +1004,30 @@ sub test_setBootwait {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
+}
+
+#==========================================
+# test_setBootwaitInvalidArg
+#------------------------------------------
+sub test_setBootwaitInvalidArg {
+	# ...
+	# Test the setBootwait method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setBootwait(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setBootwait: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -1040,7 +1088,7 @@ sub test_setInplaceRecovery {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setInplaceRecovery(1);
+	$confDataObj = $confDataObj -> setInplaceRecovery('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1057,6 +1105,30 @@ sub test_setInplaceRecovery {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('true', $recov);
+	return;
+}
+
+#==========================================
+# test_setInplaceRecoveryInvalidArg
+#------------------------------------------
+sub test_setInplaceRecoveryInvalidArg {
+	# ...
+	# Test the setInplaceRecovery method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setInplaceRecovery(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setInplaceRecovery: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -1101,7 +1173,7 @@ sub test_setKiwiInitrd {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setKiwiInitrd(1);
+	$confDataObj = $confDataObj -> setKiwiInitrd('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1118,6 +1190,30 @@ sub test_setKiwiInitrd {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('true', $kinit);
+	return;
+}
+
+#==========================================
+# test_setKiwiInitrdInvalidArg
+#------------------------------------------
+sub test_setKiwiInitrdInvalidArg {
+	# ...
+	# Test the setKiwiInitrd method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setKiwiInitrd(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setKiwiInitrd: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -1162,7 +1258,7 @@ sub test_setPartitionInstall {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setPartitionInstall(1);
+	$confDataObj = $confDataObj -> setPartitionInstall('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1179,6 +1275,30 @@ sub test_setPartitionInstall {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('true', $partIn);
+	return;
+}
+
+#==========================================
+# test_setPartitionInstallInvalidArg
+#------------------------------------------
+sub test_setPartitionInstallInvalidArg {
+	# ...
+	# Test the setPartitionInstall method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setPartitionInstall(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setPartitionInstall: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -1223,7 +1343,7 @@ sub test_setReboot {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setReboot(1);
+	$confDataObj = $confDataObj -> setReboot('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1255,6 +1375,30 @@ sub test_setReboot {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
+}
+
+#==========================================
+# test_setRebootInvalidArg
+#------------------------------------------
+sub test_setRebootInvalidArg {
+	# ...
+	# Test the setReboot method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setReboot(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setReboot: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -1315,7 +1459,7 @@ sub test_setRebootInteractive {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setRebootInteractive(1);
+	$confDataObj = $confDataObj -> setRebootInteractive('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1347,6 +1491,30 @@ sub test_setRebootInteractive {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
+}
+
+#==========================================
+# test_setRebootInteractiveInvalidArg
+#------------------------------------------
+sub test_setRebootInteractiveInvalidArg {
+	# ...
+	# Test the setRebootInteractive method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setRebootInteractive(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setRebootInteractive: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -1407,7 +1575,7 @@ sub test_setRecovery {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setRecovery(1);
+	$confDataObj = $confDataObj -> setRecovery('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1424,6 +1592,30 @@ sub test_setRecovery {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('true', $recov);
+	return;
+}
+
+#==========================================
+# test_setRecoveryInvalidArg
+#------------------------------------------
+sub test_setRecoveryInvalidArg {
+	# ...
+	# Test the setRecovery method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setRecovery(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setRecovery: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -1529,7 +1721,7 @@ sub test_setShutdown {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setShutdown(1);
+	$confDataObj = $confDataObj -> setShutdown('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1561,6 +1753,30 @@ sub test_setShutdown {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
+}
+
+#==========================================
+# test_setShutdownInvalidArg
+#------------------------------------------
+sub test_setShutdownInvalidArg {
+	# ...
+	# Test the setShutdown method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setShutdown(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setShutdown: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -1621,7 +1837,7 @@ sub test_setShutdownInteractive {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setShutdownInteractive(1);
+	$confDataObj = $confDataObj -> setShutdownInteractive('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1653,6 +1869,30 @@ sub test_setShutdownInteractive {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
+}
+
+#==========================================
+# test_setShutdownInteractiveInvalidArg
+#------------------------------------------
+sub test_setShutdownInteractiveInvalidArg {
+	# ...
+	# Test the seShutdownInteractivet method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setShutdownInteractive(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setShutdownInteractive: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -1713,7 +1953,7 @@ sub test_setSilentBoot {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setSilentBoot(1);
+	$confDataObj = $confDataObj -> setSilentBoot('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1730,6 +1970,30 @@ sub test_setSilentBoot {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('true', $silent);
+	return;
+}
+
+#==========================================
+# test_setSilentBootInvalidArg
+#------------------------------------------
+sub test_setSilentBootInvalidArg {
+	# ...
+	# Test the setSilentBoot method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setSilentBoot(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setSilentBoot: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -1774,7 +2038,7 @@ sub test_setSwap {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setSwap(1);
+	$confDataObj = $confDataObj -> setSwap('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1791,6 +2055,30 @@ sub test_setSwap {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('true', $swap);
+	return;
+}
+
+#==========================================
+# test_setSwapInvalidArg
+#------------------------------------------
+sub test_setSwapInvalidArg {
+	# ...
+	# Test the setSwap method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setSwap(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setSwap: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -1963,7 +2251,7 @@ sub test_setUnattended {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
-	$confDataObj = $confDataObj -> setUnattended(1);
+	$confDataObj = $confDataObj -> setUnattended('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1980,6 +2268,30 @@ sub test_setUnattended {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('true', $auto);
+	return;
+}
+
+#==========================================
+# test_setUnattendedInvalidArg
+#------------------------------------------
+sub test_setUnattendedInvalidArg {
+	# ...
+	# Test the setUnattended method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $res = $confDataObj -> setUnattended(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setUnattended: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 

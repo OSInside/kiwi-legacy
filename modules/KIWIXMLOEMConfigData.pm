@@ -22,6 +22,7 @@ use strict;
 use warnings;
 require Exporter;
 
+use base qw /KIWIXMLDataBase/;
 #==========================================
 # Exports
 #------------------------------------------
@@ -37,9 +38,8 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my $this  = {};
 	my $class = shift;
-	bless $this,$class;
+	my $this  = $class->SUPER::new(@_);
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
@@ -48,39 +48,29 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	$this->{kiwi} = $kiwi;
-	if ($init && ref($init) ne 'HASH') {
-		my $msg = 'Expecting a hash ref as second argument if provided';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if ($init) {
-		# Check for unsupported entries
-		my %initStruct = %{$init};
-		my %supported = map { ($_ => 1) } qw(
+	my %keywords = map { ($_ => 1) } qw(
 			oem_align_partition oem_boot_title oem_bootwait
 			oem_inplace_recovery oem_kiwi_initrd oem_partition_install
 			oem_reboot oem_reboot_interactive oem_recovery oem_recoveryID
 			oem_shutdown oem_shutdown_interactive oem_silent_boot oem_swap
 			oem_swapsize oem_systemsize oem_unattended oem_unattended_id
-		);
-		for my $key (keys %initStruct) {
-			if (! $supported{"$key"} ) {
-				my $msg = 'Unsupported option in initialization structure '
-					. "found '$key'";
-				$kiwi -> error($msg);
-				$kiwi -> failed();
-				return;
-			}
-		}
-		if (! $this -> __noConflictingSettingPostInst($init)) {
-			return;
-		}
-		if (! $this -> __noConflictingSettingSwap($init)) {
-			return;
-		}
-		if (! $this -> __noConflictingSettingUnattended($init)) {
+	);
+	$this->{supportedKeywords} = \%keywords;
+	my %boolKW = map { ($_ => 1) } qw(
+			oem_align_partition oem_bootwait oem_inplace_recovery
+			oem_kiwi_initrd oem_partition_install oem_reboot
+			oem_reboot_interactive oem_recovery oem_shutdown
+			oem_shutdown_interactive oem_silent_boot oem_swap oem_unattended
+	);
+	if (! $this -> __isHashRef($init) ) {
+		return;
+	}
+	if (! $this -> __areKeywordArgsValid($init) ) {
+		return;
+	}
+
+	if ($init) {
+		if (! $this -> __isInitConsistent($init) )  {
 			return;
 		}
 		$this->{alignPart}      = $init->{oem_align_partition};
@@ -314,12 +304,12 @@ sub setAlignPartition {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{alignPart} = 'false';
-	} else {
-		$this->{alignPart} = $val;
-	}
-	return $this;
+	my %settings = (
+					attr   => 'alignPart',
+					value  => $val,
+					caller => 'setAlignPartition'
+				);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -353,10 +343,15 @@ sub setBootwait {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{bootwait} = 'false';
-	} else {
-		$this->{bootwait}      = 'true';
+	my %settings = (
+					attr   => 'bootwait',
+					value  => $val,
+					caller => 'setBootwait'
+				);
+	if (! $this -> __setBooleanValue(\%settings) ) {
+		return;
+	}
+	if ($this->{bootwait} eq 'true' ) {
 		$this->{reboot}        = 'false';
 		$this->{rebootInter}   = 'false';
 		$this->{shutdown}      = 'false';
@@ -375,12 +370,12 @@ sub setInplaceRecovery {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{inplaceRecover} = 'false';
-	} else {
-		$this->{inplaceRecover} = 'true';
-	}
-	return $this;
+	my %settings = (
+					attr   => 'inplaceRecover',
+					value  => $val,
+					caller => 'setInplaceRecovery'
+				);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -393,12 +388,12 @@ sub setKiwiInitrd {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{kiwiInitrd} = 'false';
-	} else {
-		$this->{kiwiInitrd} = 'true';
-	}
-	return $this;
+	my %settings = (
+					attr   => 'kiwiInitrd',
+					value  => $val,
+					caller => 'setKiwiInitrd'
+				);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -411,12 +406,12 @@ sub setPartitionInstall {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{partInstall} = 'false';
-	} else {
-		$this->{partInstall} = 'true';
-	}
-	return $this;
+	my %settings = (
+					attr   => 'partInstall',
+					value  => $val,
+					caller => 'setPartitionInstall'
+				);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -430,11 +425,16 @@ sub setReboot {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{reboot} = 'false';
-	} else {
+	my %settings = (
+					attr   => 'reboot',
+					value  => $val,
+					caller => 'setReboot'
+				);
+	if (! $this -> __setBooleanValue(\%settings) ) {
+		return;
+	}
+	if ($this->{reboot} eq 'true') {
 		$this->{bootwait}      = 'false';
-		$this->{reboot}        = 'true';
 		$this->{rebootInter}   = 'false';
 		$this->{shutdown}      = 'false';
 		$this->{shutdownInter} = 'false';
@@ -453,12 +453,17 @@ sub setRebootInteractive {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{rebootInter} = 'false';
-	} else {
+	my %settings = (
+					attr   => 'rebootInter',
+					value  => $val,
+					caller => 'setRebootInteractive'
+				);
+	if (! $this -> __setBooleanValue(\%settings) ) {
+		return;
+	}
+	if ($this->{rebootInter} eq 'true') {
 		$this->{bootwait}      = 'false';
 		$this->{reboot}        = 'false';
-		$this->{rebootInter}   = 'true';
 		$this->{shutdown}      = 'false';
 		$this->{shutdownInter} = 'false';
 	}
@@ -475,12 +480,12 @@ sub setRecovery {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{recovery} = 'false';
-	} else {
-		$this->{recovery} = 'true';
-	}
-	return $this;
+	my %settings = (
+					attr   => 'recovery',
+					value  => $val,
+					caller => 'setRecovery'
+				);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -514,13 +519,18 @@ sub setShutdown {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{shutdown} = 'false';
-	} else {
+	my %settings = (
+					attr   => 'shutdown',
+					value  => $val,
+					caller => 'setShutdown'
+				);
+	if (! $this -> __setBooleanValue(\%settings) ) {
+		return;
+	}
+	if ($this->{shutdown} eq 'true') {
 		$this->{bootwait}      = 'false';
 		$this->{reboot}        = 'false';
 		$this->{rebootInter}   = 'false';
-		$this->{shutdown}      = 'true';
 		$this->{shutdownInter} = 'false';
 	}
 	return $this;
@@ -537,14 +547,19 @@ sub setShutdownInteractive {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{shutdownInter} = 'false';
-	} else {
+	my %settings = (
+					attr   => 'shutdownInter',
+					value  => $val,
+					caller => 'setShutdownInteractive'
+				);
+	if (! $this -> __setBooleanValue(\%settings) ) {
+		return;
+	}
+	if ($this->{shutdownInter} eq 'true') {
 		$this->{bootwait}      = 'false';
 		$this->{reboot}        = 'false';
 		$this->{rebootInter}   = 'false';
 		$this->{shutdown}      = 'false';
-		$this->{shutdownInter} = 'true';
 	}
 	return $this;
 }
@@ -559,12 +574,12 @@ sub setSilentBoot {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{silentBoot} = 'false';
-	} else {
-		$this->{silentBoot} = 'true';
-	}
-	return $this;
+	my %settings = (
+					attr   => 'silentBoot',
+					value  => $val,
+					caller => 'setSilentBoot'
+				);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -577,13 +592,18 @@ sub setSwap {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{swap} = 'false';
+	my %settings = (
+					attr   => 'swap',
+					value  => $val,
+					caller => 'setSwap'
+				);
+	if (! $this -> __setBooleanValue(\%settings) ) {
+		return;
+	}
+	if (! $val || $val eq 'false') {
 		if ($this->{swapSize}) {
 			delete $this->{swapSize}
 		}
-	} else {
-		$this->{swap} = 'true';
 	}
 	return $this;
 }
@@ -640,13 +660,18 @@ sub setUnattended {
 	# ---
 	my $this = shift;
 	my $val  = shift;
-	if (! $val) {
-		$this->{unattended} = 'false';
+	my %settings = (
+					attr   => 'unattended',
+					value  => $val,
+					caller => 'setUnattended'
+				);
+	if (! $this -> __setBooleanValue(\%settings) ) {
+		return;
+	}
+	if (! $val || $val eq 'false') {
 		if ($this->{unattendedID}) {
 			delete $this->{unattendedID};
 		}
-	} else {
-		$this->{unattended} = 'true';
 	}
 	return $this;
 }
@@ -675,6 +700,30 @@ sub setUnattendedID {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __isInitConsistent
+#------------------------------------------
+sub __isInitConsistent {
+	# ...
+	# Verify initialization consistency and validity requirements
+	# ---
+	my $this = shift;
+	my $init = shift;
+	if (! $this -> __areBooleanValuesValid($init) ) {
+		return;
+	}
+	if (! $this -> __noConflictingSettingPostInst($init)) {
+		return;
+	}
+	if (! $this -> __noConflictingSettingSwap($init)) {
+		return;
+	}
+	if (! $this -> __noConflictingSettingUnattended($init)) {
+		return;
+	}
+	return $this;
+}
+		
 #==========================================
 # __noConflictingSetting
 #------------------------------------------
