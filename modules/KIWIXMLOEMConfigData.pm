@@ -62,6 +62,7 @@ sub new {
 			oem_reboot_interactive oem_recovery oem_shutdown
 			oem_shutdown_interactive oem_silent_boot oem_swap oem_unattended
 	);
+	$this->{boolKeywords} = \%boolKW;
 	if (! $this -> __isInitHashRef($init) ) {
 		return;
 	}
@@ -709,7 +710,7 @@ sub __isInitConsistent {
 	# ---
 	my $this = shift;
 	my $init = shift;
-	if (! $this -> __areBooleanValuesValid($init) ) {
+	if (! $this -> __areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
 	if (! $this -> __noConflictingSettingPostInst($init)) {

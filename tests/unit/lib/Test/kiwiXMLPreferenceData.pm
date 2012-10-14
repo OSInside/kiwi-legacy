@@ -156,9 +156,8 @@ sub test_ctor_initInvalidRPMCheckSigValue {
 	 my %init = ( rpm_check_signatures => 'foo' );
 	 my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'rpm_check_signatures' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLPreferenceData: Unrecognized value for '
+		. "boolean 'rpm_check_signatures' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -183,9 +182,8 @@ sub test_ctor_initInvalidRPMExclDocValue {
 	 my %init = ( rpm_excludedocs => 'foo' );
 	 my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'rpm_excludedocs' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLPreferenceData: Unrecognized value for boolean '
+		. "'rpm_excludedocs' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -210,9 +208,8 @@ sub test_ctor_initInvalidRPMForceValue {
 	 my %init = ( rpm_force => 'foo' );
 	 my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'rpm_force' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLPreferenceData: Unrecognized value for boolean '
+		. "'rpm_force' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -262,8 +259,8 @@ sub test_ctor_initUnsupportedData {
 	my %init = ( zypperopt => '--capability' );
 	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Unsupported option in initialization structure '
-		. "found 'zypperopt'";
+	my $expected = 'KIWIXMLPreferenceData: Unsupported keyword argument '
+		. "'zypperopt' in initialization structure.";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -1303,8 +1300,8 @@ sub test_setRPMCheckSigUnknownArg {
 	my $prefDataObj = $this -> __getPrefObj();
 	my $res = $prefDataObj -> setRPMCheckSig('foo');
 	my $msg = $kiwi -> getMessage();
-	my $expected = "setRPMCheckSig: unrecognized argument expecting "
-		. '"true" or "false".';
+	my $expected = 'KIWIXMLPreferenceData:setRPMCheckSig: unrecognized '
+		. 'argument expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -1392,8 +1389,8 @@ sub test_setRPMExcludeDocUnknownArg {
 	my $prefDataObj = $this -> __getPrefObj();
 	my $res = $prefDataObj -> setRPMExcludeDoc('foo');
 	my $msg = $kiwi -> getMessage();
-	my $expected = "setRPMExcludeDoc: unrecognized argument expecting "
-		. '"true" or "false".';
+	my $expected = 'KIWIXMLPreferenceData:setRPMExcludeDoc: unrecognized '
+		. 'argument expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -1481,8 +1478,8 @@ sub test_setRPMForceUnknownArg {
 	my $prefDataObj = $this -> __getPrefObj();
 	my $res = $prefDataObj -> setRPMForce('foo');
 	my $msg = $kiwi -> getMessage();
-	my $expected = "setRPMForce: unrecognized argument expecting "
-		. '"true" or "false".';
+	my $expected = 'KIWIXMLPreferenceData:setRPMForce: unrecognized argument '
+		. 'expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);

@@ -91,8 +91,8 @@ sub test_ctor_initConflictsPostInst {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (
-				oem_bootwait => 1,
-				oem_shutdown => 1
+				oem_bootwait => 'true',
+				oem_shutdown => 'true'
 			);
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
@@ -232,7 +232,7 @@ sub test_ctor_initUnsupportedData {
 	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData: Unsupported keyword argument '
-		. "'firmwaredriver' in initialization structure";
+		. "'firmwaredriver' in initialization structure.";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -297,7 +297,7 @@ sub test_getAlignPartition {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('4k', $align);
+	$this -> assert_str_equals('true', $align);
 	return;
 }
 
@@ -2405,7 +2405,7 @@ sub __getBaseInitHash {
 	# ---
 	my $this = shift;
 	my %init = (
-				oem_align_partition   => '4k',
+				oem_align_partition   => 'true',
 				oem_boot_title        => 'test build',
 				oem_inplace_recovery  => 'true',
 				oem_kiwi_initrd       => 'false',

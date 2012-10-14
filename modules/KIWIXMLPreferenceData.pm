@@ -26,6 +26,7 @@ use strict;
 use warnings;
 require Exporter;
 
+use base qw /KIWIXMLDataBase/;
 #==========================================
 # Exports
 #------------------------------------------
@@ -41,9 +42,8 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my $this  = {};
 	my $class = shift;
-	bless $this,$class;
+	my $this  = $class->SUPER::new(@_);
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
@@ -52,36 +52,28 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	$this->{kiwi} = $kiwi;
-	if ($init && ref($init) ne 'HASH') {
-		my $msg = 'Expecting a hash ref as second argument if provided';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if ($init) {
-		# Check for unsupported entries
-		# Allow a types entry in the initialization hash, however this
-		# entry is completely ignored as it has it's own data storage object.
-		# The entry is allowed to facilitate creation of this type
-		# from the XML object using the XML objects hash representation of the
-		# prefernce data storage
-		my %supported = map { ($_ => 1) } qw(
+	# While <type> is a child of <preferences> the data is not inthis class
+	# the child relationship is enforced at the XML level.
+	my %keywords = map { ($_ => 1) } qw(
 			bootloader_theme bootsplash_theme defaultdestination
 			defaultprebuilt defaultroot hwclock keymap locale
 			packagemanager rpm_check_signatures rpm_excludedocs rpm_force
 			showlicense timezone types version
-		);
-		for my $key (keys %{$init}) {
-			if (! $supported{$key} ) {
-				my $msg = 'Unsupported option in initialization structure '
-					. "found '$key'";
-				$kiwi -> error($msg);
-				$kiwi -> failed();
-				return;
-			}
-		}
-		if (! $this -> __isValidInit($init)) {
+	);
+	$this->{supportedKeywords} = \%keywords;
+	my %boolKW = map { ($_ => 1) } qw(
+		rpm_check_signatures rpm_excludedocs rpm_force
+	);
+	$this->{boolKeywords} = \%boolKW;
+	if (! $this -> __isInitHashRef($init) ) {
+		return;
+	}
+	if (! $this -> __areKeywordArgsValid($init) ) {
+		return;
+	}
+
+	if ($init) {
+		if (! $this -> __isInitConsistent($init)) {
 			return;
 		}
 		$this->{bootloader_theme}     = $init->{bootloader_theme};
@@ -498,7 +490,7 @@ sub setRPMCheckSig {
 					value  => $cSig,
 					caller => 'setRPMCheckSig'
 				);
-	if (! $this -> __setBoolean(\%settings) ) {
+	if (! $this -> __setBooleanValue(\%settings) ) {
 		return;
 	}
 	return $this;
@@ -517,7 +509,7 @@ sub setRPMExcludeDoc {
 					value  => $eDoc,
 					caller => 'setRPMExcludeDoc'
 				);
-	if (! $this -> __setBoolean(\%settings) ) {
+	if (! $this -> __setBooleanValue(\%settings) ) {
 		return;
 	}
 	return $this;
@@ -536,7 +528,7 @@ sub setRPMForce {
 					value  => $force,
 					caller => 'setRPMForce'
 				);
-	if (! $this -> __setBoolean(\%settings) ) {
+	if (! $this -> __setBooleanValue(\%settings) ) {
 		return;
 	}
 	return $this;
@@ -609,56 +601,15 @@ sub setVersion {
 # Private helper methods
 #------------------------------------------
 #==========================================
-# __checkBools
+# __isInitConsistent
 #------------------------------------------
-sub __checkBools {
-	# ...
-	# Check all the boolean values in the ctor initialization hash
-	# to verify if the values are valid.
-	# ---
-	my $this = shift;
-	my $init = shift;
-	my @boolAttrs = qw(
-		rpm_check_signatures rpm_excludedocs rpm_force
-	);
-	for my $attr (@boolAttrs) {
-		if (! $this -> __isValidBool($init->{$attr}) ) {
-			my $kiwi = $this->{kiwi};
-			my $msg = "Unrecognized value for boolean '$attr' in "
-				. 'initialization hash, expecting "true" or "false".';
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return;
-		}
-	}
-	return 1;
-}
-
-#==========================================
-# __isValidBool
-#------------------------------------------
-sub __isValidBool {
-	# ...
-	# Verify that the given boolean is set with a recognized value
-	# true, false, or undef (undef maps to false
-	# ---
-	my $this = shift;
-	my $bVal = shift;
-	if (! $bVal || $bVal eq 'false' || $bVal eq 'true') {
-		return 1;
-	}
-	return;
-}
-#==========================================
-# __isValidInit
-#------------------------------------------
-sub __isValidInit {
+sub __isInitConsistent {
 	# ...
 	# Verify that the initialization hash is valid
 	# ---
 	my $this = shift;
 	my $init = shift;
-	if (! $this -> __checkBools($init) ) {
+	if (! $this -> __areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
 	if ($init->{packagemanager}) {
@@ -752,48 +703,6 @@ sub __isValidVersionFormat {
 		return;
 	}
 	return 1;
-}
-
-#==========================================
-# __setBoolean
-#------------------------------------------
-sub __setBoolean {
-	# ...
-	# Generic code to set the given boolean attribute on the object
-	# ---
-	my $this     = shift;
-	my $settings = shift;
-	my $attr   = $settings->{attr};
-	my $bVal   = $settings->{value};
-	my $caller = $settings->{caller};
-	my $kiwi   = $this->{kiwi};
-	if (! $attr ) {
-		my $msg = 'Internal error __setBoolean called without '
-			. 'attribute to set.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (! $caller ) {
-		my $msg = 'Internal error __setBoolean called without '
-			. 'call origin argument.';
-		$kiwi -> info($msg);
-		$kiwi -> oops();
-	}
-	if (! $this -> __isValidBool($bVal) ) {
-		my $msg = "$caller: unrecognized argument expecting "
-			. '"true" or "false".';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (! $bVal) {
-		$this->{$attr} = 'false';
-	} else {
-		$this->{$attr} = $bVal;
-	}
-		
-	return $this;
 }
 
 1;

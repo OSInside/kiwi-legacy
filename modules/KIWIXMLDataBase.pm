@@ -56,33 +56,6 @@ sub new {
 }
 
 #==========================================
-# __areBooleanValuesValid
-#------------------------------------------
-sub __areBooleanValuesValid {
-	# ...
-	# Verify that the values given for booleans are recognized. Takes a ref
-	# to a hashref
-	# ---
-	my $this = shift;
-	my $init = shift;
-	if ($init) {
-		for my $keyword (keys %{$init}) {
-			if (! $this -> __isValidBoolValue($init->{keyword}) ) {
-				my $objName = ref $this;
-				my $kiwi = $this->{kiwi};
-				my $msg = "$objName: Unrecognized value for boolean "
-					. "'$keyword' in initialization structure";
-				$kiwi -> error($msg);
-				$kiwi -> failed();
-				return;
-			}
-		}
-	}
-
-	return $this;
-}
-
-#==========================================
 # __areKeywordArgsValid
 #------------------------------------------
 sub __areKeywordArgsValid {
@@ -97,7 +70,34 @@ sub __areKeywordArgsValid {
 				my $objName = ref $this;
 				my $kiwi = $this->{kiwi};
 				my $msg = "$objName: Unsupported keyword argument '$keyword' "
-					. 'in initialization structure';
+					. 'in initialization structure.';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+		}
+	}
+
+	return $this;
+}
+
+#==========================================
+# __areKeywordBooleanValuesValid
+#------------------------------------------
+sub __areKeywordBooleanValuesValid {
+	# ...
+	# Verify that the values given for booleans are recognized. Takes a ref
+	# to a hashref
+	# ---
+	my $this = shift;
+	my $init = shift;
+	if ($init) {
+		for my $keyword (keys %{$this->{boolKeywords}}) {
+			if (! $this -> __isValidBoolValue($init->{$keyword}) ) {
+				my $objName = ref $this;
+				my $kiwi = $this->{kiwi};
+				my $msg = "$objName: Unrecognized value for boolean "
+					. "'$keyword' in initialization structure.";
 				$kiwi -> error($msg);
 				$kiwi -> failed();
 				return;
