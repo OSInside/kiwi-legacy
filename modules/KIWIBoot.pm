@@ -1683,6 +1683,8 @@ sub setupBootDisk {
 				$kiwi -> failed ();
 				return;
 			}
+			my $spare_on_volume = 30; # spare space on volume in MB
+			my $serve_on_disk   = 30; # raise disk space for volume in MB
 			foreach my $vol (keys %lvmparts) {
 				#==========================================
 				# check directory per volume
@@ -1730,17 +1732,17 @@ sub setupBootDisk {
 				my $addToDisk = 0;
 				if ($reqAbsolute) {
 					# process absolute size value from XML
-					if ($reqSize > ($lvsize + 30)) {
+					if ($reqSize > ($lvsize + $spare_on_volume)) {
 						$addToDisk = $reqSize - $lvsize;
 						$lvsize = $reqSize;
 					} else {
-						$addToDisk = 30;
-						$lvsize += 30;
+						$addToDisk = $serve_on_disk;
+						$lvsize += $spare_on_volume;
 					}
 				} else {
 					# process relative size value from XML
-					$lvsize = int ( 30 + $lvsize + $reqSize);
-					$addToDisk = $reqSize + 30;
+					$lvsize = int ( $lvsize + $reqSize + $spare_on_volume);
+					$addToDisk = $reqSize + $serve_on_disk;
 				}
 				#==========================================
 				# add calculated volume size to lvmparts
