@@ -72,11 +72,10 @@ clean:
 
 check:
 	@echo "Checking for packages..."
-	rpm -q libxml2 libxslt \
+	rpm -q libxml2-2 libxslt-devel \
 		docbook_4 docbook-xsl-stylesheets \
-		fop fop-offo batik \
-		excalibur-avalon-framework xmlgraphics-commons \
-		dejavu sil-charis xml-commons-resolver
+		xmlgraphics-fop xmlgraphics-batik dejavu-fonts sil-charis-fonts \
+		xmlgraphics-commons excalibur-avalon-framework
 
 revision:
 	cat ../../rpm/kiwi.spec | grep Version: | cut -f2 -d: | cut -f1-2 -d. |\
