@@ -1029,8 +1029,8 @@ sub test_ctor_initUnsupportedData {
 			);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Unsupported option in initialization structure found '
-		. "'disks'";
+	my $expected = 'KIWIXMLPXEDeployData: Unsupported keyword argument '
+		. "'disks' in initialization structure.";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);

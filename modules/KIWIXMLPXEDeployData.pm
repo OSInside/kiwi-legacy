@@ -23,6 +23,7 @@ use warnings;
 use Readonly;
 require Exporter;
 
+use base qw /KIWIXMLDataBase/;
 #==========================================
 # Exports
 #------------------------------------------
@@ -71,9 +72,8 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my $this  = {};
 	my $class = shift;
-	bless $this,$class;
+	my $this  = $class->SUPER::new(@_);
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
@@ -82,23 +82,24 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	$this->{kiwi}      = $kiwi;
-	$this->{blocksize} = '4096';
-	$this->{server}    = '192.168.1.1';
-	if ($init && ref($init) ne 'HASH') {
-		my $msg = 'Expecting a hash ref as second argument if provided';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
+	my %keywords = map { ($_ => 1) } qw(
+		blocksize configArch configDest configSource device initrd kernel
+		partitions server timeout unionRO unionRW unionType
+	);
+	$this->{supportedKeywords} = \%keywords;
+	if (! $this -> __isInitHashRef($init) ) {
 		return;
 	}
+	if (! $this -> __areKeywordArgsValid($init) ) {
+		return;
+	}
+
 	if ($init) {
 		# Check for unsupported entries
-		if (! $this -> __isInitHashValid($init)) {
+		if (! $this -> __isInitConsistent($init)) {
 			return;
 		}
-		if ($init->{blocksize}) {
-			$this->{blocksize} = $init->{blocksize};
-		}
+		$this->{blocksize}     = $init->{blocksize};
 		$this->{configArch}    = $init->{configArch};
 		$this->{configDest}    = $init->{configDest};
 		$this->{configSource}  = $init->{configSource};
@@ -106,14 +107,19 @@ sub new {
 		$this->{initrd}        = $init->{initrd};
 		$this->{kernel}        = $init->{kernel};
 		$this->{partitions}    = $init->{partitions};
-		if ($init->{server}) {
-			$this->{server}    = $init->{server};
-		}
+		$this->{server}        = $init->{server};
 		$this->{timeout}       = $init->{timeout};
 		$this->{unionRO}       = $init->{unionRO};
 		$this->{unionRW}       = $init->{unionRW};
 		$this->{unionType}     = $init->{unionType};
 	}
+	if (! $this->{blocksize} ) {
+		$this->{blocksize} = '4096';
+	}
+	if (! $this->{server} ) {
+		$this->{server} = '192.168.1.1';
+	}
+	
 	return $this;
 }
 
@@ -501,9 +507,6 @@ sub setConfigurationArch {
 	my $this = shift;
 	my $arch = shift;
 	my $kiwi = $this->{kiwi};
-	my %supportedArch = map { ($_ => 1) } qw(
-		armv7l ia64 ix86 ppc ppc64 s390 s390x x86_64
-	);
 	if (! $arch) {
 		my $msg = 'setConfigurationArch: no architecture argument provided, '
 			. 'retaining current data.';
@@ -525,7 +528,7 @@ sub setConfigurationArch {
 		return;
 	}
 	for my $ar (@{$arch}) {
-		if (! $supportedArch{$ar} ) {
+		if (! $this->{supportedArch}{$ar} ) {
 			my $msg = "setConfigurationArch: given architecture '$ar' not "
 			. 'supported retaining current data.';
 			$kiwi -> error($msg);
@@ -776,50 +779,6 @@ sub setTimeout {
 # Private helper methods
 #------------------------------------------
 #==========================================
-# __isInitHashValid
-#------------------------------------------
-sub __isInitHashValid {
-	# ...
-	# Verify that the initialization hash given to the constructor meets
-	# all consistency and data criteria.
-	# ---
-	my $this = shift;
-	my $init = shift;
-	my $kiwi = $this->{kiwi};
-	my %supported = map { ($_ => 1) } qw(
-		blocksize configArch configDest configSource device initrd kernel
-		partitions server timeout unionRO unionRW unionType
-	);
-	# Check for unsupported setting in the init hash
-	for my $key (keys %{$init}) {
-		if (! $supported{$key} ) {
-			my $msg = 'Unsupported option in initialization structure '
-				. "found '$key'";
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return;
-		}
-	}
-	if ( $init->{configArch} && ref($init->{configArch}) ne 'ARRAY' ) {
-		my $msg = 'Expecting an array ref as entry of "configArch" in  '
-			. 'the initialization hash.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (! $this -> __isConfigSettingValid($init) ) {
-		return;
-	}
-	if (! $this -> __isPartitionConfigValid($init) ) {
-		return;
-	}
-	if (! $this -> __isUnionConfigValid($init)) {
-		return;
-	}
-	return 1;
-}
-
-#==========================================
 # __isConfigSettingValid
 #------------------------------------------
 sub __isConfigSettingValid {
@@ -840,6 +799,36 @@ sub __isConfigSettingValid {
 	if ($init->{configSource} && !$init->{configDest}) {
 		$kiwi -> error($msg);
 		$kiwi -> failed();
+		return;
+	}
+	return 1;
+}
+
+#==========================================
+# __isInitConsistent
+#------------------------------------------
+sub __isInitConsistent {
+	# ...
+	# Verify that the initialization hash given to the constructor meets
+	# all consistency and data criteria.
+	# ---
+	my $this = shift;
+	my $init = shift;
+	my $kiwi = $this->{kiwi};
+	if ( $init->{configArch} && ref($init->{configArch}) ne 'ARRAY' ) {
+		my $msg = 'Expecting an array ref as entry of "configArch" in  '
+			. 'the initialization hash.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $this -> __isConfigSettingValid($init) ) {
+		return;
+	}
+	if (! $this -> __isPartitionConfigValid($init) ) {
+		return;
+	}
+	if (! $this -> __isUnionConfigValid($init)) {
 		return;
 	}
 	return 1;
