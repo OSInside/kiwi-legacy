@@ -97,9 +97,8 @@ sub test_ctor_initInvalidCheckprebuiltValue {
 				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'checkprebuilt' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+		. "'checkprebuilt' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -127,9 +126,8 @@ sub test_ctor_initInvalidCompressedValue {
 				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'compressed' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+		. "'compressed' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -157,9 +155,8 @@ sub test_ctor_initInvalidFsnocheckValue {
 				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'fsnocheck' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+		. "'fsnocheck' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -187,9 +184,8 @@ sub test_ctor_initInvalidHybridValue {
 				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'hybrid' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+		. "'hybrid' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -217,9 +213,8 @@ sub test_ctor_initInvalidHybridpersistentValue {
 				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'hybridpersistent' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+		. "'hybridpersistent' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -247,9 +242,8 @@ sub test_ctor_initInvalidInstallisoValue {
 				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'installiso' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+		. "'installiso' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -277,9 +271,8 @@ sub test_ctor_initInvalidInstallprovidefailsafeValue {
 				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'installprovidefailsafe' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+		. "'installprovidefailsafe' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -307,9 +300,8 @@ sub test_ctor_initInvalidInstallstickValue {
 				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'installstick' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+		. "'installstick' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -337,9 +329,8 @@ sub test_ctor_initInvalidPrimaryValue {
 				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'primary' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+		. "'primary' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -367,9 +358,8 @@ sub test_ctor_initInvalidRamonlyValue {
 				);
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'Unrecognized value for boolean '
-		 . "'ramonly' in initialization hash, expecting "
-	     . '"true" or "false".';
+	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+		. "'ramonly' in initialization structure.";
 	 $this -> assert_str_equals($expected, $msg);
 	 my $msgT = $kiwi -> getMessageType();
 	 $this -> assert_str_equals('error', $msgT);
@@ -418,8 +408,8 @@ sub test_ctor_initUnsupportedData {
 	my %init = ( bootparam => 'kiwidebug=1' );
 	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Unsupported option in initialization structure '
-		. "found 'bootparam'";
+	my $expected = 'KIWIXMLTypeData: Unsupported keyword argument '
+		. "'bootparam' in initialization structure.";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -1794,8 +1784,8 @@ sub test_setCheckPrebuiltUnknownArg {
 	my $typeDataObj = $this -> __getTypeObj();
 	my $res = $typeDataObj -> setCheckPrebuilt('5');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setCheckPrebuilt: unrecognized argument expecting "true" '
-		. 'or "false".';
+	my $expected = 'KIWIXMLTypeData:setCheckPrebuilt: unrecognized '
+		. 'argument expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -1883,8 +1873,8 @@ sub test_setCompressedUnknownArg {
 	my $typeDataObj = $this -> __getTypeObj();
 	my $res = $typeDataObj -> setCompressed('5');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setCompressed: unrecognized argument expecting "true" '
-		. 'or "false".';
+	my $expected = 'KIWIXMLTypeData:setCompressed: unrecognized argument '
+		. 'expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -2455,8 +2445,8 @@ sub test_setFSNoCheckUnknownArg {
 	my $typeDataObj = $this -> __getTypeObj();
 	my $res = $typeDataObj -> setFSNoCheck('5');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setFSNoCheck: unrecognized argument expecting "true" '
-		. 'or "false".';
+	my $expected = 'KIWIXMLTypeData:setFSNoCheck: unrecognized argument '
+		. 'expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -2726,8 +2716,8 @@ sub test_setHybridUnknownArg {
 	my $typeDataObj = $this -> __getTypeObj();
 	my $res = $typeDataObj -> setHybrid('5');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setHybrid: unrecognized argument expecting "true" '
-		. 'or "false".';
+	my $expected = 'KIWIXMLTypeData:setHybrid: unrecognized argument '
+		. 'expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -2815,8 +2805,8 @@ sub test_setHybridPersistentUnknownArg {
 	my $typeDataObj = $this -> __getTypeObj();
 	my $res = $typeDataObj -> setHybridPersistent('5');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setHybridPersistent: unrecognized argument expecting "true" '
-		. 'or "false".';
+	my $expected = 'KIWIXMLTypeData:setHybridPersistent: unrecognized '
+		. 'argument expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -3086,8 +3076,8 @@ sub test_setInstallFailsafeUnknownArg {
 	my $typeDataObj = $this -> __getTypeObj();
 	my $res = $typeDataObj -> setInstallFailsafe('5');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setInstallFailsafe: unrecognized argument expecting '
-		. '"true" or "false".';
+	my $expected = 'KIWIXMLTypeData:setInstallFailsafe: unrecognized '
+		. 'argument expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -3175,8 +3165,8 @@ sub test_setInstallIsoUnknownArg {
 	my $typeDataObj = $this -> __getTypeObj();
 	my $res = $typeDataObj -> setInstallIso('5');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setInstallIso: unrecognized argument expecting "true" '
-		. 'or "false".';
+	my $expected = 'KIWIXMLTypeData:setInstallIso: unrecognized argument '
+		. 'expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -3264,8 +3254,8 @@ sub test_setInstallStickUnknownArg {
 	my $typeDataObj = $this -> __getTypeObj();
 	my $res = $typeDataObj -> setInstallStick('5');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setInstallStick: unrecognized argument expecting "true" '
-		. 'or "false".';
+	my $expected = 'KIWIXMLTypeData:setInstallStick: unrecognized argument '
+		. 'expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -3473,8 +3463,8 @@ sub test_setPrimaryUnknownArg {
 	my $typeDataObj = $this -> __getTypeObj();
 	my $res = $typeDataObj -> setPrimary('5');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setPrimary: unrecognized argument expecting "true" '
-		. 'or "false".';
+	my $expected = 'KIWIXMLTypeData:setPrimary: unrecognized argument '
+		. 'expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -3562,8 +3552,8 @@ sub test_setRAMOnlyUnknownArg {
 	my $typeDataObj = $this -> __getTypeObj();
 	my $res = $typeDataObj -> setRAMOnly('5');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setRAMOnly: unrecognized argument expecting "true" '
-		. 'or "false".';
+	my $expected = 'KIWIXMLTypeData:setRAMOnly: unrecognized argument '
+		. 'expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -3774,7 +3764,8 @@ sub __getTypeObj {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my %init = ( boot                   => '/oem/suse-12.2',
+	my %init = (
+				boot                   => '/oem/suse-12.2',
 				bootkernel             => 'xenk',
 				bootloader             => 'grub2',
 				bootpartsize           => '512M',

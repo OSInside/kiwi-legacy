@@ -52,7 +52,7 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	# While <type> is a child of <preferences> the data is not inthis class
+	# While <type> is a child of <preferences> the data is not in this class
 	# the child relationship is enforced at the XML level.
 	my %keywords = map { ($_ => 1) } qw(
 			bootloader_theme bootsplash_theme defaultdestination

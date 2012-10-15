@@ -28,6 +28,7 @@ use warnings;
 use Scalar::Util qw /looks_like_number/;
 require Exporter;
 
+use base qw /KIWIXMLDataBase/;
 #==========================================
 # Exports
 #------------------------------------------
@@ -43,9 +44,8 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my $this  = {};
 	my $class = shift;
-	bless $this,$class;
+	my $this  = $class->SUPER::new(@_);
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
@@ -54,21 +54,10 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	$this->{kiwi} = $kiwi;
-	if ($init && ref($init) ne 'HASH') {
-		my $msg = 'Expecting a hash ref as second argument if provided';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if ($init) {
-		# Check for unsupported entries
-		# Allow ec2config, machine, oemconfig, pxedeploy, split and
-		# systemdisk data entries but ignore them. These entries are
-		# allowed to facilitate creation of this type
-		# from the XML object using the XML objects hash representation of the
-		# type data
-		my %supported = map { ($_ => 1) } qw(
+	# While <ec2config>, <machine>, <oemconfig>, <pxedeploy>, <split>, and
+	# <systemdisk> are children of <type> the data is not in this class
+	# the child relationship is enforced at the XML level.
+	my %keywords = map { ($_ => 1) } qw(
 			boot bootkernel bootloader bootpartsize bootprofile
 			boottimeout checkprebuilt compressed devicepersistency
 			ec2config editbootconfig filesystem flags format fsmountoptions
@@ -76,17 +65,23 @@ sub new {
 			installboot installiso installprovidefailsafe installstick
 			kernelcmdline luks machine oemconfig primary pxedeploy ramonly
 			size split systemdisk vga volid
-		);
-		for my $key (keys %{$init}) {
-			if (! $supported{$key} ) {
-				my $msg = 'Unsupported option in initialization structure '
-					. "found '$key'";
-				$kiwi -> error($msg);
-				$kiwi -> failed();
-				return;
-			}
-		}
-		if (! $this -> __isValidInit($init)) {
+	);
+	$this->{supportedKeywords} = \%keywords;
+	my %boolKW = map { ($_ => 1) } qw(
+			checkprebuilt compressed fsnocheck hybrid hybridpersistent
+			installiso installprovidefailsafe installstick primary
+			ramonly
+	);
+	$this->{boolKeywords} = \%boolKW;
+	if (! $this -> __isInitHashRef($init) ) {
+		return;
+	}
+	if (! $this -> __areKeywordArgsValid($init) ) {
+		return;
+	}
+
+	if ($init) {
+		if (! $this -> __isInitConsistent($init)) {
 			return;
 		}
 		$this->{boot}                   = $init->{boot};
@@ -126,7 +121,7 @@ sub new {
 		$this->{bootloader} = 'grub';
 	}
 	if (! $this->{installprovidefailsafe} ) {
-	$this->{installprovidefailsafe} = 'true';
+		$this->{installprovidefailsafe} = 'true';
 	}
 	return $this;
 }
@@ -611,7 +606,7 @@ sub setCheckPrebuilt {
 					value  => $check,
 					caller => 'setCheckPrebuilt'
 				);
-	return $this -> __setBoolean(\%settings);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -627,7 +622,7 @@ sub setCompressed {
 					value  => $comp,
 					caller => 'setCompressed'
 				);
-	return $this -> __setBoolean(\%settings);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -749,7 +744,7 @@ sub setFSNoCheck {
 					value  => $check,
 					caller => 'setFSNoCheck'
 				);
-	return $this -> __setBoolean(\%settings);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -797,7 +792,7 @@ sub setHybrid {
 					value  => $hybrid,
 					caller => 'setHybrid'
 				);
-	return $this -> __setBoolean(\%settings);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -814,7 +809,7 @@ sub setHybridPersistent {
 					value  => $hybridP,
 					caller => 'setHybridPersistent'
 				);
-	return $this -> __setBoolean(\%settings);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -863,7 +858,7 @@ sub setInstallFailsafe {
 					value  => $instF,
 					caller => 'setInstallFailsafe'
 				);
-	return $this -> __setBoolean(\%settings);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -880,7 +875,7 @@ sub setInstallIso {
 					value  => $instI,
 					caller => 'setInstallIso'
 				);
-	return $this -> __setBoolean(\%settings);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -897,7 +892,7 @@ sub setInstallStick {
 					value  => $instS,
 					caller => 'setInstallStick'
 				);
-	return $this -> __setBoolean(\%settings);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -955,7 +950,7 @@ sub setPrimary {
 					value  => $prim,
 					caller => 'setPrimary'
 				);
-	return $this -> __setBoolean(\%settings);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -972,7 +967,7 @@ sub setRAMOnly {
 					value  => $ramO,
 					caller => 'setRAMOnly'
 				);
-	return $this -> __setBoolean(\%settings);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1042,46 +1037,70 @@ sub setVolID {
 # Private helper methods
 #------------------------------------------
 #==========================================
-# __checkBools
+# __isInitConsistent
 #------------------------------------------
-sub __checkBools {
+sub __isInitConsistent {
 	# ...
-	# Check all the boolean values in the ctor initialization hash
-	# to verify if the values are valid.
+	# Verify that the initialization hash is valid
 	# ---
 	my $this = shift;
 	my $init = shift;
-	my @boolAttrs = qw (checkprebuilt compressed fsnocheck hybrid
-						hybridpersistent installiso installprovidefailsafe
-						installstick primary ramonly
-					);
-	for my $attr (@boolAttrs) {
-		if (! $this -> __isValidBool($init->{$attr}) ) {
-			my $kiwi = $this->{kiwi};
-			my $msg = "Unrecognized value for boolean '$attr' in "
-				. 'initialization hash, expecting "true" or "false".';
-			$kiwi -> error($msg);
-			$kiwi -> failed();
+	if (! $this -> __areKeywordBooleanValuesValid($init) ) {
+		return;
+	}
+	if ($init->{bootloader}) {
+		if (! $this->__isValidBootloader($init->{bootloader},
+										'object initialization')) {
 			return;
 		}
 	}
-	return 1;
-}
-
-#==========================================
-# __isValidBool
-#------------------------------------------
-sub __isValidBool {
-	# ...
-	# Verify that the given boolean is set with a recognized value
-	# true, false, or undef (undef maps to false
-	# ---
-	my $this = shift;
-	my $bVal = shift;
-	if (! $bVal || $bVal eq 'false' || $bVal eq 'true') {
-		return 1;
+	if ($init->{devicepersistency}) {
+		if (! $this->__isValidDevPersist($init->{devicepersistency},
+										'object initialization')) {
+			return;
+		}
 	}
-	return;
+	if ($init->{filesystem}) {
+		if (! $this->__isValidFilesystem($init->{filesystem},
+										'object initialization')) {
+			return;
+		}
+	}
+	if ($init->{flags}) {
+		if (! $this->__isValidFlags($init->{flags},
+									'object initialization')) {
+			return;
+		}
+	}
+	if ($init->{format}) {
+		if (! $this->__isValidFormat($init->{format},
+									'object initialization')) {
+			return;
+		}
+	}
+	if ($init->{fsreadonly}) {
+		if (! $this->__isValidFilesystem($init->{fsreadonly},
+										'object initialization')) {
+			return;
+		}
+	}
+	if ($init->{fsreadwrite}) {
+		if (! $this->__isValidFilesystem($init->{fsreadwrite},
+										'object initialization')) {
+			return;
+		}
+	}
+	if (! $this->__isValidImage($init->{image},
+								'object initialization')) {
+		return;
+	}
+	if ($init->{installboot}) {
+		if (! $this->__isValidInstBoot($init->{installboot},
+									'object initialization')) {
+			return;
+		}
+	}
+	return $this;
 }
 
 #==========================================
@@ -1340,115 +1359,6 @@ sub __isValidInstBoot {
 		return;
 	}
 	return 1;
-}
-
-#==========================================
-# __isValidInit
-#------------------------------------------
-sub __isValidInit {
-	# ...
-	# Verify that the initialization hash is valid
-	# ---
-	my $this = shift;
-	my $init = shift;
-	if ($init->{bootloader}) {
-		if (! $this->__isValidBootloader($init->{bootloader},
-										'object initialization')) {
-			return;
-		}
-	}
-	if ($init->{devicepersistency}) {
-		if (! $this->__isValidDevPersist($init->{devicepersistency},
-										'object initialization')) {
-			return;
-		}
-	}
-	if ($init->{filesystem}) {
-		if (! $this->__isValidFilesystem($init->{filesystem},
-										'object initialization')) {
-			return;
-		}
-	}
-	if ($init->{flags}) {
-		if (! $this->__isValidFlags($init->{flags},
-									'object initialization')) {
-			return;
-		}
-	}
-	if ($init->{format}) {
-		if (! $this->__isValidFormat($init->{format},
-									'object initialization')) {
-			return;
-		}
-	}
-	if ($init->{fsreadonly}) {
-		if (! $this->__isValidFilesystem($init->{fsreadonly},
-										'object initialization')) {
-			return;
-		}
-	}
-	if ($init->{fsreadwrite}) {
-		if (! $this->__isValidFilesystem($init->{fsreadwrite},
-										'object initialization')) {
-			return;
-		}
-	}
-	if (! $this->__isValidImage($init->{image},
-								'object initialization')) {
-		return;
-	}
-	if ($init->{installboot}) {
-		if (! $this->__isValidInstBoot($init->{installboot},
-									'object initialization')) {
-			return;
-		}
-	}
-	if (! $this -> __checkBools($init) ) {
-		return;
-	}
-	return 1;
-}
-
-#==========================================
-# __setBoolean
-#------------------------------------------
-sub __setBoolean {
-	# ...
-	# Generic code to set the given boolean attribute on the object
-	# ---
-	my $this     = shift;
-	my $settings = shift;
-	my $attr   = $settings->{attr};
-	my $bVal   = $settings->{value};
-	my $caller = $settings->{caller};
-	my $kiwi   = $this->{kiwi};
-	if (! $attr ) {
-		my $msg = 'Internal error __setBoolean called without '
-			. 'attribute to set.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (! $caller ) {
-		my $msg = 'Internal error __setBoolean called without '
-			. 'call origin argument.';
-		$kiwi -> info($msg);
-		$kiwi -> oops();
-	}
-	if (! $this -> __isValidBool($bVal) ) {
-		my $msg = "$caller: unrecognized argument expecting "
-			. '"true" or "false".';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (! $bVal) {
-		$this->{$attr} = 'false';
-	} else {
-		$this->{$attr} = $bVal;
-	}
-		
-	return $this;
 }
 
 1;
