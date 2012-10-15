@@ -1106,7 +1106,9 @@ sub createImageTar {
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
-	qxx ("ln -s $dest $dest.tbz");
+	my $dest_dir  = dirname  $dest;
+	my $dest_file = basename $dest;
+	qxx ("cd $dest_dir && ln -vs $dest_file $dest_file.tbz");
 	if (! $this -> buildMD5Sum ($name)) {
 		return;
 	}
