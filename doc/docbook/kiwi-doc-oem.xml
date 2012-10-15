@@ -275,21 +275,23 @@
 		<itemizedlist>
 			<listitem>
 				<para>
-					Make sure you have created an install iso along with
-					your oem image:
+					Make sure you have created an install disk
+					along with your oem image:
 <screen>
-&lt;type image="oem" ... installiso="true"/&gt;
+&lt;type image="oem" ... installstick="true"/&gt;
 </screen>
 				</para>
 			</listitem>
 			<listitem>
 				<para>
-					loop mount the created .iso file and copy the
+					loop mount the created .raw.install.raw file and copy the
 					initrd and kernel images over to your pxe server
 <screen>
-mount -o loop install-image.iso /mnt
-scp /mnt/boot/loader/initrd pxe.server.ip:/srv/tftpboot/boot
-scp /mnt/boot/loader/linux  pxe.server.ip:/srv/tftpboot/boot
+kpartx -a install-image.raw.install.raw
+mount /dev/mapper/loop0p1 /mnt
+scp /mnt/boot/initrd.* pxe.server.ip:/srv/tftpboot/boot/initrd
+scp /mnt/boot/linux.*  pxe.server.ip:/srv/tftpboot/boot/linux
+umount /mnt
 </screen>
 				</para>
             </listitem>
@@ -302,6 +304,7 @@ scp /mnt/boot/loader/linux  pxe.server.ip:/srv/tftpboot/boot
 					been gzip compressed the file is copied over to the
 					pxe boot server
 <screen>
+mount /dev/mapper/loop0p2 /mnt || mount /dev/mapper/loop0p1 /mnt
 mkdir /mnt2
 mount -o loop /mnt/image-file.raw.squashfs /mnt2
 gzip -c /mnt2/image-file.raw &gt; /tmp/image-file.gz
@@ -309,6 +312,7 @@ scp /tmp/image-file.gz   pxe.server.ip:/srv/tftpboot/image
 scp /mnt2/image-file.md5 pxe.server.ip:/srv/tftpboot/image
 umount /mnt2
 rmdir  /mnt2
+umount /mnt
 </screen>
 				</para>
 			</listitem>
@@ -318,17 +322,27 @@ rmdir  /mnt2
 					via the append line in your PXE configuration
 					(for example: pxelinux.cfg/default). It's important that
 					at least the parameter <command>pxe=1</command> is added
-					here. Additionally the boot parameters for the bootloader and
-					and an optonal LVM group name from the isolinux.cfg file
-					from the installation media should be copied too. 
-
-					Alternatively the image can be stored on a FTP,HTTP server
+					here.
+				</para>
+				<para>
+					Additionally the boot parameters set in the bootloader
+					configuration of the install disk has to be transfered
+					over to the pxe boot configuration. It depends on the
+					kiwi configuration which bootloader was used for the
+					install disk, thus the configuration filename and format
+					differs. For grub is's menu.lst for grub2 it's grub.cfg
+					for uboot it would be boot.script. The example below
+					assumes grub2 was used.
+				</para>
+				<para>
+					Optionally the image can be stored on a FTP,HTTP server
 					specified via the kiwiserver and kiwiservertype append
 					information. In this case make sure you copied the
 					system image and md5 file to the correct ftp,http
 					location.
 <screen>
-cat /mnt/boot/loader/isolinux.cfg | grep append
+mount /dev/mapper/loop0p1 /mnt
+ ===> search bootloader setup e.g /mnt/boot/grub2/grub.cfg
 
  ===> copy loader=... and VGROUP=... information if present
       into the PXE configuration append line
