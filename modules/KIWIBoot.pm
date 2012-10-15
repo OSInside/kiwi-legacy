@@ -4415,7 +4415,7 @@ sub setupBootLoaderConfiguration {
 	# Check for edit boot config
 	#------------------------------------------
 	if ($cmdL) {
-		my $editBoot = $cmdL -> getEditBootConfig_legacy();
+		my $editBoot = $cmdL -> getEditBootConfig();
 		my $idesc;
 		if ((! $editBoot) && ($xml)) {
 			$editBoot = $xml -> getEditBootConfig_legacy();
@@ -4976,7 +4976,7 @@ sub installBootLoader {
 		my $editBoot = $cmdL -> getEditBootInstall();
 		my $idesc;
 		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootInstall();
+			$editBoot = $xml -> getEditBootInstall_legacy();
 		}
 		if ($editBoot) {
 			if ($this->{originXMLPath}) {

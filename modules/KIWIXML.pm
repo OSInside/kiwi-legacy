@@ -2442,23 +2442,6 @@ sub getImageSizeBytes {
 }
 
 #==========================================
-# getEditBootInstall
-#------------------------------------------
-sub getEditBootInstall {
-	# ...
-	# Get the type specific editbootinstall value.
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $editBoot = $tnode -> getAttribute ("editbootinstall");
-	if ((! defined $editBoot) || ("$editBoot" eq "")) {
-		return;
-	}
-	return $editBoot;
-}
-
-#==========================================
 # getImageVersion
 #------------------------------------------
 sub getImageVersion {
@@ -4904,6 +4887,23 @@ sub getEditBootConfig_legacy {
 	my $kiwi = $this->{kiwi};
 	my $tnode= $this->{typeNode};
 	my $editBoot = $tnode -> getAttribute ("editbootconfig");
+	if ((! defined $editBoot) || ("$editBoot" eq "")) {
+		return;
+	}
+	return $editBoot;
+}
+
+#==========================================
+# getEditBootInstall_legacy
+#------------------------------------------
+sub getEditBootInstall_legacy {
+	# ...
+	# Get the type specific editbootinstall value.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $editBoot = $tnode -> getAttribute ("editbootinstall");
 	if ((! defined $editBoot) || ("$editBoot" eq "")) {
 		return;
 	}

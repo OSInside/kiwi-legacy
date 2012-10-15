@@ -702,7 +702,7 @@ sub createISO {
 	my $xml  = $this -> {xml};
 	my $cmdln= "$prog $para -o $dest $src $ldir 2>&1";
 	if ($cmdL) {
-		my $editBoot = $cmdL -> getEditBootConfig_legacy();
+		my $editBoot = $cmdL -> getEditBootConfig();
 		if ((! $editBoot) && ($xml)) {
 			$editBoot = $xml -> getEditBootConfig_legacy();
 		}
@@ -723,7 +723,7 @@ sub createISO {
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootInstall();
 		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootInstall();
+			$editBoot = $xml -> getEditBootInstall_legacy();
 		}
 		if (($editBoot) && (-e $editBoot)) {
 			$kiwi -> info ("Calling post bootloader install script...\n");

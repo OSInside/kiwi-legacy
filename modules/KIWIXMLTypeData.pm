@@ -58,19 +58,18 @@ sub new {
 	# <systemdisk> are children of <type> the data is not in this class
 	# the child relationship is enforced at the XML level.
 	my %keywords = map { ($_ => 1) } qw(
-			boot bootkernel bootloader bootpartsize bootprofile
-			boottimeout checkprebuilt compressed devicepersistency
-			ec2config editbootconfig filesystem flags format fsmountoptions
-			fsnocheck fsreadonly fsreadwrite hybrid hybridpersistent image
-			installboot installiso installprovidefailsafe installstick
-			kernelcmdline luks machine oemconfig primary pxedeploy ramonly
-			size split systemdisk vga volid
+	    boot bootkernel bootloader bootpartsize bootprofile boottimeout
+		checkprebuilt compressed devicepersistency ec2config editbootconfig
+		editbootinstall filesystem flags format fsmountoptions
+		fsnocheck fsreadonly fsreadwrite hybrid hybridpersistent image
+		installboot installiso installprovidefailsafe installstick
+		kernelcmdline luks machine oemconfig primary pxedeploy ramonly
+		size split systemdisk vga volid
 	);
 	$this->{supportedKeywords} = \%keywords;
 	my %boolKW = map { ($_ => 1) } qw(
-			checkprebuilt compressed fsnocheck hybrid hybridpersistent
-			installiso installprovidefailsafe installstick primary
-			ramonly
+	    checkprebuilt compressed fsnocheck hybrid hybridpersistent
+		installiso installprovidefailsafe installstick primary ramonly
 	);
 	$this->{boolKeywords} = \%boolKW;
 	if (! $this -> __isInitHashRef($init) ) {
@@ -94,6 +93,7 @@ sub new {
 		$this->{compressed}             = $init->{compressed};
 		$this->{devicepersistency}      = $init->{devicepersistency};
 		$this->{editbootconfig}         = $init->{editbootconfig};
+		$this->{editbootinstall}        = $init->{editbootinstall};
 		$this->{filesystem}             = $init->{filesystem};
 		$this->{flags}                  = $init->{flags};
 		$this->{format}                 = $init->{format};
@@ -234,6 +234,17 @@ sub getEditBootConfig {
 	# ---
 	my $this = shift;
 	return $this->{editbootconfig};
+}
+
+#==========================================
+# getEditBootInstall
+#------------------------------------------
+sub getEditBootInstall {
+	# ...
+	# Return the path to the script to modify the boot configuration
+	# ---
+	my $this = shift;
+	return $this->{editbootinstall};
 }
 
 #==========================================
@@ -659,6 +670,27 @@ sub setEditBootConfig {
 		return;
 	}
 	$this->{editbootconfig} = $confE;
+	return $this;
+}
+
+#==========================================
+# setEditBootInstall
+#------------------------------------------
+sub setEditBootInstall {
+	# ...
+	# Set the path to the script to modify the boot configuration
+	# ---
+	my $this  = shift;
+	my $confE = shift;
+	if (! $confE ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setEditBootInstall: no config script given, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{editbootinstall} = $confE;
 	return $this;
 }
 

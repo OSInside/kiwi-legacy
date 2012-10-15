@@ -862,6 +862,27 @@ sub test_getEditBootConfig {
 }
 
 #==========================================
+# test_getEditBootInstall
+#------------------------------------------
+sub test_getEditBootInstall {
+	# ...
+	# Test the getEditBootInstall method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $conf = $typeDataObj -> getEditBootInstall();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('myInstScript', $conf);
+	return;
+}
+
+#==========================================
 # test_getFilesystem
 #------------------------------------------
 sub test_getFilesystem {
@@ -2040,6 +2061,66 @@ sub test_setEditBootConfigNoArg {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('myscript', $bootE);
+	return;
+}
+
+#==========================================
+# test_setEditBootInstall
+#------------------------------------------
+sub test_setEditBootInstall {
+	# ...
+	# Test the setEditBootInstall method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	$typeDataObj = $typeDataObj -> setEditBootInstall('confInstScript');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $bootE = $typeDataObj -> getEditBootInstall();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('confInstScript', $bootE);
+	return;
+}
+
+#==========================================
+# test_setEditBootInstallNoArg
+#------------------------------------------
+sub test_setEditBootInstallNoArg {
+	# ...
+	# Test the setEditBootInstall method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setEditBootInstall();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setEditBootInstall: no config script given, '
+		. 'retaining current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $bootE = $typeDataObj -> getEditBootInstall();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('myInstScript', $bootE);
 	return;
 }
 
@@ -3775,6 +3856,7 @@ sub __getTypeObj {
 				compressed             => 'true',
 				devicepersistency      => 'by-uuid',
 				editbootconfig         => 'myscript',
+				editbootinstall        => 'myInstScript',
 				filesystem             => 'xfs',
 				flags                  => 'compressed',
 				format                 => 'qcow2',
