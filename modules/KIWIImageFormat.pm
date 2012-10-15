@@ -91,7 +91,7 @@ sub new {
 	#==========================================
 	# check format
 	#------------------------------------------
-	my $type = $xml -> getImageTypeAndAttributes();
+	my $type = $xml -> getImageTypeAndAttributes_legacy();
 	if (! defined $format) {
 		if (($type) && ($type->{format})) {
 			$format = $type->{format};
@@ -108,9 +108,9 @@ sub new {
 	#==========================================
 	# Read some XML data
 	#------------------------------------------
-	my %xenref = $xml -> getXenConfig();
-	my %vmwref = $xml -> getVMwareConfig();
-	my %ovfref = $xml -> getOVFConfig();
+	my %xenref = $xml -> getXenConfig_legacy();
+	my %vmwref = $xml -> getVMwareConfig_legacy();
+	my %ovfref = $xml -> getOVFConfig_legacy();
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -465,8 +465,8 @@ sub createEC2 {
 	$aminame.= ".ami";
 	my $title= $xml -> getImageDisplayName();
 	my $arch = qxx ("uname -m"); chomp ( $arch );
-	my %type = %{$xml->getImageTypeAndAttributes()};
-	my %ec2  = $xml->getEc2Config();
+	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
+	my %ec2  = $xml->getEc2Config_legacy();
 	my $have_account = 1;
 	if (! defined $ec2{AWSAccountNr}) {
 		$kiwi->warning ("Missing AWS account number");

@@ -327,7 +327,7 @@ sub new {
 	# find Xen domain configuration
 	#------------------------------------------
 	if ($isxen && defined $xml) {
-		my %xenc = $xml -> getXenConfig();
+		my %xenc = $xml -> getXenConfig_legacy();
 		if (defined $xenc{xen_domain}) {
 			$xendomain = $xenc{xen_domain};
 		} else {
@@ -419,7 +419,7 @@ sub new {
 	# check framebuffer vga value
 	#------------------------------------------
 	if (defined $xml) {
-		my %type = %{$xml->getImageTypeAndAttributes()};
+		my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 		if ($type{vga}) {
 			$vga = $type{vga};
 		}
@@ -636,7 +636,7 @@ sub setupInstallCD {
 	# read config XML attributes
 	#------------------------------------------
 	if (defined $xml) {
-		%type = %{$xml->getImageTypeAndAttributes()};
+		%type = %{$xml->getImageTypeAndAttributes_legacy()};
 	}
 	#==========================================
 	# check for volume id
@@ -1110,7 +1110,7 @@ sub setupInstallStick {
 	# read config XML attributes
 	#------------------------------------------
 	if (defined $xml) {
-		%type = %{$xml->getImageTypeAndAttributes()};
+		%type = %{$xml->getImageTypeAndAttributes_legacy()};
 	}
 	#==========================================
 	# setup boot loader type
@@ -1654,7 +1654,7 @@ sub setupBootDisk {
 	#==========================================
 	# load type attributes...
 	#------------------------------------------
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# Check for LVM...
 	#------------------------------------------
@@ -1667,14 +1667,14 @@ sub setupBootDisk {
 		#==========================================
 		# set volume group name
 		#------------------------------------------
-		my $vgroupName = $xml -> getLVMGroupName();
+		my $vgroupName = $xml -> getLVMGroupName_legacy();
 		if ($vgroupName) {
 			$this->{lvmgroup} = $vgroupName;
 		}
 		#==========================================
 		# check and set LVM volumes setup
 		#------------------------------------------
-		%lvmparts = $xml -> getLVMVolumes();
+		%lvmparts = $xml -> getLVMVolumes_legacy();
 		if (%lvmparts) {
 			if ( ! -d $system ) {
 				$kiwi -> error (
@@ -1837,7 +1837,7 @@ sub setupBootDisk {
 	# build bootfix for the bootloader on oem
 	#------------------------------------------
 	if ($initrd =~ /oemboot/) {
-		my $oemtitle = $xml -> getOEMBootTitle();
+		my $oemtitle = $xml -> getOEMBootTitle_legacy();
 		if ($oemtitle) {
 			$this->{bootlabel} = $oemtitle;
 			$bootfix = "OEM";
@@ -1846,7 +1846,7 @@ sub setupBootDisk {
 	#==========================================
 	# increase disk size for in-place recovery
 	#------------------------------------------
-	my $inplace = $xml -> getOEMRecoveryInPlace();
+	my $inplace = $xml -> getOEMRecoveryInPlace_legacy();
 	if (($inplace) && ("$inplace" eq "true")) {
 		my ($FD,$recoMB);
 		my $sizefile = "$destdir/recovery.partition.size";
@@ -3381,7 +3381,7 @@ sub setupBootLoaderConfiguration {
 	#------------------------------------------
 	my $defaultBootNr = 0;
 	if ($xml) {
-		%type = %{$xml->getImageTypeAndAttributes()};
+		%type = %{$xml->getImageTypeAndAttributes_legacy()};
 		$cmdline  = $type{cmdline};
 	}
 	if ($type =~ /^KIWI CD Boot/) {
@@ -3471,7 +3471,7 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Theme and Fonts table
 		#------------------------------------------
-		my @theme = $xml -> getBootTheme();
+		my @theme = $xml -> getBootTheme_legacy();
 		my $theme = $theme[1];
 		my $ascii = 'ascii.pf2';
 		my $fodir = '/boot/grub2/themes/';
@@ -4420,7 +4420,7 @@ sub setupBootLoaderConfiguration {
 		my $editBoot = $cmdL -> getEditBootConfig();
 		my $idesc;
 		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootConfig();
+			$editBoot = $xml -> getEditBootConfig_legacy();
 		}
 		if ($editBoot) {
 			if ($this->{originXMLPath}) {
@@ -4978,7 +4978,7 @@ sub installBootLoader {
 		my $editBoot = $cmdL -> getEditBootInstall();
 		my $idesc;
 		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootInstall();
+			$editBoot = $xml -> getEditBootInstall_legacy();
 		}
 		if ($editBoot) {
 			if ($this->{originXMLPath}) {
@@ -5699,7 +5699,7 @@ sub setupFilesystem {
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my $cmdL   = $this->{cmdL};
-	my %type   = %{$xml->getImageTypeAndAttributes()};
+	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
 	my %FSopts = $main::global -> checkFSOptions(
 		@{$cmdL -> getFilesystemOptions()}
 	);
@@ -5957,7 +5957,7 @@ sub __getBootSize {
 	my $arch   = qxx ("uname -m"); chomp $arch;
 	my $bbytes = qxx ("du -s --block-size=1 $boot | cut -f1"); chomp $bbytes;
 	my $needMB = sprintf ("%.0f",($bbytes / 1048576) + 15);
-	my %type   = %{$xml->getImageTypeAndAttributes()};
+	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $minMB  = 150;
 	if (defined $type{bootpartsize}) {
 		$minMB = $type{bootpartsize};

@@ -245,7 +245,7 @@ sub new {
 	# Get configured name of package manager
 	#------------------------------------------
 	$kiwi -> info ("Setting up package manager: ");
-	my $pmgr = $xml -> getPackageManager();
+	my $pmgr = $xml -> getPackageManager_legacy();
 	if (! defined $pmgr) {
 		$kiwi -> failed();
 		$this -> cleanMount();
@@ -336,7 +336,7 @@ sub init {
 	#==================================
 	# Create /etc/ImageVersion file
 	#----------------------------------
-	my $packager = $xml -> getPackageManager();
+	my $packager = $xml -> getPackageManager_legacy();
 	my $imageVersionFile = "$root/etc/ImageVersion";
 	my $imageVersion = $xml -> getImageVersion();
 	my $imageName    = $xml -> getImageName();

@@ -289,7 +289,7 @@ sub prepareImage {
 	#------------------------------------------
 	if (! $rootTgtDir) {
 		$kiwi -> info ("Checking for default root in XML data...");
-		my $rootTgt =  $xml -> getImageDefaultRoot();
+		my $rootTgt =  $xml -> getImageDefaultRoot_legacy();
 		if ($rootTgt) {
 			$this -> {cmdL} -> setRootTargetDir($rootTgt);
 			$this -> {rootTgtDir} = $rootTgt;
@@ -462,7 +462,7 @@ sub createImage {
 	if (! defined $xml) {
 		return;
 	}
-	my %attr = %{$xml->getImageTypeAndAttributes()};
+	my %attr = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $krc = KIWIRuntimeChecker -> new(
 		$kiwi,$cmdL,$xml
 	);
@@ -471,7 +471,7 @@ sub createImage {
 	#------------------------------------------
 	if (! $target) {
 		$kiwi -> info ("Checking for defaultdestination in XML data...");
-		my $defaultDestination = $xml -> getImageDefaultDestination();
+		my $defaultDestination = $xml -> getImageDefaultDestination_legacy();
 		if (! $defaultDestination) {
 			$kiwi -> failed ();
 			$kiwi -> info   ("No destination directory specified");
@@ -1174,7 +1174,7 @@ sub __prepareTree {
 	my $systemTree = shift;
 	my $kiwi       = $this -> {kiwi};
 	my $cmdL       = $this -> {cmdL};
-	my %attr       = %{$xml->getImageTypeAndAttributes()};
+	my %attr       = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $cacheMode  = "initial";
 	#==========================================
 	# Select cache if requested and exists
@@ -1193,7 +1193,7 @@ sub __prepareTree {
 	# Check for setup of boot theme
 	#------------------------------------------
 	if ($attr{"type"} eq "cpio") {
-		my @theme = $xml -> getBootTheme();
+		my @theme = $xml -> getBootTheme_legacy();
 		if (@theme) {
 			$kiwi -> info ("Using bootsplash theme: $theme[0]");
 			$kiwi -> done ();

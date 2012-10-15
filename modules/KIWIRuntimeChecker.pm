@@ -153,7 +153,7 @@ sub __hasValidLVMName {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
-	my $vgroupName = $xml -> getLVMGroupName();
+	my $vgroupName = $xml -> getLVMGroupName_legacy();
 	if (! $vgroupName) {
 		return 1;
 	}
@@ -291,7 +291,7 @@ sub __checkFilesystemTool {
 	my $this = shift;
 	my $cmdL = $this -> {cmdArgs};
 	my $xml  = $this -> {xml};
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $typeName = $type{type};
 	my $flag     = $type{flags};
 	my $toolError;
@@ -319,7 +319,7 @@ sub __checkFilesystemTool {
 			$toolError = 1;
 		}
 		my $haveTool;
-		if ($flag && $flag =~ /clic|clic_udf/) {
+		if ($flag && $flag =~ /clic|clic_udf/x) {
 			$haveTool = $this -> __isFsToolAvailable('clicfs');
 			$checkedFS = 'clicfs';
 		} elsif ($flag && $flag eq 'seed') {
@@ -383,7 +383,7 @@ sub __checkPackageManagerExists {
 	# Check that the specified package manager exists
 	# ---
 	my $this = shift;
-	my $pkgMgr = $this -> {xml} -> getPackageManager();
+	my $pkgMgr = $this -> {xml} -> getPackageManager_legacy();
 	my $haveExec = $this -> {locator} -> getExecPath($pkgMgr);
 	if (! $haveExec) {
 		my $msg = "Executable for specified package manager, $pkgMgr, "
@@ -488,13 +488,13 @@ sub __checkVMscsiCapable {
 	# ---
 	my $this = shift;
 	my $xml = $this -> {xml};
-	my $typeInfo = $xml -> getImageTypeAndAttributes();
+	my $typeInfo = $xml -> getImageTypeAndAttributes_legacy();
 	my $type = $typeInfo -> {type};
 	if ($type ne 'vmx') {
 		# Nothing to do
 		return 1;
 	}
-	my %vmConfig = $xml -> getVMwareConfig();
+	my %vmConfig = $xml -> getVMwareConfig_legacy();
 	if (defined $vmConfig{vmware_disktype} ) {
 		my $diskType = $vmConfig{vmware_disktype};
 		if ($diskType ne 'scsi') {
@@ -523,7 +523,7 @@ sub __checkVMscsiCapable {
 		. "\nto a newer version of qemu-img or change the controller to ide";
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed ();
-        return;
+		return;
 	}
 	return 1;
 }

@@ -175,7 +175,7 @@ sub updateDescription {
 	# ---
 	my $this      = shift;
 	my $src_xml   = shift;
-	my %src_type  = %{$src_xml->getImageTypeAndAttributes()};
+	my %src_type  = %{$src_xml->getImageTypeAndAttributes_legacy()};
 	my %changeset = ();
 	my @profiles;
 	my %repos;
@@ -234,10 +234,10 @@ sub updateDescription {
 	#==========================================
 	# Store general data
 	#------------------------------------------
-	$changeset{"packagemanager"} = $src_xml->getPackageManager();
-	$changeset{"showlicense"}    = $src_xml->getLicenseNames();
+	$changeset{"packagemanager"} = $src_xml->getPackageManager_legacy();
+	$changeset{"showlicense"}    = $src_xml->getLicenseNames_legacy();
 	my $domain;
-	my %xenc = $src_xml -> getXenConfig();
+	my %xenc = $src_xml -> getXenConfig_legacy();
 	if (%xenc) {
 		if (defined $xenc{xen_domain} && $xenc{xen_domain} ne '') {
 			$domain = $xenc{xen_domain};
@@ -249,14 +249,14 @@ sub updateDescription {
 	#==========================================
 	# Store Theme data
 	#------------------------------------------
-	my @theme = $src_xml->getBootTheme();
+	my @theme = $src_xml->getBootTheme_legacy();
 	$changeset{"bootsplash-theme"} = $theme[0];
 	$changeset{"bootloader-theme"} = $theme[1];
 	#==========================================
 	# Store LVM volumes
 	#------------------------------------------
 	if ($src_type{lvm}) {
-		my %lvmparts = $src_xml -> getLVMVolumes();
+		my %lvmparts = $src_xml -> getLVMVolumes_legacy();
 		$changeset{"lvm"} = $src_type{lvm};
 		$changeset{"lvmparts"} = \%lvmparts;
 	}
@@ -402,24 +402,42 @@ sub updateDescription {
 	#==========================================
 	# Store OEM data
 	#------------------------------------------
-	$changeset{"oem-partition-install"}    = $src_xml->getOEMPartitionInstall();
-	$changeset{"oem-swap"}                 = $src_xml->getOEMSwap();
-	$changeset{"oem-align-partition"}      = $src_xml->getOEMAlignPartition();
-	$changeset{"oem-swapsize"}             = $src_xml->getOEMSwapSize();
-	$changeset{"oem-systemsize"}           = $src_xml->getOEMSystemSize();
-	$changeset{"oem-boot-title"}           = $src_xml->getOEMBootTitle();
-	$changeset{"oem-kiwi-initrd"}          = $src_xml->getOEMKiwiInitrd();
-	$changeset{"oem-reboot"}               = $src_xml->getOEMReboot();
-	$changeset{"oem-reboot-interactive"}   = $src_xml->getOEMRebootInter();
-	$changeset{"oem-silent-boot"}          = $src_xml->getOEMSilentBoot();
-	$changeset{"oem-shutdown"}             = $src_xml->getOEMShutdown();
-	$changeset{"oem-shutdown-interactive"} = $src_xml->getOEMShutdownInter();
-	$changeset{"oem-bootwait"}             = $src_xml->getOEMBootWait();
-	$changeset{"oem-unattended"}           = $src_xml->getOEMUnattended();
-	$changeset{"oem-unattended-id"}        = $src_xml->getOEMUnattendedID();
-	$changeset{"oem-recovery"}             = $src_xml->getOEMRecovery();
-	$changeset{"oem-recoveryID"}           = $src_xml->getOEMRecoveryID();
-	$changeset{"oem-inplace-recovery"}     = $src_xml->getOEMRecoveryInPlace();
+	$changeset{"oem-partition-install"}    =
+		$src_xml->getOEMPartitionInstall_legacy();
+	$changeset{"oem-swap"}                 =
+		$src_xml->getOEMSwap_legacy();
+	$changeset{"oem-align-partition"}      =
+		$src_xml->getOEMAlignPartition_legacy();
+	$changeset{"oem-swapsize"}             =
+		$src_xml->getOEMSwapSize_legacy();
+	$changeset{"oem-systemsize"}           =
+		$src_xml->getOEMSystemSize_legacy();
+	$changeset{"oem-boot-title"}           =
+		$src_xml->getOEMBootTitle_legacy();
+	$changeset{"oem-kiwi-initrd"}          =
+		$src_xml->getOEMKiwiInitrd_legacy();
+	$changeset{"oem-reboot"}               =
+		$src_xml->getOEMReboot_legacy();
+	$changeset{"oem-reboot-interactive"}   =
+		$src_xml->getOEMRebootInter_legacy();
+	$changeset{"oem-silent-boot"}          =
+		$src_xml->getOEMSilentBoot_legacy();
+	$changeset{"oem-shutdown"}             =
+		$src_xml->getOEMShutdown_legacy();
+	$changeset{"oem-shutdown-interactive"} =
+		$src_xml->getOEMShutdownInter_legacy();
+	$changeset{"oem-bootwait"}             =
+		$src_xml->getOEMBootWait_legacy();
+	$changeset{"oem-unattended"}           =
+		$src_xml->getOEMUnattended_legacy();
+	$changeset{"oem-unattended-id"}        =
+		$src_xml->getOEMUnattendedID_legacy();
+	$changeset{"oem-recovery"}             =
+		$src_xml->getOEMRecovery_legacy();
+	$changeset{"oem-recoveryID"}           =
+		$src_xml->getOEMRecoveryID_legacy();
+	$changeset{"oem-inplace-recovery"}     =
+		$src_xml->getOEMRecoveryInPlace_legacy();
 	#==========================================
 	# Return changeset hash
 	#------------------------------------------
@@ -440,7 +458,7 @@ sub checkAndSetupPrebuiltBootImage {
 	my $kiwi = $this->{kiwi};
 	my $cmdL = $this->{cmdL};
 	my $idest= $cmdL->getImageTargetDir();
-	my %type = %{$ixml->getImageTypeAndAttributes()};
+	my %type = %{$ixml->getImageTypeAndAttributes_legacy()};
 	my $pblt = $type{checkprebuilt};
 	my $boot = $type{boot};
 	my $ok   = 0;
@@ -488,7 +506,7 @@ sub checkAndSetupPrebuiltBootImage {
 	if (defined $prebuiltPath) {
 		$lookup = $prebuiltPath."/";
 	} else {
-		my $defaultPath = $ixml -> getDefaultPrebuiltDir();
+		my $defaultPath = $ixml -> getDefaultPrebuiltDir_legacy();
 		if ($defaultPath) {
 			$lookup =  $defaultPath . '/';
 		}
@@ -959,7 +977,7 @@ sub createImageSquashFS {
 	my $this  = shift;
 	my $kiwi  = $this->{kiwi};
 	my $xml   = $this->{xml};
-	my %type  = %{$xml->getImageTypeAndAttributes()};
+	my %type  = %{$xml->getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
@@ -1135,7 +1153,7 @@ sub createImageRootAndBoot {
 	my $sxml       = $this->{xml};
 	my $cmdL       = $this->{cmdL};
 	my $idest      = $cmdL->getImageTargetDir();
-	my %stype      = %{$sxml->getImageTypeAndAttributes()};
+	my %stype      = %{$sxml->getImageTypeAndAttributes_legacy()};
 	my $imageTree  = $this->{imageTree};
 	my $baseSystem = $this->{baseSystem};
 	my $checkBase  = $cmdL->getRootTargetDir()."/".$baseSystem;
@@ -1380,7 +1398,7 @@ sub createImageVMX {
 	my $xml  = $this->{xml};
 	my $cmdL = $this->{cmdL};
 	my $idest= $cmdL->getImageTargetDir();
-	my %xenc = $xml  -> getXenConfig();
+	my %xenc = $xml  -> getXenConfig_legacy();
 	my $name = $this -> createImageRootAndBoot ($para,"VMX");
 	my $xendomain;
 	if (! defined $name) {
@@ -1484,7 +1502,7 @@ sub createImageLiveCD {
 	#==========================================
 	# Get system image type information
 	#------------------------------------------
-	my %stype= %{$sxml->getImageTypeAndAttributes()};
+	my %stype= %{$sxml->getImageTypeAndAttributes_legacy()};
 	my $vga  = $stype{vga};
 	#==========================================
 	# Get boot image name and compressed flag
@@ -2255,7 +2273,7 @@ sub createImageSplit {
 	my $checkBase  = $cmdL->getRootTargetDir()."/".$baseSystem;
 	my $sxml       = $this->{xml};
 	my $idest      = $cmdL->getImageTargetDir();
-	my %xenc       = $sxml->getXenConfig();
+	my %xenc       = $sxml->getXenConfig_legacy();
 	my $fsopts     = $cmdL -> getFilesystemOptions();
 	my $inodesize  = $fsopts->[1];
 	my $FSTypeRW;
@@ -2311,7 +2329,7 @@ sub createImageSplit {
 	#==========================================
 	# Get system image type information
 	#------------------------------------------
-	my %type = %{$sxml->getImageTypeAndAttributes()};
+	my %type = %{$sxml->getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
@@ -2374,7 +2392,7 @@ sub createImageSplit {
 	# walk through except files if any
 	#------------------------------------------
 	my %exceptHash;
-	foreach my $except ($sxml -> getSplitTempExceptions()) {
+	foreach my $except ($sxml -> getSplitTempExceptions_legacy()) {
 		my $globsource = "${imageTree}${except}";
 		my @files = qxx ("find $globsource -xtype f 2>/dev/null");
 		my $code  = $? >> 8;
@@ -2415,8 +2433,8 @@ sub createImageSplit {
 		}
 	};
 	find(\&$createTmpTree, $imageTree);
-	my @tempFiles    = $sxml -> getSplitTempFiles ();
-	my @persistFiles = $sxml -> getSplitPersistentFiles ();
+	my @tempFiles    = $sxml -> getSplitTempFiles_legacy ();
+	my @persistFiles = $sxml -> getSplitPersistentFiles_legacy ();
 	if ($nopersistent) {
 		push (@tempFiles, @persistFiles);
 		undef @persistFiles;
@@ -2478,7 +2496,7 @@ sub createImageSplit {
 		# walk through except files if any
 		#------------------------------------------
 		my %exceptHash;
-		foreach my $except ($sxml -> getSplitPersistentExceptions()) {
+		foreach my $except ($sxml -> getSplitPersistentExceptions_legacy()) {
 			my $globsource = "${imageTree}${except}";
 			my @files = qxx ("find $globsource -xtype f 2>/dev/null");
 			my $code  = $? >> 8;
@@ -2552,7 +2570,7 @@ sub createImageSplit {
 		#==========================================
 		# relink if entire directory was set
 		#------------------------------------------
-		foreach my $persist ($sxml -> getSplitPersistentFiles()) {
+		foreach my $persist ($sxml -> getSplitPersistentFiles_legacy()) {
 			my $globsource = "${imageTree}${persist}";
 			if (-d $globsource) {
 				my $link = $globsource;
@@ -3071,8 +3089,8 @@ sub writeImageConfig {
 	my $xml  = $this->{xml};
 	my $configName = $main::global -> generateBuildImageName($this->{xml})
 		. '.config';
-	my $device = $xml -> getPXEDeployImageDevice ();
-	my %type = %{$xml -> getImageTypeAndAttributes()};
+	my $device = $xml -> getPXEDeployImageDevice_legacy ();
+	my %type = %{$xml -> getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# create .config for types which needs it
 	#------------------------------------------
@@ -3089,8 +3107,8 @@ sub writeImageConfig {
 			-> generateBuildImageName($this->{xml}, ';');
 		my $namerw = $main::global
 			-> generateBuildImageName($this->{xml},';', '-read-write');
-		my $server = $xml -> getPXEDeployServer ();
-		my $blocks = $xml -> getPXEDeployBlockSize ();
+		my $server = $xml -> getPXEDeployServer_legacy ();
+		my $blocks = $xml -> getPXEDeployBlockSize_legacy ();
 		if (! defined $server) {
 			$server = "";
 		}
@@ -3103,7 +3121,7 @@ sub writeImageConfig {
 		#==========================================
 		# PART information
 		#------------------------------------------
-		my @parts = $xml -> getPXEDeployPartitions ();
+		my @parts = $xml -> getPXEDeployPartitions_legacy ();
 		if ((scalar @parts) > 0) {
 			print $FD "PART=";
 			for my $href (@parts) {
@@ -3163,7 +3181,7 @@ sub writeImageConfig {
 		#==========================================
 		# CONF information
 		#------------------------------------------
-		my %confs = $xml -> getPXEDeployConfiguration ();
+		my %confs = $xml -> getPXEDeployConfiguration_legacy ();
 		if ((scalar keys %confs) > 0) {
 			print $FD "CONF=";
 			foreach my $source (keys %confs) {
@@ -3180,7 +3198,7 @@ sub writeImageConfig {
 		#==========================================
 		# UNIONFS_CONFIG information
 		#------------------------------------------
-		my %unionConfig = $xml -> getPXEDeployUnionConfig ();
+		my %unionConfig = $xml -> getPXEDeployUnionConfig_legacy ();
 		if (%unionConfig) {
 			my $valid = 0;
 			my $value;
@@ -3198,7 +3216,7 @@ sub writeImageConfig {
 		#==========================================
 		# KIWI_BOOT_TIMEOUT information
 		#------------------------------------------
-		my $timeout = $xml -> getPXEDeployTimeout ();
+		my $timeout = $xml -> getPXEDeployTimeout_legacy ();
 		if (defined $timeout) {
 			print $FD "KIWI_BOOT_TIMEOUT=$timeout\n";
 		}
@@ -3212,14 +3230,14 @@ sub writeImageConfig {
 		#==========================================
 		# KIWI_KERNEL information
 		#------------------------------------------
-		my $kernel = $xml -> getPXEDeployKernel ();
+		my $kernel = $xml -> getPXEDeployKernel_legacy ();
 		if (defined $kernel) {
 			print $FD "KIWI_KERNEL=$kernel\n";
 		}
 		#==========================================
 		# KIWI_INITRD information
 		#------------------------------------------
-		my $initrd = $xml -> getPXEDeployInitrd ();
+		my $initrd = $xml -> getPXEDeployInitrd_legacy ();
 		if (defined $initrd) {
 			print $FD "KIWI_INITRD=$initrd\n";
 		}
@@ -3280,7 +3298,7 @@ sub postImage {
 	#==========================================
 	# Check image file system
 	#------------------------------------------
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	if ((! $type{filesystem}) && ($fstype)) {
 		$type{filesystem} = $fstype;
 	}
@@ -3398,7 +3416,7 @@ sub buildLogicalExtend {
 	my $encode = 0;
 	my $cipher = 0;
 	my $out    = $this->{imageDest}."/".$name;
-	my %type   = %{$xml->getImageTypeAndAttributes()};
+	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# a size is required
 	#------------------------------------------
@@ -3665,7 +3683,7 @@ sub mountLogicalExtend {
 	my $device = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
-	my %type   = %{$xml->getImageTypeAndAttributes()};
+	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $data;
 	my $code;
 	#==========================================
@@ -3804,7 +3822,7 @@ sub isBootImage {
 	if (! defined $name) {
 		return $this;
 	}
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $para = $type{type};
 	if (defined $type{filesystem}) {
 		$para = $para.":".$type{filesystem};
@@ -3890,7 +3908,7 @@ sub extractLinux {
 	my $dest      = shift;
 	my $kiwi      = $this->{kiwi};
 	my $xml       = $this->{xml};
-	my %xenc      = $xml->getXenConfig();
+	my %xenc      = $xml->getXenConfig_legacy();
 	if ((-f "$imageTree/boot/vmlinux.gz")  ||
 		(-f "$imageTree/boot/vmlinuz.el5") ||
 		(-f "$imageTree/boot/vmlinux")     ||
@@ -3964,7 +3982,7 @@ sub setupEXT2 {
 	my $cmdL    = $this->{cmdL};
 	my $kiwi    = $this->{kiwi};
 	my $xml     = $this->{xml};
-	my %type    = %{$xml->getImageTypeAndAttributes()};
+	my %type    = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $fsopts;
 	my $tuneopts;
 	my %FSopts = $main::global -> checkFSOptions(
@@ -4102,7 +4120,7 @@ sub setupSquashFS {
 	my $tree = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $imageTree = $this->{imageTree};
 	my $locator = new KIWILocator($kiwi);
 	if (! defined $tree) {
@@ -4395,7 +4413,7 @@ sub getSize {
 	my $fsopts  = $cmdL -> getFilesystemOptions();
 	my $isize   = $fsopts->[1];
 	my $iratio  = $fsopts->[2];
-	my %type    = %{$xml->getImageTypeAndAttributes()};
+	my %type    = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $fstype  = $type{type};
 	my $xmlsize;
 	if ($type{filesystem}) {

@@ -704,7 +704,7 @@ sub createISO {
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootConfig();
 		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootConfig();
+			$editBoot = $xml -> getEditBootConfig_legacy();
 		}
 		if (($editBoot) && (-e $editBoot)) {
 			$kiwi -> info ("Calling pre bootloader install script...\n");
@@ -723,14 +723,14 @@ sub createISO {
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootInstall();
 		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootInstall();
+			$editBoot = $xml -> getEditBootInstall_legacy();
 		}
 		if (($editBoot) && (-e $editBoot)) {
 			$kiwi -> info ("Calling post bootloader install script...\n");
 			my @opts = ("'".$cmdln."'");
 			system ("cd $src && bash --norc -c \"$editBoot @opts\"");
 		}
-    }
+	}
 	$this -> cleanISO();
 	return $this;
 }

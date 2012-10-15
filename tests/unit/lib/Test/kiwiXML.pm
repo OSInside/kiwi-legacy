@@ -26,7 +26,15 @@ use KIWIQX qw (qxx);
 use KIWIXML;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
+use KIWIXMLEC2ConfigData;
+use KIWIXMLOEMConfigData;
+use KIWIXMLPreferenceData;
+use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
+use KIWIXMLSplitData;
+use KIWIXMLSystemdiskData;
+use KIWIXMLTypeData;
+use KIWIXMLVMachineData;
 
 # All tests will need to be adjusted once KIWXML turns into a stateless
 # container and the ctor receives the config.xml file name as an argument.
@@ -1746,6 +1754,105 @@ sub test_addStripTools {
 }
 
 #==========================================
+# test_ctor_InvalidPXEConfigArch
+#------------------------------------------
+sub test_ctor_InvalidPXEConfigArch {
+	# ...
+	# Test the construction of the XML object with an invalid architecture
+	# setting for the pxe configuration
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'pxeSettingsInvArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Unsupported arch 'armv95' in PXE setup.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($xml);
+	return;
+}
+
+#==========================================
+# test_ctor_InvalidSplitArch
+#------------------------------------------
+sub test_ctor_InvalidSplitArch {
+	# ...
+	# Test the construction of the XML object with an invalid architecture
+	# setting for a file in the split definition
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'splitSettingsInvArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Unsupported arch 'arm95' in split setup";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($xml);
+	return;
+}
+#==========================================
+# test_ctor_InvalidSysdiskVolNameDisallowed
+#------------------------------------------
+sub test_ctor_InvalidSysdiskVolNameDisallowed {
+	# ...
+	# Test the construction of the XML object with an invalid name setting
+	# for one of the volume definitions.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'lvmConfigDisallowedDir';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Invalid name 'sbin' for LVM volume setup";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($xml);
+	return;
+}
+
+#==========================================
+# test_ctor_InvalidSysdiskVolNameRoot
+#------------------------------------------
+sub test_ctor_InvalidSysdiskVolNameRoot {
+	# ...
+	# Test the construction of the XML object with an invalid name setting
+	# for one of the volume definitions.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'lvmConfigWithRoot';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Invalid name '/' for LVM volume setup";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($xml);
+	return;
+}
+
+#==========================================
 # test_getActiveProfileNames
 #------------------------------------------
 sub test_getActiveProfileNames {
@@ -1920,11 +2027,11 @@ sub test_getBootIncludesUseProf {
 }
 
 #==========================================
-# test_getBootTheme
+# test_getBootTheme_legacy
 #------------------------------------------
-sub test_getBootTheme {
+sub test_getBootTheme_legacy {
 	# ...
-	# Verify proper return of getBootTheme method
+	# Verify proper return of getBootTheme_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -1932,7 +2039,7 @@ sub test_getBootTheme {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @values = $xml -> getBootTheme();
+	my @values = $xml -> getBootTheme_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1975,11 +2082,42 @@ sub test_getConfigName {
 }
 
 #==========================================
-# test_getDefaultPrebuiltDir
+# test_getConfiguredTypeNames
 #------------------------------------------
-sub test_getDefaultPrebuiltDir {
+sub test_getConfiguredTypeNames {
 	# ...
-	# Verify proper return of getDefaultPrebuiltDir method
+	# Test the getConfiguredTypeNames method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $typeNames = $xml -> getConfiguredTypeNames();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expected = ( 'oem', 'vmx' );
+	$this -> assert_array_equal(\@expected, $typeNames);
+	return;
+}
+
+#==========================================
+# test_getDefaultPrebuiltDir_legacy
+#------------------------------------------
+sub test_getDefaultPrebuiltDir_legacy {
+	# ...
+	# Verify proper return of getDefaultPrebuiltDir_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -1987,7 +2125,7 @@ sub test_getDefaultPrebuiltDir {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getDefaultPrebuiltDir();
+	my $value = $xml -> getDefaultPrebuiltDir_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2184,9 +2322,9 @@ sub test_getDriversNodeList {
 }
 
 #==========================================
-# test_getEc2Config
+# test_getEC2Config
 #------------------------------------------
-sub test_getEc2Config {
+sub test_getEC2Config {
 	# ...
 	# Verify proper return of EC2 configuration settings
 	# ---
@@ -2196,7 +2334,36 @@ sub test_getEc2Config {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %ec2Info = $xml -> getEc2Config();
+	my $ec2ConfObj = $xml -> getEC2Config();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my $acctNr = $ec2ConfObj -> getAccountNumber();
+	$this -> assert_str_equals('12345678911', $acctNr);
+	my $regions = $ec2ConfObj -> getRegions();
+	my @expectedRegions = qw / EU-West US-West /;
+	$this -> assert_array_equal(\@expectedRegions, $regions);
+	return;
+}
+
+#==========================================
+# test_getEc2Config_legacy
+#------------------------------------------
+sub test_getEc2Config_legacy {
+	# ...
+	# Verify proper return of EC2 configuration settings
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'ec2ConfigSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my %ec2Info = $xml -> getEc2Config_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2213,9 +2380,9 @@ sub test_getEc2Config {
 }
 
 #==========================================
-# test_getEditBootConfig
+# test_getEditBootConfig_legacy
 #------------------------------------------
-sub test_getEditBootConfig {
+sub test_getEditBootConfig_legacy {
 	# ...
 	# Verify proper return of getEditBootConfig method
 	# ---
@@ -2225,7 +2392,7 @@ sub test_getEditBootConfig {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $path = $xml -> getEditBootConfig();
+	my $path = $xml -> getEditBootConfig_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2268,11 +2435,11 @@ sub test_getHttpsRepositoryCredentials_legacy {
 }
 
 #==========================================
-# test_getImageDefaultDestination
+# test_getImageDefaultDestination_legacy
 #------------------------------------------
-sub test_getImageDefaultDestination {
+sub test_getImageDefaultDestination_legacy {
 	# ...
-	# Verify proper return of getImageDefaultDestination method
+	# Verify proper return of getImageDefaultDestination_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -2280,7 +2447,7 @@ sub test_getImageDefaultDestination {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getImageDefaultDestination();
+	my $value = $xml -> getImageDefaultDestination_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2293,11 +2460,11 @@ sub test_getImageDefaultDestination {
 }
 
 #==========================================
-# test_getImageDefaultRoot
+# test_getImageDefaultRoot_legacy
 #------------------------------------------
-sub test_getImageDefaultRoot {
+sub test_getImageDefaultRoot_legacy {
 	# ...
-	# Verify proper return of getImageDefaultRoot method
+	# Verify proper return of getImageDefaultRoot_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -2305,7 +2472,7 @@ sub test_getImageDefaultRoot {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getImageDefaultRoot();
+	my $value = $xml -> getImageDefaultRoot_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2468,11 +2635,11 @@ sub test_getImageSizeBytesNotAdditive {
 }
 
 #==========================================
-# test_getImageTypeAndAttributes
+# test_getImageType
 #------------------------------------------
-sub test_getImageTypeAndAttributesSimple {
+sub test_getImageType {
 	# ...
-	# Verify proper return of getImageTypeAndAttributes method
+	# Verify proper return of getImageType method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -2480,7 +2647,66 @@ sub test_getImageTypeAndAttributesSimple {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $typeInfo = $xml -> getImageTypeAndAttributes();
+	my $typeInfo = $xml -> getImageType();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify that we got the expected type
+	my $imageType = $typeInfo -> getImageType();
+	$this -> assert_str_equals('vmx', $imageType);
+	return;
+}
+
+#==========================================
+# test_getImageTypeProfiles
+#------------------------------------------
+sub test_getImageTypeProfiles {
+	# ...
+	# Verify proper return of getImageType method with multiple type
+	# definitions and profiles.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $typeInfo = $xml -> getImageType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify that we got the expected type
+	my $imageType = $typeInfo -> getImageType();
+	$this -> assert_str_equals('oem', $imageType);
+	return;
+}
+
+#==========================================
+# test_getImageTypeAndAttributes_legacy
+#------------------------------------------
+sub test_getImageTypeAndAttributes_legacy {
+	# ...
+	# Verify proper return of getImageTypeAndAttributes_legacy method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $typeInfo = $xml -> getImageTypeAndAttributes_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2547,11 +2773,11 @@ sub test_getInstallList {
 }
 
 #==========================================
-# test_getLicenseNames
+# test_getLicenseNames_legacy
 #------------------------------------------
-sub test_getLicenseNames {
+sub test_getLicenseNames_legacy {
 	# ...
-	# Verify proper return of getLicenseNames method
+	# Verify proper return of getLicenseNames_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -2559,7 +2785,7 @@ sub test_getLicenseNames {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $licNames = $xml -> getLicenseNames();
+	my $licNames = $xml -> getLicenseNames_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2598,9 +2824,9 @@ sub test_getLocale {
 }
 
 #==========================================
-# test_getLVMGroupName
+# test_getLVMGroupName_legacy
 #------------------------------------------
-sub test_getLVMGroupName {
+sub test_getLVMGroupName_legacy {
 	# ...
 	# Verify proper return of getLVMGroupName method
 	# ---
@@ -2610,7 +2836,7 @@ sub test_getLVMGroupName {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getLVMGroupName();
+	my $value = $xml -> getLVMGroupName_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2623,9 +2849,9 @@ sub test_getLVMGroupName {
 }
 
 #==========================================
-# test_getLVMVolumes
+# test_getLVMVolumes_legacy
 #------------------------------------------
-sub test_getLVMVolumes {
+sub test_getLVMVolumes_legacy {
 	# ...
 	# Verify proper return of getLVMVolumes method
 	# ---
@@ -2635,7 +2861,7 @@ sub test_getLVMVolumes {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %volumes = $xml -> getLVMVolumes();
+	my %volumes = $xml -> getLVMVolumes_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2662,75 +2888,67 @@ sub test_getLVMVolumes {
 }
 
 #==========================================
-# test_getLVMVolumesDisallowed
+# test_getOEMConfig
 #------------------------------------------
-sub test_getLVMVolumesUsingDisallowed {
+sub test_getOEMConfig {
 	# ...
-	# Verify proper return of getLVMVolumes method
+	# Test the getOEMConfig method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'lvmConfigDisallowedDir';
+	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %volumes = $xml -> getLVMVolumes();
+	my $oemConfObj = $xml -> getOEMConfig();
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('LVM: Directory sbin is not allowed', $msg);
+	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('warning', $msgT);
+	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('skipped', $state);
-	# Test this condition last to get potential error messages
-	my @expectedVolumes = qw /tmp var/;
-	my @volNames = keys %volumes;
-	$this -> assert_array_equal(\@expectedVolumes, \@volNames);
-	my @volSettings = $volumes{tmp};
-	$this -> assert_str_equals('all', $volSettings[0][0]);
-	$this -> assert_equals(0, $volSettings[0][1]);
-	@volSettings = $volumes{var};
-	$this -> assert_equals(50, $volSettings[0][0]);
-	$this -> assert_equals(1, $volSettings[0][1]);
+	$this -> assert_str_equals('No state set', $state);
+	my $align   = $oemConfObj -> getAlignPartition();
+	my $booT    = $oemConfObj -> getBootTitle();
+	my $bootW   = $oemConfObj -> getBootwait();
+	my $inplRec = $oemConfObj -> getInplaceRecovery();
+	my $kInit   = $oemConfObj -> getKiwiInitrd();
+	my $pInst   = $oemConfObj -> getPartitionInstall();
+	my $reboot  = $oemConfObj -> getReboot();
+	my $rebootI = $oemConfObj -> getRebootInteractive();
+	my $recover = $oemConfObj -> getRecovery();
+	my $recovI  = $oemConfObj -> getRecoveryID();
+	my $sDown   = $oemConfObj -> getShutdown();
+	my $sDownI  = $oemConfObj -> getShutdownInteractive();
+	my $sBoot   = $oemConfObj -> getSilentBoot();
+	my $swap    = $oemConfObj -> getSwap();
+	my $swapS   = $oemConfObj -> getSwapSize();
+	my $sysS    = $oemConfObj -> getSystemSize();
+	my $unat    = $oemConfObj -> getUnattended();
+	my $unatI   = $oemConfObj -> getUnattendedID();
+	$this -> assert_str_equals('true', $align);
+	$this -> assert_str_equals('Unit Test', $booT);
+	$this -> assert_str_equals('false', $bootW);
+	$this -> assert_str_equals('true', $kInit);
+	$this -> assert_str_equals('false', $pInst);
+	$this -> assert_str_equals('false', $reboot);
+	$this -> assert_str_equals('false', $rebootI);
+	$this -> assert_str_equals('true', $recover);
+	$this -> assert_str_equals('20', $recovI);
+	$this -> assert_str_equals('false', $sDown);
+	$this -> assert_str_equals('true', $sDownI);
+	$this -> assert_str_equals('true', $sBoot);
+	$this -> assert_str_equals('true', $swap);
+	$this -> assert_str_equals('2048', $swapS);
+	$this -> assert_str_equals('20G', $sysS);
+	$this -> assert_str_equals('true', $unat);
+	$this -> assert_str_equals('scsi-SATA_ST9500420AS_5VJ5JL6T-part1', $unatI);
 	return;
 }
 
 #==========================================
-# test_getLVMVolumesRoot
+# test_getOEMAlignPartition_legacy
 #------------------------------------------
-sub test_getLVMVolumesUsingRoot {
-	# ...
-	# Verify proper return of getLVMVolumes method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'lvmConfigWithRoot';
-	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
-	);
-	my %volumes = $xml -> getLVMVolumes();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('LVM: Directory / is not allowed', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('warning', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('skipped', $state);
-	# Test this condition last to get potential error messages
-	my @expectedVolumes = qw /tmp var/;
-	my @volNames = keys %volumes;
-	$this -> assert_array_equal(\@expectedVolumes, \@volNames);
-	my @volSettings = $volumes{tmp};
-	$this -> assert_str_equals('all', $volSettings[0][0]);
-	$this -> assert_equals(0, $volSettings[0][1]);
-	@volSettings = $volumes{var};
-	$this -> assert_equals(50, $volSettings[0][0]);
-	$this -> assert_equals(1, $volSettings[0][1]);
-	return;
-}
-
-#==========================================
-# test_getOEMAlignPartition
-#------------------------------------------
-sub test_getOEMAlignPartition {
+sub test_getOEMAlignPartition_legacy {
 	# ...
 	# Verify proper return of getOEMAlignPartition method
 	# ---
@@ -2740,7 +2958,7 @@ sub test_getOEMAlignPartition {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMAlignPartition();
+	my $value = $xml -> getOEMAlignPartition_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2753,9 +2971,9 @@ sub test_getOEMAlignPartition {
 }
 
 #==========================================
-# test_getOEMBootTitle
+# test_getOEMBootTitle_legacy
 #------------------------------------------
-sub test_getOEMBootTitle {
+sub test_getOEMBootTitle_legacy {
 	# ...
 	# Verify proper return of getOEMBootTitle method
 	# ---
@@ -2765,7 +2983,7 @@ sub test_getOEMBootTitle {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMBootTitle();
+	my $value = $xml -> getOEMBootTitle_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2778,9 +2996,9 @@ sub test_getOEMBootTitle {
 }
 
 #==========================================
-# test_getOEMBootWait
+# test_getOEMBootWait_legacy
 #------------------------------------------
-sub test_getOEMBootWait {
+sub test_getOEMBootWait_legacy {
 	# ...
 	# Verify proper return of getOEMBootWait method
 	# ---
@@ -2790,7 +3008,7 @@ sub test_getOEMBootWait {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMBootWait();
+	my $value = $xml -> getOEMBootWait_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2803,9 +3021,9 @@ sub test_getOEMBootWait {
 }
 
 #==========================================
-# test_getOEMKiwiInitrd
+# test_getOEMKiwiInitrd_legacy
 #------------------------------------------
-sub test_getOEMKiwiInitrd {
+sub test_getOEMKiwiInitrd_legacy {
 	# ...
 	# Verify proper return of getOEMKiwiInitrd method
 	# ---
@@ -2815,7 +3033,7 @@ sub test_getOEMKiwiInitrd {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMKiwiInitrd();
+	my $value = $xml -> getOEMKiwiInitrd_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2828,9 +3046,9 @@ sub test_getOEMKiwiInitrd {
 }
 
 #==========================================
-# test_getOEMPartitionInstall
+# test_getOEMPartitionInstall_legacy
 #------------------------------------------
-sub test_getOEMPartitionInstall {
+sub test_getOEMPartitionInstall_legacy {
 	# ...
 	# Verify proper return of getOEMPartitionInstall method
 	# ---
@@ -2840,7 +3058,7 @@ sub test_getOEMPartitionInstall {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMPartitionInstall();
+	my $value = $xml -> getOEMPartitionInstall_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2853,9 +3071,9 @@ sub test_getOEMPartitionInstall {
 }
 
 #==========================================
-# test_getOEMReboot
+# test_getOEMReboot_legacy
 #------------------------------------------
-sub test_getOEMReboot {
+sub test_getOEMReboot_legacy {
 	# ...
 	# Verify proper return of getOEMReboot method
 	# ---
@@ -2865,7 +3083,7 @@ sub test_getOEMReboot {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMReboot();
+	my $value = $xml -> getOEMReboot_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2878,9 +3096,9 @@ sub test_getOEMReboot {
 }
 
 #==========================================
-# test_getOEMRebootInter
+# test_getOEMRebootInter_legacy
 #------------------------------------------
-sub test_getOEMRebootInter {
+sub test_getOEMRebootInter_legacy {
 	# ...
 	# Verify proper return of getOEMRebootInter method
 	# ---
@@ -2890,7 +3108,7 @@ sub test_getOEMRebootInter {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMRebootInter();
+	my $value = $xml -> getOEMRebootInter_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2903,9 +3121,9 @@ sub test_getOEMRebootInter {
 }
 
 #==========================================
-# test_getOEMRecovery
+# test_getOEMRecovery_legacy
 #------------------------------------------
-sub test_getOEMRecovery {
+sub test_getOEMRecovery_legacy {
 	# ...
 	# Verify proper return of getOEMRecovery method
 	# ---
@@ -2915,7 +3133,7 @@ sub test_getOEMRecovery {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMRecovery();
+	my $value = $xml -> getOEMRecovery_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2928,9 +3146,9 @@ sub test_getOEMRecovery {
 }
 
 #==========================================
-# test_getOEMRecoveryID
+# test_getOEMRecoveryID_legacy
 #------------------------------------------
-sub test_getOEMRecoveryID {
+sub test_getOEMRecoveryID_legacy {
 	# ...
 	# Verify proper return of getOEMRecoveryID method
 	# ---
@@ -2940,7 +3158,7 @@ sub test_getOEMRecoveryID {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMRecoveryID();
+	my $value = $xml -> getOEMRecoveryID_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2953,9 +3171,9 @@ sub test_getOEMRecoveryID {
 }
 
 #==========================================
-# test_getOEMRecoveryInPlace
+# test_getOEMRecoveryInPlace_legacy
 #------------------------------------------
-sub test_getOEMRecoveryInPlace {
+sub test_getOEMRecoveryInPlace_legacy {
 	# ...
 	# Verify proper return of getOEMRecoveryInPlace method
 	# ---
@@ -2965,7 +3183,7 @@ sub test_getOEMRecoveryInPlace {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMRecoveryInPlace();
+	my $value = $xml -> getOEMRecoveryInPlace_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -2978,9 +3196,9 @@ sub test_getOEMRecoveryInPlace {
 }
 
 #==========================================
-# test_getOEMShutdown
+# test_getOEMShutdown_legacy
 #------------------------------------------
-sub test_getOEMShutdown {
+sub test_getOEMShutdown_legacy {
 	# ...
 	# Verify proper return of getOEMShutdown method
 	# ---
@@ -2990,7 +3208,7 @@ sub test_getOEMShutdown {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMShutdown();
+	my $value = $xml -> getOEMShutdown_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3003,9 +3221,9 @@ sub test_getOEMShutdown {
 }
 
 #==========================================
-# test_getOEMShutdownInter
+# test_getOEMShutdownInter_legacy
 #------------------------------------------
-sub test_getOEMShutdownInter {
+sub test_getOEMShutdownInter_legacy {
 	# ...
 	# Verify proper return of getOEMShutdownInter method
 	# ---
@@ -3015,7 +3233,7 @@ sub test_getOEMShutdownInter {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMShutdownInter();
+	my $value = $xml -> getOEMShutdownInter_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3028,9 +3246,9 @@ sub test_getOEMShutdownInter {
 }
 
 #==========================================
-# test_getOEMSilentBoot
+# test_getOEMSilentBoot_legacy
 #------------------------------------------
-sub test_getOEMSilentBoot {
+sub test_getOEMSilentBoot_legacy {
 	# ...
 	# Verify proper return of getOEMSilentBoot method
 	# ---
@@ -3040,7 +3258,7 @@ sub test_getOEMSilentBoot {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMSilentBoot();
+	my $value = $xml -> getOEMSilentBoot_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3053,9 +3271,9 @@ sub test_getOEMSilentBoot {
 }
 
 #==========================================
-# test_getOEMSwap
+# test_getOEMSwap_legacy
 #------------------------------------------
-sub test_getOEMSwap {
+sub test_getOEMSwap_legacy {
 	# ...
 	# Verify proper return of getOEMSwap method
 	# ---
@@ -3065,7 +3283,7 @@ sub test_getOEMSwap {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMSwap();
+	my $value = $xml -> getOEMSwap_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3078,9 +3296,9 @@ sub test_getOEMSwap {
 }
 
 #==========================================
-# test_getOEMSwapSize
+# test_getOEMSwapSize_legacy
 #------------------------------------------
-sub test_getOEMSwapSize {
+sub test_getOEMSwapSize_legacy {
 	# ...
 	# Verify proper return of getOEMSwapSize method
 	# ---
@@ -3090,7 +3308,7 @@ sub test_getOEMSwapSize {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMSwapSize();
+	my $value = $xml -> getOEMSwapSize_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3103,9 +3321,9 @@ sub test_getOEMSwapSize {
 }
 
 #==========================================
-# test_getOEMSystemSize
+# test_getOEMSystemSize_legacy
 #------------------------------------------
-sub test_getOEMSystemSize {
+sub test_getOEMSystemSize_legacy {
 	# ...
 	# Verify proper return of getOEMSystemSize method
 	# ---
@@ -3115,7 +3333,7 @@ sub test_getOEMSystemSize {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMSystemSize();
+	my $value = $xml -> getOEMSystemSize_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3128,9 +3346,9 @@ sub test_getOEMSystemSize {
 }
 
 #==========================================
-# test_getOEMUnattended
+# test_getOEMUnattended_legacy
 #------------------------------------------
-sub test_getOEMUnattended {
+sub test_getOEMUnattended_legacy {
 	# ...
 	# Verify proper return of getOEMUnattended method
 	# ---
@@ -3140,7 +3358,7 @@ sub test_getOEMUnattended {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMUnattended();
+	my $value = $xml -> getOEMUnattended_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3153,9 +3371,9 @@ sub test_getOEMUnattended {
 }
 
 #==========================================
-# test_getOEMUnattendedID
+# test_getOEMUnattendedID_legacy
 #------------------------------------------
-sub test_getOEMUnattendedID {
+sub test_getOEMUnattendedID_legacy {
 	# ...
 	# Verify proper return of getOEMUnattendedID method
 	# ---
@@ -3165,7 +3383,7 @@ sub test_getOEMUnattendedID {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getOEMUnattendedID();
+	my $value = $xml -> getOEMUnattendedID_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3178,9 +3396,9 @@ sub test_getOEMUnattendedID {
 }
 
 #==========================================
-# test_getOVFConfig
+# test_getOVFConfig_legacy
 #------------------------------------------
-sub test_getOVFConfig {
+sub test_getOVFConfig_legacy {
 	#...
 	# Verify proper return of the OVF data
 	#---
@@ -3190,7 +3408,7 @@ sub test_getOVFConfig {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %ovfConfig = $xml -> getOVFConfig();
+	my %ovfConfig = $xml -> getOVFConfig_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3217,9 +3435,67 @@ sub test_getOVFConfig {
 }
 
 #==========================================
-# test_getPXEDeployBlockSize
+# test_getPXEConfig
 #------------------------------------------
-sub test_getPXEDeployBlockSize {
+sub test_getPXEConfig {
+	# ...
+	# Test the getPXEConfig method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'pxeSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $pxeConfObj = $xml -> getPXEConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $blockS   = $pxeConfObj -> getBlocksize();
+	my $confArch = $pxeConfObj -> getConfigurationArch();
+	my $confDest = $pxeConfObj -> getConfigurationDestination();
+	my $confSrc  = $pxeConfObj -> getConfigurationSource();
+	my $target   = $pxeConfObj -> getDevice();
+	my $initrd   = $pxeConfObj -> getInitrd();
+	my $kernel   = $pxeConfObj -> getKernel();
+	my $mntP     = $pxeConfObj -> getPartitionMountpoint(2);
+	my $partN    = $pxeConfObj -> getPartitionNumber(2);
+	my $partS    = $pxeConfObj -> getPartitionSize(2);
+	my $partT    = $pxeConfObj -> getPartitionTarget(2);
+	my $partTy   = $pxeConfObj -> getPartitionType(2);
+	my $server   = $pxeConfObj -> getServer();
+	my $timeout  = $pxeConfObj -> getTimeout();
+	my $unionRO  = $pxeConfObj -> getUnionRO();
+	my $unionRW  = $pxeConfObj -> getUnionRW();
+	my $unionT   = $pxeConfObj -> getUnionType();
+	$this -> assert_str_equals('4096', $blockS);
+	my @expectedArch = qw /x86_64 ix86 armv7l ppc64 ppc/;
+	$this -> assert_array_equal(\@expectedArch, $confArch);
+	$this -> assert_str_equals('target', $confDest);
+	$this -> assert_str_equals('installSource', $confSrc);
+	$this -> assert_str_equals('/dev/sda', $target);
+	$this -> assert_str_equals('/pxeSetup/specialInitrd', $initrd);
+	$this -> assert_str_equals('/pxeSetup/specialKernel', $kernel);
+	$this -> assert_str_equals('/', $mntP);
+	$this -> assert_equals(2, $partN);
+	$this -> assert_str_equals('image', $partS);
+	$this -> assert_str_equals('true', $partT);
+	$this -> assert_str_equals('L', $partTy);
+	$this -> assert_str_equals('192.168.100.2', $server);
+	$this -> assert_str_equals('20', $timeout);
+	$this -> assert_str_equals('/dev/sda2', $unionRO);
+	$this -> assert_str_equals('/dev/sda3', $unionRW);
+	$this -> assert_str_equals('clicfs', $unionT);
+	return;
+}
+
+#==========================================
+# test_getPXEDeployBlockSize_legacy
+#------------------------------------------
+sub test_getPXEDeployBlockSize_legacy {
 	# ...
 	# Verify proper return of getPXEDeployBlockSize method
 	# ---
@@ -3229,7 +3505,7 @@ sub test_getPXEDeployBlockSize {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployBlockSize();
+	my $value = $xml -> getPXEDeployBlockSize_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3242,9 +3518,9 @@ sub test_getPXEDeployBlockSize {
 }
 
 #==========================================
-# test_getPXEDeployConfiguration
+# test_getPXEDeployConfiguration_legacy
 #------------------------------------------
-sub test_getPXEDeployConfiguration {
+sub test_getPXEDeployConfiguration_legacy {
 	# ...
 	# Verify proper return of getPXEDeployConfiguration method
 	# ---
@@ -3254,7 +3530,7 @@ sub test_getPXEDeployConfiguration {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %config = $xml -> getPXEDeployConfiguration();
+	my %config = $xml -> getPXEDeployConfiguration_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3268,9 +3544,9 @@ sub test_getPXEDeployConfiguration {
 }
 
 #==========================================
-# test_getPXEDeployImageDevice
+# test_getPXEDeployImageDevice_legacy
 #------------------------------------------
-sub test_getPXEDeployImageDevice {
+sub test_getPXEDeployImageDevice_legacy {
 	# ...
 	# Verify proper return of getPXEDeployImageDevice method
 	# ---
@@ -3280,7 +3556,7 @@ sub test_getPXEDeployImageDevice {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployImageDevice();
+	my $value = $xml -> getPXEDeployImageDevice_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3293,9 +3569,9 @@ sub test_getPXEDeployImageDevice {
 }
 
 #==========================================
-# test_getPXEDeployInitrd
+# test_getPXEDeployInitrd_legacy
 #------------------------------------------
-sub test_getPXEDeployInitrd {
+sub test_getPXEDeployInitrd_legacy {
 	# ...
 	# Verify proper return of getPXEDeployInitrd method
 	# ---
@@ -3305,7 +3581,7 @@ sub test_getPXEDeployInitrd {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployInitrd();
+	my $value = $xml -> getPXEDeployInitrd_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3318,9 +3594,9 @@ sub test_getPXEDeployInitrd {
 }
 
 #==========================================
-# test_getPXEDeployKernel
+# test_getPXEDeployKernel_legacy
 #------------------------------------------
-sub test_getPXEDeployKernel {
+sub test_getPXEDeployKernel_legacy {
 	# ...
 	# Verify proper return of getPXEDeployKernel method
 	# ---
@@ -3330,7 +3606,7 @@ sub test_getPXEDeployKernel {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployKernel();
+	my $value = $xml -> getPXEDeployKernel_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3343,9 +3619,9 @@ sub test_getPXEDeployKernel {
 }
 
 #==========================================
-# test_getPXEDeployPartitions
+# test_getPXEDeployPartitions_legacy
 #------------------------------------------
-sub test_getPXEDeployPartitions {
+sub test_getPXEDeployPartitions_legacy {
 	# ...
 	# Verify proper return of getPXEDeployPartitions method
 	# ---
@@ -3355,7 +3631,7 @@ sub test_getPXEDeployPartitions {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @partitions = $xml -> getPXEDeployPartitions();
+	my @partitions = $xml -> getPXEDeployPartitions_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3375,9 +3651,9 @@ sub test_getPXEDeployPartitions {
 }
 
 #==========================================
-# test_getPXEDeployServer
+# test_getPXEDeployServer_legacy
 #------------------------------------------
-sub test_getPXEDeployServer {
+sub test_getPXEDeployServer_legacy {
 	# ...
 	# Verify proper return of getPXEDeployServer method
 	# ---
@@ -3387,7 +3663,7 @@ sub test_getPXEDeployServer {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployServer();
+	my $value = $xml -> getPXEDeployServer_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3400,9 +3676,9 @@ sub test_getPXEDeployServer {
 }
 
 #==========================================
-# test_getPXEDeployTimeout
+# test_getPXEDeployTimeout_legacy
 #------------------------------------------
-sub test_getPXEDeployTimeout {
+sub test_getPXEDeployTimeout_legacy {
 	# ...
 	# Verify proper return of getPXEDeployTimeout method
 	# ---
@@ -3412,7 +3688,7 @@ sub test_getPXEDeployTimeout {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployTimeout();
+	my $value = $xml -> getPXEDeployTimeout_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3425,9 +3701,9 @@ sub test_getPXEDeployTimeout {
 }
 
 #==========================================
-# test_getPXEDeployUnionConfig
+# test_getPXEDeployUnionConfig_legacy
 #------------------------------------------
-sub test_getPXEDeployUnionConfig {
+sub test_getPXEDeployUnionConfig_legacy {
 	# ...
 	# Verify proper return of getPXEDeployUnionConfig method
 	# ---
@@ -3437,7 +3713,7 @@ sub test_getPXEDeployUnionConfig {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %unionConfig = $xml -> getPXEDeployUnionConfig();
+	my %unionConfig = $xml -> getPXEDeployUnionConfig_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3561,6 +3837,206 @@ sub test_getPackageNodeList {
 	$this -> assert_array_equal(\@expectedPats, \@patterns);
 	return;
 }
+
+#==========================================
+# test_getPreferences
+#------------------------------------------
+sub test_getPreferences {
+	# ...
+	# Verify that a proper PreferenceData object is returned
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $prefDataObj = $xml -> getPreferences();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify some of the data, complete data verification is accomplished
+	# with the unit test for the PreferenceData object
+	my $blTheme = $prefDataObj -> getBootLoaderTheme();
+	$this -> assert_str_equals('silverlining', $blTheme);
+	my $ver = $prefDataObj -> getVersion();
+	$this -> assert_str_equals('13.20.26', $ver);
+	return;
+}
+
+#==========================================
+# test_getPreferencesProfiles
+#------------------------------------------
+sub test_getPreferencesProfiles {
+	# ...
+	# Verify that a proper PreferenceData object is returned when
+	# preference data in profiles need to be merged
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $prefDataObj = $xml -> getPreferences();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify some of the data, complete data verification is accomplished
+	# with the unit test for the PreferenceData object
+	# Should have data for settings in the default profile and data for
+	# settings in profA
+	my $blTheme = $prefDataObj -> getBootLoaderTheme();
+	$this -> assert_str_equals('silverlining', $blTheme);
+	my $ver = $prefDataObj -> getVersion();
+	$this -> assert_str_equals('0.0.1', $ver);
+	return;
+}
+
+#==========================================
+# test_getPreferencesProfilesNoPref
+#------------------------------------------
+sub test_getPreferencesProfilesNoPref {
+	# ...
+	# Verify that a proper PreferenceData object is returned when
+	# getting preferences for a profile that has no specific
+	# preferences settings, i.e. the dafult should be returned
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @newProfs = ( 'profD' );
+	$xml = $xml -> setSelectionProfileNames(\@newProfs);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profD', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	my $prefDataObj = $xml -> getPreferences();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify some of the data, complete data verification is accomplished
+	# with the unit test for the PreferenceData object
+	# Should have data for settings in the default profile
+	my $blTheme = $prefDataObj -> getBootLoaderTheme();
+	$this -> assert_null($blTheme);
+	my $locale = $prefDataObj -> getLocale();
+	$this -> assert_str_equals('en_US', $locale);
+	my $ver = $prefDataObj -> getVersion();
+	$this -> assert_str_equals('0.0.1', $ver);
+	return;
+}
+
+#==========================================
+# test_getPreferencesProfilesWithConflict
+#------------------------------------------
+sub test_getPreferencesProfilesWithConflict {
+	# ...
+	# Verify that getPreferences reports the proper error for
+	# preference data in profiles that conflicts
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @newProfs = qw /profA profC/;
+	$xml = $xml -> setSelectionProfileNames(\@newProfs);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA, profC', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $prefDataObj = $xml -> getPreferences();
+	$msg = $kiwi -> getMessage();
+	my $expected = 'Error merging preferences data, found data for '
+		. "'defaultroot' in both preference definitions, ambiguous "
+		. 'operation.';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($prefDataObj);
+	return;
+}
+
+#==========================================
+# test_getPreferencesProfilesWithConflictType
+#------------------------------------------
+sub test_getPreferencesProfilesWithConflictType {
+	# ...
+	# Verify that getPreferences reports the proper error for
+	# preference data in profiles that conflicts for type definitions
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my @newProfs = ( 'profB' );
+	$xml = $xml -> setSelectionProfileNames(\@newProfs);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $prefDataObj = $xml -> getPreferences();
+	$msg = $kiwi -> getMessage();
+	my $expected = 'Error merging preferences data, found definition for '
+		. "type 'vmx' in both preference definitions, ambiguous operation.";
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($prefDataObj);
+	return;
+}
+
 #==========================================
 # test_getProfiles
 #------------------------------------------
@@ -3599,11 +4075,11 @@ sub test_getProfiles {
 }
 
 #==========================================
-# test_getRPMCheckSignatures
+# test_getRPMCheckSignatures_legacy
 #------------------------------------------
-sub test_getRPMCheckSignaturesFalse {
+sub test_getRPMCheckSignatures_legacyFalse {
 	# ...
-	# Verify proper return of getRPMCheckSignatures method
+	# Verify proper return of getRPMCheckSignatures_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -3611,7 +4087,7 @@ sub test_getRPMCheckSignaturesFalse {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getRPMCheckSignatures();
+	my $value = $xml -> getRPMCheckSignatures_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3624,11 +4100,11 @@ sub test_getRPMCheckSignaturesFalse {
 }
 
 #==========================================
-# test_getRPMExcludeDocs
+# test_getRPMExcludeDocs_legacy
 #------------------------------------------
-sub test_getRPMExcludeDocsFalse {
+sub test_getRPMExcludeDocs_legacyFalse {
 	# ...
-	# Verify proper return of getRPMExcludeDocs method
+	# Verify proper return of getRPMExcludeDocs_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -3636,7 +4112,7 @@ sub test_getRPMExcludeDocsFalse {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getRPMExcludeDocs();
+	my $value = $xml -> getRPMExcludeDocs_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3649,11 +4125,11 @@ sub test_getRPMExcludeDocsFalse {
 }
 
 #==========================================
-# test_getRPMForce
+# test_getRPMForce_legacy
 #------------------------------------------
-sub test_getRPMForceFalse {
+sub test_getRPMForce_legacyFalse {
 	# ...
-	# Verify proper return of getRPMForce method
+	# Verify proper return of getRPMForce_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -3661,7 +4137,7 @@ sub test_getRPMForceFalse {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getRPMForce();
+	my $value = $xml -> getRPMForce_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3674,11 +4150,11 @@ sub test_getRPMForceFalse {
 }
 
 #==========================================
-# test_getRPMCheckSignatures
+# test_getRPMCheckSignatures_legacy
 #------------------------------------------
-sub test_getRPMCheckSignaturesTrue {
+sub test_getRPMCheckSignatures_legacyTrue {
 	# ...
-	# Verify proper return of getRPMCheckSignatures method
+	# Verify proper return of getRPMCheckSignatures_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -3686,7 +4162,7 @@ sub test_getRPMCheckSignaturesTrue {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getRPMCheckSignatures();
+	my $value = $xml -> getRPMCheckSignatures_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3699,11 +4175,11 @@ sub test_getRPMCheckSignaturesTrue {
 }
 
 #==========================================
-# test_getRPMExcludeDocs
+# test_getRPMExcludeDocs_legacy
 #------------------------------------------
-sub test_getRPMExcludeDocsTrue {
+sub test_getRPMExcludeDocs_legacyTrue {
 	# ...
-	# Verify proper return of getRPMExcludeDocs method
+	# Verify proper return of getRPMExcludeDocs_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -3711,7 +4187,7 @@ sub test_getRPMExcludeDocsTrue {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getRPMExcludeDocs();
+	my $value = $xml -> getRPMExcludeDocs_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3724,11 +4200,11 @@ sub test_getRPMExcludeDocsTrue {
 }
 
 #==========================================
-# test_getRPMForce
+# test_getRPMForce_legacy
 #------------------------------------------
-sub test_getRPMForceTrue {
+sub test_getRPMForce_legacyTrue {
 	# ...
-	# Verify proper return of getRPMForce method
+	# Verify proper return of getRPMForce_legacy method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -3736,7 +4212,7 @@ sub test_getRPMForceTrue {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getRPMForce();
+	my $value = $xml -> getRPMForce_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4051,9 +4527,44 @@ sub test_getRepositories_legacy {
 }
 
 #==========================================
-# test_getSplitPersistentExceptions
+# test_getSplitConfig
 #------------------------------------------
-sub test_getSplitPersistentExceptions {
+sub test_getSplitConfig {
+	# ...
+	# Test the getSplitConfig method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'splitSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $spltConfObj = $xml -> getSplitConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $persExcept = $spltConfObj -> getPersistentExceptions('x86_64');
+	my $persFiles  = $spltConfObj -> getPersistentFiles('x86_64');
+	my $tmpExcept  = $spltConfObj -> getTemporaryExceptions('x86_64');
+	my $tmpFiles   = $spltConfObj -> getTemporaryFiles('x86_64');
+	my @persExceptExpect = ( 'bar' );;
+	my @persFilesExpect = qw /bar64 genericBar/;
+	my @tmpExceptExpect = qw /foo anotherFoo/;
+	my @tmpFilesExpect = qw /foo64 genericFoo/;
+	$this -> assert_array_equal(\@persExceptExpect, $persExcept);
+	$this -> assert_array_equal(\@persFilesExpect, $persFiles);
+	$this -> assert_array_equal(\@tmpExceptExpect, $tmpExcept);
+	$this -> assert_array_equal(\@tmpFilesExpect, $tmpFiles);
+	return;
+}
+
+#==========================================
+# test_getSplitPersistentExceptions_legacy
+#------------------------------------------
+sub test_getSplitPersistentExceptions_legacy {
 	# ...
 	# Verify proper return of getSplitPersistentExceptions method
 	# ---
@@ -4063,7 +4574,7 @@ sub test_getSplitPersistentExceptions {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @persExcept = $xml -> getSplitPersistentExceptions();
+	my @persExcept = $xml -> getSplitPersistentExceptions_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4077,9 +4588,9 @@ sub test_getSplitPersistentExceptions {
 }
 
 #==========================================
-# test_getSplitPersistentFiles
+# test_getSplitPersistentFiles_legacy
 #------------------------------------------
-sub test_getSplitPersistentFiles {
+sub test_getSplitPersistentFiles_legacy {
 	# ...
 	# Verify proper return of getSplitPersistentFiles method
 	# ---
@@ -4089,7 +4600,7 @@ sub test_getSplitPersistentFiles {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @persFiles = $xml -> getSplitPersistentFiles();
+	my @persFiles = $xml -> getSplitPersistentFiles_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4103,9 +4614,9 @@ sub test_getSplitPersistentFiles {
 }
 
 #==========================================
-# test_getSplitTempExceptions
+# test_getSplitTempExceptions_legacy
 #------------------------------------------
-sub test_getSplitTempExceptions {
+sub test_getSplitTempExceptions_legacy {
 	# ...
 	# Verify proper return of getSplitTempExceptions method
 	# ---
@@ -4115,7 +4626,7 @@ sub test_getSplitTempExceptions {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @tmpExcept = $xml -> getSplitTempExceptions();
+	my @tmpExcept = $xml -> getSplitTempExceptions_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4129,9 +4640,9 @@ sub test_getSplitTempExceptions {
 }
 
 #==========================================
-# test_getSplitTempFiles
+# test_getSplitTempFiles_legacy
 #------------------------------------------
-sub test_getSplitTempFiles {
+sub test_getSplitTempFiles_legacy {
 	# ...
 	# Verify proper return of getSplitTempFiles method
 	# ---
@@ -4141,7 +4652,7 @@ sub test_getSplitTempFiles {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @tmpFiles = $xml -> getSplitTempFiles();
+	my @tmpFiles = $xml -> getSplitTempFiles_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4275,6 +4786,51 @@ sub test_getStripTools {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw /megacli virt-mgr/;
 	$this -> assert_array_equal(\@expectedNames, \@toolFiles);
+	return;
+}
+
+#==========================================
+# test_getSystemDiskConfig
+#------------------------------------------
+sub test_getSystemDiskConfig {
+	# ...
+	# Test the getSystemDiskConfig method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'lvmConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $sysDiskObj = $xml -> getSystemDiskConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $vgName = $sysDiskObj -> getVGName();
+	$this -> assert_str_equals('test_Volume', $vgName);
+	my $volIDs = $sysDiskObj -> getVolumeIDs();
+	my @expectedIDs = ( 1, 2, 3, 4);
+	$this -> assert_array_equal(\@expectedIDs, $volIDs);
+	for my $id (@expectedIDs) {
+		my $free = $sysDiskObj -> getVolumeFreespace($id);
+		my $name = $sysDiskObj -> getVolumeName($id);
+		my $size = $sysDiskObj -> getVolumeSize($id);
+	if ($name eq 'home') {
+		$this -> assert_equals(2048, $free);
+	}
+	if ($name eq 'tmp') {
+		$this -> assert_str_equals('all', $free);
+	}
+	if ($name eq 'usr') {
+		$this -> assert_equals(4096, $size);
+	}
+	if ($name eq 'var') {
+		$this -> assert_equals(50, $size);
+	}
+	}
 	return;
 }
 
@@ -4433,9 +4989,142 @@ sub test_getUsers {
 }
 
 #==========================================
-# test_getVMwareConfig
+# test_getVMachineConfigOVF
 #------------------------------------------
-sub test_getVMwareConfig {
+sub test_getVMachineConfigOVF {
+	# ...
+	# Test the getVMachineConfig method with a config set up for OVF
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'ovfConfigSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $vmConfig = $xml -> getVMachineConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $desMem = $vmConfig -> getDesiredMemory();
+	my $maxMem = $vmConfig -> getMaxMemory();
+	my $mem    = $vmConfig -> getMemory();
+	my $minMem = $vmConfig -> getMinMemory();
+	my $desCPU = $vmConfig -> getDesiredCPUCnt();
+	my $maxCPU = $vmConfig -> getMaxCPUCnt();
+	my $cpu    = $vmConfig -> getNumCPUs();
+	my $minCPU = $vmConfig -> getMinCPUCnt();
+	my $oType  = $vmConfig -> getOVFType();
+	my $diskID = $vmConfig -> getSystemDiskDevice();
+	my $diskT  = $vmConfig -> getSystemDiskType();
+	my $nicIf  = $vmConfig -> getNICInterface(1);
+	$this -> assert_str_equals('1024', $desMem);
+	$this -> assert_str_equals('2048', $maxMem);
+	$this -> assert_str_equals('1024', $mem);
+	$this -> assert_str_equals('512', $minMem);
+	$this -> assert_str_equals('2', $desCPU);
+	$this -> assert_str_equals('4', $maxCPU);
+	$this -> assert_str_equals('2', $cpu);
+	$this -> assert_str_equals('1', $minCPU);
+	$this -> assert_str_equals('powervm', $oType);
+	$this -> assert_str_equals('/dev/sda', $diskID);
+	$this -> assert_str_equals('scsi', $diskT);
+	$this -> assert_str_equals('eth0', $nicIf);
+	return;
+}
+
+#==========================================
+# test_getVMachineConfigVMW
+#------------------------------------------
+sub test_getVMachineConfigVMW {
+	# ...
+	# Test the getVMachineConfig method with a config set up for VMware
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'vmwareConfigSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $vmConfig = $xml -> getVMachineConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $arch    = $vmConfig -> getArch();
+	my $confEnt = $vmConfig -> getConfigEntries();
+	my $dvdID   = $vmConfig -> getDVDID();
+	my $dvdCnt  = $vmConfig -> getDVDController();
+	my $diskCnt = $vmConfig -> getSystemDiskController();
+	my $diskID  = $vmConfig -> getSystemDiskID();
+	my $guest   = $vmConfig -> getGuestOS();
+	my $hwver   = $vmConfig -> getHardwareVersion();
+	my $mem     = $vmConfig -> getMemory();
+	my $numCPU  = $vmConfig -> getNumCPUs();
+	my $nicIF   = $vmConfig -> getNICInterface(1);
+	my $nicDr   = $vmConfig -> getNICDriver(1);
+	my $nicMod  = $vmConfig -> getNICMode(1);
+	$this -> assert_str_equals('x86_64', $arch);
+	my @expectedOpts = qw / ola pablo /;
+	$this -> assert_array_equal(\@expectedOpts, $confEnt);
+	$this -> assert_str_equals('2', $dvdID);
+	$this -> assert_str_equals('ide', $dvdCnt);
+	$this -> assert_str_equals('1', $diskID);
+	$this -> assert_str_equals('scsi', $diskCnt);
+	$this -> assert_str_equals('sles', $guest);
+	$this -> assert_str_equals('7', $hwver);
+	$this -> assert_str_equals('1024', $mem);
+	$this -> assert_str_equals('2', $numCPU);
+	$this -> assert_str_equals('eth0', $nicIF);
+	$this -> assert_str_equals('e1000', $nicDr);
+	$this -> assert_str_equals('dhcp', $nicMod);
+	return;
+}
+
+#==========================================
+# test_getVMachineConfigXen
+#------------------------------------------
+sub test_getVMachineConfigXen {
+	# ...
+	# Test the getVMachineConfig method with a config set up for Xen
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'xenConfigSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $vmConfig = $xml -> getVMachineConfig();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $confEnt = $vmConfig -> getConfigEntries();
+	my $dev     = $vmConfig -> getSystemDiskDevice();
+	my $dom     = $vmConfig -> getDomain();
+	my $mem     = $vmConfig -> getMemory();
+	my $numCPU  = $vmConfig -> getNumCPUs();
+	my $nicMac  = $vmConfig -> getNICMAC(1);
+	my @expectedOpts = qw / foo bar /;
+	$this -> assert_array_equal(\@expectedOpts, $confEnt);
+	$this -> assert_str_equals('/dev/xvda', $dev);
+	$this -> assert_str_equals('domU', $dom);
+	$this -> assert_str_equals('128', $mem);
+	$this -> assert_str_equals('3', $numCPU);
+	$this -> assert_str_equals('00:0C:6E:AA:57:2F', $nicMac);
+	return ;
+}
+
+#==========================================
+# test_getVMwareConfig_legacy
+#------------------------------------------
+sub test_getVMwareConfig_legacy {
 	# ...
 	# Verify proper return of VMWare configuration data
 	# ---
@@ -4445,7 +5134,7 @@ sub test_getVMwareConfig {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %vmConfig = $xml -> getVMwareConfig();
+	my %vmConfig = $xml -> getVMwareConfig_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4475,9 +5164,9 @@ sub test_getVMwareConfig {
 }
 
 #==========================================
-# test_getXenConfig
+# test_getXenConfig_legacy
 #------------------------------------------
-sub test_getXenConfig {
+sub test_getXenConfig_legacy {
 	# ...
 	# Verify proper return of Xen  configuration data
 	# ---
@@ -4487,7 +5176,7 @@ sub test_getXenConfig {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my %vmConfig = $xml -> getXenConfig();
+	my %vmConfig = $xml -> getXenConfig_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4666,7 +5355,7 @@ sub test_packageManagerInfoHasConfigValue {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $pkgMgr = $xml -> getPackageManager();
+	my $pkgMgr = $xml -> getPackageManager_legacy();
 	$this -> assert_str_equals('zypper', $pkgMgr);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -4728,7 +5417,7 @@ sub test_packageManagerSet_valid {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
-	my $PkgMgr= $xml -> getPackageManager();
+	my $PkgMgr= $xml -> getPackageManager_legacy();
 	$this -> assert_str_equals('smart', $PkgMgr);
 	return;
 }
@@ -4748,7 +5437,7 @@ sub test_packageManagerInfoHasProfs {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef,\@profiles,$this->{cmdL}
 	);
-	my $pkgMgr = $xml -> getPackageManager();
+	my $pkgMgr = $xml -> getPackageManager_legacy();
 	$this -> assert_str_equals('smart', $pkgMgr);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): specPkgMgr', $msg);
@@ -4766,7 +5455,7 @@ sub test_packageManagerInfoHasProfs {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
-	my $PkgMgr= $xml -> getPackageManager();
+	my $PkgMgr= $xml -> getPackageManager_legacy();
 	$this -> assert_str_equals('yum', $PkgMgr);
 	return;
 }
@@ -4839,6 +5528,129 @@ sub test_setArchInvalid {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	return;
+}
+
+#==========================================
+# test_setBuildType
+#------------------------------------------
+sub test_setBuildType {
+	# ...
+	# Test the setBuildType method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$xml = $xml -> setBuildType('vmx');
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $typeInfo = $xml -> getImageType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify that we got the expected type
+	my $imageType = $typeInfo -> getImageType();
+	$this -> assert_str_equals('vmx', $imageType);
+	return;
+}
+
+#==========================================
+# test_setBuildTypeInvalidArg
+#------------------------------------------
+sub test_setBuildTypeInvalidArg {
+	# ...
+	# Test the setBuildType method with an invalid argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $res = $xml -> setBuildType('iso');
+	$msg = $kiwi -> getMessage();
+	my $expected = 'setBuildType: no type configuration exists for the '
+			. "given type 'iso' in the current active profiles.";
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $typeInfo = $xml -> getImageType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify that we got the expected type
+	my $imageType = $typeInfo -> getImageType();
+	$this -> assert_str_equals('oem', $imageType);
+	return;
+}
+
+#==========================================
+# test_setBuildTypeNoArg
+#------------------------------------------
+sub test_setBuildTypeNoArg {
+	# ...
+	# Test the setBuildType method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $res = $xml -> setBuildType();
+	$msg = $kiwi -> getMessage();
+	my $expected = 'setBuildType: no type name given, retaining current '
+		. 'build type setting.';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $typeInfo = $xml -> getImageType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify that we got the expected type
+	my $imageType = $typeInfo -> getImageType();
+	$this -> assert_str_equals('oem', $imageType);
 	return;
 }
 
