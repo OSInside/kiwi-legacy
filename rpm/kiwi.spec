@@ -47,6 +47,7 @@ BuildRequires:  btrfsprogs
 BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
 BuildRequires:  perl-Test-Unit
+BuildRequires:  perl-Readonly
 BuildRequires:  squashfs
 BuildRequires:  zypper
 %endif
@@ -60,6 +61,7 @@ Requires:       perl-Config-IniFiles
 Requires:       perl-XML-LibXML
 Requires:       perl-XML-LibXML-Common
 Requires:       perl-XML-SAX
+Requires:       perl-Readonly
 Requires:       perl-libwww-perl
 Requires:       rsync
 Requires:       screen
