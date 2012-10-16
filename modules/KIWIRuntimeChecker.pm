@@ -400,12 +400,11 @@ sub __checkPackageManagerExists {
 #------------------------------------------
 sub __checkKernelVersionToolExists {
 	# ...
-	# Check that the build host has get_kernel_version. This is
-	# a suse extension but the kiwi git provides the source
-	# So other distros can at least install it
+	# Check that the build host has kversion provided
+	# by kiwi-tools
 	# ---
 	my $this = shift;
-	my $tool = "get_kernel_version";
+	my $tool = "kversion";
 	my $haveExec = $this -> {locator} -> getExecPath($tool);
 	if (! $haveExec) {
 		my $msg = "Executable $tool could not be found";

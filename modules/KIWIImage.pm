@@ -3927,7 +3927,7 @@ sub extractLinux {
 			$kiwi -> failed ();
 			return;
 		}
-		my $kernel = qxx ("get_kernel_version $file"); chomp $kernel;
+		my $kernel = qxx ("kversion $file"); chomp $kernel;
 		if ($kernel eq "") {
 			$kernel = "no-version-found";
 		}
