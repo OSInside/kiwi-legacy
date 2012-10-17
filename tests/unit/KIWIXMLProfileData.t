@@ -1,5 +1,5 @@
 #================
-# FILE          : KIWIXMLPreferenceData.t
+# FILE          : KIWIXMLProfileData.t
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
@@ -8,7 +8,7 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test driver for the KIWIXMLPreferenceData module.
+# DESCRIPTION   : Unit test driver for the KIWIXMLProfileData module.
 #               :
 # STATUS        : Development
 #----------------
@@ -28,4 +28,4 @@ our $kiwi   = new KIWILog ();
 our $global = new KIWIGlobals($kiwi);
 
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiXMLPreferenceData');
+$runner->start( 'Test::kiwiXMLProfileData');

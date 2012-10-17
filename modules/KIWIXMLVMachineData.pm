@@ -23,6 +23,7 @@ use warnings;
 use Scalar::Util qw /looks_like_number/;
 require Exporter;
 
+use base qw /KIWIXMLDataBase/;
 #==========================================
 # Exports
 #------------------------------------------
@@ -83,9 +84,8 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my $this  = {};
 	my $class = shift;
-	bless $this,$class;
+	my $this  = $class->SUPER::new(@_);
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
@@ -94,16 +94,21 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	$this->{kiwi} = $kiwi;
-	if ($init && ref($init) ne 'HASH') {
-		my $msg = 'Expecting a hash ref as second argument if provided';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
+	my %keywords = map { ($_ => 1) } qw(
+		HWversion arch des_cpu des_memory domain guestOS max_cpu max_memory
+		memory min_cpu min_memory ncpus ovftype vmconfig_entries vmdisks
+		vmdvd vmnics
+	);
+	$this->{supportedKeywords} = \%keywords;
+	if (! $this -> __isInitHashRef($init) ) {
+		return;
+	}
+	if (! $this -> __areKeywordArgsValid($init) ) {
 		return;
 	}
 	if ($init) {
 		# Check for unsupported entries
-		if (! $this -> __isInitHashValid($init)) {
+		if (! $this -> __isInitConsistent($init)) {
 			return;
 		}
 		$this->{HWversion}     = $init->{HWversion};
@@ -1120,34 +1125,6 @@ sub __areNICSettingsSupported {
 }
 
 #==========================================
-# __hasUnsuportedVMSettings
-#------------------------------------------
-sub __hasUnsuportedVMSettings {
-	# ...
-	# Verify that the hash has only supported settings
-	# ---
-	my $this = shift;
-	my $init = shift;
-	my $kiwi = $this->{kiwi};
-	my %initStruct = %{$init};
-	my %supported = map { ($_ => 1) } qw(
-		HWversion arch des_cpu des_memory domain guestOS max_cpu max_memory
-		memory min_cpu min_memory ncpus ovftype vmconfig_entries vmdisks
-		vmdvd vmnics
-	);
-	for my $key (keys %initStruct) {
-		if (! $supported{$key} ) {
-			my $msg = 'Unsupported option in initialization structure '
-			. "found '$key'";
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return 1;
-		}
-	}
-	return;
-}
-
-#==========================================
 # __interfaceIsUnique
 #------------------------------------------
 sub __interfaceIsUnique {
@@ -1348,9 +1325,9 @@ sub __isNICInitValid {
 }
 
 #==========================================
-# __isInitHashValid
+# __isInitConsistent
 #------------------------------------------
-sub __isInitHashValid {
+sub __isInitConsistent {
 	# ...
 	# Verify that the initialization hash given to the constructor meets
 	# all consistency and data criteria.
@@ -1358,9 +1335,6 @@ sub __isInitHashValid {
 	my $this = shift;
 	my $init = shift;
 	my $kiwi = $this->{kiwi};
-	if ($this -> __hasUnsuportedVMSettings($init) ) {
-		return;
-	}
 	if ($init->{arch}) {
 		my $arch = $init->{arch};
 		if (! $this -> __isArchValid($arch)) {

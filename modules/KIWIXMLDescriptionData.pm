@@ -22,6 +22,7 @@ use strict;
 use warnings;
 require Exporter;
 
+use base qw /KIWIXMLDataBase/;
 #==========================================
 # Exports
 #------------------------------------------
@@ -37,36 +38,34 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my $this  = {};
 	my $class = shift;
-	bless $this,$class;
+	my $this  = $class->SUPER::new(@_);
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi   = shift;
-	my $author = shift;
+	my $kiwi = shift;
+	my $init = shift;
 	#==========================================
-	# Store object data
+	# Argument checking and object data store
 	#------------------------------------------
-	$this->{kiwi} = $kiwi;
-	#==========================================
-	# Parameter processing, Store object data
-	#------------------------------------------
-	if (defined $author) {
-		if (ref $author eq 'HASH') {
-			$this->{author}        = $author->{author};
-			$this->{contact}       = $author->{contact};
-			$this->{specification} = $author->{specification};
-			# Use setType to get value checking
-			$this -> setType($author->{type});
-		} else {
-			$this->{author}        = $author;
-			$this->{contact}       = shift;
-			$this->{specification} = shift;
-			my $type = shift;
-			# Use setType to get value checking
-			$this -> setType($type);
+	my %keywords = map { ($_ => 1) } qw(
+		author contact specification type
+	);
+	$this->{supportedKeywords} = \%keywords;
+	if (! $this -> __isInitHashRef($init) ) {
+		return;
+	}
+	if (! $this -> __areKeywordArgsValid($init) ) {
+		return;
+	}
+	if ($init) {
+		if (! $this -> __isInitConsistent($init) )  {
+			return;
 		}
+		$this->{author}        = $init->{author};
+		$this->{contact}       = $init->{contact};
+		$this->{specification} = $init->{specification};
+		$this->{type}          = $init->{type};
 	}
 	return $this;
 }
@@ -184,13 +183,7 @@ sub setType {
 	# ---
 	my $this = shift;
 	my $type = shift;
-	if (! defined $type) {
-		return;
-	}
-	if ($type ne 'system' && $type ne 'boot') {
-		my $kiwi = $this->{kiwi};
-		$kiwi->warning("Attempting to set invalid description type '$type'");
-		$kiwi->oops();
+	if (! $this -> __isValidType($type, 'setType')) {
 		return;
 	}
 	$this->{type} = $type;
@@ -217,6 +210,65 @@ sub __isObjectValid {
 			$kiwi->oops();
 			return;
 		}
+	}
+	return 1;
+}
+
+#==========================================
+# __isInitConsistent
+#------------------------------------------
+sub __isInitConsistent {
+	# ...
+	# Verify initialization consistency and validity requirements
+	# ---
+	my $this = shift;
+	my $init = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $init->{type} ) {
+		my $msg = 'KIWIXMLDescriptionData: no "type" specified in '
+			. 'initialization structure.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $this->__isValidType($init->{type}, 'object initialization')) {
+		return;
+	}
+	return 1;
+}
+
+#==========================================
+# __isValidType
+#------------------------------------------
+sub __isValidType {
+	# ...
+	# Verify that the given type is supported
+	# Verify that the given bootloader is supported
+	# ---
+	my $this   = shift;
+	my $type   = shift;
+	my $caller = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller ) {
+		my $msg = 'Internal error __isValidType called without '
+			. 'call origin argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if (! $type ) {
+		my $msg = "$caller: no description type specified, retaining "
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my %supported = map { ($_ => 1) } qw( boot system );
+	if (! $supported{$type} ) {
+		my $msg = "$caller: specified description type '$type' is not "
+			. 'supported.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
 	}
 	return 1;
 }

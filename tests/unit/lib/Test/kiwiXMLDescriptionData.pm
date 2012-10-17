@@ -46,38 +46,51 @@ sub test_ctor_argsIncomplete {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	# Test with a string arguments
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, 'me');
-	$this -> assert_not_null($descrpObj);
-	$this -> assert_null($descrpObj -> getAuthor());
-	my $expected = 'XMLDescriptionData object in invalid state';
+	my %init = (
+				author => 'me',
+				type   => 'boot'
+	);
+	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals($expected, $msg);
+	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('warning', $msgT);
+	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('oops', $state);
-	$this -> assert_null($descrpObj -> getContactInfo());
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($descrpObj);
+	my $res = $descrpObj -> getAuthor();
+	my $expected = 'XMLDescriptionData object in invalid state';
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
 	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('warning', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('oops', $state);
-	$this -> assert_null($descrpObj -> getSpecificationDescript());
+	$this -> assert_null($res);
+	$res = $descrpObj -> getContactInfo();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
 	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('warning', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('oops', $state);
-	$this -> assert_null($descrpObj -> getType());
+	$this -> assert_null($res);
+	$res = $descrpObj -> getSpecificationDescript();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
 	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('warning', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('oops', $state);
+	$this -> assert_null($res);
+	$res = $descrpObj -> getType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('warning', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('oops', $state);
+	$this -> assert_null($res);
 	return;
 }
 
@@ -144,21 +157,22 @@ sub test_ctor_invalidHashRef {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %args = ( author        => 'me',
+	my %init = ( author        => 'me',
 				 contact       => 'me@suse.com',
 				 specification => 'the test case',
 				 type          => 'pablo',
 			);
 	# Test with a string arguments
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
-	$this -> assert_not_null($descrpObj);
-	my $expected = "Attempting to set invalid description type 'pablo'";
+	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%init);
+	my $expected = 'object initialization: specified description type '
+		. "'pablo' is not supported.";
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('warning', $msgT);
+	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('oops', $state);
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($descrpObj);
 	return;
 }
 
@@ -207,80 +221,55 @@ sub test_ctor_noArgs {
 }
 
 #==========================================
-# test_ctor_typeArgInvalid
+# test_ctor_unsupportedKW
 #------------------------------------------
-sub test_ctor_typeArgInvalid {
+sub test_ctor_unsupportedKW {
 	# ...
-	# Test the DescriptionData constructor with an invalid string argument
+	# Test the DescriptionData constructor with an invalid init entry
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	# Test with a string arguments
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, 'me',
-												'me@suse.com',
-												'the test case',
-												'ola');
-	$this -> assert_not_null($descrpObj);
-	my $expected = "Attempting to set invalid description type 'ola'";
+	my %init = (
+				name => 'me',
+				type => 'boot'
+	);
+	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%init);
+
+	my $expected = 'KIWIXMLDescriptionData: Unsupported keyword argument '
+		. "'name' in initialization structure.";
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('warning', $msgT);
+	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('oops', $state);
-	$this -> assert_null($descrpObj -> getAuthor());
-	$expected = 'XMLDescriptionData object in invalid state';
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals($expected, $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('warning', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('oops', $state);
-	$this -> assert_null($descrpObj -> getContactInfo());
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals($expected, $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('warning', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('oops', $state);
-	$this -> assert_null($descrpObj -> getSpecificationDescript());
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals($expected, $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('warning', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('oops', $state);
-	$this -> assert_null($descrpObj -> getType());
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals($expected, $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('warning', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('oops', $state);
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($descrpObj);
 	return;
 }
 
 #==========================================
-# test_ctor_validStrings
+# test_ctor_wInit
 #------------------------------------------
-sub test_ctor_validStrings {
+sub test_ctor_wInit {
 	# ...
-	# Test the DescriptionData constructor with valid string args
+	# Test the DescriptionData constructor with valid init structure
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	# Test with a string arguments
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, 'me',
-												'me@suse.com',
-												'the test case',
-												'system');
-	$this -> assert_not_null($descrpObj);
+	my %init = (
+				author        => 'me',
+				contact       => 'me@suse.com',
+				specification => 'the test case',
+				type          => 'system'
+	);
+	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($descrpObj);
 	my $author = $descrpObj -> getAuthor();
 	$this -> assert_str_equals('me', $author);
 	$msg = $kiwi -> getMessage();

@@ -6,6 +6,7 @@ KIWIXMLFileData.t
 KIWIXMLOEMConfigData.t
 KIWIXMLPXEDeployData.t
 KIWIXMLPreferenceData.t
+KIWIXMLProfileData.t
 KIWIXMLRepositoryData.t
 KIWIXMLSplitData.t
 KIWIXMLSystemdiskData.t
