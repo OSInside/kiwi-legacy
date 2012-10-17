@@ -504,7 +504,7 @@ sub __getTree {
 			# profiles
 			#------------------------------------------
 			/^profiles/      && do {
-				my @profiles = $xml -> getProfiles ();
+				my @profiles = $xml -> getProfiles_legacy ();
 				if ((scalar @profiles) == 0) {
 					$kiwi -> info ("No profiles available\n");
 				} else {

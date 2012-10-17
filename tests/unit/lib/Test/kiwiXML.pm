@@ -332,7 +332,8 @@ sub test_addDriversToCurrentProf {
 	my @drvNames = qw /vboxsf epat dcdbas/;
 	my @drvsToAdd = ();
 	for my $drv (@drvNames) {
-		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, $drv);
+		my %init = ( name => $drv );
+		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, \%init);
 	}
 	$xml = $xml -> addDrivers(\@drvsToAdd);
 	$msg = $kiwi -> getMessage();
@@ -398,7 +399,8 @@ sub test_addDriversToDefault {
 	my @drvNames = qw /vboxsf epat dcdbas/;
 	my @drvsToAdd = ();
 	for my $drv (@drvNames) {
-		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, $drv);
+		my %init = ( name => $drv );
+		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, \%init);
 	}
 	$xml = $xml -> addDrivers(\@drvsToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
@@ -930,9 +932,11 @@ sub test_addRepositoriesDefault {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @reposToAdd = ();
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-												'/work/repos/md',
-												'rpm-md');
+	my %init = (
+				path => '/work/repos/md',
+				type => 'rpm-md'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
 	my $res = $xml -> addRepositories(\@reposToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1001,9 +1005,11 @@ sub test_addRepositoriesExistAlias {
 						type  => 'rpm-md'
 					);
 	my @reposToAdd = ();
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-													'/work/repos/md',
-													'rpm-md');
+	my %init = (
+				path => '/work/repos/md',
+				type => 'rpm-md'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
 	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%dupAliasData);
 	my @profs = ('profA');
 	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
@@ -1054,9 +1060,11 @@ sub test_addRepositoriesExistPass {
 					username => 'foo'
 				);
 	my @reposToAdd = ();
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-													'/work/repos/md',
-													'rpm-md');
+	my %init = (
+				path => '/work/repos/md',
+				type => 'rpm-md'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
 	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%confPass);
 	my @profs = ('profB');
 	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
@@ -1102,12 +1110,16 @@ sub test_addRepositoriesExist {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @reposToAdd = ();
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-													'/work/repos/md',
-													'rpm-md');
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-											'opensuse://12.1/repo/oss/',
-											'rpm-dir');
+	my %init = (
+				path => '/work/repos/md',
+				type => 'rpm-md'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
+	my %init2 = (
+				path => 'opensuse://12.1/repo/oss/',
+				type => 'rpm-dir'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init2);
 	my $res = $xml -> addRepositories(\@reposToAdd, 'default');
 	my $expected = 'addRepositories: attempting to add repo, but a repo '
 		. 'with same path already exists';
@@ -1147,9 +1159,11 @@ sub test_addRepositoriesExistPrefLic {
 					type          => 'rpm-dir'
 				);
 	my @reposToAdd = ();
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-													'/work/repos/md',
-													'rpm-md');
+	my %init = (
+				path => '/work/repos/md',
+				type => 'rpm-md'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
 	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%prefLic);
 	my $res = $xml -> addRepositories(\@reposToAdd, 'default');
 	my $expected = 'addRepositories: attempting to add repo, but a repo '
@@ -1191,10 +1205,12 @@ sub test_addRepositoriesExistUsr {
 					username => 'bar'
 				);
 	my @reposToAdd = ();
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-													'/work/repos/md',
-													'rpm-md');
-push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%confUser);
+	my %init = (
+				path => '/work/repos/md',
+				type => 'rpm-md'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%confUser);
 	my @profs = ('profB');
 	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
 	my $expected = 'addRepositories: attempting to add repo, but a repo '
@@ -1239,16 +1255,22 @@ sub test_addRepositoriesImproperDataT {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @reposToAdd = ();
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-													'/work/repos/md',
-													'rpm-md');
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-													'/work/repos/pckgs',
-													'rpm-dir');
+	my %init = (
+				path => '/work/repos/md',
+				type => 'rpm-md'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
+	my %init2 = (
+				path => '/work/repos/pckgs',
+				type => 'rpm-dir'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init2);
 	push @reposToAdd, 'slip';
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-													'/work/repos/debs',
-													'deb-dir');
+	my %init3 = (
+				path => '/work/repos/debs',
+				type => 'deb-dir'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init3);
 	my $res = $xml -> addRepositories(\@reposToAdd, 'default');
 	my $expected = 'addRepositories: found array item not of type '
 		. 'KIWIXMLRepositoryData in repository array';
@@ -1280,15 +1302,20 @@ sub test_addRepositoriesInvalidProf {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @reposToAdd = ();
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-													'/work/repos/md',
-													'rpm-md');
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-													'/work/repos/pckgs',
-													'rpm-dir');
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-													'/work/repos/debs',
-													'deb-dir');
+	my %init = (
+				path => '/work/repos/md',
+				type => 'rpm-md'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
+	my %init2 = (
+				path => '/work/repos/pckgs',
+				type => 'rpm-dir'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init2);
+	my %init3 = (
+				path => '/work/repos/debs',
+				type => 'deb-dir'
+	);
 	my @profs = qw \profA timbuktu profB\;
 	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
 	my $expected = "Attempting to add repositorie(s) to 'timbuktu', but "
@@ -1349,9 +1376,11 @@ sub test_addRepositoriesToProf {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @reposToAdd = ();
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi,
-												'/work/repos/md',
-												'rpm-md');
+	my %init = (
+				path => '/work/repos/md',
+				type => 'rpm-md'
+	);
+	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
 	my @profs = ('profC');
 	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
 	my $msg = $kiwi -> getMessage();
@@ -4144,7 +4173,7 @@ sub test_getProfiles {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
 	);
-	my @profiles = $xml -> getProfiles();
+	my @profiles = @{$xml -> getProfiles()};
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profB', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4155,14 +4184,14 @@ sub test_getProfiles {
 	my $numProfiles = scalar @profiles;
 	$this -> assert_equals(3, $numProfiles);
 	for my $prof (@profiles) {
-		my $name = $prof -> {name};
+		my $name = $prof -> getName();
 		if ($name eq 'profA') {
-			$this -> assert_str_equals('false', $prof -> {include});
-			$this -> assert_str_equals('Test prof A', $prof -> {description});
+			$this -> assert_str_equals('false', $prof->getImportStatus());
+			$this -> assert_str_equals('Test prof A', $prof->getDescription());
 		} elsif ($name eq 'profB') {
-			$this -> assert_str_equals('true', $prof -> {include});
+			$this -> assert_str_equals('true', $prof->getImportStatus());
 		} else {
-			$this -> assert_str_equals('profC', $prof -> {name});
+			$this -> assert_str_equals('profC', $prof->getName());
 		}
 	}
 	return;
@@ -5761,14 +5790,14 @@ sub test_setDescriptionInfo {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
 	);
-	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi,
-													'Robert Schweikert',
-													'rjschwei@suse.com',
-													'test set method',
-													'system'
-													);
+	my %init = (
+				author        => 'Robert Schweikert',
+				contact       => 'rjschwei@suse.com',
+				specification => 'test set method',
+				type          => 'system'
+	);
+	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi, \%init);
 	$xml = $xml -> setDescriptionInfo($descriptObj);
-	$this -> assert_not_null($xml);
 	my $descrpObj = $xml -> getDescriptionInfo();
 	$this -> assert_not_null($descrpObj);
 	my $msg = $kiwi -> getMessage();
@@ -5785,6 +5814,7 @@ sub test_setDescriptionInfo {
 	$this -> assert_str_equals('test set method', $spec);
 	my $type = $descrpObj -> getType();
 	$this -> assert_str_equals('system', $type);
+	$this -> assert_not_null($xml);
 	return;
 }
 
@@ -5846,22 +5876,30 @@ sub test_setDescriptionInfoInvalArg {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
 	);
-	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi,
-													'Robert Schweikert',
-													'rjschwei@suse.com',
-													);
+	my %init = (
+				author  => 'Robert Schweikert',
+				contact => 'rjschwei@suse.com',
+				type    => 'system'
+	);
+	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
 	my $res = $xml -> setDescriptionInfo($descriptObj);
 	$this -> assert_null($res);
-	my $msg =  $kiwi -> getWarningMessage();
+	$msg =  $kiwi -> getWarningMessage();
 	my $expected = 'XMLDescriptionData object in invalid state';
 	$this -> assert_str_equals($expected, $msg);
-	my $state = $kiwi -> getOopsState();
+	$state = $kiwi -> getOopsState();
 	$this -> assert_str_equals('oops', $state);
 	$expected = 'setDescriptionInfo: Provided KIWIXMLDescriptionData '
 		. 'instance is not valid.';
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
+	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
@@ -5945,9 +5983,11 @@ sub test_setRepositoryBasic {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $repoData = KIWIXMLRepositoryData -> new($kiwi,
-												'/work/repos/md',
-												'rpm-md');
+	my %init = (
+				path => '/work/repos/md',
+				type => 'rpm-md'
+	);
+	my $repoData = KIWIXMLRepositoryData -> new($kiwi, \%init);
 	$xml = $xml -> setRepository($repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Replacing repository /repos/12.1-additional';
@@ -6046,9 +6086,11 @@ sub test_setRepositoryNoReplace {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $repoData = KIWIXMLRepositoryData -> new($kiwi,
-												'/work/repos/md',
-												'rpm-md');
+	my %init = (
+				path => '/work/repos/md',
+				type => 'rpm-md'
+	);
+	my $repoData = KIWIXMLRepositoryData -> new($kiwi, \%init);
 	my $res = $xml -> setRepository($repoData);
 	my $expected = 'No replacable repository configured, not using repo with '
 			. "path: '/work/repos/md'";
@@ -6079,9 +6121,11 @@ sub test_setRepositoryNoReplaceWithProf {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $repoData = KIWIXMLRepositoryData -> new($kiwi,
-												'/work/repos/md',
-												'rpm-md');
+	my %init = (
+				path => '/work/repos/md',
+				type => 'rpm-md'
+	);
+	my $repoData = KIWIXMLRepositoryData -> new($kiwi, \%init);
 	my $res = $xml -> setRepository($repoData);
 	my $expected = 'No replacable repository configured, not using repo with '
 			. "path: '/work/repos/md'";
