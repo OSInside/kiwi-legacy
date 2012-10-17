@@ -22,6 +22,7 @@ use strict;
 use warnings;
 require Exporter;
 
+use base qw /KIWIXMLDataBase/;
 #==========================================
 # Exports
 #------------------------------------------
@@ -62,9 +63,8 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my $this  = {};
 	my $class = shift;
-	bless $this,$class;
+	my $this  = $class->SUPER::new(@_);
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
@@ -73,16 +73,19 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	$this->{kiwi} = $kiwi;
-	if ($init && ref($init) ne 'HASH') {
-		my $msg = 'Expecting a hash ref as second argument if provided';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
+	my %keywords = map { ($_ => 1) } qw(
+		persistent temporary
+	);
+	$this->{supportedKeywords} = \%keywords;
+	if (! $this -> __isInitHashRef($init) ) {
+		return;
+	}
+	if (! $this -> __areKeywordArgsValid($init) ) {
 		return;
 	}
 	if ($init) {
 		# Check for unsupported entries
-		if (! $this -> __isInitHashValid($init)) {
+		if (! $this -> __isInitConsistent($init)) {
 			return;
 		}
 		$this->{persistent} = $init->{persistent};
@@ -313,9 +316,6 @@ sub __isArchValid {
 	my $arch   = shift;
 	my $caller = shift;
 	my $kiwi = $this->{kiwi};
-	my %supportedArch = map { ($_ => 1) } qw(
-		armv7l ia64 ix86 ppc ppc64 s390 s390x x86_64
-	);
 	if (! $arch) {
 		my $msg = '__isArchValid: internal error called without arch arg.';
 		$kiwi -> info($msg);
@@ -329,7 +329,7 @@ sub __isArchValid {
 		$kiwi -> oops();
 		return;
 	}
-	if (! $supportedArch{$arch} ) {
+	if (! $this->{supportedArch}{$arch} ) {
 		my $msg = "$caller: specified architecture '$arch' is not supported.";
 		$kiwi -> error($msg);
 		$kiwi -> failed();
@@ -339,9 +339,9 @@ sub __isArchValid {
 }
 
 #==========================================
-# __isInitHashValid
+# __isInitConsistent
 #------------------------------------------
-sub __isInitHashValid {
+sub __isInitConsistent {
 	# ...
 	# Verify that the initialization hash given to the constructor meets
 	# all consistency and data criteria.
@@ -349,23 +349,11 @@ sub __isInitHashValid {
 	my $this = shift;
 	my $init = shift;
 	my $kiwi = $this->{kiwi};
-	my %supportedBehavior = (
-		persistent => 1,
-		temporary  => 1
-	);
+	my %supportedBehavior = %{$this->{supportedKeywords}};
 	my %supportedUsage = (
 		except => 1,
 		files  => 1
 	);
-	for my $key (keys %{$init}) {
-		if (! $supportedBehavior{$key} ) {
-			my $msg = 'Unsupported option in initialization structure '
-				. "found '$key'";
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return;
-		}
-	}
 	for my $behavior (keys %supportedBehavior) {
 		if ($init->{$behavior} && ref($init->{$behavior}) ne 'HASH') {
 			my $msg = "Expecting hash ref as entry for '$behavior' in "

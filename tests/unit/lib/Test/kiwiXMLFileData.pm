@@ -37,23 +37,21 @@ sub new {
 }
 
 #==========================================
-# test_ctor_argsIncomplete
+# test_ctor
 #------------------------------------------
-sub test_ctor_argsIncomplete {
+sub test_ctor {
 	# ...
-	# Test the FileData constructor with insufficient args
+	# Test the FileData constructor
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $fileDataObj = KIWIXMLFileData -> new($kiwi);
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('missingName', $fileDataObj);
-	my $expected = 'missing second argument for FileData ctor';
-	$this -> assert_str_equals($expected, $msg);
+	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
+	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
+	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($fileDataObj);
 	return;
@@ -68,7 +66,11 @@ sub test_ctor_unsuportedArch {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, 'soundcore.ko', 'tegra');
+	my %init = (
+				arch => 'tegra',
+				name => 'soundcore.ko'
+	);
+	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init);
 	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -90,7 +92,8 @@ sub test_ctor_simple {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, 'soundcore.ko');
+	my %init = ( name => 'soundcore.ko' );
+	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -103,6 +106,32 @@ sub test_ctor_simple {
 }
 
 #==========================================
+# test_ctor_unsupportedKW
+#------------------------------------------
+sub test_ctor_unsupportedKW {
+	# ...
+	# Test constructor with an unsupported keyword in the initialization data
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+				arch     => 'ppc64',
+				filename => 'soundcore.ko'
+	);
+	my $driverDataObj = KIWIXMLFileData -> new($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'KIWIXMLFileData: Unsupported keyword argument '
+		. "'filename' in initialization structure.";
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($driverDataObj);
+	return;
+}
+
+#==========================================
 # test_ctor_withArch
 #------------------------------------------
 sub test_ctor_withArch {
@@ -111,7 +140,11 @@ sub test_ctor_withArch {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, 'soundcore.ko', 'ppc64');
+	my %init = (
+				arch => 'ppc64',
+				name => 'soundcore.ko'
+	);
+	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init );
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -132,7 +165,11 @@ sub test_getArch {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, 'soundcore.ko', 'ix86');
+	my %init = (
+				arch => 'ix86',
+				name => 'soundcore.ko'
+	);
+	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -161,7 +198,8 @@ sub test_getName {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, 'soundcore.ko');
+	my %init = ( name => 'soundcore.ko' );
+	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -190,7 +228,8 @@ sub test_setArch {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, 'soundcore.ko');
+	my %init = ( name => 'soundcore.ko' );
+	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init );
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -221,7 +260,8 @@ sub test_setArch_invalid {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, 'soundcore.ko');
+	my %init = ( name => 'soundcore.ko' );
+	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init );
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

@@ -38,7 +38,7 @@ sub new {
 }
 
 #==========================================
-# test_ctor_argsIncompleteNoSecond
+# test_ctor
 #------------------------------------------
 sub test_ctor_argsIncompleteNoSecond {
 	# ...
@@ -48,36 +48,13 @@ sub test_ctor_argsIncompleteNoSecond {
 	my $kiwi = $this -> {kiwi};
 	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Expecting a string or hash ref as second argument';
-	$this -> assert_str_equals($expected, $msg);
+	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
+	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
+	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($repoDataObj);
-	return;
-}
-
-#==========================================
-# test_ctor_argsIncompleteNoThird
-#------------------------------------------
-sub test_ctor_argsIncompleteNoThird {
-	# ...
-	# Test the RepositoryData constructor with no third argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, 'opensuse');
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'Expecting string specifying repo type as third arg';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_null($repoDataObj);
+	$this -> assert_not_null($repoDataObj);
 	return;
 }
 
@@ -93,8 +70,8 @@ sub test_ctor_argsInvalidHashNoPath {
 	my %repoData = ( alias => 'myRepo' );
 	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%repoData);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Provided hash ref must contain key "path" providing '
-		. 'the URI for the repository';
+	my $expected = 'KIWIXMLRepositoryData: no "path" specified in '
+		.'initialization structure.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -145,8 +122,8 @@ sub test_ctor_argsInvalidHashNoType {
 				);
 	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%repoData);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Provided hash ref must contain key "type" providing '
-		. 'the type of the repository';
+	my $expected = 'KIWIXMLRepositoryData: no "type" specified in '
+		. 'initialization structure.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -166,14 +143,16 @@ sub test_ctor_argsInvalidHashPassNoUsr {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %repoData = ( alias => 'myRepo',
+	my %repoData = (
+					alias => 'myRepo',
 					password => 'ola',
 					path  => 'opensuse:///',
 					type => 'deb-dir'
 				);
 	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%repoData);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Provided hash ref contains password, but no username';
+	my $expected = 'KIWIXMLRepositoryData: initialization data contains '
+		. 'password, but no username';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -193,14 +172,16 @@ sub test_ctor_argsInvalidHashUsrNoPass {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %repoData = ( alias => 'myRepo',
+	my %repoData = (
+					alias => 'myRepo',
 					path  => 'opensuse:///',
 					type => 'up2date-mirrors',
 					username => 'pablo'
 				);
 	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%repoData);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Provided hash ref contains username, but no password';
+	my $expected = 'KIWIXMLRepositoryData: initialization data contains '
+		. 'username, but no password';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -220,7 +201,11 @@ sub test_ctor_argsInvalidType {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, 'opensuse', 'foo');
+	my %init = (
+				path => 'opensuse:///',
+				type => 'foo'
+	);
+	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Specified repository type 'foo' is not supported";
 	$this -> assert_str_equals($expected, $msg);
@@ -259,23 +244,24 @@ sub test_ctor_argsValidHash {
 }
 
 #==========================================
-# test_ctor_argsValidStrs
+# test_ctor_invalidArg
 #------------------------------------------
-sub test_ctor_argsValidStrs {
+sub test_ctor_invalidArg {
 	# ...
-	# Test the RepositoryData constructor with valid string args
+	# Test the RepositoryData constructor with an invalid argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, 'opensuse', 'yast2');
+	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, 'opensuse');
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
+	my $expected = 'Expecting a hash ref as second argument if provided';
+	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
+	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($repoDataObj);
+	$this -> assert_null($repoDataObj);
 	return;
 }
 
@@ -288,7 +274,7 @@ sub test_getAlias {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->getAlias();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -309,7 +295,7 @@ sub test_getCredentials {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my ($username, $password) = $repoDataObj->getCredentials();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -331,7 +317,7 @@ sub test_getImageInclude {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->getImageInclude();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -352,7 +338,7 @@ sub test_getPath {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->getPath();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -373,7 +359,7 @@ sub test_getPreferLicense {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->getPreferLicense();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -394,7 +380,7 @@ sub test_getPriority {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->getPriority();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -415,7 +401,7 @@ sub test_getStatus {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->getStatus();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -436,7 +422,7 @@ sub test_getType {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->getType();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -504,7 +490,7 @@ sub test_setCredentialsNoPass {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->setCredentials('helper');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setCredentials: no password specified';
@@ -529,7 +515,7 @@ sub test_setCredentialsNoUser {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->setCredentials(undef, '7564321');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setCredentials: no username specified';
@@ -554,7 +540,7 @@ sub test_setImageIncludeOff {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	$repoDataObj = $repoDataObj->setImageInclude();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -623,7 +609,7 @@ sub test_setPathNoArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->setPath();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setPath: No location specified, retaining current data';
@@ -647,7 +633,7 @@ sub test_setPreferLicenseOff {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	$repoDataObj = $repoDataObj->setPreferLicense();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -716,7 +702,7 @@ sub test_setStatus {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	$repoDataObj = $repoDataObj->setStatus('fixed');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -739,7 +725,7 @@ sub test_setStatusInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->setStatus('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setStatus: Expected keyword "fixed" or "replacable"';
@@ -763,7 +749,7 @@ sub test_setStatusNoArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	$repoDataObj = $repoDataObj->setStatus();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setStatus: No status specified, retaining current data';
@@ -810,7 +796,7 @@ sub test_setTypeInvalid {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->setType( 'twix' );
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Specified repository type 'twix' is not supported";
@@ -835,7 +821,7 @@ sub test_setTypeNoArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = $this->__getRepoDataObjHash();
+	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->setType();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setType: No type specified, retaining current data';
@@ -860,34 +846,18 @@ sub __getRepoDataObj {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, 'opensuse', 'yast2');
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_not_null($repoDataObj);
-	return $repoDataObj;
-}
-
-sub __getRepoDataObjHash {
-	# ...
-	# Helper method to create KIWIXMLRepositoryData object
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %repoData = ( alias => 'myRepo',
-					imageinclude => 'true',
-					password => '1234567',
-					path  => 'opensuse:///',
-					preferlicense => 'true',
-					priority => 2,
-					status => 'replacable',
-					type  => 'yast2',
-					username => 'testuser'
-				);
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%repoData);
+	my %init = (
+				alias         => 'myRepo',
+				imageinclude  => 'true',
+				password      => '1234567',
+				path          => 'opensuse:///',
+				preferlicense => 'true',
+				priority      => '2',
+				status        => 'replacable',
+				type          => 'yast2',
+				username      => 'testuser'
+	);
+	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

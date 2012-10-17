@@ -174,14 +174,15 @@ sub test_ctor_initUnsupportedDataBehavior {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( persistent => 'yes',
+	my %init = (
+				persistent => 'yes',
 				temporary  => 'yes',
 				unknown    => 'foo'
-	    );
+	);
 	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Unsupported option in initialization structure found '
-		. "'unknown'";
+	my $expected = 'KIWIXMLSplitData: Unsupported keyword argument '
+		. "'unknown' in initialization structure.";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);

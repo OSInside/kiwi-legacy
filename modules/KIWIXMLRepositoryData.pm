@@ -22,6 +22,7 @@ use strict;
 use warnings;
 require Exporter;
 
+use base qw /KIWIXMLDataBase/;
 #==========================================
 # Exports
 #------------------------------------------
@@ -37,88 +38,47 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my $this  = {};
 	my $class = shift;
-	bless $this,$class;
+	my $this  = $class->SUPER::new(@_);
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
 	my $kiwi = shift;
-	my $path = shift;
-	my $type = shift;
+	my $init = shift;
 	#==========================================
-	# Store object data
+	# Argument checking and object data store
 	#------------------------------------------
-	$this->{kiwi} = $kiwi;
+	my %keywords = map { ($_ => 1) } qw(
+		alias imageinclude password path preferlicense priority
+		status type username
+	);
+	$this->{supportedKeywords} = \%keywords;
 	my %supported = map { ($_ => 1) } qw(
 		apt-deb apt-rpm	deb-dir	mirrors	red-carpet rpm-dir rpm-md slack-site
 		up2date-mirrors	urpmi yast2
 	);
 	$this->{supportedRepoTypes} = \%supported;
-	#==========================================
-	# Argument checking
-	#------------------------------------------
-	if (! $path) {
-		my $msg = 'Expecting a string or hash ref as second argument';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
+	if (! $this -> __isInitHashRef($init) ) {
 		return;
 	}
-	if (ref($path) eq 'HASH') {
-		if (! $path->{path} ) {
-			my $msg = 'Provided hash ref must contain key "path" providing '
-				. 'the URI for the repository';
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return;
-		}
-		if (! $path->{type} ) {
-			my $msg = 'Provided hash ref must contain key "type" providing '
-				. 'the type of the repository';
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return;
-		} else {
-			my $repoType = $path->{type};
-			if (! $this->__isSupportedRepoType($repoType) ) {
-				return;
-			}
-		}
-		if ( $path->{password} && ! $path->{username} ) {
-			my $msg = 'Provided hash ref contains password, but no username';
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return;
-		}
-		if (! $path->{password} && $path->{username} ) {
-			my $msg = 'Provided hash ref contains username, but no password';
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return;
-		}
-		$this->{alias}         = $path->{alias};
-		$this->{imageinclude}  = $path->{imageinclude};
-		$this->{password}      = $path->{password};
-		$this->{path}          = $path->{path};
-		$this->{preferlicense} = $path->{preferlicense};
-		$this->{priority}      = $path->{priority};
-		$this->{status}        = $path->{status};
-		$this->{type}          = $path->{type};
-		$this->{username}      = $path->{username};
-	} else {
-		$this->{path} = $path;
-		if (! $type) {
-			my $msg = 'Expecting string specifying repo type as third arg';
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return;
-		}
-		if (! $this->__isSupportedRepoType($type) ) {
-			return;
-		}
-		$this->{type} = $type;
+	if (! $this -> __areKeywordArgsValid($init) ) {
+		return;
 	}
-
+	if ($init) {
+		if (! $this -> __isInitConsistent($init)) {
+			return;
+		}
+	
+		$this->{alias}         = $init->{alias};
+		$this->{imageinclude}  = $init->{imageinclude};
+		$this->{password}      = $init->{password};
+		$this->{path}          = $init->{path};
+		$this->{preferlicense} = $init->{preferlicense};
+		$this->{priority}      = $init->{priority};
+		$this->{status}        = $init->{status};
+		$this->{type}          = $init->{type};
+		$this->{username}      = $init->{username};
+	}
 	return $this;
 }
 
@@ -382,8 +342,7 @@ sub __isSupportedRepoType {
 	# ---
 	my $this = shift;
 	my $type = shift;
-	my %supported = %{ $this->{supportedRepoTypes} };
-	if (! $supported{$type} ) {
+	if (! $this->{supportedRepoTypes}{$type} ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = "Specified repository type '$type' is not supported";
 		$kiwi -> error($msg);
@@ -393,4 +352,48 @@ sub __isSupportedRepoType {
 	return 1;
 }
 
+#==========================================
+# __isInitConsistent
+#------------------------------------------
+sub __isInitConsistent {
+	# ...
+	# Verify that the initialization hash is valid
+	# ---
+	my $this = shift;
+	my $init = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $init->{path} ) {
+		my $msg = 'KIWIXMLRepositoryData: no "path" specified in '
+			. 'initialization structure.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $init->{type} ) {
+		my $msg = 'KIWIXMLRepositoryData: no "type" specified in '
+			. 'initialization structure.';;
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $this -> __isSupportedRepoType($init->{type}) ) {
+		return;
+	}
+	if ( $init->{password} && ! $init->{username} ) {
+		my $msg = 'KIWIXMLRepositoryData: initialization data contains '
+			. 'password, but no username';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $init->{password} && $init->{username} ) {
+		my $msg = 'KIWIXMLRepositoryData: initialization data contains '
+			. 'username, but no password';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
+}
+		
 1;

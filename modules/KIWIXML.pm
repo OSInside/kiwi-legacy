@@ -35,6 +35,7 @@ use KIWIXMLDriverData;
 use KIWIXMLEC2ConfigData;
 use KIWIXMLOEMConfigData;
 use KIWIXMLPreferenceData;
+use KIWIXMLProfileData;
 use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
 use KIWIXMLSplitData;
@@ -655,7 +656,8 @@ sub getDrivers {
 	}
 	my @driverInfo = ();
 	for my $drv (@drvs) {
-		push @driverInfo, KIWIXMLDriverData -> new($kiwi, $drv);
+		my %init = ( name => $drv );
+		push @driverInfo, KIWIXMLDriverData -> new($kiwi, \%init);
 	}
 	return \@driverInfo;
 }
@@ -739,19 +741,20 @@ sub getPreferences {
 #------------------------------------------
 sub getProfiles {
 	# ...
-	# Return a list of profiles available for this image
+	# Return an array ref of ProfileData objects available for this image
 	# ---
 	my $this   = shift;
+	my $kiwi = $this->{kiwi};
 	my %imgConf = %{ $this->{imageConfig} };
 	my @result;
 	for my $prof (@{$this->{availableProfiles}}) {
 		my %profile = ();
 		$profile{name}        = $prof;
 		$profile{description} = $imgConf{$prof}->{profInfo}->{description};
-		$profile{include}     = $imgConf{$prof}->{profInfo}->{import};
-		push @result, { %profile };
+		$profile{import}      = $imgConf{$prof}->{profInfo}->{import};
+		push @result, KIWIXMLProfileData -> new($kiwi, \%profile );
 	}
-	return @result;
+	return \@result;
 }
 
 #==========================================
@@ -2045,45 +2048,24 @@ sub __populateRepositoryInfo {
 	my $idCntr = 1;
 	for my $repoNode (@repoNodes) {
 		my %repoData;
-		my $alias         = $repoNode -> getAttribute ('alias');
-		my $imageinclude  = $repoNode -> getAttribute ('imageinclude');
-		my $password      = $repoNode -> getAttribute ('password');
-		my $preferlicense = $repoNode -> getAttribute ('prefer-license');
-		my $priority      = $repoNode -> getAttribute ('priority');
+		$repoData{alias}         = $repoNode -> getAttribute ('alias');
+		$repoData{imageinclude}  = $repoNode -> getAttribute ('imageinclude');
+		$repoData{password}      = $repoNode -> getAttribute ('password');
+
+		$repoData{path}          = $repoNode
+								-> getChildrenByTagName('source')
+								-> get_node(1)
+								-> getAttribute ('path');
+
+		$repoData{preferlicense} = $repoNode
+								-> getAttribute ('prefer-license');
+		$repoData{priority}      = $repoNode -> getAttribute ('priority');
+		
+		$repoData{status}        = $repoNode -> getAttribute ('status');
+		$repoData{type}          = $repoNode -> getAttribute ('type');
+		$repoData{username}      = $repoNode -> getAttribute ('username');
+
 		my $profiles      = $repoNode -> getAttribute ('profiles');
-		my $status        = $repoNode -> getAttribute ('status');
-		my $type          = $repoNode -> getAttribute ('type');
-		my $username      = $repoNode -> getAttribute ('username');
-		my $path          = $repoNode
-			-> getChildrenByTagName('source') -> get_node(1)
-			-> getAttribute ('path');
-		if ($alias) {
-			$repoData{alias} = $alias;
-		}
-		if ($imageinclude) {
-			$repoData{imageinclude} = $imageinclude;
-		}
-		if ($password) {
-			$repoData{password} = $password;
-		}
-		if ($path) {
-			$repoData{path} = $path;
-		}
-		if ($preferlicense) {
-			$repoData{preferlicense} = $preferlicense;
-		}
-		if ($priority) {
-			$repoData{priority} = $priority;
-		}
-		if ($status) {
-			$repoData{status} = $status;
-		}
-		if ($type) {
-			$repoData{type} = $type;
-		}
-		if ($username) {
-			$repoData{username} = $username;
-		}
 		if (! $profiles) {
 			$profiles = 'kiwi_default';
 		}
@@ -6624,7 +6606,7 @@ sub __checkProfiles_legacy {
 	my $kiwi = $this->{kiwi};
 	my $rref = $this->{reqProfiles};
 	my @prequest;
-	my @profiles = $this -> getProfiles();
+	my @profiles = $this -> getProfiles_legacy();
 	if (defined $pref) {
 		@prequest = @{$pref};
 	} elsif (defined $rref) {

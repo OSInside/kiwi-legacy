@@ -649,14 +649,15 @@ sub test_ctor_initUnsupportedData {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
+	my %init = (
+				arch               => 'x86_64',
+				vmconfig_entries   => \@confEntries,
 				disks              => 'foo'
-			);
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Unsupported option in initialization structure found '
-		. "'disks'";
+	my $expected = 'KIWIXMLVMachineData: Unsupported keyword argument '
+		. "'disks' in initialization structure.";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);

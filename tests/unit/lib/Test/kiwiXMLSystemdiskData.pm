@@ -617,8 +617,8 @@ sub test_ctor_initUnsupportedEntry {
 			);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Unsupported option in initialization structure found '
-		. "'foo'";
+	my $expected = 'KIWIXMLSystemdiskData: Unsupported keyword argument '
+		. "'foo' in initialization structure.";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);

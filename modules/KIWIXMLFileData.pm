@@ -24,6 +24,7 @@ use strict;
 use warnings;
 require Exporter;
 
+use base qw /KIWIXMLDataBase/;
 #==========================================
 # Exports
 #------------------------------------------
@@ -39,39 +40,31 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my $this  = {};
 	my $class = shift;
-	bless $this,$class;
+	my $this  = $class->SUPER::new(@_);
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
 	my $kiwi = shift;
-	my $name = shift;
-	my $arch = shift;
+	my $init = shift;
 	#==========================================
-	# Store object data
+	# Argument checking and object data store
 	#------------------------------------------
-	$this->{kiwi} = $kiwi;
-	my %supported = map { ($_ => 1) } qw(
-		armv7l ia64 ix86 ppc ppc64 s390 s390x x86_64
-	);
-	$this->{supportedArch} = \%supported;
-	#==========================================
-	# Argument checking
-	#------------------------------------------
-	if (! $name) {
-		$kiwi -> error ('missing second argument for FileData ctor');
-		$kiwi -> failed ();
-		return 'missingName';
-	}
-	if (($arch) && (! $this->__isSupportedArch($arch))) {
+	my %keywords = map { ($_ => 1) } qw( arch name );
+	$this->{supportedKeywords} = \%keywords;
+	if (! $this -> __isInitHashRef($init) ) {
 		return;
 	}
-	#==========================================
-	# Store object data
-	#------------------------------------------
-	$this->{name} = $name;
-	$this->{arch} = $arch;
+	if (! $this -> __areKeywordArgsValid($init) ) {
+		return;
+	}
+	if ($init) {
+		if (! $this -> __isInitConsistent($init) )  {
+			return;
+		}
+		$this->{name} = $init->{name};
+		$this->{arch} = $init->{arch};
+	}
 	return $this;
 }
 
@@ -116,14 +109,42 @@ sub getName {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __isInitConsistent
+#------------------------------------------
+sub __isInitConsistent {
+	# ...
+	# Verify initialization consistency and validity requirements
+	# ---
+	my $this = shift;
+	my $init = shift;
+	my $kiwi = $this->{kiwi};
+	my $instName = ref $this;
+	if (! $init->{name} ) {
+		my $msg = "$instName: no 'name' specified in initialization "
+			. 'structure.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if ($init->{arch}) {
+		if (! $this -> __isSupportedArch($init->{arch})) {
+			return;
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __isSupportedArch
+#------------------------------------------
 sub __isSupportedArch {
 	# ...
 	# See if the specified architecture is supported
 	# ---
 	my $this = shift;
 	my $arch = shift;
-	my %supported = %{ $this->{supportedArch} };
-	if (! $supported{$arch} ) {
+	if (! $this->{supportedArch}{$arch} ) {
 		my $kiwi = $this->{kiwi};
 		$kiwi -> error ("Specified arch '$arch' is not supported");
 		$kiwi -> failed ();
