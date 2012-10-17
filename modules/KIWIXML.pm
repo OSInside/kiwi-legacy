@@ -288,6 +288,7 @@ sub new {
 	if (! $this -> __setDefaultBuildType() ) {
 		return;
 	}
+	$this->{selectedType} = $this->{defaultType};
 	#==========================================
 	# Populate imageConfig with repository data from config tree
 	#------------------------------------------
@@ -2122,11 +2123,35 @@ sub __setDefaultBuildType {
 	# ---
 	my $this = shift;
 	my $primaryCount = 0;
-	my %defType = ();
+	# Assume the default type of the default preferences section is the winner
+	my $defTypeName = $this->{imageConfig}
+						->{kiwi_default}
+						->{preferences}
+						->{types}
+						->{defaultType};
+	my $defType;
+	if ($defTypeName) {
+		$defType = $this->{imageConfig}
+					->{kiwi_default}
+					->{preferences}
+					->{types}
+					->{$defTypeName};
+		if ($defType->{primary} && $defType->{primary} eq 'true') {
+			$primaryCount++;
+		}
+	}
+	# Process the selected profiles to see if anything is marked primary
+	# or find the default type if the default profile had no specification
 	for my $profName (@{$this->{selectedProfiles}}) {
+		if ($profName eq 'kiwi_default') {
+			# Already used
+			next;
+		}
 		my $profDefTypeName = $this->{imageConfig}
-			->{$profName}->{preferences}->{types}
-			->{defaultType};
+								->{$profName}
+								->{preferences}
+								->{types}
+								->{defaultType};
 		if (! $profDefTypeName ) {
 			# This preferences section has no type(s) defined
 			next;
@@ -2134,32 +2159,34 @@ sub __setDefaultBuildType {
 		my $profDefTypeIsPrim = $this->{imageConfig}
 			->{$profName}->{preferences}->{types}
 			->{$profDefTypeName}->{primary};
-		if ($primaryCount > 1) {
-			my $kiwi = $this->{kiwi};
-				my $msg = 'Prosessing more than one type marked as '
+		if ($profDefTypeIsPrim && $profDefTypeIsPrim eq 'true') {
+			if ($primaryCount) {
+				my $kiwi = $this->{kiwi};
+				my $msg = 'Processing more than one type marked as '
 					. '"primary", cannot resolve build type.';
 				$kiwi -> error($msg);
 				$kiwi -> failed();
 				return;
-		}
-		if ($profDefTypeIsPrim && $profDefTypeIsPrim eq 'true') {
+			}
 			$primaryCount++;
-			$defType{primary} = $this->{imageConfig}
-				->{$profName}->{preferences}->{types}
-				->{$profDefTypeName};
-		} else {
-			$defType{standard} = $this->{imageConfig}
-				->{$profName}->{preferences}->{types}
-				->{$profDefTypeName};
+			$defType = $this->{imageConfig}
+							->{$profName}
+							->{preferences}
+							->{types}
+							->{$profDefTypeName};
+		}
+		if (! $defType) {
+			$defType = $this->{imageConfig}
+							->{$profName}
+							->{preferences}
+							->{types}
+							->{$profDefTypeName};
 		}
 	}
-	if ($defType{primary}) {
-		$this->{selectedType} = $defType{primary};
-	} else {
-		$this->{selectedType} = $defType{standard};
-	}
+	$this->{defaultType} = $defType;
 	return $this;
 }
+
 #==========================================
 # __verifyProfNames
 #------------------------------------------
