@@ -4465,6 +4465,9 @@ sub copyBootCode {
 		$kiwi -> failed ();
 		return;
 	}
+	if (! $this->{needBootP}) {
+		return $this;
+	}
 	#==========================================
 	# EFI
 	#------------------------------------------
