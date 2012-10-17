@@ -1753,6 +1753,7 @@ sub test_addStripTools {
 	return;
 }
 
+
 #==========================================
 # test_ctor_InvalidPXEConfigArch
 #------------------------------------------
@@ -1849,6 +1850,65 @@ sub test_ctor_InvalidSysdiskVolNameRoot {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($xml);
+	return;
+}
+
+#==========================================
+# test_ctor_TwoPrimaryMarkedtypes
+#------------------------------------------
+sub test_ctor_TwoPrimaryMarkedtypes {
+	# ...
+	# Test the construction of the XML object with a configuration that has
+	# 2 types marked as primary, but both profiles are being built.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'typeSettingsTwoPrimary';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Processing more than one type marked as '
+		. '"primary", cannot resolve build type.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($xml);
+	return;
+}
+
+#==========================================
+# test_ctor_NoTypeDefaultPref
+#------------------------------------------
+sub test_ctor_NoTypeDefaultPref {
+	# ...
+	# Test the construction of the XML object with a configuration that has
+	# no type specified for the default prefrences.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'typeSettingsNoTypeDefPref';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $type = $xml -> getImageType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($type);
+	my $imageT = $type -> getImageType();
+	$this -> assert_str_equals('oem', $imageT);
 	return;
 }
 
@@ -2690,6 +2750,40 @@ sub test_getImageTypeProfiles {
 	# Verify that we got the expected type
 	my $imageType = $typeInfo -> getImageType();
 	$this -> assert_str_equals('oem', $imageType);
+	return;
+}
+
+#==========================================
+# test_getImageTypeProfilesNoPrimaryType
+#------------------------------------------
+sub test_getImageTypeProfilesNoPrimaryType {
+	# ...
+	# Verify proper return of getImageType method with multiple type
+	# definitions and profiles. But no type is marked as primary and the
+	# default preferences section has no type definition.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'typeSettingsNoTypeDefPrefNoPrim';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profB', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $type = $xml -> getImageType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($type);
+	my $imageT = $type -> getImageType();
+	$this -> assert_str_equals('vmx', $imageT);
 	return;
 }
 
