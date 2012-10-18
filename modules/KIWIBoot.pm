@@ -942,18 +942,6 @@ sub setupInstallCD {
 		}
 	}
 	#==========================================
-	# add font for grub2 if required
-	#------------------------------------------
-	if ($bootloader eq "grub2") {
-		my $font = "/usr/share/grub2/unicode.pf2";
-		if (-e $font) {
-			qxx ("cp $font $tmpdir/boot");
-		} else {
-			$kiwi -> warning ("Can't find unicode font for grub2");
-			$kiwi -> skipped ();
-		}
-	}
-	#==========================================
 	# Create an iso image from the tree
 	#------------------------------------------
 	$kiwi -> info ("Creating ISO image...");
@@ -1262,7 +1250,7 @@ sub setupInstallStick {
 	#==========================================
 	# setup required disk size
 	#------------------------------------------
-	$irdsize= ($irdsize / 1e6) + 20;
+	$irdsize= ($irdsize / 1e6) + 40;
 	$irdsize= sprintf ("%.0f", $irdsize);
 	$vmsize = ($vmsize / 1e6) * 1.3 + $irdsize;
 	$vmsize = sprintf ("%.0f", $vmsize);
@@ -3521,6 +3509,16 @@ sub setupBootLoaderConfiguration {
 		$vesa{'0x31a'} = ["1280x1024x24", "1280x1024"];
 		$vesa{'0x31b'} = ["1280x1024x32", "1280x1024"];
 		#==========================================
+		# add unicode font for grub2
+		#------------------------------------------
+		my $font = "/usr/share/grub2/unicode.pf2";
+		if (-e $font) {
+			qxx ("cp $font $tmpdir/boot");
+		} else {
+			$kiwi -> warning ("Can't find unicode font for grub2");
+			$kiwi -> skipped ();
+		}
+		#==========================================
 		# Create grub.cfg file
 		#------------------------------------------
 		$kiwi -> info ("Creating grub2 configuration file...");
@@ -3551,8 +3549,8 @@ sub setupBootLoaderConfiguration {
 			}
 			print FD "set default=$defaultBootNr\n";
 			if (! $iso) {
-				print FD "set root='$rprefix,$root_id'"."\n";
-				print FD "set font=/usr/share/grub2/unicode.pf2"."\n";
+				print FD "set root='$rprefix,$boot_id'"."\n";
+				print FD "set font=/boot/unicode.pf2"."\n";
 			} else {
 				if ($config eq "grub2-efi") {
 					print FD "set root='$rprefix'"."\n";
