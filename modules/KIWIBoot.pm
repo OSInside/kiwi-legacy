@@ -1427,39 +1427,42 @@ sub setupInstallStick {
 	#------------------------------------------
 	foreach my $root ($boot,$data) {
 		next if ! defined $root;
-		if (($root eq $boot) && (
-			($bootloader =~ /syslinux|yaboot/) ||
-			(($bootloader eq "grub2") && ($efi))
-			)
-		) {
-			$kiwi -> info ("Creating DOS boot filesystem");
-			my $FATSize = 32;
-			if (($bootloader eq "yaboot") && ($lvm)) {
-				$FATSize = 16;
+		if ($root eq $boot) {
+			#==========================================
+			# check required boot filesystem type
+			#------------------------------------------
+			my $bootfs = 'ext3';
+			if ($bootloader eq 'syslinux') {
+				$bootfs = 'fat32';
+			} elsif ($bootloader eq 'yaboot') {
+				if ($lvm) {
+					$bootfs = 'fat16';
+				} else {
+					$bootfs = 'fat32';
+				}
+			} elsif (($bootloader eq "grub2") && ($efi)) {
+				$bootfs = 'fat32';
+			} elsif ($bootloader eq 'uboot') {
+				$bootfs = 'ext2';
+			} else {
+				$bootfs = 'ext3';
 			}
-			$status = qxx ("/sbin/mkdosfs -F $FATSize -n 'BOOT' $root 2>&1");
-			$result = $? >> 8;
+			#==========================================
+			# build boot filesystem
+			#------------------------------------------
+			if (! $this -> setupFilesystem ($bootfs,$root,"install-boot",1)) {
+				$this -> cleanLoop ();
+				return;
+			}
 		} else {
-			$kiwi -> info ("Creating ext3 filesystem on $root partition");
-			my %FSopts = $main::global -> checkFSOptions(
-				@{$cmdL -> getFilesystemOptions()}
-			);
-			my $fsopts = $FSopts{ext3};
-			my $fstool = "mkfs.ext3";
-			if (($root eq $data) && ($this->{inodes})) {
-				$fsopts.= " -N $this->{inodes}";
+			#==========================================
+			# build root filesystem
+			#------------------------------------------
+			if (! $this -> setupFilesystem ('ext3',$root,"install-root")) {
+				$this -> cleanLoop ();
+				return;
 			}
-			$status = qxx ( "$fstool $fsopts $root 2>&1" );
-			$result = $? >> 8;
 		}
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed creating filesystem: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return;
-		}
-		$kiwi -> done();
 	}
 	#==========================================
 	# Copy boot data on first partition
@@ -2389,45 +2392,38 @@ sub setupBootDisk {
 	# create bootloader filesystem if needed
 	#------------------------------------------
 	if ($needBootP) {
+		#==========================================
+		# check for boot device node
+		#------------------------------------------
 		$boot = $deviceMap{1};
 		if ($lvm) {
 			$boot = $deviceMap{0};
 		}
-		if (($bootloader =~ /syslinux|yaboot/) ||
-			(($bootloader eq "grub2") && ($efi))
-		) {
-			$kiwi -> info ("Creating DOS boot filesystem");
-			my $FATSize = 32;
-			if (($bootloader eq "yaboot") && ($lvm)) {
-				$FATSize = 16;
+		#==========================================
+		# check required boot filesystem type
+		#------------------------------------------
+		my $bootfs = 'ext3';
+		if ($bootloader eq 'syslinux') {
+			$bootfs = 'fat32';
+		} elsif ($bootloader eq 'yaboot') {
+			if ($lvm) {
+				$bootfs = 'fat16';
+			} else {
+				$bootfs = 'fat32';
 			}
-			$status = qxx ("/sbin/mkdosfs -F $FATSize -n 'BOOT' $boot 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create DOS filesystem: $status");
-				$kiwi -> failed ();
-				$this -> cleanLoop ();
-				return;
-			}
-			$kiwi -> done();
+		} elsif (($bootloader eq "grub2") && ($efi)) {
+			$bootfs = 'fat32';
+		} elsif ($bootloader eq 'uboot') {
+			$bootfs = 'ext2';
 		} else {
-			$kiwi -> info ("Creating ext3 boot filesystem");
-			my %FSopts = $main::global -> checkFSOptions(
-				@{$cmdL -> getFilesystemOptions()}
-			);
-			my $fsopts = $FSopts{ext3};
-			my $fstool = "mkfs.ext3";
-			$status = qxx ("$fstool -L 'BOOT' $fsopts $boot 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create filesystem: $status");
-				$kiwi -> failed ();
-				$this -> cleanLoop ();
-				return;
-			}
-			$kiwi -> done();
+			$bootfs = 'ext3';
+		}
+		#==========================================
+		# build boot filesystem
+		#------------------------------------------
+		if (! $this -> setupFilesystem ($bootfs,$boot,"boot",1)) {
+			$this -> cleanLoop ();
+			return;
 		}
 	}
 	#==========================================
@@ -5698,6 +5694,7 @@ sub setupFilesystem {
 	my $fstype = shift;
 	my $device = shift;
 	my $name   = shift;
+	my $bootp  = shift;
 	my $inodes = $this->{deviceinodes};
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
@@ -5724,6 +5721,10 @@ sub setupFilesystem {
 			if ($this->{inodes}) {
 				$fsopts.= " -N $this->{inodes}";
 			}
+			if ($bootp) {
+				$fsopts.= " -L 'BOOT'";
+				$type{fsnocheck} = 'true';
+			}
 			my $tuneopts = $type{fsnocheck} eq "true" ? "-c 0 -i 0" : "";
 			$tuneopts = $FSopts{extfstune} if $FSopts{extfstune};
 			$status = qxx ("$fstool $fsopts $device 2>&1");
@@ -5734,7 +5735,24 @@ sub setupFilesystem {
 			}
 			last SWITCH;
 		};
-		/^reiserfs/ && do {
+		/^fat16|fat32/  && do {
+			my $fstool = 'mkdosfs';
+			my $fsopts;
+			if ($name eq 'fat16') {
+				$kiwi -> info ("Creating DOS [Fat16] filesystem");
+				$fsopts.= " -F 16";
+			} else {
+				$kiwi -> info ("Creating DOS [Fat32] filesystem");
+				$fsopts.= " -F 32";
+			}
+			if ($bootp) {
+				$fsopts.= " -n 'BOOT'";
+			}
+			$status = qxx ("$fstool $fsopts $device 2>&1");
+			$result = $? >> 8;
+			last SWITCH;
+		};
+		/^reiserfs/     && do {
 			$kiwi -> info ("Creating reiserfs $name filesystem");
 			my $fsopts = $FSopts{reiserfs};
 			$fsopts.= "-f";
@@ -5744,7 +5762,7 @@ sub setupFilesystem {
 			$result = $? >> 8;
 			last SWITCH;
 		};
-		/^btrfs/    && do {
+		/^btrfs/        && do {
 			$kiwi -> info ("Creating btrfs $name filesystem");
 			my $fsopts = $FSopts{btrfs};
 			$status = qxx (
@@ -5753,7 +5771,7 @@ sub setupFilesystem {
 			$result = $? >> 8;
 			last SWITCH;
 		};
-		/^xfs/      && do {
+		/^xfs/          && do {
 			$kiwi -> info ("Creating xfs $name filesystem");
 			my $fsopts = $FSopts{xfs};
 			$status = qxx (
