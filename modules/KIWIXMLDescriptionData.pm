@@ -61,15 +61,14 @@ sub new {
 	if (! $this -> __areKeywordArgsValid($init) ) {
 		return;
 	}
-	if ($init) {
-		if (! $this -> __isInitConsistent($init) )  {
-			return;
-		}
-		$this->{author}        = $init->{author};
-		$this->{contact}       = $init->{contact};
-		$this->{specification} = $init->{specification};
-		$this->{type}          = $init->{type};
+	if (! $this -> __isInitConsistent($init) )  {
+		return;
 	}
+	$this->{author}        = $init->{author};
+	$this->{contact}       = $init->{contact};
+	$this->{specification} = $init->{specification};
+	$this->{type}          = $init->{type};
+
 	return $this;
 }
 
