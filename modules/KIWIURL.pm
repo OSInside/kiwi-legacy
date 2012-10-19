@@ -439,7 +439,7 @@ sub obsPath {
 		$module = "this://repos/$module"
 	}
 	my $path = $this -> thisPath ($module);
-	if (! -d $path) {
+	if ((! $path) || (! -d $path)) {
 		return;
 	}
 	return $path;
