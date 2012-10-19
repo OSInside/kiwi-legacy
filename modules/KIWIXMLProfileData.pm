@@ -62,14 +62,13 @@ sub new {
 	if (! $this -> __areKeywordArgsValid($init) ) {
 		return;
 	}
-	if ($init) {
-		if (! $this -> __isInitConsistent($init)) {
-			return;
-		}
-		$this->{description} = $init->{description};
-		$this->{import}      = $init->{import};
-		$this->{name}        = $init->{name};
+	if (! $this -> __isInitConsistent($init)) {
+		return;
 	}
+	$this->{description} = $init->{description};
+	$this->{import}      = $init->{import};
+	$this->{name}        = $init->{name};
+
 	return $this;
 }
 

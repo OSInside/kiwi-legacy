@@ -37,9 +37,9 @@ sub new {
 }
 
 #==========================================
-# test_ctor
+# test_ctor_noArg
 #------------------------------------------
-sub test_ctor {
+sub test_ctor_noArg {
 	# ...
 	# Test the DriverData constructor
 	# ---
@@ -47,13 +47,15 @@ sub test_ctor {
 	my $kiwi = $this -> {kiwi};
 	my $driverDataObj = KIWIXMLDriverData -> new($kiwi);
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
+	my $expectedMsg = 'KIWIXMLDriverData: must be constructed with a '
+		. 'keyword hash as argument';
+	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
+	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($driverDataObj);
+	$this -> assert_null($driverDataObj);
 	return;
 }
 
@@ -71,8 +73,8 @@ sub test_ctor_unsuportedArch {
 				name => 'soundcore.ko'
 	);
 	my $driverDataObj = KIWIXMLDriverData -> new($kiwi, \%init);
-	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
