@@ -48,36 +48,40 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
+	if (! $this -> __hasInitArg($init) ) {
+		return;
+	}
 	my %keywords = map { ($_ => 1) } qw(
 		alias imageinclude password path preferlicense priority
 		status type username
 	);
 	$this->{supportedKeywords} = \%keywords;
-	my %supported = map { ($_ => 1) } qw(
+	my %boolKW = map { ($_ => 1) } qw( preferlicense );
+	$this->{boolKeywords} = \%boolKW;
+	my %supportedRepo = map { ($_ => 1) } qw(
 		apt-deb apt-rpm	deb-dir	mirrors	red-carpet rpm-dir rpm-md slack-site
 		up2date-mirrors	urpmi yast2
 	);
-	$this->{supportedRepoTypes} = \%supported;
+	$this->{supportedRepoTypes} = \%supportedRepo;
 	if (! $this -> __isInitHashRef($init) ) {
 		return;
 	}
 	if (! $this -> __areKeywordArgsValid($init) ) {
 		return;
 	}
-	if ($init) {
-		if (! $this -> __isInitConsistent($init)) {
-			return;
-		}
-		$this->{alias}         = $init->{alias};
-		$this->{imageinclude}  = $init->{imageinclude};
-		$this->{password}      = $init->{password};
-		$this->{path}          = $init->{path};
-		$this->{preferlicense} = $init->{preferlicense};
-		$this->{priority}      = $init->{priority};
-		$this->{status}        = $init->{status};
-		$this->{type}          = $init->{type};
-		$this->{username}      = $init->{username};
+	if (! $this -> __isInitConsistent($init)) {
+		return;
 	}
+	$this->{alias}         = $init->{alias};
+	$this->{imageinclude}  = $init->{imageinclude};
+	$this->{password}      = $init->{password};
+	$this->{path}          = $init->{path};
+	$this->{preferlicense} = $init->{preferlicense};
+	$this->{priority}      = $init->{priority};
+	$this->{status}        = $init->{status};
+	$this->{type}          = $init->{type};
+	$this->{username}      = $init->{username};
+
 	return $this;
 }
 
@@ -257,13 +261,13 @@ sub setPreferLicense {
 	# the indicator is turned off.
 	# ---
 	my $this = shift;
-	my $useLic = shift;
-	if ($useLic) {
-		$this->{preferlicense} = 'true';
-	} else {
-		delete $this->{preferlicense};
-	}
-	return $this;
+	my $val = shift;
+	my %settings = (
+		attr   => 'preferlicense',
+		value  => $val,
+		caller => 'setPreferLicense'
+	);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -361,6 +365,9 @@ sub __isInitConsistent {
 	my $this = shift;
 	my $init = shift;
 	my $kiwi = $this->{kiwi};
+	if (! $this -> __areKeywordBooleanValuesValid($init) ) {
+		return;
+	}
 	if (! $init->{path} ) {
 		my $msg = 'KIWIXMLRepositoryData: no "path" specified in '
 			. 'initialization structure.';
@@ -370,7 +377,7 @@ sub __isInitConsistent {
 	}
 	if (! $init->{type} ) {
 		my $msg = 'KIWIXMLRepositoryData: no "type" specified in '
-			. 'initialization structure.';;
+			. 'initialization structure.';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;
