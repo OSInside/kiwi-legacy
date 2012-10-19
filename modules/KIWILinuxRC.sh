@@ -3611,6 +3611,37 @@ function searchVolumeGroup {
 	vgchange -a y $VGROUP
 }
 #======================================
+# deactivateVolumeGroup
+#--------------------------------------
+function deactivateVolumeGroup {
+	# /.../
+	# as signals/ioctls from earlier operations may
+	# not have been processed by the kernel or udev
+	# we may require a moment before 'vgchange -a n'
+	# return zero on success
+	# ----
+	if [ ! "$kiwi_lvm" = "true" ];then
+		return 1
+	fi
+	udevPending
+	Echo "Deactivating $VGROUP volume group..."
+	vgchange -a n $VGROUP
+}
+#======================================
+# activateVolumeGroup
+#--------------------------------------
+function activateVolumeGroup {
+	# /.../
+	# activate volume group if LVM is present
+	# ----
+	if [ ! "$kiwi_lvm" = "true" ];then
+		return 1
+	fi
+	udevPending
+	Echo "Activating $VGROUP volume group..."
+	vgchange -a y $VGROUP
+}
+#======================================
 # searchSwapSpace
 #--------------------------------------
 function searchSwapSpace {

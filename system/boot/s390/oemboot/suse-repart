@@ -351,7 +351,7 @@ function OEMRepartLVM {
 		if [ "$haveLuks" = "yes" ];then
 			luksClose
 		fi
-		vgchange -a n $VGROUP
+		deactivateVolumeGroup
 		#======================================
 		# resize LVM partition
 		#--------------------------------------
@@ -379,7 +379,7 @@ function OEMRepartLVM {
 			1 $swapParam $recoParam $bootParam yes $VGROUP
 		callPartitioner $input
 		waitForStorageDevice $(ddn $imageDiskDevice $extendID)
-		vgchange -a n $VGROUP
+		deactivateVolumeGroup
 		#======================================
 		# extend volume group with rest space
 		#--------------------------------------
@@ -387,7 +387,7 @@ function OEMRepartLVM {
 		#======================================
 		# activate volume group $VGROUP
 		#--------------------------------------
-		vgchange -a y $VGROUP
+		activateVolumeGroup
 		#======================================
 		# Add LVSwap if requested.
 		#--------------------------------------
