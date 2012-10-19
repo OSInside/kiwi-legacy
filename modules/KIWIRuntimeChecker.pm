@@ -98,9 +98,6 @@ sub createChecks {
 	if (! $this -> __checkPackageManagerExists()) {
 		return;
 	}
-	if (! $this -> __checkKernelVersionToolExists()) {
-		return;
-	}
 	if (! $this -> __checkVMscsiCapable()) {
 		return;
 	}
@@ -389,26 +386,6 @@ sub __checkPackageManagerExists {
 		my $msg = "Executable for specified package manager, $pkgMgr, "
 			. 'could not be found.';
 		$this -> {kiwi} -> error($msg);
-		$this -> {kiwi} -> failed();
-		return;
-	}
-	return 1;
-}
-
-#==========================================
-# __checkKernelVersionToolExists
-#------------------------------------------
-sub __checkKernelVersionToolExists {
-	# ...
-	# Check that the build host has kversion provided
-	# by kiwi-tools
-	# ---
-	my $this = shift;
-	my $tool = "kversion";
-	my $haveExec = $this -> {locator} -> getExecPath($tool);
-	if (! $haveExec) {
-		my $msg = "Executable $tool could not be found";
-		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed();
 		return;
 	}
