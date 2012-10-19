@@ -7237,6 +7237,9 @@ function resizeFilesystem {
 	local resize_fs
 	local resize_lucks
 	local check
+	local mnt=/mnt-resize
+	udevPending
+	mkdir -p $mnt
 	if echo $deviceResize | grep -qi "/dev/ram";then
 		ramdisk=1
 	fi
@@ -7271,17 +7274,17 @@ function resizeFilesystem {
 		fi
 	elif [ "$FSTYPE" = "btrfs" ];then
 		Echo "Resize BTRFS filesystem to full partition space..."
-		resize_fs="mount $deviceResize /mnt &&"
+		resize_fs="mount $deviceResize $mnt &&"
 		if which btrfs &>/dev/null;then
-			resize_fs="$resize_fs btrfs filesystem resize max /mnt;umount /mnt"
+			resize_fs="$resize_fs btrfs filesystem resize max $mnt;umount $mnt"
 		else
-			resize_fs="$resize_fs btrfsctl -r max /mnt;umount /mnt"
+			resize_fs="$resize_fs btrfsctl -r max $mnt;umount $mnt"
 		fi
 		check="btrfsck $deviceResize"
 	elif [ "$FSTYPE" = "xfs" ];then
 		Echo "Resize XFS filesystem to full partition space..."
-		resize_fs="mount $deviceResize /mnt &&"
-		resize_fs="$resize_fs xfs_growfs /mnt;umount /mnt"
+		resize_fs="mount $deviceResize $mnt &&"
+		resize_fs="$resize_fs xfs_growfs $mnt;umount $mnt"
 		check="xfs_check $deviceResize"
 	else
 		# don't know how to resize this filesystem
@@ -7303,7 +7306,6 @@ function resizeFilesystem {
 				"Failed to resize/check filesystem" \
 			"reboot"
 		fi
-		INITRD_MODULES="$INITRD_MODULES $FSTYPE"
 	else
 		echo $resize_fs
 	fi
