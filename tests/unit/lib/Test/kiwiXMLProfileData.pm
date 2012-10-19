@@ -38,29 +38,6 @@ sub new {
 }
 
 #==========================================
-# test_ctor
-#------------------------------------------
-sub test_ctor {
-	# ...
-	# Test the ProfileData constructor
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLProfileData -> new($kiwi);
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'KIWIXMLProfileData: must be constructed with '
-		. 'a keyword has as arg';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_null($prefDataObj);
-	return;
-}
-
-#==========================================
 # test_ctor_improperArg
 #------------------------------------------
 sub test_ctor_improperArg {
@@ -157,6 +134,29 @@ sub test_ctor_invalidArgVal {
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLProfileData: Unrecognized value for boolean '
 		. "'import' in initialization structure.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($prefDataObj);
+	return;
+}
+
+#==========================================
+# test_ctor_noInit
+#------------------------------------------
+sub test_ctor_noInit {
+	# ...
+	# Test the ProfileData constructor with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $prefDataObj = KIWIXMLProfileData -> new($kiwi);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLProfileData: must be constructed with a '
+		. 'keyword hash as argument';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -473,8 +473,7 @@ sub test_setNameNoArg {
 #------------------------------------------
 sub __getProfObj {
 	# ...
-	# Helper to construct a fully populated Profile object using
-	# initialization
+	# Helper to construct a fully populated Profile object
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
