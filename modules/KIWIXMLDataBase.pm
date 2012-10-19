@@ -78,7 +78,7 @@ sub __areKeywordArgsValid {
 			return;
 		}
 	}
-	return $this;
+	return 1;
 }
 
 #==========================================
@@ -105,7 +105,29 @@ sub __areKeywordBooleanValuesValid {
 			return;
 		}
 	}
-	return $this;
+	return 1;
+}
+
+#==========================================
+# __hasInitArg
+#------------------------------------------
+sub __hasInitArg {
+	# ...
+	# Verify that the argument is defined, error if not.
+	# Used for classes that must be initialized for proper construction.
+	# ---
+	my $this = shift;
+	my $init = shift;
+	if (! $init ) {
+		my $objName = ref $this;
+			my $kiwi = $this->{kiwi};
+			my $msg = "$objName: must be constructed with "
+			. 'a keyword hash as argument';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
 }
 
 #==========================================
@@ -124,7 +146,7 @@ sub __isInitHashRef {
 		$kiwi -> failed();
 		return;
 	}
-	return $this;
+	return 1;
 }
 
 #==========================================

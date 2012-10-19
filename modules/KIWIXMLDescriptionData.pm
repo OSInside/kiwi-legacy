@@ -48,6 +48,9 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
+	if (! $this -> __hasInitArg($init) ) {
+		return;
+	}
 	my %keywords = map { ($_ => 1) } qw(
 		author contact specification type
 	);
@@ -78,9 +81,6 @@ sub getAuthor {
 	# Return the value of the author member
 	# ---
 	my $this = shift;
-	if (! $this -> __isObjectValid()) {
-		return;
-	}
 	return $this->{author};
 }
 
@@ -92,9 +92,6 @@ sub getContactInfo {
 	# Return the value of the contact member
 	# ---
 	my $this = shift;
-	if (! $this -> __isObjectValid()) {
-		return;
-	}
 	return $this->{contact};
 }
 
@@ -106,9 +103,6 @@ sub getSpecificationDescript {
 	# Return the value of the specification member
 	# ---
 	my $this = shift;
-	if (! $this -> __isObjectValid()) {
-		return;
-	}
 	return $this->{specification};
 }
 
@@ -120,9 +114,6 @@ sub getType {
 	# Return the value of the type member
 	# ---
 	my $this = shift;
-	if (! $this -> __isObjectValid()) {
-		return;
-	}
 	return $this->{type};
 }
 
@@ -136,6 +127,11 @@ sub setAuthor {
 	my $this   = shift;
 	my $author = shift;
 	if (! defined $author) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setAuthor: no author given, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{author} = $author;
@@ -152,6 +148,11 @@ sub setContactInfo {
 	my $this   = shift;
 	my $contact = shift;
 	if (! defined $contact) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setContactInfo: no contact information given, '
+			. 'retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{contact} = $contact;
@@ -168,6 +169,11 @@ sub setSpecificationDescript {
 	my $this   = shift;
 	my $spec = shift;
 	if (! defined $spec) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setSpecificationDescript: no discription given, '
+			. 'retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	$this->{specification} = $spec;
@@ -193,27 +199,6 @@ sub setType {
 #==========================================
 # Private helper methods
 #------------------------------------------
-#==========================================
-# __isObjectValid
-#------------------------------------------
-sub __isObjectValid {
-	# ...
-	# All data members of the object must defined, or the object is
-	# considered invalid and will not return any of its data.
-	# ---
-	my $this = shift;
-	my @members = qw /author contact specification type/;
-	for my $member (@members) {
-		if (! defined $this->{$member}) {
-			my $kiwi = $this->{kiwi};
-			$kiwi->warning('XMLDescriptionData object in invalid state');
-			$kiwi->oops();
-			return;
-		}
-	}
-	return 1;
-}
-
 #==========================================
 # __isInitConsistent
 #------------------------------------------
@@ -256,7 +241,7 @@ sub __isValidType {
 		$kiwi -> oops();
 	}
 	if (! $type ) {
-		my $msg = "$caller: no description type specified, retaining "
+		my $msg = "$caller: no description type given, retaining "
 			. 'current data.';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
