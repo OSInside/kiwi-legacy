@@ -50,6 +50,9 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
+	if (! $this -> __hasInitArg($init) ) {
+		return;
+	}
 	my %keywords = map { ($_ => 1) } qw( arch name );
 	$this->{supportedKeywords} = \%keywords;
 	if (! $this -> __isInitHashRef($init) ) {
@@ -58,13 +61,12 @@ sub new {
 	if (! $this -> __areKeywordArgsValid($init) ) {
 		return;
 	}
-	if ($init) {
-		if (! $this -> __isInitConsistent($init) )  {
-			return;
-		}
-		$this->{name} = $init->{name};
-		$this->{arch} = $init->{arch};
+	if (! $this -> __isInitConsistent($init) )  {
+		return;
 	}
+	$this->{name} = $init->{name};
+	$this->{arch} = $init->{arch};
+
 	return $this;
 }
 

@@ -5863,67 +5863,6 @@ sub test_setDescriptionInfoImproperArg {
 }
 
 #==========================================
-# test_setDescriptionInfoInvalArg
-#------------------------------------------
-sub test_setDescriptionInfoInvalArg {
-	# ...
-	# Verify that setting the description information with an invalid
-	# DescriptionData object fails as expected
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'descriptData';
-	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
-	);
-	my %init = (
-				author  => 'Robert Schweikert',
-				contact => 'rjschwei@suse.com',
-				type    => 'system'
-	);
-	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi, \%init);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my $res = $xml -> setDescriptionInfo($descriptObj);
-	$this -> assert_null($res);
-	$msg =  $kiwi -> getWarningMessage();
-	my $expected = 'XMLDescriptionData object in invalid state';
-	$this -> assert_str_equals($expected, $msg);
-	$state = $kiwi -> getOopsState();
-	$this -> assert_str_equals('oops', $state);
-	$expected = 'setDescriptionInfo: Provided KIWIXMLDescriptionData '
-		. 'instance is not valid.';
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals($expected, $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	my $descrpObj = $xml -> getDescriptionInfo();
-	$this -> assert_not_null($descrpObj);
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my $author = $descrpObj -> getAuthor();
-	$this -> assert_str_equals('Robert Schweikert', $author);
-	my $contact = $descrpObj -> getContactInfo();
-	$this -> assert_str_equals('rjschwei@suse.com', $contact);
-	my $spec = $descrpObj -> getSpecificationDescript();
-	$expected = 'Verify proper handling of description in XML obj';
-	$this -> assert_str_equals($expected, $spec);
-	my $type = $descrpObj -> getType();
-	$this -> assert_str_equals('system', $type);
-	return;
-}
-
-#==========================================
 # test_setDescriptionInfoNoArg
 #------------------------------------------
 sub test_setDescriptionInfoNoArg {

@@ -47,33 +47,28 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
+	if (! $this -> __hasInitArg($init) ) {
+		return;
+	}
 	my %keywords = map { ($_ => 1) } qw(
 		description import name
 	);
 	$this->{supportedKeywords} = \%keywords;
 	my %boolKW = map { ($_ => 1) } qw( import );
 	$this->{boolKeywords} = \%boolKW;
-	if (! $init ) {
-		my $msg = 'KIWIXMLProfileData: must be constructed with '
-			. 'a keyword has as arg';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
 	if (! $this -> __isInitHashRef($init) ) {
 		return;
 	}
 	if (! $this -> __areKeywordArgsValid($init) ) {
 		return;
 	}
-	if ($init) {
-		if (! $this -> __isInitConsistent($init)) {
-			return;
-		}
-		$this->{description} = $init->{description};
-		$this->{import}      = $init->{import};
-		$this->{name}        = $init->{name};
+	if (! $this -> __isInitConsistent($init)) {
+		return;
 	}
+	$this->{description} = $init->{description};
+	$this->{import}      = $init->{import};
+	$this->{name}        = $init->{name};
+
 	return $this;
 }
 
