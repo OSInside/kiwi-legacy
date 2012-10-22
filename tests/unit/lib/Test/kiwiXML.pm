@@ -1155,7 +1155,7 @@ sub test_addRepositoriesExistPrefLic {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my %prefLic = ( path          => '/work/repos/pckgs',
-					preferlicense => 1,
+					preferlicense => 'true',
 					type          => 'rpm-dir'
 				);
 	my @reposToAdd = ();
