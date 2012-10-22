@@ -1,6 +1,6 @@
 <locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
-<transformURI fromPattern="*.xml" toPattern="*.rnc"/>
+  <transformURI fromPattern="*.xml" toPattern="*.rnc"/>
 
-<uri pattern=”*.kiwi” typeId=”KIWI”/>
-<typeId id=”KIWI” uri=”/usr/share/kiwi/modules/KIWISchema.rnc”/>
+  <uri pattern="*.kiwi" typeId="KIWI"/>
+  <typeId id="KIWI" uri="/usr/share/kiwi/modules/KIWISchema.rnc"/>
 </locatingRules>
