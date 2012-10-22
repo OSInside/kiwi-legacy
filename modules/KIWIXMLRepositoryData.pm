@@ -56,7 +56,7 @@ sub new {
 		status type username
 	);
 	$this->{supportedKeywords} = \%keywords;
-	my %boolKW = map { ($_ => 1) } qw( preferlicense );
+	my %boolKW = map { ($_ => 1) } qw( preferlicense imageinclude );
 	$this->{boolKeywords} = \%boolKW;
 	my %supportedRepo = map { ($_ => 1) } qw(
 		apt-deb apt-rpm	deb-dir	mirrors	red-carpet rpm-dir rpm-md slack-site
