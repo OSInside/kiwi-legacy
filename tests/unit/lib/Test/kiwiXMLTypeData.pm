@@ -38,27 +38,6 @@ sub new {
 }
 
 #==========================================
-# test_ctor
-#------------------------------------------
-sub test_ctor {
-	# ...
-	# Test the TypeData constructor
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($typeDataObj);
-	return;
-}
-
-#==========================================
 # test_ctor_improperArg
 #------------------------------------------
 sub test_ctor_improperArg {
@@ -284,6 +263,35 @@ sub test_ctor_initInvalidInstallprovidefailsafeValue {
 }
 
 #==========================================
+# test_ctor_initInvalidInstallPXEValue
+#------------------------------------------
+sub test_ctor_initInvalidInstallPXEValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized boolen initialization for
+	# the installpxe value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = (
+				image      => 'vmx',
+				installpxe => 'foo'
+				);
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+		. "'installpxe' in initialization structure.";
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
 # test_ctor_initInvalidInstallstickValue
 #------------------------------------------
 sub test_ctor_initInvalidInstallstickValue {
@@ -380,7 +388,10 @@ sub test_ctor_initUnsupportedBootLoad {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( bootloader => 'lnxBoot' );
+	my %init = (
+				bootloader => 'lnxBoot',
+				image      => 'split'
+			);
 	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified bootloader '
@@ -430,7 +441,10 @@ sub test_ctor_initUnsupportedDevPersist {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( devicepersistency => 'mapper-id' );
+	my %init = (
+				image             => 'vmx',
+				devicepersistency => 'mapper-id'
+			);
 	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified device persistency '
@@ -455,7 +469,10 @@ sub test_ctor_initUnsupportedFilesystem {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( filesystem => 'aufs' );
+	my %init = (
+				filesystem => 'aufs',
+				image      => 'btrfs'
+			);
 	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified filesystem '
@@ -480,7 +497,10 @@ sub test_ctor_initUnsupportedFlags {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( flags => 'gzipped' );
+	my %init = (
+				flags => 'gzipped',
+				image => 'ext4'
+			);
 	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified flags value '
@@ -505,7 +525,10 @@ sub test_ctor_initUnsupportedFormat {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( format => 'xen' );
+	my %init = (
+				format => 'xen',
+				image  => 'xfs'
+			);
 	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified format '
@@ -574,6 +597,29 @@ sub test_ctor_initUnsupportedInstBoot {
 }
 
 #==========================================
+# test_ctor_noInit
+#------------------------------------------
+sub test_ctor_noInit {
+	# ...
+	# Test the TypeData constructor
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLTypeData: must be constructed with a '
+		. 'keyword hash as argument';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($typeDataObj);
+	return;
+}
+
+#==========================================
 # test_ctor_withInit
 #------------------------------------------
 sub test_ctor_withInit {
@@ -618,8 +664,8 @@ sub test_ctor_withInitIncomplete {
 			);
 	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'object initialization: no image argument specified, '
-		. 'retaining current data.';
+	my $expected = 'KIWIXMLTypeData: no "image" specified in '
+		. 'initialization structure.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -702,7 +748,8 @@ sub test_getBootLoaderDefault {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my %init = ( image => 'ext2' );
+	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	my $name = $typeDataObj -> getBootLoader();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1114,27 +1161,6 @@ sub test_getInstallBoot {
 }
 
 #==========================================
-# test_getInstallIso
-#------------------------------------------
-sub test_getInstallIso {
-	# ...
-	# Test the getInstallIso method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = $this -> __getTypeObj();
-	my $iso = $typeDataObj -> getInstallIso();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('true', $iso);
-	return;
-}
-
-#==========================================
 # test_getInstallFailsafe
 #------------------------------------------
 sub test_getInstallFailsafe {
@@ -1164,7 +1190,8 @@ sub test_getInstallFailsafeDefault {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my %init = ( image => 'cpio' );
+	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	my $instFS = $typeDataObj -> getInstallFailsafe();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1173,6 +1200,48 @@ sub test_getInstallFailsafeDefault {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('true', $instFS);
+	return;
+}
+
+#==========================================
+# test_getInstallIso
+#------------------------------------------
+sub test_getInstallIso {
+	# ...
+	# Test the getInstallIso method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $iso = $typeDataObj -> getInstallIso();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('true', $iso);
+	return;
+}
+
+#==========================================
+# test_getInstallPXE
+#------------------------------------------
+sub test_getInstallPXE {
+	# ...
+	# Test the getInstallPXE method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $instFS = $typeDataObj -> getInstallPXE();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_null($instFS);
 	return;
 }
 
@@ -1353,7 +1422,7 @@ sub test_setBootImageDescript {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setBootImageDescript('vmxboot/suse-12.2');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1413,7 +1482,7 @@ sub test_setBootKernel {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setBootKernel('default');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1473,7 +1542,7 @@ sub test_setBootLoader {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setBootLoader('yaboot');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1564,7 +1633,7 @@ sub test_setBootPartitionSize {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setBootPartitionSize('1024M');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1624,7 +1693,7 @@ sub test_setBootProfile {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setBootProfile('xen');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1684,7 +1753,7 @@ sub test_setBootTimeout {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setBootTimeout('8');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1744,7 +1813,7 @@ sub test_setCheckPrebuilt {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setCheckPrebuilt('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1833,7 +1902,7 @@ sub test_setCompressed {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setCompressed('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1922,7 +1991,7 @@ sub test_setDevicePersistent {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setDevicePersistent('by-label');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2013,7 +2082,7 @@ sub test_setEditBootConfig {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setEditBootConfig('confScript');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2073,7 +2142,7 @@ sub test_setEditBootInstall {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setEditBootInstall('confInstScript');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2133,7 +2202,7 @@ sub test_setFilesystem {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setFilesystem('ext3');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2224,7 +2293,7 @@ sub test_setFlags {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setFlags('clic');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2315,7 +2384,7 @@ sub test_setFormat {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setFormat('ec2');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2405,7 +2474,7 @@ sub test_setFSMountOptions {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setFSMountOptions('journal');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2465,7 +2534,7 @@ sub test_setFSNoCheck {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setFSNoCheck('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2554,7 +2623,7 @@ sub test_setFSReadOnly {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setFSReadOnly('ext3');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2645,7 +2714,7 @@ sub test_setFSReadWrite {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setFSReadWrite('ext3');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2736,7 +2805,7 @@ sub test_setHybrid {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setHybrid('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2825,7 +2894,7 @@ sub test_setHybridPersistent {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setHybridPersistent('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2914,7 +2983,7 @@ sub test_setImageType {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setImageType('tbz');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3005,7 +3074,7 @@ sub test_setInstallBoot {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setInstallBoot('failsafe-install');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3096,7 +3165,7 @@ sub test_setInstallFailsafe {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setInstallFailsafe('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3185,7 +3254,7 @@ sub test_setInstallIso {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setInstallIso('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3264,6 +3333,95 @@ sub test_setInstallIsoUnknownArg {
 	$this -> assert_str_equals('true', $iso);
 	return;
 }
+#RJS
+#==========================================
+# test_setInstallPXE
+#------------------------------------------
+sub test_setInstallPXE {
+	# ...
+	# Test the setInstallPXE method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	$typeDataObj = $typeDataObj -> setInstallPXE('true');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $failS = $typeDataObj -> getInstallPXE();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('true', $failS);
+	return;
+}
+
+#==========================================
+# test_setInstallPXENoArg
+#------------------------------------------
+sub test_setInstallPXENoArg {
+	# ...
+	# Test the setInstallPXE method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setInstallPXE();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $failS = $typeDataObj -> getInstallPXE();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_null($failS);
+	return;
+}
+
+#==========================================
+# test_setInstallPXEUnknownArg
+#------------------------------------------
+sub test_setInstallPXEUnknownArg {
+	# ...
+	# Test the setInstallPXE method with an unrecognized argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setInstallPXE('5');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLTypeData:setInstallPXE: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $failS = $typeDataObj -> getInstallPXE();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_null($failS);
+	return;
+}
 
 #==========================================
 # test_setInstallStick
@@ -3274,7 +3432,7 @@ sub test_setInstallStick {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setInstallStick('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3363,7 +3521,7 @@ sub test_setKernelCmdOpts {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setKernelCmdOpts('init=/bin/sh');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3423,7 +3581,7 @@ sub test_setLucksPass {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setLucksPass('mySecret');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3483,7 +3641,7 @@ sub test_setPrimary {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setPrimary('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3572,7 +3730,7 @@ sub test_setRAMOnly {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setRAMOnly('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3661,7 +3819,7 @@ sub test_setSize {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setSize('4096');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3721,7 +3879,7 @@ sub test_setVGA {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setVGA('0x348');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3781,7 +3939,7 @@ sub test_setVolID {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = $this -> __getTypeObj();
 	$typeDataObj = $typeDataObj -> setVolID('myDist');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3870,6 +4028,7 @@ sub __getTypeObj {
 				installboot            => 'install',
 				installiso             => 'true',
 				installprovidefailsafe => 'true',
+				installpxe             => 'false',
 				installstick           => 'true',
 				kernelcmdline          => 'kiwidebug=1',
 				luks                   => 'notApass',

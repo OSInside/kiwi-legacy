@@ -54,6 +54,9 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
+	if (! $this -> __hasInitArg($init) ) {
+		return;
+	}
 	# While <ec2config>, <machine>, <oemconfig>, <pxedeploy>, <split>, and
 	# <systemdisk> are children of <type> the data is not in this class
 	# the child relationship is enforced at the XML level.
@@ -83,8 +86,8 @@ sub new {
 		installboot
 		installiso
 		installprovidefailsafe
-		installstick
 		installpxe
+		installstick
 		kernelcmdline
 		luks
 		machine
@@ -107,8 +110,8 @@ sub new {
 		hybridpersistent
 		installiso
 		installprovidefailsafe
+		installpxe
 		installstick
-        installpxe
 		primary
 		ramonly
 		installpxe
@@ -120,34 +123,32 @@ sub new {
 	if (! $this -> __areKeywordArgsValid($init) ) {
 		return;
 	}
-	if ($init) {
-		if (! $this -> __isInitConsistent($init)) {
-			return;
-		}
-		$this -> __initializeBoolMembers($init);
-		$this->{boot}                   = $init->{boot};
-		$this->{bootkernel}             = $init->{bootkernel};
-		$this->{bootloader}             = $init->{bootloader};
-		$this->{bootpartsize}           = $init->{bootpartsize};
-		$this->{bootprofile}            = $init->{bootprofile};
-		$this->{boottimeout}            = $init->{boottimeout};
-		$this->{devicepersistency}      = $init->{devicepersistency};
-		$this->{editbootconfig}         = $init->{editbootconfig};
-		$this->{editbootinstall}        = $init->{editbootinstall};
-		$this->{filesystem}             = $init->{filesystem};
-		$this->{flags}                  = $init->{flags};
-		$this->{format}                 = $init->{format};
-		$this->{fsmountoptions}         = $init->{fsmountoptions};
-		$this->{fsreadonly}             = $init->{fsreadonly};
-		$this->{fsreadwrite}            = $init->{fsreadwrite};
-		$this->{image}                  = $init->{image};
-		$this->{installboot}            = $init->{installboot};
-		$this->{kernelcmdline}          = $init->{kernelcmdline};
-		$this->{luks}                   = $init->{luks};
-		$this->{size}                   = $init->{size};
-		$this->{vga}                    = $init->{vga};
-		$this->{volid}                  = $init->{volid};
+	if (! $this -> __isInitConsistent($init)) {
+		return;
 	}
+	$this -> __initializeBoolMembers($init);
+	$this->{boot}                   = $init->{boot};
+	$this->{bootkernel}             = $init->{bootkernel};
+	$this->{bootloader}             = $init->{bootloader};
+	$this->{bootpartsize}           = $init->{bootpartsize};
+	$this->{bootprofile}            = $init->{bootprofile};
+	$this->{boottimeout}            = $init->{boottimeout};
+	$this->{devicepersistency}      = $init->{devicepersistency};
+	$this->{editbootconfig}         = $init->{editbootconfig};
+	$this->{editbootinstall}        = $init->{editbootinstall};
+	$this->{filesystem}             = $init->{filesystem};
+	$this->{flags}                  = $init->{flags};
+	$this->{format}                 = $init->{format};
+	$this->{fsmountoptions}         = $init->{fsmountoptions};
+	$this->{fsreadonly}             = $init->{fsreadonly};
+	$this->{fsreadwrite}            = $init->{fsreadwrite};
+	$this->{image}                  = $init->{image};
+	$this->{installboot}            = $init->{installboot};
+	$this->{kernelcmdline}          = $init->{kernelcmdline};
+	$this->{luks}                   = $init->{luks};
+	$this->{size}                   = $init->{size};
+	$this->{vga}                    = $init->{vga};
+	$this->{volid}                  = $init->{volid};
 	# Set default values
 	if (! $this->{bootloader} ) {
 		$this->{bootloader} = 'grub';
@@ -1149,6 +1150,14 @@ sub __isInitConsistent {
 	# ---
 	my $this = shift;
 	my $init = shift;
+	if (! $init->{image} ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'KIWIXMLTypeData: no "image" specified in '
+			. 'initialization structure.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
 	if (! $this -> __areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
