@@ -2219,6 +2219,13 @@ failsafe entry with special kernel parameters or not"</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
+    <define name="k.type.installpxe.attribute">
+      <attribute name="installpxe">
+        <a:documentation>Specifies if all data for a pxe network installation should
+be created (oem only)</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.type.kernelcmdline.attribute">
       <!--
         The kernelcmdline element specifies additional
@@ -2335,6 +2342,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.installstick.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.installpxe.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.kernelcmdline.attribute"/>

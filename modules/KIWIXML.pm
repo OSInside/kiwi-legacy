@@ -1485,6 +1485,7 @@ sub __genTypeHash {
 		'image',
 		'installboot',
 		'installiso',
+		'installpxe',
 		'installprovidefailsafe',
 		'installstick',
 		'kernelcmdline',
@@ -6476,6 +6477,8 @@ sub __populateTypeInfo_legacy {
 				-> getAttribute("installiso");
 			$record{installstick}  = $node
 				-> getAttribute("installstick");
+			$record{installpxe}    = $node
+				-> getAttribute("installpxe");
 			$record{vga}           = $node
 				-> getAttribute("vga");
 			$record{bootloader}    = $node

@@ -58,18 +58,59 @@ sub new {
 	# <systemdisk> are children of <type> the data is not in this class
 	# the child relationship is enforced at the XML level.
 	my %keywords = map { ($_ => 1) } qw(
-	    boot bootkernel bootloader bootpartsize bootprofile boottimeout
-		checkprebuilt compressed devicepersistency ec2config editbootconfig
-		editbootinstall filesystem flags format fsmountoptions
-		fsnocheck fsreadonly fsreadwrite hybrid hybridpersistent image
-		installboot installiso installprovidefailsafe installstick
-		kernelcmdline luks machine oemconfig primary pxedeploy ramonly
-		size split systemdisk vga volid
+	    boot
+		bootkernel
+		bootloader
+		bootpartsize
+		bootprofile
+		boottimeout
+		checkprebuilt
+		compressed
+		devicepersistency
+		ec2config
+		editbootconfig
+		editbootinstall
+		filesystem
+		flags
+		format
+		fsmountoptions
+		fsnocheck
+		fsreadonly
+		fsreadwrite
+		hybrid
+		hybridpersistent
+		image
+		installboot
+		installiso
+		installprovidefailsafe
+		installstick
+		installpxe
+		kernelcmdline
+		luks
+		machine
+		oemconfig
+		primary
+		pxedeploy
+		ramonly
+		size
+		split
+		systemdisk
+		vga
+		volid
 	);
 	$this->{supportedKeywords} = \%keywords;
 	my %boolKW = map { ($_ => 1) } qw(
-	    checkprebuilt compressed fsnocheck hybrid hybridpersistent
-		installiso installprovidefailsafe installstick primary ramonly
+	    checkprebuilt
+		compressed
+		fsnocheck
+		hybrid
+		hybridpersistent
+		installiso
+		installprovidefailsafe
+		installstick
+		primary
+		ramonly
+		installpxe
 	);
 	$this->{boolKeywords} = \%boolKW;
 	if (! $this -> __isInitHashRef($init) ) {
@@ -107,6 +148,7 @@ sub new {
 		$this->{installiso}             = $init->{installiso};
 		$this->{installprovidefailsafe} = $init->{installprovidefailsafe};
 		$this->{installstick}           = $init->{installstick};
+		$this->{installpxe}             = $init->{installpxe};
 		$this->{kernelcmdline}          = $init->{kernelcmdline};
 		$this->{luks}                   = $init->{luks};
 		$this->{primary}                = $init->{primary};
@@ -402,6 +444,18 @@ sub getInstallStick {
 	# ---
 	my $this = shift;
 	return $this->{installstick};
+}
+
+#==========================================
+# getInstallPXE
+#------------------------------------------
+sub getInstallPXE {
+	# ...
+	# Return the value indicating whether or not all data required
+	# for an oem PXE installation should be created as install set
+	# ---
+	my $this = shift;
+	return $this->{installpxe};
 }
 
 #==========================================
@@ -930,6 +984,24 @@ sub setInstallStick {
 		attr   => 'installstick',
 		value  => $instS,
 		caller => 'setInstallStick'
+	);
+	return $this -> __setBooleanValue(\%settings);
+}
+
+#==========================================
+# setInstallPXE
+#------------------------------------------
+sub setInstallPXE {
+	# ...
+	# Set the value indicating whether or not PXE
+	# data files should be created for installation
+	# ---
+	my $this = shift;
+	my $instP = shift;
+	my %settings = (
+		attr   => 'installpxe',
+		value  => $instP,
+		caller => 'setInstallPXE'
 	);
 	return $this -> __setBooleanValue(\%settings);
 }

@@ -23,7 +23,7 @@ use strict;
 #============================================
 # perl debugger setup
 #--------------------------------------------
-$DB::inhibit_exit = 0;
+# $DB::inhibit_exit = 0;
 
 #============================================
 # Modules
@@ -380,6 +380,20 @@ sub main {
 	}
 
 	#==========================================
+	# Create an install PXE data set
+	#------------------------------------------
+	if ($cmdL->getOperationMode("installPXE")) {
+		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		if (! $kic) {
+			kiwiExit (1);
+		}
+		if (! $kic -> createImageInstallPXE()) {
+			kiwiExit (1);
+		}
+		kiwiExit (0);
+	}
+
+	#==========================================
 	# Create a virtual disk image
 	#------------------------------------------
 	if ($cmdL->getOperationMode("bootVMDisk")) {
@@ -635,6 +649,8 @@ sub init {
 	my $InstallCDSystem;       # disk system image to be installed on disk
 	my $TestCase;              # path to image description including test/ case
 	my $InstallStickSystem;    # disk system image to be installed on disk
+	my $InstallPXE;            # Installation initrd booting via network
+	my $InstallPXESystem;      # disk system image to be installed on disk
 	my @Exclude;               # exclude directories in migrate search
 	my @Skip;                  # skip this package in migration mode
 	my @Profiles;              # list of profiles to include in image
@@ -732,6 +748,8 @@ sub init {
 		"installcd-system=s"    => \$InstallCDSystem,
 		"installstick=s"        => \$InstallStick,
 		"installstick-system=s" => \$InstallStickSystem,
+		"installpxe=s"          => \$InstallPXE,
+		"installpxe-system=s"   => \$InstallPXESystem,
 		"isocheck"              => \$ISOCheck,
 		"list|l"                => \&listImage,
 		"log-port=i"            => \$LogPort,
@@ -927,6 +945,9 @@ sub init {
 	if (defined $InstallStick) {
 		$cmdL -> setInitrdFile ($InstallStick);
 	}
+	if (defined $InstallPXE) {
+		$cmdL -> setInitrdFile ($InstallPXE);
+	}
 	if (defined $BootVMDisk) {
 		$cmdL -> setInitrdFile ($BootVMDisk);
 	}
@@ -938,6 +959,9 @@ sub init {
 	}
 	if (defined $InstallStickSystem) {
 		$cmdL -> setSystemLocation ($InstallStickSystem);
+	}
+	if (defined $InstallPXESystem) {
+		$cmdL -> setSystemLocation ($InstallPXESystem);
 	}
 	if (defined $BootVMSystem) {
 		$cmdL -> setSystemLocation ($BootVMSystem);
@@ -1175,6 +1199,9 @@ sub init {
 	if (defined $InstallStick) {
 		$cmdL -> setOperationMode ("installStick",$InstallStick);
 	}
+	if (defined $InstallPXE) {
+		$cmdL -> setOperationMode ("installPXE",$InstallPXE);
+	}
 	if (defined $BootVMDisk) {
 		$cmdL -> setOperationMode ("bootVMDisk",$BootVMDisk);
 	}
@@ -1279,6 +1306,7 @@ sub init {
 		(! defined $BootVMDisk)         &&
 		(! defined $Migrate)            &&
 		(! defined $InstallStick)       &&
+		(! defined $InstallPXE)         &&
 		(! defined $ListXMLInfo)        &&
 		(! defined $CreatePassword)     &&
 		(! defined $BootCD)             &&
@@ -1397,8 +1425,11 @@ sub usage {
 	print "       [ --installcd-system <vmx-system-image> ]\n";
 	print "    kiwi --installstick <initrd>\n";
 	print "       [ --installstick-system <vmx-system-image> ]\n";
+	print "    kiwi --installpxe <initrd>\n";
+	print "       [ --installpxe-system <vmx-system-image> ]\n";
 	print "Image format conversion:\n";
-	print "    kiwi --convert <systemImage> [ --format <vmdk|ovf|qcow2|vhd|..> ]\n";
+	print "    kiwi --convert <systemImage>\n";
+	print "       [ --format <vmdk|ovf|qcow2|vhd|..> ]\n";
 	print "Helper Tools:\n";
 	print "    kiwi --createpassword\n";
 	print "    kiwi --createhash <image-path>\n";

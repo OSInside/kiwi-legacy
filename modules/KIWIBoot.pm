@@ -1572,6 +1572,186 @@ sub setupInstallStick {
 }
 
 #==========================================
+# setupInstallPXE
+#------------------------------------------
+sub setupInstallPXE {
+	my $this = shift;
+	my $kiwi      = $this->{kiwi};
+	my $zipper    = $this->{gdata}->{Gzip};
+	my $initrd    = $this->{initrd};
+	my $system    = $this->{system};
+	my $xml       = $this->{xml};
+	my $zipped    = $this->{zipped};
+	my $arch      = $this->{arch};
+	my $vgroup    = $this->{lvmgroup};
+	my $lvm       = $this->{lvm};
+	my $imgtype   = $this->{imgtype};
+	my %type      = %{$xml->getImageTypeAndAttributes_legacy()};
+	my $destdir   = dirname ($initrd);
+	my $md5name   = $system;
+	my $appname;
+	my $sysname;
+	my $irdname;
+	my $krnname;
+	my $tarname;
+	my $haveDiskDevice;
+	my $status;
+	my $result;
+	my $version;
+	my @packfiles;
+	#==========================================
+	# Create new MBR label for PXE install
+	#------------------------------------------
+	$this->{mbrid} = $main::global -> getMBRDiskLabel();
+	#==========================================
+	# Check for disk device
+	#------------------------------------------
+	if (-b $system) {
+		$haveDiskDevice = $system;
+		$version = $xml -> getImageVersion();
+		$system  = $xml -> getImageName();
+		$system  = $destdir."/".$system.".".$arch."-".$version.".raw";
+		$md5name = $system;
+		$this->{system} = $system;
+	}
+	#==========================================
+	# check if initrd is zipped
+	#------------------------------------------
+	if (! $zipped) {
+		$kiwi -> error  ("Compressed boot image required");
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# check if system image is given
+	#------------------------------------------
+	if (! defined $system) {
+		$kiwi -> error  ("System raw disk image required");
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# check for kernel image
+	#------------------------------------------
+	$krnname = $initrd;
+	if ($krnname =~ /gz$/) {
+		$krnname =~ s/gz$/kernel/;
+	} else {
+		$krnname = $krnname.".kernel";
+	}
+	if (! -e $krnname) {
+		$krnname =~ s/splash\.kernel$/kernel/;
+	}
+	if (-l $krnname) {
+		my $knlink = $krnname;
+		$krnname = readlink ($knlink);
+		if (!File::Spec->file_name_is_absolute($krnname)) {
+			$krnname = File::Spec->catfile(dirname($initrd), $krnname);
+		}
+	}
+	if (! -e $krnname) {
+		$kiwi -> error  ("Can't find kernel image: $krnname");
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# Build md5sum of system image
+	#------------------------------------------
+	if (! $haveDiskDevice) {
+		$this -> buildMD5Sum ($system);
+	} else {
+		$this -> buildMD5Sum ($this->{loop},$system);
+	}
+	$md5name =~ s/\.raw$/\.md5/;
+	#==========================================
+	# Create PXE config append information
+	#------------------------------------------
+	$appname = $system;
+	$appname =~ s/\.raw$/\.append/;
+	if (open (my $FD,'>',$appname)) {
+		print $FD 'pxe=1';
+		if ($type{cmdline}) {
+			print $FD " $type{cmdline}";
+		}
+		if ($lvm) {
+			print $FD " VGROUP=$vgroup";
+		}
+		if ($imgtype eq 'split') {
+			print $FD ' COMBINED_IMAGE=yes';
+		}
+		if ($type{bootloader}) {
+			print $FD " loader=$type{bootloader}";
+		}
+		print $FD "\n";
+		close $FD;
+	} else {
+		$kiwi -> error  ("Failed to create append file: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# Compress system image
+	#------------------------------------------
+	$kiwi -> info ("Compressing installation image...");
+	$result = 0;
+	$sysname = $system;
+	$sysname =~ s/\.raw$/\.gz/;
+	if ($haveDiskDevice) {
+		$status = qxx (
+			"qemu-img convert -f raw -O raw $haveDiskDevice $system"
+		);
+		$result = $? >> 8;
+	}
+	if ($result == 0) {
+		$status = qxx ("$zipper -c $system > $sysname 2>&1");
+		$result = $? >> 8;
+	}
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to compress system image: $status");
+		$kiwi -> failed ();
+		return;
+	}
+	$kiwi -> done();
+	#==========================================
+	# Setup initrd for install purpose
+	#------------------------------------------
+	$kiwi -> info ("Repack initrd with install flags...");
+	$irdname = $this -> setupInstallFlags();
+	if (! defined $irdname) {
+		return;
+	}
+	$kiwi -> done();
+	#==========================================
+	# Pack result into tarball
+	#------------------------------------------
+	$kiwi -> info ("Packing installation data...");
+	$tarname = $system;
+	$tarname =~ s/\.raw$/\.tgz/;
+	foreach my $file ($md5name,$sysname,$irdname,$krnname,$appname) {
+		push @packfiles, basename $file;
+	}
+	$status = qxx (
+		"tar -C $destdir -czf $tarname @packfiles"
+	);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to pack PXE install data: $status");
+		$kiwi -> failed ();
+		return;
+	}
+	$kiwi -> done();
+	unlink $md5name;
+	unlink $sysname;
+	unlink $irdname;
+	unlink $appname;
+	$kiwi -> info ("Successfully created PXE data set: $tarname");
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
 # setupBootDisk
 #------------------------------------------
 sub setupBootDisk {
@@ -2468,7 +2648,11 @@ sub setupBootDisk {
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
 	if (($haveDiskDevice) && (! $this->{gdata}->{StudioNode})) {
-		if (($type{installiso} ne "true") && ($type{installstick} ne "true")) {
+		if (
+			($type{installiso} ne "true")   && 
+			($type{installstick} ne "true") &&
+			($type{installpxe} ne "true")
+		) {
 			#==========================================
 			# create image file from disk device
 			#------------------------------------------
@@ -2493,7 +2677,7 @@ sub setupBootDisk {
 		#==========================================
 		# OEM Install CD...
 		#------------------------------------------
-		if ($type{installiso} =~ /true|yes/i) {
+		if ($type{installiso} eq "true") {
 			$this -> {system} = $diskname;
 			if ($haveDiskDevice) {
 				$this -> {system} = $this->{loop};
@@ -2507,7 +2691,7 @@ sub setupBootDisk {
 		#==========================================
 		# OEM Install Stick...
 		#------------------------------------------
-		if ($type{installstick} =~ /true|yes/i) {
+		if ($type{installstick} eq "true") {
 			$this -> {system} = $diskname;
 			if ($haveDiskDevice) {
 				$this -> {system} = $this->{loop};
@@ -2515,6 +2699,20 @@ sub setupBootDisk {
 			$kiwi -> info ("--> Creating install USB Stick image\n");
 			$this -> cleanLoop ();
 			if (! $this -> setupInstallStick()) {
+				return;
+			}
+		}
+		#==========================================
+		# OEM Install PXE...
+		#------------------------------------------
+		if ($type{installpxe} eq "true") {
+			$this -> {system} = $diskname;
+			if ($haveDiskDevice) {
+				$this -> {system} = $this->{loop};
+			}
+			$kiwi -> info ("--> Creating install PXE data set\n");
+			$this -> cleanLoop ();
+			if (! $this -> setupInstallPXE()) {
 				return;
 			}
 		}

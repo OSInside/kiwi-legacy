@@ -931,6 +931,37 @@ sub createImageInstallStick {
 }
 
 #==========================================
+# createImageInstallPXE
+#------------------------------------------
+sub createImageInstallPXE {
+	# ...
+	# create all data required for OEM PXE install
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $ird  = $this->{initrd};
+	my $sys  = $this->{sysloc};
+	my $cmdL = $this->{cmdL};
+	$kiwi -> info ("Creating install PXE data set from: $ird...\n");
+	if (! defined $sys) {
+		$kiwi -> error  ("No Install system image specified");
+		$kiwi -> failed ();
+		return;
+	}
+	my $boot = KIWIBoot -> new($kiwi,$ird,$cmdL,$sys);
+	if (! defined $boot) {
+		return;
+	}
+	$this->{boot} = $boot;
+	if (! $boot -> setupInstallPXE()) {
+		undef $boot;
+		return;
+	}
+	undef $boot;
+	return 1;
+}
+
+#==========================================
 # createImageDisk
 #------------------------------------------
 sub createImageDisk {

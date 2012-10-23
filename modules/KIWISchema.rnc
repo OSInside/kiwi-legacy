@@ -1618,6 +1618,10 @@ div {
 	k.type.installstick.attribute =
 		## Specifies if a install stick should be created (oem only)
 		attribute installstick { xsd:boolean }
+	k.type.installpxe.attribute =
+		## Specifies if all data for a pxe network installation should
+		## be created (oem only)
+		attribute installpxe { xsd:boolean }
 	k.type.kernelcmdline.attribute =
 		# The kernelcmdline element specifies additional
 		# kernel command line options
@@ -1671,6 +1675,7 @@ div {
 		k.type.installprovidefailsafe.attribute? &
 		k.type.installiso.attribute? &
 		k.type.installstick.attribute? &
+		k.type.installpxe.attribute? &
 		k.type.kernelcmdline.attribute? &
 		k.type.luks.attribute? &
 		k.type.primary.attribute? &
