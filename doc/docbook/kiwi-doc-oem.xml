@@ -275,86 +275,54 @@
 		<itemizedlist>
 			<listitem>
 				<para>
-					Make sure you have created an install disk
+					Make sure you have created an install PXE tarball
 					along with your oem image:
 <screen>
-&lt;type image="oem" ... installstick="true"/&gt;
+&lt;type image="oem" ... installpxe="true"/&gt;
 </screen>
 				</para>
 			</listitem>
 			<listitem>
 				<para>
-					loop mount the created .raw.install.raw file and copy the
-					initrd and kernel images over to your pxe server
+					unpack the created &lt;image-name&gt;.tgz file 	and
+					copy the initrd and kernel images over to your pxe server
 <screen>
-kpartx -a install-image.raw.install.raw
-mount /dev/mapper/loop0p1 /mnt
-scp /mnt/boot/initrd.* pxe.server.ip:/srv/tftpboot/boot/initrd
-scp /mnt/boot/linux.*  pxe.server.ip:/srv/tftpboot/boot/linux
-umount /mnt
+tar -xf &lt;image-name&gt;.tgz
+scp initrd-oemboot-*.install.* pxe.server.ip:/srv/tftpboot/boot/initrd
+scp initrd-oemboot-*.kernel.*  pxe.server.ip:/srv/tftpboot/boot/linux
 </screen>
 				</para>
             </listitem>
 			<listitem>
 				<para>
-					Compress the system image which lives inside the
-					squashfs file. This is required because kiwi can't
-					loop mount the squashfs over the network without
-					a further export configuration. After the image has
-					been gzip compressed the file is copied over to the
-					pxe boot server
+					Next copy the system image and md5 sum over to
+					to the pxe boot server
 <screen>
-mount /dev/mapper/loop0p2 /mnt || mount /dev/mapper/loop0p1 /mnt
-mkdir /mnt2
-mount -o loop /mnt/image-file.raw.squashfs /mnt2
-gzip -c /mnt2/image-file.raw &gt; /tmp/image-file.gz
-scp /tmp/image-file.gz   pxe.server.ip:/srv/tftpboot/image
-scp /mnt2/image-file.md5 pxe.server.ip:/srv/tftpboot/image
-umount /mnt2
-rmdir  /mnt2
-umount /mnt
+scp &lt;image-file&gt;.gz  pxe.server.ip:/srv/tftpboot/image/
+scp &lt;image-file&gt;.md5 pxe.server.ip:/srv/tftpboot/image/
 </screen>
 				</para>
 			</listitem>
 			<listitem>
 				<para>
 					At last set the kernel commandline parameters
-					via the append line in your PXE configuration
-					(for example: pxelinux.cfg/default). It's important that
-					at least the parameter <command>pxe=1</command> is added
-					here.
-				</para>
-				<para>
-					Additionally the boot parameters set in the bootloader
-					configuration of the install disk has to be transfered
-					over to the pxe boot configuration. It depends on the
-					kiwi configuration which bootloader was used for the
-					install disk, thus the configuration filename and format
-					differs. For grub is's menu.lst for grub2 it's grub.cfg
-					for uboot it would be boot.script. The example below
-					assumes grub2 was used.
+					to the append line in your PXE configuration
+					(for example: pxelinux.cfg/default). The required
+					parameters are stored in the file
+                    <filename>&lt;image-file&gt;.append</filename>
+					from the kiwi generated install tarball                    
 				</para>
 				<para>
 					Optionally the image can be stored on a FTP,HTTP server
-					specified via the kiwiserver and kiwiservertype append
+					specified via the <command>kiwiserver</command> and
+					<command>kiwiservertype</command> append
 					information. In this case make sure you copied the
-					system image and md5 file to the correct ftp,http
-					location.
-<screen>
-mount /dev/mapper/loop0p1 /mnt
- ===> search bootloader setup e.g /mnt/boot/grub2/grub.cfg
-
- ===> copy loader=... and VGROUP=... information if present
-      into the PXE configuration append line
-
-vi pxelinux.cfg/default
-
-LABEL ...
-     kernel boot/linux
-     append initrd=boot/initrd pxe=1 loader=... VGROUP=...
-
-umount /mnt
-</screen>
+					system image and md5 file to the correct location on
+					the ftp,http,etc. server. kiwi searches the image at
+					one place only which is below the image/ directory on
+                    the root path of the specified server. initrd and linux
+					kernel are loaded by pxe thus they require a tftp server
+					to be present.
 				</para>
             </listitem>
 		</itemizedlist>
