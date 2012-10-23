@@ -73,24 +73,12 @@ sub new {
 		if (! $this -> __isInitConsistent($init) )  {
 			return;
 		}
-		$this->{alignPart}      = $init->{oem_align_partition};
-		$this->{bootTitle}      = $init->{oem_boot_title};
-		$this->{bootwait}       = $init->{oem_bootwait};
-		$this->{inplaceRecover} = $init->{oem_inplace_recovery};
-		$this->{kiwiInitrd}     = $init->{oem_kiwi_initrd};
-		$this->{partInstall}    = $init->{oem_partition_install};
-		$this->{reboot}         = $init->{oem_reboot};
-		$this->{rebootInter}    = $init->{oem_reboot_interactive};
-		$this->{recovery}       = $init->{oem_recovery};
-		$this->{recoveryID}     = $init->{oem_recoveryID};
-		$this->{shutdown}       = $init->{oem_shutdown};
-		$this->{shutdownInter}  = $init->{oem_shutdown_interactive};
-		$this->{silentBoot}     = $init->{oem_silent_boot};
-		$this->{swap}           = $init->{oem_swap};
-		$this->{swapSize}       = $init->{oem_swapsize};
-		$this->{systemSize}     = $init->{oem_systemsize};
-		$this->{unattended}     = $init->{oem_unattended};
-		$this->{unattendedID}   = $init->{oem_unattended_id};
+		$this -> __initializeBoolMembers($init);
+		$this->{oem_boot_title}    = $init->{oem_boot_title};
+		$this->{oem_recoveryID}    = $init->{oem_recoveryID};
+		$this->{oem_swapsize}      = $init->{oem_swapsize};
+		$this->{oem_systemsize}    = $init->{oem_systemsize};
+		$this->{oem_unattended_id} = $init->{oem_unattended_id};
 	}
 	return $this;
 }
@@ -103,7 +91,7 @@ sub getAlignPartition {
 	# Return the setting for the oem-align-partition configuration
 	# ---
 	my $this = shift;
-	return $this->{alignPart};
+	return $this->{oem_align_partition};
 }
 
 #==========================================
@@ -114,7 +102,7 @@ sub getBootTitle {
 	# Return the setting for the oem-boot-title configuration
 	# ---
 	my $this = shift;
-	return $this->{bootTitle};
+	return $this->{oem_boot_title};
 }
 
 #==========================================
@@ -122,10 +110,10 @@ sub getBootTitle {
 #------------------------------------------
 sub getBootwait {
 	# ...
-	# Return the setting for the oem-bootwait configuration
+	# Return the setting for the oem-oem_bootwait configuration
 	# ---
 	my $this = shift;
-	return $this->{bootwait};
+	return $this->{oem_bootwait};
 }
 
 #==========================================
@@ -136,7 +124,7 @@ sub getInplaceRecovery {
 	# Return the setting for the oem-inplace-recovery configuration
 	# ---
 	my $this = shift;
-	return $this->{inplaceRecover};
+	return $this->{oem_inplace_recovery};
 }
 
 #==========================================
@@ -147,7 +135,7 @@ sub getKiwiInitrd {
 	# Return the setting for the oem-kiwi-initrd configuration
 	# ---
 	my $this = shift;
-	return $this->{kiwiInitrd};
+	return $this->{oem_kiwi_initrd};
 }
 
 #==========================================
@@ -158,7 +146,7 @@ sub getPartitionInstall {
 	# Return the setting for the oem-partition-install configuration
 	# ---
 	my $this = shift;
-	return $this->{partInstall};
+	return $this->{oem_partition_install};
 }
 
 #==========================================
@@ -169,7 +157,7 @@ sub getReboot {
 	# Return the setting for the oem-reboot configuration
 	# ---
 	my $this = shift;
-	return $this->{reboot};
+	return $this->{oem_reboot};
 }
 
 #==========================================
@@ -180,7 +168,7 @@ sub getRebootInteractive {
 	# Return the setting for the oem-reboot-interactive configuration
 	# ---
 	my $this = shift;
-	return $this->{rebootInter};
+	return $this->{oem_reboot_interactive};
 }
 
 #==========================================
@@ -191,7 +179,7 @@ sub getRecovery {
 	# Return the setting for the oem-recovery configuration
 	# ---
 	my $this = shift;
-	return $this->{recovery};
+	return $this->{oem_recovery};
 }
 
 #==========================================
@@ -202,7 +190,7 @@ sub getRecoveryID {
 	# Return the setting for the oem-recoveryID configuration
 	# ---
 	my $this = shift;
-	return $this->{recoveryID};
+	return $this->{oem_recoveryID};
 }
 
 #==========================================
@@ -213,7 +201,7 @@ sub getShutdown {
 	# Return the setting for the oem-shutdown configuration
 	# ---
 	my $this = shift;
-	return $this->{shutdown};
+	return $this->{oem_shutdown};
 }
 
 #==========================================
@@ -224,7 +212,7 @@ sub getShutdownInteractive {
 	# Return the setting for the oem-shutdown-interactive configuration
 	# ---
 	my $this = shift;
-	return $this->{shutdownInter};
+	return $this->{oem_shutdown_interactive};
 }
 
 #==========================================
@@ -235,7 +223,7 @@ sub getSilentBoot {
 	# Return the setting for the oem-silent-boot configuration
 	# ---
 	my $this = shift;
-	return $this->{silentBoot};
+	return $this->{oem_silent_boot};
 }
 
 #==========================================
@@ -246,7 +234,7 @@ sub getSwap {
 	# Return the setting for the oem-swap configuration
 	# ---
 	my $this = shift;
-	return $this->{swap};
+	return $this->{oem_swap};
 }
 
 #==========================================
@@ -257,7 +245,7 @@ sub getSwapSize {
 	# Return the setting for the oem-swapsize configuration
 	# ---
 	my $this = shift;
-	return $this->{swapSize};
+	return $this->{oem_swapsize};
 }
 
 #==========================================
@@ -268,7 +256,7 @@ sub getSystemSize {
 	# Return the setting for the oem-systemsize configuration
 	# ---
 	my $this = shift;
-	return $this->{systemSize};
+	return $this->{oem_systemsize};
 }
 
 #==========================================
@@ -279,7 +267,7 @@ sub getUnattended {
 	# Return the setting for the oem-unattended configuration
 	# ---
 	my $this = shift;
-	return $this->{unattended};
+	return $this->{oem_unattended};
 }
 
 #==========================================
@@ -290,7 +278,7 @@ sub getUnattendedID {
 	# Return the setting for the oem-unattended-id configuration
 	# ---
 	my $this = shift;
-	return $this->{unattendedID};
+	return $this->{oem_unattended_id};
 }
 
 #==========================================
@@ -298,13 +286,13 @@ sub getUnattendedID {
 #------------------------------------------
 sub setAlignPartition {
 	# ...
-	# Set the alignPart attribute, if called with no argument the
+	# Set the oem_align_partition attribute, if called with no argument the
 	# value is set to false.
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'alignPart',
+		attr   => 'oem_align_partition',
 		value  => $val,
 		caller => 'setAlignPartition'
 	);
@@ -316,17 +304,17 @@ sub setAlignPartition {
 #------------------------------------------
 sub setBootTitle {
 	# ...
-	# Set the bootTitle attribute, if called with no argument the
+	# Set the oem_boot_title attribute, if called with no argument the
 	# attribute is erased
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	if (! $val) {
-		if ($this->{bootTitle}) {
-			delete $this->{bootTitle};
+		if ($this->{oem_boot_title}) {
+			delete $this->{oem_boot_title};
 		}
 	} else {
-		$this->{bootTitle} = $val;
+		$this->{oem_boot_title} = $val;
 	}
 	return $this;
 }
@@ -336,25 +324,25 @@ sub setBootTitle {
 #------------------------------------------
 sub setBootwait {
 	# ...
-	# Set the bootwait attribute, if called with no argument the
+	# Set the oem_bootwait attribute, if called with no argument the
 	# value is set to false. If called with an argument all other potentially
 	# conflicting settings are set to false
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'bootwait',
+		attr   => 'oem_bootwait',
 		value  => $val,
 		caller => 'setBootwait'
 	);
 	if (! $this -> __setBooleanValue(\%settings) ) {
 		return;
 	}
-	if ($this->{bootwait} eq 'true' ) {
-		$this->{reboot}        = 'false';
-		$this->{rebootInter}   = 'false';
-		$this->{shutdown}      = 'false';
-		$this->{shutdownInter} = 'false';
+	if ($this->{oem_bootwait} && $this->{oem_bootwait} eq 'true' ) {
+		delete $this->{oem_reboot};
+		delete $this->{oem_reboot_interactive};
+		delete $this->{oem_shutdown};
+		delete $this->{oem_shutdown_interactive};
 	}
 	return $this;
 }
@@ -364,13 +352,13 @@ sub setBootwait {
 #------------------------------------------
 sub setInplaceRecovery {
 	# ...
-	# Set the inplaceRecover attribute, if called with no argument the
+	# Set the oem_inplace_recovery attribute, if called with no argument the
 	# value is set to false.
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'inplaceRecover',
+		attr   => 'oem_inplace_recovery',
 		value  => $val,
 		caller => 'setInplaceRecovery'
 	);
@@ -382,13 +370,13 @@ sub setInplaceRecovery {
 #------------------------------------------
 sub setKiwiInitrd {
 	# ...
-	# Set the kiwiInitrd attribute, if called with no argument is given the
+	# Set the oem_kiwi_initrd attribute, if called with no argument is given the
 	# value is set to false.
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'kiwiInitrd',
+		attr   => 'oem_kiwi_initrd',
 		value  => $val,
 		caller => 'setKiwiInitrd'
 	);
@@ -400,13 +388,13 @@ sub setKiwiInitrd {
 #------------------------------------------
 sub setPartitionInstall {
 	# ...
-	# Set the partInstall attribute, if called with no argument is given the
+	# Set the oem_partition_install attribute, if called with no argument is given the
 	# value is set to false.
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'partInstall',
+		attr   => 'oem_partition_install',
 		value  => $val,
 		caller => 'setPartitionInstall'
 	);
@@ -425,18 +413,18 @@ sub setReboot {
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'reboot',
+		attr   => 'oem_reboot',
 		value  => $val,
 		caller => 'setReboot'
 	);
 	if (! $this -> __setBooleanValue(\%settings) ) {
 		return;
 	}
-	if ($this->{reboot} eq 'true') {
-		$this->{bootwait}      = 'false';
-		$this->{rebootInter}   = 'false';
-		$this->{shutdown}      = 'false';
-		$this->{shutdownInter} = 'false';
+	if ($this->{oem_reboot} && $this->{oem_reboot} eq 'true') {
+		delete $this->{oem_bootwait};
+		delete $this->{oem_reboot_interactive};
+		delete $this->{oem_shutdown};
+		delete $this->{oem_shutdown_interactive};
 	}
 	return $this;
 }
@@ -446,25 +434,25 @@ sub setReboot {
 #------------------------------------------
 sub setRebootInteractive {
 	# ...
-	# Set the rebootInter attribute, if called with no argument the
+	# Set the oem_reboot_interactive attribute, if called with no argument the
 	# value is set to false. If called with an argument all other potentially
 	# conflicting settings are set to false
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'rebootInter',
+		attr   => 'oem_reboot_interactive',
 		value  => $val,
 		caller => 'setRebootInteractive'
 	);
 	if (! $this -> __setBooleanValue(\%settings) ) {
 		return;
 	}
-	if ($this->{rebootInter} eq 'true') {
-		$this->{bootwait}      = 'false';
-		$this->{reboot}        = 'false';
-		$this->{shutdown}      = 'false';
-		$this->{shutdownInter} = 'false';
+	if ($this->{oem_reboot_interactive} && $this->{oem_reboot_interactive} eq 'true') {
+		delete $this->{oem_bootwait};
+		delete $this->{oem_reboot};
+		delete $this->{oem_shutdown};
+		delete $this->{oem_shutdown_interactive};
 	}
 	return $this;
 }
@@ -480,7 +468,7 @@ sub setRecovery {
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'recovery',
+		attr   => 'oem_recovery',
 		value  => $val,
 		caller => 'setRecovery'
 	);
@@ -498,11 +486,9 @@ sub setRecoveryID {
 	my $this = shift;
 	my $val  = shift;
 	if (! $val) {
-		if ($this->{recoveryID}) {
-			delete $this->{recoveryID};
-		}
+		delete $this->{oem_recoveryID};
 	} else {
-		$this->{recoveryID} = $val;
+		$this->{oem_recoveryID} = $val;
 	}
 	return $this;
 }
@@ -519,18 +505,18 @@ sub setShutdown {
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'shutdown',
+		attr   => 'oem_shutdown',
 		value  => $val,
 		caller => 'setShutdown'
 	);
 	if (! $this -> __setBooleanValue(\%settings) ) {
 		return;
 	}
-	if ($this->{shutdown} eq 'true') {
-		$this->{bootwait}      = 'false';
-		$this->{reboot}        = 'false';
-		$this->{rebootInter}   = 'false';
-		$this->{shutdownInter} = 'false';
+	if ($this->{oem_shutdown} && $this->{oem_shutdown} eq 'true') {
+		delete $this->{oem_bootwait};
+		delete $this->{oem_reboot};
+		delete $this->{oem_reboot_interactive};
+		delete $this->{oem_shutdown_interactive};
 	}
 	return $this;
 }
@@ -540,25 +526,26 @@ sub setShutdown {
 #------------------------------------------
 sub setShutdownInteractive {
 	# ...
-	# Set the shutdownInter attribute, if called with no argument the
+	# Set the oem_shutdown_interactive attribute, if called with no argument the
 	# value is set to false. If called with an argument all other potentially
 	# conflicting settings are set to false
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'shutdownInter',
+		attr   => 'oem_shutdown_interactive',
 		value  => $val,
 		caller => 'setShutdownInteractive'
 	);
 	if (! $this -> __setBooleanValue(\%settings) ) {
 		return;
 	}
-	if ($this->{shutdownInter} eq 'true') {
-		$this->{bootwait}      = 'false';
-		$this->{reboot}        = 'false';
-		$this->{rebootInter}   = 'false';
-		$this->{shutdown}      = 'false';
+	if ($this->{oem_shutdown_interactive}
+		&& $this->{oem_shutdown_interactive} eq 'true') {
+		delete $this->{oem_bootwait};
+		delete $this->{oem_reboot};
+		delete $this->{oem_reboot_interactive};
+		delete $this->{oem_shutdown};
 	}
 	return $this;
 }
@@ -568,13 +555,13 @@ sub setShutdownInteractive {
 #------------------------------------------
 sub setSilentBoot {
 	# ...
-	# Set the silentBoot attribute, if called with no argument the
+	# Set the oem_silent_boot attribute, if called with no argument the
 	# value is set to false.
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'silentBoot',
+		attr   => 'oem_silent_boot',
 		value  => $val,
 		caller => 'setSilentBoot'
 	);
@@ -592,7 +579,7 @@ sub setSwap {
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'swap',
+		attr   => 'oem_swap',
 		value  => $val,
 		caller => 'setSwap'
 	);
@@ -600,9 +587,7 @@ sub setSwap {
 		return;
 	}
 	if (! $val || $val eq 'false') {
-		if ($this->{swapSize}) {
-			delete $this->{swapSize}
-		}
+		delete $this->{oem_swapsize}
 	}
 	return $this;
 }
@@ -612,19 +597,17 @@ sub setSwap {
 #------------------------------------------
 sub setSwapSize {
 	# ...
-	# Set the swapSize attribute, if called with no argument the
+	# Set the oem_swapsize attribute, if called with no argument the
 	# attribute is removed and the swap attribute is set to false
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	if (! $val) {
-		$this->{swap} = 'false';
-		if ($this->{swapSize}) {
-			delete $this->{swapSize}
-		}
+		delete $this->{oem_swap};
+		delete $this->{oem_swapsize}
 	} else {
-		$this->{swapSize} = $val;
-		$this->{swap} = 'true';
+		$this->{oem_swapsize} = $val;
+		$this->{oem_swap}     = 'true';
 	}
 	return $this;
 }
@@ -634,17 +617,15 @@ sub setSwapSize {
 #------------------------------------------
 sub setSystemSize {
 	# ...
-	# Set the systemSize attribute, if called with no argument the
+	# Set the oem_systemsize attribute, if called with no argument the
 	# attribute is removed
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	if (! $val) {
-		if ($this->{systemSize}) {
-			delete $this->{systemSize};
-		}
+		delete $this->{oem_systemsize};
 	} else {
-		$this->{systemSize} = $val;
+		$this->{oem_systemsize} = $val;
 	}
 	return $this;
 }
@@ -655,12 +636,12 @@ sub setSystemSize {
 sub setUnattended {
 	# ...
 	# Set the unattended attribute, if called with no argument the
-	# value is set to false the unattendedID attribute is removed
+	# value is set to false the oem_unattended_id attribute is removed
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	my %settings = (
-		attr   => 'unattended',
+		attr   => 'oem_unattended',
 		value  => $val,
 		caller => 'setUnattended'
 	);
@@ -668,8 +649,8 @@ sub setUnattended {
 		return;
 	}
 	if (! $val || $val eq 'false') {
-		if ($this->{unattendedID}) {
-			delete $this->{unattendedID};
+		if ($this->{oem_unattended_id}) {
+			delete $this->{oem_unattended_id};
 		}
 	}
 	return $this;
@@ -680,18 +661,16 @@ sub setUnattended {
 #------------------------------------------
 sub setUnattendedID {
 	# ...
-	# Set the unattendedID attribute, if called with no argument the
+	# Set the oem_unattended_id attribute, if called with no argument the
 	# attribute is removed and the unattended attribute is set to false.
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	if (! $val) {
-		if ($this->{unattendedID}) {
-			delete $this->{unattendedID};
-		}
-		$this->{unattended} = 'false';
+		delete $this->{oem_unattended_id};
+		delete $this->{oem_unattended};
 	} else {
-		$this->{unattendedID} = $val;
+		$this->{oem_unattended_id} = $val;
 	}
 	return $this;
 }
@@ -780,7 +759,7 @@ sub __noConflictingSettingSwap {
 #------------------------------------------
 sub __noConflictingSettingUnattended  {
 	# ...
-	# Verify that the swap settings (swap and swapsize) do not conflict
+	# Verify that the swap settings for unattended install do not conflict
 	# ---
 	my $this = shift;
 	my $init = shift;

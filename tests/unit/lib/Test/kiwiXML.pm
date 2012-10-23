@@ -3050,14 +3050,14 @@ sub test_getOEMConfig {
 	my $unatI   = $oemConfObj -> getUnattendedID();
 	$this -> assert_str_equals('true', $align);
 	$this -> assert_str_equals('Unit Test', $booT);
-	$this -> assert_str_equals('false', $bootW);
+	$this -> assert_null($bootW);
 	$this -> assert_str_equals('true', $kInit);
-	$this -> assert_str_equals('false', $pInst);
-	$this -> assert_str_equals('false', $reboot);
-	$this -> assert_str_equals('false', $rebootI);
+	$this -> assert_null($pInst);
+	$this -> assert_null($reboot);
+	$this -> assert_null($rebootI);
 	$this -> assert_str_equals('true', $recover);
 	$this -> assert_str_equals('20', $recovI);
-	$this -> assert_str_equals('false', $sDown);
+	$this -> assert_null($sDown);
 	$this -> assert_str_equals('true', $sDownI);
 	$this -> assert_str_equals('true', $sBoot);
 	$this -> assert_str_equals('true', $swap);
@@ -4186,7 +4186,7 @@ sub test_getProfiles {
 	for my $prof (@profiles) {
 		my $name = $prof -> getName();
 		if ($name eq 'profA') {
-			$this -> assert_str_equals('false', $prof->getImportStatus());
+			$this -> assert_null($prof->getImportStatus());
 			$this -> assert_str_equals('Test prof A', $prof->getDescription());
 		} elsif ($name eq 'profB') {
 			$this -> assert_str_equals('true', $prof->getImportStatus());

@@ -1789,7 +1789,7 @@ sub test_setCheckPrebuiltNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $check);
+	$this -> assert_null($check);
 	return;
 }
 
@@ -1878,7 +1878,7 @@ sub test_setCompressedNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $comp);
+	$this -> assert_null($comp);
 	return;
 }
 
@@ -2510,7 +2510,7 @@ sub test_setFSNoCheckNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $check);
+	$this -> assert_null($check);
 	return;
 }
 
@@ -2781,7 +2781,7 @@ sub test_setHybridNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $hybrid);
+	$this -> assert_null($hybrid);
 	return;
 }
 
@@ -2870,7 +2870,7 @@ sub test_setHybridPersistentNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $hybrid);
+	$this -> assert_null($hybrid);
 	return;
 }
 
@@ -3141,7 +3141,7 @@ sub test_setInstallFailsafeNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $failS);
+	$this -> assert_null($failS);
 	return;
 }
 
@@ -3230,7 +3230,7 @@ sub test_setInstallIsoNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $iso);
+	$this -> assert_null($iso);
 	return;
 }
 
@@ -3319,7 +3319,7 @@ sub test_setInstallStickNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $stick);
+	$this -> assert_null($stick);
 	return;
 }
 
@@ -3528,7 +3528,7 @@ sub test_setPrimaryNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $prim);
+	$this -> assert_null($prim);
 	return;
 }
 
@@ -3617,7 +3617,7 @@ sub test_setRAMOnlyNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $ramO);
+	$this -> assert_null($ramO);
 	return;
 }
 

@@ -358,7 +358,7 @@ sub test_getBootwait {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $bootw);
+	$this -> assert_null($bootw);
 	return;
 }
 
@@ -418,7 +418,7 @@ sub test_getKiwiInitrd {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $kinit);
+	$this -> assert_null($kinit);
 	return;
 }
 
@@ -448,7 +448,7 @@ sub test_getPartitionInstall {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $pInst);
+	$this -> assert_null($pInst);
 	return;
 }
 
@@ -510,7 +510,7 @@ sub test_getRebootInteractive {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $rebootI);
+	$this -> assert_null($rebootI);
 	return;
 }
 
@@ -632,7 +632,7 @@ sub test_getShutdownInteractive {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $haltI);
+	$this -> assert_null($haltI);
 	return;
 }
 
@@ -842,7 +842,7 @@ sub test_setAlignPartition {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $align);
+	$this -> assert_null($align);
 	return;
 }
 
@@ -897,7 +897,7 @@ sub test_setAlignPartitionNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $align);
+	$this -> assert_null($align);
 	return;
 }
 
@@ -991,13 +991,13 @@ sub test_setBootwait {
 	$this -> assert_str_equals('true', $wait);
 	# Verify state of potentially conflicting settings
 	my $reboot = $confDataObj -> getReboot();
-	$this -> assert_str_equals('false', $reboot);
+	$this -> assert_null($reboot);
 	my $rebootInter = $confDataObj -> getRebootInteractive();
-	$this -> assert_str_equals('false', $rebootInter);
+	$this -> assert_null($rebootInter);
 	my $shutdown = $confDataObj -> getShutdown();
-	$this -> assert_str_equals('false', $shutdown);
+	$this -> assert_null($shutdown);
 	my $shutdownInter = $confDataObj -> getShutdownInteractive();;
-	$this -> assert_str_equals('false', $shutdownInter);
+	$this -> assert_null($shutdownInter);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -1059,7 +1059,7 @@ sub test_setBootwaitNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $wait);
+	$this -> assert_null($wait);
 	# Verify state of potentially conflicting settings
 	my $reboot = $confDataObj -> getReboot();
 	$this -> assert_str_equals('true', $reboot);
@@ -1159,7 +1159,7 @@ sub test_setInplaceRecoveryNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $recov);
+	$this -> assert_null($recov);
 	return;
 }
 
@@ -1244,7 +1244,7 @@ sub test_setKiwiInitrdNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $kinit);
+	$this -> assert_null($kinit);
 	return;
 }
 
@@ -1329,7 +1329,7 @@ sub test_setPartitionInstallNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $partIn);
+	$this -> assert_null($partIn);
 	return;
 }
 
@@ -1362,13 +1362,13 @@ sub test_setReboot {
 	$this -> assert_str_equals('true', $reboot);
 	# Verify state of potentially conflicting settings
 	my $wait = $confDataObj -> getBootwait();
-	$this -> assert_str_equals('false', $wait);
+	$this -> assert_null($wait);
 	my $rebootInter = $confDataObj -> getRebootInteractive();
-	$this -> assert_str_equals('false', $rebootInter);
+	$this -> assert_null($rebootInter);
 	my $shutdown = $confDataObj -> getShutdown();
-	$this -> assert_str_equals('false', $shutdown);
+	$this -> assert_null($shutdown);
 	my $shutdownInter = $confDataObj -> getShutdownInteractive();;
-	$this -> assert_str_equals('false', $shutdownInter);
+	$this -> assert_null($shutdownInter);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -1430,7 +1430,7 @@ sub test_setRebootNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $reboot);
+	$this -> assert_null($reboot);
 	# Verify state of potentially conflicting settings
 	my $wait = $confDataObj -> getBootwait();
 	$this -> assert_null($wait);
@@ -1478,13 +1478,13 @@ sub test_setRebootInteractive {
 	$this -> assert_str_equals('true', $rebInter);
 	# Verify state of potentially conflicting settings
 	my $wait = $confDataObj -> getBootwait();
-	$this -> assert_str_equals('false', $wait);
+	$this -> assert_null($wait);
 	my $reboot = $confDataObj -> getReboot();
-	$this -> assert_str_equals('false', $reboot);
+	$this -> assert_null($reboot);
 	my $shutdown = $confDataObj -> getShutdown();
-	$this -> assert_str_equals('false', $shutdown);
+	$this -> assert_null($shutdown);
 	my $shutdownInter = $confDataObj -> getShutdownInteractive();;
-	$this -> assert_str_equals('false', $shutdownInter);
+	$this -> assert_null($shutdownInter);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -1546,7 +1546,7 @@ sub test_setRebootInteractiveNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $rebInter);
+	$this -> assert_null($rebInter);
 	# Verify state of potentially conflicting settings
 	my $wait = $confDataObj -> getBootwait();
 	$this -> assert_str_equals('true', $wait);
@@ -1646,7 +1646,7 @@ sub test_setRecoveryNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $recov);
+	$this -> assert_null($recov);
 	return;
 }
 
@@ -1740,13 +1740,13 @@ sub test_setShutdown {
 	$this -> assert_str_equals('true', $down);
 	# Verify state of potentially conflicting settings
 	my $wait = $confDataObj -> getBootwait();
-	$this -> assert_str_equals('false', $wait);
+	$this -> assert_null($wait);
 	my $reboot = $confDataObj -> getReboot();
-	$this -> assert_str_equals('false', $reboot);
+	$this -> assert_null($reboot);
 	my $rebootInter = $confDataObj -> getRebootInteractive();
-	$this -> assert_str_equals('false', $rebootInter);
+	$this -> assert_null($rebootInter);
 	my $shutdownInter = $confDataObj -> getShutdownInteractive();;
-	$this -> assert_str_equals('false', $shutdownInter);
+	$this -> assert_null($shutdownInter);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -1808,7 +1808,7 @@ sub test_setShutdownNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $down);
+	$this -> assert_null($down);
 	# Verify state of potentially conflicting settings
 	my $wait = $confDataObj -> getBootwait();
 	$this -> assert_null($wait);
@@ -1856,13 +1856,13 @@ sub test_setShutdownInteractive {
 	$this -> assert_str_equals('true', $downInter);
 	# Verify state of potentially conflicting settings
 	my $wait = $confDataObj -> getBootwait();;
-	$this -> assert_str_equals('false', $wait);
+	$this -> assert_null( $wait);
 	my $reboot = $confDataObj -> getReboot();
-	$this -> assert_str_equals('false', $reboot);
+	$this -> assert_null($reboot);
 	my $rebootInter = $confDataObj -> getRebootInteractive();
-	$this -> assert_str_equals('false', $rebootInter);
+	$this -> assert_null($rebootInter);
 	my $shutdown = $confDataObj -> getShutdown();
-	$this -> assert_str_equals('false', $shutdown);
+	$this -> assert_null($shutdown);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -1924,7 +1924,7 @@ sub test_setShutdownInteractiveNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $downInter);
+	$this -> assert_null($downInter);
 	# Verify state of potentially conflicting settings
 	my $wait = $confDataObj -> getBootwait();
 	$this -> assert_str_equals('true', $wait);
@@ -2024,7 +2024,7 @@ sub test_setSilentBootNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $silent);
+	$this -> assert_null($silent);
 	return;
 }
 
@@ -2109,7 +2109,7 @@ sub test_setSwapNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $swap);
+	$this -> assert_null($swap);
 	my $sSize = $confDataObj -> getSwapSize();
 	$this -> assert_null($sSize);
 	return;
@@ -2176,7 +2176,7 @@ sub test_setSwapSizeNoArg {
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_null($sSize);
 	my $swap = $confDataObj -> getSwap();
-	$this -> assert_str_equals('false', $swap);
+	$this -> assert_null($swap);
 	return;
 }
 
@@ -2322,7 +2322,7 @@ sub test_setUnattendedNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $auto);
+	$this -> assert_null($auto);
 	my $autoID = $confDataObj -> getUnattendedID();
 	$this -> assert_null($autoID);
 	return;
@@ -2387,7 +2387,7 @@ sub test_setUnattendedIDNoArg {
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_null($id);
 	my $auto = $confDataObj -> getUnattended();
-	$this -> assert_str_equals('false', $auto);
+	$this -> assert_null($auto);
 	return;
 }
 
