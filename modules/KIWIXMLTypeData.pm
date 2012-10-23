@@ -108,6 +108,7 @@ sub new {
 		installiso
 		installprovidefailsafe
 		installstick
+        installpxe
 		primary
 		ramonly
 		installpxe
@@ -123,14 +124,13 @@ sub new {
 		if (! $this -> __isInitConsistent($init)) {
 			return;
 		}
+		$this -> __initializeBoolMembers($init);
 		$this->{boot}                   = $init->{boot};
 		$this->{bootkernel}             = $init->{bootkernel};
 		$this->{bootloader}             = $init->{bootloader};
 		$this->{bootpartsize}           = $init->{bootpartsize};
 		$this->{bootprofile}            = $init->{bootprofile};
 		$this->{boottimeout}            = $init->{boottimeout};
-		$this->{checkprebuilt}          = $init->{checkprebuilt};
-		$this->{compressed}             = $init->{compressed};
 		$this->{devicepersistency}      = $init->{devicepersistency};
 		$this->{editbootconfig}         = $init->{editbootconfig};
 		$this->{editbootinstall}        = $init->{editbootinstall};
@@ -138,21 +138,12 @@ sub new {
 		$this->{flags}                  = $init->{flags};
 		$this->{format}                 = $init->{format};
 		$this->{fsmountoptions}         = $init->{fsmountoptions};
-		$this->{fsnocheck}              = $init->{fsnocheck};
 		$this->{fsreadonly}             = $init->{fsreadonly};
 		$this->{fsreadwrite}            = $init->{fsreadwrite};
-		$this->{hybrid}                 = $init->{hybrid};
-		$this->{hybridpersistent}       = $init->{hybridpersistent};
 		$this->{image}                  = $init->{image};
 		$this->{installboot}            = $init->{installboot};
-		$this->{installiso}             = $init->{installiso};
-		$this->{installprovidefailsafe} = $init->{installprovidefailsafe};
-		$this->{installstick}           = $init->{installstick};
-		$this->{installpxe}             = $init->{installpxe};
 		$this->{kernelcmdline}          = $init->{kernelcmdline};
 		$this->{luks}                   = $init->{luks};
-		$this->{primary}                = $init->{primary};
-		$this->{ramonly}                = $init->{ramonly};
 		$this->{size}                   = $init->{size};
 		$this->{vga}                    = $init->{vga};
 		$this->{volid}                  = $init->{volid};

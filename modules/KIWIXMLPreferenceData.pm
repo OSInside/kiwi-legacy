@@ -75,6 +75,7 @@ sub new {
 		if (! $this -> __isInitConsistent($init)) {
 			return;
 		}
+		$this -> __initializeBoolMembers($init);
 		$this->{bootloader_theme}     = $init->{bootloader_theme};
 		$this->{bootsplash_theme}     = $init->{bootsplash_theme};
 		$this->{defaultdestination}   = $init->{defaultdestination};
@@ -84,9 +85,6 @@ sub new {
 		$this->{keymap}               = $init->{keymap};
 		$this->{locale}               = $init->{locale};
 		$this->{packagemanager}       = $init->{packagemanager};
-		$this->{rpm_check_signatures} = $init->{rpm_check_signatures};
-		$this->{rpm_excludedocs}      = $init->{rpm_excludedocs};
-		$this->{rpm_force}            = $init->{rpm_force};
 		$this->{showlicense}          = $init->{showlicense};
 		$this->{timezone}             = $init->{timezone};
 		$this->{version}              = $init->{version};

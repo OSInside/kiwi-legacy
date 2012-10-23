@@ -130,6 +130,26 @@ sub __hasInitArg {
 }
 
 #==========================================
+# __initializeBoolMembers
+#------------------------------------------
+sub __initializeBoolMembers {
+	# ...
+	# Initialize any members that hold boolean values
+	# ---
+	my $this = shift;
+	my $init = shift;
+	for my $boolAttr (keys %{$this->{boolKeywords}}) {
+		my %settings = (
+						attr   => $boolAttr,
+						value  => $init->{$boolAttr},
+						caller => 'ctor'
+					);
+		$this -> __setBooleanValue(\%settings);
+	}
+	return 1;
+}
+
+#==========================================
 # __isInitHashRef
 #------------------------------------------
 sub __isInitHashRef {
@@ -198,10 +218,10 @@ sub __setBooleanValue {
 		$kiwi -> failed();
 		return;
 	}
-	if (! $bVal) {
-		$this->{$attr} = 'false';
+	if (! $bVal || $bVal eq 'false') {
+		delete $this->{$attr};
 	} else {
-		$this->{$attr} = $bVal;
+		$this->{$attr} = 'true';
 	}
 	return $this;
 }

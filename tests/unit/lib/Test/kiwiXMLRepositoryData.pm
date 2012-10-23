@@ -699,7 +699,7 @@ sub test_setPreferLicenseOff {
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($repoDataObj);
 	my $res = $repoDataObj->getPreferLicense();
-	$this -> assert_str_equals('false', $res);
+	$this -> assert_null($res);
 	return;
 }
 

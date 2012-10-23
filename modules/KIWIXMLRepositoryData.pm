@@ -72,11 +72,10 @@ sub new {
 	if (! $this -> __isInitConsistent($init)) {
 		return;
 	}
+	$this -> __initializeBoolMembers($init);
 	$this->{alias}         = $init->{alias};
-	$this->{imageinclude}  = $init->{imageinclude};
 	$this->{password}      = $init->{password};
 	$this->{path}          = $init->{path};
-	$this->{preferlicense} = $init->{preferlicense};
 	$this->{priority}      = $init->{priority};
 	$this->{status}        = $init->{status};
 	$this->{type}          = $init->{type};

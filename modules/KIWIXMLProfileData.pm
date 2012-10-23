@@ -65,8 +65,8 @@ sub new {
 	if (! $this -> __isInitConsistent($init)) {
 		return;
 	}
+	$this -> __initializeBoolMembers($init);
 	$this->{description} = $init->{description};
-	$this->{import}      = $init->{import};
 	$this->{name}        = $init->{name};
 
 	return $this;
