@@ -52,7 +52,7 @@ use KIWIGlobals;
 #============================================
 # UTF-8 for output to stdout
 #--------------------------------------------
-binmode(STDOUT, ":utf8");
+binmode(STDOUT, ":encoding(UTF-8)");
 
 #============================================
 # Globals (debugging)
@@ -535,7 +535,7 @@ sub main {
 		#==========================================
 		# Create call file
 		#------------------------------------------
-		if (open my $FD,">$out/run.sh") {
+		if (open my $FD,'>',"$out/run.sh") {
 			print $FD "cd $out\n";
 			print $FD "export DISTRI=$distri"."\n";
 			print $FD "export ISO=$image"."\n";
@@ -552,7 +552,7 @@ sub main {
 		#==========================================
 		# Create screen ctrl file
 		#------------------------------------------
-		if (open my $FD,">$out/run.ctrl") {
+		if (open my $FD,'>',"$out/run.ctrl") {
 			print $FD "logfile /dev/null\n";
 			close $FD;
 		} else {
@@ -1851,8 +1851,8 @@ sub version {
 		$exit = 0;
 	}
 	my $rev  = "unknown";
-	if (open FD,$gdata->{Revision}) {
-		$rev = <FD>; close FD;
+	if (open my $FD,'<',$gdata->{Revision}) {
+		$rev = <$FD>; close $FD;
 	}
 	$kiwi -> info ("kiwi version v$gdata->{Version}\nGIT Commit: $rev\n");
 	$kiwi -> cleanSweep();
@@ -1954,7 +1954,7 @@ sub createInstSource {
 	my $vlevel= shift;
 	$kiwi -> deactivateBackTrace();
 	my $mod = "KIWICollect";
-	eval "require $mod";
+	eval "require $mod"; ## no critic
 	if($@) {
 		$kiwi->error("Module <$mod> is not available!");
 		kiwiExit (3);
