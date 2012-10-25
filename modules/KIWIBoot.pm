@@ -25,6 +25,7 @@ require Exporter;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 use Carp qw (cluck);
 use KIWILog;
 use KIWIIsoLinux;
@@ -40,7 +41,7 @@ use KIWIQX qw (qxx);
 #------------------------------------------
 sub new {
 	# ...
-	# Create a new KIWIBoot object which is used to create bootable
+	# Create KIWIBoot object which is used to create bootable
 	# media images like CD/DVD's , USB sticks or Virtual disks 
 	# ---
 	#==========================================
@@ -126,7 +127,7 @@ sub new {
 			#==========================================
 			# Check for overlay structure
 			#------------------------------------------
-			$this->{overlay} = new KIWIOverlay ($kiwi,$system);
+			$this->{overlay} = KIWIOverlay -> new ($kiwi,$system);
 			if (! $this->{overlay}) {
 				return;
 			}
@@ -291,9 +292,9 @@ sub new {
 		#==========================================
 		# read and validate XML description
 		#------------------------------------------
-		my $locator = new KIWILocator($kiwi);
+		my $locator = KIWILocator -> new ($kiwi);
 		my $controlFile = $locator -> getControlFile ($rootpath."/image");
-		my $validator = new KIWIXMLValidator (
+		my $validator = KIWIXMLValidator -> new (
 			$kiwi,$controlFile,
 			$this->{gdata}->{Revision},
 			$this->{gdata}->{Schema},
@@ -306,7 +307,7 @@ sub new {
 			}
 			return;
 		}
-		$xml = new KIWIXML (
+		$xml = KIWIXML -> new (
 			$kiwi,$rootpath."/image",$cmdL->getBuildType(),$profile,$cmdL
 		);
 		#==========================================
@@ -1000,7 +1001,7 @@ sub setupInstallCD {
 	if ($name !~ /^\//) {
 		$name = $wdir."/".$name;
 	}
-	my $iso = new KIWIIsoLinux (
+	my $iso = KIWIIsoLinux -> new (
 		$kiwi,$tmpdir,$name,$base.' '.$opts,"checkmedia",
 		$this->{cmdL},$this->{xml}
 	);
@@ -1671,22 +1672,23 @@ sub setupInstallPXE {
 	#------------------------------------------
 	$appname = $system;
 	$appname =~ s/\.raw$/\.append/;
-	if (open (my $FD,'>',$appname)) {
-		print $FD 'pxe=1';
+	my $appfd = FileHandle -> new();
+	if ($appfd -> open(">$appname")) {
+		print $appfd 'pxe=1';
 		if ($type{cmdline}) {
-			print $FD " $type{cmdline}";
+			print $appfd " $type{cmdline}";
 		}
 		if ($lvm) {
-			print $FD " VGROUP=$vgroup";
+			print $appfd " VGROUP=$vgroup";
 		}
 		if ($imgtype eq 'split') {
-			print $FD ' COMBINED_IMAGE=yes';
+			print $appfd ' COMBINED_IMAGE=yes';
 		}
 		if ($type{bootloader}) {
-			print $FD " loader=$type{bootloader}";
+			print $appfd " loader=$type{bootloader}";
 		}
-		print $FD "\n";
-		close $FD;
+		print $appfd "\n";
+		$appfd -> close();
 	} else {
 		$kiwi -> error  ("Failed to create append file: $!");
 		$kiwi -> failed ();
@@ -2785,19 +2787,19 @@ sub setupInstallFlags {
 			qxx ("rm -rf $irddir");
 			return;
 		}
-		my $FD;
-		if (! open ($FD,'>',"$irddir/config.vmxsystem")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create image boot configuration");
-			$kiwi -> failed ();
-			return;
-		}
 		my $namecd = basename ($system);
 		if (! -f $imd5) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't find md5 file");
 			$kiwi -> failed ();
 			qxx ("rm -rf $irddir");
+			return;
+		}
+		my $FD;
+		if (! open ($FD,'>',"$irddir/config.vmxsystem")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create image boot configuration");
+			$kiwi -> failed ();
 			return;
 		}
 		print $FD "IMAGE='".$namecd."'\n";
@@ -3134,8 +3136,8 @@ sub writeMBRDiskLabel {
 		return;
 	}
 	my $pid = pack "V", eval $nid; ## no critic
-	my $FD;
-	if (! open ($FD,'+<',$file)) {
+	my $FD = FileHandle -> new();
+	if (! $FD -> open("+<$file")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("MBR: failed to open file: $file: $!");
 		$kiwi -> failed ();
@@ -3147,10 +3149,12 @@ sub writeMBRDiskLabel {
 		$kiwi -> failed ();
 		$kiwi -> error  ("MBR: only $done bytes written");
 		$kiwi -> failed ();
-		seek $FD,0,2; close $FD;
+		seek $FD,0,2;
+		$FD -> close();
 		return;
 	}
-	seek $FD,0,2; close $FD;
+	seek $FD,0,2;
+	$FD -> close();
 	return $this;
 }
 
@@ -3216,7 +3220,7 @@ sub setupBootLoaderStages {
 		$kiwi -> info ("Creating grub2 boot partition map");
 		foreach my $bootfile ($bootbios,$bootefi) {
 			next if (($bootfile eq $bootefi) && (! $efi));
-			my $bpfd = new FileHandle;
+			my $bpfd = FileHandle -> new();
 			if (! $bpfd -> open(">$bootfile")) {
 				$kiwi -> failed ();
 				$kiwi -> error ("Couldn't create grub2 bootpart map: $!");
@@ -3725,8 +3729,8 @@ sub setupBootLoaderConfiguration {
 		$kiwi -> info ("Creating grub2 configuration file...");
 		foreach my $config (@config) {
 			qxx ("mkdir -p $tmpdir/boot/$config");
-			my $FD;
-			if (! open ($FD,'>',"$tmpdir/boot/$config/grub.cfg")) {
+			my $FD = FileHandle -> new();
+			if (! $FD -> open(">$tmpdir/boot/$config/grub.cfg")) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't create $config/grub.cfg: $!");
 				$kiwi -> failed ();
@@ -3800,7 +3804,7 @@ sub setupBootLoaderConfiguration {
 						$kiwi -> failed ();
 						$kiwi -> error  ("Failed to write bootnext\n");
 						$kiwi -> failed ();
-						close $FD;
+						$FD -> close();
 						return;
 					}
 				}
@@ -3987,7 +3991,7 @@ sub setupBootLoaderConfiguration {
 					print $FD "}\n";
 				}
 			}
-			close $FD;
+			$FD -> close();
 		}
 		$kiwi -> done();
 	}
@@ -4000,8 +4004,8 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		$kiwi -> info ("Creating grub menu list file...");
 		qxx ("mkdir -p $tmpdir/boot/grub");
-		my $FD;
-		if (! open ($FD,'>',"$tmpdir/boot/grub/menu.lst")) {
+		my $FD = FileHandle -> new();
+		if (! $FD -> open (">$tmpdir/boot/grub/menu.lst")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create menu.lst: $!");
 			$kiwi -> failed ();
@@ -4047,7 +4051,7 @@ sub setupBootLoaderConfiguration {
 					$kiwi -> failed ();
 					$kiwi -> error  ("Failed to write bootnext\n");
 					$kiwi -> failed ();
-					close $FD;
+					$FD -> close();
 					return;
 				}
 			}
@@ -4172,7 +4176,7 @@ sub setupBootLoaderConfiguration {
 				}
 			}
 		}
-		close $FD;
+		$FD -> close();
 		$kiwi -> done();
 	}
 	#==========================================
@@ -4187,8 +4191,8 @@ sub setupBootLoaderConfiguration {
 			$syslconfig = "extlinux.conf";
 		}
 		$kiwi -> info ("Creating $syslconfig config file...");
-		my $FD;
-		if (! open ($FD,'>',"$tmpdir/boot/syslinux/$syslconfig")) {
+		my $FD = FileHandle -> new();
+		if (! $FD -> open (">$tmpdir/boot/syslinux/$syslconfig")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create $syslconfig: $!");
 			$kiwi -> failed ();
@@ -4352,23 +4356,24 @@ sub setupBootLoaderConfiguration {
 			}
 			print $FD $cmdline;
 		}
-		close $FD;
+		$FD -> close();
 		#==========================================
 		# setup isolinux.msg file
 		#------------------------------------------
-		if (! open ($FD,'>',"$tmpdir/boot/syslinux/isolinux.msg")) {
+		my $isofd = FileHandle -> new();
+		if (! $isofd -> open (">$tmpdir/boot/syslinux/isolinux.msg")) {
 			$kiwi -> failed();
 			$kiwi -> error  ("Failed to create isolinux.msg: $!");
 			$kiwi -> failed ();
 			return;
 		}
-		print $FD "\n"."Welcome !"."\n\n";
+		print $isofd "\n"."Welcome !"."\n\n";
 		foreach my $label (@labels) {
-			print $FD "$label"."\n";
+			print $isofd "$label"."\n";
 		}
-		print $FD "\n\n";
-		print $FD "Have a lot of fun..."."\n";
-		close $FD;
+		print $isofd "\n\n";
+		print $isofd "Have a lot of fun..."."\n";
+		$isofd -> close();
 		$kiwi -> done();
 	}
 	#==========================================
@@ -4394,8 +4399,8 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return;
 		}
-		my $FD;
-		if (! open ($FD,'>',"$tmpdir/boot/$ziplconfig")) {
+		my $FD = FileHandle -> new();
+		if (! $FD -> open (">$tmpdir/boot/$ziplconfig")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create $ziplconfig: $!");
 			$kiwi -> failed ();
@@ -4472,7 +4477,7 @@ sub setupBootLoaderConfiguration {
 			print $FD "\t"."parameters = \"x11failsafe loader=$bloader";
 			print $FD " $cmdline\""."\n";
 		}
-		close $FD;
+		$FD -> close();
 		$kiwi -> done();
 	}
 	#==========================================
@@ -4491,8 +4496,8 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Standard boot
 		#------------------------------------------
-		my $FD;
-		if (! open ($FD,'>',"$tmpdir/boot/yaboot.cnf")) {
+		my $FD = FileHandle -> new();
+		if (! $FD -> open (">$tmpdir/boot/yaboot.cnf")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create yaboot.cnf: $!");
 			$kiwi -> failed ();
@@ -4535,23 +4540,24 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return;
 		}
-		close $FD;
+		$FD -> close();
 		$kiwi -> done();
 		#==========================================
 		# Create bootinfo.txt
 		#------------------------------------------
-		if (! open ($FD,'>',"$tmpdir/boot/bootinfo.txt")) {
+		my $binfofd = FileHandle -> new();
+		if (! $binfofd -> open (">$tmpdir/boot/bootinfo.txt")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create bootinfo.txt: $!");
 			$kiwi -> failed ();
 			return;
 		}
-		print $FD "<chrp-boot>\n";
-		print $FD "<description>$title</description>\n";
-		print $FD "<os-name>$title</os-name>\n";
-		print $FD "<boot-script>boot &device;:1,yaboot</boot-script>\n";
-		print $FD "</chrp-boot>\n";
-		close $FD;
+		print $binfofd "<chrp-boot>\n";
+		print $binfofd "<description>$title</description>\n";
+		print $binfofd "<os-name>$title</os-name>\n";
+		print $binfofd "<boot-script>boot &device;:1,yaboot</boot-script>\n";
+		print $binfofd "</chrp-boot>\n";
+		$binfofd -> close();
 		$kiwi -> done ();
 	}
 	#==========================================
@@ -4587,8 +4593,8 @@ sub setupBootLoaderConfiguration {
 		# custom parts needs to be added via the editbootconfig
 		# script hook
 		# ----
-		my $FD;
-		if (! open ($FD,'>',"$tmpdir/boot/boot.script")) {
+		my $FD = FileHandle -> new();
+		if (! $FD -> open (">$tmpdir/boot/boot.script")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create boot.script: $!");
 			$kiwi -> failed ();
@@ -4608,7 +4614,7 @@ sub setupBootLoaderConfiguration {
 		} else {
 			print $FD "setenv bootargs loader=$bloader $cmdline \${append}\n"
 		}
-		close $FD;
+		$FD -> close();
 		$kiwi -> done();
 	}
 	#==========================================
@@ -4759,7 +4765,7 @@ sub installBootLoader {
 	my $xml      = $this->{xml};
 	my $efi      = $this->{efi};
 	my $system   = $this->{system};
-	my $locator  = new KIWILocator($kiwi);
+	my $locator  = KIWILocator -> new ($kiwi);
 	my $bootdev;
 	my $result;
 	my $status;
@@ -4784,7 +4790,7 @@ sub installBootLoader {
 			# Create device map for the disk
 			#------------------------------------------
 			my $dmfile = "$tmpdir/boot/grub2/device.map";
-			my $dmfd = new FileHandle;
+			my $dmfd = FileHandle -> new();
 			if (! $dmfd -> open(">$dmfile")) {
 				$kiwi -> failed ();
 				$kiwi -> error ("Couldn't create grub2 device map: $!");
@@ -4893,7 +4899,7 @@ sub installBootLoader {
 		# Create device map for the disk
 		#------------------------------------------
 		my $dmfile = "$tmpdir/grub-device.map";
-		my $dmfd = new FileHandle;
+		my $dmfd = FileHandle -> new();
 		if (! $dmfd -> open(">$dmfile")) {
 			$kiwi -> failed ();
 			$kiwi -> error ("Couldn't create grub device map: $!");
@@ -5106,8 +5112,8 @@ sub installBootLoader {
 			#==========================================
 			# rewrite zipl.conf with additional params
 			#------------------------------------------
-			my $FD;
-			if (! open ($FD,'<',$config)) {
+			my $readzconf = FileHandle -> new();
+			if (! $readzconf -> open ($config)) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Can't open config file for reading: $!");
 				$kiwi -> failed ();
@@ -5115,8 +5121,10 @@ sub installBootLoader {
 				$this -> cleanLoop ();
 				return;
 			}
-			my @data = <$FD>; close $FD;
-			if (! open ($FD,'>',$config)) {
+			my @data = <$readzconf>;
+			$readzconf -> close();
+			my $zconffd = FileHandle -> new();
+			if (! $zconffd -> open (">$config")) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Can't open config file for writing: $!");
 				$kiwi -> failed ();
@@ -5126,19 +5134,19 @@ sub installBootLoader {
 			}
 			$kiwi -> loginfo ("zipl.conf target values:\n");
 			foreach my $line (@data) {
-				print $FD $line;
+				print $zconffd $line;
 				if ($line =~ /^:menu/) {
 					$kiwi -> loginfo ("targetbase = $this->{loop}\n");
 					$kiwi -> loginfo ("targetbase = SCSI\n");
 					$kiwi -> loginfo ("targetblocksize = 512\n");
 					$kiwi -> loginfo ("targetoffset = $offset\n");
-					print $FD "\t"."targetbase = $this->{loop}"."\n";
-					print $FD "\t"."targettype = SCSI"."\n";
-					print $FD "\t"."targetblocksize = 512"."\n";
-					print $FD "\t"."targetoffset = $offset"."\n";
+					print $zconffd "\t"."targetbase = $this->{loop}"."\n";
+					print $zconffd "\t"."targettype = SCSI"."\n";
+					print $zconffd "\t"."targetblocksize = 512"."\n";
+					print $zconffd "\t"."targetoffset = $offset"."\n";
 				}
 			}
-			close $FD;
+			$zconffd -> close();
 		}
 		#==========================================
 		# call zipl...
@@ -5316,7 +5324,7 @@ sub getGeometry {
 	my $status;
 	my $result;
 	my $parted;
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new ($kiwi);
 	my $parted_exec = $locator -> getExecPath("parted");
 	$status = qxx ("dd if=/dev/zero of=$disk bs=512 count=1 2>&1");
 	$result = $? >> 8;
@@ -5425,7 +5433,7 @@ sub initGeometry {
 	my $align  = $cmdL->getDiskAlignment();
 	my $secsz  = $cmdL->getDiskBIOSSectorSize();
 	my $align_sectors = int ($align / $secsz);
-	my $locator= new KIWILocator($kiwi);
+	my $locator= KIWILocator -> new ($kiwi);
 	if (! defined $this->{pStart}) {
 		$this->{pStart} = $cmdL->getDiskStartSector();
 	} else {
@@ -5471,7 +5479,7 @@ sub setStoragePartition {
 	my $status;
 	my $ignore;
 	my $action;
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new ($kiwi);
 	my $parted_exec = $locator -> getExecPath("parted");
 	if (! defined $tool) {
 		$tool = "parted";
@@ -5490,8 +5498,8 @@ sub setStoragePartition {
 				$kiwi -> loginfo ($status);
 				return;
 			}
-			my $FD;
-			if (! open ($FD,'|-',"fdasd $device &> $tmpdir/fdasd.log")) {
+			my $FD = FileHandle -> new();
+			if (! $FD -> open ("|fdasd $device &> $tmpdir/fdasd.log")) {
 				return;
 			}
 			print $FD "y\n";
@@ -5526,11 +5534,13 @@ sub setStoragePartition {
 					print $FD "$cmd\n";
 				}
 			}
-			close $FD;
+			$FD -> close();
 			$result = $? >> 8;
 			my $flog;
-			if (open ($FD,'<',"$tmpdir/fdasd.log")) {
-				my @flog = <$FD>; close $FD;
+			my $flogfd = FileHandle -> new();
+			if ($flogfd -> open ("$tmpdir/fdasd.log")) {
+				my @flog = <$flogfd>;
+				$flogfd -> close();
 				$flog = join ("\n",@flog);
 				$kiwi -> loginfo ("FDASD: $flog");
 			}
@@ -6018,7 +6028,6 @@ sub addBootNext {
 	my $this = shift;
 	my $file = shift;
 	my $id   = shift;
-	my $bn;
 	my $bootnext =
 		"\x8c\xc8\x8e\xd0\x31\xe4\x8e\xd8\x8e\xc0\xfc\xfb\xbe\x00\x7c\xbf" .
 		"\x00\x60\xb9\x00\x01\xf3\xa5\xea\x1c\x60\x00\x00\xb4\x08\x31\xff" .
@@ -6058,10 +6067,12 @@ sub addBootNext {
 
 	substr $bootnext, 0x1b8, 4, pack("V", $id);
 
-	open $bn,'>', $file or return;
+	my $bn = FileHandle -> new();
+	if (! $bn -> open (">$file")) {
+		return;
+	}
 	print $bn $bootnext;
-	close $bn;
-
+	$bn -> close();
 	return $this;
 }
 
@@ -6213,7 +6224,7 @@ sub __expandFS {
 	my $diskType  = shift;
 	my $mapper    = shift;
 	my $kiwi      = $this->{kiwi};
-	my $locator   = new KIWILocator($kiwi);
+	my $locator   = KIWILocator -> new ($kiwi);
 	my $result    = 1;
 	my $status;
 	$kiwi->loginfo ("Resize Operation: Device: $mapper\n");
@@ -6390,7 +6401,7 @@ sub __getPartID {
 	my $this = shift;
 	my $disk = shift;
 	my $flag = shift;
-	my $fd   = new FileHandle;
+	my $fd   = FileHandle -> new();
 	if ($fd -> open ("parted -m $disk print | cut -f1,7 -d:|")) {
 		while (my $line = <$fd>) {
 			if ($line =~ /^(\d):[ ,]*$flag/) {
@@ -6429,6 +6440,7 @@ sub __getPartBase {
 			return $device;
 		}
 	}
+	return;
 }
 
 #==========================================
@@ -6454,6 +6466,7 @@ sub __getPartDevice {
 			return $device;
 		}
 	}
+	return;
 }
 
 1;
