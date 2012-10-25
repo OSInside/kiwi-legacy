@@ -64,9 +64,9 @@ our @BT;
 #============================================
 # Globals
 #--------------------------------------------
-our $kiwi    = new KIWILog ();
-our $global  = new KIWIGlobals ($kiwi);
-our $locator = new KIWILocator ($kiwi);
+our $kiwi    = KIWILog -> new();
+our $global  = KIWIGlobals -> new ($kiwi);
+our $locator = KIWILocator -> new ($kiwi);
 $kiwi -> setLogServer (
 	$global -> getGlobals() -> {LogServerPort}
 );
@@ -143,7 +143,7 @@ sub main {
 		$cmdL -> setRootTargetDir ($rootTarget);
 		$cmdL -> setOperationMode ("prepare", $cmdL->getConfigDir());
 		mkdir $imageTarget;
-		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		$kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if (! $kic -> prepareImage()) {
 			kiwiExit (1);
 		}
@@ -170,7 +170,7 @@ sub main {
 		#------------------------------------------
 		$kiwi -> info ("Reading image description [Cache]...\n");
 		my $cacheType = "btrfs";
-		my $xml = new KIWIXML (
+		my $xml = KIWIXML -> new (
 			$kiwi,$cmdL->getOperationMode("initCache"),
 			$cacheType,$cmdL->getBuildProfiles(),$cmdL,undef
 		);
@@ -188,7 +188,7 @@ sub main {
 		if (! $cdir) {
 			$cdir = $locator -> getDefaultCacheDir();
 		}
-		$icache = new KIWICache (
+		$icache = KIWICache -> new (
 			$kiwi,$xml,$cdir,$gdata->{BasePath},
 			$cmdL->getBuildProfiles(),
 			$cmdL->getOperationMode("initCache"),
@@ -213,7 +213,7 @@ sub main {
 	# Prepare image and build chroot system
 	#----------------------------------------
 	if ($cmdL->getOperationMode("prepare")) {
-		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		$kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
 		}
@@ -227,7 +227,7 @@ sub main {
 	# Create image from chroot system
 	#------------------------------------------
 	if ($cmdL->getOperationMode("create")) {
-		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		$kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
 		}
@@ -241,7 +241,7 @@ sub main {
 	# Upgrade image in chroot system
 	#------------------------------------------
 	if ($cmdL->getOperationMode("upgrade")) {
-		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		$kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
 		}
@@ -264,7 +264,7 @@ sub main {
 		my $nofiles     = $migopts->[2];
 		my $notempl     = $migopts->[3];
 		$destination    = "/tmp/".$destination;
-		$migrate = new KIWIMigrate (
+		$migrate = KIWIMigrate -> new (
 			$kiwi,$destination,
 			$cmdL->getOperationMode("migrate"),$exclude,$skip,
 			$addlRepos->{repositories},
@@ -313,7 +313,7 @@ sub main {
 	# setup a splash initrd
 	#------------------------------------------
 	if ($cmdL->getOperationMode("setupSplash")) {
-		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		$kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
 		}
@@ -327,7 +327,7 @@ sub main {
 	# Create a boot Stick (USB)
 	#------------------------------------------
 	if ($cmdL->getOperationMode("bootUSB")) {
-		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		$kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
 		}
@@ -341,7 +341,7 @@ sub main {
 	# Create a boot CD (ISO)
 	#------------------------------------------
 	if ($cmdL->getOperationMode("bootCD")) {
-		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		$kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
 		}
@@ -355,7 +355,7 @@ sub main {
 	# Create an install CD (ISO)
 	#------------------------------------------
 	if ($cmdL->getOperationMode("installCD")) {
-		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		$kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
 		}
@@ -369,7 +369,7 @@ sub main {
 	# Create an install USB stick
 	#------------------------------------------
 	if ($cmdL->getOperationMode("installStick")) {
-		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		$kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
 		}
@@ -383,7 +383,7 @@ sub main {
 	# Create an install PXE data set
 	#------------------------------------------
 	if ($cmdL->getOperationMode("installPXE")) {
-		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		$kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
 		}
@@ -397,7 +397,7 @@ sub main {
 	# Create a virtual disk image
 	#------------------------------------------
 	if ($cmdL->getOperationMode("bootVMDisk")) {
-		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		$kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
 		}
@@ -411,7 +411,7 @@ sub main {
 	# Convert image into format/configuration
 	#------------------------------------------
 	if ($cmdL->getOperationMode("convert")) {
-		$kic = new KIWIImageCreator ($kiwi, $cmdL);
+		$kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if (! $kic) {
 			kiwiExit (1);
 		}
@@ -428,7 +428,7 @@ sub main {
 		$cmdL -> setConfigDir(
 			$cmdL->getOperationMode("listXMLInfo")
 		);
-		my $info = new KIWIXMLInfo($kiwi, $cmdL);
+		my $info = KIWIXMLInfo -> new ($kiwi, $cmdL);
 		if (! $info) {
 			kiwiExit (1);
 		}
@@ -596,9 +596,9 @@ sub init {
 	#==========================================
 	# IPC; signal setup
 	#------------------------------------------
-	$SIG{"HUP"}      = \&quit;
-	$SIG{"TERM"}     = \&quit;
-	$SIG{"INT"}      = \&quit;
+	local $SIG{"HUP"}  = \&quit;
+	local $SIG{"TERM"} = \&quit;
+	local $SIG{"INT"}  = \&quit;
 	#==========================================
 	# Option variables
 	#------------------------------------------
@@ -692,7 +692,7 @@ sub init {
 	#==========================================
 	# create logger and cmdline object
 	#------------------------------------------
-	$cmdL = new KIWICommandLine($kiwi);
+	$cmdL = KIWICommandLine -> new ($kiwi);
 	if (! $cmdL) {
 		kiwiExit (1);
 	}
@@ -1373,6 +1373,7 @@ sub init {
 	if (defined $SetImageType) {
 		$cmdL -> setBuildType($SetImageType);
 	}
+	return;
 }
 
 #==========================================
@@ -1602,6 +1603,7 @@ sub usage {
 	print "      generate a random id.\n";
 	print "--\n";
 	version ($exit);
+	return;
 }
 
 #==========================================
@@ -1630,7 +1632,7 @@ sub listImage {
 		);
 		if ($controlFile) {
 			$kiwi -> info ("* \033[1;32m".$image."\033[m\017\n");
-			my $xml = new KIWIXML (
+			my $xml = KIWIXML -> new (
 				$kiwi,$system."/".$image,undef,undef,$cmdL
 			);
 			if (! $xml) {
@@ -1660,7 +1662,7 @@ sub checkConfig {
 		$kiwi -> failed ();
 		exit 1;
 	}
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new (
 		$kiwi,$config,$gdata->{Revision},
 		$gdata->{Schema},$gdata->{SchemaCVT}
 	);
@@ -1768,6 +1770,7 @@ sub cloneImage {
 		$kiwi -> done();
 	}
 	kiwiExit (0);
+	return;
 }
 
 #==========================================
@@ -1777,7 +1780,7 @@ sub kiwiExit {
 	# ...
 	# private Exit function, exit safely
 	# ---
-	my $code = $_[0];
+	my $code = shift;
 	#==========================================
 	# Reformat log file for human readers...
 	#------------------------------------------
@@ -1818,6 +1821,7 @@ sub quit {
 	$kiwi -> reopenRootChannel();
 	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
 	kiwiExit (1);
+	return;
 }
 
 #==========================================
@@ -1836,6 +1840,7 @@ sub cleanup {
 	if (defined $migrate) {
 		$migrate -> cleanMount ();
 	}
+	return;
 }
 
 #==========================================
@@ -1883,12 +1888,12 @@ sub createPassword {
 	while ($word1 ne $word2) {
 		$kiwi -> info ("Enter Password: ");
 		system "stty -echo";
-		chomp ($word1 = <STDIN>);
+		chomp ($word1 = <>);
 		system "stty echo";
 		$kiwi -> done ();
 		$kiwi -> info ("Reenter Password: ");
 		system "stty -echo";
-		chomp ($word2 = <STDIN>);
+		chomp ($word2 = <>);
 		system "stty echo";
 		if ( $word1 ne $word2 ) {
 			$kiwi -> failed ();
@@ -1903,6 +1908,7 @@ sub createPassword {
 	$kiwi -> done ();
 	$kiwi -> info ("Your password:\n\t$encrypted\n");
 	kiwiExit (0);
+	return;
 }
 
 #==========================================
@@ -1939,6 +1945,7 @@ sub createHash {
 	}
 	$kiwi -> done();
 	kiwiExit (0);
+	return;
 }
 
 #==========================================
@@ -1964,7 +1971,7 @@ sub createInstSource {
 		$kiwi->done();
 	}
 	$kiwi -> info ("Reading image description [InstSource]...\n");
-	my $xml = new KIWIXML (
+	my $xml = KIWIXML -> new (
 		$kiwi,$idesc,undef,undef,$cmdL
 	);
 	if (! defined $xml) {
@@ -1988,7 +1995,7 @@ sub createInstSource {
 	#==========================================
 	# Create object...
 	#------------------------------------------
-	my $collect = new KIWICollect ( $kiwi, $xml, $root, $vlevel,$cmdL );
+	my $collect = KIWICollect -> new ( $kiwi, $xml, $root, $vlevel,$cmdL );
 	if (! defined( $collect) ) {
 		$kiwi -> error( "Unable to create KIWICollect module." );
 		$kiwi -> failed ();
@@ -2011,6 +2018,7 @@ sub createInstSource {
 	$kiwi->info( "KIWICollect completed successfully." );
 	$kiwi->done();
 	kiwiExit (0);
+	return;
 }
 
 main();
