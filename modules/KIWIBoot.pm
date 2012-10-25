@@ -5392,7 +5392,8 @@ sub getSector {
 	my $sectors;
 	if ($size =~ /\+(.*)M$/) {
 		# turn value into bytes
-		$size *= 1048576;
+		$size = $1;
+		$size*= 1048576;
 	} else {
 		# use entire rest space
 		$size = $count * $secsz;
