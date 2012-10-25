@@ -80,6 +80,13 @@ my $icache;     # Image Cache creation
 my $cmdL;       # Command line data container
 
 #==========================================
+# IPC; signal setup
+#------------------------------------------
+local $SIG{"HUP"}  = \&quit;
+local $SIG{"TERM"} = \&quit;
+local $SIG{"INT"}  = \&quit;
+
+#==========================================
 # main
 #------------------------------------------
 sub main {
@@ -593,12 +600,6 @@ sub init {
 	# requires you to perform at least one action.
 	# An action is either to prepare or create an image
 	# ---
-	#==========================================
-	# IPC; signal setup
-	#------------------------------------------
-	local $SIG{"HUP"}  = \&quit;
-	local $SIG{"TERM"} = \&quit;
-	local $SIG{"INT"}  = \&quit;
 	#==========================================
 	# Option variables
 	#------------------------------------------
