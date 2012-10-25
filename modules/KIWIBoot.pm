@@ -92,7 +92,7 @@ sub new {
 	#==========================================
 	# check for split system
 	#------------------------------------------
-	if (-f "$system/rootfs.tar") {
+	if (($system) && (-f "$system/rootfs.tar")) {
 		$kiwi -> error ("Can't use split root tree, run create first");
 		$kiwi -> failed ();
 		return;
@@ -140,7 +140,7 @@ sub new {
 	#==========================================
 	# check if we got the tree or image file
 	#------------------------------------------
-	if (-d $system) {
+	if (($system) && (-d $system)) {
 		$haveTree = 1;
 	}
 	#==========================================
@@ -1834,7 +1834,7 @@ sub setupBootDisk {
 	#==========================================
 	# Check for LVM...
 	#------------------------------------------
-	if (($type{lvm} eq "true") || ($lvm)) {
+	if ((($type{lvm}) && ($type{lvm} eq "true")) || ($lvm)) {
 		#==========================================
 		# add boot space if lvm based
 		#------------------------------------------
@@ -2136,7 +2136,7 @@ sub setupBootDisk {
 	}
 	$kiwi -> info ("Setup disk image/device...");
 	while (1) {
-		if (-x $this->{gdata}->{StudioNode}) {
+		if ($this->{gdata}->{StudioNode}) {
 			#==========================================
 			# Call custom image creation tool...
 			#------------------------------------------
@@ -2679,7 +2679,7 @@ sub setupBootDisk {
 		#==========================================
 		# OEM Install CD...
 		#------------------------------------------
-		if ($type{installiso} eq "true") {
+		if (($type{installiso}) && ($type{installiso} eq "true")) {
 			$this -> {system} = $diskname;
 			if ($haveDiskDevice) {
 				$this -> {system} = $this->{loop};
@@ -2693,7 +2693,7 @@ sub setupBootDisk {
 		#==========================================
 		# OEM Install Stick...
 		#------------------------------------------
-		if ($type{installstick} eq "true") {
+		if (($type{installstick}) && ($type{installstick} eq "true")) {
 			$this -> {system} = $diskname;
 			if ($haveDiskDevice) {
 				$this -> {system} = $this->{loop};
@@ -2707,7 +2707,7 @@ sub setupBootDisk {
 		#==========================================
 		# OEM Install PXE...
 		#------------------------------------------
-		if ($type{installpxe} eq "true") {
+		if (($type{installpxe}) && ($type{installpxe} eq "true")) {
 			$this -> {system} = $diskname;
 			if ($haveDiskDevice) {
 				$this -> {system} = $this->{loop};
@@ -3069,6 +3069,9 @@ sub cleanLoopMaps {
 	if ($dev) {
 		$loop = $dev;
 	}
+	if (! $loop) {
+		return $this;
+	}
 	if ($loop =~ /dev\/(.*)/) {
 		$loop = $1;
 	}
@@ -3249,6 +3252,12 @@ sub setupBootLoaderStages {
 		$kiwi -> info ("Importing grub2 stage and theming files");
 		my $s_efi = $stages{efi}{initrd};
 		my $s_bio = $stages{bios}{initrd};
+		if (! $s_efi) {
+			$s_efi = "";
+		}
+		if (! $s_bio) {
+			$s_bio = "";
+		}
 		if ($zipped) {
 			$status= qxx (
 				"$unzip | \\
@@ -5943,7 +5952,10 @@ sub setupFilesystem {
 				$fsopts.= " -L 'BOOT'";
 				$type{fsnocheck} = 'true';
 			}
-			my $tuneopts = $type{fsnocheck} eq "true" ? "-c 0 -i 0" : "";
+			my $tuneopts = "";
+			if (($type{fsnocheck}) && ($type{fsnocheck} eq "true")) {
+				$tuneopts = "-c 0 -i 0";
+			}
 			$tuneopts = $FSopts{extfstune} if $FSopts{extfstune};
 			$status = qxx ("$fstool $fsopts $device 2>&1");
 			$result = $? >> 8;
@@ -6320,7 +6332,7 @@ sub __initDiskSize {
 	# turn optional size from cmdline into bytes
 	#-------------------------------------------
 	$this->{sizeSetByUser} = 0;
-	if ($cmdlsize =~ /^(\d+)([MG])$/i) {
+	if (($cmdlsize) && ($cmdlsize =~ /^(\d+)([MG])$/i)) {
 		my $value= $1;
 		my $unit = $2;
 		if ($unit eq "G") {
@@ -6342,7 +6354,7 @@ sub __initDiskSize {
 		}
 		$minBytes = $cmdlBytes;
 		$this->{sizeSetByUser} = 1;
-	} elsif ($XMLBytes > 0) {
+	} elsif (("$XMLBytes" ne "auto") && ($XMLBytes > 0)) {
 		if ($XMLBytes < $minBytes) {
 			$kiwi -> warning (
 				"given size is smaller than calculated min size"
