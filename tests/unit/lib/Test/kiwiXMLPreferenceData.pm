@@ -1255,7 +1255,7 @@ sub test_setRPMCheckSig {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($cSig);
+	$this -> assert_str_equals('false', $cSig);
 	return;
 }
 
@@ -1284,7 +1284,7 @@ sub test_setRPMCheckSigNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($cSig);
+	$this -> assert_str_equals('false', $cSig);
 	return;
 }
 
@@ -1344,7 +1344,7 @@ sub test_setRPMExcludeDoc {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($eDoc);
+	$this -> assert_str_equals('false', $eDoc);
 	return;
 }
 
@@ -1373,7 +1373,7 @@ sub test_setRPMExcludeDocNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($eDoc);
+	$this -> assert_str_equals('false', $eDoc);
 	return;
 }
 
@@ -1433,7 +1433,7 @@ sub test_setRPMForce {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($force);
+	$this -> assert_str_equals('false', $force);
 	return;
 }
 
@@ -1462,7 +1462,7 @@ sub test_setRPMForceNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($force);
+	$this -> assert_str_equals('false', $force);
 	return;
 }
 
