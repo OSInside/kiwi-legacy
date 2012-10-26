@@ -914,6 +914,17 @@ sub setupInstallationSource {
 						$kiwi -> error  ("zypper: $data");
 						return;
 					}
+					if ( $prio ) {
+						$data = qxx (
+							"@kchroot zypper modifyrepo -p $prio $alias 2>&1"
+						);
+						$code = $? >> 8;
+						if ($code != 0) {
+							$kiwi -> failed ();
+							$kiwi -> error  ("zypper: $data");
+							return;
+						}
+					}
 					$kiwi -> done ();
 				}
 			}
