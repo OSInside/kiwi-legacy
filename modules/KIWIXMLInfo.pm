@@ -616,7 +616,7 @@ sub __xmlSetup {
 	}
 	my $pkgMgr = $this -> {packageManager};
 	if ($pkgMgr) {
-		$xml -> setPackageManager($pkgMgr);
+		$xml -> setPackageManager_legacy($pkgMgr);
 	}
 	my $ignore = $this -> {ignoreRepos};
 	if ($ignore) {

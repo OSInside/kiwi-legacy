@@ -1061,7 +1061,7 @@ sub __applyBaseXMLOverrides {
 	my $this = shift;
 	my $xml  = shift;
 	if ($this -> {packageManager}) {
-		$xml -> setPackageManager($this -> {packageManager});
+		$xml -> setPackageManager_legacy($this -> {packageManager});
 	}
 	if ($this -> {ignoreRepos}) {
 		$xml -> ignoreRepositories_legacy ();

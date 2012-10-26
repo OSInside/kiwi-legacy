@@ -173,6 +173,66 @@ sub test_conflictingProfiles {
 }
 
 #==========================================
+# test_duplicateRepoAliasConflict
+#------------------------------------------
+sub test_duplicateRepoAliasConflict {
+	# ...
+	# Test that duplicate repo alias names trigger an error
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/noRepoAliasUnique';
+	$cmd -> setConfigDir ($configDir);
+	my $xml = $this -> __getXMLObj( $configDir );
+	my @profiles = ('profA');
+	$xml -> setSelectionProfileNames( \@profiles );
+	my $msg = $kiwi -> getMessage();
+	my $msgT = $kiwi -> getMessageType();
+	my $state = $kiwi -> getState();
+	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
+	my $res = $checker -> prepareChecks();
+	$msg = $kiwi -> getMessage();
+	my $expected = "Specified repo alias 'arepo' not unique across "
+		. 'active repositories';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_duplicateRepoAliasNoConflict
+#------------------------------------------
+sub test_duplicateRepoAliasNoConflict {
+	# ...
+	# Test that duplicate repo alias names do not trigger an error if the
+	# conflicting repos are not used at the same time
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/noRepoAliasUnique';
+	$cmd -> setConfigDir ($configDir);
+	my $xml = $this -> __getXMLObj( $configDir );
+	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
+	my $res = $checker -> prepareChecks();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($res);
+	return;
+}
+
+#==========================================
 # test_fsToolCheckFsysImg
 #------------------------------------------
 sub test_fsToolCheckFsysImg {
@@ -468,7 +528,9 @@ sub test_packageManagerCheck_ens {
 	# the test to simulate a failure condition
 	$cmd -> setPackageManager('ensconce');
 	my $xml = $this -> __getXMLObj( $configDir );
-	$xml -> setPackageManager('ensconce');
+	my $prefObj = $xml -> getPreferences();
+	$prefObj -> setPackageManager('ensconce');
+	$xml -> setPreferences($prefObj);
 	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
 	my $locator = KIWILocator -> new($kiwi);
@@ -599,12 +661,15 @@ sub __getXMLObj {
 	# ---
 	my $this      = shift;
 	my $configDir = shift;
+	my $kiwi = $this->{kiwi};
 	# TODO
 	# Fix the creation of the XML object once the ctor arguments change
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $configDir, undef, undef,$this->{cmdL}
+		$kiwi, $configDir, undef, undef,$this->{cmdL}
 	);
 	if (! $xml) {
+		my $errMsg = $kiwi -> getMessage();
+		print "XML create msg: $errMsg\n";
 		my $msg = 'Failed to create XML obj, most likely improper config '
 		. 'path: '
 		. $configDir;
