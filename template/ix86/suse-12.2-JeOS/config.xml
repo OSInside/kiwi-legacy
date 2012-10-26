@@ -13,9 +13,12 @@
 		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
 	</profiles>
 	<preferences>
+<!-- if you want btrfs to give it a try
 		<type image="iso" primary="true" boot="isoboot/suse-12.2" flags="seed" hybrid="true" fsmountoptions="compress=lzo">
-			<size unit="M">450</size>
+			<size unit="M">1500</size>
 		</type>
+		-->
+		<type image="iso" primary="true" boot="isoboot/suse-12.2" flags="clic" hybrid="true"/>
 		<version>1.12.2</version>
 		<packagemanager>zypper</packagemanager>
 		<locale>en_US</locale>
