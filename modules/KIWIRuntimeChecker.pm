@@ -27,6 +27,11 @@ use base qw (Exporter);
 use KIWILocator;
 use KIWILog;
 use KIWIQX qw (qxx);
+use KIWIXML;
+use KIWIXMLRepositoryData;
+use KIWIXMLSystemdiskData;
+use KIWIXMLVMachineData;
+
 
 #==========================================
 # Exports
@@ -127,6 +132,9 @@ sub prepareChecks {
 	if (! $this -> __checkPatternTypeAttrrValueConsistent()) {
 		return;
 	}
+	if (! $this -> __checkRepoAliasUnique()) {
+		return;
+	}
 	if (! $this -> __checkRootRecycleCapability()) {
 		return;
 	}
@@ -150,11 +158,16 @@ sub __hasValidLVMName {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
-	my $vgroupName = $xml -> getLVMGroupName_legacy();
+	my $sysDisk = $xml -> getSystemDiskConfig();
+	if (! $sysDisk ) {
+		return 1;
+	}
+	my $vgroupName = $sysDisk -> getVGName();
 	if (! $vgroupName) {
 		return 1;
 	}
-	my @hostGroups = qxx ("vgs --noheadings -o vg_name 2>/dev/null");
+	my $vgsCmd = $this->{locator}->getExecPath('vgs');
+	my @hostGroups = qxx ("$vgsCmd --noheadings -o vg_name 2>/dev/null");
 	chomp @hostGroups;
 	foreach my $hostGroup (@hostGroups) {
 		$hostGroup =~ s/^\s+//xg;
@@ -252,6 +265,35 @@ sub __haveValidTypeString {
 }
 
 #==========================================
+# __checkRepoAliasUnique
+#------------------------------------------
+sub __checkRepoAliasUnique {
+	# ...
+	# Verify that the repo alias is unique across the currently active repos
+	# ---
+	my $this = shift;
+	my $xml = $this -> {xml};
+	my @repos = @{$xml -> getRepositories()};
+	my %aliasUsed;
+	for my $repo (@repos) {
+		my $alias = $repo -> getAlias();
+		if (! $alias) {
+			next
+		}
+		if ($aliasUsed{$alias}) {
+			my $kiwi = $this->{kiwi};
+			my $msg = "Specified repo alias '$alias' not unique across "
+				. 'active repositories';
+			$kiwi -> error ( $msg );
+			$kiwi -> failed ();
+			return;
+		}
+		$aliasUsed{$alias} = 1;
+	}
+	return 1;
+}
+
+#==========================================
 # __checkRootRecycleCapability
 #------------------------------------------
 sub __checkRootRecycleCapability {
@@ -288,9 +330,9 @@ sub __checkFilesystemTool {
 	my $this = shift;
 	my $cmdL = $this -> {cmdArgs};
 	my $xml  = $this -> {xml};
-	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
-	my $typeName = $type{type};
-	my $flag     = $type{flags};
+	my $type = $xml -> getImageType();
+	my $typeName = $type -> getImageType();
+	my $flag     = $type -> getFlags;
 	my $toolError;
 	my $checkedFS;
 	my @knownFsTypes = qw (
@@ -330,9 +372,19 @@ sub __checkFilesystemTool {
 			$toolError = 1;
 		}
 	} else {
-		my @fsType = ($type{filesystem});
-		if ($type{filesystem} =~ /(.*),(.*)/x) {
-			@fsType = ($1,$2);
+		my @fsType;
+		my $fs = $type -> getFilesystem();
+		my $roFS = $type -> getFSReadOnly();
+		my $rwFS = $type -> getFSReadWrite();
+		if ($fs) {
+			push @fsType, $type -> getFilesystem();
+		}
+		if ($roFS) {
+			push @fsType, $roFS;
+		}
+
+		if ($rwFS) {
+			push @fsType, $rwFS;
 		}
 		foreach my $fs (@fsType) {
 			my $haveTool = $this -> __isFsToolAvailable($fs);
@@ -380,7 +432,8 @@ sub __checkPackageManagerExists {
 	# Check that the specified package manager exists
 	# ---
 	my $this = shift;
-	my $pkgMgr = $this -> {xml} -> getPackageManager_legacy();
+	my $prefObj = $this -> {xml} -> getPreferences();
+	my $pkgMgr = $prefObj -> getPackageManager();
 	my $haveExec = $this -> {locator} -> getExecPath($pkgMgr);
 	if (! $haveExec) {
 		my $msg = "Executable for specified package manager, $pkgMgr, "
@@ -464,15 +517,15 @@ sub __checkVMscsiCapable {
 	# ---
 	my $this = shift;
 	my $xml = $this -> {xml};
-	my $typeInfo = $xml -> getImageTypeAndAttributes_legacy();
-	my $type = $typeInfo -> {type};
+	my $typeObj = $xml -> getImageType();
+	my $type = $typeObj -> getImageType();
 	if ($type ne 'vmx') {
 		# Nothing to do
 		return 1;
 	}
-	my %vmConfig = $xml -> getVMwareConfig_legacy();
-	if (defined $vmConfig{vmware_disktype} ) {
-		my $diskType = $vmConfig{vmware_disktype};
+	my $vmConfig = $xml -> getVMachineConfig();
+	my $diskType = $vmConfig -> getSystemDiskType();
+	if ($diskType) {
 		if ($diskType ne 'scsi') {
 			# Nothing to do
 			return 1;

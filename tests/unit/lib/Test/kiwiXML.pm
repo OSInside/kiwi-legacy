@@ -5490,11 +5490,11 @@ sub test_packageManagerInfoHasConfigValue {
 }
 
 #==========================================
-# test_packageManagerSet_noArg
+# test_packageManagerSet_noArg_legacy
 #------------------------------------------
-sub test_packageManagerSet_noArg {
+sub test_packageManagerSet_noArg_legacy {
 	# ...
-	# Verify of setPackageManager method error condition
+	# Verify of setPackageManager_legacy method error condition
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -5503,7 +5503,7 @@ sub test_packageManagerSet_noArg {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	# Call set without argument, expect error
-	my $res = $xml -> setPackageManager();
+	my $res = $xml -> setPackageManager_legacy();
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'setPackageManager method called without specifying '
 		. 'package manager value.';
@@ -5518,11 +5518,11 @@ sub test_packageManagerSet_noArg {
 }
 
 #==========================================
-# test_packageManagerSet_noArg
+# test_packageManagerSet_noArg_legacy
 #------------------------------------------
-sub test_packageManagerSet_valid {
+sub test_packageManagerSet_valid_legacy {
 	# ...
-	# Verify setPackageManager works as expected
+	# Verify setPackageManager_legacy works as expected
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -5531,7 +5531,7 @@ sub test_packageManagerSet_valid {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	# Set the package manager to be smart
-	my $res = $xml -> setPackageManager('smart');
+	my $res = $xml -> setPackageManager_legacy('smart');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -5569,7 +5569,7 @@ sub test_packageManagerInfoHasProfs {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('completed', $state);
 	# Override the specified package manager with yum
-	my $res = $xml -> setPackageManager('yum');
+	my $res = $xml -> setPackageManager_legacy('yum');
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -5903,6 +5903,161 @@ sub test_setDescriptionInfoNoArg {
 	$this -> assert_str_equals($expected, $spec);
 	my $type = $descrpObj -> getType();
 	$this -> assert_str_equals('system', $type);
+	return;
+}
+
+#==========================================
+# test_setPreferences
+#------------------------------------------
+sub test_setPreferences {
+	# ...
+	# Verify proper behavior of the setPreferences method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @profNames = ( 'profA' );
+	$xml -> setSelectionProfileNames(\@profNames);
+	$msg = $kiwi -> getMessage();
+	my $expected = 'Using profile(s): profA';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $prefObj = $xml -> getPreferences();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# This is expected modify data in profA
+	my $res = $prefObj -> setBootLoaderTheme('SLES');
+	$this -> assert_not_null($res);
+	# This is expected to modify data that exists in the default
+	$res = $prefObj -> setRPMForce('true');
+	$this -> assert_not_null($res);
+	# This adds a new attribut to the default settings
+	$res = $prefObj -> setHWClock('UTC');
+	$this -> assert_not_null($res);
+	$res = $xml -> setPreferences($prefObj);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	# Verify the default setting changes
+	$res = $xml -> setSelectionProfileNames();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	my $prefDefault = $xml -> getPreferences();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Verify the changed setting in the default
+	my $rpmF = $prefDefault -> getRPMForce();
+	$this -> assert_str_equals('true', $rpmF);
+	# Verify the new setting has been applied to the default
+	my $clock = $prefDefault -> getHWClock();
+	$this -> assert_str_equals('UTC', $clock);
+	# Verify the setting for boot loader has not been applied to the default
+	my $bLTheme = $prefDefault -> getBootLoaderTheme();
+	$this -> assert_null($bLTheme);
+	$xml -> setSelectionProfileNames(\@profNames);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$prefObj = $xml -> getPreferences();
+	# Verify the boot loader theme has changed
+	$bLTheme = $prefObj -> getBootLoaderTheme();
+	$this -> assert_str_equals('SLES', $bLTheme);
+	return;
+}
+
+#==========================================
+# test_setPreferencesInvalArg
+#------------------------------------------
+sub test_setPreferencesInvalArg {
+	# ...
+	# Verify proper behavior of the setPreferences method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $res = $xml -> setPreferences('foo');
+	$msg = $kiwi -> getMessage();
+	my $expected = 'setPreferences: expecting ref to KIWIXMLPreferenceData '
+		. ' as first argument';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_setPreferencesNoArg
+#------------------------------------------
+sub test_setPreferencesNoArg {
+	# ...
+	# Verify proper behavior of the setPreferences method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $res = $xml -> setPreferences();
+	$msg = $kiwi -> getMessage();
+	my $expected = 'setPreferences: expecting ref to KIWIXMLPreferenceData '
+		. ' as first argument';
+	$this -> assert_str_equals($expected, $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
 	return;
 }
 

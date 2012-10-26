@@ -725,7 +725,8 @@ sub getPreferences {
 			next;
 		}
 		$mergedPref = $this -> __mergePreferenceData(
-			$mergedPref,$this->{imageConfig}{$prof}{preferences}						);
+			$mergedPref,$this->{imageConfig}{$prof}{preferences}
+		);
 		if (! $mergedPref ) {
 			return;
 		}
@@ -941,6 +942,67 @@ sub setDescriptionInfo {
 	);
 	$this->{imageConfig}{description} = \%descript;
 	return $this;
+}
+
+#==========================================
+# setPreferences
+#------------------------------------------
+sub setPreferences {
+	# ...
+	# Set the preferences for the currently selected profiles. We divide
+	# each setting to the profile where it is already defined. If a setting
+	# is not defined we set the value on the default profile.
+	#
+	# If I build profiles A, B, and C and am given preferences to set this
+	# method will set, for example the bootloader_theme in the profile where
+	# the bootloader_theme is defined, A, B, or C or in the default profile
+	# if not defined in any of the other profiles.
+	# ---
+	my $this    = shift;
+	my $prefObj = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $prefObj || ref($prefObj) ne 'KIWIXMLPreferenceData') {
+		my $msg = 'setPreferences: expecting ref to KIWIXMLPreferenceData '
+			. ' as first argument';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my %attrSettings = (
+		bootloader_theme     => $prefObj -> getBootLoaderTheme(),
+		bootsplash_theme     => $prefObj -> getBootSplashTheme(),
+		defaultdestination   => $prefObj -> getDefaultDest(),
+		defaultprebuilt      => $prefObj -> getDefaultPreBuilt(),
+		defaultroot          => $prefObj -> getDefaultRoot(),
+		hwclock              => $prefObj -> getHWClock(),
+		keymap               => $prefObj -> getKeymap(),
+		locale               => $prefObj -> getLocale(),
+		packagemanager       => $prefObj -> getPackageManager(),
+		rpm_check_signatures => $prefObj -> getRPMCheckSig(),
+		rpm_excludedocs      => $prefObj -> getRPMExcludeDoc(),
+		rpm_force            => $prefObj -> getRPMForce(),
+		showlicense          => $prefObj -> getShowLic(),
+		timezone             => $prefObj -> getTimezone(),
+		version              => $prefObj -> getVersion()
+	);
+	my @sProfs = @{$this->{selectedProfiles}};
+	ATTR:
+	for my $attr (keys %attrSettings) {
+		my $appliedSet = undef;
+		my $newSet = $attrSettings{$attr};
+		for my $prof (@{$this->{selectedProfiles}}) {
+			my $curSet = $this->{imageConfig}{$prof}{preferences}{$attr};
+			if ($newSet && $curSet) {
+				$this->{imageConfig}{$prof}{preferences}{$attr} = $newSet;
+				my $appliedSet = 1;
+				next ATTR;
+			}
+		}
+		if ((! $appliedSet) && $newSet) {
+			$this->{imageConfig}{kiwi_default}{preferences}{$attr} = $newSet;
+		}
+	}
+	return 1;
 }
 
 #==========================================
@@ -1715,7 +1777,7 @@ sub __getProfsToModify {
 #------------------------------------------
 sub __mergePreferenceData {
 	# ...
-	# Merge two hashes that represent <preferemces> data into one.
+	# Merge two hashes that represent <preferences> data into one.
 	# Expecting a two hash refs as arguments and return a hashref to
 	# the merged data. If both hashes have definitions for the
 	# same data issues an error.
@@ -1726,10 +1788,22 @@ sub __mergePreferenceData {
 	my $kiwi = $this->{kiwi};
 	my %merged;
 	my @attrs = qw(
-		bootloader_theme bootsplash_theme defaultdestination
-		defaultprebuilt defaultroot hwclock keymap locale
-		packagemanager rpm_check_signatures rpm_excludedocs rpm_force
-		showlicense timezone types version
+		bootloader_theme
+		bootsplash_theme
+		defaultdestination
+		defaultprebuilt
+		defaultroot
+		hwclock
+		keymap
+		locale
+		packagemanager
+		rpm_check_signatures
+		rpm_excludedocs
+		rpm_force
+		showlicense
+		timezone
+		types
+		version
 	);
 	for my $attr (@attrs) {
 		if ($attr eq 'types') {
@@ -2544,38 +2618,6 @@ sub setArch {
 		return;
 	}
 	$this->{arch} = $newArch;
-	return $this;
-}
-
-#==========================================
-# setPackageManager
-#------------------------------------------
-sub setPackageManager {
-	# ...
-	# set packagemanager to use for this image
-	# ---
-	my $this  = shift;
-	my $value = shift;
-	if (! $value) {
-		my $msg = 'setPackageManager method called without specifying '
-		. 'package manager value.';
-		$this -> {kiwi} -> error ($msg);
-		$this -> {kiwi} -> failed();
-		return;
-	}
-	my $opts = $this -> __getPreferencesNodeByTagName ("packagemanager");
-	my $pmgr = $opts -> getElementsByTagName ("packagemanager");
-	if (($pmgr) && ("$pmgr" eq "$value")) {
-		return $this;
-	}
-	my $addElement = new XML::LibXML::Element ("packagemanager");
-	$addElement -> appendText ($value);
-	my $node = $opts -> getElementsByTagName ("packagemanager") -> get_node(1);
-	if ($node) {
-		$opts -> removeChild ($node);
-	}
-	$opts -> appendChild ($addElement);
-	$this -> updateXML();
 	return $this;
 }
 
@@ -6222,6 +6264,43 @@ sub ignoreRepositories_legacy {
 	$this->{repositNodeList} = 
 		$this->{systemTree}->getElementsByTagName ("repository");
 	$this-> updateXML();
+	return $this;
+}
+
+#==========================================
+# setPackageManager_legacy
+#------------------------------------------
+sub setPackageManager_legacy {
+	# ...
+	# set packagemanager to use for this image
+	# ---
+	my $this  = shift;
+	my $value = shift;
+	if (! $value) {
+		my $msg = 'setPackageManager method called without specifying '
+		. 'package manager value.';
+		$this -> {kiwi} -> error ($msg);
+		$this -> {kiwi} -> failed();
+		return;
+	}
+	my $opts = $this -> __getPreferencesNodeByTagName ("packagemanager");
+	my $pmgr = $opts -> getElementsByTagName ("packagemanager");
+	if (($pmgr) && ("$pmgr" eq "$value")) {
+		return $this;
+	}
+	my $addElement = new XML::LibXML::Element ("packagemanager");
+	# Also update the ned data structure to ensure the runtime checker works
+	# properly
+	my $prefObj = $this -> getPreferences();
+	$prefObj -> setPackageManager($value);
+	$this -> setPreferences($prefObj);
+	$addElement -> appendText ($value);
+	my $node = $opts -> getElementsByTagName ("packagemanager") -> get_node(1);
+	if ($node) {
+		$opts -> removeChild ($node);
+	}
+	$opts -> appendChild ($addElement);
+	$this -> updateXML();
 	return $this;
 }
 

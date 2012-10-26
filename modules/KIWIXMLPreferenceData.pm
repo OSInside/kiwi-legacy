@@ -55,14 +55,28 @@ sub new {
 	# While <type> is a child of <preferences> the data is not in this class
 	# the child relationship is enforced at the XML level.
 	my %keywords = map { ($_ => 1) } qw(
-		bootloader_theme bootsplash_theme defaultdestination
-		defaultprebuilt defaultroot hwclock keymap locale
-		packagemanager rpm_check_signatures rpm_excludedocs rpm_force
-		showlicense timezone types version
+		bootloader_theme
+		bootsplash_theme
+		defaultdestination
+		defaultprebuilt
+		defaultroot
+		hwclock
+		keymap
+		locale
+		packagemanager
+		rpm_check_signatures
+		rpm_excludedocs
+		rpm_force
+		showlicense
+		timezone
+		types
+		version
 	);
 	$this->{supportedKeywords} = \%keywords;
 	my %boolKW = map { ($_ => 1) } qw(
-		rpm_check_signatures rpm_excludedocs rpm_force
+		rpm_check_signatures
+		rpm_excludedocs
+		rpm_force
 	);
 	$this->{boolKeywords} = \%boolKW;
 	if (! $this -> __isInitHashRef($init) ) {

@@ -3,7 +3,7 @@
 <image schemaversion="5.2" name="test-filesys-tool-check-split">
 	<description type="system">
 		<author>Robert Schweikert</author>
-		<contact>rschweikert@novell.com</contact>
+		<contact>rjschwei@suse.com</contact>
 		<specification>test case for runtime checker location of file system tools, using split image with squashfs and btrfs</specification>
 	</description>
 	<preferences>
