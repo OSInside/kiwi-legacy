@@ -218,10 +218,10 @@ sub __setBooleanValue {
 		$kiwi -> failed();
 		return;
 	}
-	if (! $bVal || $bVal eq 'false') {
-		delete $this->{$attr};
+	if ((! $bVal) && $this->{$attr}) {
+		$this->{$attr} = 'false';
 	} else {
-		$this->{$attr} = 'true';
+		$this->{$attr} = $bVal;
 	}
 	return $this;
 }

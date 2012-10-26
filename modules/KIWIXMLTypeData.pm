@@ -153,7 +153,7 @@ sub new {
 	if (! $this->{bootloader} ) {
 		$this->{bootloader} = 'grub';
 	}
-	if (! $this->{installprovidefailsafe} ) {
+	if (! $init->{installprovidefailsafe} ) {
 		$this->{installprovidefailsafe} = 'true';
 	}
 	return $this;

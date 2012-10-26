@@ -341,7 +341,7 @@ sub test_setImportStatus {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($status);
+	$this -> assert_str_equals('false', $status);
 	return;
 }
 
@@ -370,7 +370,7 @@ sub test_setImportStatusNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($status);
+	$this -> assert_str_equals('false', $status);
 	return;
 }
 

@@ -358,7 +358,7 @@ sub test_getBootwait {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($bootw);
+	$this -> assert_str_equals('false', $bootw);
 	return;
 }
 
@@ -418,7 +418,7 @@ sub test_getKiwiInitrd {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($kinit);
+	$this -> assert_str_equals('false', $kinit);
 	return;
 }
 
@@ -448,7 +448,7 @@ sub test_getPartitionInstall {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($pInst);
+	$this -> assert_str_equals('false', $pInst);
 	return;
 }
 
@@ -510,7 +510,7 @@ sub test_getRebootInteractive {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($rebootI);
+	$this -> assert_str_equals('false', $rebootI);
 	return;
 }
 
@@ -632,7 +632,7 @@ sub test_getShutdownInteractive {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($haltI);
+	$this -> assert_str_equals('false', $haltI);
 	return;
 }
 
@@ -842,7 +842,7 @@ sub test_setAlignPartition {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($align);
+	$this -> assert_str_equals('false', $align);
 	return;
 }
 
@@ -897,7 +897,7 @@ sub test_setAlignPartitionNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($align);
+	$this -> assert_str_equals('false', $align);
 	return;
 }
 
@@ -1159,7 +1159,7 @@ sub test_setInplaceRecoveryNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($recov);
+	$this -> assert_str_equals('false', $recov);
 	return;
 }
 
@@ -1244,7 +1244,7 @@ sub test_setKiwiInitrdNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($kinit);
+	$this -> assert_str_equals('false', $kinit);
 	return;
 }
 
@@ -1329,7 +1329,7 @@ sub test_setPartitionInstallNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($partIn);
+	$this -> assert_str_equals('false', $partIn);
 	return;
 }
 
@@ -1646,7 +1646,7 @@ sub test_setRecoveryNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($recov);
+	$this -> assert_str_equals('false', $recov);
 	return;
 }
 
@@ -2024,7 +2024,7 @@ sub test_setSilentBootNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($silent);
+	$this -> assert_str_equals('false', $silent);
 	return;
 }
 
@@ -2109,7 +2109,7 @@ sub test_setSwapNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($swap);
+	$this -> assert_str_equals('false', $swap);
 	my $sSize = $confDataObj -> getSwapSize();
 	$this -> assert_null($sSize);
 	return;
@@ -2322,7 +2322,7 @@ sub test_setUnattendedNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($auto);
+	$this -> assert_str_equals('false', $auto);
 	my $autoID = $confDataObj -> getUnattendedID();
 	$this -> assert_null($autoID);
 	return;
