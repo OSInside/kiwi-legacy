@@ -81,6 +81,9 @@ sub new {
 	$this->{type}          = $init->{type};
 	$this->{username}      = $init->{username};
 
+	if (! $this->{status} ) {
+		$this->{status} = 'replacable';
+	}
 	return $this;
 }
 
