@@ -23,7 +23,7 @@
 	<repository type="yast2" prefer-license="true" priority="2" status="fixed">
 		<source path="opensuse://12.1/repo/oss/"/>
 	</repository>
-	<repository type="rpm-md" alias="update" imageinclude="true" >
+	<repository type="rpm-md" alias="update" imageinclude="true" status="fixed">
 		<source path="http://download.opensuse.org/update/12.1"/>
 	</repository>
 	<packages type="image">

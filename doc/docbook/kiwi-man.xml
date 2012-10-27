@@ -387,7 +387,8 @@
 			<replaceable>URL</replaceable></optional></term>
 		<listitem>
 		<para>
-			Set/Overwrite repo URL for the first listed repo.
+			Set/Overwrite the repo URL for the first repo listed in the
+            configuration file that does not have a "fixed" status.
 			The change is temporary and will not be written to the
 			XML file.
 		</para>
