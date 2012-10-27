@@ -6084,7 +6084,8 @@ sub test_setRepositoryBasic {
 	my $repoData = KIWIXMLRepositoryData -> new($kiwi, \%init);
 	$xml = $xml -> setRepository($repoData);
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'Replacing repository /repos/12.1-additional';
+	my $expectedMsg = 'Replacing repository '
+		. 'http://download.opensuse.org/update/12.1';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);
@@ -6096,7 +6097,7 @@ sub test_setRepositoryBasic {
 	$this -> assert_equals(4, $numRepos);
 	for my $repo (@repoData) {
 		my $path = $repo -> getPath();
-		if ($path eq '/repos/12.1-additional') {
+		if ($path eq 'http://download.opensuse.org/update/12.1') {
 			$this -> assert_str_equals('Improper repo replace', $path);
 		}
 	}

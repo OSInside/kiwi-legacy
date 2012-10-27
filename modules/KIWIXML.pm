@@ -1023,34 +1023,34 @@ sub setRepository {
 		$kiwi -> failed();
 		return;
 	}
-	my @profsToUse = ('kiwi_default');
-	for my $prof (@{$this->{selectedProfiles}}) {
-		if ($prof eq 'kiwi_default') {
-			next;
-		}
-		push @profsToUse, $prof;
-	}
-	my $foundReplacable;
-	PROFLOOP: for my $profName (@profsToUse) {
-		my $confRepos = $this->{imageConfig}->{$profName}{repoData};
+	my @profsToUse = @{$this->{selectedProfiles}};
+	my %repoIDreverseMap;
+	for my $prof (@profsToUse) {
+		my $confRepos = $this->{imageConfig}{$prof}{repoData};
 		if ($confRepos) {
-			my %repoInfo = %{$confRepos};
-			my @orderedIDs = sort (keys %repoInfo);
-			for my $key (@orderedIDs) {
-				my @entries = keys %repoInfo;
-				my $repoStatus = $repoInfo{$key}->{status};
-				if ($repoStatus && $repoStatus eq 'replacable') {
-					my %repoData = %{$this->__convertRepoDataToHash($repo)};
-					my $replRepoPath = $repoInfo{$key}->{path};
-					$kiwi -> info ("Replacing repository $replRepoPath");
-					$kiwi -> done();
-					$this->{imageConfig}->
-						{$profName}{repoData}->
-						{$key} = \%repoData;
-					$foundReplacable = 1;
-					last PROFLOOP;
-				}
+			for my $id (keys %{$confRepos}) {
+				$repoIDreverseMap{$id} = $prof;
 			}
+		}
+	}
+	my @orderedIDs = sort (keys %repoIDreverseMap);
+	my $foundReplacable;
+	for my $repoID (@orderedIDs) {
+		my $profName = $repoIDreverseMap{$repoID};
+		my $stat = $this->{imageConfig}{$profName}{repoData}{$repoID}{status};
+		# Note treating the "replacable" status implicitely as default
+		if (! $stat || ($stat eq 'replacable')) {
+			my %repoData = %{$this->__convertRepoDataToHash($repo)};
+			my $replRepoPath = $this->{imageConfig}
+									->{$profName}
+									->{repoData}
+									->{$repoID}
+									->{path};
+			$kiwi -> info ("Replacing repository $replRepoPath");
+			$kiwi -> done();
+			$this->{imageConfig}{$profName}{repoData}{$repoID} = \%repoData;
+			$foundReplacable = 1;
+			last;
 		}
 	}
 	if (!$foundReplacable) {
