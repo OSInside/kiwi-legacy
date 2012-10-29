@@ -205,6 +205,7 @@ sub __checkBootSpecPresent {
 	}
 	return 1;
 }
+
 #==========================================
 # __checkDefaultProfSetting
 #------------------------------------------
@@ -228,6 +229,50 @@ sub __checkDefaultProfSetting {
 			$kiwi -> error($msg);
 			$kiwi -> failed();
 			return;
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkDeletePackNoPatNoTar
+#------------------------------------------
+sub __checkDeletePackNoPatNoTar {
+	# ...
+	# A <packages type="delete"> section may not specify patterns or archives.
+	# We do not support deletion of archives and the underlying package
+	# management systems do not support the deletion of patterns.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @pkgsNodes = $this->{systemTree} -> getElementsByTagName('packages');
+	my $errMsg = 'Inconsistent data: specified INV_TYPE for '
+		. 'deletion. This is not supported.';
+	for my $pkgs (@pkgsNodes) {
+		my $type = $pkgs -> getAttribute('type');
+		if ($type eq 'delete') {
+			my $archives = $pkgs -> getElementsByTagName('archive');
+			if ($archives) {
+				$errMsg =~ s/INV_TYPE/archive/x;
+				$kiwi -> error($errMsg);
+				$kiwi -> failed();
+				return;
+			}
+			my $oPat = $pkgs -> getElementsByTagName('opensusePattern');
+			my $rPat = $pkgs -> getElementsByTagName('rhelGroup');
+			if ($oPat || $rPat){
+				$errMsg =~ s/INV_TYPE/pattern/x;
+				$kiwi -> error($errMsg);
+				$kiwi -> failed();
+				return;
+			}
+			my $prod = $pkgs -> getElementsByTagName('opensuseProduct');
+			if ($prod) {
+				$errMsg =~ s/INV_TYPE/product/x;
+				$kiwi -> error($errMsg);
+				$kiwi -> failed();
+				return;
+			}
 		}
 	}
 	return 1;
@@ -1304,6 +1349,9 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkDefaultTypeSetting()){
+		return;
+	}
+	if (! $this -> __checkDeletePackNoPatNoTar()) {
 		return;
 	}
 	if (! $this -> __checkDisplaynameValid()) {

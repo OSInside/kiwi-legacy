@@ -319,6 +319,84 @@ sub test_defaultTypeSpec {
 }
 
 #==========================================
+# test_deleteArchive
+#------------------------------------------
+sub test_deleteArchive {
+	# ...
+	# Test that an error condition is generated when trying to delete
+	# an archive.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $configFile = $this -> {dataDir} . '/deleteArchive.xml';
+	my $validator = $this -> __getValidator($configFile);
+	my $res = $validator -> validate();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Inconsistent data: specified archive for '
+		. 'deletion. This is not supported.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_deletePattern
+#------------------------------------------
+sub test_deletePattern {
+	# ...
+	# Test that an error condition is generated when trying to delete
+	# patterns.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $configFile = $this -> {dataDir} . '/deletePattern.xml';
+	my $validator = $this -> __getValidator($configFile);
+	my $res = $validator -> validate();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Inconsistent data: specified pattern for '
+		. 'deletion. This is not supported.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_deleteProduct
+#------------------------------------------
+sub test_deleteProduct {
+	# ...
+	# Test that an error condition is generated when trying to delete
+	# a product.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $configFile = $this -> {dataDir} . '/deleteProduct.xml';
+	my $validator = $this -> __getValidator($configFile);
+	my $res = $validator -> validate();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Inconsistent data: specified product for '
+		. 'deletion. This is not supported.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
 # test_displayName
 #------------------------------------------
 sub test_displayName {
