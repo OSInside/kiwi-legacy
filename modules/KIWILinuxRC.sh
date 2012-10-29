@@ -8441,7 +8441,7 @@ function resetBootBind {
 	#======================================
 	# update fstab entry
 	#--------------------------------------
-	grep -v ^boot_bind $bprefix/etc/fstab > $bprefix/etc/fstab.new
+	grep -v ^/boot_bind $bprefix/etc/fstab > $bprefix/etc/fstab.new
 	mv $bprefix/etc/fstab.new $bprefix/etc/fstab
 	sed -i -e s@/boot_bind@/boot@ $bprefix/etc/fstab
 	#======================================
