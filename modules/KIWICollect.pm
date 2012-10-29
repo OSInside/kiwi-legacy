@@ -18,25 +18,27 @@
 #----------------
 
 package KIWICollect;
+use strict;
+use warnings;
 
 BEGIN {
 	unshift @INC, '/usr/share/inst-source-utils/modules';
+	eval {
+		require RPMQ;
+		RPMQ -> import;
+	};
 }
 
 #==========================================
 # Modules
 #------------------------------------------
-use warnings;
-use strict;
 use KIWIXML;
 use KIWIUtil;
 use KIWIURL;
 use KIWIRepoMetaHandler;
 use KIWIProductData;
 use KIWIArchList;
-
-use RPMQ;
-
+use FileHandle;
 use File::Find;
 use File::Path;
 use Cwd 'abs_path';
@@ -155,7 +157,7 @@ sub new {
 		$this->logMsg('I', "Created new KIWIUtil object");
 	}
 
-	$this->{m_urlparser} = new KIWIURL($this->{m_logger},$this->{cmdL});
+	$this->{m_urlparser} = KIWIURL -> new ($this->{m_logger},$this->{cmdL});
 	if(!$this->{m_urlparser}) {
 		$this->logMsg('E', "Can't create KIWIURL object!");
 		return;
@@ -211,17 +213,19 @@ sub logMsg
 			$this->{m_logger}->info($out);
 		}
 	}
+	return;
 }
 
 sub unitedDir
 {
 	my $this = shift;
+	my $list = shift;
 	if(! ref $this ) {
 		return;
 	}
 	my $oldunited = $this->{m_united};
-	if(@_) {
-		$this->{m_united} = shift;
+	if($list) {
+		$this->{m_united} = $list;
 	}
 	return $oldunited;
 }
@@ -417,12 +421,15 @@ sub Init
 					      {$this->{m_xml}->getInstSourceProductVar()}, "prodvars");
 	$oadded = $this->{m_proddata}->addSet("ProductOption stuff",
 					      {$this->{m_xml}->getInstSourceProductOption()}, "prodopts");
-	if(! defined $iadded or ! defined $vadded or ! defined $oadded) {
-		my $msg = 'KIWICollect::Init: something wrong in the productoptions '
-		    . 'section';
-		$this->logMsg('E', $msg);
-		return;
+	if ($iadded) {
+		if ((! $vadded) || (! $oadded)) {
+			my $msg = 'KIWICollect::Init: something wrong in the productoptions '
+			    . 'section';
+			$this->logMsg('E', $msg);
+			return;
+		}
 	}
+
 	$this->{m_proddata}->_expand(); #once should be it, now--
 
 	if($this->{m_debug}) {
@@ -529,7 +536,7 @@ sub Init
 	}
 
 	$this->logMsg('I', "KIWICollect::Init: create LWP module");
-	$this->{m_browser} = new LWP::UserAgent;
+	$this->{m_browser} = LWP::UserAgent -> new();
 
 	# create the metadata handler and load (+verify) all available plugins:
 	# the required variables are MEDIUM_NAME, PLUGIN_DIR, INI_DIR
@@ -619,7 +626,7 @@ sub Init
 			$dir = "$dir/";
 		}
 		my $tmp = @tmp;
-		my %tmp = map { $_, undef } @tmp;
+		my %tmp = map { $_ => undef } @tmp;
 		if($tmp != 0) {
 			$this->{m_repos}->{$r}->{'srcdirs'} = \%tmp;
 		}
@@ -627,6 +634,7 @@ sub Init
 			$this->{m_repos}->{$r}->{'srcdirs'} = undef;
 		}
 	}
+	return;
 }
 # /Init
 
@@ -805,7 +813,7 @@ sub mainTask
 sub getMetafileList
 {
 	my $this = shift;
-	if(!%{$this->{m_basesubdir}} or ! -d $this->{m_basesubdir}->{'1'}) {
+	if((!%{$this->{m_basesubdir}}) || (! -d $this->{m_basesubdir}->{'1'})) {
 		my $msg = 'getMetafileList called to early? basesubdir must be set!';
 		$this->logMsg('W', $msg);
 		return -1;
@@ -831,18 +839,20 @@ sub getMetafileList
 	return $failed;
 } # getMetafileList
 
-sub addAppdata($$) {
+sub addAppdata {
 	my $this = shift;
 	my $packPointer = shift;
 	return unless $packPointer->{'appdata'};
 	$this->logMsg('I', "taking $packPointer->{'appdata'}");
-	open(XML, '<', $packPointer->{'appdata'});
+	my $XML = FileHandle -> new();
+	$XML -> open ($packPointer->{'appdata'});
 	while ( <XML> ) {
 		next if m,<\?xml,;
 		next if m,^\s*</?applications,;
 		$this->{m_appdata} .= $_;
 	}
-	close(XML);
+	$XML -> close();
+	return;
 }
 
 sub addDebugPackage
@@ -868,6 +878,7 @@ sub addDebugPackage
 	{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
 	$this->{m_debugPacks}->{$packname}->{'requireVersion'}->
 	{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
+	return;
 }
 
 #==========================================
@@ -875,10 +886,10 @@ sub addDebugPackage
 #------------------------------------------
 sub setupPackageFiles
 {
-	my $this = shift;
 	# 1 = collect source & debug packnames
 	# 2 = use only src/nosrc packs
 	# 3 = ignore missing packages in any case (debug media mode)
+	my $this = shift;
 	my $mode = shift;
 	my $usedPackages = shift;
 
@@ -1023,28 +1034,28 @@ sub setupPackageFiles
 					$packOptions->{$requestedArch}->{'newfile'} =
 					    "$packName-"
 					    . $packPointer->{'version'}
-					. '-'
+						. '-'
 					    . $packPointer->{'release'}
-					. ".$packPointer->{'arch'}.rpm";
+						. ".$packPointer->{'arch'}.rpm";
 					$packOptions->{$requestedArch}->{'newpath'} =
 					    "$this->{m_basesubdir}->{$medium}"
 					    . "/$base_on_cd/$packPointer->{'arch'}";
 					# check for target directory:
-					if(! $this->{m_dirlist}->
-					   {"$packOptions->{$requestedArch}->{'newpath'}"} )
-					{
+					if (! $this->{m_dirlist}->
+					   {"$packOptions->{$requestedArch}->{'newpath'}"}
+					) {
 						$this->{m_dirlist}->
 						{"$packOptions->{$requestedArch}->{'newpath'}"} = 1;
 						$this->createDirectoryStructure();
 					}
 					# link it:
-					if(! -e
-					   "$packOptions->{$requestedArch}->{'newpath'}"
-					   . "/$packOptions->{$requestedArch}->{'newfile'}"
-					   and !link ($packPointer->{'localfile'},
-						      "$packOptions->{$requestedArch}->{'newpath'}"
-						      . "/$packOptions->{$requestedArch}->{'newfile'}") )
-					{
+					my $item = $packOptions->{$requestedArch}->{'newpath'}."/$packOptions->{$requestedArch}->{'newfile'}";
+					if ((! -e  $item) && (! link (
+							$packPointer->{'localfile'},
+						    "$packOptions->{$requestedArch}->{'newpath'}"
+					        . "/$packOptions->{$requestedArch}->{'newfile'}"
+							))
+					) {
 						my $msg = "  linking file $packPointer->{'localfile'} "
 						    . "to $packOptions->{$requestedArch}->{'newpath'}/"
 						    . "$packOptions->{$requestedArch}->{'newfile'} "
@@ -1154,7 +1165,6 @@ sub setupPackageFiles
 	}
 	return $retval;
 }
-# /setupPackageFile
 
 #==========================================
 # collectPackages
@@ -1271,14 +1281,15 @@ sub collectPackages
 
 	my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
 	if ($descrdir && $this->{m_appdata}) {
-	   my $dirbase = "$this->{m_basesubdir}->{1}";
-	   print "OUT $dirbase/$descrdir\n";
-	   open(XML, ">", "$dirbase/$descrdir/appdata.xml") or die "WHAT";
-	   print XML "<?xml version='1.0' ?>\n";
-	   print XML "<applications>\n";
-	   print XML $this->{m_appdata};
-	   print XML "</applications>\n";
-	   close(XML);
+		my $dirbase = "$this->{m_basesubdir}->{1}";
+		print "OUT $dirbase/$descrdir\n";
+		my $XML = FileHandle -> new();
+		$XML -> open (">$dirbase/$descrdir/appdata.xml") or die "WHAT";
+		print XML "<?xml version='1.0' ?>\n";
+		print XML "<applications>\n";
+		print XML $this->{m_appdata};
+		print XML "</applications>\n";
+		$XML -> close ();
 	}
 
 	my @packagelist = sort(keys(%{$this->{m_metaPacks}}));
@@ -1311,9 +1322,9 @@ sub collectPackages
 #==========================================
 sub unpackMetapackages
 {
-	my $this = shift;
 	# the second (first explicit) parameter is a list of packages
 	my @packlist = @_;
+	my $this = shift @packlist;
 
       METAPACKAGE:
 	for my $metapack(@packlist) {
@@ -1569,13 +1580,9 @@ sub unpackMetapackages
 #------------------------------------------
 sub executeMetafileScripts
 {
-	my $this = shift;
-	my $ret = 0;
-
-	# the second (first explicit) parameter is a list of either packages or
-	# files for which scripts shall be executed.
 	my @filelist = @_;
-
+	my $this = shift @filelist;
+	my $ret = 0;
 	for my $metafile(@filelist) {
 		my %tmp = %{$this->{m_metafiles}->{$metafile}};
 		if($tmp{'script'}) {
@@ -1790,8 +1797,8 @@ sub dumpRepoData
 	my $this    = shift;
 	my $target  = shift;
 
-	my $DUMP;
-	if(! open($DUMP, ">", $target)) {
+	my $DUMP = FileHandle -> new();
+	if(! $DUMP -> open (">$target")) {
 		my $msg = "[dumpRepoData] Dumping data to file $target failed: ";
 		$msg .= 'file could not be created!';
 		$this->logMsg('E', $msg);
@@ -1816,7 +1823,7 @@ sub dumpRepoData
 				}
 			}
 		}
-		close $DUMP;
+		$DUMP -> close();
 	}
 	return 0;
 }
@@ -1835,8 +1842,8 @@ sub dumpPackageList
 	my $this    = shift;
 	my $target  = shift;
 
-	my $DUMP;
-	if(!open($DUMP, ">", $target)) {
+	my $DUMP = FileHandle -> new();
+	if(! $DUMP -> open(">$target")) {
 		my $msg = "[dumpPackageList] Dumping data to file $target failed: ";
 		$msg .= 'file could not be created!';
 		$this->logMsg('E', $msg);
@@ -1859,7 +1866,7 @@ sub dumpPackageList
 			print $DUMP "\n";
 		}
 	}
-	close $DUMP;
+	$DUMP -> close();
 	return;
 }
 # /dumpData
@@ -1925,7 +1932,7 @@ sub getArchList
 	if(defined($packOptions->{'addarch'})) {
 		# addarch is a modifier, use default list as base
 		@archs = $this->{m_archlist}->headList();
-		if(not(grep($packOptions->{'addarch'} eq $_, @archs))) {
+		if( not (grep {$packOptions->{'addarch'}} @archs eq $_)) {
 			$packOptions->{'addarch'} =~ s{,\s*,}{,}g;
 			$packOptions->{'addarch'} =~ s{,\s*}{,}g;
 			$packOptions->{'addarch'} =~ s{,\s*$}{};
@@ -1957,7 +1964,7 @@ sub getArchList
 sub collectProducts
 {
 	my $this = shift;
-	my $xml = new XML::LibXML;
+	my $xml = XML::LibXML -> new();
 
 	my $tmp = $this->{m_basesubdir}->{0}."/temp";
 	if (-d $tmp) {
@@ -1968,7 +1975,7 @@ sub collectProducts
 	# This will become nicer when we switched to rpm-md as product repo format
 	my $found_product = 0;
       RELEASEPACK:
-	for my $i(grep($_ =~ /-release$/,keys(%{$this->{m_repoPacks}}))) {
+	for my $i(grep {$_ =~ /-release$/} keys(%{$this->{m_repoPacks}})) {
 		qx(rm -rf $tmp);
 		if(!mkpath("$tmp", { mode => oct(755) } )) {
 			$this->logMsg('E', "can't create dir <$tmp>");
@@ -2051,6 +2058,7 @@ sub collectProducts
 	}
 	# cleanup
 	qx(rm -rf $tmp);
+	return;
 }
 
 #==========================================
@@ -2134,8 +2142,8 @@ sub createMetadata
 				$num = 1;
 			}
 			my $mediafile = "$this->{m_basesubdir}->{$n}/media.$num/media";
-			my $MEDIA;
-			if(! open($MEDIA, ">", $mediafile)) {
+			my $MEDIA = FileHandle -> new();
+			if(! $MEDIA -> open (">$mediafile")) {
 				$this->logMsg('E', "Cannot create file <$mediafile>");
 				return;
 			}
@@ -2154,7 +2162,7 @@ sub createMetadata
 					print $MEDIA $set."\n";
 				}
 			}
-			close $MEDIA;
+			$MEDIA -> close();
 			## Q&D patch: create build file:
 			my $bfile = "$this->{m_basesubdir}->{$n}/media.$num/build";
 			my $BUILD;
@@ -2304,7 +2312,7 @@ sub createMetadata
 
 	my $datadir = $this->{m_proddata}->getInfo("DATADIR");
 	my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
-	if(! defined($datadir) or ! defined($descrdir)) {
+	if((! defined($datadir)) || (! defined($descrdir))) {
 		$this->logMsg('E', "variables DATADIR and/or DESCRDIR are missing");
 		die "MISSING VARIABLES!";
 	}
@@ -2338,6 +2346,7 @@ sub createMetadata
 			}
 		}
 	}
+	return;
 }
 # createMetadata
 
@@ -2389,6 +2398,7 @@ sub unpackModules
 			qx(mkdir -p $target_dir && cp $ko $target_dir);
 		}
 	}
+	return;
 } # unpackModules
 
 # used only in DUD so far:
@@ -2408,6 +2418,7 @@ sub getBestPackFromRepos {
 		#FIXME: fallback handling missing
 		return $pkg_repos->{$repo} if $pkg_repos->{$repo}->{arch} eq $arch;
 	}
+	return;
 }
 
 # part of DUD:
@@ -2454,6 +2465,7 @@ sub unpackInstSys
 		
 		qx(cp -a $arch_tmp_dir $target_dir);
 	}
+	return;
 } # unpackInstSys
 
 # part of DUD:
@@ -2483,8 +2495,8 @@ sub createInstallPackageLinks
 
 	      RPM:
 		for my $rpmname (@packlist) {
-			if(! defined($rpmname)
-			   or ! defined($this->{m_repoPacks}->{$rpmname}))
+			if((! defined($rpmname))
+			   || (! defined($this->{m_repoPacks}->{$rpmname})))
 			{
 				my $msg = 'something wrong with rpmlist: undefined value '
 				    . "$rpmname";
@@ -2541,17 +2553,18 @@ sub createBootPackageLinks
 
 	my $RPMLIST;
 	for my $arch(keys(%rpmlist_files)) {
-		if(! open($RPMLIST, '<', $rpmlist_files{$arch})) {
+		$RPMLIST = FileHandle -> new();
+		if(! $RPMLIST -> open($rpmlist_files{$arch})) {
 			$this->logMsg('W',
 				      "cannnot open file $base/boot/$arch/$rpmlist_files{$arch}!");
 			return -1;
 		}
 		else {
 		      RPM:
-			for my $rpmname (<$RPMLIST>) {
+			while (my $rpmname = <$RPMLIST>) {
 				chomp $rpmname;
-				if(! defined($rpmname)
-				   or ! defined($this->{m_repoPacks}->{$rpmname}))
+				if((! defined($rpmname))
+				   || (! defined($this->{m_repoPacks}->{$rpmname})))
 				{
 					$this->logMsg('W',
 						      "something wrong with rpmlist: undefined value $rpmname");
@@ -2583,6 +2596,7 @@ sub createBootPackageLinks
 			}
 		}
 	}
+	$RPMLIST -> close();
 	return $retval;
 }
 
@@ -2601,6 +2615,7 @@ sub rpmlist_find_cb
 	if($File::Find::name =~ m{.*/([^/]+)/rpmlist}) {
 		$listref->{$1} = $File::Find::name;
 	}
+	return;
 }
 
 #==========================================
