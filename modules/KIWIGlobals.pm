@@ -56,6 +56,7 @@ sub new {
 	$data{ConfigName}      = "config.xml";
 	$data{Partitioner}     = "parted";
 	$data{FSInodeRatio}    = 16384;
+	$data{FSMinInodes}     = 20000;
 	$data{FSInodeSize}     = 256;
 	$data{DiskStartSector} = 2048;
 	$data{DiskSectorSize}  = 512;

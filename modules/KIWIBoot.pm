@@ -5713,11 +5713,14 @@ sub setVolumeGroup {
 	my $syszip    = shift;
 	my $haveSplit = shift;
 	my $parts     = shift;
+	my $cmdL      = $this->{cmdL};
 	my $kiwi      = $this->{kiwi};
 	my $system    = $this->{system};
 	my %deviceMap = %{$map};
 	my %lvmparts  = %{$parts};
 	my $VGroup    = $this->{lvmgroup};
+	my $fsopts    = $cmdL -> getFilesystemOptions();
+	my $inoderatio= $fsopts->[2];
 	my %newmap;
 	my $status;
 	my $result;
@@ -5763,7 +5766,11 @@ sub setVolumeGroup {
 				my $pname  = $name; $pname =~ s/_/\//g;
 				my $lvsize = $lvmparts{$name}->[2];
 				my $lvdev  = "/dev/$VGroup/LV$name";
-				$ihash{$lvdev} = "no-opts";
+				my $inodes = 2 * int ($lvsize * 1048576 / $inoderatio);
+				if ($inodes < $this->{gdata}->{FSMinInodes}) {
+					$inodes = $this->{gdata}->{FSMinInodes};
+				}
+				$ihash{$lvdev} = $inodes;
 				$status = qxx ("lvcreate -L $lvsize -n LV$name $VGroup 2>&1");
 				$result = $? >> 8;
 				if ($result != 0) {
