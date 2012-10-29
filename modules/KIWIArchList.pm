@@ -17,7 +17,7 @@
 package KIWIArchList;
 
 use strict;
-
+use warnings;
 use KIWIArch;
 use Data::Dumper;
 
@@ -107,23 +107,35 @@ sub dumpList
 #------------------
 sub _addArch
 {
-	my $this = shift;
-	if(not ref($this)) {
-		return;
+	my @list  = @_;
+	my $error = 0;
+	my $this;
+	if (! @list) {
+		$error = 1;
+	} else { 
+		$this = shift @list;
+		if (not ref ($this)) {
+			$error = 1;
+		}
+		my $num = @list;
+		if ($num < 3) {
+			$error = 1;
+		}
 	}
-	my $num = @_;
-	if(!@_ or $num < 3) {
+	if ($error == 1) {
 		$this->{m_collect}->logger()->error(
-								"_addArch: wrong number of arguments!\n");
+			"_addArch: wrong number of arguments!\n"
+		);
 		return;
 	}
-	my ($name, $desc, $next, $head) = @_;
+	my ($name, $desc, $next, $head) = @list;
 	if(defined($this->{m_archs}->{$name})) {
 		$this->{m_collect}->logger()->error(
-						"_addArch: arch=$name already in list, skipping\n");
+			"_addArch: arch=$name already in list, skipping\n"
+		);
 		return 0;
 	}
-	my $arch = new KIWIArch($name, $desc, $next, $head);
+	my $arch = KIWIArch -> new ($name, $desc, $next, $head);
 	$this->{m_archs}->{$name} = $arch;
 	return 1;
 }
@@ -170,32 +182,34 @@ sub addArchs
 #------------------
 sub fallbacks
 {
-	my $this = shift;
+	my @list = @_;
 	my @al;
-	if(not ref($this)) {
+	if (! @list) {
 		return @al;
 	}
-
-	my $name = shift;
-	if(not defined($name)) {
+	my $this = shift @list;
+	if (not ref($this)) {
 		return @al;
 	}
-	if(not defined($this->{m_archs}->{$name})) {
+	my $name = shift @list;
+	if (not defined($name)) {
 		return @al;
 	}
-
+	if (not defined($this->{m_archs}->{$name})) {
+		return @al;
+	}
 	my %omits;
-	if(@_) {
-		%omits = map { $_ => 1 } @_;
+	if(@list) {
+		%omits = map { $_ => 1 } @list;
 	}
 	# loop the whole chain following "$name":
-	my $a = $this->arch($name);
+	my $arch = $this->arch($name);
 	while(1) {
-		if(not($omits{$a->name()})) {
-			push @al, $a->name();
+		if (not($omits{$arch->name()})) {
+			push @al, $arch->name();
 		}
-		$a = $this->arch($a->follower());
-		last if not defined($a);
+		$arch = $this->arch ($arch->follower());
+		last if not defined ($arch);
 	}
 	return @al;
 }
@@ -223,6 +237,7 @@ sub headList
 	}
 
 	@al = grep { $this->{m_archs}->{$_}->isHead()  } keys(%{$this->{m_archs}});
+	return @al;
 }
 
 1;
