@@ -456,8 +456,12 @@ function setupNFSServices {
 # mountSystemFilesystems
 #--------------------------------------
 function mountSystemFilesystems {
-	mount -t proc  proc   /proc
-	mount -t sysfs sysfs  /sys
+	if [ ! -e /proc/cmdline ];then
+		mount -t proc  proc   /proc
+	fi
+	if [ ! -e /sys/kernel ];then
+		mount -t sysfs sysfs  /sys
+	fi
 }
 #======================================
 # umountSystemFilesystems
@@ -531,6 +535,9 @@ function errorLogStart {
 	#======================================
 	# Redirect stdout if quiet is set
 	#--------------------------------------
+	if [ ! -e /proc/cmdline ];then
+		mount -t proc proc /proc
+	fi
 	if cat /proc/cmdline | grep -qi "quiet";then
 		exec 1>>/dev/null
 	fi
