@@ -19,8 +19,10 @@ package KIWIImage;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 use Carp qw (cluck);
 use Fcntl ':mode';
+use FileHandle;
 use File::Basename;
 use File::Find qw(find);
 use File::stat;
@@ -296,7 +298,7 @@ sub updateDescription {
 	#==========================================
 	# Store strip sections if any
 	#------------------------------------------
-	my $stripXML = new XML::LibXML;
+	my $stripXML = XML::LibXML -> new();
 	my $stripTree = $stripXML -> parse_file ($this->{gdata}->{KStrip});
 	my @defaultStrip = $stripTree
 		-> getElementsByTagName ("initrd") -> get_node (1)
@@ -469,12 +471,12 @@ sub checkAndSetupPrebuiltBootImage {
 	#==========================================
 	# open boot image XML object
 	#------------------------------------------
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new ($kiwi);
 	my $controlFile = $locator -> getControlFile ($bootpath);
 	if (! $controlFile) {
 		return;
 	}
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new (
 		$kiwi,$controlFile,
 		$this->{gdata}->{Revision},
 		$this->{gdata}->{Schema},
@@ -484,7 +486,7 @@ sub checkAndSetupPrebuiltBootImage {
 	if (! $isValid) {
 		return;
 	}
-	my $bxml = new KIWIXML ( $kiwi,$bootpath,undef,undef,$cmdL );
+	my $bxml = KIWIXML -> new ( $kiwi,$bootpath,undef,undef,$cmdL );
 	if (! $bxml) {
 		return;
 	}
@@ -585,7 +587,7 @@ sub setupOverlay {
 	my $kiwi = $this->{kiwi};
 	my $tree = $this->{imageTree};
 	my $xml  = $this->{xml};
-	$this->{overlay} = new KIWIOverlay ($kiwi,$tree);
+	$this->{overlay} = KIWIOverlay -> new ($kiwi,$tree);
 	if (! $this->{overlay}) {
 		return;
 	}
@@ -1293,7 +1295,7 @@ sub createImageRootAndBoot {
 			$configDir = $stype{boot};
 		}
 		my $rootTarget = "$tmpdir/kiwi-".$text."boot-$$";
-		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+		my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if ((! $kic) ||	(! $kic -> prepareBootImage (
 			$configDir,$rootTarget,$this->{imageTree},\%XMLChangeSet))
 		) {
@@ -1338,7 +1340,7 @@ sub createImageRootAndBoot {
 	#==========================================
 	# Include splash screen to initrd
 	#------------------------------------------
-	my $kboot  = new KIWIBoot ($kiwi,$initrd,$cmdL);
+	my $kboot  = KIWIBoot -> new ($kiwi,$initrd,$cmdL);
 	if (! defined $kboot) {
 		return;
 	}
@@ -1424,7 +1426,7 @@ sub createImageVMX {
 			$idest."/".$name->{systemImage}
 		);
 	}
-	my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+	my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 	if ((! $kic) || (! $kic->createImageDisk())) {
 		undef $kic;
 		return;
@@ -1437,7 +1439,7 @@ sub createImageVMX {
 			$idest."/".$name->{systemImage}.".raw"
 		);
 		$cmdL -> setImageFormat ($name->{format});
-		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+		my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if ((! $kic) || (! $kic->createImageFormat($xml))) {
 			undef $kic;
 			return;
@@ -1794,7 +1796,7 @@ sub createImageLiveCD {
 			$configDir = $stype{boot};
 		}
 		my $rootTarget = "$tmpdir/kiwi-isoboot-$$";
-		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+		my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if ((! $kic) || (! $kic -> prepareBootImage (
 			$configDir,$rootTarget,$this->{imageTree},\%XMLChangeSet))
 		) {
@@ -1841,7 +1843,7 @@ sub createImageLiveCD {
 	#==========================================
 	# Include splash screen to initrd
 	#------------------------------------------
-	my $kboot  = new KIWIBoot ($kiwi,$pinitrd,$cmdL);
+	my $kboot  = KIWIBoot -> new ($kiwi,$pinitrd,$cmdL);
 	if (! defined $kboot) {
 		return;
 	}
@@ -1981,15 +1983,15 @@ sub createImageLiveCD {
 	#------------------------------------------
 	$kiwi -> info ("Saving hybrid disk label in initrd: $this->{mbrid}...");
 	qxx ("mkdir -p $tmpdir/boot/grub");
-	my $FD;
-	if (! open ($FD, '>', "$tmpdir/boot/mbrid")) {
+	my $MBRFD = FileHandle -> new();
+	if (! $MBRFD -> open (">$tmpdir/boot/mbrid")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create mbrid file: $!");
 		$kiwi -> failed ();
 		return;
 	}
-	print $FD "$this->{mbrid}";
-	close $FD;
+	print $MBRFD "$this->{mbrid}";
+	$MBRFD -> close();
 	#==========================================
 	# Repackage initrd
 	#------------------------------------------
@@ -2033,7 +2035,8 @@ sub createImageLiveCD {
 	if (-f "$gfx/gfxboot.com" || -f "$gfx/gfxboot.c32") {
 		$syslinux_new_format = 1;
 	}
-	if (! open ($FD, '>', "$destination/isolinux.cfg")) {
+	my $IFD = FileHandle -> new();
+	if (! $IFD -> open (">$destination/isolinux.cfg")) {
 		$kiwi -> failed();
 		$kiwi -> error  ("Failed to create $destination/isolinux.cfg: $!");
 		$kiwi -> failed ();
@@ -2043,88 +2046,88 @@ sub createImageLiveCD {
 		}
 		return;
 	}
-	binmode($FD, ":encoding(UTF-8)");
-	print $FD "default $label"."\n";
-	print $FD "implicit 1"."\n";
-	print $FD "display isolinux.msg"."\n";
+	binmode($IFD, ":encoding(UTF-8)");
+	print $IFD "default $label"."\n";
+	print $IFD "implicit 1"."\n";
+	print $IFD "display isolinux.msg"."\n";
 	if (-f "$gfx/bootlogo" ) {
 		if ($syslinux_new_format) {
-			print $FD "ui gfxboot bootlogo isolinux.msg"."\n";
+			print $IFD "ui gfxboot bootlogo isolinux.msg"."\n";
 		} else {
-			print $FD "gfxboot bootlogo"."\n";
+			print $IFD "gfxboot bootlogo"."\n";
 		}
 	}
-	print $FD "prompt   1"."\n";
-	print $FD "timeout  $bootTimeout"."\n";
+	print $IFD "prompt   1"."\n";
+	print $IFD "timeout  $bootTimeout"."\n";
 	if (! $isxen) {
-		print $FD "label $label"."\n";
-		print $FD "  kernel linux"."\n";
-		print $FD "  append initrd=initrd ramdisk_size=512000 ";
-		print $FD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
+		print $IFD "label $label"."\n";
+		print $IFD "  kernel linux"."\n";
+		print $IFD "  append initrd=initrd ramdisk_size=512000 ";
+		print $IFD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
 		#print FD "console=ttyS0,9600n8 console=tty0${cmdline} showopts ";
 		if ($vga) {
-			print $FD "vga=$vga ";
+			print $IFD "vga=$vga ";
 		}
-		print $FD "\n";
-		print $FD "label $lsafe"."\n";
-		print $FD "  kernel linux"."\n";
-		print $FD "  append initrd=initrd ramdisk_size=512000 ";
-		print $FD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
-		print $FD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
-		print $FD "noapic maxcpus=0 edd=off"."\n";
+		print $IFD "\n";
+		print $IFD "label $lsafe"."\n";
+		print $IFD "  kernel linux"."\n";
+		print $IFD "  append initrd=initrd ramdisk_size=512000 ";
+		print $IFD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
+		print $IFD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
+		print $IFD "noapic maxcpus=0 edd=off"."\n";
 	} else {
-		print $FD "label $label"."\n";
-		print $FD "  kernel mboot.c32"."\n";
-		print $FD "  append xen.gz --- linux ramdisk_size=512000 ";
-		print $FD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
-		#print FD "console=ttyS0,9600n8 console=tty0 ";
+		print $IFD "label $label"."\n";
+		print $IFD "  kernel mboot.c32"."\n";
+		print $IFD "  append xen.gz --- linux ramdisk_size=512000 ";
+		print $IFD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
 		if ($vga) {
-			print $FD "vga=$vga ";
+			print $IFD "vga=$vga ";
 		}
-		print $FD "--- initrd showopts"."\n";
-		print $FD "\n";
-		print $FD "label $lsafe"."\n";
-		print $FD "  kernel mboot.c32"."\n";
-		print $FD "  append xen.gz --- linux ramdisk_size=512000 ";
-		print $FD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
-		print $FD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
-		print $FD "noapic maxcpus=0 edd=off ";
-		print $FD "--- initrd showopts"."\n";
+		print $IFD "--- initrd showopts"."\n";
+		print $IFD "\n";
+		print $IFD "label $lsafe"."\n";
+		print $IFD "  kernel mboot.c32"."\n";
+		print $IFD "  append xen.gz --- linux ramdisk_size=512000 ";
+		print $IFD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
+		print $IFD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
+		print $IFD "noapic maxcpus=0 edd=off ";
+		print $IFD "--- initrd showopts"."\n";
 	}
 	#==========================================
 	# setup isolinux checkmedia boot entry
 	#------------------------------------------
 	if ($cmdL->getISOCheck()) {
-		print $FD "\n";
+		print $IFD "\n";
 		if (! $isxen) {
-			print $FD "label mediacheck"."\n";
-			print $FD "  kernel linux"."\n";
-			print $FD "  append initrd=initrd splash=silent mediacheck=1";
-			print $FD "$cmdline ";
-			print $FD "showopts"."\n";
+			print $IFD "label mediacheck"."\n";
+			print $IFD "  kernel linux"."\n";
+			print $IFD "  append initrd=initrd splash=silent mediacheck=1";
+			print $IFD "$cmdline ";
+			print $IFD "showopts"."\n";
 		} else {
-			print $FD "label mediacheck"."\n";
-			print $FD "  kernel mboot.c32"."\n";
-			print $FD "  append xen.gz --- linux splash=silent mediacheck=1";
-			print $FD "$cmdline ";
-			print $FD "--- initrd showopts"."\n";
+			print $IFD "label mediacheck"."\n";
+			print $IFD "  kernel mboot.c32"."\n";
+			print $IFD "  append xen.gz --- linux splash=silent mediacheck=1";
+			print $IFD "$cmdline ";
+			print $IFD "--- initrd showopts"."\n";
 		}
 	}
 	#==========================================
 	# setup default harddisk/memtest entries
 	#------------------------------------------
-	print $FD "\n";
-	print $FD "label harddisk\n";
-	print $FD "  localboot 0x80"."\n";
-	print $FD "\n";
-	print $FD "label memtest"."\n";
-	print $FD "  kernel memtest"."\n";
-	print $FD "\n";
-	close $FD;
+	print $IFD "\n";
+	print $IFD "label harddisk\n";
+	print $IFD "  localboot 0x80"."\n";
+	print $IFD "\n";
+	print $IFD "label memtest"."\n";
+	print $IFD "  kernel memtest"."\n";
+	print $IFD "\n";
+	$IFD -> close();
 	#==========================================
 	# setup isolinux.msg file
 	#------------------------------------------
-	if (! open ($FD, '>', "$destination/isolinux.msg")) {
+	my $MFD = FileHandle -> new();
+	if (! $MFD -> open (">$destination/isolinux.msg")) {
 		$kiwi -> failed();
 		$kiwi -> error  ("Failed to create isolinux.msg: $!");
 		$kiwi -> failed ();
@@ -2134,18 +2137,18 @@ sub createImageLiveCD {
 		}
 		return;
 	}
-	print $FD "\n"."Welcome !"."\n\n";
-	print $FD "To start the system enter '".$label."' and press <return>"."\n";
-	print $FD "\n\n";
-	print $FD "Available boot options:\n";
-	printf ($FD "%-20s - %s\n",$label,"Live System");
-	printf ($FD "%-20s - %s\n",$lsafe,"Live System failsafe mode");
-	printf ($FD "%-20s - %s\n","harddisk","Local boot from hard disk");
-	printf ($FD "%-20s - %s\n","mediacheck","Media check");
-	printf ($FD "%-20s - %s\n","memtest","Memory Test");
-	print $FD "\n";
-	print $FD "Have a lot of fun..."."\n";
-	close $FD;
+	print $MFD "\n"."Welcome !"."\n\n";
+	print $MFD "To start the system enter '".$label."' and press <return>"."\n";
+	print $MFD "\n\n";
+	print $MFD "Available boot options:\n";
+	printf ($MFD "%-20s - %s\n",$label,"Live System");
+	printf ($MFD "%-20s - %s\n",$lsafe,"Live System failsafe mode");
+	printf ($MFD "%-20s - %s\n","harddisk","Local boot from hard disk");
+	printf ($MFD "%-20s - %s\n","mediacheck","Media check");
+	printf ($MFD "%-20s - %s\n","memtest","Memory Test");
+	print $MFD "\n";
+	print $MFD "Have a lot of fun..."."\n";
+	$MFD -> close();
 	$kiwi -> done();
 	#==========================================
 	# Cleanup tmpdir
@@ -2154,26 +2157,27 @@ sub createImageLiveCD {
 	#==========================================
 	# Create boot configuration
 	#------------------------------------------
-	if (! open ($FD, '>', "$CD/config.isoclient")) {
+	my $CFD = FileHandle -> new();
+	if (! $CFD -> open (">$CD/config.isoclient")) {
 		$kiwi -> error  ("Couldn't create image boot configuration");
 		$kiwi -> failed ();
 		return;
 	}
 	if ((! defined $gzip) || ($gzip =~ /^clic/)) {
-		print $FD "IMAGE='/dev/ram1;$namecd'\n";
+		print $CFD "IMAGE='/dev/ram1;$namecd'\n";
 	} else {
-		print $FD "IMAGE='/dev/loop1;$namecd'\n";
+		print $CFD "IMAGE='/dev/loop1;$namecd'\n";
 	}
 	if (defined $gzip) {
 		if ($gzip =~ /^clic/) {
-			print $FD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,clicfs'\n";
+			print $CFD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,clicfs'\n";
 		} elsif ($gzip =~ /^seed/) {
-			print $FD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,seed'\n";
+			print $CFD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,seed'\n";
 		} else {
-			print $FD "COMBINED_IMAGE=yes\n";
+			print $CFD "COMBINED_IMAGE=yes\n";
 		}
 	}
-	close $FD;
+	$CFD -> close();
 	#==========================================
 	# create ISO image
 	#------------------------------------------
@@ -2196,7 +2200,7 @@ sub createImageLiveCD {
 		$attr .= " -V \"$stype{volid}\"";
 	}
 	$attr .= " -A \"$this->{mbrid}\"";
-	my $isolinux = new KIWIIsoLinux (
+	my $isolinux = KIWIIsoLinux -> new (
 		$kiwi,$CD,$name,$attr,"checkmedia",$this->{cmdL},$this->{xml}
 	);
 	if (defined $isolinux) {
@@ -2902,7 +2906,7 @@ sub createImageSplit {
 			$configDir = $type{boot};
 		}
 		my $rootTarget = "$tmpdir/kiwi-splitboot-$$";
-		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+		my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if ((! $kic) || (! $kic -> prepareBootImage (
 			$configDir,$rootTarget,$this->{imageTree},\%XMLChangeSet))
 		) {
@@ -2947,7 +2951,7 @@ sub createImageSplit {
 	#==========================================
 	# Include splash screen to initrd
 	#------------------------------------------
-	my $kboot  = new KIWIBoot ($kiwi,$initrd,$cmdL);
+	my $kboot  = KIWIBoot -> new ($kiwi,$initrd,$cmdL);
 	if (! defined $kboot) {
 		return;
 	}
@@ -2968,7 +2972,7 @@ sub createImageSplit {
 		$cmdL -> setSystemLocation (
 			$idest."/".$name->{systemImage}
 		);
-		my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+		my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 		if ((! $kic) || (! $kic->createImageDisk())) {
 			undef $kic;
 			return;
@@ -2981,7 +2985,7 @@ sub createImageSplit {
 				$idest."/".$name->{systemImage}.".raw"
 			);
 			$cmdL -> setImageFormat ($name->{format});
-			my $kic = new KIWIImageCreator ($kiwi, $cmdL);
+			my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
 			if ((! $kic) || (! $kic->createImageFormat($sxml))) {
 				undef $kic;
 				return;
@@ -3096,8 +3100,8 @@ sub writeImageConfig {
 	#------------------------------------------
 	if (defined $device) {
 		$kiwi -> info ("Creating boot configuration...");
-		my $FD;
-		if (! open ($FD, '>', "$this->{imageDest}/$configName")) {
+		my $FD = FileHandle -> new();
+		if (! $FD -> open (">$this->{imageDest}/$configName")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create image boot configuration");
 			$kiwi -> failed ();
@@ -3151,7 +3155,6 @@ sub writeImageConfig {
 						last SWITCH;
 					};
 				}
-
 				print $FD ";$type;$mountpoint,";
 			}
 			print $FD "\n";
@@ -3244,7 +3247,7 @@ sub writeImageConfig {
 		#==========================================
 		# More to come...
 		#------------------------------------------
-		close $FD;
+		$FD -> close();
 		$kiwi -> done ();
 	}
 	return $configName;
@@ -3830,19 +3833,15 @@ sub isBootImage {
 	SWITCH: for ($para) {
 		/ext3/i     && do {
 			return 0;
-			last SWITCH;
 		};
 		/ext4/i     && do {
 			return 0;
-			last SWITCH;
 		};
 		/reiserfs/i && do {
 			return 0;
-			last SWITCH;
 		};
 		/iso/i && do {
 			return 0;
-			last SWITCH;
 		};
 		/ext2/i && do {
 			if ($name !~ /boot/) {
@@ -3852,23 +3851,18 @@ sub isBootImage {
 		};
 		/squashfs/i && do {
 			return 0;
-			last SWITCH;
 		};
 		/clicfs/i && do {
 			return 0;
-			last SWITCH;
 		};
 		/btrfs/i  && do {
 			return 0;
-			last SWITCH;
 		};
 		/tbz/i    && do {
 			return 0;
-			last SWITCH;
 		};
 		/xfs/i    && do {
 			return 0;
-			last SWITCH;
 		};
 	}
 	return 1;
@@ -4122,7 +4116,7 @@ sub setupSquashFS {
 	my $xml  = $this->{xml};
 	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $imageTree = $this->{imageTree};
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new($kiwi);
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}
@@ -4285,6 +4279,7 @@ sub restoreCDRootData {
 	if (-f $this->{imageDest}."/".$cdrootScript) {
 		qxx ("mv $this->{imageDest}/$cdrootScript $imageTree/image");
 	}
+	return;
 }
 
 #==========================================
@@ -4391,6 +4386,7 @@ sub updateMD5File {
 		qxx ("echo \"$line $blocks $blocksize\" > $md5file");
 		$kiwi -> done();
 	}
+	return $this;
 }
 
 #==========================================
@@ -4610,8 +4606,8 @@ sub checkKernel {
 	#==========================================
 	# 2) create images.sh script...
 	#------------------------------------------
-	my $FD;
-	if (! open ($FD, '>', "$tmpdir/images.sh")) {
+	my $FD = FileHandle -> new();
+	if (! $FD -> open (">$tmpdir/images.sh")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create image.sh file: $!");
 		$kiwi -> failed ();
@@ -4624,7 +4620,7 @@ sub checkKernel {
 	print $FD 'echo "*** Fixing kernel inconsistency ***"'."\n";
 	print $FD 'suseStripKernel'."\n";
 	print $FD 'exit 0'."\n";
-	close $FD;
+	$FD -> close();
 	#==========================================
 	# 3) copy system kernel to initrd...
 	#------------------------------------------
@@ -4702,6 +4698,7 @@ sub cleanLuks {
 			qxx ("losetup -d $ldev 2>&1");
 		}
 	}
+	return;
 }
 
 #==========================================
@@ -4712,6 +4709,7 @@ sub restoreImageDest {
 	if ($this->{imageDestOrig}) {
 		$this->{imageDest} = $this->{imageDestOrig};
 	}
+	return;
 }
 
 #==========================================
@@ -4722,6 +4720,7 @@ sub remapImageDest {
 	if ($this->{imageDestMap}) {
 		$this->{imageDest} = $this->{imageDestMap};
 	}
+	return;
 }
 
 #==========================================
@@ -4731,6 +4730,7 @@ sub cleanMount {
 	my $this = shift;
 	qxx ("umount $this->{imageDest}/mnt-$$ 2>&1");
 	rmdir "$this->{imageDest}/mnt-$$";
+	return;
 }
 
 #==========================================
@@ -4742,6 +4742,7 @@ sub cleanKernelFSMount {
 	foreach my $system (@kfs) {
 		qxx ("umount $this->{imageDest}/$system 2>&1");
 	}
+	return;
 }
 
 #==========================================
@@ -4750,13 +4751,13 @@ sub cleanKernelFSMount {
 sub extractCPIO {
 	my $this = shift;
 	my $file = shift;
-	my $FD;
-	if (! open $FD, '<', $file) {
+	my $FD = FileHandle -> new();
+	if (! $FD -> open ($file)) {
 		return 0;
 	}
 	local $/;
-	my $data   = <$FD>;
-	close $FD;
+	my $data = <$FD>;
+	$FD -> close();
 	my @data   = split (//,$data);
 	my $stream = "";
 	my $count  = 0;
@@ -4787,11 +4788,12 @@ sub extractCPIO {
 		$stream .= $data[$i];
 		if ($i == $index[$count]) {
 			$count++;
-			if (! open $FD, '>', "$file.$count") {
+			my $FD = FileHandle -> new();
+			if (! $FD -> open (">$file.$count")) {
 				return 0;
 			}
 			print $FD $stream;
-			close $FD;
+			$FD -> close();
 			$stream = "";
 		}
 	}
