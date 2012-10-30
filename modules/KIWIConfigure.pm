@@ -18,7 +18,9 @@ package KIWIConfigure;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 use Carp qw (cluck);
+use FileHandle;
 use KIWILog;
 use KIWIQX qw (qxx);
 
@@ -89,7 +91,6 @@ sub setupRecoveryArchive {
 	my $root    = $this->{root};
 	my $start   = $xml -> getOEMRecovery_legacy();
 	my $inplace = $xml -> getOEMRecoveryInPlace_legacy();
-	my $FD;
 	if ((! defined $start) || ("$start" eq "false")) {
 		return $this;
 	}
@@ -129,14 +130,15 @@ sub setupRecoveryArchive {
 	#==========================================
 	# Create uncompressed byte size information
 	#------------------------------------------
-	if (! open ($FD, '>', "$root/recovery.tar.size")) {
+	my $TARFD = FileHandle -> new();
+	if (! $TARFD -> open (">$root/recovery.tar.size")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create recovery size info: $!");
 		return;
 	}
 	my $size = -s "$root/recovery.tar";
-	print $FD $size;
-	close $FD;
+	print $TARFD $size;
+	$TARFD -> close();
 	#==========================================
 	# Compress archive into .tar.gz
 	#------------------------------------------
@@ -152,7 +154,8 @@ sub setupRecoveryArchive {
 	#==========================================
 	# Create recovery partition size info
 	#------------------------------------------
-	if (! open ($FD, '>', "$root/recovery.partition.size")) {
+	my $SIZEFD = FileHandle -> new();
+	if (! $SIZEFD -> open (">$root/recovery.partition.size")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create recovery partition size info: $!");
 		return;
@@ -161,8 +164,8 @@ sub setupRecoveryArchive {
 	$psize /= 1048576;
 	$psize += 200;
 	$psize = sprintf ("%.0f", $psize);
-	print $FD $psize;
-	close $FD;
+	print $SIZEFD $psize;
+	$SIZEFD -> close();
 	$status = qxx ("cp $root/recovery.partition.size $dest 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
@@ -173,13 +176,14 @@ sub setupRecoveryArchive {
 	#==========================================
 	# Create destination filesystem information
 	#------------------------------------------
-	if (! open ($FD, '>', "$root/recovery.tar.filesystem")) {
+	my $FSFD = FileHandle -> new();
+	if (! $FSFD -> open (">$root/recovery.tar.filesystem")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create recovery filesystem info: $!");
 		return;
 	}
-	print $FD $fstype;
-	close $FD;
+	print $FSFD $fstype;
+	$FSFD -> close();
 	#==========================================
 	# Remove tarball for later recreation
 	#------------------------------------------
@@ -344,22 +348,23 @@ sub setupAutoYaST {
 	qxx (
 		"cp $imageDesc/config-yast-autoyast.xml $root/$autodir/$autocnf 2>&1"
 	);
-	my $FD;
-	if ( ! open ($FD, '>', "$root/etc/install.inf")) {
+	my $INFFD = FileHandle -> new();
+	if ( ! $INFFD -> open (">$root/etc/install.inf")) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to create install.inf: $!");
 		$kiwi -> failed ();
 		return "failed";
 	}
-	print $FD "AutoYaST: http://192.168.100.99/part2.xml\n";
-	close $FD;
-	if ( ! open ($FD, '>', "$root/var/lib/YaST2/runme_at_boot")) {
+	print $INFFD "AutoYaST: http://192.168.100.99/part2.xml\n";
+	$INFFD -> close();
+	my $AUTOFD = FileHandle -> new();
+	if ( ! $AUTOFD -> open (">$root/var/lib/YaST2/runme_at_boot")) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to create runme_at_boot: $!");
 		$kiwi -> failed ();
 		return "failed";
 	}
-	close $FD;
+	$AUTOFD -> close();
 	$kiwi -> done ();
 	return "success";
 }
@@ -407,7 +412,7 @@ sub setupFirstBootYaST {
 	# generic one (bnc#604705)
 	# ----
 	if ( ! -e "$root/etc/sysconfig/firstboot" ) {
-		my $FD;
+		my $FBFD = FileHandle -> new();
 		if ( -e "$root/var/adm/fillup-templates/sysconfig.firstboot" ) {
 			my $template = "$root/var/adm/fillup-templates/sysconfig.firstboot";
 			my $data = qxx (
@@ -422,23 +427,23 @@ sub setupFirstBootYaST {
 				$kiwi -> failed ();
 				return "failed";
 			}
-		} elsif ( ! open ($FD, '>', "$root/etc/sysconfig/firstboot")) {
+		} elsif ( ! $FBFD -> open (">$root/etc/sysconfig/firstboot")) {
 			$kiwi -> failed ();
 			$kiwi -> error ("Failed to create /etc/sysconfig/firstboot: $!");
 			$kiwi -> failed ();
 			return "failed";
 		} else {
-			print $FD "## Description: Firstboot Configuration\n";
-			print $FD "## Default: /usr/share/firstboot/scripts\n";
-			print $FD "SCRIPT_DIR=\"/usr/share/firstboot/scripts\"\n";
-			print $FD "FIRSTBOOT_WELCOME_DIR=\"/usr/share/firstboot\"\n";
-			print $FD "FIRSTBOOT_WELCOME_PATTERNS=\"\"\n";
-			print $FD "FIRSTBOOT_LICENSE_DIR=\"/usr/share/firstboot\"\n";
-			print $FD "FIRSTBOOT_NOVELL_LICENSE_DIR=\"/etc/YaST2\"\n";
-			print $FD "FIRSTBOOT_FINISH_FILE=";
-			print $FD "\"/usr/share/firstboot/congrats.txt\"\n";
-			print $FD "FIRSTBOOT_RELEASE_NOTES_PATH=\"\"\n";
-			close $FD;
+			print $FBFD "## Description: Firstboot Configuration\n";
+			print $FBFD "## Default: /usr/share/firstboot/scripts\n";
+			print $FBFD "SCRIPT_DIR=\"/usr/share/firstboot/scripts\"\n";
+			print $FBFD "FIRSTBOOT_WELCOME_DIR=\"/usr/share/firstboot\"\n";
+			print $FBFD "FIRSTBOOT_WELCOME_PATTERNS=\"\"\n";
+			print $FBFD "FIRSTBOOT_LICENSE_DIR=\"/usr/share/firstboot\"\n";
+			print $FBFD "FIRSTBOOT_NOVELL_LICENSE_DIR=\"/etc/YaST2\"\n";
+			print $FBFD "FIRSTBOOT_FINISH_FILE=";
+			print $FBFD "\"/usr/share/firstboot/congrats.txt\"\n";
+			print $FBFD "FIRSTBOOT_RELEASE_NOTES_PATH=\"\"\n";
+			$FBFD -> close();
 		}
 	}
 	if (-f "$root/etc/init.d/firstboot") {
