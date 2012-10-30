@@ -19,11 +19,12 @@ package KIWILog;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 use Carp qw (cluck);
+use FileHandle;
 use POSIX ":sys_wait_h";
 use KIWISocket;
 use KIWISharedMem;
-use FileHandle;
 use KIWIQX qw (qxx qxxLogOff qxxLogOn);
 
 #==========================================
@@ -164,6 +165,7 @@ sub doStat {
 	my $cols = $this -> getColumns();
 	my $FD   = $this->{channel};
 	printf $FD "\015\033[%sC\033[10D" , $cols;
+	return;
 }
 
 #==========================================
@@ -176,6 +178,7 @@ sub doNorm {
 	my $this = shift;
 	my $FD   = $this->{channel};
 	print $FD "\033[m\017";
+	return;
 }
 
 #==========================================
@@ -222,6 +225,7 @@ sub setFlag {
 	# save current flag value in cache
 	#------------------------------------------
 	$this -> saveInCache ("   $flag\n");
+	return;
 }
 
 #==========================================
@@ -233,6 +237,7 @@ sub done {
 	# ---
 	my $this = shift;
 	$this -> setFlag ("done");
+	return;
 }
 
 #==========================================
@@ -244,6 +249,7 @@ sub failed {
 	# ---
 	my $this = shift;
 	$this -> setFlag ("failed");
+	return;
 }
 
 #==========================================
@@ -255,6 +261,7 @@ sub skipped {
 	# ---
 	my $this = shift;
 	$this -> setFlag ("skipped");
+	return;
 }
 
 #==========================================
@@ -266,6 +273,7 @@ sub notset {
 	# ---
 	my $this = shift;
 	$this -> setFlag ("notset");
+	return;
 }
 
 #==========================================
@@ -277,6 +285,7 @@ sub oops {
 	# ---
 	my $this = shift;
 	$this -> setFlag ("oops");
+	return;
 }
 
 #==========================================
@@ -306,6 +315,7 @@ sub step {
 	} else {
 		# Don't set progress info in no-curses mode
 	}
+	return;
 }
 
 #==========================================
@@ -316,6 +326,7 @@ sub cursorOFF {
 	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		print "\033[?25l";
 	}
+	return;
 }
 
 #==========================================
@@ -326,6 +337,7 @@ sub cursorON {
 	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		print "\033[?25h";
 	}
+	return;
 }
 
 #==========================================
@@ -334,6 +346,7 @@ sub cursorON {
 sub resetRootChannel {
 	my $this = shift;
 	undef $this -> {errorOk};
+	return;
 }
 
 #==========================================
@@ -345,6 +358,7 @@ sub closeRootChannel {
 		close $this->{rootefd};
 		undef $this->{rootefd};
 	}
+	return;
 }
 
 #==========================================
@@ -356,10 +370,12 @@ sub reopenRootChannel {
 	if (defined $this->{rootefd}) {
 		return $this;
 	}
-	my $EFD;
-	if (! (open $EFD, '>>', "$file")) {
+	my $EFD = FileHandle -> new();
+	if (! $EFD -> open (">>$file")) {
 		if ($this->trace()) {
-			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
+			$main::BT[$main::TL] = eval {
+				Carp::longmess ($main::TT.$main::TL++)
+			};
 		}
 		return;
 	}
@@ -400,11 +416,11 @@ sub printLog {
 	# channels or a previosly opened file
 	# ---
 	my $this    = shift;
-	my $rootEFD = $this->{rootefd};
-	my $lglevel = $_[0];
-	my $logdata = $_[1];
-	my $flag    = $_[2];
+	my $lglevel = shift;
+	my $logdata = shift;
+	my $flag    = shift;
 	my @mcache  = ();
+	my $rootEFD = $this->{rootefd};
 	my $date    = $this -> getPrefix ( $lglevel );
 	#==========================================
 	# check log status 
@@ -439,7 +455,9 @@ sub printLog {
 		} elsif ($lglevel == 3) {
 			$result = $date.$logdata;
 			if ($this->trace()) {
-				$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
+				$main::BT[$main::TL] = eval {
+					Carp::longmess ($main::TT.$main::TL++)
+				};
 			}
 		} else {
 			$result = Carp::longmess($logdata);
@@ -522,6 +540,7 @@ sub printBackTrace {
 sub activateBackTrace {
 	my $this = shift;
 	$this->{used} = 1;
+	return;
 }
 
 #==========================================
@@ -530,6 +549,7 @@ sub activateBackTrace {
 sub deactivateBackTrace {
 	my $this = shift;
 	$this->{used} = 0;
+	return;
 }
 
 #==========================================
@@ -572,6 +592,7 @@ sub loginfo {
 	my $this = shift;
 	my $data = shift;
 	$this -> printLog ( 1,$data,"loginfo" );
+	return;
 }
 
 #==========================================
@@ -584,6 +605,7 @@ sub info {
 	my $this = shift;
 	my $data = shift;
 	$this -> printLog ( 1,$data );
+	return;
 }
 
 #==========================================
@@ -596,6 +618,7 @@ sub error {
 	my $this = shift;
 	my $data = shift;
 	$this -> printLog ( 3,$data );
+	return;
 }
 
 #==========================================
@@ -608,6 +631,7 @@ sub warning {
 	my $this = shift;
 	my $data = shift;
 	$this -> printLog ( 2,$data );
+	return;
 }
 
 #==========================================
@@ -622,6 +646,7 @@ sub note {
 	my $this = shift;
 	my $data = shift;
 	$this -> printLog ( 5,$data );
+	return;
 }
 
 #==========================================
@@ -644,16 +669,18 @@ sub setLogFile {
 	# a log() method will write its data to this file
 	# ---
 	my $this = shift;
-	my $file = $_[0];
+	my $file = shift;
 	if ($file eq "terminal") {
 		$this->{fileLog} = 2;
 		return $this;
 	}
-	my $FD;
-	if (! (open $FD, '>', "$file")) {
+	my $FD = FileHandle -> new();
+	if (! $FD -> open (">$file")) {
 		$this -> warning ("Couldn't open log channel: $!\n");
 		if ($this->trace()) {
-			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
+			$main::BT[$main::TL] = eval {
+				Carp::longmess ($main::TT.$main::TL++)
+			};
 		}
 		return;
 	}
@@ -735,19 +762,22 @@ sub finalizeLog {
 sub setLogHumanReadable {
 	my $this = shift;
 	my $rootLog = $this->{rootLog};
+	my $FDR = FileHandle -> new();
 	local $/;
-	my $FD;
-	if ((! defined $rootLog) || (! open ($FD, '<', $rootLog))) {
+	if ((! defined $rootLog) || (! $FDR -> open ($rootLog))) {
 		return;
 	}
-	my $stream = <$FD>;
-	close $FD;
+	my $stream = <$FDR>;
+	$FDR -> close();
 	my @stream = split (//,$stream);
 	my $line = "";
 	my $cr   = 0;
-	if (! open ($FD, '>', "$rootLog")) {
+	my $FDW  = FileHandle -> new();
+	if (! $FDW -> open (">$rootLog")) {
 		if ($this->trace()) {
-			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
+			$main::BT[$main::TL] = eval {
+				Carp::longmess ($main::TT.$main::TL++)
+			};
 		}
 		return;
 	}
@@ -758,11 +788,11 @@ sub setLogHumanReadable {
 		}
 		if (($l eq "\n") && (! $cr)) {
 			# normal line, print it
-			print $FD "$line\n"; $line = ""; next;
+			print $FDW "$line\n"; $line = ""; next;
 		}
 		if (($l eq "\n") && ($cr)) {
 			# multi line ended with line feed, print it
-			print $FD "$line\n"; $cr = 0; $line = ""; next;
+			print $FDW "$line\n"; $cr = 0; $line = ""; next;
 		}
 		if (($l ne "\n") && ($cr)) {
 			# multi line unfinished, overwrite 
@@ -770,7 +800,7 @@ sub setLogHumanReadable {
 		}
 		$line .= $l;
 	}
-	close $FD;
+	$FDW -> close();
 	return $this;
 }
 
@@ -801,8 +831,8 @@ sub setRootLog {
 		return;
 	}
 	info ( $this, "Set root log: $file..." );
-	my $EFD;
-	if (! (open $EFD, '>', "$file")) {
+	my $EFD = FileHandle -> new();
+	if (! $EFD -> open (">$file")) {
 		$this -> skipped ();
 		$this -> warning ("Couldn't open root log channel: $!\n");
 		$this->{errorOk} = 0;
@@ -812,6 +842,7 @@ sub setRootLog {
 	$this->{rootLog} = $file;
 	$this->{errorOk} = 1;
 	$this->{rootefd} = *$EFD;
+	return;
 }
 
 #==========================================
@@ -844,7 +875,7 @@ sub setLogServer {
 	#==========================================
 	# Create shmem segment for log messages
 	#------------------------------------------
-	my $smem = new KIWISharedMem ( $this,$this->{message} );
+	my $smem = KIWISharedMem -> new ( $this,$this->{message} );
 	if (! defined $smem) {
 		$this -> warning ("Can't create shared log memory segment");
 		$this -> skipped ();
@@ -861,7 +892,9 @@ sub setLogServer {
 		$this -> {smem} -> closeSegment();
 		undef $this -> {smem};
 		if ($this->trace()) {
-			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
+			$main::BT[$main::TL] = eval {
+				Carp::longmess ($main::TT.$main::TL++)
+			};
 		}
 		return;
 	}
@@ -877,7 +910,7 @@ sub setLogServer {
 		#------------------------------------------
 		our @logChilds = ();
 		our %logChilds = ();
-		our $logServer = new KIWISocket ($this,$port);
+		our $logServer = KIWISocket -> new ($this,$port);
 		our $sharedMem = $this->{smem};
 		if (! defined $logServer) {
 			$this -> warning ("Can't open log port: $port\n");
@@ -885,18 +918,18 @@ sub setLogServer {
 			undef $this-> {smem};
 			exit 1;
 		}
-		$SIG{TERM} = sub {
+		local $SIG{TERM} = sub {
 			foreach my $child (@logChilds) { kill (13,$child); };
 			undef $logServer;
 			exit 0;
 		};
-		$SIG{CHLD} = sub {
+		local $SIG{CHLD} = sub {
 			while ((my $child = waitpid(-1,WNOHANG)) > 0) {
 				$logServer -> closeConnection();
 				kill (13,$child);
 			}
 		};
-		$SIG{INT} = $SIG{TERM};
+		local $SIG{INT} = $SIG{TERM};
 		while (1) {
 			$logServer -> acceptConnection();
 			my $child = fork();
@@ -916,7 +949,7 @@ sub setLogServer {
 				#==========================================
 				# Handle log requests...
 				#------------------------------------------
-				$SIG{PIPE} = sub {
+				local $SIG{PIPE} = sub {
 					$logServer -> writeTo ( $this -> getLogServerMessage() );
 					$logServer -> closeConnection();
 					$sharedMem -> closeSegment();
