@@ -1152,6 +1152,30 @@ sub test_volumeNameAttrNoWhiteSpace {
 }
 
 #==========================================
+# test_volNameUnique
+#------------------------------------------
+sub test_volNameUnique {
+	# ...
+	# Test that a non unique volume name generates an error
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $configFile = $this -> {dataDir} . '/volNameNonUnique.xml';
+	my $validator = $this -> __getValidator($configFile);
+	my $res = $validator -> validate();
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Found non unique volume name 'base'.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
 # Private helper methods
 #------------------------------------------
 #==========================================
