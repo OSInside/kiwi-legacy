@@ -21,8 +21,10 @@ package KIWIImageFormat;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 use KIWILog;
 use KIWIQX qw (qxx);
+use FileHandle;
 use File::Basename;
 use KIWIBoot;
 use KIWILocator;
@@ -74,7 +76,7 @@ sub new {
 	# read XML if required
 	#------------------------------------------
 	if (! defined $xml) {
-		my $boot = new KIWIBoot (
+		my $boot = KIWIBoot -> new (
 			$kiwi,undef,$cmdL,$image,undef,undef,
 			$cmdL->getBuildProfiles()
 		);
@@ -439,15 +441,15 @@ sub createEC2 {
 	my $status;
 	my $result;
 	my $tmpdir;
-	my $FD;
 	#==========================================
 	# Import AWS region kernel map
 	#------------------------------------------
 	my %ec2RegionKernelMap;
-	if (! open ($FD, '<', $this->{gdata}->{KRegion})) {
+	my $REGIONFD = FileHandle -> new();
+	if (! $REGIONFD -> open ($this->{gdata}->{KRegion})) {
 		return;
 	}
-	while (my $line = <$FD>) {
+	while (my $line = <$REGIONFD>) {
 		next if $line =~ /^#/;
 		if ($line =~ /(.*)\s*=\s*(.*)/) {
 			my $region= $1;
@@ -455,7 +457,7 @@ sub createEC2 {
 			$ec2RegionKernelMap{$region} = $aki;
 		}
 	}
-	close $FD;
+	$REGIONFD -> close();
 	#==========================================
 	# Check AWS account information
 	#------------------------------------------
@@ -525,46 +527,49 @@ sub createEC2 {
 	# setup Xen console as serial tty
 	#------------------------------------------
 	$this -> __copy_origin ("$tmpdir/etc/inittab");
-	if (! open $FD, '>>', "$tmpdir/etc/inittab") {
+	my $ITABFD = FileHandle -> new();
+	if (! $ITABFD -> open (">>$tmpdir/etc/inittab")) {
 		$kiwi -> error  ("Failed to open $tmpdir/etc/inittab: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
 		return;
 	}
-	print $FD "\n";
-	print $FD 'X0:12345:respawn:/sbin/agetty -L 9600 xvc0 xterm'."\n";
-	close $FD;
-	if (! open $FD, '>>', "$tmpdir/etc/securetty") {
+	print $ITABFD "\n";
+	print $ITABFD 'X0:12345:respawn:/sbin/agetty -L 9600 xvc0 xterm'."\n";
+	$ITABFD -> close();
+	my $STTYFD = FileHandle -> new();
+	if (! $STTYFD -> open (">>$tmpdir/etc/securetty")) {
 		$kiwi -> error  ("Failed to open $tmpdir/etc/securetty: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
 		return;
 	}
-	print $FD "\n";
-	print $FD 'xvc0'."\n";
-	close $FD;
+	print $STTYFD "\n";
+	print $STTYFD 'xvc0'."\n";
+	$STTYFD -> close();
 	#==========================================
 	# create initrd
 	#------------------------------------------
-	if (! open $FD, '>', "$tmpdir/create_initrd.sh") {
+	my $IRDFD = FileHandle -> new();
+	if (! $IRDFD -> open (">$tmpdir/create_initrd.sh")) {
 		$kiwi -> error  ("Failed to open $tmpdir/create_initrd.sh: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
 		return;
 	}
-	print $FD 'export rootdev=/dev/sda1'."\n";
-	print $FD 'export rootfstype='.$type{type}."\n";
-	print $FD 'mknod /dev/sda1 b 8 1'."\n";
-	print $FD 'touch /boot/.rebuild-initrd'."\n";
-	print $FD 'sed -i -e \'s@^';
-	print $FD $kmod;
-	print $FD '="\(.*\)"@'.$kmod.'="\1 ';
-	print $FD $mods;
-	print $FD '"@\' ';
-	print $FD $sysk;
-	print $FD "\n";
-	print $FD 'mkinitrd -B'."\n";
-	close $FD;
+	print $IRDFD 'export rootdev=/dev/sda1'."\n";
+	print $IRDFD 'export rootfstype='.$type{type}."\n";
+	print $IRDFD 'mknod /dev/sda1 b 8 1'."\n";
+	print $IRDFD 'touch /boot/.rebuild-initrd'."\n";
+	print $IRDFD 'sed -i -e \'s@^';
+	print $IRDFD $kmod;
+	print $IRDFD '="\(.*\)"@'.$kmod.'="\1 ';
+	print $IRDFD $mods;
+	print $IRDFD '"@\' ';
+	print $IRDFD $sysk;
+	print $IRDFD "\n";
+	print $IRDFD 'mkinitrd -B'."\n";
+	$IRDFD -> close();
 	qxx ("chmod u+x $tmpdir/create_initrd.sh");
 	$status = qxx ("chroot $tmpdir bash -c ./create_initrd.sh 2>&1");
 	$result = $? >> 8;
@@ -583,54 +588,57 @@ sub createEC2 {
 	# copy grub image files
 	qxx ("cp $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1");
 	# boot/grub/device.map
-	if (! open $FD, '>', "$tmpdir/boot/grub/device.map") {
+	my $DMAPFD = FileHandle -> new();
+	if (! $DMAPFD -> open (">$tmpdir/boot/grub/device.map")) {
 		$kiwi -> error  ("Failed to open $tmpdir/boot/grub/device.map: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
 		return;
 	}
-	print $FD '(hd0)'."\t".'/dev/sda1'."\n";
-	close $FD;
+	print $DMAPFD '(hd0)'."\t".'/dev/sda1'."\n";
+	$DMAPFD -> close();
 	# etc/grub.conf
-	if (! open $FD, '>', "$tmpdir/etc/grub.conf") {
+	my $GCFD = FileHandle -> new();
+	if (! $GCFD -> open (">$tmpdir/etc/grub.conf")) {
 		$kiwi -> error  ("Failed to open $tmpdir/etc/grub.conf: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
 		return;
 	}
-	print $FD 'setup --stage2=/boot/grub/stage2 --force-lba (hd0) (hd0)'."\n";
-	print $FD 'quit'."\n";
-	close $FD;
+	print $GCFD 'setup --stage2=/boot/grub/stage2 --force-lba (hd0) (hd0)'."\n";
+	print $GCFD 'quit'."\n";
+	$GCFD -> close();
 	# boot/grub/menu.lst
-	my $args="xencons=xvc0 console=xvc0 splash=silent showopts";
-	if (! open $FD, '>', "$tmpdir/create_bootmenu.sh") {
+	my $args = "xencons=xvc0 console=xvc0 splash=silent showopts";
+	my $GMFD = FileHandle -> new();
+	if (! $GMFD -> open (">$tmpdir/create_bootmenu.sh")) {
 		$kiwi -> error  ("Failed to open $tmpdir/create_bootmenu.sh: $!");
 		$kiwi -> failed ();
 		return;
 	}
-	print $FD 'file=/boot/grub/menu.lst'."\n";
-	print $FD 'args="'.$args.'"'."\n";
-	print $FD 'echo "serial --unit=0 --speed=9600" > $file'."\n";
-	print $FD 'echo "terminal --dumb serial" >> $file'."\n";
-	print $FD 'echo "default 0" >> $file'."\n";
-	print $FD 'echo "timeout 0" >> $file'."\n";
-	print $FD 'echo "hiddenmenu" >> $file'."\n";
-	print $FD 'ls /lib/modules | while read D; do'."\n";
-	print $FD '   [ -d "/lib/modules/$D" ] || continue'."\n";
-	print $FD '   echo "$D"'."\n";
-	print $FD 'done | /usr/lib/rpm/rpmsort | tac | while read D; do'."\n";
-	print $FD '   for K in /boot/vmlinu[zx]-$D; do'."\n";
-	print $FD '      [ -f "$K" ] || continue'."\n";
-	print $FD '      echo >> $file'."\n";
-	print $FD '      echo "title '.$title.'" >> $file'."\n";
-	print $FD '      echo "    root (hd0)" >> $file'."\n";
-	print $FD '      echo "    kernel $K root=/dev/sda1 $args" >> $file'."\n";
-	print $FD '      if [ -f "/boot/initrd-$D" ]; then'."\n";
-	print $FD '         echo "    initrd /boot/initrd-$D" >> $file'."\n";
-	print $FD '      fi'."\n";
-	print $FD '   done'."\n";
-	print $FD 'done'."\n";
-	close $FD;
+	print $GMFD 'file=/boot/grub/menu.lst'."\n";
+	print $GMFD 'args="'.$args.'"'."\n";
+	print $GMFD 'echo "serial --unit=0 --speed=9600" > $file'."\n";
+	print $GMFD 'echo "terminal --dumb serial" >> $file'."\n";
+	print $GMFD 'echo "default 0" >> $file'."\n";
+	print $GMFD 'echo "timeout 0" >> $file'."\n";
+	print $GMFD 'echo "hiddenmenu" >> $file'."\n";
+	print $GMFD 'ls /lib/modules | while read D; do'."\n";
+	print $GMFD '   [ -d "/lib/modules/$D" ] || continue'."\n";
+	print $GMFD '   echo "$D"'."\n";
+	print $GMFD 'done | /usr/lib/rpm/rpmsort | tac | while read D; do'."\n";
+	print $GMFD '   for K in /boot/vmlinu[zx]-$D; do'."\n";
+	print $GMFD '      [ -f "$K" ] || continue'."\n";
+	print $GMFD '      echo >> $file'."\n";
+	print $GMFD '      echo "title '.$title.'" >> $file'."\n";
+	print $GMFD '      echo "    root (hd0)" >> $file'."\n";
+	print $GMFD '      echo "    kernel $K root=/dev/sda1 $args" >> $file'."\n";
+	print $GMFD '      if [ -f "/boot/initrd-$D" ]; then'."\n";
+	print $GMFD '         echo "    initrd /boot/initrd-$D" >> $file'."\n";
+	print $GMFD '      fi'."\n";
+	print $GMFD '   done'."\n";
+	print $GMFD 'done'."\n";
+	$GMFD -> close();
 	qxx ("chmod u+x $tmpdir/create_bootmenu.sh");
 	$status = qxx ("chroot $tmpdir bash -c ./create_bootmenu.sh 2>&1");
 	$result = $? >> 8;
@@ -642,9 +650,10 @@ sub createEC2 {
 	}
 	qxx ("rm -f $tmpdir/create_bootmenu.sh");
 	# etc/sysconfig/bootloader
-	if (open $FD, '<', "$tmpdir/etc/sysconfig/bootloader") {
-		my @lines = <$FD>;
-		close $FD;
+	my $SYSBOOT_RFD = FileHandle -> new();
+	if ($SYSBOOT_RFD -> open ("$tmpdir/etc/sysconfig/bootloader")) {
+		my @lines = <$SYSBOOT_RFD>;
+		$SYSBOOT_RFD -> close();
 		$this -> __ensure_key (\@lines, "LOADER_TYPE"      , "grub");
 		$this -> __ensure_key (\@lines, "DEFAULT_NAME"     , $title);
 		$this -> __ensure_key (\@lines, "DEFAULT_APPEND"   , $args );
@@ -654,31 +663,38 @@ sub createEC2 {
 		$this -> __ensure_key (\@lines, "XEN_KERNEL_APPEND", $args );
 		$this -> __ensure_key (\@lines, "XEN_APPEND"       , ""    );
 		$this -> __ensure_key (\@lines, "XEN_VGA"          , ""    );
-		open  $FD, '>', "$tmpdir/etc/sysconfig/bootloader";
-		print $FD @lines;
-		close $FD;
+		my $SYSBOOT_WFD = FileHandle -> new();
+		if (! $SYSBOOT_WFD -> open (">$tmpdir/etc/sysconfig/bootloader")) {
+			$kiwi -> error  ("Failed to create sysconfig/bootloader: $!");
+			$kiwi -> failed ();
+			$this -> __clean_loop ($tmpdir);
+			return;
+		}
+		print $SYSBOOT_WFD @lines;
+		$SYSBOOT_WFD -> close();
 	}
 	#==========================================
 	# setup fstab
 	#------------------------------------------
 	$this -> __copy_origin ("$tmpdir/etc/fstab");
-	if (! open $FD, '+<', "$tmpdir/etc/fstab") {
+	my $FSTABFD = FileHandle -> new();
+	if (! $FSTABFD -> open  ("+<$tmpdir/etc/fstab")) {
 		$kiwi -> error  ("Failed to open $tmpdir/etc/fstab: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
 		return;
 	}
 	my $rootfs=0;
-	foreach my $line (<$FD>) {
+	while (my $line = <$FSTABFD>) {
 		my @entries = split (/\s+/,$line);
 		if ($entries[1] eq "/") {
 			$rootfs=1; last;
 		}
 	}
 	if (! $rootfs) {
-		print $FD "/dev/sda1 / $type{type} defaults 0 0"."\n";
+		print $FSTABFD "/dev/sda1 / $type{type} defaults 0 0"."\n";
 	}
-	close $FD;
+	$FSTABFD -> close();
 	#==========================================
 	# cleanup loop
 	#------------------------------------------
@@ -696,7 +712,7 @@ sub createEC2 {
 	#==========================================
 	# Check for Amazon EC2 toolkit
 	#------------------------------------------
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new ($kiwi);
 	my $bundleCmd = $locator -> getExecPath ('ec2-bundle-image');
 	if (! $bundleCmd ) {
 		$kiwi -> error (
@@ -752,7 +768,6 @@ sub createXENConfiguration {
 	my %xenconfig = %{$xenref};
 	my $format;
 	my $file;
-	my $FD;
 	$kiwi -> info ("Creating image Xen configuration file...");
 	#==========================================
 	# setup config file name from image name
@@ -813,7 +828,8 @@ sub createXENConfiguration {
 	#==========================================
 	# Create config file
 	#------------------------------------------
-	if (! open ($FD, '>', "$file")) {
+	my $XENFD = FileHandle -> new();
+	if (! $XENFD -> open (">$file")) {
 		$kiwi -> skipped ();
 		$kiwi -> warning  ("Couldn't create xenconfig file: $!");
 		$kiwi -> skipped ();
@@ -828,19 +844,19 @@ sub createXENConfiguration {
 	my $memory = $xenconfig{xen_memory};
 	my $ncpus  = $xenconfig{xen_ncpus};
 	$image .= ".".$format;
-	print $FD '#  -*- mode: python; -*-'."\n";
-	print $FD "name=\"".$this->{xml}->getImageDisplayName()."\"\n";
+	print $XENFD '#  -*- mode: python; -*-'."\n";
+	print $XENFD "name=\"".$this->{xml}->getImageDisplayName()."\"\n";
 	if ($memory) {
-		print $FD 'memory='.$memory."\n";
+		print $XENFD 'memory='.$memory."\n";
 	}
 	if ($ncpus) {
-		print $FD 'vcpus='.$ncpus."\n";
+		print $XENFD 'vcpus='.$ncpus."\n";
 	}
 	my $tap = $format;
 	if ($tap eq "raw") {
 		$tap = "aio";
 	}
-	print $FD 'disk=[ "tap:'.$tap.':'.$image.','.$device.',w" ]'."\n";
+	print $XENFD 'disk=[ "tap:'.$tap.':'.$image.','.$device.',w" ]'."\n";
 	#==========================================
 	# network setup
 	#------------------------------------------
@@ -859,29 +875,29 @@ sub createXENConfiguration {
 			}
 		}
 		if ($vifcount == 0) {
-			print $FD "vif=[ ".$vif;
+			print $XENFD "vif=[ ".$vif;
 		} else {
-			print $FD ", ".$vif;
+			print $XENFD ", ".$vif;
 		}
 	}
 	if ($vifcount >= 0) {
-		print $FD " ]"."\n";
+		print $XENFD " ]"."\n";
 	}
 	#==========================================
 	# Process raw config options
 	#------------------------------------------
 	my @userOptSettings;
 	for my $configOpt (@{$xenconfig{xen_config}}) {
-		print $FD $configOpt . "\n";
+		print $XENFD $configOpt . "\n";
 		push @userOptSettings, (split /=/, $configOpt)[0];
 	}
 	#==========================================
 	# xen virtual framebuffer
 	#------------------------------------------
-	if (! grep /vfb/, @userOptSettings) {
-		print $FD 'vfb = ["type=vnc,vncunused=1,vnclisten=0.0.0.0"]'."\n";
+	if (! grep {/vfb/} @userOptSettings) {
+		print $XENFD 'vfb = ["type=vnc,vncunused=1,vnclisten=0.0.0.0"]'."\n";
 	}
-	close $FD;
+	$XENFD -> close();
 	$kiwi -> done();
 	return $file;
 }
@@ -897,7 +913,6 @@ sub createVMwareConfiguration {
 	my $dest   = dirname  $this->{image};
 	my $base   = basename $this->{image};
 	my $file;
-	my $FD;
 	$kiwi -> info ("Creating image VMware configuration file...");
 	#==========================================
 	# setup config file name from image name
@@ -926,7 +941,8 @@ sub createVMwareConfiguration {
 	#==========================================
 	# Create config file
 	#------------------------------------------
-	if (! open ($FD, '>', "$file")) {
+	my $VMWFD = FileHandle -> new();
+	if (! $VMWFD -> open (">$file")) {
 		$kiwi -> skipped ();
 		$kiwi -> warning ("Couldn't create VMware config file: $!");
 		$kiwi -> skipped ();
@@ -935,23 +951,23 @@ sub createVMwareConfiguration {
 	#==========================================
 	# global setup
 	#------------------------------------------
-	print $FD '#!/usr/bin/env vmware'."\n";
-	print $FD 'config.version = "8"'."\n";
-	print $FD 'tools.syncTime = "true"'."\n";
-	print $FD 'uuid.action = "create"'."\n";
+	print $VMWFD '#!/usr/bin/env vmware'."\n";
+	print $VMWFD 'config.version = "8"'."\n";
+	print $VMWFD 'tools.syncTime = "true"'."\n";
+	print $VMWFD 'uuid.action = "create"'."\n";
 	if ($vmwconfig{vmware_hwver}) {
-		print $FD 'virtualHW.version = "'.$vmwconfig{vmware_hwver}.'"'."\n";
+		print $VMWFD 'virtualHW.version = "'.$vmwconfig{vmware_hwver}.'"'."\n";
 	} else {
-		print $FD 'virtualHW.version = "4"'."\n";
+		print $VMWFD 'virtualHW.version = "4"'."\n";
 	}
-	print $FD 'displayName = "'.$image.'"'."\n";
+	print $VMWFD 'displayName = "'.$image.'"'."\n";
 	if ($vmwconfig{vmware_memory}) {
-		print $FD 'memsize = "'.$vmwconfig{vmware_memory}.'"'."\n";
+		print $VMWFD 'memsize = "'.$vmwconfig{vmware_memory}.'"'."\n";
 	}
 	if ($vmwconfig{vmware_ncpus}) {
-		print $FD 'numvcpus = "'.$vmwconfig{vmware_ncpus}.'"'."\n";
+		print $VMWFD 'numvcpus = "'.$vmwconfig{vmware_ncpus}.'"'."\n";
 	}
-	print $FD 'guestOS = "'.$vmwconfig{vmware_guest}.'"'."\n";
+	print $VMWFD 'guestOS = "'.$vmwconfig{vmware_guest}.'"'."\n";
 	#==========================================
 	# storage setup
 	#------------------------------------------
@@ -960,17 +976,17 @@ sub createVMwareConfiguration {
 		my $device = $vmwconfig{vmware_disktype}.$vmwconfig{vmware_diskid};
 		if ($type eq "ide") {
 			# IDE Interface...
-			print $FD $device.':0.present = "true"'."\n";
-			print $FD $device.':0.fileName= "'.$image.'.vmdk"'."\n";
-			print $FD $device.':0.redo = ""'."\n";
+			print $VMWFD $device.':0.present = "true"'."\n";
+			print $VMWFD $device.':0.fileName= "'.$image.'.vmdk"'."\n";
+			print $VMWFD $device.':0.redo = ""'."\n";
 		} else {
 			# SCSI Interface...
-			print $FD $device.'.present = "true"'."\n";
-			print $FD $device.'.sharedBus = "none"'."\n";
-			print $FD $device.'.virtualDev = "lsilogic"'."\n";
-			print $FD $device.':0.present = "true"'."\n";
-			print $FD $device.':0.fileName = "'.$image.'.vmdk"'."\n";
-			print $FD $device.':0.deviceType = "scsi-hardDisk"'."\n";
+			print $VMWFD $device.'.present = "true"'."\n";
+			print $VMWFD $device.'.sharedBus = "none"'."\n";
+			print $VMWFD $device.'.virtualDev = "lsilogic"'."\n";
+			print $VMWFD $device.':0.present = "true"'."\n";
+			print $VMWFD $device.':0.fileName = "'.$image.'.vmdk"'."\n";
+			print $VMWFD $device.':0.deviceType = "scsi-hardDisk"'."\n";
 		}
 	}
 	#==========================================
@@ -982,16 +998,16 @@ sub createVMwareConfiguration {
 			my $driver = $nic_info[1] -> { drv };
 			my $mode   = $nic_info[1] -> { mode };
 			my $nic    = "ethernet".$nic_info[0];
-			print $FD $nic.'.present = "true"'."\n";
-			print $FD $nic.'.addressType = "generated"'."\n";
+			print $VMWFD $nic.'.present = "true"'."\n";
+			print $VMWFD $nic.'.addressType = "generated"'."\n";
 			if ($driver) {
-				print $FD $nic.'.virtualDev = "'.$driver.'"'."\n";
+				print $VMWFD $nic.'.virtualDev = "'.$driver.'"'."\n";
 			}
 			if ($mode) {
-				print $FD $nic.'.connectionType = "'.$mode.'"'."\n";
+				print $VMWFD $nic.'.connectionType = "'.$mode.'"'."\n";
 			}
 			if ($vmwconfig{vmware_arch} =~ /64$/) {
-				print $FD $nic.'.allow64bitVmxnet = "true"'."\n";
+				print $VMWFD $nic.'.allow64bitVmxnet = "true"'."\n";
 			}
 		}
 	}
@@ -1000,10 +1016,10 @@ sub createVMwareConfiguration {
 	#------------------------------------------
 	if (defined $vmwconfig{vmware_cdtype}) {
 		my $device = $vmwconfig{vmware_cdtype}.$vmwconfig{vmware_cdid};
-		print $FD $device.':0.present = "true"'."\n";
-		print $FD $device.':0.deviceType = "cdrom-raw"'."\n";
-		print $FD $device.':0.autodetect = "true"'."\n";
-		print $FD $device.':0.startConnected = "true"'."\n";
+		print $VMWFD $device.':0.present = "true"'."\n";
+		print $VMWFD $device.':0.deviceType = "cdrom-raw"'."\n";
+		print $VMWFD $device.':0.autodetect = "true"'."\n";
+		print $VMWFD $device.':0.startConnected = "true"'."\n";
 	}
 	#==========================================
 	# Setup default options
@@ -1022,19 +1038,19 @@ sub createVMwareConfiguration {
 	#------------------------------------------
 	my @userOptSettings;
 	for my $configOpt (@{$vmwconfig{vmware_config}}) {
-		print $FD $configOpt . "\n";
+		print $VMWFD $configOpt . "\n";
 		push @userOptSettings, (split /=/, $configOpt)[0];
 	}
 	#==========================================
 	# Process the default options
 	#------------------------------------------
 	for my $defOpt (keys %defaultOpts) {
-		if (grep /$defOpt/, @userOptSettings) {
+		if (grep {/$defOpt/} @userOptSettings) {
 			next;
 		}
-		print $FD $defOpt . ' = ' . '"' . $defaultOpts{$defOpt} . '"' . "\n";
+		print $VMWFD $defOpt . ' = ' . '"' . $defaultOpts{$defOpt} . '"' . "\n";
 	}
-	close $FD;
+	$VMWFD -> close();
 	chmod 0755,$file;
 	$kiwi -> done();
 	return $file;
@@ -1056,7 +1072,6 @@ sub createOVFConfiguration {
 	my $systemtype;
 	my $ostype;
 	my $osid;
-	my $FD;
 	#==========================================
 	# setup config file name from image name
 	#------------------------------------------
@@ -1110,7 +1125,8 @@ sub createOVFConfiguration {
 	#==========================================
 	# create config file
 	#------------------------------------------
-	if (! open ($FD, '>', "$ovf")) {
+	my $OVFFD = FileHandle -> new();
+	if (! $OVFFD -> open (">$ovf")) {
 		$kiwi -> error ("Couldn't create OVF config file: $!");
 		$kiwi -> failed ();
 		return;
@@ -1118,7 +1134,7 @@ sub createOVFConfiguration {
 	#==========================================
 	# global setup
 	#------------------------------------------
-	print $FD "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"."\n".
+	print $OVFFD "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"."\n".
 		'<Envelope vmw:buildId="build-260188"'."\n".
 		'xmlns="http://schemas.dmtf.org/ovf/envelope/1"'."\n".
 		'xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common"'."\n".
@@ -1133,22 +1149,22 @@ sub createOVFConfiguration {
 	# image description
 	#------------------------------------------
 	my $size = -s $this->{image};
-	print $FD "<ovf:References>"."\n";
-	print $FD "\t"."<ovf:File ovf:href=\"$base\""."\n".
+	print $OVFFD "<ovf:References>"."\n";
+	print $OVFFD "\t"."<ovf:File ovf:href=\"$base\""."\n".
 		"\t"."ovf:id=\"file1\""."\n".
 		"\t"."ovf:size=\"$size\"/>"."\n";
-	print $FD "</ovf:References>"."\n";
+	print $OVFFD "</ovf:References>"."\n";
 	#==========================================
 	# storage description
 	#------------------------------------------
-	print $FD "<ovf:DiskSection>"."\n".
+	print $OVFFD "<ovf:DiskSection>"."\n".
 		"\t"."<ovf:Info>Disk Section</ovf:Info>"."\n".
 		"\t"."<ovf:Disk ovf:capacity=\"$size\"".
 			" ovf:capacityAllocationUnits=\"byte\"".
 			" ovf:diskId=\"vmRef1disk\" ovf:fileRef=\"file1\"".
 			" ovf:format=\"$diskformat\"".
 			" ovf:populatedSize=\"$size\"/>"."\n";
-	print $FD "</ovf:DiskSection>"."\n";
+	print $OVFFD "</ovf:DiskSection>"."\n";
 	#==========================================
 	# network description
 	#------------------------------------------
@@ -1158,17 +1174,17 @@ sub createOVFConfiguration {
 		while (my @nic_info = each %nics) {
 			my $nic = $nic_info[0];
 			next if $nic eq "undef";
-			print $FD "<ovf:NetworkSection>"."\n".
+			print $OVFFD "<ovf:NetworkSection>"."\n".
 				"\t"."<Info>The list of logical networks</Info>"."\n".
 				"\t"."<Network ovf:name=\"$nic\">"."\n".
 				"\t\t"."<Description>$name $nic</Description>"."\n";
-			print $FD "</ovf:NetworkSection>"."\n";
+			print $OVFFD "</ovf:NetworkSection>"."\n";
 		}
 	}
 	#==========================================
 	# virtual system description
 	#------------------------------------------
-	print $FD "<VirtualSystem ovf:id=\"vm\">"."\n".
+	print $OVFFD "<VirtualSystem ovf:id=\"vm\">"."\n".
 		"\t"."<Info>A virtual machine</Info>"."\n".
 		"\t"."<Name>$base</Name>"."\n".
 		"\t"."<OperatingSystemSection ".
@@ -1186,19 +1202,20 @@ sub createOVFConfiguration {
 		"\t\t"."<vssd:VirtualSystemType>$systemtype".
 		"</vssd:VirtualSystemType>"."\n".
 		"\t\t"."</System>"."\n";
-	print $FD "\t"."</VirtualHardwareSection>"."\n";
-	print $FD "\t"."</VirtualSystem>"."\n";
+	print $OVFFD "\t"."</VirtualHardwareSection>"."\n";
+	print $OVFFD "\t"."</VirtualSystem>"."\n";
 	#==========================================
 	# close envelope
 	#------------------------------------------
-	print $FD "</Envelope>";
-	close $FD;
+	print $OVFFD "</Envelope>";
+	$OVFFD -> close();
 	#==========================================
 	# create manifest file
 	#------------------------------------------
 	my $mf = $ovf;
 	$mf =~ s/\.ovf$/\.mf/;
-	if (! open ($FD, '>', "$mf")) {
+	my $MFFD = FileHandle -> new();
+	if (! $MFFD -> open (">$mf")) {
 		$kiwi -> error ("Couldn't create manifest file: $!");
 		$kiwi -> failed ();
 		return;
@@ -1207,9 +1224,9 @@ sub createOVFConfiguration {
 	my $base_config= basename $ovf;
 	my $ovfsha1   = qxx ("sha1sum $ovf | cut -f1 -d ' ' 2>&1");
 	my $imagesha1 = qxx ("sha1sum $this->{image} | cut -f1 -d ' ' 2>&1");
-	print $FD "SHA1($base_config)= $ovfsha1"."\n";
-	print $FD "SHA1($base_image)= $imagesha1"."\n";
-	close $FD;
+	print $MFFD "SHA1($base_config)= $ovfsha1"."\n";
+	print $MFFD "SHA1($base_image)= $imagesha1"."\n";
+	$MFFD -> close();
 	#==========================================
 	# create OVA tarball
 	#------------------------------------------
@@ -1258,6 +1275,7 @@ sub __ensure_key {
 	if (! $found) {
 		$lines->[$i] = "$key=\"$val\"\n";
 	}
+	return;
 }
 #==========================================
 # __copy_origin
@@ -1270,6 +1288,7 @@ sub __copy_origin {
 	} else {
 		qxx ("cp $file $file.orig");
 	}
+	return;
 }
 #==========================================
 # __clean_loop
@@ -1280,6 +1299,7 @@ sub __clean_loop {
 	qxx ("umount $dir/sys 2>&1");
 	qxx ("umount $dir 2>&1");
 	qxx ("rmdir  $dir 2>&1");
+	return;
 }
 
 #==========================================
