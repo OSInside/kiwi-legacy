@@ -328,20 +328,6 @@ my @notClean3 = qw (
 
 # List of modules not clean to level 4 (stern) of perlcritic
 my @notClean4 = qw (
-	KIWIArchList.pm
-	KIWICollect.pm
-	KIWIConfigure.pm
-	KIWIImageFormat.pm
-	KIWIImage.pm
-	KIWILog.pm
-	KIWIManager.pm
-	KIWIMigrate.pm
-	KIWIProductData.pm
-	KIWIRepoMetaHandler.pm
-	KIWIRoot.pm
-	KIWISatSolver.pm
-	KIWISharedMem.pm
-	KIWIXML.pm
 	KIWICommandLine.t
 	KIWIImageCreator.t
 	KIWILocator.t
