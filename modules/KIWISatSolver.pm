@@ -20,6 +20,7 @@ package KIWISatSolver;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 use Carp qw (cluck);
 use KIWILog;
 use KIWIQX qw (qxx);
@@ -37,7 +38,7 @@ BEGIN {
 		$KIWISatSolver::haveSaT = 0;
 	}
 	if (! $KIWISatSolver::haveSaT) {
-		package satsolver;
+		package satsolver; ## no critic
 	}
 }
 
@@ -153,7 +154,7 @@ sub new {
 		#==========================================
 		# Create SaT repository
 		#------------------------------------------
-		$pool = new satsolver::Pool;
+		$pool = satsolver::Pool -> new();
 		$arch = qx (uname -m); chomp $arch;
 		if ($arch eq "armv7l") {
 			$arch = "armv7hl";
@@ -182,7 +183,7 @@ sub new {
 	#==========================================
 	# Create SaT Solver and jobs
 	#------------------------------------------
-	$solver = new satsolver::Solver ($pool);
+	$solver = satsolver::Solver -> new($pool);
 	if ($ptype ne "plusRecommended") {
 		$solver -> set_dont_install_recommended(1);
 	}
@@ -390,7 +391,7 @@ sub getInstallList {
 		my $chs  = $solvable->attr_values("solvable:checksum");
 		my $url  = $solvable->repo->name();
 		my $chst = "unknown";
-		my $di   = new satsolver::Dataiterator (
+		my $di   = satsolver::Dataiterator -> new (
 			$solvable->repo->pool,$solvable->repo,
 			undef,0,$solvable,"solvable:checksum"
 		);
