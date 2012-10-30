@@ -1158,7 +1158,6 @@ sub createImageRootAndBoot {
 	my %stype      = %{$sxml->getImageTypeAndAttributes_legacy()};
 	my $imageTree  = $this->{imageTree};
 	my $baseSystem = $this->{baseSystem};
-	my $checkBase  = $cmdL->getRootTargetDir()."/".$baseSystem;
 	my $treeAccess = 1;
 	my @bootdata;
 	my $type;
@@ -1174,6 +1173,11 @@ sub createImageRootAndBoot {
 		$kiwi -> failed ();
 		return;
 	}
+	my $rootTarget = $cmdL->getRootTargetDir();
+	if (! $rootTarget) {
+		$rootTarget = $cmdL->getConfigDir();
+	}
+	my $checkBase = $rootTarget."/".$baseSystem;
 	#==========================================
 	# Check for direct tree access
 	#------------------------------------------
@@ -1475,7 +1479,6 @@ sub createImageLiveCD {
 	my $idest= $cmdL->getImageTargetDir();
 	my $imageTree = $this->{imageTree};
 	my $baseSystem= $this->{baseSystem};
-	my $checkBase = $cmdL->getRootTargetDir()."/".$baseSystem;
 	my @bootdata;
 	my $error;
 	my $data;
@@ -1485,6 +1488,11 @@ sub createImageLiveCD {
 	my $isxen  = 0;
 	my $hybridpersistent = 0;
 	my $cmdline;
+	my $rootTarget = $cmdL->getRootTargetDir();
+	if (! $rootTarget) {
+		$rootTarget = $cmdL->getConfigDir();
+	}
+	my $checkBase = $rootTarget."/".$baseSystem;
 	#==========================================
 	# Disable target device support for iso
 	#------------------------------------------
@@ -2274,7 +2282,6 @@ sub createImageSplit {
 	my $arch = $this->{arch};
 	my $imageTree  = $this->{imageTree};
 	my $baseSystem = $this->{baseSystem};
-	my $checkBase  = $cmdL->getRootTargetDir()."/".$baseSystem;
 	my $sxml       = $this->{xml};
 	my $idest      = $cmdL->getImageTargetDir();
 	my %xenc       = $sxml->getXenConfig_legacy();
@@ -2300,6 +2307,11 @@ sub createImageSplit {
 	my $xendomain;
 	my $minInodes;
 	my $sizeBytes;
+	my $rootTarget = $cmdL->getRootTargetDir();
+	if (! $rootTarget) {
+		$rootTarget = $cmdL->getConfigDir();
+	}
+	my $checkBase = $rootTarget."/".$baseSystem;
 	#==========================================
 	# check for xen domain setup
 	#------------------------------------------

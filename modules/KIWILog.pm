@@ -367,6 +367,9 @@ sub closeRootChannel {
 sub reopenRootChannel {
 	my $this = shift;
 	my $file = $this->{rootLog};
+	if (! $file) {
+		return;
+	}
 	if (defined $this->{rootefd}) {
 		return $this;
 	}
@@ -480,7 +483,7 @@ sub printLog {
 	#==========================================
 	# print message to root file
 	#------------------------------------------
-	if ($this->{errorOk} && ($rootEFD)) {
+	if (($this->{errorOk}) && ($rootEFD)) {
 		my $msg = $result;
 		$msg .= "\n" if ($msg !~ /\n$/);
 		print $rootEFD $msg;
@@ -869,7 +872,7 @@ sub setLogServer {
 	#==========================================
 	# Check for tiny object
 	#------------------------------------------
-	if ((defined $port) && (int $port == 0)) {
+	if (($port) && ($port eq "off")) {
 		return $this;
 	}
 	#==========================================

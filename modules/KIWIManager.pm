@@ -817,13 +817,15 @@ sub setupInstallationSource {
 				#==========================================
 				# keep packages on remote repos
 				#------------------------------------------
-				if ($val =~ /^'ftp:\/\/|http:\/\/|https:\/\/|opensuse:\/\//) {
+				if (($val) &&
+					($val =~ /^'ftp:\/\/|http:\/\/|https:\/\/|opensuse:\/\//)
+				) {
 					push (@zopts,"--keep-packages");
 				}
 				#==========================================
 				# Adapt URI parameter
 				#------------------------------------------
-				if (($key eq "baseurl") || ($key eq "path")) {
+				if (($key) && (($key eq "baseurl") || ($key eq "path"))) {
 					if ($val =~ /^'\//) {
 						$val =~ s/^'(.*)'$/"file:\/\/$1"/
 					}
@@ -840,7 +842,7 @@ sub setupInstallationSource {
 				#==========================================
 				# Adapt type parameter
 				#------------------------------------------
-				if ($key eq "type") {
+				if (($key) && ($key eq "type")) {
 					if ($val eq "yast2") {
 						$val = "YaST";
 					}
@@ -855,7 +857,7 @@ sub setupInstallationSource {
 				#==========================================
 				# Adapt priority parameter
 				#------------------------------------------
-				if ($key eq "priority") {
+				if (($key) && ($key eq "priority")) {
 					$prio = $val;
 				}
 			}
@@ -1824,6 +1826,7 @@ sub setupRootSystem {
 		foreach my $alias (@repolist) {
 			my $repo = $alias;
 			foreach my $opt (@{$source{public}{$alias}}) {
+				next if ! $opt;
 				$opt =~ /(.*?)=(.*)/;
 				my $key = $1;
 				my $val = $2;
