@@ -19,6 +19,7 @@ package KIWIManager;
 #------------------------------------------
 require Exporter;
 use strict;
+use warnings;
 use Carp qw (cluck);
 use Env;
 use FileHandle;
@@ -32,7 +33,7 @@ use KIWIQX qw (qxx);
 # Exports
 #------------------------------------------
 our @ISA    = qw (Exporter);
-our @EXPORT = qw ();
+our @EXPORT_OK = qw ();
 
 #==========================================
 # Constructor
@@ -84,7 +85,7 @@ sub new {
 		$kiwi -> warning ("Target architecture not supported for $manager");
 		$kiwi -> skipped ();
 	}
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new ($kiwi);
 	my $dataDir = "/var/cache/kiwi/$manager";
 	my $zyppConf;   # Configuration file for libzypp
 	my $zypperConf; # Configuration file for zypper
@@ -101,8 +102,8 @@ sub new {
 		$zyppConf = "$dataDir/zypp.conf.$$";
 		qxx ("echo '[main]' > $zypperConf");
 		qxx ("echo '[main]' > $zyppConf");
-		$ENV{ZYPP_CONF} = $zyppConf;
-		$zconfig = new Config::IniFiles (
+		local $ENV{ZYPP_CONF} = $zyppConf;
+		$zconfig = Config::IniFiles -> new (
 			-file => $zyppConf, -allowedcommentchars => '#'
 		);
 		my ($uname, $pass) = $xml->getHttpsRepositoryCredentials_legacy();
@@ -112,8 +113,8 @@ sub new {
 			mkdir $credDir;
 			$zconfig->newval('main', 'credentials.global.dir', $credDir);
 			$zconfig->RewriteConfig();
-			open my $CREDFILE, '>', "$credDir/kiwiRepoCredentials";
-			if (!$CREDFILE) {
+			my $CREDFILE = FileHandle -> new();
+			if (! $CREDFILE -> open (">$credDir/kiwiRepoCredentials")) {
 				my $msg = 'Unable to open credetials file for write '
 				. "in $credDir";
 				$kiwi -> error ($msg);
@@ -122,7 +123,7 @@ sub new {
 			}
 			print $CREDFILE "username=$uname\n";
 			print $CREDFILE "password=$pass\n";
-			close $CREDFILE;
+			$CREDFILE -> close();
 			$kiwi -> done();
 		}
 		if (defined $targetArch) {
@@ -231,6 +232,7 @@ sub new {
 sub switchToChroot {
 	my $this = shift;
 	$this->{chroot} = 1;
+	return 1;
 }
 
 #==========================================
@@ -239,6 +241,7 @@ sub switchToChroot {
 sub switchToLocal {
 	my $this = shift;
 	$this->{chroot} = 0;
+	return 1;
 }
 
 #==========================================
@@ -258,8 +261,8 @@ sub setupScreen {
 	#==========================================
 	# Initiate screen call file
 	#------------------------------------------
-	my $fd = new FileHandle;
-	my $cd = new FileHandle;
+	my $fd = FileHandle -> new();
+	my $cd = FileHandle -> new();
 	if ((! $fd -> open (">$screenCall")) || (! $cd -> open (">$screenCtrl"))) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create call file: $!");
@@ -316,7 +319,7 @@ sub setupScreenCall {
 	#==========================================
 	# activate shell set -x mode
 	#------------------------------------------
-	my $fd = new FileHandle;
+	my $fd = FileHandle -> new();
 	if ($fd -> open ($screenCall)) {
 		local $/; $data = <$fd>; $fd -> close();
 		if ($fd -> open (">$screenCall")) {
@@ -474,7 +477,7 @@ sub setupSignatureCheck {
 	#------------------------------------------
 	if ($manager eq "yum") {
 		my $yumc = $this->{yumconfig};
-		$data = new Config::IniFiles (
+		$data = Config::IniFiles -> new (
 			-file => $yumc, -allowedcommentchars => '#'
 		);
 		my $optval = 0;
@@ -546,7 +549,7 @@ sub resetSignatureCheck {
 	#------------------------------------------
 	if ($manager eq "yum") {
 		my $yumc = $this->{yumconfig};
-		$data = new Config::IniFiles (
+		$data = Config::IniFiles -> new (
 			-file => $yumc, -allowedcommentchars => '#'
 		);
 		$data -> newval ("main", "gpgcheck", "0");
@@ -791,7 +794,7 @@ sub setupInstallationSource {
 		my $stype = "private";
 		undef $ENV{ZYPP_LOCKFILE_ROOT};
 		if (! $chroot) {
-			$ENV{ZYPP_LOCKFILE_ROOT} = $root;
+			local $ENV{ZYPP_LOCKFILE_ROOT} = $root;
 			$stype = "public";
 		}
 		if ($chroot) {
@@ -971,7 +974,7 @@ sub setupInstallationSource {
 			# create new repo file and open it
 			#------------------------------------------
 			qxx ("echo '[$alias]' > $repo");
-			$data = new Config::IniFiles (
+			$data = Config::IniFiles -> new (
 				-file => $repo, -allowedcommentchars => '#'
 			);
 			#==========================================
@@ -1105,13 +1108,13 @@ sub setupDownload {
 	# download package files for later handling
 	# using the package manager download functionality
 	# ---
-	my $this   = shift;
+	my @pacs   = @_;
+	my $this   = shift @pacs;
 	my $kiwi   = $this->{kiwi};
 	my $manager= $this->{manager};
 	my $root   = $this->{root};
 	my @channelList = @{$this->{channelList}};
 	my $screenCall  = $this->{screenCall};
-	my @pacs   = @_;
 	#==========================================
 	# setup screen call
 	#------------------------------------------
@@ -1698,9 +1701,9 @@ sub setupArchives {
 	# install the given tar archives into the
 	# root system
 	# ---
-	my $this    = shift;
-	my $idesc   = shift;
 	my @tars    = @_;
+	my $this    = shift @tars;
+	my $idesc   = shift @tars;
 	my $kiwi    = $this->{kiwi};
 	my $chroot  = $this->{chroot};
 	my @kchroot = @{$this->{kchroot}};
@@ -1780,8 +1783,8 @@ sub setupRootSystem {
 	# install the bootstrap system to be able to
 	# chroot into this minimal image
 	# ---
-	my $this        = shift;
 	my @packs       = @_;
+	my $this        = shift @packs;
 	my $kiwi        = $this->{kiwi};
 	my $chroot      = $this->{chroot};
 	my @kchroot     = @{$this->{kchroot}};
@@ -2325,7 +2328,7 @@ sub setupPackageInfo {
 			$code = $? >> 8;
 		}
 		if ($code == 0) {
-			if (! grep (/$pack/,$data)) {
+			if (! grep {/$pack/} $data) {
 				$code = 1;
 			}
 		}
@@ -2477,6 +2480,7 @@ sub setLock {
 	my $kiwi = $this->{kiwi};
 	$kiwi -> loginfo ("Set package manager lock\n");
 	qxx (" touch $lock ");
+	return 1;
 }
 
 #==========================================
@@ -2488,6 +2492,7 @@ sub freeLock {
 	my $kiwi = $this->{kiwi};
 	$kiwi -> loginfo ("Release package manager lock\n");
 	qxx (" rm -f $lock ");
+	return 1;
 }
 
 #==========================================
@@ -2626,6 +2631,7 @@ sub DESTROY {
 	my $zypperConf = "$meta/zypper.conf.$$";
 	my $zyppConf   = "$meta/zypp.conf.$$";
 	qxx ("rm -f $zypperConf $zyppConf");
+	return 1;
 }
 
 1;
