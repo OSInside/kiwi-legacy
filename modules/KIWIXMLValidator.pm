@@ -1216,9 +1216,6 @@ sub __checkVolNameNoWhitespace {
 	my $this        = shift;
 	my $systemTree  = $this -> {systemTree};
 	my @volumeNodes = $systemTree -> getElementsByTagName('volume');
-	if (! @volumeNodes ) {
-		return 1;
-	}
 	for my $volNode (@volumeNodes) {
 		my $name = $volNode -> getAttribute('name');
 		if ($name =~ /\s/x) {
@@ -1228,6 +1225,35 @@ sub __checkVolNameNoWhitespace {
 			$kiwi -> error($msg);
 			$kiwi -> failed();
 			return;
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkVolNameUnique
+#------------------------------------------
+sub __checkVolNameUnique {
+	# ...
+	# Check that the given volume name is unique across all volumes in a
+	# systemdisk configuration.
+	# ---
+	my $this        = shift;
+	my $systemTree  = $this -> {systemTree};
+	my @sysDiskNodes = $systemTree -> getElementsByTagName('systemdisk');
+	for my $sysDNode (@sysDiskNodes) {
+		my %volNames;
+		my @volumes = $sysDNode -> getElementsByTagName('volume');
+		for my $vol (@volumes) {
+			my $name = $vol -> getAttribute('name');
+			if ($volNames{$name}) {
+				my $kiwi = $this->{kiwi};
+				my $msg = "Found non unique volume name '$name'.";
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+			$volNames{$name} = 1;
 		}
 	}
 	return 1;
@@ -1418,6 +1444,9 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkVolNameNoWhitespace()) {
+		return;
+	}
+	if (! $this -> __checkVolNameUnique()) {
 		return;
 	}
 	return 1;
