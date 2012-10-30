@@ -19,6 +19,7 @@ package KIWIRoot;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 use Carp qw (cluck);
 use File::Glob ':glob';
 use File::Find;
@@ -107,7 +108,7 @@ sub new {
 		my $pwd  = $repository{$source}[4];
 		my $plic = $repository{$source}[5];
 		my $imgincl = $repository{$source}[6];
-		my $urlHandler  = new KIWIURL ($kiwi,$cmdL,$this,$user,$pwd);
+		my $urlHandler  = KIWIURL -> new ($kiwi,$cmdL,$this,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		if ($publics_url =~ /^\//) {
 			my ( $publics_url_test ) = bsd_glob ( $publics_url );
@@ -203,7 +204,7 @@ sub new {
 	#==========================================
 	# Create root directory
 	#------------------------------------------
-	my $locator = new KIWILocator ($this -> {kiwi});
+	my $locator = KIWILocator -> new ($this -> {kiwi});
 	my $root = $locator -> createTmpDirectory (
 		$useRoot,$selfRoot,$cmdL
 	);
@@ -217,7 +218,7 @@ sub new {
 	# Check for overlay structure
 	#------------------------------------------
 	$this->{origtree}= $root;
-	$this->{overlay} = new KIWIOverlay ($kiwi,$root,$cacheRoot);
+	$this->{overlay} = KIWIOverlay -> new ($kiwi,$root,$cacheRoot);
 	if (! $this->{overlay}) {
 		$this -> cleanMount();
 		return;
@@ -256,7 +257,7 @@ sub new {
 	#==========================================
 	# Create package manager object
 	#------------------------------------------
-	my $manager = new KIWIManager (
+	my $manager = KIWIManager -> new (
 		$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
 	);
 	if (! defined $manager) {
@@ -671,6 +672,7 @@ sub cleanupResolvConf {
 		qxx ("rm -f $root/etc/sysconfig/proxy");
 		undef $this->{needProxy};
 	}
+	return;
 }
 
 #==========================================
@@ -835,7 +837,7 @@ sub fixupOverlayFilesOwnership {
 		#==========================================
 		# got archive, use archive toc file
 		#------------------------------------------
-		my $fd = new FileHandle;
+		my $fd = FileHandle -> new();
 		if ($fd -> open ($item)) {
 			while (my $line = <$fd>) {
 				chomp $line; $line =~ s/^\///;
@@ -863,7 +865,7 @@ sub fixupOverlayFilesOwnership {
 	#==========================================
 	# create passwd exception directories
 	#------------------------------------------
-	my $fd = new FileHandle;
+	my $fd = FileHandle -> new();
 	if (! $fd -> open ($root."/etc/passwd")) {
 		$kiwi -> warning ("$prefix: No passwd file found in: $root");
 		$kiwi -> skipped ();
@@ -1000,8 +1002,8 @@ sub setup {
 	# create .profile from <image> tags
 	#----------------------------------------
 	$kiwi -> info ("Create .profile for package scripts");
-	my $FD;
-	if (! open ($FD, '>', "$root/.profile")) {
+	my $FD = FileHandle -> new();
+	if (! $FD -> open (">$root/.profile")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create .profile: $!");
 		$kiwi -> failed ();
@@ -1014,11 +1016,11 @@ sub setup {
 		$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
 		print $FD "$key=\"$config{$key}\"\n";
 	}
-	close $FD;
+	$FD -> close();
 	#========================================
 	# configure the system
 	#----------------------------------------
-	my $configure = new KIWIConfigure ( $kiwi,$xml,$root,$imageDesc );
+	my $configure = KIWIConfigure -> new ( $kiwi,$xml,$root,$imageDesc );
 	if (! defined $configure) {
 		return;
 	}
