@@ -21,11 +21,12 @@ package KIWISharedMem;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 use Carp qw (cluck);
 use IPC::SysV qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU);
 use IPC::Semaphore;
 use KIWIQX qw (qxx);
-sub MAXBUF { 2000 }
+sub MAXBUF { return 2000; }
 
 #==========================================
 # Constructor
@@ -86,9 +87,10 @@ sub new {
 # get
 #------------------------------------------
 sub get {
-	my $this = shift;
-	$this -> lock;
-	my $value = $this -> peek(@_);
+	my @list = @_;
+	my $this = shift @list;
+	$this -> lockme;
+	my $value = $this -> peek(@list);
 	$this -> unlock;
 	return $value;
 }
@@ -113,10 +115,12 @@ sub peek {
 # put
 #------------------------------------------
 sub put {
-	my $this = shift;
-	$this -> lock;
-	$this -> poke(@_);
+	my @list = @_;
+	my $this = shift @list;
+	$this -> lockme;
+	$this -> poke(@list);
 	$this -> unlock;
+	return;
 }
 
 #==========================================
@@ -134,9 +138,9 @@ sub poke {
 }
 
 #==========================================
-# lock
+# lockme
 #------------------------------------------
-sub lock {
+sub lockme {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	if (! $this->{SEMA}->op(0,-1,0)) {
@@ -186,6 +190,7 @@ sub closeSegment {
 sub DESTROY {
 	my $this = shift;
 	$this -> closeSegment();
+	return;
 }
 
 1;
