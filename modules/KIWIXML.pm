@@ -49,7 +49,7 @@ use KIWISatSolver;
 # Exports
 #------------------------------------------
 our @ISA    = qw (Exporter);
-our @EXPORT = qw (
+our @EXPORT_OK = qw (
 	getInstSourceFile getInstSourceSatSolvable getSingleInstSourceSatSolvable
 );
 
@@ -207,7 +207,7 @@ sub new {
 	#==========================================
 	# Lookup XML configuration file
 	#------------------------------------------
-	my $locator = new KIWILocator($kiwi);
+	my $locator = KIWILocator -> new ($kiwi);
 	my $controlFile = $locator -> getControlFile ( $imageDesc );
 	if (! $controlFile) {
 		return;
@@ -219,7 +219,7 @@ sub new {
 	#==========================================
 	# Read and Validate XML information
 	#------------------------------------------
-	my $validator = new KIWIXMLValidator (
+	my $validator = KIWIXMLValidator -> new (
 		$kiwi,$controlFile,
 		$this->{gdata}->{Revision},
 		$this->{gdata}->{Schema},
@@ -2282,6 +2282,7 @@ sub updateTypeList {
 	my $this = shift;
 	$this->{typeList} = $this -> __populateTypeInfo_legacy();
 	$this -> __populateProfiledTypeInfo();
+	return;
 }
 
 #==========================================
@@ -2366,7 +2367,7 @@ sub createURLList {
 	foreach my $source (@sourcelist) {
 		my $user = $repository{$source}[3];
 		my $pwd  = $repository{$source}[4];
-		my $urlHandler  = new KIWIURL ($kiwi,$cmdL,undef,$user,$pwd);
+		my $urlHandler  = KIWIURL -> new ($kiwi,$cmdL,undef,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		push (@urllist,$publics_url);
 		$urlhash{$source} = $publics_url;
@@ -2690,7 +2691,7 @@ sub getTypes {
 	my @tnodes  = ();
 	my $gotprim = 0;
 	my @node    = $this->{optionsNodeList} -> get_nodelist();
-	my $urlhd   = new KIWIURL ($kiwi,$cmdL);
+	my $urlhd   = KIWIURL -> new ($kiwi,$cmdL);
 	foreach my $element (@node) {
 		if (! $this -> __requestedProfile ($element)) {
 			next;
@@ -2965,12 +2966,12 @@ sub addStrip {
 	# ...
 	# Add the given strip list and type to the xml description
 	# ----
-	my $this  = shift;
-	my $type  = shift;
 	my @list  = @_;
+	my $this  = shift @list;
+	my $type  = shift @list;
 	my $kiwi  = $this->{kiwi};
 	my @supportedTypes = qw /delete libs tools/;
-	if (! grep /$type/, @supportedTypes ) {
+	if (! grep { /$type/ } @supportedTypes ) {
 		my $msg = "Specified strip section type '$type' not supported.";
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
@@ -2987,12 +2988,12 @@ sub addStrip {
 		}
 	}
 	if (! $stripSection ) {
-		$stripSection = new XML::LibXML::Element ("strip");
+		$stripSection = XML::LibXML::Element -> new ("strip");
 		$stripSection -> setAttribute("type",$type);
 		$image-> appendChild ($stripSection);
 	}
 	foreach my $name (@list) {
-		my $fileSection = new XML::LibXML::Element ("file");
+		my $fileSection = XML::LibXML::Element -> new ("file");
 		$fileSection  -> setAttribute("name",$name);
 		$stripSection -> appendChild ($fileSection);
 	}
@@ -3013,7 +3014,7 @@ sub addSimpleType {
 	my $kiwi  = $this->{kiwi};
 	my $nodes = $this->{optionsNodeList};
 	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $addElement = new XML::LibXML::Element ("type");
+		my $addElement = XML::LibXML::Element -> new ("type");
 		$addElement -> setAttribute("image",$type);
 		$nodes -> get_node($i) -> appendChild ($addElement);
 	}
@@ -3029,12 +3030,12 @@ sub addPackages {
 	# Add the given package list to the specified packages
 	# type section of the xml description parse tree.
 	# ----
-	my $this  = shift;
-	my $ptype = shift;
-	my $bincl = shift;
-	my $nodes = shift;
-	my $kiwi  = $this->{kiwi};
 	my @packs = @_;
+	my $this  = shift @packs;
+	my $ptype = shift @packs;
+	my $bincl = shift @packs;
+	my $nodes = shift @packs;
+	my $kiwi  = $this->{kiwi};
 	if (! defined $nodes) {
 		$nodes = $this->{packageNodeList};
 	}
@@ -3081,7 +3082,7 @@ sub addPackages {
 	foreach my $pack (@packs) {
 		next if ($pack eq "");
 		next if ($packhash{$pack});
-		my $addElement = new XML::LibXML::Element ("package");
+		my $addElement = XML::LibXML::Element -> new ("package");
 		$addElement -> setAttribute("name",$pack);
 		if (($bincl) && ($bincl->{$pack}) && ($bincl->{$pack} == 1)) {
 			$addElement -> setAttribute("bootinclude","true");
@@ -3100,10 +3101,10 @@ sub addPatterns {
 	# Add the given pattern list to the specified packages
 	# type section of the xml description parse tree.
 	# ----
-	my $this  = shift;
-	my $ptype = shift;
-	my $nodes = shift;
 	my @patts = @_;
+	my $this  = shift @patts;
+	my $ptype = shift @patts;
+	my $nodes = shift @patts;
 	if (! defined $nodes) {
 		$nodes = $this->{packageNodeList};
 	}
@@ -3119,7 +3120,7 @@ sub addPatterns {
 		}
 	}
 	foreach my $pack (@patts) {
-		my $addElement = new XML::LibXML::Element ("opensusePattern");
+		my $addElement = XML::LibXML::Element -> new ("opensusePattern");
 		$addElement -> setAttribute("name",$pack);
 		$nodes -> get_node($nodeNumber)
 			-> appendChild ($addElement);
@@ -3137,11 +3138,11 @@ sub addArchives {
 	# type section of the xml description parse tree as an.
 	# archive element
 	# ----
-	my $this  = shift;
-	my $ptype = shift;
-	my $bincl = shift;
-	my $nodes = shift;
 	my @tars  = @_;
+	my $this  = shift @tars;
+	my $ptype = shift @tars;
+	my $bincl = shift @tars;
+	my $nodes = shift @tars;
 	if (! defined $nodes) {
 		$nodes = $this->{packageNodeList};
 	}
@@ -3157,7 +3158,7 @@ sub addArchives {
 		}
 	}
 	foreach my $tar (@tars) {
-		my $addElement = new XML::LibXML::Element ("archive");
+		my $addElement = XML::LibXML::Element -> new ("archive");
 		$addElement -> setAttribute("name",$tar);
 		if ($bincl) {
 			$addElement -> setAttribute("bootinclude","true");
@@ -3177,8 +3178,9 @@ sub addImagePackages {
 	# Add the given package list to the type=bootstrap packages
 	# section of the xml description parse tree.
 	# ----
-	my $this  = shift;
-	return $this -> addPackages ("image",undef,undef,@_);
+	my @list = @_;
+	my $this = shift @list;
+	return $this -> addPackages ("image",undef,undef,@list);
 }
 
 #==========================================
@@ -3189,8 +3191,9 @@ sub addImagePatterns {
 	# Add the given pattern list to the type=bootstrap packages
 	# section of the xml description parse tree.
 	# ----
-	my $this  = shift;
-	return $this -> addPatterns ("image",undef,@_);
+	my @list = @_;
+	my $this = shift @list;
+	return $this -> addPatterns ("image",undef,@list);
 }
 
 #==========================================
@@ -3201,8 +3204,9 @@ sub addRemovePackages {
 	# Add the given package list to the type=delete packages
 	# section of the xml description parse tree.
 	# ----
-	my $this  = shift;
-	return $this -> addPackages ("delete",undef,undef,@_);
+	my @list = @_;
+	my $this = shift @list;
+	return $this -> addPackages ("delete",undef,undef,@list);
 }
 
 #==========================================
@@ -3653,6 +3657,7 @@ sub getInstSourcePackageAttributes {
 sub clearPackageAttributes {
 	my $this = shift;
 	$this->{m_rpacks} = undef;
+	return;
 }
 
 #==========================================
@@ -3813,7 +3818,7 @@ sub getList {
 					# turn patterns into pacs for this manager
 					#------------------------------------------
 					# 1) try to use libsatsolver...
-					my $psolve = new KIWISatSolver (
+					my $psolve = KIWISatSolver -> new (
 						$kiwi,\@pattlist,$urllist,"solve-patterns",
 						undef,undef,$ptype
 					);
@@ -4057,7 +4062,7 @@ sub getInstallSize {
 			$meta{$pkg} =~ s#^(\d+)#int($1/1024)#e;
 		}
 	} else {
-		my $psolve = new KIWISatSolver (
+		my $psolve = KIWISatSolver -> new (
 			$kiwi,\@result,$urllist,"solve-patterns",
 			undef,undef,$ptype
 		);
@@ -4478,7 +4483,6 @@ sub getSingleInstSourceSatSolvable {
 	my $index    = 0;
 	my @index    = ();
 	my $error    = 0;
-	my $RXML;
 	#==========================================
 	# allow arch overwrite
 	#------------------------------------------
@@ -4544,7 +4548,8 @@ sub getSingleInstSourceSatSolvable {
 		}
 	}
 	if (-e $repoMD) {
-		if (! open ($RXML, '-|', "cat $repoMD")) {
+		my $RXML = FileHandle -> new();
+		if (! $RXML -> open ("cat $repoMD|")) {
 			$kiwi -> failed ();
 			$kiwi -> error ("--> Failed to open file $repoMD");
 			$kiwi -> failed ();
@@ -4552,7 +4557,7 @@ sub getSingleInstSourceSatSolvable {
 			return;
 		}
 		binmode $RXML;
-		my $rxml = new XML::LibXML;
+		my $rxml = XML::LibXML -> new();
 		my $tree = $rxml -> parse_fh ( $RXML );
 		my $nodes= $tree -> getElementsByTagName ("data");
 		my $primary;
@@ -4572,12 +4577,13 @@ sub getSingleInstSourceSatSolvable {
 					-> get_node(1) -> getAttribute ("href");
 			}
 		}
-		close $RXML;
+		$RXML -> close();
 		#==========================================
 		# Compare the repo timestamp
 		#------------------------------------------
-		if (open (my $FD, '<', "$index.timestamp")) {
-			my $curstamp = <$FD>; chomp $curstamp;
+		my $TFD = FileHandle -> new();
+		if ($TFD -> open ("$index.timestamp")) {
+			my $curstamp = <$TFD>; chomp $curstamp; $TFD -> close();
 			if ($curstamp eq $time) {
 				$kiwi -> done();
 				unlink $repoMD;
@@ -4674,15 +4680,15 @@ sub getSingleInstSourceSatSolvable {
 			#==========================================
 			# get files listed in patterns
 			#------------------------------------------
-			my $FD;
+			my $FD = FileHandle -> new();
 			my $patfile = $destfile;
-			if (! open ($FD, '<', $patfile)) {
+			if (! $FD -> open ($patfile)) {
 				$kiwi -> warning ("--> Couldn't open patterns file: $!");
 				$kiwi -> skipped ();
 				unlink $patfile;
 				next;
 			}
-			foreach my $line (<$FD>) {
+			while (my $line = <$FD>) {
 				chomp $line; $destfile = $sdir."/".$line;
 				if ($line !~ /\.$arch\./) {
 					next;
@@ -4695,7 +4701,7 @@ sub getSingleInstSourceSatSolvable {
 					next;
 				}
 			}
-			close $FD;
+			$FD -> close();
 			unlink $patfile;
 		}
 	}
@@ -4845,8 +4851,8 @@ sub addDrivers_legacy {
 	# Add the given driver list to the specified drivers
 	# section of the xml description parse tree.
 	# ----
-	my $this  = shift;
 	my @drvs  = @_;
+	my $this  = shift @drvs;
 	my $kiwi  = $this->{kiwi};
 	my $nodes = $this->{driversNodeList};
 	my $nodeNumber = -1;
@@ -4863,7 +4869,7 @@ sub addDrivers_legacy {
 	}
 	foreach my $driver (@drvs) {
 		next if ($driver eq "");
-		my $addElement = new XML::LibXML::Element ("file");
+		my $addElement = XML::LibXML::Element -> new ("file");
 		$addElement -> setAttribute("name",$driver);
 		$nodes -> get_node($nodeNumber)
 			-> appendChild ($addElement);
@@ -5751,7 +5757,8 @@ sub getPXEDeployPartitions_legacy {
 	# ---
 	my $this = shift;
 	my $tnode= $this->{typeNode};
-	my $partitions = $tnode -> getElementsByTagName ("partitions") -> get_node(1);
+	my $partitions = $tnode 
+		-> getElementsByTagName ("partitions") -> get_node(1);
 	my @result = ();
 	if (! $partitions) {
 		return @result;
@@ -5773,19 +5780,17 @@ sub getPXEDeployPartitions_legacy {
 			$mountpoint = "x";
 		}
 		my $target = $node -> getAttribute ("target");
-		if (! defined $target or $target eq "false" or $target eq "0") {
+		if ((! $target) || ($target eq "false") || ($target eq "0")) {
 			$target = 0;
 		} else {
 			$target = 1
 		}
-		
 		my %part = ();
 		$part{number} = $number;
 		$part{type} = $type;
 		$part{size} = $size;
 		$part{mountpoint} = $mountpoint;
 		$part{target} = $target;
-
 		push @result, { %part };
 	}
 	my @ordered = sort { $a->{number} cmp $b->{number} } @result;
@@ -6288,7 +6293,7 @@ sub setPackageManager_legacy {
 	if (($pmgr) && ("$pmgr" eq "$value")) {
 		return $this;
 	}
-	my $addElement = new XML::LibXML::Element ("packagemanager");
+	my $addElement = XML::LibXML::Element -> new ("packagemanager");
 	# Also update the ned data structure to ensure the runtime checker works
 	# properly
 	my $prefObj = $this -> getPreferences();
@@ -6363,24 +6368,30 @@ sub addRepositories_legacy {
 	# repos and update repositNodeList accordingly.
 	# ---
 	my $this = shift;
+	my $type = shift;
+	my $path = shift;
+	my $alias= shift;
+	my $prio = shift;
+	my $user = shift;
+	my $pass = shift;
+	my @type = @{$type};
+	my @path = @{$path};
 	my $kiwi = $this->{kiwi};
-	my @type = @{$_[0]};
-	my @path = @{$_[1]};
 	my @alias;
 	my @prio;
 	my @user;
 	my @pass;
-	if ($_[2]) {
-		@alias= @{$_[2]};
+	if ($alias) {
+		@alias= @{$alias};
 	}
-	if ($_[3]) {
-		@prio = @{$_[3]};
+	if ($prio) {
+		@prio = @{$prio};
 	}
-	if ($_[4]) {
-		@user = @{$_[4]};
+	if ($user) {
+		@user = @{$user};
 	}
-	if ($_[5]) {
-		@pass = @{$_[5]};
+	if ($pass) {
+		@pass = @{$pass};
 	}
 	my @supportedTypes = (
 		'rpm-dir','rpm-md', 'yast2',
@@ -6405,7 +6416,7 @@ sub addRepositories_legacy {
 			$kiwi -> skipped ();
 			next;
 		}
-		my $addrepo = new XML::LibXML::Element ("repository");
+		my $addrepo = XML::LibXML::Element -> new ("repository");
 		$addrepo -> setAttribute ("type",$type);
 		$addrepo -> setAttribute ("status","fixed");
 		if (defined $alias) {
@@ -6418,7 +6429,7 @@ sub addRepositories_legacy {
 			$addrepo -> setAttribute ("username",$user);
 			$addrepo -> setAttribute ("password",$pass);
 		}
-		my $addsrc  = new XML::LibXML::Element ("source");
+		my $addsrc  = XML::LibXML::Element -> new ("source");
 		$addsrc -> setAttribute ("path",$path);
 		$addrepo -> appendChild ($addsrc);
 		$this->{imgnameNodeList}->get_node(1)->appendChild ($addrepo);
@@ -6497,7 +6508,7 @@ sub __populateTypeInfo_legacy {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $cmdL   = $this->{cmdL};
-	my $urlhd  = new KIWIURL ($kiwi,$cmdL);
+	my $urlhd  = KIWIURL -> new ($kiwi,$cmdL);
 	my @node   = $this->{optionsNodeList} -> get_nodelist();
 	my @result = ();
 	my $first  = 1;
@@ -6760,7 +6771,7 @@ sub __addDefaultStripNode {
 	# read in default strip section
 	#------------------------------------------
 	my $stripTree;
-	my $stripXML = new XML::LibXML;
+	my $stripXML = XML::LibXML -> new();
 	eval {
 		$stripTree = $stripXML
 			-> parse_file ( $this->{gdata}->{KStrip} );
@@ -6842,7 +6853,7 @@ sub __addDefaultSplitNode {
 	# read in default split section
 	#------------------------------------------
 	my $splitTree;
-	my $splitXML = new XML::LibXML;
+	my $splitXML = XML::LibXML -> new();
 	eval {
 		$splitTree = $splitXML
 			-> parse_file ( $this->{gdata}->{KSplit} );
@@ -7209,6 +7220,7 @@ sub __updateDescriptionFromChangeSet {
 	# 12) cleanup reqProfiles
 	#------------------------------------------
 	$this->{reqProfiles} = $reqProfiles;
+	return;
 }
 
 #==========================================
@@ -7228,7 +7240,7 @@ sub __addVolume {
 	if (! defined $disk) {
 		return $this;
 	}
-	my $addElement = new XML::LibXML::Element ("volume");
+	my $addElement = XML::LibXML::Element -> new ("volume");
 	$addElement -> setAttribute("name",$volume);
 	$addElement -> setAttribute($aname,$aval);
 	$disk -> appendChild ($addElement);
@@ -7269,7 +7281,7 @@ sub __setOptionsElement {
 	my $kiwi = $this->{kiwi};
 	my $value = $data->{$item};
 	$kiwi -> info ("Updating element $item: $value");
-	my $addElement = new XML::LibXML::Element ("$item");
+	my $addElement = XML::LibXML::Element -> new ("$item");
 	$addElement -> appendText ($value);
 	my $opts = $this -> __getPreferencesNodeByTagName ("$item");
 	my $node = $opts -> getElementsByTagName ("$item");
@@ -7306,7 +7318,7 @@ sub __addOptionsElement {
 	}
 	foreach my $text (@{$value}) {
 		$kiwi -> info ("Adding element $item: $text");
-		my $addElement = new XML::LibXML::Element ("$item");
+		my $addElement = XML::LibXML::Element -> new ("$item");
 		$addElement -> appendText ($text);
 		my $opts = $this -> __getPreferencesNodeByTagName ("$item");
 		$opts -> appendChild ($addElement);
@@ -7365,11 +7377,11 @@ sub __setOEMOptionsElement {
 	my $value = $data->{$item};
 	my $newconfig = 0;
 	$kiwi -> info ("Updating OEM element $item: $value");
-	my $addElement = new XML::LibXML::Element ("$item");
+	my $addElement = XML::LibXML::Element -> new ("$item");
 	$addElement -> appendText ($value);
 	my $opts = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (! defined $opts) {
-		$opts = new XML::LibXML::Element ("oemconfig");
+		$opts = XML::LibXML::Element -> new ("oemconfig");
 		$newconfig = 1;
 	}
 	my $node = $opts -> getElementsByTagName ("$item");
@@ -7408,14 +7420,14 @@ sub __setSystemDiskElement {
 	my $addElement;
 	if ($item) {
 		$kiwi -> info ("Updating SystemDisk element $item: $value");
-		$addElement = new XML::LibXML::Element ("$item");
+		$addElement = XML::LibXML::Element -> new ("$item");
 		$addElement -> appendText ($value);
 	} else {
 		$kiwi -> info ("Updating SystemDisk element");
 	}
 	my $disk = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
 	if (! defined $disk) {
-		$disk = new XML::LibXML::Element ("systemdisk");
+		$disk = XML::LibXML::Element -> new ("systemdisk");
 		$newconfig = 1;
 	}
 	if ($item) {
@@ -7454,7 +7466,7 @@ sub __setMachineAttribute {
 	$kiwi -> info ("Updating machine attribute $item: $value");
 	my $opts = $tnode -> getElementsByTagName ("machine") -> get_node(1);
 	if (! defined $opts) {
-		$opts = new XML::LibXML::Element ("machine");
+		$opts = XML::LibXML::Element -> new ("machine");
 		$newconfig = 1;
 	}
 	my $node = $opts -> getElementsByTagName ("$item");
@@ -7724,7 +7736,8 @@ sub __quote {
 #------------------------------------------
 sub __resolveLink {
 	my $this = shift;
-	my $data = $this -> __resolveArchitecture ($_[0]);
+	my $arch = shift;
+	my $data = $this -> __resolveArchitecture ($arch);
 	my $cdir = qxx ("pwd"); chomp $cdir;
 	if (chdir $data) {
 		my $pdir = qxx ("pwd"); chomp $pdir;
