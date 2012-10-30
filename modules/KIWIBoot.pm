@@ -950,9 +950,9 @@ sub setupInstallCD {
 	$kiwi -> info ("Creating ISO image...");
 	my $name = $system;
 	if ($gotsys) {
-		$name =~ s/raw$/iso/;
+		$name =~ s/raw$/install\.iso/;
 	} else {
-		$name =~ s/gz$/iso/;
+		$name =~ s/gz$/install\.iso/;
 	}
 	my $base;
 	my $opts;
@@ -1732,7 +1732,7 @@ sub setupInstallPXE {
 	#------------------------------------------
 	$kiwi -> info ("Packing installation data...");
 	$tarname = $system;
-	$tarname =~ s/\.raw$/\.tgz/;
+	$tarname =~ s/\.raw$/\.install\.tgz/;
 	foreach my $file ($md5name,$sysname,$irdname,$krnname,$appname) {
 		push @packfiles, basename $file;
 	}
