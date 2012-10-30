@@ -1006,6 +1006,7 @@ sub cleanSweep {
 	my $sharedMem= $this->{smem};
 	if ($this->{errorOk}) {
 		close $rootEFD;
+		undef $this->{rootefd};
 	}
 	if (defined $logchild) {
 		kill (15, $logchild);
