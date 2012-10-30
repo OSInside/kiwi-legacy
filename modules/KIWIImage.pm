@@ -1487,7 +1487,7 @@ sub createImageLiveCD {
 	my $hybrid = 0;
 	my $isxen  = 0;
 	my $hybridpersistent = 0;
-	my $cmdline;
+	my $cmdline = "";
 	my $rootTarget = $cmdL->getRootTargetDir();
 	if (! $rootTarget) {
 		$rootTarget = $cmdL->getConfigDir();
@@ -1837,7 +1837,7 @@ sub createImageLiveCD {
 	my $pinitrd = $idest."/".$bootdata[0].".gz";
 	my $plinux  = $idest."/".$bootdata[0].".kernel";
 	my $pxboot  = glob ($idest."/".$bootdata[0]."*xen.gz");
-	if (-f $pxboot) {
+	if (($pxboot) && (-f $pxboot)) {
 		$isxen = 1;
 	}
 	#==========================================
@@ -3455,7 +3455,7 @@ sub buildLogicalExtend {
 		#==========================================
 		# Create logical extend storage and FS
 		#------------------------------------------
-		if (-x $this->{gdata}->{StudioNode}) {
+		if ($this->{gdata}->{StudioNode}) {
 			#==========================================
 			# Call custom image creation tool...
 			#------------------------------------------
@@ -3463,7 +3463,9 @@ sub buildLogicalExtend {
 			my $code = $? >> 8;
 			chomp $data;
 			if (($code != 0) || (! -b $data)) {
-				$kiwi -> error  ("Failed creating Studio storage device: $data");
+				$kiwi -> error  (
+					"Failed creating Studio storage device: $data"
+				);
 				$kiwi -> failed ();
 				return;
 			}
@@ -4009,8 +4011,13 @@ sub setupEXT2 {
 	if ($this->{inodes}) {
 		$fsopts.= " -N $this->{inodes}";
 	}
-	$tuneopts = $type{fsnocheck} eq "true" ? "-c 0 -i 0" : "";
-	$tuneopts = $FSopts{extfstune} if $FSopts{extfstune};
+	$tuneopts = "";
+	if ($FSopts{extfstune}) {
+		$tuneopts = $FSopts{extfstune};
+	}
+	if (($type{fsnocheck}) && ($type{fsnocheck} eq "true")) {
+		$tuneopts .= " -c 0 -i 0";
+	}
 	if ($device) {
 		$target = $device;
 	}

@@ -870,6 +870,7 @@ sub setupInstallationSource {
 				if (! -f $repo) {
 					$kiwi -> info ("Adding bootstrap zypper service: $alias");
 					$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
+					$code = $? >> 8;
 				} else {
 					$kiwi -> info ("Updating bootstrap zypper service: $alias");
 					$data = qxx ("grep -q '^baseurl=file:/base-system' $repo");
@@ -893,6 +894,7 @@ sub setupInstallationSource {
 				if (! -f $repo) {
 					$kiwi -> info ("Adding chroot zypper service: $alias");
 					$data = qxx ("@kchroot @zypper $sadd 2>&1");
+					$code = $? >> 8;
 				} else {
 					$kiwi -> info ("Updating chroot zypper service: $alias");
 					$data = qxx ("grep -q '^baseurl=file:/base-system' $repo");
@@ -1827,14 +1829,15 @@ sub setupRootSystem {
 			my $repo = $alias;
 			foreach my $opt (@{$source{public}{$alias}}) {
 				next if ! $opt;
-				$opt =~ /(.*?)=(.*)/;
-				my $key = $1;
-				my $val = $2;
-				if (($key eq "baseurl") || ($key eq "path")) {
-					if ($val =~ /^'\//) {
-						$val =~ s/^'(.*)'$/"file:\/\/$1"/
+				if ($opt =~ /(.*?)=(.*)/) {
+					my $key = $1;
+					my $val = $2;
+					if (($key eq "baseurl") || ($key eq "path")) {
+						if ($val =~ /^'\//) {
+							$val =~ s/^'(.*)'$/"file:\/\/$1"/
+						}
+						$repo = $val;
 					}
-					$repo = $val;
 				}
 			}
 			KIWIXML::getInstSourceFile (
