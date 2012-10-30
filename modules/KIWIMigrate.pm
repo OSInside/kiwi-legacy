@@ -21,8 +21,10 @@ package KIWIMigrate;
 # Modules
 #------------------------------------------
 use strict;
+use warnings;
 use Carp qw (cluck);
 use XML::LibXML;
+use FileHandle;
 use File::Find;
 use File::stat;
 use File::Basename;
@@ -266,8 +268,8 @@ sub createReport {
 	#==========================================
 	# Start report
 	#------------------------------------------
-	my $FD;
-	if (! open ($FD, '>', "$dest/report.html")) {
+	my $FD = FileHandle -> new();
+	if (! $FD -> open (">$dest/report.html")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create report: $!");
 		$kiwi -> failed ();
@@ -610,7 +612,7 @@ sub createReport {
 	print $FD '</div>'."\n";
 	print $FD '</body>'."\n";
 	print $FD '</html>'."\n";
-	close $FD;
+	$FD -> close();
 	#==========================================
 	# Print report note...
 	#------------------------------------------
@@ -781,8 +783,8 @@ sub setTemplate {
 	#==========================================
 	# create xml description
 	#------------------------------------------
-	my $FD;
-	if (! open ($FD, '>', "$dest/$this->{gdata}->{ConfigName}")) {
+	my $FD = FileHandle -> new();
+	if (! $FD -> open (">$dest/$this->{gdata}->{ConfigName}")) {
 		return;
 	}
 	#==========================================
@@ -861,7 +863,7 @@ sub setTemplate {
 	}
 	print $FD "\t".'</packages>'."\n";
 	print $FD '</image>'."\n";
-	close $FD;
+	$FD -> close();
 	return $this;
 }
 
@@ -874,13 +876,13 @@ sub getOperatingSystemVersion {
 	# to the table KIWIMigrate.txt
 	# ---
 	my $this = shift;
-	my $FD;
-	if (! open ($FD, '<', "/etc/SuSE-release")) {
+	my $VFD = FileHandle -> new();
+	if (! $VFD -> open ("/etc/SuSE-release")) {
 		return;
 	}
-	my $name = <$FD>; chomp $name;
-	my $vers = <$FD>; chomp $vers;
-	my $plvl = <$FD>; chomp $plvl;
+	my $name = <$VFD>; chomp $name;
+	my $vers = <$VFD>; chomp $vers;
+	my $plvl = <$VFD>; chomp $plvl;
 	$name =~ s/\s+/-/g;
 	$name =~ s/\-\(.*\)//g;
 	if ((defined $plvl) && ($plvl =~ /PATCHLEVEL = (.*)/)) {
@@ -889,22 +891,23 @@ sub getOperatingSystemVersion {
 			$name = $name."-SP".$plvl;
 		}
 	}
-	close $FD;
-	if (! open ($FD, '<', $this->{gdata}->{KMigrate})) {
+	$VFD -> close();
+	my $MFD = FileHandle -> new();
+	if (! $MFD -> open ($this->{gdata}->{KMigrate})) {
 		return;
 	}
-	while (my $line = <$FD>) {
+	while (my $line = <$MFD>) {
 		next if $line =~ /^#/;
 		if ($line =~ /(.*)\s*=\s*(.*)/) {
 			my $product= $1;
 			my $boot   = $2;
 			if ($product eq $name) {
-				close $FD;
+				close $MFD;
 				return $boot;
 			}
 		}
 	}
-	close $FD;
+	$MFD -> close();
 	return;
 }
 
@@ -924,8 +927,8 @@ sub setPrepareConfigSkript {
 	#==========================================
 	# create config script
 	#------------------------------------------
-	my $FD;
-	if (! open ($FD, '>', "$dest/config.sh")) {
+	my $FD = FileHandle -> new();
+	if (! $FD -> open (">$dest/config.sh")) {
 		return;
 	}
 	print $FD '#!/bin/bash'."\n";
@@ -971,14 +974,14 @@ sub setPrepareConfigSkript {
 	#------------------------------------------
 	my $repoProduct = "/etc/products.d/openSUSE.prod";
 	if (-e $repoProduct) {
-		my $PXML;
-		if (! open ($PXML, '-|', "cat $repoProduct")) {
+		my $PXML = FileHandle -> new();
+		if (! $PXML -> open ("cat $repoProduct|")) {
 			$kiwi -> failed ();
 			$kiwi -> warning ("--> Failed to open product file $repoProduct");
 			$kiwi -> skipped ();
 		} else {
 			binmode $PXML;
-			my $pxml = new XML::LibXML;
+			my $pxml = XML::LibXML -> new();
 			my $tree = $pxml -> parse_fh ( $PXML );
 			my $urls = $tree -> getElementsByTagName ("product")
 				-> get_node(1) -> getElementsByTagName ("urls")
@@ -1004,13 +1007,13 @@ sub setPrepareConfigSkript {
 					}
 				}
 			}
-			close $PXML;
+			$PXML -> close();
 		}
 	}
 	print $FD 'suseConfig'."\n";
 	print $FD 'baseCleanMount'."\n";
 	print $FD 'exit 0'."\n";
-	close $FD;
+	$FD -> close();
 	chmod 0755, "$dest/config.sh";
 	return $this;
 }
@@ -1117,7 +1120,7 @@ sub getPackageList {
 			@patlist = keys %pathash;
 		}
 		$this->{patterns} = \@patlist;
-		my $psolve = new KIWISatSolver (
+		my $psolve = KIWISatSolver -> new (
 			$kiwi,\@patlist,\@urllist,"solve-patterns",
 			undef,undef,"plusRecommended","merged-solvable"
 		);
@@ -1170,7 +1173,7 @@ sub getPackageList {
 		if (@result) {
 			my @rest = ();
 			my $pool = $psolve -> getPool();
-			my $xsolve = new KIWISatSolver (
+			my $xsolve = KIWISatSolver -> new (
 				$kiwi,\@result,\@urllist,"solve-packages",
 				$pool,undef,"plusRecommended","merged-solvable"
 			);
@@ -1644,8 +1647,8 @@ sub setInitialSetup {
 	if (-f "/etc/X11/xorg.conf.install") {
 		qxx ("cp /etc/X11/xorg.conf.install $dest/root/etc/X11/xorg.conf");
 	} else {
-		my $FD;
-		if (! open ($FD, '>', "$dest/root/etc/X11/xorg.conf")) {
+		my $FD = FileHandle -> new();
+		if (! $FD -> open (">$dest/root/etc/X11/xorg.conf")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create fbdev xorg.conf: $!");
 			$kiwi -> failed ();
@@ -1739,7 +1742,7 @@ sub setInitialSetup {
 		print $FD "\t".'InputDevice   "Mouse[1]"     "CorePointer"'."\n";
 		print $FD "\t".'Screen        "Screen[fbdev]"'."\n";
 		print $FD 'EndSection'."\n";
-		close $FD;
+		$FD -> close();
 	}
 	qxx (
 		"cp $dest/root/etc/X11/xorg.conf $dest/root/etc/X11/xorg.conf.install"
@@ -1814,7 +1817,7 @@ sub checkBrokenLinks {
 	if ($returnok) {
 		return $this;
 	}
-	checkBrokenLinks ($this);
+	return checkBrokenLinks ($this);
 }
 
 #==========================================
