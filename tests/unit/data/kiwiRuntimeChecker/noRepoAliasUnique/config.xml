@@ -25,18 +25,18 @@
 	<users group="root">
 	<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<repository type="yast2" prefer-license="true" priority="2" alias="arepo">
-		<source path="opensuse://12.1/repo/oss/"/>
-	</repository>
-	<repository type="rpm-md" alias="update" imageinclude="true" profiles="profA">
-		<source path="http://download.opensuse.org/update/12.1"/>
-	</repository>
-	<!-- The repo alias of this repo conflicts if profA is a selected built profile -->
-	<repository type="rpm-dir" alias="arepo" profiles="profA,profC">
+	<repository type="rpm-md" prefer-license="true" priority="2" alias="arepo">
 		<source path="/repos/12.1-additional"/>
 	</repository>
-	<repository type="yast2" username="foo" password="bar" status="replacable" profiles="profB">
-		<source path="https://myreposerver/protectedrepos/12.1"/>
+	<repository type="rpm-md" alias="update" imageinclude="true" profiles="profA">
+		<source path="/repos/12.1-additional-update"/>
+	</repository>
+	<!-- The repo alias of this repo conflicts if profA is a selected built profile -->
+	<repository type="rpm-md" alias="arepo" profiles="profA,profC">
+		<source path="/repos/12.1-additional"/>
+	</repository>
+	<repository type="rpm-md" username="foo" password="bar" status="replacable" profiles="profB">
+		<source path="/repos/12.1-additional-update"/>
 	</repository>
 	<packages type="image">
 		<package name="kernel-default"/>
