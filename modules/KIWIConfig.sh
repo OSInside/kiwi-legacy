@@ -1399,6 +1399,7 @@ function suseStripKernel {
 	# for the kernel extraction in case of kiwi boot images
 	# ----
 	local ifss=$IFS
+	local arch=$(uname -m)
 	local kversion
 	local i
 	local d
@@ -1541,6 +1542,8 @@ function suseStripKernel {
 			pushd /boot
 			if [ -f uImage-$VERSION ];then
 				mv uImage-$VERSION vmlinuz
+			elif [[ $arch =~ ^arm ]] && [ -f image-$VERSION ];then
+				mv image-$VERSION vmlinuz
 			elif [ -f vmlinux-$VERSION.gz ];then
 				mv vmlinux-$VERSION.gz vmlinux.gz
 				mv vmlinuz-$VERSION vmlinuz

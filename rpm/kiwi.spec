@@ -617,7 +617,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_datadir}/kiwi/image/isoboot/README.requires
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
 
 %files -n kiwi-desc-vmxboot
 %defattr(-, root, root)
