@@ -24,6 +24,7 @@ Group:          System/Management
 Version:        5.04.20
 Release:        0
 # requirements to build packages
+BuildRequires:  lvm2
 BuildRequires:  gcc-c++
 BuildRequires:  libxslt
 BuildRequires:  module-init-tools
