@@ -167,6 +167,9 @@ sub __hasValidLVMName {
 		return 1;
 	}
 	my $vgsCmd = $this->{locator}->getExecPath('vgs');
+	if (! $vgsCmd) {
+		return 1;
+	}
 	my @hostGroups = qxx ("$vgsCmd --noheadings -o vg_name 2>/dev/null");
 	chomp @hostGroups;
 	foreach my $hostGroup (@hostGroups) {
