@@ -47,7 +47,7 @@ sub new {
 	#------------------------------------------
 	$this->{kiwi} = $kiwi;
 	my %archesSup = map { ($_ => 1) } qw(
-		armv7l ia64 ix86 ppc ppc64 s390 s390x x86_64
+		armv5tel armv7l ia64 ix86 ppc ppc64 s390 s390x x86_64
 	);
 	$this->{supportedArch} = \%archesSup;
 
