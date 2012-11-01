@@ -41,6 +41,7 @@ use KIWIXMLRepositoryData;
 use KIWIXMLSplitData;
 use KIWIXMLSystemdiskData;
 use KIWIXMLTypeData;
+use KIWIXMLUserData;
 use KIWIXMLValidator;
 use KIWIXMLVMachineData;
 use KIWISatSolver;
@@ -134,8 +135,20 @@ sub new {
 	#				...
 	#			}
 	#		}
-	#		...
-	#     }
+	#	    ...
+	#   }
+	#   users {
+	#       NAME[+] {
+	#           group
+	#           groupid
+	#           home
+	#           passwd
+	#           passwdformat
+	#           realname
+	#           shell
+	#           userid
+	#       }
+	#    }
 	# }
 	# ---
 	#==========================================
@@ -201,7 +214,7 @@ sub new {
 		@selectProfs = @{$reqProfiles};
 		push @selectProfs, 'kiwi_default';
 	} else {
-		@selectProfs = ('kiwi_default',);
+		@selectProfs = ('kiwi_default');
 	}
 	$this->{selectedProfiles} = \@selectProfs;
 	#==========================================
@@ -295,6 +308,10 @@ sub new {
 	#------------------------------------------
 	$this -> __populateRepositoryInfo();
 	#==========================================
+	# Populate imageConfig with user data from config tree
+	#------------------------------------------
+	$this -> __populateUserInfo();
+	#==========================================
 	# Read and create profile hash
 	#------------------------------------------
 	$this->{profileHash} = $this -> __populateProfiles_legacy();
@@ -306,8 +323,8 @@ sub new {
 	# Update XML data from changeset if exists
 	#------------------------------------------
 	if (defined $changeset) {
-		$this -> __populateImageTypeAndNode();
-		$this -> __updateDescriptionFromChangeSet ($changeset);
+		$this -> __populateImageTypeAndNode_legacy();
+		$this -> __updateDescriptionFromChangeSet_legacy ($changeset);
 	}
 	#==========================================
 	# Populate default profiles from XML if set
@@ -316,7 +333,7 @@ sub new {
 	#==========================================
 	# Populate typeInfo hash
 	#------------------------------------------
-	$this -> __populateProfiledTypeInfo();
+	$this -> __populateProfiledTypeInfo_legacy();
 	#==========================================
 	# Check profile names
 	#------------------------------------------
@@ -326,7 +343,7 @@ sub new {
 	#==========================================
 	# Select and initialize image type
 	#------------------------------------------
-	if (! $this -> __populateImageTypeAndNode()) {
+	if (! $this -> __populateImageTypeAndNode_legacy()) {
 		return;
 	}
 	#==========================================
@@ -833,6 +850,55 @@ sub getSystemDiskConfig {
 }
 
 #==========================================
+# getType
+#------------------------------------------
+sub getType {
+	# ...
+	# Return a TypeDataObject for the given type if found in the
+	# active profiles.
+	# ---
+	my $this  = shift;
+	my $tname = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $tname) {
+		my $msg = 'getType: no type name specified';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	for my $prof (@{$this->{selectedProfiles}}) {
+		my $types = $this->{imageConfig}{$prof}{preferences}{types};
+		if ($types) {
+			if ($types->{$tname}) {
+				my $tObj = KIWIXMLTypeData -> new ($kiwi, $types->{$tname});
+				return $tObj;
+			}
+		}
+	}
+	my $msg = "getType: given type '$tname' not defined or available.";
+	$kiwi -> error($msg);
+	$kiwi -> failed();
+	return;
+}
+
+#==========================================
+# getUsers
+#------------------------------------------
+sub getUsers {
+	# ...
+	# Return a reference to an array holding UserData objects
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @userData;
+	for my $uInfo (values %{$this->{imageConfig}{users}}) {
+		my $uObj = KIWIXMLUserData -> new($kiwi, $uInfo);
+		push @userData, $uObj;
+	}
+	return \@userData;
+}
+
+#==========================================
 # getVMachineConfig
 #------------------------------------------
 sub getVMachineConfig {
@@ -938,7 +1004,7 @@ sub setDescriptionInfo {
 		author        => $author,
 		contact       => $xmlDescripDataObj->getContactInfo(),
 		specification => $xmlDescripDataObj->getSpecificationDescript(),
-		type          => $xmlDescripDataObj->getType
+		type          => $xmlDescripDataObj->getType()
 	);
 	$this->{imageConfig}{description} = \%descript;
 	return $this;
@@ -2118,7 +2184,7 @@ sub __populateRepositoryInfo {
 	# repository data from the XML file.
 	# ---
 	my $this = shift;
-	my @repoNodes = $this->{systemTree} 
+	my @repoNodes = $this->{systemTree}
 		-> getElementsByTagName ('repository');
 	my $idCntr = 1;
 	for my $repoNode (@repoNodes) {
@@ -2163,6 +2229,71 @@ sub __populateRepositoryInfo {
 	}
 	# Store the next counter to be used as repo ID
 	$this -> {repoCounter} = $idCntr;
+	return $this;
+}
+
+#==========================================
+# __populateUserInfo
+#------------------------------------------
+sub __populateUserInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# user data from the XML file.
+	# ---
+	my $this = shift;
+	my @userGrpNodes = $this->{systemTree} -> getElementsByTagName('users');
+	my %userData;
+	for my $grpNode (@userGrpNodes) {
+		my $groupname = $grpNode -> getAttribute('group');
+		my $groupid   = $grpNode -> getAttribute('id');
+		my @userNodes = $grpNode -> getElementsByTagName('user');
+		for my $userNode (@userNodes) {
+			my $name = $userNode -> getAttribute('name');
+			my %info = (
+				group        => $groupname,
+				groupid      => $groupid,
+				home         => $userNode -> getAttribute('home'),
+				name         => $name,
+				passwd       => $userNode -> getAttribute('pwd'),
+				passwdformat => $userNode -> getAttribute('pwdformat'),
+				realname     => $userNode -> getAttribute('realname'),
+				shell        => $userNode -> getAttribute('shell'),
+				userid       => $userNode -> getAttribute('id')
+			);
+			if ($userData{$name}) {
+				my $kiwi = $this->{kiwi};
+				my $msg = "Merging data for user '$name'";
+				#TODO: Enable message when we move to the new code
+				#      with old code the message would be misleading as
+				#      the old code actually overwrites data :(
+				#$kiwi -> info($msg);
+				my $grp = $userData{$name}{group} . ",$groupname";
+				$userData{$name}{group} = $grp;
+				if ($groupid && (! $userData{$name}{groupid})) {
+					$userData{$name}{groupid} = $groupid;
+				}
+				if ($info{passwd} && (! $userData{$name}{passwd})) {
+					$userData{$name}{passwd} = $info{passwd};
+				}
+				if ($info{passwdformat} && (! $userData{$name}{passwdformat})){
+					$userData{$name}{passwdformat} = $info{passwdformat};
+				}
+				if ($info{realname} && (! $userData{$name}{realname})) {
+					$userData{$name}{realname} = $info{realname};
+				}
+				if ($info{shell} && (! $userData{$name}{shell})) {
+					$userData{$name}{shell} = $info{shell};
+				}
+				if ($info{userid} && (! $userData{$name}{userid})) {
+					$userData{$name}{userid} = $info{userid};
+				}
+				#$kiwi -> done();
+			} else {
+				$userData{$name} = \%info;
+			}
+		}
+	}
+	$this->{imageConfig}{users} = \%userData;
 	return $this;
 }
 
@@ -2281,7 +2412,7 @@ sub updateTypeList {
 	# ---
 	my $this = shift;
 	$this->{typeList} = $this -> __populateTypeInfo_legacy();
-	$this -> __populateProfiledTypeInfo();
+	$this -> __populateProfiledTypeInfo_legacy();
 	return;
 }
 
@@ -2638,92 +2769,6 @@ sub getLocale {
 	return $lang;
 }
 
-#==========================================
-# getUsers
-#------------------------------------------
-sub getUsers {
-	# ...
-	# Receive a list of users to be added into the image
-	# the user specification contains an optional password
-	# and group. If the group doesn't exist it will be created
-	# ---
-	my $this   = shift;
-	my %result = ();
-	my @node   = $this->{usrdataNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		my $group = $element -> getAttribute("group");
-		my $gid   = $element -> getAttribute("id");
-		my @ntag  = $element -> getElementsByTagName ("user");
-		foreach my $element (@ntag) {
-			my $name = $element -> getAttribute ("name");
-			my $uid  = $element -> getAttribute ("id");
-			my $pwd  = $element -> getAttribute ("pwd");
-			my $pwdformat = $element -> getAttribute ("pwdformat");
-			my $home = $element -> getAttribute ("home");
-			my $realname = $element -> getAttribute ("realname");
-			my $shell = $element -> getAttribute ("shell");
-			if (defined $name) {
-				$result{$name}{group} = $group;
-				$result{$name}{gid}   = $gid;
-				$result{$name}{uid}   = $uid;
-				$result{$name}{home}  = $home;
-				$result{$name}{pwd}   = $pwd;
-				$result{$name}{pwdformat}= $pwdformat;
-				$result{$name}{realname} = $realname;
-				$result{$name}{shell} = $shell;
-			}
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getTypes
-#------------------------------------------
-sub getTypes {
-	# ...
-	# Receive a list of types available for this image
-	# ---
-	my $this    = shift;
-	my $kiwi    = $this->{kiwi};
-	my $cmdL    = $this->{cmdL};
-	my @result  = ();
-	my @tnodes  = ();
-	my $gotprim = 0;
-	my @node    = $this->{optionsNodeList} -> get_nodelist();
-	my $urlhd   = KIWIURL -> new ($kiwi,$cmdL);
-	foreach my $element (@node) {
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		my @types = $element -> getElementsByTagName ("type");
-		push (@tnodes,@types);
-	}
-	foreach my $node (@tnodes) {
-		my %record  = ();
-		$record{type} = $node -> getAttribute("image");
-		my $bootSpec = $node -> getAttribute("boot");
-		if ($bootSpec) {
-			$record{boot} = $bootSpec;
-			my $bootpath = $urlhd -> normalizeBootPath ($bootSpec);
-			if (defined $bootpath) {
-				$record{boot} = $bootpath;
-			}
-		}
-		my $primary = $node -> getAttribute("primary");
-		if ((defined $primary) && ("$primary" eq "true")) {
-			$record{primary} = "true";
-			$gotprim = 1;
-		} else {
-			$record{primary} = "false";
-		}
-		push (@result,\%record);
-	}
-	if (! $gotprim) {
-		$result[0]->{primary} = "true";
-	}
-	return @result;
-}
 
 #==========================================
 # getInstSourceRepository
@@ -6066,6 +6111,93 @@ sub getSplitPersistentExceptions_legacy {
 }
 
 #==========================================
+# getTypes_legacy
+#------------------------------------------
+sub getTypes_legacy {
+	# ...
+	# Receive a list of types available for this image
+	# ---
+	my $this    = shift;
+	my $kiwi    = $this->{kiwi};
+	my $cmdL    = $this->{cmdL};
+	my @result  = ();
+	my @tnodes  = ();
+	my $gotprim = 0;
+	my @node    = $this->{optionsNodeList} -> get_nodelist();
+	my $urlhd   = KIWIURL -> new ($kiwi,$cmdL);
+	foreach my $element (@node) {
+		if (! $this -> __requestedProfile ($element)) {
+			next;
+		}
+		my @types = $element -> getElementsByTagName ("type");
+		push (@tnodes,@types);
+	}
+	foreach my $node (@tnodes) {
+		my %record  = ();
+		$record{type} = $node -> getAttribute("image");
+		my $bootSpec = $node -> getAttribute("boot");
+		if ($bootSpec) {
+			$record{boot} = $bootSpec;
+			my $bootpath = $urlhd -> normalizeBootPath ($bootSpec);
+			if (defined $bootpath) {
+				$record{boot} = $bootpath;
+			}
+		}
+		my $primary = $node -> getAttribute("primary");
+		if ((defined $primary) && ("$primary" eq "true")) {
+			$record{primary} = "true";
+			$gotprim = 1;
+		} else {
+			$record{primary} = "false";
+		}
+		push (@result,\%record);
+	}
+	if (! $gotprim) {
+		$result[0]->{primary} = "true";
+	}
+	return @result;
+}
+
+#==========================================
+# getUsers_legacy
+#------------------------------------------
+sub getUsers_legacy {
+	# ...
+	# Receive a list of users to be added into the image
+	# the user specification contains an optional password
+	# and group. If the group doesn't exist it will be created
+	# ---
+	my $this   = shift;
+	my %result = ();
+	my @node   = $this->{usrdataNodeList} -> get_nodelist();
+	foreach my $element (@node) {
+		my $group = $element -> getAttribute("group");
+		my $gid   = $element -> getAttribute("id");
+		my @ntag  = $element -> getElementsByTagName ("user");
+		foreach my $element (@ntag) {
+			my $name = $element -> getAttribute ("name");
+			my $uid  = $element -> getAttribute ("id");
+			my $pwd  = $element -> getAttribute ("pwd");
+			my $pwdformat = $element -> getAttribute ("pwdformat");
+			my $home = $element -> getAttribute ("home");
+			my $realname = $element -> getAttribute ("realname");
+			my $shell = $element -> getAttribute ("shell");
+			if (defined $name) {
+				$result{$name}{group} = $group;
+				$result{$name}{gid}   = $gid;
+				$result{$name}{uid}   = $uid;
+				$result{$name}{home}  = $home;
+				$result{$name}{pwd}   = $pwd;
+				$result{$name}{pwdformat}= $pwdformat;
+				$result{$name}{realname} = $realname;
+				$result{$name}{shell} = $shell;
+			}
+		}
+	}
+	return %result;
+}
+
+#==========================================
 # getVMwareConfig_legacy
 #------------------------------------------
 sub getVMwareConfig_legacy {
@@ -6466,6 +6598,31 @@ sub getDriversNodeList_legacy {
 }
 
 #==========================================
+# __addVolume_legacy
+#------------------------------------------
+sub __addVolume_legacy {
+	# ...
+	# Add the given volume to the systemdisk section
+	# ---
+	my $this  = shift;
+	my $volume= shift;
+	my $aname = shift;
+	my $aval  = shift;
+	my $kiwi  = $this->{kiwi};
+	my $tnode = $this->{typeNode};
+	my $disk  = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
+	if (! defined $disk) {
+		return $this;
+	}
+	my $addElement = XML::LibXML::Element -> new ("volume");
+	$addElement -> setAttribute("name",$volume);
+	$addElement -> setAttribute($aname,$aval);
+	$disk -> appendChild ($addElement);
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
 # __populateProfiles_legacy
 #------------------------------------------
 sub __populateProfiles_legacy {
@@ -6727,208 +6884,89 @@ sub __checkProfiles_legacy {
 }
 
 #==========================================
-# End "old" methods section
+# __populateImageTypeAndNode_legacy
 #------------------------------------------
-
-#==========================================
-# Private helper methods
-#------------------------------------------
-sub __addDefaultStripNode {
+sub __populateImageTypeAndNode_legacy {
 	# ...
-	# if no strip section is setup we add the default
-	# section(s) from KIWIConfig.txt
+	# initialize imageType and typeNode according to the
+	# requested type or by the type specified as primary
+	# or by the first type node found
 	# ---
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $image  = $this->{imgnameNodeList} -> get_node(1);
-	my @snodes = $image -> getElementsByTagName ("strip");
-	my %attr   = %{$this->getImageTypeAndAttributes_legacy()};
-	my $haveDelete = 0;
-	my $haveTools  = 0;
-	my $haveLibs   = 0;
+	my $this     = shift;
+	my $kiwi     = $this->{kiwi};
+	my $typeinfo = $this->{typeInfo};
+	my $select;
 	#==========================================
-	# check if type is boot image
+	# check if there is a preferences section
 	#------------------------------------------
-	if ($attr{"type"} ne "cpio") {
-		return $this;
-	}
-	#==========================================
-	# check if there are strip nodes
-	#------------------------------------------
-	if (@snodes) {
-		foreach my $node (@snodes) {
-			my $type = $node -> getAttribute("type");
-			if ($type eq "delete") {
-				$haveDelete = 1;
-			} elsif ($type eq "tools") {
-				$haveTools = 1;
-			} elsif ($type eq "libs") {
-				$haveLibs = 1;
-			}
-		}
-	}
-	#==========================================
-	# read in default strip section
-	#------------------------------------------
-	my $stripTree;
-	my $stripXML = XML::LibXML -> new();
-	eval {
-		$stripTree = $stripXML
-			-> parse_file ( $this->{gdata}->{KStrip} );
-	};
-	if ($@) {
-		my $evaldata=$@;
-		$kiwi -> error  (
-			"Problem reading strip file: $this->{gdata}->{KStrip}"
-		);
-		$kiwi -> failed ();
-		$kiwi -> error  ("$evaldata\n");
+	if (! $this->{optionsNodeList}) {
 		return;
 	}
 	#==========================================
-	# append default sections
+	# check if typeinfo hash exists
 	#------------------------------------------
-	my @defaultStrip = $stripTree
-		-> getElementsByTagName ("initrd") -> get_node (1)
-		-> getElementsByTagName ("strip");
-	foreach my $element (@defaultStrip) {
-		my $type = $element -> getAttribute("type");
-		if ((! $haveDelete) && ($type eq "delete")) {
-			$kiwi -> loginfo ("STRIP: Adding default delete section\n");
-			$image -> addChild ($element -> cloneNode (1));
-		} elsif ((! $haveLibs) && ($type eq "libs")) {
-			$kiwi -> loginfo ("STRIP: Adding default libs section\n");
-			$image -> addChild ($element -> cloneNode (1));
-		} elsif ((! $haveTools) && ($type eq "tools")) {
-			$kiwi -> loginfo ("STRIP: Adding default tools section\n");
-			$image -> addChild ($element -> cloneNode (1));
-		}
-	}
-	$this -> updateXML();
-	return $this;
-}
-#==========================================
-# __addDefaultSplitNode
-#------------------------------------------
-sub __addDefaultSplitNode {
-	# ...
-	# if no split section is setup we add a default section
-	# from the contents of the KIWISplit.txt file and apply
-	# it to the split types
-	# ---
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my @node   = $this->{optionsNodeList} -> get_nodelist();
-	my @tnodes = ();
-	my @snodes = ();
-	#==========================================
-	# store list of all types
-	#------------------------------------------
-	foreach my $element (@node) {
-		my @types = $element -> getElementsByTagName ("type");
-		push (@tnodes,@types);
-	}
-	#==========================================
-	# select relevant types w.o. split section
-	#------------------------------------------
-	foreach my $element (@tnodes) {
-		my $image = $element -> getAttribute("image");
-		my $flags = $element -> getAttribute("flags");
-		if (($image eq "split") || 
-			(($image eq "iso") && ($flags) && ($flags eq "compressed"))
-		) {
-			my @splitsections = $element -> getElementsByTagName ("split");
-			if (! @splitsections) {
-				push (@snodes,$element);
-			}
-		}
-	}
-	#==========================================
-	# return if no split types are found
-	#------------------------------------------
-	if (! @snodes) {
+	if (! $typeinfo) {
+		# /.../
+		# if no typeinfo hash was populated we use the first type
+		# node listed in the description as the used type.
+		# ----
+		$this->{typeNode} = $this->{optionsNodeList}
+			-> get_node(1) -> getElementsByTagName ("type") -> get_node(1);
 		return $this;
 	}
 	#==========================================
-	# read in default split section
+	# select type and type node
 	#------------------------------------------
-	my $splitTree;
-	my $splitXML = XML::LibXML -> new();
-	eval {
-		$splitTree = $splitXML
-			-> parse_file ( $this->{gdata}->{KSplit} );
-	};
-	if ($@) {
-		my $evaldata=$@;
-		$kiwi -> error  (
-			"Problem reading split file: $this->{gdata}->{KSplit}"
-		);
+	if (! defined $this->{imageType}) {
+		# /.../
+		# no type was requested: select primary type or if
+		# not set in the XML description select the first one
+		# in the list
+		# ----
+		my @types = keys %{$typeinfo};
+		my $first;
+		foreach my $type (@types) {
+			if ($typeinfo->{$type}{primary} eq "true") {
+				$select = $type; last;
+			}
+			if ($typeinfo->{$type}{first} == 1) {
+				$first = $type;
+			}
+		}
+		if (! $select) {
+			$select = $first;
+		}
+	} else {
+		# /.../
+		# a specific type was requested, select this type
+		# ----
+		$select = $this->{imageType};
+	}
+	#==========================================
+	# check selection
+	#------------------------------------------
+	if (! $select) {
+		$kiwi -> error  ('Cannot determine build type');
 		$kiwi -> failed ();
-		$kiwi -> error  ("$evaldata\n");
+		return;
+	}
+	if (! $typeinfo->{$select}) {
+		$kiwi -> error  ("Can't find requested image type: $select");
+		$kiwi -> failed ();
 		return;
 	}
 	#==========================================
-	# append default section to selected nodes
+	# store object data
 	#------------------------------------------
-	my $defaultSplit = $splitTree
-		-> getElementsByTagName ("split") -> get_node(1);
-	foreach my $element (@snodes) {
-		$element -> addChild (
-			$defaultSplit -> cloneNode (1)
-		);
-	}
-	$this -> updateXML();
+	$this->{imageType} = $typeinfo->{$select}{type};
+	$this->{typeNode}  = $typeinfo->{$select}{node};
 	return $this;
 }
 
 #==========================================
-# __getPreferencesNodeByTagName
+# __updateDescriptionFromChangeSet_legacy
 #------------------------------------------
-sub __getPreferencesNodeByTagName {
-	# ...
-	# Searches in all nodes of the preferences sections
-	# and returns the first occurenc of the specified
-	# tag name. If the tag can't be found the function
-	# returns the first node reference
-	# ---
-	my $this = shift;
-	my $name = shift;
-	my @node = $this->{optionsNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		my $tag = $element -> getElementsByTagName ("$name");
-		if ($tag) {
-			return $element;
-		}
-	}
-	return $node[0];
-}
-
-#==========================================
-# __getVMConfigOpts
-#------------------------------------------
-sub __getVMConfigOpts {
-	# ...
-	# Extract the <vmconfig-entry> information from the
-	# XML and return all options in a list
-	# ---
-	my $this = shift;
-	my @configOpts;
-	my @configNodes = $this->{systemTree}
-		->getElementsByTagName ("vmconfig-entry");
-	for my $node (@configNodes) {
-		my $value = $node->textContent();
-		push @configOpts, $node->textContent();
-	}
-	return @configOpts;
-}
-
-#==========================================
-# __updateDescriptionFromChangeSet
-#------------------------------------------
-sub __updateDescriptionFromChangeSet {
+sub __updateDescriptionFromChangeSet_legacy {
 	# ...
 	# Write given changes into the previosly read in XML tree
 	# This function is used to incorporate repository, packages
@@ -7213,7 +7251,7 @@ sub __updateDescriptionFromChangeSet {
 			if (! $absolute) {
 				$attrname = "freespace";
 			}
-			$this -> __addVolume ($vol,$attrname,$attrval);
+			$this -> __addVolume_legacy ($vol,$attrname,$attrval);
 		}
 	}
 	#==========================================
@@ -7224,28 +7262,202 @@ sub __updateDescriptionFromChangeSet {
 }
 
 #==========================================
-# __addVolume
+# End "old" methods section
 #------------------------------------------
-sub __addVolume {
+
+#==========================================
+# Private helper methods
+#------------------------------------------
+sub __addDefaultStripNode {
 	# ...
-	# Add the given volume to the systemdisk section
+	# if no strip section is setup we add the default
+	# section(s) from KIWIConfig.txt
 	# ---
-	my $this  = shift;
-	my $volume= shift;
-	my $aname = shift;
-	my $aval  = shift;
-	my $kiwi  = $this->{kiwi};
-	my $tnode = $this->{typeNode};
-	my $disk  = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
-	if (! defined $disk) {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $image  = $this->{imgnameNodeList} -> get_node(1);
+	my @snodes = $image -> getElementsByTagName ("strip");
+	my %attr   = %{$this->getImageTypeAndAttributes_legacy()};
+	my $haveDelete = 0;
+	my $haveTools  = 0;
+	my $haveLibs   = 0;
+	#==========================================
+	# check if type is boot image
+	#------------------------------------------
+	if ($attr{"type"} ne "cpio") {
 		return $this;
 	}
-	my $addElement = XML::LibXML::Element -> new ("volume");
-	$addElement -> setAttribute("name",$volume);
-	$addElement -> setAttribute($aname,$aval);
-	$disk -> appendChild ($addElement);
+	#==========================================
+	# check if there are strip nodes
+	#------------------------------------------
+	if (@snodes) {
+		foreach my $node (@snodes) {
+			my $type = $node -> getAttribute("type");
+			if ($type eq "delete") {
+				$haveDelete = 1;
+			} elsif ($type eq "tools") {
+				$haveTools = 1;
+			} elsif ($type eq "libs") {
+				$haveLibs = 1;
+			}
+		}
+	}
+	#==========================================
+	# read in default strip section
+	#------------------------------------------
+	my $stripTree;
+	my $stripXML = XML::LibXML -> new();
+	eval {
+		$stripTree = $stripXML
+			-> parse_file ( $this->{gdata}->{KStrip} );
+	};
+	if ($@) {
+		my $evaldata=$@;
+		$kiwi -> error  (
+			"Problem reading strip file: $this->{gdata}->{KStrip}"
+		);
+		$kiwi -> failed ();
+		$kiwi -> error  ("$evaldata\n");
+		return;
+	}
+	#==========================================
+	# append default sections
+	#------------------------------------------
+	my @defaultStrip = $stripTree
+		-> getElementsByTagName ("initrd") -> get_node (1)
+		-> getElementsByTagName ("strip");
+	foreach my $element (@defaultStrip) {
+		my $type = $element -> getAttribute("type");
+		if ((! $haveDelete) && ($type eq "delete")) {
+			$kiwi -> loginfo ("STRIP: Adding default delete section\n");
+			$image -> addChild ($element -> cloneNode (1));
+		} elsif ((! $haveLibs) && ($type eq "libs")) {
+			$kiwi -> loginfo ("STRIP: Adding default libs section\n");
+			$image -> addChild ($element -> cloneNode (1));
+		} elsif ((! $haveTools) && ($type eq "tools")) {
+			$kiwi -> loginfo ("STRIP: Adding default tools section\n");
+			$image -> addChild ($element -> cloneNode (1));
+		}
+	}
 	$this -> updateXML();
 	return $this;
+}
+#==========================================
+# __addDefaultSplitNode
+#------------------------------------------
+sub __addDefaultSplitNode {
+	# ...
+	# if no split section is setup we add a default section
+	# from the contents of the KIWISplit.txt file and apply
+	# it to the split types
+	# ---
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my @node   = $this->{optionsNodeList} -> get_nodelist();
+	my @tnodes = ();
+	my @snodes = ();
+	#==========================================
+	# store list of all types
+	#------------------------------------------
+	foreach my $element (@node) {
+		my @types = $element -> getElementsByTagName ("type");
+		push (@tnodes,@types);
+	}
+	#==========================================
+	# select relevant types w.o. split section
+	#------------------------------------------
+	foreach my $element (@tnodes) {
+		my $image = $element -> getAttribute("image");
+		my $flags = $element -> getAttribute("flags");
+		if (($image eq "split") || 
+			(($image eq "iso") && ($flags) && ($flags eq "compressed"))
+		) {
+			my @splitsections = $element -> getElementsByTagName ("split");
+			if (! @splitsections) {
+				push (@snodes,$element);
+			}
+		}
+	}
+	#==========================================
+	# return if no split types are found
+	#------------------------------------------
+	if (! @snodes) {
+		return $this;
+	}
+	#==========================================
+	# read in default split section
+	#------------------------------------------
+	my $splitTree;
+	my $splitXML = XML::LibXML -> new();
+	eval {
+		$splitTree = $splitXML
+			-> parse_file ( $this->{gdata}->{KSplit} );
+	};
+	if ($@) {
+		my $evaldata=$@;
+		$kiwi -> error  (
+			"Problem reading split file: $this->{gdata}->{KSplit}"
+		);
+		$kiwi -> failed ();
+		$kiwi -> error  ("$evaldata\n");
+		return;
+	}
+	#==========================================
+	# append default section to selected nodes
+	#------------------------------------------
+	my $defaultSplit = $splitTree
+		-> getElementsByTagName ("split") -> get_node(1);
+	foreach my $element (@snodes) {
+		$element -> addChild (
+			$defaultSplit -> cloneNode (1)
+		);
+	}
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# __getPreferencesNodeByTagName
+#------------------------------------------
+sub __getPreferencesNodeByTagName {
+	# ...
+	# Searches in all nodes of the preferences sections
+	# and returns the first occurenc of the specified
+	# tag name. If the tag can't be found the function
+	# returns the first node reference
+	# ---
+	my $this = shift;
+	my $name = shift;
+	my @node = $this->{optionsNodeList} -> get_nodelist();
+	foreach my $element (@node) {
+		if (! $this -> __requestedProfile ($element)) {
+			next;
+		}
+		my $tag = $element -> getElementsByTagName ("$name");
+		if ($tag) {
+			return $element;
+		}
+	}
+	return $node[0];
+}
+
+#==========================================
+# __getVMConfigOpts
+#------------------------------------------
+sub __getVMConfigOpts {
+	# ...
+	# Extract the <vmconfig-entry> information from the
+	# XML and return all options in a list
+	# ---
+	my $this = shift;
+	my @configOpts;
+	my @configNodes = $this->{systemTree}
+		->getElementsByTagName ("vmconfig-entry");
+	for my $node (@configNodes) {
+		my $value = $node->textContent();
+		push @configOpts, $node->textContent();
+	}
+	return @configOpts;
 }
 
 #==========================================
@@ -7586,9 +7798,9 @@ sub __requestedProfile {
 }
 
 #==========================================
-# __populateProfiledTypeInfo
+# __populateProfiledTypeInfo_legacy
 #------------------------------------------
-sub __populateProfiledTypeInfo {
+sub __populateProfiledTypeInfo_legacy {
 	# ...
 	# Store those types from the typeList which are selected
 	# by the profiles or the internal 'all' profile and store
@@ -7638,86 +7850,6 @@ sub __populateProfiledTypeInfo {
 	# store types in typeInfo hash
 	#------------------------------------------
 	$this->{typeInfo} = \%result;
-	return $this;
-}
-
-#==========================================
-# __populateImageTypeAndNode
-#------------------------------------------
-sub __populateImageTypeAndNode {
-	# ...
-	# initialize imageType and typeNode according to the
-	# requested type or by the type specified as primary
-	# or by the first type node found
-	# ---
-	my $this     = shift;
-	my $kiwi     = $this->{kiwi};
-	my $typeinfo = $this->{typeInfo};
-	my $select;
-	#==========================================
-	# check if there is a preferences section
-	#------------------------------------------
-	if (! $this->{optionsNodeList}) {
-		return;
-	}
-	#==========================================
-	# check if typeinfo hash exists
-	#------------------------------------------
-	if (! $typeinfo) {
-		# /.../
-		# if no typeinfo hash was populated we use the first type
-		# node listed in the description as the used type.
-		# ----
-		$this->{typeNode} = $this->{optionsNodeList}
-			-> get_node(1) -> getElementsByTagName ("type") -> get_node(1);
-		return $this;
-	}
-	#==========================================
-	# select type and type node
-	#------------------------------------------
-	if (! defined $this->{imageType}) {
-		# /.../
-		# no type was requested: select primary type or if
-		# not set in the XML description select the first one
-		# in the list
-		# ----
-		my @types = keys %{$typeinfo};
-		my $first;
-		foreach my $type (@types) {
-			if ($typeinfo->{$type}{primary} eq "true") {
-				$select = $type; last;
-			}
-			if ($typeinfo->{$type}{first} == 1) {
-				$first = $type;
-			}
-		}
-		if (! $select) {
-			$select = $first;
-		}
-	} else {
-		# /.../
-		# a specific type was requested, select this type
-		# ----
-		$select = $this->{imageType};
-	}
-	#==========================================
-	# check selection
-	#------------------------------------------
-	if (! $select) {
-		$kiwi -> error  ('Cannot determine build type');
-		$kiwi -> failed ();
-		return;
-	}
-	if (! $typeinfo->{$select}) {
-		$kiwi -> error  ("Can't find requested image type: $select");
-		$kiwi -> failed ();
-		return;
-	}
-	#==========================================
-	# store object data
-	#------------------------------------------
-	$this->{imageType} = $typeinfo->{$select}{type};
-	$this->{typeNode}  = $typeinfo->{$select}{node};
 	return $this;
 }
 

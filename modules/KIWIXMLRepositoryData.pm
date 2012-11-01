@@ -52,15 +52,33 @@ sub new {
 		return;
 	}
 	my %keywords = map { ($_ => 1) } qw(
-		alias imageinclude password path preferlicense priority
-		status type username
+		alias
+		imageinclude
+		password
+		path
+		preferlicense
+		priority
+		status
+		type
+		username
 	);
 	$this->{supportedKeywords} = \%keywords;
-	my %boolKW = map { ($_ => 1) } qw( preferlicense imageinclude );
+	my %boolKW = map { ($_ => 1) } qw(
+		preferlicense
+		imageinclude
+	);
 	$this->{boolKeywords} = \%boolKW;
 	my %supportedRepo = map { ($_ => 1) } qw(
-		apt-deb apt-rpm	deb-dir	mirrors	red-carpet rpm-dir rpm-md slack-site
-		up2date-mirrors	urpmi yast2
+		apt-deb
+		apt-rpm
+		deb-dir
+		mirrors
+		red-carpet
+		rpm-dir
+		rpm-md
+		slack-site
+		up2date-mirrors
+		urpmi yast2
 	);
 	$this->{supportedRepoTypes} = \%supportedRepo;
 	if (! $this -> __isInitHashRef($init) ) {

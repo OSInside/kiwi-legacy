@@ -24,6 +24,9 @@
 		<user home="/home/auser" id="2001" pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" name="auser" shell="/bin/ksh"/>
 		<user home="/home/buser" pwd="linux" pwdformat="plain" name="buser" realname="Bert"/>
 	</users>
+	<users group="video">
+		<user home="/home/auser" name="auser"/>
+	</users>
 	<repository type="yast2">
 		<source path="opensuse://12.1/repo/oss/"/>
 	</repository>
