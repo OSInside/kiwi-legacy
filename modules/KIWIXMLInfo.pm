@@ -382,7 +382,7 @@ sub __getTree {
 			# types
 			#------------------------------------------
 			/^types/         && do {
-				foreach my $t ($xml -> getTypes()) {
+				foreach my $t ($xml -> getTypes_legacy()) {
 					my %type = %{$t};
 					my $type = XML::LibXML::Element -> new("type");
 					$type -> setAttribute ("name","$type{type}");

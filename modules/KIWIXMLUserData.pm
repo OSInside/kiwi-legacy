@@ -1,0 +1,525 @@
+#================
+# FILE          : KIWIXMLUserData.pm
+#----------------
+# PROJECT       : OpenSUSE Build-Service
+# COPYRIGHT     : (c) 20012 SUSE LLC
+#               :
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This module represents the data contained in the KIWI
+#               : configuration file marked with the <user> element.
+#               : Additionally the objects stores the attribute data of
+#               : the <users> element.
+#               :
+# STATUS        : Development
+#----------------
+package KIWIXMLUserData;
+#==========================================
+# Modules
+#------------------------------------------
+use strict;
+use warnings;
+use Readonly;
+require Exporter;
+
+use base qw /KIWIXMLDataBase/;
+#==========================================
+# Exports
+#------------------------------------------
+our @EXPORT_OK = qw ();
+
+#==========================================
+# constant
+#------------------------------------------
+Readonly my $MIN_ID => 1000;
+
+#==========================================
+# Constructor
+#------------------------------------------
+sub new {
+	# ...
+	# Create the KIWIXMLUserData object
+	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
+	my $class = shift;
+	my $this  = $class->SUPER::new(@_);
+	#==========================================
+	# Module Parameters
+	#------------------------------------------
+	my $kiwi = shift;
+	my $init = shift;
+	#==========================================
+	# Argument checking and object data store
+	#------------------------------------------
+	if (! $this -> __hasInitArg($init) ) {
+		return;
+	}
+	my %keywords = map { ($_ => 1) } qw(
+		group
+		groupid
+		home
+		name
+		passwd
+		passwdformat
+		realname
+		shell
+		userid
+	);
+	$this->{supportedKeywords} = \%keywords;
+	if (! $this -> __isInitHashRef($init) ) {
+		return;
+	}
+	if (! $this -> __areKeywordArgsValid($init) ) {
+		return;
+	}
+	if (! $this -> __isInitConsistent($init)) {
+		return;
+	}
+	$this->{group}        = $init->{group};
+	$this->{groupid}      = $init->{groupid};
+	$this->{home}         = $init->{home};
+	$this->{name}         = $init->{name};
+	$this->{passwd}       = $init->{passwd};
+	$this->{passwdformat} = $init->{passwdformat};
+	$this->{realname}     = $init->{realname};
+	$this->{shell}        = $init->{shell};
+	$this->{userid}       = $init->{userid};
+	# Set the default
+	if (! $this->{passwdformat} ) {
+		$this->{passwdformat} = 'encrypted';
+	}
+	return $this;
+}
+
+#==========================================
+# getGroupName
+#------------------------------------------
+sub getGroupName {
+	# ...
+	# Return the name of the group this user belongs to
+	# ---
+	my $this = shift;
+	return $this->{group};
+}
+
+#==========================================
+# getGroupID
+#------------------------------------------
+sub getGroupID {
+	# ...
+	# Return the groupid for the group this user belongs to
+	# ---
+	my $this = shift;
+	return $this->{groupid};
+}
+
+#==========================================
+# getLoginShell
+#------------------------------------------
+sub getLoginShell {
+	# ...
+	# Return the configured e
+	# ---
+	my $this = shift;
+	return $this->{shell};
+}
+
+#==========================================
+# getPassword
+#------------------------------------------
+sub getPassword {
+	# ...
+	# Return the user's password
+	# ---
+	my $this = shift;
+	return $this->{passwd};
+}
+
+#==========================================
+# getPasswordFormat
+#------------------------------------------
+sub getPasswordFormat {
+	# ...
+	# Return the format of the password
+	# ---
+	my $this = shift;
+	return $this->{passwdformat};
+}
+
+#==========================================
+# getUserHomeDir
+#------------------------------------------
+sub getUserHomeDir {
+	# ...
+	# Return the user's home directory
+	# ---
+	my $this = shift;
+	return $this->{home};
+}
+
+#==========================================
+# getUserID
+#------------------------------------------
+sub getUserID {
+	# ...
+	# Return the user's ID
+	# ---
+	my $this = shift;
+	return $this->{userid};
+}
+
+#==========================================
+# getUserName
+#------------------------------------------
+sub getUserName {
+	# ...
+	# Return the user name
+	# ---
+	my $this = shift;
+	return $this->{name};
+}
+
+#==========================================
+# getUserRealName
+#------------------------------------------
+sub getUserRealName {
+	# ...
+	# Return the real name of the user
+	# ---
+	my $this = shift;
+	return $this->{realname};
+}
+
+#==========================================
+# setGroupName
+#------------------------------------------
+sub setGroupName {
+	# ...
+	# Set the name of the group this user belongs to
+	# ---
+	my $this = shift;
+	my $name = shift;
+	if (! $name) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setGroupName: no name argument given, '
+			. 'retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $validName = $this -> __containsNoWhiteSpace($name, 'setGroupName');
+	if (! $validName ) {
+		return;
+	}
+	$this->{group} = $name;
+	return $this;
+}
+
+#==========================================
+# setGroupID
+#------------------------------------------
+sub setGroupID {
+	# ...
+	# Return the groupid for the group this user belongs to
+	# ---
+	my $this = shift;
+	my $id   = shift;
+	my $validId = $this -> __checkAssignedID($id, 'setGroupID');
+	if (! $validId) {
+		return;
+	}
+	$this->{groupid} = $id;
+	return $this;
+}
+
+#==========================================
+# setLoginShell
+#------------------------------------------
+sub setLoginShell {
+	# ...
+	# Set the login shell for the user
+	# ---
+	my $this = shift;
+	my $lsh  = shift;
+	if (! $lsh) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setLoginShell: no login shell argument given, '
+			. 'retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $nameValid = $this -> __containsNoWhiteSpace($lsh, 'setLoginShell');
+	if (! $nameValid) {
+		return;
+	}
+	$this->{shell} = $lsh;
+	return $this;
+}
+
+#==========================================
+# setPassword
+#------------------------------------------
+sub setPassword {
+	# ...
+	# Set the usre's password
+	# ---
+	my $this = shift;
+	my $pwd  = shift;
+	if (! $pwd) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setPassword: no password argument given, '
+			. 'retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{passwd} = $pwd;
+	return $this;
+}
+
+#==========================================
+# setPasswordFormat
+#------------------------------------------
+sub setPasswordFormat {
+	# ...
+	# Set the password format
+	# ---
+	my $this = shift;
+	my $pwdF = shift;
+	if (! $this -> __validPassFormat($pwdF, 'setPasswordFormat') ) {
+		return;
+	}
+	$this->{passwdformat} = $pwdF;
+	return $this;
+}
+
+#==========================================
+# setUserHomeDir
+#------------------------------------------
+sub setUserHomeDir {
+	# ...
+	# Return the user's home directory
+	# ---
+	my $this = shift;
+	my $dir  = shift;
+	if (! $dir) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setUserHomeDir: no home directory argument given, '
+			. 'retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $nameValid = $this -> __containsNoWhiteSpace($dir, 'setUserHomeDir');
+	if (! $nameValid) {
+		return;
+	}
+	$this->{home} = $dir;
+	return $this;
+}
+
+#==========================================
+# setUserID
+#------------------------------------------
+sub setUserID {
+	# ...
+	# Return the user's ID
+	# ---
+	my $this = shift;
+	my $id   = shift;
+	my $validId = $this -> __checkAssignedID($id, 'setUserID');
+	if (! $validId) {
+		return;
+	}
+	$this->{userid} = $id;
+	return $this;;
+}
+
+#==========================================
+# setUserName
+#------------------------------------------
+sub setUserName {
+	# ...
+	# Return the user name
+	# ---
+	my $this = shift;
+	my $name = shift;
+	if (! $name) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setUserName: no name argument given, '
+			. 'retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $validName = $this -> __containsNoWhiteSpace($name, 'setUserName');
+	if (! $validName ) {
+		return;
+	}
+	$this->{name} = $name;
+	return $this;
+}
+
+#==========================================
+# setUserRealName
+#------------------------------------------
+sub setUserRealName {
+	# ...
+	# Return the real name of the user
+	# ---
+	my $this = shift;
+	my $name = shift;
+	if (! $name) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setUserRealName: no name argument given, '
+			. 'retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{realname} = $name;
+	return $this;
+}
+
+#==========================================
+# Private helper methods
+#------------------------------------------
+#==========================================
+# __checkAssignedID
+#------------------------------------------
+sub __checkAssignedID {
+	# ...
+	# Check the ID and generate a warning if it is below 500
+	# ---
+	my $this     = shift;
+	my $id       = shift;
+	my $caller   = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller ) {
+		my $msg = 'Internal error: please file a bug __checkAssignedID on '
+			. 'UserData called with insufficient arguments.';
+		$kiwi -> error($msg);
+		$kiwi -> oops();
+		return;
+	}
+	if (! $id) {
+		my $msg = "$caller: no ID argument specified,, retaining "
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $idNum = int $id;
+	if ( $id < $MIN_ID ) {
+		my $msg = "$caller: assigned ID is less than 1000, this may conflict "
+			. 'with system assigned IDs for users and groups.';
+		$kiwi -> warning($msg);
+		$kiwi -> done();
+	}
+	return 1;
+}
+
+#==========================================
+# __isInitConsistent
+#------------------------------------------
+sub __isInitConsistent {
+	# ...
+	# Verify that the initialization hash is valid
+	# ---
+	my $this = shift;
+	my $init = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $init->{group} ) {
+		my $msg = 'KIWIXMLUserData: no "group" name specified in '
+			. 'initialization structure.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $init->{home} ) {
+		my $msg = 'KIWIXMLUserData: no "home" directory specified in '
+			. 'initialization structure.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $init->{name} ) {
+		my $msg = 'KIWIXMLUserData: no user "name" specified in '
+			. 'initialization structure.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if ($init->{passwdformat}) {
+		my $pwdF = $init->{passwdformat};
+		if (! $this -> __validPassFormat($pwdF, 'object initialization')) {
+			return;
+		}
+	}
+	$this -> __warnAssignedIDs($init);
+	return 1;
+}
+
+#==========================================
+# __validPassFormat
+#------------------------------------------
+sub __validPassFormat {
+	# ...
+	# Check that the passwdFormat argument has the expected value
+	# ---
+	my $this   = shift;
+	my $pwdF   = shift;
+	my $caller = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller) {
+		my $msg = 'Internal error: please file a bug __validPassFormat on '
+			. 'UserData called with insufficient arguments.';
+		$kiwi -> error($msg);
+		$kiwi -> oops();
+		return;
+	}
+	if (! $pwdF) {
+		my $msg = "$caller: no format argument given, retaining "
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my %supportedVals = (
+						encrypted => 1,
+						plain     => 1
+	);
+	if (! $supportedVals{$pwdF}) {
+		my $msg = "$caller: unexpected value for password format, expecting "
+			. 'encrypted or plain.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
+}
+
+#==========================================
+# __warnAssignedIDs
+#------------------------------------------
+sub __warnAssignedIDs {
+	# ...
+	# Give a warning if the assigned IDs are below 500
+	# ---
+	my $this = shift;
+	my $init = shift;
+	if ($init->{groupid}) {
+		$this -> __checkAssignedID($init->{groupid}, 'object initialization');
+	}
+	if ($init->{userid}) {
+		$this -> __checkAssignedID($init->{userid}, 'object initialization');
+	}
+	return;
+}
+
+1;

@@ -202,7 +202,7 @@ sub setupUsersGroups {
 	my $kiwi  = $this->{kiwi};
 	my $xml   = $this->{xml};
 	my $root  = $this->{root};
-	my %users = $xml -> getUsers();
+	my %users = $xml -> getUsers_legacy();
 	if (%users) {
 		if (! -x "$root/usr/sbin/useradd") {
 			$kiwi -> error ("Missing useradd command");

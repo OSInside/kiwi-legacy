@@ -50,6 +50,7 @@ my @kiwiModules = qw (
 	KIWIXMLSplitData.pm
 	KIWIXMLSystemdiskData.pm
 	KIWIXMLTypeData.pm
+	KIWIXMLUserData.pm
 	KIWIXMLVMachineData.pm
 	KIWIXMLValidator.pm
 	KIWICommandLine.t
@@ -70,6 +71,7 @@ my @kiwiModules = qw (
 	KIWIXMLSplitData.t
 	KIWIXMLSystemdiskData.t
 	KIWIXMLTypeData.t
+	KIWIXMLUserData.t
 	KIWIXMLVMachineData.t
 	KIWIXMLValidator.t
 	ktLog.pm
@@ -92,6 +94,7 @@ my @kiwiModules = qw (
 	kiwiXMLSplitData.pm
 	kiwiXMLSystemdiskData.pm
 	kiwiXMLTypeData.pm
+	kiwiXMLUserData.pm
 	kiwiXMLVMachineData.pm
 	kiwiXMLValidator.pm
 	collector.pl
@@ -142,6 +145,7 @@ my @notClean1 = qw (
 	KIWIXMLSplitData.pm
 	KIWIXMLSystemdiskData.pm
 	KIWIXMLTypeData.pm
+	KIWIXMLUserData.pm
 	KIWIXMLVMachineData.pm
 	KIWIXMLValidator.pm
 	KIWICommandLine.t
@@ -162,6 +166,7 @@ my @notClean1 = qw (
 	KIWIXMLSplitData.t
 	KIWIXMLSystemdiskData.t
 	KIWIXMLTypeData.t
+	KIWIXMLUserData.t
 	KIWIXMLVMachineData.t
 	KIWIXMLValidator.t
 	ktLog.pm
@@ -184,6 +189,7 @@ my @notClean1 = qw (
 	kiwiXMLSplitData.pm
 	kiwiXMLSystemdiskData.pm
 	kiwiXMLTypeData.pm
+	kiwiXMLUserData.pm
 	kiwiXMLVMachineData.pm
 	kiwiXMLValidator.pm
 	collector.pl
@@ -247,6 +253,7 @@ my @notClean2 = qw (
 	KIWIXMLSplitData.t
 	KIWIXMLSystemdiskData.t
 	KIWIXMLTypeData.t
+	KIWIXMLUserData.t
 	KIWIXMLVMachineData.t
 	KIWIXMLValidator.t
 	ktTestCase.pm
@@ -313,6 +320,7 @@ my @notClean3 = qw (
 	KIWIXMLSplitData.t
 	KIWIXMLSystemdiskData.t
 	KIWIXMLTypeData.t
+	KIWIXMLUserData.t
 	KIWIXMLVMachineData.t
 	KIWIXMLValidator.t
 	kiwiCommandLine.pm
@@ -346,6 +354,7 @@ my @notClean4 = qw (
 	KIWIXMLSplitData.t
 	KIWIXMLSystemdiskData.t
 	KIWIXMLTypeData.t
+	KIWIXMLUserData.t
 	KIWIXMLVMachineData.t
 	collector.pl
 );
