@@ -108,6 +108,39 @@ sub __areKeywordBooleanValuesValid {
 }
 
 #==========================================
+# __containsNoWhiteSpace
+#------------------------------------------
+sub __containsNoWhiteSpace {
+	# ...
+	# Verify that the given data contains no whitspace
+	# ---
+	my $this   = shift;
+	my $name   = shift;
+	my $caller = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller ) {
+		my $msg = 'Internal error __containsNoWhiteSpace called without '
+			. 'call origin argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if (! $name ) {
+		my $msg = 'Internal error __containsNoWhiteSpace called without '
+			. 'argument to check.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if ($name =~ /\s/) {
+		my $msg = "$caller: given argument contains white space "
+			. 'not supported, retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
+}
+
+#==========================================
 # __hasInitArg
 #------------------------------------------
 sub __hasInitArg {

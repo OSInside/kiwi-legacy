@@ -15,7 +15,7 @@
 				<vmnic interface="eth0"/>
 			</machine>
 		</type>
-		<type image="oem" bootloader="grub2" bootprofile="desktop" boottimeout="5" checkprebuilt="true" compressed="false"  filesystem="ext3" installboot="true" installprovidefailsafe="false" installiso="false" installstick="true" kernelcmdline="kiwidebug=1" primary="false" vga="0x367" volid="baseSys"/>
+		<type image="oem" bootloader="grub2" bootprofile="desktop" boottimeout="5" checkprebuilt="true" compressed="false"  filesystem="ext3" installboot="install" installprovidefailsafe="false" installiso="false" installstick="true" kernelcmdline="kiwidebug=1" primary="false" vga="0x367" volid="baseSys"/>
 		<version>0.0.1</version>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>false</rpm-force>
