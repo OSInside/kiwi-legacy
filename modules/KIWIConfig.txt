@@ -127,6 +127,7 @@
 		<file name="lvresize"/>
 		<file name="md5sum"/>
 		<file name="mdadm"/>
+		<file name="mdmon"/>
 		<file name="mkdir"/>
 		<file name="mkdosfs"/>
 		<file name="mke2fs"/>

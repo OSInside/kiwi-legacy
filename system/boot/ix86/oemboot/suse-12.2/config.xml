@@ -137,6 +137,7 @@
 		<package name="kpartx"/>
 		<package name="lvm2"/>
 		<package name="make"/>
+		<package name="mdadm"/>
 		<package name="module-init-tools"/>
 		<package name="net-tools"/>
 		<package name="netcfg"/>

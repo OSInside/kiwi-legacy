@@ -1119,6 +1119,13 @@ function identifyDMRaid {
 			device_disks_new="$device_disks_new $i"
 		fi
 	done
+	#======================================
+	# start event monitoring
+	#--------------------------------------
+	mdmon --all --takeover
+	#======================================
+	# return with new disk list
+	#--------------------------------------
 	deviceDisks=$device_disks_new
 }
 
