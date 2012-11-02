@@ -1308,7 +1308,7 @@ sub __clean_loop {
 sub DESTROY {
 	my $this   = shift;
 	my $tmpdir = $this->{tmpdir};
-	if (-d $tmpdir) {
+	if (($tmpdir) && (-d $tmpdir)) {
 		qxx ("rm -rf $tmpdir 2>&1");
 	}
 	return $this;
