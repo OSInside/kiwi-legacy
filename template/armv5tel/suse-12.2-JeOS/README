@@ -1,0 +1,5 @@
+Build instructions for local build
+==================================
+* call kiwi:
+  kiwi --build suse-12.2-JeOS --set-repo /path/to/12.2/repo \
+	   -d /tmp/myimage

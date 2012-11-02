@@ -3596,7 +3596,7 @@ sub test_getPXEConfig {
 	my $unionRW  = $pxeConfObj -> getUnionRW();
 	my $unionT   = $pxeConfObj -> getUnionType();
 	$this -> assert_str_equals('4096', $blockS);
-	my @expectedArch = qw /x86_64 ix86 armv7l ppc64 ppc/;
+	my @expectedArch = qw /x86_64 ix86 armv5tel armv7l ppc64 ppc/;
 	$this -> assert_array_equal(\@expectedArch, $confArch);
 	$this -> assert_str_equals('target', $confDest);
 	$this -> assert_str_equals('installSource', $confSrc);
