@@ -2265,6 +2265,7 @@ function setupBootLoaderGrub2 {
 	#======================================
 	# local variables
 	#--------------------------------------
+	local kname=$(uname -r)
 	local title
 	local cmdline
 	local timeout
@@ -2311,11 +2312,14 @@ function setupBootLoaderGrub2 {
 	if [ -z "$gfix" ];then
 		gfix="unknown"
 	fi
-	title=$(makeLabel "$gfix")
 	if [ -z "$kiwi_oemtitle" ] && [ ! -z "$kiwi_displayname" ];then
 		kiwi_oemtitle=$kiwi_displayname
 	fi
-	if [ ! -z "$kiwi_oemtitle" ];then
+	if ! echo $gfix | grep -E -q "OEM|USB|VMX|NET|unknown";then
+		title=$(makeLabel "$gfix")
+	elif [ -z "$kiwi_oemtitle" ];then
+		title=$(makeLabel "$kname [ $gfix ]")
+	else
 		title=$(makeLabel "$kiwi_oemtitle [ $gfix ]")
 	fi
 	#======================================
