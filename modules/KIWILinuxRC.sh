@@ -1188,36 +1188,6 @@ function setupBootThemes {
 			fi
 		fi
 	fi
-	#======================================
-	# Bootloader theme setup
-	#--------------------------------------
-	if [ ! -z "$kiwi_boottheme" ];then
-		local theme=/boot/grub2/themes/$kiwi_boottheme/theme.txt
-		#======================================
-		# grub2
-		#--------------------------------------
-		if [ "$kiwi_bootloader" = "grub2" ];then
-			local orig_default_grub=$srcprefix/etc/default/grub
-			local inst_default_grub=$destprefix/etc/default/grub
-			mkdir -p $destprefix/etc/default
-			touch $inst_default_grub
-			#======================================
-			# check for default config in sysimg
-			#--------------------------------------
-			if [ -f $orig_default_grub ];then
-				cp $orig_default_grub $inst_default_grub
-			fi
-			#======================================
-			# change/create default grub config
-			#--------------------------------------
-			if cat $inst_default_grub | grep -q -E "^GRUB_THEME"; then
-				sed -i "s/^GRUB_THEME=.*/GRUB_THEME=\"$theme\"/" \
-					$inst_default_grub
-			else
-				echo "GRUB_THEME=\"$theme\"" >> $inst_default_grub
-			fi
-		fi
-	fi
 }
 #======================================
 # setupBootLoaderRecovery
@@ -2281,10 +2251,136 @@ function setupBootLoaderGrub {
 #--------------------------------------
 function setupBootLoaderGrub2 {
 	# /.../
-	# this is done via grub2-mkconfig in
-	# installBootLoaderGrub2
+	# create/update default grub2 configuration
 	# ----
-	return
+	#======================================
+	# function paramters
+	#--------------------------------------
+	local mountPrefix=$1  # mount path of the image
+	local destsPrefix=$2  # base dir for the config files
+	local gnum=$3         # grub boot partition ID
+	local rdev=$4         # grub root partition
+	local gfix=$5         # grub title postfix
+	local swap=$6         # optional swap partition
+	#======================================
+	# local variables
+	#--------------------------------------
+	local title
+	local cmdline
+	local timeout
+	local vesa
+	#======================================
+	# vesa hex => resolution table
+	#--------------------------------------
+	vesa[0x301]="640x480"
+	vesa[0x310]="640x480"
+	vesa[0x311]="640x480"
+	vesa[0x312]="640x480"
+	vesa[0x303]="800x600"
+	vesa[0x313]="800x600"
+	vesa[0x314]="800x600"
+	vesa[0x315]="800x600"
+	vesa[0x305]="1024x768"
+	vesa[0x316]="1024x768"
+	vesa[0x317]="1024x768"
+	vesa[0x318]="1024x768"
+	vesa[0x307]="1280x1024"
+	vesa[0x319]="1280x1024"
+	vesa[0x31a]="1280x1024"
+	vesa[0x31b]="1280x1024"
+	#======================================
+	# setup ID device names
+	#--------------------------------------
+	local rootByID=$(getDiskID $rdev)
+	local swapByID=$(getDiskID $swap swap)
+	local diskByID=$(getDiskID $imageDiskDevice)
+	#======================================
+	# setup path names
+	#--------------------------------------
+	local orig_sysimg_profile=$mountPrefix/image/.profile
+	local inst_default_grub=$destsPrefix/etc/default/grub
+	#======================================
+	# check for system image .profile
+	#--------------------------------------
+	if [ -f $orig_sysimg_profile ];then
+		importFile < $orig_sysimg_profile
+	fi
+	#======================================
+	# setup title name
+	#--------------------------------------
+	if [ -z "$gfix" ];then
+		gfix="unknown"
+	fi
+	title=$(makeLabel "$gfix")
+	if [ -z "$kiwi_oemtitle" ] && [ ! -z "$kiwi_displayname" ];then
+		kiwi_oemtitle=$kiwi_displayname
+	fi
+	if [ ! -z "$kiwi_oemtitle" ];then
+		title=$(makeLabel "$kiwi_oemtitle [ $gfix ]")
+	fi
+	#======================================
+	# check for kernel options
+	#--------------------------------------
+	if [ ! -z "$KIWI_KERNEL_OPTIONS" ];then
+		cmdline="$cmdline $KIWI_KERNEL_OPTIONS"
+	fi
+	if [ ! -z "$KIWI_INITRD_PARAMS" ];then
+		cmdline="$cmdline $KIWI_INITRD_PARAMS";
+	fi
+	if [ ! -z "$rootByID" ];then
+		cmdline="$cmdline root=$rootByID"
+	fi
+	if [ ! -z "$diskByID" ];then
+		cmdline="$cmdline disk=$diskByID"
+	fi
+	if [ ! -z "$swapByID" ];then
+		cmdline="$cmdline resume=$swapByID"
+	fi
+	if [ "$kiwi_lvm" = "true" ];then
+		cmdline="$cmdline VGROUP=$VGROUP"
+	fi
+	if [ ! -z "$kiwi_cmdline" ];then
+		cmdline="$cmdline $kiwi_cmdline"
+	fi
+	if [ -e /dev/xvc0 ];then
+		cmdline="$cmdline console=xvc console=tty"
+	elif [ -e /dev/hvc0 ];then
+		cmdline="$cmdline console=hvc console=tty"
+	fi
+	#======================================
+	# check for boot TIMEOUT
+	#--------------------------------------
+	if [ -z "$KIWI_BOOT_TIMEOUT" ];then
+		timeout=10;
+	fi
+	#======================================
+	# write etc/default/grub
+	#--------------------------------------
+	mkdir -p $destsPrefix/etc/default
+	cat > $inst_default_grub <<- EOF
+		GRUB_DISTRIBUTOR="$title"
+		GRUB_DEFAULT=0
+		GRUB_HIDDEN_TIMEOUT=0
+		GRUB_HIDDEN_TIMEOUT_QUIET=true
+		GRUB_TIMEOUT=$timeout
+		GRUB_CMDLINE_LINUX_DEFAULT="$cmdline quiet splash=silent"
+		GRUB_CMDLINE_LINUX=""
+	EOF
+	#======================================
+	# write vesa vga setup
+	#--------------------------------------
+	if [ ! -z "${vesa[$vga]}" ];then
+		echo "GRUB_GFXMODE=${vesa[$vga]}" >> $inst_default_grub
+	fi
+	#======================================
+	# write bootloader theme setup
+	#--------------------------------------
+	if [ ! -z "$kiwi_boottheme" ];then
+		local theme=/boot/grub2/themes/$kiwi_boottheme/theme.txt
+		local bgpng=/boot/grub2/themes/$kiwi_boottheme/background.png
+		echo "GRUB_THEME=\"$theme\""      >> $inst_default_grub
+		echo "GRUB_BACKGROUND=\"$bgpng\"" >> $inst_default_grub
+	fi
 }
 #======================================
 # setupBootLoaderYaboot
@@ -6222,7 +6318,11 @@ function makeLabel {
 	# underscores. current bootloaders show the
 	# underscore sign as as space in the boot menu
 	# ---
-	if [ ! $loader = "syslinux" ] && [ ! $loader = "extlinux" ];then
+	if \
+		[ ! $loader = "syslinux" ] && \
+		[ ! $loader = "extlinux" ] && \
+		[ ! $loader = "grub2" ]
+	then
 		echo $1 | tr " " "_"
 	else
 		echo $1
