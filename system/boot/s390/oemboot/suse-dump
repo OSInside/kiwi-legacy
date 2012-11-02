@@ -196,16 +196,9 @@ function OEMInstall {
 	IFS=$IFS_ORIG
 	Echo "Searching harddrive for $OEMInstallType installation"
 	hwinfo=/usr/sbin/hwinfo
-	if [ ! -z "$imageDiskDevice" ];then
-		deviceDisks=`$hwinfo --disk |\
-			grep "Device File:" | cut -f2 -d: |\
-			cut -f1 -d"(" | sed -e s"@$imageDiskDevice@@"`
-	else
-		deviceDisks=`$hwinfo --disk |\
-			grep "Device File:" | cut -f2 -d: |\
-			cut -f1 -d"("`
-	fi
-	export deviceDisks=`echo $deviceDisks`
+	deviceDisks=$($hwinfo --disk | \
+		grep 'Device File:' | cut -f2 -d: | cut -f1 -d'(')
+	export deviceDisks=$(echo $deviceDisks)
 	#======================================
 	# Add optional ramdisk device
 	#--------------------------------------
@@ -224,6 +217,12 @@ function OEMInstall {
 	# Sort devices by capabilities
 	#--------------------------------------
 	for i in $deviceDisks;do
+		#======================================
+		# sort out the boot device
+		#--------------------------------------
+		if [ ! -z "$imageDiskDevice" ] && [ "$i" = "$imageDiskDevice" ];then
+			continue
+		fi
 		#======================================
 		# Can we read chunks from it
 		#--------------------------------------
