@@ -442,6 +442,44 @@ sub __checkFilesysSpec {
 }
 
 #==========================================
+# __checkGroupSettingsConsistent
+#------------------------------------------
+sub __checkGroupSettingsConsistent {
+	# ...
+	# Check that the group seetings are consistent across all <users> elements
+	# A group may only be specified with one ID and ID may not be used
+	# twice
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @grpNodes = $this->{systemTree} -> getElementsByTagName('users');
+	my %groupIDMap;
+	my $errMsg;
+	for my $grp (@grpNodes) {
+		my $gname = $grp -> getAttribute('group');
+		my $gid   = $grp -> getAttribute('id');
+		if ($gid) {
+			if ($groupIDMap{$gname} && ($groupIDMap{$gname} ne $gid)) {
+				$errMsg = "Group '$gname' specified with different ids, "
+					. 'cannot resolve ambiguity.';
+			}
+			if ($groupIDMap{$gid} && ($groupIDMap{$gid} ne $gname)) {
+				$errMsg = "Group ID '$gid' specified twice, cannot resolve "
+					. 'ambiguity.';
+			}
+			if ($errMsg) {
+				$kiwi -> error($errMsg);
+				$kiwi -> failed();
+				return;
+			}
+			$groupIDMap{$gname} = $gid;
+			$groupIDMap{$gid} = $gname;
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkHttpsCredentialsConsistent
 #------------------------------------------
 sub __checkHttpsCredentialsConsistent {
@@ -1146,6 +1184,108 @@ sub __checkTypeUnique {
 }
 
 #==========================================
+# __checkUserDataConsistent
+#------------------------------------------
+sub __checkUserDataConsistent {
+	# ..
+	# Check that the given data for a user is consistent if the
+	# user is specified in two groups
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $systemTree = $this->{systemTree};
+	my @grpNodes = $systemTree -> getElementsByTagName('users');
+	my $errMsg;
+	my %userData;
+	for my $grpNode (@grpNodes) {
+		my $group = $grpNode -> getAttribute('group');
+		my $gid   = $grpNode -> getAttribute('id');
+		my @userNodes = $grpNode -> getElementsByTagName('user');
+		for my $usr (@userNodes) {
+			my %info;
+			my $name = $usr -> getAttribute('name');
+			$info{group} = $group;
+			$info{gid}   = $gid;
+			$info{home}  = $usr -> getAttribute('home');
+			$info{name}  = $name;
+			$info{pwd}   = $usr -> getAttribute('pwd');
+			$info{pwdf}  = $usr -> getAttribute('pwdformat');
+			$info{rname} = $usr -> getAttribute('realname');
+			$info{shell} = $usr -> getAttribute('shell');
+			$info{uid}   = $usr -> getAttribute('id');
+			if ($name =~ /\s/x) {
+				$errMsg = 'Specified user name contains whitspace, this '
+					. 'is not supported.';
+			}
+			if ($info{home} =~ /\s/x) {
+				$errMsg = 'Specified home directory contains whitspace, '
+					. 'this is not supported.';
+			}
+			if ($info{shell} && $info{shell} =~ /\s/x) {
+				$errMsg = 'Specified login shell contains whitspace, '
+					. 'this is not supported.';
+			}
+			if ($userData{$name}) {
+				if ($group eq $userData{$name}{group}) {
+					$errMsg = 'Same user defined in a single group, '
+					. 'cannot resolve ambiguity.';
+				}
+				if ($gid && $userData{$name}{gid}) {
+					$errMsg = 'Same user defined in two groups with '
+						. 'given groupid, cannot resolve ambiguity.';
+				}
+				if ($info{home} ne $userData{$name}{home}) {
+					$errMsg = 'Same user specified with different home '
+						. 'directories, cannot resolve ambiguity.';
+				}
+				if ($info{pwd}
+					&& $userData{$name}{pwd}
+					&& ($info{pwd} ne $userData{$name}{pwd}))
+				{
+					$errMsg = 'Same user specified with different '
+						. 'passwords, cannot resolve ambiguity.';
+				}
+				if ($info{pwdf}
+					&& $userData{$name}{pwdf}
+					&& ($info{pwdf} ne $userData{$name}{pwdf}))
+				{
+					$errMsg = 'Same user specified with different '
+						. 'password formats, cannot resolve ambiguity.';
+				}
+				if ($info{rname}
+					&& $userData{$name}{rname}
+					&& ($info{rname} ne $userData{$name}{rname}))
+				{
+					$errMsg = 'Same user specified with different '
+						. 'real names, cannot resolve ambiguity.';
+				}
+				if ($info{shell}
+					&& $userData{$name}{shell}
+					&& ($info{shell} ne $userData{$name}{shell}))
+				{
+					$errMsg = 'Same user specified with different '
+						. 'shells, cannot resolve ambiguity.';
+				}
+				if ($info{uid}
+					&& $userData{$name}{uid}
+					&& ($info{uid} ne $userData{$name}{uid}))
+				{
+					$errMsg = 'Same user specified with different '
+						. 'user ids, cannot resolve ambiguity.';
+				}
+			}
+			if ($errMsg) {
+				$kiwi -> error($errMsg);
+				$kiwi -> failed();
+				return;
+			}
+			$userData{$name} = \%info;
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkVersionDefinition
 #------------------------------------------
 sub __checkVersionDefinition {
@@ -1392,6 +1532,9 @@ sub __validateConsistency {
 	if (! $this -> __checkFilesysSpec()) {
 		return;
 	}
+	if (! $this -> __checkGroupSettingsConsistent()) {
+		return;
+	}
 	if (! $this -> __checkHttpsCredentialsConsistent()) {
 		return;
 	}
@@ -1435,6 +1578,9 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkTypeUnique()) {
+		return;
+	}
+	if (! $this -> __checkUserDataConsistent()) {
 		return;
 	}
 	if (! $this -> __checkVersionDefinition()) {

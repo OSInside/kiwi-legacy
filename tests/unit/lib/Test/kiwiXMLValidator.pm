@@ -52,7 +52,8 @@ sub test_archiveUnique {
 	my $expectedMsg;
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
-		$validator -> validate();
+		$this -> assert_not_null($validator);
+		my $res = $validator -> validate();
 		if ($iConfFile =~ /archiveUniqueInvalid_1.xml/) {
 			$expectedMsg = "Archive 'myBins.tar' specified multiple times in "
 				. 'same <packages> section.';
@@ -70,7 +71,7 @@ sub test_archiveUnique {
 		my $state = $kiwi -> getState();
 		$this -> assert_str_equals('failed', $state);
 		# Test this condition last to get potential error messages
-		$this -> assert_not_null($validator);
+		$this -> assert_null($res);
 	}
 	my @validConfigs = $this -> __getValidFiles('archiveUnique');
 	$this -> __verifyValid(@validConfigs);
@@ -495,6 +496,43 @@ sub test_ec2Regions {
 }
 
 #==========================================
+# test_groupSettingConsistency
+#------------------------------------------
+sub test_groupSettingConsistency {
+	# ...
+	# Verify that inconsistent group definitions trigger the expected error
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('groupDefinition');
+	my $expected;
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$this -> assert_not_null($validator);
+		my $res = $validator -> validate();
+		my $msg = $kiwi -> getMessage();
+		if ( $iConfFile =~ '.*Invalid_1.xml') {
+			$expected = "Group 'mygrp' specified with different ids, "
+				. 'cannot resolve ambiguity.';
+		}
+		if ( $iConfFile =~ '.*Invalid_2.xml') {
+			$expected = "Group ID '1135' specified twice, cannot resolve "
+				. 'ambiguity.';
+		}
+		$this -> assert_str_equals($expected, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_null($res);
+	}
+	my @validConfigs = $this -> __getValidFiles('groupDefinition');
+	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
 # test_httpsRepoCredentials
 #------------------------------------------
 sub test_httpsRepoCredentials {
@@ -510,7 +548,8 @@ sub test_httpsRepoCredentials {
 	my $expectedMsg;
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
-		$validator -> validate();
+		$this -> assert_not_null($validator);
+		my $res = $validator -> validate();
 		my $msg = $kiwi -> getMessage();
 		if ($iConfFile =~ /httpsRepoCredentialsInvalid_1|5.xml/) {
 			$expectedMsg = 'Specified username without password on repository';
@@ -534,7 +573,7 @@ sub test_httpsRepoCredentials {
 		my $state = $kiwi -> getState();
 		$this -> assert_str_equals('failed', $state);
 		# Test this condition last to get potential error messages
-		$this -> assert_not_null($validator);
+		$this -> assert_null($res);
 	}
 	my @validConfigs = $this -> __getValidFiles('httpsRepoCredentials');
 	$this -> __verifyValid(@validConfigs);
@@ -1122,6 +1161,79 @@ sub test_versionFormat {
 }
 
 #==========================================
+# test_userDefinitionConsistent
+#------------------------------------------
+sub test_userDefinitionConsistent {
+	# ...
+	# Test that inconsistent user definitions are properly detected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('userDefinition');
+	my $expected;
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$this -> assert_not_null($validator);
+		my $res = $validator -> validate();
+		my $msg = $kiwi -> getMessage();
+		if ($iConfFile =~ /.*Invalid_1.xml/) {
+			$expected = 'Specified user name contains whitspace, this '
+				. 'is not supported.';
+		}
+		if ($iConfFile =~ /.*Invalid_2.xml/) {
+			$expected = 'Specified home directory contains whitspace, '
+				. 'this is not supported.';
+		}
+		if ($iConfFile =~ /.*Invalid_3.xml/) {
+			$expected = 'Specified login shell contains whitspace, '
+				. 'this is not supported.';
+		}
+		if ($iConfFile =~ /.*Invalid_4.xml/) {
+			$expected = 'Same user defined in a single group, '
+				. 'cannot resolve ambiguity.';
+		}
+		if ($iConfFile =~ /.*Invalid_5.xml/) {
+			$expected = 'Same user defined in two groups with '
+				. 'given groupid, cannot resolve ambiguity.';
+		}
+		if ($iConfFile =~ /.*Invalid_6.xml/) {
+			$expected = 'Same user specified with different home '
+				. 'directories, cannot resolve ambiguity.';
+		}
+		if ($iConfFile =~ /.*Invalid_7.xml/) {
+			$expected = 'Same user specified with different '
+				. 'passwords, cannot resolve ambiguity.';
+		}
+		if ($iConfFile =~ /.*Invalid_8.xml/) {
+			$expected = 'Same user specified with different '
+				. 'password formats, cannot resolve ambiguity.';
+		}
+		if ($iConfFile =~ /.*Invalid_9.xml/) {
+			$expected = 'Same user specified with different '
+				. 'real names, cannot resolve ambiguity.';
+		}
+		if ($iConfFile =~ /.*Invalid_10.xml/) {
+			$expected = 'Same user specified with different '
+				. 'shells, cannot resolve ambiguity.';
+		}
+		if ($iConfFile =~ /.*Invalid_11.xml/) {
+			$expected = 'Same user specified with different '
+				. 'user ids, cannot resolve ambiguity.';
+		}
+		$this -> assert_str_equals($expected, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_null($res);
+	}
+	my @validConfigs = $this -> __getValidFiles('userDefinition');
+	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
 # test_volumeNameAttrNoWhiteSpace
 #------------------------------------------
 sub test_volumeNameAttrNoWhiteSpace {
@@ -1138,7 +1250,7 @@ sub test_volumeNameAttrNoWhiteSpace {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
 		my $msg = $kiwi -> getMessage();
-			$this -> assert_str_equals($expectedMsg, $msg);
+		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
 		$this -> assert_str_equals('error', $msgT);
 		my $state = $kiwi -> getState();
