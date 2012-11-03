@@ -74,6 +74,27 @@ my @kiwiModules = qw (
 	KIWIXMLUserData.t
 	KIWIXMLVMachineData.t
 	KIWIXMLValidator.t
+	KTCommandLine.t
+	KTImageCreator.t
+	KTLocator.t
+	KTRuntimeChecker.t
+	KTXML.t
+	KTXMLDescriptionData.t
+	KTXMLDriverData.t
+	KTXMLEC2ConfigData.t
+	KTXMLFileData.t
+	KTXMLInfo.t
+	KTXMLOEMConfigData.t
+	KTXMLPXEDeployData.t
+	KTXMLPreferenceData.t
+	KTXMLProfileData.t
+	KTXMLRepositoryData.t
+	KTXMLSplitData.t
+	KTXMLSystemdiskData.t
+	KTXMLTypeData.t
+	KTXMLUserData.t
+	KTXMLVMachineData.t
+	KTXMLValidator.t
 	ktLog.pm
 	ktTestCase.pm
 	kiwiCommandLine.pm
@@ -169,6 +190,27 @@ my @notClean1 = qw (
 	KIWIXMLUserData.t
 	KIWIXMLVMachineData.t
 	KIWIXMLValidator.t
+	KTCommandLine.t
+	KTImageCreator.t
+	KTLocator.t
+	KTRuntimeChecker.t
+	KTXML.t
+	KTXMLDescriptionData.t
+	KTXMLDriverData.t
+	KTXMLEC2ConfigData.t
+	KTXMLFileData.t
+	KTXMLInfo.t
+	KTXMLOEMConfigData.t
+	KTXMLPXEDeployData.t
+	KTXMLPreferenceData.t
+	KTXMLProfileData.t
+	KTXMLRepositoryData.t
+	KTXMLSplitData.t
+	KTXMLSystemdiskData.t
+	KTXMLTypeData.t
+	KTXMLUserData.t
+	KTXMLVMachineData.t
+	KTXMLValidator.t
 	ktLog.pm
 	ktTestCase.pm
 	kiwiCommandLine.pm
@@ -256,6 +298,10 @@ my @notClean2 = qw (
 	KIWIXMLUserData.t
 	KIWIXMLVMachineData.t
 	KIWIXMLValidator.t
+	KTImageCreator.t
+	KTRuntimeChecker.t
+	KTXML.t
+	KTXMLInfo.t
 	ktTestCase.pm
 	kiwiCommandLine.pm
 	kiwiLocator.pm
@@ -323,6 +369,10 @@ my @notClean3 = qw (
 	KIWIXMLUserData.t
 	KIWIXMLVMachineData.t
 	KIWIXMLValidator.t
+	KTImageCreator.t
+	KTRuntimeChecker.t
+	KTXML.t
+	KTXMLInfo.t
 	kiwiCommandLine.pm
 	kiwiLocator.pm
 	kiwiImageCreator.pm

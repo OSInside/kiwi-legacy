@@ -1,18 +1,19 @@
 #!/usr/bin/perl
 #================
-# FILE          : KIWIImageCreator.t
+# FILE          : KTLocator.t
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 Novell Inc.
+# COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test driver for the KIWIImageCreator module.
+# DESCRIPTION   : Unit test driver for the KIWILocator module.
 #               :
 # STATUS        : Development
 #----------------
+package KTLocator;
 use strict;
 use warnings;
 use FindBin;
@@ -24,9 +25,7 @@ use lib "$FindBin::Bin/lib";
 # Location of Kiwi modules relative to test
 use lib "$FindBin::Bin/../../modules";
 
-use KIWIGlobals;
-our $kiwi   = KIWILog -> new();
-our $global = KIWIGlobals -> new($kiwi);
-
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiImageCreator');
+$runner->start( 'Test::kiwiLocator' );
+
+1;

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #================
-# FILE          : KIWIXMLEC2ConfigData.t
+# FILE          : KTXMLRepositoryData.t
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
@@ -9,10 +9,11 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test driver for the KIWIXMLEC2ConfigData module.
+# DESCRIPTION   : Unit test driver for the KIWIXMLRepositoryData module.
 #               :
 # STATUS        : Development
 #----------------
+package KTXMLRepositoryData;
 use strict;
 use warnings;
 use FindBin;
@@ -24,9 +25,7 @@ use lib "$FindBin::Bin/lib";
 # Location of Kiwi modules relative to test
 use lib "$FindBin::Bin/../../modules";
 
-use KIWIGlobals;
-our $kiwi   = KIWILog -> new();
-our $global = KIWIGlobals -> new($kiwi);
-
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiXMLEC2ConfigData')
+$runner->start( 'Test::kiwiXMLRepositoryData');
+
+1;

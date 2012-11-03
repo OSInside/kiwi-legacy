@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 #================
-# FILE          : KIWIXMLValidator.t
+# FILE          : KTXML.t
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 Novell Inc.
+# COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
@@ -13,8 +13,7 @@
 #               :
 # STATUS        : Development
 #----------------
-package KIWIXMLValidator;
-
+#package KTXML;
 use strict;
 use warnings;
 use FindBin;
@@ -31,6 +30,6 @@ our $kiwi   = KIWILog -> new();
 our $global = KIWIGlobals -> new($kiwi);
 
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiXMLValidator' );
+$runner->start( 'Test::kiwiXML' );
 
 1;

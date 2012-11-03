@@ -1,18 +1,19 @@
 #!/usr/bin/perl
 #================
-# FILE          : KIWILocator.t
+# FILE          : KTXMLFileData.t
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 Novell Inc.
+# COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
-# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test driver for the KIWILocator module.
+# DESCRIPTION   : Unit test driver for the KIWIXMLFileData module.
 #               :
 # STATUS        : Development
 #----------------
+package KTXMLFileData;
 use strict;
 use warnings;
 use FindBin;
@@ -25,4 +26,6 @@ use lib "$FindBin::Bin/lib";
 use lib "$FindBin::Bin/../../modules";
 
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiLocator' );
+$runner->start( 'Test::kiwiXMLFileData');
+
+1;
