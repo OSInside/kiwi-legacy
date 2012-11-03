@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #================
-# FILE          : KIWIXMLPXEDeployData.t
+# FILE          : KTXMLTypeData.t
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
@@ -9,10 +9,11 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test driver for the KIWIXMLPXEDeployData module.
+# DESCRIPTION   : Unit test driver for the KIWIXMLTypeData module.
 #               :
 # STATUS        : Development
 #----------------
+package KTXMLTypeData;
 use strict;
 use warnings;
 use FindBin;
@@ -24,9 +25,7 @@ use lib "$FindBin::Bin/lib";
 # Location of Kiwi modules relative to test
 use lib "$FindBin::Bin/../../modules";
 
-use KIWIGlobals;
-our $kiwi   = KIWILog -> new();
-our $global = KIWIGlobals -> new($kiwi);
-
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiXMLPXEDeployData');
+$runner->start( 'Test::kiwiXMLTypeData');
+
+1;

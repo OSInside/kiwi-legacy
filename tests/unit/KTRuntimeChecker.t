@@ -1,18 +1,19 @@
 #!/usr/bin/perl
 #================
-# FILE          : KIWIXMLOEMConfigData.t
+# FILE          : KTRuntimeChecker.t
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
-# AUTHOR        : Robert Schweikert <rjschwei@suse.com
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test driver for the KIWIXMLOEMConfigData module.
+# DESCRIPTION   : Unit test driver for the KIWIRuntimeChecker module.
 #               :
 # STATUS        : Development
 #----------------
+#package KTRuntimeChecker;
 use strict;
 use warnings;
 use FindBin;
@@ -25,8 +26,10 @@ use lib "$FindBin::Bin/lib";
 use lib "$FindBin::Bin/../../modules";
 
 use KIWIGlobals;
-our $kiwi   = KIWILog -> new();
+our $kiwi   = KIWILog -> new ();
 our $global = KIWIGlobals -> new($kiwi);
 
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiXMLOEMConfigData');
+$runner->start( 'Test::kiwiRuntimeChecker' );
+
+1;
