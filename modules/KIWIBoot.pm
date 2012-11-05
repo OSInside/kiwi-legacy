@@ -3239,7 +3239,7 @@ sub setupBootLoaderConfiguration {
 		print FD "set timeout=$bootTimeout\n";
 		if ($type =~ /^KIWI (CD|USB)/) {
 			my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
-			print FD 'menuentry "Boot from Hard Disk" {'."\n";
+			print FD 'menuentry \'Boot from Hard Disk\' {'."\n";
 			if ($dev eq '(cd)') {
 				print FD ' chainloader (hd0)+1'."\n";
 			} else {
@@ -3260,7 +3260,7 @@ sub setupBootLoaderConfiguration {
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
 		}
-		print FD 'menuentry "'.$title.'"';
+		print FD 'menuentry \''.$title.'\'';
 		print FD ' --class opensuse --class os {'."\n";
 		#==========================================
 		# Standard boot
@@ -3309,7 +3309,7 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		if ($failsafe) {
 			$title = $this -> makeLabel ("Failsafe -- $title");
-			print FD 'menuentry "'.$title.'"';
+			print FD 'menuentry \''.$title.'\'';
 			print FD ' --class opensuse --class os {'."\n";
 			if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 				if ($type =~ /^KIWI CD/) {
