@@ -1,20 +1,19 @@
 #!/usr/bin/perl
 #================
-# FILE          : KIWIXMLValidator.t
+# FILE          : KTXMLSystemdiskData.t
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 Novell Inc.
+# COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
-# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test driver for the KIWIXMLValidator module.
+# DESCRIPTION   : Unit test driver for the KIWIXMLSystemdiskData module.
 #               :
 # STATUS        : Development
 #----------------
-package KIWIXMLValidator;
-
+package KTXMLSystemdiskData;
 use strict;
 use warnings;
 use FindBin;
@@ -26,11 +25,7 @@ use lib "$FindBin::Bin/lib";
 # Location of Kiwi modules relative to test
 use lib "$FindBin::Bin/../../modules";
 
-use KIWIGlobals;
-our $kiwi   = KIWILog -> new();
-our $global = KIWIGlobals -> new($kiwi);
-
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiXMLValidator' );
+$runner->start( 'Test::kiwiXMLSystemdiskData');
 
 1;

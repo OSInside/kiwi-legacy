@@ -1,8 +1,8 @@
-KIWICommandLine.t
-KIWIImageCreator.t
-KIWILocator.t
-KIWIRuntimeChecker.t
-KIWIXMLInfo.t
-KIWIXML.t
-KIWIXMLDescriptionData.t
-KIWIXMLValidator.t
+KTCommandLine.t
+KTImageCreator.t
+KTLocator.t
+KTRuntimeChecker.t
+KTXMLInfo.t
+KTXML.t
+KTXMLDescriptionData.t
+KTXMLValidator.t

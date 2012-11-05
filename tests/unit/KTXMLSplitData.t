@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #================
-# FILE          : KIWIXMLSystemdiskData.t
+# FILE          : KTXMLSplitData.t
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
@@ -9,10 +9,11 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test driver for the KIWIXMLSystemdiskData module.
+# DESCRIPTION   : Unit test driver for the KIWIXMLSplitData module.
 #               :
 # STATUS        : Development
 #----------------
+package KTXMLSplitData;
 use strict;
 use warnings;
 use FindBin;
@@ -24,9 +25,7 @@ use lib "$FindBin::Bin/lib";
 # Location of Kiwi modules relative to test
 use lib "$FindBin::Bin/../../modules";
 
-use KIWIGlobals;
-our $kiwi   = KIWILog -> new();
-our $global = KIWIGlobals -> new($kiwi);
-
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiXMLSystemdiskData');
+$runner->start( 'Test::kiwiXMLSplitData');
+
+1;

@@ -1,18 +1,19 @@
 #!/usr/bin/perl
 #================
-# FILE          : KIWIXMLUserData.t
+# FILE          : KTXML.t
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
-# AUTHOR        : Robert Schweikert <rjschwei@suse.com
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test driver for the KIWIXMLUserData module.
+# DESCRIPTION   : Unit test driver for the KIWIXMLValidator module.
 #               :
 # STATUS        : Development
 #----------------
+#package KTXML;
 use strict;
 use warnings;
 use FindBin;
@@ -29,4 +30,6 @@ our $kiwi   = KIWILog -> new();
 our $global = KIWIGlobals -> new($kiwi);
 
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiXMLUserData');
+$runner->start( 'Test::kiwiXML' );
+
+1;
