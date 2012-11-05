@@ -55,7 +55,7 @@ BuildRequires:  zypper
 # requirements to run kiwi
 Requires:       checkmedia
 Requires:       coreutils
-Requires:       kiwi-tools
+Requires:       kiwi-tools >= %{version}
 Requires:       libxslt
 Requires:       perl = %{perl_version}
 Requires:       perl-Config-IniFiles
