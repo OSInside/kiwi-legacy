@@ -639,21 +639,33 @@ sub createImage {
 	#==========================================
 	# Update .profile env, current type
 	#------------------------------------------
-	$kiwi -> info ("Updating type in .profile environment");
-	qxx (
-		"sed -i -e 's#kiwi_type=.*#kiwi_type=\"$attr{type}\"#' $tree/.profile"
+	$kiwi -> info ("Updating .profile environment");
+	my $configure = KIWIConfigure -> new(
+		$kiwi,$xml,$tree,$tree."/image",$destination
 	);
+	if (! defined $configure) {
+		return;
+	}
+	my %config = $xml -> getImageConfig();
+	my $PFD = FileHandle -> new();
+	if (! $PFD -> open (">$tree/.profile")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to open $tree/.profile: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	binmode($PFD, ":encoding(UTF-8)");
+	foreach my $key (keys %config) {
+		print $PFD "$key=\"$config{$key}\"\n";
+	}
+	$PFD -> close();
+	$configure -> quoteFile ("$tree/.profile");
+	qxx ("cp $tree/.profile $tree/image/.profile");
 	$kiwi -> done();
 	#==========================================
 	# Create recovery archive if specified
 	#------------------------------------------
 	if ($attr{type} eq "oem") {
-		my $configure = KIWIConfigure -> new(
-			$kiwi,$xml,$tree,$tree."/image",$destination
-		);
-		if (! defined $configure) {
-			return;
-		}
 		if (! $configure -> setupRecoveryArchive($attr{filesystem})) {
 			return;
 		}
