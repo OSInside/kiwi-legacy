@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 #================
 # FILE          : collector.pl
 #----------------
@@ -17,6 +18,7 @@ use strict;
 use warnings;
 use DateTime;
 use File::Basename;
+use FileHandle;
 use FindBin;
 use IPC::Open2;
 
@@ -29,17 +31,18 @@ my $nextScan = $curTime + $twoWeeks;
 my $statsFileName = "$FindBin::Bin/data/codeStats.txt";
 
 # Get info about the next scan time from the file
-open(my $STATS, '<', $statsFileName) ||
-  die "Could not open '$statsFileName'\n";
-
+my $STATS = FileHandle -> new();
+if (! $STATS -> open ($statsFileName)) {
+	die "Could not open '$statsFileName'\n";
+}
 my $scanDateInfo = readline $STATS;
-close $STATS;
+$STATS -> close();
 chomp $scanDateInfo;
 my $nextScanTime = int ((split /:/, $scanDateInfo)[-1]);
 
 if ($nextScan < $nextScanTime) {
-    # Nothing to do
-    exit 0;
+	# Nothing to do
+	exit 0;
 }
 
 # Generate the lists of modules to be processed
@@ -49,8 +52,9 @@ push @modules, glob "$FindBin::Bin/../../unit/*.t";
 push @modules, glob "$FindBin::Bin/../../unit/lib/Test/*.pm";
 push @modules, glob "$FindBin::Bin/../../unit/lib/Common/*.pm";
 
-open($STATS, '+<', $statsFileName) ||
-  die "Could not open '$statsFileName'\n";
+if (! $STATS -> open ("+<$statsFileName")) {
+	die "Could not open '$statsFileName'\n";
+}
 # Mark time when the statistics should be collected again
 print $STATS "#NEXT_SCAN:$nextScan\n";
 # Write new data at the end
@@ -68,77 +72,79 @@ my $totalTLOC   = 0;
 my $chld_in;
 my $chld_out;
 for my $fl (@modules) {
-    my $isTest;
-    if ($fl =~ /.*\/modules\/.*/ or $fl =~ /.*\/kiwi.pl/) {
-        $numFiles += 1;
-    } else {
-        $numTFiles += 1;
-        $isTest = 1;
-    }
-    my $fname = basename($fl);
-    print $STATS "\tFILE:$fname\n";
-    my $pid = open2($chld_out, $chld_in, 'perlcritic', '--statistics-only',
+	my $isTest;
+	if ($fl =~ /.*\/modules\/.*/ or $fl =~ /.*\/kiwi.pl/) {
+		$numFiles += 1;
+	} else {
+		$numTFiles += 1;
+		$isTest = 1;
+	}
+	my $fname = basename($fl);
+	print $STATS "\tFILE:$fname\n";
+	my $pid = open2($chld_out, $chld_in, 'perlcritic', '--statistics-only',
                     '-severity', '1', "$fl");
-    waitpid( $pid, 0 );
-    while (<$chld_out>) {
-        # Extract line of code info an process
-        if ($_ =~ /\s*(\d*)\s*lines of Perl code.$/) {
-            my $fileLOC = int $1;
-            if ($isTest) {
-                $totalTLOC += $fileLOC;
-            } else {
-                $totalLOC += $fileLOC;
-            }
-            print $STATS "\t\tLOC:$fileLOC\n";
-        }
-        # Extract CCN and process
-        if ($_ =~ /^Average McCabe score.*/) {
-            chomp;
-            chop; # trailing .
-            my $fileCCN = (split / /, $_)[-1];
-            if ($isTest) {
-                $totalTCCN += $fileCCN;
-            } else {
-                $totalCCN += $fileCCN;
-            }
-            print $STATS "\t\tCCN:$fileCCN\n";
-        }
-        # Extract violations information levels 5 to 1
-        if ($_ =~ /^\s*(\d*) severity (\d) violations./) {
-            my $violations = $1;
-            my $level = $2;
-            my $levelID = "VIOL" . $level;
-            print $STATS "\t\t$levelID:$violations\n";
-        }
-    }
-    # Count the lines of code marked as critic exception
-    my $MOD;
-    open ($MOD, '<', $fl) || die "Could not open $fl for stats collection";
-    my @lines = <$MOD>;
-    close $MOD;
-    my $exceptCnt = 0;
-    my $exceptBlk;
-    for my $ln (@lines) {
-        if ($ln =~ /^\s*## no critic\s*$/) {
-            # Beginning of a critic exception block
-            $exceptBlk = 1;
-            next;
-        }
-        if ($ln =~ /^\s*## use critic\s*$/) {
-            # End of a critic exception block
-            $exceptBlk = undef;
-            next;
-        }
-        if ($exceptBlk or $ln =~ /\s*.*;\s*## no critic\s*$/) {
-            $exceptCnt += 1;
-        }
-    }
-    if ($isTest) {
-        $critExceptT += $exceptCnt;
-    } else {
-        $critExcept += $exceptCnt;
-    }
-    print $STATS "\t\tCEC:$exceptCnt\n";
+	waitpid( $pid, 0 );
+	while (<$chld_out>) {
+		# Extract line of code info an process
+		if ($_ =~ /\s*(\d*)\s*lines of Perl code.$/) {
+			my $fileLOC = int $1;
+			if ($isTest) {
+				$totalTLOC += $fileLOC;
+			} else {
+				$totalLOC += $fileLOC;
+			}
+			print $STATS "\t\tLOC:$fileLOC\n";
+		}
+		# Extract CCN and process
+		if ($_ =~ /^Average McCabe score.*/) {
+			chomp;
+			chop; # trailing .
+			my $fileCCN = (split / /, $_)[-1];
+			if ($isTest) {
+				$totalTCCN += $fileCCN;
+			} else {
+				$totalCCN += $fileCCN;
+			}
+			print $STATS "\t\tCCN:$fileCCN\n";
+		}
+		# Extract violations information levels 5 to 1
+		if ($_ =~ /^\s*(\d*) severity (\d) violations./) {
+			my $violations = $1;
+			my $level = $2;
+			my $levelID = "VIOL" . $level;
+			print $STATS "\t\t$levelID:$violations\n";
+		}
+	}
+	# Count the lines of code marked as critic exception
+	my $MOD = FileHandle -> new();
+	if (! $MOD -> open ($fl)) {
+		die "Could not open $fl for stats collection";
+	}
+	my @lines = <$MOD>;
+	$MOD -> close();
+	my $exceptCnt = 0;
+	my $exceptBlk;
+	for my $ln (@lines) {
+		if ($ln =~ /^\s*## no critic\s*$/) {
+			# Beginning of a critic exception block
+			$exceptBlk = 1;
+			next;
+		}
+		if ($ln =~ /^\s*## use critic\s*$/) {
+			# End of a critic exception block
+			$exceptBlk = undef;
+			next;
+		}
+		if ($exceptBlk or $ln =~ /\s*.*;\s*## no critic\s*$/) {
+			$exceptCnt += 1;
+		}
+	}
+	if ($isTest) {
+		$critExceptT += $exceptCnt;
+	} else {
+		$critExcept += $exceptCnt;
+	}
+	print $STATS "\t\tCEC:$exceptCnt\n";
 }
 # Write out summary data
 print $STATS "TOTAL_LOC:$totalLOC\n";
@@ -151,5 +157,5 @@ print $STATS "NUMBER_TEST_FILES:$numTFiles\n";
 $avg = $totalTCCN / $numTFiles;
 print $STATS "AVG_TEST_CCN:$avg\n";
 print $STATS "CRITIC_EXCEPT_TEST_LOC:$critExceptT\n";
-close $STATS;
+$STATS -> close();
 

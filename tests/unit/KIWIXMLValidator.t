@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 #================
 # FILE          : KIWIXMLValidator.t
 #----------------
@@ -26,8 +27,8 @@ use lib "$FindBin::Bin/lib";
 use lib "$FindBin::Bin/../../modules";
 
 use KIWIGlobals;
-our $kiwi   = new KIWILog ();
-our $global = new KIWIGlobals($kiwi);
+our $kiwi   = KIWILog -> new();
+our $global = KIWIGlobals -> new($kiwi);
 
 my $runner = Test::Unit::HarnessUnit->new();
 $runner->start( 'Test::kiwiXMLValidator' );

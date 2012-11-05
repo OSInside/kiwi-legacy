@@ -335,29 +335,7 @@ my @notClean3 = qw (
 );
 
 # List of modules not clean to level 4 (stern) of perlcritic
-my @notClean4 = qw (
-	KIWICommandLine.t
-	KIWIImageCreator.t
-	KIWILocator.t
-	KIWIRuntimeChecker.t
-	KIWIXML.t
-	KIWIXMLDescriptionData.t
-	KIWIXMLDriverData.t
-	KIWIXMLEC2ConfigData.t
-	KIWIXMLFileData.t
-	KIWIXMLInfo.t
-	KIWIXMLOEMConfigData.t
-	KIWIXMLPXEDeployData.t
-	KIWIXMLPreferenceData.t
-	KIWIXMLProfileData.t
-	KIWIXMLRepositoryData.t
-	KIWIXMLSplitData.t
-	KIWIXMLSystemdiskData.t
-	KIWIXMLTypeData.t
-	KIWIXMLUserData.t
-	KIWIXMLVMachineData.t
-	collector.pl
-);
+my @notClean4 = qw ();
 
 # List of modules not clean to level 5 (gentle) of perlcritic
 my @notClean5 = qw ();
