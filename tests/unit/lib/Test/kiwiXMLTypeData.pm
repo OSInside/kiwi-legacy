@@ -544,6 +544,34 @@ sub test_ctor_initUnsupportedFormat {
 }
 
 #==========================================
+# test_ctor_initUnsupportedBootFS
+#------------------------------------------
+sub test_ctor_initUnsupportedBootFS {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains unsupported data for the boot filesystem setting
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+		image => 'vmx',
+		bootfilesystem => 'foo'
+	);
+	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'object initialization: specified boot filesystem '
+		. "'foo' is not supported.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($typeDataObj);
+	return;
+}
+
+#==========================================
 # test_ctor_initUnsupportedImage
 #------------------------------------------
 sub test_ctor_initUnsupportedImage {

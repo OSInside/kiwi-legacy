@@ -62,6 +62,7 @@ sub new {
 	# the child relationship is enforced at the XML level.
 	my %keywords = map { ($_ => 1) } qw(
 	    boot
+		bootfilesystem
 		bootkernel
 		bootloader
 		bootpartsize
@@ -114,7 +115,6 @@ sub new {
 		installstick
 		primary
 		ramonly
-		installpxe
 	);
 	$this->{boolKeywords} = \%boolKW;
 	if (! $this -> __isInitHashRef($init) ) {
@@ -400,6 +400,17 @@ sub getInstallBoot {
 	# ---
 	my $this = shift;
 	return $this->{installboot};
+}
+
+#==========================================
+# getInstallBootFileSystem
+#------------------------------------------
+sub getInstallBootFileSystem {
+	# ...
+	# Return the option configured for the boot filesystem
+	# ---
+	my $this = shift;
+	return $this->{bootfilesystem};
 }
 
 #==========================================
@@ -927,6 +938,22 @@ sub setInstallBoot {
 }
 
 #==========================================
+# setBootFileSystem
+#------------------------------------------
+sub setBootFileSystem {
+	# ...
+	# Set the option configuration for the boot filesystem
+	# ---
+	my $this = shift;
+	my $opt  = shift;
+	if (! $this -> __isValidBootFS($opt, 'setBootFileSystem') ) {
+		return;
+	}
+	$this->{bootfilesystem} = $opt;
+	return $this;
+}
+
+#==========================================
 # setInstallFailsafe
 #------------------------------------------
 sub setInstallFailsafe {
@@ -1164,6 +1191,12 @@ sub __isInitConsistent {
 	if ($init->{bootloader}) {
 		if (! $this->__isValidBootloader(
 			$init->{bootloader},'object initialization')) {
+			return;
+		}
+	}
+	if ($init->{bootfilesystem}) {
+		if (! $this->__isValidBootFS(
+			$init->{bootfilesystem},'object initialization')) {
 			return;
 		}
 	}
@@ -1428,6 +1461,43 @@ sub __isValidImage {
 	);
 	if (! $supported{$image} ) {
 		my $msg = "$caller: specified image '$image' is not "
+			. 'supported.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
+}
+
+#==========================================
+# __isValidBootFS
+#------------------------------------------
+sub __isValidBootFS {
+	# ...
+	# Verify that the given boot filesystem type is supported
+	# ---
+	my $this   = shift;
+	my $bootFS = shift;
+	my $caller = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller ) {
+		my $msg = 'Internal error __isValidBootFS called without '
+			. 'call origin argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if (! $bootFS ) {
+		my $msg = "$caller: no boot filesystem argument specified, retaining "
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my %supported = map { ($_ => 1) } qw(
+		ext2 ext3 fat16 fat32
+	);
+	if (! $supported{$bootFS} ) {
+		my $msg = "$caller: specified boot filesystem '$bootFS' is not "
 			. 'supported.';
 		$kiwi -> error($msg);
 		$kiwi -> failed();

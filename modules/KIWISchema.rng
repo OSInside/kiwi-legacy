@@ -2083,6 +2083,20 @@ file for write operations</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.type.bootfilesystem.attribute">
+      <attribute name="bootfilesystem">
+        <a:documentation>if an extra boot partition is required this attribute
+specify which filesystem should be used for it. The
+type of the bootloader might overwrite this setting
+e.g for the syslinux loader fat is required</a:documentation>
+        <choice>
+          <value>ext2</value>
+          <value>ext3</value>
+          <value>fat32</value>
+          <value>fat16</value>
+        </choice>
+      </attribute>
+    </define>
     <define name="k.type.flags.attribute">
       <attribute name="flags">
         <a:documentation>Specifies flags for the image type. This could be compressed

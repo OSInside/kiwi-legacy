@@ -1591,6 +1591,7 @@ sub __genTypeHash {
 	#------------------------------------------
 	my @attrlist = (
 		'boot',
+		'bootfilesystem',
 		'bootkernel',
 		'bootloader',
 		'bootpartsize',
@@ -6710,6 +6711,8 @@ sub __populateTypeInfo_legacy {
 				-> getAttribute("compressed");
 			$record{boot}          = $node
 				-> getAttribute("boot");
+			$record{bootfilesystem}= $node
+				-> getAttribute("bootfilesystem");
 			$record{bootpartsize}  = $node
 				-> getAttribute("bootpartsize");
 			$record{volid}         = $node

@@ -1423,7 +1423,9 @@ sub setupInstallStick {
 			# check required boot filesystem type
 			#------------------------------------------
 			my $bootfs = 'ext3';
-			if ($bootloader eq 'syslinux') {
+			if ($type{bootfilesystem}) {
+				$bootfs = $type{bootfilesystem};
+			} elsif ($bootloader eq 'syslinux') {
 				$bootfs = 'fat32';
 			} elsif ($bootloader eq 'yaboot') {
 				if ($lvm) {
@@ -1433,8 +1435,6 @@ sub setupInstallStick {
 				}
 			} elsif (($bootloader eq "grub2") && ($efi)) {
 				$bootfs = 'fat32';
-			} elsif ($bootloader eq 'uboot') {
-				$bootfs = 'ext2';
 			} else {
 				$bootfs = 'ext3';
 			}
@@ -2582,7 +2582,9 @@ sub setupBootDisk {
 		# check required boot filesystem type
 		#------------------------------------------
 		my $bootfs = 'ext3';
-		if ($bootloader eq 'syslinux') {
+		if ($type{bootfilesystem}) {
+			$bootfs = $type{bootfilesystem};
+		} elsif ($bootloader eq 'syslinux') {
 			$bootfs = 'fat32';
 		} elsif ($bootloader eq 'yaboot') {
 			if ($lvm) {
@@ -2592,8 +2594,6 @@ sub setupBootDisk {
 			}
 		} elsif (($bootloader eq "grub2") && ($efi)) {
 			$bootfs = 'fat32';
-		} elsif ($bootloader eq 'uboot') {
-			$bootfs = 'ext2';
 		} else {
 			$bootfs = 'ext3';
 		}

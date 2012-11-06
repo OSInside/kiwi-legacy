@@ -1554,6 +1554,14 @@ div {
 			"btrfs" | "clicfs" | "ext2" | "ext3" | "ext4" |
 			"reiserfs" | "squashfs" | "xfs"
 		}
+	k.type.bootfilesystem.attribute =
+		## if an extra boot partition is required this attribute
+		## specify which filesystem should be used for it. The
+		## type of the bootloader might overwrite this setting
+		## e.g for the syslinux loader fat is required
+		attribute bootfilesystem {
+			"ext2" | "ext3" | "fat32" | "fat16"
+		}
 	k.type.flags.attribute =
 		## Specifies flags for the image type. This could be compressed
 		## or clic and applies to the iso type only
