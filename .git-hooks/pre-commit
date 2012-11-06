@@ -284,6 +284,7 @@ my @notClean3 = qw (
 	KIWIXMLDataBase.pm
 	KIWIXMLInfo.pm
 	KIWIXMLRepositoryData.pm
+	KIWIXMLTypeData.pm
 	KIWIXMLValidator.pm
 	KTImageCreator.t
 	KTRuntimeChecker.t
