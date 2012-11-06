@@ -634,7 +634,7 @@ sub Init
 			$this->{m_repos}->{$r}->{'srcdirs'} = undef;
 		}
 	}
-	return;
+	return 1;
 }
 # /Init
 
@@ -2596,7 +2596,7 @@ sub createBootPackageLinks
 			}
 		}
 	}
-	$RPMLIST -> close();
+	$RPMLIST -> close() if ($RPMLIST);
 	return $retval;
 }
 

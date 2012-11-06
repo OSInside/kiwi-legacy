@@ -61,6 +61,7 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
+	$this->{m_collect} = shift;
 	$this->{m_prodinfo_updated} = 0;
 	$this->{m_prodvars_updated} = 0;
 	$this->{m_prodopts_updated} = 0;
