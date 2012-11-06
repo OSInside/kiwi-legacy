@@ -1831,6 +1831,15 @@ sub setupBootDisk {
 	# load type attributes...
 	#------------------------------------------
 	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
+	if (! $type{installiso}) {
+		$type{installiso} = 'false';
+	}
+	if (! $type{installstick}) {
+		$type{installstick} = 'false';
+	}
+	if (! $type{installpxe}) {
+		$type{installpxe} = 'false';
+	}
 	#==========================================
 	# Check for LVM...
 	#------------------------------------------
@@ -2651,9 +2660,9 @@ sub setupBootDisk {
 	qxx ("rm -rf $tmpdir");
 	if (($haveDiskDevice) && (! $this->{gdata}->{StudioNode})) {
 		if (
-			($type{installiso} ne "true")   && 
+			($type{installiso}   ne "true") && 
 			($type{installstick} ne "true") &&
-			($type{installpxe} ne "true")
+			($type{installpxe}   ne "true")
 		) {
 			#==========================================
 			# create image file from disk device
