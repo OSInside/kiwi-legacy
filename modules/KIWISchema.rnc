@@ -1659,6 +1659,7 @@ div {
 		attribute volid { text }
 	k.type.attlist =
 		k.type.boot.attribute? &
+		k.type.bootfilesystem.attribute? &
 		k.type.bootkernel.attribute? &
 		k.type.bootloader.attribute? &
 		k.type.bootpartsize.attribute? &

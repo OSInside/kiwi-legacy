@@ -2288,6 +2288,9 @@ into the master block. There is space for 32 characters.</a:documentation>
           <ref name="k.type.boot.attribute"/>
         </optional>
         <optional>
+          <ref name="k.type.bootfilesystem.attribute"/>
+        </optional>
+        <optional>
           <ref name="k.type.bootkernel.attribute"/>
         </optional>
         <optional>
