@@ -367,7 +367,9 @@ sub getInstallSizeKBytes {
 	my @a = $solver->installs(1);
 	for my $solvable (@a) {
 		my $size = $solvable->attr_values("solvable:installsize");
-		$sum += $size;
+		if ($size) {
+			$sum += $size;
+		}
 	}
 	return $sum;
 }
@@ -404,6 +406,12 @@ sub getInstallList {
 			} elsif ($chst == $satsolver::REPOKEY_TYPE_SHA1) {
 				$chst = "sha1";
 			}
+		}
+		if (! $chs) {
+			$chs = "unknown";
+		}
+		if (! $size) {
+			$size = 0;
 		}
 		$chs = $chst."=".$chs;
 		$result{$name} = "$size:$arch:$ver:$chs:$url";
