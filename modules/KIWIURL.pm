@@ -60,6 +60,10 @@ sub new {
 	$this->{user} = $user;
 	$this->{pwd}  = $pwd;
 	$this->{type} = "unknown";
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{alias} = readRepoAliasTable();
 	return $this;
 }
 
@@ -87,6 +91,9 @@ sub normalizePath {
 	my $module = shift;
 	my $kiwi   = $this->{kiwi};
 	my $path;
+	if ($this->{alias}{$module}) {
+		$module = $this->{alias}{$module};
+	}
 	$module = $this -> quote ($module);
 	$path = $this -> thisPath ($module);
 	if (defined $path) {
@@ -662,6 +669,34 @@ sub urlResponse {
 		}
 	}
 	return $response;
+}
+
+#==========================================
+# readRepoAliasTable
+#------------------------------------------
+sub readRepoAliasTable {
+	# ...
+	# There is the optional /etc/kiwi/repoalias file which
+	# contains an alternative location for a specific repo
+	# This function reads in the file and provides an alias
+	# hash table which is used to check if the given repo
+	# has an alternative location to use
+	# ---
+	my $FD;
+	my %repohash;
+	if (! open ($FD, "/etc/kiwi/repoalias")) {
+		return {};
+	}
+	while (my $line = <$FD>) {
+		next if $line =~ /^#/;
+		if ($line =~ /({.*})\s*(.*)/) {
+			my $alias= $1;
+			my $repo = $2;
+			$repohash{$alias} = $repo;
+		}
+	}
+	close $FD;
+	return \%repohash;
 }
 
 1;
