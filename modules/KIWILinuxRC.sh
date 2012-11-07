@@ -6218,6 +6218,9 @@ function bootImage {
 	if [ -e /var/log/boot.kiwi ];then
 		cp -f /var/log/boot.kiwi /mnt/var/log/boot.kiwi
 	fi
+	if [ ! -d /mnt/var/log/ConsoleKit ];then
+		mkdir -p /mnt/var/log/ConsoleKit
+	fi
 	#======================================
 	# umount proc
 	#--------------------------------------
