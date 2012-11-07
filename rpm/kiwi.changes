@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Nov  7 14:48:04 CET 2012 - ms@suse.de
+
+- added support for reading /etc/kiwi/repoalias file in
+  KIWIURL.pm. The repoalias definition can be used to
+  mirror a repo path to another location (bnc #788536)
+
+-------------------------------------------------------------------
 Wed Oct 10 16:48:43 CEST 2012 - ms@suse.de
 
 - added support for dmraid fake-raid controllers (bnc #708712)
