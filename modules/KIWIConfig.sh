@@ -351,11 +351,10 @@ function suseConfig {
 	#======================================
 	# SuSEconfig
 	#--------------------------------------
-	/sbin/SuSEconfig
-	#======================================
-	# SuSEconfig permissions
-	#--------------------------------------
-	SuSEconfig --module permissions
+	if [ -x /sbin/SuSEconfig ];then
+		SuSEconfig
+		SuSEconfig --module permissions
+	fi
 }
 
 #======================================
