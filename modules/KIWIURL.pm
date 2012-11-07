@@ -21,6 +21,7 @@ use strict;
 use warnings;
 use Carp qw (cluck);
 use File::Basename;
+use FileHandle;
 use KIWILog;
 use LWP;
 use KIWIQX qw (qxx);
@@ -63,6 +64,10 @@ sub new {
 	if ($main::global) {
 		$this->{gdata}= $main::global -> getGlobals();
 	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{alias} = $this -> readRepoAliasTable();
 	return $this;
 }
 
@@ -90,6 +95,9 @@ sub normalizePath {
 	my $module = shift;
 	my $kiwi   = $this->{kiwi};
 	my $path;
+	if ($this->{alias}{$module}) {
+		$module = $this->{alias}{$module};
+	}
 	$module = $this -> quote ($module);
 	$path = $this -> thisPath ($module);
 	if (defined $path) {
@@ -557,7 +565,6 @@ sub openSUSEpath {
 	my $uriTable = $this->{gdata}->{repoURI};
 	my $origurl  = $module;
 	my %matches  = ();
-	my $FD;
 	#==========================================
 	# allow proxy server from environment
 	#------------------------------------------
@@ -579,7 +586,8 @@ sub openSUSEpath {
 	#==========================================
 	# Create URL list from URI table
 	#------------------------------------------
-	if (! open $FD, '<', $uriTable) {
+	my $FD = FileHandle -> new();
+	if (! $FD -> open ($uriTable)) {
 		return;
 	}
 	while (my $match =<$FD>) {
@@ -591,7 +599,7 @@ sub openSUSEpath {
 		eval $match; ## no critic
 		$matches{$repo} = $list[0];
 	}
-	close $FD;
+	$FD -> close();
 	#==========================================
 	# Check URL entries
 	#------------------------------------------
@@ -657,6 +665,34 @@ sub plainPath {
 		"URL: $module will be forwarded AS IS to the package manger!\n"
 	);
 	return $module;
+}
+
+#==========================================
+# readRepoAliasTable
+#------------------------------------------
+sub readRepoAliasTable {
+	# ...
+	# There is the optional /etc/kiwi/repoalias file which
+	# contains an alternative location for a specific repo
+	# This function reads in the file and provides an alias
+	# hash table which is used to check if the given repo
+	# has an alternative location to use
+	# ---
+	my $FD = FileHandle -> new();
+	my %repohash;
+	if (! $FD -> open ('/etc/kiwi/repoalias')) {
+		return \%repohash;
+	}
+	while (my $line = <$FD>) {
+		next if $line =~ /^#/;
+		if ($line =~ /({.*})\s*(.*)/) {
+			my $alias= $1;
+			my $repo = $2;
+			$repohash{$alias} = $repo;
+		}
+	}
+	$FD -> close();
+	return \%repohash;
 }
 
 1;
