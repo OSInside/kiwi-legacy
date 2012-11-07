@@ -4759,7 +4759,7 @@ sub cleanKernelFSMount {
 	my $this = shift;
 	my @kfs  = ("/proc/sys/fs/binfmt_misc","/proc","/dev/pts","/sys");
 	foreach my $system (@kfs) {
-		qxx ("umount $this->{imageDest}/$system 2>&1");
+		qxx ("umount $this->{imageTree}/$system 2>&1");
 	}
 	return;
 }
