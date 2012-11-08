@@ -4655,8 +4655,12 @@ sub setupBootLoaderConfiguration {
 			if (-f $editBoot) {
 				$kiwi -> info ("Calling pre bootloader install script:\n");
 				$kiwi -> info ("--> $editBoot\n");
+				my @opts = ();
+				if ($type{bootfilesystem}) {
+					push @opts,$type{bootfilesystem};
+				}
 				system ("cd $tmpdir && chmod u+x $editBoot");
-				system ("cd $tmpdir && bash --norc -c $editBoot");
+				system ("cd $tmpdir && bash --norc -c \"$editBoot @opts\"");
 				my $result = $? >> 8;
 				if ($result != 0) {
 					$kiwi -> error ("Call failed, see console log");

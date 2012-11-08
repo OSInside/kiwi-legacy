@@ -1037,7 +1037,12 @@ function setupRHELInitrd {
 		if [ $bootLoaderOK = "1" ];then
 			if [ -f /boot/initrd.vmx ];then
 				rm -f /boot/initrd.vmx
+			fi
+			if [ -f /boot/linux.vmx ];then
 				rm -f /boot/linux.vmx
+			fi
+			if [ -f /boot/initrd.uboot ];then
+				rm -f /boot/initrd.uboot
 			fi
 		fi
 		if [ $umountSys -eq 1 ];then
@@ -1098,7 +1103,12 @@ function setupSUSEInitrd {
 		if [ $bootLoaderOK = "1" ];then
 			if [ -f /boot/initrd.vmx ];then
 				rm -f /boot/initrd.vmx
+			fi
+			if [ -f /boot/linux.vmx ];then
 				rm -f /boot/linux.vmx
+			fi
+			if [ -f /boot/initrd.uboot ];then
+				rm -f /boot/initrd.uboot
 			fi
 		fi
 		if [ "$loader" = "syslinux" ];then
@@ -8208,6 +8218,7 @@ function setupBootPartition {
 	#--------------------------------------
 	probeFileSystem $(ddn $imageDiskDevice $bootid)
 	fs_type=$FSTYPE ; FSTYPE=$FSTYPE_SAVE
+	export bootPartitionFSType=$fs_type
 	#======================================
 	# Sanity checks
 	#--------------------------------------
