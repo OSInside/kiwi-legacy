@@ -580,15 +580,20 @@ function OEMRepart {
 			popd
 		fi
 		mkdir /reco-save/boot
+		if ! cp /reco-root/boot/initrd.vmx /reco-save/boot/initrd;then
+			systemException "Failed to copy recovery initrd" "reboot"
+		fi
+		if ! cp /reco-root/boot/linux.vmx /reco-save/boot/vmlinuz;then
+			systemException "Failed to copy recovery kernel" "reboot"
+		fi
 		if [ "$loader" = "grub" ];then
-			if ! cp /reco-root/boot/initrd.vmx /reco-save/boot/initrd;then
-				systemException "Failed to copy recovery initrd" "reboot"
-			fi
-			if ! cp /reco-root/boot/linux.vmx /reco-save/boot/vmlinuz;then
-				systemException "Failed to copy recovery kernel" "reboot"
-			fi
 			if ! cp /reco-root/boot/message /reco-save/boot/message;then
 				systemException "Failed to copy recovery gfx message" "reboot"
+			fi
+		fi
+		if [ "$loader" = "grub2" ];then
+			if ! cp /reco-root/boot/unicode.pf2 /reco-save/boot/;then
+				systemException "Failed to copy recovery unicode font" "reboot"
 			fi
 		fi
 		if ! dd if=$imageDiskDevice of=/reco-save/mbr bs=1 count=512;then

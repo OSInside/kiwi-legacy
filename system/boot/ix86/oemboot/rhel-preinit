@@ -83,27 +83,35 @@ if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 	if ! mount $imageRecoveryDevice /reco-save >/dev/null;then
 		systemException "Failed to mount recovery device" "reboot"
 	fi
+	Echo "Installing boot loader into recovery partition"
+	setupBootLoaderRecovery / /reco-save OEM
+	installBootLoaderRecovery
+	Echo "Store recovery boot files phase 1)..."
 	backupBootFiles=""
 	for i in \
 		/etc/fstab \
 		/etc/sysconfig/kernel \
 		/etc/sysconfig/bootloader \
 		/etc/grub.conf \
-		/etc/lilo.conf
+		/etc/lilo.conf \
+		/etc/default/grub \
+		/etc/grub.d/40_custom
 	do
 		test -e $i && backupBootFiles="$backupBootFiles $i"
 	done
-	tar -czf /reco-save/boot-1.tgz $backupBootFiles
+	if ! tar -czf /reco-save/boot-1.tgz $backupBootFiles;then
+		systemException "Failed to tar up recovery boot-1.tgz" "reboot"
+	fi
+	Echo "Store recovery boot files phase 2)..."
 	backupBootFiles=""
 	for i in $(find /boot -type f); do
 		if ! echo $i | grep -q -E "\.sys";then
 			backupBootFiles="$backupBootFiles $i"
 		fi
 	done
-	tar -czf /reco-save/boot-2.tgz $backupBootFiles
-	Echo "Installing boot loader into recovery partition"
-	setupBootLoaderRecovery / /reco-save OEM
-	installBootLoaderRecovery
+	if ! tar -czf /reco-save/boot-2.tgz $backupBootFiles;then
+		systemException "Failed to tar up recovery boot-2.tgz" "reboot"
+	fi
 	umount /reco-save
 	rmdir /reco-save
 fi

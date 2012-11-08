@@ -868,11 +868,11 @@ function installBootLoaderGrub2 {
 	# ----
 	local confTool=grub2-mkconfig
 	local instTool=grub2-install
-	local confPath=$destsPrefix/boot/grub2/grub.cfg
+	local confPath=/boot/grub2/grub.cfg
 	if [ "$partedTableType" = "gpt" ];then
 		confTool=grub2-efi-mkconfig
 		instTool=grub2-efi-install
-		confPath=$destsPrefix/boot/grub2-efi/grub.cfg
+		confPath=/boot/grub2-efi/grub.cfg
 	fi
 	if ! which $confTool &>/dev/null;then
 		Echo "Image doesn't have grub2 installed"
@@ -938,7 +938,7 @@ function installBootLoaderGrubRecovery {
 	# /.../
 	# install the grub into the recovery partition.
 	# By design the recovery partition is always the
-	# fourth primary partition of the disk
+	# last primary partition of the disk
 	# ----
 	local input=/grub.input
 	local gdevreco=$((recoid - 1))
@@ -961,8 +961,49 @@ function installBootLoaderGrubRecovery {
 # installBootLoaderGrub2Recovery
 #--------------------------------------
 function installBootLoaderGrub2Recovery {
-	# TODO
-	Echo "*** not implemented ***"
+	# /.../
+	# install grub2 into the recovery partition
+	# By design the recovery partition is always the
+	# last primary partition of the disk
+	# ----
+	local confTool=grub2-mkconfig
+	local instTool=grub2-install
+	local confPath=/boot/grub2/grub.cfg
+	#======================================
+	# check tool status
+	#--------------------------------------
+	if [ "$partedTableType" = "gpt" ];then
+		confTool=grub2-efi-mkconfig
+		instTool=grub2-efi-install
+		confPath=/boot/grub2-efi/grub.cfg
+	fi
+	if ! which $confTool &>/dev/null;then
+		Echo "Image doesn't have grub2 installed"
+		Echo "Can't install boot loader"
+		return 1
+	fi
+	#======================================
+	# install grub2 into partition
+	#--------------------------------------
+	$instTool --force \
+		--boot-directory=/reco-save/boot $imageRecoveryDevice 1>&2
+	if [ ! $? = 0 ];then
+		Echo "Failed to install boot loader"
+	fi
+	#======================================
+	# create custom recovery entry
+	#--------------------------------------
+	cat >> /etc/grub.d/40_custom <<- EOF
+		menuentry 'Recovery' --class opensuse --class os {
+			set root='hd0,$recoid'
+			chainloader +1
+		}
+	EOF
+	$confTool -o $confPath 1>&2
+	if [ ! $? = 0 ];then
+		Echo "Failed to create grub2 boot configuration"
+		return 1
+	fi
 }
 #======================================
 # updateModuleDependencies
@@ -1539,8 +1580,137 @@ function setupBootLoaderGrubRecovery {
 # setupBootLoaderGrub2Recovery
 #--------------------------------------
 function setupBootLoaderGrub2Recovery {
-	# TODO
-	Echo "*** not implemented ***"
+	# /.../
+	# create grub.cfg file for the recovery boot system
+	# ----
+	local mountPrefix=$1  # mount path of the image
+	local destsPrefix=$2  # base dir for the config files
+	local gfix=$3         # grub title
+	local kernel=vmlinuz  # this is a copy of the kiwi linux.vmx file
+	local initrd=initrd   # this is a copy of the kiwi initrd.vmx file
+	local conf=$destsPrefix/boot/grub2/grub.cfg
+	#======================================
+	# setup ID device names
+	#--------------------------------------
+	local rootByID=$(getDiskID $OEM_RECOVERY)
+	local diskByID=$(getDiskID $imageDiskDevice)
+	#======================================
+	# operate only in recovery mode
+	#--------------------------------------
+	if [ -z "$OEM_RECOVERY" ];then
+		return
+	fi
+	#======================================
+	# import grub2 modules into recovery
+	#--------------------------------------
+	mkdir $destsPrefix/boot
+	cp -a $mountPrefix/boot/grub2 $destsPrefix/boot/
+	rm -f $destsPrefix/boot/grub2/grub.cfg
+	rm -f $destsPrefix/boot/grub2/bootpart.cfg
+	#======================================
+	# check for kernel options
+	#--------------------------------------
+	local cmdline="KIWI_RECOVERY=$recoid loader=grub2"
+	if [ ! -z "$KIWI_KERNEL_OPTIONS" ];then
+		cmdline="$cmdline $KIWI_KERNEL_OPTIONS"
+	fi
+	if [ ! -z "$KIWI_INITRD_PARAMS" ];then
+		cmdline="$cmdline $KIWI_INITRD_PARAMS";
+	fi
+	if [ ! -z "$rootByID" ];then
+		cmdline="$cmdline root=$rootByID"
+	fi
+	if [ ! -z "$diskByID" ];then
+		cmdline="$cmdline disk=$diskByID"
+	fi
+	if [ "$kiwi_lvm" = "true" ];then
+		cmdline="$cmdline VGROUP=$VGROUP"
+	fi
+	if [ -e /dev/xvc0 ];then
+		cmdline="$cmdline console=xvc console=tty"
+	elif [ -e /dev/hvc0 ];then
+		cmdline="$cmdline console=hvc console=tty"
+	fi
+	#======================================
+	# create recovery grub.cfg
+	#--------------------------------------
+	cat > $conf <<- EOF
+		insmod ext2
+		insmod gettext
+		insmod part_msdos
+		insmod chain
+		insmod png
+		insmod vbe
+		insmod vga
+		insmod video_bochs
+		insmod video_cirrus
+		insmod gzio
+		set default=0
+		set root='hd0,$recoid'
+		set font=/boot/unicode.pf2
+		if loadfont \$font ;then
+			set gfxmode=auto
+			insmod gfxterm
+			insmod gfxmenu
+			terminal_input gfxterm
+			if terminal_output gfxterm; then true; else
+				terminal gfxterm
+			fi
+		fi
+		if loadfont /boot/grub2/themes/openSUSE/ascii.pf2;then
+			loadfont /boot/grub2/themes/openSUSE/DejaVuSans-Bold14.pf2
+			loadfont /boot/grub2/themes/openSUSE/DejaVuSans10.pf2
+			loadfont /boot/grub2/themes/openSUSE/DejaVuSans12.pf2
+			loadfont /boot/grub2/themes/openSUSE/ascii.pf2
+			set theme=/boot/grub2/themes/openSUSE/theme.txt
+			set bgimg=/boot/grub2/themes/openSUSE/background.png
+			background_image -m stretch \$bgimg
+		fi
+		set timeout=30
+	EOF
+	if xenServer $kernel $mountPrefix;then
+		cat >> $conf <<- EOF
+		menuentry 'Recover/Repair System' --class opensuse --class os {
+			set root='hd0,$recoid'
+			echo Loading Xen...
+			multiboot /boot/xen.gz dummy
+			echo Loading $kernel...
+			set gfxpayload=keep
+			module /boot/$kernel dummy $cmdline showopts
+			echo Loading $initrd...
+			module /boot/$initrd dummy
+		}
+		menuentry 'Restore Factory System' --class opensuse --class os {
+			set root='hd0,$recoid'
+			echo Loading Xen...
+			multiboot /boot/xen.gz dummy
+			echo Loading $kernel...
+			set gfxpayload=keep
+			module /boot/$kernel dummy $cmdline RESTORE=1 showopts
+			echo Loading $initrd...
+			module /boot/$initrd dummy
+		}
+		EOF
+	else
+		cat >> $conf <<- EOF
+		menuentry 'Recover/Repair System' --class opensuse --class os {
+			set root='hd0,$recoid'
+			echo Loading $kernel...
+			set gfxpayload=keep
+			linux /boot/$kernel $cmdline showopts
+			echo Loading $initrd...
+			initrd /boot/$initrd
+		}
+		menuentry 'Restore Factory System' --class opensuse --class os {
+			set root='hd0,$recoid'
+			echo Loading $kernel...
+			set gfxpayload=keep
+			linux /boot/$kernel $cmdline RESTORE=1 showopts
+			echo Loading $initrd...
+			initrd /boot/$initrd
+		}
+		EOF
+	fi
 }
 #======================================
 # setupBootLoaderUBoot
