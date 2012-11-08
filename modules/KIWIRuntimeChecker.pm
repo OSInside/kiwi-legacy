@@ -531,6 +531,9 @@ sub __checkVMscsiCapable {
 		return 1;
 	}
 	my $vmConfig = $xml -> getVMachineConfig();
+	if (! $vmConfig) {
+		return;
+	}
 	my $diskType = $vmConfig -> getSystemDiskType();
 	if ($diskType) {
 		if ($diskType ne 'scsi') {
