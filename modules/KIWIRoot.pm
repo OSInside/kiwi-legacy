@@ -131,6 +131,7 @@ sub new {
 		if (! $channel) {
 			$channel = $publics_url;
 			$channel =~ s/\//_/g;
+			$channel =~ s/_\$//g;
 			$channel =~ s/^_//;
 			$channel =~ s/_$//;
 		}
