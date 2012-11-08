@@ -3854,12 +3854,12 @@ sub setupBootLoaderConfiguration {
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "\t"."echo Loading linux.vmx...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
-					print $FD 'linux /boot/linux.vmx';
+					print $FD "\t".'linux /boot/linux.vmx';
 					print $FD " loader=$bloader splash=silent";
 				} else {
 					print $FD "\t"."echo Loading linux...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
-					print $FD 'linux /boot/linux';
+					print $FD "\t".'linux /boot/linux';
 					print $FD " loader=$bloader splash=silent";
 				}
 				print $FD $cmdline;
@@ -3880,7 +3880,7 @@ sub setupBootLoaderConfiguration {
 					print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 					print $FD "\t"."echo Loading linux...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
-					print $FD "module /boot/linux dummy";
+					print $FD "\t"."module /boot/linux dummy";
 					print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 					print $FD " cdinst=1 loader=$bloader splash=silent";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
@@ -3888,14 +3888,14 @@ sub setupBootLoaderConfiguration {
 					print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 					print $FD "\t"."echo Loading linux.vmx...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
-					print $FD 'module /boot/linux.vmx dummy';
+					print $FD "\t".'module /boot/linux.vmx dummy';
 					print $FD " loader=$bloader splash=silent";
 				} else {
 					print $FD "\t"."echo Loading Xen\n";
 					print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 					print $FD "\t"."echo Loading linux...\n";
-					print $FD "set gfxpayload=keep"."\n";
-					print $FD 'module /boot/linux dummy';
+					print $FD "\t"."set gfxpayload=keep"."\n";
+					print $FD "\t".'module /boot/linux dummy';
 					print $FD " loader=$bloader splash=silent";
 				}
 				print $FD $cmdline;
@@ -3929,7 +3929,7 @@ sub setupBootLoaderConfiguration {
 					if ($iso) {
 						print $FD "\t"."echo Loading linux...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
-						print $FD "linux /boot/linux";
+						print $FD "\t"."linux /boot/linux";
 						print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 						print $FD " cdinst=1 loader=$bloader splash=silent";
 					} elsif (
@@ -3938,12 +3938,12 @@ sub setupBootLoaderConfiguration {
 					) {
 						print $FD "\t"."echo Loading linux.vmx...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
-						print $FD 'linux /boot/linux.vmx';
+						print $FD "\t".'linux /boot/linux.vmx';
 						print $FD " loader=$bloader splash=silent";
 					} else {
 						print $FD "\t"."echo Loading linux...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
-						print $FD 'linux /boot/linux';
+						print $FD "\t".'linux /boot/linux';
 						print $FD " loader=$bloader splash=silent";
 					}
 					print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
@@ -3969,7 +3969,7 @@ sub setupBootLoaderConfiguration {
 						print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 						print $FD "\t"."echo Loading linux...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
-						print $FD "module /boot/linux dummy";
+						print $FD "\t"."module /boot/linux dummy";
 						print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 						print $FD " cdinst=1 loader=$bloader splash=silent";
 					} elsif (
@@ -3980,14 +3980,14 @@ sub setupBootLoaderConfiguration {
 						print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 						print $FD "\t"."echo Loading linux.vmx...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
-						print $FD 'module /boot/linux.vmx dummy';
+						print $FD "\t".'module /boot/linux.vmx dummy';
 						print $FD " loader=$bloader splash=silent";
 					} else {
 						print $FD "\t"."echo Loading Xen\n";
 						print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 						print $FD "\t"."echo Loading linux...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
-						print $FD 'module /boot/linux dummy';
+						print $FD "\t".'module /boot/linux dummy';
 						print $FD " loader=$bloader splash=silent";
 					}
 					print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
