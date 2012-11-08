@@ -1289,7 +1289,7 @@ sub __isNICInitValid {
 	}
 	my %usedIface = ();
 	for my $entry (values %{$nics}) {
-		if (! $entry->{interface} ) {
+		if (! defined $entry->{interface} ) {
 			my $msg = 'Initialization data for nic incomplete, '
 				. 'must provide "interface" key-value pair.';
 			$kiwi -> error($msg);
