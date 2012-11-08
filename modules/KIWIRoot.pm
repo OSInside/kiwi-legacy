@@ -140,6 +140,7 @@ sub new {
 			$channel = $publics_url;
 			$channel =~ s/\//_/g;
 			$channel =~ s/^_//;
+			$channel =~ s/_\$//;
 			$channel =~ s/_$//;
 		}
 		#==========================================
