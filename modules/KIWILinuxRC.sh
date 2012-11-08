@@ -8663,7 +8663,7 @@ function setupKernelLinks {
 	#======================================
 	# make sure boot => . link exists
 	#--------------------------------------
-	if [ ! $loader = "syslinux" -a ! $loader = "uboot" ] && [ ! -e boot ];then
+	if [ ! "$bootPartitionFSType" = "vfat" ] && [ ! -e boot ];then
 		ln -s . boot
 	fi
 	#======================================
