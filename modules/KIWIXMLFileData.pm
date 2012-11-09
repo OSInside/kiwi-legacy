@@ -45,8 +45,9 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi = shift;
-	my $init = shift;
+	my $kiwi   = shift;
+	my $init   = shift;
+	my $addlKW = shift;
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
@@ -54,6 +55,11 @@ sub new {
 		return;
 	}
 	my %keywords = map { ($_ => 1) } qw( arch name );
+	if ($addlKW) {
+		for my $kw (@{$addlKW}) {
+			$keywords{$kw} = 1;
+		}
+	}
 	$this->{supportedKeywords} = \%keywords;
 	if (! $this -> __isInitHashRef($init) ) {
 		return;
@@ -71,27 +77,11 @@ sub new {
 }
 
 #==========================================
-# setArch
-#------------------------------------------
-sub setArch {
-	# ...
-	# set the architecture value
-	# ---
-	my $this = shift;
-	my $arch = shift;
-	if (! $this->__isSupportedArch($arch)) {
-		return;
-	}
-	$this->{arch} = $arch;
-	return 1;
-}
-
-#==========================================
 # getArch
 #------------------------------------------
 sub getArch {
 	# ...
-	# return the architecture value, if any
+	# Return the architecture value, if any
 	# ---
 	my $this = shift;
 	return $this->{arch};
@@ -102,10 +92,26 @@ sub getArch {
 #------------------------------------------
 sub getName {
 	# ...
-	# return the name value
+	# Return the name value
 	# ---
 	my $this = shift;
 	return $this->{name};
+}
+
+#==========================================
+# setArch
+#------------------------------------------
+sub setArch {
+	# ...
+	# Set the architecture value
+	# ---
+	my $this = shift;
+	my $arch = shift;
+	if (! $this->__isSupportedArch($arch)) {
+		return;
+	}
+	$this->{arch} = $arch;
+	return 1;
 }
 
 #==========================================

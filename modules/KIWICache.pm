@@ -160,7 +160,7 @@ sub initializeCache {
 	#------------------------------------------
 	my @sections = ("bootstrap","image");
 	foreach my $section (@sections) {
-		my @list = $xml -> getList ($section);
+		my @list = $xml -> getList_legacy ($section);
 		foreach my $pac (@list) {
 			if ($pac =~ /^pattern:(.*)/) {
 				push @CachePatterns,$1;

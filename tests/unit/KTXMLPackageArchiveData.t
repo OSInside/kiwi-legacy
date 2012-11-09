@@ -1,19 +1,19 @@
 #!/usr/bin/perl
 #================
-# FILE          : KTXMLDriverData.t
+# FILE          : KTXMLPackageArchiveData.t
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
-# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test driver for the KIWIXMLDriverData module.
+# DESCRIPTION   : Unit test driver for the KIWIXMLPackageArchiveData module.
 #               :
 # STATUS        : Development
 #----------------
-package KTXMLDriverData;
+package KTXMLPackageArchiveData;
 use strict;
 use warnings;
 use FindBin;
@@ -26,6 +26,6 @@ use lib "$FindBin::Bin/lib";
 use lib "$FindBin::Bin/../../modules";
 
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiXMLDriverData');
+$runner->start( 'Test::kiwiXMLPackageArchiveData');
 
 1;

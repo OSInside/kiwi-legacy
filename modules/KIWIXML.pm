@@ -34,6 +34,11 @@ use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
 use KIWIXMLEC2ConfigData;
 use KIWIXMLOEMConfigData;
+use KIWIXMLPackageData;
+use KIWIXMLPackageArchiveData;
+use KIWIXMLPackageCollectData;
+use KIWIXMLPackageIgnoreData;
+use KIWIXMLPackageProductData;
 use KIWIXMLPreferenceData;
 use KIWIXMLProfileData;
 use KIWIXMLPXEDeployData;
@@ -83,18 +88,34 @@ sub new {
 	#		specification = '',
 	#		type = ''
 	#	}
+	#   pckgInstallOpt = '',
 	#	profName[+] = {
-	#		bootPkgs    = (),
-	#		bootDelPkgs = (),
-	#		delPkgs     = (),
-	#		drivers     = (),
-	#		pkgs        = (),
+	#       archives        = (),
+	#       bootArchives    = (),
+	#		bootDelPkgs     = (),
+	#		bootPkgs        = (),
+	#		bootPkgsCollect = (),
+	#       bootStrapPckgs  = (),
+	#		delPkgs         = (),
+	#		drivers         = (),
+	#       ignorePkgs      = (),
+	#       installOpt      = '',
+	#		pkgs            = (),
+	#       pkgsCollect     = (),
+	#       products        = (),
 	#		arch[+] = {
-	#			bootPkgs    = (),
-	#			bootDelPkgs = (),
-	#			delPkgs     = (),
-	#			drivers     = (),
-	#			pkgs        = ()
+	#           archives        = (),
+	#           bootArchives    = (),
+	#			bootDelPkgs     = (),
+	#			bootPkgs        = (),
+	#	   	    bootPkgsCollect = (),
+	#           bootStrapPckgs  = (),
+	#			delPkgs         = (),
+	#			drivers         = (),
+	#           ignorePkgs      = (),
+	#			pkgs            = (),
+	#           pkgsCollect     = (),
+	#           products        = (),
 	#		}
 	#       preferences = {
 	#           bootloader_theme = '',
@@ -102,22 +123,11 @@ sub new {
 	#           ........
 	#           types = {
 	#               type[+] = {
-	#                   arch[+] = {
-	#                       bootPkgs    = (),
-	#			            bootDelPkgs = (),
-	#			            delPkgs     = (),
-	#			            drivers     = (),
-	#			            pkgs        = ()
-	#		            }
-	#                   boot       = '',
-	#                   bootkernel = '',
-	#                   bootDelPkgs = (),
-	#                   bootPkgs    = (),
-	#                   delPkgs     = (),
+	#                   boot            = '',
+	#                   bootkernel      = '',
 	#                   .......
-	#                   packages   = (),
-	#                   vga        = '',
-	#                   volid      = ''
+	#                   vga             = '',
+	#                   volid           = ''
 	#               }
 	#           }
 	#           version = ''
@@ -135,7 +145,30 @@ sub new {
 	#				...
 	#			}
 	#		}
-	#	    ...
+	#	    type[+] = {
+	#           archives = (),
+	#           arch[+]  = {
+	#                       archives        = (),
+	#                       bootArchives    = (),
+	#			            bootDelPkgs     = (),
+	#			            bootPkgs        = (),
+	#	   	                bootPkgsCollect = (),
+	#			            drivers         = (),
+	#                       ignorePkgs      = (),
+	#			            pkgs            = (),
+	#                       pkgsCollect     = (),
+	#                       products        = (),
+	#		            }
+	#           bootArchives    = (),
+	#		    bootDelPkgs     = (),
+	#           bootPkgs        = (),
+	#		    bootPkgsCollect = (),
+	#           drivers         = (),
+	#           ignorePkgs      = (),
+	#           pkgs            = (),
+	#           pkgsCollect     = (),
+	#           products        = (),
+	#       }
 	#   }
 	#   users {
 	#       NAME[+] {
@@ -304,6 +337,27 @@ sub new {
 	}
 	$this->{selectedType} = $this->{defaultType};
 	#==========================================
+	# Populate imageConfig with archive data from config tree
+	#------------------------------------------
+	$this -> __populateArchiveInfo();
+	#==========================================
+	# Populate imageConfig with ignore data from config tree
+	#------------------------------------------
+	$this -> __populateIgnorePackageInfo();
+	#==========================================
+	# Populate imageConfig with package data from config tree
+	#------------------------------------------
+	$this -> __populatePackageInfo();
+	#==========================================
+	# Populate imageConfig with package collection
+	# (opensusePattern, rhelGroup) data
+	#------------------------------------------
+	$this -> __populatePackageCollectionInfo();
+	#==========================================
+	# Populate imageConfig with product data from config tree
+	#------------------------------------------
+	$this -> __populateProductInfo();
+	#==========================================
 	# Populate imageConfig with repository data from config tree
 	#------------------------------------------
 	$this -> __populateRepositoryInfo();
@@ -380,6 +434,111 @@ sub new {
 # eventual interface of this object
 #------------------------------------------
 #==========================================
+# addArchives
+#------------------------------------------
+sub addArchives {
+	# ...
+	# Add the given archives to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	#   - the given image type of the profiles being processed
+	# ---
+	my $this      = shift;
+	my $archives  = shift;
+	my $profNames = shift;
+	my $imageType = shift;
+	my %verifyData = (
+		caller       => 'addArchives',
+		expectedType => 'KIWIXMLPackageArchiveData',
+		itemName     => 'archives',
+		itemsToAdd   => $archives,
+		profNames    => $profNames,
+		type         => $imageType
+	);
+	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
+		return;
+	}
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'archive(s)');
+	if (! $imageType) {
+		$imageType = 'image';
+	}
+	my $accessID;
+	for my $prof (@profsToUse) {
+		for my $archiveObj (@{$archives}) {
+			my $arch     = $archiveObj -> getArch();
+			my $bootIncl = $archiveObj -> getBootInclude();
+			if ($bootIncl && ($bootIncl eq 'true')) {
+				$accessID = 'bootArchives';
+			} else {
+				$accessID = 'archives';
+			}
+			my %storeData = (
+				accessID => $accessID,
+				arch     => $arch,
+				dataObj  => $archiveObj,
+				profName => $prof,
+				type     => $imageType
+			);
+			if (! $this -> __storeInstallData(\%storeData)) {
+				return;
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# addBootstrapPackages
+#------------------------------------------
+sub addBootstrapPackages {
+	# ...
+	# Add the given packages to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	# ---
+	my $this       = shift;
+	my $packages   = shift;
+	my $profNames  = shift;
+	my $imageType  = shift;
+	my %verifyData = (
+		caller       => 'addBootstrapPackages',
+		expectedType => 'KIWIXMLPackageData',
+		itemName     => 'packages',
+		itemsToAdd   => $packages,
+		profNames    => $profNames
+	);
+	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
+		return;
+	}
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'package(s)');
+	$imageType = 'bootstrap';
+	for my $prof (@profsToUse) {
+		for my $pckgObj (@{$packages}) {
+			my $arch = $pckgObj -> getArch();
+			my %storeData = (
+				accessID => 'bootStrapPckgs',
+				arch     => $arch,
+				dataObj  => $pckgObj,
+				profName => $prof,
+				type     => $imageType
+			);
+			if (! $this -> __storeInstallData(\%storeData)) {
+				return;
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
 # addDrivers
 #------------------------------------------
 sub addDrivers {
@@ -412,7 +571,7 @@ sub addDrivers {
 		return;
 	}
 	#==========================================
-	# Remeber drivers to add + verify the type
+	# Verify array antries
 	#------------------------------------------
 	my @drvsToAdd = @{$drivers};
 	for my $drv (@drvsToAdd) {
@@ -456,6 +615,179 @@ sub addDrivers {
 					my @newDrv = ($name);
 					$this->{imageConfig}->{$prof}{drivers} = \@newDrv;
 				}
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# addPackages
+#------------------------------------------
+sub addPackages {
+	# ...
+	# Add the given packages to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	#   - the given image type of the profiles being processed
+	# ---
+	my $this       = shift;
+	my $packages   = shift;
+	my $profNames  = shift;
+	my $imageType  = shift;
+	my %verifyData = (
+		caller       => 'addPackages',
+		expectedType => 'KIWIXMLPackageData',
+		itemName     => 'packages',
+		itemsToAdd   => $packages,
+		profNames    => $profNames,
+		type         => $imageType
+	);
+	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
+		return;
+	}
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'package(s)');
+	if (! $imageType) {
+		$imageType = 'image';
+	}
+	for my $prof (@profsToUse) {
+		for my $pckgObj (@{$packages}) {
+			my @access;
+			my $arch     = $pckgObj -> getArch();
+			my $bootDel  = $pckgObj -> getBootDelete();
+			my $bootIncl = $pckgObj -> getBootInclude();
+			if ($bootDel && $bootDel eq 'true') {
+				push @access, 'bootDelPkgs';
+				if (! $bootIncl || $bootIncl eq 'false') {
+					push @access, 'pkgs';
+				}
+			}
+			if ($bootIncl && $bootIncl eq 'true') {
+				push @access, 'bootPkgs';
+			}
+			if (! @access) {
+				push @access, 'pkgs';
+			}
+			for my $accessID (@access) {
+				my %storeData = (
+					accessID => $accessID,
+					arch     => $arch,
+					dataObj  => $pckgObj,
+					profName => $prof,
+					type     => $imageType
+				);
+				if (! $this -> __storeInstallData(\%storeData)) {
+					return;
+				}
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# addPackageCollections
+#------------------------------------------
+sub addPackageCollections {
+	# ...
+	# Add the given package collections to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	#   - the given image type of the profiles being processed
+	# ---
+	my $this        = shift;
+	my $collections = shift;
+	my $profNames   = shift;
+	my $imageType   = shift;
+	my %verifyData = (
+		caller       => 'addPackageCollections',
+		expectedType => 'KIWIXMLPackageCollectData',
+		itemName     => 'collections',
+		itemsToAdd   => $collections,
+		profNames    => $profNames,
+		type         => $imageType
+	);
+	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
+		return;
+	}
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'collection(s)');
+	if (! $imageType) {
+		$imageType = 'image';
+	}
+	my $accessID;
+	for my $prof (@profsToUse) {
+		for my $collectObj (@{$collections}) {
+			my $arch     = $collectObj -> getArch();
+			my $bootIncl = $collectObj -> getBootInclude();
+			if ($bootIncl && ($bootIncl eq 'true')) {
+				$accessID = 'bootPkgsCollect';
+			} else {
+				$accessID = 'pkgsCollect';
+			}
+			my %storeData = (
+				accessID => $accessID,
+				arch     => $arch,
+				dataObj  => $collectObj,
+				profName => $prof,
+				type     => $imageType
+			);
+			if (! $this -> __storeInstallData(\%storeData)) {
+				return;
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# addPackagesToDelete
+#------------------------------------------
+sub addPackagesToDelete {
+	# ...
+	# Add the given packages to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	# ---
+	my $this       = shift;
+	my $packages   = shift;
+	my $profNames  = shift;
+	my $imageType  = shift;
+	my %verifyData = (
+		caller       => 'addPackagesToDelete',
+		expectedType => 'KIWIXMLPackageData',
+		itemName     => 'packages',
+		itemsToAdd   => $packages,
+		profNames    => $profNames
+	);
+	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
+		return;
+	}
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'package(s)');
+	$imageType = 'bootstrap';
+	for my $prof (@profsToUse) {
+		for my $pckgObj (@{$packages}) {
+			my $arch = $pckgObj -> getArch();
+			my %storeData = (
+				accessID => 'delPkgs',
+				arch     => $arch,
+				dataObj  => $pckgObj,
+				profName => $prof,
+				type     => $imageType
+			);
+			if (! $this -> __storeInstallData(\%storeData)) {
+				return;
 			}
 		}
 	}
@@ -608,6 +940,98 @@ sub getActiveProfileNames {
 }
 
 #==========================================
+# getArchives
+#------------------------------------------
+sub getArchives {
+	# ...
+	# Return an array ref containing ArchiveData objects
+	# ---
+	my $this = shift;
+	my $archives = $this -> __getInstallData('archives');
+	my $bInclArchives = $this -> getBootIncludeArchives();
+	push @{$archives}, @{$bInclArchives};
+	return $archives;
+}
+
+#==========================================
+# getBootDeletePackages
+#------------------------------------------
+sub getBootDeletePackages {
+	# ...
+	# Return an array ref containing PackageData objects for the packages
+	# that should be deleted.
+	# ---
+	my $this = shift;
+	return $this -> __getInstallData('bootDelPkgs');
+}
+
+#==========================================
+# getBootIncludeArchives
+#------------------------------------------
+sub getBootIncludeArchives {
+	# ...
+	# Return an array ref containing ArchiveData objects
+	# ---
+	my $this = shift;
+	return $this -> __getInstallData('bootArchives');
+}
+
+#==========================================
+# getBootIncludePackages
+#------------------------------------------
+sub getBootIncludePackages {
+	# ...
+	# Return an array ref containing PackageData objects
+	# ---
+	my $this = shift;
+	my $bPckgs = $this -> __getInstallData('bootPkgs');
+	my %pckgFilter;
+	# Any packages that are marked to be replaced need to be removed
+	for my $pckg (@{$bPckgs}) {
+		my $toReplace = $pckg -> getPackageToReplace();
+		if ($toReplace) {
+			$pckgFilter{$toReplace} = 1;
+		}
+	}
+	# Do not filter out the boot delete packages, packages marked with
+	# bootinclude='true' must be installed even if bootdlete='true' is set
+	# as well
+	my @delPackages;
+	# Create the list of packages
+	for my $pckg (@{$bPckgs}) {
+		my $name = $pckg -> getName();
+		if ($pckgFilter{$name}) {
+			next;
+		}
+		push @delPackages, $pckg;
+	}
+	return \@delPackages;
+}
+
+#==========================================
+# getBootIncludePackageCollections
+#------------------------------------------
+sub getBootIncludePackageCollections {
+	# ...
+	# Return an array ref containing PackageCollectData objects
+	# ---
+	my $this = shift;
+	return $this -> __getInstallData('bootPkgsCollect');
+}
+
+#==========================================
+# getBootstrapPackages
+#------------------------------------------
+sub getBootstrapPackages {
+	# ...
+	# Return an array ref containing PackageData objects for the packages
+	# that should be used to bootstrap the image.
+	# ---
+	my $this = shift;
+	return $this -> __getInstallData('bootStrapPckgs');
+}
+
+#==========================================
 # getConfiguredTypeNames
 #------------------------------------------
 sub getConfiguredTypeNames {
@@ -711,6 +1135,36 @@ sub getImageType {
 }
 
 #==========================================
+# getInstallOption
+#------------------------------------------
+sub getInstallOption {
+	# ...
+	# Return the install option type setting. Returns undef if there is
+	# a conflict and thus the settings ar ambiguous.
+	# ---
+	my $this     = shift;
+	my $profName = shift;
+	my @selected = @{$this->{selectedProfiles}};
+	my $instOpt;
+	for my $prof (@selected) {
+		my $opt = $this->{imageConfig}{$prof}{installOpt};
+		if ($opt && (! $instOpt)) {
+			$instOpt = $opt;
+			next;
+		}
+		if ($opt && $instOpt) {
+			if ($opt ne $instOpt) {
+				return;
+			}
+		}
+	}
+	if (! $instOpt) {
+		return 'onlyRequired';
+	}
+	return $instOpt;
+}
+
+#==========================================
 # getOEMConfig
 #------------------------------------------
 sub getOEMConfig {
@@ -723,6 +1177,76 @@ sub getOEMConfig {
 		$kiwi,$this->{selectedType}{oemconfig}
 	);
 	return $oemConfObj;
+}
+
+#==========================================
+# getPackages
+#------------------------------------------
+sub getPackages {
+	# ...
+	# Return an array ref containing PackageData objects
+	# ---
+	my $this = shift;
+	my $pckgs = $this -> __getInstallData('pkgs');
+	my $bPckgs = $this -> getBootIncludePackages();
+	push @{$pckgs}, @{$bPckgs};
+	my %pckgFilter;
+	# Any packages that are marked to be replaced need to be removed
+	for my $pckg (@{$pckgs}) {
+		my $toReplace = $pckg -> getPackageToReplace();
+		if ($toReplace) {
+			$pckgFilter{$toReplace} = 1;
+		}
+	}
+	# Any packages that are marked to be ignored need to be removed
+	my $ignorePckgs = $this -> __getPackagesToIgnore();
+	for my $ignoreP (@{$ignorePckgs}) {
+		my $name = $ignoreP -> getName();
+		$pckgFilter{$name} = 1;
+	}
+	# Filter any packages that are marked for deletion, this might save us
+	# some work later
+	my $delPckgs = $this -> __getInstallData('delPkgs');
+	for my $delP (@{$delPckgs}) {
+		my $name = $delP -> getName();
+		$pckgFilter{$name} = 1;
+	}
+	my @installPackages;
+	# Create the list of packages
+	for my $pckg (@{$pckgs}) {
+		my $name = $pckg -> getName();
+		if ($pckgFilter{$name}) {
+			next;
+		}
+		push @installPackages, $pckg;
+	}
+	return \@installPackages;
+}
+
+#==========================================
+# getPackageCollections
+#------------------------------------------
+sub getPackageCollections {
+	# ...
+	# Return an array ref containing PackageCollectData objects
+	# ---
+	my $this = shift;
+	my $collections = $this -> __getInstallData('pkgsCollect');
+	my $bCollections = $this -> getBootIncludePackageCollections();
+	push @{$collections}, @{$bCollections};
+	return $collections;
+}
+
+#==========================================
+# getPackagesToDelete
+#------------------------------------------
+sub getPackagesToDelete {
+	# ...
+	# Return an array ref containing PackageData objects for the packages
+	# that should be deleted.
+	# ---
+	my $this = shift;
+	return $this -> __getInstallData('delPkgs');
 }
 
 #==========================================
@@ -752,6 +1276,17 @@ sub getPreferences {
 		$kiwi, $mergedPref
 	);
 	return $prefObj;
+}
+
+#==========================================
+# getProducts
+#------------------------------------------
+sub getProducts {
+	# ...
+	# Return an array ref containing ProductData objects
+	# ---
+	my $this = shift;
+	return $this -> __getInstallData('products');
 }
 
 #==========================================
@@ -1800,6 +2335,131 @@ sub __getChildNodeTextValue {
 }
 
 #==========================================
+# __getEntryPath
+#------------------------------------------
+sub __getEntryPath {
+	# ...
+	# Return the position in the imageConfig structure where install data
+	# objects shold be stored. Install data objects are children of the
+	# <packages> element
+	# ---
+	my $this    = shift;
+	my $locData = shift;
+	my $arch     = $locData->{arch};
+	my $profName = $locData->{profName};
+	my $type     = $locData->{type};
+	my $kiwi = $this->{kiwi};
+	if (! $profName) {
+		my $msg = 'Internal error: __getEntryPath called without profName '
+			. 'keyword argument. Please file a bug.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $type) {
+		my $msg = 'Internal error: __getEntryPath called without type '
+			. 'keyword argument. Please file a bug.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $entryPath;
+	my $basePath = $this ->{imageConfig}->{$profName};
+	if ( $type eq 'delete' || $type eq 'bootstrap' || $type eq 'image' ) {
+		if ($arch) {
+			$entryPath = $basePath->{$arch};
+			if (! $entryPath) {
+				$basePath->{$arch} = {};
+				$entryPath = $basePath->{$arch};
+			}
+		} else {
+			$entryPath = $basePath;
+		}
+	} else { #one of the image types
+		# Create the data structure entries as needed
+		my $tPath = $basePath->{$type};
+		if (! $tPath) {
+			$basePath->{$type} = {};
+			$tPath = $basePath->{$type};
+		}
+		if ($arch) {
+			$entryPath = $tPath->{$arch};
+			if (! $entryPath) {
+				$tPath->{$arch} = {};
+				$entryPath = $tPath->{$arch};
+			}
+		} else {
+			$entryPath = $tPath;
+		}
+	}
+	return $entryPath;
+}
+
+#==========================================
+# __getInstallData
+#------------------------------------------
+sub __getInstallData {
+	# ...
+	# Return a ref to an array containing objects accumulated across the
+	# image config data structure for the given accessID.
+	# ---
+	my $this   = shift;
+	my $access = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $access) {
+		my $msg = 'Internal error: __getInstallDataNamescalled without '
+			. 'access pattern argument. Please file a bug';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $arch = $this->{arch};
+	my @selected = @{$this->{selectedProfiles}};
+	my $type = $this->{selectedType}{image};
+	my @names;
+	for my $prof (@selected) {
+		my $baseData = $this->{imageConfig}{$prof}{$access};
+		if ($baseData) {
+			push @names, @{$baseData};
+		}
+		if ($this->{imageConfig}{$prof}{$arch}) {
+			my $archData = $this->{imageConfig}{$prof}{$arch}{$access};
+			if ($archData) {
+				push @names, @{$archData};
+			}
+		}
+		my $typeInfo = $this->{imageConfig}{$prof}{$type};
+		if ($typeInfo) {
+			my $typeData = $typeInfo->{$access};
+			if ($typeData) {
+				push @names, @{$typeData};
+			}
+			my $typeArch = $typeInfo->{$arch};
+			if ($typeArch) {
+				my $typeArchData = $typeArch->{$access};
+				if ($typeArchData) {
+					push @names, @{$typeArchData};
+				}
+			}
+		}
+	}
+	return \@names;
+}
+
+#==========================================
+# __getPackagesToIgnore
+#------------------------------------------
+sub __getPackagesToIgnore {
+	# ...
+	# Return an array ref containing IgnorePackageData objects
+	# The method is private as it is needed for filtering only. Clients
+	# of the XML object should not do any filtering on the data received.
+	# ---
+	my $this = shift;
+	return $this -> __getInstallData('ignorePkgs');
+}
+
+#==========================================
 # __getProfsToModify
 #------------------------------------------
 sub __getProfsToModify {
@@ -1839,13 +2499,54 @@ sub __getProfsToModify {
 	return @profsToUse;
 }
 
+
+#==========================================
+# __getTypeNamesForProfs
+#------------------------------------------
+sub __getTypeNamesForProfs {
+	# ...
+	# Retun an array ref containing names of the configured types for the
+	# given profile names.
+	# ---
+	my $this      = shift;
+	my $profNames = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $profNames) {
+		my $msg = 'Internal error: __getTypeNamesForProfs called without '
+			. 'argument. Please file a bug.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (ref($profNames) ne 'ARRAY') {
+		my $msg = 'Internal error: __getTypeNamesForProfs expecting array '
+			. 'ref as argument. Please file a bug.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my @names;
+	for my $prof (@{$profNames}) {
+		my $prefs = $this->{imageConfig}{$prof}{preferences};
+		if (! $prefs) {
+			next;
+		}
+		my $types = $prefs->{types};
+		if (! $types) {
+			next;
+		}
+		push @names, keys %{$types};
+	}
+	return \@names;
+}
+
 #==========================================
 # __mergePreferenceData
 #------------------------------------------
 sub __mergePreferenceData {
 	# ...
 	# Merge two hashes that represent <preferences> data into one.
-	# Expecting a two hash refs as arguments and return a hashref to
+	# Expecting two hash refs as arguments and return a hashref to
 	# the merged data. If both hashes have definitions for the
 	# same data issues an error.
 	# ---
@@ -1924,6 +2625,62 @@ sub __mergePreferenceData {
 		}
 	}
 	return \%merged;
+}
+
+#==========================================
+# __populateArchiveInfo
+#------------------------------------------
+sub __populateArchiveInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# information from <archive> elements from <packages>
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @pckgsNodes = $this->{systemTree} -> getElementsByTagName('packages');
+	for my $pckgNd (@pckgsNodes) {
+		my $profiles = $pckgNd -> getAttribute('profiles');
+		my @profsToProcess;
+		if ($profiles) {
+			@profsToProcess = split /,/, $profiles;
+		} else {
+			@profsToProcess = ('kiwi_default');
+		}
+		my $type = $pckgNd -> getAttribute('type');
+		my @archiveNodes = $pckgNd -> getElementsByTagName('archive');
+		for my $prof (@profsToProcess) {
+			for my $archiveNd (@archiveNodes) {
+				my $arch     = $archiveNd -> getAttribute('arch');
+				my $bootIncl = $archiveNd -> getAttribute('bootinclude');
+				my $name     = $archiveNd -> getAttribute('name');
+				my %archData = (
+					arch        => $arch,
+					bootinclude => $bootIncl,
+					name        => $name
+				);
+				my $archiveObj = KIWIXMLPackageArchiveData -> new (
+					$kiwi, \%archData
+				);
+				my $accessID;
+				if ($bootIncl && $bootIncl eq 'true') {
+					$accessID = 'bootArchives';
+				} else {
+					$accessID = 'archives';
+				}
+				my %storeData = (
+					accessID => $accessID,
+					arch     => $arch,
+					dataObj  => $archiveObj,
+					profName => $prof,
+					type     => $type
+				);
+				if (! $this -> __storeInstallData(\%storeData)) {
+					return;
+				}
+			}
+		}
+	}
+	return 1;
 }
 
 #==========================================
@@ -2023,6 +2780,237 @@ sub __populateDriverInfo {
 }
 
 #==========================================
+# __populateIgnorePackageInfo
+#------------------------------------------
+sub __populateIgnorePackageInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# information from <ignore>
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @pckgsNodes = $this->{systemTree} -> getElementsByTagName('packages');
+	for my $pckgNd (@pckgsNodes) {
+		my $profiles = $pckgNd -> getAttribute('profiles');
+		my @profsToProcess;
+		if ($profiles) {
+			@profsToProcess = split /,/, $profiles;
+		} else {
+			@profsToProcess = ('kiwi_default');
+		}
+		my $type = $pckgNd -> getAttribute('type');
+		my @ignoreNodes = $pckgNd -> getElementsByTagName('ignore');
+		for my $prof (@profsToProcess) {
+			for my $ignoreNd (@ignoreNodes) {
+				my $arch = $ignoreNd -> getAttribute('arch');
+				my $name = $ignoreNd -> getAttribute('name');
+				my %ignoreData = (
+					arch => $arch,
+					name => $name
+				);
+				my $ignoreObj = KIWIXMLPackageIgnoreData
+					-> new($kiwi, \%ignoreData);
+				my %storeData = (
+					accessID => 'ignorePkgs',
+					arch     => $arch,
+					dataObj  => $ignoreObj,
+					profName => $prof,
+					type     => $type
+				);
+				if (! $this -> __storeInstallData(\%storeData)) {
+					return;
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __populatePackageInfo
+#------------------------------------------
+sub __populatePackageInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# information from <package>
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @pckgsNodes = $this->{systemTree} -> getElementsByTagName('packages');
+	for my $pckgNd (@pckgsNodes) {
+		my $installOptType = $pckgNd -> getAttribute('patternType');
+		my $profiles = $pckgNd -> getAttribute('profiles');
+		my @profsToProcess;
+		if ($profiles) {
+			@profsToProcess = split /,/, $profiles;
+		} else {
+			@profsToProcess = ('kiwi_default');
+		}
+		my $type = $pckgNd -> getAttribute('type');
+		my @packagesNodes = $pckgNd -> getElementsByTagName('package');
+		for my $prof (@profsToProcess) {
+			if ($installOptType) {
+				$this->{imageConfig}{$prof}{installOpt} = $installOptType;
+			}
+			for my $pNd (@packagesNodes) {
+				my $arch     = $pNd -> getAttribute('arch');
+				my $bootDel  = $pNd -> getAttribute('bootdelete');
+				my $bootIncl = $pNd -> getAttribute('bootinclude');
+				my $name     = $pNd -> getAttribute('name');
+				my $replace  = $pNd -> getAttribute('replaces');
+				my %pckgData = (
+					arch        => $arch,
+					bootdelete  => $bootDel,
+					bootinclude => $bootIncl,
+					name        => $name,
+					replaces    => $replace
+				);
+				my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%pckgData);
+				my @access;
+				if ($bootDel && $bootDel eq 'true') {
+					push @access, 'bootDelPkgs';
+					if (! $bootIncl || $bootIncl eq 'false') {
+						push @access, 'pkgs';
+					}
+				}
+				if ($bootIncl && $bootIncl eq 'true') {
+					push @access, 'bootPkgs';
+				}
+				if (! @access) {
+					push @access, 'pkgs';
+				}
+				if ($type eq 'delete') {
+					# In a type='delete' section attributes are ignored
+					@access = ('delPkgs');
+				}
+				if ($type eq 'bootstrap') {
+					# In a type='bootstrap' section attributes are ignored
+					@access = ('bootStrapPckgs');
+				}
+				for my $accessID (@access) {
+					my %storeData = (
+					    accessID => $accessID,
+					    arch     => $arch,
+					    dataObj  => $pckgObj,
+					    profName => $prof,
+					    type     => $type
+				    );
+					if (! $this -> __storeInstallData(\%storeData)) {
+						return;
+					}
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __populatePackageCollectionInfo
+#------------------------------------------
+sub __populatePackageCollectionInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# information from <opensusePattern> and <rhelGroup>
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @pckgsNodes = $this->{systemTree} -> getElementsByTagName('packages');
+	for my $pckgNd (@pckgsNodes) {
+		my $profiles = $pckgNd -> getAttribute('profiles');
+		my @profsToProcess;
+		if ($profiles) {
+			@profsToProcess = split /,/, $profiles;
+		} else {
+			@profsToProcess = ('kiwi_default');
+		}
+		my $type = $pckgNd -> getAttribute('type');
+		my @collectNodes = $pckgNd -> getElementsByTagName('opensusePattern');
+		my @cNodes = $pckgNd -> getElementsByTagName('rhelGroup');
+		push @collectNodes, @cNodes;
+		for my $prof (@profsToProcess) {
+			for my $collectNd (@collectNodes) {
+				my $arch     = $collectNd -> getAttribute('arch');
+				my $bootIncl = $collectNd -> getAttribute('bootinclude');
+				my $name     = $collectNd -> getAttribute('name');
+				my %collectData = (
+					arch       => $arch,
+					bootinclude => $bootIncl,
+					name        => $name
+				);
+				my $collectObj = KIWIXMLPackageCollectData
+					-> new($kiwi, \%collectData);
+				my $accessID;
+				if ($bootIncl && $bootIncl eq 'true') {
+					$accessID = 'bootPkgsCollect';
+				} else {
+					$accessID = 'pkgsCollect';
+				}
+				my %storeData = (
+					accessID => $accessID,
+					arch     => $arch,
+					dataObj  => $collectObj,
+					profName => $prof,
+					type     => $type
+				);
+				if (! $this -> __storeInstallData(\%storeData)) {
+					return;
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __populateProductInfo
+#------------------------------------------
+sub __populateProductInfo {
+	# ...
+	# Populate the imageConfig member with the
+	# information from <opensusePattern> and <rhelGroup>
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @pckgsNodes = $this->{systemTree} -> getElementsByTagName('packages');
+	for my $pckgNd (@pckgsNodes) {
+		my $profiles = $pckgNd -> getAttribute('profiles');
+		my @profsToProcess;
+		if ($profiles) {
+			@profsToProcess = split /,/, $profiles;
+		} else {
+			@profsToProcess = ('kiwi_default');
+		}
+		my $type = $pckgNd -> getAttribute('type');
+		my @productNodes = $pckgNd -> getElementsByTagName('opensuseProduct');
+		for my $prof (@profsToProcess) {
+			for my $prodNd (@productNodes) {
+				my $arch     = $prodNd -> getAttribute('arch');
+				my $name     = $prodNd -> getAttribute('name');
+				my %productData = (
+					arch       => $arch,
+					name        => $name
+				);
+				my $prodObj = KIWIXMLPackageProductData -> new (
+					$kiwi, \%productData
+				);
+				my %storeData = (
+					accessID => 'products',
+					arch     => $arch,
+					dataObj  => $prodObj,
+					profName => $prof,
+					type     => $type
+				);
+				if (! $this -> __storeInstallData(\%storeData)) {
+					return;
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __populatePreferenceInfo
 #------------------------------------------
 sub __populatePreferenceInfo {
@@ -2031,7 +3019,7 @@ sub __populatePreferenceInfo {
 	# preferences data from the XML file.
 	# ---
 	my $this = shift;
-	my @prefNodes = $this->{systemTree} ->getElementsByTagName ('preferences');
+	my @prefNodes = $this->{systemTree} ->getElementsByTagName('preferences');
 	if (! @prefNodes ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'No <preference> element data found, cannot construct '
@@ -2042,9 +3030,11 @@ sub __populatePreferenceInfo {
 	}
 	for my $prefInfo (@prefNodes) {
 		my $profNames = $prefInfo -> getAttribute ('profiles');
-		my @pNameLst = ('kiwi_default');
+		my @pNameLst;
 		if ($profNames) {
 			@pNameLst = split /,/, $profNames;
+		} else {
+			@pNameLst = ('kiwi_default');
 		}
 		my $bootLoaderTheme = $this -> __getChildNodeTextValue(
 			$prefInfo, 'bootloader-theme'
@@ -2368,6 +3358,137 @@ sub __setDefaultBuildType {
 	}
 	$this->{defaultType} = $defType;
 	return $this;
+}
+
+#==========================================
+# __storeInstallData
+#------------------------------------------
+sub __storeInstallData {
+	# ...
+	# Store the given install data object in the proper location in the data
+	# structure. Install data objects are objects of children of the
+	# <packages> element
+	# ---
+	my $this      = shift;
+	my $storeInfo = shift;
+	my $accessID   = $storeInfo->{accessID};
+	my $arch       = $storeInfo->{arch};
+	my $objToStore = $storeInfo->{dataObj};
+	my $profName   = $storeInfo->{profName};
+	my $type       = $storeInfo->{type};
+	my $kiwi = $this->{kiwi};
+	if (! $accessID) {
+		my $msg = 'Internal error: __storeInstallData called without '
+			. 'accessID keyword argument.';
+		$kiwi -> erro($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $objToStore) {
+		# Nothing to store
+		return 1;
+	}
+	my %entryData = (
+		arch     => $arch,
+		profName => $profName,
+		type     => $type
+	);
+	my $entryPath = $this -> __getEntryPath(\%entryData);
+	if (! $entryPath) {
+		return;
+	}
+	if ($entryPath->{$accessID}) {
+		push @{$entryPath->{$accessID}}, $objToStore;
+	} else {
+		my @data = ($objToStore);
+		$entryPath->{$accessID} = \@data;
+	}
+	return 1;
+}
+
+#==========================================
+# __verifyAddInstallDataArgs
+#------------------------------------------
+sub __verifyAddInstallDataArgs {
+	# ...
+	# Verify the arguments given to any of the add* methods that handle
+	# image installation data.
+	# ---
+	my $this = shift;
+	my $data = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $data) {
+		my $msg = 'Internal error: __verifyAddInstallDataArgs called without '
+			. 'argument. Please file a bug.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	if (ref($data) ne 'HASH') {
+		my $msg = 'Internal error: __verifyAddInstallDataArgs expecting hash '
+			. 'ref as argument. Please file a bug.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my $caller = $data->{caller};
+	if (! $caller) {
+		my $msg = 'Internal error: __verifyAddInstallDataArgs no call origin '
+			. 'given. Please file a bug.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my $expectedType = $data->{expectedType};
+	if (! $expectedType) {
+		my $msg = 'Internal error: __verifyAddInstallDataArgs no type to '
+			. 'verify given. Please file a bug.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my $itemName = $data->{itemName};
+	my $itemsToAdd = $data->{itemsToAdd};
+	if (! $itemsToAdd) {
+		my $msg = "$caller: no $itemName specified, nothing to do";
+		$kiwi -> info($msg);
+		$kiwi -> skipped ();
+		return $this;
+	}
+	if (ref($itemsToAdd) ne 'ARRAY' ) {
+		my $msg = "$caller: expecting array ref for $expectedType array "
+			. 'as first argument';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	for my $item (@{$itemsToAdd}) {
+		if (ref($item) ne $expectedType ) {
+			my $msg = "$caller: found array item not of type $expectedType "
+				. "in $itemName array";
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
+			return;
+		}
+	}
+	my $profNames = $data->{profNames};
+	my @profsToUse = $this -> __getProfsToModify($profNames, $itemName);
+	if (! @profsToUse) {
+		return;
+	}
+	my $type = $data->{type};
+	if ($type) {
+		my $typeNames = $this -> __getTypeNamesForProfs(\@profsToUse);
+		my %availTypes = map { $_ => 1 } @{$typeNames};
+		if (! $availTypes{$type}) {
+			my $msg = "$caller: could not find specified type '$type' "
+				. "within the active profiles; $itemName not added.";
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
+			return;
+		}
+	}
+	return 1;
 }
 
 #==========================================
@@ -3002,9 +4123,6 @@ sub getInstSourceMetaFiles {
 	return %result;
 }
 
-
-
-
 #==========================================
 # addStrip
 #------------------------------------------
@@ -3066,582 +4184,6 @@ sub addSimpleType {
 	}
 	$this -> updateXML();
 	return $this;
-}
-
-#==========================================
-# addPackages
-#------------------------------------------
-sub addPackages {
-	# ...
-	# Add the given package list to the specified packages
-	# type section of the xml description parse tree.
-	# ----
-	my @packs = @_;
-	my $this  = shift @packs;
-	my $ptype = shift @packs;
-	my $bincl = shift @packs;
-	my $nodes = shift @packs;
-	my $kiwi  = $this->{kiwi};
-	if (! defined $nodes) {
-		$nodes = $this->{packageNodeList};
-	}
-	my $nodeNumber = -1;
-	my $nodeNumberBootStrap = -1;
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node = $nodes -> get_node($i);
-		my $type = $node  -> getAttribute ("type");
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		if ($type eq "bootstrap") {
-			$nodeNumberBootStrap = $i;
-		}
-		if ($type eq $ptype) {
-			$nodeNumber = $i;
-		}
-	}
-	if ($nodeNumberBootStrap < 0) {
-		$kiwi -> warning (
-			"Failed to add @packs, package(s), no bootstrap section found"
-		);
-		$kiwi -> skipped ();
-		return $this;
-	}
-	if (($nodeNumber < 0) && ($ptype eq "image")) {
-		$kiwi -> warning (
-			"addPackages: no image section found, adding to bootstrap"
-		);
-		$kiwi -> done();
-		$nodeNumber = $nodeNumberBootStrap;
-	}
-	if ($nodeNumber < 0) {
-		$kiwi -> loginfo ("addPackages: no $ptype section found... skipped\n");
-		return $this;
-	}
-	my $addToNode = $nodes -> get_node($nodeNumber);
-	my @packnodes = $addToNode -> getElementsByTagName ("package");
-	my %packhash  = ();
-	foreach my $element (@packnodes) {
-		my $package = $element -> getAttribute ("name");
-		$packhash{$package} = $package;
-	}
-	foreach my $pack (@packs) {
-		next if ($pack eq "");
-		next if ($packhash{$pack});
-		my $addElement = XML::LibXML::Element -> new ("package");
-		$addElement -> setAttribute("name",$pack);
-		if (($bincl) && ($bincl->{$pack}) && ($bincl->{$pack} == 1)) {
-			$addElement -> setAttribute("bootinclude","true");
-		}
-		$addToNode -> appendChild ($addElement);
-	}
-	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
-# addPatterns
-#------------------------------------------
-sub addPatterns {
-	# ...
-	# Add the given pattern list to the specified packages
-	# type section of the xml description parse tree.
-	# ----
-	my @patts = @_;
-	my $this  = shift @patts;
-	my $ptype = shift @patts;
-	my $nodes = shift @patts;
-	if (! defined $nodes) {
-		$nodes = $this->{packageNodeList};
-	}
-	my $nodeNumber = 1;
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node = $nodes -> get_node($i);
-		my $type = $node  -> getAttribute ("type");
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		if ($type eq $ptype) {
-			$nodeNumber = $i; last;
-		}
-	}
-	foreach my $pack (@patts) {
-		my $addElement = XML::LibXML::Element -> new ("opensusePattern");
-		$addElement -> setAttribute("name",$pack);
-		$nodes -> get_node($nodeNumber)
-			-> appendChild ($addElement);
-	}
-	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
-# addArchives
-#------------------------------------------
-sub addArchives {
-	# ...
-	# Add the given archive list to the specified packages
-	# type section of the xml description parse tree as an.
-	# archive element
-	# ----
-	my @tars  = @_;
-	my $this  = shift @tars;
-	my $ptype = shift @tars;
-	my $bincl = shift @tars;
-	my $nodes = shift @tars;
-	if (! defined $nodes) {
-		$nodes = $this->{packageNodeList};
-	}
-	my $nodeNumber = 1;
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node = $nodes -> get_node($i);
-		my $type = $node  -> getAttribute ("type");
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		if ($type eq $ptype) {
-			$nodeNumber = $i; last;
-		}
-	}
-	foreach my $tar (@tars) {
-		my $addElement = XML::LibXML::Element -> new ("archive");
-		$addElement -> setAttribute("name",$tar);
-		if ($bincl) {
-			$addElement -> setAttribute("bootinclude","true");
-		}
-		$nodes -> get_node($nodeNumber)
-			-> appendChild ($addElement);
-	}
-	$this -> updateXML();
-	return $this;
-}
-
-#==========================================
-# addImagePackages
-#------------------------------------------
-sub addImagePackages {
-	# ...
-	# Add the given package list to the type=bootstrap packages
-	# section of the xml description parse tree.
-	# ----
-	my @list = @_;
-	my $this = shift @list;
-	return $this -> addPackages ("image",undef,undef,@list);
-}
-
-#==========================================
-# addImagePatterns
-#------------------------------------------
-sub addImagePatterns {
-	# ...
-	# Add the given pattern list to the type=bootstrap packages
-	# section of the xml description parse tree.
-	# ----
-	my @list = @_;
-	my $this = shift @list;
-	return $this -> addPatterns ("image",undef,@list);
-}
-
-#==========================================
-# addRemovePackages
-#------------------------------------------
-sub addRemovePackages {
-	# ...
-	# Add the given package list to the type=delete packages
-	# section of the xml description parse tree.
-	# ----
-	my @list = @_;
-	my $this = shift @list;
-	return $this -> addPackages ("delete",undef,undef,@list);
-}
-
-#==========================================
-# getBootIncludes
-#------------------------------------------
-sub getBootIncludes {
-	# ...
-	# Collect all items marked as bootinclude="true"
-	# and return them in a list of names
-	# ----
-	my $this = shift;
-	my @node = $this->{packageNodeList} -> get_nodelist();
-	my @result = ();
-	foreach my $element (@node) {
-		my $type = $element -> getAttribute ("type");
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		if (($type eq "image") || ($type eq "bootstrap")) {
-			my @plist = $element->getElementsByTagName ("package");
-			for my $element (@plist) {
-				my $pckName = $element -> getAttribute ("name");
-				my $bootinc = $element -> getAttribute ("bootinclude");
-				if ((defined $bootinc) && ("$bootinc" eq "true")) {
-					push (@result, $pckName);
-				}
-			}
-		}
-	}
-	return @result;
-}
-
-#==========================================
-# getImageConfig
-#------------------------------------------
-sub getImageConfig {
-	# ...
-	# Evaluate the attributes of the drivers and preferences tags and
-	# build a hash containing all the image parameters. This information
-	# is used to create the .profile environment
-	# ---
-	my $this = shift;
-	my %result;
-	my @nodelist;
-	#==========================================
-	# revision information
-	#------------------------------------------
-	my $rev  = "unknown";
-	if (open (my $FD, '<', $this->{gdata}->{Revision})) {
-		$rev = <$FD>; close $FD;
-		$rev =~ s/\n//g;
-	}
-	$result{kiwi_revision} = $rev;
-	#==========================================
-	# bootincluded items (packs,archives)
-	#------------------------------------------
-	my @bincl = $this -> getBootIncludes();
-	if (@bincl) {
-		$result{kiwi_fixedpackbootincludes} = join(" ",@bincl);
-	}
-	#==========================================
-	# preferences attributes and text elements
-	#------------------------------------------
-	my %type  = %{$this->getImageTypeAndAttributes_legacy()};
-	my @delp  = $this -> getDeleteList();
-	my $iver  = $this -> getImageVersion();
-	my $size  = $this -> getImageSize();
-	my $name  = $this -> getImageName();
-	my $dname = $this -> getImageDisplayName ($this);
-	my $lics  = $this -> getLicenseNames_legacy();
-	my @s_del = $this -> getStripDelete();
-	my @s_tool= $this -> getStripTools();
-	my @s_lib = $this -> getStripLibs();
-	my @tstp  = $this -> getTestingList();
-	if ($lics) {
-		$result{kiwi_showlicense} = join(" ",@{$lics});
-	}
-	if (@delp) {
-		$result{kiwi_delete} = join(" ",@delp);
-	}
-	if (@s_del) {
-		$result{kiwi_strip_delete} = join(" ",@s_del);
-	}
-	if (@s_tool) {
-		$result{kiwi_strip_tools} = join(" ",@s_tool);
-	}
-	if (@s_lib) {
-		$result{kiwi_strip_libs} = join(" ",@s_lib);
-	}
-	if (@tstp) {
-		$result{kiwi_testing} = join(" ",@tstp);
-	}
-	if ((%type)
-		&& (defined $type{compressed})
-		&& ($type{compressed} eq "true")) {
-		$result{kiwi_compressed} = "yes";
-	}
-	if (%type) {
-		$result{kiwi_type} = $type{type};
-	}
-	if ((%type) && ($type{cmdline})) {
-		$result{kiwi_cmdline} = $type{cmdline};
-	}
-	if ((%type) && ($type{bootloader})) {
-		$result{kiwi_bootloader} = $type{bootloader};
-	}
-	if ((%type) && ($type{devicepersistency})) {
-		$result{kiwi_devicepersistency} = $type{devicepersistency};
-	}
-	if ((%type) && (defined $type{boottimeout})) {
-		$result{KIWI_BOOT_TIMEOUT} = $type{boottimeout};
-	}
-	if ((%type) && ($type{installboot})) {
-		$result{kiwi_installboot} = $type{installboot};
-	}
-	if ((%type) && ($type{fsmountoptions})) {
-		$result{kiwi_fsmountoptions} = $type{fsmountoptions};
-	}
-	if ((%type)
-		&& (defined $type{luks})
-		&& ($type{luks} eq "true")) {
-		$result{kiwi_luks} = "yes";
-	}
-	if ((%type)
-		&& (defined $type{hybrid})
-		&& ($type{hybrid} eq "true")) {
-		$result{kiwi_hybrid} = "yes";
-	}
-	if ((%type)
-		&& (defined $type{hybridpersistent})
-		&& ($type{hybridpersistent} eq "true")) {
-		$result{kiwi_hybridpersistent} = "yes";
-	}
-	if ((%type)
-		&& (defined $type{ramonly})
-		&& ($type{ramonly} eq "true")) {
-		$result{kiwi_ramonly} = "yes";
-	}
-	if ((%type) && ($type{lvm})) {
-		$result{kiwi_lvm} = $type{lvm};
-	}
-	if ($size) {
-		$result{kiwi_size} = $size;
-	}
-	if ($name) {
-		$result{kiwi_iname} = $name;
-		if ($type{type} eq "cpio") {
-			$result{kiwi_cpio_name} = $name;
-		}
-	}
-	if ($dname) {
-		$result{kiwi_displayname} = quotemeta $dname;
-	}
-	if ($iver) {
-		$result{kiwi_iversion} = $iver;
-	}
-	@nodelist = $this->{optionsNodeList} -> get_nodelist();
-	foreach my $element (@nodelist) {
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		my $keytable    = $element -> getElementsByTagName ("keytable");
-		my $timezone    = $element -> getElementsByTagName ("timezone");
-		my $hwclock     = $element -> getElementsByTagName ("hwclock");
-		my $language    = $element -> getElementsByTagName ("locale");
-		my $splashtheme = $element -> getElementsByTagName ("bootsplash-theme");
-		my $loadertheme = $element -> getElementsByTagName ("bootloader-theme");
-		if ((defined $keytable) && ("$keytable" ne "")) {
-			$result{kiwi_keytable} = $keytable;
-		}
-		if ((defined $timezone) && ("$timezone" ne "")) {
-			$result{kiwi_timezone} = $timezone;
-		}
-		if ((defined $hwclock) && ("$hwclock" ne "")) {
-			$result{kiwi_hwclock} = $hwclock;
-		}
-		if ((defined $language) && ("$language" ne "")) {
-			$result{kiwi_language} = $language;
-		}
-		if ((defined $splashtheme) && ("$splashtheme" ne "")) {
-			$result{kiwi_splash_theme}= $splashtheme;
-		}
-		if ((defined $loadertheme) && ("$loadertheme" ne "")) {
-			$result{kiwi_loader_theme}= $loadertheme;
-		}
-	}
-	#==========================================
-	# drivers
-	#------------------------------------------
-	@nodelist = $this->{driversNodeList} -> get_nodelist();
-	foreach my $element (@nodelist) {
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		my @ntag = $element -> getElementsByTagName ("file");
-		my $type = "kiwi_drivers";
-		my $data = "";
-		foreach my $element (@ntag) {
-			my $name =  $element -> getAttribute ("name");
-			$data = $data.",".$name;
-		}
-		$data =~ s/^,+//;
-		if (defined $result{$type}) {
-			$result{$type} .= ",".$data;
-		} else {
-			$result{$type} = $data;
-		}
-	}
-	#==========================================
-	# machine
-	#------------------------------------------
-	my $xendomain;
-	my $tnode= $this->{typeNode};
-	my $xenNode = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	if ($xenNode) {
-		$xendomain = $xenNode -> getAttribute ("domain");
-		if (defined $xendomain) {
-			$result{kiwi_xendomain} = $xendomain;
-		}
-	}
-	#==========================================
-	# systemdisk
-	#------------------------------------------
-	my %lvmparts = $this -> getLVMVolumes_legacy();
-	if (%lvmparts) {
-		foreach my $vol (keys %lvmparts) {
-			if (! $lvmparts{$vol}) {
-				next;
-			}
-			my $attrname = "size";
-			my $attrval  = $lvmparts{$vol}->[0];
-			my $absolute = $lvmparts{$vol}->[1];
-			if (! $attrval) {
-				next;
-			}
-			if (! $absolute) {
-				$attrname = "freespace";
-			}
-			$vol =~ s/^\///;
-			$vol =~ s/\//_/g;
-			$vol = "LV".$vol;
-			if ("$attrval" eq "all") {
-				$result{kiwi_allFreeVolume} = $vol;
-			} else {
-				$result{"kiwi_LVM_$vol"} = $attrname.":".$attrval;
-			}
-		}
-	}
-	#==========================================
-	# oemconfig
-	#------------------------------------------
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (defined $node) {
-		my $oemswapMB= $node
-			-> getElementsByTagName ("oem-swapsize");
-		my $oemrootMB= $node
-			-> getElementsByTagName ("oem-systemsize");
-		my $oemswap  = $node
-			-> getElementsByTagName ("oem-swap");
-		my $oemalign = $node
-			-> getElementsByTagName ("oem-align-partition");
-		my $oempinst = $node
-			-> getElementsByTagName ("oem-partition-install");
-		my $oemtitle = $node
-			-> getElementsByTagName ("oem-boot-title");
-		my $oemkboot = $node
-			-> getElementsByTagName ("oem-kiwi-initrd");
-		my $oemreboot= $node
-			-> getElementsByTagName ("oem-reboot");
-		my $oemrebootinter= $node
-			-> getElementsByTagName ("oem-reboot-interactive");
-		my $oemsilentboot = $node
-			-> getElementsByTagName ("oem-silent-boot");
-		my $oemshutdown= $node
-			-> getElementsByTagName ("oem-shutdown");
-		my $oemshutdowninter= $node
-			-> getElementsByTagName ("oem-shutdown-interactive");
-		my $oemwait  = $node
-			-> getElementsByTagName ("oem-bootwait");
-		my $oemnomsg = $node
-			-> getElementsByTagName ("oem-unattended");
-		my $oemdevid = $node
-			-> getElementsByTagName ("oem-unattended-id");
-		my $oemreco  = $node
-			-> getElementsByTagName ("oem-recovery");
-		my $oemrecoid= $node
-			-> getElementsByTagName ("oem-recoveryID");
-		my $inplace  = $node
-			-> getElementsByTagName ("oem-inplace-recovery");
-		if ((defined $oempinst) && ("$oempinst" eq "true")) {
-			$result{kiwi_oempartition_install} = $oempinst;
-		}
-		if ("$oemswap" ne "false") {
-			$result{kiwi_oemswap} = "true";
-			if ((defined $oemswapMB) && 
-				("$oemswapMB" ne "")   && 
-				(int($oemswapMB) > 0)
-			) {
-				$result{kiwi_oemswapMB} = $oemswapMB;
-			}
-		}
-		if ((defined $oemalign) && ("$oemalign" eq "true")) {
-			$result{kiwi_oemalign} = $oemalign;
-		}
-		if ((defined $oemrootMB) && 
-			("$oemrootMB" ne "")   && 
-			(int($oemrootMB) > 0)
-		) {
-			$result{kiwi_oemrootMB} = $oemrootMB;
-		}
-		if ((defined $oemtitle) && ("$oemtitle" ne "")) {
-			$result{kiwi_oemtitle} = $this -> __quote ($oemtitle);
-		}
-		if ((defined $oemkboot) && ("$oemkboot" ne "")) {
-			$result{kiwi_oemkboot} = $oemkboot;
-		}
-		if ((defined $oemreboot) && ("$oemreboot" eq "true")) {
-			$result{kiwi_oemreboot} = $oemreboot;
-		}
-		if ((defined $oemrebootinter) && ("$oemrebootinter" eq "true")) {
-			$result{kiwi_oemrebootinteractive} = $oemrebootinter;
-		}
-		if ((defined $oemsilentboot) && ("$oemsilentboot" eq "true")) {
-			$result{kiwi_oemsilentboot} = $oemsilentboot;
-		}
-		if ((defined $oemshutdown) && ("$oemshutdown" eq "true")) {
-			$result{kiwi_oemshutdown} = $oemshutdown;
-		}
-		if ((defined $oemshutdowninter) && ("$oemshutdowninter" eq "true")) {
-			$result{kiwi_oemshutdowninteractive} = $oemshutdowninter;
-		}
-		if ((defined $oemwait) && ("$oemwait" eq "true")) {
-			$result{kiwi_oembootwait} = $oemwait;
-		}
-		if ((defined $oemnomsg) && ("$oemnomsg" eq "true")) {
-			$result{kiwi_oemunattended} = $oemnomsg;
-		}
-		if ((defined $oemdevid) && ("$oemdevid" ne "")) {
-			$result{kiwi_oemunattended_id} = $oemdevid;
-		}
-		if ((defined $oemreco) && ("$oemreco" eq "true")) {
-			$result{kiwi_oemrecovery} = $oemreco;
-		}
-		if ((defined $oemrecoid) && ("$oemrecoid" ne "")) {
-			$result{kiwi_oemrecoveryID} = $oemrecoid;
-		}
-		if ((defined $inplace) && ("$inplace" eq "true")) {
-			$result{kiwi_oemrecoveryInPlace} = $inplace;
-		}
-	}
-	#==========================================
-	# profiles
-	#------------------------------------------
-	if (defined $this->{reqProfiles}) {
-		$result{kiwi_profiles} = join ",", @{$this->{reqProfiles}};
-	}
-	return %result;
-}
-
-#==========================================
-# getPackageAttributes
-#------------------------------------------
-sub getPackageAttributes {
-	# ...
-	# Create an attribute hash from the given
-	# package category.
-	# ---
-	my $this = shift;
-	my $what = shift;
-	my $kiwi = $this->{kiwi};
-	my @node = $this->{packageNodeList} -> get_nodelist();
-	my %result;
-	$result{patternType} = "onlyRequired";
-	$result{type} = $what;
-	foreach my $element (@node) {
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		my $type = $element -> getAttribute ("type");
-		if ($type ne $what) {
-			next;
-		}
-		my $ptype = $element -> getAttribute ("patternType");
-		if ($ptype) {
-			$result{patternType} = $ptype;
-			$result{type} = $type;
-		}
-	}
-	return %result;
 }
 
 #==========================================
@@ -3734,223 +4276,6 @@ sub isArchAllowed {
 		}
 	}
 	return $this;
-}
-
-#==========================================
-# getList
-#------------------------------------------
-sub getList {
-	# ...
-	# Create a package list out of the given base xml
-	# object list. The xml objects are searched for the
-	# attribute "name" to build up the package list.
-	# Each entry must be found on the source medium
-	# ---
-	my $this = shift;
-	my $what = shift;
-	my $nopac= shift;
-	my $kiwi = $this->{kiwi};
-	my $urllist = $this -> getURLList();
-	my %pattr;
-	my $nodes;
-	if ($what ne "metapackages") {
-		%pattr= $this -> getPackageAttributes ( $what );
-	}
-	if ($what eq "metapackages") {
-		my $base = $this->{instsrcNodeList} -> get_node(1);
-		$nodes = $base -> getElementsByTagName ("metadata");
-	} elsif ($what eq "instpackages") {
-		my $base = $this->{instsrcNodeList} -> get_node(1);
-		$nodes = $base -> getElementsByTagName ("repopackages");
-	} else {
-		$nodes = $this->{packageNodeList};
-	}
-	my @result;
-	my $manager = $this -> getPackageManager_legacy();
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		#==========================================
-		# Get type and packages
-		#------------------------------------------
-		my $node  = $nodes -> get_node($i);
-		my $ptype = $node -> getAttribute ("patternType");
-		my $type  = "";
-		if (($what ne "metapackages") && ($what ne "instpackages")) {
-			$type = $node -> getAttribute ("type");
-			if ($type ne $what) {
-				next;
-			}
-		} else {
-			$type = $what;
-		}
-		#============================================
-		# Check to see if node is in included profile
-		#--------------------------------------------
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		#==========================================
-		# Check for package descriptions
-		#------------------------------------------
-		my @plist = ();
-		if (($what ne "metapackages") && ($what ne "instpackages")) {
-			if (defined $nopac) {
-				@plist = $node -> getElementsByTagName ("archive");
-			} else {
-				@plist = $node -> getElementsByTagName ("package");
-			}
-		} else {
-			@plist = $node -> getElementsByTagName ("repopackage");
-		}
-		foreach my $element (@plist) {
-			my $package = $element -> getAttribute ("name");
-			my $forarch = $element -> getAttribute ("arch");
-			my $replaces= $element -> getAttribute ("replaces");
-			if (! $this -> isArchAllowed ($element,$what)) {
-				next;
-			}
-			if (! defined $package) {
-				next;
-			}
-			if ($type ne "metapackages" && $type ne "instpackages") {
-				if (($package =~ /@/) && $manager && ($manager eq "zypper")) {
-					$package =~ s/@/\./;
-				}
-			}
-			if (defined $replaces) {
-				push @result,[$package,$replaces];
-			}
-			push @result,$package;
-		}
-		#==========================================
-		# Check for pattern descriptions
-		#------------------------------------------
-		if (($type ne "metapackages") && (! defined $nopac)) {
-			my @pattlist = ();
-			my @slist = $node -> getElementsByTagName ("opensuseProduct");
-			foreach my $element (@slist) {
-				if (! $this -> isArchAllowed ($element,$type)) {
-					next;
-				}
-				my $product = $element -> getAttribute ("name");
-				if (! defined $product) {
-					next;
-				}
-				push @pattlist,"product:".$product;
-			}
-			@slist = ();
-			my @slist_suse = $node -> getElementsByTagName ("opensusePattern");
-			my @slist_rhel = $node -> getElementsByTagName ("rhelGroup");
-			if (@slist_suse) {
-				push @slist,@slist_suse;
-			}
-			if (@slist_rhel) {
-				push @slist,@slist_rhel; 
-			}
-			foreach my $element (@slist) {
-				if (! $this -> isArchAllowed ($element,$type)) {
-					next;
-				}
-				my $pattern = $element -> getAttribute ("name");
-				if (! defined $pattern) {
-					next;
-				}
-				push @pattlist,"pattern:".$pattern;
-			}
-			if (@pattlist) {
-				if (($manager eq "ensconce")) {
-					# nothing to do for ensconce here...
-				} elsif (($manager ne "zypper") && ($manager ne "yum")) {
-					#==========================================
-					# turn patterns into pacs for this manager
-					#------------------------------------------
-					# 1) try to use libsatsolver...
-					my $psolve = KIWISatSolver -> new (
-						$kiwi,\@pattlist,$urllist,"solve-patterns",
-						undef,undef,$ptype
-					);
-					if (! defined $psolve) {
-						$kiwi -> error (
-							"SaT solver setup failed, patterns can't be solved"
-						);
-						$kiwi -> skipped ();
-						return ();
-					}
-					if (! defined $psolve) {
-						my $pp ="Pattern or product";
-						my $e1 ="$pp match failed for arch: $this->{arch}";
-						my $e2 ="Check if the $pp is written correctly?";
-						my $e3 ="Check if the arch is provided by the repo(s)?";
-						$kiwi -> warning ("$e1\n");
-						$kiwi -> warning ("    a) $e2\n");
-						$kiwi -> warning ("    b) $e3\n");
-						return ();
-					}
-					my @packageList = $psolve -> getPackages();
-					push @result,@packageList;
-				} else {
-					#==========================================
-					# zypper/yum knows about patterns/groups
-					#------------------------------------------
-					foreach my $pname (@pattlist) {
-						$kiwi -> info ("--> Requesting $pname");
-						push @result,$pname;
-						$kiwi -> done();
-					}
-				}
-			}
-		}
-		#==========================================
-		# Check for ignore list
-		#------------------------------------------
-		if (! defined $nopac) {
-			my @ilist = $node -> getElementsByTagName ("ignore");
-			my @ignorelist = ();
-			foreach my $element (@ilist) {
-				my $ignore = $element -> getAttribute ("name");
-				if (! defined $ignore) {
-					next;
-				}
-				if (($ignore =~ /@/) && ($manager eq "zypper")) {
-					$ignore =~ s/@/\./;
-				}
-				push @ignorelist,$ignore;
-			}
-			if (@ignorelist) {
-				my @newlist = ();
-				foreach my $element (@result) {
-					my $pass = 1;
-					foreach my $ignore (@ignorelist) {
-						if ($element eq $ignore) {
-							$pass = 0; last;
-						}
-					}
-					if (! $pass) {
-						next;
-					}
-					push @newlist,$element;
-				}
-				@result = @newlist;
-			}
-		}
-	}
-	#==========================================
-	# Create unique lists
-	#------------------------------------------
-	my %packHash = ();
-	my @replAddList = ();
-	my @replDelList = ();
-	foreach my $package (@result) {
-		if (ref $package) {
-			push @replAddList,$package->[0];
-			push @replDelList,$package->[1];
-		} else {
-			$packHash{$package} = $package;
-		}
-	}
-	$this->{replDelList} = \@replDelList;
-	$this->{replAddList} = \@replAddList;
-	my @ordered = sort keys %packHash;
-	return @ordered;
 }
 
 #==========================================
@@ -4054,16 +4379,16 @@ sub getInstallSize {
 	#==========================================
 	# Handle package names to be included
 	#------------------------------------------
-	@packages = $this -> getBaseList();
+	@packages = $this -> getBaseList_legacy();
 	push @result,@packages;
-	@packages = $this -> getInstallList();
+	@packages = $this -> getInstallList_legacy();
 	push @result,@packages;
-	@packages = $this -> getTypeSpecificPackageList();
+	@packages = $this -> getTypeSpecificPackageList_legacy();
 	push @result,@packages;
 	#==========================================
 	# Handle package names to be deleted later
 	#------------------------------------------
-	@delete = $this -> getDeleteList();
+	@delete = $this -> getDeleteList_legacy();
 	#==========================================
 	# Handle pattern names
 	#------------------------------------------
@@ -4176,7 +4501,7 @@ sub getInstSourceMetaPackageList {
 	# metadata package description
 	# ---
 	my $this = shift;
-	my @list = getList ($this,"metapackages");
+	my @list = getList_legacy ($this,"metapackages");
 	my %data = ();
 	foreach my $pack (@list) {
 		my $attr = $this -> getInstSourcePackageAttributes (
@@ -4196,7 +4521,7 @@ sub getInstSourcePackageList {
 	# packages package description
 	# ---
 	my $this = shift;
-	my @list = getList ($this,"instpackages");
+	my @list = getList_legacy ($this,"instpackages");
 	my %data = ();
 	foreach my $pack (@list) {
 		my $attr = $this -> getInstSourcePackageAttributes (
@@ -4205,59 +4530,6 @@ sub getInstSourcePackageList {
 		$data{$pack} = $attr;
 	}
 	return %data;
-}
-
-#==========================================
-# getBaseList
-#------------------------------------------
-sub getBaseList {
-	# ...
-	# Create base package list needed to start creating
-	# the physical extend. The packages in this list are
-	# installed manually
-	# ---
-	my $this = shift;
-	return getList ($this,"bootstrap");
-}
-
-#==========================================
-# getDeleteList
-#------------------------------------------
-sub getDeleteList {
-	# ...
-	# Create delete package list which are packages
-	# which have already been installed but could be
-	# forced for deletion in images.sh. The KIWIConfig.sh
-	# module provides a function to get the contents of
-	# this list. KIWI will store the delete list as
-	# .profile variable
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my @inc  = $this -> getBootIncludes();
-	my @del  = $this -> getList ("delete");
-	my @ret  = ();
-	#==========================================
-	# check delete list for conflicts
-	#------------------------------------------
-	foreach my $del (@del) {
-		my $found = 0;
-		foreach my $include (@inc) {
-			if ($include eq $del) {
-				$kiwi -> loginfo (
-					"WARNING: package $del also found in install list\n"
-				);
-				$kiwi -> loginfo (
-					"WARNING: package $del ignored in delete list\n"
-				);
-				$found = 1;
-				last;
-			}
-		}
-		next if $found;
-		push @ret,$del;
-	}
-	return @ret;
 }
 
 #==========================================
@@ -4271,33 +4543,7 @@ sub getTestingList {
 	# test runs they should be removed again
 	# ---
 	my $this = shift;
-	return getList ($this,"testsuite");
-}
-
-#==========================================
-# getInstallList
-#------------------------------------------
-sub getInstallList {
-	# ...
-	# Create install package list needed to blow up the
-	# physical extend to what the image was designed for
-	# ---
-	my $this = shift;
-	return getList ($this,"image");
-}
-
-#==========================================
-# getTypeSpecificPackageList
-#------------------------------------------
-sub getTypeSpecificPackageList {
-	# ...
-	# Create package list according to the selected
-	# image type
-	# ---
-	my $this = shift;
-	my $node = $this->{typeNode};
-	my $type = $node -> getAttribute("image");
-	return getList ($this,$type);
+	return getList_legacy ($this,"testsuite");
 }
 
 #==========================================
@@ -4312,22 +4558,6 @@ sub getArch {
 }
 
 #==========================================
-# getArchiveList
-#------------------------------------------
-sub getArchiveList {
-	# ...
-	# Create list of <archive> elements. These names
-	# references tarballs which must exist in the image
-	# description directory
-	# ---
-	my $this = shift;
-	my @bootarchives = getList ($this,"bootstrap","archive");
-	my @imagearchive = getList ($this,"image","archive");
-	return (@bootarchives,@imagearchive);
-}
-
-
-#==========================================
 # getStripNodeList
 #------------------------------------------
 sub getStripNodeList {
@@ -4337,18 +4567,6 @@ sub getStripNodeList {
 	# ---
 	my $this = shift;
 	return $this->{stripNodeList};
-}
-
-#==========================================
-# getPackageNodeList
-#------------------------------------------
-sub getPackageNodeList {
-	# ...
-	# Return a list of all <packages> nodes. Each list member
-	# is an XML::LibXML::Element object pointer
-	# ---
-	my $this = shift;
-	return $this->{packageNodeList};
 }
 
 #==========================================
@@ -4865,30 +5083,50 @@ sub getSingleInstSourceSatSolvable {
 }
 
 #==========================================
-# hasDefaultPackages
-#------------------------------------------
-sub hasDefaultPackages {
-	# ...
-	# Returns true if a <packages> element exists that
-	# has no profiles attribute.
-	# ---
-	my $this = shift;
-	for my $pkgs (@{$this->{packageNodeList} }) {
-		my $type = $pkgs -> getAttribute( 'type' );
-		if ($type eq 'image') {
-			my $profiles = $pkgs -> getAttribute ('profiles');
-			if (! $profiles) {
-				return 1;
-			}
-		}
-	}
-	return 0;
-}
-
-#==========================================
 # Methods using the "old" data structure that are to be
 # eliminated or replaced
 #------------------------------------------
+#==========================================
+# addArchives_legacy
+#------------------------------------------
+sub addArchives_legacy {
+	# ...
+	# Add the given archive list to the specified packages
+	# type section of the xml description parse tree as an.
+	# archive element
+	# ----
+	my @tars  = @_;
+	my $this  = shift @tars;
+	my $ptype = shift @tars;
+	my $bincl = shift @tars;
+	my $nodes = shift @tars;
+	if (! defined $nodes) {
+		$nodes = $this->{packageNodeList};
+	}
+	my $nodeNumber = 1;
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node = $nodes -> get_node($i);
+		my $type = $node  -> getAttribute ("type");
+		if (! $this -> __requestedProfile ($node)) {
+			next;
+		}
+		if ($type eq $ptype) {
+			$nodeNumber = $i; last;
+		}
+	}
+	foreach my $tar (@tars) {
+		my $addElement = XML::LibXML::Element -> new ("archive");
+		$addElement -> setAttribute("name",$tar);
+		if ($bincl) {
+			$addElement -> setAttribute("bootinclude","true");
+		}
+		$nodes -> get_node($nodeNumber)
+			-> appendChild ($addElement);
+	}
+	$this -> updateXML();
+	return $this;
+}
+
 #==========================================
 # addDrivers_legacy
 #------------------------------------------
@@ -4922,6 +5160,197 @@ sub addDrivers_legacy {
 	}
 	$this -> updateXML();
 	return $this;
+}
+
+#==========================================
+# addImagePackages_legacy
+#------------------------------------------
+sub addImagePackages_legacy {
+	# ...
+	# Add the given package list to the type=bootstrap packages
+	# section of the xml description parse tree.
+	# ----
+	my @list = @_;
+	my $this = shift @list;
+	return $this -> addPackages_legacy ("image",undef,undef,@list);
+}
+
+#==========================================
+# addImagePatterns_legacy
+#------------------------------------------
+sub addImagePatterns_legacy {
+	# ...
+	# Add the given pattern list to the type=bootstrap packages
+	# section of the xml description parse tree.
+	# ----
+	my @list = @_;
+	my $this = shift @list;
+	return $this -> addPatterns_legacy("image",undef,@list);
+}
+
+#==========================================
+# addPackages_legacy
+#------------------------------------------
+sub addPackages_legacy {
+	# ...
+	# Add the given package list to the specified packages
+	# type section of the xml description parse tree.
+	# ----
+	my @packs = @_;
+	my $this  = shift @packs;
+	my $ptype = shift @packs;
+	my $bincl = shift @packs;
+	my $nodes = shift @packs;
+	my $kiwi  = $this->{kiwi};
+	if (! defined $nodes) {
+		$nodes = $this->{packageNodeList};
+	}
+	my $nodeNumber = -1;
+	my $nodeNumberBootStrap = -1;
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node = $nodes -> get_node($i);
+		my $type = $node  -> getAttribute ("type");
+		if (! $this -> __requestedProfile ($node)) {
+			next;
+		}
+		if ($type eq "bootstrap") {
+			$nodeNumberBootStrap = $i;
+		}
+		if ($type eq $ptype) {
+			$nodeNumber = $i;
+		}
+	}
+	if ($nodeNumberBootStrap < 0) {
+		$kiwi -> warning (
+			"Failed to add @packs, package(s), no bootstrap section found"
+		);
+		$kiwi -> skipped ();
+		return $this;
+	}
+	if (($nodeNumber < 0) && ($ptype eq "image")) {
+		$kiwi -> warning (
+			"addPackages: no image section found, adding to bootstrap"
+		);
+		$kiwi -> done();
+		$nodeNumber = $nodeNumberBootStrap;
+	}
+	if ($nodeNumber < 0) {
+		$kiwi -> loginfo ("addPackages: no $ptype section found... skipped\n");
+		return $this;
+	}
+	my $addToNode = $nodes -> get_node($nodeNumber);
+	my @packnodes = $addToNode -> getElementsByTagName ("package");
+	my %packhash  = ();
+	foreach my $element (@packnodes) {
+		my $package = $element -> getAttribute ("name");
+		$packhash{$package} = $package;
+	}
+	foreach my $pack (@packs) {
+		next if ($pack eq "");
+		next if ($packhash{$pack});
+		my $addElement = XML::LibXML::Element -> new ("package");
+		$addElement -> setAttribute("name",$pack);
+		if (($bincl) && ($bincl->{$pack}) && ($bincl->{$pack} == 1)) {
+			$addElement -> setAttribute("bootinclude","true");
+		}
+		$addToNode -> appendChild ($addElement);
+	}
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# addPatterns_legacy
+#------------------------------------------
+sub addPatterns_legacy {
+	# ...
+	# Add the given pattern list to the specified packages
+	# type section of the xml description parse tree.
+	# ----
+	my @patts = @_;
+	my $this  = shift @patts;
+	my $ptype = shift @patts;
+	my $nodes = shift @patts;
+	if (! defined $nodes) {
+		$nodes = $this->{packageNodeList};
+	}
+	my $nodeNumber = 1;
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node = $nodes -> get_node($i);
+		my $type = $node  -> getAttribute ("type");
+		if (! $this -> __requestedProfile ($node)) {
+			next;
+		}
+		if ($type eq $ptype) {
+			$nodeNumber = $i; last;
+		}
+	}
+	foreach my $pack (@patts) {
+		my $addElement = XML::LibXML::Element -> new ("opensusePattern");
+		$addElement -> setAttribute("name",$pack);
+		$nodes -> get_node($nodeNumber)
+			-> appendChild ($addElement);
+	}
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# getArchiveList_legacy
+#------------------------------------------
+sub getArchiveList_legacy {
+	# ...
+	# Create list of <archive> elements. These names
+	# references tarballs which must exist in the image
+	# description directory
+	# ---
+	my $this = shift;
+	my @bootarchives = getList_legacy ($this,"bootstrap","archive");
+	my @imagearchive = getList_legacy ($this,"image","archive");
+	return (@bootarchives,@imagearchive);
+}
+
+#==========================================
+# getBaseList_legacy
+#------------------------------------------
+sub getBaseList_legacy {
+	# ...
+	# Create base package list needed to start creating
+	# the physical extend. The packages in this list are
+	# installed manually
+	# ---
+	my $this = shift;
+	return getList_legacy ($this,"bootstrap");
+}
+
+#==========================================
+# getBootIncludes_legacy
+#------------------------------------------
+sub getBootIncludes_legacy {
+	# ...
+	# Collect all items marked as bootinclude="true"
+	# and return them in a list of names
+	# ----
+	my $this = shift;
+	my @node = $this->{packageNodeList} -> get_nodelist();
+	my @result = ();
+	foreach my $element (@node) {
+		my $type = $element -> getAttribute ("type");
+		if (! $this -> __requestedProfile ($element)) {
+			next;
+		}
+		if (($type eq "image") || ($type eq "bootstrap")) {
+			my @plist = $element->getElementsByTagName ("package");
+			for my $element (@plist) {
+				my $pckName = $element -> getAttribute ("name");
+				my $bootinc = $element -> getAttribute ("bootinclude");
+				if ((defined $bootinc) && ("$bootinc" eq "true")) {
+					push (@result, $pckName);
+				}
+			}
+		}
+	}
+	return @result;
 }
 
 #==========================================
@@ -4959,6 +5388,46 @@ sub getDefaultPrebuiltDir_legacy {
 	my $node = $this -> __getPreferencesNodeByTagName ('defaultprebuilt');
 	my $imgDir = $node -> getElementsByTagName ('defaultprebuilt');
 	return $imgDir;
+}
+
+#==========================================
+# getDeleteList_legacy
+#------------------------------------------
+sub getDeleteList_legacy {
+	# ...
+	# Create delete package list which are packages
+	# which have already been installed but could be
+	# forced for deletion in images.sh. The KIWIConfig.sh
+	# module provides a function to get the contents of
+	# this list. KIWI will store the delete list as
+	# .profile variable
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @inc  = $this -> getBootIncludes_legacy();
+	my @del  = $this -> getList_legacy ("delete");
+	my @ret  = ();
+	#==========================================
+	# check delete list for conflicts
+	#------------------------------------------
+	foreach my $del (@del) {
+		my $found = 0;
+		foreach my $include (@inc) {
+			if ($include eq $del) {
+				$kiwi -> loginfo (
+					"WARNING: package $del also found in install list\n"
+				);
+				$kiwi -> loginfo (
+					"WARNING: package $del ignored in delete list\n"
+				);
+				$found = 1;
+				last;
+			}
+		}
+		next if $found;
+		push @ret,$del;
+	}
+	return @ret;
 }
 
 #==========================================
@@ -5068,6 +5537,333 @@ sub getHttpsRepositoryCredentials_legacy {
 }
 
 #==========================================
+# getImageConfig_legacy
+#------------------------------------------
+sub getImageConfig_legacy {
+	# ...
+	# Evaluate the attributes of the drivers and preferences tags and
+	# build a hash containing all the image parameters. This information
+	# is used to create the .profile environment
+	# ---
+	my $this = shift;
+	my %result;
+	my @nodelist;
+	#==========================================
+	# revision information
+	#------------------------------------------
+	my $rev  = "unknown";
+	if (open (my $FD, '<', $this->{gdata}->{Revision})) {
+		$rev = <$FD>; close $FD;
+		$rev =~ s/\n//g;
+	}
+	$result{kiwi_revision} = $rev;
+	#==========================================
+	# bootincluded items (packs,archives)
+	#------------------------------------------
+	my @bincl = $this -> getBootIncludes_legacy();
+	if (@bincl) {
+		$result{kiwi_fixedpackbootincludes} = join(" ",@bincl);
+	}
+	#==========================================
+	# preferences attributes and text elements
+	#------------------------------------------
+	my %type  = %{$this->getImageTypeAndAttributes_legacy()};
+	my @delp  = $this -> getDeleteList_legacy();
+	my $iver  = $this -> getImageVersion();
+	my $size  = $this -> getImageSize();
+	my $name  = $this -> getImageName();
+	my $dname = $this -> getImageDisplayName ($this);
+	my $lics  = $this -> getLicenseNames_legacy();
+	my @s_del = $this -> getStripDelete();
+	my @s_tool= $this -> getStripTools();
+	my @s_lib = $this -> getStripLibs();
+	my @tstp  = $this -> getTestingList();
+	if ($lics) {
+		$result{kiwi_showlicense} = join(" ",@{$lics});
+	}
+	if (@delp) {
+		$result{kiwi_delete} = join(" ",@delp);
+	}
+	if (@s_del) {
+		$result{kiwi_strip_delete} = join(" ",@s_del);
+	}
+	if (@s_tool) {
+		$result{kiwi_strip_tools} = join(" ",@s_tool);
+	}
+	if (@s_lib) {
+		$result{kiwi_strip_libs} = join(" ",@s_lib);
+	}
+	if (@tstp) {
+		$result{kiwi_testing} = join(" ",@tstp);
+	}
+	if ((%type)
+		&& (defined $type{compressed})
+		&& ($type{compressed} eq "true")) {
+		$result{kiwi_compressed} = "yes";
+	}
+	if (%type) {
+		$result{kiwi_type} = $type{type};
+	}
+	if ((%type) && ($type{cmdline})) {
+		$result{kiwi_cmdline} = $type{cmdline};
+	}
+	if ((%type) && ($type{bootloader})) {
+		$result{kiwi_bootloader} = $type{bootloader};
+	}
+	if ((%type) && ($type{devicepersistency})) {
+		$result{kiwi_devicepersistency} = $type{devicepersistency};
+	}
+	if ((%type) && (defined $type{boottimeout})) {
+		$result{KIWI_BOOT_TIMEOUT} = $type{boottimeout};
+	}
+	if ((%type) && ($type{installboot})) {
+		$result{kiwi_installboot} = $type{installboot};
+	}
+	if ((%type) && ($type{fsmountoptions})) {
+		$result{kiwi_fsmountoptions} = $type{fsmountoptions};
+	}
+	if ((%type)
+		&& (defined $type{luks})
+		&& ($type{luks} eq "true")) {
+		$result{kiwi_luks} = "yes";
+	}
+	if ((%type)
+		&& (defined $type{hybrid})
+		&& ($type{hybrid} eq "true")) {
+		$result{kiwi_hybrid} = "yes";
+	}
+	if ((%type)
+		&& (defined $type{hybridpersistent})
+		&& ($type{hybridpersistent} eq "true")) {
+		$result{kiwi_hybridpersistent} = "yes";
+	}
+	if ((%type)
+		&& (defined $type{ramonly})
+		&& ($type{ramonly} eq "true")) {
+		$result{kiwi_ramonly} = "yes";
+	}
+	if ((%type) && ($type{lvm})) {
+		$result{kiwi_lvm} = $type{lvm};
+	}
+	if ($size) {
+		$result{kiwi_size} = $size;
+	}
+	if ($name) {
+		$result{kiwi_iname} = $name;
+		if ($type{type} eq "cpio") {
+			$result{kiwi_cpio_name} = $name;
+		}
+	}
+	if ($dname) {
+		$result{kiwi_displayname} = quotemeta $dname;
+	}
+	if ($iver) {
+		$result{kiwi_iversion} = $iver;
+	}
+	@nodelist = $this->{optionsNodeList} -> get_nodelist();
+	foreach my $element (@nodelist) {
+		if (! $this -> __requestedProfile ($element)) {
+			next;
+		}
+		my $keytable    = $element -> getElementsByTagName ("keytable");
+		my $timezone    = $element -> getElementsByTagName ("timezone");
+		my $hwclock     = $element -> getElementsByTagName ("hwclock");
+		my $language    = $element -> getElementsByTagName ("locale");
+		my $splashtheme = $element -> getElementsByTagName ("bootsplash-theme");
+		my $loadertheme = $element -> getElementsByTagName ("bootloader-theme");
+		if ((defined $keytable) && ("$keytable" ne "")) {
+			$result{kiwi_keytable} = $keytable;
+		}
+		if ((defined $timezone) && ("$timezone" ne "")) {
+			$result{kiwi_timezone} = $timezone;
+		}
+		if ((defined $hwclock) && ("$hwclock" ne "")) {
+			$result{kiwi_hwclock} = $hwclock;
+		}
+		if ((defined $language) && ("$language" ne "")) {
+			$result{kiwi_language} = $language;
+		}
+		if ((defined $splashtheme) && ("$splashtheme" ne "")) {
+			$result{kiwi_splash_theme}= $splashtheme;
+		}
+		if ((defined $loadertheme) && ("$loadertheme" ne "")) {
+			$result{kiwi_loader_theme}= $loadertheme;
+		}
+	}
+	#==========================================
+	# drivers
+	#------------------------------------------
+	@nodelist = $this->{driversNodeList} -> get_nodelist();
+	foreach my $element (@nodelist) {
+		if (! $this -> __requestedProfile ($element)) {
+			next;
+		}
+		my @ntag = $element -> getElementsByTagName ("file");
+		my $type = "kiwi_drivers";
+		my $data = "";
+		foreach my $element (@ntag) {
+			my $name =  $element -> getAttribute ("name");
+			$data = $data.",".$name;
+		}
+		$data =~ s/^,+//;
+		if (defined $result{$type}) {
+			$result{$type} .= ",".$data;
+		} else {
+			$result{$type} = $data;
+		}
+	}
+	#==========================================
+	# machine
+	#------------------------------------------
+	my $xendomain;
+	my $tnode= $this->{typeNode};
+	my $xenNode = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	if ($xenNode) {
+		$xendomain = $xenNode -> getAttribute ("domain");
+		if (defined $xendomain) {
+			$result{kiwi_xendomain} = $xendomain;
+		}
+	}
+	#==========================================
+	# systemdisk
+	#------------------------------------------
+	my %lvmparts = $this -> getLVMVolumes_legacy();
+	if (%lvmparts) {
+		foreach my $vol (keys %lvmparts) {
+			if (! $lvmparts{$vol}) {
+				next;
+			}
+			my $attrname = "size";
+			my $attrval  = $lvmparts{$vol}->[0];
+			my $absolute = $lvmparts{$vol}->[1];
+			if (! $attrval) {
+				next;
+			}
+			if (! $absolute) {
+				$attrname = "freespace";
+			}
+			$vol =~ s/^\///;
+			$vol =~ s/\//_/g;
+			$vol = "LV".$vol;
+			if ("$attrval" eq "all") {
+				$result{kiwi_allFreeVolume} = $vol;
+			} else {
+				$result{"kiwi_LVM_$vol"} = $attrname.":".$attrval;
+			}
+		}
+	}
+	#==========================================
+	# oemconfig
+	#------------------------------------------
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (defined $node) {
+		my $oemswapMB= $node
+			-> getElementsByTagName ("oem-swapsize");
+		my $oemrootMB= $node
+			-> getElementsByTagName ("oem-systemsize");
+		my $oemswap  = $node
+			-> getElementsByTagName ("oem-swap");
+		my $oemalign = $node
+			-> getElementsByTagName ("oem-align-partition");
+		my $oempinst = $node
+			-> getElementsByTagName ("oem-partition-install");
+		my $oemtitle = $node
+			-> getElementsByTagName ("oem-boot-title");
+		my $oemkboot = $node
+			-> getElementsByTagName ("oem-kiwi-initrd");
+		my $oemreboot= $node
+			-> getElementsByTagName ("oem-reboot");
+		my $oemrebootinter= $node
+			-> getElementsByTagName ("oem-reboot-interactive");
+		my $oemsilentboot = $node
+			-> getElementsByTagName ("oem-silent-boot");
+		my $oemshutdown= $node
+			-> getElementsByTagName ("oem-shutdown");
+		my $oemshutdowninter= $node
+			-> getElementsByTagName ("oem-shutdown-interactive");
+		my $oemwait  = $node
+			-> getElementsByTagName ("oem-bootwait");
+		my $oemnomsg = $node
+			-> getElementsByTagName ("oem-unattended");
+		my $oemdevid = $node
+			-> getElementsByTagName ("oem-unattended-id");
+		my $oemreco  = $node
+			-> getElementsByTagName ("oem-recovery");
+		my $oemrecoid= $node
+			-> getElementsByTagName ("oem-recoveryID");
+		my $inplace  = $node
+			-> getElementsByTagName ("oem-inplace-recovery");
+		if ((defined $oempinst) && ("$oempinst" eq "true")) {
+			$result{kiwi_oempartition_install} = $oempinst;
+		}
+		if ("$oemswap" ne "false") {
+			$result{kiwi_oemswap} = "true";
+			if ((defined $oemswapMB) && 
+				("$oemswapMB" ne "")   && 
+				(int($oemswapMB) > 0)
+			) {
+				$result{kiwi_oemswapMB} = $oemswapMB;
+			}
+		}
+		if ((defined $oemalign) && ("$oemalign" eq "true")) {
+			$result{kiwi_oemalign} = $oemalign;
+		}
+		if ((defined $oemrootMB) && 
+			("$oemrootMB" ne "")   && 
+			(int($oemrootMB) > 0)
+		) {
+			$result{kiwi_oemrootMB} = $oemrootMB;
+		}
+		if ((defined $oemtitle) && ("$oemtitle" ne "")) {
+			$result{kiwi_oemtitle} = $this -> __quote ($oemtitle);
+		}
+		if ((defined $oemkboot) && ("$oemkboot" ne "")) {
+			$result{kiwi_oemkboot} = $oemkboot;
+		}
+		if ((defined $oemreboot) && ("$oemreboot" eq "true")) {
+			$result{kiwi_oemreboot} = $oemreboot;
+		}
+		if ((defined $oemrebootinter) && ("$oemrebootinter" eq "true")) {
+			$result{kiwi_oemrebootinteractive} = $oemrebootinter;
+		}
+		if ((defined $oemsilentboot) && ("$oemsilentboot" eq "true")) {
+			$result{kiwi_oemsilentboot} = $oemsilentboot;
+		}
+		if ((defined $oemshutdown) && ("$oemshutdown" eq "true")) {
+			$result{kiwi_oemshutdown} = $oemshutdown;
+		}
+		if ((defined $oemshutdowninter) && ("$oemshutdowninter" eq "true")) {
+			$result{kiwi_oemshutdowninteractive} = $oemshutdowninter;
+		}
+		if ((defined $oemwait) && ("$oemwait" eq "true")) {
+			$result{kiwi_oembootwait} = $oemwait;
+		}
+		if ((defined $oemnomsg) && ("$oemnomsg" eq "true")) {
+			$result{kiwi_oemunattended} = $oemnomsg;
+		}
+		if ((defined $oemdevid) && ("$oemdevid" ne "")) {
+			$result{kiwi_oemunattended_id} = $oemdevid;
+		}
+		if ((defined $oemreco) && ("$oemreco" eq "true")) {
+			$result{kiwi_oemrecovery} = $oemreco;
+		}
+		if ((defined $oemrecoid) && ("$oemrecoid" ne "")) {
+			$result{kiwi_oemrecoveryID} = $oemrecoid;
+		}
+		if ((defined $inplace) && ("$inplace" eq "true")) {
+			$result{kiwi_oemrecoveryInPlace} = $inplace;
+		}
+	}
+	#==========================================
+	# profiles
+	#------------------------------------------
+	if (defined $this->{reqProfiles}) {
+		$result{kiwi_profiles} = join ",", @{$this->{reqProfiles}};
+	}
+	return %result;
+}
+
+#==========================================
 # getImageDefaultDestination_legacy
 #------------------------------------------
 sub getImageDefaultDestination_legacy {
@@ -5119,6 +5915,18 @@ sub getImageTypeAndAttributes_legacy {
 }
 
 #==========================================
+# getInstallList_legacy
+#------------------------------------------
+sub getInstallList_legacy {
+	# ...
+	# Create install package list needed to blow up the
+	# physical extend to what the image was designed for
+	# ---
+	my $this = shift;
+	return getList_legacy ($this,"image");
+}
+
+#==========================================
 # getLicenseNames_legacy
 #------------------------------------------
 sub getLicenseNames_legacy {
@@ -5138,6 +5946,223 @@ sub getLicenseNames_legacy {
 		return \@names;
 	}
 	return;
+}
+
+#==========================================
+# getList_legacy
+#------------------------------------------
+sub getList_legacy {
+	# ...
+	# Create a package list out of the given base xml
+	# object list. The xml objects are searched for the
+	# attribute "name" to build up the package list.
+	# Each entry must be found on the source medium
+	# ---
+	my $this = shift;
+	my $what = shift;
+	my $nopac= shift;
+	my $kiwi = $this->{kiwi};
+	my $urllist = $this -> getURLList();
+	my %pattr;
+	my $nodes;
+	if ($what ne "metapackages") {
+		%pattr= $this -> getPackageAttributes_legacy( $what );
+	}
+	if ($what eq "metapackages") {
+		my $base = $this->{instsrcNodeList} -> get_node(1);
+		$nodes = $base -> getElementsByTagName ("metadata");
+	} elsif ($what eq "instpackages") {
+		my $base = $this->{instsrcNodeList} -> get_node(1);
+		$nodes = $base -> getElementsByTagName ("repopackages");
+	} else {
+		$nodes = $this->{packageNodeList};
+	}
+	my @result;
+	my $manager = $this -> getPackageManager_legacy();
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		#==========================================
+		# Get type and packages
+		#------------------------------------------
+		my $node  = $nodes -> get_node($i);
+		my $ptype = $node -> getAttribute ("patternType");
+		my $type  = "";
+		if (($what ne "metapackages") && ($what ne "instpackages")) {
+			$type = $node -> getAttribute ("type");
+			if ($type ne $what) {
+				next;
+			}
+		} else {
+			$type = $what;
+		}
+		#============================================
+		# Check to see if node is in included profile
+		#--------------------------------------------
+		if (! $this -> __requestedProfile ($node)) {
+			next;
+		}
+		#==========================================
+		# Check for package descriptions
+		#------------------------------------------
+		my @plist = ();
+		if (($what ne "metapackages") && ($what ne "instpackages")) {
+			if (defined $nopac) {
+				@plist = $node -> getElementsByTagName ("archive");
+			} else {
+				@plist = $node -> getElementsByTagName ("package");
+			}
+		} else {
+			@plist = $node -> getElementsByTagName ("repopackage");
+		}
+		foreach my $element (@plist) {
+			my $package = $element -> getAttribute ("name");
+			my $forarch = $element -> getAttribute ("arch");
+			my $replaces= $element -> getAttribute ("replaces");
+			if (! $this -> isArchAllowed ($element,$what)) {
+				next;
+			}
+			if (! defined $package) {
+				next;
+			}
+			if ($type ne "metapackages" && $type ne "instpackages") {
+				if (($package =~ /@/) && $manager && ($manager eq "zypper")) {
+					$package =~ s/@/\./;
+				}
+			}
+			if (defined $replaces) {
+				push @result,[$package,$replaces];
+			}
+			push @result,$package;
+		}
+		#==========================================
+		# Check for pattern descriptions
+		#------------------------------------------
+		if (($type ne "metapackages") && (! defined $nopac)) {
+			my @pattlist = ();
+			my @slist = $node -> getElementsByTagName ("opensuseProduct");
+			foreach my $element (@slist) {
+				if (! $this -> isArchAllowed ($element,$type)) {
+					next;
+				}
+				my $product = $element -> getAttribute ("name");
+				if (! defined $product) {
+					next;
+				}
+				push @pattlist,"product:".$product;
+			}
+			@slist = ();
+			my @slist_suse = $node -> getElementsByTagName ("opensusePattern");
+			my @slist_rhel = $node -> getElementsByTagName ("rhelGroup");
+			if (@slist_suse) {
+				push @slist,@slist_suse;
+			}
+			if (@slist_rhel) {
+				push @slist,@slist_rhel;
+			}
+			foreach my $element (@slist) {
+				if (! $this -> isArchAllowed ($element,$type)) {
+					next;
+				}
+				my $pattern = $element -> getAttribute ("name");
+				if (! defined $pattern) {
+					next;
+				}
+				push @pattlist,"pattern:".$pattern;
+			}
+			if (@pattlist) {
+				if (($manager eq "ensconce")) {
+					# nothing to do for ensconce here...
+				} elsif (($manager ne "zypper") && ($manager ne "yum")) {
+					#==========================================
+					# turn patterns into pacs for this manager
+					#------------------------------------------
+					# 1) try to use libsatsolver...
+					my $psolve = KIWISatSolver -> new (
+						$kiwi,\@pattlist,$urllist,"solve-patterns",
+						undef,undef,$ptype
+					);
+					if (! defined $psolve) {
+						$kiwi -> error (
+							"SaT solver setup failed, patterns can't be solved"
+						);
+						$kiwi -> skipped ();
+						return ();
+					}
+					if (! defined $psolve) {
+						my $pp ="Pattern or product";
+						my $e1 ="$pp match failed for arch: $this->{arch}";
+						my $e2 ="Check if the $pp is written correctly?";
+						my $e3 ="Check if the arch is provided by the repo(s)?";
+						$kiwi -> warning ("$e1\n");
+						$kiwi -> warning ("    a) $e2\n");
+						$kiwi -> warning ("    b) $e3\n");
+						return ();
+					}
+					my @packageList = $psolve -> getPackages();
+					push @result,@packageList;
+				} else {
+					#==========================================
+					# zypper/yum knows about patterns/groups
+					#------------------------------------------
+					foreach my $pname (@pattlist) {
+						$kiwi -> info ("--> Requesting $pname");
+						push @result,$pname;
+						$kiwi -> done();
+					}
+				}
+			}
+		}
+		#==========================================
+		# Check for ignore list
+		#------------------------------------------
+		if (! defined $nopac) {
+			my @ilist = $node -> getElementsByTagName ("ignore");
+			my @ignorelist = ();
+			foreach my $element (@ilist) {
+				my $ignore = $element -> getAttribute ("name");
+				if (! defined $ignore) {
+					next;
+				}
+				if (($ignore =~ /@/) && ($manager eq "zypper")) {
+					$ignore =~ s/@/\./;
+				}
+				push @ignorelist,$ignore;
+			}
+			if (@ignorelist) {
+				my @newlist = ();
+				foreach my $element (@result) {
+					my $pass = 1;
+					foreach my $ignore (@ignorelist) {
+						if ($element eq $ignore) {
+							$pass = 0; last;
+						}
+					}
+					if (! $pass) {
+						next;
+					}
+					push @newlist,$element;
+				}
+				@result = @newlist;
+			}
+		}
+	}
+	#==========================================
+	# Create unique lists
+	#------------------------------------------
+	my %packHash = ();
+	my @replAddList = ();
+	my @replDelList = ();
+	foreach my $package (@result) {
+		if (ref $package) {
+			push @replAddList,$package->[0];
+			push @replDelList,$package->[1];
+		} else {
+			$packHash{$package} = $package;
+		}
+	}
+	$this->{replDelList} = \@replDelList;
+	$this->{replAddList} = \@replAddList;
+	my @ordered = sort keys %packHash;
+	return @ordered;
 }
 
 #==========================================
@@ -5656,6 +6681,38 @@ sub getOVFConfig_legacy {
 }
 
 #==========================================
+# getPackageAttributes_legacy
+#------------------------------------------
+sub getPackageAttributes_legacy {
+	# ...
+	# Create an attribute hash from the given
+	# package category.
+	# ---
+	my $this = shift;
+	my $what = shift;
+	my $kiwi = $this->{kiwi};
+	my @node = $this->{packageNodeList} -> get_nodelist();
+	my %result;
+	$result{patternType} = "onlyRequired";
+	$result{type} = $what;
+	foreach my $element (@node) {
+		if (! $this -> __requestedProfile ($element)) {
+			next;
+		}
+		my $type = $element -> getAttribute ("type");
+		if ($type ne $what) {
+			next;
+		}
+		my $ptype = $element -> getAttribute ("patternType");
+		if ($ptype) {
+			$result{patternType} = $ptype;
+			$result{type} = $type;
+		}
+	}
+	return %result;
+}
+
+#==========================================
 # getPackageManager_legacy
 #------------------------------------------
 sub getPackageManager_legacy {
@@ -5673,6 +6730,18 @@ sub getPackageManager_legacy {
 		return 'zypper';
 	}
 	return $pmgr -> textContent();
+}
+
+#==========================================
+# getPackageNodeList_legacy
+#------------------------------------------
+sub getPackageNodeList_legacy {
+	# ...
+	# Return a list of all <packages> nodes. Each list member
+	# is an XML::LibXML::Element object pointer
+	# ---
+	my $this = shift;
+	return $this->{packageNodeList};
 }
 
 #==========================================
@@ -6160,6 +7229,20 @@ sub getTypes_legacy {
 }
 
 #==========================================
+# getTypeSpecificPackageList_legacy
+#------------------------------------------
+sub getTypeSpecificPackageList_legacy {
+	# ...
+	# Create package list according to the selected
+	# image type
+	# ---
+	my $this = shift;
+	my $node = $this->{typeNode};
+	my $type = $node -> getAttribute("image");
+	return getList_legacy ($this,$type);
+}
+
+#==========================================
 # getUsers_legacy
 #------------------------------------------
 sub getUsers_legacy {
@@ -6490,6 +7573,19 @@ sub setRepository_legacy {
 	$this -> createURLList();
 	$this -> updateXML();
 	return $this;
+}
+
+#==========================================
+# addRemovePackages_legacy
+#------------------------------------------
+sub addRemovePackages_legacy {
+	# ...
+	# Add the given package list to the type=delete packages
+	# section of the xml description parse tree.
+	# ----
+	my @list = @_;
+	my $this = shift @list;
+	return $this -> addPackages_legacy ("delete",undef,undef,@list);
 }
 
 #==========================================
@@ -7069,11 +8165,11 @@ sub __updateDescriptionFromChangeSet_legacy {
 			foreach my $p (@fplistImage) {
 				$kiwi -> info ("--> $p\n");
 			}
-			$this -> addPackages (
+			$this -> addPackages_legacy (
 				$section,$fixedBootInclude,$packageNodeList,@fplistImage
 			);
 			if (@fplistDelete) {
-				$this -> addPackages (
+				$this -> addPackages_legacy (
 					"delete",undef,$packageNodeList,@fplistDelete
 				);
 			}
@@ -7089,7 +8185,7 @@ sub __updateDescriptionFromChangeSet_legacy {
 			foreach my $p (@falistImage) {
 				$kiwi -> info ("--> $p\n");
 			}
-			$this -> addArchives (
+			$this -> addArchives_legacy (
 				$section,"bootinclude",$packageNodeList,@falistImage
 			);
 		}

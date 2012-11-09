@@ -334,7 +334,7 @@ sub updateDescription {
 	#==========================================
 	# Store boot included packages
 	#------------------------------------------
-	@node = $src_xml->getPackageNodeList() -> get_nodelist();
+	@node = $src_xml->getPackageNodeList_legacy() -> get_nodelist();
 	foreach my $element (@node) {
 		if (! $src_xml -> __requestedProfile ($element)) {
 			next;

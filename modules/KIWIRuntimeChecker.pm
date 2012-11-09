@@ -169,10 +169,10 @@ sub __hasValidLVMName {
 	my $vgsCmd = $this->{locator}->getExecPath('vgs');
 	if (! $vgsCmd) {
 		my $msg = 'LVM definition in configuration being processed, but '
-            . 'necessary tools not found on system.';
-        $kiwi -> error  ($msg);
-        $kiwi -> failed ();
-        return;
+			. 'necessary tools not found on system.';
+		$kiwi -> error  ($msg);
+		$kiwi -> failed ();
+		return;
 	}
 	my @hostGroups = qxx ("$vgsCmd --noheadings -o vg_name 2>/dev/null");
 	chomp @hostGroups;
@@ -205,7 +205,7 @@ sub __hasValidArchives {
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $cmdL = $this->{cmdArgs};
-	my @list = $xml -> getArchiveList();
+	my $archives = $xml -> getArchives();
 	my $desc = $cmdL-> getConfigDir();
 	my @nogo = ('^etc\/YaST2\/licenses\/.*');
 	#==========================================
@@ -218,13 +218,14 @@ sub __hasValidArchives {
 	#==========================================
 	# check archive contents
 	#------------------------------------------
-	for my $ar (@list) {
-		if (! -f "$desc/$ar") {
+	for my $ar (@{$archives}) {
+		my $arName = $ar -> getName();
+		if (! -f "$desc/$arName") {
 			$kiwi -> warning ("specified archive $ar doesn't exist in $desc");
 			$kiwi -> skipped ();
 			next;
 		}
-		my $contents = qxx ("tar -tf $desc/$ar 2>&1");
+		my $contents = qxx ("tar -tf $desc/$arName 2>&1");
 		for my $exp (@nogo) {
 			if (grep { /$exp/x } $contents ) {
 				$kiwi -> error  ("bogus archive contents in $ar");
@@ -464,6 +465,7 @@ sub __checkPatternTypeAttrrValueConsistent {
 	# profile attribute there is nothing to do.
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
 	my $buildProfiles = $this -> {cmdArgs} -> getBuildProfiles();
 	# If no profiles are specified on the command line the static check is
 	# sufficient
@@ -471,45 +473,38 @@ sub __checkPatternTypeAttrrValueConsistent {
 		return 1;
 	}
 	my @buildProfiles = @{$buildProfiles};
-	# If there is a "default" <packages> element, i.e. an element without the
-	# profiles attribute the static check is sufficient
-	if ($this -> {xml} -> hasDefaultPackages() ) {
-		return 1;
-	}
 	# If there is only one profile to be built there is nothing to check
 	my $numProfiles = @buildProfiles;
-	if ($numProfiles == 1) {
+	if (!$numProfiles || $numProfiles == 1) {
 		return 1;
 	}
-	my @pkgsNodes = @{$this -> {xml} -> getPackageNodeList()};
-	my $reqPatternTypeVal;
-	for my $pkgs (@pkgsNodes) {
-		my $profiles = $pkgs -> getAttribute( 'profiles' );
-		if (! $profiles) {
-			next;
-		}
-		my @profNames = split /,/x, $profiles;
-		my $patternType = $pkgs -> getAttribute( 'patternType' );
-		if (! $patternType) {
-			$patternType = 'onlyRequired';
-		}
-		for my $profName (@profNames) {
-			if (grep { /^$profName/x } @buildProfiles) {
-				if (! $reqPatternTypeVal) {
-					$reqPatternTypeVal = $patternType;
-				} elsif ($reqPatternTypeVal ne $patternType) {
-					my $kiwi = $this -> {kiwi};
-					my $msg = 'Conflicting patternType attribute values for '
-					. 'specified profiles "'
-					. "@buildProfiles"
-					. '" found';
-					$kiwi -> error ( $msg );
-					$kiwi -> failed ();
-					return;
-				}
-			}
-		}
+	my $xml = $this->{xml};
+	my $curActiveProfiles = $xml -> getActiveProfileNames();
+	# Set the profiles to the profiles given on the command line
+	my $msg = 'Set profiles to command line provided profiles '
+		. "for validation.\n";
+	$kiwi->info($msg);
+	my $res = $xml -> setSelectionProfileNames($buildProfiles);
+	if (! $res) {
+		return;
 	}
+	$kiwi->done();
+	# XML returns undef if the type cannot be resolved because of a conflict
+	my $installOpt = $xml -> getInstallOption();
+	if (! $installOpt) {
+		my $msg = 'Conflicting patternType attribute values for '
+			. 'specified profiles "'
+			. "@buildProfiles"
+			. '" found';
+		$kiwi -> error ( $msg );
+		$kiwi -> failed ();
+		return;
+	}
+	# Reset the profiles
+	$msg = "Reset profiles to original values.\n";
+	$kiwi->info($msg);
+	$xml -> setSelectionProfileNames($curActiveProfiles);
+	$kiwi->done();
 	return 1;
 }
 

@@ -132,12 +132,15 @@ sub test_buildProfWithDefPackages {
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
+	my $expected = 'Set profiles to command line provided profiles for '
+		. "validation.\nUsing profile(s): my-first, my-secondReset profiles "
+		. "to original values.\nUsing profile(s): ";
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
+	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
+	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('completed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
 	return;
@@ -159,14 +162,20 @@ sub test_conflictingProfiles {
 	my $xml = $this -> __getXMLObj( $this -> {dataDir} );
 	my $checker = KIWIRuntimeChecker -> new($kiwi, $cmd, $xml);
 	my $res = $checker -> prepareChecks();
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'Conflicting patternType attribute values for specified '
-	. 'profiles "my-first my-second" found';
+	my $infoMsg = $kiwi -> getInfoMessage();
+	my $expected = 'Set profiles to command line provided profiles for '
+		. "validation.\nUsing profile(s): my-first, my-second";
+	$this -> assert_str_equals($expected, $infoMsg);
+	my $msg = $kiwi -> getErrorMessage();
+	$expected = 'Conflicting patternType attribute values for specified '
+		. 'profiles "my-first my-second" found';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
+	my $state = $kiwi -> getErrorState();
 	$this -> assert_str_equals('failed', $state);
+	# Clear all states
+	$state = $kiwi -> getState();
 	# Test this condition last to get potential error messages
 	$this -> assert_null($res);
 	return;
