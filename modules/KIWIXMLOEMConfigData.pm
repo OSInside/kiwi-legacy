@@ -110,7 +110,7 @@ sub getBootTitle {
 #------------------------------------------
 sub getBootwait {
 	# ...
-	# Return the setting for the oem-oem_bootwait configuration
+	# Return the setting for the oem-bootwait configuration
 	# ---
 	my $this = shift;
 	return $this->{oem_bootwait};

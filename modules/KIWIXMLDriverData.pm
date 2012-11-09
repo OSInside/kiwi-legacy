@@ -2,7 +2,7 @@
 # FILE          : KIWIXMLDriverData.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 20012 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
@@ -41,11 +41,6 @@ sub new {
 	my $class = shift;
 	my $this  = $class->SUPER::new(@_);
 	if (! $this) {
-		return;
-	} elsif ($this eq 'missingName') {
-		my $kiwi = shift;
-		my $msg = 'Expecting a string as 2nd argument for DriverData object.';
-		$kiwi -> error ($msg);
 		return;
 	}
 	return $this;
