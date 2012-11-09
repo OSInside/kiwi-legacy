@@ -1512,7 +1512,7 @@ sub setupUpgrade {
 		my @installOpts = (
 			"--auto-agree-with-licenses"
 		);
-		my %pattr = $xml -> getPackageAttributes("image");
+		my %pattr = $xml -> getPackageAttributes_legacy("image");
 		if ($pattr{patternType} ne "plusRecommended") {
 			push (@installOpts,"--no-recommends");
 		}
@@ -1685,11 +1685,11 @@ sub setupInstallPackages {
 	#==========================================
 	# Get image package list
 	#------------------------------------------
-	my @packList = $xml -> getInstallList();
+	my @packList = $xml -> getInstallList_legacy();
 	#==========================================
 	# Get type specific packages if set
 	#------------------------------------------
-	my @typeList = $xml -> getTypeSpecificPackageList();
+	my @typeList = $xml -> getTypeSpecificPackageList_legacy();
 	if (@typeList) {
 		push @packList,@typeList;
 	}
@@ -1953,7 +1953,7 @@ sub setupRootSystem {
 			my @installOpts = (
 				"--auto-agree-with-licenses"
 			);
-			my %pattr = $xml -> getPackageAttributes("bootstrap");
+			my %pattr = $xml -> getPackageAttributes_legacy("bootstrap");
 			if ($pattr{patternType} ne "plusRecommended") {
 				push (@installOpts,"--no-recommends");
 			}
@@ -2043,7 +2043,7 @@ sub setupRootSystem {
 			my @installOpts = (
 				"--auto-agree-with-licenses"
 			);
-			my %pattr = $xml -> getPackageAttributes("image");
+			my %pattr = $xml -> getPackageAttributes_legacy("image");
 			if ($pattr{patternType} ne "plusRecommended") {
 				push (@installOpts,"--no-recommends");
 			}

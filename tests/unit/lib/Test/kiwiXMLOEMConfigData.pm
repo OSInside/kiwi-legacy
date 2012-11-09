@@ -821,7 +821,7 @@ sub test_getUnattendedID {
 #------------------------------------------
 sub test_setAlignPartition {
 	# ...
-	# Test thesetAlignPartition  method
+	# Test the setAlignPartition method
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -851,7 +851,7 @@ sub test_setAlignPartition {
 #------------------------------------------
 sub test_setAlignPartitionInvalidArg {
 	# ...
-	# Test the set AlignPartition method with anunrecognized bool value
+	# Test the setAlignPartition method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};

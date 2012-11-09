@@ -488,7 +488,7 @@ sub __getTree {
 				last SWITCH;
 			};
 			/^archives/      && do {
-				my @archives = $xml -> getArchiveList();
+				my @archives = $xml -> getArchiveList_legacy();
 				if ((scalar @archives) == 0) {
 					$kiwi -> info ("No archives available\n");
 				} else {
