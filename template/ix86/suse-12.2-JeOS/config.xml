@@ -79,6 +79,7 @@
 		<package name="plymouth"/>
 		<package name="fontconfig"/>
 		<package name="fonts-config"/>
+		<package name="tar"/>
 	</packages>
 	<packages type="iso">
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
