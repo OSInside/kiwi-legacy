@@ -94,10 +94,13 @@ function setupInitialDeviceNames {
 		#--------------------------------------
 		export imageRootDevice=$(ddn $imageDiskDevice 1)
 		export imageBootDevice=$(ddn $imageDiskDevice 1)
-		export imageRODevice=$(ddn $imageDiskDevice 2)
-		if [ -e $imageRODevice ];then
-			export imageRWDevice=$(ddn $imageDiskDevice 3)
-			export imageRootDevice=$(ddn $imageDiskDevice 2)
+		local  testDevice=$(ddn $imageDiskDevice 2)
+		if [ -e $testDevice ];then
+			if [ ! $(blkid $testDevice -s TYPE -o value) = "swap" ];then
+				export imageRODevice=$testDevice
+				export imageRootDevice=$testDevice
+				export imageRWDevice=$(ddn $imageDiskDevice 3)
+			fi
 		fi
 	fi
 	#======================================
