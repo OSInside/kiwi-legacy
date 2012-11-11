@@ -619,7 +619,7 @@ sub setupInstallCD {
 	#==========================================
 	# Check for disk device
 	#------------------------------------------
-	if (-b $system) {
+	if (($system) && (-b $system)) {
 		$haveDiskDevice = $system;
 		$version = $xml -> getImageVersion();
 		$system  = $xml -> getImageName();
@@ -1060,7 +1060,6 @@ sub setupInstallStick {
 	my $efi       = $this->{efi};
 	my $irdsize   = $main::global -> isize ($initrd);
 	my $vmsize    = $main::global -> isize ($system);
-	my $diskname  = $system.".install.raw";
 	my $md5name   = $system;
 	my $destdir   = dirname ($initrd);
 	my %deviceMap = ();
@@ -1081,6 +1080,7 @@ sub setupInstallStick {
 	my $tmpdir;
 	my %type;
 	my $stick;
+	my $diskname;
 	#==========================================
 	# Create new MBR label for install disk
 	#------------------------------------------
@@ -1088,12 +1088,11 @@ sub setupInstallStick {
 	#==========================================
 	# Check for disk device
 	#------------------------------------------
-	if (-b $system) {
+	if (($system) && (-b $system)) {
 		$haveDiskDevice = $system;
 		$version = $xml -> getImageVersion();
 		$system  = $xml -> getImageName();
 		$system  = $destdir."/".$system.".".$arch."-".$version.".raw";
-		$diskname= $system.".install.raw";
 		$md5name = $system;
 		$this->{system} = $system;
 	}
@@ -1132,10 +1131,12 @@ sub setupInstallStick {
 	#==========================================
 	# check if system image is given
 	#------------------------------------------
-	if (! defined $system) {
+	if ($system) {
+		$diskname = $system.".install.raw";
+	} else {
 		$system   = $initrd;
 		$diskname = $initrd;
-		$diskname =~ s/gz$/raw/;
+		$diskname =~ s/gz$/install\.raw/;
 		$gotsys   = 0;
 	}
 	#==========================================
@@ -3579,6 +3580,12 @@ sub setupBootLoaderConfiguration {
 	my %type;
 	my $title;
 	#==========================================
+	# set empty label if not defined
+	#------------------------------------------
+	if (! $label) {
+		$label = "";
+	}
+	#==========================================
 	# store loader type in object instance
 	#------------------------------------------
 	$this->{loader} = $loader;
@@ -3590,7 +3597,7 @@ sub setupBootLoaderConfiguration {
 		%type = %{$xml->getImageTypeAndAttributes_legacy()};
 		$cmdline  = $type{cmdline};
 	}
-	if ($type =~ /^KIWI CD Boot/) {
+	if ($type =~ /^KIWI (CD|USB) Boot/) {
 		# /.../
 		# use predefined set of parameters for simple boot CD
 		# not including a system image
@@ -5951,7 +5958,12 @@ sub setupFilesystem {
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my $cmdL   = $this->{cmdL};
-	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
+	my %type   = ();
+	if ($xml) {
+		%type = %{$xml->getImageTypeAndAttributes_legacy()};
+	} else {
+		$type{fsnocheck} = 'true';
+	}
 	my %FSopts = $main::global -> checkFSOptions(
 		@{$cmdL -> getFilesystemOptions()}
 	);
