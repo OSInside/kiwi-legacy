@@ -42,7 +42,7 @@ use KIWIQX qw (qxx);
 sub new {
 	# ...
 	# Create KIWIBoot object which is used to create bootable
-	# media images like CD/DVD's , USB sticks or Virtual disks 
+	# media images like CD/DVD's , USB sticks or Virtual disks
 	# ---
 	#==========================================
 	# Object setup
@@ -5982,6 +5982,9 @@ sub setupFilesystem {
 		/^ext[234]/     && do {
 			$kiwi -> info ("Creating $_ $name filesystem");
 			my $fsopts = $FSopts{$_};
+			if (! $fsopts) {
+				$fsopts = '';
+			}
 			my $fstool = "mkfs.".$fstype;
 			if ($this->{inodes}) {
 				$fsopts.= " -N $this->{inodes}";
@@ -5990,11 +5993,13 @@ sub setupFilesystem {
 				$fsopts.= " -L 'BOOT'";
 				$type{fsnocheck} = 'true';
 			}
-			my $tuneopts = "";
+			my $tuneopts = '';
 			if (($type{fsnocheck}) && ($type{fsnocheck} eq "true")) {
 				$tuneopts = "-c 0 -i 0";
 			}
-			$tuneopts = $FSopts{extfstune} if $FSopts{extfstune};
+			if ($FSopts{extfstune}) {
+				$tuneopts .= $FSopts{extfstune};
+			}
 			$status = qxx ("$fstool $fsopts $device 2>&1");
 			$result = $? >> 8;
 			if (!$result && $tuneopts) {
@@ -6005,7 +6010,7 @@ sub setupFilesystem {
 		};
 		/^fat16|fat32/  && do {
 			my $fstool = 'mkdosfs';
-			my $fsopts;
+			my $fsopts = '';
 			if ($name eq 'fat16') {
 				$kiwi -> info ("Creating DOS [Fat16] filesystem");
 				$fsopts.= " -F 16";
@@ -6023,6 +6028,9 @@ sub setupFilesystem {
 		/^reiserfs/     && do {
 			$kiwi -> info ("Creating reiserfs $name filesystem");
 			my $fsopts = $FSopts{reiserfs};
+			if (! $fsopts) {
+				$fsopts = '';
+			}
 			$fsopts.= "-f";
 			$status = qxx (
 				"/sbin/mkreiserfs $fsopts $device 2>&1"
@@ -6033,6 +6041,9 @@ sub setupFilesystem {
 		/^btrfs/        && do {
 			$kiwi -> info ("Creating btrfs $name filesystem");
 			my $fsopts = $FSopts{btrfs};
+			if (! $fsopts) {
+				$fsopts = '';
+			}
 			$status = qxx (
 				"/sbin/mkfs.btrfs $fsopts $device 2>&1"
 			);
@@ -6042,6 +6053,9 @@ sub setupFilesystem {
 		/^xfs/          && do {
 			$kiwi -> info ("Creating xfs $name filesystem");
 			my $fsopts = $FSopts{xfs};
+			if (! $fsopts) {
+				$fsopts = '';
+			}
 			$status = qxx (
 				"/sbin/mkfs.xfs $fsopts $device 2>&1"
 			);
