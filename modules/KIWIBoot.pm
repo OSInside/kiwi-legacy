@@ -2442,7 +2442,8 @@ sub setupBootDisk {
 				push @paths,$pname;
 			}
 			foreach my $name (@paths) {
-				my $part = split (/\//,$name);
+				my @parts = split (/\//,$name);
+				my $part  = @parts;
 				push @{$phash{$part}},$name;
 			}
 			#==========================================
