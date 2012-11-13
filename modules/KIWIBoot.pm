@@ -187,7 +187,7 @@ sub new {
 	}
 	if (! $isxen) {
 		my $kernel = readlink $xengz.".kernel";
-		if ($kernel =~ /.*-xen$/) {
+		if (($kernel) && ($kernel =~ /.*-xen$/)) {
 			$isxen = 1;
 		}
 	}
