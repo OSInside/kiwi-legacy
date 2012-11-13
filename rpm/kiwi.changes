@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Nov 13 16:22:09 CET 2012 - ms@suse.de
+
+- netboot: fixed dhcpcd '-r' option name clash. Older versions of
+  dhcpcd use that option in a completely different meaning, thus
+  we distinguish the call by the the capability of the '-p' option
+  (interface persistency) which was introduced in newer versions
+  of dhcpcd only (bnc #787924)
+
+-------------------------------------------------------------------
 Wed Nov  7 14:48:04 CET 2012 - ms@suse.de
 
 - added support for reading /etc/kiwi/repoalias file in
