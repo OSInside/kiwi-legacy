@@ -344,7 +344,7 @@ function suseConfig {
 	#--------------------------------------
 	if [ ! -z "$kiwi_hwclock" ];then
 		cat /etc/sysconfig/clock |\
-			sed -e s"@HWCLOCK=\".*\"@HWCLOCK=\"--$kiwi_hwclock\"@" \
+			sed -e s"@^HWCLOCK=\".*\"@HWCLOCK=\"--$kiwi_hwclock\"@" \
 		> etc/sysconfig/clock.new
 		mv etc/sysconfig/clock.new etc/sysconfig/clock
 	fi
