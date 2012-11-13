@@ -2555,6 +2555,9 @@ sub setupBootDisk {
 			@{$cmdL -> getFilesystemOptions()}
 		);
 		my $fsopts = $FSopts{ext3};
+		if (! $fsopts) {
+			$fsopts = '';
+		}
 		my $fstool = "mkfs.ext3";
 		$status = qxx ("$fstool $fsopts $root 2>&1");
 		$result = $? >> 8;
@@ -5995,7 +5998,7 @@ sub setupFilesystem {
 			}
 			my $tuneopts = '';
 			if (($type{fsnocheck}) && ($type{fsnocheck} eq "true")) {
-				$tuneopts = "-c 0 -i 0";
+				$tuneopts = "-c 0 -i 0 ";
 			}
 			if ($FSopts{extfstune}) {
 				$tuneopts .= $FSopts{extfstune};
@@ -6031,7 +6034,7 @@ sub setupFilesystem {
 			if (! $fsopts) {
 				$fsopts = '';
 			}
-			$fsopts.= "-f";
+			$fsopts.= " -f";
 			$status = qxx (
 				"/sbin/mkreiserfs $fsopts $device 2>&1"
 			);
