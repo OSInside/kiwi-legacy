@@ -3388,7 +3388,7 @@ sub postImage {
 	#==========================================
 	# Create image md5sum
 	#------------------------------------------
-	if ($fstype ne "clicfs") {
+	if (($fstype) && ($fstype ne "clicfs")) {
 		if (! $this -> buildMD5Sum ($name)) {
 			return;
 		}
