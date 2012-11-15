@@ -1535,6 +1535,8 @@ function suseStripKernel {
 				mv uImage-$VERSION vmlinuz
 			elif [[ $arch =~ ^arm ]] && [ -f image-$VERSION ];then
 				mv image-$VERSION vmlinuz
+			elif [[ $arch =~ ^arm ]] && [ -f Image-$VERSION ];then
+				mv Image-$VERSION vmlinuz
 			elif [ -f vmlinux-$VERSION.gz ];then
 				mv vmlinux-$VERSION.gz vmlinux.gz
 				mv vmlinuz-$VERSION vmlinuz
