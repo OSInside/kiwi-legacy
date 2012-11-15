@@ -67,6 +67,7 @@ Requires:       perl-libwww-perl
 Requires:       rsync
 Requires:       screen
 Requires:       util-linux
+Requires:       lvm2
 %ifarch %ix86 x86_64
 %if %{suse_version} > 1010
 Requires:       squashfs
