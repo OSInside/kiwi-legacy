@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Nov 15 12:44:56 CET 2012 - ms@suse.de
+
+- make sure possibly left over dhcpcd pid file from a -T (test) call
+  is removed before requesting the IP address for the interface. It
+  has turned out that the sle10 dhcpcd has this bug and kiwi works
+  around this one by actively checking for a pid file after the
+  dhcpcd -T (test) call (bnc #787924)
+
+-------------------------------------------------------------------
 Tue Nov 13 16:22:09 CET 2012 - ms@suse.de
 
 - netboot: fixed dhcpcd '-r' option name clash. Older versions of
