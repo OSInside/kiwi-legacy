@@ -310,20 +310,16 @@ function suseConfig {
 	# keytable
 	#--------------------------------------
 	if [ ! -z "$kiwi_keytable" ];then
-		cat etc/sysconfig/keyboard |\
-			sed -e s"@KEYTABLE=\".*\"@KEYTABLE=\"$kiwi_keytable\"@" \
-		> etc/sysconfig/keyboard.new
-		mv etc/sysconfig/keyboard.new etc/sysconfig/keyboard
+		baseUpdateSysConfig \
+			/etc/sysconfig/keyboard KEYTABLE $kiwi_keytable
 	fi
 	#======================================
 	# locale
 	#--------------------------------------
 	if [ ! -z "$kiwi_language" ];then
 		language=$(echo $kiwi_language | cut -f1 -d,).UTF-8
-		cat /etc/sysconfig/language |\
-			sed -e s"@RC_LANG=\".*\"@RC_LANG=\"$language\"@" \
-		> etc/sysconfig/language.new
-		mv etc/sysconfig/language.new etc/sysconfig/language
+		baseUpdateSysConfig \
+			/etc/sysconfig/language RC_LANG $language
 	fi
 	#======================================
 	# timezone
@@ -331,10 +327,8 @@ function suseConfig {
 	if [ ! -z "$kiwi_timezone" ];then
 		if [ -f /usr/share/zoneinfo/$kiwi_timezone ];then
 			cp /usr/share/zoneinfo/$kiwi_timezone /etc/localtime
-			cat /etc/sysconfig/clock |\
-				sed -e s"@TIMEZONE=\".*\"@TIMEZONE=\"$kiwi_timezone\"@" \
-			> etc/sysconfig/clock.new
-			mv etc/sysconfig/clock.new etc/sysconfig/clock
+			baseUpdateSysConfig \
+				/etc/sysconfig/clock TIMEZONE $kiwi_timezone
 		else
 			echo "timezone: $kiwi_timezone not found"
 		fi
@@ -343,10 +337,8 @@ function suseConfig {
 	# hwclock
 	#--------------------------------------
 	if [ ! -z "$kiwi_hwclock" ];then
-		cat /etc/sysconfig/clock |\
-			sed -e '/^HWCLOCK=.*/c HWCLOCK="--'"$kiwi_hwclock"'"'
-		> etc/sysconfig/clock.new
-		mv etc/sysconfig/clock.new etc/sysconfig/clock
+		baseUpdateSysConfig \
+			/etc/sysconfig/clock HWCLOCK "--$kiwi_hwclock"
 	fi
 	#======================================
 	# SuSEconfig
@@ -898,7 +890,7 @@ function baseStripUnusedLibs {
 }
 
 #======================================
-# baseSysConfig
+# baseUpdateSysConfig
 #--------------------------------------
 function baseUpdateSysConfig {
 	# /.../
