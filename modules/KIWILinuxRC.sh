@@ -4158,6 +4158,9 @@ function setupNetwork {
 			eval `grep "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info`
 			rm /var/lib/dhcpcd/dhcpcd-$try_iface.info
 			# continue with the DHCP protocol on the selected interface
+			if [ -e /var/run/dhcpcd-$PXE_IFACE.pid ];then
+				rm -f /var/run/dhcpcd-$PXE_IFACE.pid
+			fi
 			if [ $DHCPCD_HAVE_PERSIST -eq 0 ];then
 				# /.../
 				# older version of dhcpd which doesn't provide
