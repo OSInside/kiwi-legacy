@@ -1,5 +1,5 @@
 #================
-# FILE          : KIWIXMLDriverData.pm
+# FILE          : KIWIXMLIgnorePackageData.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
@@ -13,7 +13,7 @@
 #               :
 # STATUS        : Development
 #----------------
-package KIWIXMLDriverData;
+package KIWIXMLIgnorePackageData;
 #==========================================
 # Modules
 #------------------------------------------
@@ -33,7 +33,7 @@ our @EXPORT_OK = qw ();
 #------------------------------------------
 sub new {
 	# ...
-	# Create the KIWIXMLDriverData object
+	# Create the KIWIXMLIgnorePackageData object
 	# ---
 	#==========================================
 	# Object setup

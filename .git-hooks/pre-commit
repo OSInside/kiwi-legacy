@@ -36,15 +36,20 @@ my @kiwiModules = qw (
 	KIWIURL.pm
 	KIWIUtil.pm
 	KIWIXML.pm
+	KIWIXMLArchiveData.pm
 	KIWIXMLDataBase.pm
 	KIWIXMLDescriptionData.pm
 	KIWIXMLDriverData.pm
 	KIWIXMLEC2ConfigData.pm
 	KIWIXMLFileData.pm
+	KIWIXMLIgnorePackageData.pm
 	KIWIXMLInfo.pm
 	KIWIXMLOEMConfigData.pm
 	KIWIXMLPXEDeployData.pm
+	KIWIXMLPackageCollectData.pm
+	KIWIXMLPackageData.pm
 	KIWIXMLPreferenceData.pm
+	KIWIXMLProductData.pm
 	KIWIXMLProfileData.pm
 	KIWIXMLRepositoryData.pm
 	KIWIXMLSplitData.pm
@@ -58,14 +63,19 @@ my @kiwiModules = qw (
 	KTLocator.t
 	KTRuntimeChecker.t
 	KTXML.t
+	KTXMLArchiveData.t
 	KTXMLDescriptionData.t
 	KTXMLDriverData.t
 	KTXMLEC2ConfigData.t
 	KTXMLFileData.t
+	KTXMLIgnorePackageData.t
 	KTXMLInfo.t
 	KTXMLOEMConfigData.t
 	KTXMLPXEDeployData.t
+	KTXMLPackageCollectData.t
+	KTXMLPackageData.t
 	KTXMLPreferenceData.t
+	KTXMLProductData.t
 	KTXMLProfileData.t
 	KTXMLRepositoryData.t
 	KTXMLSplitData.t
@@ -81,14 +91,19 @@ my @kiwiModules = qw (
 	kiwiImageCreator.pm
 	kiwiRuntimeChecker.pm
 	kiwiXML.pm
+	kiwiXMLArchiveData.pm
 	kiwiXMLDescriptionData.pm
 	kiwiXMLDriverData.pm
 	kiwiXMLEC2ConfigData.pm
 	kiwiXMLFileData.pm
+	kiwiXMLIgnorePackageData.pm
 	kiwiXMLInfo.pm
 	kiwiXMLOEMConfigData.pm
 	kiwiXMLPXEDeployData.pm
+	kiwiXMLPackageCollectData.pm
+	kiwiXMLPackageData.pm
 	kiwiXMLPreferenceData.pm
+	kiwiXMLProductData.pm
 	kiwiXMLProfileData.pm
 	kiwiXMLRepositoryData.pm
 	kiwiXMLSplitData.pm
@@ -130,15 +145,20 @@ my @notClean1 = qw (
 	KIWIURL.pm
 	KIWIUtil.pm
 	KIWIXML.pm
+	KIWIXMLArchiveData.pm
 	KIWIXMLDataBase.pm
 	KIWIXMLDescriptionData.pm
 	KIWIXMLDriverData.pm
 	KIWIXMLEC2ConfigData.pm
 	KIWIXMLFileData.pm
+	KIWIXMLIgnorePackageData.pm
 	KIWIXMLInfo.pm
 	KIWIXMLOEMConfigData.pm
 	KIWIXMLPXEDeployData.pm
+	KIWIXMLPackageCollectData.pm
+	KIWIXMLPackageData.pm
 	KIWIXMLPreferenceData.pm
+	KIWIXMLProductData.pm
 	KIWIXMLProfileData.pm
 	KIWIXMLRepositoryData.pm
 	KIWIXMLSplitData.pm
@@ -152,14 +172,19 @@ my @notClean1 = qw (
 	KTLocator.t
 	KTRuntimeChecker.t
 	KTXML.t
+	KTXMLArchiveData.t
 	KTXMLDescriptionData.t
 	KTXMLDriverData.t
 	KTXMLEC2ConfigData.t
 	KTXMLFileData.t
+	KTXMLIgnorePackageData.t
 	KTXMLInfo.t
 	KTXMLOEMConfigData.t
 	KTXMLPXEDeployData.t
+	KTXMLPackageCollectData.t
+	KTXMLPackageData.t
 	KTXMLPreferenceData.t
+	KTXMLProductData.t
 	KTXMLProfileData.t
 	KTXMLRepositoryData.t
 	KTXMLSplitData.t
@@ -175,14 +200,19 @@ my @notClean1 = qw (
 	kiwiImageCreator.pm
 	kiwiRuntimeChecker.pm
 	kiwiXML.pm
+	kiwiXMLArchiveData.pm
 	kiwiXMLDescriptionData.pm
 	kiwiXMLDriverData.pm
 	kiwiXMLEC2ConfigData.pm
 	kiwiXMLFileData.pm
+	kiwiXMLIgnorePackageData.pm
 	kiwiXMLInfo.pm
 	kiwiXMLOEMConfigData.pm
 	kiwiXMLPXEDeployData.pm
+	kiwiXMLPackageCollectData.pm
+	kiwiXMLPackageData.pm
 	kiwiXMLPreferenceData.pm
+	kiwiXMLProductData.pm
 	kiwiXMLProfileData.pm
 	kiwiXMLRepositoryData.pm
 	kiwiXMLSplitData.pm
@@ -225,12 +255,7 @@ my @notClean2 = qw (
 	KIWIUtil.pm
 	KIWIXML.pm
 	KIWIXMLDataBase.pm
-	KIWIXMLDescriptionData.pm
-	KIWIXMLDriverData.pm
-	KIWIXMLFileData.pm
 	KIWIXMLInfo.pm
-	KIWIXMLOEMConfigData.pm
-	KIWIXMLRepositoryData.pm
 	KIWIXMLTypeData.pm
 	KIWIXMLValidator.pm
 	KTImageCreator.t

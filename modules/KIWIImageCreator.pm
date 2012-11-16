@@ -530,7 +530,7 @@ sub createImage {
 	my @deleteList;  # remove this packages
 	my @replAdd;
 	my @replDel;
-	$xml -> getBaseList();
+	$xml -> getBaseList_legacy();
 	@replAdd = $xml -> getReplacePackageAddList();
 	@replDel = $xml -> getReplacePackageDelList();
 	if (@replAdd) {
@@ -539,7 +539,7 @@ sub createImage {
 	if (@replDel) {
 		push @deleteList,@replDel;
 	}
-	$xml -> getInstallList();
+	$xml -> getInstallList_legacy();
 	@replAdd = $xml -> getReplacePackageAddList();
 	@replDel = $xml -> getReplacePackageDelList();
 	if (@replAdd) {
@@ -548,7 +548,7 @@ sub createImage {
 	if (@replDel) {
 		push @deleteList,@replDel;
 	}
-	$xml -> getTypeSpecificPackageList();
+	$xml -> getTypeSpecificPackageList_legacy();
 	@replAdd = $xml -> getReplacePackageAddList();
 	@replDel = $xml -> getReplacePackageDelList();
 	if (@replAdd) {
@@ -646,7 +646,7 @@ sub createImage {
 	if (! defined $configure) {
 		return;
 	}
-	my %config = $xml -> getImageConfig();
+	my %config = $xml -> getImageConfig_legacy();
 	my $PFD = FileHandle -> new();
 	if (! $PFD -> open (">$tree/.profile")) {
 		$kiwi -> failed ();
@@ -1052,13 +1052,13 @@ sub __applyAdditionalXMLOverrides {
 	my $this = shift;
 	my $xml  = shift;
 	if ($this -> {addlPackages}) {
-		$xml -> addImagePackages (@{$this -> {addlPackages}});
+		$xml -> addImagePackages_legacy (@{$this -> {addlPackages}});
 	}
 	if ($this -> {addlPatterns}) {
-		$xml -> addImagePatterns (@{$this -> {addlPatterns}});
+		$xml -> addImagePatterns_legacy (@{$this -> {addlPatterns}});
 	}
 	if ($this -> {removePackages}) {
-		$xml -> addRemovePackages (@{$this -> {removePackages}});
+		$xml -> addRemovePackages_legacy (@{$this -> {removePackages}});
 	}
 	return $xml;
 }
@@ -1227,9 +1227,9 @@ sub __prepareTree {
 		#==========================================
 		# Add bootstrap packages to image section
 		#------------------------------------------
-		my @initPacs = $xml -> getBaseList();
+		my @initPacs = $xml -> getBaseList_legacy();
 		if (@initPacs) {
-			$xml -> addImagePackages (@initPacs);
+			$xml -> addImagePackages_legacy (@initPacs);
 		}
 	}
 	#==========================================

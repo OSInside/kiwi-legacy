@@ -1,5 +1,5 @@
 #================
-# FILE          : KIWIXMLDriverData.pm
+# FILE          : KIWIXMLProductData.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
@@ -9,11 +9,11 @@
 # BELONGS TO    : Operating System images
 #               :
 # DESCRIPTION   : This module represents the data contained in the KIWI
-#               : configuration file marked with the <driver> element.
+#               : configuration file marked with the <opensuseProduct> element.
 #               :
 # STATUS        : Development
 #----------------
-package KIWIXMLDriverData;
+package KIWIXMLProductData;
 #==========================================
 # Modules
 #------------------------------------------
@@ -33,7 +33,7 @@ our @EXPORT_OK = qw ();
 #------------------------------------------
 sub new {
 	# ...
-	# Create the KIWIXMLDriverData object
+	# Create the KIWIXMLProductData object
 	# ---
 	#==========================================
 	# Object setup

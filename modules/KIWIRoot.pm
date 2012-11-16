@@ -369,7 +369,7 @@ sub init {
 	#==========================================
 	# Get base Package list
 	#------------------------------------------
-	my @initPacs = $xml -> getBaseList();
+	my @initPacs = $xml -> getBaseList_legacy();
 	if (! @initPacs) {
 		$kiwi -> error ("Couldn't create base package list");
 		$kiwi -> failed ();
@@ -794,7 +794,7 @@ sub installArchives {
 	#==========================================
 	# get image archive list
 	#------------------------------------------
-	my @archives = $xml -> getArchiveList();
+	my @archives = $xml -> getArchiveList_legacy();
 	#==========================================
 	# Install raw data archives
 	#------------------------------------------
@@ -1011,7 +1011,7 @@ sub setup {
 		return;
 	}
 	$kiwi -> done();
-	my %config = $xml -> getImageConfig();
+	my %config = $xml -> getImageConfig_legacy();
 	binmode($FD, ":encoding(UTF-8)");
 	foreach my $key (keys %config) {
 		$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
@@ -1149,7 +1149,7 @@ sub setup {
 	#========================================
 	# remove packages from delete section
 	#----------------------------------------
-	my @delete_packs = $xml -> getDeleteList();
+	my @delete_packs = $xml -> getDeleteList_legacy();
 	if ((! $initCache) && (@delete_packs)) {
 		$kiwi -> info ("Removing packages marked for deletion:\n");
 		foreach my $p (@delete_packs) {

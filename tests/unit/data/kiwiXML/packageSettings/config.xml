@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.4" name="testCase-package-settings">
+<image schemaversion="5.5" name="testCase-package-settings">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -9,6 +9,7 @@
 		<profile description="test profile" name="aTest"/>
 	</profiles>
 	<preferences>
+		<packagemanager>ensconce</packagemanager>
 		<type image="oem" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true"/>
 		<version>0.0.1</version>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -27,9 +28,10 @@
 		<archive name="myImageStuff.tgz"/>
 		<opensusePattern name="base"/>
 		<opensusePattern name="xfce"/>
+		<opensuseProduct name="SLES"/>
 		<package name="ed"/>
 		<package name="kernel-default"/>
-		<package name="python" bootinclude="true"/>
+		<package name="python" bootinclude="true" bootdelete="true"/>
 		<package name="vim" bootinclude="true"/>
 	</packages>
 	<packages type="image" profiles="aTest" patternType="plusRecommended">
@@ -46,11 +48,17 @@
 		<package name="libreOffice"/>
 	</packages>
 	<packages type="oem">
+		<archive name="myOEMstuffProf.tar.bz2"/>
 		<package name="kernel-firmware"/>
 		<package name="sane"/>
+		<rhelGroup name="compatAddon"/>
 	</packages>
 	<packages type="oem" profiles="aTest">
+		<archive name="myOEMstuffProf.tar.bz2"/>
+		<ignore name="python"/>
+		<package name="xemacs" replaces="vim"/>
 		<package name="gimp"/>
+		<rhelGroup name="lamp"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
