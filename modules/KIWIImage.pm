@@ -3317,6 +3317,9 @@ sub postImage {
 	if ((! $type{filesystem}) && ($fstype)) {
 		$type{filesystem} = $fstype;
 	}
+	if (! $type{filesystem}) {
+		$type{filesystem} = $type{type};
+	}
 	my $para = $type{type}.":".$type{filesystem};
 	if ($type{filesystem}) {
 		$kiwi -> info ("Checking file system: $type{filesystem}...");
