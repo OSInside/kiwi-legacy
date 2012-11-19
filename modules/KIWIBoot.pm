@@ -4710,10 +4710,8 @@ sub copyBootCode {
 	my $status = qxx ("cp -dR $source/boot $dest 2>&1");
 	my $result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Couldn't copy boot data to system image: $status");
-		$kiwi -> failed ();
-		return;
+		$kiwi -> oops ();
+		$kiwi -> warning ("Copy of boot data returned: $status");
 	}
 	if (! $this->{needBootP}) {
 		return $this;
