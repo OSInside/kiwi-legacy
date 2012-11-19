@@ -1331,10 +1331,32 @@ sub setupInstallStick {
 		$this->{loop} = $stick;
 	}
 	#==========================================
+	# check required boot filesystem type
+	#------------------------------------------
+	my $bootfs = 'ext3';
+	my $partid = "83";
+	if ($type{bootfilesystem}) {
+		$bootfs = $type{bootfilesystem};
+	} elsif ($bootloader eq 'syslinux') {
+		$bootfs = 'fat32';
+	} elsif ($bootloader eq 'yaboot') {
+		if ($lvm) {
+			$bootfs = 'fat16';
+		} else {
+			$bootfs = 'fat32';
+		}
+	} elsif (($bootloader eq "grub2") && ($efi)) {
+		$bootfs = 'fat32';
+	} else {
+		$bootfs = 'ext3';
+	}
+	if ($bootfs =~ /^fat/) {
+		$partid = "c";
+	}
+	#==========================================
 	# create disk partitions
 	#------------------------------------------
 	$kiwi -> info ("Create partition table for disk");
-	my $partid = "83";
 	if (($bootloader =~ /syslinux|yaboot/)   ||
 		(($bootloader eq "grub2") && ($efi))
 	) {
@@ -1420,25 +1442,6 @@ sub setupInstallStick {
 	foreach my $root ($boot,$data) {
 		next if ! defined $root;
 		if ($root eq $boot) {
-			#==========================================
-			# check required boot filesystem type
-			#------------------------------------------
-			my $bootfs = 'ext3';
-			if ($type{bootfilesystem}) {
-				$bootfs = $type{bootfilesystem};
-			} elsif ($bootloader eq 'syslinux') {
-				$bootfs = 'fat32';
-			} elsif ($bootloader eq 'yaboot') {
-				if ($lvm) {
-					$bootfs = 'fat16';
-				} else {
-					$bootfs = 'fat32';
-				}
-			} elsif (($bootloader eq "grub2") && ($efi)) {
-				$bootfs = 'fat32';
-			} else {
-				$bootfs = 'ext3';
-			}
 			#==========================================
 			# build boot filesystem
 			#------------------------------------------
@@ -2001,9 +2004,33 @@ sub setupBootDisk {
 	}
 	$this->{needBootP} = $needBootP;
 	#==========================================
-	# setup boot partition type
+	# check required boot filesystem type
 	#------------------------------------------
 	my $partid = 83;
+	my $bootfs = 'ext3';
+	if ($needBootP) {
+		if ($type{bootfilesystem}) {
+			$bootfs = $type{bootfilesystem};
+		} elsif ($bootloader eq 'syslinux') {
+			$bootfs = 'fat32';
+		} elsif ($bootloader eq 'yaboot') {
+			if ($lvm) {
+				$bootfs = 'fat16';
+			} else {
+				$bootfs = 'fat32';
+			}
+		} elsif (($bootloader eq "grub2") && ($efi)) {
+			$bootfs = 'fat32';
+		} else {
+			$bootfs = 'ext3';
+		}
+		if ($bootfs =~ /^fat/) {
+			$partid = "c";
+		}
+	}
+	#==========================================
+	# setup boot partition type
+	#------------------------------------------
 	if (($bootloader =~ /syslinux|yaboot/) ||
 		(($bootloader eq "grub2") && ($efi))
 	) {
@@ -2582,25 +2609,6 @@ sub setupBootDisk {
 		$boot = $deviceMap{1};
 		if ($lvm) {
 			$boot = $deviceMap{0};
-		}
-		#==========================================
-		# check required boot filesystem type
-		#------------------------------------------
-		my $bootfs = 'ext3';
-		if ($type{bootfilesystem}) {
-			$bootfs = $type{bootfilesystem};
-		} elsif ($bootloader eq 'syslinux') {
-			$bootfs = 'fat32';
-		} elsif ($bootloader eq 'yaboot') {
-			if ($lvm) {
-				$bootfs = 'fat16';
-			} else {
-				$bootfs = 'fat32';
-			}
-		} elsif (($bootloader eq "grub2") && ($efi)) {
-			$bootfs = 'fat32';
-		} else {
-			$bootfs = 'ext3';
 		}
 		#==========================================
 		# build boot filesystem
