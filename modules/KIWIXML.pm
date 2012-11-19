@@ -3818,7 +3818,7 @@ sub getImageVersion {
 	my $this = shift;
 	my $node = $this -> __getPreferencesNodeByTagName ("version");
 	my $version = $node -> getElementsByTagName ("version");
-	return $version;
+	return "$version";
 }
 
 
@@ -3888,7 +3888,7 @@ sub getLocale {
 	if ((! defined $lang) || ("$lang" eq "")) {
 		return;
 	}
-	return $lang;
+	return "$lang";
 }
 
 
@@ -5387,7 +5387,10 @@ sub getDefaultPrebuiltDir_legacy {
 	my $this = shift;
 	my $node = $this -> __getPreferencesNodeByTagName ('defaultprebuilt');
 	my $imgDir = $node -> getElementsByTagName ('defaultprebuilt');
-	return $imgDir;
+	if (! $imgDir) {
+		return;
+	}
+	return "$imgDir";
 }
 
 #==========================================
@@ -5450,21 +5453,21 @@ sub getEc2Config_legacy {
 	#------------------------------------------
 	my $awsacctno = $node -> getElementsByTagName ("ec2accountnr");
 	if ($awsacctno) {
-		$result{AWSAccountNr} = $awsacctno;
+		$result{AWSAccountNr} = "$awsacctno";
 	}
 	#==========================================
 	# EC2 path to public key file
 	#------------------------------------------
 	my $certfile = $node -> getElementsByTagName ("ec2certfile");
 	if ($certfile) {
-		$result{EC2CertFile} = $certfile;
+		$result{EC2CertFile} = "$certfile";
 	}
 	#==========================================
 	# EC2 path to private key file
 	#------------------------------------------
 	my $privkeyfile = $node -> getElementsByTagName ("ec2privatekeyfile");
 	if ($privkeyfile) {
-		$result{EC2PrivateKeyFile} = $privkeyfile;
+		$result{EC2PrivateKeyFile} = "$privkeyfile";
 	}
 	#==========================================
 	# EC2 region
@@ -5876,7 +5879,10 @@ sub getImageDefaultDestination_legacy {
 	my $this = shift;
 	my $node = $this -> __getPreferencesNodeByTagName ("defaultdestination");
 	my $dest = $node -> getElementsByTagName ("defaultdestination");
-	return $dest;
+	if (! $dest) {
+		return;
+	}
+	return "$dest";
 }
 
 #==========================================
@@ -5892,7 +5898,10 @@ sub getImageDefaultRoot_legacy {
 	my $this = shift;
 	my $node = $this -> __getPreferencesNodeByTagName ("defaultroot");
 	my $root = $node -> getElementsByTagName ("defaultroot");
-	return $root;
+	if (! $root) {
+		return;
+	}
+	return "$root";
 }
 
 #==========================================
@@ -6258,7 +6267,7 @@ sub getOEMAlignPartition_legacy {
 	if ((! defined $align) || ("$align" eq "")) {
 		return;
 	}
-	return $align;
+	return "$align";
 }
 
 #==========================================
@@ -6281,7 +6290,7 @@ sub getOEMBootTitle_legacy {
 			return;
 		}
 	}
-	return $title;
+	return "$title";
 }
 
 #==========================================
@@ -6301,7 +6310,7 @@ sub getOEMBootWait_legacy {
 	if ((! defined $wait) || ("$wait" eq "")) {
 		return;
 	}
-	return $wait;
+	return "$wait";
 }
 
 #==========================================
@@ -6321,7 +6330,7 @@ sub getOEMKiwiInitrd_legacy {
 	if ((! defined $kboot) || ("$kboot" eq "")) {
 		return;
 	}
-	return $kboot;
+	return "$kboot";
 }
 
 #==========================================
@@ -6341,7 +6350,7 @@ sub getOEMPartitionInstall_legacy {
 	if ((! defined $pinst) || ("$pinst" eq "")) {
 		return;
 	}
-	return $pinst;
+	return "$pinst";
 }
 
 #==========================================
@@ -6361,7 +6370,7 @@ sub getOEMReboot_legacy {
 	if ((! defined $boot) || ("$boot" eq "")) {
 		return;
 	}
-	return $boot;
+	return "$boot";
 }
 
 #==========================================
@@ -6381,7 +6390,7 @@ sub getOEMRebootInter_legacy {
 	if ((! defined $boot) || ("$boot" eq "")) {
 		return;
 	}
-	return $boot;
+	return "$boot";
 }
 
 #==========================================
@@ -6401,7 +6410,7 @@ sub getOEMRecovery_legacy {
 	if ((! defined $reco) || ("$reco" eq "")) {
 		return;
 	}
-	return $reco;
+	return "$reco";
 }
 
 #==========================================
@@ -6421,7 +6430,7 @@ sub getOEMRecoveryID_legacy {
 	if ((! defined $reco) || ("$reco" eq "")) {
 		return;
 	}
-	return $reco;
+	return "$reco";
 }
 
 #==========================================
@@ -6441,7 +6450,7 @@ sub getOEMRecoveryInPlace_legacy {
 	if ((! defined $inplace) || ("$inplace" eq "")) {
 		return;
 	}
-	return $inplace;
+	return "$inplace";
 }
 
 #==========================================
@@ -6461,7 +6470,7 @@ sub getOEMShutdown_legacy {
 	if ((! defined $down) || ("$down" eq "")) {
 		return;
 	}
-	return $down;
+	return "$down";
 }
 
 #==========================================
@@ -6481,7 +6490,7 @@ sub getOEMShutdownInter_legacy {
 	if ((! defined $down) || ("$down" eq "")) {
 		return;
 	}
-	return $down;
+	return "$down";
 }
 
 #==========================================
@@ -6501,7 +6510,7 @@ sub getOEMSilentBoot_legacy {
 	if ((! defined $silent) || ("$silent" eq "")) {
 		return;
 	}
-	return $silent;
+	return "$silent";
 }
 
 #==========================================
@@ -6517,7 +6526,8 @@ sub getOEMSwap_legacy {
 	if (! defined $node) {
 		return;
 	}
-	my $swap = $node -> getElementsByTagName ("oem-swap");
+	my @swap = $node -> getElementsByTagName ("oem-swap");
+	my $swap = $swap[0]->textContent();
 	if ((! defined $swap) || ("$swap" eq "")) {
 		return;
 	}
@@ -6541,7 +6551,7 @@ sub getOEMSwapSize_legacy {
 	if ((! defined $size) || ("$size" eq "")) {
 		return;
 	}
-	return $size;
+	return "$size";
 }
 
 #==========================================
@@ -6561,7 +6571,7 @@ sub getOEMSystemSize_legacy {
 	if ((! defined $size) || ("$size" eq "")) {
 		return;
 	}
-	return $size;
+	return "$size";
 }
 
 #==========================================
@@ -6577,7 +6587,8 @@ sub getOEMUnattended_legacy {
 	if (! defined $node) {
 		return;
 	}
-	my $unattended = $node -> getElementsByTagName ("oem-unattended");
+	my @unattended = $node -> getElementsByTagName ("oem-unattended");
+	my $unattended = $unattended[0]->textContent();
 	if ((! defined $unattended) || ("$unattended" eq "")) {
 		return;
 	}
@@ -6601,7 +6612,7 @@ sub getOEMUnattendedID_legacy {
 	if ((! defined $unattended_id) || ("$unattended_id" eq "")) {
 		return;
 	}
-	return $unattended_id;
+	return "$unattended_id";
 }
 
 #==========================================
@@ -6786,7 +6797,7 @@ sub getPXEDeployInitrd_legacy {
 	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
 	my $initrd = $node -> getElementsByTagName ("initrd");
 	if ((defined $initrd) && ! ("$initrd" eq "")) {
-		return $initrd;
+		return "$initrd";
 	} else {
 		return;
 	}
@@ -6959,7 +6970,7 @@ sub getPXEDeployTimeout_legacy {
 	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
 	my $timeout = $node -> getElementsByTagName ("timeout");
 	if ((defined $timeout) && ! ("$timeout" eq "")) {
-		return $timeout;
+		return "$timeout";
 	} else {
 		return;
 	}
@@ -6977,7 +6988,7 @@ sub getPXEDeployKernel_legacy {
 	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
 	my $kernel = $node -> getElementsByTagName ("kernel");
 	if ((defined $kernel) && ! ("$kernel" eq "")) {
-		return $kernel;
+		return "$kernel";
 	} else {
 		return;
 	}
@@ -6997,7 +7008,7 @@ sub getRPMCheckSignatures_legacy {
 	if ((! defined $sigs) || ("$sigs" eq "") || ("$sigs" eq "false")) {
 		return;
 	}
-	return $sigs;
+	return "$sigs";
 }
 
 #==========================================
@@ -7014,7 +7025,7 @@ sub getRPMExcludeDocs_legacy {
 	if ((! defined $xdoc) || ("$xdoc" eq "")) {
 		return;
 	}
-	return $xdoc;
+	return "$xdoc";
 }
 
 #==========================================
@@ -7031,7 +7042,7 @@ sub getRPMForce_legacy {
 	if ((! defined $frpm) || ("$frpm" eq "") || ("$frpm" eq "false")) {
 		return;
 	}
-	return $frpm;
+	return "$frpm";
 }
 
 #==========================================

@@ -1,5 +1,5 @@
 KTXML.t
-KTXMLArchiveData.t
+KTXMLPackageArchiveData.t
 KTXMLDriverData.t
 KTXMLFileData.t
 KTXMLPackageCollectData.t
