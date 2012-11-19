@@ -154,7 +154,7 @@ the image creation process afterwards. This package allows using the
 Authors:
 --------
 	Adrian Schroeter <adrian@suse.com>
-	Jan Bornschlegel <jcborn@suse.com>
+	Stephan Kulow <coolo@suse.com>
 
 %package -n kiwi-doc
 Summary:        openSUSE - KIWI Image System Documentation
@@ -212,6 +212,7 @@ Authors:
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
 Requires:       syslinux
+Requires:       dosfstools
 %if 0%{?suse_version}
 Requires:       virt-utils
 Requires:       genisoimage
@@ -250,6 +251,9 @@ Meta-package to pull in all requires to build a isoboot media.
 %package -n kiwi-desc-vmxboot
 Requires:       kiwi = %{version}
 Requires:       parted
+Requires:       syslinux
+Requires:       e2fsprogs
+Requires:       dosfstools
 %if 0%{?suse_version}
 Requires:       multipath-tools
 Requires:       virt-utils
@@ -333,6 +337,9 @@ Meta-package to pull in all requires to build a netboot media.
 %package -n kiwi-desc-oemboot
 Requires:       kiwi = %{version}
 Requires:       parted
+Requires:       syslinux
+Requires:       e2fsprogs
+Requires:       dosfstools
 %if 0%{?suse_version}
 Requires:       multipath-tools
 Requires:       virt-utils
