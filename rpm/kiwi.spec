@@ -440,7 +440,7 @@ Authors:
 %endif
 
 %prep
-%setup -n %name -a2 -a3
+%setup -q -n %name -a2 -a3
 
 %build
 # empty because of rpmlint warning rpm-buildroot-usage
