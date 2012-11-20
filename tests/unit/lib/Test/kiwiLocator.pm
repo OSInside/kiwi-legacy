@@ -336,6 +336,37 @@ sub test_getExecPathArgsDoubleDash {
 }
 
 #==========================================
+# test_getExecPathArgsPythonDash
+#------------------------------------------
+sub test_getExecPathArgsPythonDash {
+	# ...
+	# Test behavior when an executable provides double-dash and short
+	# argument options, formatted in the python optparse/argparse way
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my $execDir = $this -> {dataDir} . 'bin';
+	my @opts = qw(\? h help c calc o option b break t timeout);
+    my $res = $locator -> getExecArgsFormat($execDir . '/pythonDash', \@opts);
+    my %result = %{$res};
+    $this -> assert_equals(1, $result{'status'});
+    $this -> assert_str_equals('-?', $result{'\?'});
+    $this -> assert_str_equals('-h', $result{'h'});
+    $this -> assert_str_equals('--help', $result{'help'});
+    $this -> assert_str_equals('-c', $result{'c'});
+    $this -> assert_str_equals('--calc', $result{'calc'});
+    $this -> assert_str_equals('-o', $result{'o'});
+    $this -> assert_str_equals('--option', $result{'option'});
+    $this -> assert_str_equals('-b', $result{'b'});
+    $this -> assert_str_equals('--break', $result{'break'});
+    $this -> assert_str_equals('-t', $result{'t'});
+    $this -> assert_str_equals('--timeout', $result{'timeout'});
+
+    return;
+}
+
+#==========================================
 # test_getExecPathArgsMissingOpt
 #------------------------------------------
 sub test_getExecPathArgsMissingOpt {
