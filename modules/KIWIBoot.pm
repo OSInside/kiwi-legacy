@@ -2333,7 +2333,11 @@ sub setupBootDisk {
 		chomp $systemPSize;
 		#print "_______A $systemPSize : $systemISize\n";
 		if ($haveSplit) {
-			$splitPSize = $this->getStorageSize ($deviceMap{3});
+			my $rwdevice = $deviceMap{3};
+			if ($lvm) {
+				$rwdevice = $deviceMap{2};
+			}
+			$splitPSize = $this->getStorageSize ($rwdevice);
 			$splitISize = $main::global -> isize ($splitfile);
 			$splitISize /= 1024;
 			chomp $splitPSize;
@@ -2437,7 +2441,11 @@ sub setupBootDisk {
 		}
 		if (($haveSplit) && (-f $splitfile)) {
 			$kiwi -> info ("Dumping split read/write part on disk");
-			$root = $deviceMap{3};
+			my $rwdevice = $deviceMap{3};
+			if ($lvm) {
+				$rwdevice = $deviceMap{2};
+			}
+			$root = $rwdevice;
 			$status = qxx ("dd if=$splitfile of=$root bs=32k 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
