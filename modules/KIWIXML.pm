@@ -6527,6 +6527,9 @@ sub getOEMSwap_legacy {
 		return;
 	}
 	my @swap = $node -> getElementsByTagName ("oem-swap");
+	if (! $swap[0]) {
+		return;
+	}
 	my $swap = $swap[0]->textContent();
 	if ((! defined $swap) || ("$swap" eq "")) {
 		return;
@@ -6588,6 +6591,9 @@ sub getOEMUnattended_legacy {
 		return;
 	}
 	my @unattended = $node -> getElementsByTagName ("oem-unattended");
+	if (! $unattended[0]) {
+		return;
+	}
 	my $unattended = $unattended[0]->textContent();
 	if ((! defined $unattended) || ("$unattended" eq "")) {
 		return;
