@@ -226,8 +226,8 @@ sub getExecArgsFormat {
 	for my $opt (@help) {
 		GETOPTS:
 		for my $seekOpt (@optsToGet) {
-			if ($opt =~ /$seekOpt[,\s]+/x) {
-				my @prts = split /[,\s]+/x, $opt;
+			if ($opt =~ /$seekOpt[,\s=]+/x) {
+				my @prts = split /[,\s=]+/x, $opt;
 				OPTLINE:
 				for my $item (@prts) {
 					if ($item =~ /-+$seekOpt/x) {
