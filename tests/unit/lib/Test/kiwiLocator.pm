@@ -347,7 +347,7 @@ sub test_getExecPathArgsPythonDash {
 	my $kiwi = $this -> {kiwi};
 	my $locator = $this -> __getLocator();
 	my $execDir = $this -> {dataDir} . 'bin';
-	my @opts = qw(\? h help c calc o option b break t timeout);
+	my @opts = qw(\? h help c calc o option b break t timeout mangle);
     my $res = $locator -> getExecArgsFormat($execDir . '/pythonDash', \@opts);
     my %result = %{$res};
     $this -> assert_equals(1, $result{'status'});
@@ -362,6 +362,7 @@ sub test_getExecPathArgsPythonDash {
     $this -> assert_str_equals('--break', $result{'break'});
     $this -> assert_str_equals('-t', $result{'t'});
     $this -> assert_str_equals('--timeout', $result{'timeout'});
+    $this -> assert_str_equals('--mangle', $result{'mangle'});
 
     return;
 }
