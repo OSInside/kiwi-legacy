@@ -1801,6 +1801,7 @@ sub setupBootDisk {
 		$bootloader = "grub";
 	}
 	my $boot;
+	my $partidfile;
 	my $haveDiskDevice;
 	my $splitfile;
 	my $version;
@@ -2039,12 +2040,14 @@ sub setupBootDisk {
 	#==========================================
 	# build disk name and label from xml data
 	#------------------------------------------
-	$destdir  = dirname ($initrd);
-	$label    = $xml -> getImageDisplayName();
-	$version  = $xml -> getImageVersion();
-	$diskname = $xml -> getImageName();
-	$diskname = $destdir."/".$diskname.".".$arch."-".$version.".raw";
-	$splitfile= $destdir."/".$label."-read-write.".$arch."-".$version;
+	$destdir    = dirname ($initrd);
+	$label      = $xml -> getImageDisplayName();
+	$version    = $xml -> getImageVersion();
+	$diskname   = $xml -> getImageName();
+	$diskname   = $destdir."/".$diskname.".".$arch."-".$version.".raw";
+	$splitfile  = $destdir."/".$label."-read-write.".$arch."-".$version;
+	$partidfile = $diskname;
+	$partidfile =~ s/\.raw$/\.pids/;
 	$this->{bootlabel}= $label;
 	#==========================================
 	# build bootfix for the bootloader on oem
@@ -2103,40 +2106,10 @@ sub setupBootDisk {
 		}
 	}
 	#==========================================
-	# Setup initrd for boot
-	#------------------------------------------
-	$kiwi -> info ("Repack initrd with boot flags...");
-	if (! $this -> setupBootFlags()) {
-		return;
-	}
-	$kiwi -> done();
-	#==========================================
-	# Create Disk boot structure
-	#------------------------------------------
-	if (! $this -> createBootStructure("vmx")) {
-		return;
-	}
-	#==========================================
-	# Import boot loader stages
-	#------------------------------------------
-	if (! $this -> setupBootLoaderStages ($bootloader)) {
-		return;
-	}
-	#==========================================
-	# add extra Xen boot options if necessary
-	#------------------------------------------
-	my $extra = "";
-	#==========================================
-	# Create boot loader configuration
-	#------------------------------------------
-	if (! $this -> setupBootLoaderConfiguration ($bootloader,$bootfix,$extra)) {
-		return;
-	}
-	#==========================================
 	# Setup boot partition space
 	#------------------------------------------
 	if ($needBootP) {
-		$this ->{bootsize} = $this -> __getBootSize ($tmpdir);
+		$this ->{bootsize} = $this -> __getBootSize ();
 	}
 	#==========================================
 	# add boot space if syslinux based
@@ -2233,6 +2206,10 @@ sub setupBootDisk {
 					"t","1",$partid,
 					"a","1","w","q"
 				);
+				$this->{partids}{root}      = '2';
+				$this->{partids}{readonly}  = '2';
+				$this->{partids}{readwrite} = '3';
+				$this->{partids}{boot}      = '1';
 			} elsif ($needParts == 2) {
 				# xda1 boot | xda2 root-rw
 				@commands = (
@@ -2241,12 +2218,16 @@ sub setupBootDisk {
 					"t","1",$partid,
 					"a","1","w","q"
 				);
+				$this->{partids}{root} = '2';
+				$this->{partids}{boot} = '1';
 			} else {
 				# xda1 root-rw
 				@commands = (
 					"n","p","1",".",".",
 					"a","1","w","q"
 				);
+				$this->{partids}{boot} = '1';
+				$this->{partids}{root} = '1';
 			}
 		} else {
 			# xda1 boot | xda2 lvm
@@ -2259,6 +2240,15 @@ sub setupBootDisk {
 				"t","2","8e",
 				"a","1","w","q"
 			);
+			if (($syszip) || ($haveSplit)) {
+				$this->{partids}{root}      = 'LVComp';
+				$this->{partids}{readonly}  = 'LVComp';
+				$this->{partids}{readwrite} = 'LVRoot';
+				$this->{partids}{boot}      = '1';
+			} else {
+				$this->{partids}{root}      = 'LVRoot';
+				$this->{partids}{boot}      = '1';
+			}
 		}
 		if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
 			$kiwi -> failed ();
@@ -2375,6 +2365,44 @@ sub setupBootDisk {
 		$kiwi -> note (".");
 	}
 	$kiwi -> done();
+	#==========================================
+	# Create partition IDs meta data file
+	#------------------------------------------
+	$kiwi -> info ("Create partition IDs meta data...");
+	if (! $this -> setupPartIDs ($partidfile)) {
+		return;
+	}
+	$kiwi -> done();
+	#==========================================
+	# Setup initrd for boot
+	#------------------------------------------
+	$kiwi -> info ("Repack initrd with boot flags...");
+	if (! $this -> setupBootFlags()) {
+		return;
+	}
+	$kiwi -> done();
+	#==========================================
+	# Create Disk boot structure
+	#------------------------------------------
+	if (! $this -> createBootStructure("vmx")) {
+		return;
+	}
+	#==========================================
+	# Import boot loader stages
+	#------------------------------------------
+	if (! $this -> setupBootLoaderStages ($bootloader)) {
+		return;
+	}
+	#==========================================
+	# add extra Xen boot options if necessary
+	#------------------------------------------
+	my $extra = "";
+	#==========================================
+	# Create boot loader configuration
+	#------------------------------------------
+	if (! $this -> setupBootLoaderConfiguration ($bootloader,$bootfix,$extra)) {
+		return;
+	}
 	#==========================================
 	# Dump system image on disk
 	#------------------------------------------
@@ -2781,6 +2809,29 @@ sub setupInstallFlags {
 		return;
 	}
 	#==========================================
+	# Include Partition ID information
+	#------------------------------------------
+	if (defined $system) {
+		my $partidfile = $system;
+		$partidfile =~ s/\.raw$/\.pids/;
+		if (! -f $partidfile) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't find partid metadata: $partidfile");
+			$kiwi -> failed ();
+			qxx ("rm -rf $irddir");
+			return;
+		}
+		my $status = qxx ("cp $partidfile $irddir/config.partids 2>&1");
+		my $result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to copy partid metadata: $result");
+			$kiwi -> failed ();
+			qxx ("rm -rf $irddir");
+			return;
+		}
+	}
+	#==========================================
 	# Include MBR ID to initrd
 	#------------------------------------------
 	my $FD;
@@ -2895,6 +2946,13 @@ sub setupBootFlags {
 		return;
 	}
 	#==========================================
+	# Include Partition ID information
+	#------------------------------------------
+	if (! $this -> setupPartIDs ("$irddir/config.partids")) {
+		qxx ("rm -rf $irddir");
+		return;
+	}
+	#==========================================
 	# Include MBR ID to initrd
 	#------------------------------------------
 	my $FD;
@@ -2940,6 +2998,44 @@ sub setupBootFlags {
 		qxx ("cat $splash >> $initrd");
 	}
 	return $initrd;
+}
+
+#==========================================
+# setupPartIDs
+#------------------------------------------
+sub setupPartIDs {
+	# ...
+	# create information about device ID for root,boot
+	# readonly/readwrite partitions created for this
+	# appliance. The information is read by the initrd
+	# code to assign the correct partition device
+	# ----
+	my $this = shift;
+	my $file = shift;
+	my $kiwi = $this->{kiwi};
+	if ($this->{partids}) {
+		my $ID_FD = FileHandle -> new();
+		if (! $ID_FD -> open (">$file")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create partition ID information");
+			$kiwi -> failed ();
+			return;
+		}
+		if ($this->{partids}{root}) {
+			print $ID_FD "kiwi_RootPart=\"$this->{partids}{root}\"\n";
+		}
+		if ($this->{partids}{boot}) {
+			print $ID_FD "kiwi_BootPart=\"$this->{partids}{boot}\"\n";
+		}
+		if ($this->{partids}{readonly}) {
+			print $ID_FD "kiwi_ROPart=\"$this->{partids}{readonly}\"\n";
+		}
+		if ($this->{partids}{readwrite}) {
+			print $ID_FD "kiwi_RWPart=\"$this->{partids}{readwrite}\"\n";
+		}
+		$ID_FD -> close();
+	}
+	return $this;
 }
 
 #==========================================
@@ -6254,32 +6350,28 @@ sub DESTROY {
 # Private methods
 #------------------------------------------
 #==========================================
-# getBootSize
+# __getBootSize
 #------------------------------------------
 sub __getBootSize {
 	# ...
-	# calculate required size of /boot. This is
-	# needed if we have a separate boot partition
-	# The function returns the size in M-Bytes
+	# set minimum boot size or the specified value from the
+	# XML description. The function returns the size in
+	# M-Bytes
 	# ---
 	my $this   = shift;
-	my $extend = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
-	my $boot   = $extend."/boot";
-	my $arch   = qxx ("uname -m"); chomp $arch;
-	my $bbytes = qxx ("du -s --block-size=1 $boot | cut -f1"); chomp $bbytes;
-	my $needMB = sprintf ("%.0f",($bbytes / 1048576) + 15);
 	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
-	my $minMB  = 150;
-	if (defined $type{bootpartsize}) {
-		$minMB = $type{bootpartsize};
+	my $needMB = 150;
+	my $wantMB = 150;
+	if ($type{bootpartsize}) {
+		$wantMB = $type{bootpartsize};
 	}
-	if ($needMB < $minMB) {
-		$needMB = $minMB;
+	if ($wantMB > $needMB) {
+		$needMB = $wantMB;
 	} else {
-		$kiwi -> loginfo ("Specified boot space of $minMB MB is too small\n");
-		$kiwi -> loginfo ("Using calculated value of $needMB MB\n");
+		$kiwi -> loginfo ("Specified boot space of $wantMB MB is too small\n");
+		$kiwi -> loginfo ("Using default value of $needMB MB\n");
 	}
 	$kiwi -> info ("Set boot partition space to: ".$needMB."M\n");
 	return $needMB;
