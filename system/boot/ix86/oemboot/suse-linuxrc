@@ -36,6 +36,7 @@ export systemIntegrity="clean"
 # Exports (Configuration)
 #--------------------------------------
 export VMX_SYSTEM="/config.vmxsystem"
+export PART_IDS="/config.partids"
 export LIVECD_CONFIG="/cdrom/config.isoclient"
 export OEM_PARTITION_CONFIG="/config.oempartition"
 
@@ -71,36 +72,39 @@ function setupInitialDeviceNames {
 		"reboot"
 	fi
 	#======================================
+	# Check partition ID meta data
+	#--------------------------------------
+	if [ ! -f $PART_IDS ];then
+		systemException \
+			"Couldn't find partition IDs meta data... abort" \
+		"reboot"
+	fi
+	#======================================
+	# Import partition ID meta data
+	#--------------------------------------
+	importFile < $PART_IDS
+	#======================================
 	# Check for LVM or standard boot
 	#--------------------------------------
+	export imageBootDevice=$(ddn $imageDiskDevice $kiwi_BootPart)
 	if searchVolumeGroup; then
-		#======================================
-		# LVM setup...
-		#--------------------------------------
 		export haveLVM=yes
-		export imageBootDevice=$(ddn $imageDiskDevice 1)
-		if [ -e /dev/$VGROUP/LVComp ];then
-			export imageRootDevice=/dev/$VGROUP/LVComp
-			export imageRWDevice=/dev/$VGROUP/LVRoot
-			export imageRODevice=/dev/$VGROUP/LVComp
-			export imageIOWRDevice=$imageRWDevice
-		else
-			export imageRootDevice=/dev/$VGROUP/LVRoot
+		export imageRootDevice=/dev/$VGROUP/$kiwi_RootPart
+		if [ ! -z "$kiwi_ROPart" ];then
+			export imageRODevice=/dev/$VGROUP/$kiwi_ROPart
 		fi
-		probeFileSystem $imageRootDevice
+		if [ ! -z "$kiwi_RWPart" ];then
+			export imageRWDevice=/dev/$VGROUP/$kiwi_RWPart
+			export imageIOWRDevice=$imageRWDevice
+		fi
 	else
-		#======================================
-		# Standard setup
-		#--------------------------------------
-		export imageRootDevice=$(ddn $imageDiskDevice 1)
-		export imageBootDevice=$(ddn $imageDiskDevice 1)
-		local  testDevice=$(ddn $imageDiskDevice 2)
-		if [ -e $testDevice ];then
-			if [ ! $(blkid $testDevice -s TYPE -o value) = "swap" ];then
-				export imageRODevice=$testDevice
-				export imageRootDevice=$testDevice
-				export imageRWDevice=$(ddn $imageDiskDevice 3)
-			fi
+		export imageRootDevice=$(ddn $imageDiskDevice $kiwi_RootPart)
+		if [ ! -z "$kiwi_ROPart" ];then
+			export imageRODevice=$(ddn $imageDiskDevice $kiwi_ROPart)
+		fi
+		if [ ! -z "$kiwi_RWPart" ];then
+			export imageRWDevice=$(ddn $imageDiskDevice $kiwi_RWPart)
+			export imageIOWRDevice=$imageRWDevice
 		fi
 	fi
 	#======================================
