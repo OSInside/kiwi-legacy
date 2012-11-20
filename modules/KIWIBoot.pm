@@ -1369,12 +1369,15 @@ sub setupInstallStick {
 			"t","1",$partid,
 			"a","1","w","q"
 		);
+		$this->{partids}{boot} = '1';
+		$this->{partids}{root} = '2';
 	} else {
 		@commands = (
 			"n","p","1",".",".",
 			"t","1",$partid,
 			"a","1","w","q"
 		);
+		$this->{partids}{boot} = '1';
 	}
 	if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
 		$kiwi -> failed ();
@@ -1431,10 +1434,10 @@ sub setupInstallStick {
 		#------------------------------------------
 		$this -> umountDevice ($this->{loop});
 	}
-	my $boot = $deviceMap{1};
+	my $boot = $deviceMap{boot};
 	my $data;
 	if ($gotsys) {
-		$data = $deviceMap{2};
+		$data = $deviceMap{root};
 	}
 	#==========================================
 	# Create filesystem on partitions
@@ -2241,13 +2244,15 @@ sub setupBootDisk {
 				"a","1","w","q"
 			);
 			if (($syszip) || ($haveSplit)) {
-				$this->{partids}{root}      = 'LVComp';
-				$this->{partids}{readonly}  = 'LVComp';
-				$this->{partids}{readwrite} = 'LVRoot';
-				$this->{partids}{boot}      = '1';
+				$this->{partids}{root}         = '2';
+				$this->{partids}{root_lv}      = 'LVComp';
+				$this->{partids}{readonly_lv}  = 'LVComp';
+				$this->{partids}{readwrite_lv} = 'LVRoot';
+				$this->{partids}{boot}         = '1';
 			} else {
-				$this->{partids}{root}      = 'LVRoot';
-				$this->{partids}{boot}      = '1';
+				$this->{partids}{root}     = '2';
+				$this->{partids}{root_lv}  = 'LVRoot';
+				$this->{partids}{boot}     = '1';
 			}
 		}
 		if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
@@ -2317,10 +2322,7 @@ sub setupBootDisk {
 		#==========================================
 		# set root device name from deviceMap
 		#------------------------------------------
-		$root = $deviceMap{1};
-		if (($needBootP) && (! $lvm)) {
-			$root = $deviceMap{2};
-		}
+		$root = $deviceMap{root};
 		#==========================================
 		# check system partition size
 		#------------------------------------------
@@ -2333,11 +2335,7 @@ sub setupBootDisk {
 		chomp $systemPSize;
 		#print "_______A $systemPSize : $systemISize\n";
 		if ($haveSplit) {
-			my $rwdevice = $deviceMap{3};
-			if ($lvm) {
-				$rwdevice = $deviceMap{2};
-			}
-			$splitPSize = $this->getStorageSize ($rwdevice);
+			$splitPSize = $this->getStorageSize ($deviceMap{readwrite});
 			$splitISize = $main::global -> isize ($splitfile);
 			$splitISize /= 1024;
 			chomp $splitPSize;
@@ -2441,11 +2439,7 @@ sub setupBootDisk {
 		}
 		if (($haveSplit) && (-f $splitfile)) {
 			$kiwi -> info ("Dumping split read/write part on disk");
-			my $rwdevice = $deviceMap{3};
-			if ($lvm) {
-				$rwdevice = $deviceMap{2};
-			}
-			$root = $rwdevice;
+			$root = $deviceMap{readwrite};
 			$status = qxx ("dd if=$splitfile of=$root bs=32k 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -2588,7 +2582,7 @@ sub setupBootDisk {
 	# create read/write filesystem if needed
 	#------------------------------------------
 	if (($syszip) && (! $haveSplit) && (! $rawRW)) {
-		$root = $deviceMap{2};
+		$root = $deviceMap{root};
 		if ($haveluks) {
 			my $cipher = $type{luks};
 			my $name   = "luksReadWrite";
@@ -2642,10 +2636,7 @@ sub setupBootDisk {
 		#==========================================
 		# check for boot device node
 		#------------------------------------------
-		$boot = $deviceMap{1};
-		if ($lvm) {
-			$boot = $deviceMap{0};
-		}
+		$boot = $deviceMap{boot};
 		#==========================================
 		# build boot filesystem
 		#------------------------------------------
@@ -2662,10 +2653,7 @@ sub setupBootDisk {
 	# Mount boot space on this disk
 	#------------------------------------------
 	if ($needBootP) {
-		$boot = $deviceMap{1};
-		if ($lvm) {
-			$boot = $deviceMap{0};
-		}
+		$boot = $deviceMap{boot};
 	} else {
 		$boot = $root;
 	}
@@ -3038,17 +3026,29 @@ sub setupPartIDs {
 			$kiwi -> failed ();
 			return;
 		}
-		if ($this->{partids}{root}) {
-			print $ID_FD "kiwi_RootPart=\"$this->{partids}{root}\"\n";
+		if ($this->{lvm}) {
+			if ($this->{partids}{root_lv}) {
+				print $ID_FD "kiwi_RootPart=\"$this->{partids}{root_lv}\"\n";
+			}
+			if ($this->{partids}{readonly_lv}) {
+				print $ID_FD "kiwi_ROPart=\"$this->{partids}{readonly_lv}\"\n";
+			}
+			if ($this->{partids}{readwrite_lv}) {
+				print $ID_FD "kiwi_RWPart=\"$this->{partids}{readwrite_lv}\"\n";
+			}
+		} else {
+			if ($this->{partids}{root}) {
+				print $ID_FD "kiwi_RootPart=\"$this->{partids}{root}\"\n";
+			}
+			if ($this->{partids}{readonly}) {
+				print $ID_FD "kiwi_ROPart=\"$this->{partids}{readonly}\"\n";
+			}
+			if ($this->{partids}{readwrite}) {
+				print $ID_FD "kiwi_RWPart=\"$this->{partids}{readwrite}\"\n";
+			}
 		}
 		if ($this->{partids}{boot}) {
 			print $ID_FD "kiwi_BootPart=\"$this->{partids}{boot}\"\n";
-		}
-		if ($this->{partids}{readonly}) {
-			print $ID_FD "kiwi_ROPart=\"$this->{partids}{readonly}\"\n";
-		}
-		if ($this->{partids}{readwrite}) {
-			print $ID_FD "kiwi_RWPart=\"$this->{partids}{readwrite}\"\n";
 		}
 		$ID_FD -> close();
 	}
@@ -5793,8 +5793,25 @@ sub setDefaultDeviceMap {
 	if (! defined $device) {
 		return;
 	}
-	for (my $i=1;$i<=3;$i++) {
-		$result{$i} = $this -> __getPartDevice ($device,$i);
+	if ($this->{partids}{root}) {
+		$result{root} = $this -> __getPartDevice (
+			$device,$this->{partids}{root}
+		);
+	}
+	if ($this->{partids}{readonly}) {
+		$result{readonly} = $this -> __getPartDevice (
+			$device,$this->{partids}{readonly}
+		);
+	}
+	if ($this->{partids}{readwrite}) {
+		$result{readwrite} = $this -> __getPartDevice (
+			$device,$this->{partids}{readwrite}
+		);
+	}
+	if ($this->{partids}{boot}) {
+		$result{boot} = $this -> __getPartDevice (
+			$device,$this->{partids}{boot}
+		);
 	}
 	return %result;
 }
@@ -5813,8 +5830,25 @@ sub setLoopDeviceMap {
 	if (! defined $device) {
 		return;
 	}
-	for (my $i=1;$i<=3;$i++) {
-		$result{$i} = $this -> __getPartDevice ($device,$i);
+	if ($this->{partids}{root}) {
+		$result{root} = $this -> __getPartDevice (
+			$device,$this->{partids}{root}
+		);
+	}
+	if ($this->{partids}{readonly}) {
+		$result{readonly} = $this -> __getPartDevice (
+			$device,$this->{partids}{readonly}
+		);
+	}
+	if ($this->{partids}{readwrite}) {
+		$result{readwrite} = $this -> __getPartDevice (
+			$device,$this->{partids}{readwrite}
+		);
+	}
+	if ($this->{partids}{boot}) {
+		$result{boot} = $this -> __getPartDevice (
+			$device,$this->{partids}{boot}
+		);
 	}
 	return %result;
 }
@@ -5836,9 +5870,19 @@ sub setLVMDeviceMap {
 	if (! defined $group) {
 		return;
 	}
-	$result{0} = $this -> __getPartDevice ($device,1);
-	for (my $i=0;$i<@names;$i++) {
-		$result{$i+1} = "/dev/$group/".$names[$i];
+	if ($this->{partids}{root_lv}) {
+		$result{root} = "/dev/$group/".$this->{partids}{root_lv};
+	}
+	if ($this->{partids}{readonly_lv}) {
+		$result{readonly} = "/dev/$group/".$this->{partids}{readonly_lv};
+	}
+	if ($this->{partids}{readwrite_lv}) {
+		$result{readwrite} = "/dev/$group/".$this->{partids}{readwrite_lv}
+	}
+	if ($this->{partids}{boot}) {
+		$result{boot} = $this -> __getPartDevice (
+			$device,$this->{partids}{boot}
+		);
 	}
 	return %result;
 }
@@ -5871,7 +5915,7 @@ sub setVolumeGroup {
 	my $result;
 	$status = qxx ("vgremove --force $VGroup 2>&1");
 	$status = qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
-	$status = qxx ("pvcreate $deviceMap{2} 2>&1");
+	$status = qxx ("pvcreate $deviceMap{root} 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -5880,7 +5924,7 @@ sub setVolumeGroup {
 		$this -> cleanLoop ();
 		return;
 	}
-	$status = qxx ("vgcreate $VGroup $deviceMap{2} 2>&1");
+	$status = qxx ("vgcreate $VGroup $deviceMap{root} 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
