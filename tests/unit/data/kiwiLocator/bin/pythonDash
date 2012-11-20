@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+
+#================
+# FILE          : pythonDash
+#----------------
+# PROJECT       : OpenSUSE Build-Service
+# COPYRIGHT     : (c) 2012 Novell Inc.
+#               :
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : Executable test script used for locator validation
+#               : Write a set of fake command line options to STDOUT.
+#               :
+# STATUS        : Development
+#----------------
+
+use strict;
+use warnings;
+
+print STDOUT "Test helper pythonDash\n";
+print STDERR "Usage:\n";
+print STDERR "\t-?, -h, --help  => print help message\n";
+print STDERR "\t-c, --calc      => calculate nothing\n";
+print STDERR "\t-o, --option    => no options here\n";
+print STDERR "\t-b, --break     => nothing to break from\n";
+print STDERR "\t-t, --timeout   => take a break\n";
+print STDERR "\t-m, --mangle=shirt   => mangle a shirt\n";
