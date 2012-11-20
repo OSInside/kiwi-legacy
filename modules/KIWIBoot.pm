@@ -2994,7 +2994,16 @@ sub setupBootFlags {
 		qxx ("rm -rf $irddir");
 		return;
 	}
-	qxx ("rm -rf $irddir");	
+	qxx ("rm -rf $irddir");
+	#==========================================
+	# update splash.gz initrd if required
+	#------------------------------------------
+	my $splashird = $initrd;
+	$splashird =~ s/\.gz$/\.splash.gz/;
+	if (($initrd !~ /splash\.gz$/) && (-f $splashird)) {
+		qxx ("cp $initrd $splashird 2>&1");
+		$initrd = $splashird;
+	}
 	#==========================================
 	# recreate splash data to initrd
 	#------------------------------------------
