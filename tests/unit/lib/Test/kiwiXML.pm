@@ -902,9 +902,8 @@ sub test_addDriversToCurrentProf {
 		push @expectedDrvs, 'at76c50x-usb';
 	} elsif ($arch eq 's390') {
 		push @expectedDrvs, 'loop';
-	} else {
-		push @expectedDrvs, 'pc300too';
 	}
+	push @expectedDrvs, 'pc300too';
 	my @drvsUsed = @{$xml -> getDrivers()};
 	my @drvNamesUsed = ();
 	for my $drv (@drvsUsed) {
@@ -1823,7 +1822,7 @@ sub test_addPackageCollectionsToSpecProf {
 	$init{name} = 'lamp';
 	$collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
 	push @collectionsToAdd, $collectObj;
-	$init{name} = 'consol';
+	$init{name} = 'console';
 	$init{arch} = 'ppc64';
 	$collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
 	push @collectionsToAdd, $collectObj;
