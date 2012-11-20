@@ -8376,6 +8376,13 @@ function setupBootPartition {
 	local FSTYPE_SAVE=$FSTYPE
 	local fs_type=undef
 	unset NETBOOT_ONLY
+	local BID=1
+	#======================================
+	# Check for partition IDs meta data
+	#--------------------------------------
+	if [ ! -z "$kiwi_BootPart" ];then
+		BID=$kiwi_BootPart
+	fi
 	#======================================
 	# Check for boot partition
 	#--------------------------------------
@@ -8383,16 +8390,16 @@ function setupBootPartition {
 		# no disk device like for live ISO based on clicfs
 		return
 	fi
-	label=$(blkid $(ddn $imageDiskDevice 1) -s LABEL -o value)
+	label=$(blkid $(ddn $imageDiskDevice $BID) -s LABEL -o value)
 	if [ "$label" = "BOOT" ];then
 		export haveBootPartition=1
-		export imageBootDevice=$(ddn $imageDiskDevice 1)
+		export imageBootDevice=$(ddn $imageDiskDevice $BID)
 	fi
 	#======================================
 	# Export bootid if not yet done
 	#--------------------------------------
 	if [ -z "$bootid" ];then
-		export bootid=1
+		export bootid=$BID
 	fi
 	#======================================
 	# Probe boot partition filesystem
