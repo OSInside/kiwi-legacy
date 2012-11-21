@@ -60,8 +60,8 @@ function OEMRepartStandard {
 	# repartition disk with read/write root filesystem
 	# Initial partition table layout is:
 	# =====================================
-	# p1: [ boot ]
-	# p1: ( root )  +luks
+	# pX:   [ boot ]
+	# pX+1: ( root )  +luks
 	# -------------------------------------
 	local newparts=0
 	local partsize=0
@@ -72,30 +72,20 @@ function OEMRepartStandard {
 	#======================================
 	# calculate partition sizes
 	#--------------------------------------
-	diskXMBytes=$(($(partitionSize $imageDiskDevice) / 1024))
-	diskP1MByte=$(($(partitionSize $(ddn $imageDiskDevice 1)) / 1024))
-	diskP2MByte=0
-	if [ "$haveBootPartition" = "yes" ];then
-		diskP2MByte=$(($(partitionSize $(ddn $imageDiskDevice 2)) / 1024))
-	fi
-	diskRMBytes=$((
-		diskXMBytes - diskP1MByte - diskP2MByte - swapsize - recoMByte
+	local diskFreeMBytes=$(($(getFreeDiskBytes $imageDiskDevice) / 1048576))
+	local diskRootMBytes=$(($(partitionSize $imageRootDevice) / 1024))
+	local diskRSysMBytes=$((
+		diskRootMBytes + diskFreeMBytes - swapsize - recoMByte
 	))
-	if [ "$haveBootPartition" = "yes" ];then
-		diskRootMBytes=$diskP2MByte
-	else
-		diskRootMBytes=$diskP1MByte
-	fi
-	diskSysMBytes=$((diskRootMBytes + diskRMBytes))
 	if [ ! -z "$OEM_SYSTEMSIZE" ];then
-		if [ $OEM_SYSTEMSIZE -le $diskSysMBytes ];then
-			diskSysMBytes=$OEM_SYSTEMSIZE
+		if [ $OEM_SYSTEMSIZE -le $diskRSysMBytes ];then
+			diskRSysMBytes=$OEM_SYSTEMSIZE
 		fi
 	fi
 	#======================================
 	# check repart operation
 	#--------------------------------------
-	if [ $diskSysMBytes -lt $diskRootMBytes ];then
+	if [ $diskRSysMBytes -lt $diskRootMBytes ];then
 		# /.../
 		# Requested system partition size is smaller than
 		# existing partition, will not re-partition
@@ -125,8 +115,8 @@ function OEMRepartStandard {
 		# clean/backup boot partition
 		#--------------------------------------
 		if [ "$haveBootPartition" = "yes" ];then
-			pID=2
-			rootParam=2
+			pID=$((kiwi_BootPart + 1))
+			rootParam=$pID
 		fi
 		#======================================
 		# count partitions to be created
@@ -140,7 +130,7 @@ function OEMRepartStandard {
 		#======================================
 		# repart root partition
 		#--------------------------------------
-		partsize=+"$diskSysMBytes"M
+		partsize=+"$diskRSysMBytes"M
 		if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 0 ];then
 			partsize=.
 		fi
@@ -149,7 +139,7 @@ function OEMRepartStandard {
 		#======================================
 		# add swap partition
 		#--------------------------------------
-		if [ -z "$OEM_WITHOUTSWAP" ];then
+		if [ -z "$OEM_WITHOUTSWAP" ] && [ $pID -lt 4 ];then
 			pID=$((pID + 1))
 			partsize=+"$swapsize"M
 			if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 1 ];then
@@ -159,17 +149,21 @@ function OEMRepartStandard {
 				n p $pID . $partsize t $pID 82
 			newparts=$((newparts - 1))
 			swapParam=$pID
+		else
+			OEM_WITHOUTSWAP=1
 		fi
 		#======================================
 		# add recovery partition
 		#--------------------------------------
-		if [ ! -z "$OEM_RECOVERY" ];then
+		if [ ! -z "$OEM_RECOVERY" ] && [ $pID -lt 4 ];then
 			pID=$((pID + 1))
 			partsize=+"$recoMByte"M
 			createPartitionerInput \
 				n p $pID . $partsize t $pID $recoID
 			newparts=$((newparts - 1))
 			recoParam=$pID
+		else
+			unset OEM_RECOVERY
 		fi
 		#======================================
 		# setup new device names
@@ -189,9 +183,9 @@ function OEMRepartSplit {
 	# and friends and also systems of image type split.
 	# Initial partition table layout is:
 	# =====================================
-	# p1: boot
-	# p2: RO ( compressed )
-	# p3: RW ( write area ) +luks
+	# pX:   ( boot )
+	# pX+1: ( RO compressed )
+	# pX+2: ( RW write area ) +luks
 	# -------------------------------------
 	local newparts=0
 	local partsize=0
@@ -215,23 +209,20 @@ function OEMRepartSplit {
 		#======================================
 		# calculate partition sizes
 		#--------------------------------------
-		diskXMBytes=$(($(partitionSize $imageDiskDevice) / 1024))
-		diskP1MByte=$(($(partitionSize $(ddn $imageDiskDevice 1)) / 1024))
-		diskP2MByte=$(($(partitionSize $(ddn $imageDiskDevice 2)) / 1024))
-		diskP3MByte=$(($(partitionSize $(ddn $imageDiskDevice 3)) / 1024))
-		diskRMBytes=$((
-			diskXMBytes - diskP1MByte - diskP2MByte - diskP3MByte - swapsize
+		local diskFreeMBytes=$(($(getFreeDiskBytes $imageDiskDevice) / 1048576))
+		local diskRootMBytes=$(($(partitionSize $imageRWDevice) / 1024))
+		local diskRSysMBytes=$((
+			diskRootMBytes + diskFreeMBytes - swapsize
 		))
-		disk3MBytes=$((diskP3MByte + diskRMBytes))
 		if [ ! -z "$OEM_SYSTEMSIZE" ];then
-			if [ $OEM_SYSTEMSIZE -le $disk3MBytes ];then
-				disk3MBytes=$OEM_SYSTEMSIZE
+			if [ $OEM_SYSTEMSIZE -le $diskRSysMBytes ];then
+				diskRSysMBytes=$OEM_SYSTEMSIZE
 			fi
 		fi
 		#======================================
 		# check repart operation
 		#--------------------------------------
-		if [ $disk3MBytes -lt $diskP3MByte ];then
+		if [ $diskRSysMBytes -lt $diskRootMBytes ];then
 			# /.../
 			# Requested read/write partition size is smaller than
 			# existing partition, will not re-partition
@@ -246,10 +237,10 @@ function OEMRepartSplit {
 	# write new partition table
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
-		pID=3
-		bootParam=1
-		rootParam=2
-		cowpParam=3
+		pID=$((kiwi_BootPart + 2))
+		bootParam=$kiwi_BootPart
+		rootParam=$((kiwi_BootPart + 1))
+		cowpParam=$pID
 		swapParam=no
 		recoParam=no
 		#======================================
@@ -267,7 +258,7 @@ function OEMRepartSplit {
 		#======================================
 		# repart cow partition
 		#--------------------------------------
-		partsize=+"$disk3MBytes"M
+		partsize=+"$diskRSysMBytes"M
 		if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 0 ];then
 			partsize=.
 		fi
@@ -276,11 +267,13 @@ function OEMRepartSplit {
 		#======================================
 		# add swap partition
 		#--------------------------------------
-		if [ ! $swapsize = 0 ];then
+		if [ ! $swapsize = 0 ] && [ $pID -lt 4 ];then
 			pID=$((pID + 1))
 			createPartitionerInput \
 				n p $pID . +"$swapsize"M t $pID 82
 			swapParam=$pID
+		else
+			OEM_WITHOUTSWAP=1
 		fi
 		#======================================
 		# setup new device names
@@ -299,8 +292,8 @@ function OEMRepartLVM {
 	# repartition disk if LVM partition plus boot partition
 	# is used. Initial partition table layout is:
 	# =====================================
-	# p1: ( boot )
-	# p2: ( LVM  )  +luks
+	# pX:   ( boot )
+	# pX+1: ( LVM  )  +luks
 	# -------------------------------------
 	#======================================
 	# check for boot partition
@@ -311,20 +304,28 @@ function OEMRepartLVM {
 	#--------------------------------------
 	local extendID
 	local VOverHeadMB=300
-	local diskXMBytes=$(($(partitionSize $imageDiskDevice) / 1024))
-	local disk1MBytes=$(($(partitionSize $(ddn $imageDiskDevice 1)) / 1024))
-	local disk2MBytes=$(($(partitionSize $(ddn $imageDiskDevice 2)) / 1024))
-	if [ ! -z "$OEM_SYSTEMSIZE" ];then
-		disk2MBytes=$OEM_SYSTEMSIZE
-	fi
-	local diskRMBytes=$((
-		recoMByte + disk1MBytes + disk2MBytes + swapsize + VOverHeadMB
+	local LVMdevice=$((kiwi_BootPart + 1))
+	local LVMdevice=$(ddn $imageDiskDevice $LVMdevice)
+	local diskFreeMBytes=$(($(getFreeDiskBytes $imageDiskDevice) / 1048576))
+	local diskRootMBytes=$(($(partitionSize $LVMdevice) / 1024))
+	local diskRSysMBytes=$((
+		diskRootMBytes + diskFreeMBytes - swapsize - recoMByte
 	))
+	if [ ! -z "$OEM_SYSTEMSIZE" ];then
+		if [ $OEM_SYSTEMSIZE -le $diskRSysMBytes ];then
+			diskRSysMBytes=$OEM_SYSTEMSIZE
+		fi
+	fi
 	#======================================
 	# check repart operation
 	#--------------------------------------
-	if [ $diskRMBytes -gt $diskXMBytes ];then
-		Echo "Disk is too small, will not re-partition it"
+	if [ $diskRSysMBytes -lt $diskRootMBytes ];then
+		# /.../
+		# Requested LVM partition size is smaller than
+		# existing partition, will not re-partition
+		# ----
+		Echo "Current LVM partition is bigger than requested size"
+		Echo "Disk won't be re-partitioned"
 		disableOEMParameters
 		disableRepart
 	fi
@@ -332,9 +333,9 @@ function OEMRepartLVM {
 	# write new partition table
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
-		pID=2
-		bootParam=1
-		rootParam=1
+		pID=$((kiwi_BootPart + 1))
+		bootParam=$kiwi_BootPart
+		rootParam=$pID
 		recoParam=no
 		swapParam=no
 		#======================================
@@ -354,22 +355,22 @@ function OEMRepartLVM {
 		#======================================
 		# resize LVM partition
 		#--------------------------------------
-		disk2MBytes=$((diskXMBytes - disk1MBytes - recoMByte))
-		disk2MBytes=+"$disk2MBytes"M
 		if [ $recoMByte -eq 0 ];then
-			disk2MBytes=.
+			diskRSysMBytes=.
 		fi
 		createPartitionerInput \
-			d $pID n p $pID . $disk2MBytes t $pID 8e
+			d $pID n p $pID . $diskRSysMBytes t $pID 8e
 		extendID=$pID
-		pID=$((pID + 1))
 		#======================================
 		# add recovery partition
 		#--------------------------------------
-		if [ ! -z "$OEM_RECOVERY" ];then
+		if [ ! -z "$OEM_RECOVERY" ] && [ $pID -lt 4 ];then
+			pID=$((pID + 1))
 			createPartitionerInput \
 				n p $pID . . t $pID $recoID
 			recoParam=$pID
+		else
+			unset OEM_RECOVERY
 		fi
 		#======================================
 		# setup new device names
@@ -702,9 +703,8 @@ function setupDeviceNames {
 function createBootDeviceData {
 	#====================================== 
 	# check for boot partition
-	#-------------------------------------
-	local checkDevice=$(ddn $imageDiskDevice 2)
-	if [ -e "$checkDevice" ];then
+	#--------------------------------------
+	if [ "$kiwi_BootPart" != "$kiwi_RootPart" ];then
 		export haveBootPartition=yes
 	fi
 	#====================================== 
@@ -775,4 +775,27 @@ function resizeLVMVolumes {
 			Echo "Warning: requested size cannot be reached !"
 		fi
 	done
+}
+
+#======================================
+# getFreeDiskBytes
+#--------------------------------------
+function getFreeDiskBytes {
+	local disk=$1
+	if [ ! -b "$disk" ];then
+		echo 0 ; return
+	fi
+	local disk_Bytes=$(blockdev --getsize64 $disk)
+	local rest_Bytes=$disk_Bytes
+	local part_Bytes=0
+	for i in 1 2 3 4;do
+		local part=$(ddn $disk $i)
+		if [ ! -b "$part" ];then
+			continue
+		fi
+		local size=$(blockdev --getsize64 $part)
+		part_Bytes=$((part_Bytes + size))
+	done
+	rest_Bytes=$((rest_Bytes - part_Bytes))
+	echo $rest_Bytes
 }
