@@ -1264,40 +1264,6 @@ sub setupInstallStick {
 	#------------------------------------------
 	my $nameusb = basename ($system);
 	#==========================================
-	# Setup initrd for install purpose
-	#------------------------------------------
-	$kiwi -> info ("Repack initrd with install flags...");
-	$initrd = $this -> setupInstallFlags();
-	if (! defined $initrd) {
-		return;
-	}
-	$this->{initrd} = $initrd;
-	$kiwi -> done();
-	#==========================================
-	# Create Disk boot structure
-	#------------------------------------------
-	if (! $this -> createBootStructure("vmx")) {
-		$this->{initrd} = $oldird;
-		return;
-	}
-	#==========================================
-	# Import boot loader stages
-	#------------------------------------------
-	if (! $this -> setupBootLoaderStages ($bootloader)) {
-		return;
-	}
-	#==========================================
-	# Creating boot loader configuration
-	#------------------------------------------
-	my $title = "KIWI USB-Stick Installation";
-	if (! $gotsys) {
-		$title = "KIWI USB Boot: $nameusb";
-	}
-	if (! $this -> setupBootLoaderConfiguration ($bootloader,$title)) {
-		return;
-	}
-	$this->{initrd} = $oldird;
-	#==========================================
 	# create/use disk
 	#------------------------------------------
 	if (! $haveDiskDevice) {
@@ -1434,6 +1400,43 @@ sub setupInstallStick {
 		#------------------------------------------
 		$this -> umountDevice ($this->{loop});
 	}
+	#==========================================
+	# Setup initrd for install purpose
+	#------------------------------------------
+	$kiwi -> info ("Repack initrd with install flags...");
+	$initrd = $this -> setupInstallFlags();
+	if (! defined $initrd) {
+		return;
+	}
+	$this->{initrd} = $initrd;
+	$kiwi -> done();
+	#==========================================
+	# Create Disk boot structure
+	#------------------------------------------
+	if (! $this -> createBootStructure("vmx")) {
+		$this->{initrd} = $oldird;
+		return;
+	}
+	#==========================================
+	# Import boot loader stages
+	#------------------------------------------
+	if (! $this -> setupBootLoaderStages ($bootloader)) {
+		return;
+	}
+	#==========================================
+	# Creating boot loader configuration
+	#------------------------------------------
+	my $title = "KIWI USB-Stick Installation";
+	if (! $gotsys) {
+		$title = "KIWI USB Boot: $nameusb";
+	}
+	if (! $this -> setupBootLoaderConfiguration ($bootloader,$title)) {
+		return;
+	}
+	$this->{initrd} = $oldird;
+	#==========================================
+	# Setup device names
+	#------------------------------------------
 	my $boot = $deviceMap{boot};
 	my $data;
 	if ($gotsys) {
@@ -3698,7 +3701,6 @@ sub setupBootLoaderConfiguration {
 	my $vgroup   = $this->{lvmgroup};
 	my $xml      = $this->{xml};
 	my $efi      = $this->{efi};
-	my $needBootP= $this->{needBootP};
 	my $bloader  = "grub";
 	my $failsafe = 1;
 	my $cmdline;
@@ -3802,10 +3804,11 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# root/boot id's in grub2 context
 		#------------------------------------------
-		my $root_id = 1;
 		my $boot_id = 1;
-		if ($needBootP) {
-			$root_id = 2;
+		my $root_id = 1;
+		if ($this->{partids}) {
+			$boot_id = $this->{partids}{boot};
+			$root_id = $this->{partids}{root};
 		}
 		#==========================================
 		# Theme and Fonts table
@@ -4150,6 +4153,13 @@ sub setupBootLoaderConfiguration {
 	#------------------------------------------
 	if ($loader eq "grub") {
 		#==========================================
+		# boot id in grub context
+		#------------------------------------------
+		my $boot_id = 0;
+		if ($this->{partids}) {
+			$boot_id = $this->{partids}{boot};
+		}
+		#==========================================
 		# Create menu.lst file
 		#------------------------------------------
 		$kiwi -> info ("Creating grub menu list file...");
@@ -4180,7 +4190,7 @@ sub setupBootLoaderConfiguration {
 		}
 		print $FD "timeout $bootTimeout\n";
 		if ($type =~ /^KIWI (CD|USB)/) {
-			my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
+			my $dev = $1 eq 'CD' ? '(cd)' : "(hd0,$boot_id)";
 			if (! $type{fastboot}) {
 				if (-e "$tmpdir/boot/grub/splash.xpm.gz") {
 					print $FD "splashimage=$dev/boot/grub/splash.xpm.gz\n"
@@ -4210,9 +4220,9 @@ sub setupBootLoaderConfiguration {
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
 			if (-e "$tmpdir/boot/grub/splash.xpm.gz") {
-				print $FD "splashimage=(hd0,0)/boot/grub/splash.xpm.gz\n"
+				print $FD "splashimage=(hd0,$boot_id)/boot/grub/splash.xpm.gz\n"
 			} elsif (-e "$tmpdir/boot/message") {
-				print $FD "gfxmenu (hd0,0)/boot/message\n";
+				print $FD "gfxmenu (hd0,$boot_id)/boot/message\n";
 			}
 			print $FD "title $title\n";
 		}
@@ -4225,11 +4235,11 @@ sub setupBootLoaderConfiguration {
 				print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 				print $FD " cdinst=1 loader=$bloader";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				print $FD " root (hd0,0)\n";
+				print $FD " root (hd0,$boot_id)\n";
 				print $FD " kernel /boot/linux.vmx vga=$vga";
 				print $FD " loader=$bloader splash=silent";
 			} else {
-				print $FD " root (hd0,0)\n";
+				print $FD " root (hd0,$boot_id)\n";
 				print $FD " kernel /boot/linux vga=$vga";
 				print $FD " loader=$bloader splash=silent";
 			}
@@ -4248,12 +4258,12 @@ sub setupBootLoaderConfiguration {
 				print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 				print $FD " cdinst=1 loader=$bloader";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				print $FD " root (hd0,0)\n";
+				print $FD " root (hd0,$boot_id)\n";
 				print $FD " kernel /boot/xen.gz.vmx\n";
 				print $FD " module /boot/linux.vmx vga=$vga";
 				print $FD " loader=$bloader splash=silent";
 			} else {
-				print $FD " root (hd0,0)\n";
+				print $FD " root (hd0,$boot_id)\n";
 				print $FD " kernel /boot/xen.gz\n";
 				print $FD " module /boot/linux vga=$vga";
 				print $FD " loader=$bloader splash=silent";
@@ -4279,11 +4289,11 @@ sub setupBootLoaderConfiguration {
 					print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 					print $FD " cdinst=1 loader=$bloader";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-					print $FD " root (hd0,0)\n";
+					print $FD " root (hd0,$boot_id)\n";
 					print $FD " kernel /boot/linux.vmx vga=$vga";
 					print $FD " loader=$bloader splash=silent";
 				} else {
-					print $FD " root (hd0,0)\n";
+					print $FD " root (hd0,$boot_id)\n";
 					print $FD " kernel /boot/linux vga=$vga";
 					print $FD " loader=$bloader splash=silent";
 				}
@@ -4304,12 +4314,12 @@ sub setupBootLoaderConfiguration {
 					print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 					print $FD " cdinst=1 loader=$bloader";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-					print $FD " root (hd0,0)\n";
+					print $FD " root (hd0,$boot_id)\n";
 					print $FD " kernel /boot/xen.gz.vmx\n";
 					print $FD " module /boot/linux.vmx vga=$vga";
 					print $FD " loader=$bloader splash=silent";
 				} else {
-					print $FD " root (hd0,0)\n";
+					print $FD " root (hd0,$boot_id)\n";
 					print $FD " kernel /boot/xen.gz\n";
 					print $FD " module /boot/linux vga=$vga";
 					print $FD " loader=$bloader splash=silent";
@@ -4791,6 +4801,9 @@ sub setupBootLoaderConfiguration {
 				if ($type{bootfilesystem}) {
 					push @opts,$type{bootfilesystem};
 				}
+				if ($this->{partids}) {
+					push @opts,$this->{partids}{boot};
+				}
 				system ("cd $tmpdir && chmod u+x $editBoot");
 				system ("cd $tmpdir && bash --norc -c \"$editBoot @opts\"");
 				my $result = $? >> 8;
@@ -4925,10 +4938,14 @@ sub installBootLoader {
 	#==========================================
 	# Setup boot device name
 	#------------------------------------------
+	my $boot_id = 1;
+	if ($this->{partids}) {
+		$boot_id = $this->{partids}{boot};
+	}
 	if ((! $this->{bindloop}) && (-b $diskname)) {
-		$bootdev = $this -> __getPartBase ($diskname)."1";
+		$bootdev = $this -> __getPartBase ($diskname).$boot_id;
 	} else {
-		$bootdev = $this->{bindloop}."1";
+		$bootdev = $this->{bindloop}.$boot_id;
 	}
 	#==========================================
 	# Grub2
@@ -5072,9 +5089,9 @@ sub installBootLoader {
 			return;
 		}
 		print $dmfd "device (hd0) $diskname\n";
-		print $dmfd "root (hd0,0)\n";
+		print $dmfd "root (hd0,$boot_id)\n";
 		if ($chainload) {
-			print $dmfd "setup (hd0,0)\n";
+			print $dmfd "setup (hd0,$boot_id)\n";
 		} else {
 			print $dmfd "setup (hd0)\n";
 		}
