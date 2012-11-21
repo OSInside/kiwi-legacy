@@ -783,7 +783,7 @@ sub test_addDriversImproperDataT {
 	push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, 'x25_asy');
 	my $res = $xml -> addDrivers(\@drvsToAdd, 'default');
 	my $expected = 'addDrivers: found array item not of type '
-		. 'KIWIXMLDriverData in driver array';
+		. 'KIWIXMLDriverData in drivers array';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -815,7 +815,7 @@ sub test_addDriversInvalidProf {
 	}
 	my @profs = qw / profA timbuktu profB /;
 	my $res = $xml -> addDrivers(\@drvsToAdd, \@profs);
-	my $expected = "Attempting to add driver(s) to 'timbuktu', but "
+	my $expected = "Attempting to add drivers to 'timbuktu', but "
 		. 'this profile is not specified in the configuration.';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
@@ -848,7 +848,7 @@ sub test_addDriversNoArgs {
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('skipped', $state);
-	$this -> assert_not_null($res);
+	$this -> assert_null($res);
 	return;
 }
 
@@ -987,8 +987,8 @@ sub test_addDriversWrongArgs {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> addDrivers ('loop', 'default');
-	my $expected = 'addDrivers: expecting array ref for XMLDriverData array '
-		. 'as first argument';
+	my $expected = 'addDrivers: expecting array ref for KIWIXMLDriverData '
+		. 'array as first argument';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
