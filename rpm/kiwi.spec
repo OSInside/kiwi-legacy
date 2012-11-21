@@ -16,6 +16,7 @@
 #
 
 
+
 Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
 Summary:        openSUSE - KIWI Image System
@@ -33,17 +34,17 @@ BuildRequires:  perl-XML-LibXML
 BuildRequires:  perl-libwww-perl
 BuildRequires:  screen
 BuildRequires:  zlib-devel
-%if %{suse_version} > 1020
+%if 0%{?suse_version} > 1020
 BuildRequires:  fdupes
 %endif
 %ifarch %ix86 x86_64
 BuildRequires:  syslinux
 %endif
-%if %{suse_version} > 1030
+%if 0%{?suse_version} > 1030
 BuildRequires:  libexpat-devel
 BuildRequires:  rpm-devel
 %endif
-%if %{suse_version} > 1140
+%if 0%{?suse_version} > 1140
 BuildRequires:  btrfsprogs
 BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
@@ -69,16 +70,16 @@ Requires:       screen
 Requires:       util-linux
 Requires:       lvm2
 %ifarch %ix86 x86_64
-%if %{suse_version} > 1010
+%if 0%{?suse_version} > 1010
 Requires:       squashfs
 %endif
 %endif
-%if %{suse_version} > 1030
+%if 0%{?suse_version} > 1030
 Requires:       satsolver-tools
 %endif
 %ifarch %ix86 x86_64
 Requires:       master-boot-code
-%if %{suse_version} > 1110
+%if 0%{?suse_version} > 1110
 Requires:       clicfs >= 1.3.9
 %endif
 %endif
@@ -89,7 +90,7 @@ Recommends:     jing
 Recommends:     zypper
 Recommends:     lxc
 %endif
-%if %{suse_version} > 1140
+%if 0%{?suse_version} > 1140
 Recommends:     db45-utils
 %endif
 # obsoletes
@@ -445,7 +446,7 @@ Authors:
 %build
 # empty because of rpmlint warning rpm-buildroot-usage
 
-%if %{suse_version} > 1140
+%if 0%{?suse_version} > 1140
 %check
 make KIWIVERBTEST=1 KIWI_NO_NET=1 test
 %endif
@@ -479,7 +480,7 @@ test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
 test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
 	echo /srv/tftpboot/mboot.c32 >> kiwi.loader
 ./.links
-%if %{suse_version} > 1020
+%if 0%{?suse_version} > 1020
 %fdupes $RPM_BUILD_ROOT/srv/tftpboot
 %fdupes $RPM_BUILD_ROOT/usr/share/kiwi/image
 %fdupes $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/examples
