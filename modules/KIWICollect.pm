@@ -16,7 +16,6 @@
 #               :
 # STATUS        : Development
 #----------------
-
 package KIWICollect;
 use strict;
 use warnings;
@@ -846,7 +845,7 @@ sub addAppdata {
 	$this->logMsg('I', "taking $packPointer->{'appdata'}");
 	my $XML = FileHandle -> new();
 	$XML -> open ($packPointer->{'appdata'});
-	while ( <XML> ) {
+	while ( <$XML> ) {
 		next if m,<\?xml,;
 		next if m,^\s*</?applications,;
 		$this->{m_appdata} .= $_;
@@ -855,8 +854,7 @@ sub addAppdata {
 	return;
 }
 
-sub addDebugPackage
-{
+sub addDebugPackage {
 	my $this = shift;
 	my $packname = shift;
 	my $arch = shift;
@@ -1179,13 +1177,10 @@ sub setupPackageFiles
 # Parameters
 # $this - reference to the object for which it is called
 #------------------------------------------
-sub collectPackages
-{
+sub collectPackages {
 	my $this = shift;
-
 	my $rfailed = 0;
 	my $mfailed = 0;
-
 
 	# step 1
 	# expand dir lists (setup in constructor for each repo) to filenames
@@ -1285,10 +1280,10 @@ sub collectPackages
 		print "OUT $dirbase/$descrdir\n";
 		my $XML = FileHandle -> new();
 		$XML -> open (">$dirbase/$descrdir/appdata.xml") or die "WHAT";
-		print XML "<?xml version='1.0' ?>\n";
-		print XML "<applications>\n";
-		print XML $this->{m_appdata};
-		print XML "</applications>\n";
+		print $XML "<?xml version='1.0' ?>\n";
+		print $XML "<applications>\n";
+		print $XML $this->{m_appdata};
+		print $XML "</applications>\n";
 		$XML -> close ();
 	}
 
