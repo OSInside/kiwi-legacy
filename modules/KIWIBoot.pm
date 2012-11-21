@@ -3326,6 +3326,13 @@ sub setupBootLoaderStages {
 		my $unzip    = "$zipper -cd $initrd 2>&1";
 		my %stages   = ();
 		#==========================================
+		# boot id in grub2 context
+		#------------------------------------------
+		my $boot_id = 1;
+		if ($this->{partids}) {
+			$boot_id = $this->{partids}{boot};
+		}
+		#==========================================
 		# Stage files
 		#------------------------------------------
 		$stages{bios}{initrd}   = "'usr/lib/grub2/$grubpc/*'";
@@ -3372,13 +3379,13 @@ sub setupBootLoaderStages {
 				if ((defined $type) && ($type eq "iso")) {
 					print $bpfd 'prefix=(cd0)/boot/grub2-efi'."\n";
 				} else {
-					print $bpfd 'prefix=(hd0,1)/boot/grub2-efi'."\n";
+					print $bpfd "prefix=(hd0,$boot_id)/boot/grub2-efi"."\n";
 				}
 			} else {
 				if ((defined $type) && ($type eq "iso")) {
 					print $bpfd 'prefix=($root)/boot/grub2'."\n";
 				} else {
-					print $bpfd 'prefix=(hd0,1)/boot/grub2'."\n";
+					print $bpfd "prefix=(hd0,$boot_id)/boot/grub2"."\n";
 				}
 			}
 			$bpfd -> close();
@@ -3455,7 +3462,7 @@ sub setupBootLoaderStages {
 			'biosdisk','part_msdos','part_gpt','ext2',
 			'iso9660','chain','normal','linux','echo',
 			'vga','vbe','png','video_bochs','video_cirrus',
-			'gzio','multiboot'
+			'gzio','multiboot','search','configfile'
 		);
 		$status = qxx (
 			"grub2-mkimage -O i386-pc -o $core -c $bootbios @modules 2>&1"
@@ -3829,7 +3836,8 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		my @x86mods = (
 			'ext2','gettext','part_msdos','chain','png',
-			'vbe','vga','video_bochs','video_cirrus','gzio'
+			'vbe','vga','video_bochs','video_cirrus','gzio',
+			'search','configfile'
 		);
 		#==========================================
 		# EFI modules
@@ -3837,7 +3845,7 @@ sub setupBootLoaderConfiguration {
 		my @efimods = (
 			'fat','gettext','part_gpt','efi_gop','png',
 			'chain','video','video_bochs','video_cirrus',
-			'gzio','efi_uga'
+			'gzio','efi_uga','search','configfile'
 		);
 		#==========================================
 		# config file name
