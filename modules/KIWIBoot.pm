@@ -2027,7 +2027,7 @@ sub setupBootDisk {
 				$bootfs = 'fat32';
 			}
 		} elsif (($bootloader eq "grub2") && ($efi)) {
-			$bootfs = 'fat32';
+			$bootfs = 'fat16';
 		} else {
 			$bootfs = 'ext3';
 		}
@@ -3496,10 +3496,10 @@ sub setupBootLoaderStages {
 			$kiwi -> info ("Creating grub2 efi boot image");
 			my $core    = "$tmpdir/efi/boot/bootx64.efi";
 			my @modules = (
-				'fat','part_gpt','efi_gop','iso9660','chain','normal',
+				'fat','ext2','part_gpt','efi_gop','iso9660','chain',
 				'linux','echo','configfile','boot','search_label',
 				'search_fs_file','search','search_fs_uuid','ls',
-				'video','video_fb'
+				'video','video_fb','normal'
 			);
 			my $fo = 'x86_64-efi';
 			$status = qxx (
@@ -3843,9 +3843,9 @@ sub setupBootLoaderConfiguration {
 		# EFI modules
 		#------------------------------------------
 		my @efimods = (
-			'fat','gettext','part_gpt','efi_gop','png',
+			'fat','ext2','gettext','part_gpt','efi_gop',
 			'chain','video','video_bochs','video_cirrus',
-			'gzio','efi_uga','search','configfile'
+			'gzio','efi_uga','search','configfile','png'
 		);
 		#==========================================
 		# config file name
@@ -6202,7 +6202,7 @@ sub setupFilesystem {
 		/^fat16|fat32/  && do {
 			my $fstool = 'mkdosfs';
 			my $fsopts = '';
-			if ($name eq 'fat16') {
+			if ($fstype eq 'fat16') {
 				$kiwi -> info ("Creating DOS [Fat16] filesystem");
 				$fsopts.= " -F 16";
 			} else {
