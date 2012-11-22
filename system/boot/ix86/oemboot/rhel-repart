@@ -758,7 +758,7 @@ function resizeLVMVolumes {
 	local size
 	for i in $(cat /.profile | grep kiwi_LVM_);do
 		variable=$(echo $i|cut -f1 -d=)
-		volume=$(echo $i| cut -f3 -d_ | cut -f1 -d=)
+		volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
 		content=$(eval echo \$$variable)
 		mode=$(echo $content | cut -f1 -d:)
 		size=$(echo $content | cut -f2 -d:)
