@@ -1795,6 +1795,7 @@ sub setupBootDisk {
 	my @commands  = ();
 	my $bootfix   = "VMX";
 	my $haveluks  = 0;
+	my $needJumpP = 0;
 	my $needBootP = 0;
 	my $needParts = 1;
 	my $rawRW     = 0;
@@ -2027,7 +2028,7 @@ sub setupBootDisk {
 				$bootfs = 'fat32';
 			}
 		} elsif (($bootloader eq "grub2") && ($efi)) {
-			$bootfs = 'fat16';
+			$bootfs = 'ext3';
 		} else {
 			$bootfs = 'ext3';
 		}
@@ -2118,6 +2119,14 @@ sub setupBootDisk {
 		$this ->{bootsize} = $this -> __getBootSize ();
 	}
 	#==========================================
+	# check for jump partition
+	#------------------------------------------
+	if ($efi) {
+		$this->{jumpsize} = 5;
+		$this -> __updateDiskSize ($this->{jumpsize});
+		$needJumpP = 1;
+	}
+	#==========================================
 	# add boot space if syslinux based
 	#------------------------------------------
 	if (($bootloader =~ /(sys|ext)linux/) ||
@@ -2204,28 +2213,59 @@ sub setupBootDisk {
 		#------------------------------------------
 		if (! $lvm) {
 			if ($needParts == 3) {
-				# xda1 boot | xda2 root-ro | xda3 root-rw
-				@commands = (
-					"n","p","1",".","+".$this->{bootsize}."M",
-					"n","p","2",".","+".$syszip."M",
-					"n","p","3",".",".",
-					"t","1",$partid,
-					"a","1","w","q"
-				);
-				$this->{partids}{root}      = '2';
-				$this->{partids}{readonly}  = '2';
-				$this->{partids}{readwrite} = '3';
-				$this->{partids}{boot}      = '1';
+				if ($needJumpP) {
+					# xda1 jump | xda2 boot | xda3 root-ro | xda4 root-rw
+					@commands = (
+						"n","p","1",".","+".$this->{jumpsize}."M",
+						"n","p","2",".","+".$this->{bootsize}."M",
+						"n","p","3",".","+".$syszip."M",
+						"n","p","4",".",".",
+						"t","2",$partid,
+						"a","1","w","q"
+					);
+					$this->{partids}{root}      = '3';
+					$this->{partids}{readonly}  = '3';
+					$this->{partids}{readwrite} = '4';
+					$this->{partids}{boot}      = '2';
+					$this->{partids}{jump}      = '1';
+				} else {
+					# xda1 boot | xda2 root-ro | xda3 root-rw
+					@commands = (
+						"n","p","1",".","+".$this->{bootsize}."M",
+						"n","p","2",".","+".$syszip."M",
+						"n","p","3",".",".",
+						"t","1",$partid,
+						"a","1","w","q"
+					);
+					$this->{partids}{root}      = '2';
+					$this->{partids}{readonly}  = '2';
+					$this->{partids}{readwrite} = '3';
+					$this->{partids}{boot}      = '1';
+				}
 			} elsif ($needParts == 2) {
-				# xda1 boot | xda2 root-rw
-				@commands = (
-					"n","p","1",".","+".$this->{bootsize}."M",
-					"n","p","2",".",".",
-					"t","1",$partid,
-					"a","1","w","q"
-				);
-				$this->{partids}{root} = '2';
-				$this->{partids}{boot} = '1';
+				if ($needJumpP) {
+					# xda1 jump | xda2 boot | xda3 root-rw
+					@commands = (
+						"n","p","1",".","+".$this->{jumpsize}."M",
+						"n","p","2",".","+".$this->{bootsize}."M",
+						"n","p","3",".",".",
+						"t","2",$partid,
+						"a","1","w","q"
+					);
+					$this->{partids}{root} = '3';
+					$this->{partids}{boot} = '2';
+					$this->{partids}{jump} = '1';
+				} else {
+					# xda1 boot | xda2 root-rw
+					@commands = (
+						"n","p","1",".","+".$this->{bootsize}."M",
+						"n","p","2",".",".",
+						"t","1",$partid,
+						"a","1","w","q"
+					);
+					$this->{partids}{root} = '2';
+					$this->{partids}{boot} = '1';
+				}
 			} else {
 				# xda1 root-rw
 				@commands = (
@@ -2236,26 +2276,51 @@ sub setupBootDisk {
 				$this->{partids}{root} = '1';
 			}
 		} else {
-			# xda1 boot | xda2 lvm
 			my $lvmsize = $this->{vmmbyte} - $this->{bootsize};
 			my $bootpartsize = "+".$this->{bootsize}."M";
-			@commands = (
-				"n","p","1",".",$bootpartsize,
-				"n","p","2",".",".",
-				"t","1",$partid,
-				"t","2","8e",
-				"a","1","w","q"
-			);
-			if (($syszip) || ($haveSplit)) {
-				$this->{partids}{root}         = '2';
-				$this->{partids}{root_lv}      = 'LVComp';
-				$this->{partids}{readonly_lv}  = 'LVComp';
-				$this->{partids}{readwrite_lv} = 'LVRoot';
-				$this->{partids}{boot}         = '1';
+			if ($needJumpP) {
+				# xda1 jump | xda2 boot | xda3 lvm
+				@commands = (
+					"n","p","1",".","+".$this->{jumpsize}."M",
+					"n","p","2",".",$bootpartsize,
+					"n","p","3",".",".",
+					"t","2",$partid,
+					"t","3","8e",
+					"a","1","w","q"
+				);
+				if (($syszip) || ($haveSplit)) {
+					$this->{partids}{root}         = '3';
+					$this->{partids}{root_lv}      = 'LVComp';
+					$this->{partids}{readonly_lv}  = 'LVComp';
+					$this->{partids}{readwrite_lv} = 'LVRoot';
+					$this->{partids}{boot}         = '2';
+					$this->{partids}{jump}         = '1';
+				} else {
+					$this->{partids}{root}     = '3';
+					$this->{partids}{root_lv}  = 'LVRoot';
+					$this->{partids}{boot}     = '2';
+					$this->{partids}{jump}     = '1';
+				}
 			} else {
-				$this->{partids}{root}     = '2';
-				$this->{partids}{root_lv}  = 'LVRoot';
-				$this->{partids}{boot}     = '1';
+				# xda1 boot | xda2 lvm
+				@commands = (
+					"n","p","1",".",$bootpartsize,
+					"n","p","2",".",".",
+					"t","1",$partid,
+					"t","2","8e",
+					"a","1","w","q"
+				);
+				if (($syszip) || ($haveSplit)) {
+					$this->{partids}{root}         = '2';
+					$this->{partids}{root_lv}      = 'LVComp';
+					$this->{partids}{readonly_lv}  = 'LVComp';
+					$this->{partids}{readwrite_lv} = 'LVRoot';
+					$this->{partids}{boot}         = '1';
+				} else {
+					$this->{partids}{root}     = '2';
+					$this->{partids}{root_lv}  = 'LVRoot';
+					$this->{partids}{boot}     = '1';
+				}
 			}
 		}
 		if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
@@ -2647,6 +2712,16 @@ sub setupBootDisk {
 			$this -> cleanLoop ();
 			return;
 		}
+		if ($needJumpP) {
+			#==========================================
+			# build jump boot filesystem
+			#------------------------------------------
+			my $jump = $deviceMap{jump};
+			if (! $this -> setupFilesystem ('fat16',$jump,"jump",1)) {
+				$this -> cleanLoop ();
+				return;
+			}
+		}
 	}
 	#==========================================
 	# Dump boot image on disk
@@ -2667,6 +2742,20 @@ sub setupBootDisk {
 		$this -> cleanLoop ();
 		return;
 	}
+	if ($efi) {
+		#==========================================
+		# Mount efi jump boot space on this disk
+		#------------------------------------------
+		my $jump = $deviceMap{jump};
+		qxx ("mkdir -p $loopdir/efi");
+		if (! $main::global -> mount ($jump, "$loopdir/efi")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't mount image jump device: $boot");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return;
+		}
+	}
 	#==========================================
 	# Copy boot data on system image
 	#------------------------------------------
@@ -2674,6 +2763,16 @@ sub setupBootDisk {
 		$main::global -> umount();
 		return;
 	}
+	if ($efi) {
+		#==========================================
+		# Adapt efi boot path on jump partition
+		#------------------------------------------
+		qxx ("mkdir -p $loopdir/efi/efi");
+		qxx ("mv $loopdir/efi/boot $loopdir/efi/efi");
+	}
+	#==========================================
+	# umount entire boot space
+	#------------------------------------------
 	$main::global -> umount();
 	$kiwi -> done();
 	#==========================================
@@ -3052,6 +3151,9 @@ sub setupPartIDs {
 		}
 		if ($this->{partids}{boot}) {
 			print $ID_FD "kiwi_BootPart=\"$this->{partids}{boot}\"\n";
+		}
+		if ($this->{partids}{jump}) {
+			print $ID_FD "kiwi_JumpPart=\"$this->{partids}{jump}\"\n";
 		}
 		$ID_FD -> close();
 	}
@@ -5838,6 +5940,11 @@ sub setDefaultDeviceMap {
 			$device,$this->{partids}{boot}
 		);
 	}
+	if ($this->{partids}{jump}) {
+		$result{jump} = $this -> __getPartDevice (
+			$device,$this->{partids}{jump}
+		);
+	}
 	return %result;
 }
 
@@ -5875,6 +5982,11 @@ sub setLoopDeviceMap {
 			$device,$this->{partids}{boot}
 		);
 	}
+	if ($this->{partids}{jump}) {
+		$result{jump} = $this -> __getPartDevice (
+			$device,$this->{partids}{jump}
+		);
+	}
 	return %result;
 }
 
@@ -5907,6 +6019,11 @@ sub setLVMDeviceMap {
 	if ($this->{partids}{boot}) {
 		$result{boot} = $this -> __getPartDevice (
 			$device,$this->{partids}{boot}
+		);
+	}
+	if ($this->{partids}{jump}) {
+		$result{jump} = $this -> __getPartDevice (
+			$device,$this->{partids}{jump}
 		);
 	}
 	return %result;

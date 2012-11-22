@@ -2873,7 +2873,7 @@ function updateBootDeviceFstab {
 	if [ ! -e /mnt/$mount ];then
 		return
 	fi
-	local diskByID=`getDiskID $sdev`
+	local diskByID=$(getDiskID $sdev)
 	local nfstab=$prefix/etc/fstab
 	if [ ! -z "$FSTYPE" ];then
 		FSTYPE_SAVE=$FSTYPE
@@ -2889,6 +2889,17 @@ function updateBootDeviceFstab {
 	echo "/$mount/boot /boot none bind 0 0" >> $nfstab
 	if [ ! -z "$FSTYPE_SAVE" ];then
 		FSTYPE=$FSTYPE_SAVE
+	fi
+	#======================================
+	# check for kiwi_JumpPart
+	#--------------------------------------
+	if [ ! -z "$kiwi_JumpPart" ] && [ -d /mnt/$mount/efi ];then
+		local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
+		local fstype=$(blkid $jdev -s TYPE -o value)
+		if [ ! -z "$fstype" ];then
+			jdev=$(getDiskID $jdev)
+			echo "$jdev /boot/efi $fstype defaults 0 0" >> $nfstab
+		fi
 	fi
 }
 #======================================
@@ -6382,17 +6393,7 @@ function bootImage {
 	#======================================
 	# run resetBootBind
 	#--------------------------------------
-	if [ ! "$partedTableType" = "gpt" ];then
-		# /.../
-		# if GPT is used we boot via EFI which means we use a fat
-		# boot partition. Such a boot partition doesn't allow links
-		# which prevents the 'boot -> .' which is required to find
-		# the bootloader configuration data on the boot partition
-		# Thus the bind mount system is not reseted when we use
-		# the GPT/EFI boot method
-		# ----
-		resetBootBind /mnt
-	fi
+	resetBootBind /mnt
 	#======================================
 	# kill initial tail and utimer
 	#--------------------------------------
