@@ -1214,7 +1214,12 @@ sub setup {
 			my $code = $? >> 8;
 			if ($code == 0) {
 				$kiwi -> info ("Cleanup temporary copy of sysconfig/proxy");
-				qxx ("rm -f $root/etc/sysconfig/proxy");
+				my $template = "$root/var/adm/fillup-templates/sysconfig.proxy";
+				if (! -f $template) {
+					qxx ("rm -f $root/etc/sysconfig/proxy");
+				} else {
+					qxx ("cp $template $root/etc/sysconfig/proxy");
+				}
 				$kiwi -> done ();
 			}
 		}
