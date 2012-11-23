@@ -3564,7 +3564,7 @@ sub setupBootLoaderStages {
 			'biosdisk','part_msdos','part_gpt','ext2',
 			'iso9660','chain','normal','linux','echo',
 			'vga','vbe','png','video_bochs','video_cirrus',
-			'gzio','multiboot','search','configfile'
+			'gzio','multiboot','search','configfile','fat'
 		);
 		$status = qxx (
 			"grub2-mkimage -O i386-pc -o $core -c $bootbios @modules 2>&1"
@@ -3937,9 +3937,9 @@ sub setupBootLoaderConfiguration {
 		# BIOS modules
 		#------------------------------------------
 		my @x86mods = (
-			'ext2','gettext','part_msdos','chain','png',
+			'fat','ext2','gettext','part_msdos','chain',
 			'vbe','vga','video_bochs','video_cirrus','gzio',
-			'search','configfile'
+			'search','configfile','png'
 		);
 		#==========================================
 		# EFI modules
