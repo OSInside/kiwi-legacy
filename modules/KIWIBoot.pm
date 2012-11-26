@@ -1197,38 +1197,24 @@ sub setupInstallStick {
 	#------------------------------------------
 	my $nameusb = basename ($system);
 	#==========================================
-	# create/use disk
+	# Create virtual disk to be dumped on stick
 	#------------------------------------------
-	if ((! $haveDiskDevice) || ($this->{gdata}->{StudioNode})) {
-		#==========================================
-		# Create virtual disk to be dumped on stick
-		#------------------------------------------
-		$kiwi -> info ("Creating virtual disk...");
-		$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed creating virtual disk: $status");
-			$kiwi -> failed ();
-			return;
-		}
-		$kiwi -> done();
-		$kiwi -> info ("Binding virtual disk to loop device");
-		if (! $this -> bindDiskDevice ($diskname)) {
-			$kiwi -> failed ();
-			return;
-		}
-		$kiwi -> done();
-	} else {
-		#==========================================
-		# Find USB stick devices
-		#------------------------------------------
-		my $stick = $this -> searchUSBStickDevice ();
-		if (! $stick) {
-			return;
-		}
-		$this->{loop} = $stick;
+	$kiwi -> info ("Creating virtual disk...");
+	$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed creating virtual disk: $status");
+		$kiwi -> failed ();
+		return;
 	}
+	$kiwi -> done();
+	$kiwi -> info ("Binding virtual disk to loop device");
+	if (! $this -> bindDiskDevice ($diskname)) {
+		$kiwi -> failed ();
+		return;
+	}
+	$kiwi -> done();
 	#==========================================
 	# check required boot filesystem type
 	#------------------------------------------
@@ -1255,7 +1241,7 @@ sub setupInstallStick {
 	#==========================================
 	# create disk partitions
 	#------------------------------------------
-	$kiwi -> info ("Create partition table for disk");
+	$kiwi -> info ("Create partition table for install media");
 	if (($bootloader =~ /syslinux|yaboot/)   ||
 		(($bootloader eq "grub2") && ($efi))
 	) {
@@ -1286,53 +1272,20 @@ sub setupInstallStick {
 		return;
 	}
 	$kiwi -> done();
-	if ((! $haveDiskDevice ) || ($this->{gdata}->{StudioNode})) {
-		#==========================================
-		# setup device mapper
-		#------------------------------------------
-		$kiwi -> info ("Setup device mapper for partition access");
-		if (! $this -> bindDiskPartitions ($this->{loop})) {
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return;
-		}
-		$kiwi -> done();
-		#==========================================
-		# Create loop device mapping table
-		#------------------------------------------
-		%deviceMap = $this -> setLoopDeviceMap ($this->{loop});
-	} else {
-		#==========================================
-		# Create disk device mapping table
-		#------------------------------------------
-		%deviceMap = $this -> setDefaultDeviceMap ($this->{loop});
-		#==========================================
-		# Umount possible mounted stick partitions
-		#------------------------------------------
-		$this -> umountDevice ($this->{loop});
-		for (my $try=0;$try>=2;$try++) {
-			$status = qxx ("/sbin/blockdev --rereadpt $this->{loop} 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				sleep (1); next;
-			}
-			last;
-		}
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't reread partition table: $status");
-			$kiwi -> failed ();
-			return;
-		}
-		#==========================================
-		# Wait for new partition table to settle
-		#------------------------------------------
-		sleep (1);
-		#==========================================
-		# Umount possible mounted stick partitions
-		#------------------------------------------
-		$this -> umountDevice ($this->{loop});
+	#==========================================
+	# setup device mapper
+	#------------------------------------------
+	$kiwi -> info ("Setup device mapper for partition access");
+	if (! $this -> bindDiskPartitions ($this->{loop})) {
+		$kiwi -> failed ();
+		$this -> cleanLoop ();
+		return;
 	}
+	$kiwi -> done();
+	#==========================================
+	# Create loop device mapping table
+	#------------------------------------------
+	%deviceMap = $this -> setLoopDeviceMap ($this->{loop});
 	#==========================================
 	# Setup initrd for install purpose
 	#------------------------------------------
@@ -1498,12 +1451,7 @@ sub setupInstallStick {
 	#==========================================
 	# Install boot loader on disk
 	#------------------------------------------
-	my $bootdevice;
-	if ((! $haveDiskDevice) || ($this->{gdata}->{StudioNode})) {
-		$bootdevice = $diskname;
-	} else {
-		$bootdevice = $this->{loop};
-	}
+	my $bootdevice = $diskname;
 	if (! $this -> installBootLoader ($bootloader, $bootdevice)) {
 		$this -> cleanLoopMaps();
 		$this -> cleanLoop ();
@@ -1511,11 +1459,7 @@ sub setupInstallStick {
 	}
 	$this -> cleanLoopMaps();
 	$this -> cleanLoop();
-	if ((! $haveDiskDevice) || ($this->{gdata}->{StudioNode})) {
-		$kiwi -> info ("Created $diskname to be dd'ed on Stick");
-	} else {
-		$kiwi -> info ("Successfully created install stick on $this->{loop}");
-	}
+	$kiwi -> info ("Created $diskname to be dd'ed on Stick");
 	$kiwi -> done ();
 	return $this;
 }
@@ -3323,9 +3267,13 @@ sub writeMBRDiskLabel {
 	}
 	seek $FD,440,0;
 	my $done = syswrite ($FD,$pid,4);
-	if ($done != 4) {
+	if ((! $done) || ($done != 4)) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("MBR: only $done bytes written");
+		if ($done) {
+			$kiwi -> error  ("MBR: only $done bytes written");
+		} else {
+			$kiwi -> error  ("MBR: syswrite to $file failed: $!");
+		}
 		$kiwi -> failed ();
 		seek $FD,0,2;
 		$FD -> close();
@@ -6407,69 +6355,6 @@ sub diskOffset {
 		return;
 	}
 	return $offset;
-}
-
-#==========================================
-# searchUSBStickDevice
-#------------------------------------------
-sub searchUSBStickDevice {
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $device = $this->{device};
-	my $stick;
-	#==========================================
-	# Find USB stick devices
-	#------------------------------------------
-	my %storage = $this -> getRemovableUSBStorageDevices();
-	if (! %storage) {
-		$kiwi -> error  ("Couldn't find any removable USB storage devices");
-		$kiwi -> failed ();
-		return;
-	}
-	my $prefix = $kiwi -> getPrefix (1);
-	print STDERR $prefix,"Found following removable USB devices:\n";
-	foreach my $dev (keys %storage) {
-		print STDERR $prefix,"---> $storage{$dev} at $dev\n";
-	}
-	if (! defined $device) {
-		#==========================================
-		# Let the user select the device
-		#------------------------------------------
-		while (1) {
-			$prefix = $kiwi -> getPrefix (1);
-			print STDERR $prefix,"Your choice (enter device name): ";
-			chomp ($stick = <>);
-			my $found = 0;
-			foreach my $dev (keys %storage) {
-				if ($dev eq $stick) {
-					$found = 1; last;
-				}
-			}
-			if (! $found) {
-				if ($stick) {
-					print STDERR $prefix,"Couldn't find [ $stick ] in list\n";
-				}
-				next;
-			}
-			last;
-		}
-	} else {
-		#==========================================
-		# Check the given device
-		#------------------------------------------
-		$stick = $device;
-		my $found = 0;
-		foreach my $dev (keys %storage) {
-			if ($dev eq $stick) {
-				$found = 1; last;
-			}
-		}
-		if (! $found) {
-			print STDERR $prefix,"Couldn't find [ $stick ] in list\n";
-			return;
-		}
-	}
-	return $stick;
 }
 
 #==========================================
