@@ -1140,77 +1140,10 @@ sub setupInstallStick {
 		$gotsys   = 0;
 	}
 	#==========================================
-	# check image type
+	# check for boot menu entry base name
 	#------------------------------------------
 	if ($gotsys) {
-		#==========================================
-		# build label from xml data
-		#------------------------------------------
 		$this->{bootlabel} = $xml -> getImageDisplayName();
-		if (! $haveDiskDevice) {
-			#==========================================
-			# bind $system to loop device
-			#------------------------------------------
-			$kiwi -> info ("Binding disk to loop device");
-			if (! $this -> bindDiskDevice ($system)) {
-				$kiwi -> failed ();
-				return;
-			}
-			$kiwi -> done();
-			#==========================================
-			# setup device mapper
-			#------------------------------------------
-			$kiwi -> info ("Setup device mapper for partition access");
-			if (! $this -> bindDiskPartitions ($this->{loop})) {
-				$kiwi -> failed ();
-				$this -> cleanLoop ();
-				return;
-			}
-			$kiwi -> done();
-		} else {
-			$kiwi -> info ("Using disk device: $haveDiskDevice");
-			$this->{loop}     = $haveDiskDevice;
-			$this->{bindloop} = $this -> __getPartBase ($haveDiskDevice);
-			if (! $this->{bindloop}) {
-				if (! $this -> bindDiskPartitions ($haveDiskDevice)) {
-					$kiwi -> failed ();
-					return;
-				}
-				$this->{bindloop} = $this -> __getPartBase (
-					$haveDiskDevice
-				);
-				if (! $this->{bindloop}) {
-					$kiwi -> failed ();
-					return;
-				}
-			}
-			$kiwi -> done();
-		}
-		#==========================================
-		# find partition to check
-		#------------------------------------------
-		my $sdev = $this->{bindloop}."2";
-		if (! -e $sdev) {
-			$sdev = $this->{bindloop}."1";
-		}
-		#==========================================
-		# check for activated volume group
-		#------------------------------------------
-		$sdev = $main::global -> checkLVMbind ($sdev);
-		if ($main::global -> isMountLVM()) {
-			$this->{lvmgroup} = $main::global -> getMountLVMGroup();
-			$this->{lvm} = 1;
-		}
-		#==========================================
-		# perform mount call
-		#------------------------------------------
-		if (! $main::global -> mount ($sdev,$tmpdir,$type{fsmountoptions})) {
-			$kiwi -> error  ("Failed to mount system partition: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return;
-		}
-		$this -> cleanLoop();
 	}
 	#==========================================
 	# Build md5sum of system image
@@ -1219,7 +1152,7 @@ sub setupInstallStick {
 		if (! $haveDiskDevice) {
 			$this -> buildMD5Sum ($system);
 		} else {
-			$this -> buildMD5Sum ($this->{loop},$system);
+			$this -> buildMD5Sum ($haveDiskDevice,$system);
 		}
 	}
 	#==========================================
@@ -1264,38 +1197,24 @@ sub setupInstallStick {
 	#------------------------------------------
 	my $nameusb = basename ($system);
 	#==========================================
-	# create/use disk
+	# Create virtual disk to be dumped on stick
 	#------------------------------------------
-	if (! $haveDiskDevice) {
-		#==========================================
-		# Create virtual disk to be dumped on stick
-		#------------------------------------------
-		$kiwi -> info ("Creating virtual disk...");
-		$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed creating virtual disk: $status");
-			$kiwi -> failed ();
-			return;
-		}
-		$kiwi -> done();
-		$kiwi -> info ("Binding virtual disk to loop device");
-		if (! $this -> bindDiskDevice ($diskname)) {
-			$kiwi -> failed ();
-			return;
-		}
-		$kiwi -> done();
-	} else {
-		#==========================================
-		# Find USB stick devices
-		#------------------------------------------
-		my $stick = $this -> searchUSBStickDevice ();
-		if (! $stick) {
-			return;
-		}
-		$this->{loop} = $stick;
+	$kiwi -> info ("Creating virtual disk...");
+	$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed creating virtual disk: $status");
+		$kiwi -> failed ();
+		return;
 	}
+	$kiwi -> done();
+	$kiwi -> info ("Binding virtual disk to loop device");
+	if (! $this -> bindDiskDevice ($diskname)) {
+		$kiwi -> failed ();
+		return;
+	}
+	$kiwi -> done();
 	#==========================================
 	# check required boot filesystem type
 	#------------------------------------------
@@ -1322,7 +1241,7 @@ sub setupInstallStick {
 	#==========================================
 	# create disk partitions
 	#------------------------------------------
-	$kiwi -> info ("Create partition table for disk");
+	$kiwi -> info ("Create partition table for install media");
 	if (($bootloader =~ /syslinux|yaboot/)   ||
 		(($bootloader eq "grub2") && ($efi))
 	) {
@@ -1353,53 +1272,20 @@ sub setupInstallStick {
 		return;
 	}
 	$kiwi -> done();
-	if (! $haveDiskDevice ) {
-		#==========================================
-		# setup device mapper
-		#------------------------------------------
-		$kiwi -> info ("Setup device mapper for partition access");
-		if (! $this -> bindDiskPartitions ($this->{loop})) {
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return;
-		}
-		$kiwi -> done();
-		#==========================================
-		# Create loop device mapping table
-		#------------------------------------------
-		%deviceMap = $this -> setLoopDeviceMap ($this->{loop});
-	} else {
-		#==========================================
-		# Create disk device mapping table
-		#------------------------------------------
-		%deviceMap = $this -> setDefaultDeviceMap ($this->{loop});
-		#==========================================
-		# Umount possible mounted stick partitions
-		#------------------------------------------
-		$this -> umountDevice ($this->{loop});
-		for (my $try=0;$try>=2;$try++) {
-			$status = qxx ("/sbin/blockdev --rereadpt $this->{loop} 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				sleep (1); next;
-			}
-			last;
-		}
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't reread partition table: $status");
-			$kiwi -> failed ();
-			return;
-		}
-		#==========================================
-		# Wait for new partition table to settle
-		#------------------------------------------
-		sleep (1);
-		#==========================================
-		# Umount possible mounted stick partitions
-		#------------------------------------------
-		$this -> umountDevice ($this->{loop});
+	#==========================================
+	# setup device mapper
+	#------------------------------------------
+	$kiwi -> info ("Setup device mapper for partition access");
+	if (! $this -> bindDiskPartitions ($this->{loop})) {
+		$kiwi -> failed ();
+		$this -> cleanLoop ();
+		return;
 	}
+	$kiwi -> done();
+	#==========================================
+	# Create loop device mapping table
+	#------------------------------------------
+	%deviceMap = $this -> setLoopDeviceMap ($this->{loop});
 	#==========================================
 	# Setup initrd for install purpose
 	#------------------------------------------
@@ -1566,9 +1452,6 @@ sub setupInstallStick {
 	# Install boot loader on disk
 	#------------------------------------------
 	my $bootdevice = $diskname;
-	if ($haveDiskDevice) {
-		$bootdevice = $this->{loop};
-	}
 	if (! $this -> installBootLoader ($bootloader, $bootdevice)) {
 		$this -> cleanLoopMaps();
 		$this -> cleanLoop ();
@@ -1576,11 +1459,7 @@ sub setupInstallStick {
 	}
 	$this -> cleanLoopMaps();
 	$this -> cleanLoop();
-	if (! $haveDiskDevice) {
-		$kiwi -> info ("Created $diskname to be dd'ed on Stick");
-	} else {
-		$kiwi -> info ("Successfully created install stick on $this->{loop}");
-	}
+	$kiwi -> info ("Created $diskname to be dd'ed on Stick");
 	$kiwi -> done ();
 	return $this;
 }
@@ -1795,6 +1674,7 @@ sub setupBootDisk {
 	my @commands  = ();
 	my $bootfix   = "VMX";
 	my $haveluks  = 0;
+	my $needJumpP = 0;
 	my $needBootP = 0;
 	my $needParts = 1;
 	my $rawRW     = 0;
@@ -2027,7 +1907,7 @@ sub setupBootDisk {
 				$bootfs = 'fat32';
 			}
 		} elsif (($bootloader eq "grub2") && ($efi)) {
-			$bootfs = 'fat32';
+			$bootfs = 'ext3';
 		} else {
 			$bootfs = 'ext3';
 		}
@@ -2118,6 +1998,14 @@ sub setupBootDisk {
 		$this ->{bootsize} = $this -> __getBootSize ();
 	}
 	#==========================================
+	# check for jump partition
+	#------------------------------------------
+	if ($efi) {
+		$this->{jumpsize} = 5;
+		$this -> __updateDiskSize ($this->{jumpsize});
+		$needJumpP = 1;
+	}
+	#==========================================
 	# add boot space if syslinux based
 	#------------------------------------------
 	if (($bootloader =~ /(sys|ext)linux/) ||
@@ -2204,28 +2092,59 @@ sub setupBootDisk {
 		#------------------------------------------
 		if (! $lvm) {
 			if ($needParts == 3) {
-				# xda1 boot | xda2 root-ro | xda3 root-rw
-				@commands = (
-					"n","p","1",".","+".$this->{bootsize}."M",
-					"n","p","2",".","+".$syszip."M",
-					"n","p","3",".",".",
-					"t","1",$partid,
-					"a","1","w","q"
-				);
-				$this->{partids}{root}      = '2';
-				$this->{partids}{readonly}  = '2';
-				$this->{partids}{readwrite} = '3';
-				$this->{partids}{boot}      = '1';
+				if ($needJumpP) {
+					# xda1 jump | xda2 boot | xda3 root-ro | xda4 root-rw
+					@commands = (
+						"n","p","1",".","+".$this->{jumpsize}."M",
+						"n","p","2",".","+".$this->{bootsize}."M",
+						"n","p","3",".","+".$syszip."M",
+						"n","p","4",".",".",
+						"t","2",$partid,
+						"a","1","w","q"
+					);
+					$this->{partids}{root}      = '3';
+					$this->{partids}{readonly}  = '3';
+					$this->{partids}{readwrite} = '4';
+					$this->{partids}{boot}      = '2';
+					$this->{partids}{jump}      = '1';
+				} else {
+					# xda1 boot | xda2 root-ro | xda3 root-rw
+					@commands = (
+						"n","p","1",".","+".$this->{bootsize}."M",
+						"n","p","2",".","+".$syszip."M",
+						"n","p","3",".",".",
+						"t","1",$partid,
+						"a","1","w","q"
+					);
+					$this->{partids}{root}      = '2';
+					$this->{partids}{readonly}  = '2';
+					$this->{partids}{readwrite} = '3';
+					$this->{partids}{boot}      = '1';
+				}
 			} elsif ($needParts == 2) {
-				# xda1 boot | xda2 root-rw
-				@commands = (
-					"n","p","1",".","+".$this->{bootsize}."M",
-					"n","p","2",".",".",
-					"t","1",$partid,
-					"a","1","w","q"
-				);
-				$this->{partids}{root} = '2';
-				$this->{partids}{boot} = '1';
+				if ($needJumpP) {
+					# xda1 jump | xda2 boot | xda3 root-rw
+					@commands = (
+						"n","p","1",".","+".$this->{jumpsize}."M",
+						"n","p","2",".","+".$this->{bootsize}."M",
+						"n","p","3",".",".",
+						"t","2",$partid,
+						"a","1","w","q"
+					);
+					$this->{partids}{root} = '3';
+					$this->{partids}{boot} = '2';
+					$this->{partids}{jump} = '1';
+				} else {
+					# xda1 boot | xda2 root-rw
+					@commands = (
+						"n","p","1",".","+".$this->{bootsize}."M",
+						"n","p","2",".",".",
+						"t","1",$partid,
+						"a","1","w","q"
+					);
+					$this->{partids}{root} = '2';
+					$this->{partids}{boot} = '1';
+				}
 			} else {
 				# xda1 root-rw
 				@commands = (
@@ -2236,26 +2155,51 @@ sub setupBootDisk {
 				$this->{partids}{root} = '1';
 			}
 		} else {
-			# xda1 boot | xda2 lvm
 			my $lvmsize = $this->{vmmbyte} - $this->{bootsize};
 			my $bootpartsize = "+".$this->{bootsize}."M";
-			@commands = (
-				"n","p","1",".",$bootpartsize,
-				"n","p","2",".",".",
-				"t","1",$partid,
-				"t","2","8e",
-				"a","1","w","q"
-			);
-			if (($syszip) || ($haveSplit)) {
-				$this->{partids}{root}         = '2';
-				$this->{partids}{root_lv}      = 'LVComp';
-				$this->{partids}{readonly_lv}  = 'LVComp';
-				$this->{partids}{readwrite_lv} = 'LVRoot';
-				$this->{partids}{boot}         = '1';
+			if ($needJumpP) {
+				# xda1 jump | xda2 boot | xda3 lvm
+				@commands = (
+					"n","p","1",".","+".$this->{jumpsize}."M",
+					"n","p","2",".",$bootpartsize,
+					"n","p","3",".",".",
+					"t","2",$partid,
+					"t","3","8e",
+					"a","1","w","q"
+				);
+				if (($syszip) || ($haveSplit)) {
+					$this->{partids}{root}         = '3';
+					$this->{partids}{root_lv}      = 'LVComp';
+					$this->{partids}{readonly_lv}  = 'LVComp';
+					$this->{partids}{readwrite_lv} = 'LVRoot';
+					$this->{partids}{boot}         = '2';
+					$this->{partids}{jump}         = '1';
+				} else {
+					$this->{partids}{root}     = '3';
+					$this->{partids}{root_lv}  = 'LVRoot';
+					$this->{partids}{boot}     = '2';
+					$this->{partids}{jump}     = '1';
+				}
 			} else {
-				$this->{partids}{root}     = '2';
-				$this->{partids}{root_lv}  = 'LVRoot';
-				$this->{partids}{boot}     = '1';
+				# xda1 boot | xda2 lvm
+				@commands = (
+					"n","p","1",".",$bootpartsize,
+					"n","p","2",".",".",
+					"t","1",$partid,
+					"t","2","8e",
+					"a","1","w","q"
+				);
+				if (($syszip) || ($haveSplit)) {
+					$this->{partids}{root}         = '2';
+					$this->{partids}{root_lv}      = 'LVComp';
+					$this->{partids}{readonly_lv}  = 'LVComp';
+					$this->{partids}{readwrite_lv} = 'LVRoot';
+					$this->{partids}{boot}         = '1';
+				} else {
+					$this->{partids}{root}     = '2';
+					$this->{partids}{root_lv}  = 'LVRoot';
+					$this->{partids}{boot}     = '1';
+				}
 			}
 		}
 		if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
@@ -2647,6 +2591,16 @@ sub setupBootDisk {
 			$this -> cleanLoop ();
 			return;
 		}
+		if ($needJumpP) {
+			#==========================================
+			# build jump boot filesystem
+			#------------------------------------------
+			my $jump = $deviceMap{jump};
+			if (! $this -> setupFilesystem ('fat16',$jump,"jump",1)) {
+				$this -> cleanLoop ();
+				return;
+			}
+		}
 	}
 	#==========================================
 	# Dump boot image on disk
@@ -2667,6 +2621,20 @@ sub setupBootDisk {
 		$this -> cleanLoop ();
 		return;
 	}
+	if ($efi) {
+		#==========================================
+		# Mount efi jump boot space on this disk
+		#------------------------------------------
+		my $jump = $deviceMap{jump};
+		qxx ("mkdir -p $loopdir/efi");
+		if (! $main::global -> mount ($jump, "$loopdir/efi")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't mount image jump device: $boot");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return;
+		}
+	}
 	#==========================================
 	# Copy boot data on system image
 	#------------------------------------------
@@ -2674,6 +2642,16 @@ sub setupBootDisk {
 		$main::global -> umount();
 		return;
 	}
+	if ($efi) {
+		#==========================================
+		# Adapt efi boot path on jump partition
+		#------------------------------------------
+		qxx ("mkdir -p $loopdir/efi/efi");
+		qxx ("mv $loopdir/efi/boot $loopdir/efi/efi");
+	}
+	#==========================================
+	# umount entire boot space
+	#------------------------------------------
 	$main::global -> umount();
 	$kiwi -> done();
 	#==========================================
@@ -3053,6 +3031,9 @@ sub setupPartIDs {
 		if ($this->{partids}{boot}) {
 			print $ID_FD "kiwi_BootPart=\"$this->{partids}{boot}\"\n";
 		}
+		if ($this->{partids}{jump}) {
+			print $ID_FD "kiwi_JumpPart=\"$this->{partids}{jump}\"\n";
+		}
 		$ID_FD -> close();
 	}
 	return $this;
@@ -3286,9 +3267,13 @@ sub writeMBRDiskLabel {
 	}
 	seek $FD,440,0;
 	my $done = syswrite ($FD,$pid,4);
-	if ($done != 4) {
+	if ((! $done) || ($done != 4)) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("MBR: only $done bytes written");
+		if ($done) {
+			$kiwi -> error  ("MBR: only $done bytes written");
+		} else {
+			$kiwi -> error  ("MBR: syswrite to $file failed: $!");
+		}
 		$kiwi -> failed ();
 		seek $FD,0,2;
 		$FD -> close();
@@ -3462,7 +3447,7 @@ sub setupBootLoaderStages {
 			'biosdisk','part_msdos','part_gpt','ext2',
 			'iso9660','chain','normal','linux','echo',
 			'vga','vbe','png','video_bochs','video_cirrus',
-			'gzio','multiboot','search','configfile'
+			'gzio','multiboot','search','configfile','fat'
 		);
 		$status = qxx (
 			"grub2-mkimage -O i386-pc -o $core -c $bootbios @modules 2>&1"
@@ -3496,10 +3481,10 @@ sub setupBootLoaderStages {
 			$kiwi -> info ("Creating grub2 efi boot image");
 			my $core    = "$tmpdir/efi/boot/bootx64.efi";
 			my @modules = (
-				'fat','part_gpt','efi_gop','iso9660','chain','normal',
+				'fat','ext2','part_gpt','efi_gop','iso9660','chain',
 				'linux','echo','configfile','boot','search_label',
 				'search_fs_file','search','search_fs_uuid','ls',
-				'video','video_fb'
+				'video','video_fb','normal'
 			);
 			my $fo = 'x86_64-efi';
 			$status = qxx (
@@ -3835,17 +3820,17 @@ sub setupBootLoaderConfiguration {
 		# BIOS modules
 		#------------------------------------------
 		my @x86mods = (
-			'ext2','gettext','part_msdos','chain','png',
+			'fat','ext2','gettext','part_msdos','chain',
 			'vbe','vga','video_bochs','video_cirrus','gzio',
-			'search','configfile'
+			'search','configfile','png'
 		);
 		#==========================================
 		# EFI modules
 		#------------------------------------------
 		my @efimods = (
-			'fat','gettext','part_gpt','efi_gop','png',
+			'fat','ext2','gettext','part_gpt','efi_gop',
 			'chain','video','video_bochs','video_cirrus',
-			'gzio','efi_uga','search','configfile'
+			'gzio','efi_uga','search','configfile','png'
 		);
 		#==========================================
 		# config file name
@@ -5838,6 +5823,11 @@ sub setDefaultDeviceMap {
 			$device,$this->{partids}{boot}
 		);
 	}
+	if ($this->{partids}{jump}) {
+		$result{jump} = $this -> __getPartDevice (
+			$device,$this->{partids}{jump}
+		);
+	}
 	return %result;
 }
 
@@ -5875,6 +5865,11 @@ sub setLoopDeviceMap {
 			$device,$this->{partids}{boot}
 		);
 	}
+	if ($this->{partids}{jump}) {
+		$result{jump} = $this -> __getPartDevice (
+			$device,$this->{partids}{jump}
+		);
+	}
 	return %result;
 }
 
@@ -5907,6 +5902,11 @@ sub setLVMDeviceMap {
 	if ($this->{partids}{boot}) {
 		$result{boot} = $this -> __getPartDevice (
 			$device,$this->{partids}{boot}
+		);
+	}
+	if ($this->{partids}{jump}) {
+		$result{jump} = $this -> __getPartDevice (
+			$device,$this->{partids}{jump}
 		);
 	}
 	return %result;
@@ -6202,7 +6202,7 @@ sub setupFilesystem {
 		/^fat16|fat32/  && do {
 			my $fstool = 'mkdosfs';
 			my $fsopts = '';
-			if ($name eq 'fat16') {
+			if ($fstype eq 'fat16') {
 				$kiwi -> info ("Creating DOS [Fat16] filesystem");
 				$fsopts.= " -F 16";
 			} else {
@@ -6355,69 +6355,6 @@ sub diskOffset {
 		return;
 	}
 	return $offset;
-}
-
-#==========================================
-# searchUSBStickDevice
-#------------------------------------------
-sub searchUSBStickDevice {
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $device = $this->{device};
-	my $stick;
-	#==========================================
-	# Find USB stick devices
-	#------------------------------------------
-	my %storage = $this -> getRemovableUSBStorageDevices();
-	if (! %storage) {
-		$kiwi -> error  ("Couldn't find any removable USB storage devices");
-		$kiwi -> failed ();
-		return;
-	}
-	my $prefix = $kiwi -> getPrefix (1);
-	print STDERR $prefix,"Found following removable USB devices:\n";
-	foreach my $dev (keys %storage) {
-		print STDERR $prefix,"---> $storage{$dev} at $dev\n";
-	}
-	if (! defined $device) {
-		#==========================================
-		# Let the user select the device
-		#------------------------------------------
-		while (1) {
-			$prefix = $kiwi -> getPrefix (1);
-			print STDERR $prefix,"Your choice (enter device name): ";
-			chomp ($stick = <>);
-			my $found = 0;
-			foreach my $dev (keys %storage) {
-				if ($dev eq $stick) {
-					$found = 1; last;
-				}
-			}
-			if (! $found) {
-				if ($stick) {
-					print STDERR $prefix,"Couldn't find [ $stick ] in list\n";
-				}
-				next;
-			}
-			last;
-		}
-	} else {
-		#==========================================
-		# Check the given device
-		#------------------------------------------
-		$stick = $device;
-		my $found = 0;
-		foreach my $dev (keys %storage) {
-			if ($dev eq $stick) {
-				$found = 1; last;
-			}
-		}
-		if (! $found) {
-			print STDERR $prefix,"Couldn't find [ $stick ] in list\n";
-			return;
-		}
-	}
-	return $stick;
 }
 
 #==========================================

@@ -1320,12 +1320,13 @@ sub checkType {
 	#------------------------------------------
 	if ($cmdL->getFatStorage()) {
 		# /.../
-		# if the option --fat-storage is set, we set syslinux
-		# as bootloader because it works better on USB sticks.
+		# if the option --fat-storage is set, we set grub2
+		# as bootloader because it works well on USB sticks.
 		# Additionally we use LVM because it allows to better
 		# resize the stick
 		# ----
-		$xml -> __setTypeAttribute ("bootloader","syslinux");
+		$xml -> __setTypeAttribute ("bootloader","grub2");
+		$xml -> __setTypeAttribute ("bootfilesystem","fat16");
 		$xml -> __setSystemDiskElement ();
 		$xml -> writeXMLDescription ($root);
 	} elsif ($cmdL->getLVM()) {

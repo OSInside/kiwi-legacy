@@ -554,35 +554,17 @@ sub addDrivers {
 	my $this      = shift;
 	my $drivers   = shift;
 	my $profNames = shift;
-	my $kiwi = $this->{kiwi};
-	#==========================================
-	# Verify arguments
-	#------------------------------------------
-	if (! $drivers) {
-		$kiwi -> info ('addDrivers: no drivers specified, nothing to do');
-		$kiwi -> skipped ();
-		return $this;
-	}
-	if ( ref($drivers) ne 'ARRAY' ) {
-		my $msg = 'addDrivers: expecting array ref for XMLDriverData array '
-			. 'as first argument';
-		$kiwi -> error ($msg);
-		$kiwi -> failed ();
+	my %verifyData = (
+		caller       => 'addDrivers',
+		expectedType => 'KIWIXMLDriverData',
+		itemName     => 'drivers',
+		itemsToAdd   => $drivers,
+		profNames    => $profNames
+	);
+	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
 		return;
 	}
-	#==========================================
-	# Verify array antries
-	#------------------------------------------
-	my @drvsToAdd = @{$drivers};
-	for my $drv (@drvsToAdd) {
-		if ( ref($drv) ne 'KIWIXMLDriverData' ) {
-			my $msg = 'addDrivers: found array item not of type '
-				. 'KIWIXMLDriverData in driver array';
-			$kiwi -> error ($msg);
-			$kiwi -> failed ();
-			return;
-		}
-	}
+	my $kiwi = $this->{kiwi};
 	#==========================================
 	# Figure out what profiles to change
 	#------------------------------------------
@@ -591,30 +573,17 @@ sub addDrivers {
 		return;
 	}
 	for my $prof (@profsToUse) {
-		for my $drvData (@drvsToAdd) {
-			my $arch = $drvData -> getArch();
-			my $name = $drvData -> getName();
-			if ($arch) {
-				if ($this->{imageConfig}->{$prof}->{$arch} &&
-					$this->{imageConfig}->{$prof}->{$arch}{drivers}) {
-					my @existDrv = 
-						@{$this->{imageConfig}->{$prof}->{$arch}{drivers}};
-					push @existDrv, $name;
-					$this->{imageConfig}->{$prof}->{$arch}{drivers} =
-						\@existDrv;
-				} else {
-					my @newDrv = ($name);
-					$this->{imageConfig}->{$prof}->{$arch}{drivers} = \@newDrv;
-				}
-			} else {
-				if ($this->{imageConfig}->{$prof}{drivers}) {
-					my @existDrv = @{$this->{imageConfig}->{$prof}{drivers}};
-					push @existDrv, $name;
-					$this->{imageConfig}->{$prof}{drivers} =  \@existDrv;
-				} else {
-					my @newDrv = ($name);
-					$this->{imageConfig}->{$prof}{drivers} = \@newDrv;
-				}
+		for my $drvObj (@{$drivers}) {
+			my $arch = $drvObj -> getArch();
+			my %storeData = (
+			    accessID => 'drivers',
+				arch     => $arch,
+				dataObj  => $drvObj,
+				profName => $prof,
+				type     => 'image'
+			);
+			if (! $this -> __storeInstallData(\%storeData)) {
+				return;
 			}
 		}
 	}
@@ -1079,28 +1048,11 @@ sub getDescriptionInfo {
 #------------------------------------------
 sub getDrivers {
 	# ...
-	# Return an array reference of KIWIXMLDriverData objects that are
-	# specified to be part of the current profile(s) and architecture
+	# Return an array ref containing DriverData objects for the current
+	# selected build profile(s)
 	# ---
 	my $this = shift;
-	my $arch = $this->{arch};
-	my $kiwi = $this->{kiwi};
-	my @activeProfs = @{$this->{selectedProfiles}};
-	my @drvs = ();
-	for my $prof (@activeProfs) {
-		if ($this->{imageConfig}->{$prof}{drivers}) {
-			push @drvs, @{$this->{imageConfig}->{$prof}{drivers}};
-		}
-		if ($this->{imageConfig}{$prof}{$arch}{drivers}) {
-			push @drvs, @{$this->{imageConfig}->{$prof}->{$arch}{drivers}};
-		}
-	}
-	my @driverInfo = ();
-	for my $drv (@drvs) {
-		my %init = ( name => $drv );
-		push @driverInfo, KIWIXMLDriverData -> new($kiwi, \%init);
-	}
-	return \@driverInfo;
+	return $this -> __getInstallData('drivers');
 }
 
 #==========================================
@@ -2640,11 +2592,9 @@ sub __populateArchiveInfo {
 	my @pckgsNodes = $this->{systemTree} -> getElementsByTagName('packages');
 	for my $pckgNd (@pckgsNodes) {
 		my $profiles = $pckgNd -> getAttribute('profiles');
-		my @profsToProcess;
+		my @profsToProcess = ('kiwi_default');
 		if ($profiles) {
 			@profsToProcess = split /,/, $profiles;
-		} else {
-			@profsToProcess = ('kiwi_default');
 		}
 		my $type = $pckgNd -> getAttribute('type');
 		my @archiveNodes = $pckgNd -> getElementsByTagName('archive');
@@ -2722,61 +2672,38 @@ sub __populateDriverInfo {
 	# drivers data from the XML file.
 	# ---
 	my $this = shift;
-	my @drvNodes = $this->{systemTree}
-		-> getElementsByTagName ('drivers');
-	for my $drvNode (@drvNodes) {
-		my @drivers = $drvNode -> getElementsByTagName ('file');
-		my %archDrvs;
-		my @drvNames;
-		for my $drv (@drivers) {
-			my $name = $drv -> getAttribute('name');
-			my $arch = $drv -> getAttribute('arch');
-			if (! $arch) {
-				push @drvNames, $name
-			} else {
-				if (defined $archDrvs{$arch}) {
-					my @dLst = @{$archDrvs{$arch}};
-					push @dLst, $name;
-					$archDrvs{$arch} = \@dLst;
-				} else {
-					my @dLst = ($name, );
-					$archDrvs{$arch} = \@dLst;
-				}
-			}
+	my $kiwi = $this->{kiwi};
+	my @drvNodes = $this->{systemTree} -> getElementsByTagName ('drivers');
+	for my $drvNd (@drvNodes) {
+		my $profiles = $drvNd -> getAttribute('profiles');
+		my @profsToProcess = ('kiwi_default');
+		if ($profiles) {
+			@profsToProcess = split /,/, $profiles;
 		}
-		my @pNameLst = ('kiwi_default');
-		my $profNames = $drvNode -> getAttribute('profiles');
-		if ($profNames) {
-			@pNameLst = split /,/, $profNames;
-		}
-		for my $profName (@pNameLst) {
-			my $drivers = $this->{imageConfig}
-				->{$profName}->{drivers};
-			if (defined $drivers) {
-				my @dLst = @{$this->{imageConfig}->{$profName}->{drivers}};
-				push @dLst, @drvNames;
-				$this->{imageConfig}->{$profName}->{drivers} = \@dLst;
-			} else {
-				$this->{imageConfig}->{$profName}->{drivers} = \@drvNames;
-			}
-			for my $arch (keys %archDrvs) {
-				my $drivers = $this->{imageConfig}
-					->{$profName}->{$arch}->{drivers};
-				if (defined $drivers) {
-					my @dLst = @{$this->{imageConfig}
-						->{$profName}->{$arch}->{drivers}};
-					my @archLst = @{$archDrvs{$arch}};
-					push @dLst, @archLst;
-					$this->{imageConfig}->{$profName}
-						->{$arch}->{drivers} =	\@dLst;
-				} else {
-					$this->{imageConfig}->{$profName}
-						->{$arch}->{drivers} =	$archDrvs{$arch};
+		my @driverNodes = $drvNd -> getElementsByTagName ('file');
+		for my $prof (@profsToProcess) {
+			for my $dNd (@driverNodes) {
+				my $arch = $dNd -> getAttribute('arch');
+				my $name = $dNd -> getAttribute('name');
+				my %drvData = (
+					arch => $arch,
+					name => $name
+				);
+				my $drvObj = KIWIXMLDriverData -> new($kiwi, \%drvData);
+				my %storeData = (
+					accessID => 'drivers',
+					arch     => $arch,
+					dataObj  => $drvObj,
+					profName => $prof,
+					type     => 'image'
+				);
+				if (! $this -> __storeInstallData(\%storeData)) {
+					return;
 				}
 			}
 		}
 	}
-	return $this;
+	return 1;
 }
 
 #==========================================
@@ -2792,11 +2719,9 @@ sub __populateIgnorePackageInfo {
 	my @pckgsNodes = $this->{systemTree} -> getElementsByTagName('packages');
 	for my $pckgNd (@pckgsNodes) {
 		my $profiles = $pckgNd -> getAttribute('profiles');
-		my @profsToProcess;
+		my @profsToProcess = ('kiwi_default');
 		if ($profiles) {
 			@profsToProcess = split /,/, $profiles;
-		} else {
-			@profsToProcess = ('kiwi_default');
 		}
 		my $type = $pckgNd -> getAttribute('type');
 		my @ignoreNodes = $pckgNd -> getElementsByTagName('ignore');
@@ -2840,11 +2765,9 @@ sub __populatePackageInfo {
 	for my $pckgNd (@pckgsNodes) {
 		my $installOptType = $pckgNd -> getAttribute('patternType');
 		my $profiles = $pckgNd -> getAttribute('profiles');
-		my @profsToProcess;
+		my @profsToProcess = ('kiwi_default');
 		if ($profiles) {
 			@profsToProcess = split /,/, $profiles;
-		} else {
-			@profsToProcess = ('kiwi_default');
 		}
 		my $type = $pckgNd -> getAttribute('type');
 		my @packagesNodes = $pckgNd -> getElementsByTagName('package');
@@ -2918,11 +2841,9 @@ sub __populatePackageCollectionInfo {
 	my @pckgsNodes = $this->{systemTree} -> getElementsByTagName('packages');
 	for my $pckgNd (@pckgsNodes) {
 		my $profiles = $pckgNd -> getAttribute('profiles');
-		my @profsToProcess;
+		my @profsToProcess = ('kiwi_default');
 		if ($profiles) {
 			@profsToProcess = split /,/, $profiles;
-		} else {
-			@profsToProcess = ('kiwi_default');
 		}
 		my $type = $pckgNd -> getAttribute('type');
 		my @collectNodes = $pckgNd -> getElementsByTagName('opensusePattern');
@@ -2975,11 +2896,9 @@ sub __populateProductInfo {
 	my @pckgsNodes = $this->{systemTree} -> getElementsByTagName('packages');
 	for my $pckgNd (@pckgsNodes) {
 		my $profiles = $pckgNd -> getAttribute('profiles');
-		my @profsToProcess;
+		my @profsToProcess = ('kiwi_default');
 		if ($profiles) {
 			@profsToProcess = split /,/, $profiles;
-		} else {
-			@profsToProcess = ('kiwi_default');
 		}
 		my $type = $pckgNd -> getAttribute('type');
 		my @productNodes = $pckgNd -> getElementsByTagName('opensuseProduct');

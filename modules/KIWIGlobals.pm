@@ -19,6 +19,7 @@ package KIWIGlobals;
 #------------------------------------------
 use strict;
 use warnings;
+use File::Basename;
 use KIWILocator;
 use KIWILog;
 use KIWIQX qw (qxx);
@@ -50,7 +51,7 @@ sub new {
 	# Globals (generic)
 	#------------------------------------------
 	my %data;
-	$data{Version}         = "5.04.25";
+	$data{Version}         = "5.04.27";
 	$data{Publisher}       = "SUSE LINUX Products GmbH";
 	$data{Preparer}        = "KIWI - http://opensuse.github.com/kiwi";
 	$data{ConfigName}      = "config.xml";
@@ -348,6 +349,14 @@ sub mount {
 	my %fsattr;
 	my $type;
 	#==========================================
+	# Check source
+	#------------------------------------------
+	if (! $source) {
+		$kiwi -> error ("No mount source specified:");
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
 	# Check for DISK file / device
 	#------------------------------------------
 	if ((-f $source) || (-b $source)) {
@@ -365,16 +374,11 @@ sub mount {
 			# no block id information, handle this as a disk 
 			$this->{isdisk} = 1;
 			if (-b $source) {
-				my $devcopy = $source;
-				my $lastc = chop $devcopy;
-				if ($lastc =~ /\d/) {
-					$source .= "p";
+				my $pdev = $this -> getPartDevice ($source,2);
+				if (! -b $pdev) {
+					$pdev = $this -> getPartDevice ($source,1);
 				}
-				if (! -b $source."2") {
-					$source .= "1";
-				} else {
-					$source .= "2";
-				}
+				$source = $pdev;
 			} else {
 				$status = qxx ("/sbin/losetup -f --show $source 2>&1");
 				chomp $status;
@@ -534,6 +538,32 @@ sub mount {
 	}
 	$this->{mountdev} = $source;
 	return $dest;
+}
+
+#==========================================
+# getPartDevice
+#------------------------------------------
+sub getPartDevice {
+	# ...
+	# find the correct partition device according
+	# to the disk device and partition number
+	# ---
+	my $this = shift;
+	my $disk = shift;
+	my $part = shift;
+	my $devcopy = $disk;
+	my $devbase = basename $devcopy;
+	my @checklist = (
+		"/dev/mapper/".$devbase."p".$part,
+		"/dev/".$devbase."p".$part,
+		"/dev/".$devbase.$part
+	);
+	foreach my $device (@checklist) {
+		if (-b $device) {
+			return $device;
+		}
+	}
+	return;
 }
 
 #==========================================
@@ -948,6 +978,9 @@ sub checkLVMbind {
 	# ---
 	my $this = shift;
 	my $sdev = shift;
+	if (! $sdev) {
+		return;
+	}
 	my @UmountStack = @{$this->{UmountStack}};
 	my $vgname = qxx ("pvs --noheadings -o vg_name $sdev 2>/dev/null");
 	my $result = $? >> 8;

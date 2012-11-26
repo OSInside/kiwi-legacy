@@ -1582,11 +1582,11 @@ sub usage {
 	print "      ext[234]. Set to 0 to disable time-dependent checks.\n";
 	print "\n";
 	print "    [ --fat-storage <size in MB> ]\n";
-	print "      This option turns on the syslinux bootloader and makes\n";
+	print "      This option turns on the grub2 bootloader and makes\n";
 	print "      the image to use LVM for the operating system. The size\n";
-	print "      of the syslinux required bootpartition is set to the\n";
+	print "      of the also set fat based bootpartition is set to the\n";
 	print "      specified value. This is useful if the fat space is not\n";
-	print "      only used for booting the system but also for custom\n";
+	print "      only used for booting the system but also for custom data\n";
 	print "      Therefore this option makes sense when building Windows\n";
 	print "      friendly USB stick images\n";
 	print "\n";
