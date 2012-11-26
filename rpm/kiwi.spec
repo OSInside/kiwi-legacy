@@ -191,7 +191,9 @@ Authors:
 
 %package -n kiwi-pxeboot
 PreReq:         coreutils
+%ifarch %ix86 x86_64
 Requires:       syslinux
+%endif
 Summary:        openSUSE - KIWI Image System PXE boot structure
 License:        GPL-2.0+
 Group:          System/Management
@@ -212,7 +214,9 @@ Authors:
 %package -n kiwi-desc-isoboot
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
+%ifarch %ix86 x86_64
 Requires:       syslinux
+%endif
 Requires:       dosfstools
 %if 0%{?suse_version}
 Requires:       virt-utils
@@ -252,7 +256,6 @@ Meta-package to pull in all requires to build a isoboot media.
 %package -n kiwi-desc-vmxboot
 Requires:       kiwi = %{version}
 Requires:       parted
-Requires:       syslinux
 Requires:       e2fsprogs
 Requires:       dosfstools
 %if 0%{?suse_version}
@@ -264,6 +267,7 @@ Requires:       device-mapper-multipath
 Requires:       qemu-img
 %endif
 %ifarch %ix86 x86_64
+Requires:       syslinux
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %else
@@ -338,7 +342,6 @@ Meta-package to pull in all requires to build a netboot media.
 %package -n kiwi-desc-oemboot
 Requires:       kiwi = %{version}
 Requires:       parted
-Requires:       syslinux
 Requires:       e2fsprogs
 Requires:       dosfstools
 %if 0%{?suse_version}
@@ -351,6 +354,7 @@ Requires:       device-mapper-multipath
 Requires:       qemu-img
 %endif
 %ifarch %ix86 x86_64
+Requires:       syslinux
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %else
