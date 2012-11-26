@@ -348,6 +348,14 @@ sub mount {
 	my %fsattr;
 	my $type;
 	#==========================================
+	# Check source
+	#------------------------------------------
+	if (! $source) {
+		$kiwi -> error ("No mount source specified:");
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
 	# Check for DISK file / device
 	#------------------------------------------
 	if ((-f $source) || (-b $source)) {
@@ -948,6 +956,9 @@ sub checkLVMbind {
 	# ---
 	my $this = shift;
 	my $sdev = shift;
+	if (! $sdev) {
+		return;
+	}
 	my @UmountStack = @{$this->{UmountStack}};
 	my $vgname = qxx ("pvs --noheadings -o vg_name $sdev 2>/dev/null");
 	my $result = $? >> 8;
