@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Mon Nov 26 15:08:33 CET 2012 - ms@suse.de
+
+- fixed setupInstallStick() if called in Studio mode. If this
+  function is called with a disk device as reference it expects
+  the target USB stick to be plugged in, in order to create the
+  install image directly on that stick. For Studio this does
+  not work because the target stick is never attached to the
+  containment within this call happens. Thus this fix creates
+  the install USB stick image in a loop device
+
+-------------------------------------------------------------------
 Thu Nov 15 12:44:56 CET 2012 - ms@suse.de
 
 - make sure possibly left over dhcpcd pid file from a -T (test) call
