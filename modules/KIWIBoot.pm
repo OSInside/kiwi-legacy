@@ -1140,77 +1140,10 @@ sub setupInstallStick {
 		$gotsys   = 0;
 	}
 	#==========================================
-	# check image type
+	# check for boot menu entry base name
 	#------------------------------------------
 	if ($gotsys) {
-		#==========================================
-		# build label from xml data
-		#------------------------------------------
 		$this->{bootlabel} = $xml -> getImageDisplayName();
-		if (! $haveDiskDevice) {
-			#==========================================
-			# bind $system to loop device
-			#------------------------------------------
-			$kiwi -> info ("Binding disk to loop device");
-			if (! $this -> bindDiskDevice ($system)) {
-				$kiwi -> failed ();
-				return;
-			}
-			$kiwi -> done();
-			#==========================================
-			# setup device mapper
-			#------------------------------------------
-			$kiwi -> info ("Setup device mapper for partition access");
-			if (! $this -> bindDiskPartitions ($this->{loop})) {
-				$kiwi -> failed ();
-				$this -> cleanLoop ();
-				return;
-			}
-			$kiwi -> done();
-		} else {
-			$kiwi -> info ("Using disk device: $haveDiskDevice");
-			$this->{loop}     = $haveDiskDevice;
-			$this->{bindloop} = $this -> __getPartBase ($haveDiskDevice);
-			if (! $this->{bindloop}) {
-				if (! $this -> bindDiskPartitions ($haveDiskDevice)) {
-					$kiwi -> failed ();
-					return;
-				}
-				$this->{bindloop} = $this -> __getPartBase (
-					$haveDiskDevice
-				);
-				if (! $this->{bindloop}) {
-					$kiwi -> failed ();
-					return;
-				}
-			}
-			$kiwi -> done();
-		}
-		#==========================================
-		# find partition to check
-		#------------------------------------------
-		my $sdev = $this->{bindloop}."2";
-		if (! -e $sdev) {
-			$sdev = $this->{bindloop}."1";
-		}
-		#==========================================
-		# check for activated volume group
-		#------------------------------------------
-		$sdev = $main::global -> checkLVMbind ($sdev);
-		if ($main::global -> isMountLVM()) {
-			$this->{lvmgroup} = $main::global -> getMountLVMGroup();
-			$this->{lvm} = 1;
-		}
-		#==========================================
-		# perform mount call
-		#------------------------------------------
-		if (! $main::global -> mount ($sdev,$tmpdir,$type{fsmountoptions})) {
-			$kiwi -> error  ("Failed to mount system partition: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return;
-		}
-		$this -> cleanLoop();
 	}
 	#==========================================
 	# Build md5sum of system image
