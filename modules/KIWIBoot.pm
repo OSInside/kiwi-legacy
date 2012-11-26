@@ -1266,7 +1266,7 @@ sub setupInstallStick {
 	#==========================================
 	# create/use disk
 	#------------------------------------------
-	if (! $haveDiskDevice) {
+	if ((! $haveDiskDevice) || ($this->{gdata}->{StudioNode})) {
 		#==========================================
 		# Create virtual disk to be dumped on stick
 		#------------------------------------------
@@ -1353,7 +1353,7 @@ sub setupInstallStick {
 		return;
 	}
 	$kiwi -> done();
-	if (! $haveDiskDevice ) {
+	if ((! $haveDiskDevice ) || ($this->{gdata}->{StudioNode})) {
 		#==========================================
 		# setup device mapper
 		#------------------------------------------
@@ -1565,8 +1565,10 @@ sub setupInstallStick {
 	#==========================================
 	# Install boot loader on disk
 	#------------------------------------------
-	my $bootdevice = $diskname;
-	if ($haveDiskDevice) {
+	my $bootdevice;
+	if ((! $haveDiskDevice) || ($this->{gdata}->{StudioNode})) {
+		$bootdevice = $diskname;
+	} else {
 		$bootdevice = $this->{loop};
 	}
 	if (! $this -> installBootLoader ($bootloader, $bootdevice)) {
@@ -1576,7 +1578,7 @@ sub setupInstallStick {
 	}
 	$this -> cleanLoopMaps();
 	$this -> cleanLoop();
-	if (! $haveDiskDevice) {
+	if ((! $haveDiskDevice) || ($this->{gdata}->{StudioNode})) {
 		$kiwi -> info ("Created $diskname to be dd'ed on Stick");
 	} else {
 		$kiwi -> info ("Successfully created install stick on $this->{loop}");
