@@ -1152,7 +1152,7 @@ sub setupInstallStick {
 		if (! $haveDiskDevice) {
 			$this -> buildMD5Sum ($system);
 		} else {
-			$this -> buildMD5Sum ($this->{loop},$system);
+			$this -> buildMD5Sum ($haveDiskDevice,$system);
 		}
 	}
 	#==========================================
