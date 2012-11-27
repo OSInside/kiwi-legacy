@@ -4268,12 +4268,16 @@ sub buildMD5Sum {
 	# Create image md5sum
 	#------------------------------------------
 	$kiwi -> info ("Creating image MD5 sum...");
-	my $size = $main::global -> isize ($image);
-	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
+	my $size = int $main::global -> isize ($image);
+	my $primes = qxx ("factor $size");
+	$primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
-		last if ($blocksize * $factor > 65464);
-		$blocksize *= $factor;
+		my $iFact = int $factor;
+		if ($blocksize * $iFact > 65464) {
+			last;
+		}
+		$blocksize *= $iFact;
 	}
 	my $blocks = $size / $blocksize;
 	my $sum  = qxx ("cat $image | md5sum - | cut -f 1 -d-");
