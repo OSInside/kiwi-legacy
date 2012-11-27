@@ -5058,6 +5058,77 @@ function mountSystemSeedBtrFS {
 	return 0
 }
 #======================================
+# mountSystemUnionFS
+#--------------------------------------
+function mountSystemUnionFS {
+	local loopf=$1
+	local roDir=/read-only
+	local rwDir=/read-write
+	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
+	#======================================
+	# load fuse module
+	#--------------------------------------
+	modprobe fuse &>/dev/null
+	#======================================
+	# create overlay mount points
+	#--------------------------------------
+	mkdir -p $roDir
+	mkdir -p $rwDir
+	#======================================
+	# check read/only device location
+	#--------------------------------------
+	if [ ! -z "$NFSROOT" ];then
+		roDevice="$imageRootDevice"
+	fi
+	#======================================
+	# mount read only device
+	#--------------------------------------
+	if ! kiwiMount "$roDevice" "$roDir" "" $loopf;then
+		Echo "Failed to mount read only filesystem"
+		return 1
+	fi
+	#======================================
+	# check read/write device location
+	#--------------------------------------
+	if [ ! -z "$kiwi_ramonly" ];then
+		rwDevice=tmpfs
+	fi
+	if [ "$rwDevice" = "tmpfs" ];then
+		#======================================
+		# write into tmpfs
+		#--------------------------------------
+		if ! mount -t tmpfs tmpfs $rwDir >/dev/null;then
+			Echo "Failed to mount tmpfs read/write filesystem"
+			return 1
+		fi
+	else
+		#======================================
+		# write to another device
+		#--------------------------------------
+		if [ "$roDevice" = "nfs" ];then
+			rwDevice="-o nolock,rw $nfsRootServer:$rwDevice"
+		fi
+		if [ ! "$roDevice" = "nfs" ] && ! setupReadWrite; then
+			return 1
+		fi
+		if ! mount $rwDevice $rwDir >/dev/null;then
+			Echo "Failed to mount read/write filesystem"
+			return 1
+		fi
+	fi
+	#======================================
+	# setup fuse union mount
+	#--------------------------------------
+	local opts="cow,max_files=65000,allow_other,use_ino,suid,dev,nonempty"
+	if ! unionfs -o $opts $rwDir=RW:$roDir=RO /mnt;then
+		Echo "Failed to mount root via unionfs"
+		return 1
+	fi
+	export haveUnionFS=yes
+	return 0
+}
+#======================================
 # mountSystemClicFS
 #--------------------------------------
 function mountSystemClicFS {
@@ -5365,6 +5436,8 @@ function mountSystem {
 			mountSystemClicFS $2
 		elif [ "$unionFST" = "seed" ];then
 			mountSystemSeedBtrFS $2
+		elif [ "$unionFST" = "unionfs" ];then
+			mountSystemUnionFS $2
 		else
 			systemException \
 				"Unknown overlay mount method: $unionFST" \
