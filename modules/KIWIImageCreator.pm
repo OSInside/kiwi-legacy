@@ -1291,7 +1291,7 @@ sub __prepareTree {
 		$kiwi -> failed ();
 		return;
 	}
-	if (! $xml -> writeXMLDescription ($root->getRootPath())) {
+	if (! $xml -> writeXMLDescription_legacy ($root->getRootPath())) {
 		$kiwi -> error ("Couldn't write XML description");
 		$kiwi -> failed ();
 		return;
@@ -1328,14 +1328,14 @@ sub checkType {
 		$xml -> __setTypeAttribute ("bootloader","grub2");
 		$xml -> __setTypeAttribute ("bootfilesystem","fat16");
 		$xml -> __setSystemDiskElement ();
-		$xml -> writeXMLDescription ($root);
+		$xml -> writeXMLDescription_legacy ($root);
 	} elsif ($cmdL->getLVM()) {
 		# /.../
 		# if the option --lvm is set, we add/update a systemdisk
 		# element which triggers the use of LVM
 		# ----
 		$xml -> __setSystemDiskElement ();
-		$xml -> writeXMLDescription ($root);
+		$xml -> writeXMLDescription_legacy ($root);
 	}
 	#==========================================
 	# check for required filesystem tool(s)

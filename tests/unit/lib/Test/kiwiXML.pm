@@ -37,6 +37,7 @@ use KIWIXMLProfileData;
 use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
 use KIWIXMLSplitData;
+use KIWIXMLStripData;
 use KIWIXMLSystemdiskData;
 use KIWIXMLTypeData;
 use KIWIXMLUserData;
@@ -1041,6 +1042,252 @@ sub test_addDrivers_legacy {
 }
 
 #==========================================
+# test_addFilesToDeleteImproperDataT
+#------------------------------------------
+sub test_addFilesToDeleteImproperDataT {
+	# ...
+	# Verify addFilesToDelete behaves as expected, pass an array ref
+	# containing a string
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @delNames = qw /vboxsf epat dcdbas/;
+	my @delFlsToAdd = ();
+	for my $delName (@delNames) {
+		push @delFlsToAdd, KIWIXMLStripData -> new($kiwi, $delName);
+	}
+	push @delFlsToAdd, 'slip';
+	push @delFlsToAdd, KIWIXMLStripData -> new($kiwi, 'x25_asy');
+	my $res = $xml -> addFilesToDelete(\@delFlsToAdd, 'default');
+	my $expected = 'addFilesToDelete: found array item not of type '
+		. 'KIWIXMLStripData in deletefiles array';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addFilesToDeleteInvalidProf
+#------------------------------------------
+sub test_addFilesToDeleteInvalidProf {
+	# ...
+	# Verify addFilesToDelete behaves as expected, pass a profile name that
+	# is not defined.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @delNames = qw /vboxsf epat dcdbas/;
+	my @delFlsToAdd = ();
+	for my $delFl (@delNames) {
+		push @delFlsToAdd, KIWIXMLStripData -> new($kiwi, $delFl);
+	}
+	my @profs = qw / profA timbuktu profB /;
+	my $res = $xml -> addFilesToDelete(\@delFlsToAdd, \@profs);
+	my $expected = "Attempting to add deletefiles to 'timbuktu', but "
+		. 'this profile is not specified in the configuration.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addFilesToDeleteNoArgs
+#------------------------------------------
+sub test_addFilesToDeleteNoArgs {
+	# ...
+	# Verify addFilesToDelete behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addFilesToDelete();
+	my $expected = 'addFilesToDelete: no deletefiles specified, nothing to do';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addFilesToDeleteToCurrentProf
+#------------------------------------------
+sub test_addFilesToDeleteToCurrentProf {
+	# ...
+	# Verify addFilesToDelete behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	# Set up the profile to which the drivers are to be added
+	my @useProf = ('profA');
+	$xml = $xml -> setSelectionProfileNames(\@useProf);
+	my $expected = 'Using profile(s): profA';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	# Add the drivers, using no 2nd arg results in drivers to be added to
+	# profA only
+	my @delNames = qw /vboxsf epat dcdbas/;
+	my @delFlsToAdd = ();
+	for my $delFl (@delNames) {
+		my %init = ( name => $delFl );
+		push @delFlsToAdd, KIWIXMLStripData -> new($kiwi, \%init);
+	}
+	$xml = $xml -> addFilesToDelete(\@delFlsToAdd);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	# Verify this has the expected results, we should get the default drivers
+	# plus the arch specific profile drivers plus the ones added
+	my @defDelFls = qw (
+		/usr/bin/zoo
+		/lib/lsb/init-functions
+		/usr/lib/libogg.so.0
+	);
+	my @expectedDel = @defDelFls;
+	push @expectedDel, @delNames;
+	my $arch = $xml -> getArch();
+	if ($arch eq 'ppc64') {
+		push @expectedDel, '/usr/lib/sushi-start';
+	} elsif ($arch eq 's390') {
+		push @expectedDel, '/usr/lib/null_applet';
+	}
+	push @expectedDel, '/usr/lib/trashapplet';
+	my @delFiles = @{$xml -> getFilesToDelete()};
+	my @delNamesUsed = ();
+	for my $delFl (@delFiles) {
+		push @delNamesUsed, $delFl -> getName();
+	}
+	$this -> assert_array_equal(\@delNamesUsed, \@expectedDel);
+	# Check that the drivers were not added anywhere else
+	# reset the active profiles and we should only get the default drivers
+	$xml = $xml -> setSelectionProfileNames();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	@delFiles = @{$xml -> getFilesToDelete()};
+	@delNamesUsed = ();
+	for my $delFl (@delFiles) {
+		push @delNamesUsed, $delFl -> getName();
+	}
+	$this -> assert_array_equal(\@delNamesUsed, \@defDelFls);
+	return;
+}
+
+#==========================================
+# test_addFilesToDeleteToDefault
+#------------------------------------------
+sub test_addFilesToDeleteToDefault {
+	# ...
+	# Verify addFilesToDelete behaves as expected when the keyword
+	# "default" is used as the second argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	# Add the drivers, using the keyword "default" as 2nd arg
+	my @delNames = qw /vboxsf epat dcdbas/;
+	my @delFlsToAdd = ();
+	for my $delFl (@delNames) {
+		my %init = ( name => $delFl );
+		push @delFlsToAdd, KIWIXMLStripData -> new($kiwi, \%init);
+	}
+	$xml = $xml -> addFilesToDelete(\@delFlsToAdd, 'default');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	# Verify this has the expected results, we should get the default drivers
+	# plus the arch specific profile drivers plus the ones added
+	my @defDelFls = qw (
+		/usr/bin/zoo
+		/lib/lsb/init-functions
+		/usr/lib/libogg.so.0
+	);
+	my @expectedDel = @defDelFls;
+	push @expectedDel, @delNames;
+	my @delFiles = @{$xml -> getFilesToDelete()};
+	my @delNamesUsed = ();
+	for my $delFl (@delFiles) {
+		push @delNamesUsed, $delFl -> getName();
+	}
+	$this -> assert_array_equal(\@delNamesUsed, \@expectedDel);
+	return;
+}
+
+#==========================================
+# test_addFilesToDeleteWrongArgs
+#------------------------------------------
+sub test_addFilesToDeleteWrongArgs {
+	# ...
+	# Verify addFilesToDelete behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addFilesToDelete ('loop', 'default');
+	my $expected = 'addFilesToDelete: expecting array ref for '
+		. 'KIWIXMLStripData array as first argument';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
 # test_addImagePackages_legacy
 #------------------------------------------
 sub test_addImagePackages_legacy {
@@ -1128,6 +1375,250 @@ sub test_addImagePatterns_legacy {
 		}
 	}
 	$this -> assert_array_equal(\@expectedPats, \@patterns);
+	return;
+}
+
+#==========================================
+# test_addLibsToKeepImproperDataT
+#------------------------------------------
+sub test_addLibsToKeepImproperDataT {
+	# ...
+	# Verify addLibsToKeep behaves as expected, pass an array ref
+	# containing a string
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @libNames = qw /libpng libtiff libgif/;
+	my @libsToKeep = ();
+	for my $libName (@libNames) {
+		push @libsToKeep, KIWIXMLStripData -> new($kiwi, $libName);
+	}
+	push @libsToKeep, 'slip';
+	push @libsToKeep, KIWIXMLStripData -> new($kiwi, 'x25_asy');
+	my $res = $xml -> addLibsToKeep(\@libsToKeep, 'default');
+	my $expected = 'addLibsToKeep: found array item not of type '
+		. 'KIWIXMLStripData in keeplibs array';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addLibsToKeepInvalidProf
+#------------------------------------------
+sub test_addLibsToKeepInvalidProf {
+	# ...
+	# Verify addLibsToKeep behaves as expected, pass a profile name that
+	# is not defined.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @libNames = qw /libcurl libmenu libz/;
+	my @libsToKeep = ();
+	for my $libName (@libNames) {
+		push @libsToKeep, KIWIXMLStripData -> new($kiwi, $libName);
+	}
+	my @profs = qw / profA timbuktu profB /;
+	my $res = $xml -> addLibsToKeep(\@libsToKeep, \@profs);
+	my $expected = "Attempting to add keeplibs to 'timbuktu', but "
+		. 'this profile is not specified in the configuration.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addLibsToKeepNoArgs
+#------------------------------------------
+sub test_addLibsToKeepNoArgs {
+	# ...
+	# Verify addLibsToKeep behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addLibsToKeep();
+	my $expected = 'addLibsToKeep: no keeplibs specified, nothing to do';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addLibsToKeepToCurrentProf
+#------------------------------------------
+sub test_addLibsToKeepToCurrentProf {
+	# ...
+	# Verify addLibsToKeep behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	# Set up the profile to which the drivers are to be added
+	my @useProf = ('profA');
+	$xml = $xml -> setSelectionProfileNames(\@useProf);
+	my $expected = 'Using profile(s): profA';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	# Add the drivers, using no 2nd arg results in drivers to be added to
+	# profA only
+	my @libNames = qw /libcurl libstdc++ libz /;
+	my @libsToKeep = ();
+	for my $libName (@libNames) {
+		my %init = ( name => $libName );
+		push @libsToKeep, KIWIXMLStripData -> new($kiwi, \%init);
+	}
+	$xml = $xml -> addLibsToKeep(\@libsToKeep);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	# Verify this has the expected results, we should get the default drivers
+	# plus the arch specific profile drivers plus the ones added
+	my @defLibNames = qw (
+		libxml2.so
+		libcrack.so
+	);
+	my @expectedLibs = @defLibNames;
+	push @expectedLibs, @libNames;
+	my $arch = $xml -> getArch();
+	if ($arch eq 'ppc64') {
+		push @expectedLibs, 'libldap-2.4.so';
+	} elsif ($arch eq 's390') {
+		push @expectedLibs, 'virt-manager-launch';
+	}
+	push @expectedLibs, 'libjson.so';
+	my @libs = @{$xml -> getLibsToKeep()};
+	my @libNamesUsed = ();
+	for my $lib (@libs) {
+		push @libNamesUsed, $lib -> getName();
+	}
+	$this -> assert_array_equal(\@libNamesUsed, \@expectedLibs);
+	# Check that the drivers were not added anywhere else
+	# reset the active profiles and we should only get the default drivers
+	$xml = $xml -> setSelectionProfileNames();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	@libs = @{$xml -> getLibsToKeep()};
+	@libNamesUsed = ();
+	for my $lib (@libs) {
+		push @libNamesUsed, $lib -> getName();
+	}
+	$this -> assert_array_equal(\@libNamesUsed, \@defLibNames);
+	return;
+}
+
+#==========================================
+# test_addLibsToKeepToDefault
+#------------------------------------------
+sub test_addLibsToKeepToDefault {
+	# ...
+	# Verify addLibsToKeep behaves as expected when the keyword
+	# "default" is used as the second argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	# Add the drivers, using the keyword "default" as 2nd arg
+	my @libNames = qw /libpng libz/;
+	my @libsToKeep = ();
+	for my $libName (@libNames) {
+		my %init = ( name => $libName );
+		push @libsToKeep, KIWIXMLStripData -> new($kiwi, \%init);
+	}
+	$xml = $xml -> addLibsToKeep(\@libsToKeep, 'default');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	# Verify this has the expected results, we should get the default drivers
+	# plus the arch specific profile drivers plus the ones added
+	my @defLibNames = qw (
+		libxml2.so
+		libcrack.so
+	);
+	my @expectedLibs = @defLibNames;
+	push @expectedLibs, @libNames;
+	my @libs = @{$xml -> getLibsToKeep()};
+	my @libNamesUsed = ();
+	for my $lib (@libs) {
+		push @libNamesUsed, $lib -> getName();
+	}
+	$this -> assert_array_equal(\@libNamesUsed, \@expectedLibs);
+	return;
+}
+
+#==========================================
+# test_addLibsToKeepWrongArgs
+#------------------------------------------
+sub test_addLibsToKeepWrongArgs {
+	# ...
+	# Verify addLibsToKeep behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addLibsToKeep ('loop', 'default');
+	my $expected = 'addLibsToKeep: expecting array ref for '
+		. 'KIWIXMLStripData array as first argument';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
 	return;
 }
 
@@ -3234,9 +3725,9 @@ sub test_addRepositoriesNoTypeInf_legacy {
 }
 
 #==========================================
-# test_addStripConsistentCall
+# test_addStripConsistentCall_legacy
 #------------------------------------------
-sub test_addStripConsistentCall {
+sub test_addStripConsistentCall_legacy {
 	# ...
 	# Verify proper operation of addStrip method with improper argument
 	# ---
@@ -3247,8 +3738,8 @@ sub test_addStripConsistentCall {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @Del= qw (/etc/hosts /bin/zsh);
-	$xml -> addStrip ('files', @Del);
-	my @delFiles = $xml -> getStripDelete();
+	$xml -> __addStrip_legacy ('files', @Del);
+	my @delFiles = $xml -> __getStripDelete_legacy();
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Specified strip section type 'files' not supported.";
 	$this -> assert_str_equals($expected, $msg);
@@ -3263,9 +3754,9 @@ sub test_addStripConsistentCall {
 }
 
 #==========================================
-# test_addStripDelete
+# test_addStripDelete_legacy
 #------------------------------------------
-sub test_addStripDelete {
+sub test_addStripDelete_legacy {
 	# ...
 	# Verify proper operation of addStrip method
 	# ---
@@ -3276,8 +3767,8 @@ sub test_addStripDelete {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @Del= qw (/etc/hosts /bin/zsh);
-	$xml -> addStrip ('delete', @Del);
-	my @delFiles = $xml -> getStripDelete();
+	$xml -> __addStrip_legacy ('delete', @Del);
+	my @delFiles = $xml -> __getStripDelete_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3291,9 +3782,9 @@ sub test_addStripDelete {
 }
 
 #==========================================
-# test_addStripDelete
+# test_addStripDeleteNoPreExist_legacy
 #------------------------------------------
-sub test_addStripDeleteNoPreExist {
+sub test_addStripDeleteNoPreExist_legacy {
 	# ...
 	# Verify proper operation of addStrip method
 	# ---
@@ -3304,8 +3795,8 @@ sub test_addStripDeleteNoPreExist {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @Del= qw (/etc/hosts /bin/zsh);
-	$xml -> addStrip ('delete', @Del);
-	my @delFiles = $xml -> getStripDelete();
+	$xml -> __addStrip_legacy ('delete', @Del);
+	my @delFiles = $xml -> __getStripDelete_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3319,9 +3810,9 @@ sub test_addStripDeleteNoPreExist {
 }
 
 #==========================================
-# test_addStripLibs
+# test_addStripLibs_legacy
 #------------------------------------------
-sub test_addStripLibs {
+sub test_addStripLibs_legacy {
 	# ...
 	# Verify proper operation of addStrip method
 	# ---
@@ -3332,8 +3823,8 @@ sub test_addStripLibs {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @Libs= qw /libm libcrypt/;
-	$xml -> addStrip ('libs', @Libs);
-	my @libFiles = $xml -> getStripLibs();
+	$xml -> __addStrip_legacy ('libs', @Libs);
+	my @libFiles = $xml -> __getStripLibs_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3347,9 +3838,9 @@ sub test_addStripLibs {
 }
 
 #==========================================
-# test_addStripTools
+# test_addStripTools_legacy
 #------------------------------------------
-sub test_addStripTools {
+sub test_addStripTools_legacy {
 	# ...
 	# Verify proper operation of addStrip method
 	# ---
@@ -3360,8 +3851,8 @@ sub test_addStripTools {
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
 	my @Tools= qw /xfsrestore install-info/;
-	$xml -> addStrip ('tools', @Tools);
-	my @toolFiles = $xml -> getStripTools();
+	$xml -> __addStrip_legacy('tools', @Tools);
+	my @toolFiles = $xml -> __getStripTools_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3374,6 +3865,249 @@ sub test_addStripTools {
 	return;
 }
 
+#==========================================
+# test_addToolsToKeepImproperDataT
+#------------------------------------------
+sub test_addToolsToKeepImproperDataT {
+	# ...
+	# Verify addToolsToKeep behaves as expected, pass an array ref
+	# containing a string
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @toolNames = qw /libpng libtiff libgif/;
+	my @toolsToKeep = ();
+	for my $toolName (@toolNames) {
+		push @toolsToKeep, KIWIXMLStripData -> new($kiwi, $toolName);
+	}
+	push @toolsToKeep, 'slip';
+	push @toolsToKeep, KIWIXMLStripData -> new($kiwi, 'x25_asy');
+	my $res = $xml -> addToolsToKeep(\@toolsToKeep, 'default');
+	my $expected = 'addToolsToKeep: found array item not of type '
+		. 'KIWIXMLStripData in tools array';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addToolsToKeepInvalidProf
+#------------------------------------------
+sub test_addToolsToKeepInvalidProf {
+	# ...
+	# Verify addToolsToKeep behaves as expected, pass a profile name that
+	# is not defined.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my @toolNames = qw /libcurl libmenu libz/;
+	my @toolsToKeep = ();
+	for my $toolName (@toolNames) {
+		push @toolsToKeep, KIWIXMLStripData -> new($kiwi, $toolName);
+	}
+	my @profs = qw / profA timbuktu profB /;
+	my $res = $xml -> addToolsToKeep(\@toolsToKeep, \@profs);
+	my $expected = "Attempting to add tools to 'timbuktu', but "
+		. 'this profile is not specified in the configuration.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addToolsToKeepNoArgs
+#------------------------------------------
+sub test_addToolsToKeepNoArgs {
+	# ...
+	# Verify addToolsToKeep behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addToolsToKeep();
+	my $expected = 'addToolsToKeep: no tools specified, nothing to do';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('skipped', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_addToolsToKeepToCurrentProf
+#------------------------------------------
+sub test_addToolsToKeepToCurrentProf {
+	# ...
+	# Verify addToolsToKeep behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+	);
+	# Set up the profile to which the drivers are to be added
+	my @useProf = ('profA');
+	$xml = $xml -> setSelectionProfileNames(\@useProf);
+	my $expected = 'Using profile(s): profA';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	# Add the drivers, using no 2nd arg results in drivers to be added to
+	# profA only
+	my @toolNames = qw /more cat sed /;
+	my @toolsToKeep = ();
+	for my $toolName (@toolNames) {
+		my %init = ( name => $toolName );
+		push @toolsToKeep, KIWIXMLStripData -> new($kiwi, \%init);
+	}
+	$xml = $xml -> addToolsToKeep(\@toolsToKeep);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	# Verify this has the expected results, we should get the default drivers
+	# plus the arch specific profile drivers plus the ones added
+	my @defToolNames = qw (
+		megacli
+	ping 
+	);
+	my @expectedTools = @defToolNames;
+	push @expectedTools, @toolNames;
+	my $arch = $xml -> getArch();
+	if ($arch eq 'ppc64') {
+		push @expectedTools, 'traceroute';
+	} elsif ($arch eq 's390') {
+		push @expectedTools, 'wireshark';
+	}
+	push @expectedTools, 'cp';
+	my @tools = @{$xml -> getToolsToKeep()};
+	my @toolNamesUsed = ();
+	for my $tool (@tools) {
+		push @toolNamesUsed, $tool -> getName();
+	}
+	$this -> assert_array_equal(\@toolNamesUsed, \@expectedTools);
+	# Check that the drivers were not added anywhere else
+	# reset the active profiles and we should only get the default drivers
+	$xml = $xml -> setSelectionProfileNames();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	@tools = @{$xml -> getToolsToKeep()};
+	@toolNamesUsed = ();
+	for my $tool (@tools) {
+		push @toolNamesUsed, $tool -> getName();
+	}
+	$this -> assert_array_equal(\@toolNamesUsed, \@defToolNames);
+	return;
+}
+
+#==========================================
+# test_addToolsToKeepToDefault
+#------------------------------------------
+sub test_addToolsToKeepToDefault {
+	# ...
+	# Verify addToolsToKeep behaves as expected when the keyword
+	# "default" is used as the second argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	# Add the drivers, using the keyword "default" as 2nd arg
+	my @toolNames = qw /awk less/;
+	my @toolsToKeep = ();
+	for my $toolName (@toolNames) {
+		my %init = ( name => $toolName );
+		push @toolsToKeep, KIWIXMLStripData -> new($kiwi, \%init);
+	}
+	$xml = $xml -> addToolsToKeep(\@toolsToKeep, 'default');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	# Verify this has the expected results, we should get the default drivers
+	# plus the arch specific profile drivers plus the ones added
+	my @defToolNames = qw (
+		megacli
+		ping
+	);
+	my @expectedTools = @defToolNames;
+	push @expectedTools, @toolNames;
+	my @tools = @{$xml -> getToolsToKeep()};
+	my @toolNamesUsed = ();
+	for my $tool (@tools) {
+		push @toolNamesUsed, $tool -> getName();
+	}
+	$this -> assert_array_equal(\@toolNamesUsed, \@expectedTools);
+	return;
+}
+
+#==========================================
+# test_addToolsToKeepWrongArgs
+#------------------------------------------
+sub test_addToolsToKeepWrongArgs {
+	# ...
+	# Verify addToolsToKeep behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addToolsToKeep ('loop', 'default');
+	my $expected = 'addToolsToKeep: expecting array ref for '
+		. 'KIWIXMLStripData array as first argument';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
 
 #==========================================
 # test_ctor_InvalidPXEConfigArch
@@ -4356,6 +5090,35 @@ sub test_getEditBootConfig_legacy {
 }
 
 #==========================================
+# test_getFilesToDelete
+#------------------------------------------
+sub test_getFilesToDelete {
+	# ...
+	# Verify proper return of getFilesToDelete method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $delFiles = $xml -> getFilesToDelete();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expected = qw (/etc/resolv.conf /lib/libc.so);
+	my @stripNames = ();
+	for my $stripObj (@{$delFiles}) {
+		push @stripNames, $stripObj -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@stripNames);
+	return;
+}
+
+#==========================================
 # test_getHttpsRepositoryCredentials_legacy
 #------------------------------------------
 sub test_getHttpsRepositoryCredentials_legacy {
@@ -4858,6 +5621,35 @@ sub test_getInstallOptionDefault {
 }
 
 #==========================================
+# test_getLibsToKeep
+#------------------------------------------
+sub test_getLibsToKeep {
+	# ...
+	# Verify proper return of getLibsToKeep method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $libs = $xml -> getLibsToKeep();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expected = qw /libdbus libnss/;
+	my @libNames = ();
+	for my $lib (@{$libs}) {
+		push @libNames, $lib -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@libNames);
+	return;
+}
+
+#==========================================
 # test_getLicenseNames_legacy
 #------------------------------------------
 sub test_getLicenseNames_legacy {
@@ -4884,9 +5676,9 @@ sub test_getLicenseNames_legacy {
 }
 
 #==========================================
-# test_getLocale
+# test_getLocale_legacy
 #------------------------------------------
-sub test_getLocale {
+sub test_getLocale_legacy {
 	# ...
 	# Verify proper return of getLocale method
 	# ---
@@ -4896,7 +5688,7 @@ sub test_getLocale {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getLocale();
+	my $value = $xml -> getLocale_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -7032,9 +7824,9 @@ sub test_getSplitTempFiles_legacy {
 }
 
 #==========================================
-# test_getStripDelete
+# test_getStripDelete_legacy
 #------------------------------------------
-sub test_getStripDelete {
+sub test_getStripDelete_legacy {
 	# ...
 	# Verify proper return of getStripDelete method
 	# ---
@@ -7044,7 +7836,7 @@ sub test_getStripDelete {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @delFiles = $xml -> getStripDelete();
+	my @delFiles = $xml -> __getStripDelete_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -7058,9 +7850,9 @@ sub test_getStripDelete {
 }
 
 #==========================================
-# test_getStripLibs
+# test_getStripLibs_legacy
 #------------------------------------------
-sub test_getStripLibs {
+sub test_getStripLibs_legacy {
 	# ...
 	# Verify proper return of getStripLibs method
 	# ---
@@ -7070,7 +7862,7 @@ sub test_getStripLibs {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @libFiles = $xml -> getStripLibs();
+	my @libFiles = $xml -> __getStripLibs_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -7084,9 +7876,9 @@ sub test_getStripLibs {
 }
 
 #==========================================
-# test_getStripNodeList
+# test_getStripNodeList_legacy
 #------------------------------------------
-sub test_getStripNodeList {
+sub test_getStripNodeList_legacy {
 	# ...
 	# Verify the expected return of getStripNodeList
 	# Note, this method should eventually disappear from the XML object
@@ -7097,7 +7889,7 @@ sub test_getStripNodeList {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @stripNodes = $xml -> getStripNodeList() -> get_nodelist();
+	my @stripNodes = $xml -> getStripNodeList_legacy() -> get_nodelist();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -7130,9 +7922,9 @@ sub test_getStripNodeList {
 }
 
 #==========================================
-# test_getStripTools
+# test_getStripTools_legacy
 #------------------------------------------
-sub test_getStripTools {
+sub test_getStripTools_legacy {
 	# ...
 	# Verify proper return of getStripTools method
 	# ---
@@ -7142,7 +7934,7 @@ sub test_getStripTools {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my @toolFiles = $xml -> getStripTools();
+	my @toolFiles = $xml -> __getStripTools_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -7197,6 +7989,35 @@ sub test_getSystemDiskConfig {
 		$this -> assert_equals(50, $size);
 	}
 	}
+	return;
+}
+
+#==========================================
+# test_getToolsToKeep
+#------------------------------------------
+sub test_getToolsToKeep {
+	# ...
+	# Verify proper return of getToolsToKeep method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'stripConfig';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $tools = $xml -> getToolsToKeep();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expected = qw /megacli virt-mgr/;
+	my @toolNames = ();
+	for my $tool (@{$tools}) {
+		push @toolNames, $tool -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@toolNames);
 	return;
 }
 

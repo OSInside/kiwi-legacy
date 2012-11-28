@@ -53,6 +53,7 @@ my @kiwiModules = qw (
 	KIWIXMLProfileData.pm
 	KIWIXMLRepositoryData.pm
 	KIWIXMLSplitData.pm
+	KIWIXMLStripData.pm
 	KIWIXMLSystemdiskData.pm
 	KIWIXMLTypeData.pm
 	KIWIXMLUserData.pm
@@ -79,6 +80,7 @@ my @kiwiModules = qw (
 	KTXMLProfileData.t
 	KTXMLRepositoryData.t
 	KTXMLSplitData.t
+	KTXMLStripData.t
 	KTXMLSystemdiskData.t
 	KTXMLTypeData.t
 	KTXMLUserData.t
@@ -107,6 +109,7 @@ my @kiwiModules = qw (
 	kiwiXMLProfileData.pm
 	kiwiXMLRepositoryData.pm
 	kiwiXMLSplitData.pm
+	kiwiXMLStripData.pm
 	kiwiXMLSystemdiskData.pm
 	kiwiXMLTypeData.pm
 	kiwiXMLUserData.pm
@@ -162,6 +165,7 @@ my @notClean1 = qw (
 	KIWIXMLProfileData.pm
 	KIWIXMLRepositoryData.pm
 	KIWIXMLSplitData.pm
+	KIWIXMLStripData.pm
 	KIWIXMLSystemdiskData.pm
 	KIWIXMLTypeData.pm
 	KIWIXMLUserData.pm
@@ -188,6 +192,7 @@ my @notClean1 = qw (
 	KTXMLProfileData.t
 	KTXMLRepositoryData.t
 	KTXMLSplitData.t
+	KTXMLStripData.t
 	KTXMLSystemdiskData.t
 	KTXMLTypeData.t
 	KTXMLUserData.t
@@ -216,6 +221,7 @@ my @notClean1 = qw (
 	kiwiXMLProfileData.pm
 	kiwiXMLRepositoryData.pm
 	kiwiXMLSplitData.pm
+	kiwiXMLStripData.pm
 	kiwiXMLSystemdiskData.pm
 	kiwiXMLTypeData.pm
 	kiwiXMLUserData.pm
