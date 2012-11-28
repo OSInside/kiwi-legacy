@@ -2025,9 +2025,13 @@ sub setupBootDisk {
 	#==========================================
 	# Update raw disk size if boot part is used
 	#------------------------------------------
-	if ((! $this->{sizeSetByUser}) && ($needBootP) && ($imgtype ne "split")) {
+	if (($needBootP) && ($imgtype ne "split")) {
 		$this -> __updateDiskSize ($this->{bootsize});
 	}
+	#==========================================
+	# Check and Update to custom disk size
+	#------------------------------------------
+	$this -> __updateCustomDiskSize ();
 	#==========================================
 	# create/use disk
 	#------------------------------------------
@@ -6501,45 +6505,13 @@ sub __initDiskSize {
 	my $minBytes  = shift;
 	my $cmdlsize  = shift;
 	my $XMLBytes  = shift;
-	my $cmdlBytes = 0;
 	my $vmsize    = 0;
 	my $vmmbyte   = 0;
-	#===========================================
-	# turn optional size from cmdline into bytes
-	#-------------------------------------------
-	$this->{sizeSetByUser} = 0;
-	if (($cmdlsize) && ($cmdlsize =~ /^(\d+)([MG])$/i)) {
-		my $value= $1;
-		my $unit = $2;
-		if ($unit eq "G") {
-			# convert GB to MB...
-			$value *= 1024;
-		}
-		# convert MB to Byte
-		$cmdlBytes = $value * 1048576;
-	}
-	#===========================================
-	# adapt min size according to cmdline or XML
-	#-------------------------------------------
-	if ($cmdlBytes > 0) {
-		if ($cmdlBytes < $minBytes) {
-			$kiwi -> warning (
-				"given size is smaller than calculated min size"
-			);
-			$kiwi -> oops();
-		}
-		$minBytes = $cmdlBytes;
-		$this->{sizeSetByUser} = 1;
-	} elsif (("$XMLBytes" ne "auto") && ($XMLBytes > 0)) {
-		if ($XMLBytes < $minBytes) {
-			$kiwi -> warning (
-				"given size is smaller than calculated min size"
-			);
-			$kiwi -> oops();
-		}
-		$this->{sizeSetByUser} = 1;
-		$minBytes = $XMLBytes;
-	}
+	#==========================================
+	# Store size values from cmdline and XML
+	#------------------------------------------
+	$this->{cmdlsize} = $cmdlsize;
+	$this->{XMLBytes} = $XMLBytes;
 	#==========================================
 	# Create vmsize MB string and vmmbyte value
 	#------------------------------------------
@@ -6575,6 +6547,69 @@ sub __updateDiskSize {
 	$kiwi->loginfo (
 		"Increasing disk size by ".$addMB."M to: ".$vmsize."\n"
 	);
+	return $this;
+}
+
+#==========================================
+# __updateCustomDiskSize
+#------------------------------------------
+sub __updateCustomDiskSize {
+	# ...
+	# if a custom disk size is set via the commandline
+	# or the <size> element from XML, this function uses
+	# the custom value if it is smaller than the currently
+	# calculcated disk size value
+	# ---
+	my $this      = shift;
+	my $kiwi      = $this->{kiwi};
+	my $cmdlsize  = $this->{cmdlsize};
+	my $XMLBytes  = $this->{XMLBytes};
+	my $cmdlBytes = 0;
+	my $vmsize    = 0;
+	my $vmmbyte   = 0;
+	my $reqBytes  = 0;
+	#===========================================
+	# turn optional size from cmdline into bytes
+	#-------------------------------------------
+	if (($cmdlsize) && ($cmdlsize =~ /^(\d+)([MG])$/i)) {
+		my $value= $1;
+		my $unit = $2;
+		if ($unit eq "G") {
+			# convert GB to MB...
+			$value *= 1024;
+		}
+		# convert MB to Byte
+		$cmdlBytes = $value * 1048576;
+	}
+	#===========================================
+	# adapt req size according to cmdline or XML
+	#-------------------------------------------
+	if ($cmdlBytes > 0) {
+		$reqBytes = $cmdlBytes;
+	} elsif (("$XMLBytes" ne "auto") && ($XMLBytes > 0)) {
+		$reqBytes = $XMLBytes;
+	}
+	if ($reqBytes == 0) {
+		return $this;
+	}
+	my $reqMBytes = int ($reqBytes / 1048576);
+	if ($reqMBytes < $this->{vmmbyte}) {
+		$kiwi -> warning (
+			"given disk size is smaller than calculated size"
+		);
+		$kiwi -> skipped ();
+		return $this;
+	}
+	#==========================================
+	# Create vmsize MB string and vmmbyte value
+	#------------------------------------------
+	$vmmbyte = $reqMBytes;
+	$vmsize  = $reqMBytes."M";
+	$kiwi -> loginfo (
+		"Using custom disk size: $vmsize\n"
+	);
+	$this->{vmmbyte} = $vmmbyte;
+	$this->{vmsize}  = $vmsize;
 	return $this;
 }
 
