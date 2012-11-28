@@ -44,6 +44,7 @@ use KIWIXMLProfileData;
 use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
 use KIWIXMLSplitData;
+use KIWIXMLStripData;
 use KIWIXMLSystemdiskData;
 use KIWIXMLTypeData;
 use KIWIXMLUserData;
@@ -100,9 +101,12 @@ sub new {
 	#		drivers         = (),
 	#       ignorePkgs      = (),
 	#       installOpt      = '',
+	#       keepLibs        = (),
+	#       keepTools       = (),
 	#		pkgs            = (),
 	#       pkgsCollect     = (),
 	#       products        = (),
+	#       stripDelete     = (),
 	#		arch[+] = {
 	#           archives        = (),
 	#           bootArchives    = (),
@@ -113,9 +117,12 @@ sub new {
 	#			delPkgs         = (),
 	#			drivers         = (),
 	#           ignorePkgs      = (),
+	#           keepLibs        = (),
+	#           keepTools       = (),
 	#			pkgs            = (),
 	#           pkgsCollect     = (),
 	#           products        = (),
+	#           stripDelete     = (),
 	#		}
 	#       preferences = {
 	#           bootloader_theme = '',
@@ -362,6 +369,10 @@ sub new {
 	#------------------------------------------
 	$this -> __populateRepositoryInfo();
 	#==========================================
+	# Populate imageConfig with strip/keep datafrom config tree
+	#------------------------------------------
+	$this -> __populateStripInfo();
+	#==========================================
 	# Populate imageConfig with user data from config tree
 	#------------------------------------------
 	$this -> __populateUserInfo();
@@ -420,7 +431,7 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	#==========================================
 	# Dump imageConfig to log
 	#------------------------------------------
@@ -579,6 +590,110 @@ sub addDrivers {
 			    accessID => 'drivers',
 				arch     => $arch,
 				dataObj  => $drvObj,
+				profName => $prof,
+				type     => 'image'
+			);
+			if (! $this -> __storeInstallData(\%storeData)) {
+				return;
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# addFilesToDelete
+#------------------------------------------
+sub addFilesToDelete {
+	# ...
+	# Add the given StripData objects to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	# ---
+	my $this       = shift;
+	my $stripFiles = shift;
+	my $profNames  = shift;
+	my %verifyData = (
+		caller       => 'addFilesToDelete',
+		expectedType => 'KIWIXMLStripData',
+		itemName     => 'deletefiles',
+		itemsToAdd   => $stripFiles,
+		profNames    => $profNames
+	);
+	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
+		return;
+	}
+	my $kiwi = $this->{kiwi};
+	#==========================================
+	# Figure out what profiles to change
+	#------------------------------------------
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'deletefiles');
+	if (! @profsToUse) {
+		return;
+	}
+	for my $prof (@profsToUse) {
+		for my $stripObj (@{$stripFiles}) {
+			my $arch = $stripObj -> getArch();
+			my %storeData = (
+			    accessID => 'stripDelete',
+				arch     => $arch,
+				dataObj  => $stripObj,
+				profName => $prof,
+				type     => 'image'
+			);
+			if (! $this -> __storeInstallData(\%storeData)) {
+				return;
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# addLibsToKeep
+#------------------------------------------
+sub addLibsToKeep {
+	# ...
+	# Add the given StripData objects to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	# ---
+	my $this       = shift;
+	my $stripFiles = shift;
+	my $profNames  = shift;
+	my %verifyData = (
+		caller       => 'addLibsToKeep',
+		expectedType => 'KIWIXMLStripData',
+		itemName     => 'keeplibs',
+		itemsToAdd   => $stripFiles,
+		profNames    => $profNames
+	);
+	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
+		return;
+	}
+	my $kiwi = $this->{kiwi};
+	#==========================================
+	# Figure out what profiles to change
+	#------------------------------------------
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'keeplibs');
+	if (! @profsToUse) {
+		return;
+	}
+	for my $prof (@profsToUse) {
+		for my $stripObj (@{$stripFiles}) {
+			my $arch = $stripObj -> getArch();
+			my %storeData = (
+			    accessID => 'keepLibs',
+				arch     => $arch,
+				dataObj  => $stripObj,
 				profName => $prof,
 				type     => 'image'
 			);
@@ -888,6 +1003,58 @@ sub addRepositories {
 }
 
 #==========================================
+# addToolsToKeep
+#------------------------------------------
+sub addToolsToKeep {
+	# ...
+	# Add the given StripData objects to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	# ---
+	my $this       = shift;
+	my $stripFiles = shift;
+	my $profNames  = shift;
+	my %verifyData = (
+		caller       => 'addToolsToKeep',
+		expectedType => 'KIWIXMLStripData',
+		itemName     => 'tools',
+		itemsToAdd   => $stripFiles,
+		profNames    => $profNames
+	);
+	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
+		return;
+	}
+	my $kiwi = $this->{kiwi};
+	#==========================================
+	# Figure out what profiles to change
+	#------------------------------------------
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'tools');
+	if (! @profsToUse) {
+		return;
+	}
+	for my $prof (@profsToUse) {
+		for my $stripObj (@{$stripFiles}) {
+			my $arch = $stripObj -> getArch();
+			my %storeData = (
+			    accessID => 'keepTools',
+				arch     => $arch,
+				dataObj  => $stripObj,
+				profName => $prof,
+				type     => 'image'
+			);
+			if (! $this -> __storeInstallData(\%storeData)) {
+				return;
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
 # getActiveProfileNames
 #------------------------------------------
 sub getActiveProfileNames {
@@ -1072,6 +1239,18 @@ sub getEC2Config {
 }
 
 #==========================================
+# getFilesToDelete
+#------------------------------------------
+sub getFilesToDelete {
+	# ...
+	# Return an array ref containing StripData objects for the current
+	# selected build profile(s)
+	# ---
+	my $this = shift;
+	return $this -> __getInstallData('stripDelete');
+}
+
+#==========================================
 # getImageType
 #------------------------------------------
 sub getImageType {
@@ -1114,6 +1293,18 @@ sub getInstallOption {
 		return 'onlyRequired';
 	}
 	return $instOpt;
+}
+
+#==========================================
+# getLibsToKeep
+#------------------------------------------
+sub getLibsToKeep {
+	# ...
+	# Return an array ref containing StripData objects for the current
+	# selected build profile(s)
+	# ---
+	my $this = shift;
+	return $this -> __getInstallData('keepLibs');
 }
 
 #==========================================
@@ -1334,6 +1525,18 @@ sub getSystemDiskConfig {
 		$kiwi,$this->{selectedType}{systemdisk}
 	);
 	return $sysDiskObj;
+}
+
+#==========================================
+# getToolsToKeep
+#------------------------------------------
+sub getToolsToKeep {
+	# ...
+	# Return an array ref containing StripData objects for the current
+	# selected build profile(s)
+	# ---
+	my $this = shift;
+	return $this -> __getInstallData('keepTools');
 }
 
 #==========================================
@@ -3143,6 +3346,63 @@ sub __populateRepositoryInfo {
 }
 
 #==========================================
+# __populateStripInfo
+#------------------------------------------
+sub __populateStripInfo {
+	# ...
+	# Populate the imageConfig member with the strip data from the XML file.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @stripNodes = $this->{systemTree} -> getElementsByTagName ('strip');
+	for my $stripNd (@stripNodes) {
+		my $profiles = $stripNd -> getAttribute('profiles');
+		my @profsToProcess = ('kiwi_default');
+		if ($profiles) {
+			@profsToProcess = split /,/, $profiles;
+		}
+		my $access;
+		my $type = $stripNd -> getAttribute('type');
+		if ($type eq 'delete') {
+			$access = 'stripDelete';
+		} elsif ($type eq 'libs') {
+			$access = 'keepLibs';
+		} elsif ($type eq 'tools') {
+			$access = 'keepTools';
+		} else {
+			my $msg = '__populateStripInfo: internal error, found type other '
+				. 'than "delete, libs, or tools". Please file a bug.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+		my @stripFiles = $stripNd -> getElementsByTagName ('file');
+		for my $prof (@profsToProcess) {
+			for my $sNd (@stripFiles) {
+				my $arch = $sNd -> getAttribute('arch');
+				my $name = $sNd -> getAttribute('name');
+				my %stripData = (
+					arch => $arch,
+					name => $name
+				);
+				my $stripObj = KIWIXMLStripData -> new($kiwi, \%stripData);
+				my %storeData = (
+					accessID => $access,
+					arch     => $arch,
+					dataObj  => $stripObj,
+					profName => $prof,
+					type     => 'image'
+				);
+				if (! $this -> __storeInstallData(\%storeData)) {
+					return;
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __populateUserInfo
 #------------------------------------------
 sub __populateUserInfo {
@@ -3442,70 +3702,6 @@ sub __verifyProfNames {
 #==========================================
 # End "new" methods section
 #------------------------------------------
-#==========================================
-# updateTypeList
-#------------------------------------------
-sub updateTypeList {
-	# ...
-	# if the XML tree has changed because of a function
-	# changing the typenode, it's required to update the
-	# internal typeInfo hash too
-	# ---
-	my $this = shift;
-	$this->{typeList} = $this -> __populateTypeInfo_legacy();
-	$this -> __populateProfiledTypeInfo_legacy();
-	return;
-}
-
-#==========================================
-# updateXML
-#------------------------------------------
-sub updateXML {
-	# ...
-	# Write back the current DOM tree into the file
-	# referenced by getRootLog but with the suffix .xml
-	# if there is no log file set the service is skipped
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $xmlu = $this->{systemTree}->toString();
-	my $xmlf = $this->{xmlOrigFile};
-	$kiwi -> storeXML ( $xmlu,$xmlf );
-	return $this;
-}
-
-#==========================================
-# writeXMLDescription
-#------------------------------------------
-sub writeXMLDescription {
-	# ...
-	# Write back the XML file into the prepare tree
-	# below the image/ directory
-	# ---
-	my $this = shift;
-	my $root = shift;
-	my $gdata= $this->{gdata};
-	my $xmlu = $this->{systemTree}->toString();
-	my $file = $root."/image/config.xml";
-	my $FD;
-	if (! open ($FD, '>', $file)) {
-		return;
-	}
-	print $FD $xmlu;
-	close $FD;
-	my $pretty = $gdata->{Pretty};
-	qxx ("xsltproc -o $file.new $pretty $file");
-	qxx ("mv $file.new $file");
-	my $overlayTree = $gdata->{OverlayRootTree};
-	if ($overlayTree) {
-		qxx ("mkdir -p $overlayTree");
-		qxx ("cp $file $overlayTree");
-		$main::global -> setGlobals (
-			"OverlayRootTree",0
-		);
-	}
-	return $this;
-}
 
 #==========================================
 # getConfigName
@@ -3516,60 +3712,6 @@ sub getConfigName {
 	return ($name);
 }
 
-#==========================================
-# createURLList
-#------------------------------------------
-sub createURLList {
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $cmdL = $this->{cmdL};
-	my %repository  = ();
-	my @urllist     = ();
-	my %urlhash     = ();
-	my @sourcelist  = ();
-	%repository = $this->getRepositories_legacy();
-	if (! %repository) {
-		%repository = $this->getInstSourceRepository();
-		foreach my $name (keys %repository) {
-			push (@sourcelist,$repository{$name}{source});
-		}
-	} else {
-		@sourcelist = keys %repository;
-	}
-	foreach my $source (@sourcelist) {
-		my $user = $repository{$source}[3];
-		my $pwd  = $repository{$source}[4];
-		my $urlHandler  = KIWIURL -> new ($kiwi,$cmdL,undef,$user,$pwd);
-		my $publics_url = $urlHandler -> normalizePath ($source);
-		push (@urllist,$publics_url);
-		$urlhash{$source} = $publics_url;
-	}
-	$this->{urllist} = \@urllist;
-	$this->{urlhash} = \%urlhash;
-	return $this;
-}
-
-#==========================================
-# getURLHash
-#------------------------------------------
-sub getURLHash {
-	my $this = shift;
-	if (! $this->{urlhash}) {
-		$this -> createURLList();
-	}
-	return $this->{urlhash};
-}
-
-#==========================================
-# getURLList
-#------------------------------------------
-sub getURLList {
-	my $this = shift;
-	if (! $this->{urllist}) {
-		$this -> createURLList();
-	}
-	return $this->{urllist};
-}
 
 #==========================================
 # getImageName
@@ -3626,7 +3768,7 @@ sub getImageSize {
 	if ($size) {
 		my $plus = $node -> getElementsByTagName ("size")
 			-> get_node(1) -> getAttribute("additive");
-		if ((! defined $plus) || ($plus eq "false") || ($plus eq "0")) {
+		if ((! defined $plus) || ($plus eq "false")) {
 			my $unit = $node -> getElementsByTagName ("size")
 				-> get_node(1) -> getAttribute("unit");
 			if (! $unit) {
@@ -3741,38 +3883,6 @@ sub getImageVersion {
 }
 
 
-#==========================================
-# getStripDelete
-#------------------------------------------
-sub getStripDelete {
-	# ...
-	# return the type="delete" files from the strip section
-	# ---
-	my $this   = shift;
-	return $this -> __getStripFileList ("delete");
-}
-
-#==========================================
-# getStripTools
-#------------------------------------------
-sub getStripTools {
-	# ...
-	# return the type="tools" files from the strip section
-	# ---
-	my $this   = shift;
-	return $this -> __getStripFileList ("tools");
-}
-
-#==========================================
-# getStripLibs
-#------------------------------------------
-sub getStripLibs {
-	# ...
-	# return the type="libs" files from the strip section
-	# ---
-	my $this   = shift;
-	return $this -> __getStripFileList ("libs");
-}
 
 #==========================================
 # setArch
@@ -3793,23 +3903,6 @@ sub setArch {
 	$this->{arch} = $newArch;
 	return $this;
 }
-
-#==========================================
-# getLocale
-#------------------------------------------
-sub getLocale {
-	# ...
-	# Obtain the locale value or return undef
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("locale");
-	my $lang = $node -> getElementsByTagName ("locale");
-	if ((! defined $lang) || ("$lang" eq "")) {
-		return;
-	}
-	return "$lang";
-}
-
 
 #==========================================
 # getInstSourceRepository
@@ -4042,47 +4135,6 @@ sub getInstSourceMetaFiles {
 	return %result;
 }
 
-#==========================================
-# addStrip
-#------------------------------------------
-sub addStrip {
-	# ...
-	# Add the given strip list and type to the xml description
-	# ----
-	my @list  = @_;
-	my $this  = shift @list;
-	my $type  = shift @list;
-	my $kiwi  = $this->{kiwi};
-	my @supportedTypes = qw /delete libs tools/;
-	if (! grep { /$type/ } @supportedTypes ) {
-		my $msg = "Specified strip section type '$type' not supported.";
-		$kiwi -> error ($msg);
-		$kiwi -> failed();
-		return;
-	}
-	my $image = $this->{imgnameNodeList} -> get_node(1);
-	my @stripNodes = $image -> getElementsByTagName ("strip");
-	my $stripSection;
-	for my $stripNode (@stripNodes) {
-		my $sectionType = $stripNode -> getAttribute ("type");
-		if ($type eq $sectionType) {
-			$stripSection = $stripNode;
-			last;
-		}
-	}
-	if (! $stripSection ) {
-		$stripSection = XML::LibXML::Element -> new ("strip");
-		$stripSection -> setAttribute("type",$type);
-		$image-> appendChild ($stripSection);
-	}
-	foreach my $name (@list) {
-		my $fileSection = XML::LibXML::Element -> new ("file");
-		$fileSection  -> setAttribute("name",$name);
-		$stripSection -> appendChild ($fileSection);
-	}
-	$this -> updateXML();
-	return $this;
-}
 
 #==========================================
 # addSimpleType
@@ -4101,7 +4153,7 @@ sub addSimpleType {
 		$addElement -> setAttribute("image",$type);
 		$nodes -> get_node($i) -> appendChild ($addElement);
 	}
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -4286,7 +4338,7 @@ sub getInstallSize {
 	my $kiwi    = $this->{kiwi};
 	my $nodes   = $this->{packageNodeList};
 	my $manager = $this->getPackageManager_legacy();
-	my $urllist = $this -> getURLList();
+	my $urllist = $this -> __getURLList_legacy();
 	my @result  = ();
 	my @delete  = ();
 	my @packages= ();
@@ -4474,18 +4526,6 @@ sub getArch {
 	# ---
 	my $this = shift;
 	return $this->{arch};
-}
-
-#==========================================
-# getStripNodeList
-#------------------------------------------
-sub getStripNodeList {
-	# ...
-	# Return a list of all <strip> nodes. Each list member
-	# is an XML::LibXML::Element object pointer
-	# ---
-	my $this = shift;
-	return $this->{stripNodeList};
 }
 
 #==========================================
@@ -5042,7 +5082,7 @@ sub addArchives_legacy {
 		$nodes -> get_node($nodeNumber)
 			-> appendChild ($addElement);
 	}
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -5077,7 +5117,7 @@ sub addDrivers_legacy {
 		$nodes -> get_node($nodeNumber)
 			-> appendChild ($addElement);
 	}
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -5174,7 +5214,7 @@ sub addPackages_legacy {
 		}
 		$addToNode -> appendChild ($addElement);
 	}
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -5210,7 +5250,7 @@ sub addPatterns_legacy {
 		$nodes -> get_node($nodeNumber)
 			-> appendChild ($addElement);
 	}
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -5496,9 +5536,9 @@ sub getImageConfig_legacy {
 	my $name  = $this -> getImageName();
 	my $dname = $this -> getImageDisplayName ($this);
 	my $lics  = $this -> getLicenseNames_legacy();
-	my @s_del = $this -> getStripDelete();
-	my @s_tool= $this -> getStripTools();
-	my @s_lib = $this -> getStripLibs();
+	my @s_del = $this -> __getStripDelete_legacy();
+	my @s_tool= $this -> __getStripTools_legacy();
+	my @s_lib = $this -> __getStripLibs_legacy();
 	my @tstp  = $this -> getTestingList();
 	if ($lics) {
 		$result{kiwi_showlicense} = join(" ",@{$lics});
@@ -5890,7 +5930,7 @@ sub getList_legacy {
 	my $what = shift;
 	my $nopac= shift;
 	my $kiwi = $this->{kiwi};
-	my $urllist = $this -> getURLList();
+	my $urllist = $this -> __getURLList_legacy();
 	my %pattr;
 	my $nodes;
 	if ($what ne "metapackages") {
@@ -6091,6 +6131,22 @@ sub getList_legacy {
 	$this->{replAddList} = \@replAddList;
 	my @ordered = sort keys %packHash;
 	return @ordered;
+}
+
+#==========================================
+# getLocale_legacy
+#------------------------------------------
+sub getLocale_legacy {
+	# ...
+	# Obtain the locale value or return undef
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ("locale");
+	my $lang = $node -> getElementsByTagName ("locale");
+	if ((! defined $lang) || ("$lang" eq "")) {
+		return;
+	}
+	return "$lang";
 }
 
 #==========================================
@@ -7117,6 +7173,18 @@ sub getSplitPersistentExceptions_legacy {
 }
 
 #==========================================
+# getStripNodeList_legacy
+#------------------------------------------
+sub getStripNodeList_legacy {
+	# ...
+	# Return a list of all <strip> nodes. Each list member
+	# is an XML::LibXML::Element object pointer
+	# ---
+	my $this = shift;
+	return $this->{stripNodeList};
+}
+
+#==========================================
 # getTypes_legacy
 #------------------------------------------
 sub getTypes_legacy {
@@ -7176,6 +7244,17 @@ sub getTypeSpecificPackageList_legacy {
 	my $node = $this->{typeNode};
 	my $type = $node -> getAttribute("image");
 	return getList_legacy ($this,$type);
+}
+
+#==========================================
+# getURLHash_legacy
+#------------------------------------------
+sub getURLHash_legacy {
+	my $this = shift;
+	if (! $this->{urlhash}) {
+		$this -> __createURLList_legacy();
+	}
+	return $this->{urlhash};
 }
 
 #==========================================
@@ -7420,7 +7499,7 @@ sub ignoreRepositories_legacy {
 	}
 	$this->{repositNodeList} = 
 		$this->{systemTree}->getElementsByTagName ("repository");
-	$this-> updateXML();
+	$this-> __updateXML_legacy();
 	return $this;
 }
 
@@ -7457,7 +7536,7 @@ sub setPackageManager_legacy {
 		$opts -> removeChild ($node);
 	}
 	$opts -> appendChild ($addElement);
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -7506,8 +7585,8 @@ sub setRepository_legacy {
 		}
 		last;
 	}
-	$this -> createURLList();
-	$this -> updateXML();
+	$this -> __createURLList_legacy();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -7601,8 +7680,8 @@ sub addRepositories_legacy {
 	}
 	$this->{repositNodeList} =
 		$this->{systemTree}->getElementsByTagName ("repository");
-	$this -> createURLList();
-	$this -> updateXML();
+	$this -> __createURLList_legacy();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -7631,6 +7710,84 @@ sub getDriversNodeList_legacy {
 }
 
 #==========================================
+# writeXMLDescription_legacy
+#------------------------------------------
+sub writeXMLDescription_legacy {
+	# ...
+	# Write back the XML file into the prepare tree
+	# below the image/ directory
+	# ---
+	my $this = shift;
+	my $root = shift;
+	my $gdata= $this->{gdata};
+	my $xmlu = $this->{systemTree}->toString();
+	my $file = $root."/image/config.xml";
+	my $FD;
+	if (! open ($FD, '>', $file)) {
+		return;
+	}
+	print $FD $xmlu;
+	close $FD;
+	my $pretty = $gdata->{Pretty};
+	qxx ("xsltproc -o $file.new $pretty $file");
+	qxx ("mv $file.new $file");
+	my $overlayTree = $gdata->{OverlayRootTree};
+	if ($overlayTree) {
+		qxx ("mkdir -p $overlayTree");
+		qxx ("cp $file $overlayTree");
+		$main::global -> setGlobals (
+			"OverlayRootTree",0
+		);
+	}
+	return $this;
+}
+
+#==========================================
+# Private helper methods
+#------------------------------------------
+#==========================================
+# __addStrip_legacy
+#------------------------------------------
+sub __addStrip_legacy {
+	# ...
+	# Add the given strip list and type to the xml description
+	# ----
+	my @list  = @_;
+	my $this  = shift @list;
+	my $type  = shift @list;
+	my $kiwi  = $this->{kiwi};
+	my @supportedTypes = qw /delete libs tools/;
+	if (! grep { /$type/ } @supportedTypes ) {
+		my $msg = "Specified strip section type '$type' not supported.";
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $image = $this->{imgnameNodeList} -> get_node(1);
+	my @stripNodes = $image -> getElementsByTagName ("strip");
+	my $stripSection;
+	for my $stripNode (@stripNodes) {
+		my $sectionType = $stripNode -> getAttribute ("type");
+		if ($type eq $sectionType) {
+			$stripSection = $stripNode;
+			last;
+		}
+	}
+	if (! $stripSection ) {
+		$stripSection = XML::LibXML::Element -> new ("strip");
+		$stripSection -> setAttribute("type",$type);
+		$image-> appendChild ($stripSection);
+	}
+	foreach my $name (@list) {
+		my $fileSection = XML::LibXML::Element -> new ("file");
+		$fileSection  -> setAttribute("name",$name);
+		$stripSection -> appendChild ($fileSection);
+	}
+	$this -> __updateXML_legacy();
+	return $this;
+}
+
+#==========================================
 # __addVolume_legacy
 #------------------------------------------
 sub __addVolume_legacy {
@@ -7651,8 +7808,85 @@ sub __addVolume_legacy {
 	$addElement -> setAttribute("name",$volume);
 	$addElement -> setAttribute($aname,$aval);
 	$disk -> appendChild ($addElement);
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	return $this;
+}
+
+#==========================================
+# __createURLList_legacy
+#------------------------------------------
+sub __createURLList_legacy {
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $cmdL = $this->{cmdL};
+	my %repository  = ();
+	my @urllist     = ();
+	my %urlhash     = ();
+	my @sourcelist  = ();
+	%repository = $this->getRepositories_legacy();
+	if (! %repository) {
+		%repository = $this->getInstSourceRepository();
+		foreach my $name (keys %repository) {
+			push (@sourcelist,$repository{$name}{source});
+		}
+	} else {
+		@sourcelist = keys %repository;
+	}
+	foreach my $source (@sourcelist) {
+		my $user = $repository{$source}[3];
+		my $pwd  = $repository{$source}[4];
+		my $urlHandler  = KIWIURL -> new ($kiwi,$cmdL,undef,$user,$pwd);
+		my $publics_url = $urlHandler -> normalizePath ($source);
+		push (@urllist,$publics_url);
+		$urlhash{$source} = $publics_url;
+	}
+	$this->{urllist} = \@urllist;
+	$this->{urlhash} = \%urlhash;
+	return $this;
+}
+
+#==========================================
+# __getStripDelete_legacy
+#------------------------------------------
+sub __getStripDelete_legacy {
+	# ...
+	# return the type="delete" files from the strip section
+	# ---
+	my $this   = shift;
+	return $this -> __getStripFileList ("delete");
+}
+
+#==========================================
+# __getStripLibs_legacy
+#------------------------------------------
+sub __getStripLibs_legacy {
+	# ...
+	# return the type="libs" files from the strip section
+	# ---
+	my $this   = shift;
+	return $this -> __getStripFileList ("libs");
+}
+
+#==========================================
+# __getStripTools_legacy
+#------------------------------------------
+sub __getStripTools_legacy {
+	# ...
+	# return the type="tools" files from the strip section
+	# ---
+	my $this   = shift;
+	return $this -> __getStripFileList ("tools");
+}
+
+#==========================================
+# __getURLList_legacy
+#------------------------------------------
+sub __getURLList_legacy {
+	my $this = shift;
+	if (! $this->{urllist}) {
+		$this -> __createURLList_legacy();
+	}
+	return $this->{urllist};
 }
 
 #==========================================
@@ -8086,7 +8320,7 @@ sub __updateDescriptionFromChangeSet_legacy {
 			foreach my $item (@{$changeset->{strip}{$type}}) {
 				$kiwi -> info ("--> $item\n");
 			}
-			$this -> addStrip ($type,@{$changeset->{strip}{$type}});
+			$this -> __addStrip_legacy ($type,@{$changeset->{strip}{$type}});
 		}
 	}
 	#==========================================
@@ -8297,6 +8531,38 @@ sub __updateDescriptionFromChangeSet_legacy {
 }
 
 #==========================================
+# __updateTypeList_legacy
+#------------------------------------------
+sub __updateTypeList_legacy {
+	# ...
+	# if the XML tree has changed because of a function
+	# changing the typenode, it's required to update the
+	# internal typeInfo hash too
+	# ---
+	my $this = shift;
+	$this->{typeList} = $this -> __populateTypeInfo_legacy();
+	$this -> __populateProfiledTypeInfo_legacy();
+	return;
+}
+
+#==========================================
+# __updateXML_legacy
+#------------------------------------------
+sub __updateXML_legacy {
+	# ...
+	# Write back the current DOM tree into the file
+	# referenced by getRootLog but with the suffix .xml
+	# if there is no log file set the service is skipped
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xmlu = $this->{systemTree}->toString();
+	my $xmlf = $this->{xmlOrigFile};
+	$kiwi -> storeXML ( $xmlu,$xmlf );
+	return $this;
+}
+
+#==========================================
 # End "old" methods section
 #------------------------------------------
 
@@ -8374,7 +8640,7 @@ sub __addDefaultStripNode {
 			$image -> addChild ($element -> cloneNode (1));
 		}
 	}
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 #==========================================
@@ -8447,7 +8713,7 @@ sub __addDefaultSplitNode {
 			$defaultSplit -> cloneNode (1)
 		);
 	}
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -8542,7 +8808,7 @@ sub __setOptionsElement {
 	}
 	$opts -> appendChild ($addElement);
 	$kiwi -> done ();
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -8571,7 +8837,7 @@ sub __addOptionsElement {
 		$opts -> appendChild ($addElement);
 		$kiwi -> done ();
 	}
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -8641,8 +8907,8 @@ sub __setOEMOptionsElement {
 		$this->{typeNode} -> appendChild ($opts);
 	}
 	$kiwi -> done ();
-	$this -> updateTypeList();
-	$this -> updateXML();
+	$this -> __updateTypeList_legacy();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -8689,8 +8955,8 @@ sub __setSystemDiskElement {
 		$this->{typeNode} -> appendChild ($disk);
 	}
 	$kiwi -> done ();
-	$this -> updateTypeList();
-	$this -> updateXML();
+	$this -> __updateTypeList_legacy();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -8730,8 +8996,8 @@ sub __setMachineAttribute {
 		$this->{typeNode} -> appendChild ($opts);
 	}
 	$kiwi -> done ();
-	$this -> updateTypeList();
-	$this -> updateXML();
+	$this -> __updateTypeList_legacy();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -8756,8 +9022,8 @@ sub __setTypeAttribute {
 		$tnode-> setAttribute ("$attr","true");
 	}
 	$kiwi -> done ();
-	$this -> updateTypeList();
-	$this -> updateXML();
+	$this -> __updateTypeList_legacy();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -8780,7 +9046,7 @@ sub __setImageAttribute {
 		$inode -> setAttribute ("$attr","true");
 	}
 	$kiwi -> done ();
-	$this -> updateXML();
+	$this -> __updateXML_legacy();
 	return $this;
 }
 
@@ -8927,6 +9193,7 @@ sub __resolveArchitecture {
 	$path =~ s/\%arch/$arch/;
 	return $path;
 }
+
 
 1;
 

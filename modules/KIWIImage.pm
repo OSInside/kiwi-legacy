@@ -247,7 +247,7 @@ sub updateDescription {
 	}
 	$changeset{"domain"}         = $domain;
 	$changeset{"displayname"}    = $src_xml->getImageDisplayName();
-	$changeset{"locale"}         = $src_xml->getLocale();
+	$changeset{"locale"}         = $src_xml->getLocale_legacy();
 	#==========================================
 	# Store Theme data
 	#------------------------------------------
@@ -313,7 +313,7 @@ sub updateDescription {
 		}
 		$strip_default{$type} = \@items;
 	}
-	@node = $src_xml->getStripNodeList() -> get_nodelist();
+	@node = $src_xml->getStripNodeList_legacy() -> get_nodelist();
 	foreach my $element (@node) {
 		if (! $src_xml -> __requestedProfile ($element)) {
 			next;
@@ -595,7 +595,7 @@ sub setupOverlay {
 	if (! defined $this->{imageTree}) {
 		return;
 	}
-	$xml -> writeXMLDescription ($this->{imageTree});
+	$xml -> writeXMLDescription_legacy ($this->{imageTree});
 	return $this;
 }
 
