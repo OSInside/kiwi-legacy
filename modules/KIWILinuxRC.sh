@@ -5830,6 +5830,10 @@ function bootImage {
 		init=/sbin/init
 	fi
 	#======================================
+	# cleanup boot environment
+	#--------------------------------------
+	unset REDIRECT
+	#======================================
 	# turn runlevel 4 to 5 if found
 	#--------------------------------------
 	option=$(echo $@ | sed -e s@4@5@)
