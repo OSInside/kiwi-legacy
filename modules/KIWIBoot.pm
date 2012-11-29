@@ -4154,7 +4154,7 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		my $boot_id = 0;
 		if ($this->{partids}) {
-			$boot_id = $this->{partids}{boot};
+			$boot_id = $this->{partids}{boot} - 1;
 		}
 		#==========================================
 		# Create menu.lst file
@@ -5057,6 +5057,13 @@ sub installBootLoader {
 	#------------------------------------------
 	if ($loader eq "grub") {
 		$kiwi -> info ("Installing grub on device: $diskname");
+		#==========================================
+		# re-init bootid, legacy grub starts at 0
+		#------------------------------------------
+		$boot_id = 0;
+		if ($this->{partids}) {
+			$boot_id = $this->{partids}{boot} - 1;
+		}
 		#==========================================
 		# Clean loop maps
 		#------------------------------------------
