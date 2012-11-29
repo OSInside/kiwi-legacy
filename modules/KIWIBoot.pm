@@ -3940,7 +3940,7 @@ sub setupBootLoaderConfiguration {
 			print $FD "set timeout=$bootTimeout\n";
 			if ($type =~ /^KIWI (CD|USB)/) {
 				my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
-				print $FD 'menuentry \'Boot from Hard Disk\'';
+				print $FD 'menuentry "Boot from Hard Disk"';
 				print $FD ' --class opensuse --class os {'."\n";
 				print $FD "\t"."set root='hd0'"."\n";
 				if ($dev eq '(cd)') {
@@ -3960,11 +3960,11 @@ sub setupBootLoaderConfiguration {
 				}
 				print $FD "\t".'boot'."\n";
 				print $FD '}'."\n";
-				$title = $this -> makeLabel ("Install $label");
+				$title = $this -> quoteLabel ("Install $label");
 			} else {
-				$title = $this -> makeLabel ("$label [ $type ]");
+				$title = $this -> quoteLabel ("$label [ $type ]");
 			}
-			print $FD 'menuentry \''.$title.'\'';
+			print $FD 'menuentry "'.$title.'"';
 			print $FD ' --class opensuse --class os {'."\n";
 			if (! $iso) {
 				print $FD "\t"."set root='$rprefix,$boot_id'"."\n";
@@ -4047,8 +4047,8 @@ sub setupBootLoaderConfiguration {
 			# Failsafe boot
 			#------------------------------------------
 			if ($failsafe) {
-				$title = $this -> makeLabel ("Failsafe -- $title");
-				print $FD 'menuentry \''.$title.'\'';
+				$title = $this -> quoteLabel ("Failsafe -- $title");
+				print $FD 'menuentry "'.$title.'"';
 				print $FD ' --class opensuse --class os {'."\n";
 				if (! $iso) {
 					print $FD "\t"."set root='$rprefix,$boot_id'"."\n";
@@ -6044,6 +6044,15 @@ sub makeLabel {
 		$label =~ s/ /_/g;
 	}
 	return $label;
+}
+
+#==========================================
+# quoteLabel
+#------------------------------------------
+sub quoteLabel {
+	my $this  = shift;
+	my $label = shift;
+	return KIWIConfigure::quoteshell ($label);
 }
 
 #==========================================

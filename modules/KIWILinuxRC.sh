@@ -189,7 +189,7 @@ function importFile {
 	# remove backslash quotes if any
 	sed -i -e s"#\\\\\(.\)#\1#g" /tmp/srcme
 	# quote simple quotation marks
-	sed -i -e s"#'#'\\\\''#g" /tmp/srcme
+	sed -i -e s"#'\+#'\\\\''#g" /tmp/srcme
 	# add '...' quoting to values
 	sed -i -e s"#\(^[a-zA-Z0-9_]\+\)=\(.*\)#$prefix\1='\2'#" /tmp/srcme
 	source /tmp/srcme
@@ -2515,7 +2515,7 @@ function setupBootLoaderGrub2 {
 	#--------------------------------------
 	mkdir -p $destsPrefix/etc/default
 	cat > $inst_default_grub <<- EOF
-		GRUB_DISTRIBUTOR='$title'
+		GRUB_DISTRIBUTOR=$(printf %q $title)
 		GRUB_DEFAULT=0
 		GRUB_HIDDEN_TIMEOUT=0
 		GRUB_HIDDEN_TIMEOUT_QUIET=true
