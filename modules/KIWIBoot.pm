@@ -3241,7 +3241,7 @@ sub setupBootLoaderConfiguration {
 		print FD "set timeout=$bootTimeout\n";
 		if ($type =~ /^KIWI (CD|USB)/) {
 			my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
-			print FD 'menuentry \'Boot from Hard Disk\' {'."\n";
+			print FD 'menuentry "Boot from Hard Disk" {'."\n";
 			if ($dev eq '(cd)') {
 				print FD ' chainloader (hd0)+1'."\n";
 			} else {
@@ -3258,11 +3258,11 @@ sub setupBootLoaderConfiguration {
 				}
 			}
 			print FD '}'."\n";
-			$title = $this -> makeLabel ("Install $label");
+			$title = $this -> quoteLabel ("Install $label");
 		} else {
-			$title = $this -> makeLabel ("$label [ $type ]");
+			$title = $this -> quoteLabel ("$label [ $type ]");
 		}
-		print FD 'menuentry \''.$title.'\'';
+		print FD 'menuentry "'.$title.'"';
 		print FD ' --class opensuse --class os {'."\n";
 		#==========================================
 		# Standard boot
@@ -3310,8 +3310,8 @@ sub setupBootLoaderConfiguration {
 		# Failsafe boot
 		#------------------------------------------
 		if ($failsafe) {
-			$title = $this -> makeLabel ("Failsafe -- $title");
-			print FD 'menuentry \''.$title.'\'';
+			$title = $this -> quoteLabel ("Failsafe -- $title");
+			print FD 'menuentry "'.$title.'"';
 			print FD ' --class opensuse --class os {'."\n";
 			if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 				if ($type =~ /^KIWI CD/) {
@@ -5267,6 +5267,15 @@ sub makeLabel {
 		$label =~ s/ /_/g;
 	}
 	return $label;
+}
+
+#==========================================
+# quoteLabel
+#------------------------------------------
+sub quoteLabel {
+	my $this  = shift;
+	my $label = shift;
+	return KIWIConfigure::quoteshell ($label);
 }
 
 #==========================================
