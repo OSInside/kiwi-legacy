@@ -25,7 +25,6 @@ package KIWIXMLTypeData;
 #------------------------------------------
 use strict;
 use warnings;
-use Scalar::Util qw /looks_like_number/;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -97,6 +96,8 @@ sub new {
 		pxedeploy
 		ramonly
 		size
+		sizeadd
+		sizeunit
 		split
 		systemdisk
 		vga
@@ -115,6 +116,7 @@ sub new {
 		installstick
 		primary
 		ramonly
+		sizeadd
 	);
 	$this->{boolKeywords} = \%boolKW;
 	if (! $this -> __isInitHashRef($init) ) {
@@ -147,6 +149,8 @@ sub new {
 	$this->{kernelcmdline}          = $init->{kernelcmdline};
 	$this->{luks}                   = $init->{luks};
 	$this->{size}                   = $init->{size};
+	$this->{sizeadd}                = $init->{sizeadd};
+	$this->{sizeunit}               = $init->{sizeunit};
 	$this->{vga}                    = $init->{vga};
 	$this->{volid}                  = $init->{volid};
 	# Set default values
@@ -155,6 +159,12 @@ sub new {
 	}
 	if (! $init->{installprovidefailsafe} ) {
 		$this->{installprovidefailsafe} = 'true';
+	}
+	if (! $init->{sizeadd} ) {
+		$this->{sizeadd} = 'false';
+	}
+	if (! $init->{sizeunit} ) {
+		$this->{sizeunit} = 'M';
 	}
 	return $this;
 }
@@ -200,7 +210,11 @@ sub getBootPartitionSize {
 	# Return the configured bootpartition size
 	# ---
 	my $this = shift;
-	return $this->{bootpartsize};
+	my $size;
+	if ($this->{bootpartsize}) {
+		$size = int $this->{bootpartsize};
+	}
+	return $size;
 }
 
 #==========================================
@@ -514,7 +528,22 @@ sub getSize {
 	# Return the systemsize for this type
 	# ---
 	my $this = shift;
-	return $this->{size}
+	my $size;
+	if ($this->{size}) {
+		$size = int $this->{size};
+	}
+	return $size;
+}
+
+#==========================================
+# getSizeUnit
+#------------------------------------------
+sub getSizeUnit {
+	# ...
+	# Return the systemsize for this type
+	# ---
+	my $this = shift;
+	return $this->{sizeunit};
 }
 
 #==========================================
@@ -537,6 +566,17 @@ sub getVolID {
 	# ---
 	my $this = shift;
 	return $this->{volid};
+}
+
+#==========================================
+# isSizeAdditive
+#------------------------------------------
+sub isSizeAdditive {
+	# ...
+	# Return indication whether the size for this type is additive or not
+	# ---
+	my $this = shift;
+	return $this->{sizeadd};
 }
 
 #==========================================
@@ -1119,7 +1159,41 @@ sub setSize {
 		$kiwi -> failed();
 		return;
 	}
-	$this->{size} = $size;
+	$this->{size} = int $size;
+	return $this;
+}
+
+#==========================================
+# setSizeAdditive
+#------------------------------------------
+sub setSizeAdditive {
+	# ...
+	# Set the flag indicating whether the size is additive or not
+	# ---
+	my $this = shift;
+	my $add = shift;
+	my %settings = (
+		attr   => 'sizeadd',
+		value  => $add,
+		caller => 'setSizeAdditive'
+	);
+	return $this -> __setBooleanValue(\%settings);
+}
+
+#==========================================
+# setSizeUnit
+#------------------------------------------
+sub setSizeUnit {
+	# ...
+	# Set the systemsize unit of measure for this type
+	# ---
+	my $this = shift;
+	my $unit = shift;
+	my $u = $this->{sizeunit};
+	if (! $this->__isValidSizeUnit($unit, 'setSizeUnit')) {
+		return;
+	}
+	$this->{sizeunit} = $unit;
 	return $this;
 }
 
@@ -1242,6 +1316,12 @@ sub __isInitConsistent {
 	if ($init->{installboot}) {
 		if (! $this->__isValidInstBoot(
 			$init->{installboot},'object initialization')) {
+			return;
+		}
+	}
+	if ($init->{sizeunit}) {
+		if (! $this->__isValidSizeUnit(
+			$init->{sizeunit}, 'object initialization')) {
 			return;
 		}
 	}
@@ -1536,6 +1616,39 @@ sub __isValidInstBoot {
 	if (! $supported{$instB} ) {
 		my $msg = "$caller: specified installboot option '$instB' is not "
 			. 'supported.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
+}
+#==========================================
+# __isValidSizeUnit
+#------------------------------------------
+sub __isValidSizeUnit {
+	# ...
+	# Verify that the given unit of measure for the size is a
+	# recognized value
+	#---
+	my $this   = shift;
+	my $unit   = shift;
+	my $caller = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller ) {
+		my $msg = 'Internal error __isValidSizeUnitcalled without '
+			. 'call origin argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if (! $unit ) {
+		my $msg = "$caller: no systemsize unit value given, retaining "
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if ($unit ne 'M' && $unit ne 'G') {
+		my $msg = "$caller: expecting unit setting of 'M' or 'G'.";
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;

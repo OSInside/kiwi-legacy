@@ -374,11 +374,11 @@ sub new {
 		#==========================================
 		# Store optional size setup from XML
 		#------------------------------------------
-		my $sizeXMLAddBytes = $xml -> getImageSizeAdditiveBytes();
+		my $sizeXMLAddBytes = $xml -> getImageSizeAdditiveBytes_legacy();
 		if ($sizeXMLAddBytes) {
 			$sizeXMLBytes = $sizeBytes + $sizeXMLAddBytes;
 		} else {
-			$sizeXMLBytes = $xml -> getImageSizeBytes();
+			$sizeXMLBytes = $xml -> getImageSizeBytes_legacy();
 		}
 		#==========================================
 		# Store initial disk size

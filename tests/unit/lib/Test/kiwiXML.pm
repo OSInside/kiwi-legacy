@@ -19,6 +19,7 @@ use warnings;
 
 use Common::ktLog;
 use Common::ktTestCase;
+use Readonly;
 use base qw /Common::ktTestCase/;
 
 use KIWICommandLine;
@@ -42,6 +43,11 @@ use KIWIXMLSystemdiskData;
 use KIWIXMLTypeData;
 use KIWIXMLUserData;
 use KIWIXMLVMachineData;
+
+#==========================================
+# constants
+#------------------------------------------
+Readonly my $PREFSET_IMAGE_SIZE => 20;
 
 # All tests will need to be adjusted once KIWXML turns into a stateless
 # container and the ctor receives the config.xml file name as an argument.
@@ -5273,9 +5279,9 @@ sub test_getImageName {
 }
 
 #==========================================
-# test_getImageSize
+# test_getImageSizeNotAdditive_legacy
 #------------------------------------------
-sub test_getImageSizeNotAdditive {
+sub test_getImageSizeNotAdditive_legacy {
 	# ...
 	# Verify proper return of getImageSize method
 	# ---
@@ -5285,7 +5291,7 @@ sub test_getImageSizeNotAdditive {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getImageSize();
+	my $value = $xml -> getImageSize_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -5298,9 +5304,9 @@ sub test_getImageSizeNotAdditive {
 }
 
 #==========================================
-# test_getImageSizeAdditiveBytes
+# test_getImageSizeAdditiveBytesNotAdditive_legacy
 #------------------------------------------
-sub test_getImageSizeAdditiveBytesNotAdditive {
+sub test_getImageSizeAdditiveBytesNotAdditive_legacy {
 	# ...
 	# Verify proper return of getImageSizeAdditiveBytes method
 	# ---
@@ -5310,7 +5316,7 @@ sub test_getImageSizeAdditiveBytesNotAdditive {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getImageSizeAdditiveBytes();
+	my $value = $xml -> getImageSizeAdditiveBytes_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -5323,9 +5329,9 @@ sub test_getImageSizeAdditiveBytesNotAdditive {
 }
 
 #==========================================
-# test_getImageSizeBytes
+# test_getImageSizeBytesNotAdditive_legacy
 #------------------------------------------
-sub test_getImageSizeBytesNotAdditive {
+sub test_getImageSizeBytesNotAdditive_legacy {
 	# ...
 	# Verify proper return of getImageSizeBytes method
 	# ---
@@ -5335,7 +5341,7 @@ sub test_getImageSizeBytesNotAdditive {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getImageSizeBytes();
+	my $value = $xml -> getImageSizeBytes_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -9637,6 +9643,35 @@ sub test_setSelectionProfileNamesNoArg {
 	# Test this condition last to get potential error messages
 	my @expectedProf = ('profB');
 	$this -> assert_array_equal(\@expectedProf, $profNames);
+	return;
+}
+
+#==========================================
+# test_sizeHandling
+#------------------------------------------
+sub test_sizeHandling {
+	# ...
+	# Verify that size is properly handled
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'preferenceSettings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $typeObj = $xml -> getImageType();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $size = $typeObj -> getSize();
+	$this -> assert_equals($PREFSET_IMAGE_SIZE, $size);
+	my $unit = $typeObj -> getSizeUnit();
+	$this -> assert_str_equals('G', $unit);
+	my $add = $typeObj -> isSizeAdditive();
+	$this -> assert_str_equals('false', $add);
 	return;
 }
 
