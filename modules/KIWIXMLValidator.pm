@@ -299,7 +299,7 @@ sub __checkDefaultTypeSetting {
 			if ($hasPrimary > 1) {
 				my $kiwi = $this->{kiwi};
 				my $msg = 'Only one primary type may be specified per '
-				. 'preferences section.';
+				    . 'preferences section.';
 				$kiwi -> error ($msg);
 				$kiwi -> failed ();
 				return;
@@ -534,6 +534,34 @@ sub __checkHttpsCredentialsConsistent {
 				. 'All credentials for https repositories must be equal.';
 				$kiwi -> error ($msg);
 				$kiwi -> failed();
+				return;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkNoBootVolume
+#------------------------------------------
+sub __checkNoBootVolume {
+	# ...
+	# Check that the boot directory, i.e. /boot is not specified as
+	# a logical volume.
+	# ---
+	my $this = shift;
+	my $systemTree  = $this->{systemTree};
+	my @lvmNodes = $systemTree -> getElementsByTagName('systemdisk');
+	for my $lvmSetup (@lvmNodes) {
+		my @volumes = $lvmSetup -> getChildrenByTagName('volume');
+		for my $vol (@volumes) {
+			my $name = $vol -> getAttribute('name');
+			if ($name =~ m{^/*boot\z}mx) {
+				my $kiwi = $this->{kiwi};
+				my $msg = 'Found <systemdisk> setup using "/boot" as '
+					. 'volume. This is not supported.';
+				$kiwi -> error ($msg);
+				$kiwi -> failed ();
 				return;
 			}
 		}
@@ -1536,6 +1564,9 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkHttpsCredentialsConsistent()) {
+		return;
+	}
+	if (! $this -> __checkNoBootVolume()) {
 		return;
 	}
 	if (! $this -> __checkPackageUnique()) {
