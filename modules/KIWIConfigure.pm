@@ -247,13 +247,19 @@ sub setupUsersGroups {
 				$adduser .= " -m -d \"$home\"";
 			}
 			if (defined $gid) {
+				# add user to primary group by group ID
 				$adduser .= " -g $gid";
 				$moduser .= " -g $gid";
+			} elsif (defined $group) {
+				# add user to primary group by group name
+				$adduser .= " -g $group";
+				$moduser .= " -g $group";
 			}
 			if (defined $uid) {
 				$adduser .= " -u $uid";
 			}
 			if (defined $group) {
+				# create group if it does not exist
 				my $data = qxx (
 					"chroot $root grep -q ^$group: /etc/group 2>&1"
 				);
@@ -274,7 +280,6 @@ sub setupUsersGroups {
 					}
 					$kiwi -> done();
 				}
-				$adduser .= " -G \"$group\"";
 			}
 			if (defined $realname) {
 				$realname = quoteshell ($realname);
