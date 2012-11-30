@@ -20,9 +20,18 @@ use warnings;
 
 use Common::ktLog;
 use Common::ktTestCase;
+use Readonly;
 use base qw /Common::ktTestCase/;
 
 use KIWIXMLTypeData;
+
+#==========================================
+# constants
+#------------------------------------------
+Readonly my $BOOTPAT_SIZE   => 512;
+Readonly my $IMAGE_SIZE     => 16_384;
+Readonly my $LARGE_BOOTPART => 1024;
+Readonly my $SMALL_IMAGE    => 4096;
 
 #==========================================
 # Constructor
@@ -355,7 +364,7 @@ sub test_ctor_initInvalidPrimaryValue {
 sub test_ctor_initInvalidRamonlyValue {
 	# ...
 	# Test the TypeData constructor with an initialization hash
-	# that contains an unrecognized boolen initialization for
+	# that contains an unrecognized boolean initialization for
 	# the ramonly value
 	# ----
 	 my $this = shift;
@@ -376,6 +385,64 @@ sub test_ctor_initInvalidRamonlyValue {
 	 # Test this condition last to get potential error messages
 	 $this -> assert_null($typeDataObj);
 	 return;
+}
+
+#==========================================
+# test_ctor_initInvalidSizeaddValue
+#------------------------------------------
+sub test_ctor_initInvalidSizeaddValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized boolen initialization for
+	# the sizeadd value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = (
+	     image   => 'iso',
+		 sizeadd => 'foo'
+	);
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+		. "'sizeadd' in initialization structure.";
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
+# test_ctor_initInvalidSizeUnit
+#------------------------------------------
+sub test_ctor_initInvalidSizeUnit {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized initialization value for
+	# the sizeunit
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = (
+	     image    => 'vmx',
+		 sizeunit => 'K'
+	 );
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'object initialization: expecting unit setting of '
+		. "'M' or 'G'.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($typeDataObj);
+	return;
 }
 
 #==========================================
@@ -806,7 +873,7 @@ sub test_getBootPartitionSize {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('512M', $size);
+	$this -> assert_equals($BOOTPAT_SIZE, $size);
 	return;
 }
 
@@ -1395,7 +1462,53 @@ sub test_getSize {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('16384', $size);
+	$this -> assert_equals($IMAGE_SIZE, $size);
+	return;
+}
+
+#==========================================
+# test_getSizeUnit
+#------------------------------------------
+sub test_getSizeUnit {
+	# ...
+	# Test the getSizeUnit method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $unit = $typeDataObj -> getSizeUnit();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('M', $unit);
+	return;
+}
+
+#==========================================
+# test_getSizeUnitDefault
+#------------------------------------------
+sub test_getSizeUnitDefault {
+	# ...
+	# Test the getSizeUnit method default value setting
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+	     image => 'vmx',
+		 size  => '8192'
+	);
+	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $unit = $typeDataObj -> getSizeUnit();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('M', $unit);
 	return;
 }
 
@@ -1438,6 +1551,52 @@ sub test_getVolID {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('myImg', $id);
+	return;
+}
+
+#==========================================
+# test_isSizeAdditive
+#------------------------------------------
+sub test_isSizeAdditive {
+	# ...
+	# Test the isSizeAdditive method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $add = $typeDataObj -> isSizeAdditive();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('true', $add);
+	return;
+}
+
+#==========================================
+# test_isSizeAdditiveDefault
+#------------------------------------------
+sub test_isSizeAdditiveDefault {
+	# ...
+	# Test the isSizeAditive method default value setting
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+	     image => 'vmx',
+		 size  => '8192'
+	);
+	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $add = $typeDataObj -> isSizeAdditive();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('false', $add);
 	return;
 }
 
@@ -1662,7 +1821,7 @@ sub test_setBootPartitionSize {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $typeDataObj = $this -> __getTypeObj();
-	$typeDataObj = $typeDataObj -> setBootPartitionSize('1024M');
+	$typeDataObj = $typeDataObj -> setBootPartitionSize('1024');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1677,7 +1836,7 @@ sub test_setBootPartitionSize {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('1024M', $size);
+	$this -> assert_equals($LARGE_BOOTPART, $size);
 	return;
 }
 
@@ -1708,7 +1867,7 @@ sub test_setBootPartitionSizeNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('512M', $size);
+	$this -> assert_equals($BOOTPAT_SIZE, $size);
 	return;
 }
 
@@ -3863,7 +4022,7 @@ sub test_setSize {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('4096', $size);
+	$this -> assert_equals($SMALL_IMAGE, $size);
 	return;
 }
 
@@ -3894,7 +4053,186 @@ sub test_setSizeNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('16384', $size);
+	$this -> assert_equals($IMAGE_SIZE, $size);
+	return;
+}
+
+#==========================================
+# test_setSizeAdditive
+#------------------------------------------
+sub test_setSizeAdditive {
+	# ...
+	# Test the setSizeAdditive method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	$typeDataObj = $typeDataObj -> setSizeAdditive('true');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $add = $typeDataObj -> isSizeAdditive();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('true', $add);
+	return;
+}
+
+#==========================================
+# test_setSizeAdditiveNoArg
+#------------------------------------------
+sub test_setSizeAdditiveNoArg {
+	# ...
+	# Test the setSizeAdditive method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setSizeAdditive();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $add = $typeDataObj -> isSizeAdditive();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('false', $add);
+	return;
+}
+
+#==========================================
+# test_setSizeAdditiveUnknownArg
+#------------------------------------------
+sub test_setSizeAdditiveUnknownArg {
+	# ...
+	# Test the setSizeAdditive method with an unrecognized argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setSizeAdditive('5');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLTypeData:setSizeAdditive: unrecognized argument '
+		. 'expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $add = $typeDataObj -> isSizeAdditive();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('true', $add);
+	return;
+}
+
+#==========================================
+# test_setSizeUnit
+#------------------------------------------
+sub test_setSizeUnit {
+	# ...
+	# Test the setSizeUnit method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	$typeDataObj = $typeDataObj -> setSizeUnit('G');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $unit = $typeDataObj -> getSizeUnit();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('G', $unit);
+	return;
+}
+
+#==========================================
+# test_setSizeUnitInvalidArg
+#------------------------------------------
+sub test_setSizeUnitInvalidArg {
+	# ...
+	# Test the setSizeUnit method with an invalid argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setSizeUnit('K');
+	my $msg = $kiwi -> getMessage();
+	my $expected = "setSizeUnit: expecting unit setting of 'M' or 'G'.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $unit = $typeDataObj -> getSizeUnit();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('M', $unit);
+	return;
+}
+
+#==========================================
+# test_setSizeUnitNoArg
+#------------------------------------------
+sub test_setSizeUnitNoArg {
+	# ...
+	# Test the setSizeUnit method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setSizeUnit();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setSizeUnit: no systemsize unit value given, retaining '
+		. 'current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $unit = $typeDataObj -> getSizeUnit();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('M', $unit);
 	return;
 }
 
@@ -4035,7 +4373,7 @@ sub __getTypeObj {
 				boot                   => '/oem/suse-12.2',
 				bootkernel             => 'xenk',
 				bootloader             => 'grub2',
-				bootpartsize           => '512M',
+				bootpartsize           => '512',
 				bootprofile            => 'std',
 				boottimeout            => '5',
 				checkprebuilt          => 'true',
@@ -4063,6 +4401,8 @@ sub __getTypeObj {
 				primary                => 'true',
 				ramonly                => 'true',
 				size                   => '16384',
+				sizeadd                => 'true',
+				sizeunit               => 'M',
 				vga                    => '0x344',
 				volid                  => 'myImg'
 			);

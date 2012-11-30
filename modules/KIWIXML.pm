@@ -2351,9 +2351,15 @@ sub __genTypeHash {
 		#------------------------------------------
 		$typeData{oemconfig} = $this -> __genOEMConfigHash($type);
 		#==========================================
-		# store <size>...</size> text
+		# store <size>...</size> text and attributes
 		#------------------------------------------
 		$typeData{size} = $this -> __getChildNodeTextValue($type, 'size');
+		my @sizeNodes = $type -> getChildrenByTagName('size');
+		if (@sizeNodes) {
+			my $sizeNd = $sizeNodes[0];
+			$typeData{sizeadd} = $sizeNd -> getAttribute('additive');
+			$typeData{sizeunit} = $sizeNd -> getAttribute('unit');
+		}
 		#==========================================
 		# store <pxeconfig> child
 		#------------------------------------------
@@ -3755,119 +3761,6 @@ sub getImageID {
 	return 0;
 }
 
-#==========================================
-# getImageSize
-#------------------------------------------
-sub getImageSize {
-	# ...
-	# Get the predefined size of the logical extend
-	# ---
-	my $this = shift;
-	my $node = $this->{typeNode};
-	my $size = $node -> getElementsByTagName ("size");
-	if ($size) {
-		my $plus = $node -> getElementsByTagName ("size")
-			-> get_node(1) -> getAttribute("additive");
-		if ((! defined $plus) || ($plus eq "false")) {
-			my $unit = $node -> getElementsByTagName ("size")
-				-> get_node(1) -> getAttribute("unit");
-			if (! $unit) {
-				# no unit specified assume MB...
-				$unit = "M";
-			}
-			# /.../
-			# the fixed size value was set, we will use this value
-			# connected with the unit string
-			# ----
-			return $size.$unit;
-		} else {
-			# /.../
-			# the size is setup as additive value to the required
-			# size. The real size is calculated later and the additive
-			# value is added at that point
-			# ---
-			return "auto";
-		}
-	} else {
-		return "auto";
-	}
-}
-
-#==========================================
-# getImageSizeAdditiveBytes
-#------------------------------------------
-sub getImageSizeAdditiveBytes {
-	# ...
-	# Get the predefined size if the attribute additive
-	# was set to true
-	# ---
-	my $this = shift;
-	my $node = $this->{typeNode};
-	my $size = $node -> getElementsByTagName ("size");
-	if ($size) {
-		my $plus = $node -> getElementsByTagName ("size")
-			-> get_node(1) -> getAttribute("additive");
-		if ((! defined $plus) || ($plus eq "false")) {
-			return 0;
-		}
-	}
-	if ($size) {
-		my $byte = int $size;
-		my $unit = $node -> getElementsByTagName ("size")
-			-> get_node(1) -> getAttribute("unit");
-		if ((! $unit) || ($unit eq "M")) {
-			# no unit or M specified, turn into Bytes...
-			return $byte * 1024 * 1024;
-		} elsif ($unit eq "G") {
-			# unit G specified, turn into Bytes...
-			return $byte * 1024 * 1024 * 1024;
-		}
-	} else {
-		return 0;
-	}
-}
-
-#==========================================
-# getImageSizeBytes
-#------------------------------------------
-sub getImageSizeBytes {
-	# ...
-	# Get the predefined size of the logical extend
-	# as byte value
-	# ---
-	my $this = shift;
-	my $node = $this->{typeNode};
-	my $size = $node -> getElementsByTagName ("size");
-	if ($size) {
-		my $byte = int $size;
-		my $plus = $node -> getElementsByTagName ("size")
-			-> get_node(1) -> getAttribute("additive");
-		if ((! defined $plus) || ($plus eq "false") || ($plus eq "0")) {
-			# /.../
-			# the fixed size value was set, we will use this value
-			# and return a byte number
-			# ----
-			my $unit = $node -> getElementsByTagName ("size")
-				-> get_node(1) -> getAttribute("unit");
-			if ((! $unit) || ($unit eq "M")) {
-				# no unit or M specified, turn into Bytes...
-				return $byte * 1024 * 1024;
-			} elsif ($unit eq "G") {
-				# unit G specified, turn into Bytes...
-				return $byte * 1024 * 1024 * 1024;
-			}
-		} else {
-			# /.../
-			# the size is setup as additive value to the required
-			# size. The real size is calculated later and the additive
-			# value is added at that point
-			# ---
-			return "auto";
-		}
-	} else {
-		return "auto";
-	}
-}
 
 #==========================================
 # getImageVersion
@@ -5532,7 +5425,7 @@ sub getImageConfig_legacy {
 	my %type  = %{$this->getImageTypeAndAttributes_legacy()};
 	my @delp  = $this -> getDeleteList_legacy();
 	my $iver  = $this -> getImageVersion();
-	my $size  = $this -> getImageSize();
+	my $size  = $this -> getImageSize_legacy();
 	my $name  = $this -> getImageName();
 	my $dname = $this -> getImageDisplayName ($this);
 	my $lics  = $this -> getLicenseNames_legacy();
@@ -5861,6 +5754,119 @@ sub getImageDefaultRoot_legacy {
 		return;
 	}
 	return "$root";
+}
+#==========================================
+# getImageSize_legacy
+#------------------------------------------
+sub getImageSize_legacy {
+	# ...
+	# Get the predefined size of the logical extend
+	# ---
+	my $this = shift;
+	my $node = $this->{typeNode};
+	my $size = $node -> getElementsByTagName ("size");
+	if ($size) {
+		my $plus = $node -> getElementsByTagName ("size")
+			-> get_node(1) -> getAttribute("additive");
+		if ((! defined $plus) || ($plus eq "false")) {
+			my $unit = $node -> getElementsByTagName ("size")
+				-> get_node(1) -> getAttribute("unit");
+			if (! $unit) {
+				# no unit specified assume MB...
+				$unit = "M";
+			}
+			# /.../
+			# the fixed size value was set, we will use this value
+			# connected with the unit string
+			# ----
+			return $size.$unit;
+		} else {
+			# /.../
+			# the size is setup as additive value to the required
+			# size. The real size is calculated later and the additive
+			# value is added at that point
+			# ---
+			return "auto";
+		}
+	} else {
+		return "auto";
+	}
+}
+
+#==========================================
+# getImageSizeAdditiveBytes_legacy
+#------------------------------------------
+sub getImageSizeAdditiveBytes_legacy {
+	# ...
+	# Get the predefined size if the attribute additive
+	# was set to true
+	# ---
+	my $this = shift;
+	my $node = $this->{typeNode};
+	my $size = $node -> getElementsByTagName ("size");
+	if ($size) {
+		my $plus = $node -> getElementsByTagName ("size")
+			-> get_node(1) -> getAttribute("additive");
+		if ((! defined $plus) || ($plus eq "false")) {
+			return 0;
+		}
+	}
+	if ($size) {
+		my $byte = int $size;
+		my $unit = $node -> getElementsByTagName ("size")
+			-> get_node(1) -> getAttribute("unit");
+		if ((! $unit) || ($unit eq "M")) {
+			# no unit or M specified, turn into Bytes...
+			return $byte * 1024 * 1024;
+		} elsif ($unit eq "G") {
+			# unit G specified, turn into Bytes...
+			return $byte * 1024 * 1024 * 1024;
+		}
+	} else {
+		return 0;
+	}
+}
+
+#==========================================
+# getImageSizeBytes_legacy
+#------------------------------------------
+sub getImageSizeBytes_legacy {
+	# ...
+	# Get the predefined size of the logical extend
+	# as byte value
+	# ---
+	my $this = shift;
+	my $node = $this->{typeNode};
+	my $size = $node -> getElementsByTagName ("size");
+	if ($size) {
+		my $byte = int $size;
+		my $plus = $node -> getElementsByTagName ("size")
+			-> get_node(1) -> getAttribute("additive");
+		if ((! defined $plus) || ($plus eq "false") || ($plus eq "0")) {
+			# /.../
+			# the fixed size value was set, we will use this value
+			# and return a byte number
+			# ----
+			my $unit = $node -> getElementsByTagName ("size")
+				-> get_node(1) -> getAttribute("unit");
+			if ((! $unit) || ($unit eq "M")) {
+				# no unit or M specified, turn into Bytes...
+				return $byte * 1024 * 1024;
+			} elsif ($unit eq "G") {
+				# unit G specified, turn into Bytes...
+				return $byte * 1024 * 1024 * 1024;
+			}
+		} else {
+			# /.../
+			# the size is setup as additive value to the required
+			# size. The real size is calculated later and the additive
+			# value is added at that point
+			# ---
+			return "auto";
+		}
+	} else {
+		return "auto";
+	}
 }
 
 #==========================================
