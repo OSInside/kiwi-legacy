@@ -2231,32 +2231,6 @@ sub setupBootDisk {
 			# Create disk device mapping table
 			#------------------------------------------
 			%deviceMap = $this -> setDefaultDeviceMap ($this->{loop});
-			#==========================================
-			# Umount possible mounted stick partitions
-			#------------------------------------------
-			$this -> umountDevice ($this->{loop});
-			for (my $try=0;$try>=2;$try++) {
-				$status = qxx ("/sbin/blockdev --rereadpt $this->{loop} 2>&1");
-				$result = $? >> 8;
-				if ($result != 0) {
-					sleep (1); next;
-				}
-				last;
-			}
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't reread partition table: $status");
-				$kiwi -> failed ();
-				return;
-			}
-			#==========================================
-			# Wait for new partition table to settle
-			#------------------------------------------
-			sleep (1);
-			#==========================================
-			# Umount possible mounted stick partitions
-			#------------------------------------------
-			$this -> umountDevice ($this->{loop});
 		}
 		#==========================================
 		# setup volume group if requested
