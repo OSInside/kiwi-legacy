@@ -21,6 +21,7 @@ package KIWIXMLPXEDeployData;
 use strict;
 use warnings;
 use Readonly;
+use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -316,11 +317,11 @@ sub getKernel {
 #------------------------------------------
 sub getPartitionIDs {
 	# ...
-	# Return a sorted list of the partition IDs configured
+	# Return a sorted array ref of the partition IDs configured
 	# ---
 	my $this = shift;
 	my @partIDs = sort keys %{$this->{partitions}};
-	return @partIDs;
+	return \@partIDs;
 }
 
 #==========================================
@@ -452,6 +453,85 @@ sub getUnionType {
 	# ---
 	my $this = shift;
 	return $this->{unionType};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new('pxedeploy');
+	$element -> setAttribute('blocksize', $this -> getBlocksize());
+	$element -> setAttribute('server', $this -> getServer());
+	my $confDest = $this -> getConfigurationDestination();
+	if ($confDest) {
+		my $confElem = XML::LibXML::Element -> new('configuration');
+		$confElem -> setAttribute('dest', $confDest);
+		$confElem -> setAttribute('source', $this -> getConfigurationSource());
+		my @confArch = @{$this -> getConfigurationArch()};
+		if (@confArch) {
+			my $archDef = join q{,}, @confArch;
+			$confElem -> setAttribute('arch', $archDef);
+		}
+		$element -> addChild($confElem);
+	}
+	my %initBootImg = (
+		parent    => $element,
+		childName => 'initrd',
+		text      => $this -> getInitrd()
+	);
+	$element = $this -> __addElement(\%initBootImg);
+	my %initKern = (
+		parent    => $element,
+		childName => 'kernel',
+		text      => $this -> getKernel()
+	);
+	$element = $this -> __addElement(\%initKern);
+	my @pIDs = @{$this -> getPartitionIDs()};
+	if (@pIDs) {
+		my $partElem = XML::LibXML::Element -> new('partitions');
+		my $dev = $this -> getDevice();
+		if ($dev) {
+			$partElem -> setAttribute('device', $dev);
+		}
+		for my $id (@pIDs) {
+			my $pElem = XML::LibXML::Element -> new('partition');
+			my $mount = $this -> getPartitionMountpoint($id);
+			if ($mount) {
+				$pElem -> setAttribute('mountpoint', $mount);
+			}
+			$pElem -> setAttribute('number', $this -> getPartitionNumber($id));
+			my $size = $this -> getPartitionSize($id);
+			if ($size) {
+				$pElem -> setAttribute('size', $size);
+			}
+			my $target = $this -> getPartitionTarget($id);
+			if ($target) {
+				$pElem -> setAttribute('target', $target);
+			}
+			$pElem -> setAttribute('type', $this -> getPartitionType($id));
+			$partElem -> addChild($pElem);
+		}
+		$element -> addChild($partElem);
+	}
+	my %initTO = (
+		parent    => $element,
+		childName => 'timeout',
+		text      => $this -> getTimeout()
+	);
+	$element = $this -> __addElement(\%initTO);
+	my $unionRO = $this -> getUnionRO();
+	if ($unionRO) {
+		my $uElem = XML::LibXML::Element -> new('union');
+		$uElem -> setAttribute('ro', $unionRO);
+		$uElem -> setAttribute('rw', $this -> getUnionRW());
+		$uElem -> setAttribute('type', $this -> getUnionType());
+		$element -> addChild($uElem);
+	}
+	return $element;
 }
 
 #==========================================

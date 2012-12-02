@@ -17,6 +17,7 @@ package Test::kiwiXMLPXEDeployData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -109,7 +110,7 @@ sub test_createPartition {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('0x83', $type);
-	my @pIDs = $pxeDataObj -> getPartitionIDs();
+	my @pIDs = @{$pxeDataObj -> getPartitionIDs()};
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -1267,7 +1268,7 @@ sub test_getPartitionIDs {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $pxeDataObj = $this -> __getPXEDeployObj();
-	my @pIDs = $pxeDataObj -> getPartitionIDs();
+	my @pIDs = @{$pxeDataObj -> getPartitionIDs()};
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1926,6 +1927,43 @@ sub test_getUnionType {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('clicfs', $unionType);
+	return;
+}
+
+#==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $pxeDataObj = $this -> __getPXEDeployObj();
+	my $elem = $pxeDataObj -> getXMLElement();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<pxedeploy blocksize="8192" server="10.10.1.1">'
+		. '<configuration dest="/srv/atftp/config" source="/wrk/packages" '
+		. 'arch="ppc64,x86_64"/>'
+		. '<initrd>initrd-3.4.6</initrd>'
+		. '<kernel>vmlinuz-3.4.6-default</kernel>'
+		. '<partitions device="/dev/sdb1">'
+		. '<partition mountpoint="/" number="1" size="20G" target="true" '
+		. 'type="0x83"/>'
+		. '<partition mountpoint="/home" number="2" size="50G" type="0x83"/>'
+		. '</partitions>'
+		. '<timeout>45</timeout>'
+		. '<union ro="/dev/sdb1" rw="/dev/sdb2" type="clicfs"/>'
+		. '</pxedeploy>';
+	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
 

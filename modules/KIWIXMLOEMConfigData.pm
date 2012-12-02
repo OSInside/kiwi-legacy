@@ -20,6 +20,7 @@ package KIWIXMLOEMConfigData;
 #------------------------------------------
 use strict;
 use warnings;
+use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -49,18 +50,40 @@ sub new {
 	# Argument checking and object data store
 	#------------------------------------------
 	my %keywords = map { ($_ => 1) } qw(
-		oem_align_partition oem_boot_title oem_bootwait
-		oem_inplace_recovery oem_kiwi_initrd oem_partition_install
-		oem_reboot oem_reboot_interactive oem_recovery oem_recoveryID
-		oem_shutdown oem_shutdown_interactive oem_silent_boot oem_swap
-		oem_swapsize oem_systemsize oem_unattended oem_unattended_id
+		oem_align_partition
+		oem_boot_title
+		oem_bootwait
+		oem_inplace_recovery
+		oem_kiwi_initrd
+		oem_partition_install
+		oem_reboot
+		oem_reboot_interactive
+		oem_recovery
+		oem_recoveryID
+		oem_shutdown
+		oem_shutdown_interactive
+		oem_silent_boot
+		oem_swap
+		oem_swapsize
+		oem_systemsize
+		oem_unattended
+		oem_unattended_id
 	);
 	$this->{supportedKeywords} = \%keywords;
 	my %boolKW = map { ($_ => 1) } qw(
-		oem_align_partition oem_bootwait oem_inplace_recovery
-		oem_kiwi_initrd oem_partition_install oem_reboot
-		oem_reboot_interactive oem_recovery oem_shutdown
-		oem_shutdown_interactive oem_silent_boot oem_swap oem_unattended
+		oem_align_partition
+		oem_bootwait
+		oem_inplace_recovery
+		oem_kiwi_initrd
+		oem_partition_install
+		oem_reboot
+		oem_reboot_interactive
+		oem_recovery
+		oem_shutdown
+		oem_shutdown_interactive
+		oem_silent_boot
+		oem_swap
+		oem_unattended
 	);
 	$this->{boolKeywords} = \%boolKW;
 	if (! $this -> __isInitHashRef($init) ) {
@@ -279,6 +302,126 @@ sub getUnattendedID {
 	# ---
 	my $this = shift;
 	return $this->{oem_unattended_id};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new('oemconfig');
+	my %initAlign = (
+		parent    => $element,
+		childName => 'oem-align-partition',
+		text      => $this -> getAlignPartition ()
+	);
+	$element = $this -> __addElement(\%initAlign);
+	my %initBootT = (
+		parent    => $element,
+		childName => 'oem-boot-title',
+		text      => $this -> getBootTitle ()
+	);
+	$element = $this -> __addElement(\%initBootT);
+	my %initBootW = (
+		parent    => $element,
+		childName => 'oem-bootwait',
+		text      => $this -> getBootwait ()
+	);
+	$element = $this -> __addElement(\%initBootW);
+	my %initInplRec = (
+		parent    => $element,
+		childName => 'oem-inplace-recovery',
+		text      => $this -> getInplaceRecovery ()
+	);
+	$element = $this -> __addElement(\%initInplRec);
+	my %initKInit = (
+		parent    => $element,
+		childName => 'oem-kiwi-initrd',
+		text      => $this -> getKiwiInitrd ()
+	);
+	$element = $this -> __addElement(\%initKInit);
+	my %initPartInst = (
+		parent    => $element,
+		childName => 'oem-partition-install',
+		text      => $this -> getPartitionInstall ()
+	);
+	$element = $this -> __addElement(\%initPartInst);
+	my %initReboot = (
+		parent    => $element,
+		childName => 'oem-reboot',
+		text      => $this -> getReboot ()
+	);
+	$element = $this -> __addElement(\%initReboot);
+	my %initRebootInt = (
+		parent    => $element,
+		childName => 'oem-reboot-interactive',
+		text      => $this -> getRebootInteractive ()
+	);
+	$element = $this -> __addElement(\%initRebootInt);
+	my %initRecover = (
+		parent    => $element,
+		childName => 'oem-recovery',
+		text      => $this -> getRecovery ()
+	);
+	$element = $this -> __addElement(\%initRecover);
+	my %initRecoverID = (
+		parent    => $element,
+		childName => 'oem-recoveryID',
+		text      => $this -> getRecoveryID ()
+	);
+	$element = $this -> __addElement(\%initRecoverID);
+	my %initDown = (
+		parent    => $element,
+		childName => 'oem-shutdown',
+		text      => $this -> getShutdown ()
+	);
+	$element = $this -> __addElement(\%initDown);
+	my %initDownInter = (
+		parent    => $element,
+		childName => 'oem-shutdown-interactive',
+		text      => $this -> getShutdownInteractive ()
+	);
+	$element = $this -> __addElement(\%initDownInter);
+	my %initSBoot = (
+		parent    => $element,
+		childName => 'oem-silent-boot',
+		text      => $this -> getSilentBoot ()
+	);
+	$element = $this -> __addElement(\%initSBoot);
+	my %initSwap = (
+		parent    => $element,
+		childName => 'oem-swap',
+		text      => $this -> getSwap ()
+	);
+	$element = $this -> __addElement(\%initSwap);
+	my %initSwapS = (
+		parent    => $element,
+		childName => 'oem-swapsize',
+		text      => $this -> getSwapSize ()
+	);
+	$element = $this -> __addElement(\%initSwapS);
+	my %initSysSize = (
+		parent    => $element,
+		childName => 'oem-systemsize',
+		text      => $this -> getSystemSize ()
+	);
+	$element = $this -> __addElement(\%initSysSize);
+	my %initUnat = (
+		parent    => $element,
+		childName => 'oem-unattended',
+		text      => $this -> getUnattended ()
+	);
+	$element = $this -> __addElement(\%initUnat);
+	my %initUnatID = (
+		parent    => $element,
+		childName => 'oem-unattended-id',
+		text      => $this -> getUnattendedID ()
+	);
+	$element = $this -> __addElement(\%initUnatID);
+	return $element;
 }
 
 #==========================================

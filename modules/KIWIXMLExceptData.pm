@@ -1,5 +1,5 @@
 #================
-# FILE          : KIWIXMLPackageIgnoreData.pm
+# FILE          : KIWIXMLExceptData.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
@@ -9,11 +9,11 @@
 # BELONGS TO    : Operating System images
 #               :
 # DESCRIPTION   : This module represents the data contained in the KIWI
-#               : configuration file marked with the <driver> element.
+#               : configuration file marked with the <except> element.
 #               :
 # STATUS        : Development
 #----------------
-package KIWIXMLPackageIgnoreData;
+package KIWIXMLExceptData;
 #==========================================
 # Modules
 #------------------------------------------
@@ -33,7 +33,7 @@ our @EXPORT_OK = qw ();
 #------------------------------------------
 sub new {
 	# ...
-	# Create the KIWIXMLPackageIgnoreData object
+	# Create the KIWIXMLExceptData object
 	# ---
 	#==========================================
 	# Object setup
@@ -43,7 +43,7 @@ sub new {
 	if (! $this) {
 		return;
 	}
-	$this->{elname} = 'ignore';
+	$this->{elname} = 'except';
 	return $this;
 }
 

@@ -43,6 +43,7 @@ sub new {
 	if (! $this) {
 		return;
 	}
+	$this->{elname} = 'opensuseProduct';
 	return $this;
 }
 

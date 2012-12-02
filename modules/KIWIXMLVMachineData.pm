@@ -21,6 +21,7 @@ package KIWIXMLVMachineData;
 use strict;
 use warnings;
 use Scalar::Util qw /looks_like_number/;
+use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -488,6 +489,74 @@ sub getSystemDiskID {
 	# ---
 	my $this = shift;
 	return $this->{vmdisks}{system}{id};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new('machine');
+	my $arch = $this -> getArch();
+	if ($arch) {
+		$element -> setAttribute('arch', $arch);
+	}
+	my $dCPU = $this -> getDesiredCPUCnt();
+	if ($dCPU) {
+		$element -> setAttribute('des_cpu', $dCPU);
+	}
+	my $dMem = $this -> getDesiredMemory();
+	if ($dMem) {
+		$element -> setAttribute('des_memory', $dMem);
+	}
+	my $dom = $this -> getDomain();
+	if ($dom) {
+		$element -> setAttribute('domain', $dom);
+	}
+	my $gOS = $this -> getGuestOS();
+	if ($gOS) {
+		$element -> setAttribute('guestOS', $gOS);
+	}
+	my $hwV = $this -> getHardwareVersion();
+	if ($hwV) {
+		$element -> setAttribute('HWversion', $hwV);
+	}
+	my $maxCPU = $this -> getMaxCPUCnt();
+	if ($maxCPU) {
+		$element -> setAttribute('max_cpu', $maxCPU);
+	}
+	my $maxMem = $this -> getMaxMemory();
+	if ($maxMem) {
+		$element -> setAttribute('max_memory', $maxMem);
+	}
+	my $mem = $this -> getMemory();
+	if ($mem) {
+		$element -> setAttribute('memory', $mem);
+	}
+	my $minCPU = $this -> getMinCPUCnt();
+	if ($minCPU) {
+		$element -> setAttribute('min_cpu', $minCPU);
+	}
+	my $minMem = $this -> getMinMemory();
+	if ($minMem) {
+		$element -> setAttribute('min_memory', $minMem);
+	}
+	my $cpus = $this -> getNumCPUs();
+	if ($cpus) {
+		$element -> setAttribute('ncpus', $cpus);
+	}
+	my $ovfT = $this -> getOVFType();
+	if ($ovfT) {
+		$element -> setAttribute('ovftype', $ovfT);
+	}
+	$this -> __addVMconfiXMLElements($element);
+	$this -> __addVMdiskXMLElements($element);
+	$this -> __addVMdvdXMLElements($element);
+	$this -> __addVMnicXMLElements($element);
+	return $element;
 }
 
 #==========================================
@@ -1103,6 +1172,109 @@ sub setSystemDiskID {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __addVMconfiXMLElements
+#------------------------------------------
+sub __addVMconfiXMLElements {
+	# ...
+	# Generate XML elements for vmconfig settings and add them to the
+	# given parent.
+	# ---
+	my $this   = shift;
+	my $parent = shift;
+	my @confEntries = @{$this -> getConfigEntries()};
+	for my $conf (@confEntries) {
+		my $cElem = XML::LibXML::Element -> new('vmconfig-entry');
+		$cElem -> appendText($conf);
+		$parent -> appendChild($cElem);
+	}
+	return 1;
+}
+
+#==========================================
+# __addVMdiskXMLElements
+#------------------------------------------
+sub __addVMdiskXMLElements {
+	# ...
+	# Generate XML elements for vmdisk settings and add them to the
+	# given parent.
+	# ---
+	my $this   = shift;
+	my $parent = shift;
+	my $sysDCnt = $this -> getSystemDiskController();
+	my $sysDDev = $this -> getSystemDiskDevice();
+	my $sysDTyp = $this -> getSystemDiskType();
+	my $sysDID  = $this -> getSystemDiskID();
+	if ($sysDCnt || $sysDDev || $sysDTyp || $sysDID) {
+		my $vmdElem = XML::LibXML::Element -> new('vmdisk');
+		if ($sysDCnt) {
+			$vmdElem -> setAttribute('controller', $sysDCnt);
+		}
+		if ($sysDDev) {
+			$vmdElem -> setAttribute('device', $sysDDev);
+		}
+		if ($sysDTyp) {
+			$vmdElem -> setAttribute('disktype', $sysDTyp);
+		}
+		if ($sysDID) {
+			$vmdElem -> setAttribute('id', $sysDID);
+		}
+		$parent -> appendChild($vmdElem);
+	}
+	return 1;
+}
+
+#==========================================
+# __addVMdvdXMLElements
+#------------------------------------------
+sub __addVMdvdXMLElements {
+	# ...
+	# Generate XML elements for vmdvd settings and add them to the
+	# given parent.
+	# ---
+	my $this   = shift;
+	my $parent = shift;
+	my $dvdCnt = $this -> getDVDController();
+	if ($dvdCnt) {
+		my $optElem = XML::LibXML::Element -> new('vmdvd');
+		$optElem -> setAttribute('controller', $dvdCnt);
+		$optElem -> setAttribute('id', $this -> getDVDID());
+		$parent -> appendChild($optElem);
+	}
+	return 1;
+}
+
+#==========================================
+# __addVMnicXMLElements
+#------------------------------------------
+sub __addVMnicXMLElements {
+	# ...
+	# Generate XML elements for vmnic settings and add them to the
+	# given parent.
+	# ---
+	my $this   = shift;
+	my $parent = shift;
+	my @nIDs = @{$this -> getNICIDs()};
+	for my $nID (@nIDs) {
+		my $nElem = XML::LibXML::Element -> new('vmnic');
+		$nElem -> setAttribute('interface', $this -> getNICInterface($nID));
+		my $drv = $this -> getNICDriver($nID);
+		if ($drv) {
+			$nElem -> setAttribute('driver', $drv);
+		}
+		my $mac = $this -> getNICMAC($nID);
+		if ($mac) {
+			$nElem -> setAttribute('mac', $mac);
+		}
+		my $mode = $this -> getNICMode($nID);
+		if ($mode) {
+			$nElem -> setAttribute('mode', $mode);
+		}
+		$parent -> appendChild($nElem);
+	}
+	return 1;
+}
+
 #==========================================
 # __areNICSettingsSupported
 #------------------------------------------

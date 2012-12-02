@@ -18,6 +18,7 @@ package KIWIXMLDataBase;
 #------------------------------------------
 use strict;
 use warnings;
+use XML::LibXML;
 require Exporter;
 
 #==========================================
@@ -64,6 +65,45 @@ sub new {
 	$this->{supportedArch} = \%archesSup;
 
 	return $this;
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Must be implemented in each child
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $objName = ref $this;
+	my $msg = "$objName: no implementation of getXMLElement.";
+	$kiwi -> error($msg);
+	$kiwi -> failed();
+	return;
+}
+
+#==========================================
+# __addElement
+#------------------------------------------
+sub __addElement {
+	# ...
+	# Add an element with the given name and value to the given parent
+	# ---
+	my $this = shift;
+	my $init = shift;
+	if (! $init) {
+		return $this;
+	}
+	my $parent   = $init->{parent};
+	my $chldName = $init->{childName};
+	my $value    = $init->{text};
+	if ($value) {
+		my $child = XML::LibXML::Element -> new($chldName);
+		$child -> appendText($value);
+		$parent -> addChild($child);
+	}
+	return $parent;
 }
 
 #==========================================

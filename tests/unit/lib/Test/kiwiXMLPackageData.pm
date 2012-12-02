@@ -16,6 +16,7 @@ package Test::kiwiXMLPackageData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -295,6 +296,32 @@ sub test_getPackageToReplace {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('ruby', $repl);
+	return;
+}
+
+#==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $pckgDataObj = $this -> __getPckgDataObj();
+	my $elem = $pckgDataObj -> getXMLElement();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<package name="python" arch="x86_64" bootdelete="true" '
+		. 'bootinclude="true" replaces="ruby"/>';
+	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
 

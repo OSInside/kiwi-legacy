@@ -19,6 +19,7 @@ package KIWIXMLPackageArchiveData;
 #------------------------------------------
 use strict;
 use warnings;
+use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLFileData/;
@@ -42,7 +43,7 @@ sub new {
 	my $kiwi = shift;
 	my $init = shift;
 	my @addtlKeywords = ( 'bootinclude' );
-	my $this  = $class->SUPER::new($kiwi, $init, \@addtlKeywords);
+	my $this = $class->SUPER::new($kiwi, $init, \@addtlKeywords);
 	if (! $this) {
 		return;
 	}
@@ -52,6 +53,7 @@ sub new {
 		return;
 	}
 	$this->{bootinclude} = $init->{bootinclude};
+	$this->{elname}      = 'archive';
 	return $this;
 }
 
@@ -64,6 +66,22 @@ sub getBootInclude {
 	# ---
 	my $this = shift;
 	return $this->{bootinclude};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $elem = $this->SUPER::getXMLElement();
+	my $bootincl = $this -> getBootInclude();
+	if ($bootincl) {
+		$elem  -> setAttribute('bootinclude', $bootincl);
+	}
+	return $elem;
 }
 
 #==========================================

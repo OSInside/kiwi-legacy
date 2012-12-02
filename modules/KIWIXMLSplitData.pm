@@ -20,6 +20,11 @@ package KIWIXMLSplitData;
 #------------------------------------------
 use strict;
 use warnings;
+use XML::LibXML;
+
+use KIWIXMLExceptData;
+use KIWIXMLFileData;
+
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -105,10 +110,13 @@ sub getPersistentExceptions {
 	# ---
 	my $this = shift;
 	my $arch = shift;
-	my $files = $this->__getData(
-		'persistent','except','getPersistentExceptions',$arch
+	my %args = (
+		behavior => 'persistent',
+		usage    => 'except',
+		caller   => 'getPersistentExceptions',
+		content  => $arch
 	);
-	return $files;
+	return $this -> __getData(\%args);
 }
 
 #==========================================
@@ -122,10 +130,13 @@ sub getPersistentFiles {
 	# ---
 	my $this = shift;
 	my $arch = shift;
-	my $files = $this->__getData(
-		'persistent','files','getPersistentFiles',$arch
+	my %args = (
+		behavior => 'persistent',
+		usage    => 'files',
+		caller   => 'getPersistentFiles',
+		content  => $arch
 	);
-	return $files;
+	return $this -> __getData(\%args);
 }
 
 #==========================================
@@ -139,10 +150,13 @@ sub getTemporaryExceptions {
 	# ---
 	my $this = shift;
 	my $arch = shift;
-	my $files = $this->__getData(
-		'temporary','except','getTemporaryExceptions',$arch
+	my %args = (
+		behavior => 'temporary',
+		usage    => 'except',
+		caller   => 'getTemporaryExceptions',
+		content  => $arch
 	);
-	return $files;
+	return $this -> __getData(\%args);
 }
 
 #==========================================
@@ -156,10 +170,39 @@ sub getTemporaryFiles {
 	# ---
 	my $this = shift;
 	my $arch = shift;
-	my $files = $this->__getData(
-		'temporary','files','getTemporaryFiles',$arch
+	my %args = (
+		behavior => 'temporary',
+		usage    => 'files',
+		caller   => 'getTemporaryFiles',
+		content  => $arch
 	);
-	return $files;
+	return $this -> __getData(\%args);
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new('split');
+	my @behavior = qw /persistent temporary/;
+	my @usage = qw /except files/;
+	for my $behave (@behavior) {
+		my $bElem = XML::LibXML::Element -> new($behave);
+		for my $use (@usage) {
+			my %args = (
+				behavior => $behave,
+				parent   => $bElem,
+				usage    => $use,
+			);
+			$this -> __addChildXMLElements(\%args);
+		}
+		$element -> addChild($bElem);
+	}
+	return $element;
 }
 
 #==========================================
@@ -262,6 +305,52 @@ sub setTemporaryFiles {
 # Private helper methods
 #------------------------------------------
 #==========================================
+# __addChildElements
+#------------------------------------------
+sub __addChildXMLElements {
+	# ...
+	# Add child XML elements to the given parent based on the given behavior
+	# and usage.
+	# ---
+	my $this = shift;
+	my $args = shift;
+	my $kiwi = $this->{kiwi};
+	if (ref($args) ne 'HASH') {
+		my $msg = 'Internal error: __addChildXMLElements called without '
+			. 'keyword arguments. Please file a bug.';
+		$kiwi -> error($msg);
+		$kiwi -> oops();
+		return;
+	}
+	my $behavior = $args->{behavior};
+	my $parent   = $args->{parent};
+	my $usage    = $args->{usage};
+	if ($this->{$behavior} && $this->{$behavior}{$usage}) {
+		my %args = (
+		    behavior => $behavior,
+			usage    => $usage,
+			caller   => 'getXMLElement'
+	    );
+		my $genObjs = $this -> __getDataArchAgnostic(\%args);
+		for my $dataO (@{$genObjs}) {
+			$parent -> addChild($dataO -> getXMLElement());
+		}
+		my @arches = sort keys %{$this->{$behavior}{$usage}};
+		for my $arch (@arches) {
+			if ($arch eq 'all') {
+				next;
+			}
+			$args{content} = $arch;
+			my $dataObjs = $this -> __getDataArchSpecific(\%args);
+			for my $dataO (@{$dataObjs}) {
+				$parent -> addChild($dataO -> getXMLElement());
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __getData
 #------------------------------------------
 sub __getData {
@@ -269,14 +358,15 @@ sub __getData {
 	# Return the data from the internal data structure based on
 	# behavior, usage, and content
 	# ---
-	my $this     = shift;
-	my $behavior = shift;
-	my $usage    = shift;
-	my $caller   = shift;
-	my $content  = shift;
-	my @files;
+	my $this = shift;
+	my $init = shift;
+	my $behavior = $init->{behavior};
+	my $usage    = $init->{usage};
+	my $caller   = $init->{caller};
+	my $content  = $init->{content};
+	my $kiwi = $this->{kiwi};
+	my @dataObjs;
 	if (! $behavior || ! $usage || ! $caller) {
-		my $kiwi = $this->{kiwi};
 		my $msg = 'Internal error: please file a bug __getData on SplitData '
 			. 'called with insufficient arguments.';
 		$kiwi -> error($msg);
@@ -287,6 +377,72 @@ sub __getData {
 		if (! $this->__isArchValid($content, $caller)) {
 			return;
 		}
+		push @dataObjs, @{$this -> __getDataArchSpecific($init)};
+	}
+	push @dataObjs, @{$this -> __getDataArchAgnostic($init)};
+	return \@dataObjs;
+}
+
+#==========================================
+# __getDataArchAgnostic
+#------------------------------------------
+sub __getDataArchAgnostic {
+	# ...
+	# Return the data from the internal data structure based on
+	# behavior, usage, and content that is architecture agnostic
+	# ---
+	my $this = shift;
+	my $init = shift;
+	my $behavior = $init->{behavior};
+	my $usage    = $init->{usage};
+	my $caller   = $init->{caller};
+	my $kiwi = $this->{kiwi};
+	my @dataObjs;
+	if ($this->{$behavior}) {
+		my @files;
+		if ($this->{$behavior}{$usage}) {
+			if ($this->{$behavior}{$usage}{all}) {
+				push @files, @{$this->{$behavior}{$usage}{all}};
+			}
+		}
+		for my $fl (@files) {
+			my %init = ( name => $fl );
+			if ($usage eq 'except') {
+				push @dataObjs, KIWIXMLExceptData -> new($kiwi, \%init);
+			} elsif ($usage eq 'files') {
+				push @dataObjs, KIWIXMLFileData -> new($kiwi, \%init);
+			} else {
+				my $msg = 'Internal error: please file a bug __getData on '
+					. 'SplitData called with unkown usage access.';
+				$kiwi -> error($msg);
+				$kiwi -> oops();
+				return;
+			}
+		}
+	}
+	return \@dataObjs;
+}
+#==========================================
+# __getDataArchSpecific
+#------------------------------------------
+sub __getDataArchSpecific {
+	# ...
+	# Return the data from the internal data structure based on
+	# behavior, usage, and content that is architecture specific
+	# ---
+	my $this = shift;
+	my $init = shift;
+	my $behavior = $init->{behavior};
+	my $usage    = $init->{usage};
+	my $caller   = $init->{caller};
+	my $content  = $init->{content};
+	my $kiwi = $this->{kiwi};
+	my @dataObjs;
+	if ($content) {
+		my @files;
+		if (! $this->__isArchValid($content, $caller)) {
+			return;
+		}
 		if ($this->{$behavior}) {
 			if ($this->{$behavior}{$usage}) {
 				if ($this->{$behavior}{$usage}{$content}) {
@@ -294,15 +450,25 @@ sub __getData {
 				}
 			}
 		}
-	}
-	if ($this->{$behavior}) {
-		if ($this->{$behavior}{$usage}) {
-			if ($this->{$behavior}{$usage}{all}) {
-				push @files, @{$this->{$behavior}{$usage}{all}};
+		for my $fl (@files) {
+			my %init = (
+				arch => $content,
+				name => $fl
+			);
+			if ($usage eq 'except') {
+				push @dataObjs, KIWIXMLExceptData -> new($kiwi, \%init);
+			} elsif ($usage eq 'files') {
+				push @dataObjs, KIWIXMLFileData -> new($kiwi, \%init);
+			} else {
+				my $msg = 'Internal error: please file a bug __getData on '
+					. 'SplitData called with unkown usage access.';
+				$kiwi -> error($msg);
+				$kiwi -> oops();
+				return;
 			}
 		}
 	}
-	return \@files;
+	return \@dataObjs;
 }
 
 #==========================================

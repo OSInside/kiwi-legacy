@@ -21,6 +21,7 @@ package KIWIXMLSystemdiskData;
 use strict;
 use warnings;
 use Scalar::Util qw /looks_like_number/;
+use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -214,6 +215,37 @@ sub getVolumeSize {
 		return;
 	}
 	return $this->{volumes}{$id}{size};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new('systemdisk');
+	$element -> setAttribute('name', $this -> getVGName());
+	my @vIDs = @{$this -> getVolumeIDs()};
+	if (@vIDs) {
+		my $vpElem = XML::LibXML::Element -> new('volumes');
+		for my $id (@vIDs) {
+			my $vElem = XML::LibXML::Element -> new('volume');
+			$vElem -> setAttribute('name', $this -> getVolumeName($id));
+			my $free = $this -> getVolumeFreespace($id);
+			if ($free) {
+				$vElem -> setAttribute('freespace', $free);
+			}
+			my $size = $this -> getVolumeSize($id);
+			if ($size) {
+				$vElem -> setAttribute('size', $size);
+			}
+			$vpElem -> appendChild($vElem);
+		}
+		$element -> appendChild($vpElem);
+	}
+	return $element;
 }
 
 #==========================================
