@@ -17,6 +17,7 @@ package Test::kiwiXMLDescriptionData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -274,6 +275,35 @@ sub test_getType {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('boot', $type);
+	return;
+}
+
+#==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $descrpObj = $this -> __getDescriptObj();
+	my $elem = $descrpObj -> getXMLElement();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<description type="boot">'
+		. '<author>me</author>'
+		. '<contact>me@suse.com</contact>'
+		. '<specification>the test case</specification>'
+		. '</description>';
+	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
 
@@ -559,11 +589,12 @@ sub __getDescriptObj {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my %args = ( author        => 'me',
-				contact       => 'me@suse.com',
-				specification => 'the test case',
-				type          => 'boot',
-			);
+	my %args = (
+		author        => 'me',
+		contact       => 'me@suse.com',
+		specification => 'the test case',
+		type          => 'boot',
+	);
 	# Test with a string arguments
 	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
 	$this -> assert_not_null($descrpObj);

@@ -20,6 +20,7 @@ package KIWIXMLDescriptionData;
 #------------------------------------------
 use strict;
 use warnings;
+use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -114,6 +115,37 @@ sub getType {
 	# ---
 	my $this = shift;
 	return $this->{type};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new('description');
+	$element -> setAttribute('type', $this->getType());
+	my %initAuth = (
+		parent    => $element,
+		childName => 'author',
+		text      => $this -> getAuthor()
+	);
+	$element = $this -> __addElement(\%initAuth);
+	my %initCont = (
+		parent    => $element,
+		childName => 'contact',
+		text      => $this -> getContactInfo()
+	);
+	$element = $this -> __addElement(\%initCont);
+	my %initSpec = (
+		parent    => $element,
+		childName => 'specification',
+		text      => $this -> getSpecificationDescript()
+	);
+	$element = $this -> __addElement(\%initSpec);
+	return $element;
 }
 
 #==========================================

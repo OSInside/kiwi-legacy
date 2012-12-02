@@ -17,6 +17,7 @@ package Test::kiwiXMLUserData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -524,6 +525,40 @@ sub test_getUserRealName {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('Pablo', $name );
+	return;
+}
+
+#==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $userDataObj = $this -> __getUserObj();
+	my $elem = $userDataObj -> getXMLElement();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<users group="mygrp" id="1001">'
+		. '<user '
+		. 'home="/home/me" '
+		. 'name="me" '
+		. 'id="1111" '
+		. 'pwd="hello" '
+		. 'pwdformat="plain" '
+		. 'realname="Pablo" '
+		. 'shell="/usr/bin/zsh"/>'
+		. '</users>';
+	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
 

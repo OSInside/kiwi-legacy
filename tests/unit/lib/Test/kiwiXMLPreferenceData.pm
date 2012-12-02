@@ -17,6 +17,7 @@ package Test::kiwiXMLPreferenceData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -656,6 +657,48 @@ sub test_getVersion{
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('1.1.1', $ver);
+	return;
+}
+
+#==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement {
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $prefDataObj = $this -> __getPrefObj();
+	my $elem = $prefDataObj -> getXMLElement();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<preferences>'
+		. '<bootloader-theme>openSUSE</bootloader-theme>'
+		. '<bootsplash-theme>openSUSE</bootsplash-theme>'
+		. '<defaultdestination>/wrk/images</defaultdestination>'
+		. '<defaultprebuilt>/wrk/bootimgs</defaultprebuilt>'
+		. '<defaultroot>/wrk/myunpacked</defaultroot>'
+		. '<hwclock>utc</hwclock>'
+		. '<keytable>us.map.gz</keytable>'
+		. '<locale>en_us</locale>'
+		. '<packagemanager>smart</packagemanager>'
+		. '<rpm-check-signatures>true</rpm-check-signatures>'
+		. '<rpm-excludedocs>true</rpm-excludedocs>'
+		. '<rpm-force>true</rpm-force>'
+		. '<showlicense>/wrk/mylic.txt</showlicense>'
+		. '<showlicense>/wrk/prodlic.txt</showlicense>'
+		. '<timezone>America/NewYork</timezone>'
+		. '<version>1.1.1</version>'
+		. '</preferences>';
+	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
 
@@ -1723,22 +1766,23 @@ sub __getPrefObj {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my @licenses = ('/wrk/mylic.txt', '/wrk/prodlic.txt');
-	my %init = ( bootloader_theme     => 'openSUSE',
-				bootsplash_theme     => 'openSUSE',
-				defaultdestination   => '/wrk/images',
-				defaultprebuilt      => '/wrk/bootimgs',
-				defaultroot          => '/wrk/myunpacked',
-				hwclock              => 'utc',
-				keymap               => 'us.map.gz',
-				locale               => 'en_us',
-				packagemanager       => 'smart',
-				rpm_check_signatures => 'true',
-				rpm_excludedocs      => 'true',
-				rpm_force            => 'true',
-				showlicense          => \@licenses,
-				timezone             => 'America/NewYork',
-				version              => '1.1.1'
-			);
+	my %init = (
+		bootloader_theme     => 'openSUSE',
+		bootsplash_theme     => 'openSUSE',
+		defaultdestination   => '/wrk/images',
+		defaultprebuilt      => '/wrk/bootimgs',
+		defaultroot          => '/wrk/myunpacked',
+		hwclock              => 'utc',
+		keymap               => 'us.map.gz',
+		locale               => 'en_us',
+		packagemanager       => 'smart',
+		rpm_check_signatures => 'true',
+		rpm_excludedocs      => 'true',
+		rpm_force            => 'true',
+		showlicense          => \@licenses,
+		timezone             => 'America/NewYork',
+		version              => '1.1.1'
+	);
 	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);

@@ -1,5 +1,5 @@
 #================
-# FILE          : kiwiXMLPackageIgnoreData.pm
+# FILE          : kiwiXMLExceptData.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
@@ -13,7 +13,7 @@
 #               :
 # STATUS        : Development
 #----------------
-package Test::kiwiXMLPackageIgnoreData;
+package Test::kiwiXMLExceptData;
 
 use strict;
 use warnings;
@@ -23,7 +23,7 @@ use Common::ktLog;
 use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
 
-use KIWIXMLPackageIgnoreData;
+use KIWIXMLExceptData;
 
 #==========================================
 # Constructor
@@ -47,9 +47,9 @@ sub test_ctor_noArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi);
+	my $exceptDataObj = KIWIXMLExceptData -> new($kiwi);
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'KIWIXMLPackageIgnoreData: must be constructed with a '
+	my $expectedMsg = 'KIWIXMLExceptData: must be constructed with a '
 		. 'keyword hash as argument';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -57,7 +57,7 @@ sub test_ctor_noArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($ignoreDataObj);
+	$this -> assert_null($exceptDataObj);
 	return;
 }
 
@@ -72,9 +72,9 @@ sub test_ctor_unsuportedArch {
 	my $kiwi = $this -> {kiwi};
 	my %init = (
 				arch => 'tegra',
-				name => 'libpng'
+				name => '/tmp'
 	);
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $exceptDataObj = KIWIXMLExceptData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -83,7 +83,7 @@ sub test_ctor_unsuportedArch {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($ignoreDataObj);
+	$this -> assert_null($exceptDataObj);
 	return;
 }
 
@@ -96,8 +96,8 @@ sub test_ctor_simple {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'gimp' );
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my %init = ( name => '/etc' );
+	my $exceptDataObj = KIWIXMLExceptData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -105,7 +105,7 @@ sub test_ctor_simple {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($ignoreDataObj);
+	$this -> assert_not_null($exceptDataObj);
 	return;
 }
 
@@ -120,18 +120,18 @@ sub test_ctor_unsupportedKW {
 	my $kiwi = $this -> {kiwi};
 	my %init = (
 				arch     => 'ppc64',
-				filename => 'oowriter'
+				filename => '/usr/bin'
 	);
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $exceptDataObj = KIWIXMLExceptData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'KIWIXMLPackageIgnoreData: Unsupported keyword argument '
+	my $expectedMsg = 'KIWIXMLExceptData: Unsupported keyword argument '
 		. "'filename' in initialization structure.";
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($ignoreDataObj);
+	$this -> assert_null($exceptDataObj);
 	return;
 }
 
@@ -146,9 +146,9 @@ sub test_ctor_withArch {
 	my $kiwi = $this -> {kiwi};
 	my %init = (
 				arch => 'ppc64',
-				name => 'perl'
+				name => '/usr/sbin'
 	);
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $exceptDataObj = KIWIXMLExceptData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -156,7 +156,7 @@ sub test_ctor_withArch {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($ignoreDataObj);
+	$this -> assert_not_null($exceptDataObj);
 	return;
 }
 
@@ -171,16 +171,16 @@ sub test_getArch {
 	my $kiwi = $this -> {kiwi};
 	my %init = (
 				arch => 'ix86',
-				name => 'ruby'
+				name => '/usr/lib'
 	);
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $exceptDataObj = KIWIXMLExceptData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my $value = $ignoreDataObj -> getArch();
+	my $value = $exceptDataObj -> getArch();
 	$this -> assert_str_equals('ix86', $value);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -189,7 +189,7 @@ sub test_getArch {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($ignoreDataObj);
+	$this -> assert_not_null($exceptDataObj);
 	return;
 }
 
@@ -202,16 +202,16 @@ sub test_getName {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'php');
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my %init = ( name => '/usr/lib64');
+	my $exceptDataObj = KIWIXMLExceptData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my $value = $ignoreDataObj -> getName();
-	$this -> assert_str_equals('php', $value);
+	my $value = $exceptDataObj -> getName();
+	$this -> assert_str_equals('/usr/lib64', $value);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -219,7 +219,7 @@ sub test_getName {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($ignoreDataObj);
+	$this -> assert_not_null($exceptDataObj);
 	return;
 }
 
@@ -235,25 +235,18 @@ sub test_getXMLElement{
 	my $kiwi = $this -> {kiwi};
 	my %init = (
 		arch => 'ppc',
-		name => 'ruby'
+		name => '/var/log'
 	);
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $exceptDataObj = KIWIXMLExceptData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my $elem = $ignoreDataObj -> getXMLElement();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_not_null($elem);
+	my $elem = $exceptDataObj -> getXMLElement();
 	my $xmlstr = $elem -> toString();
-	my $expected = '<ignore name="ruby" arch="ppc"/>';
+	my $expected = '<except name="/var/log" arch="ppc"/>';
 	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
@@ -267,15 +260,15 @@ sub test_setArch {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'vi');
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my %init = ( name => '/var/run');
+	my $exceptDataObj = KIWIXMLExceptData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my $value = $ignoreDataObj -> setArch('x86_64');
+	my $value = $exceptDataObj -> setArch('x86_64');
 	$this -> assert_equals(1, $value);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -283,10 +276,10 @@ sub test_setArch {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$value = $ignoreDataObj -> getArch();
+	$value = $exceptDataObj -> getArch();
 	$this -> assert_str_equals('x86_64', $value);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($ignoreDataObj);
+	$this -> assert_not_null($exceptDataObj);
 	return;
 }
 
@@ -299,15 +292,15 @@ sub test_setArch_invalid {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'xemacs');
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my %init = ( name => '/media');
+	my $exceptDataObj = KIWIXMLExceptData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my $value = $ignoreDataObj -> setArch('tegra');
+	my $value = $exceptDataObj -> setArch('tegra');
 	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -316,10 +309,10 @@ sub test_setArch_invalid {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($value);
-	$value = $ignoreDataObj -> getArch();
+	$value = $exceptDataObj -> getArch();
 	$this -> assert_null($value);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($ignoreDataObj);
+	$this -> assert_not_null($exceptDataObj);
 	return;
 }
 

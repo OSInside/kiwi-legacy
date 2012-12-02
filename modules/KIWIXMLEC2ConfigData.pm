@@ -20,6 +20,7 @@ package KIWIXMLEC2ConfigData;
 #------------------------------------------
 use strict;
 use warnings;
+use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -117,6 +118,47 @@ sub getRegions {
 	# ---
 	my $this = shift;
 	return $this->{regions};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new('ec2config');
+	my %initAcct = (
+		parent    => $element,
+		childName => 'ec2accountnr',
+		text      => $this -> getAccountNumber()
+	);
+	$element = $this -> __addElement(\%initAcct);
+	my %initCert = (
+		parent    => $element,
+		childName => 'ec2certfile',
+		text      => $this -> getCertFilePath()
+	);
+	$element = $this -> __addElement(\%initCert);
+	my %initPk = (
+		parent    => $element,
+		childName => 'ec2privatekeyfile',
+		text      => $this -> getPrivateKeyFilePath()
+	);
+	$element = $this -> __addElement(\%initPk);
+	my $regions = $this -> getRegions();
+	if ($regions) {
+		for my $reg (@{$regions}) {
+			my %initReg = (
+				parent    => $element,
+				childName => 'region',
+				text      => $reg
+			);
+			$element = $this -> __addElement(\%initReg);
+		}
+	}
+	return $element;
 }
 
 #==========================================

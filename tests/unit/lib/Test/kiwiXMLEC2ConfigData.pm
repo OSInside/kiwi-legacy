@@ -17,6 +17,7 @@ package Test::kiwiXMLEC2ConfigData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -171,6 +172,53 @@ sub test_ctor_wInit {
 	$this -> assert_str_equals('/work/ec2/mykey.pem', $pkey);
 	my $setRegions = $confDataObj -> getRegions();
 	$this -> assert_array_equal(\@regions, $setRegions);
+	return;
+}
+
+#==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @regions = qw /US-East EU-West AP-South/;
+	my %args = (
+		ec2accountnr      => '1234567890',
+		ec2certfile       => '/work/ec2/myaccount.cert',
+		ec2privatekeyfile => '/work/ec2/mykey.pem',
+		ec2region         => \@regions
+	);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi, \%args);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $elem = $confDataObj -> getXMLElement();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<ec2config>'
+		. '<ec2accountnr>1234567890</ec2accountnr>'
+		. '<ec2certfile>/work/ec2/myaccount.cert</ec2certfile>'
+		. '<ec2privatekeyfile>/work/ec2/mykey.pem</ec2privatekeyfile>'
+		. '<region>US-East</region>'
+		. '<region>EU-West</region>'
+		. '<region>AP-South</region>'
+		. '</ec2config>';
+	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
 

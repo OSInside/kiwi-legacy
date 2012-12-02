@@ -17,6 +17,7 @@ package Test::kiwiXMLRepositoryData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -463,6 +464,41 @@ sub test_getType {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('yast2', $res);
+	return;
+}
+
+#==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $repoDataObj = $this->__getRepoDataObj();
+	my $elem = $repoDataObj -> getXMLElement();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<repository '
+		. 'alias="myRepo" '
+		. 'imageinclude="true" '
+		. 'password="1234567" '
+		. 'prefer-license="true" '
+		. 'priority="2" '
+		. 'status="replacable" '
+		. 'type="yast2" '
+		. 'username="testuser">'
+		. '<source path="opensuse:///"/>'
+		. '</repository>';
+	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
 

@@ -17,10 +17,11 @@ package Test::kiwiXMLSystemdiskData;
 
 use strict;
 use warnings;
+use Readonly;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
-use Readonly;
 use base qw /Common::ktTestCase/;
 
 use KIWIXMLSystemdiskData;
@@ -965,6 +966,36 @@ sub test_getVolumeSizeNoArg {
 }
 
 #==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $sysdDataObj = $this -> __getSystemdiskObj();
+	my $elem = $sysdDataObj -> getXMLElement();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<systemdisk name="testVG">'
+		. '<volumes>'
+		. '<volume name="test_VOL" freespace="20M" size="30G"/>'
+		. '<volume name="data_VOL" size="100G"/>'
+		. '</volumes>'
+		. '</systemdisk>';
+	$this -> assert_str_equals($expected, $xmlstr);
+	return;
+}
+
+#==========================================
 # test_setVGName
 #------------------------------------------
 sub test_setVGName {
@@ -1506,19 +1537,23 @@ sub __getSystemdiskObj {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my %vol1 = ( freespace => '20M',
-				name      => 'test_VOL',
-				size      => '30G'
-			);
-	my %vol2 = ( name      => 'data_VOL',
-				size      => '100G'
-			);
-	my %volumes = ( 1 => \%vol1,
-					2 => \%vol2
-				);
-	my %init = ( name => 'testVG',
-				volumes => \%volumes
-			);
+	my %vol1 = (
+		freespace => '20M',
+		name      => 'test_VOL',
+		size      => '30G'
+	);
+	my %vol2 = (
+		name      => 'data_VOL',
+		size      => '100G'
+	);
+	my %volumes = (
+		1 => \%vol1,
+		2 => \%vol2
+	);
+	my %init = (
+		name => 'testVG',
+		volumes => \%volumes
+	);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);

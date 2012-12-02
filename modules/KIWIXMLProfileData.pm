@@ -19,6 +19,7 @@ package KIWIXMLProfileData;
 #------------------------------------------
 use strict;
 use warnings;
+use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -103,6 +104,24 @@ sub getName {
 	# ---
 	my $this = shift;
 	return $this->{name};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new('profile');
+	$element -> setAttribute('name', $this -> getName());
+	$element -> setAttribute('description', $this -> getDescription());
+	my $import = $this -> getImportStatus();
+	if ($import) {
+		$element -> setAttribute('import', $import);
+	}
+	return $element;
 }
 
 #==========================================

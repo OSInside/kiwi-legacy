@@ -17,6 +17,7 @@ package Test::kiwiXMLProfileData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -257,6 +258,32 @@ sub test_getName {
 }
 
 #==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $profObj = $this -> __getProfObj();
+	my $elem = $profObj -> getXMLElement();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<profile name="profT" description="a test" '
+		. 'import="true"/>';
+	$this -> assert_str_equals($expected, $xmlstr);
+	return;
+}
+
+#==========================================
 # test_setDescription
 #------------------------------------------
 sub test_setDescription {
@@ -478,9 +505,9 @@ sub __getProfObj {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my %init = (
-				description => 'a test',
-				import      => 'true',
-				name        => 'profT'
+	    description => 'a test',
+		import      => 'true',
+		name        => 'profT'
 	);
 	my $profDataObj = KIWIXMLProfileData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
