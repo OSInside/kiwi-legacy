@@ -879,7 +879,7 @@ function installBootLoaderGrub2 {
 		Echo "Can't install boot loader"
 		return 1
 	fi
-	$confTool -o $confPath 1>&2
+	$confTool > $confPath 1>&2
 	if [ ! $? = 0 ];then
 		Echo "Failed to create grub2 boot configuration"
 		return 1
@@ -999,7 +999,7 @@ function installBootLoaderGrub2Recovery {
 			chainloader +1
 		}
 	EOF
-	$confTool -o $confPath 1>&2
+	$confTool > $confPath 1>&2
 	if [ ! $? = 0 ];then
 		Echo "Failed to create grub2 boot configuration"
 		return 1
