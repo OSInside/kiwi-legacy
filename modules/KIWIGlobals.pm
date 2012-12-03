@@ -881,7 +881,7 @@ sub callContained {
 	my $locator = KIWILocator -> new($kiwi);
 	my $lxcexec = $locator -> getExecPath('lxc-execute');
 	my $lxcbase = $root."/usr/lib/lxc/";
-	if (-d "/usr/lib64") {
+	if (-d $root."/usr/lib64") {
 		$lxcbase = $root."/usr/lib64/lxc/";
 	}
 	my $lxcinit = $lxcbase."lxc-init";
