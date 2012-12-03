@@ -20,6 +20,7 @@ package KIWIXMLRepositoryData;
 #------------------------------------------
 use strict;
 use warnings;
+use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -191,6 +192,50 @@ sub getType {
 	# ---
 	my $this = shift;
 	return $this->{type};
+}
+
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new('repository');
+	my $alias = $this -> getAlias();
+	if ($alias) {
+		$element -> setAttribute('alias', $alias);
+	}
+	my $include = $this -> getImageInclude();
+	if ($include) {
+		$element -> setAttribute('imageinclude', $include);
+	}
+	my ($uname, $pass) = $this -> getCredentials();
+	if ($pass) {
+		$element -> setAttribute('password', $pass);
+	}
+	my $prefLic = $this -> getPreferLicense();
+	if ($prefLic) {
+		$element -> setAttribute('prefer-license', $prefLic);
+	}
+	my $prio = $this -> getPriority();
+	if ($prio) {
+		$element -> setAttribute('priority', $prio);
+	}
+	my $status = $this -> getStatus();
+	if ($status) {
+		$element -> setAttribute('status', $status);
+	}
+	$element -> setAttribute('type', $this -> getType());
+	if ($uname) {
+		$element -> setAttribute('username', $uname);
+	}
+	my $sElem = XML::LibXML::Element -> new('source');
+	$sElem -> setAttribute('path', $this -> getPath());
+	$element -> addChild($sElem);
+	return $element;
 }
 
 #==========================================

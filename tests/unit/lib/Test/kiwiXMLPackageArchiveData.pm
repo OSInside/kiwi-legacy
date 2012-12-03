@@ -16,6 +16,7 @@ package Test::kiwiXMLPackageArchiveData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -225,6 +226,43 @@ sub test_getName {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('myData.tar.bz2', $name);
+	return;
+}
+
+#==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+		arch        => 'ppc',
+		bootinclude => 'true',
+		name        => 'myBinsPPC.tar.bz2'
+	);
+	my $archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $elem = $archiveObj -> getXMLElement();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<archive name="myBinsPPC.tar.bz2" arch="ppc" '
+		. 'bootinclude="true"/>';
+	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
 

@@ -17,6 +17,7 @@ package Test::kiwiXMLTypeData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -793,6 +794,27 @@ sub test_getBootImageDescript {
 }
 
 #==========================================
+# test_getBootImageFileSystem
+#------------------------------------------
+sub test_getBooImagetFileSystem {
+	# ...
+	# Test the getBootImagetFileSystem method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $bootFS = $typeDataObj -> getBootImageFileSystem();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('fat32', $bootFS);
+	return;
+}
+
+#==========================================
 # test_getBootKernel
 #------------------------------------------
 sub test_getBootKernel {
@@ -1383,16 +1405,16 @@ sub test_getKernelCmdOpts {
 }
 
 #==========================================
-# test_getLucksPass
+# test_getLuksPass
 #------------------------------------------
-sub test_getLucksPass {
+sub test_getLuksPass {
 	# ...
-	# Test the getLucksPass method
+	# Test the getLuksPass method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $typeDataObj = $this -> __getTypeObj();
-	my $pass = $typeDataObj -> getLucksPass();
+	my $pass = $typeDataObj -> getLuksPass();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1601,6 +1623,66 @@ sub test_isSizeAdditiveDefault {
 }
 
 #==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $elem = $typeDataObj -> getXMLElement();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<type '
+		. 'image="oem" '
+		. 'boot="/oem/suse-12.2" '
+		. 'bootfilesystem="fat32" '
+		. 'bootkernel="xenk" '
+		. 'bootloader="grub2" '
+		. 'bootpartsize="512" '
+		. 'bootprofile="std" '
+		. 'boottimeout="5" '
+		. 'checkprebuilt="true" '
+		. 'compressed="true" '
+		. 'devicepersistency="by-uuid" '
+		. 'editbootconfig="myscript" '
+		. 'editbootinstall="myInstScript" '
+		. 'filesystem="xfs" '
+		. 'flags="compressed" '
+		. 'format="qcow2" '
+		. 'fsmountoptions="barrier" '
+		. 'fsnocheck="true" '
+		. 'fsreadonly="ext3" '
+		. 'fsreadwrite="xfs" '
+		. 'hybrid="true" '
+		. 'hybridpersistent="true" '
+		. 'installboot="install" '
+		. 'installiso="true" '
+		. 'installprovidefailsafe="true" '
+		. 'installpxe="false" '
+		. 'installstick="true" '
+		. 'kernelcmdline="kiwidebug=1" '
+		. 'luks="notApass" '
+		. 'primary="true" '
+		. 'ramonly="true" '
+		. 'vga="0x344" '
+		. 'volid="myImg">'
+		. '<size additive="true" unit="M">16384</size>'
+		. '</type>';
+	$this -> assert_str_equals($expected, $xmlstr);
+	return;
+}
+
+#==========================================
 # test_setBootImageDescript
 #------------------------------------------
 sub test_setBootImageDescript {
@@ -1657,6 +1739,66 @@ sub test_setBootImageDescriptNoArg {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('/oem/suse-12.2', $path);
+	return;
+}
+
+#==========================================
+# test_setBootImageFileSystem
+#------------------------------------------
+sub test_setBootImageFileSystem {
+	# ...
+	# Test the setBootImageDescript method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	$typeDataObj = $typeDataObj -> setBootImageFileSystem('ext3');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $bIfs = $typeDataObj -> getBootImageFileSystem();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('ext3', $bIfs);
+	return;
+}
+
+#==========================================
+# test_setBootImageFileSystemNoArg
+#------------------------------------------
+sub test_setBootImageFileSystemNoArg {
+	# ...
+	# Test the setBootImageFileSystem method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setBootImageFileSystem();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setBootImageFileSystem: no boot filesystem argument '
+		. 'specified, retaining current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $bIfs = $typeDataObj -> getBootImageFileSystem();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('fat32', $bIfs);
 	return;
 }
 
@@ -3760,16 +3902,16 @@ sub test_setKernelCmdOptsNoArg {
 }
 
 #==========================================
-# test_setLucksPass
+# test_setLuksPass
 #------------------------------------------
-sub test_setLucksPass {
+sub test_setLuksPass {
 	# ...
-	# Test the setLucksPass method
+	# Test the setLuksPass method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $typeDataObj = $this -> __getTypeObj();
-	$typeDataObj = $typeDataObj -> setLucksPass('mySecret');
+	$typeDataObj = $typeDataObj -> setLuksPass('mySecret');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3777,7 +3919,7 @@ sub test_setLucksPass {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($typeDataObj);
-	my $pass = $typeDataObj -> getLucksPass();
+	my $pass = $typeDataObj -> getLuksPass();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -3789,18 +3931,18 @@ sub test_setLucksPass {
 }
 
 #==========================================
-# test_setLucksPassNoArg
+# test_setLuksPassNoArg
 #------------------------------------------
-sub test_setLucksPassNoArg {
+sub test_setLuksPassNoArg {
 	# ...
-	# Test the setLucksPass method with no argument
+	# Test the setLuksPass method with no argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $typeDataObj = $this -> __getTypeObj();
-	my $res = $typeDataObj -> setLucksPass();
+	my $res = $typeDataObj -> setLuksPass();
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setLucksPass: no password given, '
+	my $expected = 'setLuksPass: no password given, '
 		. 'retaining current data.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3808,7 +3950,7 @@ sub test_setLucksPassNoArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
-	my $pass = $typeDataObj -> getLucksPass();
+	my $pass = $typeDataObj -> getLuksPass();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -4371,6 +4513,7 @@ sub __getTypeObj {
 	my $kiwi = $this->{kiwi};
 	my %init = (
 				boot                   => '/oem/suse-12.2',
+				bootfilesystem         => 'fat32',
 				bootkernel             => 'xenk',
 				bootloader             => 'grub2',
 				bootpartsize           => '512',

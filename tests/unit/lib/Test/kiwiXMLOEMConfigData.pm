@@ -17,6 +17,7 @@ package Test::kiwiXMLOEMConfigData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -813,6 +814,53 @@ sub test_getUnattendedID {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('1', $autoID);
+	return;
+}
+
+#==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $init = $this -> __getBaseInitHash();
+	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($confDataObj);
+	my $elem = $confDataObj -> getXMLElement();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<oemconfig>'
+		. '<oem-align-partition>true</oem-align-partition>'
+		. '<oem-boot-title>test build</oem-boot-title>'
+		. '<oem-inplace-recovery>true</oem-inplace-recovery>'
+		. '<oem-kiwi-initrd>false</oem-kiwi-initrd>'
+		. '<oem-partition-install>false</oem-partition-install>'
+		. '<oem-recovery>true</oem-recovery>'
+		. '<oem-recoveryID>1234</oem-recoveryID>'
+		. '<oem-silent-boot>true</oem-silent-boot>'
+		. '<oem-swap>true</oem-swap>'
+		. '<oem-swapsize>2048</oem-swapsize>'
+		. '<oem-systemsize>8192</oem-systemsize>'
+		. '<oem-unattended>true</oem-unattended>'
+		. '<oem-unattended-id>1</oem-unattended-id>'
+		. '</oemconfig>';
+	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
 

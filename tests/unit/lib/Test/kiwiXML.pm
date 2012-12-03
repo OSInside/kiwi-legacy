@@ -7718,10 +7718,26 @@ sub test_getSplitConfig {
 	my @persFilesExpect = qw /bar64 genericBar/;
 	my @tmpExceptExpect = qw /foo anotherFoo/;
 	my @tmpFilesExpect = qw /foo64 genericFoo/;
-	$this -> assert_array_equal(\@persExceptExpect, $persExcept);
-	$this -> assert_array_equal(\@persFilesExpect, $persFiles);
-	$this -> assert_array_equal(\@tmpExceptExpect, $tmpExcept);
-	$this -> assert_array_equal(\@tmpFilesExpect, $tmpFiles);
+	my @persExcptNames;
+	for my $peObj (@{$persExcept}) {
+		push @persExcptNames, $peObj -> getName();
+	}
+	$this -> assert_array_equal(\@persExceptExpect, \@persExcptNames);
+	my @persFileNames;
+	for my $pfObj (@{$persFiles}) {
+		push @persFileNames, $pfObj -> getName();
+	}
+	$this -> assert_array_equal(\@persFilesExpect, \@persFileNames);
+	my @tmpExcptNames;
+	for my $teObj (@{$tmpExcept}) {
+		push @tmpExcptNames, $teObj -> getName();
+	}
+	$this -> assert_array_equal(\@tmpExceptExpect, \@tmpExcptNames);
+	my @tmpFileNames;
+	for my $tfObj (@{$tmpFiles}) {
+		push @tmpFileNames, $tfObj -> getName();
+	}
+	$this -> assert_array_equal(\@tmpFilesExpect, \@tmpFileNames);
 	return;
 }
 
