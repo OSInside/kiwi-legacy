@@ -845,7 +845,7 @@ function installBootLoaderGrub2 {
 		Echo "Can't install boot loader"
 		return 1
 	fi
-	grub2-mkconfig -o $destsPrefix/boot/grub2/grub.cfg 1>&2
+	grub2-mkconfig > $destsPrefix/boot/grub2/grub.cfg
 	if [ ! $? = 0 ];then
 		Echo "Failed to create grub2 boot configuration"
 		return 1
