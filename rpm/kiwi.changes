@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Dec  4 13:58:30 CET 2012 - ms@suse.de
+
+- added an architecture check for KIWIIsoLinux::createHybrid()
+  on architectures e.g ppc and ia64 the embedding of a partition
+  table into the ISO will not work. Thus the check will issue
+  a warning but proceed and does not fail
+
+-------------------------------------------------------------------
 Wed Nov 28 16:43:30 CET 2012 - ms@suse.de
 
 - make sure the initrd boot environment does not export
