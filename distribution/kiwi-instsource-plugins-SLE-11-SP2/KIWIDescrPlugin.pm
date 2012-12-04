@@ -106,6 +106,15 @@ sub new
     $params .= "$p ";
   }
 
+  # add local kwd files as argument
+  use Cwd 'abs_path';
+  my $extrafile = abs_path($this->collect()->{m_xml}->{xmlOrigFile});
+  $extrafile =~ s/.kiwi$/.kwd/;
+  if (-f $extrafile) {
+    $this->logMsg("W", "Found extra tags file $extrafile.");
+    $params .= "-T $extrafile ";
+  }
+
   $this->name($name);
   $this->order($order);
   $this->{m_tool} = $tool;
