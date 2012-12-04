@@ -752,6 +752,15 @@ sub createHybrid {
 	#==========================================
 	# Create partition table on iso
 	#------------------------------------------
+	my $sysarch = qxx ("uname -m");
+	chomp $sysarch;
+	if ($sysarch =~ /ppc|ia64/) {
+		$kiwi -> warning (
+			"Hybrid ISO not supported on $sysarch architecture"
+		);
+		$kiwi -> skipped ();
+		return $this;
+	}
 	if (! -x "/usr/bin/isohybrid") {
 		$kiwi -> error  ("Can't find isohybrid, check your syslinux version");
 		$kiwi -> failed ();
