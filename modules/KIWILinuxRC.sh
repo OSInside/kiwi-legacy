@@ -649,7 +649,7 @@ function udevStart {
 	else
 		/lib/udev/udevd --daemon
 	fi
-	UDEVD_PID=$(pidof /sbin/udevd)
+	UDEVD_PID=$(pidof -s /sbin/udevd)
 	echo UDEVD_PID=$UDEVD_PID >> /iprocs
 	# trigger events for all devices
 	udevTrigger
