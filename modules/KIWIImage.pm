@@ -2016,6 +2016,16 @@ sub createImageLiveCD {
 	}
 	$kiwi -> done();
 	#==========================================
+	# recreate splash data to initrd
+	#------------------------------------------
+	my $splash = $pinitrd;
+	if (! ($splash =~ s/splash\.gz/spl/)) {
+		$splash =~ s/gz/spl/;
+	}
+	if (-f $splash) {
+		qxx ("cat $splash >> $destination/initrd");
+	}
+	#==========================================
 	# copy base graphics boot CD files
 	#------------------------------------------
 	$kiwi -> info ("Setting up isolinux boot CD [$isoarch]");
