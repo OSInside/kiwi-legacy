@@ -6129,6 +6129,28 @@ function bootImage {
 	#--------------------------------------
 	resetBootBind /mnt
 	#======================================
+	# setup warpclock for local time setup
+	#--------------------------------------
+	local warpclock=/lib/mkinitrd/bin/warpclock
+	if [ -e /mnt/etc/localtime ] && [ -x $warpclock ];then
+		cp /mnt/etc/localtime /etc
+		if [ -e /mnt/etc/adjtime ];then
+			cp /mnt/etc/adjtime /etc
+			while read line;do
+				if test "$line" = LOCAL
+			then
+				$warpclock > /mnt/dev/shm/warpclock
+			fi
+			done < /etc/adjtime
+		elif [ -e /mnt/etc/sysconfig/clock ];then
+			cp /mnt/etc/sysconfig/clock /etc
+			. /etc/clock
+			case "$HWCLOCK" in
+				*-l*) $warpclock > /mnt/dev/shm/warpclock
+			esac
+		fi
+	fi
+	#======================================
 	# kill initial tail and utimer
 	#--------------------------------------
 	. /iprocs
