@@ -32,6 +32,7 @@ export bootLoaderOK=0
 #======================================
 # Exports (General)
 #--------------------------------------
+arch=$(uname -m)
 test -z "$haveDASD"           && export haveDASD=0
 test -z "$haveZFCP"           && export haveZFCP=0
 test -z "$ELOG_CONSOLE"       && export ELOG_CONSOLE=/dev/tty3
@@ -53,7 +54,9 @@ test -z "$PARTED_HAVE_MACHINE"&& export PARTED_HAVE_MACHINE=0
 test -z "$DHCPCD_HAVE_PERSIST"&& export DHCPCD_HAVE_PERSIST=1
 if [ -x /sbin/blogd ];then
 	test -z "$CONSOLE"            && export CONSOLE=/dev/console
-	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
+	if [[ ! $arch =~ s390 ]];then
+		test -z "$REDIRECT"       && export REDIRECT=/dev/tty1
+	fi
 fi
 if [ -e /usr/sbin/parted ];then
 	if parted -h | grep -q '\-\-align';then
@@ -72,7 +75,6 @@ fi
 #======================================
 # Exports (arch specific)
 #--------------------------------------
-arch=`uname -m`
 if [ "$arch" = "ppc64" ];then
 	loader=lilo
 	export ELOG_BOOTSHELL=/dev/hvc0
