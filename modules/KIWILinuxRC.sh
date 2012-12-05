@@ -65,8 +65,10 @@ if which parted &>/dev/null;then
 		export PARTITIONER=unsupported
 	fi
 fi
-if dhcpcd -p 2>&1 | grep -q 'Usage';then
-	export DHCPCD_HAVE_PERSIST=0
+if which dhcpcd &>/dev/null;then
+	if dhcpcd -p 2>&1 | grep -q 'Usage';then
+		export DHCPCD_HAVE_PERSIST=0
+	fi
 fi
 
 #======================================
@@ -4041,74 +4043,50 @@ function loadNetworkCard {
 	fi
 }
 #======================================
-# setupNetwork
-#--------------------------------------
-function setupNetwork {
+# dhclientImportInfo
+#-------------------------------------
+function dhclientImportInfo {
 	# /.../
-	# probe for the existing network interface names and
-	# hardware addresses. Match the BOOTIF address from PXE
-	# to the correct linux interface name. Setup the network
-	# interface using a dhcp request. On success the dhcp
-	# info file is imported into the current shell environment
-	# and the nameserver information is written to
-	# /etc/resolv.conf
+	# Import and export the information form the
+	# dhclient.lease file into the enviroment.
 	# ----
-	#======================================
-	# local variable setup
-	#--------------------------------------
-	local IFS="
-	"
-	local MAC=0
-	local DEV=0
-	local mac_list=0
-	local dev_list=0
-	local index=0
-	local hwicmd=/usr/sbin/hwinfo
-	local prefer_iface=eth0
-	local opts="--noipv4ll -p"
-	local try_iface
-	#======================================
-	# global variable setup
-	#--------------------------------------
-	export DHCPCD_STARTED
-	#======================================
-	# detect network card(s)
-	#--------------------------------------
-	for i in `$hwicmd --netcard`;do
-		IFS=$IFS_ORIG
-		if echo $i | grep -q "HW Address:";then
-			MAC=`echo $i | sed -e s"@HW Address:@@"`
-			MAC=`echo $MAC`
-			mac_list[$index]=$MAC
-			index=$((index + 1))
-		fi
-		if echo $i | grep -q "Device File:";then
-			DEV=`echo $i | sed -e s"@Device File:@@"`
-			DEV=`echo $DEV`
-			dev_list[$index]=$DEV
-		fi
-	done
-	if [ -z $BOOTIF ];then
-		# /.../
-		# there is no PXE boot interface information. We will use
-		# the first interface that responds to dhcp
-		# ----
-		prefer_iface=${dev_list[*]}
-	else
-		# /.../
-		# evaluate the information from the PXE boot interface
-		# if we found the MAC in the list the appropriate interface
-		# name is assigned.
-		# ----
-		index=0
-		BOOTIF=`echo $BOOTIF | cut -f2- -d - | tr "-" ":"`
-		for i in ${mac_list[*]};do
-			if [ $i = $BOOTIF ];then
-				prefer_iface=${dev_list[$index]}
-			fi
-			index=$((index + 1))
-		done
+	if [ ! -n $1 ]; then
+		Echo "NULL argument passed to dhclientImportInfo"
+		return
 	fi
+	local lease=/var/lib/dhclient/$1.lease
+	export IPADDR=$(
+		cat $lease | grep 'fixed-address'|\
+		awk '{print $2}' | tr -d ';'
+	)
+	export NETMASK=$(
+		cat $lease | grep 'subnet-mask'|\
+		awk	'{print $3}' | tr -d ';'
+	)
+	export GATEWAYS=$(
+		cat $lease | grep 'routers ' |\
+		awk '{print $3}' |tr -d ';'
+	)
+	export DOMAIN=$(
+		cat $lease | grep 'domain-name' | grep -v 'domain-name-server' |\
+		awk '{print $3}'| tr -d ';'
+	)
+	export DNSSERVERS=$(
+		cat $lease | grep 'domain-name-servers'|\
+		awk '{print $3}'| tr -d ';' | tr ',' ' '
+	)
+	export DNS=$DNSSERVERS
+	export DHCPCHADDR=$(
+		ip link show $1| grep link | awk '{print $2}'
+	)
+}
+#======================================
+# setupNetworkDHCPCD
+#--------------------------------------
+function setupNetworkDHCPCD {
+	# /.../
+	# assign DHCP IP address by using the dhcpcd tool
+	# ----
 	if [ $DHCPCD_HAVE_PERSIST -eq 0 ];then
 		# /.../
 		# older version of dhcpd which doesn't have the
@@ -4218,6 +4196,168 @@ function setupNetwork {
 		grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info; then
 		importFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
 	fi
+}
+#======================================
+# setupNetworkDHCLIENT
+#--------------------------------------
+function setupNetworkDHCLIENT {
+	# /.../
+	# assign DHCP IP address by using the dhclient tool
+	# ----
+	local dhclient_opts=" -4 -1 -q -timeout 20"
+	mkdir -p /var/lib/dhclient
+	mkdir -p /var/run
+	for try_iface in ${dev_list[*]}; do
+		# try DHCP_DISCOVER on all interfaces
+		dhclient $dhclient_opts \
+			-lf /var/lib/dhclient/${try_iface}.lease \
+			-pf /var/run/dhclient-${try_iface}.pid ${try_iface}
+		DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
+	done
+	if [ -z "$DHCPCD_STARTED" ];then
+		if [ -e "$root" ];then
+			Echo "Failed to setup DHCP network interface !"
+			Echo "Try fallback to local boot on: $root"
+			LOCAL_BOOT=yes
+			return
+		else
+			systemException \
+				"Failed to setup DHCP network interface !" \
+			"reboot"
+		fi
+	fi
+	#======================================
+	# wait for any preferred interface(s)
+	#--------------------------------------
+	for j in 1 2 ;do
+		for i in 1 2 3 4 5 6 7 8 9 10 11;do
+			for try_iface in $prefer_iface ; do
+				if [ -f /var/lib/dhclient/${try_iface}.lease ] &&
+					grep -q "fixed-address" /var/lib/dhclient/${try_iface}.lease
+				then
+					break 3
+				fi
+			done
+			sleep 2
+		done
+		# /.../
+		# we are behind the dhclient timeout 20s so the only thing
+		# we can do now is to try again
+		# ----
+		for try_iface in $DHCPCD_STARTED; do
+			dhclient $dhclient_opts \
+				-lf /var/lib/dhclient/${try_iface}.lease \
+				-pf /var/run/dhclient-${try_iface}.pid ${try_iface}
+		done
+		sleep 2
+	done
+	#======================================
+	# select interface from preferred list
+	#--------------------------------------
+	for try_iface in $prefer_iface $DHCPCD_STARTED; do
+		if [ -f /var/lib/dhclient/${try_iface}.lease ] &&
+			grep -q "fixed-address" /var/lib/dhclient/${try_iface}.lease
+		then
+			export PXE_IFACE=$try_iface
+			export IPADDR=$(
+				cat /var/lib/dhclient/${try_iface}.lease |\
+					grep 'fixed-address'| awk  '{print $2}' | tr -d ';'
+				)
+			break
+		fi
+	done
+	#======================================
+	# setup selected interface
+	#--------------------------------------
+	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
+	if [ -f /var/lib/dhclient/$PXE_IFACE.lease ] &&
+		grep -q "fixed-address" /var/lib/dhclient/$PXE_IFACE.lease; then
+		dhclientImportInfo "$PXE_IFACE"
+	fi
+}
+#======================================
+# setupNetwork
+#--------------------------------------
+function setupNetwork {
+	# /.../
+	# probe for the existing network interface names and
+	# hardware addresses. Match the BOOTIF address from PXE
+	# to the correct linux interface name. Setup the network
+	# interface using a dhcp request. On success the dhcp
+	# info file is imported into the current shell environment
+	# and the nameserver information is written to
+	# /etc/resolv.conf
+	# ----
+	#======================================
+	# local variable setup
+	#--------------------------------------
+	local IFS="
+	"
+	local MAC=0
+	local DEV=0
+	local mac_list=0
+	local dev_list=0
+	local index=0
+	local hwicmd=/usr/sbin/hwinfo
+	local prefer_iface=eth0
+	local opts="--noipv4ll -p"
+	local try_iface
+	#======================================
+	# global variable setup
+	#--------------------------------------
+	export DHCPCD_STARTED
+	#======================================
+	# detect network card(s)
+	#--------------------------------------
+	for i in `$hwicmd --netcard`;do
+		IFS=$IFS_ORIG
+		if echo $i | grep -q "HW Address:";then
+			MAC=`echo $i | sed -e s"@HW Address:@@"`
+			MAC=`echo $MAC`
+			mac_list[$index]=$MAC
+			index=$((index + 1))
+		fi
+		if echo $i | grep -q "Device File:";then
+			DEV=`echo $i | sed -e s"@Device File:@@"`
+			DEV=`echo $DEV`
+			dev_list[$index]=$DEV
+		fi
+	done
+	if [ -z $BOOTIF ];then
+		# /.../
+		# there is no PXE boot interface information. We will use
+		# the first interface that responds to dhcp
+		# ----
+		prefer_iface=${dev_list[*]}
+	else
+		# /.../
+		# evaluate the information from the PXE boot interface
+		# if we found the MAC in the list the appropriate interface
+		# name is assigned.
+		# ----
+		index=0
+		BOOTIF=`echo $BOOTIF | cut -f2- -d - | tr "-" ":"`
+		for i in ${mac_list[*]};do
+			if [ $i = $BOOTIF ];then
+				prefer_iface=${dev_list[$index]}
+			fi
+			index=$((index + 1))
+		done
+	fi
+	#======================================
+	# ask for an address
+	#--------------------------------------
+	if which dhcpcd &>/dev/null; then
+		setupNetworkDHCPCD
+	elif which dhclient &>/dev/null; then
+		setupNetworkDHCLIENT
+	else
+		Echo "No supported DHCP client tool found (dhcpcd/dhclient)"
+		return 1
+	fi
+	#======================================
+	# check if we got an address
+	#--------------------------------------
 	if [ -z "$IPADDR" ];then
 		if [ -e "$root" ];then
 			Echo "Can't assign IP addr via dhcp info: dhcpcd-$PXE_IFACE.info !"
@@ -4251,14 +4391,34 @@ function releaseNetwork {
 	# Do that only for _non_ network root devices
 	# ----
 	if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ] && [ -z "$AOEROOT" ];then
-		#======================================
-		# unset dhcp info variables
-		#--------------------------------------
-		unsetFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
-		#======================================
-		# free the lease and the cache
-		#--------------------------------------
-		dhcpcd -k $PXE_IFACE
+		if which dhcpcd &>/dev/null; then
+			#======================================
+			# unset dhcp info variables
+			#--------------------------------------
+			unsetFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
+			#======================================
+			# free the lease and the cache
+			#--------------------------------------
+			dhcpcd -k $PXE_IFACE
+		elif which dhclient &>/dev/null; then
+			#======================================
+			# unset dhclient info variables
+			#--------------------------------------
+			unset IPADDR
+			unset GATEWAYS
+			unset DNSSERVERS
+			unset NETMASK
+			unset DOMAIN
+			unset DNSSERVERS
+			unset DNS
+			unset DHCPCHADDR
+			#======================================
+			# free the lease and the cache
+			#--------------------------------------
+			kill -9 $(cat /var/run/dhclient-$PXE_IFACE.pid )
+			dhclient -r \
+				-lf /var/lib/dhclient/$PXE_IFACE.lease $PXE_IFACE
+		fi
 		#======================================
 		# remove sysconfig state information
 		#--------------------------------------
