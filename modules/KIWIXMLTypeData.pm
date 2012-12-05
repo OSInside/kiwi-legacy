@@ -25,7 +25,8 @@ package KIWIXMLTypeData;
 #------------------------------------------
 use strict;
 use warnings;
-use Scalar::Util qw /looks_like_number/;
+use XML::LibXML;
+
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -97,6 +98,8 @@ sub new {
 		pxedeploy
 		ramonly
 		size
+		sizeadd
+		sizeunit
 		split
 		systemdisk
 		vga
@@ -115,6 +118,7 @@ sub new {
 		installstick
 		primary
 		ramonly
+		sizeadd
 	);
 	$this->{boolKeywords} = \%boolKW;
 	if (! $this -> __isInitHashRef($init) ) {
@@ -128,6 +132,7 @@ sub new {
 	}
 	$this -> __initializeBoolMembers($init);
 	$this->{boot}                   = $init->{boot};
+	$this->{bootfilesystem}         = $init->{bootfilesystem};
 	$this->{bootkernel}             = $init->{bootkernel};
 	$this->{bootloader}             = $init->{bootloader};
 	$this->{bootpartsize}           = $init->{bootpartsize};
@@ -147,6 +152,8 @@ sub new {
 	$this->{kernelcmdline}          = $init->{kernelcmdline};
 	$this->{luks}                   = $init->{luks};
 	$this->{size}                   = $init->{size};
+	$this->{sizeadd}                = $init->{sizeadd};
+	$this->{sizeunit}               = $init->{sizeunit};
 	$this->{vga}                    = $init->{vga};
 	$this->{volid}                  = $init->{volid};
 	# Set default values
@@ -155,6 +162,12 @@ sub new {
 	}
 	if (! $init->{installprovidefailsafe} ) {
 		$this->{installprovidefailsafe} = 'true';
+	}
+	if (! $init->{sizeadd} ) {
+		$this->{sizeadd} = 'false';
+	}
+	if (! $init->{sizeunit} ) {
+		$this->{sizeunit} = 'M';
 	}
 	return $this;
 }
@@ -168,6 +181,17 @@ sub getBootImageDescript {
 	# ---
 	my $this = shift;
 	return $this->{boot};
+}
+
+#==========================================
+# getBootImageFileSystem
+#------------------------------------------
+sub getBootImageFileSystem {
+	# ...
+	# Return the option configured for the boot filesystem
+	# ---
+	my $this = shift;
+	return $this->{bootfilesystem};
 }
 
 #==========================================
@@ -200,7 +224,11 @@ sub getBootPartitionSize {
 	# Return the configured bootpartition size
 	# ---
 	my $this = shift;
-	return $this->{bootpartsize};
+	my $size;
+	if ($this->{bootpartsize}) {
+		$size = int $this->{bootpartsize};
+	}
+	return $size;
 }
 
 #==========================================
@@ -403,17 +431,6 @@ sub getInstallBoot {
 }
 
 #==========================================
-# getInstallBootFileSystem
-#------------------------------------------
-sub getInstallBootFileSystem {
-	# ...
-	# Return the option configured for the boot filesystem
-	# ---
-	my $this = shift;
-	return $this->{bootfilesystem};
-}
-
-#==========================================
 # getInstallFailsafe
 #------------------------------------------
 sub getInstallFailsafe {
@@ -473,9 +490,9 @@ sub getKernelCmdOpts {
 }
 
 #==========================================
-# getLucksPass
+# getLuksPass
 #------------------------------------------
-sub getLucksPass {
+sub getLuksPass {
 	# ...
 	# Return the configured luks password for the filesystem encryption
 	# ---
@@ -514,7 +531,22 @@ sub getSize {
 	# Return the systemsize for this type
 	# ---
 	my $this = shift;
-	return $this->{size}
+	my $size;
+	if ($this->{size}) {
+		$size = int $this->{size};
+	}
+	return $size;
+}
+
+#==========================================
+# getSizeUnit
+#------------------------------------------
+sub getSizeUnit {
+	# ...
+	# Return the systemsize for this type
+	# ---
+	my $this = shift;
+	return $this->{sizeunit};
 }
 
 #==========================================
@@ -540,6 +572,167 @@ sub getVolID {
 }
 
 #==========================================
+# isSizeAdditive
+#------------------------------------------
+sub isSizeAdditive {
+	# ...
+	# Return indication whether the size for this type is additive or not
+	# ---
+	my $this = shift;
+	return $this->{sizeadd};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new('type');
+	$element -> setAttribute('image', $this -> getImageType());
+	my $bootIm = $this -> getBootImageDescript();
+	if ($bootIm) {
+		$element -> setAttribute('boot', $bootIm);
+	}
+	my $bootFS = $this -> getBootImageFileSystem();
+	if ($bootFS) {
+		$element -> setAttribute('bootfilesystem', $bootFS);
+	}
+	my $bootK = $this -> getBootKernel();
+	if ($bootK) {
+		$element -> setAttribute('bootkernel', $bootK);
+	}
+	my $loader = $this -> getBootLoader();
+	if ($loader) {
+		$element -> setAttribute('bootloader', $loader);
+	}
+	my $bPartSize = $this -> getBootPartitionSize();
+	if ($bPartSize) {
+		$element -> setAttribute('bootpartsize', $bPartSize);
+	}
+	my $bProf = $this -> getBootProfile();
+	if ($bProf) {
+		$element -> setAttribute('bootprofile', $bProf);
+	}
+	my $bTime = $this -> getBootTimeout();
+	if ($bTime) {
+		$element -> setAttribute('boottimeout', $bTime);
+	}
+	my $cPreb = $this -> getCheckPrebuilt();
+	if ($cPreb) {
+		$element -> setAttribute('checkprebuilt', $cPreb);
+	}
+	my $comp = $this -> getCompressed();
+	if ($comp) {
+		$element -> setAttribute('compressed', $comp);
+	}
+	my $devPer = $this -> getDevicePersistent();
+	if ($devPer) {
+		$element -> setAttribute('devicepersistency', $devPer);
+	}
+	my $eBootConf = $this -> getEditBootConfig();
+	if ($eBootConf) {
+		$element -> setAttribute('editbootconfig', $eBootConf);
+	}
+	my $eBootInst = $this -> getEditBootInstall();
+	if ($eBootInst) {
+		$element -> setAttribute('editbootinstall', $eBootInst);
+	}
+	my $fileSys = $this -> getFilesystem();
+	if ($fileSys) {
+		$element -> setAttribute('filesystem', $fileSys);
+	}
+	my $flags = $this -> getFlags();
+	if ($flags) {
+		$element -> setAttribute('flags', $flags);
+	}
+	my $format = $this -> getFormat();
+	if ($format) {
+		$element -> setAttribute('format', $format);
+	}
+	my $fsOpts = $this -> getFSMountOptions();
+	if ($fsOpts) {
+		$element -> setAttribute('fsmountoptions', $fsOpts);
+	}
+	my $fsnoch = $this -> getFSNoCheck();
+	if ($fsnoch) {
+		$element -> setAttribute('fsnocheck', $fsnoch);
+	}
+	my $fsRO = $this -> getFSReadOnly();
+	if ($fsRO) {
+		$element -> setAttribute('fsreadonly', $fsRO);
+	}
+	my $fsRW = $this -> getFSReadWrite();
+	if ($fsRW) {
+		$element -> setAttribute('fsreadwrite', $fsRW);
+	}
+	my $hybrid = $this -> getHybrid();
+	if ($hybrid) {
+		$element -> setAttribute('hybrid', $hybrid);
+	}
+	my $hybridP = $this -> getHybridPersistent();
+	if ($hybridP) {
+		$element -> setAttribute('hybridpersistent', $hybridP);
+	}
+	my $instBoot = $this -> getInstallBoot();
+	if ($instBoot) {
+		$element -> setAttribute('installboot', $instBoot);
+	}
+	my $instIso = $this -> getInstallIso();
+	if ($instIso) {
+		$element -> setAttribute('installiso', $instIso);
+	}
+	my $instFail = $this -> getInstallFailsafe();
+	if ($instFail) {
+		$element -> setAttribute('installprovidefailsafe', $instFail);
+	}
+	my $instPXE = $this -> getInstallPXE();
+	if ($instPXE) {
+		$element -> setAttribute('installpxe', $instPXE);
+	}
+	my $instSt = $this -> getInstallStick();
+	if ($instSt) {
+		$element -> setAttribute('installstick', $instSt);
+	}
+	my $kernC = $this -> getKernelCmdOpts();
+	if ($kernC) {
+		$element -> setAttribute('kernelcmdline', $kernC);
+	}
+	my $luks = $this -> getLuksPass();
+	if ($luks) {
+		$element -> setAttribute('luks', $luks);
+	}
+	my $prim = $this -> getPrimary();
+	if ($prim) {
+		$element -> setAttribute('primary', $prim);
+	}
+	my $ramO = $this -> getRAMOnly();
+	if ($ramO) {
+		$element -> setAttribute('ramonly', $ramO);
+	}
+	my $size = $this -> getSize();
+	if ($size) {
+		my $sElem = XML::LibXML::Element -> new('size');
+		$sElem -> appendText($size);
+		$sElem -> setAttribute('additive', $this -> isSizeAdditive());
+		$sElem -> setAttribute('unit', $this -> getSizeUnit());
+		$element -> appendChild($sElem);
+	}
+	my $vga = $this -> getVGA();
+	if ($vga) {
+		$element -> setAttribute('vga', $vga);
+	}
+	my $volid = $this -> getVolID();
+	if ($volid) {
+		$element -> setAttribute('volid', $volid);
+	}
+
+	return $element;
+}
+
+#==========================================
 # setBootImageDescript
 #------------------------------------------
 sub setBootImageDescript {
@@ -557,6 +750,22 @@ sub setBootImageDescript {
 		return;
 	}
 	$this->{boot} = $bootD;
+	return $this;
+}
+
+#==========================================
+# setBootImageFileSystem
+#------------------------------------------
+sub setBootImageFileSystem {
+	# ...
+	# Set the option configuration for the boot filesystem
+	# ---
+	my $this = shift;
+	my $opt  = shift;
+	if (! $this -> __isValidBootFS($opt, 'setBootImageFileSystem') ) {
+		return;
+	}
+	$this->{bootfilesystem} = $opt;
 	return $this;
 }
 
@@ -938,22 +1147,6 @@ sub setInstallBoot {
 }
 
 #==========================================
-# setBootFileSystem
-#------------------------------------------
-sub setBootFileSystem {
-	# ...
-	# Set the option configuration for the boot filesystem
-	# ---
-	my $this = shift;
-	my $opt  = shift;
-	if (! $this -> __isValidBootFS($opt, 'setBootFileSystem') ) {
-		return;
-	}
-	$this->{bootfilesystem} = $opt;
-	return $this;
-}
-
-#==========================================
 # setInstallFailsafe
 #------------------------------------------
 sub setInstallFailsafe {
@@ -1047,9 +1240,9 @@ sub setKernelCmdOpts {
 }
 
 #==========================================
-# setLucksPass
+# setLuksPass
 #------------------------------------------
-sub setLucksPass {
+sub setLuksPass {
 	# ...
 	# Set the configuration for the luks password for the filesystem encryption
 	# ---
@@ -1057,7 +1250,7 @@ sub setLucksPass {
 	my $pass = shift;
 	if (! $pass ) {
 		my $kiwi = $this->{kiwi};
-		my $msg = 'setLucksPass: no password given, retaining '
+		my $msg = 'setLuksPass: no password given, retaining '
 			. 'current data.';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
@@ -1119,7 +1312,41 @@ sub setSize {
 		$kiwi -> failed();
 		return;
 	}
-	$this->{size} = $size;
+	$this->{size} = int $size;
+	return $this;
+}
+
+#==========================================
+# setSizeAdditive
+#------------------------------------------
+sub setSizeAdditive {
+	# ...
+	# Set the flag indicating whether the size is additive or not
+	# ---
+	my $this = shift;
+	my $add = shift;
+	my %settings = (
+		attr   => 'sizeadd',
+		value  => $add,
+		caller => 'setSizeAdditive'
+	);
+	return $this -> __setBooleanValue(\%settings);
+}
+
+#==========================================
+# setSizeUnit
+#------------------------------------------
+sub setSizeUnit {
+	# ...
+	# Set the systemsize unit of measure for this type
+	# ---
+	my $this = shift;
+	my $unit = shift;
+	my $u = $this->{sizeunit};
+	if (! $this->__isValidSizeUnit($unit, 'setSizeUnit')) {
+		return;
+	}
+	$this->{sizeunit} = $unit;
 	return $this;
 }
 
@@ -1245,7 +1472,50 @@ sub __isInitConsistent {
 			return;
 		}
 	}
+	if ($init->{sizeunit}) {
+		if (! $this->__isValidSizeUnit(
+			$init->{sizeunit}, 'object initialization')) {
+			return;
+		}
+	}
 	return $this;
+}
+
+#==========================================
+# __isValidBootFS
+#------------------------------------------
+sub __isValidBootFS {
+	# ...
+	# Verify that the given boot filesystem type is supported
+	# ---
+	my $this   = shift;
+	my $bootFS = shift;
+	my $caller = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller ) {
+		my $msg = 'Internal error __isValidBootFS called without '
+			. 'call origin argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if (! $bootFS ) {
+		my $msg = "$caller: no boot filesystem argument specified, retaining "
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my %supported = map { ($_ => 1) } qw(
+		ext2 ext3 fat16 fat32
+	);
+	if (! $supported{$bootFS} ) {
+		my $msg = "$caller: specified boot filesystem '$bootFS' is not "
+			. 'supported.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
 }
 
 #==========================================
@@ -1470,43 +1740,6 @@ sub __isValidImage {
 }
 
 #==========================================
-# __isValidBootFS
-#------------------------------------------
-sub __isValidBootFS {
-	# ...
-	# Verify that the given boot filesystem type is supported
-	# ---
-	my $this   = shift;
-	my $bootFS = shift;
-	my $caller = shift;
-	my $kiwi = $this->{kiwi};
-	if (! $caller ) {
-		my $msg = 'Internal error __isValidBootFS called without '
-			. 'call origin argument.';
-		$kiwi -> info($msg);
-		$kiwi -> oops();
-	}
-	if (! $bootFS ) {
-		my $msg = "$caller: no boot filesystem argument specified, retaining "
-			. 'current data.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	my %supported = map { ($_ => 1) } qw(
-		ext2 ext3 fat16 fat32
-	);
-	if (! $supported{$bootFS} ) {
-		my $msg = "$caller: specified boot filesystem '$bootFS' is not "
-			. 'supported.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return 1;
-}
-
-#==========================================
 # __isValidInstBoot
 #------------------------------------------
 sub __isValidInstBoot {
@@ -1536,6 +1769,39 @@ sub __isValidInstBoot {
 	if (! $supported{$instB} ) {
 		my $msg = "$caller: specified installboot option '$instB' is not "
 			. 'supported.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
+}
+#==========================================
+# __isValidSizeUnit
+#------------------------------------------
+sub __isValidSizeUnit {
+	# ...
+	# Verify that the given unit of measure for the size is a
+	# recognized value
+	#---
+	my $this   = shift;
+	my $unit   = shift;
+	my $caller = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller ) {
+		my $msg = 'Internal error __isValidSizeUnitcalled without '
+			. 'call origin argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if (! $unit ) {
+		my $msg = "$caller: no systemsize unit value given, retaining "
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if ($unit ne 'M' && $unit ne 'G') {
+		my $msg = "$caller: expecting unit setting of 'M' or 'G'.";
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;

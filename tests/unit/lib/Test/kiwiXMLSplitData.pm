@@ -17,6 +17,7 @@ package Test::kiwiXMLSplitData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -295,10 +296,14 @@ sub test_getPersistentExceptions {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /home/demouser /home/demouser/*
 						/etc/s390/base.conf /etc/s390/opt
 					);
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -344,8 +349,12 @@ sub test_getPersistentExceptionsNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /home/demouser /home/demouser/* );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -366,8 +375,12 @@ sub test_getPersistentFiles {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /etc/s390 /etc/s390/* /home /home/* );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -413,8 +426,12 @@ sub test_getPersistentFilesNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /home /home/* );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -435,10 +452,14 @@ sub test_getTemporaryExceptions {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /run/media/sysuser /run/media/sysuser/*
 						/var/run/s390/var.conf
 					);
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -484,8 +505,12 @@ sub test_getTemporaryExceptionsNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /run/media/sysuser /run/media/sysuser/* );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -506,10 +531,14 @@ sub test_getTemporaryFiles {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /run/media /run/media/*
 						/var/run/s390 /var/run/s390/*
 					);
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -555,8 +584,57 @@ sub test_getTemporaryFilesNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /run/media /run/media/* );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
+	return;
+}
+
+#==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $splitDataObj = $this -> __getSplitDataObj();
+	my $elem = $splitDataObj -> getXMLElement();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<split>'
+		. '<persistent>'
+		. '<except name="/home/demouser"/>'
+		. '<except name="/home/demouser/*"/>'
+		. '<except name="/etc/s390/base.conf" arch="s390"/>'
+		. '<except name="/etc/s390/opt" arch="s390"/>'
+		. '<file name="/home"/>'
+		. '<file name="/home/*"/>'
+		. '<file name="/etc/s390" arch="s390"/>'
+		. '<file name="/etc/s390/*" arch="s390"/>'
+		. '</persistent>'
+		. '<temporary>'
+		. '<except name="/run/media/sysuser"/>'
+		. '<except name="/run/media/sysuser/*"/>'
+		. '<except name="/var/run/s390/var.conf" arch="s390"/>'
+		. '<file name="/run/media"/>'
+		. '<file name="/run/media/*"/>'
+		. '<file name="/var/run/s390" arch="s390"/>'
+		. '<file name="/var/run/s390/*" arch="s390"/>'
+		. '</temporary>'
+		. '</split>';
+	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
 
@@ -586,7 +664,11 @@ sub test_setPersistentExceptions {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_array_equal(\@expected, $data);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -616,7 +698,11 @@ sub test_setPersistentExceptionsArch {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_array_equal(\@expected, $data);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -658,9 +744,13 @@ sub test_setPersistentExceptionsArchPlus {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = @expectedGen;
 	push @expected, @expectedArch;
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -714,8 +804,12 @@ sub test_setPersistentExceptionsNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /etc/s390/base.conf /etc/s390/opt );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -745,8 +839,12 @@ sub test_setPersistentExceptionsArchArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /home/demouser /home/demouser/* );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -800,7 +898,11 @@ sub test_setPersistentFiles {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_array_equal(\@expected, $data);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -830,7 +932,11 @@ sub test_setPersistentFilesArch {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_array_equal(\@expected, $data);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -847,9 +953,10 @@ sub test_setPersistentFilesArchPlus {
 	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
 	my @expectedArch = qw ( /etc/ppc/base.conf /etc/ppc/opt );
 	my @expectedGen  = qw ( /home/demouser /home/demouser/* );
-	$splitDataObj = $splitDataObj -> setPersistentFiles(\@expectedArch,
-															'ppc'
-															);
+	$splitDataObj = $splitDataObj -> setPersistentFiles(
+		\@expectedArch,
+		'ppc'
+	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -872,9 +979,13 @@ sub test_setPersistentFilesArchPlus {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = @expectedGen;
 	push @expected, @expectedArch;
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -928,8 +1039,12 @@ sub test_setPersistentFilesNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /etc/s390 /etc/s390/* );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -959,8 +1074,12 @@ sub test_setPersistentFilesArchArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /home /home/* );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -1014,7 +1133,11 @@ sub test_setTemporaryExceptions {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_array_equal(\@expected, $data);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -1044,7 +1167,11 @@ sub test_setTemporaryExceptionsArch {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_array_equal(\@expected, $data);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -1086,9 +1213,13 @@ sub test_setTemporaryExceptionsArchPlus {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = @expectedGen;
 	push @expected, @expectedArch;
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -1142,8 +1273,12 @@ sub test_setTemporaryExceptionsNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /var/run/s390/var.conf );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -1173,8 +1308,12 @@ sub test_setTemporaryExceptionsArchArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /run/media/sysuser /run/media/sysuser/* );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -1228,7 +1367,11 @@ sub test_setTemporaryFiles {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_array_equal(\@expected, $data);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -1258,7 +1401,11 @@ sub test_setTemporaryFilesArch {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_array_equal(\@expected, $data);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -1300,9 +1447,13 @@ sub test_setTemporaryFilesArchPlus {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = @expectedGen;
 	push @expected, @expectedArch;
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -1356,8 +1507,12 @@ sub test_setTemporaryFilesNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /var/run/s390 /var/run/s390/* );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -1387,8 +1542,12 @@ sub test_setTemporaryFilesArchArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
+	my @names;
+	for my $dObj (@{$data}) {
+		push @names, $dObj -> getName();
+	}
 	my @expected = qw ( /run/media /run/media/* );
-	$this -> assert_array_equal(\@expected, $data);
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -1433,31 +1592,38 @@ sub __getSplitDataObj {
 	my @persExceptGen  = qw ( /home/demouser /home/demouser/* );
 	my @persFilesArch  = qw ( /etc/s390 /etc/s390/* );
 	my @persFilesGen   = qw ( /home /home/* );
-	my %persFiles      = ( all  => \@persFilesGen,
-						s390 => \@persFilesArch
-						);
-	my %persExcept     = ( all  => \@persExceptGen,
-						s390 => \@persExceptArch
-						);
-	my %persSettings   = ( except => \%persExcept,
-						files  => \%persFiles
-						);
+	my %persFiles = (
+		all  => \@persFilesGen,
+		s390 => \@persFilesArch
+	);
+	my %persExcept = (
+		all  => \@persExceptGen,
+		s390 => \@persExceptArch
+	);
+	my %persSettings = (
+		except => \%persExcept,
+		files  => \%persFiles
+	);
 	my @tempExceptArch = qw ( /var/run/s390/var.conf );
 	my @tempExceptGen  = qw ( /run/media/sysuser /run/media/sysuser/* );
 	my @tempFilesArch  = qw ( /var/run/s390 /var/run/s390/* );
 	my @tempFilesGen   = qw ( /run/media /run/media/* );
-	my %tempFiles      = ( all  => \@tempFilesGen,
-						s390 => \@tempFilesArch
-						);
-	my %tempExcept     = ( all  => \@tempExceptGen,
-						s390 => \@tempExceptArch
-						);
-	my %tempSettings   = ( except => \%tempExcept,
-						files  => \%tempFiles
-						);
-	my %init           = ( persistent => \%persSettings,
-						temporary  => \%tempSettings
-						);
+	my %tempFiles = (
+		all  => \@tempFilesGen,
+		s390 => \@tempFilesArch
+	);
+	my %tempExcept = (
+		all  => \@tempExceptGen,
+		s390 => \@tempExceptArch
+	);
+	my %tempSettings = (
+		except => \%tempExcept,
+		files  => \%tempFiles
+	);
+	my %init = (
+		persistent => \%persSettings,
+		temporary  => \%tempSettings
+	);
 	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);

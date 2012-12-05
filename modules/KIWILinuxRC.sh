@@ -192,7 +192,7 @@ function importFile {
 	# remove backslash quotes if any
 	sed -i -e s"#\\\\\(.\)#\1#g" /tmp/srcme
 	# quote simple quotation marks
-	sed -i -e s"#'#'\\\\''#g" /tmp/srcme
+	sed -i -e s"#'\+#'\\\\''#g" /tmp/srcme
 	# add '...' quoting to values
 	sed -i -e s"#\(^[a-zA-Z0-9_]\+\)=\(.*\)#$prefix\1='\2'#" /tmp/srcme
 	source /tmp/srcme
@@ -652,7 +652,7 @@ function udevStart {
 	else
 		/lib/udev/udevd --daemon
 	fi
-	UDEVD_PID=$(pidof /sbin/udevd)
+	UDEVD_PID=$(pidof -s /sbin/udevd)
 	echo UDEVD_PID=$UDEVD_PID >> /iprocs
 	# trigger events for all devices
 	udevTrigger
@@ -882,7 +882,7 @@ function installBootLoaderGrub2 {
 		Echo "Can't install boot loader"
 		return 1
 	fi
-	$confTool -o $confPath 1>&2
+	$confTool > $confPath
 	if [ ! $? = 0 ];then
 		Echo "Failed to create grub2 boot configuration"
 		return 1
@@ -1002,7 +1002,7 @@ function installBootLoaderGrub2Recovery {
 			chainloader +1
 		}
 	EOF
-	$confTool -o $confPath 1>&2
+	$confTool > $confPath
 	if [ ! $? = 0 ];then
 		Echo "Failed to create grub2 boot configuration"
 		return 1
@@ -2518,7 +2518,7 @@ function setupBootLoaderGrub2 {
 	#--------------------------------------
 	mkdir -p $destsPrefix/etc/default
 	cat > $inst_default_grub <<- EOF
-		GRUB_DISTRIBUTOR='$title'
+		GRUB_DISTRIBUTOR=$(printf %q $title)
 		GRUB_DEFAULT=0
 		GRUB_HIDDEN_TIMEOUT=0
 		GRUB_HIDDEN_TIMEOUT_QUIET=true
@@ -5164,6 +5164,77 @@ function mountSystemSeedBtrFS {
 	return 0
 }
 #======================================
+# mountSystemUnionFS
+#--------------------------------------
+function mountSystemUnionFS {
+	local loopf=$1
+	local roDir=/read-only
+	local rwDir=/read-write
+	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
+	#======================================
+	# load fuse module
+	#--------------------------------------
+	modprobe fuse &>/dev/null
+	#======================================
+	# create overlay mount points
+	#--------------------------------------
+	mkdir -p $roDir
+	mkdir -p $rwDir
+	#======================================
+	# check read/only device location
+	#--------------------------------------
+	if [ ! -z "$NFSROOT" ];then
+		roDevice="$imageRootDevice"
+	fi
+	#======================================
+	# mount read only device
+	#--------------------------------------
+	if ! kiwiMount "$roDevice" "$roDir" "" $loopf;then
+		Echo "Failed to mount read only filesystem"
+		return 1
+	fi
+	#======================================
+	# check read/write device location
+	#--------------------------------------
+	if [ ! -z "$kiwi_ramonly" ];then
+		rwDevice=tmpfs
+	fi
+	if [ "$rwDevice" = "tmpfs" ];then
+		#======================================
+		# write into tmpfs
+		#--------------------------------------
+		if ! mount -t tmpfs tmpfs $rwDir >/dev/null;then
+			Echo "Failed to mount tmpfs read/write filesystem"
+			return 1
+		fi
+	else
+		#======================================
+		# write to another device
+		#--------------------------------------
+		if [ "$roDevice" = "nfs" ];then
+			rwDevice="-o nolock,rw $nfsRootServer:$rwDevice"
+		fi
+		if [ ! "$roDevice" = "nfs" ] && ! setupReadWrite; then
+			return 1
+		fi
+		if ! mount $rwDevice $rwDir >/dev/null;then
+			Echo "Failed to mount read/write filesystem"
+			return 1
+		fi
+	fi
+	#======================================
+	# setup fuse union mount
+	#--------------------------------------
+	local opts="cow,max_files=65000,allow_other,use_ino,suid,dev,nonempty"
+	if ! unionfs -o $opts $rwDir=RW:$roDir=RO /mnt;then
+		Echo "Failed to mount root via unionfs"
+		return 1
+	fi
+	export haveUnionFS=yes
+	return 0
+}
+#======================================
 # mountSystemClicFS
 #--------------------------------------
 function mountSystemClicFS {
@@ -5471,6 +5542,8 @@ function mountSystem {
 			mountSystemClicFS $2
 		elif [ "$unionFST" = "seed" ];then
 			mountSystemSeedBtrFS $2
+		elif [ "$unionFST" = "unionfs" ];then
+			mountSystemUnionFS $2
 		else
 			systemException \
 				"Unknown overlay mount method: $unionFST" \
@@ -6500,6 +6573,28 @@ function bootImage {
 	# run resetBootBind
 	#--------------------------------------
 	resetBootBind /mnt
+	#======================================
+	# setup warpclock for local time setup
+	#--------------------------------------
+	local warpclock=/lib/mkinitrd/bin/warpclock
+	if [ -e /mnt/etc/localtime ] && [ -x $warpclock ];then
+		cp /mnt/etc/localtime /etc
+		if [ -e /mnt/etc/adjtime ];then
+			cp /mnt/etc/adjtime /etc
+			while read line;do
+				if test "$line" = LOCAL
+			then
+				$warpclock > /mnt/dev/shm/warpclock
+			fi
+			done < /etc/adjtime
+		elif [ -e /mnt/etc/sysconfig/clock ];then
+			cp /mnt/etc/sysconfig/clock /etc
+			. /etc/clock
+			case "$HWCLOCK" in
+				*-l*) $warpclock > /mnt/dev/shm/warpclock
+			esac
+		fi
+	fi
 	#======================================
 	# kill initial tail and utimer
 	#--------------------------------------

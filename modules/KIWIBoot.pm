@@ -374,11 +374,11 @@ sub new {
 		#==========================================
 		# Store optional size setup from XML
 		#------------------------------------------
-		my $sizeXMLAddBytes = $xml -> getImageSizeAdditiveBytes();
+		my $sizeXMLAddBytes = $xml -> getImageSizeAdditiveBytes_legacy();
 		if ($sizeXMLAddBytes) {
 			$sizeXMLBytes = $sizeBytes + $sizeXMLAddBytes;
 		} else {
-			$sizeXMLBytes = $xml -> getImageSizeBytes();
+			$sizeXMLBytes = $xml -> getImageSizeBytes_legacy();
 		}
 		#==========================================
 		# Store initial disk size
@@ -2025,9 +2025,13 @@ sub setupBootDisk {
 	#==========================================
 	# Update raw disk size if boot part is used
 	#------------------------------------------
-	if ((! $this->{sizeSetByUser}) && ($needBootP) && ($imgtype ne "split")) {
+	if (($needBootP) && ($imgtype ne "split")) {
 		$this -> __updateDiskSize ($this->{bootsize});
 	}
+	#==========================================
+	# Check and Update to custom disk size
+	#------------------------------------------
+	$this -> __updateCustomDiskSize ();
 	#==========================================
 	# create/use disk
 	#------------------------------------------
@@ -2227,32 +2231,6 @@ sub setupBootDisk {
 			# Create disk device mapping table
 			#------------------------------------------
 			%deviceMap = $this -> setDefaultDeviceMap ($this->{loop});
-			#==========================================
-			# Umount possible mounted stick partitions
-			#------------------------------------------
-			$this -> umountDevice ($this->{loop});
-			for (my $try=0;$try>=2;$try++) {
-				$status = qxx ("/sbin/blockdev --rereadpt $this->{loop} 2>&1");
-				$result = $? >> 8;
-				if ($result != 0) {
-					sleep (1); next;
-				}
-				last;
-			}
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't reread partition table: $status");
-				$kiwi -> failed ();
-				return;
-			}
-			#==========================================
-			# Wait for new partition table to settle
-			#------------------------------------------
-			sleep (1);
-			#==========================================
-			# Umount possible mounted stick partitions
-			#------------------------------------------
-			$this -> umountDevice ($this->{loop});
 		}
 		#==========================================
 		# setup volume group if requested
@@ -3936,7 +3914,7 @@ sub setupBootLoaderConfiguration {
 			print $FD "set timeout=$bootTimeout\n";
 			if ($type =~ /^KIWI (CD|USB)/) {
 				my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
-				print $FD 'menuentry \'Boot from Hard Disk\'';
+				print $FD 'menuentry "Boot from Hard Disk"';
 				print $FD ' --class opensuse --class os {'."\n";
 				print $FD "\t"."set root='hd0'"."\n";
 				if ($dev eq '(cd)') {
@@ -3956,11 +3934,11 @@ sub setupBootLoaderConfiguration {
 				}
 				print $FD "\t".'boot'."\n";
 				print $FD '}'."\n";
-				$title = $this -> makeLabel ("Install $label");
+				$title = $this -> quoteLabel ("Install $label");
 			} else {
-				$title = $this -> makeLabel ("$label [ $type ]");
+				$title = $this -> quoteLabel ("$label [ $type ]");
 			}
-			print $FD 'menuentry \''.$title.'\'';
+			print $FD 'menuentry "'.$title.'"';
 			print $FD ' --class opensuse --class os {'."\n";
 			if (! $iso) {
 				print $FD "\t"."set root='$rprefix,$boot_id'"."\n";
@@ -4043,8 +4021,8 @@ sub setupBootLoaderConfiguration {
 			# Failsafe boot
 			#------------------------------------------
 			if ($failsafe) {
-				$title = $this -> makeLabel ("Failsafe -- $title");
-				print $FD 'menuentry \''.$title.'\'';
+				$title = $this -> quoteLabel ("Failsafe -- $title");
+				print $FD 'menuentry "'.$title.'"';
 				print $FD ' --class opensuse --class os {'."\n";
 				if (! $iso) {
 					print $FD "\t"."set root='$rprefix,$boot_id'"."\n";
@@ -4150,7 +4128,7 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		my $boot_id = 0;
 		if ($this->{partids}) {
-			$boot_id = $this->{partids}{boot};
+			$boot_id = $this->{partids}{boot} - 1;
 		}
 		#==========================================
 		# Create menu.lst file
@@ -5053,6 +5031,13 @@ sub installBootLoader {
 	#------------------------------------------
 	if ($loader eq "grub") {
 		$kiwi -> info ("Installing grub on device: $diskname");
+		#==========================================
+		# re-init bootid, legacy grub starts at 0
+		#------------------------------------------
+		$boot_id = 0;
+		if ($this->{partids}) {
+			$boot_id = $this->{partids}{boot} - 1;
+		}
 		#==========================================
 		# Clean loop maps
 		#------------------------------------------
@@ -6043,6 +6028,15 @@ sub makeLabel {
 }
 
 #==========================================
+# quoteLabel
+#------------------------------------------
+sub quoteLabel {
+	my $this  = shift;
+	my $label = shift;
+	return KIWIConfigure::quoteshell ($label);
+}
+
+#==========================================
 # luksResize
 #------------------------------------------
 sub luksResize {
@@ -6501,45 +6495,13 @@ sub __initDiskSize {
 	my $minBytes  = shift;
 	my $cmdlsize  = shift;
 	my $XMLBytes  = shift;
-	my $cmdlBytes = 0;
 	my $vmsize    = 0;
 	my $vmmbyte   = 0;
-	#===========================================
-	# turn optional size from cmdline into bytes
-	#-------------------------------------------
-	$this->{sizeSetByUser} = 0;
-	if (($cmdlsize) && ($cmdlsize =~ /^(\d+)([MG])$/i)) {
-		my $value= $1;
-		my $unit = $2;
-		if ($unit eq "G") {
-			# convert GB to MB...
-			$value *= 1024;
-		}
-		# convert MB to Byte
-		$cmdlBytes = $value * 1048576;
-	}
-	#===========================================
-	# adapt min size according to cmdline or XML
-	#-------------------------------------------
-	if ($cmdlBytes > 0) {
-		if ($cmdlBytes < $minBytes) {
-			$kiwi -> warning (
-				"given size is smaller than calculated min size"
-			);
-			$kiwi -> oops();
-		}
-		$minBytes = $cmdlBytes;
-		$this->{sizeSetByUser} = 1;
-	} elsif (("$XMLBytes" ne "auto") && ($XMLBytes > 0)) {
-		if ($XMLBytes < $minBytes) {
-			$kiwi -> warning (
-				"given size is smaller than calculated min size"
-			);
-			$kiwi -> oops();
-		}
-		$this->{sizeSetByUser} = 1;
-		$minBytes = $XMLBytes;
-	}
+	#==========================================
+	# Store size values from cmdline and XML
+	#------------------------------------------
+	$this->{cmdlsize} = $cmdlsize;
+	$this->{XMLBytes} = $XMLBytes;
 	#==========================================
 	# Create vmsize MB string and vmmbyte value
 	#------------------------------------------
@@ -6575,6 +6537,69 @@ sub __updateDiskSize {
 	$kiwi->loginfo (
 		"Increasing disk size by ".$addMB."M to: ".$vmsize."\n"
 	);
+	return $this;
+}
+
+#==========================================
+# __updateCustomDiskSize
+#------------------------------------------
+sub __updateCustomDiskSize {
+	# ...
+	# if a custom disk size is set via the commandline
+	# or the <size> element from XML, this function uses
+	# the custom value if it is smaller than the currently
+	# calculcated disk size value
+	# ---
+	my $this      = shift;
+	my $kiwi      = $this->{kiwi};
+	my $cmdlsize  = $this->{cmdlsize};
+	my $XMLBytes  = $this->{XMLBytes};
+	my $cmdlBytes = 0;
+	my $vmsize    = 0;
+	my $vmmbyte   = 0;
+	my $reqBytes  = 0;
+	#===========================================
+	# turn optional size from cmdline into bytes
+	#-------------------------------------------
+	if (($cmdlsize) && ($cmdlsize =~ /^(\d+)([MG])$/i)) {
+		my $value= $1;
+		my $unit = $2;
+		if ($unit eq "G") {
+			# convert GB to MB...
+			$value *= 1024;
+		}
+		# convert MB to Byte
+		$cmdlBytes = $value * 1048576;
+	}
+	#===========================================
+	# adapt req size according to cmdline or XML
+	#-------------------------------------------
+	if ($cmdlBytes > 0) {
+		$reqBytes = $cmdlBytes;
+	} elsif (("$XMLBytes" ne "auto") && ($XMLBytes > 0)) {
+		$reqBytes = $XMLBytes;
+	}
+	if ($reqBytes == 0) {
+		return $this;
+	}
+	my $reqMBytes = int ($reqBytes / 1048576);
+	if ($reqMBytes < $this->{vmmbyte}) {
+		$kiwi -> warning (
+			"given disk size is smaller than calculated size"
+		);
+		$kiwi -> skipped ();
+		return $this;
+	}
+	#==========================================
+	# Create vmsize MB string and vmmbyte value
+	#------------------------------------------
+	$vmmbyte = $reqMBytes;
+	$vmsize  = $reqMBytes."M";
+	$kiwi -> loginfo (
+		"Using custom disk size: $vmsize\n"
+	);
+	$this->{vmmbyte} = $vmmbyte;
+	$this->{vmsize}  = $vmsize;
 	return $this;
 }
 

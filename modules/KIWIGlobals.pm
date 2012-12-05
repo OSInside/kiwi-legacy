@@ -51,7 +51,7 @@ sub new {
 	# Globals (generic)
 	#------------------------------------------
 	my %data;
-	$data{Version}         = "5.04.27";
+	$data{Version}         = "5.04.28";
 	$data{Publisher}       = "SUSE LINUX Products GmbH";
 	$data{Preparer}        = "KIWI - http://opensuse.github.com/kiwi";
 	$data{ConfigName}      = "config.xml";
@@ -881,7 +881,7 @@ sub callContained {
 	my $locator = KIWILocator -> new($kiwi);
 	my $lxcexec = $locator -> getExecPath('lxc-execute');
 	my $lxcbase = $root."/usr/lib/lxc/";
-	if (-d "/usr/lib64") {
+	if (-d $root."/usr/lib64") {
 		$lxcbase = $root."/usr/lib64/lxc/";
 	}
 	my $lxcinit = $lxcbase."lxc-init";

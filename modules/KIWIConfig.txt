@@ -221,6 +221,7 @@
 		<file name="udevtrigger"/>
 		<file name="umount"/>
 		<file name="uname"/>
+		<file name="unionfs"/>
 		<file name="uniq"/>
 		<file name="usb_id"/>
 		<file name="usleep"/>

@@ -547,7 +547,7 @@ sub __setupRepoMounts {
 	my $this = shift;
 	my $xml  = shift;
 	my $kiwi = $this->{kiwi};
-	my $uhash= $xml -> getURLHash();
+	my $uhash= $xml -> getURLHash_legacy();
 	my @mountPnts;
 	if ($uhash) {
 		for my $source (keys %{$uhash}) {

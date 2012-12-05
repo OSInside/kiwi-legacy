@@ -22,6 +22,7 @@ package KIWIXMLUserData;
 use strict;
 use warnings;
 use Readonly;
+use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -192,6 +193,47 @@ sub getUserRealName {
 	# ---
 	my $this = shift;
 	return $this->{realname};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new('users');
+	$element -> setAttribute('group', $this -> getGroupName());
+	my $gid = $this -> getGroupID();
+	if ($gid) {
+		$element -> setAttribute('id', $gid);
+	}
+	my $uElem = XML::LibXML::Element -> new('user');
+	$uElem -> setAttribute('home', $this -> getUserHomeDir());
+	$uElem -> setAttribute('name', $this -> getUserName());
+	my $id = $this -> getUserID();
+	if ($id) {
+		$uElem -> setAttribute('id', $id);
+	}
+	my $pass = $this -> getPassword();
+	if ($pass) {
+		$uElem -> setAttribute('pwd', $pass);
+	}
+	my $passF = $this -> getPasswordFormat();
+	if ($passF) {
+		$uElem -> setAttribute('pwdformat', $passF);
+	}
+	my $rname = $this -> getUserRealName();
+	if ($rname) {
+		$uElem -> setAttribute('realname', $rname);
+	}
+	my $shell = $this -> getLoginShell();
+	if ($shell) {
+		$uElem -> setAttribute('shell', $shell);
+	}
+	$element -> appendChild($uElem);
+	return $element;
 }
 
 #==========================================

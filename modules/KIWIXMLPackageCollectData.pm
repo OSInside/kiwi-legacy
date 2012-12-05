@@ -11,7 +11,7 @@
 # DESCRIPTION   : This module represents the data contained in the KIWI
 #               : configuration file marked with the <rhelGroup> or
 #               : <opensusePattern> element. Both elements will eventually
-#               : combined into <packageCollection>
+#               : combined into <namedCollection>
 #               :
 # STATUS        : Development
 #----------------
@@ -54,6 +54,7 @@ sub new {
 		return;
 	}
 	$this->{bootinclude} = $init->{bootinclude};
+	$this->{elname}      = 'namedCollection';
 	return $this;
 }
 
@@ -66,6 +67,22 @@ sub getBootInclude {
 	# ---
 	my $this = shift;
 	return $this->{bootinclude};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $elem = $this->SUPER::getXMLElement();
+	my $bootincl = $this -> getBootInclude();
+	if ($bootincl) {
+		$elem  -> setAttribute('bootinclude', $bootincl);
+	}
+	return $elem;
 }
 
 #==========================================

@@ -52,10 +52,11 @@ sub assert_array_equal {
 		$this -> assert(0, 'Did not get the expected list of names.');
 	}
 
-	for my $item (@base_array) {
-		if ( ! grep { /^$item$/x } @cmp_array ) {
+	my %baseEntryMap = map { ("$_" => 1) } @base_array;
+	for my $item (@cmp_array) {
+		if (! $baseEntryMap{"$item"}) {
 			my $msg = 'Did not get the expected list of names. '
-			.'Mismatch content.';
+			    .'Mismatch content.';
 			$this -> assert(0, $msg);
 		}
 	}
@@ -128,8 +129,8 @@ sub removeTestTmpDir {
 	if (! open $mounts, '<', '/proc/mounts' ) {
 		return 0;
 	}
-    my @mountInfo = <$mounts>;
-    close $mounts;
+	my @mountInfo = <$mounts>;
+	close $mounts;
 	for my $line (@mountInfo) {
 		if ($line =~ /.*kiwi.*/x) {
 			my ($source, $mntPnt, $rest) = split /\s/x, $line;

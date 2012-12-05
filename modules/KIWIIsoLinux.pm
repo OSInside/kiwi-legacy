@@ -789,6 +789,15 @@ sub createHybrid {
 	my $code;
 	my $loop;
 	my $FD;
+	my $sysarch = qxx ("uname -m");
+	chomp $sysarch;
+	if ($sysarch =~ /ppc|ia64/) {
+		$kiwi -> warning (
+			"Hybrid ISO not supported on $sysarch architecture"
+		);
+		$kiwi -> skipped ();
+		return $this;
+	}
 	my $locator = KIWILocator -> new ($kiwi);
 	my $isoHybrid = $locator -> getExecPath ('isohybrid');
 	if (! $isoHybrid) {

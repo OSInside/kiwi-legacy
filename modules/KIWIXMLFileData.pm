@@ -22,6 +22,7 @@ package KIWIXMLFileData;
 #------------------------------------------
 use strict;
 use warnings;
+use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -70,8 +71,9 @@ sub new {
 	if (! $this -> __isInitConsistent($init) )  {
 		return;
 	}
-	$this->{name} = $init->{name};
-	$this->{arch} = $init->{arch};
+	$this->{arch}   = $init->{arch};
+	$this->{elname} = 'file';
+	$this->{name}   = $init->{name};
 
 	return $this;
 }
@@ -96,6 +98,23 @@ sub getName {
 	# ---
 	my $this = shift;
 	return $this->{name};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new( $this->{elname} );
+	$element -> setAttribute('name', $this -> getName());
+	my $arch = $this -> getArch();
+	if ($arch) {
+		$element -> setAttribute('arch', $arch);
+	}
+	return $element;
 }
 
 #==========================================

@@ -839,7 +839,8 @@ IMAGE='/dev/ram1;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
         to use a compressed root filesystem make sure your
           <filename>config.xml</filename>’s filesystem attribute
         contains either <systemitem class="filesystem">squashfs</systemitem> 
-        or <systemitem class="filesystem">clicfs</systemitem>. Below, find an example: </para>
+        or <systemitem class="filesystem">clicfs</systemitem>.
+        Below, find an example: </para>
 
 <screen>
 DISK=/dev/sda
@@ -850,7 +851,39 @@ UNIONFS_CONFIG=/dev/sda3,/dev/sda2,clicfs
 KIWI_INITRD=/boot/initrd
 </screen>
 
+        <para>As an alternative to clicfs kiwi also supports the fuse
+        based unionfs utility. clicfs writes block lists on the device
+		used for the write operations. unionfs points all write operations
+        into another filesystem which also allows to use remote write
+        locations and to watch them separately. In order to use unionfs
+        to write into ram the following UNIONFS_CONFIG setup is required
+        </para>
+<screen>
+UNIONFS_CONFIG=tmpfs,/dev/sda2,unionfs
+</screen>
+ 
+        <para>If you want to write persistently it's required to add
+        the local device name e.g /dev/sda3 instead of tmpfs as shown in
+        the initial example. If the read-only location is on NFS the
+        setup to write into a tmpfs would look like the following
+        </para>
+
+<screen>
+NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
+UNIONFS_CONFIG=tmpfs,nfs,unionfs
+</screen>
+
+        <para>Also possible is to read remotely and to write remotely.
+        Some NFS write space is required prior to the following setup:
+        </para>
+
+<screen>
+NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
+UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,unionfs
+</screen>
+
     </sect2>
+
 
     <sect2 id="sec.pxe.split-image">
       <title>Split Image</title>

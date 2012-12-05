@@ -17,6 +17,7 @@ package Test::kiwiXMLVMachineData;
 
 use strict;
 use warnings;
+use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
@@ -569,23 +570,36 @@ sub test_ctor_initImproperNoInterf {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData    = ( controller => 'scsi',
-						id         => 1
-					);
-	my %disks       = ( system => \%diskData );
-	my %dvd         = ( controller => 'ide',
-						id         =>  3
-					);
-	my %nicData = ( driver => 'e1000',
-					mac    => 'FE:C0:B1:96:64:AC'
-				);
-	my %nics = ( 1 => \%nicData );
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => \%disks,
-				vmdvd              => \%dvd,
-				vmnics             => \%nics
-			);
+	my %diskData = (
+		controller => 'scsi',
+		id         => 1
+	);
+	my %disks = ( system => \%diskData );
+	my %dvd = (
+		controller => 'ide',
+		id         =>  3
+	);
+	my %nicData1 = (
+		driver    => 'r8169',
+		interface => 'eth1',
+		mac       => 'FE:C0:B1:96:64:AD',
+		mode      => 'bridge'
+	);
+	my %nicData2 = (
+		driver => 'e1000',
+		mac    => 'FE:C0:B1:96:64:AC'
+	);
+	my %nics = (
+		1 => \%nicData1,
+		2 => \%nicData2
+	);
+	my %init = (
+		arch             => 'x86_64',
+		vmconfig_entries => \@confEntries,
+		vmdisks            => \%disks,
+		vmdvd              => \%dvd,
+		vmnics             => \%nics
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Initialization data for nic incomplete, must provide '
@@ -1602,6 +1616,52 @@ sub test_getSystemDiskID {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('1', $sdID);
+	return;
+}
+
+#==========================================
+# test_getXMLElement
+#------------------------------------------
+sub test_getXMLElement{
+	# ...
+	# Verify that the getXMLElement method returns a node
+	# with the proper data.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $machDataObj = $this -> __getVMachineObj();
+	my $elem = $machDataObj -> getXMLElement();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($elem);
+	my $xmlstr = $elem -> toString();
+	my $expected = '<machine '
+		. 'arch="x86_64" '
+		. 'des_cpu="8" '
+		. 'des_memory="8192" '
+		. 'domain="domU" '
+		. 'guestOS="SUSE" '
+		. 'HWversion="7" '
+		. 'max_cpu="16" '
+		. 'max_memory="16384" '
+		. 'memory="4096" '
+		. 'min_cpu="2" '
+		. 'min_memory="2048" '
+		. 'ncpus="4" '
+		. 'ovftype="zvm">'
+		. '<vmconfig-entry>foo=bar</vmconfig-entry>'
+		. '<vmconfig-entry>cd=none</vmconfig-entry>'
+		. '<vmdisk controller="scsi" device="sda" disktype="hdd" id="1"/>'
+		. '<vmdvd controller="ide" id="2"/>'
+		. '<vmnic interface="eth0" driver="e1000" mac="FE:C0:B1:96:64:AC"/>'
+		. '<vmnic interface="eth1" driver="r8169" mac="FE:C0:B1:96:64:AD" '
+		. 'mode="bridge"/>'
+		. '</machine>';
+	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
 
@@ -3304,45 +3364,51 @@ sub __getVMachineObj {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData    = ( controller => 'scsi',
-						device     => 'sda',
-						disktype   => 'hdd',
-						id         => '1'
-					);
-	my %disks       = ( system => \%diskData );
-	my %dvd         = ( controller => 'ide',
-						id         => '2'
-					);
-	my %nicData1 = ( driver    => 'e1000',
-					interface => 'eth0',
-					mac       => 'FE:C0:B1:96:64:AC'
-				);
-	my %nicData2 = ( driver    => 'r8169',
-					interface => 'eth1',
-					mac       => 'FE:C0:B1:96:64:AD',
-					mode      => 'bridge'
-				);
-	my %nics = ( 1 => \%nicData1,
-				2 => \%nicData2
-			);
-	my %init = ( HWversion          => '7',
-				arch               => 'x86_64',
-				des_cpu            => '8',
-				des_memory         => '8192',
-				domain             => 'domU',
-				guestOS            => 'SUSE',
-				max_cpu            => '16',
-				max_memory         => '16384',
-				memory             => '4096',
-				min_cpu            => '2',
-				min_memory         => '2048',
-				ncpus              => '4',
-				ovftype            => 'zvm',
-				vmconfig_entries   => \@confEntries,
-				vmdisks            => \%disks,
-				vmdvd              => \%dvd,
-				vmnics             => \%nics
-			);
+	my %diskData = (
+		controller => 'scsi',
+		device     => 'sda',
+		disktype   => 'hdd',
+		id         => '1'
+	);
+	my %disks = ( system => \%diskData );
+	my %dvd = (
+		controller => 'ide',
+		id         => '2'
+	);
+	my %nicData1 = (
+		driver    => 'e1000',
+		interface => 'eth0',
+		mac       => 'FE:C0:B1:96:64:AC'
+	);
+	my %nicData2 = (
+		driver    => 'r8169',
+		interface => 'eth1',
+		mac       => 'FE:C0:B1:96:64:AD',
+		mode      => 'bridge'
+	);
+	my %nics = (
+		1 => \%nicData1,
+		2 => \%nicData2
+	);
+	my %init = (
+		HWversion          => '7',
+		arch               => 'x86_64',
+		des_cpu            => '8',
+		des_memory         => '8192',
+		domain             => 'domU',
+		guestOS            => 'SUSE',
+		max_cpu            => '16',
+		max_memory         => '16384',
+		memory             => '4096',
+		min_cpu            => '2',
+		min_memory         => '2048',
+		ncpus              => '4',
+		ovftype            => 'zvm',
+		vmconfig_entries   => \@confEntries,
+		vmdisks            => \%disks,
+		vmdvd              => \%dvd,
+		vmnics             => \%nics
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);

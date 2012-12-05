@@ -614,6 +614,36 @@ sub test_missingFilesysAttr {
 }
 
 #==========================================
+# test_noBootVolume
+#------------------------------------------
+sub test_noBootVolume {
+	# ...
+	# Test that the specification of "boot" as a volume is flagged as
+	# as an error.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('noBootVolume');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $msg = $kiwi -> getMessage();
+		my $expected = 'Found <systemdisk> setup using "/boot" as '
+			. 'volume. This is not supported.';
+		$this -> assert_str_equals($expected, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('noBootVolume');
+	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
 # test_oemPostDump
 #------------------------------------------
 sub test_oemPostDump {

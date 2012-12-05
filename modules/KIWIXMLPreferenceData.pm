@@ -24,6 +24,7 @@ package KIWIXMLPreferenceData;
 #------------------------------------------
 use strict;
 use warnings;
+use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
@@ -302,6 +303,111 @@ sub getVersion {
 	# ---
 	my $this = shift;
 	return $this->{version};
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $element = XML::LibXML::Element -> new('preferences');
+	my %initBLoadT = (
+		parent    => $element,
+		childName => 'bootloader-theme',
+		text      => $this -> getBootLoaderTheme()
+	);
+	$element = $this -> __addElement(\%initBLoadT);
+	my %initBSplashT = (
+		parent    => $element,
+		childName => 'bootsplash-theme',
+		text      => $this -> getBootSplashTheme()
+	);
+	$element = $this -> __addElement(\%initBSplashT);
+	my %initDefDest = (
+		parent    => $element,
+		childName => 'defaultdestination',
+		text      => $this -> getDefaultDest()
+	);
+	$element = $this -> __addElement(\%initDefDest);
+	my %initDefPreB = (
+		parent    => $element,
+		childName => 'defaultprebuilt',
+		text      => $this -> getDefaultPreBuilt()
+	);
+	$element = $this -> __addElement(\%initDefPreB);
+	my %initDefR = (
+		parent    => $element,
+		childName => 'defaultroot',
+		text      => $this -> getDefaultRoot()
+	);
+	$element = $this -> __addElement(\%initDefR);
+	my %initClock = (
+		parent    => $element,
+		childName => 'hwclock',
+		text      => $this -> getHWClock()
+	);
+	$element = $this -> __addElement(\%initClock);
+	my %initKeyB = (
+		parent    => $element,
+		childName => 'keytable',
+		text      => $this -> getKeymap()
+	);
+	$element = $this -> __addElement(\%initKeyB);
+	my %initLoc = (
+		parent    => $element,
+		childName => 'locale',
+		text      => $this -> getLocale()
+	);
+	$element = $this -> __addElement(\%initLoc);
+	my %initPckgM = (
+		parent    => $element,
+		childName => 'packagemanager',
+		text      => $this -> getPackageManager()
+	);
+	$element = $this -> __addElement(\%initPckgM);
+	my %initRPMCSig = (
+		parent    => $element,
+		childName => 'rpm-check-signatures',
+		text      => $this -> getRPMCheckSig()
+	);
+	$element = $this -> __addElement(\%initRPMCSig);
+	my %initRPMNDoc = (
+		parent    => $element,
+		childName => 'rpm-excludedocs',
+		text      => $this -> getRPMExcludeDoc()
+	);
+	$element = $this -> __addElement(\%initRPMNDoc);
+	my %initRPMForce = (
+		parent    => $element,
+		childName => 'rpm-force',
+		text      => $this -> getRPMForce()
+	);
+	$element = $this -> __addElement(\%initRPMForce);
+	my $license = $this -> getShowLic();
+	for my $lic (@{$license}) {
+		my %initShowLic = (
+			parent    => $element,
+			childName => 'showlicense',
+			text      => $lic
+		);
+		$element = $this -> __addElement(\%initShowLic);
+	}
+	my %initTimeZ = (
+		parent    => $element,
+		childName => 'timezone',
+		text      => $this -> getTimezone()
+	);
+	$element = $this -> __addElement(\%initTimeZ);
+	my %initVer = (
+		parent    => $element,
+		childName => 'version',
+		text      => $this -> getVersion()
+	);
+	$element = $this -> __addElement(\%initVer);
+	return $element;
 }
 
 #==========================================

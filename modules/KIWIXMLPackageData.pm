@@ -60,6 +60,7 @@ sub new {
 	}
 	$this->{bootdelete}  = $init->{bootdelete};
 	$this->{bootinclude} = $init->{bootinclude};
+	$this->{elname}      = 'package';
 	$this->{replaces}    = $init->{replaces};
 	return $this;
 }
@@ -95,6 +96,30 @@ sub getPackageToReplace {
 	# ---
 	my $this = shift;
 	return $this->{replaces}
+}
+
+#==========================================
+# getXMLElement
+#------------------------------------------
+sub getXMLElement {
+	# ...
+	# Return an XML Element representing the object's data
+	# ---
+	my $this = shift;
+	my $elem = $this->SUPER::getXMLElement();
+	my $bootdel = $this -> getBootDelete();
+	if ($bootdel) {
+		$elem  -> setAttribute('bootdelete', $bootdel);
+	}
+	my $bootincl = $this -> getBootInclude();
+	if ($bootincl) {
+		$elem  -> setAttribute('bootinclude', $bootincl);
+	}
+	my $replace = $this -> getPackageToReplace();
+	if ($replace) {
+		$elem  -> setAttribute('replaces', $replace);
+	}
+	return $elem;
 }
 
 #==========================================

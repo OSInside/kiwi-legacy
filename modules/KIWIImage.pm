@@ -247,7 +247,7 @@ sub updateDescription {
 	}
 	$changeset{"domain"}         = $domain;
 	$changeset{"displayname"}    = $src_xml->getImageDisplayName();
-	$changeset{"locale"}         = $src_xml->getLocale();
+	$changeset{"locale"}         = $src_xml->getLocale_legacy();
 	#==========================================
 	# Store Theme data
 	#------------------------------------------
@@ -313,7 +313,7 @@ sub updateDescription {
 		}
 		$strip_default{$type} = \@items;
 	}
-	@node = $src_xml->getStripNodeList() -> get_nodelist();
+	@node = $src_xml->getStripNodeList_legacy() -> get_nodelist();
 	foreach my $element (@node) {
 		if (! $src_xml -> __requestedProfile ($element)) {
 			next;
@@ -595,7 +595,7 @@ sub setupOverlay {
 	if (! defined $this->{imageTree}) {
 		return;
 	}
-	$xml -> writeXMLDescription ($this->{imageTree});
+	$xml -> writeXMLDescription_legacy ($this->{imageTree});
 	return $this;
 }
 
@@ -2015,6 +2015,16 @@ sub createImageLiveCD {
 		return;
 	}
 	$kiwi -> done();
+	#==========================================
+	# recreate splash data to initrd
+	#------------------------------------------
+	my $splash = $pinitrd;
+	if (! ($splash =~ s/splash\.gz/spl/)) {
+		$splash =~ s/gz/spl/;
+	}
+	if (-f $splash) {
+		qxx ("cat $splash >> $destination/initrd");
+	}
 	#==========================================
 	# copy base graphics boot CD files
 	#------------------------------------------
@@ -4268,12 +4278,16 @@ sub buildMD5Sum {
 	# Create image md5sum
 	#------------------------------------------
 	$kiwi -> info ("Creating image MD5 sum...");
-	my $size = $main::global -> isize ($image);
-	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
+	my $size = int $main::global -> isize ($image);
+	my $primes = qxx ("factor $size");
+	$primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
-		last if ($blocksize * $factor > 65464);
-		$blocksize *= $factor;
+		my $iFact = int $factor;
+		if ($blocksize * $iFact > 65464) {
+			last;
+		}
+		$blocksize *= $iFact;
 	}
 	my $blocks = $size / $blocksize;
 	my $sum  = qxx ("cat $image | md5sum - | cut -f 1 -d-");
@@ -4464,13 +4478,13 @@ sub getSize {
 	#==========================================
 	# XML size calculated in Byte
 	#------------------------------------------
-	my $additive = $xml -> getImageSizeAdditiveBytes();
+	my $additive = $xml -> getImageSizeAdditiveBytes_legacy();
 	if ($additive) {
 		# relative size value specified...
 		$xmlsize = $minsize + $additive;
 	} else {
 		# absolute size value specified...
-		$xmlsize = $xml -> getImageSize();
+		$xmlsize = $xml -> getImageSize_legacy();
 		if ($xmlsize eq "auto") {
 			$xmlsize = $minsize;
 		} elsif ($xmlsize =~ /^(\d+)([MG])$/i) {

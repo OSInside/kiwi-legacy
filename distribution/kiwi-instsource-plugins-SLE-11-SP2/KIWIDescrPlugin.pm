@@ -71,7 +71,9 @@ sub new
   my $tpack      = $ini->val('base', 'toolpack'); # scalar value
   my $enable     = $ini->val('base', 'defaultenable'); # scalar value
 
+  my $pdbfiles  = $ini->val('options', 'pdbfiles');
   my @params	 = $ini->val('options', 'parameter');
+  my @langs     = $ini->val('options', 'language');
 
   my $gzip       = $ini->val('target', 'compress');
 
@@ -84,6 +86,7 @@ sub new
      or not defined($tdir)
      or not defined($tpack)
      or not defined($enable)
+     or not defined($pdbfiles)
      or not defined($gzip)
      or not (@params)) {
     $this->logMsg("E", "Plugin ini file <$config> seems broken!");
@@ -103,14 +106,25 @@ sub new
     $params .= "$p ";
   }
 
+  # add local kwd files as argument
+  use Cwd 'abs_path';
+  my $extrafile = abs_path($this->collect()->{m_xml}->{xmlOrigFile});
+  $extrafile =~ s/.kiwi$/.kwd/;
+  if (-f $extrafile) {
+    $this->logMsg("W", "Found extra tags file $extrafile.");
+    $params .= "-T $extrafile ";
+  }
+
   $this->name($name);
   $this->order($order);
   $this->{m_tool} = $tool;
   $this->{m_tooldir} = $tdir;
   $this->{m_toolpack} = $tpack;
+  $this->{m_pdbfiles} = $pdbfiles;
   $this->{m_createrepo} = $createrepo;
   $this->{m_rezip} = $rezip;
   $this->{m_params} = $params;
+  $this->{m_languages} = join(' ', @langs);
   $this->{m_compress} = $gzip;
   if($enable != 0) {
     $this->ready(1);
@@ -190,7 +204,7 @@ sub executeDir
 
   $this->logMsg("I", "Calling ".$this->name()." for directories <@paths>:");
 
-  my $cmd = "$this->{m_tooldir}/$this->{m_tool} $pathlist $this->{m_params} -o ".$paths[0]."/".$descrdir;
+  my $cmd = "$this->{m_tooldir}/$this->{m_tool} $this->{m_pdbfiles} $pathlist $this->{m_params} $this->{m_languages} -o ".$paths[0]."/".$descrdir;
   $this->logMsg("I", "Executing command <$cmd>");
   my $data = qx( $cmd );
   my $status = $? >> 8;
@@ -220,16 +234,16 @@ sub executeDir
     }
   }
 
-  foreach my $trans (glob('/usr/share/locale/en_US/LC_MESSAGES/package-translations-*.mo')) {
-     $trans = basename($trans, ".mo");
-     $trans =~ s,.*-,,;
-     my $cmd = "/usr/bin/translate_packages.pl $trans < $targetdir/packages.en > $targetdir/packages.$trans";
-     my $data = qx( $cmd );
-     if($? >> 8) {
-	 $this->logMsg("E", "Calling <translate_packages.pl $trans > failed:\n$data\n");
-	 return 1;
-     }
-  }
+#  foreach my $trans (glob('/usr/share/locale/en_US/LC_MESSAGES/package-translations-*.mo')) {
+#     $trans = basename($trans, ".mo");
+#     $trans =~ s,.*-,,;
+#     my $cmd = "/usr/bin/translate_packages.pl $trans < $targetdir/packages.en > $targetdir/packages.$trans";
+#     my $data = qx( $cmd );
+#     if($? >> 8) {
+#	 $this->logMsg("E", "Calling <translate_packages.pl $trans > failed:\n$data\n");
+#	 return 1;
+#     }
+#  }
 
   if($this->{m_compress} =~ m{yes}i) {
       foreach my $pfile(glob("$targetdir/packages*")) {
