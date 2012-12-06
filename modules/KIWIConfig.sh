@@ -953,7 +953,7 @@ function suseStripInitrd {
 # rhelStripInitrd
 #--------------------------------------
 function rhelStripInitrd {
-	suseStripInitrd
+	suseStripInitrd $@
 }
 
 #======================================
