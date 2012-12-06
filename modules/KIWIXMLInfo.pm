@@ -135,7 +135,7 @@ sub printXMLInfo {
 	if (! $infoRequests) {
 		return;
 	}
-	my $outfile = qxx ("mktemp -q /tmp/kiwi-xmlinfo-XXXXXX 2>&1");
+	my $outfile = qxx ("mktemp -qt kiwi-xmlinfo-XXXXXX 2>&1");
 	my $code = $? >> 8; chomp $outfile;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create tmp file: $outfile: $!");

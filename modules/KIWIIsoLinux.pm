@@ -176,7 +176,7 @@ sub new {
 	#==========================================
 	# create tmp files/directories 
 	#------------------------------------------
-	$sort = qxx ("mktemp /tmp/kiso-sort-XXXXXX 2>&1"); chomp $sort;
+	$sort = qxx ("mktemp -t kiso-sort-XXXXXX 2>&1"); chomp $sort;
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create sort file: $sort: $!");
@@ -184,7 +184,7 @@ sub new {
 		$this -> cleanISO();
 		return;
 	}
-	$ldir = qxx ("mktemp -q -d /tmp/kiso-loader-XXXXXX 2>&1"); chomp $ldir;
+	$ldir = qxx ("mktemp -qdt kiso-loader-XXXXXX 2>&1"); chomp $ldir;
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create tmp directory: $ldir: $!");

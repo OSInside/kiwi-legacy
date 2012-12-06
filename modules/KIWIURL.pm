@@ -390,7 +390,7 @@ sub smbPath {
 	if (! defined $root) {
 		return $tmpdir;
 	}
-	$tmpdir = qxx ("mktemp -q -d /tmp/kiwimount.XXXXXX"); chomp $tmpdir;
+	$tmpdir = qxx ("mktemp -qdt kiwimount.XXXXXX"); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> warning ("Couldn't create tmp dir for smb mount: $tmpdir: $!");

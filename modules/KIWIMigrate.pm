@@ -96,7 +96,7 @@ sub new {
 		qxx ("rm -rf $dest");
 	}
 	if (! defined $dest) {
-		$dest = qxx (" mktemp -q -d /tmp/kiwi-migrate.XXXXXX ");
+		$dest = qxx ("mktemp -qdt kiwi-migrate.XXXXXX");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -691,7 +691,7 @@ sub getRepos {
 						$kiwi -> skipped ();
 						next;
 					}
-					my $mpoint = qxx ("mktemp -q -d /tmp/kiwimpoint.XXXXXX");
+					my $mpoint = qxx ("mktemp -qdt kiwimpoint.XXXXXX");
 					my $result = $? >> 8;
 					if ($result != 0) {
 						$kiwi -> warning ("DVD tmpdir failed: $mpoint: $!");
@@ -720,7 +720,7 @@ sub getRepos {
 						$kiwi -> skipped ();
 						next;
 					}
-					my $mpoint = qxx ("mktemp -q -d /tmp/kiwimpoint.XXXXXX");
+					my $mpoint = qxx ("mktemp -qdt kiwimpoint.XXXXXX");
 					my $result = $? >> 8;
 					if ($result != 0) {
 						$kiwi -> warning ("ISO tmpdir failed: $mpoint: $!");

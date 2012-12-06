@@ -71,7 +71,7 @@ sub createTmpDirectory {
 	my $forceRoot = $cmdL -> getForceNewRoot();
 	if (! defined $useRoot) {
 		if (! defined $selfRoot) {
-			$root = qxx (" mktemp -q -d /tmp/kiwi.XXXXXX ");
+			$root = qxx ("mktemp -qdt kiwi.XXXXXX");
 			$code = $? >> 8;
 			if ($code == 0) {
 				$rootError = 0;
