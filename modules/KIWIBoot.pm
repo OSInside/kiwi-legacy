@@ -1082,6 +1082,10 @@ sub setupInstallStick {
 	my $stick;
 	my $diskname;
 	#==========================================
+	# Clear image inode setup, use default
+	#------------------------------------------
+	undef $this->{inodes};
+	#==========================================
 	# Create new MBR label for install disk
 	#------------------------------------------
 	$this->{mbrid} = $main::global -> getMBRDiskLabel();
