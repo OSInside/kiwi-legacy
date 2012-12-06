@@ -15,7 +15,10 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
-
+#perl_verion is on defined in centos/RHEL yet
+%if 0%{?rhel_version}
+%define perl_version    %(eval "`%{__perl} -V:version`"; echo $version)
+%endif
 
 Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
@@ -58,7 +61,12 @@ Requires:       checkmedia
 Requires:       coreutils
 Requires:       kiwi-tools >= %{version}
 Requires:       libxslt
-Requires:       perl = %{perl_version}
+%if 0%{?rhel_version} 
+# RHEL/CentOS seem to require the release info as well, while matching the version. So the >=
+Requires:       perl >= %{perl_version}  
+%else
+Requires:	perl = %{perl_version}
+%endif
 Requires:       perl-Config-IniFiles
 Requires:       perl-XML-LibXML
 Requires:       perl-XML-LibXML-Common

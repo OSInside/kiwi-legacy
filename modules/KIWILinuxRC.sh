@@ -1,3 +1,4 @@
+#/* vim: set softtabstop=8: */
 #================
 # FILE          : KIWILinuxRC.sh
 #----------------
@@ -65,8 +66,10 @@ if which parted &>/dev/null;then
 		export PARTITIONER=unsupported
 	fi
 fi
-if dhcpcd -p 2>&1 | grep -q 'Usage';then
-	export DHCPCD_HAVE_PERSIST=0
+if [ -x /sbin/dhcpcd ];then
+	if dhcpcd -p 2>&1 | grep -q 'Usage';then
+		export DHCPCD_HAVE_PERSIST=0
+	fi
 fi
 
 #======================================
@@ -4040,6 +4043,27 @@ function loadNetworkCard {
 		"reboot"
 	fi
 }
+
+#======================================
+# dhclient_import_info
+#-------------------------------------
+function dhclient_import_info {
+	# Import the information form the dhclient.lease file
+	# into the enviroment.
+	if [ ! -n $1 ]; then 
+		Echo "NULL argument passed to dhclient_import_info"
+		return
+	fi
+
+	export IPADDR=$(cat /var/lib/dhclient/$1.lease  | grep 'fixed-address'| awk  '{print $2}' | tr -d ';')
+	export NETMASK=$(cat /var/lib/dhclient/$1.lease  | grep 'subnet-mask'| awk  '{print $3}' | tr -d ';')
+	export GATEWAYS=$(cat /var/lib/dhclient/$1.lease | grep 'routers ' |awk '{print $3}' |tr -d ';')
+	export DOMAIN=$( cat /var/lib/dhclient/$1.lease | grep 'domain-name' | grep -v 'domain-name-server' | awk '{print $3}'| tr -d ';')
+	export DNSSERVERS=$(cat /var/lib/dhclient/$1.lease | grep 'domain-name-servers'| awk '{print $3}'| tr -d ';' | tr ',' ' ')
+	export DNS=$DNSSERVERS
+	export DHCPCHADDR=$(ip link show $1| grep link | awk '{print $2}' )	
+}
+
 #======================================
 # setupNetwork
 #--------------------------------------
@@ -4116,100 +4140,165 @@ function setupNetwork {
 		# ----
 		unset opts
 	fi
-	mkdir -p /var/lib/dhcpcd
-	for try_iface in ${dev_list[*]}; do
-		# try DHCP_DISCOVER on all interfaces
-		dhcpcd $opts -T $try_iface > /var/lib/dhcpcd/dhcpcd-$try_iface.info &
-		DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
-	done
-	if [ -z "$DHCPCD_STARTED" ];then
-		if [ -e "$root" ];then
-			Echo "Failed to setup DHCP network interface !"
-			Echo "Try fallback to local boot on: $root"
-			LOCAL_BOOT=yes
-			return
-		else
-			systemException \
-				"Failed to setup DHCP network interface !" \
-			"reboot"
+	if [ -x /sbin/dhcpcd ]; then  # Only the suse base distros has DHCPCD
+		mkdir -p /var/lib/dhcpcd
+		for try_iface in ${dev_list[*]}; do
+			# try DHCP_DISCOVER on all interfaces
+			dhcpcd $opts -T $try_iface > /var/lib/dhcpcd/dhcpcd-$try_iface.info &
+			DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
+		done
+		if [ -z "$DHCPCD_STARTED" ];then
+			if [ -e "$root" ];then
+				Echo "Failed to setup DHCP network interface !"
+				Echo "Try fallback to local boot on: $root"
+				LOCAL_BOOT=yes
+				return
+			else
+				systemException \
+					"Failed to setup DHCP network interface !" \
+				"reboot"
+			fi
 		fi
-	fi
-	#======================================
-	# wait for any preferred interface(s)
-	#--------------------------------------
-	for j in 1 2 ;do
-		for i in 1 2 3 4 5 6 7 8 9 10 11;do
-			for try_iface in $prefer_iface ; do
-				if [ -s /var/lib/dhcpcd/dhcpcd-$try_iface.info ] &&
-					grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info
-				then
-					break 3
-				fi
+		#======================================
+		# wait for any preferred interface(s)
+		#--------------------------------------
+		for j in 1 2 ;do
+			for i in 1 2 3 4 5 6 7 8 9 10 11;do
+				for try_iface in $prefer_iface ; do
+					if [ -s /var/lib/dhcpcd/dhcpcd-$try_iface.info ] &&
+						grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info
+					then
+						break 3
+					fi
+				done
+				sleep 2
+			done
+			# /.../
+			# we are behind the dhcpcd timeout 20s so the only thing
+			# we can do now is to try again
+			# ----
+			for try_iface in $DHCPCD_STARTED; do
+				dhcpcd $opts -T $try_iface \
+					> /var/lib/dhcpcd/dhcpcd-$try_iface.info &
 			done
 			sleep 2
 		done
-		# /.../
-		# we are behind the dhcpcd timeout 20s so the only thing
-		# we can do now is to try again
-		# ----
-		for try_iface in $DHCPCD_STARTED; do
-			dhcpcd $opts -T $try_iface \
-				> /var/lib/dhcpcd/dhcpcd-$try_iface.info &
+		#======================================
+		# select interface from preferred list
+		#--------------------------------------
+		for try_iface in $prefer_iface $DHCPCD_STARTED; do
+			if [ -s /var/lib/dhcpcd/dhcpcd-$try_iface.info ] &&
+				grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info
+			then
+				export PXE_IFACE=$try_iface
+				eval `grep "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info`
+				rm /var/lib/dhcpcd/dhcpcd-$try_iface.info
+				# continue with the DHCP protocol on the selected interface
+				if [ -e /var/run/dhcpcd-$PXE_IFACE.pid ];then
+					rm -f /var/run/dhcpcd-$PXE_IFACE.pid
+				fi
+				if [ $DHCPCD_HAVE_PERSIST -eq 0 ];then
+					# /.../
+					# older version of dhcpd which doesn't provide
+					# an option to request a specific IP address
+					# ----
+					dhcpcd $opts $PXE_IFACE 2>&1
+				else
+					dhcpcd $opts -r $IPADDR $PXE_IFACE 2>&1
+				fi
+				break
+			fi
 		done
-		sleep 2
-	done
-	#======================================
-	# select interface from preferred list
-	#--------------------------------------
-	for try_iface in $prefer_iface $DHCPCD_STARTED; do
-		if [ -s /var/lib/dhcpcd/dhcpcd-$try_iface.info ] &&
-			grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info
-		then
-			export PXE_IFACE=$try_iface
-			eval `grep "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info`
-			rm /var/lib/dhcpcd/dhcpcd-$try_iface.info
-			# continue with the DHCP protocol on the selected interface
-			if [ -e /var/run/dhcpcd-$PXE_IFACE.pid ];then
-				rm -f /var/run/dhcpcd-$PXE_IFACE.pid
-			fi
-			if [ $DHCPCD_HAVE_PERSIST -eq 0 ];then
-				# /.../
-				# older version of dhcpd which doesn't provide
-				# an option to request a specific IP address
-				# ----
-				dhcpcd $opts $PXE_IFACE 2>&1
+		#======================================
+		# fallback to local boot if possible
+		#--------------------------------------
+		if [ -z "$PXE_IFACE" ];then
+			if [ -e "$root" ];then
+				Echo "Can't get DHCP reply on any interface !"
+				Echo "Try fallback to local boot on: $root"
+				LOCAL_BOOT=yes
+				return
 			else
-				dhcpcd $opts -r $IPADDR $PXE_IFACE 2>&1
+				systemException \
+					"Can't get DHCP reply on any interface !" \
+				"reboot"
 			fi
-			break
 		fi
-	done
-	#======================================
-	# fallback to local boot if possible
-	#--------------------------------------
-	if [ -z "$PXE_IFACE" ];then
-		if [ -e "$root" ];then
-			Echo "Can't get DHCP reply on any interface !"
-			Echo "Try fallback to local boot on: $root"
-			LOCAL_BOOT=yes
-			return
-		else
-			systemException \
-				"Can't get DHCP reply on any interface !" \
-			"reboot"
+		#======================================
+		# wait for iface to finish negotiation
+		#--------------------------------------
+		for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
+			if [ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ] &&
+				grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
+			then
+				break
+			fi
+			sleep 2
+		done
+	elif [ -x /sbin/dhclient ]; then # DHCLIENT is part of fedora/rhel based distros
+
+		local dhclient_opts=" -4 -1 -q -timeout 20"
+		mkdir -p /var/lib/dhclient/
+		mkdir -p /var/run/
+		for try_iface in ${dev_list[*]}; do
+			# try DHCP_DISCOVER on all interfaces
+			dhclient $dhclient_opts -lf /var/lib/dhclient/${try_iface}.lease -pf /var/run/dhclient-${try_iface}.pid ${try_iface}
+			DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
+		done
+		if [ -z "$DHCPCD_STARTED" ];then
+			if [ -e "$root" ];then
+				Echo "Failed to setup DHCP network interface !"
+				Echo "Try fallback to local boot on: $root"
+				LOCAL_BOOT=yes
+				return
+			else
+				systemException \
+					"Failed to setup DHCP network interface !" \
+				"reboot"
+			fi
+
 		fi
+		#======================================
+		# wait for any preferred interface(s)
+		#--------------------------------------
+		for j in 1 2 ;do
+			for i in 1 2 3 4 5 6 7 8 9 10 11;do
+				for try_iface in $prefer_iface ; do
+					if [ -f /var/lib/dhclient/${try_iface}.lease ] &&
+						grep -q "fixed-address" /var/lib/dhclient/${try_iface}.lease
+					then
+						break 3
+					fi
+				done
+				sleep 2
+			done
+			# /.../
+			# we are behind the dhclient timeout 20s so the only thing
+			# we can do now is to try again
+			# ----
+			for try_iface in $DHCPCD_STARTED; do
+				dhclient $dhclient_opts -lf /var/lib/dhclient/${try_iface}.lease -pf /var/run/dhclient-${try_iface}.pid ${try_iface}
+			done
+			sleep 2
+		done
+		#======================================
+		# select interface from preferred list
+		#--------------------------------------
+		for try_iface in $prefer_iface $DHCPCD_STARTED; do
+			if [ -f /var/lib/dhclient/${try_iface}.lease ] &&
+				grep -q "fixed-address" /var/lib/dhclient/${try_iface}.lease
+			then
+				export PXE_IFACE=$try_iface
+				export IPADDR=$(cat /var/lib/dhclient/${try_iface}.lease  | grep 'fixed-address'| awk  '{print $2}' | tr -d ';')
+				break
+			fi
+		done
+
+	else	# dhclient or dhcpcd is not available.
+		Echo "These is no valid DHCP Client(dhclient/dhcpcd) application"
+		return 1	
 	fi
-	#======================================
-	# wait for iface to finish negotiation
-	#--------------------------------------
-	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
-		if [ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ] &&
-			grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
-		then
-			break
-		fi
-		sleep 2
-	done
+
 	#======================================
 	# setup selected interface
 	#--------------------------------------
@@ -4217,6 +4306,9 @@ function setupNetwork {
 	if [ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ] &&
 		grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info; then
 		importFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
+	elif [ -f /var/lib/dhclient/$PXE_IFACE.lease ] &&
+		grep -q "fixed-address" /var/lib/dhclient/$PXE_IFACE.lease; then 
+		dhclient_import_info "$PXE_IFACE"
 	fi
 	if [ -z "$IPADDR" ];then
 		if [ -e "$root" ];then
@@ -4251,14 +4343,28 @@ function releaseNetwork {
 	# Do that only for _non_ network root devices
 	# ----
 	if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ] && [ -z "$AOEROOT" ];then
-		#======================================
-		# unset dhcp info variables
-		#--------------------------------------
-		unsetFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
-		#======================================
-		# free the lease and the cache
-		#--------------------------------------
-		dhcpcd -k $PXE_IFACE
+		if [ -x /sbin/dhclient ]; then
+			unset IPADDR
+			unset GATEWAYS
+			unset DNSSERVERS
+			unset NETMASK
+			unset DOMAIN
+			unset DNSSERVERS
+			unset DNS
+			unset DHCPCHADDR
+			kill -9 $(cat /var/run/dhclient-$PXE_IFACE.pid )
+			dhclient -r -lf /var/lib/dhclient/$PXE_IFACE.lease $PXE_IFACE
+
+		elif [ -x /sbin/dhcpcd]; then 
+			#======================================
+			# unset dhcp info variables
+			#--------------------------------------
+			unsetFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
+			#======================================
+			# free the lease and the cache
+			#--------------------------------------
+			dhcpcd -k $PXE_IFACE
+		fi
 		#======================================
 		# remove sysconfig state information
 		#--------------------------------------
