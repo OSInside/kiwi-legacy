@@ -216,6 +216,7 @@ sub new {
 	#==========================================
 	# Store object data (1)
 	#------------------------------------------
+	$this->{cleanupStack} = [];
 	$this->{gdata}    = $main::global -> getGlobals();
 	$this->{tmpdir}   = $tmpdir;
 	$this->{loopdir}  = $loopdir;
@@ -709,7 +710,7 @@ sub setupInstallCD {
 			$kiwi -> info ("Setup device mapper for partition access");
 			if (! $this -> bindDiskPartitions ($this->{loop})) {
 				$kiwi -> failed ();
-				$this -> cleanLoop ();
+				$this -> cleanStack ();
 				return;
 			}
 			$kiwi -> done();
@@ -753,10 +754,10 @@ sub setupInstallCD {
 		if (! $main::global -> mount ($sdev,$tmpdir,$type{fsmountoptions})) {
 			$kiwi -> error  ("Failed to mount system partition: $status");
 			$kiwi -> failed ();
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
-		$this -> cleanLoop();
+		$this -> cleanStack ();
 	}
 	#==========================================
 	# Build md5sum of system image
@@ -1272,7 +1273,7 @@ sub setupInstallStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create partition table");
 		$kiwi -> failed ();
-		$this -> cleanLoop();
+		$this -> cleanStack ();
 		return;
 	}
 	$kiwi -> done();
@@ -1282,7 +1283,7 @@ sub setupInstallStick {
 	$kiwi -> info ("Setup device mapper for partition access");
 	if (! $this -> bindDiskPartitions ($this->{loop})) {
 		$kiwi -> failed ();
-		$this -> cleanLoop ();
+		$this -> cleanStack ();
 		return;
 	}
 	$kiwi -> done();
@@ -1342,7 +1343,7 @@ sub setupInstallStick {
 			# build boot filesystem
 			#------------------------------------------
 			if (! $this -> setupFilesystem ($bootfs,$root,"install-boot",1)) {
-				$this -> cleanLoop ();
+				$this -> cleanStack ();
 				return;
 			}
 		} else {
@@ -1350,7 +1351,7 @@ sub setupInstallStick {
 			# build root filesystem
 			#------------------------------------------
 			if (! $this -> setupFilesystem ('ext3',$root,"install-root")) {
-				$this -> cleanLoop ();
+				$this -> cleanStack ();
 				return;
 			}
 		}
@@ -1363,7 +1364,7 @@ sub setupInstallStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount boot partition: $status");
 		$kiwi -> failed ();
-		$this -> cleanLoop ();
+		$this -> cleanStack ();
 		return;
 	}
 	if (! $this -> copyBootCode ($tmpdir,$loopdir,$bootloader)) {
@@ -1427,7 +1428,7 @@ sub setupInstallStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount data partition: $status");
 			$kiwi -> failed ();
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 		$status = qxx ("mv $system $loopdir 2>&1");
@@ -1436,7 +1437,7 @@ sub setupInstallStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed importing system image: $status");
 			$kiwi -> failed ();
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 		my $FD;
@@ -1444,7 +1445,7 @@ sub setupInstallStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create USB install flag file");
 			$kiwi -> failed ();
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 		print $FD "IMAGE='".$nameusb."'\n";
@@ -1457,12 +1458,10 @@ sub setupInstallStick {
 	#------------------------------------------
 	my $bootdevice = $diskname;
 	if (! $this -> installBootLoader ($bootloader, $bootdevice)) {
-		$this -> cleanLoopMaps();
-		$this -> cleanLoop ();
+		$this -> cleanStack ();
 		return;
 	}
-	$this -> cleanLoopMaps();
-	$this -> cleanLoop();
+	$this -> cleanStack();
 	$kiwi -> info ("Created $diskname to be dd'ed on Stick");
 	$kiwi -> done ();
 	return $this;
@@ -2214,7 +2213,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create partition table");
 			$kiwi -> failed ();
-			$this -> cleanLoop();
+			$this -> cleanStack ();
 			return;
 		}
 		if ((! $haveDiskDevice ) || ($haveDiskDevice =~ /nbd|aoe/)) {
@@ -2223,7 +2222,7 @@ sub setupBootDisk {
 			#------------------------------------------
 			if (! $this -> bindDiskPartitions ($this->{loop})) {
 				$kiwi -> failed ();
-				$this -> cleanLoop ();
+				$this -> cleanStack ();
 				return;
 			}
 			#==========================================
@@ -2244,7 +2243,7 @@ sub setupBootDisk {
 				\%deviceMap,$this->{loop},$syszip,$haveSplit,\%lvmparts
 			);
 			if (! %deviceMap) {
-				$this -> cleanLoop ();
+				$this -> cleanStack ();
 				return;
 			}
 		}
@@ -2284,8 +2283,7 @@ sub setupBootDisk {
 			}
 			sleep (1);
 			$this -> deleteVolumeGroup();
-			$this -> cleanLoopMaps();
-			qxx ("/sbin/losetup -d $this->{loop}");
+			$this -> cleanStack();
 			$this -> __updateDiskSize (10);
 		} else {
 			#==========================================
@@ -2345,7 +2343,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't dump image to disk: $status");
 			$kiwi -> failed ();
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 		$kiwi -> done();
@@ -2375,7 +2373,7 @@ sub setupBootDisk {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't dump split file: $status");
 				$kiwi -> failed ();
-				$this -> cleanLoop ();
+				$this -> cleanStack ();
 				return;
 			}
 			$kiwi -> done();
@@ -2408,7 +2406,7 @@ sub setupBootDisk {
 		# Mount system image partition
 		#------------------------------------------
 		if (! $main::global -> mount ($root,$loopdir,$type{fsmountoptions})) {
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 		#==========================================
@@ -2445,18 +2443,18 @@ sub setupBootDisk {
 						$kiwi -> error (
 							"Can't create mount point $loopdir/$pname"
 						);
-						$this -> cleanLoop ();
+						$this -> cleanStack ();
 						return;
 					}
 					if (! $this -> setupFilesystem ($FSTypeRO,$device,$pname)) {
-						$this -> cleanLoop ();
+						$this -> cleanStack ();
 						return;
 					}
 					$kiwi -> loginfo ("Mounting logical volume: $pname\n");
 					if (! $main::global ->
 						mount ($device,"$loopdir/$pname",$type{fsmountoptions})
 					) {
-						$this -> cleanLoop ();
+						$this -> cleanStack ();
 						return;
 					}
 				}
@@ -2467,7 +2465,7 @@ sub setupBootDisk {
 		#------------------------------------------
 		if ($FSTypeRW eq 'btrfs') {
 			if (! $main::global -> setupBTRFSSubVolumes ($loopdir)) {
-				$this -> cleanLoop ();
+				$this -> cleanStack ();
 				return;
 			}
 		}
@@ -2489,7 +2487,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Can't copy image tree to disk: $status");
 			$kiwi -> failed ();
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 		$kiwi -> done();
@@ -2552,7 +2550,7 @@ sub setupBootDisk {
 			$kiwi -> error  ("Couldn't create filesystem: $status");
 			$kiwi -> failed ();
 			$this -> luksClose();
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 		$this -> luksClose();
@@ -2570,7 +2568,7 @@ sub setupBootDisk {
 		# build boot filesystem
 		#------------------------------------------
 		if (! $this -> setupFilesystem ($bootfs,$boot,"boot",1)) {
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 		if ($needJumpP) {
@@ -2579,7 +2577,7 @@ sub setupBootDisk {
 			#------------------------------------------
 			my $jump = $deviceMap{jump};
 			if (! $this -> setupFilesystem ('fat16',$jump,"jump",1)) {
-				$this -> cleanLoop ();
+				$this -> cleanStack ();
 				return;
 			}
 		}
@@ -2600,7 +2598,7 @@ sub setupBootDisk {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount image boot device: $boot");
 		$kiwi -> failed ();
-		$this -> cleanLoop ();
+		$this -> cleanStack ();
 		return;
 	}
 	if ($efi) {
@@ -2613,7 +2611,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount image jump device: $boot");
 			$kiwi -> failed ();
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 	}
@@ -2644,16 +2642,13 @@ sub setupBootDisk {
 		$bootdevice = $this->{loop};
 	}
 	if (! $this->installBootLoader ($bootloader,$bootdevice)) {
-		$this -> cleanLoop ();
+		$this -> cleanStack ();
 		return;
 	}
 	#==========================================
 	# cleanup device maps and part mount
 	#------------------------------------------
-	if ($lvm) {
-		qxx ("vgchange -an $this->{lvmgroup} 2>&1");
-	}
-	$this -> cleanLoopMaps();
+	$this -> cleanStack();
 	#==========================================
 	# cleanup temp directory
 	#------------------------------------------
@@ -2694,7 +2689,7 @@ sub setupBootDisk {
 				$this -> {system} = $this->{loop};
 			}
 			$kiwi -> info ("--> Creating install ISO image\n");
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			if (! $this -> setupInstallCD()) {
 				return;
 			}
@@ -2708,7 +2703,7 @@ sub setupBootDisk {
 				$this -> {system} = $this->{loop};
 			}
 			$kiwi -> info ("--> Creating install USB Stick image\n");
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			if (! $this -> setupInstallStick()) {
 				return;
 			}
@@ -2722,7 +2717,7 @@ sub setupBootDisk {
 				$this -> {system} = $this->{loop};
 			}
 			$kiwi -> info ("--> Creating install PXE data set\n");
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			if (! $this -> setupInstallPXE()) {
 				return;
 			}
@@ -2731,7 +2726,7 @@ sub setupBootDisk {
 	#==========================================
 	# cleanup loop setup and device mapper
 	#------------------------------------------
-	$this -> cleanLoop ();
+	$this -> cleanStack ();
 	return $this;
 }
 
@@ -3142,52 +3137,41 @@ sub setupSplashLink {
 }
 
 #==========================================
-# cleanLoop
+# cleanStack
 #------------------------------------------
-sub cleanLoop {
-	my $this = shift;
-	my $tmpdir = $this->{tmpdir};
-	my $loop   = $this->{loop};
-	my $lvm    = $this->{lvm};
-	my $loopdir= $this->{loopdir};
+sub cleanStack {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $cStack = $this->{cleanupStack};
+	my $status;
+	my $result;
+	if (! $cStack) {
+		return;
+	}
+	#==========================================
+	# make sure data is written
+	#------------------------------------------
+	qxx ("sync");
+	#==========================================
+	# umount from global space
+	#------------------------------------------
 	$main::global -> umount();
-	if ((defined $loop) && ($loop =~ /loop/)) {
-		$this -> cleanLoopMaps();
-		qxx ("/sbin/losetup -d $loop 2>&1");
-		undef $this->{loop};
-	}
-	return $this;
-}
-
-#==========================================
-# cleanLoopMaps
-#------------------------------------------
-sub cleanLoopMaps {
-	my $this = shift;
-	my $dev  = shift;
-	my $loop = $this->{loop};
-	my $lvm  = $this->{lvm};
-	if ($dev) {
-		$loop = $dev;
-	}
-	if (! $loop) {
-		return $this;
-	}
-	if ($loop =~ /dev\/(.*)/) {
-		$loop = $1;
-	}
-	if ($lvm) {
-		my $dev = "/dev/mapper/".$loop."p2";
-		if (-e $dev) {
-			my $vgname = qxx ("pvs --noheadings -o vg_name $dev 2>/dev/null");
-			chomp $vgname;
-			qxx ("vgchange -an $vgname 2>&1");
+	#==========================================
+	# cleanup device bindings from this object
+	#------------------------------------------
+	my @cStack = @{$cStack};
+	foreach my $cmd (reverse @cStack) {
+		$status = qxx ("$cmd 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> warning ("cleanStack failed: $cmd: $status\n");
 		}
 	}
-	foreach my $d (glob ("/dev/mapper/$loop*")) {
-		qxx ("dmsetup remove $d 2>&1");
-	}
-	return $this;
+	#==========================================
+	# reset cleanupStack
+	#-----------------------------------------
+	$this->{cleanupStack} = [];
+	return;
 }
 
 #==========================================
@@ -4982,15 +4966,13 @@ sub installBootLoader {
 					"Couldn't install $loader on $diskname: $status"
 				);
 				$kiwi -> failed ();
-				$this -> cleanLoopMaps();
-				$this -> cleanLoop();
+				$this -> cleanStack ();
 				return;
 			}
 			#==========================================
 			# Clean loop maps
 			#------------------------------------------
-			$this -> cleanLoopMaps();
-			$this -> cleanLoop();
+			$this -> cleanStack ();
 			#==========================================
 			# Check for chainloading
 			#------------------------------------------
@@ -5045,8 +5027,7 @@ sub installBootLoader {
 		#==========================================
 		# Clean loop maps
 		#------------------------------------------
-		$this -> cleanLoopMaps();
-		$this -> cleanLoop();
+		$this -> cleanStack();
 		#==========================================
 		# Create device map for the disk
 		#------------------------------------------
@@ -5203,15 +5184,13 @@ sub installBootLoader {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't install $loader on $bootdev: $status");
 			$kiwi -> failed ();
-			$this -> cleanLoopMaps();
-			$this -> cleanLoop();
+			$this -> cleanStack ();
 			return;
 		}
 		#==========================================
 		# Clean loop maps
 		#------------------------------------------
-		$this -> cleanLoopMaps();
-		$this -> cleanLoop();
+		$this -> cleanStack();
 		#==========================================
 		# Write syslinux master boot record
 		#------------------------------------------
@@ -5257,7 +5236,7 @@ sub installBootLoader {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Can't mount boot partition: $status");
 			$kiwi -> failed ();
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 		my $mount = "/mnt";
@@ -5272,7 +5251,7 @@ sub installBootLoader {
 				$kiwi -> error  ("Can't open config file for reading: $!");
 				$kiwi -> failed ();
 				qxx ("umount $mount 2>&1");
-				$this -> cleanLoop ();
+				$this -> cleanStack ();
 				return;
 			}
 			my @data = <$readzconf>;
@@ -5283,7 +5262,7 @@ sub installBootLoader {
 				$kiwi -> error  ("Can't open config file for writing: $!");
 				$kiwi -> failed ();
 				qxx ("umount $mount 2>&1");
-				$this -> cleanLoop ();
+				$this -> cleanStack ();
 				return;
 			}
 			$kiwi -> loginfo ("zipl.conf target values:\n");
@@ -5312,7 +5291,7 @@ sub installBootLoader {
 			$kiwi -> error  ("Couldn't install zipl on $diskname: $status");
 			$kiwi -> failed ();
 			qxx ("umount $mount 2>&1");
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 		qxx ("umount $mount 2>&1");
@@ -5320,8 +5299,7 @@ sub installBootLoader {
 		#==========================================
 		# clean loop maps
 		#------------------------------------------
-		$this -> cleanLoopMaps();
-		$this -> cleanLoop ();
+		$this -> cleanStack ();
 	}
 	#==========================================
 	# install yaboot/lilo
@@ -5375,8 +5353,7 @@ sub installBootLoader {
 	#==========================================
 	# clean loop maps
 	#------------------------------------------
-	$this -> cleanLoopMaps();
-	$this -> cleanLoop ();
+	$this -> cleanStack ();
 	#==========================================
 	# Write custom disk label ID to MBR
 	#------------------------------------------
@@ -5397,6 +5374,7 @@ sub bindDiskDevice {
 	my $this   = shift;
 	my $system = shift;
 	my $kiwi   = $this->{kiwi};
+	my @cStack = @{$this->{cleanupStack}};
 	my $status;
 	my $result;
 	my $loop;
@@ -5421,6 +5399,8 @@ sub bindDiskDevice {
 				$loopfound = 1;
 				$loop = "/dev/loop".$id;
 				$this->{loop} = $loop;
+				push @cStack,"losetup -d $loop";
+				$this->{cleanupStack} = \@cStack;
 				last;
 			}
 		}
@@ -5432,6 +5412,8 @@ sub bindDiskDevice {
 	}
 	$loop = $status;
 	$this->{loop} = $loop;
+	push @cStack,"losetup -d $loop";
+	$this->{cleanupStack} = \@cStack;
 	return $this;
 }
 
@@ -5446,6 +5428,7 @@ sub bindDiskPartitions {
 	my $this   = shift;
 	my $disk   = shift;
 	my $kiwi   = $this->{kiwi};
+	my @cStack = @{$this->{cleanupStack}};
 	my $status;
 	my $result;
 	my $part;
@@ -5455,6 +5438,8 @@ sub bindDiskPartitions {
 		$kiwi -> loginfo ("Failed mapping partition: $status");
 		return;
 	}
+	push @cStack,"kpartx -d $disk";
+	$this->{cleanupStack} = \@cStack;
 	$disk =~ s/dev\///;
 	$part = "/dev/mapper".$disk."p";
 	$this->{bindloop} = $part;
@@ -5916,6 +5901,7 @@ sub setVolumeGroup {
 	my $syszip    = shift;
 	my $haveSplit = shift;
 	my $parts     = shift;
+	my @cStack    = @{$this->{cleanupStack}};
 	my $cmdL      = $this->{cmdL};
 	my $kiwi      = $this->{kiwi};
 	my $system    = $this->{system};
@@ -5935,7 +5921,7 @@ sub setVolumeGroup {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed creating physical extends: $status");
 		$kiwi -> failed ();
-		$this -> cleanLoop ();
+		$this -> cleanStack ();
 		return;
 	}
 	$status = qxx ("vgcreate $VGroup $deviceMap{root} 2>&1");
@@ -5944,9 +5930,11 @@ sub setVolumeGroup {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed creating volume group: $status");
 		$kiwi -> failed ();
-		$this -> cleanLoop ();
+		$this -> cleanStack ();
 		return;
 	}
+	push @cStack,"vgchange -an $VGroup";
+	$this->{cleanupStack} = \@cStack;
 	if (($syszip) || ($haveSplit)) {
 		$status = qxx ("lvcreate -L $syszip -n LVComp $VGroup 2>&1");
 		$result = $? >> 8;
@@ -5956,7 +5944,7 @@ sub setVolumeGroup {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Logical volume(s) setup failed: $status");
 			$kiwi -> failed ();
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 		%newmap = $this -> setLVMDeviceMap (
@@ -5990,7 +5978,7 @@ sub setVolumeGroup {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Logical volume(s) setup failed: $status");
 			$kiwi -> failed ();
-			$this -> cleanLoop ();
+			$this -> cleanStack ();
 			return;
 		}
 		%newmap = $this -> setLVMDeviceMap (
@@ -6364,7 +6352,7 @@ sub DESTROY {
 	foreach my $dir (@{$dirs}) {
 		qxx ("rm -rf $dir 2>&1");
 	}
-	return $this;
+	return $this -> cleanStack ();
 }
 
 #==========================================

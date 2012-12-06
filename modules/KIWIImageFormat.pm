@@ -82,7 +82,7 @@ sub new {
 		);
 		if ($boot) {
 			$xml = $boot->{xml};
-			$boot -> cleanLoop();
+			$boot -> cleanStack ();
 		}
 		if (! defined $xml) {
 			$kiwi -> error  ("Can't load XML configuration, not an image ?");

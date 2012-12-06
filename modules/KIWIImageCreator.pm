@@ -1009,7 +1009,7 @@ sub createImageDisk {
 	if (! $boot -> setupBootDisk($tdev)) {
 		return;
 	}
-	$boot -> cleanLoop ();
+	$boot -> cleanStack ();
 	undef $boot;
 	return 1;
 }
@@ -1475,7 +1475,7 @@ sub DESTROY {
 		undef $root;
 	}
 	if ($boot) {
-		$boot -> cleanLoop ();
+		$boot -> cleanStack ();
 		undef $boot;
 	}
 	if ($image) {
