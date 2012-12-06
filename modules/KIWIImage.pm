@@ -4618,7 +4618,7 @@ sub checkKernel {
 	# fix kernel inconsistency:
 	#------------------------------------------
 	$kiwi -> info ("Fixing kernel inconsistency...");
-	$tmpdir = qxx ("mktemp -q -d /tmp/kiwi-fixboot.XXXXXX"); chomp $tmpdir;
+	$tmpdir = qxx ("mktemp -qdt kiwi-fixboot.XXXXXX"); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();

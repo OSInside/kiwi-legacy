@@ -144,7 +144,7 @@ sub unionOverlay {
 	#==========================================
 	# Create tmpdir for mount point
 	#------------------------------------------
-	$tmpdir = qxx ("mktemp -q -d /tmp/kiwiRootOverlay.XXXXXX"); chomp $tmpdir;
+	$tmpdir = qxx ("mktemp -qdt kiwiRootOverlay.XXXXXX"); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();

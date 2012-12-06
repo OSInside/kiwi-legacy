@@ -1047,13 +1047,13 @@ sub writeXMLDiff {
 		return;
 	}
 	qxxLogOff();
-	my $used = qxx ("mktemp -q /tmp/kiwi-xmlused.XXXXXX"); chomp $used;
+	my $used = qxx ("mktemp -qt kiwi-xmlused.XXXXXX"); chomp $used;
 	my $code = $? >> 8;
 	if ($code != 0) {
 		qxxLogOn();
 		return;
 	}
-	my $orig = qxx ("mktemp -q /tmp/kiwi-xmlorig.XXXXXX"); chomp $orig;
+	my $orig = qxx ("mktemp -qt kiwi-xmlorig.XXXXXX"); chomp $orig;
 	if ($code != 0) {
 		qxxLogOn();
 		return;

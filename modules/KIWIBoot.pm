@@ -194,14 +194,14 @@ sub new {
 	#==========================================
 	# create tmp dir for operations
 	#------------------------------------------
-	$tmpdir = qxx ("mktemp -q -d /tmp/kiwiboot.XXXXXX"); chomp $tmpdir;
+	$tmpdir = qxx ("mktemp -qdt kiwiboot.XXXXXX"); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
 		$kiwi -> failed ();
 		return;
 	}
-	$loopdir = qxx ("mktemp -q -d /tmp/kiwiloop.XXXXXX"); chomp $loopdir;
+	$loopdir = qxx ("mktemp -qdt kiwiloop.XXXXXX"); chomp $loopdir;
 	$result  = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $loopdir: $!");
@@ -1115,7 +1115,7 @@ sub setupInstallStick {
 	#==========================================
 	# create tmp directory
 	#------------------------------------------
-	$tmpdir = qxx ( "mktemp -q -d /tmp/kiwistickinst.XXXXXX" ); chomp $tmpdir;
+	$tmpdir = qxx ( "mktemp -qdt kiwistickinst.XXXXXX" ); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -2746,7 +2746,7 @@ sub setupInstallFlags {
 	my $xml    = $this->{xml};
 	my $zipper = $this->{gdata}->{Gzip};
 	my $newird;
-	my $irddir = qxx ("mktemp -q -d /tmp/kiwiird.XXXXXX"); chomp $irddir;
+	my $irddir = qxx ("mktemp -qdt kiwiird.XXXXXX"); chomp $irddir;
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -2876,7 +2876,7 @@ sub setupBootFlags {
 	my $initrd = $this->{initrd};
 	my $zipper = $this->{gdata}->{Gzip};
 	my $newird;
-	my $irddir = qxx ("mktemp -q -d /tmp/kiwiird.XXXXXX"); chomp $irddir;
+	my $irddir = qxx ("mktemp -qdt kiwiird.XXXXXX"); chomp $irddir;
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $irddir: $!");
