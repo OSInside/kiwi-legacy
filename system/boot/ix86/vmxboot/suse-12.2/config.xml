@@ -106,6 +106,7 @@
 		<package name="gettext-runtime"/>
 		<package name="grub"/>
 		<package name="grub2"/>
+		<package name="grub2-efi"/>
 		<package name="hwinfo"/>
 		<package name="kernel-firmware"/>
 		<package name="kexec-tools"/>
