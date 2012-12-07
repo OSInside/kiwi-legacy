@@ -1035,7 +1035,8 @@ sub setupInstallCD {
 	# Clean tmp
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
-	$kiwi -> info ("Created $name to be burned on CD");
+	my $imgfile = basename $name;
+	$kiwi -> info ("Created $imgfile to be burned on CD");
 	$kiwi -> done ();
 	$iso  -> cleanISO ();
 	return $this;
@@ -1462,7 +1463,8 @@ sub setupInstallStick {
 		return;
 	}
 	$this -> cleanStack();
-	$kiwi -> info ("Created $diskname to be dd'ed on Stick");
+	my $imgfile = basename $diskname;
+	$kiwi -> info ("Created $imgfile to be dd'ed on Stick");
 	$kiwi -> done ();
 	return $this;
 }

@@ -57,9 +57,10 @@ sub new {
 	#==========================================
 	# Store Object data
 	#------------------------------------------
-	$this->{imageTgtDir}        = '';
-	$this->{kiwi}               = $kiwi;
-	$this->{supportedRepoTypes} = \@supportedRepos;
+	$this->{imageTgtDir}             = '';
+	$this->{imageIntermediateTgtDir} = '';
+	$this->{kiwi}                    = $kiwi;
+	$this->{supportedRepoTypes}      = \@supportedRepos;
 	#==========================================
 	# Store Object data
 	#------------------------------------------
@@ -208,6 +209,17 @@ sub getImageTargetDir {
 	# ---
 	my $this = shift;
 	return $this -> {imageTgtDir};
+}
+
+#==========================================
+# getImageIntermediateTargetDir
+#------------------------------------------
+sub getImageIntermediateTargetDir {
+	# ...
+	# Return the location of the intermediate target directory for the image
+	# ---
+	my $this = shift;
+	return $this -> {imageIntermediateTgtDir};
 }
 
 #==========================================
@@ -650,14 +662,28 @@ sub setImageArchitecture {
 }
 
 #==========================================
-# setImagetargetDir
+# setImageTargetDir
 #------------------------------------------
-sub setImagetargetDir {
+sub setImageTargetDir {
 	# ...
 	# Set the destination directory for the completed image
 	# ---
 	my $this = shift;
 	$this -> {imageTgtDir} = shift;
+	return 1;
+}
+
+#==========================================
+# setImageIntermediateTargetDir
+#------------------------------------------
+sub setImageIntermediateTargetDir {
+	# ...
+	# Based on the origin imageTgtDir this is a subdirectory
+	# below the destination directory. The build data lives
+	# there until the build finishes successfully
+	# ---
+	my $this = shift;
+	$this -> {imageIntermediateTgtDir} = shift;
 	return 1;
 }
 

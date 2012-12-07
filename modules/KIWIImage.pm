@@ -459,7 +459,7 @@ sub checkAndSetupPrebuiltBootImage {
 	my $ixml = shift;
 	my $kiwi = $this->{kiwi};
 	my $cmdL = $this->{cmdL};
-	my $idest= $cmdL->getImageTargetDir();
+	my $idest= $cmdL->getImageIntermediateTargetDir();
 	my %type = %{$ixml->getImageTypeAndAttributes_legacy()};
 	my $pblt = $type{checkprebuilt};
 	my $boot = $type{boot};
@@ -1154,7 +1154,7 @@ sub createImageRootAndBoot {
 	my $kiwi       = $this->{kiwi};
 	my $sxml       = $this->{xml};
 	my $cmdL       = $this->{cmdL};
-	my $idest      = $cmdL->getImageTargetDir();
+	my $idest      = $cmdL->getImageIntermediateTargetDir();
 	my %stype      = %{$sxml->getImageTypeAndAttributes_legacy()};
 	my $imageTree  = $this->{imageTree};
 	my $baseSystem = $this->{baseSystem};
@@ -1403,7 +1403,7 @@ sub createImageVMX {
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $cmdL = $this->{cmdL};
-	my $idest= $cmdL->getImageTargetDir();
+	my $idest= $cmdL->getImageIntermediateTargetDir();
 	my %xenc = $xml  -> getXenConfig_legacy();
 	my $name = $this -> createImageRootAndBoot ($para,"VMX");
 	my $xendomain;
@@ -1476,7 +1476,7 @@ sub createImageLiveCD {
 	my $arch = $this->{arch};
 	my $sxml = $this->{xml};
 	my $cmdL = $this->{cmdL};
-	my $idest= $cmdL->getImageTargetDir();
+	my $idest= $cmdL->getImageIntermediateTargetDir();
 	my $imageTree = $this->{imageTree};
 	my $baseSystem= $this->{baseSystem};
 	my @bootdata;
@@ -2293,7 +2293,7 @@ sub createImageSplit {
 	my $imageTree  = $this->{imageTree};
 	my $baseSystem = $this->{baseSystem};
 	my $sxml       = $this->{xml};
-	my $idest      = $cmdL->getImageTargetDir();
+	my $idest      = $cmdL->getImageIntermediateTargetDir();
 	my %xenc       = $sxml->getXenConfig_legacy();
 	my $fsopts     = $cmdL -> getFilesystemOptions();
 	my $inodesize  = $fsopts->[1];

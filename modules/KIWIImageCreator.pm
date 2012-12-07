@@ -107,7 +107,6 @@ sub initialize {
 	$this->{removePackages}   = $cmdL -> getPackagesToRemove();
 	$this->{replRepo}         = $cmdL -> getReplacementRepo();
 	$this->{rootTgtDir}       = $cmdL -> getRootTargetDir();
-	$this->{imageTgtDir}      = $cmdL -> getImageTargetDir();
 	$this->{initrd}           = $cmdL -> getInitrdFile();
 	$this->{sysloc}           = $cmdL -> getSystemLocation();
 	$this->{disksize}         = $cmdL -> getImageDiskSize();
@@ -419,7 +418,6 @@ sub createImage {
 	my $kiwi         = $this -> {kiwi};
 	my $pkgMgr       = $this -> {packageManager};
 	my $ignore       = $this -> {ignoreRepos};
-	my $target       = $this -> {imageTgtDir};
 	my $cmdL         = $this -> {cmdL};
 	my $targetDevice = $this -> {targetdevice};
 	#==========================================
@@ -469,7 +467,7 @@ sub createImage {
 	#==========================================
 	# Check for default destination in XML
 	#------------------------------------------
-	if (! $target) {
+	if (! $cmdL -> getImageTargetDir()) {
 		$kiwi -> info ("Checking for defaultdestination in XML data...");
 		my $defaultDestination = $xml -> getImageDefaultDestination_legacy();
 		if (! $defaultDestination) {
@@ -478,11 +476,10 @@ sub createImage {
 			$kiwi -> failed ();
 			return;
 		}
-		$this -> {imageTgtDir} = $defaultDestination;
-		$cmdL -> setImagetargetDir ($defaultDestination);
+		$cmdL -> setImageTargetDir ($defaultDestination);
 		$kiwi -> done();
 	}
-	my $destination = $this -> {imageTgtDir};
+	my $destination = $cmdL -> getImageTargetDir();
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------
@@ -512,8 +509,7 @@ sub createImage {
 		$kiwi -> failed ();
 		return;
 	}
-	$this -> {imageTgtDir} = $destination;
-	$cmdL -> setImagetargetDir ($destination);
+	$cmdL -> setImageIntermediateTargetDir ($destination);
 	#==========================================
 	# Check tool set
 	#------------------------------------------
@@ -798,6 +794,8 @@ sub createImage {
 			return;
 		}
 		rmdir $destination;
+		$kiwi -> info ("Please find build results at: $basedest");
+		$kiwi -> done ();
 		return 1;
 	} else {
 		undef $image;

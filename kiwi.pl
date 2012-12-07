@@ -1114,7 +1114,7 @@ sub init {
 	#----------------------------------------
 	if (defined $Destination) {
 		$Destination = File::Spec->rel2abs ($Destination);
-		$cmdL -> setImagetargetDir ($Destination);
+		$cmdL -> setImageTargetDir ($Destination);
 	}
 	if (defined $Prepare) {
 		if (($Prepare !~ /^\//) && (! -d $Prepare)) {
