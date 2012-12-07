@@ -75,7 +75,7 @@ sub test_ctor_improperArg {
 sub test_ctor_initInvalidCheckprebuiltValue {
 	# ...
 	# Test the TypeData constructor with an initialization hash
-	# that contains an unrecognized boolen initialization for
+	# that contains an unrecognized boolean initialization for
 	# the checkprebuilt value
 	# ----
 	 my $this = shift;
@@ -104,7 +104,7 @@ sub test_ctor_initInvalidCheckprebuiltValue {
 sub test_ctor_initInvalidCompressedValue {
 	# ...
 	# Test the TypeData constructor with an initialization hash
-	# that contains an unrecognized boolen initialization for
+	# that contains an unrecognized boolean initialization for
 	# the compressed value
 	# ----
 	 my $this = shift;
@@ -128,12 +128,41 @@ sub test_ctor_initInvalidCompressedValue {
 }
 
 #==========================================
+# test_ctor_initInvalidFirmwareValue
+#------------------------------------------
+sub test_ctor_initInvalidFirmwareValue {
+	# ...
+	# Test the TypeData constructor with an initialization hash
+	# that contains an unrecognized initialization for
+	# the firmware value
+	# ----
+	 my $this = shift;
+	 my $kiwi = $this -> {kiwi};
+	 my %init = (
+		firmware => 'foo',
+		 image     => 'ext3'
+	);
+	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $msg = $kiwi -> getMessage();
+	 my $expected = 'object initialization: specified firmware value '
+		. "'foo' is not supported.";
+	 $this -> assert_str_equals($expected, $msg);
+	 my $msgT = $kiwi -> getMessageType();
+	 $this -> assert_str_equals('error', $msgT);
+	 my $state = $kiwi -> getState();
+	 $this -> assert_str_equals('failed', $state);
+	 # Test this condition last to get potential error messages
+	 $this -> assert_null($typeDataObj);
+	 return;
+}
+
+#==========================================
 # test_ctor_initInvalidFsnocheckValue
 #------------------------------------------
 sub test_ctor_initInvalidFsnocheckValue {
 	# ...
 	# Test the TypeData constructor with an initialization hash
-	# that contains an unrecognized boolen initialization for
+	# that contains an unrecognized boolean initialization for
 	# the fsnocheck value
 	# ----
 	 my $this = shift;
@@ -162,7 +191,7 @@ sub test_ctor_initInvalidFsnocheckValue {
 sub test_ctor_initInvalidHybridValue {
 	# ...
 	# Test the TypeData constructor with an initialization hash
-	# that contains an unrecognized boolen initialization for
+	# that contains an unrecognized boolean initialization for
 	# the hybrid value
 	# ----
 	 my $this = shift;
@@ -191,7 +220,7 @@ sub test_ctor_initInvalidHybridValue {
 sub test_ctor_initInvalidHybridpersistentValue {
 	# ...
 	# Test the TypeData constructor with an initialization hash
-	# that contains an unrecognized boolen initialization for
+	# that contains an unrecognized boolean initialization for
 	# the hybridpersistent value
 	# ----
 	 my $this = shift;
@@ -220,7 +249,7 @@ sub test_ctor_initInvalidHybridpersistentValue {
 sub test_ctor_initInvalidInstallisoValue {
 	# ...
 	# Test the TypeData constructor with an initialization hash
-	# that contains an unrecognized boolen initialization for
+	# that contains an unrecognized boolean initialization for
 	# the installiso value
 	# ----
 	 my $this = shift;
@@ -249,7 +278,7 @@ sub test_ctor_initInvalidInstallisoValue {
 sub test_ctor_initInvalidInstallprovidefailsafeValue {
 	# ...
 	# Test the TypeData constructor with an initialization hash
-	# that contains an unrecognized boolen initialization for
+	# that contains an unrecognized boolean initialization for
 	# the installprovidefailsafe value
 	# ----
 	 my $this = shift;
@@ -278,7 +307,7 @@ sub test_ctor_initInvalidInstallprovidefailsafeValue {
 sub test_ctor_initInvalidInstallPXEValue {
 	# ...
 	# Test the TypeData constructor with an initialization hash
-	# that contains an unrecognized boolen initialization for
+	# that contains an unrecognized boolean initialization for
 	# the installpxe value
 	# ----
 	 my $this = shift;
@@ -307,7 +336,7 @@ sub test_ctor_initInvalidInstallPXEValue {
 sub test_ctor_initInvalidInstallstickValue {
 	# ...
 	# Test the TypeData constructor with an initialization hash
-	# that contains an unrecognized boolen initialization for
+	# that contains an unrecognized boolean initialization for
 	# the installstick value
 	# ----
 	 my $this = shift;
@@ -336,7 +365,7 @@ sub test_ctor_initInvalidInstallstickValue {
 sub test_ctor_initInvalidPrimaryValue {
 	# ...
 	# Test the TypeData constructor with an initialization hash
-	# that contains an unrecognized boolen initialization for
+	# that contains an unrecognized boolean initialization for
 	# the primary value
 	# ----
 	 my $this = shift;
@@ -394,7 +423,7 @@ sub test_ctor_initInvalidRamonlyValue {
 sub test_ctor_initInvalidSizeaddValue {
 	# ...
 	# Test the TypeData constructor with an initialization hash
-	# that contains an unrecognized boolen initialization for
+	# that contains an unrecognized boolean initialization for
 	# the sizeadd value
 	# ----
 	 my $this = shift;
@@ -796,7 +825,7 @@ sub test_getBootImageDescript {
 #==========================================
 # test_getBootImageFileSystem
 #------------------------------------------
-sub test_getBooImagetFileSystem {
+sub test_getBootImagetFileSystem {
 	# ...
 	# Test the getBootImagetFileSystem method
 	# ---
@@ -1064,6 +1093,49 @@ sub test_getFilesystem {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('xfs', $fs);
+	return;
+}
+
+#==========================================
+# test_getFirmwareType
+#------------------------------------------
+sub test_getFirmwareType {
+	# ...
+	# Test the getFirmwareType method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $fw = $typeDataObj -> getFirmwareType();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('efi', $fw);
+	return;
+}
+
+#==========================================
+# test_getFirmwareTypeDefault
+#------------------------------------------
+sub test_getFirmwareTypeDefault {
+	# ...
+	# Test the getFirmwareType method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = ( image => 'ext2' );
+	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $fw = $typeDataObj -> getFirmwareType();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('bios', $fw);
 	return;
 }
 
@@ -1657,6 +1729,7 @@ sub test_getXMLElement{
 		. 'editbootconfig="myscript" '
 		. 'editbootinstall="myInstScript" '
 		. 'filesystem="xfs" '
+		. 'firmware="efi" '
 		. 'flags="compressed" '
 		. 'format="qcow2" '
 		. 'fsmountoptions="barrier" '
@@ -2610,6 +2683,97 @@ sub test_setFilesystemNoArg {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('xfs', $fs);
+	return;
+}
+
+#==========================================
+# test_setFirmwareType
+#------------------------------------------
+sub test_setFirmwareType {
+	# ...
+	# Test the setFirmwareType method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	$typeDataObj = $typeDataObj -> setFirmwareType('bios');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $fw = $typeDataObj -> getFirmwareType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('bios', $fw);
+	return;
+}
+
+#==========================================
+# test_setFirmwareTypeInvalidArg
+#------------------------------------------
+sub test_setFirmwareTypeInvalidArg {
+	# ...
+	# Test the setFirmwareType method with an invalid argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setFirmwareType('special');
+	my $msg = $kiwi -> getMessage();
+	my $expected = "setFirmwareType: specified firmware value 'special' "
+		. 'is not supported.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $fw = $typeDataObj -> getFirmwareType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('efi', $fw);
+	return;
+}
+
+#==========================================
+# test_setFirmwareTypeNoArg
+#------------------------------------------
+sub test_setFirmwareTypeNoArg {
+	# ...
+	# Test the setFirmwareType method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setFirmwareType();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setFirmwareType: no firmware type given, '
+		. 'retaining current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $fw = $typeDataObj -> getFirmwareType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('efi', $fw);
 	return;
 }
 
@@ -4525,6 +4689,7 @@ sub __getTypeObj {
 				editbootconfig         => 'myscript',
 				editbootinstall        => 'myInstScript',
 				filesystem             => 'xfs',
+				firmware               => 'efi',
 				flags                  => 'compressed',
 				format                 => 'qcow2',
 				fsmountoptions         => 'barrier',

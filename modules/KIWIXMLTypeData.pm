@@ -165,6 +165,9 @@ sub new {
 	if (! $init->{installprovidefailsafe} ) {
 		$this->{installprovidefailsafe} = 'true';
 	}
+	if (! $init->{firmware} ) {
+		$this->{firmware} = 'bios';
+	}
 	if (! $init->{sizeadd} ) {
 		$this->{sizeadd} = 'false';
 	}
@@ -319,6 +322,17 @@ sub getFilesystem {
 	# ---
 	my $this = shift;
 	return $this->{filesystem};
+}
+
+#==========================================
+# getFirmwareType
+#------------------------------------------
+sub getFirmwareType {
+	# ...
+	# Return the configured firmware type
+	# ---
+	my $this = shift;
+	return $this->{firmware};
 }
 
 #==========================================
@@ -492,17 +506,6 @@ sub getKernelCmdOpts {
 }
 
 #==========================================
-# getFirmwareType
-#------------------------------------------
-sub getFirmwareType {
-	# ...
-	# Return the configured firmware type
-	# ---
-	my $this = shift;
-	return $this->{firmware};
-}
-
-#==========================================
 # getLuksPass
 #------------------------------------------
 sub getLuksPass {
@@ -659,7 +662,7 @@ sub getXMLElement {
 	}
 	my $firmware = $this -> getFirmwareType();
 	if ($firmware) {
-		$element -> setAttribute('firmware',$firmware);
+		$element -> setAttribute('firmware', $firmware);
 	}
 	my $flags = $this -> getFlags();
 	if ($flags) {
@@ -1261,18 +1264,15 @@ sub setKernelCmdOpts {
 #------------------------------------------
 sub setFirmwareType {
 	# ...
-	# Set the configuration for the firmware type 
+	# Set the configuration for the firmware type
 	# ---
 	my $this = shift;
 	my $opt  = shift;
-	if (! $opt ) {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setFirmwareType: no options given, retaining '
-			. 'current data.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
+	
+	if (! $this -> __isValidFirmware($opt, 'setFirmwareType') ) {
 		return;
 	}
+
 	$this->{firmware} = $opt;
 	return $this;
 }
@@ -1467,19 +1467,25 @@ sub __isInitConsistent {
 	}
 	if ($init->{devicepersistency}) {
 		if (! $this->__isValidDevPersist(
-			$init->{devicepersistency},'object initialization')) {
+			$init->{devicepersistency}, 'object initialization')) {
 			return;
 		}
 	}
 	if ($init->{filesystem}) {
 		if (! $this->__isValidFilesystem(
-			$init->{filesystem},'object initialization')) {
+			$init->{filesystem}, 'object initialization')) {
+			return;
+		}
+	}
+	if ($init->{firmware}) {
+		if (! $this->__isValidFirmware(
+			$init->{firmware}, 'object initialization')) {
 			return;
 		}
 	}
 	if ($init->{flags}) {
 		if (! $this->__isValidFlags(
-			$init->{flags},'object initialization')) {
+			$init->{flags}, 'object initialization')) {
 			return;
 		}
 	}
@@ -1657,6 +1663,43 @@ sub __isValidFilesystem {
 	);
 	if (! $supported{$fileS} ) {
 		my $msg = "$caller: specified filesystem '$fileS' is not "
+			. 'supported.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
+}
+
+#==========================================
+# __isValidFirmware
+#------------------------------------------
+sub __isValidFirmware {
+	# ...
+	# Verify that the given firmware setting value is supported
+	# ---
+	my $this     = shift;
+	my $firmware = shift;
+	my $caller = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller ) {
+		my $msg = 'Internal error __isValidFirmware called without '
+			. 'call origin argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if (! $firmware ) {
+		my $msg = "$caller: no firmware type given, retaining "
+			. 'current data.';
+	 	$kiwi -> error($msg);
+	 	$kiwi -> failed();
+		return;
+	}
+	my %supported = map { ($_ => 1) } qw(
+		bios efi
+	);
+	if (! $supported{$firmware} ) {
+		my $msg = "$caller: specified firmware value '$firmware' is not "
 			. 'supported.';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
