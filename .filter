@@ -53,8 +53,13 @@ while (<>) {
 
 	if (defined($lastt) && $logmsg) {
 	    if (defined($logs{$lastt})) {
-		warn "Double commit detected:\n" . $logs{$lastt} ."\n";
-		$logs{$lastt} .= "-------------------------------------------------------------------\n" . $logmsg;
+		#warn "Double commit detected:\n" . $logs{$lastt} ."\n";
+		my @message = split /\n/,$logmsg;
+		shift @message;
+		shift @message;
+		$logmsg = join ("\n",@message);
+		$logs{$lastt} .= $logmsg ."\n";
+		#$logs{$lastt} .= "-------------------------------------------------------------------\n" . $logmsg;
 	    } else {
 		$logs{$lastt} = $logmsg;
 	    }
