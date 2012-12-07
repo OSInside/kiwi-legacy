@@ -1554,6 +1554,17 @@ div {
 			"btrfs" | "clicfs" | "ext2" | "ext3" | "ext4" |
 			"reiserfs" | "squashfs" | "xfs"
 		}
+	k.type.firmware.attribute =
+		## Specifies the boot firmware of the system. Most systems
+		## uses a standard BIOS but there are also other firmware
+		## systems like efi, coreboot, etc.. This attribute is
+		## used to differentiate the image according to the firmware
+		## which boots up the system. It mostly has an impact on
+		## the disk layout and the partition table type. By default
+		## the standard x86 bios firmware setup is used
+		attribute firmware {
+			"bios" | "efi"
+		}
 	k.type.bootfilesystem.attribute =
 		## if an extra boot partition is required this attribute
 		## specify which filesystem should be used for it. The
@@ -1660,6 +1671,7 @@ div {
 	k.type.attlist =
 		k.type.boot.attribute? &
 		k.type.bootfilesystem.attribute? &
+		k.type.firmware.attribute? &
 		k.type.bootkernel.attribute? &
 		k.type.bootloader.attribute? &
 		k.type.bootpartsize.attribute? &

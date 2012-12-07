@@ -211,6 +211,9 @@ sub updateDescription {
 	if ($src_type{cmdline}) {
 		$changeset{"kernelcmdline"} = $src_type{cmdline};
 	}
+	if ($src_type{firmware}) {
+		$changeset{"firmware"} = $src_type{firmware};
+	}
 	if ($src_type{bootloader}) {
 		$changeset{"bootloader"} = $src_type{bootloader};
 	}

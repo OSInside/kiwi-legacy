@@ -2083,6 +2083,21 @@ file for write operations</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.type.firmware.attribute">
+      <attribute name="firmware">
+        <a:documentation>Specifies the boot firmware of the system. Most systems
+uses a standard BIOS but there are also other firmware
+systems like efi, coreboot, etc.. This attribute is
+used to differentiate the image according to the firmware
+which boots up the system. It mostly has an impact on
+the disk layout and the partition table type. By default
+the standard x86 bios firmware setup is used</a:documentation>
+        <choice>
+          <value>bios</value>
+          <value>efi</value>
+        </choice>
+      </attribute>
+    </define>
     <define name="k.type.bootfilesystem.attribute">
       <attribute name="bootfilesystem">
         <a:documentation>if an extra boot partition is required this attribute
@@ -2289,6 +2304,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.bootfilesystem.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.firmware.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.bootkernel.attribute"/>

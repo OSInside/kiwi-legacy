@@ -76,6 +76,7 @@ sub new {
 		editbootconfig
 		editbootinstall
 		filesystem
+		firmware
 		flags
 		format
 		fsmountoptions
@@ -142,6 +143,7 @@ sub new {
 	$this->{editbootconfig}         = $init->{editbootconfig};
 	$this->{editbootinstall}        = $init->{editbootinstall};
 	$this->{filesystem}             = $init->{filesystem};
+	$this->{firmware}               = $init->{firmware};
 	$this->{flags}                  = $init->{flags};
 	$this->{format}                 = $init->{format};
 	$this->{fsmountoptions}         = $init->{fsmountoptions};
@@ -490,6 +492,17 @@ sub getKernelCmdOpts {
 }
 
 #==========================================
+# getFirmwareType
+#------------------------------------------
+sub getFirmwareType {
+	# ...
+	# Return the configured firmware type
+	# ---
+	my $this = shift;
+	return $this->{firmware};
+}
+
+#==========================================
 # getLuksPass
 #------------------------------------------
 sub getLuksPass {
@@ -643,6 +656,10 @@ sub getXMLElement {
 	my $fileSys = $this -> getFilesystem();
 	if ($fileSys) {
 		$element -> setAttribute('filesystem', $fileSys);
+	}
+	my $firmware = $this -> getFirmwareType();
+	if ($firmware) {
+		$element -> setAttribute('firmware',$firmware);
 	}
 	my $flags = $this -> getFlags();
 	if ($flags) {
@@ -1236,6 +1253,27 @@ sub setKernelCmdOpts {
 		return;
 	}
 	$this->{kernelcmdline} = $opt;
+	return $this;
+}
+
+#==========================================
+# setFirmwareType
+#------------------------------------------
+sub setFirmwareType {
+	# ...
+	# Set the configuration for the firmware type 
+	# ---
+	my $this = shift;
+	my $opt  = shift;
+	if (! $opt ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setFirmwareType: no options given, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{firmware} = $opt;
 	return $this;
 }
 

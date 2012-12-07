@@ -2293,6 +2293,7 @@ sub __genTypeHash {
 		'editbootconfig',
 		'editbootinstall',
 		'filesystem',
+		'firmware',
 		'flags',
 		'format',
 		'fsmountoptions',
@@ -5462,6 +5463,9 @@ sub getImageConfig_legacy {
 	if ((%type) && ($type{cmdline})) {
 		$result{kiwi_cmdline} = $type{cmdline};
 	}
+	if ((%type) && ($type{firmware})) {
+		$result{kiwi_firmware} = $type{firmware};
+	}
 	if ((%type) && ($type{bootloader})) {
 		$result{kiwi_bootloader} = $type{bootloader};
 	}
@@ -7979,6 +7983,8 @@ sub __populateTypeInfo_legacy {
 				-> getAttribute("luks");
 			$record{cmdline}       = $node
 				-> getAttribute("kernelcmdline");
+			$record{firmware}      = $node
+				-> getAttribute("firmware");
 			$record{compressed}    = $node
 				-> getAttribute("compressed");
 			$record{boot}          = $node
@@ -8468,6 +8474,11 @@ sub __updateDescriptionFromChangeSet_legacy {
 	if (defined $changeset->{"kernelcmdline"}) {
 		$this -> __setTypeAttribute (
 			"kernelcmdline",$changeset->{"kernelcmdline"}
+		);
+	}
+	if (defined $changeset->{"firmware"}) {
+		$this -> __setTypeAttribute (
+			"firmware",$changeset->{"firmware"}
 		);
 	}
 	if (defined $changeset->{"bootloader"}) {
