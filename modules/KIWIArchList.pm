@@ -145,7 +145,7 @@ sub _addArch
 #------------------
 # add all architectures from a hash
 # The hash has the following structure
-# (see KIWIXML::getInstSourceArchList):
+# (see KIWIXML::getInstSourceArchList_legacy):
 # - name => [descr, nextname, ishead]
 # nextname is verified through xml validation:
 # there must be an entry with the referred name

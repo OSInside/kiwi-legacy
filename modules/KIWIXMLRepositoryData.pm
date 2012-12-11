@@ -23,7 +23,7 @@ use warnings;
 use XML::LibXML;
 require Exporter;
 
-use base qw /KIWIXMLDataBase/;
+use base qw /KIWIXMLRepositoryBaseData/;
 #==========================================
 # Exports
 #------------------------------------------
@@ -56,32 +56,24 @@ sub new {
 	# Object setup
 	#------------------------------------------
 	my $class = shift;
-	my $this  = $class->SUPER::new(@_);
-	#==========================================
-	# Module Parameters
-	#------------------------------------------
 	my $kiwi = shift;
 	my $init = shift;
-	#==========================================
-	# Argument checking and object data store
-	#------------------------------------------
-	if (! $this -> __hasInitArg($init) ) {
-		return;
-	}
-	my %keywords = map { ($_ => 1) } qw(
+	my @addtlKeywords = qw(
 		alias
 		components
 		distribution
 		imageinclude
-		password
-		path
 		preferlicense
-		priority
 		status
 		type
-		username
 	);
-	$this->{supportedKeywords} = \%keywords;
+	my $this  = $class->SUPER::new($kiwi, $init, \@addtlKeywords);
+	if (! $this) {
+		return;
+	}
+	#==========================================
+	# Argument checking and object data store
+	#------------------------------------------
 	my %boolKW = map { ($_ => 1) } qw(
 		preferlicense
 		imageinclude
@@ -97,26 +89,20 @@ sub new {
 		rpm-md
 		slack-site
 		up2date-mirrors
-		urpmi yast2
+		urpmi
+		yast2
 	);
 	$this->{supportedRepoTypes} = \%supportedRepo;
-	if (! $this -> __isInitHashRef($init) ) {
-		return;
-	}
-	if (! $this -> __areKeywordArgsValid($init) ) {
-		return;
-	}
 	if (! $this -> __isInitConsistent($init)) {
 		return;
 	}
 	$this -> __initializeBoolMembers($init);
-	$this->{alias}         = $init->{alias};
-	$this->{password}      = $init->{password};
-	$this->{path}          = $init->{path};
-	$this->{priority}      = $init->{priority};
-	$this->{status}        = $init->{status};
-	$this->{type}          = $init->{type};
-	$this->{username}      = $init->{username};
+	$this->{alias}        = $init->{alias};
+	$this->{components}   = $init->{components};
+	$this->{distribution} = $init->{distribution};
+	$this->{elname}       = 'repository';
+	$this->{status}       = $init->{status};
+	$this->{type}         = $init->{type};
 
 	if (! $this->{status} ) {
 		$this->{status} = 'replacable';
@@ -136,47 +122,14 @@ sub getAlias {
 }
 
 #==========================================
-# getCredentials
+# getComponents
 #------------------------------------------
-sub getCredentials {
+sub getComponents {
 	# ...
-	# Return the username and password for the repository
+	# Return the components indicator for the repository
 	# ---
 	my $this = shift;
-	return $this->{username}, $this->{password};
-}
-
-#==========================================
-# getImageInclude
-#------------------------------------------
-sub getImageInclude {
-	# ...
-	# Return the image include indicator for the repository
-	# ---
-	my $this = shift;
-	return $this->{imageinclude};
-}
-
-#==========================================
-# getPath
-#------------------------------------------
-sub getPath {
-	# ...
-	# Return the URI for the repository
-	# ---
-	my $this = shift;
-	return $this->{path};
-}
-
-#==========================================
-# getPreferLicense
-#------------------------------------------
-sub getPreferLicense {
-	# ...
-	# Return the license file indicator for the repository
-	# ---
-	my $this = shift;
-	return $this->{preferlicense};
+	return $this->{components};
 }
 
 #==========================================
@@ -191,14 +144,25 @@ sub getDistribution {
 }
 
 #==========================================
-# getComponents
+# getImageInclude
 #------------------------------------------
-sub getComponents {
+sub getImageInclude {
 	# ...
-	# Return the components indicator for the repository
+	# Return the image include indicator for the repository
 	# ---
 	my $this = shift;
-	return $this->{components};
+	return $this->{imageinclude};
+}
+
+#==========================================
+# getPreferLicense
+#------------------------------------------
+sub getPreferLicense {
+	# ...
+	# Return the license file indicator for the repository
+	# ---
+	my $this = shift;
+	return $this->{preferlicense};
 }
 
 #==========================================
@@ -234,7 +198,6 @@ sub getType {
 	return $this->{type};
 }
 
-
 #==========================================
 # getXMLElement
 #------------------------------------------
@@ -243,30 +206,26 @@ sub getXMLElement {
 	# Return an XML Element representing the object's data
 	# ---
 	my $this = shift;
-	my $element = XML::LibXML::Element -> new('repository');
+	my $element = $this->SUPER::getXMLElement();
 	my $alias = $this -> getAlias();
 	if ($alias) {
 		$element -> setAttribute('alias', $alias);
 	}
-	my $include = $this -> getImageInclude();
-	if ($include) {
-		$element -> setAttribute('imageinclude', $include);
-	}
-	my ($uname, $pass) = $this -> getCredentials();
-	if ($pass) {
-		$element -> setAttribute('password', $pass);
-	}
-	my $prefLic = $this -> getPreferLicense();
-	if ($prefLic) {
-		$element -> setAttribute('prefer-license', $prefLic);
+	my $comp = $this -> getComponents();
+	if ($comp) {
+		$element -> setAttribute('components',$comp)
 	}
 	my $dist = $this -> getDistribution();
 	if ($dist) {
 		$element -> setAttribute('distribution', $dist);
 	}
-	my $comp = $this -> getComponents();
-	if ($comp) {
-		$element -> setAttribute('components',$comp)
+	my $include = $this -> getImageInclude();
+	if ($include) {
+		$element -> setAttribute('imageinclude', $include);
+	}
+	my $prefLic = $this -> getPreferLicense();
+	if ($prefLic) {
+		$element -> setAttribute('prefer-license', $prefLic);
 	}
 	my $prio = $this -> getPriority();
 	if ($prio) {
@@ -277,12 +236,6 @@ sub getXMLElement {
 		$element -> setAttribute('status', $status);
 	}
 	$element -> setAttribute('type', $this -> getType());
-	if ($uname) {
-		$element -> setAttribute('username', $uname);
-	}
-	my $sElem = XML::LibXML::Element -> new('source');
-	$sElem -> setAttribute('path', $this -> getPath());
-	$element -> addChild($sElem);
 	return $element;
 }
 
@@ -294,36 +247,57 @@ sub setAlias{
 	# Set the alias for this repository
 	# ---
 	my $this = shift;
-	$this->{alias} = shift;
+	my $alias = shift;
+	if (! $alias ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setAlias: No alias specified, retaining current data';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{alias} = $alias;
 	return $this;
 }
 
 #==========================================
-# setCredentials
+# setComponents
 #------------------------------------------
-sub setCredentials {
+sub setComponents {
 	# ...
-	# Set the credentials for this repository
+	# Set the components for this repository
 	# ---
 	my $this = shift;
-	my $username = shift;
-	my $password = shift;
-	if (! $username ) {
+	my $comp = shift;
+	if (! $comp) {
 		my $kiwi = $this->{kiwi};
-		my $msg = 'setCredentials: no username specified';
+		my $msg = 'setComponents: No components specified, retaining '
+			. 'current data';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;
 	}
-	if (! $password ) {
+	$this->{components} = $comp;
+	return $this;
+}
+
+#==========================================
+# setDistribution
+#------------------------------------------
+sub setDistribution {
+	# ...
+	# Set the distribution name tag for this repository
+	# ---
+	my $this = shift;
+	my $dist = shift;
+	if (! $dist) {
 		my $kiwi = $this->{kiwi};
-		my $msg = 'setCredentials: no password specified';
+		my $msg = 'setDistribution: No distribution specified, retaining '
+			. 'current data';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;
 	}
-	$this->{username} = $username;
-	$this->{password} = $password;
+	$this->{distribution} = $dist;
 	return $this;
 }
 
@@ -337,32 +311,12 @@ sub setImageInclude {
 	# ---
 	my $this = shift;
 	my $include = shift;
-	if ($include) {
-		$this->{imageinclude} = 'true';
-	} else {
-		delete $this->{imageinclude};
-	}
-	return $this;
-}
-
-#==========================================
-# setPath
-#------------------------------------------
-sub setPath {
-	# ...
-	# Set the path for the repository
-	# ---
-	my $this = shift;
-	my $path = shift;
-	if (! $path ) {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setPath: No location specified, retaining current data';
-		$kiwi -> info($msg);
-		$kiwi -> done ();
-		return $this;
-	}
-	$this->{path} = $path;
-	return $this;
+	my %settings = (
+		attr   => 'imageinclude',
+		value  => $include,
+		caller => 'setImageInclude'
+	);
+	return $this -> __setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -384,30 +338,6 @@ sub setPreferLicense {
 }
 
 #==========================================
-# setDistribution
-#------------------------------------------
-sub setDistribution {
-	# ...
-	# Set the distribution name tag for this repository
-	# ---
-	my $this = shift;
-	$this->{distribution} = shift;
-	return $this;
-}
-
-#==========================================
-# setComponents
-#------------------------------------------
-sub setComponents {
-	# ...
-	# Set the components for this repository
-	# ---
-	my $this = shift;
-	$this->{components} = shift;
-	return $this;
-}
-
-#==========================================
 # setPriority
 #------------------------------------------
 sub setPriority {
@@ -416,6 +346,13 @@ sub setPriority {
 	# ---
 	my $this = shift;
 	my $prio = shift;
+	if (! $prio ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setPriority: No priority specified, retaining current data';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
 	$this->{priority} = $prio;
 	return $this;
 }
@@ -432,9 +369,9 @@ sub setStatus {
 	if (! $status ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setStatus: No status specified, retaining current data';
-		$kiwi -> info($msg);
-		$kiwi -> done ();
-		return $this;
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
 	}
 	if ($status ne 'fixed' && $status ne 'replacable') {
 		my $kiwi = $this->{kiwi};
@@ -459,9 +396,9 @@ sub setType {
 	if (! $type ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setType: No type specified, retaining current data';
-		$kiwi -> info($msg);
-		$kiwi -> done ();
-		return $this;
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
 	}
 	if (! $this->__isSupportedRepoType($type) ) {
 		return;
@@ -505,13 +442,6 @@ sub __isInitConsistent {
 	if (! $this -> __areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
-	if (! $init->{path} ) {
-		my $msg = 'KIWIXMLRepositoryData: no "path" specified in '
-			. 'initialization structure.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
 	if (! $init->{type} ) {
 		my $msg = 'KIWIXMLRepositoryData: no "type" specified in '
 			. 'initialization structure.';
@@ -520,20 +450,6 @@ sub __isInitConsistent {
 		return;
 	}
 	if (! $this -> __isSupportedRepoType($init->{type}) ) {
-		return;
-	}
-	if ( $init->{password} && ! $init->{username} ) {
-		my $msg = 'KIWIXMLRepositoryData: initialization data contains '
-			. 'password, but no username';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (! $init->{password} && $init->{username} ) {
-		my $msg = 'KIWIXMLRepositoryData: initialization data contains '
-			. 'username, but no password';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
 		return;
 	}
 	return 1;

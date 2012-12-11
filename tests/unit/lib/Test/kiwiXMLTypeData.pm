@@ -139,9 +139,9 @@ sub test_ctor_initInvalidFirmwareValue {
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
 	 my %init = (
-		firmware => 'foo',
-		 image     => 'ext3'
-	);
+	     firmware => 'foo',
+		 image    => 'ext3'
+	 );
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'object initialization: specified firmware value '
@@ -168,9 +168,9 @@ sub test_ctor_initInvalidFsnocheckValue {
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
 	 my %init = (
-				fsnocheck => 'foo',
-				image     => 'ext3'
-				);
+	    fsnocheck => 'foo',
+		image     => 'ext3'
+	 );
 	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '

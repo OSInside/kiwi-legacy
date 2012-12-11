@@ -320,6 +320,48 @@ sub test_getAlias {
 }
 
 #==========================================
+# test_getComponents
+#------------------------------------------
+sub test_getComponents {
+	# ...
+	# Test the getComponents method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $repoDataObj = $this -> __getRepoDataObj();
+	my $res = $repoDataObj -> getComponents();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('base', $res);
+	return;
+}
+
+#==========================================
+# test_getDistribution
+#------------------------------------------
+sub test_getDistribution {
+	# ...
+	# Test the getDistribution method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $repoDataObj = $this->__getRepoDataObj();
+	my $res = $repoDataObj->getDistribution();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('sid', $res);
+	return;
+}
+
+#==========================================
 # test_getCredentials
 #------------------------------------------
 sub test_getCredentials {
@@ -488,14 +530,16 @@ sub test_getXMLElement{
 	$this -> assert_not_null($elem);
 	my $xmlstr = $elem -> toString();
 	my $expected = '<repository '
-		. 'alias="myRepo" '
-		. 'imageinclude="true" '
 		. 'password="1234567" '
-		. 'prefer-license="true" '
 		. 'priority="2" '
+		. 'username="testuser" '
+		. 'alias="myRepo" '
+		. 'components="base" '
+		. 'distribution="sid" '
+		. 'imageinclude="true" '
+		. 'prefer-license="true" '
 		. 'status="replacable" '
-		. 'type="yast2" '
-		. 'username="testuser">'
+		. 'type="yast2">'
 		. '<source path="opensuse:///"/>'
 		. '</repository>';
 	$this -> assert_str_equals($expected, $xmlstr);
@@ -522,6 +566,30 @@ sub test_setAlias {
 	$this -> assert_not_null($repoDataObj);
 	my $res = $repoDataObj->getAlias();
 	$this -> assert_str_equals('testName', $res);
+	return;
+}
+
+#==========================================
+# test_setAliasNoArg
+#------------------------------------------
+sub test_setAliasNoArg {
+	# ...
+	# Test the setAlias method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $repoDataObj = $this->__getRepoDataObj();
+	my $res = $repoDataObj->setAlias();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setAlias: No alias specified, retaining current data';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $alias = $repoDataObj->getAlias();
+	$this -> assert_str_equals('myRepo', $alias);
 	return;
 }
 
@@ -600,6 +668,126 @@ sub test_setCredentialsNoUser {
 }
 
 #==========================================
+# test_setComponents
+#------------------------------------------
+sub test_setComponents {
+	# ...
+	# Test the setComponents method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $repoDataObj = $this->__getRepoDataObj();
+	$repoDataObj = $repoDataObj->setComponents('build');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($repoDataObj);
+	my $res = $repoDataObj->getComponents();
+	$this -> assert_str_equals('build', $res);
+	return;
+}
+
+#==========================================
+# test_setComponentsNoArg
+#------------------------------------------
+sub test_setComponentsNoArg {
+	# ...
+	# Test the setComponents method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $repoDataObj = $this->__getRepoDataObj();
+	my $res = $repoDataObj->setComponents();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setComponents: No components specified, retaining '
+		. 'current data';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $alias = $repoDataObj->getComponents();
+	$this -> assert_str_equals('base', $alias);
+	return;
+}
+
+#==========================================
+# test_setDistribution
+#------------------------------------------
+sub test_setDistribution {
+	# ...
+	# Test the setDistribution method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $repoDataObj = $this->__getRepoDataObj();
+	$repoDataObj = $repoDataObj->setDistribution('woody');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($repoDataObj);
+	my $res = $repoDataObj->getDistribution();
+	$this -> assert_str_equals('woody', $res);
+	return;
+}
+
+#==========================================
+# test_setDistributionNoArg
+#------------------------------------------
+sub test_setDistributionNoArg {
+	# ...
+	# Test the setDistribution method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $repoDataObj = $this->__getRepoDataObj();
+	my $res = $repoDataObj->setDistribution();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setDistribution: No distribution specified, '
+		. 'retaining current data';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $alias = $repoDataObj->getDistribution();
+	$this -> assert_str_equals('sid', $alias);
+	return;
+}
+
+#==========================================
+# test_setImageIncludeInvalidArg
+#------------------------------------------
+sub test_setImageIncludeInvalidArg {
+	# ...
+	# Test the setImageInclude method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $repoDataObj = $this->__getRepoDataObj();
+	my $res = $repoDataObj->setImageInclude(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLRepositoryData:setImageInclude: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
 # test_setImageIncludeOff
 #------------------------------------------
 sub test_setImageIncludeOff {
@@ -618,7 +806,7 @@ sub test_setImageIncludeOff {
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($repoDataObj);
 	my $res = $repoDataObj->getImageInclude();
-	$this -> assert_null($res);
+	$this -> assert_str_equals('false', $res);
 	return;
 }
 
@@ -627,12 +815,12 @@ sub test_setImageIncludeOff {
 #------------------------------------------
 sub test_setImageIncludeOn {
 	# ...
-	# Test the setsetImageInclude method
+	# Test the setImageInclude method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $repoDataObj = $this->__getRepoDataObj();
-	$repoDataObj = $repoDataObj->setImageInclude(1);
+	$repoDataObj = $repoDataObj->setImageInclude('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -641,7 +829,7 @@ sub test_setImageIncludeOn {
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($repoDataObj);
 	my $res = $repoDataObj->getImageInclude();
-	$this -> assert_str_equals('true', $res);
+	$this -> assert_str_equals('true',$res);
 	return;
 }
 
@@ -683,10 +871,10 @@ sub test_setPathNoArg {
 	my $expected = 'setPath: No location specified, retaining current data';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('info', $msgT);
+	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('completed', $state);
-	$this -> assert_not_null($res);
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
 	$res = $repoDataObj->getPath();
 	$this -> assert_str_equals('opensuse:///', $res);
 	return;
@@ -786,6 +974,31 @@ sub test_setPriority {
 }
 
 #==========================================
+# test_setPriorityNoArg
+#------------------------------------------
+sub test_setPriorityNoArg {
+	# ...
+	# Test the setPriority method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $repoDataObj = $this->__getRepoDataObj();
+	my $res = $repoDataObj->setPriority();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setPriority: No priority specified, retaining '
+		. 'current data';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $prio = $repoDataObj->getPriority();
+	$this -> assert_str_equals('2', $prio);
+	return;
+}
+
+#==========================================
 # test_setStatus
 #------------------------------------------
 sub test_setStatus {
@@ -842,17 +1055,17 @@ sub test_setStatusNoArg {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $repoDataObj = $this->__getRepoDataObj();
-	$repoDataObj = $repoDataObj->setStatus();
+	my $res = $repoDataObj->setStatus();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setStatus: No status specified, retaining current data';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('info', $msgT);
+	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('completed', $state);
-	$this -> assert_not_null($repoDataObj);
-	my $res = $repoDataObj->getStatus();
-	$this -> assert_str_equals('replacable', $res);
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $status = $repoDataObj->getStatus();
+	$this -> assert_str_equals('replacable', $status);
 	return;
 }
 
@@ -919,13 +1132,13 @@ sub test_setTypeNoArg {
 	my $expected = 'setType: No type specified, retaining current data';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('info', $msgT);
+	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('completed', $state);
+	$this -> assert_str_equals('failed', $state);
 	my $type = $repoDataObj->getType();
 	$this -> assert_str_equals('yast2', $type);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($res);
+	$this -> assert_null($res);
 	return;
 }
 
@@ -940,6 +1153,8 @@ sub __getRepoDataObj {
 	my $kiwi = $this -> {kiwi};
 	my %init = (
 				alias         => 'myRepo',
+				components    => 'base',
+				distribution  => 'sid',
 				imageinclude  => 'true',
 				password      => '1234567',
 				path          => 'opensuse:///',
