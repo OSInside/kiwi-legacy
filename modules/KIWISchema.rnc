@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 5.5" ]
+	db:releaseinfo [ "RNC Schema Version 5.6" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -60,7 +60,7 @@ div {
 		attribute xsi:schemaLocation { xsd:anyURI }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "5.5" }
+		attribute schemaversion { "5.6" }
 	k.image.kiwirevision.attribute =
 		## A kiwi git revision number which is known to build
 		## a working image from this description. If the kiwi git
@@ -142,7 +142,7 @@ k.path.attribute        =
 k.profiles.attribute    =
 	## A profile name which binds the section to this name
 	attribute profiles { text }
-k.pwd.attribute         =
+k.password.attribute    =
 	## The password
 	attribute pwd { text }
 k.script.attribute      =
@@ -386,22 +386,21 @@ div {
 # common element <instrepo>
 #
 div {
-	#k.instrepo.name.attribute = k.id.attribute
+	k.instrepo.local.attribute =
+		attribute local { xsd:boolean }
 	k.instrepo.name.attribute = 
 		attribute name { xsd:ID }
+	k.instrepo.password.attribute = k.password.attribute
 	k.instrepo.priority.attribute =
 		## Search priority for packages in this repo
 		attribute priority { text }
 	k.instrepo.username.attribute = k.username.attribute
-	k.instrepo.pwd.attribute = k.pwd.attribute
-	k.instrepo.local.attribute =
-		attribute local { xsd:boolean }
 	k.instrepo.attlist =
+		k.instrepo.local.attribute? &
 		k.instrepo.name.attribute &
+		k.instrepo.password.attribute? &
 		k.instrepo.priority.attribute &
-		k.instrepo.username.attribute? &
-		k.instrepo.pwd.attribute? &
-		k.instrepo.local.attribute?
+		k.instrepo.username.attribute?
 	k.instrepo =
 		## Name of a Installation Repository
 		[
@@ -858,11 +857,11 @@ div {
 	k.repository.password.attribute =
 		## Channel password if required. It depends on the url type
 		## whether and how this information is passed
-		attribute password { text }
+		k.password.attribute
 	k.repository.username.attribute =
 		## Channel username if required. It depends on the url type
 		## whether and how this information is passed
-		attribute username { text }
+		k.username.attribute
 	k.repository.attlist =
 		k.repository.type.attribute &
 		k.repository.profiles.attribute? &
@@ -1823,7 +1822,7 @@ div {
 	k.user.realname.attribute =
 		## The name of an user
 		attribute realname { text }
-	k.user.pwd.attribute = k.pwd.attribute
+	k.user.pwd.attribute = k.password.attribute
 	k.user.pwdformat =
 		## Format of the given password, encrypted is the default
 		attribute pwdformat { "encrypted" | "plain" }
