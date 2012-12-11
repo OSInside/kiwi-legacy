@@ -527,12 +527,6 @@ sub createBootStructure {
 		$kiwi -> failed ();
 		return undef;
 	}
-	if ($isxen) {
-		# make xen happy and don't use cpio with splash info at the end
-		$kiwi -> info ("skip splash initrd attachment on xen domU");
-		$initrd =~ s/\.splash.*\.gz/\.gz/;
-		$kiwi -> done();
-	}
 	if ($zipped) {
 		$status = qxx ( "cp $initrd $tmpdir/boot/$iname 2>&1" );
 	} else {
@@ -2799,8 +2793,16 @@ sub setupSplashForGrub {
 	my $newird = shift;
 	my $newspl = "$spldir/splash";
 	my $irddir = "$spldir/initrd";
+	my $isxen  = $this->{isxen};
 	my $status;
 	my $result;
+	#==========================================
+	# Don't use kernel splash on Xen
+	#------------------------------------------
+	if ($isxen) {
+		# make xen happy and don't use cpio with splash info at the end
+		return ("skip splash initrd attachment for xen");
+	}
 	#==========================================
 	# move splash files
 	#------------------------------------------
