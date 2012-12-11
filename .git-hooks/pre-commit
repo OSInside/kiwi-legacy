@@ -55,6 +55,7 @@ my @kiwiModules = qw (
 	KIWIXMLExceptData.pm
 	KIWIXMLFileData.pm
 	KIWIXMLInfo.pm
+	KIWIXMLInstRepositoryData.pm
 	KIWIXMLOEMConfigData.pm
 	KIWIXMLPXEDeployData.pm
 	KIWIXMLPackageArchiveData.pm
@@ -63,7 +64,13 @@ my @kiwiModules = qw (
 	KIWIXMLPackageIgnoreData.pm
 	KIWIXMLPackageProductData.pm
 	KIWIXMLPreferenceData.pm
+	KIWIXMLProductArchitectureData.pm
+	KIWIXMLProductMetaChrootData.pm
+	KIWIXMLProductMetaFileData.pm
+	KIWIXMLProductOptionsData.pm
+	KIWIXMLProductPackageData.pm
 	KIWIXMLProfileData.pm
+	KIWIXMLRepositoryBaseData.pm
 	KIWIXMLRepositoryData.pm
 	KIWIXMLSplitData.pm
 	KIWIXMLStripData.pm
@@ -83,6 +90,7 @@ my @kiwiModules = qw (
 	KTXMLExceptData.t
 	KTXMLFileData.t
 	KTXMLInfo.t
+	KTXMLInstRepositoryData.t
 	KTXMLOEMConfigData.t
 	KTXMLPXEDeployData.t
 	KTXMLPackageArchiveData.t
@@ -91,6 +99,11 @@ my @kiwiModules = qw (
 	KTXMLPackageIgnoreData.t
 	KTXMLPackageProductData.t
 	KTXMLPreferenceData.t
+	KTXMLProductArchitectureData.t
+	KTXMLProductMetaChrootData.t
+	KTXMLProductMetaFileData.t
+	KTXMLProductOptionsData.t
+	KTXMLProductPackageData.t
 	KTXMLProfileData.t
 	KTXMLRepositoryData.t
 	KTXMLSplitData.t
@@ -113,6 +126,7 @@ my @kiwiModules = qw (
 	kiwiXMLExceptData.pm
 	kiwiXMLFileData.pm
 	kiwiXMLInfo.pm
+	kiwiXMLInstRepositoryData.pm
 	kiwiXMLOEMConfigData.pm
 	kiwiXMLPXEDeployData.pm
 	kiwiXMLPackageArchiveData.pm
@@ -121,6 +135,11 @@ my @kiwiModules = qw (
 	kiwiXMLPackageIgnoreData.pm
 	kiwiXMLPackageProductData.pm
 	kiwiXMLPreferenceData.pm
+	kiwiXMLProductArchitectureData.pm
+	kiwiXMLProductMetaChrootData.pm
+	kiwiXMLProductMetaFileData.pm
+	kiwiXMLProductOptionsData.pm
+	kiwiXMLProductPackageData.pm
 	kiwiXMLProfileData.pm
 	kiwiXMLRepositoryData.pm
 	kiwiXMLSplitData.pm
@@ -182,6 +201,7 @@ my @notClean1 = qw (
 	KIWIXMLExceptData.pm
 	KIWIXMLFileData.pm
 	KIWIXMLInfo.pm
+	KIWIXMLInstRepositoryData.pm
 	KIWIXMLOEMConfigData.pm
 	KIWIXMLPXEDeployData.pm
 	KIWIXMLPackageArchiveData.pm
@@ -190,7 +210,13 @@ my @notClean1 = qw (
 	KIWIXMLPackageIgnoreData.pm
 	KIWIXMLPackageProductData.pm
 	KIWIXMLPreferenceData.pm
+	KIWIXMLProductArchitectureData.pm
+	KIWIXMLProductMetaChrootData.pm
+	KIWIXMLProductMetaFileData.pm
+	KIWIXMLProductOptionsData.pm
+	KIWIXMLProductPackageData.pm
 	KIWIXMLProfileData.pm
+	KIWIXMLRepositoryBaseData.pm
 	KIWIXMLRepositoryData.pm
 	KIWIXMLSplitData.pm
 	KIWIXMLStripData.pm
@@ -210,6 +236,7 @@ my @notClean1 = qw (
 	KTXMLExceptData.t
 	KTXMLFileData.t
 	KTXMLInfo.t
+	KTXMLInstRepositoryData.t
 	KTXMLOEMConfigData.t
 	KTXMLPXEDeployData.t
 	KTXMLPackageArchiveData.t
@@ -218,6 +245,11 @@ my @notClean1 = qw (
 	KTXMLPackageIgnoreData.t
 	KTXMLPackageProductData.t
 	KTXMLPreferenceData.t
+	KTXMLProductArchitectureData.t
+	KTXMLProductMetaChrootData.t
+	KTXMLProductMetaFileData.t
+	KTXMLProductOptionsData.t
+	KTXMLProductPackageData.t
 	KTXMLProfileData.t
 	KTXMLRepositoryData.t
 	KTXMLSplitData.t
@@ -240,6 +272,7 @@ my @notClean1 = qw (
 	kiwiXMLExceptData.pm
 	kiwiXMLFileData.pm
 	kiwiXMLInfo.pm
+	kiwiXMLInstRepositoryData.pm
 	kiwiXMLOEMConfigData.pm
 	kiwiXMLPXEDeployData.pm
 	kiwiXMLPackageArchiveData.pm
@@ -248,6 +281,11 @@ my @notClean1 = qw (
 	kiwiXMLPackageIgnoreData.pm
 	kiwiXMLPackageProductData.pm
 	kiwiXMLPreferenceData.pm
+	kiwiXMLProductArchitectureData.pm
+	kiwiXMLProductMetaChrootData.pm
+	kiwiXMLProductMetaFileData.pm
+	kiwiXMLProductOptionsData.pm
+	kiwiXMLProductPackageData.pm
 	kiwiXMLProfileData.pm
 	kiwiXMLRepositoryData.pm
 	kiwiXMLSplitData.pm

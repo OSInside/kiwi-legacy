@@ -32,8 +32,9 @@ use KIWIXMLEC2ConfigData;
 use KIWIXMLOEMConfigData;
 use KIWIXMLPackageData;
 use KIWIXMLPackageCollectData;
-use KIWIXMLPreferenceData;
 use KIWIXMLPackageProductData;
+use KIWIXMLPreferenceData;
+use KIWIXMLProductOptionsData;
 use KIWIXMLProfileData;
 use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
@@ -4978,9 +4979,9 @@ sub test_getDrivers {
 }
 
 #==========================================
-# test_getDriversNodeList
+# test_getDriversNodeList_legacy
 #------------------------------------------
-sub test_getDriversNodeList {
+sub test_getDriversNodeList_legacy {
 	# ...
 	# Verify proper return of getDriversNodeList method
 	# ---
@@ -5008,6 +5009,134 @@ sub test_getDriversNodeList {
 		}
 	}
 	$this -> assert_array_equal(\@expectedDrivers, \@confDrivers);
+	return;
+}
+
+#==========================================
+# test_getDUDArchitectures
+#------------------------------------------
+sub test_getDUDArchitectures {
+	# ...
+	# Verify proper return of getDUDArchitectures method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'productSetings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $dudArches = $xml -> getDUDArchitectures();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($dudArches);
+	my @expected = qw (i586 i686);
+	$this -> assert_array_equal(\@expected, $dudArches);
+	return;
+}
+
+#==========================================
+# test_getDUDInstallSystemPackages
+#------------------------------------------
+sub test_getDUDInstallSystemPackages {
+	# ...
+	# Verify proper return of getDUDInstallSystemPackages method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'productSetings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $iSysPkgs = $xml -> getDUDInstallSystemPackages();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($iSysPkgs);
+	my @expected = qw (dudsetup yast);
+	my @names;
+	for my $repo (@{$iSysPkgs}) {
+		push @names, $repo -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
+	return;
+}
+
+#==========================================
+# test_getDUDModulePackages
+#------------------------------------------
+sub test_getDUDModulePackages {
+	# ...
+	# Verify proper return of getDUDModulePackages method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'productSetings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $mPkgs = $xml -> getDUDModulePackages();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($mPkgs);
+	my @expected = qw (weirdDrive_KMP weirdNet_KMP);
+	my @names;
+	for my $pkg (@{$mPkgs}) {
+		push @names, $pkg -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
+	return;
+}
+
+#==========================================
+# test_getDUDPackages
+#------------------------------------------
+sub test_getDUPackages {
+	# ...
+	# Verify proper return of getDUDPackages method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'productSetings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $pkgs = $xml -> getDUDPackages();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($pkgs);
+	my @expected = qw (specialNetDriver-KMP specialRaidDriver-KMP);
+	my @names;
+	for my $pkg (@{$pkgs}) {
+		push @names, $pkg -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
@@ -6480,11 +6609,227 @@ sub test_getPackagesUseProf {
 }
 
 #==========================================
+# test_getProductArchitectures
+#------------------------------------------
+sub test_getProductArchitectures {
+	# ...
+	# Verify proper return of getProductArchitectures method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'productSetings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $arches = $xml -> getProductArchitectures();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($arches);
+	my @expected = qw (i586 i686 noarch);
+	my @ids;
+	for my$arch (@{$arches}) {
+		push @ids, $arch -> getID();
+	}
+	$this -> assert_array_equal(\@expected, \@ids);
+	return;
+}
+
+#==========================================
+# test_getProductMetaChroots
+#------------------------------------------
+sub test_getProductMetaChroots {
+	# ...
+	# Verify proper return of getProductMetaChroots method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'productSetings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $chroots = $xml -> getProductMetaChroots();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($chroots);
+	my $cnt = scalar @{$chroots};
+	$this -> assert_equals(2, $cnt);
+	return;
+}
+
+#==========================================
+# test_getProductMetaFiles
+#------------------------------------------
+sub test_getProductMetaFiles {
+	# ...
+	# Verify proper return of getProductMetaFiles method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'productSetings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $mFiles = $xml -> getProductMetaFiles();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($mFiles);
+	my $cnt = scalar @{$mFiles};
+	$this -> assert_equals(2, $cnt);
+	return;
+}
+
+#==========================================
+# test_getProductMetaPackages
+#------------------------------------------
+sub test_getProductMetaPackages {
+	# ...
+	# Verify proper return of getProductMetaPackages method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'productSetings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $mPkgs = $xml -> getProductMetaPackages();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($mPkgs);
+	my @expected = qw (dbus gtk vi);
+	my @names;
+	for my $pkg (@{$mPkgs}) {
+		push @names, $pkg -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
+	return;
+}
+
+#==========================================
+# test_getProductOptions
+#------------------------------------------
+sub test_getProductOptions {
+	# ...
+	# Verify proper return of getProductOptions method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'productSetings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $prodOpts = $xml -> getProductOptions();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($prodOpts);
+	my $optNames = $prodOpts -> getProductOptionNames();
+	my @expected = ('INI_DIR', 'REPO LOCATION', 'SOURCEMEDIUM');
+	$this -> assert_array_equal(\@expected, $optNames);
+	return;
+}
+
+#==========================================
+# test_getProductRepositories
+#------------------------------------------
+sub test_getProductRepositories {
+	# ...
+	# Verify proper return of getProductRepositories method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'productSetings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $pRepos = $xml -> getProductRepositories();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($pRepos);
+	my @expected = qw (repo1 repo2);
+	my @names;
+	for my $repo (@{$pRepos}) {
+		push @names, $repo -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
+	return;
+}
+
+#==========================================
+# test_getProductRequiredArchitectures
+#------------------------------------------
+sub test_getProductRequiredArchitectures {
+	# ...
+	# Verify proper return of getProductRequiredArchitectures method
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'productSetings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $reqArches = $xml -> getProductRequiredArchitectures();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($reqArches);
+	my @expected = qw (i586 i686);
+	$this -> assert_array_equal(\@expected, $reqArches);
+	return;
+}
+
+#==========================================
 # test_getProducts
 #------------------------------------------
 sub test_getProducts {
 	# ...
-	# Verify proper return of getArchives method
+	# Verify proper return of getProducts method
 	# ---
 	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
 		return; # skip the test if there is no network connection
@@ -6509,6 +6854,39 @@ sub test_getProducts {
 	}
 	my @expected = ( 'SLES' );
 	$this -> assert_array_equal(\@expected, \@prodNames);
+	return;
+}
+
+#==========================================
+# test_getProductSourcePackages
+#------------------------------------------
+sub test_getProductSourcePackages {
+	# ...
+	# Test the getProductSourcePackages
+	# ---
+	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
+		return; # skip the test if there is no network connection
+	}
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'productSetings';
+	my $xml = KIWIXML -> new(
+		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+	);
+	my $pkgs = $xml -> getProductSourcePackages();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($pkgs);
+	my @expected = qw (emacs glibc kernel-default vi);
+	my @names;
+	for my $pkg (@{$pkgs}) {
+		push @names, $pkg -> getName();
+	}
+	$this -> assert_array_equal(\@expected, \@names);
 	return;
 }
 
