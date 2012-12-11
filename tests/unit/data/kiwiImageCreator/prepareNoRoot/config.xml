@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.2" name="test-imagecreate-prepare">
+<image schemaversion="5.6" name="test-imagecreate-prepare">
 	<description type="system">
 		<author>Robert Schweikert</author>
-		<contact>rschweikert@novell.com</contact>
+		<contact>rjschwei@suse.com</contact>
 		<specification>test case for the ImageCreator prepare</specification>
 	</description>
 	<preferences>
-		<type image="iso" boot="isoboot/suse-11.4"/>
+		<type image="iso" boot="isoboot/suse-12.2"/>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>

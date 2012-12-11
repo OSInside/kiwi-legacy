@@ -3817,7 +3817,7 @@ sub getInstSourceRepository {
 		my $prio = $element -> getAttribute("priority");
 		my $name = $element -> getAttribute("name");
 		my $user = $element -> getAttribute("username");
-		my $pwd  = $element -> getAttribute("pwd");
+		my $pwd  = $element -> getAttribute("password");
 		my $islocal  = $element -> getAttribute("local");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source = $this -> __resolveLink ( $stag -> getAttribute ("path") );

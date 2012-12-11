@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 5.5</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 5.6</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -91,7 +91,7 @@ second the location of the XSD Schema
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>5.5</value>
+        <value>5.6</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -238,7 +238,7 @@ for isolinux and grub</a:documentation>
       <a:documentation>A profile name which binds the section to this name</a:documentation>
     </attribute>
   </define>
-  <define name="k.pwd.attribute">
+  <define name="k.password.attribute">
     <attribute name="pwd">
       <a:documentation>The password</a:documentation>
     </attribute>
@@ -564,11 +564,18 @@ specifies where the boot image (initrd) can be found.</db:para>
     
   -->
   <div>
-    <!-- k.instrepo.name.attribute = k.id.attribute -->
+    <define name="k.instrepo.local.attribute">
+      <attribute name="local">
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.instrepo.name.attribute">
       <attribute name="name">
         <data type="ID"/>
       </attribute>
+    </define>
+    <define name="k.instrepo.password.attribute">
+      <ref name="k.password.attribute"/>
     </define>
     <define name="k.instrepo.priority.attribute">
       <attribute name="priority">
@@ -578,26 +585,18 @@ specifies where the boot image (initrd) can be found.</db:para>
     <define name="k.instrepo.username.attribute">
       <ref name="k.username.attribute"/>
     </define>
-    <define name="k.instrepo.pwd.attribute">
-      <ref name="k.pwd.attribute"/>
-    </define>
-    <define name="k.instrepo.local.attribute">
-      <attribute name="local">
-        <data type="boolean"/>
-      </attribute>
-    </define>
     <define name="k.instrepo.attlist">
       <interleave>
+        <optional>
+          <ref name="k.instrepo.local.attribute"/>
+        </optional>
         <ref name="k.instrepo.name.attribute"/>
+        <optional>
+          <ref name="k.instrepo.password.attribute"/>
+        </optional>
         <ref name="k.instrepo.priority.attribute"/>
         <optional>
           <ref name="k.instrepo.username.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.instrepo.pwd.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.instrepo.local.attribute"/>
         </optional>
       </interleave>
     </define>
@@ -1266,16 +1265,16 @@ priority is used</a:documentation>
       </attribute>
     </define>
     <define name="k.repository.password.attribute">
-      <attribute name="password">
+      <ref name="k.password.attribute">
         <a:documentation>Channel password if required. It depends on the url type
 whether and how this information is passed</a:documentation>
-      </attribute>
+      </ref>
     </define>
     <define name="k.repository.username.attribute">
-      <attribute name="username">
+      <ref name="k.username.attribute">
         <a:documentation>Channel username if required. It depends on the url type
 whether and how this information is passed</a:documentation>
-      </attribute>
+      </ref>
     </define>
     <define name="k.repository.attlist">
       <interleave>
@@ -2573,7 +2572,7 @@ compressed filesystem.</db:para>
       </attribute>
     </define>
     <define name="k.user.pwd.attribute">
-      <ref name="k.pwd.attribute"/>
+      <ref name="k.password.attribute"/>
     </define>
     <define name="k.user.pwdformat">
       <attribute name="pwdformat">
