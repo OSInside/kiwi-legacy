@@ -2,7 +2,7 @@
 <image schemaversion="5.1" name="suse-11.3-xen-guest">
 	<description type="system">
 		<author>Robert Schweikert</author>
-		<contact>rschweikert@novell.com</contact>
+		<contact>rjschwei@suse.com</contact>
 		<specification>test preference section uniqueness</specification>
 	</description>
 	<profiles>

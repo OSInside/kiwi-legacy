@@ -5,7 +5,7 @@
 # PROJECT       : OpenSuSE KIWI Image System
 # COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
 #               :
-# AUTHOR        : Robert Scwheikert <rschweikert@novell.com>
+# AUTHOR        : Robert Scwheikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :

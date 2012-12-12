@@ -3,7 +3,7 @@
 <image schemaversion="5.6" name="suse-12.1-SUSENebula-guest">
 	<description type="system">
 		<author>Robert Schweikert</author>
-		<contact>rschweikert@novell.com</contact>
+		<contact>rjschwei@suse.com</contact>
 		<specification>openSUSE 12.1 virtual disk system</specification>
 	</description>
 	<preferences>

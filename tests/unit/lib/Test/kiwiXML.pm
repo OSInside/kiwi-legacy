@@ -1,7 +1,7 @@
 #================
 # FILE          : kiwiXML.pm
 #----------------
-# PROJECT       : OpenSUSE Build-Service
+# PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>

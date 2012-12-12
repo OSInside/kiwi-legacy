@@ -1,7 +1,7 @@
 #================
 # FILE          : KIWIXMLInfo.pm
 #----------------
-# PROJECT       : OpenSUSE Build-Service
+# PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2011 SUSE LLC
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>

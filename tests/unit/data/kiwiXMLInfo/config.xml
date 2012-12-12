@@ -3,7 +3,7 @@
 <image schemaversion="5.2" name="test-xml-infod">
 	<description type="system">
 		<author>Robert Schweikert</author>
-		<contact>rschweikert@novell.com</contact>
+		<contact>rjschwei@suse.com</contact>
 		<specification>test case for the XMLInfo object</specification>
 	</description>
 	<profiles>

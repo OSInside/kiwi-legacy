@@ -3,7 +3,7 @@
 <image schemaversion="5.2" name="suse-11.3-vm-guest">
 	<description type="system">
 		<author>Robert Schweikert</author>
-		<contact>rschweikert@novell.com</contact>
+		<contact>rjschwei@suse.com</contact>
 		<specification>Generic valid configuration file</specification>
 	</description>
 	<preferences>

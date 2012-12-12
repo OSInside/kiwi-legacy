@@ -3,7 +3,7 @@
   ================
   FILE          : KIWISchema.rnc
   ****************
-  PROJECT       : OpenSUSE Build-Service
+  PROJECT       : openSUSE Build-Service
   COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
                 :
   AUTHOR        : Thomas Schraitle <toms@suse.de>
@@ -2980,7 +2980,7 @@ a standard image description created by a kiwi user.</a:documentation>
         <a:documentation>Describe Packages and Metadata</a:documentation>
         <db:para>The instsource element is used to describe the packages
 and the metadata which is required to build an installation
-source suitable for Novell SUSE Linux installation media.
+source suitable for SUSE Linux installation media.
 From such a source it should be possible to create the
 standard SUSE CDs and DVDs as well as use this source as
 repository for image building.</db:para>
@@ -3279,7 +3279,7 @@ configuration options.</db:para>
       <element name="repopackages">
         <a:documentation>Specifies Packages for Installation Source</a:documentation>
         <db:para>The repopackages elements specifies a set of packages which
-are used for creating a Novell SUSE installation source.</db:para>
+are used for creating a SUSE installation source.</db:para>
         <interleave>
           <ref name="k.repopackages.attlist"/>
           <zeroOrMore>

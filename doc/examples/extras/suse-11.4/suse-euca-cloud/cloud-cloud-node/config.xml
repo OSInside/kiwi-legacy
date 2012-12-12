@@ -3,7 +3,7 @@
 <image schemaversion="5.6" name="Eucalyptus-Cloud-Node">
 	<description type="system">
 		<author>Robert Schweikert</author>
-		<contact>rschweikert@novell.com</contact>
+		<contact>rjschwei@suse.com</contact>
 		<specification>openSUSE 11.4 Eucalyptus Cloud Node</specification>
 	</description>
 	<preferences>

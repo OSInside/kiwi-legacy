@@ -1,7 +1,7 @@
 #================
 # FILE          : KIWICache.pm
 #----------------
-# PROJECT       : OpenSUSE Build-Service
+# PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schäfer <ms@suse.de>

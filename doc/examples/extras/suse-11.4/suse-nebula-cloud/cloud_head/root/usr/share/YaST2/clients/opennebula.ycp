@@ -2,7 +2,7 @@
  * File:        clients/opennebula.ycp
  * Package:     Configuration of OpenNebula CLoud head node
  * Authors:     Jiri Suchomel <jsuchome@suse.cz>
- *              Robert Scwheikert <rschweikert@novell.com>
+ *              Robert Scwheikert <rjschwei@suse.com>
  *
  * License:     GPL v2
  *

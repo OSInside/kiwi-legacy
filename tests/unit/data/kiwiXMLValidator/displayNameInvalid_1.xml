@@ -2,7 +2,7 @@
 <image schemaversion="4.9" name="suse-11.3-oem-preload" displayname="my image">
     <description type="system">
         <author>Robert Schweikert</author>
-        <contact>rschweikert@novell.com</contact>
+        <contact>rjschwei@suse.com</contact>
         <specification>test display name value</specification>
     </description>
     <preferences>

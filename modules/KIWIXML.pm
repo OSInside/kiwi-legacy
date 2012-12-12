@@ -1,7 +1,7 @@
 #================
 # FILE          : KIWIXML.pm
 #----------------
-# PROJECT       : OpenSUSE Build-Service
+# PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 20012 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schaefer <ms@suse.de>

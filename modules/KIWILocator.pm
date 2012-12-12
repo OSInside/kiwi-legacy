@@ -1,7 +1,7 @@
 #================
 # FILE          : KIWILocator.pm
 #----------------
-# PROJECT       : OpenSUSE Build-Service
+# PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2011 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>
