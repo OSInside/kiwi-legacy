@@ -3,7 +3,7 @@
 <image schemaversion="5.2" name="ext3-test-config">
 	<description type="system">
 		<author>Robert Schweikert</author>
-		<contact>rschweikert@novell.com</contact>
+		<contact>rjschwei@suse.com</contact>
 		<specification>Test configuration for runtime validtaion using ext3 as image type.</specification>
 	</description>
 	<preferences>

@@ -1,8 +1,8 @@
 #================
 # FILE          : kiwiXMLInfo.pm
 #----------------
-# PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2012 Novell Inc.
+# PROJECT       : openSUSE Build-Service
+# COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :

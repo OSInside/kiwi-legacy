@@ -1,5 +1,5 @@
 ################################################################
-# Copyright (c) 2008 Jan-Christoph Bornschlegel, Novell Inc.
+# Copyright (c) 2008 Jan-Christoph Bornschlegel, SUSE LLC
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,7 +20,7 @@
 #================
 # FILE          : KIWILiveTreePlugin.pm
 #----------------
-# PROJECT       : OpenSUSE Build-Service
+# PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Jan-Christoph Bornschlegel <jcborn@suse.de>

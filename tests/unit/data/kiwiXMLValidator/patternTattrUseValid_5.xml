@@ -2,7 +2,7 @@
 <image schemaversion="4.9" name="suse-11.3-oem-preload">
     <description type="system">
         <author>Robert Schweikert</author>
-        <contact>rschweikert@novell.com</contact>
+        <contact>rjschwei@suse.com</contact>
         <specification>test use of paternType attribute</specification>
     </description>
     <preferences>

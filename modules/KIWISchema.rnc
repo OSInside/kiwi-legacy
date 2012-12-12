@@ -1,7 +1,7 @@
 #================
 # FILE          : KIWISchema.rnc
 #****************
-# PROJECT       : OpenSUSE Build-Service
+# PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Thomas Schraitle <toms@suse.de>
@@ -2056,7 +2056,7 @@ div {
 		db:para [
 			"The instsource element is used to describe the packages\x{a}"~
 			"and the metadata which is required to build an installation\x{a}"~
-			"source suitable for Novell SUSE Linux installation media.\x{a}"~
+			"source suitable for SUSE Linux installation media.\x{a}"~
 			"From such a source it should be possible to create the\x{a}"~
 			"standard SUSE CDs and DVDs as well as use this source as\x{a}"~
 			"repository for image building."
@@ -2296,7 +2296,7 @@ div {
 		[
 		db:para [
 			"The repopackages elements specifies a set of packages which\x{a}"~
-			"are used for creating a Novell SUSE installation source."
+			"are used for creating a SUSE installation source."
 		]
 		]
 		element repopackages {

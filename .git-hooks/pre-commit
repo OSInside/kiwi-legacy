@@ -10,16 +10,21 @@ use IPC::Open2;
 my @kiwiModules = qw (
 	KIWIArchList.pm
 	KIWIArch.pm
+	KIWIBasePlugin.pm
 	KIWIBoot.pm
 	KIWICache.pm
 	KIWICollect.pm
 	KIWICommandLine.pm
 	KIWIConfigure.pm
+	KIWIContentPlugin.pm
+	KIWIDescrPlugin.pm
+	KIWIEulaPlugin.pm
 	KIWIGlobals.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
 	KIWIImage.pm
 	KIWIIsoLinux.pm
+	KIWILiveTreePlugin.pm
 	KIWILocator.pm
 	KIWILog.pm
 	KIWIManager.pm
@@ -28,7 +33,9 @@ my @kiwiModules = qw (
 	KIWIManagerZypper.pm
 	KIWIManagerEnsconce.pm
 	KIWIMigrate.pm
+	KIWIMiniIsoPlugin.pm
 	KIWIOverlay.pm
+	KIWIPatternsPlugin.pm
 	KIWIProductData.pm
 	KIWIQX.pm
 	KIWIRepoMetaHandler.pm
@@ -129,16 +136,21 @@ my @kiwiModules = qw (
 my @notClean1 = qw (
 	KIWIArchList.pm
 	KIWIArch.pm
+	KIWIBasePlugin.pm
 	KIWIBoot.pm
 	KIWICache.pm
 	KIWICollect.pm
 	KIWICommandLine.pm
 	KIWIConfigure.pm
+	KIWIContentPlugin.pm
+	KIWIDescrPlugin.pm
+	KIWIEulaPlugin.pm
 	KIWIGlobals.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
 	KIWIImage.pm
 	KIWIIsoLinux.pm
+	KIWILiveTreePlugin.pm
 	KIWILocator.pm
 	KIWILog.pm
 	KIWIManager.pm
@@ -147,7 +159,9 @@ my @notClean1 = qw (
 	KIWIManagerZypper.pm
 	KIWIManagerEnsconce.pm
 	KIWIMigrate.pm
+	KIWIMiniIsoPlugin.pm
 	KIWIOverlay.pm
+	KIWIPatternsPlugin.pm
 	KIWIProductData.pm
 	KIWIQX.pm
 	KIWIRepoMetaHandler.pm
@@ -248,16 +262,21 @@ my @notClean1 = qw (
 my @notClean2 = qw (
 	KIWIArchList.pm
 	KIWIArch.pm
+	KIWIBasePlugin.pm
 	KIWIBoot.pm
 	KIWICache.pm
 	KIWICollect.pm
 	KIWICommandLine.pm
 	KIWIConfigure.pm
+	KIWIContentPlugin.pm
+	KIWIDescrPlugin.pm
+	KIWIEulaPlugin.pm
 	KIWIGlobals.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
 	KIWIImage.pm
 	KIWIIsoLinux.pm
+	KIWILiveTreePlugin.pm
 	KIWILocator.pm
 	KIWILog.pm
 	KIWIManager.pm
@@ -266,7 +285,9 @@ my @notClean2 = qw (
 	KIWIManagerZypper.pm
 	KIWIManagerEnsconce.pm
 	KIWIMigrate.pm
+	KIWIMiniIsoPlugin.pm
 	KIWIOverlay.pm
+	KIWIPatternsPlugin.pm
 	KIWIProductData.pm
 	KIWIQX.pm
 	KIWIRepoMetaHandler.pm
@@ -302,16 +323,21 @@ my @notClean2 = qw (
 # List of modules not clean to level 3 (harsh) of perlcritic
 my @notClean3 = qw (
 	KIWIArchList.pm
+	KIWIBasePlugin.pm
 	KIWIBoot.pm
 	KIWICache.pm
 	KIWICollect.pm
 	KIWICommandLine.pm
 	KIWIConfigure.pm
+	KIWIContentPlugin.pm
+	KIWIDescrPlugin.pm
+	KIWIEulaPlugin.pm
 	KIWIGlobals.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
 	KIWIImage.pm
 	KIWIIsoLinux.pm
+	KIWILiveTreePlugin.pm
 	KIWILog.pm
 	KIWIManager.pm
 	KIWIManagerSmart.pm
@@ -319,7 +345,9 @@ my @notClean3 = qw (
 	KIWIManagerZypper.pm
 	KIWIManagerEnsconce.pm
 	KIWIMigrate.pm
+	KIWIMiniIsoPlugin.pm
 	KIWIOverlay.pm
+	KIWIPatternsPlugin.pm
 	KIWIProductData.pm
 	KIWIQX.pm
 	KIWIRepoMetaHandler.pm
@@ -351,10 +379,26 @@ my @notClean3 = qw (
 );
 
 # List of modules not clean to level 4 (stern) of perlcritic
-my @notClean4 = qw ();
+my @notClean4 = qw (
+	KIWIBasePlugin.pm
+	KIWIContentPlugin.pm
+	KIWIDescrPlugin.pm
+	KIWIEulaPlugin.pm
+	KIWILiveTreePlugin.pm
+	KIWIMiniIsoPlugin.pm
+	KIWIPatternsPlugin.pm
+);
 
 # List of modules not clean to level 5 (gentle) of perlcritic
-my @notClean5 = qw ();
+my @notClean5 = qw (
+	KIWIBasePlugin.pm
+	KIWIContentPlugin.pm
+	KIWIDescrPlugin.pm
+	KIWIEulaPlugin.pm
+	KIWILiveTreePlugin.pm
+	KIWIMiniIsoPlugin.pm
+	KIWIPatternsPlugin.pm
+);
 
 my ($chld_in, $chld_out);
 my $pid = open2(
@@ -383,8 +427,11 @@ while (<$chld_out>) {
 # Should the code layout in our repository change,
 # these definitions have to be updated
 my $modulesDir = getcwd() . '/modules';
+# Just add one of the plugin directories, all contain the same files
+# this needs some cleaning up TODO
+my $pluginsDir = getcwd() . '/distribution/kiwi-instsource-plugins-SLE-11-SP2';
 my $testInclDir = getcwd() . '/tests/unit/lib';
-my $pathEnv = "$modulesDir:$testInclDir";
+my $pathEnv = "$modulesDir:$testInclDir:$pluginsDir";
 
 my @failedToBuild;
 for my $path (@changedFiles) {

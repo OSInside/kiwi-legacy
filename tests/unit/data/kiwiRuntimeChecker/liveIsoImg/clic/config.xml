@@ -3,7 +3,7 @@
 <image schemaversion="5.2" name="test-filetools-verification">
 	<description type="system">
 		<author>Robert Schweikert</author>
-		<contact>rschweikert@novell.com</contact>
+		<contact>rjschwei@suse.com</contact>
 		<specification>test configuration for filesystem tools checking using clicfs via flag</specification>
 	</description>
 	<preferences>

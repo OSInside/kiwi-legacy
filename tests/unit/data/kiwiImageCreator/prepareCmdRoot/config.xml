@@ -3,7 +3,7 @@
 <image schemaversion="5.2" name="test-imagecreate-prepare">
 	<description type="system">
 		<author>Robert Schweikert</author>
-		<contact>rschweikert@novell.com</contact>
+		<contact>rjschwei@suse.com</contact>
 		<specification>test case for the ImageCreator prepare</specification>
 	</description>
 	<preferences>

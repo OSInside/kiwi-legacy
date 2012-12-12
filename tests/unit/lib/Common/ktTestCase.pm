@@ -1,10 +1,10 @@
 #================
 # FILE          : ktTestCase.pm
 #----------------
-# PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2011 Novell Inc.
+# PROJECT       : openSUSE Build-Service
+# COPYRIGHT     : (c) 2011 SUSE LLC
 #               :
-# AUTHOR        : Robert Schweikert <rschweikert@novell.com>
+# AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :

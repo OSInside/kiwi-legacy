@@ -2,8 +2,8 @@
 #================
 # FILE          : kiwi.pl
 #----------------
-# PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# PROJECT       : openSUSE Build-Service
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schaefer <ms@suse.de>
 #               :
@@ -11,7 +11,7 @@
 #               :
 # DESCRIPTION   : This is the main script to provide support
 #               : for creating operating system images
-#               : 
+#               :
 #               :
 # STATUS        : $LastChangedBy: ms $
 #               : $LastChangedRevision: 1 $

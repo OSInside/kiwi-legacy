@@ -2,7 +2,7 @@
 <image schemaversion="4.7" name="suse-11.3-vm-guest" kiwirevision="3">
     <description type="system">
         <author>Robert Schweikert</author>
-        <contact>rschweikert@novell.com</contact>
+        <contact>rjschwei@suse.com</contact>
         <specification>test revision version mismatch</specification>
     </description>
     <preferences>

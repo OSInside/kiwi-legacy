@@ -1,7 +1,7 @@
 #================
 # FILE          : KIWIRepoMetaHandler.pm
 #----------------
-# PROJECT       : OpenSUSE Build-Service
+# PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Jan-Christoph Bornschlegel <jcborn@suse.de>

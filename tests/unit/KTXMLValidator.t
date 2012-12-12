@@ -1,7 +1,7 @@
 #================
 # FILE          : KTXMLValidator.t
 #----------------
-# PROJECT       : OpenSUSE Build-Service
+# PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>
@@ -13,7 +13,6 @@
 # STATUS        : Development
 #----------------
 package KTXMLValidator;
-package KIWIXMLValidator;
 
 use strict;
 use warnings;
