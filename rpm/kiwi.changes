@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Dec 12 10:15:22 CET 2012 - ms@suse.de
+
+- due to the xen splash attachment check the install media is
+  missing important data because it packs the wrong initrd on
+  the iso. This commit moves the xen splash check to the right
+  place (bnc #793099)
+
+-------------------------------------------------------------------
 Wed Dec  5 14:30:53 CET 2012 - ms@suse.de
 
 - make sure REDIRECT tty for blogd is setup only
