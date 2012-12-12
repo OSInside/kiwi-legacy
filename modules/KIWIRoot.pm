@@ -27,7 +27,10 @@ use FileHandle;
 use KIWIConfigure;
 use KIWILocator;
 use KIWILog;
-use KIWIManager;
+use KIWIManagerEnsconce;
+use KIWIManagerSmart;
+use KIWIManagerYum;
+use KIWIManagerZypper;
 use KIWIOverlay;
 use KIWIQX qw (qxx);
 use KIWIURL;
@@ -258,9 +261,29 @@ sub new {
 	#==========================================
 	# Create package manager object
 	#------------------------------------------
-	my $manager = KIWIManager -> new (
-		$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
-	);
+	my $manager;
+	if ($pmgr eq "zypper") {
+		$manager = KIWIManagerZypper -> new (
+			$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
+		);
+	} elsif ($pmgr eq "smart") {
+		$manager = KIWIManagerSmart -> new (
+			$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
+		);
+	} elsif ($pmgr eq "yum") {
+		$manager = KIWIManagerYum -> new (
+			$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
+		);
+	} elsif ($pmgr eq "ensconce") {
+		$manager = KIWIManagerEnsconce -> new (
+			$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
+		);
+	} else {
+		$kiwi -> error ("No package manager backend found for $pmgr");
+		$kiwi -> failed ();
+		$this -> cleanMount();
+		return;
+	}
 	if (! defined $manager) {
 		$this -> cleanMount();
 		return;

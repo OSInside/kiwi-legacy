@@ -23,6 +23,10 @@ my @kiwiModules = qw (
 	KIWILocator.pm
 	KIWILog.pm
 	KIWIManager.pm
+	KIWIManagerSmart.pm
+	KIWIManagerYum.pm
+	KIWIManagerZypper.pm
+	KIWIManagerEnsconce.pm
 	KIWIMigrate.pm
 	KIWIOverlay.pm
 	KIWIProductData.pm
@@ -138,6 +142,10 @@ my @notClean1 = qw (
 	KIWILocator.pm
 	KIWILog.pm
 	KIWIManager.pm
+	KIWIManagerSmart.pm
+	KIWIManagerYum.pm
+	KIWIManagerZypper.pm
+	KIWIManagerEnsconce.pm
 	KIWIMigrate.pm
 	KIWIOverlay.pm
 	KIWIProductData.pm
@@ -253,6 +261,10 @@ my @notClean2 = qw (
 	KIWILocator.pm
 	KIWILog.pm
 	KIWIManager.pm
+	KIWIManagerSmart.pm
+	KIWIManagerYum.pm
+	KIWIManagerZypper.pm
+	KIWIManagerEnsconce.pm
 	KIWIMigrate.pm
 	KIWIOverlay.pm
 	KIWIProductData.pm
@@ -302,6 +314,10 @@ my @notClean3 = qw (
 	KIWIIsoLinux.pm
 	KIWILog.pm
 	KIWIManager.pm
+	KIWIManagerSmart.pm
+	KIWIManagerYum.pm
+	KIWIManagerZypper.pm
+	KIWIManagerEnsconce.pm
 	KIWIMigrate.pm
 	KIWIOverlay.pm
 	KIWIProductData.pm
