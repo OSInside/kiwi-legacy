@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.5" name="suse-11.4-pxe-client">
+<image schemaversion="5.6" name="suse-11.4-pxe-client">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>

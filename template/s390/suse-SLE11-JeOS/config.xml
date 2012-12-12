@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.5" name="LimeJeOS-SLE11">
+<image schemaversion="5.6" name="LimeJeOS-SLE11">
 	<description type="system">
 		<author>Marcus Schaefer</author>
 		<contact>cthiel@novell.com</contact>

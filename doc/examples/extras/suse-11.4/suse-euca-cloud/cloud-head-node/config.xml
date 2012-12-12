@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.5" name="Eucalyptus-Head-Node">
+<image schemaversion="5.6" name="Eucalyptus-Head-Node">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rschweikert@novell.com</contact>
