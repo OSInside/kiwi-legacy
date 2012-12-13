@@ -28,7 +28,7 @@
 		</type>
 	</preferences>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="rpm-md">
 		<source path="iso:///image/CDs/RHEL-5.4-%arch-DVD.iso/Server"/>

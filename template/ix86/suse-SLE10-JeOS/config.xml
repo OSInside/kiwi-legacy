@@ -54,7 +54,7 @@
 		</type>
 	</preferences>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository priority="3" type="rpm-md">
 		<source path="obs://SUSE:SLE-10-SP3:GA/SLE_10_SP2_Update"/>

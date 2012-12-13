@@ -26,7 +26,7 @@
 		<type image="pxe" filesystem="ext3" boot="netboot/suse-SLES11" bootloader="zipl"/>
 	</preferences>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
 		<source path="http://download.suse.de/install/SLP/SLES-11-SP2-GM/%arch/DVD1/"/>

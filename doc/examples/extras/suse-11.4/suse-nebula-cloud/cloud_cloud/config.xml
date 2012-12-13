@@ -24,7 +24,7 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<users group="root">
-		<user pwd="cloudDemo" pwdformat="plain" home="/root" name="root"/>
+		<user password="cloudDemo" pwdformat="plain" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
 		<source path="opensuse://11.4/repo/oss/"/>
