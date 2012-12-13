@@ -981,7 +981,7 @@ sub test_getDVDID {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('2', $id);
+	$this -> assert_str_equals('0', $id);
 	return;
 }
 
@@ -1656,7 +1656,7 @@ sub test_getXMLElement{
 		. '<vmconfig-entry>foo=bar</vmconfig-entry>'
 		. '<vmconfig-entry>cd=none</vmconfig-entry>'
 		. '<vmdisk controller="scsi" device="sda" disktype="hdd" id="1"/>'
-		. '<vmdvd controller="ide" id="2"/>'
+		. '<vmdvd controller="ide" id="0"/>'
 		. '<vmnic interface="eth0" driver="e1000" mac="FE:C0:B1:96:64:AC"/>'
 		. '<vmnic interface="eth1" driver="r8169" mac="FE:C0:B1:96:64:AD" '
 		. 'mode="bridge"/>'
@@ -1960,7 +1960,7 @@ sub test_setDVDIDNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('2', $id);
+	$this -> assert_str_equals('0', $id);
 	return;
 }
 
@@ -3373,7 +3373,7 @@ sub __getVMachineObj {
 	my %disks = ( system => \%diskData );
 	my %dvd = (
 		controller => 'ide',
-		id         => '2'
+		id         => '0'
 	);
 	my %nicData1 = (
 		driver    => 'e1000',
