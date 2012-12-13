@@ -650,7 +650,7 @@ sub setDVDID {
 	# ---
 	my $this = shift;
 	my $id   = shift;
-	if (! $id ) {
+	if (! defined $id ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setDVDID: no ID data provided, retaining current data.';
 		$kiwi -> error($msg);
@@ -1148,7 +1148,7 @@ sub setSystemDiskID {
 	# ---
 	my $this   = shift;
 	my $id = shift;
-	if (! $id ) {
+	if (! defined $id ) {
 		my $kiwi = $this->{kiwi};
 		my $msg = 'setSystemDiskID: no value provided, retaining '
 			. 'current data.';
@@ -1420,7 +1420,7 @@ sub __isDVDInitValid {
 		$kiwi -> failed();
 		return;
 	}
-	if (! $dvd->{id} ) {
+	if (! defined $dvd->{id} ) {
 		my $msg = 'Initialization data for vmdvd incomplete, must '
 			. 'provide "id" key-value pair.';
 		$kiwi -> error($msg);
