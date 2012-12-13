@@ -1236,7 +1236,7 @@ sub __checkUserDataConsistent {
 			$info{gid}   = $gid;
 			$info{home}  = $usr -> getAttribute('home');
 			$info{name}  = $name;
-			$info{pwd}   = $usr -> getAttribute('pwd');
+			$info{pwd}   = $usr -> getAttribute('password');
 			$info{pwdf}  = $usr -> getAttribute('pwdformat');
 			$info{rname} = $usr -> getAttribute('realname');
 			$info{shell} = $usr -> getAttribute('shell');

@@ -44,8 +44,38 @@
 			</xsl:when>
 		</xsl:choose>
 		<xsl:copy-of select="@*[not(local-name(.) = 'pwd')]"/>
-		  <xsl:apply-templates mode="conv55to56"/>
+		<xsl:apply-templates mode="conv55to56"/>
 	</instrepo>
+</xsl:template>
+
+<!-- transform the pwd attribute of the users element to password -->
+<xsl:template match="users/user" mode="conv55to56">
+	<user>
+		<xsl:choose>
+			<xsl:when test="@pwd">
+				<xsl:attribute name="password">
+					<xsl:value-of select="@pwd"/>
+				</xsl:attribute>
+			</xsl:when>
+		</xsl:choose>
+		<xsl:copy-of select="@*[not(local-name(.) = 'pwd')]"/>
+		<xsl:apply-templates mode="conv55to56"/>
+	</user>
+</xsl:template>
+
+<!-- transform the pwd attribute of the repository element to password -->
+<xsl:template match="repository" mode="conv55to56">
+	<repository>
+		<xsl:choose>
+			<xsl:when test="@pwd">
+				<xsl:attribute name="password">
+					<xsl:value-of select="@pwd"/>
+				</xsl:attribute>
+			</xsl:when>
+		</xsl:choose>
+		<xsl:copy-of select="@*[not(local-name(.) = 'pwd')]"/>
+		<xsl:apply-templates mode="conv55to56"/>
+	</repository>
 </xsl:template>
 
 </xsl:stylesheet>

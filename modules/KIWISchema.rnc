@@ -144,7 +144,7 @@ k.profiles.attribute    =
 	attribute profiles { text }
 k.password.attribute    =
 	## The password
-	attribute pwd { text }
+	attribute password { text }
 k.script.attribute      =
 	## A script hook for meta files to be called after the
 	## file was fetched
@@ -409,7 +409,7 @@ div {
 			"installation source\x{a}"~
 			"The Priority specifies the order the repositories are\x{a}"~
 			"layered when looking for a package.\x{a}"~
-			"Username and pwd are the credentials for ftp access.\x{a}"~
+			"Username and password are the credentials for ftp access.\x{a}"~
 			"The local attribute tells kiwi to use hardlinks instead of\x{a}"~
 			"downloads in case the source and destination trees are on\x{a}"~
 			"the same machine."
@@ -1822,7 +1822,7 @@ div {
 	k.user.realname.attribute =
 		## The name of an user
 		attribute realname { text }
-	k.user.pwd.attribute = k.password.attribute
+	k.user.password.attribute = k.password.attribute
 	k.user.pwdformat =
 		## Format of the given password, encrypted is the default
 		attribute pwdformat { "encrypted" | "plain" }
@@ -1836,7 +1836,7 @@ div {
 		k.user.home.attribute &
 		k.user.id.attribute? &
 		k.user.name.attribute &
-		k.user.pwd.attribute? &
+		k.user.password.attribute? &
 		k.user.pwdformat? &
 		k.user.realname.attribute? &
 		k.user.shell.attribute?

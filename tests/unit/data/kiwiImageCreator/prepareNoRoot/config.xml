@@ -16,7 +16,7 @@
 		<version>1.0.0</version>
 	</preferences>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="rpm-dir">
 		<source path="/tmp"/>

@@ -3431,7 +3431,7 @@ sub __populateUserInfo {
 				groupid      => $groupid,
 				home         => $userNode -> getAttribute('home'),
 				name         => $name,
-				passwd       => $userNode -> getAttribute('pwd'),
+				passwd       => $userNode -> getAttribute('password'),
 				passwdformat => $userNode -> getAttribute('pwdformat'),
 				realname     => $userNode -> getAttribute('realname'),
 				shell        => $userNode -> getAttribute('shell'),
@@ -7286,7 +7286,7 @@ sub getUsers_legacy {
 		foreach my $element (@ntag) {
 			my $name = $element -> getAttribute ("name");
 			my $uid  = $element -> getAttribute ("id");
-			my $pwd  = $element -> getAttribute ("pwd");
+			my $pwd  = $element -> getAttribute ("password");
 			my $pwdformat = $element -> getAttribute ("pwdformat");
 			my $home = $element -> getAttribute ("home");
 			my $realname = $element -> getAttribute ("realname");

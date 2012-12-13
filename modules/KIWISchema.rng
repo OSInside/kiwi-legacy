@@ -239,7 +239,7 @@ for isolinux and grub</a:documentation>
     </attribute>
   </define>
   <define name="k.password.attribute">
-    <attribute name="pwd">
+    <attribute name="password">
       <a:documentation>The password</a:documentation>
     </attribute>
   </define>
@@ -607,7 +607,7 @@ specifies where the boot image (initrd) can be found.</db:para>
 installation source
 The Priority specifies the order the repositories are
 layered when looking for a package.
-Username and pwd are the credentials for ftp access.
+Username and password are the credentials for ftp access.
 The local attribute tells kiwi to use hardlinks instead of
 downloads in case the source and destination trees are on
 the same machine.</db:para>
@@ -2571,7 +2571,7 @@ compressed filesystem.</db:para>
         <a:documentation>The name of an user</a:documentation>
       </attribute>
     </define>
-    <define name="k.user.pwd.attribute">
+    <define name="k.user.password.attribute">
       <ref name="k.password.attribute"/>
     </define>
     <define name="k.user.pwdformat">
@@ -2601,7 +2601,7 @@ compressed filesystem.</db:para>
         </optional>
         <ref name="k.user.name.attribute"/>
         <optional>
-          <ref name="k.user.pwd.attribute"/>
+          <ref name="k.user.password.attribute"/>
         </optional>
         <optional>
           <ref name="k.user.pwdformat"/>
