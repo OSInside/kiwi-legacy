@@ -27,6 +27,7 @@ use FileHandle;
 use KIWIConfigure;
 use KIWILocator;
 use KIWILog;
+use KIWIManagerApt;
 use KIWIManagerEnsconce;
 use KIWIManagerSmart;
 use KIWIManagerYum;
@@ -104,13 +105,15 @@ sub new {
 	# Create sourceChannel hash
 	#------------------------------------------
 	foreach my $source (keys %repository) {
-		my $type = $repository{$source}[0];
-		my $alias= $repository{$source}[1];
-		my $prio = $repository{$source}[2];
-		my $user = $repository{$source}[3];
-		my $pwd  = $repository{$source}[4];
-		my $plic = $repository{$source}[5];
+		my $type    = $repository{$source}[0];
+		my $alias   = $repository{$source}[1];
+		my $prio    = $repository{$source}[2];
+		my $user    = $repository{$source}[3];
+		my $pwd     = $repository{$source}[4];
+		my $plic    = $repository{$source}[5];
 		my $imgincl = $repository{$source}[6];
+		my $dist    = $repository{$source}[7];
+		my $comp    = $repository{$source}[8];
 		my $urlHandler  = KIWIURL -> new ($kiwi,$cmdL,$this,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		if ($publics_url =~ /^\//) {
@@ -179,6 +182,18 @@ sub new {
 		if (($imgincl) && ("$imgincl" eq "true")) {
 			$kiwi -> info ("Retain $channel\n");
 			$sourceChannel{$channel}{imgincl} = 1;
+		}
+		#==========================================
+		# set distribution name tag
+		#------------------------------------------
+		if ($dist) {
+			$sourceChannel{$channel}{distribution} = $dist;
+		}
+		#==========================================
+		# set components
+		#------------------------------------------
+		if ($comp) {
+			$sourceChannel{$channel}{components} = $comp;
 		}
 		$count++;
 	}
@@ -276,6 +291,10 @@ sub new {
 		);
 	} elsif ($pmgr eq "ensconce") {
 		$manager = KIWIManagerEnsconce -> new (
+			$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
+		);
+	} elsif ($pmgr eq "apt-get") {
+		$manager = KIWIManagerApt -> new (
 			$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
 		);
 	} else {
@@ -393,7 +412,7 @@ sub init {
 	# Get base Package list
 	#------------------------------------------
 	my @initPacs = $xml -> getBaseList_legacy();
-	if (! @initPacs) {
+	if ((! @initPacs) && ($packager ne "apt-get")) {
 		$kiwi -> error ("Couldn't create base package list");
 		$kiwi -> failed ();
 		return;
@@ -1430,6 +1449,9 @@ sub cleanMount {
 	my $root = $this->{root};
 	my $xml  = $this->{xml};
 	if (! defined $this->{mountList}) {
+		return $this;
+	}
+	if (! defined $root) {
 		return $this;
 	}
 	my @mountList  = @{$this->{mountList}};

@@ -3590,7 +3590,7 @@ sub test_addRepositories_legacy {
 	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
-	$this -> assert_str_equals('true', $repoInfo[-2]);
+	$this -> assert_str_equals('true', $repoInfo[-4]);
 	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
@@ -3654,7 +3654,7 @@ sub test_addRepositoriesInvalidTypeInf_legacy {
 	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
-	$this -> assert_str_equals('true', $repoInfo[-2]);
+	$this -> assert_str_equals('true', $repoInfo[-4]);
 	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
@@ -3715,7 +3715,7 @@ sub test_addRepositoriesNoTypeInf_legacy {
 	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
-	$this -> assert_str_equals('true', $repoInfo[-2]);
+	$this -> assert_str_equals('true', $repoInfo[-4]);
 	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
@@ -7676,11 +7676,11 @@ sub test_getRepositories_legacy {
 	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
-	$this -> assert_str_equals('true', $repoInfo[-2]);
+	$this -> assert_str_equals('true', $repoInfo[-4]);
 	@repoInfo = @{$repos{'http://download.opensuse.org/update/12.1'}};
 	$this -> assert_str_equals('rpm-md', $repoInfo[0]);
 	$this -> assert_str_equals('update', $repoInfo[1]);
-	$this -> assert_str_equals('true', $repoInfo[-1]);
+	$this -> assert_str_equals('true', $repoInfo[-3]);
 	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);
@@ -9485,7 +9485,7 @@ sub test_setRepository_legacy {
 	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
-	$this -> assert_str_equals('true', $repoInfo[-2]);
+	$this -> assert_str_equals('true', $repoInfo[-4]);
 	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('foo', $repoInfo[3]);

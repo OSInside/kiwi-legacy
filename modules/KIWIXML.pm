@@ -3320,6 +3320,10 @@ sub __populateRepositoryInfo {
 			-> get_node(1) -> getAttribute ('path');
 		$repoData{preferlicense} = $repoNode
 			-> getAttribute ('prefer-license');
+		$repoData{distribution}  = $repoNode
+			-> getAttribute ('distribution');
+		$repoData{components}    = $repoNode
+			-> getAttribute ('components');
 		$repoData{priority}      = $repoNode
 			-> getAttribute ('priority');
 		$repoData{status}        = $repoNode
@@ -7065,9 +7069,13 @@ sub getRepositories_legacy {
 		my $user = $element -> getAttribute("username");
 		my $pwd  = $element -> getAttribute("password");
 		my $plic = $element -> getAttribute("prefer-license");
+		my $dist = $element -> getAttribute("distribution");
+		my $comp = $element -> getAttribute("components");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source = $this -> __resolveLink ( $stag -> getAttribute ("path") );
-		$result{$source} = [$type,$alias,$prio,$user,$pwd,$plic,$imgincl];
+		$result{$source} = [
+			$type,$alias,$prio,$user,$pwd,$plic,$imgincl,$dist,$comp
+		];
 	}
 	return %result;
 }

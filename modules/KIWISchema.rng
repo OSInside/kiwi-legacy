@@ -1026,6 +1026,7 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
   <div>
     <define name="k.packagemanager.content">
       <choice>
+        <value>apt-get</value>
         <value>smart</value>
         <value>zypper</value>
         <value>ensconce</value>
@@ -1241,6 +1242,17 @@ source argument doesn't really explain what this repository
 contains</a:documentation>
       </attribute>
     </define>
+    <define name="k.repository.components.attribute">
+      <attribute name="components">
+        <a:documentation>Distribution components, used for deb repositories. If
+not set it defaults to main</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.repository.distribution.attribute">
+      <attribute name="distribution">
+        <a:documentation>Distribution name information, used for deb repositories</a:documentation>
+      </attribute>
+    </define>
     <define name="k.repository.imageinclude.attribute">
       <attribute name="imageinclude">
         <a:documentation>Specify whether or not this repository should be configured in the
@@ -1287,6 +1299,12 @@ whether and how this information is passed</a:documentation>
         </optional>
         <optional>
           <ref name="k.repository.alias.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.components.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.distribution.attribute"/>
         </optional>
         <optional>
           <ref name="k.repository.imageinclude.attribute"/>

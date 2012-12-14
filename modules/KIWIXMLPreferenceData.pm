@@ -781,7 +781,7 @@ sub __isValidPckgMgr {
 		$kiwi -> failed();
 		return;
 	}
-	my %supported = map { ($_ => 1) } qw( smart ensconce yum zypper );
+	my %supported = map { ($_ => 1) } qw( apt-get smart ensconce yum zypper );
 	if (! $supported{$pMgr} ) {
 		my $msg = "$caller: specified package manager '$pMgr' is not "
 			. 'supported.';

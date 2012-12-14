@@ -699,7 +699,8 @@ div {
 # common element <packagemanager>
 #
 div {
-	k.packagemanager.content = "smart" | "zypper" | "ensconce" | "yum"
+	k.packagemanager.content = 
+		"apt-get" | "smart" | "zypper" | "ensconce" | "yum"
 	k.packagemanager.attlist = empty
 	k.packagemanager =
 		## Name of the Package Manager
@@ -840,6 +841,13 @@ div {
 		## source argument doesn't really explain what this repository
 		## contains
 		attribute alias { text }
+	k.repository.components.attribute =
+		## Distribution components, used for deb repositories. If
+		## not set it defaults to main
+		attribute components { text }
+	k.repository.distribution.attribute =
+		## Distribution name information, used for deb repositories
+		attribute distribution { text }
     k.repository.imageinclude.attribute =
         ## Specify whether or not this repository should be configured in the
         ## resulting image. Boolean value true or false, the default is false.
@@ -867,6 +875,8 @@ div {
 		k.repository.profiles.attribute? &
 		k.repository.status.attribute? &
 		k.repository.alias.attribute? &
+		k.repository.components.attribute? &
+		k.repository.distribution.attribute? &
         k.repository.imageinclude.attribute? &
 		k.repository.prefer-license.attribute? &
 		k.repository.priority.attribute? &

@@ -441,6 +441,9 @@ sub __checkPackageManagerExists {
 	# ---
 	my $this = shift;
 	my $prefObj = $this -> {xml} -> getPreferences();
+	if (! $prefObj) {
+		return;
+	}
 	my $pkgMgr = $prefObj -> getPackageManager();
 	my $haveExec = $this -> {locator} -> getExecPath($pkgMgr);
 	if (! $haveExec) {

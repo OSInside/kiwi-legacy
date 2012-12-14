@@ -54,6 +54,8 @@ sub new {
 	}
 	my %keywords = map { ($_ => 1) } qw(
 		alias
+		components
+		distribution
 		imageinclude
 		password
 		path
@@ -162,6 +164,28 @@ sub getPreferLicense {
 }
 
 #==========================================
+# getDistribution
+#------------------------------------------
+sub getDistribution {
+	# ...
+	# Return the distribution name indicator for the repository
+	# ---
+	my $this = shift;
+	return $this->{distribution};
+}
+
+#==========================================
+# getComponents
+#------------------------------------------
+sub getComponents {
+	# ...
+	# Return the components indicator for the repository
+	# ---
+	my $this = shift;
+	return $this->{components};
+}
+
+#==========================================
 # getPriority
 #------------------------------------------
 sub getPriority {
@@ -219,6 +243,14 @@ sub getXMLElement {
 	my $prefLic = $this -> getPreferLicense();
 	if ($prefLic) {
 		$element -> setAttribute('prefer-license', $prefLic);
+	}
+	my $dist = $this -> getDistribution();
+	if ($dist) {
+		$element -> setAttribute('distribution', $dist);
+	}
+	my $comp = $this -> getComponents();
+	if ($comp) {
+		$element -> setAttribute('components',$comp)
 	}
 	my $prio = $this -> getPriority();
 	if ($prio) {
@@ -333,6 +365,30 @@ sub setPreferLicense {
 		caller => 'setPreferLicense'
 	);
 	return $this -> __setBooleanValue(\%settings);
+}
+
+#==========================================
+# setDistribution
+#------------------------------------------
+sub setDistribution {
+	# ...
+	# Set the distribution name tag for this repository
+	# ---
+	my $this = shift;
+	$this->{distribution} = shift;
+	return $this;
+}
+
+#==========================================
+# setComponents
+#------------------------------------------
+sub setComponents {
+	# ...
+	# Set the components for this repository
+	# ---
+	my $this = shift;
+	$this->{components} = shift;
+	return $this;
 }
 
 #==========================================

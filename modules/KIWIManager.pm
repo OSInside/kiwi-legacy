@@ -85,6 +85,9 @@ sub new {
 		$kiwi -> warning ("Target architecture not supported for $manager");
 		$kiwi -> skipped ();
 	}
+	if ($manager eq "apt-get") {
+		$manager = "apt";
+	}
 	my $locator = KIWILocator -> new ($kiwi);
 	my $dataDir = "/var/cache/kiwi/$manager";
 	my @channelList = ();
