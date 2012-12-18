@@ -426,11 +426,15 @@ function createInitialDevices {
 	test -b $prefix/loop1    || mknod -m 0640 $prefix/loop1    b 7 1
 	test -b $prefix/loop2    || mknod -m 0640 $prefix/loop2    b 7 2
 	mkdir -p -m 0755 $prefix/pts
-	mkdir -p -m 1777 $prefix/shm
 	test -L $prefix/fd     || ln -s /proc/self/fd $prefix/fd
 	test -L $prefix/stdin  || ln -s fd/0 $prefix/stdin
 	test -L $prefix/stdout || ln -s fd/1 $prefix/stdout
 	test -L $prefix/stderr || ln -s fd/2 $prefix/stderr
+	#======================================
+	# mount shared mem tmpfs
+	#--------------------------------------
+	mkdir -m 1777 $prefix/shm
+	mount -t tmpfs -o mode=1777 tmpfs $prefix/shm
 }
 #======================================
 # mountSystemFilesystems
