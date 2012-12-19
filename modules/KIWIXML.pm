@@ -2311,6 +2311,7 @@ sub __genTypeHash {
 		'kernelcmdline',
 		'luks',
 		'ramonly',
+		'mdraid',
 		'vga',
 		'volid'
 	);
@@ -8041,6 +8042,8 @@ sub __populateTypeInfo_legacy {
 				-> getAttribute("hybridpersistent");
 			$record{ramonly}       = $node
 				-> getAttribute("ramonly");
+			$record{mdraid}        = $node
+				-> getAttribute("mdraid");
 			if (defined $disk) {
 				$record{lvm} = "true";
 			}

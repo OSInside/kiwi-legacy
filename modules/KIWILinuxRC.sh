@@ -3942,6 +3942,24 @@ function activateVolumeGroup {
 	vgchange -a y $VGROUP
 }
 #======================================
+# activateMDRaid
+#--------------------------------------
+function activateMDRaid {
+	if [ ! -z "$kiwi_RaidDev" ];then
+		Echo "Activating $kiwi_RaidDev mdraid array..."
+		mdadm --assemble --scan
+	fi
+}
+#======================================
+# deactivateMDRaid
+#--------------------------------------
+function deactivateMDRaid {
+	if [ ! -z "$kiwi_RaidDev" ];then
+		Echo "Deactivating $kiwi_RaidDev mdraid array..."
+		mdadm --stop $kiwi_RaidDev
+	fi
+}
+#======================================
 # searchSwapSpace
 #--------------------------------------
 function searchSwapSpace {

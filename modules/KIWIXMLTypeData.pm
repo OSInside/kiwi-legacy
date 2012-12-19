@@ -94,6 +94,7 @@ sub new {
 		kernelcmdline
 		luks
 		machine
+		mdraid
 		oemconfig
 		primary
 		pxedeploy
@@ -153,6 +154,7 @@ sub new {
 	$this->{installboot}            = $init->{installboot};
 	$this->{kernelcmdline}          = $init->{kernelcmdline};
 	$this->{luks}                   = $init->{luks};
+	$this->{mdraid}                 = $init->{mdraid};
 	$this->{size}                   = $init->{size};
 	$this->{sizeadd}                = $init->{sizeadd};
 	$this->{sizeunit}               = $init->{sizeunit};
@@ -517,6 +519,17 @@ sub getLuksPass {
 }
 
 #==========================================
+# getMDRaid
+#------------------------------------------
+sub getMDRaid {
+	# ...
+	# Return the software raid type
+	# ---
+	my $this = shift;
+	return $this->{mdraid};
+}
+
+#==========================================
 # getPrimary
 #------------------------------------------
 sub getPrimary {
@@ -723,6 +736,10 @@ sub getXMLElement {
 	my $luks = $this -> getLuksPass();
 	if ($luks) {
 		$element -> setAttribute('luks', $luks);
+	}
+	my $mdraid = $this -> getMDRaid();
+	if ($mdraid) {
+		$element -> setAttribute('mdraid',$mdraid);
 	}
 	my $prim = $this -> getPrimary();
 	if ($prim) {
@@ -1299,6 +1316,22 @@ sub setLuksPass {
 }
 
 #==========================================
+# setMDRaid
+#------------------------------------------
+sub setMDRaid {
+	# ...
+	# Set software raid type
+	# ---
+	my $this = shift;
+	my $type = shift;
+	if (! $this -> __isValidRaidType($type, 'setMDRaid') ) {
+		return;
+	}
+	$this->{mdraid} = $type;
+	return $this;
+}
+
+#==========================================
 # setPrimary
 #------------------------------------------
 sub setPrimary {
@@ -1516,6 +1549,12 @@ sub __isInitConsistent {
 			return;
 		}
 	}
+	if ($init->{mdraid}) {
+		if (! $this->__isValidRaidType (
+			$init->{mdraid},'object initialization')) {
+			return;
+		}
+	}
 	if ($init->{sizeunit}) {
 		if (! $this->__isValidSizeUnit(
 			$init->{sizeunit}, 'object initialization')) {
@@ -1663,6 +1702,43 @@ sub __isValidFilesystem {
 	);
 	if (! $supported{$fileS} ) {
 		my $msg = "$caller: specified filesystem '$fileS' is not "
+			. 'supported.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
+}
+
+#==========================================
+# __isValidRaidType
+#------------------------------------------
+sub __isValidRaidType {
+	# ...
+	# Verify that the given raid type is supported
+	# ---
+	my $this   = shift;
+	my $mdtype = shift;
+	my $caller = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller ) {
+		my $msg = 'Internal error __isValidRaidType called without '
+			. 'call origin argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if (! $mdtype ) {
+		my $msg = "$caller: no raid type specified, retaining "
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my %supported = map { ($_ => 1) } qw(
+		mirroring striping
+	);
+	if (! $supported{$mdtype} ) {
+		my $msg = "$caller: specified raid type '$mdtype' is not "
 			. 'supported.';
 		$kiwi -> error($msg);
 		$kiwi -> failed();

@@ -131,6 +131,7 @@ function OEMRepartStandard {
 		#======================================
 		# repart root partition
 		#--------------------------------------
+		deactivateMDRaid
 		partsize=+"$diskRSysMBytes"M
 		if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 0 ];then
 			partsize=.
@@ -172,6 +173,7 @@ function OEMRepartStandard {
 		setupDeviceNames \
 			$rootParam $swapParam $recoParam $bootParam $cowpParam
 		callPartitioner $input
+		activateMDRaid
 	fi
 }
 
@@ -353,6 +355,7 @@ function OEMRepartLVM {
 			luksClose
 		fi
 		deactivateVolumeGroup
+		deactivateMDRaid
 		#======================================
 		# resize LVM partition
 		#--------------------------------------
@@ -381,6 +384,7 @@ function OEMRepartLVM {
 		callPartitioner $input
 		waitForStorageDevice $(ddn $imageDiskDevice $extendID)
 		deactivateVolumeGroup
+		deactivateMDRaid
 		#======================================
 		# extend volume group with rest space
 		#--------------------------------------
@@ -388,6 +392,7 @@ function OEMRepartLVM {
 		#======================================
 		# activate volume group $VGROUP
 		#--------------------------------------
+		activateMDRaid
 		activateVolumeGroup
 		#======================================
 		# Add LVSwap if requested.
@@ -654,7 +659,11 @@ function setupDeviceNames {
 		#======================================
 		# set root device name
 		#--------------------------------------
-		export imageRootDevice=$(ddn $imageDiskDevice $rootID)
+		if [ ! -z "$kiwi_RaidDev" ];then
+			export imageRootDevice=$kiwi_RaidDev
+		else
+			export imageRootDevice=$(ddn $imageDiskDevice $rootID)
+		fi
 		#======================================
 		# set swap device name
 		#--------------------------------------

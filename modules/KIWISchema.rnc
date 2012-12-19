@@ -1660,6 +1660,12 @@ div {
 		## represents the password string used to be able to
 		## mount that filesystem while booting
 		attribute luks { text }
+	k.type.mdraid.attribute =
+		## Setup software raid in degraded mode with one disk
+		## Thus only mirroring and striping is possible
+		attribute mdraid {
+			"mirroring" | "striping"
+		}
 	k.type.primary.attribute =
 		## Specifies the primary type (choose KIWI option type)
 		attribute primary { xsd:boolean }
@@ -1708,6 +1714,7 @@ div {
 		k.type.installpxe.attribute? &
 		k.type.kernelcmdline.attribute? &
 		k.type.luks.attribute? &
+		k.type.mdraid.attribute? &
 		k.type.primary.attribute? &
 		k.type.ramonly.attribute? &
 		k.type.vga.attribute? &

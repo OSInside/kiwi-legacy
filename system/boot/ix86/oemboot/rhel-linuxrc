@@ -97,6 +97,13 @@ function setupInitialDeviceNames {
 			export imageRWDevice=/dev/$VGROUP/$kiwi_RWPart
 			export imageIOWRDevice=$imageRWDevice
 		fi
+	elif [ ! -z "$kiwi_RaidDev" ];then
+		export imageRootDevice=$kiwi_RaidDev
+		if [ ! -z "$kiwi_ROPart" ] || [ ! -z "$kiwi_RWPart" ];then
+			systemException \
+				"split systems not supported in software raid mode"
+			"reboot"
+		fi
 	else
 		export imageRootDevice=$(ddn $imageDiskDevice $kiwi_RootPart)
 		if [ ! -z "$kiwi_ROPart" ];then
@@ -648,6 +655,9 @@ umountSystemFilesystems
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	importBranding
+fi
+if [ -f /etc/mdadm.conf ];then
+	cp /etc/mdadm.conf /mnt/etc
 fi
 cp /preinit /mnt
 cp /include /mnt

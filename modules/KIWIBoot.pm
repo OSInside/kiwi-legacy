@@ -1604,6 +1604,7 @@ sub setupBootDisk {
 	my $needBootP = 0;
 	my $needParts = 1;
 	my $rawRW     = 0;
+	my $md        = 0;
 	my $bootloader;
 	if ($arch =~ /ppc|ppc64/) {
 		$bootloader = "yaboot";
@@ -1658,6 +1659,13 @@ sub setupBootDisk {
 	}
 	if (! $type{installpxe}) {
 		$type{installpxe} = 'false';
+	}
+	#==========================================
+	# Check for software raid...
+	#------------------------------------------
+	if ($type{mdraid}) {
+		$md = $type{mdraid};
+		$this->{md} = $md;
 	}
 	#==========================================
 	# Check for LVM...
@@ -1782,6 +1790,10 @@ sub setupBootDisk {
 	#==========================================
 	# setup boot partition ID
 	#------------------------------------------
+	if ($md) {
+		$needBootP = 1;
+		$needParts = 2;
+	}
 	if ($lvm) {
 		$needBootP = 1;
 		$needParts = 2;
@@ -1818,6 +1830,13 @@ sub setupBootDisk {
 		$needParts = 2;
 	}
 	$this->{needBootP} = $needBootP;
+	#==========================================
+	# check root partition type
+	#------------------------------------------
+	my $rootid = '83';
+	if ($md) {
+		$rootid = 'fd';
+	}
 	#==========================================
 	# check required boot filesystem type
 	#------------------------------------------
@@ -2025,6 +2044,7 @@ sub setupBootDisk {
 						"n","p","3",".","+".$syszip."M",
 						"n","p","4",".",".",
 						"t","2",$partid,
+						"t","3",$rootid,
 						"a","1","w","q"
 					);
 					$this->{partids}{root}      = '3';
@@ -2039,6 +2059,7 @@ sub setupBootDisk {
 						"n","p","2",".","+".$syszip."M",
 						"n","p","3",".",".",
 						"t","1",$partid,
+						"t","2",$rootid,
 						"a","1","w","q"
 					);
 					$this->{partids}{root}      = '2';
@@ -2054,6 +2075,7 @@ sub setupBootDisk {
 						"n","p","2",".","+".$this->{bootsize}."M",
 						"n","p","3",".",".",
 						"t","2",$partid,
+						"t","3",$rootid,
 						"a","1","w","q"
 					);
 					$this->{partids}{root} = '3';
@@ -2065,6 +2087,7 @@ sub setupBootDisk {
 						"n","p","1",".","+".$this->{bootsize}."M",
 						"n","p","2",".",".",
 						"t","1",$partid,
+						"t","2",$rootid,
 						"a","1","w","q"
 					);
 					$this->{partids}{root} = '2';
@@ -2152,6 +2175,16 @@ sub setupBootDisk {
 			# Create disk device mapping table
 			#------------------------------------------
 			%deviceMap = $this -> setDefaultDeviceMap ($this->{loop});
+		}
+		#==========================================
+		# setup md device if requested
+		#------------------------------------------
+		if ($md) {
+			%deviceMap = $this -> setMD (\%deviceMap,$md);
+			if (! %deviceMap) {
+				$this -> cleanStack ();
+				return;
+			}
 		}
 		#==========================================
 		# setup volume group if requested
@@ -2825,6 +2858,23 @@ sub setupBootFlags {
 		return;
 	}
 	#==========================================
+	# Include mdadm.conf of mdraid is active
+	#------------------------------------------
+	if ($this->{mddev}) {
+		qxx ("mkdir -p $irddir/etc");
+		$status = qxx (
+			"mdadm -Db $this->{mddev} > $irddir/etc/mdadm.conf 2>&1"
+		);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to extract raid configuration: $status");
+			$kiwi -> failed ();
+			qxx ("rm -rf $irddir");
+			return;
+		}
+	}
+	#==========================================
 	# Include MBR ID to initrd
 	#------------------------------------------
 	my $FD;
@@ -2901,6 +2951,10 @@ sub setupPartIDs {
 			$kiwi -> error  ("Couldn't create partition ID information");
 			$kiwi -> failed ();
 			return;
+		}
+		if ($this->{md}) {
+			print $ID_FD "kiwi_RaidPart=\"$this->{partids}{root}\"\n";
+			print $ID_FD "kiwi_RaidDev=/dev/md0\n";
 		}
 		if ($this->{lvm}) {
 			if ($this->{partids}{root_lv}) {
@@ -5796,12 +5850,64 @@ sub setLVMDeviceMap {
 			$device,$this->{partids}{boot}
 		);
 	}
+	if ($this->{partids}{root}) {
+		$result{root} = $this -> __getPartDevice (
+			$device,$this->{partids}{root}
+		);
+	}
 	if ($this->{partids}{jump}) {
 		$result{jump} = $this -> __getPartDevice (
 			$device,$this->{partids}{jump}
 		);
 	}
 	return %result;
+}
+
+#==========================================
+# setMD
+#------------------------------------------
+sub setMD {
+	# ...
+	# create md device for software raid capabilities
+	# The function returns a new device map which has
+	# the root device overwritten by the md device
+	# ---
+	my $this      = shift;
+	my $map       = shift;
+	my $raidtype  = shift;
+	my $kiwi      = $this->{kiwi};
+	my @cStack    = @{$this->{cleanupStack}};
+	my %deviceMap = %{$map};
+	my $mdcnt     = 0;
+	my $level     = 1;
+	my $mddev;
+	my $status;
+	my $result;
+	if ($raidtype eq "striping") {
+		$level = 0;
+	}
+	my $array = "--level=$level --raid-disks=2 $deviceMap{root} missing";
+	while ($mdcnt <= 9) {
+		$mddev  = '/dev/md'.$mdcnt;
+		$status = qxx ("mdadm --create --run $mddev $array 2>&1");
+		$result+= $? >> 8;
+		if ($result == 0) {
+			last;
+		}
+		$mdcnt++;
+	}
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Software raid array creation failed: $status");
+		$kiwi -> failed ();
+		$this -> cleanStack ();
+		return;
+	}
+	push @cStack,"mdadm --stop $mddev";
+	$this->{cleanupStack} = \@cStack;
+	$deviceMap{root} = $mddev;
+	$this->{mddev} = $mddev;
+	return %deviceMap;
 }
 
 #==========================================

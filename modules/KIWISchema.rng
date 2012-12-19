@@ -2287,6 +2287,16 @@ represents the password string used to be able to
 mount that filesystem while booting</a:documentation>
       </attribute>
     </define>
+    <define name="k.type.mdraid.attribute">
+      <attribute name="mdraid">
+        <a:documentation>Setup software raid in degraded mode with one disk
+Thus only mirroring and striping is possible</a:documentation>
+        <choice>
+          <value>mirroring</value>
+          <value>striping</value>
+        </choice>
+      </attribute>
+    </define>
     <define name="k.type.primary.attribute">
       <attribute name="primary">
         <a:documentation>Specifies the primary type (choose KIWI option type)</a:documentation>
@@ -2403,6 +2413,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.luks.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.mdraid.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.primary.attribute"/>
