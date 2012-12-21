@@ -19,7 +19,6 @@
 		<profile name="pae" description="KERNEL: pae kernel"/>
 		<profile name="rt" description="KERNEL: Real time kernel"/>
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
-		<profile name="rt" description="KERNEL: RealTime kernel"/>
 	</profiles>
 	<drivers type="usbdrivers">
 		<file name="usb/host/*"/>
