@@ -4762,7 +4762,11 @@ sub setVolumeGroup {
 				my $pname  = $name; $pname =~ s/_/\//g;
 				my $lvsize = $lvmparts{$name}->[2];
 				my $lvdev  = "/dev/$VGroup/LV$name";
-				$ihash{$lvdev} = "no-opts";
+				my $inodes = 2 * int ($lvsize * 1048576 / $main::FSInodeRatio);
+				if ($inodes < $main::FSMinInodes) {
+					$inodes = $main::FSMinInodes;
+				}
+				$ihash{$lvdev} = $inodes;
 				$status = qxx ("lvcreate -L $lvsize -n LV$name $VGroup 2>&1");
 				$result = $? >> 8;
 				if ($result != 0) {

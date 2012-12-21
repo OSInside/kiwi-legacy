@@ -209,6 +209,7 @@ our $FSJournalSize;         # filesystem journal size
 our $FSMaxMountCount;       # filesystem (ext2-4) max mount count between checks
 our $FSCheckInterval;       # filesystem (ext2-4) max interval between fs checks
 our $FSInodeRatio;          # filesystem bytes/inode ratio
+our $FSMinInodes;           # filesystem min inodes
 our $Verbosity = 0;         # control the verbosity level
 our $TargetArch;            # target architecture -> writes zypp.conf
 our $CheckKernel;           # check for kernel matches in boot and system image
@@ -1475,6 +1476,12 @@ sub init {
 	#----------------------------------------
 	if (! defined $FSInodeRatio) {
 		$FSInodeRatio = 16384;
+	}
+	#========================================
+	# set default min inode count
+	#----------------------------------------
+	if (! defined $FSMinInodes) {
+		$FSMinInodes = 20000;
 	}
 	#========================================
 	# set default inode size for ext2/3
