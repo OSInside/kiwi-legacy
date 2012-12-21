@@ -1498,6 +1498,26 @@ sub test_getLuksPass {
 }
 
 #==========================================
+# test_getMDRaid
+#------------------------------------------
+sub test_getMDRaid {
+	# ...
+	# Test the getMDRaid method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $raidt = $typeDataObj -> getMDRaid();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('striping', $raidt);
+	return;
+}
+#==========================================
 # test_getPrimary
 #------------------------------------------
 sub test_getPrimary {
@@ -1745,6 +1765,7 @@ sub test_getXMLElement{
 		. 'installstick="true" '
 		. 'kernelcmdline="kiwidebug=1" '
 		. 'luks="notApass" '
+		. 'mdraid="striping" '
 		. 'primary="true" '
 		. 'ramonly="true" '
 		. 'vga="0x344" '
@@ -4126,6 +4147,97 @@ sub test_setLuksPassNoArg {
 }
 
 #==========================================
+# test_setMDRaid
+#------------------------------------------
+sub test_setMDRaid {
+	# ...
+	# Test the setMDRaid method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	$typeDataObj = $typeDataObj -> setMDRaid('mirroring');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $fs = $typeDataObj -> getMDRaid();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('mirroring', $fs);
+	return;
+}
+
+#==========================================
+# test_setMDRaidInvalidArg
+#------------------------------------------
+sub test_setMDRaidInvalidArg {
+	# ...
+	# Test the setMDRaid method with an invalid argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setMDRaid('raid1');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setMDRaid: specified raid type '
+		. "'raid1' is not supported.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $fs = $typeDataObj -> getMDRaid();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('striping', $fs);
+	return;
+}
+
+#==========================================
+# test_setMDRaidNoArg
+#------------------------------------------
+sub test_setMDRaidNoArg {
+	# ...
+	# Test the setMDRaid method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setMDRaid();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setMDRaid: no raid type specified, '
+		. 'retaining current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $raidt = $typeDataObj -> getMDRaid();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('striping', $raidt);
+	return;
+}
+
+#==========================================
 # test_setPrimary
 #------------------------------------------
 sub test_setPrimary {
@@ -4706,6 +4818,7 @@ sub __getTypeObj {
 				installstick           => 'true',
 				kernelcmdline          => 'kiwidebug=1',
 				luks                   => 'notApass',
+				mdraid                 => 'striping',
 				primary                => 'true',
 				ramonly                => 'true',
 				size                   => '16384',
