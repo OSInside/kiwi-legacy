@@ -173,6 +173,10 @@ function OEMRepartStandard {
 			$rootParam $swapParam $recoParam $bootParam $cowpParam
 		callPartitioner $input
 		activateMDRaid
+		#======================================
+		# extend mdraid array if required
+		#--------------------------------------
+		resizeMDRaid
 	fi
 }
 
@@ -382,16 +386,19 @@ function OEMRepartLVM {
 			1 $swapParam $recoParam $bootParam yes $VGROUP
 		callPartitioner $input
 		waitForStorageDevice $(ddn $imageDiskDevice $extendID)
+		activateMDRaid
 		deactivateVolumeGroup
-		deactivateMDRaid
+		#======================================
+		# extend mdraid array if required
+		#--------------------------------------
+		resizeMDRaid
 		#======================================
 		# extend volume group with rest space
 		#--------------------------------------
-		pvresize $(ddn $imageDiskDevice $extendID)
+		resizeLVMPVs $extendID
 		#======================================
 		# activate volume group $VGROUP
 		#--------------------------------------
-		activateMDRaid
 		activateVolumeGroup
 		#======================================
 		# Add LVSwap if requested.

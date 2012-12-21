@@ -3951,6 +3951,26 @@ function activateMDRaid {
 	fi
 }
 #======================================
+# resizeMDRaid
+#--------------------------------------
+function resizeMDRaid {
+	if [ ! -z "$kiwi_RaidDev" ];then
+		Echo "Resizing $kiwi_RaidDev mdraid array..."
+		mdadm --grow --size=max $kiwi_RaidDev
+	fi
+}
+#======================================
+# resizeLVMPVs
+#--------------------------------------
+function resizeLVMPVs {
+	local extendID=$1
+	local device=$(ddn $imageDiskDevice $extendID)
+	if [ ! -z "$kiwi_RaidDev" ];then
+		device=$kiwi_RaidDev
+	fi
+	pvresize $device
+}
+#======================================
 # deactivateMDRaid
 #--------------------------------------
 function deactivateMDRaid {
