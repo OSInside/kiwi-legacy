@@ -151,6 +151,18 @@ function OEMInstall {
 		return
 	fi
 	#======================================
+	# Check partition ID meta data
+	#--------------------------------------
+	if [ ! -f $PART_IDS ];then
+		systemException \
+			"Couldn't find partition IDs meta data... abort" \
+		"reboot"
+	fi
+	#======================================
+	# Import partition ID meta data
+	#--------------------------------------
+	importFile < $PART_IDS
+	#======================================
 	# Check for install mode combination
 	#--------------------------------------
 	if [ ! -z "$OEM_PARTITION_INSTALL" ] && [ ! -z "$pxe" ];then
@@ -734,6 +746,13 @@ function OEMInstall {
 		fi
 	fi
 	clear
+	#======================================
+	# Clear superblocks on mdraid setup
+	#--------------------------------------
+	zeroMDRaidSuperBlock $instDisk
+	#======================================
+	# Perform the installation
+	#--------------------------------------
 	instIndex=0
 	while [ $instIndex -lt ${#instItems[*]} ];do
 		#======================================

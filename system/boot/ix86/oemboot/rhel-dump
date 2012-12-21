@@ -151,6 +151,18 @@ function OEMInstall {
 		return
 	fi
 	#======================================
+	# Check partition ID meta data
+	#--------------------------------------
+	if [ ! -f $PART_IDS ];then
+		systemException \
+			"Couldn't find partition IDs meta data... abort" \
+		"reboot"
+	fi
+	#======================================
+	# Import partition ID meta data
+	#--------------------------------------
+	importFile < $PART_IDS
+	#======================================
 	# Check for install mode combination
 	#--------------------------------------
 	if [ ! -z "$OEM_PARTITION_INSTALL" ] && [ ! -z "$pxe" ];then
@@ -196,16 +208,9 @@ function OEMInstall {
 	IFS=$IFS_ORIG
 	Echo "Searching harddrive for $OEMInstallType installation"
 	hwinfo=/usr/sbin/hwinfo
-	if [ ! -z "$imageDiskDevice" ];then
-		deviceDisks=`$hwinfo --disk |\
-			grep "Device File:" | cut -f2 -d: |\
-			cut -f1 -d"(" | sed -e s"@$imageDiskDevice@@"`
-	else
-		deviceDisks=`$hwinfo --disk |\
-			grep "Device File:" | cut -f2 -d: |\
-			cut -f1 -d"("`
-	fi
-	export deviceDisks=`echo $deviceDisks`
+	deviceDisks=$($hwinfo --disk | \
+		grep 'Device File:' | cut -f2 -d: | cut -f1 -d'(')
+	export deviceDisks=$(echo $deviceDisks)
 	#======================================
 	# Add optional ramdisk device
 	#--------------------------------------
@@ -224,6 +229,12 @@ function OEMInstall {
 	# Sort devices by capabilities
 	#--------------------------------------
 	for i in $deviceDisks;do
+		#======================================
+		# sort out the boot device
+		#--------------------------------------
+		if [ ! -z "$imageDiskDevice" ] && [ "$i" = "$imageDiskDevice" ];then
+			continue
+		fi
 		#======================================
 		# Can we read chunks from it
 		#--------------------------------------
@@ -735,6 +746,13 @@ function OEMInstall {
 		fi
 	fi
 	clear
+	#======================================
+	# Clear superblocks on mdraid setup
+	#--------------------------------------
+	zeroMDRaidSuperBlock $instDisk
+	#======================================
+	# Perform the installation
+	#--------------------------------------
 	instIndex=0
 	while [ $instIndex -lt ${#instItems[*]} ];do
 		#======================================
@@ -779,6 +797,9 @@ function OEMInstall {
 		#======================================
 		# Dump image(s) on disk
 		#--------------------------------------
+		if which plymouthd &>/dev/null;then
+			plymouth hide-splash
+		fi
 		if [ -z "$pxe" ];then
 			dump="cat $Source"
 			if [ -x /usr/bin/dcounter ];then
@@ -1119,6 +1140,13 @@ function identifyDMRaid {
 			device_disks_new="$device_disks_new $i"
 		fi
 	done
+	#======================================
+	# start event monitoring
+	#--------------------------------------
+	mdmon --all --takeover
+	#======================================
+	# return with new disk list
+	#--------------------------------------
 	deviceDisks=$device_disks_new
 }
 

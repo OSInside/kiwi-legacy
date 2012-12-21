@@ -3954,10 +3954,20 @@ function activateMDRaid {
 # deactivateMDRaid
 #--------------------------------------
 function deactivateMDRaid {
-	if [ ! -z "$kiwi_RaidDev" ];then
+	if [ ! -z "$kiwi_RaidDev" ] && [ -e $kiwi_RaidDev ];then
 		Echo "Deactivating $kiwi_RaidDev mdraid array..."
 		mdadm --stop $kiwi_RaidDev
 	fi
+}
+#======================================
+# zeroMDRaidSuperBlock
+#--------------------------------------
+function zeroMDRaidSuperBlock {
+	local diskDevice=$1
+	for i in /dev/md*;do
+		test -b $i && mdadm --stop $i &>/dev/null
+	done
+	mdadm --zero-superblock $diskDevice &>/dev/null
 }
 #======================================
 # searchSwapSpace
