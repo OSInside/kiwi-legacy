@@ -1834,6 +1834,9 @@ sub setupBootDisk {
 	# check root partition type
 	#------------------------------------------
 	my $rootid = '83';
+	if ($lvm) {
+		$rootid = '8e';
+	}
 	if ($md) {
 		$rootid = 'fd';
 	}
@@ -2112,7 +2115,7 @@ sub setupBootDisk {
 					"n","p","2",".",$bootpartsize,
 					"n","p","3",".",".",
 					"t","2",$partid,
-					"t","3","8e",
+					"t","3",$rootid,
 					"a","1","w","q"
 				);
 				if (($syszip) || ($haveSplit)) {
@@ -2134,7 +2137,7 @@ sub setupBootDisk {
 					"n","p","1",".",$bootpartsize,
 					"n","p","2",".",".",
 					"t","1",$partid,
-					"t","2","8e",
+					"t","2",$rootid,
 					"a","1","w","q"
 				);
 				if (($syszip) || ($haveSplit)) {
@@ -5848,11 +5851,6 @@ sub setLVMDeviceMap {
 	if ($this->{partids}{boot}) {
 		$result{boot} = $this -> __getPartDevice (
 			$device,$this->{partids}{boot}
-		);
-	}
-	if ($this->{partids}{root}) {
-		$result{root} = $this -> __getPartDevice (
-			$device,$this->{partids}{root}
 		);
 	}
 	if ($this->{partids}{jump}) {
