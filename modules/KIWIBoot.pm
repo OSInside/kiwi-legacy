@@ -1695,8 +1695,6 @@ sub setupBootDisk {
 				$kiwi -> failed ();
 				return;
 			}
-			my $spare_on_volume = 30; # spare space on volume in MB
-			my $serve_on_disk   = 30; # raise disk space for volume in MB
 			foreach my $vol (keys %lvmparts) {
 				#==========================================
 				# check directory per volume
@@ -1715,6 +1713,15 @@ sub setupBootDisk {
 				);
 				chomp $lvsize;
 				$lvsize /= 1048576;
+				#==========================================
+				# use 20% (min 30M) spare space per volume
+				#------------------------------------------
+				my $spare = int (($lvsize * 1.2) - $lvsize);
+				if ($spare < 30) {
+					$spare = 30;
+				}
+				my $spare_on_volume = $spare;
+				my $serve_on_disk   = $spare;
 				#==========================================
 				# is requested size absolute or relative
 				#------------------------------------------
