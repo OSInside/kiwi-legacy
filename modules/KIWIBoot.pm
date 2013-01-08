@@ -1597,15 +1597,19 @@ sub setupBootDisk {
 				);
 				chomp $lvsize;
 				$lvsize /= 1048576;
+				my $spare = int (($lvsize * 1.2) - $lvsize);
+				if ($spare < 30) {
+					$spare = 30;
+				}
 				if ($haveAbsolute) {
-					if ($space > ($lvsize + 30)) {
+					if ($space > ($lvsize + $spare)) {
 						$diff = $space - $lvsize;
 						$lvsize = $space;
 					} else {
-						$lvsize += 30;
+						$lvsize += $spare;
 					}
 				} else {
-					$lvsize = int ( 30 + $lvsize + $space);
+					$lvsize = int ( $spare + $lvsize + $space);
 				}
 				$lvmparts{$vol}->[2] = $lvsize;
 				#==========================================
@@ -1613,9 +1617,9 @@ sub setupBootDisk {
 				#------------------------------------------
 				$kiwi->loginfo ("Increasing disk size for volume $pname\n");
 				if ($haveAbsolute) {
-					$this -> __updateDiskSize ($diff + 30);
+					$this -> __updateDiskSize ($diff + $spare);
 				} else {
-					$this -> __updateDiskSize ($space+ 30);
+					$this -> __updateDiskSize ($space+ $spare);
 				}
 			}
 		}
