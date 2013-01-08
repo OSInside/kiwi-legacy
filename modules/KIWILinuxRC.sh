@@ -7192,6 +7192,7 @@ function selectLanguage {
 			)
 		fi
 	fi
+	export LANG=$DIALOG_LANG.utf8
 }
 #======================================
 # getText
@@ -7200,7 +7201,6 @@ function getText {
 	# /.../
 	# return translated text
 	# ----
-	export LANG=$DIALOG_LANG.utf8
 	local text=$(gettext kiwi "$1")
 	if [ ! -z "$2" ];then
 		text=$(echo $text | sed -e s"@%1@$2@")
