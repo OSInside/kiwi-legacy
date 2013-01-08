@@ -1599,25 +1599,29 @@ sub setupBootDisk {
 				);
 				chomp $lvsize;
 				$lvsize /= 1048576;
+				my $spare = int (($lvsize * 1.2) - $lvsize);
+				if ($spare < 30) {
+					$spare = 30;
+				}
 				if ($haveAbsolute) {
-					if ($space > ($lvsize + 30)) {
+					if ($space > ($lvsize + $spare)) {
 						$diff = $space - $lvsize;
 						$lvsize = $space;
 					} else {
-						$lvsize += 30;
+						$lvsize += $spare;
 					}
 				} else {
-					$lvsize = int ( 30 + $lvsize + $space);
+					$lvsize = int ( $spare + $lvsize + $space);
 				}
 				$lvmparts{$vol}->[2] = $lvsize;
 				#==========================================
 				# increase total vm disk size
 				#------------------------------------------
 				if ($haveAbsolute) {
-					$vmsize = $this->{vmmbyte} + 30 + $diff;
+					$vmsize = $this->{vmmbyte} + $spare + $diff;
 					$vmsize = sprintf ("%.0f", $vmsize);
 				} else {
-					$vmsize = $this->{vmmbyte} + 30 + $space;
+					$vmsize = $this->{vmmbyte} + $spare + $space;
 					$vmsize = sprintf ("%.0f", $vmsize);
 				}
 				$this->{vmmbyte} = $vmsize;
