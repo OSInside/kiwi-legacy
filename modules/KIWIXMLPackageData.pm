@@ -34,6 +34,17 @@ our @EXPORT_OK = qw ();
 sub new {
 	# ...
 	# Create the KIWIXMLPackageData object
+	#
+	# Internal data structure
+	#
+	# this = {
+	#    arch        = '' (inherited from KIWIXMLFileData)
+	#    name        = '' (inherited from KIWIXMLFileData)
+	#    bootdelete  = ''
+	#    bootinclude = ''
+	#    elname      = 'package'
+	#    replaces    = ''
+	# }
 	# ---
 	#==========================================
 	# Object setup

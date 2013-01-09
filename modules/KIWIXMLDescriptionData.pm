@@ -35,6 +35,15 @@ our @EXPORT_OK = qw ();
 sub new {
 	# ...
 	# Create the KIWIXMLDescriptionData object
+	#
+	# Internal data structure
+	#
+	# this = {
+	#    author        = ''
+	#    contact       = ''
+	#    specification = ''
+	#    type          = ''
+	# }
 	# ---
 	#==========================================
 	# Object setup

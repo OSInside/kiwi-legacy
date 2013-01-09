@@ -35,6 +35,15 @@ our @EXPORT_OK = qw ();
 sub new {
 	# ...
 	# Create the KIWIXMLEC2ConfigData object
+	#
+	# Internal data structure
+	#
+	# this = {
+	#    acctno         = ''
+	#    certfile       = ''
+	#    privatekeyfile = ''
+	#    regions        = ''
+	# }
 	# ---
 	#==========================================
 	# Object setup

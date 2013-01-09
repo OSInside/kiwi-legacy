@@ -42,6 +42,20 @@ Readonly my $MIN_ID => 1000;
 sub new {
 	# ...
 	# Create the KIWIXMLUserData object
+	#
+	# Internal data structure
+	#
+	# this = {
+	#    userid        = ''
+	#    name          = ''
+	#    passwd        = ''
+	#    passwdformat  = ''
+	#    group         = ''
+	#    realname      = ''
+	#    groupid       = ''
+	#    shell         = ''
+	#    home          = ''
+	# }
 	# ---
 	#==========================================
 	# Object setup

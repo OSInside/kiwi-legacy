@@ -39,6 +39,27 @@ our @EXPORT_OK = qw ();
 sub new {
 	# ...
 	# Create the KIWIXMLPreferenceData object
+	#
+	# Internal data structure
+	#
+	# this = {
+	#     bootloader_theme     = ''
+	#     bootsplash_theme     = ''
+	#     defaultdestination   = ''
+	#     defaultprebuilt      = ''
+	#     defaultroot          = ''
+	#     hwclock              = ''
+	#     keymap               = ''
+	#     locale               = ''
+	#     packagemanager       = ''
+	#     rpm_check_signatures = ''
+	#     rpm_excludedocs      = ''
+	#     rpm_force            = ''
+	#     showlicense          = ''
+	#     timezone             = ''
+	#     types                = ''
+	#     version              = ''
+	# }
 	# ---
 	#==========================================
 	# Object setup

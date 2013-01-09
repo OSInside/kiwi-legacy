@@ -84,111 +84,95 @@ sub new {
 	#
 	# imageConfig = {
 	#	description = {
-	#		author = '',
-	#		contact = '',
-	#		specification = '',
-	#		type = ''
+	#       SEE: KIWIXMLDescriptionData.pm
 	#	}
-	#   pckgInstallOpt = '',
-	#	profName[+] = {
-	#       archives        = (),
-	#       bootArchives    = (),
-	#		bootDelPkgs     = (),
-	#		bootPkgs        = (),
-	#		bootPkgsCollect = (),
-	#       bootStrapPckgs  = (),
-	#		delPkgs         = (),
-	#		drivers         = (),
-	#       ignorePkgs      = (),
-	#       installOpt      = '',
-	#       keepLibs        = (),
-	#       keepTools       = (),
-	#		pkgs            = (),
-	#       pkgsCollect     = (),
-	#       products        = (),
-	#       stripDelete     = (),
-	#		arch[+] = {
-	#           archives        = (),
-	#           bootArchives    = (),
-	#			bootDelPkgs     = (),
-	#			bootPkgs        = (),
-	#	   	    bootPkgsCollect = (),
-	#           bootStrapPckgs  = (),
-	#			delPkgs         = (),
-	#			drivers         = (),
-	#           ignorePkgs      = (),
-	#           keepLibs        = (),
-	#           keepTools       = (),
-	#			pkgs            = (),
-	#           pkgsCollect     = (),
-	#           products        = (),
-	#           stripDelete     = (),
-	#		}
-	#       preferences = {
-	#           bootloader_theme = '',
-	#           bootsplash_theme = '',
-	#           ........
-	#           types = {
-	#               type[+] = {
-	#                   boot            = '',
-	#                   bootkernel      = '',
-	#                   .......
-	#                   vga             = '',
-	#                   volid           = ''
-	#               }
-	#           }
-	#           version = ''
-	#       }
-	#		profInfo = {
-	#			description = '',
-	#			import      = ''
-	#		}
-	#		repoData = {
-	#			ID[+] {
-	#				alias    = '',
-	#				path     = '',
-	#				priority = '',
-	#				status   = '',
-	#				...
-	#			}
-	#		}
-	#	    type[+] = {
-	#           archives = (),
-	#           arch[+]  = {
-	#                       archives        = (),
-	#                       bootArchives    = (),
-	#			            bootDelPkgs     = (),
-	#			            bootPkgs        = (),
-	#	   	                bootPkgsCollect = (),
-	#			            drivers         = (),
-	#                       ignorePkgs      = (),
-	#			            pkgs            = (),
-	#                       pkgsCollect     = (),
-	#                       products        = (),
-	#		            }
-	#           bootArchives    = (),
-	#		    bootDelPkgs     = (),
-	#           bootPkgs        = (),
-	#		    bootPkgsCollect = (),
-	#           drivers         = (),
-	#           ignorePkgs      = (),
-	#           pkgs            = (),
-	#           pkgsCollect     = (),
-	#           products        = (),
+	#   users {
+	#       <username>[+] {
+	#           SEE: KIWIXMLUserData.pm
 	#       }
 	#   }
-	#   users {
-	#       NAME[+] {
-	#           group
-	#           groupid
-	#           home
-	#           passwd
-	#           passwdformat
-	#           realname
-	#           shell
-	#           userid
+	#   <profName>[+] = {
+	#       profInfo = {
+	#           SEE: KIWIXMLProfileData.pm
 	#       }
-	#    }
+	#       pkgsCollect {
+	#           &KIWIXMLPackageCollectData[+]
+	#       }
+	#       bootStrapPckgs {
+	#           &KIWIXMLPackageData[+]
+	#       }
+	#       bootPkgs {
+	#           &KIWIXMLPackageData[+]
+	#       }
+	#       bootDelPkgs {
+	#           &KIWIXMLPackageData[+]
+	#       }
+	#       delPkgs {
+	#           &KIWIXMLPackageData[+]
+	#       }
+	#       pkgs {
+	#           &KIWIXMLPackageData[+]
+	#       }
+	#       <archname>[+] {
+	#           pkgs {
+	#               &KIWIXMLPackageData[+]
+	#           }
+	#       }
+	#       <typename>[+] {
+	#           bootPkgs {
+	#               &KIWIXMLPackageData[+]
+	#           }
+	#           bootDelPkgs {
+	#               &KIWIXMLPackageData[+]
+	#           }
+	#           delPkgs {
+	#               &KIWIXMLPackageData[+]
+	#           }
+	#           pkgs {
+	#               &KIWIXMLPackageData[+]
+	#           }
+	#           <archname>[+] {
+	#               pkgs {
+	#                   &KIWIXMLPackageData[+]
+	#               }
+	#           }
+	#       }
+	#       repoData {
+	#           <id>[+] {
+	#               SEE: KIWIXMLRepositoryData.pm
+	#           }
+	#       }
+	#       products {
+	#           &KIWIXMLPackageProductData
+	#       }
+	#       preferences = {
+	#           SEE: KIWIXMLPreferenceData.pm
+	#           types {
+	#               defaultType
+	#               <typename>[+] {
+	#                  SEE: KIWIXMLTypeData.pm
+	#                  oemconfig {
+	#                      SEE: KIWIXMLOEMConfigData.pm
+	#                  }
+	#                  machine {
+	#                      SEE: KIWIXMLVMachineData.pm
+	#                  }
+	#                  systemdisk {
+	#                      SEE: KIWIXMLSystemdiskData.pm
+	#                  }
+	#                  split {
+	#                      SEE: KIWIXMLSplitData.pm
+	#                  }
+	#                  pxedeploy {
+	#                      SEE: KIWIXMLPXEDeployData.pm
+	#                  }
+	#                  ec2config {
+	#                      SEE: KIWIXMLEC2ConfigData.pm
+	#                  }
+	#               }
+	#           }
+	#       }
+	#   }
 	# }
 	# ---
 	#==========================================

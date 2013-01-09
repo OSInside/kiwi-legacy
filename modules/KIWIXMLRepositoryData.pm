@@ -35,6 +35,22 @@ our @EXPORT_OK = qw ();
 sub new {
 	# ...
 	# Create the KIWIXMLRepositoryData object
+	#
+	# Internal data structure
+	#
+	# this = {
+	#    priority      = ''
+	#    status        = ''
+	#    imageinclude  = ''
+	#    components    = ''
+	#    preferlicense = ''
+	#    path          = ''
+	#    username      = ''
+	#    distribution  = ''
+	#    password      = ''
+	#    type          = ''
+	#    alias         = ''
+	# }
 	# ---
 	#==========================================
 	# Object setup

@@ -36,6 +36,15 @@ our @EXPORT_OK = qw ();
 sub new {
 	# ...
 	# Create the KIWIXMLPackageCollectData object
+	#
+	# Internal data structure
+	#
+	# this = {
+	#    arch        = '' (inherited from KIWIXMLFileData)
+	#    name        = '' (inherited from KIWIXMLFileData)
+	#    bootinclude = ''
+	#    elname      = 'namedCollection'
+	# }
 	# ---
 	#==========================================
 	# Object setup

@@ -41,6 +41,49 @@ our @EXPORT_OK = qw ();
 sub new {
 	# ...
 	# Create the KIWIXMLTypeData object
+	#
+	# Internal data structure
+	#
+	# this = {
+	#     boot                   = ''
+	#     bootfilesystem         = ''
+	#     bootkernel             = ''
+	#     bootloader             = ''
+	#     bootpartsize           = ''
+	#     bootprofile            = ''
+	#     boottimeout            = ''
+	#     checkprebuilt          = ''
+	#     compressed             = ''
+	#     devicepersistency      = ''
+	#     editbootconfig         = ''
+	#     editbootinstall        = ''
+	#     filesystem             = ''
+	#     firmware               = ''
+	#     flags                  = ''
+	#     format                 = ''
+	#     fsmountoptions         = ''
+	#     fsnocheck              = ''
+	#     fsreadonly             = ''
+	#     fsreadwrite            = ''
+	#     hybrid                 = ''
+	#     hybridpersistent       = ''
+	#     image                  = ''
+	#     installboot            = ''
+	#     installiso             = ''
+	#     installprovidefailsafe = ''
+	#     installpxe             = ''
+	#     installstick           = ''
+	#     kernelcmdline          = ''
+	#     luks                   = ''
+	#     mdraid                 = ''
+	#     primary                = ''
+	#     ramonly                = ''
+	#     size                   = ''
+	#     sizeadd                = ''
+	#     sizeunit               = ''
+	#     vga                    = ''
+	#     volid                  = ''
+	# }
 	# ---
 	#==========================================
 	# Object setup

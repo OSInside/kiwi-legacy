@@ -34,6 +34,13 @@ our @EXPORT_OK = qw ();
 sub new {
 	# ...
 	# Create the KIWIXMLProfileData object
+	#
+	# Internal data structure
+	#
+	# this = {
+	#	 description = ''
+	#    import      = ''
+	# }
 	# ---
 	#==========================================
 	# Object setup

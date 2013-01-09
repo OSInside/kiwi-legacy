@@ -34,6 +34,14 @@ our @EXPORT_OK = qw ();
 sub new {
 	# ...
 	# Create the KIWIXMLPackageProductData object
+	#
+	# Internal data structure
+	#
+	# this = {
+	#    arch        = '' (inherited from KIWIXMLFileData)
+	#    name        = '' (inherited from KIWIXMLFileData)
+	#    elname      = 'opensuseProduct'
+	# }
 	# ---
 	#==========================================
 	# Object setup

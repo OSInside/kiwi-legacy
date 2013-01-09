@@ -35,6 +35,29 @@ our @EXPORT_OK = qw ();
 sub new {
 	# ...
 	# Create the KIWIXMLOEMConfigData object
+	#
+	# Internal data structure
+	#
+	# this = {
+	#    oem_align_partition      = ''
+	#    oem_boot_title           = ''
+	#    oem_bootwait             = ''
+	#    oem_inplace_recovery     = ''
+	#    oem_kiwi_initrd          = ''
+	#    oem_partition_install    = ''
+	#    oem_reboot               = ''
+	#    oem_reboot_interactive   = ''
+	#    oem_recovery             = ''
+	#    oem_recoveryID           = ''
+	#    oem_shutdown             = ''
+	#    oem_shutdown_interactive = ''
+	#    oem_silent_boot          = ''
+	#    oem_swap                 = ''
+	#    oem_swapsize             = ''
+	#    oem_systemsize           = ''
+	#    oem_unattended           = ''
+	#    oem_unattended_id        = ''
+	# }
 	# ---
 	#==========================================
 	# Object setup
