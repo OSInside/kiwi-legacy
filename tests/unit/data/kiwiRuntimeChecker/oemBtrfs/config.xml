@@ -9,6 +9,7 @@
 	<preferences>
 		<type image="oem" filesystem="btrfs" boot="oemboot/suse-11.3" installstick="true" installboot="install">
 			<oemconfig>
+				<oem-swap>true</oem-swap>
 				<oem-swapsize>2048</oem-swapsize>
 				<oem-unattended>true</oem-unattended>
 			</oemconfig>
