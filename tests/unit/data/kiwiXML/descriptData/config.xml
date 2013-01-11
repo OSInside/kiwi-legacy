@@ -3,6 +3,7 @@
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
+		<contact>rschweikert@suse.com</contact>
 		<specification>Verify proper handling of description in XML obj</specification>
 	</description>
 	<preferences>
