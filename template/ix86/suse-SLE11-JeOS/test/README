@@ -12,14 +12,14 @@
 # After that you can run the test by calling:
 #
 #  kiwi \
-#    --test-image LimeJeOS-openSUSE-11.4.i686-1.11.4.iso \
-#    --test-case /usr/share/kiwi/image/suse-11.4-JeOS/test \
+#    --test-image LimeJeOS-SLE11.x86_64-1.1.0.iso \
+#    --test-case /usr/share/kiwi/image/suse-SLE11-JeOS/test \
 #    --type iso
 #
 # according to your system performance it might be required to adapt
 # the IDLETHESHOLD value in the file
 #
-#  /usr/share/kiwi/image/suse-11.4-JeOS/test/env.sh
+#  /usr/share/kiwi/image/suse-SLE11-JeOS/test/env.sh
 #
 # please refer the os-autoinst documentation for details about the
 # environment and the test contents

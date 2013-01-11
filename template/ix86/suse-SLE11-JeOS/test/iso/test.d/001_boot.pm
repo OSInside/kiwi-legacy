@@ -39,7 +39,7 @@ sub run {
 
 sub checklist {
 	return {qw(
-		7c8184e291a122a5be03ae419f8a0767 OK-11.4
+		7c8184e291a122a5be03ae419f8a0767 OK-SLES-11
 	)}
 }
 
