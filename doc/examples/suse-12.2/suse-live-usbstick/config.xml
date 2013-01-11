@@ -7,7 +7,7 @@
 		<specification>openSUSE 12.2 Live system for CD/DVD and USB Stick</specification>
 	</description>
 	<preferences>
-		<type image="oem" boot="oemboot/suse-12.2" filesystem="btrfs" fsmountoptions="compress=lzo" bootloader="syslinux">
+		<type image="oem" boot="oemboot/suse-12.2" filesystem="btrfs" fsmountoptions="compress=lzo" bootfilesystem="fat16" bootloader="grub2">
 			<size unit="G">3</size>
 			<oemconfig>
 				<oem-swapsize>512</oem-swapsize>
