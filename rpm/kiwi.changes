@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Jan 11 10:41:39 CET 2013 - ms@suse.de
+
+- changed zypper call to use one call to install products, patterns
+  and packages instead of splitting that up into single calls. This
+  has the advantage that zypper can better decide for packages which
+  provides similar functionality (bnc #796062)
+
+-------------------------------------------------------------------
 Tue Jan  8 17:02:55 CET 2013 - ms@suse.de
 
 - fixed 'run out of space' problem in LVM setup. use
