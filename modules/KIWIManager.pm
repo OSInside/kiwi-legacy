@@ -1537,6 +1537,7 @@ sub setupUpgrade {
 			my @newpatts = ();
 			my @newprods = ();
 			my @newpacks = ();
+			my @institems= ();
 			foreach my $pac (@addonPackages) {
 				if ($pac =~ /^pattern:(.*)/) {
 					push @newpatts,"\"$1\"";
@@ -1550,20 +1551,21 @@ sub setupUpgrade {
 			print $fd "@kchroot @zypper dist-upgrade @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			if (@newprods) {
-				print $fd "test \$? = 0 && @kchroot @zypper install ";
-				print $fd "@installOpts -t product @newprods &\n";
-				print $fd "SPID=\$!;wait \$SPID\n";
+				foreach my $p (@newprods) {
+					push @institems,"product:$p";
+				}
 			}
 			if (@newpatts) {
-				print $fd "test \$? = 0 && @kchroot @zypper install ";
-				print $fd "@installOpts -t pattern @newpatts &\n";
-				print $fd "SPID=\$!;wait \$SPID\n";
+				foreach my $p (@newpatts) {
+					push @institems,"pattern:$p";
+				}
 			}
 			if (@addonPackages) {
-				print $fd "test \$? = 0 && @kchroot @zypper install ";
-				print $fd "@installOpts @addonPackages &\n";
-				print $fd "SPID=\$!;wait \$SPID\n";
+				push @institems,@addonPackages
 			}
+			print $fd "test \$? = 0 && @kchroot @zypper install ";
+			print $fd "@installOpts @institems &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 		} else {
 			print $fd "@kchroot @zypper dist-upgrade @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
@@ -1975,6 +1977,7 @@ sub setupRootSystem {
 			my @newpacks = ();
 			my @newpatts = ();
 			my @newprods = ();
+			my @institems= ();
 			foreach my $pac (@packs) {
 				if ($pac =~ /^pattern:(.*)/) {
 					push @newpatts,"\"$1\"";
@@ -2001,26 +2004,21 @@ sub setupRootSystem {
 			print $fd "export ZYPP_CONF=".$root."/".$this->{zyppconf}."\n";
 			print $fd "export ZYPP_ARIA2C=0\n";
 			if (@newprods) {
-				print $fd "@zypper --root $root install ";
-				print $fd "@installOpts -t product @newprods &\n";
-				print $fd "SPID=\$!;wait \$SPID\n";
+				foreach my $p (@newprods) {
+					push @institems,"product:$p";
+				}
 			}
 			if (@newpatts) {
-				if (@newprods) {
-					print $fd "test \$? = 0 && ";
+				foreach my $p (@newpatts) {
+					push @institems,"pattern:$p";
 				}
-				print $fd "@zypper --root $root install ";
-				print $fd "@installOpts -t pattern @newpatts &\n";
-				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@packs) {
-				if (@newpatts || @newprods) {
-					print $fd "test \$? = 0 && ";
-				}
-				print $fd "@zypper --root $root install ";
-				print $fd "@installOpts @packs &\n";
-				print $fd "SPID=\$!;wait \$SPID\n";
+				push @institems,@packs;
 			}
+			print $fd "@zypper --root $root install ";
+			print $fd "@installOpts @institems &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "ECODE=\$?\n";
 			print $fd "echo \$ECODE > $screenCall.exit\n";
 			print $fd "exit \$ECODE\n";
@@ -2032,6 +2030,7 @@ sub setupRootSystem {
 			my @install   = ();
 			my @newpatts  = ();
 			my @newprods  = ();
+			my @institems = ();
 			foreach my $need (@packs) {
 				if ($need =~ /^pattern:(.*)/) {
 					push @newpatts,"\"$1\"";
@@ -2068,26 +2067,21 @@ sub setupRootSystem {
 			print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
 			print $fd "export ZYPP_ARIA2C=0\n";
 			if (@newprods) {
-				print $fd "@kchroot @zypper install ";
-				print $fd "@installOpts -t product @newprods &\n";
-				print $fd "SPID=\$!;wait \$SPID\n";
+				foreach my $p (@newprods) {
+					push @institems,"product:$p";
+				}
 			}
 			if (@newpatts) {
-				if (@newprods) {
-					print $fd "test \$? = 0 && ";
+				foreach my $p (@newpatts) {
+					push @institems,"pattern:$p";
 				}
-				print $fd "@kchroot @zypper install ";
-				print $fd "@installOpts -t pattern @newpatts &\n";
-				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@install) {
-				if (@newpatts || @newprods) {
-					print $fd "test \$? = 0 && ";
-				}
-				print $fd "@kchroot @zypper install ";
-				print $fd "@installOpts @install &\n";
-				print $fd "SPID=\$!;wait \$SPID\n";
+				push @institems,@install;
 			}
+			print $fd "@kchroot @zypper install ";
+			print $fd "@installOpts @institems &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "ECODE=\$?\n";
 			print $fd "echo \$ECODE > $screenCall.exit\n";
 			print $fd "exit \$ECODE\n";
