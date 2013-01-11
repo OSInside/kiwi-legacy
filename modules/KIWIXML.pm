@@ -33,6 +33,7 @@ use KIWIURL;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
 use KIWIXMLEC2ConfigData;
+use KIWIXMLInstRepositoryData;
 use KIWIXMLOEMConfigData;
 use KIWIXMLPackageData;
 use KIWIXMLPackageArchiveData;
@@ -40,6 +41,11 @@ use KIWIXMLPackageCollectData;
 use KIWIXMLPackageIgnoreData;
 use KIWIXMLPackageProductData;
 use KIWIXMLPreferenceData;
+use KIWIXMLProductArchitectureData;
+use KIWIXMLProductMetaChrootData;
+use KIWIXMLProductMetaFileData;
+use KIWIXMLProductOptionsData;
+use KIWIXMLProductPackageData;
 use KIWIXMLProfileData;
 use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
@@ -57,7 +63,9 @@ use KIWISatSolver;
 #------------------------------------------
 our @ISA    = qw (Exporter);
 our @EXPORT_OK = qw (
-	getInstSourceFile getInstSourceSatSolvable getSingleInstSourceSatSolvable
+	getInstSourceFile_legacy
+	getInstSourceSatSolvable_legacy
+	getSingleInstSourceSatSolvable_legacy
 );
 
 #==========================================
@@ -86,69 +94,58 @@ sub new {
 	#	description = {
 	#       SEE: KIWIXMLDescriptionData.pm
 	#	}
-	#   users {
-	#       <username>[+] {
-	#           SEE: KIWIXMLUserData.pm
-	#       }
+	#   productSettings = {
+	#       architectures  = (ProductArchitectureData,... ),
+	#       dudArches      = ('',...)
+	#       dudInstSysPkgs = (ProductPackageData,... ),
+	#       dudModulePkgs  = (ProductPackageData,... ),
+	#       dudPkgs        = (ProductPackageData,... ),
+	#       instRepos      = (InstRepositoryData,... ),
+	#       metaChroots    = (ProductMetaChrootData,...),
+	#       metaFiles      = (ProductMetaFileData,...),
+	#       metaPkgs       = (ProductPackageData,... ),
+	#       options        = ProductOptionsData,
+	#       prodPkgs       = (ProductPackageData,...)
+	#       reqArches      = ('',...)
 	#   }
 	#   <profName>[+] = {
-	#       profInfo = {
-	#           SEE: KIWIXMLProfileData.pm
-	#       }
-	#       pkgsCollect {
-	#           &KIWIXMLPackageCollectData[+]
-	#       }
-	#       bootStrapPckgs {
-	#           &KIWIXMLPackageData[+]
-	#       }
-	#       bootPkgs {
-	#           &KIWIXMLPackageData[+]
-	#       }
-	#       bootDelPkgs {
-	#           &KIWIXMLPackageData[+]
-	#       }
-	#       delPkgs {
-	#           &KIWIXMLPackageData[+]
-	#       }
-	#       pkgs {
-	#           &KIWIXMLPackageData[+]
-	#       }
+    #       archives        = ('',...),
+    #       bootArchives    = ('',...),
+	#       bootDelPkgs     = (KIWIXMLPackageData, ...),
+	#       bootPkgs        = (KIWIXMLPackageData, ...),
+    #       bootPkgsCollect = (KIWIXMLPackageCollectData,...),
+	#       bootStrapPckgs  = (KIWIXMLPackageData, ...),
+	#       delPkgs         = (KIWIXMLPackageData, ...),
+    #       drivers         = (KIWIXMLDriverData, ...),
+    #       ignorePkgs      = (KIWIXMLPackageData, ...),
+    #       installOpt      = '',
+    #       keepLibs        = (KIWIXMLStripData,...),
+    #       keepTools       = (KIWIXMLStripData,...),
+	#       pkgs            = (KIWIXMLPackageData, ...),
+	#       pkgsCollect     = (KIWIXMLPackageCollectData,...),
+    #       products        = (KIWIXMLPackageProductData,...),
+    #       stripDelete     = (KIWIXMLStripData,...),
 	#       <archname>[+] {
-	#           pkgs {
-	#               &KIWIXMLPackageData[+]
-	#           }
-	#       }
-	#       <typename>[+] {
-	#           bootPkgs {
-	#               &KIWIXMLPackageData[+]
-	#           }
-	#           bootDelPkgs {
-	#               &KIWIXMLPackageData[+]
-	#           }
-	#           delPkgs {
-	#               &KIWIXMLPackageData[+]
-	#           }
-	#           pkgs {
-	#               &KIWIXMLPackageData[+]
-	#           }
-	#           <archname>[+] {
-	#               pkgs {
-	#                   &KIWIXMLPackageData[+]
-	#               }
-	#           }
-	#       }
-	#       repoData {
-	#           <id>[+] {
-	#               SEE: KIWIXMLRepositoryData.pm
-	#           }
-	#       }
-	#       products {
-	#           &KIWIXMLPackageProductData
-	#       }
+    #       archives        = ('',...),
+    #           bootArchives    = ('',...),
+	#           bootDelPkgs     = (KIWIXMLPackageData, ...),
+	#           bootPkgs        = (KIWIXMLPackageData, ...),
+    #           bootPkgsCollect = (KIWIXMLPackageCollectData,...),
+	#           bootStrapPckgs  = (KIWIXMLPackageData, ...),
+	#           delPkgs         = (KIWIXMLPackageData, ...),
+    #           drivers         = (KIWIXMLDriverData, ...),
+    #           ignorePkgs      = (KIWIXMLPackageData, ...),
+    #           keepLibs        = (KIWIXMLStripData,...),
+    #           keepTools       = (KIWIXMLStripData,...),
+	#           pkgs            = (KIWIXMLPackageData, ...),
+	#           pkgsCollect     = (KIWIXMLPackageCollectData,...),
+    #           products        = (KIWIXMLPackageProductData,...),
+    #           stripDelete     = (KIWIXMLStripData,...),
+    #      }
 	#       preferences = {
 	#           SEE: KIWIXMLPreferenceData.pm
 	#           types {
-	#               defaultType
+	#               defaultType = KIWIXMLTypeData,
 	#               <typename>[+] {
 	#                  SEE: KIWIXMLTypeData.pm
 	#                  oemconfig {
@@ -170,7 +167,45 @@ sub new {
 	#                      SEE: KIWIXMLEC2ConfigData.pm
 	#                  }
 	#               }
+    #           }
+    #       }
+	#       profInfo = {
+	#           SEE: KIWIXMLProfileData.pm
+	#       }
+	#       repoData {
+	#           <id>[+] {
+	#               SEE: KIWIXMLRepositoryData.pm
 	#           }
+	#       }
+	#       <typename>[+] {
+    #           archives = ('',....),
+    #           <archname>[+] {
+    #               archives        = ('',...),
+    #               bootArchives    = ('',...),
+    #               bootDelPkgs     = (KIWIXMLPackageData,...),
+    #               bootPkgs        = (KIWIXMLPackageData,...),
+    #               bootPkgsCollect = (KIWIXMLPackageCollectData,...),
+    #               drivers         = (KIWIXMLDriverData),
+    #               ignorePkgs      = (KIWIXMLPackageData,...),
+    #               pkgs            = (KIWIXMLPackageData,...),
+    #               pkgsCollect     = (KIWIXMLPackageCollectData),
+    #               products        = (KIWIXMLPackageProductData,...),
+    #           }
+    #           bootArchives    = ('',...),
+    #           bootDelPkgs     = (KIWIXMLPackageData,...),
+    #           bootPkgs        = (KIWIXMLPackageData,...),
+    #           bootPkgsCollect = (KIWIXMLPackageCollectData,...),
+    #           drivers         = (KIWIXMLPackageCollectData,...),
+    #           ignorePkgs      = (KIWIXMLPackageData,...),
+    #           pkgs            = (KIWIXMLPackageData,...),
+    #           pkgsCollect     = (KIWIXMLPackageCollectData,...),
+    #           products        = (KIWIXMLPackageCollectData,...),
+    #       }
+    #   }
+    #   }
+	#   users {
+	#       <username>[+] {
+	#           SEE: KIWIXMLUserData.pm
 	#       }
 	#   }
 	# }
@@ -307,6 +342,10 @@ sub new {
 	#------------------------------------------
 	$this -> __populateDescriptionInfo();
 	#==========================================
+	# Populate imageConfig with product data from config tree
+	#------------------------------------------
+	$this -> __populateInstSource();
+	#==========================================
 	# Populate imageConfig with profile data from config tree
 	#------------------------------------------
 	$this -> __populateProfileInfo();
@@ -347,7 +386,7 @@ sub new {
 	#==========================================
 	# Populate imageConfig with product data from config tree
 	#------------------------------------------
-	$this -> __populateProductInfo();
+	$this -> __populatePackageProductInfo();
 	#==========================================
 	# Populate imageConfig with repository data from config tree
 	#------------------------------------------
@@ -1207,6 +1246,63 @@ sub getDrivers {
 }
 
 #==========================================
+# getDUDArchitectures
+#------------------------------------------
+sub getDUDArchitectures {
+	# ...
+	# Return an array ref containing strings indicating the driver update
+	# disk architectures.
+	# ---
+	my $this = shift;
+	if ($this->{imageConfig}->{productSettings}) {
+		return $this->{imageConfig}->{productSettings}->{dudArches};
+	}
+	return;
+}
+
+#==========================================
+# getDUDInstallSystemPackages
+#------------------------------------------
+sub getDUDInstallSystemPackages {
+	# ...
+	# Return an array ref containing ProductPackageData objects
+	# ---
+	my $this = shift;
+	if ($this->{imageConfig}->{productSettings}) {
+		return $this->{imageConfig}->{productSettings}->{dudInstSysPkgs};
+	}
+	return;
+}
+
+#==========================================
+# getDUDModulePackages
+#------------------------------------------
+sub getDUDModulePackages {
+	# ...
+	# Return an array ref containing ProductPackageData objects
+	# ---
+	my $this = shift;
+	if ($this->{imageConfig}->{productSettings}) {
+		return $this->{imageConfig}->{productSettings}->{dudModulePkgs};
+	}
+	return;
+}
+
+#==========================================
+# getDUDPackages
+#------------------------------------------
+sub getDUDPackages {
+	# ...
+	# Return an array ref containing ProductPackageData objects
+	# ---
+	my $this = shift;
+	if ($this->{imageConfig}->{productSettings}) {
+		return $this->{imageConfig}->{productSettings}->{dudPkgs};
+	}
+	return;
+}
+
+#==========================================
 # getEC2Config
 #------------------------------------------
 sub getEC2Config {
@@ -1406,6 +1502,108 @@ sub getPreferences {
 }
 
 #==========================================
+# getProductArchitectures
+#------------------------------------------
+sub getProductArchitectures {
+	# ...
+	# Return an array ref of ProductArchitectureData objects.
+	# ---
+	my $this = shift;
+	if ($this->{imageConfig}->{productSettings}) {
+		return $this->{imageConfig}->{productSettings}->{architectures};
+	}
+	return;
+}
+
+#==========================================
+# getProductMetaChroots
+#------------------------------------------
+sub getProductMetaChroots {
+	# ...
+	# Return an array ref of ProductMetaChrootData objects specified as
+	# metadata.
+	# ---
+	my $this = shift;
+	if ($this->{imageConfig}->{productSettings}) {
+		return $this->{imageConfig}->{productSettings}->{metaChroots};
+	}
+	return;
+}
+
+#==========================================
+# getProductMetaFiles
+#------------------------------------------
+sub getProductMetaFiles {
+	# ...
+	# Return an array ref of ProductMetaFileData objects specified as
+	# metadata.
+	# ---
+	my $this = shift;
+	if ($this->{imageConfig}->{productSettings}) {
+		return $this->{imageConfig}->{productSettings}->{metaFiles};
+	}
+	return;
+}
+
+#==========================================
+# getProductMetaPackages
+#------------------------------------------
+sub getProductMetaPackages {
+	# ...
+	# Return an array ref of ProductPackageData objects specified as
+	# metadata.
+	# ---
+	my $this = shift;
+	if ($this->{imageConfig}->{productSettings}) {
+		return $this->{imageConfig}->{productSettings}->{metaPkgs};
+	}
+	return;
+}
+
+#==========================================
+# getProductOptions
+#------------------------------------------
+sub getProductOptions {
+	# ...
+	# Return a ProductOptionsData object providing all information from
+	# <productinfo>, <productoption>, and <productvar> elements.
+	# ---
+	my $this = shift;
+	if ($this->{imageConfig}->{productSettings}) {
+		return $this->{imageConfig}->{productSettings}->{options};
+	}
+	return;
+}
+
+#==========================================
+# getProductRepositories
+#------------------------------------------
+sub getProductRepositories {
+	# ...
+	# Return an array ref of InstRepositoryData objects
+	# ---
+	my $this = shift;
+	if ($this->{imageConfig}->{productSettings}) {
+		return $this->{imageConfig}->{productSettings}->{instRepos};
+	}
+	return;
+}
+
+#==========================================
+# getProductRequiredArchitectures
+#------------------------------------------
+sub getProductRequiredArchitectures {
+	# ...
+	# Return an array ref of strings indicating the required architectures
+	# ---
+	my $this = shift;
+	if ($this->{imageConfig}->{productSettings}) {
+		return $this->{imageConfig}->{productSettings}->{reqArches};
+	}
+	return;
+}
+
+#==========================================
 # getProducts
 #------------------------------------------
 sub getProducts {
@@ -1414,6 +1612,20 @@ sub getProducts {
 	# ---
 	my $this = shift;
 	return $this -> __getInstallData('products');
+}
+
+#==========================================
+# getProductSourcePackages
+#------------------------------------------
+sub getProductSourcePackages  {
+	# ...
+	# Return an array ref of ProductPackageData objects
+	# ---
+	my $this = shift;
+	if ($this->{imageConfig}->{productSettings}) {
+		return $this->{imageConfig}->{productSettings}->{prodPkgs};
+	}
+	return;
 }
 
 #==========================================
@@ -1922,6 +2134,52 @@ sub __convertSizeStrToMBVal {
 }
 
 #==========================================
+# __createProductOptionsObj
+#------------------------------------------
+sub __createProductOptionsObj {
+	# ...
+	# Return a KIWIXMLProductOptionsData object created from the
+	# <productoptions> data in the given <instsource> node.
+	# ---
+	my $this        = shift;
+	my $instSrcNode = shift;
+	my $kiwi = $this -> {kiwi};
+	my @pOptParentNodes =
+		$instSrcNode -> getElementsByTagName('productoptions');
+	my $optNode = $pOptParentNodes[0]; #only 1 child
+	my %prodinfo;
+	my @prodInfoNodes = $optNode -> getElementsByTagName('productinfo');
+	for my $infoN (@prodInfoNodes) {
+		my $key = $infoN -> getAttribute('name');
+		$prodinfo{$key} = $infoN -> textContent();
+	}
+	my %productoption;
+	my @prodOptNodes = $optNode -> getElementsByTagName('productoption');
+	for my $optN (@prodOptNodes) {
+		my $key = $optN -> getAttribute('name');
+		$productoption{$key} = $optN -> textContent();
+	}
+	my %productvar;
+	my @prodVarNodes = $optNode -> getElementsByTagName('productvar');
+	for my $varN (@prodVarNodes) {
+		my $key = $varN -> getAttribute('name');
+		$productvar{$key} = $varN -> textContent();
+	}
+	my %init = (
+		productinfo   => \%prodinfo,
+		productoption => \%productoption,
+		productvar    => \%productvar
+	);
+	my $prodOptObj = KIWIXMLProductOptionsData -> new($kiwi, \%init);
+	if (! $prodOptObj) {
+		$kiwi -> error('KIWIXMLProductOptionsData creation');
+			$kiwi -> failed();
+			return;
+	}
+	return $prodOptObj;
+}
+
+#==========================================
 # __dumpInternalXMLDescription
 #------------------------------------------
 sub __dumpInternalXMLDescription {
@@ -1937,6 +2195,75 @@ sub __dumpInternalXMLDescription {
 	my $dd = Data::Dumper->new([ %{$this->{imageConfig}} ]);
 	my $cd = $dd->Dump();
 	return $cd;
+}
+
+#==========================================
+# __genDUDInstSysPkgsArray
+#------------------------------------------
+sub __genDUDInstSysPkgsArray {
+	# ...
+	# Return a ref to an array containing ProductPackageData
+	# objects created from the <repopackage> children of the <instsys> data
+	# of the XML from the given <driverupdate> node.
+	# ---
+	my $this    = shift;
+	my $dudNode = shift;
+	my @instSysNodes = $dudNode -> getElementsByTagName('instsys');
+	my @pkgs;
+	if (@instSysNodes) {
+		my $iSysPkgs = $this -> __genRepoPackagesArray($instSysNodes[0]);
+		if (! $iSysPkgs) {
+			return;
+		}
+		@pkgs = @{$iSysPkgs};
+	}
+	return \@pkgs;
+}
+
+#==========================================
+# __genDUDModulePkgsArray
+#------------------------------------------
+sub __genDUDModulePkgsArray {
+	# ...
+	# Return a ref to an array containing ProductPackageData
+	# objects created from the <repopackage> children of the <modules> data
+	# of the XML from the given <driverupdate> node.
+	# ---
+	my $this    = shift;
+	my $dudNode = shift;
+	my @moduleNodes = $dudNode -> getElementsByTagName('modules');
+	my @pkgs;
+	if (@moduleNodes) {
+		my $modPkgs = $this -> __genRepoPackagesArray($moduleNodes[0]);
+		if (! $modPkgs) {
+			return;
+		}
+		@pkgs = @{$modPkgs};
+	}
+	return \@pkgs;
+}
+
+#==========================================
+# __genDUDPkgsArray
+#------------------------------------------
+sub __genDUDPkgsArray {
+	# ...
+	# Return a ref to an array containing ProductPackageData
+	# objects created from the <repopackage> children of the <install> data
+	# of the XML from the given <driverupdate> node.
+	# ---
+	my $this    = shift;
+	my $dudNode = shift;
+	my @installNodes = $dudNode -> getElementsByTagName('install');
+	my @pkgs;
+	if (@installNodes) {
+		my $instPkgs = $this -> __genRepoPackagesArray($installNodes[0]);
+		if (! $instPkgs) {
+			return;
+		}
+		@pkgs = @{$instPkgs};
+	}
+	return \@pkgs;
 }
 
 #==========================================
@@ -1975,6 +2302,143 @@ sub __genEC2ConfigHash {
 	}
 	$ec2ConfigData{ec2region} = $selectedRegions;
 	return \%ec2ConfigData;
+}
+
+#==========================================
+# __genInstRepoArray
+#------------------------------------------
+sub __genInstRepoArray {
+	# ...
+	# Return a ref to an array containing InstRepositoryData objects
+	# created from the <instrepo> data of the XML from the given
+	# <instsource> node.
+	# ---
+	my $this        = shift;
+	my $instSrcNode = shift;
+	my $kiwi = $this -> {kiwi};
+	my @repos;
+	my @repoNodes = $instSrcNode -> getElementsByTagName('instrepo');
+	for my $repo (@repoNodes) {
+		my @sourceNodes = $repo -> getElementsByTagName('source');
+		my $path = $sourceNodes[0] -> getAttribute('path'); # Only 1 child
+		my %init = (
+			local    => $repo -> getAttribute('local'),
+			name     => $repo -> getAttribute('name'),
+			password => $repo -> getAttribute('password'),
+			path     => $path,
+			priority => $repo -> getAttribute('priority'),
+			username => $repo -> getAttribute('username')
+		);
+		my $instRepo = KIWIXMLInstRepositoryData -> new($kiwi, \%init);
+		if (! $instRepo) {
+			$kiwi -> error('KIWIXMLInstRepositoryData creation');
+			$kiwi -> failed();
+			return;
+		}
+		push @repos, $instRepo;
+	}
+	return \@repos;
+}
+
+#==========================================
+# __genMetadataChrootArray
+#------------------------------------------
+sub __genMetadataChrootArray {
+	# ...
+	# Return a ref to an array containing ProductMetaChrootData objects
+	# created from the <chroot> data of the XML from the given
+	# <instsource> node.
+	# ---
+	my $this        = shift;
+	my $instSrcNode = shift;
+	my $kiwi = $this -> {kiwi};
+	my @cRoots;
+	my @metaNodes = $instSrcNode -> getElementsByTagName('metadata');
+	my @chrootNodes = $metaNodes[0] -> getElementsByTagName('chroot');
+	for my $crNd (@chrootNodes) {
+		my %cRinit = (
+			requires => $crNd -> getAttribute('requires'),
+			value    => $crNd -> textContent()
+		);
+		my $metaChroot = KIWIXMLProductMetaChrootData -> new($kiwi, \%cRinit);
+		if (! $metaChroot) {
+			$kiwi -> error('KIWIXMLProductMetaChrootData creation');
+			$kiwi -> failed();
+			return;
+		}
+		push @cRoots, $metaChroot;
+	}
+	return \@cRoots;
+}
+
+#==========================================
+# __genMetadataFileArray
+#------------------------------------------
+sub __genMetadataFileArray{
+	# ...
+	# Return a ref to an array containing ProductMetaFileData objects
+	# created from the <metafile> data of the XML from the given
+	# <instsource> node.
+	# ---
+	my $this        = shift;
+	my $instSrcNode = shift;
+	my $kiwi = $this -> {kiwi};
+	my @fileData;
+	my @metaNodes = $instSrcNode -> getElementsByTagName('metadata');
+	my @fileNodes = $metaNodes[0] -> getElementsByTagName('metafile');
+	for my $fileNd (@fileNodes) {
+		my %mFinit = (
+			script => $fileNd -> getAttribute('script'),
+			target => $fileNd -> getAttribute('target'),
+			url    => $fileNd -> getAttribute('url')
+		);
+		my $metaFile = KIWIXMLProductMetaFileData -> new($kiwi, \%mFinit);
+		if (! $metaFile) {
+			$kiwi -> error('KIWIXMLProductMetaFileData creation');
+			$kiwi -> failed();
+			return;
+		}
+		push @fileData, $metaFile;
+	}
+	return \@fileData;
+}
+
+#==========================================
+# __genMetadataPkgsArray
+#------------------------------------------
+sub __genMetadataPkgsArray {
+	# ...
+	# Return a ref to an array containing ProductPackageData objects
+	# created from the <repopackage> data of the XML from the given
+	# <instsource> node.
+	# ---
+	my $this        = shift;
+	my $instSrcNode = shift;
+	my $kiwi = $this -> {kiwi};
+	my @pkgs;
+	my @metaNodes = $instSrcNode -> getElementsByTagName('metadata');
+	my @pkgNodes = $metaNodes[0] -> getElementsByTagName('repopackage');
+	for my $pckgNd (@pkgNodes) {
+		my %init = (
+			arch       => $pckgNd -> getAttribute('arch'),
+			addarch    => $pckgNd -> getAttribute('addarch'),
+		    forcerepo  => $pckgNd -> getAttribute('forcerepo'),
+		    medium     => $pckgNd -> getAttribute('medium'),
+			name       => $pckgNd -> getAttribute('name'),
+		    onlyarch   => $pckgNd -> getAttribute('onlyarch'),
+		    removearch => $pckgNd -> getAttribute('removearch'),
+		    script     => $pckgNd -> getAttribute('script'),
+		    source     => $pckgNd -> getAttribute('source')
+		);
+		my $prodPkg = KIWIXMLProductPackageData -> new($kiwi, \%init);
+		if (! $prodPkg) {
+			$kiwi -> error('KIWIXMLProductPackageData creation');
+			$kiwi -> failed();
+			return;
+		}
+		push @pkgs, $prodPkg;
+	}
+	return \@pkgs;
 }
 
 #==========================================
@@ -2032,6 +2496,85 @@ sub __genOEMConfigHash {
 	$oemConfig{oem_unattended_id}        =
 		$this -> __getChildNodeTextValue($config, 'oem-unattended-id');
 	return \%oemConfig;
+}
+
+#==========================================
+# __genProductArchitectureArray
+#------------------------------------------
+sub __genProductArchitectureArray {
+	# ...
+	# Return a ref to an array containing ProductArchitectureData
+	# objects created from the <arch> data of the XML from the given
+	# <instsource> node.
+	# ---
+	my $this        = shift;
+	my $instSrcNode = shift;
+	my $kiwi = $this -> {kiwi};
+	my @archParentNodes =
+		$instSrcNode -> getElementsByTagName('architectures');
+	my @arches;
+	if (@archParentNodes) {
+		my @archNodes = $archParentNodes[0] -> getElementsByTagName('arch');
+		for my $archN (@archNodes) {
+			my %init = (
+				fallback => $archN -> getAttribute('fallback'),
+				id       => $archN -> getAttribute('id'),
+				name     => $archN -> getAttribute('name')
+			);
+			my $archObj = KIWIXMLProductArchitectureData -> new($kiwi, \%init);
+			if (! $archObj) {
+				$kiwi -> error('KIWIXMLProductArchitectureData creation');
+				$kiwi -> failed();
+				return;
+			}
+			push @arches, $archObj;
+		}
+	}
+	return \@arches;
+}
+
+#==========================================
+# __genProductPackagesArray
+#------------------------------------------
+sub __genProductPackagesArray {
+	# ...
+	# Return a ref to an array containing ProductPackageData
+	# objects created from the <repopackage> data of the XML from the given
+	# <instsource> node.
+	# ---
+	my $this        = shift;
+	my $instSrcNode = shift;
+	my @pkgsParentNodes =
+		$instSrcNode -> getElementsByTagName('repopackages');
+	my @pkgs;
+	for my $pPNd (@pkgsParentNodes) {
+		my $rPkgs = $this -> __genRepoPackagesArray($pPNd);
+		push @pkgs, @{$rPkgs};
+	}
+	return \@pkgs;
+}
+
+#==========================================
+# __genProductReqArchArray
+#------------------------------------------
+sub __genProductReqArchArray {
+	# ...
+	# Return a ref to an array containing strings identifying the required
+	# architectures.
+	# ---
+	my $this        = shift;
+	my $instSrcNode = shift;
+	my $kiwi = $this -> {kiwi};
+	my @archNodes = $instSrcNode -> getElementsByTagName('architectures');
+	my @reqArches;
+	if (@archNodes) {
+		my @reqArchNodes = $archNodes[0]
+			-> getElementsByTagName('requiredarch');
+		for my $reqArchNd (@reqArchNodes) {
+			push @reqArches, $reqArchNd -> getAttribute('ref');
+		}
+	}
+	return \@reqArches;
 }
 
 #==========================================
@@ -2110,6 +2653,42 @@ sub __genPXEDeployHash {
 		$pxeConfig{unionType} = $unionData -> getAttribute('type');
 	}
 	return \%pxeConfig;
+}
+
+#==========================================
+# __genRepoPackagesArray
+#------------------------------------------
+sub __genRepoPackagesArray {
+	# ...
+	# Return a ref to an array containing ProductPackageData objects
+	# created from the <repopackage> children of the given node.
+	# ---
+	my $this     = shift;
+	my $parentNd = shift;
+	my $kiwi = $this->{kiwi};
+	my @pkgNodes = $parentNd -> getElementsByTagName('repopackage');
+	my @pkgs;
+	for my $pkgNd (@pkgNodes) {
+		my %init = (
+			arch       => $pkgNd -> getAttribute('arch'),
+			addarch    => $pkgNd -> getAttribute('addarch'),
+		    forcerepo  => $pkgNd -> getAttribute('forcerepo'),
+		    medium     => $pkgNd -> getAttribute('medium'),
+			name       => $pkgNd -> getAttribute('name'),
+		    onlyarch   => $pkgNd -> getAttribute('onlyarch'),
+		    removearch => $pkgNd -> getAttribute('removearch'),
+		    script     => $pkgNd -> getAttribute('script'),
+		    source     => $pkgNd -> getAttribute('source')
+		);
+		my $prodPkg = KIWIXMLProductPackageData -> new($kiwi, \%init);
+		if (! $prodPkg) {
+			$kiwi -> error('KIWIXMLProductPackageData creation');
+			$kiwi -> failed();
+			return;
+		}
+		push @pkgs, $prodPkg;
+	}
+	return \@pkgs;
 }
 
 #==========================================
@@ -2859,6 +3438,100 @@ sub __populateDescriptionInfo {
 }
 
 #==========================================
+# __populateInstsrc
+#------------------------------------------
+sub __populateInstSource {
+	# ...
+	# Populate the imageConfig member with the
+	# product data provided with the <instsource> element and its children
+	#  from the XML file.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @instNodes = $this->{systemTree} -> getElementsByTagName ('instsource');
+	my $instSrc = $instNodes[0]; # Only 1 element allowed
+	if ($instSrc) {
+		my $arches = $this -> __genProductArchitectureArray($instSrc);
+		if (! $arches) {
+			return;
+		}
+		my @dudNodes = $instSrc -> getElementsByTagName('driverupdate');
+		my @dudArches;
+		my $dudInstSysPkgs;
+		my $dudModulePkgs;
+		my $dudPkgs;
+		if (@dudNodes) {
+			my @targetNodes = $dudNodes[0] -> getElementsByTagName('target');
+			for my $tgt (@targetNodes) {
+				push @dudArches, $tgt -> getAttribute('arch');
+			}
+			$dudInstSysPkgs = $this -> __genDUDInstSysPkgsArray($dudNodes[0]);
+			if (! $dudInstSysPkgs) {
+				return;
+			}
+			$dudModulePkgs = $this -> __genDUDModulePkgsArray($dudNodes[0]);
+			if (! $dudModulePkgs) {
+				return;
+			}
+			$dudPkgs = $this -> __genDUDPkgsArray($dudNodes[0]);
+			if (! $dudPkgs) {
+				return;
+			}
+		}
+		my $instRepos = $this -> __genInstRepoArray($instSrc);
+		if (! $instRepos) {
+			return;
+		}
+		my @metaNodes = $instSrc -> getElementsByTagName('metadata');
+		my $metaChroots;
+		my $metaFiles;
+		my $metaPkgs;
+		if (@metaNodes) {
+			$metaChroots = $this -> __genMetadataChrootArray($instSrc);
+			if (! $metaChroots) {
+				return;
+			}
+			$metaFiles = $this -> __genMetadataFileArray($instSrc);
+			if (! $metaFiles) {
+				return;
+			}
+			$metaPkgs  = $this -> __genMetadataPkgsArray($instSrc);
+			if (! $metaPkgs) {
+				return;
+			}
+		}
+		my $prodOpts = $this -> __createProductOptionsObj($instSrc);
+		if (! $prodOpts) {
+			return;
+		}
+		my $prodPkgs = $this -> __genProductPackagesArray($instSrc);
+		if (! $prodPkgs) {
+			return;
+		}
+		my $reqArches = $this -> __genProductReqArchArray($instSrc);
+		if (! $reqArches) {
+			return;
+		} #RJS
+		my %prodSettings = (
+			architectures  => $arches,
+			dudArches      => \@dudArches,
+			dudInstSysPkgs => $dudInstSysPkgs,
+			dudModulePkgs  => $dudModulePkgs,
+			dudPkgs        => $dudPkgs,
+			instRepos      => $instRepos,
+			metaChroots    => $metaChroots,
+			metaFiles      => $metaFiles,
+			metaPkgs       => $metaPkgs,
+			options        => $prodOpts,
+			prodPkgs       => $prodPkgs,
+			reqArches      => $reqArches
+		);
+		$this->{imageConfig}{productSettings} = \%prodSettings;
+	}
+	return 1;
+}
+
+#==========================================
 # __populateDriverInfo
 #------------------------------------------
 sub __populateDriverInfo {
@@ -3079,12 +3752,12 @@ sub __populatePackageCollectionInfo {
 }
 
 #==========================================
-# __populateProductInfo
+# __populatePackageProductInfo
 #------------------------------------------
-sub __populateProductInfo {
+sub __populatePackageProductInfo {
 	# ...
 	# Populate the imageConfig member with the
-	# information from <opensusePattern> and <rhelGroup>
+	# information from <opensuseProduct>
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -3751,7 +4424,6 @@ sub getImageID {
 	return 0;
 }
 
-
 #==========================================
 # getImageVersion
 #------------------------------------------
@@ -3764,8 +4436,6 @@ sub getImageVersion {
 	my $version = $node -> getElementsByTagName ("version");
 	return "$version";
 }
-
-
 
 #==========================================
 # setArch
@@ -3788,238 +4458,6 @@ sub setArch {
 }
 
 #==========================================
-# getInstSourceRepository
-#------------------------------------------
-sub getInstSourceRepository {
-	# ...
-	# Get the repository path and priority used for building
-	# up an installation source tree.
-	# ---
-	my $this = shift;
-	my %result;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	if (! defined $base) {
-		return %result;
-	}
-	my @node = $base -> getElementsByTagName ("instrepo");
-	foreach my $element (@node) {
-		my $prio = $element -> getAttribute("priority");
-		my $name = $element -> getAttribute("name");
-		my $user = $element -> getAttribute("username");
-		my $pwd  = $element -> getAttribute("password");
-		my $islocal  = $element -> getAttribute("local");
-		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
-		my $source = $this -> __resolveLink ( $stag -> getAttribute ("path") );
-		if (! defined $name) {
-			$name = "noname";
-		}
-		$result{$name}{source}   = $source;
-		$result{$name}{priority} = $prio;
-		$result{$name}{islocal} = $islocal;
-		if (defined $user) {
-			$result{$name}{user} = $user.":".$pwd;
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getInstSourceArchList
-#------------------------------------------
-sub getInstSourceArchList {
-	# ...
-	# Get the architecture list used for building up
-	# an installation source tree
-	# ---
-	# return a hash with the following structure:
-	# name  = [ description, follower ]
-	#   name is the key, given as "id" in the xml file
-	#   description is the alternative name given as "name" in the xml file
-	#   follower is the key value of the next arch in the fallback chain
-	# ---
-	my $this = shift;
-	my $base = $this->{instsrcNodeList}->get_node(1);
-	my $elems = $base->getElementsByTagName("architectures");
-	my %result;
-	my @attr = ("id", "name", "fallback");
-	for(my $i=1; $i<= $elems->size(); $i++) {
-		my $node  = $elems->get_node($i);
-		my @flist = $node->getElementsByTagName("arch");
-		my %rlist = map { $_->getAttribute("ref") => $_ }
-			$node->getElementsByTagName("requiredarch");
-		foreach my $element(@flist) {
-			my $id = $element->getAttribute($attr[0]);
-			next if (!$id);
-			my $ra = 0;
-			if($rlist{$id}) {
-			  $ra = 1;
-			}
-			my ($d,$n) = (
-				$element->getAttribute($attr[1]),
-				$element->getAttribute($attr[2])
-			);
-			if($n) {
-				$result{$id} = [ $d, $n, $ra ];
-			} else {
-				$result{$id} = [ $d, 0, $ra ];
-			}
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getInstSourceProductVar
-#------------------------------------------
-sub getInstSourceProductVar {
-	# ...
-	# Get the shell variable values needed for
-	# metadata creation
-	# ---
-	# return a hash with the following structure:
-	# varname = value (quoted, may contain space etc.)
-	# ---
-	my $this = shift;
-	return $this->getInstSourceProductStuff("productvar");
-}
-
-#==========================================
-# getInstSourceProductOption
-#------------------------------------------
-sub getInstSourceProductOption {
-	# ...
-	# Get the shell variable values needed for
-	# metadata creation
-	# ---
-	# return a hash with the following structure:
-	# varname = value (quoted, may contain space etc.)
-	# ---
-	my $this = shift;
-	return $this->getInstSourceProductStuff("productoption");
-}
-
-#==========================================
-# getInstSourceProductStuff
-#------------------------------------------
-sub getInstSourceProductStuff {
-	# ...
-	# generic function returning indentical data
-	# structures for different tags (of same type)
-	# ---
-	my $this = shift;
-	my $what = shift;
-	if (!$what) {
-		return;
-	}
-
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $elems = $base->getElementsByTagName("productoptions");
-	my %result;
-
-	for(my $i=1; $i<=$elems->size(); $i++) {
-		my $node  = $elems->get_node($i);
-		my @flist = $node->getElementsByTagName($what);
-		foreach my $element(@flist) {
-			my $name = $element->getAttribute("name");
-			my $value = $element ->textContent("name");
-			$result{$name} = $value;
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getInstSourceProductInfo
-#------------------------------------------
-sub getInstSourceProductInfo {
-	# ...
-	# Get the shell variable values needed for
-	# content file generation
-	# ---
-	# return a hash with the following structure:
-	# index = (name, value)
-	# ---
-	my $this = shift;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $elems = $base->getElementsByTagName("productoptions");
-	my %result;
-
-	for(my $i=1; $i<=$elems->size(); $i++) {
-		my $node  = $elems->get_node($i);
-		my @flist = $node->getElementsByTagName("productinfo");
-		for(my $j=0; $j <= $#flist; $j++) {
-		#foreach my $element(@flist) {
-			my $name = $flist[$j]->getAttribute("name");
-			my $value = $flist[$j]->textContent("name");
-			$result{$j} = [$name, $value];
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getInstSourceChrootList
-#------------------------------------------
-sub getInstSourceChrootList {
-	# ...
-	# Get the list of packages necessary to
-	# run metafile shell scripts in chroot jail
-	# ---
-	# return a list of packages
-	# ---
-	my $this = shift;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $elems = $base->getElementsByTagName("metadata");
-	my @result;
-
-	for(my $i=1; $i<=$elems->size(); $i++) {
-		my $node  = $elems->get_node($i);
-		my @flist = $node->getElementsByTagName("chroot");
-		foreach my $element(@flist) {
-			my $name = $element->getAttribute("requires");
-			push @result, $name if $name;
-		}
-	}
-	return @result;
-}
-
-#==========================================
-# getInstSourceMetaFiles
-#------------------------------------------
-sub getInstSourceMetaFiles {
-	# ...
-	# Get the metafile data if any. The method is returning
-	# a hash with key=metafile and a hashreference for the
-	# attribute values url, target and script
-	# ---
-	my $this  = shift;
-	my $base  = $this->{instsrcNodeList} -> get_node(1);
-	my $nodes = $base -> getElementsByTagName ("metadata");
-	my %result;
-	my @attrib = (
-		"target","script"
-	);
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node  = $nodes -> get_node($i);
-		my @flist = $node  -> getElementsByTagName ("metafile");
-		foreach my $element (@flist) {
-			my $file = $element -> getAttribute ("url");
-			if (! defined $file) {
-				next;
-			}
-			foreach my $key (@attrib) {
-				my $value = $element -> getAttribute ($key);
-				if (defined $value) {
-					$result{$file}{$key} = $value;
-				}
-			}
-		}
-	}
-	return %result;
-}
-
-
-#==========================================
 # addSimpleType
 #------------------------------------------
 sub addSimpleType {
@@ -4040,58 +4478,6 @@ sub addSimpleType {
 	return $this;
 }
 
-#==========================================
-# getInstSourcePackageAttributes
-#------------------------------------------
-sub getInstSourcePackageAttributes {
-	# ...
-	# Create an attribute hash for the given package
-	# and package category.
-	# ---
-	my $this = shift;
-	my $what = shift;
-	my $pack = shift;
-	my $nodes;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	if ($what eq "metapackages") {
-		$nodes = $base -> getElementsByTagName ("metadata");
-	} elsif ($what eq "instpackages") {
-		$nodes = $base -> getElementsByTagName ("repopackages");
-	} elsif ($what eq "DUDmodules") {
-		$nodes = $base -> getElementsByTagName("driverupdate")
-			-> get_node(1) -> getElementsByTagName('modules');
-	} elsif ($what eq "DUDinstall") {
-		$nodes = $base -> getElementsByTagName("driverupdate")
-			-> get_node(1) -> getElementsByTagName('install');
-	} elsif ($what eq "DUDinstsys") {
-		$nodes = $base -> getElementsByTagName("driverupdate")
-			-> get_node(1) -> getElementsByTagName('instsys');
-	}
-	my %result;
-	my @attrib = (
-		"forcerepo" ,"addarch", "removearch", "arch",
-		"onlyarch", "source", "script", "medium"
-	);
-	if(not defined($this->{m_rpacks})) {
-		my @nodes = ();
-		for (my $i=1;$i<= $nodes->size();$i++) {
-			my $node  = $nodes -> get_node($i);
-			my @plist = $node  -> getElementsByTagName ("repopackage");
-			push @nodes, @plist;
-		}
-		%{$this->{m_rpacks}} = map {$_->getAttribute("name") => $_} @nodes;
-	}
-	my $elem = $this->{m_rpacks}->{$pack};
-	if(defined($elem)) {
-		foreach my $key (@attrib) {
-			my $value = $elem -> getAttribute ($key);
-			if (defined $value) {
-				$result{$key} = $value;
-			}
-		}
-	}
-	return \%result;
-}
 
 #==========================================
 # clearPackageAttributes
@@ -4140,77 +4526,6 @@ sub isDriverUpdateDisk {
 	my $base = $this->{instsrcNodeList} -> get_node(1);
 	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
 	return ref $dud_node;
-}
-
-#==========================================
-# getInstSourceDUDTargets
-#------------------------------------------
-sub getInstSourceDUDTargets {
-	my $this = shift;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
-	my %targets = ();
-	foreach my $target ($dud_node->getElementsByTagName('target')) {
-		$targets{$target->textContent()} = $target->getAttribute("arch");
-	}
-	return %targets;
-}
-
-#==========================================
-# getInstSourceDUDConfig
-#------------------------------------------
-sub getInstSourceDUDConfig {
-	my $this = shift;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
-	my @config = $dud_node->getElementsByTagName('config');
-	my %data;
-	foreach my $cfg (@config) {
-		$data{$cfg->getAttribute("key")} = $cfg->getAttribute("value");
-	}
-	return \%data;
-}
-
-#==========================================
-# getInstSourceDUDModules
-#------------------------------------------
-sub getInstSourceDUDModules {
-	my $this = shift;
-	return $this->getInstSourceDUDPackList('modules');
-}
-
-#==========================================
-# getInstSourceDUDInstall
-#------------------------------------------
-sub getInstSourceDUDInstall {
-	my $this = shift;
-	return $this->getInstSourceDUDPackList('install');
-}
-
-#==========================================
-# getInstSourceDUDInstsys
-#------------------------------------------
-sub getInstSourceDUDInstsys {
-	my $this = shift;
-	return $this->getInstSourceDUDPackList('instsys');
-}
-
-#==========================================
-# getInstSourceDUDPackList
-#------------------------------------------
-sub getInstSourceDUDPackList {
-	my $this = shift;
-	my $what = shift;
-	return unless $what;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
-	my $modules_node = $dud_node->getElementsByTagName($what)->get_node(1);
-	my @module_packs = $modules_node->getElementsByTagName('repopackage');
-	my @modules;
-	foreach my $mod (@module_packs) {
-		push @modules, $mod->getAttribute("name");
-	}
-	return @modules;
 }
 
 #==========================================
@@ -4346,45 +4661,6 @@ sub getReplacePackageAddList {
 	return @pacs;
 }
 
-#==========================================
-# getInstSourceMetaPackageList
-#------------------------------------------
-sub getInstSourceMetaPackageList {
-	# ...
-	# Create base package list of the instsource
-	# metadata package description
-	# ---
-	my $this = shift;
-	my @list = getList_legacy ($this,"metapackages");
-	my %data = ();
-	foreach my $pack (@list) {
-		my $attr = $this -> getInstSourcePackageAttributes (
-			"metapackages",$pack
-		);
-		$data{$pack} = $attr;
-	}
-	return %data;
-}
-
-#==========================================
-# getInstSourcePackageList
-#------------------------------------------
-sub getInstSourcePackageList {
-	# ...
-	# Create base package list of the instsource
-	# packages package description
-	# ---
-	my $this = shift;
-	my @list = getList_legacy ($this,"instpackages");
-	my %data = ();
-	foreach my $pack (@list) {
-		my $attr = $this -> getInstSourcePackageAttributes (
-			"instpackages",$pack
-		);
-		$data{$pack} = $attr;
-	}
-	return %data;
-}
 
 #==========================================
 # getTestingList
@@ -4411,110 +4687,6 @@ sub getArch {
 	return $this->{arch};
 }
 
-#==========================================
-# getInstSourceFile
-#------------------------------------------
-sub getInstSourceFile {
-	# ...
-	# download a file from a network or local location to
-	# a given local path. It's possible to use regular expressions
-	# in the source file specification
-	# ---
-	my $this    = shift;
-	my $url     = shift;
-	my $dest    = shift;
-	my $dirname;
-	my $basename;
-	#==========================================
-	# Check parameters
-	#------------------------------------------
-	if ((! defined $dest) || (! defined $url)) {
-		return;
-	}
-	#==========================================
-	# setup destination base and dir name
-	#------------------------------------------
-	if ($dest =~ /(^.*\/)(.*)/) {
-		$dirname  = $1;
-		$basename = $2;
-		if (! $basename) {
-			$url =~ /(^.*\/)(.*)/;
-			$basename = $2;
-		}
-	} else {
-		return;
-	}
-	#==========================================
-	# check base and dir name
-	#------------------------------------------
-	if (! $basename) {
-		return;
-	}
-	if (! -d $dirname) {
-		return;
-	}
-	#==========================================
-	# download file
-	#------------------------------------------
-	if ($url !~ /:\/\//) {
-		# /.../
-		# local files, make them a file:// url
-		# ----
-		$url = "file://".$url;
-		$url =~ s{/{3,}}{//};
-	}
-	if ($url =~ /dir:\/\//) {
-		# /.../
-		# dir url, make them a file:// url
-		# ----
-		$url =~ s/^dir/file/;
-	}
-	# /.../
-	# use lwp-download to manage the process.
-	# if first download failed check the directory list with
-	# a regular expression to find the file. After that repeat
-	# the download
-	# ----
-	$dest = $dirname."/".$basename;
-	my $data = qxx ("lwp-download $url $dest 2>&1");
-	my $code = $? >> 8;
-	if ($code == 0) {
-		return $this;
-	}
-	if ($url =~ /(^.*\/)(.*)/) {
-		my $location = $1;
-		my $search   = $2;
-		my $browser  = LWP::UserAgent -> new;
-		my $request  = HTTP::Request  -> new (GET => $location);
-		my $response;
-		eval {
-			$response = $browser  -> request ( $request );
-		};
-		if ($@) {
-			return;
-		}
-		my $content  = $response -> content ();
-		my @lines    = split (/\n/,$content);
-		foreach my $line(@lines) {
-			if ($line !~ /href=\"(.*)\"/) {
-				next;
-			}
-			my $link = $1;
-			if ($link =~ /$search/) {
-				$url  = $location.$link;
-				$data = qxx ("lwp-download $url $dest 2>&1");
-				$code = $? >> 8;
-				if ($code == 0) {
-					return $this;
-				}
-			}
-		}
-		return;
-	} else {
-		return;
-	}
-	return $this;
-}
 
 #==========================================
 # getInstSourceSatSolvable
@@ -4649,7 +4821,7 @@ sub getSingleInstSourceSatSolvable {
 	#------------------------------------------
 	my $repoMD = $sdir."/repomd.xml"; unlink $repoMD;
 	foreach my $md (keys %repoxml) {
-		if (KIWIXML::getInstSourceFile ($kiwi,$repo.$md,$repoMD)) {
+		if (KIWIXML::getInstSourceFile_legacy ($kiwi,$repo.$md,$repoMD)) {
 			last if -e $repoMD;
 		}
 	}
@@ -4758,7 +4930,7 @@ sub getSingleInstSourceSatSolvable {
 		} else {
 			$destfile = $sdir."/$name-".$count;
 		}
-		if (KIWIXML::getInstSourceFile ($kiwi,$repo.$dist,$destfile)) {
+		if (KIWIXML::getInstSourceFile_legacy ($kiwi,$repo.$dist,$destfile)) {
 			$foundDist = 1;
 		}
 	}
@@ -4781,7 +4953,7 @@ sub getSingleInstSourceSatSolvable {
 	foreach my $patt (keys %patterns) {
 		my $name = $patterns{$patt};
 		$destfile = $sdir."/$name-".$count.".gz";
-		my $ok = KIWIXML::getInstSourceFile ($kiwi,$repo.$patt,$destfile);
+		my $ok = KIWIXML::getInstSourceFile_legacy ($kiwi,$repo.$patt,$destfile);
 		if (($ok) && ($name eq "patterns")) {
 			#==========================================
 			# get files listed in patterns
@@ -4801,7 +4973,7 @@ sub getSingleInstSourceSatSolvable {
 				}
 				my $base = dirname $patt;
 				my $file = $repo."/".$base."/".$line;
-				if (! KIWIXML::getInstSourceFile($kiwi,$file,$destfile)) {
+				if (! KIWIXML::getInstSourceFile_legacy($kiwi,$file,$destfile)) {
 					$kiwi -> warning ("--> Pattern file $line not found");
 					$kiwi -> skipped ();
 					next;
@@ -5891,6 +6063,488 @@ sub getInstallList_legacy {
 	# ---
 	my $this = shift;
 	return getList_legacy ($this,"image");
+}
+
+#==========================================
+# getInstSourceArchList_legacy
+#------------------------------------------
+sub getInstSourceArchList_legacy {
+	# ...
+	# Get the architecture list used for building up
+	# an installation source tree
+	# ---
+	# return a hash with the following structure:
+	# name  = [ description, follower ]
+	#   name is the key, given as "id" in the xml file
+	#   description is the alternative name given as "name" in the xml file
+	#   follower is the key value of the next arch in the fallback chain
+	# ---
+	my $this = shift;
+	my $base = $this->{instsrcNodeList}->get_node(1);
+	my $elems = $base->getElementsByTagName("architectures");
+	my %result;
+	my @attr = ("id", "name", "fallback");
+	for(my $i=1; $i<= $elems->size(); $i++) {
+		my $node  = $elems->get_node($i);
+		my @flist = $node->getElementsByTagName("arch");
+		my %rlist = map { $_->getAttribute("ref") => $_ }
+			$node->getElementsByTagName("requiredarch");
+		foreach my $element(@flist) {
+			my $id = $element->getAttribute($attr[0]);
+			next if (!$id);
+			my $ra = 0;
+			if($rlist{$id}) {
+			  $ra = 1;
+			}
+			my ($d,$n) = (
+				$element->getAttribute($attr[1]),
+				$element->getAttribute($attr[2])
+			);
+			if($n) {
+				$result{$id} = [ $d, $n, $ra ];
+			} else {
+				$result{$id} = [ $d, 0, $ra ];
+			}
+		}
+	}
+	return %result;
+}
+
+#==========================================
+# getInstSourceChrootList_legacy
+#------------------------------------------
+sub getInstSourceChrootList_legacy {
+	# ...
+	# Get the list of packages necessary to
+	# run metafile shell scripts in chroot jail
+	# ---
+	# return a list of packages
+	# ---
+	my $this = shift;
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	my $elems = $base->getElementsByTagName("metadata");
+	my @result;
+
+	for(my $i=1; $i<=$elems->size(); $i++) {
+		my $node  = $elems->get_node($i);
+		my @flist = $node->getElementsByTagName("chroot");
+		foreach my $element(@flist) {
+			my $name = $element->getAttribute("requires");
+			push @result, $name if $name;
+		}
+	}
+	return @result;
+}
+
+#==========================================
+# getInstSourceDUDConfig_legacy
+#------------------------------------------
+sub getInstSourceDUDConfig_legacy {
+	my $this = shift;
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
+	my @config = $dud_node->getElementsByTagName('config');
+	my %data;
+	foreach my $cfg (@config) {
+		$data{$cfg->getAttribute("key")} = $cfg->getAttribute("value");
+	}
+	return \%data;
+}
+
+#==========================================
+# getInstSourceDUDInstall_legacy
+#------------------------------------------
+sub getInstSourceDUDInstall_legacy {
+	my $this = shift;
+	return $this->__getInstSourceDUDPackList_legacy('install');
+}
+
+#==========================================
+# getInstSourceDUDInstsys_legacy
+#------------------------------------------
+sub getInstSourceDUDInstsys_legacy {
+	my $this = shift;
+	return $this->__getInstSourceDUDPackList_legacy('instsys');
+}
+
+#==========================================
+# getInstSourceDUDModules_legacy
+#------------------------------------------
+sub getInstSourceDUDModules_legacy {
+	my $this = shift;
+	return $this->__getInstSourceDUDPackList_legacy('modules');
+}
+
+#==========================================
+# getInstSourceDUDTargets_legacy
+#------------------------------------------
+sub getInstSourceDUDTargets_legacy {
+	my $this = shift;
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
+	my %targets = ();
+	foreach my $target ($dud_node->getElementsByTagName('target')) {
+		$targets{$target->textContent()} = $target->getAttribute("arch");
+	}
+	return %targets;
+}
+
+#==========================================
+# getInstSourceFile_legacy
+#------------------------------------------
+sub getInstSourceFile_legacy {
+	# ...
+	# download a file from a network or local location to
+	# a given local path. It's possible to use regular expressions
+	# in the source file specification
+	# ---
+	my $this    = shift;
+	my $url     = shift;
+	my $dest    = shift;
+	my $dirname;
+	my $basename;
+	#==========================================
+	# Check parameters
+	#------------------------------------------
+	if ((! defined $dest) || (! defined $url)) {
+		return;
+	}
+	#==========================================
+	# setup destination base and dir name
+	#------------------------------------------
+	if ($dest =~ /(^.*\/)(.*)/) {
+		$dirname  = $1;
+		$basename = $2;
+		if (! $basename) {
+			$url =~ /(^.*\/)(.*)/;
+			$basename = $2;
+		}
+	} else {
+		return;
+	}
+	#==========================================
+	# check base and dir name
+	#------------------------------------------
+	if (! $basename) {
+		return;
+	}
+	if (! -d $dirname) {
+		return;
+	}
+	#==========================================
+	# download file
+	#------------------------------------------
+	if ($url !~ /:\/\//) {
+		# /.../
+		# local files, make them a file:// url
+		# ----
+		$url = "file://".$url;
+		$url =~ s{/{3,}}{//};
+	}
+	if ($url =~ /dir:\/\//) {
+		# /.../
+		# dir url, make them a file:// url
+		# ----
+		$url =~ s/^dir/file/;
+	}
+	# /.../
+	# use lwp-download to manage the process.
+	# if first download failed check the directory list with
+	# a regular expression to find the file. After that repeat
+	# the download
+	# ----
+	$dest = $dirname."/".$basename;
+	my $data = qxx ("lwp-download $url $dest 2>&1");
+	my $code = $? >> 8;
+	if ($code == 0) {
+		return $this;
+	}
+	if ($url =~ /(^.*\/)(.*)/) {
+		my $location = $1;
+		my $search   = $2;
+		my $browser  = LWP::UserAgent -> new;
+		my $request  = HTTP::Request  -> new (GET => $location);
+		my $response;
+		eval {
+			$response = $browser  -> request ( $request );
+		};
+		if ($@) {
+			return;
+		}
+		my $content  = $response -> content ();
+		my @lines    = split (/\n/,$content);
+		foreach my $line(@lines) {
+			if ($line !~ /href=\"(.*)\"/) {
+				next;
+			}
+			my $link = $1;
+			if ($link =~ /$search/) {
+				$url  = $location.$link;
+				$data = qxx ("lwp-download $url $dest 2>&1");
+				$code = $? >> 8;
+				if ($code == 0) {
+					return $this;
+				}
+			}
+		}
+		return;
+	} else {
+		return;
+	}
+	return $this;
+}
+
+#==========================================
+# getInstSourceMetaFiles_legacy
+#------------------------------------------
+sub getInstSourceMetaFiles_legacy {
+	# ...
+	# Get the metafile data if any. The method is returning
+	# a hash with key=metafile and a hashreference for the
+	# attribute values url, target and script
+	# ---
+	my $this  = shift;
+	my $base  = $this->{instsrcNodeList} -> get_node(1);
+	my $nodes = $base -> getElementsByTagName ("metadata");
+	my %result;
+	my @attrib = (
+		"target","script"
+	);
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node  = $nodes -> get_node($i);
+		my @flist = $node  -> getElementsByTagName ("metafile");
+		foreach my $element (@flist) {
+			my $file = $element -> getAttribute ("url");
+			if (! defined $file) {
+				next;
+			}
+			foreach my $key (@attrib) {
+				my $value = $element -> getAttribute ($key);
+				if (defined $value) {
+					$result{$file}{$key} = $value;
+				}
+			}
+		}
+	}
+	return %result;
+}
+
+#==========================================
+# getInstSourceMetaPackageList_legacy
+#------------------------------------------
+sub getInstSourceMetaPackageList_legacy {
+	# ...
+	# Create base package list of the instsource
+	# metadata package description
+	# ---
+	my $this = shift;
+	my @list = getList_legacy ($this,"metapackages");
+	my %data = ();
+	foreach my $pack (@list) {
+		my $attr = $this -> getInstSourcePackageAttributes_legacy (
+			"metapackages",$pack
+		);
+		$data{$pack} = $attr;
+	}
+	return %data;
+}
+
+#==========================================
+# getInstSourcePackageAttributes_legacy
+#------------------------------------------
+sub getInstSourcePackageAttributes_legacy {
+	# ...
+	# Create an attribute hash for the given package
+	# and package category.
+	# ---
+	my $this = shift;
+	my $what = shift;
+	my $pack = shift;
+	my $nodes;
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	if ($what eq "metapackages") {
+		$nodes = $base -> getElementsByTagName ("metadata");
+	} elsif ($what eq "instpackages") {
+		$nodes = $base -> getElementsByTagName ("repopackages");
+	} elsif ($what eq "DUDmodules") {
+		$nodes = $base -> getElementsByTagName("driverupdate")
+			-> get_node(1) -> getElementsByTagName('modules');
+	} elsif ($what eq "DUDinstall") {
+		$nodes = $base -> getElementsByTagName("driverupdate")
+			-> get_node(1) -> getElementsByTagName('install');
+	} elsif ($what eq "DUDinstsys") {
+		$nodes = $base -> getElementsByTagName("driverupdate")
+			-> get_node(1) -> getElementsByTagName('instsys');
+	}
+	my %result;
+	my @attrib = (
+		"forcerepo" ,"addarch", "removearch", "arch",
+		"onlyarch", "source", "script", "medium"
+	);
+	if(not defined($this->{m_rpacks})) {
+		my @nodes = ();
+		for (my $i=1;$i<= $nodes->size();$i++) {
+			my $node  = $nodes -> get_node($i);
+			my @plist = $node  -> getElementsByTagName ("repopackage");
+			push @nodes, @plist;
+		}
+		%{$this->{m_rpacks}} = map {$_->getAttribute("name") => $_} @nodes;
+	}
+	my $elem = $this->{m_rpacks}->{$pack};
+	if(defined($elem)) {
+		foreach my $key (@attrib) {
+			my $value = $elem -> getAttribute ($key);
+			if (defined $value) {
+				$result{$key} = $value;
+			}
+		}
+	}
+	return \%result;
+}
+
+#==========================================
+# getInstSourcePackageList_legacy
+#------------------------------------------
+sub getInstSourcePackageList_legacy {
+	# ...
+	# Create base package list of the instsource
+	# packages package description
+	# ---
+	my $this = shift;
+	my @list = getList_legacy ($this,"instpackages");
+	my %data = ();
+	foreach my $pack (@list) {
+		my $attr = $this -> getInstSourcePackageAttributes_legacy (
+			"instpackages",$pack
+		);
+		$data{$pack} = $attr;
+	}
+	return %data;
+}
+
+#==========================================
+# getInstSourceProductInfo_legacy
+#------------------------------------------
+sub getInstSourceProductInfo_legacy {
+	# ...
+	# Get the shell variable values needed for
+	# content file generation
+	# ---
+	# return a hash with the following structure:
+	# index = (name, value)
+	# ---
+	my $this = shift;
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	my $elems = $base->getElementsByTagName("productoptions");
+	my %result;
+
+	for(my $i=1; $i<=$elems->size(); $i++) {
+		my $node  = $elems->get_node($i);
+		my @flist = $node->getElementsByTagName("productinfo");
+		for(my $j=0; $j <= $#flist; $j++) {
+		#foreach my $element(@flist) {
+			my $name = $flist[$j]->getAttribute("name");
+			my $value = $flist[$j]->textContent("name");
+			$result{$j} = [$name, $value];
+		}
+	}
+	return %result;
+}
+
+#==========================================
+# getInstSourceProductOption_legacy
+#------------------------------------------
+sub getInstSourceProductOption_legacy {
+	# ...
+	# Get the shell variable values needed for
+	# metadata creation
+	# ---
+	# return a hash with the following structure:
+	# varname = value (quoted, may contain space etc.)
+	# ---
+	my $this = shift;
+	return $this->getInstSourceProductStuff_legacy("productoption");
+}
+
+#==========================================
+# getInstSourceProductStuff_legacy
+#------------------------------------------
+sub getInstSourceProductStuff_legacy {
+	# ...
+	# generic function returning indentical data
+	# structures for different tags (of same type)
+	# ---
+	my $this = shift;
+	my $what = shift;
+	if (!$what) {
+		return;
+	}
+
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	my $elems = $base->getElementsByTagName("productoptions");
+	my %result;
+
+	for(my $i=1; $i<=$elems->size(); $i++) {
+		my $node  = $elems->get_node($i);
+		my @flist = $node->getElementsByTagName($what);
+		foreach my $element(@flist) {
+			my $name = $element->getAttribute("name");
+			my $value = $element ->textContent("name");
+			$result{$name} = $value;
+		}
+	}
+	return %result;
+}
+
+#==========================================
+# getInstSourceProductVar_legacy
+#------------------------------------------
+sub getInstSourceProductVar_legacy {
+	# ...
+	# Get the shell variable values needed for
+	# metadata creation
+	# ---
+	# return a hash with the following structure:
+	# varname = value (quoted, may contain space etc.)
+	# ---
+	my $this = shift;
+	return $this->getInstSourceProductStuff_legacy("productvar");
+}
+
+#==========================================
+# getInstSourceRepository_legacy
+#------------------------------------------
+sub getInstSourceRepository_legacy {
+	# ...
+	# Get the repository path and priority used for building
+	# up an installation source tree.
+	# ---
+	my $this = shift;
+	my %result;
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	if (! defined $base) {
+		return %result;
+	}
+	my @node = $base -> getElementsByTagName ("instrepo");
+	foreach my $element (@node) {
+		my $prio = $element -> getAttribute("priority");
+		my $name = $element -> getAttribute("name");
+		my $user = $element -> getAttribute("username");
+		my $pwd  = $element -> getAttribute("password");
+		my $islocal  = $element -> getAttribute("local");
+		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
+		my $source = $this -> __resolveLink ( $stag -> getAttribute ("path") );
+		if (! defined $name) {
+			$name = "noname";
+		}
+		$result{$name}{source}   = $source;
+		$result{$name}{priority} = $prio;
+		$result{$name}{islocal} = $islocal;
+		if (defined $user) {
+			$result{$name}{user} = $user.":".$pwd;
+		}
+	}
+	return %result;
 }
 
 #==========================================
@@ -7828,7 +8482,7 @@ sub __createURLList_legacy {
 	my @sourcelist  = ();
 	%repository = $this->getRepositories_legacy();
 	if (! %repository) {
-		%repository = $this->getInstSourceRepository();
+		%repository = $this->getInstSourceRepository_legacy();
 		foreach my $name (keys %repository) {
 			push (@sourcelist,$repository{$name}{source});
 		}
@@ -7846,6 +8500,24 @@ sub __createURLList_legacy {
 	$this->{urllist} = \@urllist;
 	$this->{urlhash} = \%urlhash;
 	return $this;
+}
+
+#==========================================
+# __getInstSourceDUDPackList_legacy
+#------------------------------------------
+sub __getInstSourceDUDPackList_legacy {
+	my $this = shift;
+	my $what = shift;
+	return unless $what;
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
+	my $modules_node = $dud_node->getElementsByTagName($what)->get_node(1);
+	my @module_packs = $modules_node->getElementsByTagName('repopackage');
+	my @modules;
+	foreach my $mod (@module_packs) {
+		push @modules, $mod->getAttribute("name");
+	}
+	return @modules;
 }
 
 #==========================================

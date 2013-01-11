@@ -1,5 +1,5 @@
 #================
-# FILE          : kiwiXMLFileData.pm
+# FILE          : kiwiXMLProductMetaFileData.pm
 #----------------
 # PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
@@ -8,11 +8,12 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test implementation for the KIWIXMLFileData module.
+# DESCRIPTION   : Unit test implementation for the KIWIXMLProductMetaFileData
+#               : module.
 #               :
 # STATUS        : Development
 #----------------
-package Test::kiwiXMLFileData;
+package Test::kiwiXMLProductMetaFileData;
 
 use strict;
 use warnings;
@@ -21,7 +22,7 @@ use Common::ktLog;
 use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
 
-use KIWIXMLFileData;
+use KIWIXMLProductMetaFileData;
 
 #==========================================
 # Constructor
@@ -41,15 +42,96 @@ sub new {
 #------------------------------------------
 sub test_ctor_improperArg {
 	# ...
-	# Test the FileData constructor with an improper
+	# Test the ProductMetaFileData constructor with an improper
 	# argument type
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, 'foo');
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi, 'foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($fileDataObj);
+	return;
+}
+
+#==========================================
+# test_ctor_missingArgScript
+#------------------------------------------
+sub test_ctor_missingArgScript {
+	# ...
+	# Test the ProductMetaFileData constructor with a missing script KW arg
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+		target => '/installroot',
+		url    => 'iso:///media1'
+	);
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'KIWIXMLProductMetaFileData: no "script" specified in '
+		. 'initialization structure.';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($fileDataObj);
+	return;
+}
+
+#==========================================
+# test_ctor_missingArgTarget
+#------------------------------------------
+sub test_ctor_missingArgTarget {
+	# ...
+	# Test the ProductMetaFileData constructor with a missing target KW arg
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+		script => 'myFixup.sh',
+		url    => 'iso:///media1'
+	);
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'KIWIXMLProductMetaFileData: no "target" specified in '
+		. 'initialization structure.';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($fileDataObj);
+	return;
+}
+
+#==========================================
+# test_ctor_missingArgURL
+#------------------------------------------
+sub test_ctor_missingArgURL {
+	# ...
+	# Test the ProductMetaFileData constructor with a missing url KW arg
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+		script => 'myFixup.sh',
+		target => '/installroot'
+	);
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'KIWIXMLProductMetaFileData: no "url" specified in '
+		. 'initialization structure.';
+	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
@@ -64,13 +146,13 @@ sub test_ctor_improperArg {
 #------------------------------------------
 sub test_ctor_noArg {
 	# ...
-	# Test the FileData constructor
+	# Test the ProductMetaFileData constructor
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi);
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi);
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'KIWIXMLFileData: must be constructed with a '
+	my $expectedMsg = 'KIWIXMLProductMetaFileData: must be constructed with a '
 		. 'keyword hash as argument';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -79,54 +161,6 @@ sub test_ctor_noArg {
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_null($fileDataObj);
-	return;
-}
-
-#==========================================
-# test_ctor_unsuportedArch
-#------------------------------------------
-sub test_ctor_unsuportedArch {
-	# ...
-	# Test the FileData constructor with an unsupported architecture
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = (
-				arch => 'tegra',
-				name => 'soundcore.ko'
-	);
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = "Specified arch 'tegra' is not supported";
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_null($fileDataObj);
-	return;
-}
-
-#==========================================
-# test_ctor_simple
-#------------------------------------------
-sub test_ctor_simple {
-	# ...
-	# Test proper construction with only the name argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'soundcore.ko' );
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($fileDataObj);
 	return;
 }
 
@@ -140,13 +174,15 @@ sub test_ctor_unsupportedKW {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (
-	    arch     => 'ppc64',
-		filename => 'soundcore.ko'
+	    arch   => 'ppc64',
+		script => 'myFixup.sh',
+		target => '/installroot',
+		url    => 'iso:///media1'
 	);
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init);
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'KIWIXMLFileData: Unsupported keyword argument '
-		. "'filename' in initialization structure.";
+	my $expectedMsg = 'KIWIXMLProductMetaFileData: Unsupported keyword '
+		. "argument 'arch' in initialization structure.";
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -157,19 +193,86 @@ sub test_ctor_unsupportedKW {
 }
 
 #==========================================
-# test_ctor_withArch
+# test_getScript
 #------------------------------------------
-sub test_ctor_withArch {
+sub test_getScript {
 	# ...
-	# Test proper construction with only the name argument
+	# Test the getScript method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
+	my $fileDataObj = $this -> __getProdMetaFileObj();
+	my $script = $fileDataObj -> getScript();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('myFixup.sh', $script);
+	return;
+}
+
+#==========================================
+# test_getTarget
+#------------------------------------------
+sub test_getTarget {
+	# ...
+	# Test the getTarget method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $fileDataObj = $this -> __getProdMetaFileObj();
+	my $target = $fileDataObj -> getTarget();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('/installroot', $target);
+	return;
+}
+
+#==========================================
+# test_getURL
+#------------------------------------------
+sub test_getURL {
+	# ...
+	# Test the getURL method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $fileDataObj = $this -> __getProdMetaFileObj();
+	my $url = $fileDataObj -> getURL();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('iso:///media1', $url);
+	return;
+}
+
+#==========================================
+# Private helper methods
+#------------------------------------------
+#==========================================
+# __getProdMetaFileObj
+#------------------------------------------
+sub __getProdMetaFileObj {
+	# ...
+	# Helper to construct a fully populated ProductMetaFileData object.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
 	my %init = (
-				arch => 'ppc64',
-				name => 'soundcore.ko'
+		script => 'myFixup.sh',
+		target => '/installroot',
+		url    => 'iso:///media1'
 	);
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init );
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -178,135 +281,8 @@ sub test_ctor_withArch {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($fileDataObj);
-	return;
+	return $fileDataObj;
 }
 
-#==========================================
-# test_getArch
-#------------------------------------------
-sub test_getArch {
-	# ...
-	# Verify that the proper architecture value is returned.
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = (
-				arch => 'ix86',
-				name => 'soundcore.ko'
-	);
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my $value = $fileDataObj -> getArch();
-	$this -> assert_str_equals('ix86', $value);
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($fileDataObj);
-	return;
-}
-
-#==========================================
-# test_getName
-#------------------------------------------
-sub test_getName {
-	# ...
-	# Verify that the proper name is returned.
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'soundcore.ko' );
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my $value = $fileDataObj -> getName();
-	$this -> assert_str_equals('soundcore.ko', $value);
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($fileDataObj);
-	return;
-}
-
-#==========================================
-# test_setArch
-#------------------------------------------
-sub test_setArch {
-	# ...
-	# Verify that the proper architecture value is set and returned.
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'soundcore.ko' );
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init );
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my $value = $fileDataObj -> setArch('x86_64');
-	$this -> assert_equals(1, $value);
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$value = $fileDataObj -> getArch();
-	$this -> assert_str_equals('x86_64', $value);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($fileDataObj);
-	return;
-}
-
-#==========================================
-# test_setArch_invalid
-#------------------------------------------
-sub test_setArch_invalid {
-	# ...
-	# Verify proper error condition handling for setArch().
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'soundcore.ko' );
-	my $fileDataObj = KIWIXMLFileData -> new($kiwi, \%init );
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my $value = $fileDataObj -> setArch('tegra');
-	my $expectedMsg = "Specified arch 'tegra' is not supported";
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals($expectedMsg, $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($value);
-	$value = $fileDataObj -> getArch();
-	$this -> assert_null($value);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($fileDataObj);
-	return;
-}
 
 1;

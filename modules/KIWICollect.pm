@@ -292,7 +292,7 @@ sub Init
 	# retrieve data from xml file:
 	## packages list (regular packages)
 	$this->logMsg('I', "KIWICollect::Init: querying instsource package list");
-	%{$this->{m_repoPacks}} = $this->{m_xml}->getInstSourcePackageList();
+	%{$this->{m_repoPacks}} = $this->{m_xml}->getInstSourcePackageList_legacy();
 	# this list may be empty!
 	$this->logMsg('I', "KIWICollect::Init: queried package list.");
 	if($this->{m_debug}) {
@@ -311,9 +311,9 @@ sub Init
 		      'KIWICollect::Init: querying instsource architecture list');
 	$this->{m_archlist} = KIWIArchList -> new ($this);
 	my $archadd = $this->{m_archlist}->addArchs(
-		{ $this->{m_xml}->getInstSourceArchList() } );
+		{ $this->{m_xml}->getInstSourceArchList_legacy() } );
 	if(! defined $archadd ) {
-		$this->logMsg('I', Dumper($this->{m_xml}->getInstSourceArchList()));
+		$this->logMsg('I', Dumper($this->{m_xml}->getInstSourceArchList_legacy()));
 		$this->logMsg('E', "KIWICollect::Init: addArchs returned undef");
 		return;
 	}
@@ -334,10 +334,10 @@ sub Init
 
 	# repository information
 	# mandatory. Missing = Error
-	%{$this->{m_repos}}	= $this->{m_xml}->getInstSourceRepository();
+	%{$this->{m_repos}}	= $this->{m_xml}->getInstSourceRepository_legacy();
 	if(!$this->{m_repos}) {
 		$this->logMsg('E',
-			      'KIWICollect::Init: getInstSourceRepository returned empty hash');
+			      'KIWICollect::Init: getInstSourceRepository_legacy returned empty hash');
 		return;
 	}
 	else {
@@ -354,9 +354,9 @@ sub Init
 
 	# package list (metapackages with extra effort by scripts)
 	# mandatory. Empty = Error
-	%{$this->{m_metaPacks}}	 = $this->{m_xml}->getInstSourceMetaPackageList();
+	%{$this->{m_metaPacks}}	 = $this->{m_xml}->getInstSourceMetaPackageList_legacy();
 	if(!$this->{m_metaPacks}) {
-		my $msg = 'KIWICollect::Init: getInstSourceMetaPackageList '
+		my $msg = 'KIWICollect::Init: getInstSourceMetaPackageList_legacy '
 		    . 'returned empty hash';
 		$this->logMsg('E', $msg);
 		return;
@@ -375,9 +375,9 @@ sub Init
 
 	# metafiles: different handling
 	# may be omitted
-	%{$this->{m_metafiles}} = $this->{m_xml}->getInstSourceMetaFiles();
+	%{$this->{m_metafiles}} = $this->{m_xml}->getInstSourceMetaFiles_legacy();
 	if(!$this->{m_metaPacks}) {
-		my $msg = 'KIWICollect::Init: getInstSourceMetaPackageList returned '
+		my $msg = 'KIWICollect::Init: getInstSourceMetaPackageList_legacy returned '
 		    . 'empty hash, no metafiles specified.';
 		$this->logMsg('I', $msg);
 	}
@@ -395,7 +395,7 @@ sub Init
 
 	# info about requirements for chroot env to run metadata scripts
 	# may be empty
-	@{$this->{m_chroot}} = $this->{m_xml}->getInstSourceChrootList();
+	@{$this->{m_chroot}} = $this->{m_xml}->getInstSourceChrootList_legacy();
 	if(!$this->{m_chroot}) {
 		my $msg = 'KIWICollect::Init: chroot list is empty hash, no chroot '
 		    . 'requirements specified';
@@ -415,11 +415,11 @@ sub Init
 
 	my ($iadded, $vadded, $oadded);
 	$iadded = $this->{m_proddata}->addSet("ProductInfo stuff",
-					      {$this->{m_xml}->getInstSourceProductInfo()}, "prodinfo");
+					      {$this->{m_xml}->getInstSourceProductInfo_legacy()}, "prodinfo");
 	$vadded = $this->{m_proddata}->addSet("ProductVar stuff",
-					      {$this->{m_xml}->getInstSourceProductVar()}, "prodvars");
+					      {$this->{m_xml}->getInstSourceProductVar_legacy()}, "prodvars");
 	$oadded = $this->{m_proddata}->addSet("ProductOption stuff",
-					      {$this->{m_xml}->getInstSourceProductOption()}, "prodopts");
+					      {$this->{m_xml}->getInstSourceProductOption_legacy()}, "prodopts");
 	if ($iadded) {
 		if ((! $vadded) || (! $oadded)) {
 			my $msg = 'KIWICollect::Init: something wrong in the productoptions '
@@ -823,7 +823,7 @@ sub getMetafileList
 	for my $mf(keys(%{$this->{m_metafiles}})) {
 		my $t = $this->{m_metafiles}->{$mf}->{'target'} || "";
 		# from, to
-		$this->{m_xml}->getInstSourceFile($mf,
+		$this->{m_xml}->getInstSourceFile_legacy($mf,
 						  "$this->{m_basesubdir}->{'1'}/$t");
 		my $fname;
 		$mf =~ m{.*/([^/]+)$};
@@ -913,7 +913,7 @@ sub setupPackageFiles
 	my $num_packs = keys %{$usedPackages};
 	my @missingPackages = ();
 
-      PACK:
+	PACK:
 	for my $packName(keys(%{$usedPackages})) {
 		if ($packName eq "_name") {
 			next;
@@ -1321,7 +1321,7 @@ sub unpackMetapackages
 	my @packlist = @_;
 	my $this = shift @packlist;
 
-      METAPACKAGE:
+	METAPACKAGE:
 	for my $metapack(@packlist) {
 		my %packOptions = %{$this->{m_metaPacks}->{$metapack}};
 		my $poolPackages = $this->{m_packagePool}->{$metapack};
@@ -1508,7 +1508,7 @@ sub unpackMetapackages
 						my $info = "Downloading script $packOptions{'script'} "
 						    . "to $this->{m_scriptbase}:";
 						print $info;
-						$this->{m_xml}->getInstSourceFile(
+						$this->{m_xml}->getInstSourceFile_legacy(
 							$packOptions{'script'},
 							"$this->{m_scriptbase}/$scriptfile");
 
@@ -1596,7 +1596,7 @@ sub executeMetafileScripts
 			my $info = "Downloading script $tmp{'script'} to "
 			    . "$this->{m_scriptbase}:";
 			print $info;
-			$this->{m_xml}->getInstSourceFile($tmp{'script'}, 
+			$this->{m_xml}->getInstSourceFile_legacy($tmp{'script'}, 
 							  "$this->{m_scriptbase}/$scriptfile");
 
 			# TODO I don't like this. Not at all. use chroot in next version!
@@ -1652,7 +1652,7 @@ sub lookUpAllPackages
 	my $count_repos = 0;
 	my $last_progress_time = 0;
 
-      REPO:
+	REPO:
 	for my $r (sort {
 		$this->{m_repos}->{$a}->{priority}
 		<=> $this->{m_repos}->{$b}->{priority} }
@@ -1969,7 +1969,7 @@ sub collectProducts
 	# not nice, just look for all -release packages and their content.
 	# This will become nicer when we switched to rpm-md as product repo format
 	my $found_product = 0;
-      RELEASEPACK:
+	RELEASEPACK:
 	for my $i(grep {$_ =~ /-release$/} keys(%{$this->{m_repoPacks}})) {
 		qx(rm -rf $tmp);
 		if(!mkpath("$tmp", { mode => oct(755) } )) {
@@ -2360,8 +2360,8 @@ sub unpackModules
 		return;
 	}
 
-	my @modules = $this->{m_xml}->getInstSourceDUDModules();
-	my %targets = $this->{m_xml}->getInstSourceDUDTargets();
+	my @modules = $this->{m_xml}->getInstSourceDUDModules_legacy();
+	my %targets = $this->{m_xml}->getInstSourceDUDTargets_legacy();
 	my %target_archs = reverse %targets; # values of this hash are not used
 
 	# So far DUDs only have one single medium
@@ -2431,8 +2431,8 @@ sub unpackInstSys
 		return;
 	}
 
-	my @inst_sys_packages = $this->{m_xml}->getInstSourceDUDInstsys();
-	my %targets = $this->{m_xml}->getInstSourceDUDTargets();
+	my @inst_sys_packages = $this->{m_xml}->getInstSourceDUDInstsys_legacy();
+	my %targets = $this->{m_xml}->getInstSourceDUDTargets_legacy();
 	my %target_archs = reverse %targets; # values of this hash are not used
 
 	# So far DUDs only have one single medium
@@ -2477,9 +2477,9 @@ sub createInstallPackageLinks
 	# So far DUDs only have one single medium
 	my $medium = 1;
 	my $retval = 0;
-	my @packlist = $this->{m_xml}->getInstSourceDUDModules();
-	push @packlist, $this->{m_xml}->getInstSourceDUDInstsys();
-	my %targets = $this->{m_xml}->getInstSourceDUDTargets();
+	my @packlist = $this->{m_xml}->getInstSourceDUDModules_legacy();
+	push @packlist, $this->{m_xml}->getInstSourceDUDInstsys_legacy();
+	my %targets = $this->{m_xml}->getInstSourceDUDTargets_legacy();
 
 	for my $target (keys(%targets)) {
 		my $arch = $targets{$target};

@@ -1,5 +1,5 @@
 #================
-# FILE          : kiwiXMLPackageData.pm
+# FILE          : kiwiXMLProductPackageData.pm
 #----------------
 # PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
@@ -8,11 +8,12 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test implementation for the KIWIPackageData module.
+# DESCRIPTION   : Unit test implementation for the KIWIProductPackageData
+#               : module.
 #               :
 # STATUS        : Development
 #----------------
-package Test::kiwiXMLPackageData;
+package Test::kiwiXMLProductPackageData;
 
 use strict;
 use warnings;
@@ -22,7 +23,9 @@ use Common::ktLog;
 use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
 
-use KIWIXMLPackageData;
+use KIWIXMLProductPackageData;
+
+use Data::Dumper;
 
 #==========================================
 # Constructor
@@ -42,13 +45,13 @@ sub new {
 #------------------------------------------
 sub test_ctor_noArg {
 	# ...
-	# Test the PackageData constructor
+	# Test the ProductPackageData constructor
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi);
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'KIWIXMLPackageData: must be constructed with a '
+	my $expectedMsg = 'KIWIXMLProductPackageData: must be constructed with a '
 		. 'keyword hash as argument';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -70,7 +73,7 @@ sub test_ctor_simple {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'libtiff' );
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -83,51 +86,22 @@ sub test_ctor_simple {
 }
 
 #==========================================
-# test_ctor_invalidBoolValDelete
+# test_ctor_unsuportedAddArchValue
 #------------------------------------------
-sub test_ctor_invalidBoolValDelete {
+sub test_ctor_unsuportedAddArchValue {
 	# ...
-	# Test the PackageData constructor with an invalid value for the
+	# Test the ProductPackageData constructor with an invalid value for the
 	# bootdelete keyword
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (
-				bootdelete => 'yes',
-				name       => 'python'
+	    addarch => 'tegra',
+		name    => 'python'
 	);
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'KIWIXMLPackageData: Unrecognized value for boolean '
-		. "'bootdelete' in initialization structure.";
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_null($pckgDataObj);
-	return;
-}
-
-#==========================================
-# test_ctor_invalidBoolValIncl
-#------------------------------------------
-sub test_ctor_invalidBoolValIncl {
-	# ...
-	# Test the PackageData constructor with an invalid value for the
-	# bootinclude keyword
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = (
-				bootinclude => 'yes',
-				name        => 'python'
-	);
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'KIWIXMLPackageData: Unrecognized value for boolean '
-		. "'bootinclude' in initialization structure.";
+	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -143,15 +117,15 @@ sub test_ctor_invalidBoolValIncl {
 #------------------------------------------
 sub test_ctor_unsuportedArch {
 	# ...
-	# Test the PackageData constructor with an unsupported architecture
+	# Test the ProductPackageData constructor with an unsupported architecture
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (
-				arch => 'tegra',
-				name => 'dia'
+	    arch => 'tegra',
+		name => 'dia'
 	);
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -177,15 +151,41 @@ sub test_ctor_unsupportedKW {
 				arch     => 'ppc64',
 				filename => 'zypper'
 	);
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'KIWIXMLPackageData: Unsupported keyword argument '
-		. "'filename' in initialization structure.";
+	my $expectedMsg = 'KIWIXMLProductPackageData: Unsupported keyword '
+		. "argument 'filename' in initialization structure.";
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($pckgDataObj);
+	return;
+}
+
+#==========================================
+# test_ctor_unsuportedOnlyArch
+#------------------------------------------
+sub test_ctor_unsuportedOnlyArch {
+	# ...
+	# Test the ProductPackageData constructor with an unsupported architecture
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+		name     => 'dia',
+	    onlyarch => 'tegra'
+	);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = "Specified arch 'tegra' is not supported";
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
 	$this -> assert_null($pckgDataObj);
 	return;
 }
@@ -203,7 +203,7 @@ sub test_ctor_withArch {
 				arch => 'ppc64',
 				name => 'libpng'
 	);
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -216,44 +216,86 @@ sub test_ctor_withArch {
 }
 
 #==========================================
-# test_getBootDelete
+# test_getAdditionalArch
 #------------------------------------------
-sub test_getBootDelete {
+sub test_getAdditionalArch {
 	# ...
-	# Verify that the bootdelete setting is properly returned.
+	# Verify that the addarch setting is properly returned.
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $pckgDataObj = $this -> __getPckgDataObj();
-	my $del = $pckgDataObj -> getBootDelete();
+	my $arch = $pckgDataObj -> getAdditionalArch();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('true', $del);
+	$this -> assert_str_equals('s390', $arch);
 	return;
 }
 
 #==========================================
-# test_getBootInclude
+# test_getArch
 #------------------------------------------
-sub test_getBootInclude {
+sub test_getArch {
 	# ...
-	# Verify that the bootinclude setting is properly returned.
+	# Verify that the arch setting is properly returned.
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $pckgDataObj = $this -> __getPckgDataObj();
-	my $incl = $pckgDataObj -> getBootInclude();
+	my $arch = $pckgDataObj -> getArch();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('true', $incl);
+	$this -> assert_str_equals('x86_64', $arch);
+	return;
+}
+
+#==========================================
+# test_getForceRepo
+#------------------------------------------
+sub test_getForceRepo {
+	# ...
+	# Verify that the forcerepo setting is properly returned.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $pckgDataObj = $this -> __getPckgDataObj();
+	my $force = $pckgDataObj -> getForceRepo();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('2', $force);
+	return;
+}
+
+#==========================================
+# test_getMediaID
+#------------------------------------------
+sub test_getMediaID {
+	# ...
+	# Verify that the forcerepo setting is properly returned.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $pckgDataObj = $this -> __getPckgDataObj();
+	my $id = $pckgDataObj -> getMediaID();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('5', $id);
 	return;
 }
 
@@ -279,23 +321,86 @@ sub test_getName {
 }
 
 #==========================================
-# test_getPackageToReplace
+# test_getOnlyArch
 #------------------------------------------
-sub test_getPackageToReplace {
+sub test_geOnlyArch {
 	# ...
-	# Verify that the proper package to replace is returned.
+	# Verify that the proper onlyarch setting is returned.
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $pckgDataObj = $this -> __getPckgDataObj();
-	my $repl = $pckgDataObj -> getPackageToReplace();
+	my $arch = $pckgDataObj -> getOnlyArch();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('ruby', $repl);
+	$this -> assert_str_equals('x86_64', $arch);
+	return;
+}
+
+#==========================================
+# test_getRemoveArch
+#------------------------------------------
+sub test_geRemoveArch {
+	# ...
+	# Verify that the proper onlyarch setting is returned.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $pckgDataObj = $this -> __getPckgDataObj();
+	my $regex = $pckgDataObj -> getRemoveArch();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('src', $regex);
+	return;
+}
+
+#==========================================
+# test_getScriptPath
+#------------------------------------------
+sub test_geScriptPath {
+	# ...
+	# Verify that the proper script setting is returned.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $pckgDataObj = $this -> __getPckgDataObj();
+	my $script = $pckgDataObj -> getScriptPath();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('myScript.csh', $script);
+	return;
+}
+
+#==========================================
+# test_getSourceLocation
+#------------------------------------------
+sub test_geSourceLocation {
+	# ...
+	# Verify that the proper source setting is returned.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $pckgDataObj = $this -> __getPckgDataObj();
+	my $source = $pckgDataObj -> getSourceLocation();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('http:///download', $source);
 	return;
 }
 
@@ -319,8 +424,16 @@ sub test_getXMLElement{
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($elem);
 	my $xmlstr = $elem -> toString();
-	my $expected = '<package name="python" arch="x86_64" bootdelete="true" '
-		. 'bootinclude="true" replaces="ruby"/>';
+	my $expected = '<repopackage '
+		. 'name="python" '
+		. 'arch="x86_64" '
+		. 'addarch="s390" '
+		. 'forcerepo="2" '
+		. 'medium="5" '
+		. 'onlyarch="x86_64" '
+		. 'removearch="src" '
+		. 'script="myScript.csh" '
+		. 'source="http:///download"/>';
 	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
@@ -335,7 +448,7 @@ sub test_setArch {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'libzypp');
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -350,8 +463,8 @@ sub test_setArch {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$value = $pckgDataObj -> getArch();
-	$this -> assert_str_equals('x86_64', $value);
+	my $arch = $pckgDataObj -> getArch();
+	$this -> assert_str_equals('x86_64', $arch);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($pckgDataObj);
 	return;
@@ -367,7 +480,7 @@ sub test_setArch_invalid {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'snapper');
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -391,251 +504,6 @@ sub test_setArch_invalid {
 }
 
 #==========================================
-# test_setBootDelete
-#------------------------------------------
-sub test_setBootDelete {
-	# ...
-	# Test the setBootDelete method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my %init = ( name => 'vi');
-	my $pckgDataObj = $this -> __getPckgDataObj();
-	$pckgDataObj = $pckgDataObj -> setBootDelete('false');
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($pckgDataObj);
-	my $bdel = $pckgDataObj -> getBootDelete();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $bdel);
-	return;
-}
-
-#==========================================
-# test_setBootDeleteInvalidArg
-#------------------------------------------
-sub test_setBootDeleteInvalidArg {
-	# ...
-	# Test the setBootDelete method with an unrecognized bool value
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my %init = ( name => 'gfxboot');
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($pckgDataObj);
-	my $res = $pckgDataObj -> setBootDelete(1);
-	$msg = $kiwi -> getMessage();
-	my $expected = 'KIWIXMLPackageData:setBootDelete: unrecognized '
-		. 'argument expecting "true" or "false".';
-	$this -> assert_str_equals($expected, $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_null($res);
-	return;
-}
-
-#==========================================
-# test_setBootDeleteNoArg
-#------------------------------------------
-sub test_setBootDeleteNoArg {
-	# ...
-	# Test the setBootDelete method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pckgDataObj = $this -> __getPckgDataObj();
-	$pckgDataObj = $pckgDataObj -> setBootDelete();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($pckgDataObj);
-	my $bdel = $pckgDataObj -> getBootDelete();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $bdel);
-	return;
-}
-
-#==========================================
-# test_setBootInclude
-#------------------------------------------
-sub test_setBootInclude {
-	# ...
-	# Test the setBootInclude method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my %init = ( name => 'vi');
-	my $pckgDataObj = $this -> __getPckgDataObj();
-	$pckgDataObj = $pckgDataObj -> setBootInclude('false');
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($pckgDataObj);
-	my $bincl = $pckgDataObj -> getBootInclude();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $bincl);
-	return;
-}
-
-#==========================================
-# test_setBootIncludeInvalidArg
-#------------------------------------------
-sub test_setBootIncludeInvalidArg {
-	# ...
-	# Test the setBootInclude method with an unrecognized bool value
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my %init = ( name => 'gfxboot');
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($pckgDataObj);
-	my $res = $pckgDataObj -> setBootInclude(1);
-	$msg = $kiwi -> getMessage();
-	my $expected = 'KIWIXMLPackageData:setBootInclude: unrecognized '
-		. 'argument expecting "true" or "false".';
-	$this -> assert_str_equals($expected, $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_null($res);
-	return;
-}
-
-#==========================================
-# test_setBootIncludeNoArg
-#------------------------------------------
-sub test_setBootIncludeNoArg {
-	# ...
-	# Test the setBootInclude method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pckgDataObj = $this -> __getPckgDataObj();
-	$pckgDataObj = $pckgDataObj -> setBootInclude();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($pckgDataObj);
-	my $bincl = $pckgDataObj -> getBootInclude();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $bincl);
-	return;
-}
-
-#==========================================
-# test_setPackageToReplace
-#------------------------------------------
-sub test_setPackageToReplace {
-	# ...
-	# Test the test_setPackageToReplace method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my %init = ( name => 'kernel-desktop');
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($pckgDataObj);
-	$pckgDataObj = $pckgDataObj -> setPackageToReplace('kernel-default');
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($pckgDataObj);
-	my $repl = $pckgDataObj -> getPackageToReplace();
-	$this -> assert_str_equals('kernel-default', $repl);
-	return;
-}
-
-#==========================================
-# test_setPackageToReplace_NoArg
-#------------------------------------------
-sub test_setPackageToReplace_NoArg {
-	# ...
-	# Test the test_setPackageToReplace method with no argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pckgDataObj = $this -> __getPckgDataObj();
-	$pckgDataObj = $pckgDataObj -> setPackageToReplace();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($pckgDataObj);
-	my $repl = $pckgDataObj -> getPackageToReplace();
-	$this -> assert_null($repl);
-	return;
-}
-
-#==========================================
 # Private helper methods
 #------------------------------------------
 #==========================================
@@ -643,18 +511,22 @@ sub test_setPackageToReplace_NoArg {
 #------------------------------------------
 sub __getPckgDataObj {
 	# ...
-	# Helper to construct a fully populated PackageData object.
+	# Helper to construct a fully populated ProductPackageData object.
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my %init = (
+		addarch     => 's390',
 		arch        => 'x86_64',
-		bootdelete  => 'true',
-		bootinclude => 'true',
+		forcerepo   => '2',
+		medium      => '5',
 		name        => 'python',
-		replaces    => 'ruby'
+		onlyarch    => 'x86_64',
+		removearch  => 'src',
+		script      => 'myScript.csh',
+		source      => 'http:///download'
 	);
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
