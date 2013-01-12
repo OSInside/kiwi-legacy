@@ -41,6 +41,7 @@
 		<type image="oem" boot="oemboot/rhel-06.0" filesystem="ext3" installiso="true">
 			<oemconfig>
 				<oem-systemsize>2048</oem-systemsize>
+				<oem-swap>true</oem-swap>
 				<oem-swapsize>200</oem-swapsize>
 			</oemconfig>
 		</type>

@@ -34,6 +34,7 @@
 		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.1" bootprofile="xen" bootkernel="xenk" installiso="true">
 			<oemconfig>
 				<oem-systemsize>2048</oem-systemsize>
+				<oem-swap>true</oem-swap>
 			</oemconfig>
 			<machine domain="dom0"/>
 		</type>
@@ -48,6 +49,7 @@
 		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.1" installiso="true">
 			<oemconfig>
 				<oem-systemsize>2048</oem-systemsize>
+				<oem-swap>true</oem-swap>
 			</oemconfig>
 			<machine memory="512" guestOS="suse" HWversion="4">
 				<vmdisk controller="scsi" id="0"/>

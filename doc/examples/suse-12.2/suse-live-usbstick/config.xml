@@ -11,6 +11,7 @@
 			<size unit="G">3</size>
 			<oemconfig>
 				<oem-swapsize>512</oem-swapsize>
+				<oem-swap>true</oem-swap>
 				<oem-silent-boot>true</oem-silent-boot>
 			</oemconfig>
 			<systemdisk/>

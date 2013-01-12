@@ -30,6 +30,7 @@
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
+				<oem-swap>true</oem-swap>
 			</oemconfig>
 		</type>
 	</preferences>
@@ -38,6 +39,7 @@
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
+				<oem-swap>true</oem-swap>
 			</oemconfig>
 		</type>
 	</preferences>
@@ -46,6 +48,7 @@
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
+				<oem-swap>true</oem-swap>
 			</oemconfig>
 		</type>
 	</preferences>
