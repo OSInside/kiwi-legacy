@@ -3536,7 +3536,7 @@ sub test_addRepositoriesWrongArgs {
 	);
 	my $res = $xml -> addRepositories('opensuse:///', 'profA');
 	my $expected = 'addRepositories: expecting array ref for '
-		. 'XMLRepositoryData array as first argument';
+		. 'KIWIXMLRepositoryData array as first argument';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();

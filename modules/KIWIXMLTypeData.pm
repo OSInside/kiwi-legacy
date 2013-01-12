@@ -115,7 +115,6 @@ sub new {
 		checkprebuilt
 		compressed
 		devicepersistency
-		ec2config
 		editbootconfig
 		editbootinstall
 		filesystem
@@ -136,17 +135,12 @@ sub new {
 		installstick
 		kernelcmdline
 		luks
-		machine
 		mdraid
-		oemconfig
 		primary
-		pxedeploy
 		ramonly
 		size
 		sizeadd
 		sizeunit
-		split
-		systemdisk
 		vga
 		volid
 	);

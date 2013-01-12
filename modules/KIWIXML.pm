@@ -90,123 +90,126 @@ sub new {
 	#
 	# imageConfig data structure
 	#
-	# imageConfig = {
-	#	description = {
-	#       SEE: KIWIXMLDescriptionData.pm
-	#	}
-	#   productSettings = {
-	#       dudArches      = ('',...)
-	#       reqArches      = ('',...)
-	#       options        = &KIWIXMLProductOptionsData,
-	#       architectures  = (&KIWIXMLProductArchitectureData,... ),
-	#       dudInstSysPkgs = (&KIWIXMLProductPackageData,... ),
-	#       dudModulePkgs  = (&KIWIXMLProductPackageData,... ),
-	#       dudPkgs        = (&KIWIXMLProductPackageData,... ),
-	#       instRepos      = (&KIWIXMLInstRepositoryData,... ),
-	#       metaChroots    = (&KIWIXMLProductMetaChrootData,...),
-	#       metaFiles      = (&KIWIXMLProductMetaFileData,...),
-	#       metaPkgs       = (&KIWIXMLProductPackageData,... ),
-	#       prodPkgs       = (&KIWIXMLProductPackageData,...)
-	#   }
-	#   <profName>[+] = {
-	#       installOpt      = '',
-	#       archives        = ('',...),
-	#       bootArchives    = ('',...),
-	#       bootDelPkgs     = (&KIWIXMLPackageData, ...),
-	#       bootPkgs        = (&KIWIXMLPackageData, ...),
-	#       bootPkgsCollect = (&KIWIXMLPackageCollectData,...),
-	#       bootStrapPckgs  = (&KIWIXMLPackageData, ...),
-	#       delPkgs         = (&KIWIXMLPackageData, ...),
-	#       drivers         = (&KIWIXMLDriverData, ...),
-	#       ignorePkgs      = (&KIWIXMLPackageData, ...),
-	#       keepLibs        = (&KIWIXMLStripData,...),
-	#       keepTools       = (&KIWIXMLStripData,...),
-	#       pkgs            = (&KIWIXMLPackageData, ...),
-	#       pkgsCollect     = (&KIWIXMLPackageCollectData,...),
-	#       products        = (&KIWIXMLPackageProductData,...),
-	#       stripDelete     = (&KIWIXMLStripData,...),
-	#       <archname>[+] {
+	# this = {
+	#     availableProfiles = ('',....)
+	#     defaultType = {
+	#         ec2config  = KIWIXMLEC2ConfigData,
+	#         machine    = KIWIXMLVMachineData,
+	#         oemconfig  = KIWIXMLOEMConfigData,
+	#         pxedeploy  = KIWIXMLPXEDeployData,
+	#         split      = KIWIXMLSplitData,
+	#         systemdisk = KIWIXMLSystemdiskData
+	#         type       = KIWIXMLTypeData
+	#     }
+	#     imageConfig = {
+	#       description = KIWIXMLDescriptionData,
+	#       productSettings = {
+	#           dudArches      = ('',...)
+	#           reqArches      = ('',...)
+	#           options        = KIWIXMLProductOptionsData,
+	#           architectures  = (KIWIXMLProductArchitectureData,... ),
+	#           dudInstSysPkgs = (KIWIXMLProductPackageData,... ),
+	#           dudModulePkgs  = (KIWIXMLProductPackageData,... ),
+	#           dudPkgs        = (KIWIXMLProductPackageData,... ),
+	#           instRepos      = (KIWIXMLInstRepositoryData,... ),
+	#           metaChroots    = (KIWIXMLProductMetaChrootData,...),
+	#           metaFiles      = (KIWIXMLProductMetaFileData,...),
+	#           metaPkgs       = (KIWIXMLProductPackageData,... ),
+	#           prodPkgs       = (KIWIXMLProductPackageData,...)
+	#       }
+	#       <profName>[+] = {
+	#           installOpt      = '',
 	#           archives        = ('',...),
 	#           bootArchives    = ('',...),
-	#           bootDelPkgs     = (&KIWIXMLPackageData, ...),
-	#           bootPkgs        = (&KIWIXMLPackageData, ...),
-	#           bootPkgsCollect = (&KIWIXMLPackageCollectData,...),
-	#           bootStrapPckgs  = (&KIWIXMLPackageData, ...),
-	#           delPkgs         = (&KIWIXMLPackageData, ...),
-	#           drivers         = (&KIWIXMLDriverData, ...),
-	#           ignorePkgs      = (&KIWIXMLPackageData, ...),
-	#           keepLibs        = (&KIWIXMLStripData,...),
-	#           keepTools       = (&KIWIXMLStripData,...),
-	#           pkgs            = (&KIWIXMLPackageData, ...),
-	#           pkgsCollect     = (&KIWIXMLPackageCollectData,...),
-	#           products        = (&KIWIXMLPackageProductData,...),
-	#           stripDelete     = (&KIWIXMLStripData,...),
-	#      }
-	#      preferences = {
-	#          SEE: KIWIXMLPreferenceData.pm
-	#          types {
-	#              defaultType = '',
-	#              <typename>[+] {
-	#                  SEE: KIWIXMLTypeData.pm
-	#                  oemconfig {
-	#                      SEE: KIWIXMLOEMConfigData.pm
-	#                  }
-	#                  machine {
-	#                      SEE: KIWIXMLVMachineData.pm
-	#                  }
-	#                  systemdisk {
-	#                      SEE: KIWIXMLSystemdiskData.pm
-	#                  }
-	#                  split {
-	#                      SEE: KIWIXMLSplitData.pm
-	#                  }
-	#                  pxedeploy {
-	#                      SEE: KIWIXMLPXEDeployData.pm
-	#                  }
-	#                  ec2config {
-	#                      SEE: KIWIXMLEC2ConfigData.pm
+	#           bootDelPkgs     = (KIWIXMLPackageData, ...),
+	#           bootPkgs        = (KIWIXMLPackageData, ...),
+	#           bootPkgsCollect = (KIWIXMLPackageCollectData,...),
+	#           bootStrapPckgs  = (KIWIXMLPackageData, ...),
+	#           delPkgs         = (KIWIXMLPackageData, ...),
+	#           drivers         = (KIWIXMLDriverData, ...),
+	#           ignorePkgs      = (KIWIXMLPackageData, ...),
+	#           keepLibs        = (KIWIXMLStripData,...),
+	#           keepTools       = (KIWIXMLStripData,...),
+	#           pkgs            = (KIWIXMLPackageData, ...),
+	#           pkgsCollect     = (KIWIXMLPackageCollectData,...),
+	#           products        = (KIWIXMLPackageProductData,...),
+	#           stripDelete     = (KIWIXMLStripData,...),
+	#           <archname>[+] {
+	#               archives        = ('',...),
+	#               bootArchives    = ('',...),
+	#               bootDelPkgs     = (KIWIXMLPackageData, ...),
+	#               bootPkgs        = (KIWIXMLPackageData, ...),
+	#               bootPkgsCollect = (KIWIXMLPackageCollectData,...),
+	#               bootStrapPckgs  = (KIWIXMLPackageData, ...),
+	#               delPkgs         = (KIWIXMLPackageData, ...),
+	#               drivers         = (KIWIXMLDriverData, ...),
+	#               ignorePkgs      = (KIWIXMLPackageData, ...),
+	#               keepLibs        = (KIWIXMLStripData,...),
+	#               keepTools       = (KIWIXMLStripData,...),
+	#               pkgs            = (KIWIXMLPackageData, ...),
+	#               pkgsCollect     = (KIWIXMLPackageCollectData,...),
+	#               products        = (KIWIXMLPackageProductData,...),
+	#               stripDelete     = (KIWIXMLStripData,...),
+	#          }
+	#          preferences = {
+	#              SEE: KIWIXMLPreferenceData.pm
+	#              types {
+	#                  defaultType = '',
+	#                  <typename>[+] {
+	#                      ec2config  = KIWIXMLEC2ConfigData,
+	#                      machine    = KIWIXMLVMachineData,
+	#                      oemconfig  = KIWIXMLOEMConfigData,
+	#                      pxedeploy  = KIWIXMLPXEDeployData,
+	#                      split      = KIWIXMLSplitData,
+	#                      systemdisk = KIWIXMLSystemdiskData
+	#                      type       = KIWIXMLTypeData
 	#                  }
 	#              }
 	#          }
-	#      }
-	#      profInfo = {
-	#          SEE: KIWIXMLProfileData.pm
-	#      }
-	#      repoData {
-	#          <id>[+] {
-	#              SEE: KIWIXMLRepositoryData.pm
+	#          profInfo = KIWIXMLProfileData
 	#          }
-	#      }
-	#      <typename>[+] {
-	#          archives = ('',....),
-	#          <archname>[+] {
-	#              archives        = ('',...),
+	#          repoData = (KIWIXMLRepositoryData,...)
+	#          }
+	#          <typename>[+] {
+	#              archives = ('',....),
+	#              <archname>[+] {
+	#                  archives        = ('',...),
+	#                  bootArchives    = ('',...),
+	#                  bootDelPkgs     = (KIWIXMLPackageData,...),
+	#                  bootPkgs        = (KIWIXMLPackageData,...),
+	#                  bootPkgsCollect = (KIWIXMLPackageCollectData,...),
+	#                  drivers         = (KIWIXMLDriverData),
+	#                  ignorePkgs      = (KIWIXMLPackageData,...),
+	#                  pkgs            = (KIWIXMLPackageData,...),
+	#                  pkgsCollect     = (KIWIXMLPackageCollectData),
+	#                  products        = (KIWIXMLPackageProductData,...),
+	#              }
 	#              bootArchives    = ('',...),
-	#              bootDelPkgs     = (&KIWIXMLPackageData,...),
-	#              bootPkgs        = (&KIWIXMLPackageData,...),
-	#              bootPkgsCollect = (&KIWIXMLPackageCollectData,...),
-	#              drivers         = (&KIWIXMLDriverData),
-	#              ignorePkgs      = (&KIWIXMLPackageData,...),
-	#              pkgs            = (&KIWIXMLPackageData,...),
-	#              pkgsCollect     = (&KIWIXMLPackageCollectData),
-	#              products        = (&KIWIXMLPackageProductData,...),
+	#              bootDelPkgs     = (KIWIXMLPackageData,...),
+	#              bootPkgs        = (KIWIXMLPackageData,...),
+	#              bootPkgsCollect = (KIWIXMLPackageCollectData,...),
+	#              drivers         = (KIWIXMLPackageCollectData,...),
+	#              ignorePkgs      = (KIWIXMLPackageData,...),
+	#              pkgs            = (KIWIXMLPackageData,...),
+	#              pkgsCollect     = (KIWIXMLPackageCollectData,...),
+	#              products        = (KIWIXMLPackageCollectData,...),
 	#          }
-	#          bootArchives    = ('',...),
-	#          bootDelPkgs     = (&KIWIXMLPackageData,...),
-	#          bootPkgs        = (&KIWIXMLPackageData,...),
-	#          bootPkgsCollect = (&KIWIXMLPackageCollectData,...),
-	#          drivers         = (&KIWIXMLPackageCollectData,...),
-	#          ignorePkgs      = (&KIWIXMLPackageData,...),
-	#          pkgs            = (&KIWIXMLPackageData,...),
-	#          pkgsCollect     = (&KIWIXMLPackageCollectData,...),
-	#          products        = (&KIWIXMLPackageCollectData,...),
-	#      }
-	#   }
-	#   users {
-	#       <username>[+] {
-	#           SEE: KIWIXMLUserData.pm
 	#       }
-	#   }
+	#       users {
+	#           <username>[+] {
+	#               SEE: KIWIXMLUserData.pm
+	#           }
+	#       }
+	#     }
+	#     selectedType = {
+	#         ec2config  = KIWIXMLEC2ConfigData,
+	#         machine    = KIWIXMLVMachineData,
+	#         oemconfig  = KIWIXMLOEMConfigData,
+	#         pxedeploy  = KIWIXMLPXEDeployData,
+	#         split      = KIWIXMLSplitData,
+	#         systemdisk = KIWIXMLSystemdiskData
+	#         type       = KIWIXMLTypeData
+	#     }
 	# }
 	# ---
 	#==========================================
@@ -927,7 +930,7 @@ sub addRepositories {
 	}
 	if ( ref($repos) ne 'ARRAY' ) {
 		my $msg = 'addRepositories: expecting array ref for '
-			. 'XMLRepositoryData array as first argument';
+			. 'KIWIXMLRepositoryData array as first argument';
 		$kiwi -> error ($msg);
 		$kiwi -> failed ();
 		return;
@@ -949,23 +952,18 @@ sub addRepositories {
 	if (! @profsToUse) {
 		return;
 	}
-	my $idCntr = $this -> {repoCounter};
 	for my $prof (@profsToUse) {
 		REPO:
 		for my $repo (@reposToAdd) {
-			my %repoData = %{$this->__convertRepoDataToHash($repo)};
 			my $alias                 = $repo -> getAlias();
 			my $path                  = $repo -> getPath();
 			my $preferlicense         = $repo -> getPreferLicense();
 			my ($username, $password) = $repo -> getCredentials();
-			my $repoRef = $this->{imageConfig}->{$prof}{repoData};
-			if ($repoRef) {
-				my %repoInfo = %{$repoRef};
+			my $confRepos = $this->{imageConfig}->{$prof}->{repoData};
+			if ($confRepos) {
 				# Verify uniqueness conditions
-				for my $entry (values %repoInfo) {
-					if ($entry->{alias}
-						&& $alias
-						&& $entry->{alias} eq $alias) {
+				for my $confRepo (@{$confRepos}) {
+					if ($alias && $alias eq $confRepo -> getAlias() ) {
 						my $msg = 'addRepositories: attempting to add '
 							. 'repo, but a repo with same alias already '
 							. 'exists';
@@ -973,9 +971,8 @@ sub addRepositories {
 						$kiwi -> skipped();
 						next REPO;
 					}
-					if ($entry->{password}
-						&& $password
-						&& $entry->{password} ne $password) {
+					my ($confUsr, $confPass) = $confRepo -> getCredentials();
+					if ($password && $confPass && $password ne $confPass) {
 						my $msg = 'addRepositories: attempting to add '
 							. 'repo, but a repo with a different password '
 							.  'already exists';
@@ -983,7 +980,7 @@ sub addRepositories {
 						$kiwi -> skipped();
 						next REPO;
 					}
-					if ($entry->{path} eq $path) {
+					if ($path eq $confRepo -> getPath() ) {
 						my $msg = 'addRepositories: attempting to add '
 							. 'repo, but a repo with same path already '
 							. 'exists';
@@ -991,7 +988,7 @@ sub addRepositories {
 						$kiwi -> skipped();
 						next REPO;
 					}
-					if ($entry->{preferlicense} && $preferlicense) {
+					if ($preferlicense && $confRepo -> getPreferLicense() ) {
 						my $msg = 'addRepositories: attempting to add '
 							. 'repo, but a repo with license preference '
 							. 'indicator set already exists';
@@ -999,9 +996,7 @@ sub addRepositories {
 						$kiwi -> skipped();
 						next REPO;
 					}
-					if ($entry->{username}
-						&& $username
-						&& $entry->{username} ne $username) {
+					if ($username && $confUsr && $username ne $confUsr) {
 						my $msg = 'addRepositories: attempting to add '
 							. 'repo, but a repo with a different username '
 							. 'already exists';
@@ -1010,17 +1005,12 @@ sub addRepositories {
 						next REPO;
 					}
 				}
-				$repoInfo{$idCntr} = \%repoData;
-				$this->{imageConfig}->{$prof}{repoData} = \%repoInfo;
+				push @{$confRepos}, $repo;
 			} else {
-				my %repoInfo = ( $idCntr => \%repoData);
-				$this->{imageConfig}->{$prof}{repoData} = \%repoInfo;
+				$this->{imageConfig}->{$prof}->{repoData} = ($repo);
 			}
-			$idCntr += 1;
 		}
 	}
-	# Store the next counter to be used as repo ID
-	$this -> {repoCounter} = $idCntr;
 	return $this;
 }
 
@@ -1225,11 +1215,7 @@ sub getDescriptionInfo {
 	# Return an object that encapsulates the description information
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $descriptObj = KIWIXMLDescriptionData -> new (
-		$kiwi,$this->{imageConfig}->{description}
-	);
-	return $descriptObj;
+	return $this->{imageConfig}->{description};
 }
 
 #==========================================
@@ -1310,11 +1296,7 @@ sub getEC2Config {
 	# build type.
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $ec2ConfObj = KIWIXMLEC2ConfigData -> new(
-		$kiwi,$this->{selectedType}{ec2config}
-	);
-	return $ec2ConfObj;
+	return $this->{selectedType}->{ec2config};
 }
 
 #==========================================
@@ -1337,11 +1319,7 @@ sub getImageType {
 	# Return a TypeData object for the selected build type
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $typeObj = KIWIXMLTypeData -> new(
-		$kiwi, $this->{selectedType}
-	);
-	return $typeObj;
+	return $this->{selectedType}->{type};
 }
 
 #==========================================
@@ -1394,11 +1372,7 @@ sub getOEMConfig {
 	# Return a OEMConfigData object for the selected build type
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $oemConfObj = KIWIXMLOEMConfigData -> new(
-		$kiwi,$this->{selectedType}{oemconfig}
-	);
-	return $oemConfObj;
+	return $this->{selectedType}->{oemconfig};
 }
 
 #==========================================
@@ -1639,11 +1613,7 @@ sub getProfiles {
 	my %imgConf = %{ $this->{imageConfig} };
 	my @result;
 	for my $prof (@{$this->{availableProfiles}}) {
-		my %profile = ();
-		$profile{name}        = $prof;
-		$profile{description} = $imgConf{$prof}->{profInfo}->{description};
-		$profile{import}      = $imgConf{$prof}->{profInfo}->{import};
-		push @result, KIWIXMLProfileData -> new($kiwi, \%profile );
+		push @result, $this->{imageConfig}->{$prof}->{profInfo};
 	}
 	return \@result;
 }
@@ -1657,11 +1627,8 @@ sub getPXEConfig {
 	# current build type.
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new(
-		$kiwi,$this->{selectedType}{pxedeploy}
-	);
-	return $pxeDataObj;
+	my $selType = $this->{selectedType};
+	return $this->{selectedType}->{pxedeploy};
 }
 
 #==========================================
@@ -1677,14 +1644,8 @@ sub getRepositories {
 	my @activeProfs = @{$this->{selectedProfiles}};
 	my @repoData = ();
 	for my $prof (@activeProfs) {
-		if ($this->{imageConfig}->{$prof}{repoData}) {
-			for my $key (keys %{$this->{imageConfig}->{$prof}{repoData}}) {
-				push @repoData,
-					KIWIXMLRepositoryData -> new (
-						$kiwi,
-						$this->{imageConfig}->{$prof}{repoData}->{$key}
-					);
-			}
+		if ($this->{imageConfig}->{$prof}->{repoData}) {
+			push @repoData, @{$this->{imageConfig}->{$prof}->{repoData}};
 		}
 	}
 	return \@repoData;
@@ -1699,11 +1660,7 @@ sub getSplitConfig {
 	# the current build type
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $spltObj = KIWIXMLSplitData -> new(
-		$kiwi, $this->{selectedType}{split}
-	);
-	return $spltObj;
+	return $this->{selectedType}->{split};
 }
 
 #==========================================
@@ -1715,11 +1672,7 @@ sub getSystemDiskConfig {
 	# the current build type
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $sysDiskObj = KIWIXMLSystemdiskData -> new(
-		$kiwi,$this->{selectedType}{systemdisk}
-	);
-	return $sysDiskObj;
+	return $this->{selectedType}->{systemdisk};
 }
 
 #==========================================
@@ -1755,7 +1708,7 @@ sub getType {
 		my $types = $this->{imageConfig}{$prof}{preferences}{types};
 		if ($types) {
 			if ($types->{$tname}) {
-				my $tObj = KIWIXMLTypeData -> new ($kiwi, $types->{$tname});
+				my $tObj = $types->{$tname}->{type};
 				return $tObj;
 			}
 		}
@@ -1792,11 +1745,7 @@ sub getVMachineConfig {
 	# the current build type
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $vmConfObj = KIWIXMLVMachineData -> new(
-		$kiwi,$this->{selectedType}{machine}
-	);
-	return $vmConfObj;
+	return $this->{selectedType}->{machine};
 }
 
 #==========================================
@@ -1877,21 +1826,7 @@ sub setDescriptionInfo {
 		$kiwi -> failed ();
 		return;
 	}
-	my $author = $xmlDescripDataObj->getAuthor();
-	if (! $author) {
-		my $msg = 'setDescriptionInfo: Provided KIWIXMLDescriptionData '
-			. 'instance is not valid.';
-		$kiwi -> error ($msg);
-		$kiwi -> failed ();
-		return;
-	}
-	my %descript = (
-		author        => $author,
-		contact       => $xmlDescripDataObj->getContactInfo(),
-		specification => $xmlDescripDataObj->getSpecificationDescript(),
-		type          => $xmlDescripDataObj->getType()
-	);
-	$this->{imageConfig}{description} = \%descript;
+	$this->{imageConfig}{description} = $xmlDescripDataObj;
 	return $this;
 }
 
@@ -1975,33 +1910,34 @@ sub setRepository {
 		return;
 	}
 	my @profsToUse = @{$this->{selectedProfiles}};
-	my %repoIDreverseMap;
+	# The default profile needs to be the first to be searched
+	my @profsToSearch = ('kiwi_default');
 	for my $prof (@profsToUse) {
-		my $confRepos = $this->{imageConfig}{$prof}{repoData};
-		if ($confRepos) {
-			for my $id (keys %{$confRepos}) {
-				$repoIDreverseMap{$id} = $prof;
-			}
+		if ($prof eq 'kiwi_default') {
+			next;
 		}
+		push @profsToSearch, $prof;
 	}
-	my @orderedIDs = sort (keys %repoIDreverseMap);
 	my $foundReplacable;
-	for my $repoID (@orderedIDs) {
-		my $profName = $repoIDreverseMap{$repoID};
-		my $stat = $this->{imageConfig}{$profName}{repoData}{$repoID}{status};
-		# Note treating the "replacable" status implicitely as default
-		if (! $stat || ($stat eq 'replacable')) {
-			my %repoData = %{$this->__convertRepoDataToHash($repo)};
-			my $replRepoPath = $this->{imageConfig}
-				->{$profName}
-				->{repoData}
-				->{$repoID}
-				->{path};
-			$kiwi -> info ("Replacing repository $replRepoPath");
-			$kiwi -> done();
-			$this->{imageConfig}{$profName}{repoData}{$repoID} = \%repoData;
-			$foundReplacable = 1;
-			last;
+	PROFILE:
+	for my $prof (@profsToSearch) {
+		my $repoRef = $this->{imageConfig}{$prof}->{repoData};
+		if ($repoRef) {
+			my $repoIdx = 0;
+			my @confRepos = @{$repoRef};
+			for my $cRepo (@confRepos) {
+				my $repl = $cRepo -> getStatus();
+				if ($repl eq 'replacable') {
+					my $replRepoPath = $cRepo -> getPath();
+					$kiwi -> info ("Replacing repository $replRepoPath");
+					$kiwi -> done();
+					$confRepos[$repoIdx] = $repo;
+					$this->{imageConfig}{$prof}->{repoData} = \@confRepos;
+					$foundReplacable = 1;
+					last PROFILE;
+				}
+				$repoIdx += 1;
+			}
 		}
 	}
 	if (!$foundReplacable) {
@@ -2058,55 +1994,6 @@ sub setSelectionProfileNames {
 # Private helper methods
 #------------------------------------------
 #==========================================
-# __convertRepoDataToHash
-#------------------------------------------
-sub __convertRepoDataToHash {
-	# ...
-	# Convert a KIWIXMLRepositoryData object to a hash that fits the internal
-	# data description of this object
-	# ---
-	my $this = shift;
-	my $repo = shift;
-	my %repoData;
-	my $alias                 = $repo -> getAlias();
-	my $imageinclude          = $repo -> getImageInclude();
-	my $path                  = $repo -> getPath();
-	my $preferlicense         = $repo -> getPreferLicense();
-	my $priority              = $repo -> getPriority();
-	my $status                = $repo -> getStatus();
-	my $type                  = $repo -> getType();
-	my ($username, $password) = $repo -> getCredentials();
-	if ($alias) {
-		$repoData{alias} = $alias;
-	}
-	if ($imageinclude) {
-		$repoData{imageinclude} = $imageinclude;
-	}
-	if ($password) {
-		$repoData{password} = $password;
-	}
-	if ($path) {
-		$repoData{path} = $path;
-	}
-	if ($preferlicense) {
-		$repoData{preferlicense} = $preferlicense;
-	}
-	if ($priority) {
-		$repoData{priority} = $priority;
-	}
-	if ($status) {
-		$repoData{status} = $status;
-	}
-	if ($type) {
-		$repoData{type} = $type;
-	}
-	if ($username) {
-		$repoData{username} = $username;
-	}
-	return \%repoData;
-}
-
-#==========================================
 # __convertSizeStrToMBVal
 #------------------------------------------
 sub __convertSizeStrToMBVal {
@@ -2133,9 +2020,108 @@ sub __convertSizeStrToMBVal {
 }
 
 #==========================================
-# __createProductOptionsObj
+# __createEC2Config
 #------------------------------------------
-sub __createProductOptionsObj {
+sub __createEC2Config {
+	# ...
+	# Return a ref to a hash that contains the EC2 configuration data for the
+	# given XML:ELEMENT object. Build a data structure that matches the
+	# structure defined in KIWIXMLEC2ConfigData
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $kiwi = $this->{kiwi};
+	my $ec2Config = $node -> getChildrenByTagName('ec2config') -> get_node(1);
+	if (! $ec2Config ) {
+		return;
+	}
+	my %ec2ConfigData;
+	$ec2ConfigData{ec2accountnr} = $this -> __getChildNodeTextValue(
+		$ec2Config, 'ec2accountnr'
+	);
+	$ec2ConfigData{ec2certfile}  = $this -> __getChildNodeTextValue(
+		$ec2Config, 'ec2certfile'
+	);
+	$ec2ConfigData{ec2privatekeyfile} =	$this -> __getChildNodeTextValue(
+		$ec2Config, 'ec2privatekeyfile'
+	);
+	my @ec2Regions = $ec2Config -> getChildrenByTagName('ec2region');
+	my @regions;
+	for my $regNode (@ec2Regions) {
+		push @regions, $regNode -> textContent();
+	}
+	my $selectedRegions;
+	if (@regions) {
+		$selectedRegions = \@regions;
+	}
+	$ec2ConfigData{ec2region} = $selectedRegions;
+	my $ec2Obj = KIWIXMLEC2ConfigData -> new($kiwi, \%ec2ConfigData);
+	return $ec2Obj;
+}
+
+#==========================================
+# __createOEMConfig
+#------------------------------------------
+sub __createOEMConfig {
+	# ...
+	# Return a ref to a hash containing the configuration for <oemconfig>
+	# of the given XML:ELEMENT object. Build a data structure that
+	# matches the structure defined in
+	# KIWIXMLOEMConfigData
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $kiwi = $this->{kiwi};
+	my $oemConfNode = $node -> getChildrenByTagName('oemconfig');
+	if (! $oemConfNode ) {
+		return;
+	}
+	my $config = $oemConfNode -> get_node(1);
+	my %oemConfig;
+	$oemConfig{oem_align_partition}      =
+		$this -> __getChildNodeTextValue($config, 'oem-align-partition');
+	$oemConfig{oem_boot_title}           =
+		$this -> __getChildNodeTextValue($config, 'oem-boot-title');
+	$oemConfig{oem_bootwait}             =
+		$this -> __getChildNodeTextValue($config, 'oem-bootwait');
+	$oemConfig{oem_inplace_recovery}     =
+		$this -> __getChildNodeTextValue($config, 'oem-inplace-recovery');
+	$oemConfig{oem_kiwi_initrd}          =
+		$this -> __getChildNodeTextValue($config, 'oem-kiwi-initrd');
+	$oemConfig{oem_partition_install}    =
+		$this -> __getChildNodeTextValue($config, 'oem-partition-install');
+	$oemConfig{oem_reboot}               =
+		$this -> __getChildNodeTextValue($config, 'oem-reboot');
+	$oemConfig{oem_reboot_interactive}   =
+		$this -> __getChildNodeTextValue($config, 'oem-reboot-interactive');
+	$oemConfig{oem_recovery}             =
+		$this -> __getChildNodeTextValue($config, 'oem-recovery');
+	$oemConfig{oem_recoveryID}           =
+		$this -> __getChildNodeTextValue($config, 'oem-recoveryID');
+	$oemConfig{oem_shutdown}             =
+		$this -> __getChildNodeTextValue($config, 'oem-shutdown');
+	$oemConfig{oem_shutdown_interactive} =
+		$this -> __getChildNodeTextValue($config, 'oem-shutdown-interactive');
+	$oemConfig{oem_silent_boot}          =
+		$this -> __getChildNodeTextValue($config, 'oem-silent-boot');
+	$oemConfig{oem_swap}                 =
+		$this -> __getChildNodeTextValue($config, 'oem-swap');
+	$oemConfig{oem_swapsize}             =
+		$this -> __getChildNodeTextValue($config, 'oem-swapsize');
+	$oemConfig{oem_systemsize}           =
+		$this -> __getChildNodeTextValue($config, 'oem-systemsize');
+	$oemConfig{oem_unattended}           = 
+	$this -> __getChildNodeTextValue($config, 'oem-unattended');
+	$oemConfig{oem_unattended_id}        =
+		$this -> __getChildNodeTextValue($config, 'oem-unattended-id');
+	my $oemConfObj = KIWIXMLOEMConfigData -> new($kiwi, \%oemConfig);
+	return $oemConfObj;
+}
+
+#==========================================
+# __createProductOptions
+#------------------------------------------
+sub __createProductOptions {
 	# ...
 	# Return a KIWIXMLProductOptionsData object created from the
 	# <productoptions> data in the given <instsource> node.
@@ -2179,6 +2165,308 @@ sub __createProductOptionsObj {
 }
 
 #==========================================
+# __createPXEDeployConfig
+#------------------------------------------
+sub __createPXEDeployConfig {
+	# ...
+	# Return a ref to a hash containing the configuration for <pxedeploy>
+	# of the given XML:ELEMENT object. Build a data structure that matches
+	# the structure defined in KIWIXMLPXEDeployData
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $kiwi = $this->{kiwi};
+	my %pxeConfig;
+	my $pxeDeployNode = $node -> getChildrenByTagName('pxedeploy');
+	if (! $pxeDeployNode ) {
+		return;
+	}
+	my $pxeNode = $pxeDeployNode -> get_node(1);
+	$pxeConfig{blocksize} = $pxeNode -> getAttribute('blocksize');
+	#==========================================
+	# Process <configuration>
+	#------------------------------------------
+	my $configNode = $pxeNode -> getChildrenByTagName('configuration');
+	if ( $configNode ) {
+		my $configSet = $configNode -> get_node(1);
+		my $archDef = $configSet -> getAttribute('arch');
+		if ($archDef) {
+			my @arches = split /,/, $archDef;
+			for my $arch (@arches) {
+				if (! $this->{supportedArch}{$arch} ) {
+					my $kiwi = $this->{kiwi};
+					my $msg = "Unsupported arch '$arch' in PXE setup.";
+					$kiwi -> error ($msg);
+					$kiwi -> failed ();
+					return -1;
+				}
+			}
+			$pxeConfig{configArch}   = \@arches;
+		}
+		$pxeConfig{configDest}   = $configSet -> getAttribute('dest');
+		$pxeConfig{configSource} = $configSet -> getAttribute('source');
+	}
+	$pxeConfig{initrd} = $this -> __getChildNodeTextValue($pxeNode, 'initrd');
+	$pxeConfig{kernel} = $this -> __getChildNodeTextValue($pxeNode, 'kernel');
+	#==========================================
+	# Process <partitions>
+	#------------------------------------------
+	my $partNode = $pxeNode -> getChildrenByTagName('partitions');
+	if ( $partNode ) {
+		my $partData = $partNode -> get_node(1);
+		$pxeConfig{device} = $partData -> getAttribute('device');
+		my %partData;
+		my @parts = $partData -> getChildrenByTagName('partition');
+		for my $part (@parts) {
+			my %partSet;
+			$partSet{mountpoint} = $part -> getAttribute('mountpoint');
+			my $id               = int $part -> getAttribute('number');
+			$partSet{size}       = $part -> getAttribute('size');
+			$partSet{target}     = $part -> getAttribute('target');
+			$partSet{type}       = $part -> getAttribute('type');
+			$partData{$id} = \%partSet;
+		}
+		$pxeConfig{partitions}   = \%partData
+	}
+	$pxeConfig{server}  = $pxeNode -> getAttribute('server');
+	$pxeConfig{timeout} =$this -> __getChildNodeTextValue($pxeNode, 'timeout');
+	#==========================================
+	# Process <union>
+	#------------------------------------------
+	my $unionNode = $pxeNode -> getChildrenByTagName('union');
+	if ( $unionNode ) {
+		my $unionData = $unionNode -> get_node(1);
+		$pxeConfig{unionRO}   = $unionData -> getAttribute('ro');
+		$pxeConfig{unionRW}   = $unionData -> getAttribute('rw');
+		$pxeConfig{unionType} = $unionData -> getAttribute('type');
+	}
+	my $pxeConfObj = KIWIXMLPXEDeployData -> new($kiwi, \%pxeConfig);
+	return $pxeConfObj;
+}
+
+#==========================================
+# __createSplitData
+#------------------------------------------
+sub __createSplitData {
+	# ...
+	# Return a ref to a hash containing the configuration for <split>
+	# of the given XML:ELEMENT object. Build a data structure that
+	# matches the structure defined in KIWIXMLSplitData
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $kiwi = $this->{kiwi};
+	my $splitNode = $node -> getChildrenByTagName('split');
+	if (! $splitNode ) {
+		return;
+	}
+	my $splitData = $splitNode -> get_node(1);
+	my %splitConf;
+	my @children = qw /persistent temporary/;
+	my @splitBehave = qw /file except/;
+	for my $child (@children) {
+		my $chldNodeLst = $splitData -> getChildrenByTagName($child);
+		if (! $chldNodeLst ) {
+			next;
+		}
+		my $chldNode = $chldNodeLst -> get_node(1);
+		# Build the behavior layer of the structure i.e. file or exclusion
+		# behaveData = {
+		#                except = {...}
+		#                files  = {...}
+		#              }
+		my %behaveData;
+		for my $split (@splitBehave) {
+			my @splitSet = $chldNode -> getChildrenByTagName($split);
+			if (! @splitSet ) {
+				next;
+			}
+			my $key;
+			if ($split eq 'file') {
+				$key = 'files';
+			} else {
+				$key = $split;
+			}
+			# Build inner most part of structure
+			# dataCollect = {
+			#                 all     = (),
+			#                 arch[+] = ()
+			#               }
+			my %dataCollect;
+			for my $entry (@splitSet) {
+				my $arch = $entry -> getAttribute('arch');
+				if (! $arch ) {
+					$arch = 'all';
+				} else {
+					if (! $this->{supportedArch}{$arch} ) {
+						my $kiwi = $this->{kiwi};
+						my $msg = "Unsupported arch '$arch' in split setup";
+						$kiwi -> error ($msg);
+						$kiwi -> failed ();
+						return -1;
+					}
+				}
+				my $name = $entry -> getAttribute('name');
+				if ( $dataCollect{$arch} ) {
+					push @{$dataCollect{$arch}}, $name;
+				} else {
+					my @dataLst = ( $name );
+					$dataCollect{$arch} = \@dataLst;
+				}
+			}
+			$behaveData{$key} = \%dataCollect;
+		}
+		$splitConf{$child} = \%behaveData;
+	}
+	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, \%splitConf);
+	return $splitDataObj;
+}
+
+#==========================================
+# __createSystemDiskData
+#------------------------------------------
+sub __createSystemDiskData {
+	# ...
+	# Return a ref to a hash containing the configuration for <systemdisk>
+	# of the given XML:ELEMENT object. Build a data structure that
+	# matches the structure defined in KIWIXMLSystemdiskData
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $lvmNode = $node -> getChildrenByTagName('systemdisk');
+	if (! $lvmNode ) {
+		return;
+	}
+	my $kiwi = $this->{kiwi};
+	my $lvmDataNode = $lvmNode -> get_node(1);
+	my %lvmData;
+	$lvmData{name} = $lvmDataNode -> getAttribute('name');
+	my @volumes = $lvmDataNode -> getChildrenByTagName('volume');
+	my %volData;
+	my $cntr = 1;
+	for my $vol (@volumes) {
+		my %volInfo;
+		$volInfo{freespace} = $this->__convertSizeStrToMBVal(
+			$vol -> getAttribute('freespace')
+		);
+		my $name = $vol -> getAttribute('name');
+		my $msg = "Invalid name '$name' for LVM volume setup";
+		$name =~ s/\s+//g;
+		if ($name eq '/') {
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return -1;
+		}
+		$name =~ s/^\///;
+		if ($name
+		 =~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)/sxm
+		) {
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return -1;
+		}
+		$volInfo{name} = $name;
+		$volInfo{size} = $this->__convertSizeStrToMBVal(
+			$vol -> getAttribute('size')
+		);
+		$volData{$cntr} = \%volInfo;
+		$cntr += 1;
+	}
+	$lvmData{volumes} = \%volData;
+	my $sysDiskObj = KIWIXMLSystemdiskData -> new($kiwi, \%lvmData);
+	return $sysDiskObj;
+}
+
+#==========================================
+# __createVMachineConfig
+#------------------------------------------
+sub __createVMachineConfig {
+	# ...
+	# Return a ref to a hash that contains the configuration data
+	# for the <machine> element and it's children for the
+	# given XML:ELEMENT object
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $kiwi = $this->{kiwi};
+	my $vmConfig = $node -> getChildrenByTagName('machine') -> get_node(1);
+	if (! $vmConfig ) {
+		return;
+	}
+	my %vmConfigData;
+	$vmConfigData{HWversion}  = $vmConfig -> getAttribute('HWversion');
+	$vmConfigData{arch}       = $vmConfig -> getAttribute('arch');
+	$vmConfigData{des_cpu}    = $vmConfig -> getAttribute('des_cpu');
+	$vmConfigData{des_memory} = $vmConfig -> getAttribute('des_memory');
+	$vmConfigData{domain}     = $vmConfig -> getAttribute('domain');
+	$vmConfigData{guestOS}    = $vmConfig -> getAttribute('guestOS');
+	$vmConfigData{max_cpu}    = $vmConfig -> getAttribute('max_cpu');
+	$vmConfigData{max_memory} = $vmConfig -> getAttribute('max_memory');
+	$vmConfigData{memory}     = $vmConfig -> getAttribute('memory');
+	$vmConfigData{min_cpu}    = $vmConfig -> getAttribute('min_cpu');
+	$vmConfigData{min_memory} = $vmConfig -> getAttribute('min_memory');
+	$vmConfigData{ncpus}      = $vmConfig -> getAttribute('ncpus');
+	$vmConfigData{ovftype}    = $vmConfig -> getAttribute('ovftype');
+	#==========================================
+	# Configuration text
+	#------------------------------------------
+	my @confNodes = $vmConfig -> getChildrenByTagName('vmconfig-entry');
+	my @confData;
+	for my $conf (@confNodes) {
+		push @confData, $conf -> textContent();
+	}
+	my $configSttings;
+	if (@confData) {
+		$configSttings = \@confData;
+	}
+	$vmConfigData{vmconfig_entries} = $configSttings;
+	#==========================================
+	# System Disk
+	#------------------------------------------
+	my @diskNodes = $vmConfig -> getChildrenByTagName('vmdisk');
+	my %diskData;
+	for my $disk (@diskNodes) {
+		my %diskSet;
+		$diskSet{controller} = $disk -> getAttribute('controller');
+		$diskSet{device}     = $disk -> getAttribute('device');
+		$diskSet{disktype}   = $disk -> getAttribute('disktype');
+		$diskSet{id}         = $disk -> getAttribute('id');
+		# Currently there is only one disk, the system disk
+		$diskData{system} = \%diskSet;
+	}
+	$vmConfigData{vmdisks} = \%diskData;
+	#==========================================
+	# CD/DVD
+	#------------------------------------------
+	my $dvdNodes = $vmConfig -> getChildrenByTagName('vmdvd');
+	if ($dvdNodes) {
+		my $dvdNode = $dvdNodes -> get_node(1);
+		my %dvdData;
+		$dvdData{controller} = $dvdNode -> getAttribute('controller');
+		$dvdData{id}         = $dvdNode -> getAttribute('id');
+		$vmConfigData{vmdvd} = \%dvdData;
+	}
+	#==========================================
+	# Network interfaces
+	#------------------------------------------
+	my @nicNodes = $vmConfig -> getChildrenByTagName('vmnic');
+	my %nicData;
+	my $cntr = 1;
+	for my $nic (@nicNodes) {
+		my %nicSet;
+		$nicSet{driver}    = $nic -> getAttribute('driver');
+		$nicSet{interface} = $nic -> getAttribute('interface');
+		$nicSet{mac}       = $nic -> getAttribute('mac');
+		$nicSet{mode}      = $nic -> getAttribute('mode');
+		$nicData{$cntr} = \%nicSet;
+		$cntr += 1;
+	}
+	$vmConfigData{vmnics} = \%nicData;
+	my $vmConfObj = KIWIXMLVMachineData -> new($kiwi, \%vmConfigData);
+	return $vmConfObj;
+}
+
+#==========================================
 # __dumpInternalXMLDescription
 #------------------------------------------
 sub __dumpInternalXMLDescription {
@@ -2187,7 +2475,6 @@ sub __dumpInternalXMLDescription {
 	# structure in a readable format
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
 	$Data::Dumper::Terse  = 1;
 	$Data::Dumper::Indent = 1;
 	$Data::Dumper::Useqq  = 1;
@@ -2263,44 +2550,6 @@ sub __genDUDPkgsArray {
 		@pkgs = @{$instPkgs};
 	}
 	return \@pkgs;
-}
-
-#==========================================
-# __genEC2ConfigHash
-#------------------------------------------
-sub __genEC2ConfigHash {
-	# ...
-	# Return a ref to a hash that contains the EC2 configuration data for the
-	# given XML:ELEMENT object. Build a data structure that matches the
-	# structure defined in KIWIXMLEC2ConfigData
-	# ---
-	my $this = shift;
-	my $node = shift;
-	my $ec2Config = $node -> getChildrenByTagName('ec2config') -> get_node(1);
-	if (! $ec2Config ) {
-		return;
-	}
-	my %ec2ConfigData;
-	$ec2ConfigData{ec2accountnr} = $this -> __getChildNodeTextValue(
-		$ec2Config, 'ec2accountnr'
-	);
-	$ec2ConfigData{ec2certfile}  = $this -> __getChildNodeTextValue(
-		$ec2Config, 'ec2certfile'
-	);
-	$ec2ConfigData{ec2privatekeyfile} =	$this -> __getChildNodeTextValue(
-		$ec2Config, 'ec2privatekeyfile'
-	);
-	my @ec2Regions = $ec2Config -> getChildrenByTagName('ec2region');
-	my @regions;
-	for my $regNode (@ec2Regions) {
-		push @regions, $regNode -> textContent();
-	}
-	my $selectedRegions;
-	if (@regions) {
-		$selectedRegions = \@regions;
-	}
-	$ec2ConfigData{ec2region} = $selectedRegions;
-	return \%ec2ConfigData;
 }
 
 #==========================================
@@ -2441,63 +2690,6 @@ sub __genMetadataPkgsArray {
 }
 
 #==========================================
-# __genOEMConfigHash
-#------------------------------------------
-sub __genOEMConfigHash {
-	# ...
-	# Return a ref to a hash containing the configuration for <oemconfig>
-	# of the given XML:ELEMENT object. Build a data structure that
-	# matches the structure defined in
-	# KIWIXMLOEMConfigData
-	# ---
-	my $this = shift;
-	my $node = shift;
-	my $oemConfNode = $node -> getChildrenByTagName('oemconfig');
-	if (! $oemConfNode ) {
-		return;
-	}
-	my $config = $oemConfNode -> get_node(1);
-	my %oemConfig;
-	$oemConfig{oem_align_partition}      =
-		$this -> __getChildNodeTextValue($config, 'oem-align-partition');
-	$oemConfig{oem_boot_title}           =
-		$this -> __getChildNodeTextValue($config, 'oem-boot-title');
-	$oemConfig{oem_bootwait}             =
-		$this -> __getChildNodeTextValue($config, 'oem-bootwait');
-	$oemConfig{oem_inplace_recovery}     =
-		$this -> __getChildNodeTextValue($config, 'oem-inplace-recovery');
-	$oemConfig{oem_kiwi_initrd}          =
-		$this -> __getChildNodeTextValue($config, 'oem-kiwi-initrd');
-	$oemConfig{oem_partition_install}    =
-		$this -> __getChildNodeTextValue($config, 'oem-partition-install');
-	$oemConfig{oem_reboot}               =
-		$this -> __getChildNodeTextValue($config, 'oem-reboot');
-	$oemConfig{oem_reboot_interactive}   =
-		$this -> __getChildNodeTextValue($config, 'oem-reboot-interactive');
-	$oemConfig{oem_recovery}             =
-		$this -> __getChildNodeTextValue($config, 'oem-recovery');
-	$oemConfig{oem_recoveryID}           =
-		$this -> __getChildNodeTextValue($config, 'oem-recoveryID');
-	$oemConfig{oem_shutdown}             =
-		$this -> __getChildNodeTextValue($config, 'oem-shutdown');
-	$oemConfig{oem_shutdown_interactive} =
-		$this -> __getChildNodeTextValue($config, 'oem-shutdown-interactive');
-	$oemConfig{oem_silent_boot}          =
-		$this -> __getChildNodeTextValue($config, 'oem-silent-boot');
-	$oemConfig{oem_swap}                 =
-		$this -> __getChildNodeTextValue($config, 'oem-swap');
-	$oemConfig{oem_swapsize}             =
-		$this -> __getChildNodeTextValue($config, 'oem-swapsize');
-	$oemConfig{oem_systemsize}           =
-		$this -> __getChildNodeTextValue($config, 'oem-systemsize');
-	$oemConfig{oem_unattended}           = 
-	$this -> __getChildNodeTextValue($config, 'oem-unattended');
-	$oemConfig{oem_unattended_id}        =
-		$this -> __getChildNodeTextValue($config, 'oem-unattended-id');
-	return \%oemConfig;
-}
-
-#==========================================
 # __genProductArchitectureArray
 #------------------------------------------
 sub __genProductArchitectureArray {
@@ -2577,84 +2769,6 @@ sub __genProductReqArchArray {
 }
 
 #==========================================
-# __genPXEDeployHash
-#------------------------------------------
-sub __genPXEDeployHash {
-	# ...
-	# Return a ref to a hash containing the configuration for <pxedeploy>
-	# of the given XML:ELEMENT object. Build a data structure that matches
-	# the structure defined in KIWIXMLPXEDeployData
-	# ---
-	my $this = shift;
-	my $node = shift;
-	my %pxeConfig;
-	my $pxeDeployNode = $node -> getChildrenByTagName('pxedeploy');
-	if (! $pxeDeployNode ) {
-		return;
-	}
-	my $pxeNode = $pxeDeployNode -> get_node(1);
-	$pxeConfig{blocksize} = $pxeNode -> getAttribute('blocksize');
-	#==========================================
-	# Process <configuration>
-	#------------------------------------------
-	my $configNode = $pxeNode -> getChildrenByTagName('configuration');
-	if ( $configNode ) {
-		my $configSet = $configNode -> get_node(1);
-		my $archDef = $configSet -> getAttribute('arch');
-		if ($archDef) {
-			my @arches = split /,/, $archDef;
-			for my $arch (@arches) {
-				if (! $this->{supportedArch}{$arch} ) {
-					my $kiwi = $this->{kiwi};
-					my $msg = "Unsupported arch '$arch' in PXE setup.";
-					$kiwi -> error ($msg);
-					$kiwi -> failed ();
-					return -1;
-				}
-			}
-			$pxeConfig{configArch}   = \@arches;
-		}
-		$pxeConfig{configDest}   = $configSet -> getAttribute('dest');
-		$pxeConfig{configSource} = $configSet -> getAttribute('source');
-	}
-	$pxeConfig{initrd} = $this -> __getChildNodeTextValue($pxeNode, 'initrd');
-	$pxeConfig{kernel} = $this -> __getChildNodeTextValue($pxeNode, 'kernel');
-	#==========================================
-	# Process <partitions>
-	#------------------------------------------
-	my $partNode = $pxeNode -> getChildrenByTagName('partitions');
-	if ( $partNode ) {
-		my $partData = $partNode -> get_node(1);
-		$pxeConfig{device} = $partData -> getAttribute('device');
-		my %partData;
-		my @parts = $partData -> getChildrenByTagName('partition');
-		for my $part (@parts) {
-			my %partSet;
-			$partSet{mountpoint} = $part -> getAttribute('mountpoint');
-			my $id               = int $part -> getAttribute('number');
-			$partSet{size}       = $part -> getAttribute('size');
-			$partSet{target}     = $part -> getAttribute('target');
-			$partSet{type}       = $part -> getAttribute('type');
-			$partData{$id} = \%partSet;
-		}
-		$pxeConfig{partitions}   = \%partData
-	}
-	$pxeConfig{server}  = $pxeNode -> getAttribute('server');
-	$pxeConfig{timeout} =$this -> __getChildNodeTextValue($pxeNode, 'timeout');
-	#==========================================
-	# Process <union>
-	#------------------------------------------
-	my $unionNode = $pxeNode -> getChildrenByTagName('union');
-	if ( $unionNode ) {
-		my $unionData = $unionNode -> get_node(1);
-		$pxeConfig{unionRO}   = $unionData -> getAttribute('ro');
-		$pxeConfig{unionRW}   = $unionData -> getAttribute('rw');
-		$pxeConfig{unionType} = $unionData -> getAttribute('type');
-	}
-	return \%pxeConfig;
-}
-
-#==========================================
 # __genRepoPackagesArray
 #------------------------------------------
 sub __genRepoPackagesArray {
@@ -2691,136 +2805,6 @@ sub __genRepoPackagesArray {
 }
 
 #==========================================
-# __genSplitDataHash
-#------------------------------------------
-sub __genSplitDataHash {
-	# ...
-	# Return a ref to a hash containing the configuration for <split>
-	# of the given XML:ELEMENT object. Build a data structure that
-	# matches the structure defined in KIWIXMLSplitData
-	# ---
-	my $this = shift;
-	my $node = shift;
-	my $splitNode = $node -> getChildrenByTagName('split');
-	if (! $splitNode ) {
-		return;
-	}
-	my $splitData = $splitNode -> get_node(1);
-	my %splitConf;
-	my @children = qw /persistent temporary/;
-	my @splitBehave = qw /file except/;
-	for my $child (@children) {
-		my $chldNodeLst = $splitData -> getChildrenByTagName($child);
-		if (! $chldNodeLst ) {
-			next;
-		}
-		my $chldNode = $chldNodeLst -> get_node(1);
-		# Build the behavior layer of the structure i.e. file or exclusion
-		# behaveData = {
-		#                except = {...}
-		#                files  = {...}
-		#              }
-		my %behaveData;
-		for my $split (@splitBehave) {
-			my @splitSet = $chldNode -> getChildrenByTagName($split);
-			if (! @splitSet ) {
-				next;
-			}
-			my $key;
-			if ($split eq 'file') {
-				$key = 'files';
-			} else {
-				$key = $split;
-			}
-			# Build inner most part of structure
-			# dataCollect = {
-			#                 all     = (),
-			#                 arch[+] = ()
-			#               }
-			my %dataCollect;
-			for my $entry (@splitSet) {
-				my $arch = $entry -> getAttribute('arch');
-				if (! $arch ) {
-					$arch = 'all';
-				} else {
-					if (! $this->{supportedArch}{$arch} ) {
-						my $kiwi = $this->{kiwi};
-						my $msg = "Unsupported arch '$arch' in split setup";
-						$kiwi -> error ($msg);
-						$kiwi -> failed ();
-						return -1;
-					}
-				}
-				my $name = $entry -> getAttribute('name');
-				if ( $dataCollect{$arch} ) {
-					push @{$dataCollect{$arch}}, $name;
-				} else {
-					my @dataLst = ( $name );
-					$dataCollect{$arch} = \@dataLst;
-				}
-			}
-			$behaveData{$key} = \%dataCollect;
-		}
-		$splitConf{$child} = \%behaveData;
-	}
-	return \%splitConf;
-}
-
-#==========================================
-# __genSystemDiskHash
-#------------------------------------------
-sub __genSystemDiskHash {
-	# ...
-	# Return a ref to a hash containing the configuration for <systemdisk>
-	# of the given XML:ELEMENT object. Build a data structure that
-	# matches the structure defined in KIWIXMLSystemdiskData
-	# ---
-	my $this = shift;
-	my $node = shift;
-	my $lvmNode = $node -> getChildrenByTagName('systemdisk');
-	if (! $lvmNode ) {
-		return;
-	}
-	my $kiwi = $this->{kiwi};
-	my $lvmDataNode = $lvmNode -> get_node(1);
-	my %lvmData;
-	$lvmData{name} = $lvmDataNode -> getAttribute('name');
-	my @volumes = $lvmDataNode -> getChildrenByTagName('volume');
-	my %volData;
-	my $cntr = 1;
-	for my $vol (@volumes) {
-		my %volInfo;
-		$volInfo{freespace} = $this->__convertSizeStrToMBVal(
-			$vol -> getAttribute('freespace')
-		);
-		my $name = $vol -> getAttribute('name');
-		my $msg = "Invalid name '$name' for LVM volume setup";
-		$name =~ s/\s+//g;
-		if ($name eq '/') {
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return -1;
-		}
-		$name =~ s/^\///;
-		if ($name
-		 =~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)/sxm
-		) {
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return -1;
-		}
-		$volInfo{name} = $name;
-		$volInfo{size} = $this->__convertSizeStrToMBVal(
-			$vol -> getAttribute('size')
-		);
-		$volData{$cntr} = \%volInfo;
-		$cntr += 1;
-	}
-	$lvmData{volumes} = \%volData;
-	return \%lvmData;
-}
-
-#==========================================
 # __genTypeHash
 #------------------------------------------
 sub __genTypeHash {
@@ -2832,6 +2816,7 @@ sub __genTypeHash {
 	# ---
 	my $this = shift;
 	my $node = shift;
+	my $kiwi = $this->{kiwi};
 	my @typeNodes = $node -> getChildrenByTagName('type');
 	my %types = ();
 	if (! @typeNodes) {
@@ -2886,13 +2871,14 @@ sub __genTypeHash {
 	#------------------------------------------
 	foreach my $type (@typeNodes) {
 		my %typeData;
+		my $typeName = $type -> getAttribute('image');
 		#==========================================
 		# store a value for the primary attribute
 		#------------------------------------------
 		my $prim = $type -> getAttribute('primary');
 		if ($prim && $prim eq 'true') {
 			$typeData{primary} = 'true';
-			$defaultType = $type -> getAttribute('image');
+			$defaultType = $typeName;
 		} else {
 			$typeData{primary} = 'false';
 		}
@@ -2905,15 +2891,18 @@ sub __genTypeHash {
 		#==========================================
 		# store <ec2config> child
 		#------------------------------------------
-		$typeData{ec2config} = $this -> __genEC2ConfigHash($type);
+		#$typeData{ec2config} = $this -> __createEC2Config($type);
+		my $ec2Config = $this -> __createEC2Config($type);
 		#==========================================
 		# store <machine> child
 		#------------------------------------------
-		$typeData{machine}   = $this -> __genVMachineHash($type);
+		#typeData{machine}   = $this -> __createVMachineConfig($type);
+		my $vmConfig = $this -> __createVMachineConfig($type);
 		#==========================================
 		# store <oemconfig> child
 		#------------------------------------------
-		$typeData{oemconfig} = $this -> __genOEMConfigHash($type);
+		#$typeData{oemconfig} = $this -> __createOEMConfig($type);
+		my $oemConfig = $this -> __createOEMConfig($type);
 		#==========================================
 		# store <size>...</size> text and attributes
 		#------------------------------------------
@@ -2927,118 +2916,55 @@ sub __genTypeHash {
 		#==========================================
 		# store <pxeconfig> child
 		#------------------------------------------
-		$typeData{pxedeploy} = $this -> __genPXEDeployHash($type);
-		if ($typeData{pxedeploy} && $typeData{pxedeploy} == -1) {
+		#$typeData{pxedeploy} = $this -> __createPXEDeployConfig($type);
+		#if ($typeData{pxedeploy} && $typeData{pxedeploy} == -1) {
+		#	return -1;
+		#}
+		my $pxeConfig = $this -> __createPXEDeployConfig($type);
+		if ($pxeConfig && $pxeConfig == -1) {
 			return -1;
 		}
 		#==========================================
 		# store <split> child
 		#------------------------------------------
-		$typeData{split} = $this -> __genSplitDataHash($type);
-		if ($typeData{split} && $typeData{split} == -1) {
+		#$typeData{split} = $this -> __createSplitData($type);
+		#if ($typeData{split} && $typeData{split} == -1) {
+		#	return -1;
+		#}
+		my $splitData = $this -> __createSplitData($type);
+		if ($splitData && $splitData == -1) {
 			return -1;
 		}
 		#==========================================
 		# store <systemdisk> child
 		#------------------------------------------
-		$typeData{systemdisk} = $this -> __genSystemDiskHash($type);
-		if ($typeData{systemdisk} && $typeData{systemdisk} == -1) {
+		#$typeData{systemdisk} = $this -> __createSystemDiskData($type);
+		#if ($typeData{systemdisk} && $typeData{systemdisk} == -1) {
+		#	return -1;
+		#}
+		my $sysDisk = $this -> __createSystemDiskData($type);
+		if ($sysDisk && $sysDisk == -1) {
 			return -1;
 		}
 		#==========================================
 		# store this type in %types
 		#------------------------------------------
-		$types{$typeData{image}} = \%typeData;
+		my $typeObj = KIWIXMLTypeData -> new($kiwi, \%typeData);
+		my %curType = (
+			ec2config  => $ec2Config,
+			machine    => $vmConfig,
+			oemconfig  => $oemConfig,
+			pxedeploy  => $pxeConfig,
+			split      => $splitData,
+			systemdisk => $sysDisk,
+			type       => $typeObj
+		);
+		#$types{$typeData{image}} = $typeObj;
+		#$types{$typeData{image}} = \%typeData;
+		$types{$typeData{image}} = \%curType;
 	}
 	$types{defaultType} = $defaultType;
 	return \%types;
-}
-
-#==========================================
-# __genVMachineHash
-#------------------------------------------
-sub __genVMachineHash {
-	# ...
-	# Return a ref to a hash that contains the configuration data
-	# for the <machine> element and it's children for the
-	# given XML:ELEMENT object
-	# ---
-	my $this = shift;
-	my $node = shift;
-	my $vmConfig = $node -> getChildrenByTagName('machine') -> get_node(1);
-	if (! $vmConfig ) {
-		return;
-	}
-	my %vmConfigData;
-	$vmConfigData{HWversion}  = $vmConfig -> getAttribute('HWversion');
-	$vmConfigData{arch}       = $vmConfig -> getAttribute('arch');
-	$vmConfigData{des_cpu}    = $vmConfig -> getAttribute('des_cpu');
-	$vmConfigData{des_memory} = $vmConfig -> getAttribute('des_memory');
-	$vmConfigData{domain}     = $vmConfig -> getAttribute('domain');
-	$vmConfigData{guestOS}    = $vmConfig -> getAttribute('guestOS');
-	$vmConfigData{max_cpu}    = $vmConfig -> getAttribute('max_cpu');
-	$vmConfigData{max_memory} = $vmConfig -> getAttribute('max_memory');
-	$vmConfigData{memory}     = $vmConfig -> getAttribute('memory');
-	$vmConfigData{min_cpu}    = $vmConfig -> getAttribute('min_cpu');
-	$vmConfigData{min_memory} = $vmConfig -> getAttribute('min_memory');
-	$vmConfigData{ncpus}      = $vmConfig -> getAttribute('ncpus');
-	$vmConfigData{ovftype}    = $vmConfig -> getAttribute('ovftype');
-	#==========================================
-	# Configuration text
-	#------------------------------------------
-	my @confNodes = $vmConfig -> getChildrenByTagName('vmconfig-entry');
-	my @confData;
-	for my $conf (@confNodes) {
-		push @confData, $conf -> textContent();
-	}
-	my $configSttings;
-	if (@confData) {
-		$configSttings = \@confData;
-	}
-	$vmConfigData{vmconfig_entries} = $configSttings;
-	#==========================================
-	# System Disk
-	#------------------------------------------
-	my @diskNodes = $vmConfig -> getChildrenByTagName('vmdisk');
-	my %diskData;
-	for my $disk (@diskNodes) {
-		my %diskSet;
-		$diskSet{controller} = $disk -> getAttribute('controller');
-		$diskSet{device}     = $disk -> getAttribute('device');
-		$diskSet{disktype}   = $disk -> getAttribute('disktype');
-		$diskSet{id}         = $disk -> getAttribute('id');
-		# Currently there is only one disk, the system disk
-		$diskData{system} = \%diskSet;
-	}
-	$vmConfigData{vmdisks} = \%diskData;
-	#==========================================
-	# CD/DVD
-	#------------------------------------------
-	my $dvdNodes = $vmConfig -> getChildrenByTagName('vmdvd');
-	if ($dvdNodes) {
-		my $dvdNode = $dvdNodes -> get_node(1);
-		my %dvdData;
-		$dvdData{controller} = $dvdNode -> getAttribute('controller');
-		$dvdData{id}         = $dvdNode -> getAttribute('id');
-		$vmConfigData{vmdvd} = \%dvdData;
-	}
-	#==========================================
-	# Network interfaces
-	#------------------------------------------
-	my @nicNodes = $vmConfig -> getChildrenByTagName('vmnic');
-	my %nicData;
-	my $cntr = 1;
-	for my $nic (@nicNodes) {
-		my %nicSet;
-		$nicSet{driver}    = $nic -> getAttribute('driver');
-		$nicSet{interface} = $nic -> getAttribute('interface');
-		$nicSet{mac}       = $nic -> getAttribute('mac');
-		$nicSet{mode}      = $nic -> getAttribute('mode');
-		$nicData{$cntr} = \%nicSet;
-		$cntr += 1;
-	}
-	$vmConfigData{vmnics} = \%nicData;
-	return \%vmConfigData;
 }
 
 #==========================================
@@ -3140,7 +3066,8 @@ sub __getInstallData {
 	}
 	my $arch = $this->{arch};
 	my @selected = @{$this->{selectedProfiles}};
-	my $type = $this->{selectedType}{image};
+	my $type = $this->{selectedType}{type};
+	my $typeName = $type -> getImageType();
 	my @names;
 	for my $prof (@selected) {
 		my $baseData = $this->{imageConfig}{$prof}{$access};
@@ -3153,7 +3080,7 @@ sub __getInstallData {
 				push @names, @{$archData};
 			}
 		}
-		my $typeInfo = $this->{imageConfig}{$prof}{$type};
+		my $typeInfo = $this->{imageConfig}{$prof}{$typeName};
 		if ($typeInfo) {
 			my $typeData = $typeInfo->{$access};
 			if ($typeData) {
@@ -3415,24 +3342,29 @@ sub __populateDescriptionInfo {
 	# description data from the XML file.
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
 	my $descrNode = $this->{systemTree}
 		-> getElementsByTagName ('description')
 		-> get_node(1);
 	my $author  = $this
 		-> __getChildNodeTextValue ($descrNode, 'author');
-	my $contact = $this
-		-> __getChildNodeTextValue ($descrNode, 'contact');
+	my @contactNodes = $descrNode -> getElementsByTagName ('contact');
+	my @contacts;
+	for my $contNd (@contactNodes) {
+		push @contacts, $contNd -> textContent();
+	}
 	my $spec    = $this
 		-> __getChildNodeTextValue($descrNode,'specification');
 	my $type    = $descrNode
 		-> getAttribute ('type');
 	my %descript = (
 		author        => $author,
-		contact       => $contact,
+		contact       => \@contacts,
 		specification => $spec,
 		type          => $type
 	);
-	$this->{imageConfig}{description} = \%descript;
+	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi, \%descript);
+	$this->{imageConfig}{description} = $descriptObj;
 	return $this;
 }
 
@@ -3499,7 +3431,7 @@ sub __populateInstSource {
 				return;
 			}
 		}
-		my $prodOpts = $this -> __createProductOptionsObj($instSrc);
+		my $prodOpts = $this -> __createProductOptions($instSrc);
 		if (! $prodOpts) {
 			return;
 		}
@@ -3510,7 +3442,7 @@ sub __populateInstSource {
 		my $reqArches = $this -> __genProductReqArchArray($instSrc);
 		if (! $reqArches) {
 			return;
-		} #RJS
+		}
 		my %prodSettings = (
 			architectures  => $arches,
 			dudArches      => \@dudArches,
@@ -3922,6 +3854,7 @@ sub __populateProfileInfo {
 	# profile data from the XML file.
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
 	my @profNodes = $this->{systemTree} -> getElementsByTagName ('profile');
 	if (! @profNodes ) {
 		return $this;
@@ -3938,10 +3871,12 @@ sub __populateProfileInfo {
 		push @availableProfiles, $profName;
 		# Insert into internal data structure
 		my %profile = (
-			'description' => $descript,
-			'import'      => $import
+			description => $descript,
+			import      => $import,
+			name        => $profName
 		);
-		$this->{imageConfig}{$profName}{profInfo} = \%profile;
+		$this->{imageConfig}{$profName}{profInfo} =
+			KIWIXMLProfileData -> new($kiwi, \%profile);
 		# Handle default profile setting
 		if ( $import eq 'true') {
 			my @profs = ('kiwi_default', $profName);
@@ -3961,9 +3896,9 @@ sub __populateRepositoryInfo {
 	# repository data from the XML file.
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
 	my @repoNodes = $this->{systemTree}
 		-> getElementsByTagName ('repository');
-	my $idCntr = 1;
 	for my $repoNode (@repoNodes) {
 		my %repoData;
 		$repoData{alias}         = $repoNode
@@ -3995,21 +3930,17 @@ sub __populateRepositoryInfo {
 			$profiles = 'kiwi_default';
 		}
 		my @profNames = split /,/, $profiles;
+		my $repo = KIWIXMLRepositoryData -> new ($kiwi, \%repoData);
 		for my $profName (@profNames) {
-			my $repoRef = $this->{imageConfig}->{$profName}{repoData};
+			my $repoRef = $this->{imageConfig}->{$profName}->{repoData};
 			if (! $repoRef) {
-				my %repoInfo = ( $idCntr => \%repoData);
-				$this->{imageConfig}->{$profName}{repoData} = \%repoInfo;
+				my @repos = ($repo);
+				$this->{imageConfig}->{$profName}->{repoData} = \@repos;
 			} else {
-				my %repoInfo = %{$repoRef};
-				$repoInfo{$idCntr} = \%repoData;
-				$this->{imageConfig}->{$profName}{repoData} = \%repoInfo;
+				push @{$repoRef}, $repo;
 			}
-			$idCntr += 1;
 		}
 	}
-	# Store the next counter to be used as repo ID
-	$this -> {repoCounter} = $idCntr;
 	return $this;
 }
 
@@ -4162,7 +4093,9 @@ sub __setDefaultBuildType {
 	if ($defTypeName) {
 		$defType = $this->{imageConfig}
 			->{kiwi_default}->{preferences}->{types}->{$defTypeName};
-		if ($defType->{primary} && $defType->{primary} eq 'true') {
+		my $type = $defType->{type};
+		my $prim = $type -> getPrimary();
+		if ($prim && $prim eq 'true') {
 			$primaryCount++;
 		}
 	}
@@ -4182,9 +4115,11 @@ sub __setDefaultBuildType {
 			# This preferences section has no type(s) defined
 			next;
 		}
-		my $profDefTypeIsPrim = $this->{imageConfig}
+		my $profDefType = $this->{imageConfig}
 			->{$profName}->{preferences}->{types}
-			->{$profDefTypeName}->{primary};
+			->{$profDefTypeName};
+		my $type = $profDefType->{type};
+		my $profDefTypeIsPrim = $type -> getPrimary();
 		if ($profDefTypeIsPrim && $profDefTypeIsPrim eq 'true') {
 			if ($primaryCount) {
 				my $kiwi = $this->{kiwi};
@@ -4195,12 +4130,10 @@ sub __setDefaultBuildType {
 				return;
 			}
 			$primaryCount++;
-			$defType = $this->{imageConfig}
-				->{$profName}->{preferences}->{types}->{$profDefTypeName};
+			$defType = $profDefType;
 		}
 		if (! $defType) {
-			$defType = $this->{imageConfig}
-				->{$profName}->{preferences}->{types}->{$profDefTypeName};
+			$defType = $profDefType;
 		}
 	}
 	$this->{defaultType} = $defType;
