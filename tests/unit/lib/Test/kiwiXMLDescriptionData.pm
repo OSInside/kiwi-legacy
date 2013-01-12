@@ -39,17 +39,110 @@ sub new {
 }
 
 #==========================================
-# test_ctor_invalidHashRef
+# test_ctor_incompleteHashRefAuthor
 #------------------------------------------
-sub test_ctor_incompleteHashRef {
+sub test_ctor_incompleteHashRefAuthor {
 	# ...
-	# Test the DescriptionData constructor with an invalid hashRef as argument
+	# Test the DescriptionData constructor with an incomplete hashRef
+	# as argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %args = ( author        => 'me',
-				 contact       => 'me@suse.com',
-			);
+	my @contacts = ('me@suse.com');
+	my %args = (
+	    contact       => \@contacts,
+		specification => 'test case',
+		type          => 'system'
+	);
+	# Test with a string arguments
+	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
+	my $expected = 'KIWIXMLDescriptionData: no "author" specified in '
+		. 'initialization structure.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($descrpObj);
+	return;
+}
+
+#==========================================
+# test_ctor_incompleteHashRefCont
+#------------------------------------------
+sub test_ctor_incompleteHashRefCont {
+	# ...
+	# Test the DescriptionData constructor with an incomplete hashRef
+	# as argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %args = (
+	    author        => 'me',
+		specification => 'test case',
+		type          => 'system'
+	);
+	# Test with a string arguments
+	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
+	my $expected = 'KIWIXMLDescriptionData: no "contact" specified in '
+		. 'initialization structure.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($descrpObj);
+	return;
+}
+
+#==========================================
+# test_ctor_incompleteHashRefSpec
+#------------------------------------------
+sub test_ctor_incompleteHashRefSpec {
+	# ...
+	# Test the DescriptionData constructor with an incomplete hashRef
+	# as argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @contacts = ('me@suse.com');
+	my %args = (
+	    author  => 'me',
+		contact => \@contacts,
+		type    => 'system'
+	);
+	# Test with a string arguments
+	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
+	my $expected = 'KIWIXMLDescriptionData: no "specification" given in '
+		. 'initialization structure.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($descrpObj);
+	return;
+}
+
+#==========================================
+# test_ctor_incompleteHashRefType
+#------------------------------------------
+sub test_ctor_incompleteHashRefType {
+	# ...
+	# Test the DescriptionData constructor with an incomplete hashRef
+	# as argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @contacts = ('me@suse.com');
+	my %args = (
+		author        => 'me',
+		contact       => \@contacts,
+		specification => 'test case'
+	);
 	# Test with a string arguments
 	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
 	my $expected = 'KIWIXMLDescriptionData: no "type" specified in '
@@ -65,9 +158,9 @@ sub test_ctor_incompleteHashRef {
 }
 
 #==========================================
-# test_ctor_invalidHashRef
+# test_ctor_invalidHashRefContact
 #------------------------------------------
-sub test_ctor_invalidHashRef {
+sub test_ctor_invalidHashRefContact {
 	# ...
 	# Test the DescriptionData constructor with an invalid hashRef as argument
 	# ---
@@ -75,6 +168,35 @@ sub test_ctor_invalidHashRef {
 	my $kiwi = $this -> {kiwi};
 	my %init = ( author        => 'me',
 				 contact       => 'me@suse.com',
+				 specification => 'the test case',
+				 type          => 'image',
+			);
+	# Test with a string arguments
+	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%init);
+	my $expected = 'KIWIXMLDescriptionData: expecting array ref as value '
+		. 'for "contact" argument.';
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($descrpObj);
+	return;
+}
+
+#==========================================
+# test_ctor_invalidHashRefType
+#------------------------------------------
+sub test_ctor_invalidHashRefType {
+	# ...
+	# Test the DescriptionData constructor with an invalid hashRef as argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @contacts = ('me@suse.com');
+	my %init = ( author        => 'me',
+				 contact       => \@contacts,
 				 specification => 'the test case',
 				 type          => 'pablo',
 			);
@@ -142,32 +264,6 @@ sub test_ctor_unsupportedKW {
 }
 
 #==========================================
-# test_ctor_wInit
-#------------------------------------------
-sub test_ctor_wInit {
-	# ...
-	# Test the DescriptionData constructor with valid init structure
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = (
-				author        => 'me',
-				contact       => 'me@suse.com',
-				specification => 'the test case',
-				type          => 'system'
-	);
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%init);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_not_null($descrpObj);
-	return;
-}
-
-#==========================================
 # test_ctor_validHashRef
 #------------------------------------------
 sub test_ctor_validHashRef {
@@ -176,11 +272,13 @@ sub test_ctor_validHashRef {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %args = ( author        => 'me',
-				contact       => 'me@suse.com',
-				specification => 'the test case',
-				type          => 'boot',
-			);
+	my @contacts = ('me@suse.com');
+	my %args = (
+		author        => 'me',
+		contact       => \@contacts,
+		specification => 'the test case',
+		type          => 'boot',
+	);
 	# Test with a string arguments
 	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
 	$this -> assert_not_null($descrpObj);
@@ -232,7 +330,8 @@ sub test_getContactInfo {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('me@suse.com', $contact);
+	my @expected = ('me@suse.com', 'you@suse.com');
+	$this -> assert_array_equal(\@expected, $contact);
 	return;
 }
 
@@ -301,6 +400,7 @@ sub test_getXMLElement{
 	my $expected = '<description type="boot">'
 		. '<author>me</author>'
 		. '<contact>me@suse.com</contact>'
+		. '<contact>you@suse.com</contact>'
 		. '<specification>the test case</specification>'
 		. '</description>';
 	$this -> assert_str_equals($expected, $xmlstr);
@@ -391,7 +491,8 @@ sub test_setContactInfo {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('rjschwei@suse.com', $info);
+	my @expected = ('rjschwei@suse.com');
+	$this -> assert_array_equal(\@expected, $info);
 	return;
 }
 
@@ -422,7 +523,8 @@ sub test_setContactInfoNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('me@suse.com', $info);
+	my @expected = ('me@suse.com', 'you@suse.com');
+	$this -> assert_array_equal(\@expected, $info);
 	return;
 }
 
@@ -589,9 +691,10 @@ sub __getDescriptObj {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
+	my @contacts = ('me@suse.com', 'you@suse.com');
 	my %args = (
 		author        => 'me',
-		contact       => 'me@suse.com',
+		contact       => \@contacts,
 		specification => 'the test case',
 		type          => 'boot',
 	);

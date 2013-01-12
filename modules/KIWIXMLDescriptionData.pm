@@ -40,7 +40,7 @@ sub new {
 	#
 	# this = {
 	#    author        = ''
-	#    contact       = ''
+	#    contact       = ('',...)
 	#    specification = ''
 	#    type          = ''
 	# }
@@ -98,7 +98,7 @@ sub getAuthor {
 #------------------------------------------
 sub getContactInfo {
 	# ...
-	# Return the value of the contact member
+	# Return a ref to an array containing contact information
 	# ---
 	my $this = shift;
 	return $this->{contact};
@@ -142,12 +142,15 @@ sub getXMLElement {
 		text      => $this -> getAuthor()
 	);
 	$element = $this -> __addElement(\%initAuth);
-	my %initCont = (
-		parent    => $element,
-		childName => 'contact',
-		text      => $this -> getContactInfo()
-	);
-	$element = $this -> __addElement(\%initCont);
+	my @contacts = @{$this -> getContactInfo()};
+	for my $cont (@contacts) {
+		my %initCont = (
+			parent    => $element,
+			childName => 'contact',
+		    text      => $cont
+	    );
+	    $element = $this -> __addElement(\%initCont);
+	}
 	my %initSpec = (
 		parent    => $element,
 		childName => 'specification',
@@ -194,6 +197,10 @@ sub setContactInfo {
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;
+	}
+	if (ref($contact) ne 'ARRAY') {
+		my @contacts = ($contact);
+		$contact = \@contacts;
 	}
 	$this->{contact} = $contact;
 	return $this;
@@ -249,6 +256,34 @@ sub __isInitConsistent {
 	my $this = shift;
 	my $init = shift;
 	my $kiwi = $this->{kiwi};
+	if (! $init->{author} ) {
+		my $msg = 'KIWIXMLDescriptionData: no "author" specified in '
+			. 'initialization structure.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $init->{contact} ) {
+		my $msg = 'KIWIXMLDescriptionData: no "contact" specified in '
+			. 'initialization structure.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (ref($init->{contact}) ne 'ARRAY') {
+		my $msg = 'KIWIXMLDescriptionData: expecting array ref as value '
+			. 'for "contact" argument.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $init->{specification} ) {
+		my $msg = 'KIWIXMLDescriptionData: no "specification" given in '
+			. 'initialization structure.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
 	if (! $init->{type} ) {
 		my $msg = 'KIWIXMLDescriptionData: no "type" specified in '
 			. 'initialization structure.';

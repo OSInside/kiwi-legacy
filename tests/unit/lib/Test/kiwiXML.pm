@@ -3536,7 +3536,7 @@ sub test_addRepositoriesWrongArgs {
 	);
 	my $res = $xml -> addRepositories('opensuse:///', 'profA');
 	my $expected = 'addRepositories: expecting array ref for '
-		. 'XMLRepositoryData array as first argument';
+		. 'KIWIXMLRepositoryData array as first argument';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4940,7 +4940,8 @@ sub test_getDescriptionInfo {
 	my $author = $descrpObj -> getAuthor();
 	$this -> assert_str_equals('Robert Schweikert', $author);
 	my $contact = $descrpObj -> getContactInfo();
-	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	my @expectCont = ('rjschwei@suse.com', 'rschweikert@suse.com');
+	$this -> assert_array_equal(\@expectCont, $contact);
 	my $spec = $descrpObj -> getSpecificationDescript();
 	my $expected = 'Verify proper handling of description in XML obj';
 	$this -> assert_str_equals($expected, $spec);
@@ -9380,11 +9381,12 @@ sub test_setDescriptionInfo {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
 	);
+	my @contacts = ('rjschwei@suse.com');
 	my %init = (
-				author        => 'Robert Schweikert',
-				contact       => 'rjschwei@suse.com',
-				specification => 'test set method',
-				type          => 'system'
+	    author        => 'Robert Schweikert',
+		contact       => \@contacts,
+		specification => 'test set method',
+		type          => 'system'
 	);
 	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi, \%init);
 	$xml = $xml -> setDescriptionInfo($descriptObj);
@@ -9399,7 +9401,7 @@ sub test_setDescriptionInfo {
 	my $author = $descrpObj -> getAuthor();
 	$this -> assert_str_equals('Robert Schweikert', $author);
 	my $contact = $descrpObj -> getContactInfo();
-	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	$this -> assert_array_equal(\@contacts, $contact);
 	my $spec = $descrpObj -> getSpecificationDescript();
 	$this -> assert_str_equals('test set method', $spec);
 	my $type = $descrpObj -> getType();
@@ -9443,7 +9445,8 @@ sub test_setDescriptionInfoImproperArg {
 	my $author = $descrpObj -> getAuthor();
 	$this -> assert_str_equals('Robert Schweikert', $author);
 	my $contact = $descrpObj -> getContactInfo();
-	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	my @expectCont = ('rjschwei@suse.com', 'rschweikert@suse.com');
+	$this -> assert_array_equal(\@expectCont, $contact);
 	my $spec = $descrpObj -> getSpecificationDescript();
 	$expected = 'Verify proper handling of description in XML obj';
 	$this -> assert_str_equals($expected, $spec);
@@ -9487,7 +9490,8 @@ sub test_setDescriptionInfoNoArg {
 	my $author = $descrpObj -> getAuthor();
 	$this -> assert_str_equals('Robert Schweikert', $author);
 	my $contact = $descrpObj -> getContactInfo();
-	$this -> assert_str_equals('rjschwei@suse.com', $contact);
+	my @expectCont = ('rjschwei@suse.com', 'rschweikert@suse.com');
+	$this -> assert_array_equal(\@expectCont, $contact);
 	my $spec = $descrpObj -> getSpecificationDescript();
 	$expected = 'Verify proper handling of description in XML obj';
 	$this -> assert_str_equals($expected, $spec);
