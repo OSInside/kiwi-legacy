@@ -36,7 +36,9 @@
 				<oem-systemsize>2048</oem-systemsize>
 				<oem-swap>true</oem-swap>
 			</oemconfig>
-			<machine domain="dom0"/>
+			<machine domain="dom0">
+				<vmdisk controller="scsi" id="0"/>
+			</machine>
 		</type>
 	</preferences>
 	<preferences profiles="vmxFlavour">

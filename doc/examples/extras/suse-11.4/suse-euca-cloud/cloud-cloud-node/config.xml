@@ -16,7 +16,9 @@
 				<oem-swap>true</oem-swap>
 				<oem-swapsize>1024</oem-swapsize>
 			</oemconfig>
-			<machine domain="dom0"/>
+			<machine domain="dom0">
+				<vmdisk controller="scsi" id="0"/>
+			</machine>
 		</type>
 		<version>1.1.0</version>
 		<packagemanager>zypper</packagemanager>
