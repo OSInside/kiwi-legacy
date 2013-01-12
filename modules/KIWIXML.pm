@@ -88,7 +88,7 @@ sub new {
 	# specific object for this data. The provided object in
 	# turn has get and set methods to access the data.
 	#
-	# imageConfig data structure
+	# internal data structure
 	#
 	# this = {
 	#     availableProfiles = ('',....)
@@ -101,106 +101,6 @@ sub new {
 	#         systemdisk = KIWIXMLSystemdiskData
 	#         type       = KIWIXMLTypeData
 	#     }
-	#     imageConfig = {
-	#       description = KIWIXMLDescriptionData,
-	#       productSettings = {
-	#           dudArches      = ('',...)
-	#           reqArches      = ('',...)
-	#           options        = KIWIXMLProductOptionsData,
-	#           architectures  = (KIWIXMLProductArchitectureData,... ),
-	#           dudInstSysPkgs = (KIWIXMLProductPackageData,... ),
-	#           dudModulePkgs  = (KIWIXMLProductPackageData,... ),
-	#           dudPkgs        = (KIWIXMLProductPackageData,... ),
-	#           instRepos      = (KIWIXMLInstRepositoryData,... ),
-	#           metaChroots    = (KIWIXMLProductMetaChrootData,...),
-	#           metaFiles      = (KIWIXMLProductMetaFileData,...),
-	#           metaPkgs       = (KIWIXMLProductPackageData,... ),
-	#           prodPkgs       = (KIWIXMLProductPackageData,...)
-	#       }
-	#       <profName>[+] = {
-	#           installOpt      = '',
-	#           archives        = ('',...),
-	#           bootArchives    = ('',...),
-	#           bootDelPkgs     = (KIWIXMLPackageData, ...),
-	#           bootPkgs        = (KIWIXMLPackageData, ...),
-	#           bootPkgsCollect = (KIWIXMLPackageCollectData,...),
-	#           bootStrapPckgs  = (KIWIXMLPackageData, ...),
-	#           delPkgs         = (KIWIXMLPackageData, ...),
-	#           drivers         = (KIWIXMLDriverData, ...),
-	#           ignorePkgs      = (KIWIXMLPackageData, ...),
-	#           keepLibs        = (KIWIXMLStripData,...),
-	#           keepTools       = (KIWIXMLStripData,...),
-	#           pkgs            = (KIWIXMLPackageData, ...),
-	#           pkgsCollect     = (KIWIXMLPackageCollectData,...),
-	#           products        = (KIWIXMLPackageProductData,...),
-	#           stripDelete     = (KIWIXMLStripData,...),
-	#           <archname>[+] {
-	#               archives        = ('',...),
-	#               bootArchives    = ('',...),
-	#               bootDelPkgs     = (KIWIXMLPackageData, ...),
-	#               bootPkgs        = (KIWIXMLPackageData, ...),
-	#               bootPkgsCollect = (KIWIXMLPackageCollectData,...),
-	#               bootStrapPckgs  = (KIWIXMLPackageData, ...),
-	#               delPkgs         = (KIWIXMLPackageData, ...),
-	#               drivers         = (KIWIXMLDriverData, ...),
-	#               ignorePkgs      = (KIWIXMLPackageData, ...),
-	#               keepLibs        = (KIWIXMLStripData,...),
-	#               keepTools       = (KIWIXMLStripData,...),
-	#               pkgs            = (KIWIXMLPackageData, ...),
-	#               pkgsCollect     = (KIWIXMLPackageCollectData,...),
-	#               products        = (KIWIXMLPackageProductData,...),
-	#               stripDelete     = (KIWIXMLStripData,...),
-	#          }
-	#          preferences = {
-	#              SEE: KIWIXMLPreferenceData.pm
-	#              types {
-	#                  defaultType = '',
-	#                  <typename>[+] {
-	#                      ec2config  = KIWIXMLEC2ConfigData,
-	#                      machine    = KIWIXMLVMachineData,
-	#                      oemconfig  = KIWIXMLOEMConfigData,
-	#                      pxedeploy  = KIWIXMLPXEDeployData,
-	#                      split      = KIWIXMLSplitData,
-	#                      systemdisk = KIWIXMLSystemdiskData
-	#                      type       = KIWIXMLTypeData
-	#                  }
-	#              }
-	#          }
-	#          profInfo = KIWIXMLProfileData
-	#          }
-	#          repoData = (KIWIXMLRepositoryData,...)
-	#          }
-	#          <typename>[+] {
-	#              archives = ('',....),
-	#              <archname>[+] {
-	#                  archives        = ('',...),
-	#                  bootArchives    = ('',...),
-	#                  bootDelPkgs     = (KIWIXMLPackageData,...),
-	#                  bootPkgs        = (KIWIXMLPackageData,...),
-	#                  bootPkgsCollect = (KIWIXMLPackageCollectData,...),
-	#                  drivers         = (KIWIXMLDriverData),
-	#                  ignorePkgs      = (KIWIXMLPackageData,...),
-	#                  pkgs            = (KIWIXMLPackageData,...),
-	#                  pkgsCollect     = (KIWIXMLPackageCollectData),
-	#                  products        = (KIWIXMLPackageProductData,...),
-	#              }
-	#              bootArchives    = ('',...),
-	#              bootDelPkgs     = (KIWIXMLPackageData,...),
-	#              bootPkgs        = (KIWIXMLPackageData,...),
-	#              bootPkgsCollect = (KIWIXMLPackageCollectData,...),
-	#              drivers         = (KIWIXMLPackageCollectData,...),
-	#              ignorePkgs      = (KIWIXMLPackageData,...),
-	#              pkgs            = (KIWIXMLPackageData,...),
-	#              pkgsCollect     = (KIWIXMLPackageCollectData,...),
-	#              products        = (KIWIXMLPackageCollectData,...),
-	#          }
-	#       }
-	#       users {
-	#           <username>[+] {
-	#               SEE: KIWIXMLUserData.pm
-	#           }
-	#       }
-	#     }
 	#     selectedType = {
 	#         ec2config  = KIWIXMLEC2ConfigData,
 	#         machine    = KIWIXMLVMachineData,
@@ -209,6 +109,127 @@ sub new {
 	#         split      = KIWIXMLSplitData,
 	#         systemdisk = KIWIXMLSystemdiskData
 	#         type       = KIWIXMLTypeData
+	#     }
+	#     imageConfig = {
+	#         description = KIWIXMLDescriptionData,
+	#         productSettings = {
+	#             dudArches      = ('',...)
+	#             reqArches      = ('',...)
+	#             options        = KIWIXMLProductOptionsData,
+	#             architectures  = (KIWIXMLProductArchitectureData,... ),
+	#             dudInstSysPkgs = (KIWIXMLProductPackageData,... ),
+	#             dudModulePkgs  = (KIWIXMLProductPackageData,... ),
+	#             dudPkgs        = (KIWIXMLProductPackageData,... ),
+	#             instRepos      = (KIWIXMLInstRepositoryData,... ),
+	#             metaChroots    = (KIWIXMLProductMetaChrootData,...),
+	#             metaFiles      = (KIWIXMLProductMetaFileData,...),
+	#             metaPkgs       = (KIWIXMLProductPackageData,... ),
+	#             prodPkgs       = (KIWIXMLProductPackageData,...)
+	#         }
+	#         users {
+	#             <username>[+] {
+	#                 userid        = ''
+	#                 name          = ''
+	#                 passwd        = ''
+	#                 passwdformat  = ''
+	#                 group         = ''
+	#                 realname      = ''
+	#                 groupid       = ''
+	#                 shell         = ''
+	#                 home          = ''
+	#             }
+	#         }
+	#         <profName>[+] = {
+	#             installOpt      = '',
+	#             archives        = ('',...),
+	#             bootArchives    = ('',...),
+	#             profInfo        = KIWIXMLProfileData
+	#             repoData        = (KIWIXMLRepositoryData,...)
+	#             bootDelPkgs     = (KIWIXMLPackageData, ...),
+	#             bootPkgs        = (KIWIXMLPackageData, ...),
+	#             bootPkgsCollect = (KIWIXMLPackageCollectData,...),
+	#             bootStrapPckgs  = (KIWIXMLPackageData, ...),
+	#             delPkgs         = (KIWIXMLPackageData, ...),
+	#             drivers         = (KIWIXMLDriverData, ...),
+	#             ignorePkgs      = (KIWIXMLPackageData, ...),
+	#             keepLibs        = (KIWIXMLStripData,...),
+	#             keepTools       = (KIWIXMLStripData,...),
+	#             pkgs            = (KIWIXMLPackageData, ...),
+	#             pkgsCollect     = (KIWIXMLPackageCollectData,...),
+	#             products        = (KIWIXMLPackageProductData,...),
+	#             stripDelete     = (KIWIXMLStripData,...),
+	#             <archname>[+] {
+	#                 archives        = ('',...),
+	#                 bootArchives    = ('',...),
+	#                 bootDelPkgs     = (KIWIXMLPackageData, ...),
+	#                 bootPkgs        = (KIWIXMLPackageData, ...),
+	#                 bootPkgsCollect = (KIWIXMLPackageCollectData,...),
+	#                 bootStrapPckgs  = (KIWIXMLPackageData, ...),
+	#                 delPkgs         = (KIWIXMLPackageData, ...),
+	#                 drivers         = (KIWIXMLDriverData, ...),
+	#                 ignorePkgs      = (KIWIXMLPackageData, ...),
+	#                 keepLibs        = (KIWIXMLStripData,...),
+	#                 keepTools       = (KIWIXMLStripData,...),
+	#                 pkgs            = (KIWIXMLPackageData, ...),
+	#                 pkgsCollect     = (KIWIXMLPackageCollectData,...),
+	#                 products        = (KIWIXMLPackageProductData,...),
+	#                 stripDelete     = (KIWIXMLStripData,...),
+	#            }
+	#            preferences = {
+	#                bootloader_theme     = ''
+	#                bootsplash_theme     = ''
+	#                defaultdestination   = ''
+	#                defaultprebuilt      = ''
+	#                defaultroot          = ''
+	#                hwclock              = ''
+	#                keymap               = ''
+	#                locale               = ''
+	#                packagemanager       = ''
+	#                rpm_check_signatures = ''
+	#                rpm_excludedocs      = ''
+	#                rpm_force            = ''
+	#                showlicense          = ''
+	#                timezone             = ''
+	#                types                = ''
+	#                version
+	#                types {
+	#                    defaultType = '',
+	#                    <typename>[+] {
+	#                        ec2config  = KIWIXMLEC2ConfigData,
+	#                        machine    = KIWIXMLVMachineData,
+	#                        oemconfig  = KIWIXMLOEMConfigData,
+	#                        pxedeploy  = KIWIXMLPXEDeployData,
+	#                        split      = KIWIXMLSplitData,
+	#                        systemdisk = KIWIXMLSystemdiskData
+	#                        type       = KIWIXMLTypeData
+	#                    }
+	#                }
+	#            }
+	#            <typename>[+] {
+	#                archives = ('',....),
+	#                <archname>[+] {
+	#                    archives        = ('',...),
+	#                    bootArchives    = ('',...),
+	#                    bootDelPkgs     = (KIWIXMLPackageData,...),
+	#                    bootPkgs        = (KIWIXMLPackageData,...),
+	#                    bootPkgsCollect = (KIWIXMLPackageCollectData,...),
+	#                    drivers         = (KIWIXMLDriverData),
+	#                    ignorePkgs      = (KIWIXMLPackageData,...),
+	#                    pkgs            = (KIWIXMLPackageData,...),
+	#                    pkgsCollect     = (KIWIXMLPackageCollectData),
+	#                    products        = (KIWIXMLPackageProductData,...),
+	#                }
+	#                bootArchives    = ('',...),
+	#                bootDelPkgs     = (KIWIXMLPackageData,...),
+	#                bootPkgs        = (KIWIXMLPackageData,...),
+	#                bootPkgsCollect = (KIWIXMLPackageCollectData,...),
+	#                drivers         = (KIWIXMLPackageCollectData,...),
+	#                ignorePkgs      = (KIWIXMLPackageData,...),
+	#                pkgs            = (KIWIXMLPackageData,...),
+	#                pkgsCollect     = (KIWIXMLPackageCollectData,...),
+	#                products        = (KIWIXMLPackageCollectData,...),
+	#            }
+	#         }
 	#     }
 	# }
 	# ---
