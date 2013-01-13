@@ -3666,9 +3666,7 @@ virtual machine when running the image.</db:para>
           <zeroOrMore>
             <ref name="k.vmconfig-entry"/>
           </zeroOrMore>
-          <optional>
-            <ref name="k.vmdisk"/>
-          </optional>
+          <ref name="k.vmdisk"/>
           <optional>
             <ref name="k.vmdvd"/>
           </optional>
