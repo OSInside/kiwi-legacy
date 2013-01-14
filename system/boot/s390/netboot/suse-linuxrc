@@ -870,6 +870,15 @@ runHook premount
 if ! mountSystem;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
+if [ ! -z "$imageBootDevice" ];then
+	mkdir /boot_tmp && mount $imageBootDevice /boot_tmp
+	cp -a /mnt/boot/* /boot_tmp
+	umount /boot_tmp && rmdir /boot_tmp
+	rm -rf /mnt/boot/*
+	if ! mount $imageBootDevice /mnt/boot;then
+		systemException "Failed to mount boot filesystem" "reboot"
+	fi
+fi
 validateRootTree
 runHook postmount
 
