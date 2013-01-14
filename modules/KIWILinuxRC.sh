@@ -4041,7 +4041,7 @@ function probeNetworkCard {
 	# to support the card and returns the information in
 	# the networkModule variable
 	# ----
-	IFS="%"
+	local IFS="%"
 	local module=""
 	local hwicmd="/usr/sbin/hwinfo"
 	for i in \
@@ -4063,7 +4063,6 @@ function probeNetworkCard {
 			done
 		fi
 	done
-	IFS=$IFS_ORIG
 	networkModule=`echo $networkModule`
 }
 #======================================
@@ -4073,6 +4072,7 @@ function loadNetworkCard {
 	# /.../
 	# load network module found by probeNetworkCard()
 	# ----
+	local IFS
 	local loaded=0
 	probeNetworkCard
 	IFS=":" ; for i in $networkModule;do
@@ -4083,12 +4083,6 @@ function loadNetworkCard {
 			fi
 		fi
 	done
-	IFS=$IFS_ORIG
-	if [ $loaded = 0 ];then
-		systemException \
-			"Network module: Failed to load network module !" \
-		"reboot"
-	fi
 }
 #======================================
 # dhclientImportInfo
@@ -4339,8 +4333,7 @@ function setupNetwork {
 	#======================================
 	# local variable setup
 	#--------------------------------------
-	local IFS="
-	"
+	local IFS
 	local MAC=0
 	local DEV=0
 	local mac_list=0
@@ -4355,21 +4348,14 @@ function setupNetwork {
 	#--------------------------------------
 	export DHCPCD_STARTED
 	#======================================
-	# detect network card(s)
+	# detect iface and HWaddr
 	#--------------------------------------
-	for i in `$hwicmd --netcard`;do
-		IFS=$IFS_ORIG
-		if echo $i | grep -q "HW Address:";then
-			MAC=`echo $i | sed -e s"@HW Address:@@"`
-			MAC=`echo $MAC`
-			mac_list[$index]=$MAC
-			index=$((index + 1))
-		fi
-		if echo $i | grep -q "Device File:";then
-			DEV=`echo $i | sed -e s"@Device File:@@"`
-			DEV=`echo $DEV`
-			dev_list[$index]=$DEV
-		fi
+	for i in $(ifconfig -a | grep HWaddr | tr -s " " "_");do
+		DEV=$(echo $i | cut -f1 -d _)
+		MAC=$(echo $i | cut -f5 -d _)
+		mac_list[$index]=$MAC
+		dev_list[$index]=$DEV
+		index=$((index + 1))
 	done
 	if [ -z $BOOTIF ];then
 		# /.../
