@@ -2920,6 +2920,7 @@ function updateOtherDeviceFstab {
 	local field=0
 	local count=0
 	local device
+	local diskByID
 	local IFS=","
 	if [ -z "$sysroot" ];then
 		sysroot=/mnt
@@ -2950,7 +2951,8 @@ function updateOtherDeviceFstab {
 				if [ ! -d $sysroot/$partMount ];then
 					mkdir -p $sysroot/$partMount
 				fi
-				echo "$device $partMount $FSTYPE defaults 0 0" >> $nfstab
+				diskByID=$(getDiskID $device)
+				echo "$diskByID $partMount $FSTYPE defaults 0 0" >> $nfstab
 			fi
 		fi
 	done
