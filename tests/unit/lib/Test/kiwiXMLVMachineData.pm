@@ -226,27 +226,6 @@ sub test_createNICConfigUnsupportedData {
 }
 
 #==========================================
-# test_ctor
-#------------------------------------------
-sub test_ctor {
-	# ...
-	# Test the VMachineData constructor
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($machDataObj);
-	return;
-}
-
-#==========================================
 # test_ctor_duplicateIfaceEntry
 #------------------------------------------
 sub test_ctor_duplicateIfaceEntry  {
@@ -256,6 +235,13 @@ sub test_ctor_duplicateIfaceEntry  {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
+	my %diskData = (
+		controller => 'scsi',
+		device     => 'sda',
+		disktype   => 'hdd',
+		id         => '1'
+	);
+	my %disks = ( system => \%diskData );
 	my %nicData1 = ( driver    => 'e1000',
 					interface => 'eth0',
 					mac       => 'FE:C0:B1:96:64:AC'
@@ -268,7 +254,10 @@ sub test_ctor_duplicateIfaceEntry  {
 	my %nics = ( 1 => \%nicData1,
 				2 => \%nicData2
 			);
-	my %init = ( vmnics => \%nics );
+	my %init = (
+		vmdisks => \%disks,
+		vmnics  => \%nics
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Duplicate interface device ID definition, ambiguous '
@@ -315,7 +304,17 @@ sub test_ctor_initImproperArch {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( arch => 's390' );
+	my %diskData = (
+		controller => 'scsi',
+		device     => 'sda',
+		disktype   => 'hdd',
+		id         => '1'
+	);
+	my %disks = ( system => \%diskData );
+	my %init = (
+		arch    => 's390',
+		vmdisks => \%disks
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Unsupported VM architecture specified 's390'";
@@ -339,9 +338,18 @@ sub test_ctor_initImproperConfEntry {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( arch               => 'x86_64',
-				 vmconfig_entries   => 'foo'
-			);
+	my %diskData = (
+		controller => 'scsi',
+		device     => 'sda',
+		disktype   => 'hdd',
+		id         => '1'
+	);
+	my %disks = ( system => \%diskData );
+	my %init = (
+		arch             => 'x86_64',
+		vmconfig_entries => 'foo',
+		vmdisks          => \%disks
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting an array ref as entry of "vmconfig_entries" '
@@ -367,10 +375,11 @@ sub test_ctor_initImproperDisksEntry {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => 'foo'
-			);
+	my %init = (
+		arch               => 'x86_64',
+		'vmconfig_entries' => \@confEntries,
+		vmdisks            => 'foo'
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as entry for "vmdisks" in the '
@@ -396,14 +405,16 @@ sub test_ctor_initImproperDisksHash {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData = ( controller => 'scsi',
-					id         => 1
-				);
+	my %diskData = (
+		controller => 'scsi',
+		id         => 1
+	);
 	my %disks = ( storage => \%diskData );
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => \%disks
-			);
+	my %init = (
+		arch               => 'x86_64',
+		'vmconfig_entries' => \@confEntries,
+		vmdisks            => \%disks
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Initialization data for vmdisks incomplete, must '
@@ -429,15 +440,17 @@ sub test_ctor_initImproperDVDEntry {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData = ( controller => 'scsi',
-					id         => 1
-				);
+	my %diskData = (
+		controller => 'scsi',
+		id         => 1
+	);
 	my %disks = ( system => \%diskData );
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => \%disks,
-				vmdvd              => 'foo'
-			);
+	my %init = (
+		arch               => 'x86_64',
+		'vmconfig_entries' => \@confEntries,
+		vmdisks            => \%disks,
+		vmdvd              => 'foo'
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as entry for "vmdvd" in the '
@@ -464,16 +477,18 @@ sub test_ctor_initImproperDVDHashNoCont {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData    = ( controller => 'scsi',
-						id         => 1
-					);
-	my %disks       = ( system => \%diskData );
-	my %dvd         = ( id => 9 );
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => \%disks,
-				vmdvd              => \%dvd
-			);
+	my %diskData = (
+		controller => 'scsi',
+		id         => 1
+	);
+	my %disks = ( system => \%diskData );
+	my %dvd = ( id => 9 );
+	my %init = (
+		arch               => 'x86_64',
+		'vmconfig_entries' => \@confEntries,
+		vmdisks            => \%disks,
+		vmdvd              => \%dvd
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Initialization data for vmdvd incomplete, must '
@@ -500,16 +515,18 @@ sub test_ctor_initImproperDVDHashNoId {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData    = ( controller => 'scsi',
-						id         => 1
-					);
-	my %disks       = ( system => \%diskData );
-	my %dvd         = ( controller => 'ide' );
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => \%disks,
-				vmdvd              => \%dvd
-			);
+	my %diskData    = (
+		controller => 'scsi',
+		id         => 1
+	);
+	my %disks = ( system => \%diskData );
+	my %dvd   = ( controller => 'ide' );
+	my %init = (
+		arch               => 'x86_64',
+		'vmconfig_entries' => \@confEntries,
+		vmdisks            => \%disks,
+		vmdvd              => \%dvd
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Initialization data for vmdvd incomplete, must '
@@ -535,15 +552,17 @@ sub test_ctor_initImproperNICEntry {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData = ( controller => 'scsi',
-					id         => 1
-				);
+	my %diskData = (
+		controller => 'scsi',
+		id         => 1
+	);
 	my %disks = ( system => \%diskData );
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => \%disks,
-				vmnics             => 'foo'
-			);
+	my %init = (
+		arch               => 'x86_64',
+		'vmconfig_entries' => \@confEntries,
+		vmdisks            => \%disks,
+		vmnics             => 'foo'
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as entry for "vmnics" in the '
@@ -625,20 +644,23 @@ sub test_ctor_initImproperNICID {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData = ( controller => 'scsi',
-					id         => 1
-				);
+	my %diskData = (
+		controller => 'scsi',
+		id         => 1
+	);
 	my %disks = ( system => \%diskData );
-	my %nicData = ( driver    => 'e1000',
-					interface => 'eth9',
-					mac       => 'FE:C0:B1:96:64:AC'
-				);
+	my %nicData = (
+		driver    => 'e1000',
+		interface => 'eth9',
+		mac       => 'FE:C0:B1:96:64:AC'
+	);
 	my %nics = ( 'foo' => \%nicData );
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => \%disks,
-				vmnics             => \%nics
-			);
+	my %init = (
+		arch               => 'x86_64',
+		'vmconfig_entries' => \@confEntries,
+		vmdisks            => \%disks,
+		vmnics             => \%nics
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting integer as key for "vmnics" initialization.';
@@ -664,9 +686,9 @@ sub test_ctor_initUnsupportedData {
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
 	my %init = (
-				arch               => 'x86_64',
-				vmconfig_entries   => \@confEntries,
-				disks              => 'foo'
+	    arch               => 'x86_64',
+		vmconfig_entries   => \@confEntries,
+		disks              => 'foo'
 	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
@@ -693,15 +715,17 @@ sub test_ctor_initUnsupportedDataDisk {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData = ( controller => 'scsi',
-					id         => 1,
-					sectors    => 30000
-				);
+	my %diskData = (
+		controller => 'scsi',
+		id         => 1,
+		sectors    => 30000
+	);
 	my %disks = ( system => \%diskData );
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => \%disks
-			);
+	my %init = (
+		arch               => 'x86_64',
+		'vmconfig_entries' => \@confEntries,
+		vmdisks            => \%disks
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Unsupported option in initialization structure for '
@@ -727,19 +751,22 @@ sub test_ctor_initUnsupportedDataDvd {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData    = ( controller => 'scsi',
-						id         => 1
-					);
-	my %disks       = ( system => \%diskData );
-	my %dvd         = ( controller => 'ide',
-						id         => 2,
-						opticont   => 'specialdev'
-					);
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => \%disks,
-				vmdvd              => \%dvd
-			);
+	my %diskData    = (
+		controller => 'scsi',
+		id         => 1
+	);
+	my %disks = ( system => \%diskData );
+	my %dvd   = (
+		controller => 'ide',
+		id         => 2,
+		opticont   => 'specialdev'
+	);
+	my %init = (
+		arch               => 'x86_64',
+		'vmconfig_entries' => \@confEntries,
+		vmdisks            => \%disks,
+		vmdvd              => \%dvd
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Unsupported option in initialization structure for '
@@ -765,31 +792,37 @@ sub test_ctor_initUnsupportedDataNic {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData    = ( controller => 'scsi',
-						id         => 1
-					);
-	my %disks       = ( system => \%diskData );
-	my %dvd         = ( controller => 'ide',
-						id         => 2
-					);
-	my %nicData1 = ( driver    => 'e1000',
-					interface => 'eth0',
-					mac       => 'FE:C0:B1:96:64:AC'
-				);
-	my %nicData2 = ( driver    => 'e1000',
-					firmware  => 'broadcom',
-					interface => 'eth1',
-					mac       => 'FE:C0:B1:96:64:AD'
-				);
-	my %nics = ( 1 => \%nicData1,
-				2 => \%nicData2
-			);
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => \%disks,
-				vmdvd              => \%dvd,
-				vmnics             => \%nics
-			);
+	my %diskData    = (
+		controller => 'scsi',
+		id         => 1
+	);
+	my %disks = ( system => \%diskData );
+	my %dvd   = (
+		controller => 'ide',
+		id         => 2
+	);
+	my %nicData1 = (
+		driver    => 'e1000',
+		interface => 'eth0',
+		mac       => 'FE:C0:B1:96:64:AC'
+	);
+	my %nicData2 = (
+		driver    => 'e1000',
+		firmware  => 'broadcom',
+		interface => 'eth1',
+		mac       => 'FE:C0:B1:96:64:AD'
+	);
+	my %nics = (
+		1 => \%nicData1,
+		2 => \%nicData2
+	);
+	my %init = (
+		arch               => 'x86_64',
+		'vmconfig_entries' => \@confEntries,
+		vmdisks            => \%disks,
+		vmdvd              => \%dvd,
+		vmnics             => \%nics
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Unsupported option in initialization structure for '
@@ -815,31 +848,37 @@ sub test_ctor_initUnsupportedDataOVFType {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData    = ( controller => 'scsi',
-						id         => 1
-					);
-	my %disks       = ( system => \%diskData );
-	my %dvd         = ( controller => 'ide',
-						id         => 2
-					);
-	my %nicData1 = ( driver    => 'e1000',
-					interface => 'eth0',
-					mac       => 'FE:C0:B1:96:64:AC'
-				);
-	my %nicData2 = ( driver    => 'e1000',
-					interface => 'eth1',
-					mac       => 'FE:C0:B1:96:64:AD'
-				);
-	my %nics = ( 1 => \%nicData1,
-				2 => \%nicData2
-			);
-	my %init = ( arch               => 'x86_64',
-				ovftype            => 'ibm',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => \%disks,
-				vmdvd              => \%dvd,
-				vmnics             => \%nics
-			);
+	my %diskData    = (
+		controller => 'scsi',
+		id         => 1
+	);
+	my %disks = ( system => \%diskData );
+	my %dvd   = (
+		controller => 'ide',
+		id         => 2
+	);
+	my %nicData1 = (
+		driver    => 'e1000',
+		interface => 'eth0',
+		mac       => 'FE:C0:B1:96:64:AC'
+	);
+	my %nicData2 = (
+		driver    => 'e1000',
+		interface => 'eth1',
+		mac       => 'FE:C0:B1:96:64:AD'
+	);
+	my %nics = (
+		1 => \%nicData1,
+		2 => \%nicData2
+	);
+	my %init = (
+		arch               => 'x86_64',
+		ovftype            => 'ibm',
+		'vmconfig_entries' => \@confEntries,
+		vmdisks            => \%disks,
+		vmdvd              => \%dvd,
+		vmnics             => \%nics
+	);
 	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Initialization data for ovftype contains unsupported '
@@ -855,48 +894,25 @@ sub test_ctor_initUnsupportedDataOVFType {
 }
 
 #==========================================
-# test_ctor_withInit
+# test_ctor_noArg
 #------------------------------------------
-sub test_ctor_withInit {
+sub test_ctor_noArg {
 	# ...
-	# Test the VMachineData constructor with an initialization hash
+	# Test the VMachineData constructor
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my @confEntries = qw /foo=bar cd=none/;
-	my %diskData    = ( controller => 'scsi',
-						id         => 1
-					);
-	my %disks       = ( system => \%diskData );
-	my %dvd         = ( controller => 'ide',
-						id         => 2
-					);
-	my %nicData1 = ( driver    => 'e1000',
-					interface => 'eth0',
-					mac       => 'FE:C0:B1:96:64:AC'
-				);
-	my %nicData2 = ( driver    => 'e1000',
-					interface => 'eth1',
-					mac       => 'FE:C0:B1:96:64:AD'
-				);
-	my %nics = ( 1 => \%nicData1,
-				2 => \%nicData2
-			);
-	my %init = ( arch               => 'x86_64',
-				'vmconfig_entries' => \@confEntries,
-				vmdisks            => \%disks,
-				vmdvd              => \%dvd,
-				vmnics             => \%nics
-			);
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
+	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
+	my $expected = 'KIWIXMLVMachineData: must be constructed with a '
+		. 'keyword hash as argument';
+	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
+	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($machDataObj);
+	$this -> assert_null($machDataObj);
 	return;
 }
 
@@ -1674,7 +1690,7 @@ sub test_setArch {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setArch('ix86');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1702,7 +1718,7 @@ sub test_setArchInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	my $res = $machDataObj -> setArch('s390');
 	my $msg = $kiwi -> getMessage();
 	my $expected = "setArch: unsupported architecture 's390' provided, "
@@ -1720,7 +1736,7 @@ sub test_setArchInvalidArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($arch);
+	$this -> assert_str_equals('x86_64',$arch);
 	return;
 }
 
@@ -1764,7 +1780,7 @@ sub test_setConfigEntries {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	my @config = qw \salsa=hot foo=bar\;
 	$machDataObj = $machDataObj -> setConfigEntries(\@config);
 	my $msg = $kiwi -> getMessage();
@@ -1793,7 +1809,7 @@ sub test_setConfigEntriesInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	my $res = $machDataObj -> setConfigEntries('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setConfigEntries: expecting ARRAY ref as argument, '
@@ -1811,7 +1827,8 @@ sub test_setConfigEntriesInvalidArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($config);
+	my @expected = qw /foo=bar cd=none/;
+	$this -> assert_array_equal(\@expected, $config);
 	return;
 }
 
@@ -1856,7 +1873,7 @@ sub test_setDVDController {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setDVDController('scsi');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1915,7 +1932,7 @@ sub test_setDVDID {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setDVDID('4');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1973,7 +1990,7 @@ sub test_setDesiredCPUCnt {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setDesiredCPUCnt('5');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2032,7 +2049,7 @@ sub test_setDesiredMemory {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setDesiredMemory('2048');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2091,7 +2108,7 @@ sub test_setDomain {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setDomain('dom0');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2149,7 +2166,7 @@ sub test_setGuestOS {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setGuestOS('SLES');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2208,7 +2225,7 @@ sub test_setHardwareVersion {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setHardwareVersion('9');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2267,7 +2284,7 @@ sub test_setMaxCPUCnt {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setMaxCPUCnt('20');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2325,7 +2342,7 @@ sub test_setMaxMemory {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setMaxMemory('8192');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2383,7 +2400,7 @@ sub test_setMemory {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setMemory('1024');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2441,7 +2458,7 @@ sub test_setMinCPUCnt {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setMinCPUCnt('3');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2499,7 +2516,7 @@ sub test_setMinMemory {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setMinMemory('512');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2608,7 +2625,13 @@ sub test_setNICDriverNoConfig {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my %diskData    = (
+		controller => 'scsi',
+		id         => 1
+	);
+	my %disks = ( system => \%diskData );
+	my %init = ( vmdisks => \%disks );
+	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $res = $machDataObj -> setNICDriver(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setNICDriver: no NICS configured, call createNICConfig '
@@ -2712,7 +2735,13 @@ sub test_setNICInterfaceNoConfig {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my %diskData    = (
+		controller => 'scsi',
+		id         => 1
+	);
+	my %disks = ( system => \%diskData );
+	my %init = ( vmdisks => \%disks );
+	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $res = $machDataObj -> setNICInterface(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setNICInterface: no NICS configured, call createNICConfig '
@@ -2817,7 +2846,13 @@ sub test_setNICMACNoConfig {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my %diskData    = (
+		controller => 'scsi',
+		id         => 1
+	);
+	my %disks = ( system => \%diskData );
+	my %init = ( vmdisks => \%disks );
+	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $res = $machDataObj -> setNICMAC(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setNICMAC: no NICS configured, call createNICConfig '
@@ -2922,7 +2957,13 @@ sub test_setNICModeNoConfig {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my %diskData    = (
+		controller => 'scsi',
+		id         => 1
+	);
+	my %disks = ( system => \%diskData );
+	my %init = ( vmdisks => \%disks );
+	my $machDataObj = KIWIXMLVMachineData -> new($kiwi, \%init);
 	my $res = $machDataObj -> setNICMode(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setNICMode: no NICS configured, call createNICConfig '
@@ -2976,7 +3017,7 @@ sub test_setNumCPUs {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setNumCPUs('4');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3033,7 +3074,7 @@ sub test_setOVFType {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setOVFType('xen');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3123,7 +3164,7 @@ sub test_setSystemDiskController {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setSystemDiskController('scsi');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3182,7 +3223,7 @@ sub test_setSystemDiskDevice {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setSystemDiskDevice('sdb');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3241,7 +3282,7 @@ sub test_setSystemDiskType {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setSystemDiskType('hdd');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3300,7 +3341,7 @@ sub test_setSystemDiskID {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $machDataObj = KIWIXMLVMachineData -> new($kiwi);
+	my $machDataObj = $this -> __getVMachineObj();
 	$machDataObj = $machDataObj -> setSystemDiskID('3');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
