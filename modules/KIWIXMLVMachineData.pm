@@ -95,10 +95,27 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
+	if (! $this -> __hasInitArg($init) ) {
+		return;
+	}
 	my %keywords = map { ($_ => 1) } qw(
-		HWversion arch des_cpu des_memory domain guestOS max_cpu max_memory
-		memory min_cpu min_memory ncpus ovftype vmconfig_entries vmdisks
-		vmdvd vmnics
+		HWversion
+		arch
+		des_cpu
+		des_memory
+		domain
+		guestOS
+		max_cpu
+		max_memory
+		memory
+		min_cpu
+		min_memory
+		ncpus
+		ovftype
+		vmconfig_entries
+		vmdisks
+		vmdvd
+		vmnics
 	);
 	$this->{supportedKeywords} = \%keywords;
 	if (! $this -> __isInitHashRef($init) ) {
@@ -107,29 +124,26 @@ sub new {
 	if (! $this -> __areKeywordArgsValid($init) ) {
 		return;
 	}
-	if ($init) {
-		# Check for unsupported entries
-		if (! $this -> __isInitConsistent($init)) {
-			return;
-		}
-		$this->{HWversion}     = $init->{HWversion};
-		$this->{arch}          = $init->{arch};
-		$this->{desiredCPUCnt} = $init->{des_cpu};
-		$this->{desiredMemory} = $init->{des_memory};
-		$this->{domain}        = $init->{domain};
-		$this->{guestOS}       = $init->{guestOS};
-		$this->{maxCPUCnt}     = $init->{max_cpu};
-		$this->{maxMemory}     = $init->{max_memory};
-		$this->{memory}        = $init->{memory};
-		$this->{minCPUCnt}     = $init->{min_cpu};
-		$this->{minMemory}     = $init->{min_memory};
-		$this->{ncpus}         = $init->{ncpus};
-		$this->{ovftype}       = $init->{ovftype};
-		$this->{confEntries}   = $init->{vmconfig_entries};
-		$this->{vmdisks}       = $init->{vmdisks};
-		$this->{vmdvd}         = $init->{vmdvd};
-		$this->{vmnics}        = $init->{vmnics}
+	if (! $this -> __isInitConsistent($init) ) {
+		return;
 	}
+	$this->{HWversion}     = $init->{HWversion};
+	$this->{arch}          = $init->{arch};
+	$this->{desiredCPUCnt} = $init->{des_cpu};
+	$this->{desiredMemory} = $init->{des_memory};
+	$this->{domain}        = $init->{domain};
+	$this->{guestOS}       = $init->{guestOS};
+	$this->{maxCPUCnt}     = $init->{max_cpu};
+	$this->{maxMemory}     = $init->{max_memory};
+	$this->{memory}        = $init->{memory};
+	$this->{minCPUCnt}     = $init->{min_cpu};
+	$this->{minMemory}     = $init->{min_memory};
+	$this->{ncpus}         = $init->{ncpus};
+	$this->{ovftype}       = $init->{ovftype};
+	$this->{confEntries}   = $init->{vmconfig_entries};
+	$this->{vmdisks}       = $init->{vmdisks};
+	$this->{vmdvd}         = $init->{vmdvd};
+	$this->{vmnics}        = $init->{vmnics};
 	if (! $this->{HWversion} ) {
 		$this->{HWversion} = '4';
 	}
@@ -1535,10 +1549,8 @@ sub __isInitConsistent {
 			return;
 		}
 	}
-	if ($init->{vmdisks}) {
-		if (! $this -> __isDiskInitValid($init->{vmdisks})) {
-			return;
-		}
+	if (! $this -> __isDiskInitValid($init->{vmdisks})) {
+		return;
 	}
 	if ($init->{vmdvd}) {
 		if (! $this -> __isDVDInitValid($init->{vmdvd})) {
