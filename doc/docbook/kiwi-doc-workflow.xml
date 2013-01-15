@@ -657,6 +657,64 @@ tar -cf kiwi-hooks.tgz kiwi-hooks/
             </formalpara>
         </listitem>
 	</itemizedlist>
+
+	<para>The execution of hooks can be globaly deactivated by passing the
+    following variable to the kernel commandline:
+<screen>
+KIWI_FORBID_HOOKS=1
+</screen>
+    In addition to the hook script itself it's also possible to run a
+    post command after the hook script was called. This allows to run
+    commands tied to a hook script without changing the initrd and thus
+    provides a certain flexibility when writing the hook. The post command
+    execution is based on variables one can pass to the kernel commandline
+    to extend an existing hook script. There are the following rules for
+    the processing of these information
+    <itemizedlist>
+        <listitem>
+            <formalpara>
+            <title>The hook must activate the command post processing</title>
+            <para>
+            Post hook commands are only processed if the corresponding hook
+            script activates this. The variable the hook script has to set
+            follows the naming schema: KIWI_ALLOW_HOOK_CMD_|HOOKNAME|=1
+			For example:
+<screen>
+KIWI_ALLOW_HOOK_CMD_preHWdetect=1
+</screen>
+            If this is set as part of the preHWdetect.sh hook script code
+			the post command execution is activated
+            </para>
+            </formalpara>
+        </listitem>
+
+        <listitem>
+            <formalpara>
+            <title>KIWI_HOOK_CMD_|HOOKNAME|</title>
+            <para>
+            The variable containing the command to become executed must match
+            the following naming schema. For example:
+<screen>
+KIWI_HOOK_CMD_preHWdetect="ls -l"
+</screen>
+            This would cause the preHWdetect hook to call
+            <command>ls -l</command> at the end of the hook script code
+            </para>
+            </formalpara>
+        </listitem>
+
+        <listitem>
+            <formalpara>
+            <title>KIWI_FORBID_HOOK_CMDS</title>
+            <para>
+            If this variable is set to something non empty the post hook
+            command execution is deactivated however the basic hook script
+            invocation is still active unless KIWI_FORBID_HOOKS is also set
+            </para>
+            </formalpara>
+        </listitem>
+    </itemizedlist>
+	</para>
   </sect1>
 
   <sect1 id="sec.bootcustomization">
