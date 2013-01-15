@@ -5827,12 +5827,40 @@ function searchHardwareMapHardwareAddress {
 # runHook
 #--------------------------------------
 function runHook {
+	#======================================
+	# Check for execution permission
+	#--------------------------------------
+	if [ ! -z "$KIWI_FORBID_HOOKS" ];then
+		Echo "Hook script execution is forbidden by KIWI_FORBID_HOOKS"
+		return
+	fi
+	#======================================
+	# Init custom post hook commands
+	#--------------------------------------
+	# a) switch post command execution off, can be activated by hook script
+	export eval KIWI_ALLOW_HOOK_CMD_$1=0
+	#======================================
+	# Search and execute hook script
+	#--------------------------------------
 	HOOK="/kiwi-hooks/$1.sh"
 	if [ ! -e $HOOK ];then
 		HOOK="/lib/kiwi/hooks/$1.sh"
 	fi
 	if [ -e $HOOK ]; then
 		. $HOOK "$@"
+	fi
+	#======================================
+	# Run custom post hook commands
+	#--------------------------------------
+	# b) check permisson and state of command list
+	if [ ! -z "$KIWI_FORBID_HOOK_CMDS"  ];then
+		Echo "Post-Hook command execution is forbidden by KIWI_FORBID_HOOK_CMDS"
+		return
+	fi
+	eval local call_cmd=\$KIWI_ALLOW_HOOK_CMD_$1
+	if [ "$call_cmd" -eq 1 ]; then
+		eval local call=\$KIWI_HOOK_CMD_$1
+		eval $call
 	fi
 }
 #======================================
