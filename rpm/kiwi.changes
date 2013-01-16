@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jan 16 19:59:06 CET 2013 - ms@suse.de
+
+- fix the automatic alias generation to remove '$' from the
+  name, this allows users to use SMT repos without having to
+  specify an alias in the config.xml file
+
+-------------------------------------------------------------------
 Fri Jan 11 10:41:39 CET 2013 - ms@suse.de
 
 - changed zypper call to use one call to install products, patterns
