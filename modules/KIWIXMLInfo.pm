@@ -30,6 +30,7 @@ use KIWICommandLine;
 use KIWILog;
 use KIWIQX qw (qxx);
 use KIWIXML;
+use KIWIXMLRepositoryData;
 
 #==========================================
 # Exports
@@ -330,7 +331,7 @@ sub __getTree {
 			/^repo-patterns/ && do {
 				if (! $meta) {
 					($meta,$delete,$solfile,$satlist,$solp,$rpat) =
-						$xml->getInstallSize();
+						$xml->getInstallSize_legacy();
 					if (! $meta) {
 						$kiwi -> failed();
 						$this -> __cleanMountPnts($mountDirs);
@@ -357,7 +358,7 @@ sub __getTree {
 			/^patterns/      && do {
 				if (! $meta) {
 					($meta,$delete,$solfile,$satlist,$solp) =
-						$xml->getInstallSize();
+						$xml->getInstallSize_legacy();
 					if (! $meta) {
 						$kiwi -> failed();
 						$this -> __cleanMountPnts($mountDirs);
@@ -382,15 +383,32 @@ sub __getTree {
 			# types
 			#------------------------------------------
 			/^types/         && do {
-				foreach my $t ($xml -> getTypes_legacy()) {
-					my %type = %{$t};
-					my $type = XML::LibXML::Element -> new("type");
-					$type -> setAttribute ("name","$type{type}");
-					$type -> setAttribute ("primary","$type{primary}");
-					if (defined $type{boot}) {
-						$type -> setAttribute ("boot","$type{boot}");
+				# output default or primary built type first
+				my $tData = $xml -> getImageType();
+				my $defTypeName = $tData -> getImageType();
+				my $type = XML::LibXML::Element -> new('type');
+				$type -> setAttribute('name', $defTypeName);
+				$type -> setAttribute('primary', 'true');
+				my $bootLoc = $tData -> getBootImageDescript();
+				if ($bootLoc) {
+					$type -> setAttribute('boot', $bootLoc);
+				}
+				$scan -> appendChild($type);
+				# Handle any remaining types in alpha order
+				my @tNames = @{$xml -> getConfiguredTypeNames()};
+				@tNames = sort @tNames;
+				for my $tName (@tNames) {
+					if ($tName eq $defTypeName) {
+						next;
 					}
-					$scan -> appendChild ($type);
+					$tData = $xml -> getType($tName);
+					$type = XML::LibXML::Element -> new('type');
+					$type -> setAttribute('name', $tName);
+					my $bootLoc = $tData -> getBootImageDescript();
+					if ($bootLoc) {
+						$type -> setAttribute('boot', $bootLoc);
+					}
+					$scan -> appendChild($type);
 				}
 				last SWITCH;
 			};
@@ -398,21 +416,21 @@ sub __getTree {
 			# sources
 			#------------------------------------------
 			/^sources/       && do {
-				my %repos = $xml -> getRepositories_legacy();
-				for my $url (keys %repos) {
-					my $source = XML::LibXML::Element -> new("source");
-					$source -> setAttribute ("path","$url");
-					$source -> setAttribute ("type",$repos{$url}->[0]);
-					if ($repos{$url}->[2]) {
-						$source -> setAttribute ("priority",$repos{$url}->[2]);
+				my @repos = @{$xml -> getRepositories()};
+				for my $repo (@repos) {
+					my $source = XML::LibXML::Element -> new('source');
+					$source -> setAttribute('path', $repo -> getPath());
+					$source -> setAttribute('type', $repo -> getType());
+					my $prio = $repo -> getPriority();
+					if ($prio) {
+						$source -> setAttribute('priority', $prio);
 					}
-					if ($repos{$url}->[3]) {
-						$source -> setAttribute ("username",$repos{$url}->[3]);
+					my ($uname, $pass) = $repo -> getCredentials();
+					if ($uname) {
+						$source -> setAttribute('username', $uname);
+						$source -> setAttribute('password', $pass);
 					}
-					if ($repos{$url}->[4]) {
-						$source -> setAttribute ("password",$repos{$url}->[4]);
-					}
-					$scan -> appendChild ($source);
+					$scan -> appendChild($source);
 				}
 				last SWITCH;
 			};
@@ -422,7 +440,7 @@ sub __getTree {
 			/^size/          && do {
 				if (! $meta) {
 					($meta,$delete,$solfile,$satlist,$solp) =
-						$xml->getInstallSize();
+						$xml->getInstallSize_legacy();
 					if (! $meta) {
 						$kiwi -> failed();
 						$this -> __cleanMountPnts($mountDirs);
@@ -460,7 +478,7 @@ sub __getTree {
 			/^packages/     && do {
 				if (! $meta) {
 					($meta,$delete,$solfile,$satlist,$solp) =
-						$xml->getInstallSize();
+						$xml->getInstallSize_legacy();
 					if (! $meta) {
 						$kiwi -> failed();
 						$this -> __cleanMountPnts($mountDirs);
@@ -488,13 +506,13 @@ sub __getTree {
 				last SWITCH;
 			};
 			/^archives/      && do {
-				my @archives = $xml -> getArchiveList_legacy();
+				my @archives = @{$xml -> getArchives()};
 				if ((scalar @archives) == 0) {
 					$kiwi -> info ("No archives available\n");
 				} else {
-					foreach my $archive (@archives) {
+					for my $archive (@archives) {
 						my $anode = XML::LibXML::Element -> new("archive");
-						$anode -> setAttribute ("name","$archive");
+						$anode -> setAttribute ('name', $archive -> getName());
 						$scan -> appendChild ($anode);
 					}
 				}
@@ -504,16 +522,16 @@ sub __getTree {
 			# profiles
 			#------------------------------------------
 			/^profiles/      && do {
-				my @profiles = $xml -> getProfiles_legacy ();
+				my @profiles = @{$xml -> getProfiles()};
 				if ((scalar @profiles) == 0) {
 					$kiwi -> info ("No profiles available\n");
 				} else {
-					foreach my $profile (@profiles) {
-						my $name = $profile -> {name};
-						my $desc = $profile -> {description};
+					for my $profile (@profiles) {
+						my $name = $profile -> getName();
+						my $desc = $profile -> getDescription();
 						my $pnode = XML::LibXML::Element -> new("profile");
-						$pnode -> setAttribute ("name","$name");
-						$pnode -> setAttribute ("description","$desc");
+						$pnode -> setAttribute ('name', "$name");
+						$pnode -> setAttribute ('description', "$desc");
 						$scan -> appendChild ($pnode);
 					}
 				}
@@ -523,10 +541,10 @@ sub __getTree {
 			# version
 			#------------------------------------------
 			/^version/       && do {
-				my $version = $xml -> getImageVersion();
+				my $version = $xml -> getPreferences() -> getVersion();
 				my $appname = $xml -> getImageName();
 				my $vnode = XML::LibXML::Element -> new("image");
-				$vnode -> setAttribute ("version","$version");
+				$vnode -> setAttribute ('version', $version);
 				$vnode -> setAttribute ("name","$appname");
 				$scan -> appendChild ($vnode);
 			};
@@ -620,16 +638,26 @@ sub __xmlSetup {
 	}
 	my $ignore = $this -> {ignoreRepos};
 	if ($ignore) {
-		$xml -> ignoreRepositories_legacy ();
+		$xml -> ignoreRepositories();
 	}
 	if ($this -> {replRepo}) {
+		# TODO eliminate the repo construction once other parts
+		# of the code have been converted to use the new repo information
 		my %replRepo = %{$this -> {replRepo}};
-		$xml -> setRepository_legacy (
-			$replRepo{repositoryType},
-			$replRepo{repository},
-			$replRepo{repositoryAlias},
-			$replRepo{respositoryPriority}
+		my %init = (
+			alias    => $replRepo{repositoryAlias},
+			path     => $replRepo{repository},
+			priority => $replRepo{respositoryPriority},
+			type     => $replRepo{repositoryType}
 		);
+		my $repo = KIWIXMLRepositoryData -> new($kiwi, \%init);
+		if (! $repo) {
+			return;
+		}
+		my $res = $xml -> setRepository($repo);
+		if (! $res) {
+			return;
+		}
 	}
 	if ($this -> {addlRepos}) {
 		my %addlRepos = %{$this -> {addlRepos}};
