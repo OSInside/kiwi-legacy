@@ -382,8 +382,8 @@ sub init {
 	#----------------------------------
 	my $packager = $xml -> getPackageManager_legacy();
 	my $imageVersionFile = "$root/etc/ImageVersion";
-	my $imageVersion = $xml -> getImageVersion();
-	my $imageName    = $xml -> getImageName();
+	my $imageVersion = $xml -> getImageVersion_legacy();
+	my $imageName    = $xml -> getImageName_legacy();
 	qxx ("mkdir -p $root/etc");
 	if ( ! open ($FD, '>', "$imageVersionFile")) {
 		$kiwi -> error ("Failed to create version file: $!");

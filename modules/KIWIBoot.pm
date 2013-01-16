@@ -610,8 +610,8 @@ sub setupInstallCD {
 	#------------------------------------------
 	if (($system) && (-b $system)) {
 		$haveDiskDevice = $system;
-		$version = $xml -> getImageVersion();
-		$system  = $xml -> getImageName();
+		$version = $xml -> getImageVersion_legacy();
+		$system  = $xml -> getImageName_legacy();
 		$system  = $destdir."/".$system.".".$arch."-".$version.".raw";
 		$md5name = $system;
 		$this->{system} = $system;
@@ -1019,8 +1019,8 @@ sub setupInstallStick {
 	#------------------------------------------
 	if (($system) && (-b $system)) {
 		$haveDiskDevice = $system;
-		$version = $xml -> getImageVersion();
-		$system  = $xml -> getImageName();
+		$version = $xml -> getImageVersion_legacy();
+		$system  = $xml -> getImageName_legacy();
 		$system  = $destdir."/".$system.".".$arch."-".$version.".raw";
 		$md5name = $system;
 		$this->{system} = $system;
@@ -1427,8 +1427,8 @@ sub setupInstallPXE {
 	#------------------------------------------
 	if (-b $system) {
 		$haveDiskDevice = $system;
-		$version = $xml -> getImageVersion();
-		$system  = $xml -> getImageName();
+		$version = $xml -> getImageVersion_legacy();
+		$system  = $xml -> getImageName_legacy();
 		$system  = $destdir."/".$system.".".$arch."-".$version.".raw";
 		$md5name = $system;
 		$this->{system} = $system;
@@ -1880,8 +1880,8 @@ sub setupBootDisk {
 	#------------------------------------------
 	$destdir    = dirname ($initrd);
 	$label      = $xml -> getImageDisplayName();
-	$version    = $xml -> getImageVersion();
-	$diskname   = $xml -> getImageName();
+	$version    = $xml -> getImageVersion_legacy();
+	$diskname   = $xml -> getImageName_legacy();
 	$diskname   = $destdir."/".$diskname.".".$arch."-".$version.".raw";
 	$splitfile  = $destdir."/".$label."-read-write.".$arch."-".$version;
 	$partidfile = $diskname;

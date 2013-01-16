@@ -96,6 +96,36 @@ sub test_ctor_missArg {
 }
 
 #==========================================
+# test_ArchiveInfo
+#------------------------------------------
+sub test_ArchiveInfo {
+	# ...
+	# Test to ensure we get the proper archive information
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd  = $this -> __getCmdl();
+	$cmd -> setConfigDir($this -> {baseDir});
+	my $info = $this -> __getInfoObj($cmd);
+	my @requests = ('archives');
+	my $tree = $info -> getXMLInfoTree(\@requests);
+	my $expectedMsg = '<imagescan description="'
+		. $cmd->getConfigDir()
+		. '">'
+		. '<archive name="testArchive.tgz"/>'
+		. '</imagescan>';
+	$this -> assert_not_null($tree);
+	$this -> assert_str_equals($expectedMsg, $tree -> toString());
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	return;
+}
+
+#==========================================
 # test_getTree_improperArg
 #------------------------------------------
 sub test_getTree_improperArg {
@@ -218,8 +248,11 @@ sub test_packagesInfo {
 	my $info = $this -> __getInfoObj($cmd);
 	my @requests = ('packages');
 	my $tree = $info -> getXMLInfoTree(\@requests);
-	my $expectedMsg = '<imagescan description="'.$cmd->getConfigDir().'"><package name="kiwi-test-dummy" '
-		. 'arch="noarch" version="0.0.1-1"/></imagescan>';
+	my $expectedMsg = '<imagescan description="'
+		. $cmd->getConfigDir()
+		. '">'
+		. '<package name="kiwi-test-dummy" arch="noarch" version="0.0.1-1"/>'
+		. '</imagescan>';
 	$this -> assert_str_equals($expectedMsg, $tree -> toString());
 	$this -> assert_not_null($tree);
 	# Setting up SaT generates a number of meesges that are not useful
@@ -367,9 +400,12 @@ sub test_typesInfo {
 	my $info = $this -> __getInfoObj($cmd);
 	my @requests = ('types');
 	my $tree = $info -> getXMLInfoTree(\@requests);
-	my $expectedMsg = '<imagescan description="'.$cmd->getConfigDir().'"><type name="iso" primary="true" '
-		. 'boot="isoboot/suse-11.4"/><type name="oem" primary="false" '
-		. 'boot="oemboot/suse-11.4"/><type name="xfs" primary="false"/>'
+	my $expectedMsg = '<imagescan description="'
+		. $cmd->getConfigDir()
+		. '">'
+		. '<type name="iso" primary="true" boot="isoboot/suse-11.4"/>'
+		. '<type name="oem" boot="oemboot/suse-11.4"/>'
+		. '<type name="xfs"/>'
 		. '</imagescan>';
 	$this -> assert_not_null($tree);
 	$this -> assert_str_equals($expectedMsg, $tree -> toString());
@@ -410,7 +446,11 @@ sub test_sizeInfo {
 	my $info = $this -> __getInfoObj($cmd);
 	my @requests = ('size');
 	my $tree = $info -> getXMLInfoTree(\@requests);
-	my $expectedMsg = '<imagescan description="'.$cmd->getConfigDir().'"><size rootsizeKB="1"/></imagescan>';
+	my $expectedMsg = '<imagescan description="'
+		. $cmd->getConfigDir()
+		. '">'
+		. '<size rootsizeKB="1"/>'
+		. '</imagescan>';
 	$this -> assert_str_equals($expectedMsg, $tree -> toString());
 	$this -> assert_not_null($tree);
 	# Setting up SaT generates a number of meesges that are not useful
@@ -435,7 +475,10 @@ sub test_sourcesInfo {
 	my $info = $this -> __getInfoObj($cmd);
 	my @requests = ('sources');
 	my $tree = $info -> getXMLInfoTree(\@requests);
-	my $expectedMsg = '<imagescan description="'.$cmd->getConfigDir().'"><source path="/tmp" type="rpm-dir"/>'
+	my $expectedMsg = '<imagescan description="'
+		. $cmd->getConfigDir()
+		.'">'
+		. '<source path="/tmp" type="rpm-dir"/>'
 		. '</imagescan>';
 	$this -> assert_not_null($tree);
 	$this -> assert_str_equals($expectedMsg, $tree -> toString());

@@ -112,6 +112,7 @@ sub new {
 	#     }
 	#     imageConfig = {
 	#         description = KIWIXMLDescriptionData,
+	#         imageName   = ''
 	#         productSettings = {
 	#             dudArches      = ('',...)
 	#             reqArches      = ('',...)
@@ -355,6 +356,9 @@ sub new {
 	# Data structure containing the XML file information
 	#------------------------------------------
 	$this->{imageConfig} = {};
+	my @imageNodes = $systemTree -> getElementsByTagName("image");
+	my $imgNd = $imageNodes[0]; # Only one <image> node
+	$this->{imageConfig}{imageName} = $imgNd -> getAttribute('name');
 	my %kDefProfile = (
 		'description' => 'KIWI default profile, store non qualified data',
 		'import'      => 'true'
@@ -1330,6 +1334,17 @@ sub getFilesToDelete {
 	# ---
 	my $this = shift;
 	return $this -> __getInstallData('stripDelete');
+}
+
+#==========================================
+# getImageName
+#------------------------------------------
+sub getImageName {
+	# ...
+	# Return the configured image name
+	# ---
+	my $this = shift;
+	return $this->{imageConfig}->{imageName};
 }
 
 #==========================================
@@ -4336,19 +4351,6 @@ sub getConfigName {
 
 
 #==========================================
-# getImageName
-#------------------------------------------
-sub getImageName {
-	# ...
-	# Get the name of the logical extend
-	# ---
-	my $this = shift;
-	my $node = $this->{imgnameNodeList} -> get_node(1);
-	my $name = $node -> getAttribute ("name");
-	return $name;
-}
-
-#==========================================
 # getImageDisplayName
 #------------------------------------------
 sub getImageDisplayName {
@@ -4359,7 +4361,7 @@ sub getImageDisplayName {
 	my $node = $this->{imgnameNodeList} -> get_node(1);
 	my $name = $node -> getAttribute ("displayname");
 	if (! defined $name) {
-		return $this->getImageName();
+		return $this->getImageName_legacy();
 	}
 	return $name;
 }
@@ -4375,19 +4377,6 @@ sub getImageID {
 		return $code;
 	}
 	return 0;
-}
-
-#==========================================
-# getImageVersion
-#------------------------------------------
-sub getImageVersion {
-	# ...
-	# Get the version of the logical extend
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("version");
-	my $version = $node -> getElementsByTagName ("version");
-	return "$version";
 }
 
 #==========================================
@@ -4479,107 +4468,6 @@ sub isDriverUpdateDisk {
 	my $base = $this->{instsrcNodeList} -> get_node(1);
 	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
 	return ref $dud_node;
-}
-
-#==========================================
-# getInstallSize
-#------------------------------------------
-sub getInstallSize {
-	my $this    = shift;
-	my $kiwi    = $this->{kiwi};
-	my $nodes   = $this->{packageNodeList};
-	my $manager = $this->getPackageManager_legacy();
-	my $urllist = $this -> __getURLList_legacy();
-	my @result  = ();
-	my @delete  = ();
-	my @packages= ();
-	my %meta    = ();
-	my $solf    = undef;
-	my @solp    = ();
-	my @rpat    = ();
-	my $ptype;
-	#==========================================
-	# Handle package names to be included
-	#------------------------------------------
-	@packages = $this -> getBaseList_legacy();
-	push @result,@packages;
-	@packages = $this -> getInstallList_legacy();
-	push @result,@packages;
-	@packages = $this -> getTypeSpecificPackageList_legacy();
-	push @result,@packages;
-	#==========================================
-	# Handle package names to be deleted later
-	#------------------------------------------
-	@delete = $this -> getDeleteList_legacy();
-	#==========================================
-	# Handle pattern names
-	#------------------------------------------
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node = $nodes -> get_node($i);
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		my @pattlist = ();
-		my @slist = $node -> getElementsByTagName ("opensusePattern");
-		foreach my $element (@slist) {
-			if (! $this -> isArchAllowed ($element,"packages")) {
-				next;
-			}
-			my $pattern = $element -> getAttribute ("name");
-			if ($pattern) {
-				push @result,"pattern:".$pattern;
-			}
-		}
-	}
-	#==========================================
-	# Add packagemanager in any case
-	#------------------------------------------
-	push @result, $manager;
-	#==========================================
-	# Run the solver...
-	#------------------------------------------
-	if (($manager) && ($manager eq "ensconce")) {
-		my $list = qxx ("ensconce -d");
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error (
-				"Error retrieving package metadata from ensconce."
-			);
-			return;
-		}
-		# Violates Expression form of "eval" FIXME
-		%meta = eval($list); ## no critic
-		@solp = keys(%meta);
-		# Ensconce reports package sizes in bytes, fix that
-		foreach my $pkg (keys(%meta)) {
-			$meta{$pkg} =~ s#^(\d+)#int($1/1024)#e;
-		}
-	} else {
-		my $psolve = KIWISatSolver -> new (
-			$kiwi,\@result,$urllist,"solve-patterns",
-			undef,undef,$ptype
-		);
-		if (! defined $psolve) {
-			$kiwi -> error ("SaT solver setup failed");
-			return;
-		}
-		if ($psolve -> getProblemsCount()) {
-			$kiwi -> error ("SaT solver problems found !\n");
-			return;
-		}
-		if (@{$psolve -> getFailedJobs()}) {
-			$kiwi -> error ("SaT solver failed jobs found !");
-			return;
-		}
-		%meta = $psolve -> getMetaData();
-		$solf = $psolve -> getSolfile();
-		@solp = $psolve -> getPackages();
-		@rpat = qxx (
-			"dumpsolv $solf|grep 'solvable:name: pattern:'|cut -f4 -d :"
-		);
-		chomp @rpat;
-	}
-	return (\%meta,\@delete,$solf,\@result,\@solp,\@rpat);
 }
 
 #==========================================
@@ -5539,9 +5427,9 @@ sub getImageConfig_legacy {
 	#------------------------------------------
 	my %type  = %{$this->getImageTypeAndAttributes_legacy()};
 	my @delp  = $this -> getDeleteList_legacy();
-	my $iver  = $this -> getImageVersion();
+	my $iver  = $this -> getImageVersion_legacy();
 	my $size  = $this -> getImageSize_legacy();
-	my $name  = $this -> getImageName();
+	my $name  = $this -> getImageName_legacy();
 	my $dname = $this -> getImageDisplayName ($this);
 	my $lics  = $this -> getLicenseNames_legacy();
 	my @s_del = $this -> __getStripDelete_legacy();
@@ -5873,6 +5761,20 @@ sub getImageDefaultRoot_legacy {
 	}
 	return "$root";
 }
+
+#==========================================
+# getImageName_legacy
+#------------------------------------------
+sub getImageName_legacy {
+	# ...
+	# Get the name of the logical extend
+	# ---
+	my $this = shift;
+	my $node = $this->{imgnameNodeList} -> get_node(1);
+	my $name = $node -> getAttribute ("name");
+	return $name;
+}
+
 #==========================================
 # getImageSize_legacy
 #------------------------------------------
@@ -6007,6 +5909,19 @@ sub getImageTypeAndAttributes_legacy {
 }
 
 #==========================================
+# getImageVersion_legacy
+#------------------------------------------
+sub getImageVersion_legacy {
+	# ...
+	# Get the version of the logical extend
+	# ---
+	my $this = shift;
+	my $node = $this -> __getPreferencesNodeByTagName ("version");
+	my $version = $node -> getElementsByTagName ("version");
+	return "$version";
+}
+
+#==========================================
 # getInstallList_legacy
 #------------------------------------------
 sub getInstallList_legacy {
@@ -6016,6 +5931,107 @@ sub getInstallList_legacy {
 	# ---
 	my $this = shift;
 	return getList_legacy ($this,"image");
+}
+
+#==========================================
+# getInstallSize_legacy
+#------------------------------------------
+sub getInstallSize_legacy {
+	my $this    = shift;
+	my $kiwi    = $this->{kiwi};
+	my $nodes   = $this->{packageNodeList};
+	my $manager = $this->getPackageManager_legacy();
+	my $urllist = $this -> __getURLList_legacy();
+	my @result  = ();
+	my @delete  = ();
+	my @packages= ();
+	my %meta    = ();
+	my $solf    = undef;
+	my @solp    = ();
+	my @rpat    = ();
+	my $ptype;
+	#==========================================
+	# Handle package names to be included
+	#------------------------------------------
+	@packages = $this -> getBaseList_legacy();
+	push @result,@packages;
+	@packages = $this -> getInstallList_legacy();
+	push @result,@packages;
+	@packages = $this -> getTypeSpecificPackageList_legacy();
+	push @result,@packages;
+	#==========================================
+	# Handle package names to be deleted later
+	#------------------------------------------
+	@delete = $this -> getDeleteList_legacy();
+	#==========================================
+	# Handle pattern names
+	#------------------------------------------
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node = $nodes -> get_node($i);
+		if (! $this -> __requestedProfile ($node)) {
+			next;
+		}
+		my @pattlist = ();
+		my @slist = $node -> getElementsByTagName ("opensusePattern");
+		foreach my $element (@slist) {
+			if (! $this -> isArchAllowed ($element,"packages")) {
+				next;
+			}
+			my $pattern = $element -> getAttribute ("name");
+			if ($pattern) {
+				push @result,"pattern:".$pattern;
+			}
+		}
+	}
+	#==========================================
+	# Add packagemanager in any case
+	#------------------------------------------
+	push @result, $manager;
+	#==========================================
+	# Run the solver...
+	#------------------------------------------
+	if (($manager) && ($manager eq "ensconce")) {
+		my $list = qxx ("ensconce -d");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error (
+				"Error retrieving package metadata from ensconce."
+			);
+			return;
+		}
+		# Violates Expression form of "eval" FIXME
+		%meta = eval($list); ## no critic
+		@solp = keys(%meta);
+		# Ensconce reports package sizes in bytes, fix that
+		foreach my $pkg (keys(%meta)) {
+			$meta{$pkg} =~ s#^(\d+)#int($1/1024)#e;
+		}
+	} else {
+		my $psolve = KIWISatSolver -> new (
+			$kiwi,\@result,$urllist,"solve-patterns",
+			undef,undef,$ptype
+		);
+		if (! defined $psolve) {
+			$kiwi -> error ("SaT solver setup failed");
+			return;
+		}
+		if ($psolve -> getProblemsCount()) {
+			$kiwi -> error ("SaT solver problems found !\n");
+			return;
+		}
+		if (@{$psolve -> getFailedJobs()}) {
+			$kiwi -> error ("SaT solver failed jobs found !");
+			return;
+		}
+		%meta = $psolve -> getMetaData();
+		$solf = $psolve -> getSolfile();
+		@solp = $psolve -> getPackages();
+		@rpat = qxx (
+			"dumpsolv $solf|grep 'solvable:name: pattern:'|cut -f4 -d :"
+		);
+		chomp @rpat;
+	}
+	return (\%meta,\@delete,$solf,\@result,\@solp,\@rpat);
 }
 
 #==========================================

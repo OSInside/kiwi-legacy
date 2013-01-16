@@ -5602,9 +5602,9 @@ sub test_getImageTypeAndAttributes_legacy {
 }
 
 #==========================================
-# test_getImageVersion
+# test_getImageVersion_legacy
 #------------------------------------------
-sub test_getImageVersion {
+sub test_getImageVersion_legacy {
 	# ...
 	# Verify proper return of getImageVersion method
 	# ---
@@ -5614,7 +5614,7 @@ sub test_getImageVersion {
 	my $xml = KIWIXML -> new(
 		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getImageVersion();
+	my $value = $xml -> getImageVersion_legacy();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

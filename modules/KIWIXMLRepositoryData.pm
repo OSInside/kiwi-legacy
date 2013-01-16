@@ -39,17 +39,17 @@ sub new {
 	# Internal data structure
 	#
 	# this = {
+	#    alias         = ''
+	#    components    = ''
+	#    distribution  = ''
+	#    imageinclude  = ''
+	#    path          = ''
+	#    password      = ''
+	#    preferlicense = ''
 	#    priority      = ''
 	#    status        = ''
-	#    imageinclude  = ''
-	#    components    = ''
-	#    preferlicense = ''
-	#    path          = ''
-	#    username      = ''
-	#    distribution  = ''
-	#    password      = ''
 	#    type          = ''
-	#    alias         = ''
+	#    username      = ''
 	# }
 	# ---
 	#==========================================
@@ -75,8 +75,8 @@ sub new {
 	# Argument checking and object data store
 	#------------------------------------------
 	my %boolKW = map { ($_ => 1) } qw(
-		preferlicense
 		imageinclude
+		preferlicense
 	);
 	$this->{boolKeywords} = \%boolKW;
 	my %supportedRepo = map { ($_ => 1) } qw(
