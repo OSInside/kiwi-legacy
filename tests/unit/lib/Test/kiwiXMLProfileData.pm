@@ -33,8 +33,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -47,7 +45,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLProfileData -> new($kiwi, 'foo');
+	my $prefDataObj = KIWIXMLProfileData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -74,7 +72,7 @@ sub test_ctor_incompleteDataNoDesc {
 				import => 'true',
 				name   => 'profT'
 	);
-	my $prefDataObj = KIWIXMLProfileData -> new($kiwi, \%init);
+	my $prefDataObj = KIWIXMLProfileData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLProfileData: no "description" specified in '
 		. 'initialization structure.';
@@ -102,7 +100,7 @@ sub test_ctor_incompleteDataNoName {
 				description => 'a test',
 				import      => 'true',
 	);
-	my $prefDataObj = KIWIXMLProfileData -> new($kiwi, \%init);
+	my $prefDataObj = KIWIXMLProfileData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLProfileData: no "name" specified in '
 		. 'initialization structure.';
@@ -131,7 +129,7 @@ sub test_ctor_invalidArgVal {
 				import      => 'ola',
 				name        => 'profT'
 	);
-	my $prefDataObj = KIWIXMLProfileData -> new($kiwi, \%init);
+	my $prefDataObj = KIWIXMLProfileData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLProfileData: Unrecognized value for boolean '
 		. "'import' in initialization structure.";
@@ -154,7 +152,7 @@ sub test_ctor_noInit {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLProfileData -> new($kiwi);
+	my $prefDataObj = KIWIXMLProfileData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLProfileData: must be constructed with a '
 		. 'keyword hash as argument';
@@ -182,7 +180,7 @@ sub test_ctor_wInit {
 				import      => 'true',
 				name        => 'profT'
 	);
-	my $prefDataObj = KIWIXMLProfileData -> new($kiwi, \%init);
+	my $prefDataObj = KIWIXMLProfileData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -509,7 +507,7 @@ sub __getProfObj {
 		import      => 'true',
 		name        => 'profT'
 	);
-	my $profDataObj = KIWIXMLProfileData -> new($kiwi, \%init);
+	my $profDataObj = KIWIXMLProfileData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

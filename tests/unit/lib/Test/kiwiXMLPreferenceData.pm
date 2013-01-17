@@ -33,8 +33,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -109,7 +107,7 @@ sub test_ctor {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -130,7 +128,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, 'foo');
+	my $prefDataObj = KIWIXMLPreferenceData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -155,7 +153,7 @@ sub test_ctor_initInvalidRPMCheckSigValue {
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
 	 my %init = ( rpm_check_signatures => 'foo' );
-	 my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
+	 my $prefDataObj = KIWIXMLPreferenceData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLPreferenceData: Unrecognized value for '
 		. "boolean 'rpm_check_signatures' in initialization structure.";
@@ -181,7 +179,7 @@ sub test_ctor_initInvalidRPMExclDocValue {
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
 	 my %init = ( rpm_excludedocs => 'foo' );
-	 my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
+	 my $prefDataObj = KIWIXMLPreferenceData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLPreferenceData: Unrecognized value for boolean '
 		. "'rpm_excludedocs' in initialization structure.";
@@ -207,7 +205,7 @@ sub test_ctor_initInvalidRPMForceValue {
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
 	 my %init = ( rpm_force => 'foo' );
-	 my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
+	 my $prefDataObj = KIWIXMLPreferenceData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLPreferenceData: Unrecognized value for boolean '
 		. "'rpm_force' in initialization structure.";
@@ -233,7 +231,7 @@ sub test_ctor_initInvalidVersion {
 	 my $this = shift;
 	 my $kiwi = $this -> {kiwi};
 	 my %init = ( version => '1.a' );
-	 my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
+	 my $prefDataObj = KIWIXMLPreferenceData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'object initialization: improper version format, '
 		. "expecting 'd.d.d'.";
@@ -258,7 +256,7 @@ sub test_ctor_initUnsupportedData {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( zypperopt => '--capability' );
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
+	my $prefDataObj = KIWIXMLPreferenceData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLPreferenceData: Unsupported keyword argument '
 		. "'zypperopt' in initialization structure.";
@@ -283,7 +281,7 @@ sub test_ctor_initUnsupportedPckgMgr {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( packagemanager => 'foo' );
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
+	my $prefDataObj = KIWIXMLPreferenceData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified package manager '
 		. "'foo' is not supported.";
@@ -311,7 +309,7 @@ sub test_ctor_withInit {
 				packagemanager   => 'yum',
 				version          => '1.1.0'
 			);
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
+	my $prefDataObj = KIWIXMLPreferenceData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -521,7 +519,7 @@ sub test_getPackageManagerDefault {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	my $pkM = $prefDataObj -> getPackageManager();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -711,7 +709,7 @@ sub test_setBootLoaderTheme {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setBootLoaderTheme('SLES');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -771,7 +769,7 @@ sub test_setBootSplashTheme {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setBootSplashTheme('SLES');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -831,7 +829,7 @@ sub test_setDefaultDest {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setDefaultDest('/tmp/images');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -891,7 +889,7 @@ sub test_setDefaultPreBuilt {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setDefaultPreBuilt('/tmp/images');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -951,7 +949,7 @@ sub test_setDefaultRoot {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setDefaultRoot('/tmp/images');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1011,7 +1009,7 @@ sub test_setHWClock {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setHWClock('America/NewYork');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1071,7 +1069,7 @@ sub test_setKeymap {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setKeymap('de.map.gz');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1131,7 +1129,7 @@ sub test_setLocale {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setLocale('cs_CZ');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1191,7 +1189,7 @@ sub test_setPackageManager {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setPackageManager('yum');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1220,7 +1218,7 @@ sub test_setPackageManagerInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	my $res = $prefDataObj -> setPackageManager('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = "setPackageManager: specified package manager 'foo' is not "
@@ -1282,7 +1280,7 @@ sub test_setRPMCheckSig {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setRPMCheckSig('false');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1371,7 +1369,7 @@ sub test_setRPMExcludeDoc {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setRPMExcludeDoc('false');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1460,7 +1458,7 @@ sub test_setRPMForce {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setRPMForce('false');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1549,7 +1547,7 @@ sub test_setShowLic {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setShowLic('/tmp/lic.en.txt');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1611,7 +1609,7 @@ sub test_setTimezone {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setTimezone('Germany/Berlin');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1671,7 +1669,7 @@ sub test_setVersion {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi);
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
 	$prefDataObj = $prefDataObj -> setVersion('0.0.5');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1783,7 +1781,7 @@ sub __getPrefObj {
 		timezone             => 'America/NewYork',
 		version              => '1.1.1'
 	);
-	my $prefDataObj = KIWIXMLPreferenceData -> new($kiwi, \%init);
+	my $prefDataObj = KIWIXMLPreferenceData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

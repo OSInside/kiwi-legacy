@@ -46,7 +46,6 @@ sub new {
 	#==========================================
 	# Module Parameters [ mandatory ]
 	#------------------------------------------
-	my $kiwi   = shift;
 	my $image  = shift;
 	my $cmdL   = shift;
 	#==========================================
@@ -67,6 +66,7 @@ sub new {
 	#==========================================
 	# check image file
 	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	if ((! $this->{gdata}->{StudioNode}) && (! (-f $image || -b $image))) {
 		$kiwi -> error ("no such image file: $image");
 		$kiwi -> failed ();
@@ -77,7 +77,7 @@ sub new {
 	#------------------------------------------
 	if (! defined $xml) {
 		my $boot = KIWIBoot -> new (
-			$kiwi,undef,$cmdL,$image,undef,undef,
+			undef,$cmdL,$image,undef,undef,
 			$cmdL->getBuildProfiles()
 		);
 		if ($boot) {
@@ -712,7 +712,7 @@ sub createEC2 {
 	#==========================================
 	# Check for Amazon EC2 toolkit
 	#------------------------------------------
-	my $locator = KIWILocator -> new ($kiwi);
+	my $locator = KIWILocator -> new();
 	my $bundleCmd = $locator -> getExecPath ('ec2-bundle-image');
 	if (! $bundleCmd ) {
 		$kiwi -> error (

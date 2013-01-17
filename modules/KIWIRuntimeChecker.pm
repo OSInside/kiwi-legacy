@@ -54,21 +54,21 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi    = shift;
 	my $cmdArgs = shift;
 	my $xml     = shift;
 	#==========================================
 	# Check pre-conditions
 	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	if (! $cmdArgs ) {
-		my $msg = 'Expecting reference to KIWICommandLine object as second '
+		my $msg = 'Expecting reference to KIWICommandLine object as '
 		. 'argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed ();
 		return;
 	}
 	if (! $xml ) {
-		my $msg = 'Expecting reference to KIWIXML object as third argument.';
+		my $msg = 'Expecting reference to KIWIXML object as second argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed ();
 		return;
@@ -77,7 +77,7 @@ sub new {
 	# Store module parameters
 	#------------------------------------------
 	$this->{cmdArgs} = $cmdArgs;
-	$this->{locator} = KIWILocator -> new ($kiwi);
+	$this->{locator} = KIWILocator -> new();
 	$this->{kiwi}    = $kiwi;
 	$this->{xml}     = $xml;
 	return $this;

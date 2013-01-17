@@ -56,7 +56,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi         = shift;  # log object
 	my $source       = shift;  # location of source tree
 	my $dest         = shift;  # destination for the iso file
 	my $params       = shift;  # global genisoimage/mkisofs parameters
@@ -76,6 +75,7 @@ sub new {
 	#==========================================
 	# create log object if not done
 	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	if (! -d $source) {
 		$kiwi -> error  ("No such file or directory: $source");
 		$kiwi -> failed ();
@@ -94,7 +94,7 @@ sub new {
 	#==========================================
 	# Find iso tool to use on this system
 	#------------------------------------------
-	my $locator = KIWILocator -> new($kiwi);
+	my $locator = KIWILocator -> new();
 	my $genTool = $locator -> getExecPath('genisoimage');
 	my $mkTool = $locator -> getExecPath('mkisofs');
 	if ($genTool && -x $genTool) {
@@ -798,7 +798,7 @@ sub createHybrid {
 		$kiwi -> skipped ();
 		return $this;
 	}
-	my $locator = KIWILocator -> new ($kiwi);
+	my $locator = KIWILocator -> new();
 	my $isoHybrid = $locator -> getExecPath ('isohybrid');
 	if (! $isoHybrid) {
 		$kiwi -> error ("Can't find isohybrid, check your syslinux version");

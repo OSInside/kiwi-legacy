@@ -39,10 +39,6 @@ sub new {
 	my $class = shift;
 	bless $this,$class;
 	#==========================================
-	# Module Parameters
-	#------------------------------------------
-	my $kiwi = shift;
-	#==========================================
 	# Constructor setup
 	#------------------------------------------
 	my $arch = qxx ("uname -m");
@@ -75,6 +71,7 @@ sub new {
 	elsif (($ENV{'HOME'}) && (-f $ENV{'HOME'}.'/.kiwirc')) {
 		$file = "$ENV{'HOME'}/.kiwirc";
 	}
+	my $kiwi = KIWILog -> instance();
 	if ($file) {
 		if (! do $file) {
 			$kiwi -> warning ("Invalid $file file...");
@@ -878,7 +875,7 @@ sub callContained {
 		$kiwi -> failed ();
 		return;
 	}
-	my $locator = KIWILocator -> new($kiwi);
+	my $locator = KIWILocator -> new();
 	my $lxcexec = $locator -> getExecPath('lxc-execute');
 	my $lxcbase = $root."/usr/lib/lxc/";
 	if (-d $root."/usr/lib64") {

@@ -53,7 +53,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi       = shift;
 	my $xml        = shift;
 	my $sourceRef  = shift;
 	my $root       = shift;
@@ -62,6 +61,7 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	if (! defined $xml) {
 		$kiwi -> error  ("Missing XML description pointer");
 		$kiwi -> failed ();
@@ -88,7 +88,7 @@ sub new {
 	if ($manager eq "apt-get") {
 		$manager = "apt";
 	}
-	my $locator = KIWILocator -> new ($kiwi);
+	my $locator = KIWILocator -> new();
 	my $dataDir = "/var/cache/kiwi/$manager";
 	my @channelList = ();
 	#==========================================

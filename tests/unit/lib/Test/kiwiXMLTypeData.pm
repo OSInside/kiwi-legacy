@@ -42,8 +42,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -56,7 +54,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, 'foo');
+	my $typeDataObj = KIWIXMLTypeData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -84,7 +82,7 @@ sub test_ctor_initInvalidCheckprebuiltValue {
 				checkprebuilt => 'foo',
 				image         => 'iso'
 				);
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'checkprebuilt' in initialization structure.";
@@ -113,7 +111,7 @@ sub test_ctor_initInvalidCompressedValue {
 				compressed => 'foo',
 				image      => 'oem'
 				);
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'compressed' in initialization structure.";
@@ -142,7 +140,7 @@ sub test_ctor_initInvalidFirmwareValue {
 	     firmware => 'foo',
 		 image    => 'ext3'
 	 );
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'object initialization: specified firmware value '
 		. "'foo' is not supported.";
@@ -171,7 +169,7 @@ sub test_ctor_initInvalidFsnocheckValue {
 	    fsnocheck => 'foo',
 		image     => 'ext3'
 	 );
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'fsnocheck' in initialization structure.";
@@ -200,7 +198,7 @@ sub test_ctor_initInvalidHybridValue {
 				hybrid => 'foo',
 				image  => 'xfs'
 				);
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'hybrid' in initialization structure.";
@@ -229,7 +227,7 @@ sub test_ctor_initInvalidHybridpersistentValue {
 				hybridpersistent => 'foo',
 				image            => 'cpio'
 				);
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'hybridpersistent' in initialization structure.";
@@ -258,7 +256,7 @@ sub test_ctor_initInvalidInstallisoValue {
 				image      => 'tbz',
 				installiso => 'foo'
 				);
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'installiso' in initialization structure.";
@@ -287,7 +285,7 @@ sub test_ctor_initInvalidInstallprovidefailsafeValue {
 				image                  => 'vmx',
 				installprovidefailsafe => 'foo'
 				);
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'installprovidefailsafe' in initialization structure.";
@@ -316,7 +314,7 @@ sub test_ctor_initInvalidInstallPXEValue {
 				image      => 'vmx',
 				installpxe => 'foo'
 				);
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'installpxe' in initialization structure.";
@@ -345,7 +343,7 @@ sub test_ctor_initInvalidInstallstickValue {
 				image        => 'iso',
 				installstick => 'foo'
 				);
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'installstick' in initialization structure.";
@@ -374,7 +372,7 @@ sub test_ctor_initInvalidPrimaryValue {
 				image   => 'oem',
 				primary => 'foo'
 				);
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'primary' in initialization structure.";
@@ -403,7 +401,7 @@ sub test_ctor_initInvalidRamonlyValue {
 				image   => 'vmx',
 				ramonly => 'foo'
 				);
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'ramonly' in initialization structure.";
@@ -432,7 +430,7 @@ sub test_ctor_initInvalidSizeaddValue {
 	     image   => 'iso',
 		 sizeadd => 'foo'
 	);
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'sizeadd' in initialization structure.";
@@ -461,7 +459,7 @@ sub test_ctor_initInvalidSizeUnit {
 	     image    => 'vmx',
 		 sizeunit => 'K'
 	 );
-	 my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	 my $msg = $kiwi -> getMessage();
 	 my $expected = 'object initialization: expecting unit setting of '
 		. "'M' or 'G'.";
@@ -489,7 +487,7 @@ sub test_ctor_initUnsupportedBootLoad {
 				bootloader => 'lnxBoot',
 				image      => 'split'
 			);
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified bootloader '
 		. "'lnxBoot' is not supported.";
@@ -514,7 +512,7 @@ sub test_ctor_initUnsupportedData {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( bootparam => 'kiwidebug=1' );
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLTypeData: Unsupported keyword argument '
 		. "'bootparam' in initialization structure.";
@@ -542,7 +540,7 @@ sub test_ctor_initUnsupportedDevPersist {
 				image             => 'vmx',
 				devicepersistency => 'mapper-id'
 			);
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified device persistency '
 		. "'mapper-id' is not supported.";
@@ -570,7 +568,7 @@ sub test_ctor_initUnsupportedFilesystem {
 				filesystem => 'aufs',
 				image      => 'btrfs'
 			);
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified filesystem '
 		. "'aufs' is not supported.";
@@ -598,7 +596,7 @@ sub test_ctor_initUnsupportedFlags {
 				flags => 'gzipped',
 				image => 'ext4'
 			);
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified flags value '
 		. "'gzipped' is not supported.";
@@ -626,7 +624,7 @@ sub test_ctor_initUnsupportedFormat {
 				format => 'xen',
 				image  => 'xfs'
 			);
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified format '
 	. "'xen' is not supported.";
@@ -654,7 +652,7 @@ sub test_ctor_initUnsupportedBootFS {
 		image => 'vmx',
 		bootfilesystem => 'foo'
 	);
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified boot filesystem '
 		. "'foo' is not supported.";
@@ -679,7 +677,7 @@ sub test_ctor_initUnsupportedImage {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( image => 'qcow9' );
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified image '
 		. "'qcow9' is not supported.";
@@ -707,7 +705,7 @@ sub test_ctor_initUnsupportedInstBoot {
 				image       => 'pxe',
 				installboot => 'drive'
 			);
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: specified installboot option '
 		. "'drive' is not supported.";
@@ -730,7 +728,7 @@ sub test_ctor_noInit {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi);
+	my $typeDataObj = KIWIXMLTypeData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLTypeData: must be constructed with a '
 		. 'keyword hash as argument';
@@ -760,7 +758,7 @@ sub test_ctor_withInit {
 				hybrid      => 'false',
 				image       => 'oem'
 			);
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -787,7 +785,7 @@ sub test_ctor_withInitIncomplete {
 				fsreadonly  => 'btrfs',
 				hybrid      => 'false',
 			);
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLTypeData: no "image" specified in '
 		. 'initialization structure.';
@@ -895,7 +893,7 @@ sub test_getBootLoaderDefault {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( image => 'ext2' );
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $name = $typeDataObj -> getBootLoader();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1127,7 +1125,7 @@ sub test_getFirmwareTypeDefault {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( image => 'ext2' );
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $fw = $typeDataObj -> getFirmwareType();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1380,7 +1378,7 @@ sub test_getInstallFailsafeDefault {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( image => 'cpio' );
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $instFS = $typeDataObj -> getInstallFailsafe();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1614,7 +1612,7 @@ sub test_getSizeUnitDefault {
 	     image => 'vmx',
 		 size  => '8192'
 	);
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $unit = $typeDataObj -> getSizeUnit();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1702,7 +1700,7 @@ sub test_isSizeAdditiveDefault {
 	     image => 'vmx',
 		 size  => '8192'
 	);
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $add = $typeDataObj -> isSizeAdditive();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -4827,7 +4825,7 @@ sub __getTypeObj {
 				vga                    => '0x344',
 				volid                  => 'myImg'
 			);
-	my $typeDataObj = KIWIXMLTypeData -> new($kiwi, \%init);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

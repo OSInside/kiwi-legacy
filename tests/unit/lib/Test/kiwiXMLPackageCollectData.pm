@@ -33,8 +33,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -47,7 +45,7 @@ sub test_ctor_noArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLPackageCollectData: must be constructed with a '
 		. 'keyword hash as argument';
@@ -74,7 +72,7 @@ sub test_ctor_unsuportedArch {
 				arch => 'tegra',
 				name => 'kde'
 	);
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -97,7 +95,7 @@ sub test_ctor_simple {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'xfce' );
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -123,7 +121,7 @@ sub test_ctor_invalidBoolValIncl {
 	    bootinclude => 'yes',
 		name        => 'python'
 	);
-	my $pckgDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLPackageCollectData: Unrecognized value for '
 		. "boolean 'bootinclude' in initialization structure.";
@@ -150,7 +148,7 @@ sub test_ctor_unsupportedKW {
 	    arch     => 'ppc64',
 		filename => 'lamp'
 	);
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLPackageCollectData: Unsupported keyword '
 		. "argument 'filename' in initialization structure.";
@@ -176,7 +174,7 @@ sub test_ctor_withArch {
 				arch => 'ppc64',
 				name => 'base'
 	);
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -201,7 +199,7 @@ sub test_getArch {
 				arch => 'ix86',
 				name => 'gnome'
 	);
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -235,7 +233,7 @@ sub test_getBootInclude {
 		bootinclude => 'true',
 		name        => 'base'
 	);
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	my $incl = $collectDataObj -> getBootInclude();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -257,7 +255,7 @@ sub test_getName {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'x11');
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -292,7 +290,7 @@ sub test_getXMLElement{
 		bootinclude => 'true',
 		name        => 'base'
 	);
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -324,7 +322,7 @@ sub test_setArch {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'base');
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -356,7 +354,7 @@ sub test_setArch_invalid {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'lxde');
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -393,7 +391,7 @@ sub test_setBootInclude {
 		bootinclude => 'true',
 		name        => 'base'
 	);
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	$collectDataObj = $collectDataObj -> setBootInclude('false');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -427,7 +425,7 @@ sub test_setBootIncludeInvalidArg {
 	    arch => 'ix86',
 		name => 'base'
 	);
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -464,7 +462,7 @@ sub test_setBootIncludeNoArg {
 		bootinclude => 'true',
 		name        => 'base'
 	);
-	my $collectDataObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
 	$collectDataObj = $collectDataObj -> setBootInclude();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);

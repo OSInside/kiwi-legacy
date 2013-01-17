@@ -65,7 +65,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi = shift;
 	my $init = shift;
 	#==========================================
 	# Argument checking and object data store

@@ -32,7 +32,6 @@ sub new {
 	# ---
 	my $this = shift -> SUPER::new(@_);
 	$this -> {dataDir} = $this -> getDataDir() . '/kiwiXMLValidator/';
-	$this -> {kiwi} =  Common::ktLog -> new();
 	$this -> {schema} = $this -> getBaseDir() . '/../modules/KIWISchema.rng';
 	$this -> {xslt} =  $this -> getBaseDir() . '/../xsl/master.xsl';
 
@@ -129,7 +128,6 @@ sub test_ctorInvalidConfPath {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $validator = KIWIXMLValidator -> new(
-		$kiwi,
 		'/tmp',
 		$this -> {dataDir} . 'revision.txt',
 		$this -> {schema},
@@ -157,7 +155,6 @@ sub test_ctorInvalidRevPath {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $validator = KIWIXMLValidator -> new(
-		$kiwi,
 		$this -> {dataDir} . 'genericValid.xml',
 		'/tmp',
 		$this -> {schema},
@@ -185,7 +182,6 @@ sub test_ctorInvalidSchemaPath {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $validator = KIWIXMLValidator -> new(
-		$kiwi,
 		$this -> {dataDir} . 'genericValid.xml',
 		$this -> {dataDir} . 'revision.txt',
 		'/tmp',
@@ -213,7 +209,6 @@ sub test_ctorInvalidXSLTPath {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $validator = KIWIXMLValidator -> new(
-		$kiwi,
 		$this -> {dataDir} . 'genericValid.xml',
 		$this -> {dataDir} . 'revision.txt',
 		$this -> {schema},
@@ -241,7 +236,6 @@ sub test_ctorValid {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $validator = KIWIXMLValidator -> new(
-		$kiwi,
 		$this -> {dataDir} . 'genericValid.xml',
 		$this -> {dataDir} . 'revision.txt',
 		$this -> {schema},
@@ -1343,7 +1337,6 @@ sub __getValidator {
 	my $this         = shift;
 	my $confFileName = shift;
 	my $validator = KIWIXMLValidator -> new(
-		$this -> {kiwi},
 		$confFileName,
 		$this -> {dataDir} . 'revision.txt',
 		$this -> {schema},

@@ -33,8 +33,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -47,7 +45,7 @@ sub test_ctor {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -68,7 +66,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi, 'foo');
+	my $confDataObj = KIWIXMLEC2ConfigData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -96,7 +94,7 @@ sub test_ctor_improperHashMemb {
 				ec2privatekeyfile => '/work/ec2/mykey.pem',
 				ec2region         => 'US-East'
 			);
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi, \%args);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new(\%args);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting an array ref as entry of "ec2region" in the '
 		. 'initialization hash.';
@@ -126,7 +124,7 @@ sub test_ctor_initUnsupportedData {
 				ec2privatekeyfile => '/work/ec2/mykey.pem',
 				ec2region         => \@regions
 			);
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi, \%args);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new(\%args);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLEC2ConfigData: Unsupported keyword argument '
 		. "'certfile' in initialization structure.";
@@ -155,7 +153,7 @@ sub test_ctor_wInit {
 				ec2privatekeyfile => '/work/ec2/mykey.pem',
 				ec2region         => \@regions
 			);
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi, \%args);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new(\%args);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -192,7 +190,7 @@ sub test_getXMLElement{
 		ec2privatekeyfile => '/work/ec2/mykey.pem',
 		ec2region         => \@regions
 	);
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi, \%args);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new(\%args);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -231,7 +229,7 @@ sub test_setAccountNumber {
 	# ----
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -270,7 +268,7 @@ sub test_setAccountNumber_noArg {
 				ec2privatekeyfile => '/work/ec2/mykey.pem',
 				ec2region         => \@regions
 			);
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi, \%args);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new(\%args);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -315,7 +313,7 @@ sub test_setCertFilePath {
 	# ----
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -354,7 +352,7 @@ sub test_setCertFilePath_noArg {
 				ec2privatekeyfile => '/work/ec2/mykey.pem',
 				ec2region         => \@regions
 			);
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi, \%args);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new(\%args);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -399,7 +397,7 @@ sub test_setPrivateKeyFilePath {
 	# ----
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -438,7 +436,7 @@ sub test_setPrivateKeyFilePath_noArg {
 				ec2privatekeyfile => '/work/ec2/mykey.pem',
 				ec2region         => \@regions
 			);
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi, \%args);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new(\%args);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -483,7 +481,7 @@ sub test_setRegions {
 	# ----
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -517,7 +515,7 @@ sub test_setRegionsImproperArg {
 	# ----
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -555,7 +553,7 @@ sub test_setRegions_noArg {
 				ec2privatekeyfile => '/work/ec2/mykey.pem',
 				ec2region         => \@regions
 			);
-	my $confDataObj = KIWIXMLEC2ConfigData -> new($kiwi, \%args);
+	my $confDataObj = KIWIXMLEC2ConfigData -> new(\%args);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

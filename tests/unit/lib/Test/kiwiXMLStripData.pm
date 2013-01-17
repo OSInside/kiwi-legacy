@@ -32,8 +32,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -46,7 +44,7 @@ sub test_ctor_noArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $stripDataObj = KIWIXMLStripData -> new($kiwi);
+	my $stripDataObj = KIWIXMLStripData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLStripData: must be constructed with a '
 		. 'keyword hash as argument';
@@ -73,7 +71,7 @@ sub test_ctor_unsuportedArch {
 				arch => 'tegra',
 				name => 'soundcore.ko'
 	);
-	my $stripDataObj = KIWIXMLStripData -> new($kiwi, \%init);
+	my $stripDataObj = KIWIXMLStripData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -96,7 +94,7 @@ sub test_ctor_simple {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'soundcore.ko' );
-	my $stripDataObj = KIWIXMLStripData -> new($kiwi, \%init);
+	my $stripDataObj = KIWIXMLStripData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -121,7 +119,7 @@ sub test_ctor_unsupportedKW {
 				arch     => 'ppc64',
 				filename => 'soundcore.ko'
 	);
-	my $stripDataObj = KIWIXMLStripData -> new($kiwi, \%init);
+	my $stripDataObj = KIWIXMLStripData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLStripData: Unsupported keyword argument '
 		. "'filename' in initialization structure.";
@@ -147,7 +145,7 @@ sub test_ctor_withArch {
 				arch => 'ppc64',
 				name => 'soundcore.ko'
 	);
-	my $stripDataObj = KIWIXMLStripData -> new($kiwi, \%init);
+	my $stripDataObj = KIWIXMLStripData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -172,7 +170,7 @@ sub test_getArch {
 				arch => 'ix86',
 				name => 'soundcore.ko'
 	);
-	my $stripDataObj = KIWIXMLStripData -> new($kiwi, \%init);
+	my $stripDataObj = KIWIXMLStripData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -202,7 +200,7 @@ sub test_getName {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'soundcore.ko');
-	my $stripDataObj = KIWIXMLStripData -> new($kiwi, \%init);
+	my $stripDataObj = KIWIXMLStripData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -236,7 +234,7 @@ sub test_getXMLElement{
 		arch => 'ppc',
 		name => 'libpng.so'
 	);
-	my $stripDataObj = KIWIXMLStripData -> new($kiwi, \%init);
+	my $stripDataObj = KIWIXMLStripData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -267,7 +265,7 @@ sub test_setArch {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'soundcore.ko');
-	my $stripDataObj = KIWIXMLStripData -> new($kiwi, \%init);
+	my $stripDataObj = KIWIXMLStripData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -299,7 +297,7 @@ sub test_setArch_invalid {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'soundcore.ko');
-	my $stripDataObj = KIWIXMLStripData -> new($kiwi, \%init);
+	my $stripDataObj = KIWIXMLStripData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

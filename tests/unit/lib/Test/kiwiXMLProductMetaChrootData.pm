@@ -32,8 +32,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -47,7 +45,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLProductMetaChrootData -> new($kiwi, 'foo');
+	my $fileDataObj = KIWIXMLProductMetaChrootData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -74,7 +72,7 @@ sub test_ctor_invalidValue {
 		requires => 'myFixup.sh',
 		value => 'foo'
 	);
-	my $chrootDataObj = KIWIXMLProductMetaChrootData -> new($kiwi, \%init);
+	my $chrootDataObj = KIWIXMLProductMetaChrootData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLProductMetaChrootData: Unrecognized value '
 		. "for boolean 'value' in initialization structure.";
@@ -101,7 +99,7 @@ sub test_ctor_missingArgRequires {
 	my %init = (
 		value => 'false'
 	);
-	my $chrootDataObj = KIWIXMLProductMetaChrootData -> new($kiwi, \%init);
+	my $chrootDataObj = KIWIXMLProductMetaChrootData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLProductMetaChrootData: no "requires" '
 		. 'specified in initialization structure.';
@@ -127,7 +125,7 @@ sub test_ctor_missingArgValue {
 	my %init = (
 		requires => 'myFixup.sh',
 	);
-	my $chrootDataObj = KIWIXMLProductMetaChrootData -> new($kiwi, \%init);
+	my $chrootDataObj = KIWIXMLProductMetaChrootData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLProductMetaChrootData: no "value" specified in '
 		. 'initialization structure.';
@@ -150,7 +148,7 @@ sub test_ctor_noArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLProductMetaChrootData -> new($kiwi);
+	my $fileDataObj = KIWIXMLProductMetaChrootData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLProductMetaChrootData: must be constructed '
 		. 'with a keyword hash as argument';
@@ -178,7 +176,7 @@ sub test_ctor_unsupportedKW {
 		requires => 'myFixup.sh',
 		value    => 'true',
 	);
-	my $fileDataObj = KIWIXMLProductMetaChrootData -> new($kiwi, \%init);
+	my $fileDataObj = KIWIXMLProductMetaChrootData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLProductMetaChrootData: Unsupported keyword '
 		. "argument 'arch' in initialization structure.";
@@ -249,7 +247,7 @@ sub __getProdMetaChrootObj {
 		requires => 'myFixup.sh',
 		value    => 'true'
 	);
-	my $chrootDataObj = KIWIXMLProductMetaChrootData -> new($kiwi, \%init);
+	my $chrootDataObj = KIWIXMLProductMetaChrootData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

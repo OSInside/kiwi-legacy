@@ -243,7 +243,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi        = shift;
 	my $imageDesc   = shift;
 	my $imageType   = shift;
 	my $reqProfiles = shift;
@@ -260,6 +259,7 @@ sub new {
 		armv5tel armv7l ia64 ix86 ppc ppc64 s390 s390x x86_64
 	);
 	$this->{supportedArch} = \%supported;
+	my $kiwi = KIWILog -> instance();
 	if (! $supported{$arch} ) {
 		my $msg = "Attempt to run KIWI on unsupported architecture '$arch'";
 		$kiwi -> error ($msg);
@@ -303,7 +303,7 @@ sub new {
 	#==========================================
 	# Lookup XML configuration file
 	#------------------------------------------
-	my $locator = KIWILocator -> new ($kiwi);
+	my $locator = KIWILocator -> new();
 	my $controlFile = $locator -> getControlFile ( $imageDesc );
 	if (! $controlFile) {
 		return;
@@ -316,7 +316,7 @@ sub new {
 	# Read and Validate XML information
 	#------------------------------------------
 	my $validator = KIWIXMLValidator -> new (
-		$kiwi,$controlFile,
+		$controlFile,
 		$this->{gdata}->{Revision},
 		$this->{gdata}->{Schema},
 		$this->{gdata}->{SchemaCVT}
@@ -1504,9 +1504,7 @@ sub getPreferences {
 			return;
 		}
 	}
-	my $prefObj = KIWIXMLPreferenceData -> new(
-		$kiwi, $mergedPref
-	);
+	my $prefObj = KIWIXMLPreferenceData -> new($mergedPref);
 	return $prefObj;
 }
 
@@ -1766,7 +1764,7 @@ sub getUsers {
 	my $kiwi = $this->{kiwi};
 	my @userData;
 	for my $uInfo (values %{$this->{imageConfig}{users}}) {
-		my $uObj = KIWIXMLUserData -> new($kiwi, $uInfo);
+		my $uObj = KIWIXMLUserData -> new($uInfo);
 		push @userData, $uObj;
 	}
 	return \@userData;
@@ -2017,8 +2015,10 @@ sub setSelectionProfileNames {
 	}
 	my @newProfs = @{$profiles};
 	my $info = join ', ', @newProfs;
-	$kiwi -> info ("Using profile(s): $info");
-	$kiwi -> done ();
+	if ($info) {
+		$kiwi -> info ("Using profile(s): $info");
+		$kiwi -> done ();
+	}
 	if (! $this->__hasDefaultProfName($profiles) ) {
 		push @newProfs, 'kiwi_default';
 	}
@@ -2091,7 +2091,7 @@ sub __createEC2Config {
 		$selectedRegions = \@regions;
 	}
 	$ec2ConfigData{ec2region} = $selectedRegions;
-	my $ec2Obj = KIWIXMLEC2ConfigData -> new($kiwi, \%ec2ConfigData);
+	my $ec2Obj = KIWIXMLEC2ConfigData -> new(\%ec2ConfigData);
 	return $ec2Obj;
 }
 
@@ -2150,7 +2150,7 @@ sub __createOEMConfig {
 	$this -> __getChildNodeTextValue($config, 'oem-unattended');
 	$oemConfig{oem_unattended_id}        =
 		$this -> __getChildNodeTextValue($config, 'oem-unattended-id');
-	my $oemConfObj = KIWIXMLOEMConfigData -> new($kiwi, \%oemConfig);
+	my $oemConfObj = KIWIXMLOEMConfigData -> new(\%oemConfig);
 	return $oemConfObj;
 }
 
@@ -2191,7 +2191,7 @@ sub __createProductOptions {
 		productoption => \%productoption,
 		productvar    => \%productvar
 	);
-	my $prodOptObj = KIWIXMLProductOptionsData -> new($kiwi, \%init);
+	my $prodOptObj = KIWIXMLProductOptionsData -> new(\%init);
 	if (! $prodOptObj) {
 		$kiwi -> error('KIWIXMLProductOptionsData creation');
 			$kiwi -> failed();
@@ -2276,7 +2276,7 @@ sub __createPXEDeployConfig {
 		$pxeConfig{unionRW}   = $unionData -> getAttribute('rw');
 		$pxeConfig{unionType} = $unionData -> getAttribute('type');
 	}
-	my $pxeConfObj = KIWIXMLPXEDeployData -> new($kiwi, \%pxeConfig);
+	my $pxeConfObj = KIWIXMLPXEDeployData -> new(\%pxeConfig);
 	return $pxeConfObj;
 }
 
@@ -2354,7 +2354,7 @@ sub __createSplitData {
 		}
 		$splitConf{$child} = \%behaveData;
 	}
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, \%splitConf);
+	my $splitDataObj = KIWIXMLSplitData -> new(\%splitConf);
 	return $splitDataObj;
 }
 
@@ -2409,7 +2409,7 @@ sub __createSystemDiskData {
 		$cntr += 1;
 	}
 	$lvmData{volumes} = \%volData;
-	my $sysDiskObj = KIWIXMLSystemdiskData -> new($kiwi, \%lvmData);
+	my $sysDiskObj = KIWIXMLSystemdiskData -> new(\%lvmData);
 	return $sysDiskObj;
 }
 
@@ -2498,7 +2498,7 @@ sub __createVMachineConfig {
 		$cntr += 1;
 	}
 	$vmConfigData{vmnics} = \%nicData;
-	my $vmConfObj = KIWIXMLVMachineData -> new($kiwi, \%vmConfigData);
+	my $vmConfObj = KIWIXMLVMachineData -> new(\%vmConfigData);
 	return $vmConfObj;
 }
 
@@ -2613,7 +2613,7 @@ sub __genInstRepoArray {
 			priority => $repo -> getAttribute('priority'),
 			username => $repo -> getAttribute('username')
 		);
-		my $instRepo = KIWIXMLInstRepositoryData -> new($kiwi, \%init);
+		my $instRepo = KIWIXMLInstRepositoryData -> new(\%init);
 		if (! $instRepo) {
 			$kiwi -> error('KIWIXMLInstRepositoryData creation');
 			$kiwi -> failed();
@@ -2644,7 +2644,7 @@ sub __genMetadataChrootArray {
 			requires => $crNd -> getAttribute('requires'),
 			value    => $crNd -> textContent()
 		);
-		my $metaChroot = KIWIXMLProductMetaChrootData -> new($kiwi, \%cRinit);
+		my $metaChroot = KIWIXMLProductMetaChrootData -> new(\%cRinit);
 		if (! $metaChroot) {
 			$kiwi -> error('KIWIXMLProductMetaChrootData creation');
 			$kiwi -> failed();
@@ -2676,7 +2676,7 @@ sub __genMetadataFileArray{
 			target => $fileNd -> getAttribute('target'),
 			url    => $fileNd -> getAttribute('url')
 		);
-		my $metaFile = KIWIXMLProductMetaFileData -> new($kiwi, \%mFinit);
+		my $metaFile = KIWIXMLProductMetaFileData -> new(\%mFinit);
 		if (! $metaFile) {
 			$kiwi -> error('KIWIXMLProductMetaFileData creation');
 			$kiwi -> failed();
@@ -2714,7 +2714,7 @@ sub __genMetadataPkgsArray {
 		    script     => $pckgNd -> getAttribute('script'),
 		    source     => $pckgNd -> getAttribute('source')
 		);
-		my $prodPkg = KIWIXMLProductPackageData -> new($kiwi, \%init);
+		my $prodPkg = KIWIXMLProductPackageData -> new(\%init);
 		if (! $prodPkg) {
 			$kiwi -> error('KIWIXMLProductPackageData creation');
 			$kiwi -> failed();
@@ -2748,7 +2748,7 @@ sub __genProductArchitectureArray {
 				id       => $archN -> getAttribute('id'),
 				name     => $archN -> getAttribute('name')
 			);
-			my $archObj = KIWIXMLProductArchitectureData -> new($kiwi, \%init);
+			my $archObj = KIWIXMLProductArchitectureData -> new(\%init);
 			if (! $archObj) {
 				$kiwi -> error('KIWIXMLProductArchitectureData creation');
 				$kiwi -> failed();
@@ -2829,7 +2829,7 @@ sub __genRepoPackagesArray {
 		    script     => $pkgNd -> getAttribute('script'),
 		    source     => $pkgNd -> getAttribute('source')
 		);
-		my $prodPkg = KIWIXMLProductPackageData -> new($kiwi, \%init);
+		my $prodPkg = KIWIXMLProductPackageData -> new(\%init);
 		if (! $prodPkg) {
 			$kiwi -> error('KIWIXMLProductPackageData creation');
 			$kiwi -> failed();
@@ -2985,7 +2985,7 @@ sub __genTypeHash {
 		#==========================================
 		# store this type in %types
 		#------------------------------------------
-		my $typeObj = KIWIXMLTypeData -> new($kiwi, \%typeData);
+		my $typeObj = KIWIXMLTypeData -> new(\%typeData);
 		my %curType = (
 			ec2config  => $ec2Config,
 			machine    => $vmConfig,
@@ -3344,9 +3344,7 @@ sub __populateArchiveInfo {
 					bootinclude => $bootIncl,
 					name        => $name
 				);
-				my $archiveObj = KIWIXMLPackageArchiveData -> new (
-					$kiwi, \%archData
-				);
+				my $archiveObj = KIWIXMLPackageArchiveData -> new(\%archData);
 				my $accessID;
 				if ($bootIncl && $bootIncl eq 'true') {
 					$accessID = 'bootArchives';
@@ -3399,7 +3397,7 @@ sub __populateDescriptionInfo {
 		specification => $spec,
 		type          => $type
 	);
-	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi, \%descript);
+	my $descriptObj = KIWIXMLDescriptionData -> new (\%descript);
 	$this->{imageConfig}{description} = $descriptObj;
 	return $this;
 }
@@ -3524,7 +3522,7 @@ sub __populateDriverInfo {
 					arch => $arch,
 					name => $name
 				);
-				my $drvObj = KIWIXMLDriverData -> new($kiwi, \%drvData);
+				my $drvObj = KIWIXMLDriverData -> new(\%drvData);
 				my %storeData = (
 					accessID => 'drivers',
 					arch     => $arch,
@@ -3568,8 +3566,7 @@ sub __populateIgnorePackageInfo {
 					arch => $arch,
 					name => $name
 				);
-				my $ignoreObj = KIWIXMLPackageIgnoreData
-					-> new($kiwi, \%ignoreData);
+				my $ignoreObj = KIWIXMLPackageIgnoreData -> new(\%ignoreData);
 				my %storeData = (
 					accessID => 'ignorePkgs',
 					arch     => $arch,
@@ -3623,7 +3620,7 @@ sub __populatePackageInfo {
 					name        => $name,
 					replaces    => $replace
 				);
-				my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%pckgData);
+				my $pckgObj = KIWIXMLPackageData -> new(\%pckgData);
 				my @access;
 				if ($bootDel && $bootDel eq 'true') {
 					push @access, 'bootDelPkgs';
@@ -3695,7 +3692,7 @@ sub __populatePackageCollectionInfo {
 					name        => $name
 				);
 				my $collectObj = KIWIXMLPackageCollectData
-					-> new($kiwi, \%collectData);
+					-> new(\%collectData);
 				my $accessID;
 				if ($bootIncl && $bootIncl eq 'true') {
 					$accessID = 'bootPkgsCollect';
@@ -3746,7 +3743,7 @@ sub __populatePackageProductInfo {
 					name        => $name
 				);
 				my $prodObj = KIWIXMLPackageProductData -> new (
-					$kiwi, \%productData
+					\%productData
 				);
 				my %storeData = (
 					accessID => 'products',
@@ -3912,7 +3909,7 @@ sub __populateProfileInfo {
 			name        => $profName
 		);
 		$this->{imageConfig}{$profName}{profInfo} =
-			KIWIXMLProfileData -> new($kiwi, \%profile);
+			KIWIXMLProfileData -> new(\%profile);
 		# Handle default profile setting
 		if ( $import eq 'true') {
 			my @profs = ('kiwi_default', $profName);
@@ -3966,7 +3963,7 @@ sub __populateRepositoryInfo {
 			$profiles = 'kiwi_default';
 		}
 		my @profNames = split /,/, $profiles;
-		my $repo = KIWIXMLRepositoryData -> new ($kiwi, \%repoData);
+		my $repo = KIWIXMLRepositoryData -> new (\%repoData);
 		for my $profName (@profNames) {
 			my $repoRef = $this->{imageConfig}->{$profName}->{repoData};
 			if (! $repoRef) {
@@ -4020,7 +4017,7 @@ sub __populateStripInfo {
 					arch => $arch,
 					name => $name
 				);
-				my $stripObj = KIWIXMLStripData -> new($kiwi, \%stripData);
+				my $stripObj = KIWIXMLStripData -> new(\%stripData);
 				my %storeData = (
 					accessID => $access,
 					arch     => $arch,
@@ -4537,14 +4534,13 @@ sub getInstSourceSatSolvable {
 	# This function will return a hash containing the
 	# solvable and repo url per repo
 	# ----
-	my $kiwi  = shift;
 	my $repos = shift;
 	my %index = ();
 	#==========================================
 	# create solvable/repo index
 	#------------------------------------------
 	foreach my $repo (@{$repos}) {
-		my $solvable = getSingleInstSourceSatSolvable ($kiwi,$repo);
+		my $solvable = getSingleInstSourceSatSolvable ($repo);
 		if (! $solvable) {
 			return;
 		}
@@ -4571,7 +4567,7 @@ sub getSingleInstSourceSatSolvable {
 	# the satsolver toolkit is used and therefore required in
 	# order to allow this function to work correctly
 	# ----
-	my $kiwi = shift;
+	my $kiwi = KIWILog -> instance();
 	my $repo = shift;
 	$kiwi -> info ("--> Loading $repo...");
 	#==========================================
@@ -4662,7 +4658,7 @@ sub getSingleInstSourceSatSolvable {
 	#------------------------------------------
 	my $repoMD = $sdir."/repomd.xml"; unlink $repoMD;
 	foreach my $md (keys %repoxml) {
-		if (KIWIXML::getInstSourceFile_legacy ($kiwi,$repo.$md,$repoMD)) {
+		if (KIWIXML::getInstSourceFile_legacy ($repo.$md,$repoMD)) {
 			last if -e $repoMD;
 		}
 	}
@@ -4771,7 +4767,7 @@ sub getSingleInstSourceSatSolvable {
 		} else {
 			$destfile = $sdir."/$name-".$count;
 		}
-		if (KIWIXML::getInstSourceFile_legacy ($kiwi,$repo.$dist,$destfile)) {
+		if (KIWIXML::getInstSourceFile_legacy ($repo.$dist,$destfile)) {
 			$foundDist = 1;
 		}
 	}
@@ -4794,7 +4790,7 @@ sub getSingleInstSourceSatSolvable {
 	foreach my $patt (keys %patterns) {
 		my $name = $patterns{$patt};
 		$destfile = $sdir."/$name-".$count.".gz";
-		my $ok = KIWIXML::getInstSourceFile_legacy ($kiwi,$repo.$patt,$destfile);
+		my $ok = KIWIXML::getInstSourceFile_legacy ($repo.$patt,$destfile);
 		if (($ok) && ($name eq "patterns")) {
 			#==========================================
 			# get files listed in patterns
@@ -4814,7 +4810,7 @@ sub getSingleInstSourceSatSolvable {
 				}
 				my $base = dirname $patt;
 				my $file = $repo."/".$base."/".$line;
-				if (! KIWIXML::getInstSourceFile_legacy($kiwi,$file,$destfile)) {
+				if (! KIWIXML::getInstSourceFile_legacy($file,$destfile)) {
 					$kiwi -> warning ("--> Pattern file $line not found");
 					$kiwi -> skipped ();
 					next;
@@ -6667,7 +6663,7 @@ sub getList_legacy {
 					#------------------------------------------
 					# 1) try to use libsatsolver...
 					my $psolve = KIWISatSolver -> new (
-						$kiwi,\@pattlist,$urllist,"solve-patterns",
+						\@pattlist,$urllist,"solve-patterns",
 						undef,undef,$ptype
 					);
 					if (! defined $psolve) {
@@ -7824,7 +7820,7 @@ sub getTypes_legacy {
 	my @tnodes  = ();
 	my $gotprim = 0;
 	my @node    = $this->{optionsNodeList} -> get_nodelist();
-	my $urlhd   = KIWIURL -> new ($kiwi,$cmdL);
+	my $urlhd   = KIWIURL -> new ($cmdL);
 	foreach my $element (@node) {
 		if (! $this -> __requestedProfile ($element)) {
 			next;
@@ -8461,7 +8457,7 @@ sub __createURLList_legacy {
 	foreach my $source (@sourcelist) {
 		my $user = $repository{$source}[3];
 		my $pwd  = $repository{$source}[4];
-		my $urlHandler  = KIWIURL -> new ($kiwi,$cmdL,undef,$user,$pwd);
+		my $urlHandler  = KIWIURL -> new ($cmdL,undef,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		push (@urllist,$publics_url);
 		$urlhash{$source} = $publics_url;
@@ -8576,7 +8572,7 @@ sub __populateTypeInfo_legacy {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $cmdL   = $this->{cmdL};
-	my $urlhd  = KIWIURL -> new ($kiwi,$cmdL);
+	my $urlhd  = KIWIURL -> new ($cmdL);
 	my @node   = $this->{optionsNodeList} -> get_nodelist();
 	my @result = ();
 	my $first  = 1;

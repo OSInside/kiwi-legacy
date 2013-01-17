@@ -33,8 +33,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -51,7 +49,7 @@ sub test_ctor_argsInvalidHashNoName {
 	    path     => 'opensuse:///',
 		priority => '2'
 	);
-	my $repoDataObj = KIWIXMLInstRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLInstRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLInstRepositoryData: no "name" specified in '
 		. 'initialization structure.';
@@ -78,7 +76,7 @@ sub test_ctor_argsInvalidHashNoPath {
 		name => 'myRepo',
 		priority => '2'
 	);
-	my $repoDataObj = KIWIXMLInstRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLInstRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLInstRepositoryData: no "path" specified in '
 		.'initialization structure.';
@@ -105,7 +103,7 @@ sub test_ctor_argsInvalidHashNoPrio {
 		name => 'myRepo',
 	    path => 'opensuse:///'
 	);
-	my $repoDataObj = KIWIXMLInstRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLInstRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLInstRepositoryData: no "priority" specified in '
 		.'initialization structure.';
@@ -134,7 +132,7 @@ sub test_ctor_argsInvalidHashPassNoUsr {
 		path     => 'opensuse:///',
 		priority => '2'
 	);
-	my $repoDataObj = KIWIXMLInstRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLInstRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLInstRepositoryData: initialization data contains '
 		. 'password, but no username';
@@ -163,7 +161,7 @@ sub test_ctor_argsInvalidHashUsrNoPass {
 		priority => '2',
 		username => 'pablo'
 	);
-	my $repoDataObj = KIWIXMLInstRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLInstRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLInstRepositoryData: initialization data contains '
 		. 'username, but no password';
@@ -191,7 +189,7 @@ sub test_ctor_argsValidHash {
 		path     => 'opensuse:///',
 		priority => '2'
 	);
-	my $repoDataObj = KIWIXMLInstRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLInstRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -212,7 +210,7 @@ sub test_ctor_invalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = KIWIXMLInstRepositoryData -> new($kiwi, 'opensuse');
+	my $repoDataObj = KIWIXMLInstRepositoryData -> new('opensuse');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -234,7 +232,7 @@ sub test_ctor_noArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = KIWIXMLInstRepositoryData -> new($kiwi);
+	my $repoDataObj = KIWIXMLInstRepositoryData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLInstRepositoryData: must be constructed with '
 		. 'a keyword hash as argument';
@@ -688,7 +686,7 @@ sub __getInstRepoDataObj {
 				priority => '2',
 				username => 'testuser'
 	);
-	my $repoDataObj = KIWIXMLInstRepositoryData -> new($kiwi, \%init);
+	my $repoDataObj = KIWIXMLInstRepositoryData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

@@ -36,7 +36,7 @@ sub new {
 	# These three types of information have two different
 	# kinds of representations. For details look at KIWIXML.pl
 	# and the following methods there in:
-	# 
+	#
 	# - sub getInstSourceProductVar
 	# - sub getInstSourceProductOption
 	# - sub getInstSourceProductStuff

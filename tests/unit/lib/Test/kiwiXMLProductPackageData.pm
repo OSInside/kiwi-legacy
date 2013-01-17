@@ -35,8 +35,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -49,7 +47,7 @@ sub test_ctor_noArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLProductPackageData: must be constructed with a '
 		. 'keyword hash as argument';
@@ -73,7 +71,7 @@ sub test_ctor_simple {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'libtiff' );
-	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -99,7 +97,7 @@ sub test_ctor_unsuportedAddArchValue {
 	    addarch => 'tegra',
 		name    => 'python'
 	);
-	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -125,7 +123,7 @@ sub test_ctor_unsuportedArch {
 	    arch => 'tegra',
 		name => 'dia'
 	);
-	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -151,7 +149,7 @@ sub test_ctor_unsupportedKW {
 				arch     => 'ppc64',
 				filename => 'zypper'
 	);
-	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLProductPackageData: Unsupported keyword '
 		. "argument 'filename' in initialization structure.";
@@ -177,7 +175,7 @@ sub test_ctor_unsuportedOnlyArch {
 		name     => 'dia',
 	    onlyarch => 'tegra'
 	);
-	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -203,7 +201,7 @@ sub test_ctor_withArch {
 				arch => 'ppc64',
 				name => 'libpng'
 	);
-	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -448,7 +446,7 @@ sub test_setArch {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'libzypp');
-	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -480,7 +478,7 @@ sub test_setArch_invalid {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'snapper');
-	my $pckgDataObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLProductPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -526,7 +524,7 @@ sub __getPckgDataObj {
 		script      => 'myScript.csh',
 		source      => 'http:///download'
 	);
-	my $pckgObj = KIWIXMLProductPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLProductPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

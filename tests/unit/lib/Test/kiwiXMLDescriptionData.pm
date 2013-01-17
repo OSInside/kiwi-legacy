@@ -33,8 +33,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -55,7 +53,7 @@ sub test_ctor_incompleteHashRefAuthor {
 		type          => 'system'
 	);
 	# Test with a string arguments
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
+	my $descrpObj = KIWIXMLDescriptionData -> new(\%args);
 	my $expected = 'KIWIXMLDescriptionData: no "author" specified in '
 		. 'initialization structure.';
 	my $msg = $kiwi -> getMessage();
@@ -84,7 +82,7 @@ sub test_ctor_incompleteHashRefCont {
 		type          => 'system'
 	);
 	# Test with a string arguments
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
+	my $descrpObj = KIWIXMLDescriptionData -> new(\%args);
 	my $expected = 'KIWIXMLDescriptionData: no "contact" specified in '
 		. 'initialization structure.';
 	my $msg = $kiwi -> getMessage();
@@ -114,7 +112,7 @@ sub test_ctor_incompleteHashRefSpec {
 		type    => 'system'
 	);
 	# Test with a string arguments
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
+	my $descrpObj = KIWIXMLDescriptionData -> new(\%args);
 	my $expected = 'KIWIXMLDescriptionData: no "specification" given in '
 		. 'initialization structure.';
 	my $msg = $kiwi -> getMessage();
@@ -144,7 +142,7 @@ sub test_ctor_incompleteHashRefType {
 		specification => 'test case'
 	);
 	# Test with a string arguments
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
+	my $descrpObj = KIWIXMLDescriptionData -> new(\%args);
 	my $expected = 'KIWIXMLDescriptionData: no "type" specified in '
 		. 'initialization structure.';
 	my $msg = $kiwi -> getMessage();
@@ -172,7 +170,7 @@ sub test_ctor_invalidHashRefContact {
 				 type          => 'image',
 			);
 	# Test with a string arguments
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%init);
+	my $descrpObj = KIWIXMLDescriptionData -> new(\%init);
 	my $expected = 'KIWIXMLDescriptionData: expecting array ref as value '
 		. 'for "contact" argument.';
 	my $msg = $kiwi -> getMessage();
@@ -201,7 +199,7 @@ sub test_ctor_invalidHashRefType {
 				 type          => 'pablo',
 			);
 	# Test with a string arguments
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%init);
+	my $descrpObj = KIWIXMLDescriptionData -> new(\%init);
 	my $expected = 'object initialization: specified description type '
 		. "'pablo' is not supported.";
 	my $msg = $kiwi -> getMessage();
@@ -223,7 +221,7 @@ sub test_ctor_noArgs {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi);
+	my $descrpObj = KIWIXMLDescriptionData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLDescriptionData: must be constructed with '
 		. 'a keyword hash as argument';
@@ -249,7 +247,7 @@ sub test_ctor_unsupportedKW {
 				name => 'me',
 				type => 'boot'
 	);
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%init);
+	my $descrpObj = KIWIXMLDescriptionData -> new(\%init);
 
 	my $expected = 'KIWIXMLDescriptionData: Unsupported keyword argument '
 		. "'name' in initialization structure.";
@@ -280,7 +278,7 @@ sub test_ctor_validHashRef {
 		type          => 'boot',
 	);
 	# Test with a string arguments
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
+	my $descrpObj = KIWIXMLDescriptionData -> new(\%args);
 	$this -> assert_not_null($descrpObj);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -699,7 +697,7 @@ sub __getDescriptObj {
 		type          => 'boot',
 	);
 	# Test with a string arguments
-	my $descrpObj = KIWIXMLDescriptionData -> new($kiwi, \%args);
+	my $descrpObj = KIWIXMLDescriptionData -> new(\%args);
 	$this -> assert_not_null($descrpObj);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);

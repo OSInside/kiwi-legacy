@@ -41,8 +41,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -131,7 +129,7 @@ sub test_createPartitionIcompleteArgNoNum {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my %partInfo = ( type => '0x83' );
 	my $res = $pxeDataObj -> createPartition(\%partInfo);
 	my $msg = $kiwi -> getMessage();
@@ -155,7 +153,7 @@ sub test_createPartitionIcompleteArgNotype {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my %partInfo = ( number => 2 );
 	my $res = $pxeDataObj -> createPartition(\%partInfo);
 	my $msg = $kiwi -> getMessage();
@@ -179,7 +177,7 @@ sub test_createPartitionInvalidArgNum {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my %partInfo = ( number => '5',
 					type   => '0x83'
 				);
@@ -205,7 +203,7 @@ sub test_createPartitionInvalidArgType {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my $res = $pxeDataObj -> createPartition('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'createPartition: expecting hash ref as argument.';
@@ -296,7 +294,7 @@ sub test_createPartitionUnsupportedEntry {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my %partInfo = ( label  => 'root',
 					number => '3',
 					type   => '0x83'
@@ -323,7 +321,7 @@ sub test_createUnionFSConfig {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	$pxeDataObj = $pxeDataObj -> createUnionFSConfig('/dev/sdc1',
 													'/dev/sdc2',
 													'clicfs'
@@ -421,7 +419,7 @@ sub test_createUnionFSConfigInvalidType {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my $res = $pxeDataObj -> createUnionFSConfig('/dev/sdc1',
 												'/dev/sdc2',
 												'aufs'
@@ -446,7 +444,7 @@ sub test_createUnionFSConfigMissing2Args {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my $res = $pxeDataObj -> createUnionFSConfig('/dev/sdc1');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'createUnionFSConfig: must be called with 3 arguments, '
@@ -469,7 +467,7 @@ sub test_createUnionFSConfigMissing3rdArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my $res = $pxeDataObj -> createUnionFSConfig('/dev/sdc1',
 												'/dev/sdc2',
 												);
@@ -494,7 +492,7 @@ sub test_createUnionFSConfigNoArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my $res = $pxeDataObj -> createUnionFSConfig();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'createUnionFSConfig: must be called with 3 arguments, '
@@ -517,7 +515,7 @@ sub test_ctor {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -538,7 +536,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, 'foo');
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -572,7 +570,7 @@ sub test_ctor_initImproperPartsIDTooHigh {
 	    $id += 1;
 	}
 	my %init = ( partitions => \%partitions );
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Specified a parttion number larger than 4 in '
 	    . 'initialization hash.';
@@ -607,7 +605,7 @@ sub test_ctor_initImproperPartsTooMany {
 	    $id += 1;
 	}
 	my %init = ( partitions => \%partitions );
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Specified more than 4 partitions in initialization '
 	    . 'hash.';
@@ -632,7 +630,7 @@ sub test_ctor_initImproperUnionType {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( unionType => 'aufs' );
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Type specified for union fs is not supported, only '
 		. '"clicfs" is supported';
@@ -657,7 +655,7 @@ sub test_ctor_initIncompleteConfigNoDest {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( configSource   => '/wrk/packages' );
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Incomplete initialization hash "configDest" and '
 		. '"configSource" must be specified together.';
@@ -682,7 +680,7 @@ sub test_ctor_initIncompleteConfigNoSource {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( configDest   => '/srv/atftp/config' );
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Incomplete initialization hash "configDest" and '
 		. '"configSource" must be specified together.';
@@ -721,7 +719,7 @@ sub test_ctor_initIncompletePartitionNoType {
 					2 => \%diskData2
 					);
 	my %init = ( partitions   => \%partitions );
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Partition configuration without "type" specification '
 		. 'given.';
@@ -749,7 +747,7 @@ sub test_ctor_initIncompleteUnionRONoType {
 				unionRO => '/dev/sdb1',
 				unionRW => '/dev/sdb2'
 			);
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Incomplete initialization hash "unionRO", '
 		. '"unionRW", and "unionType" must be specified together.';
@@ -777,7 +775,7 @@ sub test_ctor_initIncompleteUnionRWNoRO {
 				unionRW   => '/dev/sdb2',
 				unionType => 'clicfs'
 			);
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Incomplete initialization hash "unionRO", '
 		. '"unionRW", and "unionType" must be specified together.';
@@ -805,7 +803,7 @@ sub test_ctor_initIncompleteUnionRWNoType {
 				unionRO => '/dev/sdb1',
 				unionRW => '/dev/sdb2'
 			);
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Incomplete initialization hash "unionRO", '
 		. '"unionRW", and "unionType" must be specified together.';
@@ -833,7 +831,7 @@ sub test_ctor_initIncompleteUnionRONoRW {
 				unionRO   => '/dev/sdb1',
 				unionType => 'clicfs'
 			);
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Incomplete initialization hash "unionRO", '
 		. '"unionRW", and "unionType" must be specified together.';
@@ -861,7 +859,7 @@ sub test_ctor_initIncompleteUnionTypeNoRO {
 				unionRW   => '/dev/sdb2',
 				unionType => 'clicfs'
 			);
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Incomplete initialization hash "unionRO", '
 		. '"unionRW", and "unionType" must be specified together.';
@@ -889,7 +887,7 @@ sub test_ctor_initIncompleteUnionTypeNoRW {
 				unionRO   => '/dev/sdb1',
 				unionType => 'clicfs'
 			);
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Incomplete initialization hash "unionRO", '
 		. '"unionRW", and "unionType" must be specified together.';
@@ -914,7 +912,7 @@ sub test_ctor_initIncompleteUnionOnlyRO {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( unionRO => '/dev/sda1' );
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Incomplete initialization hash "unionRO", '
 		. '"unionRW", and "unionType" must be specified together.';
@@ -939,7 +937,7 @@ sub test_ctor_initIncompleteUnionOnlyRW {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( unionRW => '/dev/sda1' );
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Incomplete initialization hash "unionRO", '
 		. '"unionRW", and "unionType" must be specified together.';
@@ -964,7 +962,7 @@ sub test_ctor_initIncompleteUnionOnlyType {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( unionType => 'clicfs' );
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Incomplete initialization hash "unionRO", '
 		. '"unionRW", and "unionType" must be specified together.';
@@ -999,7 +997,7 @@ sub test_ctor_initInvalidDataArch {
 				configArch => 'x86_64',
 				partitions => \%disks
 	);
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting an array ref as entry of "configArch" in  '
 		. 'the initialization hash.';
@@ -1028,7 +1026,7 @@ sub test_ctor_initUnsupportedData {
 				kernel    => 'myKernel',
 				disks     => 'foo'
 			);
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLPXEDeployData: Unsupported keyword argument '
 		. "'disks' in initialization structure.";
@@ -1064,7 +1062,7 @@ sub test_ctor_initUnsupportedDataPartitions {
 				configArch => \@arches,
 				partitions => \%disks
 	);
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Unsupported option in initialization structure '
 	    . "for partition initialization, found 'unit'";
@@ -1098,7 +1096,7 @@ sub test_ctor_withInit {
 				configArch => \@arches,
 				partitions => \%disks
 	);
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1976,7 +1974,7 @@ sub test_setBlocksize {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	$pxeDataObj = $pxeDataObj -> setBlocksize('8192');
 	$this -> assert_not_null($pxeDataObj);
 	my $msg = $kiwi -> getMessage();
@@ -2005,7 +2003,7 @@ sub test_setBlocksizeReset {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	$pxeDataObj = $pxeDataObj -> setBlocksize('8192');
 	$this -> assert_not_null($pxeDataObj);
 	my $msg = $kiwi -> getMessage();
@@ -2043,7 +2041,7 @@ sub test_setConfiguration {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	$pxeDataObj = $pxeDataObj -> setConfiguration('/srv/atftp/config',
 												'/wrk/packages');
 	$this -> assert_not_null($pxeDataObj);
@@ -2285,7 +2283,7 @@ sub test_setConfigurationArchNoConfig {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my $res = $pxeDataObj -> setConfigurationArch('ppc64');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setConfigurationArch: configuration is not setup, call '
@@ -2316,7 +2314,7 @@ sub test_setDevice {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	$pxeDataObj = $pxeDataObj -> setDevice('/dev/sdc1');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2375,7 +2373,7 @@ sub test_setInitrd {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	$pxeDataObj = $pxeDataObj -> setInitrd('initrd-3.4.3-0.0');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2433,7 +2431,7 @@ sub test_setKernel {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	$pxeDataObj = $pxeDataObj -> setKernel('vmlinuz-3.2.29-33');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2618,7 +2616,7 @@ sub test_setPartitionMountpointNoPartdata {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my $res = $pxeDataObj -> setPartitionMountpoint(2, '/swap');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setPartitionMountpoint: no partition data set, call '
@@ -2767,7 +2765,7 @@ sub test_setPartitionSizeNoPartdata {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my $res = $pxeDataObj -> setPartitionSize(2, '/swap');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setPartitionSize: no partition data set, call '
@@ -2916,7 +2914,7 @@ sub test_setPartitionTargetNoPartdata {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my $res = $pxeDataObj -> setPartitionTarget(2, 'false');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setPartitionTarget: no partition data set, call '
@@ -3065,7 +3063,7 @@ sub test_setPartitionTypeNoPartdata {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	my $res = $pxeDataObj -> setPartitionType(2, '0x82');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setPartitionType: no partition data set, call '
@@ -3088,7 +3086,7 @@ sub test_setServer {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	$pxeDataObj = $pxeDataObj -> setServer('10.10.10.1');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3146,7 +3144,7 @@ sub test_setTimeout {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
 	$pxeDataObj = $pxeDataObj -> setTimeout('50');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3240,7 +3238,7 @@ sub __getPXEDeployObj {
 				unionRW      => '/dev/sdb2',
 				unionType    => 'clicfs'
 			);
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new($kiwi, \%init);
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

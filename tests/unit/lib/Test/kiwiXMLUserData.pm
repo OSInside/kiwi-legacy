@@ -33,8 +33,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -47,7 +45,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $userDataObj = KIWIXMLUserData -> new($kiwi, 'foo');
+	my $userDataObj = KIWIXMLUserData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -74,7 +72,7 @@ sub test_ctor_initIncompleteNoGroup {
 				home => '/home/me',
 				name => 'me'
 			);
-	my $userDataObj = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = KIWIXMLUserData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLUserData: no "group" name specified in '
 		. 'initialization structure.';
@@ -102,7 +100,7 @@ sub test_ctor_initIncompleteNoHome {
 				group => 'user',
 				name  => 'me'
 			);
-	my $userDataObj = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = KIWIXMLUserData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLUserData: no "home" directory specified in '
 		. 'initialization structure.';
@@ -130,7 +128,7 @@ sub test_ctor_initIncompleteNoName {
 				group => 'user',
 				home  => '/home/me'
 			);
-	my $userDataObj = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = KIWIXMLUserData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLUserData: no user "name" specified in '
 		. 'initialization structure.';
@@ -160,7 +158,7 @@ sub test_ctor_initLowGroupID {
 				home    => '/home/me',
 				name    => 'me'
 			);
-	my $userDataObj = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = KIWIXMLUserData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: assigned ID is less than 1000, '
 		. 'this may conflict with system assigned IDs for users and groups.';
@@ -190,7 +188,7 @@ sub test_ctor_initLowUserID {
 				name   => 'me',
 				userid => '600'
 			);
-	my $userDataObj = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = KIWIXMLUserData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: assigned ID is less than 1000, '
 		. 'this may conflict with system assigned IDs for users and groups.';
@@ -220,7 +218,7 @@ sub test_ctor_initUnsupportedData {
 				name   => 'me',
 				userNM => 'metoo'
 			);
-	my $userDataObj = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = KIWIXMLUserData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLUserData: Unsupported keyword argument '
 		. "'userNM' in initialization structure.";
@@ -250,7 +248,7 @@ sub test_ctor_initUnsupportedPwdFormat {
 				name         => 'me',
 				passwdformat => 'foo'
 			);
-	my $userDataObj = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = KIWIXMLUserData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: unexpected value for password '
 		. 'format, expecting encrypted or plain.';
@@ -273,7 +271,7 @@ sub test_ctor_noInit {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $userDataObj = KIWIXMLUserData -> new($kiwi);
+	my $userDataObj = KIWIXMLUserData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLUserData: must be constructed with a '
 		. 'keyword hash as argument';
@@ -301,7 +299,7 @@ sub test_ctor_withInit {
 				home   => '/home/me',
 				name   => 'me'
 			);
-	my $userDataObj = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = KIWIXMLUserData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -432,7 +430,7 @@ sub test_getPasswordFormatDefault {
 				home   => '/home/me',
 				name   => 'me'
 			);
-	my $userDataObj = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = KIWIXMLUserData -> new(\%init);
 	my $pwdf = $userDataObj -> getPasswordFormat();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1192,7 +1190,7 @@ sub __getUserObj {
 		shell        => '/usr/bin/zsh',
 		userid       => '1111'
 	);
-	my $userDataObj = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = KIWIXMLUserData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

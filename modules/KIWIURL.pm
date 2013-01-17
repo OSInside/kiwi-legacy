@@ -44,7 +44,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------	
-	my $kiwi = shift;
 	my $cmdL = shift;
 	my $root = shift;
 	my $user = shift;
@@ -52,7 +51,7 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{kiwi} = $kiwi;
+	$this->{kiwi} = KIWILog -> instance();
 	$this->{root} = $root;
 	$this->{user} = $user;
 	$this->{pwd}  = $pwd;

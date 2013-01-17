@@ -45,10 +45,6 @@ sub new {
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
-	#==========================================
-	# Module Parameters
-	#------------------------------------------
-	my $kiwi = shift;
 	my @supportedRepos = qw (
 		apt-deb apt-rpm deb-dir mirrors red-carpet
 		rpm-dir rpm-md slack-site up2date-mirrors
@@ -59,7 +55,7 @@ sub new {
 	#------------------------------------------
 	$this->{imageTgtDir}             = '';
 	$this->{imageIntermediateTgtDir} = '';
-	$this->{kiwi}                    = $kiwi;
+	$this->{kiwi}                    = KIWILog -> instance();
 	$this->{supportedRepoTypes}      = \@supportedRepos;
 	#==========================================
 	# Store Object data

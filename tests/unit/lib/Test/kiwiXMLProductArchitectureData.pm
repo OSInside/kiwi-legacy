@@ -33,8 +33,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -48,7 +46,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prodArchObj = KIWIXMLProductArchitectureData -> new($kiwi, 'foo');
+	my $prodArchObj = KIWIXMLProductArchitectureData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -76,7 +74,7 @@ sub test_ctor_initInvalidFallback {
 		id       => 'i686',
 		name     => 'intel'
 	);
-	my $prodArchObj = KIWIXMLProductArchitectureData -> new($kiwi, \%init);
+	my $prodArchObj = KIWIXMLProductArchitectureData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Specified 'fallback' has unexpected value 'i786'";
 	$this -> assert_str_equals($expected, $msg);
@@ -103,7 +101,7 @@ sub test_ctor_initInvalidID {
 		id   => 'tegra',
 		name => 'arm'
 	);
-	my $prodArchObj = KIWIXMLProductArchitectureData -> new($kiwi, \%init);
+	my $prodArchObj = KIWIXMLProductArchitectureData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Specified 'id' has unexpected value 'tegra'";
 	$this -> assert_str_equals($expected, $msg);
@@ -129,7 +127,7 @@ sub test_ctor_initInvalidNoID {
 	 my %init = (
 		name => 'arm'
 	);
-	my $prodArchObj = KIWIXMLProductArchitectureData -> new($kiwi, \%init);
+	my $prodArchObj = KIWIXMLProductArchitectureData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLProductArchitectureData: no "id" specified in '
 		. 'initialization structure.';
@@ -156,7 +154,7 @@ sub test_ctor_initInvalidNoName {
 	 my %init = (
 		id => 'ppc64'
 	);
-	my $prodArchObj = KIWIXMLProductArchitectureData -> new($kiwi, \%init);
+	my $prodArchObj = KIWIXMLProductArchitectureData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLProductArchitectureData: no "name" specified in '
 		. 'initialization structure.';
@@ -181,7 +179,7 @@ sub test_ctor_initUnsupportedData {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( arch => 'ia64' );
-	my $prodArchObj = KIWIXMLProductArchitectureData -> new($kiwi, \%init);
+	my $prodArchObj = KIWIXMLProductArchitectureData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLProductArchitectureData: Unsupported keyword '
 		. "argument 'arch' in initialization structure.";
@@ -303,7 +301,7 @@ sub __getProdArchObj {
 		id       => 'x86_64',
 		name     => 'intel'
 	);
-	my $prodArchObj = KIWIXMLProductArchitectureData -> new($kiwi, \%init);
+	my $prodArchObj = KIWIXMLProductArchitectureData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

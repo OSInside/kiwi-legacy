@@ -34,8 +34,6 @@ sub new {
 	my $this = shift -> SUPER::new(@_);
 	my $baseDir = $this -> getDataDir() . '/kiwiImageCreator/';
 	$this -> {baseDir} = $baseDir;
-	$this -> {kiwi}    = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -48,7 +46,7 @@ sub test_ctor_noCmdlArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $kic = KIWIImageCreator -> new($kiwi);
+	my $kic = KIWIImageCreator -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIImageCreator: expecting KIWICommandLine object as '
 		. 'second argument.';
@@ -73,7 +71,7 @@ sub test_prepBootImg_noCfgDir {
 	my $cmd = $this -> __getCmdObj();
 	my $confDir = $this -> {baseDir} . 'prepareXmlRoot';
 	$cmd -> setConfigDir($confDir);
-	my $kic = KIWIImageCreator -> new($kiwi, $cmd);
+	my $kic = KIWIImageCreator -> new($cmd);
 	my $res = $kic -> prepareBootImage('ola');
 	my $expectedMsg = 'prepareBootImage: config dir "ola" does not exist';
 	my $msg = $kiwi -> getMessage();
@@ -99,7 +97,7 @@ sub test_prepBootImg_noCfgDirArg {
 	my $cmd = $this -> __getCmdObj();
 	my $confDir = $this -> {baseDir} . 'prepareXmlRoot';
 	$cmd -> setConfigDir($confDir);
-	my $kic = KIWIImageCreator -> new($kiwi, $cmd);
+	my $kic = KIWIImageCreator -> new($cmd);
 	my $res = $kic -> prepareBootImage();
 	my $expectedMsg = 'prepareBootImage: no configuration directory defined';
 	my $msg = $kiwi -> getMessage();
@@ -125,7 +123,7 @@ sub test_prepBootImg_noRootDirArg {
 	my $cmd = $this -> __getCmdObj();
 	my $confDir = $this -> {baseDir} . 'prepareXmlRoot';
 	$cmd -> setConfigDir($confDir);
-	my $kic = KIWIImageCreator -> new($kiwi,$cmd);
+	my $kic = KIWIImageCreator -> new($cmd);
 	my $res = $kic -> prepareBootImage('/tmp');
 	my $expectedMsg = 'prepareBootImage: no root traget defined';
 	my $msg = $kiwi -> getMessage();
@@ -151,7 +149,7 @@ sub test_prepImg_noRootTgt {
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCmdObj();
 	$cmd -> setConfigDir($this -> {baseDir} . 'prepareNoRoot');
-	my $kic = KIWIImageCreator -> new($kiwi, $cmd);
+	my $kic = KIWIImageCreator -> new($cmd);
 	my $res = $kic -> prepareImage();
 	my $info = $kiwi -> getInfoMessage();
 	my $expectedIMsg = "Description provides no MD5 hash, check\n"
@@ -199,7 +197,7 @@ sub test_prepImg_cmdRootTgt {
 	my $repoParentDir = $this -> createTestTmpDir();
 	my $repoOrig = $this -> getDataDir();
 	system "cp -r $repoOrig/kiwiTestRepo $repoParentDir";
-	my $kic = KIWIImageCreator -> new($kiwi, $cmd);
+	my $kic = KIWIImageCreator -> new($cmd);
 	my $res = $kic -> prepareImage();
 	# Look for e specific file in the target directory to provide a base
 	# verification that the prep step worked
@@ -245,7 +243,7 @@ sub test_prepImg_xmlRootTgt {
 	my $repoParentDir = $this -> createTestTmpDir();
 	my $repoOrig = $this -> getDataDir();
 	system "cp -r $repoOrig/kiwiTestRepo $repoParentDir";
-	my $kic = KIWIImageCreator -> new($kiwi, $cmd);
+	my $kic = KIWIImageCreator -> new($cmd);
 	my $res = $kic -> prepareImage();
 	# Look for e specific file in the target directory to provide a base
 	# verification that the prep step worked
@@ -274,7 +272,7 @@ sub __getCmdObj {
 	# Helper method to create a CommandLine object;
 	# ---
 	my $this = shift;
-	my $cmd = KIWICommandLine -> new($this -> {kiwi});
+	my $cmd = KIWICommandLine -> new();
 	return $cmd;
 }
 

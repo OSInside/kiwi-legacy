@@ -33,8 +33,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -47,7 +45,7 @@ sub test_ctor {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prodOptObj = KIWIXMLProductOptionsData -> new($kiwi);
+	my $prodOptObj = KIWIXMLProductOptionsData -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -68,7 +66,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $prodOptObj = KIWIXMLProductOptionsData -> new($kiwi, 'foo');
+	my $prodOptObj = KIWIXMLProductOptionsData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -105,7 +103,7 @@ my %opts = (
 		productoption => \%opts,
 		productvar    => \%vars
 	);
-	my $prodOptObj = KIWIXMLProductOptionsData -> new($kiwi, \%init);
+	my $prodOptObj = KIWIXMLProductOptionsData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: expecting hash ref as value '
 		. "for 'productinfo' entry in initialization hash.";
@@ -144,7 +142,7 @@ sub test_ctor_invalidDataTOpt {
 		productoption => 'opts',
 		productvar    => \%vars
 	);
-	my $prodOptObj = KIWIXMLProductOptionsData -> new($kiwi, \%init);
+	my $prodOptObj = KIWIXMLProductOptionsData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: expecting hash ref as value '
 		. "for 'productoption' entry in initialization hash.";
@@ -182,7 +180,7 @@ sub test_ctor_invalidDataTVar {
 		productoption => \%opts,
 		productvar    => 'var'
 	);
-	my $prodOptObj = KIWIXMLProductOptionsData -> new($kiwi, \%init);
+	my $prodOptObj = KIWIXMLProductOptionsData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: expecting hash ref as value '
 		. "for 'productvar' entry in initialization hash.";
@@ -207,7 +205,7 @@ sub test_ctor_initUnsupportedData {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( bootparam => 'kiwidebug=1' );
-	my $prodOptObj = KIWIXMLProductOptionsData -> new($kiwi, \%init);
+	my $prodOptObj = KIWIXMLProductOptionsData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLProductOptionsData: Unsupported keyword argument '
 		. "'bootparam' in initialization structure.";
@@ -558,7 +556,7 @@ sub __getProdOptObj {
 		productoption => \%opts,
 		productvar    => \%vars
 	);
-	my $prodOptObj = KIWIXMLProductOptionsData -> new($kiwi, \%init);
+	my $prodOptObj = KIWIXMLProductOptionsData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

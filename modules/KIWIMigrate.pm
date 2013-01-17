@@ -46,7 +46,7 @@ use KIWIQX qw (qxx);
 sub new {
 	# ...
 	# Create a new KIWIMigrate object which is used to gather
-	# information on the running system 
+	# information on the running system
 	# ---
 	#==========================================
 	# Object setup
@@ -57,7 +57,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi = shift;
 	my $dest = shift;
 	my $name = shift;
 	my $excl = shift;
@@ -70,6 +69,7 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	my $code;
 	my $data;
 	if (! $main::global) {
@@ -1121,7 +1121,7 @@ sub getPackageList {
 		}
 		$this->{patterns} = \@patlist;
 		my $psolve = KIWISatSolver -> new (
-			$kiwi,\@patlist,\@urllist,"solve-patterns",
+			\@patlist,\@urllist,"solve-patterns",
 			undef,undef,"plusRecommended","merged-solvable"
 		);
 		my @result = ();
@@ -1174,7 +1174,7 @@ sub getPackageList {
 			my @rest = ();
 			my $pool = $psolve -> getPool();
 			my $xsolve = KIWISatSolver -> new (
-				$kiwi,\@result,\@urllist,"solve-packages",
+				\@result,\@urllist,"solve-packages",
 				$pool,undef,"plusRecommended","merged-solvable"
 			);
 			if (! defined $xsolve) {
