@@ -1264,7 +1264,8 @@ sub setupInstallStick {
 			#==========================================
 			# build boot filesystem
 			#------------------------------------------
-			if (! $this -> setupFilesystem ($bootfs,$root,"install-boot",1)) {
+			if (! $this -> setupFilesystem ($bootfs,$root,"install-boot","BOOT")
+			) {
 				$this -> cleanStack ();
 				return;
 			}
@@ -2528,7 +2529,7 @@ sub setupBootDisk {
 		#==========================================
 		# build boot filesystem
 		#------------------------------------------
-		if (! $this -> setupFilesystem ($bootfs,$boot,"boot",1)) {
+		if (! $this -> setupFilesystem ($bootfs,$boot,"boot","BOOT")) {
 			$this -> cleanStack ();
 			return;
 		}
@@ -2537,7 +2538,7 @@ sub setupBootDisk {
 			# build jump boot filesystem
 			#------------------------------------------
 			my $jump = $deviceMap{jump};
-			if (! $this -> setupFilesystem ('fat16',$jump,"jump",1)) {
+			if (! $this -> setupFilesystem ('fat16',$jump,"jump","EFI")) {
 				$this -> cleanStack ();
 				return;
 			}
@@ -6196,7 +6197,7 @@ sub setupFilesystem {
 				$fsopts.= " -N $this->{inodes}";
 			}
 			if ($bootp) {
-				$fsopts.= " -L 'BOOT'";
+				$fsopts.= " -L '".$bootp."'";
 				$type{fsnocheck} = 'true';
 			}
 			my $tuneopts = '';
@@ -6225,7 +6226,7 @@ sub setupFilesystem {
 				$fsopts.= " -F 32";
 			}
 			if ($bootp) {
-				$fsopts.= " -n 'BOOT'";
+				$fsopts.= " -n '".$bootp."'";
 			}
 			$status = qxx ("$fstool $fsopts $device 2>&1");
 			$result = $? >> 8;

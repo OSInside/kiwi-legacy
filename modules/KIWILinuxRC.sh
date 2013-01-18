@@ -8716,17 +8716,17 @@ function setupBootPartition {
 		export imageBootDevice=$(ddn $imageDiskDevice $BID)
 	fi
 	#======================================
+	# Probe boot partition filesystem
+	#--------------------------------------
+	probeFileSystem $(ddn $imageDiskDevice $BID)
+	fs_type=$FSTYPE ; FSTYPE=$FSTYPE_SAVE
+	export bootPartitionFSType=$fs_type
+	#======================================
 	# Export bootid if not yet done
 	#--------------------------------------
 	if [ -z "$bootid" ];then
 		export bootid=$BID
 	fi
-	#======================================
-	# Probe boot partition filesystem
-	#--------------------------------------
-	probeFileSystem $(ddn $imageDiskDevice $bootid)
-	fs_type=$FSTYPE ; FSTYPE=$FSTYPE_SAVE
-	export bootPartitionFSType=$fs_type
 	#======================================
 	# Sanity checks
 	#--------------------------------------
