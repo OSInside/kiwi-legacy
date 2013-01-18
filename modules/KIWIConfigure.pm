@@ -205,8 +205,8 @@ sub setupUsersGroups {
 	my $kiwi  = $this->{kiwi};
 	my $xml   = $this->{xml};
 	my $root  = $this->{root};
-	my %users = $xml -> getUsers_legacy();
-	if (%users) {
+	my $users = $xml -> getUsers();
+	if ($users) {
 		if (! -x "$root/usr/sbin/useradd") {
 			$kiwi -> error ("Missing useradd command");
 			$kiwi -> failed ();
@@ -222,18 +222,20 @@ sub setupUsersGroups {
 			$kiwi -> failed ();
 			return;
 		}
-		foreach my $user (keys %users) {
-			my $adduser  = "/usr/sbin/useradd";
-			my $moduser  = "/usr/sbin/usermod";
-			my $addgroup = "/usr/sbin/groupadd";
-			my $group = $users{$user}{group};
-			my $gid   = $users{$user}{gid};
-			my $uid   = $users{$user}{uid};
-			my $pwd   = $users{$user}{pwd};
-			my $home  = $users{$user}{home};
-			my $shell = $users{$user}{shell};
-			my $realname = $users{$user}{realname};
-			my $pwdformat= $users{$user}{pwdformat};
+		for my $user (@{$users}) {
+			my $adduser   = "/usr/sbin/useradd";
+			my $moduser   = "/usr/sbin/usermod";
+			my $addgroup  = "/usr/sbin/groupadd";
+			my $group     = $user -> getGroupName();
+			my $gid       = $user -> getGroupID();
+			my $logShell  = $user -> getLoginShell();
+			my $pwd       = $user -> getPassword();
+			my $pwdformat = $user -> getPasswordFormat();
+			my $uHome     = $user -> getUserHomeDir();
+			my $uID       = $user -> getUserID();
+			my $uName     = $user -> getUserName();
+			my $uRname    = $user -> getUserRealName();
+
 			if ((defined $pwdformat) && ($pwdformat eq 'plain')) {
 				$pwd = main::createPassword ($pwd);
 			}
@@ -241,13 +243,13 @@ sub setupUsersGroups {
 				$adduser .= " -p '$pwd'";
 				$moduser .= " -p '$pwd'";
 			}
-			if (defined $shell) {
-				$adduser .= " -s '$shell'";
-				$moduser .= " -s '$shell'";
+			if (defined $logShell) {
+				$adduser .= " -s '$logShell'";
+				$moduser .= " -s '$logShell'";
 			}
-			if (defined $home) {
-				$home = quoteshell ($home);
-				$adduser .= " -m -d \"$home\"";
+			if (defined $uHome) {
+				$uHome = quoteshell ($uHome);
+				$adduser .= " -m -d \"$uHome\"";
 			}
 			if (defined $gid) {
 				# add user to primary group by group ID
@@ -258,8 +260,8 @@ sub setupUsersGroups {
 				$adduser .= " -g $group";
 				$moduser .= " -g $group";
 			}
-			if (defined $uid) {
-				$adduser .= " -u $uid";
+			if (defined $uID) {
+				$adduser .= " -u $uID";
 			}
 			if (defined $group) {
 				# create group if it does not exist
@@ -284,20 +286,20 @@ sub setupUsersGroups {
 					$kiwi -> done();
 				}
 			}
-			if (defined $realname) {
-				$realname = quoteshell ($realname);
-				$adduser .= " -c \"$realname\"";
-				$moduser .= " -c \"$realname\"";
+			if (defined $uRname) {
+				$uRname = quoteshell ($uRname);
+				$adduser .= " -c \"$uRname\"";
+				$moduser .= " -c \"$uRname\"";
 			}
-			my $data = qxx ( "chroot $root grep -q ^$user: /etc/passwd 2>&1" );
+			my $data = qxx ("chroot $root grep -q ^$uName: /etc/passwd 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {
-				$kiwi -> info ("Adding user: $user [$group]");
-				$data = qxx ( "chroot $root $adduser $user 2>&1" );
+				$kiwi -> info ("Adding user: $uName [$group]");
+				$data = qxx ( "chroot $root $adduser $uName 2>&1" );
 				$code = $? >> 8;
 			} else {
-				$kiwi -> info ("Modifying user: $user [$group]");
-				$data = qxx ( "chroot $root $moduser $user 2>&1" );
+				$kiwi -> info ("Modifying user: $uName [$group]");
+				$data = qxx ( "chroot $root $moduser $uName 2>&1" );
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -307,9 +309,10 @@ sub setupUsersGroups {
 				return;
 			}
 			$kiwi -> done ();
-			if ((defined $home) && (-d "$root/$home")) {
-				$kiwi -> info("Setting owner/group permissions $user [$group]");
-				$data = qxx ( "chroot $root chown -R $user:$group $home 2>&1" );
+			if ((defined $uHome) && (-d "$root/$uHome")) {
+				my $iMsg = "Setting owner/group permissions $uName [$group]";
+				$kiwi -> info($iMsg);
+				$data = qxx("chroot $root chown -R $uName:$group $uHome 2>&1");
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();

@@ -7879,45 +7879,6 @@ sub getURLHash_legacy {
 }
 
 #==========================================
-# getUsers_legacy
-#------------------------------------------
-sub getUsers_legacy {
-	# ...
-	# Receive a list of users to be added into the image
-	# the user specification contains an optional password
-	# and group. If the group doesn't exist it will be created
-	# ---
-	my $this   = shift;
-	my %result = ();
-	my @node   = $this->{usrdataNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		my $group = $element -> getAttribute("group");
-		my $gid   = $element -> getAttribute("id");
-		my @ntag  = $element -> getElementsByTagName ("user");
-		foreach my $element (@ntag) {
-			my $name = $element -> getAttribute ("name");
-			my $uid  = $element -> getAttribute ("id");
-			my $pwd  = $element -> getAttribute ("password");
-			my $pwdformat = $element -> getAttribute ("pwdformat");
-			my $home = $element -> getAttribute ("home");
-			my $realname = $element -> getAttribute ("realname");
-			my $shell = $element -> getAttribute ("shell");
-			if (defined $name) {
-				$result{$name}{group} = $group;
-				$result{$name}{gid}   = $gid;
-				$result{$name}{uid}   = $uid;
-				$result{$name}{home}  = $home;
-				$result{$name}{pwd}   = $pwd;
-				$result{$name}{pwdformat}= $pwdformat;
-				$result{$name}{realname} = $realname;
-				$result{$name}{shell} = $shell;
-			}
-		}
-	}
-	return %result;
-}
-
-#==========================================
 # getVMwareConfig_legacy
 #------------------------------------------
 sub getVMwareConfig_legacy {
