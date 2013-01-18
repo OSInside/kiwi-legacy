@@ -32,8 +32,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -47,7 +45,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi, 'foo');
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -73,7 +71,7 @@ sub test_ctor_missingArgScript {
 		target => '/installroot',
 		url    => 'iso:///media1'
 	);
-	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi, \%init);
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLProductMetaFileData: no "script" specified in '
 		. 'initialization structure.';
@@ -100,7 +98,7 @@ sub test_ctor_missingArgTarget {
 		script => 'myFixup.sh',
 		url    => 'iso:///media1'
 	);
-	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi, \%init);
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLProductMetaFileData: no "target" specified in '
 		. 'initialization structure.';
@@ -127,7 +125,7 @@ sub test_ctor_missingArgURL {
 		script => 'myFixup.sh',
 		target => '/installroot'
 	);
-	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi, \%init);
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLProductMetaFileData: no "url" specified in '
 		. 'initialization structure.';
@@ -150,7 +148,7 @@ sub test_ctor_noArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi);
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLProductMetaFileData: must be constructed with a '
 		. 'keyword hash as argument';
@@ -179,7 +177,7 @@ sub test_ctor_unsupportedKW {
 		target => '/installroot',
 		url    => 'iso:///media1'
 	);
-	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi, \%init);
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLProductMetaFileData: Unsupported keyword '
 		. "argument 'arch' in initialization structure.";
@@ -272,7 +270,7 @@ sub __getProdMetaFileObj {
 		target => '/installroot',
 		url    => 'iso:///media1'
 	);
-	my $fileDataObj = KIWIXMLProductMetaFileData -> new($kiwi, \%init);
+	my $fileDataObj = KIWIXMLProductMetaFileData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

@@ -41,8 +41,6 @@ sub new {
 	my $this = shift -> SUPER::new(@_);
 	my $baseDir = $this -> getDataDir() . '/kiwiXMLInfo/';
 	$this -> {baseDir} = $baseDir;
-	$this -> {kiwi}    = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -55,9 +53,9 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $cmdL = KIWICommandLine -> new($kiwi);
+	my $cmdL = KIWICommandLine -> new();
 	# No argument for CommandLine object
-	my $info = KIWIXMLInfo -> new($kiwi, $cmdL);
+	my $info = KIWIXMLInfo -> new($cmdL);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Invalid KIWICommandLine object, no configuration '
 		. 'directory.';
@@ -81,7 +79,7 @@ sub test_ctor_missArg {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	# No argument for CommandLine object
-	my $info = KIWIXMLInfo -> new($kiwi);
+	my $info = KIWIXMLInfo -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLInfo: expecting KIWICommandLine object as '
 		. 'second argument.';
@@ -530,7 +528,7 @@ sub __getInfoObj {
 	# ---
 	my $this = shift;
 	my $cmd  = shift;
-	my $info = KIWIXMLInfo -> new($this -> {kiwi}, $cmd);
+	my $info = KIWIXMLInfo -> new($cmd);
 
 	return $info;
 }
@@ -543,7 +541,7 @@ sub __getCmdl {
 	# Helper to create a command line object
 	# ---
 	my $this = shift;
-	return KIWICommandLine -> new($this -> {kiwi});
+	return KIWICommandLine -> new();
 }
 
 

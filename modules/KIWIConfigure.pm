@@ -42,11 +42,14 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi = shift;
 	my $xml  = shift;
 	my $root = shift;
 	my $imageDesc = shift;
 	my $imageDest = shift;
+	#==========================================
+	# Argument checking
+	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	if (! defined $xml) {
 		$kiwi -> error ("No XML reference specified");
 		$kiwi -> failed ();

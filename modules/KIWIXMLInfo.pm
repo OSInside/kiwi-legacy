@@ -54,12 +54,12 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi = shift;
 	my $cmdL = shift;
 	my $xml  = shift;
 	#==========================================
 	# Check pre-conditions
 	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	if (! defined $cmdL) {
 		my $msg = 'KIWIXMLInfo: expecting KIWICommandLine object as '
 			. 'second argument.';
@@ -611,13 +611,13 @@ sub __xmlSetup {
 	#------------------------------------------
 	my $buildProfs = $this -> {buildProfiles};
 	my $configDir  = $this -> {configDir};
-	my $locator = KIWILocator -> new($kiwi);
+	my $locator = KIWILocator -> new();
 	my $controlFile = $locator -> getControlFile ($configDir);
 	if (! $controlFile) {
 		return;
 	}
 	my $validator = KIWIXMLValidator -> new(
-		$kiwi,$controlFile,
+		$controlFile,
 		$this->{gdata}->{Revision},
 		$this->{gdata}->{Schema},
 		$this->{gdata}->{SchemaCVT}
@@ -627,7 +627,7 @@ sub __xmlSetup {
 		return;
 	}
 	my $xml = KIWIXML -> new(
-		$kiwi, $configDir, $cmdL->getBuildType(), $buildProfs, $cmdL
+		$configDir, $cmdL->getBuildType(), $buildProfs, $cmdL
 	);
 	if (! defined $xml) {
 		return;

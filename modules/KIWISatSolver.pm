@@ -62,7 +62,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi    = shift;
 	my $pref    = shift;
 	my $urlref  = shift;
 	my $solvep  = shift;
@@ -73,6 +72,7 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
+	my $kiwi    = KIWILog -> instance();
 	my $solver;    # sat solver object
 	my @solved;    # solve result
 	my @jobFailed; # failed jobs

@@ -66,8 +66,7 @@ sub new {
 	# ---
 	my $this = shift -> SUPER::new(@_);
 	$this -> {dataDir} = $this -> getDataDir() . '/kiwiXML/';
-	$this -> {kiwi} =  Common::ktLog -> new();
-	$this -> {cmdL} = KIWICommandLine -> new($this->{kiwi});
+	$this -> {cmdL} = KIWICommandLine -> new();
 
 	return $this;
 }
@@ -86,18 +85,18 @@ sub test_addArchives {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'userConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @archivesToAdd;
 	my %init = ( name => 'data.tgz');
-	my $archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	my $archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	$init{name} = 'moreData.tar.bz2';
-	$archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	$archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	$init{name} = 'ppcData.tbz';
 	$init{arch} = 'ppc64';
-	$archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	$archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	my $res = $xml-> addArchives(\@archivesToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
@@ -134,14 +133,14 @@ sub test_addArchivesInvalidData {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @archivesToAdd;
 	my %init = ( name => 'data.tgz');
-	my $archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	my $archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	$init{name} = 'moreData.tar.bz2';
-	$archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	$archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	push @archivesToAdd, 'foo';
 	my $res = $xml-> addArchives(\@archivesToAdd);
@@ -171,12 +170,12 @@ sub test_addArchivesInvalidDataTArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml-> addArchives('foo');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'addArchives: expecting array ref for KIWIXMLPackageArchiveData '
-		. 'array as first argument';
+	my $expected = 'addArchives: expecting array ref for '
+		. 'KIWIXMLPackageArchiveData array as first argument';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -200,14 +199,14 @@ sub test_addArchivesInvalidProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @archivesToAdd;
 	my %init = ( name => 'data.tgz');
-	my $archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	my $archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	$init{name} = 'moreData.tar.bz2';
-	$archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	$archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	my @profs = qw / aTest timbuktu /;
 	my $res = $xml-> addArchives(\@archivesToAdd, \@profs);
@@ -237,7 +236,7 @@ sub test_addArchivesNoArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml-> addArchives();
 	my $msg = $kiwi -> getMessage();
@@ -265,18 +264,18 @@ sub test_addArchivesToSpecProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @archivesToAdd;
 	my %init = ( name => 'data.tgz');
-	my $archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	my $archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	$init{name} = 'moreData.tar.bz2';
-	$archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	$archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	$init{name} = 'ppcData.tar';
 	$init{arch} = 'ppc64';
-	$archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	$archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	my @useProf = ('profA');
 	my $res = $xml-> addArchives(\@archivesToAdd, \@useProf);
@@ -296,6 +295,8 @@ sub test_addArchivesToSpecProf {
 	$this -> assert_array_equal(\@expected, \@archiveNames);
 	# Select the profile and verify the archive is in the proper loaction
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
+	# Clear the log
+	$state = $kiwi -> getState();
 	$archives = $xml -> getArchives();
 	my @profArchiveNames;
 	for my $archive (@{$archives}) {
@@ -325,18 +326,18 @@ sub test_addArchivesToSpecType {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @archivesToAdd;
 	my %init = ( name => 'data.tgz');
-	my $archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	my $archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	$init{name} = 'moreData.tar.bz2';
-	$archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	$archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	$init{name} = 'ppcData.tar';
 	$init{arch} = 'ppc64';
-	$archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	$archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	my @useProf = ('profC');
 	my $res = $xml-> addArchives(\@archivesToAdd, \@useProf, 'iso');
@@ -357,6 +358,8 @@ sub test_addArchivesToSpecType {
 	# Select the profile but do not change the build type, thus we should
 	# still get the default list
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
+	# Clear the log
+	$state = $kiwi -> getState();
 	$archives = $xml -> getArchives();
 	my @profArchiveNames;
 	for my $archive (@{$archives}) {
@@ -395,14 +398,14 @@ sub test_addArchivesUndefinedType {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @archivesToAdd;
 	my %init = ( name => 'data.tgz');
-	my $archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	my $archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	$init{name} = 'moreData.tar.bz2';
-	$archiveObj = KIWIXMLPackageArchiveData -> new($kiwi, \%init);
+	$archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	my $res = $xml-> addArchives(\@archivesToAdd, 'default', 'vmx');
 	my $expected = 'addArchives: could not find specified type '
@@ -431,7 +434,7 @@ sub test_addArchives_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addArchives_legacy('image', undef, undef, 'archiveA.tgz',
 							'archiveB.tar.bz2');
@@ -478,7 +481,7 @@ sub test_addArchivesBootIncl_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addArchives_legacy('image', 'true', undef, 'archiveA.tgz',
 							'archiveB.tar.bz2');
@@ -534,18 +537,18 @@ sub test_addBootstrapPackages {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'userConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'cpio');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'tar';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'powervm';
 	$init{arch} = 'ppc64';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my $res = $xml-> addBootstrapPackages(\@packagesToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
@@ -587,14 +590,14 @@ sub test_addBootstrapPackagesInvalidData {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'cpio');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'gzip';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	push @packagesToAdd, 'foo';
 	my $res = $xml-> addBootstrapPackages(\@packagesToAdd);
@@ -625,7 +628,7 @@ sub test_addBootstrapPackagesInvalidDataTArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml-> addBootstrapPackages('foo');
 	my $msg = $kiwi -> getMessage();
@@ -655,14 +658,14 @@ sub test_addBootstrapPackagesInvalidProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'cpio');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'gzip';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my @profs = qw / aTest timbuktu /;
 	my $res = $xml-> addBootstrapPackages(\@packagesToAdd, \@profs);
@@ -692,7 +695,7 @@ sub test_addBootstrapPackagesNoArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml-> addBootstrapPackages();
 	my $msg = $kiwi -> getMessage();
@@ -722,18 +725,18 @@ sub test_addBootstrapPackagesToSpecProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'cpio');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'gzip';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'powervm';
 	$init{arch} = 'ppc64';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my @useProf = ('profA');
 	my $res = $xml-> addBootstrapPackages(\@packagesToAdd, \@useProf);
@@ -753,6 +756,8 @@ sub test_addBootstrapPackagesToSpecProf {
 	$this -> assert_array_equal(\@expected, \@pckgNames);
 	# Select the profile and verify the archive is in the proper loaction
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
+# Clear the log
+$state = $kiwi -> getState();
 	$packages = $xml -> getBootstrapPackages();
 	my @profPackageNames;
 	for my $pckg (@{$packages}) {
@@ -780,15 +785,15 @@ sub test_addDriversImproperDataT {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @drvNames = qw /vboxsf epat dcdbas/;
 	my @drvsToAdd = ();
 	for my $drv (@drvNames) {
-		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, $drv);
+		push @drvsToAdd, KIWIXMLDriverData -> new($drv);
 	}
 	push @drvsToAdd, 'slip';
-	push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, 'x25_asy');
+	push @drvsToAdd, KIWIXMLDriverData -> new('x25_asy');
 	my $res = $xml -> addDrivers(\@drvsToAdd, 'default');
 	my $expected = 'addDrivers: found array item not of type '
 		. 'KIWIXMLDriverData in drivers array';
@@ -814,12 +819,12 @@ sub test_addDriversInvalidProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @drvNames = qw /vboxsf epat dcdbas/;
 	my @drvsToAdd = ();
 	for my $drv (@drvNames) {
-		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, $drv);
+		push @drvsToAdd, KIWIXMLDriverData -> new($drv);
 	}
 	my @profs = qw / profA timbuktu profB /;
 	my $res = $xml -> addDrivers(\@drvsToAdd, \@profs);
@@ -846,7 +851,7 @@ sub test_addDriversNoArgs {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> addDrivers();
 	my $expected = 'addDrivers: no drivers specified, nothing to do';
@@ -871,7 +876,7 @@ sub test_addDriversToCurrentProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	# Set up the profile to which the drivers are to be added
 	my @useProf = ('profA');
@@ -890,7 +895,7 @@ sub test_addDriversToCurrentProf {
 	my @drvsToAdd = ();
 	for my $drv (@drvNames) {
 		my %init = ( name => $drv );
-		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, \%init);
+		push @drvsToAdd, KIWIXMLDriverData -> new(\%init);
 	}
 	$xml = $xml -> addDrivers(\@drvsToAdd);
 	$msg = $kiwi -> getMessage();
@@ -949,14 +954,14 @@ sub test_addDriversToDefault {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	# Add the drivers, using the keyword "default" as 2nd arg
 	my @drvNames = qw /vboxsf epat dcdbas/;
 	my @drvsToAdd = ();
 	for my $drv (@drvNames) {
 		my %init = ( name => $drv );
-		push @drvsToAdd, KIWIXMLDriverData -> new($kiwi, \%init);
+		push @drvsToAdd, KIWIXMLDriverData -> new(\%init);
 	}
 	$xml = $xml -> addDrivers(\@drvsToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
@@ -991,7 +996,7 @@ sub test_addDriversWrongArgs {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'driversWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> addDrivers ('loop', 'default');
 	my $expected = 'addDrivers: expecting array ref for KIWIXMLDriverData '
@@ -1006,7 +1011,6 @@ sub test_addDriversWrongArgs {
 	return;
 }
 
-
 #==========================================
 # test_addDrivers_legacy
 #------------------------------------------
@@ -1018,7 +1022,7 @@ sub test_addDrivers_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'driversConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addDrivers_legacy('fglrx', 'wl2000');
 	my $msg = $kiwi -> getMessage();
@@ -1060,15 +1064,15 @@ sub test_addFilesToDeleteImproperDataT {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @delNames = qw /vboxsf epat dcdbas/;
 	my @delFlsToAdd = ();
 	for my $delName (@delNames) {
-		push @delFlsToAdd, KIWIXMLStripData -> new($kiwi, $delName);
+		push @delFlsToAdd, KIWIXMLStripData -> new($delName);
 	}
 	push @delFlsToAdd, 'slip';
-	push @delFlsToAdd, KIWIXMLStripData -> new($kiwi, 'x25_asy');
+	push @delFlsToAdd, KIWIXMLStripData -> new('x25_asy');
 	my $res = $xml -> addFilesToDelete(\@delFlsToAdd, 'default');
 	my $expected = 'addFilesToDelete: found array item not of type '
 		. 'KIWIXMLStripData in deletefiles array';
@@ -1094,12 +1098,12 @@ sub test_addFilesToDeleteInvalidProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @delNames = qw /vboxsf epat dcdbas/;
 	my @delFlsToAdd = ();
 	for my $delFl (@delNames) {
-		push @delFlsToAdd, KIWIXMLStripData -> new($kiwi, $delFl);
+		push @delFlsToAdd, KIWIXMLStripData -> new($delFl);
 	}
 	my @profs = qw / profA timbuktu profB /;
 	my $res = $xml -> addFilesToDelete(\@delFlsToAdd, \@profs);
@@ -1126,7 +1130,7 @@ sub test_addFilesToDeleteNoArgs {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> addFilesToDelete();
 	my $expected = 'addFilesToDelete: no deletefiles specified, nothing to do';
@@ -1151,7 +1155,7 @@ sub test_addFilesToDeleteToCurrentProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	# Set up the profile to which the drivers are to be added
 	my @useProf = ('profA');
@@ -1170,7 +1174,7 @@ sub test_addFilesToDeleteToCurrentProf {
 	my @delFlsToAdd = ();
 	for my $delFl (@delNames) {
 		my %init = ( name => $delFl );
-		push @delFlsToAdd, KIWIXMLStripData -> new($kiwi, \%init);
+		push @delFlsToAdd, KIWIXMLStripData -> new(\%init);
 	}
 	$xml = $xml -> addFilesToDelete(\@delFlsToAdd);
 	$msg = $kiwi -> getMessage();
@@ -1233,14 +1237,14 @@ sub test_addFilesToDeleteToDefault {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	# Add the drivers, using the keyword "default" as 2nd arg
 	my @delNames = qw /vboxsf epat dcdbas/;
 	my @delFlsToAdd = ();
 	for my $delFl (@delNames) {
 		my %init = ( name => $delFl );
-		push @delFlsToAdd, KIWIXMLStripData -> new($kiwi, \%init);
+		push @delFlsToAdd, KIWIXMLStripData -> new(\%init);
 	}
 	$xml = $xml -> addFilesToDelete(\@delFlsToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
@@ -1279,7 +1283,7 @@ sub test_addFilesToDeleteWrongArgs {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> addFilesToDelete ('loop', 'default');
 	my $expected = 'addFilesToDelete: expecting array ref for '
@@ -1305,7 +1309,7 @@ sub test_addImagePackages_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addImagePackages_legacy('perl', 'emacs');
 	my $msg = $kiwi -> getMessage();
@@ -1350,7 +1354,7 @@ sub test_addImagePatterns_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addImagePatterns_legacy('gnome', 'kde');
 	my $msg = $kiwi -> getMessage();
@@ -1397,15 +1401,15 @@ sub test_addLibsToKeepImproperDataT {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @libNames = qw /libpng libtiff libgif/;
 	my @libsToKeep = ();
 	for my $libName (@libNames) {
-		push @libsToKeep, KIWIXMLStripData -> new($kiwi, $libName);
+		push @libsToKeep, KIWIXMLStripData -> new($libName);
 	}
 	push @libsToKeep, 'slip';
-	push @libsToKeep, KIWIXMLStripData -> new($kiwi, 'x25_asy');
+	push @libsToKeep, KIWIXMLStripData -> new('x25_asy');
 	my $res = $xml -> addLibsToKeep(\@libsToKeep, 'default');
 	my $expected = 'addLibsToKeep: found array item not of type '
 		. 'KIWIXMLStripData in keeplibs array';
@@ -1431,12 +1435,12 @@ sub test_addLibsToKeepInvalidProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @libNames = qw /libcurl libmenu libz/;
 	my @libsToKeep = ();
 	for my $libName (@libNames) {
-		push @libsToKeep, KIWIXMLStripData -> new($kiwi, $libName);
+		push @libsToKeep, KIWIXMLStripData -> new($libName);
 	}
 	my @profs = qw / profA timbuktu profB /;
 	my $res = $xml -> addLibsToKeep(\@libsToKeep, \@profs);
@@ -1463,7 +1467,7 @@ sub test_addLibsToKeepNoArgs {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> addLibsToKeep();
 	my $expected = 'addLibsToKeep: no keeplibs specified, nothing to do';
@@ -1488,7 +1492,7 @@ sub test_addLibsToKeepToCurrentProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	# Set up the profile to which the drivers are to be added
 	my @useProf = ('profA');
@@ -1507,7 +1511,7 @@ sub test_addLibsToKeepToCurrentProf {
 	my @libsToKeep = ();
 	for my $libName (@libNames) {
 		my %init = ( name => $libName );
-		push @libsToKeep, KIWIXMLStripData -> new($kiwi, \%init);
+		push @libsToKeep, KIWIXMLStripData -> new(\%init);
 	}
 	$xml = $xml -> addLibsToKeep(\@libsToKeep);
 	$msg = $kiwi -> getMessage();
@@ -1569,14 +1573,14 @@ sub test_addLibsToKeepToDefault {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	# Add the drivers, using the keyword "default" as 2nd arg
 	my @libNames = qw /libpng libz/;
 	my @libsToKeep = ();
 	for my $libName (@libNames) {
 		my %init = ( name => $libName );
-		push @libsToKeep, KIWIXMLStripData -> new($kiwi, \%init);
+		push @libsToKeep, KIWIXMLStripData -> new(\%init);
 	}
 	$xml = $xml -> addLibsToKeep(\@libsToKeep, 'default');
 	my $msg = $kiwi -> getMessage();
@@ -1614,7 +1618,7 @@ sub test_addLibsToKeepWrongArgs {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> addLibsToKeep ('loop', 'default');
 	my $expected = 'addLibsToKeep: expecting array ref for '
@@ -1640,7 +1644,7 @@ sub test_addPackagesBootstrap_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addPackages_legacy('bootstrap', undef, undef,
 									'perl', 'emacs');
@@ -1689,28 +1693,28 @@ sub test_addPackages {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'userConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'python');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'xemacs';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'vim';
 	$init{arch} = 'ppc64';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	delete $init{arch};
 	$init{name} = 'ed';
 	$init{bootinclude} = 'true';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'utils';
 	$init{bootdelete} = 'true';
 	$init{bootinclude} = 'false';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my $res = $xml -> addPackages(\@packagesToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
@@ -1763,14 +1767,14 @@ sub test_addPackagesInvalidData {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'libpng');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'k3b';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	push @packagesToAdd, 'foo';
 	my $res = $xml-> addPackages(\@packagesToAdd);
@@ -1801,7 +1805,7 @@ sub test_addPackagesInvalidDataTArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml-> addPackages('foo');
 	my $msg = $kiwi -> getMessage();
@@ -1831,14 +1835,14 @@ sub test_addPackagesInvalidProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'python');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'emacs';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my @profs = qw / aTest timbuktu /;
 	my $res = $xml-> addPackages(\@packagesToAdd, \@profs);
@@ -1868,7 +1872,7 @@ sub test_addPackagesNoArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml-> addPackages();
 	my $msg = $kiwi -> getMessage();
@@ -1898,28 +1902,28 @@ sub test_addPackagesToSpecProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'python');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'gzip';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'tar';
 	$init{arch} = 'ppc64';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	delete $init{arch};
 	$init{name} = 'ed';
 	$init{bootinclude} = 'true';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'utils';
 	$init{bootdelete} = 'true';
 	$init{bootinclude} = 'false';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my @useProf = ('profA');
 	my $res = $xml-> addPackages(\@packagesToAdd, \@useProf);
@@ -1939,6 +1943,8 @@ sub test_addPackagesToSpecProf {
 	$this -> assert_array_equal(\@expected, \@pckgNames);
 	# Select the profile and verify the archive is in the proper loaction
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
+# Clear the log
+$state = $kiwi -> getState();
 	$packages = $xml -> getPackages();
 	my @profPckgNames;
 	for my $pckg (@{$packages}) {
@@ -1988,28 +1994,28 @@ sub test_addPackagesToSpecType {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'perl');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'postgresql';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'apache2';
 	$init{arch} = 'ppc64';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	delete $init{arch};
 	$init{name} = 'vi';
 	$init{bootinclude} = 'true';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'utils';
 	$init{bootdelete} = 'true';
 	$init{bootinclude} = 'false';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my @useProf = ('profC');
 	my $res = $xml-> addPackages(\@packagesToAdd,
@@ -2033,6 +2039,8 @@ sub test_addPackagesToSpecType {
 	# Select the profile but do not change the build type, thus we should
 	# still get the default list
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
+# Clear the log
+$state = $kiwi -> getState();
 	$packages = $xml -> getPackages();
 	my @profPckgNames;
 	for my $archive (@{$packages}) {
@@ -2089,19 +2097,20 @@ sub test_addPackagesUndefinedType {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'ksnapshot');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'inkscape';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
-	my $res = $xml-> addPackages(\@packagesToAdd,
-										'default',
-										'vmx'
-);
+	my $res = $xml-> addPackages(
+		\@packagesToAdd,
+		'default',
+		'vmx'
+	);
 	my $expected = 'addPackages: could not find specified type '
 		. "'vmx' within the active profiles; packages not added.";
 	my $msg = $kiwi -> getMessage();
@@ -2128,18 +2137,18 @@ sub test_addPackageCollections {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'userConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @collectionsToAdd;
 	my %init = ( name => 'fileserve');
-	my $collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	$init{name} = 'printserve';
-	$collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	$collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	$init{name} = 'lamp';
 	$init{arch} = 'ppc64';
-	$collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	$collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	my $res = $xml-> addPackageCollections(\@collectionsToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
@@ -2176,14 +2185,14 @@ sub test_addPackageCollectionsInvalidData {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @collectionsToAdd;
 	my %init = ( name => 'gnome');
-	my $collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	$init{name} = 'lamp';
-	$collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	$collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	push @collectionsToAdd, 'foo';
 	my $res = $xml-> addPackageCollections(\@collectionsToAdd);
@@ -2214,7 +2223,7 @@ sub test_addPackageCollectionsInvalidDataTArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml-> addPackageCollections('foo');
 	my $msg = $kiwi -> getMessage();
@@ -2244,14 +2253,14 @@ sub test_addPackageCollectionsInvalidProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @collectionsToAdd;
 	my %init = ( name => 'devel_python');
-	my $collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	$init{name} = 'apparmor';
-	$collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	$collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	my @profs = qw / aTest timbuktu /;
 	my $res = $xml-> addPackageCollections(\@collectionsToAdd, \@profs);
@@ -2281,7 +2290,7 @@ sub test_addPackageCollectionsNoArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml-> addPackageCollections();
 	my $msg = $kiwi -> getMessage();
@@ -2311,18 +2320,18 @@ sub test_addPackageCollectionsToSpecProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @collectionsToAdd;
 	my %init = ( name => 'python_devel');
-	my $collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	$init{name} = 'lamp';
-	$collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	$collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	$init{name} = 'console';
 	$init{arch} = 'ppc64';
-	$collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	$collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	my @useProf = ('profA');
 	my $res = $xml-> addPackageCollections(\@collectionsToAdd, \@useProf);
@@ -2342,6 +2351,8 @@ sub test_addPackageCollectionsToSpecProf {
 	$this -> assert_array_equal(\@expected, \@collectNames);
 	# Select the profile and verify the archive is in the proper loaction
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
+# Clear the log
+$state = $kiwi -> getState();
 	$collections = $xml -> getPackageCollections();
 	my @profCollectNames;
 	for my $collect (@{$collections}) {
@@ -2372,18 +2383,18 @@ sub test_addPackageCollectionsToSpecType {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @collectionsToAdd;
 	my %init = ( name => 'devel_basis');
-	my $collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	$init{name} = 'xfce';
-	$collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	$collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	$init{name} = 'lamp';
 	$init{arch} = 'ppc64';
-	$collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	$collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	my @useProf = ('profC');
 	my $res = $xml-> addPackageCollections(\@collectionsToAdd,
@@ -2407,6 +2418,8 @@ sub test_addPackageCollectionsToSpecType {
 	# Select the profile but do not change the build type, thus we should
 	# still get the default list
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
+# Clear the log
+$state = $kiwi -> getState();
 	$collections = $xml -> getPackageCollections();
 	my @profCollectNames;
 	for my $collect (@{$collections}) {
@@ -2445,19 +2458,20 @@ sub test_addPackageCollectionsUndefinedType {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @collectionsToAdd;
 	my %init = ( name => 'lamp');
-	my $collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	my $collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	$init{name} = 'devel-basis';
-	$collectObj = KIWIXMLPackageCollectData -> new($kiwi, \%init);
+	$collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
-	my $res = $xml-> addPackageCollections(\@collectionsToAdd,
-										'default',
-										'vmx'
-);
+	my $res = $xml-> addPackageCollections(
+		\@collectionsToAdd,
+		'default',
+		'vmx'
+	);
 	my $expected = 'addPackageCollections: could not find specified type '
 		. "'vmx' within the active profiles; collections not added.";
 	my $msg = $kiwi -> getMessage();
@@ -2484,18 +2498,18 @@ sub test_addPackagesToDelete {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'userConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'cpio');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'tar';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'powervm';
 	$init{arch} = 'ppc64';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my $res = $xml-> addPackagesToDelete(\@packagesToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
@@ -2535,14 +2549,14 @@ sub test_addPackagesToDeleteInvalidData {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'cpio');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'gzip';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	push @packagesToAdd, 'foo';
 	my $res = $xml-> addPackagesToDelete(\@packagesToAdd);
@@ -2573,7 +2587,7 @@ sub test_addPackagesToDeleteInvalidDataTArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml-> addPackagesToDelete('foo');
 	my $msg = $kiwi -> getMessage();
@@ -2603,14 +2617,14 @@ sub test_addPackagesToDeleteInvalidProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'cpio');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'gzip';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my @profs = qw / aTest timbuktu /;
 	my $res = $xml-> addPackagesToDelete(\@packagesToAdd, \@profs);
@@ -2640,7 +2654,7 @@ sub test_addPackagesToDeleteNoArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml-> addPackagesToDelete();
 	my $msg = $kiwi -> getMessage();
@@ -2670,18 +2684,18 @@ sub test_addPackagesToDeleteToSpecProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @packagesToAdd;
 	my %init = ( name => 'cpio');
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'gzip';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	$init{name} = 'powervm';
 	$init{arch} = 'ppc64';
-	$pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my @useProf = ('profA');
 	my $res = $xml-> addPackagesToDelete(\@packagesToAdd, \@useProf);
@@ -2701,6 +2715,8 @@ sub test_addPackagesToDeleteToSpecProf {
 	$this -> assert_array_equal(\@expected, \@pckgNames);
 	# Select the profile and verify the archive is in the proper loaction
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
+# Clear the log
+$state = $kiwi -> getState();
 	$packages = $xml -> getPackagesToDelete();
 	my @profPackageNames;
 	for my $pckg (@{$packages}) {
@@ -2728,7 +2744,7 @@ sub test_addPackagesImage_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addPackages_legacy('image', undef, undef, 'perl', 'emacs');
 	my $msg = $kiwi -> getMessage();
@@ -2773,7 +2789,7 @@ sub test_addPackagesImageBootIncl_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %bootInclPacks = ( emacs => 1 );
 	$xml = $xml -> addPackages_legacy('image', \%bootInclPacks, undef,
@@ -2826,7 +2842,7 @@ sub test_addPackagesNoBootstrap_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettingsNoBootstrap';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addPackages_legacy('bootstrap', undef, undef,
 									'perl', 'emacs');
@@ -2853,7 +2869,7 @@ sub test_addPackagesNoImage_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettingsNoImage';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addPackages_legacy('image', undef, undef, 'perl', 'emacs');
 	my $msg = $kiwi -> getMessage();
@@ -2900,7 +2916,7 @@ sub test_addPackagesUnknownType_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addPackages_legacy('vmx', undef, undef, 'perl', 'emacs');
 	my $msg = $kiwi -> getMessage();
@@ -2924,7 +2940,7 @@ sub test_addPatterns_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addPatterns_legacy('image', undef, 'gnome', 'kde');
 	my $msg = $kiwi -> getMessage();
@@ -2970,7 +2986,7 @@ sub test_addRemovePackages_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> addRemovePackages_legacy('gnome-shell', 'cups');
 	my $msg = $kiwi -> getMessage();
@@ -3019,14 +3035,14 @@ sub test_addRepositoriesDefault {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @reposToAdd = ();
 	my %init = (
 				path => '/work/repos/md',
 				type => 'rpm-md'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init);
 	my $res = $xml -> addRepositories(\@reposToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -3088,7 +3104,7 @@ sub test_addRepositoriesExistAlias {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %dupAliasData = ( alias => 'update',
 						path  => 'http://download.opensuse.org/update/12.2',
@@ -3099,8 +3115,8 @@ sub test_addRepositoriesExistAlias {
 				path => '/work/repos/md',
 				type => 'rpm-md'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%dupAliasData);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%dupAliasData);
 	my @profs = ('profA');
 	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
 	my $expected = 'addRepositories: attempting to add repo, but a repo '
@@ -3142,7 +3158,7 @@ sub test_addRepositoriesExistPass {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %confPass = ( password => 'foo',
 					path     => '/work/repos/pckgs',
@@ -3154,8 +3170,8 @@ sub test_addRepositoriesExistPass {
 				path => '/work/repos/md',
 				type => 'rpm-md'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%confPass);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%confPass);
 	my @profs = ('profB');
 	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
 	my $expected = 'addRepositories: attempting to add repo, but a repo '
@@ -3197,19 +3213,19 @@ sub test_addRepositoriesExist {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @reposToAdd = ();
 	my %init = (
 				path => '/work/repos/md',
 				type => 'rpm-md'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init);
 	my %init2 = (
 				path => 'opensuse://12.1/repo/oss/',
 				type => 'rpm-dir'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init2);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init2);
 	my $res = $xml -> addRepositories(\@reposToAdd, 'default');
 	my $expected = 'addRepositories: attempting to add repo, but a repo '
 		. 'with same path already exists';
@@ -3242,7 +3258,7 @@ sub test_addRepositoriesExistPrefLic {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %prefLic = ( path          => '/work/repos/pckgs',
 					preferlicense => 'true',
@@ -3253,8 +3269,8 @@ sub test_addRepositoriesExistPrefLic {
 				path => '/work/repos/md',
 				type => 'rpm-md'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%prefLic);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%prefLic);
 	my $res = $xml -> addRepositories(\@reposToAdd, 'default');
 	my $expected = 'addRepositories: attempting to add repo, but a repo '
 		. 'with license preference indicator set already exists';
@@ -3287,7 +3303,7 @@ sub test_addRepositoriesExistUsr {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %confUser = ( password => 'bar',
 					path     => '/work/repos/pckgs',
@@ -3299,8 +3315,8 @@ sub test_addRepositoriesExistUsr {
 				path => '/work/repos/md',
 				type => 'rpm-md'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%confUser);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%confUser);
 	my @profs = ('profB');
 	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
 	my $expected = 'addRepositories: attempting to add repo, but a repo '
@@ -3342,25 +3358,25 @@ sub test_addRepositoriesImproperDataT {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @reposToAdd = ();
 	my %init = (
 				path => '/work/repos/md',
 				type => 'rpm-md'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init);
 	my %init2 = (
 				path => '/work/repos/pckgs',
 				type => 'rpm-dir'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init2);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init2);
 	push @reposToAdd, 'slip';
 	my %init3 = (
 				path => '/work/repos/debs',
 				type => 'deb-dir'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init3);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init3);
 	my $res = $xml -> addRepositories(\@reposToAdd, 'default');
 	my $expected = 'addRepositories: found array item not of type '
 		. 'KIWIXMLRepositoryData in repository array';
@@ -3389,19 +3405,19 @@ sub test_addRepositoriesInvalidProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @reposToAdd = ();
 	my %init = (
 				path => '/work/repos/md',
 				type => 'rpm-md'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init);
 	my %init2 = (
 				path => '/work/repos/pckgs',
 				type => 'rpm-dir'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init2);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init2);
 	my %init3 = (
 				path => '/work/repos/debs',
 				type => 'deb-dir'
@@ -3434,7 +3450,7 @@ sub test_addRepositoriesNoArgs {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> addRepositories();
 	my $expected = 'addRepositories: no repos specified, nothing to do';
@@ -3463,14 +3479,14 @@ sub test_addRepositoriesToProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @reposToAdd = ();
 	my %init = (
 				path => '/work/repos/md',
 				type => 'rpm-md'
 	);
-	push @reposToAdd, KIWIXMLRepositoryData -> new($kiwi, \%init);
+	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init);
 	my @profs = ('profC');
 	my $res = $xml -> addRepositories(\@reposToAdd, \@profs);
 	my $msg = $kiwi -> getMessage();
@@ -3532,7 +3548,7 @@ sub test_addRepositoriesWrongArgs {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> addRepositories('opensuse:///', 'profA');
 	my $expected = 'addRepositories: expecting array ref for '
@@ -3561,7 +3577,7 @@ sub test_addRepositories_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @addedTypes = qw /red-carpet urpmi/;
 	my @Locs= ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
@@ -3624,7 +3640,7 @@ sub test_addRepositoriesInvalidTypeInf_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @addedTypes = qw /red-carpet ola/;
 	my @Locs= ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
@@ -3684,7 +3700,7 @@ sub test_addRepositoriesNoTypeInf_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @addedTypes = qw /red-carpet/;
 	my @Locs= ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
@@ -3742,7 +3758,7 @@ sub test_addStripConsistentCall_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @Del= qw (/etc/hosts /bin/zsh);
 	$xml -> __addStrip_legacy ('files', @Del);
@@ -3771,7 +3787,7 @@ sub test_addStripDelete_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @Del= qw (/etc/hosts /bin/zsh);
 	$xml -> __addStrip_legacy ('delete', @Del);
@@ -3799,7 +3815,7 @@ sub test_addStripDeleteNoPreExist_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'specPkgMgr';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @Del= qw (/etc/hosts /bin/zsh);
 	$xml -> __addStrip_legacy ('delete', @Del);
@@ -3827,7 +3843,7 @@ sub test_addStripLibs_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @Libs= qw /libm libcrypt/;
 	$xml -> __addStrip_legacy ('libs', @Libs);
@@ -3855,7 +3871,7 @@ sub test_addStripTools_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @Tools= qw /xfsrestore install-info/;
 	$xml -> __addStrip_legacy('tools', @Tools);
@@ -3884,15 +3900,15 @@ sub test_addToolsToKeepImproperDataT {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @toolNames = qw /libpng libtiff libgif/;
 	my @toolsToKeep = ();
 	for my $toolName (@toolNames) {
-		push @toolsToKeep, KIWIXMLStripData -> new($kiwi, $toolName);
+		push @toolsToKeep, KIWIXMLStripData -> new($toolName);
 	}
 	push @toolsToKeep, 'slip';
-	push @toolsToKeep, KIWIXMLStripData -> new($kiwi, 'x25_asy');
+	push @toolsToKeep, KIWIXMLStripData -> new('x25_asy');
 	my $res = $xml -> addToolsToKeep(\@toolsToKeep, 'default');
 	my $expected = 'addToolsToKeep: found array item not of type '
 		. 'KIWIXMLStripData in tools array';
@@ -3918,12 +3934,12 @@ sub test_addToolsToKeepInvalidProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @toolNames = qw /libcurl libmenu libz/;
 	my @toolsToKeep = ();
 	for my $toolName (@toolNames) {
-		push @toolsToKeep, KIWIXMLStripData -> new($kiwi, $toolName);
+		push @toolsToKeep, KIWIXMLStripData -> new($toolName);
 	}
 	my @profs = qw / profA timbuktu profB /;
 	my $res = $xml -> addToolsToKeep(\@toolsToKeep, \@profs);
@@ -3950,7 +3966,7 @@ sub test_addToolsToKeepNoArgs {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> addToolsToKeep();
 	my $expected = 'addToolsToKeep: no tools specified, nothing to do';
@@ -3975,7 +3991,7 @@ sub test_addToolsToKeepToCurrentProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	# Set up the profile to which the drivers are to be added
 	my @useProf = ('profA');
@@ -3994,7 +4010,7 @@ sub test_addToolsToKeepToCurrentProf {
 	my @toolsToKeep = ();
 	for my $toolName (@toolNames) {
 		my %init = ( name => $toolName );
-		push @toolsToKeep, KIWIXMLStripData -> new($kiwi, \%init);
+		push @toolsToKeep, KIWIXMLStripData -> new(\%init);
 	}
 	$xml = $xml -> addToolsToKeep(\@toolsToKeep);
 	$msg = $kiwi -> getMessage();
@@ -4056,14 +4072,14 @@ sub test_addToolsToKeepToDefault {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	# Add the drivers, using the keyword "default" as 2nd arg
 	my @toolNames = qw /awk less/;
 	my @toolsToKeep = ();
 	for my $toolName (@toolNames) {
 		my %init = ( name => $toolName );
-		push @toolsToKeep, KIWIXMLStripData -> new($kiwi, \%init);
+		push @toolsToKeep, KIWIXMLStripData -> new(\%init);
 	}
 	$xml = $xml -> addToolsToKeep(\@toolsToKeep, 'default');
 	my $msg = $kiwi -> getMessage();
@@ -4101,7 +4117,7 @@ sub test_addToolsToKeepWrongArgs {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripWithProfAndArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> addToolsToKeep ('loop', 'default');
 	my $expected = 'addToolsToKeep: expecting array ref for '
@@ -4128,7 +4144,7 @@ sub test_ctor_InvalidPXEConfigArch {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettingsInvArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Unsupported arch 'armv95' in PXE setup.";
@@ -4153,7 +4169,7 @@ sub test_ctor_InvalidSplitArch {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'splitSettingsInvArch';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Unsupported arch 'arm95' in split setup";
@@ -4177,7 +4193,7 @@ sub test_ctor_InvalidSysdiskVolNameDisallowed {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'lvmConfigDisallowedDir';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Invalid name 'sbin' for LVM volume setup";
@@ -4202,7 +4218,7 @@ sub test_ctor_InvalidSysdiskVolNameRoot {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'lvmConfigWithRoot';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Invalid name '/' for LVM volume setup";
@@ -4227,7 +4243,7 @@ sub test_ctor_TwoPrimaryMarkedtypes {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'typeSettingsTwoPrimary';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Processing more than one type marked as '
@@ -4253,7 +4269,7 @@ sub test_ctor_NoTypeDefaultPref {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'typeSettingsNoTypeDefPref';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
@@ -4286,7 +4302,7 @@ sub test_getActiveProfileNames {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'profilesConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profB', $msg);
@@ -4321,7 +4337,7 @@ sub test_getArchives {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $archives = $xml -> getArchives();
 	my $msg = $kiwi -> getMessage();
@@ -4358,7 +4374,7 @@ sub test_getArchiveList_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	# Note there is a bug in the legacy implementation, it will not return
 	# archive entries that are type specific
@@ -4391,7 +4407,7 @@ sub test_getArchiveListUseProf_legacy {
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my @patterns = qw (aTest);
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+		$confDir, undef, \@patterns, $this->{cmdL}
 	);
 	# Note there is a bug in the legacy implementation, it will not return
 	# archive entries that are type specific
@@ -4424,7 +4440,7 @@ sub test_getArchivesUseProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	my @useProf = ('aTest');
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
@@ -4472,7 +4488,7 @@ sub test_getBaseList_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @basePcks = $xml -> getBaseList_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -4501,7 +4517,7 @@ sub test_getBootDeletePackages {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $bDelPckgs = $xml -> getBootDeletePackages();
 	my $msg = $kiwi -> getMessage();
@@ -4533,7 +4549,7 @@ sub test_getBootIncludeArchives {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $archives = $xml -> getBootIncludeArchives();
 	my $msg = $kiwi -> getMessage();
@@ -4566,7 +4582,7 @@ sub test_getBootIncludePackages {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $bInclPckgs = $xml -> getBootIncludePackages();
 	my $msg = $kiwi -> getMessage();
@@ -4601,7 +4617,7 @@ sub test_getBootIncludePackagesUseProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @useProf = ('aTest');
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
@@ -4643,7 +4659,7 @@ sub test_getBootIncludes_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @bootInclP = $xml -> getBootIncludes_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -4670,7 +4686,7 @@ sub test_getBootIncludesUseProf_legacy{
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my @patterns = qw (aTest);
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+		$confDir, undef, \@patterns, $this->{cmdL}
 	);
 	my @bootInclP = $xml -> getBootIncludes_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -4699,7 +4715,7 @@ sub test_getBootstrapPackages {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $pckgs = $xml -> getBootstrapPackages();
 	my $msg = $kiwi -> getMessage();
@@ -4728,7 +4744,7 @@ sub test_getBootTheme_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @values = $xml -> getBootTheme_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -4754,7 +4770,7 @@ sub test_getConfigName {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getConfigName();
 	my $msgT = $kiwi -> getMessageType();
@@ -4783,7 +4799,7 @@ sub test_getConfiguredTypeNames {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
@@ -4814,7 +4830,7 @@ sub test_getDefaultPrebuiltDir_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getDefaultPrebuiltDir_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -4842,7 +4858,7 @@ sub test_getDeleteList_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @delPcks = $xml -> getDeleteList_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -4872,7 +4888,7 @@ sub test_getDeleteListUseProf_legacy {
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my @patterns = qw (aTest);
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+		$confDir, undef, \@patterns, $this->{cmdL}
 	);
 	my @delPcks = $xml -> getDeleteList_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -4901,7 +4917,7 @@ sub test_getDeleteListInstallDelete {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettingsInstallDelete';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @delPcks = $xml -> getDeleteList_legacy();
 	my $msg = $kiwi -> getLogInfoMessage();
@@ -4927,7 +4943,7 @@ sub test_getDescriptionInfo {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'descriptData';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	my $descrpObj = $xml -> getDescriptionInfo();
 	$this -> assert_not_null($descrpObj);
@@ -4961,7 +4977,7 @@ sub test_getDrivers {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'driversConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @drivers = @{$xml -> getDrivers()};
 	my $msg = $kiwi -> getMessage();
@@ -4990,7 +5006,7 @@ sub test_getDriversNodeList_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'driversConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @driversNodes = $xml -> getDriversNodeList_legacy() -> get_nodelist();
 	my $msg = $kiwi -> getMessage();
@@ -5027,7 +5043,7 @@ sub test_getDUDArchitectures {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'productSetings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $dudArches = $xml -> getDUDArchitectures();
 	my $msg = $kiwi -> getMessage();
@@ -5056,7 +5072,7 @@ sub test_getDUDInstallSystemPackages {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'productSetings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $iSysPkgs = $xml -> getDUDInstallSystemPackages();
 	my $msg = $kiwi -> getMessage();
@@ -5089,7 +5105,7 @@ sub test_getDUDModulePackages {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'productSetings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $mPkgs = $xml -> getDUDModulePackages();
 	my $msg = $kiwi -> getMessage();
@@ -5122,7 +5138,7 @@ sub test_getDUPackages {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'productSetings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $pkgs = $xml -> getDUDPackages();
 	my $msg = $kiwi -> getMessage();
@@ -5152,7 +5168,7 @@ sub test_getEC2Config {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'ec2ConfigSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $ec2ConfObj = $xml -> getEC2Config();
 	my $msg = $kiwi -> getMessage();
@@ -5181,7 +5197,7 @@ sub test_getEc2Config_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'ec2ConfigSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %ec2Info = $xml -> getEc2Config_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5210,7 +5226,7 @@ sub test_getEditBootConfig_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'typeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $path = $xml -> getEditBootConfig_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5236,7 +5252,7 @@ sub test_getFilesToDelete {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $delFiles = $xml -> getFilesToDelete();
 	my $msg = $kiwi -> getMessage();
@@ -5268,7 +5284,7 @@ sub test_getHttpsRepositoryCredentials_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my ($uname, $pass) = $xml->getHttpsRepositoryCredentials_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5294,7 +5310,7 @@ sub test_getImageDefaultDestination_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageDefaultDestination_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5319,7 +5335,7 @@ sub test_getImageDefaultRoot_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageDefaultRoot_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5344,7 +5360,7 @@ sub test_getImageDisplayName {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageDisplayName();
 	my $msg = $kiwi -> getMessage();
@@ -5369,7 +5385,7 @@ sub test_getImageID {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageID();
 	my $msg = $kiwi -> getMessage();
@@ -5394,7 +5410,7 @@ sub test_getImageName {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageName();
 	my $msg = $kiwi -> getMessage();
@@ -5419,7 +5435,7 @@ sub test_getImageSizeNotAdditive_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageSize_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5444,7 +5460,7 @@ sub test_getImageSizeAdditiveBytesNotAdditive_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageSizeAdditiveBytes_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5469,7 +5485,7 @@ sub test_getImageSizeBytesNotAdditive_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageSizeBytes_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5494,7 +5510,7 @@ sub test_getImageType {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $typeInfo = $xml -> getImageType();
 	my $msg = $kiwi -> getMessage();
@@ -5521,7 +5537,7 @@ sub test_getImageTypeProfiles {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
@@ -5555,7 +5571,7 @@ sub test_getImageTypeProfilesNoPrimaryType {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'typeSettingsNoTypeDefPrefNoPrim';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profB', $msg);
@@ -5587,7 +5603,7 @@ sub test_getImageTypeAndAttributes_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $typeInfo = $xml -> getImageTypeAndAttributes_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5612,7 +5628,7 @@ sub test_getImageVersion_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getImageVersion_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5640,7 +5656,7 @@ sub test_getInstallList_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettingsNoPattern';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @instPcks = $xml -> getInstallList_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5669,7 +5685,7 @@ sub test_getInstallOption {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @useProf = ('aTest');
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
@@ -5706,7 +5722,7 @@ sub test_getInstallOptionConflict {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @useProf = ('profA');
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
@@ -5743,7 +5759,7 @@ sub test_getInstallOptionDefault {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'userConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $instOpt = $xml -> getInstallOption();
 	my $msg = $kiwi -> getMessage();
@@ -5767,7 +5783,7 @@ sub test_getLibsToKeep {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $libs = $xml -> getLibsToKeep();
 	my $msg = $kiwi -> getMessage();
@@ -5796,7 +5812,7 @@ sub test_getLicenseNames_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $licNames = $xml -> getLicenseNames_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5822,7 +5838,7 @@ sub test_getLocale_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getLocale_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5847,7 +5863,7 @@ sub test_getLVMGroupName_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'lvmConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getLVMGroupName_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5872,7 +5888,7 @@ sub test_getLVMVolumes_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'lvmConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %volumes = $xml -> getLVMVolumes_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5911,7 +5927,7 @@ sub test_getOEMConfig {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $oemConfObj = $xml -> getOEMConfig();
 	my $msg = $kiwi -> getMessage();
@@ -5969,7 +5985,7 @@ sub test_getOEMAlignPartition_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMAlignPartition_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -5994,7 +6010,7 @@ sub test_getOEMBootTitle_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMBootTitle_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6019,7 +6035,7 @@ sub test_getOEMBootWait_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMBootWait_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6044,7 +6060,7 @@ sub test_getOEMKiwiInitrd_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMKiwiInitrd_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6069,7 +6085,7 @@ sub test_getOEMPartitionInstall_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMPartitionInstall_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6094,7 +6110,7 @@ sub test_getOEMReboot_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMReboot_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6119,7 +6135,7 @@ sub test_getOEMRebootInter_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMRebootInter_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6144,7 +6160,7 @@ sub test_getOEMRecovery_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMRecovery_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6169,7 +6185,7 @@ sub test_getOEMRecoveryID_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMRecoveryID_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6194,7 +6210,7 @@ sub test_getOEMRecoveryInPlace_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMRecoveryInPlace_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6219,7 +6235,7 @@ sub test_getOEMShutdown_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMShutdown_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6244,7 +6260,7 @@ sub test_getOEMShutdownInter_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMShutdownInter_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6269,7 +6285,7 @@ sub test_getOEMSilentBoot_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMSilentBoot_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6294,7 +6310,7 @@ sub test_getOEMSwap_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMSwap_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6319,7 +6335,7 @@ sub test_getOEMSwapSize_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMSwapSize_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6344,7 +6360,7 @@ sub test_getOEMSystemSize_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMSystemSize_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6369,7 +6385,7 @@ sub test_getOEMUnattended_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMUnattended_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6394,7 +6410,7 @@ sub test_getOEMUnattendedID_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getOEMUnattendedID_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6419,7 +6435,7 @@ sub test_getOVFConfig_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'ovfConfigSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %ovfConfig = $xml -> getOVFConfig_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6461,7 +6477,7 @@ sub test_getPackages {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	my $pckgs = $xml -> getPackages();
 	my $msg = $kiwi -> getMessage();
@@ -6500,7 +6516,7 @@ sub test_getPackagesToDelete {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $delPckgs = $xml -> getPackagesToDelete();
 	my $msg = $kiwi -> getMessage();
@@ -6532,7 +6548,7 @@ sub test_getPackagesToDeleteUseProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @useProf = ('aTest');
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
@@ -6573,7 +6589,7 @@ sub test_getPackagesUseProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	my @useProf = ('aTest');
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
@@ -6623,7 +6639,7 @@ sub test_getProductArchitectures {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'productSetings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $arches = $xml -> getProductArchitectures();
 	my $msg = $kiwi -> getMessage();
@@ -6656,7 +6672,7 @@ sub test_getProductMetaChroots {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'productSetings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $chroots = $xml -> getProductMetaChroots();
 	my $msg = $kiwi -> getMessage();
@@ -6685,7 +6701,7 @@ sub test_getProductMetaFiles {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'productSetings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $mFiles = $xml -> getProductMetaFiles();
 	my $msg = $kiwi -> getMessage();
@@ -6714,7 +6730,7 @@ sub test_getProductMetaPackages {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'productSetings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $mPkgs = $xml -> getProductMetaPackages();
 	my $msg = $kiwi -> getMessage();
@@ -6747,7 +6763,7 @@ sub test_getProductOptions {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'productSetings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $prodOpts = $xml -> getProductOptions();
 	my $msg = $kiwi -> getMessage();
@@ -6777,7 +6793,7 @@ sub test_getProductRepositories {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'productSetings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $pRepos = $xml -> getProductRepositories();
 	my $msg = $kiwi -> getMessage();
@@ -6810,7 +6826,7 @@ sub test_getProductRequiredArchitectures {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'productSetings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $reqArches = $xml -> getProductRequiredArchitectures();
 	my $msg = $kiwi -> getMessage();
@@ -6839,7 +6855,7 @@ sub test_getProducts {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $products = $xml -> getProducts();
 	my $msg = $kiwi -> getMessage();
@@ -6872,7 +6888,7 @@ sub test_getProductSourcePackages {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'productSetings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $pkgs = $xml -> getProductSourcePackages();
 	my $msg = $kiwi -> getMessage();
@@ -6902,7 +6918,7 @@ sub test_getPXEConfig {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $pxeConfObj = $xml -> getPXEConfig();
 	my $msg = $kiwi -> getMessage();
@@ -6960,7 +6976,7 @@ sub test_getPXEDeployBlockSize_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getPXEDeployBlockSize_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -6985,7 +7001,7 @@ sub test_getPXEDeployConfiguration_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %config = $xml -> getPXEDeployConfiguration_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7011,7 +7027,7 @@ sub test_getPXEDeployImageDevice_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getPXEDeployImageDevice_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7036,7 +7052,7 @@ sub test_getPXEDeployInitrd_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getPXEDeployInitrd_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7061,7 +7077,7 @@ sub test_getPXEDeployKernel_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getPXEDeployKernel_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7086,7 +7102,7 @@ sub test_getPXEDeployPartitions_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @partitions = $xml -> getPXEDeployPartitions_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7118,7 +7134,7 @@ sub test_getPXEDeployServer_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getPXEDeployServer_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7143,7 +7159,7 @@ sub test_getPXEDeployTimeout_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getPXEDeployTimeout_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7168,7 +7184,7 @@ sub test_getPXEDeployUnionConfig_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'pxeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %unionConfig = $xml -> getPXEDeployUnionConfig_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7196,7 +7212,7 @@ sub test_getPackageAttributes_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	my %pattr = $xml -> getPackageAttributes_legacy('image');;
 	my $msg = $kiwi -> getMessage();
@@ -7223,7 +7239,7 @@ sub test_getPackageAttributesUseProf_legacy {
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my @patterns = qw (aTest);
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+		$confDir, undef, \@patterns, $this->{cmdL}
 	);
 	my %pattr = $xml -> getPackageAttributes_legacy('image');;
 	my $msg = $kiwi -> getMessage();
@@ -7252,7 +7268,7 @@ sub test_getPackageCollections {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $collections = $xml -> getPackageCollections();
 	my $msg = $kiwi -> getMessage();
@@ -7290,7 +7306,7 @@ sub test_getPackageCollectionsUseProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	my @useProf = ('aTest');
 	$xml = $xml -> setSelectionProfileNames(\@useProf);
@@ -7335,7 +7351,7 @@ sub test_getPackageNodeList_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	my @packNodes = $xml -> getPackageNodeList_legacy() -> get_nodelist();
 	my $msg = $kiwi -> getMessage();
@@ -7392,7 +7408,7 @@ sub test_getPreferences {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $prefDataObj = $xml -> getPreferences();
 	my $msg = $kiwi -> getMessage();
@@ -7422,7 +7438,7 @@ sub test_getPreferencesProfiles {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
@@ -7461,7 +7477,7 @@ sub test_getPreferencesProfilesNoPref {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
@@ -7509,7 +7525,7 @@ sub test_getPreferencesProfilesWithConflict {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
@@ -7551,7 +7567,7 @@ sub test_getPreferencesProfilesWithConflictType {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
@@ -7591,7 +7607,7 @@ sub test_getProfiles {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'profilesConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	my @profiles = @{$xml -> getProfiles()};
 	my $msg = $kiwi -> getMessage();
@@ -7628,7 +7644,7 @@ sub test_getRPMCheckSignatures_legacyFalse {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getRPMCheckSignatures_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7653,7 +7669,7 @@ sub test_getRPMExcludeDocs_legacyFalse {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getRPMExcludeDocs_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7678,7 +7694,7 @@ sub test_getRPMForce_legacyFalse {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'oemSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getRPMForce_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7703,7 +7719,7 @@ sub test_getRPMCheckSignatures_legacyTrue {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getRPMCheckSignatures_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7728,7 +7744,7 @@ sub test_getRPMExcludeDocs_legacyTrue {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getRPMExcludeDocs_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7753,7 +7769,7 @@ sub test_getRPMForce_legacyTrue {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $value = $xml -> getRPMForce_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -7781,7 +7797,7 @@ sub test_getReplacePackageAddList {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageReplSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	# Call getList to trigger the generation of the replace-add list as
 	# a side effect :(
@@ -7813,7 +7829,7 @@ sub test_getReplacePackageDelList {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageReplSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	# Call getList to trigger the generation of the replace-delete list as
 	# a side effect :(
@@ -7845,7 +7861,7 @@ sub test_getRepoNodeList_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @repoNodes = $xml -> getRepoNodeList_legacy() -> get_nodelist();
 	my $msg = $kiwi -> getMessage();
@@ -7885,7 +7901,7 @@ sub test_getRepositories {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @repoData = @{$xml -> getRepositories()};
 	my $msg = $kiwi -> getMessage();
@@ -7943,7 +7959,7 @@ sub test_getRepositoriesWithProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @repoData = @{$xml -> getRepositories()};
 	my $msg = $kiwi -> getMessage();
@@ -8040,7 +8056,7 @@ sub test_getRepositories_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %repos = $xml -> getRepositories_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8080,7 +8096,7 @@ sub test_getSplitConfig {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'splitSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $spltConfObj = $xml -> getSplitConfig();
 	my $msg = $kiwi -> getMessage();
@@ -8131,7 +8147,7 @@ sub test_getSplitPersistentExceptions_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'splitSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @persExcept = $xml -> getSplitPersistentExceptions_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8157,7 +8173,7 @@ sub test_getSplitPersistentFiles_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'splitSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @persFiles = $xml -> getSplitPersistentFiles_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8183,7 +8199,7 @@ sub test_getSplitTempExceptions_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'splitSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @tmpExcept = $xml -> getSplitTempExceptions_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8209,7 +8225,7 @@ sub test_getSplitTempFiles_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'splitSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @tmpFiles = $xml -> getSplitTempFiles_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8235,7 +8251,7 @@ sub test_getStripDelete_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @delFiles = $xml -> __getStripDelete_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8261,7 +8277,7 @@ sub test_getStripLibs_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @libFiles = $xml -> __getStripLibs_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8288,7 +8304,7 @@ sub test_getStripNodeList_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @stripNodes = $xml -> getStripNodeList_legacy() -> get_nodelist();
 	my $msg = $kiwi -> getMessage();
@@ -8333,7 +8349,7 @@ sub test_getStripTools_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @toolFiles = $xml -> __getStripTools_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8359,7 +8375,7 @@ sub test_getSystemDiskConfig {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'lvmConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $sysDiskObj = $xml -> getSystemDiskConfig();
 	my $msg = $kiwi -> getMessage();
@@ -8404,7 +8420,7 @@ sub test_getToolsToKeep {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'stripConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $tools = $xml -> getToolsToKeep();
 	my $msg = $kiwi -> getMessage();
@@ -8433,7 +8449,7 @@ sub test_getType {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'typeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @typeNames = @{$xml -> getConfiguredTypeNames()};
 	my $msg = $kiwi -> getMessage();
@@ -8487,7 +8503,7 @@ sub test_getTypeInvalid {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'typeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $type = $xml -> getType('iso');
 	my $msg = $kiwi -> getMessage();
@@ -8512,7 +8528,7 @@ sub test_getTypeNoArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'typeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $type = $xml -> getType();
 	my $msg = $kiwi -> getMessage();
@@ -8537,7 +8553,7 @@ sub test_getTypes_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'typeSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @types = $xml -> getTypes_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8565,7 +8581,7 @@ sub test_getTypesUseProf_legacy {
 	my $confDir = $this->{dataDir} . 'typeSettings';
 	my @patterns = qw (aTest);
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+		$confDir, undef, \@patterns, $this->{cmdL}
 	);
 	my @types = $xml -> getTypes_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8597,7 +8613,7 @@ sub test_getTypeSpecificPackageList_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my @pckgs = $xml -> getTypeSpecificPackageList_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8627,7 +8643,7 @@ sub test_getTypeSpecificPackageListUseProf_legacy {
 	my $confDir = $this->{dataDir} . 'packageSettings';
 	my @patterns = qw (aTest);
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, \@patterns, $this->{cmdL}
+		$confDir, undef, \@patterns, $this->{cmdL}
 	);
 	my @pckgs = $xml -> getTypeSpecificPackageList_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8653,7 +8669,7 @@ sub test_getUsers {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'userConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $usrData = $xml -> getUsers();
 	my $msg = $kiwi -> getMessage();
@@ -8721,7 +8737,7 @@ sub test_getUsers_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'userConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %usrData = $xml -> getUsers_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8763,7 +8779,7 @@ sub test_getVMachineConfigOVF {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'ovfConfigSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $vmConfig = $xml -> getVMachineConfig();
 	my $msg = $kiwi -> getMessage();
@@ -8810,7 +8826,7 @@ sub test_getVMachineConfigVMW {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'vmwareConfigSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $vmConfig = $xml -> getVMachineConfig();
 	my $msg = $kiwi -> getMessage();
@@ -8860,7 +8876,7 @@ sub test_getVMachineConfigXen {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'xenConfigSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $vmConfig = $xml -> getVMachineConfig();
 	my $msg = $kiwi -> getMessage();
@@ -8896,7 +8912,7 @@ sub test_getVMwareConfig_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'vmwareConfigSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %vmConfig = $xml -> getVMwareConfig_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8938,7 +8954,7 @@ sub test_getXenConfig_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'xenConfigSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %vmConfig = $xml -> getXenConfig_legacy();
 	my $msg = $kiwi -> getMessage();
@@ -8969,7 +8985,7 @@ sub test_ignoreRepositories {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> ignoreRepositories();
 	my $msg = $kiwi -> getMessage();
@@ -9011,7 +9027,7 @@ sub test_ignoreRepositories_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> ignoreRepositories_legacy();
 	my %repos = $xml -> getRepositories_legacy();
@@ -9041,7 +9057,7 @@ sub test_invalidProfileRequest {
 	my $confDir = $this->{dataDir} . 'profilesConfig';
 	my @reqProf = qw /profD/;
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, \@reqProf, $this->{cmdL}
+		$confDir, undef, \@reqProf, $this->{cmdL}
 	);
 	$this -> assert_null($xml);
 	my $msg = $kiwi -> getErrorMessage();
@@ -9067,7 +9083,7 @@ sub test_packageManagerInfoHasConfigValue {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'specPkgMgr';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $pkgMgr = $xml -> getPackageManager_legacy();
 	$this -> assert_str_equals('zypper', $pkgMgr);
@@ -9091,7 +9107,7 @@ sub test_packageManagerSet_noArg_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'specPkgMgr';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	# Call set without argument, expect error
 	my $res = $xml -> setPackageManager_legacy();
@@ -9119,7 +9135,7 @@ sub test_packageManagerSet_valid_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'specPkgMgr';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	# Set the package manager to be smart
 	my $res = $xml -> setPackageManager_legacy('smart');
@@ -9149,7 +9165,7 @@ sub test_packageManagerInfoHasProfs {
 	my @profiles = ('specPkgMgr');
 	# Verify we get the specified manager
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef,\@profiles,$this->{cmdL}
+		$confDir, undef,\@profiles,$this->{cmdL}
 	);
 	my $pkgMgr = $xml -> getPackageManager_legacy();
 	$this -> assert_str_equals('smart', $pkgMgr);
@@ -9186,7 +9202,7 @@ sub test_setArch {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'defPkgMgr';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> setArch('s390');
 	my $msg = $kiwi -> getMessage();
@@ -9218,7 +9234,7 @@ sub test_setArchInvalid {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'defPkgMgr';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> setArch('mips');
 	my $msg = $kiwi -> getMessage();
@@ -9256,7 +9272,7 @@ sub test_setBuildType {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
@@ -9295,7 +9311,7 @@ sub test_setBuildTypeInvalidArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
@@ -9337,7 +9353,7 @@ sub test_setBuildTypeNoArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
@@ -9379,7 +9395,7 @@ sub test_setDescriptionInfo {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'descriptData';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	my @contacts = ('rjschwei@suse.com');
 	my %init = (
@@ -9388,7 +9404,7 @@ sub test_setDescriptionInfo {
 		specification => 'test set method',
 		type          => 'system'
 	);
-	my $descriptObj = KIWIXMLDescriptionData -> new ($kiwi, \%init);
+	my $descriptObj = KIWIXMLDescriptionData -> new (\%init);
 	$xml = $xml -> setDescriptionInfo($descriptObj);
 	my $descrpObj = $xml -> getDescriptionInfo();
 	$this -> assert_not_null($descrpObj);
@@ -9422,7 +9438,7 @@ sub test_setDescriptionInfoImproperArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'descriptData';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	my $res = $xml -> setDescriptionInfo($xml);
 	$this -> assert_null($res);
@@ -9467,7 +9483,7 @@ sub test_setDescriptionInfoNoArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'descriptData';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	my $res = $xml -> setDescriptionInfo();
 	$this -> assert_null($res);
@@ -9511,7 +9527,7 @@ sub test_setPreferences {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -9602,7 +9618,7 @@ sub test_setPreferencesInvalArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -9634,7 +9650,7 @@ sub test_setPreferencesNoArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettingsProfNoDef';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -9669,13 +9685,13 @@ sub test_setRepositoryBasic {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %init = (
 				path => '/work/repos/md',
 				type => 'rpm-md'
 	);
-	my $repoData = KIWIXMLRepositoryData -> new($kiwi, \%init);
+	my $repoData = KIWIXMLRepositoryData -> new(\%init);
 	$xml = $xml -> setRepository($repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Replacing repository '
@@ -9713,7 +9729,7 @@ sub test_setRepositoryImproperArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> setRepository('norepo');
 	my $expected = 'setRepository: expecting ref to KIWIXMLRepositoryData '
@@ -9743,7 +9759,7 @@ sub test_setRepositoryNoArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $res = $xml -> setRepository();
 	my $expected = 'setRepository: expecting ref to KIWIXMLRepositoryData '
@@ -9773,13 +9789,13 @@ sub test_setRepositoryNoReplace {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigNoRepl';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %init = (
 				path => '/work/repos/md',
 				type => 'rpm-md'
 	);
-	my $repoData = KIWIXMLRepositoryData -> new($kiwi, \%init);
+	my $repoData = KIWIXMLRepositoryData -> new(\%init);
 	my $res = $xml -> setRepository($repoData);
 	my $expected = 'No replacable repository configured, not using repo with '
 			. "path: '/work/repos/md'";
@@ -9808,13 +9824,13 @@ sub test_setRepositoryNoReplaceWithProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfigWithProf';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my %init = (
 				path => '/work/repos/md',
 				type => 'rpm-md'
 	);
-	my $repoData = KIWIXMLRepositoryData -> new($kiwi, \%init);
+	my $repoData = KIWIXMLRepositoryData -> new(\%init);
 	my $res = $xml -> setRepository($repoData);
 	my $expected = 'No replacable repository configured, not using repo with '
 			. "path: '/work/repos/md'";
@@ -9842,7 +9858,7 @@ sub test_setRepository_legacy {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'reposConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	$xml = $xml -> setRepository_legacy('rpm-md', '/repos/pckgs','replacement',
 								'5');
@@ -9895,7 +9911,7 @@ sub test_setSelectionProfileNames {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'profilesConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	# Clear out the initial setup message
 	my $msg = $kiwi -> getMessage();
@@ -9931,7 +9947,7 @@ sub test_setSelectionProfileNamesImpropProf {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'profilesConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	# Clear out the initial setup message
 	my $msg = $kiwi -> getMessage();
@@ -9970,7 +9986,7 @@ sub test_setSelectionProfileNamesInvalidArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'profilesConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	# Clear out the initial setup message
 	my $msg = $kiwi -> getMessage();
@@ -10007,7 +10023,7 @@ sub test_setSelectionProfileNamesNoArg {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'profilesConfig';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef, $this->{cmdL}
+		$confDir, undef, undef, $this->{cmdL}
 	);
 	# Clear out the initial setup message
 	my $msg = $kiwi -> getMessage();
@@ -10055,7 +10071,7 @@ sub test_sizeHandling {
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'preferenceSettings';
 	my $xml = KIWIXML -> new(
-		$this -> {kiwi}, $confDir, undef, undef,$this->{cmdL}
+		$confDir, undef, undef,$this->{cmdL}
 	);
 	my $typeObj = $xml -> getImageType();
 	my $msg = $kiwi -> getMessage();

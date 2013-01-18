@@ -44,15 +44,11 @@ sub new {
 	my $class = shift;
 	bless $this,$class;
 	#==========================================
-	# Module Parameters
-	#------------------------------------------
-	my $kiwi = shift;
-	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{configName}  = 'config.xml';
 	$this->{defCacheDir} = '/var/cache/kiwi/image';
-	$this->{kiwi}        = $kiwi;
+	$this->{kiwi}        = KIWILog -> instance();
 	return $this;
 }
 

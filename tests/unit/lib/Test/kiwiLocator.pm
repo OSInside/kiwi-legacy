@@ -33,8 +33,7 @@ sub new {
 	# ---
 	my $this = shift -> SUPER::new(@_);
 	$this -> {dataDir} = $this -> getDataDir() . '/kiwiLocator/';
-	$this -> {kiwi} = Common::ktLog -> new();
-
+	$this -> removeTestTmpDir();
 	return $this;
 }
 
@@ -48,7 +47,7 @@ sub test_ctor {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $locator = KIWILocator -> new( $kiwi );
+	my $locator = KIWILocator -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -173,9 +172,9 @@ sub test_getControlFileMultiConfig {
 	my $res = $locator -> getControlFile( $multiConfDir );
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Found multiple control files in '
-	. "$multiConfDir\n"
-	. "\t$multiConfDir/config_one.kiwi\n"
-	. "\t$multiConfDir/config_two.kiwi\n";
+		. "$multiConfDir\n"
+		. "\t$multiConfDir/config_one.kiwi\n"
+		. "\t$multiConfDir/config_two.kiwi\n";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -201,7 +200,7 @@ sub test_getControlFileNoConfigFile {
 	my $res = $locator -> getControlFile( $noConfDir );
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Could not locate a configuration file in '
-	. "$noConfDir";
+		. "$noConfDir";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -348,23 +347,23 @@ sub test_getExecPathArgsPythonDash {
 	my $locator = $this -> __getLocator();
 	my $execDir = $this -> {dataDir} . 'bin';
 	my @opts = qw(\? h help c calc o option b break t timeout mangle);
-    my $res = $locator -> getExecArgsFormat($execDir . '/pythonDash', \@opts);
-    my %result = %{$res};
-    $this -> assert_equals(1, $result{'status'});
-    $this -> assert_str_equals('-?', $result{'\?'});
-    $this -> assert_str_equals('-h', $result{'h'});
-    $this -> assert_str_equals('--help', $result{'help'});
-    $this -> assert_str_equals('-c', $result{'c'});
-    $this -> assert_str_equals('--calc', $result{'calc'});
-    $this -> assert_str_equals('-o', $result{'o'});
-    $this -> assert_str_equals('--option', $result{'option'});
-    $this -> assert_str_equals('-b', $result{'b'});
-    $this -> assert_str_equals('--break', $result{'break'});
-    $this -> assert_str_equals('-t', $result{'t'});
-    $this -> assert_str_equals('--timeout', $result{'timeout'});
-    $this -> assert_str_equals('--mangle', $result{'mangle'});
+	my $res = $locator -> getExecArgsFormat($execDir . '/pythonDash', \@opts);
+	my %result = %{$res};
+	$this -> assert_equals(1, $result{'status'});
+	$this -> assert_str_equals('-?', $result{'\?'});
+	$this -> assert_str_equals('-h', $result{'h'});
+	$this -> assert_str_equals('--help', $result{'help'});
+	$this -> assert_str_equals('-c', $result{'c'});
+	$this -> assert_str_equals('--calc', $result{'calc'});
+	$this -> assert_str_equals('-o', $result{'o'});
+	$this -> assert_str_equals('--option', $result{'option'});
+	$this -> assert_str_equals('-b', $result{'b'});
+	$this -> assert_str_equals('--break', $result{'break'});
+	$this -> assert_str_equals('-t', $result{'t'});
+	$this -> assert_str_equals('--timeout', $result{'timeout'});
+	$this -> assert_str_equals('--mangle', $result{'mangle'});
 
-    return;
+	return;
 }
 
 #==========================================
@@ -402,6 +401,13 @@ sub test_getExecPathArgsNoExec {
 	my $locator = $this -> __getLocator();
 	my @opts = qw(calc break);
 	my $res = $locator -> getExecArgsFormat( 'execDoesNotExist', \@opts );
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals("warning: execDoesNotExist not found\n", $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
 	my %result = %{$res};
 	$this -> assert_equals(0, $result{'status'});
 	$this -> assert_str_equals('Could not find execDoesNotExist',
@@ -514,7 +520,7 @@ sub __getCommandLine {
 	# Helper method to create a KIWICommandLine object
 	# ---
 	my $this = shift;
-	my $cmdL = KIWICommandLine -> new( $this -> {kiwi} );
+	my $cmdL = KIWICommandLine -> new();
 	return $cmdL;
 }
 
@@ -526,7 +532,7 @@ sub __getLocator {
 	# Helper method to create a KIWILocator object
 	# ---
 	my $this = shift;
-	my $locator = KIWILocator -> new( $this -> {kiwi} );
+	my $locator = KIWILocator -> new();
 	return $locator;
 }
 

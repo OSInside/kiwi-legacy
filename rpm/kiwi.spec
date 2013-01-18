@@ -52,6 +52,7 @@ BuildRequires:  rpm-devel
 BuildRequires:  btrfsprogs
 BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
+BuildRequires:  perl-Class-Singleton
 BuildRequires:  perl-Test-Unit
 BuildRequires:  perl-Readonly
 BuildRequires:  squashfs
@@ -69,12 +70,13 @@ Requires:		perl >= %{perl_version}
 %else
 Requires:		perl = %{perl_version}
 %endif
+Requires:       perl-Class-Singleton
 Requires:       perl-Config-IniFiles
+Requires:       perl-libwww-perl
+Requires:       perl-Readonly
 Requires:       perl-XML-LibXML
 Requires:       perl-XML-LibXML-Common
 Requires:       perl-XML-SAX
-Requires:       perl-Readonly
-Requires:       perl-libwww-perl
 Requires:       rsync
 Requires:       screen
 Requires:       util-linux

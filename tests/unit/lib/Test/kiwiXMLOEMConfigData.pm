@@ -33,8 +33,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -47,7 +45,7 @@ sub test_ctor {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -68,7 +66,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, 'foo');
+	my $confDataObj = KIWIXMLOEMConfigData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -95,7 +93,7 @@ sub test_ctor_initConflictsPostInst {
 				oem_bootwait => 'true',
 				oem_shutdown => 'true'
 			);
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Conflicting post-install settings only one of '
 				. "'oem_bootwait oem_reboot oem_reboot_interactive "
@@ -121,7 +119,7 @@ sub test_ctor_initConflictsSwap {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (oem_swapsize => '4096');
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Conflicting swap settings, specified swap size, but '
 		. 'swap is disabled.';
@@ -149,7 +147,7 @@ sub test_ctor_initConflictsSwapFalse {
 				oem_swap     => 'false',
 				oem_swapsize => '4096'
 			);
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Conflicting swap settings, specified swap size, but '
 		. 'swap is disabled.';
@@ -174,7 +172,7 @@ sub test_ctor_initConflictsUnattended {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (oem_unattended_id => '/dev/sdc');
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Conflicting unattended install settings, specified '
 		. 'unattended target ID but unattended install is disabled.';
@@ -202,7 +200,7 @@ sub test_ctor_initConflictsUnattendedFalse {
 				oem_unattended    => 'false',
 				oem_unattended_id => '/dev/sdb'
 			);
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Conflicting unattended install settings, specified '
 		. 'unattended target ID but unattended install is disabled.';
@@ -230,7 +228,7 @@ sub test_ctor_initUnsupportedData {
 				firmwaredriver => 'b43',
 				oem_swapsize   => '2048',
 			);
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData: Unsupported keyword argument '
 		. "'firmwaredriver' in initialization structure.";
@@ -260,7 +258,7 @@ sub test_ctor_wInit {
 				oem_swap       => 'true',
 				oem_swapsize   => '2048',
 			);
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, \%init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -282,7 +280,7 @@ sub test_getAlignPartition {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -312,7 +310,7 @@ sub test_getBootTitle {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -343,7 +341,7 @@ sub test_getBootwait {
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
 	$init->{oem_bootwait} = 'false';
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -373,7 +371,7 @@ sub test_getInplaceRecovery {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -403,7 +401,7 @@ sub test_getKiwiInitrd {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -433,7 +431,7 @@ sub test_getPartitionInstall {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -464,7 +462,7 @@ sub test_getReboot {
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
 	$init->{oem_reboot} = 'true';
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -495,7 +493,7 @@ sub test_getRebootInteractive {
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
 	$init->{oem_reboot_interactive} = 'false';
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -525,7 +523,7 @@ sub test_getRecovery {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -555,7 +553,7 @@ sub test_getRecoveryID {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -586,7 +584,7 @@ sub test_getShutdown {
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
 	$init->{oem_shutdown} = 'true';
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -617,7 +615,7 @@ sub test_getShutdownInteractive {
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
 	$init->{oem_shutdown_interactive} = 'false';
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -647,7 +645,7 @@ sub test_getSilentBoot {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -677,7 +675,7 @@ sub test_getSwap {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -707,7 +705,7 @@ sub test_getSwapSize {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -737,7 +735,7 @@ sub test_getSystemSize {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -767,7 +765,7 @@ sub test_getUnattended {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -797,7 +795,7 @@ sub test_getUnattendedID {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -828,7 +826,7 @@ sub test_getXMLElement{
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -873,7 +871,7 @@ sub test_setAlignPartition {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setAlignPartition('false');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -903,7 +901,7 @@ sub test_setAlignPartitionInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setAlignPartition(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setAlignPartition: unrecognized '
@@ -928,7 +926,7 @@ sub test_setAlignPartitionNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setAlignPartition();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -958,7 +956,7 @@ sub test_setBootTitle {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setBootTitle('kiwi-image');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -989,7 +987,7 @@ sub test_setBootTitleNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setBootTitle();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1019,7 +1017,7 @@ sub test_setBootwait {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setBootwait('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1064,7 +1062,7 @@ sub test_setBootwaitInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setBootwait(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setBootwait: unrecognized '
@@ -1090,7 +1088,7 @@ sub test_setBootwaitNoArg {
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
 	$init->{oem_reboot} = 'true';
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setBootwait();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1135,7 +1133,7 @@ sub test_setInplaceRecovery {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setInplaceRecovery('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1165,7 +1163,7 @@ sub test_setInplaceRecoveryInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setInplaceRecovery(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setInplaceRecovery: unrecognized '
@@ -1190,7 +1188,7 @@ sub test_setInplaceRecoveryNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setInplaceRecovery();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1220,7 +1218,7 @@ sub test_setKiwiInitrd {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setKiwiInitrd('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1250,7 +1248,7 @@ sub test_setKiwiInitrdInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setKiwiInitrd(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setKiwiInitrd: unrecognized '
@@ -1275,7 +1273,7 @@ sub test_setKiwiInitrdNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setKiwiInitrd();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1305,7 +1303,7 @@ sub test_setPartitionInstall {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setPartitionInstall('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1335,7 +1333,7 @@ sub test_setPartitionInstallInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setPartitionInstall(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setPartitionInstall: unrecognized '
@@ -1360,7 +1358,7 @@ sub test_setPartitionInstallNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setPartitionInstall();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1390,7 +1388,7 @@ sub test_setReboot {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setReboot('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1435,7 +1433,7 @@ sub test_setRebootInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setReboot(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setReboot: unrecognized '
@@ -1461,7 +1459,7 @@ sub test_setRebootNoArg {
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
 	$init->{oem_shutdown} = 'true';
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setReboot();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1506,7 +1504,7 @@ sub test_setRebootInteractive {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setRebootInteractive('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1551,7 +1549,7 @@ sub test_setRebootInteractiveInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setRebootInteractive(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setRebootInteractive: unrecognized '
@@ -1577,7 +1575,7 @@ sub test_setRebootInteractiveNoArg {
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
 	$init->{oem_bootwait} = 'true';
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setRebootInteractive();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1622,7 +1620,7 @@ sub test_setRecovery {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setRecovery('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1652,7 +1650,7 @@ sub test_setRecoveryInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setRecovery(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setRecovery: unrecognized '
@@ -1677,7 +1675,7 @@ sub test_setRecoveryNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setRecovery();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1707,7 +1705,7 @@ sub test_setRecoveryID {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setRecoveryID('foobar');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1738,7 +1736,7 @@ sub test_setRecoveryIDNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setRecoveryID();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1768,7 +1766,7 @@ sub test_setShutdown {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setShutdown('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1813,7 +1811,7 @@ sub test_setShutdownInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setShutdown(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setShutdown: unrecognized '
@@ -1839,7 +1837,7 @@ sub test_setShutdownNoArg {
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
 	$init->{oem_reboot} = 'true';
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setShutdown();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1884,7 +1882,7 @@ sub test_setShutdownInteractive {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setShutdownInteractive('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1929,7 +1927,7 @@ sub test_setShutdownInteractiveInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setShutdownInteractive(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setShutdownInteractive: unrecognized '
@@ -1955,7 +1953,7 @@ sub test_setShutdownInteractiveNoArg {
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
 	$init->{oem_bootwait} = 'true';
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setShutdownInteractive();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2000,7 +1998,7 @@ sub test_setSilentBoot {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setSilentBoot('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2030,7 +2028,7 @@ sub test_setSilentBootInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setSilentBoot(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setSilentBoot: unrecognized '
@@ -2055,7 +2053,7 @@ sub test_setSilentBootNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setSilentBoot();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2085,7 +2083,7 @@ sub test_setSwap {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setSwap('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2115,7 +2113,7 @@ sub test_setSwapInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setSwap(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setSwap: unrecognized '
@@ -2140,7 +2138,7 @@ sub test_setSwapNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setSwap();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2172,7 +2170,7 @@ sub test_setSwapSize {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setSwapSize('4096');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2205,7 +2203,7 @@ sub test_setSwapSizeNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setSwapSize();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2237,7 +2235,7 @@ sub test_setSystemSize {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setSystemSize('8192');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2268,7 +2266,7 @@ sub test_setSystemSizeNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setSystemSize();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2298,7 +2296,7 @@ sub test_setUnattended {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setUnattended('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2328,7 +2326,7 @@ sub test_setUnattendedInvalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	my $res = $confDataObj -> setUnattended(1);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLOEMConfigData:setUnattended: unrecognized '
@@ -2353,7 +2351,7 @@ sub test_setUnattendedNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setUnattended();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2385,7 +2383,7 @@ sub test_setUnattendedID {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi);
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
 	$confDataObj = $confDataObj -> setUnattendedID('/dev/sdb');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2416,7 +2414,7 @@ sub test_setUnattendedIDNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($kiwi, $init);
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
 	$confDataObj = $confDataObj -> setUnattendedID();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);

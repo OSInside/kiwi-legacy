@@ -25,6 +25,7 @@ use XML::LibXML;
 require Exporter;
 
 use base qw /KIWIXMLDataBase/;
+
 #==========================================
 # Exports
 #------------------------------------------
@@ -90,7 +91,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi = shift;
 	my $init = shift;
 	#==========================================
 	# Argument checking and object data store

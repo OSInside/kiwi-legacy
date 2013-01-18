@@ -27,37 +27,12 @@ use KIWISocket;
 use KIWISharedMem;
 use KIWIQX qw (qxx qxxLogOff qxxLogOn);
 
+use base qw /Class::Singleton/;
+
 #==========================================
 # Tracing
 #------------------------------------------
 $Carp::Internal{KIWILog}++;
-
-#==========================================
-# Constructor
-#------------------------------------------
-sub new {
-	# ...
-	# Construct a KIWILog object. The log object
-	# is used to print out info, error and warning
-	# messages
-	# ---
-	#==========================================
-	# Object setup
-	#------------------------------------------
-	my $this  = {};
-	my $class = shift;
-	bless  $this,$class;
-	#==========================================
-	# Store object data
-	#------------------------------------------
-	$this->{showLevel} = [0,1,2,3,4,5];
-	$this->{channel}   = *STDOUT;
-	$this->{errorOk}   = 0;
-	$this->{message}   = "initialize";
-	$this->{used}      = 1;
-	$this -> getPrefix (1);
-	return $this;
-}
 
 #==========================================
 # sendLogServerMessage
@@ -1098,6 +1073,33 @@ sub writeXMLDiff {
 	}
 	unlink $used;
 	unlink $orig;
+	return $this;
+}
+
+#==========================================
+# One time initialization code
+#------------------------------------------
+sub _new_instance {
+	# ...
+	# Construct a KIWILog object. The log object
+	# is used to print out info, error and warning
+	# messages
+	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
+	my $this  = {};
+	my $class = shift;
+	bless  $this,$class;
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{showLevel} = [0,1,2,3,4,5];
+	$this->{channel}   = *STDOUT;
+	$this->{errorOk}   = 0;
+	$this->{message}   = "initialize";
+	$this->{used}      = 1;
+	$this -> getPrefix (1);
 	return $this;
 }
 

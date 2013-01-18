@@ -48,7 +48,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi       = shift;
 	my $configPath = shift;
 	my $revRecPath = shift;
 	my $schemaPath = shift;
@@ -56,6 +55,7 @@ sub new {
 	#==========================================
 	# Check pre-conditions
 	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	if ((! $configPath) || (! -f $configPath)) {
 		if (! $configPath) {
 			$configPath = "undefined";
@@ -1665,7 +1665,7 @@ sub __validateXML {
 			print $UPCNTFL $upgradedStr;
 			close ( $UPCNTFL );
 		}
-		my $locator = KIWILocator -> new( $kiwi );
+		my $locator = KIWILocator -> new();
 		my $jingExec = $locator -> getExecPath('jing');
 		if ($jingExec) {
 			qxx ("$jingExec $this->{schema} $upgradedContolFile 1>&2");

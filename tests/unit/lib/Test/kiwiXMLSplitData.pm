@@ -34,8 +34,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -48,7 +46,7 @@ sub test_ctor {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -69,7 +67,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, 'foo');
+	my $splitDataObj = KIWIXMLSplitData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -98,7 +96,7 @@ sub test_ctor_improperDataBehavior {
 	my %init = ( persistent => 'yes',
 				temporary  => \%temp
 	    );
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, \%init);
+	my $splitDataObj = KIWIXMLSplitData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Expecting hash ref as entry for 'persistent' in "
 		. 'initialization structure.';
@@ -125,7 +123,7 @@ sub test_ctor_improperDataContent {
 	my %tmpSettings = ( all => 'foo');
 	my %temp = ( files =>  \%tmpSettings);
 	my %init = ( temporary  => \%temp );
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, \%init);
+	my $splitDataObj = KIWIXMLSplitData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Expecting array ref as the entry for 'all' files in "
 		. "initialization structure for 'temporary' with 'files'.";
@@ -151,7 +149,7 @@ sub test_ctor_improperDataUsage {
 	my $kiwi = $this -> {kiwi};
 	my %temp = ( files => 'foo');
 	my %init = ( temporary  => \%temp );
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, \%init);
+	my $splitDataObj = KIWIXMLSplitData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Expecting hash ref as entry for 'files' in "
 		. 'initialization structure.';
@@ -180,7 +178,7 @@ sub test_ctor_initUnsupportedDataBehavior {
 				temporary  => 'yes',
 				unknown    => 'foo'
 	);
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, \%init);
+	my $splitDataObj = KIWIXMLSplitData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLSplitData: Unsupported keyword argument '
 		. "'unknown' in initialization structure.";
@@ -210,7 +208,7 @@ sub test_ctor_initUnsupportedDataContent {
 					);
 	my %temp = ( files =>  \%tmpSettings );
 	my %init = ( temporary  => \%temp );
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, \%init);
+	my $splitDataObj = KIWIXMLSplitData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Initialization structure: specified architecture '
 		. "'arm95' is not supported.";
@@ -240,7 +238,7 @@ sub test_ctor_initUnsupportedDataUsage {
 				foo   => 'bar'
 			);
 	my %init = ( temporary  => \%temp );
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, \%init);
+	my $splitDataObj = KIWIXMLSplitData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Unsupported option in initialization structure '
 		. "for 'temporary', found 'foo'";
@@ -267,7 +265,7 @@ sub test_ctor_withInit {
 	my %tmpSettings = ( all => \@tmpFiles);
 	my %temp = ( files =>  \%tmpSettings);
 	my %init = ( temporary  => \%temp );
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, \%init);
+	my $splitDataObj = KIWIXMLSplitData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -647,7 +645,7 @@ sub test_setPersistentExceptions {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my @expected = qw ( /home/demouser /home/demouser/* );
 	$splitDataObj = $splitDataObj -> setPersistentExceptions(\@expected);
 	my $msg = $kiwi -> getMessage();
@@ -681,7 +679,7 @@ sub test_setPersistentExceptionsArch {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my @expected = qw ( /etc/ppc/base.conf /etc/ppc/opt );
 	$splitDataObj = $splitDataObj -> setPersistentExceptions(\@expected,'ppc');
 	my $msg = $kiwi -> getMessage();
@@ -716,7 +714,7 @@ sub test_setPersistentExceptionsArchPlus {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my @expectedArch = qw ( /etc/ppc/base.conf /etc/ppc/opt );
 	my @expectedGen  = qw ( /home/demouser /home/demouser/* );
 	$splitDataObj = $splitDataObj -> setPersistentExceptions(\@expectedArch,
@@ -763,7 +761,7 @@ sub test_setPersistentExceptionsImproperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my $res = $splitDataObj -> setPersistentExceptions('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setPersistentExceptions: expecting array ref as first '
@@ -881,7 +879,7 @@ sub test_setPersistentFiles {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my @expected = qw ( /home/demouser /home/demouser/* );
 	$splitDataObj = $splitDataObj -> setPersistentFiles(\@expected);
 	my $msg = $kiwi -> getMessage();
@@ -915,7 +913,7 @@ sub test_setPersistentFilesArch {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my @expected = qw ( /etc/ppc/base.conf /etc/ppc/opt );
 	$splitDataObj = $splitDataObj -> setPersistentFiles(\@expected,'ppc');
 	my $msg = $kiwi -> getMessage();
@@ -950,7 +948,7 @@ sub test_setPersistentFilesArchPlus {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my @expectedArch = qw ( /etc/ppc/base.conf /etc/ppc/opt );
 	my @expectedGen  = qw ( /home/demouser /home/demouser/* );
 	$splitDataObj = $splitDataObj -> setPersistentFiles(
@@ -998,7 +996,7 @@ sub test_setPersistentFilesImproperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my $res = $splitDataObj -> setPersistentFiles('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setPersistentFiles: expecting array ref as first '
@@ -1116,7 +1114,7 @@ sub test_setTemporaryExceptions {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my @expected = qw ( /home/demouser /home/demouser/* );
 	$splitDataObj = $splitDataObj -> setTemporaryExceptions(\@expected);
 	my $msg = $kiwi -> getMessage();
@@ -1150,7 +1148,7 @@ sub test_setTemporaryExceptionsArch {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my @expected = qw ( /etc/ppc/base.conf /etc/ppc/opt );
 	$splitDataObj = $splitDataObj -> setTemporaryExceptions(\@expected,'ppc');
 	my $msg = $kiwi -> getMessage();
@@ -1185,7 +1183,7 @@ sub test_setTemporaryExceptionsArchPlus {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my @expectedArch = qw ( /etc/ppc/base.conf /etc/ppc/opt );
 	my @expectedGen  = qw ( /home/demouser /home/demouser/* );
 	$splitDataObj = $splitDataObj -> setTemporaryExceptions(\@expectedArch,
@@ -1232,7 +1230,7 @@ sub test_setTemporaryExceptionsImproperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my $res = $splitDataObj -> setTemporaryExceptions('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setTemporaryExceptions: expecting array ref as first '
@@ -1350,7 +1348,7 @@ sub test_setTemporaryFiles {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my @expected = qw ( /home/demouser /home/demouser/* );
 	$splitDataObj = $splitDataObj -> setTemporaryFiles(\@expected);
 	my $msg = $kiwi -> getMessage();
@@ -1384,7 +1382,7 @@ sub test_setTemporaryFilesArch {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my @expected = qw ( /etc/ppc/base.conf /etc/ppc/opt );
 	$splitDataObj = $splitDataObj -> setTemporaryFiles(\@expected,'ppc');
 	my $msg = $kiwi -> getMessage();
@@ -1419,7 +1417,7 @@ sub test_setTemporaryFilesArchPlus {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my @expectedArch = qw ( /etc/ppc/base.conf /etc/ppc/opt );
 	my @expectedGen  = qw ( /home/demouser /home/demouser/* );
 	$splitDataObj = $splitDataObj -> setTemporaryFiles(\@expectedArch,
@@ -1466,7 +1464,7 @@ sub test_setTemporaryFilesImproperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi);
+	my $splitDataObj = KIWIXMLSplitData -> new();
 	my $res = $splitDataObj -> setTemporaryFiles('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setTemporaryFiles: expecting array ref as first '
@@ -1624,7 +1622,7 @@ sub __getSplitDataObj {
 		persistent => \%persSettings,
 		temporary  => \%tempSettings
 	);
-	my $splitDataObj = KIWIXMLSplitData -> new($kiwi, \%init);
+	my $splitDataObj = KIWIXMLSplitData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

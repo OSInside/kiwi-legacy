@@ -34,8 +34,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -49,7 +47,7 @@ sub test_ctor {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $cmd = KIWICommandLine -> new($kiwi);
+	my $cmd = KIWICommandLine -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1583,7 +1581,7 @@ sub __getCmdObj {
 	# Helper method to create a CommandLine object;
 	# ---
 	my $this = shift;
-	my $cmd = KIWICommandLine -> new($this -> {kiwi});
+	my $cmd = KIWICommandLine -> new();
 	return $cmd;
 }
 

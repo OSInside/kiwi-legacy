@@ -58,7 +58,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi       = shift;
 	my $xml        = shift;
 	my $imageTree  = shift;
 	my $imageDest  = shift;
@@ -78,6 +77,7 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	if (! defined $cmdL) {
 		$kiwi -> error ("No Commandline reference specified");
 		$kiwi -> failed ();
@@ -474,13 +474,13 @@ sub checkAndSetupPrebuiltBootImage {
 	#==========================================
 	# open boot image XML object
 	#------------------------------------------
-	my $locator = KIWILocator -> new ($kiwi);
+	my $locator = KIWILocator -> new();
 	my $controlFile = $locator -> getControlFile ($bootpath);
 	if (! $controlFile) {
 		return;
 	}
 	my $validator = KIWIXMLValidator -> new (
-		$kiwi,$controlFile,
+		$controlFile,
 		$this->{gdata}->{Revision},
 		$this->{gdata}->{Schema},
 		$this->{gdata}->{SchemaCVT}
@@ -489,7 +489,7 @@ sub checkAndSetupPrebuiltBootImage {
 	if (! $isValid) {
 		return;
 	}
-	my $bxml = KIWIXML -> new ( $kiwi,$bootpath,undef,undef,$cmdL );
+	my $bxml = KIWIXML -> new ($bootpath,undef,undef,$cmdL );
 	if (! $bxml) {
 		return;
 	}
@@ -590,7 +590,7 @@ sub setupOverlay {
 	my $kiwi = $this->{kiwi};
 	my $tree = $this->{imageTree};
 	my $xml  = $this->{xml};
-	$this->{overlay} = KIWIOverlay -> new ($kiwi,$tree);
+	$this->{overlay} = KIWIOverlay -> new($tree);
 	if (! $this->{overlay}) {
 		return;
 	}
@@ -1302,7 +1302,7 @@ sub createImageRootAndBoot {
 			$configDir = $stype{boot};
 		}
 		my $rootTarget = "$tmpdir/kiwi-".$text."boot-$$";
-		my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
+		my $kic = KIWIImageCreator -> new($cmdL);
 		if ((! $kic) ||	(! $kic -> prepareBootImage (
 			$configDir,$rootTarget,$this->{imageTree},\%XMLChangeSet))
 		) {
@@ -1347,7 +1347,7 @@ sub createImageRootAndBoot {
 	#==========================================
 	# Include splash screen to initrd
 	#------------------------------------------
-	my $kboot  = KIWIBoot -> new ($kiwi,$initrd,$cmdL);
+	my $kboot  = KIWIBoot -> new($initrd,$cmdL);
 	if (! defined $kboot) {
 		return;
 	}
@@ -1433,7 +1433,7 @@ sub createImageVMX {
 			$idest."/".$name->{systemImage}
 		);
 	}
-	my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
+	my $kic = KIWIImageCreator -> new($cmdL);
 	if ((! $kic) || (! $kic->createImageDisk())) {
 		undef $kic;
 		return;
@@ -1446,7 +1446,7 @@ sub createImageVMX {
 			$idest."/".$name->{systemImage}.".raw"
 		);
 		$cmdL -> setImageFormat ($name->{format});
-		my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
+		my $kic = KIWIImageCreator -> new($cmdL);
 		if ((! $kic) || (! $kic->createImageFormat($xml))) {
 			undef $kic;
 			return;
@@ -1807,7 +1807,7 @@ sub createImageLiveCD {
 			$configDir = $stype{boot};
 		}
 		my $rootTarget = "$tmpdir/kiwi-isoboot-$$";
-		my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
+		my $kic = KIWIImageCreator -> new($cmdL);
 		if ((! $kic) || (! $kic -> prepareBootImage (
 			$configDir,$rootTarget,$this->{imageTree},\%XMLChangeSet))
 		) {
@@ -1854,7 +1854,7 @@ sub createImageLiveCD {
 	#==========================================
 	# Include splash screen to initrd
 	#------------------------------------------
-	my $kboot  = KIWIBoot -> new ($kiwi,$pinitrd,$cmdL);
+	my $kboot  = KIWIBoot -> new($pinitrd,$cmdL);
 	if (! defined $kboot) {
 		return;
 	}
@@ -2215,14 +2215,14 @@ sub createImageLiveCD {
 		$attr .= " -allow-limited-size -udf";
 	}
 	if (! defined $gzip) {
-		$attr .= " -iso-level 4"; 
+		$attr .= " -iso-level 4";
 	}
 	if ($stype{volid}) {
 		$attr .= " -V \"$stype{volid}\"";
 	}
 	$attr .= " -A \"$this->{mbrid}\"";
 	my $isolinux = KIWIIsoLinux -> new (
-		$kiwi,$CD,$name,$attr,"checkmedia",$this->{cmdL},$this->{xml}
+		$CD,$name,$attr,"checkmedia",$this->{cmdL},$this->{xml}
 	);
 	if (defined $isolinux) {
 		$isoerror = 0;
@@ -2931,7 +2931,7 @@ sub createImageSplit {
 			$configDir = $type{boot};
 		}
 		my $rootTarget = "$tmpdir/kiwi-splitboot-$$";
-		my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
+		my $kic = KIWIImageCreator -> new($cmdL);
 		if ((! $kic) || (! $kic -> prepareBootImage (
 			$configDir,$rootTarget,$this->{imageTree},\%XMLChangeSet))
 		) {
@@ -2976,7 +2976,7 @@ sub createImageSplit {
 	#==========================================
 	# Include splash screen to initrd
 	#------------------------------------------
-	my $kboot  = KIWIBoot -> new ($kiwi,$initrd,$cmdL);
+	my $kboot  = KIWIBoot -> new($initrd,$cmdL);
 	if (! defined $kboot) {
 		return;
 	}
@@ -2997,7 +2997,7 @@ sub createImageSplit {
 		$cmdL -> setSystemLocation (
 			$idest."/".$name->{systemImage}
 		);
-		my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
+		my $kic = KIWIImageCreator -> new($cmdL);
 		if ((! $kic) || (! $kic->createImageDisk())) {
 			undef $kic;
 			return;
@@ -3010,7 +3010,7 @@ sub createImageSplit {
 				$idest."/".$name->{systemImage}.".raw"
 			);
 			$cmdL -> setImageFormat ($name->{format});
-			my $kic = KIWIImageCreator -> new ($kiwi, $cmdL);
+			my $kic = KIWIImageCreator -> new($cmdL);
 			if ((! $kic) || (! $kic->createImageFormat($sxml))) {
 				undef $kic;
 				return;
@@ -4151,7 +4151,7 @@ sub setupSquashFS {
 	my $xml  = $this->{xml};
 	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $imageTree = $this->{imageTree};
-	my $locator = KIWILocator -> new($kiwi);
+	my $locator = KIWILocator -> new();
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}

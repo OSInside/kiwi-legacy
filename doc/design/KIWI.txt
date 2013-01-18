@@ -1,0 +1,14 @@
+The process and flow of information starts with the command parser and 
+"executable" kiwi.pl. When packages kiwi.pl changes to kiwi. The main
+objective of the parser is to collect all the command line data, create
+the command line object, implemented in KIWICommandline.pm, and then start
+the image build process by instantiating the image creator, implemented in
+KIWIImageCreator.pm. Based on the information in the command line object the
+image creator makes decisions about the actions to take and orchestrates the
+image build procedure.
+
+Kiwi implements a logging facility in KIWILog.pm which is implemented as a
+Singleton. All classes in KIWI log messages and thus the Singleton
+implementation of the logger allows us to access the log object from any
+location in the code without having to pass the object around.
+

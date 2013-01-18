@@ -40,10 +40,9 @@ sub new {
 	# Object setup
 	#------------------------------------------
 	my $class = shift;
-	my $kiwi = shift;
 	my $init = shift;
 	my @addtlKeywords = ( 'bootinclude' );
-	my $this = $class->SUPER::new($kiwi, $init, \@addtlKeywords);
+	my $this = $class->SUPER::new($init, \@addtlKeywords);
 	if (! $this) {
 		return;
 	}

@@ -53,7 +53,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi = shift;
 	my $init = shift;
 	#==========================================
 	# Argument checking and object data store
@@ -68,6 +67,7 @@ sub new {
 	if (! $this -> __areKeywordArgsValid($init) ) {
 		return;
 	}
+	my $kiwi = $this->{kiwi};
 	if ($init) {
 		$this->{acctno}    = $init->{ec2accountnr};
 		$this->{certfile}  = $init->{ec2certfile};
@@ -81,7 +81,6 @@ sub new {
 		}
 		$this->{regions} = $init->{ec2region};
 	}
-	$this->{kiwi} = $kiwi;
 	return $this;
 }
 

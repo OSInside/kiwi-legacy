@@ -30,6 +30,7 @@ sub new {
 	# Construct the test case
 	#---
 	my $this = shift -> SUPER::new(@_);
+	$this -> {kiwi} = Common::ktLog -> instance();
 	return $this;
 }
 

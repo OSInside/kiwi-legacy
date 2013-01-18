@@ -32,8 +32,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -46,7 +44,7 @@ sub test_ctor_noArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi);
+	my $pckgDataObj = KIWIXMLPackageData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLPackageData: must be constructed with a '
 		. 'keyword hash as argument';
@@ -70,7 +68,7 @@ sub test_ctor_simple {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'libtiff' );
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -96,7 +94,7 @@ sub test_ctor_invalidBoolValDelete {
 				bootdelete => 'yes',
 				name       => 'python'
 	);
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLPackageData: Unrecognized value for boolean '
 		. "'bootdelete' in initialization structure.";
@@ -124,7 +122,7 @@ sub test_ctor_invalidBoolValIncl {
 				bootinclude => 'yes',
 				name        => 'python'
 	);
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLPackageData: Unrecognized value for boolean '
 		. "'bootinclude' in initialization structure.";
@@ -151,7 +149,7 @@ sub test_ctor_unsuportedArch {
 				arch => 'tegra',
 				name => 'dia'
 	);
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -177,7 +175,7 @@ sub test_ctor_unsupportedKW {
 				arch     => 'ppc64',
 				filename => 'zypper'
 	);
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLPackageData: Unsupported keyword argument '
 		. "'filename' in initialization structure.";
@@ -203,7 +201,7 @@ sub test_ctor_withArch {
 				arch => 'ppc64',
 				name => 'libpng'
 	);
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -335,7 +333,7 @@ sub test_setArch {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'libzypp');
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -367,7 +365,7 @@ sub test_setArch_invalid {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'snapper');
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -431,7 +429,7 @@ sub test_setBootDeleteInvalidArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my %init = ( name => 'gfxboot');
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -525,7 +523,7 @@ sub test_setBootIncludeInvalidArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my %init = ( name => 'gfxboot');
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -588,7 +586,7 @@ sub test_setPackageToReplace {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my %init = ( name => 'kernel-desktop');
-	my $pckgDataObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgDataObj = KIWIXMLPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -654,7 +652,7 @@ sub __getPckgDataObj {
 		name        => 'python',
 		replaces    => 'ruby'
 	);
-	my $pckgObj = KIWIXMLPackageData -> new($kiwi, \%init);
+	my $pckgObj = KIWIXMLPackageData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

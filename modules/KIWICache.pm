@@ -53,7 +53,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi = shift;
 	my $xml  = shift;
 	my $cdir = shift;
 	my $base = shift;
@@ -63,6 +62,7 @@ sub new {
 	#==========================================
 	# Check pre-conditions
 	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	if (! defined $cmdL) {
 		my $msg = 'KIWICache: failed to create KIWICommandLine object';
 		$kiwi -> error ($msg);
@@ -181,7 +181,7 @@ sub initializeCache {
 	#------------------------------------------
 	if (! $createCache) {
 		$cmdL -> setConfigDir ($conf);
-		my $info = KIWIXMLInfo -> new($kiwi,$cmdL,$xml);
+		my $info = KIWIXMLInfo -> new($cmdL,$xml);
 		my @infoReq = ('packages', 'sources');
 		$CacheScan = $info -> getXMLInfoTree(\@infoReq);
 		if (! $CacheScan) {
@@ -235,7 +235,7 @@ sub createCache {
 	$cmdL -> setOperationMode ("prepare", $cmdL->getConfigDir());
 	$cmdL -> setBuildType ("btrfs");
 	$cmdL -> setForceNewRoot (1);
-	my $kic = KIWIImageCreator -> new($kiwi, $cmdL);
+	my $kic = KIWIImageCreator -> new($cmdL);
 	if (! $kic) {
 		return;
 	}
@@ -266,7 +266,7 @@ sub createCache {
 	# extraction from image cache
 	# ----
 	my $image = KIWIImage -> new(
-		$kiwi,$xml,$root,$imageCacheDir,
+		$xml,$root,$imageCacheDir,
 		undef,"/base-system",undef,"active",$cmdL
 	);
 	if (! defined $image) {

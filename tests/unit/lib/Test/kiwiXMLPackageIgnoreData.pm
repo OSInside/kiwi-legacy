@@ -33,8 +33,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -47,7 +45,7 @@ sub test_ctor_noArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi);
+	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLPackageIgnoreData: must be constructed with a '
 		. 'keyword hash as argument';
@@ -74,7 +72,7 @@ sub test_ctor_unsuportedArch {
 				arch => 'tegra',
 				name => 'libpng'
 	);
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -97,7 +95,7 @@ sub test_ctor_simple {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'gimp' );
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -122,7 +120,7 @@ sub test_ctor_unsupportedKW {
 				arch     => 'ppc64',
 				filename => 'oowriter'
 	);
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIXMLPackageIgnoreData: Unsupported keyword argument '
 		. "'filename' in initialization structure.";
@@ -148,7 +146,7 @@ sub test_ctor_withArch {
 				arch => 'ppc64',
 				name => 'perl'
 	);
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -173,7 +171,7 @@ sub test_getArch {
 				arch => 'ix86',
 				name => 'ruby'
 	);
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -203,7 +201,7 @@ sub test_getName {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'php');
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -237,7 +235,7 @@ sub test_getXMLElement{
 		arch => 'ppc',
 		name => 'ruby'
 	);
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -268,7 +266,7 @@ sub test_setArch {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'vi');
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -300,7 +298,7 @@ sub test_setArch_invalid {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( name => 'xemacs');
-	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new($kiwi, \%init);
+	my $ignoreDataObj = KIWIXMLPackageIgnoreData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

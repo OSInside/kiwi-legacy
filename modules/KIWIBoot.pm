@@ -53,7 +53,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi   = shift;
 	my $initrd = shift;
 	my $cmdL   = shift;
 	my $system = shift;
@@ -85,6 +84,7 @@ sub new {
 	#==========================================
 	# check initrd file parameter
 	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	if ((defined $initrd) && (! -f $initrd)) {
 		$kiwi -> error  ("Couldn't find initrd file: $initrd");
 		$kiwi -> failed ();
@@ -128,7 +128,7 @@ sub new {
 			#==========================================
 			# Check for overlay structure
 			#------------------------------------------
-			$this->{overlay} = KIWIOverlay -> new ($kiwi,$system);
+			$this->{overlay} = KIWIOverlay -> new($system);
 			if (! $this->{overlay}) {
 				return;
 			}
@@ -273,10 +273,10 @@ sub new {
 		#==========================================
 		# read and validate XML description
 		#------------------------------------------
-		my $locator = KIWILocator -> new ($kiwi);
+		my $locator = KIWILocator -> new();
 		my $controlFile = $locator -> getControlFile ($rootpath."/image");
 		my $validator = KIWIXMLValidator -> new (
-			$kiwi,$controlFile,
+			$controlFile,
 			$this->{gdata}->{Revision},
 			$this->{gdata}->{Schema},
 			$this->{gdata}->{SchemaCVT}
@@ -289,7 +289,7 @@ sub new {
 			return;
 		}
 		$xml = KIWIXML -> new (
-			$kiwi,$rootpath."/image",$cmdL->getBuildType(),$profile,$cmdL
+			$rootpath."/image",$cmdL->getBuildType(),$profile,$cmdL
 		);
 		#==========================================
 		# clean up
@@ -924,7 +924,7 @@ sub setupInstallCD {
 		$name = $wdir."/".$name;
 	}
 	my $iso = KIWIIsoLinux -> new (
-		$kiwi,$tmpdir,$name,$base.' '.$opts,"checkmedia",
+		$tmpdir,$name,$base.' '.$opts,"checkmedia",
 		$this->{cmdL},$this->{xml}
 	);
 	if (! defined $iso) {
@@ -4873,7 +4873,7 @@ sub installBootLoader {
 	my $xml      = $this->{xml};
 	my $firmware = $this->{firmware};
 	my $system   = $this->{system};
-	my $locator  = KIWILocator -> new ($kiwi);
+	my $locator  = KIWILocator -> new();
 	my $bootdev;
 	my $result;
 	my $status;
@@ -5447,7 +5447,7 @@ sub getGeometry {
 	my $status;
 	my $result;
 	my $parted;
-	my $locator = KIWILocator -> new ($kiwi);
+	my $locator = KIWILocator -> new();
 	my $parted_exec = $locator -> getExecPath("parted");
 	$status = qxx ("dd if=/dev/zero of=$disk bs=512 count=1 2>&1");
 	$result = $? >> 8;
@@ -5557,7 +5557,7 @@ sub initGeometry {
 	my $align  = $cmdL->getDiskAlignment();
 	my $secsz  = $cmdL->getDiskBIOSSectorSize();
 	my $align_sectors = int ($align / $secsz);
-	my $locator= KIWILocator -> new ($kiwi);
+	my $locator= KIWILocator -> new();
 	if (! defined $this->{pStart}) {
 		$this->{pStart} = $cmdL->getDiskStartSector();
 	} else {
@@ -5603,7 +5603,7 @@ sub setStoragePartition {
 	my $status;
 	my $ignore;
 	my $action;
-	my $locator = KIWILocator -> new ($kiwi);
+	my $locator = KIWILocator -> new();
 	my $parted_exec = $locator -> getExecPath("parted");
 	if (! defined $tool) {
 		$tool = "parted";
@@ -6428,7 +6428,7 @@ sub __expandFS {
 	my $diskType  = shift;
 	my $mapper    = shift;
 	my $kiwi      = $this->{kiwi};
-	my $locator   = KIWILocator -> new ($kiwi);
+	my $locator   = KIWILocator -> new();
 	my $result    = 1;
 	my $status;
 	$kiwi->loginfo ("Resize Operation: Device: $mapper\n");

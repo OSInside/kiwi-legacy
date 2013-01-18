@@ -25,6 +25,7 @@ use base qw (Exporter);
 use Carp qw (cluck);
 use FileHandle;
 use Socket;
+use KIWILog;
 use KIWIQX qw (qxx);
 
 my @EXPORT_OK = qw ();
@@ -48,7 +49,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi = shift;
 	my $port = shift;
 	#==========================================
 	# Constructor setup
@@ -64,7 +64,7 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{kiwi}   = $kiwi;
+	$this->{kiwi}   = KIWILog -> instance();
 	$this->{port}   = $port;
 	$this->{server} = $server;
 	return $this;

@@ -33,8 +33,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -48,7 +46,7 @@ sub test_ctor_argsInvalidHashNoPath {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %repoData = ( alias => 'myRepo' );
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLRepositoryData: no "path" specified in '
 		.'initialization structure.';
@@ -76,7 +74,7 @@ sub test_ctor_argsInvalidHashInvalidType {
 					path  => 'opensuse:///',
 					type  => 'bar'
 	);
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Specified repository type 'bar' is not supported";
 	$this -> assert_str_equals($expected, $msg);
@@ -104,7 +102,7 @@ sub test_ctor_argsInvalidHashInvalidPrefLic {
 					preferlicense => 'foo',
 					type          => 'rpm-md'
 	);
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLRepositoryData: Unrecognized value for boolean '
 		. "'preferlicense' in initialization structure.";
@@ -131,7 +129,7 @@ sub test_ctor_argsInvalidHashNoType {
 					alias => 'myRepo',
 					path  => 'opensuse:///'
 	);
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLRepositoryData: no "type" specified in '
 		. 'initialization structure.';
@@ -160,7 +158,7 @@ sub test_ctor_argsInvalidHashPassNoUsr {
 					path  => 'opensuse:///',
 					type => 'deb-dir'
 				);
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLRepositoryData: initialization data contains '
 		. 'password, but no username';
@@ -189,7 +187,7 @@ sub test_ctor_argsInvalidHashUsrNoPass {
 					type => 'up2date-mirrors',
 					username => 'pablo'
 				);
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLRepositoryData: initialization data contains '
 		. 'username, but no password';
@@ -216,7 +214,7 @@ sub test_ctor_argsInvalidType {
 				path => 'opensuse:///',
 				type => 'foo'
 	);
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%init);
+	my $repoDataObj = KIWIXMLRepositoryData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "Specified repository type 'foo' is not supported";
 	$this -> assert_str_equals($expected, $msg);
@@ -242,7 +240,7 @@ sub test_ctor_argsValidHash {
 					path  => 'opensuse:///',
 					type => 'up2date-mirrors'
 				);
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%repoData);
+	my $repoDataObj = KIWIXMLRepositoryData -> new(\%repoData);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -263,7 +261,7 @@ sub test_ctor_invalidArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, 'opensuse');
+	my $repoDataObj = KIWIXMLRepositoryData -> new('opensuse');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -285,7 +283,7 @@ sub test_ctor_noArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi);
+	my $repoDataObj = KIWIXMLRepositoryData -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLRepositoryData: must be constructed with '
 		. 'a keyword hash as argument';
@@ -1164,7 +1162,7 @@ sub __getRepoDataObj {
 				type          => 'yast2',
 				username      => 'testuser'
 	);
-	my $repoDataObj = KIWIXMLRepositoryData -> new($kiwi, \%init);
+	my $repoDataObj = KIWIXMLRepositoryData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

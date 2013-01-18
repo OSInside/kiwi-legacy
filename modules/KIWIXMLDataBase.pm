@@ -21,6 +21,8 @@ use warnings;
 use XML::LibXML;
 require Exporter;
 
+use KIWILog;
+
 #==========================================
 # Exports
 #------------------------------------------
@@ -40,13 +42,10 @@ sub new {
 	my $class = shift;
 	bless $this,$class;
 	#==========================================
-	# Module Parameters
-	#------------------------------------------
-	my $kiwi = shift;
-	#==========================================
 	# Argument checking and common object data
 	#------------------------------------------
-	$this->{kiwi} = $kiwi;
+	$this->{kiwi} = KIWILog -> instance();
+	my $kiwi = $this->{kiwi};
 	my %archesSup = map { ($_ => 1) } qw(
 		armv5tel
 		armv7l

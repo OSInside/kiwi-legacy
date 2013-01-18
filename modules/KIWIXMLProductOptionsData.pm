@@ -45,7 +45,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi = shift;
 	my $init = shift;
 	my %keywords = map { ($_ => 1) } qw(
 		productinfo

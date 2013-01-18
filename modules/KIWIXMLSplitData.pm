@@ -73,7 +73,6 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi = shift;
 	my $init = shift;
 	#==========================================
 	# Argument checking and object data store
@@ -408,9 +407,9 @@ sub __getDataArchAgnostic {
 		for my $fl (@files) {
 			my %init = ( name => $fl );
 			if ($usage eq 'except') {
-				push @dataObjs, KIWIXMLExceptData -> new($kiwi, \%init);
+				push @dataObjs, KIWIXMLExceptData -> new(\%init);
 			} elsif ($usage eq 'files') {
-				push @dataObjs, KIWIXMLFileData -> new($kiwi, \%init);
+				push @dataObjs, KIWIXMLFileData -> new(\%init);
 			} else {
 				my $msg = 'Internal error: please file a bug __getData on '
 					. 'SplitData called with unkown usage access.';
@@ -456,9 +455,9 @@ sub __getDataArchSpecific {
 				name => $fl
 			);
 			if ($usage eq 'except') {
-				push @dataObjs, KIWIXMLExceptData -> new($kiwi, \%init);
+				push @dataObjs, KIWIXMLExceptData -> new(\%init);
 			} elsif ($usage eq 'files') {
-				push @dataObjs, KIWIXMLFileData -> new($kiwi, \%init);
+				push @dataObjs, KIWIXMLFileData -> new(\%init);
 			} else {
 				my $msg = 'Internal error: please file a bug __getData on '
 					. 'SplitData called with unkown usage access.';

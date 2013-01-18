@@ -55,8 +55,7 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi = shift;
-	my $xml  = shift;
+	my $xml          = shift;
 	my $imageDesc    = shift;
 	my $selfRoot     = shift;
 	my $baseSystem   = shift;
@@ -69,6 +68,7 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	my $code;
 	if (($imageDesc !~ /^\//) && (! -d $imageDesc)) {
 		$imageDesc = $this->{gdata}->{System}."/".$imageDesc;
@@ -114,7 +114,7 @@ sub new {
 		my $imgincl = $repository{$source}[6];
 		my $dist    = $repository{$source}[7];
 		my $comp    = $repository{$source}[8];
-		my $urlHandler  = KIWIURL -> new ($kiwi,$cmdL,$this,$user,$pwd);
+		my $urlHandler  = KIWIURL -> new ($cmdL,$this,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		if ($publics_url =~ /^\//) {
 			my ( $publics_url_test ) = bsd_glob ( $publics_url );
@@ -237,7 +237,7 @@ sub new {
 	# Check for overlay structure
 	#------------------------------------------
 	$this->{origtree}= $root;
-	$this->{overlay} = KIWIOverlay -> new ($kiwi,$root,$cacheRoot);
+	$this->{overlay} = KIWIOverlay -> new ($root,$cacheRoot);
 	if (! $this->{overlay}) {
 		$this -> cleanMount();
 		return;
@@ -279,23 +279,23 @@ sub new {
 	my $manager;
 	if ($pmgr eq "zypper") {
 		$manager = KIWIManagerZypper -> new (
-			$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
+			$xml,\%sourceChannel,$root,$pmgr,$targetArch
 		);
 	} elsif ($pmgr eq "smart") {
 		$manager = KIWIManagerSmart -> new (
-			$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
+			$xml,\%sourceChannel,$root,$pmgr,$targetArch
 		);
 	} elsif ($pmgr eq "yum") {
 		$manager = KIWIManagerYum -> new (
-			$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
+			$xml,\%sourceChannel,$root,$pmgr,$targetArch
 		);
 	} elsif ($pmgr eq "ensconce") {
 		$manager = KIWIManagerEnsconce -> new (
-			$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
+			$xml,\%sourceChannel,$root,$pmgr,$targetArch
 		);
 	} elsif ($pmgr eq "apt-get") {
 		$manager = KIWIManagerApt -> new (
-			$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
+			$xml,\%sourceChannel,$root,$pmgr,$targetArch
 		);
 	} else {
 		$kiwi -> error ("No package manager backend found for $pmgr");
@@ -1063,7 +1063,7 @@ sub setup {
 	#========================================
 	# configure the system
 	#----------------------------------------
-	my $configure = KIWIConfigure -> new ( $kiwi,$xml,$root,$imageDesc );
+	my $configure = KIWIConfigure -> new ( $xml,$root,$imageDesc );
 	if (! defined $configure) {
 		return;
 	}

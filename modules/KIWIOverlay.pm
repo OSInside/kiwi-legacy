@@ -44,12 +44,12 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi   = shift;
 	my $rootRW = shift;
 	my $baseRO = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
 	if (! -d $rootRW) {
 		$kiwi -> error ("Directory $rootRW doesn't exist");
 		$kiwi -> failed ();

@@ -34,8 +34,6 @@ sub new {
 	# Construct new test case
 	# ---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> new();
-
 	return $this;
 }
 
@@ -48,7 +46,7 @@ sub test_createVolume {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $id = $sysdDataObj -> createVolume('newVOL');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -183,7 +181,7 @@ sub test_createVolumeInvalidName {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $id = $sysdDataObj -> createVolume('t*Vol');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'createVolume: improper name, found non word character.';
@@ -211,7 +209,7 @@ sub test_createVolumeInvalidNameInit {
 				name => 'test VG',
 				size => '50G'
 			);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $id = $sysdDataObj -> createVolume(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'createVolume: improper name, found non word character.';
@@ -234,7 +232,7 @@ sub test_createVolumeIvalidNNoArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $id = $sysdDataObj -> createVolume();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'createVolume: expecting hash ref with volume data as '
@@ -263,7 +261,7 @@ sub test_createVolumeMissingNameData {
 				freespace => '5G',
 				size      => '50G'
 			);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $id = $sysdDataObj -> createVolume(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'createVolume: initialization data must contain '
@@ -292,7 +290,7 @@ sub test_createVolumeUnsupportedData {
 				volName => 'test VG',
 				size    => '50G'
 			);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $id = $sysdDataObj -> createVolume(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "createVolume: found unsupported setting 'volName' "
@@ -366,7 +364,7 @@ sub test_ctor {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -404,7 +402,7 @@ sub test_ctor_disallowedVoName {
 				name => 'testVG',
 				volumes => \%volumes
 			);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = "object initialization: found disallowed name 'sys'.";
 	$this -> assert_str_equals($expected, $msg);
@@ -443,7 +441,7 @@ sub test_ctor_duplicateVoName {
 				name => 'testVG',
 				volumes => \%volumes
 			);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Duplicate volume name in initialization '
 		. 'structure, ambiguous operation.';
@@ -466,7 +464,7 @@ sub test_ctor_improperArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, 'foo');
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -493,7 +491,7 @@ sub test_ctor_improperDataArg {
 				name    => 'testVG',
 				volumes => 'foo'
 			);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting hash ref as entry for "volumes" in '
 		. 'initialization structure.';
@@ -527,7 +525,7 @@ sub test_ctor_improperIDDataEntry {
 				name => 'testVG',
 				volumes => \%volumes
 			);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting integer as key for "volumes" initialization.';
 	$this -> assert_str_equals($expected, $msg);
@@ -556,7 +554,7 @@ sub test_ctor_incompleteData {
 				name => 'testVG',
 				volumes => \%volumes
 			);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Initialization data for "volumes" is incomplete, '
 		. 'missing "name" entry.';
@@ -589,7 +587,7 @@ sub test_ctor_invalidVolName {
 				name => 'testVG',
 				volumes => \%volumes
 			);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'object initialization: improper name, found non word '
 		. 'character.';
@@ -616,7 +614,7 @@ sub test_ctor_initUnsupportedEntry {
 	my %init = ( name => 'testVG',
 				foo  => 'bar'
 			);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLSystemdiskData: Unsupported keyword argument '
 		. "'foo' in initialization structure.";
@@ -650,7 +648,7 @@ sub test_ctor_initUnsupportedVolDataEntry{
 				name => 'testVG',
 				volumes => \%volumes
 			);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Unsupported option in initialization structure '
 		. "for 'volumes', found 'filesys'";
@@ -682,7 +680,7 @@ sub test_ctor_wIni {
 				name => 'testVG',
 				volumes => \%volumes
 			);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -724,7 +722,7 @@ sub test_getVGNameDefault {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $name = $sysdDataObj -> getVGName();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1004,7 +1002,7 @@ sub test_setVGName {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	$sysdDataObj = $sysdDataObj -> setVGName('foo_VG');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -1064,7 +1062,7 @@ sub test_setVGNameNoArg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $res = $sysdDataObj -> setVGName();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setVGName: no volume group name argument provided, '
@@ -1197,7 +1195,7 @@ sub test_setVolumeFreespaceNoVols {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $res = $sysdDataObj -> setVolumeFreespace(1, '30M');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setVolumeFreespace: no volumes configured, call '
@@ -1376,7 +1374,7 @@ sub test_setVolumeNameNoVols {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $res = $sysdDataObj -> setVolumeName(1, 'fooVol');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setVolumeName: no volumes configured, call '
@@ -1509,7 +1507,7 @@ sub test_setVolumeSizeNoVols {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $res = $sysdDataObj -> setVolumeSize(1, '30M');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'setVolumeSize: no volumes configured, call '
@@ -1554,7 +1552,7 @@ sub __getSystemdiskObj {
 		name => 'testVG',
 		volumes => \%volumes
 	);
-	my $sysdDataObj = KIWIXMLSystemdiskData -> new($kiwi, \%init);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();

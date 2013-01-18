@@ -9,17 +9,20 @@
 # BELONGS TO    : Operating System images
 #               :
 # DESCRIPTION   : This is a stand in class to replace the KIWILog class
-#               : used during regular Kiwi execution for logging purposes.
+#               : used during regular kiwi execution for logging purposes.
 #               :
 #               : The class allows the test cases to retrive messages passed
 #               : to the logging mechanism and check the status set for
 #               : loging.
 #               :
+#               : The implementation coerces a KIWILog to return an instance
+#               : of this Singelton as it's own instance.
+#               :
 #               : The interface mimicks parts of the interface of the logging
 #               : facility provided by KIWILog.pm
 #               :
 #               : Expected use:
-#               : my $kiwi  = new ktLog();
+#               : my $kiwi  = ktLog -> instance();
 #               : my $msg   = $kiwi -> getMessage();
 #               : my $msgT  = $kiwi -> getMessageType();
 #               : my $state = $kiwi -> getState();
@@ -34,6 +37,10 @@ package Common::ktLog;
 use strict;
 use warnings;
 
+use KIWILog;
+
+use base qw /Class::Singleton/;
+
 #==========================================
 # Destructor
 #------------------------------------------
@@ -43,41 +50,6 @@ sub DESTROY {
 	# ---
 	unlink '/tmp/kiwiTestLog.log';
 	return;
-}
-
-#==========================================
-# Constructor
-#------------------------------------------
-sub new {
-	# ...
-	# Construct a new ktLog object
-	# ---
-	#==========================================
-	# Object setup
-	#------------------------------------------
-	my $this  = {};
-	my $class = shift;
-	bless  $this,$class;
-	#==========================================
-	# Stored Messages
-	#------------------------------------------
-	$this -> {errMsg}     = q{};
-	$this -> {infoMsg}    = q{};
-	$this -> {logInfoMsg} = q{};
-	$this -> {warnMsg}    = q{};
-	#==========================================
-	# Stored State
-	#------------------------------------------
-	$this -> {completed} = 0;
-	$this -> {failed}    = 0;
-	$this -> {msgType}   = 'none';
-	$this -> {oops}      = 0;
-	$this -> {skipped}   = 0;
-	#==========================================
-	# A "fake" log file
-	#------------------------------------------
-	$this -> {rootLog} = '/tmp/kiwiTestLog.log';
-	return $this;
 }
 
 #==========================================
@@ -505,6 +477,52 @@ sub terminalLogging {
 #==========================================
 # Private helper methods
 #------------------------------------------
+# The _new_instance method is used to initialize the Singleton, but this
+# cannot be seen by perlcritic, thus we need to exclude unused private method
+# checking. In order to allow us to have a Singleton log object in the
+# code base but to also allow us to test the messages produced when kiwi
+# runs we must coerce the KIWILog class when the test run, therefore we
+# must assign to a package varaiable, ProhibitPackageVars and
+# ProtectPrivateVars avoid perlcritic complaints about using the package
+# variable _instance of the Singleton object.
+## no critic (ProhibitUnusedPrivateSubroutines, ProhibitPackageVars, ProtectPrivateVars)
+#==========================================
+# Constructor
+#------------------------------------------
+sub _new_instance {
+	# ...
+	# Construct a new ktLog object
+	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
+	my $this  = {};
+	my $class = shift;
+	bless  $this,$class;
+	#==========================================
+	# Stored Messages
+	#------------------------------------------
+	$this -> {errMsg}     = q{};
+	$this -> {infoMsg}    = q{};
+	$this -> {logInfoMsg} = q{};
+	$this -> {warnMsg}    = q{};
+	#==========================================
+	# Stored State
+	#------------------------------------------
+	$this -> {completed} = 0;
+	$this -> {failed}    = 0;
+	$this -> {msgType}   = 'none';
+	$this -> {oops}      = 0;
+	$this -> {skipped}   = 0;
+	#==========================================
+	# A "fake" log file
+	#------------------------------------------
+	$this -> {rootLog} = '/tmp/kiwiTestLog.log';
+	# Coerce the KIWILog to be a ktLog
+	$KIWILog::_instance = $this;
+	return $this;
+}
+## use critic
 #==========================================
 # __printAllMessages
 #------------------------------------------
