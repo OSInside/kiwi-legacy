@@ -8727,48 +8727,6 @@ sub test_getUsers {
 }
 
 #==========================================
-# test_getUsers_legacy
-#------------------------------------------
-sub test_getUsers_legacy {
-	# ...
-	# Verify proper return of user information
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'userConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my %usrData = $xml -> getUsers_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	my @expectedUsers = qw /root auser buser/;
-	my @users = keys %usrData;
-	$this -> assert_array_equal(\@expectedUsers, \@users);
-	# Do not check any values for the auser. There is a bug in the legacy
-	# code that will overwrite existing user data if a user that is defined
-	# in 2 groups. Fixed in the new code, will not fix the legacy
-	# implementation
-	#$this -> assert_str_equals('2000', $usrData{auser}{gid});
-	$this -> assert_str_equals('2000', $usrData{buser}{gid});
-	#$this -> assert_str_equals('mygrp', $usrData{auser}{group});
-	$this -> assert_str_equals('mygrp', $usrData{buser}{group});
-	$this -> assert_str_equals('root', $usrData{root}{group});
-	#$this -> assert_str_equals('2001', $usrData{auser}{uid});
-	$this -> assert_str_equals('/root', $usrData{root}{home});
-	$this -> assert_str_equals('linux', $usrData{buser}{pwd});
-	$this -> assert_str_equals('plain', $usrData{buser}{pwdformat});
-	$this -> assert_str_equals('Bert', $usrData{buser}{realname});
-	#$this -> assert_str_equals('/bin/ksh', $usrData{auser}{shell});
-	return;
-}
-
-#==========================================
 # test_getVMachineConfigOVF
 #------------------------------------------
 sub test_getVMachineConfigOVF {
