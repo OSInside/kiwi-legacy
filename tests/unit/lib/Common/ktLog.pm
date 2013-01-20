@@ -350,8 +350,11 @@ sub loginfo {
 	# Set the information message
 	# ---
 	my $this = shift;
-	$this -> {logInfoMsg} = shift;
-	$this -> {msgType} = 'info';
+	my $msg  = shift;
+	if ($msg !~ /EXEC/ms) {
+		$this -> {logInfoMsg} = $msg;
+		$this -> {msgType} = 'info';
+	}
 	return $this;
 }
 
