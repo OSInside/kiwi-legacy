@@ -22,6 +22,7 @@ require Exporter;
 use Carp qw (cluck);
 use strict;
 use warnings;
+use KIWILog;
 
 #==========================================
 # Exports
@@ -74,9 +75,10 @@ sub qxx {
 	# item is checked which means subsequent calls in the
 	# chain might fail unnoticed
 	# ---
-	my $cmd = shift;
-	my @prg = "";
-	my $prog= "";
+	my $cmd  = shift;
+	my @prg  = "";
+	my $prog = "";
+	my $kiwi = KIWILog -> instance();
 	#==========================================
 	# Extract command name from command string
 	#------------------------------------------
@@ -89,8 +91,8 @@ sub qxx {
 	#==========================================
 	# write command line to logfile
 	#------------------------------------------
-	if ((defined $main::kiwi) && ($QXXLOG)) {
-		$main::kiwi -> loginfo ("EXEC [$cmd]\n");
+	if ($QXXLOG) {
+		$kiwi -> loginfo ("EXEC [$cmd]\n");
 	}
 	#==========================================
 	# Try to find program name in PATH
@@ -99,10 +101,8 @@ sub qxx {
 	my $exit = $?;
 	my $code = $exit >> 8;
 	if (($code != 0) || ($exit == -1)) {
-		if (defined $main::kiwi) {
-			$main::kiwi->loginfo ("EXEC [Failed: $prog]\n");
-		}
-		if ((defined $main::kiwi) && ($main::kiwi -> trace())) {
+		$kiwi -> loginfo ("EXEC [Failed: $prog]\n");
+		if ($kiwi -> trace()) {
 			$main::BT[$main::TL] = eval { Carp::longmess (
 				$main::TT.$main::TL++)
 			};

@@ -650,7 +650,7 @@ sub __xmlSetup {
 			priority => $replRepo{respositoryPriority},
 			type     => $replRepo{repositoryType}
 		);
-		my $repo = KIWIXMLRepositoryData -> new($kiwi, \%init);
+		my $repo = KIWIXMLRepositoryData -> new (\%init);
 		if (! $repo) {
 			return;
 		}

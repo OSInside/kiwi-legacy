@@ -62,7 +62,6 @@ sub new {
 		x86_64
 	);
 	$this->{supportedArch} = \%archesSup;
-
 	return $this;
 }
 

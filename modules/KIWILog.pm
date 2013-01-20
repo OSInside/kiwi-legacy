@@ -27,6 +27,9 @@ use KIWISocket;
 use KIWISharedMem;
 use KIWIQX qw (qxx qxxLogOff qxxLogOn);
 
+#==========================================
+# Singleton class
+#------------------------------------------
 use base qw /Class::Singleton/;
 
 #==========================================
@@ -50,7 +53,7 @@ sub sendLogServerMessage {
 	my $date    = $this->{date};
 	if (! defined $smem) {
 		if (($this->trace()) && ($main::TT)) {
-			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
+			$main::BT[$main::TL] = eval {Carp::longmess($main::TT.$main::TL++)};
 		}
 		return;
 	}

@@ -72,6 +72,7 @@ sub new {
 		$file = "$ENV{'HOME'}/.kiwirc";
 	}
 	my $kiwi = KIWILog -> instance();
+	$this->{kiwi} = $kiwi;
 	if ($file) {
 		if (! do $file) {
 			$kiwi -> warning ("Invalid $file file...");
@@ -157,7 +158,6 @@ sub new {
 	# Store object data
 	#------------------------------------------
 	$this->{data} = \%data;
-	$this->{kiwi} = $kiwi;
 	$this->{UmountStack} = [];
 	return $this;
 }
@@ -767,8 +767,10 @@ sub checkFileSystem {
 				}
 			}
 		} else {
-			if ($main::kiwi -> trace()) {
-				$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
+			if ($kiwi -> trace()) {
+				$main::BT[$main::TL] = eval {
+					Carp::longmess ($main::TT.$main::TL++)
+				};
 			}
 			return ();
 		}
