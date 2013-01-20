@@ -608,6 +608,119 @@ sub test_missingFilesysAttr {
 }
 
 #==========================================
+# test_netInterfaceMACUnique
+#------------------------------------------
+sub test_netInterfaceMACUnique {
+	# ...
+	# Test that a given interface MAC is unique within one <machine>
+	# definition.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('netIfaceUniqueMAC');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $msg = $kiwi -> getMessage();
+		my $expected = "Interface '00:0C:6E:AA:57:2F' assigned twice.";
+		$this -> assert_str_equals($expected, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('netIfaceUniqueMAC');
+	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
+# test_netInterfaceNameUnique
+#------------------------------------------
+sub test_netInterfaceNameUnique {
+	# ...
+	# Test that a given interface name is unique within one <machine>
+	# definition.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('netIfaceUnique');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $msg = $kiwi -> getMessage();
+		my $expected = "Interface 'br0' assigned twice.";
+		$this -> assert_str_equals($expected, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('netIfaceUnique');
+	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
+# test_noArchivesBootstrap
+#------------------------------------------
+sub test_noArchivesBootstrap {
+	# ...
+	# Test that the use of an <archive> element within the packages
+	# element marked as bootstrap is flagged as an error.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('noArchivesBootstrap');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $msg = $kiwi -> getMessage();
+		my $expected = 'May not use <archive> within <packages> '
+			. 'marked with type="bootstrap".';
+		$this -> assert_str_equals($expected, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	return;
+}
+
+#==========================================
+# test_noIDSystemGroups
+#------------------------------------------
+sub test_noIDSystemGroups {
+	# ...
+	# Test that specifying a group ID for a group created by the install
+	# creates an error
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('noIDSysGrp');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $msg = $kiwi -> getMessage();
+		my $expected = "Assigning ID to system group 'video' not allowed.";
+		$this -> assert_str_equals($expected, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	return;
+}
+
+#==========================================
 # test_noBootVolume
 #------------------------------------------
 sub test_noBootVolume {
@@ -634,6 +747,34 @@ sub test_noBootVolume {
 	}
 	my @validConfigs = $this -> __getValidFiles('noBootVolume');
 	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
+# test_noProfsBootstrap
+#------------------------------------------
+sub test_noProfsBootstrap {
+	# ...
+	# Test that the use of the profiles attribute on the packages
+	# element marked as bootstrap is flagged as an error.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('noProfsBootstrap');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $msg = $kiwi -> getMessage();
+		my $expected = 'May not use "profiles" attribute on <packages> '
+			. 'setting of type="bootstrap".';
+		$this -> assert_str_equals($expected, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
 	return;
 }
 

@@ -542,6 +542,95 @@ sub __checkHttpsCredentialsConsistent {
 }
 
 #==========================================
+# __checkNetInterfaceMACUnique
+#------------------------------------------
+sub __checkNetInterfaceMACUnique {
+	# ...
+	# Check that the interface name used is unique within one <machine>
+	# definition.
+	# ---
+	my $this = shift;
+	my $systemTree = $this->{systemTree};
+	my @vmNodes = $systemTree -> getElementsByTagName('machine');
+	for my $vmNode (@vmNodes) {
+		my @nicNodes = $vmNode -> getElementsByTagName('vmnic');
+		my %iFaces;
+		for my $nicNode (@nicNodes) {
+			my $mac = $nicNode -> getAttribute('mac');
+			if ($mac) {
+				if ($iFaces{$mac}) {
+					my $kiwi = $this->{kiwi};
+					my $msg = "Interface '$mac' assigned twice.";
+					$kiwi -> error($msg);
+					$kiwi -> failed();
+					return;
+				}
+				$iFaces{$mac} = 1;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkNetInterfaceNameUnique
+#------------------------------------------
+sub __checkNetInterfaceNameUnique {
+	# ...
+	# Check that the interface name used is unique within one <machine>
+	# definition.
+	# ---
+	my $this = shift;
+	my $systemTree = $this->{systemTree};
+	my @vmNodes = $systemTree -> getElementsByTagName('machine');
+	for my $vmNode (@vmNodes) {
+		my @nicNodes = $vmNode -> getElementsByTagName('vmnic');
+		my %iFaces;
+		for my $nicNode (@nicNodes) {
+			my $iFace = $nicNode -> getAttribute('interface');
+			if ($iFaces{$iFace}) {
+				my $kiwi = $this->{kiwi};
+				my $msg = "Interface '$iFace' assigned twice.";
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+			$iFaces{$iFace} = 1;
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkNoArchivesBootstrapPackages
+#------------------------------------------
+sub __checkNoArchivesBootstrapPackages {
+	# ...
+	# Check that the <packages> element for type "bootstrap" does not
+	# contain any archive definitions
+	# ---
+	my $this = shift;
+	my $systemTree = $this->{systemTree};
+	my @pckgsNodes = $systemTree -> getElementsByTagName('packages');
+	for my $pckgNd (@pckgsNodes) {
+		my $pType = $pckgNd -> getAttribute('type');
+		if ($pType eq 'bootstrap') {
+			my @archieves = $pckgNd -> getElementsByTagName('archive');
+			if (@archieves) {
+				my $kiwi = $this->{kiwi};
+				my $msg = 'May not use <archive> within <packages> '
+					. 'marked with type="bootstrap".';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+			last;
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkNoBootVolume
 #------------------------------------------
 sub __checkNoBootVolume {
@@ -560,10 +649,125 @@ sub __checkNoBootVolume {
 				my $kiwi = $this->{kiwi};
 				my $msg = 'Found <systemdisk> setup using "/boot" as '
 					. 'volume. This is not supported.';
-				$kiwi -> error ($msg);
-				$kiwi -> failed ();
+				$kiwi -> error($msg);
+				$kiwi -> failed();
 				return;
 			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkNoIDSystemGroups
+#------------------------------------------
+sub __checkNoIDSystemGroups {
+	# ...
+	# Check that no group ID is specified if the specieife group name
+	# is part of the system groups.
+	# ---
+	my $this = shift;
+	my $systemTree = $this->{systemTree};
+	my %sysGrps = map { ($_ => 1) } qw(
+		at
+		audio
+		avahi
+		bin
+		cdrom
+		colord
+		console
+		daemon
+		dialout
+		disk
+		floppy
+		ftp
+		games
+		gdm
+		icecream
+		kmem
+		kvm
+		libvirt
+		lightdm
+		lock
+		lp
+		maildrop
+		mail
+		man
+		messagebus
+		modem
+		mysql
+		news
+		ntadmin
+		ntp
+		obsrun
+		postfix
+		public
+		pulse
+		pulse-access
+		qemu
+		root
+		rtkit
+		scard
+		shadow
+		smolt
+		sshd
+		sys
+		tape
+		tftp
+		tomcat
+		trusted
+		tty
+		users
+		utmp
+		uucp
+		video
+		wheel
+		winbind
+		www
+		xok
+	);
+	my @usersNodes = $systemTree -> getElementsByTagName('users');
+	for my $uNode (@usersNodes) {
+		my $gName = $uNode -> getAttribute('group');
+		if ($sysGrps{$gName}) {
+			my $id = $uNode -> getAttribute('id');
+			if ($id) {
+				my $kiwi = $this->{kiwi};
+				my $msg = "Assigning ID to system group '$gName' not "
+					. 'allowed.';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkNoProfsBootstrapPackages
+#------------------------------------------
+sub __checkNoProfsBootstrapPackages {
+	# ...
+	# Check that the <packages> element for type "bootstrap" is not
+	# decorated with a profiles attribute.
+	# ---
+	my $this = shift;
+	my $systemTree = $this->{systemTree};
+	my @pckgsNodes = $systemTree -> getElementsByTagName('packages');
+	for my $pckgNd (@pckgsNodes) {
+		my $pType = $pckgNd -> getAttribute('type');
+		if ($pType eq 'bootstrap') {
+			my $profs = $pckgNd -> getAttribute('profiles');
+			if ($profs) {
+				my $kiwi = $this->{kiwi};
+				my $msg = 'May not use "profiles" attribute on <packages> '
+					. 'setting of type="bootstrap".';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+			last;
 		}
 	}
 	return 1;
@@ -1566,7 +1770,22 @@ sub __validateConsistency {
 	if (! $this -> __checkHttpsCredentialsConsistent()) {
 		return;
 	}
+	if (! $this -> __checkNetInterfaceMACUnique()) {
+		return;
+	}
+	if (! $this -> __checkNetInterfaceNameUnique()) {
+		return;
+	}
+	if (! $this -> __checkNoArchivesBootstrapPackages()) {
+		return;
+	}
 	if (! $this -> __checkNoBootVolume()) {
+		return;
+	}
+	if (! $this -> __checkNoIDSystemGroups()) {
+		return;
+	}
+	if (! $this -> __checkNoProfsBootstrapPackages()) {
 		return;
 	}
 	if (! $this -> __checkPackageUnique()) {

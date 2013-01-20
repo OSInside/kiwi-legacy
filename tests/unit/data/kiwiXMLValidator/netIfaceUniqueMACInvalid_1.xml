@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.4" name="unique-pckg-test">
+<image schemaversion="5.6" name="suse-12.2-test-image">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
-		<specification>Verify unique archive check</specification>
+		<specification>test that repeated interface names trigger an error</specification>
 	</description>
-	<profiles>
-		<profile name="profA" description="A test profile"/>
-		<profile name="profB" description="A test profile"/>
-	</profiles>
 	<preferences>
-		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.2" format="vmdk">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.2">
 			<machine memory="512">
-				<vmdisk controller="ide" id="0"/>
-				<vmnic interface="0" driver="e1000" mode="bridged"/>
-				<vmnic interface="1" driver="e1000" mode="bridged"/>
+				<vmdisk controller="scsi" id="0"/>
+				<vmnic interface="br0" mac="00:0C:6E:AA:57:2F"/>
+				<vmnic interface="eth1" mac="00:0D:6E:AA:58:2F"/>
+				<vmnic interface="eth2" mac="00:0C:6E:AA:57:2F"/>
 			</machine>
 		</type>
-		<version>1.0.0</version>
+		<version>0.0.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
@@ -25,27 +22,18 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<users group="root">
-		<user pwd="linux" pwdformat="plain" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
 		<source path="opensuse://12.2/repo/oss/"/>
 	</repository>
 	<packages type="image">
-		<archive name="yourBins.tar"/>
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="kernel-default"/>
 		<package name="ifplugd"/>
+		<package name="kernel-default"/>
 		<package name="vim"/>
 		<opensusePattern name="base"/>
-	</packages>
-	<!-- Note, this is illegal from a runtime check perspective is
-		profA and profB are built at the same time-->
-	<packages type="image" profiles="profA">
-		<archive name="myBins.tar"/>
-	</packages>
-	<packages type="image" profiles="profB">
-		<archive name="myBins.tar"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
