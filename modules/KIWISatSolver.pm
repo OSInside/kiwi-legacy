@@ -126,7 +126,7 @@ sub new {
 	# Create and cache sat solvable
 	#------------------------------------------
 	if (! defined $pool) {
-		my $solvable = KIWIXML::getInstSourceSatSolvable ($kiwi,$urlref);
+		my $solvable = KIWIXML::getInstSourceSatSolvable ($urlref);
 		if (! defined $solvable) {
 			return;
 		}

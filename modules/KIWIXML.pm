@@ -64,8 +64,8 @@ use KIWISatSolver;
 our @ISA    = qw (Exporter);
 our @EXPORT_OK = qw (
 	getInstSourceFile_legacy
-	getInstSourceSatSolvable_legacy
-	getSingleInstSourceSatSolvable_legacy
+	getInstSourceSatSolvable
+	getSingleInstSourceSatSolvable
 );
 
 #==========================================
@@ -4567,8 +4567,8 @@ sub getSingleInstSourceSatSolvable {
 	# the satsolver toolkit is used and therefore required in
 	# order to allow this function to work correctly
 	# ----
-	my $kiwi = KIWILog -> instance();
 	my $repo = shift;
+	my $kiwi = KIWILog -> instance();
 	$kiwi -> info ("--> Loading $repo...");
 	#==========================================
 	# one of the following for repo metadata
@@ -6004,7 +6004,7 @@ sub getInstallSize_legacy {
 		}
 	} else {
 		my $psolve = KIWISatSolver -> new (
-			$kiwi,\@result,$urllist,"solve-patterns",
+			\@result,$urllist,"solve-patterns",
 			undef,undef,$ptype
 		);
 		if (! defined $psolve) {
@@ -6163,7 +6163,6 @@ sub getInstSourceFile_legacy {
 	# a given local path. It's possible to use regular expressions
 	# in the source file specification
 	# ---
-	my $this    = shift;
 	my $url     = shift;
 	my $dest    = shift;
 	my $dirname;
@@ -6222,7 +6221,7 @@ sub getInstSourceFile_legacy {
 	my $data = qxx ("lwp-download $url $dest 2>&1");
 	my $code = $? >> 8;
 	if ($code == 0) {
-		return $this;
+		return $url;
 	}
 	if ($url =~ /(^.*\/)(.*)/) {
 		my $location = $1;
@@ -6248,7 +6247,7 @@ sub getInstSourceFile_legacy {
 				$data = qxx ("lwp-download $url $dest 2>&1");
 				$code = $? >> 8;
 				if ($code == 0) {
-					return $this;
+					return $url;
 				}
 			}
 		}
@@ -6256,7 +6255,7 @@ sub getInstSourceFile_legacy {
 	} else {
 		return;
 	}
-	return $this;
+	return $url;
 }
 
 #==========================================

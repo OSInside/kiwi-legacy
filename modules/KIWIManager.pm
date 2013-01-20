@@ -544,7 +544,7 @@ sub provideMediaLicense {
 			}
 		}
 		KIWIXML::getInstSourceFile_legacy (
-			$kiwi,$repo."/".$license,$root."/".$license
+			$repo."/".$license,$root."/".$license
 		);
 		last if -e $root."/".$license;
 	}
