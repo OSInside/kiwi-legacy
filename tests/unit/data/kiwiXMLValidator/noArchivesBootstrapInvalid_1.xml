@@ -5,10 +5,6 @@
 		<contact>rjschwei@suse.com</contact>
 		<specification>Verify unique archive check</specification>
 	</description>
-	<profiles>
-		<profile name="profA" description="A test profile"/>
-		<profile name="profB" description="A test profile"/>
-	</profiles>
 	<preferences>
 		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.2" format="vmdk">
 			<machine memory="512">
@@ -31,7 +27,6 @@
 		<source path="opensuse://12.2/repo/oss/"/>
 	</repository>
 	<packages type="image">
-		<archive name="yourBins.tar"/>
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default"/>
@@ -39,15 +34,8 @@
 		<package name="vim"/>
 		<opensusePattern name="base"/>
 	</packages>
-	<!-- Note, this is illegal from a runtime check perspective is
-		profA and profB are built at the same time-->
-	<packages type="image" profiles="profA">
-		<archive name="myBins.tar"/>
-	</packages>
-	<packages type="image" profiles="profB">
-		<archive name="myBins.tar"/>
-	</packages>
 	<packages type="bootstrap">
+		<archive name="myBins.tar"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 	</packages>
