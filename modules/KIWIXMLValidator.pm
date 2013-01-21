@@ -602,35 +602,6 @@ sub __checkNetInterfaceNameUnique {
 }
 
 #==========================================
-# __checkNoArchivesBootstrapPackages
-#------------------------------------------
-sub __checkNoArchivesBootstrapPackages {
-	# ...
-	# Check that the <packages> element for type "bootstrap" does not
-	# contain any archive definitions
-	# ---
-	my $this = shift;
-	my $systemTree = $this->{systemTree};
-	my @pckgsNodes = $systemTree -> getElementsByTagName('packages');
-	for my $pckgNd (@pckgsNodes) {
-		my $pType = $pckgNd -> getAttribute('type');
-		if ($pType eq 'bootstrap') {
-			my @archieves = $pckgNd -> getElementsByTagName('archive');
-			if (@archieves) {
-				my $kiwi = $this->{kiwi};
-				my $msg = 'May not use <archive> within <packages> '
-					. 'marked with type="bootstrap".';
-				$kiwi -> error($msg);
-				$kiwi -> failed();
-				return;
-			}
-			last;
-		}
-	}
-	return 1;
-}
-
-#==========================================
 # __checkNoBootVolume
 #------------------------------------------
 sub __checkNoBootVolume {
@@ -1745,9 +1716,6 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkNetInterfaceNameUnique()) {
-		return;
-	}
-	if (! $this -> __checkNoArchivesBootstrapPackages()) {
 		return;
 	}
 	if (! $this -> __checkNoBootVolume()) {
