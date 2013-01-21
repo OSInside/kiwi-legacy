@@ -200,8 +200,11 @@ sub __isProdInitConsistent {
 	my $this = shift;
 	my $init = shift;
 	if ($init->{addarch}) {
-		if (! $this->__isSupportedArch($init->{addarch})) {
-			return;
+		my @arches = split /,/smx, $init->{addarch};
+		for my $arch (@arches) {
+			if (! $this->__isSupportedArch($arch)) {
+				return;
+			}
 		}
 	}
 	if ($init->{onlyarch}) {
