@@ -751,34 +751,6 @@ sub test_noBootVolume {
 }
 
 #==========================================
-# test_noProfsBootstrap
-#------------------------------------------
-sub test_noProfsBootstrap {
-	# ...
-	# Test that the use of the profiles attribute on the packages
-	# element marked as bootstrap is flagged as an error.
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my @invalidConfigs = $this -> __getInvalidFiles('noProfsBootstrap');
-	for my $iConfFile (@invalidConfigs) {
-		my $validator = $this -> __getValidator($iConfFile);
-		$validator -> validate();
-		my $msg = $kiwi -> getMessage();
-		my $expected = 'May not use "profiles" attribute on <packages> '
-			. 'setting of type="bootstrap".';
-		$this -> assert_str_equals($expected, $msg);
-		my $msgT = $kiwi -> getMessageType();
-		$this -> assert_str_equals('error', $msgT);
-		my $state = $kiwi -> getState();
-		$this -> assert_str_equals('failed', $state);
-		# Test this condition last to get potential error messages
-		$this -> assert_not_null($validator);
-	}
-	return;
-}
-
-#==========================================
 # test_oemPostDump
 #------------------------------------------
 sub test_oemPostDump {

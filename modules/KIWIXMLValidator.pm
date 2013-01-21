@@ -745,35 +745,6 @@ sub __checkNoIDSystemGroups {
 }
 
 #==========================================
-# __checkNoProfsBootstrapPackages
-#------------------------------------------
-sub __checkNoProfsBootstrapPackages {
-	# ...
-	# Check that the <packages> element for type "bootstrap" is not
-	# decorated with a profiles attribute.
-	# ---
-	my $this = shift;
-	my $systemTree = $this->{systemTree};
-	my @pckgsNodes = $systemTree -> getElementsByTagName('packages');
-	for my $pckgNd (@pckgsNodes) {
-		my $pType = $pckgNd -> getAttribute('type');
-		if ($pType eq 'bootstrap') {
-			my $profs = $pckgNd -> getAttribute('profiles');
-			if ($profs) {
-				my $kiwi = $this->{kiwi};
-				my $msg = 'May not use "profiles" attribute on <packages> '
-					. 'setting of type="bootstrap".';
-				$kiwi -> error($msg);
-				$kiwi -> failed();
-				return;
-			}
-			last;
-		}
-	}
-	return 1;
-}
-
-#==========================================
 # __checkPackageUnique
 #------------------------------------------
 sub __checkPackageUnique {
@@ -1783,9 +1754,6 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkNoIDSystemGroups()) {
-		return;
-	}
-	if (! $this -> __checkNoProfsBootstrapPackages()) {
 		return;
 	}
 	if (! $this -> __checkPackageUnique()) {
