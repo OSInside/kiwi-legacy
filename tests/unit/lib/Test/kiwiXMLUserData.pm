@@ -575,7 +575,7 @@ sub test_mergeGroup {
 		name         => 'me',
 		passwdformat => 'plain'
 	);
-	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $mergeUser = KIWIXMLUserData -> new(\%init);
 	my $userDataObj = $this -> __getUserObj();
 	my $res = $userDataObj -> merge($mergeUser);
 	my $msg = $kiwi -> getMessage();
@@ -622,7 +622,7 @@ sub test_mergeGroupID {
 		name         => 'me',
 		passwdformat => 'plain'
 	);
-	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $mergeUser = KIWIXMLUserData -> new(\%init);
 	my $userDataObj = $this -> __getUserObj();
 	my $res = $userDataObj -> merge($mergeUser);
 	my $msg = $kiwi -> getMessage();
@@ -667,7 +667,7 @@ sub test_mergePass {
 		home  => '/home/you',
 		name  => 'you'
 	);
-	my $user1 = KIWIXMLUserData -> new($kiwi, \%init1);
+	my $user1 = KIWIXMLUserData -> new(\%init1);
 	my %init2 = (
 		group  => 'audio',
 		home   => '/home/you',
@@ -675,7 +675,7 @@ sub test_mergePass {
 		passwd => '1xfg567yh',
 		userid => '2344'
 	);
-	my $user2 = KIWIXMLUserData -> new($kiwi, \%init2);
+	my $user2 = KIWIXMLUserData -> new(\%init2);
 	my $res = $user1 -> merge($user2);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -708,7 +708,7 @@ sub test_mergeShell {
 		home  => '/home/you',
 		name  => 'you'
 	);
-	my $user1 = KIWIXMLUserData -> new($kiwi, \%init1);
+	my $user1 = KIWIXMLUserData -> new(\%init1);
 	my %init2 = (
 		group    => 'audio',
 		home     => '/home/you',
@@ -717,7 +717,7 @@ sub test_mergeShell {
 		shell    => '/usr/bin/tcsh',
 		userid   => '2344'
 	);
-	my $user2 = KIWIXMLUserData -> new($kiwi, \%init2);
+	my $user2 = KIWIXMLUserData -> new(\%init2);
 	my $res = $user1 -> merge($user2);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -751,14 +751,14 @@ sub test_mergeUid {
 		home  => '/home/you',
 		name  => 'you'
 	);
-	my $user1 = KIWIXMLUserData -> new($kiwi, \%init1);
+	my $user1 = KIWIXMLUserData -> new(\%init1);
 	my %init2 = (
 		group  => 'audio',
 		home   => '/home/you',
 		name   => 'you',
 		userid => '2344'
 	);
-	my $user2 = KIWIXMLUserData -> new($kiwi, \%init2);
+	my $user2 = KIWIXMLUserData -> new(\%init2);
 	my $res = $user1 -> merge($user2);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -788,7 +788,7 @@ sub test_mergeURname {
 		home  => '/home/you',
 		name  => 'you'
 	);
-	my $user1 = KIWIXMLUserData -> new($kiwi, \%init1);
+	my $user1 = KIWIXMLUserData -> new(\%init1);
 	my %init2 = (
 		group    => 'audio',
 		home     => '/home/you',
@@ -796,7 +796,7 @@ sub test_mergeURname {
 		realname => 'Fred Flinstone',
 		userid   => '2344'
 	);
-	my $user2 = KIWIXMLUserData -> new($kiwi, \%init2);
+	my $user2 = KIWIXMLUserData -> new(\%init2);
 	my $res = $user1 -> merge($user2);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -828,7 +828,7 @@ sub test_mergeIncompatHome {
 		home  => '/home/you',
 		name  => 'you'
 	);
-	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $mergeUser = KIWIXMLUserData -> new(\%init);
 	my $userDataObj = $this -> __getUserObj();
 	my $res = $userDataObj -> merge($mergeUser);
 	my $msg = $kiwi -> getMessage();
@@ -877,7 +877,7 @@ sub test_mergeIncompatPass {
 		passwd => 'world',
 		userid => '1111'
 	);
-	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $mergeUser = KIWIXMLUserData -> new(\%init);
 	my $userDataObj = $this -> __getUserObj();
 	my $res = $userDataObj -> merge($mergeUser);
 	my $msg = $kiwi -> getMessage();
@@ -926,7 +926,7 @@ sub test_mergeIncompatPassForm {
 		passwd => 'hello',
 		userid => '1111'
 	);
-	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $mergeUser = KIWIXMLUserData -> new(\%init);
 	my $userDataObj = $this -> __getUserObj();
 	my $res = $userDataObj -> merge($mergeUser);
 	my $msg = $kiwi -> getMessage();
@@ -975,7 +975,7 @@ sub test_mergeIncompatShell {
 		passwdformat => 'plain',
 		shell        => '/usr/bin/csh',
 	);
-	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $mergeUser = KIWIXMLUserData -> new(\%init);
 	my $userDataObj = $this -> __getUserObj();
 	my $res = $userDataObj -> merge($mergeUser);
 	my $msg = $kiwi -> getMessage();
@@ -1023,7 +1023,7 @@ sub test_mergeIncompatUid {
 		name   => 'you',
 		userid => '3000'
 	);
-	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $mergeUser = KIWIXMLUserData -> new(\%init);
 	my $userDataObj = $this -> __getUserObj();
 	my $res = $userDataObj -> merge($mergeUser);
 	my $msg = $kiwi -> getMessage();
@@ -1071,7 +1071,7 @@ sub test_mergeIncompatUname {
 		name   => 'you',
 		userid => '1111'
 	);
-	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $mergeUser = KIWIXMLUserData -> new(\%init);
 	my $userDataObj = $this -> __getUserObj();
 	my $res = $userDataObj -> merge($mergeUser);
 	my $msg = $kiwi -> getMessage();
@@ -1121,7 +1121,7 @@ sub test_mergeIncompatURName {
 		realname     => 'frank',
 		userid       => '1111'
 	);
-	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $mergeUser = KIWIXMLUserData -> new(\%init);
 	my $userDataObj = $this -> __getUserObj();
 	my $res = $userDataObj -> merge($mergeUser);
 	my $msg = $kiwi -> getMessage();
