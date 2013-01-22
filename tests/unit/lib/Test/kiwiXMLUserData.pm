@@ -561,6 +561,640 @@ sub test_getXMLElement{
 }
 
 #==========================================
+# test_mergeGroup
+#------------------------------------------
+sub test_mergeGroup {
+	# ...
+	# Test the merge method for group
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init = (
+		group        => 'audio',
+		home         => '/home/me',
+		name         => 'me',
+		passwdformat => 'plain'
+	);
+	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = $this -> __getUserObj();
+	my $res = $userDataObj -> merge($mergeUser);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	my $grpNm = $userDataObj -> getGroupName();
+	$this -> assert_str_equals('mygrp,audio', $grpNm );
+	my $gid = $userDataObj -> getGroupID();
+	$this -> assert_str_equals('1001', $gid );
+	my $lsh = $userDataObj -> getLoginShell();
+	$this -> assert_str_equals('/usr/bin/zsh', $lsh );
+	my $pwd = $userDataObj -> getPassword();
+	$this -> assert_str_equals('hello', $pwd );
+	my $pwdf = $userDataObj -> getPasswordFormat();
+	$this -> assert_str_equals('plain', $pwdf );
+	my $home = $userDataObj -> getUserHomeDir();
+	$this -> assert_str_equals('/home/me', $home );
+	my $uid = $userDataObj -> getUserID();
+	$this -> assert_str_equals('1111', $uid );
+	my $name = $userDataObj -> getUserName();
+	$this -> assert_str_equals('me', $name );
+	my $rName = $userDataObj -> getUserRealName();
+	$this -> assert_str_equals('Pablo', $rName );
+	return;
+}
+
+#==========================================
+# test_mergeGroupID
+#------------------------------------------
+sub test_mergeGroupID {
+	# ...
+	# Test the merge method for group id
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init = (
+		group        => 'audio',
+		groupid      => '1268',
+		home         => '/home/me',
+		name         => 'me',
+		passwdformat => 'plain'
+	);
+	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = $this -> __getUserObj();
+	my $res = $userDataObj -> merge($mergeUser);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	my $grpNm = $userDataObj -> getGroupName();
+	$this -> assert_str_equals('mygrp,audio', $grpNm );
+	my $gid = $userDataObj -> getGroupID();
+	$this -> assert_str_equals('1001,1268', $gid );
+	my $lsh = $userDataObj -> getLoginShell();
+	$this -> assert_str_equals('/usr/bin/zsh', $lsh );
+	my $pwd = $userDataObj -> getPassword();
+	$this -> assert_str_equals('hello', $pwd );
+	my $pwdf = $userDataObj -> getPasswordFormat();
+	$this -> assert_str_equals('plain', $pwdf );
+	my $home = $userDataObj -> getUserHomeDir();
+	$this -> assert_str_equals('/home/me', $home );
+	my $uid = $userDataObj -> getUserID();
+	$this -> assert_str_equals('1111', $uid );
+	my $name = $userDataObj -> getUserName();
+	$this -> assert_str_equals('me', $name );
+	my $rName = $userDataObj -> getUserRealName();
+	$this -> assert_str_equals('Pablo', $rName );
+	return;
+}
+
+#==========================================
+# test_mergePass
+#------------------------------------------
+sub test_mergePass {
+	# ...
+	# Test the merge method with merging the password
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init1 = (
+		group => 'audio',
+		home  => '/home/you',
+		name  => 'you'
+	);
+	my $user1 = KIWIXMLUserData -> new($kiwi, \%init1);
+	my %init2 = (
+		group  => 'audio',
+		home   => '/home/you',
+		name   => 'you',
+		passwd => '1xfg567yh',
+		userid => '2344'
+	);
+	my $user2 = KIWIXMLUserData -> new($kiwi, \%init2);
+	my $res = $user1 -> merge($user2);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	my $grpNm = $user1 -> getGroupName();
+	$this -> assert_str_equals('audio', $grpNm );
+	my $pass = $user1 -> getPassword();
+	$this -> assert_str_equals('1xfg567yh', $pass);
+	my $uid = $user1 -> getUserID();
+	$this -> assert_str_equals('2344', $uid );
+
+	return;
+}
+
+#==========================================
+# test_mergeShell
+#------------------------------------------
+sub test_mergeShell {
+	# ...
+	# Test the merge method with merging the login shell
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init1 = (
+		group => 'audio',
+		home  => '/home/you',
+		name  => 'you'
+	);
+	my $user1 = KIWIXMLUserData -> new($kiwi, \%init1);
+	my %init2 = (
+		group    => 'audio',
+		home     => '/home/you',
+		name     => 'you',
+		realname => 'Fred Flinstone',
+		shell    => '/usr/bin/tcsh',
+		userid   => '2344'
+	);
+	my $user2 = KIWIXMLUserData -> new($kiwi, \%init2);
+	my $res = $user1 -> merge($user2);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	my $grpNm = $user1 -> getGroupName();
+	$this -> assert_str_equals('audio', $grpNm );
+	my $lsh = $user1 -> getLoginShell();
+	$this -> assert_str_equals('/usr/bin/tcsh', $lsh );
+	my $uid = $user1 -> getUserID();
+	$this -> assert_str_equals('2344', $uid );
+	my $rName = $user1 -> getUserRealName();
+	$this -> assert_str_equals('Fred Flinstone', $rName );
+	return;
+}
+
+#==========================================
+# test_mergeUid
+#------------------------------------------
+sub test_mergeUid {
+	# ...
+	# Test the merge method with merging the user ID
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init1 = (
+		group => 'audio',
+		home  => '/home/you',
+		name  => 'you'
+	);
+	my $user1 = KIWIXMLUserData -> new($kiwi, \%init1);
+	my %init2 = (
+		group  => 'audio',
+		home   => '/home/you',
+		name   => 'you',
+		userid => '2344'
+	);
+	my $user2 = KIWIXMLUserData -> new($kiwi, \%init2);
+	my $res = $user1 -> merge($user2);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	my $grpNm = $user1 -> getGroupName();
+	$this -> assert_str_equals('audio', $grpNm );
+	my $uid = $user1 -> getUserID();
+	$this -> assert_str_equals('2344', $uid );
+	return;
+}
+
+#==========================================
+# test_mergeURname
+#------------------------------------------
+sub test_mergeURname {
+	# ...
+	# Test the merge method with merging the user real name
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init1 = (
+		group => 'audio',
+		home  => '/home/you',
+		name  => 'you'
+	);
+	my $user1 = KIWIXMLUserData -> new($kiwi, \%init1);
+	my %init2 = (
+		group    => 'audio',
+		home     => '/home/you',
+		name     => 'you',
+		realname => 'Fred Flinstone',
+		userid   => '2344'
+	);
+	my $user2 = KIWIXMLUserData -> new($kiwi, \%init2);
+	my $res = $user1 -> merge($user2);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	my $grpNm = $user1 -> getGroupName();
+	$this -> assert_str_equals('audio', $grpNm );
+	my $uid = $user1 -> getUserID();
+	$this -> assert_str_equals('2344', $uid );
+	my $rName = $user1 -> getUserRealName();
+	$this -> assert_str_equals('Fred Flinstone', $rName );
+	return;
+}
+
+#==========================================
+# test_mergeIncompatHome
+#------------------------------------------
+sub test_mergeIncompatHome {
+	# ...
+	# Test the merge method with incompatible home directories
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init = (
+		group => 'audio',
+		home  => '/home/you',
+		name  => 'you'
+	);
+	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = $this -> __getUserObj();
+	my $res = $userDataObj -> merge($mergeUser);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'merge: attempting to merge user data for user with '
+		. 'different home directory. Merge error';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $grpNm = $userDataObj -> getGroupName();
+	$this -> assert_str_equals('mygrp', $grpNm );
+	my $gid = $userDataObj -> getGroupID();
+	$this -> assert_str_equals('1001', $gid );
+	my $lsh = $userDataObj -> getLoginShell();
+	$this -> assert_str_equals('/usr/bin/zsh', $lsh );
+	my $pwd = $userDataObj -> getPassword();
+	$this -> assert_str_equals('hello', $pwd );
+	my $pwdf = $userDataObj -> getPasswordFormat();
+	$this -> assert_str_equals('plain', $pwdf );
+	my $home = $userDataObj -> getUserHomeDir();
+	$this -> assert_str_equals('/home/me', $home );
+	my $uid = $userDataObj -> getUserID();
+	$this -> assert_str_equals('1111', $uid );
+	my $name = $userDataObj -> getUserName();
+	$this -> assert_str_equals('me', $name );
+	my $rName = $userDataObj -> getUserRealName();
+	$this -> assert_str_equals('Pablo', $rName );
+	return;
+}
+
+#==========================================
+# test_mergeIncompatPass
+#------------------------------------------
+sub test_mergeIncompatPass {
+	# ...
+	# Test the merge method with incompatible home directories
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init = (
+		group  => 'audio',
+		home   => '/home/me',
+		name   => 'me',
+		passwd => 'world',
+		userid => '1111'
+	);
+	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = $this -> __getUserObj();
+	my $res = $userDataObj -> merge($mergeUser);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'merge: attempting to merge user data for user with '
+		. 'different passwords. Merge error';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $grpNm = $userDataObj -> getGroupName();
+	$this -> assert_str_equals('mygrp', $grpNm );
+	my $gid = $userDataObj -> getGroupID();
+	$this -> assert_str_equals('1001', $gid );
+	my $lsh = $userDataObj -> getLoginShell();
+	$this -> assert_str_equals('/usr/bin/zsh', $lsh );
+	my $pwd = $userDataObj -> getPassword();
+	$this -> assert_str_equals('hello', $pwd );
+	my $pwdf = $userDataObj -> getPasswordFormat();
+	$this -> assert_str_equals('plain', $pwdf );
+	my $home = $userDataObj -> getUserHomeDir();
+	$this -> assert_str_equals('/home/me', $home );
+	my $uid = $userDataObj -> getUserID();
+	$this -> assert_str_equals('1111', $uid );
+	my $name = $userDataObj -> getUserName();
+	$this -> assert_str_equals('me', $name );
+	my $rName = $userDataObj -> getUserRealName();
+	$this -> assert_str_equals('Pablo', $rName );
+	return;
+}
+
+#==========================================
+# test_mergeIncompatPassForm
+#------------------------------------------
+sub test_mergeIncompatPassForm {
+	# ...
+	# Test the merge method with incompatible home directories
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init = (
+		group  => 'audio',
+		home   => '/home/me',
+		name   => 'me',
+		passwd => 'hello',
+		userid => '1111'
+	);
+	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = $this -> __getUserObj();
+	my $res = $userDataObj -> merge($mergeUser);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'merge: attempting to merge user data for user with '
+		. 'different password format settings. Merge error';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $grpNm = $userDataObj -> getGroupName();
+	$this -> assert_str_equals('mygrp', $grpNm );
+	my $gid = $userDataObj -> getGroupID();
+	$this -> assert_str_equals('1001', $gid );
+	my $lsh = $userDataObj -> getLoginShell();
+	$this -> assert_str_equals('/usr/bin/zsh', $lsh );
+	my $pwd = $userDataObj -> getPassword();
+	$this -> assert_str_equals('hello', $pwd );
+	my $pwdf = $userDataObj -> getPasswordFormat();
+	$this -> assert_str_equals('plain', $pwdf );
+	my $home = $userDataObj -> getUserHomeDir();
+	$this -> assert_str_equals('/home/me', $home );
+	my $uid = $userDataObj -> getUserID();
+	$this -> assert_str_equals('1111', $uid );
+	my $name = $userDataObj -> getUserName();
+	$this -> assert_str_equals('me', $name );
+	my $rName = $userDataObj -> getUserRealName();
+	$this -> assert_str_equals('Pablo', $rName );
+	return;
+}
+
+#==========================================
+# test_mergeIncompatShell
+#------------------------------------------
+sub test_mergeIncompatShell {
+	# ...
+	# Test the merge method with incompatible login shell
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init = (
+		group        => 'audio',
+		home         => '/home/me',
+		name         => 'me',
+		passwdformat => 'plain',
+		shell        => '/usr/bin/csh',
+	);
+	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = $this -> __getUserObj();
+	my $res = $userDataObj -> merge($mergeUser);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'merge: attempting to merge user data for user with '
+		. 'different login shell. Merge error';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $grpNm = $userDataObj -> getGroupName();
+	$this -> assert_str_equals('mygrp', $grpNm );
+	my $gid = $userDataObj -> getGroupID();
+	$this -> assert_str_equals('1001', $gid );
+	my $lsh = $userDataObj -> getLoginShell();
+	$this -> assert_str_equals('/usr/bin/zsh', $lsh );
+	my $pwd = $userDataObj -> getPassword();
+	$this -> assert_str_equals('hello', $pwd );
+	my $pwdf = $userDataObj -> getPasswordFormat();
+	$this -> assert_str_equals('plain', $pwdf );
+	my $home = $userDataObj -> getUserHomeDir();
+	$this -> assert_str_equals('/home/me', $home );
+	my $uid = $userDataObj -> getUserID();
+	$this -> assert_str_equals('1111', $uid );
+	my $name = $userDataObj -> getUserName();
+	$this -> assert_str_equals('me', $name );
+	my $rName = $userDataObj -> getUserRealName();
+	$this -> assert_str_equals('Pablo', $rName );
+	return;
+}
+
+#==========================================
+# test_mergeIncompatUid
+#------------------------------------------
+sub test_mergeIncompatUid {
+	# ...
+	# Test the merge method with incompatible home directories
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init = (
+		group  => 'audio',
+		home   => '/home/me',
+		name   => 'you',
+		userid => '3000'
+	);
+	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = $this -> __getUserObj();
+	my $res = $userDataObj -> merge($mergeUser);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'merge: attempting to merge user data for user with '
+		. 'different user IDs. Merge error';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $grpNm = $userDataObj -> getGroupName();
+	$this -> assert_str_equals('mygrp', $grpNm );
+	my $gid = $userDataObj -> getGroupID();
+	$this -> assert_str_equals('1001', $gid );
+	my $lsh = $userDataObj -> getLoginShell();
+	$this -> assert_str_equals('/usr/bin/zsh', $lsh );
+	my $pwd = $userDataObj -> getPassword();
+	$this -> assert_str_equals('hello', $pwd );
+	my $pwdf = $userDataObj -> getPasswordFormat();
+	$this -> assert_str_equals('plain', $pwdf );
+	my $home = $userDataObj -> getUserHomeDir();
+	$this -> assert_str_equals('/home/me', $home );
+	my $uid = $userDataObj -> getUserID();
+	$this -> assert_str_equals('1111', $uid );
+	my $name = $userDataObj -> getUserName();
+	$this -> assert_str_equals('me', $name );
+	my $rName = $userDataObj -> getUserRealName();
+	$this -> assert_str_equals('Pablo', $rName );
+	return;
+}
+
+#==========================================
+# test_mergeIncompatUname
+#------------------------------------------
+sub test_mergeIncompatUname {
+	# ...
+	# Test the merge method with incompatible home directories
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init = (
+		group  => 'audio',
+		home   => '/home/me',
+		name   => 'you',
+		userid => '1111'
+	);
+	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = $this -> __getUserObj();
+	my $res = $userDataObj -> merge($mergeUser);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'merge: attempting to merge user data for two different '
+		. 'users. Merge error';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $grpNm = $userDataObj -> getGroupName();
+	$this -> assert_str_equals('mygrp', $grpNm );
+	my $gid = $userDataObj -> getGroupID();
+	$this -> assert_str_equals('1001', $gid );
+	my $lsh = $userDataObj -> getLoginShell();
+	$this -> assert_str_equals('/usr/bin/zsh', $lsh );
+	my $pwd = $userDataObj -> getPassword();
+	$this -> assert_str_equals('hello', $pwd );
+	my $pwdf = $userDataObj -> getPasswordFormat();
+	$this -> assert_str_equals('plain', $pwdf );
+	my $home = $userDataObj -> getUserHomeDir();
+	$this -> assert_str_equals('/home/me', $home );
+	my $uid = $userDataObj -> getUserID();
+	$this -> assert_str_equals('1111', $uid );
+	my $name = $userDataObj -> getUserName();
+	$this -> assert_str_equals('me', $name );
+	my $rName = $userDataObj -> getUserRealName();
+	$this -> assert_str_equals('Pablo', $rName );
+	return;
+}
+
+#==========================================
+# test_mergeIncompatURName
+#------------------------------------------
+sub test_mergeIncompatURName {
+	# ...
+	# Test the merge method with incompatible home directories
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init = (
+		group        => 'audio',
+		home         => '/home/me',
+		name         => 'me',
+		passwdformat => 'plain',
+		realname     => 'frank',
+		userid       => '1111'
+	);
+	my $mergeUser = KIWIXMLUserData -> new($kiwi, \%init);
+	my $userDataObj = $this -> __getUserObj();
+	my $res = $userDataObj -> merge($mergeUser);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'merge: attempting to merge user data for user with '
+		. 'different real name settings. Merge error';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $grpNm = $userDataObj -> getGroupName();
+	$this -> assert_str_equals('mygrp', $grpNm );
+	my $gid = $userDataObj -> getGroupID();
+	$this -> assert_str_equals('1001', $gid );
+	my $lsh = $userDataObj -> getLoginShell();
+	$this -> assert_str_equals('/usr/bin/zsh', $lsh );
+	my $pwd = $userDataObj -> getPassword();
+	$this -> assert_str_equals('hello', $pwd );
+	my $pwdf = $userDataObj -> getPasswordFormat();
+	$this -> assert_str_equals('plain', $pwdf );
+	my $home = $userDataObj -> getUserHomeDir();
+	$this -> assert_str_equals('/home/me', $home );
+	my $uid = $userDataObj -> getUserID();
+	$this -> assert_str_equals('1111', $uid );
+	my $name = $userDataObj -> getUserName();
+	$this -> assert_str_equals('me', $name );
+	my $rName = $userDataObj -> getUserRealName();
+	$this -> assert_str_equals('Pablo', $rName );
+	return;
+}
+
+#==========================================
+# test_mergeInvalidArg
+#------------------------------------------
+sub test_mergeInvalidArg {
+	# ...
+	# Test the merge method with an invalid argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $userDataObj = $this -> __getUserObj();
+	my $res = $userDataObj -> merge('foo');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'merge: expecting KIWIXMLUserData object as argument';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $grpNm = $userDataObj -> getGroupName();
+	$this -> assert_str_equals('mygrp', $grpNm );
+	my $gid = $userDataObj -> getGroupID();
+	$this -> assert_str_equals('1001', $gid );
+	my $lsh = $userDataObj -> getLoginShell();
+	$this -> assert_str_equals('/usr/bin/zsh', $lsh );
+	my $pwd = $userDataObj -> getPassword();
+	$this -> assert_str_equals('hello', $pwd );
+	my $pwdf = $userDataObj -> getPasswordFormat();
+	$this -> assert_str_equals('plain', $pwdf );
+	my $home = $userDataObj -> getUserHomeDir();
+	$this -> assert_str_equals('/home/me', $home );
+	my $uid = $userDataObj -> getUserID();
+	$this -> assert_str_equals('1111', $uid );
+	my $name = $userDataObj -> getUserName();
+	$this -> assert_str_equals('me', $name );
+	my $rName = $userDataObj -> getUserRealName();
+	$this -> assert_str_equals('Pablo', $rName );
+	return;
+}
+
+#==========================================
 # test_setGroupName
 #------------------------------------------
 sub test_setGroupName {
