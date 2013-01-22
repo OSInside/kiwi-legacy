@@ -551,7 +551,7 @@ sub __checkMergeConditions {
 	my $this = shift;
 	my $user = shift;
 	my $kiwi = $this->{kiwi};
-		if (ref($user) ne 'KIWIXMLUserData') {
+	if (ref($user) ne 'KIWIXMLUserData') {
 		my $msg = 'merge: expecting KIWIXMLUserData object as argument';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
