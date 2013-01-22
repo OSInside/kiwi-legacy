@@ -46,15 +46,15 @@ sub new {
 	# Internal data structure
 	#
 	# this = {
-	#    userid        = ''
+	#    group         = ''
+	#    groupid       = ''
+	#    home          = ''
 	#    name          = ''
 	#    passwd        = ''
 	#    passwdformat  = ''
-	#    group         = ''
 	#    realname      = ''
-	#    groupid       = ''
 	#    shell         = ''
-	#    home          = ''
+	#    userid        = ''
 	# }
 	# ---
 	#==========================================
@@ -247,6 +247,65 @@ sub getXMLElement {
 	}
 	$element -> appendChild($uElem);
 	return $element;
+}
+
+#==========================================
+# merge
+#------------------------------------------
+sub merge {
+	# ...
+	# Merge user data into one consistent set of data
+	# ---
+	my $this = shift;
+	my $user = shift;
+	my $kiwi = $this->{kiwi};
+	my $mergePossible = $this -> __checkMergeConditions($user);
+	if (! $mergePossible) {
+		return;
+	}
+	my $home = $user -> getUserHomeDir();
+	my $id = $user -> getUserID();
+	my $name = $user -> getUserName();
+	my $pass = $user -> getPassword();
+	my $format = $user -> getPasswordFormat();
+	my $rName = $user -> getUserRealName();
+	my $shell = $user -> getLoginShell();
+	if ($id) {
+		$this -> setUserID($id);
+	}
+	if ($pass) {
+		$this -> setPassword($pass);
+	}
+	if ($format) {
+		$this -> setPasswordFormat($format);
+	}
+	if ($rName) {
+		$this -> setUserRealName($rName);
+	}
+	if ($shell) {
+		$this -> setLoginShell($shell);
+	}
+	my $group = $user -> getGroupName();
+	my $thisGroup = $this -> getGroupName();
+	if ($group) {
+		if ($thisGroup && $thisGroup ne $group) {
+			my $newGroup = $thisGroup . q{,} . $group;
+			$this -> setGroupName($newGroup);
+		} else {
+			$this -> setGroupName($group);
+		}
+	}
+	my $gid = $user -> getGroupID();
+	my $thisGid = $this -> getGroupID();
+	if ($gid) {
+		if ($thisGid && $thisGid ne $gid) {
+			my $newGid = $thisGid . q{,} . $gid;
+			$this -> setGroupID($newGid);
+		} else {
+			$this -> setGroupID($gid);
+		}
+	}
+	return $this;
 }
 
 #==========================================
@@ -469,12 +528,105 @@ sub __checkAssignedID {
 		$kiwi -> failed();
 		return;
 	}
-	my $idNum = int $id;
-	if ( $id < $MIN_ID ) {
-		my $msg = "$caller: assigned ID is less than 1000, this may conflict "
-			. 'with system assigned IDs for users and groups.';
-		$kiwi -> warning($msg);
-		$kiwi -> done();
+	my @specIds = split /,/smx, $id;
+	for my $sid (@specIds) {
+		my $idNum = int $sid;
+	    if ( $idNum < $MIN_ID ) {
+		    my $msg = "$caller: assigned ID is less than 1000, this may "
+				. 'conflict with system assigned IDs for users and groups.';
+		    $kiwi ->  warning($msg);
+		    $kiwi -> done();
+	    }
+	}
+	return 1;
+}
+
+#==========================================
+# __checkMergeConditions
+#------------------------------------------
+sub __checkMergeConditions {
+	# ...
+	# Check the pre conditions for user merging
+	# ---
+	my $this = shift;
+	my $user = shift;
+	my $kiwi = $this->{kiwi};
+		if (ref($user) ne 'KIWIXMLUserData') {
+		my $msg = 'merge: expecting KIWIXMLUserData object as argument';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $home = $user -> getUserHomeDir();
+	if ($home ne $this -> getUserHomeDir()) {
+		my $msg = 'merge: attempting to merge user data for user with '
+			. 'different home directory. Merge error';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $id = $user -> getUserID();
+	my $thisID = $this -> getUserID();
+	if ($id) {
+		if ($thisID && $thisID ne $id) {
+			my $msg = 'merge: attempting to merge user data for user with '
+				. 'different user IDs. Merge error';
+		    $kiwi -> error($msg);
+		    $kiwi -> failed();
+		    return;
+	    }
+	}
+	my $name = $user -> getUserName();
+	if ($name ne $this -> getUserName()) {
+		my $msg = 'merge: attempting to merge user data for two different '
+			. 'users. Merge error';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $pass = $user -> getPassword();
+	my $thisPass = $this -> getPassword();
+	if ($pass) {
+		if ($thisPass && $thisPass ne $pass) {
+			my $msg = 'merge: attempting to merge user data for user with '
+				. 'different passwords. Merge error';
+		    $kiwi -> error($msg);
+		    $kiwi -> failed();
+		    return;
+	    }
+	}
+	my $format = $user -> getPasswordFormat();
+	my $thisFormat = $this -> getPasswordFormat();
+	if ($format) {
+		if ($thisFormat && $thisFormat ne $format) {
+			my $msg = 'merge: attempting to merge user data for user with '
+				. 'different password format settings. Merge error';
+		    $kiwi -> error($msg);
+		    $kiwi -> failed();
+		    return;
+	    }
+	}
+	my $rName = $user -> getUserRealName();
+	my $thisRName = $this -> getUserRealName();
+	if ($rName) {
+		if ($thisRName && $thisRName ne $rName) {
+			my $msg = 'merge: attempting to merge user data for user with '
+				. 'different real name settings. Merge error';
+		    $kiwi -> error($msg);
+		    $kiwi -> failed();
+		    return;
+	    }
+	}
+	my $shell = $user -> getLoginShell();
+	my $thisShell = $this -> getLoginShell();
+	if ($shell) {
+		if ($thisShell && $thisShell ne $shell) {
+			my $msg = 'merge: attempting to merge user data for user with '
+				. 'different login shell. Merge error';
+		    $kiwi -> error($msg);
+		    $kiwi -> failed();
+		    return;
+	    }
 	}
 	return 1;
 }
