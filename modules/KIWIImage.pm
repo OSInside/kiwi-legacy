@@ -2029,6 +2029,288 @@ sub createImageLiveCD {
 		qxx ("cat $splash >> $destination/initrd");
 	}
 	#==========================================
+	# check for boot firmware
+	#------------------------------------------
+	my $firmware = 'bios';
+	if ($stype{firmware}) {
+		$firmware = $stype{firmware};
+	}
+	#==========================================
+	# Create bootloader configuration
+	#------------------------------------------
+	if ($firmware eq "efi") {
+		#==========================================
+		# Setup grub2 if efi live iso is requested
+		#------------------------------------------
+		my @theme      = $sxml -> getBootTheme_legacy();
+		my $ir_modules = "$tmpdir/usr/lib/grub2-efi/x86_64-efi";
+		my $ir_themes  = "$tmpdir/usr/share/grub2/themes";
+		my $ir_bgnds   = "$tmpdir/usr/share/grub2/backgrounds";
+		my $ir_font    = "$tmpdir/usr/share/grub2/unicode.pf2";
+		my $cd_modules = "$CD/boot/grub2-efi/x86_64-efi";
+		my $cd_loader  = "$CD/boot/grub2-efi";
+		my $theme      = $theme[1];
+		my $ir_bg      = "$ir_bgnds/$theme/800x600.png";
+		my $cd_bg      = "$cd_loader/themes/$theme/background.png";
+		my $fodir      = '/boot/grub2-efi/themes/';
+		my $ascii      = 'ascii.pf2';
+		my @fonts = (
+			"DejaVuSans-Bold14.pf2",
+			"DejaVuSans10.pf2",
+			"DejaVuSans12.pf2",
+			"ascii.pf2"
+		);
+		my @efimods = (
+			'fat','ext2','gettext','part_gpt','efi_gop',
+			'chain','video','video_bochs','video_cirrus',
+			'gzio','efi_uga','search','configfile','png'
+		);
+		my $status;
+		my $result;
+		#==========================================
+		# Check for grub2-efi
+		#------------------------------------------
+		if (! -d $ir_modules) {
+			$kiwi -> error ("Couldn't find grub2-efi in initrd");
+			$kiwi -> failed ();
+			return;
+		}
+		#==========================================
+		# Create directory structure
+		#------------------------------------------
+		qxx ("mkdir -p $cd_modules");
+		#==========================================
+		# Copy modules/fonts/themes on CD
+		#------------------------------------------
+		qxx ("mv $ir_modules/* $cd_modules 2>&1");
+		if (-d $ir_themes) {
+			qxx ("mv $ir_themes $cd_loader 2>&1");
+		}
+		if (-d $ir_bgnds) {
+			qxx ("cp $ir_bg $cd_bg 2>&1");
+		}
+		if (-e $ir_font) {
+			qxx ("mv $ir_font $CD/boot");
+		} else {
+			$kiwi -> warning ("Can't find unicode font for grub2");
+			$kiwi -> skipped ();
+		}
+		#==========================================
+		# Create boot partition file
+		#------------------------------------------
+		my $bootefi = "$CD/boot/bootpart-efi.cfg";
+		my $bpfd = FileHandle -> new();
+		if (! $bpfd -> open(">$bootefi")) {
+			$kiwi -> error ("Couldn't create grub2 EFI bootpart map: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		print $bpfd 'prefix=(cd0)/boot/grub2-efi'."\n";
+		$bpfd -> close();
+		#==========================================
+		# create efi boot image
+		#------------------------------------------
+		$kiwi -> info ("Creating grub2 efi boot image");
+		my $core    = "$CD/boot/bootx64.efi";
+		my @modules = (
+			'fat','ext2','part_gpt','efi_gop','iso9660','chain',
+			'linux','echo','configfile','boot','search_label',
+			'search_fs_file','search','search_fs_uuid','ls',
+			'video','video_fb','normal'
+		);
+		my $fo = 'x86_64-efi';
+		$status = qxx (
+			"grub2-efi-mkimage -O $fo -o $core -c $bootefi @modules 2>&1"
+		);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create efi boot image: $status");
+			$kiwi -> failed ();
+			return;
+		}
+		$kiwi -> done();
+		#==========================================
+		# make iso EFI bootable
+		#------------------------------------------
+		my $efi_fat = "$CD/boot/grub2-efi/efiboot.img";
+		$status = qxx ("qemu-img create $efi_fat 1M 2>&1");
+		$result = $? >> 8;
+		if ($result == 0) {
+			$status = qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
+			$result = $? >> 8;
+			if ($result == 0) {
+				$status = qxx ("mount -o loop $efi_fat /mnt 2>&1");
+				$result = $? >> 8;
+				if ($result == 0) {
+					$status = qxx ("mkdir -p /mnt/efi/boot");
+					$status = qxx (
+						"cp $CD/boot/bootx64.efi /mnt/efi/boot 2>&1"
+					);
+					$result = $? >> 8;
+				}
+				qxx ("umount /mnt 2>&1");
+			}
+		}
+		if ($result != 0) {
+			$kiwi -> error  ("Failed creating efi fat image: $status");
+			$kiwi -> failed ();
+			return;
+		}
+		#==========================================
+		# create grub configuration
+		#------------------------------------------
+		$kiwi -> info ("Creating grub2 configuration file...");
+		my $FD = FileHandle -> new();
+		if (! $FD -> open(">$CD/boot/grub2-efi/grub.cfg")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create grub.cfg: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		my $rprefix = 'cd0';
+		foreach my $module (@efimods) {
+			print $FD "insmod $module"."\n";
+		}
+		print $FD "set default=0\n";
+		print $FD "set root='$rprefix'"."\n";
+		print $FD "set font=/boot/unicode.pf2"."\n";
+		print $FD 'if loadfont $font ;then'."\n";
+		print $FD "\t"."set gfxmode=auto"."\n";
+		print $FD "\t".'insmod gfxterm'."\n";
+		print $FD "\t".'insmod gfxmenu'."\n";
+		print $FD "\t".'terminal_input gfxterm'."\n";
+		print $FD "\t".'if terminal_output gfxterm; then true; else'."\n";
+		print $FD "\t\t".'terminal gfxterm'."\n";
+		print $FD "\t".'fi'."\n";
+		print $FD 'fi'."\n";
+		print $FD 'if loadfont '.$fodir.$theme.'/'.$ascii.';then'."\n";
+		foreach my $font (@fonts) {
+			print $FD "\t".'loadfont '.$fodir.$theme.'/'.$font."\n";
+		}
+		print $FD "\t".'set theme='.$fodir.$theme.'/theme.txt'."\n";
+		print $FD "\t".'background_image -m stretch ';
+		print $FD $fodir.$theme.'/background.png'."\n";
+		print $FD 'fi'."\n";
+		my $bootTimeout = 10;
+		if (defined $stype{boottimeout}) {
+			$bootTimeout = $stype{boottimeout};
+		}
+		if ($stype{fastboot}) {
+			$bootTimeout = 0;
+		}
+		print $FD "set timeout=$bootTimeout\n";
+		my $title = $systemDisplayName;
+		my $lsafe = "Failsafe -- ".$title;
+		print $FD 'menuentry "'.$title.'"';
+		print $FD ' --class opensuse --class os {'."\n";
+		print $FD "\t"."set root='$rprefix'"."\n";
+		#==========================================
+		# Standard boot
+		#------------------------------------------
+		if (! $isxen) {
+			print $FD "\t"."echo Loading linux...\n";
+			print $FD "\t"."set gfxpayload=keep"."\n";
+			print $FD "\t"."linux /boot/$isoarch/loader/linux";
+			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
+			print $FD " splash=silent"."\n";
+			print $FD "\t"."echo Loading initrd...\n";
+			print $FD "\t"."initrd /boot/$isoarch/loader/initrd\n";
+			print $FD "}\n";
+		} else {
+			print $FD "\t"."echo Loading Xen\n";
+			print $FD "\t"."multiboot /boot/$isoarch/loader/xen.gz dummy\n";
+			print $FD "\t"."echo Loading linux...\n";
+			print $FD "\t"."set gfxpayload=keep"."\n";
+			print $FD "\t"."module /boot/$isoarch/loader/linux dummy";
+			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
+			print $FD " splash=silent"."\n";
+			print $FD "\t"."echo Loading initrd...\n";
+			print $FD "\t"."module /boot/$isoarch/loader/initrd dummy\n";
+			print $FD "}\n";
+		}
+		#==========================================
+		# Failsafe boot
+		#------------------------------------------
+		print $FD 'menuentry "'.$lsafe.'"';
+		print $FD ' --class opensuse --class os {'."\n";
+		print $FD "\t"."set root='$rprefix'"."\n";
+		if (! $isxen) {
+			print $FD "\t"."echo Loading linux...\n";
+			print $FD "\t"."set gfxpayload=keep"."\n";
+			print $FD "\t"."linux /boot/$isoarch/loader/linux";
+			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
+			print $FD " splash=silent";
+			print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
+			print $FD " nosmp noapic maxcpus=0 edd=off"."\n";
+			print $FD "\t"."echo Loading initrd...\n";
+			print $FD "\t"."initrd /boot/$isoarch/loader/initrd\n";
+			print $FD "}\n";
+		} else {
+			print $FD "\t"."echo Loading Xen\n";
+			print $FD "\t"."multiboot /boot/$isoarch/loader/xen.gz dummy\n";
+			print $FD "\t"."echo Loading linux...\n";
+			print $FD "\t"."set gfxpayload=keep"."\n";
+			print $FD "\t"."module /boot/$isoarch/loader/linux dummy";
+			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
+			print $FD " splash=silent";
+			print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
+			print $FD " nosmp noapic maxcpus=0 edd=off"."\n";
+			print $FD "\t"."echo Loading initrd...\n";
+			print $FD "\t"."module /boot/$isoarch/loader/initrd dummy\n";
+			print $FD "}\n";
+		}
+		#==========================================
+		# setup isolinux checkmedia boot entry
+		#------------------------------------------
+		if ($cmdL->getISOCheck()) {
+			print $FD 'menuentry mediacheck';
+			print $FD ' --class opensuse --class os {'."\n";
+			print $FD "\t"."set root='$rprefix'"."\n";
+			if (! $isxen) {
+				print $FD "\t"."echo Loading linux...\n";
+				print $FD "\t"."set gfxpayload=keep"."\n";
+				print $FD "\t"."linux /boot/$isoarch/loader/linux";
+				print $FD " mediacheck=1 splash=silent";
+				print $FD "\t"."echo Loading initrd...\n";
+				print $FD "\t"."initrd /boot/$isoarch/loader/initrd\n";
+				print $FD "}\n";
+			} else {
+				print $FD "\t"."echo Loading Xen\n";
+				print $FD "\t"."multiboot /boot/$isoarch/loader/xen.gz dummy\n";
+				print $FD "\t"."echo Loading linux...\n";
+				print $FD "\t"."set gfxpayload=keep"."\n";
+				print $FD "\t"."module /boot/$isoarch/loader/linux dummy";
+				print $FD " mediacheck=1 splash=silent";
+				print $FD "\t"."echo Loading initrd...\n";
+				print $FD "\t"."module /boot/$isoarch/loader/initrd dummy\n";
+				print $FD "}\n";
+			}
+		}
+		#==========================================
+		# setup harddisk entry
+		#------------------------------------------
+		# try to chainload another linux efi module from
+		# the fixed hd0,1 partition. It's not certain that
+		# this preconditions are true in any case
+		# ----
+		print $FD 'menuentry "Boot from Hard Disk"';
+		print $FD ' --class opensuse --class os {'."\n";
+		print $FD "\t"."set root='hd0,1'"."\n";
+		print $FD "\t".'chainloader /efi/boot/bootx64.efi'."\n";
+		print $FD '}'."\n";
+		#==========================================
+		# setup memtest entry
+		#------------------------------------------
+		# memtest will not work in grub2-efi. This is because efi
+		# does not support launching 16-bit binaries and memtest is
+		# a 16-bit binary. Thats also the reason why there is no
+		# linux16 command/module in grub2 efi
+		# ----
+		$FD -> close();
+		$kiwi -> done();
+	}
+	#==========================================
 	# copy base graphics boot CD files
 	#------------------------------------------
 	$kiwi -> info ("Setting up isolinux boot CD [$isoarch]");
@@ -2209,8 +2491,6 @@ sub createImageLiveCD {
 	if (! defined $gzip) {
 		$attr = "-R -J -pad -joliet-long";
 	}
-	$attr .= ' -p "'.$this->{gdata}->{Preparer}.'"';
-	$attr .= ' -publisher "'.$this->{gdata}->{Publisher}.'"';
 	if ((defined $stype{flags}) && ($stype{flags} =~ /clic_udf|seed/)) {
 		$attr .= " -allow-limited-size -udf";
 	}
@@ -2221,6 +2501,15 @@ sub createImageLiveCD {
 		$attr .= " -V \"$stype{volid}\"";
 	}
 	$attr .= " -A \"$this->{mbrid}\"";
+	$attr .= ' -p "'.$this->{gdata}->{Preparer}.'"';
+	$attr .= ' -publisher "'.$this->{gdata}->{Publisher}.'"';
+	$attr .= ' -boot-load-size 4 -boot-info-table ';
+	$attr .= " -b boot/$isoarch/loader/isolinux.bin ";
+	$attr .= ' -no-emul-boot';
+	if ($firmware eq "efi") {
+		$attr.= ' -eltorito-alt-boot -b boot/grub2-efi/efiboot.img';
+		$attr.= ' -no-emul-boot -joliet-long';
+	}
 	my $isolinux = KIWIIsoLinux -> new (
 		$CD,$name,$attr,"checkmedia",$this->{cmdL},$this->{xml}
 	);
@@ -2229,7 +2518,7 @@ sub createImageLiveCD {
 		if (! $isolinux -> callBootMethods()) {
 			$isoerror = 1;
 		}
-		if (! $isolinux -> createISO()) {
+		if (! $isolinux -> createISO("raw")) {
 			$isoerror = 1;
 		}
 	}

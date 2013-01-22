@@ -196,19 +196,20 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this -> {kiwi}   = $kiwi;
-	$this -> {source} = $source;
-	$this -> {dest}   = $dest;
-	$this -> {params} = $params;
-	$this -> {base}   = \%base;
-	$this -> {tmpfile}= $sort;
-	$this -> {tmpdir} = $ldir;
-	$this -> {catalog}= \@catalog;
-	$this -> {tool}   = $tool;
-	$this -> {check}  = $mediacheck;
-	$this -> {gdata}  = $main::global -> getGlobals();
-	$this -> {cmdL}   = $cmdL;
-	$this -> {xml}    = $xml;
+	$this -> {kiwi}        = $kiwi;
+	$this -> {source}      = $source;
+	$this -> {dest}        = $dest;
+	$this -> {params}      = $params;
+	$this -> {orig_params} = $params;
+	$this -> {base}        = \%base;
+	$this -> {tmpfile}     = $sort;
+	$this -> {tmpdir}      = $ldir;
+	$this -> {catalog}     = \@catalog;
+	$this -> {tool}        = $tool;
+	$this -> {check}       = $mediacheck;
+	$this -> {gdata}       = $main::global -> getGlobals();
+	$this -> {cmdL}        = $cmdL;
+	$this -> {xml}         = $xml;
 	return $this;
 }
 
@@ -692,6 +693,7 @@ sub createISOLinuxConfig {
 #------------------------------------------
 sub createISO {
 	my $this = shift;
+	my $mode = shift;
 	my $kiwi = $this -> {kiwi};
 	my $src  = $this -> {source};
 	my $dest = $this -> {dest};
@@ -700,6 +702,9 @@ sub createISO {
 	my $prog = $this -> {tool};
 	my $cmdL = $this -> {cmdL};
 	my $xml  = $this -> {xml};
+	if (($mode) && ($mode eq "raw")) {
+		$para = $this -> {orig_params};
+	}
 	my $cmdln= "$prog $para -o $dest $src $ldir 2>&1";
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootConfig();
