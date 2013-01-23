@@ -210,6 +210,7 @@ sub new {
 	$this -> {gdata}       = $main::global -> getGlobals();
 	$this -> {cmdL}        = $cmdL;
 	$this -> {xml}         = $xml;
+	$this -> {magicID}     = '7984fc91-a43f-4e45-bf27-6d3aa08b24cf';
 	return $this;
 }
 
@@ -374,6 +375,44 @@ sub ppc64_default {
 }
 
 #==========================================
+# addBootEFILive
+#------------------------------------------
+sub addBootEFILive {
+	my $this   = shift;
+	my $size   = shift;
+	my $para   = $this->{params};
+	my $sort   = $this->{sortfile};
+	my $src    = $this->{source};
+	my $tmpdir = $this->{tmpdir};
+	my $magicID= $this->{magicID};
+	if ($size) {
+		$size = ($size + 2047) >> 11 << 2;
+	}
+	if (! -f $sort) {
+		return;
+	}
+	#==========================================
+	# update sort file
+	#------------------------------------------
+	qxx ("echo $src/boot/grub2-efi/efiboot.img 1000001 >> $sort");
+	#==========================================
+	# add end-of-header marker
+	#------------------------------------------
+	qxx ("echo $magicID >> $tmpdir/glump");
+	qxx ("echo $tmpdir/glump 1000000 >> $sort");
+	#==========================================
+	# update parameter list
+	#------------------------------------------
+	$para.= ' -eltorito-alt-boot ';
+	# FIXME: setting the size limits it, which is pretty bad
+	# $para.= " -boot-load-size $size";
+	$para.= ' -b boot/grub2-efi/efiboot.img';
+	$para.= ' -no-emul-boot -joliet-long -hide glump -hide-joliet glump';
+	$this -> {params} = $para;
+	return $this;
+}
+
+#==========================================
 # callBootMethods
 #------------------------------------------
 sub callBootMethods {
@@ -431,6 +470,7 @@ sub createLegacySortFile {
 	}
 	print $FD $src."/".$base{$arch}{boot}."/loader/isolinux.bin 2"."\n";
 	close $FD;
+	$this->{sortfile} = $sort;
 	return $sort;
 }
 
@@ -442,11 +482,8 @@ sub createS390CDLoader {
 	my $basez= shift;
 	my $kiwi = $this->{kiwi};
 	my $src  = $this->{source};
-
 	$kiwi -> info ("Creating S390 CD kernel:");
-
 	# originally from gen-s390-cd-kernel.pl by Ruediger Oertel
-
 	my $parmfile = "$src/$basez/parmfile";
 	if (-e $parmfile.".cd") {
 		$parmfile = $parmfile.".cd";
@@ -455,7 +492,6 @@ sub createS390CDLoader {
 	my $initrd = "$src/$basez/initrd";
 	my $outfile = "$src/$basez/cd.ikr";
 	my $cmdline = 'root=/dev/sda2';
-
 	# Open input files
 	if (! sysopen(image_fh,$image,O_RDONLY) ) {
 		$kiwi -> error  ("Cannot open kernel image $image: $!");
@@ -463,39 +499,37 @@ sub createS390CDLoader {
 		$this -> cleanISO();
 		return;
 	}
-
 	if (! sysopen(initrd_fh,$initrd,O_RDONLY) ) {
 		$kiwi -> error  ("Cannot open initrd $initrd: $!");
 		$kiwi -> failed ();
 		$this -> cleanISO ();
 		return;
 	}
-
 	my $image_size = (stat(image_fh))[7];
 	my $initrd_size = (stat(initrd_fh))[7];
-
 	# Get the size of the input files
-	$kiwi -> info (sprintf("\t%s: offset 0x%x len 0x%x (%d blocks)",
-			$image, 0, $image_size, ($image_size >> 12) + 1));
-
+	$kiwi -> info (
+		sprintf("\t%s: offset 0x%x len 0x%x (%d blocks)",
+		$image, 0, $image_size, ($image_size >> 12) + 1)
+	);
 	# The kernel appearently needs some free space above the
 	# actual image (bss? stack?), so use this hard-coded
 	# limit (from include/asm-s390/setup.h)
-
 	# my $initrd_offset = (($image_size >> 12) + 1) << 12;
 	my $initrd_offset = 0x800000;
 	my $boot_size = ((($initrd_offset + $initrd_size) >> 12) + 1 ) << 12;
-	$kiwi -> info (sprintf("\t%s: offset 0x%x len 0x%x (%d blocks)",
-			$initrd, $initrd_offset, $initrd_size, ($initrd_size >>12) + 1));
-	$kiwi -> info (sprintf("\t%s: len 0x%x (%d blocks)",
-			$outfile, $initrd_offset + $initrd_size, $boot_size / 4096));
-
+	$kiwi -> info (
+		sprintf("\t%s: offset 0x%x len 0x%x (%d blocks)",
+		$initrd, $initrd_offset, $initrd_size, ($initrd_size >>12) + 1)
+	);
+	$kiwi -> info (
+		sprintf("\t%s: len 0x%x (%d blocks)",
+		$outfile, $initrd_offset + $initrd_size, $boot_size / 4096)
+	);
 	# Get the kernel command line arguments
 	$cmdline .= " " if ($cmdline ne "");
-
 	if ($parmfile ne "") {
 		my $line;
-
 		$cmdline = '';
 		my $PARMFH;
 		if (! open($PARMFH, '<', $parmfile) ) {
@@ -510,19 +544,18 @@ sub createS390CDLoader {
 		}
 		close($PARMFH);
 	}
-
 	if ($cmdline ne "") {
 		chop $cmdline;
 	}
-
 	# Max length for the kernel command line is 896 bytes
 	if (length($cmdline) >= 896) {
-		$kiwi -> error  ("Kernel commandline too long (". length($cmdline) ." bytes)");
+		$kiwi -> error  (
+			"Kernel commandline too long (". length($cmdline) ." bytes)"
+		);
 		$kiwi -> failed ();
 		$this -> cleanISO ();
 		return;
 	}
-
 	# Now create the image file.
 	if (! sysopen(out_fh,$outfile,O_RDWR|O_CREAT|O_TRUNC) ) {
 		$kiwi -> error  ("Cannot open outfile $outfile: $!");
@@ -530,7 +563,6 @@ sub createS390CDLoader {
 		$this -> cleanISO ();
 		return;
 	}
-
 	# First fill the entire size with zeroes
 	if (! sysopen(null_fh,"/dev/zero",O_RDONLY) ) {
 		$kiwi -> error  ("Cannot open /dev/zero: $!");
@@ -538,7 +570,6 @@ sub createS390CDLoader {
 		$this -> cleanISO ();
 		return;
 	}
-
 	my $buffer="";
 	my $blocks_read=0;
 	while ($blocks_read < ($boot_size >> 12)) {
@@ -546,10 +577,8 @@ sub createS390CDLoader {
 		syswrite(out_fh,$buffer);
 		$blocks_read += 1;
 	}
-
 	$kiwi -> info ("\tRead $blocks_read blocks from /dev/zero");
 	close(null_fh);
-
 	# Now copy the image file to location 0
 	sysseek(out_fh,0,0);
 	$blocks_read = 0;
@@ -557,10 +586,8 @@ sub createS390CDLoader {
 		syswrite(out_fh,$buffer,4096);
 		$blocks_read += 1;
 	}
-
 	$kiwi -> info ("\tRead $blocks_read blocks from $image");
 	close(image_fh);
-
 	# Then the initrd to location specified by initrd_offset
 	sysseek(out_fh,$initrd_offset,0);
 	$blocks_read = 0;
@@ -568,34 +595,28 @@ sub createS390CDLoader {
 		syswrite(out_fh,$buffer,4096);
 		$blocks_read += 1;
 	}
-
 	$kiwi -> info ("\tRead $blocks_read blocks from $initrd");
-
 	close(initrd_fh);
-
 	# Now for the real black magic.
 	# If we are loading from CD-ROM or HMC, the kernel is already loaded
 	# in memory by the first loader itself.
 	$kiwi -> info ("\tSetting boot loader control to 0x10000");
-
 	sysseek(out_fh,4,0 );
 	syswrite(out_fh,pack("N",0x80010000),4);
-
-	$kiwi -> info ("\tWriting kernel commandline (". length($cmdline) ." bytes):");
+	$kiwi -> info (
+		"\tWriting kernel commandline (". length($cmdline) ." bytes):"
+	);
 	$kiwi -> info ("\t$cmdline");
-
 	sysseek(out_fh,0x10480,0);
 	syswrite(out_fh,$cmdline,length($cmdline));
-
-	$kiwi -> info ("\tSetting initrd parameter: offset $initrd_offset size $initrd_size");
-
+	$kiwi -> info (
+		"\tSetting initrd parameter: offset $initrd_offset size $initrd_size"
+	);
 	sysseek(out_fh,0x1040C,0);
 	syswrite(out_fh,pack("N",$initrd_offset),4);
 	sysseek(out_fh,0x10414,0);
 	syswrite(out_fh,pack("N",$initrd_size),4);
-
 	close(out_fh);
-
 	(my $retval = $outfile) =~ s|$src/||;
 	return $retval;
 }
@@ -689,23 +710,113 @@ sub createISOLinuxConfig {
 }
 
 #==========================================
+# findAndCopyMagicBlock
+#------------------------------------------
+sub findAndCopyMagicBlock {
+	# /.../
+	# Look for magic block. As we don't have a directory entry
+	# for it scan backward at the position of the first few
+	# files. If found copy that iso meta data
+	# ----
+	my $this   = shift;
+	my $kiwi   = $this -> {kiwi};
+	my $iso    = $this -> {dest};
+	my $magicID= $this -> {magicID};
+	my $tmpdir = $this -> {tmpdir};
+	my $iso_fd = FileHandle -> new();
+	my $iso_blk= FileHandle -> new();
+	my $cnt    = 0;
+	my $buf    = 0;
+	my $start;
+	if (! $iso_fd -> open ($iso)) {
+		return;
+	}
+	my $files = $this -> isols();
+	found: for (@{$files}) {
+		next unless $_->{type} eq ' ';
+		last if $cnt++ >= 2; # check only the first 2 files
+		my $buf;
+		for (my $i = 0; $i >= -4; $i--) { # go back up to 4 blocks
+			seek $iso_fd, ($_->{start} + $i) << 11, 0;
+			sysread $iso_fd, $buf, length $magicID;
+			$start = $_->{start} + $i;
+			if ($buf eq $magicID) {
+				last found;
+			}
+		}
+	}
+	if (! $iso_blk -> open (">$tmpdir/glump")) {
+		$iso -> close();
+		return;
+	}
+	seek $iso_fd, 0, 0;
+	for (my $i = 0; $i < $start + 1; $i++) {
+		if (! sysread($iso_fd, $buf, 2048) == 2048) {
+			return;
+		}
+		if (! syswrite($iso_blk, $buf, 2048) == 2048) {
+			return;
+		}
+	}
+	$iso_blk -> close();
+	$iso_fd  -> close();
+	my $offset = $start * 2048;
+	$kiwi -> loginfo ("ISO magic block address: $offset\n");
+	return $start;
+}
+
+#==========================================
+# isEmptyDir
+#------------------------------------------
+sub isEmptyDir {
+	my $this  = shift;
+	my $ldir  = shift;
+	my $count = 0;
+	if (-d $ldir) {
+		opendir(my $dh, $ldir) || return;
+		while (my $entry = readdir ($dh)) {
+			next if $entry eq "." || $entry eq "..";
+			$count++;
+		}
+		closedir $dh;
+	}
+	if ($count > 0) {
+		return 0;
+	}
+	return 1;
+}
+
+#==========================================
 # createISO
 #------------------------------------------
 sub createISO {
-	my $this = shift;
-	my $mode = shift;
-	my $kiwi = $this -> {kiwi};
-	my $src  = $this -> {source};
-	my $dest = $this -> {dest};
-	my $para = $this -> {params};
-	my $ldir = $this -> {tmpdir};
-	my $prog = $this -> {tool};
-	my $cmdL = $this -> {cmdL};
-	my $xml  = $this -> {xml};
-	if (($mode) && ($mode eq "raw")) {
-		$para = $this -> {orig_params};
+	my $this     = shift;
+	my $kiwi     = $this -> {kiwi};
+	my $src      = $this -> {source};
+	my $dest     = $this -> {dest};
+	my $para     = $this -> {params};
+	my $ldir     = $this -> {tmpdir};
+	my $prog     = $this -> {tool};
+	my $cmdL     = $this -> {cmdL};
+	my $xml      = $this -> {xml};
+	my $magicID  = $this -> {magicID};
+	my $addpara  = "-hide glump -hide-joliet glump";
+	my $firmware = 'bios';
+	my $ldir_cnt = 0;
+	my %type;
+	my $cmdln;
+	#==========================================
+	# Lookup firmware setup
+	#------------------------------------------
+	if ($xml) {
+		%type = %{$xml->getImageTypeAndAttributes_legacy()};
 	}
-	my $cmdln= "$prog $para -o $dest $src $ldir 2>&1";
+	if ($type{firmware}) {
+		$firmware = $type{firmware};
+	}
+	#==========================================
+	# check for pre bootloader install
+	#------------------------------------------
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootConfig();
 		if ((! $editBoot) && ($xml)) {
@@ -716,8 +827,15 @@ sub createISO {
 			system ("cd $src && bash --norc -c $editBoot");
 		}
 	}
-	$kiwi -> loginfo ( "Calling: $cmdln\n" );
-	my $data = qxx ( $cmdln	);
+	#==========================================
+	# Call mkisofs first stage
+	#------------------------------------------
+	if ($this -> isEmptyDir ($ldir)) {
+		$cmdln = "$prog $para -o $dest $src 2>&1";
+	} else {
+		$cmdln = "$prog $para -o $dest $ldir $src 2>&1";
+	}
+	my $data = qxx ( $cmdln );
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call $prog: $data");
@@ -725,6 +843,33 @@ sub createISO {
 		$this -> cleanISO();
 		return;
 	}
+	#==========================================
+	# Call mkisofs second stage
+	#------------------------------------------
+	if ($firmware eq "efi") {
+		if (! $this -> findAndCopyMagicBlock()) {
+			$kiwi -> error  ("Failed to read magic iso header");
+			$kiwi -> failed ();
+			$this -> cleanISO();
+			return;
+		}
+		if ($this -> isEmptyDir ($ldir)) {
+			$cmdln = "$prog $para $addpara -o $dest $src 2>&1";
+		} else {
+			$cmdln = "$prog $para $addpara -o $dest $ldir $src 2>&1";
+		}
+		$data = qxx ( $cmdln );
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("Failed to call $prog: $data");
+			$kiwi -> failed ();
+			$this -> cleanISO();
+			return;
+		}
+	}
+	#==========================================
+	# Call post bootloader install
+	#------------------------------------------
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootInstall();
 		if ((! $editBoot) && ($xml)) {
@@ -736,8 +881,50 @@ sub createISO {
 			system ("cd $src && bash --norc -c \"$editBoot @opts\"");
 		}
 	}
+	#==========================================
+	# Cleanup
+	#------------------------------------------
 	$this -> cleanISO();
 	return $this;
+}
+
+#==========================================
+# isols
+#------------------------------------------
+sub isols {
+	# /.../
+	# ISO file list sorted by start address.
+	# Return ref to array with files.
+	# ----
+	my $this = shift;
+	my $iso  = $this -> {dest};
+	my $fd   = FileHandle -> new();
+	my $dir  = "/";
+	my $files;
+	local $_;
+	if (! $fd -> open ("isoinfo -R -l -i $iso 2>/dev/null |")) {
+		return;
+	}
+	while(<$fd>) {
+		if(/^Directory listing of\s*(\/.*\/)/) {
+			$dir = $1;
+			next;
+		}
+		if(/^(.).*\s\[\s*(\d+)(\s+\d+)?\]\s+(.*?)\s*$/) {
+			my $type = $1;
+			$type = ' ' if $type eq '-';
+			if($4 ne '.' && $4 ne '..') {
+				push @$files, {
+					name => "$dir$4",type => $type,start => $2 + 0
+				};
+			}
+		}
+	}
+	$fd -> close();
+	if ($files) {
+		$files = [ sort { $a->{start} <=> $b->{start} } @$files ];
+	}
+	return $files;
 }
 
 #==========================================

@@ -1490,6 +1490,7 @@ sub createImageLiveCD {
 	my $hybrid = 0;
 	my $isxen  = 0;
 	my $hybridpersistent = 0;
+	my $efibootloadsize  = 0;
 	my $cmdline = "";
 	my $rootTarget = $cmdL->getRootTargetDir();
 	if (! $rootTarget) {
@@ -2050,7 +2051,7 @@ sub createImageLiveCD {
 		my $cd_modules = "$CD/boot/grub2-efi/x86_64-efi";
 		my $cd_loader  = "$CD/boot/grub2-efi";
 		my $theme      = $theme[1];
-		my $ir_bg      = "$ir_bgnds/$theme/800x600.png";
+		my $ir_bg      = "$ir_bgnds/$theme/1024x768.png";
 		my $cd_bg      = "$cd_loader/themes/$theme/background.png";
 		my $fodir      = '/boot/grub2-efi/themes/';
 		my $ascii      = 'ascii.pf2';
@@ -2098,7 +2099,7 @@ sub createImageLiveCD {
 		#==========================================
 		# Create boot partition file
 		#------------------------------------------
-		my $bootefi = "$CD/boot/bootpart-efi.cfg";
+		my $bootefi = "$CD/boot/bootpart.cfg";
 		my $bpfd = FileHandle -> new();
 		if (! $bpfd -> open(">$bootefi")) {
 			$kiwi -> error ("Couldn't create grub2 EFI bootpart map: $!");
@@ -2157,6 +2158,7 @@ sub createImageLiveCD {
 			$kiwi -> failed ();
 			return;
 		}
+		$efibootloadsize = -s $efi_fat;
 		#==========================================
 		# create grub configuration
 		#------------------------------------------
@@ -2503,13 +2505,6 @@ sub createImageLiveCD {
 	$attr .= " -A \"$this->{mbrid}\"";
 	$attr .= ' -p "'.$this->{gdata}->{Preparer}.'"';
 	$attr .= ' -publisher "'.$this->{gdata}->{Publisher}.'"';
-	$attr .= ' -boot-load-size 4 -boot-info-table ';
-	$attr .= " -b boot/$isoarch/loader/isolinux.bin ";
-	$attr .= ' -no-emul-boot';
-	if ($firmware eq "efi") {
-		$attr.= ' -eltorito-alt-boot -b boot/grub2-efi/efiboot.img';
-		$attr.= ' -no-emul-boot -joliet-long';
-	}
 	my $isolinux = KIWIIsoLinux -> new (
 		$CD,$name,$attr,"checkmedia",$this->{cmdL},$this->{xml}
 	);
@@ -2518,7 +2513,12 @@ sub createImageLiveCD {
 		if (! $isolinux -> callBootMethods()) {
 			$isoerror = 1;
 		}
-		if (! $isolinux -> createISO("raw")) {
+		if ($firmware eq "efi") {
+			if (! $isolinux -> addBootEFILive($efibootloadsize)) {
+				$isoerror = 1;
+			}
+		}
+		if (! $isolinux -> createISO()) {
 			$isoerror = 1;
 		}
 	}
