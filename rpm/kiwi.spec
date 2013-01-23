@@ -553,6 +553,7 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/kiwi/image/suse-11.4-JeOS
 %exclude %{_datadir}/kiwi/image/suse-12.1-JeOS
 %exclude %{_datadir}/kiwi/image/suse-12.2-JeOS
+%exclude %{_datadir}/kiwi/image/suse-12.3-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %exclude %{_datadir}/kiwi/image/rhel-05.4-JeOS
@@ -695,6 +696,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/suse-11.4-JeOS
 %{_datadir}/kiwi/image/suse-12.1-JeOS
 %{_datadir}/kiwi/image/suse-12.2-JeOS
+%{_datadir}/kiwi/image/suse-12.3-JeOS
 %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %{_datadir}/kiwi/image/rhel-05.4-JeOS
