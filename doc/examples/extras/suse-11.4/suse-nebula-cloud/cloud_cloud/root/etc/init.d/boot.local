@@ -1,6 +1,0 @@
-#!/bin/sh
-
-if [ -f /var/lib/firstboot ]; then
-    /usr/share/firstboot/scripts/cloudNodeConfig
-    rm /var/lib/firstboot
-fi
