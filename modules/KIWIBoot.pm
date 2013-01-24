@@ -1953,7 +1953,7 @@ sub setupBootDisk {
 	#==========================================
 	# check for jump partition
 	#------------------------------------------
-	if ($firmware eq "efi") {
+	if (($firmware eq "efi") || ($firmware eq "vboot")) {
 		$this->{jumpsize} = 5;
 		$this -> __updateDiskSize ($this->{jumpsize});
 		$needJumpP = 1;
@@ -5444,6 +5444,7 @@ sub getGeometry {
 	my $loader   = $this->{bootloader};
 	my $firmware = $this->{firmware};
 	my $secsz    = $cmdL -> getDiskBIOSSectorSize();
+	my $label    = 'msdos';
 	my $status;
 	my $result;
 	my $parted;
@@ -5455,11 +5456,10 @@ sub getGeometry {
 		$kiwi -> loginfo ($status);
 		return 0;
 	}
-	if ($firmware eq "efi") {
-		$status = qxx ("$parted_exec -s $disk mklabel gpt 2>&1");
-	} else {
-		$status = qxx ("$parted_exec -s $disk mklabel msdos 2>&1");
+	if (($firmware eq "efi") || ($firmware eq "vboot")) {
+		$label = 'gpt';
 	}
+	$status = qxx ("$parted_exec -s $disk mklabel $label 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> loginfo ($status);
@@ -5476,7 +5476,7 @@ sub getGeometry {
 	}
 	chomp $status;
 	$status =~ s/s//;
-	if ($firmware eq "efi") {
+	if ($label eq 'gpt') {
 		$status -= 128;
 	} else {
 		$status --;

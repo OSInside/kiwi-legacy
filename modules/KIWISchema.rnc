@@ -1572,7 +1572,7 @@ div {
 		## the disk layout and the partition table type. By default
 		## the standard x86 bios firmware setup is used
 		attribute firmware {
-			"bios" | "efi"
+			"bios" | "efi" | "vboot"
 		}
 	k.type.bootfilesystem.attribute =
 		## if an extra boot partition is required this attribute
