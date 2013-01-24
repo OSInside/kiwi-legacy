@@ -87,6 +87,13 @@ sub test_addArchives {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Merging data for user 'auser'";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
 	my @archivesToAdd;
 	my %init = ( name => 'data.tgz');
 	my $archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
@@ -99,11 +106,11 @@ sub test_addArchives {
 	$archiveObj = KIWIXMLPackageArchiveData -> new(\%init);
 	push @archivesToAdd, $archiveObj;
 	my $res = $xml-> addArchives(\@archivesToAdd, 'default');
-	my $msg = $kiwi -> getMessage();
+	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
+	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
+	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	my $archives = $xml -> getArchives();
 	my @archiveNames;
@@ -539,6 +546,13 @@ sub test_addBootstrapPackages {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Merging data for user 'auser'";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
 	my @packagesToAdd;
 	my %init = ( name => 'cpio');
 	my $pckgObj = KIWIXMLPackageData -> new(\%init);
@@ -551,11 +565,11 @@ sub test_addBootstrapPackages {
 	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my $res = $xml-> addBootstrapPackages(\@packagesToAdd, 'default');
-	my $msg = $kiwi -> getMessage();
+	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
+	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
+	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	my $packages = $xml -> getBootstrapPackages();
 	my @pckgNames;
@@ -1695,6 +1709,13 @@ sub test_addPackages {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Merging data for user 'auser'";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
 	my @packagesToAdd;
 	my %init = ( name => 'python');
 	my $pckgObj = KIWIXMLPackageData -> new(\%init);
@@ -1717,11 +1738,11 @@ sub test_addPackages {
 	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my $res = $xml -> addPackages(\@packagesToAdd, 'default');
-	my $msg = $kiwi -> getMessage();
+	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
+	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
+	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	my $packages = $xml -> getPackages();
 	my @pckgNames;
@@ -2139,6 +2160,13 @@ sub test_addPackageCollections {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Merging data for user 'auser'";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
 	my @collectionsToAdd;
 	my %init = ( name => 'fileserve');
 	my $collectObj = KIWIXMLPackageCollectData -> new(\%init);
@@ -2151,11 +2179,11 @@ sub test_addPackageCollections {
 	$collectObj = KIWIXMLPackageCollectData -> new(\%init);
 	push @collectionsToAdd, $collectObj;
 	my $res = $xml-> addPackageCollections(\@collectionsToAdd, 'default');
-	my $msg = $kiwi -> getMessage();
+	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
+	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
+	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	my $collections = $xml -> getPackageCollections();
 	my @collectNames;
@@ -2500,6 +2528,13 @@ sub test_addPackagesToDelete {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Merging data for user 'auser'";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
 	my @packagesToAdd;
 	my %init = ( name => 'cpio');
 	my $pckgObj = KIWIXMLPackageData -> new(\%init);
@@ -2512,11 +2547,11 @@ sub test_addPackagesToDelete {
 	$pckgObj = KIWIXMLPackageData -> new(\%init);
 	push @packagesToAdd, $pckgObj;
 	my $res = $xml-> addPackagesToDelete(\@packagesToAdd, 'default');
-	my $msg = $kiwi -> getMessage();
+	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
+	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
+	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	my $packages = $xml -> getPackagesToDelete();
 	my @pckgNames;
@@ -5761,12 +5796,19 @@ sub test_getInstallOptionDefault {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
-	my $instOpt = $xml -> getInstallOption();
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
+	my $expected = "Merging data for user 'auser'";
+	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
+	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $instOpt = $xml -> getInstallOption();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('onlyRequired', $instOpt);
 	return;
@@ -8671,12 +8713,19 @@ sub test_getUsers {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
-	my $usrData = $xml -> getUsers();
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
+	my $expected = "Merging data for user 'auser'";
+	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
+	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	my $usrData = $xml -> getUsers();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test these conditions last to get potential error messages
 	my $numUsers = 0;
@@ -8722,6 +8771,186 @@ sub test_getUsers {
 	}
 	if ($numUsers != 3) {
 		$this -> assert_null('Did not receive 3 users as expected');
+	}
+	return;
+}
+
+#==========================================
+# test_getUsersProfsDefault
+#------------------------------------------
+sub test_getUsersProfsDefault {
+	# ...
+	# Verify proper return of user information
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'userConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef,$this->{cmdL}
+	);
+	my $usrData = $xml -> getUsers();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my $numUsers = 0;
+	my %expectedUsers = (
+		root  => 1,
+		auser => 1,
+		buser => 1
+	);
+	for my $usr (@{$usrData}) {
+		my $name = $usr -> getUserName();
+		if (! $expectedUsers{$name}) {
+			$this -> assert_null('Found unexpected user name');
+		}
+		$numUsers++;
+	}
+	if ($numUsers != 3) {
+		my $msg = 'Did not receive 3 users for no profile selection';
+		$this -> assert_null($msg);
+	}
+	return;
+}
+
+#==========================================
+# test_getUsersProfsA
+#------------------------------------------
+sub test_getUsersProfsA {
+	# ...
+	# Verify proper return of user information
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'userConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef,$this->{cmdL}
+	);
+	# Use Prof A should get 5 users
+	my @useProf = ('profA');
+	$xml = $xml -> setSelectionProfileNames(\@useProf);
+	# Clear the log
+	my $state = $kiwi -> getState();
+	my $usrData = $xml -> getUsers();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my $numUsers = 0;
+	my %expectedUsers = (
+		root  => 1,
+		auser => 1,
+		buser => 1,
+		cuser => 1,
+		duser => 1
+	);
+	for my $usr (@{$usrData}) {
+		my $name = $usr -> getUserName();
+		if (! $expectedUsers{$name}) {
+			$this -> assert_null('Found unexpected user name');
+		}
+		$numUsers++;
+	}
+	if ($numUsers != 5) {
+		$this -> assert_null('Did not receive 5 users for profA as expected');
+	}
+	return;
+}
+
+#==========================================
+# test_getUsersProfsC
+#------------------------------------------
+sub test_getUsersProfsC {
+	# ...
+	# Verify proper return of user information
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'userConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef,$this->{cmdL}
+	);
+	# Use Prof C should get 4 users
+	my @useProf = ('profC');
+	$xml = $xml -> setSelectionProfileNames(\@useProf);
+	# Clear the log
+	my $state = $kiwi -> getState();
+	my $usrData = $xml -> getUsers();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test these conditions last to get potential error messages
+	my $numUsers = 0;
+	my %expectedUsers = (
+		root  => 1,
+		auser => 1,
+		buser => 1,
+		duser => 1
+	);
+	for my $usr (@{$usrData}) {
+		my $name = $usr -> getUserName();
+		if (! $expectedUsers{$name}) {
+			$this -> assert_null('Found unexpected user name');
+		}
+		$numUsers++;
+	}
+	if ($numUsers != 4) {
+		$this -> assert_null('Did not receive 4 users for profC as expected');
+	}
+	return ;
+}
+
+#==========================================
+# test_getUsersProfsB
+#------------------------------------------
+sub test_getUsersProfsB {
+	# ...
+	# Verify proper return of user information
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'userConfigWithProf';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef,$this->{cmdL}
+	);
+	# Use Prof B should get 3 users
+	my @useProf = ('profB');
+	$xml = $xml -> setSelectionProfileNames(\@useProf);
+	# Clear the log
+	my $state = $kiwi -> getState();
+	my $usrData = $xml -> getUsers();
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Merging data for user 'auser'";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	# Test these conditions last to get potential error messages
+	my $numUsers = 0;
+	my %expectedUsers = (
+		root  => 1,
+		auser => 1,
+		buser => 1
+	);
+	for my $usr (@{$usrData}) {
+		my $name = $usr -> getUserName();
+		if (! $expectedUsers{$name}) {
+			$this -> assert_null('Found unexpected user name');
+		}
+		$numUsers++;
+	}
+	if ($numUsers != 3) {
+		$this -> assert_null('Did not receive 3 users for profB as expected');
 	}
 	return;
 }

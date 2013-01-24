@@ -3894,11 +3894,17 @@ what portion.</db:para>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
+    <define name="k.users.profiles.attribute">
+      <ref name="k.profiles.attribute"/>
+    </define>
     <define name="k.users.attlist">
       <interleave>
         <ref name="k.users.group.attribute"/>
         <optional>
           <ref name="k.users.id.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.users.profiles.attribute"/>
         </optional>
       </interleave>
     </define>

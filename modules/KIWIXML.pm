@@ -100,7 +100,8 @@ sub new {
 	#         split      = KIWIXMLSplitData,
 	#         systemdisk = KIWIXMLSystemdiskData
 	#         type       = KIWIXMLTypeData
-	#     }
+	#     },
+	#     selectedProfiles = ('',....,'kiwi_default'),
 	#     selectedType = {
 	#         ec2config  = KIWIXMLEC2ConfigData,
 	#         machine    = KIWIXMLVMachineData,
@@ -109,7 +110,7 @@ sub new {
 	#         split      = KIWIXMLSplitData,
 	#         systemdisk = KIWIXMLSystemdiskData
 	#         type       = KIWIXMLTypeData
-	#     }
+	#     },
 	#     imageConfig = {
 	#         description = KIWIXMLDescriptionData,
 	#         imageName   = ''
@@ -126,19 +127,6 @@ sub new {
 	#             metaFiles      = (KIWIXMLProductMetaFileData,...),
 	#             metaPkgs       = (KIWIXMLProductPackageData,... ),
 	#             prodPkgs       = (KIWIXMLProductPackageData,...)
-	#         }
-	#         users {
-	#             <username>[+] {
-	#                 userid        = ''
-	#                 name          = ''
-	#                 passwd        = ''
-	#                 passwdformat  = ''
-	#                 group         = ''
-	#                 realname      = ''
-	#                 groupid       = ''
-	#                 shell         = ''
-	#                 home          = ''
-	#             }
 	#         }
 	#         <profName>[+] = {
 	#             installOpt      = '',
@@ -230,6 +218,7 @@ sub new {
 	#                pkgsCollect     = (KIWIXMLPackageCollectData,...),
 	#                products        = (KIWIXMLPackageCollectData,...),
 	#            }
+	#            users = (KIWIXMLUserData,...)
 	#         }
 	#     }
 	# }
@@ -292,12 +281,10 @@ sub new {
 	$this->{gdata}= $main::global -> getGlobals();
 	$this->{cmdL} = $cmdL;
 	$this->{buildType} = $imageType;
-	my @selectProfs;
+	my @selectProfs = ('kiwi_default');
 	if ($reqProfiles) {
 		@selectProfs = @{$reqProfiles};
 		push @selectProfs, 'kiwi_default';
-	} else {
-		@selectProfs = ('kiwi_default');
 	}
 	$this->{selectedProfiles} = \@selectProfs;
 	#==========================================
@@ -1762,12 +1749,29 @@ sub getUsers {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my @userData;
-	for my $uInfo (values %{$this->{imageConfig}{users}}) {
-		my $uObj = KIWIXMLUserData -> new($uInfo);
-		push @userData, $uObj;
+	my %uAccounts;
+	for my $pName (@{$this->{selectedProfiles}}) {
+		my @profUsers = @{$this->{imageConfig}{$pName}{users}};
+		for my $user (@profUsers) {
+			my $name = $user -> getUserName();
+			if ($uAccounts{$name}) {
+				my $mergedUser =
+					$this -> __mergeUsers($uAccounts{$name}, $user);
+				if (! $mergedUser) {
+					return;
+				}
+				$uAccounts{$name} = $mergedUser;
+			} else {
+				$uAccounts{$name} = $user
+			}
+		}
 	}
-	return \@userData;
+	my @users;
+	for my $user (values %uAccounts) {
+		push @users, $user;
+	}
+
+	return \@users;
 }
 
 #==========================================
@@ -3316,6 +3320,32 @@ sub __mergePreferenceData {
 }
 
 #==========================================
+# __mergeUsers
+#------------------------------------------
+sub __mergeUsers {
+	# ...
+	# Merge the given UserData objects. The data from the second user
+	# passed is subsumed by the first user object.
+	# ---
+	my $this  = shift;
+	my $user1 = shift;
+	my $user2 = shift;
+	my $kiwi = $this->{kiwi};
+	my $name = $user1 -> getUserName();
+	my $msg = "Merging data for user '$name'";
+	$kiwi -> info($msg);
+	my $mergedUser = $user1 -> merge($user2);
+	if (! $mergedUser) {
+		my $msg = 'User merge error';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$kiwi -> done();
+	return $mergedUser;
+}
+
+#==========================================
 # __populateArchiveInfo
 #------------------------------------------
 sub __populateArchiveInfo {
@@ -4044,58 +4074,56 @@ sub __populateUserInfo {
 	# ---
 	my $this = shift;
 	my @userGrpNodes = $this->{systemTree} -> getElementsByTagName('users');
-	my %userData;
 	for my $grpNode (@userGrpNodes) {
-		my $groupname = $grpNode -> getAttribute('group');
-		my $groupid   = $grpNode -> getAttribute('id');
-		my @userNodes = $grpNode -> getElementsByTagName('user');
-		for my $userNode (@userNodes) {
-			my $name = $userNode -> getAttribute('name');
-			my %info = (
-				group        => $groupname,
-				groupid      => $groupid,
-				home         => $userNode -> getAttribute('home'),
-				name         => $name,
-				passwd       => $userNode -> getAttribute('password'),
-				passwdformat => $userNode -> getAttribute('pwdformat'),
-				realname     => $userNode -> getAttribute('realname'),
-				shell        => $userNode -> getAttribute('shell'),
-				userid       => $userNode -> getAttribute('id')
-			);
-			if ($userData{$name}) {
-				my $kiwi = $this->{kiwi};
-				my $msg = "Merging data for user '$name'";
-				#TODO: Enable message when we move to the new code
-				#      with old code the message would be misleading as
-				#      the old code actually overwrites data :(
-				#$kiwi -> info($msg);
-				my $grp = $userData{$name}{group} . ",$groupname";
-				$userData{$name}{group} = $grp;
-				if ($groupid && (! $userData{$name}{groupid})) {
-					$userData{$name}{groupid} = $groupid;
+		my $profs = $grpNode -> getAttribute('profiles');
+		my @profiles = ('kiwi_default');
+		if ($profs) {
+			@profiles = split /,/smx, $profs;
+		}
+		for my $pName (@profiles) {
+			my %curUsers;
+			if ($this->{imageConfig}{$pName}{users}) {
+				my @prevDefUsers = @{$this->{imageConfig}{$pName}{users}};
+				for my $user (@prevDefUsers) {
+					my $name = $user -> getUserName();
+					$curUsers{$name} = $user;
 				}
-				if ($info{passwd} && (! $userData{$name}{passwd})) {
-					$userData{$name}{passwd} = $info{passwd};
-				}
-				if ($info{passwdformat} && (! $userData{$name}{passwdformat})){
-					$userData{$name}{passwdformat} = $info{passwdformat};
-				}
-				if ($info{realname} && (! $userData{$name}{realname})) {
-					$userData{$name}{realname} = $info{realname};
-				}
-				if ($info{shell} && (! $userData{$name}{shell})) {
-					$userData{$name}{shell} = $info{shell};
-				}
-				if ($info{userid} && (! $userData{$name}{userid})) {
-					$userData{$name}{userid} = $info{userid};
-				}
-				#$kiwi -> done();
-			} else {
-				$userData{$name} = \%info;
 			}
+			my $groupname = $grpNode -> getAttribute('group');
+			my $groupid   = $grpNode -> getAttribute('id');
+			my @userNodes = $grpNode -> getElementsByTagName('user');
+			for my $userNode (@userNodes) {
+				my $name = $userNode -> getAttribute('name');
+				my %info = (
+					group        => $groupname,
+					groupid      => $groupid,
+					home         => $userNode -> getAttribute('home'),
+					name         => $name,
+					passwd       => $userNode -> getAttribute('password'),
+					passwdformat => $userNode -> getAttribute('pwdformat'),
+					realname     => $userNode -> getAttribute('realname'),
+					shell        => $userNode -> getAttribute('shell'),
+					userid       => $userNode -> getAttribute('id')
+			    );
+				my $user = KIWIXMLUserData -> new(\%info);
+				if ($curUsers{$name}) {
+					my $mergedUser =
+						$this -> __mergeUsers($curUsers{$name}, $user);
+					if (! $mergedUser) {
+						return;
+					}
+					$curUsers{$name} = $mergedUser;
+				} else {
+					$curUsers{$name} = $user;
+				}
+			}
+			my @users;
+			for my $user (values %curUsers) {
+				push @users, $user;
+			}
+			$this->{imageConfig}{$pName}{users} = \@users;
 		}
 	}
-	$this->{imageConfig}{users} = \%userData;
 	return $this;
 }
 

@@ -1021,7 +1021,7 @@ sub test_profileReferenceExist {
 		my $expectedMsg = 'Found reference to profile "';
 		if ($iConfFile =~ /profileReferenceExistInvalid_(1|2).xml/) {
 			$expectedMsg .= 'vmwFlavor';
-		} elsif ($iConfFile =~ /profileReferenceExistInvalid_(3|4).xml/) {
+		} elsif ($iConfFile =~ /profileReferenceExistInvalid_(3|4|5).xml/) {
 			$expectedMsg .= 'ola';
 		}
 		$expectedMsg .= '" but this profile is not defined.';
