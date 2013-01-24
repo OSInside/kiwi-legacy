@@ -628,7 +628,7 @@ sub __checkMergeConditions {
 		    return;
 	    }
 	}
-	return 1;
+	return $this;
 }
 
 #==========================================

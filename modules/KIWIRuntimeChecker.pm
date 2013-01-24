@@ -138,6 +138,9 @@ sub prepareChecks {
 	if (! $this -> __checkRootRecycleCapability()) {
 		return;
 	}
+	if (! $this -> __checkUsersConsistent()) {
+		return;
+	}
 	if (! $this -> __hasValidArchives()) {
 		return;
 	}
@@ -508,6 +511,24 @@ sub __checkPatternTypeAttrrValueConsistent {
 	$kiwi->info($msg);
 	$xml -> setSelectionProfileNames($curActiveProfiles);
 	$kiwi->done();
+	return 1;
+}
+
+#==========================================
+# __checkUsersConsistent
+#------------------------------------------
+sub __checkUsersConsistent {
+	# ...
+	# User definitions may conflict in different profiles in the
+	# static definition. However, at build time only profiles with
+	# non conflicting user definitions may be selected.
+	# ---
+	my $this = shift;
+	my $xml = $this -> {xml};
+	my $userData = $xml -> getUsers();
+	if (! $userData) {
+		return;
+	}
 	return 1;
 }
 

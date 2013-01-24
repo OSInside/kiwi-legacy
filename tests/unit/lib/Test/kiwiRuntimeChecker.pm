@@ -181,6 +181,40 @@ sub test_conflictingProfiles {
 }
 
 #==========================================
+# test_conflictingUsers
+#------------------------------------------
+sub test_conflictingUsers {
+	# ...
+	# Test that user definitions that conflict generate an error
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
+	my @bldProfs = ('profA', 'profB');
+	my $configDir = $this -> {dataDir} . '/conflictUsers';
+	my $res = $cmd -> setConfigDir ($configDir);
+	my $xml = $this -> __getXMLObj( $configDir );
+	$xml -> setSelectionProfileNames( \@bldProfs );
+	# Clear the log
+	my $state = $kiwi -> getState();
+	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+	$res = $checker -> prepareChecks();
+	my $iMsg = $kiwi -> getInfoMessage();
+	my $iExpect = "Merging data for user 'auser'";
+	$this -> assert_str_equals($iExpect, $iMsg);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'User merge error';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
 # test_duplicateRepoAliasConflict
 #------------------------------------------
 sub test_duplicateRepoAliasConflict {

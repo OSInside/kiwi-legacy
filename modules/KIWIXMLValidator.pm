@@ -1081,7 +1081,6 @@ sub __checkReferencedProfDefined {
 	# target, i.e. the profile must be defined
 	# ---
 	my $this       = shift;
-	my $kiwi       = $this->{kiwi};
 	my $status     = 1;
 	my $systemTree = $this->{systemTree};
 	my @profiles = $systemTree -> getElementsByTagName('profile');
@@ -1089,28 +1088,24 @@ sub __checkReferencedProfDefined {
 	for my $prof (@profiles) {
 		push @profNames, $prof -> getAttribute('name');
 	}
+	my %defProfs = map { ($_ => 1) } @profNames;
 	my @nodes = ();
 	push @nodes, $systemTree -> getElementsByTagName('drivers');
 	push @nodes, $systemTree -> getElementsByTagName('packages');
 	push @nodes, $systemTree -> getElementsByTagName('preferences');
 	push @nodes, $systemTree -> getElementsByTagName('repository');
+	push @nodes, $systemTree -> getElementsByTagName('users');
 	for my $node (@nodes) {
 		my $refProf = $node -> getAttribute('profiles');
 		if (! $refProf) {
 			next;
 		}
-		foreach my $profile (split (/,/,$refProf)) {
-			my $foundit = 0;
-			foreach my $lookup (@profNames) {
-				if ($profile eq $lookup) {
-					$foundit = 1;
-					last;
-				}
-			}
-			if (! $foundit) {
+		for my $profile (split (/,/,$refProf)) {
+			if (! $defProfs{$profile}) {
+				my $kiwi = $this->{kiwi};
 				my $msg = 'Found reference to profile "'
-				. $profile
-				. '" but this profile is not defined.';
+					. $profile
+					. '" but this profile is not defined.';
 				$kiwi -> error ($msg);
 				$kiwi -> failed ();
 				$status = undef;

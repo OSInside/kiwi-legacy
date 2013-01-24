@@ -2651,8 +2651,11 @@ div {
 	k.users.id.attribute =
 		## Contains the group ID to which the user belongs
 		attribute id { xsd:nonNegativeInteger }
-	k.users.attlist = k.users.group.attribute
-		& k.users.id.attribute ?
+    k.users.profiles.attribute = k.profiles.attribute
+	k.users.attlist =
+        k.users.group.attribute &
+		k.users.id.attribute? &
+        k.users.profiles.attribute?
 	k.users = 
 		## A List of Users
 		element users {
