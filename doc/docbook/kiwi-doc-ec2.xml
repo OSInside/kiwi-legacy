@@ -76,7 +76,7 @@
 
   <para>The Amazon tools are not distributed with KIWI and can be
     installed using packages from the openSUSE Build Service <ulink
-      url="http://download.opensuse.org/repositories/Virtualization:/Cloud:/EC2/"><citetitle>Virtualization:Cloud:EC2</citetitle></ulink> repository,
+      url="http://download.opensuse.org/repositories/Cloud:/EC2/"><citetitle>Cloud:EC2</citetitle></ulink> repository,
     or can be downloaded from Amazon at 
     <ulink url="http://aws.amazon.com/developertools/368"/> and
     <ulink url="http://aws.amazon.com/developertools/351"/>.</para>

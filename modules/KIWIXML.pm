@@ -112,6 +112,7 @@ sub new {
 	#     }
 	#     imageConfig = {
 	#         description = KIWIXMLDescriptionData,
+	#         displayName = ''
 	#         imageName   = ''
 	#         productSettings = {
 	#             dudArches      = ('',...)
@@ -358,7 +359,13 @@ sub new {
 	$this->{imageConfig} = {};
 	my @imageNodes = $systemTree -> getElementsByTagName("image");
 	my $imgNd = $imageNodes[0]; # Only one <image> node
-	$this->{imageConfig}{imageName} = $imgNd -> getAttribute('name');
+	my $imgName = $imgNd -> getAttribute('name');
+	$this->{imageConfig}{imageName} = $imgName;
+	$this->{imageConfig}{displayName} = $imgName;
+	my $displayName = $imgNd -> getAttribute('displayname');
+	if ($displayName) {
+		$this->{imageConfig}{displayName} = $displayName;
+	}
 	my %kDefProfile = (
 		'description' => 'KIWI default profile, store non qualified data',
 		'import'      => 'true'
@@ -1334,6 +1341,17 @@ sub getFilesToDelete {
 	# ---
 	my $this = shift;
 	return $this -> __getInstallData('stripDelete');
+}
+
+#==========================================
+# getImageDisplayName
+#------------------------------------------
+sub getImageDisplayName {
+	# ...
+	# Get the display name of the logical extend
+	# ---
+	my $this = shift;
+	return $this->{imageConfig}->{displayName};
 }
 
 #==========================================
@@ -4348,22 +4366,6 @@ sub getConfigName {
 
 
 #==========================================
-# getImageDisplayName
-#------------------------------------------
-sub getImageDisplayName {
-	# ...
-	# Get the display name of the logical extend
-	# ---
-	my $this = shift;
-	my $node = $this->{imgnameNodeList} -> get_node(1);
-	my $name = $node -> getAttribute ("displayname");
-	if (! defined $name) {
-		return $this->getImageName_legacy();
-	}
-	return $name;
-}
-
-#==========================================
 # getImageID
 #------------------------------------------
 sub getImageID {
@@ -5282,54 +5284,6 @@ sub getDeleteList_legacy {
 		push @ret,$del;
 	}
 	return @ret;
-}
-
-#==========================================
-# getEc2Config_legacy
-#------------------------------------------
-sub getEc2Config_legacy {
-	# ...
-	# Create a hash for the <ec2config>
-	# section if it exists
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("ec2config") -> get_node(1);
-	my %result = ();
-	if (! defined $node) {
-		return %result;
-	}
-	#==========================================
-	# AWS account Nr
-	#------------------------------------------
-	my $awsacctno = $node -> getElementsByTagName ("ec2accountnr");
-	if ($awsacctno) {
-		$result{AWSAccountNr} = "$awsacctno";
-	}
-	#==========================================
-	# EC2 path to public key file
-	#------------------------------------------
-	my $certfile = $node -> getElementsByTagName ("ec2certfile");
-	if ($certfile) {
-		$result{EC2CertFile} = "$certfile";
-	}
-	#==========================================
-	# EC2 path to private key file
-	#------------------------------------------
-	my $privkeyfile = $node -> getElementsByTagName ("ec2privatekeyfile");
-	if ($privkeyfile) {
-		$result{EC2PrivateKeyFile} = "$privkeyfile";
-	}
-	#==========================================
-	# EC2 region
-	#------------------------------------------
-	my @regionNodes = $node -> getElementsByTagName ("ec2region");
-	my @regions = ();
-	for my $regNode (@regionNodes) {
-		push @regions, $regNode -> textContent();
-	}
-	$result{EC2Regions} = \@regions;
-	return %result;
 }
 
 #==========================================
