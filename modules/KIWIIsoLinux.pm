@@ -760,8 +760,8 @@ sub findAndCopyMagicBlock {
 	}
 	$iso_blk -> close();
 	$iso_fd  -> close();
-	my $offset = $start * 2048;
-	$kiwi -> loginfo ("ISO magic block address: $offset\n");
+	$this->{efi_offset} = $start * 4;
+	$this->{efi_loop_offset} = $start * 2048;
 	return $start;
 }
 
@@ -973,14 +973,29 @@ sub createHybrid {
 	# ...
 	# create hybrid ISO by calling isohybrid
 	# ---
-	my $this = shift;
-	my $mbrid= shift;
-	my $kiwi = $this->{kiwi};
-	my $iso  = $this->{dest};
+	my $this     = shift;
+	my $mbrid    = shift;
+	my $kiwi     = $this->{kiwi};
+	my $iso      = $this->{dest};
+	my $xml      = $this->{xml};
+	my $firmware = 'bios';
 	my $data;
 	my $code;
 	my $loop;
 	my $FD;
+	my %type;
+	#==========================================
+	# Lookup firmware setup
+	#------------------------------------------
+	if ($xml) {
+		%type = %{$xml->getImageTypeAndAttributes_legacy()};
+	}
+	if ($type{firmware}) {
+		$firmware = $type{firmware};
+	}
+	#==========================================
+	# Call isohybrid
+	#------------------------------------------
 	my $sysarch = qxx ("uname -m");
 	chomp $sysarch;
 	if ($sysarch =~ /ppc|ia64/) {
@@ -997,7 +1012,7 @@ sub createHybrid {
 		$kiwi -> failed ();
 		return;
 	}
-	my @neededOpts = qw(id offset type partok);
+	my @neededOpts = qw(id offset type partok uefi);
 	my %optNames = %{$locator -> getExecArgsFormat ($isoHybrid, \@neededOpts)};
 	if (! $optNames{'status'}) {
 		$kiwi -> error ($optNames{'error'});
@@ -1008,16 +1023,22 @@ sub createHybrid {
 	my $offsetOpt = $optNames{'offset'};
 	my $typeOpt   = $optNames{'type'};
 	my $partOpt   = $optNames{'partok'};
+	my $uefiOpt   = $optNames{'uefi'};
+	my $offset    = 64;
+	if ($firmware eq 'efi') {
+		$offset = $this->{efi_offset};
+	}
 	#==========================================
 	# Create partition table on iso
 	#------------------------------------------
+	my $cmd = "$isoHybrid $offsetOpt $offset";
 	if ($mbrid) {
-		my $cmd = "$isoHybrid $partOpt $idOpt $mbrid $typeOpt 0x83 "
-		. "$offsetOpt 64 $iso 2>&1";
-		$data = qxx ($cmd)
-	} else {
-		$data = qxx ("$isoHybrid $offsetOpt 64 $iso 2>&1");
+		$cmd.= " $idOpt $mbrid $typeOpt 0x83";
 	}
+	if ($firmware eq 'efi') {
+		$cmd.= " $uefiOpt";
+	}
+	$data = qxx ("$cmd $iso 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call isohybrid: $data");

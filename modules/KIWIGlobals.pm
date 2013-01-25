@@ -48,7 +48,7 @@ sub new {
 	#------------------------------------------
 	my %data;
 	$data{Version}         = "5.04.32";
-	$data{Publisher}       = "SUSE LINUX Products GmbH";
+	$data{Publisher}       = "SUSE LINUX GmbH";
 	$data{Preparer}        = "KIWI - http://opensuse.github.com/kiwi";
 	$data{ConfigName}      = "config.xml";
 	$data{Partitioner}     = "parted";
