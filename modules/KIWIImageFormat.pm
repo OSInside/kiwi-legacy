@@ -459,40 +459,13 @@ sub createEC2 {
 	}
 	$REGIONFD -> close();
 	#==========================================
-	# Check AWS account information
+	# Amazon pre-conditions check
 	#------------------------------------------
 	$kiwi -> info ("Creating $format image...\n");
 	$target  =~ s/\/$//;
 	$target .= ".$format";
 	$aminame.= ".ami";
-	my $title= $xml -> getImageDisplayName();
 	my $arch = qxx ("uname -m"); chomp ( $arch );
-	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
-	my %ec2  = $xml->getEc2Config_legacy();
-	my $have_account = 1;
-	if (! defined $ec2{AWSAccountNr}) {
-		$kiwi->warning ("Missing AWS account number");
-		$kiwi->skipped ();
-		$have_account = 0;
-	}
-	if (! defined $ec2{EC2CertFile}) {
-		$kiwi->warning ("Missing AWS user's PEM encoded RSA pubkey cert file");
-		$kiwi->skipped ();
-		$have_account = 0;
-	} elsif (! -f $ec2{EC2CertFile}) {
-		$kiwi->warning ("EC2 file: $ec2{EC2CertFile} does not exist");
-		$kiwi->skipped ();
-		$have_account = 0;
-	}
-	if (! defined $ec2{EC2PrivateKeyFile}) {
-		$kiwi->warning ("Missing AWS user's PEM encoded RSA private key file");
-		$kiwi->skipped ();
-		$have_account = 0;
-	} elsif (! -f $ec2{EC2PrivateKeyFile}) {
-		$kiwi->warning ("EC2 file: $ec2{EC2PrivateKeyFile} does not exist");
-		$kiwi->skipped ();
-		$have_account = 0;
-	}
 	if ($arch =~ /i.86/) {
 		$arch = "i386";
 	}
@@ -550,6 +523,8 @@ sub createEC2 {
 	#==========================================
 	# create initrd
 	#------------------------------------------
+	my $type = $xml -> getImageType();
+	my $imgType = $type -> getImageType();
 	my $IRDFD = FileHandle -> new();
 	if (! $IRDFD -> open (">$tmpdir/create_initrd.sh")) {
 		$kiwi -> error  ("Failed to open $tmpdir/create_initrd.sh: $!");
@@ -558,7 +533,7 @@ sub createEC2 {
 		return;
 	}
 	print $IRDFD 'export rootdev=/dev/sda1'."\n";
-	print $IRDFD 'export rootfstype='.$type{type}."\n";
+	print $IRDFD 'export rootfstype='.$imgType."\n";
 	print $IRDFD 'mknod /dev/sda1 b 8 1'."\n";
 	print $IRDFD 'touch /boot/.rebuild-initrd'."\n";
 	print $IRDFD 'sed -i -e \'s@^';
@@ -609,6 +584,7 @@ sub createEC2 {
 	print $GCFD 'quit'."\n";
 	$GCFD -> close();
 	# boot/grub/menu.lst
+	my $title= $xml -> getImageDisplayName();
 	my $args = "xencons=xvc0 console=xvc0 splash=silent showopts";
 	my $GMFD = FileHandle -> new();
 	if (! $GMFD -> open (">$tmpdir/create_bootmenu.sh")) {
@@ -632,7 +608,8 @@ sub createEC2 {
 	print $GMFD '      echo >> $file'."\n";
 	print $GMFD '      echo "title '.$title.'" >> $file'."\n";
 	print $GMFD '      echo "    root (hd0)" >> $file'."\n";
-	print $GMFD '      echo "    kernel $K root=/dev/sda1 $args" >> $file'."\n";
+	print $GMFD '      echo "    kernel $K root=/dev/sda1 $args" >> $file';
+	print $GMFD "\n";
 	print $GMFD '      if [ -f "/boot/initrd-$D" ]; then'."\n";
 	print $GMFD '         echo "    initrd /boot/initrd-$D" >> $file'."\n";
 	print $GMFD '      fi'."\n";
@@ -692,23 +669,13 @@ sub createEC2 {
 		}
 	}
 	if (! $rootfs) {
-		print $FSTABFD "/dev/sda1 / $type{type} defaults 0 0"."\n";
+		print $FSTABFD "/dev/sda1 / $imgType defaults 0 0"."\n";
 	}
 	$FSTABFD -> close();
 	#==========================================
 	# cleanup loop
 	#------------------------------------------
 	$this -> __clean_loop ($tmpdir);
-	#==========================================
-	# call ec2-bundle-image (Amazon toolkit)
-	#------------------------------------------
-	if ($have_account == 0) {
-		$kiwi->warning (
-			"EC2 bundle creation skipped due to missing credentials"
-		);
-		$kiwi->skipped ();
-		return $source;
-	}
 	#==========================================
 	# Check for Amazon EC2 toolkit
 	#------------------------------------------
@@ -722,17 +689,58 @@ sub createEC2 {
 		return
 	}
 	#==========================================
+	# AWS Account data check
+	#------------------------------------------
+	my $ec2Config = $xml -> getEC2Config();
+	my $acctNo = $ec2Config -> getAccountNumber();
+	my $certFl = $ec2Config -> getCertFilePath();
+	my $privKey = $ec2Config -> getPrivateKeyFilePath();
+	my $have_account = 1;
+	if (! defined $acctNo) {
+		$kiwi->warning ("Missing AWS account number");
+		$kiwi->skipped ();
+		$have_account = 0;
+	}
+	if (! defined $certFl) {
+		$kiwi->warning ("Missing AWS user's PEM encoded RSA pubkey cert file");
+		$kiwi->skipped ();
+		$have_account = 0;
+	} elsif (! -f $certFl) {
+		$kiwi->warning ("EC2 file: $certFl does not exist");
+		$kiwi->skipped ();
+		$have_account = 0;
+	}
+	if (! defined $privKey) {
+		$kiwi->warning ("Missing AWS user's PEM encoded RSA private key file");
+		$kiwi->skipped ();
+		$have_account = 0;
+	} elsif (! -f $privKey) {
+		$kiwi->warning ("EC2 file: $privKey does not exist");
+		$kiwi->skipped ();
+		$have_account = 0;
+	}
+	if ($have_account == 0) {
+		$kiwi->warning (
+			"EC2 bundle creation skipped due to missing credentials"
+		);
+		$kiwi->skipped ();
+		return $source;
+	}
+	#==========================================
 	# Create bundle(s)
 	#------------------------------------------
-	my $pk = $ec2{EC2PrivateKeyFile};
-	my $ca = $ec2{EC2CertFile};
-	my $nr = $ec2{AWSAccountNr};
-	my $fi = $source;
-	my $amiopts = "-i $fi -k $pk -c $ca -u $nr -p $aminame "
-	. '--block-device-mapping ami=sda1,root=/dev/sda1';
-	my @regions = @{ $ec2{EC2Regions} };
-	if (! @regions) {
+	my $amiopts = "-i $source "
+		. "-k $privKey "
+		. "-c $certFl "
+		. "-u $acctNo "
+		. "-p $aminame "
+		. '--block-device-mapping ami=sda1,root=/dev/sda1';
+	my $ec2Regions = $ec2Config -> getRegions();
+	my @regions;
+	if (! $ec2Regions) {
 		push @regions, 'any';
+	} else {
+		@regions = @{$ec2Regions};
 	}
 	for my $region (@regions) {
 		my $regionTgt = "$target-$region";

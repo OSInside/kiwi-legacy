@@ -5222,35 +5222,6 @@ sub test_getEC2Config {
 }
 
 #==========================================
-# test_getEc2Config_legacy
-#------------------------------------------
-sub test_getEc2Config_legacy {
-	# ...
-	# Verify proper return of EC2 configuration settings
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'ec2ConfigSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my %ec2Info = $xml -> getEc2Config_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	$this -> assert_str_equals('12345678911', $ec2Info{AWSAccountNr});
-	$this -> assert_str_equals('cert.cert', $ec2Info{EC2CertFile});
-	$this -> assert_str_equals('pv-key.key', $ec2Info{EC2PrivateKeyFile});
-	my @expectedRegions = qw / EU-West US-West /;
-	$this -> assert_array_equal(\@expectedRegions, $ec2Info{EC2Regions});
-	return;
-}
-
-#==========================================
 # test_getEditBootConfig_legacy
 #------------------------------------------
 sub test_getEditBootConfig_legacy {
