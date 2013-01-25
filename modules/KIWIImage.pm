@@ -2048,6 +2048,7 @@ sub createImageLiveCD {
 		my $ir_themes  = "$tmpdir/usr/share/grub2/themes";
 		my $ir_bgnds   = "$tmpdir/usr/share/grub2/backgrounds";
 		my $ir_font    = "$tmpdir/usr/share/grub2/unicode.pf2";
+		my $efi_modules= "$CD/efi/boot";
 		my $cd_modules = "$CD/boot/grub2-efi/x86_64-efi";
 		my $cd_loader  = "$CD/boot/grub2-efi";
 		my $theme      = $theme[1];
@@ -2064,7 +2065,8 @@ sub createImageLiveCD {
 		my @efimods = (
 			'fat','ext2','gettext','part_gpt','efi_gop',
 			'chain','video','video_bochs','video_cirrus',
-			'gzio','efi_uga','search','configfile','png'
+			'gzio','efi_uga','search','configfile','png',
+			'test'
 		);
 		my $status;
 		my $result;
@@ -2080,6 +2082,7 @@ sub createImageLiveCD {
 		# Create directory structure
 		#------------------------------------------
 		qxx ("mkdir -p $cd_modules");
+		qxx ("mkdir -p $efi_modules");
 		#==========================================
 		# Copy modules/fonts/themes on CD
 		#------------------------------------------
@@ -2106,18 +2109,19 @@ sub createImageLiveCD {
 			$kiwi -> failed ();
 			return;
 		}
-		print $bpfd 'prefix=(cd0)/boot/grub2-efi'."\n";
+		print $bpfd 'search -f /boot/grub2-efi/grub.cfg --set'."\n";
+		print $bpfd 'set prefix=($root)/boot/grub2-efi'."\n";
 		$bpfd -> close();
 		#==========================================
 		# create efi boot image
 		#------------------------------------------
 		$kiwi -> info ("Creating grub2 efi boot image");
-		my $core    = "$CD/boot/bootx64.efi";
+		my $core    = "$CD/efi/boot/bootx64.efi";
 		my @modules = (
 			'fat','ext2','part_gpt','efi_gop','iso9660','chain',
 			'linux','echo','configfile','boot','search_label',
 			'search_fs_file','search','search_fs_uuid','ls',
-			'video','video_fb','normal'
+			'video','video_fb','normal','test','sleep'
 		);
 		my $fo = 'x86_64-efi';
 		$status = qxx (
@@ -2146,7 +2150,7 @@ sub createImageLiveCD {
 				if ($result == 0) {
 					$status = qxx ("mkdir -p /mnt/efi/boot");
 					$status = qxx (
-						"cp $CD/boot/bootx64.efi /mnt/efi/boot 2>&1"
+						"cp $CD/efi/boot/bootx64.efi /mnt/efi/boot 2>&1"
 					);
 					$result = $? >> 8;
 				}
@@ -2170,12 +2174,11 @@ sub createImageLiveCD {
 			$kiwi -> failed ();
 			return;
 		}
-		my $rprefix = 'cd0';
 		foreach my $module (@efimods) {
 			print $FD "insmod $module"."\n";
 		}
+		print $FD 'search -f /boot/grub2-efi/grub.cfg --set'."\n";
 		print $FD "set default=0\n";
-		print $FD "set root='$rprefix'"."\n";
 		print $FD "set font=/boot/unicode.pf2"."\n";
 		print $FD 'if loadfont $font ;then'."\n";
 		print $FD "\t"."set gfxmode=auto"."\n";
@@ -2206,7 +2209,6 @@ sub createImageLiveCD {
 		my $lsafe = "Failsafe -- ".$title;
 		print $FD 'menuentry "'.$title.'"';
 		print $FD ' --class opensuse --class os {'."\n";
-		print $FD "\t"."set root='$rprefix'"."\n";
 		#==========================================
 		# Standard boot
 		#------------------------------------------
@@ -2236,7 +2238,6 @@ sub createImageLiveCD {
 		#------------------------------------------
 		print $FD 'menuentry "'.$lsafe.'"';
 		print $FD ' --class opensuse --class os {'."\n";
-		print $FD "\t"."set root='$rprefix'"."\n";
 		if (! $isxen) {
 			print $FD "\t"."echo Loading linux...\n";
 			print $FD "\t"."set gfxpayload=keep"."\n";
@@ -2268,7 +2269,6 @@ sub createImageLiveCD {
 		if ($cmdL->getISOCheck()) {
 			print $FD 'menuentry mediacheck';
 			print $FD ' --class opensuse --class os {'."\n";
-			print $FD "\t"."set root='$rprefix'"."\n";
 			if (! $isxen) {
 				print $FD "\t"."echo Loading linux...\n";
 				print $FD "\t"."set gfxpayload=keep"."\n";
@@ -2310,6 +2310,10 @@ sub createImageLiveCD {
 		# linux16 command/module in grub2 efi
 		# ----
 		$FD -> close();
+		#==========================================
+		# copy grub config to efi directory too
+		#------------------------------------------
+		qxx ("cp $CD/boot/grub2-efi/grub.cfg $CD/efi/boot");
 		$kiwi -> done();
 	}
 	#==========================================
@@ -2529,6 +2533,9 @@ sub createImageLiveCD {
 	# relocate boot catalog
 	#------------------------------------------
 	if (! $isolinux -> relocateCatalog()) {
+		return;
+	}
+	if (! $isolinux -> fixCatalog()) {
 		return;
 	}
 	#==========================================

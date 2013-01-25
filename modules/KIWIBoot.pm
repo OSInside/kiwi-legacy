@@ -856,7 +856,6 @@ sub setupInstallCD {
 					$result = $? >> 8;
 				}
 				qxx ("umount /mnt 2>&1");
-				qxx ("rm -rf $tmpdir/efi 2>&1");
 			}
 		}
 		if ($result != 0) {
@@ -865,6 +864,12 @@ sub setupInstallCD {
 			$kiwi -> failed ();
 			return;
 		}
+	}
+	#==========================================
+	# copy grub2 config file to efi path too
+	#------------------------------------------
+	if ($firmware eq "efi") {
+		qxx ("cp $tmpdir/boot/grub2-efi/grub.cfg $tmpdir/efi/boot");
 	}
 	#==========================================
 	# Create an iso image from the tree
@@ -948,6 +953,10 @@ sub setupInstallCD {
 	}
 	if ($bootloader ne "yaboot") {
 		if (! $iso -> relocateCatalog ()) {
+			$iso  -> cleanISO ();
+			return;
+		}
+		if (! $iso -> fixCatalog()) {
 			$iso  -> cleanISO ();
 			return;
 		}
@@ -3309,19 +3318,21 @@ sub setupBootLoaderStages {
 				$kiwi -> failed ();
 				return;
 			}
+			print $bpfd 'search -f /boot/grub2-efi/grub.cfg --set'."\n";
 			if ($bootfile =~ /grub2-efi/) {
 				if ((defined $type) && ($type eq "iso")) {
-					print $bpfd 'prefix=(cd0)/boot/grub2-efi'."\n";
+					print $bpfd 'set prefix=($root)/boot/grub2-efi';
 				} else {
-					print $bpfd "prefix=(hd0,$boot_id)/boot/grub2-efi"."\n";
+					print $bpfd "set prefix=(\$root,$boot_id)/boot/grub2-efi";
 				}
 			} else {
 				if ((defined $type) && ($type eq "iso")) {
-					print $bpfd 'prefix=($root)/boot/grub2'."\n";
+					print $bpfd 'set prefix=($root)/boot/grub2';
 				} else {
-					print $bpfd "prefix=(hd0,$boot_id)/boot/grub2"."\n";
+					print $bpfd "set prefix=(\$root,$boot_id)/boot/grub2";
 				}
 			}
+			print $bpfd "\n";
 			$bpfd -> close();
 		}
 		$kiwi -> done();
@@ -3764,7 +3775,6 @@ sub setupBootLoaderConfiguration {
 			"DejaVuSans12.pf2",
 			"ascii.pf2"
 		);
-		my $rprefix;
 		#==========================================
 		# BIOS modules
 		#------------------------------------------
@@ -3834,30 +3844,19 @@ sub setupBootLoaderConfiguration {
 			#==========================================
 			# General grub2 setup
 			#------------------------------------------
-			if (! $iso) {
-				$rprefix = 'hd0';
-			} else {
-				$rprefix = 'cd0';
-			}
 			if ($config eq "grub2") {
 				foreach my $module (@x86mods) {
 					print $FD "insmod $module"."\n";
 				}
+				print $FD 'search -f /boot/grub2/grub.cfg --set'."\n";
 			} else {
 				foreach my $module (@efimods) {
 					print $FD "insmod $module"."\n";
 				}
+				print $FD 'search -f /boot/grub2-efi/grub.cfg --set'."\n";
 			}
 			print $FD "set default=$defaultBootNr\n";
-			if (! $iso) {
-				print $FD "set root='$rprefix,$boot_id'"."\n";
-				print $FD "set font=/boot/unicode.pf2"."\n";
-			} else {
-				if ($config eq "grub2-efi") {
-					print $FD "set root='$rprefix'"."\n";
-				}
-				print $FD "set font=/boot/unicode.pf2"."\n";
-			}
+			print $FD "set font=/boot/unicode.pf2"."\n";
 			print $FD 'if loadfont $font ;then'."\n";
 			print $FD "\t"."set gfxmode=$vesa{$vga}->[0]"."\n";
 			print $FD "\t".'insmod gfxterm'."\n";
@@ -3887,23 +3886,28 @@ sub setupBootLoaderConfiguration {
 				my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
 				print $FD 'menuentry "Boot from Hard Disk"';
 				print $FD ' --class opensuse --class os {'."\n";
-				print $FD "\t"."set root='hd0'"."\n";
-				if ($dev eq '(cd)') {
-					print $FD "\t".'chainloader +1'."\n";
+				if ($firmware eq "efi") {
+					print $FD "\t"."set root='hd0,1'"."\n";
+					print $FD "\t".'chainloader /efi/boot/bootx64.efi'."\n";
 				} else {
-					print $FD "\t".'chainloader /boot/grub2/bootnext'."\n";
-					my $bootnext = $this -> addBootNext (
-						"$tmpdir/boot/grub2/bootnext", hex $this->{mbrid}
-					);
-					if (! defined $bootnext) {
-						$kiwi -> failed ();
-						$kiwi -> error  ("Failed to write bootnext\n");
-						$kiwi -> failed ();
-						$FD -> close();
-						return;
+					print $FD "\t"."set root='hd0'"."\n";
+					if ($dev eq '(cd)') {
+						print $FD "\t".'chainloader +1'."\n";
+					} else {
+						print $FD "\t".'chainloader /boot/grub2/bootnext'."\n";
+						my $bootnext = $this -> addBootNext (
+							"$tmpdir/boot/grub2/bootnext", hex $this->{mbrid}
+						);
+						if (! defined $bootnext) {
+							$kiwi -> failed ();
+							$kiwi -> error  ("Failed to write bootnext\n");
+							$kiwi -> failed ();
+							$FD -> close();
+							return;
+						}
 					}
+					print $FD "\t".'boot'."\n";
 				}
-				print $FD "\t".'boot'."\n";
 				print $FD '}'."\n";
 				$title = $this -> quoteLabel ("Install $label");
 			} else {
@@ -3911,13 +3915,6 @@ sub setupBootLoaderConfiguration {
 			}
 			print $FD 'menuentry "'.$title.'"';
 			print $FD ' --class opensuse --class os {'."\n";
-			if (! $iso) {
-				print $FD "\t"."set root='$rprefix,$boot_id'"."\n";
-			} else {
-				if ($config eq "grub2-efi") {
-					print $FD "\t"."set root='$rprefix'"."\n";
-				}
-			}
 			#==========================================
 			# Standard boot
 			#------------------------------------------
@@ -3995,13 +3992,6 @@ sub setupBootLoaderConfiguration {
 				$title = $this -> quoteLabel ("Failsafe -- $title");
 				print $FD 'menuentry "'.$title.'"';
 				print $FD ' --class opensuse --class os {'."\n";
-				if (! $iso) {
-					print $FD "\t"."set root='$rprefix,$boot_id'"."\n";
-				} else {
-					if ($config eq "grub2-efi") {
-						print $FD "\t"."set root='$rprefix'"."\n";
-					}
-				}
 				if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 					if ($iso) {
 						print $FD "\t"."echo Loading linux...\n";
