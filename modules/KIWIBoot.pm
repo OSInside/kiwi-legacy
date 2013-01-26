@@ -515,6 +515,7 @@ sub createBootStructure {
 			return;
 		}
 	}
+	qxx ("touch $tmpdir/boot/$this->{mbrid}");
 	$kiwi -> done();
 	return $tmpdir;
 }
@@ -3318,21 +3319,12 @@ sub setupBootLoaderStages {
 				$kiwi -> failed ();
 				return;
 			}
-			print $bpfd 'search -f /boot/grub2-efi/grub.cfg --set'."\n";
+			print $bpfd "search -f /boot/$this->{mbrid} --set"."\n";
 			if ($bootfile =~ /grub2-efi/) {
-				if ((defined $type) && ($type eq "iso")) {
-					print $bpfd 'set prefix=($root)/boot/grub2-efi';
-				} else {
-					print $bpfd "set prefix=(\$root,$boot_id)/boot/grub2-efi";
-				}
+				print $bpfd 'set prefix=($root)/boot/grub2-efi'."\n";
 			} else {
-				if ((defined $type) && ($type eq "iso")) {
-					print $bpfd 'set prefix=($root)/boot/grub2';
-				} else {
-					print $bpfd "set prefix=(\$root,$boot_id)/boot/grub2";
-				}
+				print $bpfd 'set prefix=($root)/boot/grub2'."\n";
 			}
-			print $bpfd "\n";
 			$bpfd -> close();
 		}
 		$kiwi -> done();
@@ -3848,13 +3840,12 @@ sub setupBootLoaderConfiguration {
 				foreach my $module (@x86mods) {
 					print $FD "insmod $module"."\n";
 				}
-				print $FD 'search -f /boot/grub2/grub.cfg --set'."\n";
 			} else {
 				foreach my $module (@efimods) {
 					print $FD "insmod $module"."\n";
 				}
-				print $FD 'search -f /boot/grub2-efi/grub.cfg --set'."\n";
 			}
+			print $FD "search -f /boot/$this->{mbrid} --set"."\n";
 			print $FD "set default=$defaultBootNr\n";
 			print $FD "set font=/boot/unicode.pf2"."\n";
 			print $FD 'if loadfont $font ;then'."\n";
