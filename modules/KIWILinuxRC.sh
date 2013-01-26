@@ -3566,7 +3566,27 @@ function searchImageISODevice {
 			)
 			mbrVID=$(echo $mbrVID)
 			if [ "$mbrVID" = "$mbrIID" ];then
-				biosBootDevice=$i; echo; return 0
+				# /.../
+				# found ISO header on a device, now check if there is
+				# also a partition for this device with the same
+				# information and prefer that device if it exists
+				# ----
+				biosBootDevice=$i
+				for n in 1 2;do
+					local pdev=$(ddn $i $n)
+					if [ -e $pdev ];then
+						mbrVID=$(
+							isoinfo -d -i $pdev 2>/dev/null |\
+							grep "Application id:"|cut -f2 -d:
+						)
+						mbrVID=$(echo $mbrVID)
+						if [ "$mbrVID" = "$mbrIID" ];then
+							biosBootDevice=$pdev
+							echo; return 0
+						fi
+					fi
+				done
+				echo; return 0
 			fi
 		done
 		if [ $count -eq 30 ];then
@@ -3619,16 +3639,16 @@ function setupHybridPersistent {
 	#======================================
 	# store hybrid write partition device
 	#--------------------------------------
-	# /.../
-	# use a loop device here because kernel 3.x refuses
-	# to mount a partition if the disk itself was already
-	# mounted. In case of a hybrid iso the disk device
-	# e.g /dev/sda represents the iso and is therefore
-	# mounted in any case. The same trick is used in
-	# createHybridPersistent when creating the filesystem
-	# ----
 	HYBRID_RW=$(ddn $biosBootDevice $HYBRID_PERSISTENT_PART)
-	HYBRID_RW=$(losetup -f --show $HYBRID_RW)
+	# /.../
+	# using a loop device is required if HYBRID_RW points
+	# to the entire disk and not only to a partition. In that
+	# case the kernel would hold a global busy lock on the
+	# disk and all its partitions. It depends on what isohybrid
+	# wrote into the iso header whether this workaround is
+	# required or not. At the moment it's disabled
+	# ----
+	# HYBRID_RW=$(losetup -f --show $HYBRID_RW)
 	export HYBRID_RW
 }
 #======================================
