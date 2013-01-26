@@ -1769,6 +1769,7 @@ sub getUsers {
 	my $kiwi = $this->{kiwi};
 	my %uAccounts;
 	for my $pName (@{$this->{selectedProfiles}}) {
+		next if ! $this->{imageConfig}{$pName}{users};
 		my @profUsers = @{$this->{imageConfig}{$pName}{users}};
 		for my $user (@profUsers) {
 			my $name = $user -> getUserName();
