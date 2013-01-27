@@ -54,12 +54,13 @@ sub test_createPartition {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $pxeDataObj = $this -> __getPXEDeployObj();
-	my %partInfo = ( mountpoint  => '/home',
-					number      => '3',
-					size        => '400G',
-					target      => 'true',
-					type        => '0x83'
-				);
+	my %partInfo = (
+		mountpoint  => '/home',
+		number      => '3',
+		size        => '400G',
+		target      => 'true',
+		type        => '0x83'
+	);
 	my $id = $pxeDataObj -> createPartition(\%partInfo);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -99,7 +100,236 @@ sub test_createPartition {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('true', $tgt);
+	$this -> assert_equals(1, $tgt);
+	my $type = $pxeDataObj -> getPartitionType($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('0x83', $type);
+	my @pIDs = @{$pxeDataObj -> getPartitionIDs()};
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expected = ( 1, 2, $THIRD_PART );
+	$this -> assert_array_equal(\@expected, \@pIDs);
+	return;
+}
+
+#==========================================
+# test_createPartitionDefaultMountP
+#------------------------------------------
+sub test_createPartitionDefaultMountP {
+	# ...
+	# Test the createPartition method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $pxeDataObj = $this -> __getPXEDeployObj();
+	my %partInfo = (
+		number      => '3',
+		size        => '400G',
+		target      => 'true',
+		type        => '0x83'
+	);
+	my $id = $pxeDataObj -> createPartition(\%partInfo);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_equals($THIRD_PART, $id);
+	my $mntP = $pxeDataObj -> getPartitionMountpoint($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('x', $mntP);
+	my $num = $pxeDataObj -> getPartitionNumber($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	 $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_equals($id, $num);
+	my $size = $pxeDataObj -> getPartitionSize($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('400G', $size);
+	my $tgt = $pxeDataObj -> getPartitionTarget($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_equals(1, $tgt);
+	my $type = $pxeDataObj -> getPartitionType($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('0x83', $type);
+	my @pIDs = @{$pxeDataObj -> getPartitionIDs()};
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expected = ( 1, 2, $THIRD_PART );
+	$this -> assert_array_equal(\@expected, \@pIDs);
+	return;
+}
+
+#==========================================
+# test_createPartitionDefaultSize
+#------------------------------------------
+sub test_createPartitionDefaultSize {
+	# ...
+	# Test the createPartition method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $pxeDataObj = $this -> __getPXEDeployObj();
+	my %partInfo = (
+		mountpoint  => '/home',
+		number      => '3',
+		target      => 'true',
+		type        => '0x83'
+	);
+	my $id = $pxeDataObj -> createPartition(\%partInfo);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_equals($THIRD_PART, $id);
+	my $mntP = $pxeDataObj -> getPartitionMountpoint($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('/home', $mntP);
+	my $num = $pxeDataObj -> getPartitionNumber($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	 $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_equals($id, $num);
+	my $size = $pxeDataObj -> getPartitionSize($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('x', $size);
+	my $tgt = $pxeDataObj -> getPartitionTarget($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_equals(1, $tgt);
+	my $type = $pxeDataObj -> getPartitionType($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('0x83', $type);
+	my @pIDs = @{$pxeDataObj -> getPartitionIDs()};
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my @expected = ( 1, 2, $THIRD_PART );
+	$this -> assert_array_equal(\@expected, \@pIDs);
+	return;
+}
+
+#==========================================
+# test_createPartitionDefaultTargetFalse
+#------------------------------------------
+sub test_createPartitionDefaultTargetFalse {
+	# ...
+	# Test the createPartition method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $pxeDataObj = $this -> __getPXEDeployObj();
+	my %partInfo = (
+		mountpoint  => '/home',
+		number      => '3',
+		size        => '400G',
+		target      => 'false',
+		type        => '0x83'
+	);
+	my $id = $pxeDataObj -> createPartition(\%partInfo);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_equals($THIRD_PART, $id);
+	my $mntP = $pxeDataObj -> getPartitionMountpoint($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('/home', $mntP);
+	my $num = $pxeDataObj -> getPartitionNumber($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	 $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_equals($id, $num);
+	my $size = $pxeDataObj -> getPartitionSize($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('400G', $size);
+	my $tgt = $pxeDataObj -> getPartitionTarget($id);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_equals(0, $tgt);
 	my $type = $pxeDataObj -> getPartitionType($id);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -178,9 +408,10 @@ sub test_createPartitionInvalidArgNum {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
-	my %partInfo = ( number => '5',
-					type   => '0x83'
-				);
+	my %partInfo = (
+		number => '5',
+		type   => '0x83'
+	);
 	my $res = $pxeDataObj -> createPartition(\%partInfo);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'createPartition: invalid partition ID specified, must be '
@@ -226,12 +457,13 @@ sub test_createPartitionOverwrite {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $pxeDataObj = $this -> __getPXEDeployObj();
-	my %partInfo = ( mountpoint  => '/swap',
-					number      => '2',
-					size        => '4G',
-					target      => 'false',
-					type        => '0x82'
-				);
+	my %partInfo = (
+		mountpoint  => '/swap',
+	    number      => '2',
+		size        => '4G',
+		target      => 'false',
+		type        => '0x82'
+	);
 	my $id = $pxeDataObj -> createPartition(\%partInfo);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'createPartition: overwriting data for partition with id: '
@@ -295,10 +527,11 @@ sub test_createPartitionUnsupportedEntry {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
-	my %partInfo = ( label  => 'root',
-					number => '3',
-					type   => '0x83'
-				);
+	my %partInfo = (
+		label  => 'root',
+		number => '3',
+		type   => '0x83'
+	);
 	my $res = $pxeDataObj -> createPartition(\%partInfo);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'createPartition: unsupported option in '
@@ -322,10 +555,11 @@ sub test_createUnionFSConfig {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
-	$pxeDataObj = $pxeDataObj -> createUnionFSConfig('/dev/sdc1',
-													'/dev/sdc2',
-													'clicfs'
-													);
+	$pxeDataObj = $pxeDataObj -> createUnionFSConfig(
+		'/dev/sdc1',
+		'/dev/sdc2',
+		'clicfs'
+	);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -370,10 +604,11 @@ sub test_createUnionFSConfigOverwrite {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $pxeDataObj = $this -> __getPXEDeployObj();
-	$pxeDataObj = $pxeDataObj -> createUnionFSConfig('/dev/sdc1',
-													'/dev/sdc2',
-													'clicfs'
-													);
+	$pxeDataObj = $pxeDataObj -> createUnionFSConfig(
+		'/dev/sdc1',
+		'/dev/sdc2',
+		'clicfs'
+	);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'createUnionFSConfig: overwriting existing union fs '
 		. 'config.';
@@ -634,56 +869,6 @@ sub test_ctor_initImproperUnionType {
 	my $msg = $kiwi -> getMessage();
 	my $expected =  'Type specified for union fs is not supported, only '
 		. '"clicfs" is supported';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_null($pxeDataObj);
-	return;
-}
-
-#==========================================
-# test_ctor_initIncompleteConfigNoDest
-#------------------------------------------
-sub test_ctor_initIncompleteConfigNoDest {
-	# ...
-	# Test the PXEDeployData constructor with an initialization hash
-	# that contains incomplete configuration data
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = ( configSource   => '/wrk/packages' );
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
-	my $msg = $kiwi -> getMessage();
-	my $expected =  'Incomplete initialization hash "configDest" and '
-		. '"configSource" must be specified together.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_null($pxeDataObj);
-	return;
-}
-
-#==========================================
-# test_ctor_initIncompleteConfigNoSource
-#------------------------------------------
-sub test_ctor_initIncompleteConfigNoSource {
-	# ...
-	# Test the PXEDeployData constructor with an initialization hash
-	# that contains incomplete configuration data
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = ( configDest   => '/srv/atftp/config' );
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
-	my $msg = $kiwi -> getMessage();
-	my $expected =  'Incomplete initialization hash "configDest" and '
-		. '"configSource" must be specified together.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -977,41 +1162,6 @@ sub test_ctor_initIncompleteUnionOnlyType {
 }
 
 #==========================================
-# test_ctor_initInvalidDataArch
-#------------------------------------------
-sub test_ctor_initInvalidDataArch {
-	# ...
-	# Test the PXEDeployData constructor with an initialization hash
-	# that contains invalid data type for the configArch data
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %diskData = (
-					mountpoint => '/dev/sda',
-					size       => '30G',
-					unit       => 'GB'
-	);
-	my %disks = ( 1 => \%diskData );
-	my %init = (
-				blocksize  => '4096',
-				configArch => 'x86_64',
-				partitions => \%disks
-	);
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'Expecting an array ref as entry of "configArch" in  '
-		. 'the initialization hash.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_null($pxeDataObj);
-	return;
-}
-
-#==========================================
 # test_ctor_initUnsupportedData
 #------------------------------------------
 sub test_ctor_initUnsupportedData {
@@ -1022,10 +1172,10 @@ sub test_ctor_initUnsupportedData {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (
-				blocksize => '4096',
-				kernel    => 'myKernel',
-				disks     => 'foo'
-			);
+	    blocksize => '4096',
+		kernel    => 'myKernel',
+		disks     => 'foo'
+	);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIXMLPXEDeployData: Unsupported keyword argument '
@@ -1051,16 +1201,15 @@ sub test_ctor_initUnsupportedDataPartitions {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %diskData = (
-					mountpoint => '/dev/sda',
-					size       => '30G',
-					unit       => 'GB'
+	    mountpoint => '/dev/sda',
+		size       => '30G',
+		unit       => 'GB'
 	);
 	my %disks = ( 1 => \%diskData );
 	my @arches = qw / ppc64 x86_64/;
 	my %init = (
-				blocksize  => '4096',
-				configArch => \@arches,
-				partitions => \%disks
+	    blocksize  => '4096',
+		partitions => \%disks
 	);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
@@ -1085,16 +1234,16 @@ sub test_ctor_withInit {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %diskData = ( mountpoint => '/dev/sda',
-					size       => '30G',
-					type      => '0x83'
+	my %diskData = (
+		mountpoint => '/dev/sda',
+		size       => '30G',
+		type      => '0x83'
 	);
 	my %disks = ( 1 => \%diskData );
 	my @arches = qw / ppc64 x86_64/;
 	my %init = (
-				blocksize  => '4096',
-				configArch => \@arches,
-				partitions => \%disks
+	    blocksize  => '4096',
+		partitions => \%disks
 	);
 	my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
@@ -1105,6 +1254,93 @@ sub test_ctor_withInit {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($pxeDataObj);
+	return;
+}
+
+#==========================================
+# test_defaultBlocksize
+#------------------------------------------
+sub test_defaultBlocksize {
+	# ...
+	# Test the PXEDeployData object default blocksize setting
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($pxeDataObj);
+	my $block = $pxeDataObj -> getBlocksize();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('4096', $block);
+	return;
+}
+
+#==========================================
+# test_defaultServer
+#------------------------------------------
+sub test_defaultServer {
+	# ...
+	# Test the PXEDeployData object default server setting
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($pxeDataObj);
+	my $srv = $pxeDataObj -> getServer();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('192.168.1.1', $srv);
+	return;
+}
+
+#==========================================
+# test_defaultUnionType
+#------------------------------------------
+sub test_defaultUnionType {
+	# ...
+	# Test the PXEDeployData object default union type setting
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($pxeDataObj);
+	my $unionType = $pxeDataObj -> getUnionType();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('clicfs', $unionType);
 	return;
 }
 
@@ -1126,70 +1362,6 @@ sub test_getBlocksize {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('8192', $block);
-	return;
-}
-
-#==========================================
-# test_getConfigurationArch
-#------------------------------------------
-sub test_getConfigurationArch {
-	# ...
-	# Test the getConfigurationArch method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = $this -> __getPXEDeployObj();
-	my $arch = $pxeDataObj -> getConfigurationArch();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my @expected = qw / ppc64 x86_64/;
-	$this -> assert_array_equal(\@expected, $arch);
-	return;
-}
-
-#==========================================
-# test_getConfigurationDestination
-#------------------------------------------
-sub test_getConfigurationDestination {
-	# ...
-	# Test the getConfigurationDestination method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = $this -> __getPXEDeployObj();
-	my $dest = $pxeDataObj -> getConfigurationDestination();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('/srv/atftp/config', $dest);
-	return;
-}
-
-#==========================================
-# test_getConfigurationSource
-#------------------------------------------
-sub test_getConfigurationSource {
-	# ...
-	# Test the getConfigurationSource method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = $this -> __getPXEDeployObj();
-	my $src = $pxeDataObj -> getConfigurationSource();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('/wrk/packages', $src);
 	return;
 }
 
@@ -1622,7 +1794,7 @@ sub test_getPartitionTarget {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('true', $tgt);
+	$this -> assert_equals(1, $tgt);
 	return;
 }
 
@@ -1949,8 +2121,6 @@ sub test_getXMLElement{
 	$this -> assert_not_null($elem);
 	my $xmlstr = $elem -> toString();
 	my $expected = '<pxedeploy blocksize="8192" server="10.10.1.1">'
-		. '<configuration dest="/srv/atftp/config" source="/wrk/packages" '
-		. 'arch="ppc64,x86_64"/>'
 		. '<initrd>initrd-3.4.6</initrd>'
 		. '<kernel>vmlinuz-3.4.6-default</kernel>'
 		. '<partitions device="/dev/sdb1">'
@@ -2029,279 +2199,6 @@ sub test_setBlocksizeReset {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('4096', $blockS);
-	return;
-}
-
-#==========================================
-# test_setConfiguration
-#------------------------------------------
-sub test_setConfiguration {
-	# ...
-	# Test the setConfiguration method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
-	$pxeDataObj = $pxeDataObj -> setConfiguration('/srv/atftp/config',
-												'/wrk/packages');
-	$this -> assert_not_null($pxeDataObj);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my $dest = $pxeDataObj -> getConfigurationDestination();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('/srv/atftp/config', $dest);
-	my $src = $pxeDataObj -> getConfigurationSource();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('/wrk/packages', $src);
-	return;
-}
-
-#==========================================
-# test_setConfigurationOneArg
-#------------------------------------------
-sub test_setConfigurationOneArg {
-	# ...
-	# Test the setConfiguration method with only one argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = $this -> __getPXEDeployObj();
-	my $res = $pxeDataObj -> setConfiguration('/srv/atftp/config');
-	$this -> assert_null($res);
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'setConfiguration: must be called with 2 arguments, '
-		. 'confDest and confSrc. Retaining current data.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	my $dest = $pxeDataObj -> getConfigurationDestination();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('/srv/atftp/config', $dest);
-	my $src = $pxeDataObj -> getConfigurationSource();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('/wrk/packages', $src);
-	return;
-}
-
-#==========================================
-# test_setConfigurationNoArg
-#------------------------------------------
-sub test_setConfigurationNoArg {
-	# ...
-	# Test the setConfiguration method with no argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = $this -> __getPXEDeployObj();
-	my $res = $pxeDataObj -> setConfiguration();
-	$this -> assert_null($res);
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'setConfiguration: must be called with 2 arguments, '
-		. 'confDest and confSrc. Retaining current data.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	my $dest = $pxeDataObj -> getConfigurationDestination();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('/srv/atftp/config', $dest);
-	my $src = $pxeDataObj -> getConfigurationSource();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('/wrk/packages', $src);
-	return;
-}
-
-#==========================================
-# test_setConfigurationArch
-#------------------------------------------
-sub test_setConfigurationArch {
-	# ...
-	# Test the setConfigurationArch method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = $this -> __getPXEDeployObj();
-	my @archSet = ( 's390x' );
-	$pxeDataObj = $pxeDataObj -> setConfigurationArch(\@archSet);
-	$this -> assert_not_null($pxeDataObj);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my $arch = $pxeDataObj -> getConfigurationArch();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_array_equal(\@archSet, $arch);
-	return;
-}
-
-#==========================================
-# test_setConfigurationArchInvalidArch
-#------------------------------------------
-sub test_setConfigurationArchInvalidArch {
-	# ...
-	# Test the setConfigurationArch method with an invalid architecture
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = $this -> __getPXEDeployObj();
-	my @invArch = ( 'arm95' );
-	my $res = $pxeDataObj -> setConfigurationArch(\@invArch);
-	my $msg = $kiwi -> getMessage();
-	my $expected = "setConfigurationArch: given architecture 'arm95' not "
-		. 'supported retaining current data.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-	my $arch = $pxeDataObj -> getConfigurationArch();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my @expected = qw / ppc64 x86_64/;
-	$this -> assert_array_equal(\@expected, $arch);
-	return;
-}
-
-#==========================================
-# test_setConfigurationArchInvalidArg
-#------------------------------------------
-sub test_setConfigurationArchInvalidArg {
-	# ...
-	# Test the setConfigurationArch method with an invalid argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = $this -> __getPXEDeployObj();
-	my $res = $pxeDataObj -> setConfigurationArch('arm95');
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'setConfigurationArch: expecting array ref as argument.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-	my $arch = $pxeDataObj -> getConfigurationArch();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my @expected = qw / ppc64 x86_64/;
-	$this -> assert_array_equal(\@expected, $arch);
-	return;
-}
-
-#==========================================
-# test_setConfigurationArchNoArg
-#------------------------------------------
-sub test_setConfigurationArchNoArg {
-	# ...
-	# Test the setConfigurationArch method with no argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = $this -> __getPXEDeployObj();
-	my $res = $pxeDataObj -> setConfigurationArch();
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'setConfigurationArch: no architecture argument provided, '
-		. 'retaining current data.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-	my $arch = $pxeDataObj -> getConfigurationArch();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my @expected = qw / ppc64 x86_64/;
-	$this -> assert_array_equal(\@expected, $arch);
-	return;
-}
-
-#==========================================
-# test_setConfigurationArchNoConfig
-#------------------------------------------
-sub test_setConfigurationArchNoConfig {
-	# ...
-	# Test the setConfigurationArch method if no configuration data is present
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $pxeDataObj = KIWIXMLPXEDeployData -> new();
-	my $res = $pxeDataObj -> setConfigurationArch('ppc64');
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'setConfigurationArch: configuration is not setup, call '
-		. 'setConfiguration first.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-	my $arch = $pxeDataObj -> getConfigurationArch();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($arch);
 	return;
 }
 
@@ -2900,7 +2797,7 @@ sub test_setPartitionTargetNoTargetArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('true', $target);
+	$this -> assert_equals(1, $target);
 	return;
 }
 
@@ -3222,12 +3119,8 @@ sub __getPXEDeployObj {
 					1 => \%diskData1,
 					2 => \%diskData2
 					);
-	my @arches = qw / ppc64 x86_64/;
 	my %init = (
 				blocksize    => '8192',
-				configArch   => \@arches,
-				configDest   => '/srv/atftp/config',
-				configSource => '/wrk/packages',
 				device       => '/dev/sdb1',
 				initrd       => 'initrd-3.4.6',
 				kernel       => 'vmlinuz-3.4.6-default',

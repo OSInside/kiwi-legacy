@@ -3418,8 +3418,10 @@ sub writeImageConfig {
 	my $xml  = $this->{xml};
 	my $configName = $main::global -> generateBuildImageName($this->{xml})
 		. '.config';
-	my $device = $xml -> getPXEDeployImageDevice_legacy ();
-	my %type = %{$xml -> getImageTypeAndAttributes_legacy()};
+	my $pxeConfig = $xml -> getPXEConfig();
+	my $device = $pxeConfig -> getDevice();
+	my $bldType = $xml -> getImageType();
+	#my %type = %{$xml -> getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# create .config for types which needs it
 	#------------------------------------------
@@ -3436,8 +3438,8 @@ sub writeImageConfig {
 			-> generateBuildImageName($this->{xml}, ';');
 		my $namerw = $main::global
 			-> generateBuildImageName($this->{xml},';', '-read-write');
-		my $server = $xml -> getPXEDeployServer_legacy ();
-		my $blocks = $xml -> getPXEDeployBlockSize_legacy ();
+		my $server = $pxeConfig -> getServer();
+		my $blocks = $pxeConfig -> getBlocksize();
 		if (! defined $server) {
 			$server = "";
 		}
@@ -3450,47 +3452,51 @@ sub writeImageConfig {
 		#==========================================
 		# PART information
 		#------------------------------------------
-		my @parts = $xml -> getPXEDeployPartitions_legacy ();
-		if ((scalar @parts) > 0) {
+		my $partIDs = $pxeConfig -> getPartitionIDs();
+		if ($partIDs) {
 			print $FD "PART=";
-			for my $href (@parts) {
-				if ($href -> {target}) {
-					$targetPartition = $href -> {number};
+			for my $partID (@{$partIDs}) {
+				my $target = $pxeConfig -> getPartitionTarget($partID);
+				if ($target && $target eq 'true') {
+					$targetPartition =
+						$pxeConfig -> getPartitionNumber($partID);
 					$targetPartitionNext = $targetPartition + 1;
 				}
-				if ($href -> {size} eq "image") {
+				my $partSize = $pxeConfig -> getPartitionSize($partID);
+				if ($partSize eq 'image') {
 					my $size = $main::global -> isize (
 						"$this->{imageDest}/$name"
 					);
 					print $FD int (($size/1024/1024)+1);
 				} else {
-					print $FD $href -> {size};
+					print $FD $partSize;
 				}
+				my $partType = $pxeConfig -> getPartitionType($partID);
+				my $mountpoint = $pxeConfig -> getPartitionMountpoint($partID);
 
-				my $type = $href -> {type};
-				my $mountpoint = $href -> {mountpoint};
-
-				SWITCH: for ($type) {
+				SWITCH: for ($partType) {
 					/swap/i && do {
-						$type = "S";
+						$partType = "S";
 						last SWITCH;
 					};
 					/linux/i && do {
-						$type = "83";
+						$partType = "83";
 						last SWITCH;
 					};
 				}
-				print $FD ";$type;$mountpoint,";
+				print $FD ";$partType;$mountpoint,";
 			}
 			print $FD "\n";
 		}
 		#==========================================
 		# IMAGE information
 		#------------------------------------------
-		if (($type{compressed}) && ($type{compressed} eq 'true')) {
+		my $compressed = $bldType -> getCompressed();
+		my $imgType = $bldType -> getImageType();
+		if ($compressed && $compressed eq 'true') {
 			print $FD "IMAGE='${device}${targetPartition};";
 			print $FD "$namecd;$server;$blocks;compressed'";
-			if ("$type{type}" eq "split" && defined $this->{imageTreeRW}) {
+			if ($imgType eq "split" && defined $this->{imageTreeRW}) {
 				print $FD ",${device}${targetPartitionNext}";
 				print $FD ";$namerw;$server;$blocks;compressed\n";
 			} else {
@@ -3499,7 +3505,7 @@ sub writeImageConfig {
 		} else {
 			print $FD "IMAGE='${device}${targetPartition};";
 			print $FD "$namecd;$server;$blocks'";
-			if ("$type{type}" eq "split" && defined $this->{imageTreeRW}) {
+			if ($imgType eq "split" && defined $this->{imageTreeRW}) {
 				print $FD ",${device}${targetPartitionNext}";
 				print $FD ";$namerw;$server;$blocks\n";
 			} else {
@@ -3509,63 +3515,82 @@ sub writeImageConfig {
 		#==========================================
 		# CONF information
 		#------------------------------------------
-		my %confs = $xml -> getPXEDeployConfiguration_legacy ();
-		if ((scalar keys %confs) > 0) {
-			print $FD "CONF=";
-			foreach my $source (keys %confs) {
-				print $FD "$source;$confs{$source};$server;$blocks,";
+		my $bldArch = $xml -> getArch();
+		my $configs = $xml -> getPXEConfigData();
+		if ($configs) {
+			my $confStr = 'CONF=';
+			my $writeIt;
+			for my $confData (@{$configs}) {
+				my $confArch = $confData -> getArch();
+				my $useIt = 1;
+				if ($confArch) {
+					$useIt = 0;
+					my @arches = split /,/smx, $confArch;
+					for my $arch (@arches) {
+						if ($arch eq $bldArch) {
+							$useIt = 1;
+							last;
+						}
+					}
+				}
+				if ($useIt) {
+					$writeIt = 1;
+					my $dest   = $confData -> getDestination();
+					my $source = $confData -> getSource();
+					$confStr .= "$source;$dest;$server;$blocks,";
+				}
 			}
-			print $FD "\n";
+			if ($writeIt) {
+				$confStr .= "\n";
+				print $FD $confStr;
+			}
 		}
 		#==========================================
 		# COMBINED_IMAGE information
 		#------------------------------------------
-		if ("$type{type}" eq "split") {
+		if ($imgType eq "split") {
 			print $FD "COMBINED_IMAGE=yes\n";
 		}
 		#==========================================
 		# UNIONFS_CONFIG information
 		#------------------------------------------
-		my %unionConfig = $xml -> getPXEDeployUnionConfig_legacy ();
-		if (%unionConfig) {
-			my $valid = 0;
-			my $value;
-			if (! $unionConfig{type}) {
-				$unionConfig{type} = "clicfs";
-			}
-			if (($unionConfig{rw}) && ($unionConfig{ro})) {
-				$value = "$unionConfig{rw},$unionConfig{ro},$unionConfig{type}";
-				$valid = 1;
-			}
-			if ($valid) {
-				print $FD "UNIONFS_CONFIG='".$value."'\n";
-			}
+		my $unionFS = $pxeConfig -> getUnionType();
+		my $unionRO = $pxeConfig -> getUnionRO();
+		my $unionRW = $pxeConfig -> getUnionRW();
+		if ($unionRO && $unionRW) {
+			print $FD "UNIONFS_CONFIG='"
+				. $unionRW
+				. ','
+				. $unionRO
+				. ','
+				. $unionFS
+				. "'\n";
 		}
 		#==========================================
 		# KIWI_BOOT_TIMEOUT information
 		#------------------------------------------
-		my $timeout = $xml -> getPXEDeployTimeout_legacy ();
+		my $timeout = $pxeConfig -> getTimeout();
 		if (defined $timeout) {
 			print $FD "KIWI_BOOT_TIMEOUT=$timeout\n";
 		}
 		#==========================================
 		# KIWI_KERNEL_OPTIONS information
 		#------------------------------------------
-		my $cmdline = $type{cmdline};
+		my $cmdline = $bldType -> getKernelCmdOpts();
 		if (defined $cmdline) {
 			print $FD "KIWI_KERNEL_OPTIONS='$cmdline'\n";
 		}
 		#==========================================
 		# KIWI_KERNEL information
 		#------------------------------------------
-		my $kernel = $xml -> getPXEDeployKernel_legacy ();
+		my $kernel = $pxeConfig -> getKernel();
 		if (defined $kernel) {
 			print $FD "KIWI_KERNEL=$kernel\n";
 		}
 		#==========================================
 		# KIWI_INITRD information
 		#------------------------------------------
-		my $initrd = $xml -> getPXEDeployInitrd_legacy ();
+		my $initrd = $pxeConfig -> getInitrd();
 		if (defined $initrd) {
 			print $FD "KIWI_INITRD=$initrd\n";
 		}

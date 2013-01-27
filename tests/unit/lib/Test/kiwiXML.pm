@@ -6941,9 +6941,6 @@ sub test_getPXEConfig {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	my $blockS   = $pxeConfObj -> getBlocksize();
-	my $confArch = $pxeConfObj -> getConfigurationArch();
-	my $confDest = $pxeConfObj -> getConfigurationDestination();
-	my $confSrc  = $pxeConfObj -> getConfigurationSource();
 	my $target   = $pxeConfObj -> getDevice();
 	my $initrd   = $pxeConfObj -> getInitrd();
 	my $kernel   = $pxeConfObj -> getKernel();
@@ -6958,17 +6955,13 @@ sub test_getPXEConfig {
 	my $unionRW  = $pxeConfObj -> getUnionRW();
 	my $unionT   = $pxeConfObj -> getUnionType();
 	$this -> assert_str_equals('4096', $blockS);
-	my @expectedArch = qw /x86_64 ix86 armv5tel armv7l ppc64 ppc/;
-	$this -> assert_array_equal(\@expectedArch, $confArch);
-	$this -> assert_str_equals('target', $confDest);
-	$this -> assert_str_equals('installSource', $confSrc);
 	$this -> assert_str_equals('/dev/sda', $target);
 	$this -> assert_str_equals('/pxeSetup/specialInitrd', $initrd);
 	$this -> assert_str_equals('/pxeSetup/specialKernel', $kernel);
 	$this -> assert_str_equals('/', $mntP);
 	$this -> assert_equals(2, $partN);
 	$this -> assert_str_equals('image', $partS);
-	$this -> assert_str_equals('true', $partT);
+	$this -> assert_equals(1, $partT);
 	$this -> assert_str_equals('L', $partTy);
 	$this -> assert_str_equals('192.168.100.2', $server);
 	$this -> assert_str_equals('20', $timeout);
@@ -6979,11 +6972,11 @@ sub test_getPXEConfig {
 }
 
 #==========================================
-# test_getPXEDeployBlockSize_legacy
+# test_getPXEConfigData
 #------------------------------------------
-sub test_getPXEDeployBlockSize_legacy {
+sub test_getPXEConfigData {
 	# ...
-	# Verify proper return of getPXEDeployBlockSize method
+	# Test the getPXEConfigData method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -6991,226 +6984,29 @@ sub test_getPXEDeployBlockSize_legacy {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
-	my $value = $xml -> getPXEDeployBlockSize_legacy();
+	my $pxeConfData = $xml -> getPXEConfigData();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('4096', $value);
-	return;
-}
-
-#==========================================
-# test_getPXEDeployConfiguration_legacy
-#------------------------------------------
-sub test_getPXEDeployConfiguration_legacy {
-	# ...
-	# Verify proper return of getPXEDeployConfiguration method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my %config = $xml -> getPXEDeployConfiguration_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null(%config);
-	$this -> assert_str_equals('target', $config{installSource});
-	return;
-}
-
-#==========================================
-# test_getPXEDeployImageDevice_legacy
-#------------------------------------------
-sub test_getPXEDeployImageDevice_legacy {
-	# ...
-	# Verify proper return of getPXEDeployImageDevice method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getPXEDeployImageDevice_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('/dev/sda', $value);
-	return;
-}
-
-#==========================================
-# test_getPXEDeployInitrd_legacy
-#------------------------------------------
-sub test_getPXEDeployInitrd_legacy {
-	# ...
-	# Verify proper return of getPXEDeployInitrd method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getPXEDeployInitrd_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('/pxeSetup/specialInitrd', $value);
-	return;
-}
-
-#==========================================
-# test_getPXEDeployKernel_legacy
-#------------------------------------------
-sub test_getPXEDeployKernel_legacy {
-	# ...
-	# Verify proper return of getPXEDeployKernel method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getPXEDeployKernel_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('/pxeSetup/specialKernel', $value);
-	return;
-}
-
-#==========================================
-# test_getPXEDeployPartitions_legacy
-#------------------------------------------
-sub test_getPXEDeployPartitions_legacy {
-	# ...
-	# Verify proper return of getPXEDeployPartitions method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my @partitions = $xml -> getPXEDeployPartitions_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	$this -> assert_not_null(@partitions);
-	my $partInfo = $partitions[0];
-	$this -> assert_str_equals('swap', $partInfo -> {type});
-	$this -> assert_str_equals('1', $partInfo -> {number});
-	$this -> assert_str_equals('5', $partInfo -> {size});
-	$partInfo = $partitions[1];
-	$this -> assert_str_equals('/', $partInfo -> {mountpoint});
-	$this -> assert_equals(1, $partInfo -> {target});
-	return;
-}
-
-#==========================================
-# test_getPXEDeployServer_legacy
-#------------------------------------------
-sub test_getPXEDeployServer_legacy {
-	# ...
-	# Verify proper return of getPXEDeployServer method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getPXEDeployServer_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('192.168.100.2', $value);
-	return;
-}
-
-#==========================================
-# test_getPXEDeployTimeout_legacy
-#------------------------------------------
-sub test_getPXEDeployTimeout_legacy {
-	# ...
-	# Verify proper return of getPXEDeployTimeout method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getPXEDeployTimeout_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('20', $value);
-	return;
-}
-
-#==========================================
-# test_getPXEDeployUnionConfig_legacy
-#------------------------------------------
-sub test_getPXEDeployUnionConfig_legacy {
-	# ...
-	# Verify proper return of getPXEDeployUnionConfig method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'pxeSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my %unionConfig = $xml -> getPXEDeployUnionConfig_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	$this -> assert_not_null(%unionConfig);
-	$this -> assert_str_equals('/dev/sda2', $unionConfig{ro});
-	$this -> assert_str_equals('/dev/sda3', $unionConfig{rw});
-	$this -> assert_str_equals('clicfs', $unionConfig{type});
+	$this -> assert_not_null($pxeConfData);
+	my @confData = @{$pxeConfData};
+	my $cnt = 0;
+	for my $dataObj (@confData) {
+		my $dest = $dataObj -> getDestination();
+		my $source = $dataObj -> getSource();
+		if ($source eq 's390Img') {
+			$this -> assert_str_equals('zdrive', $dest);
+		} else {
+			$this -> assert_str_equals('target', $dest);
+		}
+		$cnt += 1;
+	}
+	if ($cnt != 2) {
+		$this -> assert_null('Did not get 2 PXEDeployConfigData objects');
+	}
 	return;
 }
 
