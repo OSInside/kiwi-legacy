@@ -1,18 +1,19 @@
 #================
-# FILE          : kiwiXMLFileData.pm
+# FILE          : kiwiXMLPXEDeployConfigData.pm
 #----------------
 # PROJECT       : openSUSE Build-Service
-# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2013 SUSE LLC
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test implementation for the KIWIXMLFileData module.
+# DESCRIPTION   : Unit test implementation for the KIWIXMLPXEDeployConfigData
+#               : module.
 #               :
 # STATUS        : Development
 #----------------
-package Test::kiwiXMLFileData;
+package Test::kiwiXMLPXEDeployConfigData;
 
 use strict;
 use warnings;
@@ -21,7 +22,7 @@ use Common::ktLog;
 use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
 
-use KIWIXMLFileData;
+use KIWIXMLPXEDeployConfigData;
 
 #==========================================
 # Constructor
@@ -39,12 +40,12 @@ sub new {
 #------------------------------------------
 sub test_ctor_improperArg {
 	# ...
-	# Test the FileData constructor with an improper
+	# Test the PXEDeployConfigData constructor with an improper
 	# argument type
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLFileData -> new('foo');
+	my $confDataObj = KIWIXMLPXEDeployConfigData -> new('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Expecting a hash ref as second argument if provided';
 	$this -> assert_str_equals($expected, $msg);
@@ -53,7 +54,7 @@ sub test_ctor_improperArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($fileDataObj);
+	$this -> assert_null($confDataObj);
 	return;
 }
 
@@ -62,13 +63,13 @@ sub test_ctor_improperArg {
 #------------------------------------------
 sub test_ctor_noArg {
 	# ...
-	# Test the FileData constructor
+	# Test the PXEDeployConfigData constructor with no argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $fileDataObj = KIWIXMLFileData -> new();
+	my $confDataObj = KIWIXMLPXEDeployConfigData -> new();
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'KIWIXMLFileData: must be constructed with a '
+	my $expectedMsg = 'KIWIXMLPXEDeployConfigData: must be constructed with a '
 		. 'keyword hash as argument';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -76,7 +77,7 @@ sub test_ctor_noArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($fileDataObj);
+	$this -> assert_null($confDataObj);
 	return;
 }
 
@@ -85,15 +86,16 @@ sub test_ctor_noArg {
 #------------------------------------------
 sub test_ctor_unsuportedArch {
 	# ...
-	# Test the FileData constructor with an unsupported architecture
+	# Test the PXEDeployConfigData constructor with an unsupported architecture
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (
-	    arch => 'tegra',
-		name => 'soundcore.ko'
+		arch   => 'tegra',
+		dest   => '/dev/sda1',
+		source => '/pxeData/myImage'
 	);
-	my $fileDataObj = KIWIXMLFileData -> new(\%init);
+	my $confDataObj = KIWIXMLPXEDeployConfigData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = "Specified arch 'tegra' is not supported";
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -102,29 +104,7 @@ sub test_ctor_unsuportedArch {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($fileDataObj);
-	return;
-}
-
-#==========================================
-# test_ctor_simple
-#------------------------------------------
-sub test_ctor_simple {
-	# ...
-	# Test proper construction with only the name argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'soundcore.ko' );
-	my $fileDataObj = KIWIXMLFileData -> new(\%init);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($fileDataObj);
+	$this -> assert_null($confDataObj);
 	return;
 }
 
@@ -138,44 +118,20 @@ sub test_ctor_unsupportedKW {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (
-	    arch     => 'ppc64',
-		filename => 'soundcore.ko'
+	    arch        => 'ppc64',
+		destination => '/dev/sda1',
+		source      => '/pxeData/myImage'
 	);
-	my $fileDataObj = KIWIXMLFileData -> new(\%init);
+	my $confDataObj = KIWIXMLPXEDeployConfigData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'KIWIXMLFileData: Unsupported keyword argument '
-		. "'filename' in initialization structure.";
-	$this -> assert_str_equals($expectedMsg, $msg);
+	my $expected = 'KIWIXMLPXEDeployConfigData: Unsupported keyword argument '
+		. "'destination' in initialization structure.";
+	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($fileDataObj);
-	return;
-}
-
-#==========================================
-# test_ctor_withArch
-#------------------------------------------
-sub test_ctor_withArch {
-	# ...
-	# Test proper construction with only the name argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = (
-				arch => 'ppc64',
-				name => 'soundcore.ko'
-	);
-	my $fileDataObj = KIWIXMLFileData -> new(\%init );
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($fileDataObj);
+	$this -> assert_null($confDataObj);
 	return;
 }
 
@@ -189,18 +145,19 @@ sub test_getArch {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (
-	    arch => 'ix86',
-		name => 'soundcore.ko'
+		arch   => 's390',
+		dest   => '/dev/sda1',
+		source => '/pxeData/myImage'
 	);
-	my $fileDataObj = KIWIXMLFileData -> new(\%init);
+	my $confDataObj = KIWIXMLPXEDeployConfigData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my $value = $fileDataObj -> getArch();
-	$this -> assert_str_equals('ix86', $value);
+	my $value = $confDataObj -> getArch();
+	$this -> assert_str_equals('s390', $value);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -208,29 +165,33 @@ sub test_getArch {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($fileDataObj);
+	$this -> assert_not_null($confDataObj);
 	return;
 }
 
 #==========================================
-# test_getName
+# test_getDestination
 #------------------------------------------
-sub test_getName {
+sub test_getDestination {
 	# ...
-	# Verify that the proper name is returned.
+	# Verify that the proper destination is returned.
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'soundcore.ko' );
-	my $fileDataObj = KIWIXMLFileData -> new(\%init);
+	my %init = (
+		arch   => 's390',
+		dest   => '/dev/sda1',
+		source => '/pxeData/myImage'
+	);
+	my $confDataObj = KIWIXMLPXEDeployConfigData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my $value = $fileDataObj -> getName();
-	$this -> assert_str_equals('soundcore.ko', $value);
+	my $value = $confDataObj -> getDestination();
+	$this -> assert_str_equals('/dev/sda1', $value);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -238,72 +199,41 @@ sub test_getName {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($fileDataObj);
+	$this -> assert_not_null($confDataObj);
 	return;
 }
 
 #==========================================
-# test_setArch
+# test_getSource
 #------------------------------------------
-sub test_setArch {
+sub test_getSource {
 	# ...
-	# Verify that the proper architecture value is set and returned.
+	# Verify that the proper sourceis returned.
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'soundcore.ko' );
-	my $fileDataObj = KIWIXMLFileData -> new(\%init );
+	my %init = (
+		arch   => 's390',
+		dest   => '/dev/sda1',
+		source => '/pxeData/myImage'
+	);
+	my $confDataObj = KIWIXMLPXEDeployConfigData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my $value = $fileDataObj -> setArch('x86_64');
-	$this -> assert_equals(1, $value);
+	my $value = $confDataObj -> getSource();
+	$this -> assert_str_equals('/pxeData/myImage', $value);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$value = $fileDataObj -> getArch();
-	$this -> assert_str_equals('x86_64', $value);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($fileDataObj);
-	return;
-}
-
-#==========================================
-# test_setArch_invalid
-#------------------------------------------
-sub test_setArch_invalid {
-	# ...
-	# Verify proper error condition handling for setArch().
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %init = ( name => 'soundcore.ko' );
-	my $fileDataObj = KIWIXMLFileData -> new(\%init );
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my $value = $fileDataObj -> setArch('tegra');
-	my $expectedMsg = "Specified arch 'tegra' is not supported";
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals($expectedMsg, $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($value);
-	$value = $fileDataObj -> getArch();
-	$this -> assert_null($value);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($fileDataObj);
+	$this -> assert_not_null($confDataObj);
 	return;
 }
 

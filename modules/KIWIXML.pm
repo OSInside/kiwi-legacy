@@ -47,6 +47,7 @@ use KIWIXMLProductMetaFileData;
 use KIWIXMLProductOptionsData;
 use KIWIXMLProductPackageData;
 use KIWIXMLProfileData;
+use KIWIXMLPXEDeployConfigData;
 use KIWIXMLPXEDeployData;
 use KIWIXMLRepositoryData;
 use KIWIXMLSplitData;
@@ -96,6 +97,7 @@ sub new {
 	#         ec2config  = KIWIXMLEC2ConfigData,
 	#         machine    = KIWIXMLVMachineData,
 	#         oemconfig  = KIWIXMLOEMConfigData,
+	#         pxeconfig  = (KIWIXMLPXEDeployConfigData,...),
 	#         pxedeploy  = KIWIXMLPXEDeployData,
 	#         split      = KIWIXMLSplitData,
 	#         systemdisk = KIWIXMLSystemdiskData
@@ -106,6 +108,7 @@ sub new {
 	#         ec2config  = KIWIXMLEC2ConfigData,
 	#         machine    = KIWIXMLVMachineData,
 	#         oemconfig  = KIWIXMLOEMConfigData,
+	#         pxeconfig  = (KIWIXMLPXEDeployConfigData,...),
 	#         pxedeploy  = KIWIXMLPXEDeployData,
 	#         split      = KIWIXMLSplitData,
 	#         systemdisk = KIWIXMLSystemdiskData
@@ -188,6 +191,7 @@ sub new {
 	#                        ec2config  = KIWIXMLEC2ConfigData,
 	#                        machine    = KIWIXMLVMachineData,
 	#                        oemconfig  = KIWIXMLOEMConfigData,
+	#                        pxeconfig  = (KIWIXMLPXEDeployConfigData,...),
 	#                        pxedeploy  = KIWIXMLPXEDeployData,
 	#                        split      = KIWIXMLSplitData,
 	#                        systemdisk = KIWIXMLSystemdiskData
@@ -1671,6 +1675,19 @@ sub getPXEConfig {
 }
 
 #==========================================
+# getPXEConfigData
+#------------------------------------------
+sub getPXEConfigData {
+	# ...
+	# Return an array ref containing PXEDeployConfigData objects for
+	# current build type.
+	# ---
+	my $this = shift;
+	my $selType = $this->{selectedType};
+	return $this->{selectedType}->{pxeconfig};
+}
+
+#==========================================
 # getRepositories
 #------------------------------------------
 sub getRepositories {
@@ -2228,9 +2245,8 @@ sub __createProductOptions {
 #------------------------------------------
 sub __createPXEDeployConfig {
 	# ...
-	# Return a ref to a hash containing the configuration for <pxedeploy>
-	# of the given XML:ELEMENT object. Build a data structure that matches
-	# the structure defined in KIWIXMLPXEDeployData
+	# Return a KIWIXMLPXEDeployData object created from the information
+	# in the <pxedeploy> element of the given XML:ELEMENT object.
 	# ---
 	my $this = shift;
 	my $node = shift;
@@ -2242,29 +2258,6 @@ sub __createPXEDeployConfig {
 	}
 	my $pxeNode = $pxeDeployNode -> get_node(1);
 	$pxeConfig{blocksize} = $pxeNode -> getAttribute('blocksize');
-	#==========================================
-	# Process <configuration>
-	#------------------------------------------
-	my $configNode = $pxeNode -> getChildrenByTagName('configuration');
-	if ( $configNode ) {
-		my $configSet = $configNode -> get_node(1);
-		my $archDef = $configSet -> getAttribute('arch');
-		if ($archDef) {
-			my @arches = split /,/, $archDef;
-			for my $arch (@arches) {
-				if (! $this->{supportedArch}{$arch} ) {
-					my $kiwi = $this->{kiwi};
-					my $msg = "Unsupported arch '$arch' in PXE setup.";
-					$kiwi -> error ($msg);
-					$kiwi -> failed ();
-					return -1;
-				}
-			}
-			$pxeConfig{configArch}   = \@arches;
-		}
-		$pxeConfig{configDest}   = $configSet -> getAttribute('dest');
-		$pxeConfig{configSource} = $configSet -> getAttribute('source');
-	}
 	$pxeConfig{initrd} = $this -> __getChildNodeTextValue($pxeNode, 'initrd');
 	$pxeConfig{kernel} = $this -> __getChildNodeTextValue($pxeNode, 'kernel');
 	#==========================================
@@ -2301,6 +2294,48 @@ sub __createPXEDeployConfig {
 	}
 	my $pxeConfObj = KIWIXMLPXEDeployData -> new(\%pxeConfig);
 	return $pxeConfObj;
+}
+
+#==========================================
+# __createPXEDeployConfigData
+#------------------------------------------
+sub __createPXEDeployConfigData {
+	# ...
+	# Return an array ref to an array containing KIWIXMLPXEDeployConfigData
+	# objects. Created from the information
+	# in the <pxedeploy> element of the given XML:ELEMENT object.
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $kiwi = $this->{kiwi};
+	my %pxeConfigData;
+	my $pxeDeployNode = $node -> getChildrenByTagName('pxedeploy');
+	if (! $pxeDeployNode ) {
+		return;
+	}
+	my @pxeConfigs;
+	my $pxeNode = $pxeDeployNode -> get_node(1);
+	my @configNodes = $pxeNode -> getChildrenByTagName('configuration');
+	for my $confNd (@configNodes) {
+		my $archDef = $confNd -> getAttribute('arch');
+		if ($archDef) {
+			my @arches = split /,/, $archDef;
+			for my $arch (@arches) {
+				if (! $this->{supportedArch}{$arch} ) {
+					my $kiwi = $this->{kiwi};
+					my $msg = "Unsupported arch '$arch' in PXE setup.";
+					$kiwi -> error ($msg);
+					$kiwi -> failed ();
+					return -1;
+				}
+			}
+			$pxeConfigData{arch} = $archDef;
+		}
+		$pxeConfigData{dest}   = $confNd -> getAttribute('dest');
+		$pxeConfigData{source} = $confNd -> getAttribute('source');
+		push @pxeConfigs, KIWIXMLPXEDeployConfigData -> new(\%pxeConfigData);
+	}
+	return \@pxeConfigs
 }
 
 #==========================================
@@ -2975,12 +3010,11 @@ sub __genTypeHash {
 		#==========================================
 		# store <pxeconfig> child
 		#------------------------------------------
-		#$typeData{pxedeploy} = $this -> __createPXEDeployConfig($type);
-		#if ($typeData{pxedeploy} && $typeData{pxedeploy} == -1) {
-		#	return -1;
-		#}
 		my $pxeConfig = $this -> __createPXEDeployConfig($type);
-		if ($pxeConfig && $pxeConfig == -1) {
+		#==========================================
+		# store <configuration>, child of <pxeconfig>
+		my $pxeConfigData = $this -> __createPXEDeployConfigData($type);
+		if ($pxeConfigData && $pxeConfigData == -1) {
 			return -1;
 		}
 		#==========================================
@@ -3013,6 +3047,7 @@ sub __genTypeHash {
 			ec2config  => $ec2Config,
 			machine    => $vmConfig,
 			oemconfig  => $oemConfig,
+			pxeconfig  => $pxeConfigData,
 			pxedeploy  => $pxeConfig,
 			split      => $splitData,
 			systemdisk => $sysDisk,
@@ -7364,215 +7399,6 @@ sub getProfiles_legacy {
 		push @result, { %profile };
 	}
 	return @result;
-}
-
-#==========================================
-# getPXEDeployInitrd_legacy
-#------------------------------------------
-sub getPXEDeployInitrd_legacy {
-	# ...
-	# Get the deploy initrd, if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	my $initrd = $node -> getElementsByTagName ("initrd");
-	if ((defined $initrd) && ! ("$initrd" eq "")) {
-		return "$initrd";
-	} else {
-		return;
-	}
-}
-
-#==========================================
-# getPXEDeployUnionConfig_legacy
-#------------------------------------------
-sub getPXEDeployUnionConfig_legacy {
-	# ...
-	# Get the union file system configuration, if any
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("union") -> get_node(1);
-	my %config = ();
-	if (! $node) {
-		return %config;
-	}
-	$config{ro}   = $node -> getAttribute ("ro");
-	$config{rw}   = $node -> getAttribute ("rw");
-	$config{type} = $node -> getAttribute ("type");
-	return %config;
-}
-
-#==========================================
-# getPXEDeployImageDevice_legacy
-#------------------------------------------
-sub getPXEDeployImageDevice_legacy {
-	# ...
-	# Get the device the image will be installed to
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("partitions") -> get_node(1);
-	if (defined $node) {
-		return $node -> getAttribute ("device");
-	} else {
-		return;
-	}
-}
-
-#==========================================
-# getPXEDeployServer_legacy
-#------------------------------------------
-sub getPXEDeployServer_legacy {
-	# ...
-	# Get the server the config data is obtained from
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	if (defined $node) {
-		return $node -> getAttribute ("server");
-	} else {
-		return "192.168.1.1";
-	}
-}
-
-#==========================================
-# getPXEDeployBlockSize_legacy
-#------------------------------------------
-sub getPXEDeployBlockSize_legacy {
-	# ...
-	# Get the block size the deploy server should use
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	if (defined $node) {
-		return $node -> getAttribute ("blocksize");
-	} else {
-		return "4096";
-	}
-}
-
-#==========================================
-# getPXEDeployPartitions_legacy
-#------------------------------------------
-sub getPXEDeployPartitions_legacy {
-	# ...
-	# Get the partition configuration for this image
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $partitions = $tnode 
-		-> getElementsByTagName ("partitions") -> get_node(1);
-	my @result = ();
-	if (! $partitions) {
-		return @result;
-	}
-	my $partitionNodes = $partitions -> getElementsByTagName ("partition");
-	for (my $i=1;$i<= $partitionNodes->size();$i++) {
-		my $node = $partitionNodes -> get_node($i);
-		my $number = $node -> getAttribute ("number");
-		my $type = $node -> getAttribute ("type");
-		if (! defined $type) {
-			$type = "L";
-		}
-		my $size = $node -> getAttribute ("size");
-		if (! defined $size) {
-			$size = "x";
-		}
-		my $mountpoint = $node -> getAttribute ("mountpoint");
-		if (! defined $mountpoint) {
-			$mountpoint = "x";
-		}
-		my $target = $node -> getAttribute ("target");
-		if ((! $target) || ($target eq "false") || ($target eq "0")) {
-			$target = 0;
-		} else {
-			$target = 1
-		}
-		my %part = ();
-		$part{number} = $number;
-		$part{type} = $type;
-		$part{size} = $size;
-		$part{mountpoint} = $mountpoint;
-		$part{target} = $target;
-		push @result, { %part };
-	}
-	my @ordered = sort { $a->{number} cmp $b->{number} } @result;
-	return @ordered;
-}
-
-#==========================================
-# getPXEDeployConfiguration_legacy
-#------------------------------------------
-sub getPXEDeployConfiguration_legacy {
-	# ...
-	# Get the configuration file information for this image
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my @node = $tnode -> getElementsByTagName ("configuration");
-	my %result;
-	foreach my $element (@node) {
-		my $source = $element -> getAttribute("source");
-		my $dest   = $element -> getAttribute("dest");
-		my $forarch= $element -> getAttribute("arch");
-		my $allowed= 1;
-		if (defined $forarch) {
-			my @archlst = split (/,/,$forarch);
-			my $foundit = 0;
-			foreach my $archok (@archlst) {
-				if ($archok eq $this->{arch}) {
-					$foundit = 1; last;
-				}
-			}
-			if (! $foundit) {
-				$allowed = 0;
-			}
-		}
-		if ($allowed) {
-			$result{$source} = $dest;
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getPXEDeployTimeout_legacy
-#------------------------------------------
-sub getPXEDeployTimeout_legacy {
-	# ...
-	# Get the boot timeout, if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	my $timeout = $node -> getElementsByTagName ("timeout");
-	if ((defined $timeout) && ! ("$timeout" eq "")) {
-		return "$timeout";
-	} else {
-		return;
-	}
-}
-
-#==========================================
-# getPXEDeployKernel_legacy
-#------------------------------------------
-sub getPXEDeployKernel_legacy {
-	# ...
-	# Get the deploy kernel, if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	my $kernel = $node -> getElementsByTagName ("kernel");
-	if ((defined $kernel) && ! ("$kernel" eq "")) {
-		return "$kernel";
-	} else {
-		return;
-	}
 }
 
 #==========================================
