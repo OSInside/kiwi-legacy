@@ -65,10 +65,10 @@ our @BT;
 # Globals
 #--------------------------------------------
 my $kiwi     = KIWILog -> instance();
-our $global  = KIWIGlobals -> new ();
+my $global   = KIWIGlobals -> instance();
 our $locator = KIWILocator -> new ();
 $kiwi -> setLogServer (
-	$global -> getGlobals() -> {LogServerPort}
+	$global -> getKiwiConfig() -> {LogServerPort}
 );
 
 #============================================
@@ -97,7 +97,7 @@ sub main {
 	# of a XML control file. Once prepared KIWI can create several
 	# OS image types.
 	# ---
-	my $gdata = $global -> getGlobals();
+	my $gdata = $global -> getKiwiConfig();
 	#==========================================
 	# Initialize and check options
 	#------------------------------------------
@@ -604,7 +604,7 @@ sub init {
 	#==========================================
 	# Option variables
 	#------------------------------------------
-	my $gdata = $global -> getGlobals();
+	my $gdata = $global -> getKiwiConfig();
 	my $Help;
 	my $ArchiveImage;          # archive image results into a tarball
 	my $FSBlockSize;           # filesystem block size
@@ -1615,7 +1615,7 @@ sub listImage {
 	# ...
 	# list known image descriptions and exit
 	# ---
-	my $gdata  = $global -> getGlobals();
+	my $gdata  = $global -> getKiwiConfig();
 	my $system = $gdata->{System};
 	opendir (FD,$system);
 	my @images = readdir (FD); closedir (FD);
@@ -1656,7 +1656,7 @@ sub checkConfig {
 	# Check the specified configuration file
 	# ---
 	my $config = shift;
-	my $gdata  = $global -> getGlobals();
+	my $gdata  = $global -> getKiwiConfig();
 	if (! -f $config) {
 		$kiwi -> error (
 			"Could not access specified file to check: $config"
@@ -1694,7 +1694,7 @@ sub cloneImage {
 	# ----
 	my $clone      = shift;
 	my $answer     = "unknown";
-	my $gdata      = $global -> getGlobals();
+	my $gdata      = $global -> getKiwiConfig();
 	my $configName = $gdata->{ConfigName};
 	my $system     = $gdata->{System};
 	my $destination= $cmdL->getImageTargetDir();
@@ -1853,7 +1853,7 @@ sub version {
 	# Version information
 	# ---
 	my $exit  = shift;
-	my $gdata = $global -> getGlobals();
+	my $gdata = $global -> getKiwiConfig();
 	if (! defined $exit) {
 		$exit = 0;
 	}

@@ -65,20 +65,16 @@ sub new {
 		$kiwi -> failed ();
 		return;
 	}
-	if (! $main::global) {
-		$kiwi -> error  ("Globals object not found");
-		$kiwi -> failed ();
-		return;
-	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	my $global = KIWIGlobals -> instance();
 	$this->{kiwi}      = $kiwi;
 	$this->{imageDesc} = $imageDesc;
 	$this->{imageDest} = $imageDest;
 	$this->{xml}       = $xml;
 	$this->{root}      = $root;
-	$this->{gdata}     = $main::global -> getGlobals();
+	$this->{gdata}     = $global -> getKiwiConfig();
 	return $this;
 }
 

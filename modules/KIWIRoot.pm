@@ -24,7 +24,11 @@ use Carp qw (cluck);
 use File::Glob ':glob';
 use File::Find;
 use FileHandle;
+#==========================================
+# KIWI Modules
+#------------------------------------------
 use KIWIConfigure;
+use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
 use KIWIManagerApt;
@@ -91,11 +95,6 @@ sub new {
 	my %repository = $xml -> getRepositories_legacy();
 	if (! %repository) {
 		$kiwi -> error ("No repository specified in XML tree");
-		$kiwi -> failed ();
-		return;
-	}
-	if (! $main::global) {
-		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
 		return;
 	}
@@ -200,6 +199,7 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	my $global = KIWIGlobals -> instance();
 	$this->{kiwi}          = $kiwi;
 	$this->{sourceChannel} = \%sourceChannel;
 	$this->{xml}           = $xml;
@@ -210,7 +210,7 @@ sub new {
 	$this->{addPacks}      = $addPacks;
 	$this->{delPacks}      = $delPacks;
 	$this->{cacheRoot}     = $cacheRoot;
-	$this->{gdata}         = $main::global -> getGlobals();
+	$this->{gdata}         = $global -> getKiwiConfig();
 	#==========================================
 	# check channel count
 	#------------------------------------------
@@ -1175,7 +1175,7 @@ sub setup {
 		$kiwi -> info ("Calling image script: config.sh");
 		qxx (" cp $imageDesc/config.sh $root/tmp ");
 		qxx (" chmod u+x $root/tmp/config.sh ");
-		my ($code,$data) = $main::global -> callContained (
+		my ($code,$data) = KIWIGlobals -> instance() -> callContained (
 			$root,"/tmp/config.sh"
 		);
 		if ($code != 0) {

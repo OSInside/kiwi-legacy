@@ -22,8 +22,12 @@ use warnings;
 use Carp qw (cluck);
 use File::Basename;
 use FileHandle;
-use KIWILog;
 use LWP;
+#==========================================
+# KIWI Modules
+#------------------------------------------
+use KIWIGlobals;
+use KIWILog;
 use KIWIQX qw (qxx);
 
 #==========================================
@@ -60,9 +64,9 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	if ($main::global) {
-		$this->{gdata}= $main::global -> getGlobals();
-	}
+	my $global = KIWIGlobals -> instance();
+	$this->{gdata}= $global ->getKiwiConfig ();
+
 	#==========================================
 	# Store object data
 	#------------------------------------------

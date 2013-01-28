@@ -22,12 +22,16 @@ package KIWIImageFormat;
 #------------------------------------------
 use strict;
 use warnings;
-use KIWILog;
-use KIWIQX qw (qxx);
 use FileHandle;
 use File::Basename;
+#==========================================
+# KWIW Modules
+#------------------------------------------
 use KIWIBoot;
+use KIWIGlobals;
 use KIWILocator;
+use KIWILog;
+use KIWIQX qw (qxx);
 
 #==========================================
 # Constructor
@@ -62,7 +66,8 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{gdata} = $main::global -> getGlobals();
+	my $global = KIWIGlobals -> instance();
+	$this->{gdata} = $global -> getKiwiConfig();
 	#==========================================
 	# check image file
 	#------------------------------------------
@@ -98,14 +103,6 @@ sub new {
 		if (($type) && ($type->{format})) {
 			$format = $type->{format};
 		}
-	}
-	#==========================================
-	# check global pointer
-	#------------------------------------------
-	if (! $main::global) {
-		$kiwi -> error  ("Globals object not found");
-		$kiwi -> failed ();
-		return;
 	}
 	#==========================================
 	# Read some XML data

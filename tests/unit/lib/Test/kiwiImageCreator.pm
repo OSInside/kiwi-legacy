@@ -49,7 +49,7 @@ sub test_ctor_noCmdlArg {
 	my $kic = KIWIImageCreator -> new();
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'KIWIImageCreator: expecting KIWICommandLine object as '
-		. 'second argument.';
+		. 'argument.';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);

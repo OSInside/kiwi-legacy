@@ -25,6 +25,8 @@ use Carp qw (cluck);
 use Fcntl; # needed for some constants for sysopen
 use File::Find;
 use File::Basename;
+
+use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
 use KIWIQX qw (qxx);
@@ -83,11 +85,6 @@ sub new {
 	}
 	if (! defined $dest) {
 		$kiwi -> error  ("No destination file specified");
-		$kiwi -> failed ();
-		return;
-	}
-	if (! $main::global) {
-		$kiwi -> error  ("Globals object not found");
 		$kiwi -> failed ();
 		return;
 	}
@@ -196,6 +193,7 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	my $global = KIWIGlobals -> instance();
 	$this -> {kiwi}        = $kiwi;
 	$this -> {source}      = $source;
 	$this -> {dest}        = $dest;
@@ -207,7 +205,7 @@ sub new {
 	$this -> {catalog}     = \@catalog;
 	$this -> {tool}        = $tool;
 	$this -> {check}       = $mediacheck;
-	$this -> {gdata}       = $main::global -> getGlobals();
+	$this -> {gdata}       = $global -> getKiwiConfig();
 	$this -> {cmdL}        = $cmdL;
 	$this -> {xml}         = $xml;
 	$this -> {magicID}     = '7984fc91-a43f-4e45-bf27-6d3aa08b24cf';

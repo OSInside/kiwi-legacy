@@ -22,6 +22,10 @@ use warnings;
 require Exporter;
 use Digest::MD5 qw (md5_hex);
 use File::Spec;
+#==========================================
+# KIWIModules
+#------------------------------------------
+use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
 use KIWIQX qw (qxx);
@@ -60,9 +64,9 @@ sub new {
 	#==========================================
 	# Store Object data
 	#------------------------------------------
-	if ($main::global) {
-		$this->{gdata} = $main::global -> getGlobals();
-	}
+	my $global = KIWIGlobals -> instance();
+	$this->{gdata} = $global -> getKiwiConfig();
+
 	return $this;
 }
 
