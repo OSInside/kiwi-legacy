@@ -47,9 +47,6 @@ sub new {
 	#
 	# this = {
 	#     blocksize    = '',
-	#     configArch   = '',
-	#     configDest   = '',
-	#     configSource = '',
 	#     device       = '',
 	#     initrd       = '',
 	#     kernel       = '',
@@ -69,6 +66,10 @@ sub new {
 	#
 	# The key, ID (key) in the partitions hash is equal to the "number"
 	# attribute in the config.xml file.
+	#
+	# The <pxedeploy> element has a <configuration> child element. This
+	# child relation ship is enforced at the XML class level and the
+	# configuration data is not accessible from this class.
 	# ---
 	#==========================================
 	# Object setup
@@ -83,8 +84,16 @@ sub new {
 	# Argument checking and object data store
 	#------------------------------------------
 	my %keywords = map { ($_ => 1) } qw(
-		blocksize configArch configDest configSource device initrd kernel
-		partitions server timeout unionRO unionRW unionType
+		blocksize
+		device
+		initrd
+		kernel
+		partitions
+		server
+		timeout
+		unionRO
+		unionRW
+		unionType
 	);
 	$this->{supportedKeywords} = \%keywords;
 	if (! $this -> __isInitHashRef($init) ) {
@@ -99,9 +108,6 @@ sub new {
 			return;
 		}
 		$this->{blocksize}     = $init->{blocksize};
-		$this->{configArch}    = $init->{configArch};
-		$this->{configDest}    = $init->{configDest};
-		$this->{configSource}  = $init->{configSource};
 		$this->{device}        = $init->{device};
 		$this->{initrd}        = $init->{initrd};
 		$this->{kernel}        = $init->{kernel};
@@ -112,13 +118,21 @@ sub new {
 		$this->{unionRW}       = $init->{unionRW};
 		$this->{unionType}     = $init->{unionType};
 	}
+	#==========================================
+	# Apply defaults
+	#------------------------------------------
 	if (! $this->{blocksize} ) {
 		$this->{blocksize} = '4096';
 	}
 	if (! $this->{server} ) {
 		$this->{server} = '192.168.1.1';
 	}
-	
+	if (! $this->{unionType} ) {
+		$this->{unionType} = "clicfs";
+	}
+	if ($this->{partitions}) {
+		$this -> __applyPartitionDefaultSettings();
+	}
 	return $this;
 }
 
@@ -139,7 +153,11 @@ sub createPartition {
 		return;
 	}
 	my %partSupported = map { ($_ => 1) } qw (
-		mountpoint number size target type
+		mountpoint
+		number
+		size
+		target
+		type
 	);
 	for my $key (keys %{$partInfo}) {
 		if (! $partSupported{$key} ) {
@@ -195,6 +213,7 @@ sub createPartition {
 		type       => $partInfo->{type}
 	);
 	$this->{partitions}{$id} = \%partData;
+	$this -> __applyPartitionDefaultSettings();
 	return $id;
 }
 
@@ -246,39 +265,6 @@ sub getBlocksize {
 }
 
 #==========================================
-# getConfigurationArch
-#------------------------------------------
-sub getConfigurationArch {
-	# ...
-	# Return the architecture
-	# ---
-	my $this = shift;
-	return $this->{configArch};
-}
-
-#==========================================
-# getConfigurationDestination
-#------------------------------------------
-sub getConfigurationDestination {
-	# ...
-	# Return the destination
-	# ---
-	my $this = shift;
-	return $this->{configDest};
-}
-
-#==========================================
-# getConfigurationSource
-#------------------------------------------
-sub getConfigurationSource {
-	# ...
-	# Return the package source
-	# ---
-	my $this = shift;
-	return $this->{configSource};
-}
-
-#==========================================
 # getDevice
 #------------------------------------------
 sub getDevice {
@@ -319,8 +305,11 @@ sub getPartitionIDs {
 	# Return a sorted array ref of the partition IDs configured
 	# ---
 	my $this = shift;
-	my @partIDs = sort keys %{$this->{partitions}};
-	return \@partIDs;
+	if ($this->{partitions}) {
+		my @partIDs = sort keys %{$this->{partitions}};
+		return \@partIDs;
+	}
+	return;
 }
 
 #==========================================
@@ -465,18 +454,6 @@ sub getXMLElement {
 	my $element = XML::LibXML::Element -> new('pxedeploy');
 	$element -> setAttribute('blocksize', $this -> getBlocksize());
 	$element -> setAttribute('server', $this -> getServer());
-	my $confDest = $this -> getConfigurationDestination();
-	if ($confDest) {
-		my $confElem = XML::LibXML::Element -> new('configuration');
-		$confElem -> setAttribute('dest', $confDest);
-		$confElem -> setAttribute('source', $this -> getConfigurationSource());
-		my @confArch = @{$this -> getConfigurationArch()};
-		if (@confArch) {
-			my $archDef = join q{,}, @confArch;
-			$confElem -> setAttribute('arch', $archDef);
-		}
-		$element -> addChild($confElem);
-	}
 	my %initBootImg = (
 		parent    => $element,
 		childName => 'initrd',
@@ -499,17 +476,17 @@ sub getXMLElement {
 		for my $id (@pIDs) {
 			my $pElem = XML::LibXML::Element -> new('partition');
 			my $mount = $this -> getPartitionMountpoint($id);
-			if ($mount) {
+			if ($mount && $mount ne 'x') {
 				$pElem -> setAttribute('mountpoint', $mount);
 			}
 			$pElem -> setAttribute('number', $this -> getPartitionNumber($id));
 			my $size = $this -> getPartitionSize($id);
-			if ($size) {
+			if ($size && $size ne 'x') {
 				$pElem -> setAttribute('size', $size);
 			}
 			my $target = $this -> getPartitionTarget($id);
-			if ($target) {
-				$pElem -> setAttribute('target', $target);
+			if ($target && $target == 1) {
+				$pElem -> setAttribute('target', 'true');
 			}
 			$pElem -> setAttribute('type', $this -> getPartitionType($id));
 			$partElem -> addChild($pElem);
@@ -550,72 +527,6 @@ sub setBlocksize {
 		$kiwi -> done();
 	}
 	$this->{blocksize} = $blockS;
-	return $this;
-}
-
-#==========================================
-# setConfiguration
-#------------------------------------------
-sub setConfiguration {
-	# ...
-	# Set the base configuration
-	# ---
-	my $this     = shift;
-	my $confDest = shift;
-	my $confSrc  = shift;
-	if (! $confDest || !$confSrc ) {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setConfiguration: must be called with 2 arguments, '
-			. 'confDest and confSrc. Retaining current data.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	$this->{configDest}   = $confDest;
-	$this->{configSource} = $confSrc;
-	return $this;
-}
-
-#==========================================
-# setConfigurationArch
-#------------------------------------------
-sub setConfigurationArch {
-	# ...
-	# Set the architecture for the configuration
-	# ---
-	my $this = shift;
-	my $arch = shift;
-	my $kiwi = $this->{kiwi};
-	if (! $arch) {
-		my $msg = 'setConfigurationArch: no architecture argument provided, '
-			. 'retaining current data.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (! $this->{configDest}) {
-		my $msg = 'setConfigurationArch: configuration is not setup, call '
-			. 'setConfiguration first.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (ref($arch) ne 'ARRAY') {
-		my $msg = 'setConfigurationArch: expecting array ref as argument.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	for my $ar (@{$arch}) {
-		if (! $this->{supportedArch}{$ar} ) {
-			my $msg = "setConfigurationArch: given architecture '$ar' not "
-			. 'supported retaining current data.';
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return;
-		}
-	}
-	$this->{configArch} = $arch;
 	return $this;
 }
 
@@ -858,29 +769,28 @@ sub setTimeout {
 # Private helper methods
 #------------------------------------------
 #==========================================
-# __isConfigSettingValid
+# __applyPartitionDefaultSettings
 #------------------------------------------
-sub __isConfigSettingValid {
+sub __applyPartitionDefaultSettings {
 	# ...
-	# Verify that the initialization hash given to the constructor contains
-	# a valid setup for the configuration.
+	# Apply default settings for partition data if it was not specified
 	# ---
 	my $this = shift;
-	my $init = shift;
-	my $kiwi = $this->{kiwi};
-	my $msg = 'Incomplete initialization hash "configDest" and "configSource" '
-		. 'must be specified together.';
-	if ($init->{configDest} && !$init->{configSource}) {
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
+	for my $id (keys %{$this->{partitions}}) {
+		if (! $this->{partitions}{$id}{mountpoint}) {
+			$this->{partitions}{$id}{mountpoint} = 'x';
+		}
+		if (! $this->{partitions}{$id}{size}) {
+			$this->{partitions}{$id}{size} = 'x';
+		}
+		my $tgt = $this->{partitions}{$id}{target};
+		if (! $tgt || $tgt eq 'false') {
+			$this->{partitions}{$id}{target} = 0;
+		} else {
+			$this->{partitions}{$id}{target} = 1;
+		}
 	}
-	if ($init->{configSource} && !$init->{configDest}) {
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return 1;
+	return $this;
 }
 
 #==========================================
@@ -894,16 +804,6 @@ sub __isInitConsistent {
 	my $this = shift;
 	my $init = shift;
 	my $kiwi = $this->{kiwi};
-	if ( $init->{configArch} && ref($init->{configArch}) ne 'ARRAY' ) {
-		my $msg = 'Expecting an array ref as entry of "configArch" in  '
-			. 'the initialization hash.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (! $this -> __isConfigSettingValid($init) ) {
-		return;
-	}
 	if (! $this -> __isPartitionConfigValid($init) ) {
 		return;
 	}

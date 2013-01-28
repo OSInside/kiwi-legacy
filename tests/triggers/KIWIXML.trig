@@ -9,6 +9,7 @@ KTXMLPackageIgnoreData.t
 KTXMLInfo.t
 KTXMLInstRepositoryData.t
 KTXMLOEMConfigData.t
+KTXMLPXEDeployConfigData.t
 KTXMLPXEDeployData.t
 KTXMLPackageArchiveData.t
 KTXMLPackageData.t
