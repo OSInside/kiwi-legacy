@@ -295,6 +295,7 @@ sub main {
 		#------------------------------------------
 		if (! $nofiles) {
 			$migrate -> setSystemOverlayFiles();
+			$migrate -> createTreeLayout();
 		}
 		$migrate -> getPackageList();
 		$migrate -> createReport();

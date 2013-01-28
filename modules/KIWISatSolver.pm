@@ -452,7 +452,9 @@ sub getPackages {
 #------------------------------------------
 sub DESTROY {
 	my $this = shift;
-	unlink $this->{solfile};
+	if ($this->{solfile}) {
+		unlink $this->{solfile};
+	}
 	return $this;
 }
 

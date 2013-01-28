@@ -242,6 +242,52 @@ sub new {
 }
 
 #==========================================
+# createTreeLayout
+#------------------------------------------
+sub createTreeLayout {
+	# ...
+	# use the d3 data visualization framework to show the
+	# tree of modified and custom files in a browser
+	# ---
+	my $this       = shift;
+	my $kiwi       = $this->{kiwi};
+	my $nopackage  = $this->{nopackage};
+	my $dest       = $this->{dest};
+	my %tree       = ();
+	if (! $nopackage) {
+		return;
+	}
+	my $FD = FileHandle -> new();
+	if (! $FD -> open (">$dest/files.html")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create files layout: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	foreach my $file (sort keys %{$nopackage}) {
+		my $fattr = $nopackage->{$file}->[1];
+		my @ori_items = split (/\//,$file);
+		my @new_items = ();
+		foreach my $item (@ori_items) {
+			next if $item eq '';
+			$item = quotemeta $item;
+			push @new_items,'{"'.$item.'"}';
+		}
+		my $hsh_entry = join ('',@new_items);
+		my $eval = "\$tree$hsh_entry = 0";
+		eval $eval ## no critic
+	}
+	# TODO: create correct perl hash %d3 suitable for
+	# for d3 data visualization framework. Example:
+	# http://mbostock.github.com/d3/talk/20111018/tree.html
+	#
+	# my %d3;
+	# my $json = JSON->new->allow_nonref;
+	# my $text = $json->pretty->encode( \%tree );
+	return $this;
+}
+
+#==========================================
 # createReport
 #------------------------------------------
 sub createReport {
@@ -937,23 +983,6 @@ sub setPrepareConfigSkript {
 	print $FD 'echo "Configure image: [$kiwi_iname]..."'."\n";
 	print $FD 'suseSetupProduct'."\n";
 	#==========================================
-	# Services...
-	#------------------------------------------
-	my @serviceList;
-	my @slist = qxx ('chkconfig -l | grep :on'); chomp @slist;
-	my $code = $? >> 8;
-	if ($code == 0) {
-		foreach my $line (@slist) {
-			my ($name) = split(/\s+/,$line);
-			push (@serviceList,$name);
-		}
-	}
-	if (@serviceList) {
-		foreach my $service (@serviceList) {
-			print $FD "suseInsertService '$service'"."\n";
-		}
-	}
-	#==========================================
 	# Repos...
 	#------------------------------------------
 	foreach my $source (keys %{$osc{$product}} ) {
@@ -1425,7 +1454,8 @@ sub setSystemOverlayFiles {
 		# search for unpackaged directories...
 		$kiwi -> info ("=> searching unpackaged directories...");
 		foreach my $dir (sort keys %dirs_cmp) {
-			my $FH;	opendir $FH,$dir;
+			my $FH;
+			next if ! opendir ($FH,$dir);
 			while (my $f = readdir $FH) {
 				next if $f eq "." || $f eq "..";
 				my $path = "$dir/$f";
@@ -1629,125 +1659,8 @@ sub setInitialSetup {
 	# During first deployment of the migrated image we will call
 	# YaST2 with the result of the yast2 clone system feature
 	# ---
-	# 1) create a framebuffer based xorg.conf file, needed for <= 11.1
-	# 2) run autoyastClone()
-	# ---
 	my $this = shift;
-	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
-	$kiwi -> info ("Setting up initial deployment workflow...");
-	#==========================================
-	# create root directory
-	#------------------------------------------
-	mkdir "$dest/root";
-	#==========================================
-	# create xorg.conf [fbdev]
-	#------------------------------------------
-	qxx ("mkdir -p $dest/root/etc/X11");
-	if (-f "/etc/X11/xorg.conf.install") {
-		qxx ("cp /etc/X11/xorg.conf.install $dest/root/etc/X11/xorg.conf");
-	} else {
-		my $FD = FileHandle -> new();
-		if (! $FD -> open (">$dest/root/etc/X11/xorg.conf")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create fbdev xorg.conf: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		#==========================================
-		# Files
-		#------------------------------------------
-		print $FD 'Section "Files"'."\n";
-		print $FD "\t".'FontPath   "/usr/share/fonts/truetype/"'."\n";
-		print $FD "\t".'FontPath   "/usr/share/fonts/uni/"'."\n";
-		print $FD "\t".'FontPath   "/usr/share/fonts/misc/"'."\n";
-		print $FD "\t".'ModulePath "/usr/lib/xorg/modules"'."\n";
-		print $FD 'EndSection'."\n";
-		#==========================================
-		# ServerFlags / Module
-		#------------------------------------------
-		print $FD 'Section "ServerFlags"'."\n";
-		print $FD "\t".'Option "AllowMouseOpenFail"'."\n";
-		print $FD "\t".'Option "BlankTime" "0"'."\n";
-		print $FD 'EndSection'."\n";
-		print $FD 'Section "Module"'."\n";
-		print $FD "\t".'Load  "dbe"'."\n";
-		print $FD "\t".'Load  "extmod"'."\n";
-		print $FD 'EndSection'."\n";
-		#==========================================
-		# InputDevice [kbd/mouse]
-		#------------------------------------------
-		print $FD 'Section "InputDevice"'."\n";
-		print $FD "\t".'Driver      "kbd"'."\n";
-		print $FD "\t".'Identifier  "Keyboard[0]"'."\n";
-		print $FD "\t".'Option      "Protocol"      "Standard"'."\n";
-		print $FD "\t".'Option      "XkbRules"      "xfree86"'."\n";
-		print $FD "\t".'Option      "XkbKeycodes"   "xfree86"'."\n";
-		print $FD "\t".'Option      "XkbModel"      "pc104"'."\n";
-		print $FD "\t".'Option      "XkbLayout"     "us"'."\n";
-		print $FD 'EndSection'."\n";
-		print $FD 'Section "InputDevice"'."\n";
-		print $FD "\t".'Driver      "mouse"'."\n";
-		print $FD "\t".'Identifier  "Mouse[1]"'."\n";
-		print $FD "\t".'Option      "Device"    "/dev/input/mice"'."\n";
-		print $FD "\t".'Option      "Protocol"  "explorerps/2"'."\n";
-		print $FD 'EndSection'."\n";
-		#==========================================
-		# Monitor
-		#------------------------------------------
-		print $FD 'Section "Monitor"'."\n";
-		print $FD "\t".'HorizSync     25-40'."\n";
-		print $FD "\t".'Identifier    "Monitor[0]"'."\n";
-		print $FD "\t".'ModelName     "Initial"'."\n";
-		print $FD "\t".'VendorName    "Initial"'."\n";
-		print $FD "\t".'VertRefresh   47-75'."\n";
-		print $FD 'EndSection'."\n";
-		#==========================================
-		# Screen
-		#------------------------------------------
-		print $FD 'Section "Screen"'."\n";
-		print $FD "\t".'SubSection "Display"'."\n";
-		print $FD "\t\t".'Depth  8'."\n";
-		print $FD "\t\t".'Modes  "default"'."\n";
-		print $FD "\t".'EndSubSection'."\n";
-		print $FD "\t".'SubSection "Display"'."\n";
-		print $FD "\t\t".'Depth  15'."\n";
-		print $FD "\t\t".'Modes  "default"'."\n";
-		print $FD "\t".'EndSubSection'."\n";
-		print $FD "\t".'SubSection "Display"'."\n";
-		print $FD "\t\t".'Depth  16'."\n";
-		print $FD "\t\t".'Modes  "default"'."\n";
-		print $FD "\t".'EndSubSection'."\n";
-		print $FD "\t".'SubSection "Display"'."\n";
-		print $FD "\t\t".'Depth  24'."\n";
-		print $FD "\t\t".'Modes  "default"'."\n";
-		print $FD "\t".'EndSubSection'."\n";
-		print $FD "\t".'Device     "Device[fbdev]"'."\n";
-		print $FD "\t".'Identifier "Screen[fbdev]"'."\n";
-		print $FD "\t".'Monitor    "Monitor[0]"'."\n";
-		print $FD 'EndSection'."\n";
-		#==========================================
-		# Device
-		#------------------------------------------
-		print $FD 'Section "Device"'."\n";
-		print $FD "\t".'Driver      "fbdev"'."\n";
-		print $FD "\t".'Identifier  "Device[fbdev]"'."\n";
-		print $FD 'EndSection'."\n";
-		#==========================================
-		# ServerLayout
-		#------------------------------------------
-		print $FD 'Section "ServerLayout"'."\n";
-		print $FD "\t".'Identifier    "Layout[all]"'."\n";
-		print $FD "\t".'InputDevice   "Keyboard[0]"  "CoreKeyboard"'."\n";
-		print $FD "\t".'InputDevice   "Mouse[1]"     "CorePointer"'."\n";
-		print $FD "\t".'Screen        "Screen[fbdev]"'."\n";
-		print $FD 'EndSection'."\n";
-		$FD -> close();
-	}
-	qxx (
-		"cp $dest/root/etc/X11/xorg.conf $dest/root/etc/X11/xorg.conf.install"
-	);
-	$kiwi -> done();
 	#==========================================
 	# Activate YaST on initial deployment
 	#------------------------------------------	
@@ -1908,7 +1821,9 @@ sub resolvePath {
 				last;
 			}
 		}
-		$current = join ("/",@path);
+		if (@path) {
+			$current = join ("/",@path);
+		}
 	}
 	#========================================
 	# resolve the rest
