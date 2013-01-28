@@ -27,6 +27,7 @@ use XML::LibXML;
 # KIWI Modules
 #------------------------------------------
 use KIWICommandLine;
+use KIWIGlobals;
 use KIWILog;
 use KIWIQX qw (qxx);
 use KIWIXML;
@@ -75,11 +76,6 @@ sub new {
 		$kiwi -> failed();
 		return;
 	}
-	if (! $main::global) {
-		$kiwi -> error  ("Globals object not found");
-		$kiwi -> failed ();
-		return;
-	}
 	#==========================================
 	# Reset logging target if requested
 	#------------------------------------------
@@ -93,6 +89,7 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	my $global = KIWIGlobals -> instance();
 	$this->{addlRepos}      = $cmdL -> getAdditionalRepos();
 	$this->{buildProfiles}  = $cmdL -> getBuildProfiles();
 	$this->{configDir}      = $configDir;
@@ -100,7 +97,7 @@ sub new {
 	$this->{kiwi}           = $kiwi;
 	$this->{packageManager} = $cmdL -> getPackageManager();
 	$this->{replRepo}       = $cmdL -> getReplacementRepo();
-	$this->{gdata}          = $main::global -> getGlobals();
+	$this->{gdata}          = $global -> getKiwiConfig();
 	$this->{cmdL}           = $cmdL;
 	$this->{xml}            = $xml;
 	return $this;

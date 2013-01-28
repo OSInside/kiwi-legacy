@@ -34,6 +34,7 @@ use POSIX qw(getcwd);
 #------------------------------------------
 use KIWIBoot;
 use KIWICommandLine;
+use KIWIGlobals;
 use KIWIImageCreator;
 use KIWIIsoLinux;
 use KIWILog;
@@ -108,11 +109,6 @@ sub new {
 		$kiwi -> failed ();
 		return;
 	}
-	if (! $main::global) {
-		$kiwi -> error  ("Globals object not found");
-		$kiwi -> failed ();
-		return;
-	}
 	if (! $cmdL -> getLogFile()) {
 		$imageTree =~ s/\/$//;
 		if (defined $imageOrig) {
@@ -126,6 +122,7 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	my $global = KIWIGlobals -> instance();
 	$this->{kiwi}       = $kiwi;
 	$this->{cmdL}       = $cmdL;
 	$this->{initCache}  = $initCache;
@@ -135,7 +132,7 @@ sub new {
 	$this->{imageStrip} = $imageStrip;
 	$this->{baseSystem} = $baseSystem;
 	$this->{arch}       = $arch;
-	$this->{gdata}      = $main::global -> getGlobals();
+	$this->{gdata}      = $global -> getKiwiConfig();
 	#==========================================
 	# Mount overlay tree if required...
 	#------------------------------------------
@@ -143,7 +140,7 @@ sub new {
 	#==========================================
 	# Store a disk label ID for this object
 	#------------------------------------------
-	$this->{mbrid} = $main::global -> getMBRDiskLabel (
+	$this->{mbrid} = KIWIGlobals -> instance() -> getMBRDiskLabel (
 		$cmdL -> getMBRID()
 	);
 	#==========================================
@@ -493,7 +490,9 @@ sub checkAndSetupPrebuiltBootImage {
 	if (! $bxml) {
 		return;
 	}
-	my $bootImageName = $main::global ->generateBuildImageName($bxml);
+	my $bootImageName = KIWIGlobals
+		-> instance()
+		-> generateBuildImageName($bxml);
 	undef $bxml;
 	$kiwi -> info ("Checking for pre-built boot image");
 	#==========================================
@@ -1355,7 +1354,9 @@ sub createImageRootAndBoot {
 	#==========================================
 	# Store meta data for subsequent calls
 	#------------------------------------------
-	$result{systemImage} = $main::global -> generateBuildImageName($sxml);
+	$result{systemImage} = KIWIGlobals
+		-> instance()
+		-> generateBuildImageName($sxml);
 	$result{bootImage}   = $bootdata[0];
 	if ($text eq "VMX") {
 		$result{format} = $stype{format};
@@ -1550,9 +1551,13 @@ sub createImageLiveCD {
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
-	my $namecd = $main::global -> generateBuildImageName($this->{xml}, ';');
-	my $namerw = $main::global -> generateBuildImageName($this->{xml});
-	my $namero = $main::global -> generateBuildImageName(
+	my $namecd = KIWIGlobals
+		-> instance()
+		-> generateBuildImageName($this->{xml}, ';');
+	my $namerw = KIWIGlobals
+		-> instance()
+		-> generateBuildImageName($this->{xml});
+	my $namero = KIWIGlobals -> instance() -> generateBuildImageName(
 		$this->{xml},'-', '-read-only'
 	);
 	if (! defined $namerw) {
@@ -2700,10 +2705,12 @@ sub createImageSplit {
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
-	my $namerw = $main::global -> generateBuildImageName(
+	my $namerw = KIWIGlobals -> instance() -> generateBuildImageName(
 		$this->{xml},'-', '-read-write'
 	);
-	my $namero = $main::global -> generateBuildImageName($this->{xml});
+	my $namero = KIWIGlobals
+		-> instance()
+		-> generateBuildImageName($this->{xml});
 	if (! defined $namerw) {
 		return;
 	}
@@ -3129,7 +3136,7 @@ sub createImageSplit {
 		if (! -d $source) {
 			next;
 		}
-		my %fsattr = $main::global -> checkFileSystem ($type);
+		my %fsattr = KIWIGlobals -> instance() -> checkFileSystem ($type);
 		if (! $fsattr{readonly}) {
 			#==========================================
 			# mount logical extend for data transfer
@@ -3322,7 +3329,9 @@ sub createImageSplit {
 	#==========================================
 	# Store meta data for subsequent calls
 	#------------------------------------------
-	$name->{systemImage} = $main::global -> generateBuildImageName($sxml);
+	$name->{systemImage} = KIWIGlobals
+		-> instance()
+		-> generateBuildImageName($sxml);
 	$name->{bootImage}   = $bootdata[0];
 	$name->{format}      = $type{format};
 	if ($boot =~ /vmxboot|oemboot/) {
@@ -3426,7 +3435,9 @@ sub preImage {
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
-	my $name = $main::global -> generateBuildImageName($this->{xml});
+	my $name = KIWIGlobals
+		-> instance()
+		-> generateBuildImageName($this->{xml});
 	if (! defined $name) {
 		return;
 	}
@@ -3454,12 +3465,13 @@ sub writeImageConfig {
 	my $name = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
-	my $configName = $main::global -> generateBuildImageName($this->{xml})
-		. '.config';
+	my $configName = KIWIGlobals
+	-> instance()
+	-> generateBuildImageName($this->{xml});
+	$configName .= '.config';
 	my $pxeConfig = $xml -> getPXEConfig();
 	my $device = $pxeConfig -> getDevice();
 	my $bldType = $xml -> getImageType();
-	#my %type = %{$xml -> getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# create .config for types which needs it
 	#------------------------------------------
@@ -3472,9 +3484,9 @@ sub writeImageConfig {
 			$kiwi -> failed ();
 			return;
 		}
-		my $namecd = $main::global
+		my $namecd = KIWIGlobals -> instance()
 			-> generateBuildImageName($this->{xml}, ';');
-		my $namerw = $main::global
+		my $namerw = KIWIGlobals -> instance()
 			-> generateBuildImageName($this->{xml},';', '-read-write');
 		my $server = $pxeConfig -> getServer();
 		my $blocks = $pxeConfig -> getBlocksize();
@@ -3502,7 +3514,7 @@ sub writeImageConfig {
 				}
 				my $partSize = $pxeConfig -> getPartitionSize($partID);
 				if ($partSize eq 'image') {
-					my $size = $main::global -> isize (
+					my $size = KIWIGlobals -> instance() -> isize (
 						"$this->{imageDest}/$name"
 					);
 					print $FD int (($size/1024/1024)+1);
@@ -3671,7 +3683,9 @@ sub postImage {
 	#------------------------------------------
 	if (! defined $initCache) {
 		if (($fstype) && ($fstype eq 'btrfs')) {
-			$extend = $main::global -> setupBTRFSSubVolumes ($extend);
+			$extend = KIWIGlobals
+				-> instance()
+				-> setupBTRFSSubVolumes ($extend);
 			if (! $extend) {
 				$this -> cleanLuks();
 				return;
@@ -3823,7 +3837,7 @@ sub buildLogicalExtend {
 	if ($type{luks}) {
 		$encode = 1;
 		$cipher = "$type{luks}";
-		$main::global -> setGlobals ("LuksCipher",$cipher);
+		KIWIGlobals -> instance() -> setKiwiConfigData ("LuksCipher",$cipher);
 	}
 	#==========================================
 	# Calculate block size and number of blocks
@@ -3977,7 +3991,9 @@ sub installLogicalExtend {
 	#------------------------------------------
 	if (($device) && (! $this->{gdata}->{StudioNode})) {
 		$this -> cleanMount();
-		$name = $main::global -> generateBuildImageName($this->{xml});
+		$name = KIWIGlobals
+			-> instance()
+			-> generateBuildImageName($this->{xml});
 		my $dest = $this->{imageDest}."/".$name;
 		$kiwi -> info ("Dumping filesystem image from $device...");
 		$data = qxx ("qemu-img convert -f raw -O raw $device $dest 2>&1");
@@ -4010,7 +4026,7 @@ sub setupLogicalExtend {
 	#------------------------------------------
 	if ((! defined $initCache) && (-x "$imageTree/image/images.sh")) {
 		$kiwi -> info ("Calling image script: images.sh");
-		my ($code,$data) = $main::global -> callContained (
+		my ($code,$data) = KIWIGlobals -> instance() -> callContained (
 			$imageTree,"/image/images.sh"
 		);
 		if ($code != 0) {
@@ -4372,7 +4388,7 @@ sub setupEXT2 {
 	my %type    = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $fsopts;
 	my $tuneopts;
-	my %FSopts = $main::global -> checkFSOptions(
+	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
 		@{$cmdL->getFilesystemOptions()}
 	);
 	my $fstool;
@@ -4437,7 +4453,7 @@ sub setupBTRFS {
 	my $device = shift;
 	my $cmdL   = $this->{cmdL};
 	my $kiwi   = $this->{kiwi};
-	my %FSopts = $main::global -> checkFSOptions(
+	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
 		@{$cmdL->getFilesystemOptions()}
 	);
 	my $fsopts = $FSopts{btrfs};
@@ -4474,7 +4490,7 @@ sub setupReiser {
 	my $device = shift;
 	my $cmdL   = $this->{cmdL};
 	my $kiwi   = $this->{kiwi};
-	my %FSopts = $main::global -> checkFSOptions(
+	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
 		@{$cmdL->getFilesystemOptions()}
 	);
 	my $fsopts = $FSopts{reiserfs};
@@ -4591,7 +4607,7 @@ sub setupXFS {
 	my $device = shift;
 	my $cmdL   = $this->{cmdL};
 	my $kiwi   = $this->{kiwi};
-	my %FSopts = $main::global -> checkFSOptions(
+	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
 		@{$cmdL->getFilesystemOptions()}
 	);
 	my $fsopts = $FSopts{xfs};
@@ -4644,7 +4660,7 @@ sub buildMD5Sum {
 	# Create image md5sum
 	#------------------------------------------
 	$kiwi -> info ("Creating image MD5 sum...");
-	my $size = int $main::global -> isize ($image);
+	my $size = int KIWIGlobals -> instance() -> isize ($image);
 	my $primes = qxx ("factor $size");
 	$primes =~ s/^.*: //;
 	my $blocksize = 1;
@@ -4776,7 +4792,7 @@ sub updateMD5File {
 		my $line = <$FD>;
 		close $FD;
 		chomp $line;
-		my $size = $main::global -> isize ($image);
+		my $size = KIWIGlobals -> instance() -> isize ($image);
 		my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 		my $blocksize = 1;
 		for my $factor (split /\s/,$primes) {
@@ -5037,7 +5053,7 @@ sub checkKernel {
 	#==========================================
 	# 4) call images.sh script...
 	#------------------------------------------
-	($result,$status) = $main::global -> callContained (
+	($result,$status) = KIWIGlobals -> instance() -> callContained (
 		$tmpdir,"/images.sh"
 	);
 	if ($result != 0) {

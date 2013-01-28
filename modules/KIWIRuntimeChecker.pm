@@ -24,6 +24,10 @@ use strict;
 use warnings;
 use base qw (Exporter);
 
+#==========================================
+# KIWI Modules
+#------------------------------------------
+use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
 use KIWIQX qw (qxx);

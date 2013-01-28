@@ -21,20 +21,27 @@ package KIWIBoot;
 #------------------------------------------
 require Exporter;
 
-#==========================================
-# Modules
-#------------------------------------------
 use strict;
 use warnings;
 use Carp qw (cluck);
-use KIWILog;
-use KIWIIsoLinux;
 use FileHandle;
 use File::Basename;
 use File::Spec;
 use Math::BigFloat;
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
+use KIWIGlobals;
 use KIWILocator;
+use KIWILog;
+use KIWIIsoLinux;
 use KIWIQX qw (qxx);
+
+#==========================================
+# Exports
+#------------------------------------------
+our @EXPORT_OK = qw ();
 
 #==========================================
 # Constructor
@@ -114,9 +121,11 @@ sub new {
 	#------------------------------------------
 	if (defined $system) {
 		if ((-f $system) || (-b $system)) {
-			my %fsattr = $main::global -> checkFileSystem ($system);
+			my %fsattr = KIWIGlobals
+				-> instance()
+				-> checkFileSystem ($system);
 			if ($fsattr{readonly}) {
-				$syszip = $main::global -> isize ($system);
+				$syszip = KIWIGlobals -> instance() -> isize ($system);
 			} else {
 				$syszip = 0;
 			}
@@ -209,16 +218,12 @@ sub new {
 		$kiwi -> failed ();
 		return;
 	}
-	if (! $main::global) {
-		$kiwi -> error  ("Globals object not found");
-		$kiwi -> failed ();
-		return;
-	}
 	#==========================================
 	# Store object data (1)
 	#------------------------------------------
+	my $global = KIWIGlobals -> instance();
 	$this->{cleanupStack} = [];
-	$this->{gdata}    = $main::global -> getGlobals();
+	$this->{gdata}    = $global -> getKiwiConfig();
 	$this->{tmpdir}   = $tmpdir;
 	$this->{loopdir}  = $loopdir;
 	$this->{lvmgroup} = $vgroup;
@@ -236,20 +241,22 @@ sub new {
 			#==========================================
 			# mount system image
 			#------------------------------------------
-			if (! $main::global -> mount ($system,$tmpdir)) {
+			if (! KIWIGlobals -> instance() -> mount ($system,$tmpdir)) {
 				return;
 			}
-			my $sdev = $main::global -> getMountDevice();
-			if ($main::global -> isMountLVM()) {
-				$this->{lvmgroup} = $main::global -> getMountLVMGroup();
+			my $sdev = KIWIGlobals -> instance() -> getMountDevice();
+			if (KIWIGlobals -> instance() -> isMountLVM()) {
+				$this->{lvmgroup} = KIWIGlobals
+					-> instance()
+					-> getMountLVMGroup();
 				$this->{lvm} = 1;
 			}
 			#==========================================
 			# check for read-only root
 			#------------------------------------------
-			my %fsattr = $main::global -> checkFileSystem ($sdev);
+			my %fsattr = KIWIGlobals -> instance() -> checkFileSystem ($sdev);
 			if ($fsattr{readonly}) {
-				$syszip = $main::global -> isize ($system);
+				$syszip = KIWIGlobals -> instance() -> isize ($system);
 			}
 			#==========================================
 			# set root path to mountpoint
@@ -284,7 +291,7 @@ sub new {
 		my $isValid = $validator ? $validator -> validate() : undef;
 		if (! $isValid) {
 			if (! -d $system) {
-				$main::global -> umount();
+				KIWIGlobals -> instance() -> umount();
 			}
 			return;
 		}
@@ -295,8 +302,8 @@ sub new {
 		# clean up
 		#------------------------------------------
 		if (! -d $system) {
-			$this->{isDisk} = $main::global -> isDisk();
-			$main::global -> umount();
+			$this->{isDisk} = KIWIGlobals -> instance() -> isDisk();
+			KIWIGlobals -> instance() -> umount();
 		}
 		#==========================================
 		# check if we got the XML description
@@ -328,8 +335,8 @@ sub new {
 		my $fsopts       = $cmdL -> getFilesystemOptions();
 		my $inodesize    = $fsopts->[1];
 		my $inoderatio   = $fsopts->[2];
-		my $kernelSize   = $main::global -> isize ($kernel);
-		my $initrdSize   = $main::global -> isize ($initrd);
+		my $kernelSize   = KIWIGlobals -> instance() -> isize ($kernel);
+		my $initrdSize   = KIWIGlobals -> instance() -> isize ($initrd);
 		#==========================================
 		# Calculate minimum size of the system
 		#------------------------------------------
@@ -347,7 +354,7 @@ sub new {
 			$sizeBytes+= $spare;
 		} else {
 			# system is specified as a file...
-			$sizeBytes = $main::global -> isize ($system);
+			$sizeBytes = KIWIGlobals -> instance() -> isize ($system);
 			$sizeBytes+= $kernelSize;
 			$sizeBytes+= $initrdSize;
 			$sizeBytes+= $spare;
@@ -390,7 +397,7 @@ sub new {
 	#==========================================
 	# Store a disk label ID for this object
 	#------------------------------------------
-	$this->{mbrid} = $main::global -> getMBRDiskLabel (
+	$this->{mbrid} = KIWIGlobals -> instance() -> getMBRDiskLabel (
 		$cmdL -> getMBRID()
 	);
 	#==========================================
@@ -406,7 +413,9 @@ sub new {
 			$vga = $type{vga};
 		}
 		if ($type{luks}) {
-			$main::global -> setGlobals ("LuksCipher",$type{luks});
+			KIWIGlobals
+			-> instance()
+			-> setKiwiConfigData ("LuksCipher",$type{luks});
 		}
 		#==========================================
 		# check boot firmware
@@ -620,7 +629,7 @@ sub setupInstallCD {
 	#==========================================
 	# Create new MBR label for install ISO
 	#------------------------------------------
-	$this->{mbrid} = $main::global -> getMBRDiskLabel();
+	$this->{mbrid} = KIWIGlobals -> instance() -> getMBRDiskLabel();
 	$appid = $this->{mbrid};
 	$kiwi -> info ("Using ISO Application ID: $appid");
 	$kiwi -> done();
@@ -991,8 +1000,8 @@ sub setupInstallStick {
 	my $xml       = $this->{xml};
 	my $cmdL      = $this->{cmdL};
 	my $firmware  = $this->{firmware};
-	my $irdsize   = $main::global -> isize ($initrd);
-	my $vmsize    = $main::global -> isize ($system);
+	my $irdsize   = KIWIGlobals -> instance() -> isize ($initrd);
+	my $vmsize    = KIWIGlobals -> instance() -> isize ($system);
 	my $md5name   = $system;
 	my $destdir   = dirname ($initrd);
 	my %deviceMap = ();
@@ -1023,7 +1032,7 @@ sub setupInstallStick {
 	#==========================================
 	# Create new MBR label for install disk
 	#------------------------------------------
-	$this->{mbrid} = $main::global -> getMBRDiskLabel();
+	$this->{mbrid} = KIWIGlobals -> instance() -> getMBRDiskLabel();
 	#==========================================
 	# Check for disk device
 	#------------------------------------------
@@ -1293,7 +1302,7 @@ sub setupInstallStick {
 	# Copy boot data on first partition
 	#------------------------------------------
 	$kiwi -> info ("Installing boot data to disk");
-	if (! $main::global -> mount ($boot, $loopdir)) {
+	if (! KIWIGlobals -> instance() -> mount ($boot, $loopdir)) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount boot partition: $status");
 		$kiwi -> failed ();
@@ -1301,10 +1310,10 @@ sub setupInstallStick {
 		return;
 	}
 	if (! $this -> copyBootCode ($tmpdir,$loopdir,$bootloader)) {
-		$main::global -> umount();
+		KIWIGlobals -> instance() -> umount();
 		return;
 	}
-	$main::global -> umount();
+	KIWIGlobals -> instance() -> umount();
 	$kiwi -> done();
 	#==========================================
 	# Check for optional config-cdroot archive
@@ -1357,7 +1366,9 @@ sub setupInstallStick {
 	#------------------------------------------
 	if ($gotsys) {
 		$kiwi -> info ("Installing image data to disk");
-		if (! $main::global -> mount ($data, $loopdir,$type{fsmountoptions})) {
+		if (! KIWIGlobals
+			-> instance()
+			-> mount ($data, $loopdir,$type{fsmountoptions})) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount data partition: $status");
 			$kiwi -> failed ();
@@ -1383,7 +1394,7 @@ sub setupInstallStick {
 		}
 		print $FD "IMAGE='".$nameusb."'\n";
 		close $FD;
-		$main::global -> umount();
+		KIWIGlobals -> instance() -> umount();
 		$kiwi -> done();
 	}
 	#==========================================
@@ -1432,7 +1443,7 @@ sub setupInstallPXE {
 	#==========================================
 	# Create new MBR label for PXE install
 	#------------------------------------------
-	$this->{mbrid} = $main::global -> getMBRDiskLabel();
+	$this->{mbrid} = KIWIGlobals -> instance() -> getMBRDiskLabel();
 	#==========================================
 	# Check for disk device
 	#------------------------------------------
@@ -1928,7 +1939,7 @@ sub setupBootDisk {
 	# increase vmsize if image split RW portion
 	#------------------------------------------
 	if (($imgtype eq "split") && (-f $splitfile)) {
-		my $splitsize = $main::global -> isize ($splitfile);
+		my $splitsize = KIWIGlobals -> instance() -> isize ($splitfile);
 		my $splitMB = int (($splitsize * 1.2) / 1048576);
 		$kiwi -> info (
 			"Adding $splitMB MB space for split read-write portion"
@@ -1947,7 +1958,7 @@ sub setupBootDisk {
 		$FSTypeRO = $FSTypeRW;
 	}
 	if ($haveSplit) {
-		my %fsattr = $main::global -> checkFileSystem ($FSTypeRW);
+		my %fsattr = KIWIGlobals -> instance() -> checkFileSystem ($FSTypeRW);
 		if ($fsattr{readonly}) {
 			$kiwi -> error ("Can't copy data into requested RO filesystem");
 			$kiwi -> failed ();
@@ -2233,13 +2244,13 @@ sub setupBootDisk {
 		my $splitPSize  = 1;
 		my $splitISize  = 0;
 		my $systemPSize = $this->getStorageSize ($root);
-		my $systemISize = $main::global -> isize ($system);
+		my $systemISize = KIWIGlobals -> instance() -> isize ($system);
 		$systemISize /= 1024;
 		chomp $systemPSize;
 		#print "_______A $systemPSize : $systemISize\n";
 		if ($haveSplit) {
 			$splitPSize = $this->getStorageSize ($deviceMap{readwrite});
-			$splitISize = $main::global -> isize ($splitfile);
+			$splitISize = KIWIGlobals -> instance() -> isize ($splitfile);
 			$splitISize /= 1024;
 			chomp $splitPSize;
 			#print "_______B $splitPSize : $splitISize\n";
@@ -2324,14 +2335,14 @@ sub setupBootDisk {
 		$kiwi -> done();
 		$result = 0;
 		my $mapper = $root;
-		my %fsattr = $main::global -> checkFileSystem ($root);
+		my %fsattr = KIWIGlobals -> instance() -> checkFileSystem ($root);
 		if ($fsattr{type} eq "luks") {
 			$mapper = $this -> luksResize ($root,"luks-resize");
 			if (! $mapper) {
 				$this -> luksClose();
 				return;
 			}
-			%fsattr= $main::global -> checkFileSystem ($mapper);
+			%fsattr= KIWIGlobals -> instance() -> checkFileSystem ($mapper);
 		}
 		my $expanded = $this -> __expandFS (
 			$fsattr{type},'system', $mapper
@@ -2354,14 +2365,16 @@ sub setupBootDisk {
 			$kiwi -> done();
 			$result = 0;
 			$mapper = $root;
-			my %fsattr = $main::global -> checkFileSystem ($root);
+			my %fsattr = KIWIGlobals -> instance() -> checkFileSystem ($root);
 			if ($fsattr{type} eq "luks") {
 				$mapper = $this -> luksResize ($root,"luks-resize");
 				if (! $mapper) {
 					$this -> luksClose();
 					return;
 				}
-				%fsattr= $main::global -> checkFileSystem ($mapper);
+				%fsattr = KIWIGlobals
+					-> instance()
+					-> checkFileSystem ($mapper);
 			}
 			my $expanded = $this -> __expandFS (
 				$fsattr{type},'split', $mapper
@@ -2380,7 +2393,9 @@ sub setupBootDisk {
 		#==========================================
 		# Mount system image partition
 		#------------------------------------------
-		if (! $main::global -> mount ($root,$loopdir,$type{fsmountoptions})) {
+		if (! KIWIGlobals
+			-> instance()
+			-> mount ($root,$loopdir,$type{fsmountoptions})) {
 			$this -> cleanStack ();
 			return;
 		}
@@ -2426,7 +2441,7 @@ sub setupBootDisk {
 						return;
 					}
 					$kiwi -> loginfo ("Mounting logical volume: $pname\n");
-					if (! $main::global ->
+					if (! KIWIGlobals -> instance() ->
 						mount ($device,"$loopdir/$pname",$type{fsmountoptions})
 					) {
 						$this -> cleanStack ();
@@ -2439,7 +2454,9 @@ sub setupBootDisk {
 		# Setup filesystem specific environment
 		#------------------------------------------
 		if ($FSTypeRW eq 'btrfs') {
-			if (! $main::global -> setupBTRFSSubVolumes ($loopdir)) {
+			if (! KIWIGlobals
+				-> instance()
+				-> setupBTRFSSubVolumes ($loopdir)) {
 				$this -> cleanStack ();
 				return;
 			}
@@ -2478,7 +2495,7 @@ sub setupBootDisk {
 		#==========================================
 		# Umount system image partition
 		#------------------------------------------
-		$main::global -> umount();
+		KIWIGlobals -> instance() -> umount();
 	}
 	#==========================================
 	# create read/write filesystem if needed
@@ -2510,7 +2527,7 @@ sub setupBootDisk {
 		} else {
 			$kiwi -> info ("Creating ext3 read-write filesystem");
 		}
-		my %FSopts = $main::global -> checkFSOptions(
+		my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
 			@{$cmdL -> getFilesystemOptions()}
 		);
 		my $fsopts = $FSopts{ext3};
@@ -2569,7 +2586,7 @@ sub setupBootDisk {
 	} else {
 		$boot = $root;
 	}
-	if (! $main::global -> mount ($boot, $loopdir)) {
+	if (! KIWIGlobals -> instance() -> mount ($boot, $loopdir)) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount image boot device: $boot");
 		$kiwi -> failed ();
@@ -2582,7 +2599,7 @@ sub setupBootDisk {
 		#------------------------------------------
 		my $jump = $deviceMap{jump};
 		qxx ("mkdir -p $loopdir/efi");
-		if (! $main::global -> mount ($jump, "$loopdir/efi")) {
+		if (! KIWIGlobals -> instance() -> mount ($jump, "$loopdir/efi")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount image jump device: $boot");
 			$kiwi -> failed ();
@@ -2594,7 +2611,7 @@ sub setupBootDisk {
 	# Copy boot data on system image
 	#------------------------------------------
 	if (! $this -> copyBootCode ($tmpdir,$loopdir,$bootloader)) {
-		$main::global -> umount();
+		KIWIGlobals -> instance() -> umount();
 		return;
 	}
 	if (($firmware eq "efi") || ($firmware eq "uefi")) {
@@ -2607,7 +2624,7 @@ sub setupBootDisk {
 	#==========================================
 	# umount entire boot space
 	#------------------------------------------
-	$main::global -> umount();
+	KIWIGlobals -> instance() -> umount();
 	$kiwi -> done();
 	#==========================================
 	# Install boot loader on disk
@@ -3151,7 +3168,7 @@ sub cleanStack {
 	#==========================================
 	# umount from global space
 	#------------------------------------------
-	$main::global -> umount();
+	KIWIGlobals -> instance() -> umount();
 	#==========================================
 	# cleanup device bindings from this object
 	#------------------------------------------
@@ -3179,7 +3196,7 @@ sub buildMD5Sum {
 	my $outf = shift;
 	my $kiwi = $this->{kiwi};
 	$kiwi -> info ("Creating image MD5 sum...");
-	my $size = $main::global -> isize ($file);
+	my $size = KIWIGlobals -> instance() -> isize ($file);
 	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
@@ -3497,7 +3514,7 @@ sub setupBootLoaderStages {
 					"Can't find grub2 $s_shim and/or $s_signed in initrd");
 				$kiwi -> failed ();
 				return;
-            }
+			}
 			$status = qxx (
 				"mv $tmpdir/$s_shim $tmpdir/efi/boot/bootx64.efi 2>&1"
 			);
@@ -6231,7 +6248,7 @@ sub setupFilesystem {
 	} else {
 		$type{fsnocheck} = 'true';
 	}
-	my %FSopts = $main::global -> checkFSOptions(
+	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
 		@{$cmdL -> getFilesystemOptions()}
 	);
 	my $iorig  = $this->{inodes};

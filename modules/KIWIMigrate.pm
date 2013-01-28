@@ -37,6 +37,7 @@ use Cwd qw (abs_path cwd);
 #==========================================
 # KIWI Modules
 #------------------------------------------
+use KIWIGlobals;
 use KIWILog;
 use KIWIQX qw (qxx);
 
@@ -72,18 +73,14 @@ sub new {
 	my $kiwi = KIWILog -> instance();
 	my $code;
 	my $data;
-	if (! $main::global) {
-		$kiwi -> error  ("Globals object not found");
-		$kiwi -> failed ();
-		return;
-	}
 	if (! defined $name) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("No image name for migration given");
 		$kiwi -> failed ();
 		return;
 	}
-	$this->{gdata} = $main::global -> getGlobals();
+	my $global = KIWIGlobals -> instance();
+	$this->{gdata} = $global -> getKiwiConfig();
 	my $product = $this -> getOperatingSystemVersion();
 	if (! defined $product) {
 		$kiwi -> failed ();

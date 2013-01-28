@@ -22,6 +22,10 @@ use warnings;
 use Carp qw (cluck);
 use File::Spec;
 use File::stat;
+#==========================================
+# KIWI Modules
+#------------------------------------------
+use KIWIGlobals;
 use KIWILog;
 use KIWIQX qw (qxx);
 
@@ -77,16 +81,12 @@ sub new {
 		close $FD;
 		chomp $baseRO;
 	}
-	if (! $main::global) {
-		$kiwi -> error  ("Globals object not found");
-		$kiwi -> failed ();
-		return;
-	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	my $global = KIWIGlobals -> instance();
 	$this->{kiwi}   = $kiwi;
-	$this->{gdata}  = $main::global -> getGlobals();
+	$this->{gdata}  = $global -> getKiwiConfig();
 	$this->{baseRO} = $baseRO;
 	$this->{rootRW} = $rootRW;
 	return $this;
@@ -114,7 +114,7 @@ sub unionOverlay {
 	my $kiwi   = $this->{kiwi};
 	my $baseRO = $this->{baseRO};
 	my $rootRW = $this->{rootRW};
-	my %fsattr = $main::global -> checkFileSystem ($baseRO);
+	my %fsattr = KIWIGlobals -> instance() -> checkFileSystem ($baseRO);
 	my $type   = $fsattr{type};
 	my @mount  = ();
 	my $haveCow= 0;
@@ -266,7 +266,7 @@ sub unionOverlay {
 			# XML configuration in $rootRW/image. This happens upon
 			# the call of writeXMLDescription()
 			# ----
-			$main::global -> setGlobals (
+			KIWIGlobals -> instance() -> setKiwiConfigData (
 				"OverlayRootTree","$rootRW/image"
 			);
 		}

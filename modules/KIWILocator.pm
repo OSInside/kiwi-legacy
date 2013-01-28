@@ -20,8 +20,12 @@ package KIWILocator;
 use strict;
 use warnings;
 use base qw (Exporter);
-
 use IPC::Open3;
+
+#==========================================
+# Modules
+#------------------------------------------
+use KIWIGlobals;
 use KIWILog;
 use KIWIQX qw (qxx);
 

@@ -22,6 +22,8 @@ use base qw /Test::Unit::TestCase/;
 use FindBin;
 use File::Basename qw /dirname/;
 
+use KIWIGlobals;
+
 #==========================================
 # Constructor
 #------------------------------------------
@@ -30,7 +32,11 @@ sub new {
 	# Construct the test case
 	#---
 	my $this = shift -> SUPER::new(@_);
-	$this -> {kiwi} = Common::ktLog -> instance();
+	my $kiwi = Common::ktLog -> instance();
+	$this -> {kiwi} = $kiwi;
+	# Create the Globals instance and clear any messages it may produce
+	KIWIGlobals -> instance();
+	$kiwi -> getState();
 	return $this;
 }
 

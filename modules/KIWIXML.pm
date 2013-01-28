@@ -26,6 +26,10 @@ use File::Glob ':glob';
 use File::Basename;
 use LWP;
 use XML::LibXML;
+#==========================================
+# KIWI Modules
+#------------------------------------------
+use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
 use KIWIQX qw (qxx);
@@ -268,11 +272,6 @@ sub new {
 		$kiwi -> failed ();
 		return;
 	}
-	if (! $main::global) {
-		$kiwi -> error  ('Globals object not found');
-		$kiwi -> failed ();
-		return;
-	}
 	if (! $cmdL) {
 		$kiwi -> error  ('No commandline reference specified');
 		$kiwi -> failed ();
@@ -281,9 +280,10 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	my $global = KIWIGlobals -> instance();
 	$this->{kiwi} = $kiwi;
 	$this->{arch} = $arch;
-	$this->{gdata}= $main::global -> getGlobals();
+	$this->{gdata}= $global -> getKiwiConfig();
 	$this->{cmdL} = $cmdL;
 	$this->{buildType} = $imageType;
 	my @selectProfs = ('kiwi_default');
@@ -8126,7 +8126,7 @@ sub writeXMLDescription_legacy {
 	if ($overlayTree) {
 		qxx ("mkdir -p $overlayTree");
 		qxx ("cp $file $overlayTree");
-		$main::global -> setGlobals (
+		KIWIGlobals -> instance() -> setKiwiConfigData (
 			"OverlayRootTree",0
 		);
 	}

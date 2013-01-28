@@ -18,13 +18,14 @@ package KIWIImageCreator;
 #------------------------------------------
 use strict;
 use warnings;
+use File::Basename;
 require Exporter;
 
 #==========================================
 # KIWI Modules
 #------------------------------------------
-use File::Basename;
 use KIWICommandLine;
+use KIWIGlobals;
 use KIWIImageFormat;
 use KIWILocator;
 use KIWILog;
@@ -63,22 +64,18 @@ sub new {
 	my $kiwi = KIWILog -> instance();
 	if (! defined $cmdL) {
 		my $msg = 'KIWIImageCreator: expecting KIWICommandLine object as '
-			. 'second argument.';
+			. 'argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return;
-	}
-	if (! $main::global) {
-		$kiwi -> error  ("Globals object not found");
-		$kiwi -> failed ();
 		return;
 	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	my $global = KIWIGlobals -> instance();
 	$this->{kiwi}  = $kiwi;
 	$this->{cmdL}  = $cmdL;
-	$this->{gdata} = $main::global -> getGlobals();
+	$this->{gdata} = $global -> getKiwiConfig();
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -378,7 +375,7 @@ sub createBootImage {
 	#==========================================
 	# Create destdir if needed
 	#------------------------------------------
-	my $dirCreated = $main::global -> createDirInteractive(
+	my $dirCreated = KIWIGlobals -> instance() -> createDirInteractive(
 		$destination,$cmdL -> getDefaultAnswer()
 	);
 	if (! defined $dirCreated) {
@@ -492,7 +489,7 @@ sub createImage {
 	#==========================================
 	# Create destdir if needed
 	#------------------------------------------
-	my $dirCreated = $main::global -> createDirInteractive(
+	my $dirCreated = KIWIGlobals -> instance() -> createDirInteractive(
 		$destination,$cmdL -> getDefaultAnswer()
 	);
 	if (! defined $dirCreated) {
@@ -744,7 +741,9 @@ sub createImage {
 		return;
 	}
 	if ($ok) {
-		my $imgName = $main::global -> generateBuildImageName ($xml);
+		my $imgName = KIWIGlobals
+			-> instance()
+			-> generateBuildImageName ($xml);
 		if (($checkFormat) && ($attr{format})) {
 			my $haveFormat = $attr{format};
 			my $imgfile= $destination."/".$imgName;
@@ -1346,7 +1345,7 @@ sub checkType {
 			@fs = split (/,/,$type{filesystem});
 		}
 		foreach my $fs (@fs) {
-			my %result = $main::global -> checkFileSystem ($fs);
+			my %result = KIWIGlobals -> instance() -> checkFileSystem ($fs);
 			if (%result) {
 				if (! $result{hastool}) {
 					$kiwi -> error (

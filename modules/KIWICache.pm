@@ -25,6 +25,7 @@ require Exporter;
 # KIWI Modules
 #------------------------------------------
 use KIWICommandLine;
+use KIWIGlobals;
 use KIWIImage;
 use KIWIImageCreator;
 use KIWILog;
@@ -94,27 +95,24 @@ sub new {
 		return;
 	}
 	if ((! defined $conf) || (! -d $conf)) {
-		my $msg = 'KIWICache: no valid image configuration directory specified';
+		my $msg = 'KIWICache: no valid image configuration '
+			. 'directory specified';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
-		return;
-	}
-	if (! $main::global) {
-		$kiwi -> error  ("Globals object not found");
-		$kiwi -> failed ();
 		return;
 	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	my $global = KIWIGlobals -> instance();
 	$this->{kiwi}     = $kiwi;
 	$this->{cmdL}     = $cmdL;
-	$this->{xml}      = $xml;      
+	$this->{xml}      = $xml;
 	$this->{cdir}     = $cdir;
 	$this->{base}     = $base;
 	$this->{profiles} = $prof;
 	$this->{config}   = $conf;
-	$this->{gdata}    = $main::global -> getGlobals();
+	$this->{gdata}    = $global -> getKiwiConfig();
 	return $this;
 }
 
@@ -275,7 +273,9 @@ sub createCache {
 	if (! $image -> createImageBTRFS ()) {
 		undef $kic; return;
 	}
-	my $name= $imageCacheDir."/".$main::global -> generateBuildImageName($xml);
+	my $name= $imageCacheDir
+		. "/"
+		. KIWIGlobals -> instance() -> generateBuildImageName($xml);
 	#==========================================
 	# Turn cache into read-only image
 	#------------------------------------------

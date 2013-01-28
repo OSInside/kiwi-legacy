@@ -31,21 +31,25 @@ BEGIN {
 #==========================================
 # Modules
 #------------------------------------------
-use KIWIXML;
-use KIWIUtil;
-use KIWIURL;
-use KIWIRepoMetaHandler;
-use KIWIProductData;
-use KIWIArchList;
 use FileHandle;
 use File::Find;
 use File::Path;
 use Cwd 'abs_path';
 #use IO::Compress::Gzip qw(gzip $GzipError); # temporarily: as soon as plugins extracted, scratch here
 #use PerlIO::gzip qw(gzip $GzipError); # temporarily: as soon as plugins extracted, scratch here
-
 # remove if not longer necessary:
 use Data::Dumper;
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
+use KIWIArchList;
+use KIWIGlobals;
+use KIWIProductData;
+use KIWIRepoMetaHandler;
+use KIWIURL;
+use KIWIUtil;
+use KIWIXML;
 
 #==========================================
 # Members
@@ -119,7 +123,8 @@ sub new {
 		m_appdata      => undef,
 	};
 
-	$this->{gdata} = $main::global -> getGlobals();
+	my $global = KIWIGlobals -> instance();
+	$this->{gdata} = $global -> getKiwiConfig();
 
 	bless $this, $class;
 
