@@ -2043,12 +2043,16 @@ sub createImageLiveCD {
 	#==========================================
 	# Create bootloader configuration
 	#------------------------------------------
-	if ($firmware eq "efi") {
+	if (($firmware eq "efi") || ($firmware eq "uefi")) {
 		#==========================================
 		# Setup grub2 if efi live iso is requested
 		#------------------------------------------
+		my $lib = 'lib';
+		if (-d "$tmpdir/usr/lib64/grub2-efi") {
+			$lib = 'lib64';
+		}
 		my @theme      = $sxml -> getBootTheme_legacy();
-		my $ir_modules = "$tmpdir/usr/lib/grub2-efi/x86_64-efi";
+		my $ir_modules = "$tmpdir/usr/$lib/grub2-efi/x86_64-efi";
 		my $ir_themes  = "$tmpdir/usr/share/grub2/themes";
 		my $ir_bgnds   = "$tmpdir/usr/share/grub2/backgrounds";
 		my $ir_font    = "$tmpdir/usr/share/grub2/unicode.pf2";
@@ -2060,6 +2064,10 @@ sub createImageLiveCD {
 		my $cd_bg      = "$cd_loader/themes/$theme/background.png";
 		my $fodir      = '/boot/grub2-efi/themes/';
 		my $ascii      = 'ascii.pf2';
+		my $linux      = 'linux';
+		if ($firmware eq "uefi") {
+			$linux = 'linuxefi';
+		}
 		my @fonts = (
 			"DejaVuSans-Bold14.pf2",
 			"DejaVuSans10.pf2",
@@ -2117,28 +2125,58 @@ sub createImageLiveCD {
 		print $bpfd 'set prefix=($root)/boot/grub2-efi'."\n";
 		$bpfd -> close();
 		#==========================================
-		# create efi boot image
+		# create / use efi boot image
 		#------------------------------------------
-		$kiwi -> info ("Creating grub2 efi boot image");
-		my $core    = "$CD/efi/boot/bootx64.efi";
-		my @modules = (
-			'fat','ext2','part_gpt','efi_gop','iso9660','chain',
-			'linux','echo','configfile','boot','search_label',
-			'search_fs_file','search','search_fs_uuid','ls',
-			'video','video_fb','normal','test','sleep'
-		);
-		my $fo = 'x86_64-efi';
-		$status = qxx (
-			"grub2-efi-mkimage -O $fo -o $core -c $bootefi @modules 2>&1"
-		);
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create efi boot image: $status");
-			$kiwi -> failed ();
-			return;
+		if ($firmware eq "efi") {
+			$kiwi -> info ("Creating grub2 efi boot image");
+			my $core    = "$CD/efi/boot/bootx64.efi";
+			my @modules = (
+				'fat','ext2','part_gpt','efi_gop','iso9660','chain',
+				'linux','echo','configfile','boot','search_label',
+				'search_fs_file','search','search_fs_uuid','ls',
+				'video','video_fb','normal','test','sleep'
+			);
+			my $fo = 'x86_64-efi';
+			$status = qxx (
+				"grub2-efi-mkimage -O $fo -o $core -c $bootefi @modules 2>&1"
+			);
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create efi boot image: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$kiwi -> done();
+		} else {
+			$kiwi -> info ("Importing grub2 shim/signed efi modules");
+			my $s_shim   = "$tmpdir/usr/$lib/efi/shim.efi";
+			my $s_signed = "$tmpdir/usr/$lib/efi/grubcd.efi";
+			if ((! -e $s_shim) || (! -e $s_signed)) {
+				$kiwi -> failed ();
+				$kiwi -> error  (
+					"Can't find grub2 $s_shim and/or $s_signed in initrd");
+				$kiwi -> failed ();
+				return;
+			}
+			$status = qxx ("mv $s_shim $CD/efi/boot/bootx64.efi 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("Failed to move shim module: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$status = qxx ("mv $s_signed $CD/efi/boot/grub.efi 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("Failed to move signed module: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$kiwi -> done();
 		}
-		$kiwi -> done();
 		#==========================================
 		# make iso EFI bootable
 		#------------------------------------------
@@ -2219,7 +2257,7 @@ sub createImageLiveCD {
 		if (! $isxen) {
 			print $FD "\t"."echo Loading linux...\n";
 			print $FD "\t"."set gfxpayload=keep"."\n";
-			print $FD "\t"."linux /boot/$isoarch/loader/linux";
+			print $FD "\t"."$linux /boot/$isoarch/loader/linux";
 			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 			print $FD " splash=silent"."\n";
 			print $FD "\t"."echo Loading initrd...\n";
@@ -2245,7 +2283,7 @@ sub createImageLiveCD {
 		if (! $isxen) {
 			print $FD "\t"."echo Loading linux...\n";
 			print $FD "\t"."set gfxpayload=keep"."\n";
-			print $FD "\t"."linux /boot/$isoarch/loader/linux";
+			print $FD "\t"."$linux /boot/$isoarch/loader/linux";
 			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 			print $FD " splash=silent";
 			print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
@@ -2276,7 +2314,7 @@ sub createImageLiveCD {
 			if (! $isxen) {
 				print $FD "\t"."echo Loading linux...\n";
 				print $FD "\t"."set gfxpayload=keep"."\n";
-				print $FD "\t"."linux /boot/$isoarch/loader/linux";
+				print $FD "\t"."$linux /boot/$isoarch/loader/linux";
 				print $FD " mediacheck=1 splash=silent";
 				print $FD "\t"."echo Loading initrd...\n";
 				print $FD "\t"."initrd /boot/$isoarch/loader/initrd\n";
@@ -2521,7 +2559,7 @@ sub createImageLiveCD {
 		if (! $isolinux -> callBootMethods()) {
 			$isoerror = 1;
 		}
-		if ($firmware eq "efi") {
+		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			if (! $isolinux -> addBootEFILive($efibootloadsize)) {
 				$isoerror = 1;
 			}

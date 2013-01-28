@@ -594,7 +594,7 @@ sub setupInstallCD {
 		$bootloader = "yaboot";
 	} elsif ($arch =~ /arm/) {
 		$bootloader = "uboot";
-	} elsif ($firmware eq "efi") {
+	} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
 		$bootloader = "grub2";
 	} else {
 		$bootloader = "grub";
@@ -839,7 +839,7 @@ sub setupInstallCD {
 	#==========================================
 	# make iso EFI bootable
 	#------------------------------------------
-	if ($firmware eq "efi") {
+	if (($firmware eq "efi") || ($firmware eq "uefi")) {
 		my $efi_fat = "$tmpdir/boot/grub2-efi/efiboot.img";
 		$status = qxx ("qemu-img create $efi_fat 1M 2>&1");
 		$result = $? >> 8;
@@ -869,7 +869,7 @@ sub setupInstallCD {
 	#==========================================
 	# copy grub2 config file to efi path too
 	#------------------------------------------
-	if ($firmware eq "efi") {
+	if (($firmware eq "efi") || ($firmware eq "uefi")) {
 		qxx ("cp $tmpdir/boot/grub2-efi/grub.cfg $tmpdir/efi/boot");
 	}
 	#==========================================
@@ -889,7 +889,7 @@ sub setupInstallCD {
 		$base = "-V \"$volid\" -A \"$appid\" ";
 		$base.= "-R -J -f -b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
 		$base.= "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
-		if ($firmware eq "efi") {
+		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			$base.= "-eltorito-alt-boot -b boot/grub2-efi/efiboot.img ";
 			$base.= "-no-emul-boot ";
 		}
@@ -1003,7 +1003,7 @@ sub setupInstallStick {
 		$bootloader = "yaboot";
 	} elsif ($arch =~ /arm/) {
 		$bootloader = "uboot";
-	} elsif ($firmware eq "efi") {
+	} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
 		$bootloader = "grub2";
 	} else {
 		$bootloader = "grub";
@@ -1169,7 +1169,7 @@ sub setupInstallStick {
 		} else {
 			$bootfs = 'fat32';
 		}
-	} elsif ($firmware eq "efi") {
+	} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
 		$bootfs = 'fat16';
 	} else {
 		$bootfs = 'ext3';
@@ -1621,7 +1621,7 @@ sub setupBootDisk {
 		$bootloader = "yaboot";
 	} elsif ($arch =~ /arm/) {
 		$bootloader = "uboot";
-	} elsif ($firmware eq "efi") {
+	} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
 		$bootloader = "grub2";
 	} else {
 		$bootloader = "grub";
@@ -1827,7 +1827,7 @@ sub setupBootDisk {
 		} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
 			$needBootP = 1;
 			$needParts = 3;
-		} elsif ($firmware eq "efi") {
+		} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
 			$needBootP = 1;
 			$needParts = 3;
 		} elsif ($type{luks}) {
@@ -1840,7 +1840,7 @@ sub setupBootDisk {
 	} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
 		$needBootP = 1;
 		$needParts = 2;
-	} elsif ($firmware eq "efi") {
+	} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
 		$needBootP = 1;
 		$needParts = 2;
 	} elsif ($type{luks}) {
@@ -1874,7 +1874,7 @@ sub setupBootDisk {
 			} else {
 				$bootfs = 'fat32';
 			}
-		} elsif ($firmware eq "efi") {
+		} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
 			$bootfs = 'ext3';
 		} else {
 			$bootfs = 'ext3';
@@ -1963,7 +1963,10 @@ sub setupBootDisk {
 	#==========================================
 	# check for jump partition
 	#------------------------------------------
-	if (($firmware eq "efi") || ($firmware eq "vboot")) {
+	if (($firmware eq "efi")  ||
+		($firmware eq "uefi") ||
+		($firmware eq "vboot")
+	) {
 		$this->{jumpsize} = 5;
 		$this -> __updateDiskSize ($this->{jumpsize});
 		$needJumpP = 1;
@@ -2573,7 +2576,7 @@ sub setupBootDisk {
 		$this -> cleanStack ();
 		return;
 	}
-	if ($firmware eq "efi") {
+	if (($firmware eq "efi") || ($firmware eq "uefi")) {
 		#==========================================
 		# Mount efi jump boot space on this disk
 		#------------------------------------------
@@ -2594,7 +2597,7 @@ sub setupBootDisk {
 		$main::global -> umount();
 		return;
 	}
-	if ($firmware eq "efi") {
+	if (($firmware eq "efi") || ($firmware eq "uefi")) {
 		#==========================================
 		# Adapt efi boot path on jump partition
 		#------------------------------------------
@@ -3256,6 +3259,7 @@ sub setupBootLoaderStages {
 	my $zipped   = $this->{zipped};
 	my $zipper   = $this->{gdata}->{Gzip};
 	my $firmware = $this->{firmware};
+	my $arch     = $this->{arch};
 	my $status   = 0;
 	my $result   = 0;
 	#==========================================
@@ -3269,6 +3273,16 @@ sub setupBootLoaderStages {
 		my $bootefi  = "$tmpdir/boot/grub2-efi/bootpart.cfg";
 		my $unzip    = "$zipper -cd $initrd 2>&1";
 		my %stages   = ();
+		my $lib      = 'lib';
+		my $test     = "cat $initrd";
+		if ($zipped) {
+			$test = $unzip;
+		}
+		$status = qxx ("$test | cpio -it | grep -q lib64/grub2 2>&1");
+		$result = $? >> 8;
+		if ($result == 0) {
+			$lib = 'lib64';
+		}
 		#==========================================
 		# boot id in grub2 context
 		#------------------------------------------
@@ -3279,19 +3293,24 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Stage files
 		#------------------------------------------
-		$stages{bios}{initrd}   = "'usr/lib/grub2/$grubpc/*'";
-		$stages{bios}{stageSRC} = "/usr/lib/grub2/$grubpc";
+		$stages{bios}{initrd}   = "'usr/$lib/grub2/$grubpc/*'";
+		$stages{bios}{stageSRC} = "/usr/$lib/grub2/$grubpc";
 		$stages{bios}{stageDST} = "/boot/grub2/$grubpc";
-		if ($firmware eq "efi") {
-			$stages{efi}{initrd}   = "'usr/lib/grub2-efi/$efipc/*'";
-			$stages{efi}{stageSRC} = "/usr/lib/grub2-efi/$efipc";
+		if (($firmware eq "efi") || ($firmware eq "uefi")) {
+			$stages{efi}{initrd}   = "'usr/$lib/grub2-efi/$efipc/*'";
+			$stages{efi}{stageSRC} = "/usr/$lib/grub2-efi/$efipc";
 			$stages{efi}{stageDST} = "/boot/grub2-efi/$efipc";
+		}
+		if ($firmware eq "uefi") {
+			$stages{efi}{data}   = "'usr/$lib/efi/*'";
+			$stages{efi}{shim}   = "usr/$lib/efi/shim.efi";
+			$stages{efi}{signed} = "usr/$lib/efi/grubcd.efi";
 		}
 		#==========================================
 		# Boot directories
 		#------------------------------------------
 		my @bootdir = ();
-		if ($firmware eq "efi") {
+		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			push @bootdir,"$tmpdir/boot/grub2-efi/$efipc";
 			push @bootdir,"$tmpdir/boot/grub2/$grubpc";
 			push @bootdir,"$tmpdir/efi/boot";
@@ -3363,7 +3382,7 @@ sub setupBootLoaderStages {
 		# import Grub2 stage files...
 		#------------------------------------------
 		foreach my $stage ('bios','efi') {
-			next if (($stage eq "efi") && ($firmware ne "efi"));
+			next if (($stage eq "efi") && ($firmware !~ /efi/));
 			my $stageD = $stages{$stage}{stageSRC};
 			my $stageT = $stages{$stage}{stageDST};
 			if (glob($tmpdir.$stageD.'/*')) {
@@ -3427,7 +3446,7 @@ sub setupBootLoaderStages {
 			$kiwi -> done();
 		}
 		#==========================================
-		# Create core efi boot image
+		# Create core efi boot image, standard EFI
 		#------------------------------------------
 		if ($firmware eq "efi") {
 			$kiwi -> info ("Creating grub2 efi boot image");
@@ -3446,6 +3465,55 @@ sub setupBootLoaderStages {
 			if ($result != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't create efi boot image: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$kiwi -> done();
+		}
+		#==========================================
+		# Use signed EFI modules from packages UEFI
+		#------------------------------------------
+		if ($firmware eq "uefi") {
+			$kiwi -> info ("Importing grub2 shim/signed efi modules");
+			my $s_data   = $stages{efi}{data};
+			my $s_shim   = $stages{efi}{shim};
+			my $s_signed = $stages{efi}{signed};
+			$result = 0;
+			if ($zipped) {
+				$status= qxx (
+					"$unzip | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
+				);
+			} else {
+				$status= qxx (
+					"cat $initrd | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
+				);
+			}
+			if ((! -e "$tmpdir/$s_shim") || (! -e "$tmpdir/$s_signed")) {
+				$result = 1;
+			}
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  (
+					"Can't find grub2 $s_shim and/or $s_signed in initrd");
+				$kiwi -> failed ();
+				return;
+            }
+			$status = qxx (
+				"mv $tmpdir/$s_shim $tmpdir/efi/boot/bootx64.efi 2>&1"
+			);
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("Failed to move shim module: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$status = qxx (
+				"mv $tmpdir/$s_signed $tmpdir/efi/boot/grub.efi 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("Failed to move signed module: $status");
 				$kiwi -> failed ();
 				return;
 			}
@@ -3755,6 +3823,13 @@ sub setupBootLoaderConfiguration {
 			$root_id = $this->{partids}{root};
 		}
 		#==========================================
+		# kernel loader command
+		#------------------------------------------
+		my $linux = 'linux';
+		if ($firmware eq "uefi") {
+			$linux = 'linuxefi';
+		}
+		#==========================================
 		# Theme and Fonts table
 		#------------------------------------------
 		my @theme = $xml -> getBootTheme_legacy();
@@ -3787,7 +3862,7 @@ sub setupBootLoaderConfiguration {
 		# config file name
 		#------------------------------------------
 		my @config = ('grub2');
-		if ($firmware eq "efi") {
+		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			push @config,'grub2-efi';
 		}
 		#==========================================
@@ -3877,7 +3952,7 @@ sub setupBootLoaderConfiguration {
 				my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
 				print $FD 'menuentry "Boot from Hard Disk"';
 				print $FD ' --class opensuse --class os {'."\n";
-				if ($firmware eq "efi") {
+				if (($firmware eq "efi") || ($firmware eq "uefi")) {
 					print $FD "\t"."set root='hd0,1'"."\n";
 					print $FD "\t".'chainloader /efi/boot/bootx64.efi'."\n";
 				} else {
@@ -3913,18 +3988,18 @@ sub setupBootLoaderConfiguration {
 				if ($iso) {
 					print $FD "\t"."echo Loading linux...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
-					print $FD "\t"."linux /boot/linux";
+					print $FD "\t"."$linux /boot/linux";
 					print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 					print $FD " cdinst=1 loader=$bloader splash=silent";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "\t"."echo Loading linux.vmx...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
-					print $FD "\t".'linux /boot/linux.vmx';
+					print $FD "\t"."$linux /boot/linux.vmx";
 					print $FD " loader=$bloader splash=silent";
 				} else {
 					print $FD "\t"."echo Loading linux...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
-					print $FD "\t".'linux /boot/linux';
+					print $FD "\t"."$linux /boot/linux";
 					print $FD " loader=$bloader splash=silent";
 				}
 				print $FD $cmdline;
@@ -3987,7 +4062,7 @@ sub setupBootLoaderConfiguration {
 					if ($iso) {
 						print $FD "\t"."echo Loading linux...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
-						print $FD "\t"."linux /boot/linux";
+						print $FD "\t"."$linux /boot/linux";
 						print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 						print $FD " cdinst=1 loader=$bloader splash=silent";
 					} elsif (
@@ -3996,12 +4071,12 @@ sub setupBootLoaderConfiguration {
 					) {
 						print $FD "\t"."echo Loading linux.vmx...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
-						print $FD "\t".'linux /boot/linux.vmx';
+						print $FD "\t"."$linux /boot/linux.vmx";
 						print $FD " loader=$bloader splash=silent";
 					} else {
 						print $FD "\t"."echo Loading linux...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
-						print $FD "\t".'linux /boot/linux';
+						print $FD "\t"."$linux /boot/linux";
 						print $FD " loader=$bloader splash=silent";
 					}
 					print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
@@ -4768,7 +4843,7 @@ sub copyBootCode {
 	#==========================================
 	# EFI
 	#------------------------------------------
-	if ($firmware eq "efi") {
+	if (($firmware eq "efi") || ($firmware eq "uefi")) {
 		$status = qxx ("cp -a $source/efi $dest");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -5437,7 +5512,10 @@ sub getGeometry {
 		$kiwi -> loginfo ($status);
 		return 0;
 	}
-	if (($firmware eq "efi") || ($firmware eq "vboot")) {
+	if (($firmware eq "efi")  ||
+		($firmware eq "uefi") ||
+		($firmware eq "vboot")
+	) {
 		$label = 'gpt';
 	}
 	$status = qxx ("$parted_exec -s $disk mklabel $label 2>&1");
