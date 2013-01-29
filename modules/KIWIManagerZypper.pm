@@ -25,9 +25,14 @@ use Env;
 use FileHandle;
 use File::Basename;
 use Config::IniFiles;
+#==========================================
+# KIWI Modules
+#------------------------------------------
 use KIWILog;
 use KIWILocator;
 use KIWIQX qw (qxx);
+use KIWIXML;
+use KIWIXMLPreferenceData;
 
 #==========================================
 # Modules
@@ -169,7 +174,7 @@ sub setupExcludeDocs {
 	#==========================================
 	# Get and store docs information
 	#------------------------------------------
-	my $imgExclDocs = $xml -> getRPMExcludeDocs_legacy();
+	my $imgExclDocs = $xml -> getPreferences() -> getRPMExcludeDoc();
 	$this->{imgExclDocs} = $imgExclDocs;
 	#==========================================
 	# Update zypper configuration

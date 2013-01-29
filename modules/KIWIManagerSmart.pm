@@ -100,7 +100,7 @@ sub setupSignatureCheck {
 	#==========================================
 	# Get signature information
 	#------------------------------------------
-	my $imgCheckSig = $xml -> getRPMCheckSignatures_legacy();
+	my $imgCheckSig = $xml -> getPreferences() -> getRPMCheckSig();
 	$this->{imgCheckSig} = $imgCheckSig;
 	#==========================================
 	# smart
@@ -189,7 +189,7 @@ sub setupExcludeDocs {
 	#==========================================
 	# Get docs information
 	#------------------------------------------
-	my $imgExclDocs = $xml -> getRPMExcludeDocs_legacy();
+	my $imgExclDocs = $xml -> getPreferences() -> getRPMExcludeDoc();
 	$this->{imgExclDocs} = $imgExclDocs;
 	my @smart = @{$this->{smart}};
 	my $optionName  = "rpm-excludedocs";
@@ -560,7 +560,7 @@ sub setupUpgrade {
 		"--log-level=error",
 		"-y"
 	);
-	my $force = $xml -> getRPMForce_legacy();
+	my $force = $xml -> getPreferences() -> getRPMForce();
 	if (defined $force) {
 		push (@opts,"-o rpm-force=yes");
 	}
@@ -652,7 +652,7 @@ sub setupRootSystem {
 			"--log-level=error",
 			"-y"
 		);
-		my $force = $xml -> getRPMForce_legacy();
+		my $force = $xml -> getPreferences() -> getRPMForce();
 		if (defined $force) {
 			push (@installOpts,"-o rpm-force=yes");
 		}
@@ -697,7 +697,7 @@ sub setupRootSystem {
 			"--log-level=error",
 			"-y"
 		);
-		my $force = $xml -> getRPMForce_legacy();
+		my $force = $xml -> getPreferences() -> getRPMForce();
 		if (defined $force) {
 			push (@installOpts,"-o rpm-force=yes");
 		}
