@@ -47,7 +47,7 @@ sub new {
 	# Object setup
 	#------------------------------------------
 	my $class = shift;
-    my $this  = $class->SUPER::new(@_);
+	my $this  = $class->SUPER::new(@_);
 	#==========================================
 	# Retrieve data from base class
 	#------------------------------------------
@@ -93,7 +93,7 @@ sub setupSignatureCheck {
 	my @kchroot = @{$this->{kchroot}};
 	my $data;
 	my $code;
-	my $imgCheckSig = $xml -> getRPMCheckSignatures_legacy();
+	my $imgCheckSig = $xml -> getPreferences() -> getRPMCheckSig();
 	$this->{imgCheckSig} = $imgCheckSig;
 	my $yumc = $this->{yumconfig};
 	$data = Config::IniFiles -> new (
