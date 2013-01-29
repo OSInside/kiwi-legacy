@@ -1010,12 +1010,18 @@ sub createHybrid {
 		$kiwi -> failed ();
 		return;
 	}
-	my @neededOpts = qw(id offset type partok uefi);
+	my @neededOpts = qw(id offset type partok);
 	my %optNames = %{$locator -> getExecArgsFormat ($isoHybrid, \@neededOpts)};
 	if (! $optNames{'status'}) {
 		$kiwi -> error ($optNames{'error'});
 		$kiwi -> failed ();
 		return;
+	}
+	my @desiredOpt = ('uefi');
+	my %desOptNames = %{$locator
+		-> getExecArgsFormat ($isoHybrid, \@desiredOpt )};
+	if ($desOptNames{'status'}) {
+		$optNames{'uefi'} = $desOptNames{'uefi'}
 	}
 	my $idOpt     = $optNames{'id'};
 	my $offsetOpt = $optNames{'offset'};
