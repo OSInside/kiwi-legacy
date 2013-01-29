@@ -3304,7 +3304,7 @@ sub setupBootLoaderStages {
 		if ($firmware eq "uefi") {
 			$stages{efi}{data}   = "'usr/$lib/efi/*'";
 			$stages{efi}{shim}   = "usr/$lib/efi/shim.efi";
-			$stages{efi}{signed} = "usr/$lib/efi/grubcd.efi";
+			$stages{efi}{signed} = "usr/$lib/efi/grub.efi";
 		}
 		#==========================================
 		# Boot directories
