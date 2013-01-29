@@ -34,6 +34,7 @@ use KIWIQX qw (qxx);
 use KIWIXML;
 use KIWIXMLRepositoryData;
 use KIWIXMLSystemdiskData;
+use KIWIXMLTypeData;
 use KIWIXMLVMachineData;
 
 
@@ -113,6 +114,9 @@ sub createChecks {
 	if (! $this -> __hasValidLVMName()) {
 		return;
 	}
+	if (! $this -> __isoEFICapable()) {
+		return;
+	}
 	return 1;
 }
 
@@ -154,131 +158,6 @@ sub prepareChecks {
 #==========================================
 # Private helper methods
 #------------------------------------------
-#==========================================
-# __hasValidLVMName
-#------------------------------------------
-sub __hasValidLVMName {
-	# ...
-	# check if the optional LVM group name doesn't
-	# exist on the build host
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $xml  = $this->{xml};
-	my $sysDisk = $xml -> getSystemDiskConfig();
-	if (! $sysDisk ) {
-		return 1;
-	}
-	my $vgroupName = $sysDisk -> getVGName();
-	if (! $vgroupName) {
-		return 1;
-	}
-	my $vgsCmd = $this->{locator}->getExecPath('vgs');
-	if (! $vgsCmd) {
-		my $msg = 'LVM definition in configuration being processed, but '
-			. 'necessary tools not found on system.';
-		$kiwi -> error  ($msg);
-		$kiwi -> failed ();
-		return;
-	}
-	my @hostGroups = qxx ("$vgsCmd --noheadings -o vg_name 2>/dev/null");
-	chomp @hostGroups;
-	foreach my $hostGroup (@hostGroups) {
-		$hostGroup =~ s/^\s+//xg;
-		$hostGroup =~ s/\s+$//xg;
-		if ($hostGroup eq $vgroupName) {
-			my $msg = "There is already a volume group ";
-			$msg .= "named \"$vgroupName\" on this build host";
-			$kiwi -> error  ($msg);
-			$kiwi -> failed ();
-			$msg = "Please choose another name in your image configuration";
-			$kiwi -> error  ($msg);
-			$kiwi -> failed ();
-			return;
-		}
-	}
-	return 1;
-}
-
-#==========================================
-# __hasValidArchives
-#------------------------------------------
-sub __hasValidArchives {
-	# ...
-	# check if the optional given archives doesn't
-	# include bogus files
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $xml  = $this->{xml};
-	my $cmdL = $this->{cmdArgs};
-	my $archives = $xml -> getArchives();
-	my $desc = $cmdL-> getConfigDir();
-	my @nogo = ('^etc\/YaST2\/licenses\/.*');
-	#==========================================
-	# check for origin of image description
-	#------------------------------------------
-	if (open my $FD, '<', "$desc/image/main::Prepare") {
-		$desc = <$FD>;
-		close $FD;
-	}
-	#==========================================
-	# check archive contents
-	#------------------------------------------
-	for my $ar (@{$archives}) {
-		my $arName = $ar -> getName();
-		if (! -f "$desc/$arName") {
-			$kiwi -> warning ("specified archive $ar doesn't exist in $desc");
-			$kiwi -> skipped ();
-			next;
-		}
-		my $contents = qxx ("tar -tf $desc/$arName 2>&1");
-		for my $exp (@nogo) {
-			if (grep { /$exp/x } $contents ) {
-				$kiwi -> error  ("bogus archive contents in $ar");
-				$kiwi -> failed ();
-				$kiwi -> error  ("archive matches: $exp");
-				$kiwi -> failed ();
-				return;
-			}
-		}
-	}
-	return 1;
-}
-
-#==========================================
-# __haveValidTypeString
-#------------------------------------------
-sub __haveValidTypeString {
-	# ...
-	# if the commandline data set contains buildtype
-	# information, check if it contains a valid string
-	# This check must be done for prepare and create in
-	# order to early detect a broken commandline when
-	# using prepare + create in one call by the --build
-	# option
-	# ---
-	my $this = shift;
-	my $cmdL = $this -> {cmdArgs};
-	my $type = $cmdL -> getBuildType();
-	my @allowedTypes = qw (
-		btrfs clicfs cpio ext2 ext3 ext4 iso
-		oem product pxe reiserfs split squashfs
-		tbz vmx xfs
-	);
-	if ($type) {
-		if (! grep { /$type/x } @allowedTypes) {
-			my $kiwi = $this -> {kiwi};
-			my $msg = 'Specified value for "type" command line argument is '
-				. 'not valid.';
-			$kiwi -> error ($msg);
-			$kiwi -> failed();
-			return;
-		}
-	}
-	return 1;
-}
-
 #==========================================
 # __checkRepoAliasUnique
 #------------------------------------------
@@ -591,6 +470,131 @@ sub __checkVMscsiCapable {
 }
 
 #==========================================
+# __hasValidLVMName
+#------------------------------------------
+sub __hasValidLVMName {
+	# ...
+	# check if the optional LVM group name doesn't
+	# exist on the build host
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $sysDisk = $xml -> getSystemDiskConfig();
+	if (! $sysDisk ) {
+		return 1;
+	}
+	my $vgroupName = $sysDisk -> getVGName();
+	if (! $vgroupName) {
+		return 1;
+	}
+	my $vgsCmd = $this->{locator}->getExecPath('vgs');
+	if (! $vgsCmd) {
+		my $msg = 'LVM definition in configuration being processed, but '
+			. 'necessary tools not found on system.';
+		$kiwi -> error  ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my @hostGroups = qxx ("$vgsCmd --noheadings -o vg_name 2>/dev/null");
+	chomp @hostGroups;
+	foreach my $hostGroup (@hostGroups) {
+		$hostGroup =~ s/^\s+//xg;
+		$hostGroup =~ s/\s+$//xg;
+		if ($hostGroup eq $vgroupName) {
+			my $msg = "There is already a volume group ";
+			$msg .= "named \"$vgroupName\" on this build host";
+			$kiwi -> error  ($msg);
+			$kiwi -> failed ();
+			$msg = "Please choose another name in your image configuration";
+			$kiwi -> error  ($msg);
+			$kiwi -> failed ();
+			return;
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __hasValidArchives
+#------------------------------------------
+sub __hasValidArchives {
+	# ...
+	# check if the optional given archives doesn't
+	# include bogus files
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $cmdL = $this->{cmdArgs};
+	my $archives = $xml -> getArchives();
+	my $desc = $cmdL-> getConfigDir();
+	my @nogo = ('^etc\/YaST2\/licenses\/.*');
+	#==========================================
+	# check for origin of image description
+	#------------------------------------------
+	if (open my $FD, '<', "$desc/image/main::Prepare") {
+		$desc = <$FD>;
+		close $FD;
+	}
+	#==========================================
+	# check archive contents
+	#------------------------------------------
+	for my $ar (@{$archives}) {
+		my $arName = $ar -> getName();
+		if (! -f "$desc/$arName") {
+			$kiwi -> warning ("specified archive $ar doesn't exist in $desc");
+			$kiwi -> skipped ();
+			next;
+		}
+		my $contents = qxx ("tar -tf $desc/$arName 2>&1");
+		for my $exp (@nogo) {
+			if (grep { /$exp/x } $contents ) {
+				$kiwi -> error  ("bogus archive contents in $ar");
+				$kiwi -> failed ();
+				$kiwi -> error  ("archive matches: $exp");
+				$kiwi -> failed ();
+				return;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __haveValidTypeString
+#------------------------------------------
+sub __haveValidTypeString {
+	# ...
+	# if the commandline data set contains buildtype
+	# information, check if it contains a valid string
+	# This check must be done for prepare and create in
+	# order to early detect a broken commandline when
+	# using prepare + create in one call by the --build
+	# option
+	# ---
+	my $this = shift;
+	my $cmdL = $this -> {cmdArgs};
+	my $type = $cmdL -> getBuildType();
+	my @allowedTypes = qw (
+		btrfs clicfs cpio ext2 ext3 ext4 iso
+		oem product pxe reiserfs split squashfs
+		tbz vmx xfs
+	);
+	if ($type) {
+		if (! grep { /$type/x } @allowedTypes) {
+			my $kiwi = $this -> {kiwi};
+			my $msg = 'Specified value for "type" command line argument is '
+				. 'not valid.';
+			$kiwi -> error ($msg);
+			$kiwi -> failed();
+			return;
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __isFsToolAvailable
 #------------------------------------------
 sub __isFsToolAvailable {
@@ -627,6 +631,51 @@ sub __isFsToolAvailable {
 	if ($fsType eq 'xfs' ) {
 		return $locator -> getExecPath('mkfs.xfs');
 	}
+}
+
+#==========================================
+# __isoEFICapable
+#------------------------------------------
+sub __isoEFICapable {
+	# ...
+	# If an ISO image is being built and the firmware is specified to be
+	# efi, we need the isohybrid executable to support this option.
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $locator = $this->{locator};
+	my $xml = $this->{xml};
+	my $bldType = $xml -> getImageType();
+	my $imgType = $bldType -> getImageType();
+	if ($imgType ne 'iso' && $imgType ne 'oem') {
+		return 1;
+	}
+	my $firmware = $bldType -> getFirmwareType();
+	if ($firmware ne 'efi' && $firmware ne 'uefi') {
+		return 1;
+	}
+	my $isoHybrid = $locator -> getExecPath('isohybrid');
+	if (! $isoHybrid) {
+		my $msg = 'Attempting to create ISO image but cannot find isohybrid '
+			. 'executable. Please install the binary.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my $instIso = $bldType -> getInstallIso();
+	if (($instIso && $instIso eq 'true' && $imgType eq 'oem')
+		|| ($imgType eq 'iso')) {
+		my @opt = ('uefi');
+		my %cmdOpt = %{$locator -> getExecArgsFormat ($isoHybrid, \@opt)};
+		if (! $cmdOpt{'status'}) {
+			my $msg = 'Attempting to build EFI capable ISO image, but '
+				. 'installed isohybrid binary does not support this option.';
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
+			return;
+		}
+	}
+	return 1;
 }
 
 1;
