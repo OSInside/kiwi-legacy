@@ -1808,7 +1808,7 @@ sub __isValidFirmware {
 		return;
 	}
 	my %supported = map { ($_ => 1) } qw(
-		bios efi vboot
+		bios efi uefi vboot
 	);
 	if (! $supported{$firmware} ) {
 		my $msg = "$caller: specified firmware value '$firmware' is not "
