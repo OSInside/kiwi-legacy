@@ -29,6 +29,7 @@ Group:          System/Management
 Version:        5.04.34
 Release:        0
 # requirements to build packages
+BuildRequires:  e2fsprogs
 BuildRequires:  lvm2
 BuildRequires:  gcc-c++
 BuildRequires:  libxslt
