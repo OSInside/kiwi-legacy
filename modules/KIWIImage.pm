@@ -3470,8 +3470,11 @@ sub writeImageConfig {
 	-> generateBuildImageName($this->{xml});
 	$configName .= '.config';
 	my $pxeConfig = $xml -> getPXEConfig();
-	my $device = $pxeConfig -> getDevice();
-	my $bldType = $xml -> getImageType();
+	my $bldType   = $xml -> getImageType();
+	my $device;
+	if ($pxeConfig) {
+		$device = $pxeConfig -> getDevice();
+	}
 	#==========================================
 	# create .config for types which needs it
 	#------------------------------------------
