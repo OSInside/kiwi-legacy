@@ -230,7 +230,7 @@ sub __checkFilesystemTool {
 	my $toolError;
 	my $checkedFS;
 	my @knownFsTypes = qw (
-		btrfs clicfs ext2 ext3 ext4 reiserfs squashfs xfs cpio
+		btrfs clicfs ext2 ext3 ext4 squashfs cpio
 	);
 	if (grep { /^$typeName/x } @knownFsTypes) {
 		my $haveTool = $this -> __isFsToolAvailable($typeName);
@@ -622,14 +622,8 @@ sub __isFsToolAvailable {
 	if ($fsType eq 'ext4' ) {
 		return $locator -> getExecPath('mkfs.ext4');
 	}
-	if ($fsType eq 'reiserfs' ) {
-		return $locator -> getExecPath('mkreiserfs');
-	}
 	if ($fsType eq 'squashfs' ) {
 		return $locator -> getExecPath('mksquashfs');
-	}
-	if ($fsType eq 'xfs' ) {
-		return $locator -> getExecPath('mkfs.xfs');
 	}
 }
 

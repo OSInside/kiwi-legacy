@@ -305,10 +305,6 @@ sub test_fsToolCheckFsysImg {
 				$fsTool = 'mkfs.ext3';
 			} elsif ($fsTestName =~ 'ext4' ) {
 				$fsTool = 'mkfs.ext4';
-			} elsif ($fsTestName =~ 'reiserfs' ) {
-				$fsTool = 'mkreiserfs';
-			} elsif ($fsTestName =~ 'xfs' ) {
-				$fsTool = 'mkfs.xfs';
 			}
 			my $logMsg = $kiwi -> getLogInfoMessage();
 			my $expected = "warning: $fsTool not found\n";
