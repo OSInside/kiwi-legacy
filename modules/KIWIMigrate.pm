@@ -24,6 +24,7 @@ use strict;
 use warnings;
 use Carp qw (cluck);
 use XML::LibXML;
+use Data::Dumper;
 use FileHandle;
 use File::Find;
 use File::stat;
@@ -34,6 +35,11 @@ use Storable;
 use File::Spec;
 use Fcntl ':mode';
 use Cwd qw (abs_path cwd);
+#==========================================
+# Modules
+#------------------------------------------
+# use JSON;
+
 #==========================================
 # KIWI Modules
 #------------------------------------------
@@ -239,6 +245,46 @@ sub new {
 }
 
 #==========================================
+# searchNode
+#------------------------------------------
+sub searchNode {
+	my $this   = shift;
+	my $tree   = shift;
+	my $search = shift;
+	my %result;
+	my @search_list = @{$search};
+	foreach my $item (@search_list) {
+		my $key = quotemeta $item;
+		$result{$key} = undef;
+	}
+	if ((! $tree) || (ref $tree ne 'HASH') || (! $tree->{name})) {
+		return %result;
+	}
+	foreach my $item (@search_list) {
+		if ($tree->{name} eq $item) {
+			my $key = quotemeta $item;
+			$result{$key} = $tree;
+		} elsif ($tree->{children}) {
+			my @child_list = @{$tree->{children}};
+			my $found = 0;
+			foreach my $child (@child_list) {
+				if ($child->{name} eq $item) {
+					my $key = quotemeta $item;
+					$result{$key} = $child;
+					$tree  = $child;
+					$found = 1;
+					last;
+				}
+			}
+			if (! $found) {
+				return %result;
+			}
+		}
+	}
+	return %result;
+}
+
+#==========================================
 # createTreeLayout
 #------------------------------------------
 sub createTreeLayout {
@@ -250,10 +296,13 @@ sub createTreeLayout {
 	my $kiwi       = $this->{kiwi};
 	my $nopackage  = $this->{nopackage};
 	my $dest       = $this->{dest};
-	my %tree       = ();
+	my $tree;
 	if (! $nopackage) {
 		return;
 	}
+	#==========================================
+	# store d3 data in file
+	#------------------------------------------
 	my $FD = FileHandle -> new();
 	if (! $FD -> open (">$dest/files.html")) {
 		$kiwi -> failed ();
@@ -261,26 +310,130 @@ sub createTreeLayout {
 		$kiwi -> failed ();
 		return;
 	}
-	foreach my $file (sort keys %{$nopackage}) {
+	#==========================================
+	# we need a JSON ready perl data structure
+	#------------------------------------------
+	$kiwi -> info ("Creating JSON parse tree...");
+	my @files  = sort keys %{$nopackage};
+	my $filenr = @files;
+	my $factor = 100 / $filenr;
+	my $done_percent = 0;
+	my $done_previos = 0;
+	my $done = 0;
+	$kiwi -> cursorOFF();
+	foreach my $file (@files) {
 		my $fattr = $nopackage->{$file}->[1];
 		my @ori_items = split (/\//,$file);
+		$ori_items[0] = '/';
+		my $u_fpath = join ('_',@ori_items);
 		my @new_items = ();
-		foreach my $item (@ori_items) {
-			next if $item eq '';
-			$item = quotemeta $item;
-			push @new_items,'{"'.$item.'"}';
+		my $isdir = 0;
+		my $filename;
+		if (($fattr) && (S_ISDIR($fattr->mode))) {
+			$isdir = 1;
 		}
-		my $hsh_entry = join ('',@new_items);
-		my $eval = "\$tree$hsh_entry = 0";
-		eval $eval ## no critic
+		if (! $isdir) {
+			$filename = pop @ori_items;
+		}
+		#==========================================
+		# update progress
+		#------------------------------------------
+		$done_percent = int ($factor * $done);
+		if ($done_percent > $done_previos) {
+			$kiwi -> step ($done_percent);
+		}
+		$done_previos = $done_percent;
+		$done++;
+		#==========================================
+		# create file node first
+		#------------------------------------------
+		my $file_node;
+		if ($filename) {
+			$file_node->{name} = $filename;
+		}
+		#==========================================
+		# search for nodes in current tree
+		#------------------------------------------
+		my %node_list = $this -> searchNode ($tree,\@ori_items);
+		#==========================================
+		# walk through the tree and create/add data
+		#------------------------------------------
+		my $pre_node;
+		for (my $i=@ori_items-1; $i >= 0; $i--) {
+			my $dir_name = $ori_items[$i];
+			my $dir_key  = quotemeta $dir_name;
+			my $dir_node = $node_list{$dir_key};
+			if (! $dir_node) {
+				$dir_node->{name} = $dir_name;
+				if ($filename) {
+					$dir_node->{children} = [ $file_node ];
+				} elsif ($pre_node) {
+					$dir_node->{children} = [ $pre_node ];
+				}
+			} else {
+				my $children = $dir_node->{children};
+				my @children = ();
+				if ($children) {
+					@children = @{$children};
+				}
+				my $add_node;
+				if ($filename) {
+					$add_node = $file_node;
+				} elsif ($pre_node) {
+					$add_node = $pre_node;
+				}
+				if ($add_node) {
+					my $added = 0;
+					foreach my $c (@children) {
+						if ($c == $add_node) {
+							$added = 1; last;
+						}
+					}
+					if (! $added) {
+						push @children,$add_node;
+						$dir_node->{children} = \@children;
+					}
+				}
+			}
+			if ($filename) {
+				undef $filename;
+			}
+			if ((! $tree) && ($dir_name eq '/') && ($dir_node)) {
+				$tree = $dir_node;
+			}
+			$pre_node = $dir_node;
+		}
 	}
-	# TODO: create correct perl hash %d3 suitable for
-	# for d3 data visualization framework. Example:
+	$kiwi -> step (100);
+	$kiwi -> note ("\n");
+	$kiwi -> doNorm ();
+	$kiwi -> cursorON();
+	# /.../
+	# TODO
+	# The data structure can be dumped with Data::Dumper
+	# --------------------------------------------------
+	# $Data::Dumper::Terse  = 1;
+	# $Data::Dumper::Indent = 1;
+	# $Data::Dumper::Useqq  = 1;
+	# my $dd = Data::Dumper->new([ $tree ]);
+	# my $cd = $dd->Dump();
+	# print $cd;
+	# --------------------------------------------------
+	# But when using the JSON module I run into the
+	# maximum nesting level problem. If I increase the
+	# nesting level the processing takes forever
+	# and set the machine under heavy load. The JSON
+	# data is required for d3, Example:
 	# http://mbostock.github.com/d3/talk/20111018/tree.html
-	#
+	# --------------------------------------------------
 	# my %d3;
 	# my $json = JSON->new->allow_nonref;
-	# my $text = $json->pretty->encode( \%tree );
+	# $json ->max_depth([10000]);
+	# my $text = $json->pretty->encode( $tree );
+	# print "$text\n";
+	# --------------------------------------------------
+	# Unfortunately no good solution ahead
+	# --------------------------------------------------
 	return $this;
 }
 
@@ -1318,7 +1471,7 @@ sub setSystemOverlayFiles {
 				}
 			}
 			$done = int ($count * $spart);
-			if ($done != $done_old) {
+			if (($done_old) && ($done != $done_old)) {
 				$kiwi -> step ($done);
 			}
 			$done_old = $done;
@@ -1819,7 +1972,13 @@ sub resolvePath {
 			}
 		}
 		if (@path) {
-			$current = join ("/",@path);
+			my @path_new;
+			foreach my $p (@path) {
+				if ($p) {
+					push @path_new,$p
+				}
+			}
+			$current = join ("/",@path_new);
 		}
 	}
 	#========================================
