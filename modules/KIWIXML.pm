@@ -7402,57 +7402,6 @@ sub getProfiles_legacy {
 }
 
 #==========================================
-# getRPMCheckSignatures_legacy
-#------------------------------------------
-sub getRPMCheckSignatures_legacy {
-	# ...
-	# Check if the package manager should check for
-	# RPM signatures or not
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("rpm-check-signatures");
-	my $sigs = $node -> getElementsByTagName ("rpm-check-signatures");
-	if ((! defined $sigs) || ("$sigs" eq "") || ("$sigs" eq "false")) {
-		return;
-	}
-	return "$sigs";
-}
-
-#==========================================
-# getRPMExcludeDocs_legacy
-#------------------------------------------
-sub getRPMExcludeDocs_legacy {
-	# ...
-	# Check if the package manager should exclude docs
-	# from installed files or not
-	# ---
-	my $this = shift;
-	my $node = $this-> __getPreferencesNodeByTagName ("rpm-excludedocs");
-	my $xdoc = $node -> getElementsByTagName ("rpm-excludedocs");
-	if ((! defined $xdoc) || ("$xdoc" eq "")) {
-		return;
-	}
-	return "$xdoc";
-}
-
-#==========================================
-# getRPMForce_legacy
-#------------------------------------------
-sub getRPMForce_legacy {
-	# ...
-	# Check if the package manager should force
-	# installing packages
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("rpm-force");
-	my $frpm = $node -> getElementsByTagName ("rpm-force");
-	if ((! defined $frpm) || ("$frpm" eq "") || ("$frpm" eq "false")) {
-		return;
-	}
-	return "$frpm";
-}
-
-#==========================================
 # getRepositories_legacy
 #------------------------------------------
 sub getRepositories_legacy {
