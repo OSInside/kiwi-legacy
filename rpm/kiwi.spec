@@ -37,6 +37,7 @@ BuildRequires:  module-init-tools
 BuildRequires:  perl-Config-IniFiles
 BuildRequires:  perl-XML-LibXML
 BuildRequires:  perl-libwww-perl
+BuildRequires:  perl-JSON
 BuildRequires:  screen
 BuildRequires:  zlib-devel
 %if 0%{?suse_version} > 1020
@@ -71,6 +72,7 @@ Requires:		perl >= %{perl_version}
 %else
 Requires:		perl = %{perl_version}
 %endif
+Requires:       perl-JSON
 Requires:       perl-Class-Singleton
 Requires:       perl-Config-IniFiles
 Requires:       perl-libwww-perl

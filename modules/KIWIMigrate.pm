@@ -35,10 +35,7 @@ use Storable;
 use File::Spec;
 use Fcntl ':mode';
 use Cwd qw (abs_path cwd);
-#==========================================
-# Modules
-#------------------------------------------
-# use JSON;
+use JSON;
 
 #==========================================
 # KIWI Modules
@@ -251,37 +248,36 @@ sub searchNode {
 	my $this   = shift;
 	my $tree   = shift;
 	my $search = shift;
-	my %result;
+	my @result;
 	my @search_list = @{$search};
 	foreach my $item (@search_list) {
-		my $key = quotemeta $item;
-		$result{$key} = undef;
+		push @result,undef;
 	}
 	if ((! $tree) || (ref $tree ne 'HASH') || (! $tree->{name})) {
-		return %result;
+		return @result;
 	}
+	my $count = 0;
 	foreach my $item (@search_list) {
-		if ($tree->{name} eq $item) {
-			my $key = quotemeta $item;
-			$result{$key} = $tree;
+		if (($count == 0) && ($tree->{name} eq $item)) {
+			$result[$count] = $tree;
 		} elsif ($tree->{children}) {
 			my @child_list = @{$tree->{children}};
 			my $found = 0;
 			foreach my $child (@child_list) {
 				if ($child->{name} eq $item) {
-					my $key = quotemeta $item;
-					$result{$key} = $child;
+					$result[$count] = $child;
 					$tree  = $child;
 					$found = 1;
 					last;
 				}
 			}
 			if (! $found) {
-				return %result;
+				return @result;
 			}
 		}
+		$count++;
 	}
-	return %result;
+	return @result;
 }
 
 #==========================================
@@ -298,16 +294,6 @@ sub createTreeLayout {
 	my $dest       = $this->{dest};
 	my $tree;
 	if (! $nopackage) {
-		return;
-	}
-	#==========================================
-	# store d3 data in file
-	#------------------------------------------
-	my $FD = FileHandle -> new();
-	if (! $FD -> open (">$dest/files.html")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create files layout: $!");
-		$kiwi -> failed ();
 		return;
 	}
 	#==========================================
@@ -354,15 +340,14 @@ sub createTreeLayout {
 		#==========================================
 		# search for nodes in current tree
 		#------------------------------------------
-		my %node_list = $this -> searchNode ($tree,\@ori_items);
+		my @node_list = $this -> searchNode ($tree,\@ori_items);
 		#==========================================
 		# walk through the tree and create/add data
 		#------------------------------------------
 		my $pre_node;
 		for (my $i=@ori_items-1; $i >= 0; $i--) {
 			my $dir_name = $ori_items[$i];
-			my $dir_key  = quotemeta $dir_name;
-			my $dir_node = $node_list{$dir_key};
+			my $dir_node = $node_list[$i];
 			if (! $dir_node) {
 				$dir_node->{name} = $dir_name;
 				if ($filename) {
@@ -408,32 +393,22 @@ sub createTreeLayout {
 	$kiwi -> note ("\n");
 	$kiwi -> doNorm ();
 	$kiwi -> cursorON();
-	# /.../
-	# TODO
-	# The data structure can be dumped with Data::Dumper
-	# --------------------------------------------------
-	# $Data::Dumper::Terse  = 1;
-	# $Data::Dumper::Indent = 1;
-	# $Data::Dumper::Useqq  = 1;
-	# my $dd = Data::Dumper->new([ $tree ]);
-	# my $cd = $dd->Dump();
-	# print $cd;
-	# --------------------------------------------------
-	# But when using the JSON module I run into the
-	# maximum nesting level problem. If I increase the
-	# nesting level the processing takes forever
-	# and set the machine under heavy load. The JSON
-	# data is required for d3, Example:
-	# http://mbostock.github.com/d3/talk/20111018/tree.html
-	# --------------------------------------------------
-	# my %d3;
-	# my $json = JSON->new->allow_nonref;
-	# $json ->max_depth([10000]);
-	# my $text = $json->pretty->encode( $tree );
-	# print "$text\n";
-	# --------------------------------------------------
-	# Unfortunately no good solution ahead
-	# --------------------------------------------------
+	#==========================================
+	# store JSON data
+	#------------------------------------------
+	$kiwi -> info ("Storing D3 data stream...");
+	my $FD = FileHandle -> new();
+	if (! $FD -> open (">$dest/files.html")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create files layout: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	my $json = JSON->new->allow_nonref;
+	my $text = $json->pretty->encode( $tree );
+	print $FD $text;
+	$FD -> close();
+	$kiwi -> done();
 	return $this;
 }
 
