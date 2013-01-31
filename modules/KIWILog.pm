@@ -23,10 +23,12 @@ use warnings;
 use Carp qw (cluck);
 use FileHandle;
 use POSIX ":sys_wait_h";
-use KIWISocket;
-use KIWISharedMem;
-use KIWIQX qw (qxx qxxLogOff qxxLogOn);
-
+#==========================================
+# KIWI Modules
+#------------------------------------------
+require KIWISocket;
+require KIWISharedMem;
+require KIWIQX;
 #==========================================
 # Singleton class
 #------------------------------------------
@@ -731,7 +733,7 @@ sub finalizeLog {
 		my $logfile = $1;
 		$logfile = "$logfile.log";
 		$this -> info ("Complete logfile at: $logfile");
-		qxx ("mv $rootLog $logfile 2>&1");
+		KIWIQX::qxx ("mv $rootLog $logfile 2>&1");
 		$this -> done ();
 	}
 	return $this;
@@ -1024,39 +1026,39 @@ sub writeXMLDiff {
 	if ((! $data) || (! -f $cmpf)) {
 		return;
 	}
-	qxxLogOff();
-	my $used = qxx ("mktemp -qt kiwi-xmlused.XXXXXX"); chomp $used;
+	KIWIQX::qxxLogOff();
+	my $used = KIWIQX::qxx ("mktemp -qt kiwi-xmlused.XXXXXX"); chomp $used;
 	my $code = $? >> 8;
 	if ($code != 0) {
-		qxxLogOn();
+		KIWIQX::qxxLogOn();
 		return;
 	}
-	my $orig = qxx ("mktemp -qt kiwi-xmlorig.XXXXXX"); chomp $orig;
+	my $orig = KIWIQX::qxx ("mktemp -qt kiwi-xmlorig.XXXXXX"); chomp $orig;
 	if ($code != 0) {
-		qxxLogOn();
+		KIWIQX::qxxLogOn();
 		return;
 	}
-	qxx ("cp -a $cmpf $orig");
+	KIWIQX::qxx ("cp -a $cmpf $orig");
 	if (! open ($FX, '>', "$used")) {
-		qxxLogOn();
+		KIWIQX::qxxLogOn();
 		unlink $used;
 		unlink $orig;
 		return;
 	}
 	binmode $FX;
 	print $FX $data; close $FX;
-	qxx ("xsltproc -o $used.new $pretty $used");
-	qxx ("mv $used.new $used");
-	qxx ("xsltproc -o $orig.new $pretty $orig");
-	qxx ("mv $orig.new $orig");
-	my $diff  = qxx ("diff -uwB $orig $used | grep -v -E '^[-+]{3}' 2>&1");
+	KIWIQX::qxx ("xsltproc -o $used.new $pretty $used");
+	KIWIQX::qxx ("mv $used.new $used");
+	KIWIQX::qxx ("xsltproc -o $orig.new $pretty $orig");
+	KIWIQX::qxx ("mv $orig.new $orig");
+	my $diff  = KIWIQX::qxx ("diff -uwB $orig $used | grep -v -E '^[-+]{3}' 2>&1");
 	if (! $diff) {
-		qxxLogOn();
+		KIWIQX::qxxLogOn();
 		unlink $used;
 		unlink $orig;
 		return $this;
 	}
-	qxxLogOn();
+	KIWIQX::qxxLogOn();
 	my $print = 1;
 	if ($cache) {
 		@NC = @{$cache};
