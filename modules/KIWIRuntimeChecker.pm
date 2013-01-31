@@ -114,7 +114,7 @@ sub createChecks {
 	if (! $this -> __hasValidLVMName()) {
 		return;
 	}
-	if (! $this -> __isoEFICapable()) {
+	if (! $this -> __isoHybridCapable()) {
 		return;
 	}
 	return 1;
@@ -634,12 +634,13 @@ sub __isFsToolAvailable {
 }
 
 #==========================================
-# __isoEFICapable
+# __isoHybridCapable
 #------------------------------------------
-sub __isoEFICapable {
+sub __isoHybridCapable {
 	# ...
-	# If an ISO image is being built and the firmware is specified to be
-	# efi, we need the isohybrid executable to support this option.
+	# If an ISO image is being built check that if an iso hybrid is
+	# requested, the platform is capable. Check if the uefi capability
+	# exists if isohybrid is allowed on given platform.
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -650,25 +651,47 @@ sub __isoEFICapable {
 	if ($imgType ne 'iso' && $imgType ne 'oem') {
 		return 1;
 	}
-	my $firmware = $bldType -> getFirmwareType();
-	if ($firmware ne 'efi' && $firmware ne 'uefi') {
-		return 1;
-	}
-	my $isoHybrid = $locator -> getExecPath('isohybrid');
-	if (! $isoHybrid) {
-		my $msg = 'Attempting to create ISO image but cannot find isohybrid '
-			. 'executable. Please install the binary.';
-		$kiwi -> error ($msg);
-		$kiwi -> failed ();
-		return;
-	}
 	my $instIso = $bldType -> getInstallIso();
-	if (($instIso && $instIso eq 'true' && $imgType eq 'oem')
-		|| ($imgType eq 'iso')) {
+	my $bootloader = $bldType -> getBootLoader();
+	my $hybPersist = $bldType -> getHybridPersistent();
+	my $arch = KIWIGlobals -> instance() -> getArch();
+
+	if (
+		( $instIso
+		&& $instIso eq 'true'
+		&& $bootloader
+		&& $bootloader =~ /(sys|ext)linux/smx
+		&& $imgType eq 'oem'
+		)
+		||
+		( $hybPersist
+		&& $hybPersist eq 'true'
+		&& $imgType eq 'iso'
+		)
+	) {
+		if ($arch ne 'ix86' && $arch ne 'x86_64') {
+			my $msg = 'Attempting to create hybrid ISO image on a platform '
+				. 'that does not support hybrid ISO creation.';
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
+			return;
+		}
+		my $isoHybrid = $locator -> getExecPath('isohybrid');
+		if (! $isoHybrid) {
+			my $msg = 'Attempting to create hybrid ISO image but cannot find '
+				. 'isohybrid executable. Please install the binary.';
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
+			return;
+		}
+		my $firmware = $bldType -> getFirmwareType();
+		if ($firmware ne 'efi' && $firmware ne 'uefi') {
+			return 1;
+		}
 		my @opt = ('uefi');
 		my %cmdOpt = %{$locator -> getExecArgsFormat ($isoHybrid, \@opt)};
 		if (! $cmdOpt{'status'}) {
-			my $msg = 'Attempting to build EFI capable ISO image, but '
+			my $msg = 'Attempting to build EFI capable hybrid ISO image, but '
 				. 'installed isohybrid binary does not support this option.';
 			$kiwi -> error ($msg);
 			$kiwi -> failed ();

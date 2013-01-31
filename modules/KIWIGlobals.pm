@@ -29,6 +29,21 @@ use KIWIQX qw (qxx);
 #------------------------------------------
 use base qw /Class::Singleton/;
 
+
+#==========================================
+# getArch
+#------------------------------------------
+sub getArch {
+	# ...
+	# Return the architecture setting of the build environment
+	# ---
+	my $arch = qxx ("uname -m"); chomp $arch;
+	if ($arch =~ /i.86/) {
+		$arch = "ix86";
+	}
+	return $arch;
+}
+
 #==========================================
 # getKiwiConfig
 #------------------------------------------

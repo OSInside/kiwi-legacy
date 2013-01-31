@@ -7,7 +7,7 @@
 		<specification>test configuration of ISO for efi</specification>
 	</description>
 	<preferences>
-		<type image="iso" primary="true" boot="isoboot/suse-12.2" firmware="uefi"/>
+		<type image="iso" primary="true" boot="isoboot/suse-12.2" hybridpersistent="true" firmware="uefi"/>
 		<version>2.5.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
