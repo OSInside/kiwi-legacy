@@ -23,6 +23,10 @@ use warnings;
 use Scalar::Util qw /looks_like_number/;
 use XML::LibXML;
 require Exporter;
+#==========================================
+# KIWI Modules
+#------------------------------------------
+use KIWIGlobals;
 
 use base qw /KIWIXMLDataBase/;
 
@@ -146,6 +150,13 @@ sub new {
 	$this->{vmnics}        = $init->{vmnics};
 	if (! $this->{HWversion} ) {
 		$this->{HWversion} = '4';
+	}
+	if (! $this->{guestOS}) {
+		if ($this->{arch} && $this->{arch} =~ /64/smx) {
+			$this->{guestOS} = 'suse-64';
+		} else {
+			$this->{guestOS} = 'suse';
+		}
 	}
 	return $this;
 }
@@ -484,17 +495,6 @@ sub getSystemDiskDevice {
 }
 
 #==========================================
-# getSystemDiskType
-#------------------------------------------
-sub getSystemDiskType {
-	# ...
-	# Return the configured device type for the system disk
-	# ---
-	my $this = shift;
-	return $this->{vmdisks}{system}{disktype};
-}
-
-#==========================================
 # getSystemDiskID
 #------------------------------------------
 sub getSystemDiskID {
@@ -503,6 +503,17 @@ sub getSystemDiskID {
 	# ---
 	my $this = shift;
 	return $this->{vmdisks}{system}{id};
+}
+
+#==========================================
+# getSystemDiskType
+#------------------------------------------
+sub getSystemDiskType {
+	# ...
+	# Return the configured device type for the system disk
+	# ---
+	my $this = shift;
+	return $this->{vmdisks}{system}{disktype};
 }
 
 #==========================================
