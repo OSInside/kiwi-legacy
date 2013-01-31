@@ -20,9 +20,9 @@ package KIWIGlobals;
 use strict;
 use warnings;
 use File::Basename;
-use KIWILocator;
-use KIWILog;
-use KIWIQX qw (qxx);
+require KIWILocator;
+require KIWILog;
+require KIWIQX;
 
 #==========================================
 # Singleton class
@@ -37,7 +37,7 @@ sub getArch {
 	# ...
 	# Return the architecture setting of the build environment
 	# ---
-	my $arch = qxx ("uname -m"); chomp $arch;
+	my $arch = KIWIQX::qxx ("uname -m"); chomp $arch;
 	if ($arch =~ /i.86/) {
 		$arch = "ix86";
 	}
@@ -87,7 +87,7 @@ sub createDirInteractive {
 			chomp ($answer = <>);
 		}
 		if ($answer eq "yes") {
-			qxx ("mkdir -p $targetDir");
+			KIWIQX::qxx ("mkdir -p $targetDir");
 			return 1;
 		}
 	} else {
@@ -245,7 +245,7 @@ sub mount {
 	# Check for DISK file / device
 	#------------------------------------------
 	if ((-f $source) || (-b $source)) {
-		$status= qxx ("blkid $source 2>&1");
+		$status= KIWIQX::qxx ("blkid $source 2>&1");
 		$result= $? >> 8;
 		if ($result != 0) {
 			# no block id information, check deeper for filesystem
@@ -265,7 +265,7 @@ sub mount {
 				}
 				$source = $pdev;
 			} else {
-				$status = qxx ("/sbin/losetup -f --show $source 2>&1");
+				$status = KIWIQX::qxx ("/sbin/losetup -f --show $source 2>&1");
 				chomp $status;
 				$result = $? >> 8;
 				if ($result != 0) {
@@ -279,7 +279,7 @@ sub mount {
 				my $loop = $status;
 				push @UmountStack,"losetup -d $loop";
 				$this->{UmountStack} = \@UmountStack;
-				$status = qxx ("kpartx -a $loop 2>&1");
+				$status = KIWIQX::qxx ("kpartx -a $loop 2>&1");
 				$result = $? >> 8;
 				if ($result != 0) {
 					$kiwi -> error (
@@ -333,7 +333,7 @@ sub mount {
 	#------------------------------------------
 	if ($type eq "luks") {
 		if (-f $source) {
-			$status = qxx ("/sbin/losetup -f --show $source 2>&1");
+			$status = KIWIQX::qxx ("/sbin/losetup -f --show $source 2>&1");
 			chomp $status;
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -347,11 +347,11 @@ sub mount {
 			$this->{UmountStack} = \@UmountStack;
 		}
 		if ($cipher) {
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"echo $cipher | cryptsetup luksOpen $source luks-$salt 2>&1"
 			);
 		} else {
-			$status = qxx ("cryptsetup luksOpen $source luks-$salt 2>&1");
+			$status = KIWIQX::qxx ("cryptsetup luksOpen $source luks-$salt 2>&1");
 		}
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -369,9 +369,9 @@ sub mount {
 	#------------------------------------------
 	if ((-f $source) && ($type ne "clicfs")) {
 		if ($opts) {
-			$status = qxx ("mount -o loop,$opts $source $dest 2>&1");
+			$status = KIWIQX::qxx ("mount -o loop,$opts $source $dest 2>&1");
 		} else {
-			$status = qxx ("mount -o loop $source $dest 2>&1");
+			$status = KIWIQX::qxx ("mount -o loop $source $dest 2>&1");
 		}
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -382,17 +382,17 @@ sub mount {
 		}
 	} else {
 		if ($type eq "clicfs") {
-			$status = qxx ("clicfs -m 512 $source $dest 2>&1");
+			$status = KIWIQX::qxx ("clicfs -m 512 $source $dest 2>&1");
 			$result = $? >> 8;
 			if ($result == 0) {
-				$status = qxx ("resize2fs $dest/fsdata.ext3 2>&1");
+				$status = KIWIQX::qxx ("resize2fs $dest/fsdata.ext3 2>&1");
 				$result = $? >> 8;
 			}
 		} else {
 			if ($opts) {
-				$status = qxx ("mount -o $opts $source $dest 2>&1");
+				$status = KIWIQX::qxx ("mount -o $opts $source $dest 2>&1");
 			} else {
-				$status = qxx ("mount $source $dest 2>&1");
+				$status = KIWIQX::qxx ("mount $source $dest 2>&1");
 			}
 			$result = $? >> 8;
 		}
@@ -410,7 +410,7 @@ sub mount {
 	#------------------------------------------
 	if (-f $dest."/fsdata.ext3") {
 		$source = $dest."/fsdata.ext3";
-		$status = qxx ("mount -o loop $source $dest 2>&1");
+		$status = KIWIQX::qxx ("mount -o loop $source $dest 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error ("Failed to loop mount $source to: $dest: $status");
@@ -468,10 +468,10 @@ sub umount {
 	if (! $stack) {
 		return;
 	}
-	qxx ("sync");
+	KIWIQX::qxx ("sync");
 	my @UmountStack = @{$stack};
 	foreach my $cmd (reverse @UmountStack) {
-		$status = qxx ("$cmd 2>&1");
+		$status = KIWIQX::qxx ("$cmd 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> warning ("UmountStack failed: $cmd: $status\n");
@@ -496,7 +496,7 @@ sub isize {
 		return 0;
 	}
 	if (-b $target) {
-		my $size = qxx ("blockdev --getsize64 $target 2>&1");
+		my $size = KIWIQX::qxx ("blockdev --getsize64 $target 2>&1");
 		my $code = $? >> 8;
 		if ($code == 0) {
 			chomp  $size;
@@ -520,7 +520,7 @@ sub generateBuildImageName {
 	my $xml       = shift;
 	my $separator = shift;
 	my $extension = shift;
-	my $arch = qxx ("uname -m"); chomp ( $arch );
+	my $arch = KIWIQX::qxx ("uname -m"); chomp ( $arch );
 	$arch = ".$arch";
 	if (! defined $separator) {
 		$separator = "-";
@@ -594,7 +594,7 @@ sub checkFileSystem {
 		# got a file, block special or something
 		#------------------------------------------
 		if (-e $fs) {
-			my $data = qxx ("blkid -o value -s TYPE $fs");
+			my $data = KIWIQX::qxx ("blkid -o value -s TYPE $fs");
 			my $code = $? >> 8;
 			my $type;
 			SWITCH: for ($data) {
@@ -635,7 +635,7 @@ sub checkFileSystem {
 					last SWITCH;
 				};
 				# unknown filesystem type check clicfs...
-				$data = qxx (
+				$data = KIWIQX::qxx (
 					"dd if=$fs bs=128k count=1 2>/dev/null | grep -qi CLIC"
 				);
 				$code = $? >> 8;
@@ -683,16 +683,16 @@ sub setupBTRFSSubVolumes {
 		'tmp','opt','srv','var','var/crash',
 		'var/spool','var/log','var/run','var/tmp'
 	);
-	my $data = qxx ('btrfs subvolume create '.$path.'/@ 2>&1');
+	my $data = KIWIQX::qxx ('btrfs subvolume create '.$path.'/@ 2>&1');
 	my $code = $? >> 8;
 	if ($code == 0) {
 		my $rootID=0;
-		$data = qxx ("btrfs subvolume list $path 2>&1");
+		$data = KIWIQX::qxx ("btrfs subvolume list $path 2>&1");
 		if ($data =~ /^ID (\d+) /) {
 			$rootID=$1;
 		}
 		if ($rootID) {
-			$data = qxx (
+			$data = KIWIQX::qxx (
 				"btrfs subvolume set-default $rootID $path 2>&1"
 			);
 			$code = $? >> 8;
@@ -702,7 +702,7 @@ sub setupBTRFSSubVolumes {
 	}
 	if ($code == 0) {
 		foreach my $vol (@subvol) {
-		$data = qxx (
+		$data = KIWIQX::qxx (
 			'btrfs subvolume create '.$path.'/@/'.$vol.' 2>&1'
 		);
 		$code = $? >> 8;
@@ -735,7 +735,7 @@ sub umountSystemFileSystems {
 		return;
 	}
 	foreach my $path (@sysfs) {
-		qxx ("chroot $root umount -l $path 2>&1");
+		KIWIQX::qxx ("chroot $root umount -l $path 2>&1");
 	}
 	return $this;
 }
@@ -784,7 +784,7 @@ sub callContained {
 		# check for lxc in the unpacked tree
 		#------------------------------------------
 		if (-e $lxcinit) {
-			qxx ("mv $lxcinit $lxcinit.orig 2>&1");
+			KIWIQX::qxx ("mv $lxcinit $lxcinit.orig 2>&1");
 		}
 		#==========================================
 		# create lxc config file
@@ -800,7 +800,7 @@ sub callContained {
 			# check if lxc works
 			#------------------------------------------
 			if (! -d $lxcbase) {
-				qxx ("mkdir -p $lxcbase");
+				KIWIQX::qxx ("mkdir -p $lxcbase");
 			}
 			if (! open ($FD, ">", $lxcinit)) {
 				$kiwi -> loginfo ("Couldn't create lxc-init test: $!\n");
@@ -810,8 +810,8 @@ sub callContained {
 				print $FD "echo OK"."\n";
 				print $FD "exit 0"."\n";
 				close $FD;
-				$data = qxx ("chmod u+x $lxcinit 2>&1");
-				$data = qxx (
+				$data = KIWIQX::qxx ("chmod u+x $lxcinit 2>&1");
+				$data = KIWIQX::qxx (
 					"lxc-execute -n kiwi -f $root/config.lxc true 2>&1"
 				);
 				$code = $? >> 8;
@@ -822,8 +822,8 @@ sub callContained {
 					#==========================================
 					# call via lxc
 					#------------------------------------------
-					$data = qxx ("mv $root/$prog $lxcinit 2>&1");
-					$data = qxx (
+					$data = KIWIQX::qxx ("mv $root/$prog $lxcinit 2>&1");
+					$data = KIWIQX::qxx (
 						"lxc-execute -n kiwi -f $root/config.lxc true 2>&1"
 					);
 					$code = $? >> 8;
@@ -837,18 +837,18 @@ sub callContained {
 		#------------------------------------------
 		$kiwi -> loginfo ("Falling back to chroot method\n");
 		if (-e "$root/config.lxc") {
-			qxx ("rm -f $root/config.lxc 2>&1");
+			KIWIQX::qxx ("rm -f $root/config.lxc 2>&1");
 		}
 		if (($lxcinit) && (-e "$root/$lxcinit")) {
-			qxx ("rm -f $root/$lxcinit 2>&1");
+			KIWIQX::qxx ("rm -f $root/$lxcinit 2>&1");
 		}
 		if (($lxcinit) && (-e "$lxcinit.orig")) {
-			qxx ("mv $lxcinit.orig $lxcinit 2>&1");
+			KIWIQX::qxx ("mv $lxcinit.orig $lxcinit 2>&1");
 		}
 		#==========================================
 		# call in chroot
 		#------------------------------------------
-		$data = qxx ("chroot $root $prog 2>&1 ");
+		$data = KIWIQX::qxx ("chroot $root $prog 2>&1 ");
 		$code = $? >> 8;
 		$this -> umountSystemFileSystems ($root);
 	}
@@ -869,7 +869,7 @@ sub checkLVMbind {
 		return;
 	}
 	my @UmountStack = @{$this->{UmountStack}};
-	my $vgname = qxx ("pvs --noheadings -o vg_name $sdev 2>/dev/null");
+	my $vgname = KIWIQX::qxx ("pvs --noheadings -o vg_name $sdev 2>/dev/null");
 	my $result = $? >> 8;
 	if ($result != 0) {
 		return $sdev;
@@ -879,7 +879,7 @@ sub checkLVMbind {
 	$vgname =~ s/\s+$//;
 	$this->{lvm} = 1;
 	$this->{lvmgroup} = $vgname;
-	my $status = qxx ("vgchange -a y $vgname 2>&1");
+	my $status = KIWIQX::qxx ("vgchange -a y $vgname 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		return;
@@ -916,7 +916,7 @@ sub _new_instance {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	my $arch = qxx ("uname -m");
+	my $arch = KIWIQX::qxx ("uname -m");
 	chomp $arch;
 	#==========================================
 	# Globals (generic)
