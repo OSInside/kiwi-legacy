@@ -7,7 +7,7 @@
 		<specification>test configuration of ISO for efi</specification>
 	</description>
 	<preferences>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" installiso="true" firmware="uefi"/>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" installiso="true" firmware="uefi" bootloader="syslinux"/>
 		<version>2.5.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>

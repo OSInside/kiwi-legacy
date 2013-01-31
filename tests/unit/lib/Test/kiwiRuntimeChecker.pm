@@ -22,6 +22,7 @@ use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
 
 use KIWICommandLine;
+use KIWIGlobals;
 use KIWILocator;
 use KIWIRuntimeChecker;
 use KIWIXML;
@@ -501,21 +502,27 @@ sub test_fsToolCheckSplitImg {
 }
 
 #==========================================
-# test_noEFIIsohybrid
+# test_isohybrid
 #------------------------------------------
-sub test_noEFIIsohybrid {
+sub test_isohybrid {
 	# ...
-	# Test that trying to build an ISO for EFI firmware does trigger an
-	# error is the tool is does not support the option.
+	# Test that trying to build a hybrid ISO for EFI firmware does trigger an
+	# error if the tool does not support the option. Also test that trying
+	# to build an isohybrid on non x86 and x86_64 architectures triggers
+	# an error.
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $locator = KIWILocator -> new();
-	my $isoHybrid = $locator -> getExecPath('isohybrid');
-	if (! $isoHybrid) {
-		print "\t\tCould not find isohybrid executable skipping test "
+	my $arch = KIWIGlobals -> instance() -> getArch();
+	my $isoHybrid;
+	if ($arch eq 'ix86' || $arch eq 'x86_64') {
+		$isoHybrid = $locator -> getExecPath('isohybrid');
+		if (! $isoHybrid) {
+			print "\t\tCould not find isohybrid executable skipping test "
 			. "test_noEFIIsohybrid\n";
-		return;
+			return;
+		}
 	}
 	my $cmd = $this -> __getCommandLineObj();
 	my $configDir = $this -> {dataDir} . '/liveIsoImg/efi';
@@ -523,26 +530,34 @@ sub test_noEFIIsohybrid {
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
 	my $res = $checker -> createChecks();
-	my @opt = ('uefi');
-	my %cmdOpt = %{$locator -> getExecArgsFormat ($isoHybrid, \@opt)};
-	if ($cmdOpt{'status'}) {
-		# isohybrid has -uefi option
-		my $msg = $kiwi -> getMessage();
-		$this -> assert_str_equals('No messages set', $msg);
-		my $msgT = $kiwi -> getMessageType();
-		$this -> assert_str_equals('none', $msgT);
-		my $state = $kiwi -> getState();
-		$this -> assert_str_equals('No state set', $state);
-		# Test this condition last to get potential error messages
-		$this -> assert_not_null($res);
+	my $msg = $kiwi -> getMessage();
+	my $msgT = $kiwi -> getMessageType();
+	my $state = $kiwi -> getState();
+	if ($arch eq 'ix86' || $arch eq 'x86_64') {
+		my @opt = ('uefi');
+		my %cmdOpt = %{$locator -> getExecArgsFormat ($isoHybrid, \@opt)};
+		if ($cmdOpt{'status'}) {
+			# isohybrid has -uefi option
+			$this -> assert_str_equals('No messages set', $msg);
+			$this -> assert_str_equals('none', $msgT);
+			$this -> assert_str_equals('No state set', $state);
+			# Test this condition last to get potential error messages
+			$this -> assert_not_null($res);
+		} else {
+			my $expected = 'Attempting to build EFI capable hybrid ISO '
+				. 'image, but installed isohybrid binary does not support '
+				. 'this option.';
+			$this -> assert_str_equals($expected, $msg);
+			$this -> assert_str_equals('error', $msgT);
+			$this -> assert_str_equals('failed', $state);
+			# Test this condition last to get potential error messages
+			$this -> assert_null($res);
+		}
 	} else {
-		my $msg = $kiwi -> getMessage();
-		my $expected = 'Attempting to build EFI capable ISO image, but '
-			. 'installed isohybrid binary does not support this option.';
+		my $expected = 'Attempting to create hybrid ISO image on a platform '
+			. 'that does not support hybrid ISO creation.';
 		$this -> assert_str_equals($expected, $msg);
-		my $msgT = $kiwi -> getMessageType();
 		$this -> assert_str_equals('error', $msgT);
-		my $state = $kiwi -> getState();
 		$this -> assert_str_equals('failed', $state);
 		# Test this condition last to get potential error messages
 		$this -> assert_null($res);
@@ -555,17 +570,23 @@ sub test_noEFIIsohybrid {
 #------------------------------------------
 sub test_noEFIIsohybridOEMImg {
 	# ...
-	# Test that trying to build an ISO for EFI firmware does trigger an
-	# error is the tool is does not support the option.
+	# Test that trying to build a hybrid ISO for EFI firmware does trigger an
+	# error if the tool does not support the option. Also test that trying
+	# to build an isohybrid on non x86 and x86_64 architectures triggers
+	# an error.
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $locator = KIWILocator -> new();
-	my $isoHybrid = $locator -> getExecPath('isohybrid');
-	if (! $isoHybrid) {
-		print "\t\tCould not find isohybrid executable skipping test "
+	my $arch = KIWIGlobals -> instance() -> getArch();
+	my $isoHybrid;
+	if ($arch eq 'ix86' || $arch eq 'x86_64') {
+		$isoHybrid = $locator -> getExecPath('isohybrid');
+		if (! $isoHybrid) {
+			print "\t\tCould not find isohybrid executable skipping test "
 			. "test_noEFIIsohybrid\n";
-		return;
+			return;
+		}
 	}
 	my $cmd = $this -> __getCommandLineObj();
 	my $configDir = $this -> {dataDir} . '/liveIsoImg/efiOEM';
@@ -573,26 +594,34 @@ sub test_noEFIIsohybridOEMImg {
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
 	my $res = $checker -> createChecks();
-	my @opt = ('uefi');
-	my %cmdOpt = %{$locator -> getExecArgsFormat ($isoHybrid, \@opt)};
-	if ($cmdOpt{'status'}) {
-		# isohybrid has -uefi option
-		my $msg = $kiwi -> getMessage();
-		$this -> assert_str_equals('No messages set', $msg);
-		my $msgT = $kiwi -> getMessageType();
-		$this -> assert_str_equals('none', $msgT);
-		my $state = $kiwi -> getState();
-		$this -> assert_str_equals('No state set', $state);
-		# Test this condition last to get potential error messages
-		$this -> assert_not_null($res);
+	my $msg = $kiwi -> getMessage();
+	my $msgT = $kiwi -> getMessageType();
+	my $state = $kiwi -> getState();
+	if ($arch eq 'ix86' || $arch eq 'x86_64') {
+		my @opt = ('uefi');
+		my %cmdOpt = %{$locator -> getExecArgsFormat ($isoHybrid, \@opt)};
+		if ($cmdOpt{'status'}) {
+			# isohybrid has -uefi option
+			$this -> assert_str_equals('No messages set', $msg);
+			$this -> assert_str_equals('none', $msgT);
+			$this -> assert_str_equals('No state set', $state);
+			# Test this condition last to get potential error messages
+			$this -> assert_not_null($res);
+		} else {
+			my $expected = 'Attempting to build EFI capable hybrid ISO '
+				. 'image, but installed isohybrid binary does not support '
+				. 'this option.';
+			$this -> assert_str_equals($expected, $msg);
+			$this -> assert_str_equals('error', $msgT);
+			$this -> assert_str_equals('failed', $state);
+			# Test this condition last to get potential error messages
+			$this -> assert_null($res);
+		}
 	} else {
-		my $msg = $kiwi -> getMessage();
-		my $expected = 'Attempting to build EFI capable ISO image, but '
-			. 'installed isohybrid binary does not support this option.';
+		my $expected = 'Attempting to create hybrid ISO image on a platform '
+			. 'that does not support hybrid ISO creation.';
 		$this -> assert_str_equals($expected, $msg);
-		my $msgT = $kiwi -> getMessageType();
 		$this -> assert_str_equals('error', $msgT);
-		my $state = $kiwi -> getState();
 		$this -> assert_str_equals('failed', $state);
 		# Test this condition last to get potential error messages
 		$this -> assert_null($res);
