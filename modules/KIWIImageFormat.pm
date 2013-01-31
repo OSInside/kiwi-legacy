@@ -108,15 +108,14 @@ sub new {
 	# Read some XML data
 	#------------------------------------------
 	my %xenref = $xml -> getXenConfig_legacy();
-	my %vmwref = $xml -> getVMwareConfig_legacy();
 	my %ovfref = $xml -> getOVFConfig_legacy();
 	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{cmdL}    = $cmdL;
 	$this->{xenref}  = \%xenref;
-	$this->{vmwref}  = \%vmwref;
 	$this->{ovfref}  = \%ovfref;
+	$this->{vmdata}  = $xml -> getVMachineConfig();
 	$this->{kiwi}    = $kiwi;
 	$this->{xml}     = $xml;
 	$this->{format}  = $format;
@@ -315,7 +314,6 @@ sub createVMDK {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $format = $this->{format};
-	my %vmwc   = %{$this->{vmwref}};
 	my $source = $this->{image};
 	my $target = $source;
 	my $convert;
@@ -324,9 +322,9 @@ sub createVMDK {
 	$kiwi -> info ("Creating $format image...");
 	$target  =~ s/\.raw$/\.$format/;
 	$convert = "convert -f raw $source -O $format";
-	if (defined $vmwc{vmware_disktype} ) {
-		my $diskType = $vmwc{vmware_disktype};
-		if ($diskType eq 'scsi') {
+	if ($this->{vmdata}) {
+		my $diskType = $this->{vmdata} -> getSystemDiskType();
+		if ($diskType && $diskType eq 'scsi') {
 			$convert .= ' -o scsi';
 		}
 	}
@@ -914,7 +912,6 @@ sub createVMwareConfiguration {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
-	my $vmwref = $this->{vmwref};
 	my $dest   = dirname  $this->{image};
 	my $base   = basename $this->{image};
 	my $file;
@@ -932,14 +929,15 @@ sub createVMwareConfiguration {
 	#==========================================
 	# check XML configuration data
 	#------------------------------------------
-	my %vmwconfig = %{$vmwref};
-	if ((! %vmwconfig) || (! $vmwconfig{vmware_disktype})) {
+	my $vmdata = $this->{vmdata};
+	if (! $vmdata ) {
 		$kiwi -> skipped ();
-		if (! %vmwconfig) {
-			$kiwi -> warning ("No machine section for this image type found");
-		} else {
-			$kiwi -> warning ("No disk device setup found in machine section");
-		}
+		$kiwi -> warning ("No machine section for this image type found");
+		return $file;
+	}
+	my $diskController = $vmdata -> getSystemDiskController();
+	if (! $diskController) {
+		$kiwi -> warning ("No disk device setup found in machine section");
 		$kiwi -> skipped ();
 		return $file;
 	}
@@ -960,67 +958,76 @@ sub createVMwareConfiguration {
 	print $VMWFD 'config.version = "8"'."\n";
 	print $VMWFD 'tools.syncTime = "true"'."\n";
 	print $VMWFD 'uuid.action = "create"'."\n";
-	if ($vmwconfig{vmware_hwver}) {
-		print $VMWFD 'virtualHW.version = "'.$vmwconfig{vmware_hwver}.'"'."\n";
-	} else {
-		print $VMWFD 'virtualHW.version = "4"'."\n";
+	my $hwVer = $vmdata -> getHardwareVersion();
+	print $VMWFD 'virtualHW.version = "' . $hwVer . '"' . "\n";
+	print $VMWFD 'displayName = "' . $image . '"' . "\n";
+	my $memory = $vmdata -> getMemory();
+	if ($memory) {
+		print $VMWFD 'memsize = "' . $memory . '"' . "\n";
 	}
-	print $VMWFD 'displayName = "'.$image.'"'."\n";
-	if ($vmwconfig{vmware_memory}) {
-		print $VMWFD 'memsize = "'.$vmwconfig{vmware_memory}.'"'."\n";
+	my $ncpus = $vmdata -> getNumCPUs();
+	if ($ncpus) {
+		print $VMWFD 'numvcpus = "' . $ncpus . '"' . "\n";
 	}
-	if ($vmwconfig{vmware_ncpus}) {
-		print $VMWFD 'numvcpus = "'.$vmwconfig{vmware_ncpus}.'"'."\n";
-	}
-	print $VMWFD 'guestOS = "'.$vmwconfig{vmware_guest}.'"'."\n";
+	my $guest = $vmdata -> getGuestOS();
+	print $VMWFD 'guestOS = "' . $guest . '"' . "\n";
 	#==========================================
 	# storage setup
 	#------------------------------------------
-	if (defined $vmwconfig{vmware_disktype}) {
-		my $type   = $vmwconfig{vmware_disktype};
-		my $device = $vmwconfig{vmware_disktype}.$vmwconfig{vmware_diskid};
-		if ($type eq "ide") {
-			# IDE Interface...
-			print $VMWFD $device.':0.present = "true"'."\n";
-			print $VMWFD $device.':0.fileName= "'.$image.'.vmdk"'."\n";
-			print $VMWFD $device.':0.redo = ""'."\n";
-		} else {
-			# SCSI Interface...
-			print $VMWFD $device.'.present = "true"'."\n";
-			print $VMWFD $device.'.sharedBus = "none"'."\n";
-			print $VMWFD $device.'.virtualDev = "lsilogic"'."\n";
-			print $VMWFD $device.':0.present = "true"'."\n";
-			print $VMWFD $device.':0.fileName = "'.$image.'.vmdk"'."\n";
-			print $VMWFD $device.':0.deviceType = "scsi-hardDisk"'."\n";
-		}
+	my $diskID = $vmdata -> getSystemDiskID();
+	if (! $diskID) {
+		$diskID = '0';
+	}
+	my $device = $diskController . $diskID;
+	if ($diskController eq "ide") {
+		# IDE Interface...
+		print $VMWFD $device.':0.present = "true"'."\n";
+		print $VMWFD $device.':0.fileName= "'.$image.'.vmdk"'."\n";
+		print $VMWFD $device.':0.redo = ""'."\n";
+	} else {
+		# SCSI Interface...
+		print $VMWFD $device.'.present = "true"'."\n";
+		print $VMWFD $device.'.sharedBus = "none"'."\n";
+		print $VMWFD $device.'.virtualDev = "lsilogic"'."\n";
+		print $VMWFD $device.':0.present = "true"'."\n";
+		print $VMWFD $device.':0.fileName = "'.$image.'.vmdk"'."\n";
+		print $VMWFD $device.':0.deviceType = "scsi-hardDisk"'."\n";
 	}
 	#==========================================
 	# network setup
 	#------------------------------------------
-	if (defined $vmwconfig{vmware_nic}) {
-		my %vmnics = %{$vmwconfig{vmware_nic}};
-		while (my @nic_info = each %vmnics) {
-			my $driver = $nic_info[1] -> { drv };
-			my $mode   = $nic_info[1] -> { mode };
-			my $nic    = "ethernet".$nic_info[0];
-			print $VMWFD $nic.'.present = "true"'."\n";
-			print $VMWFD $nic.'.addressType = "generated"'."\n";
-			if ($driver) {
-				print $VMWFD $nic.'.virtualDev = "'.$driver.'"'."\n";
-			}
-			if ($mode) {
-				print $VMWFD $nic.'.connectionType = "'.$mode.'"'."\n";
-			}
-			if ($vmwconfig{vmware_arch} =~ /64$/) {
-				print $VMWFD $nic.'.allow64bitVmxnet = "true"'."\n";
-			}
+	my @nicIds = @{$vmdata -> getNICIDs()};
+	for my $id (@nicIds) {
+		my $iFace = $vmdata -> getNICInterface($id);
+		my $nic = "ethernet" . $iFace;
+		print $VMWFD $nic . '.present = "true"' . "\n";
+		my $mac = $vmdata -> getNICMAC($id);
+		if ($mac) {
+			print $VMWFD $nic . '.addressType = "static"' . "\n";
+			print $VMWFD $nic . '.address = ' . "$mac\n";
+		} else {
+			print $VMWFD $nic . '.addressType = "generated"' . "\n";
+		}
+		my $driver = $vmdata -> getNICDriver($id);
+		if ($driver) {
+			print $VMWFD $nic . '.virtualDev = "' . $driver . '"' . "\n";
+		}
+		my $mode = $vmdata -> getNICMode($id);
+		if ($mode) {
+			print $VMWFD $nic . '.connectionType = "' . $mode . '"' . "\n";
+		}
+		my $arch = $vmdata -> getArch();
+		if ($arch && $arch=~ /64$/smx) {
+			print $VMWFD $nic.'.allow64bitVmxnet = "true"'."\n";
 		}
 	}
 	#==========================================
 	# CD/DVD drive setup
 	#------------------------------------------
-	if (defined $vmwconfig{vmware_cdtype}) {
-		my $device = $vmwconfig{vmware_cdtype}.$vmwconfig{vmware_cdid};
+	my $cdtype = $vmdata -> getDVDController();
+	my $cdid = $vmdata -> getDVDID();
+	if ($cdtype && $cdid) {
+		my $device = $cdtype . $cdid;
 		print $VMWFD $device.':0.present = "true"'."\n";
 		print $VMWFD $device.':0.deviceType = "cdrom-raw"'."\n";
 		print $VMWFD $device.':0.autodetect = "true"'."\n";
@@ -1041,19 +1048,25 @@ sub createVMwareConfiguration {
 	#==========================================
 	# Process raw config options
 	#------------------------------------------
-	my @userOptSettings;
-	for my $configOpt (@{$vmwconfig{vmware_config}}) {
-		print $VMWFD $configOpt . "\n";
-		push @userOptSettings, (split /=/, $configOpt)[0];
+	my $rawConfig = $vmdata -> getConfigEntries();
+	my %usrConfigSet = ();
+	if ($rawConfig) {
+		my @usrConfig = @{$rawConfig};
+		for my $configOpt (@usrConfig) {
+			print $VMWFD $configOpt . "\n";
+			my @opt = split /=/smx, $configOpt;
+			$usrConfigSet{$opt[0]} = 1;
+		}
 	}
 	#==========================================
 	# Process the default options
 	#------------------------------------------
 	for my $defOpt (keys %defaultOpts) {
-		if (grep {/$defOpt/} @userOptSettings) {
+		if ($usrConfigSet{$defOpt}) {
 			next;
 		}
-		print $VMWFD $defOpt . ' = ' . '"' . $defaultOpts{$defOpt} . '"' . "\n";
+		print $VMWFD $defOpt . ' = ' . '"' . $defaultOpts{$defOpt}
+			. '"' . "\n";
 	}
 	$VMWFD -> close();
 	chmod 0755,$file;

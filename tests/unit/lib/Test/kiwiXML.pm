@@ -8706,48 +8706,6 @@ sub test_getVMachineConfigXen {
 }
 
 #==========================================
-# test_getVMwareConfig_legacy
-#------------------------------------------
-sub test_getVMwareConfig_legacy {
-	# ...
-	# Verify proper return of VMWare configuration data
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'vmwareConfigSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my %vmConfig = $xml -> getVMwareConfig_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	$this -> assert_str_equals('x86_64', $vmConfig{vmware_arch});
-	$this -> assert_str_equals('2', $vmConfig{vmware_cdid});
-	$this -> assert_str_equals('ide', $vmConfig{vmware_cdtype});
-	my @expectedOpts = qw / ola pablo /;
-	$this -> assert_array_equal(\@expectedOpts, $vmConfig{vmware_config});
-	$this -> assert_str_equals('1', $vmConfig{vmware_diskid});
-	$this -> assert_str_equals('scsi', $vmConfig{vmware_disktype});
-	$this -> assert_str_equals('sles-64', $vmConfig{vmware_guest});
-	$this -> assert_str_equals('7', $vmConfig{vmware_hwver});
-	$this -> assert_str_equals('1024', $vmConfig{vmware_memory});
-	$this -> assert_str_equals('2', $vmConfig{vmware_ncpus});
-	my $nicConfig = $vmConfig{vmware_nic};
-	my %nicSetup = %$nicConfig;
-	my $nicInfo = $nicSetup{eth0};
-	$this -> assert_not_null($nicInfo);
-	my %nicDetails = %$nicInfo;
-	$this -> assert_str_equals('e1000', $nicDetails{drv});
-	$this -> assert_str_equals('dhcp', $nicDetails{mode});
-	return;
-}
-
-#==========================================
 # test_getXenConfig_legacy
 #------------------------------------------
 sub test_getXenConfig_legacy {

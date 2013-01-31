@@ -118,9 +118,9 @@ sub test_createNICConfigDuplicateIfaceInInit {
 }
 
 #==========================================
-# test__createNICConfigInsufficientData
+# test_createNICConfigInsufficientData
 #------------------------------------------
-sub test__createNICConfigInsufficientData {
+sub test_createNICConfigInsufficientData {
 	# ...
 	# Test the createNICConfig method with an initialization hash
 	# that does not contain the interface key-value pair
@@ -1084,6 +1084,77 @@ sub test_getGuestOS {
 }
 
 #==========================================
+# test_getGuestOSDefault
+#------------------------------------------
+sub test_getGuestOSDefault {
+	# ...
+	# Test the getGuestOS method for default value population
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %diskData = (
+		controller => 'scsi',
+		device     => 'sda',
+		disktype   => 'hdd',
+		id         => '1'
+	);
+	my %disks = ( system => \%diskData );
+	my %init = (
+		HWversion          => '7',
+		arch               => 'x86_64',
+		memory             => '4096',
+		ncpus              => '4',
+		vmdisks            => \%disks,
+	);
+	my $machDataObj = KIWIXMLVMachineData -> new(\%init);
+	my $guest = $machDataObj -> getGuestOS();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $expected  = 'suse-64';;
+	$this -> assert_str_equals($expected, $guest);
+	return;
+}
+
+#==========================================
+# test_getGuestOSDefaultNoArch
+#------------------------------------------
+sub test_getGuestOSDefaultNoArch {
+	# ...
+	# Test the getGuestOS method for default value population
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %diskData = (
+		controller => 'scsi',
+		device     => 'sda',
+		disktype   => 'hdd',
+		id         => '1'
+	);
+	my %disks = ( system => \%diskData );
+	my %init = (
+		HWversion          => '7',
+		memory             => '4096',
+		ncpus              => '4',
+		vmdisks            => \%disks,
+	);
+	my $machDataObj = KIWIXMLVMachineData -> new(\%init);
+	my $guest = $machDataObj -> getGuestOS();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $expected  = 'suse';;
+	$this -> assert_str_equals($expected, $guest);
+	return;
+}
+
+#==========================================
 # test_getHardwareVersion
 #------------------------------------------
 sub test_getHardwareVersion {
@@ -1294,6 +1365,41 @@ sub test_getNICIDs {
 	$this -> assert_str_equals('No state set', $state);
 	my @expected = (1, 2);
 	$this -> assert_array_equal(\@expected, $ids);
+	return;
+}
+
+#==========================================
+# test_getNICIDsUndefData
+#------------------------------------------
+sub test_getNICIDsUndefData {
+	# ...
+	# Test the getNICIDs method if no data is defined
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %diskData = (
+		controller => 'scsi',
+		device     => 'sda',
+		disktype   => 'hdd',
+		id         => '1'
+	);
+	my %disks = ( system => \%diskData );
+	my %init = (
+		HWversion          => '7',
+		arch               => 'x86_64',
+		memory             => '4096',
+		ncpus              => '4',
+		vmdisks            => \%disks,
+	);
+	my $machDataObj = KIWIXMLVMachineData -> new(\%init);
+	my $ids = $machDataObj -> getNICIDs();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($ids);
 	return;
 }
 
