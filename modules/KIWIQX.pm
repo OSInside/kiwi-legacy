@@ -22,7 +22,6 @@ require Exporter;
 use Carp qw (cluck);
 use strict;
 use warnings;
-use KIWILog;
 
 #==========================================
 # Exports

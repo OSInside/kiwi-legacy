@@ -25,7 +25,6 @@ use IPC::Open3;
 #==========================================
 # Modules
 #------------------------------------------
-use KIWIGlobals;
 use KIWILog;
 use KIWIQX qw (qxx);
 

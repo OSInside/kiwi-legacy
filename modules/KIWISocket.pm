@@ -25,7 +25,6 @@ use base qw (Exporter);
 use Carp qw (cluck);
 use FileHandle;
 use Socket;
-use KIWILog;
 use KIWIQX qw (qxx);
 
 my @EXPORT_OK = qw ();

@@ -20,15 +20,16 @@ package KIWIGlobals;
 use strict;
 use warnings;
 use File::Basename;
+#==========================================
+# KIWI Modules
+#------------------------------------------
 require KIWILocator;
 require KIWILog;
 require KIWIQX;
-
 #==========================================
 # Singleton class
 #------------------------------------------
 use base qw /Class::Singleton/;
-
 
 #==========================================
 # getArch

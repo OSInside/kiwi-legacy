@@ -25,7 +25,6 @@ use warnings;
 use Carp qw (cluck);
 use IPC::SysV qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU);
 use IPC::Semaphore;
-use KIWILog;
 use KIWIQX qw (qxx);
 sub MAXBUF { return 2000; }
 
