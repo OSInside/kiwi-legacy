@@ -48,8 +48,6 @@ sub new {
 	#    HWversion     = '',
 	#    arch          = '',
 	#    confEntries   = (),
-	#    desiredCPUCnt = '',
-	#    desiredMemory = '',
 	#    domain        = '',
 	#    guestOS       = '',
 	#    maxCPUCnt     = '',
@@ -133,8 +131,6 @@ sub new {
 	}
 	$this->{HWversion}     = $init->{HWversion};
 	$this->{arch}          = $init->{arch};
-	$this->{desiredCPUCnt} = $init->{des_cpu};
-	$this->{desiredMemory} = $init->{des_memory};
 	$this->{domain}        = $init->{domain};
 	$this->{guestOS}       = $init->{guestOS};
 	$this->{maxCPUCnt}     = $init->{max_cpu};
@@ -264,28 +260,6 @@ sub getDVDID {
 		return;
 	}
 	return $this->{vmdvd}{id};
-}
-
-#==========================================
-# getDesiredCPUCnt
-#------------------------------------------
-sub getDesiredCPUCnt {
-	# ...
-	# Return the setting for the desired number of CPUs
-	# ---
-	my $this = shift;
-	return $this->{desiredCPUCnt};
-}
-
-#==========================================
-# getDesiredMemory
-#------------------------------------------
-sub getDesiredMemory {
-	# ...
-	# Return the setting for the desired memory
-	# ---
-	my $this = shift;
-	return $this->{desiredMemory};
 }
 
 #==========================================
@@ -529,14 +503,6 @@ sub getXMLElement {
 	if ($arch) {
 		$element -> setAttribute('arch', $arch);
 	}
-	my $dCPU = $this -> getDesiredCPUCnt();
-	if ($dCPU) {
-		$element -> setAttribute('des_cpu', $dCPU);
-	}
-	my $dMem = $this -> getDesiredMemory();
-	if ($dMem) {
-		$element -> setAttribute('des_memory', $dMem);
-	}
 	my $dom = $this -> getDomain();
 	if ($dom) {
 		$element -> setAttribute('domain', $dom);
@@ -688,48 +654,6 @@ sub setDVDID {
 		my %dvdInfo = ( id => $id );
 		$this->{vmdvd} = \%dvdInfo;
 	}
-	return $this;
-}
-
-#==========================================
-# setDesiredCPUCnt
-#------------------------------------------
-sub setDesiredCPUCnt {
-	# ...
-	# Set the desired number of CPUs for the VM
-	# ---
-	my $this  = shift;
-	my $dcpus = shift;
-	if (! $dcpus ) {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setDesiredCPUCnt: no cpu count provided, retaining '
-			. 'current data.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	$this->{desiredCPUCnt} = $dcpus;
-	return $this;
-}
-
-#==========================================
-# setDesiredMemory
-#------------------------------------------
-sub setDesiredMemory {
-	# ...
-	# Set the desired memory for the VM
-	# ---
-	my $this = shift;
-	my $dmem = shift;
-	if (! $dmem ) {
-		my $kiwi = $this->{kiwi};
-		my $msg = 'setDesiredMemory: no memory amount provided, retaining '
-			. 'current data.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	$this->{desiredMemory} = $dmem;
 	return $this;
 }
 

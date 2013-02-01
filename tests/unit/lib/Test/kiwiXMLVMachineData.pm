@@ -1000,48 +1000,6 @@ sub test_getDVDID {
 }
 
 #==========================================
-# test_getDesiredCPUCnt
-#------------------------------------------
-sub test_getDesiredCPUCnt {
-	# ...
-	# Test the getDesiredCPUCnt method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $machDataObj = $this -> __getVMachineObj();
-	my $num = $machDataObj -> getDesiredCPUCnt();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('8', $num);
-	return;
-}
-
-#==========================================
-# test_getDesiredMemory
-#------------------------------------------
-sub test_getDesiredMemory {
-	# ...
-	# Test the getDesiredMemory method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $machDataObj = $this -> __getVMachineObj();
-	my $mem = $machDataObj -> getDesiredMemory();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('8192', $mem);
-	return;
-}
-
-#==========================================
 # test_getDomain
 #------------------------------------------
 sub test_getDomain {
@@ -1761,8 +1719,6 @@ sub test_getXMLElement{
 	my $xmlstr = $elem -> toString();
 	my $expected = '<machine '
 		. 'arch="x86_64" '
-		. 'des_cpu="8" '
-		. 'des_memory="8192" '
 		. 'domain="domU" '
 		. 'guestOS="SUSE" '
 		. 'HWversion="7" '
@@ -2082,124 +2038,6 @@ sub test_setDVDIDNoArg {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('0', $id);
-	return;
-}
-
-#==========================================
-# test_setDesiredCPUCnt
-#------------------------------------------
-sub test_setDesiredCPUCnt {
-	# ...
-	# Test the setDesiredCPUCnt method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $machDataObj = $this -> __getVMachineObj();
-	$machDataObj = $machDataObj -> setDesiredCPUCnt('5');
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my $cnt = $machDataObj -> getDesiredCPUCnt();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('5', $cnt);
-	return;
-}
-
-#==========================================
-# test_setDesiredCPUCntNoArg
-#------------------------------------------
-sub test_setDesiredCPUCntNoArg {
-	# ...
-	# Test the setDesiredCPUCnt method with no argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $machDataObj = $this -> __getVMachineObj();
-	my $res = $machDataObj -> setDesiredCPUCnt();
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'setDesiredCPUCnt: no cpu count provided, retaining '
-		. 'current data.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-	my $num = $machDataObj -> getDesiredCPUCnt();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('8', $num);
-	return;
-}
-
-#==========================================
-# test_setDesiredMemory
-#------------------------------------------
-sub test_setDesiredMemory {
-	# ...
-	# Test the setDesiredMemory method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $machDataObj = $this -> __getVMachineObj();
-	$machDataObj = $machDataObj -> setDesiredMemory('2048');
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my $mem = $machDataObj -> getDesiredMemory();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('2048', $mem);
-	return;
-}
-
-#==========================================
-# test_setDesiredMemoryNoArg
-#------------------------------------------
-sub test_setDesiredMemoryNoArg {
-	# ...
-	# Test the setDesiredMemory method with no argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $machDataObj = $this -> __getVMachineObj();
-	my $res = $machDataObj -> setDesiredMemory();
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'setDesiredMemory: no memory amount provided, retaining '
-		. 'current data.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-	my $mem = $machDataObj -> getDesiredMemory();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('8192', $mem);
 	return;
 }
 
@@ -3538,8 +3376,6 @@ sub __getVMachineObj {
 	my %init = (
 		HWversion          => '7',
 		arch               => 'x86_64',
-		des_cpu            => '8',
-		des_memory         => '8192',
 		domain             => 'domU',
 		guestOS            => 'SUSE',
 		max_cpu            => '16',

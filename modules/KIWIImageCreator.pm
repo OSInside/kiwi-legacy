@@ -756,7 +756,7 @@ sub createImage {
 			if (! $format -> createFormat()) {
 				return;
 			}
-			$format -> createMaschineConfiguration();
+			$format -> createMachineConfiguration();
 		}
 		undef $image;
 		#==========================================
@@ -1031,7 +1031,7 @@ sub createImageFormat {
 	if (! $imageformat -> createFormat()) {
 		return;
 	}
-	$imageformat -> createMaschineConfiguration();
+	$imageformat -> createMachineConfiguration();
 	return 1;
 }
 

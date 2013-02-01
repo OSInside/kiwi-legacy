@@ -2490,8 +2490,6 @@ sub __createVMachineConfig {
 	my %vmConfigData;
 	$vmConfigData{HWversion}  = $vmConfig -> getAttribute('HWversion');
 	$vmConfigData{arch}       = $vmConfig -> getAttribute('arch');
-	$vmConfigData{des_cpu}    = $vmConfig -> getAttribute('des_cpu');
-	$vmConfigData{des_memory} = $vmConfig -> getAttribute('des_memory');
 	$vmConfigData{domain}     = $vmConfig -> getAttribute('domain');
 	$vmConfigData{guestOS}    = $vmConfig -> getAttribute('guestOS');
 	$vmConfigData{max_cpu}    = $vmConfig -> getAttribute('max_cpu');
@@ -7229,82 +7227,6 @@ sub getOEMUnattendedID_legacy {
 		return;
 	}
 	return "$unattended_id";
-}
-
-#==========================================
-# getOVFConfig_legacy
-#------------------------------------------
-sub getOVFConfig_legacy {
-	# ...
-	# Create an Attribute hash from the <machine>
-	# section if it exists suitable for the OVM
-	# configuration
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	my %result = ();
-	my $device;
-	my $disktype;
-	if (! defined $node) {
-		return %result;
-	}
-	#==========================================
-	# global setup
-	#------------------------------------------
-	my $minmemory = $node -> getAttribute ("min_memory");
-	my $desmemory = $node -> getAttribute ("des_memory");
-	my $maxmemory = $node -> getAttribute ("max_memory");
-	my $memory    = $node -> getAttribute ("memory");
-	my $ncpus     = $node -> getAttribute ("ncpus");
-	my $mincpu    = $node -> getAttribute ("min_cpu");
-	my $descpu    = $node -> getAttribute ("des_cpu");
-	my $maxcpu    = $node -> getAttribute ("max_cpu");
-	my $type      = $node -> getAttribute ("ovftype");
-	#==========================================
-	# storage setup
-	#------------------------------------------
-	my $disk = $node -> getElementsByTagName ("vmdisk");
-	if ($disk) {
-		my $node  = $disk -> get_node(1);
-		$device = $node -> getAttribute ("device");
-		$disktype = $node -> getAttribute ("disktype");
-	}
-	#==========================================
-	# network setup
-	#------------------------------------------
-	my $bridges = $node -> getElementsByTagName ("vmnic");
-	my %vifs = ();
-	for (my $i=1;$i<= $bridges->size();$i++) {
-		my $bridge = $bridges -> get_node($i);
-		if ($bridge) {
-			my $bname = $bridge -> getAttribute ("interface");
-			if (! $bname) {
-				$bname = "undef";
-			}
-			$vifs{$bname} = $i;
-		}
-	}
-	#==========================================
-	# save hash
-	#------------------------------------------
-	$result{ovf_minmemory} = $minmemory;
-	$result{ovf_desmemory} = $desmemory;
-	$result{ovf_maxmemory} = $maxmemory;
-	$result{ovf_memory}    = $memory;
-	$result{ovf_ncpus}     = $ncpus;
-	$result{ovf_mincpu}    = $mincpu;
-	$result{ovf_descpu}    = $descpu;
-	$result{ovf_maxcpu}    = $maxcpu;
-	$result{ovf_type}      = $type;
-	if ($disk) {
-		$result{ovf_disk}    = $device;
-		$result{ovf_disktype}= $disktype;
-	}
-	foreach my $bname (keys %vifs) {
-		$result{ovf_bridge}{$bname} = $vifs{$bname};
-	}
-	return %result;
 }
 
 #==========================================

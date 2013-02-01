@@ -6438,45 +6438,6 @@ sub test_getOEMUnattendedID_legacy {
 }
 
 #==========================================
-# test_getOVFConfig_legacy
-#------------------------------------------
-sub test_getOVFConfig_legacy {
-	#...
-	# Verify proper return of the OVF data
-	#---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'ovfConfigSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my %ovfConfig = $xml -> getOVFConfig_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	$this -> assert_str_equals('1024', $ovfConfig{ovf_desmemory});
-	$this -> assert_str_equals('2048', $ovfConfig{ovf_maxmemory});
-	$this -> assert_str_equals('1024', $ovfConfig{ovf_memory});
-	$this -> assert_str_equals('512', $ovfConfig{ovf_minmemory});
-	$this -> assert_str_equals('2', $ovfConfig{ovf_descpu});
-	$this -> assert_str_equals('4', $ovfConfig{ovf_maxcpu});
-	$this -> assert_str_equals('2', $ovfConfig{ovf_ncpus});
-	$this -> assert_str_equals('1', $ovfConfig{ovf_mincpu});
-	$this -> assert_str_equals('powervm', $ovfConfig{ovf_type});
-	$this -> assert_str_equals('/dev/sda', $ovfConfig{ovf_disk});
-	$this -> assert_str_equals('scsi', $ovfConfig{ovf_disktype});
-	my $nicConfig = $ovfConfig{ovf_bridge};
-	my %nicSetup = %$nicConfig;
-	my $nicInfo = $nicSetup{eth0};
-	$this -> assert_not_null($nicInfo);
-	return;
-}
-
-#==========================================
 # test_getPackages
 #------------------------------------------
 sub test_getPackages {
@@ -8592,11 +8553,9 @@ sub test_getVMachineConfigOVF {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my $desMem = $vmConfig -> getDesiredMemory();
 	my $maxMem = $vmConfig -> getMaxMemory();
 	my $mem    = $vmConfig -> getMemory();
 	my $minMem = $vmConfig -> getMinMemory();
-	my $desCPU = $vmConfig -> getDesiredCPUCnt();
 	my $maxCPU = $vmConfig -> getMaxCPUCnt();
 	my $cpu    = $vmConfig -> getNumCPUs();
 	my $minCPU = $vmConfig -> getMinCPUCnt();
@@ -8604,11 +8563,9 @@ sub test_getVMachineConfigOVF {
 	my $diskID = $vmConfig -> getSystemDiskDevice();
 	my $diskT  = $vmConfig -> getSystemDiskType();
 	my $nicIf  = $vmConfig -> getNICInterface(1);
-	$this -> assert_str_equals('1024', $desMem);
 	$this -> assert_str_equals('2048', $maxMem);
 	$this -> assert_str_equals('1024', $mem);
 	$this -> assert_str_equals('512', $minMem);
-	$this -> assert_str_equals('2', $desCPU);
 	$this -> assert_str_equals('4', $maxCPU);
 	$this -> assert_str_equals('2', $cpu);
 	$this -> assert_str_equals('1', $minCPU);
