@@ -76,7 +76,7 @@ sub new {
 		$kiwi -> error ("no such image file: $image");
 		$kiwi -> failed ();
 		return;
-	} 
+	}
 	#==========================================
 	# read XML if required
 	#------------------------------------------
@@ -108,13 +108,11 @@ sub new {
 	# Read some XML data
 	#------------------------------------------
 	my %xenref = $xml -> getXenConfig_legacy();
-	my %ovfref = $xml -> getOVFConfig_legacy();
 	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{cmdL}    = $cmdL;
 	$this->{xenref}  = \%xenref;
-	$this->{ovfref}  = \%ovfref;
 	$this->{vmdata}  = $xml -> getVMachineConfig();
 	$this->{kiwi}    = $kiwi;
 	$this->{xml}     = $xml;
@@ -197,9 +195,9 @@ sub createFormat {
 }
 
 #==========================================
-# createMaschineConfiguration
+# createMachineConfiguration
 #------------------------------------------
-sub createMaschineConfiguration {
+sub createMachineConfiguration {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $format = $this->{format};
@@ -261,23 +259,14 @@ sub createOVA {
 #------------------------------------------
 sub createOVF {
 	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $format = $this->{format};
-	my $cmdL   = $this->{cmdL};
-	my $xml    = $this->{xml};
-	my $ovfref = $this->{ovfref};
 	my $image  = $this->{image};
-	my $mf;
-	my $ovf;
-	my $source;
-	my $target;
-	my $ovfsha1;
-	my $imagesha1;
-	my $FD;
+	my $cmdl   = $this->{cmdL};
 	#==========================================
 	# create vmdk for VMware, required for ovf
 	#------------------------------------------
-	if ($ovfref->{ovf_type} eq "vmware") {
+	my $vmdata = $this->{vmdata};
+	my $ovftype = $vmdata -> getOVFType();
+	if ($ovftype eq "vmware") {
 		my $origin_format = $this->{format};
 		$this->{format} = "vmdk";
 		$image = $this->createVMDK();
@@ -291,7 +280,7 @@ sub createOVF {
 	# prepare ovf destination directory
 	#------------------------------------------
 	my $ovfdir = $image;
-	if ($ovfref->{ovf_type} eq "vmware") {
+	if ($ovftype eq "vmware") {
 		$ovfdir =~ s/\.vmdk$/\.ovf/;
 	} else {
 		$ovfdir =~ s/\.raw$/\.ovf/;
@@ -302,7 +291,8 @@ sub createOVF {
 		qxx ("mkdir -p $ovfdir");
 	}
 	my $img_base = basename $image;
-	qxx ("ln -s $image $ovfdir/$img_base");
+	my $finalImgLoc = $cmdl -> getImageTargetDir();
+	qxx ("ln -s $finalImgLoc/$img_base $ovfdir/$img_base");
 	$this->{ovfdir} = $ovfdir;
 	return $ovfdir;
 }
@@ -932,12 +922,14 @@ sub createVMwareConfiguration {
 	my $vmdata = $this->{vmdata};
 	if (! $vmdata ) {
 		$kiwi -> skipped ();
-		$kiwi -> warning ("No machine section for this image type found");
+		$kiwi -> warning ('No machine section for this image type found');
+		$kiwi -> skipped ();
 		return $file;
 	}
 	my $diskController = $vmdata -> getSystemDiskController();
 	if (! $diskController) {
-		$kiwi -> warning ("No disk device setup found in machine section");
+		$kiwi -> skipped ();
+		$kiwi -> warning ('No disk device setup found in machine section');
 		$kiwi -> skipped ();
 		return $file;
 	}
@@ -1082,14 +1074,10 @@ sub createOVFConfiguration {
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my $ovfdir = $this->{ovfdir};
-	my $ovfref = $this->{ovfref};
 	my $format = $this->{format};
 	my $base   = basename $this->{image};
 	my $ovf;
-	my $diskformat;
-	my $systemtype;
-	my $ostype;
-	my $osid;
+
 	#==========================================
 	# setup config file name from image name
 	#------------------------------------------
@@ -1104,41 +1092,54 @@ sub createOVFConfiguration {
 	#==========================================
 	# check XML configuration data
 	#------------------------------------------
-	my %ovfconfig = %{$ovfref};
-	if ((! %ovfconfig) || (! $ovfconfig{ovf_type})) {
+	my $vmdata = $this->{vmdata};
+	if (! $vmdata ) {
 		$kiwi -> skipped ();
-		if (! %ovfconfig) {
-			$kiwi -> warning ("No machine section for this image type found");
-		} else {
-			$kiwi -> warning ("No disk device setup found in machine section");
-		}
+		$kiwi -> warning ('No machine section for this image type found');
 		$kiwi -> skipped ();
 		return $ovf;
 	}
-	my $type = $ovfconfig{ovf_type};
+	my $ovfType = $vmdata -> getOVFType();
+	if (! $ovfType) {
+		$kiwi -> skipped ();
+		my $msg = 'No type specified, cannot disambiguate OVF format.';
+		$kiwi -> warning ($msg);
+		$kiwi -> skipped ();
+		return $ovf;
+	}
 	#==========================================
 	# OVF type specific setup
 	#------------------------------------------
-	if ($type eq "zvm") {
+	my $diskformat;
+	my $osid;
+	my $systemtype;
+	my $guest = $vmdata -> getGuestOS();
+	my $hwVersion = $vmdata -> getHardwareVersion();
+	if ($guest eq 'suse') {
+		$guest = 'SUSE';
+	} elsif ($guest eq 'suse-64') {
+		$guest = 'SUSE 64-Bit';
+	}
+	my $ostype = $guest;
+	if ($ovfType eq 'zvm') {
 		$osid       = 36;
-		$systemtype = "IBM:zVM:LINUX";
-		$ostype     = "sles";
-		$diskformat = "http://www.ibm.com/".
-			"xmlns/ovf/diskformat/s390.linuxfile.exustar.gz";
-	} elsif ($type eq "povervm") {
+		$systemtype = 'IBM:zVM:LINUX';
+		$diskformat = 'http://www.ibm.com/'
+			. 'xmlns/ovf/diskformat/s390.linuxfile.exustar.gz';
+	} elsif ($ovfType eq 'powervm') {
 		$osid       = 84;
-		$systemtype = "IBM:POWER:AIXLINUX";
-		$ostype     = "sles";
-		$diskformat = "http://www.ibm.com/".
-			"xmlns/ovf/diskformat/power.aix.mksysb";
-	} elsif ($type eq "xen") {
+		$systemtype = 'IBM:POWER:AIXLINUX';
+		$diskformat = 'http://www.ibm.com/'
+			. 'xmlns/ovf/diskformat/power.aix.mksysb';
+	} elsif ($ovfType eq 'xen') {
 		$osid       = 84;
+		$systemtype = 'xen-' . $hwVersion;
+		$diskformat = 'http://xen.org/';
 	} else {
 		$osid       = 84;
-		$systemtype = "vmx-04";
-		$ostype     = $ovfconfig{vmware_guest};
-		$diskformat = "http://www.vmware.com/".
-			"interfaces/specifications/vmdk.html#streamOptimized";
+		$systemtype = 'vmx-0' . $hwVersion;
+		$diskformat = 'http://www.vmware.com/'
+			. 'interfaces/specifications/vmdk.html#streamOptimized';
 	}
 	#==========================================
 	# create config file
@@ -1152,80 +1153,324 @@ sub createOVFConfiguration {
 	#==========================================
 	# global setup
 	#------------------------------------------
-	print $OVFFD "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"."\n".
-		'<Envelope vmw:buildId="build-260188"'."\n".
-		'xmlns="http://schemas.dmtf.org/ovf/envelope/1"'."\n".
-		'xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common"'."\n".
-		'xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"'."\n".
-		'xmlns:rasd="http://schemas.dmtf.org/'.
-			'wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"'."\n".
-		'xmlns:vmw="http://www.vmware.com/schema/ovf"'."\n".
-		'xmlns:vssd="http://schemas.dmtf.org/'.
-			'wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"'."\n".
-		'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'."\n";
+	print $OVFFD '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
+		. '<Envelope vmw:buildId="build-260188"' . "\n"
+		. 'xmlns="http://schemas.dmtf.org/ovf/envelope/1"' . "\n"
+		. 'xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common"' . "\n"
+		. 'xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"' . "\n"
+		. 'xmlns:rasd="http://schemas.dmtf.org/'
+		. 'wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"' . "\n"
+		. 'xmlns:vmw="http://www.vmware.com/schema/ovf"' . "\n"
+		. 'xmlns:vssd="http://schemas.dmtf.org/'
+		. 'wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"' . "\n"
+		. 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' . "\n";
 	#==========================================
 	# image description
 	#------------------------------------------
 	my $size = -s $this->{image};
-	print $OVFFD "<ovf:References>"."\n";
-	print $OVFFD "\t"."<ovf:File ovf:href=\"$base\""."\n".
-		"\t"."ovf:id=\"file1\""."\n".
-		"\t"."ovf:size=\"$size\"/>"."\n";
-	print $OVFFD "</ovf:References>"."\n";
+	print $OVFFD '<ovf:References>' . "\n"
+		. "\t" . '<ovf:File ovf:href="' . $base. '" ovf:id="file1"'
+		. 'ovf:size="' . $size . '"/>' . "\n"
+		. '</ovf:References>' . "\n";
 	#==========================================
 	# storage description
 	#------------------------------------------
-	print $OVFFD "<ovf:DiskSection>"."\n".
-		"\t"."<ovf:Info>Disk Section</ovf:Info>"."\n".
-		"\t"."<ovf:Disk ovf:capacity=\"$size\"".
-			" ovf:capacityAllocationUnits=\"byte\"".
-			" ovf:diskId=\"vmRef1disk\" ovf:fileRef=\"file1\"".
-			" ovf:format=\"$diskformat\"".
-			" ovf:populatedSize=\"$size\"/>"."\n";
-	print $OVFFD "</ovf:DiskSection>"."\n";
+	print $OVFFD '<ovf:DiskSection>' . "\n"
+		. "\t" . '<ovf:Info>Virtual disk information</ovf:Info>' . "\n"
+		. "\t" . '<ovf:Disk ovf:capacity="' . $size . '" '
+		. 'ovf:capacityAllocationUnits="byte" '
+		. 'ovf:diskId="vmdisk1" '
+		. 'ovf:fileRef="file1"'
+		. 'ovf:format="' . $diskformat . '" '
+		. 'ovf:populatedSize="' . $size . '"/>' . "\n"
+	    . '</ovf:DiskSection>' . "\n";
 	#==========================================
 	# network description
 	#------------------------------------------
-	if (defined $ovfconfig{ovf_bridge}) {
-		my $name = "The bridged network for:";
-		my %nics = %{$ovfconfig{ovf_bridge}};
-		while (my @nic_info = each %nics) {
-			my $nic = $nic_info[0];
-			next if $nic eq "undef";
-			print $OVFFD "<ovf:NetworkSection>"."\n".
-				"\t"."<Info>The list of logical networks</Info>"."\n".
-				"\t"."<Network ovf:name=\"$nic\">"."\n".
-				"\t\t"."<Description>$name $nic</Description>"."\n";
-			print $OVFFD "</ovf:NetworkSection>"."\n";
+	my @nicIDs = @{$vmdata -> getNICIDs()};
+	my $numNics = scalar @nicIDs;
+	if ($numNics) {
+		print $OVFFD '<ovf:NetworkSection>' . "\n"
+			. "\t" . '<Info>The list of logical networks</Info>' . "\n";
+	}
+	my %modes;
+	for my $id (@nicIDs) {
+		my $mode = $vmdata -> getNICMode($id);
+		if (! $modes{$mode}) {
+			print $OVFFD "\t" . '<Network ovf:name="' . $mode . '">' . "\n"
+				. "\t\t" . '<Description>The ' . $mode . ' network'
+				. '</Description>' . "\n"
+				. "\t" . '</Network>' . "\n";
+			$modes{$mode} = 1;
 		}
+	}
+	if ($numNics) {
+		print $OVFFD '</ovf:NetworkSection>' . "\n";
 	}
 	#==========================================
 	# virtual system description
 	#------------------------------------------
-	print $OVFFD "<VirtualSystem ovf:id=\"vm\">"."\n".
-		"\t"."<Info>A virtual machine</Info>"."\n".
-		"\t"."<Name>$base</Name>"."\n".
-		"\t"."<OperatingSystemSection ".
-		"ovf:id=\"$osid\" vmw:osType=\"$ostype\">"."\n".
-		"\t\t"."<Info>Appliance created by KIWI</Info>"."\n".
-		"\t"."</OperatingSystemSection>"."\n".
-		"\t"."<VirtualHardwareSection>"."\n".
-		"\t\t"."<Info>Virtual hardware requirements</Info>"."\n".
-		"\t\t"."<System>"."\n".
-		"\t\t"."<vssd:ElementName>Virtual Hardware Family".
-		"</vssd:ElementName>"."\n".
-		"\t\t"."<vssd:InstanceID>0</vssd:InstanceID>"."\n".
-		"\t\t"."<vssd:VirtualSystemIdentifier>$base".
-		"</vssd:VirtualSystemIdentifier>"."\n".
-		"\t\t"."<vssd:VirtualSystemType>$systemtype".
-		"</vssd:VirtualSystemType>"."\n".
-		"\t\t"."</System>"."\n";
-	print $OVFFD "\t"."</VirtualHardwareSection>"."\n";
-	print $OVFFD "\t"."</VirtualSystem>"."\n";
+	my $instID = 0;
+	print $OVFFD '<VirtualSystem ovf:id="vm">' . "\n"
+		. "\t" . '<Info>A virtual machine</Info>' . "\n"
+		. "\t" . '<Name>' . $base . '</Name>' . "\n"
+		. "\t" . '<OperatingSystemSection '
+		. 'ovf:id="' . $osid. '" '
+		. 'vmw:osType="' . $ostype . '">' . "\n"
+		. "\t\t" . '<Info>Appliance created by KIWI</Info>' . "\n"
+		. "\t" . '</OperatingSystemSection>' . "\n"
+		. "\t" . '<VirtualHardwareSection>' . "\n"
+		. "\t\t" . '<Info>Virtual hardware requirements</Info>' . "\n"
+		. "\t\t" . '<System>' . "\n"
+		. "\t\t\t" . '<vssd:ElementName>Virtual Hardware Family'
+		. '</vssd:ElementName>' . "\n"
+		. "\t\t\t" . '<vssd:InstanceID>' . $instID
+		. '</vssd:InstanceID>' . "\n"
+		. "\t\t\t" . '<vssd:VirtualSystemIdentifier>' . $base
+		. '</vssd:VirtualSystemIdentifier>' . "\n"
+		. "\t\t\t" . '<vssd:VirtualSystemType>' . $systemtype
+		. '</vssd:VirtualSystemType>' . "\n"
+		. "\t\t" . '</System>' . "\n";
+	$instID += 1;
+	# CPU setup
+	my $maxCPU = $vmdata -> getMaxCPUCnt();
+	my $minCPU = $vmdata -> getMinCPUCnt();
+	my $numCPU = $vmdata -> getNumCPUs();
+	if ($maxCPU || $minCPU || $numCPU) {
+		print $OVFFD "\t\t" . '<Item>' . "\n"
+			. "\t\t\t"
+			. '<rasd:Description>Number of Virtual CPUs</rasd:Description>'
+			. "\n"
+			. "\t\t\t"
+			. '<rasd:ElementName>CPU definition</rasd:ElementName>' . "\n";
+		if (! $numCPU) {
+			if ($maxCPU && $minCPU) {
+				my $max = int $maxCPU;
+				my $min = int $minCPU;
+				$numCPU = ($max + $min) / 2;
+			} elsif ($maxCPU) {
+				$numCPU = int $maxCPU;
+				if ($numCPU > 1) {
+					$numCPU -= 1;
+				}
+			} elsif ($minCPU) {
+				$numCPU = int $minCPU;
+				$numCPU += 1;
+			}
+		}
+		print $OVFFD "\t\t\t"
+			. '<rasd:VirtualQuantity>' . $numCPU
+			. '</rasd:VirtualQuantity>' . "\n";
+		if ($minCPU) {
+			print $OVFFD "\t\t\t"
+				. '<rasd:Limit>' . $minCPU . '</rasd:Limit>' . "\n";
+		}
+		if ($maxCPU) {
+			print $OVFFD "\t\t\t"
+				. '<rasd:Limit>' . $maxCPU . '</rasd:Limit>' . "\n";
+		}
+		print $OVFFD "\t\t\t"
+			. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n"
+			. "\t\t\t"
+			. '<rasd:ResourceType>3</rasd:ResourceType>' . "\n"
+			. "\t\t" . '</Item>' . "\n";
+		$instID += 1;
+	}
+	# Memory setup
+	my $maxMem = $vmdata -> getMaxMemory();
+	my $minMem = $vmdata -> getMinMemory();
+	my $memory = $vmdata -> getMemory();
+	if ($maxMem || $minMem || $memory) {
+		print $OVFFD "\t\t" . '<Item>' . "\n"
+			. "\t\t\t"
+			. '<rasd:AllocationUnits>MB</rasd:AllocationUnits>' . "\n"
+			. "\t\t\t"
+			. '<rasd:Description>Memory Size</rasd:Description>' . "\n";
+		if (! $memory) {
+			if ($maxMem && $minMem) {
+				my $max = int $maxMem;
+				my $min = int $minMem;
+				$memory = ($maxMem + $minMem) / 2;
+			} elsif ($maxMem) {
+				$memory = int $maxMem;
+				if ($memory > 512) {
+					$memory -= 512;
+				}
+			} elsif ($minMem) {
+				$memory = int $minMem;
+				$memory += 512;
+			}
+		}
+		print $OVFFD "\t\t\t"
+			. '<rasd:ElementName>' . $memory
+			. 'MB Memory</rasd:ElementName>' . "\n"
+			. "\t\t\t"
+			. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n";
+		if ($minMem) {
+			print $OVFFD "\t\t\t"
+				. '<rasd:Limit>' . $minMem . '</rasd:Limit>' . "\n";
+		}
+		if ($maxMem) {
+			print $OVFFD "\t\t\t"
+				. '<rasd:Limit>' . $maxMem . '</rasd:Limit>' . "\n";
+		}
+		print $OVFFD "\t\t\t"
+			. '<rasd:ResourceType>4</rasd:ResourceType>' . "\n"
+			. "\t\t\t"
+			. '<rasd:VirtualQuantity>' . $memory
+			. '</rasd:VirtualQuantity>' . "\n"
+			. "\t\t" . '</Item>' . "\n";
+		$instID += 1;
+	}
+	# Disk controller
+	my $controller = $vmdata -> getSystemDiskController();
+	my $controllerID = $instID;
+	if ($controller) {
+		my $rType;
+		if ($controller eq 'ide') {
+			$rType = 5;
+		} else {
+			$rType = 6;
+		}
+		print $OVFFD "\t\t" . '<Item>' . "\n"
+		. "\t\t\t"
+		. '<rasd:Description>System disk controller</rasd:Description>'
+		. "\n"
+		. "\t\t\t"
+		. '<rasd:ElementName>' . $controller . 'Controller'
+		. '</rasd:ElementName>' . "\n"
+		. "\t\t\t"
+		. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n"
+		. "\t\t\t"
+		. '<rasd:ResourceType>' . $rType . '</rasd:ResourceType>' . "\n"
+		. "\t\t" . '</Item>' . "\n";
+		$instID += 1;
+	}
+	# Connect the system disk to the controller
+	my $pAddress = 0;
+	if ($controller) {
+		print $OVFFD "\t\t" . '<Item>' . "\n"
+		. "\t\t\t"
+		. '<rasd:AddressOnParent>' . $pAddress
+		. '</rasd:AddressOnParent>' . "\n"
+		. "\t\t\t"
+		. '<rasd:ElementName>disk1</rasd:ElementName>' . "\n"
+		. "\t\t\t"
+		. '<rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>' . "\n"
+		. "\t\t\t"
+		. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n"
+		. "\t\t\t"
+		. '<rasd:Parent>' . $controllerID . '</rasd:Parent>' . "\n"
+		. "\t\t\t"
+		. '<rasd:ResourceType>17</rasd:ResourceType>' . "\n"
+		. "\t\t" . '</Item>' . "\n";
+		$pAddress += 1;
+		$instID += 1;
+	}
+	# DVD
+	my $dvdController = $vmdata -> getDVDController();
+	if ($dvdController) {
+		my $dvdContID = $controllerID;
+		if ($controller && $dvdController ne $controller) {
+			my $rType;
+			if ($dvdController eq 'ide') {
+				$rType = 5;
+			} else {
+				$rType = 6;
+			}
+			print $OVFFD "\t\t" . '<Item>' . "\n"
+				. "\t\t\t"
+				. '<rasd:Description>DVD controller</rasd:Description>'
+				. "\n"
+				. "\t\t\t"
+				. '<rasd:ElementName>DVDController' . $dvdController
+				. '</rasd:ElementName>' . "\n"
+				. "\t\t\t"
+				. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n"
+				. "\t\t\t"
+				. '<rasd:ResourceType>' . $rType . '</rasd:ResourceType>'
+				. "\n"
+				. "\t\t" . '</Item>' . "\n";
+			$dvdContID = $instID;
+			$instID += 1;
+		}
+		print $OVFFD "\t\t" . '<Item ovf:required="false">' . "\n"
+		. "\t\t\t"
+		. '<rasd:AddressOnParent>' . $pAddress
+		. '</rasd:AddressOnParent>' . "\n"
+		. "\t\t\t"
+		. '<rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>'
+		. "\n"
+		. "\t\t\t"
+		. '<rasd:Description>DVD device</rasd:Description>' . "\n"
+		. "\t\t\t"
+		. '<rasd:ElementName>DVDdrive</rasd:ElementName>' . "\n"
+		. "\t\t\t"
+		. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n"
+		. "\t\t\t"
+		. '<rasd:Parent>' . $dvdContID . '</rasd:Parent>' . "\n"
+		. "\t\t\t"
+		. '<rasd:ResourceType>16</rasd:ResourceType>' . "\n"
+		. "\t\t" . '</Item>' . "\n";
+		$pAddress += 1;
+		$instID += 1;
+	}
+	# Network
+	for my $id (@nicIDs) {
+		my $iFace = $vmdata -> getNICInterface($id);
+		my $mac = $vmdata -> getNICMAC($id);
+		print $OVFFD "\t\t" . '<Item>' . "\n";
+		if ($mac) {
+			print $OVFFD "\t\t\t"
+				. '<rasd:Address>' . $mac . '</rasd:Address>'. "\n";
+		}
+		print $OVFFD "\t\t\t"
+			. '<rasd:AddressOnParent>' . $pAddress
+			. '</rasd:AddressOnParent>' . "\n"
+			. "\t\t\t"
+			. '<rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>'
+			. "\n";
+		my $mode = $vmdata -> getNICMode($id);
+		print $OVFFD "\t\t\t"
+			. '<rasd:Connection>' . $mode . '</rasd:Connection>' . "\n"
+			. "\t\t\t"
+			. '<rasd:Description>Network adapter</rasd:Description>' . "\n"
+			. "\t\t\t"
+			. '<rasd:ElementName>ethernet' . $iFace
+			. '</rasd:ElementName>' . "\n"
+			. "\t\t\t"
+			. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n";
+		my $driver = $vmdata -> getNICDriver($id);
+		if ($driver) {
+			print $OVFFD "\t\t\t"
+			. '<rasd:ResourceSubType>' . $driver . '</rasd:ResourceSubType>'
+			. "\n";
+		}
+		print $OVFFD "\t\t\t"
+			. '<rasd:ResourceType>10</rasd:ResourceType>' . "\n"
+			. "\t\t" . '</Item>' . "\n";
+		$pAddress += 1;
+		$instID += 1;
+	}
+	# Video section
+	print $OVFFD "\t\t" . '<Item ovf:required="false">' . "\n"
+		. "\t\t\t"
+		. '<rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>'
+		. "\n"
+		. "\t\t\t"
+		. '<rasd:ElementName>video</rasd:ElementName>' . "\n"
+		. "\t\t\t"
+		. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n"
+		. "\t\t\t"
+		. '<rasd:ResourceType>24</rasd:ResourceType>' . "\n"
+		. "\t\t" . '</Item>' . "\n";
+	$pAddress += 1;
+	print $OVFFD "\t" . '</VirtualHardwareSection>' . "\n"
+		. '</VirtualSystem>' ."\n";
 	#==========================================
 	# close envelope
 	#------------------------------------------
-	print $OVFFD "</Envelope>";
+	print $OVFFD '</Envelope>';
 	$OVFFD -> close();
 	#==========================================
 	# create manifest file

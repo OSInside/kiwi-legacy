@@ -3530,7 +3530,7 @@ and setup the system disk</db:para>
         <a:documentation>The OVF configuration type</a:documentation>
         <choice>
           <value>zvm</value>
-          <value>povervm</value>
+          <value>powervm</value>
           <value>xen</value>
           <value>vmware</value>
         </choice>
@@ -3538,7 +3538,8 @@ and setup the system disk</db:para>
     </define>
     <define name="k.machine.HWversion.attribute">
       <attribute name="HWversion">
-        <a:documentation>The virtual HW version number for the VM configuration (vmdk only)</a:documentation>
+        <a:documentation>The virtual HW version number for the VM configuration
+(vmdk and ovf)</a:documentation>
         <data type="integer"/>
       </attribute>
     </define>
@@ -3563,18 +3564,14 @@ and setup the system disk</db:para>
     </define>
     <define name="k.machine.guestOS.attribute">
       <attribute name="guestOS">
-        <a:documentation>The virtual guestOS identification string for the VM (vmdk only)</a:documentation>
+        <a:documentation>The virtual guestOS identification string for the VM
+(vmdk and ovf, note the name designation is different for the two
+formats)</a:documentation>
       </attribute>
     </define>
     <define name="k.machine.min_memory.attribute">
       <attribute name="min_memory">
         <a:documentation>The virtual machine min memory in MB (ovf only)</a:documentation>
-        <data type="nonNegativeInteger"/>
-      </attribute>
-    </define>
-    <define name="k.machine.des_memory.attribute">
-      <attribute name="des_memory">
-        <a:documentation>The virtual machine desired memory in MB (ovf only)</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
@@ -3587,12 +3584,6 @@ and setup the system disk</db:para>
     <define name="k.machine.min_cpu.attribute">
       <attribute name="min_cpu">
         <a:documentation>The virtual machine min CPU count (ovf only)</a:documentation>
-        <data type="nonNegativeInteger"/>
-      </attribute>
-    </define>
-    <define name="k.machine.des_cpu.attribute">
-      <attribute name="des_cpu">
-        <a:documentation>The virtual machine desired CPU count (ovf only)</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
@@ -3620,16 +3611,10 @@ and setup the system disk</db:para>
           <ref name="k.machine.min_memory.attribute"/>
         </optional>
         <optional>
-          <ref name="k.machine.des_memory.attribute"/>
-        </optional>
-        <optional>
           <ref name="k.machine.max_memory.attribute"/>
         </optional>
         <optional>
           <ref name="k.machine.min_cpu.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.machine.des_cpu.attribute"/>
         </optional>
         <optional>
           <ref name="k.machine.max_cpu.attribute"/>

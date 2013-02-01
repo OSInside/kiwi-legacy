@@ -7,7 +7,7 @@
 	</description>
 	<preferences>
 		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="ovf">
-			<machine des_memory="1024" max_memory="2048" memory="1024" min_memory="512" des_cpu="2" max_cpu="4" ncpus="2" min_cpu="1" ovftype="vmware">				        <vmdisk device="/dev/sda" disktype="scsi"/>
+			<machine max_memory="2048" memory="1024" min_memory="512" max_cpu="4" ncpus="2" min_cpu="1" ovftype="vmware">				        <vmdisk device="/dev/sda" disktype="scsi"/>
 				<vmnic interface="eth0"/>
 			</machine>
 			<systemdisk name="test_Volume">
