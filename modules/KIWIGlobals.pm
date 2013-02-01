@@ -26,6 +26,7 @@ use File::Basename;
 require KIWILocator;
 require KIWILog;
 require KIWIQX;
+require KIWITrace;
 #==========================================
 # Singleton class
 #------------------------------------------
@@ -352,7 +353,9 @@ sub mount {
 				"echo $cipher | cryptsetup luksOpen $source luks-$salt 2>&1"
 			);
 		} else {
-			$status = KIWIQX::qxx ("cryptsetup luksOpen $source luks-$salt 2>&1");
+			$status = KIWIQX::qxx (
+				"cryptsetup luksOpen $source luks-$salt 2>&1"
+			);
 		}
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -458,7 +461,7 @@ sub getPartDevice {
 sub umount {
 	# /.../
 	# implements an umount function for filesystems mounted
-	# via main::mount(). The function walks through the
+	# via mount(). The function walks through the
 	# contents of the UmountStack list
 	# ---
 	my $this  = shift;
@@ -580,6 +583,7 @@ sub checkFileSystem {
 	my $kiwi    = $this->{kiwi};
 	my %KnownFS = %{$this->{data}->{KnownFS}};
 	my %result  = ();
+	my $trace   = KIWITrace -> instance();
 	if (defined $KnownFS{$fs}) {
 		#==========================================
 		# got a known filesystem type
@@ -657,8 +661,8 @@ sub checkFileSystem {
 			}
 		} else {
 			if ($kiwi -> trace()) {
-				$main::BT[$main::TL] = eval {
-					Carp::longmess ($main::TT.$main::TL++)
+				$trace->{BT}[$trace->{TL}] = eval {
+					Carp::longmess ($trace->{TT}.$trace->{TL}++)
 				};
 			}
 			return ();

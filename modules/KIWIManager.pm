@@ -28,6 +28,7 @@ use Config::IniFiles;
 use KIWILog;
 use KIWILocator;
 use KIWIQX qw (qxx);
+use KIWITrace;
 
 #==========================================
 # Exports
@@ -204,6 +205,7 @@ sub setupScreenCall {
 	#==========================================
 	# Check log location
 	#------------------------------------------
+	my $trace = KIWITrace -> instance();
 	if ($kiwi -> terminalLogging()) {
 		$logs = 0;
 	}
@@ -293,8 +295,8 @@ sub setupScreenCall {
 		}
 		$this -> resetInstallationSource();
 		if ($kiwi -> trace()) {
-			$main::BT[$main::TL] = eval {
-				Carp::longmess ($main::TT.$main::TL++)
+			$trace->{BT}[$trace->{TL}] = eval {
+				Carp::longmess ($trace->{TT}.$trace->{TL}++)
 			};
 		}
 		return;

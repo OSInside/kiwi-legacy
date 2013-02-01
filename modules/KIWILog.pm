@@ -29,6 +29,7 @@ use POSIX ":sys_wait_h";
 require KIWISocket;
 require KIWISharedMem;
 require KIWIQX;
+require KIWITrace;
 #==========================================
 # Singleton class
 #------------------------------------------
@@ -53,9 +54,12 @@ sub sendLogServerMessage {
 	my $message = $this->{message};
 	my $level   = $this->{level};
 	my $date    = $this->{date};
+	my $trace   = KIWITrace -> instance();
 	if (! defined $smem) {
-		if (($this->trace()) && ($main::TT)) {
-			$main::BT[$main::TL] = eval {Carp::longmess($main::TT.$main::TL++)};
+		if ($this -> trace()) {
+			$trace->{BT}[$trace->{TL}] = eval {
+				Carp::longmess ($trace->{TT}.$trace->{TL}++)
+			};
 		}
 		return;
 	}
@@ -90,11 +94,14 @@ sub getLogServerMessage {
 	# get the contents of the shared memory segment and
 	# return them
 	# ---
-	my $this = shift;
-	my $smem = $this->{smem};
+	my $this   = shift;
+	my $smem   = $this->{smem};
+	my $trace  = KIWITrace -> instance();
 	if (! defined $smem) {
-		if ($this->trace()) {
-			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
+		if ($this -> trace()) {
+			$trace->{BT}[$trace->{TL}] = eval {
+				Carp::longmess ($trace->{TT}.$trace->{TL}++)
+			};
 		}
 		return;
 	}
@@ -345,8 +352,9 @@ sub closeRootChannel {
 # reopenRootChannel
 #------------------------------------------
 sub reopenRootChannel {
-	my $this = shift;
-	my $file = $this->{rootLog};
+	my $this   = shift;
+	my $file   = $this->{rootLog};
+	my $trace  = KIWITrace -> instance();
 	if (! $file) {
 		return;
 	}
@@ -355,9 +363,9 @@ sub reopenRootChannel {
 	}
 	my $EFD = FileHandle -> new();
 	if (! $EFD -> open (">>$file")) {
-		if ($this->trace()) {
-			$main::BT[$main::TL] = eval {
-				Carp::longmess ($main::TT.$main::TL++)
+		if ($this -> trace()) {
+			$trace->{BT}[$trace->{TL}] = eval {
+				Carp::longmess ($trace->{TT}.$trace->{TL}++)
 			};
 		}
 		return;
@@ -405,6 +413,7 @@ sub printLog {
 	my @mcache  = ();
 	my $rootEFD = $this->{rootefd};
 	my $date    = $this -> getPrefix ( $lglevel );
+	my $trace   = KIWITrace -> instance();
 	#==========================================
 	# check log status 
 	#------------------------------------------
@@ -437,9 +446,9 @@ sub printLog {
 			$result = $logdata;
 		} elsif ($lglevel == 3) {
 			$result = $date.$logdata;
-			if ($this->trace()) {
-				$main::BT[$main::TL] = eval {
-					Carp::longmess ($main::TT.$main::TL++)
+			if ($this -> trace()) {
+				$trace->{BT}[$trace->{TL}] = eval {
+					Carp::longmess ($trace->{TT}.$trace->{TL}++)
 				};
 			}
 		} else {
@@ -494,24 +503,25 @@ sub printBackTrace {
 	# if no information is present an empty string
 	# is returned
 	# ---
-	my $this = shift;
-	my $used = $this->{used};
-	my $FD   = $this->{channel};
+	my $this  = shift;
+	my $used  = $this->{used};
+	my $FD    = $this->{channel};
+	my $trace = KIWITrace -> instance();
 	if (! $used) {
 		return $this;
 	}
-	if (! @main::BT) {
+	if (! $trace->{BT}) {
 		return $this;
 	}
-	my $trace = pop @main::BT;
+	my $trace_text = pop @{$trace->{BT}};
 	if (! defined $this->{nocolor}) {
 		print STDERR "\033[1;31m[*** back trace follows ***]\n";
-		print STDERR "\033[1;31m$trace";
+		print STDERR "\033[1;31m$trace_text";
 		print STDERR "\033[1;31m[*** end ***]\n";
 		$this -> doNorm();
 	} else {
 		print STDERR ("[*** back trace follows ***]\n");
-		print STDERR $trace;
+		print STDERR $trace_text;
 		print STDERR "[*** end ***]\n";
 	}
 	return $this;
@@ -651,8 +661,9 @@ sub setLogFile {
 	# set a log file name for logging. Each call of
 	# a log() method will write its data to this file
 	# ---
-	my $this = shift;
-	my $file = shift;
+	my $this   = shift;
+	my $file   = shift;
+	my $trace  = KIWITrace -> instance();
 	if ($file eq "terminal") {
 		$this->{fileLog} = 2;
 		return $this;
@@ -660,9 +671,9 @@ sub setLogFile {
 	my $FD = FileHandle -> new();
 	if (! $FD -> open (">$file")) {
 		$this -> warning ("Couldn't open log channel: $!\n");
-		if ($this->trace()) {
-			$main::BT[$main::TL] = eval {
-				Carp::longmess ($main::TT.$main::TL++)
+		if ($this -> trace()) {
+			$trace->{BT}[$trace->{TL}] = eval {
+				Carp::longmess ($trace->{TT}.$trace->{TL}++)
 			};
 		}
 		return;
@@ -743,9 +754,10 @@ sub finalizeLog {
 # setLogHumanReadable
 #------------------------------------------
 sub setLogHumanReadable {
-	my $this = shift;
+	my $this    = shift;
 	my $rootLog = $this->{rootLog};
-	my $FDR = FileHandle -> new();
+	my $FDR     = FileHandle -> new();
+	my $trace   = KIWITrace -> instance();
 	local $/;
 	if ((! defined $rootLog) || (! $FDR -> open ($rootLog))) {
 		return;
@@ -757,9 +769,9 @@ sub setLogHumanReadable {
 	my $cr   = 0;
 	my $FDW  = FileHandle -> new();
 	if (! $FDW -> open (">$rootLog")) {
-		if ($this->trace()) {
-			$main::BT[$main::TL] = eval {
-				Carp::longmess ($main::TT.$main::TL++)
+		if ($this -> trace()) {
+			$trace->{BT}[$trace->{TL}] = eval {
+				Carp::longmess ($trace->{TT}.$trace->{TL}++)
 			};
 		}
 		return;
@@ -847,8 +859,9 @@ sub setLogServer {
 	# setup a log server which can be queried. The answer to each
 	# query is a XML formated information
 	# ---
-	my $this  = shift;
-	my $port  = shift;
+	my $this   = shift;
+	my $port   = shift;
+	my $trace  = KIWITrace -> instance();
 	#==========================================
 	# Check for tiny object
 	#------------------------------------------
@@ -874,9 +887,9 @@ sub setLogServer {
 		$this -> skipped ();
 		$this -> {smem} -> closeSegment();
 		undef $this -> {smem};
-		if ($this->trace()) {
-			$main::BT[$main::TL] = eval {
-				Carp::longmess ($main::TT.$main::TL++)
+		if ($this -> trace()) {
+			$trace->{BT}[$trace->{TL}] = eval {
+				Carp::longmess ($trace->{TT}.$trace->{TL}++)
 			};
 		}
 		return;

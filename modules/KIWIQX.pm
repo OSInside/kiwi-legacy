@@ -22,6 +22,7 @@ require Exporter;
 use Carp qw (cluck);
 use strict;
 use warnings;
+use KIWITrace;
 
 #==========================================
 # Exports
@@ -74,10 +75,11 @@ sub qxx {
 	# item is checked which means subsequent calls in the
 	# chain might fail unnoticed
 	# ---
-	my $cmd  = shift;
-	my @prg  = "";
-	my $prog = "";
-	my $kiwi = KIWILog -> instance();
+	my $cmd   = shift;
+	my @prg   = "";
+	my $prog  = "";
+	my $kiwi  = KIWILog -> instance();
+	my $trace = KIWITrace -> instance();
 	#==========================================
 	# Extract command name from command string
 	#------------------------------------------
@@ -102,8 +104,8 @@ sub qxx {
 	if (($code != 0) || ($exit == -1)) {
 		$kiwi -> loginfo ("EXEC [Failed: $prog]\n");
 		if ($kiwi -> trace()) {
-			$main::BT[$main::TL] = eval { Carp::longmess (
-				$main::TT.$main::TL++)
+			$trace->{BT}[$trace->{TL}] = eval {
+				Carp::longmess ($trace->{TT}.$trace->{TL}++)
 			};
 		}
 		$? = 0xffff; ## no critic

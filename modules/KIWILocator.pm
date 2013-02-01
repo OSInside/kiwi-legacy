@@ -27,6 +27,7 @@ use IPC::Open3;
 #------------------------------------------
 use KIWILog;
 use KIWIQX qw (qxx);
+use KIWITrace;
 
 #==========================================
 # Exports
@@ -66,7 +67,8 @@ sub createTmpDirectory {
 	my $rootError     = 1;
 	my $root;
 	my $code;
-	my $kiwi = $this->{kiwi};
+	my $kiwi  = $this->{kiwi};
+	my $trace = KIWITrace -> instance();
 	my $forceRoot = $cmdL -> getForceNewRoot();
 	if (! defined $useRoot) {
 		if (! defined $selfRoot) {
@@ -104,7 +106,9 @@ sub createTmpDirectory {
 	}
 	if ( $rootError ) {
 		if ($kiwi -> trace()) {
-			$main::BT[$main::TL] = eval { Carp::longmess ($main::TT.$main::TL++) };
+			$trace->{BT}[$trace->{TL}] = eval {
+				Carp::longmess ($trace->{TT}.$trace->{TL}++)
+			};
 		}
 		return;
 	}

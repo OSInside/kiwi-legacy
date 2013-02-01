@@ -55,13 +55,6 @@ use KIWIGlobals;
 binmode(STDOUT, ":encoding(UTF-8)");
 
 #============================================
-# Globals (debugging)
-#--------------------------------------------
-our $TT = "Trace Level ";
-our $TL = 1;
-our @BT;
-
-#============================================
 # Globals
 #--------------------------------------------
 my $kiwi     = KIWILog -> instance();
