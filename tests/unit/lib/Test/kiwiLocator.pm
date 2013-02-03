@@ -158,6 +158,210 @@ sub test_createTmpDirSpecifiedDirOK {
 }
 
 #==========================================
+# test_getBootImageDescriptionFindAbsPath
+#------------------------------------------
+sub test_getBootImageDescriptionFindAbsPath {
+	# ...
+	# Test the getBootImageDescription method with absolute path that contains
+	# a config.xml file.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my $dataDir = $this -> {dataDir};
+	my $bootImgPath = $locator -> getBootImageDescription($dataDir);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals($dataDir, $bootImgPath);
+
+	return;
+}
+
+#==========================================
+# test_getBootImageDescriptionFindAddPath
+#------------------------------------------
+sub test_getBootImageDescriptionFindAddPath {
+	# ...
+	# Test the getBootImageDescription method with a path found in the
+	# additional serach path.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my $bootImgPath = $locator
+		-> getBootImageDescription('sglConf', 'data/kiwiLocator');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $expectedPath = $this -> {dataDir} . 'sglConf';
+	$this -> assert_str_equals($expectedPath, $bootImgPath);
+
+	return;
+}
+
+#==========================================
+# test_getBootImageDescriptionFindCwd
+#------------------------------------------
+sub test_getBootImageDescriptionFindCwd {
+	# ...
+	# Test the getBootImageDescription method with a path found in the
+	# current working directory.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my $bootImgPath = $locator -> getBootImageDescription('data/kiwiLocator');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	my $noTrail = substr $this -> {dataDir}, 0 , -1;
+	$this -> assert_str_equals($noTrail, $bootImgPath);
+
+	return;
+}
+
+#==========================================
+# test_getBootImageDescriptionFindDefault
+#------------------------------------------
+sub test_getBootImageDescriptionFindDefault {
+	# ...
+	# Test the getBootImageDescription method with a path found in the
+	# default location.
+	# ---
+# The used .kiwirc file to make the tests work on the current source breaks
+# this due to the image vs system directory name change upon install
+# need a good solution before re-enabling this test
+#	my $this = shift;
+#	my $kiwi = $this -> {kiwi};
+#	my $locator = $this -> __getLocator();
+#	my $bootImgPath = $locator
+#		-> getBootImageDescription('oemboot/suse-SLES11');
+#	my $msg = $kiwi -> getMessage();
+#	$this -> assert_str_equals('No messages set', $msg);
+#	my $msgT = $kiwi -> getMessageType();
+#	$this -> assert_str_equals('none', $msgT);
+#	my $state = $kiwi -> getState();
+#	$this -> assert_str_equals('No state set', $state);
+#	$this -> assert_not_null($bootImgPath);
+
+	return;
+}
+
+#==========================================
+# test_getBootImageDescriptionNoArg
+#------------------------------------------
+sub test_getBootImageDescriptionNoArg {
+	# ...
+	# Test the getBootImageDescription method with no argument.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my $bootImgPath = $locator -> getBootImageDescription();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWILocator:getBootImageDescription called without '
+		. 'boot image to look for. Internal error, please file a bug.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($bootImgPath);
+
+	return;
+}
+
+#==========================================
+# test_getBootImageDescriptionNoConfig
+#------------------------------------------
+sub test_getBootImageDescriptionNoConfig {
+	# ...
+	# Test the getBootImageDescription method with a relative path that
+	# does not contain a config.xml file.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my $bootImgPath = $locator
+		-> getBootImageDescription('noConf', 'data/kiwiLocator');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Could not find valid boot image description for'
+		. "'noConf'.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($bootImgPath);
+
+	return;
+}
+
+#==========================================
+# test_getBootImageDescriptionNoConfigAbsPath
+#------------------------------------------
+sub test_getBootImageDescriptionNoConfigAbsPath {
+	# ...
+	# Test the getBootImageDescription method with an absolute path that
+	# does not contain a config.xml file.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my $noConfDir =  $this -> {dataDir} . 'noConf';
+	my $bootImgPath = $locator -> getBootImageDescription($noConfDir);
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Given boot image description '$noConfDir' does "
+		. 'not contain configuration file.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($bootImgPath);
+
+	return;
+}
+
+#==========================================
+# test_getBootImageDescriptionNoDir
+#------------------------------------------
+sub test_getBootImageDescriptionNoDir {
+	# ...
+	# Test the getBootImageDescription method with an absolute path that
+	# does not exist.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $locator = $this -> __getLocator();
+	my $bootImgPath = $locator -> getBootImageDescription('/tmp/noKiwiConfig');
+	my $msg = $kiwi -> getMessage();
+	my $expected = "Could not find given directory '/tmp/noKiwiConfig'.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($bootImgPath);
+
+	return;
+}
+
+#==========================================
 # test_getControlFileMultiConfig
 #------------------------------------------
 sub test_getControlFileMultiConfig {
