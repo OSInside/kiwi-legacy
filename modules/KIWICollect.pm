@@ -50,6 +50,7 @@ use KIWIRepoMetaHandler;
 use KIWIURL;
 use KIWIUtil;
 use KIWIXML;
+use KIWILog;
 
 #==========================================
 # Members
@@ -128,10 +129,11 @@ sub new {
 
 	bless $this, $class;
 
+	$this->{m_logger}   = KIWILog -> instance();
+
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	$this->{m_logger}   = shift;
 	$this->{m_xml}	    = shift;
 	$this->{m_basedir}  = shift;
 	$this->{m_debug}    = shift || 0;
