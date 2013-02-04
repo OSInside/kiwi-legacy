@@ -243,7 +243,7 @@ sub __isInitHashRef {
 	my $init = shift;
 	if ($init && ref($init) ne 'HASH') {
 		my $kiwi = $this->{kiwi};
-		my $msg = 'Expecting a hash ref as second argument if provided';
+		my $msg = 'Expecting a hash ref as first argument if provided';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;

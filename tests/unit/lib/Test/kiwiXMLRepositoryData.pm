@@ -263,7 +263,7 @@ sub test_ctor_invalidArg {
 	my $kiwi = $this -> {kiwi};
 	my $repoDataObj = KIWIXMLRepositoryData -> new('opensuse');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Expecting a hash ref as second argument if provided';
+	my $expected = 'Expecting a hash ref as first argument if provided';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
