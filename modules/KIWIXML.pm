@@ -7486,54 +7486,6 @@ sub getStripNodeList_legacy {
 }
 
 #==========================================
-# getTypes_legacy
-#------------------------------------------
-sub getTypes_legacy {
-	# ...
-	# Receive a list of types available for this image
-	# ---
-	my $this    = shift;
-	my $kiwi    = $this->{kiwi};
-	my $cmdL    = $this->{cmdL};
-	my @result  = ();
-	my @tnodes  = ();
-	my $gotprim = 0;
-	my @node    = $this->{optionsNodeList} -> get_nodelist();
-	my $urlhd   = KIWIURL -> new ($cmdL);
-	foreach my $element (@node) {
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		my @types = $element -> getElementsByTagName ("type");
-		push (@tnodes,@types);
-	}
-	foreach my $node (@tnodes) {
-		my %record  = ();
-		$record{type} = $node -> getAttribute("image");
-		my $bootSpec = $node -> getAttribute("boot");
-		if ($bootSpec) {
-			$record{boot} = $bootSpec;
-			my $bootpath = $urlhd -> normalizeBootPath ($bootSpec);
-			if (defined $bootpath) {
-				$record{boot} = $bootpath;
-			}
-		}
-		my $primary = $node -> getAttribute("primary");
-		if ((defined $primary) && ("$primary" eq "true")) {
-			$record{primary} = "true";
-			$gotprim = 1;
-		} else {
-			$record{primary} = "false";
-		}
-		push (@result,\%record);
-	}
-	if (! $gotprim) {
-		$result[0]->{primary} = "true";
-	}
-	return @result;
-}
-
-#==========================================
 # getTypeSpecificPackageList_legacy
 #------------------------------------------
 sub getTypeSpecificPackageList_legacy {
