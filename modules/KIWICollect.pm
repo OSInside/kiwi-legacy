@@ -163,7 +163,7 @@ sub new {
 		$this->logMsg('I', "Created new KIWIUtil object");
 	}
 
-	$this->{m_urlparser} = KIWIURL -> new ($this->{m_logger},$this->{cmdL});
+	$this->{m_urlparser} = KIWIURL -> new ($this->{cmdL});
 	if(!$this->{m_urlparser}) {
 		$this->logMsg('E', "Can't create KIWIURL object!");
 		return;
@@ -750,11 +750,12 @@ sub mainTask
 				$hybridmedia = 1 ;
 			}
 
-			$iso = KIWIIsoLinux -> new( $this->{m_logger},
-						    $this->{m_basesubdir}->{$cd},
-						    $isoname,
-						    $attr,
-						    $checkmedia);
+			$iso = KIWIIsoLinux -> new(
+				$this->{m_basesubdir}->{$cd},
+			    $isoname,
+			    $attr,
+			    $checkmedia
+			);
 
 			# Just the first media is usually bootable at SUSE
 			my $is_bootable = 0;
