@@ -85,6 +85,14 @@ else
 fi
 
 #======================================
+# Exports boot options
+#--------------------------------------
+failsafe="ide=nodma apm=off noresume edd=off"
+failsafe="$failsafe powersaved=off nohz=off"
+failsafe="$failsafe highres=off processsor.max+cstate=1"
+failsafe="$failsafe nomodeseet x11failsafe"
+
+#======================================
 # Dialog
 #--------------------------------------
 function Dialog {
@@ -2095,9 +2103,7 @@ function setupBootLoaderSyslinux {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                  >> $conf
 				fi
-				echo -n " ide=nodma apm=off acpi=off"          >> $conf
-				echo -n " noresume selinux=0 nosmp"            >> $conf
-				echo -n " noapic maxcpus=0 edd=off"            >> $conf
+				echo -n " $failsafe"                           >> $conf
 				echo " quiet showopts"                         >> $conf
 			fi
 			count=$((count + 1))
@@ -2129,8 +2135,8 @@ function setupBootLoaderSyslinux {
 		echo -n " resume=$swapByID"                          >> $sysb
 	fi
 	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
-	echo -n " showopts ide=nodma apm=off acpi=off noresume"  >> $sysb
-	echo "selinux=0 nosmp noapic maxcpus=0 edd=off\""        >> $sysb
+	echo -n " $failsafe"                                     >> $sysb
+	echo "\""                                                >> $sysb
 }
 #======================================
 # setupBootLoaderGrub
@@ -2318,14 +2324,12 @@ function setupBootLoaderGrub {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                     >> $menu
 				fi
-				echo -n " ide=nodma apm=off acpi=off"             >> $menu
-				echo -n " noresume selinux=0 nosmp"               >> $menu
+				echo -n " $failsafe"                              >> $menu
 				if [ -e /dev/xvc0 ];then
 					echo -n " console=xvc console=tty"            >> $menu
 				elif [ -e /dev/hvc0 ];then
 					echo -n " console=hvc console=tty"            >> $menu
 				fi
-				echo -n " noapic maxcpus=0 edd=off"               >> $menu
 				echo " quiet showopts"                            >> $menu
 				echo " module /boot/$initrd"                      >> $menu
 			else
@@ -2340,14 +2344,12 @@ function setupBootLoaderGrub {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                     >> $menu
 				fi
-				echo -n " ide=nodma apm=off acpi=off"             >> $menu
-				echo -n " noresume selinux=0 nosmp"               >> $menu
+				echo -n " $failsafe"                              >> $menu
 				if [ -e /dev/xvc0 ];then
 					echo -n " console=xvc console=tty"            >> $menu
 				elif [ -e /dev/hvc0 ];then
 					echo -n " console=hvc console=tty"            >> $menu
 				fi
-				echo -n " noapic maxcpus=0 edd=off"               >> $menu
 				echo " quiet showopts"                            >> $menu
 				echo " initrd $gdev/boot/$initrd"                 >> $menu
 			fi
@@ -2398,8 +2400,8 @@ function setupBootLoaderGrub {
 		echo -n " resume=$swapByID"                          >> $sysb
 	fi
 	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
-	echo -n " showopts ide=nodma apm=off acpi=off noresume"  >> $sysb
-	echo "selinux=0 nosmp noapic maxcpus=0 edd=off\""        >> $sysb
+	echo -n " $failsafe"                                     >> $sysb
+	echo "\""                                                >> $sysb
 }
 #======================================
 # setupBootLoaderGrub2
@@ -2716,8 +2718,7 @@ function setupBootLoaderYaboot {
 				if [ "$haveLVM" = "yes" ];then
 					echo -n " VGROUP=$VGROUP"                 >> $conf
 				fi
-				echo -n " ide=nodma apm=off acpi=off"         >> $conf
-				echo -n " noresume selinux=0 nosmp"           >> $conf
+				echo -n " $failsafe"                          >> $conf
 				echo " quiet showopts\""                      >> $conf
 			fi
 			count=$((count + 1))
@@ -2749,8 +2750,8 @@ function setupBootLoaderYaboot {
 		echo -n " resume=$swapByID"                          >> $sysb
 	fi
 	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
-	echo -n " showopts ide=nodma apm=off acpi=off noresume"  >> $sysb
-	echo "selinux=0 nosmp noapic maxcpus=0 edd=off\""        >> $sysb
+	echo -n " $failsafe"                                     >> $sysb
+	echo "\""                                                >> $sysb
 }
 #======================================
 # setupDefaultPXENetwork

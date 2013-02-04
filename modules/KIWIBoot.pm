@@ -3742,6 +3742,21 @@ sub setupBootLoaderConfiguration {
 		$label = "";
 	}
 	#==========================================
+	# Failsafe boot options
+	#------------------------------------------
+	my @failsafe = (
+		'ide=nodma',
+		'apm=off',
+		'noresume',
+		'edd=off',
+		'powersaved=off',
+		'nohz=off',
+		'highres=off',
+		'processsor.max+cstate=1',
+		'nomodeseet',
+		'x11failsafe'
+	);
+	#==========================================
 	# store loader type in object instance
 	#------------------------------------------
 	$this->{loader} = $loader;
@@ -4096,8 +4111,7 @@ sub setupBootLoaderConfiguration {
 						print $FD "\t"."$linux /boot/linux";
 						print $FD " loader=$bloader splash=silent";
 					}
-					print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
-					print $FD " nosmp noapic maxcpus=0 edd=off";
+					print $FD " @failsafe";
 					print $FD $cmdline;
 					if ($iso) {
 						print $FD "\t"."echo Loading initrd...\n";
@@ -4140,8 +4154,7 @@ sub setupBootLoaderConfiguration {
 						print $FD "\t".'module /boot/linux dummy';
 						print $FD " loader=$bloader splash=silent";
 					}
-					print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
-					print $FD " nosmp noapic maxcpus=0 edd=off";
+					print $FD " @failsafe";
 					print $FD $cmdline;
 					if ($iso) {
 						print $FD "\t"."echo Loading initrd...\n";
@@ -4312,8 +4325,7 @@ sub setupBootLoaderConfiguration {
 					print $FD " kernel /boot/linux vga=$vga";
 					print $FD " loader=$bloader splash=silent";
 				}
-				print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
-				print $FD " nosmp noapic maxcpus=0 edd=off";
+				print $FD " @failsafe";
 				print $FD $cmdline;
 				if ($iso) {
 					print $FD " initrd (cd)/boot/initrd\n";
@@ -4339,8 +4351,7 @@ sub setupBootLoaderConfiguration {
 					print $FD " module /boot/linux vga=$vga";
 					print $FD " loader=$bloader splash=silent";
 				}
-				print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
-				print $FD " nosmp noapic maxcpus=0 edd=off";
+				print $FD " @failsafe";
 				print $FD $cmdline;
 				if ($iso) {
 					print $FD " module (cd)/boot/initrd\n"
@@ -4501,8 +4512,7 @@ sub setupBootLoaderConfiguration {
 					print $FD "append initrd=/boot/initrd ";
 					print $FD "vga=$vga loader=$bloader splash=silent";
 				}
-				print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
-				print $FD " nosmp noapic maxcpus=0 edd=off";
+				print $FD " @failsafe";
 			} else {
 				if ($iso) {
 					$kiwi -> failed ();
@@ -4526,8 +4536,7 @@ sub setupBootLoaderConfiguration {
 					$kiwi -> failed ();
 					return;
 				}
-				print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
-				print $FD " nosmp noapic maxcpus=0 edd=off";
+				print $FD " @failsafe";
 			}
 			print $FD $cmdline;
 		}

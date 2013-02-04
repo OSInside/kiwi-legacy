@@ -1499,6 +1499,21 @@ sub createImageLiveCD {
 	}
 	my $checkBase = $rootTarget."/".$baseSystem;
 	#==========================================
+	# Failsafe boot options
+	#------------------------------------------
+	my @failsafe = (
+		'ide=nodma',
+		'apm=off',
+		'noresume',
+		'edd=off',
+		'powersaved=off',
+		'nohz=off',
+		'highres=off',
+		'processsor.max+cstate=1',
+		'nomodeseet',
+		'x11failsafe'
+	);
+	#==========================================
 	# Disable target device support for iso
 	#------------------------------------------
 	undef $this->{gdata}->{StudioNode};
@@ -2291,8 +2306,7 @@ sub createImageLiveCD {
 			print $FD "\t"."$linux /boot/$isoarch/loader/linux";
 			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 			print $FD " splash=silent";
-			print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
-			print $FD " nosmp noapic maxcpus=0 edd=off"."\n";
+			print $FD " @failsafe"."\n";
 			print $FD "\t"."echo Loading initrd...\n";
 			print $FD "\t"."initrd /boot/$isoarch/loader/initrd\n";
 			print $FD "}\n";
@@ -2304,8 +2318,7 @@ sub createImageLiveCD {
 			print $FD "\t"."module /boot/$isoarch/loader/linux dummy";
 			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 			print $FD " splash=silent";
-			print $FD " ide=nodma apm=off acpi=off noresume selinux=0";
-			print $FD " nosmp noapic maxcpus=0 edd=off"."\n";
+			print $FD " @failsafe"."\n";
 			print $FD "\t"."echo Loading initrd...\n";
 			print $FD "\t"."module /boot/$isoarch/loader/initrd dummy\n";
 			print $FD "}\n";
@@ -2429,8 +2442,7 @@ sub createImageLiveCD {
 		print $IFD "  kernel linux"."\n";
 		print $IFD "  append initrd=initrd ramdisk_size=512000 ";
 		print $IFD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
-		print $IFD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
-		print $IFD "noapic maxcpus=0 edd=off"."\n";
+		print $IFD "@failsafe"."\n";
 	} else {
 		print $IFD "label $label"."\n";
 		print $IFD "  kernel mboot.c32"."\n";
@@ -2445,8 +2457,7 @@ sub createImageLiveCD {
 		print $IFD "  kernel mboot.c32"."\n";
 		print $IFD "  append xen.gz --- linux ramdisk_size=512000 ";
 		print $IFD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
-		print $IFD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
-		print $IFD "noapic maxcpus=0 edd=off ";
+		print $IFD "@failsafe ";
 		print $IFD "--- initrd showopts"."\n";
 	}
 	#==========================================
