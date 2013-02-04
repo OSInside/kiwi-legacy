@@ -8163,63 +8163,6 @@ sub test_getTypeNoArg {
 }
 
 #==========================================
-# test_getTypes_legacy
-#------------------------------------------
-sub test_getTypes_legacy {
-	# ...
-	# Verify proper return of getTypes_legacy method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'typeSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my @types = $xml -> getTypes_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('vmx', $types[0]->{type});
-	$this -> assert_str_equals('true', $types[0]->{primary});
-	$this -> assert_str_equals('oem', $types[1]->{type});
-	return;
-}
-
-#==========================================
-# test_getTypesUseProf_legacy
-#------------------------------------------
-sub test_getTypesUseProf_legacy {
-	# ...
-	# Verify proper return of getTypes_legacy method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'typeSettings';
-	my @patterns = qw (aTest);
-	my $xml = KIWIXML -> new(
-		$confDir, undef, \@patterns, $this->{cmdL}
-	);
-	my @types = $xml -> getTypes_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('Using profile(s): aTest', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('info', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('completed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('vmx', $types[0]->{type});
-	$this -> assert_str_equals('true', $types[0]->{primary});
-	$this -> assert_str_equals('oem', $types[1]->{type});
-	$this -> assert_str_equals('pxe', $types[2]->{type});
-	$this -> assert_str_equals('vmx', $types[3]->{type});
-	return;
-}
-
-#==========================================
 # test_getTypeSpecificPackageList_legacy
 #------------------------------------------
 sub test_getTypeSpecificPackageList_legacy {
