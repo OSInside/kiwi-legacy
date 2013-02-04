@@ -820,9 +820,22 @@ sub createISO {
 		if ((! $editBoot) && ($xml)) {
 			$editBoot = $xml -> getEditBootConfig_legacy();
 		}
-		if (($editBoot) && (-e $editBoot)) {
-			$kiwi -> info ("Calling pre bootloader install script...\n");
-			system ("cd $src && bash --norc -c $editBoot");
+		if ($editBoot) {
+			my $rootpath = $cmdL -> getConfigDir();
+			if ($rootpath) {
+				if (open my $FD, '<',"$rootpath/image/main::Prepare") {
+					my $idesc = <$FD>; close $FD;
+					if ($idesc) {
+						$editBoot = $idesc."/".$editBoot;
+					}
+				}
+			}
+			if (($editBoot) && (-e $editBoot)) {
+				$kiwi -> info ("Calling pre bootloader install script...\n");
+				$kiwi -> info ("--> $editBoot\n");
+				system ("cd $src && chmod u+x $editBoot");
+				system ("cd $src && bash --norc -c $editBoot");
+			}
 		}
 	}
 	#==========================================
@@ -873,10 +886,23 @@ sub createISO {
 		if ((! $editBoot) && ($xml)) {
 			$editBoot = $xml -> getEditBootInstall_legacy();
 		}
-		if (($editBoot) && (-e $editBoot)) {
-			$kiwi -> info ("Calling post bootloader install script...\n");
-			my @opts = ("'".$cmdln."'");
-			system ("cd $src && bash --norc -c \"$editBoot @opts\"");
+		if ($editBoot) {
+			my $rootpath = $cmdL -> getConfigDir();
+			if ($rootpath) {
+				if (open my $FD, '<',"$rootpath/image/main::Prepare") {
+					my $idesc = <$FD>; close $FD;
+					if ($idesc) {
+						$editBoot = $idesc."/".$editBoot;
+					}
+				}
+			}
+			if (($editBoot) && (-e $editBoot)) {
+				$kiwi -> info ("Calling post bootloader install script...\n");
+				$kiwi -> info ("--> $editBoot\n");
+				my @opts = ("'".$cmdln."'");
+				system ("cd $src && chmod u+x $editBoot");
+				system ("cd $src && bash --norc -c \"$editBoot @opts\"");
+			}
 		}
 	}
 	#==========================================
