@@ -170,11 +170,14 @@ sub __isSupportedArch {
 	# ---
 	my $this = shift;
 	my $arch = shift;
-	if (! $this->{supportedArch}{$arch} ) {
-		my $kiwi = $this->{kiwi};
-		$kiwi -> error ("Specified arch '$arch' is not supported");
-		$kiwi -> failed ();
-		return;
+	my @arches = split /,/smx, $arch;
+	for my $arch (@arches) {
+		if (! $this->{supportedArch}{$arch} ) {
+			my $kiwi = $this->{kiwi};
+			$kiwi -> error ("Specified arch '$arch' is not supported");
+			$kiwi -> failed ();
+			return;
+		}
 	}
 	return 1;
 }
