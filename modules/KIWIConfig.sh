@@ -33,6 +33,33 @@ for tool in setctsid klogconsole;do
 	fi
 done
 #======================================
+# baseSystemdServiceInstalled
+#--------------------------------------
+function baseSystemdServiceInstalled {
+	local service=$1
+	local sd_dirs="
+		/usr/lib/systemd/system
+		/etc/systemd/system
+		/run/systemd/system
+	"
+	local dir
+	for dir in ${sd_dirs} ; do
+		if [ -f "${dir}/$service" ];then
+			return 0
+		fi
+	done
+	test -x "/etc/init.d/${service%.service}"
+}
+
+#======================================
+# baseSystemctlCall
+#--------------------------------------
+function baseSystemdCall {
+	local service=$1; shift
+	baseSystemdServiceInstalled "$service" && \
+		systemctl "$@" "$service"
+}
+#======================================
 # suseInsertService
 #--------------------------------------
 function suseInsertService {
@@ -42,7 +69,7 @@ function suseInsertService {
 	# -----
 	local service=$1
 	if [ -f /bin/systemd ];then
-		systemctl enable $service.service
+		baseSystemdCall "$service.service" "enable"
 	else
 		if /sbin/insserv $service;then
 			echo "Service $service inserted"
@@ -64,7 +91,7 @@ function suseRemoveService {
 	# ----
 	local service=$1
 	if [ -f /bin/systemd ];then
-		systemctl disable $service.service
+		baseSystemdCall "$service.service" "disable"
 	else
 		service=/etc/init.d/$service
 		if /sbin/insserv -r $service;then
