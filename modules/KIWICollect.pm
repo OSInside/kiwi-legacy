@@ -1347,7 +1347,6 @@ sub unpackMetapackages
 
 		# regular handling: unpack, put everything from CD1..CD<n> to
 		# cdroot {m_basedir}
-		# ...
 		my $tmp = "$this->{m_basesubdir}->{$medium}/temp";
 		if(-d $tmp) {
 			qx(rm -rf $tmp);

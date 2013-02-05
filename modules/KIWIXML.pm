@@ -2082,7 +2082,7 @@ sub __convertSizeStrToMBVal {
 	# ...
 	# Convert a given size string that contains M or G into a value
 	# that is a representation in MB.
-	#
+	# ---
 	my $this    = shift;
 	my $sizeStr = shift;
 	if (! $sizeStr ) {

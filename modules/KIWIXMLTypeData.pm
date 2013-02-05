@@ -1976,7 +1976,7 @@ sub __isValidSizeUnit {
 	# ...
 	# Verify that the given unit of measure for the size is a
 	# recognized value
-	#---
+	# ---
 	my $this   = shift;
 	my $unit   = shift;
 	my $caller = shift;
