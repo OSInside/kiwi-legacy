@@ -30,13 +30,13 @@
 		<bootloader-theme>openSUSE</bootloader-theme>
 	</preferences>
 	<preferences profiles="xenFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.2" bootprofile="xen" bootkernel="xenk" bootloader="grub">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.2" bootprofile="xen" bootkernel="xenk" bootloader="grub2">
 			<machine memory="512" domain="domU">
 				<vmdisk controller="ide" id="0" device="/dev/xvda"/>
 				<vmnic interface=""/>
 			</machine>
 		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootprofile="xen" bootkernel="xenk" installiso="true" bootloader="grub">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" bootprofile="xen" bootkernel="xenk" installiso="true" bootloader="grub2">
 			<oemconfig>
 				<oem-systemsize>2048</oem-systemsize>
 				<oem-swap>true</oem-swap>
