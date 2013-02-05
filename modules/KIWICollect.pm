@@ -682,8 +682,7 @@ sub mainTask
         }
         if ($hybridmedia) {
           if(!$iso->createHybrid()) {
-            $this->logMsg("E", "Isohybrid call failed");
-            return 1;
+            $this->logMsg("W", "Isohybrid call failed");
           }
           else {
             $this->logMsg("I", "Isohybrid call successful");
