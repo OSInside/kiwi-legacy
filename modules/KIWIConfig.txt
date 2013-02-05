@@ -19,6 +19,7 @@
 	-->
 	<strip type="tools">
 		<file name="date"/>
+		<file name="dbus-uuidgen"/>
 		<file name="ifup"/>
 		<file name="isoinfo"/>
 		<file name="arch"/>

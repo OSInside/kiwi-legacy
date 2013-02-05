@@ -6553,6 +6553,12 @@ function activateImage {
 		mkdir -p /mnt/$cdDir && mount --move /$cdDir /mnt/$cdDir
 	fi
 	#======================================
+	# create dbus machine id
+	#--------------------------------------
+	if which dbus-uuidgen &>/dev/null;then
+		dbus-uuidgen > /mnt/var/lib/dbus/machine-id
+	fi
+	#======================================
 	# move device nodes
 	#--------------------------------------
 	Echo "Activating Image: [$name]"
