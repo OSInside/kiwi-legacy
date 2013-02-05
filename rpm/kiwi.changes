@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Feb  5 18:11:17 CET 2013 - adrian@suse.de
+
+- make hybrid iso call for products non-fatal
+
+-------------------------------------------------------------------
 Tue Feb  5 16:58:41 CET 2013 - ms@suse.de
 
 - netboot: following is required for (fate #314413) and (fate #314414)
