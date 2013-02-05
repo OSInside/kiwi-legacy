@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Feb  5 16:58:41 CET 2013 - ms@suse.de
+
+- netboot: following is required for (fate #314413) and (fate #314414)
+  + add support for SERVERTYPE=local for fetchFile and putFile.
+    the SERVER variable then points to a local directory
+  + use locally cached MD5 file if it has the same checksum as the
+    remote file, this is enabled by setting KIWI_LOCAL_CACHE_DIR
+    Setting of these variables will be handled in SLEPOS specific
+    hooks.
+
+-------------------------------------------------------------------
 Wed Jan 16 19:59:06 CET 2013 - ms@suse.de
 
 - fix the automatic alias generation to remove '$' from the
