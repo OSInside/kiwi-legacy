@@ -154,7 +154,7 @@ sub createFormat {
 	if (! defined $format) {
 		$kiwi -> warning ("No format for $imgtype conversion specified");
 		$kiwi -> skipped ();
-		return;
+		return $this;
 	} else {
 		my $data = qxx ("parted $image print 2>&1");
 		my $code = $? >> 8;
