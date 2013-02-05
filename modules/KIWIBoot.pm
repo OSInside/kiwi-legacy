@@ -156,14 +156,14 @@ sub new {
 	#==========================================
 	# compressed initrd used...
 	#------------------------------------------
-	if ($initrd =~ /\.gz$/) {
+	if (($initrd) && ($initrd =~ /\.gz$/)) {
 		$zipped = 1;
 	}
 	#==========================================
 	# find kernel file
 	#------------------------------------------
 	$kernel = $initrd;
-	if ($kernel =~ /gz$/) {
+	if (($kernel) && ($kernel =~ /gz$/)) {
 		$kernel =~ s/gz$/kernel/;
 	} else {
 		$kernel = $kernel.".kernel";
@@ -188,17 +188,19 @@ sub new {
 	#------------------------------------------
 	$isxen = 0;
 	$xengz = $initrd;
-	$xengz =~ s/\.gz$//;
-	$xengz =~ s/\.splash$//;
-	foreach my $xen (glob ("$xengz*xen*.gz")) {
-		$isxen = 1;
-		$xengz = $xen;
-		last;
-	}
-	if (! $isxen) {
-		my $kernel = readlink $xengz.".kernel";
-		if (($kernel) && ($kernel =~ /.*-xen$/)) {
+	if ($xengz) {
+		$xengz =~ s/\.gz$//;
+		$xengz =~ s/\.splash$//;
+		foreach my $xen (glob ("$xengz*xen*.gz")) {
 			$isxen = 1;
+			$xengz = $xen;
+			last;
+		}
+		if (! $isxen) {
+			my $kernel = readlink $xengz.".kernel";
+			if (($kernel) && ($kernel =~ /.*-xen$/)) {
+				$isxen = 1;
+			}
 		}
 	}
 	#==========================================
