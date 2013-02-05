@@ -392,6 +392,12 @@ sub new {
 	}
 	$this->{selectedType} = $this->{defaultType};
 	#==========================================
+	# Set build type given by constructor
+	#------------------------------------------
+	if ($this->{buildType}) {
+		$this -> setBuildType ($this->{buildType});
+	}
+	#==========================================
 	# Populate imageConfig with archive data from config tree
 	#------------------------------------------
 	$this -> __populateArchiveInfo();
