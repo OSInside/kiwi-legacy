@@ -4760,6 +4760,63 @@ function setupDNS {
 	fi
 }
 #======================================
+# fetchImageMD5
+#--------------------------------------
+function fetchImageMD5 {
+	# /.../
+	# download image.md5 file either from the network
+	# or from a local cache directory if specified by
+	# KIWI_LOCAL_CACHE_DIR.
+	# ----
+	local imageMD5s="image/$1-$2.md5"
+	local imageServer=$3
+	local imageBlkSize=$4
+	local error=0
+	[ -z "$imageServer" ]  && imageServer=$SERVER
+	[ -z "$imageBlkSize" ] && imageBlkSize=8192
+	#======================================
+	# Check for MD5 in the local cache
+	#--------------------------------------
+	if [ -n "$KIWI_LOCAL_CACHE_DIR" ];then
+		local cached_md5="$KIWI_LOCAL_CACHE_DIR/$imageMD5s"
+		if [ -f "$cached_md5" ];then
+			read sum_local blocks blocksize zblocks zblocksize < "$cached_md5"
+		fi
+	fi
+	#======================================
+	# Download latest MD5 from the network
+	#--------------------------------------
+	fetchFile $imageMD5s /etc/image.md5 uncomp $imageServer
+	#======================================
+	# Check results if download failed
+	#--------------------------------------
+	if test $loadCode != 0 || ! loadOK "$loadStatus"; then
+		Echo "Download of $imageMD5s failed: $loadStatus"
+		if [ -z "$sum_local" ]; then
+			Echo "Fatal: No cache copy available"
+			error=1
+		else
+			Echo "Using cache copy: $KIWI_LOCAL_CACHE_DIR/$imageMD5s"
+			cp "$KIWI_LOCAL_CACHE_DIR/$imageMD5s" /etc/image.md5
+			error=0
+		fi
+	fi
+	#======================================
+	# Check error state
+	#--------------------------------------
+	# failed MD5 download and no cache copy is fatal
+	if [ $error -eq 1 ];then
+		systemException \
+			"Failed to provide image MD5 data" \
+		"reboot"
+	fi
+	#======================================
+	# Read in provided MD5 data
+	#--------------------------------------
+	read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
+}
+
+#======================================
 # updateNeeded
 #--------------------------------------
 function updateNeeded {
@@ -4809,13 +4866,9 @@ function updateNeeded {
 		if [ -f "$versionFile" ];then
 			read installed sum2 < $versionFile
 		fi
-		imageMD5s="image/$imageName-$imageVersion.md5"
-		[ -z "$imageServer" ]  && imageServer=$SERVER
-		[ -z "$imageBlkSize" ] && imageBlkSize=8192
-		if [ ! -f /etc/image.md5 ];then
-			fetchFile $imageMD5s /etc/image.md5 uncomp $imageServer
-		fi
-		read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
+		fetchImageMD5 \
+			"$imageName" "$imageVersion"   \
+			"$imageServer" "$imageBlkSize"
 		if [ ! -z "$sum1" ];then
 			SYSTEM_MD5STATUS="$SYSTEM_MD5STATUS:$sum1"
 		else
@@ -6230,6 +6283,15 @@ function fetchFile {
 	# build download command
 	#--------------------------------------
 	case "$type" in
+		"local")
+			if test "$izip" = "compressed"; then
+				call="gzip -d < $host/$path \
+					2>$TRANSFER_ERRORS_FILE | $dump"
+			else
+				call="dd if=$host/$path bs=$imageBlkSize |\
+					$dump"
+			fi
+			;;
 		"http")
 			if test "$izip" = "compressed"; then
 				call="curl -f http://$host/$encoded_path \
@@ -6389,6 +6451,15 @@ function fetchFile {
 }
 
 #======================================
+# fetchFileLocal
+#--------------------------------------
+function fetchFileLocal {
+	# /.../
+	# ----
+	fetchFile "$1" "$2" "$3" "$KIWI_LOCAL_CACHE_DIR" "local"
+}
+
+#======================================
 # putFile
 #--------------------------------------
 function putFile {
@@ -6419,6 +6490,10 @@ function putFile {
 	fi
 	encoded_dest=$(encodeURL "$dest")
 	case "$type" in
+		"local")
+			cp -f "$path" "$host/$dest" > $TRANSFER_ERRORS_FILE 2>&1
+			return $?
+			;;
 		"http")
 			curl -f -T "$path" http://$host/$encoded_dest \
 				> $TRANSFER_ERRORS_FILE 2>&1

@@ -515,23 +515,16 @@ then
 		if test `getSystemIntegrity $count` = "fine";then
 			continue
 		fi
-		imageName="image/$imageName-$imageVersion"
-		imageMD5s="$imageName.md5"
-		[ -z "$imageServer" ]  && imageServer=$SERVER
-		[ -z "$imageBlkSize" ] && imageBlkSize=8192
+		imagePath="image/$imageName-$imageVersion"
+		IFS=$IFS_ORIG
 		while true;do
 			# /.../
 			# get image md5sum to be able to check for the size
 			# requirements if we are loading into RAM
 			# ---
-			IFS=$IFS_ORIG
-			fetchFile $imageMD5s /etc/image.md5 uncomp $imageServer
-			if test $loadCode != 0 || ! loadOK "$loadStatus"; then
-				systemException \
-					"Download of $imageMD5s failed: $loadStatus" \
-				"reboot"
-			fi
-			read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
+			fetchImageMD5 \
+				"$imageName" "$imageVersion" \
+				"$imageServer" "$imageBlkSize"
 			if ! validateSize;then
 				systemException \
 					"Not enough space available for this image" \
@@ -540,15 +533,21 @@ then
 			# /.../
 			# now load the image into the imageDevice
 			# ---
-			Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
-			fetchFile $imageName $imageDevice $imageZipped $imageServer
-			if test $loadCode != 0 || ! loadOK "$loadStatus";then
-				if [ "$imageZipped" = "compressed" ]; then
-					Echo "Download of compressed $imageName.gz failed:"
-				else
-					Echo "Download of $imageName failed:"
+			imageInfo="$imagePath [$imageDevice BS:$imageBlkSize Byte]"
+			if [ "$sum1" = "$sum_local" ] && [ -z "$sum2" ]; then
+				Echo "Using cached $imageInfo..."
+				fetchFileLocal $imagePath $imageDevice $imageZipped
+			else
+				Echo "Loading $imageInfo..."
+				fetchFile $imagePath $imageDevice $imageZipped $imageServer
+				if test $loadCode != 0 || ! loadOK "$loadStatus";then
+					if [ "$imageZipped" = "compressed" ]; then
+						Echo "Download of compressed $imageName.gz failed:"
+					else
+						Echo "Download of $imageName failed:"
+					fi
+					systemException "$loadStatus" "reboot"
 				fi
-				systemException "$loadStatus" "reboot"
 			fi
 			# /.../
 			# check the md5sum of the downloaded data records
@@ -968,11 +967,21 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 				fi
 			done
 		fi
-		if [ $cfg_copy -eq '1' ];then
+		if [ $cfg_copy -eq 1 ];then
 			Echo "Importing $cfgmsg_why configuration file: $configDest"
 			dirs=`dirname  $configDest`
 			mkdir -p /config/$dirs
-			fetchFile $configSource /config/$configDest uncomp $configServer
+			cacheConfig="$KIWI_LOCAL_CACHE_DIR/$configSource"
+			if [ -f $cacheConfig ];then
+				cacheHash=$(md5sum "$cacheConfig" | cut -f1 -d ' ')
+			fi
+			if [ -f $cacheConfig ] && [ "$cacheHash" = "$configHash" ];then
+				cp -f $cacheConfig /config/$configDest
+			else
+				fetchFile \
+					$configSource /config/$configDest \
+					uncomp $configServer
+			fi
 		fi
 	done
 	#=======================================
