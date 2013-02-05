@@ -60,6 +60,7 @@ sub new {
 		s390
 		s390x
 		x86_64
+		skipit
 	);
 	$this->{supportedArch} = \%archesSup;
 	return $this;
