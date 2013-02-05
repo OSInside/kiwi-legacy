@@ -9109,6 +9109,10 @@ sub __setMachineAttribute {
 	my $opts = $tnode -> getElementsByTagName ("machine") -> get_node(1);
 	if (! defined $opts) {
 		$opts = XML::LibXML::Element -> new ("machine");
+		my $disk = XML::LibXML::Element -> new ("vmdisk");
+		$disk -> setAttribute ("controller","scsi");
+		$disk -> setAttribute ("id","0");
+		$opts -> appendChild ($disk);
 		$newconfig = 1;
 	}
 	my $node = $opts -> getElementsByTagName ("$item");
