@@ -4467,10 +4467,13 @@ sub setupBTRFS {
 	my $device = shift;
 	my $cmdL   = $this->{cmdL};
 	my $kiwi   = $this->{kiwi};
+	my $fsopts = '';
 	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
 		@{$cmdL->getFilesystemOptions()}
 	);
-	my $fsopts = $FSopts{btrfs};
+	if ($FSopts{btrfs}) {
+		$fsopts = $FSopts{btrfs};
+	}
 	my $target = "$this->{imageDest}/$name";
 	if ($device) {
 		$target = $device;
