@@ -218,15 +218,6 @@ sub new {
 		push (@{$skip},$s);
 	}
 	#==========================================
-	# Setup autoyast clone module names
-	#------------------------------------------
-	my @autoyastCloneList = qw (
-		firewall users host kerberos language networking
-		nis ntp-client printer proxy runlevel
-		samba-client security sound suse_register
-		timezone add-on routing
-	);
-	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi}    = $kiwi;
@@ -237,7 +228,6 @@ sub new {
 	$this->{source}  = \%OSSource;
 	$this->{product} = $product;
 	$this->{mount}   = [];
-	$this->{autoyastCloneList} = \@autoyastCloneList;
 	return $this;
 }
 
@@ -1790,17 +1780,10 @@ sub setSystemOverlayFiles {
 #------------------------------------------
 sub setInitialSetup {
 	# ...
-	# During first deployment of the migrated image we will call
-	# YaST2 with the result of the yast2 clone system feature
+	# function to setup first boot calls e.g autoyast
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	#==========================================
-	# Activate YaST on initial deployment
-	#------------------------------------------	
-	if (! $this -> autoyastClone()) {
-		return;
-	}
 	return $this;
 }
 
@@ -1865,69 +1848,6 @@ sub checkBrokenLinks {
 		return $this;
 	}
 	return checkBrokenLinks ($this);
-}
-
-#==========================================
-# autoyastClone
-#------------------------------------------
-sub autoyastClone {
-	# ...
-	# call yast clone_system to backup the current system
-	# configuration information into an auto yast profile
-	# On first deployment of the appliance autoyast is 
-	# called with the created profile in order to clone
-	# the current system configuration into the appliance
-	# ---
-	my $this = shift;
-	my $dest = $this->{dest};
-	my $kiwi = $this->{kiwi};
-	my @list = @{$this->{autoyastCloneList}};
-	#==========================================
-	# check autoyast2 version
-	#==========================================
-	my $ayVersion = qxx( 'rpm -q --qf "%{VERSION}" autoyast2 2>&1' );
-	if( $? != 0 ) {
-		$kiwi -> warning("checking AutoYaST version failed");
-		$kiwi -> skipped();
-		return;
-	}
-	$ayVersion =~ /^(\d+)\.(\d+)/;
-	if( $1 < 3 && $2 < 19 ) {
-		# version is less than 2.19.x (1.xx.yy with xx >= 19 can be ignored)
-		$kiwi -> warning("AutoYaST version $ayVersion is too old for cloning");
-		$kiwi -> skipped();
-		return $this;
-	}
-	#==========================================
-	# run yast for cloning
-	#------------------------------------------
-	my $cloneList = join( ',', @list );
-	if (-e "/root/autoinst.xml") {
-		qxx ("mv /root/autoinst.xml /root/autoinst.xml.backup");
-	}
-	qxx("yast clone_system modules clone=$cloneList");
-	my $code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("AutoYaST cloning failed. $!");
-		$kiwi -> failed ();
-		return;
-	}
-	#==========================================
-	# store clone XML for use in kiwi
-	#------------------------------------------
-	qxx ("mv /root/autoinst.xml $dest/config-yast-autoyast.xml");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("failed to move /root/autoinst.xml after cloning. $!");
-		$kiwi -> failed ();
-		return;
-	}
-	if (-e "/root/autoinst.xml.backup") {
-		qxx ("mv /root/autoinst.xml.backup /root/autoinst.xml");
-	}
-	return $this;
 }
 
 #==========================================
