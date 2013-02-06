@@ -2067,12 +2067,12 @@ sub createImageLiveCD {
 		#==========================================
 		# Setup grub2 if efi live iso is requested
 		#------------------------------------------
-		my $lib = 'lib';
-		if (-d "$tmpdir/usr/lib64/grub2-efi") {
-			$lib = 'lib64';
+		my $grub = 'grub2-efi';
+		if (! -d "$tmpdir/usr/lib/$grub") {
+			$grub = 'grub2';
 		}
 		my @theme      = $sxml -> getBootTheme_legacy();
-		my $ir_modules = "$tmpdir/usr/$lib/grub2-efi/x86_64-efi";
+		my $ir_modules = "$tmpdir/usr/lib/$grub/x86_64-efi";
 		my $ir_themes  = "$tmpdir/usr/share/grub2/themes";
 		my $ir_bgnds   = "$tmpdir/usr/share/grub2/backgrounds";
 		my $ir_font    = "$tmpdir/usr/share/grub2/unicode.pf2";
@@ -2170,8 +2170,8 @@ sub createImageLiveCD {
 			$kiwi -> done();
 		} else {
 			$kiwi -> info ("Importing grub2 shim/signed efi modules");
-			my $s_shim   = "$tmpdir/usr/$lib/efi/shim.efi";
-			my $s_signed = "$tmpdir/usr/$lib/efi/grub.efi";
+			my $s_shim   = "$tmpdir/usr/lib/efi/shim.efi";
+			my $s_signed = "$tmpdir/usr/lib/efi/grub.efi";
 			if ((! -e $s_shim) || (! -e $s_signed)) {
 				$kiwi -> failed ();
 				$kiwi -> error  (
