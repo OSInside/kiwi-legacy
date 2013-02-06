@@ -1342,17 +1342,17 @@ sub init {
 	}
 	if (defined $LogPort) {
 		$kiwi -> info ("Setting log server port to: $LogPort");
-		$global -> setGlobals ("LogServerPort", $LogPort);
+		$global -> setKiwiConfigData ("LogServerPort", $LogPort);
 		$kiwi -> done ();
 	}
 	if (defined $GzipCmd) {
 		$kiwi -> info ("Setting gzip command to: $GzipCmd");
-		$global -> setGlobals ("Gzip", $GzipCmd);
+		$global -> setKiwiConfigData ("Gzip", $GzipCmd);
 		$kiwi -> done ();
 	}
 	if (defined $TargetStudio) {
 		$kiwi -> info ("Setting SuSE Studio storage creator to: $TargetStudio");
-		$global -> setGlobals ("StudioNode", $TargetStudio);
+		$global -> setKiwiConfigData ("StudioNode", $TargetStudio);
 		$kiwi -> done ();
 	}
 	if ((defined $BootVMDisk) && (! defined $BootVMSystem)) {
