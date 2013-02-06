@@ -3632,24 +3632,29 @@ function setupHybridPersistent {
 	#======================================
 	# create write partition for hybrid
 	#--------------------------------------
-	protectedDevice=$(echo $biosBootDevice | sed -e s@/dev/@@)
-	protectedDisk=$(cat /sys/block/$protectedDevice/ro)
-	if [ $protectedDisk = "0" ];then
-		createHybridPersistent $biosBootDevice
+	if [ -z "$kiwi_cowfile" ];then
+		#======================================
+		# try to create a write partition
+		#--------------------------------------
+		protectedDevice=$(echo $biosBootDevice | sed -e s@/dev/@@)
+		protectedDisk=$(cat /sys/block/$protectedDevice/ro)
+		if [ $protectedDisk = "0" ];then
+			createHybridPersistent $biosBootDevice
+		fi
+		#======================================
+		# store hybrid write partition device
+		#--------------------------------------
+		HYBRID_RW=$(ddn $biosBootDevice $HYBRID_PERSISTENT_PART)
+	else
+		#======================================
+		# use given cow device
+		#--------------------------------------
+		createCustomHybridPersistent
+		#======================================
+		# store hybrid write partition device
+		#--------------------------------------
+		HYBRID_RW=$kiwi_cowdevice
 	fi
-	#======================================
-	# store hybrid write partition device
-	#--------------------------------------
-	HYBRID_RW=$(ddn $biosBootDevice $HYBRID_PERSISTENT_PART)
-	# /.../
-	# using a loop device is required if HYBRID_RW points
-	# to the entire disk and not only to a partition. In that
-	# case the kernel would hold a global busy lock on the
-	# disk and all its partitions. It depends on what isohybrid
-	# wrote into the iso header whether this workaround is
-	# required or not. At the moment it's disabled
-	# ----
-	# HYBRID_RW=$(losetup -f --show $HYBRID_RW)
 	export HYBRID_RW
 }
 #======================================
@@ -7481,6 +7486,56 @@ function runInteractive {
 	return 0
 }
 #======================================
+# createCustomHybridPersistent
+#--------------------------------------
+function createCustomHybridPersistent {
+	# /.../
+	# import the write space for the hybrid according to
+	# the information given by kiwi_cowfile
+	# ----
+	#======================================
+	# check for custom cow location
+	#--------------------------------------
+	if [ ! -z "$kiwi_cowfile" ];then
+		return
+	fi
+	Echo "Using custom cow file: $kiwi_cowfile"
+	#======================================
+	# got custom cow location
+	#--------------------------------------
+	kiwi_cowdevice=$(echo $kiwi_cowfile | cut -f1 -d:)
+	kiwi_cowsystem=$(echo $kiwi_cowfile | cut -f2 -d:)
+	waitForStorageDevice $kiwi_cowdevice
+	#======================================
+	# mount cow device
+	#--------------------------------------
+	mkdir /cow
+	if ! mount $kiwi_cowdevice /cow;then
+		systemException \
+			"Failed to mount cow device !" \
+		"reboot"
+	fi
+	#======================================
+	# does the cow file exist
+	#--------------------------------------
+	if [ ! -f /cow/$kiwi_cowsystem ];then
+		Echo "Can't find cow file on write partition... deactivated"
+		unset kiwi_hybridpersistent
+		umount /cow
+		rmdir  /cow
+		return
+	fi
+	#======================================
+	# loop setup cow space
+	#--------------------------------------
+	kiwi_cowdevice=$(losetup -f --show /cow/$kiwi_cowsystem)
+	if [ ! -e $kiwi_cowdevice ];then
+		systemException \
+			"Failed to loop setup cow file !" \
+		"reboot"
+	fi
+}
+#======================================
 # createHybridPersistent
 #--------------------------------------
 function createHybridPersistent {
@@ -7496,6 +7551,12 @@ function createHybridPersistent {
 	local rwid=$(blkid $rwdev -s TYPE -o value)
 	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
 	rm -f $input
+	#======================================
+	# check for custom cow location
+	#--------------------------------------
+	if [ ! -z "$kiwi_cowfile" ];then
+		return
+	fi
 	#======================================
 	# check persistent write partition
 	#--------------------------------------
