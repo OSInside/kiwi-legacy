@@ -951,7 +951,7 @@ sub setTemplate {
 	#==========================================
 	# <description>
 	#------------------------------------------
-	print $FD '<image schemaversion="5.3" ';
+	print $FD '<image schemaversion="5.6" ';
 	print $FD 'name="suse-migration-'.$product.'">'."\n";
 	print $FD "\t".'<description type="system">'."\n";
 	print $FD "\t\t".'<author>***AUTHOR***</author>'."\n";
