@@ -655,6 +655,12 @@ sub __xmlSetup {
 		if (! $res) {
 			return;
 		}
+		$xml -> setRepository_legacy (
+			$replRepo{repositoryType},
+			$replRepo{repository},
+			$replRepo{repositoryAlias},
+			$replRepo{respositoryPriority}
+		);
 	}
 	if ($this -> {addlRepos}) {
 		my %addlRepos = %{$this -> {addlRepos}};
