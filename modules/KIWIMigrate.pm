@@ -1478,6 +1478,11 @@ sub setSystemOverlayFiles {
 				my $name = basename $base;
 				my $dirn = dirname  $base;
 				$dirn = abs_path ("/$dirn");
+				if ($dirn) {
+					$base = "$dirn/$name";
+				} else {
+					$base = "/$name";
+				}
 				$base = "$dirn/$name";
 				$base =~ s/\/+/\//g;
 				$base =~ s/^\///;
@@ -1489,7 +1494,11 @@ sub setSystemOverlayFiles {
 				my $name = basename $base;
 				my $dirn = dirname  $base;
 				$dirn = abs_path ("/$dirn");
-				$base = "$dirn/$name";
+				if ($dirn) {
+					$base = "$dirn/$name";
+				} else {
+					$base = "/$name";
+				}
 				$base =~ s/\/+/\//g;
 				$base =~ s/^\///;
 				next if $base eq './';
@@ -1534,7 +1543,7 @@ sub setSystemOverlayFiles {
 					$ok = 0; last;
 				}
 			}
-			if ($ok) {
+			if (($ok) && (-d $dir)) {
 				push @packaged_dirs_new,$dir;
 			}
 		}
