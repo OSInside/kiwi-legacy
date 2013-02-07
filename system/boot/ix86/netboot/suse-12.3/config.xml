@@ -214,6 +214,7 @@
 		<package name="glibc-locale"/>
 		<package name="rsync"/>
 		<package name="timezone"/>
+		<package name="module-init-tools"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,xen">
 		<package name="cracklib-dict-full"/>
