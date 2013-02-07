@@ -2611,14 +2611,12 @@ sub createImageLiveCD {
 	# Turn ISO into hybrid if requested
 	#------------------------------------------
 	if ($hybrid) {
-		$kiwi -> info ("Setting up hybrid ISO...");
+		$kiwi -> info ("Setting up hybrid ISO...\n");
 		if (! $isolinux -> createHybrid ($this->{mbrid})) {
-			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to create hybrid ISO image");
 			$kiwi -> failed ();
 			return;
 		}
-		$kiwi -> done();
 	}
 	#==========================================
 	# tag ISO image with tagmedia

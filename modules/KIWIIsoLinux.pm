@@ -1055,6 +1055,11 @@ sub createHybrid {
 	my $partOpt   = $optNames{'partok'};
 	my $uefiOpt   = $optNames{'uefi'};
 	my $offset    = 64;
+	if (($firmware eq 'efi') && (! $uefiOpt)) {
+		$kiwi -> warning ("installed isohybrid does not support EFI");
+		$kiwi -> skipped ();
+		$firmware = 'bios';
+	}
 	if ($firmware eq 'efi') {
 		$offset = $this->{efi_offset};
 	}
