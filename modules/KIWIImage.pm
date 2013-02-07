@@ -2149,6 +2149,17 @@ sub createImageLiveCD {
 		#------------------------------------------
 		if ($firmware eq "efi") {
 			$kiwi -> info ("Creating grub2 efi boot image");
+			my $locator = KIWILocator -> new();
+			my $grub2_mkimage = $locator -> getExecPath ("grub2-efi-mkimage");
+			if (! $grub2_mkimage) {
+				$grub2_mkimage = $locator -> getExecPath ("grub2-mkimage");
+			}
+			if (! $grub2_mkimage) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Can't find grub2 mkimage tool");
+				$kiwi -> failed ();
+				return;
+			}
 			my $core    = "$CD/efi/boot/bootx64.efi";
 			my @modules = (
 				'fat','ext2','part_gpt','efi_gop','iso9660','chain',
@@ -2158,7 +2169,7 @@ sub createImageLiveCD {
 			);
 			my $fo = 'x86_64-efi';
 			$status = qxx (
-				"grub2-efi-mkimage -O $fo -o $core -c $bootefi @modules 2>&1"
+				"$grub2_mkimage -O $fo -o $core -c $bootefi @modules 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
