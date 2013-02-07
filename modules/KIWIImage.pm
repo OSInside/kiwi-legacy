@@ -2181,8 +2181,12 @@ sub createImageLiveCD {
 			$kiwi -> done();
 		} else {
 			$kiwi -> info ("Importing grub2 shim/signed efi modules");
-			my $s_shim   = "$tmpdir/usr/lib/efi/shim.efi";
-			my $s_signed = "$tmpdir/usr/lib/efi/grub.efi";
+			my $lib = 'lib';
+			if ( -d "$tmpdir/usr/lib64" ) {
+				$lib = 'lib64';
+			}
+			my $s_shim   = "$tmpdir/usr/$lib/efi/shim.efi";
+			my $s_signed = "$tmpdir/usr/$lib/efi/grub.efi";
 			if ((! -e $s_shim) || (! -e $s_signed)) {
 				$kiwi -> failed ();
 				$kiwi -> error  (

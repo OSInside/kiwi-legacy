@@ -3294,6 +3294,7 @@ sub setupBootLoaderStages {
 		my %stages   = ();
 		my $test     = "cat $initrd";
 		my $grub     = 'grub2-efi';
+		my $lib      = 'lib';
 		if ($zipped) {
 			$test = $unzip;
 		}
@@ -3301,6 +3302,11 @@ sub setupBootLoaderStages {
 		$result = $? >> 8;
 		if ($result != 0) {
 			$grub = 'grub2';
+		}
+		$status = qxx ("$test | cpio -it | grep -q lib64/efi 2>&1");
+		$result = $? >> 8;
+		if ($result == 0) {
+			$lib = 'lib64';
 		}
 		#==========================================
 		# boot id in grub2 context
@@ -3321,9 +3327,9 @@ sub setupBootLoaderStages {
 			$stages{efi}{stageDST} = "/boot/grub2-efi/$efipc";
 		}
 		if ($firmware eq "uefi") {
-			$stages{efi}{data}   = "'usr/lib/efi/*'";
-			$stages{efi}{shim}   = "usr/lib/efi/shim.efi";
-			$stages{efi}{signed} = "usr/lib/efi/grub.efi";
+			$stages{efi}{data}   = "'usr/$lib/efi/*'";
+			$stages{efi}{shim}   = "usr/$lib/efi/shim.efi";
+			$stages{efi}{signed} = "usr/$lib/efi/grub.efi";
 		}
 		#==========================================
 		# Boot directories
