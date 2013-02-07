@@ -161,6 +161,7 @@ sub new {
 		'\/usr\/src\/',                 # no sources
 		'\/spool',                      # no spool directories
 		'^\/dev\/',                     # no device node files
+		'^\/run\/',                     # no udev run files
 		'\/usr\/X11R6\/',               # no depreciated dirs
 		'\/tmp',                        # no /tmp data
 		'\/boot\/',                     # no /boot data
@@ -387,18 +388,10 @@ sub createTreeLayout {
 	# store JSON data
 	#------------------------------------------
 	$kiwi -> info ("Storing D3 data stream...");
-	my $FD = FileHandle -> new();
-	if (! $FD -> open (">$dest/files.html")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create files layout: $!");
-		$kiwi -> failed ();
-		return;
-	}
 	my $json = JSON->new->allow_nonref;
 	my $text = $json->pretty->encode( $tree );
-	print $FD $text;
-	$FD -> close();
 	$kiwi -> done();
+	$this->{jsontree} = $text;
 	return $this;
 }
 
@@ -436,32 +429,40 @@ sub createReport {
 		$kiwi -> failed ();
 		return;
 	}
+	my $title = "Migration report";
 	print $FD '<!DOCTYPE html>'."\n";
 	print $FD '<html>'."\n";
-	print $FD "\t".'<head>'."\n";
-	print $FD "\t\t".'<title>Migration report</title>'."\n";
-	print $FD "\t\t".'<!--[if lt IE 9]>'."\n";
-	print $FD "\t\t".'<script src="';
-	print $FD 'http://html5shiv.googlecode.com/svn/trunk/html5.js">';
-	print $FD '</script>'."\n";
-	print $FD "\t\t".'<![endif]-->'."\n";
-	print $FD "\t\t".'<link rel="stylesheet" type="text/css" ';
-	print $FD 'href=".report/css/kiwi.css">'."\n";
-	print $FD "\t\t".'<script type="text/javascript" ';
-	print $FD 'src=".report/js/jquery.min.js">';
-	print $FD '</script>'."\n";
-	print $FD "\t\t".'<script type="text/javascript" ';
-	print $FD 'src=".report/js/data.js">';
-	print $FD '</script>'."\n";
-	print $FD "\t\t".'<script type="text/javascript" ';
-	print $FD 'src=".report/js/kiwi.js">';
-	print $FD '</script>'."\n";
-	print $FD "\t".'</head>'."\n";
+	print $FD '<head>'."\n";
+	print $FD "<meta http-equiv=\"Content-Type\"";
+	print $FD " content=\"text/html;charset=utf-8\"/>"."\n";
+	print $FD '<title>'.$title.'</title>'."\n";
+	#==========================================
+	# CSS
+	#------------------------------------------
+	print $FD '<link type="text/css" rel="stylesheet"';
+	print $FD ' href=".report/d3/style.css"/>'."\n";
+	print $FD '<link type="text/css" rel="stylesheet"';
+	print $FD ' href=".report/d3/kiwi.css">'."\n";
+	#==========================================
+	# Java Script
+	#------------------------------------------
+	print $FD '<script type="text/javascript"';
+	print $FD ' src=".report/d3/d3.js"></script>'."\n";
+	print $FD '<script type="text/javascript"';
+	print $FD ' src=".report/d3/d3.layout.js"></script>'."\n";
+	print $FD '<script type="text/javascript"';
+	print $FD ' src=".report/d3/kiwi.js"></script>'."\n";
+	print $FD '</head>'."\n";
+	#==========================================
+	# Title
+	#------------------------------------------
 	print $FD '<body class="files">'."\n";
 	print $FD '<div class="headerwrap">'."\n";
-	print $FD "\t";
-	print $FD '<div class="container"><h1>Migration report</h1></div>'."\n";
+	print $FD '<div class="container"><h1>'.$title.'</h1></div>'."\n";
 	print $FD '</div>'."\n";
+	#==========================================
+	# Chapters
+	#------------------------------------------
 	print $FD '<div class="container">'."\n";
 	#==========================================
 	# Kernel version report
@@ -737,7 +738,7 @@ sub createReport {
 	if ($nopackage) {
 		print $FD '<h1>Overlay files</h1>'."\n";
 		print $FD '<p>'."\n";
-		print $FD 'Behind the current overlay files directory you will ';
+		print $FD 'Below the current overlay files directory you will ';
 		print $FD 'find the packaged but modified files and also a ';
 		print $FD 'collection of files which seems to be required for ';
 		print $FD 'this system. Please check the current tree ';
@@ -750,22 +751,67 @@ sub createReport {
 
 		print $FD '<h1>Unpackaged files</h1>'."\n";
 		print $FD '<p>'."\n";
-		print $FD 'Behind the current custom files directory you will ';
-		print $FD 'find files/directories which are not part of any packages.';
+		print $FD 'Below the current custom files directory you will ';
+		print $FD 'find files/directories which are not part of any package.';
 		print $FD 'For binary files, including executables and libraries, ';
 		print $FD 'you should try to find and include a package that ';
 		print $FD 'provides them. If there are no package providers for ';
 		print $FD 'this file, you can leave them as overlay files, but it ';
 		print $FD 'may cause problems like broken dependencies later. ';
 		print $FD 'After that, you should look for personal files like ';
-		print $FD 'pictures, movies, etc. and remove them if ';
-		print $FD 'they can be easily restored in the later image. ';
-		print $FD 'Move all of the files you want to be part of the ';
-		print $FD 'image into the '.$dest.'/root directory.'."\n";
+		print $FD 'pictures, movies, etc. and decide to either skip them ';
+		print $FD 'if they can be easily restored later or store them in ';
+		print $FD 'the overlay files tree but keep in mind that the size ';
+		print $FD 'of the image could become big. Move all of the files you ';
+		print $FD 'want to be part of the image into the '.$dest.'/root ';
+		print $FD 'directory. you can browse the tree on the filesystem ';
+		print $FD 'level here:'."\n";
 		print $FD '</p>'."\n";
 		print $FD '<div>'."\n";
 		print $FD 'See <a href="'.$dest.'/custom">Custom directory</a>.'."\n";
 		print $FD '</div>'."\n";
+		if ($this->{jsontree}) {
+			print $FD '<p>'."\n";
+			print $FD 'The visualisation of the data below should ';
+			print $FD 'make it easier for you to browse the information.'."\n";
+			print $FD '</p>'."\n";
+			print $FD '<div id="body" class="container">'."\n";
+			print $FD '<script type="text/javascript">'."\n";
+			print $FD 'var m = [20, 120, 20, 120],'."\n";
+			print $FD 'w = 1280 - m[1] - m[3],'."\n";
+			print $FD "\t".'h = 800  - m[0] - m[2],'."\n";
+			print $FD "\t".'i = 0,'."\n";
+			print $FD "\t".'root;'."\n";
+			print $FD 'var tree = d3.layout.tree()'."\n";
+			print $FD "\t".'.size([h, w]);'."\n";
+			print $FD 'var diagonal = d3.svg.diagonal()'."\n";
+			print $FD "\t".'.projection(function(d) {return [d.y,d.x];});'."\n";
+			print $FD 'var vis = d3.select("#body").append("svg:svg")'."\n";
+			print $FD "\t".'.attr("width", w + m[1] + m[3])'."\n";
+			print $FD "\t".'.attr("height", h + m[0] + m[2])'."\n";
+			print $FD "\t".'.append("svg:g")'."\n";
+			print $FD "\t".'.attr("transform","translate("+m[3]+","+m[0]+")");';
+			print $FD "\n";
+			print $FD 'd3.inplace = function(callback) {'."\n";
+			print $FD "\t".'var myJSONObject = '.$this->{jsontree}.';'."\n";
+			print $FD "\t".'callback(myJSONObject);'."\n";
+			print $FD '};'."\n";
+			print $FD 'd3.inplace(function(json) {'."\n";
+			print $FD "\t".'root = json;'."\n";
+			print $FD "\t".'root.x0 = h / 2;'."\n";
+			print $FD "\t".'root.y0 = 0;'."\n";
+			print $FD "\t".'function toggleAll(d) {'."\n";
+			print $FD "\t\t".'if (d.children) {'."\n";
+			print $FD "\t\t".'d.children.forEach(toggleAll);'."\n";
+			print $FD "\t\t".'toggle(d);'."\n";
+			print $FD "\t\t".'}'."\n";
+			print $FD "\t".'}'."\n";
+			print $FD "\t".'root.children.forEach(toggleAll);'."\n";
+			print $FD "\t".'update(root);'."\n";
+			print $FD '});'."\n";
+			print $FD '</script>'."\n";
+			print $FD '</div>'."\n";
+		}
 	}
 	print $FD '</div>'."\n";
 	print $FD '<div class="footer container">'."\n";
