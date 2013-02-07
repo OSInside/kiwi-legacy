@@ -3705,7 +3705,6 @@ sub setupBootLoaderStages {
 	#==========================================
 	# more boot managers to come...
 	#------------------------------------------
-	# ...
 	return $this;
 }
 
@@ -4806,7 +4805,6 @@ sub setupBootLoaderConfiguration {
 	#==========================================
 	# more boot managers to come...
 	#------------------------------------------
-	# ...
 	#==========================================
 	# Check for edit boot config
 	#------------------------------------------
@@ -5383,7 +5381,6 @@ sub installBootLoader {
 	#==========================================
 	# more boot managers to come...
 	#------------------------------------------
-	# ...
 	#==========================================
 	# Check for edit boot install
 	#------------------------------------------
@@ -6008,7 +6005,7 @@ sub setMD {
 #------------------------------------------
 sub setVolumeGroup {
 	# ...
-	# create volume group and required logical 
+	# create volume group and required logical
 	# volumes. The function returns a new device map
 	# including the volume device names
 	# ---
@@ -6211,7 +6208,7 @@ sub luksClose {
 sub umountDevice {
 	# ...
 	# umount all mounted filesystems from the given
-	# storage device. The functions searches the 
+	# storage device. The functions searches the
 	# /proc/mounts table and umounts all corresponding
 	# mount entries
 	# ----
