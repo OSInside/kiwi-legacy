@@ -2118,7 +2118,7 @@ sub createImageLiveCD {
 		#==========================================
 		# Copy modules/fonts/themes on CD
 		#------------------------------------------
-		qxx ("mv $ir_modules/* $cd_modules 2>&1");
+		qxx ("cp $ir_modules/* $cd_modules 2>&1");
 		if (-d $ir_themes) {
 			qxx ("mv $ir_themes $cd_loader 2>&1");
 		}
@@ -2185,28 +2185,48 @@ sub createImageLiveCD {
 			if ( -d "$tmpdir/usr/lib64" ) {
 				$lib = 'lib64';
 			}
-			my $s_shim   = "$tmpdir/usr/$lib/efi/shim.efi";
-			my $s_signed = "$tmpdir/usr/$lib/efi/grub.efi";
-			if ((! -e $s_shim) || (! -e $s_signed)) {
+			my $s_shim_ms   = "$tmpdir/usr/$lib/efi/shim.efi";
+			my $s_shim_suse = "$tmpdir/usr/$lib/efi/shim-opensuse.efi";
+			my $s_signed    = "$tmpdir/usr/$lib/efi/grub.efi";
+			if ((! -e $s_shim_ms) && (! -e $s_shim_suse)) {
+				my $s_shim = $s_shim_ms;
+				if (-e $s_shim) {
+					$s_shim = $s_shim_suse;
+				}
 				$kiwi -> failed ();
 				$kiwi -> error  (
-					"Can't find grub2 $s_shim and/or $s_signed in initrd");
+					"Can't find $s_shim in initrd");
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx ("mv $s_shim $CD/efi/boot/bootx64.efi 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
+			if (! -e $s_signed) {
 				$kiwi -> failed ();
-				$kiwi -> error ("Failed to move shim module: $status");
+				$kiwi -> error  (
+					"Can't find grub2 $s_signed in initrd");
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx ("mv $s_signed $CD/efi/boot/grub.efi 2>&1");
+			$status = qxx (
+				"cp $s_shim_ms $CD/efi/boot/bootx64.efi 2>&1"
+			);
+			$result = $? >> 8;
+			if ($result != 0) {
+				$status = qxx (
+					"cp $s_shim_suse $CD/efi/boot/bootx64.efi 2>&1"
+				);
+				$result = $? >> 8;
+			}
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("Failed to copy shim module: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$status = qxx ("cp $s_signed $CD/efi/boot/grub.efi 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error ("Failed to move signed module: $status");
+				$kiwi -> error ("Failed to copy signed module: $status");
 				$kiwi -> failed ();
 				return;
 			}
