@@ -446,6 +446,11 @@ Recommends:     lxc
 %if 0%{?suse_version} > 1210
 Recommends:     grub2-branding-openSUSE
 %endif
+%ifarch x86_64
+%if 0%{?suse_version} > 1220
+Recommends:     shim
+%endif
+%endif
 %endif
 
 %description -n kiwi-media-requires
