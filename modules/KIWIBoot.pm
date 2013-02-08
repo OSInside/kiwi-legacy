@@ -3327,9 +3327,10 @@ sub setupBootLoaderStages {
 			$stages{efi}{stageDST} = "/boot/grub2-efi/$efipc";
 		}
 		if ($firmware eq "uefi") {
-			$stages{efi}{data}   = "'usr/$lib/efi/*'";
-			$stages{efi}{shim}   = "usr/$lib/efi/shim.efi";
-			$stages{efi}{signed} = "usr/$lib/efi/grub.efi";
+			$stages{efi}{data}      = "'usr/$lib/efi/*'";
+			$stages{efi}{shim_ms}   = "usr/$lib/efi/shim.efi";
+			$stages{efi}{shim_suse} = "usr/$lib/efi/shim-opensuse.efi";
+			$stages{efi}{signed}    = "usr/$lib/efi/grub.efi";
 		}
 		#==========================================
 		# Boot directories
@@ -3412,7 +3413,7 @@ sub setupBootLoaderStages {
 			my $stageT = $stages{$stage}{stageDST};
 			if (glob($tmpdir.$stageD.'/*')) {
 				$status = qxx (
-					'mv '.$tmpdir.$stageD.'/* '.$tmpdir.$stageT.' 2>&1'
+					'cp '.$tmpdir.$stageD.'/* '.$tmpdir.$stageT.' 2>&1'
 				);
 			} else {
 				$kiwi -> skipped ();
@@ -3511,9 +3512,10 @@ sub setupBootLoaderStages {
 		#------------------------------------------
 		if ($firmware eq "uefi") {
 			$kiwi -> info ("Importing grub2 shim/signed efi modules");
-			my $s_data   = $stages{efi}{data};
-			my $s_shim   = $stages{efi}{shim};
-			my $s_signed = $stages{efi}{signed};
+			my $s_data      = $stages{efi}{data};
+			my $s_shim_ms   = $stages{efi}{shim_ms};
+			my $s_shim_suse = $stages{efi}{shim_suse};
+			my $s_signed    = $stages{efi}{signed};
 			$result = 0;
 			if ($zipped) {
 				$status= qxx (
@@ -3524,32 +3526,46 @@ sub setupBootLoaderStages {
 					"cat $initrd | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
 				);
 			}
-			if ((! -e "$tmpdir/$s_shim") || (! -e "$tmpdir/$s_signed")) {
-				$result = 1;
-			}
-			if ($result != 0) {
+			if ((! -e "$tmpdir/$s_shim_ms") && (! -e "$tmpdir/$s_shim_suse")) {
+				my $s_shim = "$tmpdir/$s_shim_ms";
+				if (-e $s_shim) {
+					$s_shim = "$tmpdir/$s_shim_suse"
+				}
 				$kiwi -> failed ();
 				$kiwi -> error  (
-					"Can't find grub2 $s_shim and/or $s_signed in initrd");
+					"Can't find shim $s_shim in initrd");
+				$kiwi -> failed ();
+				return;
+			}
+			if (! -e "$tmpdir/$s_signed") {
+				$kiwi -> failed ();
+				$kiwi -> error  (
+					"Can't find grub2 $s_signed in initrd");
 				$kiwi -> failed ();
 				return;
 			}
 			$status = qxx (
-				"mv $tmpdir/$s_shim $tmpdir/efi/boot/bootx64.efi 2>&1"
+				"cp $tmpdir/$s_shim_ms $tmpdir/efi/boot/bootx64.efi 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
+				$status = qxx (
+					"cp $tmpdir/$s_shim_suse $tmpdir/efi/boot/bootx64.efi 2>&1"
+				);
+				$result = $? >> 8;
+			}
+			if ($result != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error ("Failed to move shim module: $status");
+				$kiwi -> error ("Failed to copy shim module: $status");
 				$kiwi -> failed ();
 				return;
 			}
 			$status = qxx (
-				"mv $tmpdir/$s_signed $tmpdir/efi/boot/grub.efi 2>&1");
+				"cp $tmpdir/$s_signed $tmpdir/efi/boot/grub.efi 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error ("Failed to move signed module: $status");
+				$kiwi -> error ("Failed to copy signed module: $status");
 				$kiwi -> failed ();
 				return;
 			}
