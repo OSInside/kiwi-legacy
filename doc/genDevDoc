@@ -26,10 +26,11 @@
 use strict;
 use warnings;
 
+use Carp;
 use Data::Dumper;
-use FileHandle;
 use File::Slurp;
 use File::Spec;
+use gv;
 use List::Util qw /first/;
 use PPI;
 
@@ -63,14 +64,14 @@ sub addMethodInfo {
 #    print "DBG: working for: $modName\n";
 	for my $ln (@{$content}) {
 		$lineNo += 1;
-		if ($ln =~ /^sub\s/) {
-			my ($keyword, $name, $curly) = split / /, $ln;
+		if ($ln =~ /^sub\s/mx) {
+			my ($keyword, $name, $curly) = split /\s/mx, $ln;
 #            print "\tDBG found sub: $name\n";
 			if (! $curly) {
 				chomp $name;
 			}
 			$methName = $name;
-			if (! ($methName =~ /^new$|^instance$/)) {
+			if (! ($methName =~ /^new$|^instance$/mx)) {
 #                print "\t\tDBG: not new or instance\n";
 				if ($kiwiMethodNames{$methName}) {
 					$duplicteName{$methName} = 1;
@@ -83,7 +84,7 @@ sub addMethodInfo {
 			# Potential 1 line method
 			if ($ln =~ /}/msx) {
 #                print "\t\tDBG potential one liner\n";
-				$ln =~ s/\s//g;
+				$ln =~ s/\s//gmx;
 				my $curlyCnt = 0;
 				my $tok = PPI::Tokenizer->new(\$ln);
 				while ( my $t = $tok->get_token() ) {
@@ -96,7 +97,7 @@ sub addMethodInfo {
 				}
 				if ($curlyCnt == 0) {
 					my $access;
-					if ($methName =~ /^_|^__/) {
+					if ($methName =~ /^_|^__/mx) {
 						$access = 'private';
 					} else {
 						$access = 'public';
@@ -113,17 +114,17 @@ sub addMethodInfo {
 			next;
 		}
 		my $access;
-		if ($methName && $methName =~ /^_|^__/) {
+		if ($methName && $methName =~ /^_|^__/mx) {
 			$access = 'private';
 		} else {
 			$access = 'public';
 		}
-		if ($inMethodContext && !$docEnd && $ln =~ /# \.\.\./) {
+		if ($inMethodContext && !$docEnd && $ln =~ /\#\s\.\.\./mx) {
 #            print "\t\tDBG: collect begin; skip line\n";
 			$collectDoc = 1;
 			next;
 		}
-		if ($collectDoc && $ln =~ /# ---/) {
+		if ($collectDoc && $ln =~ /\#\s---/mx) {
 #            print "\t\tDBG: collect end\n";
 			$classInfo{$access}{$methName}{description} = $methodDoc;
 			$classInfo{$access}{$methName}{definedOn} = $defOnLine;
@@ -135,11 +136,11 @@ sub addMethodInfo {
 		if ($collectDoc) {
 #            print "\t\tDBG: collect: $ln\n";
 			$nothingCollected = 0;
-			$ln =~ s/#//;
-			$ln =~ s/\t//;
+			$ln =~ s/\#//mx;
+			$ln =~ s/\t//mx;
 			$methodDoc .= $ln;
 		}
-		if ($inMethodContext && $nothingCollected && $ln =~ /^}/) {
+		if ($inMethodContext && $nothingCollected && $ln =~ /^}/mx) {
 #            print "\t\tDBG: method end no doc: $methName\n";
 			$classInfo{$access}{$methName}{description} = 'Missing';
 			$classInfo{$access}{$methName}{definedOn} = $defOnLine;
@@ -165,20 +166,20 @@ sub addCtorCrossReferences {
 LINE:
 	for my $ln (@{$content}) {
 		$lineNo += 1;
-		if ($ln =~ /^sub\s/) {
-			my ($keyword, $name, $curly) = split /\s/, $ln;
+		if ($ln =~ /^sub\s/mx) {
+			my ($keyword, $name, $curly) = split /\s/mx, $ln;
 			$methName = $name;
 			next LINE;
 		}
-		if ($ln =~ /\snew\s|>new|\snew|instance/ && $ln =~ /KIWI/) {
-			$ln =~ s/\s//g;
+		if ($ln =~ /\snew\s|>new|\snew|instance/mx && $ln =~ /KIWI/) {
+			$ln =~ s/\s//gmx;
 			my $tok = PPI::Tokenizer->new(\$ln);
 			my $kObj;
 			while ( my $t = $tok->get_token() ) {
 				if ($t =~ /^\#/msx) {
 					next LINE;
 				}
-				if ($t =~ /^KIWI/) {
+				if ($t =~ /^KIWI/mx) {
 					$kObj = $t;
 				}
 			}
@@ -237,13 +238,13 @@ LINE:
 	for my $ln (@{$content}) {
 		$lineNo += 1;
 		my $cln = $ln;
-		$cln =~ s/\s//g;
+		$cln =~ s/\s//gmx;
 		my $tok = PPI::Tokenizer->new(\$cln);
 		while ( my $t = $tok->get_token() ) {
-			if ($t =~ /^\#/) {
+			if ($t =~ /^\#/mx) {
 				next LINE;
 			}
-			if ($t =~ /^sub$/) {
+			if ($t =~ /^sub$/mx) {
 				$nextMethName = 1;
 			}
 			if ($nextMethName) {
@@ -274,18 +275,83 @@ sub generateDependencyData {
 	my $content = shift;
 	my @dependencies;
 	for my $ln (@{$content}) {
-		$ln =~ s/\s//g;
+		$ln =~ s/\s//gmx;
 		my $tok = PPI::Tokenizer->new(\$ln);
 		my @tokens = @{$tok->all_tokens()};
-		if ($tokens[0] && $tokens[0] =~ /^use|^require/) {
+		if ($tokens[0] && $tokens[0] =~ /^use|^require/mx) {
 			for my $token (@tokens) {
-				if ($token =~ /.*(KIWI\w+).*/) {
+				if ($token =~ /.*(KIWI\w+).*/mx) {
 					push @dependencies, $1;
 				}
 			}
 		}
 	}
 	$dependencyMap{$modName} = \@dependencies;
+	return;
+}
+
+#==========================================
+# generateDependencyGraph
+#------------------------------------------
+sub generateDependencyGraph {
+	# ...
+	# Create a DAG from the dependency data
+	# ---
+	if (! -d 'devDocs') {
+		mkdir 'devDocs';
+	}
+	my $graph = gv::graph('KIWI Module Dependencies');
+	gv::setv($graph, 'concentrate', 'true');
+	my %nodeIDmap;
+	# Add all the nodes
+	for my $modName (keys %dependencyMap) {
+		my $handleID = gv::node($graph, $modName);
+		$nodeIDmap{$modName} = $handleID;
+	}
+	# Add the edges
+	for my $modName (keys %dependencyMap) {
+		my @dependencies = @{$dependencyMap{$modName}};
+		my $headNd = $nodeIDmap{$modName};
+		for my $depMod (@dependencies) {
+			my $edge = gv::edge($nodeIDmap{$depMod}, $headNd);
+			gv::setv($edge, 'arrowhead', 'open');
+			gv::setv($edge, 'arrowsize', '2');
+		}
+	}
+	gv::layout($graph, 'dot');
+	gv::render($graph, 'svg', 'images/moduleDAG.svg');
+	return;
+}
+
+#==========================================
+# generateGraphPage
+#------------------------------------------
+sub generateGraphPage {
+	# ...
+	# Generate HTML to show the dependency graph
+	# ---
+	if (! -d 'images') {
+		mkdir 'devDocs';
+	}
+	my $page = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
+		. 'Transitional//EN">' . "\n"
+		. '<meta http-equiv="Content-type" '
+		. 'content="text/html;charset=UTF-8">' . "\n"
+		. '<html>' . "\n"
+		. '<head>' . "\n"
+		. '<title>KIWI Module Dependencies</title>' . "\n"
+		. '</head>' . "\n"
+		. '<body text="#000000" bgcolor="#E8E8FF" link="#3333FF" '
+		. 'vlink="#663366" alink="#FF0000">' . "\n"
+		. '<center><h1>KIWI Module Dependencies</h1></center>' . "\n"
+		. '<p>' . "\n"
+		. '<img SRC="../images/moduleDAG.svg"/>';
+	my $status = open( my $PAGE, '>', 'devDocs/graph.html');
+	if (! $status) {
+		croak('Could not open devDocs/graph.html');
+	}
+	print $PAGE $page;
+	close $PAGE;
 	return;
 }
 
@@ -299,7 +365,10 @@ sub generateIndexPage {
 	if (! -d 'devDocs') {
 		mkdir 'devDocs';
 	}
-	my $index = '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">' . "\n"
+	my $index = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
+		. 'Transitional//EN">' . "\n"
+		. '<meta http-equiv="Content-type" '
+		. 'content="text/html;charset=UTF-8">' . "\n"
 		. '<html>' . "\n"
 		. '<head>' . "\n"
 		. '<title>KIWI Module Index</title>' . "\n"
@@ -308,6 +377,9 @@ sub generateIndexPage {
 		. 'vlink="#663366" alink="#FF0000">' . "\n"
 		. '<center><h1>KIWI Module Index</h1></center>' . "\n"
 		. '<p>' . "\n"
+		. '<hr>' . "\n"
+		. '<a href="graph.html">Dependency Graph</a>' . "\n"
+		. '<hr>' . "\n"
 		. '<ul>' . "\n";
 	my @modules = keys %infoTree;
 	@modules = sort @modules;
@@ -332,7 +404,10 @@ sub generateIndexPage {
 	}
 	$index .= '</ul>' . "\n";
 
-	open( my $INDEX, '>', 'devDocs/index.html');
+	my $status = open( my $INDEX, '>', 'devDocs/index.html');
+	if (! $status) {
+		croak('Could not open devDocs/index.html');
+	}
 	print $INDEX $index;
 	close $INDEX;
 	return;
@@ -343,7 +418,10 @@ sub generateModulePages {
 	# Generate a page for each module
 	# ---
 	for my $mod (keys %infoTree) {
-		my $page = '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">' . "\n"
+		my $page = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
+			. 'Transitional//EN">' . "\n"
+			. '<meta http-equiv="Content-type" '
+			. 'content="text/html;charset=UTF-8">' . "\n"
 			. '<html>' . "\n"
 			. '<head>' . "\n"
 			. '<title>' . $mod . ' Info</title>' . "\n"
@@ -405,15 +483,18 @@ sub generateModulePages {
 						. 'Called in' . "\n"
 						. '<ul>' . "\n";
 					for my $call (@calls) {
-						my ($name, $methName, $lineNo) = split /:/msx, $call;
+						my ($name, $methName, $lineNum) = split /:/msx, $call;
 						$page .= '<li><a href="' . $name . '.html">' . $name
-							. '</a> : ' . $lineNo . '</li>';
+							. '</a> : ' . $lineNum . '</li>';
 					}
 					$page .= '</ul>' . "\n";
 				}
 			}
 		}
-		open( my $PAGE, '>', "devDocs/$mod.html");
+		my $status = open( my $PAGE, '>', "devDocs/$mod.html");
+		if (! $status) {
+			croak("Could not open devDocs/$mod.html");
+		}
 		print $PAGE $page;
 		close $PAGE;
 	}
@@ -454,7 +535,7 @@ sub __addLineCrossRef {
 		return;
 	}
 	my $access;
-	if ($kiwiMethodName =~ /^_|^__/) {
+	if ($kiwiMethodName =~ /^_|^__/mx) {
 		$access = 'private';
 	} else {
 		$access = 'public';
@@ -500,13 +581,13 @@ sub __disambiguateCall {
 #    print "DBG: Need to disambiguate $kiwiMethodName : in: $modName\n";
 	my @source = @{$content};
 	my $ambigCallLn = $source[$lineNo-1];
-	$ambigCallLn =~ s/\s//g;
+	$ambigCallLn =~ s/\s//gmx;
 	my $tok = PPI::Tokenizer->new(\$ambigCallLn);
 	my @tokens = @{$tok->all_tokens()};
 	my $methIdx = first { $tokens[$_] eq $kiwiMethodName } 0..$#tokens;
 	my $callerVar = $tokens[$methIdx-2];
 	my $tgtObj;
-	if ($callerVar =~ /^\$/) {
+	if ($callerVar =~ /^\$/mx) {
 		if ($callerVar eq '$this') {
 #            print "\t\tDBG: trivial case for: $kiwiMethodName\n";
 			$tgtObj = $modName;
@@ -548,11 +629,11 @@ sub __getKClassName {
 		$lineNo -= 1;
 		my $ln = $source[$lineNo];
 #        print "\t\t\tDBG: working for: $ln\n";
-		if ($ln =~ /$search\s*=/) {
+		if ($ln =~ /$search\s*=/mx) {
 #            print "\t\t\tDBG: found assignment\n";
 			my $useNextAsRval;
 			my $rval;
-			$ln =~ s/\s//g;
+			$ln =~ s/\s//gmx;
 			my $tok = PPI::Tokenizer->new(\$ln);
 			while ( my $t = $tok->get_token() ) {
 				if ($useNextAsRval) {
@@ -583,36 +664,29 @@ sub processFiles {
 	# ...
 	# Process all the modules
 	# ---
-	for my $flpath (@allModules) {
-		my ($vol, $dir, $fname) =  File::Spec->splitpath( $flpath );
-		my ($name, $ext) = split /\./msx, $fname;
-		my @lines = read_file($flpath);
-		addMethodInfo($name, \@lines);
-	}
-	for my $flpath (@allModules) {
-		my ($vol, $dir, $fname) =  File::Spec->splitpath( $flpath );
-		my ($name, $ext) = split /\./msx, $fname;
-		my @lines = read_file($flpath);
-		addCtorCrossReferences($name, \@lines);
-	}
-	for my $flpath (@allModules) {
-		my ($vol, $dir, $fname) =  File::Spec->splitpath( $flpath );
-		my ($name, $ext) = split /\./msx, $fname;
-		my @lines = read_file($flpath);
-		addMethodCallCrossReferences($name, \@lines);
-	}
-	for my $flpath (@allModules) {
-		my ($vol, $dir, $fname) =  File::Spec->splitpath( $flpath );
-		my ($name, $ext) = split /\./msx, $fname;
-		my @lines = read_file($flpath);
-		generateDependencyData($name, \@lines);
+	my @procOrder = (
+		\&addMethodInfo,
+		\&addCtorCrossReferences,
+		\&addMethodCallCrossReferences,
+		\&generateDependencyData
+	);
+	for my $func (@procOrder) {
+		for my $flpath (@allModules) {
+			my ($vol, $dir, $fname) =  File::Spec->splitpath( $flpath );
+			my ($name, $ext) = split /\./msx, $fname;
+			my @lines = read_file($flpath);
+			&{$func}($name, \@lines);
+		}
 	}
 	return;
 }
 
 processFiles();
+generateDependencyGraph();
+generateGraphPage();
 generateIndexPage();
 generateModulePages();
+
 
 #$Data::Dumper::Terse  = 1;
 #$Data::Dumper::Indent = 1;
