@@ -852,22 +852,14 @@ sub setupInstallCD {
 	#------------------------------------------
 	if (($firmware eq "efi") || ($firmware eq "uefi")) {
 		my $efi_fat = "$tmpdir/boot/grub2-efi/efiboot.img";
-		$status = qxx ("qemu-img create $efi_fat 2M 2>&1");
+		$status = qxx ("qemu-img create $efi_fat 4M 2>&1");
 		$result = $? >> 8;
 		if ($result == 0) {
 			$status = qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
 			$result = $? >> 8;
 			if ($result == 0) {
-				$status = qxx ("mount -o loop $efi_fat /mnt 2>&1");
+				$status = qxx ("mcopy -Do -s -i $efi_fat $tmpdir/efi :: 2>&1");
 				$result = $? >> 8;
-				if ($result == 0) {
-					$status = qxx ("mkdir -p /mnt/efi/boot");
-					$status = qxx (
-						"cp $tmpdir/efi/boot/bootx64.efi /mnt/efi/boot 2>&1"
-					);
-					$result = $? >> 8;
-				}
-				qxx ("umount /mnt 2>&1");
 			}
 		}
 		if ($result != 0) {
