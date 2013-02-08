@@ -2236,7 +2236,7 @@ sub createImageLiveCD {
 		# make iso EFI bootable
 		#------------------------------------------
 		my $efi_fat = "$CD/boot/grub2-efi/efiboot.img";
-		$status = qxx ("qemu-img create $efi_fat 1M 2>&1");
+		$status = qxx ("qemu-img create $efi_fat 2M 2>&1");
 		$result = $? >> 8;
 		if ($result == 0) {
 			$status = qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
