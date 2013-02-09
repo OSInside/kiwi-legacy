@@ -1396,6 +1396,27 @@ sub getPackageList {
 }
 
 #==========================================
+# isEmptyDir
+#------------------------------------------
+sub isEmptyDir {
+	my $this  = shift;
+	my $ldir  = shift;
+	my $count = 0;
+	if (-d $ldir) {
+		opendir(my $dh, $ldir) || return;
+		while (my $entry = readdir ($dh)) {
+			next if $entry eq "." || $entry eq "..";
+			$count++;
+		}
+		closedir $dh;
+	}
+	if ($count > 0) {
+		return 0;
+	}
+	return 1;
+}
+
+#==========================================
 # setSystemOverlayFiles
 #------------------------------------------
 sub setSystemOverlayFiles {
@@ -1707,22 +1728,84 @@ sub setSystemOverlayFiles {
 	}
 	$kiwi -> done();
 	#==========================================
+	# Ignore empty directories
+	#------------------------------------------
+	$kiwi -> info ("Checking for empty directories...");
+	my $checkDirs;
+	foreach my $file (sort keys %result) {
+		my $sys_file = '/'.$file;
+		if ((-d $sys_file) && ($this -> isEmptyDir ($sys_file))) {
+			$checkDirs->{$file} = $file;
+			delete $result{$file};
+		}
+	}
+	my @checkList = ();
+	while ($checkDirs) {
+		my $checkDirsNext;
+		foreach my $check (sort keys %{$checkDirs}) {
+			my $pre_dir = dirname $check;
+			if ($pre_dir ne '/') {
+				$checkDirsNext->{$pre_dir} = $pre_dir;
+			}
+		}
+		if (! $checkDirsNext) {
+			undef $checkDirs;
+			last;
+		}
+		$checkDirs = $checkDirsNext;
+		foreach my $check (sort keys %{$checkDirs}) {
+			push @checkList,$check;
+		}
+	}
+	my $tasks = @checkList;
+	my $factor = 100 / $tasks;
+	my $done_percent = 0;
+	my $done_previos = 0;
+	my $done = 0;
+	$kiwi -> cursorOFF();
+	foreach my $check (@checkList) {
+		#my $count = 0;
+		#my $match = quotemeta $check;
+		my $count = 1;
+		foreach my $file (sort keys %result) {
+			if (index($file, $check.'/') != -1) {
+				$count = 2; last;
+			}
+			#last if $count > 1;
+			#if ($file =~ /(^$match$)|(^$match\/)/) {
+			#	$count++;
+			#}
+		}
+		if ($count == 1) {
+			delete $result{$check};
+		}
+		$done_percent = int ($factor * $done);
+		if ($done_percent > $done_previos) {
+			$kiwi -> step ($done_percent);
+		}
+		$done_previos = $done_percent;
+		$done++;
+	}
+	$kiwi -> note ("\n");
+	$kiwi -> doNorm ();
+	$kiwi -> cursorON();
+	#==========================================
 	# Create modified files tree
 	#------------------------------------------
 	$kiwi -> info ("Creating modified files tree...");
 	mkdir "$dest/root";
 	my %modfiles;
-	my $tasks = 0;
-	my $done  = 0;
+	$tasks = 0;
+	$done  = 0;
 	foreach my $file (@modified) {
 		my ($name,$dir,$suffix) = fileparse ($file);
 		$modfiles{$dir}{$name} = $file;
 		$tasks++;
 	}
 	$kiwi -> cursorOFF();
-	my $factor = 100 / $tasks;
-	my $done_percent = 0;
-	my $done_previos = 0;
+	$factor = 100 / $tasks;
+	$done_percent = 0;
+	$done_previos = 0;
 	foreach my $dir (sort keys %modfiles) {
 		mkpath ("$dest/root/$dir", {verbose => 0});
 		$done_percent = int ($factor * $done);
