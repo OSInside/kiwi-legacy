@@ -586,15 +586,18 @@ function udevTrigger {
 #--------------------------------------
 function udevSystemStart {
 	# /.../
-	# start udev while in pre-init phase. This means we can
-	# run udev from the standard runlevel script
+	# start udev while in pre-init phase.
 	# ----
-	if [ -e /etc/init.d/boot.udev ];then
-		/etc/init.d/boot.udev start
-	elif which systemctl &>/dev/null;then
-		systemctl start udev.service
+	if [ -x /sbin/udevd ];then
+		/sbin/udevd --daemon
+	else
+		/lib/udev/udevd --daemon
 	fi
-	echo
+	UDEVD_PID=$(pidof -s /sbin/udevd)
+	# trigger events for all devices
+	udevTrigger
+	# wait for events to finish
+	udevPending
 }
 #======================================
 # udevSystemStop
@@ -603,12 +606,9 @@ function udevSystemStop {
 	# /.../
 	# stop udev while in pre-init phase.
 	# ----
-	if [ -e /etc/init.d/boot.udev ];then
-		/etc/init.d/boot.udev stop
-	elif which systemctl &>/dev/null;then
-		systemctl stop udev.service
+	if kill -0 $UDEVD_PID &>/dev/null;then
+		kill $UDEVD_PID
 	fi
-	echo
 }
 #======================================
 # udevStart
