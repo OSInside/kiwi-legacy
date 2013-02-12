@@ -1139,9 +1139,7 @@ function setupSUSEInitrd {
 			mount -t sysfs sysfs /sys
 			umountSys=1
 		fi
-		if [ -f /etc/init.d/boot.device-mapper ];then
-			/etc/init.d/boot.device-mapper start
-		fi
+		modprobe dm-mod &>/dev/null
 		updateModuleDependencies
 		if grep -qi param_B $mkinitrdExec;then
 			params="-B"
@@ -1182,9 +1180,7 @@ function setupSUSEInitrd {
 			cp /boot/$kernel /boot/boot/
 			cp /boot/$initrd /boot/boot/
 		fi
-		if [ -f /etc/init.d/boot.device-mapper ];then
-			/etc/init.d/boot.device-mapper stop
-		fi
+		rmmod dm-mod &>/dev/null
 		if [ $umountSys -eq 1 ];then
 			umount /sys
 		fi
