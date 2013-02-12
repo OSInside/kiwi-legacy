@@ -58,7 +58,9 @@ sub new {
 		return;
 	}
 	my %keywords = map { ($_ => 1) } qw(
-		description import name
+		description
+		import
+		name
 	);
 	$this->{supportedKeywords} = \%keywords;
 	my %boolKW = map { ($_ => 1) } qw( import );
@@ -76,6 +78,10 @@ sub new {
 	$this->{description} = $init->{description};
 	$this->{name}        = $init->{name};
 
+	# Track the defaults
+	if (! $init->{import}) {
+		$this->{defaultimport} = 1;
+	}
 	return $this;
 }
 
@@ -123,9 +129,11 @@ sub getXMLElement {
 	my $element = XML::LibXML::Element -> new('profile');
 	$element -> setAttribute('name', $this -> getName());
 	$element -> setAttribute('description', $this -> getDescription());
-	my $import = $this -> getImportStatus();
-	if ($import) {
-		$element -> setAttribute('import', $import);
+	if (! $this->{defaultimport}) {
+		my $import = $this -> getImportStatus();
+		if ($import) {
+			$element -> setAttribute('import', $import);
+		}
 	}
 	return $element;
 }

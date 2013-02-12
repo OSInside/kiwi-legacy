@@ -197,20 +197,28 @@ sub new {
 	$this->{vga}                    = $init->{vga};
 	$this->{volid}                  = $init->{volid};
 	# Set default values
-	if (! $this->{bootloader} ) {
+	if (! $init->{bootloader} ) {
 		$this->{bootloader} = 'grub';
+		$this->{defaultBootloader} = 1;
 	}
 	if (! $init->{installprovidefailsafe} ) {
 		$this->{installprovidefailsafe} = 'true';
+		$this->{defaultinstallprovidefailsafe} = 1;
 	}
 	if (! $init->{firmware} ) {
 		$this->{firmware} = 'bios';
+		$this->{defaultfirmware} = 1;
+	}
+	if (! $init->{primary} ) {
+		$this->{defaultprimary} = 1;
 	}
 	if (! $init->{sizeadd} ) {
 		$this->{sizeadd} = 'false';
+		$this->{defaultsizeadd} = 1;
 	}
 	if (! $init->{sizeunit} ) {
 		$this->{sizeunit} = 'M';
+		$this->{defaultsizeunit} = 1;
 	}
 	return $this;
 }
@@ -669,9 +677,11 @@ sub getXMLElement {
 	if ($bootK) {
 		$element -> setAttribute('bootkernel', $bootK);
 	}
-	my $loader = $this -> getBootLoader();
-	if ($loader) {
-		$element -> setAttribute('bootloader', $loader);
+	if (! $this->{defaultBootloader}) {
+		my $loader = $this -> getBootLoader();
+		if ($loader) {
+			$element -> setAttribute('bootloader', $loader);
+		}
 	}
 	my $bPartSize = $this -> getBootPartitionSize();
 	if ($bPartSize) {
@@ -709,9 +719,11 @@ sub getXMLElement {
 	if ($fileSys) {
 		$element -> setAttribute('filesystem', $fileSys);
 	}
-	my $firmware = $this -> getFirmwareType();
-	if ($firmware) {
-		$element -> setAttribute('firmware', $firmware);
+	if (! $this->{defaultfirmware}) {
+		my $firmware = $this -> getFirmwareType();
+		if ($firmware) {
+			$element -> setAttribute('firmware', $firmware);
+		}
 	}
 	my $flags = $this -> getFlags();
 	if ($flags) {
@@ -753,9 +765,11 @@ sub getXMLElement {
 	if ($instIso) {
 		$element -> setAttribute('installiso', $instIso);
 	}
-	my $instFail = $this -> getInstallFailsafe();
-	if ($instFail) {
-		$element -> setAttribute('installprovidefailsafe', $instFail);
+	if (! $this->{defaultinstallprovidefailsafe}) {
+		my $instFail = $this -> getInstallFailsafe();
+		if ($instFail) {
+			$element -> setAttribute('installprovidefailsafe', $instFail);
+		}
 	}
 	my $instPXE = $this -> getInstallPXE();
 	if ($instPXE) {
@@ -777,9 +791,11 @@ sub getXMLElement {
 	if ($mdraid) {
 		$element -> setAttribute('mdraid',$mdraid);
 	}
-	my $prim = $this -> getPrimary();
-	if ($prim) {
-		$element -> setAttribute('primary', $prim);
+	if (! $this->{defaultprimary}) {
+		my $prim = $this -> getPrimary();
+		if ($prim) {
+			$element -> setAttribute('primary', $prim);
+		}
 	}
 	my $ramO = $this -> getRAMOnly();
 	if ($ramO) {
@@ -789,8 +805,12 @@ sub getXMLElement {
 	if ($size) {
 		my $sElem = XML::LibXML::Element -> new('size');
 		$sElem -> appendText($size);
-		$sElem -> setAttribute('additive', $this -> isSizeAdditive());
-		$sElem -> setAttribute('unit', $this -> getSizeUnit());
+		if (! $this->{defaultsizeadd}) {
+			$sElem -> setAttribute('additive', $this -> isSizeAdditive());
+		}
+		if (! $this->{defaultsizeunit}) {
+			$sElem -> setAttribute('unit', $this -> getSizeUnit());
+		}
 		$element -> appendChild($sElem);
 	}
 	my $vga = $this -> getVGA();

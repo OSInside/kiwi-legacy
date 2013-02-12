@@ -125,8 +125,9 @@ sub new {
 		$this->{version}              = $init->{version};
 	}
 	# Set default values
-	if (! $this->{packagemanager} ) {
-		$this->{packagemanager}   = 'zypper';
+	if (! $init->{packagemanager} ) {
+		$this->{packagemanager} = 'zypper';
+		$this->{defaultpackagemanager} = 1;
 	}
 	return $this;
 }
@@ -382,12 +383,14 @@ sub getXMLElement {
 		text      => $this -> getLocale()
 	);
 	$element = $this -> __addElement(\%initLoc);
-	my %initPckgM = (
-		parent    => $element,
-		childName => 'packagemanager',
-		text      => $this -> getPackageManager()
-	);
-	$element = $this -> __addElement(\%initPckgM);
+	if (! $this->{defaultpackagemanager}) {
+		my %initPckgM = (
+			parent    => $element,
+			childName => 'packagemanager',
+			text      => $this -> getPackageManager()
+		);
+		$element = $this -> __addElement(\%initPckgM);
+	}
 	my %initRPMCSig = (
 		parent    => $element,
 		childName => 'rpm-check-signatures',

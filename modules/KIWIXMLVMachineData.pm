@@ -144,10 +144,13 @@ sub new {
 	$this->{vmdisks}       = $init->{vmdisks};
 	$this->{vmdvd}         = $init->{vmdvd};
 	$this->{vmnics}        = $init->{vmnics};
-	if (! $this->{HWversion} ) {
+	# Default settings
+	if (! $init->{HWversion} ) {
 		$this->{HWversion} = '4';
+		$this->{defaultHWversion} = 1;
 	}
-	if (! $this->{guestOS}) {
+	if (! $init->{guestOS}) {
+		$this->{defaultguestOS} = 1;
 		if ($this->{arch} && $this->{arch} =~ /64/smx) {
 			$this->{guestOS} = 'suse-64';
 		} else {
@@ -507,13 +510,17 @@ sub getXMLElement {
 	if ($dom) {
 		$element -> setAttribute('domain', $dom);
 	}
-	my $gOS = $this -> getGuestOS();
-	if ($gOS) {
-		$element -> setAttribute('guestOS', $gOS);
+	if (! $this->{defaultguestOS}) {
+		my $gOS = $this -> getGuestOS();
+		if ($gOS) {
+			$element -> setAttribute('guestOS', $gOS);
+		}
 	}
-	my $hwV = $this -> getHardwareVersion();
-	if ($hwV) {
-		$element -> setAttribute('HWversion', $hwV);
+	if (! $this->{defaultHWversion}) {
+		my $hwV = $this -> getHardwareVersion();
+		if ($hwV) {
+			$element -> setAttribute('HWversion', $hwV);
+		}
 	}
 	my $maxCPU = $this -> getMaxCPUCnt();
 	if ($maxCPU) {
@@ -543,7 +550,7 @@ sub getXMLElement {
 	if ($ovfT) {
 		$element -> setAttribute('ovftype', $ovfT);
 	}
-	$this -> __addVMconfiXMLElements($element);
+	$this -> __addVMconfigXMLElements($element);
 	$this -> __addVMdiskXMLElements($element);
 	$this -> __addVMdvdXMLElements($element);
 	$this -> __addVMnicXMLElements($element);
@@ -1122,20 +1129,23 @@ sub setSystemDiskID {
 # Private helper methods
 #------------------------------------------
 #==========================================
-# __addVMconfiXMLElements
+# __addVMconfigXMLElements
 #------------------------------------------
-sub __addVMconfiXMLElements {
+sub __addVMconfigXMLElements {
 	# ...
 	# Generate XML elements for vmconfig settings and add them to the
 	# given parent.
 	# ---
 	my $this   = shift;
 	my $parent = shift;
-	my @confEntries = @{$this -> getConfigEntries()};
-	for my $conf (@confEntries) {
-		my $cElem = XML::LibXML::Element -> new('vmconfig-entry');
-		$cElem -> appendText($conf);
-		$parent -> appendChild($cElem);
+	my $confEntries = $this -> getConfigEntries();
+	if ($confEntries) {
+		my @confEntries = @{$confEntries};
+		for my $conf (@confEntries) {
+			my $cElem = XML::LibXML::Element -> new('vmconfig-entry');
+			$cElem -> appendText($conf);
+			$parent -> appendChild($cElem);
+		}
 	}
 	return 1;
 }

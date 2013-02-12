@@ -286,6 +286,4 @@ sub getExecPath {
 	return $execPath;
 }
 
-
-
 1;

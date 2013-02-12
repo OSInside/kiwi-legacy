@@ -102,9 +102,10 @@ sub new {
 	$this->{elname}       = 'repository';
 	$this->{status}       = $init->{status};
 	$this->{type}         = $init->{type};
-
-	if (! $this->{status} ) {
+	# Default settings
+	if (! $init->{status} ) {
 		$this->{status} = 'replacable';
+		$this->{defaultstatus} = 1;
 	}
 	return $this;
 }
@@ -230,9 +231,11 @@ sub getXMLElement {
 	if ($prio) {
 		$element -> setAttribute('priority', $prio);
 	}
-	my $status = $this -> getStatus();
-	if ($status) {
-		$element -> setAttribute('status', $status);
+	if (! $this->{defaultstatus}) {
+		my $status = $this -> getStatus();
+		if ($status) {
+			$element -> setAttribute('status', $status);
+		}
 	}
 	$element -> setAttribute('type', $this -> getType());
 	return $element;

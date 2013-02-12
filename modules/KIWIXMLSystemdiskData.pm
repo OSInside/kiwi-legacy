@@ -228,7 +228,6 @@ sub getXMLElement {
 	$element -> setAttribute('name', $this -> getVGName());
 	my @vIDs = @{$this -> getVolumeIDs()};
 	if (@vIDs) {
-		my $vpElem = XML::LibXML::Element -> new('volumes');
 		for my $id (@vIDs) {
 			my $vElem = XML::LibXML::Element -> new('volume');
 			$vElem -> setAttribute('name', $this -> getVolumeName($id));
@@ -240,9 +239,8 @@ sub getXMLElement {
 			if ($size) {
 				$vElem -> setAttribute('size', $size);
 			}
-			$vpElem -> appendChild($vElem);
+			$element -> appendChild($vElem);
 		}
-		$element -> appendChild($vpElem);
 	}
 	return $element;
 }

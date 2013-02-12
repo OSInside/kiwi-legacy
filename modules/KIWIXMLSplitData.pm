@@ -199,7 +199,10 @@ sub getXMLElement {
 			);
 			$this -> __addChildXMLElements(\%args);
 		}
-		$element -> addChild($bElem);
+		my @children = $bElem -> getChildrenByTagName('file');
+		if (@children) {
+			$element -> addChild($bElem);
+		}
 	}
 	return $element;
 }
