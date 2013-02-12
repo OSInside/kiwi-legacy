@@ -3290,12 +3290,12 @@ sub setupBootLoaderStages {
 		if ($zipped) {
 			$test = $unzip;
 		}
-		$status = qxx ("$test | cpio -it | grep -q lib/grub2-efi 2>&1");
+		$status = qxx ("$test | cpio -it --quiet | grep -q lib/grub2-efi 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$grub = 'grub2';
 		}
-		$status = qxx ("$test | cpio -it | grep -q lib64/efi 2>&1");
+		$status = qxx ("$test | cpio -it --quiet | grep -q lib64/efi 2>&1");
 		$result = $? >> 8;
 		if ($result == 0) {
 			$lib = 'lib64';
