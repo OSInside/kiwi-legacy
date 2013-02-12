@@ -59,6 +59,11 @@ export SYSTEM_INTEGRITY
 export SYSTEM_MD5STATUS
 
 #======================================
+# Exports kernel options
+#--------------------------------------
+export kernel_cmdline=($@)
+
+#======================================
 # Functions
 #--------------------------------------
 . /include
@@ -294,4 +299,4 @@ activateImage
 #======================================
 # 23) Unmount initrd / system init
 #--------------------------------------
-bootImage $@
+bootImage

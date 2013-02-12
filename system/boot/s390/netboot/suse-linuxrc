@@ -55,6 +55,11 @@ export kiwi_hybrid=yes
 export kiwi_hybridpersistent=yes
 
 #======================================
+# Exports kernel options
+#--------------------------------------
+export kernel_cmdline=($@)
+
+#======================================
 # Functions
 #--------------------------------------
 . /include
@@ -1093,4 +1098,4 @@ activateImage
 #======================================
 # 31) Unmount initrd / system init
 #--------------------------------------
-bootImage $@
+bootImage
