@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="5.6" name="testCase-writing" displayname="xml-write-test">
+	<description type="system">
+		<author>Robert Schweikert</author>
+		<contact>rjschwei@suse.com</contact>
+		<specification>Test configuration to verify XML writing produces the expected result, i.e. an identical file to this one (spare whitespace)</specification>
+	</description>
+	<profiles>
+		<profile name="profA" description="Test prof A" import="false"/>
+		<profile name="profB" description="Test prof B"/>
+		<profile name="profC" description="Test prof C"/>
+		<profile name="profD" description="Test prof D"/>
+		<profile name="profE" description="Test prof E"/>
+		<profile name="profF" description="Test prof F"/>
+	</profiles>
+	<preferences>
+		<keytable>us.map.gz</keytable>
+		<locale>en_US</locale>
+		<rpm-check-signatures>false</rpm-check-signatures>
+		<rpm-force>false</rpm-force>
+		<version>0.0.1</version>
+		<type image="vmx" boot="vmxboot/suse-12.3" filesystem="ext4" format="vmdk">
+			<machine memory="1024" ncpus="2">
+				<vmdisk device="/dev/sda" disktype="scsi"/>
+				<vmnic interface="eth0"/>
+			</machine>
+		</type>
+	</preferences>
+	<preferences profiles="profA">
+		<hwclock>utc</hwclock>
+		<type image="xfs"/>
+	</preferences>
+	<preferences profiles="profB">
+		<type image="oem" boot="oemboot/suse-12.3" filesystem="btrfs" installstick="true">
+			<systemdisk name="testVG">
+				<volume name="home" size="1048576"/>
+				<volume name="opt" freespace="102400" size="524288"/>
+			</systemdisk>
+		</type>
+	</preferences>
+	<preferences profiles="profD">
+		<type image="split" boot="oemboot/suse-12.3" fsreadonly="squashfs" fsreadwrite="xfs" installiso="true">
+			<split>
+				<persistent>
+					<file name="/etc"/>
+					<file name="/etc/*"/>
+					<file name="/var"/>
+					<file name="/var/*"/>
+					<file name="/boot"/>
+					<file name="/boot/*"/>
+				</persistent>
+			</split>
+		</type>
+	</preferences>
+	<users group="root">
+		<user home="/root" name="root" password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"/>
+	</users>
+	<users group="users">
+		<user home="auser" name="auser" password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"/>
+	</users>
+	<users group="users" profiles="profA">
+		<user home="cuser" name="cuser" password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"/>
+	</users>
+	<users group="users" profiles="profD">
+		<user home="buser" name="buser" password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"/>
+	</users>
+	<repository priority="2" prefer-license="true" status="fixed" type="yast2">
+		<source path="opensuse://12.1/repo/oss/"/>
+	</repository>
+	<repository alias="update" imageinclude="true" type="rpm-md" profiles="profA">
+		<source path="http://download.opensuse.org/update/12.1"/>
+	</repository>
+	<drivers>
+		<file name="crypto/*"/>
+		<file name="drivers/acpi/*"/>
+	</drivers>
+	<drivers profiles="profB,profC,profD">
+		<file name="drivers/gpu/drm/i915/i915.ko"/>
+		<file name="drivers/gpu/drm/radeon/radeon.ko"/>
+	</drivers>
+	<packages type="image">
+		<archive name="myBins.tar.bz2"/>
+		<archive name="myBootStuff.tar.gz" bootinclude="true"/>
+		<namedCollection name="base"/>
+		<namedCollection name="kde" arch="x86_64"/>
+		<package name="kernel-default"/>
+		<package name="ifplugd"/>
+		<package name="vim"/>
+	</packages>
+	<packages type="image" profiles="profB,profE">
+		<namedCollection name="x11"/>
+		<package name="lvm"/>
+	</packages>
+	<packages type="image" profiles="profA,profD" patternType="plusRecommended">
+		<package name="xfsprogs"/>
+	</packages>
+	<packages type="image" profiles="profC,profF" patternType="onlyRequired">
+		<package name="emacs"/>
+	</packages>
+	<packages type="oem" profiles="profB">
+		<package name="kernel-firmware"/>
+	</packages>
+	<packages type="split" profiles="profD" patternType="plusRecommended">
+		<package name="squashfs"/>
+	</packages>
+	<packages type="delete">
+		<package name="libreoffice-math" arch="ix86"/>
+	</packages>
+	<packages type="delete" profiles="profA">
+		<package name="vim-data"/>
+	</packages>
+	<packages type="bootstrap">
+		<package name="filesystem"/>
+		<package name="glibc-locale"/>
+	</packages>
+	<strip type="delete">
+		<file name="df" arch="s390"/>
+	</strip>
+	<strip type="libs">
+		<file name="libraid"/>
+	</strip>
+	<strip type="tools">
+		<file name="megacli"/>
+	</strip>
+</image>

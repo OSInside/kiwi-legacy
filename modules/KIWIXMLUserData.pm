@@ -103,8 +103,9 @@ sub new {
 	$this->{shell}        = $init->{shell};
 	$this->{userid}       = $init->{userid};
 	# Set the default
-	if (! $this->{passwdformat} ) {
+	if (! $init->{passwdformat} ) {
 		$this->{passwdformat} = 'encrypted';
+		$this->{defaultpasswdformat} = 1;
 	}
 	return $this;
 }
@@ -231,11 +232,13 @@ sub getXMLElement {
 	}
 	my $pass = $this -> getPassword();
 	if ($pass) {
-		$uElem -> setAttribute('pwd', $pass);
+		$uElem -> setAttribute('password', $pass);
 	}
-	my $passF = $this -> getPasswordFormat();
-	if ($passF) {
-		$uElem -> setAttribute('pwdformat', $passF);
+	if (! $this->{defaultpasswdformat}) {
+		my $passF = $this -> getPasswordFormat();
+		if ($passF) {
+			$uElem -> setAttribute('pwdformat', $passF);
+		}
 	}
 	my $rname = $this -> getUserRealName();
 	if ($rname) {

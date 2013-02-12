@@ -551,7 +551,7 @@ sub test_getXMLElement{
 		. 'home="/home/me" '
 		. 'name="me" '
 		. 'id="1111" '
-		. 'pwd="hello" '
+		. 'password="hello" '
 		. 'pwdformat="plain" '
 		. 'realname="Pablo" '
 		. 'shell="/usr/bin/zsh"/>'

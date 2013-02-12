@@ -167,6 +167,23 @@ k.imagename.attribute   =
 	attribute name { image-name }
 
 #==========================================
+# common element <archive>
+#
+div {
+	k.archive.name.attribute = k.name.attribute
+	k.archive.bootinclude.attribute = k.bootinclude.attribute
+	k.archive.attlist =
+		k.archive.name.attribute &
+		k.archive.bootinclude.attribute?
+	k.archive =
+		## Name of an image archive file (tarball)
+		element archive {
+			k.archive.attlist,
+			empty
+		}
+}
+
+#==========================================
 # common element <author>
 #
 div {
@@ -174,6 +191,42 @@ div {
 	k.author =
 		## Author of the image
 		element author { k.author.attlist, text }
+}
+
+#==========================================
+# common element <bootloader-theme>
+#
+div {
+	k.bootloader-theme.attlist = empty
+	k.bootloader-theme =
+		## Image bootloader theme setup.
+		[
+		db:para [
+			"The value will be used in KIWIConfig.sh::suseGFXBoot"
+		]
+		]
+		element bootloader-theme {
+			k.bootloader-theme.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <bootsplash-theme>
+#
+div {
+	k.bootsplash-theme.attlist = empty
+	k.bootsplash-theme =
+		## Image bootsplash theme setup.
+		[
+		db:para [
+			"The value will be used in KIWIConfig.sh::suseGFXBoot"
+		]
+		]
+		element bootsplash-theme {
+			k.bootsplash-theme.attlist,
+			text
+		}
 }
 
 #==========================================
@@ -307,13 +360,28 @@ div {
 		db:para [
 			"Specify the region/availability zone in EC2 for this image.\x{a}"~
 			"Values are limited to the EC2 recognized zones:\x{a}"~
-			"AP-Northeast, AP-Southeast, EU-West, SA-East, US-East, \x{a}"~
+			"AP-Northeast, AP-Southeast, EU-West, SA-East, US-East,\x{a}"~
 			"US-West, and US-West2"
 		]
 		]
 		element ec2region {
 			k.ec2region.attlist,
 			text
+		}
+}
+
+#==========================================
+# common element <except>
+#
+div {
+	k.except.name.attribute = k.name.attribute
+	k.except.attlist =
+		k.except.name.attribute
+	k.except =
+		## A Pointer to a File which should be excluded
+		element except {
+			k.except.attlist,
+			empty
 		}
 }
 
@@ -335,17 +403,22 @@ div {
 }
 
 #==========================================
-# common element <except>
+# common element <hwclock>
 #
 div {
-	k.except.name.attribute = k.name.attribute
-	k.except.attlist =
-		k.except.name.attribute
-	k.except =
-		## A Pointer to a File which should be excluded
-		element except {
-			k.except.attlist,
-			empty
+	k.hwclock.content = "utc" | "localtime"
+	k.hwclock.attlist = empty
+	k.hwclock =
+		## Setup Image harware clock setup, either utc or localtime
+		[
+		db:para [
+			"Image hardware clock setup. The value can be either\x{a}"~
+			"set to utc or localtime."
+		]
+		]
+		element hwclock {
+			k.hwclock.attlist,
+			k.hwclock.content
 		}
 }
 
@@ -477,42 +550,6 @@ div { # locale
 }
 
 #==========================================
-# common element <bootloader-theme>
-#
-div {
-	k.bootloader-theme.attlist = empty
-	k.bootloader-theme =
-		## Image bootloader theme setup.
-		[
-		db:para [
-			"The value will be used in KIWIConfig.sh::suseGFXBoot"
-		]
-		]
-		element bootloader-theme {
-			k.bootloader-theme.attlist,
-			text
-		}
-}
-
-#==========================================
-# common element <bootsplash-theme>
-#
-div {
-	k.bootsplash-theme.attlist = empty
-	k.bootsplash-theme =
-		## Image bootsplash theme setup.
-		[
-		db:para [
-			"The value will be used in KIWIConfig.sh::suseGFXBoot"
-		]
-		]
-		element bootsplash-theme {
-			k.bootsplash-theme.attlist,
-			text
-		}
-}
-
-#==========================================
 # common element <metadata>
 #
 div {
@@ -560,396 +597,19 @@ div {
 }
 
 #==========================================
-# common element <opensusePattern>
+# common element <namedCollection>
 #
 div {
-	k.opensusepattern.name.attribute = k.name.attribute
-	k.opensusepattern.arch.attribute = k.arch.attribute
-	k.opensusepattern.attlist =
-		k.opensusepattern.name.attribute &
-		k.opensusepattern.arch.attribute?
-	k.opensusepattern =
-		## Name of a Pattern From openSUSE
-		element opensusePattern {
-			k.opensusepattern.attlist,
+	k.namedCollection.name.attribute = k.name.attribute
+	k.namedCollection.arch.attribute = k.arch.attribute
+	k.namedCollection.attlist =
+		k.namedCollection.name.attribute &
+		k.namedCollection.arch.attribute?
+	k.namedCollection =
+		## Name of a Pattern for SUSE or a Group for RH
+		element namedCollection {
+			k.namedCollection.attlist,
 			empty
-		}
-}
-
-#==========================================
-# common element <rhelGroup>
-#
-div {
-	k.rhelgroup.name.attribute = k.name.attribute
-	k.rhelgroup.arch.attribute = k.arch.attribute
-	k.rhelgroup.attlist =
-		k.rhelgroup.name.attribute &
-		k.rhelgroup.arch.attribute?
-	k.rhelgroup =
-		## Name of RHEL package group 
-		element rhelGroup {
-			k.rhelgroup.attlist,
-			empty
-		}
-}
-
-#==========================================
-# common element <opensuseProduct>
-#
-div {
-	k.opensuseproduct.name.attribute = k.name.attribute
-	k.opensuseproduct.arch.attribute = k.arch.attribute
-	k.opensuseproduct.attlist =
-		k.opensuseproduct.name.attribute &
-		k.opensuseproduct.arch.attribute?
-	k.opensuseproduct =
-		## Name of a Product From openSUSE
-		element opensuseProduct {
-			k.opensuseproduct.attlist,
-			empty
-		}
-}
-
-#==========================================
-# common element <repopackage>
-#
-div {
-	k.repopackage.name.attribute = k.name.attribute
-	k.repopackage.arch.attribute = k.arch.attribute
-	k.repopackage.forcerepo.attribute =
-		## Specifies the search priority
-		attribute forcerepo { xsd:IDREF }
-	k.repopackage.addarch.attribute =
-		## Specifies that this package should
-		## additionally add the same package from the given arch
-		attribute addarch { text }
-	k.repopackage.removearch.attribute =
-		## Specifies that the package with the
-		## given arch should be removed
-		attribute removearch { text }
-	k.repopackage.onlyarch.attribute =
-		## Specifies that the package with
-		## the given arch should be used in any case
-		attribute onlyarch { text }
-	k.repopackage.medium.attribute =
-		## Specifies that the package will be put
-		## to the specific medium number (CD1, DVD7, ...)
-		attribute medium { xsd:nonNegativeInteger }
-	k.repopackage.source.attribute = k.source.attribute
-	k.repopackage.script.attribute = k.script.attribute
-	k.repopackage.attlist =
-		k.repopackage.name.attribute & 
-		k.repopackage.arch.attribute? &
-		k.repopackage.forcerepo.attribute? &
-		k.repopackage.addarch.attribute? &
-		k.repopackage.removearch.attribute? &
-		k.repopackage.onlyarch.attribute? &
-		k.repopackage.source.attribute? &
-		k.repopackage.script.attribute? &
-		k.repopackage.medium.attribute?
-	k.repopackage =
-		## Name of an instsource Package
-		element repopackage {
-			k.repopackage.attlist,
-			empty
-		}
-}
-
-#==========================================
-# common element <package>
-#
-div {
-	k.package.name.attribute = k.name.attribute
-	k.package.arch.attribute = k.arch.attribute
-	k.package.replaces.attribute = k.replaces.attribute
-	k.package.bootinclude.attribute = k.bootinclude.attribute
-	k.package.bootdelete.attribute = k.bootdelete.attribute
-	k.package.attlist =
-		k.package.name.attribute &
-		k.package.arch.attribute? &
-		k.replaces.attribute? &
-		k.bootdelete.attribute? &
-		k.bootinclude.attribute?
-	k.package =
-		## Name of an image Package
-		element package {
-			k.package.attlist,
-			empty
-		}
-}
-
-#==========================================
-# common element <archive>
-#
-div {
-	k.archive.name.attribute = k.name.attribute
-	k.archive.bootinclude.attribute = k.bootinclude.attribute
-	k.archive.attlist =
-		k.archive.name.attribute &
-		k.archive.bootinclude.attribute?
-	k.archive =
-		## Name of an image archive file (tarball)
-		element archive {
-			k.archive.attlist,
-			empty
-		}
-}
-
-#==========================================
-# common element <packagemanager>
-#
-div {
-	k.packagemanager.content = 
-		"apt-get" | "smart" | "zypper" | "ensconce" | "yum"
-	k.packagemanager.attlist = empty
-	k.packagemanager =
-		## Name of the Package Manager
-		[
-		db:para [
-			"The package manager used for package installation\x{a}"~
-			"could be either zypper or smart"
-		]
-		]
-		element packagemanager {
-			k.packagemanager.attlist,
-			k.packagemanager.content
-		}
-}
-
-#==========================================
-# common element <partitions>
-#
-div {
-	k.partitions.device.attribute =
-		## As part of the network deploy configuration this section
-		## specifies the disk device name
-		attribute device { text }
-	k.partitions.attlist = k.partitions.device.attribute?
-	k.partitions =
-		## A List of Partitions
-		element partitions { 
-			k.partitions.attlist, 
-			k.partition+
-		}
-}
-
-#==========================================
-# common element <partition>
-#
-div {
-	k.partition.type.attribute =
-		## Partition Type identifier, see parted for details
-		attribute type { text }
-	k.partition.number.attribute =
-		## Partition ID
-		attribute number { text }
-	k.partition.size.attribute = k.size.attribute
-	k.partition.mountpoint.attribute = 
-		## Mount path for this partition
-		attribute mountpoint { text }
-	k.partition.target.attribute =
-		## Is a real target or not which means is part of
-		## the /etc/fstab file or not
-		attribute target { xsd:boolean }
-	k.partition.attlist =
-		k.partition.type.attribute &
-		k.partition.number.attribute & 
-		k.partition.size.attribute? &
-		k.partition.mountpoint.attribute? &
-		k.partition.target.attribute?
-	k.partition =
-		## A Partition
-		element partition {
-			k.partition.attlist,
-			empty
-		}
-}
-
-#==========================================
-# common element <persistent>
-#
-div {
-	k.persistent.attlist = empty
-	k.persistent =
-		## Specifies Filenames in the Read-Write Disk Area
-		[
-		db:para [
-			"As part of the split section the persistent element\x{a}"~
-			"specifies filenames which are in the read-write disk area"
-		]
-		]
-		element persistent {
-			k.persistent.attlist &
-			k.except* &
-			k.file+
-		}
-}
-
-#==========================================
-# common element <profile>
-#
-div {
-	k.profile.name.attribute = k.name.attribute
-	k.profile.description.attribute =
-		## Description of how this profiles influences the image
-		attribute description { text }
-	k.profile.import.attribute =
-		## Import profile by default if no profile was set on
-		## the command line
-		attribute import { xsd:boolean }
-	k.profile.attlist =
-		k.profile.name.attribute &
-		k.profile.description.attribute &
-		k.profile.import.attribute?
-	k.profile =
-		## Creates Profiles
-		[
-		db:para [
-			"Profiles creates a namespace on an image description and\x{a}"~
-			"thus can be used to have one description with different\x{a}"~
-			"profiles for example KDE and GNOME including different\x{a}"~
-			"packages."
-		]
-		]
-		element profile {
-			k.profile.attlist,
-			empty
-		}
-}
-
-#==========================================
-# common element <repository>
-#
-div {
-	k.repository.profiles.attribute = k.profiles.attribute
-	k.repository.type.attribute =
-	  ## Type of repository
-	  attribute type {
-		"apt-deb" | "apt-rpm" | "deb-dir" | "mirrors" | "red-carpet" |
-		"rpm-dir" | "rpm-md"  | "slack-site" | "up2date-mirrors" | "urpmi" |
-		"yast2"
-	}
-	k.repository.status.attribute =
-		## Specifies the status of the repository. This can be
-		## replacable or if not specified it's a must have repository
-		attribute status {  "fixed" | "replaceable" }
-	k.repository.alias.attribute =
-		## Alias name to be used for this repository. This is an
-		## optional free form text. If not set the source attribute
-		## value is used and builds the alias name by replacing
-		## each '/' with a '_'. An alias name should be set if the
-		## source argument doesn't really explain what this repository
-		## contains
-		attribute alias { text }
-	k.repository.components.attribute =
-		## Distribution components, used for deb repositories. If
-		## not set it defaults to main
-		attribute components { text }
-	k.repository.distribution.attribute =
-		## Distribution name information, used for deb repositories
-		attribute distribution { text }
-	k.repository.imageinclude.attribute =
-		## Specify whether or not this repository should be configured in the
-		## resulting image. Boolean value true or false, the default is false.
-		attribute imageinclude { xsd:boolean }
-	k.repository.prefer-license.attribute =
-		## Use the license found in this repository, if any, as the
-		## license installed in the image
-		attribute prefer-license { xsd:boolean }
-	k.repository.priority.attribute =
-		## Channel priority assigned to all packages available in
-		## this channel (0 if not set). If the exact same package
-		## is available in more than one channel, the highest
-		## priority is used
-		attribute priority { xsd:integer }
-	k.repository.password.attribute =
-		## Channel password if required. It depends on the url type
-		## whether and how this information is passed
-		k.password.attribute
-	k.repository.username.attribute =
-		## Channel username if required. It depends on the url type
-		## whether and how this information is passed
-		k.username.attribute
-	k.repository.attlist =
-		k.repository.type.attribute &
-		k.repository.profiles.attribute? &
-		k.repository.status.attribute? &
-		k.repository.alias.attribute? &
-		k.repository.components.attribute? &
-		k.repository.distribution.attribute? &
-		k.repository.imageinclude.attribute? &
-		k.repository.prefer-license.attribute? &
-		k.repository.priority.attribute? &
-		k.repository.password.attribute? &
-		k.repository.username.attribute?
-	k.repository =
-		## The Name of the Repository
-		element repository {
-			k.repository.attlist,
-			k.source
-		}
-}
-
-#==========================================
-# common element <rpm-check-signatures>
-#
-div {
-	k.rpm-check-signatures.content = xsd:boolean
-	k.rpm-check-signatures.attlist = empty
-	k.rpm-check-signatures =
-		## Setup a Package Signature
-		[
-		db:para [
-			"Setup if the package manager should check the package\x{a}"~
-			"signature or not. This option could be ignored according\x{a}"~
-			"to the used package manager."
-		]
-		]
-		element rpm-check-signatures {
-			k.rpm-check-signatures.attlist,
-			k.rpm-check-signatures.content
-		}
-}
-
-#==========================================
-# common element <rpm-excludedocs>
-#
-div {
-	k.rpm-excludedocs.content = xsd:boolean
-	k.rpm-excludedocs.attlist = empty
-	k.rpm-excludedocs =
-		## Do not install files marked as documentation in the package
-		[
-		db:para [
-			"Setup if the package manager should exclude docs files\x{a}"~
-			"during package installation. This option could be ignored\x{a}"~
-			"according to the used package manager."
-		]
-		]
-		element rpm-excludedocs {
-			k.rpm-excludedocs.attlist,
-			k.rpm-excludedocs.content
-		}
-}
-
-#==========================================
-# common element <rpm-force>
-#
-div {
-	k.rpm-force.content = xsd:boolean
-	k.rpm-force.attlist = empty
-	k.rpm-force =
-		## Force the Installation of a Package
-		[
-		db:para [
-			"Setup if the package manager should force the install of the\x{a}"~
-			"package or not. This option could be ignored according\x{a}"~
-			"to the used package manager."
-		]
-		]
-		element rpm-force {
-			k.rpm-force.attlist,
-			k.rpm-force.content
 		}
 }
 
@@ -1175,27 +835,6 @@ div {
 }
 
 #==========================================
-# common element <oem-silent-boot>
-#
-div {
-	k.oem-silent-boot.content = xsd:boolean
-	k.oem-silent-boot.attlist = empty
-	k.oem-silent-boot =
-		## For oemboot driven images: boot silently during the initial boot
-		## true/false
-		[
-		db:para [
-			"For oemboot driven images: complete the initial boot of the "~
-			"system in silent mode, true/false. "
-		]
-		]
-		element oem-silent-boot {
-			k.oem-silent-boot.attlist,
-			k.oem-silent-boot.content
-		}
-}
-
-#==========================================
 # common element <oem-shutdown>
 #
 div {
@@ -1237,6 +876,27 @@ div {
 		element oem-shutdown-interactive {
 			k.oem-shutdown-interactive.attlist,
 			k.oem-shutdown-interactive.content
+		}
+}
+
+#==========================================
+# common element <oem-silent-boot>
+#
+div {
+	k.oem-silent-boot.content = xsd:boolean
+	k.oem-silent-boot.attlist = empty
+	k.oem-silent-boot =
+		## For oemboot driven images: boot silently during the initial boot
+		## true/false
+		[
+		db:para [
+			"For oemboot driven images: complete the initial boot of the "~
+			"system in silent mode, true/false. "
+		]
+		]
+		element oem-silent-boot {
+			k.oem-silent-boot.attlist,
+			k.oem-silent-boot.content
 		}
 }
 
@@ -1343,6 +1003,402 @@ div {
 }
 
 #==========================================
+# common element <opensusePattern>
+#
+div {
+	k.opensusepattern.name.attribute = k.name.attribute
+	k.opensusepattern.arch.attribute = k.arch.attribute
+	k.opensusepattern.attlist =
+		k.opensusepattern.name.attribute &
+		k.opensusepattern.arch.attribute?
+	k.opensusepattern =
+		## Name of a Pattern From openSUSE
+		element opensusePattern {
+			k.opensusepattern.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <opensuseProduct>
+#
+div {
+	k.opensuseproduct.name.attribute = k.name.attribute
+	k.opensuseproduct.arch.attribute = k.arch.attribute
+	k.opensuseproduct.attlist =
+		k.opensuseproduct.name.attribute &
+		k.opensuseproduct.arch.attribute?
+	k.opensuseproduct =
+		## Name of a Product From openSUSE
+		element opensuseProduct {
+			k.opensuseproduct.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <package>
+#
+div {
+	k.package.name.attribute = k.name.attribute
+	k.package.arch.attribute = k.arch.attribute
+	k.package.replaces.attribute = k.replaces.attribute
+	k.package.bootinclude.attribute = k.bootinclude.attribute
+	k.package.bootdelete.attribute = k.bootdelete.attribute
+	k.package.attlist =
+		k.package.name.attribute &
+		k.package.arch.attribute? &
+		k.replaces.attribute? &
+		k.bootdelete.attribute? &
+		k.bootinclude.attribute?
+	k.package =
+		## Name of an image Package
+		element package {
+			k.package.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <packagemanager>
+#
+div {
+	k.packagemanager.content = 
+		"apt-get" | "smart" | "zypper" | "ensconce" | "yum"
+	k.packagemanager.attlist = empty
+	k.packagemanager =
+		## Name of the Package Manager
+		[
+		db:para [
+			"The package manager used for package installation\x{a}"~
+			"could be either zypper or smart"
+		]
+		]
+		element packagemanager {
+			k.packagemanager.attlist,
+			k.packagemanager.content
+		}
+}
+
+#==========================================
+# common element <partition>
+#
+div {
+	k.partition.type.attribute =
+		## Partition Type identifier, see parted for details
+		attribute type { text }
+	k.partition.number.attribute =
+		## Partition ID
+		attribute number { text }
+	k.partition.size.attribute = k.size.attribute
+	k.partition.mountpoint.attribute = 
+		## Mount path for this partition
+		attribute mountpoint { text }
+	k.partition.target.attribute =
+		## Is a real target or not which means is part of
+		## the /etc/fstab file or not
+		attribute target { xsd:boolean }
+	k.partition.attlist =
+		k.partition.type.attribute &
+		k.partition.number.attribute & 
+		k.partition.size.attribute? &
+		k.partition.mountpoint.attribute? &
+		k.partition.target.attribute?
+	k.partition =
+		## A Partition
+		element partition {
+			k.partition.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <partitions>
+#
+div {
+	k.partitions.device.attribute =
+		## As part of the network deploy configuration this section
+		## specifies the disk device name
+		attribute device { text }
+	k.partitions.attlist = k.partitions.device.attribute?
+	k.partitions =
+		## A List of Partitions
+		element partitions { 
+			k.partitions.attlist, 
+			k.partition+
+		}
+}
+
+#==========================================
+# common element <persistent>
+#
+div {
+	k.persistent.attlist = empty
+	k.persistent =
+		## Specifies Filenames in the Read-Write Disk Area
+		[
+		db:para [
+			"As part of the split section the persistent element\x{a}"~
+			"specifies filenames which are in the read-write disk area"
+		]
+		]
+		element persistent {
+			k.persistent.attlist &
+			k.except* &
+			k.file+
+		}
+}
+
+#==========================================
+# common element <profile>
+#
+div {
+	k.profile.name.attribute = k.name.attribute
+	k.profile.description.attribute =
+		## Description of how this profiles influences the image
+		attribute description { text }
+	k.profile.import.attribute =
+		## Import profile by default if no profile was set on
+		## the command line
+		attribute import { xsd:boolean }
+	k.profile.attlist =
+		k.profile.name.attribute &
+		k.profile.description.attribute &
+		k.profile.import.attribute?
+	k.profile =
+		## Creates Profiles
+		[
+		db:para [
+			"Profiles creates a namespace on an image description and\x{a}"~
+			"thus can be used to have one description with different\x{a}"~
+			"profiles for example KDE and GNOME including different\x{a}"~
+			"packages."
+		]
+		]
+		element profile {
+			k.profile.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <repopackage>
+#
+div {
+	k.repopackage.name.attribute = k.name.attribute
+	k.repopackage.arch.attribute = k.arch.attribute
+	k.repopackage.forcerepo.attribute =
+		## Specifies the search priority
+		attribute forcerepo { xsd:IDREF }
+	k.repopackage.addarch.attribute =
+		## Specifies that this package should
+		## additionally add the same package from the given arch
+		attribute addarch { text }
+	k.repopackage.removearch.attribute =
+		## Specifies that the package with the
+		## given arch should be removed
+		attribute removearch { text }
+	k.repopackage.onlyarch.attribute =
+		## Specifies that the package with
+		## the given arch should be used in any case
+		attribute onlyarch { text }
+	k.repopackage.medium.attribute =
+		## Specifies that the package will be put
+		## to the specific medium number (CD1, DVD7, ...)
+		attribute medium { xsd:nonNegativeInteger }
+	k.repopackage.source.attribute = k.source.attribute
+	k.repopackage.script.attribute = k.script.attribute
+	k.repopackage.attlist =
+		k.repopackage.name.attribute & 
+		k.repopackage.arch.attribute? &
+		k.repopackage.forcerepo.attribute? &
+		k.repopackage.addarch.attribute? &
+		k.repopackage.removearch.attribute? &
+		k.repopackage.onlyarch.attribute? &
+		k.repopackage.source.attribute? &
+		k.repopackage.script.attribute? &
+		k.repopackage.medium.attribute?
+	k.repopackage =
+		## Name of an instsource Package
+		element repopackage {
+			k.repopackage.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <repository>
+#
+div {
+	k.repository.profiles.attribute = k.profiles.attribute
+	k.repository.type.attribute =
+	  ## Type of repository
+	  attribute type {
+		"apt-deb" | "apt-rpm" | "deb-dir" | "mirrors" | "red-carpet" |
+		"rpm-dir" | "rpm-md"  | "slack-site" | "up2date-mirrors" | "urpmi" |
+		"yast2"
+	}
+	k.repository.status.attribute =
+		## Specifies the status of the repository. This can be
+		## replacable or if not specified it's a must have repository
+		attribute status {  "fixed" | "replaceable" }
+	k.repository.alias.attribute =
+		## Alias name to be used for this repository. This is an
+		## optional free form text. If not set the source attribute
+		## value is used and builds the alias name by replacing
+		## each '/' with a '_'. An alias name should be set if the
+		## source argument doesn't really explain what this repository
+		## contains
+		attribute alias { text }
+	k.repository.components.attribute =
+		## Distribution components, used for deb repositories. If
+		## not set it defaults to main
+		attribute components { text }
+	k.repository.distribution.attribute =
+		## Distribution name information, used for deb repositories
+		attribute distribution { text }
+	k.repository.imageinclude.attribute =
+		## Specify whether or not this repository should be configured in the
+		## resulting image. Boolean value true or false, the default is false.
+		attribute imageinclude { xsd:boolean }
+	k.repository.prefer-license.attribute =
+		## Use the license found in this repository, if any, as the
+		## license installed in the image
+		attribute prefer-license { xsd:boolean }
+	k.repository.priority.attribute =
+		## Channel priority assigned to all packages available in
+		## this channel (0 if not set). If the exact same package
+		## is available in more than one channel, the highest
+		## priority is used
+		attribute priority { xsd:integer }
+	k.repository.password.attribute =
+		## Channel password if required. It depends on the url type
+		## whether and how this information is passed
+		k.password.attribute
+	k.repository.username.attribute =
+		## Channel username if required. It depends on the url type
+		## whether and how this information is passed
+		k.username.attribute
+	k.repository.attlist =
+		k.repository.type.attribute &
+		k.repository.profiles.attribute? &
+		k.repository.status.attribute? &
+		k.repository.alias.attribute? &
+		k.repository.components.attribute? &
+		k.repository.distribution.attribute? &
+		k.repository.imageinclude.attribute? &
+		k.repository.prefer-license.attribute? &
+		k.repository.priority.attribute? &
+		k.repository.password.attribute? &
+		k.repository.username.attribute?
+	k.repository =
+		## The Name of the Repository
+		element repository {
+			k.repository.attlist,
+			k.source
+		}
+}
+
+#==========================================
+# common element <rhelGroup>
+#
+div {
+	k.rhelgroup.name.attribute = k.name.attribute
+	k.rhelgroup.arch.attribute = k.arch.attribute
+	k.rhelgroup.attlist =
+		k.rhelgroup.name.attribute &
+		k.rhelgroup.arch.attribute?
+	k.rhelgroup =
+		## Name of RHEL package group 
+		element rhelGroup {
+			k.rhelgroup.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <rpm-check-signatures>
+#
+div {
+	k.rpm-check-signatures.content = xsd:boolean
+	k.rpm-check-signatures.attlist = empty
+	k.rpm-check-signatures =
+		## Setup a Package Signature
+		[
+		db:para [
+			"Setup if the package manager should check the package\x{a}"~
+			"signature or not. This option could be ignored according\x{a}"~
+			"to the used package manager."
+		]
+		]
+		element rpm-check-signatures {
+			k.rpm-check-signatures.attlist,
+			k.rpm-check-signatures.content
+		}
+}
+
+#==========================================
+# common element <rpm-excludedocs>
+#
+div {
+	k.rpm-excludedocs.content = xsd:boolean
+	k.rpm-excludedocs.attlist = empty
+	k.rpm-excludedocs =
+		## Do not install files marked as documentation in the package
+		[
+		db:para [
+			"Setup if the package manager should exclude docs files\x{a}"~
+			"during package installation. This option could be ignored\x{a}"~
+			"according to the used package manager."
+		]
+		]
+		element rpm-excludedocs {
+			k.rpm-excludedocs.attlist,
+			k.rpm-excludedocs.content
+		}
+}
+
+#==========================================
+# common element <rpm-force>
+#
+div {
+	k.rpm-force.content = xsd:boolean
+	k.rpm-force.attlist = empty
+	k.rpm-force =
+		## Force the Installation of a Package
+		[
+		db:para [
+		"Setup if the package manager should force the install\x{a}"~
+		"of the package or not. This option could be ignored\x{a}"~
+		"according to the used package manager."
+		]
+		]
+		element rpm-force {
+			k.rpm-force.attlist,
+			k.rpm-force.content
+		}
+}
+
+#==========================================
+# common element <showlicense>
+#
+div {
+	k.showlicense.attlist = empty
+	k.showlicense =
+		## Setup showlicense
+		[
+		db:para [
+			"Image license setup. The specfied license name\x{a}"~
+			"will be displayed in a dialog window on boot."
+		]
+		]
+		element showlicense {
+			k.showlicense.attlist,
+			text
+		}
+}
+
+#==========================================
 # common element <size>
 #
 div {
@@ -1398,6 +1454,29 @@ div {
 }
 
 #==========================================
+# common element <systemdisk>
+#
+div {
+	k.systemdisk.lvmgroup.attribute =
+		## Specify Volume group name, default is kiwiVG.
+		attribute name { text }
+	k.systemdisk.attlist =
+		k.systemdisk.lvmgroup.attribute?
+
+	k.systemdisk =
+		## Specify LVM volumes other than the root volume
+		[
+		db:para [
+			"Specify LVM volumes other than the root volume."
+		]
+		]
+		element systemdisk {
+			k.systemdisk.attlist &
+			k.volume*
+		}
+}
+
+#==========================================
 # common element <temporary>
 #
 div {
@@ -1426,51 +1505,12 @@ div {
 		## Specifies an ATFTP Download Timeout
 		[
 		db:para [
-			"As part of the network deploy configuration this section \x{a}"~
+			"As part of the network deploy configuration this section\x{a}"~
 			"specifies an ATFTP download timeout"
 		]
 		]
 		element timeout {
 			k.timeout.attlist,
-			text
-		}
-}
-
-#==========================================
-# common element <hwclock>
-#
-div {
-	k.hwclock.content = "utc" | "localtime"
-	k.hwclock.attlist = empty
-	k.hwclock =
-		## Setup Image harware clock setup, either utc or localtime
-		[
-		db:para [
-			"Image hardware clock setup. The value can be either\x{a}"~
-			"set to utc or localtime."
-		]
-		]
-		element hwclock {
-			k.hwclock.attlist,
-			k.hwclock.content
-		}
-}
-
-#==========================================
-# common element <showlicense>
-#
-div {
-	k.showlicense.attlist = empty
-	k.showlicense =
-		## Setup showlicense
-		[
-		db:para [
-			"Image license setup. The specfied license name\x{a}"~
-			"will be displayed in a dialog window on boot."
-		]
-		]
-		element showlicense {
-			k.showlicense.attlist,
 			text
 		}
 }
@@ -1734,68 +1774,6 @@ div {
 }
 
 #==========================================
-# common element <volume>
-#
-div {
-	k.volume.freespace.attribute =
-		## free space to be added to this volume. The value is
-		## used as MB by default but you can add "M" and/or "G" as
-		## postfix
-		attribute freespace { volume-size-type }
-	k.volume.name.attribute =
-		## volume name. The name specifies a path which has to
-		## exist inside the root directory.
-		attribute name { text }
-	k.volume.size.attribute =
-		## absolute size of the volume. If the size value
-		## is too small to store all data it will be ignored.
-		## The value is used as MB by default but you can
-		## add "M" and/or "G" as postfix
-		attribute size { volume-size-type }
-	k.volume.attlist =
-		k.volume.freespace.attribute? &
-		k.volume.name.attribute &
-		k.volume.size.attribute?
-	k.volume =
-		## Specify which parts of the filesystem should be
-		## on an extra volume.
-		[
-		db:para [
-			"Specify which parts of the filesystem should be on\x{a}"
-			"an extra volume."
-		]
-		]
-		element volume {
-			k.volume.attlist,
-			empty
-		}
-}
-
-
-#==========================================
-# common element <systemdisk>
-#
-div {
-	k.systemdisk.lvmgroup.attribute =
-		## Specify Volume group name, default is kiwiVG.
-		attribute name { text }
-	k.systemdisk.attlist =
-		k.systemdisk.lvmgroup.attribute?
-
-	k.systemdisk =
-		## Specify LVM volumes other than the root volume
-		[
-		db:para [
-			"Specify LVM volumes other than the root volume."
-		]
-		]
-		element systemdisk {
-			k.systemdisk.attlist &
-			k.volume*
-		}
-}
-
-#==========================================
 # common element <union>
 #
 div {
@@ -1817,8 +1795,8 @@ div {
 		db:para [
 			"As part of the network deploy configuration this section\x{a}"~
 			"specifies the overlay filesystem setup if required by the\x{a}"~
-			"filesystem type of the system image.An overlay setup is only\x{a}"~
-			"required if the system image uses a squashfs\x{a}"~
+			"filesystem type of the system image.An overlay setup is\x{a}"~
+			"only required if the system image uses a squashfs\x{a}"~
 			"compressed filesystem."
 		]
 		]
@@ -1896,7 +1874,8 @@ div {
 #
 div {
 	k.vmdisk.disktype.attribute =
-		## The type of the disk as it is internally handled by the VM (ovf only)
+		## The type of the disk as it is internally handled
+		## by the VM (ovf only)
 		attribute disktype { text }
 	k.vmdisk.controller.attribute =
 		## The disk controller used for the VM guest (vmdk only)
@@ -1970,6 +1949,45 @@ div {
 			empty
 		}
 }
+
+#==========================================
+# common element <volume>
+#
+div {
+	k.volume.freespace.attribute =
+		## free space to be added to this volume. The value is
+		## used as MB by default but you can add "M" and/or "G" as
+		## postfix
+		attribute freespace { volume-size-type }
+	k.volume.name.attribute =
+		## volume name. The name specifies a path which has to
+		## exist inside the root directory.
+		attribute name { text }
+	k.volume.size.attribute =
+		## absolute size of the volume. If the size value
+		## is too small to store all data it will be ignored.
+		## The value is used as MB by default but you can
+		## add "M" and/or "G" as postfix
+		attribute size { volume-size-type }
+	k.volume.attlist =
+		k.volume.freespace.attribute? &
+		k.volume.name.attribute &
+		k.volume.size.attribute?
+	k.volume =
+		## Specify which parts of the filesystem should be
+		## on an extra volume.
+		[
+		db:para [
+			"Specify which parts of the filesystem should be on\x{a}"
+			"an extra volume."
+		]
+		]
+		element volume {
+			k.volume.attlist,
+			empty
+		}
+}
+
 
 #==========================================
 # main block: <pxedeploy>
@@ -2270,7 +2288,7 @@ div {
 			"The chroot element contains one particular environment\x{a}"~
 			"variable and its value. Shell rules for the names apply.\x{a}"~
 			"The value must not exceed a certain length for sanity.\x{a}"~
-			"reasons Any funny characters like tabs, line break, \x{a}"~
+			"reasons Any funny characters like tabs, line break,\x{a}"~
 			"carriage return or combinations are converted to spaces\x{a}"~
 			"(one each) which may lead to unexpected contents."
 		]
@@ -2555,12 +2573,13 @@ div {
 		]
 		element packages {
 			k.packages.attlist &
+			k.archive* &
+			k.ignore* &
+			k.namedCollection* &
+			k.opensuseproduct* &
 			k.package* &
 			k.opensusepattern* &
-			k.rhelgroup* &
-			k.opensuseproduct* &
-			k.ignore* &
-			k.archive*
+			k.rhelgroup*
 		}
 }
 

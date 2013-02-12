@@ -22,8 +22,9 @@ use warnings;
 require Exporter;
 use Carp qw (cluck);
 use Data::Dumper;
-use File::Glob ':glob';
 use File::Basename;
+use File::Glob ':glob';
+use File::Slurp;
 use LWP;
 use XML::LibXML;
 #==========================================
@@ -138,8 +139,8 @@ sub new {
 	#         }
 	#         <profName>[+] = {
 	#             installOpt      = '',
-	#             archives        = ('',...),
-	#             bootArchives    = ('',...),
+	#             archives        = (KIWIXMLPackageArchiveData,...),
+	#             bootArchives    = (KIWIXMLPackageArchiveData,...),
 	#             profInfo        = KIWIXMLProfileData
 	#             repoData        = (KIWIXMLRepositoryData,...)
 	#             bootDelPkgs     = (KIWIXMLPackageData, ...),
@@ -156,8 +157,8 @@ sub new {
 	#             products        = (KIWIXMLPackageProductData,...),
 	#             stripDelete     = (KIWIXMLStripData,...),
 	#             <archname>[+] {
-	#                 archives        = ('',...),
-	#                 bootArchives    = ('',...),
+	#                 archives        = (KIWIXMLPackageArchiveData,...),
+	#                 bootArchives    = (KIWIXMLPackageArchiveData,...),
 	#                 bootDelPkgs     = (KIWIXMLPackageData, ...),
 	#                 bootPkgs        = (KIWIXMLPackageData, ...),
 	#                 bootPkgsCollect = (KIWIXMLPackageCollectData,...),
@@ -204,10 +205,10 @@ sub new {
 	#                }
 	#            }
 	#            <typename>[+] {
-	#                archives = ('',....),
+	#                archives = (KIWIXMLPackageArchiveData,....),
 	#                <archname>[+] {
-	#                    archives        = ('',...),
-	#                    bootArchives    = ('',...),
+	#                    archives        = (KIWIXMLPackageArchiveData,...),
+	#                    bootArchives    = (KIWIXMLPackageArchiveData,...),
 	#                    bootDelPkgs     = (KIWIXMLPackageData,...),
 	#                    bootPkgs        = (KIWIXMLPackageData,...),
 	#                    bootPkgsCollect = (KIWIXMLPackageCollectData,...),
@@ -217,7 +218,7 @@ sub new {
 	#                    pkgsCollect     = (KIWIXMLPackageCollectData),
 	#                    products        = (KIWIXMLPackageProductData,...),
 	#                }
-	#                bootArchives    = ('',...),
+	#                bootArchives    = (KIWIXMLPackageArchiveData,...),
 	#                bootDelPkgs     = (KIWIXMLPackageData,...),
 	#                bootPkgs        = (KIWIXMLPackageData,...),
 	#                bootPkgsCollect = (KIWIXMLPackageCollectData,...),
@@ -254,7 +255,7 @@ sub new {
 		$arch = "ix86";
 	}
 	my %supported = map { ($_ => 1) } qw(
-		armv5tel armv7l ia64 ix86 ppc ppc64 s390 s390x x86_64
+		armv5tel armv7l ia64 i586 i686 ix86 ppc ppc64 s390 s390x x86_64
 	);
 	$this->{supportedArch} = \%supported;
 	my $kiwi = KIWILog -> instance();
@@ -1379,7 +1380,7 @@ sub getImageType {
 sub getInstallOption {
 	# ...
 	# Return the install option type setting. Returns undef if there is
-	# a conflict and thus the settings ar ambiguous.
+	# a conflict and thus the settings are ambiguous.
 	# ---
 	my $this     = shift;
 	my $profName = shift;
@@ -2073,8 +2074,475 @@ sub setSelectionProfileNames {
 }
 
 #==========================================
+# writeXML
+#------------------------------------------
+sub writeXML {
+	# ...
+	# Write the configuration to the given path
+	# Writes the XML in formated format
+	# ---
+	my $this = shift;
+	my $path = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $path) {
+		my $msg = 'writeXML expecting path as argument';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $imgName = $this -> getImageName();
+	my $xml = '<?xml version="1.0" encoding="utf-8"?>'
+		. '<image schemaversion="' . $this -> __getSchemaVersion()
+		. '" name="' . $imgName . '"';
+	my $displName = $this -> getImageDisplayName();
+	if ($displName && $displName ne $imgName) {
+		$xml .= ' displayname="' . $displName . '"';
+	}
+	$xml .= '>';
+	# Add description data
+	$xml .= $this -> getDescriptionInfo() -> getXMLElement() -> toString();
+	# Add the <profiles> data if needed
+	my @profiles = @{$this -> getProfiles()};
+	my $numProfs = scalar @profiles;
+	if ($numProfs) {
+		$xml .= '<profiles>';
+		for my $prof (@profiles) {
+			$xml .= $prof -> getXMLElement() -> toString();
+		}
+		$xml .= '</profiles>';
+	}
+	# Setup profile processing list, default profile first
+	my @profsToProc = ('kiwi_default');
+	push @profsToProc, @{$this->{availableProfiles}};
+	# Add preference data
+	for my $profName (@profsToProc) {
+		my $prefElem = $this -> __getPreferencesXMLElement($profName);
+		if ($prefElem) {
+			if ($profName ne 'kiwi_default') {
+				$prefElem -> setAttribute('profiles', $profName);
+			}
+			$xml .= $prefElem -> toString();
+		}
+	}
+	# Add other profile dependent data
+	my @data = qw (users repoData);
+	for my $dataName (@data) {
+		for my $profName (@profsToProc) {
+			my $entry = $this->{imageConfig}{$profName}{$dataName};
+			if ($entry) {
+				my @items = @{$entry};
+				for my $item (@items) {
+					my $elem = $item -> getXMLElement();
+					if ($profName ne 'kiwi_default') {
+						$elem -> setAttribute('profiles', $profName);
+					}
+					$xml .= $elem -> toString();
+				}
+			}
+		}
+	}
+	# Add drivers
+	my $defDrivers = $this -> __collectDefaultData('drivers');
+	if ($defDrivers) {
+		$xml .= '<drivers>';
+		for my $drvObj (@{$defDrivers}) {
+			$xml .= $drvObj -> getXMLElement() -> toString();
+		}
+		$xml .= '</drivers>';
+	}
+	my $driverCollection = $this -> __collectDriverData();
+	for my $profNames (keys %{$driverCollection}) {
+		$xml .= '<drivers profiles="' . $profNames . '">';
+		my $drivers = $driverCollection->{$profNames};
+		for my $drvObj (@{$drivers}) {
+			$xml .= $drvObj -> getXMLElement() -> toString();
+		}
+		$xml .= '</drivers>';
+	}
+	# Add image packages, archives, and products
+	my @pckgsItems;
+	my @collectData = qw (
+		archives
+		bootArchives
+		pkgsCollect
+		bootPkgsCollect
+		products
+		pkgs
+		bootPkgs
+		bootDelPkgs
+	);
+	for my $collect (@collectData) {
+		my $data = $this -> __collectDefaultData($collect);
+		if ($data) {
+			push @pckgsItems, @{$data};
+		}
+	}
+	if (@pckgsItems) {
+		$xml .= '<packages type="image"';
+		my $instOpt = $this->{imageConfig}{kiwi_default}{installOpt};
+		if ($instOpt) {
+			$xml .= ' patternType="' . $instOpt . '"';
+		}
+		$xml .= '>';
+		for my $item (@pckgsItems) {
+			$xml .= $item -> getXMLElement() -> toString();
+		}
+		$xml .= '</packages>';
+	}
+	my $pkgsCollect = $this -> __collectPackagesData();
+	$xml .= $this -> __createPackageCollectionDataXML($pkgsCollect, 'image');
+	# Add type specific packages
+	my @imgTypes = qw (
+		btrfs
+		clicfs
+		cpio
+		ext2
+		ext3
+		ext4
+		iso
+		oem
+		pxe
+		reiserfs
+		split
+		squashfs
+		tbz
+		vmx
+		xfs
+	);
+	for my $imgType (@imgTypes) {
+		my @typePckgItems;
+		for my $collect (@collectData) {
+			my $data = $this -> __collectDefaultData($collect, $imgType);
+			if ($data) {
+				push @typePckgItems, @{$data};
+			}
+		}
+		if (@typePckgItems) {
+			$xml .= '<packages type="' . $imgType . '">';
+		}
+		for my $item (@typePckgItems) {
+			for my $obj (@{$item}) {
+				$xml .= $obj -> getXMLElement() -> toString();
+			}
+		}
+		if (@typePckgItems) {
+			$xml .= '</packages>';
+		}
+	}
+	for my $imgType (@imgTypes) {
+		my $pkgsCollect = $this -> __collectPackagesData($imgType);
+		$xml .=
+			$this -> __createPackageCollectionDataXML($pkgsCollect, $imgType);
+	}
+	# Add delete packages
+	my $defDelPckgs = $this -> __collectDefaultData('delPkgs');
+	if ($defDelPckgs) {
+		$xml .= '<packages type="delete">';
+		for my $dPckg (@{$defDelPckgs}) {
+			$xml .= $dPckg -> getXMLElement() -> toString();
+		}
+		$xml .= '</packages>';
+	}
+	my $delPkgsCollect = $this -> __collectDeletePackagesData();
+	for my $profNames (keys %{$delPkgsCollect}) {
+		$xml .= '<packages type="delete" profiles="' . $profNames . '">';
+		my $pacObjs = $delPkgsCollect->{$profNames};
+		for my $pacObj (@{$pacObjs}) {
+			$xml .= $pacObj -> getXMLElement() -> toString();
+		}
+		$xml .= '</packages>';
+	}
+	# Add bootstrap packages
+	my $bootStrapPckgs = $this -> __collectDefaultData('bootStrapPckgs');
+	if ($bootStrapPckgs) {
+		$xml .= '<packages type="bootstrap">';
+		for my $bPckg (@{$bootStrapPckgs}) {
+			$xml .= $bPckg -> getXMLElement() -> toString();
+		}
+		$xml .= '</packages>';
+	}
+	my $bootPkgsCollect = $this -> __collectBootStrapPackagesData();
+	for my $profNames (keys %{$bootPkgsCollect}) {
+		$xml .= '<packages type="bootstrap" profiles="' . $profNames . '">';
+		my $pacObjs = $bootPkgsCollect->{$profNames};
+		for my $pacObj (@{$pacObjs}) {
+			$xml .= $pacObj -> getXMLElement() -> toString();
+		}
+		$xml .= '</packages>';
+	}
+		# Add strip data
+	my %nameAccessMap = (
+		delete => 'stripDelete',
+		libs   => 'keepLibs',
+		tools  => 'keepTools'
+	);
+	my @stripTypes = keys %nameAccessMap;
+	@stripTypes = sort @stripTypes;
+	for my $sType (@stripTypes) {
+		my $access = $nameAccessMap{$sType};
+		my $stripData = $this -> __collectDefaultData($access);
+		if ($stripData) {
+			$xml .= '<strip type="' . $sType . '">';
+			for my $stripObj (@{$stripData}) {
+				$xml .= $stripObj -> getXMLElement() -> toString();
+			}
+			$xml .= '</strip>';
+		}
+		my $stripDataCollect = $this -> __collectStripData($access);
+		for my $profNames (keys %{$stripDataCollect}) {
+			$xml .= '<strip type="' . $sType . '" '
+				. 'profiles="' . $profNames . '">';
+			my $stripObjs = $stripDataCollect->{$profNames};
+			for my $stripObj (@{$stripObjs}) {
+				$xml .= $stripObj -> getXMLElement() -> toString();
+			}
+			$xml .= '</strip>';
+		}
+	}
+	$xml .= '</image>';
+	# Write the file
+	my $status = open (my $XMLFL, '>', $path);
+	if (! $status) {
+		my $msg = "Could not open file '$path' for writing";
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	binmode $XMLFL;
+	print $XMLFL $xml;
+	close $XMLFL;
+	return 1;
+}
+
+#==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __collectBootStrapPackagesData
+#------------------------------------------
+sub __collectBootStrapPackagesData {
+	# ...
+	# Collect and coalesce data for the <packages type="bootstrap">
+	# ---
+	my $this = shift;
+	return $this -> __collectXMLListData('bootStrapPckgs');
+}
+
+#==========================================
+# __collectDefaultData
+#------------------------------------------
+sub __collectDefaultData {
+	# ...
+	# Collect data for the default profile for the given storage location
+	# in the data strcuture
+	# ---
+	my $this    = shift;
+	my $access  = shift;
+	my $imgType = shift;
+	if (! $access) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'KIWIXML:__collectDefaultData called without data access '
+			. 'location. Internal error, please file a bug.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my @data;
+	my $defData;
+	if ($imgType) {
+		$defData = $this->{imageConfig}{kiwi_default}{$imgType}{$access};
+	} else {
+		$defData = $this->{imageConfig}{kiwi_default}{$access};
+	}
+	if ($defData) {
+		push @data, @{$defData};
+	}
+	for my $arch (keys %{$this->{supportedArch}}) {
+		my $archEntry;
+		if ($imgType) {
+			$archEntry = $this->{imageConfig}{kiwi_default}{$imgType}{$arch};
+		} else {
+			$archEntry = $this->{imageConfig}{kiwi_default}{$arch};
+		}
+		if ($archEntry) {
+			my $defArchdata = $archEntry->{$access};
+			if ($defArchdata) {
+				push @data, @{$defArchdata};
+			}
+		}
+	}
+	if (scalar @data > 0) {
+		return \@data;
+	}
+	return;
+}
+
+#==========================================
+# __collectDeletePackagesData
+#------------------------------------------
+sub __collectDeletePackagesData {
+	# ...
+	# Collect and coalesce data for the <packages type="delete">
+	# ---
+	my $this = shift;
+	return $this -> __collectXMLListData('delPkgs');
+}
+
+#==========================================
+# __collectDriverData
+#------------------------------------------
+sub __collectDriverData {
+	# ...
+	# Collect and coalesce data for the <drivers> list
+	# ---
+	my $this = shift;
+	return $this -> __collectXMLListData('drivers');
+}
+
+#==========================================
+# __collectPackagesData
+#------------------------------------------
+sub __collectPackagesData {
+	# ...
+	# Collect and coalesce data for the <packages type="image"> list
+	# ---
+	my $this = shift;
+	my $imgT = shift;
+	my $collection     =
+		$this -> __collectXMLListData('archives', $imgT);
+	my $bootArchives   =
+		$this -> __collectXMLListData('bootArchives', $imgT);
+	my $pkgCollect     =
+		$this -> __collectXMLListData('pkgsCollect', $imgT);
+	my $bootPkgCollect =
+		$this -> __collectXMLListData('bootPkgsCollect', $imgT);
+	my $products       =
+		$this -> __collectXMLListData('products', $imgT);
+	my $pkgs           =
+		$this -> __collectXMLListData('pkgs', $imgT);
+	my $bootPkgs       =
+		$this -> __collectXMLListData('bootPkgs', $imgT);
+	my $bootDelPkgs    =
+		$this -> __collectXMLListData('bootDelPkgs', $imgT);
+	my @mergeItems = (
+		$bootArchives,
+		$pkgCollect,
+		$bootPkgCollect,
+		$products,
+		$pkgs,
+		$bootPkgs,
+		$bootDelPkgs
+	);
+	for my $mergeItem (@mergeItems) {
+		for my $profName (keys %{$mergeItem}) {
+			if ($collection->{$profName}) {
+				push @{$collection->{$profName}}, @{$mergeItem->{$profName}};
+			} else {
+				$collection->{$profName} = $mergeItem->{$profName};
+			}
+		}
+	}
+	return $collection;
+}
+
+#==========================================
+# __collectStripData
+#------------------------------------------
+sub __collectStripData {
+	# ...
+	# Collect strip data for the given access pattern
+	# ---
+	my $this   = shift;
+	my $access = shift;
+	if (! $access) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'KIWIXML:__collectStripData called with data access '
+			. 'argument. Internal error please file a bug.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return $this -> __collectXMLListData($access);
+}
+
+#==========================================
+# __collectXMLListData
+#------------------------------------------
+sub __collectXMLListData {
+	# ...
+	# Collect and coalesce data that is part of a list in XML
+	# Items to be collected must have a getName method.
+	# ---
+	my $this    = shift;
+	my $dataT   = shift;
+	my $imgType = shift;
+	if (! $dataT) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'KIWIXML:__collectXMLListData called with data access '
+			. 'argument. Internal error please file a bug.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my %dataMap;
+	my %nameProfMap;
+	for my $profName (@{$this->{availableProfiles}}) {
+		my @allData;
+		my $items;
+		if ($imgType) {
+			$items = $this->{imageConfig}{$profName}{$imgType}{$dataT};
+		} else {
+			$items = $this->{imageConfig}{$profName}{$dataT};
+		}
+		if ($items) {
+			push @allData, $items;
+		}
+		# Collect architecture specific data
+		for my $arch (keys %{$this->{supportedArch}}) {
+			my $archData;
+			if ($imgType) {
+				$archData = $this->{imageConfig}{$profName}{$imgType}{$arch};
+			} else {
+				$archData = $this->{imageConfig}{$profName}{$arch};
+			}
+			if ($archData) {
+				my $archItems = $archData->{$dataT};
+				if ($archItems) {
+					push @allData, $archItems;
+				}
+			}
+		}
+		if (@allData) {
+			for my $items (@allData) {
+				for my $obj (@{$items}) {
+					my $name = $obj -> getName();
+					if ($nameProfMap{$name}) {
+						push @{$nameProfMap{$name}{profs}}, $profName;
+					} else {
+						my @profNames = ($profName);
+						my %entry = (
+							obj   => $obj,
+							profs => \@profNames
+						);
+						$nameProfMap{$name} = \%entry;
+					}
+				}
+			}
+		}
+	}
+	for my $name (keys %nameProfMap) {
+		my $profNames = join ',', @{$nameProfMap{$name}{profs}};
+		my $obj = $nameProfMap{$name}{obj};
+		if ($dataMap{$profNames}) {
+			push @{$dataMap{$profNames}}, $obj;
+		} else {
+			my @items = ($obj);
+			$dataMap{$profNames} = \@items;
+		}
+	}
+	return \%dataMap;
+}
+
 #==========================================
 # __convertSizeStrToMBVal
 #------------------------------------------
@@ -2198,6 +2666,78 @@ sub __createOEMConfig {
 		$this -> __getChildNodeTextValue($config, 'oem-unattended-id');
 	my $oemConfObj = KIWIXMLOEMConfigData -> new(\%oemConfig);
 	return $oemConfObj;
+}
+
+#==========================================
+# __createPackageCollectionDataXML
+#------------------------------------------
+sub __createPackageCollectionDataXML {
+	# ...
+	# Add data from a collection to the given string
+	# ---
+	my $this       = shift;
+	my $pkgsCollect = shift;
+	my $imgType    = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml = q{};
+	if (! $pkgsCollect) {
+		my $msg = 'KIWIXML:__addCollectionDataToStr called without '
+			. 'collection. Internal error please file a bug.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $imgType) {
+		my $msg = 'KIWIXML:__addCollectionDataToStr called without '
+			. 'image type. Internal error please file a bug.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my @writeSeparated;
+	COLLECTION:
+	for my $profNames (keys %{$pkgsCollect}) {
+		# Verify that the patternType value matches
+		my @names = split /,/msx, $profNames;
+		my $instOpt;
+		for my $pName (@names) {
+			my $iOption = $this->{imageConfig}{$pName}{installOpt};
+			if ($iOption && $instOpt && $iOption ne $instOpt) {
+				# patternType does not match write as separate entries
+				push @writeSeparated, $profNames;
+				next COLLECTION;
+			} elsif ($iOption) {
+				$instOpt = $iOption;
+			}
+		}
+		# Add the data to the XML
+		$xml .= '<packages type="' . $imgType . '" '
+		. 'profiles="' . $profNames . '"';
+		if ($instOpt) {
+			$xml .= ' patternType="' . $instOpt . '"';
+		}
+		$xml .= '>';
+		my $pacObjs = $pkgsCollect->{$profNames};
+		for my $pacObj (@{$pacObjs}) {
+			$xml .= $pacObj -> getXMLElement() -> toString();
+		}
+		$xml .= '</packages>';
+	}
+	for my $profNames (@writeSeparated) {
+		my @names = split /,/msx, $profNames;
+		my $pacObjs = $pkgsCollect->{$profNames};
+		for my $pName (@names) {
+			my $iOption = $this->{imageConfig}{$pName}{installOpt};
+			$xml .= '<packages type="' . $imgType . '" '
+			. 'profiles="' . $pName . '" '
+			. 'patternType="' . $iOption. '">';
+			for my $pacObj (@{$pacObjs}) {
+				$xml .= $pacObj -> getXMLElement() -> toString();
+			}
+			$xml .= '</packages>';
+		}
+	}
+	return $xml;
 }
 
 #==========================================
@@ -2977,8 +3517,6 @@ sub __genTypeHash {
 		if ($prim && $prim eq 'true') {
 			$typeData{primary} = 'true';
 			$defaultType = $typeName;
-		} else {
-			$typeData{primary} = 'false';
 		}
 		#==========================================
 		# store attributes
@@ -3210,6 +3748,80 @@ sub __getPackagesToIgnore {
 }
 
 #==========================================
+# __getPreferencesXMLElement
+#------------------------------------------
+sub __getPreferencesXMLElement {
+	# ...
+	# Return a complete preferences element for the given profile name
+	# ---
+	my $this     = shift;
+	my $profName = shift;
+	if (! $profName) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'KIWIXML:__getPreferencesXMLElement internal error, called '
+			. 'without profile name, please file a bug.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my $prefs = $this->{imageConfig}{$profName}{preferences};
+	my $prefElem;
+	if ($prefs) {
+		my $prefsObj = KIWIXMLPreferenceData -> new($prefs);
+		$prefElem = $prefsObj -> getXMLElement();
+		my $types = $this->{imageConfig}{$profName}{preferences}{types};
+		if ($types) {
+			# The default type needs to be first, create a type processing
+			# array
+			my $defType = $types->{defaultType};
+			my @typeSpecs = keys %{$types};
+			my @procTypes = ($defType);
+			for my $t (@typeSpecs) {
+				if ($t ne $defType && $t ne 'defaultType') {
+					push @procTypes, $t;
+				}
+			}
+			# Process all children of the <type> element
+			my @typeChildren = qw (
+				ec2config
+				machine
+				oemconfig
+				split
+				systemdisk
+			);
+			my $tElem;
+			for my $typeName (@procTypes) {
+				my $typE = $types->{$typeName};
+				$tElem = $types->{$typeName}{type} -> getXMLElement();
+				for my $child (@typeChildren) {
+					if ($types->{$typeName}{$child}) {
+						my $chObj = $types->{$typeName}{$child};
+						my $cElement =
+							$types->{$typeName}{$child} -> getXMLElement();
+						$tElem  -> addChild($cElement);
+					}
+				}
+				# PXE is special
+				if ($types->{$typeName}{pxedeploy}) {
+					my $pxeDElem =
+						$types->{$typeName}{pxedeploy} -> getXMLElement();
+					if ($types->{$typeName}{pxeconfig}) {
+						my @pxeConfigs = @{$types->{$typeName}{pxeconfig}};
+						for my $pxeC (@pxeConfigs) {
+							my $pxeCElem = $pxeC -> getXMLElement();
+							$pxeDElem  -> addChild($pxeCElem);
+						}
+					}
+					$tElem -> addChild($pxeDElem);
+				}
+				$prefElem -> addChild($tElem);
+			}
+		}
+	}
+	return $prefElem;
+}
+
+#==========================================
 # __getProfsToModify
 #------------------------------------------
 sub __getProfsToModify {
@@ -3249,6 +3861,30 @@ sub __getProfsToModify {
 	return @profsToUse;
 }
 
+#==========================================
+# __getSchemaVersion
+#------------------------------------------
+sub __getSchemaVersion {
+	# ...
+	# Return the schema version extracted from KIWISchema.rnc
+	# ---
+	my $this = shift;
+	my $locator = KIWILocator -> new();
+	my $schema = $this->{gdata}->{Schema};
+	my @lines = read_file($schema);
+	my $useNextValue;
+	my $version = q{};
+	for my $ln (@lines) {
+		if ($ln =~ /k.image.schemaversion.attribute/msg) {
+			$useNextValue = 1;
+		}
+		if ($useNextValue && $ln =~ /<value>(\d+\.\d+)<\/value>/msx) {
+			$version = $1;
+			last;
+		}
+	}
+	return $version;
+}
 
 #==========================================
 # __getTypeNamesForProfs
@@ -3766,7 +4402,9 @@ sub __populatePackageCollectionInfo {
 			@profsToProcess = split /,/, $profiles;
 		}
 		my $type = $pckgNd -> getAttribute('type');
-		my @collectNodes = $pckgNd -> getElementsByTagName('opensusePattern');
+		my @collectNodes = $pckgNd -> getElementsByTagName('namedCollection');
+		my @sNodes = $pckgNd -> getElementsByTagName('opensusePattern');
+		push @collectNodes, @sNodes;
 		my @cNodes = $pckgNd -> getElementsByTagName('rhelGroup');
 		push @collectNodes, @cNodes;
 		for my $prof (@profsToProcess) {
@@ -3985,9 +4623,6 @@ sub __populateProfileInfo {
 		# Extract attributes
 		my $descript = $element -> getAttribute ('description');
 		my $import = $element -> getAttribute ('import');
-		if (! defined $import) {
-			$import = 'false'
-		}
 		my $profName = $element -> getAttribute ('name');
 		push @availableProfiles, $profName;
 		# Insert into internal data structure
@@ -3999,7 +4634,7 @@ sub __populateProfileInfo {
 		$this->{imageConfig}{$profName}{profInfo} =
 			KIWIXMLProfileData -> new(\%profile);
 		# Handle default profile setting
-		if ( $import eq 'true') {
+		if ($import && $import eq 'true') {
 			my @profs = ('kiwi_default', $profName);
 			$this->{selectedProfiles} = \@profs;
 		}
