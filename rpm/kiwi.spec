@@ -34,10 +34,6 @@ BuildRequires:  lvm2
 BuildRequires:  gcc-c++
 BuildRequires:  libxslt
 BuildRequires:  module-init-tools
-BuildRequires:  perl-Config-IniFiles
-BuildRequires:  perl-XML-LibXML
-BuildRequires:  perl-libwww-perl
-BuildRequires:  perl-JSON
 BuildRequires:  screen
 BuildRequires:  zlib-devel
 %if 0%{?suse_version} > 1020
@@ -55,8 +51,13 @@ BuildRequires:  btrfsprogs
 BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
 BuildRequires:  perl-Class-Singleton
-BuildRequires:  perl-Test-Unit
+BuildRequires:  perl-Config-IniFiles
+BuildRequires:  perl-File-Slurp
+BuildRequires:  perl-libwww-perl
+BuildRequires:  perl-JSON
 BuildRequires:  perl-Readonly
+BuildRequires:  perl-Test-Unit
+BuildRequires:  perl-XML-LibXML
 BuildRequires:  squashfs
 BuildRequires:  zypper
 %endif
@@ -72,9 +73,10 @@ Requires:		perl >= %{perl_version}
 %else
 Requires:		perl = %{perl_version}
 %endif
-Requires:       perl-JSON
 Requires:       perl-Class-Singleton
 Requires:       perl-Config-IniFiles
+Requires:       perl-File-Slurp
+Requires:       perl-JSON
 Requires:       perl-libwww-perl
 Requires:       perl-Readonly
 Requires:       perl-XML-LibXML

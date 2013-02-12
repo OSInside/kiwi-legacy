@@ -279,6 +279,34 @@ installation source from</a:documentation>
   </define>
   <!--
     ==========================================
+    common element <archive>
+    
+  -->
+  <div>
+    <define name="k.archive.name.attribute">
+      <ref name="k.name.attribute"/>
+    </define>
+    <define name="k.archive.bootinclude.attribute">
+      <ref name="k.bootinclude.attribute"/>
+    </define>
+    <define name="k.archive.attlist">
+      <interleave>
+        <ref name="k.archive.name.attribute"/>
+        <optional>
+          <ref name="k.archive.bootinclude.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.archive">
+      <element name="archive">
+        <a:documentation>Name of an image archive file (tarball)</a:documentation>
+        <ref name="k.archive.attlist"/>
+        <empty/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <author>
     
   -->
@@ -290,6 +318,42 @@ installation source from</a:documentation>
       <element name="author">
         <a:documentation>Author of the image</a:documentation>
         <ref name="k.author.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <bootloader-theme>
+    
+  -->
+  <div>
+    <define name="k.bootloader-theme.attlist">
+      <empty/>
+    </define>
+    <define name="k.bootloader-theme">
+      <element name="bootloader-theme">
+        <a:documentation>Image bootloader theme setup.</a:documentation>
+        <db:para>The value will be used in KIWIConfig.sh::suseGFXBoot</db:para>
+        <ref name="k.bootloader-theme.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <bootsplash-theme>
+    
+  -->
+  <div>
+    <define name="k.bootsplash-theme.attlist">
+      <empty/>
+    </define>
+    <define name="k.bootsplash-theme">
+      <element name="bootsplash-theme">
+        <a:documentation>Image bootsplash theme setup.</a:documentation>
+        <db:para>The value will be used in KIWIConfig.sh::suseGFXBoot</db:para>
+        <ref name="k.bootsplash-theme.attlist"/>
         <text/>
       </element>
     </define>
@@ -464,10 +528,30 @@ cert-*.pem</a:documentation>
         <a:documentation>Specify the region/availability zone</a:documentation>
         <db:para>Specify the region/availability zone in EC2 for this image.
 Values are limited to the EC2 recognized zones:
-AP-Northeast, AP-Southeast, EU-West, SA-East, US-East, 
+AP-Northeast, AP-Southeast, EU-West, SA-East, US-East,
 US-West, and US-West2</db:para>
         <ref name="k.ec2region.attlist"/>
         <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <except>
+    
+  -->
+  <div>
+    <define name="k.except.name.attribute">
+      <ref name="k.name.attribute"/>
+    </define>
+    <define name="k.except.attlist">
+      <ref name="k.except.name.attribute"/>
+    </define>
+    <define name="k.except">
+      <element name="except">
+        <a:documentation>A Pointer to a File which should be excluded</a:documentation>
+        <ref name="k.except.attlist"/>
+        <empty/>
       </element>
     </define>
   </div>
@@ -501,21 +585,26 @@ US-West, and US-West2</db:para>
   </div>
   <!--
     ==========================================
-    common element <except>
+    common element <hwclock>
     
   -->
   <div>
-    <define name="k.except.name.attribute">
-      <ref name="k.name.attribute"/>
+    <define name="k.hwclock.content">
+      <choice>
+        <value>utc</value>
+        <value>localtime</value>
+      </choice>
     </define>
-    <define name="k.except.attlist">
-      <ref name="k.except.name.attribute"/>
+    <define name="k.hwclock.attlist">
+      <empty/>
     </define>
-    <define name="k.except">
-      <element name="except">
-        <a:documentation>A Pointer to a File which should be excluded</a:documentation>
-        <ref name="k.except.attlist"/>
-        <empty/>
+    <define name="k.hwclock">
+      <element name="hwclock">
+        <a:documentation>Setup Image harware clock setup, either utc or localtime</a:documentation>
+        <db:para>Image hardware clock setup. The value can be either
+set to utc or localtime.</db:para>
+        <ref name="k.hwclock.attlist"/>
+        <ref name="k.hwclock.content"/>
       </element>
     </define>
   </div>
@@ -674,42 +763,6 @@ specifies the where to find the boot kernel.</db:para>
   </div>
   <!--
     ==========================================
-    common element <bootloader-theme>
-    
-  -->
-  <div>
-    <define name="k.bootloader-theme.attlist">
-      <empty/>
-    </define>
-    <define name="k.bootloader-theme">
-      <element name="bootloader-theme">
-        <a:documentation>Image bootloader theme setup.</a:documentation>
-        <db:para>The value will be used in KIWIConfig.sh::suseGFXBoot</db:para>
-        <ref name="k.bootloader-theme.attlist"/>
-        <text/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <bootsplash-theme>
-    
-  -->
-  <div>
-    <define name="k.bootsplash-theme.attlist">
-      <empty/>
-    </define>
-    <define name="k.bootsplash-theme">
-      <element name="bootsplash-theme">
-        <a:documentation>Image bootsplash theme setup.</a:documentation>
-        <db:para>The value will be used in KIWIConfig.sh::suseGFXBoot</db:para>
-        <ref name="k.bootsplash-theme.attlist"/>
-        <text/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
     common element <metadata>
     
   -->
@@ -776,627 +829,29 @@ archive is extracted in a specific way.</db:para>
   </div>
   <!--
     ==========================================
-    common element <opensusePattern>
+    common element <namedCollection>
     
   -->
   <div>
-    <define name="k.opensusepattern.name.attribute">
+    <define name="k.namedCollection.name.attribute">
       <ref name="k.name.attribute"/>
     </define>
-    <define name="k.opensusepattern.arch.attribute">
+    <define name="k.namedCollection.arch.attribute">
       <ref name="k.arch.attribute"/>
     </define>
-    <define name="k.opensusepattern.attlist">
+    <define name="k.namedCollection.attlist">
       <interleave>
-        <ref name="k.opensusepattern.name.attribute"/>
+        <ref name="k.namedCollection.name.attribute"/>
         <optional>
-          <ref name="k.opensusepattern.arch.attribute"/>
+          <ref name="k.namedCollection.arch.attribute"/>
         </optional>
       </interleave>
     </define>
-    <define name="k.opensusepattern">
-      <element name="opensusePattern">
-        <a:documentation>Name of a Pattern From openSUSE</a:documentation>
-        <ref name="k.opensusepattern.attlist"/>
+    <define name="k.namedCollection">
+      <element name="namedCollection">
+        <a:documentation>Name of a Pattern for SUSE or a Group for RH</a:documentation>
+        <ref name="k.namedCollection.attlist"/>
         <empty/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <rhelGroup>
-    
-  -->
-  <div>
-    <define name="k.rhelgroup.name.attribute">
-      <ref name="k.name.attribute"/>
-    </define>
-    <define name="k.rhelgroup.arch.attribute">
-      <ref name="k.arch.attribute"/>
-    </define>
-    <define name="k.rhelgroup.attlist">
-      <interleave>
-        <ref name="k.rhelgroup.name.attribute"/>
-        <optional>
-          <ref name="k.rhelgroup.arch.attribute"/>
-        </optional>
-      </interleave>
-    </define>
-    <define name="k.rhelgroup">
-      <element name="rhelGroup">
-        <a:documentation>Name of RHEL package group </a:documentation>
-        <ref name="k.rhelgroup.attlist"/>
-        <empty/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <opensuseProduct>
-    
-  -->
-  <div>
-    <define name="k.opensuseproduct.name.attribute">
-      <ref name="k.name.attribute"/>
-    </define>
-    <define name="k.opensuseproduct.arch.attribute">
-      <ref name="k.arch.attribute"/>
-    </define>
-    <define name="k.opensuseproduct.attlist">
-      <interleave>
-        <ref name="k.opensuseproduct.name.attribute"/>
-        <optional>
-          <ref name="k.opensuseproduct.arch.attribute"/>
-        </optional>
-      </interleave>
-    </define>
-    <define name="k.opensuseproduct">
-      <element name="opensuseProduct">
-        <a:documentation>Name of a Product From openSUSE</a:documentation>
-        <ref name="k.opensuseproduct.attlist"/>
-        <empty/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <repopackage>
-    
-  -->
-  <div>
-    <define name="k.repopackage.name.attribute">
-      <ref name="k.name.attribute"/>
-    </define>
-    <define name="k.repopackage.arch.attribute">
-      <ref name="k.arch.attribute"/>
-    </define>
-    <define name="k.repopackage.forcerepo.attribute">
-      <attribute name="forcerepo">
-        <a:documentation>Specifies the search priority</a:documentation>
-        <data type="IDREF"/>
-      </attribute>
-    </define>
-    <define name="k.repopackage.addarch.attribute">
-      <attribute name="addarch">
-        <a:documentation>Specifies that this package should
-additionally add the same package from the given arch</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.repopackage.removearch.attribute">
-      <attribute name="removearch">
-        <a:documentation>Specifies that the package with the
-given arch should be removed</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.repopackage.onlyarch.attribute">
-      <attribute name="onlyarch">
-        <a:documentation>Specifies that the package with
-the given arch should be used in any case</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.repopackage.medium.attribute">
-      <attribute name="medium">
-        <a:documentation>Specifies that the package will be put
-to the specific medium number (CD1, DVD7, ...)</a:documentation>
-        <data type="nonNegativeInteger"/>
-      </attribute>
-    </define>
-    <define name="k.repopackage.source.attribute">
-      <ref name="k.source.attribute"/>
-    </define>
-    <define name="k.repopackage.script.attribute">
-      <ref name="k.script.attribute"/>
-    </define>
-    <define name="k.repopackage.attlist">
-      <interleave>
-        <ref name="k.repopackage.name.attribute"/>
-        <optional>
-          <ref name="k.repopackage.arch.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repopackage.forcerepo.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repopackage.addarch.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repopackage.removearch.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repopackage.onlyarch.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repopackage.source.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repopackage.script.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repopackage.medium.attribute"/>
-        </optional>
-      </interleave>
-    </define>
-    <define name="k.repopackage">
-      <element name="repopackage">
-        <a:documentation>Name of an instsource Package</a:documentation>
-        <ref name="k.repopackage.attlist"/>
-        <empty/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <package>
-    
-  -->
-  <div>
-    <define name="k.package.name.attribute">
-      <ref name="k.name.attribute"/>
-    </define>
-    <define name="k.package.arch.attribute">
-      <ref name="k.arch.attribute"/>
-    </define>
-    <define name="k.package.replaces.attribute">
-      <ref name="k.replaces.attribute"/>
-    </define>
-    <define name="k.package.bootinclude.attribute">
-      <ref name="k.bootinclude.attribute"/>
-    </define>
-    <define name="k.package.bootdelete.attribute">
-      <ref name="k.bootdelete.attribute"/>
-    </define>
-    <define name="k.package.attlist">
-      <interleave>
-        <ref name="k.package.name.attribute"/>
-        <optional>
-          <ref name="k.package.arch.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.replaces.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.bootdelete.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.bootinclude.attribute"/>
-        </optional>
-      </interleave>
-    </define>
-    <define name="k.package">
-      <element name="package">
-        <a:documentation>Name of an image Package</a:documentation>
-        <ref name="k.package.attlist"/>
-        <empty/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <archive>
-    
-  -->
-  <div>
-    <define name="k.archive.name.attribute">
-      <ref name="k.name.attribute"/>
-    </define>
-    <define name="k.archive.bootinclude.attribute">
-      <ref name="k.bootinclude.attribute"/>
-    </define>
-    <define name="k.archive.attlist">
-      <interleave>
-        <ref name="k.archive.name.attribute"/>
-        <optional>
-          <ref name="k.archive.bootinclude.attribute"/>
-        </optional>
-      </interleave>
-    </define>
-    <define name="k.archive">
-      <element name="archive">
-        <a:documentation>Name of an image archive file (tarball)</a:documentation>
-        <ref name="k.archive.attlist"/>
-        <empty/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <packagemanager>
-    
-  -->
-  <div>
-    <define name="k.packagemanager.content">
-      <choice>
-        <value>apt-get</value>
-        <value>smart</value>
-        <value>zypper</value>
-        <value>ensconce</value>
-        <value>yum</value>
-      </choice>
-    </define>
-    <define name="k.packagemanager.attlist">
-      <empty/>
-    </define>
-    <define name="k.packagemanager">
-      <element name="packagemanager">
-        <a:documentation>Name of the Package Manager</a:documentation>
-        <db:para>The package manager used for package installation
-could be either zypper or smart</db:para>
-        <ref name="k.packagemanager.attlist"/>
-        <ref name="k.packagemanager.content"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <partitions>
-    
-  -->
-  <div>
-    <define name="k.partitions.device.attribute">
-      <attribute name="device">
-        <a:documentation>As part of the network deploy configuration this section
-specifies the disk device name</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.partitions.attlist">
-      <optional>
-        <ref name="k.partitions.device.attribute"/>
-      </optional>
-    </define>
-    <define name="k.partitions">
-      <element name="partitions">
-        <a:documentation>A List of Partitions</a:documentation>
-        <ref name="k.partitions.attlist"/>
-        <oneOrMore>
-          <ref name="k.partition"/>
-        </oneOrMore>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <partition>
-    
-  -->
-  <div>
-    <define name="k.partition.type.attribute">
-      <attribute name="type">
-        <a:documentation>Partition Type identifier, see parted for details</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.partition.number.attribute">
-      <attribute name="number">
-        <a:documentation>Partition ID</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.partition.size.attribute">
-      <ref name="k.size.attribute"/>
-    </define>
-    <define name="k.partition.mountpoint.attribute">
-      <attribute name="mountpoint">
-        <a:documentation>Mount path for this partition</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.partition.target.attribute">
-      <attribute name="target">
-        <a:documentation>Is a real target or not which means is part of
-the /etc/fstab file or not</a:documentation>
-        <data type="boolean"/>
-      </attribute>
-    </define>
-    <define name="k.partition.attlist">
-      <interleave>
-        <ref name="k.partition.type.attribute"/>
-        <ref name="k.partition.number.attribute"/>
-        <optional>
-          <ref name="k.partition.size.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.partition.mountpoint.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.partition.target.attribute"/>
-        </optional>
-      </interleave>
-    </define>
-    <define name="k.partition">
-      <element name="partition">
-        <a:documentation>A Partition</a:documentation>
-        <ref name="k.partition.attlist"/>
-        <empty/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <persistent>
-    
-  -->
-  <div>
-    <define name="k.persistent.attlist">
-      <empty/>
-    </define>
-    <define name="k.persistent">
-      <element name="persistent">
-        <a:documentation>Specifies Filenames in the Read-Write Disk Area</a:documentation>
-        <db:para>As part of the split section the persistent element
-specifies filenames which are in the read-write disk area</db:para>
-        <interleave>
-          <ref name="k.persistent.attlist"/>
-          <zeroOrMore>
-            <ref name="k.except"/>
-          </zeroOrMore>
-          <oneOrMore>
-            <ref name="k.file"/>
-          </oneOrMore>
-        </interleave>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <profile>
-    
-  -->
-  <div>
-    <define name="k.profile.name.attribute">
-      <ref name="k.name.attribute"/>
-    </define>
-    <define name="k.profile.description.attribute">
-      <attribute name="description">
-        <a:documentation>Description of how this profiles influences the image</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.profile.import.attribute">
-      <attribute name="import">
-        <a:documentation>Import profile by default if no profile was set on
-the command line</a:documentation>
-        <data type="boolean"/>
-      </attribute>
-    </define>
-    <define name="k.profile.attlist">
-      <interleave>
-        <ref name="k.profile.name.attribute"/>
-        <ref name="k.profile.description.attribute"/>
-        <optional>
-          <ref name="k.profile.import.attribute"/>
-        </optional>
-      </interleave>
-    </define>
-    <define name="k.profile">
-      <element name="profile">
-        <a:documentation>Creates Profiles</a:documentation>
-        <db:para>Profiles creates a namespace on an image description and
-thus can be used to have one description with different
-profiles for example KDE and GNOME including different
-packages.</db:para>
-        <ref name="k.profile.attlist"/>
-        <empty/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <repository>
-    
-  -->
-  <div>
-    <define name="k.repository.profiles.attribute">
-      <ref name="k.profiles.attribute"/>
-    </define>
-    <define name="k.repository.type.attribute">
-      <attribute name="type">
-        <a:documentation>Type of repository</a:documentation>
-        <choice>
-          <value>apt-deb</value>
-          <value>apt-rpm</value>
-          <value>deb-dir</value>
-          <value>mirrors</value>
-          <value>red-carpet</value>
-          <value>rpm-dir</value>
-          <value>rpm-md</value>
-          <value>slack-site</value>
-          <value>up2date-mirrors</value>
-          <value>urpmi</value>
-          <value>yast2</value>
-        </choice>
-      </attribute>
-    </define>
-    <define name="k.repository.status.attribute">
-      <attribute name="status">
-        <a:documentation>Specifies the status of the repository. This can be
-replacable or if not specified it's a must have repository</a:documentation>
-        <choice>
-          <value>fixed</value>
-          <value>replaceable</value>
-        </choice>
-      </attribute>
-    </define>
-    <define name="k.repository.alias.attribute">
-      <attribute name="alias">
-        <a:documentation>Alias name to be used for this repository. This is an
-optional free form text. If not set the source attribute
-value is used and builds the alias name by replacing
-each '/' with a '_'. An alias name should be set if the
-source argument doesn't really explain what this repository
-contains</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.repository.components.attribute">
-      <attribute name="components">
-        <a:documentation>Distribution components, used for deb repositories. If
-not set it defaults to main</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.repository.distribution.attribute">
-      <attribute name="distribution">
-        <a:documentation>Distribution name information, used for deb repositories</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.repository.imageinclude.attribute">
-      <attribute name="imageinclude">
-        <a:documentation>Specify whether or not this repository should be configured in the
-resulting image. Boolean value true or false, the default is false.</a:documentation>
-        <data type="boolean"/>
-      </attribute>
-    </define>
-    <define name="k.repository.prefer-license.attribute">
-      <attribute name="prefer-license">
-        <a:documentation>Use the license found in this repository, if any, as the
-license installed in the image</a:documentation>
-        <data type="boolean"/>
-      </attribute>
-    </define>
-    <define name="k.repository.priority.attribute">
-      <attribute name="priority">
-        <a:documentation>Channel priority assigned to all packages available in
-this channel (0 if not set). If the exact same package
-is available in more than one channel, the highest
-priority is used</a:documentation>
-        <data type="integer"/>
-      </attribute>
-    </define>
-    <define name="k.repository.password.attribute">
-      <ref name="k.password.attribute">
-        <a:documentation>Channel password if required. It depends on the url type
-whether and how this information is passed</a:documentation>
-      </ref>
-    </define>
-    <define name="k.repository.username.attribute">
-      <ref name="k.username.attribute">
-        <a:documentation>Channel username if required. It depends on the url type
-whether and how this information is passed</a:documentation>
-      </ref>
-    </define>
-    <define name="k.repository.attlist">
-      <interleave>
-        <ref name="k.repository.type.attribute"/>
-        <optional>
-          <ref name="k.repository.profiles.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repository.status.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repository.alias.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repository.components.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repository.distribution.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repository.imageinclude.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repository.prefer-license.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repository.priority.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repository.password.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.repository.username.attribute"/>
-        </optional>
-      </interleave>
-    </define>
-    <define name="k.repository">
-      <element name="repository">
-        <a:documentation>The Name of the Repository</a:documentation>
-        <ref name="k.repository.attlist"/>
-        <ref name="k.source"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <rpm-check-signatures>
-    
-  -->
-  <div>
-    <define name="k.rpm-check-signatures.content">
-      <data type="boolean"/>
-    </define>
-    <define name="k.rpm-check-signatures.attlist">
-      <empty/>
-    </define>
-    <define name="k.rpm-check-signatures">
-      <element name="rpm-check-signatures">
-        <a:documentation>Setup a Package Signature</a:documentation>
-        <db:para>Setup if the package manager should check the package
-signature or not. This option could be ignored according
-to the used package manager.</db:para>
-        <ref name="k.rpm-check-signatures.attlist"/>
-        <ref name="k.rpm-check-signatures.content"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <rpm-excludedocs>
-    
-  -->
-  <div>
-    <define name="k.rpm-excludedocs.content">
-      <data type="boolean"/>
-    </define>
-    <define name="k.rpm-excludedocs.attlist">
-      <empty/>
-    </define>
-    <define name="k.rpm-excludedocs">
-      <element name="rpm-excludedocs">
-        <a:documentation>Do not install files marked as documentation in the package</a:documentation>
-        <db:para>Setup if the package manager should exclude docs files
-during package installation. This option could be ignored
-according to the used package manager.</db:para>
-        <ref name="k.rpm-excludedocs.attlist"/>
-        <ref name="k.rpm-excludedocs.content"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <rpm-force>
-    
-  -->
-  <div>
-    <define name="k.rpm-force.content">
-      <data type="boolean"/>
-    </define>
-    <define name="k.rpm-force.attlist">
-      <empty/>
-    </define>
-    <define name="k.rpm-force">
-      <element name="rpm-force">
-        <a:documentation>Force the Installation of a Package</a:documentation>
-        <db:para>Setup if the package manager should force the install of the
-package or not. This option could be ignored according
-to the used package manager.</db:para>
-        <ref name="k.rpm-force.attlist"/>
-        <ref name="k.rpm-force.content"/>
       </element>
     </define>
   </div>
@@ -1628,28 +1083,6 @@ recovery partition. Default value is 83 (Linux)</db:para>
   </div>
   <!--
     ==========================================
-    common element <oem-silent-boot>
-    
-  -->
-  <div>
-    <define name="k.oem-silent-boot.content">
-      <data type="boolean"/>
-    </define>
-    <define name="k.oem-silent-boot.attlist">
-      <empty/>
-    </define>
-    <define name="k.oem-silent-boot">
-      <element name="oem-silent-boot">
-        <a:documentation>For oemboot driven images: boot silently during the initial boot
-true/false</a:documentation>
-        <db:para>For oemboot driven images: complete the initial boot of the system in silent mode, true/false. </db:para>
-        <ref name="k.oem-silent-boot.attlist"/>
-        <ref name="k.oem-silent-boot.content"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
     common element <oem-shutdown>
     
   -->
@@ -1689,6 +1122,28 @@ true/false</a:documentation>
         <db:para>For oemboot driven images: shutdown after first deployment true/false. A message to be acknowledged by the user is posted after the image has been dumped (installed) and expanded on the target disk. After user interaction the system is shutdown.</db:para>
         <ref name="k.oem-shutdown-interactive.attlist"/>
         <ref name="k.oem-shutdown-interactive.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <oem-silent-boot>
+    
+  -->
+  <div>
+    <define name="k.oem-silent-boot.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-silent-boot.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-silent-boot">
+      <element name="oem-silent-boot">
+        <a:documentation>For oemboot driven images: boot silently during the initial boot
+true/false</a:documentation>
+        <db:para>For oemboot driven images: complete the initial boot of the system in silent mode, true/false. </db:para>
+        <ref name="k.oem-silent-boot.attlist"/>
+        <ref name="k.oem-silent-boot.content"/>
       </element>
     </define>
   </div>
@@ -1797,6 +1252,623 @@ or by default with /dev/disk/by-id/...</a:documentation>
   </div>
   <!--
     ==========================================
+    common element <opensusePattern>
+    
+  -->
+  <div>
+    <define name="k.opensusepattern.name.attribute">
+      <ref name="k.name.attribute"/>
+    </define>
+    <define name="k.opensusepattern.arch.attribute">
+      <ref name="k.arch.attribute"/>
+    </define>
+    <define name="k.opensusepattern.attlist">
+      <interleave>
+        <ref name="k.opensusepattern.name.attribute"/>
+        <optional>
+          <ref name="k.opensusepattern.arch.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.opensusepattern">
+      <element name="opensusePattern">
+        <a:documentation>Name of a Pattern From openSUSE</a:documentation>
+        <ref name="k.opensusepattern.attlist"/>
+        <empty/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <opensuseProduct>
+    
+  -->
+  <div>
+    <define name="k.opensuseproduct.name.attribute">
+      <ref name="k.name.attribute"/>
+    </define>
+    <define name="k.opensuseproduct.arch.attribute">
+      <ref name="k.arch.attribute"/>
+    </define>
+    <define name="k.opensuseproduct.attlist">
+      <interleave>
+        <ref name="k.opensuseproduct.name.attribute"/>
+        <optional>
+          <ref name="k.opensuseproduct.arch.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.opensuseproduct">
+      <element name="opensuseProduct">
+        <a:documentation>Name of a Product From openSUSE</a:documentation>
+        <ref name="k.opensuseproduct.attlist"/>
+        <empty/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <package>
+    
+  -->
+  <div>
+    <define name="k.package.name.attribute">
+      <ref name="k.name.attribute"/>
+    </define>
+    <define name="k.package.arch.attribute">
+      <ref name="k.arch.attribute"/>
+    </define>
+    <define name="k.package.replaces.attribute">
+      <ref name="k.replaces.attribute"/>
+    </define>
+    <define name="k.package.bootinclude.attribute">
+      <ref name="k.bootinclude.attribute"/>
+    </define>
+    <define name="k.package.bootdelete.attribute">
+      <ref name="k.bootdelete.attribute"/>
+    </define>
+    <define name="k.package.attlist">
+      <interleave>
+        <ref name="k.package.name.attribute"/>
+        <optional>
+          <ref name="k.package.arch.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.replaces.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.bootdelete.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.bootinclude.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.package">
+      <element name="package">
+        <a:documentation>Name of an image Package</a:documentation>
+        <ref name="k.package.attlist"/>
+        <empty/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <packagemanager>
+    
+  -->
+  <div>
+    <define name="k.packagemanager.content">
+      <choice>
+        <value>apt-get</value>
+        <value>smart</value>
+        <value>zypper</value>
+        <value>ensconce</value>
+        <value>yum</value>
+      </choice>
+    </define>
+    <define name="k.packagemanager.attlist">
+      <empty/>
+    </define>
+    <define name="k.packagemanager">
+      <element name="packagemanager">
+        <a:documentation>Name of the Package Manager</a:documentation>
+        <db:para>The package manager used for package installation
+could be either zypper or smart</db:para>
+        <ref name="k.packagemanager.attlist"/>
+        <ref name="k.packagemanager.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <partition>
+    
+  -->
+  <div>
+    <define name="k.partition.type.attribute">
+      <attribute name="type">
+        <a:documentation>Partition Type identifier, see parted for details</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.partition.number.attribute">
+      <attribute name="number">
+        <a:documentation>Partition ID</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.partition.size.attribute">
+      <ref name="k.size.attribute"/>
+    </define>
+    <define name="k.partition.mountpoint.attribute">
+      <attribute name="mountpoint">
+        <a:documentation>Mount path for this partition</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.partition.target.attribute">
+      <attribute name="target">
+        <a:documentation>Is a real target or not which means is part of
+the /etc/fstab file or not</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
+    <define name="k.partition.attlist">
+      <interleave>
+        <ref name="k.partition.type.attribute"/>
+        <ref name="k.partition.number.attribute"/>
+        <optional>
+          <ref name="k.partition.size.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.partition.mountpoint.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.partition.target.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.partition">
+      <element name="partition">
+        <a:documentation>A Partition</a:documentation>
+        <ref name="k.partition.attlist"/>
+        <empty/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <partitions>
+    
+  -->
+  <div>
+    <define name="k.partitions.device.attribute">
+      <attribute name="device">
+        <a:documentation>As part of the network deploy configuration this section
+specifies the disk device name</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.partitions.attlist">
+      <optional>
+        <ref name="k.partitions.device.attribute"/>
+      </optional>
+    </define>
+    <define name="k.partitions">
+      <element name="partitions">
+        <a:documentation>A List of Partitions</a:documentation>
+        <ref name="k.partitions.attlist"/>
+        <oneOrMore>
+          <ref name="k.partition"/>
+        </oneOrMore>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <persistent>
+    
+  -->
+  <div>
+    <define name="k.persistent.attlist">
+      <empty/>
+    </define>
+    <define name="k.persistent">
+      <element name="persistent">
+        <a:documentation>Specifies Filenames in the Read-Write Disk Area</a:documentation>
+        <db:para>As part of the split section the persistent element
+specifies filenames which are in the read-write disk area</db:para>
+        <interleave>
+          <ref name="k.persistent.attlist"/>
+          <zeroOrMore>
+            <ref name="k.except"/>
+          </zeroOrMore>
+          <oneOrMore>
+            <ref name="k.file"/>
+          </oneOrMore>
+        </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <profile>
+    
+  -->
+  <div>
+    <define name="k.profile.name.attribute">
+      <ref name="k.name.attribute"/>
+    </define>
+    <define name="k.profile.description.attribute">
+      <attribute name="description">
+        <a:documentation>Description of how this profiles influences the image</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.profile.import.attribute">
+      <attribute name="import">
+        <a:documentation>Import profile by default if no profile was set on
+the command line</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
+    <define name="k.profile.attlist">
+      <interleave>
+        <ref name="k.profile.name.attribute"/>
+        <ref name="k.profile.description.attribute"/>
+        <optional>
+          <ref name="k.profile.import.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.profile">
+      <element name="profile">
+        <a:documentation>Creates Profiles</a:documentation>
+        <db:para>Profiles creates a namespace on an image description and
+thus can be used to have one description with different
+profiles for example KDE and GNOME including different
+packages.</db:para>
+        <ref name="k.profile.attlist"/>
+        <empty/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <repopackage>
+    
+  -->
+  <div>
+    <define name="k.repopackage.name.attribute">
+      <ref name="k.name.attribute"/>
+    </define>
+    <define name="k.repopackage.arch.attribute">
+      <ref name="k.arch.attribute"/>
+    </define>
+    <define name="k.repopackage.forcerepo.attribute">
+      <attribute name="forcerepo">
+        <a:documentation>Specifies the search priority</a:documentation>
+        <data type="IDREF"/>
+      </attribute>
+    </define>
+    <define name="k.repopackage.addarch.attribute">
+      <attribute name="addarch">
+        <a:documentation>Specifies that this package should
+additionally add the same package from the given arch</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.repopackage.removearch.attribute">
+      <attribute name="removearch">
+        <a:documentation>Specifies that the package with the
+given arch should be removed</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.repopackage.onlyarch.attribute">
+      <attribute name="onlyarch">
+        <a:documentation>Specifies that the package with
+the given arch should be used in any case</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.repopackage.medium.attribute">
+      <attribute name="medium">
+        <a:documentation>Specifies that the package will be put
+to the specific medium number (CD1, DVD7, ...)</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
+    <define name="k.repopackage.source.attribute">
+      <ref name="k.source.attribute"/>
+    </define>
+    <define name="k.repopackage.script.attribute">
+      <ref name="k.script.attribute"/>
+    </define>
+    <define name="k.repopackage.attlist">
+      <interleave>
+        <ref name="k.repopackage.name.attribute"/>
+        <optional>
+          <ref name="k.repopackage.arch.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repopackage.forcerepo.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repopackage.addarch.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repopackage.removearch.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repopackage.onlyarch.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repopackage.source.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repopackage.script.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repopackage.medium.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.repopackage">
+      <element name="repopackage">
+        <a:documentation>Name of an instsource Package</a:documentation>
+        <ref name="k.repopackage.attlist"/>
+        <empty/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <repository>
+    
+  -->
+  <div>
+    <define name="k.repository.profiles.attribute">
+      <ref name="k.profiles.attribute"/>
+    </define>
+    <define name="k.repository.type.attribute">
+      <attribute name="type">
+        <a:documentation>Type of repository</a:documentation>
+        <choice>
+          <value>apt-deb</value>
+          <value>apt-rpm</value>
+          <value>deb-dir</value>
+          <value>mirrors</value>
+          <value>red-carpet</value>
+          <value>rpm-dir</value>
+          <value>rpm-md</value>
+          <value>slack-site</value>
+          <value>up2date-mirrors</value>
+          <value>urpmi</value>
+          <value>yast2</value>
+        </choice>
+      </attribute>
+    </define>
+    <define name="k.repository.status.attribute">
+      <attribute name="status">
+        <a:documentation>Specifies the status of the repository. This can be
+replacable or if not specified it's a must have repository</a:documentation>
+        <choice>
+          <value>fixed</value>
+          <value>replaceable</value>
+        </choice>
+      </attribute>
+    </define>
+    <define name="k.repository.alias.attribute">
+      <attribute name="alias">
+        <a:documentation>Alias name to be used for this repository. This is an
+optional free form text. If not set the source attribute
+value is used and builds the alias name by replacing
+each '/' with a '_'. An alias name should be set if the
+source argument doesn't really explain what this repository
+contains</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.repository.components.attribute">
+      <attribute name="components">
+        <a:documentation>Distribution components, used for deb repositories. If
+not set it defaults to main</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.repository.distribution.attribute">
+      <attribute name="distribution">
+        <a:documentation>Distribution name information, used for deb repositories</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.repository.imageinclude.attribute">
+      <attribute name="imageinclude">
+        <a:documentation>Specify whether or not this repository should be configured in the
+resulting image. Boolean value true or false, the default is false.</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
+    <define name="k.repository.prefer-license.attribute">
+      <attribute name="prefer-license">
+        <a:documentation>Use the license found in this repository, if any, as the
+license installed in the image</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
+    <define name="k.repository.priority.attribute">
+      <attribute name="priority">
+        <a:documentation>Channel priority assigned to all packages available in
+this channel (0 if not set). If the exact same package
+is available in more than one channel, the highest
+priority is used</a:documentation>
+        <data type="integer"/>
+      </attribute>
+    </define>
+    <define name="k.repository.password.attribute">
+      <ref name="k.password.attribute">
+        <a:documentation>Channel password if required. It depends on the url type
+whether and how this information is passed</a:documentation>
+      </ref>
+    </define>
+    <define name="k.repository.username.attribute">
+      <ref name="k.username.attribute">
+        <a:documentation>Channel username if required. It depends on the url type
+whether and how this information is passed</a:documentation>
+      </ref>
+    </define>
+    <define name="k.repository.attlist">
+      <interleave>
+        <ref name="k.repository.type.attribute"/>
+        <optional>
+          <ref name="k.repository.profiles.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.status.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.alias.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.components.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.distribution.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.imageinclude.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.prefer-license.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.priority.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.password.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.username.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.repository">
+      <element name="repository">
+        <a:documentation>The Name of the Repository</a:documentation>
+        <ref name="k.repository.attlist"/>
+        <ref name="k.source"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <rhelGroup>
+    
+  -->
+  <div>
+    <define name="k.rhelgroup.name.attribute">
+      <ref name="k.name.attribute"/>
+    </define>
+    <define name="k.rhelgroup.arch.attribute">
+      <ref name="k.arch.attribute"/>
+    </define>
+    <define name="k.rhelgroup.attlist">
+      <interleave>
+        <ref name="k.rhelgroup.name.attribute"/>
+        <optional>
+          <ref name="k.rhelgroup.arch.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.rhelgroup">
+      <element name="rhelGroup">
+        <a:documentation>Name of RHEL package group </a:documentation>
+        <ref name="k.rhelgroup.attlist"/>
+        <empty/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <rpm-check-signatures>
+    
+  -->
+  <div>
+    <define name="k.rpm-check-signatures.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.rpm-check-signatures.attlist">
+      <empty/>
+    </define>
+    <define name="k.rpm-check-signatures">
+      <element name="rpm-check-signatures">
+        <a:documentation>Setup a Package Signature</a:documentation>
+        <db:para>Setup if the package manager should check the package
+signature or not. This option could be ignored according
+to the used package manager.</db:para>
+        <ref name="k.rpm-check-signatures.attlist"/>
+        <ref name="k.rpm-check-signatures.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <rpm-excludedocs>
+    
+  -->
+  <div>
+    <define name="k.rpm-excludedocs.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.rpm-excludedocs.attlist">
+      <empty/>
+    </define>
+    <define name="k.rpm-excludedocs">
+      <element name="rpm-excludedocs">
+        <a:documentation>Do not install files marked as documentation in the package</a:documentation>
+        <db:para>Setup if the package manager should exclude docs files
+during package installation. This option could be ignored
+according to the used package manager.</db:para>
+        <ref name="k.rpm-excludedocs.attlist"/>
+        <ref name="k.rpm-excludedocs.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <rpm-force>
+    
+  -->
+  <div>
+    <define name="k.rpm-force.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.rpm-force.attlist">
+      <empty/>
+    </define>
+    <define name="k.rpm-force">
+      <element name="rpm-force">
+        <a:documentation>Force the Installation of a Package</a:documentation>
+        <db:para>Setup if the package manager should force the install
+of the package or not. This option could be ignored
+according to the used package manager.</db:para>
+        <ref name="k.rpm-force.attlist"/>
+        <ref name="k.rpm-force.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <showlicense>
+    
+  -->
+  <div>
+    <define name="k.showlicense.attlist">
+      <empty/>
+    </define>
+    <define name="k.showlicense">
+      <element name="showlicense">
+        <a:documentation>Setup showlicense</a:documentation>
+        <db:para>Image license setup. The specfied license name
+will be displayed in a dialog window on boot.</db:para>
+        <ref name="k.showlicense.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <size>
     
   -->
@@ -1876,6 +1948,35 @@ used for.</db:para>
   </div>
   <!--
     ==========================================
+    common element <systemdisk>
+    
+  -->
+  <div>
+    <define name="k.systemdisk.lvmgroup.attribute">
+      <attribute name="name">
+        <a:documentation>Specify Volume group name, default is kiwiVG.</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.systemdisk.attlist">
+      <optional>
+        <ref name="k.systemdisk.lvmgroup.attribute"/>
+      </optional>
+    </define>
+    <define name="k.systemdisk">
+      <element name="systemdisk">
+        <a:documentation>Specify LVM volumes other than the root volume</a:documentation>
+        <db:para>Specify LVM volumes other than the root volume.</db:para>
+        <interleave>
+          <ref name="k.systemdisk.attlist"/>
+          <zeroOrMore>
+            <ref name="k.volume"/>
+          </zeroOrMore>
+        </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <temporary>
     
   -->
@@ -1912,53 +2013,9 @@ specifies file names which are in the RAM disk area.</db:para>
     <define name="k.timeout">
       <element name="timeout">
         <a:documentation>Specifies an ATFTP Download Timeout</a:documentation>
-        <db:para>As part of the network deploy configuration this section 
+        <db:para>As part of the network deploy configuration this section
 specifies an ATFTP download timeout</db:para>
         <ref name="k.timeout.attlist"/>
-        <text/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <hwclock>
-    
-  -->
-  <div>
-    <define name="k.hwclock.content">
-      <choice>
-        <value>utc</value>
-        <value>localtime</value>
-      </choice>
-    </define>
-    <define name="k.hwclock.attlist">
-      <empty/>
-    </define>
-    <define name="k.hwclock">
-      <element name="hwclock">
-        <a:documentation>Setup Image harware clock setup, either utc or localtime</a:documentation>
-        <db:para>Image hardware clock setup. The value can be either
-set to utc or localtime.</db:para>
-        <ref name="k.hwclock.attlist"/>
-        <ref name="k.hwclock.content"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <showlicense>
-    
-  -->
-  <div>
-    <define name="k.showlicense.attlist">
-      <empty/>
-    </define>
-    <define name="k.showlicense">
-      <element name="showlicense">
-        <a:documentation>Setup showlicense</a:documentation>
-        <db:para>Image license setup. The specfied license name
-will be displayed in a dialog window on boot.</db:para>
-        <ref name="k.showlicense.attlist"/>
         <text/>
       </element>
     </define>
@@ -2465,86 +2522,6 @@ into the master block. There is space for 32 characters.</a:documentation>
   </div>
   <!--
     ==========================================
-    common element <volume>
-    
-  -->
-  <div>
-    <define name="k.volume.freespace.attribute">
-      <attribute name="freespace">
-        <a:documentation>free space to be added to this volume. The value is
-used as MB by default but you can add "M" and/or "G" as
-postfix</a:documentation>
-        <ref name="volume-size-type"/>
-      </attribute>
-    </define>
-    <define name="k.volume.name.attribute">
-      <attribute name="name">
-        <a:documentation>volume name. The name specifies a path which has to
-exist inside the root directory.</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.volume.size.attribute">
-      <attribute name="size">
-        <a:documentation>absolute size of the volume. If the size value
-is too small to store all data it will be ignored.
-The value is used as MB by default but you can
-add "M" and/or "G" as postfix</a:documentation>
-        <ref name="volume-size-type"/>
-      </attribute>
-    </define>
-    <define name="k.volume.attlist">
-      <interleave>
-        <optional>
-          <ref name="k.volume.freespace.attribute"/>
-        </optional>
-        <ref name="k.volume.name.attribute"/>
-        <optional>
-          <ref name="k.volume.size.attribute"/>
-        </optional>
-      </interleave>
-    </define>
-    <define name="k.volume">
-      <element name="volume">
-        <a:documentation>Specify which parts of the filesystem should be
-on an extra volume.</a:documentation>
-        <db:para>Specify which parts of the filesystem should be on
-an extra volume.</db:para>
-        <ref name="k.volume.attlist"/>
-        <empty/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <systemdisk>
-    
-  -->
-  <div>
-    <define name="k.systemdisk.lvmgroup.attribute">
-      <attribute name="name">
-        <a:documentation>Specify Volume group name, default is kiwiVG.</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.systemdisk.attlist">
-      <optional>
-        <ref name="k.systemdisk.lvmgroup.attribute"/>
-      </optional>
-    </define>
-    <define name="k.systemdisk">
-      <element name="systemdisk">
-        <a:documentation>Specify LVM volumes other than the root volume</a:documentation>
-        <db:para>Specify LVM volumes other than the root volume.</db:para>
-        <interleave>
-          <ref name="k.systemdisk.attlist"/>
-          <zeroOrMore>
-            <ref name="k.volume"/>
-          </zeroOrMore>
-        </interleave>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
     common element <union>
     
   -->
@@ -2576,8 +2553,8 @@ an extra volume.</db:para>
         <a:documentation>Specifies the Overlay Filesystem</a:documentation>
         <db:para>As part of the network deploy configuration this section
 specifies the overlay filesystem setup if required by the
-filesystem type of the system image.An overlay setup is only
-required if the system image uses a squashfs
+filesystem type of the system image.An overlay setup is
+only required if the system image uses a squashfs
 compressed filesystem.</db:para>
         <ref name="k.union.attlist"/>
         <empty/>
@@ -2703,7 +2680,8 @@ compressed filesystem.</db:para>
   <div>
     <define name="k.vmdisk.disktype.attribute">
       <attribute name="disktype">
-        <a:documentation>The type of the disk as it is internally handled by the VM (ovf only)</a:documentation>
+        <a:documentation>The type of the disk as it is internally handled
+by the VM (ovf only)</a:documentation>
       </attribute>
     </define>
     <define name="k.vmdisk.controller.attribute">
@@ -2838,6 +2816,57 @@ scsi CD or an ide CD drive</a:documentation>
           <ref name="k.vmnic.attlist"/>
           <empty/>
         </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <volume>
+    
+  -->
+  <div>
+    <define name="k.volume.freespace.attribute">
+      <attribute name="freespace">
+        <a:documentation>free space to be added to this volume. The value is
+used as MB by default but you can add "M" and/or "G" as
+postfix</a:documentation>
+        <ref name="volume-size-type"/>
+      </attribute>
+    </define>
+    <define name="k.volume.name.attribute">
+      <attribute name="name">
+        <a:documentation>volume name. The name specifies a path which has to
+exist inside the root directory.</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.volume.size.attribute">
+      <attribute name="size">
+        <a:documentation>absolute size of the volume. If the size value
+is too small to store all data it will be ignored.
+The value is used as MB by default but you can
+add "M" and/or "G" as postfix</a:documentation>
+        <ref name="volume-size-type"/>
+      </attribute>
+    </define>
+    <define name="k.volume.attlist">
+      <interleave>
+        <optional>
+          <ref name="k.volume.freespace.attribute"/>
+        </optional>
+        <ref name="k.volume.name.attribute"/>
+        <optional>
+          <ref name="k.volume.size.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.volume">
+      <element name="volume">
+        <a:documentation>Specify which parts of the filesystem should be
+on an extra volume.</a:documentation>
+        <db:para>Specify which parts of the filesystem should be on
+an extra volume.</db:para>
+        <ref name="k.volume.attlist"/>
+        <empty/>
       </element>
     </define>
   </div>
@@ -3257,7 +3286,7 @@ The value is used to create the content file.</db:para>
         <db:para>The chroot element contains one particular environment
 variable and its value. Shell rules for the names apply.
 The value must not exceed a certain length for sanity.
-reasons Any funny characters like tabs, line break, 
+reasons Any funny characters like tabs, line break,
 carriage return or combinations are converted to spaces
 (one each) which may lead to unexpected contents.</db:para>
         <interleave>
@@ -3719,6 +3748,18 @@ and also depends of the selected image output type.</db:para>
         <interleave>
           <ref name="k.packages.attlist"/>
           <zeroOrMore>
+            <ref name="k.archive"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="k.ignore"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="k.namedCollection"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="k.opensuseproduct"/>
+          </zeroOrMore>
+          <zeroOrMore>
             <ref name="k.package"/>
           </zeroOrMore>
           <zeroOrMore>
@@ -3726,15 +3767,6 @@ and also depends of the selected image output type.</db:para>
           </zeroOrMore>
           <zeroOrMore>
             <ref name="k.rhelgroup"/>
-          </zeroOrMore>
-          <zeroOrMore>
-            <ref name="k.opensuseproduct"/>
-          </zeroOrMore>
-          <zeroOrMore>
-            <ref name="k.ignore"/>
-          </zeroOrMore>
-          <zeroOrMore>
-            <ref name="k.archive"/>
           </zeroOrMore>
         </interleave>
       </element>

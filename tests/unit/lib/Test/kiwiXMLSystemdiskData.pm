@@ -984,10 +984,8 @@ sub test_getXMLElement{
 	$this -> assert_not_null($elem);
 	my $xmlstr = $elem -> toString();
 	my $expected = '<systemdisk name="testVG">'
-		. '<volumes>'
 		. '<volume name="test_VOL" freespace="20M" size="30G"/>'
 		. '<volume name="data_VOL" size="100G"/>'
-		. '</volumes>'
 		. '</systemdisk>';
 	$this -> assert_str_equals($expected, $xmlstr);
 	return;
