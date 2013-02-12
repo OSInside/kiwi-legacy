@@ -33,6 +33,11 @@ export LIVECD="/livecd"
 export LOCAL_BOOT="no"
 
 #======================================
+# Exports kernel options
+#--------------------------------------
+export kernel_cmdline=($@)
+
+#======================================
 # Functions...
 #--------------------------------------
 . /include
@@ -300,4 +305,4 @@ activateImage
 #======================================
 # 21) Unmount initrd / system init
 #--------------------------------------
-bootImage $@
+bootImage

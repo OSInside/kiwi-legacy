@@ -41,6 +41,11 @@ export LIVECD_CONFIG="/cdrom/config.isoclient"
 export OEM_PARTITION_CONFIG="/config.oempartition"
 
 #======================================
+# Exports kernel options
+#--------------------------------------
+export kernel_cmdline=($@)
+
+#======================================
 # Functions...
 #--------------------------------------
 . /include
@@ -679,4 +684,4 @@ activateImage
 #======================================
 # 27 Unmount initrd / system init
 #--------------------------------------
-bootImage $@
+bootImage

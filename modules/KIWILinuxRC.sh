@@ -6678,7 +6678,7 @@ function bootImage {
 	# boot into the operating system
 	# ----
 	local reboot=no
-	local option=$@
+	local option=${kernel_cmdline[@]}
 	#======================================
 	# check for init kernel option
 	#--------------------------------------
