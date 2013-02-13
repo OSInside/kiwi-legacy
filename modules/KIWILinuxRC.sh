@@ -594,10 +594,6 @@ function udevSystemStart {
 		/lib/udev/udevd --daemon
 	fi
 	UDEVD_PID=$(pidof -s /sbin/udevd)
-	# trigger events for all devices
-	udevTrigger
-	# wait for events to finish
-	udevPending
 }
 #======================================
 # udevSystemStop
