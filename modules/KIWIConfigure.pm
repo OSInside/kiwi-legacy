@@ -73,7 +73,7 @@ sub new {
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi}      = $kiwi;
-	$this->{locator}   = KIWILocator -> new();
+	$this->{locator}   = KIWILocator -> instance();
 	$this->{imageDesc} = $imageDesc;
 	$this->{imageDest} = $imageDest;
 	$this->{xml}       = $xml;

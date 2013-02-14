@@ -608,7 +608,7 @@ sub __xmlSetup {
 	#------------------------------------------
 	my $buildProfs = $this -> {buildProfiles};
 	my $configDir  = $this -> {configDir};
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $controlFile = $locator -> getControlFile ($configDir);
 	if (! $controlFile) {
 		return;

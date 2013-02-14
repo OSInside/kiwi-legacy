@@ -89,7 +89,7 @@ sub new {
 	if ($manager eq "apt-get") {
 		$manager = "apt";
 	}
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $dataDir = "/var/cache/kiwi/$manager";
 	my @channelList = ();
 	#==========================================

@@ -296,7 +296,7 @@ sub new {
 	#==========================================
 	# Lookup XML configuration file
 	#------------------------------------------
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $controlFile = $locator -> getControlFile ( $imageDesc );
 	if (! $controlFile) {
 		return;
@@ -3890,7 +3890,7 @@ sub __getSchemaVersion {
 	# Return the schema version extracted from KIWISchema.rnc
 	# ---
 	my $this = shift;
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $schema = $this->{gdata}->{Schema};
 	my @lines = read_file($schema);
 	my $useNextValue;

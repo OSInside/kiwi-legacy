@@ -553,7 +553,7 @@ sub setCacheDir {
 		return;
 	}
 	if ( $dir !~ /^\//) {
-		my $locator = KIWILocator -> new($this -> {kiwi});
+		my $locator = KIWILocator -> instance();
 		$dir = $locator -> getDefaultCacheDir() . '/' . $dir;
 		my $msg = 'Specified relative path as cache location; moving cache to '
 		. "$dir\n";

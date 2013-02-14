@@ -471,7 +471,7 @@ sub checkAndSetupPrebuiltBootImage {
 	#==========================================
 	# open boot image XML object
 	#------------------------------------------
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $controlFile = $locator -> getControlFile ($bootpath);
 	if (! $controlFile) {
 		return;
@@ -2159,7 +2159,7 @@ sub createImageLiveCD {
 		#------------------------------------------
 		if ($firmware eq "efi") {
 			$kiwi -> info ("Creating grub2 efi boot image");
-			my $locator = KIWILocator -> new();
+			my $locator = KIWILocator -> instance();
 			my $grub2_mkimage = $locator -> getExecPath ("grub2-efi-mkimage");
 			if (! $grub2_mkimage) {
 				$grub2_mkimage = $locator -> getExecPath ("grub2-mkimage");
@@ -4581,7 +4581,7 @@ sub setupSquashFS {
 	my $xml  = $this->{xml};
 	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $imageTree = $this->{imageTree};
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}

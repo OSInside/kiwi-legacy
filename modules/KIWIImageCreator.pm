@@ -191,7 +191,7 @@ sub upgradeImage {
 	# Setup the image XML description
 	#------------------------------------------
 	$configDir .= "/image";
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $controlFile = $locator -> getControlFile ($configDir);
 	if (! $controlFile) {
 		return;
@@ -254,7 +254,7 @@ sub prepareImage {
 	#==========================================
 	# Setup the image XML description
 	#------------------------------------------
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $controlFile = $locator -> getControlFile ($configDir);;
 	if (! $controlFile) {
 		return;
@@ -342,7 +342,7 @@ sub createBootImage {
 	#==========================================
 	# Setup the image XML description
 	#------------------------------------------
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $controlFile = $locator -> getControlFile ($configDir);;
 	if (! $controlFile) {
 		return;
@@ -434,7 +434,7 @@ sub createImage {
 	#==========================================
 	# Setup the image XML description
 	#------------------------------------------
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $controlFile = $locator -> getControlFile ($configDir);;
 	if (! $controlFile) {
 		return;
