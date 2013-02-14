@@ -223,7 +223,7 @@ sub new {
 	#==========================================
 	# Create root directory
 	#------------------------------------------
-	my $locator = KIWILocator -> new ($this -> {kiwi});
+	my $locator = KIWILocator -> instance ();
 	my $root = $locator -> createTmpDirectory (
 		$useRoot,$selfRoot,$cmdL
 	);

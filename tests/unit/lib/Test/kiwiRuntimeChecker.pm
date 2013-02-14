@@ -469,7 +469,7 @@ sub test_fsToolCheckSplitImg {
 	my $xml = $this -> __getXMLObj($configPath);
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
 	my $res = $checker -> createChecks();
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $haveBtrfs = $locator -> getExecPath('mkfs.btrfs');
 	if ($haveBtrfs) {
 		# Filesystem tool is present
@@ -513,7 +513,7 @@ sub test_isohybrid {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $arch = KIWIGlobals -> instance() -> getArch();
 	my $isoHybrid;
 	if ($arch eq 'ix86' || $arch eq 'x86_64') {
@@ -577,7 +577,7 @@ sub test_noEFIIsohybridOEMImg {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $arch = KIWIGlobals -> instance() -> getArch();
 	my $isoHybrid;
 	if ($arch eq 'ix86' || $arch eq 'x86_64') {
@@ -709,7 +709,7 @@ sub test_packageManagerCheck_ens {
 	$xml -> setPreferences($prefObj);
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
 	my $res = $checker -> prepareChecks();
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $haveEnsconce = $locator -> getExecPath('ensconce');
 	if ($haveEnsconce) {
 		my $msg = $kiwi -> getMessage();
@@ -755,7 +755,7 @@ sub test_packageManagerCheck_zypp {
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
 	my $res = $checker -> prepareChecks();
 
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $haveZypper = $locator -> getExecPath('zypper');
 	if ($haveZypper) {
 		my $msg = $kiwi -> getMessage();

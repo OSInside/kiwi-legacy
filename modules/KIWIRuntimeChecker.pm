@@ -82,7 +82,7 @@ sub new {
 	# Store module parameters
 	#------------------------------------------
 	$this->{cmdArgs} = $cmdArgs;
-	$this->{locator} = KIWILocator -> new();
+	$this->{locator} = KIWILocator -> instance();
 	$this->{kiwi}    = $kiwi;
 	$this->{xml}     = $xml;
 	return $this;

@@ -47,7 +47,7 @@ sub test_ctor {
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -736,7 +736,7 @@ sub __getLocator {
 	# Helper method to create a KIWILocator object
 	# ---
 	my $this = shift;
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	return $locator;
 }
 

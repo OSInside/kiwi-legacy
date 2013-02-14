@@ -91,7 +91,7 @@ sub new {
 	#==========================================
 	# Find iso tool to use on this system
 	#------------------------------------------
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $genTool = $locator -> getExecPath('genisoimage');
 	my $mkTool = $locator -> getExecPath('mkisofs');
 	if ($genTool && -x $genTool) {
@@ -1032,7 +1032,7 @@ sub createHybrid {
 		$kiwi -> skipped ();
 		return $this;
 	}
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $isoHybrid = $locator -> getExecPath ('isohybrid');
 	if (! $isoHybrid) {
 		$kiwi -> error ("Can't find isohybrid, check your syslinux version");

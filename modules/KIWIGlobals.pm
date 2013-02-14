@@ -770,7 +770,7 @@ sub callContained {
 		$kiwi -> failed ();
 		return;
 	}
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $lxcexec = $locator -> getExecPath('lxc-execute');
 	my $lxcbase = $root."/usr/lib/lxc/";
 	if (-d $root."/usr/lib64") {
@@ -1012,7 +1012,7 @@ sub _new_instance {
 	# Globals (Supported filesystem names)
 	#------------------------------------------
 	my %KnownFS;
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	$KnownFS{ext4}{tool}      = $locator -> getExecPath("mkfs.ext4");
 	$KnownFS{ext3}{tool}      = $locator -> getExecPath("mkfs.ext3");
 	$KnownFS{ext2}{tool}      = $locator -> getExecPath("mkfs.ext2");
