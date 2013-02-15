@@ -28,6 +28,7 @@ export HYBRID_PERSISTENT_PART=4
 export HYBRID_PERSISTENT_DIR=/read-write
 export UTIMER_INFO=/dev/utimer
 export bootLoaderOK=0
+export enablePlymouth=1
 
 #======================================
 # Exports (console)
@@ -661,8 +662,18 @@ function udevStart {
 	udevTrigger
 	# wait for events to finish
 	udevPending
-	# start plymouth if it exists
-	startPlymouth
+	# start plymouth if it exists and enabled
+	for o in $(cat /proc/cmdline) ; do
+		case "$o" in
+			plymouth.enable=0*|rd.plymouth=0*)
+			enablePlymouth=0
+			break
+			;;
+		esac
+	done
+	if [ $enablePlymouth -eq 1 ]; then
+		startPlymouth
+	fi
 }
 #======================================
 # moduleLoadBeforeUdev
@@ -4031,8 +4042,8 @@ function searchSwapSpace {
 # updateMTAB
 #--------------------------------------
 function updateMTAB {
-	prefix=$1
-	umount=0
+	local prefix=$1
+	local umount=0
 	if [ ! -e /proc/mounts ];then
 		mount -t proc proc /proc
 		umount=1
@@ -6675,7 +6686,7 @@ function bootImage {
 	# check for init kernel option
 	#--------------------------------------
 	if [ -z "$init" ];then
-		if [ -f /mnt/bin/systemd ];then
+		if [ -e /mnt/bin/systemd ];then
 			export init=/bin/systemd
 		else
 			export init=/sbin/init
@@ -6774,6 +6785,12 @@ function bootImage {
 	#--------------------------------------
 	if which plymouthd &>/dev/null;then
 		plymouth update-root-fs --new-root-dir=/mnt
+		#======================================
+		# stop if not installed in system image
+		#--------------------------------------
+		if [ ! -e /mnt/usr/bin/plymouth ];then
+			plymouth quit
+		fi
 	fi
 	#======================================
 	# export root block device
@@ -8886,8 +8903,15 @@ function setupConsole {
 	# ----
 	local itab=/etc/inittab
 	local stty=/etc/securetty
+	local init=/bin/systemd
 	local xvc="X0:12345:respawn:/sbin/mingetty --noclear xvc0 linux"
 	local hvc="H0:12345:respawn:/sbin/mingetty --noclear hvc0 linux"
+	#======================================
+	# return early in case of systemd
+	#--------------------------------------
+	if [ -e $init ];then
+		return
+	fi
 	#======================================
 	# create tty nodes if not done
 	#--------------------------------------
