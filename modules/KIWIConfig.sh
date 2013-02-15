@@ -1627,14 +1627,16 @@ function baseSetRunlevel {
 	# the specified value
 	# ----
 	local RUNLEVEL=$1
+	local target=/usr/lib/systemd/system/runlevel$RUNLEVEL.target
+	if [ ! -f $target ];then
+		target=/lib/systemd/system/runlevel$RUNLEVEL.target
+	fi
 	case "$RUNLEVEL" in
 		1|2|3|5)
 			sed -i "s/id:[0123456]:initdefault:/id:$RUNLEVEL:initdefault:/" \
 			/etc/inittab
 			if test -d /etc/systemd/system; then
-				ln -sf \
-					/lib/systemd/system/runlevel$RUNLEVEL.target \
-					/etc/systemd/system/default.target
+				ln -sf $target /etc/systemd/system/default.target
 			fi
 		;;
 		*)
