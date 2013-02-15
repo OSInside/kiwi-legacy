@@ -137,7 +137,7 @@ sub initializeCache {
 	# Find base distro name
 	#------------------------------------------
 	$kiwi -> info ("Initialize image cache...\n");
-	my $name = $xml -> getImageName_legacy();
+	my $name = $xml -> getImageName();
 	foreach my $t (keys %{$xml->{typeInfo}}) {
 		my %type = %{$xml->{typeInfo}->{$t}};
 		if (($type{boot}) && ($type{boot} =~ /.*\/(.*)/)) {
@@ -223,7 +223,7 @@ sub createCache {
 	#==========================================
 	# Prepare cache
 	#------------------------------------------
-	my $CacheName = $xml -> getImageName_legacy();
+	my $CacheName = $xml -> getImageName();
 	$kiwi -> info (
 		"--> Building cache $CacheName...\n"
 	);

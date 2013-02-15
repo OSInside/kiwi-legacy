@@ -308,7 +308,7 @@ sub setupRootSystem {
 		return;
 	}
 	my @ensconce = @{$this->{ensconce}};
-	my $imagename = $xml -> getImageName_legacy();
+	my $imagename = $xml -> getImageName();
 	my $ensconce_args = "-i $imagename";
 	if (! $chroot) {
 		#==========================================
