@@ -1526,7 +1526,7 @@ sub createImageLiveCD {
 	#==========================================
 	# Get system image name
 	#------------------------------------------
-	my $systemName = $sxml -> getImageName_legacy();
+	my $systemName = $sxml -> getImageName();
 	my $systemDisplayName = $sxml -> getImageDisplayName();
 	#==========================================
 	# Get system image type information

@@ -6103,7 +6103,7 @@ sub getImageConfig_legacy {
 	my @delp  = $this -> getDeleteList_legacy();
 	my $iver  = $this -> getImageVersion_legacy();
 	my $size  = $this -> getImageSize_legacy();
-	my $name  = $this -> getImageName_legacy();
+	my $name  = $this -> getImageName();
 	my $dname = $this -> getImageDisplayName ($this);
 	my $lics  = $this -> getLicenseNames_legacy();
 	my @s_del = $this -> __getStripDelete_legacy();
@@ -6434,19 +6434,6 @@ sub getImageDefaultRoot_legacy {
 		return;
 	}
 	return "$root";
-}
-
-#==========================================
-# getImageName_legacy
-#------------------------------------------
-sub getImageName_legacy {
-	# ...
-	# Get the name of the logical extend
-	# ---
-	my $this = shift;
-	my $node = $this->{imgnameNodeList} -> get_node(1);
-	my $name = $node -> getAttribute ("name");
-	return $name;
 }
 
 #==========================================
