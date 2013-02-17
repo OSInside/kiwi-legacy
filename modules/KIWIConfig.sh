@@ -333,6 +333,13 @@ function baseSetupBoot {
 # suseConfig
 #--------------------------------------
 function suseConfig {
+	# Remove this function from the code base once SLE 11 is EOL
+	# June, 2019
+	if [ -x /usr/bin/localectl ];then
+		echo "Deprecated function suseConfig for this distribution version"
+		return 0
+	fi
+
 	#======================================
 	# keytable
 	#--------------------------------------

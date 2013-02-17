@@ -43,7 +43,6 @@ suseInsertService boot.device-mapper
 baseUpdateSysConfig /etc/sysconfig/windowmanager DEFAULT_WM kde
 baseUpdateSysConfig /etc/sysconfig/displaymanager DISPLAYMANAGER kdm
 baseSetRunlevel 5
-suseConfig
 
 #======================================
 # Umount kernel filesystems

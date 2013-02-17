@@ -39,11 +39,6 @@ suseInsertService boot.device-mapper
 suseInsertService sshd
 
 #======================================
-# SuSEconfig
-#--------------------------------------
-suseConfig
-
-#======================================
 # clone runlevel 3 to 4
 #--------------------------------------
 suseCloneRunlevel 4

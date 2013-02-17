@@ -271,10 +271,14 @@ sub getExecPath {
 	# ---
 	my $this     = shift;
 	my $execName = shift;
+	my $root     = shift;
 	my $kiwi     = $this->{kiwi};
-	my $execPath = qxx (
-		"bash -c \"PATH=\$PATH:/sbin which $execName\" 2>&1"
-	);
+	my $cmd = q{};
+	if ($root) {
+		$cmd .= "chroot $root ";
+	}
+	$cmd .= 'bash -c "PATH=$PATH:/sbin which ' . $execName .  '" 2>&1';
+	my $execPath = qxx ($cmd);
 	chomp $execPath;
 	my $code = $? >> 8;
 	if ($code != 0) {

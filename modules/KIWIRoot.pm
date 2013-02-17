@@ -981,7 +981,7 @@ sub setup {
 	my $manager   = $this->{manager};
 	my $data;
 	my $status;
-	#======================================== 
+	#========================================
 	# Consistency check
 	#----------------------------------------
 	if (! -d "$root/tmp") {
@@ -1148,24 +1148,31 @@ sub setup {
 		}
 	}
 	#========================================
-	# setup users/groups
+	# Apply system configuration
 	#----------------------------------------
-	if (! $configure -> setupUsersGroups()) {
+	if (! $configure -> setupGroups()) {
 		return;
 	}
+	if (! $configure -> setupUsers()) {
+		return;
+	}
+	$configure -> setupHWclock();
+	$configure -> setupKeyboardMap();
+	$configure -> setupLocale();
+	$configure -> setupTimezone();
 	#========================================
 	# check for yast firstboot setup file
 	#----------------------------------------
 	$status = $configure -> setupFirstBootYaST();
-	if ($status eq "failed") {
+	if (! $status) {
 		return;
 	}
 	$status = $configure -> setupAutoYaST();
-	if ($status eq "failed") {
+	if (! $status) {
 		return;
 	}
 	$status = $configure -> setupFirstBootAnaconda();
-	if ($status eq "failed") {
+	if (! $status) {
 		return;
 	}
 	#========================================
