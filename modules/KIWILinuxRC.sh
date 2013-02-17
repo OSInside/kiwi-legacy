@@ -488,10 +488,12 @@ function umountSystemFilesystems {
 #--------------------------------------
 function createFramebufferDevices {
 	if [ -f /proc/fb ]; then
-		Echo "Creating framebuffer devices"
 		while read fbnum fbtype; do
 			if [ $(($fbnum < 32)) ] ; then
-				[ -c /dev/fb$fbnum ] || mknod -m 0660 /dev/fb$fbnum c 29 $fbnum
+				if [ ! -c /dev/fb$fbnum ];then
+					Echo "Creating framebuffer device: /dev/fb$fbnum"
+					mknod -m 0660 /dev/fb$fbnum c 29 $fbnum
+				fi
 			fi
 		done < /proc/fb
 	fi
@@ -1064,6 +1066,7 @@ function setupRHELInitrd {
 	done
 	setupDefaultTheme
 	if [ $systemMap -eq 1 ];then
+		Echo "Creating dracut based initrd"
 		if [ ! -e /proc/mounts ];then
 			mount -t proc proc /proc
 			umountProc=1
@@ -1138,6 +1141,7 @@ function setupSUSEInitrd {
 	done
 	setupDefaultTheme
 	if [ $systemMap -eq 1 ];then
+		Echo "Creating mkinitrd based initrd"
 		if [ ! -e /proc/mounts ];then
 			mount -t proc proc /proc
 			umountProc=1
