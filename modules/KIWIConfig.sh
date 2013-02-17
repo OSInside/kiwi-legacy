@@ -333,6 +333,15 @@ function baseSetupBoot {
 # suseConfig
 #--------------------------------------
 function suseConfig {
+	# /.../
+	# Remove this function from the code base once SLE 11
+	# is EOL in June 2019. This setup is done via localectl
+	# and datetimectl from KIWIConfigure.pm in the future
+	# ----
+	if [ -x /usr/bin/localectl ];then
+		echo "Deprecated function suseConfig for this distribution version"
+		return 0
+	fi
 	#======================================
 	# keytable
 	#--------------------------------------

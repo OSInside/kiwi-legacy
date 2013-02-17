@@ -38,11 +38,6 @@ suseActivateDefaultServices
 suseInsertService boot.device-mapper
 
 #======================================
-# SuSEconfig
-#--------------------------------------
-suseConfig
-
-#======================================
 # Umount kernel filesystems
 #--------------------------------------
 baseCleanMount
