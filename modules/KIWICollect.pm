@@ -130,6 +130,7 @@ sub new {
 	bless $this, $class;
 
 	$this->{m_logger}   = KIWILog -> instance();
+        $this->{m_logger}->setLogFile("terminal");
 
 	#==========================================
 	# Module Parameters
@@ -754,7 +755,7 @@ sub mainTask
 				$this->{m_basesubdir}->{$cd},
 			    $isoname,
 			    $attr,
-			    $checkmedia
+			    $checkmedia, $this->{cmdL}, $this->{m_xml}
 			);
 
 			# Just the first media is usually bootable at SUSE
