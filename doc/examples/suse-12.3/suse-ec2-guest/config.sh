@@ -52,11 +52,6 @@ baseUpdateSysConfig /etc/sysconfig/network/dhcp DHCLIENT_SET_HOSTNAME yes
 suse-ec2-configure --norefresh
 
 #======================================
-# SuSEconfig
-#--------------------------------------
-suseConfig
-
-#======================================
 # clone runlevel 3 to 4
 #--------------------------------------
 suseCloneRunlevel 4

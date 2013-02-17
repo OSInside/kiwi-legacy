@@ -44,7 +44,6 @@ suseInsertService sshd
 baseUpdateSysConfig /etc/sysconfig/windowmanager DEFAULT_WM icewm-session
 baseUpdateSysConfig /etc/sysconfig/displaymanager DISPLAYMANAGER xdm
 baseSetRunlevel 5
-suseConfig
 
 #==========================================
 # set X link
