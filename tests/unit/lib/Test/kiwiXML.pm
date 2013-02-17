@@ -1392,7 +1392,7 @@ sub test_addImagePatterns_legacy {
 		my $type = $node -> getAttribute('type');
 		if ($type eq 'image') {
 			my @imgPckgsNodes = $node ->
-									getElementsByTagName('opensusePattern');
+									getElementsByTagName('namedCollection');
 			for my $pckNode (@imgPckgsNodes) {
 				push @patterns, $pckNode -> getAttribute('name');
 			}
@@ -2999,7 +2999,7 @@ sub test_addPatterns_legacy {
 		my $type = $node -> getAttribute('type');
 		if ($type eq 'image') {
 			my @imgPckgsNodes = $node ->
-									getElementsByTagName('opensusePattern');
+									getElementsByTagName('namedCollection');
 			for my $pckNode (@imgPckgsNodes) {
 				push @patterns, $pckNode -> getAttribute('name');
 			}
@@ -7149,7 +7149,7 @@ sub test_getPackageNodeList_legacy {
 		elsif ($type eq 'image') {
 			my @imgPckgNodes = $node -> getElementsByTagName('package');
 			my @archNodes = $node -> getElementsByTagName('archive');
-			my @pattNodes = $node -> getElementsByTagName('opensusePattern');
+			my @pattNodes = $node -> getElementsByTagName('namedCollection');
 			for my $pckNode (@imgPckgNodes) {
 				push @packages, $pckNode -> getAttribute('name');
 			}

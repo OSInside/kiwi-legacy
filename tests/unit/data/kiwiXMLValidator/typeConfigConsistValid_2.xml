@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.4" name="suse-12.1-test-image">
+
+<image schemaversion="5.7" name="suse-12.1-test-image">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
 		<specification>test VM setup</specification>
 	</description>
 	<preferences>
-		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="qcow2"> 
+		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="qcow2">
 			<machine memory="512">
-                <vmdisk controller="scsi" id="0"/>
+				<vmdisk controller="scsi" id="0"/>
 			</machine>
-            <systemdisk name="my_VG">
-                <volume name="home" size="2G"/>
-            </systemdisk>
+			<systemdisk name="my_VG">
+				<volume name="home" size="2G"/>
+			</systemdisk>
 			<size>8192</size>
 		</type>
 		<version>1.1.2</version>
@@ -23,7 +24,7 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
 		<source path="opensuse://12.1/repo/oss/"/>
@@ -34,7 +35,7 @@
 		<package name="ifplugd"/>
 		<package name="kernel-default"/>
 		<package name="vim"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

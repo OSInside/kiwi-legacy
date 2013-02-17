@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.2" name="test-xml-infod">
+<image schemaversion="5.7" name="test-xml-infod">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -27,15 +27,15 @@
 		<version>1.0.0</version>
 	</preferences>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="rpm-dir">
-		<!-- repo replaced during test, therefore path is insignificant -->
+<!-- repo replaced during test, therefore path is insignificant -->
 		<source path="/tmp"/>
 	</repository>
 	<packages type="image" patternType="onlyRequired">
 		<archive name="testArchive.tgz"/>
 		<package name="kiwi-test-dummy"/>
-<!--<opensusePattern name="base"/>-->
+<!--<namedCollection name="base"/>-->
 	</packages>
 </image>

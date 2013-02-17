@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.5" name="testCase-repo-alias-conflict">
+
+<image schemaversion="5.7" name="testCase-repo-alias-conflict">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -23,7 +24,7 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<users group="root">
-	<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="rpm-md" prefer-license="true" priority="2" alias="arepo">
 		<source path="/repos/12.1-additional"/>
@@ -31,7 +32,7 @@
 	<repository type="rpm-md" alias="update" imageinclude="true" profiles="profA">
 		<source path="/repos/12.1-additional-update"/>
 	</repository>
-	<!-- The repo alias of this repo conflicts if profA is a selected built profile -->
+<!-- The repo alias of this repo conflicts if profA is a selected built profile -->
 	<repository type="rpm-md" alias="arepo" profiles="profA,profC">
 		<source path="/repos/12.1-additional"/>
 	</repository>
@@ -40,7 +41,7 @@
 	</repository>
 	<packages type="image">
 		<package name="kernel-default"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

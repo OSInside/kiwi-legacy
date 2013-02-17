@@ -258,9 +258,8 @@ sub __checkDeletePackNoPatNoTar {
 				$kiwi -> failed();
 				return;
 			}
-			my $oPat = $pkgs -> getElementsByTagName('opensusePattern');
-			my $rPat = $pkgs -> getElementsByTagName('rhelGroup');
-			if ($oPat || $rPat){
+			my $collect = $pkgs -> getElementsByTagName('namedCollection');
+			if ($collect) {
 				$errMsg =~ s/INV_TYPE/pattern/x;
 				$kiwi -> error($errMsg);
 				$kiwi -> failed();
@@ -755,7 +754,7 @@ sub __checkPatternUnique {
 	# once per architecture per <packages> section
 	# ---
 	my $this = shift;
-	my $uniqueCheck = $this -> __uniqueInPackages('opensusePattern');
+	my $uniqueCheck = $this -> __uniqueInPackages('namedCollection');
 	if ($uniqueCheck) {
 		my $kiwi = $this -> {kiwi};
 		my ($name, $arch) = split /,/, $uniqueCheck;

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.6" name="suse-12.2-test-image">
+
+<image schemaversion="5.7" name="suse-12.2-test-image">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -47,7 +48,7 @@
 		<package name="ifplugd"/>
 		<package name="kernel-default"/>
 		<package name="vim"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

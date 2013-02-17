@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.2" name="reiserfs-test-config">
+<image schemaversion="5.7" name="reiserfs-test-config">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -16,7 +16,7 @@
 		<type image="reiserfs"/>
 	</preferences>
 	<users group="root">
-		<user pwd="linux" pwdformat="plain" home="/root" name="root"/>
+		<user password="linux" pwdformat="plain" home="/root" name="root"/>
 	</users>
 	<repository type="rpm-dir">
 		<source path="/tmp"/>
@@ -27,7 +27,7 @@
 		<package name="ifplugd"/>
 		<package name="kernel-default"/>
 		<package name="vim"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

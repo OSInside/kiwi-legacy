@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 5.6" ]
+	db:releaseinfo [ "RNC Schema Version 5.7" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -60,7 +60,7 @@ div {
 		attribute xsi:schemaLocation { xsd:anyURI }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "5.6" }
+		attribute schemaversion { "5.7" }
 	k.image.kiwirevision.attribute =
 		## A kiwi git revision number which is known to build
 		## a working image from this description. If the kiwi git
@@ -1003,23 +1003,6 @@ div {
 }
 
 #==========================================
-# common element <opensusePattern>
-#
-div {
-	k.opensusepattern.name.attribute = k.name.attribute
-	k.opensusepattern.arch.attribute = k.arch.attribute
-	k.opensusepattern.attlist =
-		k.opensusepattern.name.attribute &
-		k.opensusepattern.arch.attribute?
-	k.opensusepattern =
-		## Name of a Pattern From openSUSE
-		element opensusePattern {
-			k.opensusepattern.attlist,
-			empty
-		}
-}
-
-#==========================================
 # common element <opensuseProduct>
 #
 div {
@@ -1296,23 +1279,6 @@ div {
 		element repository {
 			k.repository.attlist,
 			k.source
-		}
-}
-
-#==========================================
-# common element <rhelGroup>
-#
-div {
-	k.rhelgroup.name.attribute = k.name.attribute
-	k.rhelgroup.arch.attribute = k.arch.attribute
-	k.rhelgroup.attlist =
-		k.rhelgroup.name.attribute &
-		k.rhelgroup.arch.attribute?
-	k.rhelgroup =
-		## Name of RHEL package group 
-		element rhelGroup {
-			k.rhelgroup.attlist,
-			empty
 		}
 }
 
@@ -2577,9 +2543,7 @@ div {
 			k.ignore* &
 			k.namedCollection* &
 			k.opensuseproduct* &
-			k.package* &
-			k.opensusepattern* &
-			k.rhelgroup*
+			k.package*
 		}
 }
 
