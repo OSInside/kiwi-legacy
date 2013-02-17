@@ -6522,8 +6522,8 @@ sub __getBootSize {
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
-	my $needMB = 150;
-	my $wantMB = 150;
+	my $needMB = 200;
+	my $wantMB = 200;
 	if ($type{bootpartsize}) {
 		$wantMB = $type{bootpartsize};
 	}

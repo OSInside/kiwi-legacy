@@ -2020,7 +2020,7 @@ At the moment grub, zipl and sys|extlinux are supported</a:documentation>
       <attribute name="bootpartsize">
         <a:documentation>For images with a separate boot partition this attribute
 specifies the size in MB. If not set the min bootpart
-size is set to 150 MB</a:documentation>
+size is set to 200 MB</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
