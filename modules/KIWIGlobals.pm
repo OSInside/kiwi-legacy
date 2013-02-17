@@ -832,6 +832,10 @@ sub callContained {
 						"lxc-execute -n kiwi -f $root/config.lxc true 2>&1"
 					);
 					$code = $? >> 8;
+					#==========================================
+					# cleanup lxc
+					#------------------------------------------
+					KIWIQX::qxx ("rm -f $root/config.lxc 2>&1");
 				}
 			}
 		}
