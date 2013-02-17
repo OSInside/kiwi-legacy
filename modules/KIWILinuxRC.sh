@@ -889,8 +889,8 @@ function installBootLoaderGrub2 {
 	local instTool=grub2-install
 	local confPath=/boot/grub2/grub.cfg
 	if [ "$partedTableType" = "gpt" ];then
-		confTool=grub2-efi-mkconfig
-		instTool=grub2-efi-install
+		which grub2-efi-mkconfig &>/dev/null && confTool=grub2-efi-mkconfig
+		which grub2-efi-install  &>/dev/null && instTool=grub2-efi-install
 		confPath=/boot/grub2-efi/grub.cfg
 	fi
 	if ! which $confTool &>/dev/null;then
@@ -992,8 +992,8 @@ function installBootLoaderGrub2Recovery {
 	# check tool status
 	#--------------------------------------
 	if [ "$partedTableType" = "gpt" ];then
-		confTool=grub2-efi-mkconfig
-		instTool=grub2-efi-install
+		which grub2-efi-mkconfig &>/dev/null && confTool=grub2-efi-mkconfig
+		which grub2-efi-install  &>/dev/null && instTool=grub2-efi-install
 		confPath=/boot/grub2-efi/grub.cfg
 	fi
 	if ! which $confTool &>/dev/null;then
