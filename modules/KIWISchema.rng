@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 5.6</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 5.7</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -91,7 +91,7 @@ second the location of the XSD Schema
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>5.6</value>
+        <value>5.7</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -1252,34 +1252,6 @@ or by default with /dev/disk/by-id/...</a:documentation>
   </div>
   <!--
     ==========================================
-    common element <opensusePattern>
-    
-  -->
-  <div>
-    <define name="k.opensusepattern.name.attribute">
-      <ref name="k.name.attribute"/>
-    </define>
-    <define name="k.opensusepattern.arch.attribute">
-      <ref name="k.arch.attribute"/>
-    </define>
-    <define name="k.opensusepattern.attlist">
-      <interleave>
-        <ref name="k.opensusepattern.name.attribute"/>
-        <optional>
-          <ref name="k.opensusepattern.arch.attribute"/>
-        </optional>
-      </interleave>
-    </define>
-    <define name="k.opensusepattern">
-      <element name="opensusePattern">
-        <a:documentation>Name of a Pattern From openSUSE</a:documentation>
-        <ref name="k.opensusepattern.attlist"/>
-        <empty/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
     common element <opensuseProduct>
     
   -->
@@ -1748,34 +1720,6 @@ whether and how this information is passed</a:documentation>
         <a:documentation>The Name of the Repository</a:documentation>
         <ref name="k.repository.attlist"/>
         <ref name="k.source"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <rhelGroup>
-    
-  -->
-  <div>
-    <define name="k.rhelgroup.name.attribute">
-      <ref name="k.name.attribute"/>
-    </define>
-    <define name="k.rhelgroup.arch.attribute">
-      <ref name="k.arch.attribute"/>
-    </define>
-    <define name="k.rhelgroup.attlist">
-      <interleave>
-        <ref name="k.rhelgroup.name.attribute"/>
-        <optional>
-          <ref name="k.rhelgroup.arch.attribute"/>
-        </optional>
-      </interleave>
-    </define>
-    <define name="k.rhelgroup">
-      <element name="rhelGroup">
-        <a:documentation>Name of RHEL package group </a:documentation>
-        <ref name="k.rhelgroup.attlist"/>
-        <empty/>
       </element>
     </define>
   </div>
@@ -3761,12 +3705,6 @@ and also depends of the selected image output type.</db:para>
           </zeroOrMore>
           <zeroOrMore>
             <ref name="k.package"/>
-          </zeroOrMore>
-          <zeroOrMore>
-            <ref name="k.opensusepattern"/>
-          </zeroOrMore>
-          <zeroOrMore>
-            <ref name="k.rhelgroup"/>
           </zeroOrMore>
         </interleave>
       </element>

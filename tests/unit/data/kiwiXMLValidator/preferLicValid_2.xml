@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.4" name="test-prefer-lic-setting">
+
+<image schemaversion="5.7" name="test-prefer-lic-setting">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -10,12 +11,12 @@
 		<profile name="vmwFlavor" description="VMX with default kernel"/>
 	</profiles>
 	<preferences>
-		<type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install"> 
-			<oemconfig> 
-				<oem-reboot>true</oem-reboot> 
-				<oem-swap>false</oem-swap> 
-				<oem-unattended>true</oem-unattended> 
-			</oemconfig> 
+		<type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
+			<oemconfig>
+				<oem-reboot>true</oem-reboot>
+				<oem-swap>false</oem-swap>
+				<oem-unattended>true</oem-unattended>
+			</oemconfig>
 		</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
@@ -40,7 +41,7 @@
 		</type>
 	</preferences>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
 		<source path="opensuse://12.1/repo/oss/"/>
@@ -65,7 +66,7 @@
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="image" profiles="xenFlavor">
 		<package name="kernel-xen" replaces="kernel-default"/>

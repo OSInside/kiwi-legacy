@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.6" name="suse-12.3-xen-guest">
+
+<image schemaversion="5.7" name="suse-12.3-xen-guest">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
 		<specification>test profile cross references</specification>
 	</description>
 	<preferences>
-		<type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-12.3" installiso="true" installboot="install"> 
-			<oemconfig> 
-				<oem-reboot>true</oem-reboot> 
-				<oem-swap>false</oem-swap> 
-				<oem-unattended>true</oem-unattended> 
-			</oemconfig> 
+		<type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-12.3" installiso="true" installboot="install">
+			<oemconfig>
+				<oem-reboot>true</oem-reboot>
+				<oem-swap>false</oem-swap>
+				<oem-unattended>true</oem-unattended>
+			</oemconfig>
 		</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
@@ -36,7 +37,7 @@
 		<package name="vim"/>
 		<package name="xen-tools-domU"/>
 		<package name="xen"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

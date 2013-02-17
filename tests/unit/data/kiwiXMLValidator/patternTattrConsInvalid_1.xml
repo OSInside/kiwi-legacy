@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.2" name="suse-xml-validator-test">
+
+<image schemaversion="5.7" name="suse-xml-validator-test">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rschweikert@novell.</contact>
@@ -23,10 +24,10 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<users group="users">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
 	</users>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
 		<source path="opensuse://11.3/repo/oss/"/>
@@ -37,7 +38,7 @@
 		<package name="kernel-default"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="image" profiles="my-second" patternType="plusRecommended">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
@@ -45,7 +46,7 @@
 		<package name="kernel-default"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="image" profiles="my-first,my-second">
 		<package name="yast2"/>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.2" name="suse-11.3-ec2-guest">
+
+<image schemaversion="5.7" name="suse-11.3-ec2-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -17,30 +18,30 @@
 				<ec2privatekeyfile>Path to EC2 private key file</ec2privatekeyfile>
 				<ec2certfile>Path to EC2 public certificate file</ec2certfile>
 				<ec2accountnr>12345678911</ec2accountnr>
-                <ec2region>EU-West</ec2region>
-                <ec2region>EU-West</ec2region>
+				<ec2region>EU-West</ec2region>
+				<ec2region>EU-West</ec2region>
 			</ec2config>
 		</type>
 	</preferences>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
 		<source path="opensuse://11.3/repo/oss/"/>
 	</repository>
-    <repository type="rpm-md">
-        <source path="opensuse:Virtualization:/Cloud:/EC2/openSUSE_11.3"/>
-    </repository>
+	<repository type="rpm-md">
+		<source path="opensuse:Virtualization:/Cloud:/EC2/openSUSE_11.3"/>
+	</repository>
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
 		<package name="kernel-ec2"/>
-        <package name="suse-ami-tools"/>
+		<package name="suse-ami-tools"/>
 		<package name="vim"/>
 		<package name="xen-tools-domU"/>
 		<package name="xen"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

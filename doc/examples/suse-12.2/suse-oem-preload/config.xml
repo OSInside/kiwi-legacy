@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.6" name="suse-12.2-oem-preload">
+<image schemaversion="5.7" name="suse-12.2-oem-preload">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -32,8 +32,8 @@
 		<package name="kernel-default"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
-		<opensusePattern name="base"/>
-		<opensusePattern name="x11"/>
+		<namedCollection name="base"/>
+		<namedCollection name="x11"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

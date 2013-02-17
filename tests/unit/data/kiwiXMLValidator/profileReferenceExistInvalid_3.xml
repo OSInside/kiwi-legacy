@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.1" name="suse-11.3-xen-guest">
+
+<image schemaversion="5.7" name="suse-11.3-xen-guest">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
 		<specification>test profile cross references</specification>
 	</description>
 	<preferences>
-        <type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install"> 
-            <oemconfig> 
-                <oem-reboot>true</oem-reboot> 
-                <oem-swap>false</oem-swap> 
-                <oem-unattended>true</oem-unattended> 
-            </oemconfig> 
-        </type>
+		<type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
+			<oemconfig>
+				<oem-reboot>true</oem-reboot>
+				<oem-swap>false</oem-swap>
+				<oem-unattended>true</oem-unattended>
+			</oemconfig>
+		</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -21,7 +22,7 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2" profiles="ola">
 		<source path="opensuse://11.3/repo/oss/"/>
@@ -33,7 +34,7 @@
 		<package name="vim"/>
 		<package name="xen-tools-domU"/>
 		<package name="xen"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="image" profiles="xenFlavour">
 		<package name="kernel-xen" replaces="kernel-ec2"/>

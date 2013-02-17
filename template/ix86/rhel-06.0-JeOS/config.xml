@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.6" name="LimeJeOS-RHEL-06.2">
+<image schemaversion="5.7" name="LimeJeOS-RHEL-06.2">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@suse.com</contact>
@@ -103,8 +103,8 @@
 		<package name="vim-enhanced"/>
 		<package name="vim-minimal"/>
 		<package name="w3m"/>
-		<rhelGroup name="Base"/>
-		<rhelGroup name="Console internet tools"/>
+		<namedCollection name="Base"/>
+		<namedCollection name="Console internet tools"/>
 		<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>
 		<package name="redhat-logos" bootinclude="true" bootdelete="true"/>
 		<package name="yum-priorities" bootinclude="true"/>
