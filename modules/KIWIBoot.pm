@@ -610,6 +610,10 @@ sub setupInstallCD {
 	} else {
 		$bootloader = "grub";
 	}
+	my $efi_arch= 'x86_64';
+	if ($arch ne 'x86_64') {
+		$efi_arch = 'i386';
+	}
 	my $status;
 	my $result;
 	my $tmpdir;
@@ -848,17 +852,28 @@ sub setupInstallCD {
 		$kiwi -> done();
 	}
 	#==========================================
+	# copy grub2 config file to efi path too
+	#------------------------------------------
+	if (($firmware eq "efi") || ($firmware eq "uefi")) {
+		qxx ("mkdir -p $tmpdir/EFI/BOOT");
+		qxx ("cp $tmpdir/boot/grub2-efi/grub.cfg $tmpdir/EFI/BOOT");
+	}
+	#==========================================
 	# make iso EFI bootable
 	#------------------------------------------
 	if (($firmware eq "efi") || ($firmware eq "uefi")) {
-		my $efi_fat = "$tmpdir/boot/grub2-efi/efiboot.img";
-		$status = qxx ("qemu-img create $efi_fat 4M 2>&1");
+		my $efi_fat = "$tmpdir/boot/$efi_arch/efi";
+		$status = qxx ("mkdir -p $tmpdir/boot/$efi_arch");
 		$result = $? >> 8;
+		if ($result == 0) {
+			$status = qxx ("qemu-img create $efi_fat 4M 2>&1");
+			$result = $? >> 8;
+		}
 		if ($result == 0) {
 			$status = qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
 			$result = $? >> 8;
 			if ($result == 0) {
-				$status = qxx ("mcopy -Do -s -i $efi_fat $tmpdir/efi :: 2>&1");
+				$status = qxx ("mcopy -Do -s -i $efi_fat $tmpdir/EFI :: 2>&1");
 				$result = $? >> 8;
 			}
 		}
@@ -868,12 +883,6 @@ sub setupInstallCD {
 			$kiwi -> failed ();
 			return;
 		}
-	}
-	#==========================================
-	# copy grub2 config file to efi path too
-	#------------------------------------------
-	if (($firmware eq "efi") || ($firmware eq "uefi")) {
-		qxx ("cp $tmpdir/boot/grub2-efi/grub.cfg $tmpdir/efi/boot");
 	}
 	#==========================================
 	# Create an iso image from the tree
@@ -893,7 +902,7 @@ sub setupInstallCD {
 		$base.= "-R -J -f -b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
 		$base.= "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
-			$base.= "-eltorito-alt-boot -b boot/grub2-efi/efiboot.img ";
+			$base.= "-eltorito-alt-boot -b boot/$efi_arch/efi ";
 			$base.= "-no-emul-boot ";
 		}
 		$opts.= "-joliet-long ";
@@ -2592,8 +2601,8 @@ sub setupBootDisk {
 		# Mount efi jump boot space on this disk
 		#------------------------------------------
 		my $jump = $deviceMap{jump};
-		qxx ("mkdir -p $loopdir/efi");
-		if (! KIWIGlobals -> instance() -> mount ($jump, "$loopdir/efi")) {
+		qxx ("mkdir -p $loopdir/EFI");
+		if (! KIWIGlobals -> instance() -> mount ($jump, "$loopdir/EFI")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount image jump device: $boot");
 			$kiwi -> failed ();
@@ -2612,8 +2621,8 @@ sub setupBootDisk {
 		#==========================================
 		# Adapt efi boot path on jump partition
 		#------------------------------------------
-		qxx ("mkdir -p $loopdir/efi/efi");
-		qxx ("mv $loopdir/efi/boot $loopdir/efi/efi");
+		qxx ("mkdir -p $loopdir/EFI/EFI");
+		qxx ("mv $loopdir/EFI/BOOT $loopdir/EFI/EFI");
 	}
 	#==========================================
 	# umount entire boot space
@@ -3331,7 +3340,7 @@ sub setupBootLoaderStages {
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			push @bootdir,"$tmpdir/boot/grub2-efi/$efipc";
 			push @bootdir,"$tmpdir/boot/grub2/$grubpc";
-			push @bootdir,"$tmpdir/efi/boot";
+			push @bootdir,"$tmpdir/EFI/BOOT";
 		} else {
 			push @bootdir,"$tmpdir/boot/grub2/$grubpc";
 		}
@@ -3479,7 +3488,7 @@ sub setupBootLoaderStages {
 				$kiwi -> failed ();
 				return;
 			}
-			my $core    = "$tmpdir/efi/boot/bootx64.efi";
+			my $core    = "$tmpdir/EFI/BOOT/bootx64.efi";
 			my @modules = (
 				'fat','ext2','part_gpt','efi_gop','iso9660','chain',
 				'linux','echo','configfile','boot','search_label',
@@ -3487,6 +3496,9 @@ sub setupBootLoaderStages {
 				'video','video_fb','normal'
 			);
 			my $fo = 'x86_64-efi';
+			if ($arch ne 'x86_64') {
+				$fo = 'i386-efi';
+			}
 			$status = qxx (
 				"$grub2_mkimage -O $fo -o $core -c $bootefi @modules 2>&1"
 			);
@@ -3537,12 +3549,12 @@ sub setupBootLoaderStages {
 				return;
 			}
 			$status = qxx (
-				"cp $tmpdir/$s_shim_ms $tmpdir/efi/boot/bootx64.efi 2>&1"
+				"cp $tmpdir/$s_shim_ms $tmpdir/EFI/BOOT/bootx64.efi 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
 				$status = qxx (
-					"cp $tmpdir/$s_shim_suse $tmpdir/efi/boot/bootx64.efi 2>&1"
+					"cp $tmpdir/$s_shim_suse $tmpdir/EFI/BOOT/bootx64.efi 2>&1"
 				);
 				$result = $? >> 8;
 			}
@@ -3553,7 +3565,7 @@ sub setupBootLoaderStages {
 				return;
 			}
 			$status = qxx (
-				"cp $tmpdir/$s_signed $tmpdir/efi/boot/grub.efi 2>&1");
+				"cp $tmpdir/$s_signed $tmpdir/EFI/BOOT/grub.efi 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -4012,7 +4024,7 @@ sub setupBootLoaderConfiguration {
 				print $FD ' --class opensuse --class os {'."\n";
 				if (($firmware eq "efi") || ($firmware eq "uefi")) {
 					print $FD "\t"."set root='hd0,1'"."\n";
-					print $FD "\t".'chainloader /efi/boot/bootx64.efi'."\n";
+					print $FD "\t".'chainloader /EFI/BOOT/bootx64.efi'."\n";
 				} else {
 					print $FD "\t"."set root='hd0'"."\n";
 					if ($dev eq '(cd)') {
@@ -4895,7 +4907,7 @@ sub copyBootCode {
 	# EFI
 	#------------------------------------------
 	if (($firmware eq "efi") || ($firmware eq "uefi")) {
-		$status = qxx ("cp -a $source/efi $dest");
+		$status = qxx ("cp -a $source/EFI $dest");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
