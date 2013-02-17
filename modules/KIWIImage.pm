@@ -2076,7 +2076,7 @@ sub createImageLiveCD {
 		my $ir_themes  = "$tmpdir/usr/share/grub2/themes";
 		my $ir_bgnds   = "$tmpdir/usr/share/grub2/backgrounds";
 		my $ir_font    = "$tmpdir/usr/share/grub2/unicode.pf2";
-		my $efi_modules= "$CD/efi/boot";
+		my $efi_modules= "$CD/EFI/BOOT";
 		my $cd_modules = "$CD/boot/grub2-efi/x86_64-efi";
 		my $cd_loader  = "$CD/boot/grub2-efi";
 		my $theme      = $theme[1];
@@ -2084,9 +2084,9 @@ sub createImageLiveCD {
 		my $cd_bg      = "$cd_loader/themes/$theme/background.png";
 		my $fodir      = '/boot/grub2-efi/themes/';
 		my $ascii      = 'ascii.pf2';
-		my $linux      = 'linux';
+		my $efi_suffix = '';
 		if ($firmware eq "uefi") {
-			$linux = 'linuxefi';
+			$efi_suffix = 'efi';
 		}
 		my @fonts = (
 			"DejaVuSans-Bold14.pf2",
@@ -2160,7 +2160,7 @@ sub createImageLiveCD {
 				$kiwi -> failed ();
 				return;
 			}
-			my $core    = "$CD/efi/boot/bootx64.efi";
+			my $core    = "$CD/EFI/BOOT/bootx64.efi";
 			my @modules = (
 				'fat','ext2','part_gpt','efi_gop','iso9660','chain',
 				'linux','echo','configfile','boot','search_label',
@@ -2207,12 +2207,12 @@ sub createImageLiveCD {
 				return;
 			}
 			$status = qxx (
-				"cp $s_shim_ms $CD/efi/boot/bootx64.efi 2>&1"
+				"cp $s_shim_ms $CD/EFI/BOOT/bootx64.efi 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
 				$status = qxx (
-					"cp $s_shim_suse $CD/efi/boot/bootx64.efi 2>&1"
+					"cp $s_shim_suse $CD/EFI/BOOT/bootx64.efi 2>&1"
 				);
 				$result = $? >> 8;
 			}
@@ -2222,7 +2222,7 @@ sub createImageLiveCD {
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx ("cp $s_signed $CD/efi/boot/grub.efi 2>&1");
+			$status = qxx ("cp $s_signed $CD/EFI/BOOT/grub.efi 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -2232,26 +2232,6 @@ sub createImageLiveCD {
 			}
 			$kiwi -> done();
 		}
-		#==========================================
-		# make iso EFI bootable
-		#------------------------------------------
-		my $efi_fat = "$CD/boot/grub2-efi/efiboot.img";
-		$status = qxx ("qemu-img create $efi_fat 4M 2>&1");
-		$result = $? >> 8;
-		if ($result == 0) {
-			$status = qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
-			$result = $? >> 8;
-			if ($result == 0) {
-				$status = qxx ("mcopy -Do -s -i $efi_fat $CD/efi :: 2>&1");
-				$result = $? >> 8;
-			}
-		}
-		if ($result != 0) {
-			$kiwi -> error  ("Failed creating efi fat image: $status");
-			$kiwi -> failed ();
-			return;
-		}
-		$efibootloadsize = -s $efi_fat;
 		#==========================================
 		# create grub configuration
 		#------------------------------------------
@@ -2304,11 +2284,11 @@ sub createImageLiveCD {
 		if (! $isxen) {
 			print $FD "\t"."echo Loading linux...\n";
 			print $FD "\t"."set gfxpayload=keep"."\n";
-			print $FD "\t"."$linux /boot/$isoarch/loader/linux";
+			print $FD "\t"."linux$efi_suffix /boot/$isoarch/loader/linux";
 			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 			print $FD " splash=silent"."\n";
 			print $FD "\t"."echo Loading initrd...\n";
-			print $FD "\t"."initrd /boot/$isoarch/loader/initrd\n";
+			print $FD "\t"."initrd$efi_suffix /boot/$isoarch/loader/initrd\n";
 			print $FD "}\n";
 		} else {
 			print $FD "\t"."echo Loading Xen\n";
@@ -2330,12 +2310,12 @@ sub createImageLiveCD {
 		if (! $isxen) {
 			print $FD "\t"."echo Loading linux...\n";
 			print $FD "\t"."set gfxpayload=keep"."\n";
-			print $FD "\t"."$linux /boot/$isoarch/loader/linux";
+			print $FD "\t"."linux$efi_suffix /boot/$isoarch/loader/linux";
 			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 			print $FD " splash=silent";
 			print $FD " @failsafe"."\n";
 			print $FD "\t"."echo Loading initrd...\n";
-			print $FD "\t"."initrd /boot/$isoarch/loader/initrd\n";
+			print $FD "\t"."initrd$efi_suffix /boot/$isoarch/loader/initrd\n";
 			print $FD "}\n";
 		} else {
 			print $FD "\t"."echo Loading Xen\n";
@@ -2359,10 +2339,10 @@ sub createImageLiveCD {
 			if (! $isxen) {
 				print $FD "\t"."echo Loading linux...\n";
 				print $FD "\t"."set gfxpayload=keep"."\n";
-				print $FD "\t"."$linux /boot/$isoarch/loader/linux";
+				print $FD "\t"."linux$efi_suffix /boot/$isoarch/loader/linux";
 				print $FD " mediacheck=1 splash=silent";
 				print $FD "\t"."echo Loading initrd...\n";
-				print $FD "\t"."initrd /boot/$isoarch/loader/initrd\n";
+				print $FD "\t"."initrd$efi_suffix /boot/$isoarch/loader/initrd\n";
 				print $FD "}\n";
 			} else {
 				print $FD "\t"."echo Loading Xen\n";
@@ -2386,7 +2366,7 @@ sub createImageLiveCD {
 		print $FD 'menuentry "Boot from Hard Disk"';
 		print $FD ' --class opensuse --class os {'."\n";
 		print $FD "\t"."set root='hd0,1'"."\n";
-		print $FD "\t".'chainloader /efi/boot/bootx64.efi'."\n";
+		print $FD "\t".'chainloader /EFI/BOOT/bootx64.efi'."\n";
 		print $FD '}'."\n";
 		#==========================================
 		# setup memtest entry
@@ -2400,8 +2380,28 @@ sub createImageLiveCD {
 		#==========================================
 		# copy grub config to efi directory too
 		#------------------------------------------
-		qxx ("cp $CD/boot/grub2-efi/grub.cfg $CD/efi/boot");
+		qxx ("cp $CD/boot/grub2-efi/grub.cfg $CD/EFI/BOOT");
 		$kiwi -> done();
+		#==========================================
+		# make iso EFI bootable
+		#------------------------------------------
+		my $efi_fat = "$CD/boot/$isoarch/efi";
+		$status = qxx ("qemu-img create $efi_fat 4M 2>&1");
+		$result = $? >> 8;
+		if ($result == 0) {
+			$status = qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
+			$result = $? >> 8;
+			if ($result == 0) {
+				$status = qxx ("mcopy -Do -s -i $efi_fat $CD/EFI :: 2>&1");
+				$result = $? >> 8;
+			}
+		}
+		if ($result != 0) {
+			$kiwi -> error  ("Failed creating efi fat image: $status");
+			$kiwi -> failed ();
+			return;
+		}
+		$efibootloadsize = -s $efi_fat;
 	}
 	#==========================================
 	# copy base graphics boot CD files

@@ -2899,12 +2899,12 @@ function updateBootDeviceFstab {
 	#======================================
 	# check for kiwi_JumpPart
 	#--------------------------------------
-	if [ ! -z "$kiwi_JumpPart" ] && [ -d /mnt/$mount/efi ];then
+	if [ ! -z "$kiwi_JumpPart" ] && [ -d /mnt/$mount/EFI ];then
 		local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
 		local fstype=$(blkid $jdev -s TYPE -o value)
 		if [ ! -z "$fstype" ];then
 			jdev=$(getDiskID $jdev)
-			echo "$jdev /boot/efi $fstype defaults 0 0" >> $nfstab
+			echo "$jdev /boot/EFI $fstype defaults 0 0" >> $nfstab
 		fi
 	fi
 }

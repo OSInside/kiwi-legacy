@@ -392,7 +392,7 @@ sub addBootEFILive {
 	#==========================================
 	# update sort file
 	#------------------------------------------
-	qxx ("echo $src/boot/grub2-efi/efiboot.img 1000001 >> $sort");
+	qxx ("echo $src/boot/x86_64/efi 1000001 >> $sort");
 	#==========================================
 	# add end-of-header marker
 	#------------------------------------------
@@ -404,7 +404,7 @@ sub addBootEFILive {
 	$para.= ' -eltorito-alt-boot ';
 	# FIXME: setting the size limits it, which is pretty bad
 	# $para.= " -boot-load-size $size";
-	$para.= ' -b boot/grub2-efi/efiboot.img';
+	$para.= ' -b boot/x86_64/efi';
 	$para.= ' -no-emul-boot -joliet-long -hide glump -hide-joliet glump';
 	$this -> {params} = $para;
 	return $this;
@@ -758,6 +758,9 @@ sub findAndCopyMagicBlock {
 	}
 	$iso_blk -> close();
 	$iso_fd  -> close();
+	$kiwi -> loginfo ("
+		KIWIIsoLinux::findAndCopyMagicBlock start block at: $start\n"
+	);
 	$this->{efi_offset} = $start * 4;
 	$this->{efi_loop_offset} = $start * 2048;
 	return $start;
@@ -857,7 +860,7 @@ sub createISO {
 	#==========================================
 	# Call mkisofs second stage
 	#------------------------------------------
-	if ($firmware eq "efi") {
+	if ($firmware eq "efi" || $firmware eq "uefi") {
 		if (! $this -> findAndCopyMagicBlock()) {
 			$kiwi -> error  ("Failed to read magic iso header");
 			$kiwi -> failed ();
@@ -1055,12 +1058,12 @@ sub createHybrid {
 	my $partOpt   = $optNames{'partok'};
 	my $uefiOpt   = $optNames{'uefi'};
 	my $offset    = 64;
-	if (($firmware eq 'efi') && (! $uefiOpt)) {
+	if (($firmware eq 'efi' || $firmware eq 'uefi') && (! $uefiOpt)) {
 		$kiwi -> warning ("installed isohybrid does not support EFI");
 		$kiwi -> skipped ();
 		$firmware = 'bios';
 	}
-	if ($firmware eq 'efi') {
+	if ($firmware eq 'efi' || $firmware eq 'uefi') {
 		$offset = $this->{efi_offset};
 	}
 	#==========================================
@@ -1070,7 +1073,7 @@ sub createHybrid {
 	if ($mbrid) {
 		$cmd.= " $idOpt $mbrid $typeOpt 0x83";
 	}
-	if ($firmware eq 'efi') {
+	if ($firmware eq 'efi' || $firmware eq 'uefi') {
 		$cmd.= " $uefiOpt";
 	}
 	$data = qxx ("$cmd $iso 2>&1");
