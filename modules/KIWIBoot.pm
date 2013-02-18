@@ -3895,9 +3895,9 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# kernel loader command
 		#------------------------------------------
-		my $linux = 'linux';
+		my $efi_suffix = '';
 		if ($firmware eq "uefi") {
-			$linux = 'linuxefi';
+			$efi_suffix = 'efi';
 		}
 		#==========================================
 		# Theme and Fonts table
@@ -4058,30 +4058,30 @@ sub setupBootLoaderConfiguration {
 				if ($iso) {
 					print $FD "\t"."echo Loading linux...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
-					print $FD "\t"."$linux /boot/linux";
+					print $FD "\t"."linux$efi_suffix /boot/linux";
 					print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 					print $FD " cdinst=1 loader=$bloader splash=silent";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "\t"."echo Loading linux.vmx...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
-					print $FD "\t"."$linux /boot/linux.vmx";
+					print $FD "\t"."linux$efi_suffix /boot/linux.vmx";
 					print $FD " loader=$bloader splash=silent";
 				} else {
 					print $FD "\t"."echo Loading linux...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
-					print $FD "\t"."$linux /boot/linux";
+					print $FD "\t"."linux$efi_suffix /boot/linux";
 					print $FD " loader=$bloader splash=silent";
 				}
 				print $FD $cmdline;
 				if ($iso) {
 					print $FD "\t"."echo Loading initrd...\n";
-					print $FD "\t"."initrd /boot/initrd\n";
+					print $FD "\t"."initrd$efi_suffix /boot/initrd\n";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "\t"."echo Loading initrd.vmx...\n";
-					print $FD "\t"."initrd /boot/initrd.vmx\n";
+					print $FD "\t"."initrd$efi_suffix /boot/initrd.vmx\n";
 				} else {
 					print $FD "\t"."echo Loading initrd...\n";
-					print $FD "\t"."initrd /boot/initrd\n";
+					print $FD "\t"."initrd$efi_suffix /boot/initrd\n";
 				}
 				print $FD "}\n";
 			} else {
@@ -4132,7 +4132,7 @@ sub setupBootLoaderConfiguration {
 					if ($iso) {
 						print $FD "\t"."echo Loading linux...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
-						print $FD "\t"."$linux /boot/linux";
+						print $FD "\t"."linux$efi_suffix /boot/linux";
 						print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 						print $FD " cdinst=1 loader=$bloader splash=silent";
 					} elsif (
@@ -4141,28 +4141,28 @@ sub setupBootLoaderConfiguration {
 					) {
 						print $FD "\t"."echo Loading linux.vmx...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
-						print $FD "\t"."$linux /boot/linux.vmx";
+						print $FD "\t"."linux$efi_suffix /boot/linux.vmx";
 						print $FD " loader=$bloader splash=silent";
 					} else {
 						print $FD "\t"."echo Loading linux...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
-						print $FD "\t"."$linux /boot/linux";
+						print $FD "\t"."linux$efi_suffix /boot/linux";
 						print $FD " loader=$bloader splash=silent";
 					}
 					print $FD " @failsafe";
 					print $FD $cmdline;
 					if ($iso) {
 						print $FD "\t"."echo Loading initrd...\n";
-						print $FD "\t"."initrd /boot/initrd\n";
+						print $FD "\t"."initrd$efi_suffix /boot/initrd\n";
 					} elsif (
 						($type=~ /^KIWI USB/) ||
 						($imgtype=~ /vmx|oem|split/)
 					) {
 						print $FD "\t"."echo Loading initrd.vmx...\n";
-						print $FD "\t"."initrd /boot/initrd.vmx\n";
+						print $FD "\t"."initrd$efi_suffix /boot/initrd.vmx\n";
 					} else {
 						print $FD "\t"."echo Loading initrd...\n";
-						print $FD "\t"."initrd /boot/initrd\n";
+						print $FD "\t"."initrd$efi_suffix /boot/initrd\n";
 					}
 					print $FD "}\n";
 				} else {
