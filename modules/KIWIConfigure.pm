@@ -367,6 +367,9 @@ sub setupHWclock {
 	my $root    = $this->{root};
 	my $xml     = $this->{xml};
 	my $hwClock = $xml -> getPreferences() -> getHWClock();
+	if (! $hwClock) {
+		return $this;
+	}
 	my $timectl = $locator -> getExecPath('timedatectl', $root);
 	if ($timectl) {
 		if ($hwClock eq 'utc') {
@@ -395,6 +398,9 @@ sub setupKeyboardMap {
 	my $root    = $this->{root};
 	my $xml     = $this->{xml};
 	my $keymap = $xml -> getPreferences() -> getKeymap();
+	if (! $keymap) {
+		return $this;
+	}
 	my $localectl = $locator -> getExecPath('localectl', $root);
 	if ($localectl) {
 		qxx("$localectl set-keymap $keymap 2>&1");
@@ -419,6 +425,9 @@ sub setupLocale {
 	my $root    = $this->{root};
 	my $xml     = $this->{xml};
 	my $locale = $xml -> getPreferences() -> getLocale();
+	if (! $locale) {
+		return $this;
+	}
 	my $localectl = $locator -> getExecPath('localectl', $root);
 	if ($localectl) {
 		qxx("$localectl set-locale $locale 2>&1");
@@ -557,6 +566,9 @@ sub setupTimezone {
 	my $root    = $this->{root};
 	my $xml     = $this->{xml};
 	my $tz = $xml -> getPreferences() -> getTimezone();
+	if (! $tz) {
+		return $this;
+	}
 	my $timectl = $locator -> getExecPath('timedatectl', $root);
 	if ($timectl) {
 		qxx("$timectl set-timezone $tz 2>&1");
