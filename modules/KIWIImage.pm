@@ -2067,17 +2067,21 @@ sub createImageLiveCD {
 		#==========================================
 		# Setup grub2 if efi live iso is requested
 		#------------------------------------------
-		my $grub = 'grub2-efi';
+		my $grub   = 'grub2-efi';
+		my $efi_fo = 'x86_64-efi';
+		if ($isoarch ne 'x86_64') {
+			$efi_fo = 'i386-efi';
+		}
 		if (! -d "$tmpdir/usr/lib/$grub") {
 			$grub = 'grub2';
 		}
 		my @theme      = $sxml -> getBootTheme_legacy();
-		my $ir_modules = "$tmpdir/usr/lib/$grub/x86_64-efi";
+		my $ir_modules = "$tmpdir/usr/lib/$grub/$efi_fo";
 		my $ir_themes  = "$tmpdir/usr/share/grub2/themes";
 		my $ir_bgnds   = "$tmpdir/usr/share/grub2/backgrounds";
 		my $ir_font    = "$tmpdir/usr/share/grub2/unicode.pf2";
 		my $efi_modules= "$CD/EFI/BOOT";
-		my $cd_modules = "$CD/boot/grub2-efi/x86_64-efi";
+		my $cd_modules = "$CD/boot/grub2-efi/$efi_fo";
 		my $cd_loader  = "$CD/boot/grub2-efi";
 		my $theme      = $theme[1];
 		my $ir_bg      = "$ir_bgnds/$theme/1024x768.png";
@@ -2167,9 +2171,8 @@ sub createImageLiveCD {
 				'search_fs_file','search','search_fs_uuid','ls',
 				'video','video_fb','normal','test','sleep'
 			);
-			my $fo = 'x86_64-efi';
 			$status = qxx (
-				"$grub2_mkimage -O $fo -o $core -c $bootefi @modules 2>&1"
+				"$grub2_mkimage -O $efi_fo -o $core -c $bootefi @modules 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
