@@ -1477,7 +1477,6 @@ sub createImageLiveCD {
 	my $this = shift;
 	my $para = shift;
 	my $kiwi = $this->{kiwi};
-	my $arch = $this->{arch};
 	my $sxml = $this->{xml};
 	my $cmdL = $this->{cmdL};
 	my $idest= $cmdL->getImageIntermediateTargetDir();
@@ -2060,6 +2059,13 @@ sub createImageLiveCD {
 	if ($stype{firmware}) {
 		$firmware = $stype{firmware};
 	}
+	if (($firmware eq 'uefi') && ($isoarch ne 'x86_64')) {
+		$kiwi -> warning (
+			"UEFI Secure boot is only supported on x86_64"
+		);
+		$kiwi -> skipped ();
+		$firmware = 'bios';
+	}
 	#==========================================
 	# Create bootloader configuration
 	#------------------------------------------
@@ -2110,7 +2116,7 @@ sub createImageLiveCD {
 		# Check for grub2-efi
 		#------------------------------------------
 		if (! -d $ir_modules) {
-			$kiwi -> error ("Couldn't find grub2-efi in initrd");
+			$kiwi -> error ("Couldn't find EFI grub2 data in: $ir_modules");
 			$kiwi -> failed ();
 			return;
 		}
