@@ -425,6 +425,13 @@ sub new {
 		if ($type{firmware}) {
 			$firmware = $type{firmware};
 		}
+		if (($firmware eq 'uefi') && ($arch ne 'x86_64')) {
+			$kiwi -> warning (
+				"UEFI Secure boot is only supported on x86_64"
+			);
+			$kiwi -> skipped ();
+			$firmware = 'bios';
+		}
 	}
 	#==========================================
 	# check partitioner
