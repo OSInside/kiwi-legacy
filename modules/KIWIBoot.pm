@@ -282,7 +282,7 @@ sub new {
 		#==========================================
 		# read and validate XML description
 		#------------------------------------------
-		my $locator = KIWILocator -> new();
+		my $locator = KIWILocator -> instance();
 		my $controlFile = $locator -> getControlFile ($rootpath."/image");
 		my $validator = KIWIXMLValidator -> new (
 			$controlFile,
@@ -3484,7 +3484,7 @@ sub setupBootLoaderStages {
 		#------------------------------------------
 		if ($firmware eq "efi") {
 			$kiwi -> info ("Creating grub2 efi boot image");
-			my $locator = KIWILocator -> new();
+			my $locator = KIWILocator -> instance();
 			my $grub2_mkimage = $locator -> getExecPath ("grub2-efi-mkimage");
 			if (! $grub2_mkimage) {
 				$grub2_mkimage = $locator -> getExecPath ("grub2-mkimage");
@@ -4999,7 +4999,7 @@ sub installBootLoader {
 	my $xml      = $this->{xml};
 	my $firmware = $this->{firmware};
 	my $system   = $this->{system};
-	my $locator  = KIWILocator -> new();
+	my $locator  = KIWILocator -> instance();
 	my $bootdev;
 	my $result;
 	my $status;
@@ -5573,7 +5573,7 @@ sub getGeometry {
 	my $status;
 	my $result;
 	my $parted;
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $parted_exec = $locator -> getExecPath("parted");
 	$status = qxx ("dd if=/dev/zero of=$disk bs=512 count=1 2>&1");
 	$result = $? >> 8;
@@ -5685,7 +5685,7 @@ sub initGeometry {
 	my $align  = $cmdL->getDiskAlignment();
 	my $secsz  = $cmdL->getDiskBIOSSectorSize();
 	my $align_sectors = int ($align / $secsz);
-	my $locator= KIWILocator -> new();
+	my $locator= KIWILocator -> instance();
 	if (! defined $this->{pStart}) {
 		$this->{pStart} = $cmdL->getDiskStartSector();
 	} else {
@@ -5731,7 +5731,7 @@ sub setStoragePartition {
 	my $status;
 	my $ignore;
 	my $action;
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $parted_exec = $locator -> getExecPath("parted");
 	if (! defined $tool) {
 		$tool = "parted";
@@ -6556,7 +6556,7 @@ sub __expandFS {
 	my $diskType  = shift;
 	my $mapper    = shift;
 	my $kiwi      = $this->{kiwi};
-	my $locator   = KIWILocator -> new();
+	my $locator   = KIWILocator -> instance();
 	my $result    = 1;
 	my $status;
 	$kiwi->loginfo ("Resize Operation: Device: $mapper\n");

@@ -664,7 +664,7 @@ sub createEC2 {
 	#==========================================
 	# Check for Amazon EC2 toolkit
 	#------------------------------------------
-	my $locator = KIWILocator -> new();
+	my $locator = KIWILocator -> instance();
 	my $bundleCmd = $locator -> getExecPath ('ec2-bundle-image');
 	if (! $bundleCmd ) {
 		$kiwi -> error (

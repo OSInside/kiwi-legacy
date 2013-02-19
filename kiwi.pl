@@ -57,9 +57,9 @@ binmode(STDOUT, ":encoding(UTF-8)");
 #============================================
 # Globals
 #--------------------------------------------
-my $kiwi     = KIWILog -> instance();
-my $global   = KIWIGlobals -> instance();
-our $locator = KIWILocator -> new ();
+my $kiwi    = KIWILog -> instance();
+my $global  = KIWIGlobals -> instance();
+my $locator = KIWILocator -> instance();
 $kiwi -> setLogServer (
 	$global -> getKiwiConfig() -> {LogServerPort}
 );

@@ -27,36 +27,19 @@ use IPC::Open3;
 # Modules
 #------------------------------------------
 require KIWIGlobals;
-use KIWILog;
-use KIWIQX qw (qxx);
-use KIWITrace;
+require KIWILog;
+require KIWIQX;
+require KIWITrace;
+
+#==========================================
+# Singleton class
+#------------------------------------------
+use base qw /Class::Singleton/;
 
 #==========================================
 # Exports
 #------------------------------------------
 our @EXPORT_OK = qw ();
-
-#==========================================
-# Constructor
-#------------------------------------------
-sub new {
-	# ...
-	# Create the Locator object
-	# ---
-	#==========================================
-	# Object setup
-	#------------------------------------------
-	my $this  = {};
-	my $class = shift;
-	bless $this,$class;
-	#==========================================
-	# Store object data
-	#------------------------------------------
-	$this->{configName}  = 'config.xml';
-	$this->{defCacheDir} = '/var/cache/kiwi/image';
-	$this->{kiwi}        = KIWILog -> instance();
-	return $this;
-}
 
 #==========================================
 # createTmpDirectory
@@ -74,7 +57,7 @@ sub createTmpDirectory {
 	my $forceRoot = $cmdL -> getForceNewRoot();
 	if (! defined $useRoot) {
 		if (! defined $selfRoot) {
-			$root = qxx ("mktemp -qdt kiwi.XXXXXX");
+			$root = KIWIQX::qxx ("mktemp -qdt kiwi.XXXXXX");
 			$code = $? >> 8;
 			if ($code == 0) {
 				$rootError = 0;
@@ -85,7 +68,9 @@ sub createTmpDirectory {
 			rmdir $root;
 			if ( -e $root && -d $root && $forceRoot ) {
 				$kiwi -> info ("Removing old root directory '$root'");
-				my $status = qxx ("cat /proc/mounts | grep '$root' 2>&1");
+				my $status = KIWIQX::qxx (
+					"cat /proc/mounts | grep '$root' 2>&1"
+				);
 				my $result = $? >> 8;
 				if ($result == 0) {
 					$kiwi -> failed();
@@ -93,7 +78,7 @@ sub createTmpDirectory {
 					$kiwi -> failed();
 					return;
 				}
-				qxx ("rm -R $root");
+				KIWIQX::qxx ("rm -R $root");
 				$kiwi -> done();
 			}
 			if (mkdir $root) {
@@ -364,12 +349,13 @@ sub getExecPath {
 	my $execName = shift;
 	my $root     = shift;
 	my $kiwi     = $this->{kiwi};
+
 	my $cmd = q{};
 	if ($root) {
 		$cmd .= "chroot $root ";
 	}
 	$cmd .= 'bash -c "PATH=$PATH:/sbin which ' . $execName .  '" 2>&1';
-	my $execPath = qxx ($cmd);
+	my $execPath = KIWIQX::qxx ($cmd);
 	chomp $execPath;
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -379,6 +365,31 @@ sub getExecPath {
 		return;
 	}
 	return $execPath;
+}
+
+#==========================================
+# Private helper methods
+#------------------------------------------
+#==========================================
+# One time initialization code
+#------------------------------------------
+sub _new_instance {
+	# ...
+	# Create the Locator object
+	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
+	my $this  = {};
+	my $class = shift;
+	bless $this,$class;
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{configName}  = 'config.xml';
+	$this->{defCacheDir} = '/var/cache/kiwi/image';
+	$this->{kiwi}        = KIWILog -> instance();
+	return $this;
 }
 
 1;
