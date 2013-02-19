@@ -2,7 +2,7 @@
 # FILE          : KIWILocator.pm
 #----------------
 # PROJECT       : openSUSE Build-Service
-# COPYRIGHT     : (c) 2011 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2013 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
@@ -20,11 +20,13 @@ package KIWILocator;
 use strict;
 use warnings;
 use base qw (Exporter);
+use Cwd qw (abs_path getcwd);
 use IPC::Open3;
 
 #==========================================
 # Modules
 #------------------------------------------
+require KIWIGlobals;
 use KIWILog;
 use KIWIQX qw (qxx);
 use KIWITrace;
@@ -119,10 +121,99 @@ sub createTmpDirectory {
 }
 
 #==========================================
+# getBootImageDescription
+#------------------------------------------
+sub getBootImageDescription {
+	# ...
+	# Return a fully qualified path for the boot image description.
+	#
+	# - If the given string argument starts with / verify that a control file
+	#   can be found within
+	# - If a relative path is given search in
+	#   ~ the current working directory
+	#   ~ the directory given as second argument
+	#   ~ the kiwi default path
+	#
+	# returns the first match found
+	#---
+	my $this          = shift;
+	my $bootImgPath   = shift;
+	my $addlSearchDir = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $bootImgPath) {
+		my $msg = 'KIWILocator:getBootImageDescription called without '
+			. 'boot image to look for. Internal error, please file a bug.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return;
+	}
+	# Check if we received an absolute path
+	my $firstC = substr $bootImgPath, 0 , 1;
+	if ($firstC eq '/') {
+		if (! -d $bootImgPath) {
+			my $msg = "Could not find given directory '$bootImgPath'.";
+			$kiwi -> error ($msg);
+			$kiwi -> failed();
+			return;
+		}
+		my $config = $this -> getControlFile($bootImgPath);
+		if (! $config) {
+			my $msg = "Given boot image description '$bootImgPath' does "
+				. 'not contain configuration file.';
+			$kiwi -> error ($msg);
+			$kiwi -> failed();
+			return;
+		}
+		return $bootImgPath;
+	}
+	# Look in the current working directory
+	my $cwd = getcwd();
+	$cwd .= '/';
+	my $potBootImgPath = $cwd . $bootImgPath;
+	if ( -d $potBootImgPath) {
+		my $config = $this -> getControlFile($potBootImgPath);
+		if ($config) {
+			return $potBootImgPath;
+		}
+	}
+	# Look in the additional search directory
+	if ($addlSearchDir) {
+		my $absSearchDir = abs_path($addlSearchDir);
+		if ( -d $absSearchDir) {
+			$absSearchDir .= '/';
+			my $probBootImgPath = $absSearchDir . $bootImgPath;
+			if ( -d $probBootImgPath) {
+				my $config = $this -> getControlFile($probBootImgPath);
+				if ($config) {
+					return $probBootImgPath;
+				}
+			}
+		}
+	}
+	# Look in the default location
+	my $global = KIWIGlobals -> instance();
+	my %confData = %{$global -> getKiwiConfig()};
+	my $sysBootImgPath = $confData{System};
+	$sysBootImgPath .= '/';
+	my $kiwiBootImgDescript = $sysBootImgPath . $bootImgPath;
+	if ( -d $kiwiBootImgDescript) {
+		my $config = $this -> getControlFile($kiwiBootImgDescript);
+		if ($config) {
+			return $kiwiBootImgDescript
+		}
+	}
+	my $msg = 'Could not find valid boot image description for'
+		. "'$bootImgPath'.";
+	$kiwi -> error($msg);
+	$kiwi -> failed();
+	return ();
+}
+
+#==========================================
 # getControlFile
 #------------------------------------------
 sub getControlFile {
-	# /.../
+	# ...
 	# This function receives a directory as parameter
 	# and searches for a kiwi xml description in it.
 	# ----
