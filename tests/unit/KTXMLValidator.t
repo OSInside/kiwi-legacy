@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 #================
 # FILE          : KTXMLValidator.t
 #----------------
