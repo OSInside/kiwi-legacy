@@ -466,6 +466,20 @@ Authors:
     Marcus Schaefer
 %endif
 
+%package -n kiwi-test
+Requires: kiwi = %{version}
+Requires: perl-Test-Unit
+Summary:  Unit tests for kiwi
+License:        GPL-2.0
+Group:          System/Management
+%if 0%{?suse_version} > 1120
+BuildArch:      noarch
+%endif
+
+%description -n kiwi-test
+This package contains the unit tests executed during package build and
+used for development testing.
+
 %prep
 %setup -q -n %name -a2 -a3
 
@@ -511,6 +525,7 @@ test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
 %fdupes $RPM_BUILD_ROOT/usr/share/kiwi/image
 %fdupes $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/examples
 %fdupes $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/schema
+%fdupes $RPM_BUILD_ROOT/usr/share/kiwi/tests/unit/data
 %endif
 cat kiwi.loader
 
@@ -729,5 +744,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_defaultdocdir}/kiwi
 
 %endif
+
+%files -n kiwi-test
+%defattr(-, root, root)
+%{_datadir}/kiwi/tests
 
 %changelog

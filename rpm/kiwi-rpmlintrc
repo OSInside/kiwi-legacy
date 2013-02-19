@@ -36,3 +36,6 @@ addFilter("W: no-manual-page-for-binary driveready");
 
 # kiwi master package can't be noarch if sub packages are arch specific
 addFilter("W: no-binary");
+
+# allow hidden kiwirc file for the tests
+addFilter("W: hidden-file-or-dir /usr/share/kiwi/tests/unit/.kiwirc")
