@@ -396,7 +396,7 @@ sub addBootEFILive {
 	#==========================================
 	# add end-of-header marker
 	#------------------------------------------
-	qxx ("echo $magicID >> $tmpdir/glump");
+	qxx ("echo $magicID > $tmpdir/glump");
 	qxx ("echo $tmpdir/glump 1000000 >> $sort");
 	#==========================================
 	# update parameter list
@@ -732,9 +732,9 @@ sub findAndCopyMagicBlock {
 	my $files = $this -> isols();
 	found: for (@{$files}) {
 		next unless $_->{type} eq ' ';
-		last if $cnt++ >= 2; # check only the first 2 files
+		last if $cnt++ >= 8; # check only the first 8 files
 		my $buf;
-		for (my $i = 0; $i >= -4; $i--) { # go back up to 4 blocks
+		for (my $i = 0; $i >= -8; $i--) { # go back up to 8 blocks
 			seek $iso_fd, ($_->{start} + $i) << 11, 0;
 			sysread $iso_fd, $buf, length $magicID;
 			$start = $_->{start} + $i;
