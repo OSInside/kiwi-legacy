@@ -771,6 +771,7 @@ sub mainTask
 					$is_bootable = 1;
 				}
 			}
+			$iso -> addBootEFILive(1);
 			if(!$iso->createISO()) {
 				$this->logMsg('E', "Cannot create Iso image");
 				return 1;
