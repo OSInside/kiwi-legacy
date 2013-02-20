@@ -2515,6 +2515,12 @@ function setupBootLoaderGrub2 {
 	elif [ -e /dev/hvc0 ];then
 		cmdline="$cmdline console=hvc console=tty"
 	fi
+	if [[ ! $cmdline =~ quiet ]];then
+		cmdline="$cmdline quiet"
+	fi
+	if [[ ! $cmdline =~ splash= ]];then
+		cmdline="$cmdline splash=silent"
+	fi
 	#======================================
 	# check for boot TIMEOUT
 	#--------------------------------------
@@ -2531,7 +2537,7 @@ function setupBootLoaderGrub2 {
 		GRUB_HIDDEN_TIMEOUT=0
 		GRUB_HIDDEN_TIMEOUT_QUIET=true
 		GRUB_TIMEOUT=$timeout
-		GRUB_CMDLINE_LINUX_DEFAULT="$cmdline quiet splash=silent"
+		GRUB_CMDLINE_LINUX_DEFAULT="$cmdline"
 		GRUB_CMDLINE_LINUX=""
 	EOF
 	#======================================
@@ -2549,6 +2555,15 @@ function setupBootLoaderGrub2 {
 		echo "GRUB_THEME=\"$theme\""      >> $inst_default_grub
 		echo "GRUB_BACKGROUND=\"$bgpng\"" >> $inst_default_grub
 	fi
+	#======================================
+	# create sysconfig/bootloader
+	#--------------------------------------
+	mkdir -p $destsPrefix/etc/sysconfig
+	local sysb=$destsPrefix/etc/sysconfig/bootloader
+	echo "LOADER_TYPE=\"grub2\""                   > $sysb
+	echo "LOADER_LOCATION=\"mbr\""                >> $sysb
+	echo "DEFAULT_APPEND=\"$cmdline\""            >> $sysb
+	echo "FAILSAFE_APPEND=\"$failsafe $cmdline\"" >> $sysb
 }
 #======================================
 # setupBootLoaderYaboot
