@@ -767,9 +767,14 @@ sub mainTask
 					$this->logMsg('W', $msg);
 				}
 				else {
-		                        if (grep {"x86_64" eq $_} $this->{m_archlist}->headList()) {
-						$this->logMsg('I', "Add EFI Live setup");
-			                        $iso -> addBootEFILive(1);
+                                        my %type;
+                                        %type = %{$this->{m_xml}->getImageTypeAndAttributes_legacy()};
+                                        my $firmware = $type{firmware};
+                                        if ($firmware eq "efi" || $firmware eq "uefi") {
+		                            if (grep {"x86_64" eq $_} $this->{m_archlist}->headList()) {
+				            	$this->logMsg('I', "Add EFI Live setup");
+			                            $iso -> addBootEFILive(1);
+                                            }
                                         }
 					$this->logMsg('I', "Boot methods called successfully");
 					$is_bootable = 1;
