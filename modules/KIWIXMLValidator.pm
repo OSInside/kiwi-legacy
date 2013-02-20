@@ -750,8 +750,9 @@ sub __checkPackageUnique {
 #------------------------------------------
 sub __checkPatternUnique {
 	# ...
-	# Check that a specified opensusePattern is unique, i.e. specified only
-	# once per architecture per <packages> section
+	# Check that a specified namedCollection is unique,
+	# i.e. specified only once per architecture
+	# per <packages> section
 	# ---
 	my $this = shift;
 	my $uniqueCheck = $this -> __uniqueInPackages('namedCollection');
