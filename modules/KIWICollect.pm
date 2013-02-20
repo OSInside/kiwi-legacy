@@ -767,11 +767,14 @@ sub mainTask
 					$this->logMsg('W', $msg);
 				}
 				else {
+		                        if (grep {"x86_64" eq $_} $this->{m_archlist}->headList()) {
+						$this->logMsg('I', "Add EFI Live setup");
+			                        $iso -> addBootEFILive(1);
+                                        }
 					$this->logMsg('I', "Boot methods called successfully");
 					$is_bootable = 1;
 				}
 			}
-			$iso -> addBootEFILive(1);
 			if(!$iso->createISO()) {
 				$this->logMsg('E', "Cannot create Iso image");
 				return 1;
