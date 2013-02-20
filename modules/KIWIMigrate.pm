@@ -1060,7 +1060,7 @@ sub setTemplate {
 		# ---
 		foreach my $pattern (sort @{$pats}) {
 			$pattern =~ s/^pattern://;
-			print $FD "\t\t".'<opensusePattern name="'.$pattern.'"/>'."\n";
+			print $FD "\t\t".'<namedCollection name="'.$pattern.'"/>'."\n";
 		}
 	}
 	if (defined $pacs) {
