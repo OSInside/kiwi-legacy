@@ -2539,6 +2539,7 @@ function setupBootLoaderGrub2 {
 		GRUB_TIMEOUT=$timeout
 		GRUB_CMDLINE_LINUX_DEFAULT="$cmdline"
 		GRUB_CMDLINE_LINUX=""
+		GRUB_TERMINAL=gfxterm
 	EOF
 	#======================================
 	# write vesa vga setup
