@@ -9,9 +9,7 @@
 # BELONGS TO    : Operating System images
 #               :
 # DESCRIPTION   : This module represents the data contained in the KIWI
-#               : configuration file marked with the <rhelGroup> or
-#               : <opensusePattern> element. Both elements will eventually
-#               : combined into <namedCollection>
+#               : configuration file marked with the <namedCollection>.
 #               :
 # STATUS        : Development
 #----------------

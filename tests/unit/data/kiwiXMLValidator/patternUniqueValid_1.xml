@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.4" name="unique-pckg-test">
+
+<image schemaversion="5.7" name="unique-pckg-test">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -21,7 +22,7 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<users group="root">
-		<user pwd="linux" pwdformat="plain" home="/root" name="root"/>
+		<user password="linux" pwdformat="plain" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
 		<source path="opensuse://12.2/repo/oss/"/>
@@ -32,9 +33,9 @@
 		<package name="kernel-default"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
-		<opensusePattern name="base"/>
-		<opensusePattern name="kde"/>
-		<opensusePattern name="kde" arch="ppc64"/>
+		<namedCollection name="base"/>
+		<namedCollection name="kde"/>
+		<namedCollection name="kde" arch="ppc64"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.1" name="suse-11.3-xen-guest">
+
+<image schemaversion="5.7" name="suse-11.3-xen-guest">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
 		<specification>test type requires boot attribute</specification>
 	</description>
 	<preferences>
-		<type image="vmx" boot="system://vmxboot/suse-11.4" filesystem="ext3" format="vmdk"> 
-			<machine  memory="512">
+		<type image="vmx" boot="system://vmxboot/suse-11.4" filesystem="ext3" format="vmdk">
+			<machine memory="512">
 				<vmdisk controller="ide" id="0"/>
 			</machine>
 		</type>
@@ -19,7 +20,7 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
 		<source path="opensuse://11.4/repo/oss/"/>
@@ -30,7 +31,7 @@
 		<package name="ifplugd"/>
 		<package name="kernel-default"/>
 		<package name="vim"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

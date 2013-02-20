@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.6" name="suse-11.4-gnome-demo">
+<image schemaversion="5.7" name="suse-11.4-gnome-demo">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -54,8 +54,8 @@
 		<package name="xorg-x11-driver-video-radeonhd"/>
 		<package name="xkeyboard-config"/>
 		<package name="xorg-x11-driver-input"/>
-		<opensusePattern name="base"/>
-		<opensusePattern name="x11"/>
+		<namedCollection name="base"/>
+		<namedCollection name="x11"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

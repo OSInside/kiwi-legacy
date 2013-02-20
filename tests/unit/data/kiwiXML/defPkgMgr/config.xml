@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.2" name="suse-xml-test-config">
+<image schemaversion="5.7" name="suse-xml-test-config">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rschweikert@novell.</contact>
@@ -19,10 +19,10 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<users group="users">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
 	</users>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="rpm-dir">
 		<source path="/tmp"/>
@@ -33,7 +33,7 @@
 		<package name="kernel-default"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

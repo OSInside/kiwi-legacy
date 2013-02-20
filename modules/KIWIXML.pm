@@ -411,8 +411,7 @@ sub new {
 	#------------------------------------------
 	$this -> __populatePackageInfo();
 	#==========================================
-	# Populate imageConfig with package collection
-	# (opensusePattern, rhelGroup) data
+	# Populate imageConfig with package collection data
 	#------------------------------------------
 	$this -> __populatePackageCollectionInfo();
 	#==========================================
@@ -4411,7 +4410,7 @@ sub __populatePackageInfo {
 sub __populatePackageCollectionInfo {
 	# ...
 	# Populate the imageConfig member with the
-	# information from <opensusePattern> and <rhelGroup>
+	# information from <namedCollection>
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -4420,14 +4419,10 @@ sub __populatePackageCollectionInfo {
 		my $profiles = $pckgNd -> getAttribute('profiles');
 		my @profsToProcess = ('kiwi_default');
 		if ($profiles) {
-			@profsToProcess = split /,/, $profiles;
+			@profsToProcess = split /,/smx, $profiles;
 		}
 		my $type = $pckgNd -> getAttribute('type');
 		my @collectNodes = $pckgNd -> getElementsByTagName('namedCollection');
-		my @sNodes = $pckgNd -> getElementsByTagName('opensusePattern');
-		push @collectNodes, @sNodes;
-		my @cNodes = $pckgNd -> getElementsByTagName('rhelGroup');
-		push @collectNodes, @cNodes;
 		for my $prof (@profsToProcess) {
 			for my $collectNd (@collectNodes) {
 				my $arch     = $collectNd -> getAttribute('arch');
@@ -5863,7 +5858,7 @@ sub addPatterns_legacy {
 		}
 	}
 	foreach my $pack (@patts) {
-		my $addElement = XML::LibXML::Element -> new ("opensusePattern");
+		my $addElement = XML::LibXML::Element -> new ("namedCollection");
 		$addElement -> setAttribute("name",$pack);
 		$nodes -> get_node($nodeNumber)
 			-> appendChild ($addElement);
@@ -6633,7 +6628,7 @@ sub getInstallSize_legacy {
 			next;
 		}
 		my @pattlist = ();
-		my @slist = $node -> getElementsByTagName ("opensusePattern");
+		my @slist = $node -> getElementsByTagName ("namedCollection");
 		foreach my $element (@slist) {
 			if (! $this -> isArchAllowed ($element,"packages")) {
 				next;
@@ -7299,15 +7294,7 @@ sub getList_legacy {
 				}
 				push @pattlist,"product:".$product;
 			}
-			@slist = ();
-			my @slist_suse = $node -> getElementsByTagName ("opensusePattern");
-			my @slist_rhel = $node -> getElementsByTagName ("rhelGroup");
-			if (@slist_suse) {
-				push @slist,@slist_suse;
-			}
-			if (@slist_rhel) {
-				push @slist,@slist_rhel;
-			}
+			@slist = $node -> getElementsByTagName ('namedCollection');
 			foreach my $element (@slist) {
 				if (! $this -> isArchAllowed ($element,$type)) {
 					next;

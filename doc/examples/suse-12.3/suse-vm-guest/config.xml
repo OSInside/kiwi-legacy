@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.6" name="suse-12.3-vm-guest">
+<image schemaversion="5.7" name="suse-12.3-vm-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -33,7 +33,7 @@
 		<package name="vim"/>
 		<package name="plymouth"/>
 		<package name="grub2"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="vmx"/>
 	<packages type="bootstrap">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.6" name="suse-12.1-OpenNebula-Cloud-Node">
+<image schemaversion="5.7" name="suse-12.1-OpenNebula-Cloud-Node">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -33,7 +33,7 @@
 		<source path="http://download.opensuse.org/repositories/Virtualization:/Cloud:/OpenNebula/openSUSE_12.1"/>
 	</repository>
 	<packages type="image">
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="bridge-utils"/>

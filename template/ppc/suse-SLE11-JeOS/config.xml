@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.6" name="LimeJeOS-SLE11">
+<image schemaversion="5.7" name="LimeJeOS-SLE11">
 	<description type="system">
 		<author>Marcus Schaefer</author>
 		<contact>cthiel@novell.com</contact>
@@ -28,7 +28,7 @@
 		<source path="http://download.suse.de/install/SLP/SLE-11-SP1-SDK-LATEST/%arch/DVD1"/>
 	</repository>
 	<packages type="image">
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 		<opensuseProduct name="SUSE_SLES"/>
 		<package name="kernel-ppc64"/>
 		<package name="ifplugd"/>

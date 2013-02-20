@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.5" name="testCase-package-settings">
+
+<image schemaversion="5.7" name="testCase-package-settings">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -18,7 +19,7 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<users group="root">
-	<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
 		<source path="opensuse://12.1/repo/oss/"/>
@@ -26,8 +27,8 @@
 	<packages type="image">
 		<archive name="myInitStuff.tar" bootinclude="true"/>
 		<archive name="myImageStuff.tgz"/>
-		<opensusePattern name="base"/>
-		<opensusePattern name="xfce"/>
+		<namedCollection name="base"/>
+		<namedCollection name="xfce"/>
 		<opensuseProduct name="SLES"/>
 		<package name="ed"/>
 		<package name="kernel-default"/>
@@ -36,7 +37,7 @@
 	</packages>
 	<packages type="image" profiles="aTest" patternType="plusRecommended">
 		<archive name="myAppArch.tgz"/>
-		<opensusePattern name="kde"/>
+		<namedCollection name="kde"/>
 		<package name="emacs"/>
 		<package name="kernel-desktop" replaces="kernel-default"/>
 		<package name="perl" bootinclude="true"/>
@@ -51,14 +52,14 @@
 		<archive name="myOEMstuffProf.tar.bz2"/>
 		<package name="kernel-firmware"/>
 		<package name="sane"/>
-		<rhelGroup name="compatAddon"/>
+		<namedCollection name="compatAddon"/>
 	</packages>
 	<packages type="oem" profiles="aTest">
 		<archive name="myOEMstuffProf.tar.bz2"/>
 		<ignore name="python"/>
 		<package name="xemacs" replaces="vim"/>
 		<package name="gimp"/>
-		<rhelGroup name="lamp"/>
+		<namedCollection name="lamp"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

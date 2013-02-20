@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.1" name="suse-11.3-xen-guest">
+
+<image schemaversion="5.7" name="suse-11.3-xen-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -9,12 +10,12 @@
 		<profile name="xen Flavour" description="VMX with Xen kernel" import="true"/>
 	</profiles>
 	<preferences>
-		<type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install"> 
-			<oemconfig> 
-				<oem-reboot>true</oem-reboot> 
-				<oem-swap>false</oem-swap> 
-				<oem-unattended>true</oem-unattended> 
-			</oemconfig> 
+		<type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
+			<oemconfig>
+				<oem-reboot>true</oem-reboot>
+				<oem-swap>false</oem-swap>
+				<oem-unattended>true</oem-unattended>
+			</oemconfig>
 		</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
@@ -32,7 +33,7 @@
 		</type>
 	</preferences>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
 		<source path="opensuse://11.3/repo/oss/"/>
@@ -44,7 +45,7 @@
 		<package name="vim"/>
 		<package name="xen-tools-domU"/>
 		<package name="xen"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="image" profiles="xen Flavour">
 		<package name="kernel-xen" replaces="kernel-default"/>

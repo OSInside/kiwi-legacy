@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.5" name="testCase-group-consitency">
+
+<image schemaversion="5.7" name="testCase-group-consitency">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -8,7 +9,7 @@
 	<preferences>
 		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="vmdk">
 			<machine memory="1024">
-		        <vmdisk device="/dev/sda" disktype="scsi"/>
+				<vmdisk device="/dev/sda" disktype="scsi"/>
 				<vmnic interface="eth0"/>
 			</machine>
 		</type>
@@ -19,21 +20,21 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<users group="root">
-		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<users group="mygrp">
-		<user home="/home/auser" id="2001" pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" name="auser" shell="/bin/ksh"/>
-		<user home="/home/buser" pwd="linux" pwdformat="plain" name="buser" realname="Bert"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/auser" id="2001" name="auser" shell="/bin/ksh"/>
+		<user password="linux" home="/home/buser" pwdformat="plain" name="buser" realname="Bert"/>
 	</users>
 	<users group="mygrp">
-		<user home="/home/cuser" id="2001" pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" name="cuser" shell="/bin/ksh"/>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/cuser" id="2001" name="cuser" shell="/bin/ksh"/>
 	</users>
 	<repository type="yast2">
 		<source path="opensuse://12.1/repo/oss/"/>
 	</repository>
 	<packages type="image">
 		<package name="kernel-default"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

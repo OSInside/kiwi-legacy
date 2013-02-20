@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="5.6" name="testCase-user-consitency">
+
+<image schemaversion="5.7" name="testCase-user-consitency">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -8,7 +9,7 @@
 	<preferences>
 		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="vmdk">
 			<machine memory="1024">
-		        <vmdisk device="/dev/sda" disktype="scsi"/>
+				<vmdisk device="/dev/sda" disktype="scsi"/>
 				<vmnic interface="eth0"/>
 			</machine>
 		</type>
@@ -32,7 +33,7 @@
 	</repository>
 	<packages type="image">
 		<package name="kernel-default"/>
-		<opensusePattern name="base"/>
+		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
