@@ -1627,7 +1627,8 @@ function baseSetRunlevel {
 	# the specified value
 	# ----
 	local RUNLEVEL=$1
-	local target=/usr/lib/systemd/system/runlevel$RUNLEVEL.target
+	local target_console=/usr/lib/systemd/system/multi-user.target
+	local target_graphics=/usr/lib/systemd/system/graphical.target
 	if [ ! -f $target ];then
 		target=/lib/systemd/system/runlevel$RUNLEVEL.target
 	fi
@@ -1636,7 +1637,11 @@ function baseSetRunlevel {
 			sed -i "s/id:[0123456]:initdefault:/id:$RUNLEVEL:initdefault:/" \
 			/etc/inittab
 			if test -d /etc/systemd/system; then
-				ln -sf $target /etc/systemd/system/default.target
+				if [ $RUNLEVEL -lt 5 ];then
+					ln -sf $target_console /etc/systemd/system/default.target
+				else
+					ln -sf $target_graphics /etc/systemd/system/default.target
+				fi
 			fi
 		;;
 		*)
