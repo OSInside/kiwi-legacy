@@ -37,9 +37,9 @@ suseSetupProduct
 suseInsertService sshd
 
 #======================================
-# Activate services
+# Setup default target, multi-user
 #--------------------------------------
-systemctl enable console-setup.service
+baseSetRunlevel 3
 
 #==========================================
 # remove package docs
@@ -60,14 +60,14 @@ sed -i -e's/^syntax on/" syntax on/' /etc/vimrc
 suseConfig
 
 #======================================
-# Add 11.1 repo
+# Add 12.3 repo
 #--------------------------------------
 baseRepo="http://download.opensuse.org/distribution/12.3/repo/oss"
 baseName="suse-12.3"
 zypper ar $baseRepo $baseName
 
 #======================================
-# Remove unneeded packages
+# Remove yast packages
 #--------------------------------------
 rpm -qa | grep yast | xargs rpm -e --nodeps
 
