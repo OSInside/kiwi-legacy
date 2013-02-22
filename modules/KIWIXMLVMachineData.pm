@@ -146,7 +146,7 @@ sub new {
 	$this->{vmnics}        = $init->{vmnics};
 	# Default settings
 	if (! $init->{HWversion} ) {
-		$this->{HWversion} = '4';
+		$this->{HWversion} = '9';
 		$this->{defaultHWversion} = 1;
 	}
 	if (! $init->{guestOS}) {
