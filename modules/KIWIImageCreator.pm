@@ -1187,7 +1187,7 @@ sub __selectCache {
 		return;
 	}
 	my $icache = KIWICache -> new(
-		$this->{cacheDir},$this->{gdata}->{BasePath},
+		$xml,$this->{cacheDir},$this->{gdata}->{BasePath},
 		$this->{buildProfiles},$configDir,$cmdL
 	);
 	if (! $icache) {
