@@ -236,8 +236,9 @@ sub new {
 	#==========================================
 	# Check for overlay structure
 	#------------------------------------------
-	$this->{origtree}= $root;
-	$this->{overlay} = KIWIOverlay -> new ($root,$cacheRoot);
+	$this->{root}     = $root;
+	$this->{origtree} = $root;
+	$this->{overlay}  = KIWIOverlay -> new ($root,$cacheRoot);
 	if (! $this->{overlay}) {
 		$this -> cleanMount();
 		return;
@@ -247,6 +248,7 @@ sub new {
 		$this -> cleanMount();
 		return;
 	}
+	$this->{root} = $root;
 	#==========================================
 	# Mark new root directory as broken
 	#------------------------------------------
@@ -310,7 +312,6 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{root}    = $root;
 	$this->{manager} = $manager;
 	$this->{cmdL}    = $cmdL;
 	return $this;
@@ -1458,12 +1459,12 @@ sub cleanMount {
 	if (! defined $this->{mountList}) {
 		return $this;
 	}
-	if (! defined $root) {
-		return $this;
-	}
 	my @mountList  = @{$this->{mountList}};
 	my $baseSystem = $this->{baseSystem};
-	my $prefix = $root."/".$baseSystem;
+	my $prefix;
+	if (($root) && (-d $root)) {
+		$prefix = $root."/".$baseSystem;
+	}
 	my @newList= ();
 	foreach my $item (reverse @mountList) {
 		if (defined $expr) {
@@ -1486,7 +1487,7 @@ sub cleanMount {
 				$kiwi -> done();
 			}
 		}
-		if ($item =~ /^$prefix/) {
+		if (($prefix) && ($item =~ /^$prefix/)) {
 			qxx ("rmdir -p \"$item\" 2>&1");
 		}
 		if ($item =~ /^\/tmp\/kiwimount/) {
@@ -1494,7 +1495,7 @@ sub cleanMount {
 		}
 		
 	}
-	if (-d $prefix) {
+	if (($prefix) && (-d $prefix)) {
 		rmdir $prefix;
 	}
 	if (defined $this->{overlay}) {
