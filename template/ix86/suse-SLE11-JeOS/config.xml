@@ -2,17 +2,19 @@
 
 <image schemaversion="5.6" name="LimeJeOS-SLE11">
 	<description type="system">
-		<author>Christoph Thiel</author>
-		<contact>cthiel@novell.com</contact>
+		<author>Marcus Schäfer</author>
+		<contact>ms@suse.de</contact>
 		<specification>SUSE Linux Enterprise 11 JeOS</specification>
 	</description>
 	<profiles>
 		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
+		<profile name="vmxFlavour-uefi" description="VMX with default kernel and UEFI support"/>
 		<profile name="xenFlavour" description="VMX with Xen kernel"/>
+		<profile name="xenFlavour-uefi" description="VMX with Xen kernel and UEFI support"/>
 		<profile name="vmxFlavour-s390" description="VMX for s390 with default kernel"/>
 	</profiles>
 	<preferences>
-		<version>1.1.0</version>
+		<version>1.11.3</version>
 		<packagemanager>zypper</packagemanager>
 		<bootsplash-theme>SLES</bootsplash-theme>
 		<bootloader-theme>SLES</bootloader-theme>
@@ -47,6 +49,41 @@
 			</machine>
 		</type>
 		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" installiso="true">
+			<oemconfig>
+				<oem-systemsize>2048</oem-systemsize>
+				<oem-swap>true</oem-swap>
+			</oemconfig>
+			<machine memory="512" guestOS="suse" HWversion="4">
+				<vmdisk controller="scsi" id="0"/>
+				<vmnic driver="e1000" interface="0" mode="bridged"/>
+			</machine>
+		</type>
+	</preferences>
+	<preferences profiles="xenFlavour-uefi">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="xen" bootkernel="xenk" bootloader="grub2" firmware="uefi">
+			<machine memory="512" domain="domU">
+				<vmdisk controller="ide" id="0" device="/dev/xvda"/>
+				<vmnic interface=""/>
+			</machine>
+		</type>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" bootprofile="xen" bootkernel="xenk" installiso="true" bootloader="grub2" firmware="uefi">
+			<oemconfig>
+				<oem-systemsize>2048</oem-systemsize>
+				<oem-swap>true</oem-swap>
+			</oemconfig>
+			<machine domain="dom0">
+				<vmdisk controller="scsi" id="0"/>
+			</machine>
+		</type>
+	</preferences>
+	<preferences profiles="vmxFlavour-uefi">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" format="vmdk" bootloader="grub2" firmware="uefi">
+			<machine memory="512" guestOS="suse" HWversion="4">
+				<vmdisk controller="scsi" id="0"/>
+				<vmnic driver="e1000" interface="0" mode="bridged"/>
+			</machine>
+		</type>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" installiso="true" bootloader="grub2" firmware="uefi">
 			<oemconfig>
 				<oem-systemsize>2048</oem-systemsize>
 				<oem-swap>true</oem-swap>
@@ -117,6 +154,12 @@
 		<package name="lvm2"/>
 		<package name="syslinux"/>
 	</packages>
+	<packages type="image" profiles="vmxFlavour-uefi,xenFlavour-uefi">
+		<package name="grub2" bootinclude="true"/>
+		<package name="grub2-x86_64-efi" arch="x86_64" bootinclude="true"/>
+		<package name="shim" arch="x86_64" bootinclude="true"/>
+		<package name="bootsplash-branding-SLES" bootinclude="true" bootdelete="true"/>
+	</packages>
 	<packages type="image" profiles="vmxFlavour,xenFlavour">
 		<package name="grub"/>
 		<package name="bootsplash-branding-SLES" bootinclude="true" bootdelete="true"/>
@@ -125,13 +168,13 @@
 	<packages type="image" profiles="vmxFlavour-s390">
 		<package name="zipl"/>
 	</packages>
-	<packages type="image" profiles="xenFlavour">
+	<packages type="image" profiles="xenFlavour,xenFlavour-uefi">
 		<package name="kernel-xen" replaces="kernel-default"/>
 		<package name="kernel-xen-base" replaces="kernel-default-base"/>
 		<package name="xen-tools-domU" replaces=""/>
 		<package name="xen" replaces=""/>
 	</packages>
-	<packages type="image" profiles="vmxFlavour,vmxFlavour-s390">
+	<packages type="image" profiles="vmxFlavour,vmxFlavour-s390,vmxFlavour-uefi">
 		<package name="kernel-default" replaces="kernel-xen"/>
 		<package name="kernel-default-base" replaces="kernel-xen-base"/>
 		<package name="kernel-default-base" replaces="xen-tools-domU"/>
