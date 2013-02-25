@@ -2481,7 +2481,7 @@ function setupKernelModules {
 		# sysconfig/kernel. Therefore we include all USB modules
 		# required to support USB storage like USB sticks
 		# ----
-		local USB_MODULES="ehci-hcd ohci-hcd uhci-hcd usbcore usb-storage sd"
+		local USB_MODULES="ehci-hcd ohci-hcd uhci-hcd xhci-hcd usbcore usb-storage sd"
 		INITRD_MODULES="$INITRD_MODULES $USB_MODULES"
 		# /.../
 		# old mkinitrd cannot figure this out on its own
