@@ -3545,8 +3545,6 @@ function searchImageISODevice {
 	local mbrVID
 	local mbrIID
 	local count=0
-	local isofrom_device
-	local isofrom_system
 	mkdir -p /cdrom
 	if [ ! -f /boot/mbrid ];then
 		systemException \
@@ -3554,17 +3552,22 @@ function searchImageISODevice {
 		"reboot"
 	fi
 	mbrIID=$(cat /boot/mbrid)
-	Echo -n "Searching for boot device in Application ID..."
 	udevPending
 	#======================================
 	# Check for ISO file on storage media
 	#--------------------------------------
-	if [ ! -z "$isofrom" ];then
-		isofrom_device=$(echo $isofrom | cut -f1 -d:)
-		isofrom_system=$(echo $isofrom | cut -f2 -d:)
-		waitForStorageDevice $isofrom_device
+	if [ ! -z "$isofrom_device" ] && [ ! -z "$isofrom_system" ];then
+		Echo "Looking up ISO on $isofrom_device..."
 		mkdir /isofrom
-		if ! mount $isofrom_device /isofrom;then
+		if [[ $isofrom_device =~ nfs: ]];then
+			setupNetwork
+			isofrom_device=$(echo $isofrom_device | cut -c 5-)
+			mount -t nfs $isofrom_device /isofrom
+		else
+			waitForStorageDevice $isofrom_device
+			mount $isofrom_device /isofrom
+		fi
+		if [ ! $? = 0 ];then
 			systemException \
 				"Failed to mount ISO storage device !" \
 			"reboot"
@@ -3575,11 +3578,12 @@ function searchImageISODevice {
 				"Failed to loop setup ISO system !" \
 			"reboot"
 		fi
-		biosBootDevice=/dev/loop0; echo; return 0
+		return 0
 	fi
 	#======================================
 	# Search ISO header in device list
 	#--------------------------------------
+	Echo -n "Searching for boot device in Application ID..."
 	while true;do
 		for i in /dev/*;do
 			if [ ! -b $i ];then
