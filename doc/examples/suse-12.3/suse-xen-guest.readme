@@ -7,7 +7,7 @@ How to build this Example
 ==============================
 
     kiwi --prepare \
-         /usr/share/doc/packages/kiwi/examples/suse-12.2/suse-xen-guest \
+         /usr/share/doc/packages/kiwi/examples/suse-12.3/suse-xen-guest \
          --root /tmp/myxen
 
     kiwi --create /tmp/myxen -d /tmp/myxen-result
@@ -17,7 +17,7 @@ How to test this Example
 * Testing the xen image works together with the Xen tools. In this
   example activating the guest domain X requires the following call:
 
-    xm create -c /tmp/myxen-result/suse-12.2-xen-guest.i686-1.1.2.xenconfig
+    xm create -c /tmp/myxen-result/suse-12.3-xen-guest.i686-1.1.2.xenconfig
 
 Login Details
 ==============================

@@ -71,6 +71,21 @@ sub assert_array_equal {
 }
 
 #==========================================
+# assert_dir_exists
+#------------------------------------------
+sub assert_dir_exists {
+	# ...
+	# Test for file existence
+	# ---
+	my $this = shift;
+	my $dir   = shift;
+	if (! -d $dir) {
+		$this -> assert(0, "Directory $dir not found.");
+	}
+	return;
+}
+
+#==========================================
 # assert_file_exists
 #------------------------------------------
 sub assert_file_exists {

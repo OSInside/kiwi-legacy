@@ -16,10 +16,16 @@ my @kiwiModules = qw (
 	KIWICollect.pm
 	KIWICommandLine.pm
 	KIWIConfigure.pm
+	KIWIConfigWriter.pm
+	KIWIConfigWriterFactory.pm
+	KIWIContainerBuilder.pm
+	KIWIContainerConfigWriter.pm
 	KIWIContentPlugin.pm
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
 	KIWIGlobals.pm
+	KIWIImageBuilder.pm
+	KIWIImageBuildFactory.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
 	KIWIImage.pm
@@ -82,6 +88,10 @@ my @kiwiModules = qw (
 	KIWIXMLVMachineData.pm
 	KIWIXMLValidator.pm
 	KTCommandLine.t
+	KTConfigWriterFactory.t
+	KTContainerBuilder.t
+	KTContainerConfigWriter.t
+	KTImageBuildFactory.t
 	KTImageCreator.t
 	KTLocator.t
 	KTRuntimeChecker.t
@@ -119,7 +129,11 @@ my @kiwiModules = qw (
 	ktLog.pm
 	ktTestCase.pm
 	kiwiCommandLine.pm
+	kiwiConfigWriterFactory.pm
+	kiwiContainerBuilder.pm
+	kiwiContainerConfigWriter.pm
 	kiwiLocator.pm
+	kiwiImageBuildFactory.pm
 	kiwiImageCreator.pm
 	kiwiRuntimeChecker.pm
 	kiwiXML.pm
@@ -166,10 +180,16 @@ my @notClean1 = qw (
 	KIWICollect.pm
 	KIWICommandLine.pm
 	KIWIConfigure.pm
+	KIWIConfigWriter.pm
+	KIWIConfigWriterFactory.pm
+	KIWIContainerBuilder.pm
+	KIWIContainerConfigWriter.pm
 	KIWIContentPlugin.pm
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
 	KIWIGlobals.pm
+	KIWIImageBuilder.pm
+	KIWIImageBuildFactory.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
 	KIWIImage.pm
@@ -232,6 +252,10 @@ my @notClean1 = qw (
 	KIWIXMLVMachineData.pm
 	KIWIXMLValidator.pm
 	KTCommandLine.t
+	KTConfigWriterFactory.t
+	KTContainerBuilder.t
+	KTContainerConfigWriter.t
+	KTImageBuildFactory.t
 	KTImageCreator.t
 	KTLocator.t
 	KTRuntimeChecker.t
@@ -269,7 +293,11 @@ my @notClean1 = qw (
 	ktLog.pm
 	ktTestCase.pm
 	kiwiCommandLine.pm
+	kiwiConfigWriterFactory.pm
+	kiwiContainerBuilder.pm
+	kiwiContainerConfigWriter.pm
 	kiwiLocator.pm
+	kiwiImageBuildFactory.pm
 	kiwiImageCreator.pm
 	kiwiRuntimeChecker.pm
 	kiwiXML.pm
@@ -316,10 +344,12 @@ my @notClean2 = qw (
 	KIWICollect.pm
 	KIWICommandLine.pm
 	KIWIConfigure.pm
+	KIWIContainerBuilder.pm
 	KIWIContentPlugin.pm
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
 	KIWIGlobals.pm
+	KIWIImageBuilder.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
 	KIWIImage.pm
@@ -355,6 +385,7 @@ my @notClean2 = qw (
 	KIWIXMLValidator.pm
 	ktTestCase.pm
 	kiwiCommandLine.pm
+	kiwiContainerBuilder.pm
 	kiwiLocator.pm
 	kiwiImageCreator.pm
 	kiwiRuntimeChecker.pm
@@ -378,6 +409,7 @@ my @notClean3 = qw (
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
 	KIWIGlobals.pm
+	KIWIImageBuilder.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
 	KIWIImage.pm

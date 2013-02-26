@@ -18,8 +18,8 @@
   <para>A VMX image is a virtual disk image for use in full
     virtualization systems like Qemu or VMware. The image is a file
     containing the system represented by the configured packages in
-    config.xml as well as partition data and bootloader information. The
-    size of this virtual disk can be specified by using the size element
+    <filename>config.xml</filename> as well as partition data and bootloader
+    information. The size of this virtual disk can be specified by using the size element
     in the <filename>config.xml</filename> file or by adding the
       <option>--bootvm-disksize</option> command line argument. </para>
   

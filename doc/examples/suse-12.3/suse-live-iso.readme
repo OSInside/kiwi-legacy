@@ -14,7 +14,7 @@ KIWI Image Description Example
 How to build this Example
 ==============================
 
-   kiwi -p /usr/share/doc/packages/kiwi/examples/suse-12.2/suse-live-iso \
+   kiwi -p /usr/share/doc/packages/kiwi/examples/suse-12.3/suse-live-iso \
         --root /tmp/myiso
 
    kiwi --create /tmp/myiso --type iso -d /tmp/myiso-result
@@ -24,7 +24,7 @@ How to test this Example
 * Testing an iso can be done with any full virtual system or simply
   by burning the .iso file on a CD or DVD. For example:
 
-    qemu -cdrom /tmp/myiso-result/suse-12.2-live.i686-2.5.2.iso -m 512
+    qemu -cdrom /tmp/myiso-result/suse-12.3-live.i686-2.5.2.iso -m 512
 
 Login Details
 ==============================

@@ -1302,9 +1302,10 @@ sub __isArchValid {
 	# ---
 	my $this = shift;
 	my $arch = shift;
-	my %supportedArch = ( 'ix86'   => 1,
-						'x86_64' => 1
-						);
+	my %supportedArch = (
+		'ix86'   => 1,
+		'x86_64' => 1
+	);
 	if (! $supportedArch{$arch} ) {
 		return;
 	}
