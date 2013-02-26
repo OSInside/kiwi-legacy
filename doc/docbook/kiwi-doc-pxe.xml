@@ -421,9 +421,9 @@ DISK=device</screen>
               the IMAGE line according to the PART setup.
               A typical raid image setup could look like this:</para>
 <screen>DISK=/dev/sda
+RAID='1;/dev/sda;/dev/sdb'
 IMAGE='/dev/md1;LimeJeOS-openSUSE-##.#.i686;1.11.3;192.168.100.2;4096'
-PART='5;S;x,2000;83;/'
-RAID='1;/dev/sda;/dev/sdb'</screen>
+PART='5;S;x,2000;83;/'</screen>
 		  </listitem>
         </varlistentry>
         <varlistentry>
@@ -529,10 +529,10 @@ RAID='1;/dev/sda;/dev/sdb'</screen>
               the IMAGE and PART information. The following example
               should explain the interconnections: </para>
 
-<screen>IMAGE='/dev/sda3;image/myImage;1.1.1;192.168.1.1;4096'
+<screen>DISK=/dev/sda
+IMAGE='/dev/sda3;image/myImage;1.1.1;192.168.1.1;4096'
 PART='200;S;x,300;L;/,x;L;x'
-UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs
-DISK=/dev/sda</screen>
+UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs</screen>
 
             <para>As the second element of the PART list must define the
               root partition it’s absolutely important that the first
@@ -777,52 +777,122 @@ NBD-Write-Port-Number;/dev/NBD-Write-Device</screen>
         <secondary>union image</secondary>
       </indexterm>
       <para>As used in the suse-pxe-client example it is possible to
-        make use of the clicfs overlay filesystems to combine
+        make use of the clicfs overlay filesystem to combine
         two filesystems into one. In case of thin clients there is often
         the need for a compressed filesystem due to space limitations.
         Unfortunately all common compressed filesystems provides only
         read-only access. Combining a read-only filesystem with a
         read-write filesystem is a solution for this problem. In order
-        to use a compressed root filesystem make sure your
-          <filename>config.xml</filename>’s filesystem attribute
-        contains either <systemitem class="filesystem">squashfs</systemitem> 
-        or <systemitem class="filesystem">clicfs</systemitem>.
-        Below, find an example: </para>
+        to use a compressed root filesystem based on clicfs make sure your
+        <filename>config.xml</filename>’s filesystem attribute
+		contains <systemitem class="filesystem">clicfs</systemitem>.
+		As an alternative to clicfs kiwi also supports the fuse
+        based unionfs utility. In contrast to clicfs which writes
+		a block list on the write device, unionfs points all write operations
+		into another filesystem which allows to mount and watch this
+		location separately. In order
+        to use a compressed root filesystem based on unionfs make sure your
+		<filename>config.xml</filename>’s filesystem attribute
+		contains <systemitem class="filesystem">squashfs</systemitem>.
+		Below find examples for the different union modes.</para>
 
+		<sect3 id="sec.pxe.union.local.local">
+			<title>Download to local storage, write to local storage</title>
+			<indexterm>
+				<primary>union image</primary>
+				<secondary>local-local</secondary>
+			</indexterm>
 <screen>DISK=/dev/sda
-PART='5;S;x,62;L;/,x;L;x'
-IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;\
-      1.2.8;192.168.100.2;4096'
-UNIONFS_CONFIG=/dev/sda3,/dev/sda2,clicfs
+PART='5;S;x,400;L;/,x;L;x'
+IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;1.2.8;192.168.100.2;4096'
+UNIONFS_CONFIG=/dev/sda3,/dev/sda2,unionfs
 KIWI_INITRD=/boot/initrd</screen>
-
-        <para>As an alternative to clicfs kiwi also supports the fuse
-        based unionfs utility. clicfs writes block lists on the device
-		used for the write operations. unionfs points all write operations
-        into another filesystem which also allows to use remote write
-        locations and to watch them separately. In order to use unionfs
-        to write into ram the following UNIONFS_CONFIG setup is required
-        </para>
-<screen>UNIONFS_CONFIG=tmpfs,/dev/sda2,unionfs</screen>
- 
-        <para>If you want to write persistently it's required to add
-        the local device name e.g /dev/sda3 instead of tmpfs as shown in
-        the initial example. If the read-only location is on NFS the
-        setup to write into a tmpfs would look like the following
-        </para>
-
+		</sect3>
+		<sect3 id="sec.pxe.union.local.ram">
+			<title>Download to local storage, write to ram</title>
+			<indexterm>
+                <primary>union image</primary>
+                <secondary>local-ram</secondary>
+            </indexterm>
+<screen>DISK=/dev/sda
+PART='5;S;x,400;L;/'
+IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;1.2.8;192.168.100.2;4096'
+UNIONFS_CONFIG=tmpfs,/dev/sda2,unionfs</screen>
+        </sect3>
+		<sect3 id="sec.pxe.union.remote.local">
+			<title>Mount from remote, write to local storage</title>
+			<indexterm>
+                <primary>union image</primary>
+                <secondary>remote-local</secondary>
+            </indexterm>
+			<para>For all of the following modes I strongly recommend to check
+			on a separate client machine in the network if it is possible to
+            access the exported read-only and read-write device locations. If
+            accessing devices works the image should also be able to access
+            them on boot. If the boot fails it should be clear that the reason
+            is not the exported device.
+			</para>
+			<itemizedlist>
+				<listitem><para>NFSROOT</para>
+<screen>PART='5;S;x,x;L;x'
+NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
+UNIONFS_CONFIG=/dev/sda2,nfs,unionfs</screen>
+				</listitem>
+				<listitem><para>AOEROOT</para>
+<screen>PART='5;S;x,x;L;x'
+AOEROOT=/dev/etherd/e0.1,/dev/sda2
+UNIONFS_CONFIG=/dev/sda2,aoe,unionfs</screen>
+                </listitem>
+				<listitem><para>NBDROOT</para>
+<screen>PART='5;S;x,x;L;x'
+NBDROOT=192.168.100.7;2000;/dev/nbd0;;;;/dev/sda2
+UNIONFS_CONFIG=/dev/sda2,nbd,unionfs</screen>
+                </listitem>
+			</itemizedlist>
+        </sect3>
+		<sect3 id="sec.pxe.union.remote.ram">
+			<title>Mount from remote, write to ram</title>
+			<indexterm>
+                <primary>union image</primary>
+                <secondary>remote-ram</secondary>
+            </indexterm>
+			<itemizedlist>
+                <listitem><para>NFSROOT</para>
 <screen>NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
 UNIONFS_CONFIG=tmpfs,nfs,unionfs</screen>
-
-        <para>Also possible is to read remotely and to write remotely.
-        Some NFS write space is required prior to the following setup:
-        </para>
-
+                </listitem>
+                <listitem><para>AOEROOT</para>
+<screen>AOEROOT=/dev/etherd/e0.1
+UNIONFS_CONFIG=tmpfs,aoe,unionfs</screen>
+                </listitem>
+                <listitem><para>NBDROOT</para>
+<screen>NBDROOT=192.168.100.7;2000;/dev/nbd0
+UNIONFS_CONFIG=tmpfs,nbd,unionfs</screen>
+                </listitem>
+            </itemizedlist>
+        </sect3>
+		<sect3 id="sec.pxe.union.remote.remote">
+			<title>Mount from remote, write to remote</title>
+			<indexterm>
+                <primary>union image</primary>
+                <secondary>remote-remote</secondary>
+            </indexterm>
+			<itemizedlist>
+                <listitem><para>NFSROOT</para>
 <screen>NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
 UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,unionfs</screen>
-
+                </listitem>
+                <listitem><para>AOEROOT</para>
+<screen>AOEROOT=/dev/etherd/e0.1,/dev/etherd/e1.1
+UNIONFS_CONFIG=aoe,aoe,unionfs</screen>
+                </listitem>
+                <listitem><para>NBDROOT</para>
+<screen>NBDROOT=192.168.100.7;2000;/dev/nbd0;3000;/dev/nbd1;4000;/dev/nbd2
+UNIONFS_CONFIG=nbd,nbd,unionfs</screen>
+                </listitem>
+            </itemizedlist>
+        </sect3>
     </sect2>
-
 
     <sect2 id="sec.pxe.split-image">
       <title>Split Image</title>
