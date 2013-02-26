@@ -9,7 +9,7 @@ How to build this Example
 ==============================
 
     kiwi --prepare \
-         /usr/share/doc/packages/kiwi/examples/suse-12.2/suse-xen-guest \
+         /usr/share/doc/packages/kiwi/examples/suse-12.3/suse-xen-guest \
          --root /tmp/myec2
 
     kiwi --create /tmp/myec2 -d /tmp/myec2-result

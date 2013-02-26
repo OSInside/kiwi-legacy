@@ -26,6 +26,7 @@ require Exporter;
 #------------------------------------------
 use KIWICommandLine;
 use KIWIGlobals;
+use KIWIImageBuildFactory;
 use KIWIImageFormat;
 use KIWILocator;
 use KIWILog;
@@ -664,7 +665,19 @@ sub createImage {
 		}
 	}
 	#==========================================
-	# Initialize logical image extend
+	# Build image using KIWIImageBuilder
+	#------------------------------------------
+	my $factory = KIWIImageBuildFactory -> new ($xml, $cmdL);
+	my $builder = $factory -> getImageBuilder();
+	if ($builder) {
+		my $status = $builder -> createImage();
+		if (! $status) {
+			return;
+		}
+		return 1;
+	}
+	#==========================================
+	# Build image using KIWIImage
 	#------------------------------------------
 	my $ok;
 	my $checkFormat = 0;

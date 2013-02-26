@@ -13,7 +13,7 @@ KIWI Image Description Example
 How to build this Example
 ==============================
 
-   kiwi -p /usr/share/doc/packages/kiwi/examples/suse-12.2/suse-live-usbstick \
+   kiwi -p /usr/share/doc/packages/kiwi/examples/suse-12.3/suse-live-usbstick \
         --root /tmp/myoem
 
    kiwi --create /tmp/myoem --type oem -d /tmp/myoem-result --fat-storage 300
@@ -23,7 +23,7 @@ How to test this Example
 * Testing an oem can be done with any full virtual system or simply
   by dumping the .raw file on the stick. For example:
 
-    qemu /tmp/myoem-result/suse-12.2-live.i686-2.5.2.raw -m 512
+    qemu /tmp/myoem-result/suse-12.3-live.i686-2.5.2.raw -m 512
 
 Login Details
 ==============================

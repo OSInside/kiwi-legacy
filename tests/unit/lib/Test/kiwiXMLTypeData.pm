@@ -1011,6 +1011,27 @@ sub test_getCompressed {
 }
 
 #==========================================
+# test_getContainerName
+#------------------------------------------
+sub test_getContainerName {
+	# ...
+	# Test the getContainerName method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $name = $typeDataObj -> getContainerName();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('mycont', $name);
+	return;
+}
+
+#==========================================
 # test_getDevicePersistent
 #------------------------------------------
 sub test_getDevicePersistent {
@@ -1743,6 +1764,7 @@ sub test_getXMLElement{
 		. 'boottimeout="5" '
 		. 'checkprebuilt="true" '
 		. 'compressed="true" '
+		. 'container="mycont" '
 		. 'devicepersistency="by-uuid" '
 		. 'editbootconfig="myscript" '
 		. 'editbootinstall="myInstScript" '
@@ -2400,6 +2422,97 @@ sub test_setCompressedUnknownArg {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('true', $comp);
+	return;
+}
+
+#==========================================
+# test_setContainerName
+#------------------------------------------
+sub test_setContainerName {
+	# ...
+	# Test the setContainerName method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	$typeDataObj = $typeDataObj -> setContainerName('foo');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $name = $typeDataObj -> getContainerName();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('foo', $name);
+	return;
+}
+
+#==========================================
+# test_setContainerNameNoArg
+#------------------------------------------
+sub test_setContainerNameNoArg {
+	# ...
+	# Test the setContainerName method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setContainerName();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setContainerName: no container name given, retaining '
+		. 'current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $name = $typeDataObj -> getContainerName();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('mycont', $name);
+	return;
+}
+
+#==========================================
+# test_setContainerNameIllegal
+#------------------------------------------
+sub test_setContainerNameIllegal {
+	# ...
+	# Test the setContainerName method with an illegal name
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setContainerName('my$bucket');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setContainerName: given container name contains non word '
+		. 'character, illegal name. Retaining current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $name = $typeDataObj -> getContainerName();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('mycont', $name);
 	return;
 }
 
@@ -3845,7 +3958,7 @@ sub test_setInstallIsoUnknownArg {
 	$this -> assert_str_equals('true', $iso);
 	return;
 }
-#RJS
+
 #==========================================
 # test_setInstallPXE
 #------------------------------------------
@@ -4795,6 +4908,7 @@ sub __getTypeObj {
 				boottimeout            => '5',
 				checkprebuilt          => 'true',
 				compressed             => 'true',
+				container              => 'mycont',
 				devicepersistency      => 'by-uuid',
 				editbootconfig         => 'myscript',
 				editbootinstall        => 'myInstScript',

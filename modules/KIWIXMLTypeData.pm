@@ -2,7 +2,7 @@
 # FILE          : KIWIXMLTypeData.pm
 #----------------
 # PROJECT       : openSUSE Build-Service
-# COPYRIGHT     : (c) 20012 SUSE LLC
+# COPYRIGHT     : (c) 2013 SUSE LLC
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>
 #               :
@@ -29,7 +29,11 @@ use XML::LibXML;
 
 require Exporter;
 
+#==========================================
+# KIWI Modules
+#------------------------------------------
 use base qw /KIWIXMLDataBase/;
+
 #==========================================
 # Exports
 #------------------------------------------
@@ -113,6 +117,7 @@ sub new {
 		boottimeout
 		checkprebuilt
 		compressed
+		container
 		devicepersistency
 		editbootconfig
 		editbootinstall
@@ -176,6 +181,7 @@ sub new {
 	$this->{bootpartsize}           = $init->{bootpartsize};
 	$this->{bootprofile}            = $init->{bootprofile};
 	$this->{boottimeout}            = $init->{boottimeout};
+	$this->{container}              = $init->{container};
 	$this->{devicepersistency}      = $init->{devicepersistency};
 	$this->{editbootconfig}         = $init->{editbootconfig};
 	$this->{editbootinstall}        = $init->{editbootinstall};
@@ -325,6 +331,18 @@ sub getCompressed {
 	my $this = shift;
 	return $this->{compressed};
 }
+
+#==========================================
+# getContainerName
+#------------------------------------------
+sub getContainerName {
+	# ...
+	# Return the configuration for the container name
+	# ---
+	my $this = shift;
+	return $this->{container};
+}
+
 
 #==========================================
 # getDevicePersistent
@@ -703,6 +721,10 @@ sub getXMLElement {
 	if ($comp) {
 		$element -> setAttribute('compressed', $comp);
 	}
+	my $container = $this -> getContainerName();
+	if ($container) {
+		$element -> setAttribute('container', $container);
+	}
 	my $devPer = $this -> getDevicePersistent();
 	if ($devPer) {
 		$element -> setAttribute('devicepersistency', $devPer);
@@ -994,6 +1016,34 @@ sub setCompressed {
 		caller => 'setCompressed'
 	);
 	return $this -> __setBooleanValue(\%settings);
+}
+
+#==========================================
+# setContainerName
+#------------------------------------------
+sub setContainerName {
+	# ...
+	# Set the container name
+	# ---
+	my $this = shift;
+	my $name = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $name) {
+		my $msg = 'setContainerName: no container name given, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if ($name =~ /\W/smx) {
+		my $msg = 'setContainerName: given container name contains non word '
+			. 'character, illegal name. Retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{container} = $name;
+	return $this;
 }
 
 #==========================================
@@ -1939,7 +1989,7 @@ sub __isValidImage {
 		return;
 	}
 	my %supported = map { ($_ => 1) } qw(
-		btrfs clicfs cpio ext2 ext3 ext4 iso oem product pxe reiserfs
+		btrfs clicfs cpio ext2 ext3 ext4 iso lxc oem product pxe reiserfs
 		split squashfs tbz vmx xfs
 	);
 	if (! $supported{$image} ) {

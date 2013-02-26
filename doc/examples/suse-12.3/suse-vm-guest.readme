@@ -9,7 +9,7 @@ KIWI Image Description Example
 How to build this Example
 ==============================
 
-    kiwi -p /usr/share/doc/packages/kiwi/examples/suse-12.2/suse-vm-guest \
+    kiwi -p /usr/share/doc/packages/kiwi/examples/suse-12.3/suse-vm-guest \
          --root /tmp/myvm
 
     kiwi --create /tmp/myvm --type vmx -d /tmp/myvm-result
@@ -19,13 +19,13 @@ How to test this Example
 * Testing virtual disk images can only happen in virtualisation systems.
   For example:
 
-    qemu /tmp/myvm-result/suse-12.2-vm-guest.i686-1.1.2.raw -m 512
+    qemu /tmp/myvm-result/suse-12.3-vm-guest.i686-1.1.2.raw -m 512
 
   If specified in config.xml kiwi can also create the guest configuration
   as required for VMware. The guest configuration for this example can
   be found here:
 
-    /tmp/myvm-result/suse-12.2-vm-guest.i686-1.1.2.vmx
+    /tmp/myvm-result/suse-12.3-vm-guest.i686-1.1.2.vmx
 
   If a format attribute is specified kiwi also converts the raw image
   format into the specified format. For example VMware uses the vmdk

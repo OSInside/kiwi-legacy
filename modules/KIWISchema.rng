@@ -2056,6 +2056,11 @@ only images respectively for the pxe or cpio type</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
+    <define name="k.type.container.attribute">
+      <attribute name="container">
+        <a:documentation>Specifies a name for the container</a:documentation>
+      </attribute>
+    </define>
     <define name="k.type.devicepersistency.attribute">
       <attribute name="devicepersistency">
         <a:documentation>Specifies which method to use in order to get persistent
@@ -2225,6 +2230,7 @@ to keep data persistent over a reboot</a:documentation>
           <value>ext3</value>
           <value>ext4</value>
           <value>iso</value>
+          <value>lxc</value>
           <value>oem</value>
           <value>product</value>
           <value>pxe</value>
@@ -2358,6 +2364,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.compressed.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.container.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.devicepersistency.attribute"/>

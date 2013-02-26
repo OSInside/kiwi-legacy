@@ -3494,6 +3494,7 @@ sub __genTypeHash {
 		'boottimeout',
 		'checkprebuilt',
 		'compressed',
+		'container',
 		'devicepersistency',
 		'editbootconfig',
 		'editbootinstall',

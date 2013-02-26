@@ -96,6 +96,9 @@ sub createChecks {
 	# Runtime checks specific to the create step
 	# ---
 	my $this = shift;
+	if (! $this -> __checkContainerHasLXC()) {
+		return;
+	}
 	if (! $this -> __haveValidTypeString()) {
 		return;
 	}
@@ -158,6 +161,36 @@ sub prepareChecks {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __checkContainerHasLXC
+#------------------------------------------
+sub __checkContainerHasLXC {
+	# ...
+	# A container build must include the lxc package
+	# ---
+	my $this = shift;
+	my $xml = $this -> {xml};
+	my $type = $xml -> getImageType();
+	my $name = $type -> getImageType();
+	if ($name =~ /^lxc/smx) {
+		my $pckgs = $xml -> getPackages();
+		push @{$pckgs}, @{$xml -> getBootstrapPackages()};
+		for my $pckg (@{$pckgs}) {
+			my $pname = $pckg -> getName();
+			if ($pname =~ /^lxc/smx) {
+				return 1;
+			}
+		}
+		my $kiwi = $this->{kiwi};
+		my $msg = 'Attempting to build container, but no lxc package included '
+			. 'in image.';
+		$kiwi -> error ( $msg );
+		$kiwi -> failed ();
+		return;
+	}
+	return 1;
+}
+
 #==========================================
 # __checkRepoAliasUnique
 #------------------------------------------
@@ -578,9 +611,23 @@ sub __haveValidTypeString {
 	my $cmdL = $this -> {cmdArgs};
 	my $type = $cmdL -> getBuildType();
 	my @allowedTypes = qw (
-		btrfs clicfs cpio ext2 ext3 ext4 iso
-		oem product pxe reiserfs split squashfs
-		tbz vmx xfs
+		btrfs
+		clicfs
+		cpio
+		ext2
+		ext3
+		ext4
+		iso
+		lxc
+		oem
+		product
+		pxe
+		reiserfs
+		split
+		squashfs
+		tbz
+		vmx
+		xfs
 	);
 	if ($type) {
 		if (! grep { /$type/x } @allowedTypes) {
