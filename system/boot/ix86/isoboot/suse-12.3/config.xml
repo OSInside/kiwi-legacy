@@ -40,7 +40,7 @@
 		<file name="drivers/input/mouse/*"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/message/fusion/*"/>
-		<file name="drivers/net/virtio_net.ko"/>
+		<file name="drivers/net/*"/>
 		<file name="drivers/parport/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/usb/*"/>
@@ -66,6 +66,11 @@
 		<file name="fs/vfat/*"/>
 		<file name="lib/crc-t10dif.ko"/>
 		<file name="lib/crc16.ko"/>
+		<file name="fs/nfs/*"/>
+		<file name="fs/nfs_common/*"/>
+		<file name="net/ipv6/*"/>
+		<file name="net/packet/*"/>
+		<file name="net/sunrpc/*"/>
 	</drivers>
 	<drivers profiles="xen">
 		<file name="drivers/xen/*"/>
@@ -96,6 +101,7 @@
 		<package name="clicfs"/>
 		<package name="cryptsetup"/>
 		<package name="dhcpcd"/>
+		<package name="nfs-client"/>
 		<package name="dialog"/>
 		<package name="file"/>
 		<package name="filesystem"/>
@@ -132,11 +138,8 @@
 		<package name="module-init-tools"/>
 	</packages>
 	<packages type="delete">
-		<package name="bind-libs"/>
-		<package name="bind-utils"/>
 		<package name="cracklib-dict-full"/>
 		<package name="cyrus-sasl"/>
-		<package name="dhcpcd"/>
 		<package name="diffutils"/>
 		<package name="fillup"/>
 		<package name="fribidi"/>
@@ -153,7 +156,6 @@
 		<package name="memtest86+"/>
 		<package name="mingetty"/>
 		<package name="mtools"/>
-		<package name="net-tools"/>
 		<package name="openSUSE-release"/>
 		<package name="pam"/>
 		<package name="pam-config"/>
