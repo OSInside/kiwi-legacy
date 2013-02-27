@@ -806,6 +806,7 @@ sub createISO {
 	my $ldir_cnt = 0;
 	my %type;
 	my $cmdln;
+	my $hybrid;
 	#==========================================
 	# Lookup firmware setup
 	#------------------------------------------
@@ -814,6 +815,9 @@ sub createISO {
 	}
 	if ($type{firmware}) {
 		$firmware = $type{firmware};
+	}
+	if ($type{hybrid}) {
+		$hybrid = $type{hybrid};
 	}
 	#==========================================
 	# check for pre bootloader install
@@ -860,7 +864,7 @@ sub createISO {
 	#==========================================
 	# Call mkisofs second stage
 	#------------------------------------------
-	if ($firmware eq "efi" || $firmware eq "uefi") {
+	if (($hybrid) && (($firmware eq "efi" || $firmware eq "uefi"))) {
 		if (! $this -> findAndCopyMagicBlock()) {
 			$kiwi -> error  ("Failed to read magic iso header");
 			$kiwi -> failed ();
