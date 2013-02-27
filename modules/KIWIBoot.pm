@@ -904,13 +904,14 @@ sub setupInstallCD {
 	my $base;
 	my $opts;
 	if ($bootloader eq "grub2") {
-		# let mkisofs run grub2 eltorito image...
-		$base = "-V \"$volid\" -A \"$appid\" ";
-		$base.= "-R -J -f -b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
-		$base.= "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
+		# let mkisofs run grub2 efi or eltorito image...
+		$base = "-V \"$volid\" -A \"$appid\" -R -J -f ";
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
-			$base.= "-eltorito-alt-boot -b boot/$efi_arch/efi ";
-			$base.= "-no-emul-boot ";
+			$base.= "-b boot/$efi_arch/efi -no-emul-boot ";
+		} else {
+			$base.= "-b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
+			$base.= "-boot-load-size 4 -boot-info-table -udf ";
+			$base.= "-allow-limited-size ";
 		}
 		$opts.= "-joliet-long ";
 	} elsif ($bootloader eq "grub") {
@@ -3326,8 +3327,8 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Stage files
 		#------------------------------------------
-		$stages{bios}{initrd}   = "'usr/lib/grub2/$grubpc/*'";
-		$stages{bios}{stageSRC} = "/usr/lib/grub2/$grubpc";
+		$stages{bios}{initrd}   = "'usr/lib/$grub/$grubpc/*'";
+		$stages{bios}{stageSRC} = "/usr/lib/$grub/$grubpc";
 		$stages{bios}{stageDST} = "/boot/grub2/$grubpc";
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			$stages{efi}{initrd}   = "'usr/lib/$grub/$efipc/*'";
@@ -3341,12 +3342,27 @@ sub setupBootLoaderStages {
 			$stages{efi}{signed}    = "usr/$lib/efi/grub.efi";
 		}
 		#==========================================
+		# Module lists for self created grub images
+		#------------------------------------------
+		my @bios_core_modules = (
+			'biosdisk','part_msdos','part_gpt','ext2',
+			'iso9660','chain','normal','linux','echo',
+			'vga','vbe','png','video_bochs','video_cirrus',
+			'gzio','multiboot','search','configfile','fat'
+		);
+		my @efi_core_modules = (
+			'fat','ext2','part_gpt','efi_gop','iso9660','chain',
+			'linux','echo','configfile','boot','search_label',
+			'search_fs_file','search','search_fs_uuid','ls',
+			'video','video_fb','normal'
+		);
+		#==========================================
 		# Boot directories
 		#------------------------------------------
 		my @bootdir = ();
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			push @bootdir,"$tmpdir/boot/grub2-efi/$efipc";
-			push @bootdir,"$tmpdir/boot/grub2/$grubpc";
+			push @bootdir,"$tmpdir/boot/grub2/$efipc";
 			push @bootdir,"$tmpdir/EFI/BOOT";
 		} else {
 			push @bootdir,"$tmpdir/boot/grub2/$grubpc";
@@ -3364,7 +3380,8 @@ sub setupBootLoaderStages {
 		#------------------------------------------
 		$kiwi -> info ("Creating grub2 boot partition map");
 		foreach my $bootfile ($bootbios,$bootefi) {
-			next if (($bootfile eq $bootefi) && ($firmware ne "efi"));
+			next if (($bootfile eq $bootbios) && ($firmware =~ /efi/));
+			next if (($bootfile eq $bootefi)  && ($firmware eq 'bios'));
 			my $bpfd = FileHandle -> new();
 			if (! $bpfd -> open(">$bootfile")) {
 				$kiwi -> failed ();
@@ -3416,7 +3433,8 @@ sub setupBootLoaderStages {
 		# import Grub2 stage files...
 		#------------------------------------------
 		foreach my $stage ('bios','efi') {
-			next if (($stage eq "efi") && ($firmware !~ /efi/));
+			next if (($stage eq "bios") && ($firmware =~ /efi/));
+			next if (($stage eq "efi")  && ($firmware eq 'bios'));
 			my $stageD = $stages{$stage}{stageSRC};
 			my $stageT = $stages{$stage}{stageDST};
 			if (glob($tmpdir.$stageD.'/*')) {
@@ -3444,57 +3462,29 @@ sub setupBootLoaderStages {
 		}
 		$kiwi -> done();
 		#==========================================
-		# Create core/eltorito grub2 boot images
+		# Lookup grub2 mkimage tool
 		#------------------------------------------
-		$kiwi -> info ("Creating grub2 core boot image");
-		my $core    = "$tmpdir/boot/grub2/$grubpc/core.img";
-		my @modules = (
-			'biosdisk','part_msdos','part_gpt','ext2',
-			'iso9660','chain','normal','linux','echo',
-			'vga','vbe','png','video_bochs','video_cirrus',
-			'gzio','multiboot','search','configfile','fat'
-		);
-		$status = qxx (
-			"grub2-mkimage -O i386-pc -o $core -c $bootbios @modules 2>&1"
-		);
-		$result = $? >> 8;
-		if ($result != 0) {
+		my $locator = KIWILocator -> instance();
+		my $grub2_mkimage = $locator -> getExecPath ("grub2-mkimage");
+		if ($firmware =~ /efi/) {
+			my $grub2_efi_mkimage = $locator -> getExecPath (
+				"grub2-efi-mkimage"
+			);
+			if ($grub2_efi_mkimage) {
+				$grub2_mkimage = $grub2_efi_mkimage;
+			}
+		}
+		if (! $grub2_mkimage) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create core boot image: $status");
+			$kiwi -> error  ("Can't find grub2 mkimage tool");
 			$kiwi -> failed ();
 			return;
-		}
-		$kiwi -> done();
-		if ((defined $type) && ($type eq "iso")) {
-			$kiwi -> info ("Creating grub2 eltorito boot image");
-			my $cdimg  = "$tmpdir/boot/grub2/$grubpc/eltorito.img";
-			my $cdcore = "$tmpdir/boot/grub2/$grubpc/cdboot.img";
-			$status = qxx ("cat $cdcore $core > $cdimg 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create eltorito image: $status");
-				$kiwi -> failed ();
-				return;
-			}
-			$kiwi -> done();
 		}
 		#==========================================
 		# Create core efi boot image, standard EFI
 		#------------------------------------------
 		if ($firmware eq "efi") {
 			$kiwi -> info ("Creating grub2 efi boot image");
-			my $locator = KIWILocator -> instance();
-			my $grub2_mkimage = $locator -> getExecPath ("grub2-efi-mkimage");
-			if (! $grub2_mkimage) {
-				$grub2_mkimage = $locator -> getExecPath ("grub2-mkimage");
-			}
-			if (! $grub2_mkimage) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Can't find grub2 mkimage tool");
-				$kiwi -> failed ();
-				return;
-			}
 			my $core    = "$tmpdir/EFI/BOOT/bootx64.efi";
 			my @modules = (
 				'fat','ext2','part_gpt','efi_gop','iso9660','chain',
@@ -3581,6 +3571,44 @@ sub setupBootLoaderStages {
 				return;
 			}
 			$kiwi -> done();
+		}
+		#==========================================
+		# Create core grub2 boot images
+		#------------------------------------------
+		if ($firmware eq 'bios') {
+			$kiwi -> info ("Creating grub2 core boot image");
+			my $format   = $grubpc;
+			my $bootconf = $bootbios;
+			my @modules  = @bios_core_modules;
+			my $core     = "$tmpdir/boot/grub2/$format/core.img";
+			my $cdimg    = "$tmpdir/boot/grub2/$format/eltorito.img";
+			my $cdcore   = "$tmpdir/boot/grub2/$format/cdboot.img";
+			my $status = qxx (
+				"$grub2_mkimage -O $format -o $core -c $bootconf @modules 2>&1"
+			);
+			my $result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create core boot image: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$kiwi -> done();
+			#==========================================
+			# Create eltorito grub2 boot image
+			#------------------------------------------
+			if ((defined $type) && ($type eq "iso")) {
+				$kiwi -> info ("Creating grub2 eltorito boot image");
+				$status = qxx ("cat $cdcore $core > $cdimg");
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("Couldn't create eltorito image: $status");
+					$kiwi -> failed ();
+					return;
+				}
+				$kiwi -> done();
+			}
 		}
 	}
 	#==========================================
@@ -4218,6 +4246,12 @@ sub setupBootLoaderConfiguration {
 				}
 			}
 			$FD -> close();
+			#==========================================
+			# copy grub2 config file to efi path too
+			#------------------------------------------
+			if ($config eq 'grub2-efi') {
+				qxx ("cp $tmpdir/boot/$config/grub.cfg $tmpdir/EFI/BOOT 2>&1");
+			}
 		}
 		$kiwi -> done();
 	}
@@ -5022,7 +5056,7 @@ sub installBootLoader {
 		#==========================================
 		# No install required with EFI bios
 		#------------------------------------------
-		if ($firmware ne "efi") {
+		if (($firmware ne "efi") && ($firmware ne "uefi")) {
 			$kiwi -> info ("Installing grub2 on device: $diskname");
 			#==========================================
 			# Create device map for the disk
