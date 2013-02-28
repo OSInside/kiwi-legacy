@@ -887,26 +887,55 @@ function installBootLoaderGrub2 {
 	# ----
 	local confTool=grub2-mkconfig
 	local instTool=grub2-install
-	local confPath=/boot/grub2/grub.cfg
-	if [ "$partedTableType" = "gpt" ];then
+	local confPath_grub=/boot/grub2/grub.cfg
+	local confPath_uefi=/boot/EFI/EFI/BOOT/grub.cfg
+	local isEFI=0
+	#======================================
+	# check for EFI and mount EFI partition
+	#--------------------------------------
+	if [ ! -z "$kiwi_JumpPart" ] && [ -d /boot/EFI ];then
+		local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
+		if ! mount $jdev /boot/EFI;then
+			Echo "Failed to mount EFI boot partition"
+			return 1
+		fi
+		isEFI=1
+	fi
+	#======================================
+	# lookup grub2 mkconfig tool
+	#--------------------------------------
+	if [ $isEFI -eq 1 ];then
 		which grub2-efi-mkconfig &>/dev/null && confTool=grub2-efi-mkconfig
-		which grub2-efi-install  &>/dev/null && instTool=grub2-efi-install
-		confPath=/boot/grub2-efi/grub.cfg
+		confPath_grub=/boot/grub2-efi/grub.cfg
 	fi
 	if ! which $confTool &>/dev/null;then
 		Echo "Image doesn't have grub2 installed"
 		Echo "Can't install boot loader"
 		return 1
 	fi
-	$confTool > $confPath
+	#======================================
+	# create grub2 configuration
+	#--------------------------------------
+	$confTool > $confPath_grub
 	if [ ! $? = 0 ];then
 		Echo "Failed to create grub2 boot configuration"
 		return 1
 	fi
-	$instTool $imageDiskDevice 1>&2
-	if [ ! $? = 0 ];then
-		Echo "Failed to install boot loader"
+	if [ $isEFI -eq 1 ] && [ -e $confPath_uefi ];then
+		cp $confPath_grub $confPath_uefi
+		umount /boot/EFI
 	fi
+	#======================================
+	# install grub2 in BIOS mode
+	#--------------------------------------
+	if [ $isEFI -eq 0 ];then
+		$instTool $imageDiskDevice 1>&2
+		if [ ! $? = 0 ];then
+			Echo "Failed to install boot loader"
+			return 1
+		fi
+	fi
+	return 0
 }
 #======================================
 # installBootLoaderYaboot
