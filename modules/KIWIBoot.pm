@@ -3302,15 +3302,16 @@ sub setupBootLoaderStages {
 		my $unzip    = "$zipper -cd $initrd 2>&1";
 		my %stages   = ();
 		my $test     = "cat $initrd";
-		my $grub     = 'grub2-efi';
+		my $grub_bios= 'grub2';
+		my $grub_efi = 'grub2';
 		my $lib      = 'lib';
 		if ($zipped) {
 			$test = $unzip;
 		}
 		$status = qxx ("$test | cpio -it --quiet | grep -q lib/grub2-efi 2>&1");
 		$result = $? >> 8;
-		if ($result != 0) {
-			$grub = 'grub2';
+		if ($result == 0) {
+			$grub_efi = 'grub2-efi';
 		}
 		$status = qxx ("$test | cpio -it --quiet | grep -q lib64/efi 2>&1");
 		$result = $? >> 8;
@@ -3327,12 +3328,12 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Stage files
 		#------------------------------------------
-		$stages{bios}{initrd}   = "'usr/lib/$grub/$grubpc/*'";
-		$stages{bios}{stageSRC} = "/usr/lib/$grub/$grubpc";
+		$stages{bios}{initrd}   = "'usr/lib/$grub_bios/$grubpc/*'";
+		$stages{bios}{stageSRC} = "/usr/lib/$grub_bios/$grubpc";
 		$stages{bios}{stageDST} = "/boot/grub2/$grubpc";
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
-			$stages{efi}{initrd}   = "'usr/lib/$grub/$efipc/*'";
-			$stages{efi}{stageSRC} = "/usr/lib/$grub/$efipc";
+			$stages{efi}{initrd}   = "'usr/lib/$grub_efi/$efipc/*'";
+			$stages{efi}{stageSRC} = "/usr/lib/$grub_efi/$efipc";
 			$stages{efi}{stageDST} = "/boot/grub2-efi/$efipc";
 		}
 		if ($firmware eq "uefi") {
