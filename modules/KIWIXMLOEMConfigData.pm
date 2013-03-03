@@ -52,6 +52,8 @@ sub new {
 	#    oem_shutdown             = ''
 	#    oem_shutdown_interactive = ''
 	#    oem_silent_boot          = ''
+	#    oem_silent_install       = ''
+	#    oem_silent_verify        = ''
 	#    oem_swap                 = ''
 	#    oem_swapsize             = ''
 	#    oem_systemsize           = ''
@@ -85,6 +87,8 @@ sub new {
 		oem_shutdown
 		oem_shutdown_interactive
 		oem_silent_boot
+		oem_silent_install
+		oem_silent_verify
 		oem_swap
 		oem_swapsize
 		oem_systemsize
@@ -104,6 +108,8 @@ sub new {
 		oem_shutdown
 		oem_shutdown_interactive
 		oem_silent_boot
+		oem_silent_install
+		oem_silent_verify
 		oem_swap
 		oem_unattended
 	);
@@ -272,6 +278,28 @@ sub getSilentBoot {
 }
 
 #==========================================
+# getSilentInstall
+#------------------------------------------
+sub getSilentInstall {
+	# ...
+	# Return the setting for the oem-silent-install configuration
+	# ---
+	my $this = shift;
+	return $this->{oem_silent_install};
+}
+
+#==========================================
+# getSilentVerify
+#------------------------------------------
+sub getSilentVerify {
+	# ...
+	# Return the setting for the oem-silent-verify configuration
+	# ---
+	my $this = shift;
+	return $this->{oem_silent_verify};
+}
+
+#==========================================
 # getSwap
 #------------------------------------------
 sub getSwap {
@@ -413,6 +441,18 @@ sub getXMLElement {
 		text      => $this -> getSilentBoot ()
 	);
 	$element = $this -> __addElement(\%initSBoot);
+	my %initSInst = (
+		parent    => $element,
+		childName => 'oem-silent-install',
+		text      => $this -> getSilentInstall ()
+	);
+	$element = $this -> __addElement(\%initSInst);
+	my %initSVerify = (
+		parent    => $element,
+		childName => 'oem-silent-verify',
+		text      => $this -> getSilentVerify ()
+	);
+	$element = $this -> __addElement(\%initSVerify);
 	my %initSwap = (
 		parent    => $element,
 		childName => 'oem-swap',
@@ -729,6 +769,42 @@ sub setSilentBoot {
 		attr   => 'oem_silent_boot',
 		value  => $val,
 		caller => 'setSilentBoot'
+	);
+	return $this -> __setBooleanValue(\%settings);
+}
+
+#==========================================
+# setSilentInstall
+#------------------------------------------
+sub setSilentInstall {
+	# ...
+	# Set the oem_silent_install attribute, if called with no argument the
+	# value is set to false.
+	# ---
+	my $this = shift;
+	my $val  = shift;
+	my %settings = (
+		attr   => 'oem_silent_install',
+		value  => $val,
+		caller => 'setSilentInstall'
+	);
+	return $this -> __setBooleanValue(\%settings);
+}
+
+#==========================================
+# setSilentVerify
+#------------------------------------------
+sub setSilentVerify {
+	# ...
+	# Set the oem_silent_verify attribute, if called with no argument the
+	# value is set to false.
+	# ---
+	my $this = shift;
+	my $val  = shift;
+	my %settings = (
+		attr   => 'oem_silent_verify',
+		value  => $val,
+		caller => 'setSilentVerify'
 	);
 	return $this -> __setBooleanValue(\%settings);
 }

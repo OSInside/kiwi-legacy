@@ -422,12 +422,16 @@ sub updateDescription {
 		$src_xml->getOEMReboot_legacy();
 	$changeset{"oem-reboot-interactive"}   =
 		$src_xml->getOEMRebootInter_legacy();
-	$changeset{"oem-silent-boot"}          =
-		$src_xml->getOEMSilentBoot_legacy();
 	$changeset{"oem-shutdown"}             =
 		$src_xml->getOEMShutdown_legacy();
 	$changeset{"oem-shutdown-interactive"} =
 		$src_xml->getOEMShutdownInter_legacy();
+	$changeset{"oem-silent-boot"}          =
+		$src_xml->getOEMSilentBoot_legacy();
+	$changeset{"oem-silent-install"}          =
+		$src_xml->getOEMSilentInstall_legacy();
+	$changeset{"oem-silent-verify"}          =
+		$src_xml->getOEMSilentVerify_legacy();
 	$changeset{"oem-bootwait"}             =
 		$src_xml->getOEMBootWait_legacy();
 	$changeset{"oem-unattended"}           =
