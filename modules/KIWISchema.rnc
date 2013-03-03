@@ -901,6 +901,48 @@ div {
 }
 
 #==========================================
+# common element <oem-silent-install>
+#
+div {
+	k.oem-silent-install.content = xsd:boolean
+	k.oem-silent-install.attlist = empty
+	k.oem-silent-install =
+		## For oemboot driven images: do not show progress of the image
+        ## dump process, true/false
+		[
+		db:para [
+			"For oemboot driven images: do not show progress of the image "~
+            "dump process, true/false (default is false.) "
+		]
+		]
+		element oem-silent-install {
+            k.oem-silent-install.attlist,
+			k.oem-silent-install.content
+		}
+}
+
+#==========================================
+# common element <oem-silent-verify>
+#
+div {
+	k.oem-silent-verify.content = xsd:boolean
+	k.oem-silent-verify.attlist = empty
+	k.oem-silent-verify =
+		## For oemboot driven images: do not show progress of the image
+        ## verification process, true/false
+		[
+		db:para [
+			"For oemboot driven images: do not show progress of the image "~
+            "verification process, true/false (default is false.) "
+		]
+		]
+		element oem-silent-verify {
+            k.oem-silent-verify.attlist,
+			k.oem-silent-verify.content
+		}
+}
+
+#==========================================
 # common element <oem-swap>
 #
 div {
@@ -2431,9 +2473,11 @@ div {
 			k.oem-reboot-interactive? &
 			k.oem-recovery? &
 			k.oem-recoveryID? &
-			k.oem-silent-boot? &
 			k.oem-shutdown? &
 			k.oem-shutdown-interactive? &
+			k.oem-silent-boot? &
+			k.oem-silent-install? &
+			k.oem-silent-verify? &
 			k.oem-swap? &
 			k.oem-swapsize? &
 			k.oem-systemsize? &

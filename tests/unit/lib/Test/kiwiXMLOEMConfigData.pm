@@ -666,6 +666,66 @@ sub test_getSilentBoot {
 }
 
 #==========================================
+# test_getSilentInstall
+#------------------------------------------
+sub test_getSilentInstall {
+	# ...
+	# Test the getSilentInstall method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $init = $this -> __getBaseInitHash();
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $sBoot = $confDataObj -> getSilentInstall();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('true', $sBoot);
+	return;
+}
+
+#==========================================
+# test_getSilentVerify
+#------------------------------------------
+sub test_getSilentVerify {
+	# ...
+	# Test the getSilentVerify method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $init = $this -> __getBaseInitHash();
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $sBoot = $confDataObj -> getSilentVerify();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('true', $sBoot);
+	return;
+}
+
+#==========================================
 # test_getSwap
 #------------------------------------------
 sub test_getSwap {
@@ -852,6 +912,8 @@ sub test_getXMLElement{
 		. '<oem-recovery>true</oem-recovery>'
 		. '<oem-recoveryID>1234</oem-recoveryID>'
 		. '<oem-silent-boot>true</oem-silent-boot>'
+		. '<oem-silent-install>true</oem-silent-install>'
+		. '<oem-silent-verify>true</oem-silent-verify>'
 		. '<oem-swap>true</oem-swap>'
 		. '<oem-swapsize>2048</oem-swapsize>'
 		. '<oem-systemsize>8192</oem-systemsize>'
@@ -2075,6 +2137,176 @@ sub test_setSilentBootNoArg {
 }
 
 #==========================================
+# test_setSilentInstall
+#------------------------------------------
+sub test_setSilentInstall {
+	# ...
+	# Test the setSilentInstall method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	$confDataObj = $confDataObj -> setSilentInstall('true');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $silent = $confDataObj -> getSilentInstall();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('true', $silent);
+	return;
+}
+
+#==========================================
+# test_setSilentInstallInvalidArg
+#------------------------------------------
+sub test_setSilentInstallInvalidArg {
+	# ...
+	# Test the setSilentInstall method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	my $res = $confDataObj -> setSilentInstall(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setSilentInstall: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_setSilentInstallNoArg
+#------------------------------------------
+sub test_setSilentInstallNoArg {
+	# ...
+	# Test the setSilentInstall method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $init = $this -> __getBaseInitHash();
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+	$confDataObj = $confDataObj -> setSilentInstall();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $silent = $confDataObj -> getSilentInstall();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('false', $silent);
+	return;
+}
+
+#==========================================
+# test_setSilentVerify
+#------------------------------------------
+sub test_setSilentVerify {
+	# ...
+	# Test the setSilentVerify method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	$confDataObj = $confDataObj -> setSilentVerify('true');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $silent = $confDataObj -> getSilentVerify();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('true', $silent);
+	return;
+}
+
+#==========================================
+# test_setSilentVerifyInvalidArg
+#------------------------------------------
+sub test_setSilentVerifyInvalidArg {
+	# ...
+	# Test the setSilentVerify method with anunrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	my $res = $confDataObj -> setSilentVerify(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setSilentVerify: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_setSilentVerifyNoArg
+#------------------------------------------
+sub test_setSilentVerifyNoArg {
+	# ...
+	# Test the setSilentVerify method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $init = $this -> __getBaseInitHash();
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+	$confDataObj = $confDataObj -> setSilentVerify();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $silent = $confDataObj -> getSilentVerify();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('false', $silent);
+	return;
+}
+
+#==========================================
 # test_setSwap
 #------------------------------------------
 sub test_setSwap {
@@ -2459,6 +2691,8 @@ sub __getBaseInitHash {
 				oem_recovery          => 'true',
 				oem_recoveryID        => '1234',
 				oem_silent_boot       => 'true',
+				oem_silent_install    => 'true',
+				oem_silent_verify     => 'true',
 				oem_swap              => 'true',
 				oem_swapsize          => '2048',
 				oem_systemsize        => '8192',

@@ -813,7 +813,7 @@ function OEMInstall {
 				dump="$dump | dcounter -s $needMByte -l \"$TEXT_LOAD \""
 			fi
 			Echo "Loading $Source [$Target] "
-			if [ -x /usr/bin/dcounter ];then
+			if [ -x /usr/bin/dcounter ] && [ -z "$OEM_SILENTINSTALL" ];then
 				test -e /progress || mkfifo /progress
 				Echo "Calling: eval $dump 2>/progress|dd bs=32k of=$Target"
 				errorLogStop
@@ -875,7 +875,7 @@ function OEMInstall {
 		Echo "Install complete, checking data..."
 		verifyBytes=$((blocks * blocksize))
 		verifyMByte=$((verifyBytes / 1048576))
-		if [ -x /usr/bin/dcounter ];then
+		if [ -x /usr/bin/dcounter ] && [ -z "$OEM_SILENTVERIFY" ];then
 			test -e /progress || mkfifo /progress
 			TEXT_VERIFY=$(getText "Verifying %1" $(basename $imageDevice))
 			echo "$TEXT_VERIFY ( 0% )" > /progress &
