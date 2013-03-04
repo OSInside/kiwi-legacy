@@ -2571,6 +2571,13 @@ function setupBootLoaderGrub2 {
 		GRUB_TERMINAL=gfxterm
 	EOF
 	#======================================
+	# activate secure boot if required
+	#--------------------------------------
+	if [ "$kiwi_firmware" = "uefi" ];then
+		echo "GRUB_USE_LINUXEFI=true"  >> $inst_default_grub
+		echo "GRUB_USE_INITRDEFI=true" >> $inst_default_grub
+	fi
+	#======================================
 	# write vesa vga setup
 	#--------------------------------------
 	if [ ! -z "${vesa[$vga]}" ];then
