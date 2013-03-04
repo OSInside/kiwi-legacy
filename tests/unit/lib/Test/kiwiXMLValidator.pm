@@ -53,13 +53,13 @@ sub test_archiveUnique {
 		my $validator = $this -> __getValidator($iConfFile);
 		$this -> assert_not_null($validator);
 		my $res = $validator -> validate();
-		if ($iConfFile =~ /archiveUniqueInvalid_1.xml/) {
+		if ($iConfFile =~ /archiveUniqueInvalid_1\.xml/smx) {
 			$expectedMsg = "Archive 'myBins.tar' specified multiple times in "
 				. 'same <packages> section.';
 		}
 		# TODO
 		# implamenet archive with arch= test once 775603 is implemented
-		#elsif ($iConfFile =~ /packageUniqueInvalid_2.xml/) {
+		#elsif ($iConfFile =~ /packageUniqueInvalid_2\.xml/smx) {
 		#    $expectedMsg = "Package 'myBins.' specified multiple times for "
 		#        . "architecture 'ppc64' in same <packages> section.";
 		#}
@@ -114,6 +114,40 @@ sub test_bootDescriptSet {
 		$this -> assert_not_null($validator);
 	}
 	my @validConfigs = $this -> __getValidFiles('bootDescript');
+	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
+# test_containerSpec
+#------------------------------------------
+sub test_containerSpec {
+	# ...
+	# Test that the container type constraints are properly verified
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('containerSpec');
+	my $expectedMsg;
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		if ($iConfFile =~ /containerSpecInvalid_1\.xml/smx) {
+			$expectedMsg = 'Must specify attribute "container" for "lxc" '
+				. 'image type.';
+		} elsif ($iConfFile =~ /containerSpecInvalid_2\.xml/smx) {
+			$expectedMsg = 'Container name contains non word character.';
+		}
+		my $msg = $kiwi -> getMessage();
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('containerSpec');
 	$this -> __verifyValid(@validConfigs);
 	return;
 }
@@ -545,16 +579,16 @@ sub test_httpsRepoCredentials {
 		$this -> assert_not_null($validator);
 		my $res = $validator -> validate();
 		my $msg = $kiwi -> getMessage();
-		if ($iConfFile =~ /httpsRepoCredentialsInvalid_1|5.xml/) {
+		if ($iConfFile =~ /httpsRepoCredentialsInvalid_1|5\.xml/smx) {
 			$expectedMsg = 'Specified username without password on repository';
 			
-		} elsif ($iConfFile =~ /httpsRepoCredentialsInvalid_2|6.xml/) {
+		} elsif ($iConfFile =~ /httpsRepoCredentialsInvalid_2|6\.xml/smx) {
 			$expectedMsg = 'Specified password without username on repository';
-		} elsif ($iConfFile =~ /httpsRepoCredentialsInvalid_3.xml/) {
+		} elsif ($iConfFile =~ /httpsRepoCredentialsInvalid_3\.xml/smx) {
 			$expectedMsg = 'Specified username, someoneelse, for https '
 			. 'repository does not match previously specified name, itsme. '
 			. 'All credentials for https repositories must be equal.';
-		} elsif ($iConfFile =~ /httpsRepoCredentialsInvalid_4.xml/) {
+		} elsif ($iConfFile =~ /httpsRepoCredentialsInvalid_4\.xml/smx) {
 			$expectedMsg = 'Specified password, another, for https repository '
 			. 'does not match previously specified password, heythere. All '
 			. 'credentials for https repositories must be equal.';
@@ -589,9 +623,9 @@ sub test_missingFilesysAttr {
 		$validator -> validate();
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'filesystem attribute must be set for image="';
-		if ($iConfFile =~ /missingFilesysAttrInvalid_1.xml/) {
+		if ($iConfFile =~ /missingFilesysAttrInvalid_1\.xml/smx) {
 			$expectedMsg .= 'oem"';
-		} elsif ($iConfFile =~ /missingFilesysAttrInvalid_2.xml/) {
+		} elsif ($iConfFile =~ /missingFilesysAttrInvalid_2\.xml/smx) {
 			$expectedMsg .= 'vmx"';
 		}
 		$this -> assert_str_equals($expectedMsg, $msg);
@@ -766,10 +800,10 @@ sub test_packageUnique {
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		if ($iConfFile =~ /packageUniqueInvalid_1.xml/) {
+		if ($iConfFile =~ /packageUniqueInvalid_1\.xml/smx) {
 			$expectedMsg = "Package 'vim' specified multiple times in "
 				. 'same <packages> section.';
-		} elsif ($iConfFile =~ /packageUniqueInvalid_2.xml/) {
+		} elsif ($iConfFile =~ /packageUniqueInvalid_2\.xml/smx) {
 			$expectedMsg = "Package 'vim' specified multiple times for "
 				. "architecture 'ppc64' in same <packages> section.";
 		}
@@ -801,10 +835,10 @@ sub test_patternUnique {
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
-		if ($iConfFile =~ /patternUniqueInvalid_1.xml/) {
+		if ($iConfFile =~ /patternUniqueInvalid_1\.xml/smx) {
 			$expectedMsg = "Package pattern 'kde' specified multiple times in "
 				. 'same <packages> section.';
-		} elsif ($iConfFile =~ /patternUniqueInvalid_2.xml/) {
+		} elsif ($iConfFile =~ /patternUniqueInvalid_2\.xml/smx) {
 			$expectedMsg = "Package pattern 'kde' specified multiple times "
 				. "for architecture 's390' in same <packages> section.";
 		}
@@ -838,17 +872,17 @@ sub test_patternTattrConsistent {
 		$validator -> validate();
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg;
-		if ($iConfFile =~ /patternTattrConsInvalid_1.xml/) {
+		if ($iConfFile =~ /patternTattrConsInvalid_1\.xml/smx) {
 			$expectedMsg = 'Conflicting patternType attribute values for '
 			. '"my-second" profile found.';
-		} elsif ($iConfFile =~ /patternTattrConsInvalid_2.xml/) {
+		} elsif ($iConfFile =~ /patternTattrConsInvalid_2\.xml/smx) {
 			$expectedMsg = 'Conflicting patternType attribute values for '
 			. '"my-first" profile found.';
-		} elsif ($iConfFile =~ /patternTattrConsInvalid_3.xml/) {
+		} elsif ($iConfFile =~ /patternTattrConsInvalid_3\.xml/smx) {
 			$expectedMsg = 'The specified value "plusRecommended" for the '
 			. 'patternType attribute differs from the specified default '
 			. 'value: "onlyRequired".';
-		} elsif ($iConfFile =~ /patternTattrConsInvalid_4.xml/) {
+		} elsif ($iConfFile =~ /patternTattrConsInvalid_4\.xml/smx) {
 			$expectedMsg = 'The patternType attribute was omitted, but the '
 			. 'base <packages> specification requires "plusRecommended" '
 			. 'the values must match.';
@@ -947,10 +981,10 @@ sub test_preferenceUnique {
 		$validator -> validate();
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg;
-		if ($iConfFile =~ /preferenceUniqueInvalid_1.xml/) {
+		if ($iConfFile =~ /preferenceUniqueInvalid_1\.xml/smx) {
 			$expectedMsg = 'Specify only one <preferences> element without '
 		. 'using the "profiles" attribute.';
-		} elsif ($iConfFile =~ /preferenceUniqueInvalid_2.xml/) {
+		} elsif ($iConfFile =~ /preferenceUniqueInvalid_2\.xml/smx) {
 			$expectedMsg = 'Only one <preferences> element may reference a '
 			. 'given profile. xenFlavor referenced multiple times.';
 		}
@@ -982,9 +1016,9 @@ sub test_profileName {
 		$validator -> validate();
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg ;
-		if ($iConfFile =~ /profileNameInvalid_2.xml/) {
+		if ($iConfFile =~ /profileNameInvalid_2\.xml/smx) {
 			$expectedMsg = "Name of a profile may not be set to 'all'.";
-		} elsif ($iConfFile =~ /profileNameInvalid_3.xml/) {
+		} elsif ($iConfFile =~ /profileNameInvalid_3\.xml/smx) {
 			$expectedMsg = 'Name of a profile may not be set to '
 				. "'kiwi_default'.";
 		} else {
@@ -1019,9 +1053,9 @@ sub test_profileReferenceExist {
 		$validator -> validate();
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'Found reference to profile "';
-		if ($iConfFile =~ /profileReferenceExistInvalid_(1|2).xml/) {
+		if ($iConfFile =~ /profileReferenceExistInvalid_(1|2)\.xml/smx) {
 			$expectedMsg .= 'vmwFlavor';
-		} elsif ($iConfFile =~ /profileReferenceExistInvalid_(3|4|5).xml/) {
+		} elsif ($iConfFile =~ /profileReferenceExistInvalid_(3|4|5)\.xml/smx){
 			$expectedMsg .= 'ola';
 		}
 		$expectedMsg .= '" but this profile is not defined.';
@@ -1140,15 +1174,15 @@ sub test_typeConfigConsist {
 		$validator -> validate();
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'Inconsistent configuration: Found ';
-		if ($iConfFile =~ /typeConfigConsistInvalid_1.xml/) {
+		if ($iConfFile =~ /typeConfigConsistInvalid_1\.xml/smx) {
 			$expectedMsg .= 'machine';
-		} elsif ($iConfFile =~ /typeConfigConsistInvalid_2.xml/) {
+		} elsif ($iConfFile =~ /typeConfigConsistInvalid_2\.xml/smx) {
 			$expectedMsg .= 'oemconfig';
 		}
 		$expectedMsg .= " type configuration as child of image type ";
-		if ($iConfFile =~ /typeConfigConsistInvalid_1.xml/) {
+		if ($iConfFile =~ /typeConfigConsistInvalid_1\.xml/smx) {
 			$expectedMsg .= 'pxe.';
-		} elsif ($iConfFile =~ /typeConfigConsistInvalid_2.xml/) {
+		} elsif ($iConfFile =~ /typeConfigConsistInvalid_2\.xml/smx) {
 			$expectedMsg .= 'vmx.';
 		}
 		$this -> assert_str_equals($expectedMsg, $msg);
@@ -1221,9 +1255,9 @@ sub test_typeUnique {
 		$validator -> validate();
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'Multiple definition of <type image="';
-		if ($iConfFile =~ /typeUniqueInvalid_1.xml/) {
+		if ($iConfFile =~ /typeUniqueInvalid_1\.xml/smx) {
 			$expectedMsg .= 'iso';
-		} elsif ($iConfFile =~ /typeUniqueInvalid_2.xml/) {
+		} elsif ($iConfFile =~ /typeUniqueInvalid_2\.xml/smx) {
 			$expectedMsg .= 'oem';
 		}
 		$expectedMsg .= '".../> found.';
@@ -1285,47 +1319,47 @@ sub test_userDefinitionConsistent {
 		$this -> assert_not_null($validator);
 		my $res = $validator -> validate();
 		my $msg = $kiwi -> getMessage();
-		if ($iConfFile =~ /.*Invalid_1.xml/) {
+		if ($iConfFile =~ /.*Invalid_1\.xml/smx) {
 			$expected = 'Specified user name contains whitspace, this '
 				. 'is not supported.';
 		}
-		if ($iConfFile =~ /.*Invalid_2.xml/) {
+		if ($iConfFile =~ /.*Invalid_2\.xml/smx) {
 			$expected = 'Specified home directory contains whitspace, '
 				. 'this is not supported.';
 		}
-		if ($iConfFile =~ /.*Invalid_3.xml/) {
+		if ($iConfFile =~ /.*Invalid_3\.xml/smx) {
 			$expected = 'Specified login shell contains whitspace, '
 				. 'this is not supported.';
 		}
-		if ($iConfFile =~ /.*Invalid_4.xml/) {
+		if ($iConfFile =~ /.*Invalid_4\.xml/smx) {
 			$expected = 'Same user defined in a single group, '
 				. 'cannot resolve ambiguity.';
 		}
-		if ($iConfFile =~ /.*Invalid_5.xml/) {
+		if ($iConfFile =~ /.*Invalid_5\.xml/smx) {
 			$expected = 'Same user defined in two groups with '
 				. 'given groupid, cannot resolve ambiguity.';
 		}
-		if ($iConfFile =~ /.*Invalid_6.xml/) {
+		if ($iConfFile =~ /.*Invalid_6\.xml/smx) {
 			$expected = 'Same user specified with different home '
 				. 'directories, cannot resolve ambiguity.';
 		}
-		if ($iConfFile =~ /.*Invalid_7.xml/) {
+		if ($iConfFile =~ /.*Invalid_7\.xml/smx) {
 			$expected = 'Same user specified with different '
 				. 'passwords, cannot resolve ambiguity.';
 		}
-		if ($iConfFile =~ /.*Invalid_8.xml/) {
+		if ($iConfFile =~ /.*Invalid_8\.xml/smx) {
 			$expected = 'Same user specified with different '
 				. 'password formats, cannot resolve ambiguity.';
 		}
-		if ($iConfFile =~ /.*Invalid_9.xml/) {
+		if ($iConfFile =~ /.*Invalid_9\.xml/smx) {
 			$expected = 'Same user specified with different '
 				. 'real names, cannot resolve ambiguity.';
 		}
-		if ($iConfFile =~ /.*Invalid_10.xml/) {
+		if ($iConfFile =~ /.*Invalid_10\.xml/smx) {
 			$expected = 'Same user specified with different '
 				. 'shells, cannot resolve ambiguity.';
 		}
-		if ($iConfFile =~ /.*Invalid_11.xml/) {
+		if ($iConfFile =~ /.*Invalid_11\.xml/smx) {
 			$expected = 'Same user specified with different '
 				. 'user ids, cannot resolve ambiguity.';
 		}

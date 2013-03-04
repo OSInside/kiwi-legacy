@@ -26,6 +26,7 @@ require Exporter;
 #------------------------------------------
 use KIWICommandLine;
 use KIWIGlobals;
+use KIWIImageBuildFactory;
 use KIWIImageFormat;
 use KIWILocator;
 use KIWILog;
@@ -662,6 +663,15 @@ sub createImage {
 		if (! $configure -> setupRecoveryArchive($attr{filesystem})) {
 			return;
 		}
+	}
+	my $factory = KIWIImageBuildFactory -> new($xml, $cmdL);
+	my $builder = $factory -> getImageBuilder();
+	if ($builder) {
+		my $status = $builder -> createImage();
+		if (! $status) {
+			return;
+		}
+		return 1;
 	}
 	#==========================================
 	# Initialize logical image extend

@@ -32,6 +32,15 @@
         <contrib>Various text improvements, migration to DocBook</contrib>
         <email>toms@suse.de</email>
       </othercredit>
+      <othercredit>
+        <affiliation>
+          <orgname>SUSE LLC</orgname>
+        </affiliation>
+        <firstname>Robert</firstname>
+        <surname>Schweikert</surname>
+        <contrib>Various text improvements, implementation</contrib>
+        <email>rjschwei@suse.com</email>
+      </othercredit>
     </authorgroup>
 	<!--
     <revhistory>
@@ -66,6 +75,7 @@
   <xi:include href="kiwi-doc-source.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-iso.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-vmx.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-lxc.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-pxe.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-oem.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-xen.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>

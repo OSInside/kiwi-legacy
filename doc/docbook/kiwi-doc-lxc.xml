@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+
+<chapter id="chap.lxc">
+  <title>Linux Container</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>Container image</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>images</primary>
+    <secondary>lxc</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>Container image</primary>
+    <secondary>lxc image</secondary>
+  </indexterm>
+  <para><ulink url="http://lxc.sourceforge.net/">
+      <citetitle>Linux Containers (LXC)</citetitle></ulink> provide operating
+       system-level virtualization, utilizing
+      <ulink url="https://www.kernel.org/doc/Documentation/cgroups/cgroups.txt">
+	      <citetitle>Control Groups (cgroups)</citetitle></ulink>. The
+      virtualization is similar to technologies in OpenVZ, Linux-VServer,
+      FreeBSD jails, AIX Workload Partitions, and Solaris Containers. The
+      network and process space of the container is separated from the
+      host resources using namespaces. Kernel space information is mounted
+      into the container root filesystem using the <filename>fstab</filename>
+      file in the configuration directory. The container root filesystem
+      provides the new user space on top of the running kernel of the host.
+      A linux container has two components, the container root file system
+      stored in
+      <filename class="directory">/var/lib/lxc/<replaceable>CONTAINER_NAME</replaceable></filename>
+      and the container configuration stored in
+      <filename class="directory">/etc/lxc/<replaceable>CONTAINER_NAME</replaceable></filename>.
+      The kiwi created container image is packaged in a tarball containing
+      the root filesystem and the configuration. The tarball is expected
+      to be inflated at the root level (/) of the target system that
+      functions as host.</para>
+
+  <sect1 id="sec.lxc.building">
+    <title>Building the suse-lxc-guest Example</title>
+    <para>The lxc-guest example provided with KIWI is based on recent
+      openSUSE releases, one example configuration per release. The example
+      provides a very minimal system.</para>
+
+    <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples 
+<command>cd</command> suse-...
+<command>kiwi</command> --prepare ./suse-lxc-guest --root /tmp/mylxc </screen>
+
+    <screen><command>kiwi</command> --create /tmp/mylxc --type lxc -d /tmp/mylxc-result</screen>
+  </sect1>
+
+  <sect1 id="sec.lxc.using">
+    <title>Using the Image</title>
+    <para>The created container is packaged in a tarball in the destination
+      directory, <filename class="directory">mylxc-result</filename>
+      in the example above. Move this tarball to the root level (/) of
+      the host machine and unpack it. The following commands assume that
+      the image build machine is also the host machine.</para>
+
+      <screen><command>cp</command> /tmp/mylxc-result/suse-##.#-lxc-guest-lxc.*-1.0.0.tbz /
+<command>cd</command> /
+<command>tar -xjf</command> suse-##.#-lxc-guest-lxc.*-1.0.0.tbz
+<command>lxc-start</command> -n os### -f /etc/lxc/os###/config </screen>
+  </sect1>
+
+  <sect1 id="sec.lxc.details">
+    <title>Image Configuartion Details</title>
+    <para>The configuartion for a container does not need to contain a kernel
+      package. The container represents the user space that runs on top
+      of the kernel of the container host system.</para>
+    <para>The container itself must contain the Linux user space container
+      tools and thus the <emphasis>lxc</emphasis> package must
+      be included in the container image.
+    </para>
+    <para>Configure the network configuration for the container using the
+      <sgmltag class="element">vmnic</sgmltag> element.
+      The  <sgmltag class="attribute">mode</sgmltag>
+      attribute indicates the network mode, <emphasis>veth</emphasis>
+      by default. While it is possible to configure multiple network
+      interfaces in the <filename>config.xml</filename> file, the written
+      conteiner configuartion will only reflect the information configured
+      for the first <sgmltag class="element">vmnic</sgmltag>
+      element found in the <filename>config.xml</filename> file. The
+      configuration for the container expects that the host has a configured
+      network bridge with the name <emphasis>br0</emphasis>.
+      For complex network setup implementations it is necessary to edit the
+      config file.
+    </para>
+    <para>The generated configuartion file restricts the device access
+      of the container according to a generally accepted best practice
+      security  model. The device access permissions may be modified by
+      editing the <filename>config</filename> file for the container.</para>
+  </sect1>
+</chapter>

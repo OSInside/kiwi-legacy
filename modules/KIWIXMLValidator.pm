@@ -187,16 +187,55 @@ sub __checkBootSpecPresent {
 	# ---
 	my $this        = shift;
 	my $systemTree  = $this->{systemTree};
-	my @needsInitrd = qw /iso oem pxe split vmx/;
+	my %needsInitrd = map { ($_ => 1) } qw (
+		iso
+		oem
+		pxe
+		split
+		vmx
+	);
 	my @types = $systemTree -> getElementsByTagName('type');
 	for my $type (@types) {
 		my $image = $type -> getAttribute('image');
-		if (grep { /^$image/x } @needsInitrd) {
+		if ($needsInitrd{$image}) {
 			my $boot = $type -> getAttribute('boot');
 			if (! $boot) {
 				my $kiwi = $this -> {kiwi};
 				my $msg = "$image requires initrd, but no 'boot' "
 					. 'attribute specified.';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __checkConainerSpec
+#------------------------------------------
+sub __checkConainerSpec {
+	# ...
+	# Check that the container attribute is set and has a valid name
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $systemTree  = $this->{systemTree};
+	my @types = $systemTree -> getElementsByTagName('type');
+	for my $type (@types) {
+		my $image = $type -> getAttribute('image');
+		if ($image eq 'lxc') {
+			my $contName = $type -> getAttribute('container');
+			if (! $contName) {
+				my $msg = 'Must specify attribute "container" for "lxc" '
+					. 'image type.';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+			if ($contName =~ /\W/smx) {
+				my $msg = 'Container name contains non word character.';
 				$kiwi -> error($msg);
 				$kiwi -> failed();
 				return;
@@ -1189,10 +1228,10 @@ sub __checkTypeConfigConsist {
 	# relevant inside the initrd
 	# ----
 	my %typeChildDeps = (
-		'ec2config'  => 'format:ec2,cpio',
-		'machine'    => 'image:vmx,split,oem,cpio',
-		'oemconfig'  => 'image:oem,split,cpio',
-		'pxedeploy'  => 'image:pxe,cpio',
+		'ec2config'  => 'format:cpio,ec2',
+		'machine'    => 'image:cpio,lxc,oem,vmx,split',
+		'oemconfig'  => 'image:cpio,oem,split',
+		'pxedeploy'  => 'image:cpio,pxe',
 		'size'       => ':', # generic
 		'split'      => ':', # generic
 		'systemdisk' => ':'  # generic
@@ -1678,6 +1717,9 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkBootSpecPresent()) {
+		return;
+	}
+	if (! $this -> __checkConainerSpec()) {
 		return;
 	}
 	if (! $this -> __checkDefaultProfSetting()) {

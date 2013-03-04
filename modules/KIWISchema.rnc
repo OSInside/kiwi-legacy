@@ -1544,6 +1544,9 @@ div {
 		## compressed or not. This makes only sense for filesystem
 		## only images respectively for the pxe or cpio type
 		attribute compressed { xsd:boolean }
+	k.type.container.attribute =
+		## Specifies a name for the container
+		attribute container { text }
 	k.type.devicepersistency.attribute =
 		## Specifies which method to use in order to get persistent
 		## storage device names. By default by-id is used.
@@ -1632,7 +1635,7 @@ div {
 		## Specifies the image type
 		attribute image {
 			"btrfs" | "clicfs" | "cpio" | "ext2" | "ext3" |
-			"ext4" | "iso" | "oem" | "product" | "pxe" | "reiserfs" |
+			"ext4" | "iso" | "lxc" | "oem" | "product" | "pxe" | "reiserfs" |
 			"split" | "squashfs" | "tbz" | "vmx" | "xfs"
 		}
 	k.type.installboot.attribute =
@@ -1700,6 +1703,7 @@ div {
 		k.type.boottimeout.attribute? &
 		k.type.checkprebuilt.attribute? &
 		k.type.compressed.attribute? &
+		k.type.container.attribute? &
 		k.type.devicepersistency.attribute? &
 		k.type.editbootconfig.attribute? &
 		k.type.editbootinstall.attribute? &

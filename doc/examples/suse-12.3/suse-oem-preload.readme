@@ -17,7 +17,7 @@ KIWI Image Description Example
 How to build this Example
 ==============================
 
-    kiwi -p /usr/share/doc/packages/kiwi/examples/suse-12.2/suse-oem-preload \
+    kiwi -p /usr/share/doc/packages/kiwi/examples/suse-12.3/suse-oem-preload \
          --root /tmp/myoem
 
     kiwi --create /tmp/myoem --type split -d /tmp/myoem-result
@@ -30,7 +30,7 @@ How to test this Example
   image. The installation disk should be tested on a bare test system
   For the .raw test just call:
 
-    qemu /tmp/myoem-result/use-12.2-oem-preload.i686-1.1.2.raw -m 512
+    qemu /tmp/myoem-result/use-12.3-oem-preload.i686-1.1.2.raw -m 512
 
   Please note if you test an oem image the virtual disk geometry of the
   image is the same as the disk geometry inside the host system. According

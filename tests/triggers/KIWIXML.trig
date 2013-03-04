@@ -1,3 +1,7 @@
+KTConfigWriterFactory.t
+KTContainerBuilder.t
+KTContainerConfigWriter.t
+KTImageBuildFactory.t
 KTImageCreator.t
 KTRuntimeChecker.t
 KTXML.t

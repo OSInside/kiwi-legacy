@@ -216,6 +216,35 @@ sub test_conflictingUsers {
 }
 
 #==========================================
+# test_containerPackMissing
+#------------------------------------------
+sub test_containerPackMissing {
+	# ...
+	# Test that a missing lxc package for a container build generates an
+	# error
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/lxcMissing';
+	my $res = $cmd -> setConfigDir ($configDir);
+	my $xml = $this -> __getXMLObj( $configDir );
+	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+	$res = $checker -> createChecks();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Attempting to build container, but no lxc package '
+		. 'included in image.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
 # test_duplicateRepoAliasConflict
 #------------------------------------------
 sub test_duplicateRepoAliasConflict {
@@ -841,7 +870,7 @@ sub __getXMLObj {
 	# TODO
 	# Fix the creation of the XML object once the ctor arguments change
 	my $xml = KIWIXML -> new(
-		$configDir, undef, undef,$this->{cmdL}
+		$configDir, undef, undef, $this->{cmdL}
 	);
 	if (! $xml) {
 		my $errMsg = $kiwi -> getMessage();
