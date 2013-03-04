@@ -241,10 +241,6 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_REBOOT_INTERACTIVE=1"
 		echo "OEM_REBOOT_INTERACTIVE=1" >> $oemfile
 	fi
-	if [ ! -z "$kiwi_oemsilentboot" ];then
-		echo "Setting up OEM_SILENTBOOT=1"
-		echo "OEM_SILENTBOOT=1" >> $oemfile
-	fi
 	if [ ! -z "$kiwi_oemshutdown" ];then
 		echo "Setting up OEM_SHUTDOWN=1"
 		echo "OEM_SHUTDOWN=1" >> $oemfile
@@ -252,6 +248,18 @@ function baseSetupOEMPartition {
 	if [ ! -z "$kiwi_oemshutdowninteractive" ];then
 		echo "Setting up OEM_SHUTDOWN_INTERACTIVE=1"
 		echo "OEM_SHUTDOWN_INTERACTIVE=1" >> $oemfile
+	fi
+	if [ ! -z "$kiwi_oemsilentboot" ];then
+		echo "Setting up OEM_SILENTBOOT=1"
+		echo "OEM_SILENTBOOT=1" >> $oemfile
+	fi
+	if [ ! -z "$kiwi_oemsilentinstall" ];then
+		echo "Setting up OEM_SILENTINSTALL=1"
+		echo "OEM_SILENTINSTALL=1" >> $oemfile
+	fi
+	if [ ! -z "$kiwi_oemsilentverify" ];then
+		echo "Setting up OEM_SILENTVERIFY=1"
+		echo "OEM_SILENTVERIFY=1" >> $oemfile
 	fi
 	if [ ! -z "$kiwi_oemalign" ];then
 		echo "Setting up OEM_ALIGN=1"
