@@ -533,7 +533,7 @@ sub generateBuildImageName {
 		$separator = "-";
 	}
 	my $name = $xml -> getImageName();
-	my $iver = $xml -> getImageVersion_legacy();
+	my $iver = $xml -> getPreferences() -> getVersion();
 	if (defined $extension) {
 		$name = $name.$extension.$arch.$separator.$iver;
 	} else {

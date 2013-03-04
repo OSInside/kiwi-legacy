@@ -2674,6 +2674,10 @@ sub __createOEMConfig {
 		$this -> __getChildNodeTextValue($config, 'oem-shutdown-interactive');
 	$oemConfig{oem_silent_boot}          =
 		$this -> __getChildNodeTextValue($config, 'oem-silent-boot');
+	$oemConfig{oem_silent_install}          =
+		$this -> __getChildNodeTextValue($config, 'oem-silent-install');
+	$oemConfig{oem_silent_verify}          =
+		$this -> __getChildNodeTextValue($config, 'oem-silent-verify');
 	$oemConfig{oem_swap}                 =
 		$this -> __getChildNodeTextValue($config, 'oem-swap');
 	$oemConfig{oem_swapsize}             =
@@ -6097,7 +6101,7 @@ sub getImageConfig_legacy {
 	#------------------------------------------
 	my %type  = %{$this->getImageTypeAndAttributes_legacy()};
 	my @delp  = $this -> getDeleteList_legacy();
-	my $iver  = $this -> getImageVersion_legacy();
+	my $iver  = $this -> getPreferences() -> getVersion();
 	my $size  = $this -> getImageSize_legacy();
 	my $name  = $this -> getImageName();
 	my $dname = $this -> getImageDisplayName ($this);
@@ -6306,12 +6310,16 @@ sub getImageConfig_legacy {
 			-> getElementsByTagName ("oem-reboot");
 		my $oemrebootinter= $node
 			-> getElementsByTagName ("oem-reboot-interactive");
-		my $oemsilentboot = $node
-			-> getElementsByTagName ("oem-silent-boot");
 		my $oemshutdown= $node
 			-> getElementsByTagName ("oem-shutdown");
 		my $oemshutdowninter= $node
 			-> getElementsByTagName ("oem-shutdown-interactive");
+		my $oemsilentboot = $node
+			-> getElementsByTagName ("oem-silent-boot");
+		my $oemsilentinstall = $node
+			-> getElementsByTagName ("oem-silent-install");
+		my $oemsilentverify = $node
+			-> getElementsByTagName ("oem-silent-verify");
 		my $oemwait  = $node
 			-> getElementsByTagName ("oem-bootwait");
 		my $oemnomsg = $node
@@ -6357,14 +6365,20 @@ sub getImageConfig_legacy {
 		if ((defined $oemrebootinter) && ("$oemrebootinter" eq "true")) {
 			$result{kiwi_oemrebootinteractive} = $oemrebootinter;
 		}
-		if ((defined $oemsilentboot) && ("$oemsilentboot" eq "true")) {
-			$result{kiwi_oemsilentboot} = $oemsilentboot;
-		}
 		if ((defined $oemshutdown) && ("$oemshutdown" eq "true")) {
 			$result{kiwi_oemshutdown} = $oemshutdown;
 		}
 		if ((defined $oemshutdowninter) && ("$oemshutdowninter" eq "true")) {
 			$result{kiwi_oemshutdowninteractive} = $oemshutdowninter;
+		}
+		if ((defined $oemsilentboot) && ("$oemsilentboot" eq "true")) {
+			$result{kiwi_oemsilentboot} = $oemsilentboot;
+		}
+		if ((defined $oemsilentinstall) && ("$oemsilentinstall" eq "true")) {
+			$result{kiwi_oemsilentinstall} = $oemsilentinstall;
+		}
+		if ((defined $oemsilentverify) && ("$oemsilentverify" eq "true")) {
+			$result{kiwi_oemsilentverify} = $oemsilentverify;
 		}
 		if ((defined $oemwait) && ("$oemwait" eq "true")) {
 			$result{kiwi_oembootwait} = $oemwait;
@@ -6563,19 +6577,6 @@ sub getImageTypeAndAttributes_legacy {
 		return;
 	}
 	return $typeinfo->{$imageType};
-}
-
-#==========================================
-# getImageVersion_legacy
-#------------------------------------------
-sub getImageVersion_legacy {
-	# ...
-	# Get the version of the logical extend
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("version");
-	my $version = $node -> getElementsByTagName ("version");
-	return "$version";
 }
 
 #==========================================
@@ -7752,6 +7753,46 @@ sub getOEMSilentBoot_legacy {
 		return;
 	}
 	my $silent = $node -> getElementsByTagName ("oem-silent-boot");
+	if ((! defined $silent) || ("$silent" eq "")) {
+		return;
+	}
+	return "$silent";
+}
+
+#==========================================
+# getOEMSilentInstall_legacy
+#------------------------------------------
+sub getOEMSilentInstall_legacy {
+	# ...
+	# Obtain the oem-silent-install value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $silent = $node -> getElementsByTagName ("oem-silent-install");
+	if ((! defined $silent) || ("$silent" eq "")) {
+		return;
+	}
+	return "$silent";
+}
+
+#==========================================
+# getOEMSilentVerify_legacy
+#------------------------------------------
+sub getOEMSilentVerify_legacy {
+	# ...
+	# Obtain the oem-silent-verify value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $silent = $node -> getElementsByTagName ("oem-silent-verify");
 	if ((! defined $silent) || ("$silent" eq "")) {
 		return;
 	}
