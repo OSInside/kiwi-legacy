@@ -3039,16 +3039,21 @@ function setupKernelModules {
 	local val
 	mkdir -p $destprefix/etc/sysconfig
 	#======================================
+	# include USB host controllers
+	#--------------------------------------
+	local USB_MODULES="ehci-hcd ohci-hcd uhci-hcd xhci-hcd"
+	INITRD_MODULES="$INITRD_MODULES $USB_MODULES"
+	#======================================
 	# check for mkinitrd capabilities
 	#--------------------------------------
 	if [ ! -e $newstyle_mkinitrd ];then
 		# /.../
 		# if boot-usb.sh does not exist we are based on an old
 		# mkinitrd version which requires all modules as part of
-		# sysconfig/kernel. Therefore we include all USB modules
+		# sysconfig/kernel. Therefore we include USB core modules
 		# required to support USB storage like USB sticks
 		# ----
-		local USB_MODULES="ehci-hcd ohci-hcd uhci-hcd usbcore usb-storage sd"
+		USB_MODULES="usbcore usb-storage sd"
 		INITRD_MODULES="$INITRD_MODULES $USB_MODULES"
 		# /.../
 		# old mkinitrd cannot figure this out on its own
