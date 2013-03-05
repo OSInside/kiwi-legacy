@@ -141,13 +141,6 @@ sub createImage {
 	if (! $status) {
 		return;
 	}
-	#==========================================
-	# provide result at final destination
-	#------------------------------------------
-	$status = $this -> __provideResults();
-	if (! $status) {
-		return;
-	}
 	return $status;
 }
 
@@ -233,6 +226,36 @@ sub __applyContainerConfig {
 }
 
 #==========================================
+# __cleanupWorkingDir
+#------------------------------------------
+sub __cleanupWorkingDir {
+	# ...
+	# Remove the tmp lxc root directory
+	# ---
+	my $this    = shift;
+	my $dirToRm = shift;
+	my $kiwi = $this->{kiwi};
+	$kiwi -> info('Clean up intermediate working directory');
+	my $baseWork = $this -> __getBaseWorkingDir();
+	if (! $dirToRm && $baseWork) {
+		my $cmdL = $this->{cmdL};
+		$dirToRm = $this -> getBaseBuildDirectory() . '/' . $baseWork;
+	}
+	if ($dirToRm) {
+		my $data = qxx ("rm -rf $dirToRm");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed();
+			$kiwi -> error("Could not remove: $dirToRm");
+			$kiwi -> failed();
+			return;
+		}
+	}
+	$kiwi -> done();
+	return 1;
+}
+
+#==========================================
 # __copyUnpackedTreeContent
 #------------------------------------------
 sub __copyUnpackedTreeContent {
@@ -273,20 +296,20 @@ sub __createContainerBundle {
 	my $locator = $this->{locator};
 	my $xml  = $this->{xml};
 	$kiwi -> info('Creating container tarball');
-	my $origin = $cmdL -> getImageIntermediateTargetDir()
+	my $baseBuildDir = $this -> getBaseBuildDirectory();
+	my $origin = $baseBuildDir
 		. '/'
 		. $this -> __getBaseWorkingDir();
-	my $targetDir = $cmdL -> getImageIntermediateTargetDir();
 	my $globals = KIWIGlobals -> instance();
 	my $imgFlName = $globals -> generateBuildImageName($xml, '-', '-lxc');
 	$imgFlName .= '.tbz';
 	my $tar = $locator -> getExecPath('tar');
 	my $cmd = "cd $origin; "
-		. "$tar -cjf $targetDir/$imgFlName etc var";
+		. "$tar -cjf $baseBuildDir/$imgFlName etc var";
 	my $data = qxx ($cmd);
 	my $code = $? >> 8;
 	if ($code != 0) {
-		$kiwi -> error("Could not create tarball $targetDir/$imgFlName");
+		$kiwi -> error("Could not create tarball $baseBuildDir/$imgFlName");
 		$kiwi -> failed();
 		return;
 	}
@@ -558,6 +581,35 @@ sub __createTargetRootTree {
 }
 
 #==========================================
+# __createWorkingDir
+#------------------------------------------
+sub __createWorkingDir {
+	# ...
+	# Create a directory to tmp store the lxc root tree
+	# ---
+	my $this = shift;
+	my $path = shift;
+	my $cmdL = $this->{cmdL};
+	my $kiwi = $this->{kiwi};
+	my $locator = $this->{locator};
+	my $basePath = $this -> getBaseBuildDirectory();
+	my $baseWork = $this -> __getBaseWorkingDir();
+	if (! $path && ! $baseWork) {
+		return $basePath;
+	}
+	my $dirPath = $basePath . '/' . $baseWork . '/' . $path;
+	my $mdir = $locator -> getExecPath('mkdir');
+	my $data = qxx ("$mdir -p $dirPath");
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error("Could not create directory: $dirPath");
+		$kiwi -> failed();
+		return;
+	}
+	return $dirPath;
+}
+
+#==========================================
 # __disableServices
 #------------------------------------------
 sub __disableServices {
@@ -626,6 +678,17 @@ sub __disableServices {
 	}
 	$kiwi -> done();
 	return 1;
+}
+
+#==========================================
+# __getBaseWorkingDir
+#------------------------------------------
+sub __getBaseWorkingDir {
+	# ...
+	# Return the name of the base working directory
+	# ---
+	my $this = shift;
+	return $this->{baseWork};
 }
 
 #==========================================

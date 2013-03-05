@@ -496,7 +496,10 @@ sub createImage {
 	if (! defined $dirCreated) {
 		return;
 	}
-	my $profileNames = join ("-",@{$xml->{reqProfiles}});
+	my $profileNames;
+	if ($xml->{reqProfiles}) {
+		$profileNames = join ("-",@{$xml->{reqProfiles}});
+	}
 	if ($profileNames) {
 		$destination.="/".$attr{type}."-".$profileNames;
 	} else {
@@ -669,91 +672,93 @@ sub createImage {
 	#------------------------------------------
 	my $factory = KIWIImageBuildFactory -> new ($xml, $cmdL);
 	my $builder = $factory -> getImageBuilder();
+	my $checkFormat = 0;
+	my $status = 0;
+	my $buildResultDir;
 	if ($builder) {
-		my $status = $builder -> createImage();
-		if (! $status) {
-			return;
+		$status = $builder -> createImage();
+		if ($status) {
+			$buildResultDir = $builder -> getBaseBuildDirectory();
 		}
-		return 1;
 	}
 	#==========================================
 	# Build image using KIWIImage
 	#------------------------------------------
-	my $ok;
-	my $checkFormat = 0;
-	SWITCH: for ($attr{type}) {
-		/^ext2/     && do {
-			$ok = $image -> createImageEXT2 ( $targetDevice );
-			$checkFormat = 1;
-			last SWITCH;
-		};
-		/^ext3/     && do {
-			$ok = $image -> createImageEXT3 ( $targetDevice );
-			$checkFormat = 1;
-			last SWITCH;
-		};
-		/^ext4/     && do {
-			$ok = $image -> createImageEXT4 ( $targetDevice );
-			$checkFormat = 1;
-			last SWITCH;
-		};
-		/^reiserfs/ && do {
-			$ok = $image -> createImageReiserFS ( $targetDevice );
-			$checkFormat = 1;
-			last SWITCH;
-		};
-		/^btrfs/    && do {
-			$ok = $image -> createImageBTRFS ( $targetDevice );
-			$checkFormat = 1;
-			last SWITCH;
-		};
-		/^squashfs/ && do {
-			$ok = $image -> createImageSquashFS ();
-			last SWITCH;
-		};
-		/^clicfs/   && do {
-			$ok = $image -> createImageClicFS ();
-			last SWITCH;
-		};
-		/^cpio/     && do {
-			$ok = $image -> createImageCPIO ();
-			last SWITCH;
-		};
-		/^tbz/      && do {
-			$ok = $image -> createImageTar ();
-			last SWITCH;
-		};
-		/^iso/      && do {
-			$ok = $image -> createImageLiveCD ( $para );
-			last SWITCH;
-		};
-		/^split/    && do {
-			$ok = $image -> createImageSplit ( $para );
-			last SWITCH;
-		};
-		/^vmx/      && do {
-			$ok = $image -> createImageVMX ( $para );
-			last SWITCH;
-		};
-		/^oem/      && do {
-			$ok = $image -> createImageVMX ( $para );
-			last SWITCH;
-		};
-		/^pxe/      && do {
-			$ok = $image -> createImagePXE ( $para );
-			last SWITCH;
-		};
-		/^xfs/    && do {
-			$ok = $image -> createImageXFS ( $targetDevice );
-			$checkFormat = 1;
-			last SWITCH;
-		};
-		$kiwi -> error  ("Unsupported type: $attr{type}");
-		$kiwi -> failed ();
-		undef $image;
-		return;
+	if (! $status) {
+		SWITCH: for ($attr{type}) {
+			/^ext2/     && do {
+				$status = $image -> createImageEXT2 ( $targetDevice );
+				$checkFormat = 1;
+				last SWITCH;
+			};
+			/^ext3/     && do {
+				$status = $image -> createImageEXT3 ( $targetDevice );
+				$checkFormat = 1;
+				last SWITCH;
+			};
+			/^ext4/     && do {
+				$status = $image -> createImageEXT4 ( $targetDevice );
+				$checkFormat = 1;
+				last SWITCH;
+			};
+			/^reiserfs/ && do {
+				$status = $image -> createImageReiserFS ( $targetDevice );
+				$checkFormat = 1;
+				last SWITCH;
+			};
+			/^btrfs/    && do {
+				$status = $image -> createImageBTRFS ( $targetDevice );
+				$checkFormat = 1;
+				last SWITCH;
+			};
+			/^squashfs/ && do {
+				$status = $image -> createImageSquashFS ();
+				last SWITCH;
+			};
+			/^clicfs/   && do {
+				$status = $image -> createImageClicFS ();
+				last SWITCH;
+			};
+			/^cpio/     && do {
+				$status = $image -> createImageCPIO ();
+				last SWITCH;
+			};
+			/^tbz/      && do {
+				$status = $image -> createImageTar ();
+				last SWITCH;
+			};
+			/^iso/      && do {
+				$status = $image -> createImageLiveCD ( $para );
+				last SWITCH;
+			};
+			/^split/    && do {
+				$status = $image -> createImageSplit ( $para );
+				last SWITCH;
+			};
+			/^vmx/      && do {
+				$status = $image -> createImageVMX ( $para );
+				last SWITCH;
+			};
+			/^oem/      && do {
+				$status = $image -> createImageVMX ( $para );
+				last SWITCH;
+			};
+			/^pxe/      && do {
+				$status = $image -> createImagePXE ( $para );
+				last SWITCH;
+			};
+			/^xfs/    && do {
+				$status = $image -> createImageXFS ( $targetDevice );
+				$checkFormat = 1;
+				last SWITCH;
+			};
+			$kiwi -> error  ("Unsupported type: $attr{type}");
+			$kiwi -> failed ();
+			undef $image;
+			return;
+		}
 	}
-	if ($ok) {
+	if ($status) {
 		my $imgName = KIWIGlobals
 			-> instance()
 			-> generateBuildImageName ($xml);
@@ -776,7 +781,10 @@ sub createImage {
 		# Package build result into an archive
 		#------------------------------------------
 		my $basedest = dirname  $destination;
-		my $basesubd = basename $destination;
+		if (! $buildResultDir) {
+			$buildResultDir = $cmdL -> getImageIntermediateTargetDir();
+		}
+		my $basesubd = basename $buildResultDir;
 		my $tarfile  = $imgName."-".$basesubd.".tgz";
 		if ($cmdL -> getArchiveImage()) {
 			$kiwi -> info ("Archiving image build result...");
@@ -796,7 +804,7 @@ sub createImage {
 		#==========================================
 		# Move build result(s) to destination dir
 		#------------------------------------------
-		my $status = qxx ("mv -f $destination/* $basedest 2>&1");
+		my $status = qxx ("mv -f $buildResultDir/* $basedest 2>&1");
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error (
@@ -805,8 +813,8 @@ sub createImage {
 			$kiwi -> failed ();
 			return;
 		}
-		rmdir $destination;
-		$kiwi -> info ("Please find build results at: $basedest");
+		rmdir $buildResultDir;
+		$kiwi -> info ("Find build results at: $basedest");
 		$kiwi -> done ();
 		return 1;
 	} else {

@@ -173,6 +173,8 @@ sub test_expectContBuilder {
 	my $confDir = $this -> {dataDir} . '/container';
 	my $cmdL = $this -> __getCommandLineObj();
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
+	my $tmpDir = $this -> createTestTmpDir();
+	$cmdL -> setImageTargetDir($tmpDir);
 	my $bFact = KIWIImageBuildFactory -> new($xml, $cmdL);
 	$this -> assert_not_null($bFact);
 	my $builder = $bFact -> getImageBuilder();
@@ -184,6 +186,7 @@ sub test_expectContBuilder {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_str_equals(ref($builder), 'KIWIContainerBuilder');
+	$this ->  removeTestTmpDir();
 	return;
 }
 

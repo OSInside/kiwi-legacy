@@ -57,6 +57,8 @@ sub test_ctor {
 	my $confDir = $this -> {dataDir};
 	my $cmdL = $this -> __getCommandLineObj();
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
+	my $tmpDir = $this -> createTestTmpDir();
+	$cmdL -> setImageTargetDir($tmpDir);
 	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -66,6 +68,7 @@ sub test_ctor {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($builder);
+	$this -> removeTestTmpDir();
 	return;
 }
 
@@ -179,8 +182,9 @@ sub test_applyContainerConfig {
 	my $confDir = $this -> {dataDir};
 	my $cmdL = $this -> __getCommandLineObj();
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
 	my $tmpDir = $this -> createTestTmpDir();
+	$cmdL -> setImageTargetDir($tmpDir);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
 	# Create fstab file to be replaced
 	mkdir $tmpDir . '/etc';
 	my $status = open my $FSTAB, '>', $tmpDir . '/etc/fstab';
@@ -235,6 +239,7 @@ sub test_copyUnpackedTreeContent {
 	my $confDir = $this -> {dataDir};
 	my $cmdL = $this -> __getCommandLineObj();
 	my $tmpDir = $this -> createTestTmpDir();
+	$cmdL -> setImageTargetDir($tmpDir);
 	my $origin =  $tmpDir . '/origin';
 	mkdir $origin;
 	$cmdL -> setConfigDir($origin);
@@ -287,23 +292,22 @@ sub test_createContainerBundle {
 	my $cmdL = $this -> __getCommandLineObj();
 	my $tmpDir = $this -> createTestTmpDir();
 	$cmdL -> setImageTargetDir($tmpDir);
-	$cmdL -> setImageIntermediateTargetDir($tmpDir);
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
 	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
 	# Create a basic setup assimilating a true directory layout
-	mkdir $tmpDir . '/container';
-	mkdir $tmpDir . '/container/etc';
-	mkdir $tmpDir . '/container/var';
-	mkdir $tmpDir . '/container/var/lib';
-	mkdir $tmpDir . '/container/var/lib/lxc';
-	mkdir $tmpDir . '/container/var/lib/lxc/mycontainer';
-	mkdir $tmpDir . '/container/var/lib/lxc/mycontainer/rootfs';
-	my $status = open my $FSTAB, '>', $tmpDir . '/container/etc/fstab';
+	mkdir $tmpDir . '/lxc/container';
+	mkdir $tmpDir . '/lxc/container/etc';
+	mkdir $tmpDir . '/lxc/container/var';
+	mkdir $tmpDir . '/lxc/container/var/lib';
+	mkdir $tmpDir . '/lxc/container/var/lib/lxc';
+	mkdir $tmpDir . '/lxc/container/var/lib/lxc/mycontainer';
+	mkdir $tmpDir . '/lxc/container/var/lib/lxc/mycontainer/rootfs';
+	my $status = open my $FSTAB, '>', $tmpDir . '/lxc/container/etc/fstab';
 	$this -> assert_not_null($status);
 	print $FSTAB 'proc  proc  proc nodev,noexec,nosuid 0 0';
 	$status = close $FSTAB;
 	$this -> assert_not_null($status);
-	my $fl = $tmpDir . '/container/var/lib/lxc/mycontainer/rootfs/.peaks';
+	my $fl = $tmpDir . '/lxc/container/var/lib/lxc/mycontainer/rootfs/.peaks';
 	$status = open my $PEAKS, '>', $fl;
 	$this -> assert_not_null($status);
 	print $PEAKS 'Matterhorn';
@@ -321,7 +325,7 @@ sub test_createContainerBundle {
 	$this -> assert_str_equals('completed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
-	my $expectedFl = 'container-test-lxc.';
+	my $expectedFl = 'lxc/container-test-lxc.';
 	my $arch = KIWIGlobals -> instance() -> getArch();
 	$expectedFl .= $arch . '-1.0.0.tbz';
 	$this -> assert_file_exists($tmpDir . '/' . $expectedFl);
@@ -370,7 +374,6 @@ sub test_createContainerConfigDir {
 	my $cmdL = $this -> __getCommandLineObj();
 	my $tmpDir = $this -> createTestTmpDir();
 	$cmdL -> setImageTargetDir($tmpDir);
-	$cmdL -> setImageIntermediateTargetDir($tmpDir);
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
 	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
 	my $res = $builder -> __createContainerConfigDir();
@@ -383,7 +386,7 @@ sub test_createContainerConfigDir {
 	$this -> assert_str_equals('completed', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
-	my $expectedDir = $tmpDir . '/container/etc/lxc/mycontainer';
+	my $expectedDir = $tmpDir . '/lxc/container/etc/lxc/mycontainer';
 	$this -> assert_dir_exists($expectedDir);
 	$this ->  removeTestTmpDir();
 	return;
@@ -458,6 +461,7 @@ sub test_createInitTab {
 	my $confDir = $this -> {dataDir} . '/container';
 	my $cmdL = $this -> __getCommandLineObj();
 	my $tmpDir = $this -> createTestTmpDir();
+	$cmdL -> setImageTargetDir($tmpDir);
 	mkdir $tmpDir . '/etc';
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
 	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
@@ -489,7 +493,6 @@ sub test_createTargetRootTree {
 	my $cmdL = $this -> __getCommandLineObj();
 	my $tmpDir = $this -> createTestTmpDir();
 	$cmdL -> setImageTargetDir($tmpDir);
-	$cmdL -> setImageIntermediateTargetDir($tmpDir);
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
 	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
 	my $tgtDir = $builder -> __createTargetRootTree();
@@ -500,10 +503,39 @@ sub test_createTargetRootTree {
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('completed', $state);
-	my $expectedDir = $tmpDir . '/container/var/lib/lxc/mycontainer/rootfs';
+	my $expectedDir = $tmpDir . '/lxc/container/var/lib/lxc/mycontainer/rootfs';
 	$this -> assert_str_equals($expectedDir, $tgtDir);
 	$this -> assert_dir_exists($expectedDir);
 	$this ->  removeTestTmpDir();
+	return;
+}
+
+#==========================================
+# test_getBaseBuildDirectory
+#------------------------------------------
+sub test_getBaseBuildDirectory {
+	# ...
+	# Test the getBaseBuildDirectory method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this -> {dataDir} . '/container';
+	my $cmdL = $this -> __getCommandLineObj();
+	my $tmpDir = $this -> createTestTmpDir();
+	$cmdL -> setImageTargetDir($tmpDir);
+	my $xml = $this -> __getXMLObj($confDir, $cmdL);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+	my $buildDir = $builder -> getBaseBuildDirectory();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	my $expectedDir = $tmpDir . '/lxc';
+	$this -> assert_str_equals($expectedDir, $buildDir);
+	$this -> removeTestTmpDir();
 	return;
 }
 
@@ -519,6 +551,7 @@ sub test_removeKiwiBuildInfo {
 	my $confDir = $this -> {dataDir} . '/container';
 	my $cmdL = $this -> __getCommandLineObj();
 	my $tmpDir = $this -> createTestTmpDir();
+	$cmdL -> setImageTargetDir($tmpDir);
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
 	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
 	mkdir $tmpDir . '/image';

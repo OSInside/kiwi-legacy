@@ -71,112 +71,58 @@ sub new {
 	$this->{kiwi} = $kiwi;
 	$this->{locator} = KIWILocator -> instance();
 	$this->{xml}  = $xml;
+	#==========================================
+	# Create atomic build dir
+	#------------------------------------------
+	my $baseBuildDir = $this -> __createBuildDir();
+	if (! $baseBuildDir) {
+		return;
+	}
+	$this->{baseBuildDir} = $baseBuildDir;
 	return $this;
 }
+
+#==========================================
+# getBaseBuildDirectory
+#------------------------------------------
+sub getBaseBuildDirectory {
+	# ...
+	# Return the path to the build directory that each builder should use to
+	# create it's image specific working files and directories.
+	# ---
+	my $this = shift;
+	return $this->{baseBuildDir};
+}
+
 
 #==========================================
 # Private helper methods
 #------------------------------------------
 #==========================================
-# __cleanupWorkingDir
+# __createBuildDir
 #------------------------------------------
-sub __cleanupWorkingDir {
-	# ...
-	# Remove the intermediate image creation directory
-	# ---
-	my $this    = shift;
-	my $dirToRm = shift;
-	my $kiwi = $this->{kiwi};
-	if ($ENV{KIWI_KEEP_INTERMEDIATE}) {
-		$kiwi -> info('Envirnment set to retain intermediate working tree');
-		$kiwi -> done();
-		return 1;
-	}
-	$kiwi -> info('Clean up intermediate working directory');
-	my $baseWork = $this -> __getBaseWorkingDir();
-	if (! $dirToRm && $baseWork) {
-		my $cmdL = $this->{cmdL};
-		$dirToRm = $cmdL -> getImageIntermediateTargetDir() . '/' . $baseWork;
-	}
-	if ($dirToRm) {
-		my $data = qxx ("rm -rf $dirToRm");
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed();
-			$kiwi -> error("Could not remove: $dirToRm");
-			$kiwi -> failed();
-			return;
-		}
-	}
-	$kiwi -> done();
-	return 1;
-}
-
-#==========================================
-# __createWorkingDir
-#------------------------------------------
-sub __createWorkingDir {
+sub __createBuildDir {
 	# ...
 	# Create a directory for the ImageBuilder to do its work
 	# ---
 	my $this = shift;
-	my $path = shift;
 	my $cmdL = $this->{cmdL};
 	my $kiwi = $this->{kiwi};
-	my $locator = $this->{locator};
-	my $basePath = $cmdL -> getImageIntermediateTargetDir();
-	my $baseWork = $this -> __getBaseWorkingDir();
-	if (! $path && ! $baseWork) {
-		return $basePath;
+	my $xml  = $this->{xml};
+	my $destination = $cmdL -> getImageTargetDir();
+	my $typeName = $xml -> getImageType() -> getImageType();
+	my $profileNames = $xml -> getActiveProfileNames();
+	my $workDirName = $typeName;
+	for my $prof (@{$profileNames}) {
+		$workDirName .= '-' . $prof;
 	}
-	my $dirPath = $basePath . '/' . $baseWork . '/' . $path;
-	my $mdir = $locator -> getExecPath('mkdir');
-	my $data = qxx ("$mdir -p $dirPath");
-	my $code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error("Could not create directory: $dirPath");
-		$kiwi -> failed();
-		return;
-	}
-	return $dirPath;
-}
-
-#==========================================
-# __provideResults
-#------------------------------------------
-sub __provideResults {
-	# ...
-	# Move build result(s) to final destination dir
-	# ---
-	my $this = shift;
-	my $cmdL = $this->{cmdL};
-	my $kiwi = $this->{kiwi};
-	my $workPath = $cmdL -> getImageIntermediateTargetDir();
-	my $basedest = dirname  $workPath;
-	my $status = qxx ("mv -f $workPath/* $basedest 2>&1");
-	my $result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> error (
-			"Failed to move result image file(s) to destination: $status"
-		);
+	$destination .= "/" . $workDirName;
+	if ((! -d $destination) && (! mkdir $destination)) {
+		$kiwi -> error  ("Failed to create destination subdir: $!");
 		$kiwi -> failed ();
 		return;
 	}
-	rmdir $workPath;
-	$kiwi -> info ("Please find build results at: $basedest");
-	$kiwi -> done ();
-	return $basedest;
-}
-
-#==========================================
-# __getBaseWorkingDir
-#------------------------------------------
-sub __getBaseWorkingDir {
-	# ...
-	# Return the name of the base working directory
-	# ---
-	my $this = shift;
-	return $this->{baseWork};
+	return $destination;
 }
 
 #==========================================
