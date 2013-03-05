@@ -9210,6 +9210,12 @@ sub __updateDescriptionFromChangeSet_legacy {
 	if (defined $changeset->{"oem-silent-boot"}) {
 		$this -> __setOEMOptionsElement ("oem-silent-boot",$changeset);
 	}
+	if (defined $changeset->{"oem-silent-verify"}) {
+		$this -> __setOEMOptionsElement ("oem-silent-verify",$changeset);
+	}
+	if (defined $changeset->{"oem-silent-install"}) {
+		$this -> __setOEMOptionsElement ("oem-silent-install",$changeset);
+	}
 	if (defined $changeset->{"oem-shutdown"}) {
 		$this -> __setOEMOptionsElement ("oem-shutdown",$changeset);
 	}
