@@ -78,7 +78,7 @@ sub new {
 	my $data;
 	if (! defined $name) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("No image name for migration given");
+		$kiwi -> error  ("No name for migration given");
 		$kiwi -> failed ();
 		return;
 	}
@@ -1084,21 +1084,36 @@ sub getOperatingSystemVersion {
 	# ---
 	my $this = shift;
 	my $VFD = FileHandle -> new();
-	if (! $VFD -> open ("/etc/SuSE-release")) {
+	my $name;
+	my $vers;
+	my $plvl;
+	if (! $VFD -> open ("/etc/products.d/baseproduct")) {
 		return;
 	}
-	my $name = <$VFD>; chomp $name;
-	my $vers = <$VFD>; chomp $vers;
-	my $plvl = <$VFD>; chomp $plvl;
-	$name =~ s/\s+/-/g;
-	$name =~ s/\-\(.*\)//g;
-	if ((defined $plvl) && ($plvl =~ /PATCHLEVEL = (.*)/)) {
-		$plvl = $1;
-		if ($plvl > 0) {
-			$name = $name."-SP".$plvl;
+	while (my $line = <$VFD>) {
+		if ($line =~ /<version>(.*)<\/version>/) {
+			$vers = $1;
+		}
+		if ($line =~ /<patchlevel>(.*)<\/patchlevel>/) {
+			$plvl = $1;
+		}
+		if ($line =~ /<name>(.*)<\/name>/) {
+			$name = $1;
 		}
 	}
 	$VFD -> close();
+	if ((! $name) || (! $vers)) {
+		return;
+	}
+	if ($name eq 'SUSE_SLES') {
+		$name = 'SUSE-Linux-Enterprise-Server';
+	}
+	if ($plvl) {
+		$plvl = 'SP'.$plvl;
+		$name = $name.'-'.$vers.'-'.$plvl;
+	} else {
+		$name = $name.'-'.$vers;
+	}
 	my $MFD = FileHandle -> new();
 	if (! $MFD -> open ($this->{gdata}->{KMigrate})) {
 		return;
