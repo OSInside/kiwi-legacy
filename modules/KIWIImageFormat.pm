@@ -508,8 +508,7 @@ sub createEC2 {
 	#==========================================
 	# create initrd
 	#------------------------------------------
-	my $type = $xml -> getImageType();
-	my $imgType = $type -> getImageType();
+	my $imgType = $xml -> getImageType() -> getTypeName();
 	my $IRDFD = FileHandle -> new();
 	if (! $IRDFD -> open (">$tmpdir/create_initrd.sh")) {
 		$kiwi -> error  ("Failed to open $tmpdir/create_initrd.sh: $!");

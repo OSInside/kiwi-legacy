@@ -3594,7 +3594,7 @@ sub writeImageConfig {
 		# IMAGE information
 		#------------------------------------------
 		my $compressed = $bldType -> getCompressed();
-		my $imgType = $bldType -> getImageType();
+		my $imgType = $bldType -> getTypeName();
 		if ($compressed && $compressed eq 'true') {
 			print $FD "IMAGE='${device}${targetPartition};";
 			print $FD "$namecd;$server;$blocks;compressed'";
