@@ -60,7 +60,8 @@ sub new {
 #------------------------------------------
 sub createImage {
 	# ...
-	# Create the image
+	# Create the image, returns an array ref containing a list of the files
+	# that are part of the image, created by this builder
 	# ---
 	my $this = shift;
 	my $status = 1; # assume success
@@ -141,7 +142,7 @@ sub createImage {
 	if (! $status) {
 		return;
 	}
-	return $status;
+	return $this->{createdFiles};
 }
 
 #==========================================
@@ -303,6 +304,7 @@ sub __createContainerBundle {
 	my $globals = KIWIGlobals -> instance();
 	my $imgFlName = $globals -> generateBuildImageName($xml, '-', '-lxc');
 	$imgFlName .= '.tbz';
+	my @createdFiles = ($imgFlName);
 	my $tar = $locator -> getExecPath('tar');
 	my $cmd = "cd $origin; "
 		. "$tar -cjf $baseBuildDir/$imgFlName etc var";
@@ -314,6 +316,7 @@ sub __createContainerBundle {
 		return;
 	}
 	$kiwi -> done();
+	$this->{createdFiles} = \@createdFiles;
 	return 1;
 }
 
