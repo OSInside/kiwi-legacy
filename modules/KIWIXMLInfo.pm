@@ -382,7 +382,7 @@ sub __getTree {
 			/^types/         && do {
 				# output default or primary built type first
 				my $tData = $xml -> getImageType();
-				my $defTypeName = $tData -> getImageType();
+				my $defTypeName = $tData -> getTypeName();
 				my $type = XML::LibXML::Element -> new('type');
 				$type -> setAttribute('name', $defTypeName);
 				$type -> setAttribute('primary', 'true');

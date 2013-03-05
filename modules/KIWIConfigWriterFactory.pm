@@ -88,8 +88,7 @@ sub getConfigWriter {
 	my $this = shift;
 	my $confDir = $this->{confDir};
 	my $xml  = $this->{xml};
-	my $type = $xml -> getImageType();
-	my $typeName = $type -> getImageType();
+	my $typeName = $xml -> getImageType() -> getTypeName();
 	SWITCH: for ($typeName) {
 		/^lxc/smx && do {
 			my $writer = KIWIContainerConfigWriter -> new($xml, $confDir);

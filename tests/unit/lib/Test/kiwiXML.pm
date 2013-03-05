@@ -4320,7 +4320,7 @@ sub test_ctor_NoTypeDefaultPref {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($type);
-	my $imageT = $type -> getImageType();
+	my $imageT = $type -> getTypeName();
 	$this -> assert_str_equals('oem', $imageT);
 	return;
 }
@@ -5526,7 +5526,7 @@ sub test_getImageType {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Verify that we got the expected type
-	my $imageType = $typeInfo -> getImageType();
+	my $imageType = $typeInfo -> getTypeName();
 	$this -> assert_str_equals('vmx', $imageType);
 	return;
 }
@@ -5559,7 +5559,7 @@ sub test_getImageTypeProfiles {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Verify that we got the expected type
-	my $imageType = $typeInfo -> getImageType();
+	my $imageType = $typeInfo -> getTypeName();
 	$this -> assert_str_equals('oem', $imageType);
 	return;
 }
@@ -5593,7 +5593,7 @@ sub test_getImageTypeProfilesNoPrimaryType {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($type);
-	my $imageT = $type -> getImageType();
+	my $imageT = $type -> getTypeName();
 	$this -> assert_str_equals('vmx', $imageT);
 	return;
 }
@@ -8932,7 +8932,7 @@ sub test_setBuildType {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Verify that we got the expected type
-	my $imageType = $typeInfo -> getImageType();
+	my $imageType = $typeInfo -> getTypeName();
 	$this -> assert_str_equals('vmx', $imageType);
 	return;
 }
@@ -8974,7 +8974,7 @@ sub test_setBuildTypeInvalidArg {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Verify that we got the expected type
-	my $imageType = $typeInfo -> getImageType();
+	my $imageType = $typeInfo -> getTypeName();
 	$this -> assert_str_equals('oem', $imageType);
 	return;
 }
@@ -9016,7 +9016,7 @@ sub test_setBuildTypeNoArg {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Verify that we got the expected type
-	my $imageType = $typeInfo -> getImageType();
+	my $imageType = $typeInfo -> getTypeName();
 	$this -> assert_str_equals('oem', $imageType);
 	return;
 }

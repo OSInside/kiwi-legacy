@@ -170,8 +170,7 @@ sub __checkContainerHasLXC {
 	# ---
 	my $this = shift;
 	my $xml = $this -> {xml};
-	my $type = $xml -> getImageType();
-	my $name = $type -> getImageType();
+	my $name = $xml -> getImageType() -> getTypeName();
 	if ($name =~ /^lxc/smx) {
 		my $pckgs = $xml -> getPackages();
 		push @{$pckgs}, @{$xml -> getBootstrapPackages()};
@@ -258,8 +257,8 @@ sub __checkFilesystemTool {
 	my $cmdL = $this -> {cmdArgs};
 	my $xml  = $this -> {xml};
 	my $type = $xml -> getImageType();
-	my $typeName = $type -> getImageType();
-	my $flag     = $type -> getFlags;
+	my $typeName = $type -> getTypeName();
+	my $flag     = $type -> getFlags();
 	my $toolError;
 	my $checkedFS;
 	my @knownFsTypes = qw (
@@ -459,8 +458,7 @@ sub __checkVMscsiCapable {
 	# ---
 	my $this = shift;
 	my $xml = $this -> {xml};
-	my $typeObj = $xml -> getImageType();
-	my $type = $typeObj -> getImageType();
+	my $type = $xml -> getImageType() -> getTypeName();
 	if ($type ne 'vmx') {
 		# Nothing to do
 		return 1;
@@ -695,7 +693,7 @@ sub __isoHybridCapable {
 	my $locator = $this->{locator};
 	my $xml = $this->{xml};
 	my $bldType = $xml -> getImageType();
-	my $imgType = $bldType -> getImageType();
+	my $imgType = $bldType -> getTypeName();
 	if ($imgType ne 'iso' && $imgType ne 'oem') {
 		return 1;
 	}

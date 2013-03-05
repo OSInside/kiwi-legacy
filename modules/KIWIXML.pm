@@ -3728,7 +3728,7 @@ sub __getInstallData {
 	my $arch = $this->{arch};
 	my @selected = @{$this->{selectedProfiles}};
 	my $type = $this->{selectedType}{type};
-	my $typeName = $type -> getImageType();
+	my $typeName = $type -> getTypeName();
 	my @names;
 	for my $prof (@selected) {
 		my $baseData = $this->{imageConfig}{$prof}{$access};
