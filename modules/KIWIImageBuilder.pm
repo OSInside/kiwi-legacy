@@ -110,7 +110,7 @@ sub __createBuildDir {
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $destination = $cmdL -> getImageTargetDir();
-	my $typeName = $xml -> getImageType() -> getImageType();
+	my $typeName = $xml -> getImageType() -> getTypeName();
 	my $profileNames = $xml -> getActiveProfileNames();
 	my $workDirName = $typeName;
 	for my $prof (@{$profileNames}) {

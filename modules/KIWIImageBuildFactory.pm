@@ -81,8 +81,7 @@ sub getImageBuilder {
 	my $this = shift;
 	my $cmdL = $this->{cmdL};
 	my $xml  = $this->{xml};
-	my $type = $xml -> getImageType();
-	my $typeName = $type -> getImageType();
+	my $typeName = $xml -> getImageType() -> getTypeName();
 	SWITCH: for ($typeName) {
 		/^lxc/smx && do {
 			my $builder = KIWIContainerBuilder -> new($xml, $cmdL);

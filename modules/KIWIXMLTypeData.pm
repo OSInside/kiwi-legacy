@@ -489,17 +489,6 @@ sub getHybridPersistent {
 }
 
 #==========================================
-# getImageType
-#------------------------------------------
-sub getImageType {
-	# ...
-	# Return the image type
-	# ---
-	my $this = shift;
-	return $this->{image};
-}
-
-#==========================================
 # getInstallBoot
 #------------------------------------------
 sub getInstallBoot {
@@ -641,6 +630,17 @@ sub getSizeUnit {
 }
 
 #==========================================
+# getTypeName
+#------------------------------------------
+sub getTypeName {
+	# ...
+	# Return the image type
+	# ---
+	my $this = shift;
+	return $this->{image};
+}
+
+#==========================================
 # getVGA
 #------------------------------------------
 sub getVGA {
@@ -682,7 +682,7 @@ sub getXMLElement {
 	# ---
 	my $this = shift;
 	my $element = XML::LibXML::Element -> new('type');
-	$element -> setAttribute('image', $this -> getImageType());
+	$element -> setAttribute('image', $this -> getTypeName());
 	my $bootIm = $this -> getBootImageDescript();
 	if ($bootIm) {
 		$element -> setAttribute('boot', $bootIm);
@@ -1258,22 +1258,6 @@ sub setHybridPersistent {
 }
 
 #==========================================
-# setImageType
-#------------------------------------------
-sub setImageType {
-	# ...
-	# Set the image type
-	# ---
-	my $this = shift;
-	my $type = shift;
-	if (! $this -> __isValidImage($type, 'setImageType') ) {
-		return;
-	}
-	$this->{image} = $type;
-	return $this;
-}
-
-#==========================================
 # setInstallBoot
 #------------------------------------------
 sub setInstallBoot {
@@ -1526,6 +1510,23 @@ sub setSizeUnit {
 	$this->{sizeunit} = $unit;
 	return $this;
 }
+
+#==========================================
+# setTypeName
+#------------------------------------------
+sub setTypeName {
+	# ...
+	# Set the image type
+	# ---
+	my $this = shift;
+	my $type = shift;
+	if (! $this -> __isValidImage($type, 'setTypeName') ) {
+		return;
+	}
+	$this->{image} = $type;
+	return $this;
+}
+
 
 #==========================================
 # setVGA
@@ -1817,43 +1818,6 @@ sub __isValidFilesystem {
 }
 
 #==========================================
-# __isValidRaidType
-#------------------------------------------
-sub __isValidRaidType {
-	# ...
-	# Verify that the given raid type is supported
-	# ---
-	my $this   = shift;
-	my $mdtype = shift;
-	my $caller = shift;
-	my $kiwi = $this->{kiwi};
-	if (! $caller ) {
-		my $msg = 'Internal error __isValidRaidType called without '
-			. 'call origin argument.';
-		$kiwi -> info($msg);
-		$kiwi -> oops();
-	}
-	if (! $mdtype ) {
-		my $msg = "$caller: no raid type specified, retaining "
-			. 'current data.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	my %supported = map { ($_ => 1) } qw(
-		mirroring striping
-	);
-	if (! $supported{$mdtype} ) {
-		my $msg = "$caller: specified raid type '$mdtype' is not "
-			. 'supported.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return 1;
-}
-
-#==========================================
 # __isValidFirmware
 #------------------------------------------
 sub __isValidFirmware {
@@ -1989,8 +1953,23 @@ sub __isValidImage {
 		return;
 	}
 	my %supported = map { ($_ => 1) } qw(
-		btrfs clicfs cpio ext2 ext3 ext4 iso lxc oem product pxe reiserfs
-		split squashfs tbz vmx xfs
+		btrfs
+		clicfs
+		cpio
+		ext2
+		ext3
+		ext4
+		iso
+		lxc
+		oem
+		product
+		pxe
+		reiserfs
+		split
+		squashfs
+		tbz
+		vmx
+		xfs
 	);
 	if (! $supported{$image} ) {
 		my $msg = "$caller: specified image '$image' is not "
@@ -2031,6 +2010,43 @@ sub __isValidInstBoot {
 	);
 	if (! $supported{$instB} ) {
 		my $msg = "$caller: specified installboot option '$instB' is not "
+			. 'supported.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
+}
+
+#==========================================
+# __isValidRaidType
+#------------------------------------------
+sub __isValidRaidType {
+	# ...
+	# Verify that the given raid type is supported
+	# ---
+	my $this   = shift;
+	my $mdtype = shift;
+	my $caller = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller ) {
+		my $msg = 'Internal error __isValidRaidType called without '
+			. 'call origin argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if (! $mdtype ) {
+		my $msg = "$caller: no raid type specified, retaining "
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my %supported = map { ($_ => 1) } qw(
+		mirroring striping
+	);
+	if (! $supported{$mdtype} ) {
+		my $msg = "$caller: specified raid type '$mdtype' is not "
 			. 'supported.';
 		$kiwi -> error($msg);
 		$kiwi -> failed();

@@ -166,7 +166,7 @@ sub test_ctor_noArg2 {
 #------------------------------------------
 sub test_expectContBuilder {
 	# ...
-	# Test the KIWIImageBuildFactory with no argument
+	# Test the getImageBuilder method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};

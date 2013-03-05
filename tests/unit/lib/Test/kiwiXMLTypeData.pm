@@ -1327,27 +1327,6 @@ sub test_getHybridPersistent {
 }
 
 #==========================================
-# test_getImageType
-#------------------------------------------
-sub test_getImageType {
-	# ...
-	# Test the getImageType method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = $this -> __getTypeObj();
-	my $type = $typeDataObj -> getImageType();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('oem', $type);
-	return;
-}
-
-#==========================================
 # test_getInstallBoot
 #------------------------------------------
 sub test_getInstallBoot {
@@ -1536,6 +1515,7 @@ sub test_getMDRaid {
 	$this -> assert_str_equals('striping', $raidt);
 	return;
 }
+
 #==========================================
 # test_getPrimary
 #------------------------------------------
@@ -1642,6 +1622,27 @@ sub test_getSizeUnitDefault {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('M', $unit);
+	return;
+}
+
+#==========================================
+# test_getTypeName
+#------------------------------------------
+sub test_getTypeName {
+	# ...
+	# Test the getImageType method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $type = $typeDataObj -> getTypeName();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('oem', $type);
 	return;
 }
 
@@ -3600,97 +3601,6 @@ sub test_setHybridPersistentUnknownArg {
 }
 
 #==========================================
-# test_setImageType
-#------------------------------------------
-sub test_setImageType {
-	# ...
-	# Test the setImageType method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = $this -> __getTypeObj();
-	$typeDataObj = $typeDataObj -> setImageType('tbz');
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_not_null($typeDataObj);
-	my $type = $typeDataObj -> getImageType();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('tbz', $type);
-	return;
-}
-
-#==========================================
-# test_setImageTypeInvalidArg
-#------------------------------------------
-sub test_setImageTypeInvalidArg {
-	# ...
-	# Test the setImageType method with an invalid argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = $this -> __getTypeObj();
-	my $res = $typeDataObj -> setImageType('foo');
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'setImageType: specified image '
-		. "'foo' is not supported.";
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-	my $type = $typeDataObj -> getImageType();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('oem', $type);
-	return;
-}
-
-#==========================================
-# test_setImageTypeNoArg
-#------------------------------------------
-sub test_setImageTypeNoArg {
-	# ...
-	# Test the setImageType method with no argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = $this -> __getTypeObj();
-	my $res = $typeDataObj -> setImageType();
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'setImageType: no image argument specified, '
-		. 'retaining current data.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-	my $type = $typeDataObj -> getImageType();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('oem', $type);
-	return;
-}
-
-#==========================================
 # test_setInstallBoot
 #------------------------------------------
 sub test_setInstallBoot {
@@ -4762,6 +4672,97 @@ sub test_setSizeUnitNoArg {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('M', $unit);
+	return;
+}
+
+#==========================================
+# test_setTypeName
+#------------------------------------------
+sub test_setTypeName {
+	# ...
+	# Test the setTypeName method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	$typeDataObj = $typeDataObj -> setTypeName('tbz');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $type = $typeDataObj -> getTypeName();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('tbz', $type);
+	return;
+}
+
+#==========================================
+# test_setTypeNameInvalidArg
+#------------------------------------------
+sub test_setTypeNameInvalidArg {
+	# ...
+	# Test the setTypeName method with an invalid argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setTypeName('foo');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setTypeName: specified image '
+		. "'foo' is not supported.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $type = $typeDataObj -> getTypeName();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('oem', $type);
+	return;
+}
+
+#==========================================
+# test_setTypeNameNoArg
+#------------------------------------------
+sub test_setTypeNameNoArg {
+	# ...
+	# Test the setTypeName method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setTypeName();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setTypeName: no image argument specified, '
+		. 'retaining current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $type = $typeDataObj -> getTypeName();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('oem', $type);
 	return;
 }
 
