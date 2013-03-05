@@ -1633,7 +1633,7 @@ sub listImage {
 			if (! $xml) {
 				next;
 			}
-			my $version = $xml -> getImageVersion_legacy();
+			my $version = $xml -> getPreferences() -> getVersion();
 			$kiwi -> info ("Version: $version");
 			$kiwi -> done();
 		}

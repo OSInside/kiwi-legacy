@@ -383,7 +383,7 @@ sub init {
 	#----------------------------------
 	my $packager = $xml -> getPackageManager_legacy();
 	my $imageVersionFile = "$root/etc/ImageVersion";
-	my $imageVersion = $xml -> getImageVersion_legacy();
+	my $imageVersion = $xml -> getPreferences() -> getVersion();
 	my $imageName    = $xml -> getImageName();
 	qxx ("mkdir -p $root/etc");
 	if ( ! open ($FD, '>', "$imageVersionFile")) {

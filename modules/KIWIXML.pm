@@ -6101,7 +6101,7 @@ sub getImageConfig_legacy {
 	#------------------------------------------
 	my %type  = %{$this->getImageTypeAndAttributes_legacy()};
 	my @delp  = $this -> getDeleteList_legacy();
-	my $iver  = $this -> getImageVersion_legacy();
+	my $iver  = $this -> getPreferences() -> getVersion();
 	my $size  = $this -> getImageSize_legacy();
 	my $name  = $this -> getImageName();
 	my $dname = $this -> getImageDisplayName ($this);
@@ -6577,19 +6577,6 @@ sub getImageTypeAndAttributes_legacy {
 		return;
 	}
 	return $typeinfo->{$imageType};
-}
-
-#==========================================
-# getImageVersion_legacy
-#------------------------------------------
-sub getImageVersion_legacy {
-	# ...
-	# Get the version of the logical extend
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("version");
-	my $version = $node -> getElementsByTagName ("version");
-	return "$version";
 }
 
 #==========================================
