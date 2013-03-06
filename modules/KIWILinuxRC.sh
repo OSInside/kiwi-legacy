@@ -3692,11 +3692,10 @@ function setupHybridPersistent {
 	# create a write partition for hybrid images if requested
 	# and store the device name in HYBRID_RW
 	# ----
-	local protectedDevice
-	local protectedDisk
 	if [ ! "$kiwi_hybridpersistent" = "yes" ];then
 		return
 	fi
+	local diskDevice=$(dn $biosBootDevice)
 	#======================================
 	# create write partition for hybrid
 	#--------------------------------------
@@ -3704,15 +3703,11 @@ function setupHybridPersistent {
 		#======================================
 		# try to create a write partition
 		#--------------------------------------
-		protectedDevice=$(echo $biosBootDevice | sed -e s@/dev/@@)
-		protectedDisk=$(cat /sys/block/$protectedDevice/ro)
-		if [ $protectedDisk = "0" ];then
-			createHybridPersistent $biosBootDevice
-		fi
+		createHybridPersistent $diskDevice
 		#======================================
 		# store hybrid write partition device
 		#--------------------------------------
-		HYBRID_RW=$(ddn $biosBootDevice $HYBRID_PERSISTENT_PART)
+		HYBRID_RW=$(ddn $diskDevice $HYBRID_PERSISTENT_PART)
 	else
 		#======================================
 		# use given cow device
@@ -5409,6 +5404,7 @@ function mountSystemUnionFS {
 	local rwDir=/read-write
 	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
+	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
 	#======================================
 	# load fuse module
 	#--------------------------------------
@@ -5461,12 +5457,26 @@ function mountSystemUnionFS {
 		fi
 	fi
 	#======================================
-	# setup fuse union mount
+	# overlay mount the locations
 	#--------------------------------------
-	local opts="cow,max_files=65000,allow_other,use_ino,suid,dev,nonempty"
-	if ! unionfs -o $opts $rwDir=RW:$roDir=RO /mnt;then
-		Echo "Failed to mount root via unionfs"
-		return 1
+	if [ "$unionFST" = "overlay" ];then
+		#======================================
+		# setup overlayfs mount
+		#--------------------------------------
+		local opts="lowerdir=$roDir,upperdir=$rwDir"
+		if ! mount -t overlayfs -o $opts overlayfs /mnt;then
+			Echo "Failed to mount root via overlayfs"
+			return 1
+		fi
+	elif [ "$unionFST" = "unionfs" ];then
+		#======================================
+		# setup fuse union mount
+		#--------------------------------------
+		local opts="cow,max_files=65000,allow_other,use_ino,suid,dev,nonempty"
+		if ! unionfs -o $opts $rwDir=RW:$roDir=RO /mnt;then
+			Echo "Failed to mount root via unionfs"
+			return 1
+		fi
 	fi
 	export haveUnionFS=yes
 	return 0
@@ -5779,6 +5789,8 @@ function mountSystem {
 			mountSystemClicFS $2
 		elif [ "$unionFST" = "seed" ];then
 			mountSystemSeedBtrFS $2
+		elif [ "$unionFST" = "overlay" ];then
+			mountSystemUnionFS $2
 		elif [ "$unionFST" = "unionfs" ];then
 			mountSystemUnionFS $2
 		else
@@ -7704,7 +7716,7 @@ function createHybridPersistent {
 	#======================================
 	# create filesystem on write partition
 	#--------------------------------------
-	if [ "$unionFST" = "clicfs" ];then
+	if [ "$unionFST" = "clicfs" ] || [ "$unionFST" = "overlay" ];then
 		local loop_dev=$(losetup -f --show $(ddn $device $disknr))
 		if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid $loop_dev;then
 			Echo "Failed to create hybrid persistent filesystem"

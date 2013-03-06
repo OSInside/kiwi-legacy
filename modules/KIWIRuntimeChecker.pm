@@ -290,7 +290,7 @@ sub __checkFilesystemTool {
 		} elsif ($flag && $flag eq 'seed') {
 			$haveTool = $this -> __isFsToolAvailable('btrfs');
 			$checkedFS = 'btrfs';
-		} elsif ($flag && $flag eq 'compressed') {
+		} elsif ($flag && $flag =~ /compressed|overlay/) {
 			$haveTool = $this -> __isFsToolAvailable('squashfs');
 			$checkedFS = 'squashfs';
 		}

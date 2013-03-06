@@ -983,6 +983,7 @@ sub createImageSquashFS {
 	# create squashfs image from source tree
 	# ---
 	my $this  = shift;
+	my $rename= shift;
 	my $kiwi  = $this->{kiwi};
 	my $xml   = $this->{xml};
 	my %type  = %{$xml->getImageTypeAndAttributes_legacy()};
@@ -992,6 +993,9 @@ sub createImageSquashFS {
 	my $name = $this -> preImage ("haveExtend");
 	if (! defined $name) {
 		return;
+	}
+	if (defined $rename) {
+		$name = $rename;
 	}
 	#==========================================
 	# Create filesystem on extend
@@ -1016,8 +1020,10 @@ sub createImageSquashFS {
 	#==========================================
 	# Create image boot configuration
 	#------------------------------------------
-	if (! $this -> writeImageConfig ($name)) {
-		return;
+	if (! defined $rename) {
+		if (! $this -> writeImageConfig ($name)) {
+			return;
+		}
 	}
 	return $this;
 }
@@ -1726,6 +1732,14 @@ sub createImageLiveCD {
 					$kiwi -> failed ();
 					$kiwi -> error ("Write protection failed: $data");
 					$kiwi -> failed ();
+					$this -> restoreSplitExtend ();
+					return;
+				}
+				last SWITCH;
+			};
+			/^overlay$/ && do {
+				$kiwi -> info ("Creating overlayfs read only filesystem...\n");
+				if (! $this -> createImageSquashFS ($namero)) {
 					$this -> restoreSplitExtend ();
 					return;
 				}
@@ -2580,6 +2594,8 @@ sub createImageLiveCD {
 			print $CFD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,clicfs'\n";
 		} elsif ($gzip =~ /^seed/) {
 			print $CFD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,seed'\n";
+		} elsif ($gzip =~ /^overlay/) {
+			print $CFD "UNIONFS_CONFIG='/dev/ram1,/dev/loop1,overlay'\n";
 		} else {
 			print $CFD "COMBINED_IMAGE=yes\n";
 		}
@@ -2595,7 +2611,7 @@ sub createImageLiveCD {
 	if (! defined $gzip) {
 		$attr = "-R -J -pad -joliet-long";
 	}
-	if ((defined $stype{flags}) && ($stype{flags} =~ /clic_udf|seed/)) {
+	if ((defined $stype{flags}) && ($stype{flags} =~ /clic_udf|seed|overlay/)) {
 		$attr .= " -allow-limited-size -udf";
 	}
 	if (! defined $gzip) {

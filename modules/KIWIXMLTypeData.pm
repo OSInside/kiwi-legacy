@@ -1879,7 +1879,7 @@ sub __isValidFlags {
 		return;
 	}
 	my %supported = map { ($_ => 1) } qw(
-		clic compressed clic_udf seed
+		clic compressed clic_udf overlay seed
 	);
 	if (! $supported{$flag} ) {
 		my $msg = "$caller: specified flags value '$flag' is not "
