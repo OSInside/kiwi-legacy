@@ -364,6 +364,56 @@
       <variablelist>
         <varlistentry>
           <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
+              class="attvalue">lxc</sgmltag>"</term>
+          <listitem>
+            <para>Use the lxc image type to build a linux container image
+              For additional information refer to the <xref linkend="chap.lxc"/>
+              chapter.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
+              class="attvalue">[filesystem]</sgmltag>"</term>
+          <listitem>
+            <para>Use one of the following image types to build a plain
+              filesystem image. This will create a file containing the
+              data in the specified filesystem and you can loop mount
+              the image to view the contents e.g image="ext3":</para>
+              <itemizedlist>
+                 <listitem>
+					<para>ext2</para>
+                 </listitem>
+                 <listitem>
+					<para>ext3</para>
+                 </listitem>
+                 <listitem>
+					<para>ext4</para>
+                 </listitem>
+                 <listitem>
+					<para>btrfs</para>
+                 </listitem>
+                 <listitem>
+					<para>squashfs</para>
+                 </listitem>
+                 <listitem>
+					<para>xfs</para>
+                 </listitem>
+                 <listitem>
+					<para>reiserfs</para>
+                 </listitem>
+              </itemizedlist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
+              class="attvalue">tbz</sgmltag>"</term>
+          <listitem>
+            <para>Use the tbz image type to just pack the unpacked image tree
+              into a tarball.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
               class="attvalue">cpio</sgmltag>"</term>
           <listitem>
             <para>Use the cpio image type to specify the generation of a
@@ -425,6 +475,15 @@
                   <para>Creates a btrfs based compressed read-only
                     filesystem which allows write operations into a btrfs
                     seed device. </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><sgmltag class="attvalue">overlay</sgmltag></term>
+                <listitem>
+                  <para>Creates a squashfs based compressed read-only
+                    filesystem which is combined with a write space via
+                    the overlayfs filesystem. overlayfs is part of the
+                    kernel since version 3.7</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
