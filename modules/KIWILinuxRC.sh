@@ -9222,6 +9222,7 @@ function createSnapshotMap {
 	if ! kpartx -a $diskLoop;then
 		return
 	fi
+	udevPending
 	echo "kpartx -d $diskLoop" >> $reset
 	if searchVolumeGroup; then
 		diskLoop=/dev/$VGROUP/LVRoot

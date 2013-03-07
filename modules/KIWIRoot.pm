@@ -1321,7 +1321,7 @@ sub setupCacheMount {
 	} else {
 		@mountList = ();
 	}
-	if (! -f "$root/dev/console") {
+	if (! -e "$root/dev/console") {
 		qxx ("mkdir -p $root/dev");
 		qxx ("mount --bind /dev $root/dev");
 		push (@mountList,"$root/dev");
@@ -1341,7 +1341,7 @@ sub setupCacheMount {
 		qxx ("mount --bind $cache $root/$cache 2>&1");
 		push (@mountList,"$root/$cache");
 	}
-	if (! -f "$root/proc/mounts") {
+	if (! -e "$root/proc/mounts") {
 		qxx ("mkdir -p $root/proc");
 		qxx ("mount -t proc proc $root/proc");
 		push (@mountList,"$root/proc");
@@ -1384,16 +1384,16 @@ sub setupMount {
 		$kiwi -> failed ();
 		return;
 	}
-	if (! -f "$root/proc/mounts") {
+	if (! -e "$root/proc/mounts") {
 		qxx ("mkdir -p $root/proc");
 		qxx ("mount -t proc proc $root/proc");
 		push (@mountList,"$root/proc");
 	}
-	if (! -f "$root/dev/console") {
+	if (! -e "$root/dev/console") {
 		qxx ("mount --bind /dev $root/dev");
 		push (@mountList,"$root/dev");
 	}
-	if (! -f "$root/var/run/dbus/pid") {
+	if (! -e "$root/var/run/dbus/pid") {
 		qxx ("mkdir -p $root/var/run/dbus");
 		qxx ("mount --bind /var/run/dbus $root/var/run/dbus");
 		push (@mountList,"$root/var/run/dbus");

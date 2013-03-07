@@ -5581,6 +5581,8 @@ sub bindDiskPartitions {
 		$kiwi -> loginfo ("Failed mapping partition: $status");
 		return;
 	}
+	# wait for the mapping devices to finish
+	qxx ("udevadm settle --timeout=30 2>&1");
 	push @cStack,"kpartx -d $disk";
 	$this->{cleanupStack} = \@cStack;
 	$disk =~ s/dev\///;
