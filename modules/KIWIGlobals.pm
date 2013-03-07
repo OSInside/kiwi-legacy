@@ -291,6 +291,8 @@ sub mount {
 					$this -> umount();
 					return;
 				}
+				# wait for the mapping to finish
+				qxx ("udevadm settle --timeout=30 2>&1");
 				push @UmountStack,"kpartx -d $loop";
 				$this->{UmountStack} = \@UmountStack;
 				$loop =~ s/\/dev\///;
