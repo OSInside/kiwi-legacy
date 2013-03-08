@@ -33,10 +33,10 @@
 	<repository type="rpm-md" alias="update" imageinclude="true" profiles="profA">
 		<source path="http://download.opensuse.org/update/12.1"/>
 	</repository>
-	<repository type="rpm-dir" status="replacable" profiles="profA,profC">
+	<repository type="rpm-dir" status="replaceable" profiles="profA,profC">
 		<source path="/repos/12.1-additional"/>
 	</repository>
-	<repository type="yast2" username="foo" password="bar" status="replacable" profiles="profB">
+	<repository type="yast2" username="foo" password="bar" status="replaceable" profiles="profB">
 		<source path="https://myreposerver/protectedrepos/12.1"/>
 	</repository>
 	<packages type="image">

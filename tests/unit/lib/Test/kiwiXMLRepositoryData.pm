@@ -482,7 +482,7 @@ sub test_getStatus {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('replacable', $res);
+	$this -> assert_str_equals('replaceable', $res);
 	return;
 }
 
@@ -536,7 +536,7 @@ sub test_getXMLElement{
 		. 'distribution="sid" '
 		. 'imageinclude="true" '
 		. 'prefer-license="true" '
-		. 'status="replacable" '
+		. 'status="replaceable" '
 		. 'type="yast2">'
 		. '<source path="opensuse:///"/>'
 		. '</repository>';
@@ -1031,7 +1031,7 @@ sub test_setStatusInvalidArg {
 	my $repoDataObj = $this->__getRepoDataObj();
 	my $res = $repoDataObj->setStatus('foo');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setStatus: Expected keyword "fixed" or "replacable"';
+	my $expected = 'setStatus: Expected keyword "fixed" or "replaceable"';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -1039,7 +1039,7 @@ sub test_setStatusInvalidArg {
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
 	$res = $repoDataObj->getStatus();
-	$this -> assert_str_equals('replacable', $res);
+	$this -> assert_str_equals('replaceable', $res);
 	return;
 }
 
@@ -1063,7 +1063,7 @@ sub test_setStatusNoArg {
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
 	my $status = $repoDataObj->getStatus();
-	$this -> assert_str_equals('replacable', $status);
+	$this -> assert_str_equals('replaceable', $status);
 	return;
 }
 
@@ -1158,7 +1158,7 @@ sub __getRepoDataObj {
 				path          => 'opensuse:///',
 				preferlicense => 'true',
 				priority      => '2',
-				status        => 'replacable',
+				status        => 'replaceable',
 				type          => 'yast2',
 				username      => 'testuser'
 	);

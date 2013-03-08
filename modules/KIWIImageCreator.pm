@@ -34,6 +34,7 @@ use KIWIQX qw (qxx);
 use KIWIRoot;
 use KIWIRuntimeChecker;
 use KIWIXML;
+use KIWIXMLSystemdiskData;
 use KIWIXMLValidator;
 
 #==========================================
@@ -123,21 +124,21 @@ sub prepareBootImage {
 	# Prepare the boot image
 	# ---
 	my $this       = shift;
-	my $configDir  = shift;
+	my $systemXML  = shift;
 	my $rootTgtDir = shift;
 	my $systemTree = shift;
 	my $changeset  = shift;
 	my $cmdL       = $this->{cmdL};
 	my $kiwi       = $this->{kiwi};
-	if (! $configDir) {
-		$kiwi -> error ('prepareBootImage: no configuration directory defined');
+	if (! $systemXML) {
+		my $msg = 'prepareBootImage: no system XML description object given';
+		$kiwi -> error ($msg);
 		$kiwi -> failed ();
 		return;
 	}
-	if (! -d $configDir) {
-		my $msg = 'prepareBootImage: config dir "'
-			. $configDir
-			. '" does not exist';
+	if (ref($systemXML) ne 'KIWIXML') {
+		my $msg = 'prepareBootImage: expecting KIWIXML object as first '
+			. 'argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed ();
 		return;
@@ -155,20 +156,39 @@ sub prepareBootImage {
 	if (! $this -> __checkImageIntegrity() ) {
 		return;
 	}
+	#==========================================
+	# Determine the location of the boot image
+	#------------------------------------------
+	my $locator = KIWILocator -> instance();
+	my $bootDescript = $systemXML -> getImageType() -> getBootImageDescript();
+	if (! $bootDescript) {
+		my $msg = 'prepareBootImage: error, trying to create a boot image '
+			. 'for a type that has not boot description defined.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my $configDir = $locator -> getBootImageDescription($bootDescript);
+	if (! $configDir) {
+		return;
+	}
 	$kiwi -> info ("--> Prepare boot image (initrd)...\n");
-	my $xml = KIWIXML -> new(
+	my $bootXml = KIWIXML -> new(
 		$configDir,undef,undef,$cmdL,$changeset
 	);
-	if (! defined $xml) {
+	$bootXml -> discardReplacableRepos();
+	my $repos = $systemXML -> getRepositories();
+	$bootXml -> addRepositories($repos, 'default');
+	if (! defined $bootXml) {
 		return;
 	}
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------
-	$xml = $this -> __applyBaseXMLOverrides($xml);
+	$bootXml = $this -> __applyBaseXMLOverrides($bootXml);
 	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	return $this -> __prepareTree (
-		$xml,$configDir,$rootTgtDir,$systemTree
+		$bootXml,$configDir,$rootTgtDir,$systemTree
 	);
 }
 
@@ -436,7 +456,7 @@ sub createImage {
 	# Setup the image XML description
 	#------------------------------------------
 	my $locator = KIWILocator -> instance();
-	my $controlFile = $locator -> getControlFile ($configDir);;
+	my $controlFile = $locator -> getControlFile ($configDir);
 	if (! $controlFile) {
 		return;
 	}
@@ -458,7 +478,6 @@ sub createImage {
 	if (! defined $xml) {
 		return;
 	}
-	my %attr = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $krc = KIWIRuntimeChecker -> new(
 		$cmdL,$xml
 	);
@@ -467,7 +486,7 @@ sub createImage {
 	#------------------------------------------
 	if (! $cmdL -> getImageTargetDir()) {
 		$kiwi -> info ("Checking for defaultdestination in XML data...");
-		my $defaultDestination = $xml -> getImageDefaultDestination_legacy();
+		my $defaultDestination = $xml -> getPreferences() -> getDefaultDest();
 		if (! $defaultDestination) {
 			$kiwi -> failed ();
 			$kiwi -> info   ("No destination directory specified");
@@ -497,26 +516,29 @@ sub createImage {
 		return;
 	}
 	my $profileNames;
-	if ($xml->{reqProfiles}) {
-		$profileNames = join ("-",@{$xml->{reqProfiles}});
+
+	#TODO: The directory creation becomes obsolete when all image creation
+	# code has been converted to the *Builder infrastructure
+	my $type = $xml -> getImageType();
+	my $typeName =  $type -> getTypeName();
+	my $activeProfs = $xml -> getActiveProfileNames();
+	my $workDirName = $typeName;
+	for my $prof (@{$profileNames}) {
+		$workDirName .= '-' . $prof;
 	}
-	if ($profileNames) {
-		$destination.="/".$attr{type}."-".$profileNames;
-	} else {
-		$destination.="/".$attr{type};
-	}
+	$destination .= "/" . $workDirName;
 	if ((! -d $destination) && (! mkdir $destination)) {
 		$kiwi -> error  ("Failed to create destination subdir: $!");
 		$kiwi -> failed ();
 		return;
 	}
 	$cmdL -> setImageIntermediateTargetDir ($destination);
+	#TODO: End code obsoletion
 	#==========================================
 	# Check tool set
 	#------------------------------------------
-	my $para = $this -> checkType (
-		$xml,\%attr,$configDir
-	);
+
+	my $para = $this -> __checkType ( $xml, $configDir );
 	if (! defined $para) {
 		return;
 	}
@@ -662,8 +684,9 @@ sub createImage {
 	#==========================================
 	# Create recovery archive if specified
 	#------------------------------------------
-	if ($attr{type} eq "oem") {
-		if (! $configure -> setupRecoveryArchive($attr{filesystem})) {
+	if ($typeName eq "oem") {
+		my $filesys = $type -> getFilesystem();
+		if (! $configure -> setupRecoveryArchive($filesys)) {
 			return;
 		}
 	}
@@ -685,7 +708,7 @@ sub createImage {
 	# Build image using KIWIImage
 	#------------------------------------------
 	if (! $status) {
-		SWITCH: for ($attr{type}) {
+		SWITCH: for ($typeName) {
 			/^ext2/     && do {
 				$status = $image -> createImageEXT2 ( $targetDevice );
 				$checkFormat = 1;
@@ -752,7 +775,7 @@ sub createImage {
 				$checkFormat = 1;
 				last SWITCH;
 			};
-			$kiwi -> error  ("Unsupported type: $attr{type}");
+			$kiwi -> error  ("Unsupported type: $typeName");
 			$kiwi -> failed ();
 			undef $image;
 			return;
@@ -762,11 +785,11 @@ sub createImage {
 		my $imgName = KIWIGlobals
 			-> instance()
 			-> generateBuildImageName ($xml);
-		if (($checkFormat) && ($attr{format})) {
-			my $haveFormat = $attr{format};
+		my $imgFormat = $type -> getFormat();
+		if ($checkFormat && $imgFormat) {
 			my $imgfile= $destination."/".$imgName;
 			my $format = KIWIImageFormat -> new(
-				$imgfile,$cmdL,$haveFormat,$xml,$image->{targetDevice}
+				$imgfile,$cmdL,$imgFormat,$xml,$image->{targetDevice}
 			);
 			if (! $format) {
 				return;
@@ -1094,25 +1117,13 @@ sub __applyBaseXMLOverrides {
 		$xml -> setPackageManager_legacy($this -> {packageManager});
 	}
 	if ($this -> {ignoreRepos}) {
-		$xml -> ignoreRepositories_legacy ();
+		$xml -> ignoreRepositories();
 	}
-	if ($this -> {addlRepos}) {
-		my %addlRepos = %{$this -> {addlRepos}};
-		$xml -> addRepositories_legacy (
-			$addlRepos{repositoryTypes},
-			$addlRepos{repositories},
-			$addlRepos{repositoryAlia},
-			$addlRepos{repositoryPriorities}
-		);
+	if ($this->{addlRepos}) {
+		$xml -> addRepositories($this->{addlRepos}, 'default');
 	}
 	if ($this -> {replRepo}) {
-		my %replRepo = %{$this -> {replRepo}};
-		$xml -> setRepository_legacy (
-			$replRepo{repositoryType},
-			$replRepo{repository},
-			$replRepo{repositoryAlias},
-			$replRepo{respositoryPriority}
-		);
+		$xml -> setRepository($this -> {replRepo});
 	}
 	return $xml;
 }
@@ -1322,17 +1333,48 @@ sub __prepareTree {
 }
 
 #==========================================
-# checkType
+# Destructor
 #------------------------------------------
-sub checkType {
-	my ($this, $xml, $typeInfo, $root) = @_;
+sub DESTROY {
+	my $this = shift;
+	my $ok   = shift;
+	my $root = $this->{root};
+	my $boot = $this->{boot};
+	my $image= $this->{image};
+	if ($root) {
+		if ($ok) {
+			$root -> cleanBroken ();
+		}
+		$root -> cleanLock   ();
+		$root -> cleanManager();
+		$root -> cleanSource ();
+		$root -> cleanMount  ();
+		undef $root;
+	}
+	if ($boot) {
+		$boot -> cleanStack ();
+		undef $boot;
+	}
+	if ($image) {
+		$image -> cleanMount ();
+	}
+	return;
+}
+
+#==========================================
+# Private helper methods
+#------------------------------------------
+#==========================================
+# __checkType
+#------------------------------------------
+sub __checkType {
+	my $this = shift;
+	my $xml  = shift;
+	my $root = shift;
 	my $kiwi   = $this->{kiwi};
 	my $cmdL   = $this->{cmdL};
-	my (%type) = %{$typeInfo};
+	my $type = $xml -> getImageType();
 	my $para   = "ok";
-	my $type   = $type{type};
-	my $flags  = $type{flags};
-	my $fs     = $type{filesystem};
 	#==========================================
 	# check for required image attributes
 	#------------------------------------------
@@ -1343,6 +1385,20 @@ sub checkType {
 		# Additionally we use LVM because it allows to better
 		# resize the stick
 		# ----
+		# Using the new data structure here does not work yet,
+		# too much black magic, fix another time:
+		# ----
+		# $type -> setBootLoader('grub2');
+		# $type -> setBootImageFileSystem('fat16');
+		# $xml  -> updateType($type);
+		# my $sysDisk = $xml -> getSystemDiskConfig();
+		# if (! $sysDisk) {
+		# 	%sysDisk = ();
+		# 	$sDisk = KIWIXMLSystemdiskData -> new(\%sysDisk);
+		# 	$xml -> addSystemDisk($sDisk);
+		# 	$xml -> writeXML ($root . '/config.xml');
+		# }
+		# ----
 		$xml -> __setTypeAttribute ("bootloader","grub2");
 		$xml -> __setTypeAttribute ("bootfilesystem","fat16");
 		$xml -> __setSystemDiskElement ();
@@ -1352,18 +1408,32 @@ sub checkType {
 		# if the option --lvm is set, we add/update a systemdisk
 		# element which triggers the use of LVM
 		# ----
+		# Using the new data structure here does not work yet,
+		# too much black magic, fix another time:
+		# ----
+		# my $sysDisk = $xml -> getSystemDiskConfig();
+		# if (! $sysDisk) {
+		#	%sysDisk = ();
+		#	$sDisk = KIWIXMLSystemdiskData -> new(\%sysDisk);
+		#	$xml -> addSystemDisk($sDisk);
+		# }
+		# $xml -> writeXML ($root . '/config.xml');
+		# ----
 		$xml -> __setSystemDiskElement ();
 		$xml -> writeXMLDescription_legacy ($root);
 	}
 	#==========================================
 	# check for required filesystem tool(s)
 	#------------------------------------------
-	if (($flags) || ($fs)) {
+	my $typeName   = $type -> getTypeName();
+	my $flags      = $type -> getFlags();
+	my $filesystem = $type -> getFilesystem();
+	if (($flags) || ($filesystem)) {
 		my @fs = ();
-		if (($flags) && ($type eq "iso")) {
-			push (@fs,$type{flags});
+		if (($flags) && ($typeName eq "iso")) {
+			push (@fs, $flags);
 		} else {
-			@fs = split (/,/,$type{filesystem});
+			@fs = split (/,/, $filesystem);
 		}
 		foreach my $fs (@fs) {
 			my %result = KIWIGlobals -> instance() -> checkFileSystem ($fs);
@@ -1386,13 +1456,15 @@ sub checkType {
 	# check tool/driver compatibility
 	#------------------------------------------
 	my $check_mksquashfs = 0;
-	if ($type{type} eq "squashfs") {
+	if ($typeName eq "squashfs") {
 		$check_mksquashfs = 1;
 	}
-	if (($type{installiso}) || ($type{installstick})) {
+	my $instISO = $type -> getInstallIso();
+	my $instStick = $type -> getInstallStick();
+	if ( $instISO || $instStick ) {
 		$check_mksquashfs = 1;
 	}
-	if (($fs) && ($fs =~ /squashfs/)) {
+	if (($filesystem) && ($filesystem =~ /squashfs/)) {
 		$check_mksquashfs = 1;
 	}
 	if (($flags) && ($flags =~ /compressed/)) {
@@ -1430,76 +1502,48 @@ sub checkType {
 	#==========================================
 	# build and check KIWIImage method params
 	#------------------------------------------
-	SWITCH: for ($type{type}) {
+	my $bootImg = $type -> getBootImageDescript();
+	SWITCH: for ($typeName) {
 		/^iso/ && do {
-			if (! defined $type{boot}) {
-				$kiwi -> error ("$type{type}: No boot image specified");
+			if (! $bootImg) {
+				$kiwi -> error ("$typeName: No boot image specified");
 				$kiwi -> failed ();
 				return;
 			}
-			$para = $type{boot};
-			if ((defined $type{flags}) && ($type{flags} ne "")) {
-				$para .= ",$type{flags}";
+			$para = $bootImg;
+			if ((defined $flags) && ($flags ne "")) {
+				$para .= ",$flags";
 			} 
 			last SWITCH;
 		};
 		/^split/ && do {
-			if (! defined $type{filesystem}) {
-				$kiwi -> error ("$type{type}: No filesystem pair specified");
+			if (! defined $filesystem) {
+				$kiwi -> error ("$typeName: No filesystem pair specified");
 				$kiwi -> failed ();
 				return;
 			}
-			$para = $type{filesystem};
-			if (defined $type{boot}) {
-				$para .= ":".$type{boot};
+			$para = $filesystem;
+			if (defined $bootImg) {
+				$para .= ":".$bootImg;
 			}
 			last SWITCH;
 		};
 		/^vmx|oem|pxe/ && do {
-			if (! defined $type{filesystem}) {
-				$kiwi -> error ("$type{type}: No filesystem specified");
+			if (! defined $filesystem) {
+				$kiwi -> error ("$typeName: No filesystem specified");
 				$kiwi -> failed ();
 				return;
 			}
-			if (! defined $type{boot}) {
-				$kiwi -> error ("$type{type}: No boot image specified");
+			if (! defined $bootImg) {
+				$kiwi -> error ("$typeName: No boot image specified");
 				$kiwi -> failed ();
 				return;
 			}
-			$para = $type{filesystem}.":".$type{boot};
+			$para = $filesystem . ":" . $bootImg;
 			last SWITCH;
 		};
 	}
 	return $para;
-}
-
-#==========================================
-# Destructor
-#------------------------------------------
-sub DESTROY {
-	my $this = shift;
-	my $ok   = shift;
-	my $root = $this->{root};
-	my $boot = $this->{boot};
-	my $image= $this->{image};
-	if ($root) {
-		if ($ok) {
-			$root -> cleanBroken ();
-		}
-		$root -> cleanLock   ();
-		$root -> cleanManager();
-		$root -> cleanSource ();
-		$root -> cleanMount  ();
-		undef $root;
-	}
-	if ($boot) {
-		$boot -> cleanStack ();
-		undef $boot;
-	}
-	if ($image) {
-		$image -> cleanMount ();
-	}
-	return;
 }
 
 1;

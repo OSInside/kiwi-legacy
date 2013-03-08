@@ -1265,7 +1265,7 @@ div {
 	}
 	k.repository.status.attribute =
 		## Specifies the status of the repository. This can be
-		## replacable or if not specified it's a must have repository
+		## replaceable or if not specified it's a must have repository
 		attribute status {  "fixed" | "replaceable" }
 	k.repository.alias.attribute =
 		## Alias name to be used for this repository. This is an

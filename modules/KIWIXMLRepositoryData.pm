@@ -104,7 +104,7 @@ sub new {
 	$this->{type}         = $init->{type};
 	# Default settings
 	if (! $init->{status} ) {
-		$this->{status} = 'replacable';
+		$this->{status} = 'replaceable';
 		$this->{defaultstatus} = 1;
 	}
 	return $this;
@@ -364,7 +364,8 @@ sub setPriority {
 #------------------------------------------
 sub setStatus {
 	# ...
-	# Set the statusfor this repository based on keywords (fixed, replacable)
+	# Set the statusfor this repository based on
+	# keywords (fixed, replaceable)
 	# ---
 	my $this = shift;
 	my $status = shift;
@@ -375,9 +376,9 @@ sub setStatus {
 		$kiwi -> failed();
 		return;
 	}
-	if ($status ne 'fixed' && $status ne 'replacable') {
+	if ($status ne 'fixed' && $status ne 'replaceable') {
 		my $kiwi = $this->{kiwi};
-		my $msg = 'setStatus: Expected keyword "fixed" or "replacable"';
+		my $msg = 'setStatus: Expected keyword "fixed" or "replaceable"';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;

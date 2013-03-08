@@ -1661,7 +1661,7 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
     <define name="k.repository.status.attribute">
       <attribute name="status">
         <a:documentation>Specifies the status of the repository. This can be
-replacable or if not specified it's a must have repository</a:documentation>
+replaceable or if not specified it's a must have repository</a:documentation>
         <choice>
           <value>fixed</value>
           <value>replaceable</value>

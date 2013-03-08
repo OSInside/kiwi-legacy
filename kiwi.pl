@@ -46,6 +46,7 @@ use KIWIQX qw (qxx);
 use KIWIRuntimeChecker;
 use KIWIImageFormat;
 use KIWIXMLInfo;
+use KIWIXMLRepositoryData;
 use KIWIXMLValidator;
 use KIWIGlobals;
 
@@ -135,7 +136,7 @@ sub main {
 			kiwiExit (1);
 		}
 		#==========================================
-		# Setup prepare 
+		# Setup prepare
 		#------------------------------------------
 		my $imageTarget = $cmdL -> getImageTargetDir();
 		my $rootTarget  = $imageTarget.'/build/image-root';
@@ -148,14 +149,14 @@ sub main {
 			kiwiExit (1);
 		}
 		#==========================================
-		# Setup create 
+		# Setup create
 		#------------------------------------------
 		$cmdL -> setConfigDir ($rootTarget);
 		$cmdL -> setOperationMode ("create",$rootTarget);
 		$cmdL -> setForceNewRoot (0);
 		$cmdL -> unsetRecycleRootDir();
 		$kic  -> initialize();
-		if (! $kic -> createImage($cmdL)) {
+		if (! $kic -> createImage()) {
 			kiwiExit (1);
 		}
 		kiwiExit (0);
@@ -1004,12 +1005,38 @@ sub init {
 	# check if repositories are to be added
 	#----------------------------------------
 	if (@AddRepository) {
-		my $res = $cmdL -> setAdditionalRepos(
-			\@AddRepository,
-			\@AddRepositoryAlias,
-			\@AddRepositoryPriority,
-			\@AddRepositoryType
-		);
+		my $numRepos = scalar @AddRepository;
+		my $numTypes = scalar @AddRepositoryType;
+		if ($numRepos != $numTypes) {
+			my $msg = 'Must specify repository type for each given '
+				. 'repository. Mismatch number of arguments.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			kiwiExit (1);
+		}
+		my $numAlia = scalar @AddRepositoryAlias;
+		my $numPrio = scalar @AddRepositoryPriority;
+		my $idx = 0;
+		my @reposToAdd;
+		while ($idx < $numRepos) {
+			my %init = (
+				path => $AddRepository[$idx],
+				type => $AddRepositoryType[$idx]
+			);
+			if ($idx < $numAlia) {
+				$init{alias} = $AddRepositoryAlias[$idx];
+			}
+			if ($idx < $numPrio) {
+				$init{priority} = $AddRepositoryPriority[$idx];
+			}
+			my $repo = KIWIXMLRepositoryData -> new (\%init);
+			if (! $repo) {
+				kiwiExit (1);
+			}
+			push @reposToAdd, $repo;
+			$idx += 1;
+		}
+		my $res = $cmdL -> setAdditionalRepos(\@reposToAdd);
 		if (! $res) {
 			kiwiExit (1);
 		}
@@ -1050,13 +1077,18 @@ sub init {
 	#========================================
 	# check replacement repo information
 	#----------------------------------------
-	if (defined $SetRepository) {
-		my $result = $cmdL -> setReplacementRepo(
-			$SetRepository,
-			$SetRepositoryAlias,
-			$SetRepositoryPriority,
-			$SetRepositoryType
+	if (($SetRepository) && ($SetRepositoryType)) {
+		my %init = (
+			alias    => $SetRepositoryAlias,
+			path     => $SetRepository,
+			priority => $SetRepositoryPriority,
+			type     => $SetRepositoryType
 		);
+		my $repo = KIWIXMLRepositoryData -> new(\%init);
+		if (! $repo) {
+			kiwiExit (1);
+		}
+		my $result = $cmdL -> setReplacementRepo($repo);
 		if (! $result) {
 			kiwiExit (1);
 		}
@@ -1340,6 +1372,14 @@ sub init {
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
+	# FIXME
+	if (($SetRepository) && (! $SetRepositoryType)) {
+		my $msg = 'Must specify repository type for given '
+				. 'repository. Mismatch number of arguments.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		kiwiExit (1);
+	}
 	if (defined $LogPort) {
 		$kiwi -> info ("Setting log server port to: $LogPort");
 		$global -> setKiwiConfigData ("LogServerPort", $LogPort);
@@ -1440,8 +1480,8 @@ sub usage {
 	print "    [ --add-profile <profile-name> ]\n";
 	print "      Use the specified profile.\n";
 	print "\n";
-	print "    [ --set-repo <URL> ]\n";
-	print "      Set/Overwrite repo URL for the first listed repo.\n";
+	print "    [ --set-repo <URL> --set-repotype <type> ]\n";
+	print "      Set/Overwrite repo URL and type for the first listed repo.\n";
 	print "\n";
 	print "    [ --set-repoalias <name> ]\n";
 	print "      Set/Overwrite alias name for the first listed repo.\n";
@@ -1449,9 +1489,6 @@ sub usage {
 	print "    [ --set-repoprio <number> ]\n";
 	print "      Set/Overwrite priority for the first listed repo.\n";
 	print "      Works with the smart packagemanager only\n";
-	print "\n";
-	print "    [ --set-repotype <type> ]\n";
-	print "      Set/Overwrite repo type for the first listed repo.\n";
 	print "\n";
 	print "    [ --add-repo <repo-path> --add-repotype <type> ]\n";
 	print "      [ --add-repotype <type> ]\n";

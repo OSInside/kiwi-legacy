@@ -25,6 +25,7 @@ use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
 
 use KIWICommandLine;
+use KIWIXMLRepositoryData;
 
 #==========================================
 # Constructor
@@ -223,244 +224,25 @@ sub test_cmdAddPatterns_valid {
 }
 
 #==========================================
-# test_cmdAddRepos_improperAlias
+# test_cmdAddRepos_invalidType
 #------------------------------------------
-sub test_cmdAddRepos_improperAlias {
+sub test_cmdAddRepos_invalidType {
 	# ...
 	# Test the AdditionalRepo storage
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCmdObj();
-	# Provide improper argument
-	my @repos = ('os11.3');
-	my @alias = ('alias');
-	my $res = $cmd -> setAdditionalRepos(\@repos, @alias);
+	my $res = $cmd -> setAdditionalRepos('foo');
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'setAdditionalRepos method expecting ARRAY_REF as '
-		. 'second argument.';
+		. 'argument.';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
-
-	return;
-}
-
-#==========================================
-# test_cmdAddRepos_improperPrio
-#------------------------------------------
-sub test_cmdAddRepos_improperPrio {
-	# ...
-	# Test the AdditionalRepo storage
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Provide improper argument
-	my @repos = ('os11.3');
-	my @prio = (1);
-	my $res = $cmd -> setAdditionalRepos(\@repos, undef, @prio);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'setAdditionalRepos method expecting ARRAY_REF as '
-		. 'third argument.';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-
-	return;
-}
-
-#==========================================
-# test_cmdAddRepos_improperRepo
-#------------------------------------------
-sub test_cmdAddRepos_improperRepo {
-	# ...
-	# Test the AdditionalRepo storage
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Provide improper argument
-	my @repos = ('os11.3');
-	my $res = $cmd -> setAdditionalRepos(@repos);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'setAdditionalRepos method expecting ARRAY_REF as '
-		. 'first argument.';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-
-	return;
-}
-
-#==========================================
-# test_cmdAddRepos_improperTypes
-#------------------------------------------
-sub test_cmdAddRepos_improperTypes {
-	# ...
-	# Test the AdditionalRepo storage
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Provide improper argument
-	my @repos = ('os11.3');
-	my @types = ('yast2');
-	my $res = $cmd -> setAdditionalRepos(\@repos, undef, undef, @types);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'setAdditionalRepos method expecting ARRAY_REF as '
-		. 'fourth argument.';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-
-	return;
-}
-
-#==========================================
-# test_cmdAddRepos_mismatchRepoAli
-#------------------------------------------
-sub test_cmdAddRepos_mismatchRepoAli {
-	# ...
-	# Test the AdditionalRepo storage
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Provide improper argument
-	my @repos = ('os11.3', 'os11.3-non-oss');
-	my @alias = ('alias');
-	my @types = ('yast2');
-	my $res = $cmd -> setAdditionalRepos(\@repos, \@alias, undef, \@types);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'Number of specified repositories does not match number '
-		. 'of provided alias, cannot form proper match.';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-
-	return;
-}
-
-#==========================================
-# test_cmdAddRepos_mismatchRepoAli_empty
-#------------------------------------------
-sub test_cmdAddRepos_mismatchRepoAli_empty {
-	# ...
-	# Test the AdditionalRepo storage
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Provide improper argument
-	my @repos = ('os11.3', 'os11.3-non-oss');
-	my @alias = ();
-	my @types = ('yast2', 'rpm-md');
-	my $res = $cmd -> setAdditionalRepos(\@repos, \@alias, undef, \@types);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_not_null($res);
-
-	return;
-}
-
-#==========================================
-# test_cmdAddRepos_mismatchRepoPrio
-#------------------------------------------
-sub test_cmdAddRepos_mismatchRepoPrio {
-	# ...
-	# Test the AdditionalRepo storage
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Provide improper argument
-	my @repos = ('os11.3', 'os11.3-non-oss');
-	my @prio = (1);
-	my @types = ('yast2');
-	my $res = $cmd -> setAdditionalRepos(\@repos, undef, \@prio, \@types);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'Number of specified repositories does not match number '
-		. 'of provided priorities, cannot form proper match.';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-
-	return;
-}
-
-#==========================================
-# test_cmdAddRepos_mismatchRepoPrio_empty
-#------------------------------------------
-sub test_cmdAddRepos_mismatchRepoPrio_empty {
-	# ...
-	# Test the AdditionalRepo storage
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Provide improper argument
-	my @repos = ('os11.3', 'os11.3-non-oss');
-	my @prio = ();
-	my @types = ('yast2', 'rpm-dir');
-	my $res = $cmd -> setAdditionalRepos(\@repos, undef, \@prio, \@types);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_not_null($res);
-
-	return;
-}
-
-#==========================================
-# test_cmdAddRepos_mismatchRepoTypes
-#------------------------------------------
-sub test_cmdAddRepos_mismatchRepoTypes {
-	# ...
-	# Test the AdditionalRepo storage
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Provide improper argument
-	my @repos = ('os11.3', 'os11.3-non-oss');
-	my @types = ('yast2');
-	my $res = $cmd -> setAdditionalRepos(\@repos, undef, undef, \@types);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'Number of specified repositories does not match number '
-		. 'of provided types, cannot form proper match.';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-
 	return;
 }
 
@@ -493,32 +275,6 @@ sub test_cmdAddRepos_noRepo {
 }
 
 #==========================================
-# test_cmdAddRepos_noTypes
-#------------------------------------------
-sub test_cmdAddRepos_noTypes {
-	# ...
-	# Test the AdditionalRepo storage
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Provide no arguments
-	my @repos = ('os11.3');
-	my $res = $cmd -> setAdditionalRepos(\@repos, undef, undef);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'setAdditionalRepos method called without specifying '
-		. 'repository types';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-
-	return;
-}
-
-#==========================================
 # test_cmdAddRepos_unssupType
 #------------------------------------------
 sub test_cmdAddRepos_unssupType {
@@ -528,19 +284,22 @@ sub test_cmdAddRepos_unssupType {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCmdObj();
-	# Provide improper argument
-	my @repos = ('os11.3', 'os11.3-non-oss');
-	my @types = ('yast2', 'foo');
-	my $res = $cmd -> setAdditionalRepos(\@repos, undef, undef, \@types);
+	my %init = (
+		path => '/work/myrepo',
+		type => 'rpm-dir'
+	);
+	my $repo = KIWIXMLRepositoryData -> new(\%init);
+	my @repos = ($repo, 'foo');
+	my $res = $cmd -> setAdditionalRepos(\@repos);
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'Specified repository type foo not supported.';
+	my $expectedMsg = 'setAdditionalRepos method expecting ARRAY_REF of '
+		. 'KIWIXMLRepositoryData objects.';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
-
 	return;
 }
 
@@ -554,12 +313,19 @@ sub test_cmdAddRepos_valid {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCmdObj();
-	# Provide improper argument
-	my @repos = ('os11.3', 'os11.3-non-oss');
-	my @alias = ('name1', 'name2');
-	my @prios = (1, 2);
-	my @types = ('yast2', 'rpm-md');
-	my $res = $cmd -> setAdditionalRepos(\@repos, \@alias, \@prios, \@types);
+	my %init = (
+		path => '/work/myrepo',
+		type => 'rpm-dir'
+	);
+	my $repo = KIWIXMLRepositoryData -> new(\%init);
+	my @repos = ($repo);
+	%init = (
+		path => 'http://download.opensuse.org/distribution/12.3',
+		type => 'yast2'
+	);
+	$repo = KIWIXMLRepositoryData -> new(\%init);
+	push @repos, $repo;
+	my $res = $cmd -> setAdditionalRepos(\@repos);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -568,12 +334,10 @@ sub test_cmdAddRepos_valid {
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($res);
 	# Make sure we get our data back
-	my %repoInfo = %{$cmd -> getAdditionalRepos()};
-	$this -> assert_array_equal(\@repos, $repoInfo{repositories});
-	$this -> assert_array_equal(\@alias, $repoInfo{repositoryAlia});
-	$this -> assert_array_equal(\@prios, $repoInfo{repositoryPriorities});
-	$this -> assert_array_equal(\@types, $repoInfo{repositoryTypes});
-
+	my $repoInfo = $cmd -> getAdditionalRepos();
+	for my $repoObj (@{$repoInfo}) {
+		$this -> assert_str_equals(ref($repoObj), 'KIWIXMLRepositoryData');
+	}
 	return;
 }
 
@@ -860,8 +624,12 @@ sub test_cmdIgnoreRepoUsage_conflict {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCmdObj();
-	# Test that passing no argument does not change the state
-	$cmd -> setReplacementRepo('os11.3', 'alias', 1, 'yast2');
+	my %init = (
+		path => '/work/myrepo',
+		type => 'rpm-dir'
+	);
+	my $repo = KIWIXMLRepositoryData -> new(\%init);
+	$cmd -> setReplacementRepo($repo);
 	my $res = $cmd -> setIgnoreRepos();
 	$this -> assert_not_null($res);
 	# Create conflicting settings
@@ -1341,7 +1109,12 @@ sub test_cmdReplaceRepo_conflict {
 	my $cmd = $this -> __getCmdObj();
 	# Test improper call no argument
 	$cmd -> setIgnoreRepos(1);
-	my $res = $cmd -> setReplacementRepo('os11.3', 'alias', 1, 'yast2');
+	my %init = (
+		path => '/work/myrepo',
+		type => 'rpm-dir'
+	);
+	my $repo = KIWIXMLRepositoryData -> new(\%init);
+	my $res = $cmd -> setReplacementRepo($repo);
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Conflicting command line arguments; ignore repos '
 		. 'and set repos';
@@ -1356,60 +1129,9 @@ sub test_cmdReplaceRepo_conflict {
 }
 
 #==========================================
-# test_cmdReplaceRepo_noAlias
+# test_cmdReplaceRepo
 #------------------------------------------
-sub test_cmdReplaceRepo_noAlias {
-	# ...
-	# Test the storage of the replacement repo information
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Test improper call no argument
-	my $res = $cmd -> setReplacementRepo('os11.3', undef, 1, 'yast2');
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = "No repo alias defined, generating time based name.\n";
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('info', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_not_null($res);
-
-	return;
-}
-
-#==========================================
-# test_cmdReplaceRepo_noPrio
-#------------------------------------------
-sub test_cmdReplaceRepo_noPrio {
-	# ...
-	# Test the storage of the replacement repo information
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Test improper call no argument
-	my $res = $cmd -> setReplacementRepo('os11.3', 'alias', undef, 'yast2');
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = "No repo priority specified, using default value '10'\n";
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('info', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_not_null($res);
-	# Verify the default priority
-	my %repoInfo = %{$cmd -> getReplacementRepo()};
-	$this -> assert_equals(10, $repoInfo{repositoryPriority});
-
-	return;
-}
-
-#==========================================
-# test_cmdReplaceRepo_noRepo
-#------------------------------------------
-sub test_cmdReplaceRepo_noRepo {
+sub test_cmdReplaceRepo {
 	# ...
 	# Test the storage of the replacement repo information
 	# ---
@@ -1419,6 +1141,59 @@ sub test_cmdReplaceRepo_noRepo {
 	# Test that commandline object has no default setting
 	my $defRepo = $cmd -> getReplacementRepo();
 	$this -> assert_null($defRepo);
+	my %init = (
+		path => '/work/myrepo',
+		type => 'rpm-dir'
+	);
+	my $repo = KIWIXMLRepositoryData -> new(\%init);
+	my $res = $cmd -> setReplacementRepo($repo);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	my $repoObj = $cmd -> getReplacementRepo();
+	$this -> assert_str_equals('KIWIXMLRepositoryData', ref($repoObj));
+	return;
+}
+
+#==========================================
+# test_cmdReplaceRepo_invalidType
+#------------------------------------------
+sub test_cmdReplaceRepo_invalidType {
+	# ...
+	# Test the storage of the replacement repo information, generate
+	# an error for wrong argument type
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
+	my $res = $cmd -> setReplacementRepo('foo');
+	my $msg = $kiwi -> getMessage();
+	my $expectedMsg = 'setReplacementRepo: expecting KIWIXMLRepositoryData '
+		. 'object as argument.';
+	$this -> assert_str_equals($expectedMsg, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_cmdReplaceRepo_noArg
+#------------------------------------------
+sub test_cmdReplaceRepo_noArg {
+	# ...
+	# Test the storage of the replacement repo information, generate an
+	# error when no argument is given
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCmdObj();
 	# Test improper call no argument
 	my $res = $cmd -> setReplacementRepo();
 	my $msg = $kiwi -> getMessage();
@@ -1430,60 +1205,6 @@ sub test_cmdReplaceRepo_noRepo {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
-
-	return;
-}
-
-#==========================================
-# test_cmdReplaceRepo_unsupRepoType
-#------------------------------------------
-sub test_cmdReplaceRepo_unsupRepoType {
-	# ...
-	# Test the storage of the replacement repo information
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Test improper call unsuported repository type
-	my $res = $cmd -> setReplacementRepo('os11.3', 'alias', 1, 'foo');
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'Specified repository type foo not supported.';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-
-	return;
-}
-
-#==========================================
-# test_cmdReplaceRepo_valid
-#------------------------------------------
-sub test_cmdReplaceRepo_valid {
-	# ...
-	# Test the storage of the replacement repo information
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCmdObj();
-	# Test expected use case
-	my $res = $cmd -> setReplacementRepo('os11.3', 'alias', 1, 'yast2');
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_not_null($res);
-	# Check we get the expected result
-	my %repoInfo = %{$cmd -> getReplacementRepo()};
-	$this -> assert_str_equals('os11.3', $repoInfo{repository});
-	$this -> assert_str_equals('alias', $repoInfo{repositoryAlias});
-	$this -> assert_equals(1, $repoInfo{repositoryPriority});
-	$this -> assert_str_equals('yast2', $repoInfo{repositoryType});
-
 	return;
 }
 
