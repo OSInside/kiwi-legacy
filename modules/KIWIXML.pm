@@ -2338,9 +2338,7 @@ sub writeXML {
 			$xml .= '<packages type="' . $imgType . '">';
 		}
 		for my $item (@typePckgItems) {
-			for my $obj (@{$item}) {
-				$xml .= $obj -> getXMLElement() -> toString();
-			}
+			$xml .= $item -> getXMLElement() -> toString();
 		}
 		if (@typePckgItems) {
 			$xml .= '</packages>';
@@ -2433,7 +2431,7 @@ sub writeXML {
 		$kiwi -> failed();
 		return;
 	}
-	binmode $XMLFL;
+	binmode($XMLFL, ":encoding(UTF-8)");
 	print $XMLFL $xml;
 	close $XMLFL;
 	return 1;

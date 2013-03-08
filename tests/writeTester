@@ -1,0 +1,48 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use FindBin;
+use Getopt::Long;
+
+use lib "$FindBin::Bin/../modules";
+
+use KIWICommandLine;
+use KIWIXML;
+
+my $config;
+my $target;
+
+my $result = GetOptions(
+	'config=s' => \$config,
+	'target=s' => \$target
+);
+
+if (($result != 1 ) || (! $config)) {
+	print 'writeTester --config KIWI_CONFIG_DIR '
+		. "--target PATH_TO_FILE_TO_BE_WRITTEN\n";
+	exit 1;
+}
+
+if (($target) && (-f $target)) {
+	unlink $target;
+} else {
+	$target = '/tmp/write-tester.xml';
+}
+
+my $cmdL = KIWICommandLine -> new();
+my $xml  = KIWIXML -> new (
+	$config, undef, undef, $cmdL, undef
+);
+if (! $xml) {
+	exit 1;
+}
+$xml -> writeXML ($target);
+
+# Pretty print
+my $cmd = '/usr/bin/xsltproc -o /tmp/pretty.xml '
+	. "/usr/share/kiwi/xsl/print.xsl $target";
+system $cmd;
+# Move to the target
+$cmd = "mv /tmp/pretty.xml $target";
+system $cmd;
