@@ -2,7 +2,7 @@
 # FILE          : KIWIManagerZypper.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
-# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2013 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schaefer <ms@suse.de>
 #               :
@@ -74,25 +74,31 @@ sub new {
 	my $zconfig = Config::IniFiles -> new (
 		-file => $zyppConf, -allowedcommentchars => '#'
 	);
-	my ($uname, $pass) = $xml->getHttpsRepositoryCredentials_legacy();
-	if ($uname) {
-		$kiwi -> info ('Creating credentials data');
-		my $credDir = "$dataDir/credentials.d";
-		mkdir $credDir;
-		$zconfig->newval('main', 'credentials.global.dir', $credDir);
-		$zconfig->RewriteConfig();
-		my $CREDFILE = FileHandle -> new();
-		if (! $CREDFILE -> open (">$credDir/kiwiRepoCredentials")) {
-			my $msg = 'Unable to open credetials file for write '
-			. "in $credDir";
-			$kiwi -> error ($msg);
-			$kiwi -> failed();
-			return;
+	# TODO: We should not write files in the constructor, but that's
+	# a job for another day
+	my $repos = $xml -> getRepositories();
+	for my $repo (@{$repos}) {
+		my ($uname, $pass) = $repo -> getCredentials();
+		if ($uname) {
+			$kiwi -> info ('Creating credentials data');
+			my $credDir = "$dataDir/credentials.d";
+			mkdir $credDir;
+			$zconfig->newval('main', 'credentials.global.dir', $credDir);
+			$zconfig->RewriteConfig();
+			my $CREDFILE = FileHandle -> new();
+			if (! $CREDFILE -> open (">$credDir/kiwiRepoCredentials")) {
+				my $msg = 'Unable to open credetials file for write '
+				. "in $credDir";
+				$kiwi -> error ($msg);
+				$kiwi -> failed();
+				return;
+			}
+			print $CREDFILE "username=$uname\n";
+			print $CREDFILE "password=$pass\n";
+			$CREDFILE -> close();
+			$kiwi -> done();
+			last;
 		}
-		print $CREDFILE "username=$uname\n";
-		print $CREDFILE "password=$pass\n";
-		$CREDFILE -> close();
-		$kiwi -> done();
 	}
 	if (defined $targetArch) {
 		$kiwi -> info ("Setting target architecture to: $targetArch");
@@ -282,12 +288,8 @@ sub setupInstallationSource {
 					$val =~ s/^'(.*)'$/"file:\/\/$1"/
 				}
 				if ($val =~ /^'https:/) {
-					my ($uname, $pass) = $this->{xml}
-								->getHttpsRepositoryCredentials_legacy();
-					if ($uname) {
-						chop $val;
-						$val .= "?credentials=kiwiRepoCredentials'";
-					}
+				    chop $val;
+					$val .= "?credentials=kiwiRepoCredentials'";
 				}
 				push (@zopts,$val);
 			}

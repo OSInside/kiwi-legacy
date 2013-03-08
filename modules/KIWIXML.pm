@@ -255,7 +255,17 @@ sub new {
 		$arch = "ix86";
 	}
 	my %supported = map { ($_ => 1) } qw(
-		armv5tel armv7l ia64 i586 i686 ix86 ppc ppc64 s390 s390x x86_64
+		armv5tel
+		armv7l
+		ia64
+		i586
+		i686
+		ix86
+		ppc
+		ppc64
+		s390
+		s390x
+		x86_64
 	);
 	$this->{supportedArch} = \%supported;
 	my $kiwi = KIWILog -> instance();
@@ -992,7 +1002,8 @@ sub addRepositories {
 			if ($confRepos) {
 				# Verify uniqueness conditions
 				for my $confRepo (@{$confRepos}) {
-					if ($alias && $alias eq $confRepo -> getAlias() ) {
+					my $confAlias = $confRepo -> getAlias();
+					if ($alias && $confAlias && ($alias eq  $confAlias)) {
 						my $msg = 'addRepositories: attempting to add '
 							. 'repo, but a repo with same alias already '
 							. 'exists';
@@ -1040,6 +1051,41 @@ sub addRepositories {
 			}
 		}
 	}
+	return $this;
+}
+
+#==========================================
+# addSystemDisk
+#------------------------------------------
+sub addSystemDisk {
+	# ...
+	# Add a KIWIXMLSystemdiskData object to the type that is currently
+	# the build type.
+	# ---
+	my $this    = shift;
+	my $sysDisk = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $sysDisk) {
+		my $msg = 'addSystemDisk: no systemdisk argument given, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (ref($sysDisk) ne 'KIWIXMLSystemdiskData') {
+		my $msg = 'addSystemDisk: expecting KIWIXMLSystemdiskData object '
+			. 'as argument, retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if ($this->{selectedType}->{systemdisk}) {
+		my $msg = 'addSystemDisk: overwriting existing system disk '
+			. 'information.';
+		$kiwi -> info($msg);
+		$kiwi -> done();
+	}
+	$this->{selectedType}->{systemdisk} = $sysDisk;
 	return $this;
 }
 
@@ -1093,6 +1139,31 @@ sub addToolsToKeep {
 		}
 	}
 	return $this;
+}
+
+#==========================================
+# discardReplacableRepos
+#------------------------------------------
+sub discardReplacableRepos {
+	# ...
+	# Remove all repositories marked as replacable
+	# ---
+	my $this = shift;
+	my @allProfs = @{$this->{availableProfiles}};
+	push @allProfs, 'kiwi_default';
+	for my $profName (@allProfs) {
+		my $repos = $this->{imageConfig}{$profName}{repoData};
+		if ($repos) {
+			my @reducedRepoSet;
+			for my $repo (@{$repos}) {
+				if ($repo -> getStatus() ne 'replacable') {
+					push @reducedRepoSet, $repo;
+				}
+			}
+			$this->{imageConfig}{$profName}{repoData} = \@reducedRepoSet;
+		}
+	}
+	return $this ;
 }
 
 #==========================================
@@ -1676,7 +1747,6 @@ sub getPXEConfig {
 	# current build type.
 	# ---
 	my $this = shift;
-	my $selType = $this->{selectedType};
 	return $this->{selectedType}->{pxedeploy};
 }
 
@@ -1689,7 +1759,6 @@ sub getPXEConfigData {
 	# current build type.
 	# ---
 	my $this = shift;
-	my $selType = $this->{selectedType};
 	return $this->{selectedType}->{pxeconfig};
 }
 
@@ -2073,6 +2142,34 @@ sub setSelectionProfileNames {
 }
 
 #==========================================
+# updateType
+#------------------------------------------
+sub updateType {
+	# ...
+	# Modify the type that is currently the build type
+	# ---
+	my $this = shift;
+	my $type = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $type) {
+		my $msg = 'updateType: no type argument given, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (ref($type) ne 'KIWIXMLTypeData') {
+		my $msg = 'updateType: expecting KIWIXMLTypeData object as argument, '
+			. 'retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{selectedType}->{type} = $type;
+	return $this;;
+}
+
+#==========================================
 # writeXML
 #------------------------------------------
 sub writeXML {
@@ -2194,8 +2291,13 @@ sub writeXML {
 			$xml .= ' patternType="' . $instOpt . '"';
 		}
 		$xml .= '>';
+		my %usedNames;
 		for my $item (@pckgsItems) {
-			$xml .= $item -> getXMLElement() -> toString();
+			my $name = $item -> getName();
+			if (! $usedNames{$name}) {
+				$usedNames{$name} = 1;
+				$xml .= $item -> getXMLElement() -> toString();
+			}
 		}
 		$xml .= '</packages>';
 	}
@@ -6045,30 +6147,6 @@ sub getEditBootInstall_legacy {
 }
 
 #==========================================
-# getHttpsRepositoryCredentials_legacy
-#------------------------------------------
-sub getHttpsRepositoryCredentials_legacy {
-	# ...
-	# If any repository is configered with credentials return the username
-	# and password
-	# ---
-	my $this = shift;
-	my @repoNodes = $this->{repositNodeList} -> get_nodelist();
-	for my $repo (@repoNodes) {
-		my $uname = $repo -> getAttribute('username');
-		my $pass = $repo -> getAttribute('password');
-		if ($uname) {
-			my @sources = $repo -> getElementsByTagName ('source');
-			my $path = $sources[0] -> getAttribute('path');
-			if ( $path =~ /^https:/) {
-				return ($uname, $pass);
-			}
-		}
-	}
-	return;
-}
-
-#==========================================
 # getImageConfig_legacy
 #------------------------------------------
 sub getImageConfig_legacy {
@@ -8002,46 +8080,6 @@ sub getProfiles_legacy {
 }
 
 #==========================================
-# getRepositories_legacy
-#------------------------------------------
-sub getRepositories_legacy {
-	# ...
-	# Get the repository type used for building
-	# up the physical extend. For information on the available
-	# types refer to the package manager documentation
-	# ---
-	my $this = shift;
-	my @node = $this->{repositNodeList} -> get_nodelist();
-	my %result;
-	foreach my $element (@node) {
-		#============================================
-		# Check to see if node is in included profile
-		#--------------------------------------------
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		#============================================
-		# Store repo information in hash
-		#--------------------------------------------
-		my $type = $element -> getAttribute("type");
-		my $alias= $element -> getAttribute("alias");
-		my $imgincl = $element -> getAttribute("imageinclude");
-		my $prio = $element -> getAttribute("priority");
-		my $user = $element -> getAttribute("username");
-		my $pwd  = $element -> getAttribute("password");
-		my $plic = $element -> getAttribute("prefer-license");
-		my $dist = $element -> getAttribute("distribution");
-		my $comp = $element -> getAttribute("components");
-		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
-		my $source = $this -> __resolveLink ( $stag -> getAttribute ("path") );
-		$result{$source} = [
-			$type,$alias,$prio,$user,$pwd,$plic,$imgincl,$dist,$comp
-		];
-	}
-	return %result;
-}
-
-#==========================================
 # getSplitPersistentFiles_legacy
 #------------------------------------------
 sub getSplitPersistentFiles_legacy {
@@ -8257,27 +8295,6 @@ sub getXenConfig_legacy {
 }
 
 #==========================================
-# ignoreRepositories_legacy
-#------------------------------------------
-sub ignoreRepositories_legacy {
-	# ...
-	# Ignore all the repositories in the XML file.
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	$kiwi -> info ('Ignoring all repositories previously configured');
-	$kiwi -> done();
-	my @node = $this->{repositNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		$this->{imgnameNodeList}->get_node(1)->removeChild ($element);
-	}
-	$this->{repositNodeList} = 
-		$this->{systemTree}->getElementsByTagName ("repository");
-	$this-> __updateXML_legacy();
-	return $this;
-}
-
-#==========================================
 # setPackageManager_legacy
 #------------------------------------------
 sub setPackageManager_legacy {
@@ -8315,56 +8332,6 @@ sub setPackageManager_legacy {
 }
 
 #==========================================
-# setRepository_legacy
-#------------------------------------------
-sub setRepository_legacy {
-	# ...
-	# Overwerite the first repository that does not have the status
-	# sttribute set to fixed.
-	# ---
-	my $this = shift;
-	my $type = shift;
-	my $path = shift;
-	my $alias= shift;
-	my $prio = shift;
-	my $user = shift;
-	my $pass = shift;
-	my @node = $this->{repositNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		my $status = $element -> getAttribute("status");
-		if ((defined $status) && ($status eq "fixed")) {
-			next;
-		}
-		my $kiwi = $this->{kiwi};
-		my $replRepo = $element -> getElementsByTagName ("source")
-			-> get_node(1) -> getAttribute ("path");
-		$kiwi -> info ("Replacing repository $replRepo");
-		$kiwi -> done();
-		if (defined $type) {
-			$element -> setAttribute ("type",$type);
-		}
-		if (defined $path) {
-			$element -> getElementsByTagName ("source")
-				-> get_node (1) -> setAttribute ("path",$path);
-		}
-		if (defined $alias) {
-			$element -> setAttribute ("alias",$alias);
-		}
-		if ((defined $prio) && ($prio != 0)) {
-			$element -> setAttribute ("priority",$prio);
-		}
-		if ((defined $user) && (defined $pass)) {
-			$element -> setAttribute ("username",$user);
-			$element -> setAttribute ("password",$pass);
-		}
-		last;
-	}
-	$this -> __createURLList_legacy();
-	$this -> __updateXML_legacy();
-	return $this;
-}
-
-#==========================================
 # addRemovePackages_legacy
 #------------------------------------------
 sub addRemovePackages_legacy {
@@ -8375,88 +8342,6 @@ sub addRemovePackages_legacy {
 	my @list = @_;
 	my $this = shift @list;
 	return $this -> addPackages_legacy ("delete",undef,undef,@list);
-}
-
-#==========================================
-# addRepositories_legacy
-#------------------------------------------
-sub addRepositories_legacy {
-	# ...
-	# Add a repository section to the current list of
-	# repos and update repositNodeList accordingly.
-	# ---
-	my $this = shift;
-	my $type = shift;
-	my $path = shift;
-	my $alias= shift;
-	my $prio = shift;
-	my $user = shift;
-	my $pass = shift;
-	my @type = @{$type};
-	my @path = @{$path};
-	my $kiwi = $this->{kiwi};
-	my @alias;
-	my @prio;
-	my @user;
-	my @pass;
-	if ($alias) {
-		@alias= @{$alias};
-	}
-	if ($prio) {
-		@prio = @{$prio};
-	}
-	if ($user) {
-		@user = @{$user};
-	}
-	if ($pass) {
-		@pass = @{$pass};
-	}
-	my @supportedTypes = (
-		'rpm-dir','rpm-md', 'yast2',
-		'apt-deb','apt-rpm','deb-dir',
-		'mirrors','red-carpet','slack-site',
-		'up2date-mirrors','urpmi'
-	);
-	foreach my $path (@path) {
-		my $type = shift @type;
-		my $alias= shift @alias;
-		my $prio = shift @prio;
-		my $user = shift @user;
-		my $pass = shift @pass;
-		if (! defined $type) {
-			$kiwi -> error   ("No type for repo [$path] specified");
-			$kiwi -> skipped ();
-			next;
-		}
-		if (! grep { /$type/x } @supportedTypes ) {
-			my $msg = "Addition of requested repo type [$type] not supported";
-			$kiwi -> error ($msg);
-			$kiwi -> skipped ();
-			next;
-		}
-		my $addrepo = XML::LibXML::Element -> new ("repository");
-		$addrepo -> setAttribute ("type",$type);
-		$addrepo -> setAttribute ("status","fixed");
-		if (defined $alias) {
-			$addrepo -> setAttribute ("alias",$alias);
-		}
-		if ((defined $prio) && ($prio != 0)) {
-			$addrepo -> setAttribute ("priority",$prio);
-		}
-		if ((defined $user) && (defined $pass)) {
-			$addrepo -> setAttribute ("username",$user);
-			$addrepo -> setAttribute ("password",$pass);
-		}
-		my $addsrc  = XML::LibXML::Element -> new ("source");
-		$addsrc -> setAttribute ("path",$path);
-		$addrepo -> appendChild ($addsrc);
-		$this->{imgnameNodeList}->get_node(1)->appendChild ($addrepo);
-	}
-	$this->{repositNodeList} =
-		$this->{systemTree}->getElementsByTagName ("repository");
-	$this -> __createURLList_legacy();
-	$this -> __updateXML_legacy();
-	return $this;
 }
 
 #==========================================
@@ -8597,22 +8482,32 @@ sub __createURLList_legacy {
 	my @urllist     = ();
 	my %urlhash     = ();
 	my @sourcelist  = ();
-	%repository = $this->getRepositories_legacy();
-	if (! %repository) {
-		%repository = $this->getInstSourceRepository_legacy();
-		foreach my $name (keys %repository) {
-			push (@sourcelist,$repository{$name}{source});
-		}
-	} else {
-		@sourcelist = keys %repository;
-	}
-	foreach my $source (@sourcelist) {
-		my $user = $repository{$source}[3];
-		my $pwd  = $repository{$source}[4];
+	# Hack my way out of a jam of different data handling between legacy and
+	# new stuff. However this method will go away anyway ;)
+	my $processed = 0;
+	my $repos = $this->getRepositories();
+	for my $repo (@{$repos}) {
+		$processed = 1;
+		my ($user, $pwd) = $repo -> getCredentials();
+		my $source = $repo -> getPath();
 		my $urlHandler  = KIWIURL -> new ($cmdL,undef,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		push (@urllist,$publics_url);
 		$urlhash{$source} = $publics_url;
+	}
+	if (! $processed) {
+		%repository = $this->getInstSourceRepository_legacy();
+		foreach my $name (keys %repository) {
+			push (@sourcelist,$repository{$name}{source});
+		}
+		foreach my $source (@sourcelist) {
+			my $user = $repository{$source}[3];
+			my $pwd  = $repository{$source}[4];
+			my $urlHandler  = KIWIURL -> new ($cmdL,undef,$user,$pwd);
+			my $publics_url = $urlHandler -> normalizePath ($source);
+			push (@urllist,$publics_url);
+			$urlhash{$source} = $publics_url;
+		}
 	}
 	$this->{urllist} = \@urllist;
 	$this->{urlhash} = \%urlhash;
@@ -9061,41 +8956,7 @@ sub __updateDescriptionFromChangeSet_legacy {
 	#==========================================
 	# 1) merge/update repositories
 	#------------------------------------------
-	if ($changeset->{repositories}) {
-		$this -> ignoreRepositories_legacy();
-		$kiwi -> info ("Updating repository node(s):");
-		# 1) add those repos which are marked as fixed in the boot xml
-		my @node = $repositNodeList -> get_nodelist();
-		foreach my $element (@node) {
-			if (! $this -> __requestedProfile ($element)) {
-				next;
-			}
-			my $status = $element -> getAttribute("status");
-			if ((! defined $status) || ($status eq "fixed")) {
-				my $type  = $element -> getAttribute("type");
-				my $source= $element -> getElementsByTagName("source")
-					-> get_node(1) -> getAttribute ("path");
-				my $alias = $element -> getAttribute("alias");
-				my $prio = $element -> getAttribute("priority");
-				$this -> addRepositories_legacy (
-					[$type],[$source],[$alias],[$prio]
-				);
-			}
-		}
-		# 2) add those repos which are part of the changeset
-		foreach my $source (keys %{$changeset->{repositories}}) {
-			my $props = $changeset->{repositories}->{$source};
-			my $type  = $props->[0];
-			my $alias = $props->[1];
-			my $prio  = $props->[2];
-			my $user  = $props->[3];
-			my $pass  = $props->[4];
-			$this -> addRepositories_legacy (
-				[$type],[$source],[$alias],[$prio],[$user],[$pass]
-			);
-		}
-		$kiwi -> done ();
-	}
+	# Repos are handled though the new data structure
 	#==========================================
 	# 2) merge/update drivers
 	#------------------------------------------

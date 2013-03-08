@@ -92,8 +92,8 @@ sub new {
 		$kiwi -> failed ();
 		return;
 	}
-	my %repository = $xml -> getRepositories_legacy();
-	if (! %repository) {
+	my $repos = $xml -> getRepositories();
+	if (! $repos) {
 		$kiwi -> error ("No repository specified in XML tree");
 		$kiwi -> failed ();
 		return;
@@ -103,16 +103,16 @@ sub new {
 	#==========================================
 	# Create sourceChannel hash
 	#------------------------------------------
-	foreach my $source (keys %repository) {
-		my $type    = $repository{$source}[0];
-		my $alias   = $repository{$source}[1];
-		my $prio    = $repository{$source}[2];
-		my $user    = $repository{$source}[3];
-		my $pwd     = $repository{$source}[4];
-		my $plic    = $repository{$source}[5];
-		my $imgincl = $repository{$source}[6];
-		my $dist    = $repository{$source}[7];
-		my $comp    = $repository{$source}[8];
+	for my $repo (@{$repos}) {
+		my $alias        = $repo -> getAlias();
+		my $comp         = $repo -> getComponents();
+		my $dist         = $repo -> getDistribution();
+		my $imgincl      = $repo -> getImageInclude();
+		my $plic         = $repo -> getPreferLicense();
+		my $prio         = $repo -> getPriority();
+		my $type         = $repo -> getType();
+		my $source       = $repo -> getPath();
+		my ($user, $pwd) = $repo ->	getCredentials();
 		my $urlHandler  = KIWIURL -> new ($cmdL,$this,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		if ($publics_url =~ /^\//) {

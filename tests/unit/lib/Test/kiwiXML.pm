@@ -3599,190 +3599,6 @@ sub test_addRepositoriesWrongArgs {
 }
 
 #==========================================
-# test_addRepositories_legacy
-#------------------------------------------
-sub test_addRepositories_legacy {
-	# ...
-	# Verify proper operation of addRepositories method
-	# ---
-	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
-		return; # skip the test if there is no network connection
-	}
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my @addedTypes = qw /red-carpet urpmi/;
-	my @Locs= ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
-	my @Alia= qw /rc pubrepo/;
-	my @Prios= qw /13 99/;
-	my @Usr= qw /pablo/;
-	my @Pass= qw /ola/;
-	$xml = $xml -> addRepositories_legacy(\@addedTypes, @Locs,\@Alia,
-								\@Prios,\@Usr, \@Pass);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my %repos = $xml -> getRepositories_legacy();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	my $numRepos = scalar keys %repos;
-	$this -> assert_equals(6, $numRepos);
-	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
-	$this -> assert_str_equals('yast2', $repoInfo[0]);
-	$this -> assert_str_equals('2', $repoInfo[2]);
-	$this -> assert_str_equals('true', $repoInfo[-4]);
-	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
-	$this -> assert_str_equals('yast2', $repoInfo[0]);
-	$this -> assert_str_equals('foo', $repoInfo[3]);
-	$this -> assert_str_equals('bar', $repoInfo[4]);
-	# Verify that new data exists
-	@repoInfo = @{$repos{'/repos/rc/12.1'}};
-	$this -> assert_str_equals('red-carpet', $repoInfo[0]);
-	$this -> assert_str_equals('rc', $repoInfo[1]);
-	$this -> assert_str_equals('13', $repoInfo[2]);
-	$this -> assert_str_equals('pablo', $repoInfo[3]);
-	$this -> assert_str_equals('ola', $repoInfo[4]);
-	@repoInfo = @{$repos{'http://otherpublicrepos/12.1'}};
-	$this -> assert_str_equals('urpmi', $repoInfo[0]);
-	$this -> assert_str_equals('pubrepo', $repoInfo[1]);
-	$this -> assert_str_equals('99', $repoInfo[2]);
-	return;
-}
-
-#==========================================
-# test_addRepositoriesInvalidTypeInf_legacy
-#------------------------------------------
-sub test_addRepositoriesInvalidTypeInf_legacy {
-	# ...
-	# Verify proper operation of addRepositories method
-	# ---
-	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
-		return; # skip the test if there is no network connection
-	}
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my @addedTypes = qw /red-carpet ola/;
-	my @Locs= ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
-	my @Alia= qw /rc pubrepo/;
-	my @Prios= qw /13 99/;
-	my @Usr= qw /pablo/;
-	my @Pass= qw /ola/;
-	$xml = $xml -> addRepositories_legacy(\@addedTypes, @Locs,\@Alia,
-								\@Prios,\@Usr, \@Pass);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'Addition of requested repo type [ola] not supported';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('skipped', $state);
-	my %repos = $xml -> getRepositories_legacy();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	my $numRepos = scalar keys %repos;
-	$this -> assert_equals(5, $numRepos);
-	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
-	$this -> assert_str_equals('yast2', $repoInfo[0]);
-	$this -> assert_str_equals('2', $repoInfo[2]);
-	$this -> assert_str_equals('true', $repoInfo[-4]);
-	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
-	$this -> assert_str_equals('yast2', $repoInfo[0]);
-	$this -> assert_str_equals('foo', $repoInfo[3]);
-	$this -> assert_str_equals('bar', $repoInfo[4]);
-	# Verify that new data exists
-	@repoInfo = @{$repos{'/repos/rc/12.1'}};
-	$this -> assert_str_equals('red-carpet', $repoInfo[0]);
-	$this -> assert_str_equals('rc', $repoInfo[1]);
-	$this -> assert_str_equals('13', $repoInfo[2]);
-	$this -> assert_str_equals('pablo', $repoInfo[3]);
-	$this -> assert_str_equals('ola', $repoInfo[4]);
-	return;
-}
-
-#==========================================
-# test_addRepositoriesNoTypeInf_legacy
-#------------------------------------------
-sub test_addRepositoriesNoTypeInf_legacy {
-	# ...
-	# Verify proper operation of addRepositories method
-	# ---
-	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
-		return; # skip the test if there is no network connection
-	}
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my @addedTypes = qw /red-carpet/;
-	my @Locs= ['/repos/rc/12.1', 'http://otherpublicrepos/12.1'];
-	my @Alia= qw /rc pubrepo/;
-	my @Prios= qw /13 99/;
-	my @Usr= qw /pablo/;
-	my @Pass= qw /ola/;
-	$xml = $xml -> addRepositories_legacy(\@addedTypes, @Locs,\@Alia,
-								\@Prios,\@Usr, \@Pass);
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'No type for repo [http://otherpublicrepos/12.1] '
-		. 'specified';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('skipped', $state);
-	my %repos = $xml -> getRepositories_legacy();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	my $numRepos = scalar keys %repos;
-	$this -> assert_equals(5, $numRepos);
-	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
-	$this -> assert_str_equals('yast2', $repoInfo[0]);
-	$this -> assert_str_equals('2', $repoInfo[2]);
-	$this -> assert_str_equals('true', $repoInfo[-4]);
-	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
-	$this -> assert_str_equals('yast2', $repoInfo[0]);
-	$this -> assert_str_equals('foo', $repoInfo[3]);
-	$this -> assert_str_equals('bar', $repoInfo[4]);
-	# Verify that new data exists
-	@repoInfo = @{$repos{'/repos/rc/12.1'}};
-	$this -> assert_str_equals('red-carpet', $repoInfo[0]);
-	$this -> assert_str_equals('rc', $repoInfo[1]);
-	$this -> assert_str_equals('13', $repoInfo[2]);
-	$this -> assert_str_equals('pablo', $repoInfo[3]);
-	$this -> assert_str_equals('ola', $repoInfo[4]);
-	return;
-}
-
-#==========================================
 # test_addStripConsistentCall_legacy
 #------------------------------------------
 sub test_addStripConsistentCall_legacy {
@@ -3920,6 +3736,171 @@ sub test_addStripTools_legacy {
 	# Test this condition last to get potential error messages
 	my @expectedNames = qw /megacli virt-mgr xfsrestore install-info/;
 	$this -> assert_array_equal(\@expectedNames, \@toolFiles);
+	return;
+}
+
+#==========================================
+# test_addSystemDisk
+#------------------------------------------
+sub test_addSystemDisk {
+	# ...
+	# Verify that the addSystemDisk method behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'typeSettings';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef,$this->{cmdL}
+	);
+	my $type = $xml -> getImageType();
+	my $typeName = $type -> getTypeName();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('vmx', $typeName);
+	my $sDisk = $xml -> getSystemDiskConfig();
+	# No systemdisk data is expected
+	$this -> assert_null($sDisk);
+	my %sysDisk = ();
+	$sDisk = KIWIXMLSystemdiskData -> new(\%sysDisk);
+	$xml = $xml -> addSystemDisk($sDisk);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($xml);
+	# Check that we can get the object back
+	$sDisk = $xml -> getSystemDiskConfig();
+	$this -> assert_str_equals(ref($sDisk), 'KIWIXMLSystemdiskData');
+	# Switch the types
+	my $res = $xml -> setBuildType('oem');
+	$this -> assert_not_null($res);
+	$type = $xml -> getImageType();
+	$typeName = $type -> getTypeName();
+	$this -> assert_str_equals('oem', $typeName);
+	# Switch the type back to the previously modified type
+	$res = $xml -> setBuildType('vmx');
+	$this -> assert_not_null($res);
+	$sDisk = $xml -> getSystemDiskConfig();
+	$this -> assert_str_equals(ref($sDisk), 'KIWIXMLSystemdiskData');
+	return;
+}
+
+#==========================================
+# test_addSystemDiskInvalidArg
+#------------------------------------------
+sub test_addSystemDiskInvalidArg {
+	# ...
+	# Verify that the addSystemDisk method generates and error when called with
+	# an invalid argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'typeSettings';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addSystemDisk('foo');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'addSystemDisk: expecting KIWIXMLSystemdiskData object '
+		. 'as argument, retaining current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $sDisk = $xml -> getSystemDiskConfig();
+	# No systemdisk data is expected
+	$this -> assert_null($sDisk);
+	return;
+}
+
+#==========================================
+# test_addSystemDiskNoArg
+#------------------------------------------
+sub test_addSystemDiskNoArg {
+	# ...
+	# Verify that the addSystemDisk method generates and error when called with
+	# no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'typeSettings';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> addSystemDisk();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'addSystemDisk: no systemdisk argument given, retaining '
+		. 'current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $sDisk = $xml -> getSystemDiskConfig();
+	# No systemdisk data is expected
+	$this -> assert_null($sDisk);
+	return;
+}
+
+#==========================================
+# test_addSystemDiskOverwrite
+#------------------------------------------
+sub test_addSystemDiskOverwrite {
+	# ...
+	# Verify that the addSystemDisk method behaves as expected when
+	# overwriting an existing configuration
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'lvmConfig';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef,$this->{cmdL}
+	);
+	my $sDisk = $xml -> getSystemDiskConfig();
+	my $vgName = $sDisk -> getVGName();
+	$this -> assert_str_equals('test_Volume', $vgName);
+	my %vol1 = (
+		freespace => '20M',
+		name      => 'test_VOL',
+		size      => '30G'
+	);
+	my %vol2 = (
+		name      => 'data_VOL',
+		size      => '100G'
+	);
+	my %volumes = (
+		1 => \%vol1,
+		2 => \%vol2
+	);
+	my %init = (
+		name => 'testVG',
+		volumes => \%volumes
+	);
+	my $sysdDataObj = KIWIXMLSystemdiskData -> new(\%init);
+	$xml = $xml -> addSystemDisk($sysdDataObj);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'addSystemDisk: overwriting existing system disk '
+		. 'information.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	$sDisk = $xml -> getSystemDiskConfig();
+	# No systemdisk data is expected
+	$this -> assert_not_null($sDisk);
+	$vgName = $sDisk -> getVGName();
+	$this -> assert_str_equals('testVG', $vgName);
 	return;
 }
 
@@ -4326,11 +4307,76 @@ sub test_ctor_NoTypeDefaultPref {
 }
 
 #==========================================
+# test_discardReplacableRepos
+#------------------------------------------
+sub test_discardReplacableRepos {
+	# ...
+	# Verify that the discardReplacableRepos behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'replRepos';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef, $this->{cmdL}
+	);
+	my $repos = $xml -> getRepositories();
+	# Check that we get the expected repos as a base line
+	my @expectedAlia = ('base', 'update');
+	my @alia;
+	for my $repo (@{$repos}) {
+		push @alia, $repo -> getAlias();
+	}
+	$this -> assert_array_equal(\@expectedAlia, \@alia);
+	# Dump all replacable repos
+	$xml = $xml -> discardReplacableRepos();
+	$this -> assert_not_null($xml);
+	$repos = $xml -> getRepositories();
+	# Verify that the default is now empty
+	for my $repo (@{$repos}) {
+		$this -> assert_null('Found repo when non expected');
+	}
+	# Add a profile that has a fixed repo
+	my @profsToUse = ('profA');
+	$xml -> setSelectionProfileNames(\@profsToUse);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$repos = $xml -> getRepositories();
+	# Check that the fixed repo remains
+	@expectedAlia = ('ec2');
+	@alia = ();
+	for my $repo (@{$repos}) {
+		push @alia, $repo -> getAlias();
+	}
+	$this -> assert_array_equal(\@expectedAlia, \@alia);
+	# Add a profile that should also have no mor repos
+	push @profsToUse, 'profB';
+	$xml -> setSelectionProfileNames(\@profsToUse);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Using profile(s): profA, profB', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$repos = $xml -> getRepositories();
+	# VErify no additional repo is present
+	@expectedAlia = ('ec2');
+	@alia = ();
+	for my $repo (@{$repos}) {
+		push @alia, $repo -> getAlias();
+	}
+	return;
+}
+
+#==========================================
 # test_getActiveProfileNames
 #------------------------------------------
 sub test_getActiveProfileNames {
 	# ...
-	# Verify the the names returned by the getActiveProfileNames method are
+	# Verify that the names returned by the getActiveProfileNames method are
 	# correct.
 	# ---
 	my $this = shift;
@@ -5273,35 +5319,6 @@ sub test_getFilesToDelete {
 		push @stripNames, $stripObj -> getName();
 	}
 	$this -> assert_array_equal(\@expected, \@stripNames);
-	return;
-}
-
-#==========================================
-# test_getHttpsRepositoryCredentials_legacy
-#------------------------------------------
-sub test_getHttpsRepositoryCredentials_legacy {
-	# ...
-	# Verify proper return of getHttpsRepositoryCredentials method
-	# ---
-	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
-		return; # skip the test if there is no network connection
-	}
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my ($uname, $pass) = $xml->getHttpsRepositoryCredentials_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	$this -> assert_str_equals('foo', $uname);
-	$this -> assert_str_equals('bar', $pass);
 	return;
 }
 
@@ -7638,49 +7655,6 @@ sub test_getRepositoriesWithProf {
 }
 
 #==========================================
-# test_getRepositories_legacy
-#------------------------------------------
-sub test_getRepositories_legacy {
-	# ...
-	# Verify proper return of getRepositories method
-	# ---
-	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
-		return; # skip the test if there is no network connection
-	}
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my %repos = $xml -> getRepositories_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	my $numRepos = scalar keys %repos;
-	$this -> assert_equals(4, $numRepos);
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
-	$this -> assert_str_equals('yast2', $repoInfo[0]);
-	$this -> assert_str_equals('2', $repoInfo[2]);
-	$this -> assert_str_equals('true', $repoInfo[-4]);
-	@repoInfo = @{$repos{'http://download.opensuse.org/update/12.1'}};
-	$this -> assert_str_equals('rpm-md', $repoInfo[0]);
-	$this -> assert_str_equals('update', $repoInfo[1]);
-	$this -> assert_str_equals('true', $repoInfo[-3]);
-	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
-	$this -> assert_str_equals('yast2', $repoInfo[0]);
-	$this -> assert_str_equals('foo', $repoInfo[3]);
-	$this -> assert_str_equals('bar', $repoInfo[4]);
-	@repoInfo = @{$repos{'/repos/12.1-additional'}};
-	$this -> assert_str_equals('rpm-dir', $repoInfo[0]);
-	return;
-}
-
-#==========================================
 # test_getSplitConfig
 #------------------------------------------
 sub test_getSplitConfig {
@@ -8654,34 +8628,6 @@ sub test_ignoreRepositories {
 }
 
 #==========================================
-# test_ignoreRepositories_legacy
-#------------------------------------------
-sub test_ignoreRepositories_legacy {
-	# ...
-	# Verify proper operation of ignoreRepositories method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	$xml = $xml -> ignoreRepositories_legacy();
-	my %repos = $xml -> getRepositories_legacy();
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'Ignoring all repositories previously configured';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('info', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('completed', $state);
-	# Test this condition last to get potential error messages
-	my $numRepos = scalar keys %repos;
-	$this -> assert_equals(0, $numRepos);
-	return;
-}
-
-#==========================================
 # test_invalidProfileRequest
 #------------------------------------------
 sub test_invalidProfileRequest {
@@ -9482,62 +9428,6 @@ sub test_setRepositoryNoReplaceWithProf {
 }
 
 #==========================================
-# test_setRepository_legacy
-#------------------------------------------
-sub test_setRepository_legacy {
-	# ...
-	# Verify proper operation of setRepository method
-	# ---
-	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
-		return; # skip the test if there is no network connection
-	}
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	$xml = $xml -> setRepository_legacy('rpm-md', '/repos/pckgs','replacement',
-								'5');
-	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'Replacing repository '
-		. 'http://download.opensuse.org/update/12.1';
-	$this -> assert_str_equals($expectedMsg, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('info', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('completed', $state);
-	my %repos = $xml -> getRepositories_legacy();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	my $numRepos = scalar keys %repos;
-	$this -> assert_equals(4, $numRepos);
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
-	$this -> assert_str_equals('yast2', $repoInfo[0]);
-	$this -> assert_str_equals('2', $repoInfo[2]);
-	$this -> assert_str_equals('true', $repoInfo[-4]);
-	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
-	$this -> assert_str_equals('yast2', $repoInfo[0]);
-	$this -> assert_str_equals('foo', $repoInfo[3]);
-	$this -> assert_str_equals('bar', $repoInfo[4]);
-	@repoInfo = @{$repos{'/repos/12.1-additional'}};
-	$this -> assert_str_equals('rpm-dir', $repoInfo[0]);
-	@repoInfo = @{$repos{'/repos/pckgs'}};
-	$this -> assert_str_equals('rpm-md', $repoInfo[0]);
-	$this -> assert_str_equals('replacement', $repoInfo[1]);
-	$this -> assert_str_equals('5', $repoInfo[2]);
-	# Assert the expected repo has been replaced
-	my $repoInfo = $repos{'http://download.opensuse.org/update/12.1'};
-	$this -> assert_null($repoInfo);
-	return;
-}
-
-#==========================================
 # test_setSelectionProfileNames
 #------------------------------------------
 sub test_setSelectionProfileNames {
@@ -9723,6 +9613,122 @@ sub test_sizeHandling {
 	$this -> assert_str_equals('G', $unit);
 	my $add = $typeObj -> isSizeAdditive();
 	$this -> assert_str_equals('false', $add);
+	return;
+}
+
+#==========================================
+# test_updateType
+#------------------------------------------
+sub test_updateType {
+	# ...
+	# Verify that the updateType method behaves as expected
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'typeSettings';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef,$this->{cmdL}
+	);
+	my $type = $xml -> getImageType();
+	my $typeName = $type -> getTypeName();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('vmx', $typeName);
+	$type -> setBootLoader('extlinux');
+	$type -> setFilesystem('xfs');
+	my $res = $xml -> updateType($type);
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	# Fetch the type again and make certain the changes are persitent
+	$type = $xml -> getImageType();
+	my $bootL = $type -> getBootLoader();
+	$this -> assert_str_equals('extlinux', $bootL);
+	my $filesys = $type -> getFilesystem();
+	$this -> assert_str_equals('xfs', $filesys);
+	# Switch the types
+	$res = $xml -> setBuildType('oem');
+	$this -> assert_not_null($res);
+	$type = $xml -> getImageType();
+	$typeName = $type -> getTypeName();
+	$this -> assert_str_equals('oem', $typeName);
+	# Switch the type back to the previously modified type
+	$res = $xml -> setBuildType('vmx');
+	$this -> assert_not_null($res);
+	$type = $xml -> getImageType();
+	# Verify that the changes stuck
+	$bootL = $type -> getBootLoader();
+	$this -> assert_str_equals('extlinux', $bootL);
+	$filesys = $type -> getFilesystem();
+	$this -> assert_str_equals('xfs', $filesys);
+	return;
+}
+
+#==========================================
+# test_updateTypeInvalidArg
+#------------------------------------------
+sub test_updateTypeInvalidArg {
+	# ...
+	# Verify that the updateType method generates and error when called with
+	# an invalid argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'typeSettings';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> updateType('foo');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'updateType: expecting KIWIXMLTypeData object as argument, '
+		. 'retaining current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $type = $xml -> getImageType();
+	my $typeName = $type -> getTypeName();
+	$this -> assert_str_equals('vmx', $typeName);
+	return;
+}
+
+#==========================================
+# test_updateTypeNoArg
+#------------------------------------------
+sub test_updateTypeNoArg {
+	# ...
+	# Verify that the updateType method generates and error when called with
+	# no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'typeSettings';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef,$this->{cmdL}
+	);
+	my $res = $xml -> updateType();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'updateType: no type argument given, retaining '
+		. 'current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $type = $xml -> getImageType();
+	my $typeName = $type -> getTypeName();
+	$this -> assert_str_equals('vmx', $typeName);
 	return;
 }
 
