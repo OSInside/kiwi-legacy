@@ -1688,7 +1688,7 @@ sub __uniqueInPackages {
 			if ($repl) {
 				$item .= ",$repl";
 			}
-			foreach my $name (@names) {
+			for my $name (@names) {
 				if ($name eq $item) {
 					return $item;
 				}

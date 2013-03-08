@@ -60,9 +60,9 @@ sub test_ctor_noCmdlArg {
 }
 
 #==========================================
-# test_prepBootImg_noCfgDir
+# test_prepBootImg_invalidTypeXML
 #------------------------------------------
-sub test_prepBootImg_noCfgDir {
+sub test_prepBootImg_invalidTypeXML {
 	# ...
 	# Test error condition for non existent config dir
 	# ---
@@ -73,7 +73,8 @@ sub test_prepBootImg_noCfgDir {
 	$cmd -> setConfigDir($confDir);
 	my $kic = KIWIImageCreator -> new($cmd);
 	my $res = $kic -> prepareBootImage('ola');
-	my $expectedMsg = 'prepareBootImage: config dir "ola" does not exist';
+	my $expectedMsg = 'prepareBootImage: expecting KIWIXML object as first '
+		. 'argument.';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -86,9 +87,9 @@ sub test_prepBootImg_noCfgDir {
 }
 
 #==========================================
-# test_prepBootImg_noCfgDirArg
+# test_prepBootImg_noXMLArg
 #------------------------------------------
-sub test_prepBootImg_noCfgDirArg {
+sub test_prepBootImg_noXMLArg {
 	# ...
 	# Test error condition for missing config dir argument
 	# ---
@@ -99,7 +100,8 @@ sub test_prepBootImg_noCfgDirArg {
 	$cmd -> setConfigDir($confDir);
 	my $kic = KIWIImageCreator -> new($cmd);
 	my $res = $kic -> prepareBootImage();
-	my $expectedMsg = 'prepareBootImage: no configuration directory defined';
+	my $expectedMsg = 'prepareBootImage: no system XML description '
+		. 'object given';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -122,9 +124,10 @@ sub test_prepBootImg_noRootDirArg {
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCmdObj();
 	my $confDir = $this -> {baseDir} . 'prepareXmlRoot';
+	my $xml = KIWIXML -> new($confDir, undef, undef, $cmd);
 	$cmd -> setConfigDir($confDir);
 	my $kic = KIWIImageCreator -> new($cmd);
-	my $res = $kic -> prepareBootImage('/tmp');
+	my $res = $kic -> prepareBootImage($xml);
 	my $expectedMsg = 'prepareBootImage: no root traget defined';
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expectedMsg, $msg);
@@ -207,7 +210,7 @@ sub test_prepImg_cmdRootTgt {
 							"$basePath/usr/share/doc/kiwi/tests/README.txt");
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
-	# Test generate a lot of messages, ignore them, just make sure 
+	# Test generate a lot of messages, ignore them, just make sure
 	# everything in the log object gets reset
 	$kiwi -> getState();
 	# Clean up

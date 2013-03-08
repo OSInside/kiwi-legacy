@@ -637,39 +637,11 @@ sub __xmlSetup {
 	if ($ignore) {
 		$xml -> ignoreRepositories();
 	}
-	if ($this -> {replRepo}) {
-		# TODO eliminate the repo construction once other parts
-		# of the code have been converted to use the new repo information
-		my %replRepo = %{$this -> {replRepo}};
-		my %init = (
-			alias    => $replRepo{repositoryAlias},
-			path     => $replRepo{repository},
-			priority => $replRepo{respositoryPriority},
-			type     => $replRepo{repositoryType}
-		);
-		my $repo = KIWIXMLRepositoryData -> new (\%init);
-		if (! $repo) {
-			return;
-		}
-		my $res = $xml -> setRepository($repo);
-		if (! $res) {
-			return;
-		}
-		$xml -> setRepository_legacy (
-			$replRepo{repositoryType},
-			$replRepo{repository},
-			$replRepo{repositoryAlias},
-			$replRepo{respositoryPriority}
-		);
+	if ($this->{replRepo}) {
+		$xml -> setRepository($this->{replRepo});
 	}
-	if ($this -> {addlRepos}) {
-		my %addlRepos = %{$this -> {addlRepos}};
-		$xml -> addRepositories_legacy (
-			$addlRepos{repositoryTypes},
-			$addlRepos{repositories},
-			$addlRepos{repositoryAlia},
-			$addlRepos{repositoryPriorities}
-		);
+	if ($this->{addlRepos}) {
+		$xml -> addRepositories($this->{addlRepos}, 'default');
 	}
 	return $xml;
 }

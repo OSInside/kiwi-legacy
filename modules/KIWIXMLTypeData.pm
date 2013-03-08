@@ -1696,7 +1696,10 @@ sub __isValidBootFS {
 		return;
 	}
 	my %supported = map { ($_ => 1) } qw(
-		ext2 ext3 fat16 fat32
+		ext2
+		ext3
+		fat16
+		fat32
 	);
 	if (! $supported{$bootFS} ) {
 		my $msg = "$caller: specified boot filesystem '$bootFS' is not "
@@ -1732,7 +1735,13 @@ sub __isValidBootloader {
 		return;
 	}
 	my %supported = map { ($_ => 1) } qw(
-		extlinux grub grub2 syslinux zipl yaboot uboot
+		extlinux
+		grub
+		grub2
+		syslinux
+		uboot
+		yaboot
+		zipl
 	);
 	if (! $supported{$bootL} ) {
 		my $msg = "$caller: specified bootloader '$bootL' is not supported.";

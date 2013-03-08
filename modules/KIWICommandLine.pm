@@ -49,18 +49,12 @@ sub new {
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
-	my @supportedRepos = qw (
-		apt-deb apt-rpm deb-dir mirrors red-carpet
-		rpm-dir rpm-md slack-site up2date-mirrors
-		urpmi yast2
-	);
 	#==========================================
 	# Store Object data
 	#------------------------------------------
 	$this->{imageTgtDir}             = '';
 	$this->{imageIntermediateTgtDir} = '';
 	$this->{kiwi}                    = KIWILog -> instance();
-	$this->{supportedRepoTypes}      = \@supportedRepos;
 	#==========================================
 	# Store Object data
 	#------------------------------------------
@@ -116,8 +110,8 @@ sub getAdditionalPatterns {
 #------------------------------------------
 sub getAdditionalRepos {
 	# ...
-	# Return the information about additional repositories set by the user
-	# on the command line.
+	# Return an array ref containing XMLRepositoryData objects representing
+	# the additional repositories set by the user on the command line.
 	# ---
 	my $this = shift;
 	return $this -> {additionalRepos};
@@ -378,102 +372,31 @@ sub setAdditionalRepos {
 	# ---
 	my $this      = shift;
 	my $repos     = shift;
-	my $repoAlias = shift;
-	my $repoPrios = shift;
-	my $repoTypes = shift;
 	my $kiwi = $this->{kiwi};
 	if (! $repos) {
 		my $msg = 'setAdditionalRepos method called without specifying '
-		. 'repositories';
+			. 'repositories';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
 		return;
 	}
-	if (! ref $repos) {
+	if (ref($repos) ne 'ARRAY') {
 		my $msg = 'setAdditionalRepos method expecting ARRAY_REF as '
-			. 'first argument.';
+			. 'argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
 		return;
 	}
-	if (($repoAlias) && (! ref $repoAlias)) {
-		my $msg = 'setAdditionalRepos method expecting ARRAY_REF as '
-			. 'second argument.';
-		$kiwi -> error ($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (($repoPrios) && (! ref $repoPrios)) {
-		my $msg = 'setAdditionalRepos method expecting ARRAY_REF as '
-			. 'third argument.';
-		$kiwi -> error ($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (! $repoTypes) {
-		my $msg = 'setAdditionalRepos method called without specifying '
-		. 'repository types';
-		$kiwi -> error ($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (! ref $repoTypes) {
-		my $msg = 'setAdditionalRepos method expecting ARRAY_REF as '
-			. 'fourth argument.';
-		$kiwi -> error ($msg);
-		$kiwi -> failed();
-		return;
-	}
-	my @reposit = @{$repos};
-	my $numRepos = @reposit;
-	my @repositAlias;
-	if ($repoAlias) {
-		@repositAlias = @{$repoAlias};
-		my $numAlias = @repositAlias;
-		if (($numAlias > 0) && ($numRepos != $numAlias)) {
-			my $msg = 'Number of specified repositories does not match number '
-				. 'of provided alias, cannot form proper match.';
+	for my $repo (@{$repos}) {
+		if (ref($repo) ne 'KIWIXMLRepositoryData') {
+			my $msg = 'setAdditionalRepos method expecting ARRAY_REF of '
+				. 'KIWIXMLRepositoryData objects.';
 			$kiwi -> error ($msg);
 			$kiwi -> failed();
 			return;
 		}
 	}
-	my @repositPrio;
-	if ($repoPrios) {
-		@repositPrio = @{$repoPrios};
-		my $numPrios = @repositPrio;
-		if (($numPrios > 0) && ($numRepos != $numPrios)) {
-			my $msg = 'Number of specified repositories does not match number '
-				. 'of provided priorities, cannot form proper match.';
-			$kiwi -> error ($msg);
-			$kiwi -> failed();
-			return;
-		}
-	}
-	my @repositTypes = @{$repoTypes};
-	my $numTypes = @repositTypes;
-	if ($numRepos != $numTypes) {
-		my $msg = 'Number of specified repositories does not match number '
-		. 'of provided types, cannot form proper match.';
-		$kiwi -> error ($msg);
-		$kiwi -> failed();
-		return;
-	}
-	my @supportedTypes = @{$this->{supportedRepoTypes}};
-	for my $type (@repositTypes) {
-		if (! grep { /$type/x } @supportedTypes ) {
-			my $msg = "Specified repository type $type not supported.";
-			$kiwi -> error ($msg);
-			$kiwi -> failed();
-			return;
-		}
-	}
-	my %repoInfo;
-	$repoInfo{repositories}         = $repos;
-	$repoInfo{repositoryAlia}       = $repoAlias;
-	$repoInfo{repositoryPriorities} = $repoPrios;
-	$repoInfo{repositoryTypes}      = $repoTypes;
-	$this -> {additionalRepos} = \%repoInfo;
+	$this -> {additionalRepos} = $repos;
 	return 1;
 }
 
@@ -787,11 +710,7 @@ sub setReplacementRepo {
 	# ---
 	my $this      = shift;
 	my $repo      = shift;
-	my $repoAlias = shift;
-	my $repoPrio  = shift;
-	my $repoType  = shift;
 	my $kiwi = $this -> {kiwi};
-	my %replRepo;
 	if ($this -> {ignoreRepos}){
 		my $msg = 'Conflicting command line arguments; ignore repos and '
 			. 'set repos';
@@ -801,35 +720,19 @@ sub setReplacementRepo {
 	}
 	if (! $repo) {
 		my $msg = 'setReplacementRepo method called without specifying '
-		. 'a repository.';
+			. 'a repository.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
 		return;
 	}
-	if (! $repoAlias) {
-		my $msg = "No repo alias defined, generating time based name.\n";
-		$kiwi -> loginfo ($msg);
-		my $curTime = time;
-		$repoAlias = 'genName_' . md5_hex($repo);
-	}
-	if (! $repoPrio) {
-		my $msg = "No repo priority specified, using default value '10'\n";
-		$kiwi -> loginfo ($msg);
-		$repoPrio = 10;
-	}
-	if (($repoType) && 
-		(! grep { /$repoType/x } @{$this->{supportedRepoTypes}})
-	) {
-		my $msg = "Specified repository type $repoType not supported.";
+	if (ref($repo) ne 'KIWIXMLRepositoryData') {
+		my $msg = 'setReplacementRepo: expecting KIWIXMLRepositoryData '
+			. 'object as argument.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
 		return;
 	}
-	$replRepo{repository}         = $repo;
-	$replRepo{repositoryAlias}    = $repoAlias;
-	$replRepo{repositoryPriority} = $repoPrio;
-	$replRepo{repositoryType}     = $repoType;
-	$this -> {replacementRepo} = \%replRepo;
+	$this -> {replacementRepo} = $repo;
 	return 1;
 }
 

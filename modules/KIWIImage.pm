@@ -1304,16 +1304,10 @@ sub createImageRootAndBoot {
 		#==========================================
 		# Prepare boot image...
 		#------------------------------------------
-		my $configDir;
-		if (($stype{boot} !~ /^\//) && (! -d $stype{boot})) {
-			$configDir = $this->{gdata}->{System}."/".$stype{boot};
-		} else {
-			$configDir = $stype{boot};
-		}
 		my $rootTarget = "$tmpdir/kiwi-".$text."boot-$$";
 		my $kic = KIWIImageCreator -> new($cmdL);
 		if ((! $kic) ||	(! $kic -> prepareBootImage (
-			$configDir,$rootTarget,$this->{imageTree},\%XMLChangeSet))
+			$sxml,$rootTarget,$this->{imageTree},\%XMLChangeSet))
 		) {
 			undef $kic;
 			if (! -d $checkBase) {
@@ -1838,16 +1832,10 @@ sub createImageLiveCD {
 		#==========================================
 		# Prepare boot image...
 		#------------------------------------------
-		my $configDir;
-		if (($stype{boot} !~ /^\//) && (! -d $stype{boot})) {
-			$configDir = $this->{gdata}->{System}."/".$stype{boot};
-		} else {
-			$configDir = $stype{boot};
-		}
 		my $rootTarget = "$tmpdir/kiwi-isoboot-$$";
 		my $kic = KIWIImageCreator -> new($cmdL);
 		if ((! $kic) || (! $kic -> prepareBootImage (
-			$configDir,$rootTarget,$this->{imageTree},\%XMLChangeSet))
+			$sxml,$rootTarget,$this->{imageTree},\%XMLChangeSet))
 		) {
 			undef $kic;
 			if (! -d $checkBase) {
@@ -3334,16 +3322,10 @@ sub createImageSplit {
 		#==========================================
 		# Prepare boot image...
 		#------------------------------------------
-		my $configDir;
-		if (($type{boot} !~ /^\//) && (! -d $type{boot})) {
-			$configDir = $this->{gdata}->{System}."/".$type{boot};
-		} else {
-			$configDir = $type{boot};
-		}
 		my $rootTarget = "$tmpdir/kiwi-splitboot-$$";
 		my $kic = KIWIImageCreator -> new($cmdL);
 		if ((! $kic) || (! $kic -> prepareBootImage (
-			$configDir,$rootTarget,$this->{imageTree},\%XMLChangeSet))
+			$sxml,$rootTarget,$this->{imageTree},\%XMLChangeSet))
 		) {
 			undef $kic;
 			if (! -d $checkBase) {

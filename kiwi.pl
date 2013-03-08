@@ -46,6 +46,7 @@ use KIWIQX qw (qxx);
 use KIWIRuntimeChecker;
 use KIWIImageFormat;
 use KIWIXMLInfo;
+use KIWIXMLRepositoryData;
 use KIWIXMLValidator;
 use KIWIGlobals;
 
@@ -135,7 +136,7 @@ sub main {
 			kiwiExit (1);
 		}
 		#==========================================
-		# Setup prepare 
+		# Setup prepare
 		#------------------------------------------
 		my $imageTarget = $cmdL -> getImageTargetDir();
 		my $rootTarget  = $imageTarget.'/build/image-root';
@@ -148,14 +149,14 @@ sub main {
 			kiwiExit (1);
 		}
 		#==========================================
-		# Setup create 
+		# Setup create
 		#------------------------------------------
 		$cmdL -> setConfigDir ($rootTarget);
 		$cmdL -> setOperationMode ("create",$rootTarget);
 		$cmdL -> setForceNewRoot (0);
 		$cmdL -> unsetRecycleRootDir();
 		$kic  -> initialize();
-		if (! $kic -> createImage($cmdL)) {
+		if (! $kic -> createImage()) {
 			kiwiExit (1);
 		}
 		kiwiExit (0);
@@ -1004,12 +1005,38 @@ sub init {
 	# check if repositories are to be added
 	#----------------------------------------
 	if (@AddRepository) {
-		my $res = $cmdL -> setAdditionalRepos(
-			\@AddRepository,
-			\@AddRepositoryAlias,
-			\@AddRepositoryPriority,
-			\@AddRepositoryType
-		);
+		my $numRepos = scalar @AddRepository;
+		my $numTypes = scalar @AddRepositoryType;
+		if ($numRepos != $numTypes) {
+			my $msg = 'Must specify repository type for each given '
+				. 'repository. Mismatch number of arguments.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			kiwiExit (1);
+		}
+		my $numAlia = scalar @AddRepositoryAlias;
+		my $numPrio = scalar @AddRepositoryPriority;
+		my $idx = 0;
+		my @reposToAdd;
+		while ($idx < $numRepos) {
+			my %init = (
+				path => $AddRepository[$idx],
+				type => $AddRepositoryType[$idx]
+			);
+			if ($idx < $numAlia) {
+				$init{alias} = $AddRepositoryAlias[$idx];
+			}
+			if ($idx < $numPrio) {
+				$init{priority} = $AddRepositoryPriority[$idx];
+			}
+			my $repo = KIWIXMLRepositoryData -> new (\%init);
+			if (! $repo) {
+				kiwiExit (1);
+			}
+			push @reposToAdd, $repo;
+			$idx += 1;
+		}
+		my $res = $cmdL -> setAdditionalRepos(\@reposToAdd);
 		if (! $res) {
 			kiwiExit (1);
 		}
@@ -1051,12 +1078,17 @@ sub init {
 	# check replacement repo information
 	#----------------------------------------
 	if (defined $SetRepository) {
-		my $result = $cmdL -> setReplacementRepo(
-			$SetRepository,
-			$SetRepositoryAlias,
-			$SetRepositoryPriority,
-			$SetRepositoryType
+		my %init = (
+			alias    => $SetRepositoryAlias,
+			path     => $SetRepository,
+			priority => $SetRepositoryPriority,
+			type     => $SetRepositoryType
 		);
+		my $repo = KIWIXMLRepository -> new(\%init);
+		if (! $repo) {
+			kiwiExit (1);
+		}
+		my $result = $cmdL -> setReplacementRepo($repo);
 		if (! $result) {
 			kiwiExit (1);
 		}
