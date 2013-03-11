@@ -1974,6 +1974,8 @@ sub setupBootDisk {
 	#------------------------------------------
 	my $dmap; # device map
 	my $root; # root device
+	my $try_count = 50;
+	my $try_loop  = 0;
 	if (! defined $system) {
 		$kiwi -> error  ("No system image given");
 		$kiwi -> failed ();
@@ -2209,12 +2211,24 @@ sub setupBootDisk {
 		my $systemISize = KIWIGlobals -> instance() -> isize ($system);
 		$systemISize /= 1024;
 		chomp $systemPSize;
+		if ($systemPSize < 0) {
+			$kiwi -> error ("Sorry Can't get size for device $root");
+			$kiwi -> failed();
+			return;
+		}
 		#print "_______A $systemPSize : $systemISize\n";
 		if ($haveSplit) {
 			$splitPSize = $this->getStorageSize ($deviceMap{readwrite});
 			$splitISize = KIWIGlobals -> instance() -> isize ($splitfile);
 			$splitISize /= 1024;
 			chomp $splitPSize;
+			if ($splitPSize < 0) {
+				$kiwi -> error (
+					"Sorry Can't get size for device $deviceMap{readwrite}"
+				);
+				$kiwi -> failed();
+				return;
+			}
 			#print "_______B $splitPSize : $splitISize\n";
 		}
 		if (($systemPSize <= $systemISize) || ($splitPSize <= $splitISize)) {
@@ -2240,6 +2254,17 @@ sub setupBootDisk {
 			last;
 		}
 		$kiwi -> note (".");
+		$try_loop++;
+		if ($try_loop > $try_count) {
+			#==========================================
+			# We should never get there
+			#------------------------------------------
+			$kiwi -> error (
+				"Sorry can't create requested partition table"
+			);
+			$kiwi -> failed();
+			return;
+		}
 	}
 	$kiwi -> done();
 	#==========================================
@@ -5854,6 +5879,9 @@ sub getStorageSize {
 	# --- 
 	my $this = shift;
 	my $pdev = shift;
+	if ((! $pdev) || (! -e $pdev)) {
+		return -1;
+	}
 	my $status = qxx ("blockdev --getsize64 $pdev 2>&1");
 	my $result = $? >> 8;
 	if ($result == 0) {
