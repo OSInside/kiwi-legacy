@@ -539,55 +539,6 @@ sub createBootStructure {
 }
 
 #==========================================
-# getRemovableUSBStorageDevices
-#------------------------------------------
-sub getRemovableUSBStorageDevices {
-	my $this    = shift;
-	my %devices = ();
-	my @storage = glob ("/sys/bus/usb/drivers/usb-storage/*");
-	foreach my $device (@storage) {
-		if (-l $device) {
-			my @descriptions = glob ("$device/host*/target*/*/block*");
-			foreach my $description (@descriptions) {
-				if (! -d $description) {
-					next;
-				}
-				my $isremovable = "$description/removable";
-				my $serial = "USB Stick (unknown type)";
-				if ($description =~ /usb-storage\/(.*?):.*/) {
-					$serial = "/sys/bus/usb/devices/$1/serial";
-					if (open (my $FD,'<',$serial)) {
-						$serial = <$FD>;
-						chomp $serial;
-						close $FD;
-					}
-				}
-				if ($description =~ /block:(.*)/) {
-					$description = "/dev/".$1;
-				} else {
-					my @bdevs = glob ("$description/*");	
-					my $bdev = basename ($bdevs[0]);
-					$isremovable = $description."/".$bdev."/removable";
-					$description = "/dev/".$bdev;
-				}
-				my $FD;
-				if (! open ($FD,'<',$isremovable)) {
-					next;
-				}
-				$isremovable = <$FD>; close $FD;
-				if ($isremovable == 1) {
-					my $result = $this -> getStorageSize ($description);
-					if ($result > 0) {
-						$devices{$description} = $serial;
-					}
-				}
-			}
-		}
-	}
-	return %devices;
-}
-
-#==========================================
 # setupInstallCD
 #------------------------------------------
 sub setupInstallCD {
