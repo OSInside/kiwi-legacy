@@ -281,7 +281,7 @@ sub mount {
 				my $loop = $status;
 				push @UmountStack,"losetup -d $loop";
 				$this->{UmountStack} = \@UmountStack;
-				$status = KIWIQX::qxx ("kpartx -a $loop 2>&1");
+				$status = KIWIQX::qxx ("kpartx -sa $loop 2>&1");
 				$result = $? >> 8;
 				if ($result != 0) {
 					$kiwi -> error (
@@ -293,7 +293,7 @@ sub mount {
 				}
 				# wait for the mapping to finish
 				qxx ("udevadm settle --timeout=30 2>&1");
-				push @UmountStack,"kpartx -d $loop";
+				push @UmountStack,"kpartx -sd $loop";
 				$this->{UmountStack} = \@UmountStack;
 				$loop =~ s/\/dev\///;
 				$source = "/dev/mapper/".$loop."p3";
