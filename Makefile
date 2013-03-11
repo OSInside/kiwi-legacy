@@ -116,6 +116,7 @@ install:
 	# Install kiwi tests
 	#--------------------------------------------
 	cp -r ./tests/unit ${KIWITESTS}
+	install -m 755 ./tests/writeTester ${KIWITESTS}
 
 	#============================================
 	# Install kiwi tools
