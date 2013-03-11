@@ -9219,7 +9219,7 @@ function createSnapshotMap {
 		fi
 	fi
 	echo "losetup -d $diskLoop" > $reset
-	if ! kpartx -a $diskLoop;then
+	if ! kpartx -sa $diskLoop;then
 		return
 	fi
 	udevPending
