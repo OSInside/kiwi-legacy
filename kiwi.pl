@@ -914,7 +914,6 @@ sub init {
 			$kiwi -> failed ();
 			kiwiExit (1);
 		}
-
 		$cmdL -> setMBRID (sprintf ("0x%08x", $MBRID));
 	}
 	#========================================
@@ -1372,7 +1371,6 @@ sub init {
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
-	# FIXME
 	if (($SetRepository) && (! $SetRepositoryType)) {
 		my $msg = 'Must specify repository type for given '
 				. 'repository. Mismatch number of arguments.';

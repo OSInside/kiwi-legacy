@@ -297,12 +297,6 @@ sub new {
 	$this->{gdata}= $global -> getKiwiConfig();
 	$this->{cmdL} = $cmdL;
 	$this->{buildType} = $imageType;
-	my @selectProfs = ('kiwi_default');
-	if ($reqProfiles) {
-		@selectProfs = @{$reqProfiles};
-		push @selectProfs, 'kiwi_default';
-	}
-	$this->{selectedProfiles} = \@selectProfs;
 	#==========================================
 	# Lookup XML configuration file
 	#------------------------------------------
@@ -1291,11 +1285,9 @@ sub getConfiguredTypeNames {
 	my @typeNames;
 	for my $profName ( @{$this->{selectedProfiles}} ) {
 		if ( $this->{imageConfig}{$profName}{preferences}{types} ) {
-			my @names = keys %{ $this->{imageConfig}
-									->{$profName}
-									->{preferences}
-									->{types}
-								};
+			my @names = keys %{
+				$this->{imageConfig}->{$profName}->{preferences}->{types}
+			};
 			for my $name (@names) {
 				if ($name eq 'defaultType') {
 					next;
@@ -4738,32 +4730,59 @@ sub __populateProfileInfo {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my @profNodes = $this->{systemTree} -> getElementsByTagName ('profile');
-	if (! @profNodes ) {
-		return $this;
-	}
-	my @availableProfiles;
-	for my $element (@profNodes) {
-		# Extract attributes
-		my $descript = $element -> getAttribute ('description');
-		my $import = $element -> getAttribute ('import');
-		my $profName = $element -> getAttribute ('name');
-		push @availableProfiles, $profName;
-		# Insert into internal data structure
-		my %profile = (
-			description => $descript,
-			import      => $import,
-			name        => $profName
-		);
-		$this->{imageConfig}{$profName}{profInfo} =
-			KIWIXMLProfileData -> new(\%profile);
-		# Handle default profile setting
-		if ($import && $import eq 'true') {
-			my @profs = ('kiwi_default', $profName);
-			$this->{selectedProfiles} = \@profs;
+	my $reqp = $this->{reqProfiles};
+	my @selectProfs = ('kiwi_default');
+	my $reqp_count  = 0;
+	#==========================================
+	# add commandline selected profiles
+	#------------------------------------------
+	if ($reqp) {
+		$reqp_count = @{$reqp};
+		if ($reqp_count > 0) {
+			push @selectProfs,@{$reqp};
 		}
 	}
-	$this->{availableProfiles} = \@availableProfiles;
+	#==========================================
+	# walk through profiles from XML
+	#------------------------------------------
+	my @profNodes = $this->{systemTree} -> getElementsByTagName ('profile');
+	if (@profNodes ) {
+		my @availableProfiles;
+		for my $element (@profNodes) {
+			#==========================================
+			# extract attributes
+			#------------------------------------------
+			my $descript = $element -> getAttribute ('description');
+			my $import   = $element -> getAttribute ('import');
+			my $profName = $element -> getAttribute ('name');
+			push @availableProfiles, $profName;
+			#==========================================
+			# insert into internal data structure
+			#------------------------------------------
+			my %profile = (
+				description => $descript,
+				import      => $import,
+				name        => $profName
+			);
+			$this->{imageConfig}{$profName}{profInfo} =
+				KIWIXMLProfileData -> new(\%profile);
+			#==========================================
+			# add import=true profiles to selected
+			#------------------------------------------
+			# add only if no profile was selected on the commandline
+			if (($reqp_count == 0) && ($import && $import eq 'true')) {
+				push @selectProfs,$profName;
+			}
+		}
+		#==========================================
+		# store available profile list from XML
+		#------------------------------------------
+		$this->{availableProfiles} = \@availableProfiles;
+	}
+	#==========================================
+	# store selected profile list
+	#------------------------------------------
+	$this->{selectedProfiles} = \@selectProfs;
 	return $this;
 }
 
