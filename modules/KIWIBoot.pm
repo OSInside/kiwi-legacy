@@ -6605,15 +6605,21 @@ sub __expandFS {
 		};
 		/^btrfs/    && do {
 			$kiwi -> info ("Resizing $diskType $fsType filesystem");
-			my $bfsctl = $locator -> getExecPath('btrfsctl');
-			if (! $bfsctl) {
-				$kiwi -> error ('Could not locate btrfsctl');
+			my $btrfs_ctrl = $locator -> getExecPath('btrfsctl');
+			my $btrfs_tool = $locator -> getExecPath('btrfs');
+			my $btrfs_cmd;
+			if ((! $btrfs_tool) && (! $btrfs_ctrl)) {
+				$kiwi -> error ('Could not locate btrfs control tool');
 				$kiwi -> failed ();
 				return;
 			}
-			my $bctl = "$bfsctl -r max /mnt";
+			if ($btrfs_tool) {
+				$btrfs_cmd = "$btrfs_tool filesystem resize max /mnt";
+			} else {
+				$btrfs_cmd = "$btrfs_ctrl -r max /mnt";
+			}
 			$status = qxx ("
-					mount $mapper /mnt && $bctl; umount /mnt 2>&1"
+				mount $mapper /mnt && $btrfs_cmd; umount /mnt 2>&1"
 			);
 			$result = $? >> 8;
 			last SWITCH;
