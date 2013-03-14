@@ -4674,6 +4674,7 @@ sub getSingleInstSourceSatSolvable {
 	my %patterns;
 	$patterns{"/suse/setup/descr/patterns"} = "patterns";
 	$patterns{"/repodata/patterns.xml.gz"}  = "projectxml";
+	$patterns{"/repodata/patterns.xml"}     = "projectxml";
 	#==========================================
 	# common data variables
 	#------------------------------------------
@@ -4873,7 +4874,11 @@ sub getSingleInstSourceSatSolvable {
 	$count++;
 	foreach my $patt (keys %patterns) {
 		my $name = $patterns{$patt};
-		$destfile = $sdir."/$name-".$count.".gz";
+		if ($patt =~ /\.gz$/) {
+			$destfile = $sdir."/$name-".$count.".gz";
+		} else {
+			$destfile = $sdir."/$name-".$count;
+		}
 		my $ok = KIWIXML::getInstSourceFile_legacy ($repo.$patt,$destfile);
 		if (($ok) && ($name eq "patterns")) {
 			#==========================================
@@ -4972,11 +4977,21 @@ sub getSingleInstSourceSatSolvable {
 	#==========================================
 	# create solvable from opensuse xml pattern
 	#------------------------------------------
-	if (glob ("$sdir/projectxml-*.gz")) {
-		foreach my $file (glob ("$sdir/projectxml-*.gz")) {
+	if (glob ("$sdir/projectxml-*")) {
+		my $gzicmd = "gzip -cd ";
+		my $stdcmd = "cat ";
+		my $data;
+		my $code;
+		foreach my $file (glob ("$sdir/projectxml-*")) {
 			$destfile = $sdir."/primary-".$count;
-			my $data = qxx ("gzip -cd $file | rpmmd2solv > $destfile 2>&1");
-			my $code = $? >> 8;
+			if ($file =~ /\.gz$/) {
+				$gzicmd .= $file." ";
+				$data = qxx ("$gzicmd | rpmmd2solv > $destfile 2>&1");
+			} else {
+				$stdcmd .= $file." ";
+				$data = qxx ("$stdcmd | rpmmd2solv > $destfile 2>&1");
+			}
+			$code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("--> Can't create SaT solvable file");
