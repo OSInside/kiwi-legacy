@@ -928,7 +928,7 @@ function installBootLoaderGrub2 {
 	#======================================
 	# install grub2 in BIOS mode
 	#--------------------------------------
-	if [ $isEFI -eq 0 ];then
+	if [ $isEFI -eq 0 ] || [ ! -z "$OEMSyncGPT" ];then
 		$instTool $imageDiskDevice 1>&2
 		if [ ! $? = 0 ];then
 			Echo "Failed to install boot loader"
@@ -7807,6 +7807,33 @@ function createFDasdInput {
 		fi
 		echo $cmd >> $input
 	done
+}
+#======================================
+# syncGPT
+#--------------------------------------
+function syncGPT {
+	# /.../
+	# use gptsync/sfdisk to add an MBR into the GPT
+	# ----
+	local device=$1
+	if ! which gptsync &>/dev/null;then
+		Echo "syncGPT: sorry no gptsync tool found... skipped"
+		return 1
+	fi
+	if ! which sfdisk &>/dev/null;then
+		Echo "syncGPT: sorry no sfdisk tool found... skipped"
+		return 1
+	fi
+	if ! gptsync -q $device;then
+		Echo "syncGPT: Couldn't sync MBR to GPT"
+		return 1
+	fi
+	if ! sfdisk $device --force -A 2;then
+		Echo "syncGPT: Couldn't set MBR boot flag"
+		return 1
+	fi
+	export OEMSyncGPT=1
+	return 0
 }
 #======================================
 # partedInit
