@@ -520,6 +520,12 @@ function OEMRepart {
 	fi
 	sleep 1
 	#======================================
+	# sync MBR into GPT if possible
+	#--------------------------------------
+	if [ ! "$partedTableType" = "gpt" ];then
+		syncGPT $imageDiskDevice
+	fi
+	#======================================
 	# setup luks maps
 	#--------------------------------------
 	if [ "$haveLuks" = "yes" ];then

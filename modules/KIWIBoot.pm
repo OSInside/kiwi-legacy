@@ -906,12 +906,11 @@ sub setupInstallCD {
 	if ($bootloader eq "grub2") {
 		# let mkisofs run grub2 efi or eltorito image...
 		$base = "-V \"$volid\" -A \"$appid\" -R -J -f ";
+		$base.= "-b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
+		$base.= "-boot-load-size 4 -boot-info-table -udf ";
+		$base.= "-allow-limited-size ";
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
-			$base.= "-b boot/$efi_arch/efi -no-emul-boot ";
-		} else {
-			$base.= "-b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
-			$base.= "-boot-load-size 4 -boot-info-table -udf ";
-			$base.= "-allow-limited-size ";
+			$base.= "-eltorito-alt-boot -b boot/$efi_arch/efi -no-emul-boot ";
 		}
 		$opts.= "-joliet-long ";
 	} elsif ($bootloader eq "grub") {
@@ -3360,13 +3359,11 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Boot directories
 		#------------------------------------------
-		my @bootdir = ();
+		my @bootdir = ("$tmpdir/boot/grub2/$grubpc");
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			push @bootdir,"$tmpdir/boot/grub2-efi/$efipc";
 			push @bootdir,"$tmpdir/boot/grub2/$efipc";
 			push @bootdir,"$tmpdir/EFI/BOOT";
-		} else {
-			push @bootdir,"$tmpdir/boot/grub2/$grubpc";
 		}
 		$status = qxx ("mkdir -p @bootdir 2>&1");
 		$result = $? >> 8;
@@ -3380,9 +3377,11 @@ sub setupBootLoaderStages {
 		# Create boot partition file
 		#------------------------------------------
 		$kiwi -> info ("Creating grub2 boot partition map");
-		foreach my $bootfile ($bootbios,$bootefi) {
-			next if (($bootfile eq $bootbios) && ($firmware =~ /efi/));
-			next if (($bootfile eq $bootefi)  && ($firmware eq 'bios'));
+		my @bootFiles = ($bootbios);
+		if (($firmware eq "efi") || ($firmware eq "uefi")) {
+			push @bootFiles,$bootefi;
+		}
+		foreach my $bootfile (@bootFiles) {
 			my $bpfd = FileHandle -> new();
 			if (! $bpfd -> open(">$bootfile")) {
 				$kiwi -> failed ();
@@ -3433,9 +3432,11 @@ sub setupBootLoaderStages {
 		#==========================================
 		# import Grub2 stage files...
 		#------------------------------------------
-		foreach my $stage ('bios','efi') {
-			next if (($stage eq "bios") && ($firmware =~ /efi/));
-			next if (($stage eq "efi")  && ($firmware eq 'bios'));
+		my @stageFiles = ('bios');
+		if (($firmware eq "efi") || ($firmware eq "uefi")) {
+			push @stageFiles,'efi';
+		}
+		foreach my $stage (@stageFiles) {
 			my $stageD = $stages{$stage}{stageSRC};
 			my $stageT = $stages{$stage}{stageDST};
 			if (glob($tmpdir.$stageD.'/*')) {
@@ -3466,26 +3467,27 @@ sub setupBootLoaderStages {
 		# Lookup grub2 mkimage tool
 		#------------------------------------------
 		my $locator = KIWILocator -> new();
-		my $grub2_mkimage = $locator -> getExecPath ("grub2-mkimage");
+		my $grub2_bios_mkimage = $locator -> getExecPath ("grub2-mkimage");
+		my $grub2_uefi_mkimage = $grub2_bios_mkimage;
 		if ($firmware =~ /efi/) {
 			my $grub2_efi_mkimage = $locator -> getExecPath (
 				"grub2-efi-mkimage"
 			);
 			if ($grub2_efi_mkimage) {
-				$grub2_mkimage = $grub2_efi_mkimage;
+				$grub2_uefi_mkimage = $grub2_efi_mkimage;
 			}
-		}
-		if (! $grub2_mkimage) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Can't find grub2 mkimage tool");
-			$kiwi -> failed ();
-			return;
 		}
 		#==========================================
 		# Create core efi boot image, standard EFI
 		#------------------------------------------
 		if ($firmware eq "efi") {
 			$kiwi -> info ("Creating grub2 efi boot image");
+			if (! $grub2_uefi_mkimage) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Can't find grub2 mkimage tool");
+				$kiwi -> failed ();
+				return;
+			}
 			my $core    = "$tmpdir/EFI/BOOT/bootx64.efi";
 			my @modules = (
 				'fat','ext2','part_gpt','efi_gop','iso9660','chain',
@@ -3498,7 +3500,7 @@ sub setupBootLoaderStages {
 				$fo = 'i386-efi';
 			}
 			$status = qxx (
-				"$grub2_mkimage -O $fo -o $core -c $bootefi @modules 2>&1"
+				"$grub2_uefi_mkimage -O $fo -o $core -c $bootefi @modules 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -3576,40 +3578,44 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Create core grub2 boot images
 		#------------------------------------------
-		if ($firmware eq 'bios') {
-			$kiwi -> info ("Creating grub2 core boot image");
-			my $format   = $grubpc;
-			my $bootconf = $bootbios;
-			my @modules  = @bios_core_modules;
-			my $core     = "$tmpdir/boot/grub2/$format/core.img";
-			my $cdimg    = "$tmpdir/boot/grub2/$format/eltorito.img";
-			my $cdcore   = "$tmpdir/boot/grub2/$format/cdboot.img";
-			my $status = qxx (
-				"$grub2_mkimage -O $format -o $core -c $bootconf @modules 2>&1"
-			);
-			my $result = $? >> 8;
+		$kiwi -> info ("Creating grub2 bios core boot image");
+		if (! $grub2_bios_mkimage) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't find grub2 mkimage tool");
+			$kiwi -> failed ();
+			return;
+		}
+		my $format   = $grubpc;
+		my $bootconf = $bootbios;
+		my @modules  = @bios_core_modules;
+		my $core     = "$tmpdir/boot/grub2/$format/core.img";
+		my $cdimg    = "$tmpdir/boot/grub2/$format/eltorito.img";
+		my $cdcore   = "$tmpdir/boot/grub2/$format/cdboot.img";
+		my $status = qxx (
+			"$grub2_bios_mkimage -O $format -o $core -c $bootconf @modules 2>&1"
+		);
+		my $result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create core boot image: $status");
+			$kiwi -> failed ();
+			return;
+		}
+		$kiwi -> done();
+		#==========================================
+		# Create eltorito grub2 boot image
+		#------------------------------------------
+		if ((defined $type) && ($type eq "iso")) {
+			$kiwi -> info ("Creating grub2 eltorito boot image");
+			$status = qxx ("cat $cdcore $core > $cdimg");
+			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create core boot image: $status");
+				$kiwi -> error  ("Couldn't create eltorito image: $status");
 				$kiwi -> failed ();
 				return;
 			}
 			$kiwi -> done();
-			#==========================================
-			# Create eltorito grub2 boot image
-			#------------------------------------------
-			if ((defined $type) && ($type eq "iso")) {
-				$kiwi -> info ("Creating grub2 eltorito boot image");
-				$status = qxx ("cat $cdcore $core > $cdimg");
-				$result = $? >> 8;
-				if ($result != 0) {
-					$kiwi -> failed ();
-					$kiwi -> error  ("Couldn't create eltorito image: $status");
-					$kiwi -> failed ();
-					return;
-				}
-				$kiwi -> done();
-			}
 		}
 	}
 	#==========================================
@@ -5059,11 +5065,41 @@ sub installBootLoader {
 		#==========================================
 		# No install required with EFI bios
 		#------------------------------------------
-		if (($firmware ne "efi") && ($firmware ne "uefi")) {
-			$kiwi -> info ("Installing grub2 on device: $diskname");
+		my $gptsync = $locator -> getExecPath ('gptsync');
+		if (($firmware =~ /efi/) && (! $gptsync)) {
+			$kiwi -> warning (
+				"gptsync not installed, skipping legacy BIOS support"
+			);
+			$kiwi -> skipped ();
+		}
+		if (($firmware eq 'bios') || ($gptsync)) {
+			#==========================================
+			# add MBR to GPT
+			#------------------------------------------
+			if (($firmware =~ /efi/) && ($gptsync)) {
+				$kiwi -> info ("Adding sync MBR into GPT...");
+				$status = qxx ("$gptsync -q $diskname 2>&1");
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error ("Couldn't sync MBR to GPT: $status");
+					$kiwi -> failed ();
+					return;
+				}
+				$status = qxx ("sfdisk $diskname --force -A 2 2>&1");
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error ("Couldn't set MBR boot flag: $status");
+					$kiwi -> failed ();
+					return;
+				}
+				$kiwi -> done();
+			}
 			#==========================================
 			# Create device map for the disk
 			#------------------------------------------
+			$kiwi -> info ("Installing grub2 on device: $diskname");
 			my $dmfile = "$tmpdir/boot/grub2/device.map";
 			my $dmfd = FileHandle -> new();
 			if (! $dmfd -> open(">$dmfile")) {
