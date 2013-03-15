@@ -326,7 +326,7 @@ sub test_createContainerBundle {
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
 	my $expectedFl = 'lxc/container-test-lxc.';
-	my $arch = KIWIGlobals -> instance() -> getArch();
+	my $arch = KIWIQX::qxx ("uname -m"); chomp ( $arch );
 	$expectedFl .= $arch . '-1.0.0.tbz';
 	$this -> assert_file_exists($tmpDir . '/' . $expectedFl);
 	my $CHILDWRITE;
