@@ -31,6 +31,7 @@ Release:        0
 # requirements to build packages
 BuildRequires:  e2fsprogs
 BuildRequires:  lvm2
+BuildRequires:  lxc
 BuildRequires:  gcc-c++
 BuildRequires:  libxslt
 BuildRequires:  module-init-tools
