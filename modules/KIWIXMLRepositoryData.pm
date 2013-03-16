@@ -95,7 +95,7 @@ sub new {
 	if (! $this -> __isInitConsistent($init)) {
 		return;
 	}
-	$this -> __initializeBoolMembers($init);
+	$this -> initializeBoolMembers($init);
 	$this->{alias}        = $init->{alias};
 	$this->{components}   = $init->{components};
 	$this->{distribution} = $init->{distribution};
@@ -318,7 +318,7 @@ sub setImageInclude {
 		value  => $include,
 		caller => 'setImageInclude'
 	);
-	return $this -> __setBooleanValue(\%settings);
+	return $this -> setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -336,7 +336,7 @@ sub setPreferLicense {
 		value  => $val,
 		caller => 'setPreferLicense'
 	);
-	return $this -> __setBooleanValue(\%settings);
+	return $this -> setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -442,7 +442,7 @@ sub __isInitConsistent {
 	my $this = shift;
 	my $init = shift;
 	my $kiwi = $this->{kiwi};
-	if (! $this -> __areKeywordBooleanValuesValid($init) ) {
+	if (! $this -> areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
 	if (! $init->{type} ) {

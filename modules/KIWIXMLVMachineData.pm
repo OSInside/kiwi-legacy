@@ -97,7 +97,7 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	if (! $this -> __hasInitArg($init) ) {
+	if (! $this -> hasInitArg($init) ) {
 		return;
 	}
 	my %keywords = map { ($_ => 1) } qw(
@@ -120,10 +120,10 @@ sub new {
 		vmnics
 	);
 	$this->{supportedKeywords} = \%keywords;
-	if (! $this -> __isInitHashRef($init) ) {
+	if (! $this -> isInitHashRef($init) ) {
 		return;
 	}
-	if (! $this -> __areKeywordArgsValid($init) ) {
+	if (! $this -> areKeywordArgsValid($init) ) {
 		return;
 	}
 	if (! $this -> __isInitConsistent($init) ) {

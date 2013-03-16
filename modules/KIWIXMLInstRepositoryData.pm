@@ -56,7 +56,7 @@ sub new {
 	if (! $this -> __isInitConsistent($init)) {
 		return;
 	}
-	$this -> __initializeBoolMembers($init);
+	$this -> initializeBoolMembers($init);
 	$this->{elname} = 'instrepo';
 	$this->{local}  = $init->{local};
 	$this->{name}   = $init->{name};
@@ -117,7 +117,7 @@ sub setLocal {
 		value  => $loc,
 		caller => 'setLocal'
 	);
-	return $this -> __setBooleanValue(\%settings);
+	return $this -> setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -153,7 +153,7 @@ sub __isInitConsistent {
 	my $this = shift;
 	my $init = shift;
 	my $kiwi = $this->{kiwi};
-	if (! $this -> __areKeywordBooleanValuesValid($init) ) {
+	if (! $this -> areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
 	if (! $init->{name} ) {

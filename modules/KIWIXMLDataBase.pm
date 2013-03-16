@@ -67,25 +67,9 @@ sub new {
 }
 
 #==========================================
-# getXMLElement
+# addElement
 #------------------------------------------
-sub getXMLElement {
-	# ...
-	# Must be implemented in each child
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $objName = ref $this;
-	my $msg = "$objName: no implementation of getXMLElement.";
-	$kiwi -> error($msg);
-	$kiwi -> failed();
-	return;
-}
-
-#==========================================
-# __addElement
-#------------------------------------------
-sub __addElement {
+sub addElement {
 	# ...
 	# Add an element with the given name and value to the given parent
 	# ---
@@ -106,9 +90,9 @@ sub __addElement {
 }
 
 #==========================================
-# __areKeywordArgsValid
+# areKeywordArgsValid
 #------------------------------------------
-sub __areKeywordArgsValid {
+sub areKeywordArgsValid {
 	# ...
 	# Verify the keyword arguments
 	# ---
@@ -132,9 +116,9 @@ sub __areKeywordArgsValid {
 }
 
 #==========================================
-# __areKeywordBooleanValuesValid
+# areKeywordBooleanValuesValid
 #------------------------------------------
-sub __areKeywordBooleanValuesValid {
+sub areKeywordBooleanValuesValid {
 	# ...
 	# Verify that the values given for booleans are recognized. Takes a ref
 	# to a hashref
@@ -145,7 +129,7 @@ sub __areKeywordBooleanValuesValid {
 		return $this;
 	}
 	for my $keyword (keys %{$this->{boolKeywords}}) {
-		if (! $this -> __isValidBoolValue($init->{$keyword}) ) {
+		if (! $this -> isValidBoolValue($init->{$keyword}) ) {
 			my $objName = ref $this;
 			my $kiwi = $this->{kiwi};
 			my $msg = "$objName: Unrecognized value for boolean "
@@ -159,9 +143,9 @@ sub __areKeywordBooleanValuesValid {
 }
 
 #==========================================
-# __containsNoWhiteSpace
+# containsNoWhiteSpace
 #------------------------------------------
-sub __containsNoWhiteSpace {
+sub containsNoWhiteSpace {
 	# ...
 	# Verify that the given data contains no whitspace
 	# ---
@@ -170,18 +154,18 @@ sub __containsNoWhiteSpace {
 	my $caller = shift;
 	my $kiwi = $this->{kiwi};
 	if (! $caller ) {
-		my $msg = 'Internal error __containsNoWhiteSpace called without '
+		my $msg = 'Internal error containsNoWhiteSpace called without '
 			. 'call origin argument.';
 		$kiwi -> info($msg);
 		$kiwi -> oops();
 	}
 	if (! $name ) {
-		my $msg = 'Internal error __containsNoWhiteSpace called without '
+		my $msg = 'Internal error containsNoWhiteSpace called without '
 			. 'argument to check.';
 		$kiwi -> info($msg);
 		$kiwi -> oops();
 	}
-	if ($name =~ /\s/) {
+	if ($name =~ /\s/msx) {
 		my $msg = "$caller: given argument contains white space "
 			. 'not supported, retaining current data.';
 		$kiwi -> error($msg);
@@ -192,9 +176,25 @@ sub __containsNoWhiteSpace {
 }
 
 #==========================================
-# __hasInitArg
+# getXMLElement
 #------------------------------------------
-sub __hasInitArg {
+sub getXMLElement {
+	# ...
+	# Must be implemented in each child
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $objName = ref $this;
+	my $msg = "$objName: no implementation of getXMLElement.";
+	$kiwi -> error($msg);
+	$kiwi -> failed();
+	return;
+}
+
+#==========================================
+# hasInitArg
+#------------------------------------------
+sub hasInitArg {
 	# ...
 	# Verify that the argument is defined, error if not.
 	# Used for classes that must be initialized for proper construction.
@@ -214,9 +214,9 @@ sub __hasInitArg {
 }
 
 #==========================================
-# __initializeBoolMembers
+# initializeBoolMembers
 #------------------------------------------
-sub __initializeBoolMembers {
+sub initializeBoolMembers {
 	# ...
 	# Initialize any members that hold boolean values
 	# ---
@@ -228,15 +228,15 @@ sub __initializeBoolMembers {
 						value  => $init->{$boolAttr},
 						caller => 'ctor'
 					);
-		$this -> __setBooleanValue(\%settings);
+		$this -> setBooleanValue(\%settings);
 	}
 	return 1;
 }
 
 #==========================================
-# __isInitHashRef
+# isInitHashRef
 #------------------------------------------
-sub __isInitHashRef {
+sub isInitHashRef {
 	# ...
 	# Verify that the given argument is a hashref
 	# ---
@@ -253,9 +253,9 @@ sub __isInitHashRef {
 }
 
 #==========================================
-# __isValidBoolValue
+# isValidBoolValue
 #------------------------------------------
-sub __isValidBoolValue {
+sub isValidBoolValue {
 	# ...
 	# Verify that the given boolean is a recognized value
 	# true, false, or undef (undef maps to false)
@@ -269,9 +269,9 @@ sub __isValidBoolValue {
 }
 
 #==========================================
-# __setBooleanValue
+# setBooleanValue
 #------------------------------------------
-sub __setBooleanValue {
+sub setBooleanValue {
 	# ...
 	# Generic code to set the given boolean attribute on the object
 	# ---
@@ -282,19 +282,19 @@ sub __setBooleanValue {
 	my $caller = $settings->{caller};
 	my $kiwi   = $this->{kiwi};
 	if (! $attr ) {
-		my $msg = 'Internal error __setBooleanValue called without '
+		my $msg = 'Internal error setBooleanValue called without '
 			. 'attribute to set.';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;
 	}
 	if (! $caller ) {
-		my $msg = 'Internal error __setBoolean called without '
+		my $msg = 'Internal error setBoolean called without '
 			. 'call origin argument.';
 		$kiwi -> info($msg);
 		$kiwi -> oops();
 	}
-	if (! $this -> __isValidBoolValue($bVal) ) {
+	if (! $this -> isValidBoolValue($bVal) ) {
 		my $name = ref $this;
 		my $msg = "$name:$caller: unrecognized argument expecting "
 			. '"true" or "false".';
