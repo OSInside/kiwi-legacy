@@ -57,17 +57,17 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	if (! $this -> __hasInitArg($init) ) {
+	if (! $this -> hasInitArg($init) ) {
 		return;
 	}
 	my %keywords = map { ($_ => 1) } qw(
 		author contact specification type
 	);
 	$this->{supportedKeywords} = \%keywords;
-	if (! $this -> __isInitHashRef($init) ) {
+	if (! $this -> isInitHashRef($init) ) {
 		return;
 	}
-	if (! $this -> __areKeywordArgsValid($init) ) {
+	if (! $this -> areKeywordArgsValid($init) ) {
 		return;
 	}
 	if (! $this -> __isInitConsistent($init) )  {
@@ -140,7 +140,7 @@ sub getXMLElement {
 		childName => 'author',
 		text      => $this -> getAuthor()
 	);
-	$element = $this -> __addElement(\%initAuth);
+	$element = $this -> addElement(\%initAuth);
 	my @contacts = @{$this -> getContactInfo()};
 	for my $cont (@contacts) {
 		my %initCont = (
@@ -148,14 +148,14 @@ sub getXMLElement {
 			childName => 'contact',
 		    text      => $cont
 	    );
-	    $element = $this -> __addElement(\%initCont);
+	    $element = $this -> addElement(\%initCont);
 	}
 	my %initSpec = (
 		parent    => $element,
 		childName => 'specification',
 		text      => $this -> getSpecificationDescript()
 	);
-	$element = $this -> __addElement(\%initSpec);
+	$element = $this -> addElement(\%initSpec);
 	return $element;
 }
 

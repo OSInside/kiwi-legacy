@@ -100,17 +100,17 @@ sub new {
 		rpm_force
 	);
 	$this->{boolKeywords} = \%boolKW;
-	if (! $this -> __isInitHashRef($init) ) {
+	if (! $this -> isInitHashRef($init) ) {
 		return;
 	}
-	if (! $this -> __areKeywordArgsValid($init) ) {
+	if (! $this -> areKeywordArgsValid($init) ) {
 		return;
 	}
 	if ($init) {
 		if (! $this -> __isInitConsistent($init)) {
 			return;
 		}
-		$this -> __initializeBoolMembers($init);
+		$this -> initializeBoolMembers($init);
 		$this->{bootloader_theme}     = $init->{bootloader_theme};
 		$this->{bootsplash_theme}     = $init->{bootsplash_theme};
 		$this->{defaultdestination}   = $init->{defaultdestination};
@@ -340,75 +340,75 @@ sub getXMLElement {
 		childName => 'bootloader-theme',
 		text      => $this -> getBootLoaderTheme()
 	);
-	$element = $this -> __addElement(\%initBLoadT);
+	$element = $this -> addElement(\%initBLoadT);
 	my %initBSplashT = (
 		parent    => $element,
 		childName => 'bootsplash-theme',
 		text      => $this -> getBootSplashTheme()
 	);
-	$element = $this -> __addElement(\%initBSplashT);
+	$element = $this -> addElement(\%initBSplashT);
 	my %initDefDest = (
 		parent    => $element,
 		childName => 'defaultdestination',
 		text      => $this -> getDefaultDest()
 	);
-	$element = $this -> __addElement(\%initDefDest);
+	$element = $this -> addElement(\%initDefDest);
 	my %initDefPreB = (
 		parent    => $element,
 		childName => 'defaultprebuilt',
 		text      => $this -> getDefaultPreBuilt()
 	);
-	$element = $this -> __addElement(\%initDefPreB);
+	$element = $this -> addElement(\%initDefPreB);
 	my %initDefR = (
 		parent    => $element,
 		childName => 'defaultroot',
 		text      => $this -> getDefaultRoot()
 	);
-	$element = $this -> __addElement(\%initDefR);
+	$element = $this -> addElement(\%initDefR);
 	my %initClock = (
 		parent    => $element,
 		childName => 'hwclock',
 		text      => $this -> getHWClock()
 	);
-	$element = $this -> __addElement(\%initClock);
+	$element = $this -> addElement(\%initClock);
 	my %initKeyB = (
 		parent    => $element,
 		childName => 'keytable',
 		text      => $this -> getKeymap()
 	);
-	$element = $this -> __addElement(\%initKeyB);
+	$element = $this -> addElement(\%initKeyB);
 	my %initLoc = (
 		parent    => $element,
 		childName => 'locale',
 		text      => $this -> getLocale()
 	);
-	$element = $this -> __addElement(\%initLoc);
+	$element = $this -> addElement(\%initLoc);
 	if (! $this->{defaultpackagemanager}) {
 		my %initPckgM = (
 			parent    => $element,
 			childName => 'packagemanager',
 			text      => $this -> getPackageManager()
 		);
-		$element = $this -> __addElement(\%initPckgM);
+		$element = $this -> addElement(\%initPckgM);
 	}
 	my %initRPMCSig = (
 		parent    => $element,
 		childName => 'rpm-check-signatures',
 		text      => $this -> getRPMCheckSig()
 	);
-	$element = $this -> __addElement(\%initRPMCSig);
+	$element = $this -> addElement(\%initRPMCSig);
 	my %initRPMNDoc = (
 		parent    => $element,
 		childName => 'rpm-excludedocs',
 		text      => $this -> getRPMExcludeDoc()
 	);
-	$element = $this -> __addElement(\%initRPMNDoc);
+	$element = $this -> addElement(\%initRPMNDoc);
 	my %initRPMForce = (
 		parent    => $element,
 		childName => 'rpm-force',
 		text      => $this -> getRPMForce()
 	);
-	$element = $this -> __addElement(\%initRPMForce);
+	$element = $this -> addElement(\%initRPMForce);
 	my $license = $this -> getShowLic();
 	for my $lic (@{$license}) {
 		my %initShowLic = (
@@ -416,20 +416,20 @@ sub getXMLElement {
 			childName => 'showlicense',
 			text      => $lic
 		);
-		$element = $this -> __addElement(\%initShowLic);
+		$element = $this -> addElement(\%initShowLic);
 	}
 	my %initTimeZ = (
 		parent    => $element,
 		childName => 'timezone',
 		text      => $this -> getTimezone()
 	);
-	$element = $this -> __addElement(\%initTimeZ);
+	$element = $this -> addElement(\%initTimeZ);
 	my %initVer = (
 		parent    => $element,
 		childName => 'version',
 		text      => $this -> getVersion()
 	);
-	$element = $this -> __addElement(\%initVer);
+	$element = $this -> addElement(\%initVer);
 	return $element;
 }
 
@@ -631,7 +631,7 @@ sub setRPMCheckSig {
 		value  => $cSig,
 		caller => 'setRPMCheckSig'
 	);
-	if (! $this -> __setBooleanValue(\%settings) ) {
+	if (! $this -> setBooleanValue(\%settings) ) {
 		return;
 	}
 	return $this;
@@ -651,7 +651,7 @@ sub setRPMExcludeDoc {
 		value  => $eDoc,
 		caller => 'setRPMExcludeDoc'
 	);
-	if (! $this -> __setBooleanValue(\%settings) ) {
+	if (! $this -> setBooleanValue(\%settings) ) {
 		return;
 	}
 	return $this;
@@ -671,7 +671,7 @@ sub setRPMForce {
 		value  => $force,
 		caller => 'setRPMForce'
 	);
-	if (! $this -> __setBooleanValue(\%settings) ) {
+	if (! $this -> setBooleanValue(\%settings) ) {
 		return;
 	}
 	return $this;
@@ -752,7 +752,7 @@ sub __isInitConsistent {
 	# ---
 	my $this = shift;
 	my $init = shift;
-	if (! $this -> __areKeywordBooleanValuesValid($init) ) {
+	if (! $this -> areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
 	if ($init->{packagemanager}) {

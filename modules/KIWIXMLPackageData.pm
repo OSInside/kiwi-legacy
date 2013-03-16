@@ -65,7 +65,7 @@ sub new {
 		bootinclude
 	);
 	$this->{boolKeywords} = \%boolKW;
-	if (! $this -> __areKeywordBooleanValuesValid($init) ) {
+	if (! $this -> areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
 	$this->{bootdelete}  = $init->{bootdelete};
@@ -147,7 +147,7 @@ sub setBootDelete {
 		value  => $val,
 		caller => 'setBootDelete'
 	);
-	return $this -> __setBooleanValue(\%settings);
+	return $this -> setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -165,7 +165,7 @@ sub setBootInclude {
 		value  => $val,
 		caller => 'setBootInclude'
 	);
-	return $this -> __setBooleanValue(\%settings);
+	return $this -> setBooleanValue(\%settings);
 }
 
 #==========================================

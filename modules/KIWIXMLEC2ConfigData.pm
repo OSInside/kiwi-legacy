@@ -61,10 +61,10 @@ sub new {
 		ec2accountnr ec2certfile ec2privatekeyfile ec2region
 	);
 	$this->{supportedKeywords} = \%keywords;
-	if (! $this -> __isInitHashRef($init) ) {
+	if (! $this -> isInitHashRef($init) ) {
 		return;
 	}
-	if (! $this -> __areKeywordArgsValid($init) ) {
+	if (! $this -> areKeywordArgsValid($init) ) {
 		return;
 	}
 	my $kiwi = $this->{kiwi};
@@ -142,19 +142,19 @@ sub getXMLElement {
 		childName => 'ec2accountnr',
 		text      => $this -> getAccountNumber()
 	);
-	$element = $this -> __addElement(\%initAcct);
+	$element = $this -> addElement(\%initAcct);
 	my %initCert = (
 		parent    => $element,
 		childName => 'ec2certfile',
 		text      => $this -> getCertFilePath()
 	);
-	$element = $this -> __addElement(\%initCert);
+	$element = $this -> addElement(\%initCert);
 	my %initPk = (
 		parent    => $element,
 		childName => 'ec2privatekeyfile',
 		text      => $this -> getPrivateKeyFilePath()
 	);
-	$element = $this -> __addElement(\%initPk);
+	$element = $this -> addElement(\%initPk);
 	my $regions = $this -> getRegions();
 	if ($regions) {
 		for my $reg (@{$regions}) {
@@ -163,7 +163,7 @@ sub getXMLElement {
 				childName => 'region',
 				text      => $reg
 			);
-			$element = $this -> __addElement(\%initReg);
+			$element = $this -> addElement(\%initReg);
 		}
 	}
 	return $element;

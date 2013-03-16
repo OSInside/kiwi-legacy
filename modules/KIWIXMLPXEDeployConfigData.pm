@@ -57,10 +57,10 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	if (! $this -> __hasInitArg($init) ) {
+	if (! $this -> hasInitArg($init) ) {
 		return;
 	}
-	if (! $this -> __isInitHashRef($init) ) {
+	if (! $this -> isInitHashRef($init) ) {
 		return;
 	}
 	#==========================================
@@ -72,7 +72,7 @@ sub new {
 		source
 	);
 	$this->{supportedKeywords} = \%keywords;
-	if (! $this -> __areKeywordArgsValid($init) ) {
+	if (! $this -> areKeywordArgsValid($init) ) {
 		return;
 	}
 	if (! $this -> __isInitConsistent($init)) {
