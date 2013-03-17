@@ -140,7 +140,7 @@ sub prepareChecks {
 	if (! $this -> __checkPackageManagerExists()) {
 		return;
 	}
-	if (! $this -> __checkPatternTypeAttrrValueConsistent()) {
+	if (! $this -> __checkPatternTypeAttrValueConsistent()) {
 		return;
 	}
 	if (! $this -> __checkRepoAliasUnique()) {
@@ -377,7 +377,7 @@ sub __checkPackageManagerExists {
 #==========================================
 # __checkPatternTypeAttrValueConsistent
 #------------------------------------------
-sub __checkPatternTypeAttrrValueConsistent {
+sub __checkPatternTypeAttrValueConsistent {
 	# ...
 	# Check that the use of the patternType attribute for the <packages>
 	# element is consistent. The static component of this is checked during
