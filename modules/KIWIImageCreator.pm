@@ -515,15 +515,16 @@ sub createImage {
 	if (! defined $dirCreated) {
 		return;
 	}
-	my $profileNames;
-
-	#TODO: The directory creation becomes obsolete when all image creation
-	# code has been converted to the *Builder infrastructure
+	# /.../
+	# The directory creation here will become obsolete when
+	# all image creation code has been converted to the *Builder
+	# infrastructure
+	# ----
 	my $type = $xml -> getImageType();
 	my $typeName =  $type -> getTypeName();
 	my $activeProfs = $xml -> getActiveProfileNames();
 	my $workDirName = $typeName;
-	for my $prof (@{$profileNames}) {
+	for my $prof (@{$activeProfs}) {
 		$workDirName .= '-' . $prof;
 	}
 	$destination .= "/" . $workDirName;
@@ -533,11 +534,10 @@ sub createImage {
 		return;
 	}
 	$cmdL -> setImageIntermediateTargetDir ($destination);
-	#TODO: End code obsoletion
+	# ----
 	#==========================================
 	# Check tool set
 	#------------------------------------------
-
 	my $para = $this -> __checkType ( $xml, $configDir );
 	if (! defined $para) {
 		return;
