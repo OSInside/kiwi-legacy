@@ -54,7 +54,7 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	if (! $this -> hasInitArg($init) ) {
+	if (! $this -> p_hasInitArg($init) ) {
 		return;
 	}
 	my %keywords = map { ($_ => 1) } qw(
@@ -65,16 +65,16 @@ sub new {
 	$this->{supportedKeywords} = \%keywords;
 	my %boolKW = map { ($_ => 1) } qw( import );
 	$this->{boolKeywords} = \%boolKW;
-	if (! $this -> isInitHashRef($init) ) {
+	if (! $this -> p_isInitHashRef($init) ) {
 		return;
 	}
-	if (! $this -> areKeywordArgsValid($init) ) {
+	if (! $this -> p_areKeywordArgsValid($init) ) {
 		return;
 	}
 	if (! $this -> __isInitConsistent($init)) {
 		return;
 	}
-	$this -> initializeBoolMembers($init);
+	$this -> p_initializeBoolMembers($init);
 	$this->{description} = $init->{description};
 	$this->{name}        = $init->{name};
 
@@ -173,7 +173,7 @@ sub setImportStatus {
 		value  => $val,
 		caller => 'setImportStatus'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -210,7 +210,7 @@ sub __isInitConsistent {
 	my $this = shift;
 	my $init = shift;
 	my $kiwi = $this->{kiwi};
-	if (! $this -> areKeywordBooleanValuesValid($init) ) {
+	if (! $this -> p_areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
 	if (! $init->{description} ) {

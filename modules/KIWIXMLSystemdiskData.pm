@@ -63,10 +63,10 @@ sub new {
 	#------------------------------------------
 	my %keywords = map { ($_ => 1) } qw( name volumes );
 	$this->{supportedKeywords} = \%keywords;
-	if (! $this -> isInitHashRef($init) ) {
+	if (! $this -> p_isInitHashRef($init) ) {
 		return;
 	}
-	if (! $this -> areKeywordArgsValid($init) ) {
+	if (! $this -> p_areKeywordArgsValid($init) ) {
 		return;
 	}
 	if ($init) {

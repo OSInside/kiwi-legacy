@@ -48,7 +48,7 @@ sub new {
 	}
 	my %boolKW = ( bootinclude => 1 );
 	$this->{boolKeywords} = \%boolKW;
-	if (! $this -> areKeywordBooleanValuesValid($init) ) {
+	if (! $this -> p_areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
 	$this->{bootinclude} = $init->{bootinclude};
@@ -98,7 +98,7 @@ sub setBootInclude {
 		value  => $val,
 		caller => 'setBootInclude'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 1;

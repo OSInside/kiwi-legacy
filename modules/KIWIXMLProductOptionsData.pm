@@ -52,10 +52,10 @@ sub new {
 		productvar
 	);
 	$this->{supportedKeywords} = \%keywords;
-	if (! $this -> isInitHashRef($init) ) {
+	if (! $this -> p_isInitHashRef($init) ) {
 		return;
 	}
-	if (! $this -> areKeywordArgsValid($init) ) {
+	if (! $this -> p_areKeywordArgsValid($init) ) {
 		return;
 	}
 	if (! $this -> __isInitConsistent($init) )  {

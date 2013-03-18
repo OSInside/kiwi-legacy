@@ -96,10 +96,10 @@ sub new {
 		unionType
 	);
 	$this->{supportedKeywords} = \%keywords;
-	if (! $this -> isInitHashRef($init) ) {
+	if (! $this -> p_isInitHashRef($init) ) {
 		return;
 	}
-	if (! $this -> areKeywordArgsValid($init) ) {
+	if (! $this -> p_areKeywordArgsValid($init) ) {
 		return;
 	}
 	if ($init) {
@@ -459,13 +459,13 @@ sub getXMLElement {
 		childName => 'initrd',
 		text      => $this -> getInitrd()
 	);
-	$element = $this -> addElement(\%initBootImg);
+	$element = $this -> p_addElement(\%initBootImg);
 	my %initKern = (
 		parent    => $element,
 		childName => 'kernel',
 		text      => $this -> getKernel()
 	);
-	$element = $this -> addElement(\%initKern);
+	$element = $this -> p_addElement(\%initKern);
 	my @pIDs = @{$this -> getPartitionIDs()};
 	if (@pIDs) {
 		my $partElem = XML::LibXML::Element -> new('partitions');
@@ -498,7 +498,7 @@ sub getXMLElement {
 		childName => 'timeout',
 		text      => $this -> getTimeout()
 	);
-	$element = $this -> addElement(\%initTO);
+	$element = $this -> p_addElement(\%initTO);
 	my $unionRO = $this -> getUnionRO();
 	if ($unionRO) {
 		my $uElem = XML::LibXML::Element -> new('union');

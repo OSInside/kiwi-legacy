@@ -67,9 +67,28 @@ sub new {
 }
 
 #==========================================
-# addElement
+# getXMLElement
 #------------------------------------------
-sub addElement {
+sub getXMLElement {
+	# ...
+	# Must be implemented in each child
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $objName = ref $this;
+	my $msg = "$objName: no implementation of getXMLElement.";
+	$kiwi -> error($msg);
+	$kiwi -> failed();
+	return;
+}
+
+#==========================================
+# Protected methods by naming convention
+#------------------------------------------
+#==========================================
+# p_addElement
+#------------------------------------------
+sub p_addElement {
 	# ...
 	# Add an element with the given name and value to the given parent
 	# ---
@@ -90,9 +109,9 @@ sub addElement {
 }
 
 #==========================================
-# areKeywordArgsValid
+# p_areKeywordArgsValid
 #------------------------------------------
-sub areKeywordArgsValid {
+sub p_areKeywordArgsValid {
 	# ...
 	# Verify the keyword arguments
 	# ---
@@ -116,9 +135,9 @@ sub areKeywordArgsValid {
 }
 
 #==========================================
-# areKeywordBooleanValuesValid
+# p_areKeywordBooleanValuesValid
 #------------------------------------------
-sub areKeywordBooleanValuesValid {
+sub p_areKeywordBooleanValuesValid {
 	# ...
 	# Verify that the values given for booleans are recognized. Takes a ref
 	# to a hashref
@@ -129,7 +148,7 @@ sub areKeywordBooleanValuesValid {
 		return $this;
 	}
 	for my $keyword (keys %{$this->{boolKeywords}}) {
-		if (! $this -> isValidBoolValue($init->{$keyword}) ) {
+		if (! $this -> p_isValidBoolValue($init->{$keyword}) ) {
 			my $objName = ref $this;
 			my $kiwi = $this->{kiwi};
 			my $msg = "$objName: Unrecognized value for boolean "
@@ -143,9 +162,9 @@ sub areKeywordBooleanValuesValid {
 }
 
 #==========================================
-# containsNoWhiteSpace
+# p_containsNoWhiteSpace
 #------------------------------------------
-sub containsNoWhiteSpace {
+sub p_containsNoWhiteSpace {
 	# ...
 	# Verify that the given data contains no whitspace
 	# ---
@@ -176,25 +195,9 @@ sub containsNoWhiteSpace {
 }
 
 #==========================================
-# getXMLElement
+# p_hasInitArg
 #------------------------------------------
-sub getXMLElement {
-	# ...
-	# Must be implemented in each child
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $objName = ref $this;
-	my $msg = "$objName: no implementation of getXMLElement.";
-	$kiwi -> error($msg);
-	$kiwi -> failed();
-	return;
-}
-
-#==========================================
-# hasInitArg
-#------------------------------------------
-sub hasInitArg {
+sub p_hasInitArg {
 	# ...
 	# Verify that the argument is defined, error if not.
 	# Used for classes that must be initialized for proper construction.
@@ -214,9 +217,9 @@ sub hasInitArg {
 }
 
 #==========================================
-# initializeBoolMembers
+# p_initializeBoolMembers
 #------------------------------------------
-sub initializeBoolMembers {
+sub p_initializeBoolMembers {
 	# ...
 	# Initialize any members that hold boolean values
 	# ---
@@ -228,15 +231,15 @@ sub initializeBoolMembers {
 						value  => $init->{$boolAttr},
 						caller => 'ctor'
 					);
-		$this -> setBooleanValue(\%settings);
+		$this -> p_setBooleanValue(\%settings);
 	}
 	return 1;
 }
 
 #==========================================
-# isInitHashRef
+# p_isInitHashRef
 #------------------------------------------
-sub isInitHashRef {
+sub p_isInitHashRef {
 	# ...
 	# Verify that the given argument is a hashref
 	# ---
@@ -253,9 +256,9 @@ sub isInitHashRef {
 }
 
 #==========================================
-# isValidBoolValue
+# p_isValidBoolValue
 #------------------------------------------
-sub isValidBoolValue {
+sub p_isValidBoolValue {
 	# ...
 	# Verify that the given boolean is a recognized value
 	# true, false, or undef (undef maps to false)
@@ -269,9 +272,9 @@ sub isValidBoolValue {
 }
 
 #==========================================
-# setBooleanValue
+# p_setBooleanValue
 #------------------------------------------
-sub setBooleanValue {
+sub p_setBooleanValue {
 	# ...
 	# Generic code to set the given boolean attribute on the object
 	# ---
@@ -294,7 +297,7 @@ sub setBooleanValue {
 		$kiwi -> info($msg);
 		$kiwi -> oops();
 	}
-	if (! $this -> isValidBoolValue($bVal) ) {
+	if (! $this -> p_isValidBoolValue($bVal) ) {
 		my $name = ref $this;
 		my $msg = "$name:$caller: unrecognized argument expecting "
 			. '"true" or "false".';
