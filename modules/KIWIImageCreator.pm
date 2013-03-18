@@ -857,7 +857,10 @@ sub createSplash {
 	my $kiwi = $this->{kiwi};
 	my $ird  = $this->{initrd};
 	my $cmdL = $this->{cmdL};
-	my $boot = KIWIBoot -> new($ird,$cmdL);
+	my $prof = $this->{buildProfiles};
+	my $boot = KIWIBoot -> new (
+		$ird,$cmdL,undef,undef,undef,$prof
+	);
 	if (! defined $boot) {
 		return;
 	}
@@ -880,8 +883,11 @@ sub createImageBootUSB {
 	my $kiwi = $this->{kiwi};
 	my $ird  = $this->{initrd};
 	my $cmdL = $this->{cmdL};
+	my $prof = $this->{buildProfiles};
 	$kiwi -> info ("Creating boot USB stick from: $ird...\n");
-	my $boot = KIWIBoot -> new($ird,$cmdL);
+	my $boot = KIWIBoot -> new (
+		$ird,$cmdL,undef,undef,undef,$prof
+	);
 	if (! defined $boot) {
 		return;
 	}
@@ -907,8 +913,11 @@ sub createImageBootCD {
 	my $kiwi = $this->{kiwi};
 	my $ird  = $this->{initrd};
 	my $cmdL = $this->{cmdL};
+	my $prof = $this->{buildProfiles};
 	$kiwi -> info ("Creating boot ISO from: $ird...\n");
-	my $boot = KIWIBoot -> new($ird,$cmdL);
+	my $boot = KIWIBoot -> new (
+		$ird,$cmdL,undef,undef,undef,$prof
+	);
 	if (! defined $boot) {
 		return;
 	}
@@ -933,13 +942,16 @@ sub createImageInstallCD {
 	my $ird  = $this->{initrd};
 	my $sys  = $this->{sysloc};
 	my $cmdL = $this->{cmdL};
+	my $prof = $this->{buildProfiles};
 	$kiwi -> info ("Creating install ISO from: $ird...\n");
 	if (! defined $sys) {
 		$kiwi -> error  ("No Install system image specified");
 		$kiwi -> failed ();
 		return;
 	}
-	my $boot = KIWIBoot -> new($ird,$cmdL,$sys);
+	my $boot = KIWIBoot -> new (
+		$ird,$cmdL,$sys,undef,undef,$prof
+	);
 	if (! defined $boot) {
 		return;
 	}
@@ -964,13 +976,16 @@ sub createImageInstallStick {
 	my $ird  = $this->{initrd};
 	my $sys  = $this->{sysloc};
 	my $cmdL = $this->{cmdL};
+	my $prof = $this->{buildProfiles};
 	$kiwi -> info ("Creating install Stick from: $ird...\n");
 	if (! defined $sys) {
 		$kiwi -> error  ("No Install system image specified");
 		$kiwi -> failed ();
 		return;
 	}
-	my $boot = KIWIBoot -> new($ird,$cmdL,$sys);
+	my $boot = KIWIBoot -> new (
+		$ird,$cmdL,$sys,undef,undef,$prof
+	);
 	if (! defined $boot) {
 		return;
 	}
@@ -995,13 +1010,16 @@ sub createImageInstallPXE {
 	my $ird  = $this->{initrd};
 	my $sys  = $this->{sysloc};
 	my $cmdL = $this->{cmdL};
+	my $prof = $this->{buildProfiles};
 	$kiwi -> info ("Creating install PXE data set from: $ird...\n");
 	if (! defined $sys) {
 		$kiwi -> error  ("No Install system image specified");
 		$kiwi -> failed ();
 		return;
 	}
-	my $boot = KIWIBoot -> new($ird,$cmdL,$sys);
+	my $boot = KIWIBoot -> new (
+		$ird,$cmdL,$sys,undef,undef,$prof
+	);
 	if (! defined $boot) {
 		return;
 	}
