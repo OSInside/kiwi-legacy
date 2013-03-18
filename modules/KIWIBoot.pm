@@ -3415,7 +3415,7 @@ sub setupBootLoaderStages {
 		foreach my $stage (@stageFiles) {
 			my $stageD = $stages{$stage}{stageSRC};
 			my $stageT = $stages{$stage}{stageDST};
-			if (glob($tmpdir.$stageD.'/*')) {
+			if (-d $tmpdir.$stageD) {
 				$status = qxx (
 					'cp '.$tmpdir.$stageD.'/* '.$tmpdir.$stageT.' 2>&1'
 				);
