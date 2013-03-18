@@ -857,11 +857,17 @@ sub setupInstallCD {
 	if ($bootloader eq "grub2") {
 		# let mkisofs run grub2 efi or eltorito image...
 		$base = "-V \"$volid\" -A \"$appid\" -R -J -f ";
-		$base.= "-b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
-		$base.= "-boot-load-size 4 -boot-info-table -udf ";
-		$base.= "-allow-limited-size ";
-		if (($firmware eq "efi") || ($firmware eq "uefi")) {
-			$base.= "-eltorito-alt-boot -b boot/$efi_arch/efi -no-emul-boot ";
+		if ($firmware eq 'bios') {
+			$base.= "-b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
+			$base.= "-boot-load-size 4 -boot-info-table -udf ";
+			$base.= "-allow-limited-size ";
+		} elsif (($firmware eq 'efi') || ($firmware eq 'uefi')) {
+			if (-e "$tmpdir/boot/grub2/i386-pc/eltorito.img") {
+				$base.= "-b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
+				$base.= "-boot-load-size 4 -boot-info-table -udf ";
+				$base.= "-allow-limited-size -eltorito-alt-boot ";
+			}
+			$base.= "-b boot/$efi_arch/efi -no-emul-boot ";
 		}
 		$opts.= "-joliet-long ";
 	} elsif ($bootloader eq "grub") {
@@ -3408,6 +3414,9 @@ sub setupBootLoaderStages {
 		#==========================================
 		# import Grub2 stage files...
 		#------------------------------------------
+		my $stagesOK   = 0;
+		my $stagesBIOS = 0;
+		my $stagesEFI  = 0;
 		my @stageFiles = ('bios');
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			push @stageFiles,'efi';
@@ -3419,24 +3428,35 @@ sub setupBootLoaderStages {
 				$status = qxx (
 					'cp '.$tmpdir.$stageD.'/* '.$tmpdir.$stageT.' 2>&1'
 				);
-			} else {
-				$kiwi -> skipped ();
-				$kiwi -> warning ("No grub2 stage files found in boot image");
-				$kiwi -> skipped ();
-				$kiwi -> info (
-					"Trying to use grub2 stages from local machine"
-				);
-				$status = qxx (
-					'cp '.$stageD.'/* '.$tmpdir.$stageT.' 2>&1'
-				);
+				$result = $? >> 8;
+				if ($result != 0) {
+					next;
+				}
+				$stagesOK = 1;
+				if ($stage eq 'bios') {
+					$stagesBIOS = 1;
+				} elsif ($stage eq 'efi') {
+					$stagesEFI = 1;
+				}
 			}
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Failed importing grub2 stages: $status");
-				$kiwi -> failed ();
-				return;
-			}
+		}
+		if (! $stagesOK) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("No grub2 stage files found in boot image");
+			$kiwi -> failed ();
+			return;
+		}
+		if (($firmware =~ /efi/) && (! $stagesEFI)) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("No grub2 EFI stage files found in boot image");
+			$kiwi -> failed ();
+			return;
+		}
+		if (($firmware eq 'bios') && (! $stagesBIOS)) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("No grub2 BIOS stage files found in boot image");
+			$kiwi -> failed ();
+			return;
 		}
 		$kiwi -> done();
 		#==========================================
@@ -3554,44 +3574,47 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Create core grub2 boot images
 		#------------------------------------------
-		$kiwi -> info ("Creating grub2 bios core boot image");
-		if (! $grub2_bios_mkimage) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Can't find grub2 mkimage tool");
-			$kiwi -> failed ();
-			return;
-		}
-		my $format   = $grubpc;
-		my $bootconf = $bootbios;
-		my @modules  = @bios_core_modules;
-		my $core     = "$tmpdir/boot/grub2/$format/core.img";
-		my $cdimg    = "$tmpdir/boot/grub2/$format/eltorito.img";
-		my $cdcore   = "$tmpdir/boot/grub2/$format/cdboot.img";
-		my $status = qxx (
-			"$grub2_bios_mkimage -O $format -o $core -c $bootconf @modules 2>&1"
-		);
-		my $result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create core boot image: $status");
-			$kiwi -> failed ();
-			return;
-		}
-		$kiwi -> done();
-		#==========================================
-		# Create eltorito grub2 boot image
-		#------------------------------------------
-		if ((defined $type) && ($type eq "iso")) {
-			$kiwi -> info ("Creating grub2 eltorito boot image");
-			$status = qxx ("cat $cdcore $core > $cdimg");
-			$result = $? >> 8;
+		if ($stagesBIOS) {
+			$kiwi -> info ("Creating grub2 bios core boot image");
+			if (! $grub2_bios_mkimage) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Can't find grub2 mkimage tool");
+				$kiwi -> failed ();
+				return;
+			}
+			my $format   = $grubpc;
+			my $bootconf = $bootbios;
+			my @modules  = @bios_core_modules;
+			my $core     = "$tmpdir/boot/grub2/$format/core.img";
+			my $cdimg    = "$tmpdir/boot/grub2/$format/eltorito.img";
+			my $cdcore   = "$tmpdir/boot/grub2/$format/cdboot.img";
+			my $mkimage  = $grub2_bios_mkimage;
+			my $status = qxx (
+				"$mkimage -O $format -o $core -c $bootconf @modules 2>&1"
+			);
+			my $result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create eltorito image: $status");
+				$kiwi -> error  ("Couldn't create core boot image: $status");
 				$kiwi -> failed ();
 				return;
 			}
 			$kiwi -> done();
+			#==========================================
+			# Create eltorito grub2 boot image
+			#------------------------------------------
+			if ((defined $type) && ($type eq "iso")) {
+				$kiwi -> info ("Creating grub2 eltorito boot image");
+				$status = qxx ("cat $cdcore $core > $cdimg");
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("Couldn't create eltorito image: $status");
+					$kiwi -> failed ();
+					return;
+				}
+				$kiwi -> done();
+			}
 		}
 	}
 	#==========================================
