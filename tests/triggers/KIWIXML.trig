@@ -10,6 +10,7 @@ KTXMLDriverData.t
 KTXMLEC2ConfigData.t
 KTXMLFileData.t
 KTXMLPackageIgnoreData.t
+KTImageBuilderBase.t
 KTXMLInfo.t
 KTXMLInstRepositoryData.t
 KTXMLOEMConfigData.t

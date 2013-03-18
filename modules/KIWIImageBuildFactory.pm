@@ -50,6 +50,7 @@ sub new {
 	#------------------------------------------
 	my $xml = shift;
 	my $cmdL = shift;
+	my $uPckImg = shift;
 	my $kiwi = KIWILog -> instance();
 	if (! defined $xml || ref($xml) ne 'KIWIXML') {
 		my $msg = 'KIWIImageBuildFactory: expecting KIWIXML object as '
@@ -65,9 +66,17 @@ sub new {
 		$kiwi -> failed();
 		return;
 	}
-	$this->{cmdL} = $cmdL;
-	$this->{kiwi} = $kiwi;
-	$this->{xml}  = $xml;
+	if (! defined $uPckImg || ref($uPckImg) ne 'KIWIImage') {
+		my $msg = 'KIWIImageBuildFactory: expecting KIWIImage object '
+			. 'as third argument.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{cmdL}    = $cmdL;
+	$this->{uPckImg} = $uPckImg;
+	$this->{kiwi}    = $kiwi;
+	$this->{xml}     = $xml;
 	return $this;
 }
 
@@ -80,11 +89,12 @@ sub getImageBuilder {
 	# ---
 	my $this = shift;
 	my $cmdL = $this->{cmdL};
+    my $unPImg = $this->{uPckImg};
 	my $xml  = $this->{xml};
 	my $typeName = $xml -> getImageType() -> getTypeName();
 	SWITCH: for ($typeName) {
 		/^lxc/smx && do {
-			my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+			my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $unPImg);
 			return $builder;
 		};
 	}

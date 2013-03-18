@@ -24,7 +24,7 @@ my @kiwiModules = qw (
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
 	KIWIGlobals.pm
-	KIWIImageBuilder.pm
+	KIWIImageBuilderBase.pm
 	KIWIImageBuildFactory.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
@@ -91,6 +91,8 @@ my @kiwiModules = qw (
 	KTConfigWriterFactory.t
 	KTContainerBuilder.t
 	KTContainerConfigWriter.t
+	KTImage.t
+	KTImageBuilderBase.t
 	KTImageBuildFactory.t
 	KTImageCreator.t
 	KTLocator.t
@@ -133,6 +135,8 @@ my @kiwiModules = qw (
 	kiwiContainerBuilder.pm
 	kiwiContainerConfigWriter.pm
 	kiwiLocator.pm
+	kiwiImage.pm
+	kiwiImageBuilderBase.pm
 	kiwiImageBuildFactory.pm
 	kiwiImageCreator.pm
 	kiwiRuntimeChecker.pm
@@ -188,7 +192,7 @@ my @notClean1 = qw (
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
 	KIWIGlobals.pm
-	KIWIImageBuilder.pm
+	KIWIImageBuilderBase.pm
 	KIWIImageBuildFactory.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
@@ -255,6 +259,8 @@ my @notClean1 = qw (
 	KTConfigWriterFactory.t
 	KTContainerBuilder.t
 	KTContainerConfigWriter.t
+	KTImage.t
+	KTImageBuilderBase.t
 	KTImageBuildFactory.t
 	KTImageCreator.t
 	KTLocator.t
@@ -297,6 +303,8 @@ my @notClean1 = qw (
 	kiwiContainerBuilder.pm
 	kiwiContainerConfigWriter.pm
 	kiwiLocator.pm
+	kiwiImage.pm
+	kiwiImageBuilderBase.pm
 	kiwiImageBuildFactory.pm
 	kiwiImageCreator.pm
 	kiwiRuntimeChecker.pm
@@ -349,7 +357,7 @@ my @notClean2 = qw (
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
 	KIWIGlobals.pm
-	KIWIImageBuilder.pm
+	KIWIImageBuilderBase.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
 	KIWIImage.pm
@@ -408,7 +416,6 @@ my @notClean3 = qw (
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
 	KIWIGlobals.pm
-	KIWIImageBuilder.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
 	KIWIImage.pm
@@ -473,20 +480,25 @@ my @notClean5 = qw (
 	KIWIPatternsPlugin.pm
 );
 
-my ($chld_in, $chld_out);
+my @changedFiles;
+my %knownFiles = map { ($_ => 1) } @kiwiModules;
+my $chld_in;
+my $chld_out;
 my $pid = open2(
 	$chld_out, $chld_in, 'git', 'diff-index', '--name-only','HEAD'
 );
 waitpid( $pid, 0 );
-
-my @changedFiles;
 # Collect all changed Perl code and verify that all Perl modules are known
 while (<$chld_out>) {
+	my $exists;
+	chomp $_;
+	if (-f $_) {
+		$exists = 1;
+	}
 	my $fname = basename($_);
-	chomp $fname;
 	if ($fname =~ /.*\.pm$|\.pl$|\.t$/x) {
 		push @changedFiles, $_;
-		if (! grep { /^$fname$/x } @kiwiModules) {
+		if (! $knownFiles{$fname} && $exists) {
 			print "Comitting new module '$fname'. Registration required. Add ";
 			print "your module to the\ngit-hooks/pre-commit file in the ";
 			print '@kiwiModules list as well as the notCleanX list';
@@ -508,6 +520,10 @@ my $pathEnv = "$modulesDir:$testInclDir:$pluginsDir";
 
 my @failedToBuild;
 for my $path (@changedFiles) {
+	if (! -f $path) {
+		# File was renamed, but is still in the list delivered by git
+		next;
+	}
 	my $result = system "env PERL5LIB=$pathEnv perl -wc $path";
 	if ($result != 0) {
 		push @failedToBuild, $path;
@@ -531,6 +547,10 @@ my @criticLevelFiles = (\@notClean1, \@notClean2, \@notClean3, \@notClean4,
 my $defSeverity = 3;
 VERIFY:
 for my $path (@changedFiles) {
+	if (! -f $path) {
+		# File was renamed, but is still in the list delivered by git
+		next;
+	}
 	my $listed;
 	for my $level (0..4) {
 		my $fname = basename($path);

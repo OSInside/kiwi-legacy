@@ -1,5 +1,5 @@
 #================
-# FILE          : kiwiImageBuildFactory.pm
+# FILE          : kiwiImage.pm
 #----------------
 # PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2013 SUSE LLC
@@ -8,12 +8,12 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test implementation for the KIWIImageBuildFactory
+# DESCRIPTION   : Unit test implementation for the KIWIImage
 #               : module.
 #               :
 # STATUS        : Development
 #----------------
-package Test::kiwiImageBuildFactory;
+package Test::kiwiImage;
 
 use strict;
 use warnings;
@@ -24,9 +24,8 @@ use base qw /Common::ktTestCase/;
 
 use KIWICommandLine;
 use KIWIImage;
-use KIWIImageBuildFactory;
-use KIWIOverlay;
 use KIWIXML;
+use KIWIOverlay;
 
 #==========================================
 # Constructor
@@ -37,7 +36,7 @@ sub new {
 	# ---
 	my $this = shift -> SUPER::new(@_);
 	$this -> {dataDir} = $this -> getDataDir() . '/kiwiConfigWriterFactory';
-
+	$this -> removeTestTmpDir();
 	return $this;
 }
 
@@ -46,15 +45,16 @@ sub new {
 #------------------------------------------
 sub test_ctor {
 	# ...
-	# Test the KIWIImageBuildFactory
+	# Test the KIWIImage constructor
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this -> {dataDir};
 	my $cmdL = $this -> __getCommandLineObj();
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-    my $image = $this -> __getImageObj($xml, $cmdL);
-	my $bFact = KIWIImageBuildFactory -> new($xml, $cmdL, $image);
+	my $tmpDir = $this -> createTestTmpDir();
+    my $image = KIWIImage -> new($xml, $tmpDir, $tmpDir, undef, '/tmp',
+                                 undef, undef, $cmdL);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -62,7 +62,8 @@ sub test_ctor {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_not_null($bFact);
+	$this -> assert_not_null($image);
+	$this -> removeTestTmpDir();
 	return;
 }
 
@@ -71,13 +72,13 @@ sub test_ctor {
 #------------------------------------------
 sub test_ctor_invalidArg1 {
 	# ...
-	# Test the KIWIImageBuildFactory with invalid first argument
+	# Test the KIWIImage with invalid first argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $bFact = KIWIImageBuildFactory -> new('foo');
+	my $image = KIWIImage -> new('foo');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'KIWIImageBuildFactory: expecting KIWIXML object as '
+	my $expected = 'KIWIImage: expecting KIWIXML object as '
 		. 'first argument.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -85,74 +86,49 @@ sub test_ctor_invalidArg1 {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($bFact);
+	$this -> assert_null($image);
 	return;
 }
 
 #==========================================
-# test_ctor_invalidArg2
+# test_ctor_invalidArg8
 #------------------------------------------
-sub test_ctor_invalidArg2 {
+sub test_ctor_invalidArg8 {
 	# ...
-	# Test the KIWIImageBuildFactory with invalid second argument
+	# Test the KIWIImage with an invalid eigth argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDir = $this -> {dataDir};
+    my $confDir = $this -> {dataDir};
 	my $cmdL = $this -> __getCommandLineObj();
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $bFact = KIWIImageBuildFactory -> new($xml, 'foo');
+	my $image = KIWIImage -> new($xml, '/tmp', '/tmp', undef, '/tmp',
+                                undef, undef, 'foo');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'KIWIImageBuildFactory: expecting KIWICommandLine object '
-		. 'as second argument.';
+	my $expected = 'KIWIImage: expecting KIWICommandLine object as '
+        . 'eigth argument';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($bFact);
+	$this -> assert_null($image);
 	return;
 }
 
 #==========================================
-# test_ctor_invalidArg3
+# test_ctor_NoArg1
 #------------------------------------------
-sub test_ctor_invalidArg3 {
+sub test_ctor_NoArg1 {
 	# ...
-	# Test the KIWIImageBuildFactory with invalid third argument
+	# Test the KIWIImage with no argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDir = $this -> {dataDir};
-	my $cmdL = $this -> __getCommandLineObj();
-	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $bFact = KIWIImageBuildFactory -> new($xml, $cmdL, 'foo');
+	my $image = KIWIImage -> new();
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'KIWIImageBuildFactory: expecting KIWIImage object '
-		. 'as third argument.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_null($bFact);
-	return;
-}
-
-#==========================================
-# test_ctor_noArg1
-#------------------------------------------
-sub test_ctor_noArg1 {
-	# ...
-	# Test the KIWIImageBuildFactory with no argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $bFact = KIWIImageBuildFactory -> new();
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'KIWIImageBuildFactory: expecting KIWIXML object as '
+	my $expected = 'KIWIImage: expecting KIWIXML object as '
 		. 'first argument.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -160,89 +136,136 @@ sub test_ctor_noArg1 {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($bFact);
+	$this -> assert_null($image);
 	return;
 }
 
 #==========================================
-# test_ctor_noArg2
+# test_ctor_NoArg2
 #------------------------------------------
-sub test_ctor_noArg2 {
+sub test_ctor_NoArg2 {
 	# ...
-	# Test the KIWIImageBuildFactory with no second argument
+	# Test the KIWIImage with no second argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDir = $this -> {dataDir};
+    my $confDir = $this -> {dataDir};
 	my $cmdL = $this -> __getCommandLineObj();
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $bFact = KIWIImageBuildFactory -> new($xml);
+	my $image = KIWIImage -> new($xml);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'KIWIImageBuildFactory: expecting KIWICommandLine object '
-		. 'as second argument.';
+	my $expected = 'KIWIImage: expecting unpacked image directory path '
+        . 'as second argument.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($bFact);
+	$this -> assert_null($image);
 	return;
 }
 
 #==========================================
-# test_ctor_noArg3
+# test_ctor_NoArg3
 #------------------------------------------
-sub test_ctor_noArg3 {
+sub test_ctor_NoArg3 {
 	# ...
-	# Test the KIWIImageBuildFactory with no third argument
+	# Test the KIWIImage with no third argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDir = $this -> {dataDir};
+    my $confDir = $this -> {dataDir};
 	my $cmdL = $this -> __getCommandLineObj();
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $bFact = KIWIImageBuildFactory -> new($xml, $cmdL);
+	my $image = KIWIImage -> new($xml, '/tmp');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'KIWIImageBuildFactory: expecting KIWIImage object '
-		. 'as third argument.';
+	my $expected = 'KIWIImage: expecting destination directory as '
+        . 'third argument.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($bFact);
+	$this -> assert_null($image);
 	return;
 }
 
 #==========================================
-# test_expectContBuilder
+# test_ctor_NoArg5
 #------------------------------------------
-sub test_expectContBuilder {
+sub test_ctor_NoArg5 {
 	# ...
-	# Test the getImageBuilder method
+	# Test the KIWIImage with no fifth argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my $confDir = $this -> {dataDir} . '/container';
+    my $confDir = $this -> {dataDir};
 	my $cmdL = $this -> __getCommandLineObj();
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-    my $image = $this -> __getImageObj($xml, $cmdL);
-	my $tmpDir = $this -> createTestTmpDir();
-	$cmdL -> setImageTargetDir($tmpDir);
-	my $bFact = KIWIImageBuildFactory -> new($xml, $cmdL, $image);
-	$this -> assert_not_null($bFact);
-	my $builder = $bFact -> getImageBuilder();
+	my $image = KIWIImage -> new($xml, '/tmp', '/tmp');
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
+	my $expected = 'KIWIImage: expecting system path as fifth argument';
+	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
+	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_str_equals(ref($builder), 'KIWIContainerBuilder');
-	$this ->  removeTestTmpDir();
+	$this -> assert_null($image);
+	return;
+}
+
+#==========================================
+# test_ctor_NoArg8
+#------------------------------------------
+sub test_ctor_NoArg8 {
+	# ...
+	# Test the KIWIImage with no eigth argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+    my $confDir = $this -> {dataDir};
+	my $cmdL = $this -> __getCommandLineObj();
+	my $xml = $this -> __getXMLObj($confDir, $cmdL);
+	my $image = KIWIImage -> new($xml, '/tmp', '/tmp', undef, '/tmp');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIImage: expecting KIWICommandLine object as '
+        . 'eigth argument';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($image);
+	return;
+}
+
+#==========================================
+# test_ctor_NoDirArg3
+#------------------------------------------
+sub test_ctor_NoDirArg3 {
+	# ...
+	# Test the KIWIImage with no third argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+    my $confDir = $this -> {dataDir};
+	my $cmdL = $this -> __getCommandLineObj();
+	my $xml = $this -> __getXMLObj($confDir, $cmdL);
+	my $image = KIWIImage -> new($xml, 'tmp', 'foo');
+	my $msg = $kiwi -> getMessage();
+	my $expected ="KIWIImage: given destination directory 'foo' "
+        . 'does not exist';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($image);
 	return;
 }
 
@@ -258,21 +281,6 @@ sub __getCommandLineObj {
 	# ---
 	my $cmdL = KIWICommandLine -> new();
 	return $cmdL;
-}
-
-#==========================================
-# __getImageObj
-#------------------------------------------
-sub __getImageObj {
-    # ...
-    # Return a basic KIWIImageObject
-    # ---
-    my $this = shift;
-    my $xml  = shift;
-    my $cmdL = shift;
-    my $image = KIWIImage -> new($xml, '/tmp', '/tmp', undef, '/tmp', '/tmp',
-                                 undef, $cmdL);
-    return $image;
 }
 
 #==========================================
