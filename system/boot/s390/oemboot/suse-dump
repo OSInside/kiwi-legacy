@@ -797,9 +797,6 @@ function OEMInstall {
 		#======================================
 		# Dump image(s) on disk
 		#--------------------------------------
-		if which plymouthd &>/dev/null;then
-			plymouth hide-splash
-		fi
 		if [ -z "$pxe" ];then
 			dump="cat $Source"
 			if [ -x /usr/bin/dcounter ];then
