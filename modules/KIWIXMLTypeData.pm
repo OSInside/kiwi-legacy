@@ -101,7 +101,7 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	if (! $this -> hasInitArg($init) ) {
+	if (! $this -> p_hasInitArg($init) ) {
 		return;
 	}
 	# While <ec2config>, <machine>, <oemconfig>, <pxedeploy>, <split>, and
@@ -164,16 +164,16 @@ sub new {
 		sizeadd
 	);
 	$this->{boolKeywords} = \%boolKW;
-	if (! $this -> isInitHashRef($init) ) {
+	if (! $this -> p_isInitHashRef($init) ) {
 		return;
 	}
-	if (! $this -> areKeywordArgsValid($init) ) {
+	if (! $this -> p_areKeywordArgsValid($init) ) {
 		return;
 	}
 	if (! $this -> __isInitConsistent($init)) {
 		return;
 	}
-	$this -> initializeBoolMembers($init);
+	$this -> p_initializeBoolMembers($init);
 	$this->{boot}                   = $init->{boot};
 	$this->{bootfilesystem}         = $init->{bootfilesystem};
 	$this->{bootkernel}             = $init->{bootkernel};
@@ -998,7 +998,7 @@ sub setCheckPrebuilt {
 		value  => $check,
 		caller => 'setCheckPrebuilt'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1015,7 +1015,7 @@ sub setCompressed {
 		value  => $comp,
 		caller => 'setCompressed'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1187,7 +1187,7 @@ sub setFSNoCheck {
 		value  => $check,
 		caller => 'setFSNoCheck'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1236,7 +1236,7 @@ sub setHybrid {
 		value  => $hybrid,
 		caller => 'setHybrid'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1254,7 +1254,7 @@ sub setHybridPersistent {
 		value  => $hybridP,
 		caller => 'setHybridPersistent'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1288,7 +1288,7 @@ sub setInstallFailsafe {
 		value  => $instF,
 		caller => 'setInstallFailsafe'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1306,7 +1306,7 @@ sub setInstallIso {
 		value  => $instI,
 		caller => 'setInstallIso'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1324,7 +1324,7 @@ sub setInstallStick {
 		value  => $instS,
 		caller => 'setInstallStick'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1342,7 +1342,7 @@ sub setInstallPXE {
 		value  => $instP,
 		caller => 'setInstallPXE'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1435,7 +1435,7 @@ sub setPrimary {
 		value  => $prim,
 		caller => 'setPrimary'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1453,7 +1453,7 @@ sub setRAMOnly {
 		value  => $ramO,
 		caller => 'setRAMOnly'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1491,7 +1491,7 @@ sub setSizeAdditive {
 		value  => $add,
 		caller => 'setSizeAdditive'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -1590,7 +1590,7 @@ sub __isInitConsistent {
 		$kiwi -> failed();
 		return;
 	}
-	if (! $this -> areKeywordBooleanValuesValid($init) ) {
+	if (! $this -> p_areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
 	if ($init->{bootloader}) {

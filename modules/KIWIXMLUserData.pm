@@ -69,7 +69,7 @@ sub new {
 	#==========================================
 	# Argument checking and object data store
 	#------------------------------------------
-	if (! $this -> hasInitArg($init) ) {
+	if (! $this -> p_hasInitArg($init) ) {
 		return;
 	}
 	my %keywords = map { ($_ => 1) } qw(
@@ -84,10 +84,10 @@ sub new {
 		userid
 	);
 	$this->{supportedKeywords} = \%keywords;
-	if (! $this -> isInitHashRef($init) ) {
+	if (! $this -> p_isInitHashRef($init) ) {
 		return;
 	}
-	if (! $this -> areKeywordArgsValid($init) ) {
+	if (! $this -> p_areKeywordArgsValid($init) ) {
 		return;
 	}
 	if (! $this -> __isInitConsistent($init)) {
@@ -328,7 +328,7 @@ sub setGroupName {
 		$kiwi -> failed();
 		return;
 	}
-	my $validName = $this -> containsNoWhiteSpace($name, 'setGroupName');
+	my $validName = $this -> p_containsNoWhiteSpace($name, 'setGroupName');
 	if (! $validName ) {
 		return;
 	}
@@ -370,7 +370,7 @@ sub setLoginShell {
 		$kiwi -> failed();
 		return;
 	}
-	my $nameValid = $this -> containsNoWhiteSpace($lsh, 'setLoginShell');
+	my $nameValid = $this -> p_containsNoWhiteSpace($lsh, 'setLoginShell');
 	if (! $nameValid) {
 		return;
 	}
@@ -432,7 +432,7 @@ sub setUserHomeDir {
 		$kiwi -> failed();
 		return;
 	}
-	my $nameValid = $this -> containsNoWhiteSpace($dir, 'setUserHomeDir');
+	my $nameValid = $this -> p_containsNoWhiteSpace($dir, 'setUserHomeDir');
 	if (! $nameValid) {
 		return;
 	}
@@ -474,7 +474,7 @@ sub setUserName {
 		$kiwi -> failed();
 		return;
 	}
-	my $validName = $this -> containsNoWhiteSpace($name, 'setUserName');
+	my $validName = $this -> p_containsNoWhiteSpace($name, 'setUserName');
 	if (! $validName ) {
 		return;
 	}

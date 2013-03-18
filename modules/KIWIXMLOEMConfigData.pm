@@ -114,17 +114,17 @@ sub new {
 		oem_unattended
 	);
 	$this->{boolKeywords} = \%boolKW;
-	if (! $this -> isInitHashRef($init) ) {
+	if (! $this -> p_isInitHashRef($init) ) {
 		return;
 	}
-	if (! $this -> areKeywordArgsValid($init) ) {
+	if (! $this -> p_areKeywordArgsValid($init) ) {
 		return;
 	}
 	if ($init) {
 		if (! $this -> __isInitConsistent($init) )  {
 			return;
 		}
-		$this -> initializeBoolMembers($init);
+		$this -> p_initializeBoolMembers($init);
 		$this->{oem_boot_title}    = $init->{oem_boot_title};
 		$this->{oem_recoveryID}    = $init->{oem_recoveryID};
 		$this->{oem_swapsize}      = $init->{oem_swapsize};
@@ -368,121 +368,121 @@ sub getXMLElement {
 		childName => 'oem-align-partition',
 		text      => $this -> getAlignPartition ()
 	);
-	$element = $this -> addElement(\%initAlign);
+	$element = $this -> p_addElement(\%initAlign);
 	my %initBootT = (
 		parent    => $element,
 		childName => 'oem-boot-title',
 		text      => $this -> getBootTitle ()
 	);
-	$element = $this -> addElement(\%initBootT);
+	$element = $this -> p_addElement(\%initBootT);
 	my %initBootW = (
 		parent    => $element,
 		childName => 'oem-bootwait',
 		text      => $this -> getBootwait ()
 	);
-	$element = $this -> addElement(\%initBootW);
+	$element = $this -> p_addElement(\%initBootW);
 	my %initInplRec = (
 		parent    => $element,
 		childName => 'oem-inplace-recovery',
 		text      => $this -> getInplaceRecovery ()
 	);
-	$element = $this -> addElement(\%initInplRec);
+	$element = $this -> p_addElement(\%initInplRec);
 	my %initKInit = (
 		parent    => $element,
 		childName => 'oem-kiwi-initrd',
 		text      => $this -> getKiwiInitrd ()
 	);
-	$element = $this -> addElement(\%initKInit);
+	$element = $this -> p_addElement(\%initKInit);
 	my %initPartInst = (
 		parent    => $element,
 		childName => 'oem-partition-install',
 		text      => $this -> getPartitionInstall ()
 	);
-	$element = $this -> addElement(\%initPartInst);
+	$element = $this -> p_addElement(\%initPartInst);
 	my %initReboot = (
 		parent    => $element,
 		childName => 'oem-reboot',
 		text      => $this -> getReboot ()
 	);
-	$element = $this -> addElement(\%initReboot);
+	$element = $this -> p_addElement(\%initReboot);
 	my %initRebootInt = (
 		parent    => $element,
 		childName => 'oem-reboot-interactive',
 		text      => $this -> getRebootInteractive ()
 	);
-	$element = $this -> addElement(\%initRebootInt);
+	$element = $this -> p_addElement(\%initRebootInt);
 	my %initRecover = (
 		parent    => $element,
 		childName => 'oem-recovery',
 		text      => $this -> getRecovery ()
 	);
-	$element = $this -> addElement(\%initRecover);
+	$element = $this -> p_addElement(\%initRecover);
 	my %initRecoverID = (
 		parent    => $element,
 		childName => 'oem-recoveryID',
 		text      => $this -> getRecoveryID ()
 	);
-	$element = $this -> addElement(\%initRecoverID);
+	$element = $this -> p_addElement(\%initRecoverID);
 	my %initDown = (
 		parent    => $element,
 		childName => 'oem-shutdown',
 		text      => $this -> getShutdown ()
 	);
-	$element = $this -> addElement(\%initDown);
+	$element = $this -> p_addElement(\%initDown);
 	my %initDownInter = (
 		parent    => $element,
 		childName => 'oem-shutdown-interactive',
 		text      => $this -> getShutdownInteractive ()
 	);
-	$element = $this -> addElement(\%initDownInter);
+	$element = $this -> p_addElement(\%initDownInter);
 	my %initSBoot = (
 		parent    => $element,
 		childName => 'oem-silent-boot',
 		text      => $this -> getSilentBoot ()
 	);
-	$element = $this -> addElement(\%initSBoot);
+	$element = $this -> p_addElement(\%initSBoot);
 	my %initSInst = (
 		parent    => $element,
 		childName => 'oem-silent-install',
 		text      => $this -> getSilentInstall ()
 	);
-	$element = $this -> addElement(\%initSInst);
+	$element = $this -> p_addElement(\%initSInst);
 	my %initSVerify = (
 		parent    => $element,
 		childName => 'oem-silent-verify',
 		text      => $this -> getSilentVerify ()
 	);
-	$element = $this -> addElement(\%initSVerify);
+	$element = $this -> p_addElement(\%initSVerify);
 	my %initSwap = (
 		parent    => $element,
 		childName => 'oem-swap',
 		text      => $this -> getSwap ()
 	);
-	$element = $this -> addElement(\%initSwap);
+	$element = $this -> p_addElement(\%initSwap);
 	my %initSwapS = (
 		parent    => $element,
 		childName => 'oem-swapsize',
 		text      => $this -> getSwapSize ()
 	);
-	$element = $this -> addElement(\%initSwapS);
+	$element = $this -> p_addElement(\%initSwapS);
 	my %initSysSize = (
 		parent    => $element,
 		childName => 'oem-systemsize',
 		text      => $this -> getSystemSize ()
 	);
-	$element = $this -> addElement(\%initSysSize);
+	$element = $this -> p_addElement(\%initSysSize);
 	my %initUnat = (
 		parent    => $element,
 		childName => 'oem-unattended',
 		text      => $this -> getUnattended ()
 	);
-	$element = $this -> addElement(\%initUnat);
+	$element = $this -> p_addElement(\%initUnat);
 	my %initUnatID = (
 		parent    => $element,
 		childName => 'oem-unattended-id',
 		text      => $this -> getUnattendedID ()
 	);
-	$element = $this -> addElement(\%initUnatID);
+	$element = $this -> p_addElement(\%initUnatID);
 	return $element;
 }
 
@@ -501,7 +501,7 @@ sub setAlignPartition {
 		value  => $val,
 		caller => 'setAlignPartition'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -540,7 +540,7 @@ sub setBootwait {
 		value  => $val,
 		caller => 'setBootwait'
 	);
-	if (! $this -> setBooleanValue(\%settings) ) {
+	if (! $this -> p_setBooleanValue(\%settings) ) {
 		return;
 	}
 	if ($this->{oem_bootwait} && $this->{oem_bootwait} eq 'true' ) {
@@ -567,7 +567,7 @@ sub setInplaceRecovery {
 		value  => $val,
 		caller => 'setInplaceRecovery'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -585,7 +585,7 @@ sub setKiwiInitrd {
 		value  => $val,
 		caller => 'setKiwiInitrd'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -603,7 +603,7 @@ sub setPartitionInstall {
 		value  => $val,
 		caller => 'setPartitionInstall'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -622,7 +622,7 @@ sub setReboot {
 		value  => $val,
 		caller => 'setReboot'
 	);
-	if (! $this -> setBooleanValue(\%settings) ) {
+	if (! $this -> p_setBooleanValue(\%settings) ) {
 		return;
 	}
 	if ($this->{oem_reboot} && $this->{oem_reboot} eq 'true') {
@@ -650,7 +650,7 @@ sub setRebootInteractive {
 		value  => $val,
 		caller => 'setRebootInteractive'
 	);
-	if (! $this -> setBooleanValue(\%settings) ) {
+	if (! $this -> p_setBooleanValue(\%settings) ) {
 		return;
 	}
 	if ($this->{oem_reboot_interactive} && $this->{oem_reboot_interactive} eq 'true') {
@@ -677,7 +677,7 @@ sub setRecovery {
 		value  => $val,
 		caller => 'setRecovery'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -714,7 +714,7 @@ sub setShutdown {
 		value  => $val,
 		caller => 'setShutdown'
 	);
-	if (! $this -> setBooleanValue(\%settings) ) {
+	if (! $this -> p_setBooleanValue(\%settings) ) {
 		return;
 	}
 	if ($this->{oem_shutdown} && $this->{oem_shutdown} eq 'true') {
@@ -742,7 +742,7 @@ sub setShutdownInteractive {
 		value  => $val,
 		caller => 'setShutdownInteractive'
 	);
-	if (! $this -> setBooleanValue(\%settings) ) {
+	if (! $this -> p_setBooleanValue(\%settings) ) {
 		return;
 	}
 	if ($this->{oem_shutdown_interactive}
@@ -770,7 +770,7 @@ sub setSilentBoot {
 		value  => $val,
 		caller => 'setSilentBoot'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -788,7 +788,7 @@ sub setSilentInstall {
 		value  => $val,
 		caller => 'setSilentInstall'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -806,7 +806,7 @@ sub setSilentVerify {
 		value  => $val,
 		caller => 'setSilentVerify'
 	);
-	return $this -> setBooleanValue(\%settings);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
@@ -824,7 +824,7 @@ sub setSwap {
 		value  => $val,
 		caller => 'setSwap'
 	);
-	if (! $this -> setBooleanValue(\%settings) ) {
+	if (! $this -> p_setBooleanValue(\%settings) ) {
 		return;
 	}
 	if (! $val || $val eq 'false') {
@@ -886,7 +886,7 @@ sub setUnattended {
 		value  => $val,
 		caller => 'setUnattended'
 	);
-	if (! $this -> setBooleanValue(\%settings) ) {
+	if (! $this -> p_setBooleanValue(\%settings) ) {
 		return;
 	}
 	if (! $val || $val eq 'false') {
@@ -928,7 +928,7 @@ sub __isInitConsistent {
 	# ---
 	my $this = shift;
 	my $init = shift;
-	if (! $this -> areKeywordBooleanValuesValid($init) ) {
+	if (! $this -> p_areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
 	if (! $this -> __noConflictingSettingPostInst($init)) {
