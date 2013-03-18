@@ -400,8 +400,12 @@ sub init {
 	#==================================
 	# Return early if existing root
 	#----------------------------------
+	my $forceBootStrap = $cmdL -> getForceBootstrap();
 	if ($cmdL -> getRecycleRootDir()) {
-		return $this;
+		# return unless bootstrapping is enforced
+		if (! $forceBootStrap) {
+			return $this;
+		}
 	}
 	#==================================
 	# Return early if cache is used

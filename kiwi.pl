@@ -650,6 +650,7 @@ sub init {
 	my @Exclude;               # exclude directories in migrate search
 	my @Skip;                  # skip this package in migration mode
 	my @Profiles;              # list of profiles to include in image
+	my $ForceBootstrap;        # force bootstrap, checked for recycle-root mode
 	my $ForceNewRoot;          # force creation of new root directory
 	my $NoColor;               # don't use colored output (done/failed messages)
 	my $LogPort;               # specify alternative log server port
@@ -724,6 +725,7 @@ sub init {
 		"destdir|d=s"           => \$Destination,
 		"exclude|e=s"           => \@Exclude,
 		"fat-storage=i"         => \$FatStorage,
+		"force-bootstrap"       => \$ForceBootstrap,
 		"force-new-root"        => \$ForceNewRoot,
 		"format|f=s"            => \$Format,
 		"fs-blocksize=i"        => \$FSBlockSize,
@@ -1041,6 +1043,12 @@ sub init {
 		}
 	}
 	#========================================
+	# check if force-bootstrap is set
+	#----------------------------------------
+	if (defined $ForceBootstrap) {
+		$cmdL -> setForceBootstrap ($ForceBootstrap);
+	}
+	#========================================
 	# check if force-new-root is set
 	#----------------------------------------
 	if (defined $ForceNewRoot) {
@@ -1346,6 +1354,15 @@ sub init {
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
+	if (($Build) && ($RecycleRoot)) {
+		$kiwi -> error (
+			"Sorry --recycle-root can be only used in separate build steps"
+		);
+		$kiwi -> failed ();
+		$kiwi -> error ("User --prepare and --create instead of --build");
+		$kiwi -> failed ();
+		kiwiExit (1);
+	}
 	if (($InitCache) && ($LogFile)) {
 		$kiwi -> warning ("Logfile set to terminal in init-cache mode");
 		$cmdL -> setLogFile ("terminal");
@@ -1431,11 +1448,15 @@ sub usage {
 	print "    kiwi -o | --clone <image-path> -d <destination>\n";
 	print "Image Creation in one step:\n";
 	print "    kiwi -b | --build <image-path> -d <destination>\n";
+	print "      [ --cache <dir> ]\n";
 	print "Image Preparation/Creation in two steps:\n";
 	print "    kiwi -p | --prepare <image-path>\n";
-	print "       [ --root <image-root> --cache <dir> ]\n";
+	print "       [ --root <image-root> ]\n";
+	print "       [ --recycle-root <base-root-dir> [ --force-bootstrap ]] ||\n";
+	print "       [ --cache <dir> ]\n";
 	print "    kiwi -c | --create  <image-root> -d <destination>\n";
 	print "       [ --type <image-type> ]\n";
+	print "       [ --recycle-root <base-boot-dir> [ --force-bootstrap ]]\n";
 	print "Image Cache:\n";
 	print "    kiwi --init-cache <image-path>\n";
 	print "       [ --cache <dir> ]\n";

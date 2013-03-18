@@ -129,6 +129,17 @@ sub getForceNewRoot {
 }
 
 #==========================================
+# getForceBootstrap
+#------------------------------------------
+sub getForceBootstrap {
+	# ...
+	# Return the bool value for the force-bootstrap option
+	# ---
+	my $this = shift;
+	return $this -> {forceBootstrap};
+}
+
+#==========================================
 # getBuildType
 #------------------------------------------
 sub getBuildType {
@@ -409,6 +420,16 @@ sub setForceNewRoot {
 	if (! $this -> {setRecycleRoot}) {
 		$this -> {forceNewRoot} = $fnr;
 	}
+	return 1;
+}
+
+#==========================================
+# setForceBootstrap
+#------------------------------------------
+sub setForceBootstrap {
+	my $this = shift;
+	my $fbs  = shift;
+	$this -> {forceBootstrap} = $fbs;
 	return 1;
 }
 
