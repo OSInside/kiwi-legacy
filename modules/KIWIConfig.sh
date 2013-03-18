@@ -1220,12 +1220,11 @@ function suseGFXBoot {
 		fi
 	elif [ "$loader" = "uboot" ];then
 		# uboot loaders
-		if [ -f /boot/u-boot.bin ];then
-			mv /boot/u-boot.bin /image/loader
-		fi
 		if [ -f /boot/MLO ];then
 			mv /boot/MLO /image/loader
 		fi
+		mv /boot/*.bin /image/loader &>/dev/null
+		mv /boot/*.img /image/loader &>/dev/null
 	else
 		# boot loader binary part of MBR
 		:
