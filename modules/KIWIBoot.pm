@@ -4975,10 +4975,8 @@ sub copyBootCode {
 			$kiwi -> failed ();
 			return;
 		}
-		if (-f "$dest/boot/u-boot.bin") {
-			$status = qxx ("mv $dest/boot/u-boot.bin $dest");
-			$result = $? >> 8;
-		}
+		qxx ("mv $dest/boot/*.bin $dest &>/dev/null");
+		qxx ("mv $dest/boot/*.img $dest &>/dev/null");
 		if (-f "$dest/boot/MLO") {
 			$status = qxx ("mv $dest/boot/MLO $dest");
 			$result = $? >> 8;
