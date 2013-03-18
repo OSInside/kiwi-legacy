@@ -254,7 +254,19 @@ sub new {
 		$arch = "ix86";
 	}
 	my %supported = map { ($_ => 1) } qw(
-		armv5tel armv7l ia64 ix86 ppc ppc64 s390 s390x x86_64
+		armv5el
+		armv5tel
+		armv6l
+		armv7l
+		ia64
+		i586
+		i686
+		ix86
+		ppc
+		ppc64
+		s390
+		s390x
+		x86_64
 	);
 	$this->{supportedArch} = \%supported;
 	my $kiwi = KIWILog -> instance();
