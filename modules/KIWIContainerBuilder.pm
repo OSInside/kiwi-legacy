@@ -32,7 +32,7 @@ use KIWIQX qw(qxx);
 use KIWIXML;
 use KIWIXMLTypeData;
 
-use base qw /KIWIImageBuilder/;
+use base qw /KIWIImageBuilderBase/;
 
 #==========================================
 # Exports
@@ -71,6 +71,13 @@ sub createImage {
 	#------------------------------------------
 	my $targetDir = $this -> __createTargetRootTree();
 	if (! $targetDir) {
+		return;
+	}
+	#==========================================
+	# Run the user defined images.sh script
+	#------------------------------------------
+	$status = $this -> p_runUserImageScript();
+	if (! $status) {
 		return;
 	}
 	#==========================================
@@ -125,7 +132,7 @@ sub createImage {
 	#==========================================
 	# write the configuration file
 	#------------------------------------------
-	$status = $this -> __writeConfigFile($confDir);
+	$status = $this -> p_writeConfigFile($confDir);
 	if (! $status) {
 		return;
 	}
@@ -137,13 +144,20 @@ sub createImage {
 		return;
 	}
 	#==========================================
+	# create a checksum file for the container
+	#------------------------------------------
+	$status = $this -> p_createChecksumFiles();
+	if (! $status) {
+		return;
+	}
+	#==========================================
 	# clean up
 	#------------------------------------------
 	$status = $this -> __cleanupWorkingDir();
 	if (! $status) {
 		return;
 	}
-	return $this->{createdFiles};
+	return $this -> p_getCreatedFiles();
 }
 
 #==========================================
@@ -238,7 +252,7 @@ sub __cleanupWorkingDir {
 	my $dirToRm = shift;
 	my $kiwi = $this->{kiwi};
 	$kiwi -> info('Clean up intermediate working directory');
-	my $baseWork = $this -> __getBaseWorkingDir();
+	my $baseWork = $this -> p_getBaseWorkingDir();
 	if (! $dirToRm && $baseWork) {
 		my $cmdL = $this->{cmdL};
 		$dirToRm = $this -> getBaseBuildDirectory() . '/' . $baseWork;
@@ -301,11 +315,11 @@ sub __createContainerBundle {
 	my $baseBuildDir = $this -> getBaseBuildDirectory();
 	my $origin = $baseBuildDir
 		. '/'
-		. $this -> __getBaseWorkingDir();
+		. $this -> p_getBaseWorkingDir();
 	my $globals = KIWIGlobals -> instance();
 	my $imgFlName = $globals -> generateBuildImageName($xml, '-', '-lxc');
 	$imgFlName .= '.tbz';
-	my @createdFiles = ($imgFlName);
+	$this -> p_addCreatedFile($imgFlName);
 	my $tar = $locator -> getExecPath('tar');
 	my $cmd = "cd $origin; "
 		. "$tar -cjf $baseBuildDir/$imgFlName etc var";
@@ -317,7 +331,6 @@ sub __createContainerBundle {
 		return;
 	}
 	$kiwi -> done();
-	$this->{createdFiles} = \@createdFiles;
 	return 1;
 }
 
@@ -597,7 +610,7 @@ sub __createWorkingDir {
 	my $kiwi = $this->{kiwi};
 	my $locator = $this->{locator};
 	my $basePath = $this -> getBaseBuildDirectory();
-	my $baseWork = $this -> __getBaseWorkingDir();
+	my $baseWork = $this -> p_getBaseWorkingDir();
 	if (! $path && ! $baseWork) {
 		return $basePath;
 	}
@@ -682,17 +695,6 @@ sub __disableServices {
 	}
 	$kiwi -> done();
 	return 1;
-}
-
-#==========================================
-# __getBaseWorkingDir
-#------------------------------------------
-sub __getBaseWorkingDir {
-	# ...
-	# Return the name of the base working directory
-	# ---
-	my $this = shift;
-	return $this->{baseWork};
 }
 
 #==========================================

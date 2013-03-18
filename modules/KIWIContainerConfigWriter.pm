@@ -52,9 +52,9 @@ sub new {
 }
 
 #==========================================
-# writeConfigFile
+# p_writeConfigFile
 #------------------------------------------
-sub writeConfigFile {
+sub p_writeConfigFile {
 	# ...
 	# Write the container configuration file
 	# ---
@@ -84,14 +84,17 @@ sub writeConfigFile {
 				$iface = 'eth0';
 			}
 			$config .= 'lxc.network.name = ' . $iface . "\n"
-			. '#remove next line if host DNS configuration should not '
-			. 'be available to container' . "\n"
-			. 'lxc.mount.entry = /etc/resolv.conf '
-			. '/var/lib/lxc/testCont/rootfs/etc/resolv.conf none '
-			. 'bind,ro 0 0' . "\n";
+			    . '#remove next line if host DNS configuration should not '
+			    . 'be available to container' . "\n"
+			    . 'lxc.mount.entry = /etc/resolv.conf '
+			    . '/var/lib/lxc/testCont/rootfs/etc/resolv.conf none '
+			    . 'bind,ro 0 0' . "\n";
 		}
 	}
-	$config .= "\n" . 'lxc.tty = 4' . "\n"
+	$config .= "\n" . '#When the host system has lxc >= 0.8.0 uncoment '
+		. 'the following line' . "\n"
+		. '#lxc.autodev=1' . "\n"
+	    . 'lxc.tty = 4' . "\n"
 		. 'lxc.pts = 1024' . "\n";
 	my $name =  $xml -> getImageType() -> getContainerName();
 	$config .= 'lxc.rootfs = /var/lib/lxc/' . $name . '/rootfs' . "\n";

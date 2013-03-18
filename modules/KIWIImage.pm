@@ -32,10 +32,11 @@ use POSIX qw(getcwd);
 #==========================================
 # KIWI Modules
 #------------------------------------------
+require KIWIGlobals;
+require KIWIImageCreator;
+
 use KIWIBoot;
 use KIWICommandLine;
-use KIWIGlobals;
-use KIWIImageCreator;
 use KIWIIsoLinux;
 use KIWILog;
 use KIWIQX qw (qxx);
@@ -67,45 +68,55 @@ sub new {
 	my $imageOrig  = shift;
 	my $initCache  = shift;
 	my $cmdL       = shift;
-	my $configFile = $xml -> getConfigName();
-	#==========================================
-	# Use absolute path for image destination
-	#------------------------------------------
-	if ($imageDest !~ /^\//) {
-		my $pwd = getcwd();
-		$imageDest = $pwd."/".$imageDest;
-	}
+
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
 	my $kiwi = KIWILog -> instance();
-	if (! defined $cmdL) {
-		$kiwi -> error ("No Commandline reference specified");
-		$kiwi -> failed ();
-		return;
-	}
-	if (! defined $xml) {
-		$kiwi -> error ("No XML reference specified");
-		$kiwi -> failed ();
-		return;
-	}
-	if (! defined $baseSystem) {
-		$kiwi -> error ("No base system path specified");
+	if (! defined $xml || ref($xml) ne 'KIWIXML') {
+        my $msg = 'KIWIImage: expecting KIWIXML object as '
+            . 'first argument.';
+		$kiwi -> error($msg);
 		$kiwi -> failed ();
 		return;
 	}
 	if (! defined $imageTree) {
-		$kiwi -> error  ("No image tree specified");
-		$kiwi -> failed ();
+        my $msg = 'KIWIImage: expecting unpacked image directory path as '
+            . 'second argument.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
-	if (! -f $configFile) {
-		$kiwi -> error  ("Validation of $imageTree failed");
-		$kiwi -> failed ();
+    if (! defined $imageDest) {
+        my $msg = 'KIWIImage: expecting destination directory as'
+            . 'third argument.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
 		return;
 	}
 	if (! -d $imageDest) {
-		$kiwi -> error  ("No valid destdir: $imageDest");
+        my $msg = "KIWIImage: given destination directory '$imageDest' "
+            . 'does not exist';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! defined $baseSystem) {
+        my $msg = 'KIWIImage expecting system path as fifth argument';
+		$kiwi -> error ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	if (! defined $cmdL || ref($cmdL) ne 'KIWICommandLine') {
+        my $msg = 'KIWIImage: expecting KIWICommandLine object as '
+            . 'eigth argument';
+		$kiwi -> error($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	my $configFile = $xml -> getConfigName();
+	if (! -f $configFile) {
+		$kiwi -> error  ("Validation of $imageTree failed");
 		$kiwi -> failed ();
 		return;
 	}
@@ -119,6 +130,13 @@ sub new {
 	}
 	my $arch = qxx ("uname -m"); chomp ( $arch );
 	$arch = ".$arch";
+	#==========================================
+	# Use absolute path for image destination
+	#------------------------------------------
+	if ($imageDest !~ /^\//) {
+		my $pwd = getcwd();
+		$imageDest = $pwd."/".$imageDest;
+	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -148,6 +166,36 @@ sub new {
 	#------------------------------------------
 	$this -> cleanKernelFSMount();
 	return $this;
+}
+
+#==========================================
+# executeUserImagesScript
+#------------------------------------------
+sub executeUserImagesScript {
+    # ...
+    # Execute the images.sh script if it exists
+    # TODO, this will eventually have to move into the builder to enable
+    # parallel builds
+    # ...
+    my $this = shift;
+    my $imageTree = $this->{imageTree};
+    my $kiwi      = $this->{kiwi};
+    if (-x "$imageTree/image/images.sh") {
+        $kiwi -> info ('Calling image script: images.sh');
+		my ($code,$data) = KIWIGlobals -> instance() -> callContained (
+            $imageTree,"/image/images.sh"
+		);
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> info   ($data);
+			$this -> cleanMount();
+			return;
+		} else {
+			$kiwi -> loginfo ("images.sh: $data");
+		}
+		$kiwi -> done ();
+	}
+    return $this;
 }
 
 #==========================================
@@ -5292,15 +5340,17 @@ sub DESTROY {
 	my $this = shift;
 	my $dirs = $this->{tmpdirs};
 	my $imageDest = $this->{imageDest};
-	my $spldir    = $imageDest."/splash";
-	foreach my $dir (@{$dirs}) {
-		qxx ("rm -rf $dir 2>&1");
-	}
-	if (-d $spldir) {
-		qxx ("rm -rf $spldir 2>&1");
-	}
-	$this -> cleanMount();
-	$this -> cleanLuks();
+    if ($imageDest) {
+        my $spldir    = $imageDest."/splash";
+        foreach my $dir (@{$dirs}) {
+            qxx ("rm -rf $dir 2>&1");
+        }
+        if (-d $spldir) {
+            qxx ("rm -rf $spldir 2>&1");
+        }
+        $this -> cleanMount();
+        $this -> cleanLuks();
+    }
 	return $this;
 }
 
