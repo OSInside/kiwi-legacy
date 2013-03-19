@@ -880,6 +880,50 @@ sub test_addDriversNoArgs {
 }
 
 #==========================================
+# test_addDriversNoDups
+#------------------------------------------
+sub test_addDriversNoDups {
+    # ...
+    # Verify that no duplicates are added
+    # ---
+    my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this->{dataDir} . 'driversConfig';
+	my $xml = KIWIXML -> new(
+		$confDir, undef, undef, $this->{cmdL}
+	);
+	my @drvNames = qw /epat usb e100/;
+	my @drvsToAdd = ();
+	for my $drv (@drvNames) {
+		my %init = ( name => $drv );
+		push @drvsToAdd, KIWIXMLDriverData -> new(\%init);
+	}
+	$xml = $xml -> addDrivers(\@drvsToAdd, 'default');
+	my $msg = $kiwi -> getMessage();
+    my $expected = "Added following drivers:\n"
+        . "  --> epat\n"
+        . "  --> e100\n";
+	$this -> assert_str_equals($expected, $msg);
+    my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('info', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('completed', $state);
+	$this -> assert_not_null($xml);
+	# Verify this has the expected results
+	my @defDrvs = qw /e1000 rs232 usb/;
+	my @expectedDrvs = @defDrvs;
+    push @expectedDrvs, 'epat';
+    push @expectedDrvs, 'e100';
+	my @drvsUsed = @{$xml -> getDrivers()};
+	my @drvNamesUsed = ();
+	for my $drv (@drvsUsed) {
+		push @drvNamesUsed, $drv -> getName();
+	}
+	$this -> assert_array_equal(\@drvNamesUsed, \@expectedDrvs);
+    return;
+}
+
+#==========================================
 # test_addDriversToCurrentProf
 #------------------------------------------
 sub test_addDriversToCurrentProf {
@@ -913,11 +957,15 @@ sub test_addDriversToCurrentProf {
 	}
 	$xml = $xml -> addDrivers(\@drvsToAdd);
 	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
+    $expected = "Added following drivers:\n"
+        . "  --> vboxsf\n"
+        . "  --> epat\n"
+        . "  --> dcdbas\n";
+	$this -> assert_str_equals($expected, $msg);
 	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
+	$this -> assert_str_equals('info', $msgT);
 	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('completed', $state);
 	$this -> assert_not_null($xml);
 	# Verify this has the expected results, we should get the default drivers
 	# plus the arch specific profile drivers plus the ones added
@@ -979,11 +1027,15 @@ sub test_addDriversToDefault {
 	}
 	$xml = $xml -> addDrivers(\@drvsToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
+    my $expected = "Added following drivers:\n"
+        . "  --> vboxsf\n"
+        . "  --> epat\n"
+        . "  --> dcdbas\n";
+	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
+	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('completed', $state);
 	$this -> assert_not_null($xml);
 	# Verify this has the expected results, we should get the default drivers
 	# plus the arch specific profile drivers plus the ones added
@@ -1022,47 +1074,6 @@ sub test_addDriversWrongArgs {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
-	return;
-}
-
-#==========================================
-# test_addDrivers_legacy
-#------------------------------------------
-sub test_addDrivers_legacy {
-	# ...
-	# Verify proper operation of addDrivers method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'driversConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	$xml = $xml -> addDrivers_legacy('fglrx', 'wl2000');
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	my @driversNodes = $xml -> getDriversNodeList_legacy() -> get_nodelist();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	my @expectedDrivers = qw /usb e1000 rs232 fglrx wl2000/;
-	my @confDrivers;
-	for my $node (@driversNodes) {
-		my @files = $node -> getElementsByTagName ("file");
-		for my $element (@files) {
-			my $name = $element -> getAttribute ("name");
-			push (@confDrivers, $name);
-		}
-	}
-	$this -> assert_array_equal(\@expectedDrivers, \@confDrivers);
 	return;
 }
 
@@ -5071,40 +5082,6 @@ sub test_getDrivers {
 	my @confDrivers;
 	for my $drvData (@drivers) {
 		push @confDrivers, $drvData -> getName();
-	}
-	$this -> assert_array_equal(\@expectedDrivers, \@confDrivers);
-	return;
-}
-
-#==========================================
-# test_getDriversNodeList_legacy
-#------------------------------------------
-sub test_getDriversNodeList_legacy {
-	# ...
-	# Verify proper return of getDriversNodeList method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'driversConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my @driversNodes = $xml -> getDriversNodeList_legacy() -> get_nodelist();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	my @expectedDrivers = qw /usb e1000 rs232/;
-	my @confDrivers;
-	for my $node (@driversNodes) {
-		my @files = $node -> getElementsByTagName ("file");
-		for my $element (@files) {
-			my $name = $element -> getAttribute ("name");
-			push (@confDrivers, $name);
-		}
 	}
 	$this -> assert_array_equal(\@expectedDrivers, \@confDrivers);
 	return;

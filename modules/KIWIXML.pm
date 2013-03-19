@@ -329,7 +329,6 @@ sub new {
 	#------------------------------------------
 	my $imgnameNodeList = $systemTree -> getElementsByTagName ("image");
 	my $optionsNodeList = $systemTree -> getElementsByTagName ("preferences");
-	my $driversNodeList = $systemTree -> getElementsByTagName ("drivers");
 	my $stripNodeList   = $systemTree -> getElementsByTagName ("strip");
 	my $usrdataNodeList = $systemTree -> getElementsByTagName ("users");
 	my $repositNodeList = $systemTree -> getElementsByTagName ("repository");
@@ -347,7 +346,6 @@ sub new {
 	$this->{repositNodeList} = $repositNodeList;
 	$this->{packageNodeList} = $packageNodeList;
 	$this->{instsrcNodeList} = $instsrcNodeList;
-	$this->{driversNodeList} = $driversNodeList;
 	$this->{stripNodeList}   = $stripNodeList;
 	#==========================================
 	# Data structure containing the XML file information
@@ -641,6 +639,7 @@ sub addDrivers {
 	if (! @profsToUse) {
 		return;
 	}
+    my @addedDrivers;
 	for my $prof (@profsToUse) {
 		for my $drvObj (@{$drivers}) {
 			my $arch = $drvObj -> getArch();
@@ -651,11 +650,24 @@ sub addDrivers {
 				profName => $prof,
 				type     => 'image'
 			);
-			if (! $this -> __storeInstallData(\%storeData)) {
+            my $stored = $this -> __storeInstallData(\%storeData);
+			if (! $stored) {
 				return;
 			}
+            if (ref $stored eq 'KIWIXMLDriverData') {
+                push @addedDrivers, $stored -> getName();
+            }
 		}
 	}
+    if (@addedDrivers) {
+        $kiwi -> info("Added following drivers:\n");
+    }
+    for my $name (@addedDrivers) {
+        $kiwi -> info("  --> $name\n");
+    }
+    if (@addedDrivers) {
+        $kiwi -> done();
+    }
 	return $this;
 }
 
@@ -5044,7 +5056,9 @@ sub __storeInstallData {
 	# ...
 	# Store the given install data object in the proper location in the data
 	# structure. Install data objects are objects of children of the
-	# <packages> element
+	# <packages> or <driver> element.
+    # If the object was stored, return the object
+    # If th object was already present return 1
 	# ---
 	my $this      = shift;
 	my $storeInfo = shift;
@@ -5074,13 +5088,22 @@ sub __storeInstallData {
 	if (! $entryPath) {
 		return;
 	}
+    my $stored = 1;
 	if ($entryPath->{$accessID}) {
-		push @{$entryPath->{$accessID}}, $objToStore;
+        # Do not store duplicates
+        my %definedNames = map { ($_->getName() => 1) }
+            @{$entryPath->{$accessID}};
+        my $name = $objToStore -> getName();
+        if (! $definedNames{$name}) {
+            push @{$entryPath->{$accessID}}, $objToStore;
+            $stored = $objToStore;
+        }
 	} else {
 		my @data = ($objToStore);
 		$entryPath->{$accessID} = \@data;
+        $stored = $objToStore;
 	}
-	return 1;
+	return $stored;
 }
 
 #==========================================
@@ -5842,41 +5865,6 @@ sub addArchives_legacy {
 }
 
 #==========================================
-# addDrivers_legacy
-#------------------------------------------
-sub addDrivers_legacy {
-	# ...
-	# Add the given driver list to the specified drivers
-	# section of the xml description parse tree.
-	# ----
-	my @drvs  = @_;
-	my $this  = shift @drvs;
-	my $kiwi  = $this->{kiwi};
-	my $nodes = $this->{driversNodeList};
-	my $nodeNumber = -1;
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node = $nodes -> get_node($i);
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		$nodeNumber = $i;
-	}
-	if ($nodeNumber < 0) {
-		$kiwi -> loginfo ("addDrivers: no drivers section found... skipped\n");
-		return $this;
-	}
-	foreach my $driver (@drvs) {
-		next if ($driver eq "");
-		my $addElement = XML::LibXML::Element -> new ("file");
-		$addElement -> setAttribute("name",$driver);
-		$nodes -> get_node($nodeNumber)
-			-> appendChild ($addElement);
-	}
-	$this -> __updateXML_legacy();
-	return $this;
-}
-
-#==========================================
 # addImagePackages_legacy
 #------------------------------------------
 sub addImagePackages_legacy {
@@ -6341,25 +6329,7 @@ sub getImageConfig_legacy {
 	#==========================================
 	# drivers
 	#------------------------------------------
-	@nodelist = $this->{driversNodeList} -> get_nodelist();
-	foreach my $element (@nodelist) {
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		my @ntag = $element -> getElementsByTagName ("file");
-		my $type = "kiwi_drivers";
-		my $data = "";
-		foreach my $element (@ntag) {
-			my $name =  $element -> getAttribute ("name");
-			$data = $data.",".$name;
-		}
-		$data =~ s/^,+//;
-		if (defined $result{$type}) {
-			$result{$type} .= ",".$data;
-		} else {
-			$result{$type} = $data;
-		}
-	}
+	# drivers are handled in the new data structure
 	#==========================================
 	# machine
 	#------------------------------------------
@@ -8392,18 +8362,6 @@ sub getRepoNodeList_legacy {
 }
 
 #==========================================
-# getDriversNodeList_legacy
-#------------------------------------------
-sub getDriversNodeList_legacy {
-	# ...
-	# Return a list of all <drivers> nodes. Each list member
-	# is an XML::LibXML::Element object pointer
-	# ---
-	my $this = shift;
-	return $this->{driversNodeList};
-}
-
-#==========================================
 # writeXMLDescription_legacy
 #------------------------------------------
 sub writeXMLDescription_legacy {
@@ -8991,18 +8949,11 @@ sub __updateDescriptionFromChangeSet_legacy {
 	#==========================================
 	# 1) merge/update repositories
 	#------------------------------------------
-	# Repos are handled though the new data structure
+	# Repos are handled through the new data structure
 	#==========================================
 	# 2) merge/update drivers
 	#------------------------------------------
-	if (@{$changeset->{driverList}}) {
-		$kiwi -> info ("Updating driver section(s):\n");
-		my @drivers = @{$changeset->{driverList}};
-		foreach my $d (@drivers) {
-			$kiwi -> info ("--> $d\n");
-		}
-		$this -> addDrivers_legacy (@drivers);
-	}
+    # Driver data is handled through the new data structure
 	#==========================================
 	# 3) merge/update strip
 	#------------------------------------------

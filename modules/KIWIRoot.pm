@@ -1050,6 +1050,7 @@ sub setup {
 	#========================================
 	# create .profile from <image> tags
 	#----------------------------------------
+    # Duplicated with ImageCrator, refactoring needed
 	$kiwi -> info ("Create .profile for package scripts");
 	my $FD = FileHandle -> new();
 	if (! $FD -> open (">$root/.profile")) {
@@ -1065,6 +1066,17 @@ sub setup {
 		$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
 		print $FD "$key=\"$config{$key}\"\n";
 	}
+    my $drivers = $xml -> getDrivers();
+    if ($drivers) {
+        my $drvCfg = "kiwi_drivers='";
+        for my $drv (@{$drivers}) {
+            $drvCfg .= $drv -> getName();
+            $drvCfg .= ',';
+        }
+        chop $drvCfg;
+        $drvCfg .= "'\n";
+        print $FD $drvCfg;
+    }
 	$FD -> close();
 	#========================================
 	# configure the system
