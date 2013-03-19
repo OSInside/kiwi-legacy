@@ -147,12 +147,23 @@ sub removeTestTmpDir {
 	my $this = shift;
 	# Before removing anything make sure there are no dangling mounts that
 	# might have a negative imapct on the system we run on
-	my $mounts;
-	if (! open $mounts, '<', '/proc/mounts' ) {
-		return 0;
+	my @mountInfo;
+	if (! -f '/proc/mounts') {
+	    my $chld_in;
+	    my $chld_out;
+	    my $pid = open2($chld_out, $chld_in, 'mount');
+	    waitpid $pid, 0;
+	    while (<$chld_out>) {
+			push @mountInfo, $_;
+	    }
+	} else {
+	    my $mounts;
+	    if (! open $mounts, '<', '/proc/mounts' ) {
+			return 0;
+	    }
+	    @mountInfo = <$mounts>;
+	    close $mounts;
 	}
-	my @mountInfo = <$mounts>;
-	close $mounts;
 	for my $line (@mountInfo) {
 		if ($line =~ /.*kiwi.*/x) {
 			my ($source, $mntPnt, $rest) = split /\s/x, $line;
