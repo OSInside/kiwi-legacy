@@ -572,10 +572,15 @@ sub setupUpgrade {
 	# ...
 	# upgrade the previosly installed root system
 	# using the package manager upgrade functionality
+	# along with the upgrade additional packages can
+	# be removed or installed. It's also possible to
+	# perform only the package remove/install operation
+	# without running the dist-upgrade
 	# ---
 	my $this       = shift;
 	my $addPacks   = shift;
 	my $delPacks   = shift;
+	my $noUpgrade  = shift;
 	my $kiwi       = $this->{kiwi};
 	my $root       = $this->{root};
 	my $xml        = $this->{xml};
@@ -592,7 +597,15 @@ sub setupUpgrade {
 	#==========================================
 	# Create screen call file
 	#------------------------------------------
-	$kiwi -> info ("Upgrading image...");
+	if ($noUpgrade) {
+		$kiwi -> info (
+			"Checking for package install/remove requests..."
+		);
+	} else {
+		$kiwi -> info (
+			"Upgrading/Checking for package install/remove requests....."
+		);
+	}
 	my @installOpts = (
 		"--auto-agree-with-licenses"
 	);
@@ -617,6 +630,9 @@ sub setupUpgrade {
 	print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 	print $fd "export YAST_IS_RUNNING=true\n";
 	print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
+	#==========================================
+	# Handle remove request
+	#------------------------------------------
 	if (defined $delPacks) {
 		my @removePackages = @{$delPacks};
 		if (@removePackages) {
@@ -626,6 +642,17 @@ sub setupUpgrade {
 			print $fd "test \$? = 0 && ";
 		}
 	}
+	#==========================================
+	# Handle upgrade request
+	#------------------------------------------
+	if (! $noUpgrade) {
+		print $fd "test \$? = 0 && @kchroot @zypper dist-upgrade ";
+		print $fd "@installOpts &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+	}
+	#==========================================
+	# Handle install request
+	#------------------------------------------
 	if (defined $addPacks) {
 		my @addonPackages = @{$addPacks};
 		my @newpatts = ();
@@ -642,8 +669,6 @@ sub setupUpgrade {
 			}
 		}
 		@addonPackages = @newpacks;
-		print $fd "@kchroot @zypper dist-upgrade @installOpts &\n";
-		print $fd "SPID=\$!;wait \$SPID\n";
 		if (@newprods) {
 			foreach my $p (@newprods) {
 				push @institems,"product:$p";
@@ -660,14 +685,14 @@ sub setupUpgrade {
 		print $fd "test \$? = 0 && @kchroot @zypper install ";
 		print $fd "@installOpts @institems &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-	} else {
-		print $fd "@kchroot @zypper dist-upgrade @installOpts &\n";
-		print $fd "SPID=\$!;wait \$SPID\n";
 	}
 	print $fd "ECODE=\$?\n";
 	print $fd "echo \$ECODE > $screenCall.exit\n";
 	print $fd "exit \$ECODE\n";
 	$fd -> close();
+	#==========================================
+	# Perform call
+	#------------------------------------------
 	return $this -> setupScreenCall();
 }
 

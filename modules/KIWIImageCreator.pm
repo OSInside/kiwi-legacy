@@ -197,6 +197,7 @@ sub prepareBootImage {
 #------------------------------------------
 sub upgradeImage {
 	my $this      = shift;
+	my $upStatus  = shift;
 	my $configDir = $this -> {configDir};
 	my $kiwi      = $this -> {kiwi};
 	my $cmdL      = $this -> {cmdL};
@@ -248,7 +249,7 @@ sub upgradeImage {
 		return;
 	}
 	return $this -> __upgradeTree(
-		$xml,$this->{configDir}
+		$xml,$this->{configDir},$upStatus
 	);
 }
 
@@ -611,7 +612,7 @@ sub createImage {
 		if (! $kic) {
 			return;
 		}
-		if (! $kic -> upgradeImage()) {
+		if (! $kic -> upgradeImage("NoDistUpgrade")) {
 			return;
 		}
 		$cmdL -> setAdditionalPackages ([]);
@@ -1183,6 +1184,7 @@ sub __upgradeTree {
 	my $this      = shift;
 	my $xml       = shift;
 	my $configDir = shift;
+	my $upStatus  = shift;
 	my $kiwi      = $this -> {kiwi};
 	my $cmdL      = $this -> {cmdL};
 	my $cacheMode = "remount";
@@ -1211,7 +1213,7 @@ sub __upgradeTree {
 	#==========================================
 	# Upgrade root system
 	#------------------------------------------
-	if (! $root -> upgrade ()) {
+	if (! $root -> upgrade ($upStatus)) {
 		$kiwi -> error ("Image Upgrade failed");
 		$kiwi -> failed ();
 		return;

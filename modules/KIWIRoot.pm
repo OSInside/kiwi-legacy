@@ -569,9 +569,10 @@ sub upgrade {
 	# Upgrade a previosly prepared image root tree
 	# with respect to changes of the installation source(s)
 	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $root = $this->{root};
+	my $this     = shift;
+	my $upStatus = shift;
+	my $kiwi     = $this->{kiwi};
+	my $root     = $this->{root};
 	my $manager  = $this->{manager};
 	my $addPacks = $this->{addPacks};
 	my $delPacks = $this->{delPacks};
@@ -622,7 +623,7 @@ sub upgrade {
 		$manager -> freeLock();
 		return;
 	}
-	if (! $manager -> setupUpgrade ($addPacks,$delPacks)) {
+	if (! $manager -> setupUpgrade ($addPacks,$delPacks,$upStatus)) {
 		$this -> cleanupResolvConf();
 		$manager -> freeLock();
 		return;

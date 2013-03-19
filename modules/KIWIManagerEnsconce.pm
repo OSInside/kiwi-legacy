@@ -255,12 +255,12 @@ sub removePackages {
 #------------------------------------------
 sub setupUpgrade {
 	# ...
-	# upgrade the previosly installed root system
-	# using the package manager upgrade functionality
+	# Ignored for ensconce, always report success
 	# ---
 	my $this       = shift;
 	my $addPacks   = shift;
 	my $delPacks   = shift;
+	my $noUpgrade  = shift;
 	my $screenCall = $this->{screenCall};
 	#==========================================
 	# setup screen call
@@ -269,7 +269,6 @@ sub setupUpgrade {
 	if (! defined $fd) {
 		return;
 	}
-	# Ignored for ensconce, always report package as installed
 	print $fd "echo 0 > $screenCall.exit; exit 0\n";
 	$fd -> close();
 	return $this;
