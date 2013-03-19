@@ -35,6 +35,7 @@ BuildRequires:  lxc
 BuildRequires:  gcc-c++
 BuildRequires:  libxslt
 BuildRequires:  module-init-tools
+BuildRequires:       rsync
 BuildRequires:  screen
 BuildRequires:  zlib-devel
 %if 0%{?suse_version} > 1020
@@ -53,6 +54,7 @@ BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
 BuildRequires:  perl-Class-Singleton
 BuildRequires:  perl-Config-IniFiles
+BuildRequires:  perl-Digest-SHA1
 BuildRequires:  perl-File-Slurp
 BuildRequires:  perl-libwww-perl
 BuildRequires:  perl-JSON
@@ -76,6 +78,7 @@ Requires:		perl = %{perl_version}
 %endif
 Requires:       perl-Class-Singleton
 Requires:       perl-Config-IniFiles
+Requires:       perl-Digest-SHA1
 Requires:       perl-File-Slurp
 Requires:       perl-JSON
 Requires:       perl-libwww-perl
