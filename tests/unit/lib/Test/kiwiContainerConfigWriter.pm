@@ -293,11 +293,11 @@ sub test_setConfigDirNoExist {
 }
 
 #==========================================
-# test_writeConfigFile
+# test_p_writeConfigFile
 #------------------------------------------
-sub test_writeConfigFile {
+sub test_p_writeConfigFile {
 	# ...
-	# Test the writeConfigFile method
+	# Test the p_writeConfigFile method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -305,7 +305,7 @@ sub test_writeConfigFile {
 	my $xml = $this -> __getXMLObj($confDir);
 	my $cDir = $this -> createTestTmpDir();
 	my $writer = KIWIContainerConfigWriter -> new($xml, $cDir);
-	my $res = $writer -> writeConfigFile();
+	my $res = $writer -> p_writeConfigFile();
 	my $msg = $kiwi -> getInfoMessage();
 	my $expected = 'Write container configuartion file'
 		. 'Write fstab for container';
@@ -329,6 +329,9 @@ sub test_writeConfigFile {
 		. 'lxc.mount.entry = /etc/resolv.conf '
 		. '/var/lib/lxc/testCont/rootfs/etc/resolv.conf none '
 		. 'bind,ro 0 0' . "\n\n"
+		. '#When the host system has lxc >= 0.8.0 uncoment the '
+		. 'following line' . "\n"
+		. '#lxc.autodev=1' . "\n"
 		. 'lxc.tty = 4' . "\n"
 		. 'lxc.pts = 1024' . "\n"
 		. 'lxc.rootfs = /var/lib/lxc/mycontainer/rootfs' . "\n"

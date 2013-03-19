@@ -29,6 +29,7 @@ use base qw /Common::ktTestCase/;
 
 use KIWICommandLine;
 use KIWIContainerBuilder;
+use KIWIImage;
 use KIWIGlobals;
 use KIWIXML;
 
@@ -58,8 +59,9 @@ sub test_ctor {
 	my $cmdL = $this -> __getCommandLineObj();
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
 	my $tmpDir = $this -> createTestTmpDir();
+    my $image = $this -> __getImageObj($cmdL, $tmpDir, $xml);
 	$cmdL -> setImageTargetDir($tmpDir);
-	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $image);
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -100,7 +102,7 @@ sub test_ctor_invalidArg1 {
 #------------------------------------------
 sub test_ctor_invalidArg2 {
 	# ...
-	# Test the KIWIContainerBuilder with invalid first argument
+	# Test the KIWIContainerBuilder with invalid second argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
@@ -111,6 +113,32 @@ sub test_ctor_invalidArg2 {
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'KIWIContainerBuilder: expecting KIWICommandLine object '
 		. 'as second argument.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($builder);
+	return;
+}
+
+#==========================================
+# test_ctor_invalidArg3
+#------------------------------------------
+sub test_ctor_invalidArg3 {
+	# ...
+	# Test the KIWIContainerBuilder with invalid thried argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this -> {dataDir};
+	my $cmdL = $this -> __getCommandLineObj();
+	my $xml = $this -> __getXMLObj($confDir, $cmdL);
+	my $builder = KIWIContainerBuilder -> new($xml, , $cmdL, 'foo');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIContainerBuilder: expecting KIWIImage object '
+        . 'as third argument.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -171,6 +199,32 @@ sub test_ctor_noArg2 {
 }
 
 #==========================================
+# test_ctor_noArg3
+#------------------------------------------
+sub test_ctor_noArg3 {
+	# ...
+	# Test the KIWIContainerBuilder with no third argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $confDir = $this -> {dataDir};
+	my $cmdL = $this -> __getCommandLineObj();
+	my $xml = $this -> __getXMLObj($confDir, $cmdL);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIContainerBuilder: expecting KIWIImage object '
+        . 'as third argument.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($builder);
+	return;
+}
+
+#==========================================
 # test_applyContainerConfig
 #------------------------------------------
 sub test_applyContainerConfig {
@@ -183,8 +237,9 @@ sub test_applyContainerConfig {
 	my $cmdL = $this -> __getCommandLineObj();
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
 	my $tmpDir = $this -> createTestTmpDir();
+    my $image = $this -> __getImageObj($cmdL, $tmpDir, $xml);
 	$cmdL -> setImageTargetDir($tmpDir);
-	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $image);
 	# Create fstab file to be replaced
 	mkdir $tmpDir . '/etc';
 	my $status = open my $FSTAB, '>', $tmpDir . '/etc/fstab';
@@ -244,7 +299,8 @@ sub test_copyUnpackedTreeContent {
 	mkdir $origin;
 	$cmdL -> setConfigDir($origin);
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+    my $image = $this -> __getImageObj($cmdL, $tmpDir, $xml);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $image);
 	# Create some entries in the directory
 	mkdir $origin . '/foo';
 	mkdir $origin . '/bar';
@@ -293,8 +349,10 @@ sub test_createContainerBundle {
 	my $tmpDir = $this -> createTestTmpDir();
 	$cmdL -> setImageTargetDir($tmpDir);
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+    my $image = $this -> __getImageObj($cmdL, $tmpDir, $xml);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $image);
 	# Create a basic setup assimilating a true directory layout
+    mkdir $tmpDir . '/lxc';
 	mkdir $tmpDir . '/lxc/container';
 	mkdir $tmpDir . '/lxc/container/etc';
 	mkdir $tmpDir . '/lxc/container/var';
@@ -375,7 +433,8 @@ sub test_createContainerConfigDir {
 	my $tmpDir = $this -> createTestTmpDir();
 	$cmdL -> setImageTargetDir($tmpDir);
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+    my $image = $this -> __getImageObj($cmdL, $tmpDir, $xml);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $image);
 	my $res = $builder -> __createContainerConfigDir();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Creating container configuration directory';
@@ -410,7 +469,8 @@ sub test_createDevNodes {
 	my $tmpDir = $this -> createTestTmpDir();
 	mkdir $tmpDir . '/dev';
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+    my $image = $this -> __getImageObj($cmdL, $tmpDir, $xml);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $image);
 	my $res = $builder -> __createDevNodes($tmpDir);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Creating container device nodes';
@@ -464,7 +524,8 @@ sub test_createInitTab {
 	$cmdL -> setImageTargetDir($tmpDir);
 	mkdir $tmpDir . '/etc';
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+    my $image = $this -> __getImageObj($cmdL, $tmpDir, $xml);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $image);
 	my $res = $builder -> __createInitTab($tmpDir);
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Create container inittab';
@@ -494,7 +555,8 @@ sub test_createTargetRootTree {
 	my $tmpDir = $this -> createTestTmpDir();
 	$cmdL -> setImageTargetDir($tmpDir);
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+    my $image = $this -> __getImageObj($cmdL, $tmpDir, $xml);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $image);
 	my $tgtDir = $builder -> __createTargetRootTree();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Creating rootfs target directory';
@@ -503,7 +565,8 @@ sub test_createTargetRootTree {
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('completed', $state);
-	my $expectedDir = $tmpDir . '/lxc/container/var/lib/lxc/mycontainer/rootfs';
+	my $expectedDir = $tmpDir
+        . '/lxc/container/var/lib/lxc/mycontainer/rootfs';
 	$this -> assert_str_equals($expectedDir, $tgtDir);
 	$this -> assert_dir_exists($expectedDir);
 	$this ->  removeTestTmpDir();
@@ -524,7 +587,8 @@ sub test_getBaseBuildDirectory {
 	my $tmpDir = $this -> createTestTmpDir();
 	$cmdL -> setImageTargetDir($tmpDir);
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+    my $image = $this -> __getImageObj($cmdL, $tmpDir, $xml);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $image);
 	my $buildDir = $builder -> getBaseBuildDirectory();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -553,7 +617,8 @@ sub test_removeKiwiBuildInfo {
 	my $tmpDir = $this -> createTestTmpDir();
 	$cmdL -> setImageTargetDir($tmpDir);
 	my $xml = $this -> __getXMLObj($confDir, $cmdL);
-	my $builder = KIWIContainerBuilder -> new($xml, $cmdL);
+    my $image = $this -> __getImageObj($cmdL, $tmpDir, $xml);
+	my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $image);
 	mkdir $tmpDir . '/image';
 	my $status = open my $KCONF, '>', $tmpDir . '/.kconfig';
 	$this -> assert_not_null($status);
@@ -606,6 +671,22 @@ sub __getCommandLineObj {
 	# ---
 	my $cmdL = KIWICommandLine -> new();
 	return $cmdL;
+}
+
+#==========================================
+# __getImageObj
+#------------------------------------------
+sub __getImageObj {
+    # ...
+    # Return a basic KIWIImage object
+    # ---
+    my $this = shift;
+    my $cmdL = shift;
+    my $imgTree = shift;
+    my $xml  = shift;
+    my $image = KIWIImage -> new($xml, $imgTree, $imgTree, undef, '/tmp',
+                                 undef, undef, $cmdL);
+    return $image;
 }
 
 #==========================================

@@ -694,7 +694,7 @@ sub createImage {
 	#==========================================
 	# Build image using KIWIImageBuilder
 	#------------------------------------------
-	my $factory = KIWIImageBuildFactory -> new ($xml, $cmdL);
+	my $factory = KIWIImageBuildFactory -> new ($xml, $cmdL, $image);
 	my $builder = $factory -> getImageBuilder();
 	my $checkFormat = 0;
 	my $status = 0;
