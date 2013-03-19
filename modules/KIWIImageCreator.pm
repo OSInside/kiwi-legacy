@@ -176,11 +176,21 @@ sub prepareBootImage {
 	my $bootXml = KIWIXML -> new(
 		$configDir,undef,undef,$cmdL,$changeset
 	);
-	$bootXml -> discardReplacableRepos();
-	my $repos = $systemXML -> getRepositories();
-	$bootXml -> addRepositories($repos, 'default');
-	if (! defined $bootXml) {
+	my $status = $bootXml -> discardReplacableRepos();
+	if (! $status) {
 		return;
+	}
+	my $repos = $systemXML -> getRepositories();
+	$status = $bootXml -> addRepositories($repos, 'default');
+	if (! $status) {
+		return;
+	}
+	my $drivers = $systemXML -> getDrivers();
+	if ($drivers) {
+		$status = $bootXml -> addDrivers($drivers, 'default');
+		if (! $status) {
+			return;
+		}
 	}
 	#==========================================
 	# Apply XML over rides from command line
@@ -666,7 +676,7 @@ sub createImage {
 	if (! defined $configure) {
 		return;
 	}
-	my %config = $xml -> getImageConfig_legacy();
+	my %config = $xml -> getImageProfileEnvironment();
 	my $PFD = FileHandle -> new();
 	if (! $PFD -> open (">$tree/.profile")) {
 		$kiwi -> failed ();
