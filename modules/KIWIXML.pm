@@ -2956,6 +2956,7 @@ sub __genTypeHash {
 		'kernelcmdline',
 		'luks',
 		'ramonly',
+		'syncMBR',
 		'mdraid',
 		'vga',
 		'volid'
@@ -5520,6 +5521,11 @@ sub getImageConfig_legacy {
 		&& (defined $type{ramonly})
 		&& ($type{ramonly} eq "true")) {
 		$result{kiwi_ramonly} = "yes";
+	}
+	if ((%type)
+		&& (defined $type{syncMBR})
+		&& ($type{syncMBR} eq "true")) {
+		$result{kiwi_syncMBR} = "yes";
 	}
 	if ((%type) && ($type{lvm})) {
 		$result{kiwi_lvm} = $type{lvm};
@@ -8143,6 +8149,8 @@ sub __populateTypeInfo_legacy {
 				-> getAttribute("hybridpersistent");
 			$record{ramonly}       = $node
 				-> getAttribute("ramonly");
+			$record{syncMBR}       = $node
+				-> getAttribute("syncMBR");
 			$record{mdraid}        = $node
 				-> getAttribute("mdraid");
 			if (defined $disk) {
@@ -8581,6 +8589,11 @@ sub __updateDescriptionFromChangeSet_legacy {
 	if (defined $changeset->{"ramonly"}) {
 		$this -> __setTypeAttribute (
 			"ramonly",$changeset->{"ramonly"}
+		);
+	}
+	if (defined $changeset->{"syncMBR"}) {
+		$this -> __setTypeAttribute (
+			"syncMBR",$changeset->{"syncMBR"}
 		);
 	}
 	if (defined $changeset->{"kernelcmdline"}) {

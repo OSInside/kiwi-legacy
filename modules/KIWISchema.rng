@@ -2312,6 +2312,15 @@ will force any COW action to happen in RAM</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
+    <define name="k.type.syncMBR.attribute">
+      <attribute name="syncMBR">
+        <a:documentation>Specifies if an MBR should be included into the GPT
+the GPT partition table is used with EFI systems. Thus
+this attribute has only an effect if the firmware
+type is set to efi or uefi</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.type.vga.attribute">
       <attribute name="vga">
         <a:documentation>Specifies the kernel framebuffer mode. More information
@@ -2424,6 +2433,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.ramonly.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.syncMBR.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.vga.attribute"/>

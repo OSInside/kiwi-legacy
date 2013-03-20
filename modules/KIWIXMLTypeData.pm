@@ -78,6 +78,7 @@ sub new {
 	#     mdraid                 = ''
 	#     primary                = ''
 	#     ramonly                = ''
+	#     syncMBR                = ''
 	#     size                   = ''
 	#     sizeadd                = ''
 	#     sizeunit               = ''
@@ -137,6 +138,7 @@ sub new {
 		mdraid
 		primary
 		ramonly
+		syncMBR
 		size
 		sizeadd
 		sizeunit
@@ -156,6 +158,7 @@ sub new {
 		installstick
 		primary
 		ramonly
+		syncMBR
 		sizeadd
 	);
 	$this->{boolKeywords} = \%boolKW;
@@ -589,6 +592,18 @@ sub getRAMOnly {
 }
 
 #==========================================
+# getSyncMBR
+#------------------------------------------
+sub getSyncMBR {
+	# ...
+	# Return the flag indicating whether an MBR is
+	# embedded into the GPT or not
+	# ---
+	my $this = shift;
+	return $this->{syncMBR};
+}
+
+#==========================================
 # getSize
 #------------------------------------------
 sub getSize {
@@ -784,6 +799,10 @@ sub getXMLElement {
 	my $ramO = $this -> getRAMOnly();
 	if ($ramO) {
 		$element -> setAttribute('ramonly', $ramO);
+	}
+	my $syncMBR = $this -> getSyncMBR();
+	if ($syncMBR) {
+		$element -> setAttribute('syncMBR', $syncMBR);
 	}
 	my $size = $this -> getSize();
 	if ($size) {
@@ -1400,6 +1419,24 @@ sub setRAMOnly {
 		caller => 'setRAMOnly'
 	);
 	return $this -> __setBooleanValue(\%settings);
+}
+
+#==========================================
+# setSyncMBR
+#------------------------------------------
+sub setSyncMBR {
+	# ...
+	# Set the flag indicating whether a MBR is
+	# embedded into the GPT
+	# ---
+	my $this = shift;
+	my $sync = shift;
+	my %settings = (
+		attr   => 'syncMBR',
+		value  => $sync,
+		caller => 'setSyncMBR'
+	);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
