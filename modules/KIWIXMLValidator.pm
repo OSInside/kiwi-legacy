@@ -421,8 +421,16 @@ sub __checkEC2Regions {
 		return 1;
 	}
 	my @regions = $ec2ConfNodes[0] -> getElementsByTagName('ec2region');
-	my @supportedRegions =
-	qw /AP-Northeast AP-Southeast EU-West SA-East US-East US-West US-West2/;
+	my @supportedRegions = qw(
+		AP-Northeast
+		AP-Southeast
+		AP-Southeast2
+		EU-West
+		SA-East
+		US-East
+		US-West
+		US-West2
+	);
 	my @selectedRegions = ();
 	for my $region (@regions) {
 		my $regionStr = $region -> textContent();
