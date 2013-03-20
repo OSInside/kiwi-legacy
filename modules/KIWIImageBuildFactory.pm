@@ -28,6 +28,7 @@ require Exporter;
 use KIWICommandLine;
 use KIWIContainerBuilder;
 use KIWILog;
+use KIWITarArchiveBuilder;
 use KIWIXML;
 
 #==========================================
@@ -89,12 +90,16 @@ sub getImageBuilder {
 	# ---
 	my $this = shift;
 	my $cmdL = $this->{cmdL};
-    my $unPImg = $this->{uPckImg};
+	my $unPImg = $this->{uPckImg};
 	my $xml  = $this->{xml};
 	my $typeName = $xml -> getImageType() -> getTypeName();
 	SWITCH: for ($typeName) {
 		/^lxc/smx && do {
 			my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $unPImg);
+			return $builder;
+		};
+		/^tbz/smx && do {
+			my $builder = KIWITarArchiveBuilder -> new($xml, $cmdL, $unPImg);
 			return $builder;
 		};
 	}

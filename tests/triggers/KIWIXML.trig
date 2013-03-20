@@ -4,6 +4,7 @@ KTContainerConfigWriter.t
 KTImageBuildFactory.t
 KTImageCreator.t
 KTRuntimeChecker.t
+KTTarArchiveBuilder.t
 KTXML.t
 KTXMLDescriptionData.t
 KTXMLDriverData.t
