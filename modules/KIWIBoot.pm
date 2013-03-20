@@ -383,7 +383,7 @@ sub new {
 			# will be created during the image creation. In this
 			# case we need to create the inode count
 			# ----
-			my $buildType = $xml -> getImageType() -> getTypeName();
+			my $buildType = $xml -> getImageType() -> getImageType();
 			if (($sizeXMLBytes ne 'auto') && ($buildType eq 'vmx')) {
 				# calculate inodes according to requested size for vmx type
 				$this->{inodes} = int ($sizeXMLBytes / $inoderatio);
