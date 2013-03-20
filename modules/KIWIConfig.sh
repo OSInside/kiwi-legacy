@@ -1576,6 +1576,8 @@ function suseStripKernel {
 			pushd /boot
 			if [ -f uImage-$VERSION ];then
 				mv uImage-$VERSION vmlinuz
+			elif [[ $arch =~ ^arm ]] && [ -f zImage-$VERSION ];then
+				mv zImage-$VERSION vmlinuz
 			elif [[ $arch =~ ^arm ]] && [ -f Image-$VERSION ];then
 				mv Image-$VERSION vmlinuz
 			elif [ -f vmlinux-$VERSION.gz ];then
