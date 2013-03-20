@@ -51,6 +51,7 @@ my @kiwiModules = qw (
 	KIWISatSolver.pm
 	KIWISharedMem.pm
 	KIWISocket.pm
+	KIWITarArchiveBuilder.pm
 	KIWITrace.pm
 	KIWIURL.pm
 	KIWIUtil.pm
@@ -97,6 +98,7 @@ my @kiwiModules = qw (
 	KTImageCreator.t
 	KTLocator.t
 	KTRuntimeChecker.t
+	KTTarArchiveBuilder.t
 	KTXML.t
 	KTXMLDescriptionData.t
 	KTXMLDriverData.t
@@ -140,6 +142,7 @@ my @kiwiModules = qw (
 	kiwiImageBuildFactory.pm
 	kiwiImageCreator.pm
 	kiwiRuntimeChecker.pm
+	kiwiTarArchiveBuilder.pm
 	kiwiXML.pm
 	kiwiXMLDescriptionData.pm
 	kiwiXMLDriverData.pm
@@ -219,6 +222,7 @@ my @notClean1 = qw (
 	KIWISatSolver.pm
 	KIWISharedMem.pm
 	KIWISocket.pm
+	KIWITarArchiveBuilder.pm
 	KIWITrace.pm
 	KIWIURL.pm
 	KIWIUtil.pm
@@ -265,6 +269,7 @@ my @notClean1 = qw (
 	KTImageCreator.t
 	KTLocator.t
 	KTRuntimeChecker.t
+	KTTarArchiveBuilder.t
 	KTXML.t
 	KTXMLDescriptionData.t
 	KTXMLDriverData.t
@@ -308,6 +313,7 @@ my @notClean1 = qw (
 	kiwiImageBuildFactory.pm
 	kiwiImageCreator.pm
 	kiwiRuntimeChecker.pm
+	kiwiTarArchiveBuilder.pm
 	kiwiXML.pm
 	kiwiXMLDescriptionData.pm
 	kiwiXMLDriverData.pm
@@ -383,6 +389,7 @@ my @notClean2 = qw (
 	KIWISatSolver.pm
 	KIWISharedMem.pm
 	KIWISocket.pm
+	KIWITarArchiveBuilder.pm
 	KIWITrace.pm
 	KIWIURL.pm
 	KIWIUtil.pm
@@ -396,6 +403,7 @@ my @notClean2 = qw (
 	kiwiLocator.pm
 	kiwiImageCreator.pm
 	kiwiRuntimeChecker.pm
+	kiwiTarArchiveBuilder.pm
 	kiwiXML.pm
 	kiwiXMLInfo.pm
 	kiwiXMLSystemdiskData.pm
