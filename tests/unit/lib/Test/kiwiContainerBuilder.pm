@@ -376,7 +376,7 @@ sub test_createContainerBundle {
 	# Test the method
 	my $res = $builder -> __createContainerBundle();
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Creating container tarball';
+	my $expected = 'Creating container tarball...';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);

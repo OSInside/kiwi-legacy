@@ -311,7 +311,7 @@ sub __createContainerBundle {
 	my $kiwi = $this->{kiwi};
 	my $locator = $this->{locator};
 	my $xml  = $this->{xml};
-	$kiwi -> info('Creating container tarball');
+	$kiwi -> info('Creating container tarball...');
 	my $baseBuildDir = $this -> getBaseBuildDirectory();
 	my $origin = $baseBuildDir
 		. '/'
@@ -319,17 +319,19 @@ sub __createContainerBundle {
 	my $globals = KIWIGlobals -> instance();
 	my $imgFlName = $globals -> generateBuildImageName($xml, '-', '-lxc');
 	$imgFlName .= '.tbz';
-	$this -> p_addCreatedFile($imgFlName);
 	my $tar = $locator -> getExecPath('tar');
 	my $cmd = "cd $origin; "
-		. "$tar -cjf $baseBuildDir/$imgFlName etc var";
+		. "$tar -cjf $baseBuildDir/$imgFlName etc var 2>&1";
 	my $data = qxx ($cmd);
 	my $code = $? >> 8;
 	if ($code != 0) {
+        $kiwi -> failed();
 		$kiwi -> error("Could not create tarball $baseBuildDir/$imgFlName");
 		$kiwi -> failed();
+		$kiwi -> error($data);
 		return;
 	}
+    $this -> p_addCreatedFile($imgFlName);
 	$kiwi -> done();
 	return 1;
 }

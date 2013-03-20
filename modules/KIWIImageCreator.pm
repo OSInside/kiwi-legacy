@@ -747,10 +747,6 @@ sub createImage {
 				$status = $image -> createImageCPIO ();
 				last SWITCH;
 			};
-			/^tbz/      && do {
-				$status = $image -> createImageTar ();
-				last SWITCH;
-			};
 			/^iso/      && do {
 				$status = $image -> createImageLiveCD ( $para );
 				last SWITCH;

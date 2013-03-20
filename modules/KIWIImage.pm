@@ -83,7 +83,7 @@ sub new {
 		$kiwi -> failed();
 		return;
 	}
-    if (! defined $imageDest) {
+	if (! defined $imageDest) {
 		$msg .= 'expecting destination directory as third argument.';
 		$kiwi -> error($msg);
 		$kiwi -> failed();
@@ -166,16 +166,16 @@ sub new {
 # executeUserImagesScript
 #------------------------------------------
 sub executeUserImagesScript {
-    # ...
-    # Execute the images.sh script if it exists
-    # ---
-    my $this = shift;
-    my $imageTree = $this->{imageTree};
-    my $kiwi      = $this->{kiwi};
-    if (-x "$imageTree/image/images.sh") {
-        $kiwi -> info ('Calling image script: images.sh');
+	# ...
+	# Execute the images.sh script if it exists
+	# ---
+	my $this = shift;
+	my $imageTree = $this->{imageTree};
+	my $kiwi      = $this->{kiwi};
+	if (-x "$imageTree/image/images.sh") {
+		$kiwi -> info ('Calling image script: images.sh');
 		my ($code,$data) = KIWIGlobals -> instance() -> callContained (
-            $imageTree,"/image/images.sh"
+			$imageTree,"/image/images.sh"
 		);
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -187,7 +187,7 @@ sub executeUserImagesScript {
 		}
 		$kiwi -> done ();
 	}
-    return $this;
+	return $this;
 }
 
 #==========================================
@@ -1136,51 +1136,6 @@ sub createImageCPIO {
 	if ($compress) {
 		$name = $name.".gz";
 	}
-	if (! $this -> buildMD5Sum ($name)) {
-		return;
-	}
-	return $this;
-}
-
-#==========================================
-# createImageTar
-#------------------------------------------
-sub createImageTar {
-	# ...
-	# create tar archive from the image source tree
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $xml  = $this->{xml};
-	my $imageTree = $this->{imageTree};
-	#==========================================
-	# PRE filesystem setup
-	#------------------------------------------
-	my $name = $this -> preImage ("haveExtend");
-	if (! defined $name) {
-		return;
-	}
-	#==========================================
-	# PRE Create tarball from extend
-	#------------------------------------------
-	$kiwi -> info ("Creating tar archive...");
-	my $dest = $this->{imageDest}."/".$name;
-	my $data = qxx ("cd $imageTree && tar -cjf $dest . 2>&1");
-	my $code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create tar archive");
-		$kiwi -> failed ();
-		$kiwi -> error  ($data);
-		return;
-	}
-	$kiwi -> done();
-	#==========================================
-	# PRE filesystem setup
-	#------------------------------------------
-	my $dest_dir  = dirname  $dest;
-	my $dest_file = basename $dest;
-	qxx ("cd $dest_dir && ln -vs $dest_file $dest_file.tbz");
 	if (! $this -> buildMD5Sum ($name)) {
 		return;
 	}
@@ -5332,17 +5287,17 @@ sub DESTROY {
 	my $this = shift;
 	my $dirs = $this->{tmpdirs};
 	my $imageDest = $this->{imageDest};
-    if ($imageDest) {
-        my $spldir    = $imageDest."/splash";
-        foreach my $dir (@{$dirs}) {
-            qxx ("rm -rf $dir 2>&1");
-        }
-        if (-d $spldir) {
-            qxx ("rm -rf $spldir 2>&1");
-        }
-        $this -> cleanMount();
-        $this -> cleanLuks();
-    }
+	if ($imageDest) {
+		my $spldir    = $imageDest."/splash";
+		foreach my $dir (@{$dirs}) {
+			qxx ("rm -rf $dir 2>&1");
+		}
+		if (-d $spldir) {
+			qxx ("rm -rf $spldir 2>&1");
+		}
+		$this -> cleanMount();
+		$this -> cleanLuks();
+	}
 	return $this;
 }
 
