@@ -5067,14 +5067,18 @@ sub installBootLoader {
 		#==========================================
 		# No install required with EFI bios
 		#------------------------------------------
+		my $syncMBR = $xml -> getImageType() -> getSyncMBR();
 		my $gptsync = $locator -> getExecPath ('gptsync');
-		if (($firmware =~ /efi/) && (! $gptsync)) {
+		if (! $syncMBR) {
+			$syncMBR = 'false';
+		}
+		if (($firmware =~ /efi/) && ($syncMBR eq 'true') && (! $gptsync)) {
 			$kiwi -> warning (
 				"gptsync not installed, skipping legacy BIOS support"
 			);
 			$kiwi -> skipped ();
 		}
-		if (($firmware eq 'bios') || ($gptsync)) {
+		if (($firmware eq 'bios') || ($syncMBR eq 'true') && ($gptsync)) {
 			#==========================================
 			# add MBR to GPT
 			#------------------------------------------
@@ -5645,6 +5649,7 @@ sub getGeometry {
 	my $cmdL     = $this->{cmdL};
 	my $loader   = $this->{bootloader};
 	my $firmware = $this->{firmware};
+	my $xml      = $this->{xml};
 	my $secsz    = $cmdL -> getDiskBIOSSectorSize();
 	my $label    = 'msdos';
 	my $status;
@@ -5662,7 +5667,19 @@ sub getGeometry {
 		($firmware eq "uefi") ||
 		($firmware eq "vboot")
 	) {
-		$label = 'gpt';
+		my $syncMBR = $xml -> getImageType() -> getSyncMBR();
+		if (($syncMBR) && ($syncMBR eq 'true')) {
+			# /.../
+			# I'm afraid but the MBR created by this suse parted
+			# extension does not work. I got better results by
+			# using gptsync
+			# ----
+			# $label = 'gpt_sync_mbr';
+			# ----
+			$label = 'gpt';
+		} else {
+			$label = 'gpt';
+		}
 	}
 	$status = qxx ("$parted_exec -s $disk mklabel $label 2>&1");
 	$result = $? >> 8;
@@ -5681,7 +5698,7 @@ sub getGeometry {
 	}
 	chomp $status;
 	$status =~ s/s//;
-	if ($label eq 'gpt') {
+	if ($label =~ /^gpt/) {
 		$status -= 128;
 	} else {
 		$status --;

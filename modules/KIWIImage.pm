@@ -245,6 +245,9 @@ sub updateDescription {
 	if ($src_type{ramonly}) {
 		$changeset{"ramonly"} = $src_type{ramonly};
 	}
+	if ($src_type{syncMBR}) {
+		$changeset{"syncMBR"} = $src_type{syncMBR};
+	}
 	if ($src_type{cmdline}) {
 		$changeset{"kernelcmdline"} = $src_type{cmdline};
 	}
