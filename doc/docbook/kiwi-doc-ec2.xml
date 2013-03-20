@@ -316,6 +316,18 @@
                 <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
               </row>
               <row>
+                <entry>AP-Southeast2</entry>
+                <entry>aki-33990e09</entry>
+                <entry>x86</entry>
+                <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.02-i386.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
+                <entry>AP-Southeast2</entry>
+                <entry>aki-31990e0b</entry>
+                <entry>x86-64</entry>
+                <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
+              </row>
+              <row>
                 <entry>EU-West</entry>
                 <entry>aki-64695810</entry>
                 <entry>x86</entry>

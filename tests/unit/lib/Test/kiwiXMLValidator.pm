@@ -501,9 +501,16 @@ sub test_ec2Regions {
 		$validator -> validate();
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg;
-		my @supportedRegions =
-				qw /AP-Northeast AP-Southeast EU-West SA-East US-East/;
-		push  @supportedRegions, qw /US-West US-West2/;
+		my @supportedRegions = qw(
+		    AP-Northeast
+			AP-Southeast
+			AP-Southeast2
+			EU-West
+			SA-East
+			US-East
+		    US-West
+			US-West2
+		);
 		if ( $iConfFile =~ 'ec2RegionInvalid_1.xml' ) {
 			$expectedMsg = 'Specified region EU-West not unique';
 		} else {

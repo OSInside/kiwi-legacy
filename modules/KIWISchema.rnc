@@ -360,8 +360,8 @@ div {
 		db:para [
 			"Specify the region/availability zone in EC2 for this image.\x{a}"~
 			"Values are limited to the EC2 recognized zones:\x{a}"~
-			"AP-Northeast, AP-Southeast, EU-West, SA-East, US-East,\x{a}"~
-			"US-West, and US-West2"
+			"AP-Northeast, AP-Southeast, AP-Southeast2, EU-West,,\x{a}"~
+            " SA-East, US-East, US-West, and US-West2"
 		]
 		]
 		element ec2region {
