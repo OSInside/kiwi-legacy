@@ -8991,7 +8991,7 @@ sub __updateDescriptionFromChangeSet_legacy {
 	#==========================================
 	# 1) merge/update repositories
 	#------------------------------------------
-	# Repos are handled though the new data structure
+	# Repos are handled through the new data structure
 	#==========================================
 	# 2) merge/update drivers
 	#------------------------------------------

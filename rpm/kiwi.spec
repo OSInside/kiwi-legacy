@@ -35,7 +35,7 @@ BuildRequires:  lxc
 BuildRequires:  gcc-c++
 BuildRequires:  libxslt
 BuildRequires:  module-init-tools
-BuildRequires:       rsync
+BuildRequires:  rsync
 BuildRequires:  screen
 BuildRequires:  zlib-devel
 %if 0%{?suse_version} > 1020
