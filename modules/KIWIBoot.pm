@@ -383,7 +383,14 @@ sub new {
 			# will be created during the image creation. In this
 			# case we need to create the inode count
 			# ----
-			$this->{inodes} = int ($this->{vmmbyte} * 1048576 / $inoderatio);
+			my $buildType = $xml -> getImageType() -> getTypeName();
+			if (($sizeXMLBytes) && ($buildType eq 'vmx')) {
+				# calculate inodes according to requested size for vmx type
+				$this->{inodes} = int ($sizeXMLBytes / $inoderatio);
+			} else {
+				# calculate inodes for required min size
+				$this->{inodes} = int ($this->{vmmbyte}*1048576 / $inoderatio);
+			}
 			$kiwi -> loginfo (
 				"Using ".$this->{inodes}." inodes for the root filesystem\n"
 			);
