@@ -38,7 +38,7 @@ while (my $line = <>) {
 		if ($line =~ /^-/) {
 			push @out, $line;
 			$indent = $indent_l1;
-		} elsif ($line =~ /^\*/) {
+		} elsif ($line =~ /^[\*,\+]/) {
 			push @out, $indent_l1.$line;
 			$indent = $indent_l2;
 		} else {
