@@ -1537,12 +1537,14 @@ sub __checkType {
 			last SWITCH;
 		};
 		/^split/ && do {
-			if (! defined $filesystem) {
+            my $fsro = $type -> getFSReadOnly();
+            my $fsrw = $type -> getFSReadWrite();
+			if (! $fsro || ! $fsrw) {
 				$kiwi -> error ("$typeName: No filesystem pair specified");
 				$kiwi -> failed ();
 				return;
 			}
-			$para = $filesystem;
+			$para = "$fsrw,$fsro";
 			if (defined $bootImg) {
 				$para .= ":".$bootImg;
 			}
