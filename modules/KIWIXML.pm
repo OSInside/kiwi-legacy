@@ -6196,8 +6196,10 @@ sub getImageProfileEnvironment {
 			$drvCfg .= $drv -> getName();
 			$drvCfg .= ',';
 		}
-		chop $drvCfg;
-		$result{kiwi_drivers} = $drvCfg;
+		if ($drvCfg) {
+			chop $drvCfg;
+			$result{kiwi_drivers} = $drvCfg;
+		}
 	}
 	return %result;
 }
