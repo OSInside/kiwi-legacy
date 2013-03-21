@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="5.7" name="suse-12.3-lxc-guest">
 	<description type="system">
 		<author>Robert Schweikert</author>
