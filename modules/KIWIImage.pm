@@ -324,21 +324,6 @@ sub updateDescription {
 	}
 	$changeset{"repositories"} = \%repos;
 	#==========================================
-	# Store drivers section if any
-	#------------------------------------------
-	@node = $src_xml->getDriversNodeList_legacy() -> get_nodelist();
-	foreach my $element (@node) {
-		if (! $src_xml -> __requestedProfile ($element)) {
-			next;
-		}
-		my @files = $element->getElementsByTagName ("file");
-		foreach my $element (@files) {
-			my $driver = $element -> getAttribute ("name");
-			push (@driverList,$driver);
-		}
-	}
-	$changeset{"driverList"} = \@driverList;
-	#==========================================
 	# Store strip sections if any
 	#------------------------------------------
 	my $stripXML = XML::LibXML -> new();

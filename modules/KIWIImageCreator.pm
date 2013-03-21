@@ -176,12 +176,22 @@ sub prepareBootImage {
 	my $bootXml = KIWIXML -> new(
 		$configDir,undef,undef,$cmdL,$changeset
 	);
-	$bootXml -> discardReplacableRepos();
+	my $status = $bootXml -> discardReplacableRepos();
+    if (! $status) {
+        return;
+    }
 	my $repos = $systemXML -> getRepositories();
-	$bootXml -> addRepositories($repos, 'default');
-	if (! defined $bootXml) {
+	$status = $bootXml -> addRepositories($repos, 'default');
+	if (! $status) {
 		return;
 	}
+    my $drivers = $systemXML -> getDrivers();
+    if ($drivers) {
+        $status = $bootXml -> addDrivers($drivers, 'default');
+        if (! $status) {
+            return;
+        }
+    }
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------
@@ -678,6 +688,17 @@ sub createImage {
 	foreach my $key (keys %config) {
 		print $PFD "$key=\"$config{$key}\"\n";
 	}
+    my $drivers = $xml -> getDrivers();
+    if ($drivers) {
+        my $drvCfg = "kiwi_drivers='";
+        for my $drv (@{$drivers}) {
+            $drvCfg .= $drv -> getName();
+            $drvCfg .= ',';
+        }
+        chop $drvCfg;
+        $drvCfg .= "'\n";
+        print $PFD $drvCfg;
+    }
 	$PFD -> close();
 	$configure -> quoteFile ("$tree/.profile");
 	qxx ("cp $tree/.profile $tree/image/.profile");
