@@ -82,10 +82,10 @@ sub new {
 	#     mdraid                 = ''
 	#     primary                = ''
 	#     ramonly                = ''
-	#     syncMBR                = ''
 	#     size                   = ''
 	#     sizeadd                = ''
 	#     sizeunit               = ''
+	#     syncMBR                = ''
 	#     vga                    = ''
 	#     volid                  = ''
 	# }
@@ -143,10 +143,10 @@ sub new {
 		mdraid
 		primary
 		ramonly
-		syncMBR
 		size
 		sizeadd
 		sizeunit
+		syncMBR
 		vga
 		volid
 	);
@@ -163,8 +163,8 @@ sub new {
 		installstick
 		primary
 		ramonly
-		syncMBR
 		sizeadd
+		syncMBR
 	);
 	$this->{boolKeywords} = \%boolKW;
 	if (! $this -> p_isInitHashRef($init) ) {
@@ -607,18 +607,6 @@ sub getRAMOnly {
 }
 
 #==========================================
-# getSyncMBR
-#------------------------------------------
-sub getSyncMBR {
-	# ...
-	# Return the flag indicating whether an MBR is
-	# embedded into the GPT or not
-	# ---
-	my $this = shift;
-	return $this->{syncMBR};
-}
-
-#==========================================
 # getSize
 #------------------------------------------
 sub getSize {
@@ -642,6 +630,18 @@ sub getSizeUnit {
 	# ---
 	my $this = shift;
 	return $this->{sizeunit};
+}
+
+#==========================================
+# getSyncMBR
+#------------------------------------------
+sub getSyncMBR {
+	# ...
+	# Return the flag indicating whether an MBR is
+	# embedded into the GPT or not
+	# ---
+	my $this = shift;
+	return $this->{syncMBR};
 }
 
 #==========================================
@@ -838,10 +838,6 @@ sub getXMLElement {
 	if ($ramO) {
 		$element -> setAttribute('ramonly', $ramO);
 	}
-	my $syncMBR = $this -> getSyncMBR();
-	if ($syncMBR) {
-		$element -> setAttribute('syncMBR', $syncMBR);
-	}
 	my $size = $this -> getSize();
 	if ($size) {
 		my $sElem = XML::LibXML::Element -> new('size');
@@ -853,6 +849,10 @@ sub getXMLElement {
 			$sElem -> setAttribute('unit', $this -> getSizeUnit());
 		}
 		$element -> appendChild($sElem);
+	}
+	my $syncMBR = $this -> getSyncMBR();
+	if ($syncMBR) {
+		$element -> setAttribute('syncMBR', $syncMBR);
 	}
 	my $vga = $this -> getVGA();
 	if ($vga) {
@@ -1476,24 +1476,6 @@ sub setRAMOnly {
 }
 
 #==========================================
-# setSyncMBR
-#------------------------------------------
-sub setSyncMBR {
-	# ...
-	# Set the flag indicating whether a MBR is
-	# embedded into the GPT
-	# ---
-	my $this = shift;
-	my $sync = shift;
-	my %settings = (
-		attr   => 'syncMBR',
-		value  => $sync,
-		caller => 'setSyncMBR'
-	);
-	return $this -> p_setBooleanValue(\%settings);
-}
-
-#==========================================
 # setSize
 #------------------------------------------
 sub setSize {
@@ -1546,6 +1528,24 @@ sub setSizeUnit {
 	}
 	$this->{sizeunit} = $unit;
 	return $this;
+}
+
+#==========================================
+# setSyncMBR
+#------------------------------------------
+sub setSyncMBR {
+	# ...
+	# Set the flag indicating whether a MBR is
+	# embedded into the GPT
+	# ---
+	my $this = shift;
+	my $sync = shift;
+	my %settings = (
+		attr   => 'syncMBR',
+		value  => $sync,
+		caller => 'setSyncMBR'
+	);
+	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
