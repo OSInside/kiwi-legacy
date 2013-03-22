@@ -6170,41 +6170,6 @@ sub getEditBootInstall_legacy {
 }
 
 #==========================================
-# getImageProfileEnvironment
-#------------------------------------------
-sub getImageProfileEnvironment {
-	# ...
-	# build a hash containing all the .profile relevant paramters
-	# the .profile env file is used by KIWIConfig.sh and in the
-	# kiwi boot code
-	# ---
-	my $this   = shift;
-	#==========================================
-	# fill has with data from legacy function
-	#------------------------------------------
-	# if all information from the legacy function has been
-	# moved here the legacy call can be removed
-	# ---
-	my %result = $this -> getImageConfig_legacy();
-	#==========================================
-	# kiwi_drivers
-	#------------------------------------------
-	my $drivers = $this -> getDrivers();
-	if ($drivers) {
-		my $drvCfg;
-		for my $drv (@{$drivers}) {
-			$drvCfg .= $drv -> getName();
-			$drvCfg .= ',';
-		}
-		if ($drvCfg) {
-			chop $drvCfg;
-			$result{kiwi_drivers} = $drvCfg;
-		}
-	}
-	return %result;
-}
-
-#==========================================
 # getImageConfig_legacy
 #------------------------------------------
 sub getImageConfig_legacy {
@@ -6216,15 +6181,6 @@ sub getImageConfig_legacy {
 	my $this = shift;
 	my %result;
 	my @nodelist;
-	#==========================================
-	# revision information
-	#------------------------------------------
-	my $rev  = "unknown";
-	if (open (my $FD, '<', $this->{gdata}->{Revision})) {
-		$rev = <$FD>; close $FD;
-		$rev =~ s/\n//g;
-	}
-	$result{kiwi_revision} = $rev;
 	#==========================================
 	# bootincluded items (packs,archives)
 	#------------------------------------------
@@ -6292,11 +6248,6 @@ sub getImageConfig_legacy {
 	}
 	if ((%type) && ($type{fsmountoptions})) {
 		$result{kiwi_fsmountoptions} = $type{fsmountoptions};
-	}
-	if ((%type)
-		&& (defined $type{luks})
-		&& ($type{luks} eq "true")) {
-		$result{kiwi_luks} = "yes";
 	}
 	if ((%type)
 		&& (defined $type{hybrid})

@@ -676,7 +676,7 @@ sub createImage {
 	if (! defined $configure) {
 		return;
 	}
-	my %config = $xml -> getImageProfileEnvironment();
+	my %config = $xml -> getImageConfig_legacy();
 	my $PFD = FileHandle -> new();
 	if (! $PFD -> open (">$tree/.profile")) {
 		$kiwi -> failed ();
@@ -689,6 +689,19 @@ sub createImage {
 		print $PFD "$key=\"$config{$key}\"\n";
 	}
 	$PFD -> close();
+	# Add entries that are handled through the new XML data structure
+	my $profile = KIWIProfileFile -> new("$tree/.profile");
+	if (! $profile) {
+		return;
+	}
+	my $status = $profile -> updateFromXML($xml);
+	if (! $status) {
+		return;
+	}
+	$status = $profile -> writeProfile("$tree/.profile");
+	if (! $status) {
+		return;
+	}
 	$configure -> quoteFile ("$tree/.profile");
 	qxx ("cp $tree/.profile $tree/image/.profile");
 	$kiwi -> done();
@@ -707,7 +720,7 @@ sub createImage {
 	my $factory = KIWIImageBuildFactory -> new ($xml, $cmdL, $image);
 	my $builder = $factory -> getImageBuilder();
 	my $checkFormat = 0;
-	my $status = 0;
+	$status = 0;
 	my $buildResultDir;
 	if ($builder) {
 		$status = $builder -> createImage();
