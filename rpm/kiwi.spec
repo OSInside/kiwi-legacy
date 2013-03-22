@@ -29,6 +29,7 @@ Group:          System/Management
 Version:        5.05.6
 Release:        0
 # requirements to build packages
+BuildRequires:  diffutils
 BuildRequires:  e2fsprogs
 BuildRequires:  lvm2
 BuildRequires:  lxc

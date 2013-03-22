@@ -1,0 +1,2 @@
+kiwi_drivers='e100,isdn,usb'
+kiwi_revision='4711'

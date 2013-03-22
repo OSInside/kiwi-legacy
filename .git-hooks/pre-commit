@@ -44,6 +44,7 @@ my @kiwiModules = qw (
 	KIWIOverlay.pm
 	KIWIPatternsPlugin.pm
 	KIWIProductData.pm
+	KIWIProfileFile.pm
 	KIWIQX.pm
 	KIWIRepoMetaHandler.pm
 	KIWIRoot.pm
@@ -97,6 +98,7 @@ my @kiwiModules = qw (
 	KTImageBuildFactory.t
 	KTImageCreator.t
 	KTLocator.t
+	KTProfileFile.t
 	KTRuntimeChecker.t
 	KTTarArchiveBuilder.t
 	KTXML.t
@@ -141,6 +143,7 @@ my @kiwiModules = qw (
 	kiwiImageBuilderBase.pm
 	kiwiImageBuildFactory.pm
 	kiwiImageCreator.pm
+	kiwiProfileFile.pm
 	kiwiRuntimeChecker.pm
 	kiwiTarArchiveBuilder.pm
 	kiwiXML.pm
@@ -215,6 +218,7 @@ my @notClean1 = qw (
 	KIWIOverlay.pm
 	KIWIPatternsPlugin.pm
 	KIWIProductData.pm
+	KIWIProfileFile.pm
 	KIWIQX.pm
 	KIWIRepoMetaHandler.pm
 	KIWIRoot.pm
@@ -268,6 +272,7 @@ my @notClean1 = qw (
 	KTImageBuildFactory.t
 	KTImageCreator.t
 	KTLocator.t
+	KTProfileFile.t
 	KTRuntimeChecker.t
 	KTTarArchiveBuilder.t
 	KTXML.t
@@ -312,6 +317,7 @@ my @notClean1 = qw (
 	kiwiImageBuilderBase.pm
 	kiwiImageBuildFactory.pm
 	kiwiImageCreator.pm
+	kiwiProfileFile.pm
 	kiwiRuntimeChecker.pm
 	kiwiTarArchiveBuilder.pm
 	kiwiXML.pm

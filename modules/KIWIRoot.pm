@@ -37,6 +37,7 @@ use KIWIManagerSmart;
 use KIWIManagerYum;
 use KIWIManagerZypper;
 use KIWIOverlay;
+use KIWIProfileFile;
 use KIWIQX qw (qxx);
 use KIWIURL;
 
@@ -1059,13 +1060,30 @@ sub setup {
 		return;
 	}
 	$kiwi -> done();
-	my %config = $xml -> getImageProfileEnvironment();
+	my %config = $xml -> getImageConfig_legacy();
 	binmode($FD, ":encoding(UTF-8)");
 	foreach my $key (keys %config) {
 		$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
-		print $FD "$key=\"$config{$key}\"\n";
+		print $FD "$key='$config{$key}'\n";
 	}
 	$FD -> close();
+	# Add entries that are handled through the new XML data structure
+	my $profile = KIWIProfileFile -> new();
+	if (! $profile) {
+		return;
+	}
+	$status = $profile -> updateFromHash (\%config);
+	if (! $status) {
+		return;
+	}
+	$status = $profile -> updateFromXML ($xml);
+	if (! $status) {
+		return;
+	}
+	$status = $profile -> writeProfile ($root);
+	if (! $status) {
+		return;
+	}
 	#========================================
 	# configure the system
 	#----------------------------------------

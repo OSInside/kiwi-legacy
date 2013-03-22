@@ -15,6 +15,7 @@ KTImageBuilderBase.t
 KTXMLInfo.t
 KTXMLInstRepositoryData.t
 KTXMLOEMConfigData.t
+KTProfileFile.t
 KTXMLPXEDeployConfigData.t
 KTXMLPXEDeployData.t
 KTXMLPackageArchiveData.t

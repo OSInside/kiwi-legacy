@@ -30,6 +30,7 @@ use KIWIImageBuildFactory;
 use KIWIImageFormat;
 use KIWILocator;
 use KIWILog;
+use KIWIProfileFile;
 use KIWIQX qw (qxx);
 use KIWIRoot;
 use KIWIRuntimeChecker;
@@ -676,7 +677,7 @@ sub createImage {
 	if (! defined $configure) {
 		return;
 	}
-	my %config = $xml -> getImageProfileEnvironment();
+	my %config = $xml -> getImageConfig_legacy();
 	my $PFD = FileHandle -> new();
 	if (! $PFD -> open (">$tree/.profile")) {
 		$kiwi -> failed ();
@@ -686,9 +687,28 @@ sub createImage {
 	}
 	binmode($PFD, ":encoding(UTF-8)");
 	foreach my $key (keys %config) {
+		$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
 		print $PFD "$key=\"$config{$key}\"\n";
 	}
 	$PFD -> close();
+	# Add entries that are handled through the new XML data structure
+	my $profile = KIWIProfileFile -> new();
+	my $status;
+	if (! $profile) {
+		return;
+	}
+	$status = $profile -> updateFromHash (\%config);
+	if (! $status) {
+		return;
+	}
+	$status = $profile -> updateFromXML ($xml);
+	if (! $status) {
+		return;
+	}
+	$status = $profile -> writeProfile ($tree);
+	if (! $status) {
+		return;
+	}
 	$configure -> quoteFile ("$tree/.profile");
 	qxx ("cp $tree/.profile $tree/image/.profile");
 	$kiwi -> done();
@@ -707,7 +727,7 @@ sub createImage {
 	my $factory = KIWIImageBuildFactory -> new ($xml, $cmdL, $image);
 	my $builder = $factory -> getImageBuilder();
 	my $checkFormat = 0;
-	my $status = 0;
+	$status = 0;
 	my $buildResultDir;
 	if ($builder) {
 		$status = $builder -> createImage();
