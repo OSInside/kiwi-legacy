@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #================
-# FILE          : KTXML.t
+# FILE          : KTProfileFile.t
 #----------------
 # PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2012 SUSE LLC
@@ -9,11 +9,11 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : Unit test driver for the KIWIXML module.
+# DESCRIPTION   : Unit test driver for the KIWIProfileFile module.
 #               :
 # STATUS        : Development
 #----------------
-package KTXML;
+package KTProfileFile;
 use strict;
 use warnings;
 use FindBin;
@@ -26,6 +26,6 @@ use lib "$FindBin::Bin/lib";
 use lib "$FindBin::Bin/../../modules";
 
 my $runner = Test::Unit::HarnessUnit->new();
-$runner->start( 'Test::kiwiXML' );
+$runner->start( 'Test::kiwiProfileFile' );
 
 1;
