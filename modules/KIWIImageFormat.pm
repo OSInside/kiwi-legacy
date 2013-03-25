@@ -661,18 +661,6 @@ sub createEC2 {
 	#------------------------------------------
 	$this -> __clean_loop ($tmpdir);
 	#==========================================
-	# Check for Amazon EC2 toolkit
-	#------------------------------------------
-	my $locator = KIWILocator -> instance();
-	my $bundleCmd = $locator -> getExecPath ('ec2-bundle-image');
-	if (! $bundleCmd ) {
-		$kiwi -> error (
-			"Couldn't find ec2-bundle-image; required to create EC2 image"
-		);
-		$kiwi -> failed ();
-		return
-	}
-	#==========================================
 	# AWS Account data check
 	#------------------------------------------
 	my $ec2Config = $xml -> getEC2Config();
@@ -709,6 +697,18 @@ sub createEC2 {
 		);
 		$kiwi->skipped ();
 		return $source;
+	}
+	#==========================================
+	# Check for Amazon EC2 toolkit
+	#------------------------------------------
+	my $locator = KIWILocator -> instance();
+	my $bundleCmd = $locator -> getExecPath ('ec2-bundle-image');
+	if (! $bundleCmd ) {
+		$kiwi -> error (
+			"Couldn't find ec2-bundle-image; required to create EC2 image"
+		);
+		$kiwi -> failed ();
+		return
 	}
 	#==========================================
 	# Create bundle(s)
