@@ -383,16 +383,24 @@ sub addBootEFILive {
 	my $src    = $this->{source};
 	my $tmpdir = $this->{tmpdir};
 	my $magicID= $this->{magicID};
+	my $arch;
 	if ($size) {
 		$size = ($size + 2047) >> 11 << 2;
 	}
 	if (! -f $sort) {
 		return;
 	}
+	if (-d "$src/boot/x86_64") {
+		$arch = 'x86_64';
+	} elsif (-d "$src/boot/i386") {
+		$arch = 'i386';
+	} else {
+		return;
+	}
 	#==========================================
 	# update sort file
 	#------------------------------------------
-	qxx ("echo $src/boot/x86_64/efi 1000001 >> $sort");
+	qxx ("echo $src/boot/$arch/efi 1000001 >> $sort");
 	#==========================================
 	# add end-of-header marker
 	#------------------------------------------
@@ -404,7 +412,7 @@ sub addBootEFILive {
 	$para.= ' -eltorito-alt-boot ';
 	# FIXME: setting the size limits it, which is pretty bad
 	# $para.= " -boot-load-size $size";
-	$para.= ' -b boot/x86_64/efi';
+	$para.= " -b boot/$arch/efi";
 	$para.= ' -no-emul-boot -joliet-long -hide glump -hide-joliet glump';
 	$this -> {params} = $para;
 	return $this;
