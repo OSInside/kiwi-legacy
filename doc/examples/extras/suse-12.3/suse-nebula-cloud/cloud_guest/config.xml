@@ -7,7 +7,7 @@
 		<specification>openSUSE 12.3 virtual disk system</specification>
 	</description>
 	<preferences>
-		<type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-12.3" format="qcow2"/>
+		<type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-12.3" format="qcow2" bootloader="grub2"/>
 		<version>1.0.0</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -22,16 +22,21 @@
 		<source path="opensuse://12.3/repo/oss/"/>
 	</repository>
 	<packages type="image">
-		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="grub2"/>
+		<package name="grub2-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default"/>
 		<package name="ifplugd"/>
 		<package name="iputils"/>
+		<package name="plymouth"/>
+		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
+		<package name="splashy"/>
+		<package name="splashy-branding-openSUSE" bootinclude="true"/>
 		<package name="vim"/>
 		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
+		<package name="module-init-tools"/>
 	</packages>
 </image>
