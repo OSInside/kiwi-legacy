@@ -305,6 +305,10 @@ function systemException {
 		Echo "waitException: waiting for ever..."
 		while true;do sleep 100;done
 	;;
+	"waitkey")
+		Echo "waitException: Press any key to continue: "
+		read
+	;;
 	"shell")
 		Echo "shellException: providing shell..."
 		if [ ! -z "$DROPBEAR_PID" ] && [ ! -z "$IPADDR" ];then
@@ -3675,14 +3679,18 @@ function runMediaCheck {
 	# /.../
 	# run checkmedia program on the specified device
 	# ----
-	test -e /proc/splash && echo verbose > /proc/splash
-	if ! checkmedia $biosBootDevice;then
-		Echo "ISO check failed, you have been warned"
+	local device_iso=$biosBootDevice
+	local device_sdx=$(dn $biosBootDevice)
+	if [ -e "$device_sdx" ];then
+		device_iso=$device_sdx
+	fi
+	if ! checkmedia $device_iso;then
+		systemException \
+			"ISO check failed, you have been warned" \
+		"waitkey"
 	else
 		Echo "ISO check passed"
 	fi
-	Echo "Press any key to continue: "
-	read
 }
 #======================================
 # setupHybridFeatures
