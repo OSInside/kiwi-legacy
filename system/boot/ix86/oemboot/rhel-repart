@@ -521,7 +521,7 @@ function OEMRepart {
 	#======================================
 	# sync MBR into GPT if possible
 	#--------------------------------------
-	if [ ! "$partedTableType" = "gpt" ];then
+	if [ "$partedTableType" = "gpt" ];then
 		syncGPT $imageDiskDevice
 	fi
 	#======================================
