@@ -94,14 +94,22 @@ failsafe="$failsafe highres=off processsor.max+cstate=1"
 failsafe="$failsafe nomodeseet x11failsafe"
 
 #======================================
+# hideSplash
+#--------------------------------------
+function hideSplash {
+	test -e /proc/splash && echo verbose > /proc/splash
+	if which plymouthd &>/dev/null;then
+		plymouth hide-splash
+	fi
+}
+
+#======================================
 # Dialog
 #--------------------------------------
 function Dialog {
 	local code=1
 	export DIALOG_CANCEL=1
-	if which plymouthd &>/dev/null;then
-		plymouth hide-splash
-	fi
+	hideSplash
 	cat > /tmp/fbcode <<- EOF
 		dialog \
 			--ok-label "$TEXT_OK" \
@@ -285,10 +293,7 @@ function systemException {
 	if [ ! -e $ttydev ];then
 		ttydev=/mnt/$ttydev
 	fi
-	test -e /proc/splash && echo verbose > /proc/splash
-	if which plymouthd &>/dev/null;then
-		plymouth hide-splash
-	fi
+	hideSplash
 	if [ $what = "reboot" ];then
 		if cat /proc/cmdline 2>/dev/null | grep -qi "kiwidebug=1";then
 			what="shell"
@@ -7560,9 +7565,7 @@ function runInteractive {
 	# tty first. The output of the dialog call is stored in
 	# a file and printed as result to this function
 	# ----
-	if which plymouthd &>/dev/null;then
-		plymouth hide-splash
-	fi
+	hideSplash
 	local r=/tmp/rid
 	local code
 	echo "dialog $@ > /tmp/out" > $r
