@@ -827,6 +827,7 @@ function OEMInstall {
 					fi
 				)&
 				dump_pid=$!
+				hideSplash
 				echo "cat /progress | dialog \
 					--backtitle \"$TEXT_INSTALLTITLE\" \
 					--progressbox 3 65
@@ -887,6 +888,7 @@ function OEMInstall {
 					head --bytes=$verifyBytes | md5sum - > /etc/ireal.md5
 			)&
 			dump_pid=$!
+			hideSplash
 			echo "cat /progress | dialog \
 				--backtitle \"$TEXT_INSTALLTITLE\" \
 				--progressbox 3 65
@@ -991,6 +993,7 @@ function OEMInstall {
 				kill $dPID
 			)&
 			dump_pid=$!
+			hideSplash
 			echo "mst -f /progress | dialog \
 				--backtitle \"$TEXT_INSTALLTITLE\" \
 				--progressbox 3 50
