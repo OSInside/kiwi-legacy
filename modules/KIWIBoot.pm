@@ -5985,30 +5985,12 @@ sub setDefaultDeviceMap {
 	if (! defined $device) {
 		return;
 	}
-	if ($this->{partids}{root}) {
-		$result{root} = $this -> __getPartDevice (
-			$device,$this->{partids}{root}
-		);
-	}
-	if ($this->{partids}{readonly}) {
-		$result{readonly} = $this -> __getPartDevice (
-			$device,$this->{partids}{readonly}
-		);
-	}
-	if ($this->{partids}{readwrite}) {
-		$result{readwrite} = $this -> __getPartDevice (
-			$device,$this->{partids}{readwrite}
-		);
-	}
-	if ($this->{partids}{boot}) {
-		$result{boot} = $this -> __getPartDevice (
-			$device,$this->{partids}{boot}
-		);
-	}
-	if ($this->{partids}{jump}) {
-		$result{jump} = $this -> __getPartDevice (
-			$device,$this->{partids}{jump}
-		);
+	for my $part (qw(root readonly readwrite boot jump)) {
+		if ($this->{partids}{$part}) {
+			$result{$part} = $this -> __getPartDevice (
+				$device,$this->{partids}{$part}
+			);
+		}
 	}
 	return %result;
 }
@@ -6021,38 +6003,7 @@ sub setLoopDeviceMap {
 	# set loop device map which creates a mapping for
 	# /dev/mapper loop device names to a number
 	# ---
-	my $this   = shift;
-	my $device = shift;
-	my %result;
-	if (! defined $device) {
-		return;
-	}
-	if ($this->{partids}{root}) {
-		$result{root} = $this -> __getPartDevice (
-			$device,$this->{partids}{root}
-		);
-	}
-	if ($this->{partids}{readonly}) {
-		$result{readonly} = $this -> __getPartDevice (
-			$device,$this->{partids}{readonly}
-		);
-	}
-	if ($this->{partids}{readwrite}) {
-		$result{readwrite} = $this -> __getPartDevice (
-			$device,$this->{partids}{readwrite}
-		);
-	}
-	if ($this->{partids}{boot}) {
-		$result{boot} = $this -> __getPartDevice (
-			$device,$this->{partids}{boot}
-		);
-	}
-	if ($this->{partids}{jump}) {
-		$result{jump} = $this -> __getPartDevice (
-			$device,$this->{partids}{jump}
-		);
-	}
-	return %result;
+	&setDefaultDeviceMap
 }
 
 #==========================================
@@ -6072,24 +6023,17 @@ sub setLVMDeviceMap {
 	if (! defined $group) {
 		return;
 	}
-	if ($this->{partids}{root_lv}) {
-		$result{root} = "/dev/$group/".$this->{partids}{root_lv};
+	for my $part (qw(root readonly readwrite)) {
+		if ($this->{partids}{$part."_lv"}) {
+			$result{$part} = "/dev/$group/".$this->{partids}{$part."_lv"};
+		}
 	}
-	if ($this->{partids}{readonly_lv}) {
-		$result{readonly} = "/dev/$group/".$this->{partids}{readonly_lv};
-	}
-	if ($this->{partids}{readwrite_lv}) {
-		$result{readwrite} = "/dev/$group/".$this->{partids}{readwrite_lv}
-	}
-	if ($this->{partids}{boot}) {
-		$result{boot} = $this -> __getPartDevice (
-			$device,$this->{partids}{boot}
-		);
-	}
-	if ($this->{partids}{jump}) {
-		$result{jump} = $this -> __getPartDevice (
-			$device,$this->{partids}{jump}
-		);
+	for my $part (qw(boot jump)) {
+		if ($this->{partids}{$part}) {
+			$result{$part} = $this -> __getPartDevice (
+				$device,$this->{partids}{$part}
+			);
+		}
 	}
 	return %result;
 }
