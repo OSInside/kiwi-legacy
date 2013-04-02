@@ -2568,7 +2568,7 @@ div {
 #
 div {
 	k.packages.type.attribute = attribute type {
-		"bootstrap" | "delete" | "image" | "iso" | "oem" | "pxe" |
+		"bootstrap" | "delete" | "image" | "iso" | "lxc" | "oem" | "pxe" |
 		"split" | "testsuite" | "vmx"
 	}
 	k.packages.profiles.attribute = k.profiles.attribute
