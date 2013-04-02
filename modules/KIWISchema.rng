@@ -3722,6 +3722,7 @@ virtual machine when running the image.</db:para>
           <value>delete</value>
           <value>image</value>
           <value>iso</value>
+          <value>lxc</value>
           <value>oem</value>
           <value>pxe</value>
           <value>split</value>
