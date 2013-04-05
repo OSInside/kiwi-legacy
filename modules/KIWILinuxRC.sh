@@ -7593,7 +7593,7 @@ function createCustomHybridPersistent {
 	#======================================
 	# check for custom cow location
 	#--------------------------------------
-	if [ ! -z "$kiwi_cowfile" ];then
+	if [ -z "$kiwi_cowfile" ];then
 		return
 	fi
 	Echo "Using custom cow file: $kiwi_cowfile"
