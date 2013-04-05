@@ -5072,11 +5072,13 @@ sub installBootLoader {
 		if (! $syncMBR) {
 			$syncMBR = 'false';
 		}
-		if (($firmware =~ /efi/) && ($syncMBR eq 'true') && (! $gptsync)) {
-			$kiwi -> warning (
-				"gptsync not installed, skipping legacy BIOS support"
-			);
-			$kiwi -> skipped ();
+		if (($firmware =~ /efi/) && ($syncMBR eq 'true')) {
+			$kiwi -> info ("EFI legacy BIOS support enabled:\n");
+			if ($gptsync) {
+				$kiwi -> info ("--> Using gptsync program\n");
+			} else {
+				$kiwi -> info ("--> Using parted gpt_sync_mbr table type\n");
+			}
 		}
 		if (($firmware eq 'bios') || ($syncMBR eq 'true') && ($gptsync)) {
 			#==========================================
@@ -5669,14 +5671,14 @@ sub getGeometry {
 	) {
 		my $syncMBR = $xml -> getImageType() -> getSyncMBR();
 		if (($syncMBR) && ($syncMBR eq 'true')) {
-			# /.../
-			# I'm afraid but the MBR created by this suse parted
-			# extension does not work. I got better results by
-			# using gptsync
-			# ----
-			# $label = 'gpt_sync_mbr';
-			# ----
-			$label = 'gpt';
+			my $gptsync = $locator -> getExecPath ('gptsync');
+			if ($gptsync) {
+				# use the opensource gptsync program
+				$label = 'gpt';
+			} else {
+				# use the parted extension from SUSE
+				$label = 'gpt_sync_mbr';
+			}
 		} else {
 			$label = 'gpt';
 		}
