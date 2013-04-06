@@ -3712,7 +3712,7 @@ function setupHybridPersistent {
 	#======================================
 	# create write partition for hybrid
 	#--------------------------------------
-	if [ -z "$kiwi_cowfile" ];then
+	if [ -z "$kiwi_cowdevice" ] && [ -z "$kiwi_cowsystem" ];then
 		#======================================
 		# try to create a write partition
 		#--------------------------------------
@@ -7588,20 +7588,21 @@ function runInteractive {
 function createCustomHybridPersistent {
 	# /.../
 	# import the write space for the hybrid according to
-	# the information given by kiwi_cowfile
+	# the information given by kiwi_cowdevice and kiwi_cowsystem
 	# ----
 	#======================================
 	# check for custom cow location
 	#--------------------------------------
-	if [ -z "$kiwi_cowfile" ];then
+	if [ -z "$kiwi_cowdevice" ];then
 		return
 	fi
-	Echo "Using custom cow file: $kiwi_cowfile"
+	if [ -z "$kiwi_cowsystem" ];then
+		return
+	fi
+	Echo "Using custom cow file: $kiwi_cowdevice:$kiwi_cowsystem"
 	#======================================
 	# got custom cow location
 	#--------------------------------------
-	kiwi_cowdevice=$(echo $kiwi_cowfile | cut -f1 -d:)
-	kiwi_cowsystem=$(echo $kiwi_cowfile | cut -f2 -d:)
 	waitForStorageDevice $kiwi_cowdevice
 	#======================================
 	# mount cow device
@@ -7651,7 +7652,7 @@ function createHybridPersistent {
 	#======================================
 	# check for custom cow location
 	#--------------------------------------
-	if [ ! -z "$kiwi_cowfile" ];then
+	if [ ! -z "$kiwi_cowdevice" ] || [ ! -z "$kiwi_cowsystem" ];then
 		return
 	fi
 	#======================================
