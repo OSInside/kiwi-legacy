@@ -184,7 +184,7 @@ sub test_createVolumeInvalidName {
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $id = $sysdDataObj -> createVolume('t*Vol');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'createVolume: improper name, found non word character.';
+	my $expected = 'createVolume: improper LVM volume name found.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -212,7 +212,7 @@ sub test_createVolumeInvalidNameInit {
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new();
 	my $id = $sysdDataObj -> createVolume(\%init);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'createVolume: improper name, found non word character.';
+	my $expected = 'createVolume: improper LVM volume name found.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -589,8 +589,7 @@ sub test_ctor_invalidVolName {
 			);
 	my $sysdDataObj = KIWIXMLSystemdiskData -> new(\%init);
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'object initialization: improper name, found non word '
-		. 'character.';
+	my $expected = 'object initialization: improper LVM volume name found.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -1032,7 +1031,7 @@ sub test_setVGNameInvalidName {
 	my $sysdDataObj = $this -> __getSystemdiskObj();
 	my $res = $sysdDataObj -> setVGName('foo VG');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'setVGName: improper name, found non word character.';
+	my $expected = 'setVGName: improper LVM volume name found.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -1296,7 +1295,7 @@ sub test_setVolumeNameInvalidName {
 	my $sysdDataObj = $this -> __getSystemdiskObj();
 	my $res = $sysdDataObj -> setVolumeName('2', 'bar VOL');
 	my $msg = $kiwi -> getMessage();
-	my $expected =  'setVolumeName: improper name, found non word character.';
+	my $expected =  'setVolumeName: improper LVM volume name found.';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);

@@ -463,8 +463,8 @@ sub __isNameValid {
 		$kiwi -> oops();
 		return 1;
 	}
-	if ($name =~ /\W/smx) {
-		my $msg = "$caller: improper name, found non word character.";
+	if ($name !~ /^[A-Za-z0-9_\+][A-Za-z0-9_\/\+\-]*$/saxm) {
+		my $msg = "$caller: improper LVM volume name found.";
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;
