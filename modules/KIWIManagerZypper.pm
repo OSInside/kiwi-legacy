@@ -115,6 +115,7 @@ sub new {
 		'--no-gpg-checks',
 		'--pkg-cache-dir /var/cache/kiwi/packages',
 		"--reposd-dir $root/$dataDir/repos",
+		"--solv-cache-dir $root/$dataDir/solv",
 		"--cache-dir $root/$dataDir",
 		"--config $zypperConf"
 	];
@@ -124,6 +125,7 @@ sub new {
 		'--no-gpg-checks',
 		'--pkg-cache-dir /var/cache/kiwi/packages',
 		"--reposd-dir $dataDir/repos",
+		"--solv-cache-dir $dataDir/solv",
 		"--cache-dir $dataDir",
 		"--config $zypperConf"
 	];
