@@ -5288,11 +5288,11 @@ function kiwiMount {
 	#--------------------------------------
 	if [ ! -z "$lop" ];then
 		# /.../
-		# if loop mount is requested a fixed loop1 device
+		# if loop mount is requested a fixed loop7 device
 		# was set as src parameter. Because this fixed loop
 		# name is used later too we stick to this device name
 		# ----
-		losetup /dev/loop1 $lop
+		losetup /dev/loop7 $lop
 	fi
 	if ! mount -t $FSTYPE $opt $src $dst >/dev/null;then
 		return 1
