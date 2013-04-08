@@ -6725,6 +6725,12 @@ function activateImage {
 	local cdDir=/livecd
 	if [ -d $cdDir ];then
 		mkdir -p /mnt/$cdDir && mount --move /$cdDir /mnt/$cdDir
+		if [ -d /cow ];then
+			mkdir -p /mnt/cow && mount --move /cow /mnt/cow
+		fi
+		if [ -d /isofrom ];then
+			mkdir -p /mnt/isofrom && mount --move /isofrom /mnt/isofrom
+		fi
 	fi
 	#======================================
 	# create dbus machine id
