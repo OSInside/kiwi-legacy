@@ -171,7 +171,6 @@
 		<package name="limal-perl"/>
 		<package name="logrotate"/>
 		<package name="make"/>
-		<package name="mdadm"/>
 		<package name="mingetty"/>
 		<package name="openslp"/>
 		<package name="pam"/>
