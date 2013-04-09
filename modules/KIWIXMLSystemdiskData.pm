@@ -463,7 +463,7 @@ sub __isNameValid {
 		$kiwi -> oops();
 		return 1;
 	}
-	if ($name !~ /^[A-Za-z0-9_\+][A-Za-z0-9_\/\+\-]*$/saxm) {
+	if ($name !~ /^[A-Za-z0-9_\+][A-Za-z0-9_\/\+\-]*$/smx) {
 		my $msg = "$caller: improper LVM volume name found.";
 		$kiwi -> error($msg);
 		$kiwi -> failed();
