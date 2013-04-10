@@ -4088,11 +4088,13 @@ function deactivateMDRaid {
 # zeroMDRaidSuperBlock
 #--------------------------------------
 function zeroMDRaidSuperBlock {
-	local diskDevice=$1
-	for i in /dev/md*;do
-		test -b $i && mdadm --stop $i &>/dev/null
-	done
-	mdadm --zero-superblock $diskDevice &>/dev/null
+	if [ ! -z "$kiwi_RaidDev" ] && [ -e $kiwi_RaidDev ];then
+		local diskDevice=$1
+		for i in /dev/md*;do
+			test -b $i && mdadm --stop $i &>/dev/null
+		done
+		mdadm --zero-superblock $diskDevice &>/dev/null
+	fi
 }
 #======================================
 # searchSwapSpace
