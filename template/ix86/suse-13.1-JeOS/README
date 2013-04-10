@@ -1,0 +1,8 @@
+Build instructions for local build
+==================================
+* tip: create a local 13.1 installation source to speed up the build process
+  tip: copy 13.1 DVD
+
+* call kiwi:
+  kiwi --build suse-13.1-JeOS --set-repo /path/to/13.1/repo \
+	   -d /tmp/myimage --type vmx
