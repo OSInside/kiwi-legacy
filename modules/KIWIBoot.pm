@@ -2464,15 +2464,19 @@ sub setupBootDisk {
 		# Copy root tree to disk
 		#------------------------------------------
 		$kiwi -> info ("Copying system image tree on disk");
+		my $btrfs_sub_vol = '';
+		my $rsync_cmd = 'rsync -aHXA --one-file-system ';
 		if (-e $loopdir.'/@') {
-			$status = qxx (
-				'rsync -aHXA --one-file-system '.$system.'/ '.$loopdir.'/@ 2>&1'
-			);
-		} else {
-			$status = qxx (
-				"rsync -aHXA --one-file-system $system/ $loopdir 2>&1"
-			);
+			# /.../
+			# if we found the special btrfs subvolume named @ we
+			# sync only this volume and not the other nested sub
+			# volumes
+			# ----
+			$btrfs_sub_vol = '/@';
 		}
+		$status = qxx (
+			$rsync_cmd.$system.'/ '.$loopdir.$btrfs_sub_vol.' 2>&1'
+		);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
