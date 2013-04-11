@@ -254,6 +254,7 @@ sub new {
 		$arch = "ix86";
 	}
 	my %supported = map { ($_ => 1) } qw(
+		aarch64
 		armv5el
 		armv5tel
 		armv6l
