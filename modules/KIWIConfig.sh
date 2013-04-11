@@ -1242,6 +1242,8 @@ function suseGFXBoot {
 		fi
 		mv /boot/*.bin /image/loader &>/dev/null
 		mv /boot/*.img /image/loader &>/dev/null
+		mv /boot/*.imx /image/loader &>/dev/null
+		mv /boot/*.dtb /image/loader &>/dev/null
 	else
 		# boot loader binary part of MBR
 		:
