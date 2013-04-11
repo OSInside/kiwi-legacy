@@ -728,7 +728,7 @@ sub setupInstallCD {
 	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
-	if (! $this -> setupBootLoaderStages ($bootloader,"iso")) {
+	if (! $this -> setupBootLoaderStages ($bootloader,'iso')) {
 		return;
 	}
 	qxx ("rm -rf $tmpdir/usr 2>&1");
@@ -1226,7 +1226,7 @@ sub setupInstallStick {
 	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
-	if (! $this -> setupBootLoaderStages ($bootloader)) {
+	if (! $this -> setupBootLoaderStages ($bootloader,'disk')) {
 		return;
 	}
 	#==========================================
@@ -2304,7 +2304,7 @@ sub setupBootDisk {
 	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
-	if (! $this -> setupBootLoaderStages ($bootloader)) {
+	if (! $this -> setupBootLoaderStages ($bootloader,'disk')) {
 		return;
 	}
 	#==========================================
@@ -3282,6 +3282,13 @@ sub setupBootLoaderStages {
 	my $arch     = $this->{arch};
 	my $status   = 0;
 	my $result   = 0;
+	my $label;
+	#==========================================
+	# set the boot part label
+	#------------------------------------------
+	if (($type) && ($type ne 'disk')) {
+		$label = 'BOOT';
+	}
 	#==========================================
 	# Grub2
 	#------------------------------------------
@@ -3382,7 +3389,11 @@ sub setupBootLoaderStages {
 				$kiwi -> failed ();
 				return;
 			}
-			print $bpfd "search -f /boot/$this->{mbrid} --set"."\n";
+			if ($label) {
+				print $bpfd "search --label $label --set"."\n";
+			} else {
+				print $bpfd "search --file /boot/$this->{mbrid} --set"."\n";
+			}
 			if ($bootfile =~ /grub2-efi/) {
 				print $bpfd 'set prefix=($root)/boot/grub2-efi'."\n";
 			} else {
