@@ -266,7 +266,7 @@ Meta-package to pull in all requires to build a isoboot media.
 
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
 
 %package -n kiwi-desc-vmxboot
 Requires:       kiwi = %{version}
@@ -352,7 +352,7 @@ Meta-package to pull in all requires to build a netboot media.
 
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
 
 %package -n kiwi-desc-oemboot
 Requires:       kiwi = %{version}
@@ -376,7 +376,7 @@ Requires:       grub2
 Requires:       grub
 %endif
 %endif
-%ifarch %arm
+%ifarch %arm aarch64
 Requires:       u-boot-tools
 %endif
 Summary:        openSUSE - KIWI image descriptions
@@ -407,7 +407,7 @@ Meta-package to pull in all requires to build a oemboot media.
 
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
 
 %package -n kiwi-templates
 PreReq:         coreutils
@@ -428,7 +428,7 @@ Authors:
     Marcus Schaefer
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
 
 %package -n kiwi-media-requires
 Summary:        openSUSE - packages which should be part of the DVD
@@ -569,7 +569,7 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch s390 s390x
 %exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %endif
-%ifarch %arm
+%ifarch %arm aarch64
 %exclude %{_datadir}/kiwi/image/suse-12.2-JeOS
 %exclude %{_datadir}/kiwi/image/suse-12.3-JeOS
 %endif
@@ -680,7 +680,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_datadir}/kiwi/image/netboot/README.requires
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
 
 %files -n kiwi-desc-oemboot
 %defattr(-, root, root)
@@ -696,7 +696,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_datadir}/kiwi/image/oemboot/README.requires
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
 
 %files -n kiwi-templates
 %defattr(-, root, root)
@@ -712,7 +712,7 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch s390 s390x
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %endif
-%ifarch %arm
+%ifarch %arm aarch64
 %{_datadir}/kiwi/image/suse-12.2-JeOS
 %{_datadir}/kiwi/image/suse-12.3-JeOS
 %endif
@@ -722,7 +722,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm
+%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
 
 %files -n kiwi-media-requires
 %defattr(-, root, root)
