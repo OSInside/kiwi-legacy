@@ -28,23 +28,7 @@ function OEMNetwork {
 	#======================================
 	# load nics detected by hwinfo
 	#--------------------------------------
-	local loaded=0
-	probeNetworkCard
-	IFS=":"
-	for i in $networkModule;do
-		if [ ! -z $i ];then
-			modprobe $i 2>/dev/null
-			if test $? = 0;then
-				loaded=1
-			fi
-		fi
-	done
-	IFS=$IFS_ORIG
-	if test $loaded = 0;then
-		systemException \
-			"Network module: Failed to load network module !" \
-		"reboot"
-	fi
+	loadNetworkCard
 	#======================================
 	# setup network via DHCP
 	#--------------------------------------
