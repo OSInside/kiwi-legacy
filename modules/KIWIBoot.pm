@@ -5010,6 +5010,9 @@ sub copyBootCode {
 		}
 		qxx ("mv $dest/boot/*.bin $dest &>/dev/null");
 		qxx ("mv $dest/boot/*.img $dest &>/dev/null");
+		qxx ("mv $dest/boot/*.imx $dest &>/dev/null");
+		qxx ("mv $dest/boot/*.dtb $dest &>/dev/null");
+		qxx ("mv $dest/boot/*.elf $dest &>/dev/null");
 		if (-f "$dest/boot/MLO") {
 			$status = qxx ("mv $dest/boot/MLO $dest");
 			$result = $? >> 8;
