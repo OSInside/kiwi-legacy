@@ -27,19 +27,19 @@
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2" alias="base">
-		<source path="/tmp"/>
+		<source path="/tmp/a"/>
 	</repository>
 	<repository type="rpm-md" alias="update" status="replaceable">
-		<source path="/tmp"/>
+		<source path="/tmp/b"/>
 	</repository>
 	<repository type="rpm-md" alias="ec2" status="fixed" profiles="profA">
-		<source path="/tmp"/>
+		<source path="/tmp/c"/>
 	</repository>
 	<repository type="rpm-md" alias="python" profiles="ProfA">
-		<source path="/tmp"/>
+		<source path="/tmp/d"/>
 	</repository>
 	<repository type="rpm-md" alias="perl" status="replaceable" profiles="profB">
-		<source path="/tmp"/>
+		<source path="/tmp/e"/>
 	</repository>
 	<packages type="image">
 		<package name="kernel-default"/>

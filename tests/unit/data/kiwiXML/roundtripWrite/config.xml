@@ -69,7 +69,7 @@
 		<source path="/tmp"/>
 	</repository>
 	<repository alias="update" imageinclude="true" type="rpm-md" profiles="profA">
-		<source path="/tmp"/>
+		<source path="http://download.opensuse.org/update/12.1"/>
 	</repository>
 	<drivers>
 		<file name="crypto/*"/>

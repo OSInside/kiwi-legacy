@@ -47,7 +47,7 @@
 		<source path="/tmp"/>
 	</repository>
 	<repository type="rpm-md" prefer-license="true">
-		<source path="/tmp"/>
+		<source path="http://download.opensuse.org/update/12.1/"/>
 	</repository>
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>

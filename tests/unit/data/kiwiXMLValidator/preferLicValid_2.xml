@@ -47,19 +47,19 @@
 		<source path="/tmp"/>
 	</repository>
 	<repository type="rpm-md" prefer-license="false">
-		<source path="/tmp"/>
+		<source path="http://download.opensuse.org/update/12.1/"/>
 	</repository>
 	<repository type="rpm-dir" prefer-license="true" profiles="xenFlavor">
-		<source path="/tmp"/>
+		<source path="/mnt/myXenpckgs"/>
 	</repository>
 	<repository type="rpm-dir" prefer-license="false" profiles="xenFlavor">
-		<source path="/tmp"/>
+		<source path="/mnt/myXenBuild"/>
 	</repository>
 	<repository type="rpm-dir" prefer-license="true" profiles="vmwFlavor">
-		<source path="/tmp"/>
+		<source path="/mnt/myVmApp"/>
 	</repository>
 	<repository type="rpm-dir" profiles="vmwFlavor">
-		<source path="/tmp"/>
+		<source path="/mnt/myVmPckgs"/>
 	</repository>
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
