@@ -29,7 +29,7 @@
 		<user password="linux" pwdformat="plain" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<source path="opensuse://12.2/repo/oss/"/>
+		<source path="/tmp"/>
 	</repository>
 	<packages type="image">
 		<archive name="yourBins.tar"/>

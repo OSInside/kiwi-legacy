@@ -3103,7 +3103,7 @@ sub test_addRepositoriesDefault {
 	$this -> assert_equals(2, $numRepos);
 	for my $repo (@repoData) {
 		my $path = $repo -> getPath();
-		if ($path ne 'opensuse://12.1/repo/oss/' &&
+		if ($path ne '/tmp/12.1/repo/oss/' &&
 			$path ne '/work/repos/md') {
 			$this -> assert_str_equals('No path match', $path);
 		}
@@ -3268,7 +3268,7 @@ sub test_addRepositoriesExist {
 	);
 	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init);
 	my %init2 = (
-				path => 'opensuse://12.1/repo/oss/',
+				path => '/tmp/12.1/repo/oss/',
 				type => 'rpm-dir'
 	);
 	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init2);
@@ -7437,44 +7437,6 @@ sub test_getReplacePackageDelList {
 }
 
 #==========================================
-# test_getRepoNodeList_legacy
-#------------------------------------------
-sub test_getRepoNodeList_legacy {
-	# ...
-	# Verify proper return of getRepoNodeList method
-	# ---
-	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
-		return; # skip the test if there is no network connection
-	}
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my @repoNodes = $xml -> getRepoNodeList_legacy() -> get_nodelist();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	my @expectedPaths = ['opensuse://12.1/repo/oss/',
-						'http://download.opensuse.org/update/12.1',
-						'https://myreposerver/protectedrepos/12.1',
-						'/repos/12.1-additional'];
-	my @configPaths;
-	for my $element (@repoNodes) {
-		my $source= $element -> getElementsByTagName('source')
-			-> get_node(1) -> getAttribute ('path');
-		push @configPaths, $source;
-	}
-	$this -> assert_array_equal(@expectedPaths, \@configPaths);
-	return;
-}
-
-#==========================================
 # test_getRepositories
 #------------------------------------------
 sub test_getRepositories {
@@ -7502,7 +7464,7 @@ sub test_getRepositories {
 	my $numRepos = @repoData;
 	$this -> assert_equals(4, $numRepos);
 	for my $repoDataObj (@repoData) {
-		if ( $repoDataObj -> getPath() eq 'opensuse://12.1/repo/oss/' ) {
+		if ( $repoDataObj -> getPath() eq '/tmp/12.1/repo/oss/' ) {
 			$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
 			$this -> assert_str_equals('2', $repoDataObj -> getPriority() );
 			$this -> assert_str_equals('true',
@@ -7560,7 +7522,7 @@ sub test_getRepositoriesWithProf {
 	my $numRepos = @repoData;
 	$this -> assert_equals(1, $numRepos);
 	for my $repoDataObj (@repoData) {
-		$this -> assert_str_equals('opensuse://12.1/repo/oss/',
+		$this -> assert_str_equals('/tmp/12.1/repo/oss/',
 								$repoDataObj -> getPath()
 								);
 		$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
@@ -7583,7 +7545,7 @@ sub test_getRepositoriesWithProf {
 	$numRepos = @repoData;
 	$this -> assert_equals(3, $numRepos);
 	for my $repoDataObj (@repoData) {
-		if ( $repoDataObj -> getPath() eq 'opensuse://12.1/repo/oss/' ) {
+		if ( $repoDataObj -> getPath() eq '/tmp/12.1/repo/oss/' ) {
 			$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
 			$this -> assert_str_equals('2', $repoDataObj -> getPriority() );
 			$this -> assert_str_equals('true',
@@ -7616,7 +7578,7 @@ sub test_getRepositoriesWithProf {
 	$numRepos = @repoData;
 	$this -> assert_equals(2, $numRepos);
 	for my $repoDataObj (@repoData) {
-		if ( $repoDataObj -> getPath() eq 'opensuse://12.1/repo/oss/' ) {
+		if ( $repoDataObj -> getPath() eq '/tmp/12.1/repo/oss/' ) {
 			$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
 			$this -> assert_str_equals('2', $repoDataObj -> getPriority() );
 			$this -> assert_str_equals('true',

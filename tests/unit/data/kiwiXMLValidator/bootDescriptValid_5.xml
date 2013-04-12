@@ -23,7 +23,7 @@
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<source path="opensuse://11.4/repo/oss/"/>
+		<source path="/tmp"/>
 	</repository>
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>

@@ -27,19 +27,19 @@
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2" alias="base">
-		<source path="opensuse://12.3/repo/oss/"/>
+		<source path="/tmp"/>
 	</repository>
 	<repository type="rpm-md" alias="update" status="replaceable">
-		<source path="opensuse://update/12.3"/>
+		<source path="/tmp"/>
 	</repository>
 	<repository type="rpm-md" alias="ec2" status="fixed" profiles="profA">
-		<source path="opensuse://repositories/Cloud:/EC2/openSUSE_12.3"/>
+		<source path="/tmp"/>
 	</repository>
 	<repository type="rpm-md" alias="python" profiles="ProfA">
-		<source path="opensuse://repositories/devel:/languages:/python/openSUSE_12.3"/>
+		<source path="/tmp"/>
 	</repository>
 	<repository type="rpm-md" alias="perl" status="replaceable" profiles="profB">
-		<source path="opensuse://repositories/devel:/languages:/perl/openSUSE_12.3"/>
+		<source path="/tmp"/>
 	</repository>
 	<packages type="image">
 		<package name="kernel-default"/>
