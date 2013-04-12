@@ -231,7 +231,7 @@ def registerNode():
 #----------------------------------------------------------------------------
 def removeConfNetworkSetting(iFace):
 	"""Shutdown the configuration network and remove the configuration."""
-	syslog.syslog(syslog.LOG_INFO, 'Shutdown configuartion network\n')
+	syslog.syslog(syslog.LOG_INFO, 'Shutdown configuration network\n')
 	os.system('/sbin/ifdown %s' %iFace)
 	msg = 'Remove configuration network interface config\n'
 	syslog.syslog(syslog.LOG_INFO, msg)

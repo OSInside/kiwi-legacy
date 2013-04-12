@@ -66,8 +66,8 @@
   </sect1>
 
   <sect1 id="sec.lxc.details">
-    <title>Image Configuartion Details</title>
-    <para>The configuartion for a container does not need to contain a kernel
+    <title>Image Configuration Details</title>
+    <para>The configuration for a container does not need to contain a kernel
       package. The container represents the user space that runs on top
       of the kernel of the container host system.</para>
     <para>The container itself must contain the Linux user space container
@@ -80,7 +80,7 @@
       attribute indicates the network mode, <emphasis>veth</emphasis>
       by default. While it is possible to configure multiple network
       interfaces in the <filename>config.xml</filename> file, the written
-      conteiner configuartion will only reflect the information configured
+      conteiner configuration will only reflect the information configured
       for the first <sgmltag class="element">vmnic</sgmltag>
       element found in the <filename>config.xml</filename> file. The
       configuration for the container expects that the host has a configured
@@ -88,7 +88,7 @@
       For complex network setup implementations it is necessary to edit the
       config file.
     </para>
-    <para>The generated configuartion file restricts the device access
+    <para>The generated configuration file restricts the device access
       of the container according to a generally accepted best practice
       security  model. The device access permissions may be modified by
       editing the <filename>config</filename> file for the container.</para>
