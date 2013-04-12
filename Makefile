@@ -32,6 +32,7 @@ KIWIMODVZ   = ${kiwi_prefix}/modules
 KIWILOCVZ   = ${kiwi_prefix}/locale
 KIWIXSLVZ   = ${kiwi_prefix}/xsl
 TOOLSVZ     = ${bin_prefix}
+LIVESTICKVZ = ${kiwi_prefix}/livestick
 INITVZ      = ${init_prefix}
 KIWIIMAGE   = ${kiwi_prefix}/image
 KIWIEDITING = ${kiwi_prefix}/editing
@@ -76,7 +77,7 @@ install:
 	install -d -m 755 ${TFTPBOOTBOOT} ${KIWILOCVZ} ${KIWIKEYVZ}
 	install -d -m 755 ${TFTPUPLOAD} ${KIWIREPO}
 	install -d -m 755 ${PACKDOCVZ} ${MANVZ}
-	install -d -m 755 ${TOOLSVZ} ${INITVZ}
+	install -d -m 755 ${TOOLSVZ} ${INITVZ} ${LIVESTICKVZ}
 	install -d -m 755 ${KIWIEDITING} ${KIWIEMACS} ${KIWITESTS}
 
 	#============================================

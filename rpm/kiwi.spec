@@ -599,6 +599,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
+%{_datadir}/kiwi/livestick
 %{_datadir}/kiwi/editing
 %{_datadir}/kiwi/locale
 %{_datadir}/kiwi/repo
@@ -609,6 +610,7 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/kiwi/modules/KIWIUtil.pm
 %{_datadir}/kiwi/xsl
 %{_sbindir}/kiwi
+/usr/bin/livestick
 #=================================================
 # KIWI doc...      
 #-------------------------------------------------
@@ -657,6 +659,7 @@ rm -rf $RPM_BUILD_ROOT
 %files -n kiwi-tools
 %defattr(-, root, root)
 %doc %{_defaultdocdir}/kiwi/README.tools
+%exclude /usr/bin/livestick
 /usr/bin/*
 #=================================================
 # KIWI-desc-* and templates...

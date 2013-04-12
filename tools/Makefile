@@ -12,6 +12,8 @@ install:
 	install -m 755 startshell/startshell ${TOOLSVZ}
 	install -m 755 driveready/driveready ${TOOLSVZ}
 	install -m 755 utimer/utimer ${TOOLSVZ}
+	install -m 755 livestick/livestick ${TOOLSVZ}
+	cp -a livestick/theme ${LIVESTICKVZ}
 
 clean:
 	${MAKE} -C dcounter clean
