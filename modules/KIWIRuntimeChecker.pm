@@ -656,6 +656,9 @@ sub __isFsToolAvailable {
 	if ($fsType eq 'clicfs' ) {
 		return $locator -> getExecPath('mkclicfs');
 	}
+	if ($fsType eq 'overlayfs' ) {
+		return $locator -> getExecPath('mksquashfs');
+	}
 	if ($fsType eq 'cpio' ) {
 		return $locator -> getExecPath('cpio');
 	}

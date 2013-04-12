@@ -1022,6 +1022,7 @@ sub _new_instance {
 	$KnownFS{ext3}{tool}      = $locator -> getExecPath("mkfs.ext3");
 	$KnownFS{ext2}{tool}      = $locator -> getExecPath("mkfs.ext2");
 	$KnownFS{squashfs}{tool}  = $locator -> getExecPath("mksquashfs");
+	$KnownFS{overlayfs}{tool} = $locator -> getExecPath("mksquashfs");
 	$KnownFS{clicfs}{tool}    = $locator -> getExecPath("mkclicfs");
 	$KnownFS{clic}{tool}      = $locator -> getExecPath("mkclicfs");
 	$KnownFS{seed}{tool}      = $locator -> getExecPath("mkfs.btrfs");

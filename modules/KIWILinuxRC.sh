@@ -5247,6 +5247,7 @@ function umountSystem {
 #--------------------------------------
 function isFSTypeReadOnly {
 	if [ "$FSTYPE" = "squashfs" ];then
+		export unionFST=overlay
 		return 0
 	fi
 	if [ "$FSTYPE" = "clicfs" ];then

@@ -1851,7 +1851,7 @@ sub __isValidFilesystem {
 		return;
 	}
 	my %supported = map { ($_ => 1) } qw(
-		btrfs clicfs ext2 ext3 ext4 reiserfs squashfs xfs
+		btrfs clicfs ext2 ext3 ext4 overlayfs reiserfs squashfs xfs
 	);
 	if (! $supported{$fileS} ) {
 		my $msg = "$caller: specified filesystem '$fileS' is not "

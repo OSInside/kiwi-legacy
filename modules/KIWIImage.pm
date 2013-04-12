@@ -1234,6 +1234,10 @@ sub createImageRootAndBoot {
 			$ok = $this -> createImageClicFS ();
 			last SWITCH;
 		};
+		/^overlayfs/  && do {
+			$ok = $this -> createImageSquashFS ();
+			last SWITCH;
+		};
 		/^btrfs/      && do {
 			if (! $treeAccess) {
 				$ok = $this -> createImageBTRFS ();
@@ -3760,6 +3764,13 @@ sub postImage {
 			last SWITCH;
 		};
 		#==========================================
+		# Check overlayfs file system
+		#------------------------------------------
+		/overlayfs/ && do {
+			# nothing to do for overlayfs (squashfs)
+			last SWITCH;
+		};
+		#==========================================
 		# Check EXT4 file system
 		#------------------------------------------
 		/ext4/i     && do {
@@ -3814,7 +3825,7 @@ sub postImage {
 	#==========================================
 	# Create image md5sum
 	#------------------------------------------
-	if ($para ne "clicfs") {
+	if (($para ne "clicfs") && ($para ne "overlayfs")) {
 		if (! $this -> buildMD5Sum ($name)) {
 			return;
 		}
@@ -4295,6 +4306,9 @@ sub isBootImage {
 			return 0;
 		};
 		/clicfs/i && do {
+			return 0;
+		};
+		/overlayfs/i && do {
 			return 0;
 		};
 		/btrfs/i  && do {

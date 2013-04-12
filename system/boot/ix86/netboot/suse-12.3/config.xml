@@ -56,6 +56,7 @@
 		<file name="fs/ext2/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext4/*"/>
+		<file name="fs/overlayfs/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/fuse/*"/>
 		<file name="fs/hfs/*"/>
@@ -135,6 +136,8 @@
 		<file name="fs/exportfs/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/ext3/*"/>
+		<file name="fs/ext4/*"/>
+		<file name="fs/overlayfs/*"/>
 		<file name="fs/fuse/*"/>
 		<file name="fs/lockd/*"/>
 		<file name="fs/mbcache.ko"/>

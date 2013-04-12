@@ -1806,7 +1806,7 @@ sub setupBootDisk {
 		if ($imgtype eq "split") {
 			$needBootP = 1;
 			$needParts = 3;
-		} elsif ($type{filesystem} eq "clicfs") {
+		} elsif ($type{filesystem} =~ /clicfs|overlayfs/) {
 			$needBootP = 1;
 			$needParts = 3;
 		} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
@@ -2504,20 +2504,20 @@ sub setupBootDisk {
 	# create read/write filesystem if needed
 	#------------------------------------------
 	if (($syszip) && (! $haveSplit) && (! $rawRW)) {
-		$root = $deviceMap{root};
+		my $rw = $deviceMap{readwrite};
 		if ($haveluks) {
 			my $cipher = $type{luks};
 			my $name   = "luksReadWrite";
 			$kiwi -> info ("Creating LUKS->ext3 read-write filesystem");
-			$status = qxx ("echo $cipher|cryptsetup -q luksFormat $root 2>&1");
+			$status = qxx ("echo $cipher|cryptsetup -q luksFormat $rw 2>&1");
 			$result = $? >> 8;
 			if ($status != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't setup luks format: $root");
+				$kiwi -> error  ("Couldn't setup luks format: $rw");
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx ("echo $cipher|cryptsetup luksOpen $root $name 2>&1");
+			$status = qxx ("echo $cipher|cryptsetup luksOpen $rw $name 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -2525,7 +2525,8 @@ sub setupBootDisk {
 				$kiwi -> failed ();
 				return;
 			}
-			$root = "/dev/mapper/$name";
+			$rw = "/dev/mapper/$name";
+			$deviceMap{readwrite} = $rw;
 			$this->{luks} = $name;
 		} else {
 			$kiwi -> info ("Creating ext3 read-write filesystem");
@@ -2538,7 +2539,7 @@ sub setupBootDisk {
 			$fsopts = '';
 		}
 		my $fstool = "mkfs.ext3";
-		$status = qxx ("$fstool $fsopts $root 2>&1");
+		$status = qxx ("$fstool $fsopts $rw 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -2587,7 +2588,7 @@ sub setupBootDisk {
 	if ($needBootP) {
 		$boot = $deviceMap{boot};
 	} else {
-		$boot = $root;
+		$boot = $deviceMap{root};
 	}
 	if (! KIWIGlobals -> instance() -> mount ($boot, $loopdir)) {
 		$kiwi -> failed ();

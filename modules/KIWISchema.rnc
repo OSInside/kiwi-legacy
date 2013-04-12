@@ -1612,7 +1612,7 @@ div {
 		## file for write operations
 		attribute filesystem {
 			"btrfs" | "clicfs" | "ext2" | "ext3" | "ext4" |
-			"reiserfs" | "squashfs" | "xfs"
+			"overlayfs" | "reiserfs" | "squashfs" | "xfs"
 		}
 	k.type.firmware.attribute =
 		## Specifies the boot firmware of the system. Most systems

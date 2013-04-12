@@ -5032,6 +5032,9 @@ sub __setDefaultBuildType {
 			->{$profName}->{preferences}->{types}
 			->{$profDefTypeName};
 		my $type = $profDefType->{type};
+		if (! $type) {
+			return;
+		}
 		my $profDefTypeIsPrim = $type -> getPrimary();
 		if ($profDefTypeIsPrim && $profDefTypeIsPrim eq 'true') {
 			if ($primaryCount) {

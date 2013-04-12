@@ -2144,6 +2144,7 @@ file for write operations</a:documentation>
           <value>ext2</value>
           <value>ext3</value>
           <value>ext4</value>
+          <value>overlayfs</value>
           <value>reiserfs</value>
           <value>squashfs</value>
           <value>xfs</value>
