@@ -307,7 +307,7 @@ sub test_p_writeConfigFile {
 	my $writer = KIWIContainerConfigWriter -> new($xml, $cDir);
 	my $res = $writer -> p_writeConfigFile();
 	my $msg = $kiwi -> getInfoMessage();
-	my $expected = 'Write container configuartion file'
+	my $expected = 'Write container configuration file'
 		. 'Write fstab for container';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();

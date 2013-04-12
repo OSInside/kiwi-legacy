@@ -61,7 +61,7 @@ sub p_writeConfigFile {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml = $this->{xml};
-	$kiwi -> info('Write container configuartion file');
+	$kiwi -> info('Write container configuration file');
 	my $vmConfig = $xml -> getVMachineConfig();
 	my $config = '# KIWI generated container configuration file' . "\n";
 	if ($vmConfig) {
