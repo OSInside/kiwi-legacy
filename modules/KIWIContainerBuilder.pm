@@ -168,7 +168,7 @@ sub createImage {
 #------------------------------------------
 sub __applyContainerConfig {
 	# ...
-	# Apply container configuartion settings
+	# Apply container configuration settings
 	# ---
 	my $this      = shift;
 	my $targetDir = shift;
