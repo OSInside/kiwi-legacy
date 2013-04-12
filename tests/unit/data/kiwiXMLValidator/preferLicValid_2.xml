@@ -43,7 +43,7 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<source path="opensuse://12.1/repo/oss/"/>
+		<source path="/tmp"/>
 	</repository>
 	<repository type="rpm-md" prefer-license="false">
 		<source path="http://download.opensuse.org/update/12.1/"/>

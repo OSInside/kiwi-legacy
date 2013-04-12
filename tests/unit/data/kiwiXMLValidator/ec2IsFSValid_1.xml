@@ -26,10 +26,10 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<source path="opensuse://11.3/repo/oss/"/>
+		<source path="/tmp"/>
 	</repository>
 	<repository type="rpm-md">
-		<source path="opensuse:Virtualization:/Cloud:/EC2/openSUSE_11.3"/>
+		<source path="/tmp"/>
 	</repository>
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>

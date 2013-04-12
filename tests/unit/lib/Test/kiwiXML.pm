@@ -3092,7 +3092,7 @@ sub test_addRepositoriesDefault {
 	$this -> assert_equals(2, $numRepos);
 	for my $repo (@repoData) {
 		my $path = $repo -> getPath();
-		if ($path ne 'opensuse://12.1/repo/oss/' &&
+		if ($path ne '/tmp/12.1/repo/oss/' &&
 			$path ne '/work/repos/md') {
 			$this -> assert_str_equals('No path match', $path);
 		}
@@ -3257,7 +3257,7 @@ sub test_addRepositoriesExist {
 	);
 	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init);
 	my %init2 = (
-				path => 'opensuse://12.1/repo/oss/',
+				path => '/tmp/12.1/repo/oss/',
 				type => 'rpm-dir'
 	);
 	push @reposToAdd, KIWIXMLRepositoryData -> new(\%init2);
@@ -3639,7 +3639,7 @@ sub test_addRepositories_legacy {
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(6, $numRepos);
 	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'/tmp/12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-4]);
@@ -3703,7 +3703,7 @@ sub test_addRepositoriesInvalidTypeInf_legacy {
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(5, $numRepos);
 	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'/tmp/12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-4]);
@@ -3764,7 +3764,7 @@ sub test_addRepositoriesNoTypeInf_legacy {
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(5, $numRepos);
 	# Spot check that existing data was not modified
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'/tmp/12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-4]);
@@ -7491,7 +7491,7 @@ sub test_getRepoNodeList_legacy {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
-	my @expectedPaths = ['opensuse://12.1/repo/oss/',
+	my @expectedPaths = ['/tmp/12.1/repo/oss/',
 						'http://download.opensuse.org/update/12.1',
 						'https://myreposerver/protectedrepos/12.1',
 						'/repos/12.1-additional'];
@@ -7533,7 +7533,7 @@ sub test_getRepositories {
 	my $numRepos = @repoData;
 	$this -> assert_equals(4, $numRepos);
 	for my $repoDataObj (@repoData) {
-		if ( $repoDataObj -> getPath() eq 'opensuse://12.1/repo/oss/' ) {
+		if ( $repoDataObj -> getPath() eq '/tmp/12.1/repo/oss/' ) {
 			$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
 			$this -> assert_str_equals('2', $repoDataObj -> getPriority() );
 			$this -> assert_str_equals('true',
@@ -7591,7 +7591,7 @@ sub test_getRepositoriesWithProf {
 	my $numRepos = @repoData;
 	$this -> assert_equals(1, $numRepos);
 	for my $repoDataObj (@repoData) {
-		$this -> assert_str_equals('opensuse://12.1/repo/oss/',
+		$this -> assert_str_equals('/tmp/12.1/repo/oss/',
 								$repoDataObj -> getPath()
 								);
 		$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
@@ -7614,7 +7614,7 @@ sub test_getRepositoriesWithProf {
 	$numRepos = @repoData;
 	$this -> assert_equals(3, $numRepos);
 	for my $repoDataObj (@repoData) {
-		if ( $repoDataObj -> getPath() eq 'opensuse://12.1/repo/oss/' ) {
+		if ( $repoDataObj -> getPath() eq '/tmp/12.1/repo/oss/' ) {
 			$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
 			$this -> assert_str_equals('2', $repoDataObj -> getPriority() );
 			$this -> assert_str_equals('true',
@@ -7647,7 +7647,7 @@ sub test_getRepositoriesWithProf {
 	$numRepos = @repoData;
 	$this -> assert_equals(2, $numRepos);
 	for my $repoDataObj (@repoData) {
-		if ( $repoDataObj -> getPath() eq 'opensuse://12.1/repo/oss/' ) {
+		if ( $repoDataObj -> getPath() eq '/tmp/12.1/repo/oss/' ) {
 			$this -> assert_str_equals('yast2', $repoDataObj -> getType() );
 			$this -> assert_str_equals('2', $repoDataObj -> getPriority() );
 			$this -> assert_str_equals('true',
@@ -7659,49 +7659,6 @@ sub test_getRepositoriesWithProf {
 			$this -> assert_str_equals('rpm-dir', $repoDataObj -> getType() );
 		}
 	}
-	return;
-}
-
-#==========================================
-# test_getRepositories_legacy
-#------------------------------------------
-sub test_getRepositories_legacy {
-	# ...
-	# Verify proper return of getRepositories method
-	# ---
-	if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
-		return; # skip the test if there is no network connection
-	}
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'reposConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my %repos = $xml -> getRepositories_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	my $numRepos = scalar keys %repos;
-	$this -> assert_equals(4, $numRepos);
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
-	$this -> assert_str_equals('yast2', $repoInfo[0]);
-	$this -> assert_str_equals('2', $repoInfo[2]);
-	$this -> assert_str_equals('true', $repoInfo[-4]);
-	@repoInfo = @{$repos{'http://download.opensuse.org/update/12.1'}};
-	$this -> assert_str_equals('rpm-md', $repoInfo[0]);
-	$this -> assert_str_equals('update', $repoInfo[1]);
-	$this -> assert_str_equals('true', $repoInfo[-3]);
-	@repoInfo = @{$repos{'https://myreposerver/protectedrepos/12.1'}};
-	$this -> assert_str_equals('yast2', $repoInfo[0]);
-	$this -> assert_str_equals('foo', $repoInfo[3]);
-	$this -> assert_str_equals('bar', $repoInfo[4]);
-	@repoInfo = @{$repos{'/repos/12.1-additional'}};
-	$this -> assert_str_equals('rpm-dir', $repoInfo[0]);
 	return;
 }
 
@@ -9542,7 +9499,7 @@ sub test_setRepository_legacy {
 	# Test these conditions last to get potential error messages
 	my $numRepos = scalar keys %repos;
 	$this -> assert_equals(4, $numRepos);
-	my @repoInfo = @{$repos{'opensuse://12.1/repo/oss/'}};
+	my @repoInfo = @{$repos{'/tmp/12.1/repo/oss/'}};
 	$this -> assert_str_equals('yast2', $repoInfo[0]);
 	$this -> assert_str_equals('2', $repoInfo[2]);
 	$this -> assert_str_equals('true', $repoInfo[-4]);

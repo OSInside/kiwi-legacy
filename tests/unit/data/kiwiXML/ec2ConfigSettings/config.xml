@@ -25,7 +25,7 @@
 	<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<source path="opensuse://12.1/repo/oss/"/>
+		<source path="/tmp"/>
 	</repository>
 	<packages type="image">
 		<package name="kernel-default"/>

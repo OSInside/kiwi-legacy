@@ -29,7 +29,7 @@
 		<user home="/home/auser" id="2001" pwd=".NbYWFl0" name="auser" shell="/bin/ksh"/>
 	</users>
 	<repository type="yast2">
-		<source path="opensuse://12.1/repo/oss/"/>
+		<source path="/tmp"/>
 	</repository>
 	<packages type="image">
 		<package name="kernel-default"/>
