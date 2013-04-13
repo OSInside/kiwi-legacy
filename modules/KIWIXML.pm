@@ -1158,7 +1158,10 @@ sub discardReplacableRepos {
 	# Remove all repositories marked as replaceable
 	# ---
 	my $this = shift;
-	my @allProfs = @{$this->{availableProfiles}};
+	my @allProfs;
+	if ($this->{availableProfiles}) {
+		@allProfs = @{$this->{availableProfiles}};
+	}
 	push @allProfs, 'kiwi_default';
 	for my $profName (@allProfs) {
 		my $repos = $this->{imageConfig}{$profName}{repoData};
@@ -1739,6 +1742,9 @@ sub getProfiles {
 	my $kiwi = $this->{kiwi};
 	my %imgConf = %{ $this->{imageConfig} };
 	my @result;
+	if (! $this->{availableProfiles}) {
+		return \@result;
+	}
 	for my $prof (@{$this->{availableProfiles}}) {
 		push @result, $this->{imageConfig}->{$prof}->{profInfo};
 	}
@@ -1913,8 +1919,11 @@ sub ignoreRepositories {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
+	my @allProfs;
 	$kiwi -> info ('Ignoring all repositories previously configured');
-	my @allProfs = @{$this->{availableProfiles}};
+	if ($this->{availableProfiles}) {
+		@allProfs = @{$this->{availableProfiles}};
+	}
 	push @allProfs, 'kiwi_default';
 	for my $profName (@allProfs) {
 		if ($this->{imageConfig}->{$profName}->{repoData}) {
@@ -2222,7 +2231,9 @@ sub writeXML {
 		$xml .= '</profiles>';
 	}
 	my @profsToProc = ('kiwi_default');
-	push @profsToProc, @{$this->{availableProfiles}};
+	if ($this->{availableProfiles}) {
+		push @profsToProc, @{$this->{availableProfiles}};
+	}
 	#==========================================
 	# Add <preference> data
 	#------------------------------------------
@@ -2616,6 +2627,9 @@ sub __collectXMLListData {
 	}
 	my %dataMap;
 	my %nameProfMap;
+	if (! $this->{availableProfiles}) {
+		return \%dataMap;
+	}
 	for my $profName (@{$this->{availableProfiles}}) {
 		my @allData;
 		my $items;
@@ -5210,6 +5224,9 @@ sub __verifyProfNames {
 	my $names = shift;
 	my $msg   = shift;
 	my @namesToCheck = @{$names};
+	if (! $this->{availableProfiles}) {
+		return 1;
+	}
 	my %specProfs = map { ($_ => 1 ) } @{$this->{availableProfiles}};
 	for my $name (@namesToCheck) {
 		if ($name eq 'kiwi_default') {
@@ -5218,17 +5235,13 @@ sub __verifyProfNames {
 		if (! $specProfs{$name} ) {
 			my $kiwi = $this->{kiwi};
 			$msg =~ s/PROF_NAME/$name/;
-			$kiwi -> error($msg);
-			$kiwi ->  failed();
+			$kiwi -> error ($msg);
+			$kiwi -> failed();
 			return;
 		}
 	}
 	return 1;
 }
-
-#==========================================
-# End "new" methods section
-#------------------------------------------
 
 #==========================================
 # getConfigName
@@ -5238,7 +5251,6 @@ sub getConfigName {
 	my $name = $this->{controlFile};
 	return ($name);
 }
-
 
 #==========================================
 # getImageID
@@ -5293,7 +5305,6 @@ sub addSimpleType {
 	$this -> __updateXML_legacy();
 	return $this;
 }
-
 
 #==========================================
 # clearPackageAttributes
@@ -5376,7 +5387,6 @@ sub getReplacePackageAddList {
 	return @pacs;
 }
 
-
 #==========================================
 # getTestingList
 #------------------------------------------
@@ -5401,7 +5411,6 @@ sub getArch {
 	my $this = shift;
 	return $this->{arch};
 }
-
 
 #==========================================
 # getInstSourceSatSolvable
