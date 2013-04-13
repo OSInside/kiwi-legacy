@@ -3661,6 +3661,7 @@ function searchImageISODevice {
 						mbrVID=$(echo $mbrVID)
 						if [ "$mbrVID" = "$mbrIID" ];then
 							biosBootDevice=$pdev
+							biosRootDevice=$i
 							echo; return 0
 						fi
 					fi
@@ -3709,7 +3710,10 @@ function setupHybridPersistent {
 	if [ ! "$kiwi_hybridpersistent" = "yes" ];then
 		return
 	fi
-	local diskDevice=$(dn $biosBootDevice)
+	if [ -z "$biosRootDevice" ] ; then
+		biosRootDevice=$biosBootDevice
+	fi
+	local diskDevice=$(dn $biosRootDevice)
 	#======================================
 	# create write partition for hybrid
 	#--------------------------------------
