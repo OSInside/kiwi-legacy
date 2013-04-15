@@ -5517,8 +5517,8 @@ function mountSystemClicFS {
 			Echo "Failed to mount NFS filesystem"
 			return 1
 		fi
-		if [ ! -e "$roDir/fsdata.ext4" ];then
-			Echo "Can't find clic fsdata.ext4 in NFS export"
+		if [ ! -e "$roDir/fsdata.ext3" ];then
+			Echo "Can't find clic fsdata.ext3 in NFS export"
 			return 1
 		fi
 	else
@@ -5536,20 +5536,20 @@ function mountSystemClicFS {
 	#======================================
 	# mount root over clic
 	#--------------------------------------
-	size=`stat -c %s $roDir/fsdata.ext4`
+	size=`stat -c %s $roDir/fsdata.ext3`
 	size=$((size/512))
 	# we don't want reserved blocks...
-	tune2fs -m 0 $roDir/fsdata.ext4 >/dev/null
+	tune2fs -m 0 $roDir/fsdata.ext3 >/dev/null
 	# we don't want automatic filesystem check...
-	tune2fs -i 0 $roDir/fsdata.ext4 >/dev/null
+	tune2fs -i 0 $roDir/fsdata.ext3 >/dev/null
 	if [ ! $LOCAL_BOOT = "no" ];then
-		e2fsck -p $roDir/fsdata.ext4
+		e2fsck -p $roDir/fsdata.ext3
 	fi
 	if [ $LOCAL_BOOT = "no" ] || [ $ramOnly = 1 ];then
-		resize2fs $roDir/fsdata.ext4 $size"s"
+		resize2fs $roDir/fsdata.ext3 $size"s"
 	fi
 	mount -o loop,noatime,nodiratime,errors=remount-ro,barrier=0 \
-		$roDir/fsdata.ext4 /mnt
+		$roDir/fsdata.ext3 /mnt
 	if [ ! $? = 0 ];then
 		Echo "Failed to mount ext3 clic container"
 		return 1
