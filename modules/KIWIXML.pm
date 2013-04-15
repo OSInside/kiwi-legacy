@@ -5830,6 +5830,8 @@ sub getSingleInstSourceSatSolvable {
 	if (! $error) {
 		$kiwi -> done();
 		return $index;
+	} else {
+		qxx ("rm -f $index*");
 	}
 	return;
 }
