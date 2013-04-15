@@ -6918,6 +6918,10 @@ sub getInstSourceFile_legacy {
 	my $dest    = shift;
 	my $dirname;
 	my $basename;
+	my $proxy;
+	my $user;
+	my $pass;
+	my $lwp = "/dev/shm/lwp-download";
 	#==========================================
 	# Check parameters
 	#------------------------------------------
@@ -6962,14 +6966,45 @@ sub getInstSourceFile_legacy {
 		# ----
 		$url =~ s/^dir/file/;
 	}
+	if ($url =~ /^(.*)\?(.*)$/) {
+		$url=$1;
+		my $redirect=$2;
+		if ($redirect =~ /proxy=(.*?)\&/) {
+			$proxy="$1";
+		}
+		if ($redirect =~ /proxyuser=(.*)\&proxypass=(.*)/) {
+			$user=$1;
+			$pass=$2;
+		}
+	}
+	my $LWP = FileHandle -> new();
+	if (! $LWP -> open (">$lwp")) {
+		return;
+	}
+	if ($proxy) {
+		print $LWP 'export PERL_LWP_ENV_PROXY=1'."\n";
+		if (($user) && ($pass)) {
+			print $LWP "export http_proxy=http://$user:$pass\@$proxy\n";
+		} else {
+			print $LWP "export http_proxy=http://$proxy\n";
+		}
+	}
+	my $locator = KIWILocator -> instance();
+	my $lwpload = $locator -> getExecPath ('lwp-download');
+	if (! $lwpload) {
+		return;
+	}
+	print $LWP $lwpload.' "$1" "$2"'."\n";
+	$LWP -> close();
 	# /.../
 	# use lwp-download to manage the process.
 	# if first download failed check the directory list with
 	# a regular expression to find the file. After that repeat
 	# the download
 	# ----
+	qxx ("chmod u+x $lwp 2>&1");
 	$dest = $dirname."/".$basename;
-	my $data = qxx ("lwp-download $url $dest 2>&1");
+	my $data = qxx ("$lwp $url $dest 2>&1");
 	my $code = $? >> 8;
 	if ($code == 0) {
 		return $url;
@@ -6995,7 +7030,7 @@ sub getInstSourceFile_legacy {
 			my $link = $1;
 			if ($link =~ /$search/) {
 				$url  = $location.$link;
-				$data = qxx ("lwp-download $url $dest 2>&1");
+				$data = qxx ("$lwp $url $dest 2>&1");
 				$code = $? >> 8;
 				if ($code == 0) {
 					return $url;
