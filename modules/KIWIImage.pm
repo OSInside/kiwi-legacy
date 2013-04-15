@@ -2839,6 +2839,7 @@ sub createImageSplit {
 		my $rerooted = $path;
 		$rerooted =~ s#$imageTree#/read-only/#;
 		my $st = lstat($path);
+		return if ! $st;
 		if (S_ISDIR($st->mode)) {
 			mkdir $target;
 			chmod S_IMODE($st->mode), $target;
