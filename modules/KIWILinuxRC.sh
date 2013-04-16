@@ -4063,7 +4063,8 @@ function resizeLVMPVs {
 	if [ ! -z "$kiwi_RaidDev" ];then
 		device=$kiwi_RaidDev
 	fi
-	pvresize $device
+	local unixDevice=$(getDiskDevice $device)
+	pvresize $unixDevice
 }
 #======================================
 # deactivateMDRaid
