@@ -32,6 +32,11 @@ echo "Configure image: [$kiwi_iname]..."
 suseSetupProduct
 
 #======================================
+# Add missing gpg keys to rpm
+#--------------------------------------
+suseImportBuildKey
+
+#======================================
 # Activate services
 #--------------------------------------
 suseInsertService sshd
