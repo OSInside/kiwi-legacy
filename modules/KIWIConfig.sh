@@ -210,8 +210,12 @@ function suseImportBuildKey {
 		echo "suseImportBuildKey: Failed to create temp dir"
 		return
 	fi
-	pushd "$TDIR"
-	/usr/lib/rpm/gnupg/dumpsigs /usr/lib/rpm/gnupg/suse-build-key.gpg
+	if [ -d "/usr/lib/rpm/gnupg/keys" ];then
+		pushd "/usr/lib/rpm/gnupg/keys"
+	else
+		pushd "$TDIR"
+		/usr/lib/rpm/gnupg/dumpsigs /usr/lib/rpm/gnupg/suse-build-key.gpg
+	fi
 	ls gpg-pubkey-*.asc | while read KFN; do
 		KEY=$(basename "$KFN" .asc)
 		rpm -q "$KEY" >/dev/null
