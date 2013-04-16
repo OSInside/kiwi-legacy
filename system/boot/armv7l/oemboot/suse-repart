@@ -74,24 +74,64 @@ function OEMRepartStandard {
 	#--------------------------------------
 	local diskFreeMBytes=$(($(getFreeDiskBytes $imageDiskDevice) / 1048576))
 	local diskRootMBytes=$(($(partitionSize $imageRootDevice) / 1024))
-	local diskRSysMBytes=$((
-		diskRootMBytes + diskFreeMBytes - swapsize - recoMByte
-	))
+	local diskRSysMBytes
+	local minAddMBytes
+	if [ -z "$OEM_SYSTEMSIZE" ];then
+		diskRSysMBytes=$((
+			diskRootMBytes + diskFreeMBytes - swapsize - recoMByte
+		))
+		minAddMBytes=$((
+			swapsize + recoMByte
+		))
+	else
+		diskRSysMBytes=$OEM_SYSTEMSIZE
+		minAddMBytes=$((
+			swapsize + recoMByte + OEM_SYSTEMSIZE - diskRootMBytes
+		))
+	fi
+	#======================================
+	# 1) check repart operation
+	#--------------------------------------
 	if [ ! -z "$OEM_SYSTEMSIZE" ];then
-		if [ $OEM_SYSTEMSIZE -le $diskRSysMBytes ];then
-			diskRSysMBytes=$OEM_SYSTEMSIZE
+		if [ $OEM_SYSTEMSIZE -lt $diskRootMBytes ];then
+			# /.../
+			# specified oem-systemsize is smaller than root partition
+			# ----
+			Echo "Requested OEM systemsize is smaller than root partition"
+			Echo "Disk won't be re-partitioned !"
+			echo
+			Echo -b "Current Root partition: $diskRootMBytes MB"
+			Echo -b "==> Requested size: $OEM_SYSTEMSIZE MB"
+			echo
+			disableOEMParameters
+			disableRepart
 		fi
 	fi
 	#======================================
-	# check repart operation
+	# 2) check repart operation
 	#--------------------------------------
-	if [ $diskRSysMBytes -lt $diskRootMBytes ];then
+	if [ -z "$DONT_PARTITION" -a $minAddMBytes -gt $diskFreeMBytes ];then
 		# /.../
-		# Requested system partition size is smaller than
-		# existing partition, will not re-partition
+		# Requested sizes for root, swap and recovery
+		# exceeds free space on the disk, will not re-partition
 		# ----
-		Echo "Current system partition is bigger than requested size"
-		Echo "Disk won't be re-partitioned"
+		Echo "Requested sizes exceeds free space on the disk:"
+		Echo "Disk won't be re-partitioned !"
+		echo
+		Echo -b "Minimum required additional size: $minAddMBytes MB:"
+		if [ ! -z "$OEM_SYSTEMSIZE" ];then
+			local share=$((OEM_SYSTEMSIZE - diskRootMBytes))
+			Echo -b "==> Root's share is: $share MB"
+		fi
+		if [ $swapsize -gt 0 ];then
+			Echo -b "==> Swap's share is: $swapsize MB"
+		fi
+		if [ $recoMByte -gt 0 ];then
+			Echo -b "==> Recovery's share is: $recoMByte MB"
+		fi
+		echo
+		Echo -b "Free Space on disk: $diskFreeMBytes MB"
+		echo
 		disableOEMParameters
 		disableRepart
 	fi
@@ -217,24 +257,59 @@ function OEMRepartSplit {
 		#--------------------------------------
 		local diskFreeMBytes=$(($(getFreeDiskBytes $imageDiskDevice) / 1048576))
 		local diskRootMBytes=$(($(partitionSize $imageRWDevice) / 1024))
-		local diskRSysMBytes=$((
-			diskRootMBytes + diskFreeMBytes - swapsize
-		))
+		local diskRSysMBytes
+		local minAddMBytes
+		if [ -z "$OEM_SYSTEMSIZE" ];then
+			diskRSysMBytes=$((
+				diskRootMBytes + diskFreeMBytes - swapsize
+			))
+			minAddMBytes=$swapsize
+		else
+			diskRSysMBytes=$OEM_SYSTEMSIZE
+			minAddMBytes=$((
+				swapsize + OEM_SYSTEMSIZE - diskRootMBytes
+			))
+		fi
+		#======================================
+		# 1) check repart operation
+		#--------------------------------------
 		if [ ! -z "$OEM_SYSTEMSIZE" ];then
-			if [ $OEM_SYSTEMSIZE -le $diskRSysMBytes ];then
-				diskRSysMBytes=$OEM_SYSTEMSIZE
+			if [ $OEM_SYSTEMSIZE -lt $diskRootMBytes ];then
+				# /.../
+				# specified oem-systemsize is smaller than RW partition
+				# ----
+				Echo "Requested OEM systemsize is smaller than RW partition"
+				Echo "Disk won't be re-partitioned !"
+				echo
+				Echo -b "Current RW partition: $diskRootMBytes MB"
+				Echo -b "==> Requested size: $OEM_SYSTEMSIZE MB"
+				echo
+				disableOEMParameters
+				disableRepart
 			fi
 		fi
 		#======================================
-		# check repart operation
+		# 2) check repart operation
 		#--------------------------------------
-		if [ $diskRSysMBytes -lt $diskRootMBytes ];then
+		if [ -z "$DONT_PARTITION" -a $minAddMBytes -gt $diskFreeMBytes ];then
 			# /.../
-			# Requested read/write partition size is smaller than
-			# existing partition, will not re-partition
+			# Requested sizes for read/write and swap
+			# exceeds free space on the disk, will not re-partition
 			# ----
-			Echo "Current read/write partition is bigger than requested size"
-			Echo "Disk won't be re-partitioned"
+			Echo "Requested sizes exceeds free space on the disk:"
+			Echo "Disk won't be re-partitioned !"
+			echo
+			Echo -b "Minimum required additional size: $minAddMBytes MB:"
+			if [ ! -z "$OEM_SYSTEMSIZE" ];then
+				local share=$((OEM_SYSTEMSIZE - diskRootMBytes))
+				Echo -b "==> Root's share is: $share MB"
+			fi
+			if [ $swapsize -gt 0 ];then
+				Echo -b "==> Swap's share is: $swapsize MB"
+			fi
+			echo
+			Echo -b "Free Space on disk: $diskFreeMBytes MB"
+			echo
 			disableOEMParameters
 			disableRepart
 		fi
@@ -310,29 +385,73 @@ function OEMRepartLVM {
 	# calculate partition sizes
 	#--------------------------------------
 	local extendID
-	local VOverHeadMB=300
+	local LVspare=100
 	local LVMdevice=$((kiwi_BootPart + 1))
 	local LVMdevice=$(ddn $imageDiskDevice $LVMdevice)
 	local diskFreeMBytes=$(($(getFreeDiskBytes $imageDiskDevice) / 1048576))
 	local diskRootMBytes=$(($(partitionSize $LVMdevice) / 1024))
-	local diskRSysMBytes=$((
-		diskRootMBytes + diskFreeMBytes - swapsize - recoMByte
-	))
+	local diskRSysMBytes
+	local minAddMBytes
+	if [ -z "$OEM_SYSTEMSIZE" ];then
+		diskRSysMBytes=$((
+			diskRootMBytes + diskFreeMBytes - recoMByte
+		))
+		minAddMBytes=$((
+			swapsize + recoMByte + LVspare
+		))
+	else
+		diskRSysMBytes=$((
+			OEM_SYSTEMSIZE + swapsize + LVspare
+		))
+		minAddMBytes=$((
+			swapsize + recoMByte + LVspare + OEM_SYSTEMSIZE - diskRootMBytes
+		))
+	fi
+	#======================================
+	# 1) check repart operation
+	#--------------------------------------
 	if [ ! -z "$OEM_SYSTEMSIZE" ];then
-		if [ $OEM_SYSTEMSIZE -le $diskRSysMBytes ];then
-			diskRSysMBytes=$OEM_SYSTEMSIZE
+		if [ $OEM_SYSTEMSIZE -lt $diskRootMBytes ];then
+			# /.../
+			# specified oem-systemsize is smaller than root partition
+			# ----
+			Echo "Requested OEM systemsize is smaller than root partition"
+			Echo "Disk won't be re-partitioned !"
+			echo
+			Echo -b "Current Root partition: $diskRootMBytes MB"
+			Echo -b "==> Requested size: $OEM_SYSTEMSIZE MB"
+			echo
+			disableOEMParameters
+			disableRepart
 		fi
 	fi
 	#======================================
-	# check repart operation
+	# 2) check repart operation
 	#--------------------------------------
-	if [ $diskRSysMBytes -lt $diskRootMBytes ];then
+	if [ -z "$DONT_PARTITION" -a $minAddMBytes -gt $diskFreeMBytes ];then
 		# /.../
-		# Requested LVM partition size is smaller than
-		# existing partition, will not re-partition
+		# Requested sizes for root, swap and recovery
+		# exceeds free space on the disk, will not re-partition
 		# ----
-		Echo "Current LVM partition is bigger than requested size"
-		Echo "Disk won't be re-partitioned"
+		Echo "Requested sizes exceeds free space on the disk:"
+		Echo "Disk won't be re-partitioned !"
+		echo
+		Echo -b "Minimum required additional size: $minAddMBytes MB:"
+		if [ ! -z "$OEM_SYSTEMSIZE" ];then
+			local share=$((OEM_SYSTEMSIZE - diskRootMBytes))
+			Echo -b "==> Root's share is: $share MB"
+		else
+			Echo -b "==> Root's share is: $LVspare MB"
+		fi
+		if [ $swapsize -gt 0 ];then
+			Echo -b "==> Swap's share is: $swapsize MB"
+		fi
+		if [ $recoMByte -gt 0 ];then
+			Echo -b "==> Recovery's share is: $recoMByte MB"
+		fi
+		echo
+		Echo -b "Free Space on disk: $diskFreeMBytes MB"
+		echo
 		disableOEMParameters
 		disableRepart
 	fi
