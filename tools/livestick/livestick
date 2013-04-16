@@ -1,6 +1,22 @@
 #!/bin/bash
-#Usage: livestick kiwi-live.iso /dev/stick
-
+#================
+# FILE          : livestick
+#----------------
+# PROJECT       : openSUSE Build-Service
+# COPYRIGHT     : (c) 2013 SUSE LINUX Products GmbH, Germany
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : helper tool to deploy kiwi live iso image on a
+#               : USB stick without removing data from the stick
+#               :
+# STATUS        : Work-In-Progress
+#----------------
+#==========================================
+# pre-checks
+#------------------------------------------
 if [ -z "$1" ] || [ -z "$2" ];then
 	echo "Usage: livestick kiwi-live.iso /dev/stick"
 	exit 1
@@ -11,12 +27,19 @@ fi
 #------------------------------------------
 . /usr/share/kiwi/modules/KIWILinuxRC.sh
 
+#==========================================
+# Functions
+#------------------------------------------
 function clean {
 	if [ -d "$tmpdir" ];then
 		rm -rf $tmpdir
 	fi
 	exit 1
 }
+
+#==========================================
+# Signal handling
+#------------------------------------------
 trap clean INT TERM
 
 #==========================================
@@ -88,12 +111,6 @@ cp -al /boot/grub2/i386-pc $tmpdir/boot/grub2
 echo "(hd0) $device_disk" > $tmpdir/boot/grub2/device.map
 
 #==========================================
-# create hex id flag file
-#------------------------------------------
-id=0x8f331d95
-touch $tmpdir/boot/$id
-
-#==========================================
 # create grub2 prefix boot file
 #------------------------------------------
 uuid=$(blkid -o value -s UUID $device_part)
@@ -138,7 +155,7 @@ cat > $conf <<- EOF
 	insmod search
 	insmod configfile
 	insmod png
-	search -f /boot/$id --set
+	search --no-floppy --fs-uuid --set=root $uuid
 	set default=0
 	set font=/boot/grub2/fonts/unicode.pf2
 	if loadfont \$font ;then
