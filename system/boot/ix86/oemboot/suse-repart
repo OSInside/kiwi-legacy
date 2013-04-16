@@ -301,6 +301,7 @@ function OEMRepartLVM {
 	# pX:   ( boot )
 	# pX+1: ( LVM  )  +luks
 	# -------------------------------------
+	local partsize=0
 	#======================================
 	# check for boot partition
 	#--------------------------------------
@@ -362,11 +363,12 @@ function OEMRepartLVM {
 		#======================================
 		# resize LVM partition
 		#--------------------------------------
+		partsize=+"$diskRSysMBytes"M
 		if [ $recoMByte -eq 0 ];then
-			diskRSysMBytes=.
+			partsize=.
 		fi
 		createPartitionerInput \
-			d $pID n p $pID . $diskRSysMBytes t $pID 8e
+			d $pID n p $pID . $partsize t $pID 8e
 		extendID=$pID
 		#======================================
 		# add recovery partition
