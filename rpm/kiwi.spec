@@ -26,7 +26,7 @@ Name:           kiwi
 Summary:        openSUSE - KIWI Image System
 License:        GPL-2.0
 Group:          System/Management
-Version:        5.05.7
+Version:        5.05.8
 Release:        0
 # requirements to build packages
 BuildRequires:  diffutils
