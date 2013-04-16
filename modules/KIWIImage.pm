@@ -1512,7 +1512,7 @@ sub createImageLiveCD {
 		'nohz=off',
 		'highres=off',
 		'processsor.max+cstate=1',
-		'nomodeseet',
+		'nomodeset',
 		'x11failsafe'
 	);
 	#==========================================
