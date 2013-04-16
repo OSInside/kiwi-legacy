@@ -457,9 +457,13 @@ function OEMPartitionInstall {
 			allFreeVolume=$kiwi_allFreeVolume
 		fi
 		#======================================
+		# extend mdraid array if required
+		#--------------------------------------
+		resizeMDRaid
+		#======================================
 		# resize PV's
 		#--------------------------------------
-		pvresize $(ddn $imageDiskDevice $rID)
+		resizeLVMPVs $rID
 		#======================================
 		# Resize volumes to requested size
 		#--------------------------------------
