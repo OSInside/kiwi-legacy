@@ -2426,6 +2426,7 @@ function setupBootLoaderGrub {
 	if [ ! -z "$imageDiskDevice" ];then
 		rdisk=$imageDiskDevice
 	fi
+	rdisk=$(getDiskID $rdisk)
 	echo "(hd0) $rdisk" > $dmap
 	#======================================
 	# create sysconfig/bootloader
@@ -2684,7 +2685,7 @@ function setupBootLoaderYaboot {
 	if [ ! -z "$imageDiskDevice" ];then
 		rdisk=$imageDiskDevice
 	fi
-	rdev=$rdisk$lnum
+	rdev=$(ddn $(dn $rdisk) $lnum)
 	#======================================
 	# create directory structure
 	#--------------------------------------
