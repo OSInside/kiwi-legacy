@@ -569,9 +569,11 @@ function OEMRepart {
 		if ! mount $imageRootDevice /reco-root >/dev/null;then
 			systemException "Failed to mount root device" "reboot"
 		fi
-		if [ ! -z "$haveLVM" ];then
-			mkdir -p /recoboot && mount $imageBootDevice /recoboot
-			mount --bind /recoboot/boot /reco-root/boot
+		if [ -e "$imageBootDevice" ];then
+			if [ ! $imageBootDevice = $imageRootDevice ];then
+				mkdir -p /recoboot && mount $imageBootDevice /recoboot
+				mount --bind /recoboot/boot /reco-root/boot
+			fi
 		fi
 		mkdir -p /reco-save
 		if ! mount $imageRecoveryDevice /reco-save >/dev/null;then
@@ -628,9 +630,11 @@ function OEMRepart {
 				systemException "Failed to store LVM metadata" "reboot"
 			fi
 		fi
-		if [ ! -z "$haveLVM" ];then
-			umount /reco-root/boot
-			umount /recoboot && rmdir /recoboot
+		if [ -e "$imageBootDevice" ];then
+			if [ ! $imageBootDevice = $imageRootDevice ];then
+				umount /reco-root/boot
+				umount /recoboot && rmdir /recoboot
+			fi
 		fi
 		umount /reco-save && rmdir /reco-save
 		umount /reco-root && rmdir /reco-root
