@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Apr 17 12:18:03 CEST 2013 - ms@suse.de
+
+- fixed setupBootLoaderGrub to write the udev device name
+  into /boot/grub/device.map instead of the unix kernel
+  device name (bnc #813216)
+
+-------------------------------------------------------------------
 Tue Feb  5 18:11:17 CET 2013 - adrian@suse.de
 
 - make hybrid iso call for products non-fatal
