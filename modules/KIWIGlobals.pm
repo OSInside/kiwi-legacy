@@ -136,7 +136,6 @@ sub checkFSOptions {
 				if (($FSInodeSize) && ($FSInodeSize != 256)) {
 					$inodesize = "-I $FSInodeSize"
 				}
-				if ($FSInodeRatio)  {$inoderatio  = "-i $FSInodeRatio"}
 				if ($FSJournalSize) {$journalsize = "-J size=$FSJournalSize"}
 				if ($FSMaxMountCount) {
 					$fs_maxmountcount = " -c $FSMaxMountCount";
