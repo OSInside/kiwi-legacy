@@ -54,6 +54,7 @@ sub new {
 	#    oem_silent_boot          = ''
 	#    oem_silent_install       = ''
 	#    oem_silent_verify        = ''
+	#    oem_skip_verify          = ''
 	#    oem_swap                 = ''
 	#    oem_swapsize             = ''
 	#    oem_systemsize           = ''
@@ -89,6 +90,7 @@ sub new {
 		oem_silent_boot
 		oem_silent_install
 		oem_silent_verify
+		oem_skip_verify
 		oem_swap
 		oem_swapsize
 		oem_systemsize
@@ -110,6 +112,7 @@ sub new {
 		oem_silent_boot
 		oem_silent_install
 		oem_silent_verify
+		oem_skip_verify
 		oem_swap
 		oem_unattended
 	);
@@ -300,6 +303,17 @@ sub getSilentVerify {
 }
 
 #==========================================
+# getSkipVerify
+#------------------------------------------
+sub getSkipVerify {
+	# ...
+	# Return the setting for the oem-skip-verify configuration
+	# ---
+	my $this = shift;
+	return $this->{oem_skip_verify};
+}
+
+#==========================================
 # getSwap
 #------------------------------------------
 sub getSwap {
@@ -453,6 +467,12 @@ sub getXMLElement {
 		text      => $this -> getSilentVerify ()
 	);
 	$element = $this -> p_addElement(\%initSVerify);
+	my %initSSkip = (
+		parent    => $element,
+		childName => 'oem-skip-verify',
+		text      => $this -> getSkipVerify ()
+	);
+	$element = $this -> p_addElement(\%initSSkip);
 	my %initSwap = (
 		parent    => $element,
 		childName => 'oem-swap',
@@ -805,6 +825,24 @@ sub setSilentVerify {
 		attr   => 'oem_silent_verify',
 		value  => $val,
 		caller => 'setSilentVerify'
+	);
+	return $this -> p_setBooleanValue(\%settings);
+}
+
+#==========================================
+# setSkipVerify
+#------------------------------------------
+sub setSkipVerify {
+	# ...
+	# Set the oem_skip_verify attribute, if called with no argument the
+	# value is set to false.
+	# ---
+	my $this = shift;
+	my $val  = shift;
+	my %settings = (
+		attr   => 'oem_skip_verify',
+		value  => $val,
+		caller => 'setSkipVerify'
 	);
 	return $this -> p_setBooleanValue(\%settings);
 }

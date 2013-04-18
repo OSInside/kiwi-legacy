@@ -922,6 +922,27 @@ div {
 }
 
 #==========================================
+# common element <oem-skip-verify>
+#
+div {
+	k.oem-skip-verify.content = xsd:boolean
+	k.oem-skip-verify.attlist = empty
+	k.oem-skip-verify =
+		## For oemboot driven images: do not perform the md5
+		## verification process, true/false
+		[
+		db:para [
+			"For oemboot driven images: do not perform the md5 "~
+			"verification process, true/false (default is false.) "
+		]
+		]
+		element oem-skip-verify {
+			k.oem-skip-verify.attlist,
+			k.oem-skip-verify.content
+		}
+}
+
+#==========================================
 # common element <oem-silent-verify>
 #
 div {
@@ -2485,6 +2506,7 @@ div {
 			k.oem-silent-boot? &
 			k.oem-silent-install? &
 			k.oem-silent-verify? &
+			k.oem-skip-verify? &
 			k.oem-swap? &
 			k.oem-swapsize? &
 			k.oem-systemsize? &

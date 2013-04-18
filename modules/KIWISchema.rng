@@ -1171,6 +1171,28 @@ dump process, true/false</a:documentation>
   </div>
   <!--
     ==========================================
+    common element <oem-skip-verify>
+    
+  -->
+  <div>
+    <define name="k.oem-skip-verify.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-skip-verify.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-skip-verify">
+      <element name="oem-skip-verify">
+        <a:documentation>For oemboot driven images: do not perform the md5
+verification process, true/false</a:documentation>
+        <db:para>For oemboot driven images: do not perform the md5 verification process, true/false (default is false.) </db:para>
+        <ref name="k.oem-skip-verify.attlist"/>
+        <ref name="k.oem-skip-verify.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <oem-silent-verify>
     
   -->
@@ -3545,6 +3567,9 @@ and setup the system disk</db:para>
           </optional>
           <optional>
             <ref name="k.oem-silent-verify"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-skip-verify"/>
           </optional>
           <optional>
             <ref name="k.oem-swap"/>

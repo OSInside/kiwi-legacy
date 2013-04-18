@@ -2802,6 +2802,8 @@ sub __createOEMConfig {
 		$this -> __getChildNodeTextValue($config, 'oem-silent-install');
 	$oemConfig{oem_silent_verify}          =
 		$this -> __getChildNodeTextValue($config, 'oem-silent-verify');
+	$oemConfig{oem_skip_verify}          =
+		$this -> __getChildNodeTextValue($config, 'oem-skip-verify');
 	$oemConfig{oem_swap}                 =
 		$this -> __getChildNodeTextValue($config, 'oem-swap');
 	$oemConfig{oem_swapsize}             =
@@ -6411,6 +6413,8 @@ sub getImageConfig_legacy {
 			-> getElementsByTagName ("oem-silent-install");
 		my $oemsilentverify = $node
 			-> getElementsByTagName ("oem-silent-verify");
+		my $oemskipverify = $node
+			-> getElementsByTagName ("oem-skip-verify");
 		my $oemwait  = $node
 			-> getElementsByTagName ("oem-bootwait");
 		my $oemnomsg = $node
@@ -6470,6 +6474,9 @@ sub getImageConfig_legacy {
 		}
 		if ((defined $oemsilentverify) && ("$oemsilentverify" eq "true")) {
 			$result{kiwi_oemsilentverify} = $oemsilentverify;
+		}
+		if ((defined $oemskipverify) && ("$oemskipverify" eq "true")) {
+			$result{kiwi_oemskipverify} = $oemskipverify;
 		}
 		if ((defined $oemwait) && ("$oemwait" eq "true")) {
 			$result{kiwi_oembootwait} = $oemwait;
@@ -7923,6 +7930,26 @@ sub getOEMSilentVerify_legacy {
 		return;
 	}
 	return "$silent";
+}
+
+#==========================================
+# getOEMSkipVerify_legacy
+#------------------------------------------
+sub getOEMSkipVerify_legacy {
+	# ...
+	# Obtain the oem-skip-verify value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $skip = $node -> getElementsByTagName ("oem-skip-verify");
+	if ((! defined $skip) || ("$skip" eq "")) {
+		return;
+	}
+	return "$skip";
 }
 
 #==========================================

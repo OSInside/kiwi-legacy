@@ -265,6 +265,10 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_SILENTVERIFY=1"
 		echo "OEM_SILENTVERIFY=1" >> $oemfile
 	fi
+	if [ ! -z "$kiwi_oemskipverify" ];then
+		echo "Setting up OEM_SKIPVERIFY=1"
+		echo "OEM_SKIPVERIFY=1" >> $oemfile
+	fi
 	if [ ! -z "$kiwi_oemalign" ];then
 		echo "Setting up OEM_ALIGN=1"
 		echo "OEM_ALIGN=1" >> $oemfile

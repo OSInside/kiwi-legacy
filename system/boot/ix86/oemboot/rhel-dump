@@ -853,7 +853,7 @@ function OEMInstall {
 	#======================================
 	# Check the md5sum of the raw disk
 	#--------------------------------------
-	if [ -z "$OEM_PARTITION_INSTALL" ];then
+	if [ -z "$OEM_PARTITION_INSTALL" ] && [ -z "$OEM_SKIPVERIFY" ];then
 		Echo "Install complete, checking data..."
 		verifyBytes=$((blocks * blocksize))
 		verifyMByte=$((verifyBytes / 1048576))
