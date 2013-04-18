@@ -485,6 +485,7 @@ then
 		fi
 		imagePath="image/$imageName-$imageVersion"
 		IFS=$IFS_ORIG
+		sum2=
 		while true;do
 			# /.../
 			# get image md5sum to be able to check for the size

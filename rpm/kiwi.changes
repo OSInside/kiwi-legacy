@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Apr 18 11:14:33 CEST 2013 - ms@suse.de
+
+- netboot: The sum2 variable in the suse-linuxrc download code
+  conflicts with the same variable set in the updateNeeded function
+  Because of that the check for the first cycle in the download
+  loop did not work in all cases.
+
+-------------------------------------------------------------------
 Wed Apr 17 12:18:03 CEST 2013 - ms@suse.de
 
 - fixed setupBootLoaderGrub to write the udev device name
