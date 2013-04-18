@@ -4761,9 +4761,29 @@ function updateNeeded {
 	# image version file as well as the md5 sum of the installed
 	# and the available image on the tftp server
 	# ----
+	#======================================
+	# Local variables
+	#--------------------------------------
+	local IFS
+	local count=0
+	local sum2
+	local installed
+	local field
+	local atversion
+	local versionFile
+	local imageName
+	local imageVersion
+	local imageServer
+	local imageBlkSize
+	local imageZipped
+	#======================================
+	# Global variables
+	#--------------------------------------
 	SYSTEM_INTEGRITY=""
 	SYSTEM_MD5STATUS=""
-	local count=0
+	#======================================
+	# Check system update status via md5
+	#--------------------------------------
 	IFS="," ; for i in $IMAGE;do
 		field=0
 		IFS=";" ; for n in $i;do
