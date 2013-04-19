@@ -670,7 +670,6 @@ sub __checkNoIDSystemGroups {
 		news
 		ntadmin
 		ntp
-		obsrun
 		postfix
 		public
 		pulse
