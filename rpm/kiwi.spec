@@ -643,6 +643,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n kiwi-pxeboot -f kiwi.loader
 %defattr(-, root, root)
+%dir %attr(0750,tftp,tftp) /srv/tftpboot
 %doc /srv/tftpboot/README
 %dir /srv/tftpboot
 %dir /srv/tftpboot/KIWI
