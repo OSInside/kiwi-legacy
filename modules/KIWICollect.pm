@@ -2037,7 +2037,13 @@ sub collectProducts
 				$sp_version = $tree->getElementsByTagName( "patchlevel" )
 				    ->get_node(1)->textContent();
 			}
-
+			my $main_product = $this->{m_proddata}->getOpt("MAIN_PRODUCT");
+			if ( defined($main_product) && $main_product ne $product_name ) {
+				$this->logMsg(
+					'I', "Skip $product_name, main product is $main_product"
+				);
+				next;
+			}
 			if ( $found_product ) {
 				my $msg = 'ERROR: No handling of multiple products on one '
 				    . 'media supported yet (spec for content file missing)!';
