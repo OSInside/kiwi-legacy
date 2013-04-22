@@ -2875,7 +2875,7 @@ exist inside the root directory.</a:documentation>
     <define name="k.volume.size.attribute">
       <attribute name="size">
         <a:documentation>absolute size of the volume. If the size value
-is too small to store all data it will be ignored.
+is too small to store all data kiwi will exit.
 The value is used as MB by default but you can
 add "M" and/or "G" as postfix</a:documentation>
         <ref name="volume-size-type"/>
