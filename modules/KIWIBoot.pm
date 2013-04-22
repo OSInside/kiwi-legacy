@@ -6609,7 +6609,7 @@ sub __getBootSize {
 	if ($type{bootpartsize}) {
 		$wantMB = $type{bootpartsize};
 	}
-	if ($wantMB > $needMB) {
+	if ($wantMB >= $needMB) {
 		$needMB = $wantMB;
 	} else {
 		$kiwi -> loginfo ("Specified boot space of $wantMB MB is too small\n");
