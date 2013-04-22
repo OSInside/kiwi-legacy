@@ -39,6 +39,11 @@ use KIWIXMLVMachineData;
 use Readonly;
 
 #==========================================
+# constants
+#------------------------------------------
+Readonly my $MEGABYTE => 1048576;
+
+#==========================================
 # Exports
 #------------------------------------------
 our @EXPORT_OK = qw ();
@@ -108,6 +113,9 @@ sub createChecks {
 	if (! $this -> __checkFilesystemTool()) {
 		return;
 	}
+	if (! $this -> __checkOEMsizeSettingSufficient()) {
+		return;
+	}
 	if (! $this -> __checkPackageManagerExists()) {
 		return;
 	}
@@ -140,6 +148,9 @@ sub prepareChecks {
 	if (! $this -> __checkHaveTypeToBuild()) {
 		return;
 	}
+	if (! $this -> __checkLVMoemSizeSettings()) {
+		return;
+	}
 	if (! $this -> __checkPackageManagerExists()) {
 		return;
 	}
@@ -158,9 +169,6 @@ sub prepareChecks {
 	if (! $this -> __hasValidArchives()) {
 		return;
 	}
-	if (! $this -> __checkSystemSizeAndSwapRecommended()) {
-		return;
-	}
 	return 1;
 }
 
@@ -168,9 +176,9 @@ sub prepareChecks {
 # Private helper methods
 #------------------------------------------
 #==========================================
-# __checkSystemSizeAndSwapRecommended
+# __checkSwapRecommended
 #------------------------------------------
-sub __checkSystemSizeAndSwapRecommended {
+sub __checkSwapRecommended {
 	my $this    = shift;
 	my $kiwi    = $this -> {kiwi};
 	my $xml     = $this -> {xml};
@@ -193,14 +201,12 @@ sub __checkSystemSizeAndSwapRecommended {
 	#==========================================
 	# Collect size values
 	#------------------------------------------
-	my $volSizes = 0;
 	if ($sysDisk) {
 		my $volIDs = $sysDisk -> getVolumeIDs();
 		if ($volIDs) {
 			foreach my $id (@{$volIDs}) {
 				my $size = $sysDisk -> getVolumeSize ($id);
 				if ($size) {
-					$volSizes += $size;
 					$volumeResizeRequest = 1;
 					last;
 				} else {
@@ -217,19 +223,6 @@ sub __checkSystemSizeAndSwapRecommended {
 		$swapRequested = $oemConf -> getSwap();
 		$systemSize = $oemConf -> getSystemSize();
 		$systemSwap = $oemConf -> getSwapSize();
-		if ($systemSwap) {
-			$volSizes += $systemSwap;
-		}
-	}
-	#==========================================
-	# Fast check if req. system size < volumes
-	#------------------------------------------
-	if (($systemSize) && ($systemSize < $volSizes)) {
-		$kiwi -> error (
-			"--> Specified system size is smaller than requested volume sizes"
-		);
-		$kiwi -> failed();
-		return;
 	}
 	#==========================================
 	# Check if a swapsize should be specified
@@ -242,125 +235,6 @@ sub __checkSystemSizeAndSwapRecommended {
 			$kiwi -> notset();
 			# warning only, thus return success
 			return 1;
-		}
-	}
-	#==========================================
-	# We got that far, nice
-	#------------------------------------------
-	return 1;
-}
-
-#==========================================
-# __checkSystemDiskData
-#------------------------------------------
-sub __checkSystemDiskData {
-	my $this    = shift;
-	my $kiwi    = $this -> {kiwi};
-	my $cmdL    = $this -> {cmdArgs};
-	my $xml     = $this -> {xml};
-	my $imgType = $xml  -> getImageType() -> getTypeName();
-	my $sysDisk = $xml  -> getSystemDiskConfig();
-	my $oemConf = $xml  -> getOEMConfig();
-	my $tree    = $cmdL -> getConfigDir();
-	#==========================================
-	# Variables
-	#------------------------------------------
-	Readonly my $MEGABYTE => 1048576;
-	my $systemSize = 0;
-	my $systemSwap = 0;
-	my $rootsize   = 0;
-	my $addsize    = 0;
-	my $freesize   = 0;
-	my %volumes;
-	#==========================================
-	# Perform the test only for oem images
-	#------------------------------------------
-	if ($imgType ne "oem") {
-		return 1;
-	}
-	#==========================================
-	# Collect real/specified system sizes
-	#------------------------------------------
-	if ($sysDisk) {
-		my $volIDs = $sysDisk -> getVolumeIDs();
-		if ($volIDs) {
-			foreach my $id (@{$volIDs}) {
-				my $name = $sysDisk -> getVolumeName ($id);
-				my $size = $sysDisk -> getVolumeSize ($id);
-				my $lvsize = 0;
-				my $path = $name;
-				$path =~ s/_/\//g;
-				if (! -d "$tree/$path") {
-					$kiwi -> error (
-						"--> Volume path $path does not exist in unpacked tree"
-					);
-					$kiwi -> failed();
-					return;
-				}
-				if ($size) {
-					$lvsize = qxx (
-						"du -s --block-size=1 $tree/$path | cut -f1"
-					);
-					chomp $lvsize;
-					$lvsize = sprintf ("%.f",$lvsize / $MEGABYTE);
-				} else {
-					$size = $sysDisk -> getVolumeFreespace ($id);
-					if ($size eq "all") {
-						$size = 0;
-					}
-				}
-				$volumes{$path} = [$size,$lvsize];
-			}
-		}
-	}
-	if ($oemConf) {
-		$systemSize = $oemConf -> getSystemSize();
-		$systemSwap = $oemConf -> getSwapSize();
-		if ($systemSwap) {
-			$volumes{swap} = [$systemSwap,0];
-		}
-	}
-	#==========================================
-	# Check integrity of volume size setup
-	#------------------------------------------
-	if ((%volumes) && ($systemSize)) {
-		$rootsize = qxx (
-			"du -s --block-size=1 $tree | cut -f1"
-		);
-		chomp $rootsize;
-		$rootsize = sprintf ("%.f",$rootsize / $MEGABYTE);
-		if ($systemSize < $rootsize) {
-			$kiwi -> error (
-				"--> System requires $rootsize MB, got only $systemSize MB"
-			);
-			$kiwi -> failed();
-			return;
-		}
-		foreach my $path (keys %volumes) {
-			my $sizelist = $volumes{$path};
-			my $s_req = $sizelist->[0];
-			my $s_cur = $sizelist->[1];
-			if ($s_req < $s_cur) {
-				$kiwi -> error (
-					"--> Path $path requires $s_cur MB, got only $s_req MB"
-				);
-				$kiwi -> failed();
-				return;
-			}
-			$addsize += $s_req - $s_cur;
-		}
-	}
-	#==========================================
-	# Check integrity of overall size setup
-	#------------------------------------------
-	if (($addsize) && ($systemSize)) {
-		$freesize = $systemSize - $rootsize;
-		if ($freesize < $addsize) {
-			$kiwi -> error (
-				"--> Calculated $freesize MB free, but require $addsize MB"
-			);
-			$kiwi -> failed();
-			return;
 		}
 	}
 	#==========================================
@@ -398,55 +272,50 @@ sub __checkContainerHasLXC {
 	return 1;
 }
 
-#==========================================
-# __checkRepoAliasUnique
-#------------------------------------------
-sub __checkRepoAliasUnique {
-	# ...
-	# Verify that the repo alias is unique across the currently active repos
-	# ---
-	my $this = shift;
-	my $xml = $this -> {xml};
-	my @repos = @{$xml -> getRepositories()};
-	my %aliasUsed;
-	for my $repo (@repos) {
-		my $alias = $repo -> getAlias();
-		if (! $alias) {
-			next
-		}
-		if ($aliasUsed{$alias}) {
-			my $kiwi = $this->{kiwi};
-			my $msg = "Specified repo alias '$alias' not unique across "
-				. 'active repositories';
-			$kiwi -> error ( $msg );
-			$kiwi -> failed ();
-			return;
-		}
-		$aliasUsed{$alias} = 1;
-	}
-	return 1;
-}
 
 #==========================================
-# __checkRootRecycleCapability
+# __checkLVMoemSizeSettings
 #------------------------------------------
-sub __checkRootRecycleCapability {
+sub __checkLVMoemSizeSettings {
 	# ...
-	# Check the root tree if --recycle-root is set. In that case
-	# it's not allowed to use a root tree which is based on
-	# an image cache
+	# Verify that the specified LVM size requirements do not exceed the
+	# specified system size if specified
 	# ---
-	my $this = shift;
-	my $cmdL = $this -> {cmdArgs};
-	my $tree = $cmdL -> getRecycleRootDir();
-	my $kiwi = $this -> {kiwi};
-	if (($tree) && (! -d $tree)) {
-		$kiwi -> error ("Specified recycle tree doesn't exist: $tree");
-		$kiwi -> failed();
-		return;
+	my $this    = shift;
+	my $kiwi    = $this -> {kiwi};
+	my $xml     = $this -> {xml};
+	my $imgType = $xml  -> getImageType() -> getTypeName();
+	#==========================================
+	# Perform the test only for oem images
+	#------------------------------------------
+	if ($imgType ne "oem") {
+		return 1;
 	}
-	if (($tree) && (-f "$tree/kiwi-root.cache")) {
-		$kiwi -> error ("Can't recycle cache based root tree");
+	#==========================================
+	# Collect size values
+	#------------------------------------------
+	my $sysDisk = $xml  -> getSystemDiskConfig();
+	my $volSizes = 0;
+	if ($sysDisk) {
+		my $volIDs = $sysDisk -> getVolumeIDs();
+		if ($volIDs) {
+			for my $id (@{$volIDs}) {
+				my $size = $sysDisk -> getVolumeSize ($id);
+				if ($size) {
+					$volSizes += $size;
+				}
+			}
+		}
+	}
+	my $oemConf = $xml  -> getOEMConfig();
+	if (! $oemConf) {
+		return 1;
+	}
+	my $systemSize = $oemConf -> getSystemSize();
+	if (($systemSize) && ($systemSize < $volSizes)) {
+		my $msg = 'Specified system size is smaller than requested '
+			. 'volume sizes, plus swap';
+		$kiwi -> error ($msg);
 		$kiwi -> failed();
 		return;
 	}
@@ -559,6 +428,44 @@ sub __checkHaveTypeToBuild {
 }
 
 #==========================================
+# __checkOEMsizeSettingSufficient
+#------------------------------------------
+sub __checkOEMsizeSettingSufficient {
+	# ...
+	# Verify that the image fits within the specified size
+	# ---
+	my $this    = shift;
+	my $kiwi    = $this -> {kiwi};
+	my $xml     = $this -> {xml};
+	my $imgType = $xml  -> getImageType() -> getTypeName();
+	#==========================================
+	# Perform the test only for oem images
+	#------------------------------------------
+	if ($imgType ne "oem") {
+		return 1;
+	}
+	my $oemConf = $xml -> getOEMConfig();
+	my $cmdL    = $this -> {cmdArgs};
+	my $tree    = $cmdL -> getConfigDir();
+	if ($oemConf) {
+		my $systemSize = $oemConf -> getSystemSize();
+		if ($systemSize) {
+			my $rootsize = qxx ("du -s --block-size=1 $tree | cut -f1");
+			chomp $rootsize;
+			$rootsize = sprintf ("%.f",$rootsize / $MEGABYTE);
+			if ($rootsize > $systemSize) {
+				my $msg = "System requires $rootsize MB, but size "
+					. "constraint set to $systemSize MB";
+				$kiwi -> error ($msg);
+				$kiwi -> failed();
+				return;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkPackageManagerExists
 #------------------------------------------
 sub __checkPackageManagerExists {
@@ -634,6 +541,148 @@ sub __checkPatternTypeAttrValueConsistent {
 	$kiwi->info($msg);
 	$xml -> setSelectionProfileNames($curActiveProfiles);
 	$kiwi->done();
+	return 1;
+}
+
+#==========================================
+# __checkRepoAliasUnique
+#------------------------------------------
+sub __checkRepoAliasUnique {
+	# ...
+	# Verify that the repo alias is unique across the currently active repos
+	# ---
+	my $this = shift;
+	my $xml = $this -> {xml};
+	my @repos = @{$xml -> getRepositories()};
+	my %aliasUsed;
+	for my $repo (@repos) {
+		my $alias = $repo -> getAlias();
+		if (! $alias) {
+			next
+		}
+		if ($aliasUsed{$alias}) {
+			my $kiwi = $this->{kiwi};
+			my $msg = "Specified repo alias '$alias' not unique across "
+				. 'active repositories';
+			$kiwi -> error ( $msg );
+			$kiwi -> failed ();
+			return;
+		}
+		$aliasUsed{$alias} = 1;
+	}
+	return 1;
+}
+
+#==========================================
+# __checkRootRecycleCapability
+#------------------------------------------
+sub __checkRootRecycleCapability {
+	# ...
+	# Check the root tree if --recycle-root is set. In that case
+	# it's not allowed to use a root tree which is based on
+	# an image cache
+	# ---
+	my $this = shift;
+	my $cmdL = $this -> {cmdArgs};
+	my $tree = $cmdL -> getRecycleRootDir();
+	my $kiwi = $this -> {kiwi};
+	if (($tree) && (! -d $tree)) {
+		$kiwi -> error ("Specified recycle tree doesn't exist: $tree");
+		$kiwi -> failed();
+		return;
+	}
+	if (($tree) && (-f "$tree/kiwi-root.cache")) {
+		$kiwi -> error ("Can't recycle cache based root tree");
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
+}
+
+#==========================================
+# __checkSystemDiskData
+#------------------------------------------
+sub __checkSystemDiskData {
+	my $this    = shift;
+	my $kiwi    = $this -> {kiwi};
+	my $cmdL    = $this -> {cmdArgs};
+	my $xml     = $this -> {xml};
+	my $imgType = $xml  -> getImageType() -> getTypeName();
+	#==========================================
+	# Perform the test only for oem images
+	#------------------------------------------
+	if ($imgType ne "oem") {
+		return 1;
+	}
+	#==========================================
+	# Collect real/specified system sizes
+	#------------------------------------------
+	my $sysDisk = $xml  -> getSystemDiskConfig();
+	my $tree    = $cmdL -> getConfigDir();
+	my $addtlSizeReq = 0;
+	my $needExtra;
+	if ($sysDisk) {
+		my $volIDs = $sysDisk -> getVolumeIDs();
+		if ($volIDs) {
+			for my $id (@{$volIDs}) {
+				my $name = $sysDisk -> getVolumeName ($id);
+				my $size = $sysDisk -> getVolumeSize ($id);
+				my $lvsize = 0;
+				my $path = $name;
+				$path =~ s/_/\//g;
+				if (! -d "$tree/$path") {
+					my $msg = "Volume path $path does not exist in "
+						. 'unpacked tree';
+					$kiwi -> error ($msg);
+					$kiwi -> failed();
+					return;
+				}
+				if ($size) {
+					$lvsize = qxx (
+						"du -s --block-size=1 $tree/$path | cut -f1"
+					);
+					chomp $lvsize;
+					$lvsize = sprintf ("%.f",$lvsize / $MEGABYTE);
+					if ($lvsize > $size) {
+						my $msg = "Required size for $name $lvsize MB "
+							. 'larger than specified size.';
+						$kiwi -> error ($msg);
+						$kiwi -> failed();
+						return;
+					}
+					$addtlSizeReq += $size - $lvsize;
+				}
+				my $freeSpace = $sysDisk -> getVolumeFreespace ($id);
+				if (($freeSpace) && ($freeSpace ne 'all')) {
+					$addtlSizeReq += $freeSpace;
+				}
+			}
+		}
+	}
+	my $oemConf = $xml  -> getOEMConfig();
+	my $systemSize = 0;
+	if ($oemConf) {
+		$systemSize = $oemConf -> getSystemSize();
+	}
+	if (! $systemSize) {
+		return 1; # No overall contsraint, no additional checks required
+	}
+	#==========================================
+	# Check integrity of overall size setup
+	#------------------------------------------
+	if ($addtlSizeReq) {
+		my $rootsize = qxx ("du -s --block-size=1 $tree | cut -f1");
+		chomp $rootsize;
+		$rootsize = sprintf ("%.f",$rootsize / $MEGABYTE);
+		my $freesize = $systemSize - $rootsize;
+		if ($freesize < $addtlSizeReq) {
+			my $msg = "Calculated $freesize MB free, but require "
+				. "$addtlSizeReq MB";
+			$kiwi -> error ($msg);
+			$kiwi -> failed();
+			return;
+		}
+	}
 	return 1;
 }
 

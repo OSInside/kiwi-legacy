@@ -1049,8 +1049,18 @@
                   >oem-systemsize</sgmltag>number in MB<sgmltag
                     class="endtag">oem-systemsize</sgmltag></term>
                 <listitem>
-                  <para>Set the size of the root partition. This value
-                    is represented by the variable
+                  <para>Set the size of the root partition of the 
+                    system to be installed on the target media. The size
+                    limit does not include any consideration fro swap space
+                    or a recovery partition. In combination with the
+                    <sgmltag class="element">systemdisk</sgmltag>
+                    element the specified value represents the upper bounds
+                    of all specifed volume sizes plus any additinally
+                    specified freespace. Thus, the sum of all specified 
+                    volume sizes plus the sum of the specified freespace for
+                    each volume must be smaller or equal to the size
+                    specified with the <sgmltag class="element">oem-systemsize</sgmltag>
+                    element. This value is represented by the variable
                       <varname>OEM_SYSTEMSIZE</varname> in
                       <filename>config.oempartition</filename>. </para>
                 </listitem>

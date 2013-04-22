@@ -2130,7 +2130,7 @@ sub setSelectionProfileNames {
 	my $profiles = shift;
 	my $kiwi = $this->{kiwi};
 	if (! $profiles) {
-		delete $this->{availableProfiles};
+		delete $this->{availableProfiles}; # repopulated below
 		my @def = ('kiwi_default');
 		$this->{selectedProfiles} = \@def;
 		$this->__populateProfileInfo();
