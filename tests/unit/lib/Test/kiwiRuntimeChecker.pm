@@ -17,6 +17,8 @@ package Test::kiwiRuntimeChecker;
 use strict;
 use warnings;
 
+use Readonly;
+
 use Common::ktLog;
 use Common::ktTestCase;
 use base qw /Common::ktTestCase/;
@@ -26,6 +28,11 @@ use KIWIGlobals;
 use KIWILocator;
 use KIWIRuntimeChecker;
 use KIWIXML;
+
+#==========================================
+# constants
+#------------------------------------------
+Readonly my $MEGABYTE => 1048576;
 
 #==========================================
 # Constructor
@@ -595,6 +602,118 @@ sub test_isohybrid {
 }
 
 #==========================================
+# test_lvmOEMSizeSetings
+#------------------------------------------
+sub test_lvmOEMSizeSetings {
+	# ...
+	# Test that a system size that is smaller than the addition of LVM
+	# volume sizes causes an error.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/lvmGreaterSysSize';
+	$cmd -> setConfigDir ($configDir);
+	my $xml = $this -> __getXMLObj( $configDir );
+	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+	my $res = $checker -> prepareChecks();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Specified system size is smaller than requested '
+		. 'volume sizes, plus swap';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_lvmOEMSizeSetingsValid
+#------------------------------------------
+sub test_lvmOEMSizeSetingsValid {
+	# ...
+	# Test that a system size that is smaller than the addition of LVM
+	# volume sizes causes an error.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/lvmAndSwapGreaterSysSize';
+	$cmd -> setConfigDir ($configDir);
+	my $xml = $this -> __getXMLObj( $configDir );
+	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+	my $res = $checker -> prepareChecks();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($res);
+	return;
+}
+
+#==========================================
+# test_noBuildProfile
+#------------------------------------------
+sub test_noBuildProfile {
+	# ...
+	# Test that using no build profile does not trigger an error
+	# in the runtime checker.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/liveIsoImg/clic';
+	$cmd -> setConfigDir ($configDir);
+	my $xml = $this -> __getXMLObj( $configDir );
+	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+	my $res = $checker -> prepareChecks();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($res);
+	return;
+}
+
+#==========================================
+# test_noBuildType
+#------------------------------------------
+sub test_noBuildType {
+	# ...
+	# Test that an error is triggered if Kiwi cannot determine the build type
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/noDefaultBuildType';
+	# TODO
+	# Change to a RuntimeChecker test when XML object becomes a dumb
+	# container and looses notion of state
+	#my $xml = $this -> __getXMLObj($configDir);
+	#my $checker = new KIWIRuntimeChecker($cmd, $xml);
+	#my $res = $checker -> prepareChecks();
+	my $xml = KIWIXML -> new(
+		$configDir, undef, undef,$this->{cmdL}
+	);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('Cannot determine build type', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($xml);
+	return;
+}
+
+#==========================================
 # test_noEFIIsohybridOEMImg
 #------------------------------------------
 sub test_noEFIIsohybridOEMImg {
@@ -657,62 +776,43 @@ sub test_noEFIIsohybridOEMImg {
 	}
 	return;
 }
-	
-#==========================================
-# test_noBuildProfile
-#------------------------------------------
-sub test_noBuildProfile {
-	# ...
-	# Test that using no build profile does not trigger an error
-	# in the runtime checker.
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $cmd = $this -> __getCommandLineObj();
-	my $configDir = $this -> {dataDir} . '/liveIsoImg/clic';
-	$cmd -> setConfigDir ($configDir);
-	my $xml = $this -> __getXMLObj( $configDir );
-	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> prepareChecks();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($res);
-	return;
-}
 
 #==========================================
-# test_noBuildType
+# test_oemSizeSettingSufficient
 #------------------------------------------
-sub test_noBuildType {
+sub test_oemSizeSettingSufficient {
 	# ...
-	# Test that an error is triggered if Kiwi cannot determine the build type
+	# Test that a insufficiently large system size causes an error
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
+	my $configDir = $this -> {dataDir} . '/minSysSize';
+	my $xml = $this -> __getXMLObj( $configDir );
 	my $cmd = $this -> __getCommandLineObj();
-	my $configDir = $this -> {dataDir} . '/noDefaultBuildType';
-	# TODO
-	# Change to a RuntimeChecker test when XML object becomes a dumb
-	# container and looses notion of state
-	#my $xml = $this -> __getXMLObj($configDir);
-	#my $checker = new KIWIRuntimeChecker($cmd, $xml);
-	#my $res = $checker -> prepareChecks();
-	my $xml = KIWIXML -> new(
-		$configDir, undef, undef,$this->{cmdL}
-	);
+	my $tmpDir = $this -> createTestTmpDir();
+	my $status = open my $TESTFILE, '>', $tmpDir . '/out.txt';
+	$this -> assert_not_null($status);
+	my $cnt = 0;
+	while ($cnt < $MEGABYTE + 1) {
+		print $TESTFILE "a\n";
+		$cnt += 1;
+	}
+	$status = close $TESTFILE;
+	$this -> assert_not_null($status);
+	$cmd -> setConfigDir ($tmpDir);
+	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+	my $res = $checker -> createChecks();
 	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('Cannot determine build type', $msg);
+	my $expected = 'System requires 2 MB, but size '
+		. 'constraint set to 1 MB';
+	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($xml);
+	$this -> assert_null($res);
+	$this -> removeTestTmpDir();
 	return;
 }
 
@@ -811,6 +911,121 @@ sub test_packageManagerCheck_zypp {
 			. "anticipated success condition. This is NOT an error.\n";
 		print STDOUT $infoMsg;
 	}
+	return;
+}
+
+#==========================================
+# test_systemDiskDataNoVolume
+#------------------------------------------
+sub test_systemDiskDataNoVolume {
+	# ...
+	# Test that an error is generated if the specified volume does not
+	# exist as a directory in the unpacked image tree
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/lvmSetup';
+	$cmd -> setConfigDir ($configDir);
+	my $xml = $this -> __getXMLObj( $configDir );
+	my $tmpDir = $this -> createTestTmpDir();
+	$cmd -> setConfigDir ($tmpDir);
+	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+	my $res = $checker -> createChecks();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Volume path home does not exist in unpacked tree';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	$this -> removeTestTmpDir();
+	return;
+}
+
+#==========================================
+# test_systemDiskDataSizeTooSmall
+#------------------------------------------
+sub test_systemDiskDataSizeTooSmall {
+	# ...
+	# Test that an insufficient system size generates an error
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/lvmSetup';
+	$cmd -> setConfigDir ($configDir);
+	my $xml = $this -> __getXMLObj( $configDir );
+	my $tmpDir = $this -> createTestTmpDir();
+	$cmd -> setConfigDir ($tmpDir);
+	mkdir $tmpDir . '/home';
+	mkdir $tmpDir . '/usr';
+	mkdir $tmpDir . '/var';
+	my $status = open my $TESTFILE, '>', $tmpDir . '/home/out.txt';
+	$this -> assert_not_null($status);
+	my $cnt = 0;
+	while ($cnt < $MEGABYTE + 1) {
+		print $TESTFILE "a\n";
+		$cnt += 1;
+	}
+	$status = close $TESTFILE;
+	$this -> assert_not_null($status);
+	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+	my $res = $checker -> createChecks();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Calculated 6 MB free, but require 7 MB';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	$this -> removeTestTmpDir();
+	return;
+}
+
+#==========================================
+# test_systemDiskDataVolTooSmall
+#------------------------------------------
+sub test_systemDiskDataVolTooSmall {
+	# ...
+	# Test that an insufficient volume size generates an error
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmd = $this -> __getCommandLineObj();
+	my $configDir = $this -> {dataDir} . '/lvmSetup';
+	$cmd -> setConfigDir ($configDir);
+	my $xml = $this -> __getXMLObj( $configDir );
+	my $tmpDir = $this -> createTestTmpDir();
+	$cmd -> setConfigDir ($tmpDir);
+	mkdir $tmpDir . '/home';
+	mkdir $tmpDir . '/usr';
+	mkdir $tmpDir . '/var';
+	my $status = open my $TESTFILE, '>', $tmpDir . '/var/out.txt';
+	$this -> assert_not_null($status);
+	my $cnt = 0;
+	while ($cnt < $MEGABYTE + 1) {
+		print $TESTFILE "a\n";
+		$cnt += 1;
+	}
+	$status = close $TESTFILE;
+	$this -> assert_not_null($status);
+	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+	my $res = $checker -> createChecks();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Required size for var 2 MB larger than specified size.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	$this -> removeTestTmpDir();
 	return;
 }
 
