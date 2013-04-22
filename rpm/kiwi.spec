@@ -124,7 +124,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %if 0%{?sles_version}
 %define mysystems suse-SLES%{sles_version} suse-SLED%{sles_version}
 %else
-%define mysystems %(echo `export VER=%{suse_version}; [ "$VER" == "1230" ] && VER="1220"; echo "suse-${VER:0:2}.${VER:2:1}"`)
+%define mysystems %(echo `export VER=%{suse_version}; echo "suse-${VER:0:2}.${VER:2:1}"`)
 %endif
 %endif
 %if 0%{?rhel_version}
