@@ -385,7 +385,6 @@ function OEMRepartLVM {
 	# calculate partition sizes
 	#--------------------------------------
 	local extendID
-	local LVspare=100
 	local LVMdevice=$((kiwi_BootPart + 1))
 	local LVMdevice=$(ddn $imageDiskDevice $LVMdevice)
 	local diskFreeMBytes=$(($(getFreeDiskBytes $imageDiskDevice) / 1048576))
@@ -397,14 +396,14 @@ function OEMRepartLVM {
 			diskRootMBytes + diskFreeMBytes - recoMByte
 		))
 		minAddMBytes=$((
-			swapsize + recoMByte + LVspare
+			swapsize + recoMByte
 		))
 	else
 		diskRSysMBytes=$((
-			OEM_SYSTEMSIZE + swapsize + LVspare
+			OEM_SYSTEMSIZE + swapsize
 		))
 		minAddMBytes=$((
-			swapsize + recoMByte + LVspare + OEM_SYSTEMSIZE - diskRootMBytes
+			swapsize + recoMByte + OEM_SYSTEMSIZE - diskRootMBytes
 		))
 	fi
 	#======================================
@@ -440,8 +439,6 @@ function OEMRepartLVM {
 		if [ ! -z "$OEM_SYSTEMSIZE" ];then
 			local share=$((OEM_SYSTEMSIZE - diskRootMBytes))
 			Echo -b "==> Root's share is: $share MB"
-		else
-			Echo -b "==> Root's share is: $LVspare MB"
 		fi
 		if [ $swapsize -gt 0 ];then
 			Echo -b "==> Swap's share is: $swapsize MB"
@@ -483,7 +480,7 @@ function OEMRepartLVM {
 		# resize LVM partition
 		#--------------------------------------
 		partsize=+"$diskRSysMBytes"M
-		if [ $recoMByte -eq 0 ];then
+		if [ $recoMByte -eq 0 ] && [ -z "$OEM_SYSTEMSIZE" ];then
 			partsize=.
 		fi
 		createPartitionerInput \
@@ -533,16 +530,9 @@ function OEMRepartLVM {
 		#--------------------------------------
 		resizeLVMVolumes
 		#======================================
-		# Extend root + optional allFreeVolume
+		# Extend root or allFreeVolume
 		#--------------------------------------
-		if [ -z "$OEM_SYSTEMSIZE" ];then
-			lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
-		else
-			lvextend --size $OEM_SYSTEMSIZE"M" /dev/$VGROUP/LVRoot
-			if [ "$allFreeVolume" != "LVRoot" ];then
-				lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
-			fi
-		fi
+		lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
 		#======================================
 		# setup new device names
 		#--------------------------------------
