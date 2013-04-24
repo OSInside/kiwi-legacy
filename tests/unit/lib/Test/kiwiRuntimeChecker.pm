@@ -975,7 +975,7 @@ sub test_systemDiskDataSizeTooSmall {
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
 	my $res = $checker -> createChecks();
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Calculated 6 MB free, but require 2055 MB';
+	my $expected = 'Calculated 6 MB free, but require 7 MB';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);

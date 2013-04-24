@@ -313,10 +313,6 @@ sub __checkLVMoemSizeSettings {
 				}
 			}
 		}
-		my $swap = $oemConf -> getSwapSize();
-		if ($swap) {
-			$volSizes += $swap;
-		}
 	}
 	#==========================================
 	# Check values
@@ -672,12 +668,6 @@ sub __checkSystemDiskData {
 				if (($freeSpace) && ($freeSpace ne 'all')) {
 					$needFree += $freeSpace;
 				}
-			}
-		}
-		if ($oemConf) {
-			my $swap = $oemConf -> getSwapSize();
-			if ($swap) {
-				$needFree += $swap;
 			}
 		}
 	}
