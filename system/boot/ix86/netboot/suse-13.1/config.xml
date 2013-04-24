@@ -215,6 +215,7 @@
 		<package name="rsync"/>
 		<package name="timezone"/>
 		<package name="module-init-tools"/>
+		<package name="which"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,xen">
 		<package name="cracklib-dict-full"/>

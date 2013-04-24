@@ -161,6 +161,7 @@
 		<package name="procps"/>
 		<package name="rsync"/>
 		<package name="timezone"/>
+		<package name="which"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>

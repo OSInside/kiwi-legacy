@@ -137,6 +137,7 @@
 		<package name="tar"/>
 		<package name="timezone"/>
 		<package name="module-init-tools"/>
+		<package name="which"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>

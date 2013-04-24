@@ -134,6 +134,7 @@
 		<package name="glibc-locale"/>
 		<package name="procps"/>
 		<package name="timezone"/>
+		<package name="which"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>
