@@ -1050,26 +1050,23 @@
                     class="endtag">oem-systemsize</sgmltag></term>
                 <listitem>
                   <para>Set the size the operating system is allowed to
-					consume on the target disk. In a setup
-					<emphasis>without</emphasis> a
+					consume on the target disk. The size limit does not
+					include any consideration for swap space or a
+					recovery partition.
+					In a setup <emphasis>without</emphasis> a
 					<sgmltag class="element">systemdisk</sgmltag> element
 					this value specifies the size of the root partition.
-					The size limit does not include any consideration for
-					swap space or a recovery partition. In a setup
-					<emphasis>including</emphasis>
+					In a setup <emphasis>including</emphasis>
 					a <sgmltag class="element">systemdisk</sgmltag> element
 					this value specifies the size of the LVM partition which
-					contains all specified volumes including a volume for
-					swap. Thus, the sum of all specified volume sizes plus
-					the sum of the specified freespace for each volume plus
-					the size for the swap volume must be smaller or equal
+					contains all specified volumes.	Thus, the sum of all
+					specified volume sizes plus	the sum of the specified
+					freespace for each volume must be smaller or equal
 					to the size specified with the
 					<sgmltag class="element">oem-systemsize</sgmltag>.
-					The size limit in this case does not include any
-					consideration for a recovery partition.
                     This value is represented by the variable
                       <varname>OEM_SYSTEMSIZE</varname> in
-                      <filename>config.oempartition</filename>. </para>
+                      <filename>config.oempartition</filename>.</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
