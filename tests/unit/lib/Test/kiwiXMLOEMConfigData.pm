@@ -215,6 +215,35 @@ sub test_ctor_initConflictsUnattendedFalse {
 }
 
 #==========================================
+# test_ctor_initConflictsVerify
+#------------------------------------------
+sub test_ctor_initConflictsVerify {
+	# ...
+	# Test the OEMConfigData constructor with conflicting install
+	# verification settings in the initialization hash.
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+				oem_silent_verify => 'true',
+				oem_skip_verify => 'true'
+			);
+	my $confDataObj = KIWIXMLOEMConfigData -> new(\%init);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'Ambiguous install verification settings, install '
+		. 'verification is disabled, but also expected silently '
+		. 'unable to resolve ambiguity.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($confDataObj);
+	return;
+}
+
+#==========================================
 # test_ctor_initUnsupportedData
 #------------------------------------------
 sub test_ctor_initUnsupportedData {
@@ -726,6 +755,37 @@ sub test_getSilentVerify {
 }
 
 #==========================================
+# test_getSkipVerify
+#------------------------------------------
+sub test_getSkipVerify {
+	# ...
+	# Test the getSkipVerify method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $init = $this -> __getBaseInitHash();
+	$init->{oem_skip_verify} = 'false';
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $skip = $confDataObj -> getSkipVerify();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('false', $skip);
+	return;
+}
+
+#==========================================
 # test_getSwap
 #------------------------------------------
 sub test_getSwap {
@@ -1120,7 +1180,7 @@ sub test_setBootwait {
 #------------------------------------------
 sub test_setBootwaitInvalidArg {
 	# ...
-	# Test the setBootwait method with anunrecognized bool value
+	# Test the setBootwait method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -1221,7 +1281,7 @@ sub test_setInplaceRecovery {
 #------------------------------------------
 sub test_setInplaceRecoveryInvalidArg {
 	# ...
-	# Test the setInplaceRecovery method with anunrecognized bool value
+	# Test the setInplaceRecovery method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -1306,7 +1366,7 @@ sub test_setKiwiInitrd {
 #------------------------------------------
 sub test_setKiwiInitrdInvalidArg {
 	# ...
-	# Test the setKiwiInitrd method with anunrecognized bool value
+	# Test the setKiwiInitrd method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -1391,7 +1451,7 @@ sub test_setPartitionInstall {
 #------------------------------------------
 sub test_setPartitionInstallInvalidArg {
 	# ...
-	# Test the setPartitionInstall method with anunrecognized bool value
+	# Test the setPartitionInstall method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -1491,7 +1551,7 @@ sub test_setReboot {
 #------------------------------------------
 sub test_setRebootInvalidArg {
 	# ...
-	# Test the setReboot method with anunrecognized bool value
+	# Test the setReboot method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -1607,7 +1667,7 @@ sub test_setRebootInteractive {
 #------------------------------------------
 sub test_setRebootInteractiveInvalidArg {
 	# ...
-	# Test the setRebootInteractive method with anunrecognized bool value
+	# Test the setRebootInteractive method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -1708,7 +1768,7 @@ sub test_setRecovery {
 #------------------------------------------
 sub test_setRecoveryInvalidArg {
 	# ...
-	# Test the setRecovery method with anunrecognized bool value
+	# Test the setRecovery method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -1869,7 +1929,7 @@ sub test_setShutdown {
 #------------------------------------------
 sub test_setShutdownInvalidArg {
 	# ...
-	# Test the setShutdown method with anunrecognized bool value
+	# Test the setShutdown method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -1985,7 +2045,7 @@ sub test_setShutdownInteractive {
 #------------------------------------------
 sub test_setShutdownInteractiveInvalidArg {
 	# ...
-	# Test the seShutdownInteractivet method with anunrecognized bool value
+	# Test the seShutdownInteractivet method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -2086,7 +2146,7 @@ sub test_setSilentBoot {
 #------------------------------------------
 sub test_setSilentBootInvalidArg {
 	# ...
-	# Test the setSilentBoot method with anunrecognized bool value
+	# Test the setSilentBoot method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -2171,7 +2231,7 @@ sub test_setSilentInstall {
 #------------------------------------------
 sub test_setSilentInstallInvalidArg {
 	# ...
-	# Test the setSilentInstall method with anunrecognized bool value
+	# Test the setSilentInstall method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -2230,7 +2290,8 @@ sub test_setSilentVerify {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	my %init = ( oem_skip_verify => 'true' );
+	my $confDataObj = KIWIXMLOEMConfigData -> new(\%init);
 	$confDataObj = $confDataObj -> setSilentVerify('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
@@ -2248,6 +2309,8 @@ sub test_setSilentVerify {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('true', $silent);
+	my $skip = $confDataObj -> getSkipVerify();
+	$this -> assert_null($skip);
 	return;
 }
 
@@ -2256,7 +2319,7 @@ sub test_setSilentVerify {
 #------------------------------------------
 sub test_setSilentVerifyInvalidArg {
 	# ...
-	# Test the setSilentVerify method with anunrecognized bool value
+	# Test the setSilentVerify method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -2307,6 +2370,96 @@ sub test_setSilentVerifyNoArg {
 }
 
 #==========================================
+# test_setSkipVerify
+#------------------------------------------
+sub test_setSkipVerify {
+	# ...
+	# Test the setSkipVerify method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %init = ( oem_silent_verify => 'true' );
+	my $confDataObj = KIWIXMLOEMConfigData -> new(\%init);
+	$confDataObj = $confDataObj -> setSkipVerify('true');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $skip = $confDataObj -> getSkipVerify();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('true', $skip);
+	my $silent = $confDataObj -> getSilentVerify();
+	$this -> assert_null($silent);
+	return;
+}
+
+#==========================================
+# test_setSkipVerifyInvalidArg
+#------------------------------------------
+sub test_setSkipVerifyInvalidArg {
+	# ...
+	# Test the setSkipVerify method with an unrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	my $res = $confDataObj -> setSkipVerify(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setSkipVerify: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_setSkipVerifyNoArg
+#------------------------------------------
+sub test_setSkipVerifyNoArg {
+	# ...
+	# Test the setSkipVerify method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $init = $this -> __getBaseInitHash();
+	$init->{oem_silent_verify} = 'false';
+	$init->{oem_skip_verify} = 'true';
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+	$confDataObj = $confDataObj -> setSkipVerify();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $skip = $confDataObj -> getSkipVerify();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('false', $skip);
+	return;
+}
+
+#==========================================
 # test_setSwap
 #------------------------------------------
 sub test_setSwap {
@@ -2341,7 +2494,7 @@ sub test_setSwap {
 #------------------------------------------
 sub test_setSwapInvalidArg {
 	# ...
-	# Test the setSwap method with anunrecognized bool value
+	# Test the setSwap method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -2554,7 +2707,7 @@ sub test_setUnattended {
 #------------------------------------------
 sub test_setUnattendedInvalidArg {
 	# ...
-	# Test the setUnattended method with anunrecognized bool value
+	# Test the setUnattended method with an unrecognized bool value
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
