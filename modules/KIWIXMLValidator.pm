@@ -588,6 +588,43 @@ sub __checkHttpsCredentialsConsistent {
 }
 
 #==========================================
+# __checkInstallVerifyAction
+#------------------------------------------
+sub __checkInstallVerifyAction {
+	# ...
+	# Check that the install verification settings do not conflict
+	# ---
+	my $this = shift;
+	my @confNodes = $this->{systemTree} -> getElementsByTagName("oemconfig");
+	my @instVerifyOpts = qw {
+		oem-silent-verify
+		oem-skip-verify
+	};
+	for my $oemconfig (@confNodes) {
+		my $haveInstVerify = 0;
+		for my $action (@instVerifyOpts) {
+			my @actionList = $oemconfig -> getElementsByTagName($action);
+			if (@actionList) {
+				my $isSet = $actionList[0]->textContent();
+				if ($isSet eq "true") {
+					if ($haveInstVerify == 0) {
+						$haveInstVerify = 1;
+						next;
+					}
+					my $kiwi = $this->{kiwi};
+					my $msg = 'Only one verification action may be  defined';
+					$kiwi -> error($msg);
+					$kiwi -> error("Use one of @instVerifyOpts");
+					$kiwi -> failed();
+					return;
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkNetInterfaceMACUnique
 #------------------------------------------
 sub __checkNetInterfaceMACUnique {
@@ -960,13 +997,13 @@ sub __checkPostDumpAction {
 	# ---
 	my $this = shift;
 	my @confNodes = $this->{systemTree} -> getElementsByTagName("oemconfig");
+	my @postDumOpts = qw {
+		oem-reboot
+		oem-reboot-interactive
+		oem-shutdown
+		oem-shutdown-interactive
+	};
 	for my $oemconfig (@confNodes) {
-		my @postDumOpts = qw
-		/oem-reboot
-		 oem-reboot-interactive
-		 oem-shutdown
-		 oem-shutdown-interactive
-		/;
 		my $havePostDumpAction = 0;
 		for my $action (@postDumOpts) {
 			my @actionList = $oemconfig -> getElementsByTagName($action);
@@ -1754,6 +1791,9 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkHttpsCredentialsConsistent()) {
+		return;
+	}
+	if (! $this -> __checkInstallVerifyAction()) {
 		return;
 	}
 	if (! $this -> __checkNetInterfaceMACUnique()) {
