@@ -817,7 +817,8 @@ sub setSilentInstall {
 sub setSilentVerify {
 	# ...
 	# Set the oem_silent_verify attribute, if called with no argument the
-	# value is set to false.
+	# value is set to false. If called with an argument all other potentially
+	# conflicting settings are set to false
 	# ---
 	my $this = shift;
 	my $val  = shift;
@@ -826,7 +827,13 @@ sub setSilentVerify {
 		value  => $val,
 		caller => 'setSilentVerify'
 	);
-	return $this -> p_setBooleanValue(\%settings);
+	if (! $this -> p_setBooleanValue(\%settings) ) {
+		return;
+	}
+	if ($this->{oem_silent_verify} && $this->{oem_silent_verify} eq 'true' ) {
+		delete $this->{oem_skip_verify};
+	}
+	return $this;
 }
 
 #==========================================
@@ -835,7 +842,8 @@ sub setSilentVerify {
 sub setSkipVerify {
 	# ...
 	# Set the oem_skip_verify attribute, if called with no argument the
-	# value is set to false.
+	# value is set to false. If called with an argument all other potentially
+	# conflicting settings are set to false
 	# ---
 	my $this = shift;
 	my $val  = shift;
@@ -844,7 +852,13 @@ sub setSkipVerify {
 		value  => $val,
 		caller => 'setSkipVerify'
 	);
-	return $this -> p_setBooleanValue(\%settings);
+	if (! $this -> p_setBooleanValue(\%settings) ) {
+		return;
+	}
+	if ($this->{oem_skip_verify} && $this->{oem_skip_verify} eq 'true' ) {
+		delete $this->{oem_silent_verify};
+	}
+	return $this;
 }
 
 #==========================================
@@ -978,6 +992,9 @@ sub __isInitConsistent {
 	if (! $this -> __noConflictingSettingUnattended($init)) {
 		return;
 	}
+	if (! $this -> __noConflictingSettingVerify($init)) {
+		return;
+	}
 	return $this;
 }
 		
@@ -1038,7 +1055,7 @@ sub __noConflictingSettingSwap {
 #------------------------------------------
 sub __noConflictingSettingUnattended  {
 	# ...
-	# Verify that the swap settings for unattended install do not conflict
+	# Verify that the settings for unattended install do not conflict
 	# ---
 	my $this = shift;
 	my $init = shift;
@@ -1048,6 +1065,30 @@ sub __noConflictingSettingUnattended  {
 			my $kiwi = $this -> {kiwi};
 			my $msg = 'Conflicting unattended install settings, specified '
 				. 'unattended target ID but unattended install is disabled.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __noConflictingSettingVerify
+#------------------------------------------
+sub __noConflictingSettingVerify {
+	# ...
+	# Verify that the settings for image verification do not conflict
+	# ---
+	my $this = shift;
+	my $init = shift;
+	if ($init->{oem_skip_verify} && $init->{oem_skip_verify} eq 'true') {
+		if ($init->{oem_silent_verify}
+			&& $init->{oem_silent_verify} eq 'true') {
+			my $kiwi = $this -> {kiwi};
+			my $msg = 'Ambiguous install verification settings, install '
+				. 'verification is disabled, but also expected silently '
+				. 'unable to resolve ambiguity.';
 			$kiwi -> error($msg);
 			$kiwi -> failed();
 			return;
