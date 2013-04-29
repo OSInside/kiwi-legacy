@@ -11,6 +11,11 @@ test -f /.profile && . /.profile
 echo "Configure image: [$kiwi_iname]..."
 
 #======================================
+# Mount system filesystems
+#--------------------------------------
+baseMount
+
+#======================================
 # Activate services
 #--------------------------------------
 suseActivateDefaultServices
