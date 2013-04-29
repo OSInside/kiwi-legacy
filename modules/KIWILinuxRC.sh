@@ -2504,6 +2504,7 @@ function setupBootLoaderGrub2 {
 	#--------------------------------------
 	local orig_sysimg_profile=$mountPrefix/image/.profile
 	local inst_default_grub=$destsPrefix/etc/default/grub
+	local inst_default_grubdev=$destsPrefix/etc/default/grub_installdevice
 	#======================================
 	# check for system image .profile
 	#--------------------------------------
@@ -2580,6 +2581,12 @@ function setupBootLoaderGrub2 {
 		GRUB_CMDLINE_LINUX_DEFAULT="$cmdline"
 		GRUB_CMDLINE_LINUX=""
 		GRUB_TERMINAL=gfxterm
+	EOF
+	#======================================
+	# write etc/default/grub_installdevice
+	#--------------------------------------
+	cat > $inst_default_grubdev <<- EOF
+		$diskByID
 	EOF
 	#======================================
 	# activate secure boot if required
