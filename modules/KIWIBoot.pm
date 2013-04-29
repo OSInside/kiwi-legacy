@@ -1207,40 +1207,6 @@ sub setupInstallStick {
 	#------------------------------------------
 	%deviceMap = $this -> setLoopDeviceMap ($this->{loop});
 	#==========================================
-	# Setup initrd for install purpose
-	#------------------------------------------
-	$kiwi -> info ("Repack initrd with install flags...");
-	$initrd = $this -> setupInstallFlags();
-	if (! defined $initrd) {
-		return;
-	}
-	$this->{initrd} = $initrd;
-	$kiwi -> done();
-	#==========================================
-	# Create Disk boot structure
-	#------------------------------------------
-	if (! $this -> createBootStructure("vmx")) {
-		$this->{initrd} = $oldird;
-		return;
-	}
-	#==========================================
-	# Import boot loader stages
-	#------------------------------------------
-	if (! $this -> setupBootLoaderStages ($bootloader,'disk')) {
-		return;
-	}
-	#==========================================
-	# Creating boot loader configuration
-	#------------------------------------------
-	my $title = "KIWI USB-Stick Installation";
-	if (! $gotsys) {
-		$title = "KIWI USB Boot: $nameusb";
-	}
-	if (! $this -> setupBootLoaderConfiguration ($bootloader,$title)) {
-		return;
-	}
-	$this->{initrd} = $oldird;
-	#==========================================
 	# Setup device names
 	#------------------------------------------
 	my $boot = $deviceMap{boot};
@@ -1272,6 +1238,41 @@ sub setupInstallStick {
 			}
 		}
 	}
+	#==========================================
+	# Setup initrd for install purpose
+	#------------------------------------------
+	$kiwi -> info ("Repack initrd with install flags...");
+	$initrd = $this -> setupInstallFlags();
+	if (! defined $initrd) {
+		return;
+	}
+	$this->{initrd} = $initrd;
+	$kiwi -> done();
+	#==========================================
+	# Create Disk boot structure
+	#------------------------------------------
+	if (! $this -> createBootStructure("vmx")) {
+		$this->{initrd} = $oldird;
+		return;
+	}
+	#==========================================
+	# Import boot loader stages
+	#------------------------------------------
+	my $uuid = qxx("blkid $boot -s UUID -o value"); chomp $uuid;
+	if (! $this -> setupBootLoaderStages ($bootloader,'disk',$uuid)) {
+		return;
+	}
+	#==========================================
+	# Creating boot loader configuration
+	#------------------------------------------
+	my $title = "KIWI USB-Stick Installation";
+	if (! $gotsys) {
+		$title = "KIWI USB Boot: $nameusb";
+	}
+	if (! $this -> setupBootLoaderConfiguration ($bootloader,$title)) {
+		return;
+	}
+	$this->{initrd} = $oldird;
 	#==========================================
 	# Copy boot data on first partition
 	#------------------------------------------
@@ -2288,36 +2289,6 @@ sub setupBootDisk {
 	}
 	$kiwi -> done();
 	#==========================================
-	# Setup initrd for boot
-	#------------------------------------------
-	$kiwi -> info ("Repack initrd with boot flags...");
-	if (! $this -> setupBootFlags()) {
-		return;
-	}
-	$kiwi -> done();
-	#==========================================
-	# Create Disk boot structure
-	#------------------------------------------
-	if (! $this -> createBootStructure("vmx")) {
-		return;
-	}
-	#==========================================
-	# Import boot loader stages
-	#------------------------------------------
-	if (! $this -> setupBootLoaderStages ($bootloader,'disk')) {
-		return;
-	}
-	#==========================================
-	# add extra Xen boot options if necessary
-	#------------------------------------------
-	my $extra = "";
-	#==========================================
-	# Create boot loader configuration
-	#------------------------------------------
-	if (! $this -> setupBootLoaderConfiguration ($bootloader,$bootfix,$extra)) {
-		return;
-	}
-	#==========================================
 	# Dump system image on disk
 	#------------------------------------------
 	if (! $haveTree) {
@@ -2581,15 +2552,49 @@ sub setupBootDisk {
 	#==========================================
 	# Dump boot image on disk
 	#------------------------------------------
-	$kiwi -> info ("Copying boot image to disk");
+	$kiwi -> info ("Copying boot image to disk...\n");
 	#==========================================
-	# Mount boot space on this disk
+	# Find boot partition
 	#------------------------------------------
 	if ($needBootP) {
 		$boot = $deviceMap{boot};
 	} else {
 		$boot = $deviceMap{root};
 	}
+	#==========================================
+	# Setup initrd for boot
+	#------------------------------------------
+	$kiwi -> info ("Repack initrd with boot flags...");
+	if (! $this -> setupBootFlags()) {
+		return;
+	}
+	$kiwi -> done();
+	#==========================================
+	# Create Disk boot structure
+	#------------------------------------------
+	if (! $this -> createBootStructure("vmx")) {
+		return;
+	}
+	#==========================================
+	# Import boot loader stages
+	#------------------------------------------
+	my $uuid = qxx("blkid $boot -s UUID -o value"); chomp $uuid;
+	if (! $this -> setupBootLoaderStages ($bootloader,'disk',$uuid)) {
+		return;
+	}
+	#==========================================
+	# add extra Xen boot options if necessary
+	#------------------------------------------
+	my $extra = "";
+	#==========================================
+	# Create boot loader configuration
+	#------------------------------------------
+	if (! $this -> setupBootLoaderConfiguration ($bootloader,$bootfix,$extra)) {
+		return;
+	}
+	#==========================================
+	# Mount boot space on this disk
+	#------------------------------------------
 	if (! KIWIGlobals -> instance() -> mount ($boot, $loopdir)) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount image boot device: $boot");
@@ -2629,7 +2634,6 @@ sub setupBootDisk {
 	# umount entire boot space
 	#------------------------------------------
 	KIWIGlobals -> instance() -> umount();
-	$kiwi -> done();
 	#==========================================
 	# Install boot loader on disk
 	#------------------------------------------
@@ -3274,6 +3278,7 @@ sub setupBootLoaderStages {
 	my $this     = shift;
 	my $loader   = shift;
 	my $type     = shift;
+	my $uuid     = shift;
 	my $kiwi     = $this->{kiwi};
 	my $tmpdir   = $this->{tmpdir};
 	my $initrd   = $this->{initrd};
@@ -3283,13 +3288,6 @@ sub setupBootLoaderStages {
 	my $arch     = $this->{arch};
 	my $status   = 0;
 	my $result   = 0;
-	my $label;
-	#==========================================
-	# set the boot part label
-	#------------------------------------------
-	if (($type) && ($type ne 'disk')) {
-		$label = 'BOOT';
-	}
 	#==========================================
 	# Grub2
 	#------------------------------------------
@@ -3345,18 +3343,21 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Module lists for self created grub images
 		#------------------------------------------
+		my @core_modules = (
+			'ext2','iso9660','chain','linux','echo','configfile',
+			'boot','search_label','search_fs_file','search',
+			'search_fs_uuid','ls','normal','gzio','multiboot',
+			'png','fat'
+		);
 		my @bios_core_modules = (
-			'biosdisk','part_msdos','part_gpt','ext2',
-			'iso9660','chain','normal','linux','echo',
-			'vga','vbe','png','video_bochs','video_cirrus',
-			'gzio','multiboot','search','configfile','fat'
+			'biosdisk','part_msdos','part_gpt','vga','vbe',
+			'video_bochs','video_cirrus'
 		);
 		my @efi_core_modules = (
-			'fat','ext2','part_gpt','efi_gop','iso9660','chain',
-			'linux','echo','configfile','boot','search_label',
-			'search_fs_file','search','search_fs_uuid','ls',
-			'video','video_fb','normal'
+			'part_gpt','efi_gop','video','video_fb'
 		);
+		push @efi_core_modules ,@core_modules;
+		push @bios_core_modules,@core_modules;
 		#==========================================
 		# Boot directories
 		#------------------------------------------
@@ -3377,7 +3378,7 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Create boot partition file
 		#------------------------------------------
-		$kiwi -> info ("Creating grub2 boot partition map");
+		$kiwi -> info ("Creating grub2 boot partition map\n");
 		my @bootFiles = ($bootbios);
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			push @bootFiles,$bootefi;
@@ -3390,10 +3391,18 @@ sub setupBootLoaderStages {
 				$kiwi -> failed ();
 				return;
 			}
-			if ($label) {
-				print $bpfd "search --label $label --set"."\n";
+			if ($uuid) {
+				$kiwi -> info ("--> Using fs-uuid search method\n");
+				print $bpfd "search --fs-uuid --set=root $uuid"."\n";
+				$kiwi -> loginfo (
+					"grub search fs-uuid: $uuid\n"
+				);
 			} else {
+				$kiwi -> info ("--> Using file search method\n");
 				print $bpfd "search --file /boot/$this->{mbrid} --set"."\n";
+				$kiwi -> loginfo (
+					"grub search file: boot/$this->{mbrid}\n"
+				);
 			}
 			if ($bootfile =~ /grub2-efi/) {
 				print $bpfd 'set prefix=($root)/boot/grub2-efi'."\n";
@@ -3402,7 +3411,6 @@ sub setupBootLoaderStages {
 			}
 			$bpfd -> close();
 		}
-		$kiwi -> done();
 		#==========================================
 		# Get Grub2 stage and theming files
 		#------------------------------------------
@@ -3508,12 +3516,7 @@ sub setupBootLoaderStages {
 				return;
 			}
 			my $core    = "$tmpdir/EFI/BOOT/bootx64.efi";
-			my @modules = (
-				'fat','ext2','part_gpt','efi_gop','iso9660','chain',
-				'linux','echo','configfile','boot','search_label',
-				'search_fs_file','search','search_fs_uuid','ls',
-				'video','video_fb','normal'
-			);
+			my @modules = @efi_core_modules;
 			my $fo = 'x86_64-efi';
 			if ($arch ne 'x86_64') {
 				$fo = 'i386-efi';
