@@ -1394,16 +1394,15 @@ sub setupMount {
 		@mountList = ();
 	}
 	$kiwi -> info ("Mounting required file systems");
-	if (! -d $prefix) {
-	if (! mkdir $prefix) {
+	if (-d $prefix) {
 		$kiwi -> failed ();
-		$kiwi -> error ("Couldn't create directory: $prefix");
+		$kiwi -> error ("Entity $prefix already exist");
 		$kiwi -> failed ();
 		return;
 	}
-	} else {
+	if (! mkdir $prefix) {
 		$kiwi -> failed ();
-		$kiwi -> error ("Entity $prefix already exist");
+		$kiwi -> error ("Couldn't create directory: $prefix");
 		$kiwi -> failed ();
 		return;
 	}
@@ -1428,6 +1427,11 @@ sub setupMount {
 		qxx ("mount -t devpts devpts $root/dev/pts");
 		push (@mountList,"$root/sys");
 		push (@mountList,"$root/dev/pts");
+	}
+	if (! -e "$root/proc/sys/fs/binfmt_misc/register") {
+		qxx ("mkdir -p $root/proc/sys/fs/binfmt_misc");
+		qxx ("mount -t binfmt_misc binfmt_misc $root/proc/sys/fs/binfmt_misc");
+		push (@mountList,"$root/proc/sys/fs/binfmt_misc");
 	}
 	$this->{mountList} = \@mountList;
 	@mountList = $this -> setupCacheMount();
@@ -1497,6 +1501,9 @@ sub cleanMount {
 			}
 		}
 		$kiwi -> loginfo ("Umounting path: $item\n");
+		if (! -d $item) {
+			next;
+		}
 		my $data = qxx ("umount \"$item\" 2>&1");
 		my $code = $? >> 8;
 		if (($code != 0) && ($data !~ "not mounted")) {
