@@ -426,6 +426,24 @@ function baseCleanMount {
 }
 
 #======================================
+# baseMount
+#--------------------------------------
+function baseMount {
+	if [ ! -e /proc/cmdline ];then
+		mount -t proc proc /proc
+	fi
+	if [ ! -e /sys/kernel ];then
+		mount -t sysfs sysfs /sys
+	fi
+	if [ ! -e /proc/sys/fs/binfmt_misc/register ];then
+		mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
+	fi
+	if [ ! -e /dev/pts/0 ];then
+		mount -t devpts devpts /dev/pts
+	fi
+}
+
+#======================================
 # baseStripMans 
 #--------------------------------------
 function baseStripMans {
