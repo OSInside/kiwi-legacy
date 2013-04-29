@@ -63,14 +63,24 @@ test -f /.profile &amp;&amp; . /.profile
 echo "Configure image: [$kiwi_iname]..."
 
 #======================================
+# Mount system filesystems
+#--------------------------------------
+baseMount
+
+#======================================
 # Call configuration code/functions
 #--------------------------------------
 ...
 
 #======================================
+# Umount kernel filesystems
+#--------------------------------------
+baseCleanMount
+
+#======================================
 # Exit safely
 #--------------------------------------
-exit</programlisting>
+exit 0</programlisting>
   </example>
   </refsect1>
   
