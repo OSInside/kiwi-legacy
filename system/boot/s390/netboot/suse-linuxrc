@@ -441,6 +441,15 @@ then
 		fi
 	fi
 	runHook postpartition
+else
+	#======================================
+	# Identify swap partition
+	#--------------------------------------
+	if [ -z "$RAID" ];then
+		export imageSwapDevice=$(pxeSwapDevice)
+	else
+		export imageSwapDevice=$(pxeRaidSwapDevice)
+	fi
 fi
 
 #======================================
