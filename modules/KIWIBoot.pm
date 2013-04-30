@@ -3379,6 +3379,13 @@ sub setupBootLoaderStages {
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			push @bootFiles,$bootefi;
 		}
+		if ($uuid) {
+			$kiwi -> info ("--> Using fs-uuid search method\n");
+			$kiwi -> loginfo ("grub search fs-uuid: $uuid\n");
+		} else {
+			$kiwi -> info ("--> Using file search method\n");
+			$kiwi -> loginfo ("grub search file: boot/$this->{mbrid}\n");
+		}
 		foreach my $bootfile (@bootFiles) {
 			my $bpfd = FileHandle -> new();
 			if (! $bpfd -> open(">$bootfile")) {
@@ -3388,17 +3395,9 @@ sub setupBootLoaderStages {
 				return;
 			}
 			if ($uuid) {
-				$kiwi -> info ("--> Using fs-uuid search method\n");
 				print $bpfd "search --fs-uuid --set=root $uuid"."\n";
-				$kiwi -> loginfo (
-					"grub search fs-uuid: $uuid\n"
-				);
 			} else {
-				$kiwi -> info ("--> Using file search method\n");
 				print $bpfd "search --file /boot/$this->{mbrid} --set"."\n";
-				$kiwi -> loginfo (
-					"grub search file: boot/$this->{mbrid}\n"
-				);
 			}
 			if ($bootfile =~ /grub2-efi/) {
 				print $bpfd 'set prefix=($root)/boot/grub2-efi'."\n";
