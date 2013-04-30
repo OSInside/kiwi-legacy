@@ -2550,10 +2550,6 @@ sub setupBootDisk {
 		}
 	}
 	#==========================================
-	# Dump boot image on disk
-	#------------------------------------------
-	$kiwi -> info ("Copying boot image to disk...\n");
-	#==========================================
 	# Find boot partition
 	#------------------------------------------
 	if ($needBootP) {
