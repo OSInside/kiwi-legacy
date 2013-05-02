@@ -33,19 +33,14 @@ function OEMRepartInit {
 		swapsize=0
 	fi
 	if [ ! -z "$OEM_RECOVERY" ];then
-		mkdir -p /reco-root
-		if ! mount $imageRootDevice /reco-root >/dev/null;then
-			systemException "Failed to mount root device" "reboot"
-		fi
-		if [ ! -f /reco-root/recovery.partition.size ];then
+		if [ ! -f /recovery.partition.size ];then
 			systemException "Can't find recovery part size info" "reboot"
 		fi
-		recoMByte=$(cat /reco-root/recovery.partition.size)
+		recoMByte=$(cat /recovery.partition.size)
 		recoID=83
 		if [ ! -z "$OEM_RECOVERY_ID" ];then
 			recoID=$OEM_RECOVERY_ID
 		fi
-		umount /reco-root && rmdir /reco-root
 	fi
 	export input=/part.input
 	export bootid=1

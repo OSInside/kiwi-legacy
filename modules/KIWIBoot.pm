@@ -2759,6 +2759,24 @@ sub setupInstallFlags {
 		return;
 	}
 	#==========================================
+	# Include recovery information
+	#------------------------------------------
+	if (defined $system) {
+		my $destdir = dirname ($system);
+		my $recopart= "$destdir/recovery.partition.size";
+		if (-f $recopart) {
+			my $status = qxx ("cp $recopart $irddir 2>&1");
+			my $result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Failed to copy recovery metadata: $result");
+				$kiwi -> failed ();
+				qxx ("rm -rf $irddir");
+				return;
+			}
+		}
+	}
+	#==========================================
 	# Include Partition ID information
 	#------------------------------------------
 	if (defined $system) {
@@ -2894,6 +2912,22 @@ sub setupBootFlags {
 		$kiwi -> failed ();
 		qxx ("rm -rf $irddir");
 		return;
+	}
+	#==========================================
+	# Include recovery information
+	#------------------------------------------
+	my $destdir = dirname ($initrd);
+	my $recopart= "$destdir/recovery.partition.size";
+	if (-f $recopart) {
+		my $status = qxx ("cp $recopart $irddir 2>&1");
+		my $result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to copy recovery metadata: $result");
+			$kiwi -> failed ();
+			qxx ("rm -rf $irddir");
+			return;
+		}
 	}
 	#==========================================
 	# Include Partition ID information

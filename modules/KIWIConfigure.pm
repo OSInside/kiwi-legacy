@@ -521,7 +521,7 @@ sub setupRecoveryArchive {
 	}
 	my $psize = -s "$root/recovery.tar.gz";
 	$psize /= 1048576;
-	$psize += 200;
+	$psize += 300;
 	$psize = sprintf ("%.0f", $psize);
 	print $SIZEFD $psize;
 	$SIZEFD -> close();
