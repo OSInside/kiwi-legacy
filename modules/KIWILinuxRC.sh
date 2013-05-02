@@ -5225,7 +5225,11 @@ function includeKernelParameters {
 		fi
 	fi
 	if [ ! -z "$lang" ];then
+		# lang set on the commandline, e.g by the boot theme
 		export DIALOG_LANG=$lang
+	elif [ ! -z "$kiwi_language" ];then
+		# lang set from the XML data, first item is the primary language
+		export DIALOG_LANG=$(echo $kiwi_language | cut -f1 -d,)
 	fi
 }
 #======================================
@@ -7433,6 +7437,7 @@ function selectLanguage {
 	# Check language environment
 	#--------------------------------------
 	if [ ! -z "$kiwi_oemunattended" ] && [ "$DIALOG_LANG" = "ask" ];then
+		# answer the language question in unatteneded mode
 		DIALOG_LANG=en_US
 	fi
 	if [ "$DIALOG_LANG" = "ask" ];then
