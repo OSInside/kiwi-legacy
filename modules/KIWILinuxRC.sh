@@ -4059,8 +4059,10 @@ function activateVolumeGroup {
 #--------------------------------------
 function activateMDRaid {
 	if [ ! -z "$kiwi_RaidDev" ];then
+		udevPending
 		Echo "Activating $kiwi_RaidDev mdraid array..."
 		mdadm --assemble --scan
+		waitForStorageDevice $kiwi_RaidDev
 	fi
 }
 #======================================
@@ -4068,6 +4070,7 @@ function activateMDRaid {
 #--------------------------------------
 function resizeMDRaid {
 	if [ ! -z "$kiwi_RaidDev" ];then
+		udevPending
 		Echo "Resizing $kiwi_RaidDev mdraid array..."
 		mdadm --grow --size=max $kiwi_RaidDev
 	fi
@@ -4089,6 +4092,7 @@ function resizeLVMPVs {
 #--------------------------------------
 function deactivateMDRaid {
 	if [ ! -z "$kiwi_RaidDev" ] && [ -e $kiwi_RaidDev ];then
+		udevPending
 		Echo "Deactivating $kiwi_RaidDev mdraid array..."
 		mdadm --stop $kiwi_RaidDev
 	fi

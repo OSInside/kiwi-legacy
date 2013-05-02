@@ -103,12 +103,13 @@ function setupInitialDeviceNames {
 			export imageIOWRDevice=$imageRWDevice
 		fi
 	elif [ ! -z "$kiwi_RaidDev" ];then
-		export imageRootDevice=$kiwi_RaidDev
 		if [ ! -z "$kiwi_ROPart" ] || [ ! -z "$kiwi_RWPart" ];then
 			systemException \
 				"split systems not supported in software raid mode"
 			"reboot"
 		fi
+		activateMDRaid
+		export imageRootDevice=$kiwi_RaidDev
 	else
 		export imageRootDevice=$(ddn $imageDiskDevice $kiwi_RootPart)
 		if [ ! -z "$kiwi_ROPart" ];then
