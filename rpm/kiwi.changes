@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu May  2 11:43:38 CEST 2013 - ms@suse.de
+
+- netboot: fixed setup of swap device in $imageSwapDevice
+  If the partition table stays untouched the variable
+  was not set which caused a broken fstab entry for
+  swap. This patch makes sure the swap device variable
+  is set in any case
+
+-------------------------------------------------------------------
 Sun Apr 21 14:04:21 CEST 2013 - ms@suse.de
 
 - fixed SUSE product creation if specified MAIN_PRODUCT
