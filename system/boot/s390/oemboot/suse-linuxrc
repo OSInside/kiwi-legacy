@@ -557,20 +557,20 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 			imageBootMountP=$(echo $imageBootDevice | cut -f2 -d:)
 			imageBootDevice=$(echo $imageBootDevice | cut -f1 -d:)
 			rm -rf /mnt/boot
-			mkdir  /mnt/boot
 			probeFileSystem $imageRootDevice
 			createFilesystem $imageBootDevice
 			mkdir -p /mnt/$imageBootMountP
 			mount $imageBootDevice /mnt/$imageBootMountP
-			mkdir -p /mnt/$imageBootMountP/boot
-			mount --bind /mnt/$imageBootMountP/boot /mnt/boot
+			pushd /mnt/$imageBootMountP >/dev/null
+			ln -s . boot
+			popd >/dev/null
 		fi
 	fi
 	#======================================
 	# 16.7) restore boot files 2
 	#--------------------------------------
 	Echo "Restoring boot configuration archive part (2)..."
-	if ! tar -xf /reco-save/boot-2.tgz -C /mnt/$imageBootMountP;then
+	if ! tar -xf /reco-save/boot-2.tgz -C /mnt;then
 		systemException "Failed to restore boot configuration" "reboot"
 	fi
 	#======================================
