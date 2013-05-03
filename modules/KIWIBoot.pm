@@ -6428,7 +6428,7 @@ sub setupFilesystem {
 				$fsopts = '';
 			}
 			my $fstool = "mkfs.".$fstype;
-			if ($this->{inodes}) {
+			if (($this->{inodes}) && (! $bootp)) {
 				$fsopts.= " -N $this->{inodes}";
 			}
 			if ($bootp) {
