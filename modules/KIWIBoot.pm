@@ -495,7 +495,6 @@ sub createBootStructure {
 	if (defined $loc) {
 		$lname  = $lname.".".$loc;
 		$iname  = $iname.".".$loc;
-		$xname  = $xname.".".$loc;
 	}
 	if ($initrd !~ /splash\.gz$|splash\.install\.gz/) {
 		$initrd = $this -> setupSplash();
@@ -535,7 +534,7 @@ sub createBootStructure {
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Failed importing Xen dom0 kernel: $!");
+			$kiwi -> error  ("Failed importing Xen hypervisor: $!");
 			$kiwi -> failed ();
 			return;
 		}
