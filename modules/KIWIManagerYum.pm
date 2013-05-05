@@ -202,6 +202,7 @@ sub setupInstallationSource {
 			#==========================================
 			# Set baseurl and name parameter
 			#------------------------------------------
+			next if ! $key;
 			if (($key eq "baseurl") || ($key eq "path")) {
 				if ($val =~ /^'\//) {
 					$val =~ s/^'(.*)'$/"file:\/\/$1"/
