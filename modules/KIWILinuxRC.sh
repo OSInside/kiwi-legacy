@@ -3730,6 +3730,14 @@ function setupHybridPersistent {
 		# store hybrid write partition device
 		#--------------------------------------
 		HYBRID_RW=$(ddn $diskDevice $HYBRID_PERSISTENT_PART)
+
+		#======================================
+		# failed to create partion -> disable hybrid
+		#--------------------------------------
+		if [ ! -e "$HYBRID_RW" ]; then
+			unset HYBRID_RW
+			return
+		fi
 	else
 		#======================================
 		# use given cow device
