@@ -3730,6 +3730,14 @@ function setupHybridPersistent {
 		# store hybrid write partition device
 		#--------------------------------------
 		HYBRID_RW=$(ddn $diskDevice $HYBRID_PERSISTENT_PART)
+		if [ ! -e "$HYBRID_RW" ]; then
+			# /.../
+			# failed to create read-write partition -> disable it
+			# ----
+			unset HYBRID_RW
+			unset kiwi_hybridpersistent
+			return
+		fi
 	else
 		#======================================
 		# use given cow device
