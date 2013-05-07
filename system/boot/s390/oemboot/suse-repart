@@ -630,6 +630,10 @@ function OEMRepart {
 	fi
 	sleep 1
 	#======================================
+	# activate boot partition
+	#--------------------------------------
+	activateBootPartition
+	#======================================
 	# sync MBR into GPT if possible
 	#--------------------------------------
 	if [ "$partedTableType" = "gpt" ];then
