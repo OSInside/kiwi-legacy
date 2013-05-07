@@ -7373,6 +7373,48 @@ function luksClose {
 	done
 }
 #======================================
+# importText
+#--------------------------------------
+function importText {
+	# /.../
+	# read in all texts from the catalog
+	# ----
+	export TEXT_TIMEOUT=$(
+		getText "Boot continues in 10 sec...")
+	export TEXT_OK=$(
+		getText "OK")
+	export TEXT_CANCEL=$(
+		getText "Cancel")
+	export TEXT_YES=$(
+		getText "Yes")
+	export TEXT_NO=$(
+		getText "No")
+	export TEXT_EXIT=$(
+		getText "Exit")
+	export TEXT_LUKS=$(
+		getText "Enter LUKS passphrase")
+	export TEXT_LICENSE=$(
+		getText "Do you accept the license agreement ?")
+	export TEXT_RESTORE=$(
+		getText "Do you want to start the System-Restore ?")
+	export TEXT_REPAIR=$(
+		getText "Do you want to start the System-Recovery ?")
+	export TEXT_RECOVERYTITLE=$(
+		getText "Restoring base operating system...")
+	export TEXT_INSTALLTITLE=$(
+		getText "Installation...")
+	export TEXT_CDPULL=$(
+		getText "Please remove the CD/DVD before reboot")
+	export TEXT_USBPULL=$(
+		getText "Please unplug the USB stick before reboot")
+	export TEXT_CDPULL_SDOWN=$(
+		getText "Please remove the CD/DVD before shutdown")
+	export TEXT_USBPULL_SDOWN=$(
+		getText "System will be shutdown. Remove USB stick before power on")
+	export TEXT_SELECT=$(
+		getText "Select disk for installation:")
+}
+#======================================
 # selectLanguage
 #--------------------------------------
 function selectLanguage {
@@ -7409,42 +7451,9 @@ function selectLanguage {
 	local code
 	local lang
 	#======================================
-	# Exports (Texts)
+	# Exports (Texts), default language
 	#--------------------------------------
-	export TEXT_TIMEOUT=$(
-		getText "Boot continues in 10 sec...")
-	export TEXT_OK=$(
-		getText "OK")
-	export TEXT_CANCEL=$(
-		getText "Cancel")
-	export TEXT_YES=$(
-		getText "Yes")
-	export TEXT_NO=$(
-		getText "No")
-	export TEXT_EXIT=$(
-		getText "Exit")
-	export TEXT_LUKS=$(
-		getText "Enter LUKS passphrase")
-	export TEXT_LICENSE=$(
-		getText "Do you accept the license agreement ?")
-	export TEXT_RESTORE=$(
-		getText "Do you want to start the System-Restore ?")
-	export TEXT_REPAIR=$(
-		getText "Do you want to start the System-Recovery ?")
-	export TEXT_RECOVERYTITLE=$(
-		getText "Restoring base operating system...")
-	export TEXT_INSTALLTITLE=$(
-		getText "Installation...")
-	export TEXT_CDPULL=$(
-		getText "Please remove the CD/DVD before reboot")
-	export TEXT_USBPULL=$(
-		getText "Please unplug the USB stick before reboot")
-	export TEXT_CDPULL_SDOWN=$(
-		getText "Please remove the CD/DVD before shutdown")
-	export TEXT_USBPULL_SDOWN=$(
-		getText "System will be shutdown. Remove USB stick before power on")
-	export TEXT_SELECT=$(
-		getText "Select disk for installation:")
+	importText
 	#======================================
 	# Check language environment
 	#--------------------------------------
@@ -7471,6 +7480,10 @@ function selectLanguage {
 		fi
 	fi
 	export LANG=$DIALOG_LANG.utf8
+	#======================================
+	# Exports (Texts), selected language
+	#--------------------------------------
+	importText
 }
 #======================================
 # getText
