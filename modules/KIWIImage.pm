@@ -2068,19 +2068,25 @@ sub createImageLiveCD {
 		#==========================================
 		# Setup grub2 if efi live iso is requested
 		#------------------------------------------
-		my $grub   = 'grub2-efi';
-		my $efi_fo = 'x86_64-efi';
+		my $grub_efi   = 'grub2-efi';
+		my $grub_share = 'grub2';
+		my $efi_fo     = 'x86_64-efi';
 		if ($isoarch ne 'x86_64') {
 			$efi_fo = 'i386-efi';
 		}
-		if (! -d "$tmpdir/usr/lib/$grub") {
-			$grub = 'grub2';
+		if (-d "$tmpdir/usr/lib/grub2") {
+			$grub_efi = 'grub2';
+		} elsif (-d "$tmpdir/usr/lib/grub") {
+			$grub_efi = 'grub';
+		}
+		if (-d "$tmpdir/usr/share/grub") {
+			$grub_share = 'grub';
 		}
 		my @theme      = $sxml -> getBootTheme_legacy();
-		my $ir_modules = "$tmpdir/usr/lib/$grub/$efi_fo";
-		my $ir_themes  = "$tmpdir/usr/share/grub2/themes";
-		my $ir_bgnds   = "$tmpdir/usr/share/grub2/backgrounds";
-		my $ir_font    = "$tmpdir/usr/share/grub2/unicode.pf2";
+		my $ir_modules = "$tmpdir/usr/lib/$grub_efi/$efi_fo";
+		my $ir_themes  = "$tmpdir/usr/share/$grub_share/themes";
+		my $ir_bgnds   = "$tmpdir/usr/share/$grub_share/backgrounds";
+		my $ir_font    = "$tmpdir/usr/share/$grub_share/unicode.pf2";
 		my $efi_modules= "$CD/EFI/BOOT";
 		my $cd_modules = "$CD/boot/grub2-efi/$efi_fo";
 		my $cd_loader  = "$CD/boot/grub2-efi";
@@ -2100,10 +2106,12 @@ sub createImageLiveCD {
 			"ascii.pf2"
 		);
 		my @efimods = (
-			'fat','ext2','gettext','part_gpt','efi_gop',
-			'chain','video','video_bochs','video_cirrus',
-			'gzio','efi_uga','search','configfile','png',
-			'test'
+			'fat','ext2','part_gpt','efi_gop','iso9660','chain',
+			'linux','echo','configfile','boot','search_label',
+			'search_fs_file','search','search_fs_uuid','ls',
+			'video','video_fb','normal','test','sleep','png',
+			'gettext','video_bochs','video_cirrus','gzio',
+			'efi_uga'
 		);
 		my $status;
 		my $result;
@@ -2166,12 +2174,7 @@ sub createImageLiveCD {
 				return;
 			}
 			my $core    = "$CD/EFI/BOOT/bootx64.efi";
-			my @modules = (
-				'fat','ext2','part_gpt','efi_gop','iso9660','chain',
-				'linux','echo','configfile','boot','search_label',
-				'search_fs_file','search','search_fs_uuid','ls',
-				'video','video_fb','normal','test','sleep'
-			);
+			my @modules = @efimods;
 			$status = qxx (
 				"$grub2_mkimage -O $efi_fo -o $core -c $bootefi @modules 2>&1"
 			);

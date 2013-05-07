@@ -3321,19 +3321,30 @@ sub setupBootLoaderStages {
 	# Grub2
 	#------------------------------------------
 	if ($loader eq "grub2") {
-		my $efipc    = 'x86_64-efi';
-		my $grubpc   = 'i386-pc';
-		my $figure   = "'usr/share/grub2/themes/*'";
-		my $bootbios = "$tmpdir/boot/grub2/bootpart.cfg";
-		my $bootefi  = "$tmpdir/boot/grub2-efi/bootpart.cfg";
-		my $unzip    = "$zipper -cd $initrd 2>&1";
-		my %stages   = ();
-		my $test     = "cat $initrd";
-		my $grub_bios= 'grub2';
-		my $grub_efi = 'grub2';
-		my $lib      = 'lib';
+		my $efipc      = 'x86_64-efi';
+		my $grubpc     = 'i386-pc';
+		my $bootbios   = "$tmpdir/boot/grub2/bootpart.cfg";
+		my $bootefi    = "$tmpdir/boot/grub2-efi/bootpart.cfg";
+		my $unzip      = "$zipper -cd $initrd 2>&1";
+		my %stages     = ();
+		my $test       = "cat $initrd";
+		my $grub_bios  = 'grub2';
+		my $grub_efi   = 'grub2';
+		my $grub_share = 'grub2';
+		my $lib        = 'lib';
 		if ($zipped) {
 			$test = $unzip;
+		}
+		$status = qxx ("$test | cpio -it --quiet | grep -q share/grub/ 2>&1");
+		$result = $? >> 8;
+		if ($result == 0) {
+			$grub_share = 'grub';
+		}
+		$status = qxx ("$test | cpio -it --quiet | grep -q lib/grub2/ 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$grub_bios = 'grub';
+			$grub_efi  = 'grub';
 		}
 		$status = qxx ("$test | cpio -it --quiet | grep -q lib/grub2-efi 2>&1");
 		$result = $? >> 8;
@@ -3443,6 +3454,7 @@ sub setupBootLoaderStages {
 		# Get Grub2 stage and theming files
 		#------------------------------------------
 		$kiwi -> info ("Importing grub2 stage and theming files");
+		my $figure= "'usr/share/$grub_share/themes/*'";
 		my $s_efi = $stages{efi}{initrd};
 		my $s_bio = $stages{bios}{initrd};
 		if (! $s_efi) {
@@ -3465,10 +3477,13 @@ sub setupBootLoaderStages {
 		#==========================================
 		# import Grub2 theme files...
 		#------------------------------------------
-		if (-d "$tmpdir/usr/share/grub2/themes") {
-			$status = qxx (
-				"mv $tmpdir/usr/share/grub2/themes $tmpdir/boot/grub2 2>&1"
-			);
+		foreach my $grub ('grub','grub2') {
+			if (-d "$tmpdir/usr/share/$grub/themes") {
+				$status = qxx (
+					"mv $tmpdir/usr/share/$grub/themes $tmpdir/boot/grub2 2>&1"
+				);
+				last;
+			}
 		}
 		#==========================================
 		# import Grub2 stage files...
@@ -4007,6 +4022,7 @@ sub setupBootLoaderConfiguration {
 			"DejaVuSans12.pf2",
 			"ascii.pf2"
 		);
+		my $font;
 		#==========================================
 		# BIOS modules
 		#------------------------------------------
@@ -4053,8 +4069,11 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# add unicode font for grub2
 		#------------------------------------------
-		my $font = "/usr/share/grub2/unicode.pf2";
-		if (-e $font) {
+		foreach my $grub ('grub2','grub') {
+			$font = "/usr/share/$grub/unicode.pf2";
+			last if (-e $font);
+		}
+		if (($font) && (-e $font)) {
 			qxx ("cp $font $tmpdir/boot");
 		} else {
 			$kiwi -> warning ("Can't find unicode font for grub2");
