@@ -428,9 +428,11 @@ sub setupLocale {
 	if (! $locale) {
 		return $this;
 	}
+	my @locales = split (/,/x,$locale);
+	my $primary = $locales[0];
 	my $localectl = $locator -> getExecPath('localectl', $root);
 	if ($localectl) {
-		qxx("$localectl set-locale $locale 2>&1");
+		qxx("$localectl set-locale $primary 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> loginfo ("warning: unable to set the locale\n");
