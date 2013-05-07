@@ -9377,6 +9377,22 @@ function createOriginSnapshot {
 	fi
 }
 #======================================
+# activateBootPartition
+#--------------------------------------
+function activateBootPartition {
+	local device=$imageBootDevice
+	if [ ! -e $device ];then
+		device=$imageRootDevice
+	fi
+	if [ ! -e $device ];then
+		echo "Can't find boot partition, activation skipped"
+		return
+	fi
+	local bootID=$(nd $device)
+	local diskID=$(dn $device)
+	sfdisk $diskID --force -A $bootID
+}
+#======================================
 # initialize
 #--------------------------------------
 function initialize {
