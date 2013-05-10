@@ -212,6 +212,10 @@ function OEMInstall {
 		fi
 	fi
 	#======================================
+	# Run user script
+	#--------------------------------------
+	runHook postHWdetect
+	#======================================
 	# Sort devices by capabilities
 	#--------------------------------------
 	for i in $deviceDisks;do
