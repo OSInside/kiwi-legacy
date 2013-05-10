@@ -151,6 +151,11 @@
               This script is executed prior to the hardware scan on the
                   target machine.</para>
             </listitem>
+			<listitem>
+              <para><filename>postHWdetect.sh</filename>
+              This script is executed after the hardware scan on the
+                  target machine.</para>
+            </listitem>
             <listitem>
               <para><filename>preImageDump.sh</filename>
               This script is executed immediately prior to the OEM

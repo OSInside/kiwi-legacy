@@ -628,6 +628,39 @@
         also be specified at the commandline with the
           <option>--prebuiltbootimage</option> parameter. </para>
 
+      <para>Within the type section, there could be other optional
+		attributes which are either universally valid or can be used
+		for different image types in the same way. The following list
+        explains these attributes: </para>
+
+		<variablelist>
+			<varlistentry>
+				<term><sgmltag class="attribute"
+					>kernelcmdline</sgmltag></term>
+				<listitem>
+					<para>Specifies additional kernel parameters.
+					The following example disables kernel messages:
+					<literal>kernelcmdline="quiet"</literal></para>
+				</listitem>
+			</varlistentry>
+            <varlistentry>
+				<term><sgmltag class="attribute"
+                    >mdraid</sgmltag></term>
+                <listitem>
+                    <para>For disk based image types, aka oem and vmx,
+					mdraid activates the creation of a software raid image.
+					The raid inside the image is created in degraded mode
+					because at creation time we only know about one disk.
+					It's in the hand of the user to add devices to the raid
+					after the image runs on the target machine. The value
+					for mdraid can be either <emphasis>mirroring</emphasis>
+					or <emphasis>striping</emphasis>, which means the raid
+					level is set to RAID1 (mirroring) or
+					RAID0 (striping).</para>
+                </listitem>
+			</varlistentry>
+		</variablelist>
+
       <para>Within the preferences section, there are the following
         optional elements: </para>
 
@@ -739,17 +772,7 @@
               specified when calling KIWI </para>
           </listitem>
         </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute"
-            >kernelcmdline</sgmltag></term>
-          <listitem>
-            <para> Specifies additional kernel parameters. The following
-              example disables kernel messages:
-                <literal>kernelcmdline="quiet"</literal>
-            </para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
+       </variablelist>
 
       <para>The <sgmltag>type</sgmltag> element may contain child
         elements to provide specific configuration information for the

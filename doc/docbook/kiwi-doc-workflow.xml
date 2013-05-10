@@ -638,11 +638,11 @@ tar -cf kiwi-hooks.tgz kiwi-hooks/
 
         <listitem>
             <formalpara>
-            <title>preHWdetect</title>
+            <title>preHWdetect|postHWdetect</title>
             <para>
-			This hook is called before the install image boot code searches
-			for the possible target storage device(s). The hook exists only
-			for the <emphasis>oem</emphasis> image type.
+			The hooks are called before and after the install image boot
+			code detects the possible target storage device(s).
+			The hook exists only for the <emphasis>oem</emphasis> image type.
             </para>
             </formalpara>
         </listitem>
