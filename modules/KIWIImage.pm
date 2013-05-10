@@ -462,6 +462,8 @@ sub updateDescription {
 		$src_xml->getOEMSilentVerify_legacy();
 	$changeset{"oem-skip-verify"}          =
 		$src_xml->getOEMSkipVerify_legacy();
+	$changeset{"oem-ataraid-scan"}         =
+		$src_xml->getOEMAtaRaidScan_legacy();
 	$changeset{"oem-bootwait"}             =
 		$src_xml->getOEMBootWait_legacy();
 	$changeset{"oem-unattended"}           =

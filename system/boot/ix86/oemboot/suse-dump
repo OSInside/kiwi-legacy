@@ -204,10 +204,12 @@ function OEMInstall {
 	#======================================
 	# Add optional dmraid device(s)
 	#--------------------------------------
-	if [ -x /sbin/dmraid ] && dmraid -s &>/dev/null;then
-		dmraid -a y
-		udevPending
-		identifyDMRaid
+	if [ ! "$OEM_ATARAID_SCAN" = "false" ];then
+		if which dmraid &>/dev/null && dmraid -s &>/dev/null;then
+			dmraid -a y
+			udevPending
+			identifyDMRaid
+		fi
 	fi
 	#======================================
 	# Sort devices by capabilities

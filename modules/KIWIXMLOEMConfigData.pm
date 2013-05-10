@@ -40,6 +40,7 @@ sub new {
 	#
 	# this = {
 	#    oem_align_partition      = ''
+	#    oem_ataraid_scan         = ''
 	#    oem_boot_title           = ''
 	#    oem_bootwait             = ''
 	#    oem_inplace_recovery     = ''
@@ -76,6 +77,7 @@ sub new {
 	#------------------------------------------
 	my %keywords = map { ($_ => 1) } qw(
 		oem_align_partition
+		oem_ataraid_scan
 		oem_boot_title
 		oem_bootwait
 		oem_inplace_recovery
@@ -100,6 +102,7 @@ sub new {
 	$this->{supportedKeywords} = \%keywords;
 	my %boolKW = map { ($_ => 1) } qw(
 		oem_align_partition
+		oem_ataraid_scan
 		oem_bootwait
 		oem_inplace_recovery
 		oem_kiwi_initrd
@@ -146,6 +149,17 @@ sub getAlignPartition {
 	# ---
 	my $this = shift;
 	return $this->{oem_align_partition};
+}
+
+#==========================================
+# getAtaRaidScan
+#------------------------------------------
+sub getAtaRaidScan {
+	# ...
+	# Return the setting for the oem-ataraid-scan configuration
+	# ---
+	my $this = shift;
+	return $this->{oem_ataraid_scan};
 }
 
 #==========================================
@@ -383,6 +397,12 @@ sub getXMLElement {
 		text      => $this -> getAlignPartition ()
 	);
 	$element = $this -> p_addElement(\%initAlign);
+	my %initAtaRaidScan = (
+		parent    => $element,
+		childName => 'oem-ataraid-scan',
+		text      => $this -> getAtaRaidScan ()
+	);
+	$element = $this -> p_addElement(\%initAtaRaidScan);
 	my %initBootT = (
 		parent    => $element,
 		childName => 'oem-boot-title',
@@ -520,6 +540,24 @@ sub setAlignPartition {
 		attr   => 'oem_align_partition',
 		value  => $val,
 		caller => 'setAlignPartition'
+	);
+	return $this -> p_setBooleanValue(\%settings);
+}
+
+#==========================================
+# setAtaRaidScan
+#------------------------------------------
+sub setAtaRaidScan {
+	# ...
+	# Set the oem_ataraid_scan attribute, if called with no argument the
+	# value is set to false.
+	# ---
+	my $this = shift;
+	my $val  = shift;
+	my %settings = (
+		attr   => 'oem_ataraid_scan',
+		value  => $val,
+		caller => 'setAtaRaidScan'
 	);
 	return $this -> p_setBooleanValue(\%settings);
 }

@@ -2774,6 +2774,8 @@ sub __createOEMConfig {
 	my %oemConfig;
 	$oemConfig{oem_align_partition}      =
 		$this -> __getChildNodeTextValue($config, 'oem-align-partition');
+	$oemConfig{oem_ataraid_scan}         =
+		$this -> __getChildNodeTextValue($config, 'oem-ataraid-scan');
 	$oemConfig{oem_boot_title}           =
 		$this -> __getChildNodeTextValue($config, 'oem-boot-title');
 	$oemConfig{oem_bootwait}             =
@@ -6385,6 +6387,8 @@ sub getImageConfig_legacy {
 	#------------------------------------------
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (defined $node) {
+		my $oemataraidscan = $node
+			-> getElementsByTagName ("oem-ataraid-scan");
 		my $oemswapMB= $node
 			-> getElementsByTagName ("oem-swapsize");
 		my $oemrootMB= $node
@@ -6447,6 +6451,9 @@ sub getImageConfig_legacy {
 			(int($oemrootMB) > 0)
 		) {
 			$result{kiwi_oemrootMB} = $oemrootMB;
+		}
+		if ((defined $oemataraidscan) && ("$oemataraidscan" eq "false")) {
+			$result{kiwi_oemataraid_scan} = $oemataraidscan;
 		}
 		if ((defined $oemtitle) && ("$oemtitle" ne "")) {
 			$result{kiwi_oemtitle} = $this -> __quote ($oemtitle);
@@ -7950,6 +7957,26 @@ sub getOEMSkipVerify_legacy {
 		return;
 	}
 	return "$skip";
+}
+
+#==========================================
+# getOEMAtaRaidScan_legacy
+#------------------------------------------
+sub getOEMAtaRaidScan_legacy {
+	# ...
+	# Obtain the oem-ataraid-scan value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return;
+	}
+	my $ataraidscan = $node -> getElementsByTagName ("oem-ataraid-scan");
+	if ((! defined $ataraidscan) || ("$ataraidscan" eq "")) {
+		return;
+	}
+	return "$ataraidscan";
 }
 
 #==========================================
