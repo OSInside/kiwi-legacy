@@ -6056,6 +6056,8 @@ sub setDefaultDeviceMap {
 	if (! defined $device) {
 		return;
 	}
+	# wait for udev to finish device creation
+	qxx ("udevadm settle --timeout=30 2>&1");
 	for my $part (qw(root readonly readwrite boot jump)) {
 		if ($this->{partids}{$part}) {
 			$result{$part} = $this -> __getPartDevice (
