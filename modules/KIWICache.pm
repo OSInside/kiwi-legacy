@@ -249,7 +249,7 @@ sub createCache {
 	my $ignore = "'gpg-pubkey|bundle-lang'";
 	my $rpmopts= "'%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n'";
 	my $rpm    = "chroot $root rpm";
-	qxx ("$rpm -qa --qf $rpmopts | grep -vE $ignore > $meta");
+	qxx ("$rpm -qa --qf $rpmopts 2>/dev/null | grep -vE $ignore > $meta");
 	qxx ("rm -f $root/image/config.xml");
 	qxx ("rm -f $root/image/*.kiwi");
 	#==========================================
@@ -427,6 +427,7 @@ sub selectCache {
 			if ($Cache{$clic} == $max) {
 				$kiwi -> info ("Using cache: $clic");
 				$kiwi -> done();
+				$clic =~ s/\/+/\//g;
 				return $clic;
 			}
 		}
