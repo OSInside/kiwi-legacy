@@ -4579,6 +4579,8 @@ sub setDefaultDeviceMap {
 	if (! defined $device) {
 		return undef;
 	}
+	# wait for udev to finish device creation
+	qxx ("udevadm settle --timeout=30 2>&1");
 	for (my $i=1;$i<=3;$i++) {
 		$result{$i} = $device.$i;
 	}

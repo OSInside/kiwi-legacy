@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue May 14 15:57:31 CEST 2013 - ms@suse.de
+
+- if a targetdevice is used instead of a loop we need to wait
+  for udev to finish the event loop in the same way as it is
+  done in bindDiskPartitions() when binding the partitions of
+  a loop device (bnc #819772)
+
+-------------------------------------------------------------------
 Thu May  2 11:43:38 CEST 2013 - ms@suse.de
 
 - netboot: fixed setup of swap device in $imageSwapDevice
