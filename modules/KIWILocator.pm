@@ -387,7 +387,7 @@ sub _new_instance {
 	# Store object data
 	#------------------------------------------
 	$this->{configName}  = 'config.xml';
-	$this->{defCacheDir} = '/var/cache/kiwi/image';
+	$this->{defCacheDir} = '/var/tmp/kiwicache/image';
 	$this->{kiwi}        = KIWILog -> instance();
 	return $this;
 }

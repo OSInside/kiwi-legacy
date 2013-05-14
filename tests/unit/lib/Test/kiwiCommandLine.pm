@@ -384,7 +384,7 @@ sub test_cmdCacheDirUsage_relPath {
 	my $res = $cmd -> setCacheDir('tmp');
 	my $msg = $kiwi -> getMessage();
 	my $expectedMsg = 'Specified relative path as cache location; moving '
-		. "cache to /var/cache/kiwi/image/tmp\n";
+		. "cache to /var/tmp/kiwicache/image/tmp\n";
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);
@@ -393,7 +393,7 @@ sub test_cmdCacheDirUsage_relPath {
 	$this -> assert_not_null($res);
 	# Make sure we get the proper value back
 	my $dir = $cmd -> getCacheDir();
-	$this -> assert_str_equals('/var/cache/kiwi/image/tmp', $dir);
+	$this -> assert_str_equals('/var/tmp/kiwicache/image/tmp', $dir);
 
 	return;
 }
