@@ -228,6 +228,7 @@
 		<package name="logrotate"/>
 		<package name="make"/>
 		<package name="mingetty"/>
+		<package name="Mesa"/>
 		<package name="openSUSE-release"/>
 		<package name="pam"/>
 		<package name="pam-modules"/>

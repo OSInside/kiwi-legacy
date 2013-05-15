@@ -127,7 +127,6 @@
 		<package name="fribidi"/>
 		<package name="genisoimage"/>
 		<package name="gettext-runtime"/>
-		<package name="grub"/>
 		<package name="grub2"/>
 		<package name="grub2-efi"/>
 		<package name="shim" arch="x86_64"/>
@@ -172,6 +171,7 @@
 		<package name="iproute2"/>
 		<package name="make"/>
 		<package name="mingetty"/>
+		<package name="Mesa"/>
 		<package name="openSUSE-release"/>
 		<package name="pam"/>
 		<package name="pam-modules"/>
