@@ -1725,7 +1725,7 @@ sub createImageLiveCD {
 			};
 			/^overlay$/ && do {
 				$kiwi -> info ("Creating overlayfs read only filesystem...\n");
-				if (! $this -> createImageSquashFS ($namero)) {
+				if (! $this -> createImageSquashFS ($namero,'-comp xz')) {
 					$this -> restoreSplitExtend ();
 					return;
 				}
