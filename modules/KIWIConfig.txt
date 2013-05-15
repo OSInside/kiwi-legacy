@@ -10,6 +10,9 @@
 		<file name="/usr/src/packages"/>
 		<file name="/usr/share/X11/locale"/>
 		<file name="/usr/share/backgrounds"/>
+		<file name="/usr/share/grub2/backgrounds"/>
+		<file name="/usr/share/kbd"/>
+		<file name="/usr/lib/rpm"/>  
 		<file name="/var/log/*"/>
 	</strip>
 
