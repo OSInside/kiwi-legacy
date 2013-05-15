@@ -99,7 +99,13 @@ sub new {
 	$this->{replRepo}       = $cmdL -> getReplacementRepo();
 	$this->{gdata}          = $global -> getKiwiConfig();
 	$this->{cmdL}           = $cmdL;
-	$this->{xml}            = $xml;
+	#==========================================
+	# Setup XML
+	#------------------------------------------
+	$this->{xml} = $this -> __xmlSetup ($xml);
+	if (! $this->{xml}) {
+		return;
+	}
 	return $this;
 }
 
@@ -257,9 +263,6 @@ sub __getTree {
 	my $requests = shift;
 	my $kiwi     = $this -> {kiwi};
 	my $xml      = $this -> {xml};
-	if (! $xml) {
-		$xml = $this -> __xmlSetup();
-	}
 	if (! $xml) {
 		return;
 	}
@@ -601,33 +604,36 @@ sub __xmlSetup {
 	# Configure the XML object to suitably collect all requested information
 	# ---
 	my $this = shift;
+	my $xml  = shift;
 	my $kiwi = $this->{kiwi};
 	my $cmdL = $this->{cmdL};
 	#==========================================
 	# Setup the XML
 	#------------------------------------------
-	my $buildProfs = $this -> {buildProfiles};
-	my $configDir  = $this -> {configDir};
-	my $locator = KIWILocator -> instance();
-	my $controlFile = $locator -> getControlFile ($configDir);
-	if (! $controlFile) {
-		return;
-	}
-	my $validator = KIWIXMLValidator -> new(
-		$controlFile,
-		$this->{gdata}->{Revision},
-		$this->{gdata}->{Schema},
-		$this->{gdata}->{SchemaCVT}
-	);
-	my $isValid = $validator ? $validator -> validate() : undef;
-	if (! $isValid) {
-		return;
-	}
-	my $xml = KIWIXML -> new(
-		$configDir, $cmdL->getBuildType(), $buildProfs, $cmdL
-	);
-	if (! defined $xml) {
-		return;
+	if (! $xml) {
+		my $buildProfs = $this -> {buildProfiles};
+		my $configDir  = $this -> {configDir};
+		my $locator = KIWILocator -> instance();
+		my $controlFile = $locator -> getControlFile ($configDir);
+		if (! $controlFile) {
+			return;
+		}
+		my $validator = KIWIXMLValidator -> new(
+			$controlFile,
+			$this->{gdata}->{Revision},
+			$this->{gdata}->{Schema},
+			$this->{gdata}->{SchemaCVT}
+		);
+		my $isValid = $validator ? $validator -> validate() : undef;
+		if (! $isValid) {
+			return;
+		}
+		$xml = KIWIXML -> new(
+			$configDir, $cmdL->getBuildType(), $buildProfs, $cmdL
+		);
+		if (! defined $xml) {
+			return;
+		}
 	}
 	my $pkgMgr = $this -> {packageManager};
 	if ($pkgMgr) {
@@ -643,6 +649,7 @@ sub __xmlSetup {
 	if ($this->{addlRepos}) {
 		$xml -> addRepositories($this->{addlRepos}, 'default');
 	}
+	$xml -> __createURLList_legacy();
 	return $xml;
 }
 

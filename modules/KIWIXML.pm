@@ -6091,10 +6091,10 @@ sub getBootTheme_legacy {
 	my @result = (
 		"openSUSE","openSUSE"
 	);
-	if ((defined $splash) || ("$splash" ne "")) {
+	if (($splash) && ("$splash" ne "")) {
 		$result[0] = $splash;
 	}
-	if ((defined $loader) || ("$loader" ne "")) {
+	if (($loader) && ("$loader" ne "")) {
 		$result[1] = $loader;
 	}
 	return @result;
