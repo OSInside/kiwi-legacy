@@ -6020,6 +6020,8 @@ sub setDefaultDeviceMap {
 	if (! defined $device) {
 		return;
 	}
+	# wait for udev to finish device creation
+	qxx ("udevadm settle --timeout=30 2>&1");
 	if ($this->{partids}{root}) {
 		$result{root} = $this -> __getPartDevice (
 			$device,$this->{partids}{root}
