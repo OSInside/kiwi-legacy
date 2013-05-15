@@ -1016,6 +1016,7 @@ sub createImageSquashFS {
 	# ---
 	my $this  = shift;
 	my $rename= shift;
+	my $opts  = shift;
 	my $kiwi  = $this->{kiwi};
 	my $xml   = $this->{xml};
 	my %type  = %{$xml->getImageTypeAndAttributes_legacy()};
@@ -1032,7 +1033,7 @@ sub createImageSquashFS {
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	if (! $this -> setupSquashFS ( $name )) {
+	if (! $this -> setupSquashFS ( $name,undef,$opts )) {
 		return;
 	}
 	#==========================================
@@ -4584,6 +4585,7 @@ sub setupSquashFS {
 	my $this = shift;
 	my $name = shift;
 	my $tree = shift;
+	my $opts = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
@@ -4595,9 +4597,12 @@ sub setupSquashFS {
 	if ($type{luks}) {
 		$this -> restoreImageDest();
 	}
+	if (! $opts) {
+		$opts = "";
+	}
 	unlink ("$this->{imageDest}/$name");
 	my $squashfs_tool = $locator -> getExecPath("mksquashfs");
-	my $data = qxx ("$squashfs_tool $tree $this->{imageDest}/$name 2>&1");
+	my $data = qxx ("$squashfs_tool $tree $this->{imageDest}/$name $opts 2>&1");
 	my $code = $? >> 8; 
 	if ($code != 0) {
 		$kiwi -> failed ();
