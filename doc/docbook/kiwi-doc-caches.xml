@@ -75,12 +75,12 @@
    kiwi --init-cache /tmp/image-cache
    kiwi --init-cache /tmp/boot-cache
 			</screen>
-			By default those caches will be created in '/var/cache/kiwi/image'.
+			By default those caches will be created in '/var/tmp/kiwicache/image'.
 			To run a build which makes use of the cache the following command
 			is used:
 			<screen>
 kiwi --build suse-12.2-JeOS -d /tmp/myimage --type vmx \
-     --cache /var/cache/kiwi/image
+     --cache /var/tmp/kiwicache/image
 			</screen>
 			This call is about 50% faster compared to the creation without a
 			cache. It's important to understand that a cache based build will
