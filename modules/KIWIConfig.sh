@@ -1082,7 +1082,7 @@ function suseGFXBoot {
 		return
 	fi
 	#======================================
-	# setup bootloader data
+	# setup gfxboot bootloader data
 	#--------------------------------------
 	if [ -d /usr/share/gfxboot ];then
 		#======================================
@@ -1223,7 +1223,19 @@ function suseGFXBoot {
 					$(echo $kiwi_language | tr "," " ") --default-language en_US
 			fi
 		fi
-	elif [ -d /usr/share/grub2/themes/$loader_theme ];then
+	else
+		#======================================
+		# no gfxboot based graphics boot data
+		#--------------------------------------
+		echo "gfxboot devel not installed"
+		echo "gfxboot branding not installed"
+		echo "gfxboot graphics boot skipped !"
+		mkdir /image/loader
+	fi
+	#======================================
+	# setup grub2 bootloader data
+	#--------------------------------------
+	if [ -d /usr/share/grub2/themes/$loader_theme ];then
 		#======================================
 		# use boot theme from grub2-branding
 		#--------------------------------------
@@ -1233,11 +1245,10 @@ function suseGFXBoot {
 		mkdir /image/loader
 	else
 		#======================================
-		# no graphics boot possible
+		# no grub2 based graphics boot data
 		#--------------------------------------
-		echo "gfxboot devel not installed"
-		echo "gfxboot branding not installed"
-		echo "graphics boot skipped !"
+		echo "grub2 branding not installed"
+		echo "grub2 graphics boot skipped !"
 		mkdir /image/loader
 	fi
 	#======================================

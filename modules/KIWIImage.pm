@@ -2088,13 +2088,12 @@ sub createImageLiveCD {
 		my @theme      = $sxml -> getBootTheme_legacy();
 		my $ir_modules = "$tmpdir/usr/lib/$grub_efi/$efi_fo";
 		my $ir_themes  = "$tmpdir/usr/share/$grub_share/themes";
-		my $ir_bgnds   = "$tmpdir/usr/share/$grub_share/backgrounds";
 		my $ir_font    = "$tmpdir/usr/share/$grub_share/unicode.pf2";
 		my $efi_modules= "$CD/EFI/BOOT";
 		my $cd_modules = "$CD/boot/grub2-efi/$efi_fo";
 		my $cd_loader  = "$CD/boot/grub2-efi";
 		my $theme      = $theme[1];
-		my $ir_bg      = "$ir_bgnds/$theme/1024x768.png";
+		my $ir_bg      = "$ir_themes/$theme/background.png";
 		my $cd_bg      = "$cd_loader/themes/$theme/background.png";
 		my $fodir      = '/boot/grub2-efi/themes/';
 		my $ascii      = 'ascii.pf2';
@@ -2138,7 +2137,7 @@ sub createImageLiveCD {
 		if (-d $ir_themes) {
 			qxx ("mv $ir_themes $cd_loader 2>&1");
 		}
-		if (-d $ir_bgnds) {
+		if (-f $ir_bg) {
 			qxx ("cp $ir_bg $cd_bg 2>&1");
 		}
 		if (-e $ir_font) {
