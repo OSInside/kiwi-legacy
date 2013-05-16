@@ -512,7 +512,7 @@ sub test_getDefCacheDir {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	# Make sure directory has expected path
-	$this -> assert_str_equals($cacheDir, '/var/tmp/kiwicache/image');
+	$this -> assert_str_equals($cacheDir, '/var/cache/kiwi/image');
 
 	return;
 }
