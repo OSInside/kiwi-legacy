@@ -299,7 +299,6 @@ sub new {
 	$this->{arch} = $arch;
 	$this->{gdata}= $global -> getKiwiConfig();
 	$this->{cmdL} = $cmdL;
-	$this->{buildType} = $imageType;
 	#==========================================
 	# Lookup XML configuration file
 	#------------------------------------------
@@ -396,12 +395,11 @@ sub new {
 	if (! $this -> __setDefaultBuildType() ) {
 		return;
 	}
-	$this->{selectedType} = $this->{defaultType};
 	#==========================================
 	# Set build type given by constructor
 	#------------------------------------------
-	if ($this->{buildType}) {
-		$this -> setBuildType ($this->{buildType});
+	if ($imageType) {
+		$this -> setBuildType ($imageType);
 	}
 	#==========================================
 	# Populate imageConfig with archive data from config tree
@@ -5073,7 +5071,7 @@ sub __setDefaultBuildType {
 			$defType = $profDefType;
 		}
 	}
-	$this->{defaultType} = $defType;
+	$this->{selectedType} = $defType;
 	return $this;
 }
 
