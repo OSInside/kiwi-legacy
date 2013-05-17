@@ -423,10 +423,10 @@ function baseGetProfilesUsed {
 # baseCleanMount
 #--------------------------------------
 function baseCleanMount {
-	umount /proc/sys/fs/binfmt_misc
-	umount /proc
-	umount /dev/pts
-	umount /sys
+	umount /proc/sys/fs/binfmt_misc &>/dev/null
+	umount /proc    &>/dev/null
+	umount /dev/pts &>/dev/null
+	umount /sys     &>/dev/null
 }
 
 #======================================
@@ -1145,7 +1145,7 @@ function suseGFXBoot {
 		# create the archive [2]
 		[ "$newlayout" ] || make -C themes/$loader_theme prep
 		make -C themes/$loader_theme
-		mkdir /image/loader
+		test -d /image/loader || mkdir /image/loader
 		local gfximage=
 		local bootimage=
 		if [ "$newlayout" ] ; then
@@ -1192,7 +1192,7 @@ function suseGFXBoot {
 		#--------------------------------------
 		echo "gfxboot devel not installed, custom branding skipped !"
 		echo "using gfxboot branding package"
-		mkdir /image/loader
+		test -d /image/loader || mkdir /image/loader
 		if [ $loader = "isolinux" ];then
 			# isolinux boot data...
 			mv /etc/bootsplash/themes/$loader_theme/cdrom/* /image/loader
@@ -1230,7 +1230,7 @@ function suseGFXBoot {
 		echo "gfxboot devel not installed"
 		echo "gfxboot branding not installed"
 		echo "gfxboot graphics boot skipped !"
-		mkdir /image/loader
+		test -d /image/loader || mkdir /image/loader
 	fi
 	#======================================
 	# setup grub2 bootloader data
@@ -1242,14 +1242,14 @@ function suseGFXBoot {
 		echo "using grub2 branding data"
 		mv /boot/grub2/themes/$loader_theme/background.png \
 			/usr/share/grub2/themes/$loader_theme
-		mkdir /image/loader
+		test -d /image/loader || mkdir /image/loader
 	else
 		#======================================
 		# no grub2 based graphics boot data
 		#--------------------------------------
 		echo "grub2 branding not installed"
 		echo "grub2 graphics boot skipped !"
-		mkdir /image/loader
+		test -d /image/loader || mkdir /image/loader
 	fi
 	#======================================
 	# copy bootloader binaries if required
