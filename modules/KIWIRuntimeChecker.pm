@@ -535,7 +535,6 @@ sub __checkPatternTypeAttrValueConsistent {
 	if (! $res) {
 		return;
 	}
-	$kiwi->done();
 	# XML returns undef if the type cannot be resolved because of a conflict
 	my $installOpt = $xml -> getInstallOption();
 	if (! $installOpt) {
@@ -551,7 +550,6 @@ sub __checkPatternTypeAttrValueConsistent {
 	$msg = "Reset profiles to original values.\n";
 	$kiwi->info($msg);
 	$xml -> setSelectionProfileNames($curActiveProfiles);
-	$kiwi->done();
 	return 1;
 }
 
