@@ -602,7 +602,7 @@ sub __checkRootRecycleCapability {
 		$kiwi -> failed();
 		return;
 	}
-	if (($tree) && (-f "$tree/kiwi-root.cache")) {
+	if (($tree) && (-f "$tree/image/kiwi-root.cache")) {
 		$kiwi -> error ("Can't recycle cache based root tree");
 		$kiwi -> failed();
 		return;

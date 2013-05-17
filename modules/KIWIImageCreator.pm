@@ -1256,12 +1256,13 @@ sub __selectCache {
 	my $xml       = shift;
 	my $configDir = shift;
 	my $cacheMode = shift;
+	my $cacheData = $configDir."/image/kiwi-root.cache";
 	my $kiwi = $this -> {kiwi};
 	my $cmdL = $this -> {cmdL};
 	if ( ! $this -> {cacheDir}) {
 		return;
 	}
-	if (($cacheMode eq "remount") && (! -f "$configDir/kiwi-root.cache")) {
+	if (($cacheMode eq "remount") && (! -f "$cacheData")) {
 		return;
 	}
 	my $icache = KIWICache -> new(

@@ -166,6 +166,7 @@ sub removeTestTmpDir {
 	}
 	for my $line (@mountInfo) {
 		if ($line =~ /.*kiwi.*/x) {
+			next if $line =~ /tmpfs/;
 			my ($source, $mntPnt, $rest) = split /\s/x, $line;
 			my $res = system "umount $mntPnt";
 			if ($res) {

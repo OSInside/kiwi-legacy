@@ -70,9 +70,9 @@ sub new {
 		# ---
 		$this->{initial} = 1;
 	}
-	if (-f "$rootRW/kiwi-root.cache") {
+	if (-f "$rootRW/image/kiwi-root.cache") {
 		my $FD;
-		if (! open ($FD, '<', "$rootRW/kiwi-root.cache")) {
+		if (! open ($FD, '<', "$rootRW/image/kiwi-root.cache")) {
 			$kiwi -> error  ("Can't open cache root meta data");
 			$kiwi -> failed ();
 			return;
@@ -130,30 +130,15 @@ sub unionOverlay {
 	}
 	$this->{tmpdir} = $tmpdir;
 	#==========================================
-	# Create read-write path
-	#------------------------------------------
-	my $baseRWDir = "$rootRW/kiwi-root.rw";
-	if (! -d $baseRWDir) {
-		$status = qxx ("mkdir $baseRWDir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  (
-				"Failed to create overlay dir: $baseRWDir: $status"
-			);
-			return;
-		}
-	}
-	#==========================================
 	# Mount cache as snapshot
 	#------------------------------------------
 	$kiwi -> info("Creating overlay path\n");
 	$kiwi -> info("--> Base: $baseRO(ro)\n");
-	$kiwi -> info("--> COW:  $baseRWDir(rw)\n");
+	$kiwi -> info("--> COW:  $rootRW(rw)\n");
 	#==========================================
 	# overlay mount both paths
 	#------------------------------------------
-	my $opts= "lowerdir=$baseRO,upperdir=$baseRWDir";
+	my $opts= "lowerdir=$baseRO,upperdir=$rootRW";
 	$status = qxx ("mount -t overlayfs -o $opts overlayfs $tmpdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -171,15 +156,8 @@ sub unionOverlay {
 		# store the location of the base read-only cache file
 		# on invocation of an initial prepare call
 		# ----
-		qxx ("echo $this->{baseRO} > $rootRW/kiwi-root.cache");
-		# /.../
-		# tell the global object that we want to store the updated
-		# XML configuration in $rootRW/image. This happens upon
-		# the call of writeXMLDescription()
-		# ----
-		KIWIGlobals -> instance() -> setKiwiConfigData (
-			"OverlayRootTree","$rootRW/image"
-		);
+		qxx ("mkdir -p $rootRW/image");
+		qxx ("echo $this->{baseRO} > $rootRW/image/kiwi-root.cache");
 	}
 	return $tmpdir;
 }
