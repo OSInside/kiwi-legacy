@@ -381,7 +381,7 @@ sub new {
 	#------------------------------------------
 	$this -> __populateProfileInfo();
 	#==========================================
-	# Populate imageConfig with diver data from config tree
+	# Populate imageConfig with driver data from config tree
 	#------------------------------------------
 	$this -> __populateDriverInfo();
 	#==========================================
@@ -4387,12 +4387,15 @@ sub __populateDriverInfo {
 	my @drvNodes = $this->{systemTree} -> getElementsByTagName ('drivers');
 	for my $drvNd (@drvNodes) {
 		my $profiles = $drvNd -> getAttribute('profiles');
-		my @profsToProcess = ('kiwi_default');
+		my @profsToProcess = ('default');
 		if ($profiles) {
 			@profsToProcess = split /,/, $profiles;
 		}
 		my @driverNodes = $drvNd -> getElementsByTagName ('file');
 		for my $prof (@profsToProcess) {
+			if ($prof eq 'default') {
+				$prof = 'kiwi_default';
+			}
 			for my $dNd (@driverNodes) {
 				my $arch = $dNd -> getAttribute('arch');
 				my $name = $dNd -> getAttribute('name');
