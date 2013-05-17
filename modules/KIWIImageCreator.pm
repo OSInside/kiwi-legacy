@@ -193,6 +193,10 @@ sub prepareBootImage {
 			return;
 		}
 	}
+	$bootXml -> setBootProfiles (
+		$systemXML -> getBootProfile(),
+		$systemXML -> getBootKernel()
+	);
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------
@@ -366,6 +370,7 @@ sub createBootImage {
 	# Create the boot image
 	# ---
 	my $this         = shift;
+	my $systemXML    = shift;
 	my $configDir    = shift;
 	my $destination  = shift;
 	my $kiwi         = $this->{kiwi};
@@ -400,6 +405,10 @@ sub createBootImage {
 	if (! defined $xml) {
 		return;
 	}
+	$xml -> setBootProfiles (
+		$systemXML -> getBootProfile(),
+		$systemXML -> getBootKernel()
+	);
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------

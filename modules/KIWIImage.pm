@@ -1311,7 +1311,7 @@ sub createImageRootAndBoot {
 		# Create boot image...
 		#------------------------------------------
 		if ((! $kic) || (! $kic -> createBootImage (
-			$rootTarget,$this->{imageDest}))
+			$sxml,$rootTarget,$this->{imageDest}))
 		) {
 			undef $kic;
 			if (! -d $checkBase) {
@@ -1839,7 +1839,7 @@ sub createImageLiveCD {
 		# Create boot image...
 		#------------------------------------------
 		if ((! $kic) || (! $kic -> createBootImage (
-			$rootTarget,$this->{imageDest}))
+			$sxml,$rootTarget,$this->{imageDest}))
 		) {
 			undef $kic;
 			if (! -d $checkBase) {
@@ -3332,7 +3332,7 @@ sub createImageSplit {
 		# Create boot image...
 		#------------------------------------------
 		if ((! $kic) || (! $kic -> createBootImage (
-			$rootTarget,$this->{imageDest}))
+			$sxml,$rootTarget,$this->{imageDest}))
 		) {
 			undef $kic;
 			if (! -d $checkBase) {

@@ -1339,6 +1339,24 @@ sub getDrivers {
 }
 
 #==========================================
+# getBootProfile
+#------------------------------------------
+sub getBootProfile {
+	my $this = shift;
+	my $type = $this->{selectedType}->{type};
+	return $type -> getBootProfile();
+}
+
+#==========================================
+# getBootKernel
+#------------------------------------------
+sub getBootKernel {
+	my $this = shift;
+	my $type = $this->{selectedType}->{type};
+	return $type -> getBootKernel();
+}
+
+#==========================================
 # getDUDArchitectures
 #------------------------------------------
 sub getDUDArchitectures {
@@ -5268,6 +5286,32 @@ sub getImageID {
 		return $code;
 	}
 	return 0;
+}
+
+#==========================================
+# setBootProfiles
+#------------------------------------------
+sub setBootProfiles {
+	my $this = shift;
+	my $bootprofile = shift;
+	my $bootkernel  = shift;
+	my $type = $this->{selectedType}->{type};
+	my $name = $type->getTypeName();
+	if ($name ne 'cpio') {
+		return;
+	}
+	my @list = ('kiwi_default');
+	if (($bootprofile) && ($bootprofile ne 'default')) {
+		push @list, split (/,/,$bootprofile);
+	}
+	if ($bootkernel) {
+		push @list, split (/,/,$bootkernel);
+	} else {
+		# apply 'std' kernel profile required for boot images
+		push @list, "std";
+	}
+	$this->{selectedProfiles} = \@list;
+	return $this;
 }
 
 #==========================================
