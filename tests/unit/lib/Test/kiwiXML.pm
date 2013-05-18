@@ -4912,31 +4912,6 @@ sub test_getConfiguredTypeNames {
 }
 
 #==========================================
-# test_getDefaultPrebuiltDir_legacy
-#------------------------------------------
-sub test_getDefaultPrebuiltDir_legacy {
-	# ...
-	# Verify proper return of getDefaultPrebuiltDir_legacy method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getDefaultPrebuiltDir_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('/work/kiwibootimgs', $value);
-	return;
-}
-
-#==========================================
 # test_getDeleteList_legacy
 #------------------------------------------
 sub test_getDeleteList_legacy {

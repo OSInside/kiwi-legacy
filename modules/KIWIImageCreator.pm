@@ -118,6 +118,14 @@ sub initialize {
 }
 
 #==========================================
+# getBootImageName
+#------------------------------------------
+sub getBootImageName {
+	my $this = shift;
+	return $this->{bootImageName};
+}
+
+#==========================================
 # prepareBootImage
 #------------------------------------------
 sub prepareBootImage {
@@ -173,10 +181,66 @@ sub prepareBootImage {
 	if (! $configDir) {
 		return;
 	}
+	#==========================================
+	# Read boot image description
+	#------------------------------------------
 	$kiwi -> info ("--> Prepare boot image (initrd)...\n");
 	my $bootXml = KIWIXML -> new(
 		$configDir,undef,undef,$cmdL,$changeset
 	);
+	if (! $bootXml) {
+		return;
+	}
+	#==========================================
+	# Store boot image name
+	#------------------------------------------
+	my $bootImageName = KIWIGlobals	-> instance()
+		-> generateBuildImageName ($bootXml);
+	$this->{bootImageName} = $bootImageName;
+	#==========================================
+	# Check for prebuild boot image
+	#------------------------------------------
+	my $pblt = $systemXML -> getImageType() -> getCheckPrebuilt();
+	if (($pblt) && ($pblt eq "true")) {
+		$kiwi -> info ("Checking for pre-built boot image");
+		my $lookup = $configDir."-prebuilt/";
+		my $prebuiltPath = $cmdL -> getPrebuiltBootImagePath();
+		if (defined $prebuiltPath) {
+			$lookup = $prebuiltPath."/";
+		} else {
+			my $defaultPath = $systemXML
+				-> getPreferences() -> getDefaultPreBuilt();
+			if ($defaultPath) {
+				$lookup =  $defaultPath . '/';
+			}
+		}
+		my $pinitrd = $lookup.$bootImageName.".gz";
+		my $psplash;
+		if (-f $lookup.$bootImageName.'.spl') {
+			$psplash = $lookup.$bootImageName.'.spl';
+		}
+		my $plinux  = $lookup.$bootImageName.".kernel";
+		if (! -f $pinitrd) {
+			$pinitrd = $lookup.$bootImageName;
+		}
+		if ((! -f $pinitrd) || (! -f $plinux)) {
+			$kiwi -> skipped();
+			$kiwi -> info ("Can't find pre-built boot image in $lookup");
+			$kiwi -> skipped();
+		} else {
+			$kiwi -> done();
+			$kiwi -> info ("Found pre-built boot image, return early");
+			$this->{prebuilt} = basename $pinitrd;
+			$this->{psplash}  = $psplash;
+			$this->{pinitrd}  = $pinitrd;
+			$this->{plinux}   = $plinux;
+			$kiwi -> done();
+			return $this;
+		}
+	}
+	#==========================================
+	# Inherit system XML data to the boot
+	#------------------------------------------
 	my $status = $bootXml -> discardReplacableRepos();
 	if (! $status) {
 		return;
@@ -243,6 +307,9 @@ sub upgradeImage {
 	if (! $isValid) {
 		return;
 	}
+	#==========================================
+	# Read system image description
+	#------------------------------------------
 	$kiwi -> info ("Reading image description [Upgrade]...\n");
 	my $buildProfs = $this -> {buildProfiles};
 	my $xml = KIWIXML -> new(
@@ -306,6 +373,9 @@ sub prepareImage {
 	if (! $isValid) {
 		return;
 	}
+	#==========================================
+	# Read system image description
+	#------------------------------------------
 	$kiwi -> info ("Reading image description [Prepare]...\n");
 	my $buildProfs = $this -> {buildProfiles};
 	my $xml = KIWIXML -> new(
@@ -378,6 +448,46 @@ sub createBootImage {
 	my $ignore       = $this->{ignoreRepos};
 	my $cmdL         = $this->{cmdL};
 	#==========================================
+	# Check for prebuild boot image
+	#------------------------------------------
+	if ($this->{prebuilt}) {
+		$kiwi -> info ("Copying pre-built boot image to destination");
+		my $lookup = $this->{prebuilt};
+		if (-f "$destination/$lookup") {
+			#==========================================
+			# Already exists in destination dir
+			#------------------------------------------
+			$kiwi -> done();
+		} else {
+			#==========================================
+			# Needs to be copied...
+			#------------------------------------------
+			if ($this->{psplash}) {
+				qxx ("cp -a $this->{psplash} $destination 2>&1");
+			}
+			my $data = qxx ("cp -a $this->{pinitrd} $destination 2>&1");
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed();
+				$kiwi -> error ("Can't copy pre-built initrd: $data");
+				$kiwi -> failed();
+				return;
+			} else {
+				$data = qxx ("cp -a $this->{plinux}* $destination 2>&1");
+				$code = $? >> 8;
+				if ($code != 0) {
+					$kiwi -> failed();
+					$kiwi -> error ("Can't copy pre-built kernel: $data");
+					$kiwi -> failed();
+					return;
+				} else {
+					$kiwi -> done();
+				}
+			}
+		}
+		return $this;
+	}
+	#==========================================
 	# Setup the image XML description
 	#------------------------------------------
 	my $locator = KIWILocator -> instance();
@@ -398,6 +508,9 @@ sub createBootImage {
 	if (! $this -> __checkImageIntegrity() ) {
 		return;
 	}
+	#==========================================
+	# Read boot image description
+	#------------------------------------------
 	$kiwi -> info ("--> Create boot image (initrd)...\n");
 	my $xml = KIWIXML -> new(
 		$configDir,"cpio",undef,$cmdL
@@ -405,6 +518,9 @@ sub createBootImage {
 	if (! defined $xml) {
 		return;
 	}
+	#==========================================
+	# Inherit system XML data to the boot
+	#------------------------------------------
 	$xml -> setBootProfiles (
 		$systemXML -> getBootProfile(),
 		$systemXML -> getBootKernel()

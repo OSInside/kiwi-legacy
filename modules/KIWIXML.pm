@@ -6146,22 +6146,6 @@ sub getBootTheme_legacy {
 }
 
 #==========================================
-# getDefaultPrebuiltDir_legacy
-#------------------------------------------
-sub getDefaultPrebuiltDir_legacy {
-	# ...
-	# Return the path of the default location for pre-built boot images
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ('defaultprebuilt');
-	my $imgDir = $node -> getElementsByTagName ('defaultprebuilt');
-	if (! $imgDir) {
-		return;
-	}
-	return "$imgDir";
-}
-
-#==========================================
 # getDeleteList_legacy
 #------------------------------------------
 sub getDeleteList_legacy {

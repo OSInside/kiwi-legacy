@@ -483,137 +483,6 @@ sub updateDescription {
 }
 
 #==========================================
-# checkAndSetupPrebuiltBootImage
-#------------------------------------------
-sub checkAndSetupPrebuiltBootImage {
-	# ...
-	# check the xml if a prebuild boot image was requested.
-	# if yes check if that boot image exists and if yes
-	# copy it to the destination directory for this build
-	# ---
-	my $this = shift;
-	my $ixml = shift;
-	my $kiwi = $this->{kiwi};
-	my $cmdL = $this->{cmdL};
-	my $idest= $cmdL->getImageIntermediateTargetDir();
-	my %type = %{$ixml->getImageTypeAndAttributes_legacy()};
-	my $pblt = $type{checkprebuilt};
-	my $boot = $type{boot};
-	my $ok   = 0;
-	my $bootpath = $boot;
-	if (($boot !~ /^\//) && (! -d $boot)) {
-		$bootpath = $this->{gdata}->{System}."/".$boot;
-	}
-	#==========================================
-	# open boot image XML object
-	#------------------------------------------
-	my $locator = KIWILocator -> instance();
-	my $controlFile = $locator -> getControlFile ($bootpath);
-	if (! $controlFile) {
-		return;
-	}
-	my $validator = KIWIXMLValidator -> new (
-		$controlFile,
-		$this->{gdata}->{Revision},
-		$this->{gdata}->{Schema},
-		$this->{gdata}->{SchemaCVT}
-	);
-	my $isValid = $validator ? $validator -> validate() : undef;
-	if (! $isValid) {
-		return;
-	}
-	my $bxml = KIWIXML -> new ($bootpath,undef,undef,$cmdL );
-	if (! $bxml) {
-		return;
-	}
-	my $bootImageName = KIWIGlobals
-		-> instance()
-		-> generateBuildImageName($bxml);
-	undef $bxml;
-	$kiwi -> info ("Checking for pre-built boot image");
-	#==========================================
-	# is it requested...
-	#------------------------------------------
-	if ((! $pblt) || ($pblt eq "false")) {
-		$kiwi -> notset();
-		return ($bootImageName,0);
-	}
-	#==========================================
-	# check path names for boot image
-	#------------------------------------------
-	my $lookup = $bootpath."-prebuilt/";
-	my $prebuiltPath = $cmdL -> getPrebuiltBootImagePath();
-	if (defined $prebuiltPath) {
-		$lookup = $prebuiltPath."/";
-	} else {
-		my $defaultPath = $ixml -> getDefaultPrebuiltDir_legacy();
-		if ($defaultPath) {
-			$lookup =  $defaultPath . '/';
-		}
-	}
-	my $pinitrd = $lookup.$bootImageName.".gz";
-	my $psplash;
-	if (-f $lookup.$bootImageName.'.spl') {
-		$psplash = $lookup.$bootImageName.'.spl';
-	}
-	my $plinux  = $lookup.$bootImageName.".kernel";
-	if (! -f $pinitrd) {
-		$pinitrd = $lookup.$bootImageName;
-	}
-	if ((! -f $pinitrd) || (! -f $plinux)) {
-		$kiwi -> skipped();
-		$kiwi -> info ("Can't find pre-built boot image in $lookup");
-		$kiwi -> skipped();
-		$ok = 0;
-	} else {
-		$kiwi -> done();
-		$kiwi -> info ("Copying pre-built boot image to destination");
-		my $lookup = basename $pinitrd;
-		if (-f "$idest/$lookup") {
-			#==========================================
-			# Already exists in destination dir
-			#------------------------------------------
-			$kiwi -> done();
-			$ok = 1;
-		} else {
-			#==========================================
-			# Needs to be copied...
-			#------------------------------------------
-			if ($psplash) {
-				qxx ("cp -a $psplash $idest 2>&1");
-			}
-			my $data = qxx ("cp -a $pinitrd $idest 2>&1");
-			my $code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> failed();
-				$kiwi -> error ("Can't copy pre-built initrd: $data");
-				$kiwi -> failed();
-				$ok = 0;
-			} else {
-				$data = qxx ("cp -a $plinux* $idest 2>&1");
-				$code = $? >> 8;
-				if ($code != 0) {
-					$kiwi -> failed();
-					$kiwi -> error ("Can't copy pre-built kernel: $data");
-					$kiwi -> failed();
-					$ok = 0;
-				} else {
-					$kiwi -> done();
-					$ok = 1;
-				}
-			}
-		}
-	}
-	#==========================================
-	# setup return for ok
-	#------------------------------------------
-	if (! $ok) {
-		return ($bootImageName,0);
-	}
-	return ($bootImageName,1);
-}
-
-#==========================================
 # setupOverlay
 #------------------------------------------
 sub setupOverlay {
@@ -1136,6 +1005,73 @@ sub createImageCPIO {
 }
 
 #==========================================
+# createImageBootImage
+#------------------------------------------
+sub createImageBootImage {
+	my $this       = shift;
+	my $text       = shift;
+	my $boot       = shift;
+	my $sxml       = shift;
+	my $idest      = shift;
+	my $checkBase  = shift;
+	my $kiwi       = $this->{kiwi};
+	#==========================================
+	# Prepare/Create boot image
+	#------------------------------------------
+	$kiwi -> info ("--> Creating $text boot image: $boot...\n");
+	#==========================================
+	# Setup changeset to be used by boot image
+	#------------------------------------------
+	my %XMLChangeSet = $this -> updateDescription ($sxml);
+	#==========================================
+	# Create tmp dir for boot image creation
+	#------------------------------------------
+	my $tmpdir = qxx ("mktemp -q -d $idest/boot-$text.XXXXXX");
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	chomp $tmpdir;
+	push @{$this->{tmpdirs}},$tmpdir;
+	#==========================================
+	# Prepare boot image...
+	#------------------------------------------
+	my $rootTarget = "$tmpdir/kiwi-".$text."boot-$$";
+	my $kic = KIWIImageCreator -> new ($this->{cmdL});
+	if ((! $kic) ||	(! $kic -> prepareBootImage (
+		$sxml,$rootTarget,$this->{imageTree},\%XMLChangeSet))
+	) {
+		undef $kic;
+		if (! -d $checkBase) {
+			qxx ("rm -rf $tmpdir");
+		}
+		return;
+	}
+	#==========================================
+	# Create boot image...
+	#------------------------------------------
+	if ((! $kic) || (! $kic -> createBootImage (
+		$sxml,$rootTarget,$this->{imageDest}))
+	) {
+		undef $kic;
+		if (! -d $checkBase) {
+			qxx ("rm -rf $tmpdir");
+		}
+		return;
+	}
+	#==========================================
+	# Clean up tmp directory
+	#------------------------------------------
+	qxx ("rm -rf $tmpdir");
+	#==========================================
+	# Return boot image name
+	#------------------------------------------
+	return $kic -> getBootImageName();
+}
+
+#==========================================
 # createImageRootAndBoot
 #------------------------------------------
 sub createImageRootAndBoot {
@@ -1159,7 +1095,6 @@ sub createImageRootAndBoot {
 	my $imageTree  = $this->{imageTree};
 	my $baseSystem = $this->{baseSystem};
 	my $treeAccess = 1;
-	my @bootdata;
 	my $type;
 	my $boot;
 	my %result;
@@ -1271,71 +1206,24 @@ sub createImageRootAndBoot {
 	#==========================================
 	# Prepare/Create boot image
 	#------------------------------------------
-	$kiwi -> info ("--> Creating $text boot image: $boot...\n");
-	@bootdata = $this -> checkAndSetupPrebuiltBootImage ($sxml);
-	if (! @bootdata) {
+	my $bname = $this -> createImageBootImage (
+		$text,$boot,$sxml,$idest,$checkBase
+	);
+	if (! $bname) {
 		return;
-	}
-	if ($bootdata[1] == 0) {
-		#==========================================
-		# Setup changeset to be used by boot image
-		#------------------------------------------
-		my %XMLChangeSet = $this -> updateDescription ($sxml);
-		#==========================================
-		# Create tmp dir for boot image creation
-		#------------------------------------------
-		my $tmpdir = qxx ("mktemp -q -d $idest/boot-$text.XXXXXX");
-		my $result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		chomp $tmpdir;
-		push @{$this->{tmpdirs}},$tmpdir;
-		#==========================================
-		# Prepare boot image...
-		#------------------------------------------
-		my $rootTarget = "$tmpdir/kiwi-".$text."boot-$$";
-		my $kic = KIWIImageCreator -> new($cmdL);
-		if ((! $kic) ||	(! $kic -> prepareBootImage (
-			$sxml,$rootTarget,$this->{imageTree},\%XMLChangeSet))
-		) {
-			undef $kic;
-			if (! -d $checkBase) {
-				qxx ("rm -rf $tmpdir");
-			}
-			return;
-		}
-		#==========================================
-		# Create boot image...
-		#------------------------------------------
-		if ((! $kic) || (! $kic -> createBootImage (
-			$sxml,$rootTarget,$this->{imageDest}))
-		) {
-			undef $kic;
-			if (! -d $checkBase) {
-				qxx ("rm -rf $tmpdir");
-			}
-			return;
-		}
-		#==========================================
-		# Clean up tmp directory
-		#------------------------------------------
-		qxx ("rm -rf $tmpdir");
 	}
 	#==========================================
 	# setup initrd name
 	#------------------------------------------
-	my $initrd = $idest."/".$bootdata[0].".gz";
+	my $initrd = $idest."/".$bname.".gz";
 	if (! -f $initrd) {
-		$initrd = $idest."/".$bootdata[0];
+		$initrd = $idest."/".$bname;
 	}
 	#==========================================
 	# Check boot and system image kernel
 	#------------------------------------------
 	if ($cmdL->getCheckKernel()) {
-		if (! $this -> checkKernel ($initrd,$imageTree,$bootdata[0])) {
+		if (! $this -> checkKernel ($initrd,$imageTree,$bname)) {
 			return;
 		}
 	}
@@ -1350,10 +1238,9 @@ sub createImageRootAndBoot {
 	#==========================================
 	# Store meta data for subsequent calls
 	#------------------------------------------
-	$result{systemImage} = KIWIGlobals
-		-> instance()
-		-> generateBuildImageName($sxml);
-	$result{bootImage}   = $bootdata[0];
+	$result{systemImage} = KIWIGlobals -> instance()
+		-> generateBuildImageName ($sxml);
+	$result{bootImage}   = $bname;
 	if ($text eq "VMX") {
 		$result{format} = $stype{format};
 	}
@@ -1478,7 +1365,6 @@ sub createImageLiveCD {
 	my $idest= $cmdL->getImageIntermediateTargetDir();
 	my $imageTree = $this->{imageTree};
 	my $baseSystem= $this->{baseSystem};
-	my @bootdata;
 	my $error;
 	my $data;
 	my $code;
@@ -1799,65 +1685,18 @@ sub createImageLiveCD {
 	#==========================================
 	# Prepare and Create ISO boot image
 	#------------------------------------------
-	$kiwi -> info ("--> Creating ISO boot image: $boot...\n");
-	@bootdata = $this -> checkAndSetupPrebuiltBootImage ($sxml);
-	if (! @bootdata) {
+	my $bname = $this -> createImageBootImage (
+		'iso',$boot,$sxml,$idest,$checkBase
+	);
+	if (! $bname) {
 		return;
-	}
-	if ($bootdata[1] == 0) {
-		#==========================================
-		# Setup changeset to be used by boot image
-		#------------------------------------------
-		my %XMLChangeSet = $this -> updateDescription ($sxml);
-		#==========================================
-		# Create tmp dir for boot image creation
-		#------------------------------------------
-		my $tmpdir = qxx ("mktemp -q -d $idest/boot-iso.XXXXXX");
-		my $result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		chomp $tmpdir;
-		push @{$this->{tmpdirs}},$tmpdir;
-		#==========================================
-		# Prepare boot image...
-		#------------------------------------------
-		my $rootTarget = "$tmpdir/kiwi-isoboot-$$";
-		my $kic = KIWIImageCreator -> new($cmdL);
-		if ((! $kic) || (! $kic -> prepareBootImage (
-			$sxml,$rootTarget,$this->{imageTree},\%XMLChangeSet))
-		) {
-			undef $kic;
-			if (! -d $checkBase) {
-				qxx ("rm -rf $tmpdir");
-			}
-			return;
-		}
-		#==========================================
-		# Create boot image...
-		#------------------------------------------
-		if ((! $kic) || (! $kic -> createBootImage (
-			$sxml,$rootTarget,$this->{imageDest}))
-		) {
-			undef $kic;
-			if (! -d $checkBase) {
-				qxx ("rm -rf $tmpdir");
-			}
-			return;
-		}
-		#==========================================
-		# Clean up tmp directory
-		#------------------------------------------
-		qxx ("rm -rf $tmpdir");
 	}
 	#==========================================
 	# setup initrd/kernel names
 	#------------------------------------------
-	my $pinitrd = $idest."/".$bootdata[0].".gz";
-	my $plinux  = $idest."/".$bootdata[0].".kernel";
-	my $pxboot  = glob ($idest."/".$bootdata[0]."*xen.gz");
+	my $pinitrd = $idest."/".$bname.".gz";
+	my $plinux  = $idest."/".$bname.".kernel";
+	my $pxboot  = glob ($idest."/".$bname."*xen.gz");
 	if (($pxboot) && (-f $pxboot)) {
 		$isxen = 1;
 	}
@@ -1865,7 +1704,7 @@ sub createImageLiveCD {
 	# Check boot and system image kernel
 	#------------------------------------------
 	if ($cmdL->getCheckKernel()) {
-		if (! $this -> checkKernel ($pinitrd,$imageTree,$bootdata[0])) {
+		if (! $this -> checkKernel ($pinitrd,$imageTree,$bname)) {
 			return;
 		}
 	}
@@ -2694,7 +2533,6 @@ sub createImageSplit {
 	my $FSTypeRO;
 	my $error;
 	my $ok;
-	my @bootdata;
 	my $imageTreeRW;
 	my $imageTreeTmp;
 	my $mbytesro;
@@ -3288,75 +3126,28 @@ sub createImageSplit {
 	if (! defined $boot) {
 		return $this;
 	}
+	$imageTree = $this->{imageTree};
 	#==========================================
 	# Prepare and Create boot image
 	#------------------------------------------
-	$imageTree = $this->{imageTree};
-	$kiwi -> info ("--> Creating boot image: $boot...\n");
-	@bootdata = $this -> checkAndSetupPrebuiltBootImage ($sxml);
-	if (! @bootdata) {
+	my $bname = $this -> createImageBootImage (
+		'split',$boot,$sxml,$idest,$checkBase
+	);
+	if (! $bname) {
 		return;
-	}
-	if ($bootdata[1] == 0) {
-		#==========================================
-		# Setup changeset to be used by boot image
-		#------------------------------------------
-		my %XMLChangeSet = $this -> updateDescription ($sxml);
-		#==========================================
-		# Create tmp dir for boot image creation
-		#------------------------------------------
-		my $tmpdir = qxx ("mktemp -q -d $idest/boot-split.XXXXXX");
-		my $result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		chomp $tmpdir;
-		push @{$this->{tmpdirs}},$tmpdir;
-		#==========================================
-		# Prepare boot image...
-		#------------------------------------------
-		my $rootTarget = "$tmpdir/kiwi-splitboot-$$";
-		my $kic = KIWIImageCreator -> new($cmdL);
-		if ((! $kic) || (! $kic -> prepareBootImage (
-			$sxml,$rootTarget,$this->{imageTree},\%XMLChangeSet))
-		) {
-			undef $kic;
-			if (! -d $checkBase) {
-				qxx ("rm -rf $tmpdir");
-			}
-			return;
-		}
-		#==========================================
-		# Create boot image...
-		#------------------------------------------
-		if ((! $kic) || (! $kic -> createBootImage (
-			$sxml,$rootTarget,$this->{imageDest}))
-		) {
-			undef $kic;
-			if (! -d $checkBase) {
-				qxx ("rm -rf $tmpdir");
-			}
-			return;
-		}
-		#==========================================
-		# Clean up tmp directory
-		#------------------------------------------
-		qxx ("rm -rf $tmpdir");
 	}
 	#==========================================
 	# setup initrd name
 	#------------------------------------------
-	my $initrd = $idest."/".$bootdata[0].".gz";
+	my $initrd = $idest."/".$bname.".gz";
 	if (! -f $initrd) {
-		$initrd = $idest."/".$bootdata[0];
+		$initrd = $idest."/".$bname;
 	}
 	#==========================================
 	# Check boot and system image kernel
 	#------------------------------------------
 	if ($cmdL->getCheckKernel()) {
-		if (! $this -> checkKernel ($initrd,$imageTree,$bootdata[0])) {
+		if (! $this -> checkKernel ($initrd,$imageTree,$bname)) {
 			return;
 		}
 	}
@@ -3374,7 +3165,7 @@ sub createImageSplit {
 	$name->{systemImage} = KIWIGlobals
 		-> instance()
 		-> generateBuildImageName($sxml);
-	$name->{bootImage}   = $bootdata[0];
+	$name->{bootImage}   = $bname;
 	$name->{format}      = $type{format};
 	if ($boot =~ /vmxboot|oemboot/) {
 		#==========================================
