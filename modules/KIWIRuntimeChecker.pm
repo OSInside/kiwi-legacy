@@ -647,13 +647,13 @@ sub __checkSystemDiskData {
 					$kiwi -> failed();
 					return;
 				}
-				if ($size) {
+				if (($size) && ($size ne 'all')) {
 					$lvsize = qxx (
 						"du -s --block-size=1 $tree/$path | cut -f1"
 					);
 					chomp $lvsize;
 					$lvsize = sprintf ("%.f",$lvsize / $MEGABYTE);
-					if ($lvsize > $size) {
+					if (($size ne 'all') && ($lvsize > $size)) {
 						$msg = "Required size for $name [ $lvsize MB ] ";
 						$msg.= "is larger than specified size [ $size ] MB";
 						$kiwi -> error ($msg);
