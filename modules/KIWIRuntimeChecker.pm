@@ -460,7 +460,9 @@ sub __checkOEMsizeSettingSufficient {
 	if ($oemConf) {
 		my $systemSize = $oemConf -> getSystemSize();
 		if ($systemSize) {
-			my $rootsize = qxx ("du -s --block-size=1 $tree | cut -f1");
+			my $rootsize = qxx (
+				"du -s --apparent-size --block-size=1 $tree | cut -f1"
+			);
 			chomp $rootsize;
 			$rootsize = sprintf ("%.f",$rootsize / $MEGABYTE);
 			if ($rootsize > $systemSize) {
@@ -638,6 +640,7 @@ sub __checkSystemDiskData {
 				my $name = $sysDisk -> getVolumeName ($id);
 				my $size = $sysDisk -> getVolumeSize ($id);
 				my $lvsize = 0;
+				my $lvpath;
 				my $path = $name;
 				$path =~ s/_/\//g;
 				if (! -d "$tree/$path") {
@@ -648,8 +651,9 @@ sub __checkSystemDiskData {
 					return;
 				}
 				if (($size) && ($size ne 'all')) {
+					$lvpath = "$tree/$path";
 					$lvsize = qxx (
-						"du -s --block-size=1 $tree/$path | cut -f1"
+						"du -s --apparent-size --block-size=1 $lvpath | cut -f1"
 					);
 					chomp $lvsize;
 					$lvsize = sprintf ("%.f",$lvsize / $MEGABYTE);
@@ -681,7 +685,9 @@ sub __checkSystemDiskData {
 		return 1;
 	}
 	if ($needFree) {
-		my $rootsize = qxx ("du -s --block-size=1 $tree | cut -f1");
+		my $rootsize = qxx (
+			"du -s --apparent-size --block-size=1 $tree | cut -f1"
+		);
 		chomp $rootsize;
 		$rootsize = sprintf ("%.f",$rootsize / $MEGABYTE);
 		my $freesize = $systemSize - $rootsize;

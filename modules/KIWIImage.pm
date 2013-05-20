@@ -2849,7 +2849,9 @@ sub createImageSplit {
 	# Embed rootfs meta data into ro extend
 	#------------------------------------------
 	$minInodes = qxx ("find $imageTreeTmp | wc -l");
-	$sizeBytes = qxx ("du -s --block-size=1 $imageTreeTmp | cut -f1");
+	$sizeBytes = qxx (
+		"du -s --apparent-size --block-size=1 $imageTreeTmp | cut -f1"
+	);
 	$sizeBytes+= $minInodes * $inodesize;
 	$sizeBytes = sprintf ("%.0f", $sizeBytes);
 	$minInodes*= 2;
@@ -4674,7 +4676,9 @@ sub getSize {
 	my $cmdL    = $this->{cmdL};
 	my $xml     = $this->{xml};
 	my $mini    = qxx ("find $extend | wc -l"); chomp $mini;
-	my $minsize = qxx ("du -s --block-size=1 $extend | cut -f1");
+	my $minsize = qxx (
+		"du -s --apparent-size --block-size=1 $extend | cut -f1"
+	);
 	my $spare   = 100 * 1024 * 1024;
 	my $files   = $mini;
 	my $fsopts  = $cmdL -> getFilesystemOptions();

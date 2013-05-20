@@ -332,8 +332,7 @@ sub new {
 		my $sizeBytes;
 		my $minInodes;
 		my $sizeXMLBytes = 0;
-		my $spare        = 100 * 1024 * 1024; # 100M free
-		my $fsoverhead   = 1.4;
+		my $fsoverhead   = 1.2;
 		my $fsopts       = $cmdL -> getFilesystemOptions();
 		my $inodesize    = $fsopts->[1];
 		my $inoderatio   = $fsopts->[2];
@@ -345,7 +344,9 @@ sub new {
 		if (-d $system) {
 			# System is specified as a directory...
 			$minInodes = qxx ("find $system | wc -l");
-			$sizeBytes = qxx ("du -s --block-size=1 $system | cut -f1");
+			$sizeBytes = qxx (
+				"du -s --apparent-size --block-size=1 $system | cut -f1"
+			);
 			$sizeBytes*= $fsoverhead;
 			chomp $minInodes;
 			chomp $sizeBytes;
@@ -353,13 +354,11 @@ sub new {
 			$sizeBytes+= $minInodes * $inodesize;
 			$sizeBytes+= $kernelSize;
 			$sizeBytes+= $initrdSize;
-			$sizeBytes+= $spare;
 		} else {
 			# system is specified as a file...
 			$sizeBytes = KIWIGlobals -> instance() -> isize ($system);
 			$sizeBytes+= $kernelSize;
 			$sizeBytes+= $initrdSize;
-			$sizeBytes+= $spare;
 		}
 		#==========================================
 		# Store optional size setup from XML
@@ -1704,8 +1703,9 @@ sub setupBootDisk {
 				#==========================================
 				# calculate size required by volume
 				#------------------------------------------
+				my $lvpath = "$system/$pname";
 				my $lvsize = qxx (
-					"du -s --block-size=1 $system/$pname | cut -f1"
+					"du -s --apparent-size --block-size=1 $lvpath | cut -f1"
 				);
 				chomp $lvsize;
 				$lvsize /= 1048576;
@@ -1717,7 +1717,7 @@ sub setupBootDisk {
 					$spare = 30;
 				}
 				my $spare_on_volume = $spare;
-				my $serve_on_disk   = $spare;
+				my $serve_on_disk   = 30;
 				#==========================================
 				# is requested size absolute or relative
 				#------------------------------------------
