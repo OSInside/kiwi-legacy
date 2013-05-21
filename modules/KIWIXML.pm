@@ -7020,6 +7020,8 @@ sub getInstSourceFile_legacy {
 		}
 		if ($redirect =~ /proxy=(.*?)\&/) {
 			$proxy="$1";
+		} elsif ($redirect =~ /proxy=(.*)/) {
+			$proxy="$1";
 		}
 		if ($redirect =~ /proxyuser=(.*)\&proxypass=(.*)/) {
 			$user=$1;

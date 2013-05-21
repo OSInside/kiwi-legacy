@@ -531,20 +531,20 @@ sub provideMediaLicense {
 	# to be the first one according to the XML description
 	# ----
 	foreach my $alias (@repolist) {
-		my $repo = $alias;
+		my $repo;
 		foreach my $opt (@{$source{public}{$alias}}) {
 			next if ! $opt;
-			if ($opt =~ /(.*?)=(.*)/) {
+			if ($opt =~ /(.*?)=['\"](.*)['\"]/) {
 				my $key = $1;
 				my $val = $2;
-				if (($key eq "baseurl") || ($key eq "path")) {
-					if ($val =~ /^'\//) {
-						$val =~ s/^'(.*)'$/"file:\/\/$1"/
-					}
+				$repo = $val;
+				if ($val =~ /^\//) {
+					$val = "file://".$val;
 					$repo = $val;
 				}
 			}
 		}
+		next if ! $repo;
 		KIWIXML::getInstSourceFile_legacy (
 			$repo."/".$license,$root."/".$license
 		);
