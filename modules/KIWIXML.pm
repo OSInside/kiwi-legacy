@@ -7018,11 +7018,19 @@ sub getInstSourceFile_legacy {
 			$redirect = $1;
 			$url.=$2;
 		}
-		if ($redirect =~ /proxy=(.*?)\&/) {
-			$proxy="$1";
-		} elsif ($redirect =~ /proxy=(.*)/) {
-			$proxy="$1";
+		# get proxy url:
+		# \bproxy makes sure it does not pick up "otherproxy=unrelated"
+		# (?=&|$) makes sure the captured substring is followed by an
+		# ampersand or the end-of-string
+		# ----
+		if ($redirect =~ /\bproxy=(.*?)(?=&|$)/) {
+			$proxy = "$1";
 		}
+		# remove locator string e.g http://
+		if ($proxy) {
+			$proxy =~ s/^.*\/\///;
+		}
+		# extract credentials user and password
 		if ($redirect =~ /proxyuser=(.*)\&proxypass=(.*)/) {
 			$user=$1;
 			$pass=$2;
