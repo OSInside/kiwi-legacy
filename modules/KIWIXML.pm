@@ -7014,6 +7014,10 @@ sub getInstSourceFile_legacy {
 	if ($url =~ /^(.*)\?(.*)$/) {
 		$url=$1;
 		my $redirect=$2;
+		if ($redirect =~ /(.*)\/(.*)?$/) {
+			$redirect = $1;
+			$url.=$2;
+		}
 		if ($redirect =~ /proxy=(.*?)\&/) {
 			$proxy="$1";
 		}
