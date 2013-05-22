@@ -460,10 +460,7 @@ sub __checkOEMsizeSettingSufficient {
 	if ($oemConf) {
 		my $systemSize = $oemConf -> getSystemSize();
 		if ($systemSize) {
-			my $rootsize = qxx (
-				"du -s --apparent-size --block-size=1 $tree | cut -f1"
-			);
-			chomp $rootsize;
+			my $rootsize = KIWIGlobals -> instance() -> dsize ($tree);
 			$rootsize = sprintf ("%.f",$rootsize / $MEGABYTE);
 			if ($rootsize > $systemSize) {
 				my $msg;
@@ -652,10 +649,7 @@ sub __checkSystemDiskData {
 				}
 				if (($size) && ($size ne 'all')) {
 					$lvpath = "$tree/$path";
-					$lvsize = qxx (
-						"du -s --apparent-size --block-size=1 $lvpath | cut -f1"
-					);
-					chomp $lvsize;
+					$lvsize = KIWIGlobals -> instance() -> dsize ($lvpath);
 					$lvsize = sprintf ("%.f",$lvsize / $MEGABYTE);
 					if (($size ne 'all') && ($lvsize > $size)) {
 						$msg = "Required size for $name [ $lvsize MB ] ";
@@ -685,10 +679,7 @@ sub __checkSystemDiskData {
 		return 1;
 	}
 	if ($needFree) {
-		my $rootsize = qxx (
-			"du -s --apparent-size --block-size=1 $tree | cut -f1"
-		);
-		chomp $rootsize;
+		my $rootsize = KIWIGlobals -> instance() -> dsize ($tree);
 		$rootsize = sprintf ("%.f",$rootsize / $MEGABYTE);
 		my $freesize = $systemSize - $rootsize;
 		if ($freesize < $needFree) {

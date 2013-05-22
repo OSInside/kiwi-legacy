@@ -344,9 +344,7 @@ sub new {
 		if (-d $system) {
 			# System is specified as a directory...
 			$minInodes = qxx ("find $system | wc -l");
-			$sizeBytes = qxx (
-				"du -s --apparent-size --block-size=1 $system | cut -f1"
-			);
+			$sizeBytes = KIWIGlobals -> instance() -> dsize ($system);
 			$sizeBytes*= $fsoverhead;
 			chomp $minInodes;
 			chomp $sizeBytes;
@@ -1704,10 +1702,7 @@ sub setupBootDisk {
 				# calculate size required by volume
 				#------------------------------------------
 				my $lvpath = "$system/$pname";
-				my $lvsize = qxx (
-					"du -s --apparent-size --block-size=1 $lvpath | cut -f1"
-				);
-				chomp $lvsize;
+				my $lvsize = KIWIGlobals -> instance() -> dsize ($lvpath);
 				$lvsize /= 1048576;
 				#==========================================
 				# use 20% (min 30M) spare space per volume

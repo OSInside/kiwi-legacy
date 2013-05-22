@@ -517,6 +517,33 @@ sub isize {
 }
 
 #==========================================
+# dsize
+#------------------------------------------
+sub dsize {
+	# /.../
+	# implements a size function which calculates the size of
+	# all entities in a directory using the 'du' utility
+	# ---
+	my $this = shift;
+	my $dir  = shift;
+	if (! defined $dir) {
+		return 0;
+	}
+	my $size1 = KIWIQX::qxx (
+		"du -s --block-size=1 $dir | cut -f1"
+	);
+	chomp $size1;
+	my $size2 = KIWIQX::qxx (
+		"du -s --apparent-size --block-size=1 $dir | cut -f1"
+	);
+	chomp $size2;
+	if ($size1 > $size2) {
+		return $size1;
+	}
+	return $size2;
+}
+
+#==========================================
 # generateBuildImageName
 #------------------------------------------
 sub generateBuildImageName {
