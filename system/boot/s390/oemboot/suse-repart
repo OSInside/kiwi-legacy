@@ -85,6 +85,9 @@ function OEMRepartStandard {
 			swapsize + recoMByte + OEM_SYSTEMSIZE - diskRootMBytes
 		))
 	fi
+	if [ $minAddMBytes -lt 5 ];then
+		minAddMBytes=5
+	fi
 	#======================================
 	# 1) check repart operation
 	#--------------------------------------
@@ -266,6 +269,9 @@ function OEMRepartSplit {
 				swapsize + OEM_SYSTEMSIZE - diskRootMBytes
 			))
 		fi
+		if [ $minAddMBytes -lt 5 ];then
+			minAddMBytes=5
+		fi
 		#======================================
 		# 1) check repart operation
 		#--------------------------------------
@@ -401,6 +407,9 @@ function OEMRepartLVM {
 		minAddMBytes=$((
 			swapsize + recoMByte + OEM_SYSTEMSIZE - diskRootMBytes
 		))
+	fi
+	if [ $minAddMBytes -lt 5 ];then
+		minAddMBytes=5
 	fi
 	#======================================
 	# 1) check repart operation
