@@ -308,7 +308,7 @@ sub __checkLVMoemSizeSettings {
 		if ($volIDs) {
 			for my $id (@{$volIDs}) {
 				my $size = $sysDisk -> getVolumeSize ($id);
-				if ($size) {
+				if (($size) && ($size ne 'all')) {
 					$volSizes += $size;
 				}
 			}
