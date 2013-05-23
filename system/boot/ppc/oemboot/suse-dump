@@ -363,7 +363,7 @@ function OEMInstall {
 			losetup $loop $imageName
 		fi
 		loop=$(echo $loop | sed -e s@^/dev/@@)
-		if ! kpartx -a /dev/$loop;then
+		if ! kpartx -sa /dev/$loop;then
 			systemException \
 				"Loop setup for $instDisk failed" \
 			"reboot"
@@ -920,7 +920,7 @@ function OEMInstall {
 	if [ -z "$OEM_PARTITION_INSTALL" ];then
 		blockdev --rereadpt $imageDevice
 		if echo $imageDevice | grep -q "^\/dev\/ram";then
-			kpartx -a $imageDevice
+			kpartx -sa $imageDevice
 		fi
 		deviceTest=$(ddn $imageDevice 1)
 		if ! waitForStorageDevice $deviceTest;then
