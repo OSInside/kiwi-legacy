@@ -7296,7 +7296,7 @@ function luksOpen {
 			Echo "Try: $retry"
 			errorLogStop
 			luks_pass=$(runInteractive \
-				"--stdout --insecure --passwordbox "\"$TEXT_LUKS\"" 10 60"
+				"--insecure --passwordbox "\"$TEXT_LUKS\"" 10 60"
 			)
 			errorLogContinue
 		fi
@@ -7473,7 +7473,7 @@ function selectLanguage {
 			DIALOG_LANG=en_US
 		else
 			DIALOG_LANG=$(runInteractive \
-				"--stdout --timeout 10 --no-cancel \
+				"--timeout 10 --no-cancel \
 				 --backtitle \"$TEXT_TIMEOUT\" \
 				 --radiolist $title 20 40 10 $list"
 			)
@@ -7637,7 +7637,7 @@ function runInteractive {
 	hideSplash
 	local r=/tmp/rid
 	local code
-	echo "dialog $@ > /tmp/out" > $r
+	echo "dialog $@ 2> /tmp/out" > $r
 	echo "echo -n \$? > /tmp/out.exit" >> $r
 	if [ -e /dev/fb0 ] && which fbiterm &>/dev/null;then
 		setctsid $ELOG_EXCEPTION fbiterm -m $UFONT -- bash -i $r
