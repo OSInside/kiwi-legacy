@@ -96,7 +96,6 @@
 		<file name="gettext"/>
 		<file name="grep"/>
 		<file name="grub"/>
-		<file name="gptsync"/>
 		<file name="gzip"/>
 		<file name="halt"/>
 		<file name="hdparm"/>

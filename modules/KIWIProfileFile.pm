@@ -108,7 +108,6 @@ sub new {
 		kiwi_strip_delete
 		kiwi_strip_libs
 		kiwi_strip_tools
-		kiwi_syncMBR
 		kiwi_testing
 		kiwi_timezone
 		kiwi_type

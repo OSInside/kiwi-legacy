@@ -1626,27 +1626,6 @@ sub test_getSizeUnitDefault {
 }
 
 #==========================================
-# test_getSyncMBR
-#------------------------------------------
-sub test_getSyncMBR {
-    # ...
-    # Test the getSyncMBR method
-    # ---
-    my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = $this -> __getTypeObj();
-	my $sync = $typeDataObj -> getSyncMBR();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('true', $sync);
-	return;
-}
-
-#==========================================
 # test_getTypeName
 #------------------------------------------
 sub test_getTypeName {
@@ -1810,7 +1789,6 @@ sub test_getXMLElement{
 		. 'mdraid="striping" '
 		. 'primary="true" '
 		. 'ramonly="true" '
-        . 'syncMBR="true" '
 		. 'vga="0x344" '
 		. 'volid="myImg">'
 		. '<size additive="true" unit="M">16384</size>'
@@ -4698,95 +4676,6 @@ sub test_setSizeUnitNoArg {
 }
 
 #==========================================
-# test_setSyncMBR
-#------------------------------------------
-sub test_setSyncMBR {
-	# ...
-	# Test the setSyncMBR method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = $this -> __getTypeObj();
-	$typeDataObj = $typeDataObj -> setSyncMBR('false');
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_not_null($typeDataObj);
-	my $sync = $typeDataObj -> getSyncMBR();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $sync);
-	return;
-}
-
-#==========================================
-# test_setSyncMBRNoArg
-#------------------------------------------
-sub test_setSyncMBRNoArg {
-	# ...
-	# Test the setSyncMBR method with no argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = $this -> __getTypeObj();
-	my $res = $typeDataObj -> setSyncMBR();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_not_null($typeDataObj);
-	my $sync = $typeDataObj -> getSyncMBR();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $sync);
-	return;
-}
-
-#==========================================
-# test_setSyncMBRUnknownArg
-#------------------------------------------
-sub test_setSyncMBRUnknownArg {
-	# ...
-	# Test the setSyncMBR method with an unrecognized argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $typeDataObj = $this -> __getTypeObj();
-	my $res = $typeDataObj -> setSyncMBR('5');
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'KIWIXMLTypeData:setSyncMBR: unrecognized argument '
-		. 'expecting "true" or "false".';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	$this -> assert_null($res);
-	my $sync = $typeDataObj -> getSyncMBR();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('true', $sync);
-	return;
-}
-
-#==========================================
 # test_setTypeName
 #------------------------------------------
 sub test_setTypeName {
@@ -5048,7 +4937,6 @@ sub __getTypeObj {
 				size                   => '16384',
 				sizeadd                => 'true',
 				sizeunit               => 'M',
-                syncMBR                => 'true',
 				vga                    => '0x344',
 				volid                  => 'myImg'
 			);

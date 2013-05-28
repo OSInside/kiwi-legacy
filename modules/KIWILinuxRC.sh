@@ -897,8 +897,10 @@ function installBootLoaderGrub2 {
 	# ----
 	local confTool=grub2-mkconfig
 	local instTool=grub2-install
-	local confPath_grub=/boot/grub2/grub.cfg
-	local confPath_uefi=/boot/EFI/EFI/BOOT/grub.cfg
+	local confFile_grub_bios=/boot/grub2/grub.cfg
+	local confFile_grub_efi=/boot/grub2-efi/grub.cfg
+	local confFile_uefi=/boot/EFI/EFI/BOOT/grub.cfg
+	local confFile_grub=$confFile_grub_bios
 	local isEFI=0
 	#======================================
 	# check for EFI and mount EFI partition
@@ -916,7 +918,7 @@ function installBootLoaderGrub2 {
 	#--------------------------------------
 	if [ $isEFI -eq 1 ];then
 		which grub2-efi-mkconfig &>/dev/null && confTool=grub2-efi-mkconfig
-		confPath_grub=/boot/grub2-efi/grub.cfg
+		confFile_grub=$confFile_grub_efi
 	fi
 	if ! which $confTool &>/dev/null;then
 		Echo "Image doesn't have grub2 installed"
@@ -926,19 +928,22 @@ function installBootLoaderGrub2 {
 	#======================================
 	# create grub2 configuration
 	#--------------------------------------
-	$confTool > $confPath_grub
+	$confTool > $confFile_grub
 	if [ ! $? = 0 ];then
 		Echo "Failed to create grub2 boot configuration"
 		return 1
 	fi
-	if [ $isEFI -eq 1 ] && [ -e $confPath_uefi ];then
-		cp $confPath_grub $confPath_uefi
+	if [ -e $confFile_grub_bios ];then
+		cp $confFile_grub $confFile_grub_bios
+	fi
+	if [ $isEFI -eq 1 ] && [ -e $confFile_uefi ];then
+		cp $confFile_grub $confFile_uefi
 		umount /boot/EFI
 	fi
 	#======================================
 	# install grub2 in BIOS mode
 	#--------------------------------------
-	if [ $isEFI -eq 0 ] || [ ! -z "$OEMSyncGPT" ];then
+	if [ $isEFI -eq 0 ] || [ ! -z "$kiwi_BiosGrub" ];then
 		$instTool $imageDiskDevice 1>&2
 		if [ ! $? = 0 ];then
 			Echo "Failed to install boot loader"
@@ -7888,33 +7893,6 @@ function createFDasdInput {
 		fi
 		echo $cmd >> $input
 	done
-}
-#======================================
-# syncGPT
-#--------------------------------------
-function syncGPT {
-	# /.../
-	# use gptsync/sfdisk to add an MBR into the GPT
-	# ----
-	local device=$1
-	if ! which gptsync &>/dev/null;then
-		Echo "syncGPT: sorry no gptsync tool found... skipped"
-		return 1
-	fi
-	if ! which sfdisk &>/dev/null;then
-		Echo "syncGPT: sorry no sfdisk tool found... skipped"
-		return 1
-	fi
-	if ! gptsync -q $device;then
-		Echo "syncGPT: Couldn't sync MBR to GPT"
-		return 1
-	fi
-	if ! sfdisk $device --force -A 2;then
-		Echo "syncGPT: Couldn't set MBR boot flag"
-		return 1
-	fi
-	export OEMSyncGPT=1
-	return 0
 }
 #======================================
 # partedInit

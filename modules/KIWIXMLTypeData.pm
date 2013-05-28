@@ -85,7 +85,6 @@ sub new {
 	#     size                   = ''
 	#     sizeadd                = ''
 	#     sizeunit               = ''
-	#     syncMBR                = ''
 	#     vga                    = ''
 	#     volid                  = ''
 	# }
@@ -146,7 +145,6 @@ sub new {
 		size
 		sizeadd
 		sizeunit
-		syncMBR
 		vga
 		volid
 	);
@@ -164,7 +162,6 @@ sub new {
 		primary
 		ramonly
 		sizeadd
-		syncMBR
 	);
 	$this->{boolKeywords} = \%boolKW;
 	if (! $this -> p_isInitHashRef($init) ) {
@@ -633,18 +630,6 @@ sub getSizeUnit {
 }
 
 #==========================================
-# getSyncMBR
-#------------------------------------------
-sub getSyncMBR {
-	# ...
-	# Return the flag indicating whether an MBR is
-	# embedded into the GPT or not
-	# ---
-	my $this = shift;
-	return $this->{syncMBR};
-}
-
-#==========================================
 # getTypeName
 #------------------------------------------
 sub getTypeName {
@@ -849,10 +834,6 @@ sub getXMLElement {
 			$sElem -> setAttribute('unit', $this -> getSizeUnit());
 		}
 		$element -> appendChild($sElem);
-	}
-	my $syncMBR = $this -> getSyncMBR();
-	if ($syncMBR) {
-		$element -> setAttribute('syncMBR', $syncMBR);
 	}
 	my $vga = $this -> getVGA();
 	if ($vga) {
@@ -1528,24 +1509,6 @@ sub setSizeUnit {
 	}
 	$this->{sizeunit} = $unit;
 	return $this;
-}
-
-#==========================================
-# setSyncMBR
-#------------------------------------------
-sub setSyncMBR {
-	# ...
-	# Set the flag indicating whether a MBR is
-	# embedded into the GPT
-	# ---
-	my $this = shift;
-	my $sync = shift;
-	my %settings = (
-		attr   => 'syncMBR',
-		value  => $sync,
-		caller => 'setSyncMBR'
-	);
-	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================

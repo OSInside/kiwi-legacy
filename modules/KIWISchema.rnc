@@ -1768,12 +1768,6 @@ div {
 		## for use with overlay filesystems only:
 		## will force any COW action to happen in RAM
 		attribute ramonly { xsd:boolean }
-	k.type.syncMBR.attribute =
-		## Specifies if an MBR should be included into the GPT
-		## the GPT partition table is used with EFI systems. Thus
-		## this attribute has only an effect if the firmware
-		## type is set to efi or uefi
-		attribute syncMBR { xsd:boolean }
 	k.type.vga.attribute =
 		## Specifies the kernel framebuffer mode. More information
 		## about the possible values can be found by calling
@@ -1819,7 +1813,6 @@ div {
 		k.type.mdraid.attribute? &
 		k.type.primary.attribute? &
 		k.type.ramonly.attribute? &
-		k.type.syncMBR.attribute? &
 		k.type.vga.attribute? &
 		k.type.volid.attribute?
 	k.type =

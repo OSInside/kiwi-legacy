@@ -1948,7 +1948,7 @@ sub setupBootDisk {
 		($firmware eq "vboot")
 	) {
 		$this->{jumpsize} = 5;
-		$this -> __updateDiskSize ($this->{jumpsize});
+		$this -> __updateDiskSize ($this->{jumpsize} * 2);
 		$needJumpP = 1;
 	}
 	#==========================================
@@ -2043,23 +2043,25 @@ sub setupBootDisk {
 		if (! $lvm) {
 			if ($needParts == 3) {
 				if ($needJumpP) {
-					# xda1 jump | xda2 boot | xda3 root-ro | xda4 root-rw
+					# xda1 bios | xda2 jump | xda3 boot | xda4 ro | xda5 rw
 					@commands = (
 						"n","p","1",".","+".$this->{jumpsize}."M",
-						"n","p","2",".","+".$this->{bootsize}."M",
-						"n","p","3",".","+".$syszip."M",
-						"n","p","4",".",".",
-						"t","2",$partid,
-						"t","3",$rootid,
-						"a","1","w","q"
+						"n","p","2",".","+".$this->{jumpsize}."M",
+						"n","p","3",".","+".$this->{bootsize}."M",
+						"n","p","4",".","+".$syszip."M",
+						"n","p","5",".",".",
+						"t","3",$partid,
+						"t","4",$rootid,
+						"a","2","w","q"
 					);
-					$this->{partids}{root}      = '3';
-					$this->{partids}{readonly}  = '3';
-					$this->{partids}{readwrite} = '4';
-					$this->{partids}{boot}      = '2';
-					$this->{partids}{jump}      = '1';
+					$this->{partids}{root}      = '4';
+					$this->{partids}{readonly}  = '4';
+					$this->{partids}{readwrite} = '5';
+					$this->{partids}{boot}      = '3';
+					$this->{partids}{jump}      = '2';
+					$this->{partids}{biosgrub}  = '1';
 				} else {
-					# xda1 boot | xda2 root-ro | xda3 root-rw
+					# xda1 boot | xda2 root-ro | xda3 rw
 					@commands = (
 						"n","p","1",".","+".$this->{bootsize}."M",
 						"n","p","2",".","+".$syszip."M",
@@ -2075,20 +2077,22 @@ sub setupBootDisk {
 				}
 			} elsif ($needParts == 2) {
 				if ($needJumpP) {
-					# xda1 jump | xda2 boot | xda3 root-rw
+					# xda1 bios | xda2 jump | xda3 boot | xda4 rw
 					@commands = (
 						"n","p","1",".","+".$this->{jumpsize}."M",
-						"n","p","2",".","+".$this->{bootsize}."M",
-						"n","p","3",".",".",
-						"t","2",$partid,
-						"t","3",$rootid,
-						"a","1","w","q"
+						"n","p","2",".","+".$this->{jumpsize}."M",
+						"n","p","3",".","+".$this->{bootsize}."M",
+						"n","p","4",".",".",
+						"t","3",$partid,
+						"t","4",$rootid,
+						"a","2","w","q"
 					);
-					$this->{partids}{root} = '3';
-					$this->{partids}{boot} = '2';
-					$this->{partids}{jump} = '1';
+					$this->{partids}{root}      = '4';
+					$this->{partids}{boot}      = '3';
+					$this->{partids}{jump}      = '2';
+					$this->{partids}{biosgrub}  = '1';
 				} else {
-					# xda1 boot | xda2 root-rw
+					# xda1 boot | xda2 rw
 					@commands = (
 						"n","p","1",".","+".$this->{bootsize}."M",
 						"n","p","2",".",".",
@@ -2100,7 +2104,7 @@ sub setupBootDisk {
 					$this->{partids}{boot} = '1';
 				}
 			} else {
-				# xda1 root-rw
+				# xda1 rw
 				@commands = (
 					"n","p","1",".",".",
 					"a","1","w","q"
@@ -2112,27 +2116,30 @@ sub setupBootDisk {
 			my $lvmsize = $this->{vmmbyte} - $this->{bootsize};
 			my $bootpartsize = "+".$this->{bootsize}."M";
 			if ($needJumpP) {
-				# xda1 jump | xda2 boot | xda3 lvm
+				# xda1 bios | xda2 jump | xda3 boot | xda4 lvm
 				@commands = (
 					"n","p","1",".","+".$this->{jumpsize}."M",
-					"n","p","2",".",$bootpartsize,
-					"n","p","3",".",".",
-					"t","2",$partid,
-					"t","3",$rootid,
-					"a","1","w","q"
+					"n","p","2",".","+".$this->{jumpsize}."M",
+					"n","p","3",".",$bootpartsize,
+					"n","p","4",".",".",
+					"t","3",$partid,
+					"t","4",$rootid,
+					"a","2","w","q"
 				);
 				if (($syszip) || ($haveSplit)) {
-					$this->{partids}{root}         = '3';
+					$this->{partids}{root}         = '4';
 					$this->{partids}{root_lv}      = 'LVComp';
 					$this->{partids}{readonly_lv}  = 'LVComp';
 					$this->{partids}{readwrite_lv} = 'LVRoot';
-					$this->{partids}{boot}         = '2';
-					$this->{partids}{jump}         = '1';
+					$this->{partids}{boot}         = '3';
+					$this->{partids}{jump}         = '2';
+					$this->{partids}{biosgrub}     = '1';
 				} else {
-					$this->{partids}{root}     = '3';
+					$this->{partids}{root}     = '4';
 					$this->{partids}{root_lv}  = 'LVRoot';
-					$this->{partids}{boot}     = '2';
-					$this->{partids}{jump}     = '1';
+					$this->{partids}{boot}     = '3';
+					$this->{partids}{jump}     = '2';
+					$this->{partids}{biosgrub} = '1';
 				}
 			} else {
 				# xda1 boot | xda2 lvm
@@ -2162,6 +2169,17 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$this -> cleanStack ();
 			return;
+		}
+		if ($needJumpP) {
+			$status = qxx ("parted $this->{loop} set 1 bios_grub on 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("Couldn't set bios_grub label: $status");
+				$kiwi -> failed ();
+				$this -> cleanStack ();
+				return;
+			}
 		}
 		if ((! $haveDiskDevice ) || ($haveDiskDevice =~ /nbd|aoe/)) {
 			#==========================================
@@ -3055,6 +3073,9 @@ sub setupPartIDs {
 		}
 		if ($this->{partids}{jump}) {
 			print $ID_FD "kiwi_JumpPart=\"$this->{partids}{jump}\"\n";
+		}
+		if ($this->{partids}{biosgrub}) {
+			print $ID_FD "kiwi_BiosGrub=\"$this->{partids}{biosgrub}\"\n";
 		}
 		$ID_FD -> close();
 	}
@@ -5112,6 +5133,7 @@ sub installBootLoader {
 	my $bootdev;
 	my $result;
 	my $status;
+	my $biosgrub;
 	#==========================================
 	# Setup boot device name
 	#------------------------------------------
@@ -5129,141 +5151,103 @@ sub installBootLoader {
 	#------------------------------------------
 	if ($loader eq "grub2") {
 		#==========================================
-		# No install required with EFI bios
+		# Check for bios loader
 		#------------------------------------------
-		my $syncMBR = $xml -> getImageType() -> getSyncMBR();
-		my $gptsync = $locator -> getExecPath ('gptsync');
-		if (! $syncMBR) {
-			$syncMBR = 'false';
+		$biosgrub = $locator -> getExecPath ('grub2-bios-setup');
+		if (($firmware eq 'bios') && (! $biosgrub)) {
+			$kiwi -> error  ("Mandatory grub2-bios-setup not found");
+			$kiwi -> failed ();
+			return;
 		}
-		if (($firmware =~ /efi/) && ($syncMBR eq 'true')) {
-			$kiwi -> info ("EFI legacy BIOS support enabled:\n");
-			if ($gptsync) {
-				$kiwi -> info ("--> Using gptsync program\n");
-			} else {
-				$kiwi -> info ("--> Using parted gpt_sync_mbr table type\n");
-			}
+		#==========================================
+		# Create device map for the disk
+		#------------------------------------------
+		$kiwi -> info ("Creating grub2 device map");
+		my $dmfile = "$tmpdir/boot/grub2/device.map";
+		my $dmfd = FileHandle -> new();
+		if (! $dmfd -> open(">$dmfile")) {
+			$kiwi -> failed ();
+			return;
 		}
-		if (($firmware eq 'bios') || ($syncMBR eq 'true') && ($gptsync)) {
+		print $dmfd "(hd0) $diskname\n";
+		$dmfd -> close();
+		$kiwi -> done();
+		#==========================================
+		# Mount boot partition
+		#------------------------------------------
+		my $stages = "/mnt/boot/grub2/i386-pc";
+		$status = qxx ("mount $bootdev /mnt 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Couldn't mount boot partition: $status");
+			$kiwi -> failed ();
+			return;
+		}
+		#==========================================
+		# Install grub2
+		#------------------------------------------
+		$kiwi -> info ("Installing grub2:\n");
+		my $loaderTarget = $diskname;
+		if ($chainload) {
+			$loaderTarget = readlink ($bootdev);
+			$loaderTarget =~ s/\.\./\/dev/;
+			$kiwi -> info ("--> on partition target: $loaderTarget\n");
+		} else {
+			$kiwi -> info ("--> on disk target: $loaderTarget\n");
+		}
+		$status = qxx (
+			"$biosgrub -f -d $stages -m $dmfile $loaderTarget 2>&1"
+		);
+		$result = $? >> 8;
+		qxx ("umount /mnt");
+		if ($result != 0) {
+			$kiwi -> error  (
+				"Couldn't install $loader on $loaderTarget: $status"
+			);
+			$kiwi -> failed ();
+			$this -> cleanStack ();
+			return;
+		}
+		#==========================================
+		# Clean loop maps
+		#------------------------------------------
+		$this -> cleanStack ();
+		#==========================================
+		# Check for chainloading
+		#------------------------------------------
+		if ($chainload) {
+			# /.../
+			# chainload grub with master-boot-code
+			# zero out sectors between 0x200 - 0x3f0 for preload
+			# process store a copy of the master-boot-code at 0x800
+			# write FDST flag at 0x190
+			# ---
+			my $mbr = "/usr/lib/boot/master-boot-code";
+			my $opt = "conv=notrunc";
+			my $fdst;
 			#==========================================
-			# add MBR to GPT
+			# write master-boot-code
 			#------------------------------------------
-			if (($firmware =~ /efi/) && ($gptsync)) {
-				$kiwi -> info ("Adding sync MBR into GPT...");
-				$status = qxx ("$gptsync -q $diskname 2>&1");
-				$result = $? >> 8;
-				if ($result != 0) {
-					$kiwi -> failed ();
-					$kiwi -> error ("Couldn't sync MBR to GPT: $status");
-					$kiwi -> failed ();
-					return;
-				}
-				$status = qxx ("sfdisk $diskname --force -A 2 2>&1");
-				$result = $? >> 8;
-				if ($result != 0) {
-					$kiwi -> failed ();
-					$kiwi -> error ("Couldn't set MBR boot flag: $status");
-					$kiwi -> failed ();
-					return;
-				}
-				$kiwi -> done();
-			}
-			#==========================================
-			# Create device map for the disk
-			#------------------------------------------
-			$kiwi -> info ("Installing grub2 on device: $diskname");
-			my $dmfile = "$tmpdir/boot/grub2/device.map";
-			my $dmfd = FileHandle -> new();
-			if (! $dmfd -> open(">$dmfile")) {
-				$kiwi -> failed ();
-				$kiwi -> error ("Couldn't create grub2 device map: $!");
-				$kiwi -> failed ();
-				return;
-			}
-			print $dmfd "(hd0) $diskname\n";
-			$dmfd -> close();
-			#==========================================
-			# Install grub2
-			#------------------------------------------
-			my $stages = "/mnt/boot/grub2/i386-pc";
-			$status = qxx ("mount $bootdev /mnt 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error ("Couldn't mount boot partition: $status");
-				$kiwi -> failed ();
-				return;
-			}
-			if ((! $chainload) && ($firmware ne "efi")) {
-				#==========================================
-				# install grub2 into MBR
-				#------------------------------------------
-				$status = qxx (
-					"grub2-bios-setup -v -d $stages -m $dmfile $diskname 2>&1"
-				);
-				$result = $? >> 8;
-			} else {
-				#==========================================
-				# install grub2 into partition
-				#------------------------------------------
-				my $bdev = readlink ($bootdev);
-				$bdev =~ s/\.\./\/dev/;
-				$status = qxx (
-					"grub2-bios-setup -vf -d $stages -m $dmfile $bdev 2>&1"
-				);
-				$result = $? >> 8;
-			}
-			qxx ("umount /mnt");
+			$status = qxx (
+				"dd if=$mbr of=$diskname bs=1 count=446 $opt 2>&1"
+			);
+			$result= $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  (
-					"Couldn't install $loader on $diskname: $status"
+					"Couldn't install master boot code: $status"
 				);
 				$kiwi -> failed ();
-				$this -> cleanStack ();
 				return;
 			}
 			#==========================================
-			# Clean loop maps
+			# write FDST flag
 			#------------------------------------------
-			$this -> cleanStack ();
-			#==========================================
-			# Check for chainloading
-			#------------------------------------------
-			if ($chainload) {
-				# /.../
-				# chainload grub with master-boot-code
-				# zero out sectors between 0x200 - 0x3f0 for preload process
-				# store a copy of the master-boot-code at 0x800
-				# write FDST flag at 0x190
-				# ---
-				my $mbr = "/usr/lib/boot/master-boot-code";
-				my $opt = "conv=notrunc";
-				#==========================================
-				# write master-boot-code
-				#------------------------------------------
-				$status = qxx (
-					"dd if=$mbr of=$diskname bs=1 count=446 $opt 2>&1"
-				);
-				$result= $? >> 8;
-				if ($result != 0) {
-					$kiwi -> failed ();
-					$kiwi -> error  (
-						"Couldn't install master boot code: $status"
-					);
-					$kiwi -> failed ();
-					return;
-				}
-				#==========================================
-				# write FDST flag
-				#------------------------------------------
-				my $fdst = "perl -e \"printf '%s', pack 'A4', eval 'FDST';\"";
-				qxx (
-					"$fdst| \\
-					dd of=$diskname bs=1 count=4 seek=\$((0x190)) $opt 2>&1"
-				);
-			}
-			$kiwi -> done();
+			$fdst = "perl -e \"printf '%s', pack 'A4', eval 'FDST';\"";
+			qxx (
+				"$fdst| \\
+				dd of=$diskname bs=1 count=4 seek=\$((0x190)) $opt 2>&1"
+			);
 		}
 	}
 	#==========================================
@@ -5733,19 +5717,7 @@ sub getGeometry {
 		($firmware eq "uefi") ||
 		($firmware eq "vboot")
 	) {
-		my $syncMBR = $xml -> getImageType() -> getSyncMBR();
-		if (($syncMBR) && ($syncMBR eq 'true')) {
-			my $gptsync = $locator -> getExecPath ('gptsync');
-			if ($gptsync) {
-				# use the opensource gptsync program
-				$label = 'gpt';
-			} else {
-				# use the parted extension from SUSE
-				$label = 'gpt_sync_mbr';
-			}
-		} else {
-			$label = 'gpt';
-		}
+		$label = 'gpt';
 	}
 	$status = qxx ("$parted_exec -s $disk mklabel $label 2>&1");
 	$result = $? >> 8;

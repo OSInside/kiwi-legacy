@@ -368,24 +368,16 @@ function OEMInstall {
 		imageName=/dev/mapper/${loop}p1
 		reqpart=$(parted -m /dev/$loop print | grep '^[[:digit:]]' | wc -l)
 		#======================================
-		# Check if we can proceed
-		#--------------------------------------
-		if [ $reqpart -gt 3 ];then
-			Echo "Sorry only disk images with a root and optional boot"
-			Echo "partition are supported in partition based install mode"
-			Echo "I found $reqpart partitions in the disk image"
-			systemException \
-				"Installation aborted..." \
-			"reboot"
-		fi
-		#======================================
 		# Create partition size search list
 		#--------------------------------------
 		for i in /dev/mapper/${loop}*;do
 			psize=$(partitionSize $i)
 			psize=$((psize / 1024))
 			plabel=$(blkid $i -s LABEL -o value)
-			if [ -z "$plabel" ];then
+			pftype=$(blkid $i -s TYPE  -o value)
+			if [ -z "$pftype" ];then
+				plabel=BIOS_GRUB
+			elif [ -z "$plabel" ];then
 				plabel=ROOT
 			fi
 			if [ -z "$req_partsize" ];then
@@ -482,7 +474,7 @@ function OEMInstall {
 					icewm -c /tmp/wmrc &
 					xterm +sb -e dialog --textbox /tmp/partinfo 20 70 &
 					gparted $imageDiskDevice
-				' -- :0 vt7
+				' -- :0 vt7 || systemException "session failed" "reboot"
 				#======================================
 				# Cleanup and recheck
 				#--------------------------------------
@@ -522,15 +514,20 @@ function OEMInstall {
 			#--------------------------------------
 			for p in /dev/mapper/${loop}*;do
 				plabel=$(blkid $p -s LABEL -o value)
-				if [ -z "$plabel" ];then
+				pftype=$(blkid $p -s TYPE  -o value)
+				if [ -z "$pftype" ];then
+					plabel=BIOS_GRUB
+				elif [ -z "$plabel" ];then
 					plabel=ROOT
 				fi
 				if [ $plabel = "ROOT" ];then
 					pdevs[0]=$p:$plabel
-				elif  [ $plabel = "EFI" ];then
+				elif [ $plabel = "BIOS_GRUB" ];then
 					pdevs[1]=$p:$plabel
-				elif [ $plabel = "BOOT" ];then
+				elif [ $plabel = "EFI" ];then
 					pdevs[2]=$p:$plabel
+				elif [ $plabel = "BOOT" ];then
+					pdevs[3]=$p:$plabel
 				fi
 			done
 			item=0
