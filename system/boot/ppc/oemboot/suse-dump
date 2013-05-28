@@ -426,63 +426,9 @@ function OEMInstall {
 				done
 				IFS=$IFS_ORIG
 				cat $info
-				Echo "Overlay mounting system on install media..."
-				#======================================
-				# Mount OEM root image read-write
-				#--------------------------------------
-				OEMRootSystem=/system
-				mkdir -p $OEMRootSystem
-				createSnapshotMap $OEMRootImage
-				if [ ! -e $snapshotMap ];then
-					systemException \
-						"Failed to create CD root snapshot map..." \
-					"reboot"
-				fi
-				if ! mount $snapshotMap $OEMRootSystem;then
-					systemException \
-						"Failed to mount OEM root image..." \
-					"reboot"
-				fi
-				#======================================
-				# Check OEM image tool chain
-				#--------------------------------------
-				for i in \
-					usr/sbin/gparted \
-					usr/bin/dialog   \
-					usr/bin/xinit    \
-					usr/bin/xterm    \
-					usr/bin/icewm
-				do
-					if [ ! -e $OEMRootSystem/$i ];then
-						systemException \
-							"missing $i in OEM image..." \
-						"reboot"
-					fi
-				done
-				#======================================
-				# Make system devices available
-				#--------------------------------------
-				for i in dev sys proc dev/pts;do
-					mount --bind /$i /system/$i
-				done
-				#======================================
-				# Start gparted for partition setup
-				#--------------------------------------
-				cp $info /system/tmp
-				cp $wmrc /system/tmp
-				chroot /system 	xinit /bin/bash -c '
-					icewm -c /tmp/wmrc &
-					xterm +sb -e dialog --textbox /tmp/partinfo 20 70 &
-					gparted $imageDiskDevice
-				' -- :0 vt7 || systemException "session failed" "reboot"
-				#======================================
-				# Cleanup and recheck
-				#--------------------------------------
-				for i in dev/pts proc sys dev;do
-					umount /system/$i
-				done
-				umount $OEMRootSystem
-				resetSnapshotMap
+				systemException \
+					"Use parted to setup the partition table" \
+				"shell"
 				continue
 			fi
 			#======================================
