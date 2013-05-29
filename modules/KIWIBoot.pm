@@ -2049,7 +2049,7 @@ sub setupBootDisk {
 						"n","p:legacy","1",".","+".$this->{legacysize}."M",
 						"n","p:UEFI","2",".","+".$this->{jumpsize}."M",
 						"n","p:lxboot","3",".","+".$this->{bootsize}."M",
-						"n","p:lxro","4",".","+".$syszip."M",
+						"n","p:lxroot","4",".","+".$syszip."M",
 						"n","p:lxrw","5",".",".",
 						"t","3",$partid,
 						"t","4",$rootid,
@@ -2062,10 +2062,10 @@ sub setupBootDisk {
 					$this->{partids}{jump}      = '2';
 					$this->{partids}{biosgrub}  = '1';
 				} else {
-					# xda1 boot | xda2 root-ro | xda3 rw
+					# xda1 boot | xda2 ro | xda3 rw
 					@commands = (
 						"n","p:lxboot","1",".","+".$this->{bootsize}."M",
-						"n","p:lxro","2",".","+".$syszip."M",
+						"n","p:lxroot","2",".","+".$syszip."M",
 						"n","p:lxrw","3",".",".",
 						"t","1",$partid,
 						"t","2",$rootid,

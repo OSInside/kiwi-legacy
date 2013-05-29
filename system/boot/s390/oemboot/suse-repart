@@ -175,7 +175,7 @@ function OEMRepartStandard {
 			partsize=.
 		fi
 		createPartitionerInput \
-			d $pID u y n p $pID . $partsize
+			d $pID u y n p:lxroot $pID . $partsize
 		#======================================
 		# add swap partition
 		#--------------------------------------
@@ -186,7 +186,7 @@ function OEMRepartStandard {
 				partsize=.
 			fi
 			createPartitionerInput \
-				n p $pID . $partsize t $pID 82
+				n p:lxswap $pID . $partsize t $pID 82
 			newparts=$((newparts - 1))
 			swapParam=$pID
 		else
@@ -199,7 +199,7 @@ function OEMRepartStandard {
 			pID=$((pID + 1))
 			partsize=+"$recoMByte"M
 			createPartitionerInput \
-				n p $pID . $partsize t $pID $recoID
+				n p:lxrecovery $pID . $partsize t $pID $recoID
 			newparts=$((newparts - 1))
 			recoParam=$pID
 		else
@@ -346,14 +346,14 @@ function OEMRepartSplit {
 			partsize=.
 		fi
 		createPartitionerInput \
-			d u y $pID n p $pID . $partsize
+			d u y $pID n p:lxrw $pID . $partsize
 		#======================================
 		# add swap partition
 		#--------------------------------------
 		if [ ! $swapsize = 0 ] && [ $pID -lt 4 ];then
 			pID=$((pID + 1))
 			createPartitionerInput \
-				n p $pID . +"$swapsize"M t $pID 82
+				n p:lxswap $pID . +"$swapsize"M t $pID 82
 			swapParam=$pID
 		else
 			OEM_WITHOUTSWAP=1
@@ -489,7 +489,7 @@ function OEMRepartLVM {
 			partsize=.
 		fi
 		createPartitionerInput \
-			d $pID u y n p $pID . $partsize t $pID 8e
+			d $pID u y n p:lxlvm $pID . $partsize t $pID 8e
 		extendID=$pID
 		#======================================
 		# add recovery partition
@@ -497,7 +497,7 @@ function OEMRepartLVM {
 		if [ ! -z "$OEM_RECOVERY" ] && [ $pID -lt 4 ];then
 			pID=$((pID + 1))
 			createPartitionerInput \
-				u y n p $pID . . t $pID $recoID
+				u y n p:lxrecovery $pID . . t $pID $recoID
 			recoParam=$pID
 		else
 			unset OEM_RECOVERY

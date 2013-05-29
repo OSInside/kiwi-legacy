@@ -7877,7 +7877,7 @@ function createFDasdInput {
 			ignore=1
 			continue
 		fi
-		if [ $cmd = "p" ];then
+		if [[ $cmd =~ ^p: ]];then
 			ignore_once=1
 			continue
 		fi
@@ -8014,6 +8014,7 @@ function createPartedInput {
 	shift
 	local index=0
 	local partid
+	local partnm
 	local pstart
 	local pstopp
 	local value
@@ -8038,9 +8039,15 @@ function createPartedInput {
 			# create new partition
 			#--------------------------------------
 			"n")
+				partnm=${pcmds[$index + 1]}
 				partid=${pcmds[$index + 2]}
 				partid=$(($partid / 1))
 				pstart=${pcmds[$index + 3]}
+				if [ ! "$partedTableType" = "gpt" ];then
+					partnm=primary
+				else
+					partnm=$(echo $partnm | cut -f2 -d:)
+				fi
 				if [ "$pstart" = "1" ];then
 					pstart=$(echo $startSectors | cut -f $partid -d:)
 				fi
@@ -8071,7 +8078,7 @@ function createPartedInput {
 						pstopp=$partedCylCount
 					fi
 				fi
-				cmdq="$cmdq mkpart primary $pstart $pstopp"
+				cmdq="$cmdq mkpart $partnm $pstart $pstopp"
 				partedWrite "$disk" "$cmdq"
 				partedSectorInit $imageDiskDevice
 				cmdq=""
@@ -8084,7 +8091,6 @@ function createPartedInput {
 				partid=${pcmds[$index + 1]}
 				cmdq="$cmdq set $partid type 0x$ptypex"
 				if [ ! "$partedTableType" = "gpt" ];then
-					# disabled with GPT, feels like a parted bug
 					partedWrite "$disk" "$cmdq"
 				fi
 				cmdq=""
@@ -8574,6 +8580,7 @@ function pxeRaidPartitionInputFDASD {
 function pxePartitionInputGeneric {
 	local field=0
 	local count=0
+	local pname
 	local IFS=","
 	for i in $PART;do
 		field=0
@@ -8586,23 +8593,39 @@ function pxePartitionInputGeneric {
 		esac
 		done
 		partSize=$(pxeSizeToMB $partSize)
-		if [ $partID = "S" ];then
+		pname=lxrw
+		if [ $partID = "S" ] || [ $partID = "82" ];then
 			partID=82
+			pname=lxswap
 		fi
-		if [ $partID = "L" ];then
+		if [ $partID = "L" ] || [ $partID = "83" ];then
 			partID=83
+			pname=lxroot
 		fi
-		if [ $partID = "V" ];then
+		if [ $partID = "V" ] || [ $partID = "8e" ];then
 			partID=8e
+			pname=lxlvm
+		fi
+		if [ $partID = "fd" ];then
+			partID=fd
+			pname=lxroot
 		fi
 		if [ $count -eq 1 ];then
-			echo -n "n p $count 1 $partSize "
-			if [ $partID = "82" ] || [ $partID = "8e" ] || [ $partID = "41" ] ;then
+			echo -n "n p:$pname $count 1 $partSize "
+			if  [ $partID = "82" ] || \
+				[ $partID = "8e" ] || \
+				[ $partID = "41" ] || \
+				[ $partID = "fd" ]
+			then
 				echo -n "t $partID "
 			fi
 		else
-			echo -n "n p $count . $partSize "
-			if [ $partID = "82" ] || [ $partID = "8e" ];then
+			echo -n "n p:$pname $count . $partSize "
+			if 	[ $partID = "82" ] || \
+				[ $partID = "8e" ] || \
+				[ $partID = "41" ] || \
+				[ $partID = "fd" ]
+			then
 				echo -n "t $count $partID "
 			fi
 		fi
@@ -8613,30 +8636,7 @@ function pxePartitionInputGeneric {
 # pxeRaidPartitionInputGeneric
 #--------------------------------------
 function pxeRaidPartitionInputGeneric {
-	local field=0
-	local count=0
-	local IFS=","
-	for i in $PART;do
-		field=0
-		count=$((count + 1))
-		IFS=";" ; for n in $i;do
-		case $field in
-			0) partSize=$n   ; field=1 ;;
-			1) partID=$n     ; field=2 ;;
-			2) partMount=$n;
-		esac
-		done
-		partSize=$(pxeSizeToMB $partSize)
-		partID=fd
-		if [ $count -eq 1 ];then
-			echo -n "n p $count 1 $partSize "
-			echo -n "t $partID "
-		else
-			echo -n "n p $count . $partSize "
-			echo -n "t $count $partID "
-		fi
-	done
-	echo "w q"
+	pxePartitionInputGeneric
 }
 #======================================
 # pxeRaidCreate
