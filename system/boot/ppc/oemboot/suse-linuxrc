@@ -553,7 +553,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 			imageBootMountP=$(echo $imageBootDevice | cut -f2 -d:)
 			imageBootDevice=$(echo $imageBootDevice | cut -f1 -d:)
 			rm -rf /mnt/boot
-			probeFileSystem $imageRootDevice
+			probeFileSystem $imageBootDevice
 			createFilesystem $imageBootDevice
 			mkdir -p /mnt/$imageBootMountP
 			mount $imageBootDevice /mnt/$imageBootMountP
