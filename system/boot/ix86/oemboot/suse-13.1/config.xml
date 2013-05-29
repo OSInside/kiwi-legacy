@@ -161,6 +161,7 @@
 		<package name="rsync"/>
 		<package name="timezone"/>
 		<package name="which"/>
+		<package name="udev"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>

@@ -124,6 +124,7 @@
 		<package name="glibc"/>
 		<package name="glibc-locale"/>
 		<package name="procps"/>
+		<package name="udev"/>
 	</packages>
 	<packages type="delete">
 		<package name="audit-libs"/>

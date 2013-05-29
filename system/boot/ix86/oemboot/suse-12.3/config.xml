@@ -162,6 +162,7 @@
 		<package name="procps"/>
 		<package name="rsync"/>
 		<package name="timezone"/>
+		<package name="udev"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>
