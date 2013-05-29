@@ -1265,7 +1265,9 @@ sub setupInstallStick {
 	if (! $gotsys) {
 		$title = "KIWI USB Boot: $nameusb";
 	}
-	if (! $this -> setupBootLoaderConfiguration ($bootloader,$title)) {
+	if (! $this -> setupBootLoaderConfiguration (
+		$bootloader,$title,undef,undef,$uuid)
+	) {
 		return;
 	}
 	$this->{initrd} = $oldird;
@@ -2598,7 +2600,9 @@ sub setupBootDisk {
 	#==========================================
 	# Create boot loader configuration
 	#------------------------------------------
-	if (! $this -> setupBootLoaderConfiguration ($bootloader,$bootfix,$extra)) {
+	if (! $this -> setupBootLoaderConfiguration (
+		$bootloader,$bootfix,$extra,undef,$uuid)
+	) {
 		return;
 	}
 	#==========================================
@@ -3881,6 +3885,7 @@ sub setupBootLoaderConfiguration {
 	my $type     = shift;
 	my $extra    = shift;
 	my $iso      = shift;
+	my $uuid     = shift;
 	my $cmdL     = $this->{cmdL};
 	my $system   = $this->{system};
 	my $kiwi     = $this->{kiwi};
@@ -4121,7 +4126,11 @@ sub setupBootLoaderConfiguration {
 					print $FD "insmod $module"."\n";
 				}
 			}
-			print $FD "search -f /boot/$this->{mbrid} --set"."\n";
+			if ($uuid) {
+				print $FD "search --fs-uuid --set=root $uuid"."\n";
+			} else {
+				print $FD "search -f /boot/$this->{mbrid} --set"."\n";
+			}
 			print $FD "set default=$defaultBootNr\n";
 			print $FD "set font=/boot/unicode.pf2"."\n";
 			print $FD 'if loadfont $font ;then'."\n";
