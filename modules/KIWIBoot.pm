@@ -1165,8 +1165,8 @@ sub setupInstallStick {
 	$kiwi -> info ("Create partition table for install media");
 	if ($gotsys) {
 		@commands = (
-			"n","p","1",".","+".$irdsize."M",
-			"n","p","2",".",".",
+			"n","p:lxboot","1",".","+".$irdsize."M",
+			"n","p:lxinstall","2",".",".",
 			"t","1",$partid,
 			"a","1","w","q"
 		);
@@ -1174,7 +1174,7 @@ sub setupInstallStick {
 		$this->{partids}{root} = '2';
 	} else {
 		@commands = (
-			"n","p","1",".",".",
+			"n","p:lxboot","1",".",".",
 			"t","1",$partid,
 			"a","1","w","q"
 		);
@@ -1947,8 +1947,9 @@ sub setupBootDisk {
 		($firmware eq "uefi") ||
 		($firmware eq "vboot")
 	) {
-		$this->{jumpsize} = 5;
-		$this -> __updateDiskSize ($this->{jumpsize} * 2);
+		$this->{jumpsize}   = 32;
+		$this->{legacysize} = 2;
+		$this -> __updateDiskSize ($this->{jumpsize} + $this->{legacysize});
 		$needJumpP = 1;
 	}
 	#==========================================
@@ -2045,11 +2046,11 @@ sub setupBootDisk {
 				if ($needJumpP) {
 					# xda1 bios | xda2 jump | xda3 boot | xda4 ro | xda5 rw
 					@commands = (
-						"n","p","1",".","+".$this->{jumpsize}."M",
-						"n","p","2",".","+".$this->{jumpsize}."M",
-						"n","p","3",".","+".$this->{bootsize}."M",
-						"n","p","4",".","+".$syszip."M",
-						"n","p","5",".",".",
+						"n","p:legacy","1",".","+".$this->{legacysize}."M",
+						"n","p:UEFI","2",".","+".$this->{jumpsize}."M",
+						"n","p:lxboot","3",".","+".$this->{bootsize}."M",
+						"n","p:lxro","4",".","+".$syszip."M",
+						"n","p:lxrw","5",".",".",
 						"t","3",$partid,
 						"t","4",$rootid,
 						"a","2","w","q"
@@ -2063,9 +2064,9 @@ sub setupBootDisk {
 				} else {
 					# xda1 boot | xda2 root-ro | xda3 rw
 					@commands = (
-						"n","p","1",".","+".$this->{bootsize}."M",
-						"n","p","2",".","+".$syszip."M",
-						"n","p","3",".",".",
+						"n","p:lxboot","1",".","+".$this->{bootsize}."M",
+						"n","p:lxro","2",".","+".$syszip."M",
+						"n","p:lxrw","3",".",".",
 						"t","1",$partid,
 						"t","2",$rootid,
 						"a","1","w","q"
@@ -2079,10 +2080,10 @@ sub setupBootDisk {
 				if ($needJumpP) {
 					# xda1 bios | xda2 jump | xda3 boot | xda4 rw
 					@commands = (
-						"n","p","1",".","+".$this->{jumpsize}."M",
-						"n","p","2",".","+".$this->{jumpsize}."M",
-						"n","p","3",".","+".$this->{bootsize}."M",
-						"n","p","4",".",".",
+						"n","p:legacy","1",".","+".$this->{legacysize}."M",
+						"n","p:UEFI","2",".","+".$this->{jumpsize}."M",
+						"n","p:lxboot","3",".","+".$this->{bootsize}."M",
+						"n","p:lxroot","4",".",".",
 						"t","3",$partid,
 						"t","4",$rootid,
 						"a","2","w","q"
@@ -2094,8 +2095,8 @@ sub setupBootDisk {
 				} else {
 					# xda1 boot | xda2 rw
 					@commands = (
-						"n","p","1",".","+".$this->{bootsize}."M",
-						"n","p","2",".",".",
+						"n","p:lxboot","1",".","+".$this->{bootsize}."M",
+						"n","p:lxroot","2",".",".",
 						"t","1",$partid,
 						"t","2",$rootid,
 						"a","1","w","q"
@@ -2106,7 +2107,7 @@ sub setupBootDisk {
 			} else {
 				# xda1 rw
 				@commands = (
-					"n","p","1",".",".",
+					"n","p:lxroot","1",".",".",
 					"a","1","w","q"
 				);
 				$this->{partids}{boot} = '1';
@@ -2118,10 +2119,10 @@ sub setupBootDisk {
 			if ($needJumpP) {
 				# xda1 bios | xda2 jump | xda3 boot | xda4 lvm
 				@commands = (
-					"n","p","1",".","+".$this->{jumpsize}."M",
-					"n","p","2",".","+".$this->{jumpsize}."M",
-					"n","p","3",".",$bootpartsize,
-					"n","p","4",".",".",
+					"n","p:legacy","1",".","+".$this->{legacysize}."M",
+					"n","p:UEFI","2",".","+".$this->{jumpsize}."M",
+					"n","p:lxboot","3",".",$bootpartsize,
+					"n","p:lxlvm","4",".",".",
 					"t","3",$partid,
 					"t","4",$rootid,
 					"a","2","w","q"
@@ -2144,8 +2145,8 @@ sub setupBootDisk {
 			} else {
 				# xda1 boot | xda2 lvm
 				@commands = (
-					"n","p","1",".",$bootpartsize,
-					"n","p","2",".",".",
+					"n","p:lxboot","1",".",$bootpartsize,
+					"n","p:lxlvm","2",".",".",
 					"t","1",$partid,
 					"t","2",$rootid,
 					"a","1","w","q"
@@ -5711,7 +5712,7 @@ sub getGeometry {
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> loginfo ($status);
-		return 0;
+		return;
 	}
 	if (($firmware eq "efi")  ||
 		($firmware eq "uefi") ||
@@ -5723,7 +5724,7 @@ sub getGeometry {
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> loginfo ($status);
-		return 0;
+		return;
 	}
 	$parted = "$parted_exec -m $disk unit s print";
 	$status = qxx (
@@ -5732,7 +5733,7 @@ sub getGeometry {
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> loginfo ($status);
-		return 0;
+		return;
 	}
 	chomp $status;
 	$status =~ s/s//;
@@ -5745,7 +5746,7 @@ sub getGeometry {
 	$kiwi -> loginfo (
 		"Disk Sector count is: $this->{pDiskSectors}\n"
 	);
-	return $status;
+	return $label;
 }
 
 #==========================================
@@ -5900,7 +5901,7 @@ sub setStoragePartition {
 					$ignore=1;
 					next;
 				}
-				if ($cmd eq "p") {
+				if ($cmd =~ /^p:/) {
 					next;
 				}
 				if (($cmd =~ /^[0-9]$/) && ($action ne "t")) {
@@ -5936,28 +5937,50 @@ sub setStoragePartition {
 		/^parted/  && do {
 			my $p_cmd = ();
 			$this -> resetGeometry();
-			$this -> getGeometry ($device);
+			my $ptype = $this -> getGeometry ($device);
+			if (! $ptype) {
+				return;
+			}
 			for (my $count=0;$count<@commands;$count++) {
+				my $status;
+				my $result = 0;
 				my $cmd = $commands[$count];
 				if ($cmd eq "n") {
+					my $name = $commands[$count+1];
 					my $size = $commands[$count+4];
+					if ($ptype ne 'gpt') {
+						$name = 'primary';
+					} else {
+						$name =~ s/^p://;
+					}
 					$this -> initGeometry ($device,$size);
-					$p_cmd = "mkpart primary $this->{pStart} $this->{pStopp}";
+					$p_cmd = "mkpart $name $this->{pStart} $this->{pStopp}";
 					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
-					qxx ("$parted_exec -s $device unit s $p_cmd 2>&1");
+					$status = qxx (
+						"$parted_exec -s $device unit s $p_cmd 2>&1"
+					);
 				}
-				if ($cmd eq "t") {
+				if (($cmd eq "t") && ($ptype eq 'msdos')) {
 					my $index= $commands[$count+1];
 					my $type = $commands[$count+2];
 					$p_cmd = "set $index type 0x$type";
 					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
-					qxx ("$parted_exec -s $device unit s $p_cmd 2>&1");
+					$status = qxx (
+						"$parted_exec -s $device unit s $p_cmd 2>&1"
+					);
 				}
 				if ($cmd eq "a") {
 					my $index= $commands[$count+1];
 					$p_cmd = "set $index boot on";
 					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
-					qxx ("$parted_exec -s $device unit s $p_cmd 2>&1");
+					$status = qxx (
+						"$parted_exec -s $device unit s $p_cmd 2>&1"
+					);
+				}
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> loginfo ($status);
+					return;
 				}
 			}
 			last SWITCH;
