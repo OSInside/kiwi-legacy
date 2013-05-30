@@ -495,8 +495,9 @@ function OEMRepartLVM {
 		#--------------------------------------
 		if [ ! -z "$OEM_RECOVERY" ] && [ $pID -lt 4 ];then
 			pID=$((pID + 1))
+			partsize=+"$recoMByte"M
 			createPartitionerInput \
-				n p:lxrecovery $pID . . t $pID $recoID
+				n p:lxrecovery $pID . $partsize t $pID $recoID
 			recoParam=$pID
 		else
 			unset OEM_RECOVERY
