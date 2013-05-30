@@ -186,6 +186,7 @@
 		<file name="rmdir"/>
 		<file name="rmmod"/>
 		<file name="route"/>
+		<file name="haveged"/>
 		<file name="rpcbind"/>
 		<file name="rpc.idmapd"/>
 		<file name="rpc.statd"/>
