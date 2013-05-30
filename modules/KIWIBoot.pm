@@ -4129,7 +4129,7 @@ sub setupBootLoaderConfiguration {
 			if ($uuid) {
 				print $FD "search --fs-uuid --set=root $uuid"."\n";
 			} else {
-				print $FD "search -f /boot/$this->{mbrid} --set"."\n";
+				print $FD "search --file /boot/$this->{mbrid} --set"."\n";
 			}
 			print $FD "set default=$defaultBootNr\n";
 			print $FD "set font=/boot/unicode.pf2"."\n";

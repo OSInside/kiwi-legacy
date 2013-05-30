@@ -1992,7 +1992,7 @@ sub createImageLiveCD {
 			$kiwi -> failed ();
 			return;
 		}
-		print $bpfd "search -f /boot/$this->{mbrid} --set"."\n";
+		print $bpfd "search --file /boot/$this->{mbrid} --set"."\n";
 		print $bpfd 'set prefix=($root)/boot/grub2-efi'."\n";
 		$bpfd -> close();
 		#==========================================
@@ -2091,7 +2091,7 @@ sub createImageLiveCD {
 		foreach my $module (@efimods) {
 			print $FD "insmod $module"."\n";
 		}
-		print $FD "search -f /boot/$this->{mbrid} --set"."\n";
+		print $FD "search --file /boot/$this->{mbrid} --set"."\n";
 		print $FD "set default=0\n";
 		print $FD "set font=/boot/unicode.pf2"."\n";
 		print $FD 'if loadfont $font ;then'."\n";
