@@ -382,8 +382,8 @@ sub __checkEC2IsFsysType {
 	# ---
 	my $this = shift;
 	# TODO:
-	# Excluding btrfs and xfs, needs testing first. There are potentisl issues
-	# with both file systems as they require a boot partition and our current
+	# Excluding btrfs, xfs and zfs, needs testing first. There are issues
+	# with these file systems as they require a boot partition and our current
 	# setup for EC2 is to not have a boot partition.
 	# Excluding clicfs and squashfs, they appear to be impractical for EC2,
 	# can be enabled if someone complains

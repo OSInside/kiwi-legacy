@@ -665,6 +665,9 @@ sub createImage {
 		$workDirName .= '-' . $prof;
 	}
 	$destination .= "/" . $workDirName;
+	if (-d $destination) {
+		qxx ("rm -rf $destination 2>&1");
+	}
 	if ((! -d $destination) && (! mkdir $destination)) {
 		$kiwi -> error  ("Failed to create destination subdir: $!");
 		$kiwi -> failed ();
@@ -924,6 +927,11 @@ sub createImage {
 			};
 			/^xfs/    && do {
 				$status = $image -> createImageXFS ( $targetDevice );
+				$checkFormat = 1;
+				last SWITCH;
+			};
+			/^zfs/    && do {
+				$status = $image -> createImageZFS ( $targetDevice );
 				$checkFormat = 1;
 				last SWITCH;
 			};

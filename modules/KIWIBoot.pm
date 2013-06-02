@@ -1816,7 +1816,7 @@ sub setupBootDisk {
 			$needBootP = 1;
 			$needParts = 3;
 		}
-	} elsif ($type{filesystem} =~ /btrfs|xfs/) {
+	} elsif ($type{filesystem} =~ /btrfs|xfs|zfs/) {
 		$needBootP = 1;
 		$needParts = 2;
 	} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
@@ -5186,9 +5186,7 @@ sub installBootLoader {
 		# Mount boot partition
 		#------------------------------------------
 		my $stages = "/mnt/boot/grub2/i386-pc";
-		$status = qxx ("mount $bootdev /mnt 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
+		if (! KIWIGlobals -> instance() -> mount ($bootdev, '/mnt')) {
 			$kiwi -> error ("Couldn't mount boot partition: $status");
 			$kiwi -> failed ();
 			return;
@@ -5420,9 +5418,7 @@ sub installBootLoader {
 			$result = $? >> 8;
 		} else {
 			$kiwi -> info ("Installing extlinux on device: $bootdev");
-			$status = qxx ("mount $bootdev /mnt 2>&1");
-			$result = $? >> 8;
-			if ($result == 0) {
+			if (KIWIGlobals -> instance() -> mount ($bootdev, '/mnt')) {
 				$status = qxx ("extlinux --install /mnt/boot/syslinux 2>&1");
 				$result = $? >> 8;
 			}
@@ -5478,9 +5474,7 @@ sub installBootLoader {
 		#==========================================
 		# mount boot device...
 		#------------------------------------------
-		$status = qxx ("mount $bootdev /mnt 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
+		if (! KIWIGlobals -> instance() -> mount ($bootdev, '/mnt')) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Can't mount boot partition: $status");
 			$kiwi -> failed ();
@@ -6521,6 +6515,23 @@ sub setupFilesystem {
 				"/sbin/mkfs.xfs $fsopts $device 2>&1"
 			);
 			$result = $? >> 8;
+			last SWITCH;
+		};
+		/^zfs/          && do {
+			$kiwi -> info ("Creating zfs $name filesystem");
+			$status = qxx (
+				"zpool create kiwiroot $device 2>&1"
+			);
+			$result = $? >> 8;
+			if ($result == 0) {
+				$status = qxx ("umount /kiwiroot 2>&1");
+				$result = $? >> 8;
+				rmdir '/kiwiroot';
+				if ($result == 0) {
+					$status = qxx ("zpool export kiwiroot 2>&1");
+					$result = $? >> 8;
+				}
+			}
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported filesystem type: $fstype");

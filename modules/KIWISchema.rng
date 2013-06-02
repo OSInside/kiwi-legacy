@@ -2179,10 +2179,7 @@ structure</a:documentation>
     </define>
     <define name="k.type.filesystem.attribute">
       <attribute name="filesystem">
-        <a:documentation>Specifies the filesystem which can be one of:
-btrfs, clicfs, ext2, ext3, ext4, reiserfs, squashfs, or xfs
-clicfs is a fuse based compressed filesystem using a cow
-file for write operations</a:documentation>
+        <a:documentation>Specifies the root filesystem type</a:documentation>
         <choice>
           <value>btrfs</value>
           <value>clicfs</value>
@@ -2193,6 +2190,7 @@ file for write operations</a:documentation>
           <value>reiserfs</value>
           <value>squashfs</value>
           <value>xfs</value>
+          <value>zfs</value>
         </choice>
       </attribute>
     </define>
@@ -2263,15 +2261,7 @@ or clic and applies to the iso type only</a:documentation>
     <define name="k.type.fsreadonly.attribute">
       <attribute name="fsreadonly">
         <a:documentation>Specifies the filesystem for the read-only part of a split image</a:documentation>
-        <choice>
-          <value>btrfs</value>
-          <value>ext2</value>
-          <value>ext3</value>
-          <value>ext4</value>
-          <value>reiserfs</value>
-          <value>squashfs</value>
-          <value>xfs</value>
-        </choice>
+        <value>squashfs</value>
       </attribute>
     </define>
     <define name="k.type.fsreadwrite.attribute">
@@ -2331,6 +2321,7 @@ to keep data persistent over a reboot</a:documentation>
           <value>tbz</value>
           <value>vmx</value>
           <value>xfs</value>
+          <value>zfs</value>
         </choice>
       </attribute>
     </define>

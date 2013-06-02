@@ -3263,6 +3263,7 @@ function probeFileSystem {
 		clicfs)      FSTYPE=clicfs ;;
 		xfs)         FSTYPE=xfs ;;
 		udf)         FSTYPE=udf ;;
+		zfs_member)  FSTYPE=zfs ;;
 		*)
 			FSTYPE=unknown
 		;;
@@ -5348,8 +5349,28 @@ function kiwiMount {
 		# ----
 		losetup /dev/loop7 $lop
 	fi
-	if ! mount -t $FSTYPE $opt $src $dst >/dev/null;then
-		return 1
+	if [ "$FSTYPE" = "zfs" ];then
+		if [ -b $src ];then
+			if ! zpool import kiwiroot >/dev/null;then
+				return 1
+			fi
+		else
+			local basedir=$(dirname $src)
+			if ! zpool import -d $basedir kiwiroot;then
+				return 1
+			fi
+		fi
+		if ! umount /kiwiroot;then
+			return 1
+		fi
+		rmdir /kiwiroot
+		if ! mount -o zfsutil -t zfs kiwiroot $dst >/dev/null;then
+			return 1
+		fi
+	else
+		if ! mount -t $FSTYPE $opt $src $dst >/dev/null;then
+			return 1
+		fi
 	fi
 	if [ ! -z "$FSTYPE_SAVE" ];then
 		FSTYPE=$FSTYPE_SAVE
@@ -5518,7 +5539,7 @@ function mountSystemUnionFS {
 		if [ ! "$roDevice" = "nfs" ] && ! setupReadWrite; then
 			return 1
 		fi
-		if ! mount $rwDevice $rwDir >/dev/null;then
+		if ! kiwiMount "$rwDevice" "$rwDir";then
 			Echo "Failed to mount read/write filesystem"
 			return 1
 		fi
@@ -5783,7 +5804,7 @@ function mountSystemCombined {
 			# a link to it: /read-write -> /mnt/read-write 
 			# ----
 			mkdir /mnt/read-write >/dev/null
-			mount $rwDevice /mnt/read-write >/dev/null
+			kiwiMount "$rwDevice" "/mnt/read-write"
 			rm -rf /read-write >/dev/null
 			ln -s /mnt/read-write /read-write >/dev/null
 		fi
@@ -5794,12 +5815,6 @@ function mountSystemCombined {
 #--------------------------------------
 function mountSystemStandard {
 	local mountDevice=$1
-	if [ "$FSTYPE" = "btrfs" ];then
-		export haveBtrFS=yes
-	fi
-	if [ "$FSTYPE" = "xfs" ];then
-		export haveXFS=yes
-	fi
 	if [ ! -z $FSTYPE ]          && 
 	   [ ! $FSTYPE = "unknown" ] && 
 	   [ ! $FSTYPE = "auto" ]
@@ -5818,7 +5833,7 @@ function mountSystemStandard {
 				[ ! $volume = "Swap" ]
 			then
 				mkdir -p /mnt/$mpoint
-				mount /dev/$VGROUP/LV$volume /mnt/$mpoint
+				kiwiMount "/dev/$VGROUP/LV$volume" "/mnt/$mpoint"
 			fi
 		done
 	fi
@@ -6857,8 +6872,6 @@ function cleanImage {
 	#--------------------------------------
 	if \
 		[ "$haveClicFS" = "yes" ] || \
-		[ "$haveBtrFS"  = "yes" ] || \
-		[ "$haveXFS"    = "yes" ] || \
 		[ ! -z "$NFSROOT" ]       || \
 		[ ! -z "$NBDROOT" ]       || \
 		[ ! -z "$AOEROOT" ]       || \

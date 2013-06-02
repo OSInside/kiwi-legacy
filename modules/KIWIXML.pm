@@ -2359,6 +2359,7 @@ sub writeXML {
 		tbz
 		vmx
 		xfs
+		zfs
 	);
 	for my $imgType (@imgTypes) {
 		my @typePckgItems;

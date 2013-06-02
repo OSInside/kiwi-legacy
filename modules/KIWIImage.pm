@@ -840,6 +840,41 @@ sub createImageBTRFS {
 }
 
 #==========================================
+# createImageZFS
+#------------------------------------------
+sub createImageZFS {
+	# ...
+	# create ZFS image from source tree
+	# ---
+	my $this   = shift;
+	my $device = shift;
+	my $kiwi   = $this->{kiwi};
+	#==========================================
+	# PRE filesystem setup
+	#------------------------------------------
+	my $name = $this -> preImage ($device);
+	if (! defined $name) {
+		return;
+	}
+	if ($this->{targetDevice}) {
+		$device = $this->{targetDevice};
+	}
+	#==========================================
+	# Create filesystem on extend
+	#------------------------------------------
+	if (! $this -> setupZFS ( $name,$device )) {
+		return;
+	}
+	#==========================================
+	# POST filesystem setup
+	#------------------------------------------
+	if (! $this -> postImage ($name,undef,undef,$device)) {
+		return;
+	}
+	return $this;
+}
+
+#==========================================
 # createImageXFS
 #------------------------------------------
 sub createImageXFS {
@@ -1187,6 +1222,15 @@ sub createImageRootAndBoot {
 		/^xfs/        && do {
 			if (! $treeAccess) {
 				$ok = $this -> createImageXFS ();
+			} else {
+				$ok = $this -> setupLogicalExtend();
+				$result{imageTree} = $imageTree;
+			}
+			last SWITCH;
+		};
+		/^zfs/        && do {
+			if (! $treeAccess) {
+				$ok = $this -> createImageZFS ();
 			} else {
 				$ok = $this -> setupLogicalExtend();
 				$result{imageTree} = $imageTree;
@@ -2931,6 +2975,10 @@ sub createImageSplit {
 				$ok = $this -> setupXFS ( $namerw );
 				last SWITCH;
 			};
+			/zfs/        && do {
+				$ok = $this -> setupZFS ( $namerw );
+				last SWITCH;
+			};
 			$kiwi -> error  ("Unsupported type: $FSTypeRW");
 			$kiwi -> failed ();
 			qxx ("rm -rf $imageTreeRW");
@@ -2985,6 +3033,10 @@ sub createImageSplit {
 		};
 		/xfs/      && do {
 			$ok = $this -> setupXFS ( $namero );
+			last SWITCH;
+		};
+		/zfs/      && do {
+			$ok = $this -> setupZFS ( $namero );
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRO");
@@ -3080,6 +3132,11 @@ sub createImageSplit {
 			};
 			/xfs/        && do {
 				qxx ("/sbin/mkfs.xfs $this->{imageDest}/$name 2>&1");
+				$kiwi -> done();
+				last SWITCH;
+			};
+			/zfs/        && do {
+				# do nothing for zfs
 				$kiwi -> done();
 				last SWITCH;
 			};
@@ -3608,6 +3665,14 @@ sub postImage {
 			last SWITCH;
 		};
 		#==========================================
+		# Check ZFS file system
+		#------------------------------------------
+		/zfs/       && do {
+			# do nothing for zfs
+			$kiwi -> done();
+			last SWITCH;
+		};
+		#==========================================
 		# Unknown filesystem type
 		#------------------------------------------
 		$kiwi -> failed();
@@ -3938,6 +4003,7 @@ sub mountLogicalExtend {
 	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $data;
 	my $code;
+	my @clean;
 	#==========================================
 	# mount logical extend for data transfer
 	#------------------------------------------
@@ -3951,6 +4017,8 @@ sub mountLogicalExtend {
 		$opts .= ",loop";
 	}
 	mkdir "$this->{imageDest}/mnt-$$";
+	push @clean,"rmdir $this->{imageDest}/mnt-$$";
+	$this->{UmountStack} = \@clean;
 	#==========================================
 	# check for filesystem options
 	#------------------------------------------
@@ -3958,6 +4026,12 @@ sub mountLogicalExtend {
 		"/sbin/blkid -c /dev/null -s TYPE -o value $target"
 	);
 	chomp $fstype;
+	if ($fstype eq 'zfs_member') {
+		$opts   = 'zfsutil -t zfs';
+		$target = 'kiwiroot';
+		push @clean,"zpool export kiwiroot";
+		$this->{UmountStack} = \@clean;
+	}
 	if ($fstype eq "ext4") {
 		# /.../
 		# ext4 (currently) should be mounted with 'nodelalloc';
@@ -3978,13 +4052,15 @@ sub mountLogicalExtend {
 	$code= $? >> 8;
 	if ($code != 0) {
 		chomp $data;
-		$kiwi -> error  ("Image loop mount failed:");
+		$kiwi -> error  ("Image file mount failed:");
 		$kiwi -> failed ();
 		$kiwi -> error  (
 			"mnt: $target -> $this->{imageDest}/mnt-$$: $data"
 		);
 		return;
 	}
+	push @clean,"umount $this->{imageDest}/mnt-$$";
+	$this->{UmountStack} = \@clean;
 	return "$this->{imageDest}/mnt-$$";
 }
 
@@ -4114,6 +4190,9 @@ sub isBootImage {
 			return 0;
 		};
 		/xfs/i    && do {
+			return 0;
+		};
+		/zfs/i    && do {
 			return 0;
 		};
 	}
@@ -4443,6 +4522,60 @@ sub setupSquashFS {
 	$data = qxx ("chmod 644 $this->{imageDest}/$name");
 	$data = qxx ("rm -f $this->{imageDest}/$name.squashfs");
 	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.squashfs 2>&1");
+	$this -> remapImageDest();
+	$kiwi -> loginfo ($data);
+	return $name;
+}
+
+#==========================================
+# setupZFS
+#------------------------------------------
+sub setupZFS {
+	my $this   = shift;
+	my $name   = shift;
+	my $device = shift;
+	my $cmdL   = $this->{cmdL};
+	my $kiwi   = $this->{kiwi};
+	my $target = $this->{imageDest}."/".$name;
+	if ($device) {
+		$target = $device;
+	}
+	my $data = qxx (
+		"zpool create kiwiroot $target 2>&1"
+	);
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't create ZFS filesystem");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return;
+	}
+	$data = qxx ("umount /kiwiroot 2>&1");
+	$code = $? >> 8;
+	if ($code == 0) {
+		$data = qxx ("zpool export kiwiroot 2>&1");
+		$code = $? >> 8;
+		if ($code == 0) {
+			$data = qxx ("zpool import -d $this->{imageDest} kiwiroot 2>&1");
+			$code = $? >> 8;
+			if ($code == 0) {
+				$data = qxx ("umount /kiwiroot 2>&1");
+				$code = $? >> 8;
+				rmdir '/kiwiroot';
+			}
+		}
+	}
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't sync ZFS filesystem");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return;
+	}
+	if ($device) {
+		qxx ("touch $this->{imageDest}/$name");
+	}
+	$this -> restoreImageDest();
+	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.zfs 2>&1");
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
@@ -4995,9 +5128,23 @@ sub remapImageDest {
 # cleanMount
 #------------------------------------------
 sub cleanMount {
-	my $this = shift;
-	qxx ("umount $this->{imageDest}/mnt-$$ 2>&1");
-	rmdir "$this->{imageDest}/mnt-$$";
+	my $this  = shift;
+	my $kiwi  = $this->{kiwi};
+	my $stack = $this->{UmountStack};
+	if (! $stack) {
+		return;
+	}
+	my @UmountStack = @{$stack};
+	my $status;
+	my $result;
+	foreach my $cmd (reverse @UmountStack) {
+		$status = qxx ("$cmd 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> warning ("UmountStack failed: $cmd: $status\n");
+		}
+	}
+	$this->{UmountStack} = [];
 	return;
 }
 

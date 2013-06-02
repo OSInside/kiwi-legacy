@@ -1814,7 +1814,7 @@ sub __isValidFilesystem {
 		return;
 	}
 	my %supported = map { ($_ => 1) } qw(
-		btrfs clicfs ext2 ext3 ext4 overlayfs reiserfs squashfs xfs
+		btrfs clicfs ext2 ext3 ext4 overlayfs reiserfs squashfs xfs zfs
 	);
 	if (! $supported{$fileS} ) {
 		my $msg = "$caller: specified filesystem '$fileS' is not "
@@ -1979,6 +1979,7 @@ sub __isValidImage {
 		tbz
 		vmx
 		xfs
+		zfs
 	);
 	if (! $supported{$image} ) {
 		my $msg = "$caller: specified image '$image' is not "

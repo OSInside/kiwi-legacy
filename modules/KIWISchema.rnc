@@ -1650,13 +1650,10 @@ div {
 		## structure
 		attribute editbootinstall { text }
 	k.type.filesystem.attribute = 
-		## Specifies the filesystem which can be one of:
-		## btrfs, clicfs, ext2, ext3, ext4, reiserfs, squashfs, or xfs
-		## clicfs is a fuse based compressed filesystem using a cow
-		## file for write operations
+		## Specifies the root filesystem type
 		attribute filesystem {
 			"btrfs" | "clicfs" | "ext2" | "ext3" | "ext4" |
-			"overlayfs" | "reiserfs" | "squashfs" | "xfs"
+			"overlayfs" | "reiserfs" | "squashfs" | "xfs" | "zfs"
 		}
 	k.type.firmware.attribute =
 		## Specifies the boot firmware of the system. Most systems
@@ -1694,8 +1691,7 @@ div {
 	k.type.fsreadonly.attribute =
 		## Specifies the filesystem for the read-only part of a split image
 		attribute fsreadonly {
-			"btrfs" | "ext2" | "ext3" | "ext4" |
-			"reiserfs" | "squashfs" | "xfs"
+			"squashfs"
 		}
 	k.type.fsreadwrite.attribute =
 		## Specifies the filesystem for the read-write part of a split image
@@ -1722,7 +1718,7 @@ div {
 		attribute image {
 			"btrfs" | "clicfs" | "cpio" | "ext2" | "ext3" |
 			"ext4" | "iso" | "lxc" | "oem" | "product" | "pxe" | "reiserfs" |
-			"split" | "squashfs" | "tbz" | "vmx" | "xfs"
+			"split" | "squashfs" | "tbz" | "vmx" | "xfs" | "zfs"
 		}
 	k.type.installboot.attribute =
 		## Specifies the bootloader default boot entry for the"

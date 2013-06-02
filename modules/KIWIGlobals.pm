@@ -375,7 +375,7 @@ sub mount {
 	#==========================================
 	# Mount device or loop mount file
 	#------------------------------------------
-	if ((-f $source) && ($type ne "clicfs")) {
+	if ((-f $source) && ($type ne "clicfs") && ($type ne 'zfs')) {
 		if ($opts) {
 			$status = KIWIQX::qxx ("mount -o loop,$opts $source $dest 2>&1");
 		} else {
@@ -389,7 +389,30 @@ sub mount {
 			return;
 		}
 	} else {
-		if ($type eq "clicfs") {
+		if ($type eq 'zfs') {
+			if (! -b $source) {
+				my $basedir = dirname ($source);
+				$status = KIWIQX::qxx (
+					"zpool import -d $basedir kiwiroot 2>&1"
+				);
+			} else {
+				$status = KIWIQX::qxx ("zpool import kiwiroot 2>&1");
+			}
+			$result = $? >> 8;
+			if ($result == 0) {
+				push @UmountStack,"zpool export kiwiroot";
+				$this->{UmountStack} = \@UmountStack;
+				$status = KIWIQX::qxx ("umount /kiwiroot 2>&1");
+				$result = $? >> 8;
+				if ($result == 0) {
+					rmdir '/kiwiroot';
+					$status = KIWIQX::qxx (
+						"mount -o zfsutil -t zfs kiwiroot $dest 2>&1"
+					);
+					$result = $? >> 8;
+				}
+			}
+		} elsif ($type eq "clicfs") {
 			$status = KIWIQX::qxx ("clicfs -m 512 $source $dest 2>&1");
 			$result = $? >> 8;
 			if ($result == 0) {
@@ -482,7 +505,9 @@ sub umount {
 		$status = KIWIQX::qxx ("$cmd 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
-			$kiwi -> warning ("UmountStack failed: $cmd: $status\n");
+			$kiwi -> loginfo (
+				"KIWIGlobals::umount $cmd failed: $status\n"
+			);
 		}
 	}
 	$this->{UmountStack} = [];
@@ -668,6 +693,10 @@ sub checkFileSystem {
 				};
 				/xfs/          && do {
 					$type = "xfs";
+					last SWITCH;
+				};
+				/zfs_member/   && do {
+					$type = "zfs";
 					last SWITCH;
 				};
 				# unknown filesystem type check clicfs...
@@ -1058,6 +1087,7 @@ sub _new_instance {
 	$KnownFS{reiserfs}{tool}  = $locator -> getExecPath("mkreiserfs");
 	$KnownFS{btrfs}{tool}     = $locator -> getExecPath("mkfs.btrfs");
 	$KnownFS{xfs}{tool}       = $locator -> getExecPath("mkfs.xfs");
+	$KnownFS{zfs}{tool}       = $locator -> getExecPath("zpool");
 	$KnownFS{cpio}{tool}      = $locator -> getExecPath("cpio");
 	$KnownFS{ext3}{ro}        = 0;
 	$KnownFS{ext4}{ro}        = 0;
@@ -1069,6 +1099,7 @@ sub _new_instance {
 	$KnownFS{reiserfs}{ro}    = 0;
 	$KnownFS{btrfs}{ro}       = 0;
 	$KnownFS{xfs}{ro}         = 0;
+	$KnownFS{zfs}{ro}         = 0;
 	$KnownFS{cpio}{ro}        = 0;
 	$data{KnownFS} = \%KnownFS;
 	#==========================================

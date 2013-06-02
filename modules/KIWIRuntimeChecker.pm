@@ -346,7 +346,7 @@ sub __checkFilesystemTool {
 	my $toolError;
 	my $checkedFS;
 	my @knownFsTypes = qw (
-		btrfs clicfs ext2 ext3 ext4 reiserfs squashfs xfs cpio
+		btrfs clicfs ext2 ext3 ext4 reiserfs squashfs xfs cpio zfs
 	);
 	if (grep { /^$typeName/x } @knownFsTypes) {
 		my $haveTool = $this -> __isFsToolAvailable($typeName);
@@ -890,6 +890,7 @@ sub __haveValidTypeString {
 		tbz
 		vmx
 		xfs
+		zfs
 	);
 	if ($type) {
 		if (! grep { /$type/x } @allowedTypes) {
@@ -943,6 +944,9 @@ sub __isFsToolAvailable {
 	}
 	if ($fsType eq 'xfs' ) {
 		return $locator -> getExecPath('mkfs.xfs');
+	}
+	if ($fsType eq 'zfs' ) {
+		return $locator -> getExecPath('zpool');
 	}
 }
 
