@@ -17,7 +17,7 @@
 	to <tag class="attribute">schemaversion</tag> from
 	<literal>5.7</literal> to <literal>5.8</literal>.
 </para>
-<xsl:template match="image" mode="conv53to54">
+<xsl:template match="image" mode="conv57to58">
 	<xsl:choose>
 		<!-- nothing to do if already at 5.8 -->
 		<xsl:when test="@schemaversion > 5.7">
