@@ -1972,7 +1972,7 @@ sub setupBootDisk {
 	#==========================================
 	# Update raw disk size if boot part is used
 	#------------------------------------------
-	if (($needBootP) && ($imgtype ne "split")) {
+	if ($needBootP) {
 		$this -> __updateDiskSize ($this->{bootsize});
 	}
 	#==========================================
