@@ -5789,14 +5789,18 @@ sub getSingleInstSourceSatSolvable {
 		$scommand = "";
 		$destfile = $sdir."/primary-".$count;
 		foreach my $file (glob ("$sdir/packages-*")) {
-			if ($file =~ /\.gz$/) {
+			qxx ("gzip -t $file &>/dev/null");
+			my $code = $? >> 8;
+			if ($code == 0) {
 				$gzicmd .= $file." ";
 			} else {
 				$stdcmd .= $file." ";
 			}
 		}
 		foreach my $file (glob ("$sdir/*.pat*")) {
-			if ($file =~ /\.gz$/) {
+			qxx ("gzip -t $file &>/dev/null");
+			my $code = $? >> 8;
+			if ($code == 0) {
 				$gzicmd .= $file." ";
 			} else {
 				$stdcmd .= $file." ";
