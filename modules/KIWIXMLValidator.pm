@@ -1887,22 +1887,29 @@ sub __validateXML {
 	};
 	if ($@) {
 		my $evaldata=$@;
-		$kiwi -> error  ("Schema validation failed: $evaldata");
+		$kiwi -> error  ("Schema validation failed:\n");
+		$kiwi -> error  ($evaldata);
 		$kiwi -> failed ();
 		my $configStr = $systemXML -> parse_file( $controlFile ) -> toString();
 		my $upgradedStr = $systemTree -> toString();
 		my $upgradedContolFile = $controlFile;
 		if ($configStr ne $upgradedStr) {
 			$upgradedContolFile =~ s/\.xml/\.converted\.xml/;
-			$kiwi -> info (
-				"Automatically upgraded $controlFile to $upgradedContolFile\n"
-			);
-			$kiwi -> info (
-				"Reported line numbers may not match the file $controlFile\n"
-			);
-			open (my $UPCNTFL, '>', $upgradedContolFile);
-			print $UPCNTFL $upgradedStr;
-			close ( $UPCNTFL );
+			my $UPCNTFL;
+			if (! open ($UPCNTFL, '>', $upgradedContolFile)) {
+				$kiwi -> error  ("Failed to auto upgrade control file: $!");
+				$kiwi -> failed ();
+			} else {
+				print $UPCNTFL $upgradedStr;
+				close ( $UPCNTFL );
+				my $info;
+				$info = "Automatically upgraded $controlFile ";
+				$info.= "to $upgradedContolFile\n";
+				$kiwi -> info ( $info );
+				$info = "Reported Line numbers may not match the ";
+				$info.= "file $controlFile\n";
+				$kiwi -> info ( $info );
+			}
 		}
 		my $locator = KIWILocator -> instance();
 		my $jingExec = $locator -> getExecPath('jing');
