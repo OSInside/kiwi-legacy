@@ -290,8 +290,8 @@ function baseSetupOEMPartition {
 		echo "OEM_PARTITION_INSTALL=1" >> $oemfile
 	fi
 	if [ ! -z "$kiwi_oemataraid_scan" ];then
-		echo "Setting up OEM_ATARAID_SCAN=1"
-		echo "OEM_ATARAID_SCAN=1" >> $oemfile
+		echo "Setting up DISABLE_OEM_ATARAID_SCAN=1"
+		echo "DISABLE_OEM_ATARAID_SCAN=1" >> $oemfile
 	fi
 	if [ ! -z "$kiwi_oemswapMB" ];then
 		echo "Setting up OEM_SWAPSIZE=$kiwi_oemswapMB"

@@ -80,6 +80,7 @@ sub new {
 		kiwi_luks
 		kiwi_lvm
 		kiwi_oemalign
+		kiwi_oemataraid_scan
 		kiwi_oembootwait
 		kiwi_oemkboot
 		kiwi_oempartition_install

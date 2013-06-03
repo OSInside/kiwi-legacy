@@ -9168,6 +9168,9 @@ sub __updateDescriptionFromChangeSet_legacy {
 	if (defined $changeset->{"oem-align-partition"}) {
 		$this -> __setOEMOptionsElement ("oem-align-partition",$changeset);
 	}
+	if (defined $changeset->{"oem-ataraid-scan"}) {
+		$this -> __setOEMOptionsElement ("oem-ataraid-scan",$changeset);
+	}
 	if (defined $changeset->{"oem-partition-install"}) {
 		$this -> __setOEMOptionsElement ("oem-partition-install",$changeset);
 	}
