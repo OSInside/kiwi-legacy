@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jun  4 17:41:26 CEST 2013 - ms@suse.de
+
+- fixed fetchFile function. The variable $imageBlkSize is
+  not initialized, so it is better to use $chunk
+
+-------------------------------------------------------------------
 Tue May 14 15:57:31 CEST 2013 - ms@suse.de
 
 - if a targetdevice is used instead of a loop we need to wait
