@@ -1017,7 +1017,7 @@ sub createVMwareConfiguration {
 	#------------------------------------------
 	my $cdtype = $vmdata -> getDVDController();
 	my $cdid = $vmdata -> getDVDID();
-	if ($cdtype && $cdid) {
+	if ($cdtype && defined $cdid) {
 		my $device = $cdtype . $cdid;
 		print $VMWFD $device.':0.present = "true"'."\n";
 		print $VMWFD $device.':0.deviceType = "cdrom-raw"'."\n";
