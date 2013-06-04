@@ -6288,7 +6288,7 @@ function fetchFile {
 				call="gzip -d < $host/$path \
 					2>$TRANSFER_ERRORS_FILE | $dump"
 			else
-				call="dd if=$host/$path bs=$imageBlkSize |\
+				call="dd if=$host/$path bs=$chunk |\
 					$dump"
 			fi
 			;;
