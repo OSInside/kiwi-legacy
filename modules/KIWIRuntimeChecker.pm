@@ -128,6 +128,9 @@ sub createChecks {
 	if (! $this -> __isoHybridCapable()) {
 		return;
 	}
+	if (! $this -> __checkLVMoemSizeSettings()) {
+		return;
+	}
 	if (! $this -> __checkSystemDiskData()) {
 		return;
 	}
@@ -281,11 +284,13 @@ sub __checkLVMoemSizeSettings {
 	# Verify that the specified LVM size requirements do not
 	# exceed the specified OEM system size if specified
 	# ---
-	my $this    = shift;
-	my $kiwi    = $this -> {kiwi};
-	my $xml     = $this -> {xml};
-	my $imgType = $xml  -> getImageType() -> getTypeName();
-	my $oemConf = $xml  -> getOEMConfig();
+	my $this        = shift;
+	my $kiwi        = $this -> {kiwi};
+	my $xml         = $this -> {xml};
+	my $imgType     = $xml  -> getImageType() -> getTypeName();
+	my $oemConf     = $xml  -> getOEMConfig();
+	my $volSizes    = 0;
+	my $volAllCount = 0;
 	#==========================================
 	# Perform the test only for oem images
 	#------------------------------------------
@@ -302,26 +307,56 @@ sub __checkLVMoemSizeSettings {
 	# Collect volume size values and swap
 	#------------------------------------------
 	my $sysDisk = $xml  -> getSystemDiskConfig();
-	my $volSizes = 0;
 	if ($sysDisk) {
 		my $volIDs = $sysDisk -> getVolumeIDs();
 		if ($volIDs) {
 			for my $id (@{$volIDs}) {
 				my $size = $sysDisk -> getVolumeSize ($id);
+				my $freeSpace = $sysDisk -> getVolumeFreespace ($id);
+				if (($size) && ($freeSpace)) {
+					my $msg;
+					$msg = 'Found size and freespace specified for one volume';
+					$kiwi -> error ($msg);
+					$kiwi -> failed();
+					return;
+				}
 				if (($size) && ($size ne 'all')) {
 					$volSizes += $size;
+				} elsif (($size) && ($size eq 'all')) {
+					$volAllCount++;
+				}
+				# /.../
+				# this is a fast check which also runs in
+				# prepare. Thus we can't do a correct check for
+				# the freespace size requests because we don't
+				# know the real size prior to the installation
+				# ----
+				if (($freeSpace) && ($freeSpace ne 'all')) {
+					$volSizes += $freeSpace;
+				} elsif (($freeSpace) && ($freeSpace eq 'all')) {
+					$volAllCount++;
 				}
 			}
 		}
 	}
 	#==========================================
-	# Check values
+	# Check all size setup
+	#------------------------------------------
+	if ($volAllCount > 1) {
+		my $msg;
+        $msg = 'Multiple volumes flagged with the "all" size attribute';
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return;
+	}
+	#==========================================
+	# Check size values
 	#------------------------------------------
 	my $systemSize = $oemConf -> getSystemSize();
 	if (($systemSize) && ($systemSize < $volSizes)) {
 		my $msg;
 		$msg = 'Specified system size is smaller than requested ';
-		$msg.= 'volume sizes, plus swap';
+		$msg.= 'volume sizes';
 		$kiwi -> error ($msg);
 		$kiwi -> failed();
 		return;
@@ -629,6 +664,8 @@ sub __checkSystemDiskData {
 	my $sysDisk  = $xml  -> getSystemDiskConfig();
 	my $tree     = $cmdL -> getConfigDir();
 	my $needFree = 0;
+	my $rootsize = 0;
+	my $lvsum    = 0;
 	my $msg;
 	if ($sysDisk) {
 		my $volIDs = $sysDisk -> getVolumeIDs();
@@ -636,10 +673,16 @@ sub __checkSystemDiskData {
 			for my $id (@{$volIDs}) {
 				my $name = $sysDisk -> getVolumeName ($id);
 				my $size = $sysDisk -> getVolumeSize ($id);
+				my $freeSpace = $sysDisk -> getVolumeFreespace ($id);
 				my $lvsize = 0;
 				my $lvpath;
 				my $path = $name;
 				$path =~ s/_/\//g;
+				if ($name eq '@root') {
+					$rootsize = KIWIGlobals -> instance() -> dsize ($tree);
+					$rootsize = sprintf ("%.f",$rootsize / $MEGABYTE);
+					next;
+				}
 				if (! -d "$tree/$path") {
 					$msg = "Volume path $path does not exist ";
 					$msg.= 'in unpacked tree';
@@ -647,11 +690,12 @@ sub __checkSystemDiskData {
 					$kiwi -> failed();
 					return;
 				}
+				$lvpath = "$tree/$path";
+				$lvsize = KIWIGlobals -> instance() -> dsize ($lvpath);
+				$lvsize = sprintf ("%.f",$lvsize / $MEGABYTE);
+				$lvsum += $lvsize;
 				if (($size) && ($size ne 'all')) {
-					$lvpath = "$tree/$path";
-					$lvsize = KIWIGlobals -> instance() -> dsize ($lvpath);
-					$lvsize = sprintf ("%.f",$lvsize / $MEGABYTE);
-					if (($size ne 'all') && ($lvsize > $size)) {
+					if ($lvsize > $size) {
 						$msg = "Required size for $name [ $lvsize MB ] ";
 						$msg.= "is larger than specified size [ $size ] MB";
 						$kiwi -> error ($msg);
@@ -660,10 +704,13 @@ sub __checkSystemDiskData {
 					}
 					$needFree += $size - $lvsize;
 				}
-				my $freeSpace = $sysDisk -> getVolumeFreespace ($id);
 				if (($freeSpace) && ($freeSpace ne 'all')) {
 					$needFree += $freeSpace;
 				}
+			}
+			if ($rootsize) {
+				$rootsize -= $lvsum;
+				$needFree += $rootsize;
 			}
 		}
 	}

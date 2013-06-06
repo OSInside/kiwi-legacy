@@ -6403,7 +6403,11 @@ sub getImageConfig_legacy {
 			$vol =~ s/^\///;
 			$vol =~ s/\//_/g;
 			$vol = "LV".$vol;
-			if ("$attrval" eq "all") {
+			if ($vol eq 'LV@root') {
+				if ($attrval ne 'all') {
+					$result{kiwi_LVM_LVRoot} = $attrname.":".$attrval;
+				}
+			} elsif ("$attrval" eq "all") {
 				$result{kiwi_allFreeVolume} = $vol;
 			} else {
 				$result{"kiwi_LVM_$vol"} = $attrname.":".$attrval;

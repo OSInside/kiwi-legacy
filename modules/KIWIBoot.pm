@@ -1690,7 +1690,19 @@ sub setupBootDisk {
 				$kiwi -> failed ();
 				return;
 			}
+			my $lvsum = 0;
 			foreach my $vol (keys %lvmparts) {
+				#==========================================
+				# skip special @root volume data
+				#------------------------------------------
+				if ($vol eq '@root') {
+					# /.../
+					# this volume contains the size information for the
+					# LVRoot volume and doesn't need to be handled here
+					# see end of block for handling @root
+					# ----
+					next;
+				}
 				#==========================================
 				# check directory per volume
 				#------------------------------------------
@@ -1705,7 +1717,8 @@ sub setupBootDisk {
 				#------------------------------------------
 				my $lvpath = "$system/$pname";
 				my $lvsize = KIWIGlobals -> instance() -> dsize ($lvpath);
-				$lvsize /= 1048576;
+				$lvsize = int ($lvsize / 1048576);
+				$lvsum += $lvsize;
 				#==========================================
 				# use 20% (min 30M) spare space per volume
 				#------------------------------------------
@@ -1764,6 +1777,66 @@ sub setupBootDisk {
 				# increase total vm disk size
 				#------------------------------------------
 				$kiwi->loginfo ("Increasing disk size for volume $pname\n");
+				$this -> __updateDiskSize ($addToDisk);
+			}
+			#==========================================
+			# Handle @root volume
+			#------------------------------------------
+			if ($type{type} eq "vmx") {
+				#==========================================
+				# calculate size required by root volume
+				#------------------------------------------
+				my $rootsize = KIWIGlobals -> instance() -> dsize ($system);
+				$rootsize = int ($rootsize / 1048576);
+				$rootsize -= $lvsum;
+				#==========================================
+				# use 20% (min 30M) spare space
+				#------------------------------------------
+				my $spare = int (($rootsize * 1.2) - $rootsize);
+				if ($spare < 30) {
+					$spare = 30;
+				}
+				my $spare_on_volume = $spare;
+				my $serve_on_disk   = 30;
+				#==========================================
+				# is requested size absolute or relative
+				#------------------------------------------
+				my $reqAbsolute = 0;
+				if ($lvmparts{'@root'}) {
+					$reqAbsolute = $lvmparts{'@root'}->[1];
+				}
+				#==========================================
+				# calculate root volume size
+				#------------------------------------------
+				my $reqSize   = 0;
+				my $addToDisk = 0;
+				my $lvroot    = 0;
+				if ($lvmparts{'@root'}) {
+					$reqSize = $lvmparts{'@root'}->[0];
+					if ($reqSize eq "all") {
+						$reqSize = 0;
+					}
+				}
+				if ($reqAbsolute) {
+					if ($reqSize > ($rootsize + $spare_on_volume)) {
+						$lvroot = int ($reqSize + $spare_on_volume);
+						$addToDisk = $reqSize - $rootsize;
+					} else {
+						$lvroot = int ($rootsize + $spare);
+						$addToDisk = $serve_on_disk;
+					}
+				} else {
+					$lvroot = int ($rootsize + $reqSize + $spare_on_volume);
+					$addToDisk = $reqSize + $serve_on_disk;
+				}
+				#==========================================
+				# add calculated root vol. size to lvmparts
+				#------------------------------------------
+				$lvmparts{'@root'}->[2] = $lvroot;
+				#==========================================
+				# increase total vm disk size
+				#------------------------------------------
+				$kiwi->loginfo ("Increasing disk size for root volume\n");
 				$this -> __updateDiskSize ($addToDisk);
 			}
 		}
@@ -2410,6 +2483,7 @@ sub setupBootDisk {
 			#------------------------------------------
 			foreach my $level (sort {($a <=> $b) || ($a cmp $b)} keys %phash) {
 				foreach my $pname (@{$phash{$level}}) {
+					next if $pname eq '@root';
 					my $lname = $pname; $lname =~ s/\//_/g;
 					my $device = "/dev/$VGroup/LV$lname";
 					$status = qxx ("mkdir -p $loopdir/$pname 2>&1");
@@ -6191,6 +6265,7 @@ sub setVolumeGroup {
 	my %newmap;
 	my $status;
 	my $result;
+	my $allFree = 'LVRoot';
 	$status = qxx ("vgremove --force $VGroup 2>&1");
 	$status = qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
 	$status = qxx ("pvcreate $deviceMap{root} 2>&1");
@@ -6232,25 +6307,48 @@ sub setVolumeGroup {
 		if (%lvmparts) {
 			my %ihash = ();
 			foreach my $name (keys %lvmparts) {
-				my $pname  = $name; $pname =~ s/_/\//g;
-				my $lvsize = $lvmparts{$name}->[2];
-				my $lvdev  = "/dev/$VGroup/LV$name";
-				my $inodes = 2 * int ($lvsize * 1048576 / $inoderatio);
-				if ($inodes < $this->{gdata}->{FSMinInodes}) {
-					$inodes = $this->{gdata}->{FSMinInodes};
+				if ($lvmparts{$name}->[0] eq 'all') {
+					if ($name eq '@root') {
+						$allFree = 'LVRoot';
+					} else {
+						$allFree = "LV$name";
+					}
 				}
-				$ihash{$lvdev} = $inodes;
-				$status = qxx ("lvcreate -L $lvsize -n LV$name $VGroup 2>&1");
-				$result = $? >> 8;
-				if ($result != 0) {
-					last;
+				if ($name ne '@root') {
+					my $lvsize = $lvmparts{$name}->[2];
+					my $lvdev  = "/dev/$VGroup/LV$name";
+					my $inodes = 2 * int ($lvsize * 1048576 / $inoderatio);
+					if ($inodes < $this->{gdata}->{FSMinInodes}) {
+						$inodes = $this->{gdata}->{FSMinInodes};
+					}
+					$ihash{$lvdev} = $inodes;
+					$status = qxx (
+						"lvcreate -L $lvsize -n LV$name $VGroup 2>&1"
+					);
+					$result = $? >> 8;
+					if ($result != 0) {
+						last;
+					}
 				}
 			}
 			$this->{deviceinodes} = \%ihash;
 		}
 		if ($result == 0) {
-			$status = qxx ("lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1");
+			if (($lvmparts{'@root'}) && ($lvmparts{'@root'}->[2])) {
+				my $rootsize = $lvmparts{'@root'}->[2];
+				$status = qxx ("lvcreate -L $rootsize -n LVRoot $VGroup 2>&1");
+			} else {
+				$status = qxx ("lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1");
+			}
 			$result = $? >> 8;
+		}
+		if ($result == 0) {
+			if (($lvmparts{'@root'}) && ($lvmparts{'@root'}->[2])) {
+				$status = qxx (
+					"lvextend -l +100%FREE /dev/$VGroup/$allFree 2>&1"
+				);
+				$result = $? >> 8;
+			}
 		}
 		if ($result != 0) {
 			$kiwi -> failed ();

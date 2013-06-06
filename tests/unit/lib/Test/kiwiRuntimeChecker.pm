@@ -619,7 +619,7 @@ sub test_lvmOEMSizeSetings {
 	my $res = $checker -> prepareChecks();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Specified system size is smaller than requested '
-		. 'volume sizes, plus swap';
+		. 'volume sizes';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -925,7 +925,7 @@ sub test_systemDiskDataNoVolume {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCommandLineObj();
-	my $configDir = $this -> {dataDir} . '/lvmSetup';
+	my $configDir = $this -> {dataDir} . '/lvmSetup2';
 	$cmd -> setConfigDir ($configDir);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $tmpDir = $this -> createTestTmpDir();
@@ -955,7 +955,7 @@ sub test_systemDiskDataSizeTooSmall {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCommandLineObj();
-	my $configDir = $this -> {dataDir} . '/lvmSetup';
+	my $configDir = $this -> {dataDir} . '/lvmSetup2';
 	$cmd -> setConfigDir ($configDir);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $tmpDir = $this -> createTestTmpDir();
@@ -966,7 +966,7 @@ sub test_systemDiskDataSizeTooSmall {
 	my $status = open my $TESTFILE, '>', $tmpDir . '/home/out.txt';
 	$this -> assert_not_null($status);
 	my $cnt = 0;
-	while ($cnt < $MEGABYTE + 1) {
+	while ($cnt < 2*($MEGABYTE + 1)) {
 		print $TESTFILE "a\n";
 		$cnt += 1;
 	}
@@ -975,7 +975,7 @@ sub test_systemDiskDataSizeTooSmall {
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
 	my $res = $checker -> createChecks();
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Calculated 6 MB free, but require 7 MB';
+	my $expected = 'Calculated 1 MB free, but require 3 MB';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -997,7 +997,7 @@ sub test_systemDiskDataVolTooSmall {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCommandLineObj();
-	my $configDir = $this -> {dataDir} . '/lvmSetup';
+	my $configDir = $this -> {dataDir} . '/lvmSetup2';
 	$cmd -> setConfigDir ($configDir);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $tmpDir = $this -> createTestTmpDir();
