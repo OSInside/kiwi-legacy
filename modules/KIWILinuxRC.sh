@@ -2504,6 +2504,7 @@ function setupBootLoaderGrub2 {
 	local orig_sysimg_profile=$mountPrefix/image/.profile
 	local inst_default_grub=$destsPrefix/etc/default/grub
 	local inst_default_grubdev=$destsPrefix/etc/default/grub_installdevice
+	local unifont=$mountPrefix/usr/share/grub2/unicode.pf2
 	#======================================
 	# check for system image .profile
 	#--------------------------------------
@@ -2579,8 +2580,15 @@ function setupBootLoaderGrub2 {
 		GRUB_TIMEOUT=$timeout
 		GRUB_CMDLINE_LINUX_DEFAULT="$cmdline"
 		GRUB_CMDLINE_LINUX=""
-		GRUB_TERMINAL=gfxterm
 	EOF
+	#======================================
+	# set terminal mode
+	#--------------------------------------
+	if [ -e $unifont ];then
+		echo "GRUB_TERMINAL=gfxterm"  >> $inst_default_grub
+	else
+		echo "GRUB_TERMINAL=console"  >> $inst_default_grub
+	fi
 	#======================================
 	# write etc/default/grub_installdevice
 	#--------------------------------------
