@@ -300,7 +300,7 @@ function systemException {
 		fi
 	fi
 	runHook preException "$@"
-	Echo "$1"
+	Echo -e "$1"
 	case "$what" in
 	"reboot")
 		Echo "rebootException: reboot in 120 sec..."; sleep 120
@@ -789,6 +789,14 @@ function installBootLoader {
 			"*** boot loader install for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+	if [ ! $? = 0 ];then
+		msg1="The system will not be able to reboot. Please make sure"
+		msg2="to fixup and install the bootloader before next reboot"
+		msg3="check /var/log/boot.kiwi for details"
+		systemException \
+			"Bootloader installation has failed !\n\n$msg1\n$msg2\n$msg3\n" \
+		"waitkey"
+	fi
 	masterBootID=$(printf 0x%04x%04x $RANDOM $RANDOM)
 	Echo "writing new MBR ID to master boot record: $masterBootID"
 	echo $masterBootID > /boot/mbrid
@@ -844,11 +852,14 @@ function installBootLoaderS390 {
 		zipl -c /etc/zipl.conf 1>&2
 		if [ ! $? = 0 ];then
 			Echo "Failed to install boot loader"
+			return 1
 		fi
 	else
 		Echo "Image doesn't have zipl installed"
 		Echo "Can't install boot loader"
+		return 1
 	fi
+	return 0
 }
 #======================================
 # installBootLoaderSyslinux
@@ -858,15 +869,23 @@ function installBootLoaderSyslinux {
 	if [ -e $syslmbr ];then
 		Echo "Installing boot loader..."
 		if [ $loader = "syslinux" ];then
-			syslinux $imageBootDevice
+			if ! syslinux $imageBootDevice;then
+				Echo "Failed to install boot loader"
+				return 1
+			fi
 		else
-			extlinux --install /boot/syslinux
+			if ! extlinux --install /boot/syslinux;then
+				Echo "Failed to install boot loader"
+				return 1
+			fi
 		fi
 		dd if=$syslmbr of=$imageDiskDevice bs=512 count=1 conv=notrunc
 	else
 		Echo "Image doesn't have syslinux (mbr.bin) installed"
 		Echo "Can't install boot loader"
+		return 1
 	fi
+	return 0
 }
 #======================================
 # installBootLoaderGrub
@@ -881,11 +900,14 @@ function installBootLoaderGrub {
 		grub --batch --no-floppy < /etc/grub.conf 1>&2
 		if [ ! $? = 0 ];then
 			Echo "Failed to install boot loader"
+			return 1
 		fi
 	else
 		Echo "Image doesn't have grub installed"
 		Echo "Can't install boot loader"
+		return 1
 	fi
+	return 0
 }
 #======================================
 # installBootLoaderGrub2
@@ -964,19 +986,21 @@ function installBootLoaderYaboot {
 		/sbin/lilo 1>&2
 		if [ ! $? = 0 ];then
 			Echo "Failed to install boot loader"
+			return 1
 		fi
 	else
 		Echo "Image doesn't have lilo installed"
 		Echo "Can't install boot loader"
+		return 1
 	fi
+	return 0
 }
 #======================================
 # installBootLoaderS390Recovery
 #--------------------------------------
 function installBootLoaderS390Recovery {
-	systemException \
-		"*** zipl: recovery boot not implemented ***" \
-	"reboot"
+	Echo "*** zipl: recovery boot not implemented ***"
+	return 1
 }
 #======================================
 # installBootLoaderSyslinuxRecovery
@@ -985,14 +1009,22 @@ function installBootLoaderSyslinuxRecovery {
 	local syslmbr=/usr/share/syslinux/mbr.bin
 	if [ -e $syslmbr ];then
 		if [ $loader = "syslinux" ];then
-			syslinux $imageRecoveryDevice
+			if ! syslinux $imageRecoveryDevice;then
+				Echo "Failed to install boot loader"
+				return 1
+			fi
 		else
-			extlinux --install /reco-save/boot/syslinux
+			if ! extlinux --install /reco-save/boot/syslinux;then
+				Echo "Failed to install boot loader"
+				return 1
+			fi
 		fi
 	else
 		Echo "Image doesn't have syslinux (mbr.bin) installed"
 		Echo "Can't install boot loader"
+		return 1
 	fi
+	return 0
 }
 #======================================
 # installBootLoaderGrubRecovery
@@ -1010,15 +1042,17 @@ function installBootLoaderGrubRecovery {
 	echo "setup (hd0,$gdevreco)" >> $input
 	echo "quit"          >> $input
 	if which grub &>/dev/null;then
-		grub --batch < $input 1>&2
+		if ! grub --batch < $input 1>&2;then
+			Echo "Failed to install boot loader"
+			return 1
+		fi
 		rm -f $input
 	else
 		Echo "Image doesn't have grub installed"
 		Echo "Can't install boot loader"
-		systemException \
-			"recovery grub setup failed" \
-		"reboot"
+		return 1
 	fi
+	return 0
 }
 #======================================
 # installBootLoaderGrub2Recovery
@@ -1067,6 +1101,7 @@ function installBootLoaderGrub2Recovery {
 		Echo "Failed to create grub2 boot configuration"
 		return 1
 	fi
+	return 0
 }
 #======================================
 # updateModuleDependencies
