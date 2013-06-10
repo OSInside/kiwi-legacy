@@ -70,6 +70,14 @@ msgstr "إلغاء"
 msgid "Exit"
 msgstr "إنهاء"
 
+msgid "Bootloader installation has failed"
+msgstr ""
+
+msgid ""
+"The system will not be able to reboot. Please make sure to fixup and install "
+"the bootloader before next reboot. Check /var/log/boot.kiwi for details"
+msgstr ""
+
 msgid "Please remove the CD/DVD before reboot"
 msgstr ""
 

@@ -71,6 +71,14 @@ msgstr "Отмена"
 msgid "Exit"
 msgstr "Выход"
 
+msgid "Bootloader installation has failed"
+msgstr ""
+
+msgid ""
+"The system will not be able to reboot. Please make sure to fixup and install "
+"the bootloader before next reboot. Check /var/log/boot.kiwi for details"
+msgstr ""
+
 #, fuzzy
 msgid "Please remove the CD/DVD before reboot"
 msgstr "Перед продолжением извлеките установочный CD/DVD"

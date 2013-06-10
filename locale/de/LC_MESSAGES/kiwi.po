@@ -19,7 +19,7 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Boot continues in 10 sec"
-msgstr ""
+msgstr "Bootvorgang wird in 10 sec fortgesetzt"
 
 msgid "Enter LUKS passphrase"
 msgstr "LUKS-Passphrase eingeben"
@@ -68,6 +68,17 @@ msgstr "Verwerfen"
 
 msgid "Exit"
 msgstr "Exit"
+
+msgid "Bootloader installation has failed"
+msgstr "Bootloader Installation nicht möglich"
+
+msgid ""
+"The system will not be able to reboot. Please make sure to fixup and install "
+"the bootloader before next reboot. Check /var/log/boot.kiwi for details"
+msgstr ""
+"Das System kann nicht neu gestartet werden. Bitte prüfen und korrigieren Sie "
+"das Bootloader setup vor dem nächsten Neustart. Weitere Information finden "
+"Sie auch in /var/log/boot.kiwi"
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "Bitte entfernen Sie die CD/DVD vor dem Neustart"
