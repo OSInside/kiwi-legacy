@@ -790,12 +790,15 @@ function installBootLoader {
 		"reboot"
 	esac
 	if [ ! $? = 0 ];then
-		msg1="The system will not be able to reboot. Please make sure"
-		msg2="to fixup and install the bootloader before next reboot"
-		msg3="check /var/log/boot.kiwi for details"
-		systemException \
-			"Bootloader installation has failed !\n\n$msg1\n$msg2\n$msg3\n" \
-		"waitkey"
+		if which dialog &>/dev/null;then
+			Dialog \
+				--backtitle \"$TEXT_BOOT_SETUP_FAILED\" \
+				--msgbox "\"$TEXT_BOOT_SETUP_FAILED_INFO\"" 10 70
+		else
+			systemException \
+				"$TEXT_BOOT_SETUP_FAILED\n\n$TEXT_BOOT_SETUP_FAILED_INFO" \
+			"waitkey"
+		fi
 	fi
 	masterBootID=$(printf 0x%04x%04x $RANDOM $RANDOM)
 	Echo "writing new MBR ID to master boot record: $masterBootID"
@@ -1197,6 +1200,17 @@ function setupRHELInitrd {
 		systemIntegrity=unknown
 		bootLoaderOK=0
 	fi
+	if [ $bootLoaderOK = 0 ];then
+		if which dialog &>/dev/null;then
+			Dialog \
+				--backtitle \"$TEXT_BOOT_SETUP_FAILED\" \
+				--msgbox "\"$TEXT_BOOT_SETUP_FAILED_INFO\"" 10 70
+		else
+			systemException \
+				"$TEXT_BOOT_SETUP_FAILED\n\n$TEXT_BOOT_SETUP_FAILED_INFO" \
+			"waitkey"
+		fi
+	fi
 }
 #======================================
 # setupSUSEInitrd
@@ -1282,6 +1296,17 @@ function setupSUSEInitrd {
 		Echo "Can't create initrd"
 		systemIntegrity=unknown
 		bootLoaderOK=0
+	fi
+	if [ $bootLoaderOK = 0 ];then
+		if which dialog &>/dev/null;then
+			Dialog \
+				--backtitle \"$TEXT_BOOT_SETUP_FAILED\" \
+				--msgbox "\"$TEXT_BOOT_SETUP_FAILED_INFO\"" 10 70
+		else
+			systemException \
+				"$TEXT_BOOT_SETUP_FAILED\n\n$TEXT_BOOT_SETUP_FAILED_INFO" \
+			"waitkey"
+		fi
 	fi
 }
 #======================================
@@ -7474,6 +7499,10 @@ function importText {
 		getText "System will be shutdown. Remove USB stick before power on")
 	export TEXT_SELECT=$(
 		getText "Select disk for installation:")
+	export TEXT_BOOT_SETUP_FAILED=$(
+		getText "Bootloader installation has failed")
+	export TEXT_BOOT_SETUP_FAILED_INFO=$(
+		getText "The system will not be able to reboot. Please make sure to fixup and install the bootloader before next reboot. Check /var/log/boot.kiwi for details")
 }
 #======================================
 # selectLanguage
