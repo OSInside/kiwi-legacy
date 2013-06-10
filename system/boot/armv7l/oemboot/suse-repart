@@ -582,16 +582,9 @@ function OEMPartitionInstall {
 		#--------------------------------------
 		resizeLVMVolumes
 		#======================================
-		# Extend root + optional allFreeVolume
+		# Extend root or allFreeVolume
 		#--------------------------------------
-		if [ -z "$OEM_SYSTEMSIZE" ];then
-			lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
-		else
-			lvextend --size $OEM_SYSTEMSIZE"M" /dev/$VGROUP/LVRoot
-			if [ "$allFreeVolume" != "LVRoot" ];then
-				lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
-			fi
-		fi
+		lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
 	fi
 	#======================================
 	# resize boot filesystem if needed
