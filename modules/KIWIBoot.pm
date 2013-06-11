@@ -1690,6 +1690,13 @@ sub setupBootDisk {
 				$kiwi -> failed ();
 				return;
 			}
+			if ($type{filesystem} =~ /zfs/) {
+				$kiwi -> error (
+					"LVM volumes setup not yet supported with zfs filesystem"
+				);
+				$kiwi -> failed ();
+				return;
+			}
 			my $lvsum = 0;
 			foreach my $vol (keys %lvmparts) {
 				#==========================================
@@ -1850,7 +1857,7 @@ sub setupBootDisk {
 	#==========================================
 	# check for raw read-write overlay
 	#------------------------------------------
-	if ($type{filesystem} eq "clicfs") {
+	if ($type{filesystem} =~ /clicfs/) {
 		$rawRW = 1;
 	}
 	#==========================================
@@ -6512,6 +6519,7 @@ sub setupFilesystem {
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my $cmdL   = $this->{cmdL};
+	my $opts   = $xml -> getImageType() -> getFSMountOptions();
 	my %type   = ();
 	if ($xml) {
 		%type = %{$xml->getImageTypeAndAttributes_legacy()};
@@ -6617,17 +6625,15 @@ sub setupFilesystem {
 		};
 		/^zfs/          && do {
 			$kiwi -> info ("Creating zfs $name filesystem");
-			$status = qxx (
-				"zpool create kiwiroot $device 2>&1"
-			);
+			if ($opts) {
+				$status = qxx ("zpool create -o $opts kiwipool $device 2>&1");
+			} else {
+				$status = qxx ("zpool create kiwipool $device 2>&1");
+			}
 			$result = $? >> 8;
 			if ($result == 0) {
-				$status = qxx ("umount /kiwiroot 2>&1");
-				$result = $? >> 8;
-				rmdir '/kiwiroot';
-				if ($result == 0) {
-					$status = qxx ("zpool export kiwiroot 2>&1");
-					$result = $? >> 8;
+				if (! KIWIGlobals -> instance() -> setupZFSPoolVolumes()) {
+					$result = 1;
 				}
 			}
 			last SWITCH;

@@ -393,21 +393,26 @@ sub mount {
 			if (! -b $source) {
 				my $basedir = dirname ($source);
 				$status = KIWIQX::qxx (
-					"zpool import -d $basedir kiwiroot 2>&1"
+					"zpool import -d $basedir kiwipool 2>&1"
 				);
 			} else {
-				$status = KIWIQX::qxx ("zpool import kiwiroot 2>&1");
+				$status = KIWIQX::qxx (
+					"zpool import kiwipool 2>&1"
+				);
 			}
 			$result = $? >> 8;
 			if ($result == 0) {
-				push @UmountStack,"zpool export kiwiroot";
+				push @UmountStack,"zpool export kiwipool";
 				$this->{UmountStack} = \@UmountStack;
-				$status = KIWIQX::qxx ("umount /kiwiroot 2>&1");
+				$status = KIWIQX::qxx ("zfs umount -a 2>&1");
 				$result = $? >> 8;
 				if ($result == 0) {
-					rmdir '/kiwiroot';
+					rmdir '/kiwipool/ROOT/system-1';
+					rmdir '/kiwipool/ROOT';
+					rmdir '/kiwipool';
+					my $rootpool = 'kiwipool/ROOT/system-1';
 					$status = KIWIQX::qxx (
-						"mount -o zfsutil -t zfs kiwiroot $dest 2>&1"
+						"mount -o zfsutil -t zfs $rootpool $dest 2>&1"
 					);
 					$result = $? >> 8;
 				}
@@ -732,6 +737,70 @@ sub checkFileSystem {
 }
 
 #==========================================
+# setupZFSPoolVolumes
+#------------------------------------------
+sub setupZFSPoolVolumes {
+	# /.../
+	# create zfs pool layout as suggested by
+	# the community
+	# ----
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $data;
+	my $code;
+	#==========================================
+	# create sub pools
+	#------------------------------------------
+	$data = KIWIQX::qxx ('zfs create kiwipool/ROOT 2>&1');
+	$code = $? >> 8;
+	if ($code == 0) {
+		$data = KIWIQX::qxx ('zfs create kiwipool/ROOT/system-1 2>&1');
+		$code = $? >> 8;
+	}
+	if ($code != 0) {
+		$kiwi -> error ("Failed to create zfs pool volumes: $data\n");
+		$kiwi -> failed();
+		$this -> cleanLuks();
+		return;
+	}
+	#==========================================
+	# create pool properties
+	#------------------------------------------
+	$data = KIWIQX::qxx ("zfs umount -a 2>&1");
+	$code = $? >> 8;
+	if ($code == 0) {
+		$data = KIWIQX::qxx (
+			'zpool set bootfs=kiwipool/ROOT/system-1 kiwipool 2>&1'
+		);
+		$code = $? >> 8;
+	}
+	if ($code != 0) {
+		$kiwi -> error ("Failed to create zfs pool properties: $data\n");
+		$kiwi -> failed();
+		$this -> cleanLuks();
+		return;
+	}
+	#==========================================
+	# export pool
+	#------------------------------------------
+	$data = KIWIQX::qxx ("zpool export kiwipool 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error ("Failed to export zfs pool: $data\n");
+		$kiwi -> failed();
+		$this -> cleanLuks();
+		return;
+	}
+	#==========================================
+	# cleanup
+	#------------------------------------------
+	rmdir '/kiwipool/ROOT/system-1';
+	rmdir '/kiwipool/ROOT';
+	rmdir '/kiwipool';
+	return $this;
+}
+
+#==========================================
 # setupBTRFSSubVolumes
 #------------------------------------------
 sub setupBTRFSSubVolumes {
@@ -740,7 +809,6 @@ sub setupBTRFSSubVolumes {
 	# by the community and compatible to a standard
 	# installation
 	# ----
-	#
 	my $this = shift;
 	my $path = shift;
 	my $kiwi = $this->{kiwi};

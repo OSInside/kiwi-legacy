@@ -4028,8 +4028,8 @@ sub mountLogicalExtend {
 	chomp $fstype;
 	if ($fstype eq 'zfs_member') {
 		$opts   = 'zfsutil -t zfs';
-		$target = 'kiwiroot';
-		push @clean,"zpool export kiwiroot";
+		$target = 'kiwipool/ROOT/system-1';
+		push @clean,"zpool export kiwipool";
 		$this->{UmountStack} = \@clean;
 	}
 	if ($fstype eq "ext4") {
@@ -4537,12 +4537,16 @@ sub setupZFS {
 	my $cmdL   = $this->{cmdL};
 	my $kiwi   = $this->{kiwi};
 	my $target = $this->{imageDest}."/".$name;
+	my $opts   = $this->{xml} -> getImageType() -> getFSMountOptions();
+	my $data;
 	if ($device) {
 		$target = $device;
 	}
-	my $data = qxx (
-		"zpool create kiwiroot $target 2>&1"
-	);
+	if ($opts) {
+		$data = qxx ("zpool create -o $opts kiwipool $target 2>&1");
+	} else {
+		$data = qxx ("zpool create kiwipool $target 2>&1");
+	}
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create ZFS filesystem");
@@ -4550,23 +4554,20 @@ sub setupZFS {
 		$kiwi -> error  ($data);
 		return;
 	}
-	$data = qxx ("umount /kiwiroot 2>&1");
+	if (! KIWIGlobals -> instance() -> setupZFSPoolVolumes()) {
+		return;
+	}
+	$data = qxx ("zpool import -d $this->{imageDest} kiwipool 2>&1");
 	$code = $? >> 8;
 	if ($code == 0) {
-		$data = qxx ("zpool export kiwiroot 2>&1");
+		$data = qxx ("zfs umount -a 2>&1");
 		$code = $? >> 8;
-		if ($code == 0) {
-			$data = qxx ("zpool import -d $this->{imageDest} kiwiroot 2>&1");
-			$code = $? >> 8;
-			if ($code == 0) {
-				$data = qxx ("umount /kiwiroot 2>&1");
-				$code = $? >> 8;
-				rmdir '/kiwiroot';
-			}
-		}
+		rmdir '/kiwipool/ROOT/system-1';
+		rmdir '/kiwipool/ROOT';
+		rmdir '/kiwipool';
 	}
 	if ($code != 0) {
-		$kiwi -> error  ("Couldn't sync ZFS filesystem");
+		$kiwi -> error  ("Couldn't sync zfs pool");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
 		return;

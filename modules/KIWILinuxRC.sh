@@ -5419,20 +5419,22 @@ function kiwiMount {
 	fi
 	if [ "$FSTYPE" = "zfs" ];then
 		if [ -b $src ];then
-			if ! zpool import kiwiroot >/dev/null;then
+			if ! zpool import kiwipool >/dev/null;then
 				return 1
 			fi
 		else
 			local basedir=$(dirname $src)
-			if ! zpool import -d $basedir kiwiroot;then
+			if ! zpool import -d $basedir kiwipool;then
 				return 1
 			fi
 		fi
-		if ! umount /kiwiroot;then
+		if ! zfs umount -a ; then
 			return 1
 		fi
-		rmdir /kiwiroot
-		if ! mount -o zfsutil -t zfs kiwiroot $dst >/dev/null;then
+		rmdir /kiwipool/ROOT/system-1
+		rmdir /kiwipool/ROOT
+		rmdir /kiwipool
+		if ! mount -o zfsutil -t zfs kiwipool/ROOT/system-1 $dst >/dev/null;then
 			return 1
 		fi
 	else
