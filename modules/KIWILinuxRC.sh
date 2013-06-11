@@ -5964,7 +5964,11 @@ function mountSystem {
 		[ $retval = 0 ]                   && \
 		[ -z "$RESTORE" ]
 	then
-		setupBootPartition
+		if [[ $kiwi_iname =~ netboot ]];then
+			setupBootPartitionPXE
+		else
+			setupBootPartition
+		fi
 	fi
 	#======================================
 	# reset mount counter
@@ -9106,6 +9110,101 @@ function startUtimer {
 	fi
 }
 #======================================
+# setupBootPartitionPXE
+#--------------------------------------
+function setupBootPartitionPXE {
+	#======================================
+	# Variable setup
+	#--------------------------------------
+	local fs_type
+	local FSTYPE_SAVE=$FSTYPE
+	local mpoint=boot_bind
+	unset NETBOOT_ONLY
+	#======================================
+	# Check for boot partition in PART
+	#--------------------------------------
+	local bootdev=$(pxeBootDevice)
+	if [ -e "$bootdev" ];then
+		export imageBootDevice=$bootdev
+	fi
+	#======================================
+	# Initial bootid setup
+	#--------------------------------------
+	if [ ! -z "$imageBootDevice" ];then
+		# bootid is boot partition
+		export bootid=$(nd $imageBootDevice)
+	else
+		# bootid is root partition
+		export bootid=$(nd $imageRootDevice)
+		export imageBootDevice=$imageRootDevice
+	fi
+	if [ ! -z "$RAID" ] && [ ! -z "$bootid" ];then
+		# raid md devices start with 0 but partition id's start with 1
+		export bootid=$((bootid + 1))
+	fi
+	#======================================
+	# Probe boot/root filesystem
+	#--------------------------------------
+	probeFileSystem $imageRootDevice
+	fs_type=$FSTYPE ; FSTYPE=$FSTYPE_SAVE
+	#======================================
+	# return if no extra boot partition
+	#--------------------------------------
+	if [ $imageBootDevice = $imageRootDevice ];then
+		if [ $fs_type = "unknown" ] || [ "$haveLuks" = "yes" ];then
+			# /.../
+			# there is no extra boot device and the root device has an
+			# unsupported boot filesystem or layer, mark as netboot only
+			# ----
+			export NETBOOT_ONLY=yes
+		fi
+		# no boot partition setup required
+		return
+	fi
+	#======================================
+	# Check boot partition filesystem
+	#--------------------------------------
+	if [ $fs_type = "unknown" ];then
+		# /.../
+		# there is a boot device with an unknown filesystem
+		# create boot filesystem
+		# ----
+		createFilesystem $imageBootDevice
+	fi
+	#======================================
+	# export bootpart relevant variables
+	#--------------------------------------
+	export haveBootPartition=1
+	export bootPartitionFSType=$fs_type
+	export kiwi_BootPart=$bootid
+	#======================================
+	# copy boot data from image to bootpart
+	#--------------------------------------
+	mkdir -p /$mpoint
+	mount $imageBootDevice /$mpoint
+	cp -a /mnt/boot /$mpoint
+	if [ -e /boot.tgz ];then
+		tar -xf /boot.tgz -C /$mpoint
+	fi
+	umount /$mpoint
+	rmdir  /$mpoint
+	#======================================
+	# bind mount boot partition
+	#--------------------------------------
+	# the resetBootBind() function will resolve this to a
+	# standard /boot mount when the bootloader will be
+	# installed in preinit.
+	# ---
+	if ! isFSTypeReadOnly;then
+		rm -rf /mnt/boot
+		mkdir  /mnt/boot
+	fi
+	mkdir /mnt/$mpoint
+	mount $imageBootDevice /mnt/$mpoint
+	mount --bind \
+		/mnt/$mpoint/boot /mnt/boot
+}
+#======================================
 # setupBootPartition
 #--------------------------------------
 function setupBootPartition {
@@ -9117,7 +9216,6 @@ function setupBootPartition {
 	local haveBootPartition=0
 	local FSTYPE_SAVE=$FSTYPE
 	local fs_type=undef
-	unset NETBOOT_ONLY
 	local BID=1
 	#======================================
 	# Check for partition IDs meta data
@@ -9148,22 +9246,6 @@ function setupBootPartition {
 	#--------------------------------------
 	if [ -z "$bootid" ];then
 		export bootid=$BID
-	fi
-	#======================================
-	# Sanity checks
-	#--------------------------------------
-	if [ "$fs_type" = "luks" ]; then
-		# /.../
-		# ups, boot partition should not be luks encoded
-		# unset bootid and hopefully handly it correctly
-		# outside of this function
-		# ----
-		unset bootid
-	fi
-	if [ -z "$bootid" ] && [[ $kiwi_iname =~ netboot ]];then
-		# pxe boot env and no suitable boot partition found
-		export NETBOOT_ONLY=yes
-		return
 	fi
 	#======================================
 	# Return if no boot setup required
