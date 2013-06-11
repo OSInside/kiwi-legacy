@@ -855,48 +855,17 @@ if isFSTypeReadOnly;then
 fi
 
 #======================================
-# 19) Setup bootid for this table
-#--------------------------------------
-if [ ! -z "$imageBootDevice" ];then
-	# bootid is boot partition
-	export bootid=$(nd $imageBootDevice)
-else
-	if [ -z "$haveLuks" ]; then
-		# bootid is root partition for non LUKS devices
-		export bootid=$(nd $imageRootDevice)
-	else
-		# bootid can be a boot partition or undefined in
-		# e.g pxe netboot only environments. let setupBootPartition
-		# find out if we have one
-		unset bootid
-	fi
-fi
-if [ ! -z "$RAID" ] && [ ! -z "$bootid" ];then
-	# raid md devices start with 0 but partition id's start with 1
-	bootid=$((bootid + 1))
-fi
-
-#======================================
-# 20) Mount OS image to /mnt
+# 19) Mount OS image to /mnt
 #--------------------------------------
 runHook premount
 if ! mountSystem;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
-if [ ! -z "$imageBootDevice" ];then
-	mkdir /boot_tmp && mount $imageBootDevice /boot_tmp
-	cp -a /mnt/boot/* /boot_tmp
-	umount /boot_tmp && rmdir /boot_tmp
-	rm -rf /mnt/boot/*
-	if ! mount $imageBootDevice /mnt/boot;then
-		systemException "Failed to mount boot filesystem" "reboot"
-	fi
-fi
 validateRootTree
 runHook postmount
 
 #======================================
-# 21) Import fixed configuration files
+# 20) Import fixed configuration files
 #--------------------------------------
 runHook preconfig
 if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
@@ -904,19 +873,19 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 		Echo "Configuration files reload forced via RELOAD_CONFIG..."
 	fi
 	#=======================================
-	# 21.0) Import NFS root files
+	# 20.0) Import NFS root files
 	#---------------------------------------
 	if [ ! -z "$NFSROOT" ];then
 		test -f /etc/resolv.conf && cp /etc/resolv.conf /mnt/etc
 	fi
 	#=======================================
-	# 21.1) Import RAID config file
+	# 20.1) Import RAID config file
 	#---------------------------------------
 	if [ ! -z "$RAID" ];then
 		cp /mdadm.conf /mnt/etc
 	fi
 	#=======================================
-	# 21.2) Import files from backup
+	# 20.2) Import files from backup
 	#---------------------------------------
 	BCFG_BASE='etc/KIWI'
 	BCFG_NAME='InstalledConfigFiles'
@@ -926,7 +895,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	ALL_CCONF=`condenseConfigData "$CONF,$VENDOR_CONF"`
 	ALL_CBK_CONF=`condenseConfigData "$BK_CONF,$BK_VENDOR_CONF"`
 	#=======================================
-	# 21.3) Store new configuration
+	# 20.3) Store new configuration
 	#---------------------------------------
 	mkdir  /config
 	mkdir -p  /config/$BCFG_BASE
@@ -934,7 +903,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	echo "CONF=$CONF"               >  "/config/$BCFG_BASE/$BCFG_NAME"
 	echo "VENDOR_CONF=$VENDOR_CONF" >> "/config/$BCFG_BASE/$BCFG_NAME"
 	#=======================================
-	# 21.4) Get files from CONF, VENDOR_CONF
+	# 20.4) Get files from CONF, VENDOR_CONF
 	#---------------------------------------
 	IFS="," ; for i in $ALL_CCONF;do
 		unset configHash
@@ -985,7 +954,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 		fi
 	done
 	#=======================================
-	# 21.5) check config files to be deleted
+	# 20.5) check config files to be deleted
 	#---------------------------------------
 	IFS="," ; for i in $ALL_CBK_CONF;do
 		BKconfigDest=`echo "$i" | cut -d ';' -f 2`
@@ -1004,7 +973,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 	done
 	IFS=$IFS_ORIG
 	#=======================================
-	# 21.6) Check for KIWI_INITRD
+	# 20.6) Check for KIWI_INITRD
 	#---------------------------------------
 	if [ $haveDisk = "1" ] && [ $systemIntegrity = "clean" ];then
 		if [ ! -z "$KIWI_INITRD" ] && [ ! -z "$KIWI_KERNEL" ];then
@@ -1031,7 +1000,7 @@ fi
 runHook postconfig
 
 #======================================
-# 22) check filesystem and kernels
+# 21) check filesystem and kernels
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	if [ "$FSTYPE" != "nfs" ];then
@@ -1041,14 +1010,14 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 23) setup ird/kernel links for union
+# 22) setup ird/kernel links for union
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ] && [ $systemIntegrity = "clean" ];then
 	setupKernelLinks
 fi
 
 #======================================
-# 24) Create system dependant files
+# 23) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	mkdir -p /config
@@ -1065,25 +1034,25 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 25) copy system dependant files
+# 24) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 26) update system dependant files
+# 25) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
-# 27) umount system filesystems
+# 26) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 28) copy initrd files to image
+# 27) copy initrd files to image
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 	if canWrite /mnt;then
@@ -1094,17 +1063,17 @@ if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 fi
 
 #======================================
-# 29) kill boot shell
+# 28) kill boot shell
 #--------------------------------------
 killShell
 
 #======================================
-# 30) Activate new root
+# 29) Activate new root
 #--------------------------------------
 runHook preactivate
 activateImage
 
 #======================================
-# 31) Unmount initrd / system init
+# 30) Unmount initrd / system init
 #--------------------------------------
 bootImage
