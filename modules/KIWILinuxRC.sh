@@ -898,6 +898,10 @@ function installBootLoaderGrub2 {
 	local instTool=grub2-install
 	local confPath_grub=/boot/grub2/grub.cfg
 	local confPath_uefi=/boot/EFI/EFI/BOOT/grub.cfg
+	local product=/etc/products.d/baseproduct
+	local elilo_efi=/usr/lib64/efi/elilo.efi
+	local grub_efi=/boot/EFI/EFI/BOOT/grub.efi
+	local prod=unknown
 	local isEFI=0
 	#======================================
 	# check for EFI and mount EFI partition
@@ -909,6 +913,60 @@ function installBootLoaderGrub2 {
 			return 1
 		fi
 		isEFI=1
+	fi
+	#======================================
+	# check for elilo compat mode
+	#--------------------------------------
+	if [ $isEFI -eq 1 ] && [ -e $product ] && [ -e $elilo_efi ];then
+		product=$(readlink $product)
+		if [ "$product" = "SUSE_SLES.prod" ];then
+			#======================================
+			# replace grub efi binary with elilo
+			#--------------------------------------
+			if [ -e $grub_efi ];then
+				# shim loader loads grub, now let it load elilo
+				cp $elilo_efi $grub_efi
+			else
+				# no shim loader, let efi firmware load elilo
+				cp $elilo_efi /boot/EFI/EFI/BOOT/bootx64.efi
+			fi
+			#======================================
+			# write elilo.conf
+			#--------------------------------------
+			. /etc/default/grub
+			local timeout=10
+			if [ ! -z "$KIWI_BOOT_TIMEOUT" ];then
+				timeout=$KIWI_BOOT_TIMEOUT
+			fi
+			cat > /etc/elilo.conf <<- EOF
+				prompt
+				timeout=$timeout
+				default=SLES
+				image=vmlinuz
+				    label=SLES
+				    initrd=initrd
+				    read-only
+				    root=$(getDiskID $imageRootDevice)
+				    append="$GRUB_CMDLINE_LINUX_DEFAULT"
+			EOF
+			#======================================
+			# copy kernel initrd and config file
+			#--------------------------------------
+			# elilo requires kernel and initrd in the same directory
+			# as the config file, links will also not work because we
+			# are on fat here for efi
+			# ----
+			cp /boot/initrd    /boot/EFI/EFI/BOOT
+			cp /boot/vmlinuz   /boot/EFI/EFI/BOOT
+			cp /etc/elilo.conf /boot/EFI/EFI/BOOT
+			rm -f $confPath_uefi
+			#======================================
+			# update sysconfig/bootloader
+			#--------------------------------------
+			sed -i -e s'@LOADER_TYPE.*@LOADER_TYPE="elilo"@' \
+				/etc/sysconfig/bootloader
+			return 0
+		fi
 	fi
 	#======================================
 	# lookup grub2 mkconfig tool
