@@ -2003,7 +2003,7 @@ sub setupBootDisk {
 		($firmware eq "uefi") ||
 		($firmware eq "vboot")
 	) {
-		$this->{jumpsize} = 5;
+		$this->{jumpsize} = 32;
 		$this -> __updateDiskSize ($this->{jumpsize});
 		$needJumpP = 1;
 	}
