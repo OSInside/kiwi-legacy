@@ -2650,7 +2650,7 @@ function setupBootLoaderGrub2 {
 	#======================================
 	# set terminal mode
 	#--------------------------------------
-	if [ -e $unifont ];then
+	if [ -e $unifont ] && [ ! "$kiwi_firmware" = "uefi" ];then
 		echo "GRUB_TERMINAL=gfxterm"  >> $inst_default_grub
 	else
 		echo "GRUB_TERMINAL=console"  >> $inst_default_grub

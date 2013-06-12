@@ -4198,13 +4198,16 @@ sub setupBootLoaderConfiguration {
 			#==========================================
 			# General grub2 setup
 			#------------------------------------------
-			if ($config eq "grub2") {
-				foreach my $module (@x86mods) {
-					print $FD "insmod $module"."\n";
-				}
-			} else {
-				foreach my $module (@efimods) {
-					print $FD "insmod $module"."\n";
+			if ($firmware ne "uefi") {
+				# load modules only if not in efi secure boot mode
+				if ($config eq "grub2") {
+					foreach my $module (@x86mods) {
+						print $FD "insmod $module"."\n";
+					}
+				} else {
+					foreach my $module (@efimods) {
+						print $FD "insmod $module"."\n";
+					}
 				}
 			}
 			if ($uuid) {
@@ -4214,23 +4217,30 @@ sub setupBootLoaderConfiguration {
 			}
 			print $FD "set default=$defaultBootNr\n";
 			print $FD "set font=/boot/unicode.pf2"."\n";
-			print $FD 'if loadfont $font ;then'."\n";
-			print $FD "\t"."set gfxmode=$vesa{$vga}->[0]"."\n";
-			print $FD "\t".'insmod gfxterm'."\n";
-			print $FD "\t".'insmod gfxmenu'."\n";
-			print $FD "\t".'terminal_input gfxterm'."\n";
-			print $FD "\t".'if terminal_output gfxterm; then true; else'."\n";
-			print $FD "\t\t".'terminal gfxterm'."\n";
-			print $FD "\t".'fi'."\n";
-			print $FD 'fi'."\n";
-			print $FD 'if loadfont '.$fodir.$theme.'/'.$ascii.';then'."\n";
-			foreach my $font (@fonts) {
-				print $FD "\t".'loadfont '.$fodir.$theme.'/'.$font."\n";
+			if ($firmware ne "uefi") {
+				# support theme and graphics if not in efi secure boot mode
+				print $FD 'if loadfont $font ;then'."\n";
+				print $FD "\t"."set gfxmode=$vesa{$vga}->[0]"."\n";
+				print $FD "\t".'insmod gfxterm'."\n";
+				print $FD "\t".'insmod gfxmenu'."\n";
+				print $FD "\t".'terminal_input gfxterm'."\n";
+				print $FD "\t".'if terminal_output gfxterm;then true;else'."\n";
+				print $FD "\t\t".'terminal gfxterm'."\n";
+				print $FD "\t".'fi'."\n";
+				print $FD 'fi'."\n";
+				print $FD 'if loadfont '.$fodir.$theme.'/'.$ascii.';then'."\n";
+				foreach my $font (@fonts) {
+					print $FD "\t".'loadfont '.$fodir.$theme.'/'.$font."\n";
+				}
+				print $FD "\t".'set theme='.$fodir.$theme.'/theme.txt'."\n";
+				print $FD "\t".'background_image -m stretch ';
+				print $FD $fodir.$theme.'/background.png'."\n";
+				print $FD 'fi'."\n";
+			} else {
+				# use standard console mode for secure boot
+				print $FD "\t".'terminal_input console'."\n";
+				print $FD "\t".'terminal_output console'."\n";
 			}
-			print $FD "\t".'set theme='.$fodir.$theme.'/theme.txt'."\n";
-			print $FD "\t".'background_image -m stretch ';
-			print $FD $fodir.$theme.'/background.png'."\n";
-			print $FD 'fi'."\n";
 			my $bootTimeout = 10;
 			if (defined $type{boottimeout}) {
 				$bootTimeout = $type{boottimeout};
