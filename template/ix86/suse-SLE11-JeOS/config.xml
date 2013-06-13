@@ -158,6 +158,7 @@
 		<package name="grub2-x86_64-efi" arch="x86_64" bootinclude="true"/>
 		<package name="shim" arch="x86_64" bootinclude="true"/>
 		<package name="bootsplash-branding-SLES" bootinclude="true" bootdelete="true"/>
+		<package name="elilo"/>
 	</packages>
 	<packages type="image" profiles="vmxFlavour,xenFlavour">
 		<package name="grub"/>
