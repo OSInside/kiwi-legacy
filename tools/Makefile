@@ -4,6 +4,7 @@ all:
 	${MAKE} -C driveready all
 	${MAKE} -C utimer all
 	${MAKE} -C kversion all
+	${MAKE} -C isconsole all
 
 install:
 	install -m 644 README ${PACKDOCVZ}/README.tools
@@ -13,6 +14,7 @@ install:
 	install -m 755 driveready/driveready ${TOOLSVZ}
 	install -m 755 utimer/utimer ${TOOLSVZ}
 	install -m 755 livestick/livestick ${TOOLSVZ}
+	install -m 755 isconsole/isconsole ${TOOLSVZ}
 	cp -a livestick/theme ${LIVESTICKVZ}
 
 clean:
@@ -21,3 +23,4 @@ clean:
 	${MAKE} -C driveready clean
 	${MAKE} -C utimer clean
 	${MAKE} -C kversion clean
+	${MAKE} -C isconsole clean

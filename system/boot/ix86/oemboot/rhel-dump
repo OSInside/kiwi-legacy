@@ -712,7 +712,7 @@ function OEMInstall {
 					--backtitle \"$TEXT_INSTALLTITLE\" \
 					--progressbox 3 65
 				" > /tmp/progress.sh
-				if [ -e /dev/fb0 ] && which fbiterm &>/dev/null;then
+				if FBOK;then
 					fbiterm -m $UFONT -- bash -e /tmp/progress.sh || \
 					bash -e /tmp/progress.sh
 				else
@@ -773,7 +773,7 @@ function OEMInstall {
 				--backtitle \"$TEXT_INSTALLTITLE\" \
 				--progressbox 3 65
 			" > /tmp/progress.sh
-			if [ -e /dev/fb0 ] && which fbiterm &>/dev/null;then
+			if FBOK;then
 				fbiterm -m $UFONT -- bash -e /tmp/progress.sh || \
 				bash -e /tmp/progress.sh
 			else
@@ -878,7 +878,7 @@ function OEMInstall {
 				--backtitle \"$TEXT_INSTALLTITLE\" \
 				--progressbox 3 50
 			" > /tmp/progress.sh
-			if [ -e /dev/fb0 ] && which fbiterm &>/dev/null;then
+			if FBOK;then
 				fbiterm -m $UFONT -- bash -e /tmp/progress.sh || \
 				bash -e /tmp/progress.sh
 			else

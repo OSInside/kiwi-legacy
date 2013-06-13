@@ -120,7 +120,7 @@ function Dialog {
 			$@
 		echo \$? > /tmp/fbcode
 EOF
-	if [ -e /dev/fb0 ] && which fbiterm &>/dev/null;then
+	if FBOK;then
 		fbiterm -m $UFONT -- bash -e /tmp/fbcode
 	else
 		bash -e /tmp/fbcode
@@ -6563,7 +6563,7 @@ function fetchFile {
 			--backtitle \"$TEXT_INSTALLTITLE\" \
 			--progressbox 3 65
 		" > /tmp/progress.sh
-		if [ -e /dev/fb0 ] && which fbiterm &>/dev/null;then
+		if FBOK;then
 			fbiterm -m $UFONT -- bash -e /tmp/progress.sh
 		else
 			bash -e /tmp/progress.sh
@@ -7735,7 +7735,7 @@ function runInteractive {
 	local code
 	echo "dialog $@ 2> /tmp/out" > $r
 	echo "echo -n \$? > /tmp/out.exit" >> $r
-	if [ -e /dev/fb0 ] && which fbiterm &>/dev/null;then
+	if FBOK;then
 		setctsid $ELOG_EXCEPTION fbiterm -m $UFONT -- bash -i $r
 	else
 		setctsid $ELOG_EXCEPTION bash -i $r
@@ -9625,6 +9625,26 @@ function activateBootPartition {
 	local bootID=$(nd $device)
 	local diskID=$(dn $device)
 	sfdisk $diskID --force -A $bootID
+}
+#======================================
+# FBOK
+#--------------------------------------
+function FBOK {
+	if [ ! -e /dev/fb0 ];then
+		# no framebuffer device found
+		return 1
+	fi
+	if ! which fbiterm &>/dev/null;then
+		# no framebuffer terminal program found
+		return 1
+	fi
+	if which isconsole &>/dev/null;then
+		if ! isconsole;then
+			# inappropriate ioctl (not a linux console)
+			return 1
+		fi
+	fi
+	return 0
 }
 #======================================
 # initialize
