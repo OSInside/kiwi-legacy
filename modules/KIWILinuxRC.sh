@@ -9004,6 +9004,19 @@ function setupBootPartitionPXE {
 	local mpoint=boot_bind
 	unset NETBOOT_ONLY
 	#======================================
+	# Don't operate with unknown root part
+	#--------------------------------------
+	if [ -z "$imageRootDevice" ];then
+		# /.../
+		# this case should only be reached when the netboot
+		# code checks if the image needs an update. The update
+		# check happens as early as possible and at that time
+		# the root device variable is not set, so we use this
+		# as the trigger to return
+		# ----
+		return
+	fi
+	#======================================
 	# Check for boot partition in PART
 	#--------------------------------------
 	local bootdev=$(pxeBootDevice)
