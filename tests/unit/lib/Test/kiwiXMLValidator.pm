@@ -776,9 +776,9 @@ sub test_packageUnique {
 		my $msg = $kiwi -> getMessage();
 		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
-		$this -> assert_str_equals('error', $msgT);
+		$this -> assert_str_equals('warning', $msgT);
 		my $state = $kiwi -> getState();
-		$this -> assert_str_equals('failed', $state);
+		$this -> assert_str_equals('oops', $state);
 		# Test this condition last to get potential error messages
 		$this -> assert_not_null($validator);
 	}
