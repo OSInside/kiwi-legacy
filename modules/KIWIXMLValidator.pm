@@ -814,15 +814,15 @@ sub __checkPackageUnique {
 			my $msg = "Package '$name' specified multiple "
 				. "times for architecture '$arch' in same "
 				. '<packages> section.';
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return;
+			$kiwi -> warning ($msg);
+			$kiwi -> oops ();
+			return 1;
 		} else {
 			my $msg = "Package '$name' specified multiple times in "
 				. 'same <packages> section.';
-			$kiwi -> error($msg);
-			$kiwi -> failed();
-			return;
+			$kiwi -> warning ($msg);
+			$kiwi -> oops ();
+			return 1;
 		}
 	}
 	return 1;
