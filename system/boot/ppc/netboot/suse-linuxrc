@@ -555,7 +555,7 @@ then
 					--backtitle \"$TEXT_INSTALLTITLE\" \
 					--progressbox 3 65
 				" > /tmp/progress.sh
-				if [ -e /dev/fb0 ];then
+				if FBOK;then
 					fbiterm -m $UFONT -- bash -e /tmp/progress.sh || \
 					bash -e /tmp/progress.sh
 				else

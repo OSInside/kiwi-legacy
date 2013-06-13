@@ -19,3 +19,7 @@
 /usr/bin/dcounter
    * a small program to count bytes on a transfer so that you
      can show a progress information about the transfer
+
+/usr/bin/isconsole
+   * a small program sending the KDGETMODE ioctl to /dev/console
+     in order to check if we can fbiterm on that console
