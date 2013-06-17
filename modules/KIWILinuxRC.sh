@@ -24,7 +24,6 @@ export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
 export HYBRID_PERSISTENT_FS=ext3
 export HYBRID_PERSISTENT_ID=83
-export HYBRID_PERSISTENT_PART=4
 export HYBRID_PERSISTENT_DIR=/read-write
 export UTIMER_INFO=/dev/utimer
 export bootLoaderOK=0
@@ -3800,29 +3799,23 @@ function setupHybridPersistent {
 		# try to create a write partition
 		#--------------------------------------
 		createHybridPersistent $diskDevice
-		#======================================
-		# store hybrid write partition device
-		#--------------------------------------
-		HYBRID_RW=$(ddn $diskDevice $HYBRID_PERSISTENT_PART)
-		if [ ! -e "$HYBRID_RW" ]; then
-			# /.../
-			# failed to create read-write partition -> disable it
-			# ----
-			unset HYBRID_RW
-			unset kiwi_hybridpersistent
-			return
-		fi
 	else
 		#======================================
 		# use given cow device
 		#--------------------------------------
 		createCustomHybridPersistent
-		#======================================
-		# store hybrid write partition device
-		#--------------------------------------
-		HYBRID_RW=$kiwi_cowdevice
 	fi
-	export HYBRID_RW
+	#======================================
+	# check hybrid write partition device
+	#--------------------------------------
+	if [ ! -e "$HYBRID_RW" ]; then
+		# /.../
+		# failed to create read-write partition
+		# disable persistent writing
+		# ----
+		unset HYBRID_RW
+		unset kiwi_hybridpersistent
+	fi
 }
 #======================================
 # CDUmount
@@ -7797,6 +7790,10 @@ function createCustomHybridPersistent {
 			"Failed to loop setup cow file !" \
 		"reboot"
 	fi
+	#======================================
+	# export read-write device name
+	#--------------------------------------
+	export HYBRID_RW=$kiwi_cowdevice
 }
 #======================================
 # createHybridPersistent
@@ -7809,10 +7806,7 @@ function createHybridPersistent {
 	# ----
 	local device=$1
 	local input=/part.input
-	local disknr=$HYBRID_PERSISTENT_PART
-	local rwdev=$(ddn $biosBootDevice $disknr)
-	local rwid=$(blkid $rwdev -s TYPE -o value)
-	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+	local pID
 	rm -f $input
 	#======================================
 	# check for custom cow location
@@ -7823,69 +7817,30 @@ function createHybridPersistent {
 	#======================================
 	# check persistent write partition
 	#--------------------------------------
-	if [ "$rwid" = "btrfs" ];then
-		return
-	fi
-	#======================================
-	# check persistent write partition
-	#--------------------------------------
-	mkdir -p /cow
-	if mount -L hybrid /cow;then
-		Echo "Existing persistent hybrid partition found"
-		#======================================
-		# does the cow file exist
-		#--------------------------------------
-		if [ ! -f /cow/.clicfs_COW ];then
-			Echo "Can't find cow file on write partition... deactivated"
-			unset kiwi_hybridpersistent
-			umount /cow
-			rmdir  /cow
+	for pID in 4 3 2 1;do
+		local partd=$(ddn $device $pID)
+		local label=$(blkid $partd -s LABEL -o value)
+		if [ "$label" = "hybrid" ];then
+			Echo "Existing persistent hybrid partition found"
+			export HYBRID_RW=$partd
 			return
 		fi
-		#======================================
-		# is the cow file valid
-		#--------------------------------------
-		if [ -x /usr/bin/clicfs_fsck ] && ! clicfs_fsck /cow/.clicfs_COW;then
-			Echo "COW file is broken... deactivated"
-			unset kiwi_hybridpersistent
-			umount /cow
-			rmdir  /cow
-			return
-		fi
-		#======================================
-		# everything ok, go ahead
-		#--------------------------------------
-		umount /cow
-		rmdir  /cow
-		return
-	fi
+	done
 	#======================================
 	# create persistent write partition
 	#--------------------------------------
-	# /.../
-	# we have to use fdisk here because parted can't work
-	# with the partition table created by isohybrid
-	# ----
 	Echo "Creating hybrid persistent partition for COW data"
-	for cmd in n p $disknr . . t $disknr $HYBRID_PERSISTENT_ID w q;do
-		if [ $cmd = "." ];then
-			echo >> $input
-			continue
-		fi
-		echo $cmd >> $input
-	done
-	fdisk $device < $input 1>&2
-	if test $? != 0; then
-		Echo "Failed to create persistent write partition"
-		Echo "Persistent writing deactivated"
-		unset kiwi_hybridpersistent
-		return
-	fi
+	export imageDiskDevice=$device
+	pID=$(parted -m -s $device print | grep ^[1-4] | wc -l)
+	pID=$((pID + 1))
+	createPartitionerInput \
+		n p:lxrw $pID . . t $pID $HYBRID_PERSISTENT_ID
+	callPartitioner $input
 	#======================================
 	# check partition device node
 	#--------------------------------------
-	if ! waitForStorageDevice $(ddn $device $disknr);then
-		Echo "Partition $disknr on $device doesn't appear... fatal !"
+	if ! waitForStorageDevice $(ddn $device $pID);then
+		Echo "Partition $pID on $device doesn't appear... fatal !"
 		Echo "Persistent writing deactivated"
 		unset kiwi_hybridpersistent
 		return
@@ -7893,15 +7848,15 @@ function createHybridPersistent {
 	#======================================
 	# create filesystem on write partition
 	#--------------------------------------
-	if [ "$unionFST" = "clicfs" ] || [ "$unionFST" = "overlay" ];then
-		local loop_dev=$(losetup -f --show $(ddn $device $disknr))
-		if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid $loop_dev;then
-			Echo "Failed to create hybrid persistent filesystem"
-			Echo "Persistent writing deactivated"
-			unset kiwi_hybridpersistent
-		fi
-		losetup -d $loop_dev
+	if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid $(ddn $device $pID);then
+		Echo "Failed to create hybrid persistent filesystem"
+		Echo "Persistent writing deactivated"
+		unset kiwi_hybridpersistent
 	fi
+	#======================================
+	# export read-write device name
+	#--------------------------------------
+	export HYBRID_RW=$(ddn $device $pID)
 }
 #======================================
 # callPartitioner
@@ -7999,6 +7954,7 @@ function partedInit {
 	local parted=$(parted -m -s $device unit cyl print | grep -v Warning:)
 	local header=$(echo $parted | head -n 3 | tail -n 1)
 	local ccount=$(echo $header | cut -f1 -d:)
+	local ccount=$(echo $parted | grep ^$device | cut -f 2 -d: | tr -d cyl)
 	local cksize=$(echo $header | cut -f4 -d: | cut -f1 -dk)
 	local diskhd=$(echo $parted | head -n 3 | tail -n 2 | head -n 1)
 	local plabel=$(echo $diskhd | cut -f6 -d:)

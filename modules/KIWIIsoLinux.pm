@@ -810,7 +810,7 @@ sub createISO {
 	my $xml      = $this -> {xml};
 	my $magicID  = $this -> {magicID};
 	my $addpara  = "-hide glump -hide-joliet glump";
-	my $firmware = 'bios';
+	my $firmware = 'efi';
 	my $ldir_cnt = 0;
 	my %type;
 	my $cmdln;
@@ -1017,7 +1017,7 @@ sub createHybrid {
 	my $kiwi     = $this->{kiwi};
 	my $iso      = $this->{dest};
 	my $xml      = $this->{xml};
-	my $firmware = 'bios';
+	my $firmware = 'efi';
 	my $data;
 	my $code;
 	my $loop;
@@ -1073,7 +1073,7 @@ sub createHybrid {
 	if (($firmware eq 'efi' || $firmware eq 'uefi') && (! $uefiOpt)) {
 		$kiwi -> warning ("installed isohybrid does not support EFI");
 		$kiwi -> skipped ();
-		$firmware = 'bios';
+		$firmware = 'efi';
 	}
 	if ($firmware eq 'efi' || $firmware eq 'uefi') {
 		$offset = $this->{efi_offset};

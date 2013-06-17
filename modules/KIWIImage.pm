@@ -1933,7 +1933,7 @@ sub createImageLiveCD {
 	#==========================================
 	# check for boot firmware
 	#------------------------------------------
-	my $firmware = 'bios';
+	my $firmware = 'efi';
 	if ($stype{firmware}) {
 		$firmware = $stype{firmware};
 	}
@@ -1942,7 +1942,7 @@ sub createImageLiveCD {
 			"UEFI Secure boot is only supported on x86_64"
 		);
 		$kiwi -> skipped ();
-		$firmware = 'bios';
+		$firmware = 'efi';
 	}
 	#==========================================
 	# Create bootloader configuration
