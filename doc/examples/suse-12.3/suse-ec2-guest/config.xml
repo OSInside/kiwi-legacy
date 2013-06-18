@@ -35,7 +35,6 @@
 		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
 		<package name="ifplugd"/>
 		<package name="kernel-ec2"/>
-		<package name="kernel-ec2-base"/>
 		<package name="suse-ami-tools"/>
 		<package name="vim"/>
 		<package name="plymouth"/>
@@ -47,5 +46,6 @@
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
+		<package name="module-init-tools"/>
 	</packages>
 </image>
