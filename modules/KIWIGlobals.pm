@@ -417,6 +417,8 @@ sub mount {
 					$result = $? >> 8;
 				}
 			}
+			push @UmountStack,"zfs umount -a";
+			$this->{UmountStack} = \@UmountStack;
 		} elsif ($type eq "clicfs") {
 			$status = KIWIQX::qxx ("clicfs -m 512 $source $dest 2>&1");
 			$result = $? >> 8;
@@ -737,9 +739,9 @@ sub checkFileSystem {
 }
 
 #==========================================
-# setupZFSPoolVolumes
+# createZFSPool
 #------------------------------------------
-sub setupZFSPoolVolumes {
+sub createZFSPool {
 	# /.../
 	# create zfs pool layout as suggested by
 	# the community
@@ -798,21 +800,117 @@ sub setupZFSPoolVolumes {
 }
 
 #==========================================
+# setupZFSPoolVolumes
+#------------------------------------------
+sub setupZFSPoolVolumes {
+	# /.../
+	# create zfs subvolume setup as configured in
+	# the systemdisk volume setup
+	# ----
+	my $this   = shift;
+	my $path   = shift;
+	my $vols   = shift;
+	my $kiwi   = $this->{kiwi};
+	my %phash  = ();
+	my @paths  = ();
+	my $data;
+	my $code;
+	if ($vols) {
+		#==========================================
+		# Create path names in correct order
+		#------------------------------------------
+		foreach my $name (keys %{$vols}) {
+			next if $name eq '@root';
+			my $pname  = $name; $pname =~ s/_/\//g;
+			$pname =~ s/^\///;
+			$pname =~ s/\s*$//;
+			push @paths,$pname;
+		}
+		foreach my $name (@paths) {
+			my @parts = split (/\//,$name);
+			my $part  = @parts;
+			push @{$phash{$part}},$name;
+		}
+	}
+	if (! %phash) {
+		return $this;
+	}
+	$kiwi -> info ("Creating ZFS pool\n");
+	my $main = 'kiwipool/ROOT/system-1';
+	foreach my $level (sort {($a <=> $b) || ($a cmp $b)} keys %phash) {
+		foreach my $vol (@{$phash{$level}}) {
+			$kiwi -> info ("--> Adding pool $vol");
+			$data = KIWIQX::qxx ("zfs create $main/$vol 2>&1");
+			$code = $? >> 8;
+			if ($code == 0) {
+				$data = KIWIQX::qxx ("umount /$main/$vol 2>&1");
+				$data = KIWIQX::qxx ("rmdir /$main/$vol 2>&1");
+				$data = KIWIQX::qxx ("mkdir -p $path/$vol 2>&1");
+				$data = KIWIQX::qxx (
+					"mount -o zfsutil -t zfs $main/$vol $path/$vol 2>&1"
+				);
+				$code = $? >> 8;
+			}
+			if ($code == 0) {
+				$kiwi -> done();
+			} else {
+				$kiwi -> failed();
+				last;
+			}
+		}
+	}
+	#==========================================
+	# cleanup
+	#------------------------------------------
+	rmdir '/kiwipool/ROOT/system-1';
+	rmdir '/kiwipool/ROOT';
+	rmdir '/kiwipool';
+	#==========================================
+	# check error flag and return
+	#------------------------------------------
+	if ($code != 0) {
+		$kiwi -> error ("Failed to create zfs pool volumes: $data\n");
+		$kiwi -> failed();
+		return;
+	}
+	return $this;
+}
+
+#==========================================
 # setupBTRFSSubVolumes
 #------------------------------------------
 sub setupBTRFSSubVolumes {
 	# /.../
-	# create a btrfs subvolume setup as suggested
-	# by the community and compatible to a standard
-	# installation
+	# create a btrfs subvolume setup as configured in
+	# the systemdisk volume setup
 	# ----
-	my $this = shift;
-	my $path = shift;
-	my $kiwi = $this->{kiwi};
-	my @subvol = (
-		'tmp','opt','srv','var','var/crash',
-		'var/spool','var/log','var/run','var/tmp'
-	);
+	my $this   = shift;
+	my $path   = shift;
+	my $vols   = shift;
+	my $kiwi   = $this->{kiwi};
+	my %phash  = ();
+	my @paths  = ();
+	if ($vols) {
+		#==========================================
+		# Create path names in correct order
+		#------------------------------------------
+		foreach my $name (keys %{$vols}) {
+			next if $name eq '@root';
+			my $pname  = $name; $pname =~ s/_/\//g;
+			$pname =~ s/^\///;
+			$pname =~ s/\s*$//;
+			push @paths,$pname;
+		}
+		foreach my $name (@paths) {
+			my @parts = split (/\//,$name);
+			my $part  = @parts;
+			push @{$phash{$part}},$name;
+		}
+	}
+	if (! %phash) {
+		return $this;
+	}
+	$kiwi -> info ("Creating btrfs pool\n");
 	my $data = KIWIQX::qxx ('btrfs subvolume create '.$path.'/@ 2>&1');
 	my $code = $? >> 8;
 	if ($code == 0) {
@@ -831,12 +929,20 @@ sub setupBTRFSSubVolumes {
 		}
 	}
 	if ($code == 0) {
-		foreach my $vol (@subvol) {
-		$data = KIWIQX::qxx (
-			'btrfs subvolume create '.$path.'/@/'.$vol.' 2>&1'
-		);
-		$code = $? >> 8;
-			last if $code != 0;
+		foreach my $level (sort {($a <=> $b) || ($a cmp $b)} keys %phash) {
+			foreach my $vol (@{$phash{$level}}) {
+				$kiwi -> info ("--> Adding subvolume $vol");
+				$data = KIWIQX::qxx (
+					'btrfs subvolume create '.$path.'/@/'.$vol.' 2>&1'
+				);
+				$code = $? >> 8;
+				if ($code == 0) {
+					$kiwi -> done();
+				} else {
+					$kiwi -> failed();
+					last;
+				}
+			}
 		}
 	}
 	if ($code != 0) {

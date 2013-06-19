@@ -1624,6 +1624,7 @@ sub setupBootDisk {
 	my $status;
 	my $destdir;
 	my %lvmparts;
+	my $vgroupName;
 	#==========================================
 	# check if we can operate on this root
 	#------------------------------------------
@@ -1663,6 +1664,27 @@ sub setupBootDisk {
 		$this->{md} = $md;
 	}
 	#==========================================
+	# Check if LVM is requested...
+	#------------------------------------------
+	if ((($type{lvm}) && ($type{lvm} eq "true")) || ($lvm)) {
+		#==========================================
+		# set volume group name and flag variable
+		#------------------------------------------
+		$lvm = 1;
+		$this->{lvm}= $lvm;
+		$vgroupName = $xml -> getLVMGroupName_legacy();
+		if ($vgroupName) {
+			$this->{lvmgroup} = $vgroupName;
+		}
+	}
+	#==========================================
+	# Check if volume management is done by fs
+	#------------------------------------------
+	if ($type{filesystem} =~ /zfs|btrfs/) {
+		undef $lvm;
+		undef $this->{lvm};
+	}
+	#==========================================
 	# Check if ZFS setup can be done...
 	#------------------------------------------
 	if (($type{filesystem} =~ /zfs/) && ( ! -d $system )) {
@@ -1675,38 +1697,34 @@ sub setupBootDisk {
 	#==========================================
 	# Check if LVM setup can be done...
 	#------------------------------------------
-	if ((($type{lvm}) && ($type{lvm} eq "true")) || ($lvm)) {
-		#==========================================
-		# add boot space if lvm based
-		#------------------------------------------
-		$lvm = 1;
-		$this->{lvm}= $lvm;
-		#==========================================
-		# set volume group name
-		#------------------------------------------
-		my $vgroupName = $xml -> getLVMGroupName_legacy();
-		if ($vgroupName) {
-			$this->{lvmgroup} = $vgroupName;
+	%lvmparts = $xml -> getLVMVolumes_legacy();
+	if (($lvm) && (%lvmparts)) {
+		if ( ! -d $system ) {
+			$kiwi -> error (
+				"LVM volumes setup requires root tree but got image file"
+			);
+			$kiwi -> failed ();
+			return;
 		}
+		if ($type{filesystem} =~ /zfs/) {
+			$kiwi -> error (
+				"LVM volumes setup not yet supported with zfs filesystem"
+			);
+			$kiwi -> failed ();
+			return;
+		}
+	}
+	#==========================================
+	# Calculate volume size requirements...
+	#------------------------------------------
+	if (($lvm) || ($type{filesystem} =~ /zfs|btrfs/)) {
 		#==========================================
-		# check and set LVM volumes setup
+		# check and set volumes setup
 		#------------------------------------------
-		%lvmparts = $xml -> getLVMVolumes_legacy();
+		# the volume information is also evaluated for filesystems
+		# which supports volumes/snapshots
+		# ----
 		if (%lvmparts) {
-			if ( ! -d $system ) {
-				$kiwi -> error (
-					"LVM volumes setup requires root tree but got image file"
-				);
-				$kiwi -> failed ();
-				return;
-			}
-			if ($type{filesystem} =~ /zfs/) {
-				$kiwi -> error (
-					"LVM volumes setup not yet supported with zfs filesystem"
-				);
-				$kiwi -> failed ();
-				return;
-			}
 			my $lvsum = 0;
 			foreach my $vol (keys %lvmparts) {
 				#==========================================
@@ -2532,7 +2550,15 @@ sub setupBootDisk {
 		if ($FSTypeRW eq 'btrfs') {
 			if (! KIWIGlobals
 				-> instance()
-				-> setupBTRFSSubVolumes ($loopdir)) {
+				-> setupBTRFSSubVolumes ($loopdir,\%lvmparts)) {
+				$this -> cleanStack ();
+				return;
+			}
+		}
+		if ($FSTypeRW eq 'zfs') {
+			if (! KIWIGlobals
+				-> instance()
+				-> setupZFSPoolVolumes ($loopdir,\%lvmparts)) {
 				$this -> cleanStack ();
 				return;
 			}
@@ -6652,7 +6678,7 @@ sub setupFilesystem {
 			}
 			$result = $? >> 8;
 			if ($result == 0) {
-				if (! KIWIGlobals -> instance() -> setupZFSPoolVolumes()) {
+				if (! KIWIGlobals -> instance() -> createZFSPool()) {
 					$result = 1;
 				}
 			}

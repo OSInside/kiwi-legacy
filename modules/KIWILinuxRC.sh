@@ -5421,13 +5421,7 @@ function kiwiMount {
 				return 1
 			fi
 		fi
-		if ! zfs umount -a ; then
-			return 1
-		fi
-		rmdir /kiwipool/ROOT/system-1
-		rmdir /kiwipool/ROOT
-		rmdir /kiwipool
-		if ! mount -o zfsutil -t zfs kiwipool/ROOT/system-1 $dst >/dev/null;then
+		if ! mount --move /kiwipool/ROOT/system-1 $dst >/dev/null;then
 			return 1
 		fi
 	else

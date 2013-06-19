@@ -4554,7 +4554,7 @@ sub setupZFS {
 		$kiwi -> error  ($data);
 		return;
 	}
-	if (! KIWIGlobals -> instance() -> setupZFSPoolVolumes()) {
+	if (! KIWIGlobals -> instance() -> createZFSPool()) {
 		return;
 	}
 	$data = qxx ("zpool import -d $this->{imageDest} kiwipool 2>&1");
