@@ -1663,7 +1663,17 @@ sub setupBootDisk {
 		$this->{md} = $md;
 	}
 	#==========================================
-	# Check for LVM...
+	# Check if ZFS setup can be done...
+	#------------------------------------------
+	if (($type{filesystem} =~ /zfs/) && ( ! -d $system )) {
+		$kiwi -> error (
+			"ZFS setup requires root tree but got image file"
+		);
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# Check if LVM setup can be done...
 	#------------------------------------------
 	if ((($type{lvm}) && ($type{lvm} eq "true")) || ($lvm)) {
 		#==========================================
@@ -6636,7 +6646,7 @@ sub setupFilesystem {
 		/^zfs/          && do {
 			$kiwi -> info ("Creating zfs $name filesystem");
 			if ($opts) {
-				$status = qxx ("zpool create -o $opts kiwipool $device 2>&1");
+				$status = qxx ("zpool create $opts kiwipool $device 2>&1");
 			} else {
 				$status = qxx ("zpool create kiwipool $device 2>&1");
 			}
@@ -6868,8 +6878,8 @@ sub __expandFS {
 				return;
 			}
 			$status = qxx ("
-					mount $mapper /mnt && $xfsGrow /mnt; umount /mnt 2>&1"
-			 );
+				mount $mapper /mnt && $xfsGrow /mnt; umount /mnt 2>&1"
+			);
 			$result = $? >> 8;
 			last SWITCH;
 		};

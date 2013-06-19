@@ -2955,7 +2955,7 @@ function updateRootDeviceFstab {
 	#======================================
 	# check for custom options
 	#--------------------------------------
-	if [ ! -z "$kiwi_fsmountoptions" ];then
+	if [ ! -z "$kiwi_fsmountoptions" ] && [ ! $FSTYPE = "zfs" ];then
 		opts=$kiwi_fsmountoptions
 	fi
 	#======================================
@@ -8330,12 +8330,18 @@ function resizeFilesystem {
 		resize_fs="mount $deviceResize $mnt &&"
 		resize_fs="$resize_fs xfs_growfs $mnt;umount $mnt"
 		check="xfs_check $deviceResize"
+	elif [ "$FSTYPE" = "zfs" ];then
+		local device=$(getDiskID $deviceResize)
+		Echo "Resize ZFS filesystem to full partition space..."
+		resize_fs="zpool import kiwipool && udevPending &&"
+		resize_fs="$resize_fs zpool online -e kiwipool $device;"
+		resize_fs="$resize_fs zpool export kiwipool"
 	else
 		# don't know how to resize this filesystem
 		return
 	fi
 	if [ -z "$callme" ];then
-		if [ $ramdisk -eq 0 ];then
+		if [ $ramdisk -eq 0 ] && [ ! -z "$check" ];then
 			$check
 		fi
 		if [ $ramdisk -eq 0 ];then

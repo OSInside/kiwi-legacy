@@ -4543,7 +4543,7 @@ sub setupZFS {
 		$target = $device;
 	}
 	if ($opts) {
-		$data = qxx ("zpool create -o $opts kiwipool $target 2>&1");
+		$data = qxx ("zpool create $opts kiwipool $target 2>&1");
 	} else {
 		$data = qxx ("zpool create kiwipool $target 2>&1");
 	}

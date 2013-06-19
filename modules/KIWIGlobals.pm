@@ -760,7 +760,6 @@ sub setupZFSPoolVolumes {
 	if ($code != 0) {
 		$kiwi -> error ("Failed to create zfs pool volumes: $data\n");
 		$kiwi -> failed();
-		$this -> cleanLuks();
 		return;
 	}
 	#==========================================
@@ -777,7 +776,6 @@ sub setupZFSPoolVolumes {
 	if ($code != 0) {
 		$kiwi -> error ("Failed to create zfs pool properties: $data\n");
 		$kiwi -> failed();
-		$this -> cleanLuks();
 		return;
 	}
 	#==========================================
@@ -788,7 +786,6 @@ sub setupZFSPoolVolumes {
 	if ($code != 0) {
 		$kiwi -> error ("Failed to export zfs pool: $data\n");
 		$kiwi -> failed();
-		$this -> cleanLuks();
 		return;
 	}
 	#==========================================
@@ -845,7 +842,6 @@ sub setupBTRFSSubVolumes {
 	if ($code != 0) {
 		$kiwi -> error ("Failed to create btrfs subvolume: $data\n");
 		$kiwi -> failed();
-		$this -> cleanLuks();
 		return;
 	}
 	$path.='/@';
