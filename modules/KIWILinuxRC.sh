@@ -7949,11 +7949,11 @@ function partedInit {
 	# as well as the number of cylinders and the
 	# cyliner size in kB for this disk
 	# ----
-	local device=$1
+	local devname=$1
+	local device=$(getDiskDevice $devname)
 	local IFS=""
 	local parted=$(parted -m -s $device unit cyl print | grep -v Warning:)
 	local header=$(echo $parted | head -n 3 | tail -n 1)
-	local ccount=$(echo $header | cut -f1 -d:)
 	local ccount=$(echo $parted | grep ^$device | cut -f 2 -d: | tr -d cyl)
 	local cksize=$(echo $header | cut -f4 -d: | cut -f1 -dk)
 	local diskhd=$(echo $parted | head -n 3 | tail -n 2 | head -n 1)
