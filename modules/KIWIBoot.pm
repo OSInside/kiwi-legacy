@@ -2737,8 +2737,8 @@ sub setupBootDisk {
 		# Mount efi jump boot space on this disk
 		#------------------------------------------
 		my $jump = $deviceMap{jump};
-		qxx ("mkdir -p $loopdir/EFI");
-		if (! KIWIGlobals -> instance() -> mount ($jump, "$loopdir/EFI")) {
+		qxx ("mkdir -p $loopdir/efi");
+		if (! KIWIGlobals -> instance() -> mount ($jump, "$loopdir/efi")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount image jump device: $boot");
 			$kiwi -> failed ();
@@ -2757,8 +2757,7 @@ sub setupBootDisk {
 		#==========================================
 		# Adapt efi boot path on jump partition
 		#------------------------------------------
-		qxx ("mkdir -p $loopdir/EFI/EFI");
-		qxx ("mv $loopdir/EFI/BOOT $loopdir/EFI/EFI");
+		qxx ("mv $loopdir/EFI $loopdir/efi");
 	}
 	#==========================================
 	# umount entire boot space
