@@ -925,6 +925,7 @@ function installBootLoaderGrub2 {
 	local confFile_grub_efi=/boot/grub2-efi/grub.cfg
 	local confFile_uefi=/boot/EFI/EFI/BOOT/grub.cfg
 	local confFile_grub=$confFile_grub_bios
+	local bios_grub=/boot/grub2/i386-pc
 	local isEFI=0
 	#======================================
 	# check for EFI and mount EFI partition
@@ -967,10 +968,18 @@ function installBootLoaderGrub2 {
 	#======================================
 	# install grub2 in BIOS mode
 	#--------------------------------------
-	if [ $isEFI -eq 0 ] || [ ! -z "$kiwi_BiosGrub" ];then
+	if [ $isEFI -eq 0 ];then
+		# use plain grub2-install in standard bios mode
 		$instTool $imageDiskDevice 1>&2
 		if [ ! $? = 0 ];then
 			Echo "Failed to install boot loader"
+			return 1
+		fi
+	elif [ ! -z "$kiwi_BiosGrub" ] && [ -d $bios_grub ];then
+		# run grub2-bios-setup manually for EFI legacy support
+		grub2-bios-setup -f -d $bios_grub $imageDiskDevice 1>&2
+		if [ ! $? = 0 ];then
+			Echo "Failed to install legacy boot loader"
 			return 1
 		fi
 	fi
@@ -2691,6 +2700,17 @@ function setupBootLoaderGrub2 {
 	echo "LOADER_LOCATION=\"mbr\""                >> $sysb
 	echo "DEFAULT_APPEND=\"$cmdline\""            >> $sysb
 	echo "FAILSAFE_APPEND=\"$failsafe $cmdline\"" >> $sysb
+	#======================================
+	# toggle bios grub flag
+	#--------------------------------------
+	# for some strange reasons it's required to toggle the
+	# bios_grub flag in the partition table if set in order
+	# to fix the EFI boot
+	# ----
+	if [ ! -z "$toggleBIOSGrubFlag" ];then
+		parted $imageDiskDevice set 1 bios_grub off &>/dev/null
+		parted $imageDiskDevice set 1 bios_grub on  &>/dev/null
+	fi
 }
 #======================================
 # setupBootLoaderYaboot
@@ -9459,6 +9479,9 @@ function updatePartitionTable {
 		if [ ! -z "$pflag" ];then
 			# set flag, but ignore errors here
 			parted -s $device set $partn $pflag on &>/dev/null
+			if [ $pflag = "bios_grub" ];then
+				export toggleBIOSGrubFlag=1
+			fi
 		fi
 	done < /tmp/table
 	return 0
