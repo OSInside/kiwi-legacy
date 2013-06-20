@@ -8028,7 +8028,8 @@ function partedSectorInit {
 	unset startSectors
 	unset endSectors
 	for i in $(
-		parted -m -s $disk unit s print | grep ^[1-4]: | cut -f2-3 -d: | tr -d s
+		parted -m -s $disk unit s print |\
+		grep -E ^[1-9]+:| cut -f2-3 -d: | tr -d s
 	);do
 		s_start=$(echo $i | cut -f1 -d:)
 		s_stopp=$(echo $i | cut -f2 -d:)
@@ -8196,7 +8197,7 @@ function normalizeRepartInput {
 		case $cmd in
 			"d")
 				partid=${pcmds[$index + 1]}
-				if ! echo $partid | grep -q "^[0-4]$";then
+				if ! echo $partid | grep -q -E "^[0-9]+$";then
 					# make sure there is a ID set for the deletion
 					index_fix=$(($index_fix + 1))
 					pcmds_fix[$index_fix]=1
@@ -8205,7 +8206,7 @@ function normalizeRepartInput {
 			"n")
 				partid=${pcmds[$index + 2]}
 				if [ ! "$PARTITIONER" = "fdasd" ];then
-					if ! echo $partid | grep -q "^[0-4]$";then
+					if ! echo $partid | grep -q -E "^[0-9]+$";then
 						# make sure there is a ID set for the creation
 						index_fix=$(($index_fix + 1))
 						pcmds_fix[$index_fix]=${pcmds[$index + 1]}
@@ -8217,7 +8218,7 @@ function normalizeRepartInput {
 			;;
 			"t")
 				partid=${pcmds[$index + 1]}
-				if ! echo $partid | grep -q "^[0-4]$";then
+				if ! echo $partid | grep -q -E "^[0-9]+$";then
 					# make sure there is a ID set for the type
 					index_fix=$(($index_fix + 1))
 					pcmds_fix[$index_fix]=1

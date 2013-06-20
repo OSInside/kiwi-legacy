@@ -140,7 +140,7 @@ function OEMRepartStandard {
 		#======================================
 		# add swap partition
 		#--------------------------------------
-		if [ -z "$OEM_WITHOUTSWAP" ] && [ $pID -lt 4 ];then
+		if [ -z "$OEM_WITHOUTSWAP" ];then
 			pID=$((pID + 1))
 			partsize=+"$swapsize"M
 			if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 1 ];then
@@ -156,7 +156,7 @@ function OEMRepartStandard {
 		#======================================
 		# add recovery partition
 		#--------------------------------------
-		if [ ! -z "$OEM_RECOVERY" ] && [ $pID -lt 4 ];then
+		if [ ! -z "$OEM_RECOVERY" ];then
 			pID=$((pID + 1))
 			partsize=+"$recoMByte"M
 			createPartitionerInput \
@@ -273,7 +273,7 @@ function OEMRepartSplit {
 		#======================================
 		# add swap partition
 		#--------------------------------------
-		if [ ! $swapsize = 0 ] && [ $pID -lt 4 ];then
+		if [ ! $swapsize = 0 ];then
 			pID=$((pID + 1))
 			createPartitionerInput \
 				n p $pID . +"$swapsize"M t $pID 82
@@ -373,7 +373,7 @@ function OEMRepartLVM {
 		#======================================
 		# add recovery partition
 		#--------------------------------------
-		if [ ! -z "$OEM_RECOVERY" ] && [ $pID -lt 4 ];then
+		if [ ! -z "$OEM_RECOVERY" ];then
 			pID=$((pID + 1))
 			createPartitionerInput \
 				n p $pID . . t $pID $recoID
