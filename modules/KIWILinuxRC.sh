@@ -897,7 +897,7 @@ function installBootLoaderGrub2 {
 	local confTool=grub2-mkconfig
 	local instTool=grub2-install
 	local confPath_grub=/boot/grub2/grub.cfg
-	local confPath_uefi=/boot/EFI/EFI/BOOT/grub.cfg
+	local confPath_uefi=/boot/efi/EFI/BOOT/grub.cfg
 	local product=/etc/products.d/baseproduct
 	local elilo_efi=/usr/lib64/efi/elilo.efi
 	local grub_efi=/boot/EFI/EFI/BOOT/grub.efi
@@ -906,9 +906,9 @@ function installBootLoaderGrub2 {
 	#======================================
 	# check for EFI and mount EFI partition
 	#--------------------------------------
-	if [ ! -z "$kiwi_JumpPart" ] && [ -d /boot/EFI ];then
+	if [ ! -z "$kiwi_JumpPart" ] && [ -d /boot/efi ];then
 		local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
-		if ! mount $jdev /boot/EFI;then
+		if ! mount $jdev /boot/efi;then
 			Echo "Failed to mount EFI boot partition"
 			return 1
 		fi
@@ -990,7 +990,7 @@ function installBootLoaderGrub2 {
 	fi
 	if [ $isEFI -eq 1 ] && [ -e $confPath_uefi ];then
 		cp $confPath_grub $confPath_uefi
-		umount /boot/EFI
+		umount /boot/efi
 	fi
 	#======================================
 	# install grub2 in BIOS mode
@@ -3038,12 +3038,12 @@ function updateBootDeviceFstab {
 	#======================================
 	# check for kiwi_JumpPart
 	#--------------------------------------
-	if [ ! -z "$kiwi_JumpPart" ] && [ -d /mnt/$mount/EFI ];then
+	if [ ! -z "$kiwi_JumpPart" ] && [ -d /mnt/$mount/efi ];then
 		local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
 		local fstype=$(blkid $jdev -s TYPE -o value)
 		if [ ! -z "$fstype" ];then
 			jdev=$(getDiskID $jdev)
-			echo "$jdev /boot/EFI $fstype defaults 0 0" >> $nfstab
+			echo "$jdev /boot/efi $fstype defaults 0 0" >> $nfstab
 		fi
 	fi
 }
