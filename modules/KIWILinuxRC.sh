@@ -9400,15 +9400,67 @@ function updatePartitionTable {
 	# for fixing the table when e.g the print command is called.
 	# We tell parted to fix the table
 	# ----
-	local device=$1
-	if parted -m -s $device unit cyl print | grep -qE 'Warning:|Error:';then
-		Echo "Updating GPT metadata..."
-		if ! parted $device print Fix Fix &>/dev/null;then
+	local device=$(getDiskDevice $1)
+	local diskhd
+	local plabel
+	local line
+	local partn
+	local begin
+	local stopp
+	local label
+	local pflag
+	#======================================
+	# fix and store current table
+	#--------------------------------------
+	# the strange parted creates a gpt_sync_mbr if the disk
+	# geometry has changed. If this happened we have to rewrite
+	# the entire table with a new GPT label, thanks parted :(
+	# ----
+	if ! parted -m -s $device unit s print > /tmp/table;then
+		systemException \
+			"Failed to store current partition table" \
+		"reboot"
+	fi
+	#======================================
+	# check table type
+	#--------------------------------------
+	plabel=$(cat /tmp/table | grep ^$device: | cut -f6 -d:)
+	if [ ! "$plabel" = "gpt_sync_mbr" ];then
+		return 0
+	fi
+	#======================================
+	# clone GPT table
+	#--------------------------------------
+	Echo "Updating GPT metadata..."
+	if ! parted -s $device mklabel gpt;then
+		systemException \
+			"Failed to create GPT label" \
+		"reboot"
+	fi
+	while read line;do
+		if [[ ! $line =~ ^[0-9]+: ]];then
+			continue
+		fi
+		line=$(echo "${line%?}")
+		partn=$(echo $line | cut -f1 -d:)
+		begin=$(echo $line | cut -f2 -d:)
+		stopp=$(echo $line | cut -f3 -d:)
+		label=$(echo $line | cut -f6 -d:)
+		pflag=$(echo $line | cut -f7 -d:)
+		if [ -z "$label" ];then
+			label=primary
+		fi
+		if ! parted -s $device mkpart $label $begin $stopp 1>&2;then
 			systemException \
-				"Failed to update GPT metadata, please check with parted" \
+				"Failed to clone GPT table" \
 			"reboot"
 		fi
-	fi
+		if [ ! -z "$pflag" ];then
+			# set flag, but ignore errors here
+			parted -s $device set $partn $pflag on &>/dev/null
+		fi
+	done < /tmp/table
+	return 0
 }
 #======================================
 # resetBootBind
