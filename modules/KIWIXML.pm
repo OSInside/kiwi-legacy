@@ -8848,15 +8848,18 @@ sub __populateTypeInfo_legacy {
 				-> getAttribute("ramonly");
 			$record{mdraid}        = $node
 				-> getAttribute("mdraid");
-			if (defined $disk) {
-				$record{lvm} = "true";
-			}
 			if ($record{type} eq "split") {
 				my $filesystemRO = $node -> getAttribute("fsreadonly");
 				my $filesystemRW = $node -> getAttribute("fsreadwrite");
 				if ((defined $filesystemRO) && (defined $filesystemRW)) {
 					$record{filesystem} = "$filesystemRW,$filesystemRO";
 				}
+			}
+			if ((defined $disk) &&
+				($record{filesystem} !~ /zfs|btrfs/) &&
+				($record{type} !~ /zfs|btrfs/)
+			) {
+				$record{lvm} = "true";
 			}
 			my $bootpath = $urlhd -> normalizeBootPath ($record{boot});
 			if (defined $bootpath) {
