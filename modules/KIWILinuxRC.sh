@@ -900,7 +900,7 @@ function installBootLoaderGrub2 {
 	local confPath_uefi=/boot/efi/EFI/BOOT/grub.cfg
 	local product=/etc/products.d/baseproduct
 	local elilo_efi=/usr/lib64/efi/elilo.efi
-	local grub_efi=/boot/EFI/EFI/BOOT/grub.efi
+	local grub_efi=/boot/efi/EFI/BOOT/grub.efi
 	local prod=unknown
 	local isEFI=0
 	#======================================
@@ -921,16 +921,6 @@ function installBootLoaderGrub2 {
 		product=$(readlink $product)
 		if [ "$product" = "SUSE_SLES.prod" ];then
 			#======================================
-			# replace grub efi binary with elilo
-			#--------------------------------------
-			if [ -e $grub_efi ];then
-				# shim loader loads grub, now let it load elilo
-				cp $elilo_efi $grub_efi
-			else
-				# no shim loader, let efi firmware load elilo
-				cp $elilo_efi /boot/EFI/EFI/BOOT/bootx64.efi
-			fi
-			#======================================
 			# write elilo.conf
 			#--------------------------------------
 			. /etc/default/grub
@@ -939,32 +929,44 @@ function installBootLoaderGrub2 {
 				timeout=$KIWI_BOOT_TIMEOUT
 			fi
 			cat > /etc/elilo.conf <<- EOF
+				# Modified by YaST2.
+				timeout = $timeout
+				##YaST - boot_efilabel = "SUSE Linux Enterprise Server 11"
+				vendor-directory = BOOT
+				secure-boot = on
 				prompt
-				timeout=$timeout
-				default=SLES
-				image=vmlinuz
-				    label=SLES
-				    initrd=initrd
-				    read-only
-				    root=$(getDiskID $imageRootDevice)
-				    append="$GRUB_CMDLINE_LINUX_DEFAULT"
+				image  = /boot/vmlinuz
+				###Don't change this comment - YaST2 identifier: Original name: linux###
+				initrd = /boot/initrd
+				label  = linux
+				append = "$GRUB_CMDLINE_LINUX_DEFAULT"
+				description = Linux
+				root = $(getDiskID $imageRootDevice)
 			EOF
 			#======================================
-			# copy kernel initrd and config file
+			# copy elilo config file
 			#--------------------------------------
-			# elilo requires kernel and initrd in the same directory
-			# as the config file, links will also not work because we
-			# are on fat here for efi
-			# ----
-			cp /boot/initrd    /boot/EFI/EFI/BOOT
-			cp /boot/vmlinuz   /boot/EFI/EFI/BOOT
-			cp /etc/elilo.conf /boot/EFI/EFI/BOOT
-			rm -f $confPath_uefi
+			cp /etc/elilo.conf /boot/efi/EFI/BOOT
 			#======================================
 			# update sysconfig/bootloader
 			#--------------------------------------
 			sed -i -e s'@LOADER_TYPE.*@LOADER_TYPE="elilo"@' \
 				/etc/sysconfig/bootloader
+			#======================================
+			# update grub.cfg
+			#--------------------------------------
+			sed -i -e s'@initrd.vmx@initrd@' -e s'@linux.vmx@vmlinuz@' \
+				$confPath_uefi
+			#======================================
+			# write efi variable to NvRam
+			#--------------------------------------
+			# this is for the efi boot manager to show a better
+			# title for this system
+			# ----
+			elilo --refresh-EBM
+			#======================================
+			# return early for elilo case
+			#--------------------------------------
 			return 0
 		fi
 	fi
@@ -2684,6 +2686,17 @@ function setupBootLoaderGrub2 {
 	echo "LOADER_LOCATION=\"mbr\""                >> $sysb
 	echo "DEFAULT_APPEND=\"$cmdline\""            >> $sysb
 	echo "FAILSAFE_APPEND=\"$failsafe $cmdline\"" >> $sysb
+	#======================================
+	# toggle boot flag
+	#--------------------------------------
+	# for some strange reasons it's required to toggle the
+	# boot flag in the partition table if set in order
+	# to fix the EFI boot
+	# ----
+	if [ ! -z "$toggleBootFlag" ];then
+		parted $imageDiskDevice set 1 boot off &>/dev/null
+		parted $imageDiskDevice set 1 boot on  &>/dev/null
+	fi
 }
 #======================================
 # setupBootLoaderYaboot
@@ -9385,6 +9398,9 @@ function updatePartitionTable {
 		if [ ! -z "$pflag" ];then
 			# set flag, but ignore errors here
 			parted -s $device set $partn $pflag on &>/dev/null
+			if [ $pflag = "boot" ];then
+				export toggleBootFlag=1
+			fi
 		fi
 	done < /tmp/table
 	return 0
