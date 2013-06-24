@@ -9691,6 +9691,9 @@ function FBOK {
 			# inappropriate ioctl (not a linux console)
 			return 1
 		fi
+	elif ! fbiterm echo &>/dev/null;then
+		# fbiterm can't be called with echo test cmd
+		return 1
 	fi
 	return 0
 }
