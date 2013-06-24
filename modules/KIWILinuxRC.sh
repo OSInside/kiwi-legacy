@@ -5441,7 +5441,10 @@ function kiwiMount {
 				return 1
 			fi
 		fi
-		if ! mount --move /kiwipool/ROOT/system-1 $dst >/dev/null;then
+		zfs umount -a && \
+			zfs set mountpoint=$dst kiwipool/ROOT/system-1 && \
+			zfs mount -a
+		if [ ! $? = 0 ];then
 			return 1
 		fi
 	else
