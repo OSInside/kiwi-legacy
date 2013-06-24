@@ -150,6 +150,13 @@ sub new {
 	#------------------------------------------
 	$this -> setupOverlay();
 	#==========================================
+	# read origin path of XML description
+	#------------------------------------------
+	if (open my $FD, '<', "$imageTree/image/main::Prepare") {
+		my $idesc = <$FD>; close $FD;
+		$this->{originXMLPath} = $idesc;
+	}
+	#==========================================
 	# Store a disk label ID for this object
 	#------------------------------------------
 	$this->{mbrid} = KIWIGlobals -> instance() -> getMBRDiskLabel (
@@ -2231,8 +2238,8 @@ sub createImageLiveCD {
 				print $FD "\t"."linux$efi_suffix /boot/$isoarch/loader/linux";
 				print $FD " mediacheck=1 splash=silent";
 				print $FD "\t"."echo Loading initrd...\n";
-				print $FD "\t"."initrd$efi_suffix /boot/$isoarch/loader/initrd\n";
-				print $FD "}\n";
+				print $FD "\t"."initrd$efi_suffix /boot/$isoarch/loader/initrd";
+				print $FD "\n}\n";
 			} else {
 				print $FD "\t"."echo Loading Xen\n";
 				print $FD "\t"."multiboot /boot/$isoarch/loader/xen.gz dummy\n";
@@ -2241,8 +2248,8 @@ sub createImageLiveCD {
 				print $FD "\t"."module /boot/$isoarch/loader/linux dummy";
 				print $FD " mediacheck=1 splash=silent";
 				print $FD "\t"."echo Loading initrd...\n";
-				print $FD "\t"."module /boot/$isoarch/loader/initrd dummy\n";
-				print $FD "}\n";
+				print $FD "\t"."module /boot/$isoarch/loader/initrd dummy";
+				print $FD "\n}\n";
 			}
 		}
 		#==========================================
@@ -2464,6 +2471,45 @@ sub createImageLiveCD {
 	}
 	$CFD -> close();
 	#==========================================
+	# Check for edit boot config
+	#------------------------------------------
+	if ($cmdL) {
+		my $editBoot = $cmdL -> getEditBootConfig();
+		my $idesc;
+		if ((! $editBoot) && ($sxml)) {
+			$editBoot = $sxml -> getEditBootConfig_legacy();
+		}
+		if ($editBoot) {
+			if (($this->{originXMLPath}) && (! -f $editBoot)) {
+				$editBoot = $this->{originXMLPath}."/".$editBoot;
+			}
+			if (-f $editBoot) {
+				$kiwi -> info ("Calling pre bootloader install script:\n");
+				$kiwi -> info ("--> $editBoot\n");
+				my @opts = ();
+				if ($stype{bootfilesystem}) {
+					push @opts,$stype{bootfilesystem};
+				}
+				if ($this->{partids}) {
+					push @opts,$this->{partids}{boot};
+				}
+				system ("cd $CD && chmod u+x $editBoot");
+				system ("cd $CD && bash --norc -c \"$editBoot @opts\"");
+				my $result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error ("Call failed, see console log");
+					$kiwi -> failed ();
+					return;
+				}
+			} else {
+				$kiwi -> warning (
+					"Can't find pre bootloader install script: $editBoot..."
+				);
+				$kiwi -> skipped ();
+			}
+		}
+	}
+	#==========================================
 	# create ISO image
 	#------------------------------------------
 	$kiwi -> info ("Creating ISO image...\n");
@@ -2504,6 +2550,39 @@ sub createImageLiveCD {
 	}
 	if ($isoerror) {
 		return;
+	}
+	#==========================================
+	# Check for edit boot install
+	#------------------------------------------
+	if ($cmdL) {
+		my $editBoot = $cmdL -> getEditBootInstall();
+		my $idesc;
+		if ((! $editBoot) && ($sxml)) {
+			$editBoot = $sxml -> getEditBootInstall_legacy();
+		}
+		if ($editBoot) {
+			if (($this->{originXMLPath}) && (! -f $editBoot)) {
+				$editBoot = $this->{originXMLPath}."/".$editBoot;
+			}
+			if (-f $editBoot) {
+				$kiwi -> info ("Calling post bootloader install script:\n");
+				$kiwi -> info ("--> $editBoot\n");
+				my @opts = ($name);
+				system ("cd $CD && chmod u+x $editBoot");
+				system ("cd $CD && bash --norc -c \"$editBoot @opts\"");
+				my $result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error ("Call failed, see console log");
+					$kiwi -> failed ();
+					return;
+				}
+			} else {
+				$kiwi -> warning (
+					"Can't find post bootloader install script: $editBoot..."
+				);
+				$kiwi -> skipped ();
+			}
+		}
 	}
 	#==========================================
 	# relocate boot catalog

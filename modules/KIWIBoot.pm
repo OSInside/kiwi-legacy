@@ -5124,7 +5124,7 @@ sub setupBootLoaderConfiguration {
 			$editBoot = $xml -> getEditBootConfig_legacy();
 		}
 		if ($editBoot) {
-			if ($this->{originXMLPath}) {
+			if (($this->{originXMLPath}) && (! -f $editBoot)) {
 				$editBoot = $this->{originXMLPath}."/".$editBoot;
 			}
 			if (-f $editBoot) {
@@ -5694,7 +5694,7 @@ sub installBootLoader {
 			$editBoot = $xml -> getEditBootInstall_legacy();
 		}
 		if ($editBoot) {
-			if ($this->{originXMLPath}) {
+			if (($this->{originXMLPath}) && (! -f $editBoot)) {
 				$editBoot = $this->{originXMLPath}."/".$editBoot;
 			}
 			if (-f $editBoot) {
