@@ -919,7 +919,9 @@ function installBootLoaderGrub2 {
 	#--------------------------------------
 	if [ $isEFI -eq 1 ] && [ -e $product ] && [ -e $elilo_efi ];then
 		product=$(readlink $product)
-		if [ "$product" = "SUSE_SLES.prod" ];then
+		if  [ "$product" = "SUSE_SLES.prod" ] ||\
+			[ "$product" = "SUSE_SLED.prod" ]
+		then
 			#======================================
 			# write elilo.conf
 			#--------------------------------------
