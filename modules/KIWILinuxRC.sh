@@ -6951,8 +6951,9 @@ function activateImage {
 #--------------------------------------
 function cleanImage {
 	# /.../
-	# remove preinit code from system image before real init
-	# is called
+	# remove preinit code from system image before
+	# real init is called. this function runs already
+	# inside the system root directory via chroot
 	# ----
 	local bootdir=boot_bind
 	#======================================
@@ -7161,6 +7162,17 @@ function bootImage {
 	if [ ! -z "$DROPBEAR_PID" ];then
 		kill $DROPBEAR_PID
 	fi
+	#======================================
+	# copy initrd to /run/initramfs
+	#--------------------------------------
+	mkdir -p /mnt/run/initramfs
+	for dir in /*;do
+		if [[ $dir =~ mnt|lost\+found|dev|boot|tmp|run|proc|sys ]];then
+			mkdir -p /mnt/run/initramfs/$dir
+			continue
+		fi
+		cp -a $dir /mnt/run/initramfs
+	done
 	#======================================
 	# hand over control to init
 	#--------------------------------------
