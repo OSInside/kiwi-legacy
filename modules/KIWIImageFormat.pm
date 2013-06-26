@@ -418,7 +418,6 @@ sub createEC2 {
 	my $source = $this->{image};
 	my $format = $this->{format};
 	my $target = $source;
-	my $mods   = "ext3 jbd xenblk";
 	my $kmod   = "INITRD_MODULES";
 	my $sysk   = "/etc/sysconfig/kernel";
 	my $aminame= basename $source;
@@ -426,6 +425,12 @@ sub createEC2 {
 	my $status;
 	my $result;
 	my $tmpdir;
+	#==========================================
+	# Default kernel modules
+	#------------------------------------------
+	# Building ec2 image the type must be a filesystem
+	my $fsType = $xml -> getImageType() -> getTypeName();
+	my $mods = "$fsType jbd xenblk";
 	#==========================================
 	# Import AWS region kernel map
 	#------------------------------------------
@@ -508,7 +513,6 @@ sub createEC2 {
 	#==========================================
 	# create initrd
 	#------------------------------------------
-	my $imgType = $xml -> getImageType() -> getTypeName();
 	my $IRDFD = FileHandle -> new();
 	if (! $IRDFD -> open (">$tmpdir/create_initrd.sh")) {
 		$kiwi -> error  ("Failed to open $tmpdir/create_initrd.sh: $!");
@@ -517,7 +521,7 @@ sub createEC2 {
 		return;
 	}
 	print $IRDFD 'export rootdev=/dev/sda1'."\n";
-	print $IRDFD 'export rootfstype='.$imgType."\n";
+	print $IRDFD 'export rootfstype='.$fsType."\n";
 	print $IRDFD 'mknod /dev/sda1 b 8 1'."\n";
 	print $IRDFD 'touch /boot/.rebuild-initrd'."\n";
 	print $IRDFD 'sed -i -e \'s@^';
@@ -527,7 +531,7 @@ sub createEC2 {
 	print $IRDFD '"@\' ';
 	print $IRDFD $sysk;
 	print $IRDFD "\n";
-	print $IRDFD 'mkinitrd -B'."\n";
+	print $IRDFD 'mkinitrd -A -B'."\n";
 	$IRDFD -> close();
 	qxx ("chmod u+x $tmpdir/create_initrd.sh");
 	$status = qxx ("chroot $tmpdir bash -c ./create_initrd.sh 2>&1");
@@ -564,7 +568,8 @@ sub createEC2 {
 		$this -> __clean_loop ($tmpdir);
 		return;
 	}
-	print $GCFD 'setup --stage2=/boot/grub/stage2 --force-lba (hd0) (hd0)'."\n";
+	print $GCFD 'setup --stage2=/boot/grub/stage2 --force-lba (hd0) (hd0)'
+		. "\n";
 	print $GCFD 'quit'."\n";
 	$GCFD -> close();
 	# boot/grub/menu.lst
@@ -653,7 +658,7 @@ sub createEC2 {
 		}
 	}
 	if (! $rootfs) {
-		print $FSTABFD "/dev/sda1 / $imgType defaults 0 0"."\n";
+		print $FSTABFD "/dev/sda1 / $fsType defaults 0 0"."\n";
 	}
 	$FSTABFD -> close();
 	#==========================================
@@ -664,6 +669,11 @@ sub createEC2 {
 	# AWS Account data check
 	#------------------------------------------
 	my $ec2Config = $xml -> getEC2Config();
+	if (! $ec2Config) {
+		$kiwi -> info ('No AWS Account Data provided, skip bundle creation');
+		$kiwi -> skipped ();
+		return $source;
+	}
 	my $acctNo = $ec2Config -> getAccountNumber();
 	my $certFl = $ec2Config -> getCertFilePath();
 	my $privKey = $ec2Config -> getPrivateKeyFilePath();
