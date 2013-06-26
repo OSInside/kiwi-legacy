@@ -5317,30 +5317,43 @@ sub installBootLoader {
 			$kiwi -> failed ();
 			return;
 		}
+		if (($firmware eq 'bios') && (! -e "$stages/core.img")) {
+			$kiwi -> error  ("Mandatory grub2-bios modules not found");
+			$kiwi -> failed ();
+			return;
+		}
 		#==========================================
 		# Install grub2
 		#------------------------------------------
-		$kiwi -> info ("Installing grub2:\n");
-		my $loaderTarget = $diskname;
-		if ($chainload) {
-			$loaderTarget = readlink ($bootdev);
-			$loaderTarget =~ s/\.\./\/dev/;
-			$kiwi -> info ("--> on partition target: $loaderTarget\n");
-		} else {
-			$kiwi -> info ("--> on disk target: $loaderTarget\n");
-		}
-		$status = qxx (
-			"$biosgrub -f -d $stages -m $dmfile $loaderTarget 2>&1"
-		);
-		$result = $? >> 8;
-		qxx ("umount /mnt");
-		if ($result != 0) {
-			$kiwi -> error  (
-				"Couldn't install $loader on $loaderTarget: $status"
+		if (-e "$stages/core.img") {
+			$kiwi -> info ("Installing grub2:\n");
+			my $loaderTarget = $diskname;
+			if ($chainload) {
+				$loaderTarget = readlink ($bootdev);
+				$loaderTarget =~ s/\.\./\/dev/;
+				$kiwi -> info ("--> on partition target: $loaderTarget\n");
+			} else {
+				$kiwi -> info ("--> on disk target: $loaderTarget\n");
+			}
+			$status = qxx (
+				"$biosgrub -f -d $stages -m $dmfile $loaderTarget 2>&1"
 			);
-			$kiwi -> failed ();
-			$this -> cleanStack ();
-			return;
+			$result = $? >> 8;
+			qxx ("umount /mnt");
+			if ($result != 0) {
+				$kiwi -> error  (
+					"Couldn't install $loader on $loaderTarget: $status"
+				);
+				$kiwi -> failed ();
+				$this -> cleanStack ();
+				return;
+			}
+		} else {
+			$kiwi -> warning (
+				"grub2-bios modules not found, legacy boot disabled"
+			);
+			$kiwi -> skipped ();
+			qxx ("umount /mnt");
 		}
 		#==========================================
 		# Clean loop maps
