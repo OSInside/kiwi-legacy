@@ -1595,9 +1595,10 @@ sub setupBootDisk {
 	my @commands  = ();
 	my $bootfix   = "VMX";
 	my $haveluks  = 0;
+	my $needBiosP = 0;
 	my $needJumpP = 0;
 	my $needBootP = 0;
-	my $needParts = 1;
+	my $needRoP   = 0;
 	my $rawRW     = 0;
 	my $md        = 0;
 	my $bootloader;
@@ -1896,48 +1897,50 @@ sub setupBootDisk {
 	}
 	$this->{bootloader} = $bootloader;
 	#==========================================
-	# setup boot partition ID
+	# Do we need a bios legacy partition
+	#------------------------------------------
+	if (($firmware eq "efi") || ($firmware eq "uefi")) {
+		$needBiosP = 1;
+		$this->{legacysize} = 2;
+		$this -> __updateDiskSize ($this->{legacysize});
+	}
+	#==========================================
+	# Do we need a jump to boot partition
+	#------------------------------------------
+	if (($firmware eq "efi")  ||
+		($firmware eq "uefi") ||
+		($firmware eq "vboot")
+	) {
+		$this->{jumpsize}   = 32;
+		$this -> __updateDiskSize ($this->{jumpsize});
+		$needJumpP = 1;
+	}
+	#==========================================
+	# Do we need a boot partition
 	#------------------------------------------
 	if ($md) {
 		$needBootP = 1;
-		$needParts = 2;
-	}
-	if ($lvm) {
+	} elsif ($lvm) {
 		$needBootP = 1;
-		$needParts = 2;
 	} elsif ($syszip) {
 		$needBootP = 1;
-		$needParts = 2;
-		if ($imgtype eq "split") {
-			$needBootP = 1;
-			$needParts = 3;
-		} elsif ($type{filesystem} =~ /clicfs|overlayfs/) {
-			$needBootP = 1;
-			$needParts = 3;
-		} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
-			$needBootP = 1;
-			$needParts = 3;
-		} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
-			$needBootP = 1;
-			$needParts = 3;
-		} elsif ($type{luks}) {
-			$needBootP = 1;
-			$needParts = 3;
-		}
 	} elsif ($type{filesystem} =~ /btrfs|xfs|zfs/) {
 		$needBootP = 1;
-		$needParts = 2;
 	} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
 		$needBootP = 1;
-		$needParts = 2;
-	} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
-		$needBootP = 1;
-		$needParts = 2;
 	} elsif ($type{luks}) {
 		$needBootP = 1;
-		$needParts = 2;
 	}
 	$this->{needBootP} = $needBootP;
+	$this->{needJumpP} = $needJumpP;
+	#==========================================
+	# Do we need a read-only root partition
+	#------------------------------------------
+	if ($imgtype eq "split") {
+		$needRoP = 1;
+	} elsif ($type{filesystem} =~ /clicfs|overlayfs/) {
+		$needRoP = 1;
+	}
 	#==========================================
 	# check root partition type
 	#------------------------------------------
@@ -2051,18 +2054,6 @@ sub setupBootDisk {
 		$this ->{bootsize} = $this -> __getBootSize ();
 	}
 	#==========================================
-	# check for jump partition
-	#------------------------------------------
-	if (($firmware eq "efi")  ||
-		($firmware eq "uefi") ||
-		($firmware eq "vboot")
-	) {
-		$this->{jumpsize}   = 32;
-		$this->{legacysize} = 2;
-		$this -> __updateDiskSize ($this->{jumpsize} + $this->{legacysize});
-		$needJumpP = 1;
-	}
-	#==========================================
 	# add boot space if syslinux based
 	#------------------------------------------
 	if ($bootfs =~ /^fat/) {
@@ -2149,131 +2140,65 @@ sub setupBootDisk {
 			}
 		}
 		#==========================================
-		# create disk partition
+		# create disk partitions
 		#------------------------------------------
-		if (! $lvm) {
-			if ($needParts == 3) {
-				if ($needJumpP) {
-					# xda1 bios | xda2 jump | xda3 boot | xda4 ro | xda5 rw
-					@commands = (
-						"n","p:legacy","1",".","+".$this->{legacysize}."M",
-						"n","p:UEFI","2",".","+".$this->{jumpsize}."M",
-						"n","p:lxboot","3",".","+".$this->{bootsize}."M",
-						"n","p:lxroot","4",".","+".$syszip."M",
-						"n","p:lxrw","5",".",".",
-						"t","3",$partid,
-						"t","4",$rootid,
-						"a","2","w","q"
-					);
-					$this->{partids}{root}      = '4';
-					$this->{partids}{readonly}  = '4';
-					$this->{partids}{readwrite} = '5';
-					$this->{partids}{boot}      = '3';
-					$this->{partids}{jump}      = '2';
-					$this->{partids}{biosgrub}  = '1';
-				} else {
-					# xda1 boot | xda2 ro | xda3 rw
-					@commands = (
-						"n","p:lxboot","1",".","+".$this->{bootsize}."M",
-						"n","p:lxroot","2",".","+".$syszip."M",
-						"n","p:lxrw","3",".",".",
-						"t","1",$partid,
-						"t","2",$rootid,
-						"a","1","w","q"
-					);
-					$this->{partids}{root}      = '2';
-					$this->{partids}{readonly}  = '2';
-					$this->{partids}{readwrite} = '3';
-					$this->{partids}{boot}      = '1';
-				}
-			} elsif ($needParts == 2) {
-				if ($needJumpP) {
-					# xda1 bios | xda2 jump | xda3 boot | xda4 rw
-					@commands = (
-						"n","p:legacy","1",".","+".$this->{legacysize}."M",
-						"n","p:UEFI","2",".","+".$this->{jumpsize}."M",
-						"n","p:lxboot","3",".","+".$this->{bootsize}."M",
-						"n","p:lxroot","4",".",".",
-						"t","3",$partid,
-						"t","4",$rootid,
-						"a","2","w","q"
-					);
-					$this->{partids}{root}      = '4';
-					$this->{partids}{boot}      = '3';
-					$this->{partids}{jump}      = '2';
-					$this->{partids}{biosgrub}  = '1';
-				} else {
-					# xda1 boot | xda2 rw
-					@commands = (
-						"n","p:lxboot","1",".","+".$this->{bootsize}."M",
-						"n","p:lxroot","2",".",".",
-						"t","1",$partid,
-						"t","2",$rootid,
-						"a","1","w","q"
-					);
-					$this->{partids}{root} = '2';
-					$this->{partids}{boot} = '1';
-				}
-			} else {
-				# xda1 rw
-				@commands = (
-					"n","p:lxroot","1",".",".",
-					"a","1","w","q"
-				);
-				$this->{partids}{boot} = '1';
-				$this->{partids}{root} = '1';
-			}
-		} else {
-			my $lvmsize = $this->{vmmbyte} - $this->{bootsize};
-			my $bootpartsize = "+".$this->{bootsize}."M";
-			if ($needJumpP) {
-				# xda1 bios | xda2 jump | xda3 boot | xda4 lvm
-				@commands = (
-					"n","p:legacy","1",".","+".$this->{legacysize}."M",
-					"n","p:UEFI","2",".","+".$this->{jumpsize}."M",
-					"n","p:lxboot","3",".",$bootpartsize,
-					"n","p:lxlvm","4",".",".",
-					"t","3",$partid,
-					"t","4",$rootid,
-					"a","2","w","q"
-				);
-				if (($syszip) || ($haveSplit)) {
-					$this->{partids}{root}         = '4';
-					$this->{partids}{root_lv}      = 'LVComp';
-					$this->{partids}{readonly_lv}  = 'LVComp';
-					$this->{partids}{readwrite_lv} = 'LVRoot';
-					$this->{partids}{boot}         = '3';
-					$this->{partids}{jump}         = '2';
-					$this->{partids}{biosgrub}     = '1';
-				} else {
-					$this->{partids}{root}     = '4';
-					$this->{partids}{root_lv}  = 'LVRoot';
-					$this->{partids}{boot}     = '3';
-					$this->{partids}{jump}     = '2';
-					$this->{partids}{biosgrub} = '1';
-				}
-			} else {
-				# xda1 boot | xda2 lvm
-				@commands = (
-					"n","p:lxboot","1",".",$bootpartsize,
-					"n","p:lxlvm","2",".",".",
-					"t","1",$partid,
-					"t","2",$rootid,
-					"a","1","w","q"
-				);
-				if (($syszip) || ($haveSplit)) {
-					$this->{partids}{root}         = '2';
-					$this->{partids}{root_lv}      = 'LVComp';
-					$this->{partids}{readonly_lv}  = 'LVComp';
-					$this->{partids}{readwrite_lv} = 'LVRoot';
-					$this->{partids}{boot}         = '1';
-				} else {
-					$this->{partids}{root}     = '2';
-					$this->{partids}{root_lv}  = 'LVRoot';
-					$this->{partids}{boot}     = '1';
-				}
+		my $pnr = 0;    # partition number start for increment
+		my $active = 1; # default active partition (bios)
+		if ($needBiosP) {
+			$pnr++;
+			push @commands,"n","p:legacy",$pnr,".","+".$this->{legacysize}."M";
+			$this->{partids}{biosgrub}  = $pnr;
+		}
+		if ($needJumpP) {
+			$pnr++;
+			push @commands,"n","p:UEFI",$pnr,".","+".$this->{jumpsize}."M";
+			$this->{partids}{jump} = $pnr;
+			$active = $pnr;
+		}
+		if ($needBootP) {
+			$pnr++;
+			push @commands,"n","p:lxboot",$pnr,".","+".$this->{bootsize}."M";
+			push @commands,"t",$pnr,$partid;
+			$this->{partids}{boot} = $pnr;
+			if (! $needJumpP) {
+				$active = $pnr;
 			}
 		}
+		if (! $lvm) {
+			if ($needRoP) {
+				$pnr++;
+				push @commands,"n","p:lxroot",$pnr,".","+".$syszip."M";
+				push @commands,"t",$pnr,$rootid;
+				$this->{partids}{readonly} = $pnr;
+				$this->{partids}{root}     = $pnr;
+				$pnr++;
+				push @commands,"n","p:lxrw",$pnr,".",".";
+				$this->{partids}{readwrite} = $pnr;
+			} else {
+				$pnr++;
+				push @commands,"n","p:lxroot",$pnr,".",".";
+				$this->{partids}{root} = $pnr;
+				if (! $needBootP) {
+					$this->{partids}{boot} = $pnr;
+				}
+			}
+		} else {
+			$pnr++;
+			push @commands,"n","p:lxlvm",$pnr,".",".";
+			push @commands,"t",$pnr,$rootid;
+			$this->{partids}{root} = $pnr;
+			if ($needRoP) {
+				$this->{partids}{root_lv}      = 'LVComp';
+				$this->{partids}{readonly_lv}  = 'LVComp';
+				$this->{partids}{readwrite_lv} = 'LVRoot';
+			} else {
+				$this->{partids}{root_lv}  = 'LVRoot';
+			}
+		}
+		push @commands,"a",$active;
+		#==========================================
+		# write partition table
+		#------------------------------------------
 		if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create partition table");
@@ -2656,7 +2581,7 @@ sub setupBootDisk {
 		$kiwi -> done();
 	}
 	#==========================================
-	# create bootloader filesystem if needed
+	# create bootloader filesystem(s) if needed
 	#------------------------------------------
 	if ($needBootP) {
 		#==========================================
@@ -2670,15 +2595,15 @@ sub setupBootDisk {
 			$this -> cleanStack ();
 			return;
 		}
-		if ($needJumpP) {
-			#==========================================
-			# build jump boot filesystem
-			#------------------------------------------
-			my $jump = $deviceMap{jump};
-			if (! $this -> setupFilesystem ('fat16',$jump,"jump","EFI")) {
-				$this -> cleanStack ();
-				return;
-			}
+	}
+	if ($needJumpP) {
+		#==========================================
+		# build jump boot filesystem
+		#------------------------------------------
+		my $jump = $deviceMap{jump};
+		if (! $this -> setupFilesystem ('fat16',$jump,"jump","EFI")) {
+			$this -> cleanStack ();
+			return;
 		}
 	}
 	#==========================================
@@ -5166,13 +5091,19 @@ sub copyBootCode {
 	my $loader   = shift;
 	my $kiwi     = $this->{kiwi};
 	my $firmware = $this->{firmware};
+	if (-l "$dest/boot/grub2-efi") {
+		unlink "$dest/boot/grub2-efi";
+	}
 	my $status   = qxx ("cp -dR $source/boot $dest 2>&1");
 	my $result   = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> oops ();
 		$kiwi -> warning ("Copy of boot data returned: $status");
 	}
-	if (! $this->{needBootP}) {
+	#==========================================
+	# return early if no jump partition
+	#------------------------------------------
+	if (! $this->{needJumpP}) {
 		return $this;
 	}
 	#==========================================
@@ -5187,6 +5118,12 @@ sub copyBootCode {
 			$kiwi -> failed ();
 			return;
 		}
+	}
+	#==========================================
+	# return early if no boot partition
+	#------------------------------------------
+	if (! $this->{needBootP}) {
+		return $this;
 	}
 	#==========================================
 	# Uboot
