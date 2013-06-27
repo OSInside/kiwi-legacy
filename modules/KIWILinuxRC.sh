@@ -481,6 +481,9 @@ function mountSystemFilesystems {
 	if [ ! -e /sys/kernel ];then
 		mount -t sysfs sysfs  /sys
 	fi
+	if [ -e /run/initramfs/shutdown ];then
+		chmod u+x /run/initramfs/shutdown
+	fi
 }
 #======================================
 # umountSystemFilesystems
@@ -7122,6 +7125,56 @@ function bootImage {
 	umount proc &>/dev/null && \
 	umount proc &>/dev/null
 	#======================================
+	# copy initrd to /run/initramfs
+	#--------------------------------------
+	mkdir -p /mnt/run/initramfs
+	for dir in /*;do
+		if [[ $dir =~ mnt|lost\+found|dev|boot|tmp|run|proc|sys ]];then
+			mkdir -p /mnt/run/initramfs/$dir
+			continue
+		fi
+		cp -a $dir /mnt/run/initramfs
+	done
+	if [ "$FSTYPE" = "zfs" ];then
+		#======================================
+		# setup shutdown script
+		#--------------------------------------
+		local halt=/mnt/run/initramfs/shutdown
+		cat > $halt <<- EOF
+			#!/bin/sh
+			# if systemd is used this script is called after all
+			# services are terminated and mount points unmounted
+			# ---
+			ACTION="\$1"
+		EOF
+		#======================================
+		# shutdown: zfs -> export pool
+		#--------------------------------------
+		echo "zpool export kiwipool" >> $halt
+		#======================================
+		# shutdown: handle requested action
+		#--------------------------------------
+		cat >> $halt <<- EOF
+			case "\$ACTION" in
+			    reboot)
+			        reboot -f -d
+			    ;;
+			    poweroff)
+			        reboot -f -d -p
+			    ;;
+			    halt)
+			        halt
+			    ;;
+			    kexec)
+			        kexec -e
+			    ;;
+			    *)
+			        reboot -f -d
+			    ;;
+			esac
+		EOF
+	fi
+	#======================================
 	# run preinit and cleanImage
 	#--------------------------------------
 	chroot /mnt /bin/bash -c \
@@ -7162,17 +7215,6 @@ function bootImage {
 	if [ ! -z "$DROPBEAR_PID" ];then
 		kill $DROPBEAR_PID
 	fi
-	#======================================
-	# copy initrd to /run/initramfs
-	#--------------------------------------
-	mkdir -p /mnt/run/initramfs
-	for dir in /*;do
-		if [[ $dir =~ mnt|lost\+found|dev|boot|tmp|run|proc|sys ]];then
-			mkdir -p /mnt/run/initramfs/$dir
-			continue
-		fi
-		cp -a $dir /mnt/run/initramfs
-	done
 	#======================================
 	# hand over control to init
 	#--------------------------------------
