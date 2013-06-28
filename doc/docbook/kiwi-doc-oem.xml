@@ -207,7 +207,7 @@
         <emphasis>kiwiVG</emphasis> name.
       </para>
 
-      <screen><command>kiwi</command> --create /tmp/myoem --type oem<!-- 
+      <screen><command>kiwi</command> --create /tmp/myoem --type split<!-- 
       --> -d /tmp/myoem-result --lvm</screen>
 
       <para>With the <sgmltag>systemdisk</sgmltag> section you
