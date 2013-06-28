@@ -8855,11 +8855,20 @@ sub __populateTypeInfo_legacy {
 					$record{filesystem} = "$filesystemRW,$filesystemRO";
 				}
 			}
-			if ((defined $disk) &&
-				($record{filesystem} !~ /zfs|btrfs/) &&
-				($record{type} !~ /zfs|btrfs/)
-			) {
-				$record{lvm} = "true";
+			if ($disk) {
+				my $use_lvm = 1;
+				if (($record{filesystem}) &&
+					($record{filesystem}=~/zfs|btrfs/)
+				) {
+					$use_lvm = 0;
+				} elsif (($record{type})  &&
+					($record{type} =~ /zfs|btrfs/)
+				) {
+					$use_lvm = 0;
+				}
+				if ($use_lvm) {
+					$record{lvm} = "true";
+				}
 			}
 			my $bootpath = $urlhd -> normalizeBootPath ($record{boot});
 			if (defined $bootpath) {
