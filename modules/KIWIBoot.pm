@@ -6309,7 +6309,9 @@ sub setVolumeGroup {
 		if (%lvmparts) {
 			my %ihash = ();
 			foreach my $name (keys %lvmparts) {
-				if ($lvmparts{$name}->[0] eq 'all') {
+				if (($lvmparts{$name}->[0]) &&
+					($lvmparts{$name}->[0] eq 'all')
+				) {
 					if ($name eq '@root') {
 						$allFree = 'LVRoot';
 					} else {
