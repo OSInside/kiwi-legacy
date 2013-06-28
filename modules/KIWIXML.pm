@@ -9950,12 +9950,15 @@ sub __populateProfiledTypeInfo_legacy {
 	#==========================================
 	# select record(s) according to selection
 	#------------------------------------------
+	my $first = 1;
 	foreach my $record (@{$typeList}) {
 		my $found = 0;
-		my $first = 1;
+
+	PROFILESEARCH:
 		foreach my $p (@{$record->{assigned}}) {
 			if ($select{$p}) {
-				$found = 1; last;
+				$found = 1;
+				last PROFILESEARCH;
 			}
 		}
 		next if ! $found;

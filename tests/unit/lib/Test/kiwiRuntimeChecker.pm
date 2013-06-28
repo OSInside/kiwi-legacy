@@ -503,10 +503,10 @@ sub test_fsToolCheckSplitImg {
 	my $cmd = $this -> __getCommandLineObj();
 	my $configPath = $this -> {dataDir} . '/splitImg';
 	my $xml = $this -> __getXMLObj($configPath);
-	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> createChecks();
 	my $locator = KIWILocator -> instance();
 	my $haveBtrfs = $locator -> getExecPath('mkfs.btrfs');
+	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+	my $res = $checker -> createChecks();
 	if ($haveBtrfs) {
 		# Filesystem tool is present
 		my $msg = $kiwi -> getMessage();
