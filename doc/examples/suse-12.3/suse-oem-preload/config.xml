@@ -7,7 +7,7 @@
 		<specification>openSUSE 12.3 oem preload system</specification>
 	</description>
 	<preferences>
-		<type image="split" fsreadwrite="ext4" fsreadonly="squashfs" boot="oemboot/suse-12.3" installiso="true" bootloader="grub2"/>
+		<type image="split" fsreadwrite="ext4" fsreadonly="squashfs" boot="oemboot/suse-12.3" installiso="true"/>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -26,7 +26,7 @@
 	</repository>
 	<packages type="image">
 		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
-		<package name="grub2-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="plymouth"/>
 		<package name="grub2"/>
 		<package name="kernel-default"/>
