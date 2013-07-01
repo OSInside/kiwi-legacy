@@ -665,6 +665,16 @@ sub createEC2 {
 	#------------------------------------------
 	$this -> __clean_loop ($tmpdir);
 	#==========================================
+	# Rebuild md5 sum
+	#------------------------------------------
+	my $file = $source;
+	if (($this->{targetDevice}) && (-b $this->{targetDevice})) {
+		$file = $this->{targetDevice};
+	}
+	if (! KIWIBoot::buildMD5Sum ($this,$file,$file.'.md5')) {
+		return;
+	}
+	#==========================================
 	# AWS Account data check
 	#------------------------------------------
 	my $ec2Config = $xml -> getEC2Config();
@@ -1555,9 +1565,9 @@ sub __copy_origin {
 	my $this = shift;
 	my $file = shift;
 	if (-f "$file.orig") {
-		qxx ("cp $file.orig $file");
+		qxx ("cp $file.orig $file 2>&1");
 	} else {
-		qxx ("cp $file $file.orig");
+		qxx ("cp $file $file.orig 2>&1");
 	}
 	return;
 }
