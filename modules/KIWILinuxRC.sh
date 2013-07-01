@@ -8234,7 +8234,16 @@ function createPartedInput {
 			"t")
 				ptypex=${pcmds[$index + 2]}
 				partid=${pcmds[$index + 1]}
-				cmdq="$cmdq set $partid type 0x$ptypex"
+				if [ "$ptypex" = "82" ];then
+					cmdq="$cmdq set $partid swap on"
+				elif [ "$ptypex" = "fd" ];then
+					cmdq="$cmdq set $partid raid on"
+				elif [ "$ptypex" = "8e" ];then
+					cmdq="$cmdq set $partid lvm on"
+				else
+					# don't know about this flag, use default
+					continue
+				fi
 				if [ ! "$partedTableType" = "gpt" ];then
 					partedWrite "$disk" "$cmdq"
 				fi

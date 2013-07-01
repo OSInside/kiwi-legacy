@@ -6042,7 +6042,16 @@ sub setStoragePartition {
 				if (($cmd eq "t") && ($ptype eq 'msdos')) {
 					my $index= $commands[$count+1];
 					my $type = $commands[$count+2];
-					$p_cmd = "set $index type 0x$type";
+					if ($type eq '82') {
+						$p_cmd = "set $index swap on";
+					} elsif ($type eq 'fd') {
+						$p_cmd = "set $index raid on";
+					} elsif ($type eq '8e') {
+						$p_cmd = "set $index lvm on";
+					} else {
+						# don't know about this flag, use default
+						next;
+					}
 					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
 					$status = qxx (
 						"$parted_exec -s $device unit s $p_cmd 2>&1"
