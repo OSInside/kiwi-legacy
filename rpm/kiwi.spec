@@ -65,7 +65,7 @@ BuildRequires:  perl-Readonly
 BuildRequires:  perl-XML-LibXML
 BuildRequires:  perl-XML-LibXML-Common
 BuildRequires:  perl-XML-SAX
-BuildRequires:  perl-Test-Unit
+BuildRequires:  perl-Test-Unit-Lite
 # requirements to run kiwi
 Requires:       checkmedia
 Requires:       coreutils
