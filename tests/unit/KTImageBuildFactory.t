@@ -17,7 +17,7 @@ package KTImageBuildFactory;
 use strict;
 use warnings;
 use FindBin;
-use Test::Unit::HarnessUnit;
+use Test::Unit::Lite;
 
 # Location of test cases according to program path
 use lib "$FindBin::Bin/lib";

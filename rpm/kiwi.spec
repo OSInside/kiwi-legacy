@@ -60,7 +60,7 @@ BuildRequires:  perl-File-Slurp
 BuildRequires:  perl-libwww-perl
 BuildRequires:  perl-JSON
 BuildRequires:  perl-Readonly
-BuildRequires:  perl-Test-Unit
+BuildRequires:  perl-Test-Unit-Lite
 BuildRequires:  perl-XML-LibXML
 BuildRequires:  squashfs
 BuildRequires:  zypper
@@ -473,7 +473,7 @@ Authors:
 
 %package -n kiwi-test
 Requires: kiwi = %{version}
-Requires: perl-Test-Unit
+Requires: perl-Test-Unit-Lite
 Summary:  Unit tests for kiwi
 License:        GPL-2.0
 Group:          System/Management
