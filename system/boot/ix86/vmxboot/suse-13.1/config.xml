@@ -105,7 +105,9 @@
 		<package name="fribidi"/>
 		<package name="gettext-runtime"/>
 		<package name="grub2"/>
-		<package name="grub2-efi"/>
+		<package name="grub2-x86_64-efi" arch="x86_64"/>
+		<package name="grub2-i386-efi" arch="i686"/>
+		<package name="grub2-i386-pc"/>
 		<package name="shim" arch="x86_64"/>
 		<package name="hwinfo"/>
 		<package name="kernel-firmware"/>
