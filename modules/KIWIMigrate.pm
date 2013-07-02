@@ -1091,7 +1091,9 @@ sub getOperatingSystemVersion {
 		return;
 	}
 	while (my $line = <$VFD>) {
-		if ($line =~ /<version>(.*)<\/version>/) {
+		if ($line =~ /<baseversion>(.*)<\/baseversion>/) {
+			$vers = $1;
+		} elsif ($line =~ /<version>(.*)<\/version>/) {
 			$vers = $1;
 		}
 		if ($line =~ /<patchlevel>(.*)<\/patchlevel>/) {
