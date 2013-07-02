@@ -6043,7 +6043,9 @@ sub setStoragePartition {
 					my $index= $commands[$count+1];
 					my $type = $commands[$count+2];
 					if ($type eq '82') {
-						$p_cmd = "set $index swap on";
+						# suse parted is not able to do this
+						# $p_cmd = "set $index swap on";
+						next;
 					} elsif ($type eq 'fd') {
 						$p_cmd = "set $index raid on";
 					} elsif ($type eq '8e') {

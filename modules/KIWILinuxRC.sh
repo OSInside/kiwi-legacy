@@ -8235,7 +8235,9 @@ function createPartedInput {
 				ptypex=${pcmds[$index + 2]}
 				partid=${pcmds[$index + 1]}
 				if [ "$ptypex" = "82" ];then
-					cmdq="$cmdq set $partid swap on"
+					# suse parted is not able to do this
+					# cmdq="$cmdq set $partid swap on"
+					continue
 				elif [ "$ptypex" = "fd" ];then
 					cmdq="$cmdq set $partid raid on"
 				elif [ "$ptypex" = "8e" ];then
@@ -8760,7 +8762,11 @@ function pxePartitionInputGeneric {
 		fi
 		if [ $partID = "L" ] || [ $partID = "83" ];then
 			partID=83
-			pname=lxroot
+			if [ "$partMount" = "/boot" ];then
+				pname=lxboot
+			else
+				pname=lxroot
+			fi
 		fi
 		if [ $partID = "V" ] || [ $partID = "8e" ];then
 			partID=8e
@@ -8777,7 +8783,7 @@ function pxePartitionInputGeneric {
 				[ $partID = "41" ] || \
 				[ $partID = "fd" ]
 			then
-				echo -n "t $partID "
+				echo -n "t $count $partID "
 			fi
 		else
 			echo -n "n p:$pname $count . $partSize "
