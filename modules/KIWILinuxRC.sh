@@ -8234,19 +8234,20 @@ function createPartedInput {
 			"t")
 				ptypex=${pcmds[$index + 2]}
 				partid=${pcmds[$index + 1]}
+				flagok=1
 				if [ "$ptypex" = "82" ];then
 					# suse parted is not able to do this
 					# cmdq="$cmdq set $partid swap on"
-					continue
+					flagok=0
 				elif [ "$ptypex" = "fd" ];then
 					cmdq="$cmdq set $partid raid on"
 				elif [ "$ptypex" = "8e" ];then
 					cmdq="$cmdq set $partid lvm on"
 				else
 					# don't know about this flag, use default
-					continue
+					flagok=0
 				fi
-				if [ ! "$partedTableType" = "gpt" ];then
+				if [ ! "$partedTableType" = "gpt" ] && [ $flagok = 1 ];then
 					partedWrite "$disk" "$cmdq"
 				fi
 				cmdq=""
