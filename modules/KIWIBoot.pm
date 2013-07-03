@@ -1783,7 +1783,7 @@ sub setupBootDisk {
 				# ----
 				if (($type{type} ne "oem") && ($lvmparts{$vol})) {
 					$reqSize = $lvmparts{$vol}->[0];
-					if ($reqSize eq "all") {
+					if (($reqSize) && ($reqSize eq "all")) {
 						$reqSize = 0;
 					}
 				}
