@@ -145,6 +145,19 @@ fi
 setupConsole
 
 #======================================
+# 11.1) load network module
+#--------------------------------------
+if loadNetworkCardS390 "0.0.0191";then
+	#======================================
+	# 11.2) Setup network interface and DNS
+	#--------------------------------------
+	setupNetworkInterfaceS390
+	udevPending
+	setupNetworkStatic 1
+	setupNetworkStatic 0
+fi
+
+#======================================
 # 12) create origin snapshot if possible
 #--------------------------------------
 createOriginSnapshot

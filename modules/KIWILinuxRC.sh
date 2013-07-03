@@ -4329,6 +4329,47 @@ function loadNetworkCard {
 	done
 }
 #======================================
+# loadNetworkCardS390
+#--------------------------------------
+function loadNetworkCardS390 {
+	# /.../
+	# load s390 network parameters from DASD 191 if available
+	# ----
+	local file="/etc/deactivate_s390_network_config_from_dasd"
+	if [ ! -f "$file" ];then
+		Echo "Trying to get network configuration file <UID>.PARM-S11 from DASD ${1}."
+		if [ ! -x /usr/bin/cmsfscat  ];then
+			Echo "Unable to load network parameters because the program cmsfscat doesn't exist."
+			return 1
+		fi
+		if [ ! -b /dev/disk/by-path/ccw-$1 ];then
+			/sbin/dasd_configure $1 1 0
+			udevPending
+			if [ ! -b /dev/disk/by-path/ccw-$1 ];then
+					Echo "Unable to load network parameters because DASD ${1} couldn't be activated."
+					return 1
+			fi
+		fi
+		if ! lsmod | grep -q vmcp;then
+			modprobe vmcp
+		fi
+		local filename="`vmcp query userid | cut -d ' ' -f 1`.PARM-S11"
+		cmsfscat -d /dev/disk/by-path/ccw-$1 -a "$filename" > /tmp/"$filename"
+		if [ ! $? = 0 ];then
+			Echo "The network configuration file ${filename} doesn't exist on DASD ${1}."
+			return 1
+		fi
+		includeKernelParametersLowerCase "/tmp/$filename"
+		rm -f "/tmp/$filename"
+		/sbin/dasd_configure $1 0 0
+		return 0
+	else
+		Echo "Didn't try to load network parameters from DASD ${1} because ${file} does exist."
+		rm -f "$file"
+		return 1
+	fi
+}
+#======================================
 # dhclientImportInfo
 #-------------------------------------
 function dhclientImportInfo {
