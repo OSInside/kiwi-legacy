@@ -890,9 +890,9 @@ sub getRepos {
 			my $origsrc = $source;
 			if ($enabled eq "Yes") {
 				#==========================================
-				# handle special source type dvd://
+				# handle special source type dvd|cd://
 				#------------------------------------------
-				if ($source =~ /^dvd:/) {
+				if ($source =~ /^(dvd|cd):/) {
 					if (! -e "/dev/dvd") {
 						$kiwi -> warning ("DVD repo: /dev/dvd does not exist");
 						$kiwi -> skipped ();
