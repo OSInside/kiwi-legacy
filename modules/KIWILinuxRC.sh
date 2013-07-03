@@ -5312,7 +5312,12 @@ function includeKernelParameters {
 	# the current shell environment
 	# ----
 	IFS=$IFS_ORIG
-	for i in `cat /proc/cmdline`;do
+	local file=$1
+	local translate=$2
+	if [ -z "$file" ];then
+		file=/proc/cmdline
+	fi
+	for i in $(cat $file);do
 		if ! echo $i | grep -q "=";then
 			continue
 		fi
@@ -5320,7 +5325,7 @@ function includeKernelParameters {
 		#======================================
 		# convert parameters to lowercase if required
 		#--------------------------------------
-		if [ "$1" = "lowercase" ];then
+		if [ "$translate" = "lowercase" ];then
 			kernelKey=`echo $kernelKey | tr [:upper:] [:lower:]`
 		fi
 		kernelVal=`echo $i | cut -f2 -d=`
@@ -5364,7 +5369,7 @@ function includeKernelParameters {
 # includeKernelParametersLowerCase
 #--------------------------------------
 function includeKernelParametersLowerCase {
-	includeKernelParameters "lowercase"
+	includeKernelParameters "$1" "lowercase"
 }
 #======================================
 # umountSystem
