@@ -5461,18 +5461,16 @@ function kiwiMount {
 	fi
 	if [ "$FSTYPE" = "zfs" ];then
 		if [ -b $src ];then
-			if ! zpool import kiwipool >/dev/null;then
+			if ! zpool import -N kiwipool >/dev/null;then
 				return 1
 			fi
 		else
 			local basedir=$(dirname $src)
-			if ! zpool import -d $basedir kiwipool;then
+			if ! zpool import -N -d $basedir kiwipool;then
 				return 1
 			fi
 		fi
-		zfs umount -a && \
-			zfs set mountpoint=$dst kiwipool/ROOT/system-1 && \
-			zfs mount -a
+		zfs set mountpoint=$dst kiwipool/ROOT/system-1 && zfs mount -a
 		if [ ! $? = 0 ];then
 			return 1
 		fi

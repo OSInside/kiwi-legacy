@@ -4080,37 +4080,36 @@ sub mountLogicalExtend {
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
+	my $dest   = $this->{imageDest}."/mnt-$$";
+	my $target = "$this->{imageDest}/$name";
 	my $data;
 	my $code;
 	my @clean;
 	#==========================================
-	# mount logical extend for data transfer
+	# check for target device
 	#------------------------------------------
-	my $target = "$this->{imageDest}/$name";
-	if (defined $type{fsmountoptions}) {
-		$opts .= ','.$type{fsmountoptions};
-	}
 	if ($device) {
 		$target = $device;
-	} else {
-		$opts .= ",loop";
 	}
-	mkdir "$this->{imageDest}/mnt-$$";
-	push @clean,"rmdir $this->{imageDest}/mnt-$$";
+	#==========================================
+	# create mount point
+	#------------------------------------------
+	mkdir $dest;
+	push @clean,"rmdir $dest";
 	$this->{UmountStack} = \@clean;
 	#==========================================
 	# check for filesystem options
 	#------------------------------------------
+	if (defined $type{fsmountoptions}) {
+		$opts .= ','.$type{fsmountoptions};
+	}
+	if (! $device) {
+		$opts .= ",loop";
+	}
 	my $fstype = qxx (
 		"/sbin/blkid -c /dev/null -s TYPE -o value $target"
 	);
 	chomp $fstype;
-	if ($fstype eq 'zfs_member') {
-		$opts   = 'zfsutil -t zfs';
-		$target = 'kiwipool/ROOT/system-1';
-		push @clean,"zpool export kiwipool";
-		$this->{UmountStack} = \@clean;
-	}
 	if ($fstype eq "ext4") {
 		# /.../
 		# ext4 (currently) should be mounted with 'nodelalloc';
@@ -4118,27 +4117,45 @@ sub mountLogicalExtend {
 		# ----
 		$opts .= ",nodelalloc";
 	}
-	if ($opts) {
-		$opts =~ s/^,//;
-		$data= qxx (
-			"mount -o $opts $target $this->{imageDest}/mnt-$$ 2>&1"
-		);
+	#==========================================
+	# mount filesystem
+	#------------------------------------------
+	if ($fstype eq 'zfs_member') {
+		#==========================================
+		# mount zfs filesystem
+		#------------------------------------------
+		$data = qxx ("zpool import -d $this->{imageDest} kiwipool 2>&1");
+		$code = $? >> 8;
+		if ($code == 0) {
+			push @clean,"zpool export kiwipool";
+			$this->{UmountStack} = \@clean;
+			$data = qxx ("mount --bind /kiwipool/ROOT/system-1 $dest 2>&1");
+		}
 	} else {
-		$data= qxx (
-			"mount $target $this->{imageDest}/mnt-$$ 2>&1"
-		);
+		#==========================================
+		# standard mount
+		#------------------------------------------
+		if ($opts) {
+			$opts =~ s/^,//;
+			$data = qxx ("mount -o $opts $target $dest 2>&1");
+		} else {
+			$data = qxx ("mount $target $dest 2>&1");
+		}
 	}
-	$code= $? >> 8;
+	#==========================================
+	# check return code
+	#------------------------------------------
+	$code = $? >> 8;
 	if ($code != 0) {
 		chomp $data;
-		$kiwi -> error  ("Image file mount failed:");
+		$kiwi -> error  ("Image file mount failed: $data");
 		$kiwi -> failed ();
-		$kiwi -> error  (
-			"mnt: $target -> $this->{imageDest}/mnt-$$: $data"
-		);
 		return;
 	}
-	push @clean,"umount $this->{imageDest}/mnt-$$";
+	#==========================================
+	# update cleanup stack
+	#------------------------------------------
+	push @clean,"umount $dest";
 	$this->{UmountStack} = \@clean;
 	return "$this->{imageDest}/mnt-$$";
 }
@@ -4634,21 +4651,6 @@ sub setupZFS {
 		return;
 	}
 	if (! KIWIGlobals -> instance() -> createZFSPool()) {
-		return;
-	}
-	$data = qxx ("zpool import -d $this->{imageDest} kiwipool 2>&1");
-	$code = $? >> 8;
-	if ($code == 0) {
-		$data = qxx ("zfs umount -a 2>&1");
-		$code = $? >> 8;
-		rmdir '/kiwipool/ROOT/system-1';
-		rmdir '/kiwipool/ROOT';
-		rmdir '/kiwipool';
-	}
-	if ($code != 0) {
-		$kiwi -> error  ("Couldn't sync zfs pool");
-		$kiwi -> failed ();
-		$kiwi -> error  ($data);
 		return;
 	}
 	if ($device) {

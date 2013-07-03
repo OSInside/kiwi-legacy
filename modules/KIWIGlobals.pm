@@ -404,21 +404,12 @@ sub mount {
 			if ($result == 0) {
 				push @UmountStack,"zpool export kiwipool";
 				$this->{UmountStack} = \@UmountStack;
-				$status = KIWIQX::qxx ("zfs umount -a 2>&1");
+				my $rootpool = '/kiwipool/ROOT/system-1';
+				$status = KIWIQX::qxx (
+					"mount --bind $rootpool $dest 2>&1"
+				);
 				$result = $? >> 8;
-				if ($result == 0) {
-					rmdir '/kiwipool/ROOT/system-1';
-					rmdir '/kiwipool/ROOT';
-					rmdir '/kiwipool';
-					my $rootpool = 'kiwipool/ROOT/system-1';
-					$status = KIWIQX::qxx (
-						"mount -o zfsutil -t zfs $rootpool $dest 2>&1"
-					);
-					$result = $? >> 8;
-				}
 			}
-			push @UmountStack,"zfs umount -a";
-			$this->{UmountStack} = \@UmountStack;
 		} elsif ($type eq "clicfs") {
 			$status = KIWIQX::qxx ("clicfs -m 512 $source $dest 2>&1");
 			$result = $? >> 8;
@@ -767,14 +758,10 @@ sub createZFSPool {
 	#==========================================
 	# create pool properties
 	#------------------------------------------
-	$data = KIWIQX::qxx ("zfs umount -a 2>&1");
+	$data = KIWIQX::qxx (
+		'zpool set bootfs=kiwipool/ROOT/system-1 kiwipool 2>&1'
+	);
 	$code = $? >> 8;
-	if ($code == 0) {
-		$data = KIWIQX::qxx (
-			'zpool set bootfs=kiwipool/ROOT/system-1 kiwipool 2>&1'
-		);
-		$code = $? >> 8;
-	}
 	if ($code != 0) {
 		$kiwi -> error ("Failed to create zfs pool properties: $data\n");
 		$kiwi -> failed();
@@ -790,12 +777,6 @@ sub createZFSPool {
 		$kiwi -> failed();
 		return;
 	}
-	#==========================================
-	# cleanup
-	#------------------------------------------
-	rmdir '/kiwipool/ROOT/system-1';
-	rmdir '/kiwipool/ROOT';
-	rmdir '/kiwipool';
 	return $this;
 }
 
@@ -815,6 +796,7 @@ sub setupZFSPoolVolumes {
 	my @paths  = ();
 	my $data;
 	my $code;
+	my @UmountStack = @{$this->{UmountStack}};
 	if ($vols) {
 		#==========================================
 		# Create path names in correct order
@@ -843,15 +825,8 @@ sub setupZFSPoolVolumes {
 			$data = KIWIQX::qxx ("zfs create $main/$vol 2>&1");
 			$code = $? >> 8;
 			if ($code == 0) {
-				$data = KIWIQX::qxx ("umount /$main/$vol 2>&1");
-				$data = KIWIQX::qxx ("rmdir /$main/$vol 2>&1");
-				$data = KIWIQX::qxx ("mkdir -p $path/$vol 2>&1");
-				$data = KIWIQX::qxx (
-					"mount -o zfsutil -t zfs $main/$vol $path/$vol 2>&1"
-				);
-				$code = $? >> 8;
-			}
-			if ($code == 0) {
+				push @UmountStack,"umount /$main/$vol";
+				$this->{UmountStack} = \@UmountStack;
 				$kiwi -> done();
 			} else {
 				$kiwi -> failed();
@@ -859,12 +834,6 @@ sub setupZFSPoolVolumes {
 			}
 		}
 	}
-	#==========================================
-	# cleanup
-	#------------------------------------------
-	rmdir '/kiwipool/ROOT/system-1';
-	rmdir '/kiwipool/ROOT';
-	rmdir '/kiwipool';
 	#==========================================
 	# check error flag and return
 	#------------------------------------------
