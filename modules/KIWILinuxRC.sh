@@ -4270,6 +4270,72 @@ function loadNetworkCard {
 	done
 }
 #======================================
+# loadNetworkCardS390
+#--------------------------------------
+function loadNetworkCardS390 {
+	# /.../
+	# search and include parameters from a parm file
+	# provided on the specified host
+	# ----
+	local host=$1
+	local skip="/etc/deactivate_s390_network_config_from_dasd"
+	local hostdev=/dev/disk/by-path/ccw-${host}
+	#======================================
+	# check if we got stopped
+	#--------------------------------------
+	if [ -e $skip ];then
+		Echo "Processing skipped by $skip"
+		rm -f $skip
+		return 0
+	fi
+	#======================================
+	# check for required tools
+	#--------------------------------------
+	if [ ! which cmsfscat &>/dev/null ];then
+		Echo "Can't find cmsfscat program required for loading"
+		return 1
+	fi
+	#======================================
+	# check for required modules
+	#--------------------------------------
+	if ! lsmod | grep -q vmcp;then
+		if ! modprobe vmcp;then
+			Echo "Failed to load required module vmcp"
+			return 1
+		fi
+	fi
+	#======================================
+	# bring host online
+	#--------------------------------------
+	if [ ! -b $hostdev ];then
+		dasd_configure ${host} 1 0
+		udevPending
+		if [ ! -b $hostdev ];then
+			Echo "Failed to activate DASD ${host}"
+			return 1
+		fi
+	fi
+	#======================================
+	# load parm file using cmsfscat
+	#--------------------------------------
+	Echo "Lookup configuration file <UID>.PARM-S11 from ${host}..."
+	local parmfile="$(vmcp query userid | cut -d ' ' -f 1).PARM-S11"
+	if ! cmsfscat -d $hostdev -a "$parmfile" > /tmp/"$parmfile";then
+		Echo "Can't create /tmp/${parmfile} on DASD ${host}"
+		return 1
+	fi
+	#======================================
+	# import data into environment
+	#--------------------------------------
+	includeKernelParametersLowerCase "/tmp/$parmfile"
+	#======================================
+	# unbind host and cleanup
+	#--------------------------------------
+	rm -f "/tmp/$parmfile"
+	dasd_configure ${host} 0 0
+	return 0
+}
+#======================================
 # dhclientImportInfo
 #-------------------------------------
 function dhclientImportInfo {
