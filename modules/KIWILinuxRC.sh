@@ -4888,14 +4888,21 @@ function setupDNS {
 	# /.../
 	# setup DNS. write data to resolv.conf
 	# ----
+	local file="/etc/resolv.conf"
 	if [ -n "$domain" ];then
 		export DOMAIN=$domain
-		echo "search $domain" >> /etc/resolv.conf
+		local line="search $domain"
+		if ! grep -q $line $file;then
+			echo "$line" >> "$file"
+		fi
 	fi
 	if [ -n "$nameserver" ];then
 		export DNS=$nameserver
 		IFS="," ; for i in $nameserver;do
-			echo "nameserver $i" >> /etc/resolv.conf
+			local line="nameserver $i"
+			if ! grep -q $line $file;then
+				echo "$line" >> "$file"
+			fi
 		done
 	fi
 }
