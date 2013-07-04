@@ -38,6 +38,7 @@
 	<packages type="image">
 		<namedCollection name="base"/>
 		<opensuseProduct name="SUSE_SLES"/>
+		<package name="cmsfs"/>
 		<package name="kernel-default"/>
 		<package name="ifplugd"/>
 		<package name="iputils"/>
