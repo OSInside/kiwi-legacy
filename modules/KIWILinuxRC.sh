@@ -4275,11 +4275,12 @@ function loadNetworkCard {
 function loadNetworkCardS390 {
 	# /.../
 	# search and include parameters from a parm file
-	# provided on the specified host
+	# provided on the specified dasd id
 	# ----
 	local host=$1
 	local skip="/etc/deactivate_s390_network_config_from_dasd"
 	local hostdev=/dev/disk/by-path/ccw-${host}
+	Echo "Trying parm file lookup on DASD id: ${host}"
 	#======================================
 	# check if we got stopped
 	#--------------------------------------
@@ -4311,17 +4312,17 @@ function loadNetworkCardS390 {
 		dasd_configure ${host} 1 0
 		udevPending
 		if [ ! -b $hostdev ];then
-			Echo "Failed to activate DASD ${host}"
+			Echo "Failed to activate DASD id: ${host}"
 			return 1
 		fi
 	fi
 	#======================================
 	# load parm file using cmsfscat
 	#--------------------------------------
-	Echo "Lookup configuration file <UID>.PARM-S11 from ${host}..."
+	Echo "Loading configuration file <UID>.PARM-S11 from ${host}..."
 	local parmfile="$(vmcp query userid | cut -d ' ' -f 1).PARM-S11"
 	if ! cmsfscat -d $hostdev -a "$parmfile" > /tmp/"$parmfile";then
-		Echo "Can't create /tmp/${parmfile} on DASD ${host}"
+		Echo "Can't create /tmp/${parmfile} on DASD id: ${host}"
 		return 1
 	fi
 	#======================================
