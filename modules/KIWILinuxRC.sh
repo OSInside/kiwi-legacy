@@ -4345,7 +4345,7 @@ function loadNetworkCardS390 {
 	if [ -e $skip ];then
 		Echo "Processing skipped by $skip"
 		rm -f $skip
-		return 0
+		return 1
 	fi
 	#======================================
 	# check for required tools
