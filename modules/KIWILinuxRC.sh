@@ -9607,6 +9607,16 @@ function updatePartitionTable {
 	local label
 	local pflag
 	#======================================
+	# check for hybrid iso
+	#--------------------------------------
+	if [ "$kiwi_hybridpersistent" = "yes" ];then
+		# /.../
+		# The partition table written into an iso doesn't
+		# like the resync, so we return early here
+		# ----
+		return
+	fi
+	#======================================
 	# fix and store current table
 	#--------------------------------------
 	# the strange parted creates a gpt_sync_mbr if the disk
