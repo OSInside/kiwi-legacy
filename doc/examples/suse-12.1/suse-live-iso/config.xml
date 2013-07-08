@@ -7,7 +7,7 @@
 		<specification>openSUSE 12.1 Live system for CD/DVD and USB Stick</specification>
 	</description>
 	<preferences>
-		<type image="iso" primary="true" boot="isoboot/suse-12.1" hybrid="true" flags="clic"/>
+		<type image="iso" primary="true" boot="isoboot/suse-12.1" hybrid="true" flags="clic" firmware="bios"/>
 		<version>2.5.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>

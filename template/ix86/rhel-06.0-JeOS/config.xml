@@ -28,7 +28,7 @@
 		<timezone>Europe/Berlin</timezone>
 		<hwclock>utc</hwclock>
 		<rpm-check-signatures>false</rpm-check-signatures>
-		<type image="iso" primary="true" boot="isoboot/rhel-06.0" flags="clic"/>
+		<type image="iso" primary="true" boot="isoboot/rhel-06.0" flags="clic" firmware="bios"/>
 		<type image="vmx" boot="vmxboot/rhel-06.0" filesystem="ext3" format="vmdk" kernelcmdline="rhgb">
 			<machine memory="1024" guestOS="rhel6">
 				<vmdisk controller="scsi" id="0"/>
