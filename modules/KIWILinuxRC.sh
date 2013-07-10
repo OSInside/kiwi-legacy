@@ -8164,6 +8164,15 @@ function partedWrite {
 		opts="-a cyl"
 	fi
 	if ! parted $opts -m -s $device unit cyl $cmds;then
+		if [ ! -z "$kiwi_hybridpersistent" ];then
+			# /.../
+			# in case of a iso hybrid table don't stop with
+			# a reboot exception in case of an error. The error
+			# in this case will cause the deactivation of the
+			# persistent writing
+			# ----
+			return 1
+		fi
 		systemException "Failed to create partition table" "reboot"
 	fi
 	partedInit $device
