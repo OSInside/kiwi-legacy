@@ -809,6 +809,14 @@ sub main {
 		my $ok;
 		my $checkFormat = 0;
 		my $imgName = $image -> buildImageName();
+		#==========================================
+		# Create package content and verification
+		#------------------------------------------
+		if (-f "$tree/var/lib/rpm/Packages") {
+			my $query = '%{NAME}|%{VERSION}|%{RELEASE}|%{ARCH}|%{DISTURL}\n';
+			qxx ("rpm --root $tree -qa --qf \"$query\" > $Destination/$imgName.packages");
+			qxx ("rpm --root $tree -Va > $Destination/$imgName.verified");
+		}
 		SWITCH: for ($attr{type}) {
 			/^ext2/     && do {
 				$ok = $image -> createImageEXT2 ( $targetDevice );
