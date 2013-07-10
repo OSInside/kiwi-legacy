@@ -664,7 +664,18 @@ sub createImage {
 		}
 	}
 	#==========================================
-	# Initialize logical image extend
+	# Create package content and verification
+	#------------------------------------------
+	if (-f "$tree/var/lib/rpm/Packages") {
+		my $idest = $cmdL -> getImageIntermediateTargetDir();
+		my $query = '%{NAME}|%{VERSION}|%{RELEASE}|%{ARCH}|%{DISTURL}\n';
+		my $name  = KIWIGlobals
+			-> instance() -> generateBuildImageName($xml);
+		qxx ("rpm --root $tree -qa --qf \"$query\" > $idest/$name.packages");
+		qxx ("rpm --root $tree -Va > $idest/$name.verified");
+	}
+	#==========================================
+	# Build image using KIWIImage
 	#------------------------------------------
 	my $ok;
 	my $checkFormat = 0;
