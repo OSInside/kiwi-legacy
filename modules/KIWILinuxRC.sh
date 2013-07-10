@@ -3726,7 +3726,16 @@ function searchImageISODevice {
 	local mbrVID
 	local mbrIID
 	local count=0
+	local isoinfo=/usr/bin/isoinfo
 	mkdir -p /cdrom
+	if [ ! -e $isoinfo ];then
+		isoinfo=/usr/lib/genisoimage/isoinfo
+	fi
+	if [ ! -e $isoinfo ];then
+		systemException \
+			"Can't find isoinfo tool in initrd" \
+		"reboot"
+	fi
 	if [ ! -f /boot/mbrid ];then
 		systemException \
 			"Can't find MBR id file in initrd" \
@@ -3771,7 +3780,7 @@ function searchImageISODevice {
 				continue
 			fi
 			mbrVID=$(
-				isoinfo -d -i $i 2>/dev/null|grep "Application id:"|cut -f2 -d:
+				$isoinfo -d -i $i 2>/dev/null|grep "Application id:"|cut -f2 -d:
 			)
 			mbrVID=$(echo $mbrVID)
 			if [ "$mbrVID" = "$mbrIID" ];then
@@ -3785,7 +3794,7 @@ function searchImageISODevice {
 					local pdev=$(ddn $i $n)
 					if [ -e $pdev ];then
 						mbrVID=$(
-							isoinfo -d -i $pdev 2>/dev/null |\
+							$isoinfo -d -i $pdev 2>/dev/null |\
 							grep "Application id:"|cut -f2 -d:
 						)
 						mbrVID=$(echo $mbrVID)
