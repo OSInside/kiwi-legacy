@@ -61,7 +61,7 @@
 	</packages>
 	<packages type="bootstrap" profiles="xenk">
 		<package name="kernel-xen" arch="x86_64"/>
-		<package name="kernel-xenpae" arch="i686"/>
+		<package name="kernel-xenpae" arch="ix86"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="bind-libs"/>

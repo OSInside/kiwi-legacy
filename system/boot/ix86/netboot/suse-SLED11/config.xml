@@ -138,8 +138,8 @@
 		<package name="kernel-default-base"/>
 	</packages>
 	<packages type="image" profiles="pae">
-		<package name="kernel-pae" arch="i686"/>
-		<package name="kernel-pae-base" arch="i686"/>
+		<package name="kernel-pae" arch="ix86"/>
+		<package name="kernel-pae-base" arch="ix86"/>
 	</packages>
 	<packages type="image" profiles="rt">
 		<package name="kernel-rt"/>

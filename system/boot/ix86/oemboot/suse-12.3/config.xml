@@ -91,7 +91,7 @@
 		<package name="kernel-default"/>
 	</packages>
 	<packages type="image" profiles="pae">
-		<package name="kernel-pae" arch="i686"/>
+		<package name="kernel-pae" arch="ix86"/>
 	</packages>
 	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>
