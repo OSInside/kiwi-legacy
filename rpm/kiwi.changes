@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Jul 10 22:07:01 CEST 2013 - ms@suse.de
+
+- added build result meta data files
+  each build now contains two additional files:
+  The .packages file which contains a list of all installed packages
+  The .verified file which contains the result of rpm -Va
+  These files are only created on rpm based systems and
+  should help to compare build results better
+
+-------------------------------------------------------------------
 Thu Jun  6 12:34:08 CEST 2013 - ms@suse.de
 
 - fixed getSingleInstSourceSatSolvable()
