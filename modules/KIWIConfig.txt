@@ -199,6 +199,7 @@
 		<file name="setctsid"/>
 		<file name="setterm"/>
 		<file name="sfdisk"/>
+		<file name="sg_inq"/>
 		<file name="sh"/>
 		<file name="showconsole"/>
 		<file name="shutdown"/>
