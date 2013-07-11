@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Jul 11 11:52:59 CEST 2013 - ms@suse.de
+
+- fixed handling of bootincluded items:
+  packages and archives marked as bootinclude have to
+  respect an optional arch setup like this example:
+  <package name="foo" bootinclude="true" arch="ix86"/>
+
+-------------------------------------------------------------------
 Wed Jul 10 22:07:01 CEST 2013 - ms@suse.de
 
 - added build result meta data files
