@@ -1244,26 +1244,28 @@ sub getBootIncludePackages {
 	my $this = shift;
 	my $bPckgs = $this -> __getInstallData('bootPkgs');
 	my %pckgFilter;
-	# Any packages that are marked to be replaced need to be removed
+	# /.../
+	# Filter out any package which is marked to become
+	# replaced by another package
+	# ----
 	for my $pckg (@{$bPckgs}) {
 		my $toReplace = $pckg -> getPackageToReplace();
 		if ($toReplace) {
 			$pckgFilter{$toReplace} = 1;
 		}
 	}
-	# Do not filter out the boot delete packages, packages marked with
-	# bootinclude='true' must be installed even if bootdlete='true' is set
-	# as well
-	my @delPackages;
-	# Create the list of packages
+	# /.../
+	# Create list, filter out if marked in pckgFilter
+	# ----
+	my @bootInclPackages;
 	for my $pckg (@{$bPckgs}) {
 		my $name = $pckg -> getName();
 		if ($pckgFilter{$name}) {
 			next;
 		}
-		push @delPackages, $pckg;
+		push @bootInclPackages, $pckg;
 	}
-	return \@delPackages;
+	return \@bootInclPackages;
 }
 
 #==========================================
