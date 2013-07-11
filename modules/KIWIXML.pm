@@ -4135,6 +4135,13 @@ sub __updateDescriptionFromChangeSet {
 	my $packageNodeList = $this->{packageNodeList};
 	my $reqProfiles;
 	#==========================================
+	# Get architecture
+	#------------------------------------------
+	my $arch = qxx ("uname -m"); chomp $arch;
+	if ($arch =~ /i.86/) {
+		$arch = "ix86";
+	}
+	#==========================================
 	# check changeset...
 	#------------------------------------------
 	if (! defined $changeset) {
@@ -4194,10 +4201,14 @@ sub __updateDescriptionFromChangeSet {
 			}
 		}
 		foreach my $element (@plist) {
+			my $archset = $element -> getAttribute ("arch");
 			my $package = $element -> getAttribute ("name");
 			my $bootinc = $element -> getAttribute ("bootinclude");
 			my $bootdel = $element -> getAttribute ("bootdelete");
 			my $include = 0;
+			if (($archset) && ($archset ne $arch)) {
+				next;
+			}
 			if ((defined $bootinc) && ("$bootinc" eq "true")) {
 				push (@fplistImage,$package);
 				$include++;
@@ -4209,8 +4220,12 @@ sub __updateDescriptionFromChangeSet {
 			$fixedBootInclude{$package} = $include;
 		}
 		foreach my $element (@alist) {
+			my $archset = $element -> getAttribute ("arch");
 			my $archive = $element -> getAttribute ("name");
 			my $bootinc = $element -> getAttribute ("bootinclude");
+			if (($archset) && ($archset ne $arch)) {
+				next;
+			}
 			if ((defined $bootinc) && ("$bootinc" eq "true")) {
 				push (@falistImage,$archive);
 			}
