@@ -117,8 +117,6 @@ sub new {
 			$kiwi -> setRootLog ($imageTree.".".$$.".screenrc.log");
 		}
 	}
-	my $arch = qxx ("uname -m"); chomp ( $arch );
-	$arch = ".$arch";
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -131,7 +129,6 @@ sub new {
 	$this->{imageDest}  = $imageDest;
 	$this->{imageStrip} = $imageStrip;
 	$this->{baseSystem} = $baseSystem;
-	$this->{arch}       = $arch;
 	$this->{gdata}      = $global -> getKiwiConfig();
 	#==========================================
 	# Mount overlay tree if required...
@@ -193,6 +190,13 @@ sub updateDescription {
 	my @driverList;
 	my %fixedBootInclude;
 	my @node;
+	#==========================================
+	# Get architecture
+	#------------------------------------------
+	my $arch = qxx ("uname -m"); chomp $arch;
+	if ($arch =~ /i.86/) {
+		$arch = "ix86";
+	}
 	#==========================================
 	# Store general data
 	#------------------------------------------
@@ -342,7 +346,7 @@ sub updateDescription {
 		if (! $src_xml -> __requestedProfile ($element)) {
 			next;
 		}
-		my $type = $element  -> getAttribute ("type");
+		my $type = $element -> getAttribute ("type");
 		if ($type =~ /^(bootstrap|$src_type{type})$/x) {
 			push (@bootstrap_plist,$element->getElementsByTagName ("package"));
 			push (@bootstrap_alist,$element->getElementsByTagName ("archive"));
@@ -351,13 +355,16 @@ sub updateDescription {
 			push (@image_plist,$element->getElementsByTagName ("package"));
 			push (@image_alist,$element->getElementsByTagName ("archive"));
 		}
-
 	}
 	foreach my $element (@bootstrap_plist) {
+		my $archset = $element -> getAttribute ("arch");
 		my $package = $element -> getAttribute ("name");
 		my $bootinc = $element -> getAttribute ("bootinclude");
 		my $bootdel = $element -> getAttribute ("bootdelete");
 		my $include = 0;
+		if (($archset) && ($archset ne $arch)) {
+			next;
+		}
 		if ((defined $bootinc) && ("$bootinc" eq "true")) {
 			push (@bootstrap_fplistImage,$package);
 			$include++;
@@ -369,10 +376,14 @@ sub updateDescription {
 		$fixedBootInclude{$package} = $include;
 	}
 	foreach my $element (@image_plist) {
+		my $archset = $element -> getAttribute ("arch");
 		my $package = $element -> getAttribute ("name");
 		my $bootinc = $element -> getAttribute ("bootinclude");
 		my $bootdel = $element -> getAttribute ("bootdelete");
 		my $include = 0;
+		if (($archset) && ($archset ne $arch)) {
+			next;
+		}
 		if ((defined $bootinc) && ("$bootinc" eq "true")) {
 			push (@image_fplistImage,$package);
 			$include++;
@@ -384,15 +395,23 @@ sub updateDescription {
 		$fixedBootInclude{$package} = $include;
 	}
 	foreach my $element (@bootstrap_alist) {
+		my $archset = $element -> getAttribute ("arch");
 		my $archive = $element -> getAttribute ("name");
 		my $bootinc = $element -> getAttribute ("bootinclude");
+		if (($archset) && ($archset ne $arch)) {
+			next;
+		}
 		if ((defined $bootinc) && ("$bootinc" eq "true")) {
 			push (@bootstrap_falistImage,$archive);
 		}
 	}
 	foreach my $element (@image_alist) {
+		my $archset = $element -> getAttribute ("arch");
 		my $archive = $element -> getAttribute ("name");
 		my $bootinc = $element -> getAttribute ("bootinclude");
+		if (($archset) && ($archset ne $arch)) {
+			next;
+		}
 		if ((defined $bootinc) && ("$bootinc" eq "true")) {
 			push (@image_falistImage,$archive);
 		}
@@ -2678,19 +2697,18 @@ sub createImageSplit {
 	# to be copied into a PXE boot structure for use with
 	# a netboot setup.
 	# ---
-	my $this = shift;
-	my $type = shift;
+	my $this         = shift;
+	my $type         = shift;
 	my $nopersistent = shift;
-	my $kiwi = $this->{kiwi};
-	my $cmdL = $this->{cmdL};
-	my $arch = $this->{arch};
-	my $imageTree  = $this->{imageTree};
-	my $baseSystem = $this->{baseSystem};
-	my $sxml       = $this->{xml};
-	my $idest      = $cmdL->getImageIntermediateTargetDir();
-	my %xenc       = $sxml->getXenConfig_legacy();
-	my $fsopts     = $cmdL -> getFilesystemOptions();
-	my $inodesize  = $fsopts->[1];
+	my $kiwi         = $this->{kiwi};
+	my $cmdL         = $this->{cmdL};
+	my $imageTree    = $this->{imageTree};
+	my $baseSystem   = $this->{baseSystem};
+	my $sxml         = $this->{xml};
+	my $idest        = $cmdL->getImageIntermediateTargetDir();
+	my %xenc         = $sxml->getXenConfig_legacy();
+	my $fsopts       = $cmdL -> getFilesystemOptions();
+	my $inodesize    = $fsopts->[1];
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $error;
@@ -4985,7 +5003,6 @@ sub checkKernel {
 	my $systree = shift;
 	my $name    = shift;
 	my $kiwi    = $this->{kiwi};
-	my $arch    = $this->{arch};
 	my $zipper  = $this->{gdata}->{Gzip};
 	my %sysk    = ();
 	my %bootk   = ();
