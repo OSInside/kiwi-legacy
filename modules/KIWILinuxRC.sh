@@ -2604,6 +2604,7 @@ function setupBootLoaderGrub2 {
 	local orig_sysimg_profile=$mountPrefix/image/.profile
 	local inst_default_grub=$destsPrefix/etc/default/grub
 	local inst_default_grubdev=$destsPrefix/etc/default/grub_installdevice
+	local inst_default_grubmap=$destsPrefix/boot/grub2/device.map
 	local unifont=$mountPrefix/usr/share/grub2/unicode.pf2
 	#======================================
 	# check for system image .profile
@@ -2694,6 +2695,13 @@ function setupBootLoaderGrub2 {
 	#--------------------------------------
 	cat > $inst_default_grubdev <<- EOF
 		$diskByID
+	EOF
+	#======================================
+	# write boot/grub2/device.map
+	#--------------------------------------
+	mkdir -p $destsPrefix/boot/grub2
+	cat > $inst_default_grubmap <<- EOF
+		(hd0) $diskByID
 	EOF
 	#======================================
 	# activate secure boot if required
