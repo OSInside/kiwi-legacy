@@ -54,12 +54,18 @@ BuildRequires:  rpm-devel
 BuildRequires:  btrfsprogs
 BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
-BuildRequires:  perl-Class-Singleton
-BuildRequires:  perl-Test-Unit
-BuildRequires:  perl-Readonly
 BuildRequires:  squashfs
 BuildRequires:  zypper
 %endif
+BuildRequires:  perl-JSON
+BuildRequires:  perl-Class-Singleton
+BuildRequires:  perl-Config-IniFiles
+BuildRequires:  perl-libwww-perl
+BuildRequires:  perl-Readonly
+BuildRequires:  perl-XML-LibXML
+BuildRequires:  perl-XML-LibXML-Common
+BuildRequires:  perl-XML-SAX
+BuildRequires:  perl-Test-Unit
 # requirements to run kiwi
 Requires:       checkmedia
 Requires:       coreutils
