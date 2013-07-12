@@ -50,13 +50,11 @@ BuildRequires:  syslinux
 BuildRequires:  libexpat-devel
 BuildRequires:  rpm-devel
 %endif
-%if 0%{?suse_version} > 1140
 BuildRequires:  btrfsprogs
 BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
 BuildRequires:  squashfs
 BuildRequires:  zypper
-%endif
 BuildRequires:  perl-JSON
 BuildRequires:  perl-Class-Singleton
 BuildRequires:  perl-Config-IniFiles
