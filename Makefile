@@ -191,7 +191,7 @@ test:
 	for i in `find -name "*.t" | cut -d/ -f4`;do \
 		touch tests/.timestamps/$$i's';\
 	done
-	cd tests/unit && ${NONETWORKTEST} /usr/bin/prove ${TESTVERBOSE} -f .
+	cd tests/unit && ${NONETWORKTEST} /usr/bin/prove ${TESTVERBOSE} .
 	rm -f .revision
 
 %.t:

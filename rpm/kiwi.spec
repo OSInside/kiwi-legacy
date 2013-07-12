@@ -476,10 +476,8 @@ Authors:
 %build
 # empty because of rpmlint warning rpm-buildroot-usage
 
-%if 0%{?suse_version} > 1140
 %check
 make KIWIVERBTEST=1 KIWI_NO_NET=1 test
-%endif
 
 %install
 # build
