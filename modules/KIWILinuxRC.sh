@@ -617,6 +617,7 @@ function udevSystemStop {
 	# stop udev while in pre-init phase.
 	# ----
 	if kill -0 $UDEVD_PID &>/dev/null;then
+		udevPending
 		kill $UDEVD_PID
 	fi
 }
@@ -714,6 +715,7 @@ function loadAGPModules {
 function udevKill {
 	. /iprocs
 	if kill -0 $UDEVD_PID &>/dev/null;then
+		udevPending
 		kill $UDEVD_PID
 	fi
 }
