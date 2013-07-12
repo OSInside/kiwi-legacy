@@ -1606,6 +1606,8 @@ sub setupBootDisk {
 		$bootloader = "yaboot";
 	} elsif ($arch =~ /arm/) {
 		$bootloader = "uboot";
+	} elsif ($arch =~ /s390/) {
+		$bootloader = "zipl";
 	} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
 		$bootloader = "grub2";
 	} else {
