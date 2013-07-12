@@ -1,7 +1,7 @@
 #
 # spec file for package kiwi
 #
-# Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2013 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -31,10 +31,10 @@ Release:        0
 # requirements to build packages
 BuildRequires:  diffutils
 BuildRequires:  e2fsprogs
-BuildRequires:  lvm2
-BuildRequires:  lxc
 BuildRequires:  gcc-c++
 BuildRequires:  libxslt
+BuildRequires:  lvm2
+BuildRequires:  lxc
 BuildRequires:  module-init-tools
 BuildRequires:  rsync
 BuildRequires:  screen
@@ -53,18 +53,20 @@ BuildRequires:  rpm-devel
 BuildRequires:  btrfsprogs
 BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
+BuildRequires:  squashfs
+BuildRequires:  zypper
+%endif
 BuildRequires:  perl-Class-Singleton
 BuildRequires:  perl-Config-IniFiles
 BuildRequires:  perl-Digest-SHA1
 BuildRequires:  perl-File-Slurp
-BuildRequires:  perl-libwww-perl
 BuildRequires:  perl-JSON
 BuildRequires:  perl-Readonly
-BuildRequires:  perl-Test-Unit-Lite
 BuildRequires:  perl-XML-LibXML
-BuildRequires:  squashfs
-BuildRequires:  zypper
-%endif
+BuildRequires:  perl-XML-LibXML-Common
+BuildRequires:  perl-XML-SAX
+BuildRequires:  perl-libwww-perl
+BuildRequires:  perl-Test-Unit-Lite
 # requirements to run kiwi
 Requires:       checkmedia
 Requires:       coreutils
@@ -73,24 +75,24 @@ Requires:       libxslt
 %if 0%{?rhel_version}
 # RHEL/CentOS seem to require the release info as well,
 # while matching the version. So the >=
-Requires:		perl >= %{perl_version}
+Requires:       perl >= %{perl_version}
 %else
-Requires:		perl = %{perl_version}
+Requires:       perl = %{perl_version}
 %endif
+Requires:       lvm2
 Requires:       perl-Class-Singleton
 Requires:       perl-Config-IniFiles
 Requires:       perl-Digest-SHA1
 Requires:       perl-File-Slurp
 Requires:       perl-JSON
-Requires:       perl-libwww-perl
 Requires:       perl-Readonly
 Requires:       perl-XML-LibXML
 Requires:       perl-XML-LibXML-Common
 Requires:       perl-XML-SAX
+Requires:       perl-libwww-perl
 Requires:       rsync
 Requires:       screen
 Requires:       util-linux
-Requires:       lvm2
 %ifarch %ix86 x86_64
 %if 0%{?suse_version} > 1010
 Requires:       squashfs
@@ -241,8 +243,8 @@ Requires:       syslinux
 %endif
 Requires:       dosfstools
 %if 0%{?suse_version}
-Requires:       virt-utils
 Requires:       genisoimage
+Requires:       virt-utils
 %endif
 %if 0%{?rhel_version}
 Requires:       qemu-img
@@ -276,10 +278,10 @@ Meta-package to pull in all requires to build a isoboot media.
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
 
 %package -n kiwi-desc-vmxboot
+Requires:       dosfstools
+Requires:       e2fsprogs
 Requires:       kiwi = %{version}
 Requires:       parted
-Requires:       e2fsprogs
-Requires:       dosfstools
 %if 0%{?suse_version}
 Requires:       multipath-tools
 Requires:       virt-utils
@@ -362,14 +364,14 @@ Meta-package to pull in all requires to build a netboot media.
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
 
 %package -n kiwi-desc-oemboot
+Requires:       dosfstools
+Requires:       e2fsprogs
 Requires:       kiwi = %{version}
 Requires:       parted
-Requires:       e2fsprogs
-Requires:       dosfstools
 %if 0%{?suse_version}
+Requires:       genisoimage
 Requires:       multipath-tools
 Requires:       virt-utils
-Requires:       genisoimage
 %endif
 %if 0%{?rhel_version}
 Requires:       device-mapper-multipath
@@ -472,9 +474,9 @@ Authors:
 %endif
 
 %package -n kiwi-test
-Requires: kiwi = %{version}
-Requires: perl-Test-Unit-Lite
-Summary:  Unit tests for kiwi
+Requires:       kiwi = %{version}
+Requires:       perl-Test-Unit-Lite
+Summary:        Unit tests for kiwi
 License:        GPL-2.0
 Group:          System/Management
 %if 0%{?suse_version} > 1120
