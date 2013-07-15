@@ -354,11 +354,11 @@ sub getExecPath {
 	if ($root) {
 		$cmd .= "chroot $root ";
 	}
-	$cmd .= 'bash -c "PATH=$PATH:/sbin which ' . $execName .  '" 2>&1';
+	$cmd .= 'bash -c "PATH=$PATH:/sbin:/usr/sbin type -p ' . $execName .  '" 2>&1';
 	my $execPath = KIWIQX::qxx ($cmd);
 	chomp $execPath;
 	my $code = $? >> 8;
-	if ($code != 0) {
+	if ($code != 0 || !$execPath) {
 		if ($kiwi) {
 			$kiwi -> loginfo ("warning: $execName not found\n");
 		}
