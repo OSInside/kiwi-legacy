@@ -5062,7 +5062,9 @@ sub setupBootLoaderConfiguration {
 			$editBoot = $xml -> getEditBootConfig_legacy();
 		}
 		if ($editBoot) {
-			if (($this->{originXMLPath}) && (! -f $editBoot)) {
+			if (($this->{originXMLPath}) &&
+				(!File::Spec->file_name_is_absolute($editBoot))
+			) {
 				$editBoot = $this->{originXMLPath}."/".$editBoot;
 			}
 			if (-f $editBoot) {
@@ -5075,8 +5077,7 @@ sub setupBootLoaderConfiguration {
 				if ($this->{partids}) {
 					push @opts,$this->{partids}{boot};
 				}
-				system ("cd $tmpdir && chmod u+x $editBoot");
-				system ("cd $tmpdir && bash --norc -c \"$editBoot @opts\"");
+				system ("cd $tmpdir && bash --norc $editBoot @opts");
 				my $result = $? >> 8;
 				if ($result != 0) {
 					$kiwi -> error ("Call failed, see console log");
@@ -5657,15 +5658,16 @@ sub installBootLoader {
 			$editBoot = $xml -> getEditBootInstall_legacy();
 		}
 		if ($editBoot) {
-			if (($this->{originXMLPath}) && (! -f $editBoot)) {
+			if (($this->{originXMLPath}) &&
+				(!File::Spec->file_name_is_absolute($editBoot))
+			) {
 				$editBoot = $this->{originXMLPath}."/".$editBoot;
 			}
 			if (-f $editBoot) {
 				$kiwi -> info ("Calling post bootloader install script:\n");
 				$kiwi -> info ("--> $editBoot\n");
 				my @opts = ($diskname,$bootdev);
-				system ("cd $tmpdir && chmod u+x $editBoot");
-				system ("cd $tmpdir && bash --norc -c \"$editBoot @opts\"");
+				system ("cd $tmpdir && bash --norc $editBoot @opts");
 				my $result = $? >> 8;
 				if ($result != 0) {
 					$kiwi -> error ("Call failed, see console log");
