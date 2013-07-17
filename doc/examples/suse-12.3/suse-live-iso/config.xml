@@ -7,7 +7,7 @@
 		<specification>openSUSE 12.3 Live system for CD/DVD and USB Stick</specification>
 	</description>
 	<preferences>
-		<type image="iso" primary="true" boot="isoboot/suse-12.3" hybrid="true" flags="clic" firmware="efi"/>
+		<type image="iso" primary="true" boot="isoboot/suse-12.3" hybrid="true" flags="clic" firmware="efi" bootloader="grub2"/>
 		<version>2.5.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -32,9 +32,22 @@
 		<package name="ifplugd"/>
 		<package name="vim"/>
 		<package name="plymouth"/>
+		<package name="x11-tools"/>
+		<package name="xkeyboard-config"/>
+		<package name="xorg-x11"/>
+		<package name="xorg-x11-driver-input"/>
+		<package name="xorg-x11-driver-video"/>
+		<package name="xorg-x11-libX11-ccache"/>
+		<package name="xorg-x11-xauth"/>
+		<package name="xterm"/>
+		<package name="xorg-x11-server"/>
 		<package name="yast2-firstboot"/>
+		<package name="yast2-network"/>
+		<package name="yast2-users"/>
 		<namedCollection name="base"/>
 		<namedCollection name="kde4"/>
+		<namedCollection name="kde4_basis"/>
+		<namedCollection name="kde4_utilities"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
