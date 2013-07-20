@@ -8744,9 +8744,6 @@ sub test_setArchInvalid {
 	$this -> assert_null($res);
 	my $arch = $xml -> getArch();
 	my $curArch = qxx ("uname -m");
-	if ($curArch =~ /i.86/) {
-		$curArch = "ix86";
-	}
 	chomp $curArch;
 	$this -> assert_str_equals($curArch, $arch);
 	$msg = $kiwi -> getMessage();

@@ -105,7 +105,7 @@
 		<package name="squashfs"/>
 	</packages>
 	<packages type="delete">
-		<package name="libreoffice-math" arch="ix86"/>
+		<package name="libreoffice-math" arch="i686"/>
 	</packages>
 	<packages type="delete" profiles="profA">
 		<package name="vim-data"/>

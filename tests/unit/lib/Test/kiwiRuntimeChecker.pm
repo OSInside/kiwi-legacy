@@ -552,7 +552,7 @@ sub test_isohybrid {
 	my $locator = KIWILocator -> instance();
 	my $arch = KIWIGlobals -> instance() -> getArch();
 	my $isoHybrid;
-	if ($arch eq 'ix86' || $arch eq 'x86_64') {
+	if ($arch eq 'i686' || $arch eq 'i586' || $arch eq 'x86_64') {
 		$isoHybrid = $locator -> getExecPath('isohybrid');
 		if (! $isoHybrid) {
 			print "\t\tCould not find isohybrid executable skipping test "
@@ -569,7 +569,7 @@ sub test_isohybrid {
 	my $msg = $kiwi -> getMessage();
 	my $msgT = $kiwi -> getMessageType();
 	my $state = $kiwi -> getState();
-	if ($arch eq 'ix86' || $arch eq 'x86_64') {
+	if ($arch eq 'i686' || $arch eq 'i586' || $arch eq 'x86_64') {
 		my @opt = ('uefi');
 		my %cmdOpt = %{$locator -> getExecArgsFormat ($isoHybrid, \@opt)};
 		if ($cmdOpt{'status'}) {
@@ -728,7 +728,7 @@ sub test_noEFIIsohybridOEMImg {
 	my $locator = KIWILocator -> instance();
 	my $arch = KIWIGlobals -> instance() -> getArch();
 	my $isoHybrid;
-	if ($arch eq 'ix86' || $arch eq 'x86_64') {
+	if ($arch eq 'i686' || $arch eq 'i586' || $arch eq 'x86_64') {
 		$isoHybrid = $locator -> getExecPath('isohybrid');
 		if (! $isoHybrid) {
 			print "\t\tCould not find isohybrid executable skipping test "
@@ -745,7 +745,7 @@ sub test_noEFIIsohybridOEMImg {
 	my $msg = $kiwi -> getMessage();
 	my $msgT = $kiwi -> getMessageType();
 	my $state = $kiwi -> getState();
-	if ($arch eq 'ix86' || $arch eq 'x86_64') {
+	if ($arch eq 'i686' || $arch eq 'i586' || $arch eq 'x86_64') {
 		my @opt = ('uefi');
 		my %cmdOpt = %{$locator -> getExecArgsFormat ($isoHybrid, \@opt)};
 		if ($cmdOpt{'status'}) {

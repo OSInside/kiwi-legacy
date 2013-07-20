@@ -196,7 +196,7 @@ sub test_getArch {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (
-				arch => 'ix86',
+				arch => 'i686',
 				name => 'gnome'
 	);
 	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
@@ -207,7 +207,7 @@ sub test_getArch {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	my $value = $collectDataObj -> getArch();
-	$this -> assert_str_equals('ix86', $value);
+	$this -> assert_str_equals('i686', $value);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -229,7 +229,7 @@ sub test_getBootInclude {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (
-	    arch        => 'ix86',
+	    arch        => 'i686',
 		bootinclude => 'true',
 		name        => 'base'
 	);
@@ -387,7 +387,7 @@ sub test_setBootInclude {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my %init = (
-	    arch        => 'ix86',
+	    arch        => 'i686',
 		bootinclude => 'true',
 		name        => 'base'
 	);
@@ -422,7 +422,7 @@ sub test_setBootIncludeInvalidArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my %init = (
-	    arch => 'ix86',
+	    arch => 'i686',
 		name => 'base'
 	);
 	my $collectDataObj = KIWIXMLPackageCollectData -> new(\%init);
@@ -458,7 +458,7 @@ sub test_setBootIncludeNoArg {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my %init = (
-	    arch        => 'ix86',
+	    arch        => 'i686',
 		bootinclude => 'true',
 		name        => 'base'
 	);

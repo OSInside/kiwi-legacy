@@ -9,7 +9,7 @@
 	<preferences>
 		<type image="pxe" filesystem="clicfs" boot="netboot/suse-12.1" installiso="true">
 			<pxedeploy server="192.168.100.2" blocksize="4096">
-				<configuration arch="x86_64,ix86,armv5tel,armv7l,ppc64,ppc" dest="target" source="installSource"/>
+				<configuration arch="x86_64,i686,armv5tel,armv7l,ppc64,ppc" dest="target" source="installSource"/>
 				<configuration arch="s390" dest="zdrive" source="s390Img"/>
 				<initrd>/pxeSetup/specialInitrd</initrd>
 				<kernel>/pxeSetup/specialKernel</kernel>

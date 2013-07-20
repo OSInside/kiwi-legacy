@@ -167,7 +167,7 @@ sub test_getArch {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = (
-				arch => 'ix86',
+				arch => 'i686',
 				name => 'soundcore.ko'
 	);
 	my $driverDataObj = KIWIXMLDriverData -> new(\%init);
@@ -178,7 +178,7 @@ sub test_getArch {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	my $value = $driverDataObj -> getArch();
-	$this -> assert_str_equals('ix86', $value);
+	$this -> assert_str_equals('i686', $value);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
