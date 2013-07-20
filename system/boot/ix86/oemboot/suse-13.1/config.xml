@@ -90,7 +90,8 @@
 		<package name="kernel-default"/>
 	</packages>
 	<packages type="image" profiles="pae">
-		<package name="kernel-pae" arch="ix86"/>
+		<package name="kernel-pae" arch="i686"/>
+		<package name="kernel-default" arch="i586"/>
 	</packages>
 	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>
@@ -103,7 +104,9 @@
 		<package name="xen" arch="x86_64"/>
 	</packages>
 	<packages type="image" profiles="desktop">
-		<package name="kernel-desktop"/>
+		<package name="kernel-desktop" arch="x86_64"/>
+		<package name="kernel-desktop" arch="i686"/>
+		<package name="kernel-default" arch="i586"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="adaptec-firmware"/>
@@ -129,7 +132,8 @@
 		<package name="gettext-runtime"/>
 		<package name="grub2"/>
 		<package name="grub2-x86_64-efi" arch="x86_64"/>
-		<package name="grub2-i386-efi" arch="ix86"/>
+		<package name="grub2-i386-efi" arch="i686"/>
+		<package name="grub2-i386-efi" arch="i586"/>
 		<package name="grub2-i386-pc"/>
 		<package name="shim" arch="x86_64"/>
 		<package name="hwinfo"/>

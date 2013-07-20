@@ -91,7 +91,8 @@
 		<package name="kernel-default"/>
 	</packages>
 	<packages type="image" profiles="pae">
-		<package name="kernel-pae" arch="ix86"/>
+		<package name="kernel-pae" arch="i686"/>
+		<package name="kernel-default" arch="i586"/>
 	</packages>
 	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>
@@ -104,7 +105,9 @@
 		<package name="xen" arch="x86_64"/>
 	</packages>
 	<packages type="image" profiles="desktop">
-		<package name="kernel-desktop"/>
+		<package name="kernel-desktop" arch="x86_64"/>
+		<package name="kernel-desktop" arch="i686"/>
+		<package name="kernel-default" arch="i586"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="adaptec-firmware"/>
