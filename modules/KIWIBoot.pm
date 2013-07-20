@@ -3622,12 +3622,14 @@ sub setupBootLoaderStages {
 				$kiwi -> failed ();
 				return;
 			}
-			my $core    = "$tmpdir/EFI/BOOT/bootx64.efi";
 			my @modules = @efi_core_modules;
-			my $fo = 'x86_64-efi';
+			my $fo      = 'x86_64-efi';
+			my $fo_bin  = 'bootx64.efi';
 			if ($arch ne 'x86_64') {
-				$fo = 'i386-efi';
+				$fo     = 'i386-efi';
+				$fo_bin = 'bootx32.efi';
 			}
+			my $core= "$tmpdir/EFI/BOOT/$fo_bin";
 			$status = qxx (
 				"$grub2_uefi_mkimage -O $fo -o $core -c $bootefi @modules 2>&1"
 			);
@@ -3649,6 +3651,10 @@ sub setupBootLoaderStages {
 			my $s_shim_ms   = $stages{efi}{shim_ms};
 			my $s_shim_suse = $stages{efi}{shim_suse};
 			my $s_signed    = $stages{efi}{signed};
+			my $fo_bin      = 'bootx64.efi';
+			if ($arch ne 'x86_64') {
+				$fo_bin = 'bootx32.efi';
+			}
 			$result = 0;
 			if ($zipped) {
 				$status= qxx (
@@ -3678,12 +3684,12 @@ sub setupBootLoaderStages {
 				return;
 			}
 			$status = qxx (
-				"cp $tmpdir/$s_shim_ms $tmpdir/EFI/BOOT/bootx64.efi 2>&1"
+				"cp $tmpdir/$s_shim_ms $tmpdir/EFI/BOOT/$fo_bin 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
 				$status = qxx (
-					"cp $tmpdir/$s_shim_suse $tmpdir/EFI/BOOT/bootx64.efi 2>&1"
+					"cp $tmpdir/$s_shim_suse $tmpdir/EFI/BOOT/$fo_bin 2>&1"
 				);
 				$result = $? >> 8;
 			}
@@ -4213,11 +4219,16 @@ sub setupBootLoaderConfiguration {
 			print $FD "set timeout=$bootTimeout\n";
 			if ($type =~ /^KIWI (CD|USB)/) {
 				my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
+				my $arch = KIWIGlobals -> instance() -> getArch();
 				print $FD 'menuentry "Boot from Hard Disk"';
 				print $FD ' --class opensuse --class os {'."\n";
 				if (($firmware eq "efi") || ($firmware eq "uefi")) {
 					print $FD "\t"."set root='hd0,1'"."\n";
-					print $FD "\t".'chainloader /EFI/BOOT/bootx64.efi'."\n";
+					if ($arch eq 'x86_64') {
+						print $FD "\t".'chainloader /EFI/BOOT/bootx64.efi'."\n";
+					} else {
+						print $FD "\t".'chainloader /EFI/BOOT/bootx32.efi'."\n";
+					}
 				} else {
 					print $FD "\t"."set root='hd0'"."\n";
 					if ($dev eq '(cd)') {

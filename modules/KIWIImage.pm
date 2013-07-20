@@ -1977,8 +1977,10 @@ sub createImageLiveCD {
 		my $grub_efi   = 'grub2-efi';
 		my $grub_share = 'grub2';
 		my $efi_fo     = 'x86_64-efi';
+		my $efi_bin    = 'bootx64.efi';
 		if ($isoarch ne 'x86_64') {
 			$efi_fo = 'i386-efi';
+			$efi_bin= 'bootx32.efi';
 		}
 		if (-d "$tmpdir/usr/lib/grub2") {
 			$grub_efi = 'grub2';
@@ -2078,7 +2080,7 @@ sub createImageLiveCD {
 				$kiwi -> failed ();
 				return;
 			}
-			my $core    = "$CD/EFI/BOOT/bootx64.efi";
+			my $core    = "$CD/EFI/BOOT/$efi_bin";
 			my @modules = @efimods;
 			$status = qxx (
 				"$grub2_mkimage -O $efi_fo -o $core -c $bootefi @modules 2>&1"
@@ -2119,12 +2121,12 @@ sub createImageLiveCD {
 				return;
 			}
 			$status = qxx (
-				"cp $s_shim_ms $CD/EFI/BOOT/bootx64.efi 2>&1"
+				"cp $s_shim_ms $CD/EFI/BOOT/$efi_bin 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
 				$status = qxx (
-					"cp $s_shim_suse $CD/EFI/BOOT/bootx64.efi 2>&1"
+					"cp $s_shim_suse $CD/EFI/BOOT/$efi_bin 2>&1"
 				);
 				$result = $? >> 8;
 			}
@@ -2278,7 +2280,11 @@ sub createImageLiveCD {
 		print $FD 'menuentry "Boot from Hard Disk"';
 		print $FD ' --class opensuse --class os {'."\n";
 		print $FD "\t"."set root='hd0,1'"."\n";
-		print $FD "\t".'chainloader /EFI/BOOT/bootx64.efi'."\n";
+		if ($isoarch eq 'x86_64') {
+			print $FD "\t".'chainloader /EFI/BOOT/bootx64.efi'."\n";
+		} else {
+			print $FD "\t".'chainloader /EFI/BOOT/bootx32.efi'."\n";
+		}
 		print $FD '}'."\n";
 		#==========================================
 		# setup memtest entry
