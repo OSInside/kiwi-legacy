@@ -1033,7 +1033,7 @@ sub __isoHybridCapable {
 		&& $imgType eq 'iso'
 		)
 	) {
-		if ($arch ne 'ix86' && $arch ne 'x86_64') {
+		if ($arch ne 'i686' && $arch ne 'i586' && $arch ne 'x86_64') {
 			my $msg = 'Attempting to create hybrid ISO image on a platform '
 				. 'that does not support hybrid ISO creation.';
 			$kiwi -> error ($msg);

@@ -240,10 +240,7 @@ sub updateDescription {
 	#==========================================
 	# Get architecture
 	#------------------------------------------
-	my $arch = qxx ("uname -m"); chomp $arch;
-	if ($arch =~ /i.86/) {
-		$arch = "ix86";
-	}
+	my $arch = KIWIGlobals -> instance() -> getArch();
 	#==========================================
 	# Store general data
 	#------------------------------------------

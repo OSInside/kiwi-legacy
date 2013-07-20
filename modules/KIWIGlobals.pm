@@ -40,9 +40,6 @@ sub getArch {
 	# Return the architecture setting of the build environment
 	# ---
 	my $arch = KIWIQX::qxx ("uname -m"); chomp $arch;
-	if ($arch =~ /i.86/) {
-		$arch = "ix86";
-	}
 	return $arch;
 }
 

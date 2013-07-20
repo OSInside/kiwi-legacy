@@ -250,10 +250,7 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	my $arch = qxx ("uname -m"); chomp $arch;
-	if ($arch =~ /i.86/) {
-		$arch = "ix86";
-	}
+	my $arch = KIWIGlobals -> instance() -> getArch();
 	my %supported = map { ($_ => 1) } qw(
 		aarch64
 		armv5el
@@ -263,7 +260,6 @@ sub new {
 		ia64
 		i586
 		i686
-		ix86
 		ppc
 		ppc64
 		s390
