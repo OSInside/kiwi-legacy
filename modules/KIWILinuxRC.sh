@@ -9690,7 +9690,7 @@ function setupKernelLinks {
 	#======================================
 	# remove garbage if possible 
 	#--------------------------------------
-	if [ $loader = "syslinux" ] || [ $loader = "extlinux" ];then
+	if [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
 		rm -rf grub
 	fi
 	#======================================
