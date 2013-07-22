@@ -19,6 +19,7 @@ package KIWIImageCreator;
 use strict;
 use warnings;
 use File::Basename;
+use File::Spec;
 require Exporter;
 
 #==========================================
@@ -671,8 +672,9 @@ sub createImage {
 		my $query = '%{NAME}|%{VERSION}|%{RELEASE}|%{ARCH}|%{DISTURL}\n';
 		my $name  = KIWIGlobals
 			-> instance() -> generateBuildImageName($xml);
-		qxx ("rpm --root $tree -qa --qf \"$query\" > $idest/$name.packages");
-		qxx ("rpm --root $tree -Va > $idest/$name.verified");
+		my $path = File::Spec->rel2abs ($tree);
+		qxx ("rpm --root $path -qa --qf \"$query\" > $idest/$name.packages");
+		qxx ("rpm --root $path -Va > $idest/$name.verified");
 	}
 	#==========================================
 	# Build image using KIWIImage
