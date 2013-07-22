@@ -8920,7 +8920,7 @@ function pxeRaidCreate {
 	local raidFirst
 	local raidSecond
 	local conf=/mdadm.conf
-	touch $conf
+	echo -n > $conf
 	for i in $PART;do
 		count=$((count + 1))
 		raidFirst=$(ddn $raidDiskFirst $count)
@@ -8940,7 +8940,7 @@ function pxeRaidCreate {
 				"Failed to create raid array... fatal !" \
 			"reboot"
 		fi
-		echo "mdadm -Db /dev/md$mdcount" >> $conf
+		mdadm -Db /dev/md$mdcount >> $conf
 		mdcount=$((mdcount + 1))
 	done
 }
@@ -8955,6 +8955,8 @@ function pxeRaidAssemble {
 	local IFS=";"
 	local raidFirst
 	local raidSecond
+	local conf=/mdadm.conf
+	echo -n > $conf
 	for n in $RAID;do
 		case $field in
 			0) raidLevel=$n     ; field=1 ;;
@@ -8979,6 +8981,7 @@ function pxeRaidAssemble {
 		fi
 		IFS=$IFS_ORIG
 		mdadm --assemble --run /dev/md$mdcount $devices
+		mdadm -Db /dev/md$mdcount >> $conf
 		mdcount=$((mdcount + 1))
 	done
 }
