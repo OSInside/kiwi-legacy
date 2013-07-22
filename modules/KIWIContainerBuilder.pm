@@ -233,9 +233,17 @@ sub __applyContainerConfig {
 	print $BOOT $config;
 	close $BOOT;
 	#==========================================
-	# add the console to the securetty to allow login
+	# add console to securetty to allow login
 	#------------------------------------------
-	qxx("echo console >> $targetDir/etc/securetty");
+	my $ttyfd = FileHandle -> new();
+	if (! $ttyfd -> open(">>$targetDir/etc/securetty")) {
+		$kiwi -> failed();
+		$kiwi -> error ("Could not open $targetDir/etc/securetty: $!");
+		$kiwi -> failed();
+		return;
+	}
+	print $ttyfd "console"."\n";
+	$ttyfd -> close();
 	$kiwi -> done();
 	return 1;
 }
