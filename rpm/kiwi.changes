@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Jul 22 10:20:44 CEST 2013 - ms@suse.de
+
+- fixed broken shell string comparison in KIWILinuxRC
+  if the variable $loader is not set (bnc #829537)
+
+- fixed creation of mdadm.conf. The file is missing if the
+  original RAID setup is used without formatting (bnc #829504)
+
+-------------------------------------------------------------------
 Thu Jul 11 11:52:59 CEST 2013 - ms@suse.de
 
 - fixed handling of bootincluded items:
