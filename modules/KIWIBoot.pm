@@ -5938,6 +5938,7 @@ sub setStoragePartition {
 					print $FD "$cmd\n";
 				}
 			}
+			print $FD "w\n";
 			$FD -> close();
 			$result = $? >> 8;
 			my $flog;
