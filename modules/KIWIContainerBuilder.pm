@@ -235,8 +235,7 @@ sub __applyContainerConfig {
 	#==========================================
 	# add the console to the securetty to allow login
 	#------------------------------------------
-	my $ech = $locator -> getExecPath('echo');
-	qxx("$ech console >> $targetDir/etc/securetty");
+	qxx("echo console >> $targetDir/etc/securetty");
 	$kiwi -> done();
 	return 1;
 }
