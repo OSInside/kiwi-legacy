@@ -134,7 +134,7 @@ function suseService {
 	# ----
 	local service=$1
 	local action=$2
-	if [ -x /etc/init.d/$i ] && [ -f /etc/init.d/$service ];then
+	if [ -x /etc/init.d/$service ];then
 		if [ $action = on ];then
 			suseInsertService $service
 		elif [ $action = off ];then
