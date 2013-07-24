@@ -167,7 +167,7 @@ function suseActivateDefaultServices {
 		kbd
 	)
 	for i in "${services[@]}";do
-		if [ -x /etc/init.d/$i ] && [ -f /etc/init.d/$i ];then
+		if [ -x /etc/init.d/$i ];then
 			suseInsertService $i
 		fi
 	done
