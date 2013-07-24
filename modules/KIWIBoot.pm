@@ -1488,9 +1488,6 @@ sub setupInstallPXE {
 		if ($type{cmdline}) {
 			print $appfd " $type{cmdline}";
 		}
-		if ($lvm) {
-			print $appfd " VGROUP=$vgroup";
-		}
 		if ($imgtype eq 'split') {
 			print $appfd ' COMBINED_IMAGE=yes';
 		}
@@ -4040,7 +4037,6 @@ sub setupBootLoaderConfiguration {
 	# join common options, finish with '\n'
 	#------------------------------------------
 	$cmdline .= " $extra" if $extra;
-	$cmdline .= " VGROUP=$vgroup" if $lvm;
 	$cmdline .= " COMBINED_IMAGE=yes" if $imgtype eq "split";
 	$cmdline .= " showopts\n";
 	# ensure exactly one space at start

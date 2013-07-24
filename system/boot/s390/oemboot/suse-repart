@@ -507,7 +507,7 @@ function OEMRepartLVM {
 		# setup new device names
 		#--------------------------------------
 		setupDeviceNames \
-			1 $swapParam $recoParam $bootParam yes $VGROUP
+			1 $swapParam $recoParam $bootParam yes $kiwi_lvmgroup
 		callPartitioner $input
 		waitForStorageDevice $(ddn $imageDiskDevice $extendID)
 		activateMDRaid
@@ -521,14 +521,14 @@ function OEMRepartLVM {
 		#--------------------------------------
 		resizeLVMPVs $extendID
 		#======================================
-		# activate volume group $VGROUP
+		# activate volume group $kiwi_lvmgroup
 		#--------------------------------------
 		activateVolumeGroup
 		#======================================
 		# Add LVSwap if requested.
 		#--------------------------------------
 		if [ -z "$OEM_WITHOUTSWAP" ];then
-			lvcreate --size $swapsize"M" -n LVSwap $VGROUP
+			lvcreate --size $swapsize"M" -n LVSwap $kiwi_lvmgroup
 			swapParam=yes
 		fi
 		#======================================
@@ -538,12 +538,12 @@ function OEMRepartLVM {
 		#======================================
 		# Extend root or allFreeVolume
 		#--------------------------------------
-		lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
+		lvextend -l +100%FREE /dev/$kiwi_lvmgroup/$allFreeVolume
 		#======================================
 		# setup new device names
 		#--------------------------------------
 		setupDeviceNames \
-			$rootParam $swapParam $recoParam $bootParam yes $VGROUP
+			$rootParam $swapParam $recoParam $bootParam yes $kiwi_lvmgroup
 	fi
 }
 
@@ -585,7 +585,7 @@ function OEMPartitionInstall {
 		#======================================
 		# Extend root or allFreeVolume
 		#--------------------------------------
-		lvextend -l +100%FREE /dev/$VGROUP/$allFreeVolume
+		lvextend -l +100%FREE /dev/$kiwi_lvmgroup/$allFreeVolume
 	fi
 	#======================================
 	# resize boot filesystem if needed
@@ -732,7 +732,7 @@ function OEMRepart {
 			systemException "Failed to store MBR" "reboot"
 		fi
 		if [ ! -z "$haveLVM" ];then
-			if ! vgcfgbackup -f /reco-save/lvm $VGROUP;then
+			if ! vgcfgbackup -f /reco-save/lvm $kiwi_lvmgroup;then
 				systemException "Failed to store LVM metadata" "reboot"
 			fi
 		fi
@@ -766,7 +766,7 @@ function recreateVTOCTable {
 		if [ "$haveLuks" = "yes" ];then
 			luksClose
 		fi
-		vgchange -a n $VGROUP
+		vgchange -a n $kiwi_lvmgroup
 	fi
 	createPartitionerInput u y w
 	callPartitioner $input
@@ -928,13 +928,13 @@ function resizeLVMVolumes {
 		size=$(echo $content | cut -f2 -d:)
 		Echo "Resizing volume $volume..."
 		if [ $mode = "size" ];then
-			lvextend -L ${size}M /dev/$VGROUP/$volume
+			lvextend -L ${size}M /dev/$kiwi_lvmgroup/$volume
 		else
-			lvextend -L +${size}M /dev/$VGROUP/$volume
+			lvextend -L +${size}M /dev/$kiwi_lvmgroup/$volume
 		fi
 		if [ $? = 0 ];then
 			unset FSTYPE
-			resizeFilesystem /dev/$VGROUP/$volume
+			resizeFilesystem /dev/$kiwi_lvmgroup/$volume
 		else
 			Echo "Warning: requested size cannot be reached !"
 		fi

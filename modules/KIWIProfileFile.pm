@@ -79,6 +79,7 @@ sub new {
 		kiwi_loader_theme
 		kiwi_luks
 		kiwi_lvm
+		kiwi_lvmgroup
 		kiwi_oemalign
 		kiwi_oemataraid_scan
 		kiwi_oembootwait
@@ -137,7 +138,7 @@ sub addEntry {
 	my $kiwi  = $this->{kiwi};
 	if (! $key) {
 		my $msg = 'addEntry: expecting a string as first argument';
-		$kiwi -> error($msg);
+		$kiwi -> error ($msg);
 		$kiwi -> failed();
 		return;
 	}
@@ -147,8 +148,8 @@ sub addEntry {
 	my %allowedVars = %{$this->{vars}};
 	if ((! $allowedVars{$key}) && ($key !~ /^kiwi_LVM_LV/msx)) {
 		my $msg = "Unrecognized variable: $key";
-		$kiwi -> info($msg);
-		$kiwi -> skipped();
+		$kiwi -> warning ($msg);
+		$kiwi -> skipped ();
 		return $this;
 	}
 	if ($this->{profile}{$key}) {
@@ -210,6 +211,14 @@ sub updateFromXML {
 	if (@drvNames) {
 		my $addItem = join q{,}, @drvNames;
 		$this -> addEntry('kiwi_drivers', $addItem);
+	}
+	# Process the systemdisk
+	my $systemdisk = $xml -> getSystemDiskConfig();
+	if ($systemdisk) {
+		my $lvmgroup = $systemdisk -> getVGName();
+		if ($lvmgroup) {
+			$this -> addEntry('kiwi_lvmgroup',$lvmgroup);
+		}
 	}
 	# my $type = $xml -> getImageType();
 	# Process preferences

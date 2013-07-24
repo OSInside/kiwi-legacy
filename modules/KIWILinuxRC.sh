@@ -50,7 +50,6 @@ test -z "$DIALOG_LANG"        && export DIALOG_LANG=ask
 test -z "$TERM"               && export TERM=linux
 test -z "$LANG"               && export LANG=en_US.utf8
 test -z "$UTIMER"             && export UTIMER=0
-test -z "$VGROUP"             && export VGROUP=kiwiVG
 test -z "$PARTED_HAVE_ALIGN"  && export PARTED_HAVE_ALIGN=0
 test -z "$PARTED_HAVE_MACHINE"&& export PARTED_HAVE_MACHINE=0
 test -z "$DHCPCD_HAVE_PERSIST"&& export DHCPCD_HAVE_PERSIST=1
@@ -1555,9 +1554,6 @@ function setupBootLoaderSyslinuxRecovery {
 			echo -n " splash=silent"                       >> $conf
 			echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
 			echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
-			if [ "$haveLVM" = "yes" ];then
-				echo -n " VGROUP=$VGROUP"                  >> $conf
-			fi
 			echo " KIWI_RECOVERY=$recoid"                  >> $conf
 			echo " quiet showopts"                         >> $conf
 		fi
@@ -1581,9 +1577,6 @@ function setupBootLoaderSyslinuxRecovery {
 			echo -n " splash=silent"                       >> $conf
 			echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
 			echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
-			if [ "$haveLVM" = "yes" ];then
-				echo -n " VGROUP=$VGROUP"                  >> $conf
-			fi
 			echo " KIWI_RECOVERY=$recoid RESTORE=1"        >> $conf
 			echo " quiet showopts"                         >> $conf
 		fi
@@ -1656,9 +1649,6 @@ function setupBootLoaderGrubRecovery {
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
-			if [ "$haveLVM" = "yes" ];then
-				echo -n " VGROUP=$VGROUP"                 >> $menu
-			fi
 			echo -n " KIWI_RECOVERY=$recoid"              >> $menu
 			echo " quiet showopts"                        >> $menu
 			echo " module /boot/$initrd"                  >> $menu
@@ -1671,9 +1661,6 @@ function setupBootLoaderGrubRecovery {
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
-			if [ "$haveLVM" = "yes" ];then
-				echo -n " VGROUP=$VGROUP"                 >> $menu
-			fi
 			echo -n " KIWI_RECOVERY=$recoid"              >> $menu
 			echo " quiet showopts"                        >> $menu
 			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
@@ -1694,9 +1681,6 @@ function setupBootLoaderGrubRecovery {
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
-			if [ "$haveLVM" = "yes" ];then
-				echo -n " VGROUP=$VGROUP"                 >> $menu
-			fi
 			echo -n " KIWI_RECOVERY=$recoid"              >> $menu
 			echo " quiet showopts"                        >> $menu
 			echo " module /boot/$initrd"                  >> $menu
@@ -1709,9 +1693,6 @@ function setupBootLoaderGrubRecovery {
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
-			if [ "$haveLVM" = "yes" ];then
-				echo -n " VGROUP=$VGROUP"                 >> $menu
-			fi
 			echo -n " KIWI_RECOVERY=$recoid RESTORE=1"    >> $menu
 			echo " quiet showopts"                        >> $menu
 			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
@@ -1767,9 +1748,6 @@ function setupBootLoaderGrub2Recovery {
 	fi
 	if [ ! -z "$diskByID" ];then
 		cmdline="$cmdline disk=$diskByID"
-	fi
-	if [ "$kiwi_lvm" = "true" ];then
-		cmdline="$cmdline VGROUP=$VGROUP"
 	fi
 	if [ -e /dev/xvc0 ];then
 		cmdline="$cmdline console=xvc console=tty"
@@ -2011,9 +1989,6 @@ function setupBootLoaderS390 {
 		if [ ! -z "$swap" ];then
 			echo -n " resume=$swapByID" >> $conf
 		fi
-		if [ "$haveLVM" = "yes" ];then
-			echo -n " VGROUP=$VGROUP" >> $conf
-		fi
 		echo -n " $KIWI_INITRD_PARAMS"  >> $conf
 		echo -n " $KIWI_KERNEL_OPTIONS" >> $conf
 		echo -n " loader=$loader"       >> $conf
@@ -2028,9 +2003,6 @@ function setupBootLoaderS390 {
 		echo -n "parameters = \"root=$diskByID"  >> $conf
 		if [ ! -z "$imageDiskDevice" ];then
 			echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
-		fi
-		if [ "$haveLVM" = "yes" ];then
-			echo -n " VGROUP=$VGROUP" >> $conf
 		fi
 		echo -n " $KIWI_INITRD_PARAMS"         >> $conf
 		echo -n " $KIWI_KERNEL_OPTIONS"        >> $conf
@@ -2208,9 +2180,6 @@ function setupBootLoaderSyslinux {
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
 				echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
-				if [ "$haveLVM" = "yes" ];then
-					echo -n " VGROUP=$VGROUP"                  >> $conf
-				fi
 				echo " quiet showopts"                         >> $conf
 			fi
 			#======================================
@@ -2241,9 +2210,6 @@ function setupBootLoaderSyslinux {
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
 				echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
-				if [ "$haveLVM" = "yes" ];then
-					echo -n " VGROUP=$VGROUP"                  >> $conf
-				fi
 				echo -n " $failsafe"                           >> $conf
 				echo " quiet showopts"                         >> $conf
 			fi
@@ -2421,9 +2387,6 @@ function setupBootLoaderGrub {
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
-				if [ "$haveLVM" = "yes" ];then
-					echo -n " VGROUP=$VGROUP"                     >> $menu
-				fi
 				echo " quiet showopts"                            >> $menu
 				echo " module /boot/$initrd"                      >> $menu
 			else
@@ -2443,9 +2406,6 @@ function setupBootLoaderGrub {
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
-				if [ "$haveLVM" = "yes" ];then
-					echo -n " VGROUP=$VGROUP"                     >> $menu
-				fi
 				echo " quiet showopts"                            >> $menu
 				echo " initrd $gdev/boot/$initrd"                 >> $menu
 			fi
@@ -2465,9 +2425,6 @@ function setupBootLoaderGrub {
 				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
-				if [ "$haveLVM" = "yes" ];then
-					echo -n " VGROUP=$VGROUP"                     >> $menu
-				fi
 				echo -n " $failsafe"                              >> $menu
 				if [ -e /dev/xvc0 ];then
 					echo -n " console=xvc console=tty"            >> $menu
@@ -2485,9 +2442,6 @@ function setupBootLoaderGrub {
 				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
-				if [ "$haveLVM" = "yes" ];then
-					echo -n " VGROUP=$VGROUP"                     >> $menu
-				fi
 				echo -n " $failsafe"                              >> $menu
 				if [ -e /dev/xvc0 ];then
 					echo -n " console=xvc console=tty"            >> $menu
@@ -2647,9 +2601,6 @@ function setupBootLoaderGrub2 {
 	fi
 	if [ ! -z "$swapByID" ];then
 		cmdline="$cmdline resume=$swapByID"
-	fi
-	if [ "$kiwi_lvm" = "true" ];then
-		cmdline="$cmdline VGROUP=$VGROUP"
 	fi
 	if [ ! -z "$kiwi_cmdline" ];then
 		cmdline="$cmdline $kiwi_cmdline"
@@ -2890,9 +2841,6 @@ function setupBootLoaderYaboot {
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                >> $conf
 				echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
-				if [ "$haveLVM" = "yes" ];then
-					echo -n " VGROUP=$VGROUP"                 >> $conf
-				fi
 				echo " quiet showopts\""                      >> $conf
 			fi
 			#======================================
@@ -2923,9 +2871,6 @@ function setupBootLoaderYaboot {
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                >> $conf
 				echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
-				if [ "$haveLVM" = "yes" ];then
-					echo -n " VGROUP=$VGROUP"                 >> $conf
-				fi
 				echo -n " $failsafe"                          >> $conf
 				echo " quiet showopts\""                      >> $conf
 			fi
@@ -3038,19 +2983,19 @@ function updateRootDeviceFstab {
 	# check for LVM volume setup
 	#--------------------------------------
 	if [ "$haveLVM" = "yes" ];then
-		for i in /dev/$VGROUP/LV*;do
+		for i in /dev/$kiwi_lvmgroup/LV*;do
 			if [ ! -e $i ];then
 				continue
 			fi
 			local volume=$(echo $i | cut -f4 -d/ | cut -c3-)
 			local mpoint=$(echo $volume | tr _ /)
+			local mppath="/dev/$kiwi_lvmgroup/LV$volume"
 			if \
 				[ ! $volume = "Root" ] && \
 				[ ! $volume = "Comp" ] && \
 				[ ! $volume = "Swap" ]
 			then
-				echo "/dev/$VGROUP/LV$volume /$mpoint $FSTYPE $opts 1 2" \
-				>> $nfstab
+				echo "$mppath /$mpoint $FSTYPE $opts 1 2" >> $nfstab
 			fi
 		done
 	fi
@@ -4138,9 +4083,9 @@ function searchBIOSBootDevice {
 #--------------------------------------
 function searchVolumeGroup {
 	# /.../
-	# search for a volume group named $VGROUP and if it can be
+	# search for a volume group named $kiwi_lvmgroup and if it can be
 	# found activate it while creating appropriate device nodes:
-	# /dev/$VGROUP/LVRoot and/or /dev/$VGROUP/LVComp
+	# /dev/$kiwi_lvmgroup/LVRoot and/or /dev/$kiwi_lvmgroup/LVComp
 	# return zero on success
 	# ----
 	local vg_count=0
@@ -4150,21 +4095,21 @@ function searchVolumeGroup {
 	fi
 	for i in $(vgs --noheadings -o vg_name 2>/dev/null);do
 		vg_found=$(echo $i)
-		if [ "$vg_found" = "$VGROUP" ];then
+		if [ "$vg_found" = "$kiwi_lvmgroup" ];then
 			vg_count=$((vg_count + 1))
 		fi
 	done
 	if [ $vg_count -gt 1 ];then
-		Echo "Duplicate VolumeGroup name $VGROUP found !"
+		Echo "Duplicate VolumeGroup name $kiwi_lvmgroup found !"
 		Echo "$vg_count versions of this volume group exists"
 		Echo "The volume group name must be unique"
 		Echo "Please check your disks and rename/remove the duplicates"
 		systemException \
-			"VolumeGroup $VGROUP not unique !" \
+			"VolumeGroup $kiwi_lvmgroup not unique !" \
 		"reboot"
 	fi
-	Echo "Activating $VGROUP volume group..."
-	vgchange -a y $VGROUP
+	Echo "Activating $kiwi_lvmgroup volume group..."
+	vgchange -a y $kiwi_lvmgroup
 }
 #======================================
 # deactivateVolumeGroup
@@ -4180,8 +4125,8 @@ function deactivateVolumeGroup {
 		return 1
 	fi
 	udevPending
-	Echo "Deactivating $VGROUP volume group..."
-	vgchange -a n $VGROUP
+	Echo "Deactivating $kiwi_lvmgroup volume group..."
+	vgchange -a n $kiwi_lvmgroup
 }
 #======================================
 # activateVolumeGroup
@@ -4194,8 +4139,8 @@ function activateVolumeGroup {
 		return 1
 	fi
 	udevPending
-	Echo "Activating $VGROUP volume group..."
-	vgchange -a y $VGROUP
+	Echo "Activating $kiwi_lvmgroup volume group..."
+	vgchange -a y $kiwi_lvmgroup
 }
 #======================================
 # activateMDRaid
@@ -5933,7 +5878,7 @@ function mountSystemCombined {
 	if [ "$haveLuks" = "yes" ]; then
 		rwDevice="/dev/mapper/luksReadWrite"
 	elif [ "$haveLVM" = "yes" ]; then
-		rwDevice="/dev/$VGROUP/LVRoot"
+		rwDevice="/dev/$kiwi_lvmgroup/LVRoot"
 	else
 		rwDevice=`getNextPartition $mountDevice`
 	fi
@@ -6029,7 +5974,7 @@ function mountSystemStandard {
 		mount $mountDevice /mnt >/dev/null
 	fi
 	if [ "$haveLVM" = "yes" ];then
-		for i in /dev/$VGROUP/LV*;do
+		for i in /dev/$kiwi_lvmgroup/LV*;do
 			local volume=$(echo $i | cut -f4 -d/ | cut -c3-)
 			local mpoint=$(echo $volume | tr _ /)
 			if \
@@ -6038,7 +5983,7 @@ function mountSystemStandard {
 				[ ! $volume = "Swap" ]
 			then
 				mkdir -p /mnt/$mpoint
-				kiwiMount "/dev/$VGROUP/LV$volume" "/mnt/$mpoint"
+				kiwiMount "/dev/$kiwi_lvmgroup/LV$volume" "/mnt/$mpoint"
 			fi
 		done
 	fi
@@ -6851,7 +6796,7 @@ function getDiskID {
 	if [ -z "$device" ];then
 		return
 	fi
-	if [ ! -z "$VGROUP" ] && echo $device | grep -q "$VGROUP"; then
+	if [ ! -z "$kiwi_lvmgroup" ] && echo $device | grep -q "$kiwi_lvmgroup";then
 		echo $device
 		return
 	fi
@@ -7098,14 +7043,14 @@ function cleanImage {
 	#======================================
 	# umount LVM root parts
 	#--------------------------------------
-	for i in /dev/$VGROUP/LV*;do
+	for i in /dev/$kiwi_lvmgroup/LV*;do
 		if [ ! -e $i ];then
 			continue
 		fi
 		if \
-			[ ! $i = "/dev/$VGROUP/LVRoot" ] && \
-			[ ! $i = "/dev/$VGROUP/LVComp" ] && \
-			[ ! $i = "/dev/$VGROUP/LVSwap" ]
+			[ ! $i = "/dev/$kiwi_lvmgroup/LVRoot" ] && \
+			[ ! $i = "/dev/$kiwi_lvmgroup/LVComp" ] && \
+			[ ! $i = "/dev/$kiwi_lvmgroup/LVSwap" ]
 		then
 			mpoint=$(echo ${i##/*/LV})
 			umount $mpoint 1>&2

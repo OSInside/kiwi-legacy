@@ -526,6 +526,16 @@ sub createBootImage {
 		$systemXML -> getBootProfile(),
 		$systemXML -> getBootKernel()
 	);
+	my $systemdisk = $systemXML -> getSystemDiskConfig();
+	if ($systemdisk) {
+		my $lvmgroup = $systemdisk -> getVGName();
+		if (! $lvmgroup) {
+			$lvmgroup = 'kiwiVG';
+		}
+		my $sdk = KIWIXMLSystemdiskData -> new();
+		$sdk -> setVGName ($lvmgroup);
+		$xml -> addSystemDisk ($sdk);
+	}
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------
@@ -551,6 +561,51 @@ sub createBootImage {
 		return;
 	}
 	$this->{image} = $image;
+	#==========================================
+	# Update .profile env, current type
+	#------------------------------------------
+	$kiwi -> info ("Updating boot image .profile environment");
+	my $tree = $image -> getImageTree();
+	my $configure = KIWIConfigure -> new(
+		$xml,$tree,$tree."/image",$destination
+	);
+	if (! defined $configure) {
+		return;
+	}
+	my %config = $xml -> getImageConfig_legacy();
+	my $PFD = FileHandle -> new();
+	if (! $PFD -> open (">$tree/.profile")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to open $tree/.profile: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	binmode($PFD, ":encoding(UTF-8)");
+	foreach my $key (keys %config) {
+		$kiwi -> loginfo ("[BOOT PROFILE]: $key=\"$config{$key}\"\n");
+		print $PFD "$key=\"$config{$key}\"\n";
+	}
+	$PFD -> close();
+	# Add entries that are handled through the new XML data structure
+	my $profile = KIWIProfileFile -> new();
+	my $status;
+	if (! $profile) {
+		return;
+	}
+	$status = $profile -> updateFromHash (\%config);
+	if (! $status) {
+		return;
+	}
+	$status = $profile -> updateFromXML ($xml);
+	if (! $status) {
+		return;
+	}
+	$status = $profile -> writeProfile ($tree);
+	if (! $status) {
+		return;
+	}
+	$configure -> quoteFile ("$tree/.profile");
+	$kiwi -> done();
 	#==========================================
 	# Create cpio image
 	#------------------------------------------
@@ -854,13 +909,27 @@ sub createImage {
 	# Create package content and verification
 	#------------------------------------------
 	if (-f "$tree/var/lib/rpm/Packages") {
+		$kiwi -> info ("Creating unpacked image tree meta data");
 		my $idest = $cmdL -> getImageIntermediateTargetDir();
 		my $query = '%{NAME}|%{VERSION}|%{RELEASE}|%{ARCH}|%{DISTURL}\n';
 		my $name  = KIWIGlobals
 			-> instance() -> generateBuildImageName($xml);
 		my $path = File::Spec->rel2abs ($tree);
-		qxx ("rpm --root $path -qa --qf \"$query\" > $idest/$name.packages");
-		qxx ("rpm --root $path -Va > $idest/$name.verified");
+		qxx ("rpm --root $path -qa --qf \"$query\" &> $idest/$name.packages");
+		my $result = $? >> 8;
+		if ($result == 0) {
+			qxx ("rpm --root $path -Va &> $idest/$name.verified");
+		}
+		if ($result != 0) {
+			my $msg;
+			$kiwi -> failed ();
+			$msg  = 'meta data creation failed, ';
+			$msg .= "see $idest/$name.packages for details";
+			$kiwi -> warning ($msg);
+			$kiwi -> skipped ();
+		} else {
+			$kiwi -> done();
+		}
 	}
 	#==========================================
 	# Build image using KIWIImageBuilder

@@ -94,12 +94,12 @@ function setupInitialDeviceNames {
 	export imageBootDevice=$(ddn $imageDiskDevice $kiwi_BootPart)
 	if searchVolumeGroup; then
 		export haveLVM=yes
-		export imageRootDevice=/dev/$VGROUP/$kiwi_RootPart
+		export imageRootDevice=/dev/$kiwi_lvmgroup/$kiwi_RootPart
 		if [ ! -z "$kiwi_ROPart" ];then
-			export imageRODevice=/dev/$VGROUP/$kiwi_ROPart
+			export imageRODevice=/dev/$kiwi_lvmgroup/$kiwi_ROPart
 		fi
 		if [ ! -z "$kiwi_RWPart" ];then
-			export imageRWDevice=/dev/$VGROUP/$kiwi_RWPart
+			export imageRWDevice=/dev/$kiwi_lvmgroup/$kiwi_RWPart
 			export imageIOWRDevice=$imageRWDevice
 		fi
 	elif [ ! -z "$kiwi_RaidDev" ];then
@@ -143,7 +143,7 @@ function setupInitialDeviceNames {
 	if [ "$FSTYPE" = "luks" ];then
 		luksOpen $imageRootDevice
 		imageRootDevice=$luksDeviceOpened
-		if [ -e /dev/$VGROUP/LVComp ];then
+		if [ -e /dev/$kiwi_lvmgroup/LVComp ];then
 			imageRODevice=$imageRootDevice
 		fi
 		probeFileSystem $imageRootDevice
@@ -314,7 +314,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			# ----
 			resizeFilesystem $deviceResize
 		fi
-		deviceResize=/dev/$VGROUP/$allFreeVolume
+		deviceResize=/dev/$kiwi_lvmgroup/$allFreeVolume
 	fi
 	if [ ! -z "$deviceResize" ] && partitionSize $deviceResize &>/dev/null;then
 		if [ ! -z "$OEM_RECOVERY" ];then
@@ -379,7 +379,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		fi
 		if [ -f /reco-save/lvm ];then
 			restoreLVMPhysicalVolumes /reco-save/lvm
-			if ! vgcfgrestore -f /reco-save/lvm $VGROUP;then
+			if ! vgcfgrestore -f /reco-save/lvm $kiwi_lvmgroup;then
 				systemException "Failed to restore LVM metadata" "reboot"
 			fi
 			setupInitialDeviceNames

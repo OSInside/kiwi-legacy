@@ -554,7 +554,7 @@ function OEMInstall {
 			bID=$rID
 		fi
 		if [ "$haveLVM" = "yes" ];then
-			setupDeviceNames $rID $sID no $bID no $VGROUP
+			setupDeviceNames $rID $sID no $bID no $kiwi_lvmgroup
 		else
 			setupDeviceNames $rID $sID no $bID no
 		fi
