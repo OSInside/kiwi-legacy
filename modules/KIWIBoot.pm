@@ -4843,6 +4843,10 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		my $title_standard;
 		my $title_failsafe;
+		my $bootTimeout = 200;
+		if (defined $type{boottimeout}) {
+			$bootTimeout = $type{boottimeout};
+		}
 		if ($type =~ /^KIWI (CD|USB)/) {
 			$title_standard = $this -> makeLabel (
 				"Install $label"
@@ -4864,7 +4868,7 @@ sub setupBootLoaderConfiguration {
 		print $FD "\t"."default = 1"."\n";
 		print $FD "\t"."prompt  = 1"."\n";
 		print $FD "\t"."target  = boot/zipl"."\n";
-		print $FD "\t"."timeout = 200"."\n";
+		print $FD "\t"."timeout = $bootTimeout"."\n";
 		print $FD "\t"."1 = $title_standard"."\n";
 		print $FD "\t"."2 = $title_failsafe"."\n\n";
 		#==========================================
