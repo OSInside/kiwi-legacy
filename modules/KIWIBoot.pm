@@ -1491,9 +1491,6 @@ sub setupInstallPXE {
 		if ($imgtype eq 'split') {
 			print $appfd ' COMBINED_IMAGE=yes';
 		}
-		if ($type{bootloader}) {
-			print $appfd " loader=$type{bootloader}";
-		}
 		print $appfd "\n";
 		$appfd -> close();
 	} else {
@@ -3946,7 +3943,6 @@ sub setupBootLoaderConfiguration {
 	my $vgroup   = $this->{lvmgroup};
 	my $xml      = $this->{xml};
 	my $firmware = $this->{firmware};
-	my $bloader  = "grub";
 	my $failsafe = 1;
 	my $cmdline;
 	my %type;
@@ -4018,12 +4014,6 @@ sub setupBootLoaderConfiguration {
 				$defaultBootNr = 1;
 			}
 		}
-	}
-	#==========================================
-	# setup boot loader type
-	#------------------------------------------
-	if ($type{bootloader}) {
-		$bloader = $type{bootloader};
 	}
 	#==========================================
 	# report additional cmdline options
@@ -4260,17 +4250,17 @@ sub setupBootLoaderConfiguration {
 					print $FD "\t"."set gfxpayload=keep"."\n";
 					print $FD "\t"."linux$efi_suffix /boot/linux";
 					print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
-					print $FD " cdinst=1 loader=$bloader splash=silent";
+					print $FD " cdinst=1 splash=silent";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "\t"."echo Loading linux.vmx...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
 					print $FD "\t"."linux$efi_suffix /boot/linux.vmx";
-					print $FD " loader=$bloader splash=silent";
+					print $FD " splash=silent";
 				} else {
 					print $FD "\t"."echo Loading linux...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
 					print $FD "\t"."linux$efi_suffix /boot/linux";
-					print $FD " loader=$bloader splash=silent";
+					print $FD " splash=silent";
 				}
 				print $FD $cmdline;
 				if ($iso) {
@@ -4292,21 +4282,21 @@ sub setupBootLoaderConfiguration {
 					print $FD "\t"."set gfxpayload=keep"."\n";
 					print $FD "\t"."module /boot/linux dummy";
 					print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
-					print $FD " cdinst=1 loader=$bloader splash=silent";
+					print $FD " cdinst=1 splash=silent";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "\t"."echo Loading Xen\n";
 					print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 					print $FD "\t"."echo Loading linux.vmx...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
 					print $FD "\t".'module /boot/linux.vmx dummy';
-					print $FD " loader=$bloader splash=silent";
+					print $FD " splash=silent";
 				} else {
 					print $FD "\t"."echo Loading Xen\n";
 					print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 					print $FD "\t"."echo Loading linux...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
 					print $FD "\t".'module /boot/linux dummy';
-					print $FD " loader=$bloader splash=silent";
+					print $FD " splash=silent";
 				}
 				print $FD $cmdline;
 				if ($iso) {
@@ -4334,7 +4324,7 @@ sub setupBootLoaderConfiguration {
 						print $FD "\t"."set gfxpayload=keep"."\n";
 						print $FD "\t"."linux$efi_suffix /boot/linux";
 						print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
-						print $FD " cdinst=1 loader=$bloader splash=silent";
+						print $FD " cdinst=1 splash=silent";
 					} elsif (
 						($type=~ /^KIWI USB/) ||
 						($imgtype=~ /vmx|oem|split/)
@@ -4342,12 +4332,12 @@ sub setupBootLoaderConfiguration {
 						print $FD "\t"."echo Loading linux.vmx...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
 						print $FD "\t"."linux$efi_suffix /boot/linux.vmx";
-						print $FD " loader=$bloader splash=silent";
+						print $FD " splash=silent";
 					} else {
 						print $FD "\t"."echo Loading linux...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
 						print $FD "\t"."linux$efi_suffix /boot/linux";
-						print $FD " loader=$bloader splash=silent";
+						print $FD " splash=silent";
 					}
 					print $FD " @failsafe";
 					print $FD $cmdline;
@@ -4373,7 +4363,7 @@ sub setupBootLoaderConfiguration {
 						print $FD "\t"."set gfxpayload=keep"."\n";
 						print $FD "\t"."module /boot/linux dummy";
 						print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
-						print $FD " cdinst=1 loader=$bloader splash=silent";
+						print $FD " cdinst=1 splash=silent";
 					} elsif (
 						($type=~ /^KIWI USB/) || 
 						($imgtype=~ /vmx|oem|split/)
@@ -4383,14 +4373,14 @@ sub setupBootLoaderConfiguration {
 						print $FD "\t"."echo Loading linux.vmx...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
 						print $FD "\t".'module /boot/linux.vmx dummy';
-						print $FD " loader=$bloader splash=silent";
+						print $FD " splash=silent";
 					} else {
 						print $FD "\t"."echo Loading Xen\n";
 						print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 						print $FD "\t"."echo Loading linux...\n";
 						print $FD "\t"."set gfxpayload=keep"."\n";
 						print $FD "\t".'module /boot/linux dummy';
-						print $FD " loader=$bloader splash=silent";
+						print $FD " splash=silent";
 					}
 					print $FD " @failsafe";
 					print $FD $cmdline;
@@ -4505,15 +4495,15 @@ sub setupBootLoaderConfiguration {
 			if ($iso) {
 				print $FD " kernel (cd)/boot/linux vga=$vga splash=silent";
 				print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
-				print $FD " cdinst=1 loader=$bloader";
+				print $FD " cdinst=1";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print $FD " root (hd0,$boot_id)\n";
 				print $FD " kernel /boot/linux.vmx vga=$vga";
-				print $FD " loader=$bloader splash=silent";
+				print $FD " splash=silent";
 			} else {
 				print $FD " root (hd0,$boot_id)\n";
 				print $FD " kernel /boot/linux vga=$vga";
-				print $FD " loader=$bloader splash=silent";
+				print $FD " splash=silent";
 			}
 			print $FD $cmdline;
 			if ($iso) {
@@ -4528,17 +4518,17 @@ sub setupBootLoaderConfiguration {
 				print $FD " kernel (cd)/boot/xen.gz\n";
 				print $FD " module /boot/linux vga=$vga splash=silent";
 				print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
-				print $FD " cdinst=1 loader=$bloader";
+				print $FD " cdinst=1";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print $FD " root (hd0,$boot_id)\n";
 				print $FD " kernel /boot/xen.gz.vmx\n";
 				print $FD " module /boot/linux.vmx vga=$vga";
-				print $FD " loader=$bloader splash=silent";
+				print $FD " splash=silent";
 			} else {
 				print $FD " root (hd0,$boot_id)\n";
 				print $FD " kernel /boot/xen.gz\n";
 				print $FD " module /boot/linux vga=$vga";
-				print $FD " loader=$bloader splash=silent";
+				print $FD " splash=silent";
 			}
 			print $FD $cmdline;
 			if ($iso) {
@@ -4559,15 +4549,15 @@ sub setupBootLoaderConfiguration {
 				if ($iso) {
 					print $FD " kernel (cd)/boot/linux vga=$vga splash=silent";
 					print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
-					print $FD " cdinst=1 loader=$bloader";
+					print $FD " cdinst=1";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD " root (hd0,$boot_id)\n";
 					print $FD " kernel /boot/linux.vmx vga=$vga";
-					print $FD " loader=$bloader splash=silent";
+					print $FD " splash=silent";
 				} else {
 					print $FD " root (hd0,$boot_id)\n";
 					print $FD " kernel /boot/linux vga=$vga";
-					print $FD " loader=$bloader splash=silent";
+					print $FD " splash=silent";
 				}
 				print $FD " @failsafe";
 				print $FD $cmdline;
@@ -4583,17 +4573,17 @@ sub setupBootLoaderConfiguration {
 					print $FD " kernel (cd)/boot/xen.gz\n";
 					print $FD " module (cd)/boot/linux vga=$vga splash=silent";
 					print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
-					print $FD " cdinst=1 loader=$bloader";
+					print $FD " cdinst=1";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD " root (hd0,$boot_id)\n";
 					print $FD " kernel /boot/xen.gz.vmx\n";
 					print $FD " module /boot/linux.vmx vga=$vga";
-					print $FD " loader=$bloader splash=silent";
+					print $FD " splash=silent";
 				} else {
 					print $FD " root (hd0,$boot_id)\n";
 					print $FD " kernel /boot/xen.gz\n";
 					print $FD " module /boot/linux vga=$vga";
-					print $FD " loader=$bloader splash=silent";
+					print $FD " splash=silent";
 				}
 				print $FD " @failsafe";
 				print $FD $cmdline;
@@ -4694,17 +4684,17 @@ sub setupBootLoaderConfiguration {
 			if ($iso) {
 				print $FD "kernel linux\n";
 				print $FD "append initrd=initrd ";
-				print $FD "vga=$vga loader=$bloader splash=silent ";
+				print $FD "vga=$vga splash=silent ";
 				print $FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
 				print $FD "cdinst=1 kiwi_hybrid=1";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print $FD "kernel /boot/linux.vmx\n";
 				print $FD "append initrd=/boot/initrd.vmx ";
-				print $FD "vga=$vga loader=$bloader splash=silent";
+				print $FD "vga=$vga splash=silent";
 			} else {
 				print $FD "kernel /boot/linux\n";
 				print $FD "append initrd=/boot/initrd ";
-				print $FD "vga=$vga loader=$bloader splash=silent";
+				print $FD "vga=$vga splash=silent";
 			}
 		} else {
 			if ($iso) {
@@ -4744,17 +4734,17 @@ sub setupBootLoaderConfiguration {
 				if ($iso) {
 					print $FD "kernel linux\n";
 					print $FD "append initrd=initrd ";
-					print $FD "vga=$vga loader=$bloader splash=silent ";
+					print $FD "vga=$vga splash=silent ";
 					print $FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
 					print $FD "cdinst=1 kiwi_hybrid=1";
 				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "kernel /boot/linux.vmx\n";
 					print $FD "append initrd=/boot/initrd.vmx ";
-					print $FD "vga=$vga loader=$bloader splash=silent";
+					print $FD "vga=$vga splash=silent";
 				} else {
 					print $FD "kernel /boot/linux\n";
 					print $FD "append initrd=/boot/initrd ";
-					print $FD "vga=$vga loader=$bloader splash=silent";
+					print $FD "vga=$vga splash=silent";
 				}
 				print $FD " @failsafe";
 			} else {
@@ -4885,8 +4875,7 @@ sub setupBootLoaderConfiguration {
 			print $FD "\t"."target  = boot/zipl"."\n";
 			print $FD "\t"."ramdisk = boot/initrd,0x4000000"."\n";
 		}
-		print $FD "\t"."parameters = \"loader=$bloader";
-		print $FD " $cmdline\""."\n";
+		print $FD "\t"."parameters = \"$cmdline\""."\n";
 		#==========================================
 		# Failsafe boot
 		#------------------------------------------
@@ -4906,7 +4895,7 @@ sub setupBootLoaderConfiguration {
 				print $FD "\t"."target  = boot/zipl"."\n";
 				print $FD "\t"."ramdisk = boot/initrd,0x4000000"."\n";
 			}
-			print $FD "\t"."parameters = \"x11failsafe loader=$bloader";
+			print $FD "\t"."parameters = \"x11failsafe";
 			print $FD " $cmdline\""."\n";
 		}
 		$FD -> close();
@@ -4953,18 +4942,18 @@ sub setupBootLoaderConfiguration {
 				print $FD "\t"."label = $title\n";
 				print $FD "\t"."image  = /boot/linux\n";
 				print $FD "\t"."initrd = /boot/initrd\n";
-				print $FD "\t"."append = \"$cmdline loader=$bloader cdinst=1\"";
+				print $FD "\t"."append = \"$cmdline cdinst=1\"";
 				print $FD "\n";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print $FD "\t"."label = $title\n";
 				print $FD "\t"."image  = /boot/linux.vmx"."\n";
 				print $FD "\t"."initrd = /boot/initrd.vmx\n";
-				print $FD "\t"."append = \"$cmdline loader=$bloader\"\n";
+				print $FD "\t"."append = \"$cmdline\"\n";
 			} else {
 				print $FD "\t"."label = $title\n";
 				print $FD "\t"."image  = /boot/linux"."\n";
 				print $FD "\t"."initrd = /boot/initrd\n";
-				print $FD "\t"."append = \"$cmdline loader=$bloader\"\n";
+				print $FD "\t"."append = \"$cmdline\"\n";
 			}
 		} else {
 			$kiwi -> failed ();
@@ -5042,9 +5031,9 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return;
 		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-			print $FD "setenv bootargs loader=$bloader $cmdline \${append}\n";
+			print $FD "setenv bootargs $cmdline \${append}\n";
 		} else {
-			print $FD "setenv bootargs loader=$bloader $cmdline \${append}\n"
+			print $FD "setenv bootargs $cmdline \${append}\n"
 		}
 		$FD -> close();
 		$kiwi -> done();

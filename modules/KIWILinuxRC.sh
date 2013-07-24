@@ -1550,7 +1550,7 @@ function setupBootLoaderSyslinuxRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 			fi
-			echo -n " vga=$fbmode loader=$loader"          >> $conf
+			echo -n " vga=$fbmode"                         >> $conf
 			echo -n " splash=silent"                       >> $conf
 			echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
 			echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
@@ -1573,7 +1573,7 @@ function setupBootLoaderSyslinuxRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 			fi
-			echo -n " vga=$fbmode loader=$loader"          >> $conf
+			echo -n " vga=$fbmode"                         >> $conf
 			echo -n " splash=silent"                       >> $conf
 			echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
 			echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
@@ -1736,7 +1736,7 @@ function setupBootLoaderGrub2Recovery {
 	#======================================
 	# check for kernel options
 	#--------------------------------------
-	local cmdline="KIWI_RECOVERY=$recoid loader=grub2"
+	local cmdline="KIWI_RECOVERY=$recoid"
 	if [ ! -z "$KIWI_KERNEL_OPTIONS" ];then
 		cmdline="$cmdline $KIWI_KERNEL_OPTIONS"
 	fi
@@ -1991,7 +1991,6 @@ function setupBootLoaderS390 {
 		fi
 		echo -n " $KIWI_INITRD_PARAMS"  >> $conf
 		echo -n " $KIWI_KERNEL_OPTIONS" >> $conf
-		echo -n " loader=$loader"       >> $conf
 		echo " quiet showopts\""        >> $conf
 		#======================================
 		# create failsafe entry
@@ -2006,7 +2005,7 @@ function setupBootLoaderS390 {
 		fi
 		echo -n " $KIWI_INITRD_PARAMS"         >> $conf
 		echo -n " $KIWI_KERNEL_OPTIONS"        >> $conf
-		echo -n " loader=$loader x11failsafe"  >> $conf
+		echo -n " x11failsafe"                 >> $conf
 		echo " quiet showopts\""               >> $conf
 		count=$((count + 1))
 	done
@@ -2168,7 +2167,7 @@ function setupBootLoaderSyslinux {
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 				fi
-				echo -n " vga=$fbmode loader=$loader"          >> $conf
+				echo -n " vga=$fbmode"                         >> $conf
 				echo -n " splash=silent"                       >> $conf
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                >> $conf
@@ -2198,7 +2197,7 @@ function setupBootLoaderSyslinux {
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 				fi
-				echo -n " vga=$fbmode loader=$loader"          >> $conf
+				echo -n " vga=$fbmode"                         >> $conf
 				echo -n " splash=silent"                       >> $conf
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                >> $conf
@@ -9866,7 +9865,7 @@ function initialize {
 	if [ -f /.profile ];then
 		importFile < /.profile
 		if [ ! -z "$kiwi_bootloader" ];then
-			loader=$kiwi_bootloader
+			export loader=$kiwi_bootloader
 		fi
 	fi
 	#======================================
