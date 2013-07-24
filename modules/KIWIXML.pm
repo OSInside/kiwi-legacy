@@ -3695,17 +3695,14 @@ sub __genTypeHash {
 		#==========================================
 		# store <ec2config> child
 		#------------------------------------------
-		#$typeData{ec2config} = $this -> __createEC2Config($type);
 		my $ec2Config = $this -> __createEC2Config($type);
 		#==========================================
 		# store <machine> child
 		#------------------------------------------
-		#typeData{machine}   = $this -> __createVMachineConfig($type);
 		my $vmConfig = $this -> __createVMachineConfig($type);
 		#==========================================
 		# store <oemconfig> child
 		#------------------------------------------
-		#$typeData{oemconfig} = $this -> __createOEMConfig($type);
 		my $oemConfig = $this -> __createOEMConfig($type);
 		#==========================================
 		# store <size>...</size> text and attributes
@@ -3723,6 +3720,7 @@ sub __genTypeHash {
 		my $pxeConfig = $this -> __createPXEDeployConfig($type);
 		#==========================================
 		# store <configuration>, child of <pxeconfig>
+		#==========================================
 		my $pxeConfigData = $this -> __createPXEDeployConfigData($type);
 		if ($pxeConfigData && $pxeConfigData == -1) {
 			return -1;
@@ -3730,10 +3728,6 @@ sub __genTypeHash {
 		#==========================================
 		# store <split> child
 		#------------------------------------------
-		#$typeData{split} = $this -> __createSplitData($type);
-		#if ($typeData{split} && $typeData{split} == -1) {
-		#	return -1;
-		#}
 		my $splitData = $this -> __createSplitData($type);
 		if ($splitData && $splitData == -1) {
 			return -1;
@@ -3741,10 +3735,6 @@ sub __genTypeHash {
 		#==========================================
 		# store <systemdisk> child
 		#------------------------------------------
-		#$typeData{systemdisk} = $this -> __createSystemDiskData($type);
-		#if ($typeData{systemdisk} && $typeData{systemdisk} == -1) {
-		#	return -1;
-		#}
 		my $sysDisk = $this -> __createSystemDiskData($type);
 		if ($sysDisk && $sysDisk == -1) {
 			return -1;
@@ -3763,8 +3753,6 @@ sub __genTypeHash {
 			systemdisk => $sysDisk,
 			type       => $typeObj
 		);
-		#$types{$typeData{image}} = $typeObj;
-		#$types{$typeData{image}} = \%typeData;
 		$types{$typeData{image}} = \%curType;
 	}
 	$types{defaultType} = $defaultType;
