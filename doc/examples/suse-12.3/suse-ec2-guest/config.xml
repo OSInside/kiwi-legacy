@@ -32,12 +32,10 @@
 		<source path="opensuse://12.3/repo/non-oss"/>
 	</repository>
 	<packages type="image">
-		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
 		<package name="ifplugd"/>
 		<package name="kernel-ec2"/>
 		<package name="suse-ami-tools"/>
 		<package name="vim"/>
-		<package name="plymouth"/>
 		<package name="xen-tools-domU"/>
 		<package name="xen"/>
 		<package name="grub"/>
