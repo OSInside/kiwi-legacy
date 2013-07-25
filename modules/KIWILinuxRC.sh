@@ -9807,14 +9807,14 @@ function createOriginSnapshot {
 	if [ ! "$FSTYPE" = "btrfs" ];then
 		return
 	fi
-	if which btrfs &>/dev/null;then
-		btrfs subvolume snapshot / /origin
-	elif which btrfsctl &>/dev/null;then 
-		btrfsctl -s /origin /
-	else
+	if ! which btrfs &>/dev/null;then
 		echo "Can't find btrfs tools, creation of origin snapshot skipped !"
 		return
 	fi
+	for vol in $(btrfs subvolume list / | grep / | cut -f2 -d /);do
+		btrfs subvolume snapshot -r /$vol /origin_$vol
+	done
+	btrfs subvolume snapshot -r / /origin
 }
 #======================================
 # activateBootPartition
