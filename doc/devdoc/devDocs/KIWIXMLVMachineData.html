@@ -1,0 +1,588 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+<html>
+<head>
+<title>KIWIXMLVMachineData Info</title>
+</head>
+<body text="#000000" bgcolor="#E8E8FF" link="#3333FF" vlink="#663366" alink="#FF0000">
+<center><h1>KIWIXMLVMachineData Info</h1></center>
+<p>
+<hr>
+<a name="TOP"></a>
+<h2>Public methods</h2>
+<p>
+<ul>
+<li><a href="#createNICConfig">createNICConfig</a></li>
+<li><a href="#getArch">getArch</a></li>
+<li><a href="#getConfigEntries">getConfigEntries</a></li>
+<li><a href="#getDVDController">getDVDController</a></li>
+<li><a href="#getDVDID">getDVDID</a></li>
+<li><a href="#getDomain">getDomain</a></li>
+<li><a href="#getGuestOS">getGuestOS</a></li>
+<li><a href="#getHardwareVersion">getHardwareVersion</a></li>
+<li><a href="#getMaxCPUCnt">getMaxCPUCnt</a></li>
+<li><a href="#getMaxMemory">getMaxMemory</a></li>
+<li><a href="#getMemory">getMemory</a></li>
+<li><a href="#getMinCPUCnt">getMinCPUCnt</a></li>
+<li><a href="#getMinMemory">getMinMemory</a></li>
+<li><a href="#getNICDriver">getNICDriver</a></li>
+<li><a href="#getNICIDs">getNICIDs</a></li>
+<li><a href="#getNICInterface">getNICInterface</a></li>
+<li><a href="#getNICMAC">getNICMAC</a></li>
+<li><a href="#getNICMode">getNICMode</a></li>
+<li><a href="#getNumCPUs">getNumCPUs</a></li>
+<li><a href="#getOVFType">getOVFType</a></li>
+<li><a href="#getSystemDiskController">getSystemDiskController</a></li>
+<li><a href="#getSystemDiskDevice">getSystemDiskDevice</a></li>
+<li><a href="#getSystemDiskID">getSystemDiskID</a></li>
+<li><a href="#getSystemDiskType">getSystemDiskType</a></li>
+<li><a href="#getXMLElement">getXMLElement</a></li>
+<li><a href="#new">new</a></li>
+<li><a href="#setArch">setArch</a></li>
+<li><a href="#setConfigEntries">setConfigEntries</a></li>
+<li><a href="#setDVDController">setDVDController</a></li>
+<li><a href="#setDVDID">setDVDID</a></li>
+<li><a href="#setDomain">setDomain</a></li>
+<li><a href="#setGuestOS">setGuestOS</a></li>
+<li><a href="#setHardwareVersion">setHardwareVersion</a></li>
+<li><a href="#setMaxCPUCnt">setMaxCPUCnt</a></li>
+<li><a href="#setMaxMemory">setMaxMemory</a></li>
+<li><a href="#setMemory">setMemory</a></li>
+<li><a href="#setMinCPUCnt">setMinCPUCnt</a></li>
+<li><a href="#setMinMemory">setMinMemory</a></li>
+<li><a href="#setNICDriver">setNICDriver</a></li>
+<li><a href="#setNICInterface">setNICInterface</a></li>
+<li><a href="#setNICMAC">setNICMAC</a></li>
+<li><a href="#setNICMode">setNICMode</a></li>
+<li><a href="#setNumCPUs">setNumCPUs</a></li>
+<li><a href="#setOVFType">setOVFType</a></li>
+<li><a href="#setSystemDiskController">setSystemDiskController</a></li>
+<li><a href="#setSystemDiskDevice">setSystemDiskDevice</a></li>
+<li><a href="#setSystemDiskID">setSystemDiskID</a></li>
+<li><a href="#setSystemDiskType">setSystemDiskType</a></li>
+</ul>
+<h2>Private methods</h2>
+<p>
+<ul>
+<li><a href="#__addVMconfigXMLElements">__addVMconfigXMLElements</a></li>
+<li><a href="#__addVMdiskXMLElements">__addVMdiskXMLElements</a></li>
+<li><a href="#__addVMdvdXMLElements">__addVMdvdXMLElements</a></li>
+<li><a href="#__addVMnicXMLElements">__addVMnicXMLElements</a></li>
+<li><a href="#__areNICSettingsSupported">__areNICSettingsSupported</a></li>
+<li><a href="#__interfaceIsUnique">__interfaceIsUnique</a></li>
+<li><a href="#__isArchValid">__isArchValid</a></li>
+<li><a href="#__isDVDInitValid">__isDVDInitValid</a></li>
+<li><a href="#__isDiskInitValid">__isDiskInitValid</a></li>
+<li><a href="#__isInitConsistent">__isInitConsistent</a></li>
+<li><a href="#__isNICIDValid">__isNICIDValid</a></li>
+<li><a href="#__isNICInitValid">__isNICInitValid</a></li>
+<li><a href="#__isOVFTypeValid">__isOVFTypeValid</a></li>
+</ul>
+<hr>
+<a name="__addVMconfigXMLElements"><h2>__addVMconfigXMLElements</h2></a>
+<p>
+ Generate XML elements for vmconfig settings and add them to the
+ given parent.
+<p>
+Defined on line: 1134
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 553</li></ul>
+<a name="__addVMdiskXMLElements"><h2>__addVMdiskXMLElements</h2></a>
+<p>
+ Generate XML elements for vmdisk settings and add them to the
+ given parent.
+<p>
+Defined on line: 1156
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 554</li></ul>
+<a name="__addVMdvdXMLElements"><h2>__addVMdvdXMLElements</h2></a>
+<p>
+ Generate XML elements for vmdvd settings and add them to the
+ given parent.
+<p>
+Defined on line: 1189
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 555</li></ul>
+<a name="__addVMnicXMLElements"><h2>__addVMnicXMLElements</h2></a>
+<p>
+ Generate XML elements for vmnic settings and add them to the
+ given parent.
+<p>
+Defined on line: 1209
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 556</li></ul>
+<a name="__areNICSettingsSupported"><h2>__areNICSettingsSupported</h2></a>
+<p>
+ Verify that the hash has only supported settings
+<p>
+Defined on line: 1240
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 188</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1439</li></ul>
+<a name="__interfaceIsUnique"><h2>__interfaceIsUnique</h2></a>
+<p>
+ Verify that the interface given is unique
+<p>
+Defined on line: 1261
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 203</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 210</li></ul>
+<a name="__isArchValid"><h2>__isArchValid</h2></a>
+<p>
+ Check if the given architecture is a supported setting
+<p>
+Defined on line: 1299
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 577</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1472</li></ul>
+<a name="__isDVDInitValid"><h2>__isDVDInitValid</h2></a>
+<p>
+ Verify that the initialization hash given for the DVD configuration
+ setup is valid.
+<p>
+Defined on line: 1361
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1502</li></ul>
+<a name="__isDiskInitValid"><h2>__isDiskInitValid</h2></a>
+<p>
+ Verify that the initialization hash given for the disk configuration
+ setup is valid.
+<p>
+Defined on line: 1318
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1498</li></ul>
+<a name="__isInitConsistent"><h2>__isInitConsistent</h2></a>
+<p>
+ Verify that the initialization hash given to the constructor meets
+ all consistency and data criteria.
+<p>
+Defined on line: 1462
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 129</li></ul>
+<a name="__isNICIDValid"><h2>__isNICIDValid</h2></a>
+<p>
+ verify that the ID given for a NIC query is valid.
+<p>
+Defined on line: 1517
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 365</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 393</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 409</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 424</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 847</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 879</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 912</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 945</li></ul>
+<a name="__isNICInitValid"><h2>__isNICInitValid</h2></a>
+<p>
+ Verify that the initialization hash given for the NIC configuration
+ setup is valid.
+<p>
+Defined on line: 1407
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1507</li></ul>
+<a name="__isOVFTypeValid"><h2>__isOVFTypeValid</h2></a>
+<p>
+ Verify that the given OVF type is supported
+<p>
+Defined on line: 1549
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 997</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1481</li></ul>
+<a name="createNICConfig"><h2>createNICConfig</h2></a>
+<p>
+ Create a NIC configuration entry with the data provided and return
+ the ID of the new configuration to allow completion of the
+ config using the setNIC* methods.
+<p>
+Defined on line: 166
+<a name="getArch"><h2>getArch</h2></a>
+<p>
+ Return the machine architecture
+<p>
+Defined on line: 221
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 505</li></ul>
+<a name="getConfigEntries"><h2>getConfigEntries</h2></a>
+<p>
+ Return the configuration file entries for the VM
+<p>
+Defined on line: 232
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1064</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1141</li></ul>
+<a name="getDVDController"><h2>getDVDController</h2></a>
+<p>
+ Return the DVD controller setting
+<p>
+Defined on line: 243
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1040</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1392</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1196</li></ul>
+<a name="getDVDID"><h2>getDVDID</h2></a>
+<p>
+ Return the DVD ID setting
+<p>
+Defined on line: 257
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1041</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1200</li></ul>
+<a name="getDomain"><h2>getDomain</h2></a>
+<p>
+ Return the specified domain
+<p>
+Defined on line: 271
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 509</li></ul>
+<a name="getGuestOS"><h2>getGuestOS</h2></a>
+<p>
+ Return the setting for the guest OS
+<p>
+Defined on line: 282
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 985</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1137</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 514</li></ul>
+<a name="getHardwareVersion"><h2>getHardwareVersion</h2></a>
+<p>
+ Return the setting for the hardware version to emulate
+<p>
+Defined on line: 293
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 974</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1138</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 520</li></ul>
+<a name="getMaxCPUCnt"><h2>getMaxCPUCnt</h2></a>
+<p>
+ Return the setting for the maximum CPUs to use
+<p>
+Defined on line: 304
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1257</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 525</li></ul>
+<a name="getMaxMemory"><h2>getMaxMemory</h2></a>
+<p>
+ Return the setting for the maximum amount of memory to allocate
+<p>
+Defined on line: 315
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1301</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 529</li></ul>
+<a name="getMemory"><h2>getMemory</h2></a>
+<p>
+ Return the amount of memory to allocate
+<p>
+Defined on line: 326
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 977</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1303</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 533</li></ul>
+<a name="getMinCPUCnt"><h2>getMinCPUCnt</h2></a>
+<p>
+ Return the minimum number of CPUs to use
+<p>
+Defined on line: 337
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1258</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 537</li></ul>
+<a name="getMinMemory"><h2>getMinMemory</h2></a>
+<p>
+ Return the minimum memory to allocate for the virtual machine
+<p>
+Defined on line: 348
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1302</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 541</li></ul>
+<a name="getNICDriver"><h2>getNICDriver</h2></a>
+<p>
+ Return the driver for the NIC configured with the given ID
+<p>
+Defined on line: 359
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1024</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1464</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1220</li></ul>
+<a name="getNICIDs"><h2>getNICIDs</h2></a>
+<p>
+ Return an array ref of IDs for configured NICs
+<p>
+Defined on line: 374
+<p>
+Called in
+<ul>
+<li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 68</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1012</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1211</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 175</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1216</li></ul>
+<a name="getNICInterface"><h2>getNICInterface</h2></a>
+<p>
+ Return the interface specified for the NIC configured with the given ID
+<p>
+Defined on line: 387
+<p>
+Called in
+<ul>
+<li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 82</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1014</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1441</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1219</li></ul>
+<a name="getNICMAC"><h2>getNICMAC</h2></a>
+<p>
+ Return the MAC address specified for the NIC configured with
+ the given ID
+<p>
+Defined on line: 402
+<p>
+Called in
+<ul>
+<li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 78</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1017</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1442</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1224</li></ul>
+<a name="getNICMode"><h2>getNICMode</h2></a>
+<p>
+ Return the mode configured for the NIC with the given ID
+<p>
+Defined on line: 418
+<p>
+Called in
+<ul>
+<li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 71</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1028</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1219</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1454</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1228</li></ul>
+<a name="getNumCPUs"><h2>getNumCPUs</h2></a>
+<p>
+ Return the nominal number of CPUs configured
+<p>
+Defined on line: 433
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 981</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1259</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 545</li></ul>
+<a name="getOVFType"><h2>getOVFType</h2></a>
+<p>
+ Return the configured OVF format type
+<p>
+Defined on line: 444
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 268</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1123</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 549</li></ul>
+<a name="getSystemDiskController"><h2>getSystemDiskController</h2></a>
+<p>
+ Return the controller configured for the system disk
+<p>
+Defined on line: 455
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 950</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 1347</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1163</li></ul>
+<a name="getSystemDiskDevice"><h2>getSystemDiskDevice</h2></a>
+<p>
+ Return the configured device ID for the system disk
+<p>
+Defined on line: 466
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1164</li></ul>
+<a name="getSystemDiskID"><h2>getSystemDiskID</h2></a>
+<p>
+ Return the disk ID configured for the system disk
+<p>
+Defined on line: 477
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 990</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1166</li></ul>
+<a name="getSystemDiskType"><h2>getSystemDiskType</h2></a>
+<p>
+ Return the configured device type for the system disk
+<p>
+Defined on line: 488
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 316</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 782</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1165</li></ul>
+<a name="getXMLElement"><h2>getXMLElement</h2></a>
+<p>
+ Return an XML Element representing the object's data
+<p>
+Defined on line: 499
+<a name="new"><h2>new</h2></a>
+<p>
+ Create the KIWIXMLVMachineData object
+
+ Internal data structure
+
+ this = {
+    HWversion     = '',
+    arch          = '',
+    confEntries   = (),
+    domain        = '',
+    guestOS       = '',
+    maxCPUCnt     = '',
+    maxMemory     = '',
+    memory        = '',
+    minCPUCnt     = '',
+    minMemory     = '',
+    ncpus         = '',
+    ovftype       = ''
+    vmdisks = {
+        system = {
+            controller = '',
+            device     = '',
+            disktype 	= '',
+            id         = ''
+        }
+    }
+    vmdvd  = {
+        controller = '',
+        id         = ''
+    }
+    vmnics = {
+        ID[+] = {
+            driver    = '',
+            interface = '',
+            mac       = '',
+            mode      = ''
+        }
+    }
+ }
+
+ Having the disks as a two level hashref allows us to support
+ specification of storage images at a later point without having to
+ change the data structure or changing the arguments and return
+ values of the interface with minimal to no extra cost if we decide to
+ never support storage virtual disks.
+<p>
+Defined on line: 41
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3270</li></ul>
+<a name="setArch"><h2>setArch</h2></a>
+<p>
+ Set the architecture to be used for this VM
+<p>
+Defined on line: 563
+<a name="setConfigEntries"><h2>setConfigEntries</h2></a>
+<p>
+ Set the configuration file entries for the VM config
+<p>
+Defined on line: 591
+<a name="setDVDController"><h2>setDVDController</h2></a>
+<p>
+ Set the dvd controller for the VM
+<p>
+Defined on line: 619
+<a name="setDVDID"><h2>setDVDID</h2></a>
+<p>
+ Set the dvd ID for the VM
+<p>
+Defined on line: 645
+<a name="setDomain"><h2>setDomain</h2></a>
+<p>
+ Set the domain
+<p>
+Defined on line: 670
+<a name="setGuestOS"><h2>setGuestOS</h2></a>
+<p>
+ Set the name of the VM guest OS
+<p>
+Defined on line: 690
+<a name="setHardwareVersion"><h2>setHardwareVersion</h2></a>
+<p>
+ Set the harware version to emulate for this VM
+<p>
+Defined on line: 711
+<a name="setMaxCPUCnt"><h2>setMaxCPUCnt</h2></a>
+<p>
+ Set the maximum number of CPUs to allocate for this VM
+<p>
+Defined on line: 732
+<a name="setMaxMemory"><h2>setMaxMemory</h2></a>
+<p>
+ Set the maximum memory to allocate for this VM
+<p>
+Defined on line: 752
+<a name="setMemory"><h2>setMemory</h2></a>
+<p>
+ Set the nominal  memory to allocate for this VM
+<p>
+Defined on line: 772
+<a name="setMinCPUCnt"><h2>setMinCPUCnt</h2></a>
+<p>
+ Set the minimum number of CPUs to allocate for this VM
+<p>
+Defined on line: 792
+<a name="setMinMemory"><h2>setMinMemory</h2></a>
+<p>
+ Set the minimum memory to allocate for this VM
+<p>
+Defined on line: 812
+<a name="setNICDriver"><h2>setNICDriver</h2></a>
+<p>
+ Set the driver for the NIC configuration with the given ID
+<p>
+Defined on line: 832
+<a name="setNICInterface"><h2>setNICInterface</h2></a>
+<p>
+ Set the interface for the NIC configuration with the given ID
+<p>
+Defined on line: 864
+<a name="setNICMAC"><h2>setNICMAC</h2></a>
+<p>
+ Set the MAC for the NIC configuration with the given ID
+<p>
+Defined on line: 897
+<a name="setNICMode"><h2>setNICMode</h2></a>
+<p>
+ Set the Mode for the NIC configuration with the given ID
+<p>
+Defined on line: 930
+<a name="setNumCPUs"><h2>setNumCPUs</h2></a>
+<p>
+ Set the minimum memory to allocate for this VM
+<p>
+Defined on line: 963
+<a name="setOVFType"><h2>setOVFType</h2></a>
+<p>
+ Set the OVF type to be used to package and describe the VM image
+<p>
+Defined on line: 983
+<a name="setSystemDiskController"><h2>setSystemDiskController</h2></a>
+<p>
+ Set the controller to emulate for the system disk for this VM
+<p>
+Defined on line: 1011
+<a name="setSystemDiskDevice"><h2>setSystemDiskDevice</h2></a>
+<p>
+ Set the device to emulate for the system disk for this VM
+<p>
+Defined on line: 1041
+<a name="setSystemDiskID"><h2>setSystemDiskID</h2></a>
+<p>
+ Set the ID to emulate for the system disk for this VM
+<p>
+Defined on line: 1101
+<a name="setSystemDiskType"><h2>setSystemDiskType</h2></a>
+<p>
+ Set the type to emulate for the system disk for this VM
+<p>
+Defined on line: 1071

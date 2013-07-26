@@ -12,7 +12,10 @@ FIG=images/*.fig
 FOPCONFIG=etc/fop.xml
 NONET=--nonet
 
-all: revision html pdf man
+all: revision html pdf man devdoc
+
+devdoc:
+	${MAKE} -C ../devdoc all
 
 html:kiwi.html
 	mv kiwi.html ../
@@ -72,7 +75,7 @@ clean:
 
 check:
 	@echo "Checking for packages..."
-	rpm -q libxml2-2 libxslt-devel \
+	rpm -q libxml2-2 libxslt-devel graphviz-perl \
 		docbook_4 docbook-xsl-stylesheets \
 		xmlgraphics-fop xmlgraphics-batik dejavu-fonts sil-charis-fonts \
 		xmlgraphics-commons excalibur-avalon-framework

@@ -1,0 +1,836 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+<html>
+<head>
+<title>KIWIXMLTypeData Info</title>
+</head>
+<body text="#000000" bgcolor="#E8E8FF" link="#3333FF" vlink="#663366" alink="#FF0000">
+<center><h1>KIWIXMLTypeData Info</h1></center>
+<p>
+<hr>
+<a name="TOP"></a>
+<h2>Public methods</h2>
+<p>
+<ul>
+<li><a href="#getBootImageDescript">getBootImageDescript</a></li>
+<li><a href="#getBootImageFileSystem">getBootImageFileSystem</a></li>
+<li><a href="#getBootKernel">getBootKernel</a></li>
+<li><a href="#getBootLoader">getBootLoader</a></li>
+<li><a href="#getBootPartitionSize">getBootPartitionSize</a></li>
+<li><a href="#getBootProfile">getBootProfile</a></li>
+<li><a href="#getBootTimeout">getBootTimeout</a></li>
+<li><a href="#getCheckPrebuilt">getCheckPrebuilt</a></li>
+<li><a href="#getCompressed">getCompressed</a></li>
+<li><a href="#getContainerName">getContainerName</a></li>
+<li><a href="#getDevicePersistent">getDevicePersistent</a></li>
+<li><a href="#getEditBootConfig">getEditBootConfig</a></li>
+<li><a href="#getEditBootInstall">getEditBootInstall</a></li>
+<li><a href="#getFSMountOptions">getFSMountOptions</a></li>
+<li><a href="#getFSNoCheck">getFSNoCheck</a></li>
+<li><a href="#getFSReadOnly">getFSReadOnly</a></li>
+<li><a href="#getFSReadWrite">getFSReadWrite</a></li>
+<li><a href="#getFilesystem">getFilesystem</a></li>
+<li><a href="#getFirmwareType">getFirmwareType</a></li>
+<li><a href="#getFlags">getFlags</a></li>
+<li><a href="#getFormat">getFormat</a></li>
+<li><a href="#getHybrid">getHybrid</a></li>
+<li><a href="#getHybridPersistent">getHybridPersistent</a></li>
+<li><a href="#getInstallBoot">getInstallBoot</a></li>
+<li><a href="#getInstallFailsafe">getInstallFailsafe</a></li>
+<li><a href="#getInstallIso">getInstallIso</a></li>
+<li><a href="#getInstallPXE">getInstallPXE</a></li>
+<li><a href="#getInstallStick">getInstallStick</a></li>
+<li><a href="#getKernelCmdOpts">getKernelCmdOpts</a></li>
+<li><a href="#getLuksPass">getLuksPass</a></li>
+<li><a href="#getMDRaid">getMDRaid</a></li>
+<li><a href="#getPrimary">getPrimary</a></li>
+<li><a href="#getRAMOnly">getRAMOnly</a></li>
+<li><a href="#getSize">getSize</a></li>
+<li><a href="#getSizeUnit">getSizeUnit</a></li>
+<li><a href="#getTypeName">getTypeName</a></li>
+<li><a href="#getVGA">getVGA</a></li>
+<li><a href="#getVolID">getVolID</a></li>
+<li><a href="#getXMLElement">getXMLElement</a></li>
+<li><a href="#isSizeAdditive">isSizeAdditive</a></li>
+<li><a href="#new">new</a></li>
+<li><a href="#setBootImageDescript">setBootImageDescript</a></li>
+<li><a href="#setBootImageFileSystem">setBootImageFileSystem</a></li>
+<li><a href="#setBootKernel">setBootKernel</a></li>
+<li><a href="#setBootLoader">setBootLoader</a></li>
+<li><a href="#setBootPartitionSize">setBootPartitionSize</a></li>
+<li><a href="#setBootProfile">setBootProfile</a></li>
+<li><a href="#setBootTimeout">setBootTimeout</a></li>
+<li><a href="#setCheckPrebuilt">setCheckPrebuilt</a></li>
+<li><a href="#setCompressed">setCompressed</a></li>
+<li><a href="#setContainerName">setContainerName</a></li>
+<li><a href="#setDevicePersistent">setDevicePersistent</a></li>
+<li><a href="#setEditBootConfig">setEditBootConfig</a></li>
+<li><a href="#setEditBootInstall">setEditBootInstall</a></li>
+<li><a href="#setFSMountOptions">setFSMountOptions</a></li>
+<li><a href="#setFSNoCheck">setFSNoCheck</a></li>
+<li><a href="#setFSReadOnly">setFSReadOnly</a></li>
+<li><a href="#setFSReadWrite">setFSReadWrite</a></li>
+<li><a href="#setFilesystem">setFilesystem</a></li>
+<li><a href="#setFirmwareType">setFirmwareType</a></li>
+<li><a href="#setFlags">setFlags</a></li>
+<li><a href="#setFormat">setFormat</a></li>
+<li><a href="#setHybrid">setHybrid</a></li>
+<li><a href="#setHybridPersistent">setHybridPersistent</a></li>
+<li><a href="#setInstallBoot">setInstallBoot</a></li>
+<li><a href="#setInstallFailsafe">setInstallFailsafe</a></li>
+<li><a href="#setInstallIso">setInstallIso</a></li>
+<li><a href="#setInstallPXE">setInstallPXE</a></li>
+<li><a href="#setInstallStick">setInstallStick</a></li>
+<li><a href="#setKernelCmdOpts">setKernelCmdOpts</a></li>
+<li><a href="#setLuksPass">setLuksPass</a></li>
+<li><a href="#setMDRaid">setMDRaid</a></li>
+<li><a href="#setPrimary">setPrimary</a></li>
+<li><a href="#setRAMOnly">setRAMOnly</a></li>
+<li><a href="#setSize">setSize</a></li>
+<li><a href="#setSizeAdditive">setSizeAdditive</a></li>
+<li><a href="#setSizeUnit">setSizeUnit</a></li>
+<li><a href="#setTypeName">setTypeName</a></li>
+<li><a href="#setVGA">setVGA</a></li>
+<li><a href="#setVolID">setVolID</a></li>
+</ul>
+<h2>Private methods</h2>
+<p>
+<ul>
+<li><a href="#__isInitConsistent">__isInitConsistent</a></li>
+<li><a href="#__isValidBootFS">__isValidBootFS</a></li>
+<li><a href="#__isValidBootloader">__isValidBootloader</a></li>
+<li><a href="#__isValidDevPersist">__isValidDevPersist</a></li>
+<li><a href="#__isValidFilesystem">__isValidFilesystem</a></li>
+<li><a href="#__isValidFirmware">__isValidFirmware</a></li>
+<li><a href="#__isValidFlags">__isValidFlags</a></li>
+<li><a href="#__isValidFormat">__isValidFormat</a></li>
+<li><a href="#__isValidImage">__isValidImage</a></li>
+<li><a href="#__isValidInstBoot">__isValidInstBoot</a></li>
+<li><a href="#__isValidRaidType">__isValidRaidType</a></li>
+<li><a href="#__isValidSizeUnit">__isValidSizeUnit</a></li>
+</ul>
+<hr>
+<a name="__isInitConsistent"><h2>__isInitConsistent</h2></a>
+<p>
+ Verify that the initialization hash is valid
+<p>
+Defined on line: 1579
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 173</li></ul>
+<a name="__isValidBootFS"><h2>__isValidBootFS</h2></a>
+<p>
+ Verify that the given boot filesystem type is supported
+<p>
+Defined on line: 1677
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 880</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1603</li></ul>
+<a name="__isValidBootloader"><h2>__isValidBootloader</h2></a>
+<p>
+ Verify that the given bootloader is supported
+<p>
+Defined on line: 1717
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 917</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1597</li></ul>
+<a name="__isValidDevPersist"><h2>__isValidDevPersist</h2></a>
+<p>
+ Verify that the given device persistency setting is supported
+<p>
+Defined on line: 1758
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1058</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1609</li></ul>
+<a name="__isValidFilesystem"><h2>__isValidFilesystem</h2></a>
+<p>
+ Verify that the given filesystem is supported
+<p>
+Defined on line: 1795
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1116</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1202</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1218</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1615</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1639</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1645</li></ul>
+<a name="__isValidFirmware"><h2>__isValidFirmware</h2></a>
+<p>
+ Verify that the given firmware setting value is supported
+<p>
+Defined on line: 1832
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1379</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1621</li></ul>
+<a name="__isValidFlags"><h2>__isValidFlags</h2></a>
+<p>
+ Verify that the given flags value is supported
+<p>
+Defined on line: 1869
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1132</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1627</li></ul>
+<a name="__isValidFormat"><h2>__isValidFormat</h2></a>
+<p>
+ Verify that the given format value is supported
+<p>
+Defined on line: 1906
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1148</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1633</li></ul>
+<a name="__isValidImage"><h2>__isValidImage</h2></a>
+<p>
+ Verify that the given image type value is supported
+<p>
+Defined on line: 1943
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1523</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1650</li></ul>
+<a name="__isValidInstBoot"><h2>__isValidInstBoot</h2></a>
+<p>
+ Verify that the given installboot value is supported
+<p>
+Defined on line: 1997
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1269</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1654</li></ul>
+<a name="__isValidRaidType"><h2>__isValidRaidType</h2></a>
+<p>
+ Verify that the given raid type is supported
+<p>
+Defined on line: 2034
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1417</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1660</li></ul>
+<a name="__isValidSizeUnit"><h2>__isValidSizeUnit</h2></a>
+<p>
+ Verify that the given unit of measure for the size is a
+ recognized value
+<p>
+Defined on line: 2071
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1507</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1666</li></ul>
+<a name="getBootImageDescript"><h2>getBootImageDescript</h2></a>
+<p>
+ Return the configured boot image description
+<p>
+Defined on line: 235
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 173</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1767</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 392</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 407</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 686</li></ul>
+<a name="getBootImageFileSystem"><h2>getBootImageFileSystem</h2></a>
+<p>
+ Return the option configured for the boot filesystem
+<p>
+Defined on line: 246
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 690</li></ul>
+<a name="getBootKernel"><h2>getBootKernel</h2></a>
+<p>
+ Return the configured bootkernel
+<p>
+Defined on line: 257
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 694</li></ul>
+<a name="getBootLoader"><h2>getBootLoader</h2></a>
+<p>
+ Return the configured bootloader
+<p>
+Defined on line: 268
+<p>
+Called in
+<ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1019</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 699</li></ul>
+<a name="getBootPartitionSize"><h2>getBootPartitionSize</h2></a>
+<p>
+ Return the configured bootpartition size
+<p>
+Defined on line: 279
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 704</li></ul>
+<a name="getBootProfile"><h2>getBootProfile</h2></a>
+<p>
+ Return the configured bootprofile
+<p>
+Defined on line: 294
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 708</li></ul>
+<a name="getBootTimeout"><h2>getBootTimeout</h2></a>
+<p>
+ Return the configured boot timeout
+<p>
+Defined on line: 305
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 712</li></ul>
+<a name="getCheckPrebuilt"><h2>getCheckPrebuilt</h2></a>
+<p>
+ Return the configuration for the pre built boot image check
+<p>
+Defined on line: 316
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 204</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 716</li></ul>
+<a name="getCompressed"><h2>getCompressed</h2></a>
+<p>
+ Return the configuration for compressed image generation
+<p>
+Defined on line: 327
+<p>
+Called in
+<ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 3534</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 720</li></ul>
+<a name="getContainerName"><h2>getContainerName</h2></a>
+<p>
+ Return the configuration for the container name
+<p>
+Defined on line: 338
+<p>
+Called in
+<ul>
+<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 361</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 590</li><li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 99</li><li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 163</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 724</li></ul>
+<a name="getDevicePersistent"><h2>getDevicePersistent</h2></a>
+<p>
+ Return the configuration for the device persistency method
+<p>
+Defined on line: 350
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 728</li></ul>
+<a name="getEditBootConfig"><h2>getEditBootConfig</h2></a>
+<p>
+ Return the path to the script to modify the boot configuration
+<p>
+Defined on line: 361
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 732</li></ul>
+<a name="getEditBootInstall"><h2>getEditBootInstall</h2></a>
+<p>
+ Return the path to the script to modify the boot configuration
+<p>
+Defined on line: 372
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 736</li></ul>
+<a name="getFSMountOptions"><h2>getFSMountOptions</h2></a>
+<p>
+ Return the file system mount options
+<p>
+Defined on line: 427
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6535</li><li><a href="KIWIImage.html">KIWIImage</a> : 4657</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 758</li></ul>
+<a name="getFSNoCheck"><h2>getFSNoCheck</h2></a>
+<p>
+ Return the value for the fscheck flag
+<p>
+Defined on line: 438
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 762</li></ul>
+<a name="getFSReadOnly"><h2>getFSReadOnly</h2></a>
+<p>
+ Return the filesystem for read only access
+<p>
+Defined on line: 449
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1782</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 422</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 766</li></ul>
+<a name="getFSReadWrite"><h2>getFSReadWrite</h2></a>
+<p>
+ Return the filesystem for read write access
+<p>
+Defined on line: 460
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1783</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 423</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 770</li></ul>
+<a name="getFilesystem"><h2>getFilesystem</h2></a>
+<p>
+ Return the configured filesystem
+<p>
+Defined on line: 383
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 903</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1692</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 421</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 425</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 740</li></ul>
+<a name="getFirmwareType"><h2>getFirmwareType</h2></a>
+<p>
+ Return the configured firmware type
+<p>
+Defined on line: 394
+<p>
+Called in
+<ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1051</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 745</li></ul>
+<a name="getFlags"><h2>getFlags</h2></a>
+<p>
+ Return the configuration for the fags setting
+<p>
+Defined on line: 405
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1691</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 380</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 750</li></ul>
+<a name="getFormat"><h2>getFormat</h2></a>
+<p>
+ Return the format for the virtual image
+<p>
+Defined on line: 416
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1030</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 754</li></ul>
+<a name="getHybrid"><h2>getHybrid</h2></a>
+<p>
+ Return the flag value to indicate a hybrid image
+<p>
+Defined on line: 471
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 774</li></ul>
+<a name="getHybridPersistent"><h2>getHybridPersistent</h2></a>
+<p>
+ Return the flag value indicating whether or not persistent storage
+ is included in the hybrid image
+<p>
+Defined on line: 482
+<p>
+Called in
+<ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1020</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 778</li></ul>
+<a name="getInstallBoot"><h2>getInstallBoot</h2></a>
+<p>
+ Return the option configured for the initial boot selection
+<p>
+Defined on line: 494
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 782</li></ul>
+<a name="getInstallFailsafe"><h2>getInstallFailsafe</h2></a>
+<p>
+ Return the value indicating whether the boot menu should have a
+ failsfe entry or not
+<p>
+Defined on line: 505
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 791</li></ul>
+<a name="getInstallIso"><h2>getInstallIso</h2></a>
+<p>
+ Return the value indicating whether or not an ISO image should be
+ created as install media
+<p>
+Defined on line: 517
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1724</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1018</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 786</li></ul>
+<a name="getInstallPXE"><h2>getInstallPXE</h2></a>
+<p>
+ Return the value indicating whether or not all data required
+ for an oem PXE installation should be created as install set
+<p>
+Defined on line: 541
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 796</li></ul>
+<a name="getInstallStick"><h2>getInstallStick</h2></a>
+<p>
+ Return the value indicating whether or not an USB stick image
+ should be created for installation
+<p>
+Defined on line: 529
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1725</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 800</li></ul>
+<a name="getKernelCmdOpts"><h2>getKernelCmdOpts</h2></a>
+<p>
+ Return the configured kernel command line options
+<p>
+Defined on line: 553
+<p>
+Called in
+<ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 3619</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 804</li></ul>
+<a name="getLuksPass"><h2>getLuksPass</h2></a>
+<p>
+ Return the configured luks password for the filesystem encryption
+<p>
+Defined on line: 564
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 808</li></ul>
+<a name="getMDRaid"><h2>getMDRaid</h2></a>
+<p>
+ Return the software raid type
+<p>
+Defined on line: 575
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 812</li></ul>
+<a name="getPrimary"><h2>getPrimary</h2></a>
+<p>
+ Return the flag indicating if this type is marked default
+<p>
+Defined on line: 586
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 5033</li><li><a href="KIWIXML.html">KIWIXML</a> : 5061</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 817</li></ul>
+<a name="getRAMOnly"><h2>getRAMOnly</h2></a>
+<p>
+ Return the flag indicating whether overlay file system writes
+ take place in RAM only
+<p>
+Defined on line: 597
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 822</li></ul>
+<a name="getSize"><h2>getSize</h2></a>
+<p>
+ Return the systemsize for this type
+<p>
+Defined on line: 609
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 826</li></ul>
+<a name="getSizeUnit"><h2>getSizeUnit</h2></a>
+<p>
+ Return the systemsize for this type
+<p>
+Defined on line: 624
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 834</li></ul>
+<a name="getTypeName"><h2>getTypeName</h2></a>
+<p>
+ Return the image type
+<p>
+Defined on line: 635
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 383</li><li><a href="KIWIConfigWriterFactory.html">KIWIConfigWriterFactory</a> : 91</li><li><a href="KIWIImage.html">KIWIImage</a> : 3535</li><li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 319</li><li><a href="KIWIImageBuildFactory.html">KIWIImageBuildFactory</a> : 95</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 717</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1690</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 432</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 188</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 258</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 290</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 379</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 482</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 653</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 772</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1014</li><li><a href="KIWIXML.html">KIWIXML</a> : 3862</li><li><a href="KIWIXML.html">KIWIXML</a> : 5285</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 388</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 685</li></ul>
+<a name="getVGA"><h2>getVGA</h2></a>
+<p>
+ Return the vga settings for the kernel command line
+<p>
+Defined on line: 646
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 838</li></ul>
+<a name="getVolID"><h2>getVolID</h2></a>
+<p>
+ Return the volume ID for an ISO image
+<p>
+Defined on line: 657
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 842</li></ul>
+<a name="getXMLElement"><h2>getXMLElement</h2></a>
+<p>
+ Return an XML Element representing the object's data
+<p>
+Defined on line: 679
+<a name="isSizeAdditive"><h2>isSizeAdditive</h2></a>
+<p>
+ Return indication whether the size for this type is additive or not
+<p>
+Defined on line: 668
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 831</li></ul>
+<a name="new"><h2>new</h2></a>
+<p>
+ Create the KIWIXMLTypeData object
+
+ Internal data structure
+
+ this = {
+     boot                   = ''
+     bootfilesystem         = ''
+     bootkernel             = ''
+     bootloader             = ''
+     bootpartsize           = ''
+     bootprofile            = ''
+     boottimeout            = ''
+     checkprebuilt          = ''
+     compressed             = ''
+     devicepersistency      = ''
+     editbootconfig         = ''
+     editbootinstall        = ''
+     filesystem             = ''
+     firmware               = ''
+     flags                  = ''
+     format                 = ''
+     fsmountoptions         = ''
+     fsnocheck              = ''
+     fsreadonly             = ''
+     fsreadwrite            = ''
+     hybrid                 = ''
+     hybridpersistent       = ''
+     image                  = ''
+     installboot            = ''
+     installiso             = ''
+     installprovidefailsafe = ''
+     installpxe             = ''
+     installstick           = ''
+     kernelcmdline          = ''
+     luks                   = ''
+     mdraid                 = ''
+     primary                = ''
+     ramonly                = ''
+     size                   = ''
+     sizeadd                = ''
+     sizeunit               = ''
+     vga                    = ''
+     volid                  = ''
+ }
+<p>
+Defined on line: 45
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3745</li></ul>
+<a name="setBootImageDescript"><h2>setBootImageDescript</h2></a>
+<p>
+ Set the configuration for the boot image description
+<p>
+Defined on line: 853
+<a name="setBootImageFileSystem"><h2>setBootImageFileSystem</h2></a>
+<p>
+ Set the option configuration for the boot filesystem
+<p>
+Defined on line: 874
+<a name="setBootKernel"><h2>setBootKernel</h2></a>
+<p>
+ Set the configuration for the bootkernel
+<p>
+Defined on line: 890
+<a name="setBootLoader"><h2>setBootLoader</h2></a>
+<p>
+ Set the configuration for the  bootloader
+<p>
+Defined on line: 911
+<a name="setBootPartitionSize"><h2>setBootPartitionSize</h2></a>
+<p>
+ Set the configuration for the  bootpartition size
+<p>
+Defined on line: 927
+<a name="setBootProfile"><h2>setBootProfile</h2></a>
+<p>
+ Set the configuration for the bootprofile
+<p>
+Defined on line: 948
+<a name="setBootTimeout"><h2>setBootTimeout</h2></a>
+<p>
+ Set the configuration for the  boot timeout
+<p>
+Defined on line: 969
+<a name="setCheckPrebuilt"><h2>setCheckPrebuilt</h2></a>
+<p>
+ Set the configuration for the pre built boot image check
+<p>
+Defined on line: 990
+<a name="setCompressed"><h2>setCompressed</h2></a>
+<p>
+ Set the configuration for compressed image generation
+<p>
+Defined on line: 1007
+<a name="setContainerName"><h2>setContainerName</h2></a>
+<p>
+ Set the container name
+<p>
+Defined on line: 1024
+<a name="setDevicePersistent"><h2>setDevicePersistent</h2></a>
+<p>
+ Set the configuration for the device persistency method
+<p>
+Defined on line: 1052
+<a name="setEditBootConfig"><h2>setEditBootConfig</h2></a>
+<p>
+ Set the path to the script to modify the boot configuration
+<p>
+Defined on line: 1068
+<a name="setEditBootInstall"><h2>setEditBootInstall</h2></a>
+<p>
+ Set the path to the script to modify the boot configuration
+<p>
+Defined on line: 1089
+<a name="setFSMountOptions"><h2>setFSMountOptions</h2></a>
+<p>
+ Set the file system mount options
+<p>
+Defined on line: 1158
+<a name="setFSNoCheck"><h2>setFSNoCheck</h2></a>
+<p>
+ Set the value for the fscheck flag
+<p>
+Defined on line: 1179
+<a name="setFSReadOnly"><h2>setFSReadOnly</h2></a>
+<p>
+ Set the filesystem for read only access
+<p>
+Defined on line: 1196
+<a name="setFSReadWrite"><h2>setFSReadWrite</h2></a>
+<p>
+ Set the filesystem for read write access
+<p>
+Defined on line: 1212
+<a name="setFilesystem"><h2>setFilesystem</h2></a>
+<p>
+ Set the configuration for the  filesystem
+<p>
+Defined on line: 1110
+<a name="setFirmwareType"><h2>setFirmwareType</h2></a>
+<p>
+ Set the configuration for the firmware type
+<p>
+Defined on line: 1372
+<a name="setFlags"><h2>setFlags</h2></a>
+<p>
+ Set the configuration for the fags setting
+<p>
+Defined on line: 1126
+<a name="setFormat"><h2>setFormat</h2></a>
+<p>
+ Set the format for the virtual image
+<p>
+Defined on line: 1142
+<a name="setHybrid"><h2>setHybrid</h2></a>
+<p>
+ Set the flag value to indicate a hybrid image
+<p>
+Defined on line: 1228
+<a name="setHybridPersistent"><h2>setHybridPersistent</h2></a>
+<p>
+ Set the flag value indicating whether or not persistent storage
+ is included in the hybrid image
+<p>
+Defined on line: 1245
+<a name="setInstallBoot"><h2>setInstallBoot</h2></a>
+<p>
+ Set the option configuration for the  for the initial boot selection
+<p>
+Defined on line: 1263
+<a name="setInstallFailsafe"><h2>setInstallFailsafe</h2></a>
+<p>
+ Set the value indicating whether the boot menu should have a
+ failsfe entry or not
+<p>
+Defined on line: 1279
+<a name="setInstallIso"><h2>setInstallIso</h2></a>
+<p>
+ Set the value indicating whether or not an ISO image should be
+ created as install media
+<p>
+Defined on line: 1297
+<a name="setInstallPXE"><h2>setInstallPXE</h2></a>
+<p>
+ Set the value indicating whether or not PXE
+ data files should be created for installation
+<p>
+Defined on line: 1333
+<a name="setInstallStick"><h2>setInstallStick</h2></a>
+<p>
+ Set the value indicating whether or not an USB stick image
+ should be created for installation
+<p>
+Defined on line: 1315
+<a name="setKernelCmdOpts"><h2>setKernelCmdOpts</h2></a>
+<p>
+ Set the configuration for the  kernel command line options
+<p>
+Defined on line: 1351
+<a name="setLuksPass"><h2>setLuksPass</h2></a>
+<p>
+ Set the configuration for the luks password for the filesystem encryption
+<p>
+Defined on line: 1390
+<a name="setMDRaid"><h2>setMDRaid</h2></a>
+<p>
+ Set software raid type
+<p>
+Defined on line: 1411
+<a name="setPrimary"><h2>setPrimary</h2></a>
+<p>
+ Set the flag indicating if this type is marked default
+<p>
+Defined on line: 1427
+<a name="setRAMOnly"><h2>setRAMOnly</h2></a>
+<p>
+ Set the flag indicating whether overlay file system writes
+ take place in RAM only
+<p>
+Defined on line: 1444
+<a name="setSize"><h2>setSize</h2></a>
+<p>
+ Set the systemsize for this type
+<p>
+Defined on line: 1462
+<a name="setSizeAdditive"><h2>setSizeAdditive</h2></a>
+<p>
+ Set the flag indicating whether the size is additive or not
+<p>
+Defined on line: 1483
+<a name="setSizeUnit"><h2>setSizeUnit</h2></a>
+<p>
+ Set the systemsize unit of measure for this type
+<p>
+Defined on line: 1500
+<a name="setTypeName"><h2>setTypeName</h2></a>
+<p>
+ Set the image type
+<p>
+Defined on line: 1517
+<a name="setVGA"><h2>setVGA</h2></a>
+<p>
+ Set the vga settings for the kernel command line
+<p>
+Defined on line: 1534
+<a name="setVolID"><h2>setVolID</h2></a>
+<p>
+ Set the volume ID for an ISO image
+<p>
+Defined on line: 1555
