@@ -471,12 +471,6 @@ sub new {
 		return;
 	}
 	#==========================================
-	# Add default strip section if not defined
-	#------------------------------------------
-	if (! $this -> __addDefaultStripNode()) {
-		return;
-	}
-	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{usrdataNodeList}    = $usrdataNodeList;
@@ -4013,6 +4007,10 @@ sub __getProfsToModify {
 			}
 			push @profsToUse, $prof;
 		}
+		if (! @profsToUse) {
+			# Only the default profile is affected by change
+			@profsToUse = ('kiwi_default');
+		}
 	}
 	return @profsToUse;
 }
@@ -6229,6 +6227,39 @@ sub getImageConfig_legacy {
 		$result{kiwi_fixedpackbootincludes} = join(" ",@bincl);
 	}
 	#==========================================
+	# strip section data (tools,libs,delete)
+	#------------------------------------------
+	my $s_delref = $this -> getFilesToDelete();
+	if ($s_delref) {
+		my @s_del;
+		foreach my $stripdata (@{$s_delref}) {
+			push @s_del,$stripdata->getName();
+		}
+		if (@s_del) {
+			$result{kiwi_strip_delete} = join(" ",@s_del);
+		}
+	}
+	my $s_toolref = $this -> getToolsToKeep();
+	if ($s_toolref) {
+		my @s_tool;
+		foreach my $stripdata (@{$s_toolref}) {
+			push @s_tool,$stripdata->getName();
+		}
+		if (@s_tool) {
+			$result{kiwi_strip_tools} = join(" ",@s_tool);
+		}
+	}
+	my $s_libref  = $this -> getLibsToKeep();
+	if ($s_libref) {
+		my @s_lib;
+		foreach my $stripdata (@{$s_libref}) {
+			push @s_lib,$stripdata->getName();
+		}
+		if (@s_lib) {
+			$result{kiwi_strip_libs} = join(" ",@s_lib);
+		}
+	}
+	#==========================================
 	# preferences attributes and text elements
 	#------------------------------------------
 	my %type  = %{$this->getImageTypeAndAttributes_legacy()};
@@ -6238,24 +6269,12 @@ sub getImageConfig_legacy {
 	my $name  = $this -> getImageName();
 	my $dname = $this -> getImageDisplayName ($this);
 	my $lics  = $this -> getLicenseNames_legacy();
-	my @s_del = $this -> __getStripDelete_legacy();
-	my @s_tool= $this -> __getStripTools_legacy();
-	my @s_lib = $this -> __getStripLibs_legacy();
 	my @tstp  = $this -> getTestingList();
 	if ($lics) {
 		$result{kiwi_showlicense} = join(" ",@{$lics});
 	}
 	if (@delp) {
 		$result{kiwi_delete} = join(" ",@delp);
-	}
-	if (@s_del) {
-		$result{kiwi_strip_delete} = join(" ",@s_del);
-	}
-	if (@s_tool) {
-		$result{kiwi_strip_tools} = join(" ",@s_tool);
-	}
-	if (@s_lib) {
-		$result{kiwi_strip_libs} = join(" ",@s_lib);
 	}
 	if (@tstp) {
 		$result{kiwi_testing} = join(" ",@tstp);
@@ -8524,50 +8543,62 @@ sub writeXMLDescription_legacy {
 }
 
 #==========================================
-# Private helper methods
+# readDefaultStripNode
 #------------------------------------------
-#==========================================
-# __addStrip_legacy
-#------------------------------------------
-sub __addStrip_legacy {
+sub readDefaultStripNode {
 	# ...
-	# Add the given strip list and type to the xml description
-	# ----
-	my @list  = @_;
-	my $this  = shift @list;
-	my $type  = shift @list;
-	my $kiwi  = $this->{kiwi};
-	my @supportedTypes = qw /delete libs tools/;
-	if (! grep { /$type/ } @supportedTypes ) {
-		my $msg = "Specified strip section type '$type' not supported.";
-		$kiwi -> error ($msg);
-		$kiwi -> failed();
+	# read the default strip section data and return
+	# KIWIXMLStripData objects in a hash for each
+	# strip section type
+	# ---
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my %result;
+	#==========================================
+	# read in default strip section
+	#------------------------------------------
+	my $stripTree;
+	my $stripXML = XML::LibXML -> new();
+	eval {
+		$stripTree = $stripXML
+			-> parse_file ( $this->{gdata}->{KStrip} );
+	};
+	if ($@) {
+		my $evaldata=$@;
+		$kiwi -> error  (
+			"Problem reading strip file: $this->{gdata}->{KStrip}"
+		);
+		$kiwi -> failed ();
+		$kiwi -> error  ("$evaldata\n");
 		return;
 	}
-	my $image = $this->{imgnameNodeList} -> get_node(1);
-	my @stripNodes = $image -> getElementsByTagName ("strip");
-	my $stripSection;
-	for my $stripNode (@stripNodes) {
-		my $sectionType = $stripNode -> getAttribute ("type");
-		if ($type eq $sectionType) {
-			$stripSection = $stripNode;
-			last;
+	#==========================================
+	# append default sections
+	#------------------------------------------
+	my @defaultStrip = $stripTree
+		-> getElementsByTagName ("initrd") -> get_node (1)
+		-> getElementsByTagName ("strip");
+	foreach my $element (@defaultStrip) {
+		my $type = $element -> getAttribute("type");
+		my @list = ();
+		foreach my $node ($element -> getElementsByTagName ('file')) {
+			my $name = $node -> getAttribute('name');
+			my $arch = $node -> getAttribute('arch');
+			my %stripData = (
+				arch => $arch,
+				name => $name
+			);
+			my $stripObj = KIWIXMLStripData -> new(\%stripData);
+			push @list,$stripObj;
 		}
+		$result{$type} = \@list;
 	}
-	if (! $stripSection ) {
-		$stripSection = XML::LibXML::Element -> new ("strip");
-		$stripSection -> setAttribute("type",$type);
-		$image-> appendChild ($stripSection);
-	}
-	foreach my $name (@list) {
-		my $fileSection = XML::LibXML::Element -> new ("file");
-		$fileSection  -> setAttribute("name",$name);
-		$stripSection -> appendChild ($fileSection);
-	}
-	$this -> __updateXML_legacy();
-	return $this;
+	return %result;
 }
 
+#==========================================
+# Private helper methods
+#------------------------------------------
 #==========================================
 # __addVolume_legacy
 #------------------------------------------
@@ -8652,39 +8683,6 @@ sub __getInstSourceDUDPackList_legacy {
 		push @modules, $mod->getAttribute("name");
 	}
 	return @modules;
-}
-
-#==========================================
-# __getStripDelete_legacy
-#------------------------------------------
-sub __getStripDelete_legacy {
-	# ...
-	# return the type="delete" files from the strip section
-	# ---
-	my $this   = shift;
-	return $this -> __getStripFileList ("delete");
-}
-
-#==========================================
-# __getStripLibs_legacy
-#------------------------------------------
-sub __getStripLibs_legacy {
-	# ...
-	# return the type="libs" files from the strip section
-	# ---
-	my $this   = shift;
-	return $this -> __getStripFileList ("libs");
-}
-
-#==========================================
-# __getStripTools_legacy
-#------------------------------------------
-sub __getStripTools_legacy {
-	# ...
-	# return the type="tools" files from the strip section
-	# ---
-	my $this   = shift;
-	return $this -> __getStripFileList ("tools");
 }
 
 #==========================================
@@ -9071,7 +9069,6 @@ sub __updateDescriptionFromChangeSet_legacy {
 	my $this      = shift;
 	my $changeset = shift;
 	my $kiwi      = $this->{kiwi};
-	my $repositNodeList = $this->{repositNodeList};
 	my $packageNodeList = $this->{packageNodeList};
 	my $reqProfiles;
 	#==========================================
@@ -9098,15 +9095,7 @@ sub __updateDescriptionFromChangeSet_legacy {
 	#==========================================
 	# 3) merge/update strip
 	#------------------------------------------
-	if ($changeset->{strip}) {
-		foreach my $type (keys %{$changeset->{strip}}) {
-			$kiwi -> info ("Updating $type strip section:\n");
-			foreach my $item (@{$changeset->{strip}{$type}}) {
-				$kiwi -> info ("--> $item\n");
-			}
-			$this -> __addStrip_legacy ($type,@{$changeset->{strip}{$type}});
-		}
-	}
+	# Strip data is handled through the new data structure
 	#==========================================
 	# 4) merge/update packages
 	#------------------------------------------
@@ -9367,80 +9356,6 @@ sub __updateXML_legacy {
 #==========================================
 # Private helper methods
 #------------------------------------------
-sub __addDefaultStripNode {
-	# ...
-	# if no strip section is setup we add the default
-	# section(s) from KIWIConfig.txt
-	# ---
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $image  = $this->{imgnameNodeList} -> get_node(1);
-	my @snodes = $image -> getElementsByTagName ("strip");
-	my %attr   = %{$this->getImageTypeAndAttributes_legacy()};
-	my $haveDelete = 0;
-	my $haveTools  = 0;
-	my $haveLibs   = 0;
-	#==========================================
-	# check if type is boot image
-	#------------------------------------------
-	if ($attr{"type"} ne "cpio") {
-		return $this;
-	}
-	#==========================================
-	# check if there are strip nodes
-	#------------------------------------------
-	if (@snodes) {
-		foreach my $node (@snodes) {
-			my $type = $node -> getAttribute("type");
-			if ($type eq "delete") {
-				$haveDelete = 1;
-			} elsif ($type eq "tools") {
-				$haveTools = 1;
-			} elsif ($type eq "libs") {
-				$haveLibs = 1;
-			}
-		}
-	}
-	#==========================================
-	# read in default strip section
-	#------------------------------------------
-	my $stripTree;
-	my $stripXML = XML::LibXML -> new();
-	eval {
-		$stripTree = $stripXML
-			-> parse_file ( $this->{gdata}->{KStrip} );
-	};
-	if ($@) {
-		my $evaldata=$@;
-		$kiwi -> error  (
-			"Problem reading strip file: $this->{gdata}->{KStrip}"
-		);
-		$kiwi -> failed ();
-		$kiwi -> error  ("$evaldata\n");
-		return;
-	}
-	#==========================================
-	# append default sections
-	#------------------------------------------
-	my @defaultStrip = $stripTree
-		-> getElementsByTagName ("initrd") -> get_node (1)
-		-> getElementsByTagName ("strip");
-	foreach my $element (@defaultStrip) {
-		my $type = $element -> getAttribute("type");
-		if ((! $haveDelete) && ($type eq "delete")) {
-			$kiwi -> loginfo ("STRIP: Adding default delete section\n");
-			$image -> addChild ($element -> cloneNode (1));
-		} elsif ((! $haveLibs) && ($type eq "libs")) {
-			$kiwi -> loginfo ("STRIP: Adding default libs section\n");
-			$image -> addChild ($element -> cloneNode (1));
-		} elsif ((! $haveTools) && ($type eq "tools")) {
-			$kiwi -> loginfo ("STRIP: Adding default tools section\n");
-			$image -> addChild ($element -> cloneNode (1));
-		}
-	}
-	$this -> __updateXML_legacy();
-	return $this;
-}
 #==========================================
 # __addDefaultSplitNode
 #------------------------------------------
@@ -9637,39 +9552,6 @@ sub __addOptionsElement {
 	}
 	$this -> __updateXML_legacy();
 	return $this;
-}
-
-#==========================================
-# __getStripFileList
-#------------------------------------------
-sub __getStripFileList {
-	# ...
-	# return filelist from the strip section referencing $ftype
-	# ---
-	my $this   = shift;
-	my $ftype  = shift;
-	my $inode  = $this->{imgnameNodeList} -> get_node(1);
-	my @nodes  = $inode -> getElementsByTagName ("strip");
-	my @result = ();
-	my $tnode;
-	if (! @nodes) {
-		return @result;
-	}
-	foreach my $node (@nodes) {
-		my $type = $node -> getAttribute ("type");
-		if ($type eq $ftype) {
-			$tnode = $node; last
-		}
-	}
-	if (! $tnode) {
-		return @result;
-	}
-	my @fileNodeList = $tnode -> getElementsByTagName ("file");
-	foreach my $fileNode (@fileNodeList) {
-		my $name = $fileNode -> getAttribute ("name");
-		push @result, $name;
-	}
-	return @result;
 }
 
 #==========================================

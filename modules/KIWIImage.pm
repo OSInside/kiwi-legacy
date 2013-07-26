@@ -222,8 +222,6 @@ sub updateDescription {
 	my %changeset = ();
 	my @profiles;
 	my %repos;
-	my %strip;
-	my %strip_default;
 	my @bootstrap_plist;
 	my @image_plist;
 	my @bootstrap_alist;
@@ -309,42 +307,6 @@ sub updateDescription {
 		$changeset{"lvm"} = $src_type{lvm};
 		$changeset{"lvmparts"} = \%lvmparts;
 	}
-	#==========================================
-	# Store strip sections if any
-	#------------------------------------------
-	my $stripXML = XML::LibXML -> new();
-	my $stripTree = $stripXML -> parse_file ($this->{gdata}->{KStrip});
-	my @defaultStrip = $stripTree
-		-> getElementsByTagName ("initrd") -> get_node (1)
-		-> getElementsByTagName ("strip");
-	foreach my $element (@defaultStrip) {
-		my $type  = $element -> getAttribute("type");
-		my @files = $element -> getElementsByTagName ("file");
-		my @items = ();
-		foreach my $element (@files) {
-			my $name = $element -> getAttribute ("name");
-			push (@items,$name);
-		}
-		$strip_default{$type} = \@items;
-	}
-	@node = $src_xml->getStripNodeList_legacy() -> get_nodelist();
-	foreach my $element (@node) {
-		if (! $src_xml -> __requestedProfile ($element)) {
-			next;
-		}
-		my $type  = $element -> getAttribute ("type");
-		my @files = $element -> getElementsByTagName ("file");
-		my @items = ();
-		foreach my $element (@files) {
-			my $name = $element -> getAttribute ("name");
-			push (@items,$name);
-		}
-		if (($type eq "tools") || ($type eq "libs") || ($type eq "delete")) {
-			push (@items,@{$strip_default{$type}});
-		}
-		$strip{$type} = \@items;
-	}
-	$changeset{"strip"} = \%strip;
 	#==========================================
 	# Store boot included packages
 	#------------------------------------------
