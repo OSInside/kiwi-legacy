@@ -242,6 +242,9 @@ sub prepareBootImage {
 	#==========================================
 	# Inherit system XML data to the boot
 	#------------------------------------------
+	#==========================================
+	# merge/update repositories
+	#------------------------------------------
 	my $status = $bootXml -> discardReplacableRepos();
 	if (! $status) {
 		return;
@@ -251,6 +254,9 @@ sub prepareBootImage {
 	if (! $status) {
 		return;
 	}
+	#==========================================
+	# merge/update drivers
+	#------------------------------------------
 	my $drivers = $systemXML -> getDrivers();
 	if ($drivers) {
 		$status = $bootXml -> addDrivers($drivers, 'default');
@@ -258,6 +264,10 @@ sub prepareBootImage {
 			return;
 		}
 	}
+	# TODO: more to come
+	#==========================================
+	# update boot profiles
+	#------------------------------------------
 	$bootXml -> setBootProfiles (
 		$systemXML -> getBootProfile(),
 		$systemXML -> getBootKernel()
@@ -522,10 +532,9 @@ sub createBootImage {
 	#==========================================
 	# Inherit system XML data to the boot
 	#------------------------------------------
-	$xml -> setBootProfiles (
-		$systemXML -> getBootProfile(),
-		$systemXML -> getBootKernel()
-	);
+	#==========================================
+	# merge/update systemdisk
+	#------------------------------------------
 	my $systemdisk = $systemXML -> getSystemDiskConfig();
 	if ($systemdisk) {
 		my $lvmgroup = $systemdisk -> getVGName();
@@ -536,6 +545,14 @@ sub createBootImage {
 		$sdk -> setVGName ($lvmgroup);
 		$xml -> addSystemDisk ($sdk);
 	}
+	# TODO: more to come
+	#==========================================
+	# update boot profiles
+	#------------------------------------------
+	$xml -> setBootProfiles (
+		$systemXML -> getBootProfile(),
+		$systemXML -> getBootKernel()
+	);
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------

@@ -234,7 +234,6 @@ sub updateDescription {
 	my @image_fplistImage;
 	my @bootstrap_fplistDelete;
 	my @image_fplistDelete;
-	my @driverList;
 	my %fixedBootInclude;
 	my @node;
 	#==========================================
@@ -310,24 +309,6 @@ sub updateDescription {
 		$changeset{"lvm"} = $src_type{lvm};
 		$changeset{"lvmparts"} = \%lvmparts;
 	}
-	#==========================================
-	# Store repositories
-	#------------------------------------------
-	@node = $src_xml->getRepoNodeList_legacy() -> get_nodelist();
-	foreach my $element (@node) {
-		if (! $src_xml -> __requestedProfile ($element)) {
-			next;
-		}
-		my $type  = $element -> getAttribute("type");
-		my $alias = $element -> getAttribute("alias");
-		my $prio  = $element -> getAttribute("priority");
-		my $user  = $element -> getAttribute("username");
-		my $pwd   = $element -> getAttribute("password");
-		my $source= $element -> getElementsByTagName("source")
-			-> get_node(1) -> getAttribute ("path");
-		$repos{$source} = [$type,$alias,$prio,$user,$pwd];
-	}
-	$changeset{"repositories"} = \%repos;
 	#==========================================
 	# Store strip sections if any
 	#------------------------------------------
