@@ -58,6 +58,7 @@ my @kiwiModules = qw (
 	KIWIUtil.pm
 	KIWIXML.pm
 	KIWIXMLDataBase.pm
+	KIWIXMLDefStripData.pm
 	KIWIXMLDescriptionData.pm
 	KIWIXMLDriverData.pm
 	KIWIXMLEC2ConfigData.pm
@@ -102,6 +103,7 @@ my @kiwiModules = qw (
 	KTRuntimeChecker.t
 	KTTarArchiveBuilder.t
 	KTXML.t
+	KTXMLDefStripData.t
 	KTXMLDescriptionData.t
 	KTXMLDriverData.t
 	KTXMLEC2ConfigData.t
@@ -147,6 +149,7 @@ my @kiwiModules = qw (
 	kiwiRuntimeChecker.pm
 	kiwiTarArchiveBuilder.pm
 	kiwiXML.pm
+	kiwiXMLDefStripData.pm
 	kiwiXMLDescriptionData.pm
 	kiwiXMLDriverData.pm
 	kiwiXMLEC2ConfigData.pm
@@ -232,6 +235,7 @@ my @notClean1 = qw (
 	KIWIUtil.pm
 	KIWIXML.pm
 	KIWIXMLDataBase.pm
+	KIWIXMLDefStripData.pm
 	KIWIXMLDescriptionData.pm
 	KIWIXMLDriverData.pm
 	KIWIXMLEC2ConfigData.pm
@@ -276,6 +280,7 @@ my @notClean1 = qw (
 	KTRuntimeChecker.t
 	KTTarArchiveBuilder.t
 	KTXML.t
+	KTXMLDefStripData.t
 	KTXMLDescriptionData.t
 	KTXMLDriverData.t
 	KTXMLEC2ConfigData.t
@@ -321,6 +326,7 @@ my @notClean1 = qw (
 	kiwiRuntimeChecker.pm
 	kiwiTarArchiveBuilder.pm
 	kiwiXML.pm
+	kiwiXMLDefStripData.pm
 	kiwiXMLDescriptionData.pm
 	kiwiXMLDriverData.pm
 	kiwiXMLEC2ConfigData.pm
@@ -400,6 +406,7 @@ my @notClean2 = qw (
 	KIWIURL.pm
 	KIWIUtil.pm
 	KIWIXML.pm
+	KIWIXMLDefStripData.pm
 	KIWIXMLInfo.pm
 	KIWIXMLTypeData.pm
 	KIWIXMLValidator.pm

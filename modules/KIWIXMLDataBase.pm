@@ -56,6 +56,7 @@ sub new {
 		i486
 		i586
 		i686
+		ix86
 		ppc
 		ppc64
 		s390

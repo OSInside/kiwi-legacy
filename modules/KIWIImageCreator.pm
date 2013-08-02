@@ -36,6 +36,7 @@ use KIWIQX qw (qxx);
 use KIWIRoot;
 use KIWIRuntimeChecker;
 use KIWIXML;
+use KIWIXMLDefStripData;
 use KIWIXMLSystemdiskData;
 use KIWIXMLValidator;
 
@@ -186,17 +187,17 @@ sub prepareBootImage {
 	# Read boot image description
 	#------------------------------------------
 	$kiwi -> info ("--> Prepare boot image (initrd)...\n");
-	my $bootXml = KIWIXML -> new(
+	my $bootXML = KIWIXML -> new(
 		$configDir,undef,undef,$cmdL,$changeset
 	);
-	if (! $bootXml) {
+	if (! $bootXML) {
 		return;
 	}
 	#==========================================
 	# Store boot image name
 	#------------------------------------------
 	my $bootImageName = KIWIGlobals	-> instance()
-		-> generateBuildImageName ($bootXml);
+		-> generateBuildImageName ($bootXML);
 	$this->{bootImageName} = $bootImageName;
 	#==========================================
 	# Check for prebuild boot image
@@ -245,12 +246,12 @@ sub prepareBootImage {
 	#==========================================
 	# merge/update repositories
 	#------------------------------------------
-	my $status = $bootXml -> discardReplacableRepos();
+	my $status = $bootXML -> discardReplacableRepos();
 	if (! $status) {
 		return;
 	}
 	my $repos = $systemXML -> getRepositories();
-	$status = $bootXml -> addRepositories($repos, 'default');
+	$status = $bootXML -> addRepositories($repos, 'default');
 	if (! $status) {
 		return;
 	}
@@ -259,7 +260,7 @@ sub prepareBootImage {
 	#------------------------------------------
 	my $drivers = $systemXML -> getDrivers();
 	if ($drivers) {
-		$status = $bootXml -> addDrivers($drivers, 'default');
+		$status = $bootXML -> addDrivers($drivers, 'default');
 		if (! $status) {
 			return;
 		}
@@ -267,43 +268,25 @@ sub prepareBootImage {
 	#==========================================
 	# merge/update strip
 	#------------------------------------------
-	my %default = $systemXML -> readDefaultStripNode();
-	if ((%default) && ($default{delete})) {
-		$bootXml -> addFilesToDelete ($default{delete});
-	}
-	if ((%default) && ($default{tools})) {
-		$bootXml -> addToolsToKeep ($default{tools});
-	}
-	if ((%default) && ($default{libs})) {
-		$bootXml -> addLibsToKeep ($default{libs});
-	}
-	my $stripDelete = $systemXML -> getFilesToDelete();
-	if ($stripDelete) {
-		$bootXml -> addFilesToDelete ($stripDelete);
-	}
-	my $stripLibs = $systemXML -> getLibsToKeep();
-	if ($stripLibs) {
-		$bootXml -> addLibsToKeep ($stripLibs);
-	}
-	my $stripTools  = $systemXML -> getToolsToKeep();
-	if ($stripTools) {
-		$bootXml -> addToolsToKeep ($stripTools);
+	my $res = $this -> __addStripDataToBootXML($systemXML, $bootXML);
+	if (! $res) {
+		return;
 	}
 	# TODO: more to come
 	#==========================================
 	# update boot profiles
 	#------------------------------------------
-	$bootXml -> setBootProfiles (
+	$bootXML -> setBootProfiles (
 		$systemXML -> getBootProfile(),
 		$systemXML -> getBootKernel()
 	);
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------
-	$bootXml = $this -> __applyBaseXMLOverrides($bootXml);
+	$bootXML = $this -> __applyBaseXMLOverrides($bootXML);
 	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	return $this -> __prepareTree (
-		$bootXml,$configDir,$rootTgtDir,$systemTree
+		$bootXML,$configDir,$rootTgtDir,$systemTree
 	);
 }
 
@@ -549,10 +532,10 @@ sub createBootImage {
 	# Read boot image description
 	#------------------------------------------
 	$kiwi -> info ("--> Create boot image (initrd)...\n");
-	my $bootXml = KIWIXML -> new(
+	my $bootXML = KIWIXML -> new(
 		$configDir,"cpio",undef,$cmdL
 	);
-	if (! defined $bootXml) {
+	if (! defined $bootXML) {
 		return;
 	}
 	#==========================================
@@ -569,14 +552,14 @@ sub createBootImage {
 		}
 		my $sdk = KIWIXMLSystemdiskData -> new();
 		$sdk -> setVGName ($lvmgroup);
-		$bootXml -> addSystemDisk ($sdk);
+		$bootXML -> addSystemDisk ($sdk);
 	}
 	#==========================================
 	# merge/update drivers
 	#------------------------------------------
 	my $drivers = $systemXML -> getDrivers();
 	if ($drivers) {
-		$status = $bootXml -> addDrivers($drivers, 'default');
+		$status = $bootXML -> addDrivers($drivers, 'default');
 		if (! $status) {
 			return;
 		}
@@ -584,40 +567,22 @@ sub createBootImage {
 	#==========================================
 	# merge/update strip
 	#------------------------------------------
-	my %default = $systemXML -> readDefaultStripNode();
-	if ((%default) && ($default{delete})) {
-		$bootXml -> addFilesToDelete ($default{delete});
-	}
-	if ((%default) && ($default{tools})) {
-		$bootXml -> addToolsToKeep ($default{tools});
-	}
-	if ((%default) && ($default{libs})) {
-		$bootXml -> addLibsToKeep ($default{libs});
-	}
-	my $stripDelete = $systemXML -> getFilesToDelete();
-	if ($stripDelete) {
-		$bootXml -> addFilesToDelete ($stripDelete);
-	}
-	my $stripLibs = $systemXML -> getLibsToKeep();
-	if ($stripLibs) {
-		$bootXml -> addLibsToKeep ($stripLibs);
-	}
-	my $stripTools  = $systemXML -> getToolsToKeep();
-	if ($stripTools) {
-		$bootXml -> addToolsToKeep ($stripTools);
+	my $res = $this -> __addStripDataToBootXML($systemXML, $bootXML);
+	if (! $res) {
+		return;
 	}
 	# TODO: more to come
 	#==========================================
 	# update boot profiles
 	#------------------------------------------
-	$bootXml -> setBootProfiles (
+	$bootXML -> setBootProfiles (
 		$systemXML -> getBootProfile(),
 		$systemXML -> getBootKernel()
 	);
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------
-	$bootXml = $this -> __applyBaseXMLOverrides($bootXml);
+	$bootXML = $this -> __applyBaseXMLOverrides($bootXML);
 	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	#==========================================
 	# Create destdir if needed
@@ -632,7 +597,7 @@ sub createBootImage {
 	# Create KIWIImage object
 	#------------------------------------------
 	my $image = KIWIImage -> new(
-		$bootXml,$configDir,$destination,undef,
+		$bootXML,$configDir,$destination,undef,
 		"/base-system",$configDir,undef,$cmdL
 	);
 	if (! defined $image) {
@@ -645,12 +610,12 @@ sub createBootImage {
 	$kiwi -> info ("Updating boot image .profile environment");
 	my $tree = $image -> getImageTree();
 	my $configure = KIWIConfigure -> new(
-		$bootXml,$tree,$tree."/image",$destination
+		$bootXML,$tree,$tree."/image",$destination
 	);
 	if (! defined $configure) {
 		return;
 	}
-	my %config = $bootXml -> getImageConfig_legacy();
+	my %config = $bootXML -> getImageConfig_legacy();
 	my $PFD = FileHandle -> new();
 	if (! $PFD -> open (">$tree/.profile")) {
 		$kiwi -> failed ();
@@ -673,7 +638,7 @@ sub createBootImage {
 	if (! $status) {
 		return;
 	}
-	$status = $profile -> updateFromXML ($bootXml);
+	$status = $profile -> updateFromXML ($bootXML);
 	if (! $status) {
 		return;
 	}
@@ -1704,9 +1669,44 @@ sub DESTROY {
 # Private helper methods
 #------------------------------------------
 #==========================================
+# __addStripDataToBootXML
+#------------------------------------------
+sub __addStripDataToBootXML {
+	# ...
+	# Add default strip data and the strip data from the user to the
+	# boot image description.
+	# ---
+	my $this = shift;
+	my $systemXML = shift;
+	my $bootXML = shift;
+	my $defStrip = KIWIXMLDefStripData -> new();
+	# Add the default strip data
+	$bootXML -> addFilesToDelete($defStrip -> getFilesToDelete());
+	$bootXML -> addLibsToKeep($defStrip -> getLibsToKeep());
+	$bootXML -> addToolsToKeep($defStrip -> getToolsToKeep());
+	# Add the user defined strip data
+	my $stripDelete = $systemXML -> getFilesToDelete();
+	if ($stripDelete) {
+		$bootXML -> addFilesToDelete ($stripDelete);
+	}
+	my $stripLibs = $systemXML -> getLibsToKeep();
+	if ($stripLibs) {
+		$bootXML -> addLibsToKeep ($stripLibs);
+	}
+	my $stripTools  = $systemXML -> getToolsToKeep();
+	if ($stripTools) {
+		$bootXML -> addToolsToKeep ($stripTools);
+	}
+	return 1;
+}
+
+#==========================================
 # __checkType
 #------------------------------------------
 sub __checkType {
+	# ...
+	# Check the image type
+	# ---
 	my $this = shift;
 	my $xml  = shift;
 	my $root = shift;
