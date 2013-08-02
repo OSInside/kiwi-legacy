@@ -31,6 +31,7 @@ KTXMLProductPackageData.t
 KTXMLProfileData.t
 KTXMLRepositoryData.t
 KTXMLSplitData.t
+KTXMLStripData.t
 KTXMLSystemdiskData.t
 KTXMLTypeData.t
 KTXMLUserData.t

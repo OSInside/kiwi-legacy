@@ -8543,60 +8543,6 @@ sub writeXMLDescription_legacy {
 }
 
 #==========================================
-# readDefaultStripNode
-#------------------------------------------
-sub readDefaultStripNode {
-	# ...
-	# read the default strip section data and return
-	# KIWIXMLStripData objects in a hash for each
-	# strip section type
-	# ---
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my %result;
-	#==========================================
-	# read in default strip section
-	#------------------------------------------
-	my $stripTree;
-	my $stripXML = XML::LibXML -> new();
-	eval {
-		$stripTree = $stripXML
-			-> parse_file ( $this->{gdata}->{KStrip} );
-	};
-	if ($@) {
-		my $evaldata=$@;
-		$kiwi -> error  (
-			"Problem reading strip file: $this->{gdata}->{KStrip}"
-		);
-		$kiwi -> failed ();
-		$kiwi -> error  ("$evaldata\n");
-		return;
-	}
-	#==========================================
-	# append default sections
-	#------------------------------------------
-	my @defaultStrip = $stripTree
-		-> getElementsByTagName ("initrd") -> get_node (1)
-		-> getElementsByTagName ("strip");
-	foreach my $element (@defaultStrip) {
-		my $type = $element -> getAttribute("type");
-		my @list = ();
-		foreach my $node ($element -> getElementsByTagName ('file')) {
-			my $name = $node -> getAttribute('name');
-			my $arch = $node -> getAttribute('arch');
-			my %stripData = (
-				arch => $arch,
-				name => $name
-			);
-			my $stripObj = KIWIXMLStripData -> new(\%stripData);
-			push @list,$stripObj;
-		}
-		$result{$type} = \@list;
-	}
-	return %result;
-}
-
-#==========================================
 # Private helper methods
 #------------------------------------------
 #==========================================

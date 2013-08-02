@@ -875,7 +875,7 @@ sub test_addDriversNoArgs {
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('skipped', $state);
-	$this -> assert_null($res);
+	$this -> assert_not_null($res);
 	return;
 }
 
@@ -1165,7 +1165,7 @@ sub test_addFilesToDeleteNoArgs {
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('skipped', $state);
-	$this -> assert_null($res);
+	$this -> assert_not_null($res);
 	return;
 }
 
@@ -1502,7 +1502,7 @@ sub test_addLibsToKeepNoArgs {
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('skipped', $state);
-	$this -> assert_null($res);
+	$this -> assert_not_null($res);
 	return;
 }
 
@@ -3862,7 +3862,7 @@ sub test_addToolsToKeepNoArgs {
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('skipped', $state);
-	$this -> assert_null($res);
+	$this -> assert_not_null($res);
 	return;
 }
 
