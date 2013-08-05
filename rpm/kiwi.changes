@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Mon Aug  5 12:41:09 CEST 2013 - ms@suse.de
+
+- fixed getSingleInstSourceSatSolvable() in terms of pattern
+  handling. the function stores projectxml always with the
+  the suffix .gz which indicates a compressed version of the
+  file. But the patterns information file could also contain
+  a non compressed version of patterns.xml which is then
+  wrongly used as compressed file (bnc #822247)
+
+-------------------------------------------------------------------
 Mon Jul 22 10:20:44 CEST 2013 - ms@suse.de
 
 - fixed broken shell string comparison in KIWILinuxRC
