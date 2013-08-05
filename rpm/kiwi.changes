@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug  5 12:46:52 CEST 2013 - ms@suse.de
+
+- fixed creation of .packages and .verified meta data if a
+  relative path is used in the kiwi create call
+
+-------------------------------------------------------------------
 Mon Aug  5 12:41:09 CEST 2013 - ms@suse.de
 
 - fixed getSingleInstSourceSatSolvable() in terms of pattern
