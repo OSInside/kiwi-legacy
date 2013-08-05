@@ -814,8 +814,10 @@ sub main {
 		#------------------------------------------
 		if (-f "$tree/var/lib/rpm/Packages") {
 			my $query = '%{NAME}|%{VERSION}|%{RELEASE}|%{ARCH}|%{DISTURL}\n';
-			qxx ("rpm --root $tree -qa --qf \"$query\" > $Destination/$imgName.packages");
-			qxx ("rpm --root $tree -Va > $Destination/$imgName.verified");
+			my $path = File::Spec->rel2abs ($tree);
+			my $rpmc = "rpm --root $path";
+			qxx ("$rpmc -qa --qf \"$query\" > $Destination/$imgName.packages");
+			qxx ("$rpmc -Va > $Destination/$imgName.verified");
 		}
 		SWITCH: for ($attr{type}) {
 			/^ext2/     && do {
