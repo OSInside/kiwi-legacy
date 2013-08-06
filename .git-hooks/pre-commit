@@ -545,6 +545,10 @@ for my $path (@changedFiles) {
 		# File was renamed, but is still in the list delivered by git
 		next;
 	}
+	if ($path =~ /^tests/) {
+		next;
+	}
+	print STDOUT "Verify perl code in: $path\n";
 	my $result = system "env PERL5LIB=$pathEnv perl -wc $path";
 	if ($result != 0) {
 		push @failedToBuild, $path;
@@ -560,6 +564,7 @@ for my $path (@changedFiles) {
 
 my @criticLevelFiles = (\@notClean1, \@notClean2, \@notClean3, \@notClean4,
 						\@notClean5);
+
 
 # Verify the changed file against the strictest perlcritic level possible
 # for this file based on the known "goodness" level. Default is level 3, the
@@ -580,7 +585,7 @@ for my $path (@changedFiles) {
 			my $cmd = "perlcritic --quiet --severity $severity $path";
 			my $status = system $cmd;
 			if ($status) {
-				print STDOUT "Failed verification for: $path\n";
+				print {*STDERR} "Failed verification for: $path\n";
 				exit 1;
 			}
 			next VERIFY;
@@ -592,13 +597,14 @@ for my $path (@changedFiles) {
 		my $cmd = "perlcritic --quiet --severity $defSeverity $path";
 		my $status = system $cmd;
 		if ($status) {
-			print STDOUT "Failed verification for: $path\n";
+			print {*STDERR} "Failed verification for: $path\n";
 			exit 1;
 		}
 	}
 }
 
 # Run tests as needed
+print STDOUT "Trigger unit tests for changed files\n";
 my $cmd = './tests/runTests';
 for my $path (@changedFiles) {
 	chomp $path;
