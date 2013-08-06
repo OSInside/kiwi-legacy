@@ -946,26 +946,24 @@ function installBootLoaderGrub2 {
 				root = $(getDiskID $imageRootDevice)
 			EOF
 			#======================================
-			# copy elilo config file
-			#--------------------------------------
-			cp /etc/elilo.conf /boot/efi/EFI/BOOT
-			#======================================
 			# update sysconfig/bootloader
 			#--------------------------------------
 			sed -i -e s'@LOADER_TYPE.*@LOADER_TYPE="elilo"@' \
 				/etc/sysconfig/bootloader
 			#======================================
-			# update grub.cfg
+			# set up boot files and configurations
 			#--------------------------------------
-			sed -i -e s'@initrd.vmx@initrd@' -e s'@linux.vmx@vmlinuz@' \
-				$confPath_uefi
+			# create elilo.conf and grub.cfg and 
+			# copy boot files to /boot/efi
+			# ----
+			elilo -vv
 			#======================================
 			# write efi variable to NvRam
 			#--------------------------------------
 			# this is for the efi boot manager to show a better
 			# title for this system
 			# ----
-			elilo --refresh-EBM
+			elilo --refresh-EBM -vv
 			#======================================
 			# return early for elilo case
 			#--------------------------------------
