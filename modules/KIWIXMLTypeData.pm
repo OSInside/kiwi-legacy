@@ -86,6 +86,7 @@ sub new {
 	#     sizeadd                = ''
 	#     sizeunit               = ''
 	#     vga                    = ''
+	#     vhdfixedtag            = ''
 	#     volid                  = ''
 	# }
 	# ---
@@ -146,6 +147,7 @@ sub new {
 		sizeadd
 		sizeunit
 		vga
+		vhdfixedtag
 		volid
 	);
 	$this->{supportedKeywords} = \%keywords;
@@ -201,6 +203,7 @@ sub new {
 	$this->{sizeadd}                = $init->{sizeadd};
 	$this->{sizeunit}               = $init->{sizeunit};
 	$this->{vga}                    = $init->{vga};
+	$this->{vhdfixedtag}            = $init->{vhdfixedtag};
 	$this->{volid}                  = $init->{volid};
 	# Set default values
 	if (! $init->{bootloader} ) {
@@ -652,6 +655,17 @@ sub getVGA {
 }
 
 #==========================================
+# getVHDFixedTag
+#------------------------------------------
+sub getVHDFixedTag {
+	# ...
+	# Return the VHD fixed tag for a fixed-vhd formated image
+	# ---
+	my $this = shift;
+	return $this->{vhdfixedtag};
+}
+
+#==========================================
 # getVolID
 #------------------------------------------
 sub getVolID {
@@ -838,6 +852,10 @@ sub getXMLElement {
 	my $vga = $this -> getVGA();
 	if ($vga) {
 		$element -> setAttribute('vga', $vga);
+	}
+	my $vhdfixedtag = $this -> getVHDFixedTag();
+	if ($vhdfixedtag) {
+		$element -> setAttribute('vhdfixedtag',$vhdfixedtag);
 	}
 	my $volid = $this -> getVolID();
 	if ($volid) {
@@ -1546,6 +1564,27 @@ sub setVGA {
 		return;
 	}
 	$this->{vga} = $vga;
+	return $this;
+}
+
+#==========================================
+# setVHDFixedTag
+#------------------------------------------
+sub setVHDFixedTag {
+	# ...
+	# Set the VHD tag for a fixed-vhd formated image
+	# ---
+	my $this = shift;
+	my $guid = shift;
+	if (! $guid ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setVHDFixedTag: no tag given, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{vhdfixedtag} = $guid;
 	return $this;
 }
 
