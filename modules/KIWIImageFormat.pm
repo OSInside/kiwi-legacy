@@ -95,36 +95,43 @@ sub new {
 			return;
 		}
 	}
+	my $type = $xml  -> getImageType();
 	#==========================================
-	# check format
+	# get build type
 	#------------------------------------------
-	my $type = $xml -> getImageTypeAndAttributes_legacy();
-	if (! defined $format) {
-		if (($type) && ($type->{format})) {
-			$format = $type->{format};
-		}
+	my $imgtype = $type -> getTypeName();
+	#==========================================
+	# get format
+	#------------------------------------------
+	my $xmlformat = $type -> getFormat();
+	if ($xmlformat) {
+		$format = $xmlformat;
 	}
 	#==========================================
 	# check for guid in vhd-fixed format
 	#------------------------------------------
-	my $guid = $xml -> getImageType() -> getVHDFixedTag();
+	my $guid = $type -> getVHDFixedTag();
 	#==========================================
-	# Read some XML data
+	# get boot profile
 	#------------------------------------------
-	my %xenref = $xml -> getXenConfig_legacy();
+	my $bootp = $type -> getBootProfile();
+	#==========================================
+	# get machine domain
+	#------------------------------------------
+	my $domain = $xml -> getVMachineConfig -> getDomain();
 	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{cmdL}    = $cmdL;
-	$this->{xenref}  = \%xenref;
 	$this->{vmdata}  = $xml -> getVMachineConfig();
 	$this->{kiwi}    = $kiwi;
 	$this->{xml}     = $xml;
 	$this->{format}  = $format;
 	$this->{image}   = $image;
-	$this->{type}    = $type;
+	$this->{bootp}   = $bootp;
 	$this->{guid}    = $guid;
-	$this->{imgtype} = $type->{type};
+	$this->{domain}  = $domain;
+	$this->{imgtype} = $imgtype;
 	$this->{targetDevice} = $tdev;
 	return $this;
 }
@@ -208,12 +215,11 @@ sub createMachineConfiguration {
 	my $format = $this->{format};
 	my $imgtype= $this->{imgtype};
 	my $xml    = $this->{xml};
-	my %type   = %{$this->{type}};
 	my $xenref = $this->{xenref};
-	my %xenc   = %{$xenref};
-	my $xend   = "dom0";
-	if (defined $xenc{xen_domain}) {
-		$xend = $xenc{xen_domain};
+	my $bootp  = $this->{bootp};
+	my $xend   = $this->{domain};
+	if (! $xend) {
+		$xend = "dom0";
 	}
 	if ($imgtype eq "iso") {
 		$kiwi -> warning (
@@ -222,7 +228,7 @@ sub createMachineConfiguration {
 		$kiwi -> skipped ();
 		return;
 	}
-	if (($type{bootprofile}) && ($type{bootprofile} eq "xen")
+	if (($bootp) && ($bootp eq "xen")
 		&& ($xend eq "domU")) {
 		$kiwi -> info ("Starting $imgtype image machine configuration\n");
 		return $this -> createXENConfiguration();
@@ -788,8 +794,8 @@ sub createXENConfiguration {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
+	# FIXME
 	my $xenref = $this->{xenref};
-	my %type   = %{$this->{type}};
 	my $dest   = dirname  $this->{image};
 	my $base   = basename $this->{image};
 	my %xenconfig = %{$xenref};
