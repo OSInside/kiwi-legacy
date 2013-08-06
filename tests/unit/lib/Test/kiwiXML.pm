@@ -8250,37 +8250,6 @@ sub test_getVMachineConfigXen {
 }
 
 #==========================================
-# test_getXenConfig_legacy
-#------------------------------------------
-sub test_getXenConfig_legacy {
-	# ...
-	# Verify proper return of Xen  configuration data
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'xenConfigSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my %vmConfig = $xml -> getXenConfig_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	my @expectedOpts = qw / foo bar /;
-	$this -> assert_array_equal(\@expectedOpts, $vmConfig{xen_config});
-	$this -> assert_str_equals('/dev/xvda', $vmConfig{xen_diskdevice});
-	$this -> assert_str_equals('domU', $vmConfig{xen_domain});
-	$this -> assert_str_equals('128', $vmConfig{xen_memory});
-	$this -> assert_str_equals('3', $vmConfig{xen_ncpus});
-	$this -> assert_str_equals('00:0C:6E:AA:57:2F',$vmConfig{xen_bridge}{br0});
-	return;
-}
-
-#==========================================
 # test_ignoreRepositories
 #------------------------------------------
 sub test_ignoreRepositories {

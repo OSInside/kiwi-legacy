@@ -215,7 +215,6 @@ sub createMachineConfiguration {
 	my $format = $this->{format};
 	my $imgtype= $this->{imgtype};
 	my $xml    = $this->{xml};
-	my $xenref = $this->{xenref};
 	my $bootp  = $this->{bootp};
 	my $xend   = $this->{domain};
 	if (! $xend) {
@@ -794,11 +793,9 @@ sub createXENConfiguration {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
-	# FIXME
-	my $xenref = $this->{xenref};
+	my $vmc    = $xml -> getVMachineConfig();
 	my $dest   = dirname  $this->{image};
 	my $base   = basename $this->{image};
-	my %xenconfig = %{$xenref};
 	my $format;
 	my $file;
 	$kiwi -> info ("Creating image Xen configuration file...");
@@ -848,9 +845,9 @@ sub createXENConfiguration {
 	#==========================================
 	# check XML configuration data
 	#------------------------------------------
-	if ((! %xenconfig) || (! $xenconfig{xen_diskdevice})) {
+	if ((! $vmc ) || (! defined $vmc -> getSystemDiskID())) {
 		$kiwi -> skipped ();
-		if (! %xenconfig) {
+		if (! $vmc) {
 			$kiwi -> warning ("No machine section for this image type found");
 		} else {
 			$kiwi -> warning ("No disk device setup found in machine section");
@@ -871,11 +868,11 @@ sub createXENConfiguration {
 	#==========================================
 	# global setup
 	#------------------------------------------
-	my $device = $xenconfig{xen_diskdevice};
+	my $device = $vmc -> getSystemDiskDevice();
 	$device =~ s/\/dev\///;
 	my $part = $device."1";
-	my $memory = $xenconfig{xen_memory};
-	my $ncpus  = $xenconfig{xen_ncpus};
+	my $memory = $vmc -> getMemory();
+	my $ncpus  = $vmc -> getNumCPUs();
 	$image .= ".".$format;
 	print $XENFD '#  -*- mode: python; -*-'."\n";
 	print $XENFD "name=\"".$this->{xml}->getImageDisplayName()."\"\n";
@@ -894,9 +891,11 @@ sub createXENConfiguration {
 	# network setup
 	#------------------------------------------
 	my $vifcount = -1;
-	foreach my $bname (keys %{$xenconfig{xen_bridge}}) {
+	my @nIDs = @{$vmc -> getNICIDs()};
+	for my $nID (@nIDs) {
 		$vifcount++;
-		my $mac = $xenconfig{xen_bridge}{$bname};
+		my $mac   = $vmc -> getNICMAC ($nID);
+		my $bname = $vmc -> getNICInterface ($nID);
 		my $vif = '"bridge='.$bname.'"';
 		if ($bname eq "undef") {
 			$vif = '""';
@@ -920,9 +919,13 @@ sub createXENConfiguration {
 	# Process raw config options
 	#------------------------------------------
 	my @userOptSettings;
-	for my $configOpt (@{$xenconfig{xen_config}}) {
-		print $XENFD $configOpt . "\n";
-		push @userOptSettings, (split /=/, $configOpt)[0];
+	my $confEntries = $vmc -> getConfigEntries();
+	if ($confEntries) {
+		my @confEntries = @{$confEntries};
+		for my $configOpt (@confEntries) {
+			print $XENFD $configOpt . "\n";
+			push @userOptSettings, (split /=/, $configOpt)[0];
+		}
 	}
 	#==========================================
 	# xen virtual framebuffer

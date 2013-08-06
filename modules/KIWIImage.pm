@@ -219,6 +219,7 @@ sub updateDescription {
 	my $this      = shift;
 	my $src_xml   = shift;
 	my %src_type  = %{$src_xml->getImageTypeAndAttributes_legacy()};
+	my $domain    = $src_xml -> getVMachineConfig -> getDomain();
 	my %changeset = ();
 	my @profiles;
 	my %repos;
@@ -283,13 +284,6 @@ sub updateDescription {
 	#------------------------------------------
 	$changeset{"packagemanager"} = $src_xml->getPackageManager_legacy();
 	$changeset{"showlicense"}    = $src_xml->getLicenseNames_legacy();
-	my $domain;
-	my %xenc = $src_xml -> getXenConfig_legacy();
-	if (%xenc) {
-		if (defined $xenc{xen_domain} && $xenc{xen_domain} ne '') {
-			$domain = $xenc{xen_domain};
-		}
-	}
 	$changeset{"domain"}         = $domain;
 	$changeset{"displayname"}    = $src_xml->getImageDisplayName();
 	$changeset{"locale"}         = $src_xml->getLocale_legacy();
@@ -1298,15 +1292,12 @@ sub createImageVMX {
 	my $xml  = $this->{xml};
 	my $cmdL = $this->{cmdL};
 	my $idest= $cmdL->getImageIntermediateTargetDir();
-	my %xenc = $xml  -> getXenConfig_legacy();
 	my $name = $this -> createImageRootAndBoot ($para,"VMX");
-	my $xendomain;
+	my $xendomain = $xml -> getVMachineConfig -> getDomain();
 	if (! defined $name) {
 		return;
 	}
-	if (defined $xenc{xen_domain}) {
-		$xendomain = $xenc{xen_domain};
-	} else {
+	if (! $xendomain) {
 		$xendomain = "dom0";
 	}
 	#==========================================
@@ -2610,7 +2601,6 @@ sub createImageSplit {
 	my $baseSystem   = $this->{baseSystem};
 	my $sxml         = $this->{xml};
 	my $idest        = $cmdL->getImageIntermediateTargetDir();
-	my %xenc         = $sxml->getXenConfig_legacy();
 	my $fsopts       = $cmdL -> getFilesystemOptions();
 	my $inodesize    = $fsopts->[1];
 	my $FSTypeRW;
@@ -2640,9 +2630,8 @@ sub createImageSplit {
 	#==========================================
 	# check for xen domain setup
 	#------------------------------------------
-	if (defined $xenc{xen_domain}) {
-		$xendomain = $xenc{xen_domain};
-	} else {
+	$xendomain = $sxml -> getVMachineConfig -> getDomain();
+	if (! $xendomain) {
 		$xendomain = "dom0";
 	}
 	#==========================================
@@ -4293,7 +4282,7 @@ sub extractLinux {
 	my $dest      = shift;
 	my $kiwi      = $this->{kiwi};
 	my $xml       = $this->{xml};
-	my %xenc      = $xml->getXenConfig_legacy();
+	my $xendomain = $xml -> getVMachineConfig -> getDomain();
 	if ((-f "$imageTree/boot/vmlinux.gz")  ||
 		(-f "$imageTree/boot/vmlinuz.el5") ||
 		(-f "$imageTree/boot/vmlinux")     ||
@@ -4339,7 +4328,7 @@ sub extractLinux {
 		# /.../
 		# check for the Xen hypervisor and extract them as well
 		# ----
-		if ((defined $xenc{xen_domain}) && ($xenc{xen_domain} eq "dom0")) {
+		if ((defined $xendomain) && ($xendomain eq "dom0")) {
 			if (! -f "$imageTree/boot/xen.gz") {
 				$kiwi -> error  ("Xen dom0 requested but no hypervisor found");
 				$kiwi -> failed ();
