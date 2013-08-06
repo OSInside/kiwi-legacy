@@ -52,6 +52,11 @@
       <param name="pattern">\d+|\d+M|\d+G|all</param>
     </data>
   </define>
+  <define name="vhd-tag-type">
+    <data type="token">
+      <param name="pattern">[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}</param>
+    </data>
+  </define>
   <!--
     ==========================================
     start with image description
@@ -2328,6 +2333,12 @@ about the possible values can be found by calling
 hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt</a:documentation>
       </attribute>
     </define>
+    <define name="k.type.vhd-fixed-tag.attribute">
+      <attribute name="vhdfixedtag">
+        <a:documentation>Specifies the GUID in a fixed format VHD</a:documentation>
+        <ref name="vhd-tag-type"/>
+      </attribute>
+    </define>
     <define name="k.type.volid.attribute">
       <attribute name="volid">
         <a:documentation>for the iso type only:
@@ -2439,6 +2450,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.vga.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.vhd-fixed-tag.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.volid.attribute"/>

@@ -2972,6 +2972,7 @@ sub __genTypeHash {
 		'syncMBR',
 		'mdraid',
 		'vga',
+		'vhdfixedtag',
 		'volid'
 	);
 	#==========================================
@@ -8159,6 +8160,8 @@ sub __populateTypeInfo_legacy {
 				-> getAttribute("installpxe");
 			$record{vga}           = $node
 				-> getAttribute("vga");
+			$record{vhdfixedtag}   = $node
+				-> getAttribute("vhdfixedtag");
 			$record{bootloader}    = $node
 				-> getAttribute("bootloader");
 			$record{devicepersistency} = $node

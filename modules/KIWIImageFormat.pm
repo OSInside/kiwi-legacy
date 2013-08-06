@@ -105,6 +105,10 @@ sub new {
 		}
 	}
 	#==========================================
+	# check for guid in vhd-fixed format
+	#------------------------------------------
+	my $guid = $xml -> getImageType() -> getVHDFixedTag();
+	#==========================================
 	# Read some XML data
 	#------------------------------------------
 	my %xenref = $xml -> getXenConfig_legacy();
@@ -119,6 +123,7 @@ sub new {
 	$this->{format}  = $format;
 	$this->{image}   = $image;
 	$this->{type}    = $type;
+	$this->{guid}    = $guid;
 	$this->{imgtype} = $type->{type};
 	$this->{targetDevice} = $tdev;
 	return $this;
@@ -363,6 +368,7 @@ sub createVHDSubFormatFixed {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $source = $this->{image};
+	my $guid   = $this->{guid};
 	my $target = $source;
 	my $convert;
 	my $status;
@@ -379,6 +385,13 @@ sub createVHDSubFormatFixed {
 		return;
 	}
 	$kiwi -> done ();
+	if ($guid) {
+		$kiwi -> info ("Saving VHD disk Tag: $guid");
+		if (! $this -> writeVHDTag ($target,$guid)) {
+			return;
+		}
+		$kiwi -> done();
+	}
 	return $target;
 }
 
@@ -1533,6 +1546,155 @@ sub createOVFConfiguration {
 	}
 	$kiwi -> done();
 	return $ovf;
+}
+
+#==========================================
+# createNetGUID
+#------------------------------------------
+sub createNetGUID {
+	# /.../
+	# Convert a string in the expected format, into 16 bytes,
+	# emulating .Net's Guid constructor
+	# ----
+	my $this = shift;
+	my $id   = shift;
+	my $hx   = '[0-9a-f]';
+	if ($id !~ /^($hx{8})-($hx{4})-($hx{4})-($hx{4})-($hx{12})$/i) {
+		return;
+	}
+	my @parts = split (/-/,$id);
+	#==========================================
+	# pack into signed long 4 byte
+	#------------------------------------------
+	my $p1 = $parts[0];
+	$p1 = pack   'H*', $p1;
+	$p1 = unpack 'l>', $p1;
+	$p1 = pack   'l' , $p1;
+	#==========================================
+	# pack into unsigned short 2 byte
+	#------------------------------------------
+	my $p2 = $parts[1];
+	$p2 = pack   'H*', $p2;
+	$p2 = unpack 'S>', $p2;
+	$p2 = pack   'S' , $p2;
+	#==========================================
+	# pack into unsigned short 2 byte
+	#------------------------------------------
+	my $p3 = $parts[2];
+	$p3 = pack   'H*', $p3;
+	$p3 = unpack 'S>', $p3;
+	$p3 = pack   'S' , $p3;
+	#==========================================
+	# pack into hex string (high nybble first)
+	#------------------------------------------
+	my $p4 = $parts[3];
+	my $p5 = $parts[4];
+	$p4 = pack   'H*', $p4;
+	$p5 = pack   'H*', $p5;
+	#==========================================
+	# concat result and return
+	#------------------------------------------
+	my $guid = $p1.$p2.$p3.$p4.$p5;
+	return $guid;
+}
+
+#==========================================
+# writeVHDTag
+#------------------------------------------
+sub writeVHDTag {
+	# /.../
+	# Azure service uses a tag injected into the disk
+	# image to identify the OS. The tag is 512B long,
+	# starting with a GUID, and is placed at a 16K offset
+	# from the start of the disk image.
+	#
+	# +------------------------------+
+	# | jump       | GUID(16B)000... |
+	# +------------------------------|
+	# | 16K offset | TAG (512B)      |
+	# +------------+-----------------+
+	#
+	# Fixed-format VHD
+	# ----
+	my $this   = shift;
+	my $file   = shift;
+	my $tag    = shift;
+	my $kiwi   = $this->{kiwi};
+	my $guid   = $this->createNetGUID ($tag);
+	my $buffer = '';
+	my $null_fh;
+	my $done;
+	#==========================================
+	# check result of guid format
+	#------------------------------------------
+	if (! $guid) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("VHD Tag: failed to convert tag: $tag");
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# open target file
+	#------------------------------------------
+	my $FD = FileHandle -> new();
+	if (! $FD -> open("+<$file")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("VHD Tag: failed to open file: $file: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# read in an empty buffer
+	#------------------------------------------
+	if (! sysopen ($null_fh,"/dev/zero",O_RDONLY) ) {
+		$kiwi -> error  ("VHD Tag: Cannot open /dev/zero: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# seek to 16k offset and zero out 512 byte
+	#------------------------------------------
+	sysread ($null_fh,$buffer, 512); close ($null_fh);
+	seek $FD,16384,0;
+	$done = syswrite ($FD,$buffer);
+	if ((! $done) || ($done != 512)) {
+		$kiwi -> failed ();
+		if ($done) {
+			$kiwi -> error ("VHD Tag: only $done bytes cleaned");
+		} else {
+			$kiwi -> error ("VHD Tag: syswrite to $file failed: $!");
+		}
+		$kiwi -> failed ();
+		seek $FD,0,2;
+		$FD -> close();
+		return;
+	}
+	#==========================================
+	# seek back to 16k offset
+	#------------------------------------------
+	seek $FD,16384,0;
+	#==========================================
+	# write 16 bytes GUID
+	#------------------------------------------
+	$done = syswrite ($FD,$guid,16);
+	if ((! $done) || ($done != 16)) {
+		$kiwi -> failed ();
+		if ($done) {
+			$kiwi -> error ("VHD Tag: only $done bytes written");
+		} else {
+			$kiwi -> error ("VHD Tag: syswrite to $file failed: $!");
+		}
+		$kiwi -> failed ();
+		seek $FD,0,2;
+		$FD -> close();
+		return;
+	}
+	#==========================================
+	# seek end and close
+	#------------------------------------------
+	seek $FD,0,2;
+	$FD -> close();
+	return $this;
 }
 
 #==========================================
