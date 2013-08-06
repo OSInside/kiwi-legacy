@@ -88,11 +88,13 @@
 	</packages>
 	<packages type="image" profiles="xenFlavour">
 		<package name="kernel-xen" replaces="kernel-default"/>
+		<package name="kernel-xen" replaces="kernel-desktop"/>
 		<package name="xen-tools" arch="x86_64" replaces=""/>
 		<package name="xen" arch="x86_64" replaces=""/>
 	</packages>
 	<packages type="image" profiles="vmxFlavour">
 		<package name="kernel-default" replaces="kernel-xen"/>
+		<package name="kernel-default" replaces="kernel-desktop"/>
 		<package name="kernel-default" replaces="xen-tools"/>
 		<package name="kernel-default" replaces="xen"/>
 	</packages>
