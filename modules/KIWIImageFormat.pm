@@ -116,21 +116,20 @@ sub new {
 	#------------------------------------------
 	my $bootp = $type -> getBootProfile();
 	#==========================================
-	# get machine domain
+	# get machine configuration
 	#------------------------------------------
-	my $domain = $xml -> getVMachineConfig -> getDomain();
+	my $vconf = $xml -> getVMachineConfig();
 	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{cmdL}    = $cmdL;
-	$this->{vmdata}  = $xml -> getVMachineConfig();
+	$this->{vmdata}  = $vconf;
 	$this->{kiwi}    = $kiwi;
 	$this->{xml}     = $xml;
 	$this->{format}  = $format;
 	$this->{image}   = $image;
 	$this->{bootp}   = $bootp;
 	$this->{guid}    = $guid;
-	$this->{domain}  = $domain;
 	$this->{imgtype} = $imgtype;
 	$this->{targetDevice} = $tdev;
 	return $this;
@@ -216,7 +215,11 @@ sub createMachineConfiguration {
 	my $imgtype= $this->{imgtype};
 	my $xml    = $this->{xml};
 	my $bootp  = $this->{bootp};
-	my $xend   = $this->{domain};
+	my $vconf  = $this->{vmdata};
+	my $xend;
+	if ($vconf) {
+		$xend = $vconf -> getDomain();
+	}
 	if (! $xend) {
 		$xend = "dom0";
 	}

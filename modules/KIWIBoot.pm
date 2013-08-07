@@ -318,7 +318,10 @@ sub new {
 	# find Xen domain configuration
 	#------------------------------------------
 	if ($isxen && defined $xml) {
-		$xendomain = $xml -> getVMachineConfig -> getDomain();
+		my $vconf = $xml -> getVMachineConfig();
+		if ($vconf) {
+			$xendomain = $vconf -> getDomain();
+		}
 		if (! $xendomain) {
 			$xendomain = "dom0";
 		}

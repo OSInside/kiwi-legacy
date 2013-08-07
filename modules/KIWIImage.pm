@@ -219,7 +219,7 @@ sub updateDescription {
 	my $this      = shift;
 	my $src_xml   = shift;
 	my %src_type  = %{$src_xml->getImageTypeAndAttributes_legacy()};
-	my $domain    = $src_xml -> getVMachineConfig -> getDomain();
+	my $vconf     = $src_xml -> getVMachineConfig();
 	my %changeset = ();
 	my @profiles;
 	my %repos;
@@ -235,6 +235,13 @@ sub updateDescription {
 	my @image_fplistDelete;
 	my %fixedBootInclude;
 	my @node;
+	my $domain;
+	#==========================================
+	# Get domain
+	#------------------------------------------
+	if ($vconf) {
+		$domain = $vconf -> getDomain();
+	}
 	#==========================================
 	# Get architecture
 	#------------------------------------------
@@ -1293,7 +1300,11 @@ sub createImageVMX {
 	my $cmdL = $this->{cmdL};
 	my $idest= $cmdL->getImageIntermediateTargetDir();
 	my $name = $this -> createImageRootAndBoot ($para,"VMX");
-	my $xendomain = $xml -> getVMachineConfig -> getDomain();
+	my $vconf= $xml -> getVMachineConfig();
+	my $xendomain;
+	if ($vconf) {
+		$xendomain = $vconf -> getDomain();
+	}
 	if (! defined $name) {
 		return;
 	}
@@ -2630,7 +2641,10 @@ sub createImageSplit {
 	#==========================================
 	# check for xen domain setup
 	#------------------------------------------
-	$xendomain = $sxml -> getVMachineConfig -> getDomain();
+	my $vconf = $sxml -> getVMachineConfig();
+	if ($vconf) {
+		$xendomain = $vconf -> getDomain();
+	}
 	if (! $xendomain) {
 		$xendomain = "dom0";
 	}
@@ -4282,7 +4296,11 @@ sub extractLinux {
 	my $dest      = shift;
 	my $kiwi      = $this->{kiwi};
 	my $xml       = $this->{xml};
-	my $xendomain = $xml -> getVMachineConfig -> getDomain();
+	my $vconf     = $xml -> getVMachineConfig();
+	my $xendomain;
+	if ($vconf) {
+		$xendomain = $vconf -> getDomain();
+	}
 	if ((-f "$imageTree/boot/vmlinux.gz")  ||
 		(-f "$imageTree/boot/vmlinuz.el5") ||
 		(-f "$imageTree/boot/vmlinux")     ||
