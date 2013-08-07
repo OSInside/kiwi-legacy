@@ -6221,13 +6221,6 @@ sub getImageConfig_legacy {
 	my %result;
 	my @nodelist;
 	#==========================================
-	# bootincluded items (packs,archives)
-	#------------------------------------------
-	my @bincl = $this -> getBootIncludes_legacy();
-	if (@bincl) {
-		$result{kiwi_fixedpackbootincludes} = join(" ",@bincl);
-	}
-	#==========================================
 	# strip section data (tools,libs,delete)
 	#------------------------------------------
 	my $s_delref = $this -> getFilesToDelete();
@@ -8983,14 +8976,13 @@ sub __updateDescriptionFromChangeSet_legacy {
 	foreach my $section (("image","bootstrap")) {
 		if (@{$changeset->{$section."_fplistImage"}}) {
 			$kiwi -> info ("Updating package(s) [$section]:\n");
-			my $fixedBootInclude = $changeset->{fixedBootInclude};
 			my @fplistImage = @{$changeset->{$section."_fplistImage"}};
 			my @fplistDelete = @{$changeset->{$section."_fplistDelete"}};
 			foreach my $p (@fplistImage) {
 				$kiwi -> info ("--> $p\n");
 			}
 			$this -> addPackages_legacy (
-				$section,$fixedBootInclude,$packageNodeList,@fplistImage
+				$section,undef,$packageNodeList,@fplistImage
 			);
 			if (@fplistDelete) {
 				$this -> addPackages_legacy (

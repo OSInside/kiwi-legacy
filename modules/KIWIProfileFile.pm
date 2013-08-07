@@ -67,7 +67,6 @@ sub new {
 		kiwi_drivers
 		kiwi_firmware
 		kiwi_fsmountoptions
-		kiwi_fixedpackbootincludes
 		kiwi_hwclock
 		kiwi_hybrid
 		kiwi_hybridpersistent
@@ -186,7 +185,6 @@ sub updateFromXML {
 	# All list entries using a space as separator
 	my %listObjData = (
 		# kiwi_delete                => $xml -> getPackagesToDelete(),
-		# kiwi_fixedpackbootincludes => $xml -> getBootIncludePackages(),
 		# kiwi_strip_delete          => $xml -> getFilesToDelete(),
 		# kiwi_strip_tools           => $xml -> getToolsToKeep(),
 		# kiwi_strip_libs            => $xml -> getLibsToKeep(),

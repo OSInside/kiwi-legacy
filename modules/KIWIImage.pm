@@ -233,7 +233,6 @@ sub updateDescription {
 	my @image_fplistImage;
 	my @bootstrap_fplistDelete;
 	my @image_fplistDelete;
-	my %fixedBootInclude;
 	my @node;
 	my $domain;
 	#==========================================
@@ -331,38 +330,30 @@ sub updateDescription {
 		my $package = $element -> getAttribute ("name");
 		my $bootinc = $element -> getAttribute ("bootinclude");
 		my $bootdel = $element -> getAttribute ("bootdelete");
-		my $include = 0;
 		if (($archset) && ($archset ne $arch)) {
 			next;
 		}
 		if ((defined $bootinc) && ("$bootinc" eq "true")) {
 			push (@bootstrap_fplistImage,$package);
-			$include++;
 		}
 		if ((defined $bootdel) && ("$bootdel" eq "true")) {
 			push (@bootstrap_fplistDelete,$package);
-			$include--;
 		}
-		$fixedBootInclude{$package} = $include;
 	}
 	foreach my $element (@image_plist) {
 		my $archset = $element -> getAttribute ("arch");
 		my $package = $element -> getAttribute ("name");
 		my $bootinc = $element -> getAttribute ("bootinclude");
 		my $bootdel = $element -> getAttribute ("bootdelete");
-		my $include = 0;
 		if (($archset) && ($archset ne $arch)) {
 			next;
 		}
 		if ((defined $bootinc) && ("$bootinc" eq "true")) {
 			push (@image_fplistImage,$package);
-			$include++;
 		}
 		if ((defined $bootdel) && ("$bootdel" eq "true")) {
 			push (@image_fplistDelete,$package);
-			$include--;
 		}
-		$fixedBootInclude{$package} = $include;
 	}
 	foreach my $element (@bootstrap_alist) {
 		my $archset = $element -> getAttribute ("arch");
@@ -386,7 +377,6 @@ sub updateDescription {
 			push (@image_falistImage,$archive);
 		}
 	}
-	$changeset{"fixedBootInclude"}       = \%fixedBootInclude;
 	$changeset{"bootstrap_falistImage"}  = \@bootstrap_falistImage;
 	$changeset{"image_falistImage"}      = \@image_falistImage;
 	$changeset{"bootstrap_fplistImage"}  = \@bootstrap_fplistImage;
