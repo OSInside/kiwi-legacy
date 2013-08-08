@@ -1647,6 +1647,27 @@ sub test_getTypeName {
 }
 
 #==========================================
+# test_getVHDFixedTag
+#------------------------------------------
+sub test_getVHDFixedTag {
+	# ...
+	# Test the getVHDFixedTag method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $tag = $typeDataObj -> getVHDFixedTag();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('12345678', $tag);
+	return;
+}
+
+#==========================================
 # test_getVGA
 #------------------------------------------
 sub test_getVGA {
@@ -1790,6 +1811,7 @@ sub test_getXMLElement{
 		. 'primary="true" '
 		. 'ramonly="true" '
 		. 'vga="0x344" '
+		. 'vhdfixedtag="12345678" '
 		. 'volid="myImg">'
 		. '<size additive="true" unit="M">16384</size>'
 		. '</type>';
@@ -4827,6 +4849,66 @@ sub test_setVGANoArg {
 }
 
 #==========================================
+# test_setVHDFixedTag
+#------------------------------------------
+sub test_setVHDFixedTag {
+	# ...
+	# Test the setVHDFixedTag method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	$typeDataObj = $typeDataObj -> setVHDFixedTag('98765432');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_not_null($typeDataObj);
+	my $tag = $typeDataObj -> getVHDFixedTag();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('98765432', $tag);
+	return;
+}
+
+#==========================================
+# test_setVHDFixedTagNoArg
+#------------------------------------------
+sub test_setVHDFixedTagNoArg {
+	# ...
+	# Test the setVHDFixedTag method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $res = $typeDataObj -> setVHDFixedTag();
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'setVHDFixedTag: no tag given, '
+		. 'retaining current data.';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	$this -> assert_null($res);
+	my $tag = $typeDataObj -> getVHDFixedTag();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('12345678', $tag);
+	return;
+}
+
+#==========================================
 # test_setVolID
 #------------------------------------------
 sub test_setVolID {
@@ -4938,6 +5020,7 @@ sub __getTypeObj {
 				sizeadd                => 'true',
 				sizeunit               => 'M',
 				vga                    => '0x344',
+				vhdfixedtag            => '12345678',
 				volid                  => 'myImg'
 			);
 	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
