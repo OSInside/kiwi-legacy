@@ -208,7 +208,7 @@ sub test_getTree_noArg {
 	# Do not supply an argument
 	my $res = $info -> getXMLInfoTree();
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'No information requested, nothing todo.';
+	my $expectedMsg = 'No information requested';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);
@@ -346,7 +346,7 @@ sub test_printTree_noArg {
 	# Do not supply an argument
 	my $res = $info -> printXMLInfo();
 	my $msg = $kiwi -> getMessage();
-	my $expectedMsg = 'No information requested, nothing todo.';
+	my $expectedMsg = 'No information requested';
 	$this -> assert_str_equals($expectedMsg, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('error', $msgT);

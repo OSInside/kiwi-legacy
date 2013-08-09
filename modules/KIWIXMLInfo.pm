@@ -106,6 +106,62 @@ sub new {
 	if (! $this->{xml}) {
 		return;
 	}
+	$xml = $this->{xml};
+	#==========================================
+	# Store package names to be included
+	#------------------------------------------
+	my @items_install = ();
+	my @items_delete  = ();
+	my $bootstrapPacks = $xml -> getBootstrapPackages();
+	for my $package (@{$bootstrapPacks}) {
+		my $name = $package -> getName();
+		push @items_install, $name;
+	}
+	my $imagePackages = $xml -> getPackages();
+	for my $package (@{$imagePackages}) {
+		my $name = $package -> getName();
+		push @items_install, $name;
+	}
+	#==========================================
+	# Store pattern names
+	#------------------------------------------
+	my $imageCollection = $xml -> getPackageCollections();
+	for my $collection (@{$imageCollection}) {
+		my $name = $collection -> getName();
+		push @items_install, 'pattern:'.$name;
+	}
+	#==========================================
+	# Add package manager
+	#------------------------------------------
+	my $manager = $xml -> getPreferences() -> getPackageManager();
+	push @items_install, $manager;
+	#==========================================
+	# Store package names to be deleted later
+	#------------------------------------------
+	my $deletePacks = $xml -> getPackagesToDelete();
+	for my $package (@{$deletePacks}) {
+		my $name = $package -> getName();
+		push @items_delete, $name;
+	}
+	#==========================================
+	# Store URL list from repo setup/cmdline
+	#------------------------------------------
+	my @urllist = ();
+	my $repos = $xml -> getRepositories();
+	for my $repo (@{$repos}) {
+		my ($user, $pwd) = $repo -> getCredentials();
+		my $source = $repo -> getPath();
+		my $urlHandler  = KIWIURL -> new ($cmdL,undef,$user,$pwd);
+		my $publics_url = $urlHandler -> normalizePath ($source);
+		push (@urllist,$publics_url);
+	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{install} = \@items_install;
+	$this->{delete}  = \@items_delete;
+	$this->{manager} = $manager;
+	$this->{urllist} = \@urllist;
 	return $this;
 }
 
@@ -118,11 +174,11 @@ sub getXMLInfoTree {
 	# ---
 	my $this     = shift;
 	my $requests = shift;
-	my $infoRequests = $this -> __checkRequests($requests);
+	my $infoRequests = $this -> __checkRequests ($requests);
 	if (! $infoRequests) {
 		return;
 	}
-	return $this -> __getTree($infoRequests);
+	return $this -> __getTree ($infoRequests);
 }
 
 #==========================================
@@ -135,7 +191,7 @@ sub printXMLInfo {
 	my $this     = shift;
 	my $requests = shift;
 	my $kiwi = $this->{kiwi};
-	my $infoRequests = $this -> __checkRequests($requests);
+	my $infoRequests = $this -> __checkRequests ($requests);
 	if (! $infoRequests) {
 		return;
 	}
@@ -147,14 +203,16 @@ sub printXMLInfo {
 		return;
 	}
 	$this -> {kiwi} -> info ("Reading image description [ListXMLInfo]...\n");
-	my $infoTree = $this -> __getTree($infoRequests);
+	my $infoTree = $this -> __getTree ($infoRequests);
 	if (! $infoTree) {
 		return;
 	}
-	# Violates 3 argument open rule FIXME
-	open (my $F, "|xsltproc $this->{gdata}->{Pretty} - | cat > $outfile"); ## no critic
+	my $F = FileHandle -> new();
+	if (! $F -> open ("|xsltproc $this->{gdata}->{Pretty} - | cat > $outfile")) {
+		return;
+	}
 	print $F $infoTree -> toString();
-	close $F;
+	$F -> close();
 	system ("cat $outfile");
 	$kiwi -> info ("Requested information written to: $outfile\n");
 	return 1;
@@ -163,6 +221,328 @@ sub printXMLInfo {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __solve
+#------------------------------------------
+sub __solve {
+	# ...
+	# use the satsolver to solve the list of packages/patterns
+	# in order to allow size estimations and a complete information
+	# about the packages which will be installed later
+	# ---
+	my $this    = shift;
+	my $manager = $this->{manager};
+	my $items   = $this->{install};
+	my $urllist = $this->{urllist};
+	my $kiwi    = $this->{kiwi};
+	my %meta;
+	my @solp;
+	my $solf;
+	my @rpat;
+	my $psolve = KIWISatSolver -> new (
+		$items,$urllist,"solve-patterns"
+	);
+	if (! defined $psolve) {
+		$kiwi -> error ("SaT solver setup failed");
+		return;
+	}
+	if ($psolve -> getProblemsCount()) {
+		$kiwi -> error ("SaT solver problems found !\n");
+		return;
+	}
+	if (@{$psolve -> getFailedJobs()}) {
+		$kiwi -> error ("SaT solver failed jobs found !");
+		return;
+	}
+	%meta = $psolve -> getMetaData();
+	$solf = $psolve -> getSolfile();
+	@solp = $psolve -> getPackages();
+	@rpat = qxx (
+		"dumpsolv $solf|grep 'solvable:name: pattern:'|cut -f4 -d :"
+	);
+	chomp @rpat;
+	$this->{meta}    = \%meta;
+	$this->{solfile} = $solf;
+	$this->{solved}  = \@solp;
+	$this->{repopat} = \@rpat;
+	return $this;
+}
+
+#==========================================
+# __getPackages
+#------------------------------------------
+sub __getPackages {
+	# ...
+	# provide information about packages, returns
+	# a list of package names
+	# ---
+	my $this   = shift;
+	my @result = ();
+	if (! $this->{meta}) {
+		if (! $this -> __solve()) {
+			return;
+		}
+	}
+	my $meta = $this->{meta};
+	if (! $meta) {
+		return;
+	}
+	if (! keys %{$meta}) {
+		return;
+	}
+	foreach my $package (sort keys %{$meta}) {
+		if ($package =~ /pattern:.*/) {
+			next;
+		}
+		my @data = split (/:/,$meta->{$package});
+		push @data,$package;
+		push @result,\@data;
+	}
+	return @result;
+}
+
+#==========================================
+# __getPatterns
+#------------------------------------------
+sub __getPatterns {
+	# ...
+	# provide information about patterns used in the
+	# XML configuration, returns a list of pattern names
+	# ---
+	my $this   = shift;
+	my @result = ();
+	if (! $this->{meta}) {
+		if (! $this -> __solve()) {
+			return;
+		}
+	}
+	my $meta = $this->{meta};
+	if (! $meta) {
+		return;
+	}
+	if (! keys %{$meta}) {
+		return;
+	}
+	foreach my $package (sort keys %{$meta}) {
+		if ($package =~ /pattern:(.*)/) {
+			my $name = $1;
+			push @result,$name;
+		}
+	}
+	if ((scalar @result) == 0) {
+		return;
+	}
+	return @result;
+}
+
+#==========================================
+# __getProfiles
+#------------------------------------------
+sub __getProfiles {
+	# ...
+	# provide information about profiles, returns
+	# a list with KIWIXMLProfileData objects
+	# ---
+	my $this  = shift;
+	my $xml   = $this->{xml};
+	my @result= @{$xml -> getProfiles()};
+	if ((scalar @result) == 0) {
+		return;
+	}
+	return @result;
+}
+
+#==========================================
+# __getRepoPatterns
+#------------------------------------------
+sub __getRepoPatterns {
+	# ...
+	# provide information about the patterns provided
+	# by the configured repositories. returns a list
+	# of pattern names
+	# ---
+	my $this   = shift;
+	my @result = ();
+	if (! $this->{repopat}) {
+		if (! $this -> __solve()) {
+			return;
+		}
+	}
+	my $repopatterns = $this->{repopat};
+	if (! $repopatterns) {
+		return;
+	}
+	foreach my $pattern (@{$repopatterns}) {
+		next if ($pattern eq "\n");
+		$pattern =~ s/^\s+//;
+		$pattern =~ s/\s+$//;
+		push @result,$pattern;
+	}
+	return @result;
+}
+
+#==========================================
+# __getOverlayFiles
+#------------------------------------------
+sub __getOverlayFiles {
+	# ...
+	# provide information about overlay files
+	# returns a hash with the file as key and the path
+	# as hash value
+	# ---
+	my $this  = shift;
+	my %result= ();
+	my $generateWanted = sub  {
+		my $filehash = shift;
+		my $basedir  = shift;
+		return sub {
+			my $file = $File::Find::name;
+			if (! -d $file) {
+				$file =~ s/$basedir//;
+				$file = "[root/]$file";
+				$filehash->{$file} = $basedir;
+			}
+		};
+	};
+	if (! -d $this->{configDir}."/root") {
+		return;
+	} else {
+		my $wref = &$generateWanted (
+			\%result,$this->{configDir}."/root/"
+		);
+		my $rdir = $this->{configDir}."/root";
+		find({ wanted => $wref, follow => 0 }, $rdir);
+	}
+	return %result;
+}
+
+#==========================================
+# __getArchives
+#------------------------------------------
+sub __getArchives {
+	# ...
+	# provide information about configured archives
+	# returns a list with KIWIXMLArchiveData objects
+	# ---
+	my $this = shift;
+	my $xml  = $this->{xml};
+	my @result = @{$xml -> getArchives()};
+	if ((scalar @result) == 0) {
+		return;
+	}
+	return @result;
+}
+
+#==========================================
+# __getSizeEstimation
+#------------------------------------------
+sub __getSizeEstimation {
+	# ...
+	# provide information about the overall size the later
+	# image will have. This is just an estimation because
+	# with the custom script and other hook-in mechanism
+	# it's not possible to forecast the end size exactly.
+	# returns a list with two elements:
+	# rootsizeKB,deletionsizeKB
+	# ---
+	my $this   = shift;
+	my @result = ();
+	if (! $this->{meta}) {
+		if (! $this -> __solve()) {
+			return;
+		}
+	}
+	my $meta   = $this->{meta};
+	my $delete = $this->{delete};
+	if (! $meta) {
+		return;
+	}
+	my $size = 0;
+	my %meta = %{$meta};
+	foreach my $p (keys %meta) {
+		my @metalist = split (/:/,$meta{$p});
+		$size += $metalist[0];
+	}
+	# store root size in KB as first element
+	push @result,$size;
+	$size = 0;
+	if ($delete) {
+		foreach my $del (@{$delete}) {
+			if ($meta{$del}) {
+				my @metalist = split (/:/,$meta{$del});
+				$size += $metalist[0];
+			}
+		}
+	}
+	if ($size > 0) {
+		# store deletion size in KB as second element
+		push @result,$size;
+	}
+	return @result;
+}
+
+#==========================================
+# __getRepoURI
+#------------------------------------------
+sub __getRepoURI {
+	# ...
+	# provide information about the configured repos
+	# returns a list with KIWIXMLRepositories objects
+	# ---
+	my $this  = shift;
+	my $xml   = $this->{xml};
+	my @result= @{$xml -> getRepositories()};
+	if ((scalar @result) == 0) {
+		return;
+	}
+	return @result;
+}
+
+#==========================================
+# __getImageTypes
+#------------------------------------------
+sub __getImageTypes {
+	# ...
+	# provide information about the configured image types
+	# returns a list of KIWIXMLTypeData objects. default or
+	# primary built type is the first item in the list
+	# ---
+	my $this   = shift;
+	my $xml    = $this->{xml};
+	my @result = ();
+	my $tData  = $xml -> getImageType();
+	if (! $tData) {
+		return;
+	}
+	my $defTypeName = $tData -> getTypeName();
+	push @result,$tData;
+	my @tNames = @{$xml -> getConfiguredTypeNames()};
+	@tNames = sort @tNames;
+	for my $tName (@tNames) {
+		if ($tName eq $defTypeName) {
+			next;
+		}
+		$tData = $xml -> getType ($tName);
+		push @result,$tData;
+	}
+	return @result;
+}
+
+#==========================================
+# __getImageVersion
+#------------------------------------------
+sub __getImageVersion {
+	# ...
+	# provide information about the image version
+	# returns a list with two items: name,version
+	# ---
+	my $this = shift;
+	my $xml  = $this->{xml};
+	my $version = $xml -> getPreferences() -> getVersion();
+	my $appname = $xml -> getImageName();
+	return ($version,$appname);
+}
+
 #==========================================
 # __checkRequests
 #------------------------------------------
@@ -174,7 +554,7 @@ sub __checkRequests {
 	my $requests = shift;
 	my $kiwi = $this -> {kiwi};
 	if (! $requests) {
-		my $msg = 'No information requested, nothing todo.';
+		my $msg = 'No information requested';
 		$kiwi -> error ($msg);
 		$kiwi -> failed ();
 		return;
@@ -292,35 +672,14 @@ sub __getTree {
 			# overlay-files
 			#------------------------------------------
 			/^overlay-files/ && do {
-				my %result;
-				$generateWanted = sub  {
-					my $filehash = shift;
-					my $basedir  = shift;
-					return sub {
-						my $file = $File::Find::name;
-						if (! -d $file) {
-							$file =~ s/$basedir//;
-							$file = "[root/]$file";
-							$filehash->{$file} = $basedir;
-						}
-					};
-				};
-				if (! -d $this->{configDir}."/root") {
-					$kiwi -> info ("No overlay root directory present\n");
+				my %result = $this -> __getOverlayFiles();
+				if (! %result) {
+					$kiwi -> info ("No overlay files found\n");
 				} else {
-					my $wref = &$generateWanted (
-						\%result,$this->{configDir}."/root/"
-					);
-					my $rdir = $this->{configDir}."/root";
-					find({ wanted => $wref, follow => 0 }, $rdir);
-					if (! %result) {
-						$kiwi -> info ("No overlay files found\n");
-					} else {
-						foreach my $file (sort keys %result) {
-							my $overlay = XML::LibXML::Element->new("overlay");
-							$overlay -> setAttribute ("file","$file");
-							$scan -> appendChild ($overlay);
-						}
+					foreach my $file (sort keys %result) {
+						my $overlay = XML::LibXML::Element->new("overlay");
+						$overlay -> setAttribute ("file","$file");
+						$scan -> appendChild ($overlay);
 					}
 				}
 				last SWITCH;
@@ -329,22 +688,11 @@ sub __getTree {
 			# repo-patterns
 			#------------------------------------------
 			/^repo-patterns/ && do {
-				if (! $meta) {
-					($meta,$delete,$solfile,$satlist,$solp,$rpat) =
-						$xml->getInstallSize_legacy();
-					if (! $meta) {
-						$kiwi -> failed();
-						$this -> __cleanMountPnts($mountDirs);
-						return;
-					}
-				}
-				if (! $rpat) {
+				my @rpat = $this -> __getRepoPatterns();
+				if (! @rpat) {
 					$kiwi -> info ("No patterns in repo solvable\n");
 				} else {
-					foreach my $p (@{$rpat}) {
-						next if ($p eq "\n");
-						$p =~ s/^\s+//;
-						$p =~ s/\s+$//;
+					foreach my $p (@rpat) {
 						my $pattern = XML::LibXML::Element->new("repopattern");
 						$pattern -> setAttribute ("name","$p");
 						$scan -> appendChild ($pattern);
@@ -356,25 +704,14 @@ sub __getTree {
 			# patterns
 			#------------------------------------------
 			/^patterns/      && do {
-				if (! $meta) {
-					($meta,$delete,$solfile,$satlist,$solp) =
-						$xml->getInstallSize_legacy();
-					if (! $meta) {
-						$kiwi -> failed();
-						$this -> __cleanMountPnts($mountDirs);
-						return;
-					}
-				}
-				if (! keys %{$meta}) {
+				my @patterns = $this -> __getPatterns();
+				if (! @patterns) {
 					$kiwi -> info ("No packages/patterns solved\n");
 				} else {
-					foreach my $p (sort keys %{$meta}) {
-						if ($p =~ /pattern:(.*)/) {
-							my $name = $1;
-							my $pattern = XML::LibXML::Element->new("pattern");
-							$pattern -> setAttribute ("name","$name");
-							$scan -> appendChild ($pattern);
-						}
+					foreach my $name (@patterns) {
+						my $pattern = XML::LibXML::Element->new("pattern");
+						$pattern -> setAttribute ("name",$name);
+						$scan -> appendChild ($pattern);
 					}
 				}
 				last SWITCH;
@@ -383,32 +720,32 @@ sub __getTree {
 			# types
 			#------------------------------------------
 			/^types/         && do {
-				# output default or primary built type first
-				my $tData = $xml -> getImageType();
-				my $defTypeName = $tData -> getTypeName();
-				my $type = XML::LibXML::Element -> new('type');
-				$type -> setAttribute('name', $defTypeName);
-				$type -> setAttribute('primary', 'true');
-				my $bootLoc = $tData -> getBootImageDescript();
-				if ($bootLoc) {
-					$type -> setAttribute('boot', $bootLoc);
-				}
-				$scan -> appendChild($type);
-				# Handle any remaining types in alpha order
-				my @tNames = @{$xml -> getConfiguredTypeNames()};
-				@tNames = sort @tNames;
-				for my $tName (@tNames) {
-					if ($tName eq $defTypeName) {
-						next;
-					}
-					$tData = $xml -> getType($tName);
-					$type = XML::LibXML::Element -> new('type');
-					$type -> setAttribute('name', $tName);
+				my @tNames = $this -> __getImageTypes();
+				if (! @tNames) {
+					$kiwi -> info ("No image type(s) configured\n");
+				} else {
+					# output default or primary built type first
+					my $tData = shift @tNames;
+					my $defTypeName = $tData -> getTypeName();
+					my $type = XML::LibXML::Element -> new('type');
+					$type -> setAttribute('name', $defTypeName);
+					$type -> setAttribute('primary', 'true');
 					my $bootLoc = $tData -> getBootImageDescript();
 					if ($bootLoc) {
 						$type -> setAttribute('boot', $bootLoc);
 					}
 					$scan -> appendChild($type);
+					# Handle any remaining types in alpha order
+					for my $tData (@tNames) {
+						my $tName = $tData -> getTypeName();
+						$type = XML::LibXML::Element -> new('type');
+						$type -> setAttribute('name', $tName);
+						my $bootLoc = $tData -> getBootImageDescript();
+						if ($bootLoc) {
+							$type -> setAttribute('boot', $bootLoc);
+						}
+						$scan -> appendChild($type);
+					}
 				}
 				last SWITCH;
 			};
@@ -416,21 +753,25 @@ sub __getTree {
 			# sources
 			#------------------------------------------
 			/^sources/       && do {
-				my @repos = @{$xml -> getRepositories()};
-				for my $repo (@repos) {
-					my $source = XML::LibXML::Element -> new('source');
-					$source -> setAttribute('path', $repo -> getPath());
-					$source -> setAttribute('type', $repo -> getType());
-					my $prio = $repo -> getPriority();
-					if ($prio) {
-						$source -> setAttribute('priority', $prio);
+				my @repos = $this -> __getRepoURI();
+				if (! @repos) {
+					$kiwi -> info ("No repository configured\n");
+				} else {
+					for my $repo (@repos) {
+						my $source = XML::LibXML::Element -> new('source');
+						$source -> setAttribute('path', $repo -> getPath());
+						$source -> setAttribute('type', $repo -> getType());
+						my $prio = $repo -> getPriority();
+						if ($prio) {
+							$source -> setAttribute('priority', $prio);
+						}
+						my ($uname, $pass) = $repo -> getCredentials();
+						if ($uname) {
+							$source -> setAttribute('username', $uname);
+							$source -> setAttribute('password', $pass);
+						}
+						$scan -> appendChild($source);
 					}
-					my ($uname, $pass) = $repo -> getCredentials();
-					if ($uname) {
-						$source -> setAttribute('username', $uname);
-						$source -> setAttribute('password', $pass);
-					}
-					$scan -> appendChild($source);
 				}
 				last SWITCH;
 			};
@@ -438,76 +779,48 @@ sub __getTree {
 			# size
 			#------------------------------------------
 			/^size/          && do {
-				if (! $meta) {
-					($meta,$delete,$solfile,$satlist,$solp) =
-						$xml->getInstallSize_legacy();
-					if (! $meta) {
-						$kiwi -> failed();
-						$this -> __cleanMountPnts($mountDirs);
-						return;
+				my @sizeinfo = $this -> __getSizeEstimation();
+				if (! @sizeinfo) {
+					$kiwi -> info ("Can't calculate size estimation\n");
+				} else {
+					my $sizenode = XML::LibXML::Element -> new("size");
+					$sizenode -> setAttribute ("rootsizeKB",$sizeinfo[0]);
+					if ($sizeinfo[1]) {
+						$sizenode -> setAttribute (
+							"deletionsizeKB","$sizeinfo[1]"
+						);
 					}
+					$scan -> appendChild ($sizenode);
 				}
-				my $size = 0;
-				my %meta = %{$meta};
-				foreach my $p (keys %meta) {
-					my @metalist = split (/:/,$meta{$p});
-					$size += $metalist[0];
-				}
-				my $sizenode = XML::LibXML::Element -> new("size");
-				if ($size > 0) {
-					$sizenode -> setAttribute ("rootsizeKB","$size");
-				}
-				$size = 0;
-				if ($delete) {
-					foreach my $del (@{$delete}) {
-						if ($meta{$del}) {
-							my @metalist = split (/:/,$meta{$del});
-							$size += $metalist[0];
-						}
-					}
-				}
-				if ($size > 0) {
-					$sizenode -> setAttribute ("deletionsizeKB","$size");
-				}
-				$scan -> appendChild ($sizenode);
 				last SWITCH;
 			};
 			#==========================================
 			# packages
 			#------------------------------------------
 			/^packages/     && do {
-				if (! $meta) {
-					($meta,$delete,$solfile,$satlist,$solp) =
-						$xml->getInstallSize_legacy();
-					if (! $meta) {
-						$kiwi -> failed();
-						$this -> __cleanMountPnts($mountDirs);
-						return;
-					}
-				}
-				if (! keys %{$meta}) {
+				my @packages = $this -> __getPackages();
+				if (! @packages) {
 					$kiwi -> info ("No packages/patterns solved\n");
 				} else {
-					foreach my $p (sort keys %{$meta}) {
-						if ($p =~ /pattern:.*/) {
-							next;
-						}
-						my @m = split (/:/,$meta->{$p});
-						my $repo = $m[4]; $repo =~ s/ /:/g;
+					foreach my $p (@packages) {
+						my $repo = $p->[4]; $repo =~ s/ /:/g;
 						my $pacnode = XML::LibXML::Element -> new("package");
-						$pacnode -> setAttribute ("name","$p");
-						$pacnode -> setAttribute ("arch","$m[1]");
-						$pacnode -> setAttribute ("version","$m[2]");
-						$pacnode -> setAttribute ("sum","$m[3]");
-						$pacnode -> setAttribute ("repo",$repo);
+						$pacnode -> setAttribute ("name"   ,"$p->[5]");
+						$pacnode -> setAttribute ("arch"   ,"$p->[1]");
+						$pacnode -> setAttribute ("version","$p->[2]");
+						$pacnode -> setAttribute ("sum"    ,"$p->[3]");
+						$pacnode -> setAttribute ("repo"   ,$repo);
 						$scan -> appendChild ($pacnode);
 					}
 				}
 				last SWITCH;
 			};
+			#==========================================
+			# archives
+			#------------------------------------------
 			/^archives/      && do {
-				my @archives = @{$xml -> getArchives()};
-				if ((scalar @archives) == 0) {
+				my @archives = $this -> __getArchives();
+				if (! @archives) {
 					$kiwi -> info ("No archives available\n");
 				} else {
 					for my $archive (@archives) {
@@ -522,8 +835,8 @@ sub __getTree {
 			# profiles
 			#------------------------------------------
 			/^profiles/      && do {
-				my @profiles = @{$xml -> getProfiles()};
-				if ((scalar @profiles) == 0) {
+				my @profiles = $this -> __getProfiles();
+				if (! @profiles) {
 					$kiwi -> info ("No profiles available\n");
 				} else {
 					for my $profile (@profiles) {
@@ -541,12 +854,15 @@ sub __getTree {
 			# version
 			#------------------------------------------
 			/^version/       && do {
-				my $version = $xml -> getPreferences() -> getVersion();
-				my $appname = $xml -> getImageName();
-				my $vnode = XML::LibXML::Element -> new("image");
-				$vnode -> setAttribute ('version', $version);
-				$vnode -> setAttribute ("name","$appname");
-				$scan -> appendChild ($vnode);
+				my @vinfo = $this -> __getImageVersion();
+				if (! @vinfo) {
+					$kiwi -> info ("No image version/name found\n");
+				} else {
+					my $vnode = XML::LibXML::Element -> new("image");
+					$vnode -> setAttribute ('version', $vinfo[0]);
+					$vnode -> setAttribute ("name","$vinfo[1]");
+					$scan -> appendChild ($vnode);
+				}
 			};
 		}
 	}
@@ -562,35 +878,38 @@ sub __setupRepoMounts {
 	# Setup mount points and mount any repositories that need to be mounted
 	# locally
 	# ---
-	my $this = shift;
-	my $xml  = shift;
-	my $kiwi = $this->{kiwi};
-	my $uhash= $xml -> getURLHash_legacy();
+	my $this  = shift;
+	my $xml   = shift;
+	my $kiwi  = $this->{kiwi};
+	my $cmdL  = $this->{cmdL};
+	my $repos = $xml -> getRepositories();
 	my @mountPnts;
-	if ($uhash) {
-		for my $source (keys %{$uhash}) {
-			#==========================================
-			# iso:// sources
-			#------------------------------------------
-			if ($source =~ /^iso:\/\/(.*\.iso)/) {
-				my $iso  = $1;
-				if (! -f $iso) {
-					return \@mountPnts;
-				}
-				my $dir  = $uhash->{$source};
-				my $data = qxx ("mkdir -p $dir; mount -o loop $iso $dir 2>&1");
-				my $code = $? >> 8;
-				if ($code != 0) {
-					$kiwi -> error  ("Failed to loop mount ISO path: $data");
-					$kiwi -> failed ();
-					rmdir $dir;
-					if (@mountPnts) {
-						$this -> __cleanMountPnts(\@mountPnts);
-					}
-					return;
-				}
-				push @mountPnts, $dir;
+	for my $repo (@{$repos}) {
+		my ($user, $pwd) = $repo -> getCredentials();
+		my $source = $repo -> getPath();
+		my $urlHandler  = KIWIURL -> new ($cmdL,undef,$user,$pwd);
+		my $uri = $urlHandler -> normalizePath ($source);
+
+		#==========================================
+		# iso:// sources
+		#------------------------------------------
+		if ($source =~ /^iso:\/\/(.*\.iso)/) {
+			my $iso  = $1;
+			if (! -f $iso) {
+				return \@mountPnts;
 			}
+			my $data = qxx ("mkdir -p $uri; mount -o loop $iso $uri 2>&1");
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> error  ("Failed to loop mount ISO path: $data");
+				$kiwi -> failed ();
+				rmdir $uri;
+				if (@mountPnts) {
+					$this -> __cleanMountPnts(\@mountPnts);
+				}
+				return;
+			}
+			push @mountPnts, $uri;
 		}
 	}
 	return \@mountPnts;
@@ -635,9 +954,9 @@ sub __xmlSetup {
 			return;
 		}
 	}
-	my $pkgMgr = $this -> {packageManager};
+	my $pkgMgr = $this->{packageManager};
 	if ($pkgMgr) {
-		$xml -> setPackageManager_legacy($pkgMgr);
+		$xml -> getPreferences() -> setPackageManager ($pkgMgr);
 	}
 	my $ignore = $this -> {ignoreRepos};
 	if ($ignore) {
@@ -649,7 +968,6 @@ sub __xmlSetup {
 	if ($this->{addlRepos}) {
 		$xml -> addRepositories($this->{addlRepos}, 'default');
 	}
-	$xml -> __createURLList_legacy();
 	return $xml;
 }
 
