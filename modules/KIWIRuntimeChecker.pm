@@ -886,9 +886,11 @@ sub __hasValidArchives {
 	for my $ar (@{$archives}) {
 		my $arName = $ar -> getName();
 		if (! -f "$desc/$arName") {
-			$kiwi -> warning ("specified archive $ar doesn't exist in $desc");
-			$kiwi -> skipped ();
-			next;
+			$kiwi -> error (
+				"specified archive $arName doesn't exist in $desc"
+			);
+			$kiwi -> failed ();
+			return;
 		}
 		my $contents = qxx ("tar -tf $desc/$arName 2>&1");
 		for my $exp (@nogo) {

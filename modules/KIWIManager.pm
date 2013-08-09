@@ -326,13 +326,27 @@ sub setupInstallPackages {
 	#==========================================
 	# Get image package list
 	#------------------------------------------
-	my @packList = $xml -> getInstallList_legacy();
+	my @packList;
+	my $imagePackages = $xml -> getPackages();
+	for my $package (@{$imagePackages}) {
+		my $name = $package -> getName();
+		push @packList, $name;
+	}
 	#==========================================
-	# Get type specific packages if set
+	# Get image pattern list
 	#------------------------------------------
-	my @typeList = $xml -> getTypeSpecificPackageList_legacy();
-	if (@typeList) {
-		push @packList,@typeList;
+	my $imageCollection = $xml -> getPackageCollections();
+	for my $collection (@{$imageCollection}) {
+		my $name = $collection -> getName();
+		push @packList, 'pattern:'.$name;
+	}
+	#==========================================
+	# Get image product list
+	#------------------------------------------
+	my $imageProduct = $xml -> getProducts();
+	for my $product (@{$imageProduct}) {
+		my $name = $product -> getName();
+		push @packList, 'product:'.$name;
 	}
 	$this->{packlist} = \@packList;
 	return @packList;

@@ -505,24 +505,24 @@ sub addArchives {
 	#       ~ if the second argument is a reference to an array
 	#   - the given image type of the profiles being processed
 	# ---
-	my $this      = shift;
-	my $archives  = shift;
-	my $profNames = shift;
-	my $imageType = shift;
+	my $this       = shift;
+	my $archives   = shift;
+	my $profNames  = shift;
+	my $sectionType= shift;
 	my %verifyData = (
 		caller       => 'addArchives',
 		expectedType => 'KIWIXMLPackageArchiveData',
 		itemName     => 'archives',
 		itemsToAdd   => $archives,
 		profNames    => $profNames,
-		type         => $imageType
+		type         => $sectionType
 	);
 	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
 		return;
 	}
 	my @profsToUse = $this -> __getProfsToModify($profNames, 'archive(s)');
-	if (! $imageType) {
-		$imageType = 'image';
+	if (! $sectionType) {
+		$sectionType = 'image';
 	}
 	my $accessID;
 	for my $prof (@profsToUse) {
@@ -539,7 +539,58 @@ sub addArchives {
 				arch     => $arch,
 				dataObj  => $archiveObj,
 				profName => $prof,
-				type     => $imageType
+				type     => $sectionType
+			);
+			if (! $this -> __storeInstallData(\%storeData)) {
+				return;
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# addBootstrapArchives
+#------------------------------------------
+sub addBootstrapArchives {
+	# ...
+	# Add the given archives to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	#   - the given image type of the profiles being processed
+	# ---
+	my $this       = shift;
+	my $archives   = shift;
+	my $profNames  = shift;
+	my $sectionType= shift;
+	my %verifyData = (
+		caller       => 'addArchives',
+		expectedType => 'KIWIXMLPackageArchiveData',
+		itemName     => 'archives',
+		itemsToAdd   => $archives,
+		profNames    => $profNames,
+	);
+	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
+		return;
+	}
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'archive(s)');
+	if (! $sectionType) {
+		$sectionType = 'image';
+	}
+	my $accessID;
+	for my $prof (@profsToUse) {
+		for my $archiveObj (@{$archives}) {
+			my $arch      = $archiveObj -> getArch();
+			my %storeData = (
+				accessID => 'archives',
+				arch     => $arch,
+				dataObj  => $archiveObj,
+				profName => $prof,
+				type     => $sectionType
 			);
 			if (! $this -> __storeInstallData(\%storeData)) {
 				return;
@@ -565,7 +616,7 @@ sub addBootstrapPackages {
 	my $this       = shift;
 	my $packages   = shift;
 	my $profNames  = shift;
-	my $imageType  = shift;
+	my $sectionType= shift;
 	my %verifyData = (
 		caller       => 'addBootstrapPackages',
 		expectedType => 'KIWIXMLPackageData',
@@ -577,7 +628,9 @@ sub addBootstrapPackages {
 		return;
 	}
 	my @profsToUse = $this -> __getProfsToModify($profNames, 'package(s)');
-	$imageType = 'bootstrap';
+	if (! $sectionType) {
+		$sectionType = 'bootstrap';
+	}
 	for my $prof (@profsToUse) {
 		for my $pckgObj (@{$packages}) {
 			my $arch = $pckgObj -> getArch();
@@ -586,7 +639,7 @@ sub addBootstrapPackages {
 				arch     => $arch,
 				dataObj  => $pckgObj,
 				profName => $prof,
-				type     => $imageType
+				type     => $sectionType
 			);
 			if (! $this -> __storeInstallData(\%storeData)) {
 				return;
@@ -783,21 +836,21 @@ sub addPackages {
 	my $this       = shift;
 	my $packages   = shift;
 	my $profNames  = shift;
-	my $imageType  = shift;
+	my $sectionType= shift;
 	my %verifyData = (
 		caller       => 'addPackages',
 		expectedType => 'KIWIXMLPackageData',
 		itemName     => 'packages',
 		itemsToAdd   => $packages,
 		profNames    => $profNames,
-		type         => $imageType
+		type         => $sectionType
 	);
 	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
 		return;
 	}
 	my @profsToUse = $this -> __getProfsToModify($profNames, 'package(s)');
-	if (! $imageType) {
-		$imageType = 'image';
+	if (! $sectionType) {
+		$sectionType = 'image';
 	}
 	for my $prof (@profsToUse) {
 		for my $pckgObj (@{$packages}) {
@@ -823,7 +876,7 @@ sub addPackages {
 					arch     => $arch,
 					dataObj  => $pckgObj,
 					profName => $prof,
-					type     => $imageType
+					type     => $sectionType
 				);
 				if (! $this -> __storeInstallData(\%storeData)) {
 					return;
@@ -851,21 +904,21 @@ sub addPackageCollections {
 	my $this        = shift;
 	my $collections = shift;
 	my $profNames   = shift;
-	my $imageType   = shift;
+	my $sectionType = shift;
 	my %verifyData = (
 		caller       => 'addPackageCollections',
 		expectedType => 'KIWIXMLPackageCollectData',
 		itemName     => 'collections',
 		itemsToAdd   => $collections,
 		profNames    => $profNames,
-		type         => $imageType
+		type         => $sectionType
 	);
 	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
 		return;
 	}
 	my @profsToUse = $this -> __getProfsToModify($profNames, 'collection(s)');
-	if (! $imageType) {
-		$imageType = 'image';
+	if (! $sectionType) {
+		$sectionType = 'image';
 	}
 	my $accessID;
 	for my $prof (@profsToUse) {
@@ -882,7 +935,7 @@ sub addPackageCollections {
 				arch     => $arch,
 				dataObj  => $collectObj,
 				profName => $prof,
-				type     => $imageType
+				type     => $sectionType
 			);
 			if (! $this -> __storeInstallData(\%storeData)) {
 				return;
@@ -908,7 +961,7 @@ sub addPackagesToDelete {
 	my $this       = shift;
 	my $packages   = shift;
 	my $profNames  = shift;
-	my $imageType  = shift;
+	my $sectionType= shift;
 	my %verifyData = (
 		caller       => 'addPackagesToDelete',
 		expectedType => 'KIWIXMLPackageData',
@@ -920,7 +973,9 @@ sub addPackagesToDelete {
 		return;
 	}
 	my @profsToUse = $this -> __getProfsToModify($profNames, 'package(s)');
-	$imageType = 'bootstrap';
+	if (! $sectionType) {
+		$sectionType = 'bootstrap';
+	}
 	for my $prof (@profsToUse) {
 		for my $pckgObj (@{$packages}) {
 			my $arch = $pckgObj -> getArch();
@@ -929,7 +984,7 @@ sub addPackagesToDelete {
 				arch     => $arch,
 				dataObj  => $pckgObj,
 				profName => $prof,
-				type     => $imageType
+				type     => $sectionType
 			);
 			if (! $this -> __storeInstallData(\%storeData)) {
 				return;
@@ -3838,12 +3893,16 @@ sub __getEntryPath {
 #------------------------------------------
 sub __getInstallData {
 	# ...
-	# Return a ref to an array containing objects accumulated across the
-	# image config data structure for the given accessID.
+	# Return a ref to an array containing objects accumulated
+	# across the image config data structure for the given
+	# accessID.
 	# ---
 	my $this   = shift;
 	my $access = shift;
 	my $kiwi = $this->{kiwi};
+	#==========================================
+	# check for required section ID
+	#------------------------------------------
 	if (! $access) {
 		my $msg = 'Internal error: __getInstallDataNamescalled without '
 			. 'access pattern argument. Please file a bug';
@@ -3856,7 +3915,13 @@ sub __getInstallData {
 	my $type = $this->{selectedType}{type};
 	my $typeName = $type -> getTypeName();
 	my @names;
+	#==========================================
+	# walk through all selected profiles
+	#------------------------------------------
 	for my $prof (@selected) {
+		#==========================================
+		# catch all standard sections
+		#------------------------------------------
 		my $baseData = $this->{imageConfig}{$prof}{$access};
 		if ($baseData) {
 			push @names, @{$baseData};
@@ -3867,6 +3932,9 @@ sub __getInstallData {
 				push @names, @{$archData};
 			}
 		}
+		#==========================================
+		# catch all build type specific items
+		#------------------------------------------
 		my $typeInfo = $this->{imageConfig}{$prof}{$typeName};
 		if ($typeInfo) {
 			my $typeData = $typeInfo->{$access};
@@ -4495,6 +4563,9 @@ sub __populatePackageInfo {
 				my $bootIncl = $pNd -> getAttribute('bootinclude');
 				my $name     = $pNd -> getAttribute('name');
 				my $replace  = $pNd -> getAttribute('replaces');
+				if ((defined $replace) && ($replace eq '')) {
+					$replace = 'none';
+				}
 				my %pckgData = (
 					arch        => $arch,
 					bootdelete  => $bootDel,
@@ -5087,7 +5158,7 @@ sub __storeInstallData {
 	# location in the data structure. Install data objects
 	# are objects of children of the <packages> or <driver>
 	# elements. If the object was stored, return the object
-	# If th object was already present return 1
+	# If the object was already present return 1
 	# ---
 	my $this       = shift;
 	my $storeInfo  = shift;
@@ -5119,16 +5190,28 @@ sub __storeInstallData {
 	}
 	my $stored = 1;
 	if ($entryPath->{$accessID}) {
-		my %definedNames = map { ($_->getName() => 1) }
-			@{$entryPath->{$accessID}};
+		my %definedNames =
+			map { ($_->getName() => 1) }	@{$entryPath->{$accessID}};
 		my $name = $objToStore -> getName();
-		if (! $definedNames{$name}) {
+		my $oref = ref $objToStore;
+		my $allowduplicates = 0;
+		if ($oref eq 'KIWIXMLPackageData') {
+			if ($objToStore -> getPackageToReplace()) {
+				$allowduplicates = 1;
+			}
+		}
+		if ($allowduplicates) {
 			push @{$entryPath->{$accessID}}, $objToStore;
 			$stored = $objToStore;
+		} else {
+			if (! $definedNames{$name}) {
+				push @{$entryPath->{$accessID}}, $objToStore;
+				$stored = $objToStore;
+			}
 		}
 	} else {
-		my @data = ($objToStore);
-		$entryPath->{$accessID} = \@data;
+		my $data = [$objToStore];
+		$entryPath->{$accessID} = $data;
 		$stored = $objToStore;
 	}
 	return $stored;
@@ -5387,38 +5470,6 @@ sub isDriverUpdateDisk {
 	my $base = $this->{instsrcNodeList} -> get_node(1);
 	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
 	return ref $dud_node;
-}
-
-#==========================================
-# getReplacePackageDelList
-#------------------------------------------
-sub getReplacePackageDelList {
-	# ...
-	# return the package names which are deleted in
-	# a replace list setup
-	# ---
-	my $this = shift;
-	my @pacs;
-	if ($this->{replDelList}) {
-		@pacs = @{$this->{replDelList}};
-	}
-	return @pacs;
-}
-
-#==========================================
-# getReplacePackageAddList
-#------------------------------------------
-sub getReplacePackageAddList {
-	# ...
-	# return the package names which are added in
-	# a replace list setup
-	# ---
-	my $this = shift;
-	my @pacs;
-	if ($this->{replAddList}) {
-		@pacs = @{$this->{replAddList}};
-	}
-	return @pacs;
 }
 
 #==========================================
@@ -8973,39 +9024,11 @@ sub __updateDescriptionFromChangeSet_legacy {
 	#==========================================
 	# 4) merge/update packages
 	#------------------------------------------
-	foreach my $section (("image","bootstrap")) {
-		if (@{$changeset->{$section."_fplistImage"}}) {
-			$kiwi -> info ("Updating package(s) [$section]:\n");
-			my @fplistImage = @{$changeset->{$section."_fplistImage"}};
-			my @fplistDelete = @{$changeset->{$section."_fplistDelete"}};
-			foreach my $p (@fplistImage) {
-				$kiwi -> info ("--> $p\n");
-			}
-			$this -> addPackages_legacy (
-				$section,undef,$packageNodeList,@fplistImage
-			);
-			if (@fplistDelete) {
-				$this -> addPackages_legacy (
-					"delete",undef,$packageNodeList,@fplistDelete
-				);
-			}
-		}
-	}
+	# Package data is handled through the new data structure
 	#==========================================
 	# 5) merge/update archives
 	#------------------------------------------
-	foreach my $section (("image","bootstrap")) {
-		if (@{$changeset->{$section."_falistImage"}}) {
-			$kiwi -> info ("Updating archive(s) [$section]:\n");
-			my @falistImage = @{$changeset->{$section."_falistImage"}};
-			foreach my $p (@falistImage) {
-				$kiwi -> info ("--> $p\n");
-			}
-			$this -> addArchives_legacy (
-				$section,"bootinclude",$packageNodeList,@falistImage
-			);
-		}
-	}
+	# Archive data is handled through the new data structure
 	#==========================================
 	# 6) merge/update machine attribs in type
 	#------------------------------------------

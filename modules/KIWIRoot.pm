@@ -417,7 +417,12 @@ sub init {
 	#==========================================
 	# Get base Package list
 	#------------------------------------------
-	my @initPacs = $xml -> getBaseList_legacy();
+	my @initPacs;
+	my $bootstrapPacks = $xml -> getBootstrapPackages();
+	for my $package (@{$bootstrapPacks}) {
+		my $name = $package -> getName();
+		push @initPacs, $name;
+	}
 	if ((! @initPacs) && ($packager ne "apt-get")) {
 		$kiwi -> error ("Couldn't create base package list");
 		$kiwi -> failed ();
@@ -843,7 +848,12 @@ sub installArchives {
 	#==========================================
 	# get image archive list
 	#------------------------------------------
-	my @archives = $xml -> getArchiveList_legacy();
+	my @archives;
+	my $archiveList = $xml -> getArchives();
+	for my $archive (@{$archiveList}) {
+		my $name = $archive -> getName();
+		push @archives, $name;
+	}
 	#==========================================
 	# Install raw data archives
 	#------------------------------------------
@@ -1222,7 +1232,12 @@ sub setup {
 	#========================================
 	# remove packages from delete section
 	#----------------------------------------
-	my @delete_packs = $xml -> getDeleteList_legacy();
+	my @delete_packs;
+	my $deletePacks = $xml -> getPackagesToDelete();
+	for my $package (@{$deletePacks}) {
+		my $name = $package -> getName();
+		push @delete_packs,$name;
+	}
 	if ((! $initCache) && (@delete_packs)) {
 		$kiwi -> info ("Removing packages marked for deletion:\n");
 		foreach my $p (@delete_packs) {

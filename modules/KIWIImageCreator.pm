@@ -272,6 +272,36 @@ sub prepareBootImage {
 	if (! $res) {
 		return;
 	}
+	#==========================================
+	# merge/update boot incl. packages/archives
+	#------------------------------------------
+	my $bootArchives = $systemXML -> getBootIncludeArchives();
+	my $bootAddPacks = $systemXML -> getBootIncludePackages();
+	my $bootDelPacks = $systemXML -> getBootDeletePackages();
+	if (@{$bootArchives}) {
+		$kiwi -> info ("Boot including archive(s) [bootstrap]:\n");
+		for my $archive (@{$bootArchives}) {
+			my $name = $archive -> getName();
+			$kiwi -> info ("--> $name\n");
+		}
+		$bootXML -> addBootstrapArchives ($bootArchives);
+	}
+	if (@{$bootAddPacks}) {
+		$kiwi -> info ("Boot including package(s) [bootstrap]:\n");
+		for my $package (@{$bootAddPacks}) {
+			my $name = $package -> getName();
+			$kiwi -> info ("--> $name\n");
+		}
+		$bootXML -> addBootstrapPackages ($bootAddPacks);
+	}
+	if (@{$bootDelPacks}) {
+		$kiwi -> info ("Boot included package(s) marked for deletion:\n");
+		for my $package (@{$bootDelPacks}) {
+			my $name = $package -> getName();
+			$kiwi -> info ("--> $name\n");
+		}
+		$bootXML -> addPackagesToDelete ($bootDelPacks);
+	}
 	# TODO: more to come
 	#==========================================
 	# update boot profiles
@@ -785,34 +815,17 @@ sub createImage {
 	#------------------------------------------
 	my @addonList;   # install this packages
 	my @deleteList;  # remove this packages
-	my @replAdd;
-	my @replDel;
-	$xml -> getBaseList_legacy();
-	@replAdd = $xml -> getReplacePackageAddList();
-	@replDel = $xml -> getReplacePackageDelList();
-	if (@replAdd) {
-		push @addonList,@replAdd;
-	}
-	if (@replDel) {
-		push @deleteList,@replDel;
-	}
-	$xml -> getInstallList_legacy();
-	@replAdd = $xml -> getReplacePackageAddList();
-	@replDel = $xml -> getReplacePackageDelList();
-	if (@replAdd) {
-		push @addonList,@replAdd;
-	}
-	if (@replDel) {
-		push @deleteList,@replDel;
-	}
-	$xml -> getTypeSpecificPackageList_legacy();
-	@replAdd = $xml -> getReplacePackageAddList();
-	@replDel = $xml -> getReplacePackageDelList();
-	if (@replAdd) {
-		push @addonList,@replAdd;
-	}
-	if (@replDel) {
-		push @deleteList,@replDel;
+	my $bootstrapPacks= $xml -> getBootstrapPackages();
+	my $imagePackages = $xml -> getPackages();
+	for my $package ((@{$bootstrapPacks},@{$imagePackages})) {
+		if ($package -> getPackageToReplace()) {
+			my $add = $package -> getName();
+			my $del = $package -> getPackageToReplace();
+			if ($del ne 'none') {
+				push @deleteList,$del;
+			}
+			push @addonList ,$add;
+		}
 	}
 	if (@addonList) {
 		my %uniq;
@@ -1560,9 +1573,9 @@ sub __prepareTree {
 		#==========================================
 		# Add bootstrap packages to image section
 		#------------------------------------------
-		my @initPacs = $xml -> getBaseList_legacy();
-		if (@initPacs) {
-			$xml -> addImagePackages_legacy (@initPacs);
+		my $bootstrapPacks = $xml -> getBootstrapPackages();
+		if (@{$bootstrapPacks}) {
+			$xml -> addPackages ($bootstrapPacks);
 		}
 	}
 	#==========================================
