@@ -1,3 +1,12 @@
+#!/bin/bash
+
+echo "last 3 released according to log:"
 git log --grep "- v.*released" --format=oneline |\
-	awk '{printf "git tag %s %s\n", $3, $1}'    |\
+	awk '{printf "--> git tag %s %s\n", $3, $1}'    |\
 	head -n 3
+
+echo
+
+echo "last tagged release:"
+echo -n '--> '
+git tag --list | tail -n 1
