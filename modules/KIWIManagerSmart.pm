@@ -594,17 +594,6 @@ sub setupUpgrade {
 	print $fd "@kchroot @smart channel --show &\n";
 	print $fd "SPID=\$!;wait \$SPID\n";
 	#==========================================
-	# Handle remove request
-	#------------------------------------------
-	if (defined $delPacks) {
-		my @removePackages = @{$delPacks};
-		if (@removePackages) {
-			print $fd "test \$? = 0 && @kchroot @smart remove -y ";
-			print $fd "@removePackages || false &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
-		}
-	}
-	#==========================================
 	# Handle upgrade request
 	#------------------------------------------
 	if (! $noUpgrade) {
@@ -619,6 +608,17 @@ sub setupUpgrade {
 		if (@addonPackages) {
 			print $fd "test \$? = 0 && @kchroot @smart install @opts ";
 			print $fd "@addonPackages || false &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+		}
+	}
+	#==========================================
+	# Handle remove request
+	#------------------------------------------
+	if (defined $delPacks) {
+		my @removePackages = @{$delPacks};
+		if (@removePackages) {
+			print $fd "test \$? = 0 && @kchroot @smart remove -y ";
+			print $fd "@removePackages || false &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		}
 	}

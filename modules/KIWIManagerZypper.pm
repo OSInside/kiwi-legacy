@@ -633,18 +633,6 @@ sub setupUpgrade {
 	print $fd "export YAST_IS_RUNNING=true\n";
 	print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
 	#==========================================
-	# Handle remove request
-	#------------------------------------------
-	if (defined $delPacks) {
-		my @removePackages = @{$delPacks};
-		if (@removePackages) {
-			print $fd "@kchroot @zypper remove ";
-			print $fd "--force-resolution @removePackages || true &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && ";
-		}
-	}
-	#==========================================
 	# Handle upgrade request
 	#------------------------------------------
 	if (! $noUpgrade) {
@@ -687,6 +675,18 @@ sub setupUpgrade {
 		print $fd "test \$? = 0 && @kchroot @zypper install ";
 		print $fd "@installOpts @institems &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
+	}
+	#==========================================
+	# Handle remove request
+	#------------------------------------------
+	if (defined $delPacks) {
+		my @removePackages = @{$delPacks};
+		if (@removePackages) {
+			print $fd "@kchroot @zypper remove ";
+			print $fd "--force-resolution @removePackages || true &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "test \$? = 0 && ";
+		}
 	}
 	print $fd "ECODE=\$?\n";
 	print $fd "echo \$ECODE > $screenCall.exit\n";

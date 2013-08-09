@@ -498,17 +498,6 @@ sub setupUpgrade {
 	print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 	print $fd "trap clean INT TERM\n";
 	#==========================================
-	# Handle remove request
-	#------------------------------------------
-	if (defined $delPacks) {
-		my @removePackages = @{$delPacks};
-		if (@removePackages) {
-			print $fd "@kchroot @apt remove @removePackages &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && ";
-		}
-	}
-	#==========================================
 	# Handle upgrade request
 	#------------------------------------------
 	if (! $noUpgrade) {
@@ -536,6 +525,17 @@ sub setupUpgrade {
 		if (@addonPackages) {
 			print $fd "@kchroot @apt install @addonPackages &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
+		}
+	}
+	#==========================================
+	# Handle remove request
+	#------------------------------------------
+	if (defined $delPacks) {
+		my @removePackages = @{$delPacks};
+		if (@removePackages) {
+			print $fd "@kchroot @apt remove @removePackages &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "test \$? = 0 && ";
 		}
 	}
 	print $fd "ECODE=\$?\n";
