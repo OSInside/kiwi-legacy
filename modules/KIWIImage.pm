@@ -288,7 +288,8 @@ sub updateDescription {
 	#==========================================
 	# Store general data
 	#------------------------------------------
-	$changeset{"packagemanager"} = $src_xml->getPackageManager_legacy();
+	$changeset{"packagemanager"} = $src_xml
+		-> getPreferences() -> getPackageManager();
 	$changeset{"showlicense"}    = $src_xml->getLicenseNames_legacy();
 	$changeset{"domain"}         = $domain;
 	$changeset{"displayname"}    = $src_xml->getImageDisplayName();

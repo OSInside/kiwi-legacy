@@ -1407,14 +1407,50 @@ sub __applyAdditionalXMLOverrides {
 	# ---
 	my $this = shift;
 	my $xml  = shift;
+	my @addPacks;
+	my @addCollections;
+	my @delPacks;
+	#==========================================
+	# additional image packages
+	#------------------------------------------
 	if ($this -> {addlPackages}) {
-		$xml -> addImagePackages_legacy (@{$this -> {addlPackages}});
+		for my $name (@{$this -> {addlPackages}}) {
+			my %pckgData = (
+				name => $name
+			);
+			my $pckgObj = KIWIXMLPackageData
+				-> new (\%pckgData);
+			push @addPacks, $pckgObj;
+		}
+		$xml -> addPackages (\@addPacks);
 	}
+	#==========================================
+	# additional image collections
+	#------------------------------------------
 	if ($this -> {addlPatterns}) {
-		$xml -> addImagePatterns_legacy (@{$this -> {addlPatterns}});
+		for my $name (@{$this -> {addlPatterns}}) {
+			my %collectData = (
+				name => $name
+			);
+			my $collectObj = KIWIXMLPackageCollectData
+				-> new (\%collectData);
+			push @addCollections, $collectObj;
+		}
+		$xml -> addPackageCollections (\@addCollections);
 	}
+	#==========================================
+	# additional image packages to delete
+	#------------------------------------------
 	if ($this -> {removePackages}) {
-		$xml -> addRemovePackages_legacy (@{$this -> {removePackages}});
+		for my $name (@{$this -> {removePackages}}) {
+			my %pckgData = (
+				name => $name
+			);
+			my $pckgObj = KIWIXMLPackageData
+				-> new (\%pckgData);
+			push @delPacks, $pckgObj;
+		}
+		$xml -> addPackagesToDelete (\@addPacks);
 	}
 	return $xml;
 }
@@ -1429,7 +1465,9 @@ sub __applyBaseXMLOverrides {
 	my $this = shift;
 	my $xml  = shift;
 	if ($this -> {packageManager}) {
-		$xml -> setPackageManager_legacy($this -> {packageManager});
+		$xml -> getPreferences() -> setPackageManager (
+			$this -> {packageManager}
+		);
 	}
 	if ($this -> {ignoreRepos}) {
 		$xml -> ignoreRepositories();

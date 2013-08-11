@@ -80,7 +80,7 @@ sub new {
 		return;
 	}
 	if (! defined $manager) {
-		$manager = $xml -> getPackageManager_legacy();
+		$manager = $xml -> getPreferences() -> getPackageManager();
 	}
 	if (defined $targetArch && $manager ne 'zypper') {
 		$kiwi -> warning ("Target architecture not supported for $manager");

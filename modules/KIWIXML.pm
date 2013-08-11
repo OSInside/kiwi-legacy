@@ -5930,238 +5930,6 @@ sub getSingleInstSourceSatSolvable {
 # eliminated or replaced
 #------------------------------------------
 #==========================================
-# addArchives_legacy
-#------------------------------------------
-sub addArchives_legacy {
-	# ...
-	# Add the given archive list to the specified packages
-	# type section of the xml description parse tree as an.
-	# archive element
-	# ----
-	my @tars  = @_;
-	my $this  = shift @tars;
-	my $ptype = shift @tars;
-	my $bincl = shift @tars;
-	my $nodes = shift @tars;
-	if (! defined $nodes) {
-		$nodes = $this->{packageNodeList};
-	}
-	my $nodeNumber = 1;
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node = $nodes -> get_node($i);
-		my $type = $node  -> getAttribute ("type");
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		if ($type eq $ptype) {
-			$nodeNumber = $i; last;
-		}
-	}
-	foreach my $tar (@tars) {
-		my $addElement = XML::LibXML::Element -> new ("archive");
-		$addElement -> setAttribute("name",$tar);
-		if ($bincl) {
-			$addElement -> setAttribute("bootinclude","true");
-		}
-		$nodes -> get_node($nodeNumber)
-			-> appendChild ($addElement);
-	}
-	$this -> __updateXML_legacy();
-	return $this;
-}
-
-#==========================================
-# addImagePackages_legacy
-#------------------------------------------
-sub addImagePackages_legacy {
-	# ...
-	# Add the given package list to the type=bootstrap packages
-	# section of the xml description parse tree.
-	# ----
-	my @list = @_;
-	my $this = shift @list;
-	return $this -> addPackages_legacy ("image",undef,undef,@list);
-}
-
-#==========================================
-# addImagePatterns_legacy
-#------------------------------------------
-sub addImagePatterns_legacy {
-	# ...
-	# Add the given pattern list to the type=bootstrap packages
-	# section of the xml description parse tree.
-	# ----
-	my @list = @_;
-	my $this = shift @list;
-	return $this -> addPatterns_legacy("image",undef,@list);
-}
-
-#==========================================
-# addPackages_legacy
-#------------------------------------------
-sub addPackages_legacy {
-	# ...
-	# Add the given package list to the specified packages
-	# type section of the xml description parse tree.
-	# ----
-	my @packs = @_;
-	my $this  = shift @packs;
-	my $ptype = shift @packs;
-	my $bincl = shift @packs;
-	my $nodes = shift @packs;
-	my $kiwi  = $this->{kiwi};
-	if (! defined $nodes) {
-		$nodes = $this->{packageNodeList};
-	}
-	my $nodeNumber = -1;
-	my $nodeNumberBootStrap = -1;
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node = $nodes -> get_node($i);
-		my $type = $node  -> getAttribute ("type");
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		if ($type eq "bootstrap") {
-			$nodeNumberBootStrap = $i;
-		}
-		if ($type eq $ptype) {
-			$nodeNumber = $i;
-		}
-	}
-	if ($nodeNumberBootStrap < 0) {
-		$kiwi -> warning (
-			"Failed to add @packs, package(s), no bootstrap section found"
-		);
-		$kiwi -> skipped ();
-		return $this;
-	}
-	if (($nodeNumber < 0) && ($ptype eq "image")) {
-		$kiwi -> warning (
-			"addPackages: no image section found, adding to bootstrap"
-		);
-		$kiwi -> done();
-		$nodeNumber = $nodeNumberBootStrap;
-	}
-	if ($nodeNumber < 0) {
-		$kiwi -> loginfo ("addPackages: no $ptype section found... skipped\n");
-		return $this;
-	}
-	my $addToNode = $nodes -> get_node($nodeNumber);
-	my @packnodes = $addToNode -> getElementsByTagName ("package");
-	my %packhash  = ();
-	foreach my $element (@packnodes) {
-		my $package = $element -> getAttribute ("name");
-		$packhash{$package} = $package;
-	}
-	foreach my $pack (@packs) {
-		next if ($pack eq "");
-		next if ($packhash{$pack});
-		my $addElement = XML::LibXML::Element -> new ("package");
-		$addElement -> setAttribute("name",$pack);
-		if (($bincl) && ($bincl->{$pack}) && ($bincl->{$pack} == 1)) {
-			$addElement -> setAttribute("bootinclude","true");
-		}
-		$addToNode -> appendChild ($addElement);
-	}
-	$this -> __updateXML_legacy();
-	return $this;
-}
-
-#==========================================
-# addPatterns_legacy
-#------------------------------------------
-sub addPatterns_legacy {
-	# ...
-	# Add the given pattern list to the specified packages
-	# type section of the xml description parse tree.
-	# ----
-	my @patts = @_;
-	my $this  = shift @patts;
-	my $ptype = shift @patts;
-	my $nodes = shift @patts;
-	if (! defined $nodes) {
-		$nodes = $this->{packageNodeList};
-	}
-	my $nodeNumber = 1;
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node = $nodes -> get_node($i);
-		my $type = $node  -> getAttribute ("type");
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		if ($type eq $ptype) {
-			$nodeNumber = $i; last;
-		}
-	}
-	foreach my $pack (@patts) {
-		my $addElement = XML::LibXML::Element -> new ("namedCollection");
-		$addElement -> setAttribute("name",$pack);
-		$nodes -> get_node($nodeNumber)
-			-> appendChild ($addElement);
-	}
-	$this -> __updateXML_legacy();
-	return $this;
-}
-
-#==========================================
-# getArchiveList_legacy
-#------------------------------------------
-sub getArchiveList_legacy {
-	# ...
-	# Create list of <archive> elements. These names
-	# references tarballs which must exist in the image
-	# description directory
-	# ---
-	my $this = shift;
-	my @bootarchives = getList_legacy ($this,"bootstrap","archive");
-	my @imagearchive = getList_legacy ($this,"image","archive");
-	return (@bootarchives,@imagearchive);
-}
-
-#==========================================
-# getBaseList_legacy
-#------------------------------------------
-sub getBaseList_legacy {
-	# ...
-	# Create base package list needed to start creating
-	# the physical extend. The packages in this list are
-	# installed manually
-	# ---
-	my $this = shift;
-	return getList_legacy ($this,"bootstrap");
-}
-
-#==========================================
-# getBootIncludes_legacy
-#------------------------------------------
-sub getBootIncludes_legacy {
-	# ...
-	# Collect all items marked as bootinclude="true"
-	# and return them in a list of names
-	# ----
-	my $this = shift;
-	my @node = $this->{packageNodeList} -> get_nodelist();
-	my @result = ();
-	foreach my $element (@node) {
-		my $type = $element -> getAttribute ("type");
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		if (($type eq "image") || ($type eq "bootstrap")) {
-			my @plist = $element->getElementsByTagName ("package");
-			for my $element (@plist) {
-				my $pckName = $element -> getAttribute ("name");
-				my $bootinc = $element -> getAttribute ("bootinclude");
-				if ((defined $bootinc) && ("$bootinc" eq "true")) {
-					push (@result, $pckName);
-				}
-			}
-		}
-	}
-	return @result;
-}
-
-#==========================================
 # getBootTheme_legacy
 #------------------------------------------
 sub getBootTheme_legacy {
@@ -6183,46 +5951,6 @@ sub getBootTheme_legacy {
 		$result[1] = $loader;
 	}
 	return @result;
-}
-
-#==========================================
-# getDeleteList_legacy
-#------------------------------------------
-sub getDeleteList_legacy {
-	# ...
-	# Create delete package list which are packages
-	# which have already been installed but could be
-	# forced for deletion in images.sh. The KIWIConfig.sh
-	# module provides a function to get the contents of
-	# this list. KIWI will store the delete list as
-	# .profile variable
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my @inc  = $this -> getBootIncludes_legacy();
-	my @del  = $this -> getList_legacy ("delete");
-	my @ret  = ();
-	#==========================================
-	# check delete list for conflicts
-	#------------------------------------------
-	foreach my $del (@del) {
-		my $found = 0;
-		foreach my $include (@inc) {
-			if ($include eq $del) {
-				$kiwi -> loginfo (
-					"WARNING: package $del also found in install list\n"
-				);
-				$kiwi -> loginfo (
-					"WARNING: package $del ignored in delete list\n"
-				);
-				$found = 1;
-				last;
-			}
-		}
-		next if $found;
-		push @ret,$del;
-	}
-	return @ret;
 }
 
 #==========================================
@@ -6308,7 +6036,7 @@ sub getImageConfig_legacy {
 	# preferences attributes and text elements
 	#------------------------------------------
 	my %type  = %{$this->getImageTypeAndAttributes_legacy()};
-	my @delp  = $this -> getDeleteList_legacy();
+	my $delp  = $this -> getPackagesToDelete();
 	my $iver  = $this -> getPreferences() -> getVersion();
 	my $size  = $this -> getImageSize_legacy();
 	my $name  = $this -> getImageName();
@@ -6318,8 +6046,13 @@ sub getImageConfig_legacy {
 	if ($lics) {
 		$result{kiwi_showlicense} = join(" ",@{$lics});
 	}
-	if (@delp) {
-		$result{kiwi_delete} = join(" ",@delp);
+	if (@{$delp}) {
+		my @items_delete;
+		for my $package (@{$delp}) {
+			my $name = $package -> getName();
+			push @items_delete, $name;
+		}
+		$result{kiwi_delete} = join(" ",@items_delete);
 	}
 	if (@tstp) {
 		$result{kiwi_testing} = join(" ",@tstp);
@@ -6764,119 +6497,6 @@ sub getImageTypeAndAttributes_legacy {
 		return;
 	}
 	return $typeinfo->{$imageType};
-}
-
-#==========================================
-# getInstallList_legacy
-#------------------------------------------
-sub getInstallList_legacy {
-	# ...
-	# Create install package list needed to blow up the
-	# physical extend to what the image was designed for
-	# ---
-	my $this = shift;
-	return getList_legacy ($this,"image");
-}
-
-#==========================================
-# getInstallSize_legacy
-#------------------------------------------
-sub getInstallSize_legacy {
-	my $this    = shift;
-	my $kiwi    = $this->{kiwi};
-	my $nodes   = $this->{packageNodeList};
-	my $manager = $this->getPackageManager_legacy();
-	my $urllist = $this -> __getURLList_legacy();
-	my @result  = ();
-	my @delete  = ();
-	my @packages= ();
-	my %meta    = ();
-	my $solf    = undef;
-	my @solp    = ();
-	my @rpat    = ();
-	my $ptype;
-	#==========================================
-	# Handle package names to be included
-	#------------------------------------------
-	@packages = $this -> getBaseList_legacy();
-	push @result,@packages;
-	@packages = $this -> getInstallList_legacy();
-	push @result,@packages;
-	@packages = $this -> getTypeSpecificPackageList_legacy();
-	push @result,@packages;
-	#==========================================
-	# Handle package names to be deleted later
-	#------------------------------------------
-	@delete = $this -> getDeleteList_legacy();
-	#==========================================
-	# Handle pattern names
-	#------------------------------------------
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node = $nodes -> get_node($i);
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		my @pattlist = ();
-		my @slist = $node -> getElementsByTagName ("namedCollection");
-		foreach my $element (@slist) {
-			if (! $this -> isArchAllowed ($element,"packages")) {
-				next;
-			}
-			my $pattern = $element -> getAttribute ("name");
-			if ($pattern) {
-				push @result,"pattern:".$pattern;
-			}
-		}
-	}
-	#==========================================
-	# Add packagemanager in any case
-	#------------------------------------------
-	push @result, $manager;
-	#==========================================
-	# Run the solver...
-	#------------------------------------------
-	if (($manager) && ($manager eq "ensconce")) {
-		my $list = qxx ("ensconce -d");
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error (
-				"Error retrieving package metadata from ensconce."
-			);
-			return;
-		}
-		# Violates Expression form of "eval" FIXME
-		%meta = eval($list); ## no critic
-		@solp = keys(%meta);
-		# Ensconce reports package sizes in bytes, fix that
-		foreach my $pkg (keys(%meta)) {
-			$meta{$pkg} =~ s#^(\d+)#int($1/1024)#e;
-		}
-	} else {
-		my $psolve = KIWISatSolver -> new (
-			\@result,$urllist,"solve-patterns",
-			undef,undef,$ptype
-		);
-		if (! defined $psolve) {
-			$kiwi -> error ("SaT solver setup failed");
-			return;
-		}
-		if ($psolve -> getProblemsCount()) {
-			$kiwi -> error ("SaT solver problems found !\n");
-			return;
-		}
-		if (@{$psolve -> getFailedJobs()}) {
-			$kiwi -> error ("SaT solver failed jobs found !");
-			return;
-		}
-		%meta = $psolve -> getMetaData();
-		$solf = $psolve -> getSolfile();
-		@solp = $psolve -> getPackages();
-		@rpat = qxx (
-			"dumpsolv $solf|grep 'solvable:name: pattern:'|cut -f4 -d :"
-		);
-		chomp @rpat;
-	}
-	return (\%meta,\@delete,$solf,\@result,\@solp,\@rpat);
 }
 
 #==========================================
@@ -7461,7 +7081,7 @@ sub getList_legacy {
 		$nodes = $this->{packageNodeList};
 	}
 	my @result;
-	my $manager = $this -> getPackageManager_legacy();
+	my $manager = $this -> getPreferences() -> getPackageManager();
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		#==========================================
 		# Get type and packages
@@ -8216,26 +7836,6 @@ sub getPackageAttributes_legacy {
 }
 
 #==========================================
-# getPackageManager_legacy
-#------------------------------------------
-sub getPackageManager_legacy {
-	# ...
-	# Get the name of the package manager if set.
-	# if not set return the default package
-	# manager name
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $node = $this -> __getPreferencesNodeByTagName ("packagemanager");
-	my @packMgrs = $node -> getElementsByTagName ("packagemanager");
-	my $pmgr = $packMgrs[0];
-	if (! $pmgr) {
-		return 'zypper';
-	}
-	return $pmgr -> textContent();
-}
-
-#==========================================
 # getPackageNodeList_legacy
 #------------------------------------------
 sub getPackageNodeList_legacy {
@@ -8385,105 +7985,6 @@ sub getSplitPersistentExceptions_legacy {
 		push @result, $fileNode -> getAttribute ("name");
 	}
 	return @result;
-}
-
-#==========================================
-# getStripNodeList_legacy
-#------------------------------------------
-sub getStripNodeList_legacy {
-	# ...
-	# Return a list of all <strip> nodes. Each list member
-	# is an XML::LibXML::Element object pointer
-	# ---
-	my $this = shift;
-	return $this->{stripNodeList};
-}
-
-#==========================================
-# getTypeSpecificPackageList_legacy
-#------------------------------------------
-sub getTypeSpecificPackageList_legacy {
-	# ...
-	# Create package list according to the selected
-	# image type
-	# ---
-	my $this = shift;
-	my $node = $this->{typeNode};
-	my $type = $node -> getAttribute("image");
-	return getList_legacy ($this,$type);
-}
-
-#==========================================
-# getURLHash_legacy
-#------------------------------------------
-sub getURLHash_legacy {
-	my $this = shift;
-	if (! $this->{urlhash}) {
-		$this -> __createURLList_legacy();
-	}
-	return $this->{urlhash};
-}
-
-#==========================================
-# setPackageManager_legacy
-#------------------------------------------
-sub setPackageManager_legacy {
-	# ...
-	# set packagemanager to use for this image
-	# ---
-	my $this  = shift;
-	my $value = shift;
-	if (! $value) {
-		my $msg = 'setPackageManager method called without specifying '
-		. 'package manager value.';
-		$this -> {kiwi} -> error ($msg);
-		$this -> {kiwi} -> failed();
-		return;
-	}
-	my $opts = $this -> __getPreferencesNodeByTagName ("packagemanager");
-	my $pmgr = $opts -> getElementsByTagName ("packagemanager");
-	if (($pmgr) && ("$pmgr" eq "$value")) {
-		return $this;
-	}
-	my $addElement = XML::LibXML::Element -> new ("packagemanager");
-	# Also update the ned data structure to ensure the runtime checker works
-	# properly
-	my $prefObj = $this -> getPreferences();
-	$prefObj -> setPackageManager($value);
-	$this -> setPreferences($prefObj);
-	$addElement -> appendText ($value);
-	my $node = $opts -> getElementsByTagName ("packagemanager") -> get_node(1);
-	if ($node) {
-		$opts -> removeChild ($node);
-	}
-	$opts -> appendChild ($addElement);
-	$this -> __updateXML_legacy();
-	return $this;
-}
-
-#==========================================
-# addRemovePackages_legacy
-#------------------------------------------
-sub addRemovePackages_legacy {
-	# ...
-	# Add the given package list to the type=delete packages
-	# section of the xml description parse tree.
-	# ----
-	my @list = @_;
-	my $this = shift @list;
-	return $this -> addPackages_legacy ("delete",undef,undef,@list);
-}
-
-#==========================================
-# getRepoNodeList_legacy
-#------------------------------------------
-sub getRepoNodeList_legacy {
-	# ...
-	# Return the current <repository> list which consists
-	# of XML::LibXML::Element object pointers
-	# ---
-	my $this = shift;
-	return $this->{repositNodeList};
 }
 
 #==========================================
