@@ -1061,7 +1061,7 @@ sub setup {
 	#========================================
 	# create .profile from <image> tags
 	#----------------------------------------
-	$kiwi -> info ("Create .profile for package scripts");
+	$kiwi -> info ("Create .profile environment");
 	my $FD = FileHandle -> new();
 	if (! $FD -> open (">$root/.profile")) {
 		$kiwi -> failed ();

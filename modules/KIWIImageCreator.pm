@@ -194,6 +194,10 @@ sub prepareBootImage {
 		return;
 	}
 	#==========================================
+	# Store XML instance
+	#------------------------------------------
+	$this->{bootXML} = $bootXML;
+	#==========================================
 	# Store boot image name
 	#------------------------------------------
 	my $bootImageName = KIWIGlobals	-> instance()
@@ -496,6 +500,7 @@ sub createBootImage {
 	my $pkgMgr       = $this->{packageManager};
 	my $ignore       = $this->{ignoreRepos};
 	my $cmdL         = $this->{cmdL};
+	my $bootXML      = $this->{bootXML};
 	my $status;
 	#==========================================
 	# Check for prebuild boot image
@@ -538,33 +543,9 @@ sub createBootImage {
 		return $this;
 	}
 	#==========================================
-	# Setup the image XML description
-	#------------------------------------------
-	my $locator = KIWILocator -> instance();
-	my $controlFile = $locator -> getControlFile ($configDir);;
-	if (! $controlFile) {
-		return;
-	}
-	my $validator = KIWIXMLValidator -> new(
-		$controlFile,
-		$this->{gdata}->{Revision},
-		$this->{gdata}->{Schema},
-		$this->{gdata}->{SchemaCVT}
-	);
-	my $isValid = $validator ? $validator -> validate() : undef;
-	if (! $isValid) {
-		return;
-	}
-	if (! $this -> __checkImageIntegrity() ) {
-		return;
-	}
-	#==========================================
-	# Read boot image description
+	# Access boot image description
 	#------------------------------------------
 	$kiwi -> info ("--> Create boot image (initrd)...\n");
-	my $bootXML = KIWIXML -> new(
-		$configDir,"cpio",undef,$cmdL
-	);
 	if (! defined $bootXML) {
 		return;
 	}
@@ -635,49 +616,11 @@ sub createBootImage {
 	}
 	$this->{image} = $image;
 	#==========================================
-	# Update .profile env, current type
+	# Update .profile environment
 	#------------------------------------------
-	$kiwi -> info ("Updating boot image .profile environment");
-	my $tree = $image -> getImageTree();
-	my $configure = KIWIConfigure -> new(
-		$bootXML,$tree,$tree."/image",$destination
-	);
-	if (! defined $configure) {
+	if (! $this -> __updateProfileEnvironment ($bootXML,$destination)) {
 		return;
 	}
-	my %config = $bootXML -> getImageConfig_legacy();
-	my $PFD = FileHandle -> new();
-	if (! $PFD -> open (">$tree/.profile")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed to open $tree/.profile: $!");
-		$kiwi -> failed ();
-		return;
-	}
-	binmode($PFD, ":encoding(UTF-8)");
-	foreach my $key (keys %config) {
-		$kiwi -> loginfo ("[BOOT PROFILE]: $key=\"$config{$key}\"\n");
-		print $PFD "$key=\"$config{$key}\"\n";
-	}
-	$PFD -> close();
-	# Add entries that are handled through the new XML data structure
-	my $profile = KIWIProfileFile -> new();
-	if (! $profile) {
-		return;
-	}
-	$status = $profile -> updateFromHash (\%config);
-	if (! $status) {
-		return;
-	}
-	$status = $profile -> updateFromXML ($bootXML);
-	if (! $status) {
-		return;
-	}
-	$status = $profile -> writeProfile ($tree);
-	if (! $status) {
-		return;
-	}
-	$configure -> quoteFile ("$tree/.profile");
-	$kiwi -> done();
 	#==========================================
 	# Create cpio image
 	#------------------------------------------
@@ -907,56 +850,23 @@ sub createImage {
 		qxx ("mv $tree/image/config-cdroot.sh $destination");
 	}
 	#==========================================
-	# Update .profile env, current type
+	# Update .profile environment
 	#------------------------------------------
-	$kiwi -> info ("Updating .profile environment");
-	my $configure = KIWIConfigure -> new(
-		$xml,$tree,$tree."/image",$destination
-	);
-	if (! defined $configure) {
+	if (! $this -> __updateProfileEnvironment ($xml,$destination)) {
 		return;
 	}
-	my %config = $xml -> getImageConfig_legacy();
-	my $PFD = FileHandle -> new();
-	if (! $PFD -> open (">$tree/.profile")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed to open $tree/.profile: $!");
-		$kiwi -> failed ();
-		return;
-	}
-	binmode($PFD, ":encoding(UTF-8)");
-	foreach my $key (keys %config) {
-		$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
-		print $PFD "$key=\"$config{$key}\"\n";
-	}
-	$PFD -> close();
-	# Add entries that are handled through the new XML data structure
-	my $profile = KIWIProfileFile -> new();
-	my $status;
-	if (! $profile) {
-		return;
-	}
-	$status = $profile -> updateFromHash (\%config);
-	if (! $status) {
-		return;
-	}
-	$status = $profile -> updateFromXML ($xml);
-	if (! $status) {
-		return;
-	}
-	$status = $profile -> writeProfile ($tree);
-	if (! $status) {
-		return;
-	}
-	$configure -> quoteFile ("$tree/.profile");
-	qxx ("cp $tree/.profile $tree/image/.profile");
-	$kiwi -> done();
 	#==========================================
 	# Create recovery archive if specified
 	#------------------------------------------
 	if ($typeName eq "oem") {
 		my $filesys = $type -> getFilesystem();
-		if (! $configure -> setupRecoveryArchive($filesys)) {
+		my $configure = KIWIConfigure -> new(
+			$xml,$tree,$tree."/image",$destination
+		);
+		if (! defined $configure) {
+			return;
+		}
+		if (! $configure -> setupRecoveryArchive ($filesys)) {
 			return;
 		}
 	}
@@ -992,7 +902,7 @@ sub createImage {
 	my $factory = KIWIImageBuildFactory -> new ($xml, $cmdL, $image);
 	my $builder = $factory -> getImageBuilder();
 	my $checkFormat = 0;
-	$status = 0;
+	my $status = 0;
 	my $buildResultDir;
 	if ($builder) {
 		$status = $builder -> createImage();
@@ -1936,6 +1846,70 @@ sub __checkType {
 		};
 	}
 	return $para;
+}
+
+#==========================================
+# __updateProfileEnvironment
+#------------------------------------------
+sub __updateProfileEnvironment {
+	# ...
+	# update the contents of the .profile file due to
+	# changes given on the command line e.g image type
+	# or by inherited data when building boot (initrd)
+	# images
+	# ---
+	my $this  = shift;
+	my $xml   = shift;
+	my $dest  = shift;
+	my $kiwi  = $this->{kiwi};
+	my $image = $this->{image};
+	$kiwi -> info ("Updating .profile environment");
+	my $tree = $image -> getImageTree();
+	my $configure = KIWIConfigure -> new(
+		$xml,$tree,$tree."/image",$dest
+	);
+	if (! defined $configure) {
+		return;
+	}
+	# Add entries that are handled through the old data structure
+	my %config = $xml -> getImageConfig_legacy();
+	my $PFD = FileHandle -> new();
+	if (! $PFD -> open (">$tree/.profile")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to open $tree/.profile: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	binmode($PFD, ":encoding(UTF-8)");
+	foreach my $key (keys %config) {
+		$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
+		print $PFD "$key=\"$config{$key}\"\n";
+	}
+	$PFD -> close();
+	# Add entries that are handled through the new XML data structure
+	my $profile = KIWIProfileFile -> new();
+	my $status;
+	if (! $profile) {
+		return;
+	}
+	$status = $profile -> updateFromHash (\%config);
+	if (! $status) {
+		return;
+	}
+	$status = $profile -> updateFromXML ($xml);
+	if (! $status) {
+		return;
+	}
+	$status = $profile -> writeProfile ($tree);
+	if (! $status) {
+		return;
+	}
+	$configure -> quoteFile ("$tree/.profile");
+	if (-d "$tree/image") {
+		qxx ("cp $tree/.profile $tree/image/.profile");
+	}
+	$kiwi -> done();
+	return $this;
 }
 
 1;
