@@ -25,6 +25,7 @@ use Env;
 use FileHandle;
 use File::Basename;
 use Config::IniFiles;
+use POSIX;
 #==========================================
 # KIWI Modules
 #------------------------------------------
@@ -258,9 +259,9 @@ sub setupInstallationSource {
 		$stype = "public";
 	}
 	if ($chroot) {
-		$data = qxx ("@kchroot zypper --version 2>&1 | cut -c 8");
-		if ($data < 1) {
-			$kiwi -> info ("image zypper version is too old");
+		$data = qxx ("@kchroot zypper --version 2>&1 | cut -c 8"); chomp $data;
+		if ((! isdigit($data)) || ($data < 1)) {
+			$kiwi -> info ("image zypper version is too old, or not installed");
 			$kiwi -> skipped ();
 			return $this;
 		}

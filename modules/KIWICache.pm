@@ -155,18 +155,20 @@ sub initializeCache {
 	#==========================================
 	# Check for cachable patterns
 	#------------------------------------------
-	my @sections = ("bootstrap","image");
-	foreach my $section (@sections) {
-		my @list = $xml -> getList_legacy ($section);
-		foreach my $pac (@list) {
-			if ($pac =~ /^pattern:(.*)/) {
-				push @CachePatterns,$1;
-			} elsif ($pac =~ /^product:(.*)/) {
-				# no cache for products at the moment
-			} else {
-				push @CachePackages,$pac;
-			}
-		}
+	my $bootstrapPacks = $xml -> getBootstrapPackages();
+	for my $package (@{$bootstrapPacks}) {
+		my $name = $package -> getName();
+		push @CachePackages, $name;
+	}
+	my $imagePackages = $xml -> getPackages();
+	for my $package (@{$imagePackages}) {
+		my $name = $package -> getName();
+		push @CachePackages, $name;
+	}
+	my $imageCollection = $xml -> getPackageCollections();
+	for my $collection (@{$imageCollection}) {
+		my $name = $collection -> getName();
+		push @CachePatterns, 'pattern:'.$name;
 	}
 	if ((! @CachePatterns) && (! @CachePackages)) {
 		$kiwi -> warning ("No cachable patterns/packages in this image");
@@ -317,11 +319,13 @@ sub selectCache {
 	#==========================================
 	# setup cache file names...
 	#------------------------------------------
+	$kiwi -> info ("Searching for cached data...\n");
 	@file = glob ($this->{cdir}.'/'.$CacheDistro.'*.cache');
 	if (! @file) {
-		$kiwi -> loginfo (
-			"Cache: no caches found for $CacheDistro in $this->{cdir}\n"
+		$kiwi -> info (
+			"--> No caches found for $CacheDistro in $this->{cdir}\n"
 		);
+		$cmdL -> unsetCacheDir();
 		return;
 	}
 	#==========================================
@@ -331,10 +335,11 @@ sub selectCache {
 		#==========================================
 		# check cache files
 		#------------------------------------------
+		$kiwi -> info ("Cache check for: $meta...\n");
 		my $CACHE_FD;
 		if (! open ($CACHE_FD, '<', $meta)) {
-			$kiwi -> loginfo (
-				"Cache: no cache meta data $meta found\n"
+			$kiwi -> info (
+				"--> No cache meta data $meta found\n"
 			);
 			next;
 		}
@@ -346,7 +351,7 @@ sub selectCache {
 		chomp @cpac;
 		my $ccnt = @cpac;
 		$kiwi -> loginfo (
-			"Cache: $meta $ccnt packages, Image: $pcnt packages\n"
+			"--> $meta $ccnt packages, Image: $pcnt packages\n"
 		);
 		#==========================================
 		# check validity of cache
@@ -355,7 +360,7 @@ sub selectCache {
 		if ($ccnt > $pcnt) {
 			# cache is bigger than image solved list
 			$kiwi -> loginfo (
-				"Cache: $meta contains more packages than image installs\n"
+				"--> $meta contains more packages than image installs\n"
 			);
 			$invalid = 1;
 		} else {
@@ -363,7 +368,7 @@ sub selectCache {
 				if (! defined $plist{$p}) {
 					# cache package not part of image solved list
 					$kiwi -> loginfo (
-						"Cache: $meta $p not in image install list\n"
+						"--> $meta $p not in image install list\n"
 					);
 					$invalid = 1; last;
 				}
