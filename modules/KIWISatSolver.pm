@@ -159,6 +159,9 @@ sub new {
 		if ($arch eq "armv7l") {
 			$arch = "armv7hl";
 		}
+		if ($arch eq "armv6l") {
+			$arch = "armv6hl";
+		}
 		#==========================================
 		# allow arch overwrite
 		#------------------------------------------
