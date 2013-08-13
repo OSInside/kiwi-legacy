@@ -144,6 +144,9 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %ifarch armv7l armv7hl
 %define myarch armv7l
 %endif
+%ifarch armv6l armv6hl
+%define myarch armv6l
+%endif
 %ifarch %ix86
 %define myarch ix86
 %endif
