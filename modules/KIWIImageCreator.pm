@@ -587,6 +587,12 @@ sub createBootImage {
 	if (! $this -> __addVMachineDomainToBootXML ($systemXML, $bootXML)) {
 		return;
 	}
+	#==========================================
+	# merge/update oemconfig
+	#------------------------------------------
+	if (! $this -> __addOEMConfigDataToBootXML ($systemXML, $bootXML)) {
+		return;
+	}
 	# TODO: more to come
 	#==========================================
 	# update boot profiles
@@ -1634,6 +1640,31 @@ sub DESTROY {
 #==========================================
 # Private helper methods
 #------------------------------------------
+sub __addOEMConfigDataToBootXML {
+	# ...
+	# add the oemconfig information from the system XML data to the
+	# boot XML data by cloning the oemconfig section. kiwi's boot
+	# image descriptions does not contain oemconfig section data
+	# thus it's ok to to just add a copy of the system XML oemconfig
+	# section. The data is only copied if an oemconfig sectiom
+	# exists in the system XML data set
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $systemXML = shift;
+	my $bootXML   = shift;
+	my $systemOEMconf = $systemXML -> getOEMConfig();
+	if ($systemOEMconf) {
+		$bootXML -> setOEMConfig ($systemOEMconf);
+		my $data = $bootXML -> getOEMConfig() -> getDataReport();
+		foreach my $key (keys %{$data}) {
+			$kiwi -> info ("Updating OEM element $key: $data->{$key}");
+			$kiwi -> done ();
+		}
+	}
+	return $this;
+}
+
 #==========================================
 # __addVMachineDomainToBootXML
 #------------------------------------------

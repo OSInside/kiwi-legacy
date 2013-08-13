@@ -141,6 +141,25 @@ sub new {
 }
 
 #==========================================
+# getDataReport
+#------------------------------------------
+sub getDataReport {
+	# ...
+	# return a hash with OEM keys set to a value
+	# ---
+	my $this = shift;
+	my %result ;
+	foreach my $key (keys %{$this}) {
+		my $value = $this->{$key};
+		next if ref $value;
+		if (defined $value) {
+			$result{$key} = $value;
+		}
+	}
+	return \%result;
+}
+
+#==========================================
 # getAlignPartition
 #------------------------------------------
 sub getAlignPartition {

@@ -182,63 +182,23 @@ sub updateFromXML {
 		$kiwi -> failed();
 		return;
 	}
-	# All list entries using a space as separator
-	my %listObjData = (
-		# kiwi_delete                => $xml -> getPackagesToDelete(),
-		# kiwi_strip_delete          => $xml -> getFilesToDelete(),
-		# kiwi_strip_tools           => $xml -> getToolsToKeep(),
-		# kiwi_strip_libs            => $xml -> getLibsToKeep(),
-	);
-	for my $entry (keys %listObjData) {
-		my @names;
-		my $objs = $listObjData{$entry};
-		for my $obj (@{$objs}) {
-			push @names, $obj -> getName();
-		}
-		if (@names) {
-			my $addItem = join q{ }, @names;
-			$this -> addEntry($entry, $addItem);
-		}
-	}
-	# Process the drivers
-	my $drivers = $xml -> getDrivers();
-	my @drvNames;
-	for my $drv (@{$drivers}) {
-		push @drvNames, $drv -> getName();
-	}
-	if (@drvNames) {
-		my $addItem = join q{,}, @drvNames;
-		$this -> addEntry('kiwi_drivers', $addItem);
-	}
-	# Process the systemdisk
-	my $systemdisk = $xml -> getSystemDiskConfig();
-	if ($systemdisk) {
-		my $lvmgroup = $systemdisk -> getVGName();
-		if ($lvmgroup) {
-			$this -> addEntry('kiwi_lvmgroup',$lvmgroup);
-		}
-	}
-	# Process the machine
-	my $vconf = $xml -> getVMachineConfig();
-	if ($vconf) {
-		my $domain = $vconf -> getDomain();
-		if ($domain) {
-			$this -> addEntry('kiwi_xendomain',$domain);
-		}
-	}
-	# my $type = $xml -> getImageType();
-	# Process preferences
-	# my $comp = $type -> getCompressed();
-	# if ($comp && $comp eq 'true') {
-	#	$this -> addEntry('kiwi_compressed', 'yes');
-	# }
-	# Process license file data
-	# my $prefs = $xml -> getPreferences();
-	# my $lics = $prefs -> getShowLic();
-	# my $addItem = join q{ }, @{$lics};
-	# if ($addItem) {
-	#	$this -> addEntry('kiwi_showlicense', $addItem);
-	# }
+	#==========================================
+	# kiwi_drivers
+	#------------------------------------------
+	$this -> __updateXMLDrivers ($xml);
+	#==========================================
+	# kiwi_lvmgroup
+	#------------------------------------------
+	$this -> __updateXMLSystemDisk ($xml);
+	#==========================================
+	# kiwi_xendomain
+	#------------------------------------------
+	$this -> __updateXMLMachine ($xml);
+	#==========================================
+	# kiwi_oem*
+	#------------------------------------------
+	$this -> __updateXMLOEMConfig ($xml);
+	# TODO: more to come
 	return $this;
 }
 
@@ -309,6 +269,125 @@ sub writeProfile {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __updateXMLDrivers
+#------------------------------------------
+sub __updateXMLDrivers {
+	my $this = shift;
+	my $xml  = shift;
+	my $drivers = $xml -> getDrivers();
+	my @drvNames;
+	for my $drv (@{$drivers}) {
+		push @drvNames, $drv -> getName();
+	}
+	if (@drvNames) {
+		my $addItem = join q{,}, @drvNames;
+		$this -> addEntry('kiwi_drivers', $addItem);
+	}
+	return $this;
+}
+
+#==========================================
+# __updateXMLSystemDisk
+#------------------------------------------
+sub __updateXMLSystemDisk {
+	my $this = shift;
+	my $xml  = shift;
+	my $systemdisk = $xml -> getSystemDiskConfig();
+	if ($systemdisk) {
+		my $lvmgroup = $systemdisk -> getVGName();
+		if ($lvmgroup) {
+			$this -> addEntry('kiwi_lvmgroup',$lvmgroup);
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# __updateXMLMachine
+#------------------------------------------
+sub __updateXMLMachine {
+	my $this = shift;
+	my $xml  = shift;
+	my $vconf = $xml -> getVMachineConfig();
+	if ($vconf) {
+		my $domain = $vconf -> getDomain();
+		if ($domain) {
+			$this -> addEntry('kiwi_xendomain',$domain);
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# __updateXMLOEMConfig
+#------------------------------------------
+sub __updateXMLOEMConfig {
+	my $this = shift;
+	my $xml  = shift; 
+	my $oemconf = $xml -> getOEMConfig();
+	my %oem;
+	if ($oemconf) {
+		$oem{kiwi_oemataraid_scan}       = $oemconf -> getAtaRaidScan();
+		$oem{kiwi_oemswapMB}             = $oemconf -> getSwapSize();
+		$oem{kiwi_oemrootMB}             = $oemconf -> getSystemSize();
+		$oem{kiwi_oemswap}               = $oemconf -> getSwap();
+		$oem{kiwi_oemalign}              = $oemconf -> getAlignPartition();
+        $oem{kiwi_oempartition_install}  = $oemconf -> getPartitionInstall();
+        $oem{kiwi_oemtitle}              = $oemconf -> getBootTitle();
+        $oem{kiwi_oemkboot}              = $oemconf -> getKiwiInitrd();
+        $oem{kiwi_oemreboot}             = $oemconf -> getReboot();
+        $oem{kiwi_oemrebootinteractive}  = $oemconf -> getRebootInteractive();
+        $oem{kiwi_oemshutdown}           = $oemconf -> getShutdown();
+        $oem{kiwi_oemshutdowninteractive}= $oemconf -> getShutdownInteractive();
+        $oem{kiwi_oemsilentboot}         = $oemconf -> getSilentBoot();
+        $oem{kiwi_oemsilentinstall}      = $oemconf -> getSilentInstall();
+        $oem{kiwi_oemsilentverify}       = $oemconf -> getSilentVerify();
+        $oem{kiwi_oemskipverify}         = $oemconf -> getSkipVerify();
+        $oem{kiwi_oembootwait}           = $oemconf -> getBootwait();
+        $oem{kiwi_oemunattended}         = $oemconf -> getUnattended();
+        $oem{kiwi_oemunattended_id}      = $oemconf -> getUnattendedID();
+        $oem{kiwi_oemrecovery}           = $oemconf -> getRecovery();
+        $oem{kiwi_oemrecoveryID}         = $oemconf -> getRecoveryID();
+        $oem{kiwi_oemrecoveryInPlace}    = $oemconf -> getInplaceRecovery();
+		#==========================================
+		# special handling
+		#------------------------------------------
+		if ($oem{kiwi_oemswap} ne 'false') {
+			$this -> addEntry('kiwi_oemswap','true');
+			if (($oem{kiwi_oemswapMB}) && ($oem{kiwi_oemswapMB} > 0)) {
+				$this -> addEntry('kiwi_oemswapMB',$oem{kiwi_oemswapMB});
+			}
+		}
+		if (($oem{kiwi_oemataraid_scan}) && 
+			($oem{kiwi_oemataraid_scan} eq 'false')
+		) {
+			$this -> addEntry(
+				'kiwi_oemataraid_scan',$oem{kiwi_oemataraid_scan}
+			);
+		}
+		if ($oem{kiwi_oemtitle}) {
+			$this -> addEntry(
+				'kiwi_oemtitle',$this -> __quote ($oem{kiwi_oemtitle})
+			);
+		}
+		delete $oem{kiwi_oemtitle};
+		delete $oem{kiwi_oemswap};
+		delete $oem{kiwi_oemswapMB};
+		delete $oem{kiwi_oemataraid_scan};
+		#==========================================
+		# default handling for non false values
+		#------------------------------------------
+		foreach my $key (keys %oem) {
+			my $value = $oem{$key};
+			next if ! $value;
+			next if ($value eq 'false');
+			$this -> addEntry ($key,$value);
+		}
+	}
+	return $this;
+}
+
 #==========================================
 # __storeRevisionInformation
 #------------------------------------------

@@ -1991,8 +1991,12 @@ sub setupBootDisk {
 	#==========================================
 	# build bootfix for the bootloader on oem
 	#------------------------------------------
+	my $oemconf = $xml -> getOEMConfig();
 	if ($initrd =~ /oemboot/) {
-		my $oemtitle = $xml -> getOEMBootTitle_legacy();
+		my $oemtitle;
+		if ($oemconf) {
+			$oemtitle = $oemconf -> getBootTitle();
+		}
 		if ($oemtitle) {
 			$this->{bootlabel} = $oemtitle;
 			$bootfix = "OEM";
@@ -2001,7 +2005,10 @@ sub setupBootDisk {
 	#==========================================
 	# increase disk size for in-place recovery
 	#------------------------------------------
-	my $inplace = $xml -> getOEMRecoveryInPlace_legacy();
+	my $inplace;
+	if ($oemconf) {
+		$inplace = $oemconf -> getInplaceRecovery();
+	}
 	if (($inplace) && ("$inplace" eq "true")) {
 		my ($FD,$recoMB);
 		my $sizefile = "$destdir/recovery.partition.size";
