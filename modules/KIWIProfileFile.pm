@@ -218,6 +218,14 @@ sub updateFromXML {
 			$this -> addEntry('kiwi_lvmgroup',$lvmgroup);
 		}
 	}
+	# Process the machine
+	my $vconf = $xml -> getVMachineConfig();
+	if ($vconf) {
+		my $domain = $vconf -> getDomain();
+		if ($domain) {
+			$this -> addEntry('kiwi_xendomain',$domain);
+		}
+	}
 	# my $type = $xml -> getImageType();
 	# Process preferences
 	# my $comp = $type -> getCompressed();

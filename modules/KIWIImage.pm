@@ -219,7 +219,6 @@ sub updateDescription {
 	my $this      = shift;
 	my $src_xml   = shift;
 	my %src_type  = %{$src_xml->getImageTypeAndAttributes_legacy()};
-	my $vconf     = $src_xml -> getVMachineConfig();
 	my %changeset = ();
 	my @profiles;
 	my %repos;
@@ -234,13 +233,6 @@ sub updateDescription {
 	my @bootstrap_fplistDelete;
 	my @image_fplistDelete;
 	my @node;
-	my $domain;
-	#==========================================
-	# Get domain
-	#------------------------------------------
-	if ($vconf) {
-		$domain = $vconf -> getDomain();
-	}
 	#==========================================
 	# Get architecture
 	#------------------------------------------
@@ -291,7 +283,6 @@ sub updateDescription {
 	$changeset{"packagemanager"} = $src_xml
 		-> getPreferences() -> getPackageManager();
 	$changeset{"showlicense"}    = $src_xml->getLicenseNames_legacy();
-	$changeset{"domain"}         = $domain;
 	$changeset{"displayname"}    = $src_xml->getImageDisplayName();
 	$changeset{"locale"}         = $src_xml->getLocale_legacy();
 	#==========================================

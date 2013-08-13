@@ -578,8 +578,13 @@ sub createBootImage {
 	#==========================================
 	# merge/update strip
 	#------------------------------------------
-	my $res = $this -> __addStripDataToBootXML($systemXML, $bootXML);
-	if (! $res) {
+	if (! $this -> __addStripDataToBootXML($systemXML, $bootXML)) {
+		return;
+	}
+	#==========================================
+	# merge/update machine attribs in type
+	#------------------------------------------
+	if (! $this -> __addVMachineDomainToBootXML ($systemXML, $bootXML)) {
 		return;
 	}
 	# TODO: more to come
@@ -1629,6 +1634,34 @@ sub DESTROY {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __addVMachineDomainToBootXML
+#------------------------------------------
+sub __addVMachineDomainToBootXML {
+	# ...
+	# add the domain information from the system XML data to the
+	# boot XML data by cloning the machine section. kiwi's boot
+	# image descriptions does not contain machine section data
+	# thus it's ok to to just add a copy of the system XML machine
+	# section. The data is only copied if the system XML machine
+	# section contains a domain information
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $systemXML = shift;
+	my $bootXML   = shift;
+	my $systemVConf = $systemXML -> getVMachineConfig();
+	if ($systemVConf) {
+		my $domain = $systemVConf -> getDomain();
+		if ($domain) {
+			$kiwi -> info ("Updating machine attribute domain: $domain");
+			$bootXML -> setVMachineConfig ($systemVConf);
+			$kiwi -> done();
+		}
+	}
+	return $this;
+}
+
 #==========================================
 # __addStripDataToBootXML
 #------------------------------------------

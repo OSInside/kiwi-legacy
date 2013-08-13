@@ -1974,6 +1974,26 @@ sub getVMachineConfig {
 }
 
 #==========================================
+# setVMachineConfig
+#------------------------------------------
+sub setVMachineConfig {
+	# ...
+	# Store a new VMachineData object
+	# ---
+	my $this  = shift;
+	my $vconf = shift;
+	my $vcref = ref $vconf;
+	if (! $vcref) {
+		return;
+	}
+	if ($vcref ne 'KIWIXMLVMachineData') {
+		return;
+	}
+	$this->{selectedType}->{machine} = $vconf;
+	return $this;
+}
+
+#==========================================
 # ignoreRepositories
 #------------------------------------------
 sub ignoreRepositories {
@@ -6156,15 +6176,7 @@ sub getImageConfig_legacy {
 	#==========================================
 	# machine
 	#------------------------------------------
-	my $xendomain;
-	my $tnode= $this->{typeNode};
-	my $xenNode = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	if ($xenNode) {
-		$xendomain = $xenNode -> getAttribute ("domain");
-		if (defined $xendomain) {
-			$result{kiwi_xendomain} = $xendomain;
-		}
-	}
+	# domain is handled in the new data structure
 	#==========================================
 	# systemdisk
 	#------------------------------------------
@@ -6200,6 +6212,7 @@ sub getImageConfig_legacy {
 	#==========================================
 	# oemconfig
 	#------------------------------------------
+	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	if (defined $node) {
 		my $oemataraidscan = $node
@@ -8533,9 +8546,7 @@ sub __updateDescriptionFromChangeSet_legacy {
 	#==========================================
 	# 6) merge/update machine attribs in type
 	#------------------------------------------
-	if (defined $changeset->{"domain"}) {
-		$this -> __setMachineAttribute ("domain",$changeset);
-	}
+	# domain attribute is handled through the new data structure
 	#==========================================
 	# 7) merge/update preferences and type
 	#------------------------------------------
@@ -9030,51 +9041,6 @@ sub __setSystemDiskElement {
 	}
 	if ($newconfig) {
 		$this->{typeNode} -> appendChild ($disk);
-	}
-	$kiwi -> done ();
-	$this -> __updateTypeList_legacy();
-	$this -> __updateXML_legacy();
-	return $this;
-}
-
-#==========================================
-# __setMachineAttribute
-#------------------------------------------
-sub __setMachineAttribute {
-	# ...
-	# If given element exists in the data hash, set this
-	# attribute into the current machine (options) XML tree
-	# if no machine section exists create a new one
-	# ---
-	my $this = shift;
-	my $item = shift;
-	my $data = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $value = $data->{$item};
-	my $newconfig = 0;
-	$kiwi -> info ("Updating machine attribute $item: $value");
-	my $opts = $tnode -> getElementsByTagName ("machine") -> get_node(1);
-	if (! defined $opts) {
-		$opts = XML::LibXML::Element -> new ("machine");
-		my $disk = XML::LibXML::Element -> new ("vmdisk");
-		$disk -> setAttribute ("controller","scsi");
-		$disk -> setAttribute ("id","0");
-		$opts -> appendChild ($disk);
-		$newconfig = 1;
-	}
-	my $node = $opts -> getElementsByTagName ("$item");
-	if ($node) {
-		$node = $node -> get_node(1);
-		$opts -> removeChild ($node);
-	}
-	if ($value) {
-		$opts-> setAttribute ("$item","$value");
-	} else {
-		$opts-> setAttribute ("$item","true");
-	}
-	if ($newconfig) {
-		$this->{typeNode} -> appendChild ($opts);
 	}
 	$kiwi -> done ();
 	$this -> __updateTypeList_legacy();
