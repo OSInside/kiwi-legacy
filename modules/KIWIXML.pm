@@ -1496,6 +1496,19 @@ sub getImageDisplayName {
 }
 
 #==========================================
+# setImageDisplayName
+#------------------------------------------
+sub setImageDisplayName {
+	# ...
+	# Set the display name used for the boot menu
+	# ---
+	my $this = shift;
+	my $name = shift;
+	$this->{imageConfig}->{displayName} = $name;
+	return $this;
+}
+
+#==========================================
 # getImageName
 #------------------------------------------
 sub getImageName {
@@ -7770,11 +7783,7 @@ sub __updateDescriptionFromChangeSet_legacy {
 	#==========================================
 	# 9) merge/update image attribs, toplevel
 	#------------------------------------------
-	if (defined $changeset->{"displayname"}) {
-		$this -> __setImageAttribute (
-			"displayname",$changeset->{"displayname"}
-		);
-	}
+	# image data is handled through the new data structure
 	#==========================================
 	# 10) merge/update volumes with size info
 	#------------------------------------------
@@ -7984,29 +7993,6 @@ sub __setTypeAttribute {
 	}
 	$kiwi -> done ();
 	$this -> __updateTypeList_legacy();
-	$this -> __updateXML_legacy();
-	return $this;
-}
-
-#==========================================
-# __setImageAttribute
-#------------------------------------------
-sub __setImageAttribute {
-	# ...
-	# set given attribute to the image section
-	# ---
-	my $this = shift;
-	my $attr = shift;
-	my $val  = shift;
-	my $kiwi = $this->{kiwi};
-	my $inode= $this->{imgnameNodeList} -> get_node(1);
-	$kiwi -> info ("Updating image attribute: $attr");
-	if ($val) {
-		$inode -> setAttribute ("$attr","$val");
-	} else {
-		$inode -> setAttribute ("$attr","true");
-	}
-	$kiwi -> done ();
 	$this -> __updateXML_legacy();
 	return $this;
 }

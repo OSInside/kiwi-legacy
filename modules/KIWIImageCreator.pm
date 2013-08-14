@@ -248,6 +248,16 @@ sub prepareBootImage {
 	# Inherit system XML data to the boot
 	#------------------------------------------
 	#==========================================
+	# merge/update displayname
+	#------------------------------------------
+	my $displayname = $systemXML -> getImageDisplayName();
+	if ($displayname) {
+		$kiwi -> info (
+			"Updating image attribute: displayname: $displayname"
+		);
+		$bootXML -> setImageDisplayName ($displayname);
+	}
+	#==========================================
 	# merge/update repositories
 	#------------------------------------------
 	my $status = $bootXML -> discardReplacableRepos();

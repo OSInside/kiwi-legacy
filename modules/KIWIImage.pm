@@ -278,10 +278,6 @@ sub updateDescription {
 		$changeset{"profiles"} = \@profiles;
 	}
 	#==========================================
-	# Store general data
-	#------------------------------------------
-	$changeset{"displayname"}    = $src_xml->getImageDisplayName();
-	#==========================================
 	# Return changeset hash
 	#------------------------------------------
 	return %changeset;
