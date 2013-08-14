@@ -129,6 +129,12 @@ sub new {
 		$this->{packagemanager} = 'zypper';
 		$this->{defaultpackagemanager} = 1;
 	}
+	if (! $init->{bootloader_theme}) {
+		$this->{bootloader_theme} = 'openSUSE';
+	}
+	if (! $init->{bootsplash_theme}) {
+		$this->{bootsplash_theme} = 'openSUSE';
+	}
 	return $this;
 }
 

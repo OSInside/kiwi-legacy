@@ -183,6 +183,52 @@ sub updateFromXML {
 		return;
 	}
 	#==========================================
+	# kiwi_profiles
+	#------------------------------------------
+	my $profiles = $xml -> getActiveProfileNames();
+	if ($profiles) {
+		$this -> addEntry('kiwi_profiles',join(q{,},@{$profiles}));
+	}
+	#==========================================
+	# kiwi_type
+	#------------------------------------------
+	my $type = $xml -> getImageType() -> getTypeName();
+	if ($type) {
+		$this -> addEntry('kiwi_type',$type);
+	}
+	#==========================================
+	# kiwi_delete
+	#------------------------------------------
+	my $delp = $xml -> getPackagesToDelete();
+	if (@{$delp}) {
+		my @items_delete;
+		for my $package (@{$delp}) {
+			my $name = $package -> getName();
+			push @items_delete, $name;
+		}
+		$this -> addEntry('kiwi_delete',join(q{ },@items_delete));
+	}
+	#==========================================
+	# kiwi_iname
+	#------------------------------------------
+	my $name  = $xml -> getImageName();
+	if ($name) {
+		$this -> addEntry('kiwi_iname',$name);
+	}
+	#==========================================
+	# kiwi_cpio_name
+	#------------------------------------------
+	if ($type eq 'cpio') {
+		$this -> addEntry('kiwi_cpio_name',$name);
+	}
+	#==========================================
+	# kiwi_displayname
+	#------------------------------------------
+	my $dname = $xml -> getImageDisplayName ($xml);
+	if ($dname) {
+		$this -> addEntry('kiwi_displayname',quotemeta ($dname));
+	}
+	#==========================================
 	# kiwi_drivers
 	#------------------------------------------
 	$this -> __updateXMLDrivers ($xml);
@@ -198,7 +244,14 @@ sub updateFromXML {
 	# kiwi_oem*
 	#------------------------------------------
 	$this -> __updateXMLOEMConfig ($xml);
-	# TODO: more to come
+	#==========================================
+	# kiwi_strip*
+	#------------------------------------------
+	$this -> __updateXMLStrip ($xml);
+	#==========================================
+	# kiwi preferences variables
+	#------------------------------------------
+	$this -> __updateXMLPreferences ($xml);
 	return $this;
 }
 
@@ -269,6 +322,111 @@ sub writeProfile {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __updateXMLPreferences
+#------------------------------------------
+sub __updateXMLPreferences {
+	my $this = shift;
+	my $xml  = shift;
+	my $pref = $xml -> getPreferences();
+	#==========================================
+	# kiwi_iversion
+	#------------------------------------------
+	my $iver = $pref -> getVersion();
+	if ($iver) {
+		$this -> addEntry('kiwi_iversion',$iver);
+	}
+	#==========================================
+	# kiwi_showlicense
+	#------------------------------------------
+	my $lics = $pref -> getShowLic();
+	if ($lics) {
+		$this -> addEntry('kiwi_showlicense',$lics);
+	}
+	#==========================================
+	# kiwi_keytable
+	#------------------------------------------
+	my $keytable = $pref -> getKeymap();
+	if ($keytable) {
+		$this -> addEntry('kiwi_keytable',$keytable);
+	}
+	#==========================================
+	# kiwi_timezone
+	#------------------------------------------
+	my $timezone = $pref -> getTimezone();
+	if ($timezone) {
+		$this -> addEntry('kiwi_timezone',$timezone);
+	}
+	#==========================================
+	# kiwi_hwclock
+	#------------------------------------------
+	my $hwclock = $pref -> getHWClock();
+	if ($hwclock) {
+		$this -> addEntry('kiwi_hwclock',$hwclock);
+	}
+	#==========================================
+	# kiwi_language
+	#------------------------------------------
+	my $lang = $pref -> getLocale();
+	if ($lang) {
+		$this -> addEntry('kiwi_language',$lang);
+	}
+	#==========================================
+	# kiwi_splash_theme
+	#------------------------------------------
+	my $splashtheme = $pref -> getBootSplashTheme();
+	if ($splashtheme) {
+		$this -> addEntry('kiwi_splash_theme',$splashtheme);
+	}
+	#==========================================
+	# kiwi_loader_theme
+	#------------------------------------------
+	my $loadertheme = $pref -> getBootLoaderTheme();
+	if ($loadertheme) {
+		$this -> addEntry('kiwi_loader_theme',$loadertheme);
+	}
+	return $this;
+}
+
+#==========================================
+# __updateXMLStrip
+#------------------------------------------
+sub __updateXMLStrip {
+	my $this = shift;
+	my $xml  = shift;
+	my $s_delref = $xml -> getFilesToDelete();
+	if ($s_delref) {
+		my @s_del;
+		foreach my $stripdata (@{$s_delref}) {
+			push @s_del,$stripdata->getName();
+		}
+		if (@s_del) {
+			$this -> addEntry('kiwi_strip_delete',join(q{ },@s_del));
+		}
+	}
+	my $s_toolref = $xml -> getToolsToKeep();
+	if ($s_toolref) {
+		my @s_tool;
+		foreach my $stripdata (@{$s_toolref}) {
+			push @s_tool,$stripdata->getName();
+		}
+		if (@s_tool) {
+			$this -> addEntry('kiwi_strip_tools',join(q{ },@s_tool));
+		}
+	}
+	my $s_libref  = $xml -> getLibsToKeep();
+	if ($s_libref) {
+		my @s_lib;
+		foreach my $stripdata (@{$s_libref}) {
+			push @s_lib,$stripdata->getName();
+		}
+		if (@s_lib) {
+			$this -> addEntry('kiwi_strip_libs',join(q{ },@s_lib));
+		}
+	}
+	return $this;
+}
+
 #==========================================
 # __updateXMLDrivers
 #------------------------------------------

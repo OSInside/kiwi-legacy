@@ -272,8 +272,13 @@ sub prepareBootImage {
 	#==========================================
 	# merge/update strip
 	#------------------------------------------
-	my $res = $this -> __addStripDataToBootXML($systemXML, $bootXML);
-	if (! $res) {
+	if (! $this -> __addStripDataToBootXML($systemXML, $bootXML)) {
+		return;
+	}
+	#==========================================
+	# merge/update preferences
+	#------------------------------------------
+	if (! $this -> __addPreferencesToBootXML ($systemXML, $bootXML)) {
 		return;
 	}
 	#==========================================
@@ -1540,14 +1545,15 @@ sub __prepareTree {
 	# Check for setup of boot theme
 	#------------------------------------------
 	if ($attr{"type"} eq "cpio") {
-		my @theme = $xml -> getBootTheme_legacy();
-		if (@theme) {
-			$kiwi -> info ("Using bootsplash theme: $theme[0]");
+		my $pref  = $xml -> getPreferences();
+		my $splash_theme = $pref -> getBootSplashTheme();
+		my $loader_theme = $pref -> getBootLoaderTheme();
+		if ($splash_theme) {
+			$kiwi -> info ("Using bootsplash theme: $splash_theme");
 			$kiwi -> done ();
-			$kiwi -> info ("Using bootloader theme: $theme[1]");
-			$kiwi -> done ();
-		} else {
-			$kiwi -> warning ("No boot theme set, default is openSUSE");
+		}
+		if ($loader_theme) {
+			$kiwi -> info ("Using bootloader theme: $loader_theme");
 			$kiwi -> done ();
 		}
 	}
@@ -1639,6 +1645,54 @@ sub DESTROY {
 #==========================================
 # Private helper methods
 #------------------------------------------
+sub __addPreferencesToBootXML {
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $systemXML = shift;
+	my $bootXML   = shift;
+	my $syspref   = $systemXML -> getPreferences();
+	my $bootpref  = $bootXML   -> getPreferences();
+	#==========================================
+	# package manager
+	#------------------------------------------
+	my $manager = $syspref -> getPackageManager();
+	if ($manager) {
+		$bootpref -> setPackageManager ($manager);
+	}
+	#==========================================
+	# locale
+	#------------------------------------------
+	my $locale = $syspref -> getLocale();
+	if ($locale) {
+		$bootpref -> setLocale ($locale);
+	}
+	#==========================================
+	# license
+	#------------------------------------------
+	my $license = $syspref -> getShowLic();
+	if ($license) {
+		$bootpref -> setShowLic ($license);
+	}
+	#==========================================
+	# bootloader theme
+	#------------------------------------------
+	my $loadertheme = $syspref -> getBootLoaderTheme();
+	if ($loadertheme) {
+		$bootpref -> setBootLoaderTheme ($loadertheme);
+	}
+	#==========================================
+	# bootsplash theme
+	#------------------------------------------
+	my $splashtheme = $syspref -> getBootSplashTheme();
+	if ($splashtheme) {
+		$bootpref -> setBootSplashTheme ($splashtheme);
+	}
+	return $this;
+}
+
+#==========================================
+# __addSystemDiskToBootXML
+#------------------------------------------
 sub __addSystemDiskToBootXML {
 	# ...
 	# add the systemdisk information from the system XML data to the
@@ -1719,9 +1773,10 @@ sub __addTypeToBootXML {
 	#==========================================
 	# filesystem 
 	#------------------------------------------
-	$bootType -> setFilesystem (
-		$systemType -> getFilesystem()
-	);
+	my $fs = $systemType -> getFilesystem();
+	if ($fs) {
+		$bootType -> setFilesystem ($fs);
+	}
 	# TODO: more to come
 	return $this;
 }

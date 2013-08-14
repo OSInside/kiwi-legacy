@@ -4011,32 +4011,6 @@ sub test_getBootstrapPackages {
 }
 
 #==========================================
-# test_getBootTheme_legacy
-#------------------------------------------
-sub test_getBootTheme_legacy {
-	# ...
-	# Verify proper return of getBootTheme_legacy method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my @values = $xml -> getBootTheme_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	my @themes = qw /bluestar silverlining/;
-	$this -> assert_array_equal(\@themes, \@values);
-	return;
-}
-
-#==========================================
 # test_getConfigName
 #------------------------------------------
 sub test_getConfigName {
@@ -4823,57 +4797,6 @@ sub test_getLibsToKeep {
 		push @libNames, $lib -> getName();
 	}
 	$this -> assert_array_equal(\@expected, \@libNames);
-	return;
-}
-
-#==========================================
-# test_getLicenseNames_legacy
-#------------------------------------------
-sub test_getLicenseNames_legacy {
-	# ...
-	# Verify proper return of getLicenseNames_legacy method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $licNames = $xml -> getLicenseNames_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	my @expected = qw (/opt/myApp/lic.txt /opt/myApp/thirdParty/appA/lic.txt);
-	$this -> assert_array_equal(\@expected, $licNames);
-	return;
-}
-
-#==========================================
-# test_getLocale_legacy
-#------------------------------------------
-sub test_getLocale_legacy {
-	# ...
-	# Verify proper return of getLocale method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getLocale_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('en_US', $value);
 	return;
 }
 
@@ -5798,7 +5721,7 @@ sub test_getPreferencesProfilesNoPref {
 	# with the unit test for the PreferenceData object
 	# Should have data for settings in the default profile
 	my $blTheme = $prefDataObj -> getBootLoaderTheme();
-	$this -> assert_null($blTheme);
+	$this -> assert_str_equals('openSUSE', $blTheme);
 	my $locale = $prefDataObj -> getLocale();
 	$this -> assert_str_equals('en_US', $locale);
 	my $ver = $prefDataObj -> getVersion();
@@ -7267,7 +7190,7 @@ sub test_setPreferences {
 	$this -> assert_str_equals('UTC', $clock);
 	# Verify the setting for boot loader has not been applied to the default
 	my $bLTheme = $prefDefault -> getBootLoaderTheme();
-	$this -> assert_null($bLTheme);
+	$this -> assert_str_equals('openSUSE', $bLTheme);
 	$xml -> setSelectionProfileNames(\@profNames);
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals($expected, $msg);

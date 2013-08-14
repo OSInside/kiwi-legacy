@@ -5970,30 +5970,6 @@ sub getSingleInstSourceSatSolvable {
 # eliminated or replaced
 #------------------------------------------
 #==========================================
-# getBootTheme_legacy
-#------------------------------------------
-sub getBootTheme_legacy {
-	# ...
-	# Obtain the theme values for splash and bootloader
-	# ---
-	my $this   = shift;
-	my $snode  = $this -> __getPreferencesNodeByTagName ("bootsplash-theme");
-	my $lnode  = $this -> __getPreferencesNodeByTagName ("bootloader-theme");
-	my $splash = $snode -> getElementsByTagName ("bootsplash-theme");
-	my $loader = $lnode -> getElementsByTagName ("bootloader-theme");
-	my @result = (
-		"openSUSE","openSUSE"
-	);
-	if (($splash) && ("$splash" ne "")) {
-		$result[0] = $splash;
-	}
-	if (($loader) && ("$loader" ne "")) {
-		$result[1] = $loader;
-	}
-	return @result;
-}
-
-#==========================================
 # getEditBootConfig_legacy
 #------------------------------------------
 sub getEditBootConfig_legacy {
@@ -6040,60 +6016,10 @@ sub getImageConfig_legacy {
 	my %result;
 	my @nodelist;
 	#==========================================
-	# strip section data (tools,libs,delete)
-	#------------------------------------------
-	my $s_delref = $this -> getFilesToDelete();
-	if ($s_delref) {
-		my @s_del;
-		foreach my $stripdata (@{$s_delref}) {
-			push @s_del,$stripdata->getName();
-		}
-		if (@s_del) {
-			$result{kiwi_strip_delete} = join(" ",@s_del);
-		}
-	}
-	my $s_toolref = $this -> getToolsToKeep();
-	if ($s_toolref) {
-		my @s_tool;
-		foreach my $stripdata (@{$s_toolref}) {
-			push @s_tool,$stripdata->getName();
-		}
-		if (@s_tool) {
-			$result{kiwi_strip_tools} = join(" ",@s_tool);
-		}
-	}
-	my $s_libref  = $this -> getLibsToKeep();
-	if ($s_libref) {
-		my @s_lib;
-		foreach my $stripdata (@{$s_libref}) {
-			push @s_lib,$stripdata->getName();
-		}
-		if (@s_lib) {
-			$result{kiwi_strip_libs} = join(" ",@s_lib);
-		}
-	}
-	#==========================================
 	# preferences attributes and text elements
 	#------------------------------------------
 	my %type  = %{$this->getImageTypeAndAttributes_legacy()};
-	my $delp  = $this -> getPackagesToDelete();
-	my $iver  = $this -> getPreferences() -> getVersion();
-	my $size  = $this -> getImageSize_legacy();
-	my $name  = $this -> getImageName();
-	my $dname = $this -> getImageDisplayName ($this);
-	my $lics  = $this -> getLicenseNames_legacy();
 	my @tstp  = $this -> getTestingList();
-	if ($lics) {
-		$result{kiwi_showlicense} = join(" ",@{$lics});
-	}
-	if (@{$delp}) {
-		my @items_delete;
-		for my $package (@{$delp}) {
-			my $name = $package -> getName();
-			push @items_delete, $name;
-		}
-		$result{kiwi_delete} = join(" ",@items_delete);
-	}
 	if (@tstp) {
 		$result{kiwi_testing} = join(" ",@tstp);
 	}
@@ -6101,9 +6027,6 @@ sub getImageConfig_legacy {
 		&& (defined $type{compressed})
 		&& ($type{compressed} eq "true")) {
 		$result{kiwi_compressed} = "yes";
-	}
-	if (%type) {
-		$result{kiwi_type} = $type{type};
 	}
 	if ((%type) && ($type{cmdline})) {
 		$result{kiwi_cmdline} = $type{cmdline};
@@ -6141,72 +6064,9 @@ sub getImageConfig_legacy {
 		&& ($type{ramonly} eq "true")) {
 		$result{kiwi_ramonly} = "yes";
 	}
+	my $size  = $this -> getImageSize_legacy();
 	if ($size) {
 		$result{kiwi_size} = $size;
-	}
-	if ($name) {
-		$result{kiwi_iname} = $name;
-		if ($type{type} eq "cpio") {
-			$result{kiwi_cpio_name} = $name;
-		}
-	}
-	if ($dname) {
-		$result{kiwi_displayname} = quotemeta $dname;
-	}
-	if ($iver) {
-		$result{kiwi_iversion} = $iver;
-	}
-	@nodelist = $this->{optionsNodeList} -> get_nodelist();
-	foreach my $element (@nodelist) {
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		my $keytable    = $element -> getElementsByTagName ("keytable");
-		my $timezone    = $element -> getElementsByTagName ("timezone");
-		my $hwclock     = $element -> getElementsByTagName ("hwclock");
-		my $language    = $element -> getElementsByTagName ("locale");
-		my $splashtheme = $element -> getElementsByTagName ("bootsplash-theme");
-		my $loadertheme = $element -> getElementsByTagName ("bootloader-theme");
-		if ((defined $keytable) && ("$keytable" ne "")) {
-			$result{kiwi_keytable} = $keytable;
-		}
-		if ((defined $timezone) && ("$timezone" ne "")) {
-			$result{kiwi_timezone} = $timezone;
-		}
-		if ((defined $hwclock) && ("$hwclock" ne "")) {
-			$result{kiwi_hwclock} = $hwclock;
-		}
-		if ((defined $language) && ("$language" ne "")) {
-			$result{kiwi_language} = $language;
-		}
-		if ((defined $splashtheme) && ("$splashtheme" ne "")) {
-			$result{kiwi_splash_theme}= $splashtheme;
-		}
-		if ((defined $loadertheme) && ("$loadertheme" ne "")) {
-			$result{kiwi_loader_theme}= $loadertheme;
-		}
-	}
-	#==========================================
-	# drivers
-	#------------------------------------------
-	# drivers are handled in the new data structure
-	#==========================================
-	# machine
-	#------------------------------------------
-	# domain is handled in the new data structure
-	#==========================================
-	# systemdisk
-	#------------------------------------------
-	# systemdisk is handled in the new data structure
-	#==========================================
-	# oemconfig
-	#------------------------------------------
-	# oemconfig is handled in the new data structure
-	#==========================================
-	# profiles
-	#------------------------------------------
-	if (defined $this->{reqProfiles}) {
-		$result{kiwi_profiles} = join ",", @{$this->{reqProfiles}};
 	}
 	return %result;
 }
@@ -6913,28 +6773,6 @@ sub getInstSourceRepository_legacy {
 }
 
 #==========================================
-# getLicenseNames_legacy
-#------------------------------------------
-sub getLicenseNames_legacy {
-	# ...
-	# Get the names of all showlicense elements and return
-	# them as a list to the caller
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $node = $this -> __getPreferencesNodeByTagName ("showlicense");
-	my @lics = $node -> getElementsByTagName ("showlicense");
-	my @names = ();
-	foreach my $node (@lics) {
-		push (@names,$node -> textContent());
-	}
-	if (@names) {
-		return \@names;
-	}
-	return;
-}
-
-#==========================================
 # getList_legacy
 #------------------------------------------
 sub getList_legacy {
@@ -7141,22 +6979,6 @@ sub getList_legacy {
 	$this->{replAddList} = \@replAddList;
 	my @ordered = sort keys %packHash;
 	return @ordered;
-}
-
-#==========================================
-# getLocale_legacy
-#------------------------------------------
-sub getLocale_legacy {
-	# ...
-	# Obtain the locale value or return undef
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("locale");
-	my $lang = $node -> getElementsByTagName ("locale");
-	if ((! defined $lang) || ("$lang" eq "")) {
-		return;
-	}
-	return "$lang";
 }
 
 #==========================================
@@ -7886,21 +7708,7 @@ sub __updateDescriptionFromChangeSet_legacy {
 	#------------------------------------------
 	# oemconfig  data is handled through the new data structure
 	# systemdisk data is handled through the new data structure
-	if (defined $changeset->{"locale"}) {
-		$this -> __setOptionsElement ("locale",$changeset);
-	}
-	if (defined $changeset->{"bootloader-theme"}) {
-		$this -> __setOptionsElement ("bootloader-theme",$changeset);
-	}
-	if (defined $changeset->{"bootsplash-theme"}) {
-		$this -> __setOptionsElement ("bootsplash-theme",$changeset);
-	}
-	if (defined $changeset->{"packagemanager"}) {
-		$this -> __setOptionsElement ("packagemanager",$changeset);
-	}
-	if (defined $changeset->{"showlicense"}) {
-		$this -> __addOptionsElement ("showlicense",$changeset);
-	}
+	# preferences data is handled through the new data structure
 	#==========================================
 	# 8) merge/update type attributes
 	#------------------------------------------
@@ -8152,67 +7960,6 @@ sub __hasDefaultProfName {
 		}
 	}
 	return;
-}
-
-#==========================================
-# __setOptionsElement
-#------------------------------------------
-sub __setOptionsElement {
-	# ...
-	# If given element exists in the data hash, set this
-	# element into the current preferences (options) XML tree
-	# ---
-	my $this = shift;
-	my $item = shift;
-	my $data = shift;
-	my $kiwi = $this->{kiwi};
-	my $value = $data->{$item};
-	$kiwi -> info ("Updating element $item: $value");
-	my $addElement = XML::LibXML::Element -> new ("$item");
-	$addElement -> appendText ($value);
-	my $opts = $this -> __getPreferencesNodeByTagName ("$item");
-	my $node = $opts -> getElementsByTagName ("$item");
-	if ($node) {
-		if ("$node" eq "$value") {
-			$kiwi -> done ();
-			return $this;
-		}
-		$node = $node -> get_node(1);
-		$opts -> removeChild ($node);
-	}
-	$opts -> appendChild ($addElement);
-	$kiwi -> done ();
-	$this -> __updateXML_legacy();
-	return $this;
-}
-
-#==========================================
-# __addOptionsElement
-#------------------------------------------
-sub __addOptionsElement {
-	# ...
-	# add a new element into the current preferences XML tree
-	# the data reference must be an array. Each element of the
-	# array is processed as new XML element
-	# ---
-	my $this = shift;
-	my $item = shift;
-	my $data = shift;
-	my $kiwi = $this->{kiwi};
-	my $value= $data->{$item};
-	if (! $value) {
-		return $this;
-	}
-	foreach my $text (@{$value}) {
-		$kiwi -> info ("Adding element $item: $text");
-		my $addElement = XML::LibXML::Element -> new ("$item");
-		$addElement -> appendText ($text);
-		my $opts = $this -> __getPreferencesNodeByTagName ("$item");
-		$opts -> appendChild ($addElement);
-		$kiwi -> done ();
-	}
-	$this -> __updateXML_legacy();
-	return $this;
 }
 
 #==========================================

@@ -280,17 +280,7 @@ sub updateDescription {
 	#==========================================
 	# Store general data
 	#------------------------------------------
-	$changeset{"packagemanager"} = $src_xml
-		-> getPreferences() -> getPackageManager();
-	$changeset{"showlicense"}    = $src_xml->getLicenseNames_legacy();
 	$changeset{"displayname"}    = $src_xml->getImageDisplayName();
-	$changeset{"locale"}         = $src_xml->getLocale_legacy();
-	#==========================================
-	# Store Theme data
-	#------------------------------------------
-	my @theme = $src_xml->getBootTheme_legacy();
-	$changeset{"bootsplash-theme"} = $theme[0];
-	$changeset{"bootloader-theme"} = $theme[1];
 	#==========================================
 	# Return changeset hash
 	#------------------------------------------
@@ -1788,7 +1778,10 @@ sub createImageLiveCD {
 		if (-d "$tmpdir/usr/share/grub") {
 			$grub_share = 'grub';
 		}
-		my @theme      = $sxml -> getBootTheme_legacy();
+		my @theme      = ();
+		my $pref       = $sxml -> getPreferences();
+		push @theme, $pref -> getBootSplashTheme();
+		push @theme, $pref -> getBootLoaderTheme();
 		my $ir_modules = "$tmpdir/usr/lib/$grub_efi/$efi_fo";
 		my $ir_themes  = "$tmpdir/usr/share/$grub_share/themes";
 		my $ir_font    = "$tmpdir/usr/share/$grub_share/unicode.pf2";
