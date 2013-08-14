@@ -1644,6 +1644,7 @@ sub setupBootDisk {
 	#==========================================
 	# load type attributes...
 	#------------------------------------------
+	my $systemDisk = $xml -> getSystemDiskConfig();
 	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 	if (! $type{installiso}) {
 		$type{installiso} = 'false';
@@ -1664,13 +1665,17 @@ sub setupBootDisk {
 	#==========================================
 	# Check if LVM is requested...
 	#------------------------------------------
+	# TODO: change this to:
+	# check with $xml->getSystemDiskConfig && $xml->getImageType->useLVM()
 	if ((($type{lvm}) && ($type{lvm} eq "true")) || ($lvm)) {
 		#==========================================
 		# set volume group name and flag variable
 		#------------------------------------------
 		$lvm = 1;
 		$this->{lvm}= $lvm;
-		$vgroupName = $xml -> getLVMGroupName_legacy();
+		if ($systemDisk) {
+			$vgroupName = $systemDisk -> getVGName();
+		}
 		if ($vgroupName) {
 			$this->{lvmgroup} = $vgroupName;
 		}
@@ -1695,7 +1700,12 @@ sub setupBootDisk {
 	#==========================================
 	# Check if LVM setup can be done...
 	#------------------------------------------
-	%lvmparts = $xml -> getLVMVolumes_legacy();
+	if ($systemDisk) {
+		my $volumes = $systemDisk -> getVolumes();
+		if ($volumes) {
+			%lvmparts = %{$volumes};
+		}
+	}
 	if (($lvm) && (%lvmparts)) {
 		if ( ! -d $system ) {
 			$kiwi -> error (

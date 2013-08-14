@@ -392,6 +392,27 @@ sub getFilesystem {
 }
 
 #==========================================
+# useLVM
+#------------------------------------------
+sub useLVM {
+	# ...
+	# Check if LVM can be used according to the used
+	# filesystem. filesystems like zfs and btrfs have
+	# their own volume management
+	# ---
+	my $this = shift;
+	my $filesystem = $this->{filesystem};
+	my $typename   = $this->{image};
+	if (($typename) && ($typename =~ /zfs|btrfs/)) {
+		return 0;
+	}
+	if (($filesystem) && ($filesystem =~ /zfs|btrfs/)) {
+		return 0;
+	}
+	return 1;
+}
+
+#==========================================
 # getFirmwareType
 #------------------------------------------
 sub getFirmwareType {

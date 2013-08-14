@@ -21,6 +21,7 @@ package KIWIXMLSystemdiskData;
 use strict;
 use warnings;
 use Scalar::Util qw /looks_like_number/;
+use Readonly;
 use XML::LibXML;
 require Exporter;
 
@@ -29,6 +30,11 @@ use base qw /KIWIXMLDataBase/;
 # Exports
 #------------------------------------------
 our @EXPORT_OK = qw ();
+
+#==========================================
+# constant
+#------------------------------------------
+Readonly my $NEXT_UNIT => 1024;
 
 #==========================================
 # Constructor
@@ -214,6 +220,53 @@ sub getVolumeSize {
 		return;
 	}
 	return $this->{volumes}{$id}{size};
+}
+
+#==========================================
+# getVolumes
+#------------------------------------------
+sub getVolumes {
+	# ...
+	# Return a hash with the volume name as key and a list
+	# reference containing two elements with size information
+	# ---
+	my $this = shift;
+	my $volIDs = $this -> getVolumeIDs();
+	my %lvmparts;
+	if ($volIDs) {
+		foreach my $id (@{$volIDs}) {
+			my $name = $this -> getVolumeName ($id);
+			my $free = $this -> getVolumeFreespace ($id);
+			my $size = $this -> getVolumeSize ($id);
+			my $haveAbsolute;
+			my $usedValue;
+			if ($size) {
+				$haveAbsolute = 1;
+				$usedValue = $size;
+			} elsif ($free) {
+				$usedValue = $free;
+				$haveAbsolute = 0;
+			}
+			if (($usedValue) && ($usedValue =~ /(\d+)([MG]*)/sxm)) {
+				my $byte = int $1;
+				my $unit = $2;
+				if ($unit eq "G") {
+					$usedValue = $byte * $NEXT_UNIT;
+				} else {
+					# no or unknown unit, assume MB...
+					$usedValue = $byte;
+				}
+			}
+			$name =~ s/\s+//gsxm;
+			if ($name eq q{/}) {
+				next;
+			}
+			$name =~ s/^\///sxm;
+			$name =~ s/\//_/gsxm;
+			$lvmparts{$name} = [ $usedValue,$haveAbsolute ];
+		}
+	}
+	return \%lvmparts;
 }
 
 #==========================================

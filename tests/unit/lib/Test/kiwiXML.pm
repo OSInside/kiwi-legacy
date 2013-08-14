@@ -4903,45 +4903,6 @@ sub test_getLVMGroupName_legacy {
 }
 
 #==========================================
-# test_getLVMVolumes_legacy
-#------------------------------------------
-sub test_getLVMVolumes_legacy {
-	# ...
-	# Verify proper return of getLVMVolumes method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'lvmConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my %volumes = $xml -> getLVMVolumes_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	my @expectedVolumes = qw /usr tmp var home/;
-	my @volNames = keys %volumes;
-	$this -> assert_array_equal(\@expectedVolumes, \@volNames);
-	my @volSettings = $volumes{usr};
-	$this -> assert_equals(4096, $volSettings[0][0]);
-	$this -> assert_equals(1, $volSettings[0][1]);
-	@volSettings = $volumes{tmp};
-	$this -> assert_str_equals('all', $volSettings[0][0]);
-	$this -> assert_equals(0, $volSettings[0][1]);
-	@volSettings = $volumes{var};
-	$this -> assert_equals(50, $volSettings[0][0]);
-	$this -> assert_equals(1, $volSettings[0][1]);
-	@volSettings = $volumes{home};
-	$this -> assert_equals(2048, $volSettings[0][0]);
-	$this -> assert_equals(0, $volSettings[0][1]);
-	return;
-}
-
-#==========================================
 # test_getOEMConfig
 #------------------------------------------
 sub test_getOEMConfig {

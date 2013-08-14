@@ -187,7 +187,7 @@ sub updateFromXML {
 	#------------------------------------------
 	$this -> __updateXMLDrivers ($xml);
 	#==========================================
-	# kiwi_lvmgroup
+	# kiwi_*
 	#------------------------------------------
 	$this -> __updateXMLSystemDisk ($xml);
 	#==========================================
@@ -298,6 +298,47 @@ sub __updateXMLSystemDisk {
 		my $lvmgroup = $systemdisk -> getVGName();
 		if ($lvmgroup) {
 			$this -> addEntry('kiwi_lvmgroup',$lvmgroup);
+		}
+		my $type = $xml -> getImageType();
+		if ($type) {
+			if ($type -> useLVM()) {
+				$this -> addEntry('kiwi_lvm','true');
+			}
+		}
+		my $lvmparts = $systemdisk -> getVolumes();
+		if ($lvmparts) {
+			foreach my $vol (keys %{$lvmparts}) {
+				if (! $lvmparts->{$vol}) {
+					next;
+				}
+				my $attrname = 'size';
+				my $attrval  = $lvmparts->{$vol}->[0];
+				my $absolute = $lvmparts->{$vol}->[1];
+				if (! $attrval) {
+					next;
+				}
+				if (! $absolute) {
+					$attrname = "freespace";
+				}
+				$vol =~ s/^\///sxm;
+				$vol =~ s/\//_/gsxm;
+				$vol = 'LV'.$vol;
+				if ($vol eq 'LV@root') {
+					if ($attrval ne 'all') {
+						$this -> addEntry(
+							'kiwi_LVM_LVRoot', "$attrname:$attrval"
+						);
+					}
+				} elsif ($attrval eq 'all') {
+					$this -> addEntry(
+						'kiwi_allFreeVolume',$vol
+					);
+				} else {
+					$this -> addEntry(
+						"kiwi_LVM_$vol", "$attrname:$attrval"
+					);
+				}
+			}
 		}
 	}
 	return $this;

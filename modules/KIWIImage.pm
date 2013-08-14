@@ -292,14 +292,6 @@ sub updateDescription {
 	$changeset{"bootsplash-theme"} = $theme[0];
 	$changeset{"bootloader-theme"} = $theme[1];
 	#==========================================
-	# Store LVM volumes
-	#------------------------------------------
-	if ($src_type{lvm}) {
-		my %lvmparts = $src_xml -> getLVMVolumes_legacy();
-		$changeset{"lvm"} = $src_type{lvm};
-		$changeset{"lvmparts"} = \%lvmparts;
-	}
-	#==========================================
 	# Return changeset hash
 	#------------------------------------------
 	return %changeset;
@@ -977,6 +969,8 @@ sub createImageRootAndBoot {
 	if (($text ne "VMX") || ($stype{luks})) {
 		$treeAccess = 0;
 	}
+	# TODO: change this to:
+	# check with $xml->getSystemDiskConfig && $xml->getImageType->useLVM()
 	if ($stype{lvm}) {
 		if ($stype{luks}) {
 			$kiwi -> warning ("LUKS encryption on LVM not yet supported");

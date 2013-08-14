@@ -553,19 +553,6 @@ sub createBootImage {
 	# Inherit system XML data to the boot
 	#------------------------------------------
 	#==========================================
-	# merge/update systemdisk
-	#------------------------------------------
-	my $systemdisk = $systemXML -> getSystemDiskConfig();
-	if ($systemdisk) {
-		my $lvmgroup = $systemdisk -> getVGName();
-		if (! $lvmgroup) {
-			$lvmgroup = 'kiwiVG';
-		}
-		my $sdk = KIWIXMLSystemdiskData -> new();
-		$sdk -> setVGName ($lvmgroup);
-		$bootXML -> addSystemDisk ($sdk);
-	}
-	#==========================================
 	# merge/update drivers
 	#------------------------------------------
 	my $drivers = $systemXML -> getDrivers();
@@ -574,6 +561,18 @@ sub createBootImage {
 		if (! $status) {
 			return;
 		}
+	}
+	#==========================================
+	# merge/update type
+	#------------------------------------------
+	if (! $this -> __addTypeToBootXML ($systemXML, $bootXML)) {
+		return;
+	}
+	#==========================================
+	# merge/update systemdisk
+	#------------------------------------------
+	if (! $this -> __addSystemDiskToBootXML ($systemXML, $bootXML)) {
+		return;
 	}
 	#==========================================
 	# merge/update strip
@@ -1640,6 +1639,96 @@ sub DESTROY {
 #==========================================
 # Private helper methods
 #------------------------------------------
+sub __addSystemDiskToBootXML {
+	# ...
+	# add the systemdisk information from the system XML data to the
+	# boot XML data by copying some data into a new SystemdiskData
+	# object which is then stored in the boot XML object. kiwi's boot
+	# image descriptions does not contain systemdisk section data
+	# thus it's ok to to just add a copy of the system XML systemdisk
+	# section. The data is only copied if a systemdisk sectiom
+	# exists in the system XML data set
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $systemXML = shift;
+	my $bootXML   = shift;
+	my $systemdisk = $systemXML -> getSystemDiskConfig();
+	if ($systemdisk) {
+		my %lvmData;
+		$kiwi -> info ("Updating SystemDisk section\n");
+		#==========================================
+		# volume group name
+		#------------------------------------------
+		my $lvmgroup = $systemdisk -> getVGName();
+		if (! $lvmgroup) {
+			$lvmgroup = 'kiwiVG';
+		}
+		$kiwi -> info ("--> Volume group name: $lvmgroup\n");
+		$lvmData{name} = $lvmgroup;
+		#==========================================
+		# volumes
+		#------------------------------------------
+		my %volData;
+		my $vcount = 1;
+		my $volIDs = $systemdisk -> getVolumeIDs();
+		if ($volIDs) {
+			foreach my $id (@{$volIDs}) {
+				my %volInfo;
+				$volInfo{name}      = $systemdisk -> getVolumeName ($id);
+				$volInfo{freespace} = $systemdisk -> getVolumeFreespace ($id);
+				$volInfo{size}      = $systemdisk -> getVolumeSize ($id);
+				$volData{$vcount} = \%volInfo;
+				$vcount++;
+				if ($volInfo{freespace}) {
+					$kiwi -> info (
+						"--> Volume $volInfo{name}: free:$volInfo{freespace}M\n"
+					);
+				} elsif ($volInfo{size}) {
+					$kiwi -> info (
+						"--> Volume $volInfo{name}: size:$volInfo{size}M\n"
+					);
+				} else {
+					$kiwi-> info (
+						"--> Volume $volInfo{name}\n"
+					);
+				}
+			}
+		}
+		$lvmData{volumes} = \%volData;
+		my $sdk = KIWIXMLSystemdiskData -> new (\%lvmData);
+		$bootXML -> addSystemDisk ($sdk);
+	}
+	return $this;
+}
+
+#==========================================
+# __addTypeToBootXML
+#------------------------------------------
+sub __addTypeToBootXML {
+	# ...
+	# add additional type information from the system XML data
+	# to the boot XML data
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $systemXML = shift;
+	my $bootXML   = shift;
+	my $systemType = $systemXML -> getImageType();
+	my $bootType   = $bootXML -> getImageType();
+	#==========================================
+	# filesystem 
+	#------------------------------------------
+	$bootType -> setFilesystem (
+		$systemType -> getFilesystem()
+	);
+	# TODO: more to come
+	return $this;
+}
+
+#==========================================
+# __addOEMConfigDataToBootXML
+#------------------------------------------
 sub __addOEMConfigDataToBootXML {
 	# ...
 	# add the oemconfig information from the system XML data to the
@@ -1735,10 +1824,10 @@ sub __checkType {
 	my $this = shift;
 	my $xml  = shift;
 	my $root = shift;
-	my $kiwi   = $this->{kiwi};
-	my $cmdL   = $this->{cmdL};
+	my $kiwi = $this->{kiwi};
+	my $cmdL = $this->{cmdL};
 	my $type = $xml -> getImageType();
-	my $para   = "ok";
+	my $para = "ok";
 	#==========================================
 	# check for required image attributes
 	#------------------------------------------
@@ -1749,42 +1838,26 @@ sub __checkType {
 		# Additionally we use LVM because it allows to better
 		# resize the stick
 		# ----
-		# Using the new data structure here does not work yet,
-		# too much black magic, fix another time:
-		# ----
-		# $type -> setBootLoader('grub2');
-		# $type -> setBootImageFileSystem('fat16');
-		# $xml  -> updateType($type);
-		# my $sysDisk = $xml -> getSystemDiskConfig();
-		# if (! $sysDisk) {
-		# 	%sysDisk = ();
-		# 	$sDisk = KIWIXMLSystemdiskData -> new(\%sysDisk);
-		# 	$xml -> addSystemDisk($sDisk);
-		# 	$xml -> writeXML ($root . '/config.xml');
-		# }
-		# ----
-		$xml -> __setTypeAttribute ("bootloader","grub2");
-		$xml -> __setTypeAttribute ("bootfilesystem","fat16");
-		$xml -> __setSystemDiskElement ();
-		$xml -> writeXMLDescription_legacy ($root);
+		$type -> setBootLoader('grub2');
+		$type -> setBootImageFileSystem('fat16');
+		$xml  -> updateType ($type);
+		my $sysDisk = $xml -> getSystemDiskConfig();
+		if (! $sysDisk) {
+			my %lvmData;
+			$sysDisk = KIWIXMLSystemdiskData -> new(\%lvmData);
+			$xml -> addSystemDisk ($sysDisk);
+		}
 	} elsif ($cmdL->getLVM()) {
 		# /.../
 		# if the option --lvm is set, we add/update a systemdisk
 		# element which triggers the use of LVM
 		# ----
-		# Using the new data structure here does not work yet,
-		# too much black magic, fix another time:
-		# ----
-		# my $sysDisk = $xml -> getSystemDiskConfig();
-		# if (! $sysDisk) {
-		#	%sysDisk = ();
-		#	$sDisk = KIWIXMLSystemdiskData -> new(\%sysDisk);
-		#	$xml -> addSystemDisk($sDisk);
-		# }
-		# $xml -> writeXML ($root . '/config.xml');
-		# ----
-		$xml -> __setSystemDiskElement ();
-		$xml -> writeXMLDescription_legacy ($root);
+		my $sysDisk = $xml -> getSystemDiskConfig();
+		if (! $sysDisk) {
+			my %lvmData;
+			$sysDisk = KIWIXMLSystemdiskData -> new(\%lvmData);
+			$xml -> addSystemDisk ($sysDisk);
+		}
 	}
 	#==========================================
 	# check for required filesystem tool(s)

@@ -6141,9 +6141,6 @@ sub getImageConfig_legacy {
 		&& ($type{ramonly} eq "true")) {
 		$result{kiwi_ramonly} = "yes";
 	}
-	if ((%type) && ($type{lvm})) {
-		$result{kiwi_lvm} = $type{lvm};
-	}
 	if ($size) {
 		$result{kiwi_size} = $size;
 	}
@@ -6200,35 +6197,7 @@ sub getImageConfig_legacy {
 	#==========================================
 	# systemdisk
 	#------------------------------------------
-	my %lvmparts = $this -> getLVMVolumes_legacy();
-	if (%lvmparts) {
-		foreach my $vol (keys %lvmparts) {
-			if (! $lvmparts{$vol}) {
-				next;
-			}
-			my $attrname = "size";
-			my $attrval  = $lvmparts{$vol}->[0];
-			my $absolute = $lvmparts{$vol}->[1];
-			if (! $attrval) {
-				next;
-			}
-			if (! $absolute) {
-				$attrname = "freespace";
-			}
-			$vol =~ s/^\///;
-			$vol =~ s/\//_/g;
-			$vol = "LV".$vol;
-			if ($vol eq 'LV@root') {
-				if ($attrval ne 'all') {
-					$result{kiwi_LVM_LVRoot} = $attrname.":".$attrval;
-				}
-			} elsif ("$attrval" eq "all") {
-				$result{kiwi_allFreeVolume} = $vol;
-			} else {
-				$result{"kiwi_LVM_$vol"} = $attrname.":".$attrval;
-			}
-		}
-	}
+	# systemdisk is handled in the new data structure
 	#==========================================
 	# oemconfig
 	#------------------------------------------
@@ -7207,66 +7176,6 @@ sub getLVMGroupName_legacy {
 }
 
 #==========================================
-# getLVMVolumes_legacy
-#------------------------------------------
-sub getLVMVolumes_legacy {
-	# ...
-	# Create list of LVM volume names for sub volume
-	# setup. Each volume name will end up in an own
-	# LVM volume when the LVM setup is requested
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
-	my %result = ();
-	if (! defined $node) {
-		return %result;
-	}
-	my @vollist = $node -> getElementsByTagName ("volume");
-	foreach my $volume (@vollist) {
-		my $name = $volume -> getAttribute ("name");
-		my $free = $volume -> getAttribute ("freespace");
-		my $size = $volume -> getAttribute ("size");
-		my $haveAbsolute;
-		my $usedValue;
-		if ($size) {
-			$haveAbsolute = 1;
-			$usedValue = $size;
-		} elsif ($free) {
-			$usedValue = $free;
-			$haveAbsolute = 0;
-		}
-		if (($usedValue) && ($usedValue =~ /(\d+)([MG]*)/)) {
-			my $byte = int $1;
-			my $unit = $2;
-			if ($unit eq "G") {
-				$usedValue = $byte * 1024;
-			} else {
-				# no or unknown unit, assume MB...
-				$usedValue = $byte;
-			}
-		}
-		$name =~ s/\s+//g;
-		if ($name eq "/") {
-			$kiwi -> warning ("LVM: Directory $name is not allowed");
-			$kiwi -> skipped ();
-			next;
-		}
-		$name =~ s/^\///;
-		if ($name
-			=~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)/) {
-			$kiwi -> warning ("LVM: Directory $name is not allowed");
-			$kiwi -> skipped ();
-			next;
-		}
-		$name =~ s/\//_/g;
-		$result{$name} = [ $usedValue,$haveAbsolute ];
-	}
-	return %result;
-}
-
-#==========================================
 # getPackageAttributes_legacy
 #------------------------------------------
 sub getPackageAttributes_legacy {
@@ -7486,31 +7395,6 @@ sub writeXMLDescription_legacy {
 #==========================================
 # Private helper methods
 #------------------------------------------
-#==========================================
-# __addVolume_legacy
-#------------------------------------------
-sub __addVolume_legacy {
-	# ...
-	# Add the given volume to the systemdisk section
-	# ---
-	my $this  = shift;
-	my $volume= shift;
-	my $aname = shift;
-	my $aval  = shift;
-	my $kiwi  = $this->{kiwi};
-	my $tnode = $this->{typeNode};
-	my $disk  = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
-	if (! defined $disk) {
-		return $this;
-	}
-	my $addElement = XML::LibXML::Element -> new ("volume");
-	$addElement -> setAttribute("name",$volume);
-	$addElement -> setAttribute($aname,$aval);
-	$disk -> appendChild ($addElement);
-	$this -> __updateXML_legacy();
-	return $this;
-}
-
 #==========================================
 # __createURLList_legacy
 #------------------------------------------
@@ -8000,7 +7884,8 @@ sub __updateDescriptionFromChangeSet_legacy {
 	#==========================================
 	# 7) merge/update preferences and type
 	#------------------------------------------
-	# oemconfig data is handled through the new data structure
+	# oemconfig  data is handled through the new data structure
+	# systemdisk data is handled through the new data structure
 	if (defined $changeset->{"locale"}) {
 		$this -> __setOptionsElement ("locale",$changeset);
 	}
@@ -8015,9 +7900,6 @@ sub __updateDescriptionFromChangeSet_legacy {
 	}
 	if (defined $changeset->{"showlicense"}) {
 		$this -> __addOptionsElement ("showlicense",$changeset);
-	}
-	if (defined $changeset->{"lvm"}) {
-		$this -> __setSystemDiskElement (undef,$changeset);
 	}
 	#==========================================
 	# 8) merge/update type attributes
@@ -8088,24 +7970,7 @@ sub __updateDescriptionFromChangeSet_legacy {
 	#==========================================
 	# 10) merge/update volumes with size info
 	#------------------------------------------
-	if (defined $changeset->{"lvmparts"}) {
-		my %lvmparts = %{$changeset->{"lvmparts"}};
-		foreach my $vol (keys %lvmparts) {
-			if (! $lvmparts{$vol}) {
-				next;
-			}
-			my $attrname = "size";
-			my $attrval  = $lvmparts{$vol}->[0];
-			my $absolute = $lvmparts{$vol}->[1];
-			if (! $attrval) {
-				next;
-			}
-			if (! $absolute) {
-				$attrname = "freespace";
-			}
-			$this -> __addVolume_legacy ($vol,$attrname,$attrval);
-		}
-	}
+	# systemdisk data is handled through the new data structure
 	#==========================================
 	# 12) cleanup reqProfiles
 	#------------------------------------------
@@ -8346,54 +8211,6 @@ sub __addOptionsElement {
 		$opts -> appendChild ($addElement);
 		$kiwi -> done ();
 	}
-	$this -> __updateXML_legacy();
-	return $this;
-}
-
-#==========================================
-# __setSystemDiskElement
-#------------------------------------------
-sub __setSystemDiskElement {
-	# ...
-	# If given element exists in the data hash, set this
-	# element into the current systemdisk XML tree
-	# ---
-	my $this = shift;
-	my $item = shift;
-	my $data = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $value;
-	if (($data) && ($item)) {
-		$value = $data->{$item};
-	}
-	my $newconfig = 0;
-	my $addElement;
-	if ($item) {
-		$kiwi -> info ("Updating SystemDisk element $item: $value");
-		$addElement = XML::LibXML::Element -> new ("$item");
-		$addElement -> appendText ($value);
-	} else {
-		$kiwi -> info ("Updating SystemDisk element");
-	}
-	my $disk = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
-	if (! defined $disk) {
-		$disk = XML::LibXML::Element -> new ("systemdisk");
-		$newconfig = 1;
-	}
-	if ($item) {
-		my $node = $disk -> getElementsByTagName ("$item");
-		if ($node) {
-			$node = $node -> get_node(1);
-			$disk -> removeChild ($node);
-		}
-		$disk -> appendChild ($addElement);
-	}
-	if ($newconfig) {
-		$this->{typeNode} -> appendChild ($disk);
-	}
-	$kiwi -> done ();
-	$this -> __updateTypeList_legacy();
 	$this -> __updateXML_legacy();
 	return $this;
 }
