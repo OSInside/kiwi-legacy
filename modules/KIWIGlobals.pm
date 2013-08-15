@@ -967,26 +967,16 @@ sub callContained {
 		return;
 	}
 	my $locator = KIWILocator -> instance();
-	my $lxcexec = $locator -> getExecPath('lxc-execute');
-	my $lxcbase = $root."/usr/lib/lxc/";
-	if (-d $root."/usr/lib64") {
-		$lxcbase = $root."/usr/lib64/lxc/";
-	}
-	my $lxcinit = $lxcbase."lxc-init";
+	my $lxstart = $locator -> getExecPath('lxc-start');
+	my $lxstop  = $locator -> getExecPath('lxc-stop');
 	my $legacy  = 0;
-	if (! $lxcexec ) {
+	if ((! $lxstart) || (! $lxstop)) {
 		#==========================================
 		# no lxc installed used chroot
 		#------------------------------------------
 		$kiwi -> loginfo ("lxc not installed\n");
 		$legacy = 1;
 	} else {
-		#==========================================
-		# check for lxc in the unpacked tree
-		#------------------------------------------
-		if (-e $lxcinit) {
-			KIWIQX::qxx ("mv $lxcinit $lxcinit.orig 2>&1");
-		}
 		#==========================================
 		# create lxc config file
 		#------------------------------------------
@@ -998,42 +988,17 @@ sub callContained {
 			print $FD "lxc.rootfs  = $root"."\n";
 			close $FD;
 			#==========================================
-			# check if lxc works
+			# call via lxc-start
 			#------------------------------------------
-			if (! -d $lxcbase) {
-				KIWIQX::qxx ("mkdir -p $lxcbase");
-			}
-			if (! open ($FD, ">", $lxcinit)) {
-				$kiwi -> loginfo ("Couldn't create lxc-init test: $!\n");
-				$legacy = 1;
-			} else {
-				print $FD "#! /bin/bash"."\n";
-				print $FD "echo OK"."\n";
-				print $FD "exit 0"."\n";
-				close $FD;
-				$data = KIWIQX::qxx ("chmod u+x $lxcinit 2>&1");
-				$data = KIWIQX::qxx (
-					"lxc-execute -n kiwi -f $root/config.lxc true 2>&1"
-				);
-				$code = $? >> 8;
-				if ($code != 0) {
-					$kiwi -> loginfo ("Failed to execute lxc: $data\n");
-					$legacy = 1;
-				} else {
-					#==========================================
-					# call via lxc
-					#------------------------------------------
-					$data = KIWIQX::qxx ("mv $root/$prog $lxcinit 2>&1");
-					$data = KIWIQX::qxx (
-						"lxc-execute -n kiwi -f $root/config.lxc true 2>&1"
-					);
-					$code = $? >> 8;
-					#==========================================
-					# cleanup lxc
-					#------------------------------------------
-					KIWIQX::qxx ("rm -f $root/config.lxc 2>&1");
-				}
-			}
+			$data = KIWIQX::qxx (
+				"$lxstart -n kiwi -f $root/config.lxc ./$prog 2>&1"
+			);
+			$code = $? >> 8;
+			#==========================================
+			# cleanup lxc
+			#------------------------------------------
+			KIWIQX::qxx ("rm -f $root/config.lxc 2>&1");
+			KIWIQX::qxx ("$lxstop -n kiwi 2>&1");
 		}
 	}
 	if ($legacy) {
@@ -1043,12 +1008,6 @@ sub callContained {
 		$kiwi -> loginfo ("Falling back to chroot method\n");
 		if (-e "$root/config.lxc") {
 			KIWIQX::qxx ("rm -f $root/config.lxc 2>&1");
-		}
-		if (($lxcinit) && (-e "$root/$lxcinit")) {
-			KIWIQX::qxx ("rm -f $root/$lxcinit 2>&1");
-		}
-		if (($lxcinit) && (-e "$lxcinit.orig")) {
-			KIWIQX::qxx ("mv $lxcinit.orig $lxcinit 2>&1");
 		}
 		#==========================================
 		# call in chroot
