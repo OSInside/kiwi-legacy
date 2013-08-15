@@ -256,6 +256,7 @@ sub prepareBootImage {
 			"Updating image attribute: displayname: $displayname"
 		);
 		$bootXML -> setImageDisplayName ($displayname);
+		$kiwi -> done();
 	}
 	#==========================================
 	# merge/update repositories
@@ -460,7 +461,11 @@ sub prepareImage {
 	#------------------------------------------
 	if (! $rootTgtDir) {
 		$kiwi -> info ("Checking for default root in XML data...");
-		my $rootTgt =  $xml -> getImageDefaultRoot_legacy();
+		my $rootTgt;
+		my $pref = $xml -> getPreferences();
+		if ($pref) {
+			$rootTgt = $pref -> getDefaultRoot();
+		}
 		if ($rootTgt) {
 			$this -> {cmdL} -> setRootTargetDir($rootTgt);
 			$this -> {rootTgtDir} = $rootTgt;

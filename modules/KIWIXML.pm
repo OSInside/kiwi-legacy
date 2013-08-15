@@ -6085,44 +6085,6 @@ sub getImageConfig_legacy {
 }
 
 #==========================================
-# getImageDefaultDestination_legacy
-#------------------------------------------
-sub getImageDefaultDestination_legacy {
-	# ...
-	# Get the default destination to store the images below
-	# normally this is given by the --destination option but if
-	# not and defaultdestination is specified in xml descr. we
-	# will use this path as destination
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("defaultdestination");
-	my $dest = $node -> getElementsByTagName ("defaultdestination");
-	if (! $dest) {
-		return;
-	}
-	return "$dest";
-}
-
-#==========================================
-# getImageDefaultRoot_legacy
-#------------------------------------------
-sub getImageDefaultRoot_legacy {
-	# ...
-	# Get the default root directory name to build up a new image
-	# normally this is given by the --root option but if
-	# not and defaultroot is specified in xml descr. we
-	# will use this path as root path.
-	# ---
-	my $this = shift;
-	my $node = $this -> __getPreferencesNodeByTagName ("defaultroot");
-	my $root = $node -> getElementsByTagName ("defaultroot");
-	if (! $root) {
-		return;
-	}
-	return "$root";
-}
-
-#==========================================
 # getImageSize_legacy
 #------------------------------------------
 sub getImageSize_legacy {
@@ -7906,31 +7868,6 @@ sub __addDefaultSplitNode {
 	}
 	$this -> __updateXML_legacy();
 	return $this;
-}
-
-#==========================================
-# __getPreferencesNodeByTagName
-#------------------------------------------
-sub __getPreferencesNodeByTagName {
-	# ...
-	# Searches in all nodes of the preferences sections
-	# and returns the first occurenc of the specified
-	# tag name. If the tag can't be found the function
-	# returns the first node reference
-	# ---
-	my $this = shift;
-	my $name = shift;
-	my @node = $this->{optionsNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		my $tag = $element -> getElementsByTagName ("$name");
-		if ($tag) {
-			return $element;
-		}
-	}
-	return $node[0];
 }
 
 #==========================================

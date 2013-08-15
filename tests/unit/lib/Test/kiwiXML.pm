@@ -4346,56 +4346,6 @@ sub test_getFilesToDelete {
 }
 
 #==========================================
-# test_getImageDefaultDestination_legacy
-#------------------------------------------
-sub test_getImageDefaultDestination_legacy {
-	# ...
-	# Verify proper return of getImageDefaultDestination_legacy method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getImageDefaultDestination_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('/work/tmp', $value);
-	return;
-}
-
-#==========================================
-# test_getImageDefaultRoot_legacy
-#------------------------------------------
-sub test_getImageDefaultRoot_legacy {
-	# ...
-	# Verify proper return of getImageDefaultRoot_legacy method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getImageDefaultRoot_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('/var/tmp', $value);
-	return;
-}
-
-#==========================================
 # test_getImageDisplayName
 #------------------------------------------
 sub test_getImageDisplayName {
