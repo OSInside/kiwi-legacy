@@ -295,34 +295,33 @@ sub prepareBootImage {
 	#==========================================
 	# merge/update boot incl. packages/archives
 	#------------------------------------------
-	my $bootArchives = $systemXML -> getBootIncludeArchives();
-	my $bootAddPacks = $systemXML -> getBootIncludePackages();
-	my $bootDelPacks = $systemXML -> getBootDeletePackages();
-	if (@{$bootArchives}) {
-		$kiwi -> info ("Boot including archive(s) [bootstrap]:\n");
-		for my $archive (@{$bootArchives}) {
-			my $name = $archive -> getName();
-			$kiwi -> info ("--> $name\n");
-		}
-		$bootXML -> addBootstrapArchives ($bootArchives);
+	if (! $this -> __addPackagesToBootBootXML ($systemXML, $bootXML)) {
+		return;
 	}
-	if (@{$bootAddPacks}) {
-		$kiwi -> info ("Boot including package(s) [bootstrap]:\n");
-		for my $package (@{$bootAddPacks}) {
-			my $name = $package -> getName();
-			$kiwi -> info ("--> $name\n");
-		}
-		$bootXML -> addBootstrapPackages ($bootAddPacks);
+	#==========================================
+	# merge/update type
+	#------------------------------------------
+	if (! $this -> __addTypeToBootXML ($systemXML, $bootXML)) {
+		return;
 	}
-	if (@{$bootDelPacks}) {
-		$kiwi -> info ("Boot included package(s) marked for deletion:\n");
-		for my $package (@{$bootDelPacks}) {
-			my $name = $package -> getName();
-			$kiwi -> info ("--> $name\n");
-		}
-		$bootXML -> addPackagesToDelete ($bootDelPacks);
+	#==========================================
+	# merge/update systemdisk
+	#------------------------------------------
+	if (! $this -> __addSystemDiskToBootXML ($systemXML, $bootXML)) {
+		return;
 	}
-	# TODO: more to come
+	#==========================================
+	# merge/update machine attribs in type
+	#------------------------------------------
+	if (! $this -> __addVMachineDomainToBootXML ($systemXML, $bootXML)) {
+		return;
+	}
+	#==========================================
+	# merge/update oemconfig
+	#------------------------------------------
+	if (! $this -> __addOEMConfigDataToBootXML ($systemXML, $bootXML)) {
+		return;
+	}
 	#==========================================
 	# update boot profiles
 	#------------------------------------------
@@ -570,62 +569,6 @@ sub createBootImage {
 		return;
 	}
 	#==========================================
-	# Inherit system XML data to the boot
-	#------------------------------------------
-	#==========================================
-	# merge/update drivers
-	#------------------------------------------
-	my $drivers = $systemXML -> getDrivers();
-	if ($drivers) {
-		$status = $bootXML -> addDrivers($drivers, 'default');
-		if (! $status) {
-			return;
-		}
-	}
-	#==========================================
-	# merge/update type
-	#------------------------------------------
-	if (! $this -> __addTypeToBootXML ($systemXML, $bootXML)) {
-		return;
-	}
-	#==========================================
-	# merge/update systemdisk
-	#------------------------------------------
-	if (! $this -> __addSystemDiskToBootXML ($systemXML, $bootXML)) {
-		return;
-	}
-	#==========================================
-	# merge/update strip
-	#------------------------------------------
-	if (! $this -> __addStripDataToBootXML($systemXML, $bootXML)) {
-		return;
-	}
-	#==========================================
-	# merge/update machine attribs in type
-	#------------------------------------------
-	if (! $this -> __addVMachineDomainToBootXML ($systemXML, $bootXML)) {
-		return;
-	}
-	#==========================================
-	# merge/update oemconfig
-	#------------------------------------------
-	if (! $this -> __addOEMConfigDataToBootXML ($systemXML, $bootXML)) {
-		return;
-	}
-	# TODO: more to come
-	#==========================================
-	# update boot profiles
-	#------------------------------------------
-	$bootXML -> setBootProfiles (
-		$systemXML -> getBootProfile(),
-		$systemXML -> getBootKernel()
-	);
-	#==========================================
-	# Apply XML over rides from command line
-	#------------------------------------------
-	$bootXML = $this -> __applyBaseXMLOverrides($bootXML);
-	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
-	#==========================================
 	# Create destdir if needed
 	#------------------------------------------
 	my $dirCreated = KIWIGlobals -> instance() -> createDirInteractive(
@@ -645,12 +588,6 @@ sub createBootImage {
 		return;
 	}
 	$this->{image} = $image;
-	#==========================================
-	# Update .profile environment
-	#------------------------------------------
-	if (! $this -> __updateProfileEnvironment ($bootXML,$destination)) {
-		return;
-	}
 	#==========================================
 	# Create cpio image
 	#------------------------------------------
@@ -1660,7 +1597,52 @@ sub DESTROY {
 #==========================================
 # Private helper methods
 #------------------------------------------
+sub __addPackagesToBootBootXML {
+	# ...
+	# add boot included packages/archives information
+	# from the system XML data to the boot XML data
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $systemXML = shift;
+	my $bootXML   = shift;
+	my $bootArchives = $systemXML -> getBootIncludeArchives();
+	my $bootAddPacks = $systemXML -> getBootIncludePackages();
+	my $bootDelPacks = $systemXML -> getBootDeletePackages();
+	if (@{$bootArchives}) {
+		$kiwi -> info ("Boot including archive(s) [bootstrap]:\n");
+		for my $archive (@{$bootArchives}) {
+			my $name = $archive -> getName();
+			$kiwi -> info ("--> $name\n");
+		}
+		$bootXML -> addBootstrapArchives ($bootArchives);
+	}
+	if (@{$bootAddPacks}) {
+		$kiwi -> info ("Boot including package(s) [bootstrap]:\n");
+		for my $package (@{$bootAddPacks}) {
+			my $name = $package -> getName();
+			$kiwi -> info ("--> $name\n");
+		}
+		$bootXML -> addBootstrapPackages ($bootAddPacks);
+	}
+	if (@{$bootDelPacks}) {
+		$kiwi -> info ("Boot included package(s) marked for deletion:\n");
+		for my $package (@{$bootDelPacks}) {
+			my $name = $package -> getName();
+			$kiwi -> info ("--> $name\n");
+		}
+		$bootXML -> addPackagesToDelete ($bootDelPacks);
+	}
+	return $this;
+}
+#==========================================
+# __addPreferencesToBootXML
+#------------------------------------------
 sub __addPreferencesToBootXML {
+	# ...
+	# add additional preferences information from the
+	# the system XML data to the boot XML data
+	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $systemXML = shift;
@@ -1776,23 +1758,124 @@ sub __addSystemDiskToBootXML {
 #------------------------------------------
 sub __addTypeToBootXML {
 	# ...
-	# add additional type information from the system XML data
-	# to the boot XML data
+	# add additional type information from the system
+	# XML data to the boot XML data
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $systemXML = shift;
 	my $bootXML   = shift;
 	my $systemType = $systemXML -> getImageType();
-	my $bootType   = $bootXML -> getImageType();
+	my $bootType   = $bootXML   -> getImageType();
+	$kiwi -> info ("Updating Type section\n");
 	#==========================================
 	# filesystem 
 	#------------------------------------------
 	my $fs = $systemType -> getFilesystem();
 	if ($fs) {
+		$kiwi -> info ("--> filesystem: $fs");
 		$bootType -> setFilesystem ($fs);
+		$kiwi -> done();
 	}
-	# TODO: more to come
+	#==========================================
+	# hybrid
+	#------------------------------------------
+	my $hybrid = $systemType -> getHybrid();
+	if ($hybrid) {
+		$kiwi -> info ("--> hybrid: $hybrid");
+		$bootType -> setHybrid ($hybrid);
+		$kiwi -> done();
+	}
+	#==========================================
+	# hybridpersistent
+	#------------------------------------------
+	my $hybridpersistent = $systemType -> getHybridPersistent();
+	if ($hybridpersistent) {
+		$kiwi -> info ("--> hybridpersistent: $hybridpersistent");
+		$bootType -> setHybridPersistent ($hybridpersistent);
+		$kiwi -> done();
+	}
+	#==========================================
+	# ramonly
+	#------------------------------------------
+	my $ramonly = $systemType -> getRAMOnly();
+	if ($ramonly) {
+		$kiwi -> info ("--> ramonly: $ramonly");
+		$bootType -> setRAMOnly ($ramonly);
+		$kiwi -> done();
+	}
+	#==========================================
+	# kernelcmdline
+	#------------------------------------------
+	my $kernelcmdline = $systemType -> getKernelCmdOpts();
+	if ($kernelcmdline) {
+		$kiwi -> info ("--> kernelcmdline: $kernelcmdline");
+		$bootType -> setKernelCmdOpts ($kernelcmdline);
+		$kiwi -> done();
+	}
+	#==========================================
+	# firmware
+	#------------------------------------------
+	my $firmware = $systemType -> getFirmwareType();
+	if ($firmware) {
+		$kiwi -> info ("--> firmware: $firmware");
+		$bootType -> setFirmwareType ($firmware);
+		$kiwi -> done();
+	}
+	#==========================================
+	# bootloader
+	#------------------------------------------
+	my $bootloader = $systemType -> getBootLoader();
+	if ($bootloader) {
+		$kiwi -> info ("--> bootloader: $bootloader");
+		$bootType -> setBootLoader ($bootloader);
+		$kiwi -> done();
+	}
+	#==========================================
+	# devicepersistency
+	#------------------------------------------
+	my $devicepersistency = $systemType -> getDevicePersistent();
+	if ($devicepersistency) {
+		$kiwi -> info ("--> devicepersistency: $devicepersistency");
+		$bootType -> setDevicePersistent ($devicepersistency);
+		$kiwi -> done();
+	}
+	#==========================================
+	# installboot
+	#------------------------------------------
+	my $installboot = $systemType -> getInstallBoot();
+	if ($installboot) {
+		$kiwi -> info ("--> installboot: $installboot");
+		$bootType -> setInstallBoot ($installboot);
+		$kiwi -> done();
+	}
+	#==========================================
+	# bootkernel
+	#------------------------------------------
+	my $bootkernel = $systemType -> getBootKernel();
+	if ($bootkernel) {
+		$kiwi -> info ("--> bootkernel: $bootkernel");
+		$bootType -> setBootKernel ($bootkernel);
+		$kiwi -> done();
+	}
+	#==========================================
+	# fsmountoptions
+	#------------------------------------------
+	my $fsmountoptions = $systemType -> getFSMountOptions();
+	if ($fsmountoptions) {
+		$kiwi -> info ("--> fsmountoptions: $fsmountoptions");
+		$bootType -> setFSMountOptions ($fsmountoptions);
+		$kiwi -> done();
+	}
+	#==========================================
+	# bootprofile
+	#------------------------------------------
+	my $bootprofile = $systemType -> getBootProfile();
+	if ($bootprofile) {
+		$kiwi -> info ("--> bootprofile: $bootprofile");
+		$bootType -> setBootProfile ($bootprofile);
+		$kiwi -> done();
+	}
 	return $this;
 }
 
@@ -2062,8 +2145,6 @@ sub __updateProfileEnvironment {
 	# ...
 	# update the contents of the .profile file due to
 	# changes given on the command line e.g image type
-	# or by inherited data when building boot (initrd)
-	# images
 	# ---
 	my $this  = shift;
 	my $xml   = shift;

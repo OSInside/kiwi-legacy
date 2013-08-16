@@ -57,7 +57,9 @@ sub new {
 	my %supportedEntries = map { ($_ => 1) } qw(
 		kiwi_allFreeVolume
 		kiwi_bootloader
-		kiwi_boot_timeout
+		kiwi_bootprofile
+		kiwi_bootkernel
+		KIWI_BOOT_TIMEOUT
 		kiwi_cmdline
 		kiwi_compressed
 		kiwi_cpio_name
@@ -104,7 +106,6 @@ sub new {
 		kiwi_ramonly
 		kiwi_revision
 		kiwi_showlicense
-		kiwi_size
 		kiwi_splash_theme
 		kiwi_strip_delete
 		kiwi_strip_libs
@@ -182,19 +183,13 @@ sub updateFromXML {
 		$kiwi -> failed();
 		return;
 	}
+	my $type = $xml -> getImageType() -> getTypeName();
 	#==========================================
 	# kiwi_profiles
 	#------------------------------------------
 	my $profiles = $xml -> getActiveProfileNames();
 	if ($profiles) {
 		$this -> addEntry('kiwi_profiles',join(q{,},@{$profiles}));
-	}
-	#==========================================
-	# kiwi_type
-	#------------------------------------------
-	my $type = $xml -> getImageType() -> getTypeName();
-	if ($type) {
-		$this -> addEntry('kiwi_type',$type);
 	}
 	#==========================================
 	# kiwi_delete
@@ -252,6 +247,10 @@ sub updateFromXML {
 	# kiwi preferences variables
 	#------------------------------------------
 	$this -> __updateXMLPreferences ($xml);
+	#==========================================
+	# kiwi type variables
+	#------------------------------------------
+	$this -> __updateXMLType ($xml);
 	return $this;
 }
 
@@ -322,6 +321,58 @@ sub writeProfile {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __updateXMLType
+#------------------------------------------
+sub __updateXMLType {
+	my $this = shift;
+	my $xml  = shift;
+	my $type = $xml -> getImageType();
+	my %data;
+	#==========================================
+	# get profile type variables
+	#------------------------------------------
+	$data{kiwi_type}             = $type -> getTypeName();
+	$data{kiwi_compressed}       = $type -> getCompressed();
+	$data{KIWI_BOOT_TIMEOUT}     = $type -> getBootTimeout();
+	$data{kiwi_hybrid}           = $type -> getHybrid();
+	$data{kiwi_hybridpersistent} = $type -> getHybridPersistent();
+	$data{kiwi_ramonly}          = $type -> getRAMOnly();
+	$data{kiwi_cmdline}          = $type -> getKernelCmdOpts();
+	$data{kiwi_firmware}         = $type -> getFirmwareType();
+	$data{kiwi_bootloader}       = $type -> getBootLoader();
+	$data{kiwi_devicepersistency}= $type -> getDevicePersistent();
+	$data{kiwi_installboot}      = $type -> getInstallBoot();
+	$data{kiwi_bootkernel}       = $type -> getBootKernel();
+	$data{kiwi_fsmountoptions}   = $type -> getFSMountOptions();
+	$data{kiwi_bootprofile}      = $type -> getBootProfile();
+	#==========================================
+	# store as profile variable
+	#------------------------------------------
+	foreach my $key (keys %data) {
+		my $value = $data{$key};
+		next if ! $value;
+		next if ($value eq 'false');
+		if ($value eq 'true') {
+			if (($key eq 'kiwi_compressed') ||
+				($key eq 'kiwi_hybrid')     ||
+				($key eq 'kiwi_hybridpersistent') ||
+				($key eq 'kiwi_ramonly')
+			) {
+				# /.../
+				# the kiwi linuxrc code handles these variables with
+				# a yes|no value. This should be changed here and in
+				# the linuxrc code to a true|false evaluation like it
+				# is done for all other bool types in the next
+				# code cleanup process
+				# ----
+				$value = 'yes';
+			}
+		}
+		$this -> addEntry ($key,$value);
+	}
+	return $this;
+}
 #==========================================
 # __updateXMLPreferences
 #------------------------------------------

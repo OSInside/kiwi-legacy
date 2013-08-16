@@ -6029,57 +6029,11 @@ sub getImageConfig_legacy {
 	my %result;
 	my @nodelist;
 	#==========================================
-	# preferences attributes and text elements
+	# test packages list
 	#------------------------------------------
-	my %type  = %{$this->getImageTypeAndAttributes_legacy()};
 	my @tstp  = $this -> getTestingList();
 	if (@tstp) {
 		$result{kiwi_testing} = join(" ",@tstp);
-	}
-	if ((%type)
-		&& (defined $type{compressed})
-		&& ($type{compressed} eq "true")) {
-		$result{kiwi_compressed} = "yes";
-	}
-	if ((%type) && ($type{cmdline})) {
-		$result{kiwi_cmdline} = $type{cmdline};
-	}
-	if ((%type) && ($type{firmware})) {
-		$result{kiwi_firmware} = $type{firmware};
-	}
-	if ((%type) && ($type{bootloader})) {
-		$result{kiwi_bootloader} = $type{bootloader};
-	}
-	if ((%type) && ($type{devicepersistency})) {
-		$result{kiwi_devicepersistency} = $type{devicepersistency};
-	}
-	if ((%type) && (defined $type{boottimeout})) {
-		$result{KIWI_BOOT_TIMEOUT} = $type{boottimeout};
-	}
-	if ((%type) && ($type{installboot})) {
-		$result{kiwi_installboot} = $type{installboot};
-	}
-	if ((%type) && ($type{fsmountoptions})) {
-		$result{kiwi_fsmountoptions} = $type{fsmountoptions};
-	}
-	if ((%type)
-		&& (defined $type{hybrid})
-		&& ($type{hybrid} eq "true")) {
-		$result{kiwi_hybrid} = "yes";
-	}
-	if ((%type)
-		&& (defined $type{hybridpersistent})
-		&& ($type{hybridpersistent} eq "true")) {
-		$result{kiwi_hybridpersistent} = "yes";
-	}
-	if ((%type)
-		&& (defined $type{ramonly})
-		&& ($type{ramonly} eq "true")) {
-		$result{kiwi_ramonly} = "yes";
-	}
-	my $size  = $this -> getImageSize_legacy();
-	if ($size) {
-		$result{kiwi_size} = $size;
 	}
 	return %result;
 }
