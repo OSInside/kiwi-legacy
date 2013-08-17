@@ -1524,6 +1524,12 @@ sub setupInstallPXE {
 	}
 	$kiwi -> done();
 	#==========================================
+	# update md5 block/blocksize information
+	#------------------------------------------
+	if (! $this -> updateMD5File ($sysname,$md5name)) {
+		return;
+	}
+	#==========================================
 	# Setup initrd for install purpose
 	#------------------------------------------
 	$kiwi -> info ("Repack initrd with install flags...");
@@ -3327,6 +3333,43 @@ sub buildMD5Sum {
 	}
 	qxx ("echo \"$sum $blocks $blocksize\" > $file");
 	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
+# updateMD5File
+#------------------------------------------
+sub updateMD5File {
+	my $this = shift;
+	my $file = shift;
+	my $outf = shift;
+	my $kiwi = $this->{kiwi};
+	#==========================================
+	# Update md5file adding zblocks/zblocksize
+	#------------------------------------------
+	if (-e $outf) {
+		$kiwi -> info ("Updating md5 file...");
+		my $FD;
+		if (! open ($FD, '<', $outf)) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to open md5 file: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		my $line = <$FD>;
+		close $FD;
+		chomp $line;
+		my $size = KIWIGlobals -> instance() -> isize ($file);
+		my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
+		my $blocksize = 1;
+		for my $factor (split /\s/,$primes) {
+			last if ($blocksize * $factor > 65464);
+			$blocksize *= $factor;
+		}
+		my $blocks = $size / $blocksize;
+		qxx ("echo \"$line $blocks $blocksize\" > $outf");
+		$kiwi -> done();
+	}
 	return $this;
 }
 
