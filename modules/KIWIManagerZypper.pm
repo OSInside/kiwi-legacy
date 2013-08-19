@@ -612,8 +612,8 @@ sub setupUpgrade {
 	my @installOpts = (
 		"--auto-agree-with-licenses"
 	);
-	my %pattr = $xml -> getPackageAttributes_legacy("image");
-	if ($pattr{patternType} ne "plusRecommended") {
+	my $installOption = $xml -> getInstallOption();
+	if (($installOption) && ($installOption ne 'plusRecommended')) {
 		push (@installOpts,"--no-recommends");
 	}
 	print $fd "ZV=\$(@kchroot zypper --version 2>&1 | cut -c 8)"."\n";
@@ -739,8 +739,8 @@ sub setupRootSystem {
 		my @installOpts = (
 			"--auto-agree-with-licenses"
 		);
-		my %pattr = $xml -> getPackageAttributes_legacy("bootstrap");
-		if ($pattr{patternType} ne "plusRecommended") {
+		my $installOption = $xml -> getInstallOption();
+		if (($installOption) && ($installOption ne 'plusRecommended')) {
 			push (@installOpts,"--no-recommends");
 		}
 		#==========================================
@@ -826,8 +826,8 @@ sub setupRootSystem {
 		my @installOpts = (
 			"--auto-agree-with-licenses"
 		);
-		my %pattr = $xml -> getPackageAttributes_legacy("image");
-		if ($pattr{patternType} ne "plusRecommended") {
+		my $installOption = $xml -> getInstallOption();
+		if (($installOption) && ($installOption ne 'plusRecommended')) {
 			push (@installOpts,"--no-recommends");
 		}
 		#==========================================
