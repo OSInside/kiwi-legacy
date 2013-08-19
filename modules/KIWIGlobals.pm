@@ -20,6 +20,7 @@ package KIWIGlobals;
 use strict;
 use warnings;
 use File::Basename;
+use LWP;
 #==========================================
 # KIWI Modules
 #------------------------------------------
@@ -1203,6 +1204,160 @@ sub _new_instance {
 	$this->{data} = \%data;
 	$this->{UmountStack} = [];
 	return $this;
+}
+
+#==========================================
+# downloadFile
+#------------------------------------------
+sub downloadFile {
+	# ...
+	# download a file from a network or local location to
+	# a given local path. It's possible to use regular expressions
+	# in the source file specification
+	# ---
+	my $this    = shift;
+	my $url     = shift;
+	my $dest    = shift;
+	my $dirname;
+	my $basename;
+	my $proxy;
+	my $user;
+	my $pass;
+	my $lwp = "/dev/shm/lwp-download";
+	#==========================================
+	# Check parameters
+	#------------------------------------------
+	if ((! defined $dest) || (! defined $url)) {
+		return;
+	}
+	#==========================================
+	# setup destination base and dir name
+	#------------------------------------------
+	if ($dest =~ /(^.*\/)(.*)/) {
+		$dirname  = $1;
+		$basename = $2;
+		if (! $basename) {
+			$url =~ /(^.*\/)(.*)/;
+			$basename = $2;
+		}
+	} else {
+		return;
+	}
+	#==========================================
+	# check base and dir name
+	#------------------------------------------
+	if (! $basename) {
+		return;
+	}
+	if (! -d $dirname) {
+		return;
+	}
+	#==========================================
+	# download file
+	#------------------------------------------
+	if ($url !~ /:\/\//) {
+		# /.../
+		# local files, make them a file:// url
+		# ----
+		$url = "file://".$url;
+		$url =~ s{/{3,}}{//};
+	}
+	if ($url =~ /dir:\/\//) {
+		# /.../
+		# dir url, make them a file:// url
+		# ----
+		$url =~ s/^dir/file/;
+	}
+	if ($url =~ /^(.*)\?(.*)$/) {
+		$url=$1;
+		my $redirect=$2;
+		if ($redirect =~ /(.*)\/(.*)?$/) {
+			$redirect = $1;
+			$url.=$2;
+		}
+		# get proxy url:
+		# \bproxy makes sure it does not pick up "otherproxy=unrelated"
+		# (?=&|$) makes sure the captured substring is followed by an
+		# ampersand or the end-of-string
+		# ----
+		if ($redirect =~ /\bproxy=(.*?)(?=&|$)/) {
+			$proxy = "$1";
+		}
+		# remove locator string e.g http://
+		if ($proxy) {
+			$proxy =~ s/^.*\/\///;
+		}
+		# extract credentials user and password
+		if ($redirect =~ /proxyuser=(.*)\&proxypass=(.*)/) {
+			$user=$1;
+			$pass=$2;
+		}
+	}
+	my $LWP = FileHandle -> new();
+	if (! $LWP -> open (">$lwp")) {
+		return;
+	}
+	if ($proxy) {
+		print $LWP 'export PERL_LWP_ENV_PROXY=1'."\n";
+		if (($user) && ($pass)) {
+			print $LWP "export http_proxy=http://$user:$pass\@$proxy\n";
+		} else {
+			print $LWP "export http_proxy=http://$proxy\n";
+		}
+	}
+	my $locator = KIWILocator -> instance();
+	my $lwpload = $locator -> getExecPath ('lwp-download');
+	if (! $lwpload) {
+		return;
+	}
+	print $LWP $lwpload.' "$1" "$2"'."\n";
+	$LWP -> close();
+	# /.../
+	# use lwp-download to manage the process.
+	# if first download failed check the directory list with
+	# a regular expression to find the file. After that repeat
+	# the download
+	# ----
+	KIWIQX::qxx ("chmod u+x $lwp 2>&1");
+	$dest = $dirname."/".$basename;
+	my $data = KIWIQX::qxx ("$lwp $url $dest 2>&1");
+	my $code = $? >> 8;
+	if ($code == 0) {
+		return $url;
+	}
+	if ($url =~ /(^.*\/)(.*)/) {
+		my $location = $1;
+		my $search   = $2;
+		my $browser  = LWP::UserAgent -> new;
+		my $request  = HTTP::Request  -> new (GET => $location);
+		my $response;
+		eval {
+			$response = $browser  -> request ( $request );
+		};
+		if ($@) {
+			return;
+		}
+		my $content  = $response -> content ();
+		my @lines    = split (/\n/,$content);
+		foreach my $line(@lines) {
+			if ($line !~ /href=\"(.*)\"/) {
+				next;
+			}
+			my $link = $1;
+			if ($link =~ /$search/) {
+				$url  = $location.$link;
+				$data = KIWIQX::qxx ("$lwp $url $dest 2>&1");
+				$code = $? >> 8;
+				if ($code == 0) {
+					return $url;
+				}
+			}
+		}
+		return;
+	} else {
+		return;
+	}
+	return $url;
 }
 
 1;

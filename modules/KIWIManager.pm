@@ -559,7 +559,7 @@ sub provideMediaLicense {
 			}
 		}
 		next if ! $repo;
-		KIWIXML::getInstSourceFile_legacy (
+		KIWIGlobals -> instance() -> downloadFile (
 			$repo."/".$license,$root."/".$license
 		);
 		last if -e $root."/".$license;

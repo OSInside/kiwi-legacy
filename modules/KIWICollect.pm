@@ -843,8 +843,8 @@ sub getMetafileList
 	for my $mf(keys(%{$this->{m_metafiles}})) {
 		my $t = $this->{m_metafiles}->{$mf}->{'target'} || "";
 		# from, to
-		$this->{m_xml}->getInstSourceFile_legacy($mf,
-						  "$this->{m_basesubdir}->{'1'}/$t");
+		KIWIGlobals -> instance() -> downloadFile($mf,
+			"$this->{m_basesubdir}->{'1'}/$t");
 		my $fname;
 		$mf =~ m{.*/([^/]+)$};
 		$fname = $1;
@@ -1527,7 +1527,7 @@ sub unpackMetapackages
 						my $info = "Downloading script $packOptions{'script'} "
 						    . "to $this->{m_scriptbase}:";
 						print $info;
-						$this->{m_xml}->getInstSourceFile_legacy(
+						KIWIGlobals -> instance() -> downloadFile(
 							$packOptions{'script'},
 							"$this->{m_scriptbase}/$scriptfile");
 
@@ -1615,8 +1615,8 @@ sub executeMetafileScripts
 			my $info = "Downloading script $tmp{'script'} to "
 			    . "$this->{m_scriptbase}:";
 			print $info;
-			$this->{m_xml}->getInstSourceFile_legacy($tmp{'script'}, 
-							  "$this->{m_scriptbase}/$scriptfile");
+			KIWIGlobals -> instance() -> downloadFile($tmp{'script'},
+				"$this->{m_scriptbase}/$scriptfile");
 
 			# TODO I don't like this. Not at all. use chroot in next version!
 			qx(chmod u+x "$this->{m_scriptbase}/$scriptfile");
