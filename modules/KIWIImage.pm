@@ -208,73 +208,23 @@ sub getImageTree {
 }
 
 #==========================================
-# updateDescription
+# updateDescription_legacy
 #------------------------------------------
-sub updateDescription {
+sub updateDescription_legacy {
 	# ...
 	# Create change set hash from the given XML object
 	# to be integrated into another XML object at a later
 	# point in the process.
 	# ---
 	my $this      = shift;
-	my $src_xml   = shift;
-	my %src_type  = %{$src_xml->getImageTypeAndAttributes_legacy()};
+	my $xml       = shift;
 	my %changeset = ();
-	my @profiles;
-	my %repos;
-	my @bootstrap_plist;
-	my @image_plist;
-	my @bootstrap_alist;
-	my @image_alist;
-	my @bootstrap_falistImage;
-	my @image_falistImage;
-	my @bootstrap_fplistImage;
-	my @image_fplistImage;
-	my @bootstrap_fplistDelete;
-	my @image_fplistDelete;
-	my @node;
+	my @profiles  = ();
 	#==========================================
-	# Get architecture
+	# store profiles
 	#------------------------------------------
-	my $arch = KIWIGlobals -> instance() -> getArch();
-	#==========================================
-	# Store general data
-	#------------------------------------------
-	if ($src_type{hybrid}) {
-		$changeset{"hybrid"}= $src_type{hybrid};
-	}
-	if ($src_type{hybridpersistent}) {
-		$changeset{"hybridpersistent"} = $src_type{hybridpersistent};
-	}
-	if ($src_type{ramonly}) {
-		$changeset{"ramonly"} = $src_type{ramonly};
-	}
-	if ($src_type{cmdline}) {
-		$changeset{"kernelcmdline"} = $src_type{cmdline};
-	}
-	if ($src_type{firmware}) {
-		$changeset{"firmware"} = $src_type{firmware};
-	}
-	if ($src_type{bootloader}) {
-		$changeset{"bootloader"} = $src_type{bootloader};
-	}
-	if ($src_type{devicepersistency}) {
-		$changeset{"devicepersistency"} = $src_type{devicepersistency};
-	}
-	if ($src_type{installboot}) {
-		$changeset{"installboot"} = $src_type{installboot};
-	}
-	if ($src_type{bootprofile}) {
-		$changeset{"bootprofile"} = $src_type{bootprofile};
-	}
-	if ($src_type{bootkernel}) {
-		$changeset{"bootkernel"} = $src_type{bootkernel};
-	}
-	if ($src_type{fsmountoptions}) {
-		$changeset{"fsmountoptions"} = $src_type{fsmountoptions};
-	}
-	if ($src_xml->{reqProfiles}) {
-		push @profiles,@{$src_xml->{reqProfiles}};
+	if ($xml->{reqProfiles}) {
+		push @profiles,@{$xml->{reqProfiles}};
 		$changeset{"profiles"} = \@profiles;
 	}
 	#==========================================
@@ -858,7 +808,7 @@ sub createImageBootImage {
 	#==========================================
 	# Setup changeset to be used by boot image
 	#------------------------------------------
-	my %XMLChangeSet = $this -> updateDescription ($sxml);
+	my %XMLChangeSet = $this -> updateDescription_legacy ($sxml);
 	#==========================================
 	# Create tmp dir for boot image creation
 	#------------------------------------------

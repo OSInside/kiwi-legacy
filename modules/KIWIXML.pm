@@ -6153,25 +6153,6 @@ sub getImageSizeBytes_legacy {
 }
 
 #==========================================
-# getImageTypeAndAttributes_legacy
-#------------------------------------------
-sub getImageTypeAndAttributes_legacy {
-	# ...
-	# return typeinfo hash for selected build type
-	# ---
-	my $this     = shift;
-	my $typeinfo = $this->{typeInfo};
-	my $imageType= $this->{imageType};
-	if (! $typeinfo) {
-		return;
-	}
-	if (! $imageType) {
-		return;
-	}
-	return $typeinfo->{$imageType};
-}
-
-#==========================================
 # getInstSourceArchList_legacy
 #------------------------------------------
 sub getInstSourceArchList_legacy {
@@ -7608,105 +7589,6 @@ sub __updateDescriptionFromChangeSet_legacy {
 		$reqProfiles = $this->{reqProfiles};
 		$this->{reqProfiles} = $changeset->{profiles};
 	}
-	#==========================================
-	# 1) merge/update repositories
-	#------------------------------------------
-	# Repos are handled through the new data structure
-	#==========================================
-	# 2) merge/update drivers
-	#------------------------------------------
-	# Driver data is handled through the new data structure
-	#==========================================
-	# 3) merge/update strip
-	#------------------------------------------
-	# Strip data is handled through the new data structure
-	#==========================================
-	# 4) merge/update packages
-	#------------------------------------------
-	# Package data is handled through the new data structure
-	#==========================================
-	# 5) merge/update archives
-	#------------------------------------------
-	# Archive data is handled through the new data structure
-	#==========================================
-	# 6) merge/update machine attribs in type
-	#------------------------------------------
-	# domain attribute is handled through the new data structure
-	#==========================================
-	# 7) merge/update preferences and type
-	#------------------------------------------
-	# oemconfig  data is handled through the new data structure
-	# systemdisk data is handled through the new data structure
-	# preferences data is handled through the new data structure
-	#==========================================
-	# 8) merge/update type attributes
-	#------------------------------------------
-	if (defined $changeset->{"hybrid"}) {
-		$this -> __setTypeAttribute (
-			"hybrid",$changeset->{"hybrid"}
-		);
-	}
-	if (defined $changeset->{"hybridpersistent"}) {
-		$this -> __setTypeAttribute (
-			"hybridpersistent",$changeset->{"hybridpersistent"}
-		);
-	}
-	if (defined $changeset->{"ramonly"}) {
-		$this -> __setTypeAttribute (
-			"ramonly",$changeset->{"ramonly"}
-		);
-	}
-	if (defined $changeset->{"kernelcmdline"}) {
-		$this -> __setTypeAttribute (
-			"kernelcmdline",$changeset->{"kernelcmdline"}
-		);
-	}
-	if (defined $changeset->{"firmware"}) {
-		$this -> __setTypeAttribute (
-			"firmware",$changeset->{"firmware"}
-		);
-	}
-	if (defined $changeset->{"bootloader"}) {
-		$this -> __setTypeAttribute (
-			"bootloader",$changeset->{"bootloader"}
-		);
-	}
-	if (defined $changeset->{"devicepersistency"}) {
-		$this -> __setTypeAttribute (
-			"devicepersistency",$changeset->{"devicepersistency"}
-		);
-	}
-	if (defined $changeset->{"installboot"}) {
-		$this -> __setTypeAttribute (
-			"installboot",$changeset->{"installboot"}
-		);
-	}
-	if (defined $changeset->{"bootkernel"}) {
-		$this -> __setTypeAttribute (
-			"bootkernel",$changeset->{"bootkernel"}
-		);
-	}
-	if (defined $changeset->{"fsmountoptions"}) {
-		$this -> __setTypeAttribute (
-			"fsmountoptions",$changeset->{"fsmountoptions"}
-		);
-	}
-	if (defined $changeset->{"bootprofile"}) {
-		$this -> __setTypeAttribute (
-			"bootprofile",$changeset->{"bootprofile"}
-		);
-	}
-	#==========================================
-	# 9) merge/update image attribs, toplevel
-	#------------------------------------------
-	# image data is handled through the new data structure
-	#==========================================
-	# 10) merge/update volumes with size info
-	#------------------------------------------
-	# systemdisk data is handled through the new data structure
-	#==========================================
-	# 12) cleanup reqProfiles
-	#------------------------------------------
 	$this->{reqProfiles} = $reqProfiles;
 	return;
 }
@@ -7860,32 +7742,6 @@ sub __hasDefaultProfName {
 		}
 	}
 	return;
-}
-
-#==========================================
-# __setTypeAttribute
-#------------------------------------------
-sub __setTypeAttribute {
-	# ...
-	# set given attribute to selected type in the
-	# xml preferences node
-	# ---
-	my $this = shift;
-	my $attr = shift;
-	my $val  = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	if ($val) {
-		$kiwi -> info ("Updating type attribute: $attr : $val");
-		$tnode-> setAttribute ("$attr","$val");
-	} else {
-		$kiwi -> info ("Updating type attribute: $attr");
-		$tnode-> setAttribute ("$attr","true");
-	}
-	$kiwi -> done ();
-	$this -> __updateTypeList_legacy();
-	$this -> __updateXML_legacy();
-	return $this;
 }
 
 #==========================================

@@ -4589,31 +4589,6 @@ sub test_getImageTypeProfilesNoPrimaryType {
 }
 
 #==========================================
-# test_getImageTypeAndAttributes_legacy
-#------------------------------------------
-sub test_getImageTypeAndAttributes_legacy {
-	# ...
-	# Verify proper return of getImageTypeAndAttributes_legacy method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $typeInfo = $xml -> getImageTypeAndAttributes_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('vmx', $typeInfo->{type});
-	return;
-}
-
-#==========================================
 # test_getInstallOption
 #------------------------------------------
 sub test_getInstallOption {
