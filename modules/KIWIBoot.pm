@@ -3532,7 +3532,7 @@ sub setupBootLoaderStages {
 		);
 		my @bios_core_modules = (
 			'biosdisk','part_msdos','part_gpt','vga','vbe',
-			'video_bochs','video_cirrus'
+			'video_bochs','video_cirrus','gfxterm'
 		);
 		my @efi_core_modules = (
 			'part_gpt','efi_gop','video','video_fb'
