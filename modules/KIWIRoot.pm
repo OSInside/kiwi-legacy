@@ -998,6 +998,7 @@ sub setup {
 	my $manager   = $this->{manager};
 	my $data;
 	my $status;
+	my $FD;
 	#========================================
 	# Consistency check
 	#----------------------------------------
@@ -1062,28 +1063,8 @@ sub setup {
 	# create .profile from <image> tags
 	#----------------------------------------
 	$kiwi -> info ("Create .profile environment");
-	my $FD = FileHandle -> new();
-	if (! $FD -> open (">$root/.profile")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create .profile: $!");
-		$kiwi -> failed ();
-		return;
-	}
-	$kiwi -> done();
-	my %config = $xml -> getImageConfig_legacy();
-	binmode($FD, ":encoding(UTF-8)");
-	foreach my $key (keys %config) {
-		$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
-		print $FD "$key='$config{$key}'\n";
-	}
-	$FD -> close();
-	# Add entries that are handled through the new XML data structure
 	my $profile = KIWIProfileFile -> new();
 	if (! $profile) {
-		return;
-	}
-	$status = $profile -> updateFromHash (\%config);
-	if (! $status) {
 		return;
 	}
 	$status = $profile -> updateFromXML ($xml);
@@ -1094,6 +1075,7 @@ sub setup {
 	if (! $status) {
 		return;
 	}
+	$kiwi -> done();
 	#========================================
 	# configure the system
 	#----------------------------------------

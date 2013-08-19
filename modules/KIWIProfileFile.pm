@@ -205,6 +205,18 @@ sub updateFromXML {
 		$this -> addEntry('kiwi_delete',join(q{ },@items_delete));
 	}
 	#==========================================
+	# kiwi_testing
+	#------------------------------------------
+	my $testsuite = $xml -> getTestSuitePackages();
+	if (@{$testsuite}) {
+		my @items_test;
+		for my $package (@{$testsuite}) {
+			my $name = $package -> getName();
+			push @items_test, $name;
+		}
+		$this -> addEntry('kiwi_testing',join(q{ },@items_test));
+	}
+	#==========================================
 	# kiwi_iname
 	#------------------------------------------
 	my $name  = $xml -> getImageName();
@@ -252,29 +264,6 @@ sub updateFromXML {
 	# kiwi type variables
 	#------------------------------------------
 	$this -> __updateXMLType ($xml);
-	return $this;
-}
-
-#==========================================
-# updateFromHash
-#------------------------------------------
-sub updateFromHash {
-	# ...
-	# Update the existing data from an XML object.
-	# the onus is on the client to avoid duplicates
-	# in the data
-	# ---
-	my $this = shift;
-	my $hash = shift;
-	my $kiwi = $this->{kiwi};
-	my $msg  = 'updateFromHash: ';
-	if (! $hash || ref($hash) ne 'HASH') {
-		$msg .= 'expecting HASH ref as first argument';
-		$kiwi -> error ($msg);
-		$kiwi -> failed();
-		return;
-	}
-	$this->{profile} = $hash;
 	return $this;
 }
 

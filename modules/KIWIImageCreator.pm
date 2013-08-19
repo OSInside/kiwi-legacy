@@ -2159,29 +2159,9 @@ sub __updateProfileEnvironment {
 	if (! defined $configure) {
 		return;
 	}
-	# Add entries that are handled through the old data structure
-	my %config = $xml -> getImageConfig_legacy();
-	my $PFD = FileHandle -> new();
-	if (! $PFD -> open (">$tree/.profile")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed to open $tree/.profile: $!");
-		$kiwi -> failed ();
-		return;
-	}
-	binmode($PFD, ":encoding(UTF-8)");
-	foreach my $key (keys %config) {
-		$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
-		print $PFD "$key=\"$config{$key}\"\n";
-	}
-	$PFD -> close();
-	# Add entries that are handled through the new XML data structure
 	my $profile = KIWIProfileFile -> new();
 	my $status;
 	if (! $profile) {
-		return;
-	}
-	$status = $profile -> updateFromHash (\%config);
-	if (! $status) {
 		return;
 	}
 	$status = $profile -> updateFromXML ($xml);

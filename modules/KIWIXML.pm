@@ -147,6 +147,7 @@ sub new {
 	#             bootPkgs        = (KIWIXMLPackageData, ...),
 	#             bootPkgsCollect = (KIWIXMLPackageCollectData,...),
 	#             bootStrapPckgs  = (KIWIXMLPackageData, ...),
+	#             TestSuitePckgs  = (KIWIXMLPackageData, ...),
 	#             delPkgs         = (KIWIXMLPackageData, ...),
 	#             drivers         = (KIWIXMLDriverData, ...),
 	#             ignorePkgs      = (KIWIXMLPackageData, ...),
@@ -163,6 +164,7 @@ sub new {
 	#                 bootPkgs        = (KIWIXMLPackageData, ...),
 	#                 bootPkgsCollect = (KIWIXMLPackageCollectData,...),
 	#                 bootStrapPckgs  = (KIWIXMLPackageData, ...),
+	#                 TestSuitePckgs  = (KIWIXMLPackageData, ...),
 	#                 delPkgs         = (KIWIXMLPackageData, ...),
 	#                 drivers         = (KIWIXMLDriverData, ...),
 	#                 ignorePkgs      = (KIWIXMLPackageData, ...),
@@ -1334,6 +1336,18 @@ sub getBootstrapPackages {
 	# ---
 	my $this = shift;
 	return $this -> __getInstallData('bootStrapPckgs');
+}
+
+#==========================================
+# getTestSuitePackages
+#------------------------------------------
+sub getTestSuitePackages {
+	# ...
+	# Return an array ref containing PackageData objects for the packages
+	# that should be used in a testsuite run.
+	# ---
+	my $this = shift;
+	return $this -> __getInstallData('testSuitePckgs');
 }
 
 #==========================================
@@ -4648,6 +4662,10 @@ sub __populatePackageInfo {
 					# In a type='bootstrap' section attributes are ignored
 					@access = ('bootStrapPckgs');
 				}
+				if ($type eq 'testsuite') {
+					# In a type='testsuite' section attributes are ignored
+					@access = ('TestSuitePckgs');
+				}
 				for my $accessID (@access) {
 					my %storeData = (
 					    accessID => $accessID,
@@ -5526,20 +5544,6 @@ sub isDriverUpdateDisk {
 }
 
 #==========================================
-# getTestingList
-#------------------------------------------
-sub getTestingList {
-	# ...
-	# Create package list with packages used for testing
-	# the image integrity. The packages here are installed
-	# temporary as long as the testsuite runs. After the
-	# test runs they should be removed again
-	# ---
-	my $this = shift;
-	return getList_legacy ($this,"testsuite");
-}
-
-#==========================================
 # getArch
 #------------------------------------------
 sub getArch {
@@ -6014,28 +6018,6 @@ sub getEditBootInstall_legacy {
 		return;
 	}
 	return $editBoot;
-}
-
-#==========================================
-# getImageConfig_legacy
-#------------------------------------------
-sub getImageConfig_legacy {
-	# ...
-	# Evaluate the attributes of the drivers and preferences tags and
-	# build a hash containing all the image parameters. This information
-	# is used to create the .profile environment
-	# ---
-	my $this = shift;
-	my %result;
-	my @nodelist;
-	#==========================================
-	# test packages list
-	#------------------------------------------
-	my @tstp  = $this -> getTestingList();
-	if (@tstp) {
-		$result{kiwi_testing} = join(" ",@tstp);
-	}
-	return %result;
 }
 
 #==========================================
