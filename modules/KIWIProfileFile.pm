@@ -97,6 +97,7 @@ sub new {
 		kiwi_oemsilentboot
 		kiwi_oemsilentinstall
 		kiwi_oemsilentverify
+		kiwi_oemskipverify
 		kiwi_oemswap
 		kiwi_oemswapMB
 		kiwi_oemtitle
