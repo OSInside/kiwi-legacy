@@ -88,6 +88,7 @@ sub new {
 	my $xendomain;
 	my $xengz;
 	my $xml;
+	my %type;
 	#==========================================
 	# check initrd file parameter
 	#------------------------------------------
@@ -315,6 +316,41 @@ sub new {
 		}
 	}
 	#==========================================
+	# store type information
+	#------------------------------------------
+	if (defined $xml) {
+		my $xmltype = $xml -> getImageType();
+		if (! $xmltype) {
+			return;
+		}
+		$type{bootfilesystem}         = $xmltype -> getBootImageFileSystem();
+		$type{bootloader}             = $xmltype -> getBootLoader();
+		$type{bootpartsize}           = $xmltype -> getBootPartitionSize();
+		$type{boottimeout}            = $xmltype -> getBootTimeout();
+		$type{cmdline}                = $xmltype -> getKernelCmdOpts();
+		$type{filesystem}             = $xmltype -> getFilesystem();
+		$type{firmware}               = $xmltype -> getFirmwareType();
+		$type{fsmountoptions}         = $xmltype -> getFSMountOptions();
+		$type{fsnocheck}              = $xmltype -> getFSNoCheck();
+		$type{installboot}            = $xmltype -> getInstallBoot();
+		$type{installiso}             = $xmltype -> getInstallIso();
+		$type{installprovidefailsafe} = $xmltype -> getInstallFailsafe();
+		$type{installpxe}             = $xmltype -> getInstallPXE();
+		$type{installstick}           = $xmltype -> getInstallStick();
+		$type{luks}                   = $xmltype -> getLuksPass();
+		$type{lvm}                    = $xmltype -> useLVM();
+		$type{mdraid}                 = $xmltype -> getMDRaid();
+		$type{type}                   = $xmltype -> getTypeName();
+		$type{vga}                    = $xmltype -> getVGA();
+		$type{volid}                  = $xmltype -> getVolID();
+	}
+	#==========================================
+	# store systemdisk information
+	#------------------------------------------
+	if (defined $xml) {
+		$this->{sysdisk} = $xml -> getSystemDiskConfig();
+	}
+	#==========================================
 	# find Xen domain configuration
 	#------------------------------------------
 	if ($isxen && defined $xml) {
@@ -415,7 +451,6 @@ sub new {
 		#==========================================
 		# check framebuffer vga value
 		#------------------------------------------
-		my %type = %{$xml->getImageTypeAndAttributes_legacy()};
 		if ($type{vga}) {
 			$vga = $type{vga};
 		}
@@ -467,6 +502,7 @@ sub new {
 	$this->{imgtype}   = $cmdL->getBuildType();
 	$this->{chainload} = $cmdL->getGrubChainload();
 	$this->{firmware}  = $firmware;
+	$this->{type}      = \%type;
 	return $this;
 }
 
@@ -562,6 +598,7 @@ sub setupInstallCD {
 	my $gotsys    = 1;
 	my $volid     = "KIWI CD/DVD Installation";
 	my $appid     = $this->{mbrid};
+	my $type      = $this->{type};
 	my $bootloader;
 	if ($arch =~ /ppc|ppc64/) {
 		$bootloader = "yaboot";
@@ -579,7 +616,6 @@ sub setupInstallCD {
 	my $status;
 	my $result;
 	my $tmpdir;
-	my %type;
 	my $haveDiskDevice;
 	my $version;
 	my $FD;
@@ -602,22 +638,16 @@ sub setupInstallCD {
 	$kiwi -> info ("Using ISO Application ID: $appid");
 	$kiwi -> done();
 	#==========================================
-	# read config XML attributes
-	#------------------------------------------
-	if (defined $xml) {
-		%type = %{$xml->getImageTypeAndAttributes_legacy()};
-	}
-	#==========================================
 	# check for volume id
 	#------------------------------------------
-	if ((%type) && ($type{volid})) {
-		$volid = $type{volid};
+	if ($type->{volid}) {
+		$volid = $type->{volid};
 	}
 	#==========================================
 	# setup boot loader type
 	#------------------------------------------
-	if ((%type) && ($type{bootloader})) {
-		$bootloader = $type{bootloader};
+	if ($type->{bootloader}) {
+		$bootloader = $type->{bootloader};
 	}
 	#==========================================
 	# create tmp directory
@@ -971,6 +1001,7 @@ sub setupInstallStick {
 	my $xml       = $this->{xml};
 	my $cmdL      = $this->{cmdL};
 	my $firmware  = $this->{firmware};
+	my $type      = $this->{type};
 	my $irdsize   = KIWIGlobals -> instance() -> isize ($initrd);
 	my $vmsize    = KIWIGlobals -> instance() -> isize ($system);
 	my $md5name   = $system;
@@ -993,7 +1024,6 @@ sub setupInstallStick {
 	my $result;
 	my $version;
 	my $tmpdir;
-	my %type;
 	my $stick;
 	my $diskname;
 	#==========================================
@@ -1016,16 +1046,10 @@ sub setupInstallStick {
 		$this->{system} = $system;
 	}
 	#==========================================
-	# read config XML attributes
-	#------------------------------------------
-	if (defined $xml) {
-		%type = %{$xml->getImageTypeAndAttributes_legacy()};
-	}
-	#==========================================
 	# setup boot loader type
 	#------------------------------------------
-	if ((%type) && ($type{bootloader})) {
-		$bootloader = $type{bootloader};
+	if ($type->{bootloader}) {
+		$bootloader = $type->{bootloader};
 	}
 	#==========================================
 	# create tmp directory
@@ -1139,8 +1163,8 @@ sub setupInstallStick {
 	#------------------------------------------
 	my $bootfs = 'ext3';
 	my $partid = "83";
-	if ($type{bootfilesystem}) {
-		$bootfs = $type{bootfilesystem};
+	if ($type->{bootfilesystem}) {
+		$bootfs = $type->{bootfilesystem};
 	} elsif ($bootloader eq 'syslinux') {
 		$bootfs = 'fat32';
 	} elsif ($bootloader eq 'yaboot') {
@@ -1342,7 +1366,7 @@ sub setupInstallStick {
 		$kiwi -> info ("Installing image data to disk");
 		if (! KIWIGlobals
 			-> instance()
-			-> mount ($data, $loopdir,$type{fsmountoptions})) {
+			-> mount ($data, $loopdir,$type->{fsmountoptions})) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount data partition: $status");
 			$kiwi -> failed ();
@@ -1401,7 +1425,7 @@ sub setupInstallPXE {
 	my $vgroup    = $this->{lvmgroup};
 	my $lvm       = $this->{lvm};
 	my $imgtype   = $this->{imgtype};
-	my %type      = %{$xml->getImageTypeAndAttributes_legacy()};
+	my $type      = $this->{type};
 	my $destdir   = dirname ($initrd);
 	my $md5name   = $system;
 	my $appname;
@@ -1486,8 +1510,8 @@ sub setupInstallPXE {
 	my $appfd = FileHandle -> new();
 	if ($appfd -> open(">$appname")) {
 		print $appfd 'pxe=1';
-		if ($type{cmdline}) {
-			print $appfd " $type{cmdline}";
+		if ($type->{cmdline}) {
+			print $appfd " $type->{cmdline}";
 		}
 		if ($imgtype eq 'split') {
 			print $appfd ' COMBINED_IMAGE=yes';
@@ -1591,6 +1615,8 @@ sub setupBootDisk {
 	my $imgtype   = $this->{imgtype};
 	my $haveSplit = $this->{haveSplit};
 	my $firmware  = $this->{firmware};
+	my $type      = $this->{type};
+	my $systemDisk= $this->{sysdisk};
 	my $diskname  = $system.".raw";
 	my %deviceMap = ();
 	my @commands  = ();
@@ -1650,30 +1676,26 @@ sub setupBootDisk {
 	#==========================================
 	# load type attributes...
 	#------------------------------------------
-	my $systemDisk = $xml -> getSystemDiskConfig();
-	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
-	if (! $type{installiso}) {
-		$type{installiso} = 'false';
+	if (! $type->{installiso}) {
+		$type->{installiso} = 'false';
 	}
-	if (! $type{installstick}) {
-		$type{installstick} = 'false';
+	if (! $type->{installstick}) {
+		$type->{installstick} = 'false';
 	}
-	if (! $type{installpxe}) {
-		$type{installpxe} = 'false';
+	if (! $type->{installpxe}) {
+		$type->{installpxe} = 'false';
 	}
 	#==========================================
 	# Check for software raid...
 	#------------------------------------------
-	if ($type{mdraid}) {
-		$md = $type{mdraid};
+	if ($type->{mdraid}) {
+		$md = $type->{mdraid};
 		$this->{md} = $md;
 	}
 	#==========================================
 	# Check if LVM is requested...
 	#------------------------------------------
-	# TODO: change this to:
-	# check with $xml->getSystemDiskConfig && $xml->getImageType->useLVM()
-	if ((($type{lvm}) && ($type{lvm} eq "true")) || ($lvm)) {
+	if ((($systemDisk) && ($type->{lvm})) || ($lvm)) {
 		#==========================================
 		# set volume group name and flag variable
 		#------------------------------------------
@@ -1689,14 +1711,14 @@ sub setupBootDisk {
 	#==========================================
 	# Check if volume management is done by fs
 	#------------------------------------------
-	if ($type{filesystem} =~ /zfs|btrfs/) {
+	if ($type->{filesystem} =~ /zfs|btrfs/) {
 		undef $lvm;
 		undef $this->{lvm};
 	}
 	#==========================================
 	# Check if ZFS setup can be done...
 	#------------------------------------------
-	if (($type{filesystem} =~ /zfs/) && ( ! -d $system )) {
+	if (($type->{filesystem} =~ /zfs/) && ( ! -d $system )) {
 		$kiwi -> error (
 			"ZFS setup requires root tree but got image file"
 		);
@@ -1720,7 +1742,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			return;
 		}
-		if ($type{filesystem} =~ /zfs/) {
+		if ($type->{filesystem} =~ /zfs/) {
 			$kiwi -> error (
 				"LVM volumes setup not yet supported with zfs filesystem"
 			);
@@ -1731,7 +1753,7 @@ sub setupBootDisk {
 	#==========================================
 	# Calculate volume size requirements...
 	#------------------------------------------
-	if (($lvm) || ($type{filesystem} =~ /zfs|btrfs/)) {
+	if (($lvm) || ($type->{filesystem} =~ /zfs|btrfs/)) {
 		#==========================================
 		# check and set volumes setup
 		#------------------------------------------
@@ -1794,7 +1816,7 @@ sub setupBootDisk {
 				# size of the volumes is created by a resize operation
 				# on first boot of the appliance
 				# ----
-				if (($type{type} ne "oem") && ($lvmparts{$vol})) {
+				if (($type->{type} ne "oem") && ($lvmparts{$vol})) {
 					$reqSize = $lvmparts{$vol}->[0];
 					if ((! $reqSize) || ($reqSize eq "all")) {
 						$reqSize = 0;
@@ -1831,7 +1853,7 @@ sub setupBootDisk {
 			#==========================================
 			# Handle @root volume
 			#------------------------------------------
-			if ($type{type} eq "vmx") {
+			if ($type->{type} eq "vmx") {
 				#==========================================
 				# calculate size required by root volume
 				#------------------------------------------
@@ -1893,20 +1915,20 @@ sub setupBootDisk {
 	#==========================================
 	# check for LUKS extension
 	#------------------------------------------
-	if ($type{luks}) {
+	if ($type->{luks}) {
 		$haveluks = 1;
 	}
 	#==========================================
 	# check for raw read-write overlay
 	#------------------------------------------
-	if ($type{filesystem} =~ /clicfs/) {
+	if ($type->{filesystem} =~ /clicfs/) {
 		$rawRW = 1;
 	}
 	#==========================================
 	# setup boot loader type
 	#------------------------------------------
-	if ($type{bootloader}) {
-		$bootloader = $type{bootloader};
+	if ($type->{bootloader}) {
+		$bootloader = $type->{bootloader};
 	}
 	$this->{bootloader} = $bootloader;
 	#==========================================
@@ -1937,11 +1959,11 @@ sub setupBootDisk {
 		$needBootP = 1;
 	} elsif ($syszip) {
 		$needBootP = 1;
-	} elsif ($type{filesystem} =~ /btrfs|xfs|zfs/) {
+	} elsif ($type->{filesystem} =~ /btrfs|xfs|zfs/) {
 		$needBootP = 1;
 	} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
 		$needBootP = 1;
-	} elsif ($type{luks}) {
+	} elsif ($type->{luks}) {
 		$needBootP = 1;
 	}
 	$this->{needBootP} = $needBootP;
@@ -1951,7 +1973,7 @@ sub setupBootDisk {
 	#------------------------------------------
 	if ($imgtype eq "split") {
 		$needRoP = 1;
-	} elsif ($type{filesystem} =~ /clicfs|overlayfs/) {
+	} elsif ($type->{filesystem} =~ /clicfs|overlayfs/) {
 		$needRoP = 1;
 	}
 	#==========================================
@@ -1970,8 +1992,8 @@ sub setupBootDisk {
 	my $partid = 83;
 	my $bootfs = 'ext3';
 	if ($needBootP) {
-		if ($type{bootfilesystem}) {
-			$bootfs = $type{bootfilesystem};
+		if ($type->{bootfilesystem}) {
+			$bootfs = $type->{bootfilesystem};
 		} elsif ($bootloader eq 'syslinux') {
 			$bootfs = 'fat32';
 		} elsif ($bootloader eq 'yaboot') {
@@ -2052,11 +2074,11 @@ sub setupBootDisk {
 	#==========================================
 	# obtain filesystem type from xml data
 	#------------------------------------------
-	if ($type{filesystem} =~ /(.*),(.*)/) {
+	if ($type->{filesystem} =~ /(.*),(.*)/) {
 		$FSTypeRW = $1;
 		$FSTypeRO = $2;
 	} else {
-		$FSTypeRW = $type{filesystem};
+		$FSTypeRW = $type->{filesystem};
 		$FSTypeRO = $FSTypeRW;
 	}
 	if ($haveSplit) {
@@ -2433,7 +2455,7 @@ sub setupBootDisk {
 		#------------------------------------------
 		if (! KIWIGlobals
 			-> instance()
-			-> mount ($root,$loopdir,$type{fsmountoptions})) {
+			-> mount ($root,$loopdir,$type->{fsmountoptions})) {
 			$this -> cleanStack ();
 			return;
 		}
@@ -2481,7 +2503,7 @@ sub setupBootDisk {
 					}
 					$kiwi -> loginfo ("Mounting logical volume: $pname\n");
 					if (! KIWIGlobals -> instance() ->
-						mount ($device,"$loopdir/$pname",$type{fsmountoptions})
+						mount ($device,"$loopdir/$pname",$type->{fsmountoptions})
 					) {
 						$this -> cleanStack ();
 						return;
@@ -2554,7 +2576,7 @@ sub setupBootDisk {
 	if (($syszip) && (! $haveSplit) && (! $rawRW)) {
 		my $rw = $deviceMap{readwrite};
 		if ($haveluks) {
-			my $cipher = $type{luks};
+			my $cipher = $type->{luks};
 			my $name   = "luksReadWrite";
 			$kiwi -> info ("Creating LUKS->ext3 read-write filesystem");
 			$status = qxx ("echo $cipher|cryptsetup -q luksFormat $rw 2>&1");
@@ -2729,9 +2751,9 @@ sub setupBootDisk {
 	qxx ("rm -rf $tmpdir");
 	if (($haveDiskDevice) && (! $this->{gdata}->{StudioNode})) {
 		if (
-			($type{installiso}   ne "true") && 
-			($type{installstick} ne "true") &&
-			($type{installpxe}   ne "true")
+			($type->{installiso}   ne "true") &&
+			($type->{installstick} ne "true") &&
+			($type->{installpxe}   ne "true")
 		) {
 			#==========================================
 			# create image file from disk device
@@ -2757,7 +2779,7 @@ sub setupBootDisk {
 		#==========================================
 		# OEM Install CD...
 		#------------------------------------------
-		if (($type{installiso}) && ($type{installiso} eq "true")) {
+		if (($type->{installiso}) && ($type->{installiso} eq 'true')) {
 			$this -> {system} = $diskname;
 			if ($haveDiskDevice) {
 				$this -> {system} = $this->{loop};
@@ -2771,7 +2793,7 @@ sub setupBootDisk {
 		#==========================================
 		# OEM Install Stick...
 		#------------------------------------------
-		if (($type{installstick}) && ($type{installstick} eq "true")) {
+		if (($type->{installstick}) && ($type->{installstick} eq 'true')) {
 			$this -> {system} = $diskname;
 			if ($haveDiskDevice) {
 				$this -> {system} = $this->{loop};
@@ -2785,7 +2807,7 @@ sub setupBootDisk {
 		#==========================================
 		# OEM Install PXE...
 		#------------------------------------------
-		if (($type{installpxe}) && ($type{installpxe} eq "true")) {
+		if (($type->{installpxe}) && ($type->{installpxe} eq 'true')) {
 			$this -> {system} = $diskname;
 			if ($haveDiskDevice) {
 				$this -> {system} = $this->{loop};
@@ -3986,10 +4008,11 @@ sub setupBootLoaderStages {
 sub setupBootLoaderConfiguration {
 	my $this     = shift;
 	my $loader   = shift;
-	my $type     = shift;
+	my $topic    = shift;
 	my $extra    = shift;
 	my $iso      = shift;
 	my $uuid     = shift;
+	my $type     = $this->{type};
 	my $cmdL     = $this->{cmdL};
 	my $system   = $this->{system};
 	my $kiwi     = $this->{kiwi};
@@ -4006,7 +4029,6 @@ sub setupBootLoaderConfiguration {
 	my $firmware = $this->{firmware};
 	my $failsafe = 1;
 	my $cmdline;
-	my %type;
 	my $title;
 	#==========================================
 	# set empty label if not defined
@@ -4037,38 +4059,37 @@ sub setupBootLoaderConfiguration {
 	# setup boot loader default boot label/nr
 	#------------------------------------------
 	my $defaultBootNr = 0;
-	if ($xml) {
-		%type = %{$xml->getImageTypeAndAttributes_legacy()};
-		$cmdline  = $type{cmdline};
+	if ($type->{cmdline}) {
+		$cmdline  = $type->{cmdline};
 	}
-	if ($type =~ /^KIWI (CD|USB) Boot/) {
+	if ($topic =~ /^KIWI (CD|USB) Boot/) {
 		# /.../
 		# use predefined set of parameters for simple boot CD
 		# not including a system image
 		# ----
-		$type{installboot} = "install";
-		$type{boottimeout} = 1;
-		$type{fastboot}    = 1;
+		$type->{installboot} = "install";
+		$type->{boottimeout} = 1;
+		$type->{fastboot}    = 1;
 		$cmdline="kiwistderr=/dev/hvc0";
 		$vga="normal";
 	}
-	if ($type =~ /^KIWI (CD|USB)/) {
+	if ($topic =~ /^KIWI (CD|USB)/) {
 		# In install mode we have the following menu layout
 		# ----
 		# 0 -> Boot from Hard Disk
 		# 1 -> Install $label
 		# 2 -> [ Failsafe -- Install $label ]
 		# ----
-		if ($type{installboot}) {
-			if ($type{installboot} eq "install") {
+		if ($type->{installboot}) {
+			if ($type->{installboot} eq 'install') {
 				$defaultBootNr = 1;
 			}
-			if ($type{installboot} eq "failsafe-install") {
+			if ($type->{installboot} eq 'failsafe-install') {
 				$defaultBootNr = 2;
 			}
 		}
-		if (($type{installprovidefailsafe}) &&
-			($type{installprovidefailsafe} eq "false")
+		if (($type->{installprovidefailsafe}) &&
+			($type->{installprovidefailsafe} eq 'false')
 		) {
 			$failsafe = 0;
 			if ($defaultBootNr == 2) {
@@ -4256,14 +4277,14 @@ sub setupBootLoaderConfiguration {
 				print $FD "\t".'terminal_output console'."\n";
 			}
 			my $bootTimeout = 10;
-			if (defined $type{boottimeout}) {
-				$bootTimeout = $type{boottimeout};
+			if (defined $type->{boottimeout}) {
+				$bootTimeout = $type->{boottimeout};
 			}
-			if ($type{fastboot}) {
+			if ($type->{fastboot}) {
 				$bootTimeout = 0;
 			}
 			print $FD "set timeout=$bootTimeout\n";
-			if ($type =~ /^KIWI (CD|USB)/) {
+			if ($topic =~ /^KIWI (CD|USB)/) {
 				my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
 				my $arch = KIWIGlobals -> instance() -> getArch();
 				print $FD 'menuentry "Boot from Hard Disk"';
@@ -4297,7 +4318,7 @@ sub setupBootLoaderConfiguration {
 				print $FD '}'."\n";
 				$title = $this -> quoteLabel ("Install $label");
 			} else {
-				$title = $this -> quoteLabel ("$label [ $type ]");
+				$title = $this -> quoteLabel ("$label [ $topic ]");
 			}
 			print $FD 'menuentry "'.$title.'"';
 			print $FD ' --class opensuse --class os {'."\n";
@@ -4311,7 +4332,7 @@ sub setupBootLoaderConfiguration {
 					print $FD "\t"."linux$efi_suffix /boot/linux";
 					print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 					print $FD " cdinst=1 splash=silent";
-				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+				} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "\t"."echo Loading linux.vmx...\n";
 					print $FD "\t"."set gfxpayload=keep"."\n";
 					print $FD "\t"."linux$efi_suffix /boot/linux.vmx";
@@ -4326,7 +4347,7 @@ sub setupBootLoaderConfiguration {
 				if ($iso) {
 					print $FD "\t"."echo Loading initrd...\n";
 					print $FD "\t"."initrd$efi_suffix /boot/initrd\n";
-				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+				} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "\t"."echo Loading initrd.vmx...\n";
 					print $FD "\t"."initrd$efi_suffix /boot/initrd.vmx\n";
 				} else {
@@ -4343,7 +4364,7 @@ sub setupBootLoaderConfiguration {
 					print $FD "\t"."module /boot/linux dummy";
 					print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 					print $FD " cdinst=1 splash=silent";
-				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+				} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "\t"."echo Loading Xen\n";
 					print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 					print $FD "\t"."echo Loading linux.vmx...\n";
@@ -4362,7 +4383,7 @@ sub setupBootLoaderConfiguration {
 				if ($iso) {
 					print $FD "\t"."echo Loading initrd...\n";
 					print $FD "\t"."module /boot/initrd dummy\n";
-				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+				} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "\t"."echo Loading initrd.vmx...\n";
 					print $FD "\t"."module /boot/initrd.vmx dummy\n";
 				} else {
@@ -4386,7 +4407,7 @@ sub setupBootLoaderConfiguration {
 						print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 						print $FD " cdinst=1 splash=silent";
 					} elsif (
-						($type=~ /^KIWI USB/) ||
+						($topic=~ /^KIWI USB/) ||
 						($imgtype=~ /vmx|oem|split/)
 					) {
 						print $FD "\t"."echo Loading linux.vmx...\n";
@@ -4405,7 +4426,7 @@ sub setupBootLoaderConfiguration {
 						print $FD "\t"."echo Loading initrd...\n";
 						print $FD "\t"."initrd$efi_suffix /boot/initrd\n";
 					} elsif (
-						($type=~ /^KIWI USB/) ||
+						($topic=~ /^KIWI USB/) ||
 						($imgtype=~ /vmx|oem|split/)
 					) {
 						print $FD "\t"."echo Loading initrd.vmx...\n";
@@ -4425,7 +4446,7 @@ sub setupBootLoaderConfiguration {
 						print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 						print $FD " cdinst=1 splash=silent";
 					} elsif (
-						($type=~ /^KIWI USB/) || 
+						($topic=~ /^KIWI USB/) ||
 						($imgtype=~ /vmx|oem|split/)
 					) {
 						print $FD "\t"."echo Loading Xen\n";
@@ -4448,7 +4469,7 @@ sub setupBootLoaderConfiguration {
 						print $FD "\t"."echo Loading initrd...\n";
 						print $FD "\t"."module /boot/initrd dummy\n";
 					} elsif (
-						($type=~ /^KIWI USB/) || 
+						($topic=~ /^KIWI USB/) ||
 						($imgtype=~ /vmx|oem|split/)
 					) {
 						print $FD "\t"."echo Loading initrd.vmx...\n";
@@ -4504,16 +4525,16 @@ sub setupBootLoaderConfiguration {
 		print $FD "color cyan/blue white/blue\n";
 		print $FD "default $defaultBootNr\n";
 		my $bootTimeout = 10;
-		if (defined $type{boottimeout}) {
-			$bootTimeout = $type{boottimeout};
+		if (defined $type->{boottimeout}) {
+			$bootTimeout = $type->{boottimeout};
 		}
-		if ($type{fastboot}) {
+		if ($type->{fastboot}) {
 			$bootTimeout = 0;
 		}
 		print $FD "timeout $bootTimeout\n";
-		if ($type =~ /^KIWI (CD|USB)/) {
+		if ($topic =~ /^KIWI (CD|USB)/) {
 			my $dev = $1 eq 'CD' ? '(cd)' : "(hd0,$boot_id)";
-			if (! $type{fastboot}) {
+			if (! $type->{fastboot}) {
 				if (-e "$tmpdir/boot/grub/splash.xpm.gz") {
 					print $FD "splashimage=$dev/boot/grub/splash.xpm.gz\n"
 				} elsif (-e "$tmpdir/boot/message") {
@@ -4540,7 +4561,7 @@ sub setupBootLoaderConfiguration {
 			$title = $this -> makeLabel ("Install $label");
 			print $FD "title $title\n";
 		} else {
-			$title = $this -> makeLabel ("$label [ $type ]");
+			$title = $this -> makeLabel ("$label [ $topic ]");
 			if (-e "$tmpdir/boot/grub/splash.xpm.gz") {
 				print $FD "splashimage=(hd0,$boot_id)/boot/grub/splash.xpm.gz\n"
 			} elsif (-e "$tmpdir/boot/message") {
@@ -4556,7 +4577,7 @@ sub setupBootLoaderConfiguration {
 				print $FD " kernel (cd)/boot/linux vga=$vga splash=silent";
 				print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 				print $FD " cdinst=1";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+			} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print $FD " root (hd0,$boot_id)\n";
 				print $FD " kernel /boot/linux.vmx vga=$vga";
 				print $FD " splash=silent";
@@ -4568,7 +4589,7 @@ sub setupBootLoaderConfiguration {
 			print $FD $cmdline;
 			if ($iso) {
 				print $FD " initrd (cd)/boot/initrd\n";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+			} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print $FD " initrd /boot/initrd.vmx\n";
 			} else {
 				print $FD " initrd /boot/initrd\n";
@@ -4579,7 +4600,7 @@ sub setupBootLoaderConfiguration {
 				print $FD " module /boot/linux vga=$vga splash=silent";
 				print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 				print $FD " cdinst=1";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+			} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print $FD " root (hd0,$boot_id)\n";
 				print $FD " kernel /boot/xen.gz.vmx\n";
 				print $FD " module /boot/linux.vmx vga=$vga";
@@ -4593,7 +4614,7 @@ sub setupBootLoaderConfiguration {
 			print $FD $cmdline;
 			if ($iso) {
 				print $FD " module (cd)/boot/initrd\n";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+			} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print $FD " module /boot/initrd.vmx\n";
 			} else {
 				print $FD " module /boot/initrd\n";
@@ -4610,7 +4631,7 @@ sub setupBootLoaderConfiguration {
 					print $FD " kernel (cd)/boot/linux vga=$vga splash=silent";
 					print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 					print $FD " cdinst=1";
-				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+				} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD " root (hd0,$boot_id)\n";
 					print $FD " kernel /boot/linux.vmx vga=$vga";
 					print $FD " splash=silent";
@@ -4623,7 +4644,7 @@ sub setupBootLoaderConfiguration {
 				print $FD $cmdline;
 				if ($iso) {
 					print $FD " initrd (cd)/boot/initrd\n";
-				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+				} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD " initrd /boot/initrd.vmx\n";
 				} else {
 					print $FD " initrd /boot/initrd\n";
@@ -4634,7 +4655,7 @@ sub setupBootLoaderConfiguration {
 					print $FD " module (cd)/boot/linux vga=$vga splash=silent";
 					print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 					print $FD " cdinst=1";
-				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+				} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD " root (hd0,$boot_id)\n";
 					print $FD " kernel /boot/xen.gz.vmx\n";
 					print $FD " module /boot/linux.vmx vga=$vga";
@@ -4649,7 +4670,7 @@ sub setupBootLoaderConfiguration {
 				print $FD $cmdline;
 				if ($iso) {
 					print $FD " module (cd)/boot/initrd\n"
-				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+				} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD " module /boot/initrd.vmx\n"
 				} else {
 					print $FD " module /boot/initrd\n";
@@ -4689,8 +4710,8 @@ sub setupBootLoaderConfiguration {
 		print $FD "implicit 1"."\n";
 		print $FD "prompt   1"."\n";
 		my $bootTimeout = 100;
-		if (defined $type{boottimeout}) {
-			$bootTimeout = $type{boottimeout};
+		if (defined $type->{boottimeout}) {
+			$bootTimeout = $type->{boottimeout};
 			if (int ($bootTimeout) == 0) {
 				# /.../
 				# a timeout value of 0 disables the timeout in syslinux
@@ -4713,7 +4734,7 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Setup default title
 		#------------------------------------------
-		if ($type =~ /^KIWI (CD|USB)/) {
+		if ($topic =~ /^KIWI (CD|USB)/) {
 			if ($defaultBootNr == 0) {
 				$title = $this -> makeLabel ("Boot from Hard Disk");
 			} elsif ($defaultBootNr == 1) {
@@ -4724,16 +4745,16 @@ sub setupBootLoaderConfiguration {
 				);
 			}
 		} else {
-			$title = $this -> makeLabel ("$label [ $type ]");
+			$title = $this -> makeLabel ("$label [ $topic ]");
 		}
 		print $FD "default $title"."\n";
-		if ($type =~ /^KIWI (CD|USB)/) {
+		if ($topic =~ /^KIWI (CD|USB)/) {
 			$title = $this -> makeLabel ("Boot from Hard Disk");
 			print $FD "label $title\n";
 			print $FD "localboot 0x80\n";
 			$title = $this -> makeLabel ("Install $label");
 		} else {
-			$title = $this -> makeLabel ("$label [ $type ]");
+			$title = $this -> makeLabel ("$label [ $topic ]");
 		}
 		print $FD "label $title"."\n";
 		push @labels,$title;
@@ -4747,7 +4768,7 @@ sub setupBootLoaderConfiguration {
 				print $FD "vga=$vga splash=silent ";
 				print $FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
 				print $FD "cdinst=1 kiwi_hybrid=1";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+			} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print $FD "kernel /boot/linux.vmx\n";
 				print $FD "append initrd=/boot/initrd.vmx ";
 				print $FD "vga=$vga splash=silent";
@@ -4762,7 +4783,7 @@ sub setupBootLoaderConfiguration {
 				$kiwi -> error  ("*** syslinux: Xen cdinst not supported ***");
 				$kiwi -> failed ();
 				return;
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+			} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("*** syslinux: Xen boot not supported ***");
 				$kiwi -> failed ();
@@ -4782,11 +4803,11 @@ sub setupBootLoaderConfiguration {
 			if ($iso) {
 				$title = $this -> makeLabel ("Failsafe -- Install $label");
 				print $FD "label $title"."\n";
-			} elsif ($type =~ /^KIWI USB/) {
+			} elsif ($topic =~ /^KIWI USB/) {
 				$title = $this -> makeLabel ("Failsafe -- Install $label");
 				print $FD "label $title"."\n";
 			} else {
-				$title = $this -> makeLabel ("Failsafe -- $label [ $type ]");
+				$title = $this -> makeLabel ("Failsafe -- $label [ $topic ]");
 				print $FD "label $title"."\n";
 			}
 			push @labels,$title;
@@ -4797,7 +4818,7 @@ sub setupBootLoaderConfiguration {
 					print $FD "vga=$vga splash=silent ";
 					print $FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
 					print $FD "cdinst=1 kiwi_hybrid=1";
-				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+				} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "kernel /boot/linux.vmx\n";
 					print $FD "append initrd=/boot/initrd.vmx ";
 					print $FD "vga=$vga splash=silent";
@@ -4815,7 +4836,7 @@ sub setupBootLoaderConfiguration {
 					);
 					$kiwi -> failed ();
 					return;
-				} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+				} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					$kiwi -> failed ();
 					$kiwi -> error  (
 						"*** syslinux: Xen boot not supported ***"
@@ -4890,10 +4911,10 @@ sub setupBootLoaderConfiguration {
 		my $title_standard;
 		my $title_failsafe;
 		my $bootTimeout = 200;
-		if (defined $type{boottimeout}) {
-			$bootTimeout = $type{boottimeout};
+		if (defined $type->{boottimeout}) {
+			$bootTimeout = $type->{boottimeout};
 		}
-		if ($type =~ /^KIWI (CD|USB)/) {
+		if ($topic =~ /^KIWI (CD|USB)/) {
 			$title_standard = $this -> makeLabel (
 				"Install $label"
 			);
@@ -4902,10 +4923,10 @@ sub setupBootLoaderConfiguration {
 			);
 		} else {
 			$title_standard = $this -> makeLabel (
-				"$label ( $type )"
+				"$label ( $topic )"
 			);
 			$title_failsafe = $this -> makeLabel (
-				"Failsafe -- $label ( $type )"
+				"Failsafe -- $label ( $topic )"
 			);
 		}
 		print $FD "[defaultboot]"."\n";
@@ -4926,7 +4947,7 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> error  ("*** zipl: CD boot not supported ***");
 			$kiwi -> failed ();
 			return;
-		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+		} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 			print $FD "\t"."image   = boot/linux.vmx"."\n";
 			print $FD "\t"."target  = boot/zipl"."\n";
 			print $FD "\t"."ramdisk = boot/initrd.vmx,0x4000000"."\n";
@@ -4946,7 +4967,7 @@ sub setupBootLoaderConfiguration {
 				$kiwi -> error  ("*** zipl: CD boot not supported ***");
 				$kiwi -> failed ();
 				return;
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+			} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print $FD "\t"."image   = boot/linux.vmx"."\n";
 				print $FD "\t"."target  = boot/zipl"."\n";
 				print $FD "\t"."ramdisk = boot/initrd.vmx,0x4000000"."\n";
@@ -4971,8 +4992,8 @@ sub setupBootLoaderConfiguration {
 		$kiwi -> info ("Creating lilo/yaboot config file...");
 		$cmdline =~ s/\n//g;
 		my $bootTimeout = 80;
-		if (defined $type{boottimeout}) {
-			$bootTimeout = $type{boottimeout};
+		if (defined $type->{boottimeout}) {
+			$bootTimeout = $type->{boottimeout};
 		}
 		#==========================================
 		# Standard boot
@@ -4987,10 +5008,10 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# General yaboot setup
 		#------------------------------------------
-		if ($type =~ /^KIWI (CD|USB)/) {
+		if ($topic =~ /^KIWI (CD|USB)/) {
 			$title = $this -> makeLabel ("Install $label");
 		} else {
-			$title = $this -> makeLabel ("$label [ $type ]");
+			$title = $this -> makeLabel ("$label [ $topic ]");
 		}
 		print $FD "default = $title\n";
 		print $FD "timeout = $bootTimeout\n";
@@ -5004,7 +5025,7 @@ sub setupBootLoaderConfiguration {
 				print $FD "\t"."initrd = /boot/initrd\n";
 				print $FD "\t"."append = \"$cmdline cdinst=1\"";
 				print $FD "\n";
-			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+			} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 				print $FD "\t"."label = $title\n";
 				print $FD "\t"."image  = /boot/linux.vmx"."\n";
 				print $FD "\t"."initrd = /boot/initrd.vmx\n";
@@ -5090,7 +5111,7 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> error  ("*** uboot: CD boot not supported ***");
 			$kiwi -> failed ();
 			return;
-		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+		} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 			print $FD "setenv bootargs $cmdline \${append}\n";
 		} else {
 			print $FD "setenv bootargs $cmdline \${append}\n"
@@ -5120,8 +5141,8 @@ sub setupBootLoaderConfiguration {
 				$kiwi -> info ("Calling pre bootloader install script:\n");
 				$kiwi -> info ("--> $editBoot\n");
 				my @opts = ();
-				if ($type{bootfilesystem}) {
-					push @opts,$type{bootfilesystem};
+				if ($type->{bootfilesystem}) {
+					push @opts,$type->{bootfilesystem};
 				}
 				if ($this->{partids}) {
 					push @opts,$this->{partids}{boot};
@@ -6588,16 +6609,14 @@ sub setupFilesystem {
 	my $device = shift;
 	my $name   = shift;
 	my $bootp  = shift;
+	my $type   = $this->{type};
 	my $inodes = $this->{deviceinodes};
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my $cmdL   = $this->{cmdL};
 	my $opts   = $xml -> getImageType() -> getFSMountOptions();
-	my %type   = ();
-	if ($xml) {
-		%type = %{$xml->getImageTypeAndAttributes_legacy()};
-	} else {
-		$type{fsnocheck} = 'true';
+	if (! $type->{fsnocheck}) {
+		$type->{fsnocheck} = 'true';
 	}
 	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
 		@{$cmdL -> getFilesystemOptions()}
@@ -6625,10 +6644,10 @@ sub setupFilesystem {
 			}
 			if ($bootp) {
 				$fsopts.= " -L '".$bootp."'";
-				$type{fsnocheck} = 'true';
+				$type->{fsnocheck} = 'true';
 			}
 			my $tuneopts = '';
-			if (($type{fsnocheck}) && ($type{fsnocheck} eq "true")) {
+			if (($type->{fsnocheck}) && ($type->{fsnocheck} eq "true")) {
 				$tuneopts = "-c 0 -i 0 ";
 			}
 			if ($FSopts{extfstune}) {
@@ -6842,11 +6861,11 @@ sub __getBootSize {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
-	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
+	my $type   = $this->{type};
 	my $needMB = 200;
 	my $wantMB = 200;
-	if ($type{bootpartsize}) {
-		$wantMB = $type{bootpartsize};
+	if ($type->{bootpartsize}) {
+		$wantMB = $type->{bootpartsize};
 	}
 	if ($wantMB >= $needMB) {
 		$needMB = $wantMB;

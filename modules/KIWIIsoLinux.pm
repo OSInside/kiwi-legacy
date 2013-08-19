@@ -819,14 +819,13 @@ sub createISO {
 	# Lookup firmware setup
 	#------------------------------------------
 	if ($xml) {
-		%type = %{$xml->getImageTypeAndAttributes_legacy()};
-	}
-	if ($type{firmware}) {
-		$firmware = $type{firmware};
-	}
-	if ($type{hybrid}) {
-		$hybrid = $type{hybrid};
-	}
+		my $type = $xml -> getImageType();
+		my $xmlFirmWare = $type -> getFirmwareType();
+		if ($xmlFirmWare) {
+			$firmware = $xmlFirmWare;
+		}
+		$hybrid = $type -> getHybrid();
+    }
 	#==========================================
 	# check for pre bootloader install
 	#------------------------------------------
@@ -1022,15 +1021,14 @@ sub createHybrid {
 	my $code;
 	my $loop;
 	my $FD;
-	my %type;
 	#==========================================
 	# Lookup firmware setup
 	#------------------------------------------
 	if ($xml) {
-		%type = %{$xml->getImageTypeAndAttributes_legacy()};
-	}
-	if ($type{firmware}) {
-		$firmware = $type{firmware};
+		my $xmlFirmWare = $xml -> getImageType() -> getFirmwareType();
+		if ($xmlFirmWare) {
+			$firmware = $xmlFirmWare;
+		}
 	}
 	#==========================================
 	# Call isohybrid

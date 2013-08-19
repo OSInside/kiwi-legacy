@@ -767,9 +767,11 @@ sub mainTask
 					$this->logMsg('W', $msg);
 				}
 				else {
-                                        my %type;
-                                        %type = %{$this->{m_xml}->getImageTypeAndAttributes_legacy()};
-                                        my $firmware = $type{firmware};
+										my $firmware = 'bios';
+										my $xmlFirmWare = $this->{m_xml} -> getImageType() -> getFirmwareType();
+										if ($xmlFirmWare) {
+											$firmware = $xmlFirmWare;
+										}
                                         if ($firmware eq "efi" || $firmware eq "uefi") {
 		                            if (grep {"x86_64" eq $_} $this->{m_archlist}->headList()) {
 				            	$this->logMsg('I', "Add EFI Live setup");

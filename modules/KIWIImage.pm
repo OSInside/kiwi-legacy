@@ -724,7 +724,6 @@ sub createImageSquashFS {
 	my $opts  = shift;
 	my $kiwi  = $this->{kiwi};
 	my $xml   = $this->{xml};
-	my %type  = %{$xml->getImageTypeAndAttributes_legacy()};
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
@@ -750,7 +749,8 @@ sub createImageSquashFS {
 	#==========================================
 	# Compress image using gzip
 	#------------------------------------------
-	if (($type{compressed}) && ($type{compressed} eq 'true')) {
+	my $compressed = $xml -> getImageType() -> getCompressed();
+	if (($compressed) && ($compressed eq 'true')) {
 		if (! $this -> compressImage ($name,'squashfs')) {
 			return;
 		}
@@ -924,10 +924,11 @@ sub createImageRootAndBoot {
 	my $para       = shift;
 	my $text       = shift;
 	my $kiwi       = $this->{kiwi};
-	my $sxml       = $this->{xml};
+	my $xml        = $this->{xml};
 	my $cmdL       = $this->{cmdL};
 	my $idest      = $cmdL->getImageIntermediateTargetDir();
-	my %stype      = %{$sxml->getImageTypeAndAttributes_legacy()};
+	my $sysdisk    = $xml -> getSystemDiskConfig();
+	my $xmltype    = $xml -> getImageType();
 	my $imageTree  = $this->{imageTree};
 	my $baseSystem = $this->{baseSystem};
 	my $treeAccess = 1;
@@ -952,13 +953,13 @@ sub createImageRootAndBoot {
 	#==========================================
 	# Check for direct tree access
 	#------------------------------------------
-	if (($text ne "VMX") || ($stype{luks})) {
+	my $luks = $xmltype -> getLuksPass();
+	if (($text ne 'VMX') || ($luks)) {
 		$treeAccess = 0;
 	}
-	# TODO: change this to:
-	# check with $xml->getSystemDiskConfig && $xml->getImageType->useLVM()
-	if ($stype{lvm}) {
-		if ($stype{luks}) {
+	my $lvm = $xmltype -> useLVM();
+	if (($sysdisk) && ($lvm)) {
+		if ($luks) {
 			$kiwi -> warning ("LUKS encryption on LVM not yet supported");
 			$kiwi -> skipped ();
 		}
@@ -1054,7 +1055,7 @@ sub createImageRootAndBoot {
 	# Prepare/Create boot image
 	#------------------------------------------
 	my $bname = $this -> createImageBootImage (
-		$text,$boot,$sxml,$idest,$checkBase
+		$text,$boot,$xml,$idest,$checkBase
 	);
 	if (! $bname) {
 		return;
@@ -1086,10 +1087,10 @@ sub createImageRootAndBoot {
 	# Store meta data for subsequent calls
 	#------------------------------------------
 	$result{systemImage} = KIWIGlobals -> instance()
-		-> generateBuildImageName ($sxml);
+		-> generateBuildImageName ($xml);
 	$result{bootImage}   = $bname;
 	if ($text eq "VMX") {
-		$result{format} = $stype{format};
+		$result{format} = $xmltype -> getFormat();
 	}
 	return \%result;
 }
@@ -1208,7 +1209,7 @@ sub createImageLiveCD {
 	my $this = shift;
 	my $para = shift;
 	my $kiwi = $this->{kiwi};
-	my $sxml = $this->{xml};
+	my $xml  = $this->{xml};
 	my $cmdL = $this->{cmdL};
 	my $idest= $cmdL->getImageIntermediateTargetDir();
 	my $imageTree = $this->{imageTree};
@@ -1256,13 +1257,12 @@ sub createImageLiveCD {
 	#==========================================
 	# Get system image name
 	#------------------------------------------
-	my $systemName = $sxml -> getImageName();
-	my $systemDisplayName = $sxml -> getImageDisplayName();
+	my $systemName = $xml -> getImageName();
+	my $systemDisplayName = $xml -> getImageDisplayName();
 	#==========================================
 	# Get system image type information
 	#------------------------------------------
-	my %stype= %{$sxml->getImageTypeAndAttributes_legacy()};
-	my $vga  = $stype{vga};
+	my $xmltype = $xml -> getImageType();
 	#==========================================
 	# Get boot image name and compressed flag
 	#------------------------------------------
@@ -1278,31 +1278,32 @@ sub createImageLiveCD {
 	#==========================================
 	# Check for hybrid ISO
 	#------------------------------------------
-	if ((defined $stype{hybrid}) && ($stype{hybrid} eq 'true')) {
+	my $xmlhybrid = $xmltype -> getHybrid();
+	if (($xmlhybrid) && ($xmlhybrid eq 'true')) {
 		$hybrid = 1;
 	}
-	if ((defined $stype{hybridpersistent}) &&
-		($stype{hybridpersistent} eq 'true')
-	) {
+	my $xmlhybridpersistent = $xmltype -> getHybridPersistent();
+	if (($xmlhybridpersistent) && ($xmlhybridpersistent eq 'true')) {
 		$hybridpersistent = 1;
 	}
 	#==========================================
 	# Check for user-specified cmdline options
 	#------------------------------------------
-	if (defined $stype{cmdline}) {
-		$cmdline = " $stype{cmdline}";
+	my $xmlcmdline = $xmltype -> getKernelCmdOpts();
+	if ($xmlcmdline) {
+		$cmdline = " $xmlcmdline";
 	}
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
 	my $namecd = KIWIGlobals
 		-> instance()
-		-> generateBuildImageName($this->{xml}, ';');
+		-> generateBuildImageName($xml, ';');
 	my $namerw = KIWIGlobals
 		-> instance()
-		-> generateBuildImageName($this->{xml});
+		-> generateBuildImageName($xml);
 	my $namero = KIWIGlobals -> instance() -> generateBuildImageName(
-		$this->{xml},'-', '-read-only'
+		$xml,'-', '-read-only'
 	);
 	if (! defined $namerw) {
 		return;
@@ -1534,7 +1535,7 @@ sub createImageLiveCD {
 	# Prepare and Create ISO boot image
 	#------------------------------------------
 	my $bname = $this -> createImageBootImage (
-		'iso',$boot,$sxml,$idest,$checkBase
+		'iso',$boot,$xml,$idest,$checkBase
 	);
 	if (! $bname) {
 		return;
@@ -1741,8 +1742,9 @@ sub createImageLiveCD {
 	# check for boot firmware
 	#------------------------------------------
 	my $firmware = 'efi';
-	if ($stype{firmware}) {
-		$firmware = $stype{firmware};
+	my $xmlfirmware = $xmltype -> getFirmwareType();
+	if ($xmlfirmware) {
+		$firmware = $xmlfirmware;
 	}
 	if (($firmware eq 'uefi') && ($isoarch ne 'x86_64')) {
 		$kiwi -> warning (
@@ -1775,7 +1777,7 @@ sub createImageLiveCD {
 			$grub_share = 'grub';
 		}
 		my @theme      = ();
-		my $pref       = $sxml -> getPreferences();
+		my $pref       = $xml -> getPreferences();
 		push @theme, $pref -> getBootSplashTheme();
 		push @theme, $pref -> getBootLoaderTheme();
 		my $ir_modules = "$tmpdir/usr/lib/$grub_efi/$efi_fo";
@@ -1968,11 +1970,9 @@ sub createImageLiveCD {
 		print $FD $fodir.$theme.'/background.png'."\n";
 		print $FD 'fi'."\n";
 		my $bootTimeout = 10;
-		if (defined $stype{boottimeout}) {
-			$bootTimeout = $stype{boottimeout};
-		}
-		if ($stype{fastboot}) {
-			$bootTimeout = 0;
+		my $xmlboottimeout = $xmltype -> getBootTimeout();
+		if ($xmlboottimeout) {
+			$bootTimeout = $xmlboottimeout;
 		}
 		print $FD "set timeout=$bootTimeout\n";
 		my $title = $systemDisplayName;
@@ -2131,8 +2131,13 @@ sub createImageLiveCD {
 	# setup isolinux.cfg file
 	#------------------------------------------
 	$kiwi -> info ("Creating isolinux configuration...");
+	my $vga = $xmltype -> getVGA();
 	my $syslinux_new_format = 0;
-	my $bootTimeout = $stype{boottimeout} ? int $stype{boottimeout} : 200;
+	my $bootTimeout = 200;
+	my $xmlboottimeout = $xmltype -> getBootTimeout();
+	if ($xmlboottimeout) {
+		$bootTimeout = $xmlboottimeout;
+	}
 	if (-f "$gfx/gfxboot.com" || -f "$gfx/gfxboot.c32") {
 		$syslinux_new_format = 1;
 	}
@@ -2285,8 +2290,8 @@ sub createImageLiveCD {
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootConfig();
 		my $idesc;
-		if ((! $editBoot) && ($sxml)) {
-			$editBoot = $sxml -> getEditBootConfig_legacy();
+		if ((! $editBoot) && ($xml)) {
+			$editBoot = $xml -> getEditBootConfig_legacy();
 		}
 		if ($editBoot) {
 			if (($this->{originXMLPath}) && (! -f $editBoot)) {
@@ -2296,8 +2301,9 @@ sub createImageLiveCD {
 				$kiwi -> info ("Calling pre bootloader install script:\n");
 				$kiwi -> info ("--> $editBoot\n");
 				my @opts = ();
-				if ($stype{bootfilesystem}) {
-					push @opts,$stype{bootfilesystem};
+				my $bootfilesystem = $xmltype -> getBootImageFileSystem();
+				if ($bootfilesystem) {
+					push @opts,$bootfilesystem;
 				}
 				if ($this->{partids}) {
 					push @opts,$this->{partids}{boot};
@@ -2325,17 +2331,19 @@ sub createImageLiveCD {
 	my $isoerror = 1;
 	my $name = $this->{imageDest}."/".$namerw.".iso";
 	my $attr = "-R -J -f -pad -joliet-long";
+	my $flags= $xmltype -> getFlags();
+	my $volid= $xmltype -> getVolID();
 	if (! defined $gzip) {
 		$attr = "-R -J -pad -joliet-long";
 	}
-	if ((defined $stype{flags}) && ($stype{flags} =~ /clic_udf|seed|overlay/)) {
+	if (($flags) && ($flags =~ /clic_udf|seed|overlay/)) {
 		$attr .= " -allow-limited-size -udf";
 	}
 	if (! defined $gzip) {
 		$attr .= " -iso-level 4";
 	}
-	if ($stype{volid}) {
-		$attr .= " -V \"$stype{volid}\"";
+	if ($volid) {
+		$attr .= " -V \"$volid\"";
 	}
 	$attr .= " -A \"$this->{mbrid}\"";
 	$attr .= ' -p "'.$this->{gdata}->{Preparer}.'"';
@@ -2366,8 +2374,8 @@ sub createImageLiveCD {
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootInstall();
 		my $idesc;
-		if ((! $editBoot) && ($sxml)) {
-			$editBoot = $sxml -> getEditBootInstall_legacy();
+		if ((! $editBoot) && ($xml)) {
+			$editBoot = $xml -> getEditBootInstall_legacy();
 		}
 		if ($editBoot) {
 			if (($this->{originXMLPath}) && (! -f $editBoot)) {
@@ -2452,7 +2460,7 @@ sub createImageSplit {
 	my $cmdL         = $this->{cmdL};
 	my $imageTree    = $this->{imageTree};
 	my $baseSystem   = $this->{baseSystem};
-	my $sxml         = $this->{xml};
+	my $xml          = $this->{xml};
 	my $idest        = $cmdL->getImageIntermediateTargetDir();
 	my $fsopts       = $cmdL -> getFilesystemOptions();
 	my $inodesize    = $fsopts->[1];
@@ -2483,7 +2491,7 @@ sub createImageSplit {
 	#==========================================
 	# check for xen domain setup
 	#------------------------------------------
-	my $vconf = $sxml -> getVMachineConfig();
+	my $vconf = $xml -> getVMachineConfig();
 	if ($vconf) {
 		$xendomain = $vconf -> getDomain();
 	}
@@ -2515,7 +2523,7 @@ sub createImageSplit {
 	#==========================================
 	# Get system image type information
 	#------------------------------------------
-	my %type = %{$sxml->getImageTypeAndAttributes_legacy()};
+	my $xmltype = $xml -> getImageType();
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
@@ -2580,7 +2588,7 @@ sub createImageSplit {
 	# walk through except files if any
 	#------------------------------------------
 	my %exceptHash;
-	foreach my $except ($sxml -> getSplitTempExceptions_legacy()) {
+	foreach my $except ($xml -> getSplitTempExceptions_legacy()) {
 		my $globsource = "${imageTree}${except}";
 		my @files = qxx ("find $globsource -xtype f 2>/dev/null");
 		my $code  = $? >> 8;
@@ -2622,8 +2630,8 @@ sub createImageSplit {
 		}
 	};
 	find(\&$createTmpTree, $imageTree);
-	my @tempFiles    = $sxml -> getSplitTempFiles_legacy ();
-	my @persistFiles = $sxml -> getSplitPersistentFiles_legacy ();
+	my @tempFiles    = $xml -> getSplitTempFiles_legacy ();
+	my @persistFiles = $xml -> getSplitPersistentFiles_legacy ();
 	if ($nopersistent) {
 		push (@tempFiles, @persistFiles);
 		undef @persistFiles;
@@ -2685,7 +2693,7 @@ sub createImageSplit {
 		# walk through except files if any
 		#------------------------------------------
 		my %exceptHash;
-		foreach my $except ($sxml -> getSplitPersistentExceptions_legacy()) {
+		foreach my $except ($xml -> getSplitPersistentExceptions_legacy()) {
 			my $globsource = "${imageTree}${except}";
 			my @files = qxx ("find $globsource -xtype f 2>/dev/null");
 			my $code  = $? >> 8;
@@ -2759,7 +2767,7 @@ sub createImageSplit {
 		#==========================================
 		# relink if entire directory was set
 		#------------------------------------------
-		foreach my $persist ($sxml -> getSplitPersistentFiles_legacy()) {
+		foreach my $persist ($xml -> getSplitPersistentFiles_legacy()) {
 			my $globsource = "${imageTree}${persist}";
 			if (-d $globsource) {
 				my $link = $globsource;
@@ -3073,7 +3081,7 @@ sub createImageSplit {
 	# Prepare and Create boot image
 	#------------------------------------------
 	my $bname = $this -> createImageBootImage (
-		'split',$boot,$sxml,$idest,$checkBase
+		'split',$boot,$xml,$idest,$checkBase
 	);
 	if (! $bname) {
 		return;
@@ -3106,9 +3114,9 @@ sub createImageSplit {
 	#------------------------------------------
 	$name->{systemImage} = KIWIGlobals
 		-> instance()
-		-> generateBuildImageName($sxml);
+		-> generateBuildImageName($xml);
 	$name->{bootImage}   = $bname;
-	$name->{format}      = $type{format};
+	$name->{format}      = $xmltype -> getFormat();
 	if ($boot =~ /vmxboot|oemboot/) {
 		#==========================================
 		# Create virtual disk images if requested
@@ -3133,7 +3141,7 @@ sub createImageSplit {
 			);
 			$cmdL -> setImageFormat ($name->{format});
 			my $kic = KIWIImageCreator -> new($cmdL);
-			if ((! $kic) || (! $kic->createImageFormat($sxml))) {
+			if ((! $kic) || (! $kic->createImageFormat($xml))) {
 				undef $kic;
 				return;
 			}
@@ -3449,6 +3457,7 @@ sub postImage {
 	my $kiwi     = $this->{kiwi};
 	my $xml      = $this->{xml};
 	my $initCache= $this->{initCache};
+	my $xmltype  = $xml -> getImageType();
 	#==========================================
 	# mount logical extend for data transfer
 	#------------------------------------------
@@ -3481,18 +3490,19 @@ sub postImage {
 	#==========================================
 	# Check image file system
 	#------------------------------------------
-	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
-	if ((! $type{filesystem}) && ($fstype)) {
-		$type{filesystem} = $fstype;
+	my $filesystem = $xmltype -> getFilesystem();
+	my $imagetype  = $xmltype -> getTypeName();
+	if ((! $filesystem) && ($fstype)) {
+		$filesystem = $fstype;
 	}
-	if (! $type{filesystem}) {
-		$type{filesystem} = $type{type};
+	if (! $filesystem) {
+		$filesystem = $imagetype;
 	}
-	my $para = $type{type}.":".$type{filesystem};
-	if ($type{filesystem}) {
-		$kiwi -> info ("Checking file system: $type{filesystem}...");
+	my $para = $imagetype.":".$filesystem;
+	if ($filesystem) {
+		$kiwi -> info ("Checking file system: $filesystem...");
 	} else {
-		$kiwi -> info ("Checking file system: $type{type}...");
+		$kiwi -> info ("Checking file system: $imagetype...");
 	}
 	SWITCH: for ($para) {
 		#==========================================
@@ -3564,7 +3574,7 @@ sub postImage {
 		# Unknown filesystem type
 		#------------------------------------------
 		$kiwi -> failed();
-		$kiwi -> error ("Unsupported filesystem type: $type{filesystem}");
+		$kiwi -> error ("Unsupported filesystem type: $filesystem");
 		$kiwi -> failed();
 		$this -> cleanLuks();
 		return;
@@ -3583,12 +3593,13 @@ sub postImage {
 	# Compress image using gzip
 	#------------------------------------------
 	if (! defined $nozip) {
-		if (($type{compressed}) && ($type{compressed} eq 'true')) {
+		my $compressed = $xmltype -> getCompressed();
+		if (($compressed) && ($compressed eq 'true')) {
 			my $rootfs;
-			if ($type{filesystem}) {
-				$rootfs = $type{filesystem};
+			if ($filesystem) {
+				$rootfs = $filesystem;
 			} else {
-				$rootfs = $type{type};
+				$rootfs = $imagetype;
 			}
 			if (! $this -> compressImage ($name,$rootfs)) {
 				return;
@@ -3617,7 +3628,7 @@ sub buildLogicalExtend {
 	my $encode = 0;
 	my $cipher = 0;
 	my $out    = $this->{imageDest}."/".$name;
-	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
+	my $xmltype= $xml -> getImageType();
 	#==========================================
 	# a size is required
 	#------------------------------------------
@@ -3627,9 +3638,10 @@ sub buildLogicalExtend {
 	#==========================================
 	# Check if luks encoding is requested
 	#------------------------------------------
-	if ($type{luks}) {
+	my $luks = $xmltype -> getLuksPass();
+	if ($luks) {
 		$encode = 1;
-		$cipher = "$type{luks}";
+		$cipher = "$luks";
 		KIWIGlobals -> instance() -> setKiwiConfigData ("LuksCipher",$cipher);
 	}
 	#==========================================
@@ -3888,9 +3900,9 @@ sub mountLogicalExtend {
 	my $device = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
-	my %type   = %{$xml->getImageTypeAndAttributes_legacy()};
 	my $dest   = $this->{imageDest}."/mnt-$$";
 	my $target = "$this->{imageDest}/$name";
+	my $xmltype= $xml -> getImageType();
 	my $data;
 	my $code;
 	my @clean;
@@ -3909,8 +3921,9 @@ sub mountLogicalExtend {
 	#==========================================
 	# check for filesystem options
 	#------------------------------------------
-	if (defined $type{fsmountoptions}) {
-		$opts .= ','.$type{fsmountoptions};
+	my $fsmountoptions = $xmltype -> getFSMountOptions();
+	if ($fsmountoptions) {
+		$opts .= ','.$fsmountoptions;
 	}
 	if (! $device) {
 		$opts .= ",loop";
@@ -4053,55 +4066,20 @@ sub isBootImage {
 	my $name = shift;
 	my $xml  = $this->{xml};
 	if (! defined $name) {
-		return $this;
+		# no boot attribute set, no bootable entity
+		return 2;
 	}
-	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
-	my $para = $type{type};
-	if (defined $type{filesystem}) {
-		$para = $para.":".$type{filesystem};
+	my $xmltype = $xml -> getImageType();
+	my $imagetype  = $xmltype -> getTypeName();
+	if ($imagetype eq 'cpio') {
+		# cpio formatted initrd, OK
+		return 1;
 	}
-	SWITCH: for ($para) {
-		/ext3/i     && do {
-			return 0;
-		};
-		/ext4/i     && do {
-			return 0;
-		};
-		/reiserfs/i && do {
-			return 0;
-		};
-		/iso/i && do {
-			return 0;
-		};
-		/ext2/i && do {
-			if ($name !~ /boot/) {
-				return 0;
-			}
-			last SWITCH;
-		};
-		/squashfs/i && do {
-			return 0;
-		};
-		/clicfs/i && do {
-			return 0;
-		};
-		/overlayfs/i && do {
-			return 0;
-		};
-		/btrfs/i  && do {
-			return 0;
-		};
-		/tbz/i    && do {
-			return 0;
-		};
-		/xfs/i    && do {
-			return 0;
-		};
-		/zfs/i    && do {
-			return 0;
-		};
+	if (($imagetype eq 'ext2') && ($name =~ /boot/)) {
+		# ext2 formatter initrd, OK
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 #==========================================
@@ -4216,7 +4194,7 @@ sub setupEXT2 {
 	my $cmdL    = $this->{cmdL};
 	my $kiwi    = $this->{kiwi};
 	my $xml     = $this->{xml};
-	my %type    = %{$xml->getImageTypeAndAttributes_legacy()};
+	my $xmltype = $xml -> getImageType();
 	my $fsopts;
 	my $tuneopts;
 	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
@@ -4241,7 +4219,8 @@ sub setupEXT2 {
 	if ($FSopts{extfstune}) {
 		$tuneopts = $FSopts{extfstune};
 	}
-	if (($type{fsnocheck}) && ($type{fsnocheck} eq "true")) {
+	my $fsnocheck = $xmltype -> getFSNoCheck();
+	if (($fsnocheck) && ($fsnocheck eq 'true')) {
 		$tuneopts .= " -c 0 -i 0";
 	}
 	if ($device) {
@@ -4357,19 +4336,20 @@ sub setupReiser {
 # setupSquashFS
 #------------------------------------------
 sub setupSquashFS {
-	my $this = shift;
-	my $name = shift;
-	my $tree = shift;
-	my $opts = shift;
-	my $kiwi = $this->{kiwi};
-	my $xml  = $this->{xml};
-	my %type = %{$xml->getImageTypeAndAttributes_legacy()};
+	my $this    = shift;
+	my $name    = shift;
+	my $tree    = shift;
+	my $opts    = shift;
+	my $kiwi    = $this->{kiwi};
+	my $xml     = $this->{xml};
+	my $xmltype = $xml -> getImageType(); 
 	my $imageTree = $this->{imageTree};
 	my $locator = KIWILocator -> instance();
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}
-	if ($type{luks}) {
+	my $luks = $xmltype -> getLuksPass();
+	if ($luks) {
 		$this -> restoreImageDest();
 	}
 	if (! $opts) {
@@ -4389,10 +4369,10 @@ sub setupSquashFS {
 	#==========================================
 	# Check for LUKS extension
 	#------------------------------------------
-	if ($type{luks}) {
+	if ($luks) {
 		my $outimg = $this->{imageDest}."/".$name;
 		my $squashimg = $outimg.".squashfs";
-		my $cipher = "$type{luks}";
+		my $cipher = "$luks";
 		my $data = qxx ("mv $outimg $squashimg 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -4705,11 +4685,12 @@ sub getSize {
 	my $fsopts  = $cmdL -> getFilesystemOptions();
 	my $isize   = $fsopts->[1];
 	my $iratio  = $fsopts->[2];
-	my %type    = %{$xml->getImageTypeAndAttributes_legacy()};
-	my $fstype  = $type{type};
+	my $xmltype = $xml -> getImageType();
+	my $fstype  = $xmltype -> getTypeName();
+	my $xmlfs   = $xmltype -> getFilesystem();
 	my $xmlsize;
-	if ($type{filesystem}) {
-		$fstype .= ":$type{filesystem}";
+	if ($xmlfs) {
+		$fstype .= ":$xmlfs";
 	}
 	$minsize = sprintf ("%.0f",$minsize);
 	#==========================================

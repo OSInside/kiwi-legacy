@@ -1478,7 +1478,7 @@ sub __prepareTree {
 	my $systemTree = shift;
 	my $kiwi       = $this -> {kiwi};
 	my $cmdL       = $this -> {cmdL};
-	my %attr       = %{$xml->getImageTypeAndAttributes_legacy()};
+	my $type       = $xml -> getImageType() -> getTypeName();
 	my $cacheMode  = "initial";
 	#==========================================
 	# Select cache if requested and exists
@@ -1496,7 +1496,7 @@ sub __prepareTree {
 	#==========================================
 	# Check for setup of boot theme
 	#------------------------------------------
-	if ($attr{"type"} eq "cpio") {
+	if ($type eq "cpio") {
 		my $pref  = $xml -> getPreferences();
 		my $splash_theme = $pref -> getBootSplashTheme();
 		my $loader_theme = $pref -> getBootLoaderTheme();
