@@ -2043,6 +2043,16 @@ sub __checkType {
 		}
 	}
 	#==========================================
+	# check for default bootloader on iso
+	#------------------------------------------
+	if ($typeName eq 'iso') {
+		# /.../
+		# live iso images always use isolinux for bios boot
+		# and grub2 for efi boot. Thus overwrite the default
+		# ----
+		$type -> setBootLoader ('isolinux');
+	}
+	#==========================================
 	# check tool/driver compatibility
 	#------------------------------------------
 	my $check_mksquashfs = 0;

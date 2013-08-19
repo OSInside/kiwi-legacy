@@ -1799,6 +1799,7 @@ sub __isValidBootloader {
 		grub
 		grub2
 		syslinux
+		isolinux
 		uboot
 		yaboot
 		zipl
