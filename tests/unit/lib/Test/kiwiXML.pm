@@ -4291,32 +4291,6 @@ sub test_getEC2Config {
 }
 
 #==========================================
-# test_getEditBootConfig_legacy
-#------------------------------------------
-sub test_getEditBootConfig_legacy {
-	# ...
-	# Verify proper return of getEditBootConfig method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'typeSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $path = $xml -> getEditBootConfig_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	my $fileName = (split /\//, $path)[-1];
-	$this -> assert_str_equals('fixupBootEnter', $fileName);
-	return;
-}
-
-#==========================================
 # test_getFilesToDelete
 #------------------------------------------
 sub test_getFilesToDelete {

@@ -832,7 +832,7 @@ sub createISO {
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootConfig();
 		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootConfig_legacy();
+			$editBoot = $xml -> getImageType() -> getEditBootConfig();
 		}
 		if ($editBoot) {
 			my $rootpath = $cmdL -> getConfigDir();
@@ -898,7 +898,7 @@ sub createISO {
 	if ($cmdL) {
 		my $editBoot = $cmdL -> getEditBootInstall();
 		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootInstall_legacy();
+			$editBoot = $xml -> getImageType() -> getEditBootInstall();
 		}
 		if ($editBoot) {
 			my $rootpath = $cmdL -> getConfigDir();

@@ -5985,40 +5985,6 @@ sub getSingleInstSourceSatSolvable {
 # eliminated or replaced
 #------------------------------------------
 #==========================================
-# getEditBootConfig_legacy
-#------------------------------------------
-sub getEditBootConfig_legacy {
-	# ...
-	# Get the type specific editbootconfig value.
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $editBoot = $tnode -> getAttribute ("editbootconfig");
-	if ((! defined $editBoot) || ("$editBoot" eq "")) {
-		return;
-	}
-	return $editBoot;
-}
-
-#==========================================
-# getEditBootInstall_legacy
-#------------------------------------------
-sub getEditBootInstall_legacy {
-	# ...
-	# Get the type specific editbootinstall value.
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $tnode= $this->{typeNode};
-	my $editBoot = $tnode -> getAttribute ("editbootinstall");
-	if ((! defined $editBoot) || ("$editBoot" eq "")) {
-		return;
-	}
-	return $editBoot;
-}
-
-#==========================================
 # getImageSize_legacy
 #------------------------------------------
 sub getImageSize_legacy {

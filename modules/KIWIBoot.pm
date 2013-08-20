@@ -5129,7 +5129,7 @@ sub setupBootLoaderConfiguration {
 		my $editBoot = $cmdL -> getEditBootConfig();
 		my $idesc;
 		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootConfig_legacy();
+			$editBoot = $xml -> getImageType() -> getEditBootConfig();
 		}
 		if ($editBoot) {
 			if (($this->{originXMLPath}) &&
@@ -5725,7 +5725,7 @@ sub installBootLoader {
 		my $editBoot = $cmdL -> getEditBootInstall();
 		my $idesc;
 		if ((! $editBoot) && ($xml)) {
-			$editBoot = $xml -> getEditBootInstall_legacy();
+			$editBoot = $xml -> getImageType() -> getEditBootInstall();
 		}
 		if ($editBoot) {
 			if (($this->{originXMLPath}) &&
