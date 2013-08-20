@@ -4669,13 +4669,13 @@ sub getSize {
 	#==========================================
 	# XML size calculated in Byte
 	#------------------------------------------
-	my $additive = $xml -> getImageSizeAdditiveBytes_legacy();
+	my $additive = $xml -> getImageType() -> getImageSizeAdditiveBytes();
 	if ($additive) {
 		# relative size value specified...
 		$xmlsize = $minsize + $additive;
 	} else {
 		# absolute size value specified...
-		$xmlsize = $xml -> getImageSize_legacy();
+		$xmlsize = $xml -> getImageType() -> getImageSize();
 		if ($xmlsize eq "auto") {
 			$xmlsize = $minsize;
 		} elsif ($xmlsize =~ /^(\d+)([MG])$/i) {

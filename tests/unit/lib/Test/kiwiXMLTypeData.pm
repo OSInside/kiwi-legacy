@@ -1726,7 +1726,7 @@ sub test_isSizeAdditive {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('true', $add);
+	$this -> assert_str_equals('1', $add);
 	return;
 }
 
@@ -1751,7 +1751,7 @@ sub test_isSizeAdditiveDefault {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $add);
+	$this -> assert_str_equals('0', $add);
 	return;
 }
 
@@ -4543,7 +4543,7 @@ sub test_setSizeAdditive {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('true', $add);
+	$this -> assert_str_equals('1', $add);
 	return;
 }
 
@@ -4572,7 +4572,7 @@ sub test_setSizeAdditiveNoArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $add);
+	$this -> assert_str_equals('0', $add);
 	return;
 }
 
@@ -4603,7 +4603,7 @@ sub test_setSizeAdditiveUnknownArg {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('true', $add);
+	$this -> assert_str_equals('1', $add);
 	return;
 }
 

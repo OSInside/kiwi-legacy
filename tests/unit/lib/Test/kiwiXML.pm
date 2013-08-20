@@ -4395,81 +4395,6 @@ sub test_getImageName {
 }
 
 #==========================================
-# test_getImageSizeNotAdditive_legacy
-#------------------------------------------
-sub test_getImageSizeNotAdditive_legacy {
-	# ...
-	# Verify proper return of getImageSize method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getImageSize_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('20G', $value);
-	return;
-}
-
-#==========================================
-# test_getImageSizeAdditiveBytesNotAdditive_legacy
-#------------------------------------------
-sub test_getImageSizeAdditiveBytesNotAdditive_legacy {
-	# ...
-	# Verify proper return of getImageSizeAdditiveBytes method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getImageSizeAdditiveBytes_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('0', $value);
-	return;
-}
-
-#==========================================
-# test_getImageSizeBytesNotAdditive_legacy
-#------------------------------------------
-sub test_getImageSizeBytesNotAdditive_legacy {
-	# ...
-	# Verify proper return of getImageSizeBytes method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'preferenceSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getImageSizeBytes_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('21474836480', $value);
-	return;
-}
-
-#==========================================
 # test_getImageType
 #------------------------------------------
 sub test_getImageType {
@@ -7526,7 +7451,7 @@ sub test_sizeHandling {
 	my $unit = $typeObj -> getSizeUnit();
 	$this -> assert_str_equals('G', $unit);
 	my $add = $typeObj -> isSizeAdditive();
-	$this -> assert_str_equals('false', $add);
+	$this -> assert_str_equals('0', $add);
 	return;
 }
 

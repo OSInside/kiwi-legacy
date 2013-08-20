@@ -25,6 +25,7 @@ package KIWIXMLTypeData;
 #------------------------------------------
 use strict;
 use warnings;
+use Readonly;
 use XML::LibXML;
 
 require Exporter;
@@ -38,6 +39,11 @@ use base qw /KIWIXMLDataBase/;
 # Exports
 #------------------------------------------
 our @EXPORT_OK = qw ();
+
+#==========================================
+# Constants
+#------------------------------------------
+Readonly my $NEXT_UNIT => 1024;
 
 #==========================================
 # Constructor
@@ -643,6 +649,79 @@ sub getSize {
 }
 
 #==========================================
+# getImageSize
+#------------------------------------------
+sub getImageSize {
+	# ...
+	# return a size string with unit or the string 'auto'
+	# ---
+	my $this = shift;
+	my $size = $this -> getSize();
+	my $unit = $this -> getSizeUnit();
+	if ($size) {
+		if (! $this -> isSizeAdditive()) {
+			# /.../
+			# a fixed size value was set, we will use this value
+			# connected with the unit string
+			# ----
+			if (! $unit) {
+				# no unit specified assume MB...
+				$unit = 'M';
+			}
+			return $size.$unit;
+		} else {
+			# /.../
+			# the size is setup as additive value to the required
+			# size. The real size is calculated later and the additive
+			# value is added at that point
+			# ---
+			return 'auto';
+		}
+	}
+	return 'auto';
+}
+
+#==========================================
+# getImageSizeBytes
+#------------------------------------------
+sub getImageSizeBytes {
+	# ...
+	# return a size byte value or 'auto'
+	# ---
+	my $this = shift;
+	my $size = $this -> getImageSize();
+	if ($size eq 'auto') {
+		return $size;
+	}
+	return $this -> __byteValue (
+		$this -> getSize(),
+		$this -> getSizeUnit()
+	);
+}
+
+#==========================================
+# getImageSizeAdditiveBytes
+#------------------------------------------
+sub getImageSizeAdditiveBytes {
+	# ...
+	# return the size byte value if the additive
+	# attribute is set to true, otherwise return
+	# zero
+	# ---
+	my $this = shift;
+	my $size = $this -> getSize();
+	if (! $this -> isSizeAdditive()) {
+		return 0;
+	}
+	if ($size) {
+		return $this -> __byteValue (
+			$size, $this -> getSizeUnit()
+		);
+	}
+	return 0;
+}
+
+#==========================================
 # getSizeUnit
 #------------------------------------------
 sub getSizeUnit {
@@ -705,7 +784,14 @@ sub isSizeAdditive {
 	# Return indication whether the size for this type is additive or not
 	# ---
 	my $this = shift;
-	return $this->{sizeadd};
+	my $added = $this->{sizeadd};
+	if (! $added) {
+		return 0;
+	}
+	if (($added eq 'false') || ($added eq '0')) {
+		return 0;
+	}
+	return 1;
 }
 
 #==========================================
@@ -863,7 +949,11 @@ sub getXMLElement {
 		my $sElem = XML::LibXML::Element -> new('size');
 		$sElem -> appendText($size);
 		if (! $this->{defaultsizeadd}) {
-			$sElem -> setAttribute('additive', $this -> isSizeAdditive());
+			my $additive = 'false';
+			if ($this -> isSizeAdditive()) {
+				$additive = 'true';
+			}
+			$sElem -> setAttribute('additive', $additive);
 		}
 		if (! $this->{defaultsizeunit}) {
 			$sElem -> setAttribute('unit', $this -> getSizeUnit());
@@ -2158,6 +2248,33 @@ sub __isValidSizeUnit {
 		return;
 	}
 	return 1;
+}
+
+#==========================================
+# __byteValue
+#------------------------------------------
+sub __byteValue {
+	# ...
+	# turn given value into bytes, units M and G
+	# are allowed no unit assumes a MB value
+	# ---
+	my $this = shift;
+	my $size = shift;
+	my $unit = shift;
+	if (! $unit) {
+		$unit = 'M';
+	}
+	if (! $size) {
+		return 0;
+	}
+	if ($unit eq 'M') {
+		# no unit or M specified, turn into Bytes...
+		return $size * $NEXT_UNIT * $NEXT_UNIT;
+	} elsif ($unit eq 'G') {
+		# unit G specified, turn into Bytes...
+		return $size * $NEXT_UNIT * $NEXT_UNIT * $NEXT_UNIT;
+	}
+	return 0;
 }
 
 1;
