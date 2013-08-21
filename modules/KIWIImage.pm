@@ -2432,6 +2432,7 @@ sub createImageSplit {
 	my $xendomain;
 	my $minInodes;
 	my $sizeBytes;
+	my $splitconf  = $xml -> getSplitConfig();
 	my $rootTarget = $cmdL->getRootTargetDir();
 	if (! $rootTarget) {
 		$rootTarget = $cmdL->getConfigDir();
@@ -2537,7 +2538,11 @@ sub createImageSplit {
 	# walk through except files if any
 	#------------------------------------------
 	my %exceptHash;
-	foreach my $except ($xml -> getSplitTempExceptions_legacy()) {
+	my $tmp_except_list = [];
+	if ($splitconf) {
+		$tmp_except_list = $splitconf -> getTemporaryExceptions();
+	}
+	foreach my $except (@{$tmp_except_list}) {
 		my $globsource = "${imageTree}${except}";
 		my @files = qxx ("find $globsource -xtype f 2>/dev/null");
 		my $code  = $? >> 8;
@@ -2579,8 +2584,16 @@ sub createImageSplit {
 		}
 	};
 	find(\&$createTmpTree, $imageTree);
-	my @tempFiles    = $xml -> getSplitTempFiles_legacy ();
-	my @persistFiles = $xml -> getSplitPersistentFiles_legacy ();
+	my $tmp_file_list = [];
+	if ($splitconf) {
+		$tmp_file_list = $splitconf -> getTemporaryFiles();
+	}
+	my $persist_file_list = [];
+	if ($splitconf) {
+		$persist_file_list = $splitconf -> getPersistentFiles();
+	}
+	my @tempFiles    = @{$tmp_file_list};
+	my @persistFiles = @{$persist_file_list};
 	if ($nopersistent) {
 		push (@tempFiles, @persistFiles);
 		undef @persistFiles;
@@ -2642,7 +2655,11 @@ sub createImageSplit {
 		# walk through except files if any
 		#------------------------------------------
 		my %exceptHash;
-		foreach my $except ($xml -> getSplitPersistentExceptions_legacy()) {
+		my $persist_except_list = [];
+		if ($splitconf) {
+			$persist_except_list = $splitconf -> getPersistentExceptions();
+		}
+		foreach my $except (@{$persist_except_list}) {
 			my $globsource = "${imageTree}${except}";
 			my @files = qxx ("find $globsource -xtype f 2>/dev/null");
 			my $code  = $? >> 8;
@@ -2716,7 +2733,11 @@ sub createImageSplit {
 		#==========================================
 		# relink if entire directory was set
 		#------------------------------------------
-		foreach my $persist ($xml -> getSplitPersistentFiles_legacy()) {
+		my $persist_file_list = [];
+		if ($splitconf) {
+			$persist_file_list = $splitconf -> getPersistentFiles();
+		}
+		foreach my $persist (@{$persist_file_list}) {
 			my $globsource = "${imageTree}${persist}";
 			if (-d $globsource) {
 				my $link = $globsource;
