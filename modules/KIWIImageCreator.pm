@@ -333,7 +333,6 @@ sub prepareBootImage {
 	# Apply XML over rides from command line
 	#------------------------------------------
 	$bootXML = $this -> __applyBaseXMLOverrides($bootXML);
-	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	return $this -> __prepareTree (
 		$bootXML,$configDir,$rootTgtDir,$systemTree
 	);
@@ -394,7 +393,6 @@ sub upgradeImage {
 	#------------------------------------------
 	$xml = $this -> __applyBaseXMLOverrides($xml);
 	$xml = $this -> __applyAdditionalXMLOverrides($xml);
-	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	if (! $krc -> prepareChecks()) {
 		return;
 	}
@@ -482,7 +480,6 @@ sub prepareImage {
 	#------------------------------------------
 	$xml = $this -> __applyBaseXMLOverrides($xml);
 	$xml = $this -> __applyAdditionalXMLOverrides($xml);
-	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	if (! $krc -> prepareChecks()) {
 		return;
 	}
@@ -677,7 +674,6 @@ sub createImage {
 	#------------------------------------------
 	$xml = $this -> __applyBaseXMLOverrides($xml);
 	$xml = $this -> __applyAdditionalXMLOverrides($xml);
-	$kiwi -> writeXMLDiff ($this->{gdata}->{Pretty});
 	if (! $krc -> createChecks()) {
 		return;
 	}
@@ -1550,11 +1546,6 @@ sub __prepareTree {
 	}
 	if (! $root -> setup ()) {
 		$kiwi -> error ("Couldn't setup image system");
-		$kiwi -> failed ();
-		return;
-	}
-	if (! $xml -> writeXMLDescription_legacy ($root->getRootPath())) {
-		$kiwi -> error ("Couldn't write XML description");
 		$kiwi -> failed ();
 		return;
 	}

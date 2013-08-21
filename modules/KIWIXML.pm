@@ -476,10 +476,6 @@ sub new {
 	$this->{usrdataNodeList}    = $usrdataNodeList;
 	$this->{controlFile}        = $controlFile;
 	#==========================================
-	# Store object data
-	#------------------------------------------
-	$this -> __updateXML_legacy();
-	#==========================================
 	# Dump imageConfig to log
 	#------------------------------------------
 	# print $this->__dumpInternalXMLDescription();
@@ -5472,27 +5468,6 @@ sub setArch {
 }
 
 #==========================================
-# addSimpleType
-#------------------------------------------
-sub addSimpleType {
-	# ...
-	# add simple filesystem type to the list of types
-	# inside the preferences section
-	# ---
-	my $this  = shift;
-	my $type  = shift;
-	my $kiwi  = $this->{kiwi};
-	my $nodes = $this->{optionsNodeList};
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $addElement = XML::LibXML::Element -> new ("type");
-		$addElement -> setAttribute("image",$type);
-		$nodes -> get_node($i) -> appendChild ($addElement);
-	}
-	$this -> __updateXML_legacy();
-	return $this;
-}
-
-#==========================================
 # clearPackageAttributes
 #------------------------------------------
 sub clearPackageAttributes {
@@ -6771,39 +6746,6 @@ sub getSplitPersistentExceptions_legacy {
 }
 
 #==========================================
-# writeXMLDescription_legacy
-#------------------------------------------
-sub writeXMLDescription_legacy {
-	# ...
-	# Write back the XML file into the prepare tree
-	# below the image/ directory
-	# ---
-	my $this = shift;
-	my $root = shift;
-	my $gdata= $this->{gdata};
-	my $xmlu = $this->{systemTree}->toString();
-	my $file = $root."/image/config.xml";
-	my $FD;
-	if (! open ($FD, '>', $file)) {
-		return;
-	}
-	print $FD $xmlu;
-	close $FD;
-	my $pretty = $gdata->{Pretty};
-	qxx ("xsltproc -o $file.new $pretty $file");
-	qxx ("mv $file.new $file");
-	my $overlayTree = $gdata->{OverlayRootTree};
-	if ($overlayTree) {
-		qxx ("mkdir -p $overlayTree");
-		qxx ("cp $file $overlayTree");
-		KIWIGlobals -> instance() -> setKiwiConfigData (
-			"OverlayRootTree",0
-		);
-	}
-	return $this;
-}
-
-#==========================================
 # Private helper methods
 #------------------------------------------
 #==========================================
@@ -7286,24 +7228,6 @@ sub __updateTypeList_legacy {
 	$this -> __populateProfiledTypeInfo_legacy();
 	return;
 }
-
-#==========================================
-# __updateXML_legacy
-#------------------------------------------
-sub __updateXML_legacy {
-	# ...
-	# Write back the current DOM tree into the file
-	# referenced by getRootLog but with the suffix .xml
-	# if there is no log file set the service is skipped
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $xmlu = $this->{systemTree}->toString();
-	my $xmlf = $this->{xmlOrigFile};
-	$kiwi -> storeXML ( $xmlu,$xmlf );
-	return $this;
-}
-
 #==========================================
 # End "old" methods section
 #------------------------------------------
@@ -7381,7 +7305,6 @@ sub __addDefaultSplitNode {
 			$defaultSplit -> cloneNode (1)
 		);
 	}
-	$this -> __updateXML_legacy();
 	return $this;
 }
 

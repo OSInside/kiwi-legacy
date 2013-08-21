@@ -253,7 +253,6 @@ sub setupOverlay {
 	if (! defined $this->{imageTree}) {
 		return;
 	}
-	$xml -> writeXMLDescription_legacy ($this->{imageTree});
 	return $this;
 }
 
