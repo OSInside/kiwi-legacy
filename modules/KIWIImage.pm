@@ -2512,7 +2512,8 @@ sub createImageSplit {
 	if ($splitconf) {
 		$tmp_except_list = $splitconf -> getTemporaryExceptions();
 	}
-	foreach my $except (@{$tmp_except_list}) {
+	foreach my $except_item (@{$tmp_except_list}) {
+		my $except = $except_item -> getName();
 		my $globsource = "${imageTree}${except}";
 		my @files = qxx ("find $globsource -xtype f 2>/dev/null");
 		my $code  = $? >> 8;
@@ -2554,16 +2555,22 @@ sub createImageSplit {
 		}
 	};
 	find(\&$createTmpTree, $imageTree);
-	my $tmp_file_list = [];
+	my @tempFiles    = ();
+	my @persistFiles = ();
 	if ($splitconf) {
-		$tmp_file_list = $splitconf -> getTemporaryFiles();
+		my $tmp_file_list = $splitconf -> getTemporaryFiles();
+		for my $item (@{$tmp_file_list}) {
+			my $name = $item -> getName();
+			push @tempFiles,$name;
+		}
 	}
-	my $persist_file_list = [];
 	if ($splitconf) {
-		$persist_file_list = $splitconf -> getPersistentFiles();
+		my $persist_file_list = $splitconf -> getPersistentFiles();
+		for my $item (@{$persist_file_list}) {
+			my $name = $item -> getName();
+			push @persistFiles,$name;
+		}
 	}
-	my @tempFiles    = @{$tmp_file_list};
-	my @persistFiles = @{$persist_file_list};
 	if ($nopersistent) {
 		push (@tempFiles, @persistFiles);
 		undef @persistFiles;
@@ -2629,7 +2636,8 @@ sub createImageSplit {
 		if ($splitconf) {
 			$persist_except_list = $splitconf -> getPersistentExceptions();
 		}
-		foreach my $except (@{$persist_except_list}) {
+		foreach my $except_item (@{$persist_except_list}) {
+			my $except = $except_item -> getName();
 			my $globsource = "${imageTree}${except}";
 			my @files = qxx ("find $globsource -xtype f 2>/dev/null");
 			my $code  = $? >> 8;
@@ -2707,7 +2715,8 @@ sub createImageSplit {
 		if ($splitconf) {
 			$persist_file_list = $splitconf -> getPersistentFiles();
 		}
-		foreach my $persist (@{$persist_file_list}) {
+		foreach my $persist_item (@{$persist_file_list}) {
+			my $persist = $persist_item -> getName();
 			my $globsource = "${imageTree}${persist}";
 			if (-d $globsource) {
 				my $link = $globsource;

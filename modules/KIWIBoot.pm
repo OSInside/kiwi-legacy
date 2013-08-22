@@ -343,6 +343,13 @@ sub new {
 		$type{type}                   = $xmltype -> getTypeName();
 		$type{vga}                    = $xmltype -> getVGA();
 		$type{volid}                  = $xmltype -> getVolID();
+		if (! $type{filesystem}) {
+			my $fsro = $xmltype -> getFSReadOnly();
+			my $fsrw = $xmltype -> getFSReadWrite();
+			if (($fsro) && ($fsrw)) {
+				$type{filesystem} = "$fsrw,$fsro";
+			}
+		}
 	}
 	#==========================================
 	# store systemdisk information
