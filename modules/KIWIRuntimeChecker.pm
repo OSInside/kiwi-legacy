@@ -185,7 +185,7 @@ sub __checkSwapRecommended {
 	my $this    = shift;
 	my $kiwi    = $this -> {kiwi};
 	my $xml     = $this -> {xml};
-	my $imgType = $xml  -> getImageType() -> getTypeName();
+	my $type    = $xml  -> getImageType();
 	my $sysDisk = $xml  -> getSystemDiskConfig();
 	my $oemConf = $xml  -> getOEMConfig();
 	#==========================================
@@ -196,8 +196,15 @@ sub __checkSwapRecommended {
 	my $systemSize = 0;
 	my $systemSwap = 0;
 	#==========================================
+	# no type information
+	#------------------------------------------
+	if (! $type) {
+		return 1;
+	}
+	#==========================================
 	# Perform the test only for oem images
 	#------------------------------------------
+	my $imgType = $type -> getTypeName();
 	if ($imgType ne "oem") {
 		return 1;
 	}
@@ -254,8 +261,12 @@ sub __checkContainerHasLXC {
 	# A container build must include the lxc package
 	# ---
 	my $this = shift;
-	my $xml = $this -> {xml};
-	my $name = $xml -> getImageType() -> getTypeName();
+	my $xml  = $this -> {xml};
+	my $type = $xml  -> getImageType();
+	if (! $type) {
+		return 1;
+	}
+	my $name = $type -> getTypeName();
 	if ($name =~ /^lxc/smx) {
 		my $pckgs = $xml -> getPackages();
 		push @{$pckgs}, @{$xml -> getBootstrapPackages()};
@@ -287,13 +298,20 @@ sub __checkLVMoemSizeSettings {
 	my $this        = shift;
 	my $kiwi        = $this -> {kiwi};
 	my $xml         = $this -> {xml};
-	my $imgType     = $xml  -> getImageType() -> getTypeName();
+	my $type        = $xml  -> getImageType();
 	my $oemConf     = $xml  -> getOEMConfig();
 	my $volSizes    = 0;
 	my $volAllCount = 0;
 	#==========================================
+	# No type information
+	#------------------------------------------
+	if (! $type) {
+		return 1;
+	}
+	#==========================================
 	# Perform the test only for oem images
 	#------------------------------------------
+	my $imgType     = $type -> getTypeName();
 	if ($imgType ne "oem") {
 		return 1;
 	}
@@ -376,6 +394,9 @@ sub __checkFilesystemTool {
 	my $cmdL = $this -> {cmdArgs};
 	my $xml  = $this -> {xml};
 	my $type = $xml -> getImageType();
+	if (! $type) {
+		return 1;
+	}
 	my $typeName = $type -> getTypeName();
 	my $flag     = $type -> getFlags();
 	my $toolError;
@@ -479,10 +500,17 @@ sub __checkOEMsizeSettingSufficient {
 	my $this    = shift;
 	my $kiwi    = $this -> {kiwi};
 	my $xml     = $this -> {xml};
-	my $imgType = $xml  -> getImageType() -> getTypeName();
+	my $type    = $xml  -> getImageType();
+	#==========================================
+	# No type information
+	#------------------------------------------
+	if (! $type) {
+		return 1;
+	}
 	#==========================================
 	# Perform the test only for oem images
 	#------------------------------------------
+	my $imgType = $type -> getTypeName();
 	if ($imgType ne "oem") {
 		return 1;
 	}
@@ -650,11 +678,18 @@ sub __checkSystemDiskData {
 	my $kiwi    = $this -> {kiwi};
 	my $cmdL    = $this -> {cmdArgs};
 	my $xml     = $this -> {xml};
-	my $imgType = $xml  -> getImageType() -> getTypeName();
+	my $type    = $xml  -> getImageType();
 	my $oemConf = $xml  -> getOEMConfig();
+	#==========================================
+	# No type information
+	#------------------------------------------
+	if (! $type) {
+		return 1;
+	}
 	#==========================================
 	# Perform the test only for oem images
 	#------------------------------------------
+	my $imgType = $type -> getTypeName();
 	if ($imgType ne "oem") {
 		return 1;
 	}
@@ -769,8 +804,12 @@ sub __checkVMscsiCapable {
 	# ---
 	my $this = shift;
 	my $xml = $this -> {xml};
-	my $type = $xml -> getImageType() -> getTypeName();
-	if ($type ne 'vmx') {
+	my $type = $xml -> getImageType();
+	if (! $type) {
+		return 1;
+	}
+	my $imgtype = $type -> getTypeName();
+	if ($imgtype ne 'vmx') {
 		# Nothing to do
 		return 1;
 	}
@@ -919,7 +958,9 @@ sub __haveValidTypeString {
 	# option
 	# ---
 	my $this = shift;
-	my $cmdL = $this -> {cmdArgs};
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $cmdL = $this->{cmdArgs};
 	my $type = $cmdL -> getBuildType();
 	my @allowedTypes = qw (
 		btrfs
@@ -950,6 +991,13 @@ sub __haveValidTypeString {
 			$kiwi -> failed();
 			return;
 		}
+	}
+	my $bldType = $xml -> getImageType();
+	if (! $bldType) {
+		my $msg = 'Cannot determine build type';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
 	}
 	return 1;
 }
@@ -1013,6 +1061,9 @@ sub __isoHybridCapable {
 	my $locator = $this->{locator};
 	my $xml = $this->{xml};
 	my $bldType = $xml -> getImageType();
+	if (! $bldType) {
+		return 1;
+	}
 	my $imgType = $bldType -> getTypeName();
 	if ($imgType ne 'iso' && $imgType ne 'oem') {
 		return 1;

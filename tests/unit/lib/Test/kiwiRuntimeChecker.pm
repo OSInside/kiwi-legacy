@@ -693,15 +693,10 @@ sub test_noBuildType {
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCommandLineObj();
 	my $configDir = $this -> {dataDir} . '/noDefaultBuildType';
-	# TODO
-	# Change to a RuntimeChecker test when XML object becomes a dumb
-	# container and looses notion of state
-	#my $xml = $this -> __getXMLObj($configDir);
-	#my $checker = new KIWIRuntimeChecker($cmd, $xml);
-	#my $res = $checker -> prepareChecks();
-	my $xml = KIWIXML -> new(
-		$configDir, undef, undef,$this->{cmdL}
-	);
+	$cmd -> setConfigDir ($configDir);
+	my $xml = $this -> __getXMLObj( $configDir );
+	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+	my $res = $checker -> prepareChecks();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Cannot determine build type', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -709,7 +704,7 @@ sub test_noBuildType {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	# Test this condition last to get potential error messages
-	$this -> assert_null($xml);
+	$this -> assert_null($res);
 	return;
 }
 

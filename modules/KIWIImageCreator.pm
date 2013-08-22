@@ -138,7 +138,6 @@ sub prepareBootImage {
 	my $systemXML  = shift;
 	my $rootTgtDir = shift;
 	my $systemTree = shift;
-	my $changeset  = shift;
 	my $cmdL       = $this->{cmdL};
 	my $kiwi       = $this->{kiwi};
 	if (! $systemXML) {
@@ -188,7 +187,7 @@ sub prepareBootImage {
 	#------------------------------------------
 	$kiwi -> info ("--> Prepare boot image (initrd)...\n");
 	my $bootXML = KIWIXML -> new(
-		$configDir,undef,undef,$cmdL,$changeset
+		$configDir,undef,undef,$cmdL
 	);
 	if (! $bootXML) {
 		return;
@@ -329,6 +328,7 @@ sub prepareBootImage {
 		$systemXML -> getBootProfile(),
 		$systemXML -> getBootKernel()
 	);
+	$this -> __printProfileInfo ($bootXML,'Using boot profile(s):');
 	#==========================================
 	# Apply XML over rides from command line
 	#------------------------------------------
@@ -385,6 +385,7 @@ sub upgradeImage {
 	if (! defined $xml) {
 		return;
 	}
+	$this -> __printProfileInfo ($xml);
 	my $krc = KIWIRuntimeChecker -> new(
 		$this -> {cmdL}, $xml
 	);
@@ -450,6 +451,7 @@ sub prepareImage {
 	if (! defined $xml) {
 		return;
 	}
+	$this -> __printProfileInfo ($xml);
 	my $krc = KIWIRuntimeChecker -> new(
 		$this -> {cmdL}, $xml
 	);
@@ -650,6 +652,7 @@ sub createImage {
 	if (! defined $xml) {
 		return;
 	}
+	$this -> __printProfileInfo ($xml);
 	my $krc = KIWIRuntimeChecker -> new(
 		$cmdL,$xml
 	);
@@ -2178,6 +2181,27 @@ sub __updateProfileEnvironment {
 		qxx ("cp $tree/.profile $tree/image/.profile");
 	}
 	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
+# __printProfileInfo
+#------------------------------------------
+sub __printProfileInfo {
+	my $this  = shift;
+	my $xml   = shift;
+	my $text  = shift;
+	my $kiwi  = $this->{kiwi};
+	if (! $text) {
+		$text = 'Using profile(s):';
+	}
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	if (($activeProfiles) && (scalar @{$activeProfiles} > 0)) {
+		my $info = join (",",@{$activeProfiles});
+		$kiwi -> info ("$text\n");
+		$kiwi -> info ("--> @{$activeProfiles}");
+		$kiwi -> done ();
+	}
 	return $this;
 }
 

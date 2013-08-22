@@ -208,32 +208,6 @@ sub getImageTree {
 }
 
 #==========================================
-# updateDescription_legacy
-#------------------------------------------
-sub updateDescription_legacy {
-	# ...
-	# Create change set hash from the given XML object
-	# to be integrated into another XML object at a later
-	# point in the process.
-	# ---
-	my $this      = shift;
-	my $xml       = shift;
-	my %changeset = ();
-	my @profiles  = ();
-	#==========================================
-	# store profiles
-	#------------------------------------------
-	if ($xml->{reqProfiles}) {
-		push @profiles,@{$xml->{reqProfiles}};
-		$changeset{"profiles"} = \@profiles;
-	}
-	#==========================================
-	# Return changeset hash
-	#------------------------------------------
-	return %changeset;
-}
-
-#==========================================
 # setupOverlay
 #------------------------------------------
 sub setupOverlay {
@@ -805,10 +779,6 @@ sub createImageBootImage {
 	#------------------------------------------
 	$kiwi -> info ("--> Creating $text boot image: $boot...\n");
 	#==========================================
-	# Setup changeset to be used by boot image
-	#------------------------------------------
-	my %XMLChangeSet = $this -> updateDescription_legacy ($sxml);
-	#==========================================
 	# Create tmp dir for boot image creation
 	#------------------------------------------
 	my $tmpdir = qxx ("mktemp -q -d $idest/boot-$text.XXXXXX");
@@ -826,7 +796,7 @@ sub createImageBootImage {
 	my $rootTarget = "$tmpdir/kiwi-".$text."boot-$$";
 	my $kic = KIWIImageCreator -> new ($this->{cmdL});
 	if ((! $kic) ||	(! $kic -> prepareBootImage (
-		$sxml,$rootTarget,$this->{imageTree},\%XMLChangeSet))
+		$sxml,$rootTarget,$this->{imageTree}))
 	) {
 		undef $kic;
 		if (! -d $checkBase) {

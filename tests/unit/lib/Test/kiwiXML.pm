@@ -3630,6 +3630,10 @@ sub test_ctor_NoTypeDefaultPref {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3728,6 +3732,10 @@ sub test_getActiveProfileNames {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef, $this->{cmdL}
 	);
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profB', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4052,6 +4060,10 @@ sub test_getConfiguredTypeNames {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4435,6 +4447,10 @@ sub test_getImageTypeProfiles {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4469,6 +4485,10 @@ sub test_getImageTypeProfilesNoPrimaryType {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profB', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -4622,31 +4642,6 @@ sub test_getLibsToKeep {
 		push @libNames, $lib -> getName();
 	}
 	$this -> assert_array_equal(\@expected, \@libNames);
-	return;
-}
-
-#==========================================
-# test_getLVMGroupName_legacy
-#------------------------------------------
-sub test_getLVMGroupName_legacy {
-	# ...
-	# Verify proper return of getLVMGroupName method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'lvmConfig';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $value = $xml -> getLVMGroupName_legacy();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('test_Volume', $value);
 	return;
 }
 
@@ -5330,63 +5325,6 @@ sub test_getPackageCollectionsUseProf {
 }
 
 #==========================================
-# test_getPackageNodeList_legacy
-#------------------------------------------
-sub test_getPackageNodeList_legacy {
-	# ...
-	# Verify proper return of getPackageNodeList method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef, $this->{cmdL}
-	);
-	my @packNodes = $xml -> getPackageNodeList_legacy() -> get_nodelist();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	my @expectedPcks = qw /ed emacs filesystem glibc-locale kernel-default
-						kernel-desktop perl python vim/;
-	my @expectedArch = qw /myInitStuff.tar myImageStuff.tgz myAppArch.tgz/;
-	my @expectedPats = qw /base xfce kde/;
-	my @packages;
-	my @archives;
-	my @patterns;
-	for my $node (@packNodes) {
-		my $type = $node -> getAttribute('type');
-		if ($type eq 'bootstrap') {
-			my @bootPckgsNodes = $node -> getElementsByTagName('package');
-			for my $pckNode (@bootPckgsNodes) {
-				push @packages, $pckNode -> getAttribute('name');
-			}
-		}
-		elsif ($type eq 'image') {
-			my @imgPckgNodes = $node -> getElementsByTagName('package');
-			my @archNodes = $node -> getElementsByTagName('archive');
-			my @pattNodes = $node -> getElementsByTagName('namedCollection');
-			for my $pckNode (@imgPckgNodes) {
-				push @packages, $pckNode -> getAttribute('name');
-			}
-			for my $archNode (@archNodes) {
-				push @archives, $archNode -> getAttribute('name');
-			}
-			for my $pattNode (@pattNodes) {
-				push @patterns, $pattNode -> getAttribute('name');
-			}
-		}
-	}
-	$this -> assert_array_equal(\@expectedPcks, \@packages);
-	$this -> assert_array_equal(\@expectedArch, \@archives);
-	$this -> assert_array_equal(\@expectedPats, \@patterns);
-	return;
-}
-
-#==========================================
 # test_getPreferences
 #------------------------------------------
 sub test_getPreferences {
@@ -5429,6 +5367,10 @@ sub test_getPreferencesProfiles {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -5468,6 +5410,10 @@ sub test_getPreferencesProfilesNoPref {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();	
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -5516,6 +5462,10 @@ sub test_getPreferencesProfilesWithConflict {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -5558,6 +5508,10 @@ sub test_getPreferencesProfilesWithConflictType {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -5598,7 +5552,11 @@ sub test_getProfiles {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef, $this->{cmdL}
 	);
-	my @profiles = @{$xml -> getProfiles()};
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
+	my $profiles = $xml -> getProfiles();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profB', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -5606,9 +5564,9 @@ sub test_getProfiles {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('completed', $state);
 	# Test these conditions last to get potential error messages
-	my $numProfiles = scalar @profiles;
+	my $numProfiles = scalar @{$profiles};
 	$this -> assert_equals(3, $numProfiles);
-	for my $prof (@profiles) {
+	for my $prof (@{$profiles}) {
 		my $name = $prof -> getName();
 		if ($name eq 'profA') {
 			$this -> assert_str_equals('false', $prof->getImportStatus());
@@ -6435,33 +6393,6 @@ sub test_ignoreRepositories {
 }
 
 #==========================================
-# test_invalidProfileRequest
-#------------------------------------------
-sub test_invalidProfileRequest {
-	# ...
-	# Test the privat __checkProfiles method by passing an invalid
-	# profile name to the ctor.
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'profilesConfig';
-	my @reqProf = qw /profD/;
-	my $xml = KIWIXML -> new(
-		$confDir, undef, \@reqProf, $this->{cmdL}
-	);
-	$this -> assert_null($xml);
-	my $msg = $kiwi -> getErrorMessage();
-	$this -> assert_str_equals('Profile profD: not found', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getErrorState();
-	$this -> assert_str_equals('failed', $state);
-	# for this test, just make sure everything in the log object gets reset
-	$kiwi -> getState();
-	return;
-}
-
-#==========================================
 # test_setArch
 #------------------------------------------
 sub test_setArch {
@@ -6541,6 +6472,10 @@ sub test_setBuildType {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -6580,6 +6515,10 @@ sub test_setBuildTypeInvalidArg {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -6622,6 +6561,10 @@ sub test_setBuildTypeNoArg {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef,$this->{cmdL}
 	);
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profA', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -7124,7 +7067,10 @@ sub test_setSelectionProfileNames {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef, $this->{cmdL}
 	);
-	# Clear out the initial setup message
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profB', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -7160,7 +7106,10 @@ sub test_setSelectionProfileNamesImpropProf {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef, $this->{cmdL}
 	);
-	# Clear out the initial setup message
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profB', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -7199,7 +7148,10 @@ sub test_setSelectionProfileNamesInvalidArg {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef, $this->{cmdL}
 	);
-	# Clear out the initial setup message
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profB', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -7236,7 +7188,10 @@ sub test_setSelectionProfileNamesNoArg {
 	my $xml = KIWIXML -> new(
 		$confDir, undef, undef, $this->{cmdL}
 	);
-	# Clear out the initial setup message
+	my $activeProfiles = $xml -> getActiveProfileNames();
+	my $info = join (",",@{$activeProfiles});
+	$kiwi -> info ("Using profile(s): $info");
+	$kiwi -> done ();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Using profile(s): profB', $msg);
 	my $msgT = $kiwi -> getMessageType();

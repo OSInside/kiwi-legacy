@@ -246,7 +246,6 @@ sub new {
 	my $imageType   = shift;
 	my $reqProfiles = shift;
 	my $cmdL        = shift;
-	my $changeset   = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -346,7 +345,7 @@ sub new {
 	$this->{instsrcNodeList} = $instsrcNodeList;
 	$this->{stripNodeList}   = $stripNodeList;
 	#==========================================
-	# Data structure containing the XML file information
+	# Internal Data structure -> imageConfig 
 	#------------------------------------------
 	$this->{imageConfig} = {};
 	my @imageNodes = $systemTree -> getElementsByTagName("image");
@@ -364,23 +363,29 @@ sub new {
 	);
 	$this->{imageConfig}{kiwi_default}{profInfo} = \%kDefProfile;
 	#==========================================
-	# Populate imageConfig with description data from config tree
+	# Add default split section if not defined
+	#------------------------------------------
+	if (! $this -> __addDefaultSplitNode()) {
+		return;
+	}
+	#==========================================
+	# Populate description data from xml
 	#------------------------------------------
 	$this -> __populateDescriptionInfo();
 	#==========================================
-	# Populate imageConfig with product data from config tree
+	# Populate product data from xml
 	#------------------------------------------
 	$this -> __populateInstSource();
 	#==========================================
-	# Populate imageConfig with profile data from config tree
+	# Populate profile data from xml
 	#------------------------------------------
 	$this -> __populateProfileInfo();
 	#==========================================
-	# Populate imageConfig with driver data from config tree
+	# Populate driver data from xml
 	#------------------------------------------
 	$this -> __populateDriverInfo();
 	#==========================================
-	# Populate imageConfig with preferences data from config tree
+	# Populate preferences data from xml
 	#------------------------------------------
 	if (! $this -> __populatePreferenceInfo() ) {
 		return;
@@ -398,78 +403,37 @@ sub new {
 		$this -> setBuildType ($imageType);
 	}
 	#==========================================
-	# Populate imageConfig with archive data from config tree
+	# Populate archive data from xml
 	#------------------------------------------
 	$this -> __populateArchiveInfo();
 	#==========================================
-	# Populate imageConfig with ignore data from config tree
+	# Populate packages to ignore from xml data
 	#------------------------------------------
 	$this -> __populateIgnorePackageInfo();
 	#==========================================
-	# Populate imageConfig with package data from config tree
+	# Populate package data from xml data
 	#------------------------------------------
 	$this -> __populatePackageInfo();
 	#==========================================
-	# Populate imageConfig with package collection data
+	# Populate package collection data from xml
 	#------------------------------------------
 	$this -> __populatePackageCollectionInfo();
 	#==========================================
-	# Populate imageConfig with product data from config tree
+	# Populate product data from xml
 	#------------------------------------------
 	$this -> __populatePackageProductInfo();
 	#==========================================
-	# Populate imageConfig with repository data from config tree
+	# Populate repository data from xml
 	#------------------------------------------
 	$this -> __populateRepositoryInfo();
 	#==========================================
-	# Populate imageConfig with strip/keep datafrom config tree
+	# Populate strip/keep data from xml
 	#------------------------------------------
 	$this -> __populateStripInfo();
 	#==========================================
-	# Populate imageConfig with user data from config tree
+	# Populate user data from xml
 	#------------------------------------------
 	$this -> __populateUserInfo();
-	#==========================================
-	# Read and create profile hash
-	#------------------------------------------
-	$this->{profileHash} = $this -> __populateProfiles_legacy();
-	#==========================================
-	# Read and create type hash
-	#------------------------------------------
-	$this->{typeList} = $this -> __populateTypeInfo_legacy();
-	#==========================================
-	# Update XML data from changeset if exists
-	#------------------------------------------
-	if (defined $changeset) {
-		$this -> __populateImageTypeAndNode_legacy();
-		$this -> __updateDescriptionFromChangeSet_legacy ($changeset);
-	}
-	#==========================================
-	# Populate default profiles from XML if set
-	#------------------------------------------
-	$this -> __populateDefaultProfiles_legacy();
-	#==========================================
-	# Populate typeInfo hash
-	#------------------------------------------
-	$this -> __populateProfiledTypeInfo_legacy();
-	#==========================================
-	# Check profile names
-	#------------------------------------------
-	if (! $this -> __checkProfiles_legacy()) {
-		return;
-	}
-	#==========================================
-	# Select and initialize image type
-	#------------------------------------------
-	if (! $this -> __populateImageTypeAndNode_legacy()) {
-		return;
-	}
-	#==========================================
-	# Add default split section if not defined
-	#------------------------------------------
-	if (! $this -> __addDefaultSplitNode()) {
-		return;
-	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -482,11 +446,6 @@ sub new {
 	return $this;
 }
 
-#==========================================
-# Methods that use the "new" imageConfig data structure
-# These are replcements for "old" methods and represent the
-# eventual interface of this object
-#------------------------------------------
 #==========================================
 # addArchives
 #------------------------------------------
@@ -1247,8 +1206,10 @@ sub getArchives {
 	# ---
 	my $this = shift;
 	my $archives = $this -> __getInstallData('archives');
-	my $bInclArchives = $this -> getBootIncludeArchives();
-	push @{$archives}, @{$bInclArchives};
+	if ($archives) {
+		my $bInclArchives = $this -> getBootIncludeArchives();
+		push @{$archives}, @{$bInclArchives};
+	}
 	return $archives;
 }
 
@@ -3996,6 +3957,9 @@ sub __getInstallData {
 	my $arch = $this->{arch};
 	my @selected = @{$this->{selectedProfiles}};
 	my $type = $this->{selectedType}{type};
+	if (! $type) {
+		return;
+	}
 	my $typeName = $type -> getTypeName();
 	my @names;
 	#==========================================
@@ -4930,7 +4894,6 @@ sub __populateProfileInfo {
 	# profile data from the XML file.
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
 	my $reqp = $this->{reqProfiles};
 	my @selectProfs = ('kiwi_default');
 	my $reqp_count  = 0;
@@ -5462,13 +5425,16 @@ sub setBootProfiles {
 	}
 	my @list = ('kiwi_default');
 	if (($bootprofile) && ($bootprofile ne 'default')) {
+		$type -> setBootProfile ($bootprofile);
 		push @list, split (/,/,$bootprofile);
 	}
 	if ($bootkernel) {
+		$type -> setBootKernel ($bootkernel);
 		push @list, split (/,/,$bootkernel);
 	} else {
 		# apply 'std' kernel profile required for boot images
-		push @list, "std";
+		$type -> setBootKernel ('std');
+		push @list, 'std';
 	}
 	$this->{selectedProfiles} = \@list;
 	return $this;
@@ -5974,588 +5940,6 @@ sub getSingleInstSourceSatSolvable {
 }
 
 #==========================================
-# Methods using the "old" data structure that are to be
-# eliminated or replaced
-#------------------------------------------
-#==========================================
-# getInstSourceDUDConfig_legacy
-#------------------------------------------
-sub getInstSourceDUDConfig_legacy {
-	my $this = shift;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
-	my @config = $dud_node->getElementsByTagName('config');
-	my %data;
-	foreach my $cfg (@config) {
-		$data{$cfg->getAttribute("key")} = $cfg->getAttribute("value");
-	}
-	return \%data;
-}
-
-#==========================================
-# getInstSourceRepository_legacy
-#------------------------------------------
-sub getInstSourceRepository_legacy {
-	# ...
-	# Get the repository path and priority used for building
-	# up an installation source tree.
-	# ---
-	my $this = shift;
-	my %result;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	if (! defined $base) {
-		return %result;
-	}
-	my @node = $base -> getElementsByTagName ("instrepo");
-	foreach my $element (@node) {
-		my $prio = $element -> getAttribute("priority");
-		my $name = $element -> getAttribute("name");
-		my $user = $element -> getAttribute("username");
-		my $pwd  = $element -> getAttribute("password");
-		my $islocal  = $element -> getAttribute("local");
-		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
-		my $source = $this -> __resolveLink ( $stag -> getAttribute ("path") );
-		if (! defined $name) {
-			$name = "noname";
-		}
-		$result{$name}{source}   = $source;
-		$result{$name}{priority} = $prio;
-		$result{$name}{islocal} = $islocal;
-		if (defined $user) {
-			$result{$name}{user} = $user.":".$pwd;
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getLVMGroupName_legacy
-#------------------------------------------
-sub getLVMGroupName_legacy {
-	# ...
-	# Return the name of the volume group if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
-	if (! defined $node) {
-		return;
-	}
-	return $node -> getAttribute ("name");
-}
-
-#==========================================
-# getPackageNodeList_legacy
-#------------------------------------------
-sub getPackageNodeList_legacy {
-	# ...
-	# Return a list of all <packages> nodes. Each list member
-	# is an XML::LibXML::Element object pointer
-	# ---
-	my $this = shift;
-	return $this->{packageNodeList};
-}
-
-#==========================================
-# getProfiles_legacy
-#------------------------------------------
-sub getProfiles_legacy {
-	# ...
-	# Return a list of profiles available for this image
-	# ---
-	my $this   = shift;
-	my @result = ();
-	if (! defined $this->{profilesNodeList}) {
-		return @result;
-	}
-	my $base = $this->{profilesNodeList} -> get_node(1);
-	if (! defined $base) {
-		return @result;
-	}
-	my @node = $base -> getElementsByTagName ("profile");
-	foreach my $element (@node) {
-		my $name = $element -> getAttribute ("name");
-		my $desc = $element -> getAttribute ("description");
-		my $incl = $element -> getAttribute ("import");
-		my %profile = ();
-		$profile{name} = $name;
-		$profile{description} = $desc;
-		$profile{include} = $incl;
-		push @result, { %profile };
-	}
-	return @result;
-}
-
-#==========================================
-# Private helper methods
-#------------------------------------------
-#==========================================
-# __createURLList_legacy
-#------------------------------------------
-sub __createURLList_legacy {
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $cmdL = $this->{cmdL};
-	my %repository  = ();
-	my @urllist     = ();
-	my %urlhash     = ();
-	my @sourcelist  = ();
-	# Hack my way out of a jam of different data handling between legacy and
-	# new stuff. However this method will go away anyway ;)
-	my $processed = 0;
-	my $repos = $this->getRepositories();
-	for my $repo (@{$repos}) {
-		$processed = 1;
-		my ($user, $pwd) = $repo -> getCredentials();
-		my $source = $repo -> getPath();
-		my $urlHandler  = KIWIURL -> new ($cmdL,undef,$user,$pwd);
-		my $publics_url = $urlHandler -> normalizePath ($source);
-		push (@urllist,$publics_url);
-		$urlhash{$source} = $publics_url;
-	}
-	if (! $processed) {
-		%repository = $this->getInstSourceRepository_legacy();
-		foreach my $name (keys %repository) {
-			push (@sourcelist,$repository{$name}{source});
-		}
-		foreach my $source (@sourcelist) {
-			my $user = $repository{$source}[3];
-			my $pwd  = $repository{$source}[4];
-			my $urlHandler  = KIWIURL -> new ($cmdL,undef,$user,$pwd);
-			my $publics_url = $urlHandler -> normalizePath ($source);
-			push (@urllist,$publics_url);
-			$urlhash{$source} = $publics_url;
-		}
-	}
-	$this->{urllist} = \@urllist;
-	$this->{urlhash} = \%urlhash;
-	return $this;
-}
-
-#==========================================
-# __getURLList_legacy
-#------------------------------------------
-sub __getURLList_legacy {
-	my $this = shift;
-	if (! $this->{urllist}) {
-		$this -> __createURLList_legacy();
-	}
-	return $this->{urllist};
-}
-
-#==========================================
-# __populateProfiles_legacy
-#------------------------------------------
-sub __populateProfiles_legacy {
-	# ...
-	# import profiles section if specified
-	# ---
-	my $this     = shift;
-	my %result   = ();
-	my @profiles = $this -> getProfiles_legacy();
-	foreach my $profile (@profiles) {
-		if ($profile->{include}) {
-			$result{$profile->{name}} = "$profile->{include}";
-		} else {
-			$result{$profile->{name}} = "false";
-		}
-	}
-	return \%result;
-}
-
-#==========================================
-# __populateTypeInfo_legacy
-#------------------------------------------
-sub __populateTypeInfo_legacy {
-	# ...
-	# Extract the information contained in the <type> elements
-	# and store the type descriptions in a list of hash references
-	# ---
-	# list = (
-	#   {
-	#      'key' => 'value'
-	#      'key' => 'value'
-	#   },
-	#   {
-	#      'key' => 'value'
-	#      'key' => 'value'
-	#   }
-	# )
-	# ---
-	#
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $cmdL   = $this->{cmdL};
-	my $urlhd  = KIWIURL -> new ($cmdL);
-	my @node   = $this->{optionsNodeList} -> get_nodelist();
-	my @result = ();
-	my $first  = 1;
-	#==========================================
-	# select types
-	#------------------------------------------
-	foreach my $element (@node) {
-		my @types    = $element -> getElementsByTagName ("type");
-		my $profiles = $element -> getAttribute("profiles");
-		my @assigned = ("all");
-		if ($profiles) {
-			@assigned = split (/,/,$profiles);
-		}
-		foreach my $node (@types) {
-			my %record = ();
-			my $prim   = $node -> getAttribute("primary");
-			if (! defined $prim) {
-				$record{primary} = "false";
-			} else {
-				$record{primary} = $prim;
-			}
-			my $disk = $node->getElementsByTagName("systemdisk")->get_node(1);
-			#==========================================
-			# meta data
-			#------------------------------------------
-			$record{first}    = $first;
-			$record{node}     = $node;
-			$record{assigned} = \@assigned;
-			$first = 0;
-			#==========================================
-			# type attributes
-			#------------------------------------------
-			$record{type}          = $node
-				-> getAttribute("image");
-			$record{fsmountoptions}= $node
-				-> getAttribute("fsmountoptions");
-			$record{luks}          = $node
-				-> getAttribute("luks");
-			$record{cmdline}       = $node
-				-> getAttribute("kernelcmdline");
-			$record{firmware}      = $node
-				-> getAttribute("firmware");
-			$record{compressed}    = $node
-				-> getAttribute("compressed");
-			$record{boot}          = $node
-				-> getAttribute("boot");
-			$record{bootfilesystem}= $node
-				-> getAttribute("bootfilesystem");
-			$record{bootpartsize}  = $node
-				-> getAttribute("bootpartsize");
-			$record{volid}         = $node
-				-> getAttribute("volid");
-			$record{flags}         = $node
-				-> getAttribute("flags");
-			$record{hybrid}        = $node
-				-> getAttribute("hybrid");
-			$record{format}        = $node
-				-> getAttribute("format");
-			$record{installiso}    = $node
-				-> getAttribute("installiso");
-			$record{installstick}  = $node
-				-> getAttribute("installstick");
-			$record{installpxe}    = $node
-				-> getAttribute("installpxe");
-			$record{vga}           = $node
-				-> getAttribute("vga");
-			$record{vhdfixedtag}   = $node
-				-> getAttribute("vhdfixedtag");
-			$record{bootloader}    = $node
-				-> getAttribute("bootloader");
-			$record{devicepersistency} = $node
-				-> getAttribute("devicepersistency");
-			$record{boottimeout}   = $node
-				-> getAttribute("boottimeout");
-			$record{installboot}   = $node
-				-> getAttribute("installboot");
-			$record{installprovidefailsafe} = $node
-				-> getAttribute("installprovidefailsafe");
-			$record{checkprebuilt} = $node
-				-> getAttribute("checkprebuilt");
-			$record{bootprofile}   = $node
-				-> getAttribute("bootprofile");
-			$record{bootkernel}    = $node
-				-> getAttribute("bootkernel");
-			$record{filesystem}    = $node
-				-> getAttribute("filesystem");
-			$record{fsnocheck}     = $node
-				-> getAttribute("fsnocheck");
-			$record{hybridpersistent}  = $node
-				-> getAttribute("hybridpersistent");
-			$record{ramonly}       = $node
-				-> getAttribute("ramonly");
-			$record{mdraid}        = $node
-				-> getAttribute("mdraid");
-			if ($record{type} eq "split") {
-				my $filesystemRO = $node -> getAttribute("fsreadonly");
-				my $filesystemRW = $node -> getAttribute("fsreadwrite");
-				if ((defined $filesystemRO) && (defined $filesystemRW)) {
-					$record{filesystem} = "$filesystemRW,$filesystemRO";
-				}
-			}
-			if ($disk) {
-				my $use_lvm = 1;
-				if (($record{filesystem}) &&
-					($record{filesystem}=~/zfs|btrfs/)
-				) {
-					$use_lvm = 0;
-				} elsif (($record{type})  &&
-					($record{type} =~ /zfs|btrfs/)
-				) {
-					$use_lvm = 0;
-				}
-				if ($use_lvm) {
-					$record{lvm} = "true";
-				}
-			}
-			my $bootpath = $urlhd -> normalizeBootPath ($record{boot});
-			if (defined $bootpath) {
-				$record{boot} = $bootpath;
-			}
-			#==========================================
-			# push to list
-			#------------------------------------------
-			push @result,\%record;
-		}
-	}
-	return \@result;
-}
-
-#==========================================
-# __populateDefaultProfiles_legacy
-#------------------------------------------
-sub __populateDefaultProfiles_legacy {
-	# ...
-	# import default profiles if no other profiles
-	# were set on the commandline
-	# ---
-	my $this     = shift;
-	my $kiwi     = $this->{kiwi};
-	my $profiles = $this->{profileHash};
-	my @list     = ();
-	#==========================================
-	# check for profiles already processed
-	#------------------------------------------
-	if ((defined $this->{reqProfiles}) && (@{$this->{reqProfiles}})) {
-		my $info = join (",",@{$this->{reqProfiles}});
-		$kiwi -> info ("Using profile(s): $info");
-		$kiwi -> done ();
-		return $this;
-	}
-	#==========================================
-	# select profiles marked to become included
-	#------------------------------------------
-	foreach my $name (keys %{$profiles}) {
-		if ($profiles->{$name} eq "true") {
-			push @list,$name;
-		}
-	}
-	#==========================================
-	# read default type: bootprofile,bootkernel
-	#------------------------------------------
-	# /.../
-	# read the first <type> element which is always the one and only
-	# type element in a boot image description. The check made here
-	# applies only to boot image descriptions:
-	# ----
-	my $node = $this->{optionsNodeList}
-		-> get_node(1) -> getElementsByTagName ("type") -> get_node(1);
-	if (defined $node) {
-		my $type = $node -> getAttribute("image");
-		if ((defined $type) && ($type eq "cpio")) {
-			my $bootprofile = $node -> getAttribute("bootprofile");
-			my $bootkernel  = $node -> getAttribute("bootkernel");
-			if ($bootprofile) {
-				push @list, split (/,/,$bootprofile);
-			} else {
-				# apply 'default' profile required for boot images
-				push @list, "default";
-			}
-			if ($bootkernel) {
-				push @list, split (/,/,$bootkernel);
-			} else {
-				# apply 'std' kernel profile required for boot images
-				push @list, "std";
-			}
-		}
-	}
-	#==========================================
-	# store list of requested profiles
-	#------------------------------------------
-	if (@list) {
-		my $info = join (",",@list);
-		$kiwi -> info ("Using profile(s): $info");
-		$this -> {reqProfiles} = \@list;
-		$kiwi -> done ();
-	}
-	return $this;
-}
-
-#==========================================
-# __checkProfiles_legacy
-#------------------------------------------
-sub __checkProfiles_legacy {
-	# ...
-	# validate profile names. Wrong profile names are treated
-	# as fatal error because you can't know what the result of
-	# your image would be without the requested profile
-	# ---
-	my $this = shift;
-	my $pref = shift;
-	my $kiwi = $this->{kiwi};
-	my $rref = $this->{reqProfiles};
-	my @prequest;
-	my @profiles = $this -> getProfiles_legacy();
-	if (defined $pref) {
-		@prequest = @{$pref};
-	} elsif (defined $rref) {
-		@prequest = @{$rref};
-	}
-	if (@prequest) {
-		foreach my $requested (@prequest) {
-			my $ok = 0;
-			foreach my $profile (@profiles) {
-				if ($profile->{name} eq $requested) {
-					$ok=1; last;
-				}
-			}
-			if (! $ok) {
-				$kiwi -> error  ("Profile $requested: not found");
-				$kiwi -> failed ();
-				return;
-			}
-		}
-	}
-	return $this;
-}
-
-#==========================================
-# __populateImageTypeAndNode_legacy
-#------------------------------------------
-sub __populateImageTypeAndNode_legacy {
-	# ...
-	# initialize imageType and typeNode according to the
-	# requested type or by the type specified as primary
-	# or by the first type node found
-	# ---
-	my $this     = shift;
-	my $kiwi     = $this->{kiwi};
-	my $typeinfo = $this->{typeInfo};
-	my $select;
-	#==========================================
-	# check if there is a preferences section
-	#------------------------------------------
-	if (! $this->{optionsNodeList}) {
-		return;
-	}
-	#==========================================
-	# check if typeinfo hash exists
-	#------------------------------------------
-	if (! $typeinfo) {
-		# /.../
-		# if no typeinfo hash was populated we use the first type
-		# node listed in the description as the used type.
-		# ----
-		$this->{typeNode} = $this->{optionsNodeList}
-			-> get_node(1) -> getElementsByTagName ("type") -> get_node(1);
-		return $this;
-	}
-	#==========================================
-	# select type and type node
-	#------------------------------------------
-	if (! defined $this->{imageType}) {
-		# /.../
-		# no type was requested: select primary type or if
-		# not set in the XML description select the first one
-		# in the list
-		# ----
-		my @types = keys %{$typeinfo};
-		my $first;
-		foreach my $type (@types) {
-			if ($typeinfo->{$type}{primary} eq "true") {
-				$select = $type; last;
-			}
-			if ($typeinfo->{$type}{first} == 1) {
-				$first = $type;
-			}
-		}
-		if (! $select) {
-			$select = $first;
-		}
-	} else {
-		# /.../
-		# a specific type was requested, select this type
-		# ----
-		$select = $this->{imageType};
-	}
-	#==========================================
-	# check selection
-	#------------------------------------------
-	if (! $select) {
-		$kiwi -> error  ('Cannot determine build type');
-		$kiwi -> failed ();
-		return;
-	}
-	if (! $typeinfo->{$select}) {
-		$kiwi -> error  ("Can't find requested image type: $select");
-		$kiwi -> failed ();
-		return;
-	}
-	#==========================================
-	# store object data
-	#------------------------------------------
-	$this->{imageType} = $typeinfo->{$select}{type};
-	$this->{typeNode}  = $typeinfo->{$select}{node};
-	return $this;
-}
-
-#==========================================
-# __updateDescriptionFromChangeSet_legacy
-#------------------------------------------
-sub __updateDescriptionFromChangeSet_legacy {
-	# ...
-	# Write given changes into the previosly read in XML tree
-	# This function is used to incorporate repository, packages
-	# and other changes into the current XML description. Most
-	# often required in order to build the boot image to fit
-	# together with the system image
-	# ---
-	my $this      = shift;
-	my $changeset = shift;
-	my $kiwi      = $this->{kiwi};
-	my $packageNodeList = $this->{packageNodeList};
-	my $reqProfiles;
-	#==========================================
-	# check changeset...
-	#------------------------------------------
-	if (! defined $changeset) {
-		return;
-	}
-	#==========================================
-	# check profiles in changeset...
-	#------------------------------------------
-	if ($changeset->{profiles}) {
-		$reqProfiles = $this->{reqProfiles};
-		$this->{reqProfiles} = $changeset->{profiles};
-	}
-	$this->{reqProfiles} = $reqProfiles;
-	return;
-}
-
-#==========================================
-# __updateTypeList_legacy
-#------------------------------------------
-sub __updateTypeList_legacy {
-	# ...
-	# if the XML tree has changed because of a function
-	# changing the typenode, it's required to update the
-	# internal typeInfo hash too
-	# ---
-	my $this = shift;
-	$this->{typeList} = $this -> __populateTypeInfo_legacy();
-	$this -> __populateProfiledTypeInfo_legacy();
-	return;
-}
-#==========================================
-# End "old" methods section
-#------------------------------------------
-
-#==========================================
 # Private helper methods
 #------------------------------------------
 #==========================================
@@ -6670,113 +6054,6 @@ sub __hasDefaultProfName {
 }
 
 #==========================================
-# __requestedProfile
-#------------------------------------------
-sub __requestedProfile {
-	# ...
-	# Return a boolean representing whether or not
-	# a given element is requested to be included
-	# in this image.
-	# ---
-	my $this      = shift;
-	my $element   = shift;
-
-	if (! defined $element) {
-		# print "Element not defined\n";
-		return 1;
-	}
-	#my $nodeName  = $element->nodeName();
-	my $profiles = $element -> getAttribute ("profiles");
-	if (! defined $profiles) {
-		# If no profile is specified, then it is assumed to be in all profiles.
-		# print "Section $nodeName always used\n";
-		return 1;
-	}
-	if ((! $this->{reqProfiles}) || ((scalar @{$this->{reqProfiles}}) == 0)) {
-		# element has a profile, but no profiles requested so exclude it.
-		# print "Section $nodeName profiled, but no profiles requested\n";
-		return 0;
-	}
-	my @splitProfiles = split(/,/, $profiles);
-	my %profileHash = ();
-	foreach my $profile (@splitProfiles) {
-		$profileHash{$profile} = 1;
-	}
-	if (defined $this->{reqProfiles}) {
-		foreach my $reqprof (@{$this->{reqProfiles}}) {
-			# strip whitespace
-			$reqprof =~ s/^\s+//s;
-			$reqprof =~ s/\s+$//s;
-			if (defined $profileHash{$reqprof}) {
-				# print "Section $nodeName selected\n";
-				return 1;
-			}
-		}
-	}
-	# print "Section $nodeName not selected\n";
-	return 0;
-}
-
-#==========================================
-# __populateProfiledTypeInfo_legacy
-#------------------------------------------
-sub __populateProfiledTypeInfo_legacy {
-	# ...
-	# Store those types from the typeList which are selected
-	# by the profiles or the internal 'all' profile and store
-	# them in the object internal typeInfo hash:
-	# ---
-	# typeInfo{imagetype}{attr} = value
-	# ---
-	my $this     = shift;
-	my $kiwi     = $this->{kiwi};
-	my %result   = ();
-	my %select   = ();
-	my $typeList = $this->{typeList};
-	my @node     = $this->{optionsNodeList} -> get_nodelist();
-	#==========================================
-	# create selection according to profiles
-	#------------------------------------------
-	foreach my $element (@node) {
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		my $profiles = $element -> getAttribute("profiles");
-		my @assigned = ("all");
-		if ($profiles) {
-			@assigned = split (/,/,$profiles);
-		}
-		foreach my $p (@assigned) {
-			$select{$p} = $p;
-		}
-	}
-	#==========================================
-	# select record(s) according to selection
-	#------------------------------------------
-	my $first = 1;
-	foreach my $record (@{$typeList}) {
-		my $found = 0;
-
-	PROFILESEARCH:
-		foreach my $p (@{$record->{assigned}}) {
-			if ($select{$p}) {
-				$found = 1;
-				last PROFILESEARCH;
-			}
-		}
-		next if ! $found;
-		$record->{first} = $first;
-		$result{$record->{type}} = $record;
-		$first = 0;
-	}
-	#==========================================
-	# store types in typeInfo hash
-	#------------------------------------------
-	$this->{typeInfo} = \%result;
-	return $this;
-}
-
-#==========================================
 # __quote
 #------------------------------------------
 sub __quote {
@@ -6815,7 +6092,6 @@ sub __resolveArchitecture {
 	$path =~ s/\%arch/$arch/;
 	return $path;
 }
-
 
 1;
 
