@@ -4158,7 +4158,8 @@ sub test_getDUDArchitectures {
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($dudArches);
 	my @expected = qw (i586 i686);
-	$this -> assert_array_equal(\@expected, $dudArches);
+	my @got = sort keys %{$dudArches};
+	$this -> assert_array_equal(\@expected,\@got);
 	return;
 }
 
@@ -5080,8 +5081,9 @@ sub test_getProductRequiredArchitectures {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($reqArches);
-	my @expected = qw (i586 i686);
-	$this -> assert_array_equal(\@expected, $reqArches);
+	my @expected = qw (i586 i686 noarch);
+	my @got = sort keys %{$reqArches};
+	$this -> assert_array_equal(\@expected, \@got);
 	return;
 }
 
@@ -5238,59 +5240,6 @@ sub test_getPXEConfigData {
 	if ($cnt != 2) {
 		$this -> assert_null('Did not get 2 PXEDeployConfigData objects');
 	}
-	return;
-}
-
-#==========================================
-# test_getPackageAttributes_legacy
-#------------------------------------------
-sub test_getPackageAttributes_legacy {
-	# ...
-	# Verify proper return of getPackageAttributes_legacey method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'packageSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef, $this->{cmdL}
-	);
-	my %pattr = $xml -> getPackageAttributes_legacy('image');;
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('image', $pattr{type});
-	$this -> assert_str_equals('onlyRequired', $pattr{patternType});
-	return;
-}
-
-#==========================================
-# test_getPackageAttributesUseProf_legacy
-#------------------------------------------
-sub test_getPackageAttributesUseProf_legacy {
-	# ...
-	# Verify proper return of getPackageAttributes method
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'packageSettings';
-	my @patterns = qw (aTest);
-	my $xml = KIWIXML -> new(
-		$confDir, undef, \@patterns, $this->{cmdL}
-	);
-	my %pattr = $xml -> getPackageAttributes_legacy('image');;
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('Using profile(s): aTest', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('info', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('completed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_str_equals('image', $pattr{type});
-	$this -> assert_str_equals('plusRecommended', $pattr{patternType});
 	return;
 }
 

@@ -1416,7 +1416,7 @@ sub getBootKernel {
 #------------------------------------------
 sub getDUDArchitectures {
 	# ...
-	# Return an array ref containing strings indicating the driver update
+	# Return a hash ref containing strings indicating the driver update
 	# disk architectures.
 	# ---
 	my $this = shift;
@@ -1801,7 +1801,7 @@ sub getProductRepositories {
 #------------------------------------------
 sub getProductRequiredArchitectures {
 	# ...
-	# Return an array ref of strings indicating the required architectures
+	# Return a hash ref of strings indicating the required architectures
 	# ---
 	my $this = shift;
 	if ($this->{imageConfig}->{productSettings}) {
@@ -3661,26 +3661,48 @@ sub __genProductPackagesArray {
 }
 
 #==========================================
-# __genProductReqArchArray
+# __genProductReqArchHash
 #------------------------------------------
-sub __genProductReqArchArray {
+sub __genProductReqArchHash {
 	# ...
-	# Return a ref to an array containing strings identifying the required
-	# architectures.
+	# Get the architecture list used for building up
+	# an installation source tree
+	# ---
+	# return a hash with the following structure:
+	# name  = [ description, follower ]
+	#   name is the key, given as "id" in the xml file
+	#   description is the alternative name given as "name" in the xml file
+	#   follower is the key value of the next arch in the fallback chain
 	# ---
 	my $this        = shift;
 	my $instSrcNode = shift;
-	my $kiwi = $this -> {kiwi};
-	my @archNodes = $instSrcNode -> getElementsByTagName('architectures');
-	my @reqArches;
-	if (@archNodes) {
-		my @reqArchNodes = $archNodes[0]
-			-> getElementsByTagName('requiredarch');
-		for my $reqArchNd (@reqArchNodes) {
-			push @reqArches, $reqArchNd -> getAttribute('ref');
+	my $elems = $instSrcNode -> getElementsByTagName("architectures");
+	my %result;
+	my @attr = ("id", "name", "fallback");
+	for(my $i=1; $i<= $elems->size(); $i++) {
+		my $node  = $elems->get_node($i);
+		my @flist = $node->getElementsByTagName("arch");
+		my %rlist = map { $_->getAttribute("ref") => $_ }
+			$node->getElementsByTagName("requiredarch");
+		foreach my $element(@flist) {
+			my $id = $element->getAttribute($attr[0]);
+			next if (!$id);
+			my $ra = 0;
+			if($rlist{$id}) {
+			  $ra = 1;
+			}
+			my ($d,$n) = (
+				$element->getAttribute($attr[1]),
+				$element->getAttribute($attr[2])
+			);
+			if($n) {
+				$result{$id} = [ $d, $n, $ra ];
+			} else {
+				$result{$id} = [ $d, 0, $ra ];
+			}
 		}
 	}
-	return \@reqArches;
+	return \%result;
 }
 
 #==========================================
@@ -4416,8 +4438,8 @@ sub __populateDescriptionInfo {
 sub __populateInstSource {
 	# ...
 	# Populate the imageConfig member with the
-	# product data provided with the <instsource> element and its children
-	#  from the XML file.
+	# product data provided with the <instsource> element and
+	# its children from the XML file.
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -4429,14 +4451,19 @@ sub __populateInstSource {
 			return;
 		}
 		my @dudNodes = $instSrc -> getElementsByTagName('driverupdate');
-		my @dudArches;
+		my %dudArches;
 		my $dudInstSysPkgs;
 		my $dudModulePkgs;
 		my $dudPkgs;
 		if (@dudNodes) {
 			my @targetNodes = $dudNodes[0] -> getElementsByTagName('target');
 			for my $tgt (@targetNodes) {
-				push @dudArches, $tgt -> getAttribute('arch');
+				my $text = $tgt -> textContent();
+				my $arch = $tgt -> getAttribute("arch");
+				if (! $text) {
+					$text = $arch;
+				}
+				$dudArches{$text} = $arch;
 			}
 			$dudInstSysPkgs = $this -> __genDUDInstSysPkgsArray($dudNodes[0]);
 			if (! $dudInstSysPkgs) {
@@ -4481,13 +4508,13 @@ sub __populateInstSource {
 		if (! $prodPkgs) {
 			return;
 		}
-		my $reqArches = $this -> __genProductReqArchArray($instSrc);
+		my $reqArches = $this -> __genProductReqArchHash($instSrc);
 		if (! $reqArches) {
 			return;
 		}
 		my %prodSettings = (
 			architectures  => $arches,
-			dudArches      => \@dudArches,
+			dudArches      => \%dudArches,
 			dudInstSysPkgs => $dudInstSysPkgs,
 			dudModulePkgs  => $dudModulePkgs,
 			dudPkgs        => $dudPkgs,
@@ -5468,15 +5495,6 @@ sub setArch {
 }
 
 #==========================================
-# clearPackageAttributes
-#------------------------------------------
-sub clearPackageAttributes {
-	my $this = shift;
-	$this->{m_rpacks} = undef;
-	return;
-}
-
-#==========================================
 # isArchAllowed
 #------------------------------------------
 sub isArchAllowed {
@@ -5960,77 +5978,6 @@ sub getSingleInstSourceSatSolvable {
 # eliminated or replaced
 #------------------------------------------
 #==========================================
-# getInstSourceArchList_legacy
-#------------------------------------------
-sub getInstSourceArchList_legacy {
-	# ...
-	# Get the architecture list used for building up
-	# an installation source tree
-	# ---
-	# return a hash with the following structure:
-	# name  = [ description, follower ]
-	#   name is the key, given as "id" in the xml file
-	#   description is the alternative name given as "name" in the xml file
-	#   follower is the key value of the next arch in the fallback chain
-	# ---
-	my $this = shift;
-	my $base = $this->{instsrcNodeList}->get_node(1);
-	my $elems = $base->getElementsByTagName("architectures");
-	my %result;
-	my @attr = ("id", "name", "fallback");
-	for(my $i=1; $i<= $elems->size(); $i++) {
-		my $node  = $elems->get_node($i);
-		my @flist = $node->getElementsByTagName("arch");
-		my %rlist = map { $_->getAttribute("ref") => $_ }
-			$node->getElementsByTagName("requiredarch");
-		foreach my $element(@flist) {
-			my $id = $element->getAttribute($attr[0]);
-			next if (!$id);
-			my $ra = 0;
-			if($rlist{$id}) {
-			  $ra = 1;
-			}
-			my ($d,$n) = (
-				$element->getAttribute($attr[1]),
-				$element->getAttribute($attr[2])
-			);
-			if($n) {
-				$result{$id} = [ $d, $n, $ra ];
-			} else {
-				$result{$id} = [ $d, 0, $ra ];
-			}
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getInstSourceChrootList_legacy
-#------------------------------------------
-sub getInstSourceChrootList_legacy {
-	# ...
-	# Get the list of packages necessary to
-	# run metafile shell scripts in chroot jail
-	# ---
-	# return a list of packages
-	# ---
-	my $this = shift;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $elems = $base->getElementsByTagName("metadata");
-	my @result;
-
-	for(my $i=1; $i<=$elems->size(); $i++) {
-		my $node  = $elems->get_node($i);
-		my @flist = $node->getElementsByTagName("chroot");
-		foreach my $element(@flist) {
-			my $name = $element->getAttribute("requires");
-			push @result, $name if $name;
-		}
-	}
-	return @result;
-}
-
-#==========================================
 # getInstSourceDUDConfig_legacy
 #------------------------------------------
 sub getInstSourceDUDConfig_legacy {
@@ -6043,261 +5990,6 @@ sub getInstSourceDUDConfig_legacy {
 		$data{$cfg->getAttribute("key")} = $cfg->getAttribute("value");
 	}
 	return \%data;
-}
-
-#==========================================
-# getInstSourceDUDInstall_legacy
-#------------------------------------------
-sub getInstSourceDUDInstall_legacy {
-	my $this = shift;
-	return $this->__getInstSourceDUDPackList_legacy('install');
-}
-
-#==========================================
-# getInstSourceDUDInstsys_legacy
-#------------------------------------------
-sub getInstSourceDUDInstsys_legacy {
-	my $this = shift;
-	return $this->__getInstSourceDUDPackList_legacy('instsys');
-}
-
-#==========================================
-# getInstSourceDUDModules_legacy
-#------------------------------------------
-sub getInstSourceDUDModules_legacy {
-	my $this = shift;
-	return $this->__getInstSourceDUDPackList_legacy('modules');
-}
-
-#==========================================
-# getInstSourceDUDTargets_legacy
-#------------------------------------------
-sub getInstSourceDUDTargets_legacy {
-	my $this = shift;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
-	my %targets = ();
-	foreach my $target ($dud_node->getElementsByTagName('target')) {
-		$targets{$target->textContent()} = $target->getAttribute("arch");
-	}
-	return %targets;
-}
-
-#==========================================
-# getInstSourceMetaFiles_legacy
-#------------------------------------------
-sub getInstSourceMetaFiles_legacy {
-	# ...
-	# Get the metafile data if any. The method is returning
-	# a hash with key=metafile and a hashreference for the
-	# attribute values url, target and script
-	# ---
-	my $this  = shift;
-	my $base  = $this->{instsrcNodeList} -> get_node(1);
-	my $nodes = $base -> getElementsByTagName ("metadata");
-	my %result;
-	my @attrib = (
-		"target","script"
-	);
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node  = $nodes -> get_node($i);
-		my @flist = $node  -> getElementsByTagName ("metafile");
-		foreach my $element (@flist) {
-			my $file = $element -> getAttribute ("url");
-			if (! defined $file) {
-				next;
-			}
-			foreach my $key (@attrib) {
-				my $value = $element -> getAttribute ($key);
-				if (defined $value) {
-					$result{$file}{$key} = $value;
-				}
-			}
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getInstSourceMetaPackageList_legacy
-#------------------------------------------
-sub getInstSourceMetaPackageList_legacy {
-	# ...
-	# Create base package list of the instsource
-	# metadata package description
-	# ---
-	my $this = shift;
-	my @list = getList_legacy ($this,"metapackages");
-	my %data = ();
-	foreach my $pack (@list) {
-		my $attr = $this -> getInstSourcePackageAttributes_legacy (
-			"metapackages",$pack
-		);
-		$data{$pack} = $attr;
-	}
-	return %data;
-}
-
-#==========================================
-# getInstSourcePackageAttributes_legacy
-#------------------------------------------
-sub getInstSourcePackageAttributes_legacy {
-	# ...
-	# Create an attribute hash for the given package
-	# and package category.
-	# ---
-	my $this = shift;
-	my $what = shift;
-	my $pack = shift;
-	my $nodes;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	if ($what eq "metapackages") {
-		$nodes = $base -> getElementsByTagName ("metadata");
-	} elsif ($what eq "instpackages") {
-		$nodes = $base -> getElementsByTagName ("repopackages");
-	} elsif ($what eq "DUDmodules") {
-		$nodes = $base -> getElementsByTagName("driverupdate")
-			-> get_node(1) -> getElementsByTagName('modules');
-	} elsif ($what eq "DUDinstall") {
-		$nodes = $base -> getElementsByTagName("driverupdate")
-			-> get_node(1) -> getElementsByTagName('install');
-	} elsif ($what eq "DUDinstsys") {
-		$nodes = $base -> getElementsByTagName("driverupdate")
-			-> get_node(1) -> getElementsByTagName('instsys');
-	}
-	my %result;
-	my @attrib = (
-		"forcerepo" ,"addarch", "removearch", "arch",
-		"onlyarch", "source", "script", "medium"
-	);
-	if(not defined($this->{m_rpacks})) {
-		my @nodes = ();
-		for (my $i=1;$i<= $nodes->size();$i++) {
-			my $node  = $nodes -> get_node($i);
-			my @plist = $node  -> getElementsByTagName ("repopackage");
-			push @nodes, @plist;
-		}
-		%{$this->{m_rpacks}} = map {$_->getAttribute("name") => $_} @nodes;
-	}
-	my $elem = $this->{m_rpacks}->{$pack};
-	if(defined($elem)) {
-		foreach my $key (@attrib) {
-			my $value = $elem -> getAttribute ($key);
-			if (defined $value) {
-				$result{$key} = $value;
-			}
-		}
-	}
-	return \%result;
-}
-
-#==========================================
-# getInstSourcePackageList_legacy
-#------------------------------------------
-sub getInstSourcePackageList_legacy {
-	# ...
-	# Create base package list of the instsource
-	# packages package description
-	# ---
-	my $this = shift;
-	my @list = getList_legacy ($this,"instpackages");
-	my %data = ();
-	foreach my $pack (@list) {
-		my $attr = $this -> getInstSourcePackageAttributes_legacy (
-			"instpackages",$pack
-		);
-		$data{$pack} = $attr;
-	}
-	return %data;
-}
-
-#==========================================
-# getInstSourceProductInfo_legacy
-#------------------------------------------
-sub getInstSourceProductInfo_legacy {
-	# ...
-	# Get the shell variable values needed for
-	# content file generation
-	# ---
-	# return a hash with the following structure:
-	# index = (name, value)
-	# ---
-	my $this = shift;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $elems = $base->getElementsByTagName("productoptions");
-	my %result;
-
-	for(my $i=1; $i<=$elems->size(); $i++) {
-		my $node  = $elems->get_node($i);
-		my @flist = $node->getElementsByTagName("productinfo");
-		for(my $j=0; $j <= $#flist; $j++) {
-		#foreach my $element(@flist) {
-			my $name = $flist[$j]->getAttribute("name");
-			my $value = $flist[$j]->textContent("name");
-			$result{$j} = [$name, $value];
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getInstSourceProductOption_legacy
-#------------------------------------------
-sub getInstSourceProductOption_legacy {
-	# ...
-	# Get the shell variable values needed for
-	# metadata creation
-	# ---
-	# return a hash with the following structure:
-	# varname = value (quoted, may contain space etc.)
-	# ---
-	my $this = shift;
-	return $this->getInstSourceProductStuff_legacy("productoption");
-}
-
-#==========================================
-# getInstSourceProductStuff_legacy
-#------------------------------------------
-sub getInstSourceProductStuff_legacy {
-	# ...
-	# generic function returning indentical data
-	# structures for different tags (of same type)
-	# ---
-	my $this = shift;
-	my $what = shift;
-	if (!$what) {
-		return;
-	}
-
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $elems = $base->getElementsByTagName("productoptions");
-	my %result;
-
-	for(my $i=1; $i<=$elems->size(); $i++) {
-		my $node  = $elems->get_node($i);
-		my @flist = $node->getElementsByTagName($what);
-		foreach my $element(@flist) {
-			my $name = $element->getAttribute("name");
-			my $value = $element ->textContent("name");
-			$result{$name} = $value;
-		}
-	}
-	return %result;
-}
-
-#==========================================
-# getInstSourceProductVar_legacy
-#------------------------------------------
-sub getInstSourceProductVar_legacy {
-	# ...
-	# Get the shell variable values needed for
-	# metadata creation
-	# ---
-	# return a hash with the following structure:
-	# varname = value (quoted, may contain space etc.)
-	# ---
-	my $this = shift;
-	return $this->getInstSourceProductStuff_legacy("productvar");
 }
 
 #==========================================
@@ -6337,215 +6029,6 @@ sub getInstSourceRepository_legacy {
 }
 
 #==========================================
-# getList_legacy
-#------------------------------------------
-sub getList_legacy {
-	# ...
-	# Create a package list out of the given base xml
-	# object list. The xml objects are searched for the
-	# attribute "name" to build up the package list.
-	# Each entry must be found on the source medium
-	# ---
-	my $this = shift;
-	my $what = shift;
-	my $nopac= shift;
-	my $kiwi = $this->{kiwi};
-	my $urllist = $this -> __getURLList_legacy();
-	my %pattr;
-	my $nodes;
-	if ($what ne "metapackages") {
-		%pattr= $this -> getPackageAttributes_legacy( $what );
-	}
-	if ($what eq "metapackages") {
-		my $base = $this->{instsrcNodeList} -> get_node(1);
-		$nodes = $base -> getElementsByTagName ("metadata");
-	} elsif ($what eq "instpackages") {
-		my $base = $this->{instsrcNodeList} -> get_node(1);
-		$nodes = $base -> getElementsByTagName ("repopackages");
-	} else {
-		$nodes = $this->{packageNodeList};
-	}
-	my @result;
-	my $manager = $this -> getPreferences() -> getPackageManager();
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		#==========================================
-		# Get type and packages
-		#------------------------------------------
-		my $node  = $nodes -> get_node($i);
-		my $ptype = $node -> getAttribute ("patternType");
-		my $type  = "";
-		if (($what ne "metapackages") && ($what ne "instpackages")) {
-			$type = $node -> getAttribute ("type");
-			if ($type ne $what) {
-				next;
-			}
-		} else {
-			$type = $what;
-		}
-		#============================================
-		# Check to see if node is in included profile
-		#--------------------------------------------
-		if (! $this -> __requestedProfile ($node)) {
-			next;
-		}
-		#==========================================
-		# Check for package descriptions
-		#------------------------------------------
-		my @plist = ();
-		if (($what ne "metapackages") && ($what ne "instpackages")) {
-			if (defined $nopac) {
-				@plist = $node -> getElementsByTagName ("archive");
-			} else {
-				@plist = $node -> getElementsByTagName ("package");
-			}
-		} else {
-			@plist = $node -> getElementsByTagName ("repopackage");
-		}
-		foreach my $element (@plist) {
-			my $package = $element -> getAttribute ("name");
-			my $forarch = $element -> getAttribute ("arch");
-			my $replaces= $element -> getAttribute ("replaces");
-			if (! $this -> isArchAllowed ($element,$what)) {
-				next;
-			}
-			if (! defined $package) {
-				next;
-			}
-			if ($type ne "metapackages" && $type ne "instpackages") {
-				if (($package =~ /@/) && $manager && ($manager eq "zypper")) {
-					$package =~ s/@/\./;
-				}
-			}
-			if (defined $replaces) {
-				push @result,[$package,$replaces];
-			}
-			push @result,$package;
-		}
-		#==========================================
-		# Check for pattern descriptions
-		#------------------------------------------
-		if (($type ne "metapackages") && (! defined $nopac)) {
-			my @pattlist = ();
-			my @slist = $node -> getElementsByTagName ("opensuseProduct");
-			foreach my $element (@slist) {
-				if (! $this -> isArchAllowed ($element,$type)) {
-					next;
-				}
-				my $product = $element -> getAttribute ("name");
-				if (! defined $product) {
-					next;
-				}
-				push @pattlist,"product:".$product;
-			}
-			@slist = $node -> getElementsByTagName ('namedCollection');
-			foreach my $element (@slist) {
-				if (! $this -> isArchAllowed ($element,$type)) {
-					next;
-				}
-				my $pattern = $element -> getAttribute ("name");
-				if (! defined $pattern) {
-					next;
-				}
-				push @pattlist,"pattern:".$pattern;
-			}
-			if (@pattlist) {
-				if (($manager eq "ensconce")) {
-					# nothing to do for ensconce here...
-				} elsif (($manager ne "zypper") && ($manager ne "yum")) {
-					#==========================================
-					# turn patterns into pacs for this manager
-					#------------------------------------------
-					# 1) try to use libsatsolver...
-					my $psolve = KIWISatSolver -> new (
-						\@pattlist,$urllist,"solve-patterns",
-						undef,undef,$ptype
-					);
-					if (! defined $psolve) {
-						$kiwi -> error (
-							"SaT solver setup failed, patterns can't be solved"
-						);
-						$kiwi -> skipped ();
-						return ();
-					}
-					if (! defined $psolve) {
-						my $pp ="Pattern or product";
-						my $e1 ="$pp match failed for arch: $this->{arch}";
-						my $e2 ="Check if the $pp is written correctly?";
-						my $e3 ="Check if the arch is provided by the repo(s)?";
-						$kiwi -> warning ("$e1\n");
-						$kiwi -> warning ("    a) $e2\n");
-						$kiwi -> warning ("    b) $e3\n");
-						return ();
-					}
-					my @packageList = $psolve -> getPackages();
-					push @result,@packageList;
-				} else {
-					#==========================================
-					# zypper/yum knows about patterns/groups
-					#------------------------------------------
-					foreach my $pname (@pattlist) {
-						$kiwi -> info ("--> Requesting $pname");
-						push @result,$pname;
-						$kiwi -> done();
-					}
-				}
-			}
-		}
-		#==========================================
-		# Check for ignore list
-		#------------------------------------------
-		if (! defined $nopac) {
-			my @ilist = $node -> getElementsByTagName ("ignore");
-			my @ignorelist = ();
-			foreach my $element (@ilist) {
-				my $ignore = $element -> getAttribute ("name");
-				if (! defined $ignore) {
-					next;
-				}
-				if (($ignore =~ /@/) && ($manager eq "zypper")) {
-					$ignore =~ s/@/\./;
-				}
-				push @ignorelist,$ignore;
-			}
-			if (@ignorelist) {
-				my @newlist = ();
-				foreach my $element (@result) {
-					my $pass = 1;
-					foreach my $ignore (@ignorelist) {
-						if ($element eq $ignore) {
-							$pass = 0; last;
-						}
-					}
-					if (! $pass) {
-						next;
-					}
-					push @newlist,$element;
-				}
-				@result = @newlist;
-			}
-		}
-	}
-	#==========================================
-	# Create unique lists
-	#------------------------------------------
-	my %packHash = ();
-	my @replAddList = ();
-	my @replDelList = ();
-	foreach my $package (@result) {
-		if (ref $package) {
-			push @replAddList,$package->[0];
-			push @replDelList,$package->[1];
-		} else {
-			$packHash{$package} = $package;
-		}
-	}
-	$this->{replDelList} = \@replDelList;
-	$this->{replAddList} = \@replAddList;
-	my @ordered = sort keys %packHash;
-	return @ordered;
-}
-
-#==========================================
 # getLVMGroupName_legacy
 #------------------------------------------
 sub getLVMGroupName_legacy {
@@ -6559,38 +6042,6 @@ sub getLVMGroupName_legacy {
 		return;
 	}
 	return $node -> getAttribute ("name");
-}
-
-#==========================================
-# getPackageAttributes_legacy
-#------------------------------------------
-sub getPackageAttributes_legacy {
-	# ...
-	# Create an attribute hash from the given
-	# package category.
-	# ---
-	my $this = shift;
-	my $what = shift;
-	my $kiwi = $this->{kiwi};
-	my @node = $this->{packageNodeList} -> get_nodelist();
-	my %result;
-	$result{patternType} = "onlyRequired";
-	$result{type} = $what;
-	foreach my $element (@node) {
-		if (! $this -> __requestedProfile ($element)) {
-			next;
-		}
-		my $type = $element -> getAttribute ("type");
-		if ($type ne $what) {
-			next;
-		}
-		my $ptype = $element -> getAttribute ("patternType");
-		if ($ptype) {
-			$result{patternType} = $ptype;
-			$result{type} = $type;
-		}
-	}
-	return %result;
 }
 
 #==========================================
@@ -6679,24 +6130,6 @@ sub __createURLList_legacy {
 	$this->{urllist} = \@urllist;
 	$this->{urlhash} = \%urlhash;
 	return $this;
-}
-
-#==========================================
-# __getInstSourceDUDPackList_legacy
-#------------------------------------------
-sub __getInstSourceDUDPackList_legacy {
-	my $this = shift;
-	my $what = shift;
-	return unless $what;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
-	my $modules_node = $dud_node->getElementsByTagName($what)->get_node(1);
-	my @module_packs = $modules_node->getElementsByTagName('repopackage');
-	my @modules;
-	foreach my $mod (@module_packs) {
-		push @modules, $mod->getAttribute("name");
-	}
-	return @modules;
 }
 
 #==========================================

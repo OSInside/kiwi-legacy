@@ -299,8 +299,23 @@ sub Init
 
 	# retrieve data from xml file:
 	## packages list (regular packages)
+	my %instPacks;
+	my $instref = $this->{m_xml} -> getProductSourcePackages();
+	for my $package (@{$instref}) {
+		my $name = $package -> getName();
+		my %attr;
+		$attr{forcerepo} = $package -> getForceRepo();
+		$attr{addarch}   = $package -> getAdditionalArch();
+		$attr{removearch}= $package -> getRemoveArch();
+		$attr{arch}      = $package -> getArch();
+		$attr{onlyarch}  = $package -> getOnlyArch();
+		$attr{source}    = $package -> getSourceLocation();
+		$attr{script}    = $package -> getScriptPath();
+		$attr{medium}    = $package -> getMediaID();
+		$instPacks{$name} = \%attr;
+	}
 	$this->logMsg('I', "KIWICollect::Init: querying instsource package list");
-	%{$this->{m_repoPacks}} = $this->{m_xml}->getInstSourcePackageList_legacy();
+	%{$this->{m_repoPacks}} = %instPacks;
 	# this list may be empty!
 	$this->logMsg('I', "KIWICollect::Init: queried package list.");
 	if($this->{m_debug}) {
@@ -318,10 +333,10 @@ sub Init
 	$this->logMsg('I',
 		      'KIWICollect::Init: querying instsource architecture list');
 	$this->{m_archlist} = KIWIArchList -> new ($this);
-	my $archadd = $this->{m_archlist}->addArchs(
-		{ $this->{m_xml}->getInstSourceArchList_legacy() } );
+	my $archref = $this->{m_xml} -> getProductRequiredArchitectures();
+	my $archadd = $this->{m_archlist}->addArchs( $archref );
 	if(! defined $archadd ) {
-		$this->logMsg('I', Dumper($this->{m_xml}->getInstSourceArchList_legacy()));
+		$this->logMsg('I', Dumper($archref));
 		$this->logMsg('E', "KIWICollect::Init: addArchs returned undef");
 		return;
 	}
@@ -336,16 +351,31 @@ sub Init
 			close $DUMP;
 		}
 	}
-
-	#cleanup the wasted memory in KIWIXML:
-	$this->{m_xml}->clearPackageAttributes();
-
 	# repository information
 	# mandatory. Missing = Error
-	%{$this->{m_repos}}	= $this->{m_xml}->getInstSourceRepository_legacy();
+	my $prodrepo = $this->{m_xml} -> getProductRepositories();
+	my %repodata;
+	for my $repo (@{$prodrepo}) {
+		my $name = $repo -> getName();
+		my $prio = $repo -> getPriority();
+		my ($user,$pwd) = $repo -> getCredentials(); 
+		my $islocal =  $repo -> isLocal();
+		my $path = $repo -> getPath();
+		my $source = $this -> $this->{m_xml} -> __resolveLink ($path);
+		if (! defined $name) {
+			$name = "noname";
+		}
+		$repodata{$name}{source}   = $source;
+        $repodata{$name}{priority} = $prio;
+        $repodata{$name}{islocal} = $islocal;
+		if (defined $user) {
+			$repodata{$name}{user} = $user.":".$pwd;
+		}
+	}
+	%{$this->{m_repos}}	= %repodata;
 	if(!$this->{m_repos}) {
 		$this->logMsg('E',
-			      'KIWICollect::Init: getInstSourceRepository_legacy returned empty hash');
+	      'KIWICollect::Init: getProductRepositories returned empty hash');
 		return;
 	}
 	else {
@@ -362,10 +392,25 @@ sub Init
 
 	# package list (metapackages with extra effort by scripts)
 	# mandatory. Empty = Error
-	%{$this->{m_metaPacks}}	 = $this->{m_xml}->getInstSourceMetaPackageList_legacy();
+	my %metaPacks;
+	my $metaref = $this->{m_xml} -> getProductMetaPackages();
+	for my $package (@{$metaref}) {
+		my $name = $package -> getName();
+		my %attr;
+		$attr{forcerepo} = $package -> getForceRepo();
+		$attr{addarch}   = $package -> getAdditionalArch();
+		$attr{removearch}= $package -> getRemoveArch();
+		$attr{arch}      = $package -> getArch();
+		$attr{onlyarch}  = $package -> getOnlyArch();
+		$attr{source}    = $package -> getSourceLocation();
+		$attr{script}    = $package -> getScriptPath();
+		$attr{medium}    = $package -> getMediaID();
+		$metaPacks{$name} = \%attr;
+	}
+	%{$this->{m_metaPacks}}	 = %metaPacks;
 	if(!$this->{m_metaPacks}) {
-		my $msg = 'KIWICollect::Init: getInstSourceMetaPackageList_legacy '
-		    . 'returned empty hash';
+		my $msg = 'KIWICollect::Init: getProductMetaPackages '
+		    . 'returned no information, no metadata specified.';
 		$this->logMsg('E', $msg);
 		return;
 	}
@@ -383,10 +428,24 @@ sub Init
 
 	# metafiles: different handling
 	# may be omitted
-	%{$this->{m_metafiles}} = $this->{m_xml}->getInstSourceMetaFiles_legacy();
+	my $metafileref = $this->{m_xml} -> getProductMetaFiles();
+	my %metafile;
+	for my $file (@{$metafileref}) {
+		my $url = $file -> getURL();
+		next if (! $url);
+		my $target = $file -> getTarget();
+		if ($target) {
+			$metafile{$url}{target} = $target;
+		}
+		my $script = $file -> getScript();
+		if ($script) {
+			$metafile{$url}{script} = $script;
+		}
+	}
+	%{$this->{m_metafiles}} = %metafile;
 	if(!$this->{m_metaPacks}) {
-		my $msg = 'KIWICollect::Init: getInstSourceMetaPackageList_legacy returned '
-		    . 'empty hash, no metafiles specified.';
+		my $msg = 'KIWICollect::Init: getProductMetaFiles returned '
+		    . 'no information, no metafiles specified.';
 		$this->logMsg('I', $msg);
 	}
 	else {
@@ -403,7 +462,15 @@ sub Init
 
 	# info about requirements for chroot env to run metadata scripts
 	# may be empty
-	@{$this->{m_chroot}} = $this->{m_xml}->getInstSourceChrootList_legacy();
+	my $metachrootref = $this->{m_xml} -> getProductMetaChroots();
+	my @metachroot;
+	for my $item (@{$metachrootref}) {
+		my $reqvalue = $item -> getRequires();
+		if ($reqvalue) {
+			push @metachroot,$reqvalue
+		}
+	}
+	@{$this->{m_chroot}} = @metachroot;
 	if(!$this->{m_chroot}) {
 		my $msg = 'KIWICollect::Init: chroot list is empty hash, no chroot '
 		    . 'requirements specified';
@@ -420,25 +487,46 @@ sub Init
 			close $DUMP;
 		}
 	}
-
 	my ($iadded, $vadded, $oadded);
-	$iadded = $this->{m_proddata}->addSet("ProductInfo stuff",
-					      {$this->{m_xml}->getInstSourceProductInfo_legacy()}, "prodinfo");
-	$vadded = $this->{m_proddata}->addSet("ProductVar stuff",
-					      {$this->{m_xml}->getInstSourceProductVar_legacy()}, "prodvars");
-	$oadded = $this->{m_proddata}->addSet("ProductOption stuff",
-					      {$this->{m_xml}->getInstSourceProductOption_legacy()}, "prodopts");
+	my $prod_info = $this->{m_xml} -> getProductOptions();
+	my @prod_info_names = @{$prod_info -> getProductInfoNames()};
+	my %prod_info_hash;
+	for(my $n=0; $n <= $#prod_info_names; $n++) {
+		my $name = $prod_info_names[$n];
+		my $data = $prod_info -> getProductInfoData ($name);
+		$prod_info_hash{$n} = [$name,$data];
+	}
+	my @prod_var_names = @{$prod_info -> getProductVariableNames()};
+	my %prod_var_hash;
+	for(my $n=0; $n <= $#prod_var_names; $n++) {
+		my $name = $prod_var_names[$n];
+		my $data = $prod_info -> getProductVariableData ($name);
+		$prod_var_hash{$name} = $data;
+	}
+	my @prod_opt_names = @{$prod_info -> getProductOptionNames()};
+	my %prod_opt_hash;
+	for(my $n=0; $n <= $#prod_opt_names; $n++) {
+		my $name = $prod_opt_names[$n];
+		my $data = $prod_info -> getProductOptionData ($name);
+		$prod_opt_hash{$name} = $data;
+	}
+	$iadded = $this->{m_proddata}->addSet(
+		"ProductInfo stuff",\%prod_info_hash,"prodinfo"
+	);
+	$vadded = $this->{m_proddata}->addSet(
+		"ProductVar stuff",\%prod_var_hash,"prodvars"
+	);
+	$oadded = $this->{m_proddata}->addSet(
+		"ProductOption stuff",\%prod_opt_hash,"prodopts"
+	);
 	if ($iadded) {
 		if ((! $vadded) || (! $oadded)) {
-			my $msg = 'KIWICollect::Init: something wrong in the productoptions '
-			    . 'section';
+			my $msg = 'KIWICollect::Init: incomplete productoptions section';
 			$this->logMsg('E', $msg);
 			return;
 		}
 	}
-
 	$this->{m_proddata}->_expand(); #once should be it, now--
-
 	if($this->{m_debug}) {
 		my $DUMP;
 		open($DUMP, '>', "$this->{m_basedir}/productdata.pl")
@@ -2384,9 +2472,13 @@ sub unpackModules
 		$this->logMsg('E', "can't create dir <$tmp_dir>");
 		return;
 	}
-
-	my @modules = $this->{m_xml}->getInstSourceDUDModules_legacy();
-	my %targets = $this->{m_xml}->getInstSourceDUDTargets_legacy();
+	my @modules;
+	my $modsref = $this->{m_xml} -> getDUDModulePackages();
+	for my $package (@{$modsref}) {
+		my $name = $package -> getName();
+		push @modules,$name;
+	}
+	my %targets = %{$this->{m_xml}->getDUDArchitectures()};
 	my %target_archs = reverse %targets; # values of this hash are not used
 
 	# So far DUDs only have one single medium
@@ -2455,9 +2547,13 @@ sub unpackInstSys
 		$this->logMsg('E', "can't create dir <$tmp_dir>");
 		return;
 	}
-
-	my @inst_sys_packages = $this->{m_xml}->getInstSourceDUDInstsys_legacy();
-	my %targets = $this->{m_xml}->getInstSourceDUDTargets_legacy();
+	my @inst_sys_packages = ();
+	my $packref = $this->{m_xml} -> getDUDInstallSystemPackages();
+	for my $package (@{$packref}) {
+		my $name = $package -> getName();
+		push @inst_sys_packages,$name;	
+	}
+	my %targets = %{$this->{m_xml}->getDUDArchitectures()};
 	my %target_archs = reverse %targets; # values of this hash are not used
 
 	# So far DUDs only have one single medium
@@ -2502,10 +2598,18 @@ sub createInstallPackageLinks
 	# So far DUDs only have one single medium
 	my $medium = 1;
 	my $retval = 0;
-	my @packlist = $this->{m_xml}->getInstSourceDUDModules_legacy();
-	push @packlist, $this->{m_xml}->getInstSourceDUDInstsys_legacy();
-	my %targets = $this->{m_xml}->getInstSourceDUDTargets_legacy();
-
+	my @packlist = ();
+	my $packref = $this->{m_xml} -> getDUDInstallSystemPackages();
+	my $modsref = $this->{m_xml} -> getDUDModulePackages();
+	for my $package (@{$modsref}) {
+		my $name = $package -> getName();
+		push @packlist,$name;
+	}
+	for my $package (@{$packref}) {
+		my $name = $package -> getName();
+		push @packlist,$name;
+	}
+	my %targets = %{$this->{m_xml}->getDUDArchitectures()};
 	for my $target (keys(%targets)) {
 		my $arch = $targets{$target};
 		my $target_dir = "$this->{m_basesubdir}->{$medium}"
