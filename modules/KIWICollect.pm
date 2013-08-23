@@ -361,7 +361,7 @@ sub Init
 		my ($user,$pwd) = $repo -> getCredentials(); 
 		my $islocal =  $repo -> isLocal();
 		my $path = $repo -> getPath();
-		my $source = $this -> $this->{m_xml} -> __resolveLink ($path);
+		my $source = $this->{m_xml} -> __resolveLink ($path);
 		if (! defined $name) {
 			$name = "noname";
 		}
