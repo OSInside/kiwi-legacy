@@ -6871,7 +6871,7 @@ sub __getBootSize {
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my $type   = $this->{type};
-	my $needMB = 200;
+	my $needMB = 100;
 	my $wantMB = 200;
 	if ($type->{bootpartsize}) {
 		$wantMB = $type->{bootpartsize};
