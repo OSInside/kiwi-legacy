@@ -104,6 +104,9 @@ sub createChecks {
 	if (! $this -> __checkContainerHasLXC()) {
 		return;
 	}
+	if (! $this -> __checkProfileConsistent()) {
+		return;
+	}
 	if (! $this -> __haveValidTypeString()) {
 		return;
 	}
@@ -146,6 +149,9 @@ sub prepareChecks {
 	# ---
 	my $this = shift;
 	if (! $this -> __haveValidTypeString()) {
+		return;
+	}
+	if (! $this -> __checkProfileConsistent()) {
 		return;
 	}
 	if (! $this -> __checkHaveTypeToBuild()) {
@@ -559,6 +565,25 @@ sub __checkPackageManagerExists {
 		$this -> {kiwi} -> failed();
 		return;
 	}
+	return 1;
+}
+
+#==========================================
+# __checkProfileConsistent
+#------------------------------------------
+sub __checkProfileConsistent {
+	# ...
+	# Check if the selected profiles exists
+	# ---
+	my $this = shift;
+	my $xml  = $this->{xml};
+	my $message;
+	my $profiles = $xml -> getActiveProfileNames();
+	$message  = 'Attempting to set active profile to "PROF_NAME", but ';
+	$message .= 'this profile cannot be not found in the configuration.';
+	if (! $xml -> __verifyProfNames ($profiles, $message)) {
+        return;
+    }
 	return 1;
 }
 
