@@ -19,6 +19,7 @@ package KIWIURL;
 #------------------------------------------
 use strict;
 use warnings;
+use Cwd qw (realpath);
 use Carp qw (cluck);
 use File::Basename;
 use FileHandle;
@@ -130,6 +131,7 @@ sub normalizePath {
 	if (defined $path) {
 		return $path;
 	}
+	$module = $this -> __realPath ($module);
 	return $module;
 }
 
@@ -331,6 +333,7 @@ sub thisPath {
 	}
 	$thisPath =~ s/\/\.\//\//g;
 	$thisPath =~ s/\/+/\//g;
+	$thisPath = $this -> __realPath ($thisPath);
 	return $thisPath;
 }
 
@@ -358,6 +361,7 @@ sub dirPath {
 		$kiwi -> skipped ();
 		return;
 	}
+	$module = $this -> __realPath ($module);
 	return $module;
 }
 
@@ -510,6 +514,7 @@ sub isoPath {
 		$module = $1;
 		$search = $2;
 	}
+	$module = $this -> __realPath ($module);
 	my ( $module_test ) = glob ($module);
 	if (! -e $module_test) {
 		$kiwi -> warning ("ISO path: $module_test doesn't exist: $!");
@@ -696,6 +701,22 @@ sub readRepoAliasTable {
 	}
 	$FD -> close();
 	return \%repohash;
+}
+
+#==========================================
+# __realPath
+#------------------------------------------
+sub __realPath {
+	# ...
+	# make sure a local path is stored with its absolute
+	# path. in any other case leave it untouched
+	# ---
+	my $this = shift;
+	my $uri  = shift;
+	if (-e $uri) {
+		$uri = realpath ($uri);
+	}
+	return $uri;
 }
 
 1;
