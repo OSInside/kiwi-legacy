@@ -5424,9 +5424,12 @@ sub setBootProfiles {
 		return;
 	}
 	my @list = ('kiwi_default');
-	if (($bootprofile) && ($bootprofile ne 'default')) {
+	if ($bootprofile) {
 		$type -> setBootProfile ($bootprofile);
 		push @list, split (/,/,$bootprofile);
+	} else {
+		$type -> setBootProfile ('default');
+		push @list, 'default';
 	}
 	if ($bootkernel) {
 		$type -> setBootKernel ($bootkernel);
