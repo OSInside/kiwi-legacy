@@ -1492,7 +1492,7 @@ function setupBootLoaderSyslinuxRecovery {
 	rdev_recovery=$OEM_RECOVERY
 	diskByID=$(getDiskID $rdev_recovery)
 	if [ "$FSTYPE" = "zfs" ];then
-		diskByID="zfs:kiwipool"
+		diskByID="ZFS=kiwipool/ROOT/system-1"
 	fi
 	#======================================
 	# import syslinux into recovery
@@ -1604,7 +1604,7 @@ function setupBootLoaderGrubRecovery {
 	rdev_recovery=$OEM_RECOVERY
 	diskByID=$(getDiskID $rdev_recovery)
 	if [ "$FSTYPE" = "zfs" ];then
-		diskByID="zfs:kiwipool"
+		diskByID="ZFS=kiwipool/ROOT/system-1"
 	fi
 	#======================================
 	# import grub stages into recovery
@@ -1718,7 +1718,7 @@ function setupBootLoaderGrub2Recovery {
 	local rootByID=$(getDiskID $OEM_RECOVERY)
 	local diskByID=$(getDiskID $imageDiskDevice)
 	if [ "$FSTYPE" = "zfs" ];then
-		rootByID="zfs:kiwipool"
+		rootByID="ZFS=kiwipool/ROOT/system-1"
 	fi
 	#======================================
 	# operate only in recovery mode
@@ -1873,7 +1873,7 @@ function setupBootLoaderS390 {
 	local diskByID=$(getDiskID $rdev)
 	local swapByID=$(getDiskID $swap swap)
 	if [ "$FSTYPE" = "zfs" ];then
-		diskByID="zfs:kiwipool"
+		diskByID="ZFS=kiwipool/ROOT/system-1"
 	fi
 	#======================================
 	# check for bootloader displayname
@@ -2066,7 +2066,7 @@ function setupBootLoaderSyslinux {
 	local diskByID=$(getDiskID $rdev)
 	local swapByID=$(getDiskID $swap swap)
 	if [ "$FSTYPE" = "zfs" ];then
-		diskByID="zfs:kiwipool"
+		diskByID="ZFS=kiwipool/ROOT/system-1"
 	fi
 	#======================================
 	# check for bootloader displayname
@@ -2282,7 +2282,7 @@ function setupBootLoaderGrub {
 	local diskByID=$(getDiskID $rdev)
 	local swapByID=$(getDiskID $swap swap)
 	if [ "$FSTYPE" = "zfs" ];then
-		diskByID="zfs:kiwipool"
+		diskByID="ZFS=kiwipool/ROOT/system-1"
 	fi
 	#======================================
 	# check for system image .profile
@@ -2551,7 +2551,7 @@ function setupBootLoaderGrub2 {
 	local swapByID=$(getDiskID $swap swap)
 	local diskByID=$(getDiskID $imageDiskDevice)
 	if [ "$FSTYPE" = "zfs" ];then
-		rootByID="zfs:kiwipool"
+		rootByID="ZFS=kiwipool/ROOT/system-1"
 	fi
 	#======================================
 	# setup path names
@@ -2735,7 +2735,7 @@ function setupBootLoaderYaboot {
 	local diskByID=`getDiskID $rdev`
 	local swapByID=`getDiskID $swap swap`
 	if [ "$FSTYPE" = "zfs" ];then
-		diskByID="zfs:kiwipool"
+		diskByID="ZFS=kiwipool/ROOT/system-1"
 	fi
 	#======================================
 	# check for bootloader displayname
