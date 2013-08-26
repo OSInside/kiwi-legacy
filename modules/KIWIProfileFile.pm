@@ -648,4 +648,14 @@ sub __storeRevisionInformation {
 	return $this;
 }
 
+#==========================================
+# __quote
+#------------------------------------------
+sub __quote {
+    my $this = shift;
+    my $line = shift;
+    $line =~ s/([\"\$\`\\])/\\$1/sxmg;
+    return $line;
+}
+
 1;
