@@ -3743,6 +3743,7 @@ sub __genTypeHash {
 		'flags',
 		'format',
 		'fsmountoptions',
+		'zfsoptions',
 		'fsnocheck',
 		'fsreadonly',
 		'fsreadwrite',

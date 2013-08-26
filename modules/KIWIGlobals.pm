@@ -736,6 +736,7 @@ sub createZFSPool {
 	# the community
 	# ----
 	my $this = shift;
+	my $opts = shift;
 	my $kiwi = $this->{kiwi};
 	my $data;
 	my $code;
@@ -761,9 +762,26 @@ sub createZFSPool {
 	);
 	$code = $? >> 8;
 	if ($code != 0) {
+		KIWIQX::qxx ("zpool export kiwipool 2>&1");
 		$kiwi -> error ("Failed to create zfs pool properties: $data\n");
 		$kiwi -> failed();
 		return;
+	}
+	#==========================================
+	# set pool options
+	#------------------------------------------
+	if ($opts) {
+		my @optlist = split (/,/,$opts);
+		foreach my $opt (@optlist) {
+			$data = KIWIQX::qxx ("zfs set $opt kiwipool 2>&1");
+			$code = $? >> 8;
+			if ($code != 0) {
+				KIWIQX::qxx ("zpool export kiwipool 2>&1");
+				$kiwi -> error ("Failed to set pool property: $opt:$data\n");
+				$kiwi -> failed();
+				return;
+			}
+		}
 	}
 	#==========================================
 	# export pool

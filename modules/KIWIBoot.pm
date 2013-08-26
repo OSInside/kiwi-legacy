@@ -6624,6 +6624,7 @@ sub setupFilesystem {
 	my $xml    = $this->{xml};
 	my $cmdL   = $this->{cmdL};
 	my $opts   = $xml -> getImageType() -> getFSMountOptions();
+	my $zfsopts= $xml -> getImageType() -> getZFSOptions();
 	if (! $type->{fsnocheck}) {
 		$type->{fsnocheck} = 'true';
 	}
@@ -6733,7 +6734,7 @@ sub setupFilesystem {
 			}
 			$result = $? >> 8;
 			if ($result == 0) {
-				if (! KIWIGlobals -> instance() -> createZFSPool()) {
+				if (! KIWIGlobals -> instance() -> createZFSPool($zfsopts)) {
 					$result = 1;
 				}
 			}

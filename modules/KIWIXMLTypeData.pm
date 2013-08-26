@@ -72,6 +72,7 @@ sub new {
 	#     flags                  = ''
 	#     format                 = ''
 	#     fsmountoptions         = ''
+	#     zfsoptions             = ''
 	#     fsnocheck              = ''
 	#     fsreadonly             = ''
 	#     fsreadwrite            = ''
@@ -133,6 +134,7 @@ sub new {
 		flags
 		format
 		fsmountoptions
+		zfsoptions
 		fsnocheck
 		fsreadonly
 		fsreadwrite
@@ -198,6 +200,7 @@ sub new {
 	$this->{flags}                  = $init->{flags};
 	$this->{format}                 = $init->{format};
 	$this->{fsmountoptions}         = $init->{fsmountoptions};
+	$this->{zfsoptions}             = $init->{zfsoptions};
 	$this->{fsreadonly}             = $init->{fsreadonly};
 	$this->{fsreadwrite}            = $init->{fsreadwrite};
 	$this->{image}                  = $init->{image};
@@ -460,6 +463,17 @@ sub getFSMountOptions {
 	# ---
 	my $this = shift;
 	return $this->{fsmountoptions};
+}
+
+#==========================================
+# getZFSOptions
+#------------------------------------------
+sub getZFSOptions {
+	# ...
+	# Return the ZFS filesystem pool options
+	# ---
+	my $this = shift;
+	return $this->{zfsoptions};
 }
 
 #==========================================
@@ -880,6 +894,10 @@ sub getXMLElement {
 	if ($fsOpts) {
 		$element -> setAttribute('fsmountoptions', $fsOpts);
 	}
+	my $zfsOpts = $this -> getZFSOptions();
+	if ($zfsOpts) {
+		$element -> setAttribute('zfsoptions',$zfsOpts);
+	}
 	my $fsnoch = $this -> getFSNoCheck();
 	if ($fsnoch) {
 		$element -> setAttribute('fsnocheck', $fsnoch);
@@ -1299,6 +1317,27 @@ sub setFSMountOptions {
 		return;
 	}
 	$this->{fsmountoptions} = $opts;
+	return $this;
+}
+
+#==========================================
+# setZFSOptions
+#------------------------------------------
+sub setZFSOptions {
+	# ...
+	# Set the ZFS pool options
+	# ---
+	my $this = shift;
+	my $opts = shift;
+	if (! $opts ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setZFSOptions: no pool options given, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{zfsoptions} = $opts;
 	return $this;
 }
 

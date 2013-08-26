@@ -4376,6 +4376,7 @@ sub setupZFS {
 	my $kiwi   = $this->{kiwi};
 	my $target = $this->{imageDest}."/".$name;
 	my $opts   = $this->{xml} -> getImageType() -> getFSMountOptions();
+	my $zfsopts= $this->{xml} -> getImageType() -> getZFSOptions();
 	my $data;
 	if ($device) {
 		$target = $device;
@@ -4392,7 +4393,7 @@ sub setupZFS {
 		$kiwi -> error  ($data);
 		return;
 	}
-	if (! KIWIGlobals -> instance() -> createZFSPool()) {
+	if (! KIWIGlobals -> instance() -> createZFSPool($zfsopts)) {
 		return;
 	}
 	if ($device) {

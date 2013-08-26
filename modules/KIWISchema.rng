@@ -2288,6 +2288,11 @@ or clic and applies to the iso type only</a:documentation>
 The string given here is passed as value to the -o option of mount</a:documentation>
       </attribute>
     </define>
+    <define name="k.type.zfsoptions.attribute">
+      <attribute name="zfsoptions">
+        <a:documentation>Specifies the zfs pool options used on creation of the pool</a:documentation>
+      </attribute>
+    </define>
     <define name="k.type.hybrid.attribute">
       <attribute name="hybrid">
         <a:documentation>for the iso type only:
@@ -2490,6 +2495,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.fsmountoptions.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.zfsoptions.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.hybrid.attribute"/>
