@@ -76,6 +76,10 @@ function OEMFindPartitions {
 	local disk=$1
 	local rids=$2
 	local IFS
+	local ID="(MBR) ID"
+	if [ "$imageTableType" = "gpt" ];then
+		ID="(Mapped GPT Name) ID"
+	fi
 	disk=$(echo $disk | sed -e s@^/dev/@@)
 	for i in $(cat /proc/partitions |\
 		grep -E $disk.+ | sed "s/^ *//;s/ *$//;s/ \{1,\}/:/g" |\
@@ -84,31 +88,33 @@ function OEMFindPartitions {
 		local device=/dev/$(echo $i | cut -f2 -d:)
 		local kbsize=$(echo $i | cut -f1 -d:)
 		local mbsize=$((kbsize / 1024))
+		local partid=$(partitionID /dev/$disk $(nd $device))
 		local deviceOK=0
 		IFS=","
 		for i in $rids;do
 			req_psize=$(echo $i | cut -f1 -d:)
-			if [ $req_psize -lt $mbsize ];then
+			req_partid=$(echo $i | cut -f3 -d:)
+			if [ $partid = $req_partid ] && [ $req_psize -lt $mbsize ];then
 				deviceOK=1 ; break
 			fi
 		done
 		IFS=$IFS_ORIG
 		if [ $deviceOK -eq 0 ];then
-			Echo "Partition $device with size $mbsize skipped"
-			Echo "Partition size too small"
+			Echo "Partition $device with $ID $partid and size $mbsize skipped"
+			Echo "Partition ID mismatch and/or size too small"
 			Echo "Searching in range: $rids"
 			continue
 		fi
 		probeFileSystem $device
 		if [ ! -z "$FSTYPE" ] && [ ! "$FSTYPE" = "unknown" ];then
-			Echo "Partition $device with size $mbsize skipped"
+			Echo "Partition $device with $ID $partid and size $mbsize skipped"
 			Echo "Partition contains a filesystem"
 			continue
 		fi
 		if [ -z "$OEMPartitions" ];then
-			OEMPartitions=$device:$mbsize
+			OEMPartitions=$device:$mbsize:$partid
 		else
-			OEMPartitions=$OEMPartitions,$device:$mbsize
+			OEMPartitions=$OEMPartitions,$device:$mbsize:$partid
 		fi
 	done
 }
@@ -367,6 +373,11 @@ function OEMInstall {
 		fi
 		imageName=/dev/mapper/${loop}p1
 		reqpart=$(parted -m /dev/$loop print | grep '^[[:digit:]]' | wc -l)
+		dhd=$(parted -m /dev/$loop print | head -n 3 | tail -n 2 | head -n 1)
+		imageTableType=$(echo $dhd | cut -f6 -d:)
+		if [[ $imageTableType =~ gpt ]];then
+			imageTableType=gpt
+		fi
 		#======================================
 		# Create partition size search list
 		#--------------------------------------
@@ -375,22 +386,24 @@ function OEMInstall {
 			psize=$((psize / 1024))
 			plabel=$(blkid $i -s LABEL -o value)
 			pftype=$(blkid $i -s TYPE  -o value)
+			partnr=$(echo $i | rev | cut -c1)
+			partid=$(partitionID /dev/$loop $partnr)
 			if [ -z "$pftype" ];then
 				plabel=BIOS_GRUB
 			elif [ -z "$plabel" ];then
 				plabel=ROOT
 			fi
-			if [ -z "$req_partsize" ];then
-				req_partsize=$psize:$plabel
+			if [ -z "$req_part_info" ];then
+				req_part_info=$psize:$plabel:$partid
 			else
-				req_partsize=$req_partsize,$psize:$plabel
+				req_part_info=$req_part_info,$psize:$plabel:$partid
 			fi
 		done
 		#======================================
 		# Check ptable and provide service mode
 		#--------------------------------------
 		while true;do
-			OEMFindPartitions $(getDiskDevice $instDisk) $req_partsize
+			OEMFindPartitions $(getDiskDevice $instDisk) $req_part_info
 			partitions=$OEMPartitions
 			if [ ! -z "$partitions" ];then
 				count=0
@@ -410,19 +423,23 @@ function OEMInstall {
 				else
 					echo "Not enough partitions for installation found:" \
 						 > $info
-					echo "Found $count but required $reqpart"      >> $info
+					echo "Found $count but required $reqpart"        >> $info
 				fi
-				echo "Please prepare your disk first:"             >> $info
+				echo "Please prepare your disk first:"               >> $info
 				echo >> $info
-				echo "kiwi requires $reqpart partition(s) of the"  >> $info
-				echo "types below without any filesystem inside !" >> $info
+				echo "kiwi requires $reqpart partition(s) as listed" >> $info
+				echo "below without any filesystem inside !"         >> $info
 				echo >> $info
 				IFS=","
-				for i in $req_partsize;do
+				for i in $req_part_info;do
 					psize=$(echo $i | cut -f1 -d:)
 					partname=$(echo $i | cut -f2 -d:)
+					partid=$(echo $i | cut -f3 -d:)
 					echo "* $partname partition requires at least $psize MB" \
 						>> $info
+					if [ ! $imageTableType = "gpt" ];then
+						echo "  Partition MBR Type: 0x$partid" >> $info
+					fi
 				done
 				IFS=$IFS_ORIG
 				cat $info

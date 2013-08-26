@@ -5142,9 +5142,37 @@ function fdasdGetPartitionID {
 function partedGetPartitionID {
 	# /.../
 	# prints the partition ID for the given device and number
+	# map ID's if GPT table according to kiwi set partition
+	# names
 	# ----
-	parted -m -s $1 print | grep ^$2: | cut -f2 -d= |\
-		sed -e 's@[,; ]@@g' | tr -d 0
+	local parted=$(parted -m -s $1 print | grep -v Warning:)
+	local diskhd=$(echo $parted | head -n 3 | tail -n 2 | head -n 1)
+	local plabel=$(echo $diskhd | cut -f6 -d:)
+	if [[ $plabel =~ gpt ]];then
+		plabel=gpt
+	fi
+	if [ ! $plabel = "gpt" ];then
+		parted -m -s $1 print | grep ^$2: | cut -f2 -d= |\
+			sed -e 's@[,; ]@@g' | tr -d 0
+	else
+		local name=$(parted -m -s $1 print | grep ^$2: | cut -f6 -d:)
+		if [ $name = "lxroot" ];then
+			# map lxroot to MBR type 83 (linux)
+			echo 83
+		elif [ $name = "lxswap" ];then
+			# map lxswap to MBR type 82 (linux swap)
+			echo 82
+		elif [ $name = "lxlvm" ];then
+			# map lxlvm to MBR type 8e (linux LVM)
+			echo 8e
+		elif [ $name = "UEFI" ];then
+			# map UEFI to MBR type 6 (fat 16)
+			echo 6
+		else
+			# map anything else to ee (GPT)
+			echo ee
+		fi
+	fi
 }
 #======================================
 # partitionID
