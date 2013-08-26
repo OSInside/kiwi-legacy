@@ -124,9 +124,10 @@ sub execute
   }
   my $cd = 1;
 
-  my %type;
-  %type = %{$this->collect()->{m_xml}->getImageTypeAndAttributes_legacy()};
-  my $firmware = $type{firmware};
+  my $type = $this->collect()->{m_xml}->getImageType();
+  return 0 unless $type;
+
+  my $firmware = $type->getFirmwareType();
   if ($firmware eq "efi" || $firmware eq "uefi") {
     my $dir = $this->collect()->basesubdirs()->{$cd};
 
