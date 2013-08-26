@@ -41,6 +41,7 @@ use Data::Dumper;
 use Config::IniFiles;
 use File::Find;
 
+use KIWIQX qw (qxx);
 
 sub new
 {
@@ -225,6 +226,29 @@ sub execute
     close(F);
     $retval++;
   }
+
+  my $grubcfg = $this->collect()->basesubdirs()->{1} . "/EFI/BOOT/grub.cfg";
+  if ( -f $grubcfg ) {
+    $this->logMsg("I", "editing <$grubcfg>");
+    open(IN, $grubcfg) || die "oops";
+    open(OUT, ">", "$grubcfg.new") || die "can't open output";
+    while( <IN> ) {
+      my $line = $_;
+      chomp $line;
+      $this->logMsg("I", "-$line");
+      $line =~ s,(linuxefi /boot/x86_64/loader/linux),$1 install=$repoloc,;
+      $this->logMsg("I", "+$line");
+      print OUT "$line\n";
+    }
+    close(OUT);
+    close(IN); 
+    qxx("diff -u $grubcfg $grubcfg.new");
+    rename("$grubcfg.new", $grubcfg);
+  } else {
+    $this->logMsg("I", "no grub.cfg at <$grubcfg>");
+  }
+ 
+
   return $retval;
 }
 
