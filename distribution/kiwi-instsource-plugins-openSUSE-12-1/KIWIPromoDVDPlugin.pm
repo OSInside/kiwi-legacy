@@ -1,5 +1,5 @@
 ################################################################
-# Copyright (c) 2008 Jan-Christoph Bornschlegel, SUSE LLC
+# Copyright (c) 2012 SUSE
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,12 +18,12 @@
 ################################################################
 
 #================
-# FILE          : KIWILiveTreePlugin.pm
+# FILE          : KIWIPromoDVDPlugin.pm
 #----------------
-# PROJECT       : openSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# PROJECT       : OpenSUSE Build-Service
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
-# AUTHOR        : Jan-Christoph Bornschlegel <jcborn@suse.de>
+# AUTHOR        : Stephan Kulow <coolo@suse.de>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -32,7 +32,7 @@
 # STATUS        : Development
 #----------------
 
-package KIWILiveTreePlugin;
+package KIWIPromoDVDPlugin;
 
 use strict;
 
@@ -46,7 +46,7 @@ use File::Basename;
 sub new
 {
   # ...
-  # Create a new KIWILiveTreePlugin object
+  # Create a new KIWIPromoDVDPlugin object
   # ---
   my $class   = shift;
   my $handler = shift;
@@ -127,26 +127,20 @@ sub execute
     $this->logMsg("W", "FLAVOR not set?");
     return $retval;
   }
-  if($ismini !~ m{livetree}i) {
+  if($ismini !~ m{dvd-promo}i) {
     return $retval;
   }
 
   my $medium = $this->collect()->productData()->getVar("MEDIUM_NAME");
-  my $cd = undef;
-  find( sub { if (m/.iso/) { $cd = $File::Find::name; }  }, $this->handler()->collect()->basedir());
-  if (!$cd) {
-	$this->logMsg("E", "Initial CD not found\n");
-	exit(1);
-  }
-  $this->logMsg("I", "$cd $medium");
-  my $dname = dirname($cd);
-  $this->logMsg("I", "$dname");
-
-  my $nname = "$medium.iso";
-  $nname =~ s,-i586-,-i686-,;
-
-  $this->logMsg("I", "Renaming $cd to $dname/$nname");
-  rename($cd, "$dname/$nname") || $this->logMsg("E", "could not rename $cd");
+  find( sub { 
+     if (m/initrd.liv/) { 
+       my $cd = $File::Find::name; 
+       system("mkdir -p boot; echo $medium > boot/mbrid");
+       system("echo boot/mbrid | cpio --create --format=newc --quiet | gzip -9 -f >> $cd");
+       system("rm boot/mbrid; rmdir boot");
+       $this->logMsg("I", "updated $cd");
+      }  
+     }, $this->handler()->collect()->basedir());
 
   return $retval;
 }

@@ -1,5 +1,5 @@
 ################################################################
-# Copyright (c) 2008 Jan-Christoph Bornschlegel, SUSE LLC
+# Copyright (c) 2012 SUSE
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,12 +18,12 @@
 ################################################################
 
 #================
-# FILE          : KIWILiveTreePlugin.pm
+# FILE          : KIWIFinishEFIPlugin.pm
 #----------------
-# PROJECT       : openSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# PROJECT       : OpenSUSE Build-Service
+# COPYRIGHT     : (c) 2012 SUSE LINUX Products GmbH, Germany
 #               :
-# AUTHOR        : Jan-Christoph Bornschlegel <jcborn@suse.de>
+# AUTHOR        : Stephan Kulow <coolo@suse.de>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -32,7 +32,7 @@
 # STATUS        : Development
 #----------------
 
-package KIWILiveTreePlugin;
+package KIWIFinishEFIPlugin;
 
 use strict;
 
@@ -41,12 +41,13 @@ use Data::Dumper;
 use Config::IniFiles;
 use File::Find;
 use File::Basename;
+use KIWIQX qw (qxx);
 
 
 sub new
 {
   # ...
-  # Create a new KIWILiveTreePlugin object
+  # Create a new KIWIFinishEFIPlugin object
   # ---
   my $class   = shift;
   my $handler = shift;
@@ -121,32 +122,21 @@ sub execute
   if($this->{m_ready} == 0) {
     return $retval;
   }
+  my $cd = 1;
 
-  my $ismini = $this->collect()->productData()->getVar("FLAVOR");
-  if(not defined($ismini)) {
-    $this->logMsg("W", "FLAVOR not set?");
-    return $retval;
+  my $type = $this->collect()->{m_xml}->getImageType();
+  return 0 unless $type;
+
+  my $firmware = $type->getFirmwareType();
+  if ($firmware eq "efi" || $firmware eq "uefi") {
+    my $dir = $this->collect()->basesubdirs()->{$cd};
+
+    my $efi = "$dir/boot/x86_64/efi";
+    $this->logMsg("I", "creating $efi");
+    qxx("dd if=/dev/zero of=$efi bs=1M count=4");
+    qxx("/usr/sbin/mkdosfs -n 'BOOT' $efi");
+    qxx("mcopy -Do -s -i $efi $dir/EFI ::");
   }
-  if($ismini !~ m{livetree}i) {
-    return $retval;
-  }
-
-  my $medium = $this->collect()->productData()->getVar("MEDIUM_NAME");
-  my $cd = undef;
-  find( sub { if (m/.iso/) { $cd = $File::Find::name; }  }, $this->handler()->collect()->basedir());
-  if (!$cd) {
-	$this->logMsg("E", "Initial CD not found\n");
-	exit(1);
-  }
-  $this->logMsg("I", "$cd $medium");
-  my $dname = dirname($cd);
-  $this->logMsg("I", "$dname");
-
-  my $nname = "$medium.iso";
-  $nname =~ s,-i586-,-i686-,;
-
-  $this->logMsg("I", "Renaming $cd to $dname/$nname");
-  rename($cd, "$dname/$nname") || $this->logMsg("E", "could not rename $cd");
 
   return $retval;
 }

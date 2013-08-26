@@ -239,6 +239,25 @@ sub executeDir
 	 return 1;
      }
   }
+  # one more time for english to insert possible EULAs
+  my $cmd = "/usr/bin/translate_packages.pl en < $targetdir/packages.en > $targetdir/packages.en.new && mv $targetdir/packages.en.new $targetdir/packages.en";
+  my $data = qx( $cmd );
+  if($? >> 8) {
+     $this->logMsg("E", "Calling <translate_packages.pl en > failed:\n$data\n");
+     return 1;
+  }
+
+  if (-x "/usr/bin/extract-appdata-icons" && -s "$targetdir/appdata.xml") {
+     my $cmd = "/usr/bin/extract-appdata-icons $targetdir/appdata.xml $targetdir";
+     my $data = qx( $cmd );
+     if($? >> 8) {
+       $this->logMsg("E", "Calling <extract-appdata-icons $targetdir/appdata.xml $targetdir> failed:\n$data\n");
+       return 1;
+     }
+     if($this->{m_compress} =~ m{yes}i) {
+         system("gzip", "--rsyncable", "$targetdir/appdata.xml");
+     }
+  }
 
   if($this->{m_compress} =~ m{yes}i) {
       foreach my $pfile(glob("$targetdir/packages*")) {
