@@ -593,7 +593,9 @@ sub __updateXMLOEMConfig {
 		#==========================================
 		# special handling
 		#------------------------------------------
-		if ($oem{kiwi_oemswap} ne 'false') {
+		if (($oem{kiwi_oemswap}) && 
+			($oem{kiwi_oemswap} ne 'false')
+		) {
 			$this -> addEntry('kiwi_oemswap','true');
 			if (($oem{kiwi_oemswapMB}) && ($oem{kiwi_oemswapMB} > 0)) {
 				$this -> addEntry('kiwi_oemswapMB',$oem{kiwi_oemswapMB});
