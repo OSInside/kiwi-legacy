@@ -1172,6 +1172,8 @@ sub setupInstallStick {
 	#------------------------------------------
 	my $bootfs = 'ext3';
 	my $partid = "83";
+	my $needBiosP  = 0;
+	my $legacysize = 2;
 	if ($type->{bootfilesystem}) {
 		$bootfs = $type->{bootfilesystem};
 	} elsif ($bootloader eq 'syslinux') {
@@ -1184,6 +1186,7 @@ sub setupInstallStick {
 		}
 	} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
 		$bootfs = 'fat16';
+		$needBiosP = 1;
 	} else {
 		$bootfs = 'ext3';
 	}
@@ -1194,32 +1197,58 @@ sub setupInstallStick {
 		$partid = "c";
 	}
 	#==========================================
-	# create disk partitions
+	# setup disk partitions
 	#------------------------------------------
 	$kiwi -> info ("Create partition table for install media");
-	if ($gotsys) {
-		@commands = (
-			"n","p:lxboot","1",".","+".$irdsize."M",
-			"n","p:lxinstall","2",".",".",
-			"t","1",$partid,
-			"a","1","w","q"
-		);
-		$this->{partids}{boot} = '1';
-		$this->{partids}{root} = '2';
-	} else {
-		@commands = (
-			"n","p:lxboot","1",".",".",
-			"t","1",$partid,
-			"a","1","w","q"
-		);
-		$this->{partids}{boot} = '1';
+	my $pnr = 0;    # partition number start for increment
+	#==========================================
+	# setup legacy bios_grub partition
+	#------------------------------------------
+	if ($needBiosP) {
+		$pnr++;
+		push @commands,"n","p:legacy",$pnr,".","+".$legacysize."M";
+		$this->{partids}{biosgrub}  = $pnr;
 	}
+	#==========================================
+	# setup boot partition
+	#------------------------------------------
+	$pnr++;
+	push @commands,"n","p:lxboot",$pnr,".","+".$irdsize."M";
+	push @commands,"t",$pnr,$partid;
+	push @commands,"a",$pnr;
+	$this->{partids}{boot} = $pnr;
+	#==========================================
+	# setup install partition
+	#------------------------------------------
+	if ($gotsys) {
+		$pnr++;
+		push @commands,"n","p:lxinstall",$pnr,".",".";
+		$this->{partids}{root} = $pnr;
+	}
+	push @commands,"w","q";
+	#==========================================
+	# create partition table
+	#------------------------------------------
 	if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create partition table");
 		$kiwi -> failed ();
 		$this -> cleanStack ();
 		return;
+	}
+	#==========================================
+	# create bios_grub flag
+	#------------------------------------------
+	if ($needBiosP) {
+		$status = qxx ("parted $this->{loop} set 1 bios_grub on 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Couldn't set bios_grub label: $status");
+			$kiwi -> failed ();
+			$this -> cleanStack ();
+			return;
+		}
 	}
 	$kiwi -> done();
 	#==========================================
