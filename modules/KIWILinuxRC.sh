@@ -5168,6 +5168,9 @@ function partedGetPartitionID {
 		elif [ $name = "UEFI" ];then
 			# map UEFI to MBR type 6 (fat 16)
 			echo 6
+		elif [ $name = "legacy" ];then
+			# map bios grub legacy partition to MBR type ef (EFI)
+			echo ef
 		else
 			# map anything else to ee (GPT)
 			echo ee

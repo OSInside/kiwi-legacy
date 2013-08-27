@@ -89,12 +89,19 @@ function OEMFindPartitions {
 		local kbsize=$(echo $i | cut -f1 -d:)
 		local mbsize=$((kbsize / 1024))
 		local partid=$(partitionID /dev/$disk $(nd $device))
+		local labels=""
 		local deviceOK=0
 		IFS=","
 		for i in $rids;do
 			req_psize=$(echo $i | cut -f1 -d:)
+			req_label=$(echo $i | cut -f2 -d:)
 			req_partid=$(echo $i | cut -f3 -d:)
-			if [ $partid = $req_partid ] && [ $req_psize -lt $mbsize ];then
+			if [ $partid = $req_partid ] && [ $req_psize -le $mbsize ];then
+				if [ -z "$labels" ];then
+					labels=$req_label
+				else
+					labels=$labels:$req_label
+				fi
 				deviceOK=1 ; break
 			fi
 		done
@@ -102,7 +109,7 @@ function OEMFindPartitions {
 		if [ $deviceOK -eq 0 ];then
 			Echo "Partition $device with $ID $partid and size $mbsize skipped"
 			Echo "Partition ID mismatch and/or size too small"
-			Echo "Searching in range: $rids"
+			Echo "Searched in range: $rids"
 			continue
 		fi
 		probeFileSystem $device
@@ -112,9 +119,9 @@ function OEMFindPartitions {
 			continue
 		fi
 		if [ -z "$OEMPartitions" ];then
-			OEMPartitions=$device:$mbsize:$partid
+			OEMPartitions=$device:$mbsize:$partid:$labels
 		else
-			OEMPartitions=$OEMPartitions,$device:$mbsize:$partid
+			OEMPartitions=$OEMPartitions,$device:$mbsize:$partid:$labels
 		fi
 	done
 }
@@ -504,35 +511,40 @@ function OEMInstall {
 				count=0
 				IFS=","
 				for i in $partitions;do
-					psize=$(echo $i | cut -f2 -d:)
-					pname=$(echo $i | cut -f1 -d:)
-					if [ $count = 0 ];then
-						dpara="$pname \"[ $psize MB ]\" on"
-						count=1
-					else
-						dpara="$dpara $pname \"[ $psize MB ]\" off"
+					plabel=$(echo $i | cut -f4- -d:)
+					if [[ $plabel =~ $selectedText ]];then
+						psize=$(echo $i | cut -f2 -d:)
+						pname=$(echo $i | cut -f1 -d:)
+						if [ $count -eq 0 ];then
+							dpara="$pname \"[ $psize MB ]\" on"
+						else
+							dpara="$dpara $pname \"[ $psize MB ]\" off"
+						fi
+						count=$((count + 1))
 					fi
-					count=$((count + 1))
 				done
 				IFS=$IFS_ORIG
-				selectedPart=$(runInteractive \
-					"--radiolist \"$TEXT_SELECT\" 20 75 15 $dpara"
-				)
-				if [ ! $? = 0 ];then
-					systemException \
-						"System installation canceled" \
-					"reboot"
+				if [ $count -eq 1 ];then
+					selectedPart=$pname
+				else
+					selectedPart=$(runInteractive \
+						"--radiolist \"$TEXT_SELECT\" 20 75 15 $dpara"
+					)
+					if [ ! $? = 0 ];then
+						systemException \
+							"System installation canceled" \
+						"reboot"
+					fi
 				fi
 				count=0
 				IFS=","
 				for i in $partitions;do
-					psize=$(echo $i | cut -f2 -d:)
 					pname=$(echo $i | cut -f1 -d:)
 					if [ ! $pname = $selectedPart ];then
-						if [ $count = 0 ];then
-							partitions_next=$pname:$psize
+						if [ $count -eq 0 ];then
+							partitions_next=$i
 						else
-							partitions_next=$partitions_next,$pname:$psize
+							partitions_next=$partitions_next,$i
 						fi
 						count=$((count + 1))
 					fi
