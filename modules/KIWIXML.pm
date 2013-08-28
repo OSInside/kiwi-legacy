@@ -256,6 +256,7 @@ sub new {
 		armv5tel
 		armv6l
 		armv7l
+		armv7hl
 		ia64
 		i586
 		i686
