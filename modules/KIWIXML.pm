@@ -255,6 +255,7 @@ sub new {
 		armv5el
 		armv5tel
 		armv6l
+		armv6hl
 		armv7l
 		armv7hl
 		ia64
@@ -265,6 +266,7 @@ sub new {
 		s390
 		s390x
 		x86_64
+		noarch
 	);
 	$this->{supportedArch} = \%supported;
 	my $kiwi = KIWILog -> instance();
