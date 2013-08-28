@@ -47,10 +47,12 @@ sub new {
 	$this->{kiwi} = KIWILog -> instance();
 	my $kiwi = $this->{kiwi};
 	my %archesSup = map { ($_ => 1) } qw(
+		aarch64
 		armv5el
 		armv5tel
 		armv6l
 		armv7l
+		armv7hl
 		ia64
 		i386
 		i486
