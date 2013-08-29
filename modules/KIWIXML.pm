@@ -663,11 +663,9 @@ sub addDrivers {
 	}
 	if (@addedDrivers) {
 		$kiwi -> info("Added following drivers:\n");
-	}
-	for my $name (@addedDrivers) {
-		$kiwi -> info("  --> $name\n");
-	}
-	if (@addedDrivers) {
+		for my $name (@addedDrivers) {
+			$kiwi -> info("  --> $name");
+		}
 		$kiwi -> done();
 	}
 	return $this;
