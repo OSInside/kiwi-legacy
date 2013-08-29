@@ -1,0 +1,4 @@
+#!/bin/bash
+for file in $(find -name "*.p[lm]");do
+    expand -t 4 $file > $file.tmp && mv $file.tmp $file
+done
