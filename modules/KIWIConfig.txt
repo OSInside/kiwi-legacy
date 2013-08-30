@@ -248,6 +248,7 @@
 		<file name="wc"/>
 		<file name="which"/>
 		<file name="xargs"/>
+		<file name="xz"/>
 		<file name="yes"/>
 		<file name="zfcp_disk_configure"/>
 		<file name="zfcp_host_configure"/>

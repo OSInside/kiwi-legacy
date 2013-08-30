@@ -3280,10 +3280,10 @@ sub writeImageConfig {
 		my $imgType = $bldType -> getTypeName();
 		if ($compressed && $compressed eq 'true') {
 			print $FD "IMAGE='${device}${targetPartition};";
-			print $FD "$namecd;$server;$blocks;compressed'";
+			print $FD "$namecd;$server;$blocks;compressed-gzip'";
 			if ($imgType eq "split" && defined $this->{imageTreeRW}) {
 				print $FD ",${device}${targetPartitionNext}";
-				print $FD ";$namerw;$server;$blocks;compressed\n";
+				print $FD ";$namerw;$server;$blocks;compressed-gzip\n";
 			} else {
 				print $FD "\n";
 			}

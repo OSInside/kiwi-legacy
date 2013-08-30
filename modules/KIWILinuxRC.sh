@@ -6477,29 +6477,63 @@ function fetchFile {
 	local dump
 	local call
 	local call_pid
-	if test -z "$chunk";then
-		chunk=4k
+	local unzip
+	#======================================
+	# source path is required
+	#--------------------------------------
+	if [ -z "$path" ]; then
+		systemException "No source path specified" "reboot"
 	fi
-	if test -z "$path"; then
-		systemException "No path specified" "reboot"
+	#======================================
+	# destination path is required
+	#--------------------------------------
+	if [ -z "$dest" ];then
+		systemException "No destination path specified" "reboot"
 	fi
-	if test -z "$host"; then
+	#======================================
+	# source host is required
+	#--------------------------------------
+	if [ -z "$host" ]; then
 		if test -z "$SERVER"; then
-			systemException "No server specified" "reboot"
+			systemException "No source server specified" "reboot"
 		fi
 		host=$SERVER
 	fi
-	if test -z "$type"; then
-		if test -z "$SERVERTYPE"; then
+	#======================================
+	# set default chunk size
+	#--------------------------------------
+	if [ -z "$chunk" ];then
+		chunk=4k
+	fi
+	#======================================
+	# set default service type
+	#--------------------------------------
+	if [ -z "$type" ]; then
+		if [ -z "$SERVERTYPE" ]; then
 			type="tftp"
 		else
 			type="$SERVERTYPE"
 		fi
 	fi
-	if test "$izip" = "compressed"; then
-		path=$(echo "$path" | sed -e s@\\.gz@@)
-		path="$path.gz"
+	#======================================
+	# set source path + tool if compressed
+	#--------------------------------------
+	if [ ! -z "$izip" ];then
+		if [ $izip = "compressed" ] || [ "$izip" = "compressed-gzip" ]; then
+			unzip="gzip -d"
+			path=$(echo "$path" | sed -e s@\\.gz@@)
+			path="$path.gz"
+		elif [ $izip = "compressed-xz" ];then
+			unzip="xz -d"
+			path=$(echo "$path" | sed -e s@\\.xz@@)
+			path="$path.xz"
+		else
+			systemException "Unknown compression mode: $izip" "reboot"
+		fi
 	fi
+	#======================================
+	# encode special URL characters
+	#--------------------------------------
 	encoded_path=$(encodeURL "$path")
 	#======================================
 	# setup progress meta information
@@ -6522,7 +6556,7 @@ function fetchFile {
 		fi
 		progressBaseName=$(basename "$path")
 		TEXT_LOAD=$(getText "Loading %1" "$progressBaseName")
-		TEXT_GZIP=$(getText "Uncompressing %1" "$progressBaseName")
+		TEXT_COMP=$(getText "Uncompressing %1" "$progressBaseName")
 		dump="dcounter -s $needMByte -l \"$TEXT_LOAD \" 2>/progress | $dump"
 	fi
 	#======================================
@@ -6530,8 +6564,8 @@ function fetchFile {
 	#--------------------------------------
 	case "$type" in
 		"local")
-			if test "$izip" = "compressed"; then
-				call="gzip -d < $host/$path \
+			if [ ! -z "$izip" ];then
+				call="$unzip < $host/$path \
 					2>$TRANSFER_ERRORS_FILE | $dump"
 			else
 				call="dd if=$host/$path bs=$chunk |\
@@ -6539,10 +6573,10 @@ function fetchFile {
 			fi
 			;;
 		"http")
-			if test "$izip" = "compressed"; then
+			if [ ! -z "$izip" ];then
 				call="curl -f http://$host/$encoded_path \
 					2>$TRANSFER_ERRORS_FILE |\
-					gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump"
+					$unzip 2>>$TRANSFER_ERRORS_FILE | $dump"
 			else
 				call="curl -f http://$host/$encoded_path \
 					2>$TRANSFER_ERRORS_FILE |\
@@ -6550,10 +6584,10 @@ function fetchFile {
 			fi
 			;;
 		"https")
-			if test "$izip" = "compressed"; then
+			if [ ! -z "$izip" ];then
 				call="curl -f -k https://$host/$encoded_path \
 					2>$TRANSFER_ERRORS_FILE |\
-					gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump"
+					$unzip 2>>$TRANSFER_ERRORS_FILE | $dump"
 			else
 				call="curl -f -k https://$host/$encoded_path \
 					2>$TRANSFER_ERRORS_FILE |\
@@ -6561,10 +6595,10 @@ function fetchFile {
 			fi
 			;;
 		"ftp")
-			if test "$izip" = "compressed"; then
+			if [ ! -z "$izip" ];then
 				call="curl ftp://$host/$encoded_path \
 					2>$TRANSFER_ERRORS_FILE |\
-					gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump"
+					$unzip 2>>$TRANSFER_ERRORS_FILE | $dump"
 			else
 				call="curl ftp://$host/$encoded_path \
 					2>$TRANSFER_ERRORS_FILE |\
@@ -6596,14 +6630,14 @@ function fetchFile {
 				FETCH_FILE_TEMP_FILE="$FETCH_FILE_TEMP_DIR/${path##*/}"
 				export FETCH_FILE_TEMP_FILE
 			fi
-			if test "$izip" = "compressed"; then
+			if [ ! -z "$izip" ];then
 				if [ $havetemp_dir -eq 0 ];then
 					# /.../
 					# operate without temp files, standard case
 					# ----
 					call="busybox tftp \
 						-b $imageBlkSize -g -r \"$path\" \
-						-l >(gzip -d 2>>$TRANSFER_ERRORS_FILE | $dump) \
+						-l >($unzip 2>>$TRANSFER_ERRORS_FILE | $dump) \
 						$host 2>>$TRANSFER_ERRORS_FILE"
 				else
 					# /.../
@@ -6621,8 +6655,8 @@ function fetchFile {
 								$needZMByte \"$TEXT_LOAD\" \
 								$TRANSFER_ERRORS_FILE $imageBlkSize \
 							>&2 ; \
-							gzip -d < \"$FETCH_FILE_TEMP_FILE\" | \
-								dcounter -s $needMByte -l \"$TEXT_GZIP \" | \
+							$unzip < \"$FETCH_FILE_TEMP_FILE\" | \
+								dcounter -s $needMByte -l \"$TEXT_COMP \" | \
 								dd bs=$chunk of=\"$dest\" ) 2>/progress "
 					else
 						call="atftp \
@@ -6630,7 +6664,7 @@ function fetchFile {
 							--option \"blksize $imageBlkSize\" \
 							-g -r \"$path\" -l \"$FETCH_FILE_TEMP_FILE\" $host \
 							&> $TRANSFER_ERRORS_FILE ; \
-							gzip -d < \"$FETCH_FILE_TEMP_FILE\" | \
+							$unzip < \"$FETCH_FILE_TEMP_FILE\" | \
 							dd bs=$chunk of=\"$dest\" "
 					fi
 				fi

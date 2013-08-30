@@ -1144,6 +1144,7 @@ sub _new_instance {
 	no strict 'vars';
 	$data{BasePath}      = $BasePath;      # configurable base kiwi path
 	$data{Gzip}          = $Gzip;          # configurable gzip command
+	$data{Xz}            = $Xz;            # configurable xz command
 	$data{LogServerPort} = $LogServerPort; # configurable log server port
 	$data{LuksCipher}    = $LuksCipher;    # configurable luks passphrase
 	$data{System}        = $System;        # configurable base image desc. path
@@ -1152,6 +1153,9 @@ sub _new_instance {
 	}
 	if (! defined $Gzip) {
 		$data{Gzip} = "gzip -9";
+	}
+	if (! defined $Xz) {
+		$data{Xz} = "xz -6";
 	}
 	if (! defined $LogServerPort) {
 		$data{LogServerPort} = "off";
