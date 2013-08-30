@@ -804,7 +804,6 @@ sub test_addDriversNoDups {
     my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('completed', $state);
 	$this -> assert_not_null($xml);
 	# Verify this has the expected results
 	my @defDrvs = qw /e1000 rs232 usb/;
@@ -862,7 +861,6 @@ sub test_addDriversToCurrentProf {
 	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);
 	$state = $kiwi -> getState();
-	$this -> assert_str_equals('completed', $state);
 	$this -> assert_not_null($xml);
 	# Verify this has the expected results, we should get the default drivers
 	# plus the arch specific profile drivers plus the ones added
@@ -932,7 +930,6 @@ sub test_addDriversToDefault {
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('completed', $state);
 	$this -> assert_not_null($xml);
 	# Verify this has the expected results, we should get the default drivers
 	# plus the arch specific profile drivers plus the ones added
