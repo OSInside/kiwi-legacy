@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.8" name="initrd-isoboot-suse-12.3">
+<image schemaversion="5.8" name="initrd-isoboot-suse-13.1">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -102,6 +102,7 @@
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="checkmedia"/>
+		<package name="cdrkit-cdrtools-compat"/>
 		<package name="clicfs"/>
 		<package name="cryptsetup"/>
 		<package name="dhcpcd"/>
