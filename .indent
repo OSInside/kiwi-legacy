@@ -3,3 +3,8 @@ for file in $(find -name "*.p[lm]";find -name "config.xml";find -name "*.rnc")
 do
     expand -t 4 $file > $file.tmp && mv $file.tmp $file
 done
+chmod 755 kiwi.pl
+make modules/KIWISchema.rng
+
+sed -i -e 's@\&#9;@\&#32;\&#32;\&#32;\&#32;@' xsl/pretty.xsl
+sed -i -e 's@\&#9;@\&#32;\&#32;\&#32;\&#32;@' xsl/print.xsl
