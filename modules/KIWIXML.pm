@@ -2880,6 +2880,8 @@ sub __createOEMConfig {
 		$this -> __getChildNodeTextValue($config, 'oem-recovery');
 	$oemConfig{oem_recoveryID}           =
 		$this -> __getChildNodeTextValue($config, 'oem-recoveryID');
+	$oemConfig{oem_recoveryPartitionSize}=
+		$this -> __getChildNodeTextValue($config, 'oem-recovery-part-size');
 	$oemConfig{oem_shutdown}             =
 		$this -> __getChildNodeTextValue($config, 'oem-shutdown');
 	$oemConfig{oem_shutdown_interactive} =

@@ -836,6 +836,26 @@ div {
 }
 
 #==========================================
+# common element <oem-recovery-part-size>
+#
+div {
+	k.oem-recovery-part-size.attlist = empty
+	k.oem-recovery-part-size =
+		## For oemboot driven images: Set the partition ID of
+		## recovery partition. Default value is 83 (Linux)
+		[
+		db:para [
+			"For oemboot driven images: Set the size of\x{a}"~
+			"the recovery partition in MBytes."
+		]
+		]
+		element oem-recovery-part-size {
+			k.oem-recovery-part-size.attlist,
+			xsd:nonNegativeInteger
+		}
+}
+
+#==========================================
 # common element <oem-shutdown>
 #
 div {
@@ -2523,6 +2543,7 @@ div {
 			k.oem-reboot-interactive? &
 			k.oem-recovery? &
 			k.oem-recoveryID? &
+			k.oem-recovery-part-size? &
 			k.oem-shutdown? &
 			k.oem-shutdown-interactive? &
 			k.oem-silent-boot? &

@@ -317,6 +317,10 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_RECOVERY_ID=$kiwi_oemrecoveryID"
 		echo "OEM_RECOVERY_ID=$kiwi_oemrecoveryID" >> $oemfile
 	fi
+	if [ ! -z "$kiwi_oemrecoveryPartSize" ];then
+		echo "Setting up OEM_RECOVERY_PART_SIZE=$kiwi_oemrecoveryPartSize"
+		echo "OEM_RECOVERY_PART_SIZE=$kiwi_oemrecoveryPartSize" >> $oemfile
+	fi
 	if [ ! -z "$kiwi_oemrecoveryInPlace" ];then
 		echo "Setting up OEM_RECOVERY_INPLACE=1"
 		echo "OEM_RECOVERY_INPLACE=1" >> $oemfile

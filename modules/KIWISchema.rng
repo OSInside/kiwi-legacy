@@ -1088,6 +1088,26 @@ recovery partition. Default value is 83 (Linux)</db:para>
   </div>
   <!--
     ==========================================
+    common element <oem-recovery-part-size>
+    
+  -->
+  <div>
+    <define name="k.oem-recovery-part-size.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-recovery-part-size">
+      <element name="oem-recovery-part-size">
+        <a:documentation>For oemboot driven images: Set the partition ID of
+recovery partition. Default value is 83 (Linux)</a:documentation>
+        <db:para>For oemboot driven images: Set the size of
+the recovery partition in MBytes.</db:para>
+        <ref name="k.oem-recovery-part-size.attlist"/>
+        <data type="nonNegativeInteger"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <oem-shutdown>
     
   -->
@@ -3579,6 +3599,9 @@ and setup the system disk</db:para>
           </optional>
           <optional>
             <ref name="k.oem-recoveryID"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-recovery-part-size"/>
           </optional>
           <optional>
             <ref name="k.oem-shutdown"/>

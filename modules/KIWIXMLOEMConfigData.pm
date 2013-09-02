@@ -50,6 +50,7 @@ sub new {
 	#    oem_reboot_interactive   = ''
 	#    oem_recovery             = ''
 	#    oem_recoveryID           = ''
+	#    oem_recoveryPartitionSize= ''
 	#    oem_shutdown             = ''
 	#    oem_shutdown_interactive = ''
 	#    oem_silent_boot          = ''
@@ -87,6 +88,7 @@ sub new {
 		oem_reboot_interactive
 		oem_recovery
 		oem_recoveryID
+		oem_recoveryPartitionSize
 		oem_shutdown
 		oem_shutdown_interactive
 		oem_silent_boot
@@ -278,6 +280,14 @@ sub getRecoveryID {
 	# ---
 	my $this = shift;
 	return $this->{oem_recoveryID};
+}
+
+#==========================================
+# getRecoveryPartSize
+#------------------------------------------
+sub getRecoveryPartSize {
+	my $this = shift;
+	return $this->{oem_recoveryPartitionSize};
 }
 
 #==========================================
@@ -476,6 +486,12 @@ sub getXMLElement {
 		text      => $this -> getRecoveryID ()
 	);
 	$element = $this -> p_addElement(\%initRecoverID);
+	my %initRecoverPSize = (
+		parent    => $element,
+		childName => 'oem-recovery-part-size',
+		text      => $this -> getRecoveryPartSize ()
+	);
+	$element = $this -> p_addElement(\%initRecoverPSize);
 	my %initDown = (
 		parent    => $element,
 		childName => 'oem-shutdown',
@@ -771,6 +787,24 @@ sub setRecoveryID {
 		delete $this->{oem_recoveryID};
 	} else {
 		$this->{oem_recoveryID} = $val;
+	}
+	return $this;
+}
+
+#==========================================
+# setRecvoveryPartitionSize
+#------------------------------------------
+sub setRecvoveryPartitionSize {
+	# ...
+	# Set the recovery partition size attribute, if called
+	# with no argument the attribute is removed
+	# ---
+	my $this = shift;
+	my $val  = shift;
+	if (! $val) {
+		delete $this->{oem_recoveryPartitionSize};
+	} else {
+		$this->{oem_recoveryPartitionSize} = $val;
 	}
 	return $this;
 }

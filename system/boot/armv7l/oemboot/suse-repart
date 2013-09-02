@@ -23,20 +23,35 @@ function OEMRepartInit {
 	# calculate memory based swapsize amount and initialize
 	# size of recovery archive
 	# ----
+	#======================================
+	# initialize swap partition size
+	#--------------------------------------
 	mem_size=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
 	swapsize=$(( $mem_size *2 / 1024 ))
-	recoMByte=0
 	if [ ! -z "$OEM_SWAPSIZE" ];then
 		swapsize=$OEM_SWAPSIZE
 	fi
 	if [ ! -z "$OEM_WITHOUTSWAP" ];then
 		swapsize=0
 	fi
+	#======================================
+	# initialize recovery partition size
+	#--------------------------------------
+	recoMByte=0
 	if [ ! -z "$OEM_RECOVERY" ];then
 		if [ ! -f /recovery.partition.size ];then
 			systemException "Can't find recovery part size info" "reboot"
 		fi
 		recoMByte=$(cat /recovery.partition.size)
+		if [ ! -z "$OEM_RECOVERY_PART_SIZE" ];then
+			if [ $OEM_RECOVERY_PART_SIZE -lt $recoMByte ];then
+				Echo "Warning: Specified recovery partition size too small !"
+				Echo "need $recoMByte MB got $OEM_RECOVERY_PART_SIZE MB"
+				Echo "specified value will be ignored"
+			else
+				recoMByte=$OEM_RECOVERY_PART_SIZE
+			fi
+		fi
 		recoID=83
 		if [ ! -z "$OEM_RECOVERY_ID" ];then
 			recoID=$OEM_RECOVERY_ID

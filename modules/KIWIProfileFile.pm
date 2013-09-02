@@ -91,6 +91,7 @@ sub new {
 		kiwi_oemrecovery
 		kiwi_oemrecoveryID
 		kiwi_oemrecoveryInPlace
+		kiwi_oemrecoveryPartSize
 		kiwi_oemrootMB
 		kiwi_oemshutdown
 		kiwi_oemshutdowninteractive
@@ -573,23 +574,24 @@ sub __updateXMLOEMConfig {
 		$oem{kiwi_oemrootMB}             = $oemconf -> getSystemSize();
 		$oem{kiwi_oemswap}               = $oemconf -> getSwap();
 		$oem{kiwi_oemalign}              = $oemconf -> getAlignPartition();
-        $oem{kiwi_oempartition_install}  = $oemconf -> getPartitionInstall();
-        $oem{kiwi_oemtitle}              = $oemconf -> getBootTitle();
-        $oem{kiwi_oemkboot}              = $oemconf -> getKiwiInitrd();
-        $oem{kiwi_oemreboot}             = $oemconf -> getReboot();
-        $oem{kiwi_oemrebootinteractive}  = $oemconf -> getRebootInteractive();
-        $oem{kiwi_oemshutdown}           = $oemconf -> getShutdown();
-        $oem{kiwi_oemshutdowninteractive}= $oemconf -> getShutdownInteractive();
-        $oem{kiwi_oemsilentboot}         = $oemconf -> getSilentBoot();
-        $oem{kiwi_oemsilentinstall}      = $oemconf -> getSilentInstall();
-        $oem{kiwi_oemsilentverify}       = $oemconf -> getSilentVerify();
-        $oem{kiwi_oemskipverify}         = $oemconf -> getSkipVerify();
-        $oem{kiwi_oembootwait}           = $oemconf -> getBootwait();
-        $oem{kiwi_oemunattended}         = $oemconf -> getUnattended();
-        $oem{kiwi_oemunattended_id}      = $oemconf -> getUnattendedID();
-        $oem{kiwi_oemrecovery}           = $oemconf -> getRecovery();
-        $oem{kiwi_oemrecoveryID}         = $oemconf -> getRecoveryID();
-        $oem{kiwi_oemrecoveryInPlace}    = $oemconf -> getInplaceRecovery();
+		$oem{kiwi_oempartition_install}  = $oemconf -> getPartitionInstall();
+		$oem{kiwi_oemtitle}              = $oemconf -> getBootTitle();
+		$oem{kiwi_oemkboot}              = $oemconf -> getKiwiInitrd();
+		$oem{kiwi_oemreboot}             = $oemconf -> getReboot();
+		$oem{kiwi_oemrebootinteractive}  = $oemconf -> getRebootInteractive();
+		$oem{kiwi_oemshutdown}           = $oemconf -> getShutdown();
+		$oem{kiwi_oemshutdowninteractive}= $oemconf -> getShutdownInteractive();
+		$oem{kiwi_oemsilentboot}         = $oemconf -> getSilentBoot();
+		$oem{kiwi_oemsilentinstall}      = $oemconf -> getSilentInstall();
+		$oem{kiwi_oemsilentverify}       = $oemconf -> getSilentVerify();
+		$oem{kiwi_oemskipverify}         = $oemconf -> getSkipVerify();
+		$oem{kiwi_oembootwait}           = $oemconf -> getBootwait();
+		$oem{kiwi_oemunattended}         = $oemconf -> getUnattended();
+		$oem{kiwi_oemunattended_id}      = $oemconf -> getUnattendedID();
+		$oem{kiwi_oemrecovery}           = $oemconf -> getRecovery();
+		$oem{kiwi_oemrecoveryID}         = $oemconf -> getRecoveryID();
+		$oem{kiwi_oemrecoveryPartSize}   = $oemconf -> getRecoveryPartSize();
+		$oem{kiwi_oemrecoveryInPlace}    = $oemconf -> getInplaceRecovery();
 		#==========================================
 		# special handling
 		#------------------------------------------
