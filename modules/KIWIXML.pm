@@ -2747,10 +2747,19 @@ sub __collectXMLListData {
 				}
 			}
 		}
+		my $index = 0;
 		if (@allData) {
 			for my $items (@allData) {
 				for my $obj (@{$items}) {
 					my $name = $obj -> getName();
+					my $oref = ref $obj;
+					if ($oref eq 'KIWIXMLPackageData') {
+						if ($obj -> getPackageToReplace()) {
+							# allow duplicates if replace information exists
+							$name = $name.$index;
+							$index++;
+						}
+					}
 					if ($nameProfMap{$name}) {
 						push @{$nameProfMap{$name}{profs}}, $profName;
 					} else {
