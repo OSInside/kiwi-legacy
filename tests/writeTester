@@ -23,11 +23,11 @@ if (($result != 1 ) || (! $config)) {
 		. "--target PATH_TO_FILE_TO_BE_WRITTEN\n";
 	exit 1;
 }
-
-if (($target) && (-f $target)) {
-	unlink $target;
-} else {
+if (! $target) {
 	$target = '/tmp/write-tester.xml';
+}
+if (-f $target) {
+	unlink $target;
 }
 
 my $cmdL = KIWICommandLine -> new();

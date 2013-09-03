@@ -2441,8 +2441,13 @@ sub writeXML {
 		if (@typePckgItems) {
 			$xml .= '<packages type="' . $imgType . '">';
 		}
+		my %usedNames;
 		for my $item (@typePckgItems) {
-			$xml .= $item -> getXMLElement() -> toString();
+			my $name = $item -> getName();
+			if (! $usedNames{$name}) {
+				$usedNames{$name} = 1;
+				$xml .= $item -> getXMLElement() -> toString();
+			}
 		}
 		if (@typePckgItems) {
 			$xml .= '</packages>';
