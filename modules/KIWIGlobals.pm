@@ -1180,6 +1180,7 @@ sub _new_instance {
 	$data{KRegion}   = $BasePath."/modules/KIWIEC2Region.txt";
 	$data{KMigraCSS} = $BasePath."/modules/KIWIMigrate.tgz";
 	$data{KSplit}    = $BasePath."/modules/KIWISplit.txt";
+	$data{KMigraTPL} = $BasePath."/modules/KIWIMigrate.kiwi";
 	$data{KStrip}    = $BasePath."/modules/KIWIConfig.txt";
 	$data{repoURI}   = $BasePath."/modules/KIWIURL.txt";
 	$data{Revision}  = $BasePath."/.revision";
