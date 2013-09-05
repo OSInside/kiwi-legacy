@@ -43,6 +43,14 @@ use JSON;
 use KIWIGlobals;
 use KIWILog;
 use KIWIQX qw (qxx);
+use KIWIXML;
+use KIWIXMLDescriptionData;
+use KIWIXMLPreferenceData;
+use KIWIXMLTypeData;
+use KIWIXMLOEMConfigData;
+use KIWIXMLRepositoryData;
+use KIWIXMLPackageData;
+use KIWIXMLPackageCollectData;
 
 #==========================================
 # Constructor
@@ -988,62 +996,81 @@ sub setTemplate {
 	my $pacs    = $this->{packages};
 	my %osc     = %{$this->{source}};
 	#==========================================
-	# create xml description
+	# read template
 	#------------------------------------------
-	my $FD = FileHandle -> new();
-	if (! $FD -> open (">$dest/$this->{gdata}->{ConfigName}")) {
+	my $cmdL = KIWICommandLine -> new();
+	my $xml  = KIWIXML -> new (
+		$this->{gdata}->{KMigraTPL}, undef, undef, $cmdL, undef
+	);
+	if (! $xml) {
 		return;
 	}
 	#==========================================
-	# <description>
+	# KIWIXMLDescriptionData
 	#------------------------------------------
-	print $FD '<image schemaversion="5.6" ';
-	print $FD 'name="suse-migration-'.$product.'">'."\n";
-	print $FD "\t".'<description type="system">'."\n";
-	print $FD "\t\t".'<author>***AUTHOR***</author>'."\n";
-	print $FD "\t\t".'<contact>***MAIL***</contact>'."\n";
-	print $FD "\t\t".'<specification>'.$product.'</specification>'."\n";
-	print $FD "\t".'</description>'."\n";
+	my $xml_desc = $xml -> getDescriptionInfo();
+	$xml_desc -> setSpecificationDescript ($product);
 	#==========================================
-	# <preferences>
+	# KIWIXMLPreferenceData
 	#------------------------------------------
-	print $FD "\t".'<preferences>'."\n";
-	print $FD "\t\t".'<type image="oem" boot="oemboot/'.$product.'"';
-	print $FD ' filesystem="ext3" installiso="true">'."\n";
-	print $FD "\t\t\t".'<oemconfig/>'."\n";
-	print $FD "\t\t".'</type>'."\n";
-	print $FD "\t\t".'<version>1.1.1</version>'."\n";
-	print $FD "\t\t".'<packagemanager>zypper</packagemanager>'."\n";
-	print $FD "\t\t".'<locale>en_US</locale>'."\n";
-	print $FD "\t\t".'<keytable>us.map.gz</keytable>'."\n";
-	print $FD "\t\t".'<timezone>Europe/Berlin</timezone>'."\n";
-	print $FD "\t\t".'<bootloader-theme>openSUSE</bootloader-theme>'."\n";
-	print $FD "\t\t".'<bootsplash-theme>openSUSE</bootsplash-theme>'."\n";
-	print $FD "\t".'</preferences>'."\n";
+	# getPreferences returns a new KIWIXMLPreferenceData object
+	# containing combined information. Thus it's required to set
+	# the changed object back into the KIWIXML space
+	# ---
+	my $xml_pref = $xml -> getPreferences();
+	$xml_pref -> setBootLoaderTheme ('openSUSE');
+	$xml_pref -> setBootSplashTheme ('openSUSE');
+	$xml_pref -> setLocale ('en_US');
+	$xml_pref -> setKeymap ('us.map.gz');
+	$xml_pref -> setTimezone ('Europe/Berlin');
+	$xml -> setPreferences ($xml_pref);
 	#==========================================
-	# <repository>
+	# KIWIXMLTypeData
 	#------------------------------------------
+	my $xml_type = $xml -> getImageType();
+	$xml_type -> setBootImageDescript ('oemboot/'.$product);
+	#==========================================
+	# KIWIXMLOEMConfigData
+	#------------------------------------------
+	my $xml_oemc = $xml -> getOEMConfig();
+	$xml_oemc -> setSwap ('true');
+	#==========================================
+	# KIWIXMLRepositoryData
+	#------------------------------------------
+	my @xml_repo = ();
 	foreach my $source (keys %{$osc{$product}} ) {
 		my $type = $osc{$product}{$source}{type};
 		my $alias= $osc{$product}{$source}{alias};
 		my $prio = $osc{$product}{$source}{prio};
 		my $url  = $osc{$product}{$source}{src};
-		print $FD "\t".'<repository type="'.$type.'"';
-		if (defined $alias) {
-			print $FD ' alias="'.$alias.'"';
-		}
-		if ((defined $prio) && ($prio != 0)) {
-			print $FD ' priority="'.$prio.'"';
-		}
-		print $FD '>'."\n";
-		print $FD "\t\t".'<source path="'.$url.'"/>'."\n";
-		print $FD "\t".'</repository>'."\n";
+		my %repo_data = (
+			'path'             => $url,
+			'type'             => $type,
+			'alias'            => $alias,
+			'priority'         => $prio
+		);
+		my $r = KIWIXMLRepositoryData -> new (\%repo_data);
+		push @xml_repo, $r;
 	}
+	$xml -> addRepositories (\@xml_repo, 'default');
 	#==========================================
-	# <packages>
+	# KIWIXMLPackageData
 	#------------------------------------------
-	print $FD "\t".'<packages type="bootstrap" patternType="plusRecommended">';
-	print $FD "\n";
+	my @xml_pack = ();
+	if (defined $pacs) {
+		foreach my $package (sort @{$pacs}) {
+			my %pack_data = (
+				'name'         => $package
+			);
+			my $p = KIWIXMLPackageData -> new (\%pack_data);
+			push @xml_pack, $p;
+		}
+	}
+	$xml -> addPackages (\@xml_pack, 'bootstrap');
+	#==========================================
+	# KIWIXMLPackageCollectData
+	#------------------------------------------
+	my @xml_patt = ();
 	if (defined $pats) {
 		# FIXME: I don't have a solution for the problem below
 		# /.../
@@ -1060,17 +1087,28 @@ sub setTemplate {
 		# ---
 		foreach my $pattern (sort @{$pats}) {
 			$pattern =~ s/^pattern://;
-			print $FD "\t\t".'<namedCollection name="'.$pattern.'"/>'."\n";
+			my %patt_data = (
+				'name'         => $pattern
+			);
+			my $p = KIWIXMLPackageCollectData -> new(\%patt_data);
+			push @xml_patt, $p;
 		}
 	}
-	if (defined $pacs) {
-		foreach my $package (sort @{$pacs}) {
-			print $FD "\t\t".'<package name="'.$package.'"/>'."\n";
-		}
+	$xml -> addPackageCollections (\@xml_patt, 'image');
+	#==========================================
+	# write XML description
+	#------------------------------------------
+	my $file = "$dest/$this->{gdata}->{ConfigName}";
+	if (! $xml -> writeXML ($file)) {
+		return;
 	}
-	print $FD "\t".'</packages>'."\n";
-	print $FD '</image>'."\n";
-	$FD -> close();
+	my $temp = "/tmp/pretty.xml";
+	my $data = qxx ("xsltproc -o $temp $this->{gdata}->{Pretty} $file");
+	my $code = $? >> 8;
+	if ($code != 0) {
+		return;
+	}
+	qxx ("mv $temp $file");
 	return $this;
 }
 
