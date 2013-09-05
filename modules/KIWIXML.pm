@@ -97,81 +97,81 @@ sub new {
 	# this = {
 	#     availableProfiles = ('',....)
 	#     defaultType = {
-	#         ec2config  = KIWIXMLEC2ConfigData,
-	#         machine    = KIWIXMLVMachineData,
-	#         oemconfig  = KIWIXMLOEMConfigData,
-	#         pxeconfig  = (KIWIXMLPXEDeployConfigData,...),
-	#         pxedeploy  = KIWIXMLPXEDeployData,
-	#         split      = KIWIXMLSplitData,
+	#         ec2config  = KIWIXMLEC2ConfigData
+	#         machine    = KIWIXMLVMachineData
+	#         oemconfig  = KIWIXMLOEMConfigData
+	#         pxeconfig  = (KIWIXMLPXEDeployConfigData,...)
+	#         pxedeploy  = KIWIXMLPXEDeployData
+	#         split      = KIWIXMLSplitData
 	#         systemdisk = KIWIXMLSystemdiskData
 	#         type       = KIWIXMLTypeData
 	#     },
-	#     selectedProfiles = ('',....,'kiwi_default'),
+	#     selectedProfiles = ('',....,'kiwi_default')
 	#     selectedType = {
-	#         ec2config  = KIWIXMLEC2ConfigData,
-	#         machine    = KIWIXMLVMachineData,
-	#         oemconfig  = KIWIXMLOEMConfigData,
-	#         pxeconfig  = (KIWIXMLPXEDeployConfigData,...),
-	#         pxedeploy  = KIWIXMLPXEDeployData,
-	#         split      = KIWIXMLSplitData,
+	#         ec2config  = KIWIXMLEC2ConfigData
+	#         machine    = KIWIXMLVMachineData
+	#         oemconfig  = KIWIXMLOEMConfigData
+	#         pxeconfig  = (KIWIXMLPXEDeployConfigData,...)
+	#         pxedeploy  = KIWIXMLPXEDeployData
+	#         split      = KIWIXMLSplitData
 	#         systemdisk = KIWIXMLSystemdiskData
 	#         type       = KIWIXMLTypeData
 	#     },
 	#     imageConfig = {
-	#         description = KIWIXMLDescriptionData,
+	#         description  = KIWIXMLDescriptionData
 	#         displayName = ''
 	#         imageName   = ''
 	#         productSettings = {
 	#             dudArches      = ('',...)
 	#             reqArches      = ('',...)
-	#             options        = KIWIXMLProductOptionsData,
-	#             architectures  = (KIWIXMLProductArchitectureData,... ),
-	#             dudInstSysPkgs = (KIWIXMLProductPackageData,... ),
-	#             dudModulePkgs  = (KIWIXMLProductPackageData,... ),
-	#             dudPkgs        = (KIWIXMLProductPackageData,... ),
-	#             instRepos      = (KIWIXMLInstRepositoryData,... ),
-	#             metaChroots    = (KIWIXMLProductMetaChrootData,...),
-	#             metaFiles      = (KIWIXMLProductMetaFileData,...),
-	#             metaPkgs       = (KIWIXMLProductPackageData,... ),
+	#             options        = KIWIXMLProductOptionsData
+	#             architectures  = (KIWIXMLProductArchitectureData,... )
+	#             dudInstSysPkgs = (KIWIXMLProductPackageData,... )
+	#             dudModulePkgs  = (KIWIXMLProductPackageData,... )
+	#             dudPkgs        = (KIWIXMLProductPackageData,... )
+	#             instRepos      = (KIWIXMLInstRepositoryData,... )
+	#             metaChroots    = (KIWIXMLProductMetaChrootData,...)
+	#             metaFiles      = (KIWIXMLProductMetaFileData,...)
+	#             metaPkgs       = (KIWIXMLProductPackageData,... )
 	#             prodPkgs       = (KIWIXMLProductPackageData,...)
 	#         }
 	#         <profName>[+] = {
-	#             installOpt      = '',
-	#             archives        = (KIWIXMLPackageArchiveData,...),
-	#             bootArchives    = (KIWIXMLPackageArchiveData,...),
+	#             installOpt      = ''
+	#             archives        = (KIWIXMLPackageArchiveData,...)
+	#             bootArchives    = (KIWIXMLPackageArchiveData,...)
 	#             profInfo        = KIWIXMLProfileData
 	#             repoData        = (KIWIXMLRepositoryData,...)
-	#             bootDelPkgs     = (KIWIXMLPackageData, ...),
-	#             bootPkgs        = (KIWIXMLPackageData, ...),
-	#             bootPkgsCollect = (KIWIXMLPackageCollectData,...),
-	#             bootStrapPckgs  = (KIWIXMLPackageData, ...),
-	#             TestSuitePckgs  = (KIWIXMLPackageData, ...),
-	#             delPkgs         = (KIWIXMLPackageData, ...),
-	#             drivers         = (KIWIXMLDriverData, ...),
-	#             ignorePkgs      = (KIWIXMLPackageData, ...),
-	#             keepLibs        = (KIWIXMLStripData,...),
-	#             keepTools       = (KIWIXMLStripData,...),
-	#             pkgs            = (KIWIXMLPackageData, ...),
-	#             pkgsCollect     = (KIWIXMLPackageCollectData,...),
-	#             products        = (KIWIXMLPackageProductData,...),
-	#             stripDelete     = (KIWIXMLStripData,...),
+	#             bootDelPkgs     = (KIWIXMLPackageData, ...)
+	#             bootPkgs        = (KIWIXMLPackageData, ...)
+	#             bootPkgsCollect = (KIWIXMLPackageCollectData,...)
+	#             bootStrapPckgs  = (KIWIXMLPackageData, ...)
+	#             TestSuitePckgs  = (KIWIXMLPackageData, ...)
+	#             delPkgs         = (KIWIXMLPackageData, ...)
+	#             drivers         = (KIWIXMLDriverData,  ...)
+	#             ignorePkgs      = (KIWIXMLPackageData, ...)
+	#             keepLibs        = (KIWIXMLStripData,...)
+	#             keepTools       = (KIWIXMLStripData,...)
+	#             pkgs            = (KIWIXMLPackageData, ...)
+	#             pkgsCollect     = (KIWIXMLPackageCollectData,...)
+	#             products        = (KIWIXMLPackageProductData,...)
+	#             stripDelete     = (KIWIXMLStripData,...)
 	#             <archname>[+] {
-	#                 archives        = (KIWIXMLPackageArchiveData,...),
-	#                 bootArchives    = (KIWIXMLPackageArchiveData,...),
-	#                 bootDelPkgs     = (KIWIXMLPackageData, ...),
-	#                 bootPkgs        = (KIWIXMLPackageData, ...),
-	#                 bootPkgsCollect = (KIWIXMLPackageCollectData,...),
-	#                 bootStrapPckgs  = (KIWIXMLPackageData, ...),
-	#                 TestSuitePckgs  = (KIWIXMLPackageData, ...),
-	#                 delPkgs         = (KIWIXMLPackageData, ...),
-	#                 drivers         = (KIWIXMLDriverData, ...),
-	#                 ignorePkgs      = (KIWIXMLPackageData, ...),
-	#                 keepLibs        = (KIWIXMLStripData,...),
-	#                 keepTools       = (KIWIXMLStripData,...),
-	#                 pkgs            = (KIWIXMLPackageData, ...),
-	#                 pkgsCollect     = (KIWIXMLPackageCollectData,...),
-	#                 products        = (KIWIXMLPackageProductData,...),
-	#                 stripDelete     = (KIWIXMLStripData,...),
+	#                 archives        = (KIWIXMLPackageArchiveData,...)
+	#                 bootArchives    = (KIWIXMLPackageArchiveData,...)
+	#                 bootDelPkgs     = (KIWIXMLPackageData, ...)
+	#                 bootPkgs        = (KIWIXMLPackageData, ...)
+	#                 bootPkgsCollect = (KIWIXMLPackageCollectData,...)
+	#                 bootStrapPckgs  = (KIWIXMLPackageData, ...)
+	#                 TestSuitePckgs  = (KIWIXMLPackageData, ...)
+	#                 delPkgs         = (KIWIXMLPackageData, ...)
+	#                 drivers         = (KIWIXMLDriverData,  ...)
+	#                 ignorePkgs      = (KIWIXMLPackageData, ...)
+	#                 keepLibs        = (KIWIXMLStripData,...)
+	#                 keepTools       = (KIWIXMLStripData,...)
+	#                 pkgs            = (KIWIXMLPackageData, ...)
+	#                 pkgsCollect     = (KIWIXMLPackageCollectData,...)
+	#                 products        = (KIWIXMLPackageProductData,...)
+	#                 stripDelete     = (KIWIXMLStripData,...)
 	#            }
 	#            preferences = {
 	#                bootloader_theme     = ''
@@ -191,42 +191,42 @@ sub new {
 	#                types                = ''
 	#                version
 	#                types {
-	#                    defaultType = '',
+	#                    defaultType = ''
 	#                    <typename>[+] {
-	#                        ec2config  = KIWIXMLEC2ConfigData,
-	#                        machine    = KIWIXMLVMachineData,
-	#                        oemconfig  = KIWIXMLOEMConfigData,
-	#                        pxeconfig  = (KIWIXMLPXEDeployConfigData,...),
-	#                        pxedeploy  = KIWIXMLPXEDeployData,
-	#                        split      = KIWIXMLSplitData,
+	#                        ec2config  = KIWIXMLEC2ConfigData
+	#                        machine    = KIWIXMLVMachineData
+	#                        oemconfig  = KIWIXMLOEMConfigData
+	#                        pxeconfig  = (KIWIXMLPXEDeployConfigData,...)
+	#                        pxedeploy  = KIWIXMLPXEDeployData
+	#                        split      = KIWIXMLSplitData
 	#                        systemdisk = KIWIXMLSystemdiskData
 	#                        type       = KIWIXMLTypeData
 	#                    }
 	#                }
 	#            }
 	#            <typename>[+] {
-	#                archives = (KIWIXMLPackageArchiveData,....),
+	#                archives = (KIWIXMLPackageArchiveData,....)
 	#                <archname>[+] {
-	#                    archives        = (KIWIXMLPackageArchiveData,...),
-	#                    bootArchives    = (KIWIXMLPackageArchiveData,...),
-	#                    bootDelPkgs     = (KIWIXMLPackageData,...),
-	#                    bootPkgs        = (KIWIXMLPackageData,...),
-	#                    bootPkgsCollect = (KIWIXMLPackageCollectData,...),
-	#                    drivers         = (KIWIXMLDriverData),
-	#                    ignorePkgs      = (KIWIXMLPackageData,...),
-	#                    pkgs            = (KIWIXMLPackageData,...),
-	#                    pkgsCollect     = (KIWIXMLPackageCollectData),
-	#                    products        = (KIWIXMLPackageProductData,...),
+	#                    archives        = (KIWIXMLPackageArchiveData,...)
+	#                    bootArchives    = (KIWIXMLPackageArchiveData,...)
+	#                    bootDelPkgs     = (KIWIXMLPackageData,...)
+	#                    bootPkgs        = (KIWIXMLPackageData,...)
+	#                    bootPkgsCollect = (KIWIXMLPackageCollectData,...)
+	#                    drivers         = (KIWIXMLDriverData)
+	#                    ignorePkgs      = (KIWIXMLPackageData,...)
+	#                    pkgs            = (KIWIXMLPackageData,...)
+	#                    pkgsCollect     = (KIWIXMLPackageCollectData)
+	#                    products        = (KIWIXMLPackageProductData,...)
 	#                }
-	#                bootArchives    = (KIWIXMLPackageArchiveData,...),
-	#                bootDelPkgs     = (KIWIXMLPackageData,...),
-	#                bootPkgs        = (KIWIXMLPackageData,...),
-	#                bootPkgsCollect = (KIWIXMLPackageCollectData,...),
-	#                drivers         = (KIWIXMLPackageCollectData,...),
-	#                ignorePkgs      = (KIWIXMLPackageData,...),
-	#                pkgs            = (KIWIXMLPackageData,...),
-	#                pkgsCollect     = (KIWIXMLPackageCollectData,...),
-	#                products        = (KIWIXMLPackageCollectData,...),
+	#                bootArchives    = (KIWIXMLPackageArchiveData,...)
+	#                bootDelPkgs     = (KIWIXMLPackageData,...)
+	#                bootPkgs        = (KIWIXMLPackageData,...)
+	#                bootPkgsCollect = (KIWIXMLPackageCollectData,...)
+	#                drivers         = (KIWIXMLPackageCollectData,...)
+	#                ignorePkgs      = (KIWIXMLPackageData,...)
+	#                pkgs            = (KIWIXMLPackageData,...)
+	#                pkgsCollect     = (KIWIXMLPackageCollectData,...)
+	#                products        = (KIWIXMLPackageCollectData,...)
 	#            }
 	#            users = (KIWIXMLUserData,...)
 	#         }
@@ -1647,7 +1647,8 @@ sub getPackagesToDelete {
 #------------------------------------------
 sub getPreferences {
 	# ...
-	# Return a PreferenceData object for the current selected build
+	# Return a new KIWIXMLPreferenceData object which references
+	# the sum of all default and currently selected build
 	# profile(s)
 	# ---
 	my $this = shift;
@@ -4889,13 +4890,12 @@ sub __populatePreferenceInfo {
 				$this->{imageConfig}{$profName}{preferences} = \%prefs;
 			} else {
 				my $mergedPrefs = $this -> __mergePreferenceData(
-					$this->{imageConfig}{$profName}{preferences},
-					\%prefs
+					$this->{imageConfig}{$profName}{preferences},\%prefs
 				);
 				if (! $mergedPrefs ) {
 					return;
 				}
-				$this->{imageConfig}{$profName}{preferences} = $mergedPrefs
+				$this->{imageConfig}{$profName}{preferences} = $mergedPrefs;
 			}
 		}
 	}
