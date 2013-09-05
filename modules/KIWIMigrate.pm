@@ -1874,7 +1874,9 @@ sub setSystemOverlayFiles {
 		next if ! chdir "$dest/root/$dir";
 		foreach my $file (sort keys %{$modfiles{$dir}}) {
 			if (-e "$dir/$file") {
-				link "$dir/$file", "$file";
+				if (! link "$dir/$file", "$file") {
+					symlink "$dir/$file", "$file";
+				}
 				$done_percent = int ($factor * $done);
 				if ($done_percent > $done_previos) {
 					$kiwi -> step ($done_percent);
@@ -1938,7 +1940,9 @@ sub setSystemOverlayFiles {
 		next if ! chdir "$dest/custom/$dir";
 		foreach my $file (sort keys %{$filelist{$dir}}) {
 			if (-e "$dir/$file") {
-				link "$dir/$file", "$file";
+				if (! link "$dir/$file", "$file") {
+					symlink "$dir/$file", "$file";
+				}
 				$done_percent = int ($factor * $done);
 				if ($done_percent > $done_previos) {
 					$kiwi -> step ($done_percent);
