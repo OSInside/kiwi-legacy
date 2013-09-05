@@ -18,6 +18,6 @@
 	<users group="root">
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<packages type="bootstrap" patternType="plusRecommended">
+	<packages patternType="plusRecommended">
 	</packages>
 </image>

@@ -1060,13 +1060,13 @@ sub setTemplate {
 	if (defined $pacs) {
 		foreach my $package (sort @{$pacs}) {
 			my %pack_data = (
-				'name'         => $package
+				'name' => $package
 			);
 			my $p = KIWIXMLPackageData -> new (\%pack_data);
 			push @xml_pack, $p;
 		}
 	}
-	$xml -> addPackages (\@xml_pack, 'bootstrap');
+	$xml -> addBootstrapPackages (\@xml_pack);
 	#==========================================
 	# KIWIXMLPackageCollectData
 	#------------------------------------------
@@ -1094,7 +1094,7 @@ sub setTemplate {
 			push @xml_patt, $p;
 		}
 	}
-	$xml -> addPackageCollections (\@xml_patt, 'image');
+	$xml -> addPackageCollections (\@xml_patt);
 	#==========================================
 	# write XML description
 	#------------------------------------------
