@@ -3225,6 +3225,7 @@ function kernelCheck {
 	# image kernel. This is done by either using kexec
 	# or a real reboot is triggered
 	# ----
+	local IFS
 	local kactive=`uname -r`
 	local kreboot=1
 	local prefix=$1
