@@ -1192,6 +1192,13 @@ sub setup {
 		return;
 	}
 	#========================================
+	# check for augeas configuration file
+	#----------------------------------------
+	$status = $configure -> setupAugeasImport();
+	if (! $status) {
+		return;
+	}
+	#========================================
 	# call config.sh image script
 	#----------------------------------------
 	if ((! $initCache) && (-e "$imageDesc/config.sh")) {

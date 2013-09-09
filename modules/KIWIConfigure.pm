@@ -29,6 +29,14 @@ use KIWILog;
 use KIWIQX qw (qxx);
 
 #==========================================
+# Module Globals
+#------------------------------------------
+my @p_aug_path;    # store current augeas path
+my $p_aug_id = 1;  # store current augeas comment ID
+my $p_aug_val;     # store current augeas value
+my @p_aug_result;  # result augeas call list
+
+#==========================================
 # Constructor
 #------------------------------------------
 sub new {
@@ -303,6 +311,126 @@ sub setupFirstBootYaST {
 	}
 	$kiwi -> done();
 	return $this;
+}
+
+#==========================================
+# setupAugeasImport
+#------------------------------------------
+sub setupAugeasImport {
+	# ...
+	# Apply configuration data from an augeas XML export
+	# requires augeas and augeas-lenses to be installed as part
+	# of the appliance. For the format of the augeas XML
+	# schema please refer to the augeas documentation and/or
+	# take a look at: 'augtool dump-xml /files/*'
+	# ---
+	my $this      = shift;
+	my $kiwi      = $this->{kiwi};
+	my $locator   = $this->{locator};
+	my $root      = $this->{root};
+	my $imageDesc = $this->{imageDesc};
+	my $config    = $imageDesc.'/config-augeas.xml';
+	#==========================================
+	# check for augeas XML export file
+	#------------------------------------------
+	if (! -f $config) {
+		return $this;
+	}
+	#==========================================
+	# check for augtool in image root tree
+	#------------------------------------------
+	my $augtool = $locator -> getExecPath('augtool', $root);
+	if (! $augtool) {
+		$kiwi -> error ("Missing augtool command");
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# open and read the augeas XML data
+	#------------------------------------------
+	$kiwi -> info ("Apply Augeas configuration...");
+	my $AUG_XML = FileHandle -> new();
+	if (! $AUG_XML -> open ("cat $config|")) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to open $config: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	binmode $AUG_XML;
+	my $augxml  = XML::LibXML -> new();
+	my $augtree = $augxml -> parse_fh ( $AUG_XML );
+	my $augeas = $augtree
+		-> getElementsByTagName ("augeas") -> get_node(1);
+	$AUG_XML -> close();
+	#==========================================
+	# traverse tree / store command list
+	#------------------------------------------
+	$this -> setupAugeasTraverse ($augeas);
+	if (! @p_aug_result) {
+		$kiwi -> failed ();
+		$kiwi -> error ("No action items for augeas found");
+		$kiwi -> failed ();
+		return;
+	}
+	my $AUG_AI = FileHandle -> new();
+	if (! $AUG_AI -> open (">$root/augeas.tmp")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to create $root/augeas.tmp: $!");
+		return;
+	}
+	foreach my $set (@p_aug_result) {
+		print $AUG_AI "set $set\n";
+	}
+	print $AUG_AI "save\n";
+	$AUG_AI -> close();
+	#==========================================
+	# call augtool / apply configuration
+	#------------------------------------------
+	my $data = qxx ("chroot $root $augtool -f augeas.tmp 2>&1");
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> info ($data);
+		$kiwi -> failed ();
+		return;
+	}
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
+# setupAugeasTraverse
+#------------------------------------------
+sub setupAugeasTraverse {
+	my $this -> shift;
+	my $node = shift;
+	my @nodes = $node -> getChildrenByTagName ("node");
+	if (! @nodes) {
+		my $p = join ('/',@p_aug_path);
+		if ($p_aug_val) {
+			push @p_aug_result,"/files/$p \"$p_aug_val\"";
+		}
+		pop @p_aug_path;
+		undef $p_aug_val;
+		return;
+	}
+	$p_aug_id = 1;
+	foreach my $node (@nodes) {
+		my $label = $node -> getAttribute ("label");
+		my $value = $node
+			-> getChildrenByTagName ("value") -> get_node(1);
+		if ($label eq '#comment') {
+			$label = "#comment[$p_aug_id]";
+			$p_aug_id++;
+		}
+		if ($value) {
+			$p_aug_val = $value -> textContent();
+		}
+		push @p_aug_path,$label;
+		$this -> setupAugeasTraverse ($node);
+	}
+	pop @p_aug_path;
+	return;
 }
 
 #==========================================
