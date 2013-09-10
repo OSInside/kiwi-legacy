@@ -349,6 +349,7 @@ fi
 if \
 	[ $LOCAL_BOOT = "no" ]         && \
 	[ $systemIntegrity = "clean" ] && \
+	[ "$haveRamDisk" = "0" ]       && \
 	[ "$partOK" = "0" ]
 then
 	runHook prepartition
