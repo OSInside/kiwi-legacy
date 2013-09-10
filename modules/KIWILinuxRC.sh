@@ -4964,7 +4964,7 @@ function fetchImageMD5 {
 	#======================================
 	# Download latest MD5 from the network
 	#--------------------------------------
-	fetchFile $imageMD5s /etc/image.md5 uncomp $imageServer
+	fetchFile $imageMD5s /etc/image.md5 uncompressed $imageServer
 	#======================================
 	# Check results if download failed
 	#--------------------------------------
@@ -6519,7 +6519,7 @@ function fetchFile {
 	#======================================
 	# set source path + tool if compressed
 	#--------------------------------------
-	if [ ! -z "$izip" ];then
+	if [ ! -z "$izip" ] && [ ! "$izip" = "uncompressed" ];then
 		if [ $izip = "compressed" ] || [ "$izip" = "compressed-gzip" ]; then
 			unzip="gzip -d"
 			path=$(echo "$path" | sed -e s@\\.gz@@)
@@ -6531,6 +6531,8 @@ function fetchFile {
 		else
 			systemException "Unknown compression mode: $izip" "reboot"
 		fi
+	else
+		unset izip
 	fi
 	#======================================
 	# encode special URL characters

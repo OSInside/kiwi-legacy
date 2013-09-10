@@ -934,7 +934,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
 			else
 				fetchFile \
 					$configSource /config/$configDest \
-					uncomp $configServer
+					uncompressed $configServer
 			fi
 		fi
 	done
