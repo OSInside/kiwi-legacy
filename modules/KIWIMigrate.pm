@@ -284,122 +284,157 @@ sub searchNode {
 #------------------------------------------
 sub createTreeLayout {
 	# ...
-	# use the d3 data visualization framework to show the
-	# tree of modified and custom files in a browser
+	# use the d3 data visualization framework to show
+	# the tree of custom files in a browser
 	# ---
 	my $this       = shift;
 	my $kiwi       = $this->{kiwi};
 	my $nopackage  = $this->{nopackage};
 	my $dest       = $this->{dest};
-	my $tree;
 	if (! $nopackage) {
 		return;
 	}
 	#==========================================
 	# we need a JSON ready perl data structure
 	#------------------------------------------
-	$kiwi -> info ("Creating JSON parse tree...");
+	# split into binary and text data...
+	my $tree_binary;
+	my $tree_text;
+	my @files_binary = ();
+	my @files_text   = ();
 	my @files  = sort keys %{$nopackage};
-	my $filenr = @files;
-	my $factor = 100 / $filenr;
-	my $done_percent = 0;
-	my $done_previos = 0;
-	my $done = 0;
-	$kiwi -> cursorOFF();
 	foreach my $file (@files) {
 		my $fattr = $nopackage->{$file}->[1];
-		my @ori_items = split (/\//,$file);
-		$ori_items[0] = '/';
-		my $u_fpath = join ('_',@ori_items);
-		my @new_items = ();
-		my $isdir = 0;
-		my $filename;
-		if (($fattr) && (S_ISDIR($fattr->mode))) {
-			$isdir = 1;
+		my $type  = $fattr->[13];
+		my $is_binary = 0;
+		if (($type) && ($type == 1)) {
+			$is_binary = 1;
 		}
-		if (! $isdir) {
-			$filename = pop @ori_items;
-		}
-		#==========================================
-		# update progress
-		#------------------------------------------
-		$done_percent = int ($factor * $done);
-		if ($done_percent > $done_previos) {
-			$kiwi -> step ($done_percent);
-		}
-		$done_previos = $done_percent;
-		$done++;
-		#==========================================
-		# create file node first
-		#------------------------------------------
-		my $file_node;
-		if ($filename) {
-			$file_node->{name} = $filename;
-		}
-		#==========================================
-		# search for nodes in current tree
-		#------------------------------------------
-		my @node_list = $this -> searchNode ($tree,\@ori_items);
-		#==========================================
-		# walk through the tree and create/add data
-		#------------------------------------------
-		my $pre_node;
-		for (my $i=@ori_items-1; $i >= 0; $i--) {
-			my $dir_name = $ori_items[$i];
-			my $dir_node = $node_list[$i];
-			if (! $dir_node) {
-				$dir_node->{name} = $dir_name;
-				if ($filename) {
-					$dir_node->{children} = [ $file_node ];
-				} elsif ($pre_node) {
-					$dir_node->{children} = [ $pre_node ];
-				}
-			} else {
-				my $children = $dir_node->{children};
-				my @children = ();
-				if ($children) {
-					@children = @{$children};
-				}
-				my $add_node;
-				if ($filename) {
-					$add_node = $file_node;
-				} elsif ($pre_node) {
-					$add_node = $pre_node;
-				}
-				if ($add_node) {
-					my $added = 0;
-					foreach my $c (@children) {
-						if ($c == $add_node) {
-							$added = 1; last;
-						}
-					}
-					if (! $added) {
-						push @children,$add_node;
-						$dir_node->{children} = \@children;
-					}
-				}
-			}
-			if ($filename) {
-				undef $filename;
-			}
-			if ((! $tree) && ($dir_name eq '/') && ($dir_node)) {
-				$tree = $dir_node;
-			}
-			$pre_node = $dir_node;
+		if ($is_binary) {
+			push @files_binary,$file;
+		} else {
+			push @files_text,$file;
 		}
 	}
-	$kiwi -> step (100);
-	$kiwi -> note ("\n");
-	$kiwi -> doNorm ();
-	$kiwi -> cursorON();
+	# run twice for binary and text data...
+	foreach my $file_ref (\@files_binary,\@files_text) {
+		my $mode;
+		my $tree;
+		if ($file_ref == \@files_binary) {
+			$mode = 'binary data';
+		} else {
+			$mode = 'text data';
+		}
+		$kiwi -> info ("Creating JSON $mode parse tree...");
+		my @files  = @{$file_ref};
+		my $filenr = @files;
+		my $factor = 100 / $filenr;
+		my $done_percent = 0;
+		my $done_previos = 0;
+		my $done = 0;
+		$kiwi -> cursorOFF();
+		foreach my $file (@files) {
+			my $fattr = $nopackage->{$file}->[1];
+			my @ori_items = split (/\//,$file);
+			$ori_items[0] = '/';
+			my $u_fpath = join ('_',@ori_items);
+			my @new_items = ();
+			my $isdir = 0;
+			my $filename;
+			if (($fattr) && (S_ISDIR($fattr->mode))) {
+				$isdir = 1;
+			}
+			if (! $isdir) {
+				$filename = pop @ori_items;
+			}
+			#==========================================
+			# update progress
+			#------------------------------------------
+			$done_percent = int ($factor * $done);
+			if ($done_percent > $done_previos) {
+				$kiwi -> step ($done_percent);
+			}
+			$done_previos = $done_percent;
+			$done++;
+			#==========================================
+			# create file node first
+			#------------------------------------------
+			my $file_node;
+			if ($filename) {
+				$file_node->{name} = $filename;
+			}
+			#==========================================
+			# search for nodes in current tree
+			#------------------------------------------
+			my @node_list = $this -> searchNode ($tree,\@ori_items);
+			#==========================================
+			# walk through the tree and create/add data
+			#------------------------------------------
+			my $pre_node;
+			for (my $i=@ori_items-1; $i >= 0; $i--) {
+				my $dir_name = $ori_items[$i];
+				my $dir_node = $node_list[$i];
+				if (! $dir_node) {
+					$dir_node->{name} = $dir_name;
+					if ($filename) {
+						$dir_node->{children} = [ $file_node ];
+					} elsif ($pre_node) {
+						$dir_node->{children} = [ $pre_node ];
+					}
+				} else {
+					my $children = $dir_node->{children};
+					my @children = ();
+					if ($children) {
+						@children = @{$children};
+					}
+					my $add_node;
+					if ($filename) {
+						$add_node = $file_node;
+					} elsif ($pre_node) {
+						$add_node = $pre_node;
+					}
+					if ($add_node) {
+						my $added = 0;
+						foreach my $c (@children) {
+							if ($c == $add_node) {
+								$added = 1; last;
+							}
+						}
+						if (! $added) {
+							push @children,$add_node;
+							$dir_node->{children} = \@children;
+						}
+					}
+				}
+				if ($filename) {
+					undef $filename;
+				}
+				if ((! $tree) && ($dir_name eq '/') && ($dir_node)) {
+					$tree = $dir_node;
+				}
+				$pre_node = $dir_node;
+			}
+		}
+		if ($file_ref == \@files_binary) {
+			$tree_binary = $tree;
+		} else {
+			$tree_text = $tree;
+		}
+		$kiwi -> step (100);
+		$kiwi -> note ("\n");
+		$kiwi -> doNorm ();
+		$kiwi -> cursorON();
+	}
 	#==========================================
 	# store JSON data
 	#------------------------------------------
 	$kiwi -> info ("Storing D3 data stream...");
 	my $json = JSON->new->allow_nonref;
-	my $text = $json->pretty->encode( $tree );
+	my $binary = $json->pretty->encode( $tree_binary );
+	$this->{jsontree_binary} = $binary;
+	my $text = $json->pretty->encode( $tree_text );
+	$this->{jsontree_text} = $text;
 	$kiwi -> done();
-	$this->{jsontree} = $text;
 	return $this;
 }
 
@@ -583,8 +618,9 @@ sub createReport {
 		print $FD '<h1>RPM Package(s) installed multiple times</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following packages are installed multiple times. ';
-		print $FD 'Please uninstall the old versions of the packages ';
-		print $FD 'and re-run the migration. ';
+		print $FD 'For a clone of the system you only need to take the ';
+		print $FD 'latest version into account which also is the default. ';
+		print $FD 'action when re-installing those packages.';
 		print $FD '</p>'."\n";
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
@@ -694,13 +730,7 @@ sub createReport {
 		print $FD '</li>'."\n";
 		print $FD '<li>'."\n";
 		print $FD 'Ignoring the package. If you ignore the package, your ';
-		print $FD 'software selection might not be part of your final ';
-		print $FD 'image. Also, if you ignore a package which contains ';
-		print $FD 'files modified in the system, kiwi will store the ';
-		print $FD 'modified files inside the overlay tree. This means your ';
-		print $FD 'image might contain files from the ignored package but ';
-		print $FD 'they are most likely not useful without the full ';
-		print $FD 'package installed.';
+		print $FD 'software selection might not be part of your final image.';
 		print $FD "\n";
 		print $FD '</li>'."\n";
 		print $FD '</ul>'."\n";
@@ -741,23 +771,10 @@ sub createReport {
 		print $FD '</table>'."\n";
 	}
 	#==========================================
-	# Modified files report...
+	# Custom files report...
 	#------------------------------------------
 	if ($nopackage) {
-		print $FD '<h1>Overlay files</h1>'."\n";
-		print $FD '<p>'."\n";
-		print $FD 'Below the current overlay files directory you will ';
-		print $FD 'find the packaged but modified files and also a ';
-		print $FD 'collection of files which seems to be required for ';
-		print $FD 'this system. Please check the current tree ';
-		print $FD 'and take the same rules as for the unpackaged files ';
-		print $FD 'mentioned in the next section into account. ';
-		print $FD '</p>'."\n";
-		print $FD '<div>'."\n";
-		print $FD 'See <a href="'.$dest.'/root">Overlay directory</a>.'."\n";
-		print $FD '</div>'."\n";
-
-		print $FD '<h1>Unpackaged files</h1>'."\n";
+		print $FD '<h1>Custom files</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'Below the current custom files directory you will ';
 		print $FD 'find files/directories which are not part of any package.';
@@ -776,50 +793,144 @@ sub createReport {
 		print $FD 'level here:'."\n";
 		print $FD '</p>'."\n";
 		print $FD '<div>'."\n";
-		print $FD 'See <a href="'.$dest.'/custom">Custom directory</a>.'."\n";
+		print $FD 'Open <a href="'.$dest.'/custom">Custom directory</a>.'."\n";
 		print $FD '</div>'."\n";
-		if ($this->{jsontree}) {
-			print $FD '<p>'."\n";
-			print $FD 'The visualisation of the data below should ';
-			print $FD 'make it easier for you to browse the information.'."\n";
-			print $FD '</p>'."\n";
-			print $FD '<div id="body" class="container">'."\n";
-			print $FD '<script type="text/javascript">'."\n";
-			print $FD 'var m = [20, 120, 20, 120],'."\n";
-			print $FD 'w = 1280 - m[1] - m[3],'."\n";
-			print $FD "\t".'h = 800  - m[0] - m[2],'."\n";
-			print $FD "\t".'i = 0,'."\n";
-			print $FD "\t".'root;'."\n";
-			print $FD 'var tree = d3.layout.tree()'."\n";
-			print $FD "\t".'.size([h, w]);'."\n";
-			print $FD 'var diagonal = d3.svg.diagonal()'."\n";
-			print $FD "\t".'.projection(function(d) {return [d.y,d.x];});'."\n";
-			print $FD 'var vis = d3.select("#body").append("svg:svg")'."\n";
-			print $FD "\t".'.attr("width", w + m[1] + m[3])'."\n";
-			print $FD "\t".'.attr("height", h + m[0] + m[2])'."\n";
-			print $FD "\t".'.append("svg:g")'."\n";
-			print $FD "\t".'.attr("transform","translate("+m[3]+","+m[0]+")");';
-			print $FD "\n";
-			print $FD 'd3.inplace = function(callback) {'."\n";
-			print $FD "\t".'var myJSONObject = '.$this->{jsontree}.';'."\n";
-			print $FD "\t".'callback(myJSONObject);'."\n";
-			print $FD '};'."\n";
-			print $FD 'd3.inplace(function(json) {'."\n";
-			print $FD "\t".'root = json;'."\n";
-			print $FD "\t".'root.x0 = h / 2;'."\n";
-			print $FD "\t".'root.y0 = 0;'."\n";
-			print $FD "\t".'function toggleAll(d) {'."\n";
-			print $FD "\t\t".'if (d.children) {'."\n";
-			print $FD "\t\t".'d.children.forEach(toggleAll);'."\n";
-			print $FD "\t\t".'toggle(d);'."\n";
-			print $FD "\t\t".'}'."\n";
-			print $FD "\t".'}'."\n";
-			print $FD "\t".'root.children.forEach(toggleAll);'."\n";
-			print $FD "\t".'update(root);'."\n";
-			print $FD '});'."\n";
-			print $FD '</script>'."\n";
-			print $FD '</div>'."\n";
+		foreach my $tree ($this->{jsontree_binary},$this->{jsontree_text}) {
+			#==========================================
+			# Run only with data
+			#------------------------------------------
+			next if ! $tree;
+			#==========================================
+			# Setup title and outfile
+			#------------------------------------------
+			my $file;
+			my $title;
+			if ($tree eq $this->{jsontree_binary}) {
+				$file = "$dest/report-binary.html";
+				$title = "Custom binary data report";
+			} else {
+				$file = "$dest/report-text.html";
+				$title = "Custom text data report";
+			}
+			#==========================================
+			# Start D3 report
+			#------------------------------------------
+			my $JD = FileHandle -> new();
+			if (! $JD -> open (">$file")) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create report: $!");
+				$kiwi -> failed ();
+				return;
+			}
+			print $JD '<!DOCTYPE html>'."\n";
+			print $JD '<html>'."\n";
+			print $JD '<head>'."\n";
+			print $JD "<meta http-equiv=\"Content-Type\"";
+			print $JD " content=\"text/html;charset=utf-8\"/>"."\n";
+			print $JD '<title>'.$title.'</title>'."\n";
+			#==========================================
+			# CSS
+			#------------------------------------------
+			print $JD '<link type="text/css" rel="stylesheet"';
+			print $JD ' href=".report/d3/style.css"/>'."\n";
+			print $JD '<link type="text/css" rel="stylesheet"';
+			print $JD ' href=".report/d3/kiwi.css">'."\n";
+			#==========================================
+			# Java Script
+			#------------------------------------------
+			print $JD '<script type="text/javascript"';
+			print $JD ' src=".report/d3/d3.js"></script>'."\n";
+			print $JD '<script type="text/javascript"';
+			print $JD ' src=".report/d3/d3.layout.js"></script>'."\n";
+			print $JD '<script type="text/javascript"';
+			print $JD ' src=".report/d3/kiwi.js"></script>'."\n";
+			print $JD '</head>'."\n";
+			#==========================================
+			# Title
+			#------------------------------------------
+			print $JD '<body class="files">'."\n";
+			print $JD '<div class="headerwrap">'."\n";
+			print $JD '<div class="container"><h1>'.$title.'</h1></div>'."\n";
+			print $JD '</div>'."\n";
+			#==========================================
+			# Chapters
+			#------------------------------------------
+			print $JD '<div class="container">'."\n";
+			#==========================================
+			# Intro
+			#------------------------------------------
+			print $JD '<p>'."\n";
+			if ($tree eq $this->{jsontree_binary}) {
+				print $JD 'The visualisation of the data below shows ';
+				print $JD 'the unmanaged binary data tree.'."\n";
+			} else {
+				print $JD 'The visualisation of the data below shows ';
+				print $JD 'the unmanaged text data tree.'."\n";
+			}
+			print $JD '</p>'."\n";
+			print $JD '<div id="body" class="container">'."\n";
+			print $JD '<script type="text/javascript">'."\n";
+			print $JD 'var m = [20, 120, 20, 120],'."\n";
+			print $JD 'w = 1280 - m[1] - m[3],'."\n";
+			print $JD "\t".'h = 800  - m[0] - m[2],'."\n";
+			print $JD "\t".'i = 0,'."\n";
+			print $JD "\t".'root;'."\n";
+			print $JD 'var tree = d3.layout.tree()'."\n";
+			print $JD "\t".'.size([h, w]);'."\n";
+			print $JD 'var diagonal = d3.svg.diagonal()'."\n";
+			print $JD "\t".'.projection(function(d) {return [d.y,d.x];});'."\n";
+			print $JD 'var vis = d3.select("#body").append("svg:svg")'."\n";
+			print $JD "\t".'.attr("width", w + m[1] + m[3])'."\n";
+			print $JD "\t".'.attr("height", h + m[0] + m[2])'."\n";
+			print $JD "\t".'.append("svg:g")'."\n";
+			print $JD "\t".'.attr("transform","translate("+m[3]+","+m[0]+")");';
+			print $JD "\n";
+			print $JD 'd3.inplace = function(callback) {'."\n";
+			print $JD "\t".'var myJSONObject = '.$tree.';';
+			print $JD "\n";
+			print $JD "\t".'callback(myJSONObject);'."\n";
+			print $JD '};'."\n";
+			print $JD 'd3.inplace(function(json) {'."\n";
+			print $JD "\t".'root = json;'."\n";
+			print $JD "\t".'root.x0 = h / 2;'."\n";
+			print $JD "\t".'root.y0 = 0;'."\n";
+			print $JD "\t".'function toggleAll(d) {'."\n";
+			print $JD "\t\t".'if (d.children) {'."\n";
+			print $JD "\t\t".'d.children.forEach(toggleAll);'."\n";
+			print $JD "\t\t".'toggle(d);'."\n";
+			print $JD "\t\t".'}'."\n";
+			print $JD "\t".'}'."\n";
+			print $JD "\t".'root.children.forEach(toggleAll);'."\n";
+			print $JD "\t".'update(root);'."\n";
+			print $JD '});'."\n";
+			print $JD '</script>'."\n";
+			print $JD '</div>'."\n";
+			print $JD '</div>'."\n";
+			print $JD '</body>'."\n";
+			print $JD '</html>'."\n";
+			$JD -> close();
 		}
+		print $FD '<h1>Custom files visualisation</h1>'."\n";
+		print $FD '<p>'."\n";
+		print $FD 'For a better overview the following data reports ';
+		print $FD 'were created';
+		print $FD '</p>'."\n";
+		print $FD '<div>'."\n";
+		my $binary_report = $dest.'/report-binary.html';
+		my $text_report   = $dest.'/report-text.html';
+		if (-e $binary_report) {
+			print $FD '<p>'."\n";
+			print $FD "Open <a href=\"$binary_report\" target=\"_blank\">";
+			print $FD 'Custom binary data</a>.'."\n";
+			print $FD '</p>'."\n";
+		}
+		if (-e $text_report) {
+			print $FD '<p>'."\n";
+			print $FD "Open <a href=\"$text_report\" target=\"_blank\">";
+			print $FD 'Custom text data</a>.'."\n";
+			print $FD '</p>'."\n";
+		}
+		print $FD '</div>'."\n";
 	}
 	print $FD '</div>'."\n";
 	print $FD '<div class="footer container">'."\n";
@@ -1767,6 +1878,12 @@ sub setSystemOverlayFiles {
 	}
 	$kiwi -> done();
 	#==========================================
+	# check for modified data handled by augeas
+	#------------------------------------------
+	foreach my $file (@modified) {
+		push @custom_deny,'^'.$file;
+	}
+	#==========================================
 	# apply all deny files on result hash
 	#------------------------------------------
 	$kiwi -> info ("Apply deny expressions on custom tree...");
@@ -1845,50 +1962,19 @@ sub setSystemOverlayFiles {
 	$kiwi -> doNorm ();
 	$kiwi -> cursorON();
 	#==========================================
-	# Create modified files tree
+	# Create augeas configuration data tree
 	#------------------------------------------
-	$kiwi -> info ("Creating modified files tree...");
-	mkdir "$dest/root";
-	my %modfiles;
-	$tasks = 0;
-	$done  = 0;
-	foreach my $file (@modified) {
-		my ($name,$dir,$suffix) = fileparse ($file);
-		$modfiles{$dir}{$name} = $file;
-		$tasks++;
+	$kiwi -> info ("Creating augeas system configuration export...");
+	my $locator = KIWILocator -> instance();
+	my $augtool = $locator -> getExecPath('augtool');
+	if ($augtool) {
+		qxx ("augtool dump-xml /files/* > $dest/config-augeas.xml");
+		$kiwi -> done();
+	} else {
+		$kiwi -> skipped ();
+		$kiwi -> info ("Required augtool command not found");
+		$kiwi -> skipped ();
 	}
-	$kiwi -> cursorOFF();
-	$factor = 100 / $tasks;
-	$done_percent = 0;
-	$done_previos = 0;
-	foreach my $dir (sort keys %modfiles) {
-		mkpath ("$dest/root/$dir", {verbose => 0});
-		$done_percent = int ($factor * $done);
-		if ($done_percent > $done_previos) {
-			$kiwi -> step ($done_percent);
-		}
-		$done_previos = $done_percent;
-		$done++;
-	}
-	foreach my $dir (sort keys %modfiles) {
-		next if ! chdir "$dest/root/$dir";
-		foreach my $file (sort keys %{$modfiles{$dir}}) {
-			if (-e "$dir/$file") {
-				if (! link "$dir/$file", "$file") {
-					symlink "$dir/$file", "$file";
-				}
-				$done_percent = int ($factor * $done);
-				if ($done_percent > $done_previos) {
-					$kiwi -> step ($done_percent);
-				}
-				$done_previos = $done_percent;
-				$done++;
-			}
-		}
-	}
-	$kiwi -> note ("\n");
-	$kiwi -> doNorm ();
-	$kiwi -> cursorON();
 	#==========================================
 	# apply deny files on overlay tree
 	#------------------------------------------
@@ -1901,15 +1987,45 @@ sub setSystemOverlayFiles {
 	#==========================================
 	# Create custom (unpackaged) files tree
 	#------------------------------------------
-	$kiwi -> info ("Creating custom/unpackaged files tree...");
+	$kiwi -> info ("Creating custom/unpackaged meta data...");
+	$kiwi -> cursorOFF();
 	my %filelist;
 	my @dirslist;
-	$tasks = 0;
-	$done  = 0;
-	foreach my $file (sort keys %result) {
+	my @itemlist = sort keys %result;
+	$tasks = @itemlist;
+	$factor = 100 / $tasks;
+	$done_percent = 0;
+	$done_previos = 0;
+	$done = 0;
+	foreach my $file (@itemlist) {
 		my $fattr = $result{$file}->[1];
 		my $type  = "file";
 		my $key   = "/";
+		my $binary= 0;
+		# /.../
+		# for performance reasons we only check for the
+		# ELF header which identifies the Linux binary format
+		# ----
+		if (($fattr) && (S_ISREG($fattr->mode))) {
+			if (sysopen (my $fd,$file,O_RDONLY)) {
+				my $buf;
+				seek ($fd,1,0);
+				sysread ($fd,$buf,3);
+				close ($fd);
+				if ($buf eq 'ELF') {
+					$binary = 1;
+				}
+			}
+		}
+		# /.../
+		# The following code is more accurate but way too slow
+		# $binary = 1;
+		# my $magic = qxx ("file \"$file\" 2>&1");
+		# if ($magic =~ /text|character data/) {
+		#	$binary = 0;
+		# }
+		# ----
+		$fattr->[13] = $binary;
 		if (($fattr) && (S_ISDIR($fattr->mode))) {
 			$type = "directory";
 		}
@@ -1921,12 +2037,22 @@ sub setSystemOverlayFiles {
 			$filelist{$dirn}{$name} = $fattr;
 			push @dirslist,$dirn;
 		}
-		$tasks++;
+		$done_percent = int ($factor * $done);
+		if ($done_percent > $done_previos) {
+			$kiwi -> step ($done_percent);
+		}
+		$done_previos = $done_percent;
+		$done++;
 	}
+	$kiwi -> note ("\n");
+	$kiwi -> doNorm ();
+	$kiwi -> cursorON();
+	$kiwi -> info ("Creating custom/unpackaged files tree...");
 	$kiwi -> cursorOFF();
 	$factor = 100 / $tasks;
 	$done_percent = 0;
 	$done_previos = 0;
+	$done = 0;
 	foreach my $dir (sort @dirslist) {
 		mkpath ("$dest/custom/$dir", {verbose => 0});
 		$done_percent = int ($factor * $done);
