@@ -122,6 +122,7 @@ sub new {
 		m_debug	       => undef,
 		m_rmlists      => undef,
 		m_appdata      => undef,
+		m_reportLog    => {},
 	};
 
 	my $global = KIWIGlobals -> instance();
@@ -1168,6 +1169,7 @@ sub setupPackageFiles
 						    . 'failed';
 						$this->logMsg('E', $msg);
 					} else {
+						$this->addToReportFile($packOptions->{$requestedArch}->{'newpath'}, $medium, $packPointer->{'localfile'});
 						if ($this->{m_debug} >= 4) {
 							my $lnkTarget = $packOptions->{$requestedArch}->
 							{'newpath'};
@@ -1404,9 +1406,26 @@ sub collectPackages {
 	# step 4: run scripts for other (non-meta) packages
 	# TODO (copy/paste?)
 
+        # close all report log file handles
+        for my $r(keys(%{$this->{m_reportLog}})) {
+		close $this->{m_reportLog}->{$r};
+        }
+
 	return 0;
 }
 # /collectPackages
+
+sub addToReportFile($$$)
+{
+	my ($this, $source, $medium, $target) = @_;
+
+        if (!$this->{m_reportLog}->{$medium}) {
+         	open($this->{m_reportLog}->{$medium}, ">", "$this->{m_basesubdir}->{$medium}.packages") or die "Unable to open report file";
+        }
+
+        my $fh = $this->{m_reportLog}->{$medium};
+        print $fh "$source from $target\n";
+}
 
 #==========================================
 # unpackMetapackages
@@ -1500,7 +1519,8 @@ sub unpackMetapackages
 					}
 
 					$this->logMsg('I', "unpack $packPointer->{localfile} ");
-					$this->{m_util}->unpac_package( $packPointer->{localfile}, "$tmp");
+					$this->{m_util}->unpac_package($packPointer->{localfile}, $tmp);
+					$this->addToReportFile($packPointer->{localfile}, $medium, "META");
 					# all metapackages contain at least a CD1 dir and _may_
 					# contain another /usr/share/<name> dir
 					if ( -d "$tmp/CD1") {
