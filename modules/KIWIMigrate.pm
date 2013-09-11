@@ -1183,7 +1183,7 @@ sub setTemplate {
 	# KIWIXMLRepositoryData
 	#------------------------------------------
 	my @xml_repo = ();
-	foreach my $source (keys %{$osc{$product}} ) {
+	foreach my $source (sort keys %{$osc{$product}} ) {
 		my $type = $osc{$product}{$source}{type};
 		my $alias= $osc{$product}{$source}{alias};
 		my $prio = $osc{$product}{$source}{prio};
@@ -1346,7 +1346,7 @@ sub setPrepareConfigSkript {
 	#==========================================
 	# Repos...
 	#------------------------------------------
-	foreach my $source (keys %{$osc{$product}} ) {
+	foreach my $source (sort keys %{$osc{$product}} ) {
 		my $alias= $osc{$product}{$source}{alias};
 		my $url  = $osc{$product}{$source}{src};
 		my $flag = $osc{$product}{$source}{flag};
@@ -1384,7 +1384,7 @@ sub setPrepareConfigSkript {
 					my $alias = "openSUSE";
 					my $alreadyThere = 0;
 					$url =~ s/\/$//;
-					foreach my $source (keys %{$osc{$product}} ) {
+					foreach my $source (sort keys %{$osc{$product}} ) {
 						my $curl = $osc{$product}{$source}{src};
 						$curl =~ s/\/$//;
 						if ($curl eq $url) {
@@ -1479,7 +1479,7 @@ sub getPackageList {
 		next if $inskip;
 		$packages{$p}++;
 	}
-	foreach my $installed (keys %packages) {
+	foreach my $installed (sort keys %packages) {
 		if ($packages{$installed} > 1) {
 			my @list = qxx ("rpm -q $installed"); chomp @list;
 			push @twice,@list;
@@ -1495,7 +1495,7 @@ sub getPackageList {
 	#==========================================
 	# create URL list to lookup solvables
 	#------------------------------------------
-	foreach my $source (keys %{$osc{$product}}) {
+	foreach my $source (sort keys %{$osc{$product}}) {
 		push (@urllist,$source);
 	}
 	#==========================================
@@ -1520,7 +1520,7 @@ sub getPackageList {
 					$pathash{"pattern:$name"} = "$name";
 				}
 			}
-			@patlist = keys %pathash;
+			@patlist = sort keys %pathash;
 		}
 		$this->{patterns} = \@patlist;
 		my $psolve = KIWISatSolver -> new (
