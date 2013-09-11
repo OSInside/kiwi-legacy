@@ -306,6 +306,7 @@ sub main {
 				kiwiExit (1);
 			}
 		}
+		$migrate -> commitTransaction();
 		$migrate -> cleanMount();
 		kiwiExit (0);
 	}

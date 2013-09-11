@@ -125,6 +125,23 @@ sub new {
 			$kiwi -> failed ();
 			return;
 		}
+		$data = qxx ("git init $dest 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("git init failed: $data");
+			$kiwi -> failed ();
+			return;
+		}
+		my $FD = FileHandle -> new();
+		if (! $FD -> open (">$dest/.gitignore")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create .gitignore: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		print $FD 'custom'."\n";
+		$FD -> close();
 	}
 	$dest =~ s/\/$//;
 	$kiwi -> done ();
@@ -238,6 +255,23 @@ sub new {
 	$this->{product} = $product;
 	$this->{mount}   = [];
 	return $this;
+}
+
+#==========================================
+# commitTransaction
+#------------------------------------------
+sub commitTransaction {
+	my $this = shift;
+	my $dest = $this->{dest};
+	my $kiwi = $this->{kiwi};
+	my $text = '- automatic transaction commit';
+	my $data = qxx ("cd $dest && git add . 2>&1");
+	my $code = $? >> 8;
+	if ($code == 0) {
+		$data = qxx ("cd $dest && git commit -a -m \"$text\" 2>&1");
+		$code = $? >> 8;
+	}
+	return $code;
 }
 
 #==========================================
