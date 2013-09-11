@@ -1850,7 +1850,15 @@ sub setSystemOverlayFiles {
 	$kiwi -> info ("Searching for revision control checkout(s)...");
 	my %repos = ();
 	foreach my $file (sort keys %result) {
-		if ($file =~ /\.git$/) {
+		if ($file =~ /\.osc$/) {
+			#==========================================
+			# buildservice repo
+			#------------------------------------------
+			my $dir = $file;
+			$dir =~ s/\/\.osc$//;
+			push @custom_deny,'^'.$dir;
+			$repos{$dir} = "buildservice";
+		} elsif ($file =~ /\.git$/) {
 			#==========================================
 			# git repo
 			#------------------------------------------
