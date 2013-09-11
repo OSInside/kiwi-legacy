@@ -755,6 +755,7 @@ sub init {
 		"lvm"                   => \$LVM,
 		"mbrid=o"               => \$MBRID,
 		"migrate|m=s"           => \$Migrate,
+		"describe|D=s"          => \$Migrate,
 		"nocolor"               => \$NoColor,
 		"nofiles"               => \$MigrateNoFiles,
 		"notemplate"            => \$MigrateNoTemplate,
@@ -1463,8 +1464,8 @@ sub usage {
 	print "Image Upgrade:\n";
 	print "    kiwi -u | --upgrade <image-root>\n";
 	print "       [ --add-package <name> --add-pattern <name> ]\n";
-	print "System to Image migration:\n";
-	print "    kiwi -m | --migrate <name>\n";
+	print "System Analysis/Migration:\n";
+	print "    kiwi -D | --describe <name>\n";
 	print "       [ --exclude <directory> --exclude <...> ]\n";
 	print "       [ --skip <package> --skip <...> ]\n";
 	print "       [ --nofiles --notemplate ]\n";
