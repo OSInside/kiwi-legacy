@@ -1400,6 +1400,19 @@ sub setPrepareConfigSkript {
 			$PXML -> close();
 		}
 	}
+	#==========================================
+	# Systemd services
+	#------------------------------------------
+	my $sctl = FileHandle -> new();
+	if ($sctl -> open ("systemctl list-unit-files|")) {
+		while (my $line = <$sctl>) {
+			if ($line =~ /^(.*)\.service.*enabled/) {
+				my $service = $1;
+				print $FD "suseInsertService $service\n";
+			}
+		}
+		$sctl -> close();
+	}
 	print $FD 'suseConfig'."\n";
 	print $FD 'baseCleanMount'."\n";
 	print $FD 'exit 0'."\n";
