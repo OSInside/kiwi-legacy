@@ -15,6 +15,8 @@
 <li><a href="#new">new</a></li>
 <li><a href="#quoteFile">quoteFile</a></li>
 <li><a href="#quoteshell">quoteshell</a></li>
+<li><a href="#setupAugeasImport">setupAugeasImport</a></li>
+<li><a href="#setupAugeasTraverse">setupAugeasTraverse</a></li>
 <li><a href="#setupAutoYaST">setupAutoYaST</a></li>
 <li><a href="#setupFirstBootAnaconda">setupFirstBootAnaconda</a></li>
 <li><a href="#setupFirstBootYaST">setupFirstBootYaST</a></li>
@@ -33,20 +35,20 @@
  different image configuration functions. Configurations are
  done within the pyhsical extend
 <p>
-Defined on line: 34
+Defined on line: 42
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 569</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 858</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1090</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 829</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2160</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1082</li></ul>
 <a name="quoteFile"><h2>quoteFile</h2></a>
 <p>
  ensure proper quoting of the given file
 <p>
-Defined on line: 708
+Defined on line: 841
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 607</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 896</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1097</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2179</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1089</li></ul>
 <a name="quoteshell"><h2>quoteshell</h2></a>
 <p>
  Enclosing characters in double quotes preserves the
@@ -54,11 +56,32 @@ Called in
  with the exception of $, `, \, and, when history
  expansion is enabled, !.
 <p>
-Defined on line: 693
+Defined on line: 826
 <p>
 Called in
 <ul>
-<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 336</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 634</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 650</li></ul>
+<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 464</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 767</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 783</li></ul>
+<a name="setupAugeasImport"><h2>setupAugeasImport</h2></a>
+<p>
+ Apply configuration data from an augeas XML export
+ requires augeas and augeas-lenses to be installed as part
+ of the appliance. For the format of the augeas XML
+ schema please refer to the augeas documentation and/or
+ take a look at: 'augtool dump-xml /files/*'
+<p>
+Defined on line: 319
+<p>
+Called in
+<ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1197</li></ul>
+<a name="setupAugeasTraverse"><h2>setupAugeasTraverse</h2></a>
+<p>
+Missing<p>
+Defined on line: 404
+<p>
+Called in
+<ul>
+<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 368</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 430</li></ul>
 <a name="setupAutoYaST"><h2>setupAutoYaST</h2></a>
 <p>
  This function will make use of the autoyast system and setup
@@ -69,11 +92,11 @@ Called in
  of calling YaST to perform tasks on first boot. Use the function
  setupFirstBootYaST below which uses yast2-firstboot to do the job
 <p>
-Defined on line: 88
+Defined on line: 96
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1194</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1186</li></ul>
 <a name="setupFirstBootAnaconda"><h2>setupFirstBootAnaconda</h2></a>
 <p>
  This function activates the RHEL firstboot mechanism.
@@ -82,11 +105,11 @@ Called in
  file config-anaconda-firstboot exists as part of your
  image description
 <p>
-Defined on line: 141
+Defined on line: 149
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1198</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1190</li></ul>
 <a name="setupFirstBootYaST"><h2>setupFirstBootYaST</h2></a>
 <p>
  This function is based on the yast2-firstboot functionality which
@@ -95,68 +118,68 @@ Called in
  this the input file has a different name. the firstboot input file
  is preferred over the config-yast-autoyast.xml file
 <p>
-Defined on line: 180
+Defined on line: 188
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1190</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1182</li></ul>
 <a name="setupGroups"><h2>setupGroups</h2></a>
 <p>
 Missing<p>
-Defined on line: 311
+Defined on line: 439
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1177</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1169</li></ul>
 <a name="setupHWclock"><h2>setupHWclock</h2></a>
 <p>
  Setup the configuration for the HW clock timezone
 <p>
-Defined on line: 360
+Defined on line: 488
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1183</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1175</li></ul>
 <a name="setupKeyboardMap"><h2>setupKeyboardMap</h2></a>
 <p>
  Setup the configuration for the keyboard
 <p>
-Defined on line: 391
+Defined on line: 519
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1184</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1176</li></ul>
 <a name="setupLocale"><h2>setupLocale</h2></a>
 <p>
  Setup the configuration for the locale
 <p>
-Defined on line: 418
+Defined on line: 546
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1185</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1177</li></ul>
 <a name="setupRecoveryArchive"><h2>setupRecoveryArchive</h2></a>
 <p>
 Missing<p>
-Defined on line: 447
+Defined on line: 575
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 904</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 835</li></ul>
 <a name="setupTimezone"><h2>setupTimezone</h2></a>
 <p>
  Setup the configuration for the timezone
 <p>
-Defined on line: 561
+Defined on line: 694
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1186</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1178</li></ul>
 <a name="setupUsers"><h2>setupUsers</h2></a>
 <p>
 Missing<p>
-Defined on line: 589
+Defined on line: 722
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1180</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1172</li></ul>

@@ -53,6 +53,7 @@
 <li><a href="#setupSplash">setupSplash</a></li>
 <li><a href="#setupSplashLink">setupSplashLink</a></li>
 <li><a href="#umountDevice">umountDevice</a></li>
+<li><a href="#updateMD5File">updateMD5File</a></li>
 <li><a href="#writeMBRDiskLabel">writeMBRDiskLabel</a></li>
 </ul>
 <h2>Private methods</h2>
@@ -72,58 +73,58 @@
 <p>
  Expand the file system to its maximum size
 <p>
-Defined on line: 6804
+Defined on line: 6922
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2361</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2393</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2445</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2477</li></ul>
 <a name="__getBootSize"><h2>__getBootSize</h2></a>
 <p>
  set minimum boot size or the specified value from the
  XML description. The function returns the size in
  M-Bytes
 <p>
-Defined on line: 6776
+Defined on line: 6894
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2050</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2134</li></ul>
 <a name="__getPartBase"><h2>__getPartBase</h2></a>
 <p>
  find the correct partition device for a
  given disk device by checking for the first
  two partitions
 <p>
-Defined on line: 7042
+Defined on line: 7160
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 5221</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 5340</li></ul>
 <a name="__getPartDevice"><h2>__getPartDevice</h2></a>
 <p>
  find the correct partition device according
  to the disk device and partition number
 <p>
-Defined on line: 7072
+Defined on line: 7190
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 6148</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6172</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6204</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6267</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6291</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6323</li></ul>
 <a name="__getPartID"><h2>__getPartID</h2></a>
 <p>
  try to find the partition number which references
  the provided flag like "boot" or "lvm"
 <p>
-Defined on line: 7019
+Defined on line: 7137
 <a name="__initDiskSize"><h2>__initDiskSize</h2></a>
 <p>
  setup initial disk size value
 <p>
-Defined on line: 6899
+Defined on line: 7017
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 373</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 419</li></ul>
 <a name="__updateCustomDiskSize"><h2>__updateCustomDiskSize</h2></a>
 <p>
  if a custom disk size is set via the commandline
@@ -131,26 +132,26 @@ Called in
  the custom value if it is smaller than the currently
  calculcated disk size value
 <p>
-Defined on line: 6956
+Defined on line: 7074
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2076</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2160</li></ul>
 <a name="__updateDiskSize"><h2>__updateDiskSize</h2></a>
 <p>
  increase the current virtual disk size value
  by the specified value. value is treated as
  number in MB
 <p>
-Defined on line: 6933
+Defined on line: 7051
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 1812</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1872</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1901</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1911</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2012</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2025</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2071</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2306</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1889</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1949</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1978</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1988</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2096</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2109</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2155</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2390</li></ul>
 <a name="DESTROY"><h2>DESTROY</h2></a>
 <p>
 Missing<p>
-Defined on line: 6761
+Defined on line: 6879
 <a name="addBootNext"><h2>addBootNext</h2></a>
 <p>
  Write boot program that boots the firsts drive that
@@ -158,117 +159,117 @@ Defined on line: 6761
  creates $bootnext below is added in the git repo below
  tools/bootnext
 <p>
-Defined on line: 6674
+Defined on line: 6792
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 4224</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4469</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 4343</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4588</li></ul>
 <a name="bindDiskDevice"><h2>bindDiskDevice</h2></a>
 <p>
 Missing<p>
-Defined on line: 5694
+Defined on line: 5813
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 1131</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2123</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1165</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2207</li></ul>
 <a name="bindDiskPartitions"><h2>bindDiskPartitions</h2></a>
 <p>
  make sure we can access the partitions of the
  loop mounted disk file
 <p>
-Defined on line: 5744
+Defined on line: 5863
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 1195</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2220</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1258</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2304</li></ul>
 <a name="buildMD5Sum"><h2>buildMD5Sum</h2></a>
 <p>
 Missing<p>
-Defined on line: 3288
+Defined on line: 3372
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 665</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 667</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1071</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1073</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1475</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1477</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3208</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 705</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 707</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1105</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1107</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1538</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1540</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3292</li></ul>
 <a name="cleanStack"><h2>cleanStack</h2></a>
 <p>
 Missing<p>
-Defined on line: 3250
+Defined on line: 3334
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 1187</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1197</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1224</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1232</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1282</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1348</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1357</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1365</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1378</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1381</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2202</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2212</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2222</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2241</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2253</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2305</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2346</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2376</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2413</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2451</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2455</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2462</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2475</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2483</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2509</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2573</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2591</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2601</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2653</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2666</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2695</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2701</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2742</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2756</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2770</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2779</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5288</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5301</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5355</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5510</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5516</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5560</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5575</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5586</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5615</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5623</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5677</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6249</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6295</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6304</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6318</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6377</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6767</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1313</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1617</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 90</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1236</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1249</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1260</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1287</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1295</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1345</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1411</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1420</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1428</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1441</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1444</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2286</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2296</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2306</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2325</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2337</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2389</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2430</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2460</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2497</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2535</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2539</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2546</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2559</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2567</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2593</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2657</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2675</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2685</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2737</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2750</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2779</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2785</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2826</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2840</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2854</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2863</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5407</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5420</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5474</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5629</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5635</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5679</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5694</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5705</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5734</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5742</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5796</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6368</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6414</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6423</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6437</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6496</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6885</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1244</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1582</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 90</li></ul>
 <a name="copyBootCode"><h2>copyBootCode</h2></a>
 <p>
 Missing<p>
-Defined on line: 5090
+Defined on line: 5209
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 1285</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2673</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1348</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2757</li></ul>
 <a name="createBootStructure"><h2>createBootStructure</h2></a>
 <p>
 Missing<p>
-Defined on line: 475
+Defined on line: 521
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 720</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1250</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2624</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 760</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1313</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2708</li></ul>
 <a name="deleteVolumeGroup"><h2>deleteVolumeGroup</h2></a>
 <p>
 Missing<p>
-Defined on line: 6390
+Defined on line: 6509
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2304</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2388</li></ul>
 <a name="diskOffset"><h2>diskOffset</h2></a>
 <p>
  find the offset to the start of the first partition
 <p>
-Defined on line: 6735
+Defined on line: 6853
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 5544</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 5663</li></ul>
 <a name="getGeometry"><h2>getGeometry</h2></a>
 <p>
  obtain number of sectors from the given
  disk device and return it
 <p>
-Defined on line: 5775
+Defined on line: 5894
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 6024</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6143</li></ul>
 <a name="getSector"><h2>getSector</h2></a>
 <p>
  turn the given size in MB to the number of
  required sectors aligned to the value of
  getDiskAlignment (default 4MB)
 <p>
-Defined on line: 5838
+Defined on line: 5957
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 5922</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6041</li></ul>
 <a name="getStorageID"><h2>getStorageID</h2></a>
 <p>
  return the partition id of the given
  partition. If the call fails the function
  returns 0
 <p>
-Defined on line: 6090
+Defined on line: 6209
 <a name="getStorageSize"><h2>getStorageSize</h2></a>
 <p>
  return the size of the given disk or disk
  partition in Kb. If the call fails the function
  returns 0
 <p>
-Defined on line: 6111
+Defined on line: 6230
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2267</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2278</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2351</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2362</li></ul>
 <a name="initGeometry"><h2>initGeometry</h2></a>
 <p>
  setup start sector and stop sector for the given size at
@@ -280,45 +281,45 @@ Called in
  The function returns the number of sectors which represents
  the given size
 <p>
-Defined on line: 5885
+Defined on line: 6004
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 6040</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6159</li></ul>
 <a name="installBootLoader"><h2>installBootLoader</h2></a>
 <p>
 Missing<p>
-Defined on line: 5196
+Defined on line: 5315
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 1377</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2694</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1440</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2778</li></ul>
 <a name="luksClose"><h2>luksClose</h2></a>
 <p>
 Missing<p>
-Defined on line: 6478
+Defined on line: 6597
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2356</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2386</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2572</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2576</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6466</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6886</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6889</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2440</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2470</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2656</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2660</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6585</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7004</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7007</li></ul>
 <a name="luksResize"><h2>luksResize</h2></a>
 <p>
 Missing<p>
-Defined on line: 6430
+Defined on line: 6549
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2354</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2384</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2438</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2468</li></ul>
 <a name="makeLabel"><h2>makeLabel</h2></a>
 <p>
  grub handles spaces as "_", so we replace
  each space with an underscore
 <p>
-Defined on line: 6404
+Defined on line: 6523
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 4480</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4483</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4546</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4658</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4660</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4662</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4667</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4671</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4674</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4676</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4723</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4726</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4729</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4837</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4840</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4844</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4847</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4931</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4933</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 4599</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4602</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4665</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4777</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4779</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4781</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4786</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4790</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4793</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4795</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4842</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4845</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4848</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4956</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4959</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4963</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4966</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5050</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5052</li></ul>
 <a name="new"><h2>new</h2></a>
 <p>
  Create KIWIBoot object which is used to create bootable
@@ -328,159 +329,159 @@ Defined on line: 49
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 1297</li><li><a href="KIWIImage.html">KIWIImage</a> : 1778</li><li><a href="KIWIImage.html">KIWIImage</a> : 3311</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1103</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1130</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1160</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1194</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1228</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1262</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1303</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 84</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 1000</li><li><a href="KIWIImage.html">KIWIImage</a> : 1482</li><li><a href="KIWIImage.html">KIWIImage</a> : 3056</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1034</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1061</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1091</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1125</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1159</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1193</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1234</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 84</li></ul>
 <a name="quoteLabel"><h2>quoteLabel</h2></a>
 <p>
 Missing<p>
-Defined on line: 6421
+Defined on line: 6540
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 4238</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4240</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4318</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 4357</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4359</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4437</li></ul>
 <a name="resetGeometry"><h2>resetGeometry</h2></a>
 <p>
  reset global disk geometry information
 <p>
-Defined on line: 5871
+Defined on line: 5990
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 6023</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6142</li></ul>
 <a name="setDefaultDeviceMap"><h2>setDefaultDeviceMap</h2></a>
 <p>
  set default device map which creates a mapping for
  device names to a number
 <p>
-Defined on line: 6133
+Defined on line: 6252
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2233</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2317</li></ul>
 <a name="setLVMDeviceMap"><h2>setLVMDeviceMap</h2></a>
 <p>
  set LVM device map which creates a mapping for
  /dev/VG/name volume group device names to a number
 <p>
-Defined on line: 6183
+Defined on line: 6302
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 6321</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6380</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6440</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6499</li></ul>
 <a name="setLoopDeviceMap"><h2>setLoopDeviceMap</h2></a>
 <p>
  set loop device map which creates a mapping for
  /dev/mapper loop device names to a number
 <p>
-Defined on line: 6159
+Defined on line: 6278
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 1204</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2228</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1267</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2312</li></ul>
 <a name="setMD"><h2>setMD</h2></a>
 <p>
  create md device for software raid capabilities
  The function returns a new device map which has
  the root device overwritten by the md device
 <p>
-Defined on line: 6215
+Defined on line: 6334
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2239</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2323</li></ul>
 <a name="setStoragePartition"><h2>setStoragePartition</h2></a>
 <p>
  creates the partition table on the given device
  according to the command argument list
 <p>
-Defined on line: 5933
+Defined on line: 6052
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 1183</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2198</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1232</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2282</li></ul>
 <a name="setVolumeGroup"><h2>setVolumeGroup</h2></a>
 <p>
  create volume group and required logical
  volumes. The function returns a new device map
  including the volume device names
 <p>
-Defined on line: 6262
+Defined on line: 6381
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2249</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2333</li></ul>
 <a name="setupBootDisk"><h2>setupBootDisk</h2></a>
 <p>
 Missing<p>
-Defined on line: 1566
+Defined on line: 1635
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1310</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1241</li></ul>
 <a name="setupBootFlags"><h2>setupBootFlags</h2></a>
 <p>
 Missing<p>
-Defined on line: 2936
+Defined on line: 3020
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2617</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2701</li></ul>
 <a name="setupBootLoaderConfiguration"><h2>setupBootLoaderConfiguration</h2></a>
 <p>
 Missing<p>
-Defined on line: 3925
+Defined on line: 4046
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 740</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1268</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2641</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 780</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1331</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2725</li></ul>
 <a name="setupBootLoaderStages"><h2>setupBootLoaderStages</h2></a>
 <p>
 Missing<p>
-Defined on line: 3364
+Defined on line: 3485
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 727</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1258</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2631</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 767</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1321</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2715</li></ul>
 <a name="setupFilesystem"><h2>setupFilesystem</h2></a>
 <p>
  create filesystem according to selected type
 <p>
-Defined on line: 6522
+Defined on line: 6641
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 1222</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1231</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2404</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2454</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2590</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2600</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1285</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1294</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2488</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2538</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2674</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2684</li></ul>
 <a name="setupInstallCD"><h2>setupInstallCD</h2></a>
 <p>
 Missing<p>
-Defined on line: 547
+Defined on line: 593
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2743</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1167</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1201</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2827</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1098</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1132</li></ul>
 <a name="setupInstallFlags"><h2>setupInstallFlags</h2></a>
 <p>
 Missing<p>
-Defined on line: 2786
+Defined on line: 2870
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 711</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1241</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1529</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 751</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1304</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1598</li></ul>
 <a name="setupInstallPXE"><h2>setupInstallPXE</h2></a>
 <p>
 Missing<p>
-Defined on line: 1391
+Defined on line: 1454
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2771</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1269</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2855</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1200</li></ul>
 <a name="setupInstallStick"><h2>setupInstallStick</h2></a>
 <p>
 Missing<p>
-Defined on line: 958
+Defined on line: 998
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2757</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1137</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1235</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2841</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1068</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1166</li></ul>
 <a name="setupPartIDs"><h2>setupPartIDs</h2></a>
 <p>
  create information about device ID for root,boot
@@ -488,31 +489,31 @@ Called in
  appliance. The information is read by the initrd
  code to assign the correct partition device
 <p>
-Defined on line: 3070
+Defined on line: 3154
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2331</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2989</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2415</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3073</li></ul>
 <a name="setupSplash"><h2>setupSplash</h2></a>
 <p>
  setup kernel based bootsplash
 <p>
-Defined on line: 3130
+Defined on line: 3214
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 497</li><li><a href="KIWIImage.html">KIWIImage</a> : 1301</li><li><a href="KIWIImage.html">KIWIImage</a> : 1782</li><li><a href="KIWIImage.html">KIWIImage</a> : 3315</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1110</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 543</li><li><a href="KIWIImage.html">KIWIImage</a> : 1004</li><li><a href="KIWIImage.html">KIWIImage</a> : 1486</li><li><a href="KIWIImage.html">KIWIImage</a> : 3060</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1041</li></ul>
 <a name="setupSplashLink"><h2>setupSplashLink</h2></a>
 <p>
  This function only makes sure the .splash.gz
  file exists. This is done by creating a link to the
  original initrd file
 <p>
-Defined on line: 3215
+Defined on line: 3299
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 3193</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 3277</li></ul>
 <a name="umountDevice"><h2>umountDevice</h2></a>
 <p>
  umount all mounted filesystems from the given
@@ -520,15 +521,23 @@ Called in
  /proc/mounts table and umounts all corresponding
  mount entries
 <p>
-Defined on line: 6490
+Defined on line: 6609
+<a name="updateMD5File"><h2>updateMD5File</h2></a>
+<p>
+Missing<p>
+Defined on line: 3402
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1591</li></ul>
 <a name="writeMBRDiskLabel"><h2>writeMBRDiskLabel</h2></a>
 <p>
  writes a 4byte random ID into the MBR of the
  previosly installed boot manager. The function
  returns the written ID or undef on error
 <p>
-Defined on line: 3318
+Defined on line: 3439
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 5683</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 5802</li></ul>
