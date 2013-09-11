@@ -1614,19 +1614,16 @@ sub getPackageList {
 sub isEmptyDir {
 	my $this  = shift;
 	my $ldir  = shift;
-	my $count = 0;
-	if (-d $ldir) {
-		opendir(my $dh, $ldir) || return;
-		while (my $entry = readdir ($dh)) {
-			next if $entry eq "." || $entry eq "..";
-			$count++;
-		}
-		closedir $dh;
+	my $empty = 1;
+	my $dh;
+	opendir($dh, $ldir) || return $empty;
+	readdir ($dh);
+	readdir ($dh);
+	if (readdir ($dh)) {
+		$empty = 0;
 	}
-	if ($count > 0) {
-		return 0;
-	}
-	return 1;
+	closedir $dh;
+	return $empty;
 }
 
 #==========================================
@@ -1958,6 +1955,7 @@ sub setSystemOverlayFiles {
 	# Ignore empty directories
 	#------------------------------------------
 	$kiwi -> info ("Checking for empty directories...");
+	# store empty directories in %checkDirs
 	my $checkDirs;
 	foreach my $file (sort keys %result) {
 		my $sys_file = '/'.$file;
@@ -1966,6 +1964,7 @@ sub setSystemOverlayFiles {
 			delete $result{$file};
 		}
 	}
+	# store empty dirs and subdirs of empty directories in @checkList
 	my @checkList = ();
 	while ($checkDirs) {
 		my $checkDirsNext;
@@ -1984,24 +1983,20 @@ sub setSystemOverlayFiles {
 			push @checkList,$check;
 		}
 	}
+	# walk through items in checkList and remove if substr occurs only once
 	my $tasks = @checkList;
 	my $factor = 100 / $tasks;
 	my $done_percent = 0;
 	my $done_previos = 0;
 	my $done = 0;
 	$kiwi -> cursorOFF();
+	my @fileList = sort keys %result;
 	foreach my $check (@checkList) {
-		#my $count = 0;
-		#my $match = quotemeta $check;
 		my $count = 1;
-		foreach my $file (sort keys %result) {
+		foreach my $file (@fileList) {
 			if (index($file, $check.'/') != -1) {
 				$count = 2; last;
 			}
-			#last if $count > 1;
-			#if ($file =~ /(^$match$)|(^$match\/)/) {
-			#	$count++;
-			#}
 		}
 		if ($count == 1) {
 			delete $result{$check};
