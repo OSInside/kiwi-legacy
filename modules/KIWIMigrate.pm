@@ -1899,9 +1899,17 @@ sub setSystemOverlayFiles {
 			# buildservice repo
 			#------------------------------------------
 			my $dir = $file;
+			my $add = 1;
 			$dir =~ s/\/\.osc$//;
-			push @custom_deny,'^'.$dir;
-			$repos{$dir} = "buildservice";
+			foreach my $rule (@custom_deny) {
+				if ($dir =~ /$rule/) {
+					$add = 0; last;
+				}
+			}
+			if ($add) {
+				push @custom_deny,'^'.$dir;
+				$repos{$dir} = "buildservice";
+			}
 		} elsif ($file =~ /\.git$/) {
 			#==========================================
 			# git repo
