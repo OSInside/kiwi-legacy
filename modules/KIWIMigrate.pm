@@ -216,7 +216,7 @@ sub new {
 		'\/var\/cache\/',               # no cache files
 		'\/var\/db\/',                  # no db caches
 		'\/usr\/share\/doc\/',          # no documentation
-		'\/ruby\/gems\/.*\/doc\/',      # no ruby gem documentation
+		'\/ruby\/gems\/',               # no ruby gems
 		'\/usr\/share\/mime\/',         # no mime types
 		'\/lost\+found',                # no fs inode backup
 		'\/icons',                      # no icon directories
@@ -254,6 +254,49 @@ sub new {
 	$this->{source}  = \%OSSource;
 	$this->{product} = $product;
 	$this->{mount}   = [];
+	#==========================================
+	# Open the cache
+	#------------------------------------------
+	my $cdata;
+	my $cache = $dest.".cache";
+	if (-f $cache) {
+		$kiwi -> info ("Open cache file: $cache\n");
+		$cdata = retrieve($cache);
+		if (! $cdata) {
+			$kiwi -> warning ("--> Failed to open cache file");
+			$kiwi -> skipped ();
+			undef $cache;
+		} elsif (! $cdata->{version}) {
+			$kiwi -> warning ("--> Cache doesn't provide version");
+			$kiwi -> skipped ();
+			undef $cache;
+		} elsif ($cdata->{version} ne $this->{gdata}->{Version}) {
+			$kiwi -> warning ("--> Cache version doesn't match");
+			$kiwi -> skipped ();
+			undef $cache;
+		} elsif ($cdata->{rpmdbsum}) {
+			my $rpmdb = '/var/lib/rpm/Packages';
+			if (-e $rpmdb) {
+				my $dbsum = qxx ("cat $rpmdb | md5sum - | cut -f 1 -d-");
+				chomp $dbsum;
+				if ($dbsum ne $cdata->{rpmdbsum}) {
+					$kiwi -> warning ("--> RPM database has changed");
+					$kiwi -> skipped ();
+					undef $cache;
+				}
+			} else {
+				$kiwi -> warning ("--> RPM database not found");
+				$kiwi -> oops();
+				$kiwi -> info ("--> Using possibly outdated cache file\n");
+			}
+		} else {
+			$kiwi -> info ("--> Using cache file\n");
+		}
+	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{cdata} = $cdata;
 	return $this;
 }
 
@@ -547,9 +590,12 @@ sub createReport {
 	print $FD '<h1>Currently active kernel version</h1>'."\n";
 	print $FD '<p>'."\n";
 	print $FD 'The table below shows the packages required for the currently ';
-	print $FD 'active kernel. If multiple kernels are installed make sure ';
-	print $FD 'that the reported kernel package names are part of the ';
-	print $FD 'image description';
+	print $FD 'active kernel. The generated image description template ';
+	print $FD 'always uses the default kernel when building the image. ';
+	print $FD 'If another kernel e.g the xen kernel is in use or multiple ';
+	print $FD 'kernels are installed, you need to make sure to select ';
+	print $FD 'the kernel of the image with the bootkernel and bootprofile ';
+	print $FD 'attributes in the type section of the config.xml file';
 	print $FD '</p>'."\n";
 	print $FD '<hr>'."\n";
 	print $FD '<table>'."\n";
@@ -658,7 +704,8 @@ sub createReport {
 		print $FD '</p>'."\n";
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
-		my @list = qxx ("rpm -q @pacs --last"); chomp @list;
+		my @list = qxx ("rpm -q @pacs --last");
+		chomp @list;
 		foreach my $job (sort @list) {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
 				my $pac  = $1;
@@ -772,7 +819,8 @@ sub createReport {
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
 		my @pacs = @{$failedJob2};
-		my @list = qxx ("rpm -q @pacs --last"); chomp @list;
+		my @list = qxx ("rpm -q @pacs --last");
+		chomp @list;
 		foreach my $job (sort @list) {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
 				my $pac  = $1;
@@ -1437,6 +1485,7 @@ sub getPackageList {
 	my $skip    = $this->{skip};
 	my $dest    = $this->{dest};
 	my %osc     = %{$this->{source}};
+	my $cdata   = $this->{cdata};
 	my @urllist = ();
 	my @patlist = ();
 	my @ilist   = ();
@@ -1449,11 +1498,19 @@ sub getPackageList {
 	#==========================================
 	# search installed packages if not yet done
 	#------------------------------------------
+	$kiwi -> info ("Searching installed packages...\n");
 	if ($this->{ilist}) {
+		$kiwi -> info ("--> reading from object data");
 		@ilist = @{$this->{ilist}};
+		$kiwi -> done();
+	} elsif ($cdata->{rpmsort}) {
+		$kiwi -> info ("--> reading from cache data");
+		@ilist = @{$cdata->{rpmsort}};
+		$kiwi -> done();
 	} else {
-		$kiwi -> info ("Searching installed packages...");
-		@ilist = qxx ('rpm -qa --qf "%{NAME}\n" | sort'); chomp @ilist;
+		$kiwi -> info ("--> requesting from rpm database...");
+		@ilist = qxx ('rpm -qa --qf "%{NAME}\n" | sort');
+		chomp @ilist;
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -1481,7 +1538,8 @@ sub getPackageList {
 	}
 	foreach my $installed (sort keys %packages) {
 		if ($packages{$installed} > 1) {
-			my @list = qxx ("rpm -q $installed"); chomp @list;
+			my @list = qxx ("rpm -q $installed");
+			chomp @list;
 			push @twice,@list;
 		}
 	}
@@ -1641,8 +1699,7 @@ sub setSystemOverlayFiles {
 	my $kiwi   = $this->{kiwi};
 	my $rdev   = $this->{rdev};
 	my @deny   = @{$this->{deny}};
-	my $cache  = $dest.".cache";
-	my $cdata;
+	my $cdata  = $this->{cdata};
 	my $checkopt;
 	my %result;
 	my $data;
@@ -1650,41 +1707,17 @@ sub setSystemOverlayFiles {
 	my @modified;
 	my $root = "/";
 	#==========================================
-	# check for cache file
-	#------------------------------------------
-	if (! -f $cache) {
-		undef $cache;
-	} else {
-		$kiwi -> info ("=> Open cache file: $cache\n");
-		$cdata = retrieve($cache);
-		if (! $cdata) {
-			$kiwi -> warning ("=> Failed to open cache file");
-			$kiwi -> skipped ();
-			undef $cache;
-		} elsif (! $cdata->{version}) {
-			$kiwi -> warning ("=> Cache doesn't provide version");
-			$kiwi -> skipped ();
-			undef $cache;
-		} elsif ($cdata->{version} ne $this->{gdata}->{Version}) {
-			$kiwi -> warning ("=> Cache version doesn't match");
-			$kiwi -> skipped ();
-			undef $cache;
-		} else {
-			$kiwi -> info ("=> Using cache file\n");
-			$kiwi -> info ("=> Remove cache if your system has changed !!\n");
-		}
-	}
-	#==========================================
 	# Find files packaged but changed
 	#------------------------------------------
 	$kiwi -> info ("Inspecting RPM database [modified files]...");
-	if ($cache) {
+	if ($cdata) {
 		@modified = @{$cdata->{modified}};
 		$kiwi -> done(); 
 	} else {
 		$checkopt = "--nodeps --nodigest --nosignature --nomtime ";
 		$checkopt.= "--nolinkto --nouser --nogroup --nomode";
-		my @rpmcheck = qxx ("rpm -Va $checkopt"); chomp @rpmcheck;
+		my @rpmcheck = qxx ("rpm -Va $checkopt");
+		chomp @rpmcheck;
 		my $rpmsize = @rpmcheck;
 		my $spart = 100 / $rpmsize;
 		my $count = 1;
@@ -1728,158 +1761,170 @@ sub setSystemOverlayFiles {
 	# Find files/directories not packaged
 	#------------------------------------------
 	$kiwi -> info ("Inspecting package database(s) [unpackaged files]\n");
-	if ($cache) {
-		$kiwi -> info ("=> reading from cache");
-		%result = %{$cdata->{result}};
-		$kiwi -> done();
+	my @rpmcheck = ();
+	my @ilist    = ();
+	if ($cdata) {
+		$kiwi -> info ("--> reading RPM package list from cache");
+		@rpmcheck = @{$cdata->{rpmlist}};
 	} else {
-		$kiwi -> info ("=> requesting RPM package list...");
-		my @rpmcheck = qxx ("rpm -qlav");
+		$kiwi -> info ("--> requesting RPM package list...");
+		@rpmcheck = qxx ("rpm -qlav");
 		chomp @rpmcheck;
-		my @rpm_dir  = ();
-		my @rpm_file = ();
-		# lookup rpm database files...
-		foreach my $dir (@rpmcheck) {
-			if ($dir =~ /^d.*?\/(.*)$/) {
-				my $base = $1;
-				my $name = basename $base;
-				my $dirn = dirname  $base;
-				$dirn = abs_path ("/$dirn");
-				if ($dirn) {
-					$base = "$dirn/$name";
-				} else {
-					$base = "/$name";
-				}
+		@ilist = qxx ('rpm -qa --qf "%{NAME}\n" | sort');
+		chomp @ilist;
+		$cdata->{rpmlist} = \@rpmcheck;
+		$cdata->{rpmsort} = \@ilist;
+		$this->{ilist} = \@ilist;
+	}
+	my @rpm_dir  = ();
+	my @rpm_file = ();
+	# lookup rpm database files...
+	foreach my $dir (@rpmcheck) {
+		if ($dir =~ /^d.*?\/(.*)$/) {
+			my $base = $1;
+			my $name = basename $base;
+			my $dirn = dirname  $base;
+			$dirn = abs_path ("/$dirn");
+			if ($dirn) {
 				$base = "$dirn/$name";
-				$base =~ s/\/+/\//g;
-				$base =~ s/^\///;
-				next if $base eq './';
-				push @rpm_file,$base;
-				push @rpm_dir ,$base;
-			} elsif ($dir =~ /.*?\/(.*?)( -> .*)?$/) {
-				my $base = $1;
-				my $name = basename $base;
-				my $dirn = dirname  $base;
-				$dirn = abs_path ("/$dirn");
-				if ($dirn) {
-					$base = "$dirn/$name";
-				} else {
-					$base = "/$name";
-				}
-				$base =~ s/\/+/\//g;
-				$base =~ s/^\///;
-				next if $base eq './';
-				push @rpm_file,$base;
+			} else {
+				$base = "/$name";
 			}
+			$base = "$dirn/$name";
+			$base =~ s/\/+/\//g;
+			$base =~ s/^\///;
+			next if $base eq './';
+			push @rpm_file,$base;
+			push @rpm_dir ,$base;
+		} elsif ($dir =~ /.*?\/(.*?)( -> .*)?$/) {
+			my $base = $1;
+			my $name = basename $base;
+			my $dirn = dirname  $base;
+			$dirn = abs_path ("/$dirn");
+			if ($dirn) {
+				$base = "$dirn/$name";
+			} else {
+				$base = "/$name";
+			}
+			$base =~ s/\/+/\//g;
+			$base =~ s/^\///;
+			next if $base eq './';
+			push @rpm_file,$base;
+		}
+	}
+	$kiwi -> done();
+	# fake gem contents as rpm files...
+	if (-x "/usr/bin/gem") {
+		$kiwi -> info ("--> requesting GEM package list...");
+		my @gemcheck = qxx ("gem contents --all");
+		chomp @gemcheck;
+		foreach my $item (@gemcheck) {
+			my $name = basename $item;
+			my $dirn = dirname  $item;
+			$name =~ s/^\///;
+			$dirn =~ s/^\///;
+			push @rpm_file,$dirn."/".$name;
+			push @rpm_dir ,$dirn;
 		}
 		$kiwi -> done();
-		# fake gem contents as rpm files...
-		if (-x "/usr/bin/gem") {
-			$kiwi -> info ("=> requesting GEM package list...");
-			my @gemcheck = qxx ("gem contents --all");
-			chomp @gemcheck;
-			foreach my $item (@gemcheck) {
-				my $name = basename $item;
-				my $dirn = dirname  $item;
-				$name =~ s/^\///;
-				$dirn =~ s/^\///;
-				push @rpm_file,$dirn."/".$name;
-				push @rpm_dir ,$dirn;
-			}
-			$kiwi -> done();
+	}
+	# search files in packaged directories...
+	$kiwi -> info ("searching files in packaged directories...\n");
+	my %file_rpm;
+	my %dirs_rpm;
+	my %dirs_cmp;
+	@file_rpm{map {$_ = "/$_"} @rpm_file} = ();
+	@dirs_rpm{map {$_ = "/$_"} @rpm_dir}  = ();
+	$dirs_cmp{"/"} = undef;
+	foreach my $dir (sort keys %dirs_rpm) {
+		while ($dir =~ s:/[^/]+$::) {
+			$dirs_cmp{$dir} = undef;
 		}
-		# search files in packaged directories...
-		$kiwi -> info ("=> searching files in packaged directories...");
-		my %file_rpm;
-		my %dirs_rpm;
-		my %dirs_cmp;
-		@file_rpm{map {$_ = "/$_"} @rpm_file} = ();
-		@dirs_rpm{map {$_ = "/$_"} @rpm_dir}  = ();
-		$dirs_cmp{"/"} = undef;
-		foreach my $dir (sort keys %dirs_rpm) {
-			while ($dir =~ s:/[^/]+$::) {
-				$dirs_cmp{$dir} = undef;
+	}
+	my @packaged_dirs = sort keys %dirs_rpm;
+	my @packaged_dirs_new = ();
+	foreach my $dir (@packaged_dirs) {
+		my $ok = 1;
+		foreach my $exp (@deny) {
+			if ($dir =~ /$exp/) {
+				$ok = 0; last;
 			}
 		}
-		my @packaged_dirs = sort keys %dirs_rpm;
-		my @packaged_dirs_new = ();
-		foreach my $dir (@packaged_dirs) {
-			my $ok = 1;
-			foreach my $exp (@deny) {
-				if ($dir =~ /$exp/) {
-					$ok = 0; last;
-				}
-			}
-			if (($ok) && (-d $dir)) {
-				push @packaged_dirs_new,$dir;
-			}
+		if (($ok) && (-d $dir)) {
+			push @packaged_dirs_new,$dir;
 		}
-		@packaged_dirs = @packaged_dirs_new;
-		$kiwi -> loginfo ("packaged directories: @packaged_dirs");
-		my $wref = generateWanted (\%result);
-		find({ wanted => $wref, follow => 0 }, @packaged_dirs);
-		$kiwi -> done();
+	}
+	@packaged_dirs = @packaged_dirs_new;
+	$kiwi -> loginfo ("packaged directories: @packaged_dirs");
+	$kiwi -> snip ("--> Processing...");
+	my $wref = generateWanted (\%result);
+	find({ wanted => $wref, follow => 0 }, @packaged_dirs);
+	$kiwi -> snap();
 
-		# search for unpackaged symlinks whose origin is packaged
-		$kiwi -> info ("=> searching symlinks whose origin is packaged...");
-		foreach my $file (sort keys %result) {
-			if (-l $file) {
-				my $origin = readlink $file;
-				my $dirn = dirname $file;
-				my $path = $dirn."/".$origin;
-				my $base = basename $path;
-				$dirn = dirname $path;
-				$dirn = $this -> resolvePath ($dirn);
-				$path = $dirn."/".$base;
-				if (exists $result{$path}) {
-					delete $result{$file};
-				}
-			}
-		}
-		$kiwi -> done();
-
-		# search for unpackaged files in packaged directories...
-		$kiwi -> info ("=> searching unpackaged files in packaged dirs...");
-		foreach my $file (sort keys %result) {
-			if (exists $file_rpm{$file}) {
+	# search for unpackaged symlinks whose origin is packaged
+	$kiwi -> info ("--> searching symlinks whose origin is packaged...");
+	foreach my $file (sort keys %result) {
+		if (-l $file) {
+			my $origin = readlink $file;
+			my $dirn = dirname $file;
+			my $path = $dirn."/".$origin;
+			my $base = basename $path;
+			$dirn = dirname $path;
+			$dirn = $this -> resolvePath ($dirn);
+			$path = $dirn."/".$base;
+			if (exists $result{$path}) {
 				delete $result{$file};
 			}
 		}
-		foreach my $dir (sort keys %dirs_rpm) {
-			if (exists $result{$dir}) {
-				delete $result{$dir};
-			}
-		}
-		$kiwi -> done();
-
-		# search for unpackaged directories...
-		$kiwi -> info ("=> searching unpackaged directories...");
-		foreach my $dir (sort keys %dirs_cmp) {
-			my $FH;
-			next if ! opendir ($FH,$dir);
-			while (my $f = readdir $FH) {
-				next if $f eq "." || $f eq "..";
-				my $path = "$dir/$f";
-				if ($dir eq "/") {
-					$path = "/$f";
-				}
-				if ((-d $path) && (! -l $path)) {
-					if (! exists $dirs_rpm{$path}) {
-						my $attr = stat $path;
-						$result{$path} = [$path,$attr];
-					}
-				}
-			}
-			closedir $FH;
-		}
-		$kiwi -> done ();
-		$cdata->{result} = \%result;
 	}
+	$kiwi -> done();
+
+	# search for unpackaged files in packaged directories...
+	$kiwi -> info ("--> searching unpackaged files in packaged dirs...");
+	foreach my $file (sort keys %result) {
+		if (exists $file_rpm{$file}) {
+			delete $result{$file};
+		}
+	}
+	foreach my $dir (sort keys %dirs_rpm) {
+		if (exists $result{$dir}) {
+			delete $result{$dir};
+		}
+	}
+	$kiwi -> done();
+
+	# search for unpackaged directories...
+	$kiwi -> info ("--> searching unpackaged directories...");
+	foreach my $dir (sort keys %dirs_cmp) {
+		my $FH;
+		next if ! opendir ($FH,$dir);
+		while (my $f = readdir $FH) {
+			next if $f eq "." || $f eq "..";
+			my $path = "$dir/$f";
+			if ($dir eq "/") {
+				$path = "/$f";
+			}
+			if ((-d $path) && (! -l $path)) {
+				if (! exists $dirs_rpm{$path}) {
+					my $attr = stat $path;
+					$result{$path} = [$path,$attr];
+				}
+			}
+		}
+		closedir $FH;
+	}
+	$kiwi -> done ();
 	#==========================================
 	# Write cache if required
 	#------------------------------------------
-	if (! $cache) {
+	if (! $cdata) {
 		$kiwi -> info ("Writing cache file...");
+		my $rpmdb = '/var/lib/rpm/Packages';
+		if (-e $rpmdb) {
+			my $dbsum = qxx ("cat $rpmdb | md5sum - | cut -f 1 -d-");
+			chomp $dbsum;
+			$cdata->{rpmdbsum} = $dbsum;
+		}
 		$cdata->{version} = $this->{gdata}->{Version};
 		store ($cdata,$dest.".cache");
 		$kiwi -> done();

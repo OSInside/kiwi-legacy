@@ -23,6 +23,7 @@ use warnings;
 use Carp qw (cluck);
 use FileHandle;
 use POSIX ":sys_wait_h";
+use Time::HiRes qw( sleep );
 #==========================================
 # KIWI Modules
 #------------------------------------------
@@ -272,6 +273,53 @@ sub oops {
 	# ---
 	my $this = shift;
 	$this -> setFlag ("oops");
+	return;
+}
+
+#==========================================
+# snip
+#------------------------------------------
+sub snip {
+	# ...
+	# Show moving elements while waiting
+	# ---
+	my $this = shift;
+	my $text = shift;
+	my $col  = 36; # cyan
+	my @data = ('-','\\','|','/','-','\\','|','/');
+	my $child = fork();
+	$this -> cursorOFF();
+	if ($child) {
+		$this->{spinPID} = $child;
+	} else {
+		local $SIG{"TERM"} = 'DEFAULT';
+		if ($text) {
+			my $prefix = $this -> getPrefix(1);
+			print $prefix.$text;
+		}
+		while (1) {
+			foreach my $flag (@data) {
+				$this -> doStat();
+				print "\033[1;".$col."m".$flag;
+				sleep 0.1;
+				$this -> doNorm();
+			}
+		}
+	}
+	return;
+}
+
+#==========================================
+# snap
+#------------------------------------------
+sub snap {
+	# ...
+	# Stop moving elements
+	# ---
+	my $this = shift;
+	kill 15, $this->{spinPID};
+	$this -> done ();
+	$this -> cursorON();
 	return;
 }
 
