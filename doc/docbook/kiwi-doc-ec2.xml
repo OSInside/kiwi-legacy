@@ -614,14 +614,15 @@
         sufficient space to transfer the image tarball you created earlier.
         From the destination directory on your local machine that contains your
         tarball initiate an ftp session to your EC2 instance.
+      </para>
       
         <screen><command>sftp</command> <!--
           -->-i <replaceable>PATH_TO_PRIVATE_KEY</replaceable> <!--
           -->root@<replaceable>PUBLIC_IP_OF_YOUR_INSTANCE</replaceable><!--
-          --></screen>
-        <screen>sftp><command>cd</command> /mnt</screen>
-        <screen>sftp><command>put</command> myImage.tar</screen>
-        <screen>sftp><command>bye</command></screen></para>
+          -->
+sftp><command>cd</command> /mnt
+sftp><command>put</command> myImage.tar
+sftp><command>bye</command></screen>
 
       <para>While the image is transfering you can create a new EC2 volume.
         This new volume will become the backing store for your new AMI and
@@ -659,8 +660,8 @@
         In the shell on your EC2 instance unpack the tarball as shown
         below.</para>
 
-        <screen><command>cd</command> /mnt</screen>
-        <screen><command>tar</command> -xSf <!--
+        <screen><command>cd</command> /mnt
+<command>tar</command> -xSf <!--
           --><replaceable>myImage.tar</replaceable></screen>
 
       <para>After the unpack operation completes you can dump the filesystem
@@ -692,9 +693,9 @@
 
         <screen><command>ec2-detach-volume</command> <!--
           -->-i <replaceable>INST_ID</replaceable> <!--
-          -->-d /dev/sdg <replaceable>VOL_ID</replaceable></screen>
+          -->-d /dev/sdg <replaceable>VOL_ID</replaceable>
 
-        <screen><command>ec2-detach-volume</command> <!--
+<command>ec2-detach-volume</command> <!--
           -->-i <replaceable>INST_ID</replaceable> <!--
           -->-d /dev/sdf <replaceable>STORE_VOL_ID</replaceable></screen>
 
@@ -704,9 +705,9 @@
          <command>ec2-describe-volumes</command> command.
 
          <screen><command>ec2-delete-volume</command> <!--
-          --><replaceable>STORE_VOL_ID</replaceable></screen>
+          --><replaceable>STORE_VOL_ID</replaceable>
 
-         <screen><command>ec2-terminate-instances</command> <!--
+<command>ec2-terminate-instances</command> <!--
           --><replaceable>INST_ID</replaceable></screen></para>
 
       <para>Your next step is to create a snapshot of the EBS volume that

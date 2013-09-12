@@ -15,16 +15,19 @@
   <indexterm>
     <primary>PXE images</primary>
   </indexterm>
-  <para>A PXE image consists of a boot image and a system image like all
+  <para>PXE is a boot protocol implemented in most BIOS implementations 
+    which makes it so interesting. The protocol
+    sends DHCP requests to assign an IP address and after that it uses
+    tftp to download kernel and boot instructions.
+  </para>
+  <para>
+    A PXE image consists of a boot image and a system image like all
     other image types too. But with a PXE image the image files are
     available separately and needs to be copied at specific locations of
-    a network boot server. PXE is a boot protocol implemented in most
-    BIOS implementations which makes it so interesting. The protocol
-    sends DHCP requests to assign an IP address and after that it uses
-    tftp to download kernel and boot instructions. </para>
+    a network boot server. </para>
   <sect1 id="sec.pxe.setting-up">
     <title>Setting Up the Required Services</title>
-    <para>Before you start to build pxe images with KIWI, setup the boot
+    <para>Before you start to build PXE images with KIWI, setup the boot
       server. The boot server requires the services atftp and DHCP to
       run. </para>
     <sect2 id="sec.pxe.atftp-server">
@@ -43,23 +46,17 @@
             the following variables: </para>
           <itemizedlist>
             <listitem>
-<screen>
-ATFTPD_OPTIONS="--daemon --no-multicast"
-</screen>
+<screen>ATFTPD_OPTIONS="--daemon --no-multicast"</screen>
             </listitem>
             <listitem>
-<screen>
-ATFTPD_DIRECTORY="/srv/tftpboot"
-</screen>
+<screen>ATFTPD_DIRECTORY="/srv/tftpboot"</screen>
             </listitem>
           </itemizedlist>
         </step>
         <step>
           <para>Run <systemitem class="service">atftpd</systemitem> by
             calling the command:</para>
-<screen><command>
-rcatftpd</command> start
-</screen>
+<screen><command>rcatftpd</command> start</screen>
         </step>
       </procedure>
     </sect2>
@@ -83,8 +80,7 @@ rcatftpd</command> start
         <step>
           <para>Create the file <filename>/etc/dhcpd.conf</filename> and include the
             following statements: </para>
-<screen>
-option domain-name "example.org";
+<screen>option domain-name "example.org";
 option domain-name-servers 192.168.100.2;
 option broadcast-address 192.168.100.255;
 option routers 192.168.100.2;
@@ -98,22 +94,17 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
    filename "pxelinux.0";
    next-server 192.168.100.2;
    range dynamic-bootp 192.168.100.5 192.168.100.20;
-}
-</screen>
+}</screen>
 
         </step>
         <step>
           <para>Edit the file <filename>/etc/sysconfig/dhcpd</filename>
             and setup the network interface the server should listen on: </para>
-<screen>
-DHCPD_INTERFACE="eth0"
-</screen>
+<screen>DHCPD_INTERFACE="eth0"</screen>
         </step>
         <step>
           <para>Run the <systemitem class="server">dhcp</systemitem> server by calling:</para>
-<screen>
-<command>rcdhcpd</command> start
-</screen>
+<screen><command>rcdhcpd</command> start</screen>
         </step>
       </procedure>
     </sect2>
@@ -127,12 +118,10 @@ DHCPD_INTERFACE="eth0"
       filesystem and its root tree is deployed as clicfs based
       overlay system. </para>
 
-<screen>
-<command>cd</command> /usr/share/doc/packages/kiwi/examples
+<screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
 ==> select the example directory for the desired distribution change into it
 <command>cd</command> suse-...
-<command>kiwi</command> --build ./suse-pxe-client -d /tmp/mypxe-result --type pxe
-</screen>
+<command>kiwi</command> --build ./suse-pxe-client -d /tmp/mypxe-result --type pxe</screen>
 
   </sect1>
 
@@ -145,35 +134,27 @@ DHCPD_INTERFACE="eth0"
     <procedure id="proc.pxe.using">
       <step>
         <para>Change working directory:</para>
-<screen>
-<command>cd</command> /tmp/mypxe-result
-</screen>
+<screen><command>cd</command> /tmp/mypxe-result</screen>
       </step>
       <step>
         <para>Copy of the boot and kernel image:</para>
-<screen>
-<command>cp</command> initrd-netboot-suse-*.splash.gz \
+<screen><command>cp</command> initrd-netboot-suse-*.splash.gz \
   /srv/tftpboot/boot/initrd
 <command>cp</command> initrd-netboot-suse-*.kernel \
-  /srv/tftpboot/boot/linux
-</screen>
+  /srv/tftpboot/boot/linux</screen>
       </step>
       <step>
         <para>Copy of the system image and md5 sum:</para>
-<screen>
-<command>cp</command> suse-*-pxe-client.* /srv/tftpboot/image 
-</screen>
+<screen><command>cp</command> suse-*-pxe-client.* /srv/tftpboot/image</screen>
       </step>
       <step>
         <para>Copy of the image boot configuration. Normally the boot
           configuration applies to one client which means it is required
           to obtain the MAC address of this client. If the boot
           configuration should be used globally, copy the KIWI generated
-          file as config.default: </para>
-<screen>
-<command>cp</command> suse-*-pxe-client.*.config \
-  /srv/tftpboot/KIWI/config.<replaceable>MAC</replaceable>
-</screen>
+          file as <filename>config.default</filename>: </para>
+<screen><command>cp</command> suse-*-pxe-client.*.config \
+  /srv/tftpboot/KIWI/config.<replaceable>MAC</replaceable></screen>
       </step>
       <step>
         <para>Check the PXE configuration file. The PXE configuration
@@ -184,8 +165,7 @@ DHCPD_INTERFACE="eth0"
           following information into the file
             <filename>/srv/tftpboot/pxelinux.cfg/default</filename>: </para>
 
-<screen>
-DEFAULT KIWI-Boot
+<screen>DEFAULT KIWI-Boot
 
 LABEL KIWI-Boot
     kernel boot/linux
@@ -193,8 +173,7 @@ LABEL KIWI-Boot
     IPAPPEND 1
 
 LABEL Local-Boot
-    localboot 0
-</screen>
+    localboot 0</screen>
 
       </step>
       <step>
@@ -218,9 +197,7 @@ LABEL Local-Boot
     <sect2 id="sec.pxe.client-control-file">
       <title>The PXE Client Control File</title>
       <para>This section describes the netboot client control file: </para>
-<screen>
-hwtype.$&lt;$MAC Address$&gt;$
-</screen>
+<screen>hwtype.$&lt;$MAC Address$&gt;$</screen>
       <para>The control file is primarily used to set up new netboot
         clients. In this case, there is no configuration file
         corresponding to the client MAC address available. Using the MAC
@@ -233,9 +210,7 @@ hwtype.$&lt;$MAC Address$&gt;$
       <title>The PXE Client Configuration File</title>
       <para>This section describes the netboot client configuration
         file: </para>
-<screen>
-config.$&lt;$MAC Address$&gt;$
-</screen>
+<screen>config.$&lt;$MAC Address$&gt;$</screen>
 
       <para>The configuration file contains data about image,
         configuration, synchronization, or partition parameters. The
@@ -248,20 +223,16 @@ config.$&lt;$MAC Address$&gt;$
         read-write filesystem which is stored onto a local storage
         device of the client. Below, find an example to cover this case. </para>
 
-<screen>
-DISK=/dev/sda
+<screen>DISK=/dev/sda
 PART='5;S;x,x;L;/'
-IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
-</screen>
+IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'</screen>
 
       <para>The following format is used: </para>
 
-<screen>
-IMAGE='device;name;version;srvip;bsize;compressed,...,'
+<screen>IMAGE='device;name;version;srvip;bsize;compressed,...,'
 CONF='src;dest;srvip;bsize;[hash],...,src;dest;srvip;bsize;[hash]'
 PART='size;id;Mount,...,size;id;Mount'
-DISK=device
-</screen>
+DISK=device</screen>
 
       <variablelist>
         <varlistentry>
@@ -449,12 +420,10 @@ DISK=device
               and so on. It's required to specifiy the correct raid partition in
               the IMAGE line according to the PART setup.
               A typical raid image setup could look like this:</para>
-<screen>
-DISK=/dev/sda
+<screen>DISK=/dev/sda
 IMAGE='/dev/md1;LimeJeOS-openSUSE-##.#.i686;1.11.3;192.168.100.2;4096'
 PART='5;S;x,2000;83;/'
-RAID='1;/dev/sda;/dev/sdb'
-</screen>
+RAID='1;/dev/sda;/dev/sdb'</screen>
 		  </listitem>
         </varlistentry>
         <varlistentry>
@@ -533,9 +502,7 @@ RAID='1;/dev/sda;/dev/sdb'
               Because the tftp server do a chroot into the tftp server
               path you need to specify the initrd file as the following
               example shows: </para>
-<screen>
-KIWI_INITRD=/boot/<replaceable>name-of-initrd-file</replaceable>
-</screen>
+<screen>KIWI_INITRD=/boot/<replaceable>name-of-initrd-file</replaceable></screen>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -547,9 +514,7 @@ KIWI_INITRD=/boot/<replaceable>name-of-initrd-file</replaceable>
               recommended compressed filesystem type for the system
               image is <emphasis role="bold">clicfs</emphasis>.
             </para>
-<screen>
-UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs
-</screen>
+<screen>UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs</screen>
             <para>In this example the first device <filename
                 class="devicefile">/dev/sda2</filename> represents the
               read/write filesystem and the second device <filename
@@ -564,12 +529,10 @@ UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs
               the IMAGE and PART information. The following example
               should explain the interconnections: </para>
 
-<screen>
-IMAGE='/dev/sda3;image/myImage;1.1.1;192.168.1.1;4096'
+<screen>IMAGE='/dev/sda3;image/myImage;1.1.1;192.168.1.1;4096'
 PART='200;S;x,300;L;/,x;L;x'
 UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs
-DISK=/dev/sda
-</screen>
+DISK=/dev/sda</screen>
 
             <para>As the second element of the PART list must define the
               root partition it’s absolutely important that the first
@@ -614,12 +577,10 @@ DISK=/dev/sda
               allow the KIWI boot image to use that, the following
               information must be provided: </para>
 
-<screen>
-NBDROOT=NBD.Server.IP.address;\
+<screen>NBDROOT=NBD.Server.IP.address;\
 NBD-Port-Number;/dev/NBD-Device;\
 NBD-Swap-Port-Number;/dev/NBD-Swap-Device;\
-NBD-Write-Port-Number;/dev/NBD-Write-Device
-</screen>
+NBD-Write-Port-Number;/dev/NBD-Write-Device</screen>
 
             <para> The NBD-Device, NBD-Swap-Port-Number,
               NBD-Swap-Device, NBD-Write-Port-Number and
@@ -653,9 +614,7 @@ NBD-Write-Port-Number;/dev/NBD-Write-Device
               export the local <filename class="devicefile"
                 >/dev/sdb1</filename> partition via AoE:</para>
 
-<screen>
-<command>vbladed</command> 0 1 eth0 /dev/sdb1
-</screen>
+<screen><command>vbladed</command> 0 1 eth0 /dev/sdb1</screen>
             <para> Some explanation about this command, each AoE device
               is identified by a couple Major/Minor, with major between
               0-65535 and minor between 0-255. AoE is based just over
@@ -670,9 +629,7 @@ NBD-Write-Port-Number;/dev/NBD-Write-Device
                 >/dev/etherd/e0.1</filename>. According to this the
               AOEROOT variable must be set as follows: </para>
 
-<screen>
-AOEROOT=/dev/etherd/e0.1
-</screen>
+<screen>AOEROOT=/dev/etherd/e0.1</screen>
 
             <para> KIWI is now able to mount and use the specified AoE
               device as the remote root filesystem. In case of a
@@ -680,9 +637,7 @@ AOEROOT=/dev/etherd/e0.1
               AOEROOT variable can also contain a device for the write
               actions: </para>
 
-<screen>
-AOEROOT=/dev/etherd/e0.1,/dev/ram1
-</screen>
+<screen>AOEROOT=/dev/etherd/e0.1,/dev/ram1</screen>
 
             <para> Writing to RAM is the default but you also can set
               another device like another aoe location or a local device
@@ -701,9 +656,7 @@ AOEROOT=/dev/etherd/e0.1,/dev/ram1
               directory exists on this server. The information must be
               provided as in the following example: </para>
 
-<screen>
-NFSROOT=NFS.Server.IP.address;/path/to/root/tree
-</screen>
+<screen>NFSROOT=NFS.Server.IP.address;/path/to/root/tree</screen>
 
           </listitem>
         </varlistentry>
@@ -720,9 +673,7 @@ NFSROOT=NFS.Server.IP.address;/path/to/root/tree
               TFTP server path, you must specify the initrd file as
               follows: </para>
 
-<screen>
-KIWI_INITRD=/boot/name-of-initrd-file
-</screen>
+<screen>KIWI_INITRD=/boot/name-of-initrd-file</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -733,9 +684,7 @@ KIWI_INITRD=/boot/name-of-initrd-file
                 <varname>KIWI_INITRD</varname> applies for the kernel
               setup: </para>
 
-<screen>
-KIWI_KERNEL=/boot/name-of-kernel-file
-</screen>
+<screen>KIWI_KERNEL=/boot/name-of-kernel-file</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -745,7 +694,7 @@ KIWI_KERNEL=/boot/name-of-kernel-file
               deployment. Along with the message a shell is provided.
               This functionality should be used to send the user a
               message if it’s clear the boot process will fail because
-              the boot environment or something else influences the pxe
+              the boot environment or something else influences the PXE
               boot process in a bad way. </para>
           </listitem>
         </varlistentry>
@@ -816,9 +765,7 @@ KIWI_KERNEL=/boot/name-of-kernel-file
           <para>Create
               <filename>config.<replaceable>MAC</replaceable></filename>
           </para>
-<screen>
-IMAGE='/dev/ram1;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
-</screen>
+<screen>IMAGE='/dev/ram1;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'</screen>
         </listitem>
       </itemizedlist>
     </sect2>
@@ -842,14 +789,12 @@ IMAGE='/dev/ram1;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
         or <systemitem class="filesystem">clicfs</systemitem>.
         Below, find an example: </para>
 
-<screen>
-DISK=/dev/sda
+<screen>DISK=/dev/sda
 PART='5;S;x,62;L;/,x;L;x'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;\
       1.2.8;192.168.100.2;4096'
 UNIONFS_CONFIG=/dev/sda3,/dev/sda2,clicfs
-KIWI_INITRD=/boot/initrd
-</screen>
+KIWI_INITRD=/boot/initrd</screen>
 
         <para>As an alternative to clicfs kiwi also supports the fuse
         based unionfs utility. clicfs writes block lists on the device
@@ -858,29 +803,23 @@ KIWI_INITRD=/boot/initrd
         locations and to watch them separately. In order to use unionfs
         to write into ram the following UNIONFS_CONFIG setup is required
         </para>
-<screen>
-UNIONFS_CONFIG=tmpfs,/dev/sda2,unionfs
-</screen>
+<screen>UNIONFS_CONFIG=tmpfs,/dev/sda2,unionfs</screen>
  
-        <para>If you want to write persistently it's required to add
-        the local device name e.g /dev/sda3 instead of tmpfs as shown in
-        the initial example. If the read-only location is on NFS the
-        setup to write into a tmpfs would look like the following
-        </para>
+        <para>If you want to write persistently it's required to add the
+        local device name e.g <filename>/dev/sda3</filename> instead of
+        tmpfs as shown in the initial example. If the read-only location
+        is on NFS the setup to write into a tmpfs would look like the
+        following </para>
 
-<screen>
-NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
-UNIONFS_CONFIG=tmpfs,nfs,unionfs
-</screen>
+<screen>NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
+UNIONFS_CONFIG=tmpfs,nfs,unionfs</screen>
 
         <para>Also possible is to read remotely and to write remotely.
         Some NFS write space is required prior to the following setup:
         </para>
 
-<screen>
-NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
-UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,unionfs
-</screen>
+<screen>NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
+UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,unionfs</screen>
 
     </sect2>
 
@@ -902,18 +841,15 @@ UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,unionfs
         <listitem>
           <para>Add a split type in <filename>config.xml</filename>, for
             example </para>
-<screen>
-&lt;type fsreadonly="squashfs" 
-   image="split" fsreadwrite="ext3" boot="netboot/suse-..."/&gt;
-</screen>
+<screen>&lt;type fsreadonly="squashfs" 
+   image="split" fsreadwrite="ext3" boot="netboot/suse-..."/&gt;</screen>
         </listitem>
         <listitem>
           <para>Add a split section inside the type to describe the
               <sgmltag>temporary</sgmltag> and
               <sgmltag>persistent</sgmltag> parts. For example:</para>
 
-<screen>
-&lt;split&gt;
+<screen>&lt;split&gt;
   &lt;temporary&gt; 
     <sgmltag class="sgmlcomment"> allow RAM read/write access to: </sgmltag>
     &lt;file name="/mnt"/&gt; 
@@ -930,21 +866,18 @@ UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,unionfs
     &lt;file name="/home"/&gt;
     &lt;file name="/home/*"/&gt;
   &lt;/persistent&gt; 
-&lt;/split&gt;
-</screen>
+&lt;/split&gt;</screen>
         </listitem>
         <listitem>
           <para>Sample
               <filename>config.<replaceable>MAC</replaceable></filename>: </para>
 
-<screen>
-IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096,\
+<screen>IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096,\
       /dev/sda3;suse-##.#-pxe-client-read-write.i686;1.2.8;192.168.100.2;4096'
 PART='200;S;x,500;L;/,x;L'
 DISK=/dev/sda
 COMBINED_IMAGE=yes
-KIWI_INITRD=/boot/initrd
-</screen>
+KIWI_INITRD=/boot/initrd</screen>
         </listitem>
       </itemizedlist>
     </sect2>
@@ -963,9 +896,7 @@ KIWI_INITRD=/boot/initrd
         <listitem>
           <para>Sample
               <filename>config.<replaceable>MAC</replaceable></filename>: </para>
-<screen>
-NFSROOT=192.168.100.7;/tmp/kiwi.nfsroot
-</screen>
+<screen>NFSROOT=192.168.100.7;/tmp/kiwi.nfsroot</screen>
         </listitem>
       </itemizedlist>
     </sect2>
@@ -985,9 +916,7 @@ NFSROOT=192.168.100.7;/tmp/kiwi.nfsroot
           <para>Sample
               <filename>config.<replaceable>MAC</replaceable></filename>
           </para>
-<screen>
-NBDROOT=192.168.100.7;2000;/dev/nbd0
-</screen>
+<screen>NBDROOT=192.168.100.7;2000;/dev/nbd0</screen>
         </listitem>
       </itemizedlist>
     </sect2>
@@ -1008,14 +937,10 @@ NBDROOT=192.168.100.7;2000;/dev/nbd0
         <listitem>
           <para>Sample
               <filename>config.<replaceable>MAC</replaceable></filename>: </para>
-<screen>
-AOEROOT=/dev/etherd/e0.1
-</screen>
+<screen>AOEROOT=/dev/etherd/e0.1</screen>
           <para>This would require the following command to be called
             first:</para>
-<screen>
-<command>vbladed</command> 0 1 eth0 blockdevice
-</screen>
+<screen><command>vbladed</command> 0 1 eth0 blockdevice</screen>
         </listitem>
       </itemizedlist>
     </sect2>
@@ -1044,21 +969,17 @@ AOEROOT=/dev/etherd/e0.1
         file for each MAC address that will reside on the network. </para>
       <para>There will be one configuration file that will always be required if using groups,
         called:</para>
-<screen>
-/srv/tftpboot/KIWI/config.group
-</screen>
+<screen>/srv/tftpboot/KIWI/config.group</screen>
       <para>This file has a new static element that must exist, and one or more dynamic
         elements depending on the number of groups that will be created. For example, the
         config.group file defined below lists 3 distinct groups:</para>
-<screen>
-KIWI_GROUP="test1, test2, test3"
+<screen>KIWI_GROUP="test1, test2, test3"
 
 test1_KIWI_MAC_LIST="11:11:11:11:11:11, 00:11:00:11:22:CA"
 
 test2_KIWI_MAC_LIST="00:22:00:44:00:4D, 99:3F:21:A2:F4:32"
 
-test3_KIWI_MAC_LIST="00:54:33:FA:44:33, 84:3D:45:2F:5F:33"
-</screen>
+test3_KIWI_MAC_LIST="00:54:33:FA:44:33, 84:3D:45:2F:5F:33"</screen>
 
       <para>Note: The above hardware addresses contain random entries, and may not reflect actual
         hardware.</para>
@@ -1089,9 +1010,7 @@ test3_KIWI_MAC_LIST="00:54:33:FA:44:33, 84:3D:45:2F:5F:33"
             here, as these names will have to be used as fully defined bash/sh variables when
             linking hardware addresses to an assigned group. The following is an example that contains
             valid names:</para>
-<screen>
-KIWI_GROUP="test1, test_my_name, LIST_HARDWARE, Multple_Case_Group_1"
-</screen>
+<screen>KIWI_GROUP="test1, test_my_name, LIST_HARDWARE, Multple_Case_Group_1"</screen>
         </listitem>
         <listitem>
           <para>&lt;GROUP_NAME>_KIWI_MAC_LIST</para>
@@ -1129,61 +1048,68 @@ KIWI_GROUP="test1, test_my_name, LIST_HARDWARE, Multple_Case_Group_1"
     </sect2>
     <sect2>
       <title>The Group Details File</title>
-      <para>In addition to the config.group file, each defined group will require a
-        config.&lt;GROUP_NAME> file. This file is exactly like a standard KIWI config.&lt;MAC> file,
-        but is assigned to a group of hosts rather than a single unit. If we continue with the
-        example we used in the previous section, we would need the following files:</para>
-<screen>
-/srv/tftpboot/KIWI/config.test1
+      <para>In addition to the <filename>config.group</filename> file,
+        each defined group will require a
+          <filename>config.&lt;GROUP_NAME></filename> file. This file is
+        exactly like a standard KIWI config.&lt;MAC> file, but is
+        assigned to a group of hosts rather than a single unit. If we
+        continue with the example we used in the previous section, we
+        would need the following files:</para>
+<screen>/srv/tftpboot/KIWI/config.test1
 /srv/tftpboot/KIWI/config.test2
-/srv/tftpboot/KIWI/config.test3
-</screen>
+/srv/tftpboot/KIWI/config.test3</screen>
       <para>The contents of these files is the same that would normally reside in a config.&lt;MAC>
         file, and all definitions that would be supported for a single host, are supported for a
         group of hosts. In addition, if a host is matched to a group, yet the config.&lt;GROUP_NAME>
         file does not exist, KIWI will error out.</para>
-      <para>For example, the following configuration file, called config.test1 would be used for
-        the group called "test1":</para>
-<screen>
-DISK=/dev/sda
+      <para>For example, the following configuration file, called
+          <filename>config.test1</filename> would be used for the group
+        called "test1":</para>
+<screen>DISK=/dev/sda
 PART='5;S;x,x;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
 CONF='CONFIGURATIONS/xorg.conf.test1;/etc/X11/xorg.conf;192.168.100.2;4096,\
-     CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096'
-</screen>
-      <para>As a result of this configuration file, the image would be configured consistently
-        across all the hosts assigned to test1. The following file called config.test2, contains a
-        small change that may be specific to a function:</para>
-<screen>
-DISK=/dev/sda
+     CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096'</screen>
+      <para>As a result of this configuration file, the image would be
+        configured consistently across all the hosts assigned to test1.
+        The following file called <filename>config.test2</filename>,
+        contains a small change that may be specific to a
+        function:</para>
+<screen>DISK=/dev/sda
 PART='5;S;x,x;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
 CONF='CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,\
-     CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096'
-</screen>
-      <para>As we can see, while group 1 and 2 share the syslog.conf configuration file, they have
-        different xorg.conf files defined, therefore two distinct groups with one or more hosts
-        assigned to each group can now be configured by managing a smaller number of files.</para>
+     CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096'</screen>
+      <para>As we can see, while group 1 and 2 share the syslog.conf
+        configuration file, they have different
+          <filename>xorg.conf</filename> files defined, therefore two
+        distinct groups with one or more hosts assigned to each group
+        can now be configured by managing a smaller number of
+        files.</para>
     </sect2>
     <sect2>
       <title> Using Hardware Mapping to Provide Overrides</title>
-      <para>The only issue with running mixed hardware configurations pertains primarily to hardware
-        differences. For instance, it may be possible to create a single, xorg.conf file that is
-        able to work with all of the hardware, but there is a chance it might not be possible to do
-        so. With this in mind, KIWI provides a mechanism to provide "default" configurations that
-        works with the most common hardware configuration, while providing hardware specific
-        overrides to allow for any differences and yet have all hardware linked to the same
+      <para>The only issue with running mixed hardware configurations
+        pertains primarily to hardware differences. For instance, it may
+        be possible to create a single, <filename>xorg.conf</filename>
+        file that is able to work with all of the hardware, but there is
+        a chance it might not be possible to do so. With this in mind,
+        KIWI provides a mechanism to provide "default" configurations
+        that works with the most common hardware configuration, while
+        providing hardware specific overrides to allow for any
+        differences and yet have all hardware linked to the same
         group.</para>
       <sect3>
         <title>The Hardware Mapping Elements</title>
-        <para>To make use of the hardware linking mechanism, two additional parameters needs to be
-          added to the group details file, the one named config.&lt;group_name>. These two elements
-          "link" hardware specific configurations to the appropriate systems. A general example
-          would look like this:</para>
-<screen>
-HARDWARE_MAP="vendor_name_model"
-vendor_name_model_HARDWARE_MAP="00:00:00:11:11:11"
-</screen>
+        <para>To make use of the hardware linking mechanism, two
+          additional parameters needs to be added to the group details
+          file, the one named
+            <filename>config.&lt;group_name></filename>. These two
+          elements "link" hardware specific configurations to the
+          appropriate systems. A general example would look like
+          this:</para>
+<screen>HARDWARE_MAP="vendor_name_model"
+vendor_name_model_HARDWARE_MAP="00:00:00:11:11:11"</screen>
         <para>These parameters are not required, and the same functionality can be applied by using
           multiple groups to do the same thing, but that might not be desirable to some
           administrators. This feature allows for a slightly more complex group to be defined, but
@@ -1217,9 +1143,7 @@ vendor_name_model_HARDWARE_MAP="00:00:00:11:11:11"
           specific elements are linked to the host(s) in question. This is done by creating a new
           hardware_config.&lt;hardware_map> file. The contents of the file is quite simple, and
           contains only one element called VENDOR_CONF, as the following example shows:</para>
-<screen>
-VENDOR_CONF='CONFIGURATIONS/xorg.conf.hardware_name_model;/etc/X11/xorg.conf;192.168.100.2;4096'
-</screen>
+<screen>VENDOR_CONF='CONFIGURATIONS/xorg.conf.hardware_name_model;/etc/X11/xorg.conf;192.168.100.2;4096'</screen>
         <para>The format of the VENDOR_CONF values is exactly the same as the CONF variable used in
           the standard host and group configurations. In addition, files defined within this list
           will over-write any files defined in the group configuration, if and only if, all of the
@@ -1244,18 +1168,15 @@ VENDOR_CONF='CONFIGURATIONS/xorg.conf.hardware_name_model;/etc/X11/xorg.conf;192
           We will also assume that the differences we are trying to address are specific to the
           video card and X.Org drivers used as a result.</para>
         <para>With this in mind, we will need the following KIWI specific files:</para>
-<screen>
-cd /srv/tftpboot/KIWI
-ls
+<screen><command>cd</command> /srv/tftpboot/KIWI
+<command>ls</command>
    config.example1
    config.group
-   hardware_config.maxterm_3500
-</screen>
+   hardware_config.maxterm_3500</screen>
         <para>As we can see, there is a KIWI group file, the group configuration or details file,
           and a new file that we have not seen before called hardware_config.maxterm_3500. We will
           first look at the contents of the config,group file:</para>
-<screen>
-cat config.group
+<screen><command>cat</command> config.group
 
 KIWI_GROUP="example1"
 example1_KIWI_MAC_LIST=
@@ -1263,13 +1184,11 @@ example1_KIWI_MAC_LIST=
    00:00:00:00:00:03 00:00:00:00:00:04 \
    00:00:00:00:00:05 00:00:00:00:00:06 \
    00:00:00:00:00:07 00:00:00:00:00:08 
-   00:00:00:00:00:09 00:00:00:00:00:0A"
-</screen>
+   00:00:00:00:00:09 00:00:00:00:00:0A"</screen>
         <para>Within the file, there is a group called "example1", with ten hosts defined, in this
           case with imaginary sequential MAC addresses. Next, we look at the config.example1 group
           details/configuration file:</para>
-<screen>
-cat config.example1
+<screen><command>cat</command> config.example1
 
 KIWI_INITRD=/boot/initrd
 KIWI_KERNEL=/boot/linux
@@ -1281,46 +1200,54 @@ CONF='prefs.js;/home/kioskuser/.mozilla/firefox/07xvl1ty.default/prefs.js;192.16
 RELOAD_IMAGE=yes
 RELOAD_CONFIG=yes
 HARDWARE_MAP='maxterm_3500'
-maxterm_3500_HARDWARE_MAP='00:00:00:00:00:02 00:00:00:00:00:03 00:00:00:00:00:04'
-</screen>
+maxterm_3500_HARDWARE_MAP='00:00:00:00:00:02 00:00:00:00:00:03 00:00:00:00:00:04'</screen>
         <para>Here, most of the standard KIWI configuration elements are in place, with a few
           extras. There are three areas we want to focus our attention on, the CONF, HARDWARE_MAP
           and maxterm_3500_HARDWARE_MAP variables, as they are the most critical elements to our
           example.</para>
-        <para>The first parameter to look at is the CONF parameter, which indicates a prefs.js (for
-          Mozilla Firefox), and a xorg.conf (for X Windows) files will be copied to the host during
-          boot up. These files should be considered defaults for the group, and all hosts defined in
-          this group will use these files. As such, when the systems boot, both of these files will
-          be copied over to their local file systems when the CONF element is processed.</para>
+        <para>The first parameter to look at is the CONF parameter,
+          which indicates a <filename>prefs.js</filename> (for Mozilla
+          Firefox), and a xorg.conf (for X Windows) files will be copied
+          to the host during boot up. These files should be considered
+          defaults for the group, and all hosts defined in this group
+          will use these files. As such, when the systems boot, both of
+          these files will be copied over to their local file systems
+          when the CONF element is processed.</para>
         <para>Lastly, we have a hardware mapping group called "maxterm_3500", with three of the
           groups hosts defined as part of of a sub-group, or hardware map. The content of this file
           is as follows:</para>
-<screen>
-cat hardware_config.maxterm_3500
+<screen><command>cat</command> hardware_config.maxterm_3500
 
 VENDOR_CONF='xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
-            someconfig.cfg;/etc/sysconfig/someconfig.cfg;192.168.1.2;4096'
-</screen>
+            someconfig.cfg;/etc/sysconfig/someconfig.cfg;192.168.1.2;4096'</screen>
         <para>When the VENDOR_CONF defintition is used, we are telling KIWI that all files defined
           within this element, are specific to the hardware map they are linked to. As a result, any
           files listed here will be transferred to a host if, and only if, the host has been linked
           to the hardware map via the maxterm_3500_HARDWARE_MAP element. In our example the only
           systems that will receive the xorg.conf.maxterm_3500 file will be the three maxterms we
           linked to the hardware map itself.</para>
-        <para>In our VENDOR_CONF element, we are indicating two files that should be transferred, in
-          addition to any file transferred during the processing of the CONF element. A "specific"
-          xorg.conf file, as well as someconfig.cfg. In the case of the xorg.conf.maxterm_3500 file,
-          when it is transferred to the host, it will overwrite the xorg.conf file that was
-          previously transferred via the CONF element. However, with the someconfig.cfg file, because
-          it was not previously defined in the CONF element, it will simply get transferred over, and
-          is a perfect example of how one could enable functionality that is not otherwise
-          configured.</para>
-        <para>As a result of this example, we have seven terminals that are using a prefs.js and
-          generic xorg.conf file for their system configuration, and three terminals that are using
-          prefs.js, a new version of the xorg.conf file as well as a file called somconfig.cfg. For
-          the purposes of our example, the contents of the prefs.js, xorg.conf,
-          xorg.conf.maxterm_3500 and someconfig.cfg are arbitrary, and don't need to be explained
-          here.</para>
+        <para>In our VENDOR_CONF element, we are indicating two files
+          that should be transferred, in addition to any file
+          transferred during the processing of the CONF element. A
+          "specific" <filename>xorg.conf</filename> file, as well as
+          someconfig.cfg. In the case of the xorg.conf.maxterm_3500
+          file, when it is transferred to the host, it will overwrite
+          the <filename>xorg.conf</filename> file that was previously
+          transferred via the CONF element. However, with the
+            <filename>someconfig.cfg</filename> file, because it was not
+          previously defined in the CONF element, it will simply get
+          transferred over, and is a perfect example of how one could
+          enable functionality that is not otherwise configured.</para>
+        <para>As a result of this example, we have seven terminals that
+          are using a prefs.js and generic xorg.conf file for their
+          system configuration, and three terminals that are using
+          prefs.js, a new version of the <filename>xorg.conf</filename>
+          file as well as a file called somconfig.cfg. For the purposes
+          of our example, the contents of the
+            <filename>prefs.js</filename>,
+            <filename>xorg.conf</filename>, xorg.conf.maxterm_3500 and
+            <filename>someconfig.cfg</filename> are arbitrary, and don't
+          need to be explained here.</para>
       </sect3>
     </sect2>
   </sect1>

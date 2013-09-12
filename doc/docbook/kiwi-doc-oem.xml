@@ -22,7 +22,7 @@
     to the OEM image type. </para>
 
 
-  <para>The basic idea behind an oem image is to provide the virtual
+  <para>The basic idea behind an OEM image is to provide the virtual
     disk data for OEM vendors to support easy deployment of the system
     to physical storage media. The deployment can be performed from any
     OS including Windows as long as a tool to dump data onto a disk
@@ -33,26 +33,22 @@
     <sect1 id="sec.oem.building">
     <title>Building the suse-oem-preload Example</title>
 
-    <para>
-		The OEM example provided with kiwi is based on recent openSUSE
-		releases, one example configuration per release, and includes the
-		default and x11 patterns. The image type is a split type utilizing
-		the distributions default filesystem format for the read-write
-		partition and the <systemitem class="filesystem"
-		>squashfs</systemitem> filesystem for the read-only partition.
-		Using the additional <sgmltag class="attribute"
-		>installiso</sgmltag> attribute creates an installable ISO
-		image. When booting from the ISO image the OEM disk image will be
-		deployed to the storage media on the booting machine (after
-		confirmation by the user).
-	</para>
+    <para> The OEM example provided with KIWI is based on recent
+      openSUSE releases, one example configuration per release, and
+      includes the default and x11 patterns. The image type is a split
+      type utilizing the distributions default filesystem format for the
+      read-write partition and the <systemitem class="filesystem"
+        >squashfs</systemitem> filesystem for the read-only partition.
+      Using the additional <sgmltag class="attribute"
+        >installiso</sgmltag> attribute creates an installable ISO
+      image. When booting from the ISO image the OEM disk image will be
+      deployed to the storage media on the booting machine (after
+      confirmation by the user). </para>
 
-<screen>
-<command>cd</command> /usr/share/doc/packages/kiwi/examples
+<screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
 ==> select the example directory for the desired distribution change into it
 <command>cd</command> suse-...
-<command>kiwi</command> --build ./suse-oem-preload -d /tmp/myoem-result --type split
-</screen>
+<command>kiwi</command> --build ./suse-oem-preload -d /tmp/myoem-result --type split</screen>
 
     </sect1>
 
@@ -70,20 +66,16 @@
       The following command shows how to use QEMU to test the OEM disk
       image (<filename>filename.raw</filename>). </para>
 
-<screen>
-<command>cd</command> /tmp/myoem-result 
-<command>qemu</command> suse-*-oem-preload.*.raw
-</screen>
+<screen><command>cd</command> /tmp/myoem-result 
+<command>qemu</command> suse-*-oem-preload.*.raw</screen>
 
     <para>or using the <command>dd</command> command you can dump the
       image onto a test hard disk or USB stick and upon reboot select
       the appropriate device as the boot device in the BIOS: </para>
 
-<screen>
-<command>cd</command> /tmp/myoem-result 
+<screen><command>cd</command> /tmp/myoem-result 
 <command>dd</command> if=suse-*-oem-preload.*.raw<!-- 
---> of=/dev/<replaceable>device</replaceable> bs=32k
-</screen>
+--> of=/dev/<replaceable>device</replaceable> bs=32k</screen>
 
     <para>Note, when testing an oem image using the virtual disk image,
       i.e. the <filename class="extension">.raw</filename> file, the
@@ -98,12 +90,10 @@
       be executed. The following commands show this procedure using
       QEMU. </para>
 
-<screen>
-<command>cd</command> /tmp/myoem-result 
+<screen><command>cd</command> /tmp/myoem-result 
 <command>qemu-img</command> create /tmp/mydisk 20G 
 <command>qemu</command> -hda /tmp/mydisk<!-- 
---> -cdrom suse-*-oem-preload.*.iso -boot d
-</screen>
+--> -cdrom suse-*-oem-preload.*.iso -boot d</screen>
 
   </sect1>
 
@@ -221,7 +211,7 @@
         user can setup a disk with free partitions for the KIWI OEM
         installation process. This way already existing data will not be
         touched. In order to activate the partition based install mode
-        the following oem option has to be set in
+        the following OEM option has to be set in
           <filename>config.xml</filename>: </para>
 
       <screen>&lt;oem-partition-install&gt;true&lt;/oem-partition-install&gt;</screen>
@@ -243,7 +233,7 @@
         </listitem>
         <listitem>
           <para>There is no support for remote (PXE) OEM installation
-            because kiwi has to loop mount the disk image in order to
+            because KIWI has to loop mount the disk image in order to
             access the partitions which can’t be done remotely. </para>
         </listitem>
         <listitem>
@@ -260,70 +250,53 @@
 	
 	<sect2 id="sec.oem.pxe-based-installation">
 		<title>Network Based Installation</title>
-		<para>
-			Instead of manually dumping the OEM image on the target
-			device or creating a kiwi install CD, USB stick, there is
-			a third method of deploying the OEM image on the target
-			device. It's possible to let the image be downloaded from
-			a PXE boot server over the network. This requires a PXE
-			network boot server to be setup properly in the first place
-			For details how to do this refer to the
-			chapter: <xref linkend="chap.pxe"/>. If your pxe server
-			is running the following steps are required to setup
-			the install process over the network
-		</para>
+		<para> Instead of manually dumping the OEM image on the target device
+        or creating a KIWI install CD, USB stick, there is a third
+        method of deploying the OEM image on the target device. It's
+        possible to let the image be downloaded from a PXE boot server
+        over the network. This requires a PXE network boot server to be
+        setup properly in the first place For details how to do this
+        refer to the chapter: <xref linkend="chap.pxe"/>. If your pxe
+        server is running the following steps are required to setup the
+        install process over the network </para>
 		<itemizedlist>
 			<listitem>
-				<para>
-					Make sure you have created an install PXE tarball
-					along with your oem image:
-<screen>
-&lt;type image="oem" ... installpxe="true"/&gt;
-</screen>
-				</para>
+				<para> Make sure you have created an install PXE tarball along with
+            your oem image:
+            <screen>&lt;type image="oem" ... installpxe="true"/&gt;</screen>
+          </para>
 			</listitem>
 			<listitem>
-				<para>
-					unpack the created &lt;image-name&gt;.tgz file 	and
-					copy the initrd and kernel images over to your pxe server
-<screen>
-tar -xf &lt;image-name&gt;.tgz
-scp initrd-oemboot-*.install.* pxe.server.ip:/srv/tftpboot/boot/initrd
-scp initrd-oemboot-*.kernel.*  pxe.server.ip:/srv/tftpboot/boot/linux
-</screen>
-				</para>
+				<para> unpack the created &lt;image-name&gt;.tgz file and copy the
+            initrd and kernel images over to your PXE server
+            <screen><command>tar</command> -xf &lt;image-name&gt;.tgz
+<command>scp</command> initrd-oemboot-*.install.* pxe.server.ip:/srv/tftpboot/boot/initrd
+<command>scp</command> initrd-oemboot-*.kernel.*  pxe.server.ip:/srv/tftpboot/boot/linux</screen>
+          </para>
             </listitem>
 			<listitem>
-				<para>
-					Next copy the system image and md5 sum over to
-					to the pxe boot server
-<screen>
-scp &lt;image-file&gt;.gz  pxe.server.ip:/srv/tftpboot/image/
-scp &lt;image-file&gt;.md5 pxe.server.ip:/srv/tftpboot/image/
-</screen>
-				</para>
+				<para> Next copy the system image and md5 sum over to to the PXE
+            boot server
+            <screen><command>scp</command> &lt;image-file&gt;.gz  pxe.server.ip:/srv/tftpboot/image/
+<command>scp</command> &lt;image-file&gt;.md5 pxe.server.ip:/srv/tftpboot/image/</screen>
+          </para>
 			</listitem>
 			<listitem>
-				<para>
-					At last set the kernel commandline parameters
-					to the append line in your PXE configuration
-					(for example: pxelinux.cfg/default). The required
-					parameters are stored in the file
-                    <filename>&lt;image-file&gt;.append</filename>
-					from the kiwi generated install tarball                    
-				</para>
-				<para>
-					Optionally the image can be stored on a FTP,HTTP server
-					specified via the <command>kiwiserver</command> and
-					<command>kiwiservertype</command> append
-					information. In this case make sure you copied the
-					system image and md5 file to the correct location on
-					the ftp,http,etc. server. kiwi searches the image at
-					one place only which is below the image/ directory on
-                    the root path of the specified server. initrd and linux
-					kernel are loaded by pxe thus they require a tftp server
-					to be present.
-				</para>
+				<para> At last set the kernel commandline parameters to the append
+            line in your PXE configuration (for example:
+              <filename>pxelinux.cfg/default</filename>). The required
+            parameters are stored in the file
+              <filename>&lt;image-file&gt;.append</filename> from the
+            KIWI generated install tarball </para>
+				<para> Optionally the image can be stored on a FTP,HTTP server
+            specified via the <command>kiwiserver</command> and
+              <command>kiwiservertype</command> append information. In
+            this case make sure you copied the system image and md5 file
+            to the correct location on the ftp, http, etc. server. KIWI
+            searches the image at one place only which is below the
+              <filename>image/</filename> directory on the root path of
+            the specified server. initrd and linux kernel are loaded by
+            PXE thus they require a tftp server to be present. </para>
             </listitem>
 		</itemizedlist>
 	</sect2>
