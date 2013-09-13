@@ -54,34 +54,39 @@
 			and based on the openSUSE 12.2 JeOS image description. In order to
 			create image caches for the system and the boot image the following
 			steps needs to be done:
-			<screen>
-1) copy the base image descriptions used in the build:
-   cp -a /usr/share/kiwi/image/vmxboot/suse-12.2 /tmp/boot-cache
-   cp -a /usr/share/kiwi/image/suse-12.2-JeOS /tmp/image-cache
-
-2) modify boot-cache and image-cache config.xml files to add a
-   btrfs type and size
-
-   &lt;type image="btrfs"&gt;
-       &lt;size unit="G">5&lt;/size&gt;
-   &lt;/type&gt;
-
-3) modify boot-cache and image-cache to contain the packagemanager.
-   This is required for the later use of the caches
-  
-   &lt;package name="zypper"/&gt;
-
-4) now build the caches:
-   kiwi --init-cache /tmp/image-cache
-   kiwi --init-cache /tmp/boot-cache
-			</screen>
-			By default those caches will be created in '/var/cache/kiwi/image'.
-			To run a build which makes use of the cache the following command
-			is used:
-			<screen>
-kiwi --build suse-12.2-JeOS -d /tmp/myimage --type vmx \
-     --cache /var/cache/kiwi/image
-			</screen>
+		</para>
+    <procedure>
+      <step>
+        <para>Copy the base image descriptions used in the build:</para>
+        <screen><command>cp</command> -a /usr/share/kiwi/image/vmxboot/suse-12.2 /tmp/boot-cache
+<command>cp</command> -a /usr/share/kiwi/image/suse-12.2-JeOS /tmp/image-cache</screen>
+      </step>
+      <step>
+        <para>Modify boot-cache and image-cache
+            <filename>config.xml</filename> files to add a btrfs type
+          and size</para>
+        <screen>&lt;type image="btrfs"&gt;
+    &lt;size unit="G">5&lt;/size&gt;
+&lt;/type&gt;</screen>
+      </step>
+      <step>
+        <para>Modify boot-cache and image-cache to contain the package
+          manager. This is required for the later use of the
+          caches.</para>
+        <screen>&lt;package name="zypper"/&gt;</screen>
+      </step>
+      <step>
+        <para>Build the caches:</para>
+        <screen><command>kiwi</command> --init-cache /tmp/image-cache
+<command>kiwi</command> --init-cache /tmp/boot-cache</screen>
+      </step>
+    </procedure>
+		<para> By default those caches will be created in
+        <filename>/var/cache/kiwi/image</filename>. To run a build which
+      makes use of the cache the following command is used: </para>
+			<screen><command>kiwi</command> --build suse-12.2-JeOS -d /tmp/myimage --type vmx \
+     --cache /var/cache/kiwi/image</screen>
+			<para>
 			This call is about 50% faster compared to the creation without a
 			cache. It's important to understand that a cache based build will
 			create a root tree which contains only the cow file containing the
