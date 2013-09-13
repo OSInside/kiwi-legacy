@@ -3290,6 +3290,7 @@ function kernelCheck {
 			initrd=`echo $i | cut -f2 -d:`
 			break
 		done
+		IFS=$IFS_ORIG
 		if [ ! -f $prefix/boot/$kernel ] || [ ! -f $prefix/boot/$initrd ];then
 			Echo "Can't find $kernel / $initrd in system image"
 			Echo "Reboot triggered in 5 sec..."
@@ -9814,6 +9815,10 @@ function FBOK {
 # initialize
 #--------------------------------------
 function initialize {
+	#======================================
+	# Export IFS default value
+	#--------------------------------------
+	export IFS_ORIG=$IFS
 	#======================================
 	# Exports boot image .profile
 	#--------------------------------------
