@@ -199,7 +199,7 @@
     </para>
     <para>
       The process will always place it's result into the
-      <filename>/tmp/$OptionValueOf-D</filename> directory. The reason for
+      <filename>/tmp/$OptionValueOf--describe</filename> directory. The reason for
       this is because
       <filename class="directory">/tmp</filename> is always excluded from
       the analysis and therefore
@@ -223,7 +223,6 @@
     </para>    
     <cmdsynopsis><command>kiwi</command> 
       <group choice="req">
-        <arg choice="plain">-D</arg>
         <arg choice="plain">--describe</arg>
       </group>
       <arg choice="plain"><replaceable>name</replaceable></arg>
