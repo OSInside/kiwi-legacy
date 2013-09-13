@@ -755,7 +755,7 @@ sub init {
 		"lvm"                   => \$LVM,
 		"mbrid=o"               => \$MBRID,
 		"migrate|m=s"           => \$Migrate,
-		"describe|D=s"          => \$Migrate,
+		"describe=s"            => \$Migrate,
 		"nocolor"               => \$NoColor,
 		"nofiles"               => \$MigrateNoFiles,
 		"notemplate"            => \$MigrateNoTemplate,
