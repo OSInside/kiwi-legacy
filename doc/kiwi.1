@@ -2,12 +2,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.78.0 <http://docbook.sf.net/>
-.\"      Date: Created: 09/11/2013
+.\"      Date: Created: 09/13/2013
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 5.05
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 09/11/2013" "KIWI 5\&.05" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 09/13/2013" "KIWI 5\&.05" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -87,14 +87,14 @@ and
 you can tell the system to ignore specific directories and/or packages\&. This makes sense if you know before that some data is not worth to become handled or can be restored easily later inside the cloned image like software repositories\&.
 .PP
 The process will always place it\*(Aqs result into the
-/tmp/$OptionValueOf\-D
+/tmp/$OptionValueOf\-\-describe
 directory\&. The reason for this is because
 /tmp
 is always excluded from the analysis and therefore we can safely place new files there without influencing the process itself\&. You should have at least 50\ \&MB free space for the cache file and the image description all the rest are just hard links\&.
 .PP
 As one result a HTML based report file is created which contains important information about the system\&. You are free to ignore that information but with the risk that the image from that description does not represent the same system which is running at the moment\&. The less issues left in the report the better is the result\&. In most cases a manual fine tuning is required\&. This includes the repository selection and the unmanaged files along with the configuration details of your currently running operating system\&. You should understand the module as a helper to analyse running servers\&.
 .HP \w'\fBkiwi\fR\ 'u
-\fBkiwi\fR {\-D | \-\-describe} \fIname\fR [\-\-exclude\ \fIdirectory\fR...] [\-\-skip\ \fIpackage\fR...] [\-\-nofiles] [\-\-notemplate]
+\fBkiwi\fR {\-\-describe} \fIname\fR [\-\-exclude\ \fIdirectory\fR...] [\-\-skip\ \fIpackage\fR...] [\-\-nofiles] [\-\-notemplate]
 .SH "IMAGE POSTPROCESSING MODES"
 .PP
 The KIWI post\-processing modes are used for special image deployment tasks, like installing the image on a USB stick\&. So to say they are the third step after preparation and creation\&. KIWI calls the postprocessing modules automatically according to the specified output image type and attributes but it\*(Aqs also possible to call them manually\&.

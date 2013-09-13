@@ -16,6 +16,7 @@
 <li><a href="#getVGName">getVGName</a></li>
 <li><a href="#getVolumeFreespace">getVolumeFreespace</a></li>
 <li><a href="#getVolumeIDs">getVolumeIDs</a></li>
+<li><a href="#getVolumeMountPoint">getVolumeMountPoint</a></li>
 <li><a href="#getVolumeName">getVolumeName</a></li>
 <li><a href="#getVolumeSize">getVolumeSize</a></li>
 <li><a href="#getVolumes">getVolumes</a></li>
@@ -23,6 +24,7 @@
 <li><a href="#new">new</a></li>
 <li><a href="#setVGName">setVGName</a></li>
 <li><a href="#setVolumeFreespace">setVolumeFreespace</a></li>
+<li><a href="#setVolumeMountPoint">setVolumeMountPoint</a></li>
 <li><a href="#setVolumeName">setVolumeName</a></li>
 <li><a href="#setVolumeSize">setVolumeSize</a></li>
 </ul>
@@ -40,93 +42,103 @@
  Verify that the initialization hash given to the constructor meets
  all consistency and data criteria.
 <p>
-Defined on line: 430
+Defined on line: 502
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 80</li></ul>
+<li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 81</li></ul>
 <a name="__isNameValid"><h2>__isNameValid</h2></a>
 <p>
  Verify that the name given for a volume or volume group is valid.
 <p>
-Defined on line: 498
+Defined on line: 571
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 137</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 146</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 318</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 385</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 477</li></ul>
+<li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 139</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 155</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 358</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 425</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 550</li></ul>
 <a name="__isVolIDValid"><h2>__isVolIDValid</h2></a>
 <p>
  Verify that the ID given for a volume is valid.
 <p>
-Defined on line: 539
+Defined on line: 612
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 177</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 204</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 219</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 343</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 375</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 410</li></ul>
+<li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 186</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 213</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 228</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 243</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 383</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 415</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 450</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 482</li></ul>
 <a name="__nameIsUnique"><h2>__nameIsUnique</h2></a>
 <p>
 Missing<p>
-Defined on line: 573
+Defined on line: 646
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 140</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 149</li></ul>
+<li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 142</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 146</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 158</li></ul>
 <a name="createVolume"><h2>createVolume</h2></a>
 <p>
  Create a volume setup and return the ID
 <p>
-Defined on line: 96
+Defined on line: 97
 <a name="getVGName"><h2>getVGName</h2></a>
 <p>
  Return the configured name for the volume group
 <p>
-Defined on line: 160
+Defined on line: 169
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 1743</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1708</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 498</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 894</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 281</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1743</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1708</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 498</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 894</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 317</li></ul>
 <a name="getVolumeFreespace"><h2>getVolumeFreespace</h2></a>
 <p>
  Return the configured freespace for the volume with the given ID
 <p>
-Defined on line: 171
+Defined on line: 180
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1724</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 229</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 339</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 736</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 239</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 287</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1725</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 229</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 339</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 736</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 265</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 327</li></ul>
 <a name="getVolumeIDs"><h2>getVolumeIDs</h2></a>
 <p>
  Return an array ref of the IDs for defined volumes
 <p>
-Defined on line: 186
+Defined on line: 195
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1719</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 221</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 335</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 731</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 103</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 234</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 282</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1719</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 221</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 335</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 731</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 104</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 259</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 318</li></ul>
+<a name="getVolumeMountPoint"><h2>getVolumeMountPoint</h2></a>
+<p>
+ Return the configured mountpoint for the volume with the given ID
+<p>
+Defined on line: 222
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1724</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 264</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 323</li></ul>
 <a name="getVolumeName"><h2>getVolumeName</h2></a>
 <p>
  Return the configured name for the volume with the given ID
 <p>
-Defined on line: 198
+Defined on line: 207
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1723</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 734</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 238</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 286</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1723</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 734</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 263</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 322</li></ul>
 <a name="getVolumeSize"><h2>getVolumeSize</h2></a>
 <p>
  Return the configured name for the volume with the given ID
 <p>
-Defined on line: 213
+Defined on line: 237
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1725</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 224</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 338</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 735</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 240</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 291</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1726</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 224</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 338</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 735</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 266</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 331</li></ul>
 <a name="getVolumes"><h2>getVolumes</h2></a>
 <p>
- Return a hash with the volume name as key and a list
+ Return a hash with the volume path as key and a list
  reference containing two elements with size information
+ and one element with an optional mountpoint name
 <p>
-Defined on line: 228
+Defined on line: 252
 <p>
 Called in
 <ul>
@@ -135,7 +147,7 @@ Called in
 <p>
  Return an XML Element representing the object's data
 <p>
-Defined on line: 275
+Defined on line: 311
 <a name="new"><h2>new</h2></a>
 <p>
  Create the KIWIXMLSystemdiskData object
@@ -143,12 +155,13 @@ Defined on line: 275
  Internal data structure
 
  this = {
-    name = '',
+    name = ''
     volumes = {
         ID[+] = {
-            freespace = '',
-            name      = '',
+            freespace = ''
+            name      = ''
             size      = ''
+            mountpoint= ''
     }
  }
 <p>
@@ -156,24 +169,29 @@ Defined on line: 42
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1744</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1994</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2005</li><li><a href="KIWIXML.html">KIWIXML</a> : 3271</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1751</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2001</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2012</li><li><a href="KIWIXML.html">KIWIXML</a> : 3273</li></ul>
 <a name="setVGName"><h2>setVGName</h2></a>
 <p>
  Set the name for the volume group
 <p>
-Defined on line: 304
+Defined on line: 344
 <a name="setVolumeFreespace"><h2>setVolumeFreespace</h2></a>
 <p>
  Set the configured freespace for the volume with the given ID
 <p>
-Defined on line: 328
+Defined on line: 368
+<a name="setVolumeMountPoint"><h2>setVolumeMountPoint</h2></a>
+<p>
+ Set the configured mountpoint for the volume with the given ID
+<p>
+Defined on line: 435
 <a name="setVolumeName"><h2>setVolumeName</h2></a>
 <p>
- Set the configured freespace for the volume with the given ID
+ Set the configured name for the volume with the given ID
 <p>
-Defined on line: 360
+Defined on line: 400
 <a name="setVolumeSize"><h2>setVolumeSize</h2></a>
 <p>
  Set the configured freespace for the volume with the given ID
 <p>
-Defined on line: 395
+Defined on line: 467
