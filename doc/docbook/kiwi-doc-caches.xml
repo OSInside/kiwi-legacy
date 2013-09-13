@@ -15,8 +15,8 @@
 			The process of creating an appliance could take quite some time
 			and often the same software is installed over and over again. In
 			order to speed up that process kiwi is able to create and re-use
-			so called image caches. An image cache in kiwi is an ext3 based
-			filesystem image representing a pre-installed software bundle.
+			so called image caches. An image cache in kiwi is a partial root tree
+            created from a cache image description.
 		</para>
 
 		<figure id="fig.imagecachingarch">
@@ -39,11 +39,11 @@
 		<para>
 			Once there are caches in the system kiwi selects the best match and
 			mounts the cache in a way that all write actions (copy-on-write cache)
-			are redirected to a cow file. That way the cache itself is never changed
+			are redirected to the new root system. That way the cache itself is never changed
 			and can be re-used simultaniosly for other build processes. As result
 			the build process doesn't start with an empty tree but with a tree
 			almost complete. Only the missing parts are now installed and according
-			to how much the cache already covered this process is done fastly
+			to how much the cache already covered this process can speedup the build
 		</para>
 	</sect1>
 
@@ -60,14 +60,6 @@
         <para>Copy the base image descriptions used in the build:</para>
         <screen><command>cp</command> -a /usr/share/kiwi/image/vmxboot/suse-12.2 /tmp/boot-cache
 <command>cp</command> -a /usr/share/kiwi/image/suse-12.2-JeOS /tmp/image-cache</screen>
-      </step>
-      <step>
-        <para>Modify boot-cache and image-cache
-            <filename>config.xml</filename> files to add a btrfs type
-          and size</para>
-        <screen>&lt;type image="btrfs"&gt;
-    &lt;size unit="G">5&lt;/size&gt;
-&lt;/type&gt;</screen>
       </step>
       <step>
         <para>Modify boot-cache and image-cache to contain the package
@@ -89,10 +81,10 @@
 			<para>
 			This call is about 50% faster compared to the creation without a
 			cache. It's important to understand that a cache based build will
-			create a root tree which contains only the cow file containing the
-			differences compared to the used cache. So at any time you want
+			create a root tree which contains only the differences 
+			compared to the used cache. Thus at any time you want
 			to create an image out of it you have to make sure that the cache
-			also exists
+			exists and is accessible on the system.
 		</para>
 	</sect1>
 </chapter>
