@@ -166,17 +166,6 @@ sub getPreferLicense {
 }
 
 #==========================================
-# getPriority
-#------------------------------------------
-sub getPriority {
-	# ...
-	# Return the priority setting for the repository
-	# ---
-	my $this = shift;
-	return $this->{priority};
-}
-
-#==========================================
 # getStatus
 #------------------------------------------
 sub getStatus {
