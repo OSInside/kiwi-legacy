@@ -1,27 +1,31 @@
-DEST=activation.png description.png intro.png maintain.png nbboot.png source.png types.png
+SOURCES=activation.fig description.fig intro.fig maintain.fig nbboot.fig source.fig types.fig
+OBJECTS=$(SOURCES:.fig=.png)
 
-all:${DEST}
+all: $(SOURCES) $(OBJECTS)
 
 activation.png:activation.fig
-	convert activation.fig -alpha copy -channel alpha -negate +channel -rotate 90 -trim ../../images/activation.png
+	fig2dev -L png -S4 activation.fig ../../images/activation.png
 
 description.png:description.fig
-	convert description.fig -alpha copy -channel alpha -negate +channel -rotate 90 -trim ../../images/description.png
+	fig2dev -L png -S4 description.fig ../../images/description.png
 
 intro.png:intro.fig
-	convert intro.fig -alpha copy -channel alpha -negate +channel -rotate 90 -trim ../../images/intro.png
+	fig2dev -L png -S4 intro.fig ../../images/intro.png
 
 maintain.png:maintain.fig
-	convert maintain.fig -alpha copy -channel alpha -negate +channel -trim ../../images/maintain.png
+	fig2dev -L png -S4 maintain.fig ../../images/maintain.png
 
 nbboot.png:nbboot.fig
-	convert nbboot.fig -alpha copy -channel alpha -negate +channel -trim ../../images/nbboot.png
+	fig2dev -L png -S4 nbboot.fig ../../images/nbboot.png
 
 source.png:source.fig
-	convert source.fig -alpha copy -channel alpha -negate +channel -rotate 90 -trim ../../images/source.png
+	fig2dev -L png -S4 source.fig ../../images/source.png
 
 types.png:types.fig
-	convert types.fig -alpha copy -channel alpha -negate +channel -rotate 90 -trim ../../images/types.png
+	fig2dev -L png -S4 types.fig ../../images/types.png
 
 cache.png:cache.fig
-	convert cache.fig -alpha copy -channel alpha -negate +channel -rotate 90 -trim ../../images/cache.png
+	fig2dev -L png -S4 cache.fig ../../images/cache.png
+
+clean:
+	for i in ${DEST};do rm -f ../../images/$$i;done
