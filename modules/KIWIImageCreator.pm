@@ -1721,21 +1721,28 @@ sub __addSystemDiskToBootXML {
 			foreach my $id (@{$volIDs}) {
 				my %volInfo;
 				$volInfo{name}      = $systemdisk -> getVolumeName ($id);
+				$volInfo{mountpoint}= $systemdisk -> getVolumeMountPoint ($id);
 				$volInfo{freespace} = $systemdisk -> getVolumeFreespace ($id);
 				$volInfo{size}      = $systemdisk -> getVolumeSize ($id);
 				$volData{$vcount} = \%volInfo;
 				$vcount++;
+				my $name = $volInfo{name};
+				if ($volInfo{mountpoint}) {
+					my $mount = $volInfo{mountpoint};
+					$mount =~ s/^\///;
+					$name = $volInfo{name}.'['.$mount.']';
+				}
 				if ($volInfo{freespace}) {
 					$kiwi -> info (
-						"--> Volume $volInfo{name}: free:$volInfo{freespace}M\n"
+						"--> Volume $name: free:$volInfo{freespace}M\n"
 					);
 				} elsif ($volInfo{size}) {
 					$kiwi -> info (
-						"--> Volume $volInfo{name}: size:$volInfo{size}M\n"
+						"--> Volume $name: size:$volInfo{size}M\n"
 					);
 				} else {
 					$kiwi-> info (
-						"--> Volume $volInfo{name}\n"
+						"--> Volume $name\n"
 					);
 				}
 			}

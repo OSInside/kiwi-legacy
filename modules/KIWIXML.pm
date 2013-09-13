@@ -3245,6 +3245,7 @@ sub __createSystemDiskData {
 			$vol -> getAttribute('freespace')
 		);
 		my $name = $vol -> getAttribute('name');
+		my $mount= $vol -> getAttribute('mountpoint');
 		my $msg = "Invalid name '$name' for LVM volume setup";
 		$name =~ s/\s+//g;
 		if ($name eq '/') {
@@ -3260,6 +3261,7 @@ sub __createSystemDiskData {
 			$kiwi -> failed();
 			return -1;
 		}
+		$volInfo{mountpoint} = $mount;
 		$volInfo{name} = $name;
 		$volInfo{size} = $this->__convertSizeStrToMBVal(
 			$vol -> getAttribute('size')

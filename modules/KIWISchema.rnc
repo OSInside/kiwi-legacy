@@ -2041,9 +2041,14 @@ div {
 		## postfix
 		attribute freespace { volume-size-type }
 	k.volume.name.attribute =
-		## volume name. The name specifies a path which has to
+		## volume name. The name of the volume. if mountpoint is
+		## not specified the name specifies a path which has to
 		## exist inside the root directory.
 		attribute name { text }
+	k.volume.mountpoint.attribute =
+		## volume path. The mountpoint specifies a path which has to
+		## exist inside the root directory.
+		attribute mountpoint { text }
 	k.volume.size.attribute =
 		## absolute size of the volume. If the size value
 		## is too small to store all data kiwi will exit.
@@ -2052,6 +2057,7 @@ div {
 		attribute size { volume-size-type }
 	k.volume.attlist =
 		k.volume.freespace.attribute? &
+		k.volume.mountpoint.attribute? &
 		k.volume.name.attribute &
 		k.volume.size.attribute?
 	k.volume =
@@ -2068,7 +2074,6 @@ div {
 			empty
 		}
 }
-
 
 #==========================================
 # main block: <pxedeploy>

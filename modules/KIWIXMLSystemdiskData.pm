@@ -46,12 +46,13 @@ sub new {
 	# Internal data structure
 	#
 	# this = {
-	#    name = '',
+	#    name = ''
 	#    volumes = {
 	#        ID[+] = {
-	#            freespace = '',
-	#            name      = '',
+	#            freespace = ''
+	#            name      = ''
 	#            size      = ''
+	#            mountpoint= ''
 	#    }
 	# }
 	# ---
@@ -114,9 +115,10 @@ sub createVolume {
 	}
 	if (ref($volInit) eq 'HASH' ) {
 		my %suppoetedVolAttrs = (
-			freespace => 1,
-			name      => 1,
-			size      => 1
+			freespace  => 1,
+			name       => 1,
+			size       => 1,
+			mountpoint => 1
 		);
 		for my $key (keys %{$volInit}) {
 			if (! $suppoetedVolAttrs{$key} ) {
@@ -139,6 +141,13 @@ sub createVolume {
 		}
 		if (! $this->__nameIsUnique($volInit->{name}, 'createVolume')) {
 			return;
+		}
+		if ($volInit->{mountpoint} ) {
+			if (! $this->__nameIsUnique
+				($volInit->{mountpoint},'createVolume')
+			) {
+				return;
+			}
 		}
 		$this->{volumes}{$newID} = $volInit;
 		return $newID;
@@ -208,6 +217,21 @@ sub getVolumeName {
 }
 
 #==========================================
+# getVolumeMountPoint
+#------------------------------------------
+sub getVolumeMountPoint {
+	# ...
+	# Return the configured mountpoint for the volume with the given ID
+	# ---
+	my $this = shift;
+	my $id   = shift;
+	if (! $this->__isVolIDValid($id, 'getVolumeMountPoint')) {
+		return;
+    }
+    return $this->{volumes}{$id}{mountpoint};
+}
+
+#==========================================
 # getVolumeSize
 #------------------------------------------
 sub getVolumeSize {
@@ -227,8 +251,9 @@ sub getVolumeSize {
 #------------------------------------------
 sub getVolumes {
 	# ...
-	# Return a hash with the volume name as key and a list
+	# Return a hash with the volume path as key and a list
 	# reference containing two elements with size information
+	# and one element with an optional mountpoint name
 	# ---
 	my $this = shift;
 	my $volIDs = $this -> getVolumeIDs();
@@ -236,6 +261,7 @@ sub getVolumes {
 	if ($volIDs) {
 		foreach my $id (@{$volIDs}) {
 			my $name = $this -> getVolumeName ($id);
+			my $mount= $this -> getVolumeMountPoint ($id);
 			my $free = $this -> getVolumeFreespace ($id);
 			my $size = $this -> getVolumeSize ($id);
 			my $haveAbsolute;
@@ -263,7 +289,17 @@ sub getVolumes {
 			}
 			$name =~ s/^\///sxm;
 			$name =~ s/\//_/gsxm;
-			$lvmparts{$name} = [ $usedValue,$haveAbsolute ];
+			if ($mount) {
+				# if a mountpoint is set the following applies:
+				# --> volume path is $mount
+				# --> volume name is $name
+				$lvmparts{$mount} = [ $usedValue,$haveAbsolute,$name ];
+			} else {
+				# if no mountpoint is set the following applies:
+				# --> volume path is $name
+				# --> volume name is $name
+				$lvmparts{$name} = [ $usedValue,$haveAbsolute ];
+			}
 		}
 	}
 	return \%lvmparts;
@@ -284,6 +320,10 @@ sub getXMLElement {
 		for my $id (@vIDs) {
 			my $vElem = XML::LibXML::Element -> new('volume');
 			$vElem -> setAttribute('name', $this -> getVolumeName($id));
+			my $mount = $this -> getVolumeMountPoint($id);
+			if ($mount) {
+				$vElem -> setAttribute('mountpoint',$mount);
+			}
 			my $free = $this -> getVolumeFreespace($id);
 			if ($free) {
 				$vElem -> setAttribute('freespace', $free);
@@ -359,7 +399,7 @@ sub setVolumeFreespace {
 #------------------------------------------
 sub setVolumeName {
 	# ...
-	# Set the configured freespace for the volume with the given ID
+	# Set the configured name for the volume with the given ID
 	# ---
 	my $this = shift;
 	my $id   = shift;
@@ -386,6 +426,38 @@ sub setVolumeName {
 		return;
 	}
 	$this->{volumes}{$id}{name} = $name;
+	return $this;
+}
+
+#==========================================
+# setVolumeMountPoint
+#------------------------------------------
+sub setVolumeMountPoint {
+	# ...
+	# Set the configured mountpoint for the volume with the given ID
+	# ---
+	my $this = shift;
+	my $id   = shift;
+	my $mount= shift;
+	my $kiwi = $this->{kiwi};
+	if (! $this->{volumes} ) {
+		my $msg = 'setVolumeMountPoint: no volumes configured, call '
+			. 'createVolume first.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $this->__isVolIDValid($id, 'setVolumeMountPoint')) {
+		return;
+	}
+	if (! $mount) {
+		my $msg = 'setVolumeMountPoint: no setting for mountpoint provided, '
+			. 'retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{volumes}{$id}{mountpoint} = $mount;
 	return $this;
 }
 
@@ -438,7 +510,8 @@ sub __isInitConsistent {
 	my %suppoetedVolAttrs = (
 		freespace => 1,
 		name      => 1,
-		size      => 1
+		size      => 1,
+		mountpoint=> 1
 	);
 	if (! $init->{volumes}) {
 		return 1;

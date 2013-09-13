@@ -148,7 +148,7 @@ sub addEntry {
 		delete $this->{profile}{$key};
 	}
 	my %allowedVars = %{$this->{vars}};
-	if ((! $allowedVars{$key}) && ($key !~ /^kiwi_LVM_LV/msx)) {
+	if ((! $allowedVars{$key}) && ($key !~ /^kiwi_LVM_/msx)) {
 		my $msg = "Unrecognized variable: $key";
 		$kiwi -> warning ($msg);
 		$kiwi -> skipped ();
@@ -514,6 +514,7 @@ sub __updateXMLSystemDisk {
 				my $attrname = 'size';
 				my $attrval  = $lvmparts->{$vol}->[0];
 				my $absolute = $lvmparts->{$vol}->[1];
+				my $lvname   = $lvmparts->{$vol}->[2];
 				if (! $attrval) {
 					next;
 				}
@@ -534,9 +535,15 @@ sub __updateXMLSystemDisk {
 						'kiwi_allFreeVolume',$vol
 					);
 				} else {
-					$this -> addEntry(
-						"kiwi_LVM_$vol", "$attrname:$attrval"
-					);
+					if ($lvname) {
+						$this -> addEntry(
+							"kiwi_LVM_$lvname", "$attrname:$attrval:$vol"
+						);
+					} else {
+						$this -> addEntry(
+							"kiwi_LVM_$vol", "$attrname:$attrval"
+						);
+					}
 				}
 			}
 		}

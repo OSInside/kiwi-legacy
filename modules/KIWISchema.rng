@@ -2912,7 +2912,14 @@ postfix</a:documentation>
     </define>
     <define name="k.volume.name.attribute">
       <attribute name="name">
-        <a:documentation>volume name. The name specifies a path which has to
+        <a:documentation>volume name. The name of the volume. if mountpoint is
+not specified the name specifies a path which has to
+exist inside the root directory.</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.volume.mountpoint.attribute">
+      <attribute name="mountpoint">
+        <a:documentation>volume path. The mountpoint specifies a path which has to
 exist inside the root directory.</a:documentation>
       </attribute>
     </define>
@@ -2929,6 +2936,9 @@ add "M" and/or "G" as postfix</a:documentation>
       <interleave>
         <optional>
           <ref name="k.volume.freespace.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.volume.mountpoint.attribute"/>
         </optional>
         <ref name="k.volume.name.attribute"/>
         <optional>

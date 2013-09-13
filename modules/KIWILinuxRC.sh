@@ -2982,17 +2982,27 @@ function updateRootDeviceFstab {
 	# check for LVM volume setup
 	#--------------------------------------
 	if [ "$haveLVM" = "yes" ];then
-		for i in /dev/$kiwi_lvmgroup/LV*;do
-			if [ ! -e $i ];then
-				continue
+		local variable
+		local volume
+		local content
+		local volpath
+		local mpoint
+		local mppath
+		for i in $(cat /.profile | grep kiwi_LVM_);do
+			variable=$(echo $i|cut -f1 -d=)
+			volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
+			content=$(eval echo \$$variable)
+			volpath=$(echo $content | cut -f3 -d:)
+			if [ -z "$volpath" ];then
+				volpath=$volume
 			fi
-			local volume=$(echo $i | cut -f4 -d/ | cut -c3-)
-			local mpoint=$(echo $volume | tr _ /)
-			local mppath="/dev/$kiwi_lvmgroup/LV$volume"
+			volpath=$(echo $volpath | cut -f4 -d/ | cut -c3-)
+			mpoint=$(echo $volpath | tr -d LV | tr _ /)
+			mppath="/dev/$kiwi_lvmgroup/$volume"
 			if \
-				[ ! $volume = "Root" ] && \
-				[ ! $volume = "Comp" ] && \
-				[ ! $volume = "Swap" ]
+				[ ! $volume = "LVRoot" ] && \
+				[ ! $volume = "LVComp" ] && \
+				[ ! $volume = "LVSwap" ]
 			then
 				echo "$mppath /$mpoint $FSTYPE $opts 1 2" >> $nfstab
 			fi
@@ -5996,6 +6006,11 @@ function mountSystemCombined {
 #--------------------------------------
 function mountSystemStandard {
 	local mountDevice=$1
+	local variable
+	local volume
+	local content
+	local volpath
+	local mpoint
 	if [ ! -z $FSTYPE ]          && 
 	   [ ! $FSTYPE = "unknown" ] && 
 	   [ ! $FSTYPE = "auto" ]
@@ -6005,16 +6020,23 @@ function mountSystemStandard {
 		mount $mountDevice /mnt >/dev/null
 	fi
 	if [ "$haveLVM" = "yes" ];then
-		for i in /dev/$kiwi_lvmgroup/LV*;do
-			local volume=$(echo $i | cut -f4 -d/ | cut -c3-)
-			local mpoint=$(echo $volume | tr _ /)
+		for i in $(cat /.profile | grep kiwi_LVM_);do
+			variable=$(echo $i|cut -f1 -d=)
+			volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
+			content=$(eval echo \$$variable)
+			volpath=$(echo $content | cut -f3 -d:)
+			if [ -z "$volpath" ];then
+				volpath=$volume
+			fi
+			volpath=$(echo $volpath | cut -f4 -d/ | cut -c3-)
+			mpoint=$(echo $volpath | tr -d LV | tr _ /)
 			if \
-				[ ! $volume = "Root" ] && \
-				[ ! $volume = "Comp" ] && \
-				[ ! $volume = "Swap" ]
+				[ ! $volume = "LVRoot" ] && \
+				[ ! $volume = "LVComp" ] && \
+				[ ! $volume = "LVSwap" ]
 			then
 				mkdir -p /mnt/$mpoint
-				kiwiMount "/dev/$kiwi_lvmgroup/LV$volume" "/mnt/$mpoint"
+				kiwiMount "/dev/$kiwi_lvmgroup/$volume" "/mnt/$mpoint"
 			fi
 		done
 	fi
@@ -7110,17 +7132,27 @@ function cleanImage {
 	#======================================
 	# umount LVM root parts
 	#--------------------------------------
-	for i in /dev/$kiwi_lvmgroup/LV*;do
-		if [ ! -e $i ];then
-			continue
+	local variable
+	local volume
+	local content
+	local volpath
+	local mpoint
+	for i in $(cat /.profile | grep kiwi_LVM_);do
+		variable=$(echo $i|cut -f1 -d=)
+		volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
+		content=$(eval echo \$$variable)
+		volpath=$(echo $content | cut -f3 -d:)
+		if [ -z "$volpath" ];then
+			volpath=$volume
 		fi
+		volpath=$(echo $volpath | cut -f4 -d/ | cut -c3-)
+		mpoint=$(echo $volpath | tr -d LV | tr _ /)
 		if \
-			[ ! $i = "/dev/$kiwi_lvmgroup/LVRoot" ] && \
-			[ ! $i = "/dev/$kiwi_lvmgroup/LVComp" ] && \
-			[ ! $i = "/dev/$kiwi_lvmgroup/LVSwap" ]
+			[ ! $volume = "LVRoot" ] && \
+			[ ! $volume = "LVComp" ] && \
+			[ ! $volume = "LVSwap" ]
 		then
-			mpoint=$(echo ${i##/*/LV})
-			umount $mpoint 1>&2
+			umount /$mpoint 1>&2
 		fi
 	done
 	#======================================

@@ -1881,7 +1881,7 @@ sub setupBootDisk {
 				#==========================================
 				# add calculated volume size to lvmparts
 				#------------------------------------------
-				$lvmparts{$vol}->[2] = $lvsize;
+				$lvmparts{$vol}->[3] = $lvsize;
 				#==========================================
 				# increase total vm disk size
 				#------------------------------------------
@@ -1941,7 +1941,7 @@ sub setupBootDisk {
 				#==========================================
 				# add calculated root vol. size to lvmparts
 				#------------------------------------------
-				$lvmparts{'@root'}->[2] = $lvroot;
+				$lvmparts{'@root'}->[3] = $lvroot;
 				#==========================================
 				# increase total vm disk size
 				#------------------------------------------
@@ -2504,14 +2504,17 @@ sub setupBootDisk {
 			my $VGroup = $this->{lvmgroup};
 			my @paths  = ();
 			my %phash  = ();
+			my %lhash  = ();
 			#==========================================
 			# Create path names in correct order
 			#------------------------------------------
 			foreach my $name (keys %lvmparts) {
-				my $pname  = $name; $pname =~ s/_/\//g;
+				my $pname  = $name;
+				$pname =~ s/_/\//g;
 				$pname =~ s/^\///;
 				$pname =~ s/\s*$//;
 				push @paths,$pname;
+				$lhash{$pname} = $lvmparts{$name}->[2];
 			}
 			foreach my $name (@paths) {
 				my @parts = split (/\//,$name);
@@ -2524,8 +2527,13 @@ sub setupBootDisk {
 			foreach my $level (sort {($a <=> $b) || ($a cmp $b)} keys %phash) {
 				foreach my $pname (@{$phash{$level}}) {
 					next if $pname eq '@root';
-					my $lname = $pname; $lname =~ s/\//_/g;
-					my $device = "/dev/$VGroup/LV$lname";
+					my $lvname = $lhash{$pname};
+					if (! $lvname) {
+						$lvname = $pname;
+						$lvname =~ s/\//_/g;
+						$lvname = 'LV'.$lvname;
+					}
+					my $device = "/dev/$VGroup/$lvname";
 					$status = qxx ("mkdir -p $loopdir/$pname 2>&1");
 					$result = $? >> 8;
 					if ($result != 0) {
@@ -2540,8 +2548,8 @@ sub setupBootDisk {
 						return;
 					}
 					$kiwi -> loginfo ("Mounting logical volume: $pname\n");
-					if (! KIWIGlobals -> instance() ->
-						mount ($device,"$loopdir/$pname",$type->{fsmountoptions})
+					if (! KIWIGlobals -> instance() -> mount
+						($device,"$loopdir/$pname",$type->{fsmountoptions})
 					) {
 						$this -> cleanStack ();
 						return;
@@ -6444,25 +6452,29 @@ sub setVolumeGroup {
 		if (%lvmparts) {
 			my %ihash = ();
 			foreach my $name (keys %lvmparts) {
+				my $lvname = $lvmparts{$name}->[2];
+				if (! $lvname) {
+					$lvname = 'LV'.$name;
+				}
 				if (($lvmparts{$name}->[0]) &&
 					($lvmparts{$name}->[0] eq 'all')
 				) {
 					if ($name eq '@root') {
 						$allFree = 'LVRoot';
 					} else {
-						$allFree = "LV$name";
+						$allFree = $lvname;
 					}
 				}
 				if ($name ne '@root') {
-					my $lvsize = $lvmparts{$name}->[2];
-					my $lvdev  = "/dev/$VGroup/LV$name";
+					my $lvsize = $lvmparts{$name}->[3];
+					my $lvdev  = "/dev/$VGroup/$lvname";
 					my $inodes = 2 * int ($lvsize * 1048576 / $inoderatio);
 					if ($inodes < $this->{gdata}->{FSMinInodes}) {
 						$inodes = $this->{gdata}->{FSMinInodes};
 					}
 					$ihash{$lvdev} = $inodes;
 					$status = qxx (
-						"lvcreate -L $lvsize -n LV$name $VGroup 2>&1"
+						"lvcreate -L $lvsize -n $lvname $VGroup 2>&1"
 					);
 					$result = $? >> 8;
 					if ($result != 0) {
@@ -6473,8 +6485,8 @@ sub setVolumeGroup {
 			$this->{deviceinodes} = \%ihash;
 		}
 		if ($result == 0) {
-			if (($lvmparts{'@root'}) && ($lvmparts{'@root'}->[2])) {
-				my $rootsize = $lvmparts{'@root'}->[2];
+			if (($lvmparts{'@root'}) && ($lvmparts{'@root'}->[3])) {
+				my $rootsize = $lvmparts{'@root'}->[3];
 				$status = qxx ("lvcreate -L $rootsize -n LVRoot $VGroup 2>&1");
 			} else {
 				$status = qxx ("lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1");
@@ -6482,7 +6494,7 @@ sub setVolumeGroup {
 			$result = $? >> 8;
 		}
 		if ($result == 0) {
-			if (($lvmparts{'@root'}) && ($lvmparts{'@root'}->[2])) {
+			if (($lvmparts{'@root'}) && ($lvmparts{'@root'}->[3])) {
 				$status = qxx (
 					"lvextend -l +100%FREE /dev/$VGroup/$allFree 2>&1"
 				);
