@@ -296,7 +296,9 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{cdata} = $cdata;
+	if ($cache) {
+		$this->{cdata} = $cdata;
+	}
 	return $this;
 }
 
